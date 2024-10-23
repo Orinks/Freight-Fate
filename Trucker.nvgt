@@ -286,24 +286,25 @@ void drive() {
         // Update distance and fuel based on speed
         if(speed > 0) {
             distance += speed;
-            fuel -= (speed * 0.025); // Fuel consumption proportional to speed
+            fuel -= (speed * 0.015); // Reduced fuel consumption
         }
 
-        // Status updates every 3 seconds
-        if(last_status >= 60) { // 60 * 50ms = 3000ms
+        // Status updates every 5 seconds
+        if(last_status >= 100) { // 100 * 50ms = 5000ms
             speak("Speed: " + (speed * 30) + " mph, Fuel: " + fuel + " gallons", true);
             last_status = 0;
+            
+            // Only check for random events and destination when giving status updates
+            if(fuel <= 0) {
+                speak("Out of Fuel! You've run out of fuel and need to get a tow!", false);
+                money -= 200; // Tow truck fee
+                driving = false;
+            } else {
+                random_event();
+                check_destination();
+            }
         }
         last_status++;
-
-        if(fuel <= 0) {
-            speak("Out of Fuel! You've run out of fuel and need to get a tow!", false);
-            money -= 200; // Tow truck fee
-            driving = false;
-        }
-
-        random_event();
-        check_destination();
 
         if(game_won) {
             driving = false;
