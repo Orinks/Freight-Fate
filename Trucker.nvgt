@@ -253,11 +253,16 @@ void drive() {
     const double BRAKE_POWER = 0.2;
     int last_status = 0;
 
-    while(driving) {
+    while(driving && !game_over) {
         if (check_exit_keys()) {
             driving = false;
             game_over = true;
             return;
+        }
+        
+        if(key_pressed(KEY_ESCAPE)) {
+            driving = false;
+            break;
         }
 
         // Handle acceleration
@@ -281,10 +286,6 @@ void drive() {
             last_status = 0;
         }
         last_status++;
-
-        if(key_pressed(KEY_ESCAPE)) {
-            driving = false;
-        }
 
         if(fuel <= 0) {
             speak("Out of Fuel! You've run out of fuel and need to get a tow!", false);
