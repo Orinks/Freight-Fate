@@ -281,7 +281,6 @@ void drive() {
             last_status = 0;
         }
         last_status++;
-        }
 
         if(key_pressed(KEY_ESCAPE)) {
             driving = false;
