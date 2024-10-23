@@ -1,0 +1,27 @@
+#include "menu.nvgt"
+
+void get_choice() {
+    menu m;
+    m.intro_text = "What would you like to do?";
+    m.add_item("Drive", "drive");
+    m.add_item("Refuel", "refuel");
+    m.add_item("Rest", "rest");
+    m.add_item("Check Status", "status");
+    m.add_item("Quit", "quit");
+
+    int choice = m.run();
+    string action = m.selected_item_id;
+
+    if(action == "drive") {
+        drive();
+    } else if(action == "refuel") {
+        refuel();
+    } else if(action == "rest") {
+        rest();
+    } else if(action == "status") {
+        display_status();
+    } else if(action == "quit") {
+        speak("Thanks for playing!");
+        exit();
+    }
+}
