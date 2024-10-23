@@ -35,4 +35,6 @@ In Freight Fate, you play as a truck driver delivering cargo between major US ci
 
 ## License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+Copyright (c) 2024 Freight Fate Contributors
