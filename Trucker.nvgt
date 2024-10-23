@@ -1,0 +1,344 @@
+#include "form.nvgt"
+#include "speech.nvgt"
+#include "input.nvgt"
+#include "menu.nvgt"
+#include "music.nvgt"
+#include "game_menus.nvgt"
+
+// Global variables
+double distance = 0;
+double fuel = 100;
+double money = 1000;
+bool driving = false;
+int choice = 0;
+
+array<double> destinations;
+uint current_destination = 0;
+bool game_won = false;
+
+array<string> locations;
+array<double> fuel_prices;
+uint current_location = 0;
+string current_cargo = "";
+double cargo_value = 0;
+
+bool game_over = false;
+bool player_won = false;
+
+audio_form form;
+
+bool check_exit_keys() {
+    if (key_pressed(KEY_ESCAPE) or (key_down(KEY_LALT) and key_pressed(KEY_F4))) {
+        exit();
+        return true;
+    }
+    return false;
+}
+
+void main() {
+    show_window("Road Trip Game");
+    initialize_game();
+    while (true) {
+        int main_choice = show_main_menu();
+        if (main_choice == -1 or check_exit_keys()) {
+            exit();
+            break;
+        }
+        switch (main_choice) {
+            case 0: start_new_game(); break;
+            case 1: load_game(); break;
+            case 2: show_options_menu(); break;
+            case 3: exit(); break;
+        }
+    }
+}
+
+void initialize_game() {
+    locations = {"New York", "Chicago", "Denver", "Las Vegas", "Los Angeles"};
+    destinations = {0, 800, 1400, 2200, 2800};
+    fuel_prices = {3.5, 3.2, 3.7, 3.9, 4.1};
+}
+
+void start_new_game() {
+    // Reset game state
+    distance = 0;
+    fuel = 100;
+    money = 1000;
+    current_destination = 0;
+    current_location = 0;
+    current_cargo = "";
+    cargo_value = 0;
+    game_won = false;
+    game_over = false;
+    player_won = false;
+
+    // Set initial distance to the first destination
+    distance = destinations[current_destination];
+
+    pick_up_cargo();
+    wait(3000); // Increased wait time after initial cargo pickup
+
+    while (!game_over) {
+        if (check_exit_keys()) return;
+
+        string action = show_game_menu();
+        if (action == "drive") drive();
+        else if (action == "refuel") refuel();
+        else if (action == "rest") rest();
+        else if (action == "status") check_status();
+        else if (action == "save") save_game();
+        else if (action == "quit") {
+            if (confirm_quit()) {
+                game_over = true;
+            }
+        }
+
+        if (game_won) {
+            player_won = true;
+            game_over = true;
+        }
+    }
+
+    int end_choice = show_game_over_menu(player_won);
+    if (end_choice == 0) start_new_game();
+    else if (end_choice == 1) return; // Back to main menu
+    else exit();
+}
+
+void load_game() {
+    speak("Game loading is not implemented yet.", false);
+} // Closing brace added here
+
+void save_game() {
+    speak("Game saving is not implemented yet.", false);
+} // Closing brace added here
+
+void check_status() {
+    display_status();
+    wait(1000); // Additional pause after status is spoken
+}
+
+void display_status() {
+    string status_message = "Status: ";
+    status_message += "You're in " + locations[current_location] + ". ";
+    status_message += "You've traveled " + distance + " miles. ";
+    status_message += "You have " + fuel + " gallons of fuel and $" + money + ". ";
+    status_message += "Fuel price here is $" + fuel_prices[current_location] + " per gallon. ";
+
+    if (current_location < locations.length() - 1) {
+        status_message += "Next destination is " + locations[current_location + 1] + " in " + (destinations[current_destination] - distance) + " miles.";
+    } else {
+        status_message += "You've reached the final destination!";
+    }
+
+    speak(status_message, false);
+
+    if(current_cargo != "") {
+        speak("You're carrying " + current_cargo + " worth $" + cargo_value + ".", false);
+    }
+
+    wait(500); // Add a small delay to ensure all status information is spoken
+}
+
+void adjust_volume() {
+    speak("Volume adjustment is not implemented yet.");
+}
+
+void toggle_sound_effects() {
+    speak("Sound effects toggle is not implemented yet.");
+}
+
+void change_difficulty() {
+    speak("Difficulty change is not implemented yet.");
+}
+
+bool confirm_quit() {
+    menu m;
+    m.intro_text = "Are you sure you want to quit?";
+    m.add_item("Yes");
+    m.add_item("No");
+    int choice = m.run();
+    return choice == 0;
+}
+
+void pick_up_cargo() {
+    array<string> cargo_types = {"Electronics", "Furniture", "Food", "Clothing", "Construction Materials"};
+    int cargo_index = random(0, cargo_types.length() - 1);
+    current_cargo = cargo_types[cargo_index];
+    cargo_value = random(500, 2000);
+    speak("You've picked up a shipment of " + current_cargo + " worth $" + cargo_value + ".", false);
+}
+
+void check_destination() {
+    if(distance >= destinations[current_destination]) {
+        current_destination++;
+        current_location++;
+        if(current_destination >= destinations.length()) {
+            game_won = true;
+            speak("Congratulations! You've reached all destinations and won the game!", false);
+        } else {
+            speak("You've reached " + locations[current_location] + ". Next destination is " + locations[current_location + 1] + " in " + (destinations[current_destination] - distance) + " miles.", false);
+            deliver_cargo();
+        }
+    }
+}
+
+void deliver_cargo() {
+    if(current_cargo != "") {
+        money += cargo_value;
+        speak("You've delivered " + current_cargo + " and earned $" + cargo_value + ".", false);
+        current_cargo = "";
+        cargo_value = 0;
+    }
+    pick_up_cargo();
+}
+
+void refuel() {
+    menu m;
+    m.intro_text = "Refuel";
+    m.add_item("Enter the number of gallons:", "input");
+    m.add_item("Buy Fuel", "submit");
+
+    while(true) {
+        int choice = m.run();
+        string action = m.selected_item_id;
+
+        if (action == "submit") {
+            string input = form.create_input_box("Enter the number of gallons:");
+            double amount = parse_float(input);
+
+            if (amount <= 0) {
+                speak("Invalid Input. Please enter a positive number.");
+                continue;
+            }
+
+            double cost = amount * fuel_prices[current_location];
+
+            if(cost > money) {
+                speak("Insufficient Funds. You don't have enough money for that much fuel.");
+                return;
+            }
+
+            fuel = fuel + amount;
+            money = money - cost;
+            speak("Refueled " + amount + " gallons for $" + cost + " at $" + fuel_prices[current_location] + " per gallon.");
+            return;
+        }
+    }
+}
+
+void rest() {
+    speak("Resting. You take a short rest to refresh yourself.");
+    wait(3000);
+    speak("Rested. You feel refreshed and ready to continue your journey.");
+}
+
+void drive() {
+    speak("Driving. Hold down the up arrow to accelerate, and escape to stop.", false);
+    driving = true;
+
+    while(driving) {
+        if (check_exit_keys()) {
+            driving = false;
+            game_over = true;
+            return;
+        }
+
+        if(key_down(KEY_UP)) {
+            distance = distance + 0.1;
+            fuel = fuel - 0.05;
+            wait(50);
+
+            // Check if the destination is reached
+            check_destination();
+        }
+
+        if(key_pressed(KEY_ESCAPE)) {
+            driving = false;
+        }
+
+        if(fuel <= 0) {
+            speak("Out of Fuel. You've run out of fuel!");
+            driving = false;
+        }
+
+        random_event();
+
+        if(game_won) {
+            driving = false;
+        }
+    }
+
+    speak("Stopped Driving. You've stopped driving.");
+}
+
+void random_event() {
+    if(random(1, 100) <= 10) { // Increased chance of random events to 10%
+        int event_choice = random(1, 10); // Expanded range for more events
+        switch(event_choice) {
+            case 1:
+                good_weather();
+                break;
+            case 2:
+                bad_weather();
+                break;
+            case 3:
+                road_construction();
+                break;
+            case 4:
+                find_money();
+                break;
+            case 5:
+                free_meal();
+                break;
+            case 6:
+                speak("Lucky! You find a shortcut and save some fuel!");
+                fuel += 5;
+                break;
+            case 7:
+                speak("Traffic. You hit traffic and waste some fuel.");
+                fuel -= 5;
+                break;
+            case 8:
+                speak("Hitchhiker. You pick up a hitchhiker who gives you some money for gas.");
+                money += 20;
+                break;
+            case 9:
+                speak("Flat Tire. You get a flat tire and have to spend money to fix it.");
+                money -= 50;
+                break;
+            case 10:
+                speak("Police Check. You get stopped by the police and have to pay a fine.");
+                money -= 100;
+                break;
+        }
+    }
+}
+
+void good_weather() {
+    speak("Clear skies ahead! The good weather improves your fuel efficiency.");
+    fuel += 3;
+}
+
+void bad_weather() {
+    speak("Heavy rain ahead. The bad weather reduces your fuel efficiency.");
+    fuel -= 3;
+}
+
+void road_construction() {
+    speak("Road construction ahead. You'll need to slow down and take a detour.");
+    distance -= 10;
+    fuel -= 2;
+}
+
+void find_money() {
+    int found_amount = random(10, 50);
+    speak("Lucky day! You found $" + found_amount + " on the road.");
+    money += found_amount;
+}
+
+void free_meal() {
+    speak("A kind stranger offers you a free meal at a truck stop. You save some money and feel refreshed.");
+    money += 15;
+    fuel += 2; // Assuming the rest during the meal slightly improves efficiency
+}
