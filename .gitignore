@@ -1,2 +1,9 @@
 .aider*
 .env
+# NVGT documentation and includes
+nvgt.md
+menu.nvgt
+speech.nvgt
+
+# NVGT compiled files
+*.exe
