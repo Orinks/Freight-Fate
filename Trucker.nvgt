@@ -109,7 +109,7 @@ bool check_exit_keys() {
 }
 
 void main() {
-    show_window("Road Trip Game");
+    show_window("Freight Fate");
     initialize_game();
     //initialize_audio();
     //play_menu_music();
