@@ -285,7 +285,7 @@ void drive() {
 
         // Update distance and fuel based on speed
         if(speed > 0) {
-            distance += speed;
+            distance += (speed * 30); // Convert speed to MPH for distance calculation
             fuel -= (speed * 0.015); // Reduced fuel consumption
         }
 
