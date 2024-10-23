@@ -245,9 +245,18 @@ void rest() {
 }
 
 void drive() {
-    speak("Driving. Hold up arrow to accelerate, down arrow to brake, and escape to stop.", false);
-    driving = true;
+    speak("Press up arrow to start driving. Use down arrow to brake, and escape to stop.", false);
+    driving = false;
     double speed = 0;
+    
+    // Wait for initial acceleration
+    while(!driving) {
+        if(key_pressed(KEY_ESCAPE)) return;
+        if(key_pressed(KEY_UP)) driving = true;
+        wait(50);
+    }
+    
+    speak("Starting to drive!", false);
     const double MAX_SPEED = 2.0;
     const double ACCELERATION = 0.1;
     const double BRAKE_POWER = 0.2;
