@@ -286,7 +286,7 @@ void drive() {
         // Update distance and fuel based on speed
         if(speed > 0) {
             distance += (speed * 30); // Convert speed to MPH for distance calculation
-            fuel -= (speed * 0.015); // Reduced fuel consumption
+            fuel = maximum(0, fuel - (speed * 0.15)); // Increased fuel consumption rate
         }
 
         // Status updates every 5 seconds
