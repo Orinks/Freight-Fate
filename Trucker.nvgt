@@ -263,15 +263,15 @@ void drive() {
     int last_status = 0;
 
     while(driving && !game_over) {
-        if (check_exit_keys()) {
-            driving = false;
-            game_over = true;
-            return;
-        }
-        
         if(key_pressed(KEY_ESCAPE)) {
             driving = false;
             break;
+        }
+
+        // Only check global exit keys if not driving
+        if (!driving && check_exit_keys()) {
+            game_over = true;
+            return;
         }
 
         // Handle acceleration
