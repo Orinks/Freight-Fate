@@ -246,79 +246,90 @@ void rest() {
 
 void drive() {
     speak("Press up arrow to start driving. Use down arrow to brake, and escape to stop.", false);
-    driving = false;
-    double speed = 0;
+    
+    // Constants for driving mechanics
+    const double MPH_MULTIPLIER = 60.0; // Convert speed units to MPH for display
+    const double MAX_SPEED_MPH = 70.0;  // Maximum speed in MPH
+    const double ACCELERATION_MPH = 5.0; // MPH gained per second when accelerating
+    const double BRAKE_POWER_MPH = 10.0; // MPH lost per second when braking
+    const double COAST_DECEL_MPH = 2.0;  // MPH lost per second when coasting
+    const double FUEL_PER_MILE = 0.05;   // Gallons used per mile (20 MPG)
+    
+    // Initialize driving state
+    double speed_mph = 0;
+    double miles_traveled = 0;
+    int update_counter = 0;
+    bool is_driving = false;
     
     // Wait for initial acceleration
-    while(!driving) {
+    while(!is_driving) {
         if(key_pressed(KEY_ESCAPE)) return;
-        if(key_pressed(KEY_UP)) driving = true;
+        if(key_pressed(KEY_UP)) is_driving = true;
         wait(50);
     }
     
     speak("Starting to drive!", false);
-    const double MAX_SPEED = 2.0;
-    const double ACCELERATION = 0.1;
-    const double BRAKE_POWER = 0.2;
-    int last_status = 0;
-
-    while(driving && !game_over) {
+    
+    while(is_driving) {
         if(key_pressed(KEY_ESCAPE)) {
-            driving = false;
+            is_driving = false;
             break;
         }
-
-        // Only check global exit keys if not driving
-        if (!driving && check_exit_keys()) {
-            game_over = true;
-            return;
-        }
-
-        // Handle acceleration
+        
+        // Calculate time elapsed for this frame (50ms = 0.05 seconds)
+        double time_elapsed = 0.05;
+        
+        // Handle acceleration/deceleration
         if(key_down(KEY_UP) && fuel > 0) {
-            speed = minimum(speed + ACCELERATION, MAX_SPEED);
+            speed_mph = minimum(speed_mph + (ACCELERATION_MPH * time_elapsed), MAX_SPEED_MPH);
         } else if(key_down(KEY_DOWN)) {
-            speed = maximum(speed - BRAKE_POWER, 0);
+            speed_mph = maximum(speed_mph - (BRAKE_POWER_MPH * time_elapsed), 0);
         } else {
-            speed = maximum(speed - (ACCELERATION/2), 0); // Natural deceleration
+            speed_mph = maximum(speed_mph - (COAST_DECEL_MPH * time_elapsed), 0);
         }
-
-        // Update distance and fuel based on speed
-        if(speed > 0) {
-            distance += (speed * 30); // Convert speed to MPH for distance calculation
-            fuel = maximum(0, fuel - (speed * 0.5)); // Further increased fuel consumption rate
+        
+        // Calculate distance traveled this frame
+        double miles_this_frame = (speed_mph * time_elapsed) / 3600.0; // Convert MPH to miles per frame
+        miles_traveled += miles_this_frame;
+        distance += miles_this_frame;
+        
+        // Calculate fuel consumption
+        if(speed_mph > 0) {
+            double fuel_used = miles_this_frame * FUEL_PER_MILE;
+            fuel = maximum(0, fuel - fuel_used);
         }
-
-        // Speed updates every second, full status every 5 seconds
-        if(last_status >= 20) { // 20 * 50ms = 1000ms
-            speak("Speed: " + int(speed * 30) + " mph", true);
+        
+        // Update status every second (20 frames)
+        update_counter++;
+        if(update_counter >= 20) {
+            speak("Speed: " + int(speed_mph) + " mph", true);
+            update_counter = 0;
             
-            // Full status update and checks every 5 seconds
-            if(last_status >= 100) {
+            // Full status update every 5 seconds
+            if(update_counter % 100 == 0) {
                 speak("Fuel: " + int(fuel) + " gallons", true);
-                last_status = 0;
                 
-                // Only check for random events and destination during full status updates
                 if(fuel <= 0) {
                     speak("Out of Fuel! You've run out of fuel and need to get a tow!", false);
                     money -= 200; // Tow truck fee
-                    driving = false;
-                } else {
-                    random_event();
-                    check_destination();
+                    is_driving = false;
+                    break;
+                }
+                
+                random_event();
+                check_destination();
+                
+                if(game_won) {
+                    is_driving = false;
+                    break;
                 }
             }
         }
-        last_status++;
-
-        if(game_won) {
-            driving = false;
-        }
-
+        
         wait(50);
     }
-
-    speak("Stopped driving at " + distance + " miles traveled.");
+    
+    speak("Stopped driving. Traveled " + int(miles_traveled) + " miles this trip.");
 }
 
 void random_event() {
