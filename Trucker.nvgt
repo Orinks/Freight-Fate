@@ -1,5 +1,65 @@
 #include "form.nvgt"
 
+// Audio management
+sound menu_music;
+sound engine_sound;
+sound event_sounds;
+sound ui_sounds;
+
+void initialize_audio() {
+    // Load menu music
+    menu_music.load("sounds/menu_music.ogg");
+    menu_music.loop = true;
+    menu_music.volume = 0.5;
+    
+    // Load engine sound
+    engine_sound.load("sounds/engine_idle.ogg");
+    engine_sound.loop = true;
+    engine_sound.volume = 0.3;
+    
+    // Load UI sounds
+    ui_sounds.load("sounds/ui_click.ogg");
+    ui_sounds.volume = 0.7;
+    
+    // Load event sounds
+    event_sounds.load("sounds/event.ogg");
+    event_sounds.volume = 0.6;
+}
+
+void play_menu_music() {
+    if(!menu_music.playing) {
+        menu_music.play();
+    }
+}
+
+void stop_menu_music() {
+    if(menu_music.playing) {
+        menu_music.stop();
+    }
+}
+
+void play_engine_sound(double speed_mph) {
+    if(!engine_sound.playing) {
+        engine_sound.play();
+    }
+    // Adjust pitch based on speed
+    engine_sound.pitch = 0.8 + (speed_mph / 100.0);
+}
+
+void stop_engine_sound() {
+    if(engine_sound.playing) {
+        engine_sound.stop();
+    }
+}
+
+void play_ui_sound() {
+    ui_sounds.play();
+}
+
+void play_event_sound() {
+    event_sounds.play();
+}
+
 // Math helper functions
 double minimum(double a, double b) {
     if(a < b) return a;
@@ -49,6 +109,8 @@ bool check_exit_keys() {
 void main() {
     show_window("Road Trip Game");
     initialize_game();
+    initialize_audio();
+    play_menu_music();
     while (true) {
         int main_choice = show_main_menu();
         if (main_choice == -1 or check_exit_keys()) {
@@ -276,6 +338,7 @@ void drive() {
     }
     
     speak("Starting to drive!", false);
+    stop_menu_music();
     
     while(is_driving) {
         if(key_pressed(KEY_ESCAPE)) {
@@ -306,10 +369,11 @@ void drive() {
             fuel = maximum(0, fuel - fuel_used);
         }
         
-        // Update status every second (20 frames)
+        // Update status and sounds every second (20 frames)
         update_counter++;
         if(update_counter >= 20) {
             speak("Speed: " + int(speed_mph) + " mph", true);
+            play_engine_sound(speed_mph);
             update_counter = 0;
             
             // Full status update every 5 seconds
@@ -336,11 +400,14 @@ void drive() {
         wait(50);
     }
     
+    stop_engine_sound();
+    play_menu_music();
     speak("Stopped driving. Traveled " + int(miles_traveled) + " miles this trip.");
 }
 
 void random_event() {
     if(random(1, 100) <= 10) { // Increased chance of random events to 10%
+        play_event_sound();
         int event_choice = random(1, 10); // Expanded range for more events
         switch(event_choice) {
             case 1:
