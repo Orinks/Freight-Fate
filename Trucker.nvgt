@@ -1,4 +1,15 @@
 #include "form.nvgt"
+
+// Math helper functions
+double minimum(double a, double b) {
+    if(a < b) return a;
+    return b;
+}
+
+double maximum(double a, double b) {
+    if(a > b) return a;
+    return b;
+}
 #include "speech.nvgt"
 #include "input.nvgt"
 #include "menu.nvgt"
