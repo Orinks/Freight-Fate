@@ -73,7 +73,6 @@ double maximum(double a, double b) {
     return b;
 }
 #include "speech.nvgt"
-#include "input.nvgt"
 #include "menu.nvgt"
 #include "game_menus.nvgt"
 
