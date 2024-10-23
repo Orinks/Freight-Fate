@@ -253,11 +253,11 @@ void drive() {
         
         // Handle acceleration
         if(key_down(KEY_UP) && fuel > 0) {
-            speed = min(speed + ACCELERATION, MAX_SPEED);
+            speed = minimum(speed + ACCELERATION, MAX_SPEED);
         } else if(key_down(KEY_DOWN)) {
-            speed = max(speed - BRAKE_POWER, 0);
+            speed = maximum(speed - BRAKE_POWER, 0);
         } else {
-            speed = max(speed - (ACCELERATION/2), 0); // Natural deceleration
+            speed = maximum(speed - (ACCELERATION/2), 0); // Natural deceleration
         }
 
         // Update distance and fuel based on speed
