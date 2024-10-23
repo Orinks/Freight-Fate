@@ -234,8 +234,13 @@ void rest() {
 }
 
 void drive() {
-    speak("Driving. Hold down the up arrow to accelerate, and escape to stop.", false);
+    speak("Driving. Hold up arrow to accelerate, down arrow to brake, and escape to stop.", false);
     driving = true;
+    double speed = 0;
+    const double MAX_SPEED = 2.0;
+    const double ACCELERATION = 0.1;
+    const double BRAKE_POWER = 0.2;
+    uint last_status = 0;
 
     while(driving) {
         if (check_exit_keys()) {
@@ -244,13 +249,27 @@ void drive() {
             return;
         }
 
-        if(key_down(KEY_UP)) {
-            distance = distance + 0.1;
-            fuel = fuel - 0.05;
-            wait(50);
+        uint current_time = get_ticks();
+        
+        // Handle acceleration
+        if(key_down(KEY_UP) && fuel > 0) {
+            speed = min(speed + ACCELERATION, MAX_SPEED);
+        } else if(key_down(KEY_DOWN)) {
+            speed = max(speed - BRAKE_POWER, 0);
+        } else {
+            speed = max(speed - (ACCELERATION/2), 0); // Natural deceleration
+        }
 
-            // Check if the destination is reached
-            check_destination();
+        // Update distance and fuel based on speed
+        if(speed > 0) {
+            distance += speed;
+            fuel -= (speed * 0.025); // Fuel consumption proportional to speed
+        }
+
+        // Status updates every 3 seconds
+        if(current_time - last_status >= 3000) {
+            speak("Speed: " + (speed * 30) + " mph, Fuel: " + fuel + " gallons", true);
+            last_status = current_time;
         }
 
         if(key_pressed(KEY_ESCAPE)) {
@@ -258,18 +277,22 @@ void drive() {
         }
 
         if(fuel <= 0) {
-            speak("Out of Fuel. You've run out of fuel!");
+            speak("Out of Fuel! You've run out of fuel and need to get a tow!", false);
+            money -= 200; // Tow truck fee
             driving = false;
         }
 
         random_event();
+        check_destination();
 
         if(game_won) {
             driving = false;
         }
+
+        wait(50);
     }
 
-    speak("Stopped Driving. You've stopped driving.");
+    speak("Stopped driving at " + distance + " miles traveled.");
 }
 
 void random_event() {
