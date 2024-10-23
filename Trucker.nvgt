@@ -261,10 +261,17 @@ void drive() {
     int update_counter = 0;
     bool is_driving = false;
     
-    // Wait for initial acceleration
+    // Wait for initial acceleration with clear prompt
+    speak("Press up arrow to begin driving", false);
     while(!is_driving) {
-        if(key_pressed(KEY_ESCAPE)) return;
-        if(key_pressed(KEY_UP)) is_driving = true;
+        if(key_pressed(KEY_ESCAPE)) {
+            speak("Cancelled driving", false);
+            return;
+        }
+        if(key_pressed(KEY_UP)) {
+            is_driving = true;
+            speak("Starting engine!", false);
+        }
         wait(50);
     }
     
