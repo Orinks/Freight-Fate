@@ -291,7 +291,7 @@ void drive() {
 
         // Status updates every 5 seconds
         if(last_status >= 100) { // 100 * 50ms = 5000ms
-            speak("Speed: " + (speed * 30) + " mph, Fuel: " + fuel + " gallons", true);
+            speak("Speed: " + int(speed * 30) + " mph, Fuel: " + int(fuel) + " gallons", true);
             last_status = 0;
             
             // Only check for random events and destination when giving status updates
