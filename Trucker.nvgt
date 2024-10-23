@@ -75,7 +75,6 @@ double maximum(double a, double b) {
 #include "speech.nvgt"
 #include "input.nvgt"
 #include "menu.nvgt"
-#include "music.nvgt"
 #include "game_menus.nvgt"
 
 // Global variables
