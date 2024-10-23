@@ -251,7 +251,7 @@ void drive() {
     const double MAX_SPEED = 2.0;
     const double ACCELERATION = 0.1;
     const double BRAKE_POWER = 0.2;
-    uint last_status = 0;
+    int last_status = 0;
 
     while(driving) {
         if (check_exit_keys()) {
@@ -260,8 +260,6 @@ void drive() {
             return;
         }
 
-        uint current_time = get_ticks();
-        
         // Handle acceleration
         if(key_down(KEY_UP) && fuel > 0) {
             speed = minimum(speed + ACCELERATION, MAX_SPEED);
@@ -278,9 +276,11 @@ void drive() {
         }
 
         // Status updates every 3 seconds
-        if(current_time - last_status >= 3000) {
+        if(last_status >= 60) { // 60 * 50ms = 3000ms
             speak("Speed: " + (speed * 30) + " mph, Fuel: " + fuel + " gallons", true);
-            last_status = current_time;
+            last_status = 0;
+        }
+        last_status++;
         }
 
         if(key_pressed(KEY_ESCAPE)) {
