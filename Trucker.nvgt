@@ -114,30 +114,30 @@ void save_game() {
 } // Closing brace added here
 
 void check_status() {
-    display_status();
-    wait(1000); // Additional pause after status is spoken
-}
-
-void display_status() {
-    string status_message = "Status: ";
-    status_message += "You're in " + locations[current_location] + ". ";
-    status_message += "You've traveled " + distance + " miles. ";
-    status_message += "You have " + fuel + " gallons of fuel and $" + money + ". ";
-    status_message += "Fuel price here is $" + fuel_prices[current_location] + " per gallon. ";
-
+    menu status_menu;
+    status_menu.intro_text = "Current Status";
+    
+    // Add all status information as separate menu items for easy reading
+    status_menu.add_item("Location: " + locations[current_location]);
+    status_menu.add_item("Distance traveled: " + distance + " miles");
+    status_menu.add_item("Fuel remaining: " + fuel + " gallons");
+    status_menu.add_item("Money: $" + money);
+    status_menu.add_item("Fuel price here: $" + fuel_prices[current_location] + " per gallon");
+    
     if (current_location < locations.length() - 1) {
-        status_message += "Next destination is " + locations[current_location + 1] + " in " + (destinations[current_destination] - distance) + " miles.";
+        status_menu.add_item("Next destination: " + locations[current_location + 1] + " (" + (destinations[current_destination] - distance) + " miles away)");
     } else {
-        status_message += "You've reached the final destination!";
+        status_menu.add_item("You've reached the final destination!");
     }
-
-    speak(status_message, false);
 
     if(current_cargo != "") {
-        speak("You're carrying " + current_cargo + " worth $" + cargo_value + ".", false);
+        status_menu.add_item("Cargo: " + current_cargo + " (worth $" + cargo_value + ")");
     }
-
-    wait(500); // Add a small delay to ensure all status information is spoken
+    
+    status_menu.add_item("Return to game");
+    
+    // Run the menu until user selects "Return to game" or presses escape
+    status_menu.run();
 }
 
 void adjust_volume() {
