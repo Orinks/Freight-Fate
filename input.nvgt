@@ -19,7 +19,7 @@ void get_choice() {
     } else if(action == "rest") {
         rest();
     } else if(action == "status") {
-        display_status();
+        check_status();
     } else if(action == "quit") {
         speak("Thanks for playing!");
         exit();
