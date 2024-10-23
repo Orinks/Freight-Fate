@@ -130,9 +130,9 @@ void check_status() {
     
     // Add all status information as separate menu items for easy reading
     status_menu.add_item("Location: " + locations[current_location]);
-    status_menu.add_item("Distance traveled: " + distance + " miles");
-    status_menu.add_item("Fuel remaining: " + fuel + " gallons");
-    status_menu.add_item("Money: $" + money);
+    status_menu.add_item("Distance traveled: " + int(distance) + " miles");
+    status_menu.add_item("Fuel remaining: " + int(fuel) + " gallons");
+    status_menu.add_item("Money: $" + int(money));
     status_menu.add_item("Fuel price here: $" + fuel_prices[current_location] + " per gallon");
     
     if (current_location < locations.length() - 1) {
@@ -286,7 +286,7 @@ void drive() {
         // Update distance and fuel based on speed
         if(speed > 0) {
             distance += (speed * 30); // Convert speed to MPH for distance calculation
-            fuel = maximum(0, fuel - (speed * 0.15)); // Increased fuel consumption rate
+            fuel = maximum(0, fuel - (speed * 0.5)); // Further increased fuel consumption rate
         }
 
         // Status updates every 5 seconds
