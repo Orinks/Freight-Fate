@@ -289,19 +289,24 @@ void drive() {
             fuel = maximum(0, fuel - (speed * 0.5)); // Further increased fuel consumption rate
         }
 
-        // Status updates every 5 seconds
-        if(last_status >= 100) { // 100 * 50ms = 5000ms
-            speak("Speed: " + int(speed * 30) + " mph, Fuel: " + int(fuel) + " gallons", true);
-            last_status = 0;
+        // Speed updates every second, full status every 5 seconds
+        if(last_status >= 20) { // 20 * 50ms = 1000ms
+            speak("Speed: " + int(speed * 30) + " mph", true);
             
-            // Only check for random events and destination when giving status updates
-            if(fuel <= 0) {
-                speak("Out of Fuel! You've run out of fuel and need to get a tow!", false);
-                money -= 200; // Tow truck fee
-                driving = false;
-            } else {
-                random_event();
-                check_destination();
+            // Full status update and checks every 5 seconds
+            if(last_status >= 100) {
+                speak("Fuel: " + int(fuel) + " gallons", true);
+                last_status = 0;
+                
+                // Only check for random events and destination during full status updates
+                if(fuel <= 0) {
+                    speak("Out of Fuel! You've run out of fuel and need to get a tow!", false);
+                    money -= 200; // Tow truck fee
+                    driving = false;
+                } else {
+                    random_event();
+                    check_destination();
+                }
             }
         }
         last_status++;
