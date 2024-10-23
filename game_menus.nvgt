@@ -1,0 +1,59 @@
+#include "menu.nvgt"
+
+// Main menu at startup
+int show_main_menu() {
+    menu m;
+    m.intro_text = "Welcome to the Road Trip Game. Choose an option:";
+    m.add_item("Start New Game");
+    m.add_item("Load Game");
+    m.add_item("Options");
+    m.add_item("Quit");
+    
+    return m.run();
+}
+
+// Game menu during gameplay
+string show_game_menu() {
+    menu m;
+    m.intro_text = "What would you like to do?";
+    m.add_item("Drive", "drive");
+    m.add_item("Refuel", "refuel");
+    m.add_item("Rest", "rest");
+    m.add_item("Check Status", "status");
+    m.add_item("Save Game", "save");
+    m.add_item("Quit", "quit");
+    
+    m.run();
+    return m.selected_item_id;
+}
+
+// Options menu
+void show_options_menu() {
+    menu m;
+    m.intro_text = "Game Options:";
+    m.add_item("Adjust Volume");
+    m.add_item("Toggle Sound Effects");
+    m.add_item("Change Difficulty");
+    m.add_item("Back to Main Menu");
+    
+    while (true) {
+        int choice = m.run();
+        switch (choice) {
+            case 0: adjust_volume(); break;
+            case 1: toggle_sound_effects(); break;
+            case 2: change_difficulty(); break;
+            case 3: return;
+        }
+    }
+}
+
+// Game over menu
+int show_game_over_menu(bool won) {
+    menu m;
+    m.intro_text = won ? "Congratulations! You've won the game!" : "Game Over. Better luck next time!";
+    m.add_item("Play Again");
+    m.add_item("Return to Main Menu");
+    m.add_item("Quit");
+    
+    return m.run();
+}
