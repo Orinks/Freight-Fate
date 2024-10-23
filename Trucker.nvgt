@@ -83,8 +83,8 @@ void start_new_game() {
     game_over = false;
     player_won = false;
 
-    // Set initial distance to the first destination
-    distance = destinations[current_destination];
+    // Start at 0 distance
+    distance = 0;
 
     pick_up_cargo();
     wait(3000); // Increased wait time after initial cargo pickup
