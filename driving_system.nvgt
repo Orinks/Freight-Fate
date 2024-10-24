@@ -1,0 +1,110 @@
+class DrivingSystem {
+    private GameState@ game_state;
+    private SoundManager@ sound_manager;
+    private RandomEventSystem@ event_system;
+
+    // Constants for driving mechanics
+    private const double MPH_MULTIPLIER = 60.0;
+    private const double MAX_SPEED_MPH = 70.0;
+    private const double ACCELERATION_MPH = 5.0;
+    private const double BRAKE_POWER_MPH = 10.0;
+    private const double COAST_DECEL_MPH = 2.0;
+    private const double FUEL_PER_MILE = 0.05;
+
+    DrivingSystem(GameState@ state, SoundManager@ sounds, RandomEventSystem@ events) {
+        @game_state = state;
+        @sound_manager = sounds;
+        @event_system = events;
+    }
+
+    void drive() {
+        speak("Press up arrow to start driving. Use down arrow to brake, and escape to stop.", false);
+        
+        // Initialize driving state
+        double speed_mph = 0;
+        double miles_traveled = 0;
+        int update_counter = 0;
+        bool is_driving = false;
+        
+        // Wait for initial acceleration with clear prompt
+        speak("Press up arrow to begin driving", false);
+        while(!is_driving) {
+            if(key_pressed(KEY_ESCAPE)) {
+                speak("Cancelled driving", false);
+                return;
+            }
+            if(key_pressed(KEY_UP)) {
+                is_driving = true;
+                speak("Starting engine!", false);
+            }
+            wait(50);
+        }
+        
+        speak("Starting to drive!", false);
+        sound_manager.stop_menu_music();
+        
+        while(is_driving) {
+            if(key_pressed(KEY_ESCAPE)) {
+                is_driving = false;
+                break;
+            }
+            
+            // Calculate time elapsed for this frame (50ms = 0.05 seconds)
+            double time_elapsed = 0.05;
+            
+            // Handle acceleration/deceleration
+            if(key_down(KEY_UP) && game_state.fuel > 0) {
+                speed_mph = minimum(speed_mph + (ACCELERATION_MPH * time_elapsed), MAX_SPEED_MPH);
+            } else if(key_down(KEY_DOWN)) {
+                speed_mph = maximum(speed_mph - (BRAKE_POWER_MPH * time_elapsed), 0);
+            } else {
+                speed_mph = maximum(speed_mph - (COAST_DECEL_MPH * time_elapsed), 0);
+            }
+            
+            // Calculate distance traveled this frame
+            double miles_this_frame = (speed_mph * time_elapsed) / 3600.0;
+            miles_traveled += miles_this_frame;
+            game_state.distance += miles_this_frame;
+            
+            // Calculate fuel consumption
+            if(speed_mph > 0) {
+                double fuel_used = miles_this_frame * FUEL_PER_MILE;
+                game_state.fuel = maximum(0, game_state.fuel - fuel_used);
+            }
+            
+            // Update status and sounds every second (20 frames)
+            update_counter++;
+            if(update_counter >= 20) {
+                speak("Speed: " + int(speed_mph) + " mph", true);
+                sound_manager.play_engine_sound(speed_mph);
+                update_counter = 0;
+                
+                // Full status update every 5 seconds
+                if(update_counter % 100 == 0) {
+                    speak("Fuel: " + int(game_state.fuel) + " gallons", true);
+                    
+                    if(game_state.fuel <= 0) {
+                        speak("Out of Fuel! You've run out of fuel and need to get a tow!", false);
+                        game_state.money -= 200; // Tow truck fee
+                        is_driving = false;
+                        break;
+                    }
+                    
+                    event_system.check_for_event();
+                    game_state.check_destination();
+                    
+                    if(game_state.game_won) {
+                        is_driving = false;
+                        break;
+                    }
+                }
+            }
+            
+            wait(50);
+        }
+        
+        sound_manager.stop_engine_sound();
+        sound_manager.play_menu_music();
+        speak("Stopped driving. Traveled " + int(miles_traveled) + " miles this trip.");
+    }
+}
