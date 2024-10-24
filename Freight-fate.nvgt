@@ -310,7 +310,7 @@ void start_new_game() {
     while (!game_state.game_over) {
         if (check_exit_keys()) return;
 
-        string action = show_game_menu();
+        string action = menu_manager.show_game_menu();
         if (action == "drive") drive();
         else if (action == "refuel") refuel();
         else if (action == "rest") rest();
@@ -318,7 +318,7 @@ void start_new_game() {
         else if (action == "save") save_game();
         else if (action == "quit") {
             if (confirm_quit()) {
-                game_over = true;
+                game_state.game_over = true;
             }
         }
 
@@ -328,7 +328,7 @@ void start_new_game() {
         }
     }
 
-    int end_choice = show_game_over_menu(player_won);
+    int end_choice = menu_manager.show_game_over_menu(game_state.player_won);
     if (end_choice == 0) start_new_game();
     else if (end_choice == 1) return; // Back to main menu
     else exit();
