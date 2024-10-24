@@ -252,35 +252,31 @@ class MenuManager {
 
 MenuManager@ menu_manager;
 
-void main() {
-    try {
-        show_window("Freight Fate");
-        initialize_game();
-        initialize_audio();
+void main() 
+{
+    show_window("Freight Fate");
+    initialize_game();
+    initialize_audio();
+    
+    @menu_manager = MenuManager(@game_state);
+    play_menu_music();
+    
+    while (true) {
+        int main_choice = menu_manager.show_main_menu();
+        if (main_choice == -1 or check_exit_keys()) {
+            cleanup_resources();
+            break;
+        }
         
-        @menu_manager = MenuManager(@game_state);
-        play_menu_music();
-        
-        while (true) {
-            int main_choice = menu_manager.show_main_menu();
-            if (main_choice == -1 or check_exit_keys()) {
-                cleanup_resources();
-                break;
-            }
-            
-            switch (main_choice) {
-                case 0: start_new_game(); break;
-                case 1: load_game(); break;
-                case 2: menu_manager.show_options_menu(); break;
-                case 3: cleanup_resources(); exit(); break;
-            }
+        switch (main_choice) {
+            case 0: start_new_game(); break;
+            case 1: load_game(); break;
+            case 2: menu_manager.show_options_menu(); break;
+            case 3: cleanup_resources(); exit(); break;
         }
     }
-    catch(string e) {
-        speak("Fatal error: " + e, false);
-        cleanup_resources();
-        exit();
-    }
+    
+    cleanup_resources();
 }
 
 void cleanup_resources() {
