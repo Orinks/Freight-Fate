@@ -2,6 +2,7 @@
 #include "menu.nvgt"
 #include "form.nvgt"
 #include "game_state.nvgt"
+#include "game_data.nvgt"
 
 class MenuManager {
     private GameState@ game_state;

@@ -3,6 +3,7 @@
 #include "menu.nvgt"    // For menu interfaces
 #include "form.nvgt"    // For auditory UI components
 #include "game_state.nvgt" // For game state management
+#include "game_data.nvgt" // For shared game data
 #include "menu_manager.nvgt" // For menu management
 #include "random_events.nvgt" // For random event handling
 #include "sound_manager.nvgt" // For sound management

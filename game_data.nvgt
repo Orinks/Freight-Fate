@@ -1,0 +1,31 @@
+// Shared game data
+array<string> locations;
+array<double> destinations; 
+array<double> fuel_prices;
+
+// Sound system references
+sound_pool@ game_sounds;
+int menu_music_handle = -1;
+int engine_idle_handle = -1;
+int ui_click_handle = -1;
+int event_handle = -1;
+
+void play_ui_sound() {
+    if(ui_click_handle >= 0) {
+        game_sounds.destroy_sound(ui_click_handle);
+        ui_click_handle = game_sounds.play_stationary("sounds/ui_click.ogg", false);
+        if(ui_click_handle >= 0) {
+            game_sounds.update_sound_start_values(ui_click_handle, 0, -0.3, 100);
+        }
+    }
+}
+
+void play_event_sound() {
+    if(event_handle >= 0) {
+        game_sounds.destroy_sound(event_handle);
+        event_handle = game_sounds.play_stationary("sounds/event.ogg", false);
+        if(event_handle >= 0) {
+            game_sounds.update_sound_start_values(event_handle, 0, -0.4, 100);
+        }
+    }
+}
