@@ -14,7 +14,7 @@ int show_main_menu() {
         
         return m.run();
     }
-    catch(string e) {
+    catch(const string& e) {
         speak("Error showing main menu: " + e);
         return -1;
     }

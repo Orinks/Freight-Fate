@@ -120,6 +120,7 @@ class GameState {
     double cargo_value = 0;
     bool game_over = false;
     bool player_won = false;
+    bool game_won = false;
     
     void reset() {
         distance = 0;
@@ -291,11 +292,11 @@ void check_status() {
     status_menu.intro_text = "Current Status";
     
     // Add all status information as separate menu items for easy reading
-    status_menu.add_item("Location: " + locations[current_location]);
-    status_menu.add_item("Distance traveled: " + int(distance) + " miles");
-    status_menu.add_item("Fuel remaining: " + int(fuel) + " gallons");
-    status_menu.add_item("Money: $" + int(money));
-    status_menu.add_item("Fuel price here: $" + fuel_prices[current_location] + " per gallon");
+    status_menu.add_item("Location: " + locations[game_state.current_location]);
+    status_menu.add_item("Distance traveled: " + int(game_state.distance) + " miles");
+    status_menu.add_item("Fuel remaining: " + int(game_state.fuel) + " gallons");
+    status_menu.add_item("Money: $" + int(game_state.money));
+    status_menu.add_item("Fuel price here: $" + fuel_prices[game_state.current_location] + " per gallon");
     
     if (current_location < locations.length() - 1) {
         status_menu.add_item("Next destination: " + locations[current_location + 1] + " (" + (destinations[current_destination] - distance) + " miles away)");
@@ -303,8 +304,8 @@ void check_status() {
         status_menu.add_item("You've reached the final destination!");
     }
 
-    if(current_cargo != "") {
-        status_menu.add_item("Cargo: " + current_cargo + " (worth $" + cargo_value + ")");
+    if(game_state.current_cargo != "") {
+        status_menu.add_item("Cargo: " + game_state.current_cargo + " (worth $" + game_state.cargo_value + ")");
     }
     
     status_menu.add_item("Return to game");
