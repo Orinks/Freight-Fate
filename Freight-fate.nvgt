@@ -206,6 +206,8 @@ class MenuManager {
                 case 2: change_difficulty(); break;
                 case 3: return true;
             }
+            // Add default return for switch fallthrough
+            return false;
         }
     }
 
