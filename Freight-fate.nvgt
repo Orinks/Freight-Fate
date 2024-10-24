@@ -2,6 +2,7 @@
 #include "speech.nvgt"  // For text-to-speech functionality 
 #include "menu.nvgt"    // For menu interfaces
 #include "form.nvgt"    // For auditory UI components
+#include "menu_manager.nvgt" // Menu management
 
 // Sound management using sound_pool and proper error handling
 sound_pool game_sounds;
@@ -201,15 +202,19 @@ bool check_exit_keys() {
     return false;
 }
 
+MenuManager@ menu_manager;
+
 void main() {
     try {
         show_window("Freight Fate");
         initialize_game();
         initialize_audio();
+        
+        @menu_manager = MenuManager(@game_state);
         play_menu_music();
         
         while (true) {
-            int main_choice = show_main_menu();
+            int main_choice = menu_manager.show_main_menu();
             if (main_choice == -1 or check_exit_keys()) {
                 cleanup_resources();
                 break;
@@ -218,7 +223,7 @@ void main() {
             switch (main_choice) {
                 case 0: start_new_game(); break;
                 case 1: load_game(); break;
-                case 2: show_options_menu(); break;
+                case 2: menu_manager.show_options_menu(); break;
                 case 3: cleanup_resources(); exit(); break;
             }
         }
@@ -378,37 +383,15 @@ void deliver_cargo() {
 }
 
 void refuel() {
-    menu m;
-    m.intro_text = "Refuel";
-    m.add_item("Enter the number of gallons:", "input");
-    m.add_item("Buy Fuel", "submit");
-
-    while(true) {
-        int choice = m.run();
-        string action = m.selected_item_id;
-
-        if (action == "submit") {
-            string input = form.create_input_box("Enter the number of gallons:");
-            double amount = parse_float(input);
-
-            if (amount <= 0) {
-                speak("Invalid Input. Please enter a positive number.");
-                continue;
-            }
-
-            double cost = amount * fuel_prices[current_location];
-
-            if(cost > money) {
-                speak("Insufficient Funds. You don't have enough money for that much fuel.");
-                return;
-            }
-
-            fuel = fuel + amount;
-            money = money - cost;
-            speak("Refueled " + amount + " gallons for $" + cost + " at $" + fuel_prices[current_location] + " per gallon.");
-            return;
-        }
-    }
+    double amount = menu_manager.show_refuel_menu();
+    if(amount <= 0) return;
+    
+    double cost = amount * fuel_prices[game_state.current_location];
+    game_state.fuel += amount;
+    game_state.money -= cost;
+    
+    speak("Refueled " + int(amount) + " gallons for $" + int(cost), false);
+    play_ui_sound();
 }
 
 void rest() {
