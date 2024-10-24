@@ -31,7 +31,7 @@ void initialize_audio() {
         game_sounds.set_sound_volume("ui_click", 0.7);
         game_sounds.set_sound_volume("event", 0.6);
     }
-    catch(const string& e) {
+    catch(string e) {
         speak("Error initializing audio: " + e, false);
     }
 }
