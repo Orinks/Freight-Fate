@@ -206,8 +206,8 @@ class MenuManager {
                 case 2: change_difficulty(); break;
                 case 3: return true;
             }
-            return false;
         }
+        return false;
     }
 
     int show_game_over_menu(bool won) {
