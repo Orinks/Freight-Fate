@@ -524,7 +524,7 @@ void drive() {
                 random_event();
                 check_destination();
                 
-                if(game_won) {
+                if(game_state.game_won) {
                     is_driving = false;
                     break;
                 }
