@@ -2,7 +2,6 @@
 #include "speech.nvgt"  // For text-to-speech functionality 
 #include "menu.nvgt"    // For menu interfaces
 #include "form.nvgt"    // For auditory UI components
-#include "menu_manager.nvgt" // Menu management
 
 // Sound management using sound_pool and proper error handling
 sound_pool game_sounds;
@@ -187,12 +186,59 @@ class GameState {
     }
 }
 
+class MenuManager {
+    private GameState@ game_state;
+    
+    MenuManager(GameState@ state) {
+        @game_state = state;
+    }
+
+    int show_main_menu() {
+        menu main_menu;
+        main_menu.intro_text = "Welcome to Freight Fate";
+        main_menu.add_item("New Game");
+        main_menu.add_item("Load Game");
+        main_menu.add_item("Options");
+        main_menu.add_item("Exit");
+        
+        play_ui_sound();
+        return main_menu.run();
+    }
+
+    double show_refuel_menu() {
+        menu refuel_menu;
+        refuel_menu.intro_text = "Current money: $" + int(game_state.money) + 
+                            "\nFuel price: $" + fuel_prices[game_state.current_location] + " per gallon";
+        
+        // Calculate max affordable gallons
+        double max_affordable = game_state.money / fuel_prices[game_state.current_location];
+        double tank_space = 100 - game_state.fuel;
+        double max_possible = minimum(max_affordable, tank_space);
+
+        refuel_menu.add_item("10 gallons - $" + int(10 * fuel_prices[game_state.current_location]));
+        refuel_menu.add_item("20 gallons - $" + int(20 * fuel_prices[game_state.current_location]));
+        refuel_menu.add_item("30 gallons - $" + int(30 * fuel_prices[game_state.current_location]));
+        refuel_menu.add_item("Fill tank (" + int(tank_space) + " gallons) - $" + int(tank_space * fuel_prices[game_state.current_location]));
+        refuel_menu.add_item("Cancel");
+
+        play_ui_sound();
+        int choice = refuel_menu.run();
+        
+        switch(choice) {
+            case 0: return minimum(10, max_possible);
+            case 1: return minimum(20, max_possible);
+            case 2: return minimum(30, max_possible);
+            case 3: return tank_space;
+            case 4: return 0; // Cancel
+            default: return 0;
+        }
+    }
+}
+
 GameState game_state;
 array<double> destinations;
 array<string> locations;
 array<double> fuel_prices;
-
-audio_form form;
 
 bool check_exit_keys() {
     if (key_pressed(KEY_ESCAPE) or (key_down(KEY_LALT) and key_pressed(KEY_F4))) {
