@@ -322,9 +322,9 @@ void start_new_game() {
             }
         }
 
-        if (game_won) {
-            player_won = true;
-            game_over = true;
+        if (game_state.game_won) {
+            game_state.player_won = true;
+            game_state.game_over = true;
         }
     }
 
