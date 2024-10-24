@@ -319,17 +319,17 @@ bool confirm_quit() {
 void pick_up_cargo() {
     array<string> cargo_types = {"Electronics", "Furniture", "Food", "Clothing", "Construction Materials"};
     int cargo_index = random(0, cargo_types.length() - 1);
-    current_cargo = cargo_types[cargo_index];
-    cargo_value = random(500, 2000);
-    speak("You've picked up a shipment of " + current_cargo + " worth $" + cargo_value + ".", false);
+    game_state.current_cargo = cargo_types[cargo_index];
+    game_state.cargo_value = random(500, 2000);
+    speak("You've picked up a shipment of " + game_state.current_cargo + " worth $" + game_state.cargo_value + ".", false);
 }
 
 void check_destination() {
-    if(distance >= destinations[current_destination]) {
-        current_destination++;
-        current_location++;
-        if(current_destination >= destinations.length()) {
-            game_won = true;
+    if(game_state.distance >= destinations[game_state.current_destination]) {
+        game_state.current_destination++;
+        game_state.current_location++;
+        if(game_state.current_destination >= destinations.length()) {
+            game_state.game_won = true;
             speak("Congratulations! You've reached all destinations and won the game!", false);
         } else {
             speak("You've reached " + locations[current_location] + ". Next destination is " + locations[current_location + 1] + " in " + (destinations[current_destination] - distance) + " miles.", false);
@@ -339,11 +339,11 @@ void check_destination() {
 }
 
 void deliver_cargo() {
-    if(current_cargo != "") {
-        money += cargo_value;
-        speak("You've delivered " + current_cargo + " and earned $" + cargo_value + ".", false);
-        current_cargo = "";
-        cargo_value = 0;
+    if(game_state.current_cargo != "") {
+        game_state.money += game_state.cargo_value;
+        speak("You've delivered " + game_state.current_cargo + " and earned $" + game_state.cargo_value + ".", false);
+        game_state.current_cargo = "";
+        game_state.cargo_value = 0;
     }
     pick_up_cargo();
 }
