@@ -74,4 +74,51 @@ class GameState {
             default: return "Normal";
         }
     }
+
+    void pick_up_cargo() {
+        array<string> cargo_types = {"Electronics", "Furniture", "Food", "Clothing", "Construction Materials"};
+        int cargo_index = random(0, cargo_types.length() - 1);
+        current_cargo = cargo_types[cargo_index];
+        cargo_value = random(500, 2000);
+        speak("You've picked up a shipment of " + current_cargo + " worth $" + cargo_value + ".", false);
+    }
+
+    void deliver_cargo() {
+        if(current_cargo != "") {
+            money += cargo_value;
+            speak("You've delivered " + current_cargo + " and earned $" + cargo_value + ".", false);
+            current_cargo = "";
+            cargo_value = 0;
+        }
+        pick_up_cargo();
+    }
+
+    void check_destination() {
+        if(distance >= destinations[current_destination]) {
+            current_destination++;
+            current_location++;
+            if(current_destination >= destinations.length()) {
+                game_won = true;
+                speak("Congratulations! You've reached all destinations and won the game!", false);
+            } else {
+                speak("You've reached " + locations[current_location] + ". Next destination is " + locations[current_location + 1] + " in " + (destinations[current_destination] - distance) + " miles.", false);
+                deliver_cargo();
+            }
+        }
+    }
+
+    // Location data
+    array<string> locations;
+    array<double> destinations;
+    array<double> fuel_prices;
+
+    void initialize_locations(array<string>& in loc, array<double>& in dest, array<double>& in prices) {
+        locations = loc;
+        destinations = dest;
+        fuel_prices = prices;
+    }
+
+    double get_current_fuel_price() {
+        return fuel_prices[current_location];
+    }
 }

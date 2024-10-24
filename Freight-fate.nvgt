@@ -2,16 +2,18 @@
 #include "speech.nvgt"  // For text-to-speech functionality 
 #include "menu.nvgt"    // For menu interfaces
 #include "form.nvgt"    // For auditory UI components
-#include "sound_pool.nvgt" // For sound management
 #include "game_state.nvgt" // For game state management
 #include "menu_manager.nvgt" // For menu management
 #include "random_events.nvgt" // For random event handling
+#include "sound_manager.nvgt" // For sound management
+#include "driving_system.nvgt" // For driving mechanics
 
-// Manager instances
+// Game state and managers
+GameState game_state;
+MenuManager@ menu_manager;
 SoundManager@ sound_manager;
+RandomEventSystem@ event_system;
 DrivingSystem@ driving_system;
-
-
 
 // Math helper functions
 double minimum(double a, double b) {
@@ -23,13 +25,6 @@ double maximum(double a, double b) {
     if(a > b) return a;
     return b;
 }
-
-
-
-GameState game_state;
-array<double> destinations;
-array<string> locations;
-array<double> fuel_prices;
 
 bool check_exit_keys() {
     if (key_pressed(KEY_ESCAPE) or (key_down(KEY_LALT) and key_pressed(KEY_F4))) {
@@ -79,17 +74,17 @@ void cleanup_resources() {
 }
 
 void initialize_game() {
-    locations = {"New York", "Chicago", "Denver", "Las Vegas", "Los Angeles"};
-    destinations = {0, 800, 1400, 2200, 2800};
-    fuel_prices = {3.5, 3.2, 3.7, 3.9, 4.1};
+    array<string> locations = {"New York", "Chicago", "Denver", "Las Vegas", "Los Angeles"};
+    array<double> destinations = {0, 800, 1400, 2200, 2800};
+    array<double> fuel_prices = {3.5, 3.2, 3.7, 3.9, 4.1};
+    
+    game_state.initialize_locations(locations, destinations, fuel_prices);
 }
 
 void start_new_game() {
-    // Reset game state
     game_state.reset();
-
-    pick_up_cargo();
-    wait(3000); // Increased wait time after initial cargo pickup
+    game_state.pick_up_cargo();
+    wait(3000);
 
     while (!game_state.game_over) {
         if (check_exit_keys()) return;
@@ -98,10 +93,10 @@ void start_new_game() {
         if (action == "drive") driving_system.drive();
         else if (action == "refuel") refuel();
         else if (action == "rest") rest();
-        else if (action == "status") check_status();
+        else if (action == "status") menu_manager.show_status_menu();
         else if (action == "save") save_game();
         else if (action == "quit") {
-            if (confirm_quit()) {
+            if (menu_manager.show_confirm_quit()) {
                 game_state.game_over = true;
             }
         }
@@ -114,8 +109,6 @@ void start_new_game() {
 
     int end_choice = menu_manager.show_game_over_menu(game_state.player_won);
     if (end_choice == 0) start_new_game();
-    else if (end_choice == 1) return; // Back to main menu
-    else exit();
 }
 
 void load_game() {
@@ -210,12 +203,12 @@ void refuel() {
     double amount = menu_manager.show_refuel_menu();
     if(amount <= 0) return;
     
-    double cost = amount * fuel_prices[game_state.current_location];
-    game_state.fuel += amount;
-    game_state.money -= cost;
+    double cost = amount * game_state.get_current_fuel_price();
+    game_state.add_fuel(amount);
+    game_state.apply_cost(cost);
     
     speak("Refueled " + int(amount) + " gallons for $" + int(cost), false);
-    play_ui_sound();
+    sound_manager.play_ui_sound();
 }
 
 void rest() {
