@@ -1,3 +1,8 @@
+// Game constants
+const double STARTING_FUEL = 100;
+const double STARTING_MONEY = 1000; 
+const double MAX_FUEL = 100;
+
 /**
  * Game state management class
  * Handles core game state and settings
@@ -25,10 +30,6 @@ class GameState {
     // Game settings
     int difficulty = 1; // 0=Easy, 1=Normal, 2=Hard
     
-    // Constants - moved to static
-    static double STARTING_FUEL = 100;
-    static double STARTING_MONEY = 1000;
-    static double MAX_FUEL = 100;
     
     void reset() {
         distance = 0;

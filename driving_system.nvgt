@@ -1,15 +1,16 @@
+// Driving constants
+const double MPH_MULTIPLIER = 60.0;
+const double MAX_SPEED_MPH = 70.0;
+const double ACCELERATION_MPH = 5.0;
+const double BRAKE_POWER_MPH = 10.0;
+const double COAST_DECEL_MPH = 2.0;
+const double FUEL_PER_MILE = 0.05;
+
 class DrivingSystem {
     private GameState@ game_state;
     private SoundManager@ sound_manager;
     private RandomEventSystem@ event_system;
 
-    // Constants for driving mechanics
-    private static double MPH_MULTIPLIER = 60.0;
-    private static double MAX_SPEED_MPH = 70.0;
-    private static double ACCELERATION_MPH = 5.0;
-    private static double BRAKE_POWER_MPH = 10.0;
-    private static double COAST_DECEL_MPH = 2.0;
-    private static double FUEL_PER_MILE = 0.05;
 
     DrivingSystem(GameState@ state, SoundManager@ sounds, RandomEventSystem@ events) {
         @game_state = state;
