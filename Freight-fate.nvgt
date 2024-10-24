@@ -281,7 +281,7 @@ void main() {
             }
         }
     }
-    catch(const string& e) {
+    catch(string e) {
         speak("Fatal error: " + e, false);
         cleanup_resources();
         exit();
