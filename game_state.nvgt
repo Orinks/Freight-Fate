@@ -1,5 +1,9 @@
-// Game state structure for better organization
+/**
+ * Game state management class
+ * Handles core game state and settings
+ */
 class GameState {
+    // Game progress
     double distance = 0;
     double fuel = 100;
     double money = 1000;
@@ -17,12 +21,19 @@ class GameState {
     double music_volume = 1.0;
     double effects_volume = 1.0;
     bool sound_enabled = true;
+    
+    // Game settings
     int difficulty = 1; // 0=Easy, 1=Normal, 2=Hard
+    
+    // Constants
+    const double STARTING_FUEL = 100;
+    const double STARTING_MONEY = 1000;
+    const double MAX_FUEL = 100;
     
     void reset() {
         distance = 0;
-        fuel = 100;
-        money = 1000;
+        fuel = STARTING_FUEL;
+        money = STARTING_MONEY;
         driving = false;
         current_destination = 0;
         current_location = 0;
@@ -30,5 +41,37 @@ class GameState {
         cargo_value = 0;
         game_over = false;
         player_won = false;
+        game_won = false;
+    }
+    
+    double get_fuel_capacity_remaining() {
+        return MAX_FUEL - fuel;
+    }
+    
+    double get_max_affordable_fuel(double price_per_gallon) {
+        return money / price_per_gallon;
+    }
+    
+    bool can_afford(double cost) {
+        return money >= cost;
+    }
+    
+    void apply_cost(double cost) {
+        if(can_afford(cost)) {
+            money -= cost;
+        }
+    }
+    
+    void add_fuel(double amount) {
+        fuel = minimum(fuel + amount, MAX_FUEL);
+    }
+    
+    string get_difficulty_name() {
+        switch(difficulty) {
+            case 0: return "Easy";
+            case 1: return "Normal"; 
+            case 2: return "Hard";
+            default: return "Normal";
+        }
     }
 }
