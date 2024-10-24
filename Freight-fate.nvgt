@@ -16,62 +16,82 @@ void initialize_audio() {
             return;
         }
 
-        // Initialize sound pool with proper error checking
-        game_sounds.add_sound("menu_music", "sounds/menu_music.ogg");
-        game_sounds.add_sound("engine_idle", "sounds/engine_idle.ogg"); 
-        game_sounds.add_sound("ui_click", "sounds/ui_click.ogg");
-        game_sounds.add_sound("event", "sounds/event.ogg");
+        // Initialize sounds with proper error checking
+        int menu_music = game_sounds.play_stationary("sounds/menu_music.ogg", true);
+        int engine_idle = game_sounds.play_stationary("sounds/engine_idle.ogg", true);
+        int ui_click = game_sounds.play_stationary("sounds/ui_click.ogg", false);
+        int event = game_sounds.play_stationary("sounds/event.ogg", false);
 
-        // Set default properties
-        game_sounds.set_sound_looping("menu_music", true);
-        game_sounds.set_sound_looping("engine_idle", true);
-        
-        game_sounds.set_sound_volume("menu_music", 0.5);
-        game_sounds.set_sound_volume("engine_idle", 0.3);
-        game_sounds.set_sound_volume("ui_click", 0.7);
-        game_sounds.set_sound_volume("event", 0.6);
+        if(menu_music >= 0) {
+            game_sounds.update_sound_start_values(menu_music, 0, -0.5, 100);
+        }
+        if(engine_idle >= 0) {
+            game_sounds.update_sound_start_values(engine_idle, 0, -0.7, 100); 
+        }
+        if(ui_click >= 0) {
+            game_sounds.update_sound_start_values(ui_click, 0, -0.3, 100);
+        }
+        if(event >= 0) {
+            game_sounds.update_sound_start_values(event, 0, -0.4, 100);
+        }
     }
     catch(string e) {
         speak("Error initializing audio: " + e, false);
     }
 }
 
+// Sound handles
+int menu_music_handle = -1;
+int engine_idle_handle = -1;
+int ui_click_handle = -1;
+int event_handle = -1;
+
 void play_menu_music() {
-    if(game_sounds.sound_exists("menu_music")) {
-        game_sounds.play_sound("menu_music");
+    if(menu_music_handle >= 0) {
+        game_sounds.resume_sound(menu_music_handle);
     }
 }
 
 void stop_menu_music() {
-    if(game_sounds.sound_exists("menu_music")) {
-        game_sounds.stop_sound("menu_music");
+    if(menu_music_handle >= 0) {
+        game_sounds.pause_sound(menu_music_handle);
     }
 }
 
 void play_engine_sound(double speed_mph) {
-    if(game_sounds.sound_exists("engine_idle")) {
-        if(!game_sounds.is_sound_playing("engine_idle")) {
-            game_sounds.play_sound("engine_idle");
+    if(engine_idle_handle >= 0) {
+        if(!game_sounds.sound_is_playing(engine_idle_handle)) {
+            game_sounds.resume_sound(engine_idle_handle);
         }
-        game_sounds.set_sound_pitch("engine_idle", 0.8 + (speed_mph / 100.0));
+        game_sounds.update_sound_start_values(engine_idle_handle, 0, -0.7, 80 + (speed_mph / 100.0 * 40));
     }
 }
 
 void stop_engine_sound() {
-    if(game_sounds.sound_exists("engine_idle")) {
-        game_sounds.stop_sound("engine_idle");
+    if(engine_idle_handle >= 0) {
+        game_sounds.pause_sound(engine_idle_handle);
     }
 }
 
 void play_ui_sound() {
-    if(game_sounds.sound_exists("ui_click")) {
-        game_sounds.play_sound("ui_click");
+    if(ui_click_handle >= 0) {
+        // Restart the sound each time for UI feedback
+        game_sounds.destroy_sound(ui_click_handle);
+        ui_click_handle = game_sounds.play_stationary("sounds/ui_click.ogg", false);
+        if(ui_click_handle >= 0) {
+            game_sounds.update_sound_start_values(ui_click_handle, 0, -0.3, 100);
+        }
     }
 }
 
 void play_event_sound() {
-    if(game_sounds.sound_exists("event")) {
-        game_sounds.play_sound("event");
+    if(event_handle >= 0) {
+        // Restart the sound each time for events
+        game_sounds.destroy_sound(event_handle);
+        event_handle = game_sounds.play_stationary("sounds/event.ogg", false);
+        if(event_handle >= 0) {
+            game_sounds.update_sound_start_values(event_handle, 0, -0.4, 100);
+        }
     }
 }
 
@@ -216,7 +236,7 @@ void main() {
 void cleanup_resources() {
     stop_menu_music();
     stop_engine_sound();
-    game_sounds.destroy();
+    game_sounds.destroy_all();
     sound_pack.close();
 }
 
