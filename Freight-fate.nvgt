@@ -2,9 +2,10 @@
 #include "speech.nvgt"  // For text-to-speech functionality 
 #include "menu.nvgt"    // For menu interfaces
 #include "form.nvgt"    // For auditory UI components
+#include "sound_pool.nvgt" // For sound management
 
 // Sound management using sound_pool and proper error handling
-sound_pool game_sounds;
+sound_pool@ game_sounds;
 pack sound_pack;
 
 void initialize_audio() {
@@ -74,76 +75,6 @@ void play_event_sound() {
     }
 }
 
-// Sound management using sound_pool
-sound_pool game_sounds;
-pack sound_pack;
-
-void initialize_audio() {
-    try {
-        @sound_default_pack = sound_pack;
-        if(!sound_pack.open("sounds.dat")) {
-            speak("Warning: Could not load sound pack", false);
-            return;
-        }
-
-        // Initialize sound pool with proper error checking
-        game_sounds.load("menu_music", "sounds/menu_music.ogg");
-        game_sounds.load("engine_idle", "sounds/engine_idle.ogg"); 
-        game_sounds.load("ui_click", "sounds/ui_click.ogg");
-        game_sounds.load("event", "sounds/event.ogg");
-
-        // Set default properties
-        game_sounds.set_looping("menu_music", true);
-        game_sounds.set_looping("engine_idle", true);
-        
-        game_sounds.set_volume("menu_music", 0.5);
-        game_sounds.set_volume("engine_idle", 0.3);
-        game_sounds.set_volume("ui_click", 0.7);
-        game_sounds.set_volume("event", 0.6);
-    }
-    catch(const string& e) {
-        speak("Error initializing audio: " + e, false);
-    }
-}
-
-void play_menu_music() {
-    if(game_sounds.is_valid("menu_music")) {
-        game_sounds.play("menu_music");
-    }
-}
-
-void stop_menu_music() {
-    if(game_sounds.is_valid("menu_music")) {
-        game_sounds.stop("menu_music");
-    }
-}
-
-void play_engine_sound(double speed_mph) {
-    if(game_sounds.is_valid("engine_idle")) {
-        if(!game_sounds.is_playing("engine_idle")) {
-            game_sounds.play("engine_idle");
-        }
-        game_sounds.set_pitch("engine_idle", 0.8 + (speed_mph / 100.0));
-    }
-}
-
-void stop_engine_sound() {
-    if(game_sounds.is_valid("engine_idle")) {
-        game_sounds.stop("engine_idle");
-    }
-}
-
-void play_ui_sound() {
-    if(game_sounds.is_valid("ui_click")) {
-        game_sounds.play("ui_click");
-    }
-}
-
-void play_event_sound() {
-    if(game_sounds.is_valid("event")) {
-        game_sounds.play("event");
-    }
-}
 
 // Math helper functions
 double minimum(double a, double b) {
@@ -198,6 +129,55 @@ bool check_exit_keys() {
         return true;
     }
     return false;
+}
+
+class MenuManager {
+    private GameState@ game_state;
+    
+    MenuManager(GameState@ state) {
+        @game_state = state;
+    }
+
+    int show_main_menu() {
+        menu main_menu;
+        main_menu.intro_text = "Welcome to Freight Fate";
+        main_menu.add_item("New Game");
+        main_menu.add_item("Load Game");
+        main_menu.add_item("Options");
+        main_menu.add_item("Exit");
+        
+        play_ui_sound();
+        return main_menu.run();
+    }
+
+    double show_refuel_menu() {
+        menu refuel_menu;
+        refuel_menu.intro_text = "Current money: $" + int(game_state.money) + 
+                            "\nFuel price: $" + fuel_prices[game_state.current_location] + " per gallon";
+        
+        // Calculate max affordable gallons
+        double max_affordable = game_state.money / fuel_prices[game_state.current_location];
+        double tank_space = 100 - game_state.fuel;
+        double max_possible = minimum(max_affordable, tank_space);
+
+        refuel_menu.add_item("10 gallons - $" + int(10 * fuel_prices[game_state.current_location]));
+        refuel_menu.add_item("20 gallons - $" + int(20 * fuel_prices[game_state.current_location]));
+        refuel_menu.add_item("30 gallons - $" + int(30 * fuel_prices[game_state.current_location]));
+        refuel_menu.add_item("Fill tank (" + int(tank_space) + " gallons) - $" + int(tank_space * fuel_prices[game_state.current_location]));
+        refuel_menu.add_item("Cancel");
+
+        play_ui_sound();
+        int choice = refuel_menu.run();
+        
+        switch(choice) {
+            case 0: return minimum(10, max_possible);
+            case 1: return minimum(20, max_possible);
+            case 2: return minimum(30, max_possible);
+            case 3: return tank_space;
+            case 4: return 0; // Cancel
+            default: return 0;
+        }
+    }
 }
 
 MenuManager@ menu_manager;
