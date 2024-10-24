@@ -5,6 +5,7 @@
 #include "sound_pool.nvgt" // For sound management
 #include "game_state.nvgt" // For game state management
 #include "menu_manager.nvgt" // For menu management
+#include "random_events.nvgt" // For random event handling
 
 // Sound management using sound_pool and proper error handling
 sound_pool@ game_sounds = sound_pool();
@@ -129,6 +130,7 @@ void main()
     initialize_audio();
     
     @menu_manager = MenuManager(@game_state);
+    @event_system = RandomEventSystem(@game_state);
     play_menu_music();
     
     while (true) {
@@ -383,7 +385,7 @@ void drive() {
                     break;
                 }
                 
-                random_event();
+                event_system.check_for_event();
                 check_destination();
                 
                 if(game_state.game_won) {
@@ -401,74 +403,4 @@ void drive() {
     speak("Stopped driving. Traveled " + int(miles_traveled) + " miles this trip.");
 }
 
-void random_event() {
-    if(random(1, 100) <= 10) { // Increased chance of random events to 10%
-        //play_event_sound();
-        int event_choice = random(1, 10); // Expanded range for more events
-        switch(event_choice) {
-            case 1:
-                good_weather();
-                break;
-            case 2:
-                bad_weather();
-                break;
-            case 3:
-                road_construction();
-                break;
-            case 4:
-                find_money();
-                break;
-            case 5:
-                free_meal();
-                break;
-            case 6:
-                speak("Lucky! You find a shortcut and save some fuel!");
-                game_state.fuel += 5;
-                break;
-            case 7:
-                speak("Traffic. You hit traffic and waste some fuel.");
-                game_state.fuel -= 5;
-                break;
-            case 8:
-                speak("Hitchhiker. You pick up a hitchhiker who gives you some money for gas.");
-                game_state.money += 20;
-                break;
-            case 9:
-                speak("Flat Tire. You get a flat tire and have to spend money to fix it.");
-                game_state.money -= 50;
-                break;
-            case 10:
-                speak("Police Check. You get stopped by the police and have to pay a fine.");
-                game_state.money -= 100;
-                break;
-        }
-    }
-}
-
-void good_weather() {
-    speak("Clear skies ahead! The good weather improves your fuel efficiency.");
-    game_state.fuel += 3;
-}
-
-void bad_weather() {
-    speak("Heavy rain ahead. The bad weather reduces your fuel efficiency.");
-    game_state.fuel -= 3;
-}
-
-void road_construction() {
-    speak("Road construction ahead. You'll need to slow down and take a detour.");
-    game_state.distance -= 10;
-    game_state.fuel -= 2;
-}
-
-void find_money() {
-    int found_amount = random(10, 50);
-    speak("Lucky day! You found $" + found_amount + " on the road.");
-    game_state.money += found_amount;
-}
-
-void free_meal() {
-    speak("A kind stranger offers you a free meal at a truck stop. You save some money and feel refreshed.");
-    game_state.money += 15;
-    game_state.fuel += 2; // Assuming the rest during the meal slightly improves efficiency
-}
+RandomEventSystem@ event_system;
