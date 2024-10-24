@@ -561,23 +561,23 @@ void random_event() {
                 break;
             case 6:
                 speak("Lucky! You find a shortcut and save some fuel!");
-                fuel += 5;
+                game_state.fuel += 5;
                 break;
             case 7:
                 speak("Traffic. You hit traffic and waste some fuel.");
-                fuel -= 5;
+                game_state.fuel -= 5;
                 break;
             case 8:
                 speak("Hitchhiker. You pick up a hitchhiker who gives you some money for gas.");
-                money += 20;
+                game_state.money += 20;
                 break;
             case 9:
                 speak("Flat Tire. You get a flat tire and have to spend money to fix it.");
-                money -= 50;
+                game_state.money -= 50;
                 break;
             case 10:
                 speak("Police Check. You get stopped by the police and have to pay a fine.");
-                money -= 100;
+                game_state.money -= 100;
                 break;
         }
     }
@@ -585,28 +585,28 @@ void random_event() {
 
 void good_weather() {
     speak("Clear skies ahead! The good weather improves your fuel efficiency.");
-    fuel += 3;
+    game_state.fuel += 3;
 }
 
 void bad_weather() {
     speak("Heavy rain ahead. The bad weather reduces your fuel efficiency.");
-    fuel -= 3;
+    game_state.fuel -= 3;
 }
 
 void road_construction() {
     speak("Road construction ahead. You'll need to slow down and take a detour.");
-    distance -= 10;
-    fuel -= 2;
+    game_state.distance -= 10;
+    game_state.fuel -= 2;
 }
 
 void find_money() {
     int found_amount = random(10, 50);
     speak("Lucky day! You found $" + found_amount + " on the road.");
-    money += found_amount;
+    game_state.money += found_amount;
 }
 
 void free_meal() {
     speak("A kind stranger offers you a free meal at a truck stop. You save some money and feel refreshed.");
-    money += 15;
-    fuel += 2; // Assuming the rest during the meal slightly improves efficiency
+    game_state.money += 15;
+    game_state.fuel += 2; // Assuming the rest during the meal slightly improves efficiency
 }
