@@ -484,7 +484,7 @@ void drive() {
         double time_elapsed = 0.05;
         
         // Handle acceleration/deceleration
-        if(key_down(KEY_UP) && fuel > 0) {
+        if(key_down(KEY_UP) && game_state.fuel > 0) {
             speed_mph = minimum(speed_mph + (ACCELERATION_MPH * time_elapsed), MAX_SPEED_MPH);
         } else if(key_down(KEY_DOWN)) {
             speed_mph = maximum(speed_mph - (BRAKE_POWER_MPH * time_elapsed), 0);
@@ -495,12 +495,12 @@ void drive() {
         // Calculate distance traveled this frame
         double miles_this_frame = (speed_mph * time_elapsed) / 3600.0; // Convert MPH to miles per frame
         miles_traveled += miles_this_frame;
-        distance += miles_this_frame;
+        game_state.distance += miles_this_frame;
         
         // Calculate fuel consumption
         if(speed_mph > 0) {
             double fuel_used = miles_this_frame * FUEL_PER_MILE;
-            fuel = maximum(0, fuel - fuel_used);
+            game_state.fuel = maximum(0, game_state.fuel - fuel_used);
         }
         
         // Update status and sounds every second (20 frames)
@@ -512,11 +512,11 @@ void drive() {
             
             // Full status update every 5 seconds
             if(update_counter % 100 == 0) {
-                speak("Fuel: " + int(fuel) + " gallons", true);
+                speak("Fuel: " + int(game_state.fuel) + " gallons", true);
                 
-                if(fuel <= 0) {
+                if(game_state.fuel <= 0) {
                     speak("Out of Fuel! You've run out of fuel and need to get a tow!", false);
-                    money -= 200; // Tow truck fee
+                    game_state.money -= 200; // Tow truck fee
                     is_driving = false;
                     break;
                 }
