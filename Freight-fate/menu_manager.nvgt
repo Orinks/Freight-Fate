@@ -110,27 +110,31 @@ class MenuManager {
     }
 
     double show_refuel_menu() {
-        form.reset();
-        form.add_edit_box("amount", "Enter gallons to buy:", "");
+        menu refuel_menu;
+        refuel_menu.intro_text = "Current money: $" + int(game_state.money) + 
+                            "\nFuel price: $" + fuel_prices[game_state.current_location] + " per gallon";
         
-        while(true) {
-            if(form.run() == -1) return 0;
-            
-            string input = form.get_edit_box_text("amount");
-            double amount = parse_float(input);
-            
-            if(amount <= 0) {
-                speak("Please enter a positive number", false);
-                continue;
-            }
+        // Calculate max affordable gallons
+        double max_affordable = game_state.money / fuel_prices[game_state.current_location];
+        double tank_space = 100 - game_state.fuel;
+        double max_possible = minimum(max_affordable, tank_space);
 
-            double cost = amount * fuel_prices[game_state.current_location];
-            if(cost > game_state.money) {
-                speak("Insufficient funds - you need $" + int(cost), false);
-                continue;
-            }
+        refuel_menu.add_item("10 gallons - $" + int(10 * fuel_prices[game_state.current_location]));
+        refuel_menu.add_item("20 gallons - $" + int(20 * fuel_prices[game_state.current_location]));
+        refuel_menu.add_item("30 gallons - $" + int(30 * fuel_prices[game_state.current_location]));
+        refuel_menu.add_item("Fill tank (" + int(tank_space) + " gallons) - $" + int(tank_space * fuel_prices[game_state.current_location]));
+        refuel_menu.add_item("Cancel");
 
-            return amount;
+        play_ui_sound();
+        int choice = refuel_menu.run();
+        
+        switch(choice) {
+            case 0: return minimum(10, max_possible);
+            case 1: return minimum(20, max_possible);
+            case 2: return minimum(30, max_possible);
+            case 3: return tank_space;
+            case 4: return 0; // Cancel
+            default: return 0;
         }
     }
 }
