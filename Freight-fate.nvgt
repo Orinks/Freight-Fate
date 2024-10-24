@@ -1,66 +1,78 @@
-#include "form.nvgt"
+// Core includes
+#include "speech.nvgt"  // For text-to-speech functionality 
+#include "menu.nvgt"    // For menu interfaces
+#include "form.nvgt"    // For auditory UI components
 
-/*
-// Audio management - Commented out until sound files are added
-sound menu_music;
-sound engine_sound;
-sound event_sounds;
-sound ui_sounds;
+// Sound management using sound_pool
+sound_pool game_sounds;
+pack sound_pack;
 
 void initialize_audio() {
-    // Load menu music
-    menu_music.load("sounds/menu_music.ogg");
-    menu_music.loop = true;
-    menu_music.volume = 0.5;
-    
-    // Load engine sound
-    engine_sound.load("sounds/engine_idle.ogg");
-    engine_sound.loop = true;
-    engine_sound.volume = 0.3;
-    
-    // Load UI sounds
-    ui_sounds.load("sounds/ui_click.ogg");
-    ui_sounds.volume = 0.7;
-    
-    // Load event sounds
-    event_sounds.load("sounds/event.ogg");
-    event_sounds.volume = 0.6;
+    try {
+        @sound_default_pack = sound_pack;
+        if(!sound_pack.open("sounds.dat")) {
+            speak("Warning: Could not load sound pack", false);
+            return;
+        }
+
+        // Initialize sound pool with proper error checking
+        game_sounds.load("menu_music", "sounds/menu_music.ogg");
+        game_sounds.load("engine_idle", "sounds/engine_idle.ogg"); 
+        game_sounds.load("ui_click", "sounds/ui_click.ogg");
+        game_sounds.load("event", "sounds/event.ogg");
+
+        // Set default properties
+        game_sounds.set_looping("menu_music", true);
+        game_sounds.set_looping("engine_idle", true);
+        
+        game_sounds.set_volume("menu_music", 0.5);
+        game_sounds.set_volume("engine_idle", 0.3);
+        game_sounds.set_volume("ui_click", 0.7);
+        game_sounds.set_volume("event", 0.6);
+    }
+    catch(const string& e) {
+        speak("Error initializing audio: " + e, false);
+    }
 }
 
 void play_menu_music() {
-    if(!menu_music.playing) {
-        menu_music.play();
+    if(game_sounds.is_valid("menu_music")) {
+        game_sounds.play("menu_music");
     }
 }
 
 void stop_menu_music() {
-    if(menu_music.playing) {
-        menu_music.stop();
+    if(game_sounds.is_valid("menu_music")) {
+        game_sounds.stop("menu_music");
     }
 }
 
 void play_engine_sound(double speed_mph) {
-    if(!engine_sound.playing) {
-        engine_sound.play();
+    if(game_sounds.is_valid("engine_idle")) {
+        if(!game_sounds.is_playing("engine_idle")) {
+            game_sounds.play("engine_idle");
+        }
+        game_sounds.set_pitch("engine_idle", 0.8 + (speed_mph / 100.0));
     }
-    // Adjust pitch based on speed
-    engine_sound.pitch = 0.8 + (speed_mph / 100.0);
 }
 
 void stop_engine_sound() {
-    if(engine_sound.playing) {
-        engine_sound.stop();
+    if(game_sounds.is_valid("engine_idle")) {
+        game_sounds.stop("engine_idle");
     }
 }
 
 void play_ui_sound() {
-    ui_sounds.play();
+    if(game_sounds.is_valid("ui_click")) {
+        game_sounds.play("ui_click");
+    }
 }
 
 void play_event_sound() {
-    event_sounds.play();
+    if(game_sounds.is_valid("event")) {
+        game_sounds.play("event");
+    }
 }
-*/
 
 // Math helper functions
 double minimum(double a, double b) {
