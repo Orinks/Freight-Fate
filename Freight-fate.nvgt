@@ -3,6 +3,7 @@
 #include "menu.nvgt"    // For menu interfaces
 #include "form.nvgt"    // For auditory UI components
 #include "sound_pool.nvgt" // For sound management
+#include "game_menus.nvgt" // For game-specific menus
 
 // Sound management using sound_pool and proper error handling
 sound_pool@ game_sounds = sound_pool();
@@ -106,9 +107,6 @@ double maximum(double a, double b) {
     if(a > b) return a;
     return b;
 }
-#include "speech.nvgt"
-#include "menu.nvgt"
-#include "game_menus.nvgt"
 
 // Game state structure for better organization
 class GameState {
