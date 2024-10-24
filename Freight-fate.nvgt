@@ -205,9 +205,8 @@ class MenuManager {
                 case 1: toggle_sound_effects(); break;
                 case 2: change_difficulty(); break;
                 case 3: return true;
+                default: return false;
             }
-            // Add default return for switch fallthrough
-            return false;
         }
     }
 
