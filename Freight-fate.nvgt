@@ -307,7 +307,7 @@ void start_new_game() {
     pick_up_cargo();
     wait(3000); // Increased wait time after initial cargo pickup
 
-    while (!game_over) {
+    while (!game_state.game_over) {
         if (check_exit_keys()) return;
 
         string action = show_game_menu();
@@ -353,8 +353,8 @@ void check_status() {
     status_menu.add_item("Money: $" + int(game_state.money));
     status_menu.add_item("Fuel price here: $" + fuel_prices[game_state.current_location] + " per gallon");
     
-    if (current_location < locations.length() - 1) {
-        status_menu.add_item("Next destination: " + locations[current_location + 1] + " (" + (destinations[current_destination] - distance) + " miles away)");
+    if (game_state.current_location < locations.length() - 1) {
+        status_menu.add_item("Next destination: " + locations[game_state.current_location + 1] + " (" + (destinations[game_state.current_destination] - game_state.distance) + " miles away)");
     } else {
         status_menu.add_item("You've reached the final destination!");
     }
@@ -406,7 +406,7 @@ void check_destination() {
             game_state.game_won = true;
             speak("Congratulations! You've reached all destinations and won the game!", false);
         } else {
-            speak("You've reached " + locations[current_location] + ". Next destination is " + locations[current_location + 1] + " in " + (destinations[current_destination] - distance) + " miles.", false);
+            speak("You've reached " + locations[game_state.current_location] + ". Next destination is " + locations[game_state.current_location + 1] + " in " + (destinations[game_state.current_destination] - game_state.distance) + " miles.", false);
             deliver_cargo();
         }
     }
