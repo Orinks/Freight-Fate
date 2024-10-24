@@ -3,6 +3,77 @@
 #include "menu.nvgt"    // For menu interfaces
 #include "form.nvgt"    // For auditory UI components
 
+// Sound management using sound_pool and proper error handling
+sound_pool game_sounds;
+pack sound_pack;
+
+void initialize_audio() {
+    try {
+        @sound_default_pack = sound_pack;
+        if(!sound_pack.open("sounds.dat")) {
+            speak("Warning: Could not load sound pack", false);
+            return;
+        }
+
+        // Initialize sound pool with proper error checking
+        game_sounds.load("menu_music", "sounds/menu_music.ogg");
+        game_sounds.load("engine_idle", "sounds/engine_idle.ogg"); 
+        game_sounds.load("ui_click", "sounds/ui_click.ogg");
+        game_sounds.load("event", "sounds/event.ogg");
+
+        // Set default properties
+        game_sounds.set_looping("menu_music", true);
+        game_sounds.set_looping("engine_idle", true);
+        
+        game_sounds.set_volume("menu_music", 0.5);
+        game_sounds.set_volume("engine_idle", 0.3);
+        game_sounds.set_volume("ui_click", 0.7);
+        game_sounds.set_volume("event", 0.6);
+    }
+    catch(const string& e) {
+        speak("Error initializing audio: " + e, false);
+    }
+}
+
+void play_menu_music() {
+    if(game_sounds.is_valid("menu_music")) {
+        game_sounds.play("menu_music");
+    }
+}
+
+void stop_menu_music() {
+    if(game_sounds.is_valid("menu_music")) {
+        game_sounds.stop("menu_music");
+    }
+}
+
+void play_engine_sound(double speed_mph) {
+    if(game_sounds.is_valid("engine_idle")) {
+        if(!game_sounds.is_playing("engine_idle")) {
+            game_sounds.play("engine_idle");
+        }
+        game_sounds.set_pitch("engine_idle", 0.8 + (speed_mph / 100.0));
+    }
+}
+
+void stop_engine_sound() {
+    if(game_sounds.is_valid("engine_idle")) {
+        game_sounds.stop("engine_idle");
+    }
+}
+
+void play_ui_sound() {
+    if(game_sounds.is_valid("ui_click")) {
+        game_sounds.play("ui_click");
+    }
+}
+
+void play_event_sound() {
+    if(game_sounds.is_valid("event")) {
+        game_sounds.play("event");
+    }
+}
+
 // Sound management using sound_pool
 sound_pool game_sounds;
 pack sound_pack;
@@ -88,25 +159,37 @@ double maximum(double a, double b) {
 #include "menu.nvgt"
 #include "game_menus.nvgt"
 
-// Global variables
-double distance = 0;
-double fuel = 100;
-double money = 1000;
-bool driving = false;
-int choice = 0;
+// Game state structure for better organization
+class GameState {
+    double distance = 0;
+    double fuel = 100;
+    double money = 1000;
+    bool driving = false;
+    uint current_destination = 0;
+    uint current_location = 0;
+    string current_cargo = "";
+    double cargo_value = 0;
+    bool game_over = false;
+    bool player_won = false;
+    
+    void reset() {
+        distance = 0;
+        fuel = 100;
+        money = 1000;
+        driving = false;
+        current_destination = 0;
+        current_location = 0;
+        current_cargo = "";
+        cargo_value = 0;
+        game_over = false;
+        player_won = false;
+    }
+}
 
+GameState game_state;
 array<double> destinations;
-uint current_destination = 0;
-bool game_won = false;
-
 array<string> locations;
 array<double> fuel_prices;
-uint current_location = 0;
-string current_cargo = "";
-double cargo_value = 0;
-
-bool game_over = false;
-bool player_won = false;
 
 audio_form form;
 
@@ -119,23 +202,39 @@ bool check_exit_keys() {
 }
 
 void main() {
-    show_window("Freight Fate");
-    initialize_game();
-    //initialize_audio();
-    //play_menu_music();
-    while (true) {
-        int main_choice = show_main_menu();
-        if (main_choice == -1 or check_exit_keys()) {
-            exit();
-            break;
-        }
-        switch (main_choice) {
-            case 0: start_new_game(); break;
-            case 1: load_game(); break;
-            case 2: show_options_menu(); break;
-            case 3: exit(); break;
+    try {
+        show_window("Freight Fate");
+        initialize_game();
+        initialize_audio();
+        play_menu_music();
+        
+        while (true) {
+            int main_choice = show_main_menu();
+            if (main_choice == -1 or check_exit_keys()) {
+                cleanup_resources();
+                break;
+            }
+            
+            switch (main_choice) {
+                case 0: start_new_game(); break;
+                case 1: load_game(); break;
+                case 2: show_options_menu(); break;
+                case 3: cleanup_resources(); exit(); break;
+            }
         }
     }
+    catch(const string& e) {
+        speak("Fatal error: " + e, false);
+        cleanup_resources();
+        exit();
+    }
+}
+
+void cleanup_resources() {
+    stop_menu_music();
+    stop_engine_sound();
+    game_sounds.close();
+    sound_pack.close();
 }
 
 void initialize_game() {
