@@ -5,7 +5,7 @@
 #include "sound_pool.nvgt" // For sound management
 
 // Sound management using sound_pool and proper error handling
-sound_pool@ game_sounds;
+sound_pool@ game_sounds = sound_pool();
 pack sound_pack;
 
 void initialize_audio() {
@@ -17,19 +17,19 @@ void initialize_audio() {
         }
 
         // Initialize sound pool with proper error checking
-        game_sounds.load("menu_music", "sounds/menu_music.ogg");
-        game_sounds.load("engine_idle", "sounds/engine_idle.ogg"); 
-        game_sounds.load("ui_click", "sounds/ui_click.ogg");
-        game_sounds.load("event", "sounds/event.ogg");
+        game_sounds.add_sound("menu_music", "sounds/menu_music.ogg");
+        game_sounds.add_sound("engine_idle", "sounds/engine_idle.ogg"); 
+        game_sounds.add_sound("ui_click", "sounds/ui_click.ogg");
+        game_sounds.add_sound("event", "sounds/event.ogg");
 
         // Set default properties
-        game_sounds.set_looping("menu_music", true);
-        game_sounds.set_looping("engine_idle", true);
+        game_sounds.set_sound_looping("menu_music", true);
+        game_sounds.set_sound_looping("engine_idle", true);
         
-        game_sounds.set_volume("menu_music", 0.5);
-        game_sounds.set_volume("engine_idle", 0.3);
-        game_sounds.set_volume("ui_click", 0.7);
-        game_sounds.set_volume("event", 0.6);
+        game_sounds.set_sound_volume("menu_music", 0.5);
+        game_sounds.set_sound_volume("engine_idle", 0.3);
+        game_sounds.set_sound_volume("ui_click", 0.7);
+        game_sounds.set_sound_volume("event", 0.6);
     }
     catch(const string& e) {
         speak("Error initializing audio: " + e, false);
@@ -37,41 +37,41 @@ void initialize_audio() {
 }
 
 void play_menu_music() {
-    if(game_sounds.is_valid("menu_music")) {
-        game_sounds.play("menu_music");
+    if(game_sounds.sound_exists("menu_music")) {
+        game_sounds.play_sound("menu_music");
     }
 }
 
 void stop_menu_music() {
-    if(game_sounds.is_valid("menu_music")) {
-        game_sounds.stop("menu_music");
+    if(game_sounds.sound_exists("menu_music")) {
+        game_sounds.stop_sound("menu_music");
     }
 }
 
 void play_engine_sound(double speed_mph) {
-    if(game_sounds.is_valid("engine_idle")) {
-        if(!game_sounds.is_playing("engine_idle")) {
-            game_sounds.play("engine_idle");
+    if(game_sounds.sound_exists("engine_idle")) {
+        if(!game_sounds.is_sound_playing("engine_idle")) {
+            game_sounds.play_sound("engine_idle");
         }
-        game_sounds.set_pitch("engine_idle", 0.8 + (speed_mph / 100.0));
+        game_sounds.set_sound_pitch("engine_idle", 0.8 + (speed_mph / 100.0));
     }
 }
 
 void stop_engine_sound() {
-    if(game_sounds.is_valid("engine_idle")) {
-        game_sounds.stop("engine_idle");
+    if(game_sounds.sound_exists("engine_idle")) {
+        game_sounds.stop_sound("engine_idle");
     }
 }
 
 void play_ui_sound() {
-    if(game_sounds.is_valid("ui_click")) {
-        game_sounds.play("ui_click");
+    if(game_sounds.sound_exists("ui_click")) {
+        game_sounds.play_sound("ui_click");
     }
 }
 
 void play_event_sound() {
-    if(game_sounds.is_valid("event")) {
-        game_sounds.play("event");
+    if(game_sounds.sound_exists("event")) {
+        game_sounds.play_sound("event");
     }
 }
 
@@ -216,7 +216,7 @@ void main() {
 void cleanup_resources() {
     stop_menu_music();
     stop_engine_sound();
-    game_sounds.close();
+    game_sounds.destroy();
     sound_pack.close();
 }
 
@@ -228,19 +228,7 @@ void initialize_game() {
 
 void start_new_game() {
     // Reset game state
-    distance = 0;
-    fuel = 100;
-    money = 1000;
-    current_destination = 0;
-    current_location = 0;
-    current_cargo = "";
-    cargo_value = 0;
-    game_won = false;
-    game_over = false;
-    player_won = false;
-
-    // Start at 0 distance
-    distance = 0;
+    game_state.reset();
 
     pick_up_cargo();
     wait(3000); // Increased wait time after initial cargo pickup
