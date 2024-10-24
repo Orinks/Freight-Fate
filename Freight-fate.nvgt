@@ -7,91 +7,10 @@
 #include "menu_manager.nvgt" // For menu management
 #include "random_events.nvgt" // For random event handling
 
-// Sound management using sound_pool and proper error handling
-sound_pool@ game_sounds = sound_pool();
-pack sound_pack;
+// Manager instances
+SoundManager@ sound_manager;
+DrivingSystem@ driving_system;
 
-void initialize_audio() {
-    @sound_default_pack = sound_pack;
-    if(!sound_pack.open("sounds.dat")) {
-        speak("Warning: Could not load sound pack", false);
-        return;
-    }
-
-    // Initialize sounds with proper error checking
-    menu_music_handle = game_sounds.play_stationary("sounds/menu_music.ogg", true);
-    engine_idle_handle = game_sounds.play_stationary("sounds/engine_idle.ogg", true);
-    ui_click_handle = game_sounds.play_stationary("sounds/ui_click.ogg", false);
-    event_handle = game_sounds.play_stationary("sounds/event.ogg", false);
-
-    if(menu_music_handle >= 0) {
-        game_sounds.update_sound_start_values(menu_music_handle, 0, -0.5, 100);
-    }
-    if(engine_idle_handle >= 0) {
-        game_sounds.update_sound_start_values(engine_idle_handle, 0, -0.7, 100); 
-    }
-    if(ui_click_handle >= 0) {
-        game_sounds.update_sound_start_values(ui_click_handle, 0, -0.3, 100);
-    }
-    if(event_handle >= 0) {
-        game_sounds.update_sound_start_values(event_handle, 0, -0.4, 100);
-    }
-}
-
-// Sound handles
-int menu_music_handle = -1;
-int engine_idle_handle = -1;
-int ui_click_handle = -1;
-int event_handle = -1;
-
-void play_menu_music() {
-    if(menu_music_handle >= 0) {
-        game_sounds.resume_sound(menu_music_handle);
-    }
-}
-
-void stop_menu_music() {
-    if(menu_music_handle >= 0) {
-        game_sounds.pause_sound(menu_music_handle);
-    }
-}
-
-void play_engine_sound(double speed_mph) {
-    if(engine_idle_handle >= 0) {
-        if(!game_sounds.sound_is_playing(engine_idle_handle)) {
-            game_sounds.resume_sound(engine_idle_handle);
-        }
-        game_sounds.update_sound_start_values(engine_idle_handle, 0, -0.7, 80 + (speed_mph / 100.0 * 40));
-    }
-}
-
-void stop_engine_sound() {
-    if(engine_idle_handle >= 0) {
-        game_sounds.pause_sound(engine_idle_handle);
-    }
-}
-
-void play_ui_sound() {
-    if(ui_click_handle >= 0) {
-        // Restart the sound each time for UI feedback
-        game_sounds.destroy_sound(ui_click_handle);
-        ui_click_handle = game_sounds.play_stationary("sounds/ui_click.ogg", false);
-        if(ui_click_handle >= 0) {
-            game_sounds.update_sound_start_values(ui_click_handle, 0, -0.3, 100);
-        }
-    }
-}
-
-void play_event_sound() {
-    if(event_handle >= 0) {
-        // Restart the sound each time for events
-        game_sounds.destroy_sound(event_handle);
-        event_handle = game_sounds.play_stationary("sounds/event.ogg", false);
-        if(event_handle >= 0) {
-            game_sounds.update_sound_start_values(event_handle, 0, -0.4, 100);
-        }
-    }
-}
 
 
 // Math helper functions
@@ -127,11 +46,15 @@ void main()
 {
     show_window("Freight Fate");
     initialize_game();
-    initialize_audio();
     
+    // Initialize managers
     @menu_manager = MenuManager(@game_state);
+    @sound_manager = SoundManager();
     @event_system = RandomEventSystem(@game_state);
-    play_menu_music();
+    @driving_system = DrivingSystem(@game_state, @sound_manager, @event_system);
+    
+    sound_manager.initialize();
+    sound_manager.play_menu_music();
     
     while (true) {
         int main_choice = menu_manager.show_main_menu();
@@ -152,10 +75,7 @@ void main()
 }
 
 void cleanup_resources() {
-    stop_menu_music();
-    stop_engine_sound();
-    game_sounds.destroy_all();
-    sound_pack.close();
+    sound_manager.cleanup();
 }
 
 void initialize_game() {
@@ -175,7 +95,7 @@ void start_new_game() {
         if (check_exit_keys()) return;
 
         string action = menu_manager.show_game_menu();
-        if (action == "drive") drive();
+        if (action == "drive") driving_system.drive();
         else if (action == "refuel") refuel();
         else if (action == "rest") rest();
         else if (action == "status") check_status();
