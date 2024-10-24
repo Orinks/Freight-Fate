@@ -10,9 +10,7 @@
 
 // Game state and managers
 GameState game_state;
-MenuManager@ menu_manager;
 SoundManager@ sound_manager;
-RandomEventSystem@ event_system;
 DrivingSystem@ driving_system;
 
 // Math helper functions
