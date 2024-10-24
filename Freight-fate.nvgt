@@ -9,34 +9,29 @@ sound_pool@ game_sounds = sound_pool();
 pack sound_pack;
 
 void initialize_audio() {
-    try {
-        @sound_default_pack = sound_pack;
-        if(!sound_pack.open("sounds.dat")) {
-            speak("Warning: Could not load sound pack", false);
-            return;
-        }
-
-        // Initialize sounds with proper error checking
-        int menu_music = game_sounds.play_stationary("sounds/menu_music.ogg", true);
-        int engine_idle = game_sounds.play_stationary("sounds/engine_idle.ogg", true);
-        int ui_click = game_sounds.play_stationary("sounds/ui_click.ogg", false);
-        int event = game_sounds.play_stationary("sounds/event.ogg", false);
-
-        if(menu_music >= 0) {
-            game_sounds.update_sound_start_values(menu_music, 0, -0.5, 100);
-        }
-        if(engine_idle >= 0) {
-            game_sounds.update_sound_start_values(engine_idle, 0, -0.7, 100); 
-        }
-        if(ui_click >= 0) {
-            game_sounds.update_sound_start_values(ui_click, 0, -0.3, 100);
-        }
-        if(event >= 0) {
-            game_sounds.update_sound_start_values(event, 0, -0.4, 100);
-        }
+    @sound_default_pack = sound_pack;
+    if(!sound_pack.open("sounds.dat")) {
+        speak("Warning: Could not load sound pack", false);
+        return;
     }
-    catch(string e) {
-        speak("Error initializing audio: " + e, false);
+
+    // Initialize sounds with proper error checking
+    menu_music_handle = game_sounds.play_stationary("sounds/menu_music.ogg", true);
+    engine_idle_handle = game_sounds.play_stationary("sounds/engine_idle.ogg", true);
+    ui_click_handle = game_sounds.play_stationary("sounds/ui_click.ogg", false);
+    event_handle = game_sounds.play_stationary("sounds/event.ogg", false);
+
+    if(menu_music_handle >= 0) {
+        game_sounds.update_sound_start_values(menu_music_handle, 0, -0.5, 100);
+    }
+    if(engine_idle_handle >= 0) {
+        game_sounds.update_sound_start_values(engine_idle_handle, 0, -0.7, 100); 
+    }
+    if(ui_click_handle >= 0) {
+        game_sounds.update_sound_start_values(ui_click_handle, 0, -0.3, 100);
+    }
+    if(event_handle >= 0) {
+        game_sounds.update_sound_start_values(event_handle, 0, -0.4, 100);
     }
 }
 
