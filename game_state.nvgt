@@ -1,0 +1,27 @@
+// Game state structure for better organization
+class GameState {
+    double distance = 0;
+    double fuel = 100;
+    double money = 1000;
+    bool driving = false;
+    uint current_destination = 0;
+    uint current_location = 0;
+    string current_cargo = "";
+    double cargo_value = 0;
+    bool game_over = false;
+    bool player_won = false;
+    bool game_won = false;
+    
+    void reset() {
+        distance = 0;
+        fuel = 100;
+        money = 1000;
+        driving = false;
+        current_destination = 0;
+        current_location = 0;
+        current_cargo = "";
+        cargo_value = 0;
+        game_over = false;
+        player_won = false;
+    }
+}

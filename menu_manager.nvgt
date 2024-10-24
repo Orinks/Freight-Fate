@@ -138,3 +138,113 @@ class MenuManager {
         }
     }
 }
+#include "speech.nvgt"
+#include "menu.nvgt"
+#include "form.nvgt"
+#include "game_state.nvgt"
+
+class MenuManager {
+    private GameState@ game_state;
+    
+    MenuManager(GameState@ state) {
+        @game_state = state;
+    }
+
+    int show_main_menu() {
+        menu m;
+        m.intro_text = "Welcome to Freight Fate! Use up/down arrows to choose an option and press Enter to select:";
+        m.click_sound = "sounds/menu_nav.ogg";
+        m.select_sound = "sounds/menu_select.ogg";
+        m.add_item("Start New Game - Begin your trucking adventure");
+        m.add_item("Load Game - Continue a saved game"); 
+        m.add_item("Options - Adjust game settings");
+        m.add_item("Quit - Exit the game");
+        
+        play_ui_sound();
+        return m.run();
+    }
+
+    string show_game_menu() {
+        menu m;
+        m.intro_text = "Game Menu - What would you like to do? Use up/down arrows to choose:";
+        m.click_sound = "sounds/menu_nav.ogg";
+        m.select_sound = "sounds/menu_select.ogg";
+        m.add_item("Drive - Start driving your truck", "drive");
+        m.add_item("Refuel - Fill up your gas tank", "refuel");
+        m.add_item("Rest - Take a break to refresh", "rest"); 
+        m.add_item("Check Status - View game statistics", "status");
+        m.add_item("Save Game - Save your progress", "save");
+        m.add_item("Quit - Return to main menu", "quit");
+        
+        m.run();
+        return m.selected_item_id;
+    }
+
+    bool show_options_menu() {
+        menu m;
+        m.intro_text = "Game Options - Customize your game experience:";
+        m.click_sound = "sounds/menu_nav.ogg";
+        m.select_sound = "sounds/menu_select.ogg";
+        m.add_item("Adjust Volume - Change game volume levels");
+        m.add_item("Toggle Sound Effects - Turn game sounds on/off");
+        m.add_item("Change Difficulty - Modify game challenge");
+        m.add_item("Back - Return to main menu");
+        
+        while (true) {
+            int choice = m.run();
+            if(choice == -1) return false;
+            
+            switch (choice) {
+                case 0: adjust_volume(); break;
+                case 1: toggle_sound_effects(); break;
+                case 2: change_difficulty(); break;
+                case 3: return true;
+            }
+        }
+        return false;
+    }
+
+    int show_game_over_menu(bool won) {
+        menu m;
+        m.intro_text = won ? 
+            "Congratulations! You've successfully completed your deliveries and won the game!" :
+            "Game Over. Your trucking journey has come to an end. Better luck next time!";
+        m.click_sound = "sounds/menu_nav.ogg";
+        m.select_sound = "sounds/menu_select.ogg";
+        m.add_item("Play Again - Start a new game");
+        m.add_item("Main Menu - Return to title screen");
+        m.add_item("Quit - Exit the game");
+        
+        play_ui_sound();
+        return m.run();
+    }
+
+    double show_refuel_menu() {
+        menu refuel_menu;
+        refuel_menu.intro_text = "Current money: $" + int(game_state.money) + 
+                            "\nFuel price: $" + fuel_prices[game_state.current_location] + " per gallon";
+        
+        // Calculate max affordable gallons
+        double max_affordable = game_state.money / fuel_prices[game_state.current_location];
+        double tank_space = 100 - game_state.fuel;
+        double max_possible = minimum(max_affordable, tank_space);
+
+        refuel_menu.add_item("10 gallons - $" + int(10 * fuel_prices[game_state.current_location]));
+        refuel_menu.add_item("20 gallons - $" + int(20 * fuel_prices[game_state.current_location]));
+        refuel_menu.add_item("30 gallons - $" + int(30 * fuel_prices[game_state.current_location]));
+        refuel_menu.add_item("Fill tank (" + int(tank_space) + " gallons) - $" + int(tank_space * fuel_prices[game_state.current_location]));
+        refuel_menu.add_item("Cancel");
+
+        play_ui_sound();
+        int choice = refuel_menu.run();
+        
+        switch(choice) {
+            case 0: return minimum(10, max_possible);
+            case 1: return minimum(20, max_possible);
+            case 2: return minimum(30, max_possible);
+            case 3: return tank_space;
+            case 4: return 0; // Cancel
+            default: return 0;
+        }
+    }
+}
