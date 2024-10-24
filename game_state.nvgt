@@ -12,6 +12,13 @@ class GameState {
     bool player_won = false;
     bool game_won = false;
     
+    // Sound settings
+    double master_volume = 1.0;
+    double music_volume = 1.0;
+    double effects_volume = 1.0;
+    bool sound_enabled = true;
+    int difficulty = 1; // 0=Easy, 1=Normal, 2=Hard
+    
     void reset() {
         distance = 0;
         fuel = 100;
