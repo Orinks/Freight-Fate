@@ -38,6 +38,7 @@ MenuManager@ menu_manager;
 
 void main() 
 {
+install_keyhook();
     show_window("Freight Fate");
     initialize_game();
     
