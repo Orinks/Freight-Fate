@@ -220,19 +220,19 @@ class MenuManager {
     double show_refuel_menu() {
         menu m;
         m.intro_text = "Current money: $" + int(game_state.money) + 
-                      "\nFuel price: $" + fuel_prices[game_state.current_location] + " per gallon";
+                      "\nFuel price: $" + game_state.get_current_fuel_price() + " per gallon";
         m.click_sound = "sounds/menu_nav.ogg";
         m.select_sound = "sounds/menu_select.ogg";
         
         // Calculate max affordable gallons
-        double max_affordable = game_state.money / fuel_prices[game_state.current_location];
+        double max_affordable = game_state.money / game_state.get_current_fuel_price();
         double tank_space = 100 - game_state.fuel;
         double max_possible = minimum(max_affordable, tank_space);
 
-        m.add_item("10 gallons - $" + int(10 * fuel_prices[game_state.current_location]));
-        m.add_item("20 gallons - $" + int(20 * fuel_prices[game_state.current_location]));
-        m.add_item("30 gallons - $" + int(30 * fuel_prices[game_state.current_location]));
-        m.add_item("Fill tank (" + int(tank_space) + " gallons) - $" + int(tank_space * fuel_prices[game_state.current_location]));
+        m.add_item("10 gallons - $" + int(10 * game_state.get_current_fuel_price()));
+        m.add_item("20 gallons - $" + int(20 * game_state.get_current_fuel_price()));
+        m.add_item("30 gallons - $" + int(30 * game_state.get_current_fuel_price()));
+        m.add_item("Fill tank (" + int(tank_space) + " gallons) - $" + int(tank_space * game_state.get_current_fuel_price()));
         m.add_item("Cancel");
 
         play_ui_sound();
