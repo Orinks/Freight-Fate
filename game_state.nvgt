@@ -129,4 +129,18 @@ class GameState {
         }
         return "Unknown Location";
     }
+
+    string get_next_location_name() {
+        if(current_location + 1 < locations.length()) {
+            return locations[current_location + 1];
+        }
+        return "";
+    }
+
+    double get_remaining_distance() {
+        if(current_destination < destinations.length()) {
+            return destinations[current_destination] - distance;
+        }
+        return 0;
+    }
 }
