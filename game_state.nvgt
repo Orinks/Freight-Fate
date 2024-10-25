@@ -122,4 +122,11 @@ class GameState {
     double get_current_fuel_price() {
         return fuel_prices[current_location];
     }
+
+    string get_current_location_name() {
+        if(current_location < locations.length()) {
+            return locations[current_location];
+        }
+        return "Unknown Location";
+    }
 }
