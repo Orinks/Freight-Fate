@@ -47,16 +47,18 @@ class MenuManager {
         m.click_sound = "sounds/menu_nav.ogg";
         m.select_sound = "sounds/menu_select.ogg";
         
-        m.add_item("Location: " + locations[game_state.current_location]);
+        m.add_item("Location: " + game_state.get_current_location_name());
         m.add_item("Distance: " + int(game_state.distance) + " miles");
         m.add_item("Fuel: " + int(game_state.fuel) + " gallons");
         m.add_item("Money: $" + int(game_state.money));
-        m.add_item("Fuel price: $" + fuel_prices[game_state.current_location]);
+        m.add_item("Fuel price: $" + game_state.get_current_fuel_price());
         
         if (game_state.current_location < locations.length() - 1) {
-            double remaining = destinations[game_state.current_destination] - game_state.distance;
-            m.add_item("Next: " + locations[game_state.current_location + 1] + 
-                      " (" + int(remaining) + " miles)");
+            double remaining = game_state.get_remaining_distance();
+            string next_location = game_state.get_next_location_name();
+            if(next_location != "") {
+                m.add_item("Next: " + next_location + " (" + int(remaining) + " miles)");
+            }
         }
 
         if(game_state.current_cargo != "") {
