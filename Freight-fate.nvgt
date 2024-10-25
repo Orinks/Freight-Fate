@@ -27,6 +27,7 @@ double maximum(double a, double b) {
 
 bool check_exit_keys() {
     if (key_pressed(KEY_ESCAPE) or (key_down(KEY_LALT) and key_pressed(KEY_F4))) {
+        uninstall_keyhook();
         exit();
         return true;
     }
@@ -62,7 +63,7 @@ install_keyhook();
             case 0: start_new_game(); break;
             case 1: load_game(); break;
             case 2: menu_manager.show_options_menu(); break;
-            case 3: cleanup_resources(); exit(); break;
+            case 3: cleanup_resources(); uninstall_keyhook(); exit(); break;
         }
     }
     
