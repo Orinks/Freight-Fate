@@ -1,0 +1,75 @@
+{
+    "cities": [
+        {
+            "name": "New York",
+            "coordinates": {"lat": 40.7128, "lon": -74.0060},
+            "locations": [
+                {
+                    "name": "Port Authority",
+                    "type": "warehouse",
+                    "cargo_types": ["general", "container"]
+                },
+                {
+                    "name": "Manhattan Distribution Center",
+                    "type": "distribution",
+                    "cargo_types": ["retail", "food"]
+                }
+            ]
+        },
+        {
+            "name": "Los Angeles",
+            "coordinates": {"lat": 34.0522, "lon": -118.2437},
+            "locations": [
+                {
+                    "name": "Port of LA",
+                    "type": "port",
+                    "cargo_types": ["container", "bulk"]
+                },
+                {
+                    "name": "LA Freight Terminal",
+                    "type": "terminal",
+                    "cargo_types": ["general", "container"]
+                }
+            ]
+        },
+        {
+            "name": "Chicago",
+            "coordinates": {"lat": 41.8781, "lon": -87.6298},
+            "locations": [
+                {
+                    "name": "Chicago Rail Hub",
+                    "type": "rail",
+                    "cargo_types": ["container", "bulk"]
+                },
+                {
+                    "name": "Midwest Distribution",
+                    "type": "distribution",
+                    "cargo_types": ["retail", "food"]
+                }
+            ]
+        }
+    ],
+    "routes": [
+        {
+            "start": "New York",
+            "end": "Chicago",
+            "distance": 787,
+            "terrain": "flat",
+            "weather_zones": ["northeast", "midwest"]
+        },
+        {
+            "start": "Chicago",
+            "end": "Los Angeles",
+            "distance": 2004,
+            "terrain": "mountain",
+            "weather_zones": ["midwest", "southwest"]
+        },
+        {
+            "start": "Los Angeles",
+            "end": "New York",
+            "distance": 2789,
+            "terrain": "varied",
+            "weather_zones": ["southwest", "southeast", "northeast"]
+        }
+    ]
+}

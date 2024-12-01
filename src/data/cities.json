@@ -1,0 +1,242 @@
+{
+    "job_locations": {
+        "truck_stops": {
+            "Love's Travel Stop": {
+                "type": "truck_stop",
+                "company": "Love's",
+                "services": ["fuel", "food", "repair", "rest", "job_board"],
+                "job_types": ["general_freight", "refrigerated", "flatbed"]
+            },
+            "Pilot Flying J": {
+                "type": "truck_stop",
+                "company": "Pilot",
+                "services": ["fuel", "food", "repair", "rest", "job_board"],
+                "job_types": ["general_freight", "tanker", "refrigerated"]
+            },
+            "TA Travel Center": {
+                "type": "truck_stop",
+                "company": "TravelCenters of America",
+                "services": ["fuel", "food", "repair", "rest", "job_board"],
+                "job_types": ["general_freight", "oversized", "hazmat"]
+            }
+        },
+        "freight_terminals": {
+            "XPO Logistics": {
+                "type": "terminal",
+                "company": "XPO",
+                "services": ["loading", "unloading", "job_board", "repair"],
+                "job_types": ["ltl_freight", "full_truckload", "expedited"]
+            },
+            "FedEx Freight": {
+                "type": "terminal",
+                "company": "FedEx",
+                "services": ["loading", "unloading", "job_board"],
+                "job_types": ["ltl_freight", "express_freight"]
+            },
+            "Yellow": {
+                "type": "terminal",
+                "company": "Yellow",
+                "services": ["loading", "unloading", "job_board", "repair"],
+                "job_types": ["ltl_freight", "full_truckload"]
+            }
+        },
+        "distribution_centers": {
+            "Walmart DC": {
+                "type": "distribution",
+                "company": "Walmart",
+                "services": ["loading", "unloading", "job_board"],
+                "job_types": ["retail_freight", "refrigerated"]
+            },
+            "Amazon Fulfillment": {
+                "type": "distribution",
+                "company": "Amazon",
+                "services": ["loading", "unloading", "job_board"],
+                "job_types": ["express_freight", "general_freight"]
+            },
+            "Target DC": {
+                "type": "distribution",
+                "company": "Target",
+                "services": ["loading", "unloading", "job_board"],
+                "job_types": ["retail_freight", "general_freight"]
+            }
+        }
+    },
+    "highways": {
+        "I-95": {
+            "description": "Major East Coast corridor",
+            "start": {
+                "city": "Miami",
+                "state": "Florida",
+                "lat": 25.7617,
+                "lon": -80.1918
+            },
+            "end": {
+                "city": "Houlton",
+                "state": "Maine",
+                "lat": 46.1259,
+                "lon": -67.8403
+            },
+            "length_miles": 1919,
+            "terrain": ["coastal", "urban", "rural"],
+            "traffic": "heavy",
+            "truck_stops": "frequent",
+            "major_cities": ["Miami", "Jacksonville", "Richmond", "Washington DC", "Baltimore", "Philadelphia", "New York", "Boston"]
+        },
+        "I-80": {
+            "description": "Major cross-country route",
+            "start": {
+                "city": "San Francisco",
+                "state": "California",
+                "lat": 37.7749,
+                "lon": -122.4194
+            },
+            "end": {
+                "city": "Teaneck",
+                "state": "New Jersey",
+                "lat": 40.8843,
+                "lon": -74.0164
+            },
+            "length_miles": 2899,
+            "terrain": ["mountains", "plains", "urban"],
+            "traffic": "moderate",
+            "truck_stops": "frequent",
+            "major_cities": ["San Francisco", "Sacramento", "Reno", "Salt Lake City", "Cheyenne", "Omaha", "Chicago", "Cleveland", "New York"]
+        },
+        "I-70": {
+            "description": "Central US corridor",
+            "start": {
+                "city": "Cove Fort",
+                "state": "Utah",
+                "lat": 38.6002,
+                "lon": -112.5819
+            },
+            "end": {
+                "city": "Baltimore",
+                "state": "Maryland",
+                "lat": 39.2904,
+                "lon": -76.6122
+            },
+            "length_miles": 2151,
+            "terrain": ["mountains", "plains", "urban"],
+            "traffic": "moderate",
+            "truck_stops": "regular",
+            "major_cities": ["Denver", "Kansas City", "St. Louis", "Indianapolis", "Columbus", "Pittsburgh", "Baltimore"]
+        },
+        "I-90": {
+            "description": "Northern US corridor",
+            "start": {
+                "city": "Seattle",
+                "state": "Washington",
+                "lat": 47.6062,
+                "lon": -122.3321
+            },
+            "end": {
+                "city": "Boston",
+                "state": "Massachusetts",
+                "lat": 42.3601,
+                "lon": -71.0589
+            },
+            "length_miles": 3020,
+            "terrain": ["mountains", "plains", "lakes", "urban"],
+            "traffic": "moderate",
+            "truck_stops": "frequent",
+            "major_cities": ["Seattle", "Spokane", "Billings", "Rapid City", "Minneapolis", "Chicago", "Cleveland", "Buffalo", "Albany", "Boston"]
+        }
+    },
+    "cities": {
+        "New York": {
+            "lat": 40.7128,
+            "lon": -74.0060,
+            "state": "New York",
+            "highways": ["I-95", "I-80"],
+            "job_locations": {
+                "truck_stops": [
+                    {"name": "TA Travel Center", "location": "Exit 13", "coordinates": {"lat": 40.7372, "lon": -74.0783}},
+                    {"name": "Pilot Flying J", "location": "Exit 15", "coordinates": {"lat": 40.7589, "lon": -74.0923}}
+                ],
+                "freight_terminals": [
+                    {"name": "XPO Logistics", "location": "Bronx Terminal", "coordinates": {"lat": 40.8166, "lon": -73.9265}},
+                    {"name": "FedEx Freight", "location": "Newark Terminal", "coordinates": {"lat": 40.7357, "lon": -74.1724}}
+                ],
+                "distribution_centers": [
+                    {"name": "Amazon Fulfillment", "location": "Staten Island", "coordinates": {"lat": 40.5795, "lon": -74.1502}},
+                    {"name": "Walmart DC", "location": "Bethlehem", "coordinates": {"lat": 40.6179, "lon": -75.3705}}
+                ]
+            },
+            "connections": {
+                "Philadelphia": {"distance": 97, "highway": "I-95", "rest_stops": ["Flying J - Exit 13", "TA - Exit 15"]},
+                "Boston": {"distance": 215, "highway": "I-95", "rest_stops": ["Love's - Exit 234", "Pilot - Exit 305"]}
+            }
+        },
+        "Boston": {
+            "lat": 42.3601,
+            "lon": -71.0589,
+            "state": "Massachusetts",
+            "highways": ["I-95", "I-90"],
+            "connections": {
+                "New York": {"distance": 215, "highway": "I-95", "rest_stops": ["Flying J - Exit 13", "TA - Exit 15"]},
+                "Albany": {"distance": 165, "highway": "I-90", "rest_stops": ["Love's - Exit 67", "Pilot - Exit 89"]}
+            }
+        },
+        "Philadelphia": {
+            "lat": 39.9526,
+            "lon": -75.1652,
+            "state": "Pennsylvania",
+            "highways": ["I-95"],
+            "connections": {
+                "New York": {"distance": 97, "highway": "I-95", "rest_stops": ["Flying J - Exit 13", "TA - Exit 15"]},
+                "Baltimore": {"distance": 101, "highway": "I-95", "rest_stops": ["Love's - Exit 109", "TA - Exit 89"]}
+            }
+        },
+        "Baltimore": {
+            "lat": 39.2904,
+            "lon": -76.6122,
+            "state": "Maryland",
+            "highways": ["I-95", "I-70"],
+            "connections": {
+                "Philadelphia": {"distance": 101, "highway": "I-95", "rest_stops": ["Love's - Exit 109", "TA - Exit 89"]},
+                "Pittsburgh": {"distance": 246, "highway": "I-70", "rest_stops": ["Flying J - Exit 123", "TA - Exit 168"]}
+            }
+        },
+        "Pittsburgh": {
+            "lat": 40.4406,
+            "lon": -79.9959,
+            "state": "Pennsylvania",
+            "highways": ["I-70", "I-80"],
+            "connections": {
+                "Baltimore": {"distance": 246, "highway": "I-70", "rest_stops": ["Flying J - Exit 123", "TA - Exit 168"]},
+                "Cleveland": {"distance": 135, "highway": "I-80", "rest_stops": ["Love's - Exit 234", "Pilot - Exit 305"]}
+            }
+        },
+        "Cleveland": {
+            "lat": 41.4993,
+            "lon": -81.6944,
+            "state": "Ohio",
+            "highways": ["I-80", "I-90"],
+            "connections": {
+                "Pittsburgh": {"distance": 135, "highway": "I-80", "rest_stops": ["Love's - Exit 234", "Pilot - Exit 305"]},
+                "Chicago": {"distance": 344, "highway": "I-80", "rest_stops": ["Flying J - Exit 123", "TA - Exit 168"]}
+            }
+        },
+        "Chicago": {
+            "lat": 41.8781,
+            "lon": -87.6298,
+            "state": "Illinois",
+            "highways": ["I-80", "I-90"],
+            "connections": {
+                "Cleveland": {"distance": 344, "highway": "I-80", "rest_stops": ["Flying J - Exit 123", "TA - Exit 168"]},
+                "Minneapolis": {"distance": 410, "highway": "I-90", "rest_stops": ["Love's - Exit 234", "Pilot - Exit 305"]}
+            }
+        },
+        "Minneapolis": {
+            "lat": 44.9778,
+            "lon": -93.2650,
+            "state": "Minnesota",
+            "highways": ["I-90", "I-35"],
+            "connections": {
+                "Chicago": {"distance": 410, "highway": "I-90", "rest_stops": ["Love's - Exit 234", "Pilot - Exit 305"]},
+                "Des Moines": {"distance": 244, "highway": "I-35", "rest_stops": ["Flying J - Exit 123", "TA - Exit 168"]}
+            }
+        }
+    }
+}
