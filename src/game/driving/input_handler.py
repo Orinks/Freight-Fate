@@ -1,5 +1,6 @@
 import pygame
-from typing import Dict, Optional
+from typing import Optional
+from ..settings import Settings
 from .vehicle import TruckPhysics
 from .transmission import Transmission
 
@@ -7,6 +8,7 @@ class DrivingInputHandler:
     def __init__(self, truck: TruckPhysics, transmission: Transmission):
         self.truck = truck
         self.transmission = transmission
+        self.settings = None  # Will be set by DrivingState
         
         # Input state
         self.throttle_input = 0.0
@@ -16,6 +18,10 @@ class DrivingInputHandler:
         
         # Key state tracking
         self.shift_keys_held = set()
+        
+    def set_settings(self, settings):
+        """Set the settings instance for unit conversion."""
+        self.settings = settings
         
     def handle_event(self, event: pygame.event.Event) -> Optional[str]:
         """Handle a single input event."""
@@ -31,6 +37,8 @@ class DrivingInputHandler:
                 self.brake_input = 1.0
             elif event.key == pygame.K_LSHIFT:
                 self.clutch_input = 1.0
+            elif event.key == pygame.K_u and self.settings:  # Add unit toggle
+                self.settings.toggle_units()
                 
         elif event.type == pygame.KEYUP:
             if event.key in range(pygame.K_1, pygame.K_9):
@@ -78,7 +86,7 @@ class DrivingInputHandler:
         # Update transmission
         self.transmission.update(dt, self.clutch_input)
     
-    def get_input_state(self) -> Dict:
+    def get_input_state(self) -> dict:
         """Get current input state."""
         return {
             'throttle': self.throttle_input,

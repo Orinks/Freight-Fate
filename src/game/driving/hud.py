@@ -1,6 +1,7 @@
 import pygame
 import math
 from typing import Dict, Optional, Tuple
+from ..settings import Settings
 from .vehicle import TruckPhysics
 from .transmission import Transmission, GearState
 
@@ -77,10 +78,11 @@ class Gauge:
         self.surface.blit(text, text_rect)
 
 class DrivingHUD:
-    def __init__(self, screen: pygame.Surface, truck: TruckPhysics, transmission: Transmission):
+    def __init__(self, screen: pygame.Surface, truck: TruckPhysics, transmission: Transmission, settings: Settings):
         self.screen = screen
         self.truck = truck
         self.transmission = transmission
+        self.settings = settings
         
         # Colors
         self.WHITE = (255, 255, 255)
@@ -98,12 +100,15 @@ class DrivingHUD:
         screen_width = screen.get_width()
         screen_height = screen.get_height()
         
+        # Set max speed based on units (140 kph = ~87 mph)
+        max_speed = 87 if self.settings.use_imperial else 140
+        
         self.speedometer = Gauge(
             screen,
             (screen_width - 150, screen_height - 100),
             80,
             0,
-            140,  # max speed in kph
+            max_speed,  # max speed in current units
             color=self.GREEN
         )
         
@@ -137,113 +142,66 @@ class DrivingHUD:
             'tire_wear': pygame.Rect(140, 20, 30, 30)
         }
         
+    def update(self, dt):
+        """Update HUD state.
+        
+        Args:
+            dt: Time delta since last update in seconds
+        """
+        # Update gauges
+        self.speedometer.draw(self.settings.convert_speed(self.truck.get_speed_kph()))
+        self.tachometer.draw(self.truck.engine_rpm, self.truck.engine_rpm > self.truck.specs.engine.rpm_range[1])
+        self.fuel_gauge.draw(self.truck.fuel_level, self.truck.fuel_level < 20)
+        
     def draw_gear_indicator(self):
         """Draw the current gear and shift state."""
-        gear_state = self.transmission.get_state()
-        current_gear = gear_state['gear']
-        shift_state = gear_state['state']
+        gear_text = str(self.transmission.current_gear) if self.transmission.current_gear > 0 else "N"
+        if self.transmission.state == GearState.SHIFTING:
+            gear_text += "..."
+            
+        gear_surface = self.large_font.render(gear_text, True, self.WHITE)
+        gear_rect = gear_surface.get_rect(center=(self.screen.get_width() // 2, self.screen.get_height() - 100))
+        self.screen.blit(gear_surface, gear_rect)
         
-        # Background
-        gear_rect = pygame.Rect(
-            self.screen.get_width() // 2 - 30,
-            self.screen.get_height() - 100,
-            60,
-            60
-        )
-        pygame.draw.rect(self.screen, self.BLACK, gear_rect)
-        pygame.draw.rect(self.screen, self.WHITE, gear_rect, 2)
-        
-        # Gear number
-        color = self.YELLOW if shift_state == 'SHIFTING' else self.WHITE
-        gear_text = self.large_font.render(str(current_gear), True, color)
-        gear_text_rect = gear_text.get_rect(center=gear_rect.center)
-        self.screen.blit(gear_text, gear_text_rect)
-        
-        # Shift progress if shifting
-        if shift_state == 'SHIFTING':
-            progress = gear_state['shifting_progress']
-            progress_rect = pygame.Rect(
-                gear_rect.x,
-                gear_rect.bottom - 5,
-                gear_rect.width * progress,
-                5
-            )
-            pygame.draw.rect(self.screen, self.YELLOW, progress_rect)
-    
     def draw_warning_indicators(self):
         """Draw warning indicators for vehicle systems."""
-        warnings = self.truck.warnings
-        
-        for warning_type, rect in self.warning_icons.items():
-            # Draw icon background
-            color = self.RED if warnings[warning_type] else (50, 50, 50)
-            pygame.draw.rect(self.screen, color, rect)
-            pygame.draw.rect(self.screen, self.WHITE, rect, 1)
+        for name, rect in self.warning_icons.items():
+            pygame.draw.rect(self.screen, self.RED if self.truck.warnings[name] else self.GREEN, rect)
             
-            # Draw icon symbol
-            symbol = {
-                'engine_temp': '°C',
-                'brake_temp': 'B',
-                'low_fuel': 'F',
-                'tire_wear': 'T'
-            }[warning_type]
-            
-            text = self.small_font.render(symbol, True, self.WHITE)
-            text_rect = text.get_rect(center=rect.center)
-            self.screen.blit(text, text_rect)
-    
     def draw_system_status(self):
         """Draw detailed system status information."""
-        status = self.truck.get_status()
+        # Convert speed to current units
+        speed = self.settings.convert_speed(self.truck.get_speed_kph())
+        speed_unit = self.settings.get_speed_unit()
         
-        # Create status texts
-        texts = [
-            f"Engine: {status['engine_temp']:.0f}°C",
-            f"Brakes: {status['brake_temp']:.0f}°C",
-            f"Tires: {status['tire_wear']:.0f}%"
-        ]
+        # Render speed
+        speed_text = f"{speed:.1f} {speed_unit}"
+        speed_surface = self.medium_font.render(speed_text, True, self.WHITE)
+        self.screen.blit(speed_surface, (self.screen.get_width() - 200, self.screen.get_height() - 150))
         
-        # Draw status panel
-        y = 60
-        for text in texts:
-            surface = self.small_font.render(text, True, self.WHITE)
-            self.screen.blit(surface, (20, y))
-            y += 25
-    
+        # Render RPM
+        rpm_text = f"{self.truck.engine_rpm:.0f} RPM"
+        rpm_surface = self.medium_font.render(rpm_text, True, self.WHITE)
+        self.screen.blit(rpm_surface, (100, self.screen.get_height() - 150))
+        
+        # Render fuel level
+        fuel_text = f"Fuel: {self.truck.fuel_level:.0f}%"
+        fuel_surface = self.small_font.render(fuel_text, True, self.WHITE)
+        self.screen.blit(fuel_surface, (self.screen.get_width() - 350, self.screen.get_height() - 150))
+        
     def render(self):
         """Render the complete HUD."""
-        status = self.truck.get_status()
+        # Draw gauges with converted values
+        speed = self.settings.convert_speed(self.truck.get_speed_kph())
+        speed_text = self.settings.format_speed(speed)
+        speed_surface = self.large_font.render(speed_text, True, self.WHITE)
+        speed_rect = speed_surface.get_rect(center=(self.screen.get_width() // 2, self.screen.get_height() - 50))
+        self.screen.blit(speed_surface, speed_rect)
         
-        # Draw gauges
-        self.speedometer.draw(
-            status['speed'],
-            status['speed'] > 120  # Warning if speeding
-        )
+        self.speedometer.draw(speed)
+        self.tachometer.draw(self.truck.engine_rpm, self.truck.engine_rpm > self.truck.specs.engine.rpm_range[1])
+        self.fuel_gauge.draw(self.truck.fuel_level, self.truck.fuel_level < 20)
         
-        self.tachometer.draw(
-            status['rpm'],
-            status['rpm'] > 2500  # Warning if over-revving
-        )
-        
-        self.fuel_gauge.draw(
-            status['fuel'],
-            status['fuel'] < 10  # Warning if low fuel
-        )
-        
-        # Draw gear indicator
         self.draw_gear_indicator()
-        
-        # Draw warning indicators
         self.draw_warning_indicators()
-        
-        # Draw system status
         self.draw_system_status()
-        
-        # Draw labels
-        speed_label = self.medium_font.render("KPH", True, self.WHITE)
-        rpm_label = self.medium_font.render("RPM", True, self.WHITE)
-        fuel_label = self.medium_font.render("FUEL", True, self.WHITE)
-        
-        self.screen.blit(speed_label, (self.screen.get_width() - 150, self.screen.get_height() - 30))
-        self.screen.blit(rpm_label, (150, self.screen.get_height() - 30))
-        self.screen.blit(fuel_label, (self.screen.get_width() - 300, self.screen.get_height() - 30))

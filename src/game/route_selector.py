@@ -1,7 +1,7 @@
 import pygame
 import json
-import accessible_output3 as ao
 import os
+from typing import Dict, Optional
 from data.routes import get_available_routes, find_route
 
 # Get the absolute path to cities.json

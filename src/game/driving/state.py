@@ -4,6 +4,7 @@ from .transmission import Transmission
 from .input_handler import DrivingInputHandler
 from .hud import DrivingHUD
 from .audio_hud import AudioHUD
+from ..settings import Settings
 import os
 
 class DrivingState:
@@ -22,6 +23,9 @@ class DrivingState:
         self.location = location_data['location']
         self.sound_manager = sound_manager
         
+        # Initialize settings
+        self.settings = Settings()
+        
         # Announce starting location
         if self.tts_engine:
             self.tts_engine.output(f"Starting at {self.location['name']} in {self.city}")
@@ -35,7 +39,7 @@ class DrivingState:
             gear_ratios=[0.0, 3.5, 2.8, 2.2, 1.8, 1.5, 1.2, 1.0]  # 0 is neutral, then 1st through 7th
         )
         specs = TruckSpecs(
-            mass=8000.0,
+            mass=8000.0,  # kg
             drag_coefficient=0.7,
             rolling_resistance=0.015,
             wheel_radius=0.5,
@@ -45,12 +49,13 @@ class DrivingState:
         self.truck = TruckPhysics(specs)
         self.transmission = Transmission(gear_ratios=engine.gear_ratios)
         
+        # Initialize HUD components with settings
+        self.hud = DrivingHUD(self.screen, self.truck, self.transmission, self.settings)
+        self.audio_hud = AudioHUD(self.tts_engine, self.truck, self.transmission, self.settings)
+        
         # Initialize input handler
         self.input_handler = DrivingInputHandler(self.truck, self.transmission)
-        
-        # Initialize HUD components
-        self.hud = DrivingHUD(screen, self.truck, self.transmission)
-        self.audio_hud = AudioHUD(self.truck, self.transmission, self.tts_engine)
+        self.input_handler.set_settings(self.settings)
         
         # Start engine sound
         self.sound_manager.play_engine_idle()
@@ -82,7 +87,11 @@ class DrivingState:
         return None
         
     def update(self, dt):
-        """Update game state."""
+        """Update game state.
+        
+        Args:
+            dt: Time delta since last update in seconds
+        """
         if not self.paused:
             # Update input handler first
             self.input_handler.update(dt)
@@ -94,7 +103,7 @@ class DrivingState:
             self.transmission.update(dt, self.input_handler.clutch_input)
             
             # Update audio feedback
-            self.audio_hud.update()
+            self.audio_hud.update(dt)
             
             # Update engine sound based on RPM
             self.sound_manager.update_engine_sound(self.truck.engine_rpm, self.truck.specs.engine.rpm_range[1])

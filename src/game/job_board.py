@@ -1,7 +1,6 @@
 import pygame
 import random
 import json
-import accessible_output3.outputs.auto
 from datetime import datetime
 from typing import List, Optional, Dict
 from .jobs import Job, JobGenerator

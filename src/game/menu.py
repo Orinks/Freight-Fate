@@ -52,7 +52,14 @@ class Menu:
                 for location in city['locations']:
                     locations.append(MenuItem(
                         f"{location['name']} ({location['type']}) - {', '.join(location['cargo_types'])}",
-                        {'city': city['name'], 'location': location}
+                        {
+                            'city': city['name'],
+                            'location': {
+                                'name': location['name'],
+                                'type': location['type'],
+                                'cargo_types': location['cargo_types']
+                            }
+                        }
                     ))
         
         return {
@@ -66,6 +73,15 @@ class Menu:
     def get_current_menu(self):
         """Get the current menu state."""
         return self.states[self.current_state]
+        
+    def announce_current_item(self):
+        """Announce the currently selected menu item."""
+        if not self.tts_engine:
+            return
+            
+        current_state = self.states[self.current_state]
+        current_item = current_state['items'][current_state['selected_index']]
+        self.tts_engine.output(current_item.text)
         
     def speak_current_item(self):
         """Announce the currently selected menu item."""
@@ -95,9 +111,7 @@ class Menu:
                 current_state['selected_index'] = (current_state['selected_index'] + direction) % len(current_state['items'])
                 
                 # Announce selected item
-                selected_item = current_state['items'][current_state['selected_index']]
-                if self.tts_engine:
-                    self.tts_engine.output(selected_item.text)
+                self.announce_current_item()
                     
             elif event.key == pygame.K_RETURN:
                 # Play selection sound
@@ -113,6 +127,8 @@ class Menu:
                         self.current_state = 'location'
                         if self.tts_engine:
                             self.tts_engine.output("Select your starting location")
+                    elif selected_item.action == 'settings':
+                        return 'settings'
                     elif selected_item.action == 'exit':
                         return 'exit'
                 elif self.current_state == 'location':
@@ -132,7 +148,7 @@ class Menu:
                 selected_item = current_state['items'][current_state['selected_index']]
                 if self.tts_engine and self.cities_data:
                     for city in self.cities_data['cities']:
-                        if city['name'] == selected_item.text:
+                        if city['name'] == selected_item.action['city']:
                             details = f"{city['name']}. Population: {city['population']}. Description: {city['description']}"
                             self.tts_engine.output(details)
                             break

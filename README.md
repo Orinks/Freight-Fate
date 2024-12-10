@@ -76,6 +76,7 @@ freight-fate/
 - F1: Toggle accessibility mode
 - M: Toggle music
 - +/-: Adjust volume
+- U: Toggle between imperial/metric units
 
 ## Requirements
 

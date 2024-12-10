@@ -1,21 +1,16 @@
 import os
 import json
 import pygame
-import accessible_output3.outputs.auto
+from sral_tts import SRALEngine
 from game.menu import Menu
 from game.route_selector import RouteSelector
 from game.job_board import JobBoard
-from game.objectives import ObjectiveGenerator, RouteProgress
-from game.location_selector import LocationSelector
-from game.tutorial_objectives import TutorialManager
-from game.help_system import HelpSystem
-from game.driving.vehicle import TruckPhysics, TruckSpecs, EngineDef
-from game.driving.transmission import Transmission
-from game.driving.input_handler import DrivingInputHandler
 from game.driving.state import DrivingState
 from game.weather.weather_manager import WeatherManager
 from game.weather.forecast_ui import WeatherForecastUI
 from game.sound_manager import SoundManager
+from game.settings_menu import SettingsMenu
+from game.settings import Settings
 
 print("Starting game initialization...")
 
@@ -59,8 +54,13 @@ class FreightFate:
         
         # Initialize TTS
         print("\n4. TTS Setup:")
-        self.tts_engine = accessible_output3.outputs.auto.Auto()
-        print("- TTS engine initialized")
+        try:
+            self.tts_engine = SRALEngine()
+            self.tts_engine.output("Text to speech initialized")
+            print("- TTS engine initialized")
+        except Exception as e:
+            print(f"Warning: Could not initialize TTS: {e}")
+            self.tts_engine = None
         
         # Initialize sound manager
         print("\n5. Sound Manager Setup:")
@@ -68,6 +68,9 @@ class FreightFate:
         debug_info = self.sound_manager.get_debug_info()
         for key, value in debug_info.items():
             print(f"- {key}: {value}")
+        
+        # Initialize settings
+        self.settings = Settings()
         
         # Load city data
         print("\n6. Loading Game Data:")
@@ -85,7 +88,8 @@ class FreightFate:
         # Game states
         self.states = {
             'menu': Menu(self.screen, self.tts_engine, self.sound_manager, self.cities_data),
-            'driving': None  # Will be initialized when needed
+            'driving': None,  # Will be initialized when needed
+            'settings': SettingsMenu(self.screen, self.tts_engine, self.settings)
         }
         self.current_state = 'menu'
         print("\n=== Initialization Complete ===\n")
@@ -112,6 +116,12 @@ class FreightFate:
                         break
                     elif isinstance(result, tuple) and result[0] == 'start_game':
                         self.start_game(result[1])
+                    elif result == 'settings':
+                        self.current_state = 'settings'
+                elif self.current_state == 'settings':
+                    result = self.states['settings'].handle_input(event)
+                    if result == 'back':
+                        self.current_state = 'menu'
                 elif self.current_state == 'driving':
                     # Handle driving state input
                     print(f"Handling driving input for event: {event}")  # Debug output
@@ -126,6 +136,8 @@ class FreightFate:
             # Render current state
             if self.current_state == 'menu':
                 self.states['menu'].render()
+            elif self.current_state == 'settings':
+                self.states['settings'].render()
             elif self.current_state == 'driving':
                 self.states['driving'].render()
                 
@@ -136,6 +148,7 @@ class FreightFate:
     def speak(self, text):
         if self.tts_engine:
             self.tts_engine.output(text)
+            # self.tts_engine.runAndWait()
 
     def handle_state_result(self, result):
         if not result:

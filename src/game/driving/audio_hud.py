@@ -1,29 +1,32 @@
 import pygame
-from typing import Dict, Optional
-from threading import Lock
 import time
+import threading
+from typing import Dict, Optional
+from ..settings import Settings
 from .vehicle import TruckPhysics
 from .transmission import Transmission
 from .sound_effects import SoundEffects
 
 class AudioHUD:
-    def __init__(self, truck: TruckPhysics, transmission: Transmission, tts_engine):
+    def __init__(self, tts_engine, truck: TruckPhysics, transmission: Transmission, settings: Settings):
         """Initialize the audio HUD.
         
         Args:
+            tts_engine: Text-to-speech engine from main game
             truck: TruckPhysics instance for vehicle state
             transmission: Transmission instance for gear state
-            tts_engine: Text-to-speech engine from main game
+            settings: Settings instance for unit preferences
         """
         self.truck = truck
         self.transmission = transmission
         self.tts_engine = tts_engine
+        self.settings = settings
         
         # Initialize sound effects
         self.sound_fx = SoundEffects()
         
         # Thread safety for TTS engine
-        self.tts_lock = Lock()
+        self.tts_lock = threading.Lock()
         
         # State tracking to avoid repetitive announcements
         self.last_announcement_time: Dict[str, float] = {}
@@ -49,7 +52,7 @@ class AudioHUD:
             'gear': 0.0,  # No cooldown for gear changes
             'warning': 15.0,
             'fuel': 30.0,
-            'status': 60.0
+            'status': 10.0
         }
         
         # Configure different voices for different types of feedback
@@ -68,9 +71,15 @@ class AudioHUD:
         return False
     
     def announce_speed(self):
-        """Announce current speed on demand."""
-        status = self.truck.get_status()
-        self.speak(f"{int(status['speed'])} kilometers per hour")
+        """Announce current speed."""
+        if not self._can_announce('speed'):
+            return
+            
+        speed_kph = self.truck.get_speed_kph()
+        speed = self.settings.convert_speed(speed_kph)
+        unit = self.settings.get_speed_unit()
+        self.speak(f"Speed: {speed:.0f} {unit}")
+        self._update_last_announcement('speed')
     
     def announce_fuel(self):
         """Announce fuel status on demand."""
@@ -143,24 +152,29 @@ class AudioHUD:
             else:
                 print("AudioHUD: No TTS engine available!")  # Debug output
     
-    def can_announce(self, announcement_type: str) -> bool:
+    def _can_announce(self, announcement_type: str) -> bool:
         """Check if enough time has passed to make another announcement."""
         current_time = time.time()
         last_time = self.last_announcement_time.get(announcement_type, 0)
         return current_time - last_time >= self.cooldowns[announcement_type]
     
+    def _update_last_announcement(self, announcement_type: str):
+        """Update the last announcement time."""
+        self.last_announcement_time[announcement_type] = time.time()
+    
     def update_speed_feedback(self, current_speed: float):
         """Provide speed feedback when it changes significantly."""
-        if not self.can_announce('speed'):
+        if not self._can_announce('speed'):
             return
             
         # Only announce speed changes of 10 KPH or more
         speed_diff = abs(current_speed - self.last_values['speed'])
         if speed_diff >= 10:
-            speed_text = f"{int(current_speed)} kilometers per hour"
-            self.speak(speed_text)
+            speed = self.settings.convert_speed(current_speed)
+            unit = self.settings.get_speed_unit()
+            self.speak(f"{speed:.0f} {unit}")
             self.last_values['speed'] = current_speed
-            self.last_announcement_time['speed'] = time.time()
+            self._update_last_announcement('speed')
     
     def update_gear_feedback(self, current_gear: int, shift_state: str):
         """Provide feedback on gear changes and shifting state."""
@@ -173,7 +187,7 @@ class AudioHUD:
     
     def update_warning_feedback(self, warnings: Dict[str, bool]):
         """Provide feedback for active warnings."""
-        if not self.can_announce('warning'):
+        if not self._can_announce('warning'):
             return
             
         current_warnings = {
@@ -194,53 +208,67 @@ class AudioHUD:
                 self.speak(warning_messages[warning], warning=True)
             
             self.last_values['warnings'] = current_warnings
-            self.last_announcement_time['warning'] = time.time()
+            self._update_last_announcement('warning')
     
     def update_fuel_feedback(self, fuel_level: float):
         """Provide periodic fuel level updates."""
-        if not self.can_announce('fuel'):
+        if not self._can_announce('fuel'):
             return
             
         # Announce fuel level at 25% intervals or when low
         if fuel_level <= 10 and self.last_values['fuel'] > 10:
             self.speak("Fuel level critical. Less than 10 percent remaining.", warning=True)
-            self.last_announcement_time['fuel'] = time.time()
+            self._update_last_announcement('fuel')
         elif int(fuel_level / 25) < int(self.last_values['fuel'] / 25):
             self.speak(f"Fuel at {int(fuel_level)} percent")
-            self.last_announcement_time['fuel'] = time.time()
+            self._update_last_announcement('fuel')
         
         self.last_values['fuel'] = fuel_level
     
     def announce_status(self):
-        """Provide a comprehensive status update on request."""
-        if not self.can_announce('status'):
+        """Announce full vehicle status."""
+        if not self._can_announce('status'):
             return
             
-        status = self.truck.get_status()
-        transmission_state = self.transmission.get_state()
+        speed_kph = self.truck.get_speed_kph()
+        speed = self.settings.convert_speed(speed_kph)
+        speed_unit = self.settings.get_speed_unit()
         
         status_text = (
-            f"Vehicle status: Speed {int(status['speed'])} kilometers per hour. "
-            f"Currently in gear {transmission_state['gear']}. "
-            f"Fuel at {int(status['fuel'])} percent. "
-            f"Engine temperature {int(status['engine_temp'])} degrees. "
-            f"Tire wear at {int(status['tire_wear'])} percent."
+            f"Current speed: {speed:.0f} {speed_unit}. "
+            f"Gear: {self.transmission.current_gear}. "
+            f"RPM: {self.truck.engine_rpm:.0f}. "
+            f"Fuel: {self.truck.fuel_level:.0f} percent."
         )
         
         self.speak(status_text)
-        self.last_announcement_time['status'] = time.time()
+        self._update_last_announcement('status')
     
-    def update(self):
-        """Update all audio feedback systems."""
+    def update(self, dt):
+        """Update all audio feedback systems.
+        
+        Args:
+            dt: Time delta since last update in seconds
+        """
         status = self.truck.get_status()
         transmission_state = self.transmission.get_state()
+        
+        # Speed announcements
+        speed_kph = self.truck.get_speed_kph()
+        speed = self.settings.convert_speed(speed_kph)
+        
+        # Announce speed at regular intervals or significant changes
+        current_time = time.time()
+        if current_time - self.last_announcement_time.get('speed', 0) > 10.0:  # Every 10 seconds
+            self.announce_speed()
+            self.last_announcement_time['speed'] = current_time
         
         # Update sound effects
         self.update_engine_sounds(status)
         self.update_warning_sounds(status['warnings'])
         
         # Update speech feedback
-        self.update_speed_feedback(status['speed'])
+        self.update_speed_feedback(speed_kph)
         self.update_gear_feedback(transmission_state['gear'], transmission_state['state'])
         self.update_warning_feedback(status['warnings'])
         self.update_fuel_feedback(status['fuel'])
