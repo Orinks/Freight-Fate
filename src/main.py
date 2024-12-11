@@ -11,6 +11,7 @@ from game.weather.forecast_ui import WeatherForecastUI
 from game.sound_manager import SoundManager
 from game.settings_menu import SettingsMenu
 from game.settings import Settings
+from game.tutorial_objectives import TutorialManager
 
 print("Starting game initialization...")
 
@@ -239,8 +240,18 @@ class FreightFate:
         # Stop menu music
         self.sound_manager.stop_menu_music()
         
-        # Initialize driving state with selected location
-        self.states['driving'] = DrivingState(self.screen, self.tts_engine, location, self.sound_manager)
+        # Initialize tutorial manager
+        player_data = {'visited_location_types': set(), 'current_city': location['city']}
+        tutorial_manager = TutorialManager(self.screen, self.tts_engine, player_data)
+        
+        # Start tutorial messages
+        print("\nStarting tutorial initialization...")
+        tutorial_manager.update_objective("start_tutorial")
+        print("Tutorial initialization complete")
+        
+        # Initialize driving state with selected location and tutorial
+        self.states['driving'] = DrivingState(self.screen, self.tts_engine, location, self.sound_manager, self.cities_data)
+        self.states['driving'].tutorial_manager = tutorial_manager
         self.current_state = 'driving'
 
 if __name__ == "__main__":

@@ -8,7 +8,7 @@ from ..settings import Settings
 import os
 
 class DrivingState:
-    def __init__(self, screen, tts_engine, location_data, sound_manager):
+    def __init__(self, screen, tts_engine, location_data, sound_manager, cities_data=None):
         """Initialize the driving state.
         
         Args:
@@ -16,7 +16,12 @@ class DrivingState:
             tts_engine: Text-to-speech engine
             location_data: Dictionary containing city and location information
             sound_manager: Sound manager instance
+            cities_data: Dictionary containing all cities and their locations
         """
+        self.tutorial_manager = None  # Will be set by FreightFate
+        self.cities_data = cities_data
+        print(f"Tutorial manager initialized: {self.tutorial_manager is not None}")
+        print("\nDrivingState initialized. Tutorial manager will be set later.")
         self.screen = screen
         self.tts_engine = tts_engine
         self.city = location_data['city']
@@ -62,6 +67,7 @@ class DrivingState:
         
         # Game state
         self.paused = False
+        self.map_view = None  # Will be initialized when needed
         
     def handle_input(self, event):
         """Handle input events."""
@@ -74,8 +80,17 @@ class DrivingState:
                     self.audio_hud.speak("Game paused")
                 else:
                     self.audio_hud.speak("Game resumed")
+            elif event.key == pygame.K_m:
+                if not self.map_view:
+                    from ..map_view import MapView
+                    self.map_view = MapView(self.screen, self.tts_engine, self.cities_data)
+                return None
                 
-        # Handle audio HUD input first
+        # Handle tutorial input first if tutorial is active
+        if self.tutorial_manager:
+            self.tutorial_manager.handle_event(event)
+                
+        # Handle audio HUD input next
         if self.audio_hud.handle_input(event):
             print("Audio HUD handled input")  # Debug output
             return None
@@ -110,11 +125,18 @@ class DrivingState:
         
     def render(self):
         """Render the current frame."""
-        # Clear screen
-        self.screen.fill((100, 100, 100))  # Gray background for road
-        
-        # Draw HUD
-        self.hud.render()
-        
-        # Update display
-        pygame.display.flip()
+        if self.map_view:
+            self.map_view.render()
+        else:
+            # Clear screen
+            self.screen.fill((100, 100, 100))  # Gray background for road
+            
+            # Draw HUD
+            self.hud.render()
+            
+            # Render tutorial if active
+            if self.tutorial_manager:
+                self.tutorial_manager.render()
+            
+            # Update display
+            pygame.display.flip()

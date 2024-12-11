@@ -37,13 +37,20 @@ class SRALWrapper:
         self.sral.SRAL_GetCurrentEngine.argtypes = []
         self.sral.SRAL_GetCurrentEngine.restype = ctypes.c_int
         
+        # JAWS key hook
+        self.sral.SRAL_InstallJawsKeyHook.argtypes = []
+        self.sral.SRAL_InstallJawsKeyHook.restype = ctypes.c_bool
+        
         # Initialize SRAL
         if not self.initialize():
             raise RuntimeError("Failed to initialize SRAL")
     
     def initialize(self, engines_exclude: int = 0) -> bool:
         """Initialize SRAL with optional engine exclusions."""
-        return self.sral.SRAL_Initialize(engines_exclude)
+        success = self.sral.SRAL_Initialize(engines_exclude)
+        if success and self.get_current_engine() == SRALEngines.JAWS:
+            self.sral.SRAL_InstallJawsKeyHook()
+        return success
     
     def speak(self, text: str, interrupt: bool = True) -> bool:
         """Speak the given text."""
