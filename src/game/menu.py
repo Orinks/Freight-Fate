@@ -149,7 +149,7 @@ class Menu:
                 if self.tts_engine and self.cities_data:
                     for city in self.cities_data['cities']:
                         if city['name'] == selected_item.action['city']:
-                            details = f"{city['name']}. Population: {city['population']}. Description: {city['description']}"
+                            details = f"{city['name']} - Available locations: {len(city.get('locations', []))}"
                             self.tts_engine.output(details)
                             break
                             

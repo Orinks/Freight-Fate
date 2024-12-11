@@ -240,8 +240,12 @@ class LocationSelector:
                 self.tts_engine.output(help_text)
             # Space key for location details
             elif event.key == pygame.K_SPACE:
-                if self.selected_location:
+                if not self.available_locations:
+                    self.tts_engine.output("No locations available")
+                elif self.selected_location:
                     self.speak_location_details()
+                else:
+                    self.tts_engine.output("No location selected")
                 
         return False, None
         

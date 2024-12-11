@@ -10,10 +10,11 @@ class SoundEffects:
         self.channels: Dict[str, pygame.mixer.Channel] = {}
         
         # Reserve channels for different sound types
-        self.channels['engine'] = pygame.mixer.Channel(0)
-        self.channels['warnings'] = pygame.mixer.Channel(1)
-        self.channels['transmission'] = pygame.mixer.Channel(2)
-        self.channels['ui'] = pygame.mixer.Channel(3)
+        self.channels['engine_idle'] = pygame.mixer.Channel(0)
+        self.channels['engine_load'] = pygame.mixer.Channel(1)
+        self.channels['warnings'] = pygame.mixer.Channel(2)
+        self.channels['transmission'] = pygame.mixer.Channel(3)
+        self.channels['ui'] = pygame.mixer.Channel(4)
         
         # Load sound effects
         sound_dir = Path(__file__).parent / "sounds"
@@ -39,29 +40,28 @@ class SoundEffects:
     
     def play_engine_sound(self, rpm: float, load: float):
         """
-        Dynamically mix engine sounds based on RPM and load.
+        Mix idle and load engine sounds based on RPM and load.
         rpm: Engine RPM (0.0 to 1.0)
         load: Engine load (0.0 to 1.0)
         """
-        if 'engine_idle' in self.sounds and 'engine_rev' in self.sounds:
-            # Crossfade between idle and rev sounds based on RPM
-            idle_vol = 1.0 - rpm
-            rev_vol = rpm
+        if 'engine_idle' in self.sounds:
+            # Idle sound always plays, fades out at high RPM
+            idle_vol = max(0.2, 1.0 - rpm)  # Keep some idle rumble
+            self.channels['engine_idle'].set_volume(idle_vol)
+            if not self.channels['engine_idle'].get_busy():
+                self.sounds['engine_idle'].play(-1, fade_ms=100)
             
-            # Adjust volume based on load
-            idle_vol *= 0.5 + (load * 0.5)
-            rev_vol *= load
-            
-            # Play both sounds on the engine channel
-            self.channels['engine'].set_volume(idle_vol)
-            self.sounds['engine_idle'].play(-1, fade_ms=100)
-            
-            self.channels['engine'].set_volume(rev_vol)
-            self.sounds['engine_rev'].play(-1, fade_ms=100)
+            # Load sound increases with RPM and load
+            if 'engine_rev' in self.sounds:
+                load_vol = rpm * (0.4 + (load * 0.6))  # Load affects volume more at high RPM
+                self.channels['engine_load'].set_volume(load_vol)
+                if not self.channels['engine_load'].get_busy():
+                    self.sounds['engine_rev'].play(-1, fade_ms=100)
     
     def stop_engine_sound(self):
         """Stop all engine sounds."""
-        self.channels['engine'].stop()
+        self.channels['engine_idle'].stop()
+        self.channels['engine_load'].stop()
     
     def play_gear_shift(self):
         """Play gear shifting sound."""

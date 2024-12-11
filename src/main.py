@@ -143,6 +143,13 @@ class FreightFate:
                 
             pygame.display.flip()
             
+        # Clean up before exit
+        if self.sound_manager:
+            self.sound_manager.stop_all()
+        if self.tts_engine:
+            self.tts_engine.stop()
+        if self.settings.is_dirty:  # Only save if changed
+            self.settings.save_settings()
         pygame.quit()
 
     def speak(self, text):
@@ -237,7 +244,12 @@ class FreightFate:
         self.current_state = 'driving'
 
 if __name__ == "__main__":
-    print("Creating game instance...")
-    game = FreightFate()
-    print("Starting game loop...")
-    game.run()
+    try:
+        print("Creating game instance...")
+        game = FreightFate()
+        print("Starting game loop...")
+        game.run()
+    except Exception as e:
+        print(f"\nError occurred: {e}")
+        import traceback
+        traceback.print_exc()

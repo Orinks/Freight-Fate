@@ -1,4 +1,4 @@
-from sral_wrapper import SRALWrapper, SRALEngines
+from src.sral_wrapper import SRALWrapper, SRALEngines
 
 def test_sral():
     try:

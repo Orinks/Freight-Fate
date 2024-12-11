@@ -14,7 +14,7 @@ An accessible cross-country trucking simulation game built with Python, featurin
 
 ## Installation
 
-1. Ensure you have Python 3.11 installed
+1. Ensure you have Python 3.12 installed
 2. Clone this repository
 3. Create a virtual environment:
 ```bash
@@ -41,7 +41,7 @@ pip install -r requirements.txt
 python src/main.py
 ```
 
-Note: The game requires Python 3.11 specifically due to dependency compatibility. Other versions may not work correctly.
+Note: The game requires Python 3.12 or later.
 
 ## Project Structure
 
@@ -80,7 +80,7 @@ freight-fate/
 
 ## Requirements
 
-- Python 3.11 or compatible
+- Python 3.12 or later
 - Pygame 2.5.2 or later
 - Screen reader compatible
 - Sound output device

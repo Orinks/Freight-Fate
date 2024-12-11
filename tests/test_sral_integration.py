@@ -1,4 +1,4 @@
-from sral_tts import SRALEngine
+from src.sral_tts import SRALEngine
 import time
 
 def test_sral():

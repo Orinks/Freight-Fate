@@ -82,6 +82,7 @@ class SoundManager:
                 
                 if not os.path.exists(sound_path):
                     print(f"! Sound file not found: {sound_path}")
+                    self.sounds[sound_name] = None  # Store None instead of failing
                     continue
                     
                 # Check if WAV file is valid (skip for OGG files)
@@ -113,7 +114,7 @@ class SoundManager:
         if not self.enabled:
             return
             
-        if sound_name in self.sounds:
+        if sound_name in self.sounds and self.sounds[sound_name] is not None:
             try:
                 print(f"\nPlaying sound: {sound_name}")
                 print(f"- Mixer busy: {pygame.mixer.get_busy()}")

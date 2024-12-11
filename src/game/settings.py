@@ -6,6 +6,7 @@ class Settings:
     def __init__(self):
         self.use_imperial = True  # Default to imperial for US setting
         self.settings_file = self._get_settings_path()
+        self.is_dirty = False
         self.load_settings()
         
     def _get_settings_path(self):
@@ -47,7 +48,7 @@ class Settings:
     def toggle_units(self):
         """Toggle between imperial and metric units."""
         self.use_imperial = not self.use_imperial
-        self.save_settings()
+        self.is_dirty = True
         
     def get_speed_unit(self):
         """Get the current speed unit."""
