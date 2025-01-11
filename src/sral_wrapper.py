@@ -36,6 +36,16 @@ class SRALWrapper:
         
         self.sral.SRAL_GetCurrentEngine.argtypes = []
         self.sral.SRAL_GetCurrentEngine.restype = ctypes.c_int
+
+        # Add new function signatures for SAPI voices
+        self.sral.SRAL_GetSapiVoices.argtypes = []
+        self.sral.SRAL_GetSapiVoices.restype = ctypes.c_char_p
+        
+        self.sral.SRAL_SetSapiVoice.argtypes = [ctypes.c_int]
+        self.sral.SRAL_SetSapiVoice.restype = ctypes.c_bool
+        
+        self.sral.SRAL_GetCurrentSapiVoice.argtypes = []
+        self.sral.SRAL_GetCurrentSapiVoice.restype = ctypes.c_int
         
         # JAWS key hook
         self.sral.SRAL_InstallJawsKeyHook.argtypes = []
@@ -72,6 +82,27 @@ class SRALWrapper:
         """Get the current speech engine identifier."""
         return self.sral.SRAL_GetCurrentEngine()
     
+    def get_sapi_voices(self) -> list[str]:
+        """Get list of available SAPI voices."""
+        if self.get_current_engine() != SRALEngines.SAPI:
+            return []
+        voices_str = self.sral.SRAL_GetSapiVoices()
+        if not voices_str:
+            return []
+        return voices_str.decode('utf-8').split('|')
+    
+    def set_sapi_voice(self, index: int) -> bool:
+        """Set current SAPI voice by index."""
+        if self.get_current_engine() != SRALEngines.SAPI:
+            return False
+        return self.sral.SRAL_SetSapiVoice(index)
+    
+    def get_current_sapi_voice(self) -> int:
+        """Get current SAPI voice index."""
+        if self.get_current_engine() != SRALEngines.SAPI:
+            return -1
+        return self.sral.SRAL_GetCurrentSapiVoice()
+
     def __del__(self):
         """Clean up SRAL when the wrapper is destroyed."""
         if hasattr(self, 'sral'):

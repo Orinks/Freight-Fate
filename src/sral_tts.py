@@ -1,12 +1,14 @@
 import ctypes
 import os
 from typing import Optional
+from sral_wrapper import SRALEngines
 
 class SRALEngine:
+
     """SRAL-based text-to-speech engine that implements the same interface as accessible_output3."""
     
-    def __init__(self):
-        """Initialize SRAL text-to-speech engine."""
+    def __init__(self, speech_engine_mode="default"):
+        """Initialize SRAL text-to-speech engine with specified speech engine mode."""
         # Load SRAL DLL
         dll_path = os.path.join(os.path.dirname(__file__), "SRAL.dll")
         self.sral = ctypes.CDLL(dll_path)
@@ -21,12 +23,60 @@ class SRALEngine:
         self.sral.SRAL_StopSpeech.argtypes = []
         self.sral.SRAL_StopSpeech.restype = ctypes.c_bool
         
-        # Initialize SRAL
-        if not self.sral.SRAL_Initialize(0):  # 0 means don't exclude any engines
+        self.sral.SRAL_Uninitialize.argtypes = []
+        self.sral.SRAL_Uninitialize.restype = None
+        
+        # SAPI voice functions
+        self.sral.SRAL_GetSapiVoices.argtypes = []
+        self.sral.SRAL_GetSapiVoices.restype = ctypes.c_char_p
+        
+        self.sral.SRAL_SetSapiVoice.argtypes = [ctypes.c_int]
+        self.sral.SRAL_SetSapiVoice.restype = ctypes.c_bool
+        
+        self.sral.SRAL_GetCurrentSapiVoice.argtypes = []
+        self.sral.SRAL_GetCurrentSapiVoice.restype = ctypes.c_int
+        
+        self.speech_engine_mode = speech_engine_mode
+        self._initialize()
+    
+    def _initialize(self):
+        """Initialize SRAL with current mode."""
+        # First uninitialize if already initialized
+        self.sral.SRAL_Uninitialize()
+        
+        # Initialize with appropriate mode
+        engines_exclude = ~SRALEngines.SAPI if self.speech_engine_mode == "sapi" else 0
+        if not self.sral.SRAL_Initialize(engines_exclude):
             raise RuntimeError("Failed to initialize SRAL")
     
+    def set_mode(self, mode):
+        """Change the speech engine mode."""
+        if mode != self.speech_engine_mode:
+            self.speech_engine_mode = mode
+            self._initialize()
+    
+    def get_sapi_voices(self) -> list[str]:
+        """Get list of available SAPI voices."""
+        if hasattr(self.sral, 'SRAL_GetSapiVoices'):
+            voices_str = self.sral.SRAL_GetSapiVoices()
+            if voices_str:
+                return voices_str.decode('utf-8').split('|')
+        return []
+    
+    def set_sapi_voice(self, index: int) -> bool:
+        """Set current SAPI voice by index."""
+        if hasattr(self.sral, 'SRAL_SetSapiVoice'):
+            return self.sral.SRAL_SetSapiVoice(index)
+        return False
+    
+    def get_current_sapi_voice(self) -> int:
+        """Get current SAPI voice index."""
+        if hasattr(self.sral, 'SRAL_GetCurrentSapiVoice'):
+            return self.sral.SRAL_GetCurrentSapiVoice()
+        return -1
+    
     def output(self, text: str, interrupt: bool = True) -> bool:
-        """Output text through speech. This matches accessible_output3's interface."""
+        """Output text through speech."""
         if not text:
             return False
         return self.sral.SRAL_Speak(text.encode('utf-8'), interrupt)

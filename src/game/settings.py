@@ -1,17 +1,17 @@
-"""Game settings and configuration management."""
 import os
 import json
 
 class Settings:
     def __init__(self):
         self.use_imperial = True  # Default to imperial for US setting
+        self.speech_engine_mode = "default"  # Can be "default" or "sapi"
+        self.sapi_voice_index = 0  # Default SAPI voice index
         self.settings_file = self._get_settings_path()
         self.is_dirty = False
         self.load_settings()
         
     def _get_settings_path(self):
         """Get the path to the settings file."""
-        # Get the absolute path to the game directory
         current_file = os.path.abspath(__file__)
         src_dir = os.path.dirname(os.path.dirname(current_file))
         project_root = os.path.dirname(src_dir)
@@ -29,7 +29,11 @@ class Settings:
                 with open(self.settings_file, 'r') as f:
                     data = json.load(f)
                     self.use_imperial = data.get('use_imperial', True)
+                    self.speech_engine_mode = data.get('screen_reader_mode', "default")  # Keep old key for compatibility
+                    self.sapi_voice_index = data.get('sapi_voice_index', 0)
                 print(f"Settings loaded: Using {'imperial' if self.use_imperial else 'metric'} units")
+                print(f"Speech engine mode: {self.speech_engine_mode}")
+                print(f"SAPI voice index: {self.sapi_voice_index}")
         except Exception as e:
             print(f"Error loading settings: {e}")
         
@@ -37,19 +41,34 @@ class Settings:
         """Save settings to file."""
         try:
             data = {
-                'use_imperial': self.use_imperial
+                'use_imperial': self.use_imperial,
+                'screen_reader_mode': self.speech_engine_mode,  # Keep old key for compatibility
+                'sapi_voice_index': self.sapi_voice_index
             }
             with open(self.settings_file, 'w') as f:
                 json.dump(data, f, indent=4)
             print(f"Settings saved: Using {'imperial' if self.use_imperial else 'metric'} units")
+            print(f"Speech engine mode: {self.speech_engine_mode}")
+            print(f"SAPI voice index: {self.sapi_voice_index}")
         except Exception as e:
             print(f"Error saving settings: {e}")
-        
+            
     def toggle_units(self):
         """Toggle between imperial and metric units."""
         self.use_imperial = not self.use_imperial
         self.is_dirty = True
         
+    def toggle_speech_engine_mode(self):
+        """Toggle between default and SAPI speech engine modes."""
+        self.speech_engine_mode = "sapi" if self.speech_engine_mode == "default" else "default"
+        self.is_dirty = True
+        
+    def set_sapi_voice(self, index: int):
+        """Set the SAPI voice index."""
+        if self.sapi_voice_index != index:
+            self.sapi_voice_index = index
+            self.is_dirty = True
+            
     def get_speed_unit(self):
         """Get the current speed unit."""
         return "mph" if self.use_imperial else "km/h"
@@ -100,3 +119,4 @@ class Settings:
         if include_unit:
             return f"{converted:.0f} {self.get_weight_unit()}"
         return f"{converted:.0f}"
+
