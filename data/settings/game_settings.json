@@ -1,3 +1,4 @@
 {
-    "use_imperial": true
+    "use_imperial": true,
+    "screen_reader_mode": "sapi"
 }

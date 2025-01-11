@@ -52,12 +52,15 @@ class FreightFate:
         pygame.display.set_caption("Freight Fate")
         print("- Display initialized:", self.screen.get_size())
         
-        # Initialize TTS
+        # Initialize settings first
+        self.settings = Settings()
+
+        # Initialize TTS with the saved speech engine mode
         print("\n4. TTS Setup:")
         try:
-            self.tts_engine = SRALEngine()
+            self.tts_engine = SRALEngine(speech_engine_mode=self.settings.speech_engine_mode)
             self.tts_engine.output("Text to speech initialized")
-            print("- TTS engine initialized")
+            print("- TTS engine initialized with mode:", self.settings.speech_engine_mode)
         except Exception as e:
             print(f"Warning: Could not initialize TTS: {e}")
             self.tts_engine = None
@@ -68,9 +71,6 @@ class FreightFate:
         debug_info = self.sound_manager.get_debug_info()
         for key, value in debug_info.items():
             print(f"- {key}: {value}")
-        
-        # Initialize settings
-        self.settings = Settings()
         
         # Load city data
         print("\n6. Loading Game Data:")
@@ -84,18 +84,28 @@ class FreightFate:
         except Exception as e:
             print(f"! Failed to load cities data: {e}")
             self.cities_data = None
-            
+
         # Game states
         self.states = {
             'menu': Menu(self.screen, self.tts_engine, self.sound_manager, self.cities_data),
             'driving': None,  # Will be initialized when needed
-            'settings': SettingsMenu(self.screen, self.tts_engine, self.settings)
+            'settings': SettingsMenu(self.screen, self.tts_engine, self.settings, self.update_tts_engine)
         }
+
         self.current_state = 'menu'
         print("\n=== Initialization Complete ===\n")
         
         # Start menu music
         self.sound_manager.play_menu_music()
+
+    def update_tts_engine(self, new_engine):
+        """Update TTS engine across all game states when it changes."""
+        self.tts_engine = new_engine
+        # Update TTS engine in all states that use it
+        if 'menu' in self.states:
+            self.states['menu'].tts_engine = new_engine
+        if 'driving' in self.states and self.states['driving']:
+            self.states['driving'].tts_engine = new_engine
 
     def run(self):
         """Main game loop."""

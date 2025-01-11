@@ -3,7 +3,7 @@ import accessible_output2.outputs.auto
 
 class SoundManager:
     def __init__(self):
-        self.screen_reader = accessible_output2.outputs.auto.Auto()
+        self.speech_engine = accessible_output2.outputs.auto.Auto()
         self.sounds = {}
         self._load_sounds()
 
@@ -26,5 +26,5 @@ class SoundManager:
             self.sounds[sound_name].play(-1 if loop else 0)
 
     def speak(self, message):
-        """Use screen reader to speak a message"""
-        self.screen_reader.output(message)
+        """Use speech engine to speak a message"""
+        self.speech_engine.output(message)

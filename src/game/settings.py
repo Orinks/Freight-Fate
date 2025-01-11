@@ -5,6 +5,7 @@ import json
 class Settings:
     def __init__(self):
         self.use_imperial = True  # Default to imperial for US setting
+        self.speech_engine_mode = "default"  # Can be "default" or "sapi"
         self.settings_file = self._get_settings_path()
         self.is_dirty = False
         self.load_settings()
@@ -29,7 +30,9 @@ class Settings:
                 with open(self.settings_file, 'r') as f:
                     data = json.load(f)
                     self.use_imperial = data.get('use_imperial', True)
+                    self.speech_engine_mode = data.get('screen_reader_mode', "default")  # Keep old key for backward compatibility
                 print(f"Settings loaded: Using {'imperial' if self.use_imperial else 'metric'} units")
+                print(f"Speech engine mode: {self.speech_engine_mode}")
         except Exception as e:
             print(f"Error loading settings: {e}")
         
@@ -37,11 +40,13 @@ class Settings:
         """Save settings to file."""
         try:
             data = {
-                'use_imperial': self.use_imperial
+                'use_imperial': self.use_imperial,
+                'screen_reader_mode': self.speech_engine_mode  # Keep old key for backward compatibility
             }
             with open(self.settings_file, 'w') as f:
                 json.dump(data, f, indent=4)
             print(f"Settings saved: Using {'imperial' if self.use_imperial else 'metric'} units")
+            print(f"Speech engine mode: {self.speech_engine_mode}")
         except Exception as e:
             print(f"Error saving settings: {e}")
         
@@ -100,3 +105,8 @@ class Settings:
         if include_unit:
             return f"{converted:.0f} {self.get_weight_unit()}"
         return f"{converted:.0f}"
+        
+    def toggle_speech_engine_mode(self):
+        """Toggle between default and SAPI speech engine modes."""
+        self.speech_engine_mode = "sapi" if self.speech_engine_mode == "default" else "default"
+        self.is_dirty = True
