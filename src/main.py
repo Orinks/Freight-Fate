@@ -59,11 +59,11 @@ class FreightFate:
         print("\n4. TTS Setup:")
         try:
             self.tts_engine = SRALEngine(speech_engine_mode=self.settings.speech_engine_mode)
-            self.tts_engine.output("Text to speech initialized")
             print("- TTS engine initialized with mode:", self.settings.speech_engine_mode)
         except Exception as e:
             print(f"Warning: Could not initialize TTS: {e}")
             self.tts_engine = None
+
         
         # Initialize sound manager
         print("\n5. Sound Manager Setup:")
@@ -89,7 +89,10 @@ class FreightFate:
         self.states = {
             'menu': Menu(self.screen, self.tts_engine, self.sound_manager, self.cities_data),
             'driving': None,  # Will be initialized when needed
-            'settings': SettingsMenu(self.screen, self.tts_engine, self.settings, self.update_tts_engine)
+            'settings': SettingsMenu(self.screen, self.tts_engine, self.settings, self.sound_manager, self.update_tts_engine),
+            'location_selector': None,  # Will be initialized when needed
+            'job_board': None,  # Will be initialized when needed
+            'route_selection': None  # Will be initialized when needed
         }
 
         self.current_state = 'menu'
@@ -128,16 +131,27 @@ class FreightFate:
                         self.start_game(result[1])
                     elif result == 'settings':
                         self.current_state = 'settings'
+                        if self.tts_engine:
+                            self.tts_engine.output("Settings Menu. Use arrow keys to navigate options, Enter to adjust settings, Tab for help.")
                 elif self.current_state == 'settings':
                     result = self.states['settings'].handle_input(event)
                     if result == 'back':
                         self.current_state = 'menu'
+                        if self.tts_engine:
+                            self.tts_engine.output("Main Menu. Use arrow keys to navigate, Enter to select, Tab for help.")
                 elif self.current_state == 'driving':
                     # Handle driving state input
                     print(f"Handling driving input for event: {event}")  # Debug output
                     result = self.states['driving'].handle_input(event)
                     if result == 'menu':
                         self.current_state = 'menu'
+                        # Stop driving sounds and start menu music
+                        self.sound_manager.stop_all()
+                        self.sound_manager.play_menu_music()
+                    elif result == 'settings':
+                        self.current_state = 'settings'
+                        if self.tts_engine:
+                            self.tts_engine.output("Settings Menu. Use arrow keys to navigate options, Enter to adjust settings, Tab for help.")
                         
             # Update driving state
             if self.current_state == 'driving':
@@ -174,44 +188,26 @@ class FreightFate:
         if self.current_state == 'menu':
             if result == 'new_game':
                 self.current_state = 'location_selector'
-                self.states['location_selector'].set_city(self.player['current_city'])
-                self.speak("Welcome to Freight Fate. Find a job location using arrow keys.")
-                
+                if 'location_selector' in self.states:
+                    self.states['location_selector'].set_city(None)
+                    
         elif self.current_state == 'location_selector':
-            if isinstance(result, dict):
-                if result['action'] == 'visit_location':
-                    self.player['current_location'] = result['location']
-                    location_type = result['location']['type']
-                    self.player['visited_location_types'].add(location_type)
-                    
-                    # Update tutorial objectives
-                    reward = self.tutorial_manager.update_objective("visit_location")
-                    if reward:
-                        self.player['money'] += reward
-                    
-                    if len(self.player['visited_location_types']) >= 3:
-                        reward = self.tutorial_manager.update_objective("visit_all_types")
-                        if reward:
-                            self.player['money'] += reward
-                    
-                    self.current_state = 'job_board'
+            if isinstance(result, dict) and result.get('action') == 'visit_location':
+                self.current_state = 'job_board'
+                if 'job_board' in self.states:
                     self.states['job_board'].refresh_jobs(
-                        self.player['current_city'],
-                        self.player['level'],
-                        self.player['current_location']
+                        result['city'],
+                        0,  # Default level
+                        result['location']
                     )
                     
         elif self.current_state == 'job_board':
             if result == "accept_job":
-                # Update tutorial objective for accepting first job
-                reward = self.tutorial_manager.update_objective("accept_job")
-                if reward:
-                    self.player['money'] += reward
-                
                 self.current_state = 'route_selection'
-                current_job = self.states['job_board'].current_job
-                self.states['route_selection'].set_destination(current_job.end_city)
-                
+                if 'route_selection' in self.states:
+                    current_job = self.states['job_board'].current_job
+                    self.states['route_selection'].set_destination(current_job.end_city)
+                    
         elif self.current_state == 'route_selection':
             if isinstance(result, dict) and 'highway' in result:
                 self.current_highway = result['highway']
@@ -220,6 +216,7 @@ class FreightFate:
                          f"Traffic is {self.highway_conditions['traffic']}. "
                          f"Terrain is {self.highway_conditions['terrain']}.")
                 self.current_state = 'driving'
+
 
     def render(self):
         """Render the current game state."""
@@ -245,12 +242,20 @@ class FreightFate:
         
         pygame.display.flip()
 
-    def start_game(self, location):
+    def start_game(self, location_data):
         # Stop menu music
         self.sound_manager.stop_menu_music()
         
         # Initialize driving state with selected location
-        self.states['driving'] = DrivingState(self.screen, self.tts_engine, location, self.sound_manager)
+        # location_data contains both city and location info from menu selection
+        self.states['driving'] = DrivingState(
+            screen=self.screen,
+            tts_engine=self.tts_engine,
+            sound_manager=self.sound_manager,
+            settings=self.settings,
+            start_city=location_data['city'],
+            start_location=location_data['location']
+        )
         self.current_state = 'driving'
 
 if __name__ == "__main__":

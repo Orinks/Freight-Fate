@@ -37,6 +37,13 @@ class SRALWrapper:
         self.sral.SRAL_GetCurrentEngine.argtypes = []
         self.sral.SRAL_GetCurrentEngine.restype = ctypes.c_int
         
+        # Add rate control function signatures
+        self.sral.SRAL_SetRate.argtypes = [ctypes.c_uint64]
+        self.sral.SRAL_SetRate.restype = ctypes.c_bool
+        
+        self.sral.SRAL_GetRate.argtypes = []
+        self.sral.SRAL_GetRate.restype = ctypes.c_uint64
+        
         # Initialize SRAL
         if not self.initialize():
             raise RuntimeError("Failed to initialize SRAL")
@@ -64,6 +71,14 @@ class SRALWrapper:
     def get_current_engine(self) -> int:
         """Get the current speech engine identifier."""
         return self.sral.SRAL_GetCurrentEngine()
+    
+    def set_rate(self, rate: int) -> bool:
+        """Set the speech rate (0-100)."""
+        return self.sral.SRAL_SetRate(ctypes.c_uint64(rate))
+
+    def get_rate(self) -> int:
+        """Get the current speech rate."""
+        return self.sral.SRAL_GetRate()
     
     def __del__(self):
         """Clean up SRAL when the wrapper is destroyed."""

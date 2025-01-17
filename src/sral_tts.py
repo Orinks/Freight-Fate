@@ -25,6 +25,24 @@ class SRALEngine:
         self.sral.SRAL_Uninitialize.argtypes = []
         self.sral.SRAL_Uninitialize.restype = None
         
+        self.sral.SRAL_GetVoiceCount.argtypes = []
+        self.sral.SRAL_GetVoiceCount.restype = ctypes.c_uint64
+        
+        self.sral.SRAL_GetVoiceName.argtypes = [ctypes.c_uint64]
+        self.sral.SRAL_GetVoiceName.restype = ctypes.c_char_p
+        
+        self.sral.SRAL_SetVoice.argtypes = [ctypes.c_uint64]
+        self.sral.SRAL_SetVoice.restype = ctypes.c_bool
+        
+        self.sral.SRAL_SetRate.argtypes = [ctypes.c_uint64]
+        self.sral.SRAL_SetRate.restype = ctypes.c_bool
+        
+        self.sral.SRAL_SetVolume.argtypes = [ctypes.c_uint64]
+        self.sral.SRAL_SetVolume.restype = ctypes.c_bool
+        
+        self.sral.SRAL_SetEngineParameter.argtypes = [ctypes.c_int, ctypes.c_int, ctypes.c_int]
+        self.sral.SRAL_SetEngineParameter.restype = ctypes.c_bool
+        
         self.speech_engine_mode = speech_engine_mode
         self._initialize()
     
@@ -58,6 +76,90 @@ class SRALEngine:
         """Stop current speech."""
         return self.sral.SRAL_StopSpeech()
     
+    def get_available_voices(self) -> list[str]:
+        """Get a list of available voice names."""
+        if self.speech_engine_mode != "sapi":
+            return []
+            
+        voice_count = self.sral.SRAL_GetVoiceCount()
+        voices = []
+        for i in range(voice_count):
+            voice_name = self.sral.SRAL_GetVoiceName(i)
+            if voice_name:
+                voices.append(voice_name.decode('utf-8'))
+        return voices
+    
+    def set_voice_by_name(self, voice_name: str) -> bool:
+        """Set voice by name."""
+        if self.speech_engine_mode != "sapi":
+            return False
+            
+        voices = self.get_available_voices()
+        try:
+            index = voices.index(voice_name)
+            return self.sral.SRAL_SetVoice(index)
+        except ValueError:
+            return False
+    
+    def set_voice_by_index(self, index: int) -> bool:
+        """Set voice by index."""
+        if self.speech_engine_mode != "sapi":
+            return False
+            
+        return self.sral.SRAL_SetVoice(index)
+    
+    def set_rate(self, rate: int) -> bool:
+        """Set speech rate (0-100)."""
+        if not 0 <= rate <= 100:
+            return False
+        return self.sral.SRAL_SetRate(rate)
+    
+    def set_volume(self, volume: int) -> bool:
+        """Set speech volume (0-100)."""
+        if not 0 <= volume <= 100:
+            return False
+        return self.sral.SRAL_SetVolume(volume)
+    
+    def set_pitch(self, pitch: int) -> bool:
+        """Set speech pitch (0-100). Only works in SAPI mode."""
+        if self.speech_engine_mode != "sapi":
+            return False
+            
+        if not 0 <= pitch <= 100:
+            return False
+            
+        PARAM_PITCH = 4  # SAPI pitch parameter
+        return self.sral.SRAL_SetEngineParameter(SRALEngines.SAPI, PARAM_PITCH, pitch)
+
+    def configure_voice(self, voice_name: Optional[str] = None, rate: Optional[int] = None, 
+                       volume: Optional[int] = None, pitch: Optional[int] = None) -> bool:
+        """Configure multiple voice parameters at once.
+        
+        Args:
+            voice_name: Name of the voice to use (SAPI only)
+            rate: Speech rate (0-100)
+            volume: Volume level (0-100)
+            pitch: Pitch level (0-100, SAPI only)
+            
+        Returns:
+            bool: True if all requested parameters were set successfully
+        """
+        success = True
+        
+        if voice_name is not None and self.speech_engine_mode == "sapi":
+            success &= self.set_voice_by_name(voice_name)
+        
+        if rate is not None:
+            success &= self.set_rate(rate)
+            
+        if volume is not None:
+            success &= self.set_volume(volume)
+            
+        if pitch is not None and self.speech_engine_mode == "sapi":
+            success &= self.set_pitch(pitch)
+            
+        return success
+
     def __del__(self):
         """Clean up SRAL when the engine is destroyed."""
         if hasattr(self, 'sral'):

@@ -2,12 +2,13 @@ from typing import Dict, List, Optional
 import pygame
 
 class TutorialObjective:
-    def __init__(self, title: str, description: str, reward: float, completed: bool = False):
+    def __init__(self, title: str, description: str, reward: float, completed: bool = False, help_text: str = ""):
         self.title = title
         self.description = description
         self.reward = reward
         self.completed = completed
         self.completion_time = None
+        self.help_text = help_text
 
 class TutorialManager:
     def __init__(self, screen, tts_engine, player_data: Dict):
@@ -27,36 +28,65 @@ class TutorialManager:
         # Initialize tutorial objectives
         self.objectives = [
             TutorialObjective(
-                "Find a Job Location",
-                "Visit a truck stop, freight terminal, or distribution center to find work",
-                250.0
+                "Basic Controls",
+                "Learn the basic truck controls",
+                100.0,
+                help_text="Use W/S for acceleration/brake, A/D for steering. Press H for help."
             ),
             TutorialObjective(
-                "Accept Your First Job",
-                "Accept a delivery job that matches your CDL license",
-                500.0
+                "Start Your Engine",
+                "Press 'E' to start your truck's engine",
+                50.0,
+                help_text="Look for the engine status indicator in your HUD"
+            ),
+            TutorialObjective(
+                "Practice Driving",
+                "Drive forward and come to a complete stop",
+                200.0,
+                help_text="Gently press W to move forward, then S to brake smoothly"
+            ),
+            TutorialObjective(
+                "Navigate to Job Location",
+                "Follow the GPS to reach a nearby job location",
+                300.0,
+                help_text="Watch for navigation arrows and distance indicators"
+            ),
+            TutorialObjective(
+                "Find Available Jobs",
+                "Check the job board for available deliveries",
+                250.0,
+                help_text="Look for jobs matching your current location and license"
+            ),
+            TutorialObjective(
+                "Accept First Job",
+                "Choose and accept a suitable delivery job",
+                500.0,
+                help_text="Consider distance, pay, and cargo type when selecting"
+            ),
+            TutorialObjective(
+                "Load Cargo",
+                "Position your truck at the loading dock",
+                200.0,
+                help_text="Align your trailer with the loading markers"
+            ),
+            TutorialObjective(
+                "Safe Driving",
+                "Drive 1 mile without accidents or violations",
+                400.0,
+                help_text="Watch your speed and maintain safe following distance"
             ),
             TutorialObjective(
                 "Complete First Delivery",
-                "Successfully deliver your first cargo to its destination",
-                1000.0
-            ),
-            TutorialObjective(
-                "Visit Different Location Types",
-                "Visit at least one truck stop, one freight terminal, and one distribution center",
-                750.0
-            ),
-            TutorialObjective(
-                "Maintain Cargo Safety",
-                "Complete a delivery with no cargo damage",
-                500.0
+                "Deliver your cargo safely to destination",
+                1000.0,
+                help_text="Follow route guidance and traffic rules"
             )
         ]
         
         self.show_tutorial = True
         self.current_objective_index = 0
         
-    def update_objective(self, objective_type: str) -> Optional[float]:
+    def update_objective(self, objective_type: str, **kwargs) -> Optional[float]:
         """Update objective progress and return reward if completed."""
         if not self.show_tutorial:
             return None
@@ -64,29 +94,47 @@ class TutorialManager:
         reward = None
         current_obj = self.objectives[self.current_objective_index]
         
-        if objective_type == "visit_location" and current_obj.title == "Find a Job Location":
+        if objective_type == "controls_learned" and current_obj.title == "Basic Controls":
             current_obj.completed = True
             reward = current_obj.reward
             self.advance_tutorial()
             
-        elif objective_type == "accept_job" and current_obj.title == "Accept Your First Job":
+        elif objective_type == "engine_started" and current_obj.title == "Start Your Engine":
             current_obj.completed = True
             reward = current_obj.reward
             self.advance_tutorial()
             
-        elif objective_type == "complete_delivery" and current_obj.title == "Complete First Delivery":
+        elif objective_type == "practice_complete" and current_obj.title == "Practice Driving":
             current_obj.completed = True
             reward = current_obj.reward
             self.advance_tutorial()
             
-        elif objective_type == "visit_all_types":
-            visited_types = set(self.player_data.get('visited_location_types', []))
-            if len(visited_types) >= 3 and current_obj.title == "Visit Different Location Types":
-                current_obj.completed = True
-                reward = current_obj.reward
-                self.advance_tutorial()
-                
-        elif objective_type == "perfect_delivery" and current_obj.title == "Maintain Cargo Safety":
+        elif objective_type == "reached_location" and current_obj.title == "Navigate to Job Location":
+            current_obj.completed = True
+            reward = current_obj.reward
+            self.advance_tutorial()
+            
+        elif objective_type == "viewed_jobs" and current_obj.title == "Find Available Jobs":
+            current_obj.completed = True
+            reward = current_obj.reward
+            self.advance_tutorial()
+            
+        elif objective_type == "job_accepted" and current_obj.title == "Accept First Job":
+            current_obj.completed = True
+            reward = current_obj.reward
+            self.advance_tutorial()
+            
+        elif objective_type == "cargo_loaded" and current_obj.title == "Load Cargo":
+            current_obj.completed = True
+            reward = current_obj.reward
+            self.advance_tutorial()
+            
+        elif objective_type == "safe_mile" and current_obj.title == "Safe Driving":
+            current_obj.completed = True
+            reward = current_obj.reward
+            self.advance_tutorial()
+            
+        elif objective_type == "delivery_complete" and current_obj.title == "Complete First Delivery":
             current_obj.completed = True
             reward = current_obj.reward
             self.advance_tutorial()
@@ -110,24 +158,53 @@ class TutorialManager:
         if not self.show_tutorial:
             return
             
-        # Draw tutorial box
-        box_rect = pygame.Rect(10, 10, 300, 150)
-        pygame.draw.rect(self.screen, self.BLACK, box_rect)
+        # Draw tutorial box with increased size for help text
+        box_rect = pygame.Rect(10, 10, 300, 200)
+        
+        # Draw semi-transparent background
+        s = pygame.Surface((300, 200))
+        s.set_alpha(200)
+        s.fill(self.BLACK)
+        self.screen.blit(s, (10, 10))
+        
+        # Draw border
         pygame.draw.rect(self.screen, self.WHITE, box_rect, 2)
         
         # Draw tutorial title
-        title = self.font.render("Tutorial Objectives", True, self.YELLOW)
+        title = self.font.render("Tutorial", True, self.YELLOW)
         self.screen.blit(title, (20, 20))
         
         # Draw current objective
         current_obj = self.objectives[self.current_objective_index]
         obj_title = self.small_font.render(current_obj.title, True, self.WHITE)
-        obj_desc = self.small_font.render(current_obj.description, True, self.GRAY)
-        reward_text = self.small_font.render(f"Reward: ${current_obj.reward:.2f}", True, self.GREEN)
         
-        self.screen.blit(obj_title, (20, 60))
-        self.screen.blit(obj_desc, (20, 90))
-        self.screen.blit(reward_text, (20, 120))
+        # Split description into multiple lines if needed
+        words = current_obj.description.split()
+        lines = []
+        current_line = []
+        for word in words:
+            current_line.append(word)
+            test_line = ' '.join(current_line)
+            if self.small_font.size(test_line)[0] > 280:
+                current_line.pop()
+                lines.append(' '.join(current_line))
+                current_line = [word]
+        if current_line:
+            lines.append(' '.join(current_line))
+        
+        # Draw objective info
+        self.screen.blit(obj_title, (20, 50))
+        for i, line in enumerate(lines):
+            desc_line = self.small_font.render(line, True, self.GRAY)
+            self.screen.blit(desc_line, (20, 80 + i * 25))
+        
+        # Draw help hint
+        help_hint = self.small_font.render("Press H for help", True, self.GREEN)
+        self.screen.blit(help_hint, (20, 170))
+        
+        # Draw reward
+        reward_text = self.small_font.render(f"Reward: ${current_obj.reward:.2f}", True, self.GREEN)
+        self.screen.blit(reward_text, (150, 170))
         
     def speak_objective_completed(self, objective: TutorialObjective):
         """Announce completion of an objective."""

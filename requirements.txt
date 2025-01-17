@@ -1,3 +1,8 @@
 pyttsx3==2.90
 pygame==2.5.2
 requests==2.31.0  # For weather API integration
+wxPython==4.2.1
+pandas==2.1.4
+numpy==1.26.2
+keyboard==0.13.5
+noise==1.2.2  # For Perlin noise terrain generation
