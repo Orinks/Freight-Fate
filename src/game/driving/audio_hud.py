@@ -55,6 +55,9 @@ class AudioHUD:
             'status': 10.0
         }
         
+        # Initialize timers
+        self.update_timer = 0.0
+        
         # Configure different voices for different types of feedback
         self.voices = None
         self.warning_voice = None
@@ -75,10 +78,15 @@ class AudioHUD:
         if not self._can_announce('speed'):
             return
             
-        speed_kph = self.truck.get_speed_kph()
-        speed = self.settings.convert_speed(speed_kph)
-        unit = self.settings.get_speed_unit()
-        self.speak(f"Speed: {speed:.0f} {unit}")
+        # Get current speed in appropriate units
+        if self.settings.use_imperial:
+            speed = self.truck.speed_mph
+            speed_unit = "miles per hour"
+        else:
+            speed = self.truck.speed
+            speed_unit = "kilometers per hour"
+        
+        self.speak(f"Speed: {speed:.0f} {speed_unit}")
         self._update_last_announcement('speed')
     
     def announce_fuel(self):
@@ -170,9 +178,15 @@ class AudioHUD:
         # Only announce speed changes of 10 KPH or more
         speed_diff = abs(current_speed - self.last_values['speed'])
         if speed_diff >= 10:
-            speed = self.settings.convert_speed(current_speed)
-            unit = self.settings.get_speed_unit()
-            self.speak(f"{speed:.0f} {unit}")
+            # Get current speed in appropriate units
+            if self.settings.use_imperial:
+                speed = self.truck.speed_mph
+                speed_unit = "miles per hour"
+            else:
+                speed = self.truck.speed
+                speed_unit = "kilometers per hour"
+            
+            self.speak(f"{speed:.0f} {speed_unit}")
             self.last_values['speed'] = current_speed
             self._update_last_announcement('speed')
     
@@ -230,9 +244,13 @@ class AudioHUD:
         if not self._can_announce('status'):
             return
             
-        speed_kph = self.truck.get_speed_kph()
-        speed = self.settings.convert_speed(speed_kph)
-        speed_unit = self.settings.get_speed_unit()
+        # Get current speed in appropriate units
+        if self.settings.use_imperial:
+            speed = self.truck.speed_mph
+            speed_unit = "miles per hour"
+        else:
+            speed = self.truck.speed
+            speed_unit = "kilometers per hour"
         
         status_text = (
             f"Current speed: {speed:.0f} {speed_unit}. "
@@ -244,38 +262,23 @@ class AudioHUD:
         self.speak(status_text)
         self._update_last_announcement('status')
     
-    def update(self, dt):
+    def update(self, dt: float):
         """Update all audio feedback systems.
         
         Args:
             dt: Time delta since last update in seconds
         """
-        status = self.truck.get_status()
-        transmission_state = self.transmission.get_state()
-        
-        # Speed announcements
-        speed_kph = self.truck.get_speed_kph()
-        speed = self.settings.convert_speed(speed_kph)
-        
-        # Announce speed at regular intervals or significant changes
-        current_time = time.time()
-        if current_time - self.last_announcement_time.get('speed', 0) > 10.0:  # Every 10 seconds
-            self.announce_speed()
-            self.last_announcement_time['speed'] = current_time
-        
-        # Update sound effects
-        self.update_engine_sounds(status)
-        self.update_warning_sounds(status['warnings'])
-        
-        # Update speech feedback
-        self.update_speed_feedback(speed_kph)
-        self.update_gear_feedback(transmission_state['gear'], transmission_state['state'])
-        self.update_warning_feedback(status['warnings'])
-        self.update_fuel_feedback(status['fuel'])
-        
-        # Play gear shift sound if gear changed
-        if transmission_state['gear'] != self.last_values['gear']:
-            self.sound_fx.play_gear_shift()
+        # Update timer for periodic announcements
+        self.update_timer += dt
+        if self.update_timer >= 5.0:
+            self.update_timer = 0.0
+            try:
+                if self.settings.use_imperial:
+                    self.speak(f"Speed: {self.truck.speed_mph:.0f} miles per hour")
+                else:
+                    self.speak(f"Speed: {self.truck.speed:.0f} kilometers per hour")
+            except Exception as e:
+                print(f"Error in audio update: {e}")
     
     def cleanup(self):
         """Clean up audio resources."""

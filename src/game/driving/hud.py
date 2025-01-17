@@ -149,7 +149,7 @@ class DrivingHUD:
             dt: Time delta since last update in seconds
         """
         # Update gauges
-        self.speedometer.draw(self.settings.convert_speed(self.truck.get_speed_kph()))
+        self.speedometer.draw(self.settings.convert_speed(self.truck.speed))
         self.tachometer.draw(self.truck.engine_rpm, self.truck.engine_rpm > self.truck.specs.engine.rpm_range[1])
         self.fuel_gauge.draw(self.truck.fuel_level, self.truck.fuel_level < 20)
         
@@ -170,12 +170,16 @@ class DrivingHUD:
             
     def draw_system_status(self):
         """Draw detailed system status information."""
-        # Convert speed to current units
-        speed = self.settings.convert_speed(self.truck.get_speed_kph())
-        speed_unit = self.settings.get_speed_unit()
-        
-        # Render speed
-        speed_text = f"{speed:.1f} {speed_unit}"
+        # Get speed in appropriate units
+        if self.settings.use_imperial:
+            speed = self.truck.speed_mph
+            speed_unit = "MPH"
+        else:
+            speed = self.truck.speed
+            speed_unit = "KPH"
+            
+        # Draw speed
+        speed_text = f"{speed:.0f} {speed_unit}"
         speed_surface = self.medium_font.render(speed_text, True, self.WHITE)
         self.screen.blit(speed_surface, (self.screen.get_width() - 200, self.screen.get_height() - 150))
         
@@ -192,7 +196,7 @@ class DrivingHUD:
     def render(self):
         """Render the complete HUD."""
         # Draw gauges with converted values
-        speed = self.settings.convert_speed(self.truck.get_speed_kph())
+        speed = self.settings.convert_speed(self.truck.speed)
         speed_text = self.settings.format_speed(speed)
         speed_surface = self.large_font.render(speed_text, True, self.WHITE)
         speed_rect = speed_surface.get_rect(center=(self.screen.get_width() // 2, self.screen.get_height() - 50))

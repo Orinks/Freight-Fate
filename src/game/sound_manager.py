@@ -1,225 +1,256 @@
 import os
+import math
+import array
 import pygame
-import wave
 
 class SoundManager:
-    def __init__(self, volume=0.5):
-        """Initialize the sound manager."""
-        self.sounds = {}
-        self.volume = max(0.0, min(1.0, volume))  # Clamp between 0 and 1
+    def __init__(self, volume=0.2):
+        """Initialize the sound system."""
         self.enabled = True
-        self.engine_channel = None
-        self.music_channel = None
+        self.volume = volume
         
-        try:
-            # Initialize pygame mixer
-            if not pygame.mixer.get_init():
-                pygame.mixer.pre_init(44100, -16, 2, 2048)
-                pygame.mixer.init()
-            print("Sound system initialized successfully")
-            print(f"Mixer settings: {pygame.mixer.get_init()}")
-            
-            # Reserve channels for music and engine
-            pygame.mixer.set_reserved(2)  # Reserve first 2 channels
-            self.engine_channel = pygame.mixer.Channel(0)
-            self.music_channel = pygame.mixer.Channel(1)
-        except Exception as e:
-            print(f"Failed to initialize sound system: {e}")
-            self.enabled = False
-            
+        # Initialize pygame mixer if not already done
+        if not pygame.mixer.get_init():
+            pygame.mixer.init(44100, -16, 2, 2048)
+        
+        # Reserve channels for engine sounds
+        pygame.mixer.set_num_channels(16)  # Ensure we have enough channels
+        self.engine_low_channel = pygame.mixer.Channel(2)
+        self.engine_mid_channel = pygame.mixer.Channel(3)
+        self.engine_high_channel = pygame.mixer.Channel(4)
+        
+        # Dictionary to store loaded sounds
+        self.sounds = {}
+        
+        # Load all sound effects
         self.load_sounds()
+        
+        print("Sound system initialized successfully")
+        print(f"Mixer settings: {pygame.mixer.get_init()}")
         
     def load_sounds(self):
         """Load all sound effects."""
-        if not self.enabled:
-            print("! Sound system disabled, skipping sound loading")
-            return
-            
-        # Get the absolute path to the sounds directory
-        current_file = os.path.abspath(__file__)  # Get path to sound_manager.py
-        src_dir = os.path.dirname(os.path.dirname(current_file))  # Go up to src directory
-        project_root = os.path.dirname(src_dir)  # Go up to project root
+        # Get paths
+        current_file = os.path.abspath(__file__)
+        src_dir = os.path.dirname(os.path.dirname(current_file))
+        project_root = os.path.dirname(src_dir)
         sounds_dir = os.path.join(project_root, 'assets', 'sounds')
         
-        print(f"\nSound file paths:")
+        print("\nSound file paths:")
         print(f"- Current file: {current_file}")
         print(f"- Src directory: {src_dir}")
         print(f"- Project root: {project_root}")
         print(f"- Sounds directory: {sounds_dir}")
         
-        # List all files in the sounds directory
-        if os.path.exists(sounds_dir):
-            print("\nFiles in sounds directory:")
-            for file in os.listdir(sounds_dir):
-                print(f"- {file}")
-        else:
-            print(f"! Sounds directory not found: {sounds_dir}")
-        
-        # Define sound effects with their filenames
+        # Define sound files to load
         sound_files = {
-            'menu_nav': 'menu_nav.wav',
-            'menu_select': 'menu_select.wav',
-            'menu_back': 'menu_nav.wav',  # Reuse menu_nav sound for back action
-            'engine_idle': os.path.join('engine', 'idle.wav'),
-            'menu_music': os.path.join('music', 'menu.wav')  # Can also be menu.ogg
+            'menu_nav': os.path.join(sounds_dir, 'menu_nav.wav'),
+            'menu_select': os.path.join(sounds_dir, 'menu_select.wav'),
+            'menu_back': os.path.join(sounds_dir, 'menu_back.wav'),
+            'menu_music': os.path.join(sounds_dir, 'music', 'menu.ogg'),
+            'engine_idle': os.path.join(sounds_dir, 'engine', 'idle.wav'),
+            'engine_low': os.path.join(sounds_dir, 'engine', 'low.wav'),
+            'engine_mid': os.path.join(sounds_dir, 'engine', 'mid.wav'),
+            'engine_high': os.path.join(sounds_dir, 'engine', 'high.wav'),
+            'engine_rev': os.path.join(sounds_dir, 'engine', 'rev.wav'),
+            'engine_start': os.path.join(sounds_dir, 'engine', 'start.wav'),
+            'gear_shift': os.path.join(sounds_dir, 'vehicle', 'gear_shift.wav'),
+            'brake': os.path.join(sounds_dir, 'vehicle', 'brake.wav'),
+            'tire_screech': os.path.join(sounds_dir, 'vehicle', 'tire_screech.wav'),
+            'collision': os.path.join(sounds_dir, 'vehicle', 'collision.wav'),
+            'rain_light': os.path.join(sounds_dir, 'weather', 'rain_light.wav'),
+            'rain_heavy': os.path.join(sounds_dir, 'weather', 'rain_heavy.wav'),
+            'thunder': os.path.join(sounds_dir, 'weather', 'thunder.wav'),
+            'wind': os.path.join(sounds_dir, 'weather', 'wind.wav'),
         }
         
         # Load each sound file
-        for sound_name, filename in sound_files.items():
-            try:
-                # First try the specified extension
-                sound_path = os.path.join(sounds_dir, filename)
-                
-                # For music files, also try .ogg if .wav doesn't exist
-                if sound_name == 'menu_music' and not os.path.exists(sound_path):
-                    ogg_path = os.path.join(sounds_dir, 'music', 'menu.ogg')
-                    if os.path.exists(ogg_path):
-                        sound_path = ogg_path
-                
-                print(f"\nProcessing {sound_name}:")
-                print(f"- Full path: {sound_path}")
-                print(f"- File exists: {os.path.exists(sound_path)}")
-                
-                if not os.path.exists(sound_path):
-                    print(f"! Sound file not found: {sound_path}")
-                    self.sounds[sound_name] = None  # Store None instead of failing
-                    continue
-                    
-                # Check if WAV file is valid (skip for OGG files)
-                if sound_path.lower().endswith('.wav'):
-                    try:
-                        with wave.open(sound_path, 'rb') as wav_file:
-                            params = wav_file.getparams()
-                            print(f"- WAV file parameters for {filename}:")
-                            print(f"  * Channels: {params.nchannels}")
-                            print(f"  * Sample width: {params.sampwidth}")
-                            print(f"  * Framerate: {params.framerate}")
-                            print(f"  * Frames: {params.nframes}")
-                    except Exception as wav_error:
-                        print(f"! Invalid WAV file {filename}: {wav_error}")
-                        continue
-                
-                # Try to load the sound
-                print("- Loading sound into pygame...")
-                sound = pygame.mixer.Sound(sound_path)
-                sound.set_volume(self.volume)
-                self.sounds[sound_name] = sound
-                print(f"Successfully loaded {sound_name}")
-                
-            except Exception as e:
-                print(f"! Failed to load sound {sound_name}: {e}")
-                
-    def play_sound(self, sound_name: str):
-        """Play a sound effect by name."""
-        if not self.enabled:
-            return
+        for name, path in sound_files.items():
+            print(f"\nProcessing {name}:")
+            print(f"- Full path: {path}")
+            print(f"- File exists: {os.path.exists(path)}")
             
-        if sound_name in self.sounds and self.sounds[sound_name] is not None:
             try:
-                print(f"\nPlaying sound: {sound_name}")
-                print(f"- Mixer busy: {pygame.mixer.get_busy()}")
-                print(f"- Available channels: {pygame.mixer.get_num_channels()}")
-                
-                channel = self.sounds[sound_name].play()
-                if channel is None:
-                    print(f"! No free channel to play sound {sound_name}")
+                if os.path.exists(path):
+                    self.sounds[name] = pygame.mixer.Sound(path)
+                    print("- Sound loaded successfully")
                 else:
-                    print(f"Playing {sound_name} on channel {channel}")
+                    # Create placeholder sounds for missing engine sounds
+                    if name.startswith('engine_'):
+                        # Create simple tones at different frequencies for engine sounds
+                        if name == 'engine_low':
+                            self.sounds[name] = self.create_placeholder_sound(220)  # A3
+                        elif name == 'engine_mid':
+                            self.sounds[name] = self.create_placeholder_sound(440)  # A4
+                        elif name == 'engine_high':
+                            self.sounds[name] = self.create_placeholder_sound(880)  # A5
+                        else:
+                            self.sounds[name] = self.create_placeholder_sound(440)
+                    else:
+                        self.sounds[name] = self.create_placeholder_sound(440)
+                    print(f"! Sound file not found: {path}, using placeholder")
             except Exception as e:
-                print(f"! Failed to play sound {sound_name}: {e}")
-        else:
-            print(f"! Sound not found: {sound_name}")
-                
-    def set_volume(self, volume: float):
-        """Set volume for all sounds (0.0 to 1.0)."""
-        if not self.enabled:
-            return
-            
-        self.volume = max(0.0, min(1.0, volume))
-        for sound in self.sounds.values():
-            sound.set_volume(self.volume)
-            
-    def stop_all(self):
-        """Stop all currently playing sounds."""
-        if not self.enabled:
-            return
-            
-        try:
-            pygame.mixer.stop()
-        except Exception as e:
-            print(f"Failed to stop sounds: {e}")
-            
-    def get_debug_info(self):
-        """Get debug information about the sound system."""
-        info = {
-            "Enabled": self.enabled,
-            "Volume": self.volume,
-            "Mixer Initialized": pygame.mixer.get_init() is not None,
-            "Loaded Sounds": list(self.sounds.keys()),
-            "Available Channels": pygame.mixer.get_num_channels() if self.enabled else 0
-        }
-        return info
-
-    def play_menu_music(self):
-        """Start playing menu background music with smooth looping."""
-        if not self.enabled or 'menu_music' not in self.sounds:
-            return
-            
-        try:
-            print("\nStarting menu music")
-            # Set volume before playing to avoid initial volume spike
-            self.music_channel.set_volume(self.volume * 8.0)  # Keep the 8x volume boost
-            # Start playing with infinite loops (-1)
-            self.music_channel.play(self.sounds['menu_music'], loops=-1, fade_ms=100)
-        except Exception as e:
-            print(f"! Failed to play menu music: {e}")
-            
-    def stop_menu_music(self):
-        """Stop menu background music with fade out."""
-        if not self.enabled:
-            return
-            
-        try:
-            print("\nStopping menu music")
-            self.music_channel.fadeout(1000)  # 1 second fade out
-        except Exception as e:
-            print(f"! Failed to stop menu music: {e}")
-            
-    def play_engine_idle(self):
-        """Start playing engine idle sound."""
-        if not self.enabled or 'engine_idle' not in self.sounds:
-            return
-            
-        try:
-            print("\nStarting engine sound")
-            self.engine_channel.play(self.sounds['engine_idle'], loops=-1)
-            self.engine_channel.set_volume(self.volume * 0.7)
-        except Exception as e:
-            print(f"! Failed to play engine sound: {e}")
-            
+                print(f"! Error loading sound {name}: {e}")
+                self.sounds[name] = self.create_placeholder_sound(440)
+        
+        print("\nDebug info:")
+        print(f"- Enabled: {self.enabled}")
+        print(f"- Volume: {self.volume}")
+        print(f"- Mixer Initialized: {bool(pygame.mixer.get_init())}")
+        print(f"- Loaded Sounds: {list(self.sounds.keys())}")
+        print(f"- Available Channels: {pygame.mixer.get_num_channels()}")
+    
+    def create_placeholder_sound(self, frequency):
+        """Create a simple placeholder sound."""
+        sample_rate = 44100
+        duration = 1.0  # seconds
+        
+        # Generate a simple sine wave
+        samples = []
+        for i in range(int(duration * sample_rate)):
+            sample = int(32767.0 * math.sin(2.0 * math.pi * frequency * i / sample_rate))
+            samples.append(sample)
+        
+        # Convert to bytes
+        sample_array = array.array('h', samples)
+        return pygame.mixer.Sound(sample_array)
+    
     def update_engine_sound(self, current_rpm: float, max_rpm: float):
         """Update engine sound based on RPM."""
-        if not self.enabled or not self.engine_channel:
+        if not self.enabled:
+            return
+        
+        rpm_fraction = current_rpm / max_rpm
+        
+        # Calculate volumes for each engine sound layer
+        vol_low = max(0.0, 1.0 - (rpm_fraction * 2.0))
+        vol_mid = max(0.0, 1.0 - abs(rpm_fraction * 2.0 - 1.0))
+        vol_high = max(0.0, (rpm_fraction * 2.0 - 1.0))
+        
+        # Scale by master volume
+        vol_low *= self.volume
+        vol_mid *= self.volume
+        vol_high *= self.volume
+        
+        # Start playing if not already
+        if not self.engine_low_channel.get_busy():
+            self.engine_low_channel.play(self.sounds["engine_low"], loops=-1)
+        if not self.engine_mid_channel.get_busy():
+            self.engine_mid_channel.play(self.sounds["engine_mid"], loops=-1)
+        if not self.engine_high_channel.get_busy():
+            self.engine_high_channel.play(self.sounds["engine_high"], loops=-1)
+        
+        # Set volumes
+        self.engine_low_channel.set_volume(vol_low)
+        self.engine_mid_channel.set_volume(vol_mid)
+        self.engine_high_channel.set_volume(vol_high)
+    
+    def play_sound(self, sound_name):
+        """Play a sound effect."""
+        if not self.enabled or sound_name not in self.sounds:
             return
             
-        try:
-            # Calculate volume and pitch based on RPM
-            rpm_factor = current_rpm / max_rpm
-            volume = self.volume * (0.7 + (rpm_factor * 0.3))  # 70-100% volume
-            self.engine_channel.set_volume(volume)
-            
-            # Note: Pygame's mixer doesn't support real-time pitch shifting
-            # We could pre-load different pitch variants if needed
-        except Exception as e:
-            print(f"! Failed to update engine sound: {e}")
-            
-    def stop_engine_sound(self):
-        """Stop engine sound."""
+        print(f"\nPlaying sound: {sound_name}")
+        print(f"- Mixer busy: {pygame.mixer.get_busy()}")
+        print(f"- Available channels: {pygame.mixer.get_num_channels()}")
+        
+        channel = pygame.mixer.find_channel()
+        if channel:
+            channel.set_volume(self.volume)
+            channel.play(self.sounds[sound_name])
+            print(f"Playing {sound_name} on channel {channel}")
+        else:
+            print("No available channel to play sound")
+    
+    def play_engine_start(self):
+        """Play the engine start sound."""
+        print("\nStarting engine sound")
+        if self.enabled and 'engine_start' in self.sounds:
+            channel = pygame.mixer.find_channel()
+            if channel:
+                channel.set_volume(self.volume)
+                channel.play(self.sounds['engine_start'])
+    
+    def play_engine_idle(self):
+        """Play the engine idle sound."""
+        if self.enabled and 'engine_idle' in self.sounds:
+            self.engine_low_channel.play(self.sounds['engine_idle'], loops=-1)
+    
+    def play_engine_rev(self, rpm):
+        """Play engine rev sound based on RPM."""
         if not self.enabled:
             return
             
-        try:
-            print("\nStopping engine sound")
-            self.engine_channel.fadeout(500)  # 0.5 second fade out
-        except Exception as e:
-            print(f"! Failed to stop engine sound: {e}")
+        # Use RPM to determine which sound to play
+        if rpm < 1000:
+            sound = self.sounds['engine_low']
+        elif rpm < 2000:
+            sound = self.sounds['engine_mid']
+        else:
+            sound = self.sounds['engine_high']
+            
+        channel = pygame.mixer.find_channel()
+        if channel:
+            channel.set_volume(self.volume)
+            channel.play(sound)
+            print(f"Playing engine rev at {rpm} RPM")
+    
+    def play_gear_shift(self):
+        """Play gear shift sound."""
+        self.play_sound('gear_shift')
+    
+    def play_brake(self):
+        """Play brake sound."""
+        self.play_sound('brake')
+    
+    def play_tire_screech(self):
+        """Play tire screech sound."""
+        self.play_sound('tire_screech')
+    
+    def play_collision(self):
+        """Play collision sound."""
+        self.play_sound('collision')
+    
+    def play_rain_light(self):
+        """Play light rain sound."""
+        self.play_sound('rain_light')
+    
+    def play_rain_heavy(self):
+        """Play heavy rain sound."""
+        self.play_sound('rain_heavy')
+    
+    def play_thunder(self):
+        """Play thunder sound."""
+        self.play_sound('thunder')
+    
+    def play_wind(self):
+        """Play wind sound."""
+        self.play_sound('wind')
+    
+    def play_menu_music(self):
+        """Play menu music."""
+        print("\nStarting menu music")
+        if self.enabled and 'menu_music' in self.sounds:
+            pygame.mixer.music.load(os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 'assets', 'sounds', 'music', 'menu.ogg'))
+            pygame.mixer.music.set_volume(self.volume)
+            pygame.mixer.music.play(-1)
+    
+    def stop_menu_music(self):
+        """Stop menu music."""
+        print("\nStopping menu music")
+        pygame.mixer.music.stop()
+    
+    def stop_all(self):
+        """Stop all sounds."""
+        pygame.mixer.stop()
+        pygame.mixer.music.stop()
+    
+    def get_debug_info(self):
+        """Get debug information about sound system state."""
+        return {
+            'enabled': self.enabled,
+            'volume': self.volume,
+            'mixer_initialized': bool(pygame.mixer.get_init()),
+            'loaded_sounds': list(self.sounds.keys()),
+            'available_channels': pygame.mixer.get_num_channels()
+        }

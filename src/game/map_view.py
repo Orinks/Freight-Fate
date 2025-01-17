@@ -1,6 +1,9 @@
 import pygame
 from typing import Dict, List, Optional
+<<<<<<< HEAD
 from .ui_elements import Button, TextBox, ScrollableList
+=======
+>>>>>>> main
 
 class MapView:
     def __init__(self, screen, tts_engine, cities_data: Dict):
@@ -17,7 +20,12 @@ class MapView:
         
         # State
         self.selected_city_index = 0
+<<<<<<< HEAD
         self.cities = [city['name'] for city in cities_data['cities']]
+=======
+        # Convert cities dictionary to list
+        self.cities = list(cities_data['cities'].keys())
+>>>>>>> main
         
         # Initialize with TTS announcement
         if self.tts_engine:
@@ -63,6 +71,7 @@ class MapView:
         """Announce the currently selected city."""
         if self.cities:
             city = self.cities[self.selected_city_index]
+<<<<<<< HEAD
             city_data = next((c for c in self.cities_data['cities'] if c['name'] == city), None)
             locations = len(city_data['locations']) if city_data else 0
             self.tts_engine.output(f"{city}. {locations} job locations available.")
@@ -78,6 +87,13 @@ class MapView:
         if self.cities:
             self.selected_city_index = (self.selected_city_index + 1) % len(self.cities)
             self.announce_current_city()
+=======
+            city_data = self.cities_data['cities'].get(city, {})
+            job_locations = len(city_data.get('job_locations', {}).get('truck_stops', [])) if city_data else 0
+            job_locations += len(city_data.get('job_locations', {}).get('freight_terminals', [])) if city_data else 0
+            job_locations += len(city_data.get('job_locations', {}).get('distribution_centers', [])) if city_data else 0
+            self.tts_engine.output(f"{city}. {job_locations} job locations available.")
+>>>>>>> main
             
     def announce_help(self):
         """Announce help information."""
@@ -105,9 +121,18 @@ class MapView:
             color = self.YELLOW if i == self.selected_city_index else self.WHITE
             prefix = "→ " if i == self.selected_city_index else "  "
             
+<<<<<<< HEAD
             city_data = next((c for c in self.cities_data['cities'] if c['name'] == city), None)
             locations = len(city_data['locations']) if city_data else 0
             text = f"{prefix}{city} ({locations} locations)"
+=======
+            city_data = self.cities_data['cities'].get(city, {})
+            job_locations = len(city_data.get('job_locations', {}).get('truck_stops', [])) if city_data else 0
+            job_locations += len(city_data.get('job_locations', {}).get('freight_terminals', [])) if city_data else 0
+            job_locations += len(city_data.get('job_locations', {}).get('distribution_centers', [])) if city_data else 0
+            
+            text = f"{prefix}{city} ({job_locations} locations)"
+>>>>>>> main
             
             text_surface = self.font.render(text, True, color)
             text_rect = text_surface.get_rect(left=50, top=y_position)
@@ -129,3 +154,7 @@ class MapView:
             y_position += 30
             
         pygame.display.flip()
+<<<<<<< HEAD
+=======
+
+>>>>>>> main

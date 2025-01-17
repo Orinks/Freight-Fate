@@ -224,7 +224,7 @@ class WeatherForecastUI:
         return False
     
     def get_accessibility_text(self) -> str:
-        """Get screen reader friendly weather description."""
+        """Get speech engine friendly weather description."""
         current = self.weather_manager.weather_system.current_condition
         warning = self.get_weather_warning(current)
         
