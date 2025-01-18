@@ -8,8 +8,25 @@ from ..tutorial_objectives import TutorialManager
 from ..pause_menu import PauseMenu
 
 class DrivingState:
+<<<<<<< HEAD
+    def __init__(self, screen, tts_engine, location_data, sound_manager, cities_data=None):
+        """Initialize the driving state.
+        
+        Args:
+            screen: Pygame display surface
+            tts_engine: Text-to-speech engine
+            location_data: Dictionary containing city and location information
+            sound_manager: Sound manager instance
+            cities_data: Dictionary containing all cities and their locations
+        """
+        self.tutorial_manager = None  # Will be set by FreightFate
+        self.cities_data = cities_data
+        print(f"Tutorial manager initialized: {self.tutorial_manager is not None}")
+        print("\nDrivingState initialized. Tutorial manager will be set later.")
+=======
     def __init__(self, screen, tts_engine, sound_manager, settings, start_city, start_location):
         """Initialize the driving state."""
+>>>>>>> main
         self.screen = screen
         self.tts_engine = tts_engine
         self.sound_manager = sound_manager
@@ -63,6 +80,9 @@ class DrivingState:
         
         # Game state
         self.paused = False
+<<<<<<< HEAD
+        self.map_view = None  # Will be initialized when needed
+=======
         self.pause_menu = PauseMenu(self.screen, self.tts_engine, self.sound_manager)
         
         # Add tutorial manager
@@ -121,6 +141,7 @@ class DrivingState:
                 pygame.Rect(700, 100, 200, 200),  # Storage facility
                 pygame.Rect(100, 700, 400, 200),  # Loading area
             ])
+>>>>>>> main
         
     def handle_input(self, event):
         """Handle input events."""
@@ -131,6 +152,14 @@ class DrivingState:
                     if self.tts_engine:
                         self.tts_engine.output("Game resumed")
                 else:
+<<<<<<< HEAD
+                    self.audio_hud.speak("Game resumed")
+            elif event.key == pygame.K_m:
+                if not self.map_view:
+                    from ..map_view import MapView
+                    self.map_view = MapView(self.screen, self.tts_engine, self.cities_data)
+                return None
+=======
                     self.paused = True
                     if self.tts_engine:
                         self.tts_engine.output("Game paused")
@@ -152,8 +181,13 @@ class DrivingState:
                 if self.tts_engine:
                     self.tts_engine.output("Game resumed")
             return result
+>>>>>>> main
                 
-        # Handle audio HUD input first
+        # Handle tutorial input first if tutorial is active
+        if self.tutorial_manager:
+            self.tutorial_manager.handle_event(event)
+                
+        # Handle audio HUD input next
         if self.audio_hud.handle_input(event):
             print("Audio HUD handled input")  # Debug output
             return None
@@ -218,6 +252,23 @@ class DrivingState:
         
     def render(self):
         """Render the current frame."""
+<<<<<<< HEAD
+        if self.map_view:
+            self.map_view.render()
+        else:
+            # Clear screen
+            self.screen.fill((100, 100, 100))  # Gray background for road
+            
+            # Draw HUD
+            self.hud.render()
+            
+            # Render tutorial if active
+            if self.tutorial_manager:
+                self.tutorial_manager.render()
+            
+            # Update display
+            pygame.display.flip()
+=======
         # Clear screen with sky color
         self.screen.fill((135, 206, 235))  # Sky blue
         
@@ -342,3 +393,4 @@ class DrivingState:
         ]
         for wx, wy in wheel_positions:
             pygame.draw.circle(self.screen, (0, 0, 0), (int(wx), int(wy)), wheel_radius)
+>>>>>>> main

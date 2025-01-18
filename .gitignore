@@ -4,6 +4,7 @@ __pycache__/
 *$py.class
 *.so
 .Python
+.pytest_cache/
 build/
 develop-eggs/
 dist/
@@ -40,3 +41,5 @@ desktop.ini
 *.log
 *.bak
 SRAL/
+nvdaControllerClient.dll
+sound_prompts.txt

@@ -111,16 +111,22 @@ class DrivingInputHandler:
         """Update continuous inputs."""
         keys = pygame.key.get_pressed()
         
-        # Throttle (W/S)
-        if keys[pygame.K_w]:
+        # Throttle (UP/DOWN)
+        if keys[pygame.K_UP]:
             self.throttle_input = min(1.0, self.throttle_input + dt * 2)
-        elif keys[pygame.K_s]:
+        elif keys[pygame.K_DOWN]:
+            self.brake_input = min(1.0, self.brake_input + dt * 2)
+        else:
             self.throttle_input = max(0.0, self.throttle_input - dt * 2)
+<<<<<<< HEAD
+            self.brake_input = max(0.0, self.brake_input - dt * 2)
+=======
         else:
             if self.throttle_input > 0:
                 self.throttle_input = max(0.0, self.throttle_input - dt * 2)
             else:
                 self.throttle_input = min(0.0, self.throttle_input + dt * 2)
+>>>>>>> main
         
         # Steering (A/D)
         if keys[pygame.K_a]:

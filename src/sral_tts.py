@@ -4,6 +4,7 @@ from typing import Optional
 from sral_wrapper import SRALEngines
 
 class SRALEngine:
+
     """SRAL-based text-to-speech engine that implements the same interface as accessible_output3."""
     
     def __init__(self, speech_engine_mode="default"):
@@ -25,6 +26,17 @@ class SRALEngine:
         self.sral.SRAL_Uninitialize.argtypes = []
         self.sral.SRAL_Uninitialize.restype = None
         
+<<<<<<< HEAD
+        # SAPI voice functions
+        self.sral.SRAL_GetSapiVoices.argtypes = []
+        self.sral.SRAL_GetSapiVoices.restype = ctypes.c_char_p
+        
+        self.sral.SRAL_SetSapiVoice.argtypes = [ctypes.c_int]
+        self.sral.SRAL_SetSapiVoice.restype = ctypes.c_bool
+        
+        self.sral.SRAL_GetCurrentSapiVoice.argtypes = []
+        self.sral.SRAL_GetCurrentSapiVoice.restype = ctypes.c_int
+=======
         self.sral.SRAL_GetVoiceCount.argtypes = []
         self.sral.SRAL_GetVoiceCount.restype = ctypes.c_uint64
         
@@ -42,6 +54,7 @@ class SRALEngine:
         
         self.sral.SRAL_SetEngineParameter.argtypes = [ctypes.c_int, ctypes.c_int, ctypes.c_int]
         self.sral.SRAL_SetEngineParameter.restype = ctypes.c_bool
+>>>>>>> main
         
         self.speech_engine_mode = speech_engine_mode
         self._initialize()
@@ -62,6 +75,29 @@ class SRALEngine:
             self.speech_engine_mode = mode
             self._initialize()
     
+<<<<<<< HEAD
+    def get_sapi_voices(self) -> list[str]:
+        """Get list of available SAPI voices."""
+        if hasattr(self.sral, 'SRAL_GetSapiVoices'):
+            voices_str = self.sral.SRAL_GetSapiVoices()
+            if voices_str:
+                return voices_str.decode('utf-8').split('|')
+        return []
+    
+    def set_sapi_voice(self, index: int) -> bool:
+        """Set current SAPI voice by index."""
+        if hasattr(self.sral, 'SRAL_SetSapiVoice'):
+            return self.sral.SRAL_SetSapiVoice(index)
+        return False
+    
+    def get_current_sapi_voice(self) -> int:
+        """Get current SAPI voice index."""
+        if hasattr(self.sral, 'SRAL_GetCurrentSapiVoice'):
+            return self.sral.SRAL_GetCurrentSapiVoice()
+        return -1
+    
+=======
+>>>>>>> main
     def output(self, text: str, interrupt: bool = True) -> bool:
         """Output text through speech."""
         if not text:
