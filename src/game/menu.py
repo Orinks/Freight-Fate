@@ -62,8 +62,9 @@ class Menu:
             for city in self.cities_data['cities']:
                 for location in city['locations']:
                     locations.append(MenuItem(
-                        f"{location['name']} ({location['type']}) - {', '.join(location['cargo_types'])}",
+                        f"{city['name']} - {location['name']} ({location['type']}) - {', '.join(location['cargo_types'])}",
                         {
+                            'action': 'visit_location',
                             'city': city['name'],
                             'location': {
                                 'name': location['name'],
@@ -72,7 +73,7 @@ class Menu:
                             }
                         }
                     ))
-        
+
         return MenuSection('Select Starting Location', locations)
         
     def get_current_menu(self):
