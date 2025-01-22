@@ -3,77 +3,13 @@ import pygame
 from .menu import Menu, MenuItem, MenuSection
 
 class SettingsMenu(Menu):
-<<<<<<< HEAD
-    def __init__(self, screen, tts_engine, settings, on_tts_change=None):
-=======
     def __init__(self, screen, tts_engine, settings, sound_manager, on_tts_change=None):
->>>>>>> main
         """Initialize the settings menu.
         
         Args:
             screen: Pygame display surface
             tts_engine: Text-to-speech engine
             settings: Settings instance
-<<<<<<< HEAD
-            on_tts_change: Callback for when TTS settings change
-        """
-        super().__init__(screen, tts_engine)
-        self.settings = settings
-        self.on_tts_change = on_tts_change
-        self.available_voices = []
-        self.update_available_voices()
-        
-        # Menu items
-        self.states = {
-            'main': {
-                'items': [
-                    MenuItem('Unit System', 'toggle_units'),
-                    MenuItem('Speech Engine', 'toggle_speech_engine'),
-                    MenuItem('SAPI Voice', 'select_voice'),
-                    MenuItem('Back', 'back')
-                ],
-                'selected_index': 0,
-                'title': 'Settings'
-            }
-        }
-        self.current_state = 'main'
-        
-        # Colors
-        self.WHITE = (255, 255, 255)
-        self.YELLOW = (255, 255, 0)
-
-    def update_available_voices(self):
-        """Update list of available SAPI voices."""
-        if hasattr(self.tts_engine, 'get_sapi_voices'):
-            self.available_voices = self.tts_engine.get_sapi_voices()
-        
-    def cycle_sapi_voice(self):
-        """Cycle through available SAPI voices."""
-        if not self.available_voices or self.settings.speech_engine_mode != "sapi":
-            return
-            
-        next_index = (self.settings.sapi_voice_index + 1) % len(self.available_voices)
-        self.settings.set_sapi_voice(next_index)
-        self.settings.save_settings()
-        
-        if self.tts_engine:
-            self.tts_engine.set_sapi_voice(next_index)
-            # Announce the change
-            voice_name = self.available_voices[next_index]
-            self.tts_engine.output(f"Changed to voice: {voice_name}")
-
-    def toggle_speech_engine(self):
-        """Toggle between default and SAPI speech engines."""
-        self.settings.toggle_speech_engine_mode()
-        self.settings.save_settings()
-        if self.on_tts_change:
-            self.on_tts_change()
-        # Announce the change
-        current_engine = 'SAPI' if self.settings.speech_engine_mode == 'sapi' else 'Default'
-        if self.tts_engine:
-            self.tts_engine.output(f"Changed to {current_engine} speech engine")
-            
-=======
             sound_manager: Sound manager instance
             on_tts_change: Callback for when TTS engine is reinitialized
         """
@@ -106,7 +42,6 @@ class SettingsMenu(Menu):
         if self.tts_engine:
             self.tts_engine.output("Settings Menu. Use arrow keys to navigate options, Enter to adjust settings, Tab for help.")
 
->>>>>>> main
     def toggle_units(self):
         """Toggle between imperial and metric units."""
         if self.sound_manager:
@@ -135,11 +70,11 @@ class SettingsMenu(Menu):
                 self.on_tts_change(self.tts_engine)
             
             # Announce the change
-            current_mode = 'SAPI' if self.settings.speech_engine_mode == 'sapi' else 'Default'
+            current_mode = 'SAPI' if self.settings.speech_engine_mode == 'sapi' else 'Screen Reader'
             if current_mode == 'SAPI':
                 self.tts_engine.output(f"Speech engine changed to {current_mode}. Additional voice settings are now available.")
             else:
-                self.tts_engine.output(f"Speech engine changed to {current_mode}.")
+                self.tts_engine.output(f"Speech engine changed to {current_mode}. Using available screen readers.")
 
     def select_sapi_voice(self):
         """Select a SAPI voice from available voices."""
@@ -267,7 +202,7 @@ class SettingsMenu(Menu):
                         elif current_item.text == "Speech Volume":
                             self.tts_engine.output("Speech Volume - Adjust voice announcements volume")
                         elif current_item.text == "Speech Engine":
-                            current_mode = 'SAPI' if self.settings.speech_engine_mode == 'sapi' else 'Default'
+                            current_mode = 'SAPI' if self.settings.speech_engine_mode == 'sapi' else 'Screen Reader'
                             self.tts_engine.output(f"Speech Engine - Currently set to {current_mode}")
                         elif current_item.text == "SAPI Voice":
                             self.tts_engine.output(f"SAPI Voice - Select different voice for announcements")
@@ -304,7 +239,7 @@ class SettingsMenu(Menu):
                     help_text = (
                         "Settings Help: "
                         "Volume controls adjust different sound levels. "
-                        "Speech Engine toggles between Default and SAPI modes. "
+                        "Speech Engine toggles between Screen Reader and SAPI modes. "
                         "When SAPI is enabled, you can adjust voice, rate, and pitch. "
                         "Unit System switches between Imperial and Metric measurements. "
                         "All settings are saved automatically."
@@ -362,22 +297,6 @@ class SettingsMenu(Menu):
         visible_index = 0
         
         # Draw menu items
-<<<<<<< HEAD
-        start_y = 200
-        for i, item in enumerate(state['items']):
-            if item.text == 'Unit System':
-                text = f"Unit System: {'Imperial' if self.settings.use_imperial else 'Metric'}"
-            elif item.text == 'Speech Engine':
-                text = f"Speech Engine: {'SAPI' if self.settings.speech_engine_mode == 'sapi' else 'Default'}"
-            elif item.text == 'SAPI Voice':
-                if self.settings.speech_engine_mode == 'sapi' and self.available_voices:
-                    current_voice = self.available_voices[self.settings.sapi_voice_index]
-                    text = f"SAPI Voice: {current_voice}"
-                else:
-                    text = "SAPI Voice: Not Available"
-            else:
-                text = item.text
-=======
         y_position = 200
         for item in self.menu_items:
             if isinstance(item, MenuSection):
@@ -386,13 +305,12 @@ class SettingsMenu(Menu):
                 section_rect = section_title.get_rect(center=(self.screen.get_width() // 2, y_position))
                 self.screen.blit(section_title, section_rect)
                 y_position += 40
->>>>>>> main
                 
                 # Draw section items
                 for sub_item in item.items:
                     if sub_item.visible_when():
                         if sub_item.text == 'Speech Engine':
-                            text = f"Speech Engine: {'SAPI' if self.settings.speech_engine_mode == 'sapi' else 'Default'}"
+                            text = f"Speech Engine: {'SAPI' if self.settings.speech_engine_mode == 'sapi' else 'Screen Reader'}"
                         elif sub_item.text == 'Automatic Transmission':
                             text = f"Transmission: {'Automatic' if self.settings.auto_transmission else 'Manual'}"
                         else:
@@ -419,93 +337,6 @@ class SettingsMenu(Menu):
                     visible_index += 1
         
         pygame.display.flip()
-<<<<<<< HEAD
-        
-    def handle_input(self, event):
-        """Handle input events."""
-        if event.type == pygame.KEYDOWN:
-            state = self.states[self.current_state]
-            
-            if event.key == pygame.K_UP:
-                state['selected_index'] = (state['selected_index'] - 1) % len(state['items'])
-                self.announce_current_item()
-            elif event.key == pygame.K_DOWN:
-                state['selected_index'] = (state['selected_index'] + 1) % len(state['items'])
-                self.announce_current_item()
-            elif event.key in (pygame.K_RETURN, pygame.K_SPACE):
-                selected_item = state['items'][state['selected_index']]
-                if selected_item.action == 'toggle_units':
-                    self.toggle_units()
-                    self.announce_current_item()
-                elif selected_item.action == 'toggle_speech_engine':
-                    self.toggle_speech_engine()
-                    self.update_available_voices()  # Update voices when engine changes
-                    self.announce_current_item()
-                elif selected_item.action == 'select_voice':
-                    self.cycle_sapi_voice()
-                    self.announce_current_item()
-                elif selected_item.action == 'back':
-                    return 'back'
-            elif event.key == pygame.K_ESCAPE:
-                return 'back'
-        return None
-        
-=======
-
->>>>>>> main
-    def announce_current_item(self):
-        """Announce the current menu item via TTS."""
-        if not self.tts_engine:
-            return
-            
-<<<<<<< HEAD
-        state = self.states[self.current_state]
-        item = state['items'][state['selected_index']]
-        if item.text == 'Unit System':
-            current_system = 'Imperial' if self.settings.use_imperial else 'Metric'
-            self.tts_engine.output(f"Unit System: Currently set to {current_system}")
-        elif item.text == 'Speech Engine':
-            current_mode = 'SAPI' if self.settings.speech_engine_mode == 'sapi' else 'Default'
-            self.tts_engine.output(f"Speech Engine: Currently set to {current_mode}")
-        elif item.text == 'SAPI Voice':
-            if self.settings.speech_engine_mode == 'sapi' and self.available_voices:
-                current_voice = self.available_voices[self.settings.sapi_voice_index]
-                self.tts_engine.output(f"SAPI Voice: Currently set to {current_voice}")
-            else:
-                self.tts_engine.output("SAPI Voice: Not available. Switch to SAPI engine first.")
-        else:
-            self.tts_engine.output(item.text)
-=======
-        # Get list of visible items
-        visible_items = self.get_visible_items()
-        visible_index = 0
-        
-        for item in self.menu_items:
-            if isinstance(item, MenuSection):
-                for sub_item in item.items:
-                    if sub_item.visible_when():
-                        if visible_index == self.selected_index:
-                            if sub_item.text == 'Unit System':
-                                current_system = 'Imperial' if self.settings.use_imperial else 'Metric'
-                                self.tts_engine.output(f"Unit System: Currently set to {current_system}")
-                            elif sub_item.text == 'Speech Engine':
-                                current_mode = 'SAPI' if self.settings.speech_engine_mode == 'sapi' else 'Default'
-                                self.tts_engine.output(f"Speech Engine: Currently set to {current_mode}")
-                            else:
-                                self.tts_engine.output(sub_item.text)
-                        visible_index += 1
-            else:
-                if item.visible_when():
-                    if visible_index == self.selected_index:
-                        if item.text == 'Unit System':
-                            current_system = 'Imperial' if self.settings.use_imperial else 'Metric'
-                            self.tts_engine.output(f"Unit System: Currently set to {current_system}")
-                        elif item.text == 'Speech Engine':
-                            current_mode = 'SAPI' if self.settings.speech_engine_mode == 'sapi' else 'Default'
-                            self.tts_engine.output(f"Speech Engine: Currently set to {current_mode}")
-                        else:
-                            self.tts_engine.output(item.text)
-                    visible_index += 1
 
     def toggle_transmission(self):
         """Toggle automatic transmission setting."""
@@ -521,4 +352,3 @@ class SettingsMenu(Menu):
     # Colors
     WHITE = (255, 255, 255)
     YELLOW = (255, 255, 0)
->>>>>>> main

@@ -117,16 +117,13 @@ class DrivingInputHandler:
         elif keys[pygame.K_DOWN]:
             self.brake_input = min(1.0, self.brake_input + dt * 2)
         else:
-            self.throttle_input = max(0.0, self.throttle_input - dt * 2)
-<<<<<<< HEAD
-            self.brake_input = max(0.0, self.brake_input - dt * 2)
-=======
-        else:
+            # Smooth throttle decay
             if self.throttle_input > 0:
                 self.throttle_input = max(0.0, self.throttle_input - dt * 2)
             else:
                 self.throttle_input = min(0.0, self.throttle_input + dt * 2)
->>>>>>> main
+            # Smooth brake decay
+            self.brake_input = max(0.0, self.brake_input - dt * 2)
         
         # Steering (A/D)
         if keys[pygame.K_a]:

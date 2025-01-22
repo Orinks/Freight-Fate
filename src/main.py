@@ -58,12 +58,20 @@ class FreightFate:
 
         # Initialize TTS with the saved speech engine mode
         print("\n4. TTS Setup:")
+        self.speech_system_status = "active"  # Can be "active", "fallback", or "disabled"
         try:
+            print("- Attempting to initialize TTS with mode:", self.settings.speech_engine_mode)
             self.tts_engine = SRALEngine(speech_engine_mode=self.settings.speech_engine_mode)
-            print("- TTS engine initialized with mode:", self.settings.speech_engine_mode)
+            if self.tts_engine.speech_engine_mode != self.settings.speech_engine_mode:
+                print(f"- TTS initialized in fallback mode: {self.tts_engine.speech_engine_mode}")
+                self.speech_system_status = "fallback"
+            else:
+                print(f"- TTS successfully initialized with mode: {self.settings.speech_engine_mode}")
         except Exception as e:
-            print(f"Warning: Could not initialize TTS: {e}")
+            print(f"Critical: Could not initialize TTS: {e}")
+            print("- Speech system will be disabled")
             self.tts_engine = None
+            self.speech_system_status = "disabled"
 
         
         # Initialize sound manager
@@ -88,9 +96,21 @@ class FreightFate:
 
         # Game states
         self.states = {
-            'menu': Menu(self.screen, self.tts_engine, self.sound_manager, self.cities_data),
+            'menu': Menu(
+                self.screen,
+                self.tts_engine,
+                self.sound_manager,
+                self.cities_data,
+                self.speech_system_status
+            ),
             'driving': None,  # Will be initialized when needed
-            'settings': SettingsMenu(self.screen, self.tts_engine, self.settings, self.sound_manager, self.update_tts_engine),
+            'settings': SettingsMenu(
+                self.screen,
+                self.tts_engine,
+                self.settings,
+                self.sound_manager,
+                self.update_tts_engine
+            ),
             'location_selector': None,  # Will be initialized when needed
             'job_board': None,  # Will be initialized when needed
             'route_selection': None  # Will be initialized when needed
@@ -105,9 +125,19 @@ class FreightFate:
     def update_tts_engine(self, new_engine):
         """Update TTS engine across all game states when it changes."""
         self.tts_engine = new_engine
-        # Update TTS engine in all states that use it
+        
+        # Update speech system status
+        if new_engine is None:
+            self.speech_system_status = "disabled"
+        elif new_engine.speech_engine_mode != self.settings.speech_engine_mode:
+            self.speech_system_status = "fallback"
+        else:
+            self.speech_system_status = "active"
+            
+        # Update TTS engine and status in all states that use it
         if 'menu' in self.states:
             self.states['menu'].tts_engine = new_engine
+            self.states['menu'].speech_status = self.speech_system_status
         if 'driving' in self.states and self.states['driving']:
             self.states['driving'].tts_engine = new_engine
 
@@ -247,9 +277,11 @@ class FreightFate:
         # Stop menu music
         self.sound_manager.stop_menu_music()
         
-<<<<<<< HEAD
         # Initialize tutorial manager
-        player_data = {'visited_location_types': set(), 'current_city': location['city']}
+        player_data = {
+            'visited_location_types': set(),
+            'current_city': location_data['city']
+        }
         tutorial_manager = TutorialManager(self.screen, self.tts_engine, player_data)
         
         # Start tutorial messages
@@ -258,11 +290,6 @@ class FreightFate:
         print("Tutorial initialization complete")
         
         # Initialize driving state with selected location and tutorial
-        self.states['driving'] = DrivingState(self.screen, self.tts_engine, location, self.sound_manager, self.cities_data)
-        self.states['driving'].tutorial_manager = tutorial_manager
-=======
-        # Initialize driving state with selected location
-        # location_data contains both city and location info from menu selection
         self.states['driving'] = DrivingState(
             screen=self.screen,
             tts_engine=self.tts_engine,
@@ -271,7 +298,7 @@ class FreightFate:
             start_city=location_data['city'],
             start_location=location_data['location']
         )
->>>>>>> main
+        self.states['driving'].tutorial_manager = tutorial_manager
         self.current_state = 'driving'
 
 if __name__ == "__main__":

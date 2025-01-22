@@ -99,8 +99,7 @@ class TutorialManager:
         reward = None
         current_obj = self.objectives[self.current_objective_index]
         
-<<<<<<< HEAD
-        # Announce current objective when starting
+        # Handle start tutorial
         if objective_type == "start_tutorial":
             print("Tutorial: Initializing tutorial messages")
             self.current_messages = [
@@ -117,11 +116,10 @@ class TutorialManager:
             # Speak welcome immediately
             self.tts_engine.output(self.current_messages[0])
             self.message_index = 1  # Set up for next message
-        
-        if objective_type == "visit_location" and current_obj.title == "Find a Job Location":
-=======
+            return None
+
+        # Handle objective completions
         if objective_type == "controls_learned" and current_obj.title == "Basic Controls":
->>>>>>> main
             current_obj.completed = True
             reward = current_obj.reward
             self.advance_tutorial()
@@ -136,21 +134,6 @@ class TutorialManager:
             reward = current_obj.reward
             self.advance_tutorial()
             
-<<<<<<< HEAD
-        elif objective_type == "visit_all_types":
-            visited_types = set(self.player_data.get('visited_location_types', []))
-            if len(visited_types) >= 3 and current_obj.title == "Visit Different Location Types":
-                current_obj.completed = True
-                reward = current_obj.reward
-                self.advance_tutorial()
-            else:
-                # Progress update
-                remaining = 3 - len(visited_types)
-                if remaining > 0:
-                    self.tts_engine.output(f"Progress: Visit {remaining} more location types to complete this objective.")
-                
-        elif objective_type == "perfect_delivery" and current_obj.title == "Maintain Cargo Safety":
-=======
         elif objective_type == "reached_location" and current_obj.title == "Navigate to Job Location":
             current_obj.completed = True
             reward = current_obj.reward
@@ -177,7 +160,6 @@ class TutorialManager:
             self.advance_tutorial()
             
         elif objective_type == "delivery_complete" and current_obj.title == "Complete First Delivery":
->>>>>>> main
             current_obj.completed = True
             reward = current_obj.reward
             self.advance_tutorial()

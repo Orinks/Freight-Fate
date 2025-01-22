@@ -1,6 +1,6 @@
 {
     "use_imperial": true,
-    "screen_reader_mode": "default",
+    "screen_reader_mode": "screen_reader",
     "sapi_voice": "Microsoft David Desktop - English (United States)",
     "speech_rate": 50,
     "speech_pitch": 50,

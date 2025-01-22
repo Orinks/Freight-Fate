@@ -18,19 +18,24 @@ class MenuSection:
         return [item for item in self.items if item.visible_when()]
 
 class Menu:
-    def __init__(self, screen, tts_engine, sound_manager=None, cities_data=None):
+    def __init__(self, screen, tts_engine, sound_manager=None, cities_data=None, speech_status="active"):
         """Initialize the menu."""
         self.screen = screen
         self.tts_engine = tts_engine
         self.sound_manager = sound_manager
         self.cities_data = cities_data
+        self.speech_status = speech_status
         self.font = pygame.font.Font(None, 36)
+        self.small_font = pygame.font.Font(None, 24)
         
         # Colors
         self.WHITE = (255, 255, 255)
         self.BLACK = (0, 0, 0)
         self.YELLOW = (255, 255, 0)
         self.GRAY = (128, 128, 128)
+        self.RED = (255, 0, 0)
+        self.GREEN = (0, 255, 0)
+        self.ORANGE = (255, 165, 0)
         
         # Menu states
         self.states = {
@@ -229,6 +234,15 @@ class Menu:
                         )
                     self.tts_engine.output(help_text)
                     
+    def get_speech_status_info(self):
+        """Get the speech status text and color."""
+        if self.speech_status == "active":
+            return "Speech: Active", self.GREEN
+        elif self.speech_status == "fallback":
+            return "Speech: Fallback Mode", self.ORANGE
+        else:
+            return "Speech: Disabled", self.RED
+
     def render(self):
         """Render the current menu state."""
         self.screen.fill(self.BLACK)
@@ -238,6 +252,12 @@ class Menu:
         title = self.font.render(menu.title, True, self.WHITE)
         title_rect = title.get_rect(center=(self.screen.get_width() // 2, 50))
         self.screen.blit(title, title_rect)
+
+        # Draw speech status indicator
+        status_text, status_color = self.get_speech_status_info()
+        status_surface = self.small_font.render(status_text, True, status_color)
+        status_rect = status_surface.get_rect(topright=(self.screen.get_width() - 10, 10))
+        self.screen.blit(status_surface, status_rect)
         
         # Draw menu items
         if self.current_state == 'main':

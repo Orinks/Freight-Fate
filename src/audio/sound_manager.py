@@ -1,9 +1,7 @@
 import pygame
-import accessible_output2.outputs.auto
 
 class SoundManager:
     def __init__(self):
-        self.speech_engine = accessible_output2.outputs.auto.Auto()
         self.sounds = {}
         self._load_sounds()
 
@@ -24,7 +22,3 @@ class SoundManager:
         """Play a sound by name"""
         if sound_name in self.sounds:
             self.sounds[sound_name].play(-1 if loop else 0)
-
-    def speak(self, message):
-        """Use speech engine to speak a message"""
-        self.speech_engine.output(message)

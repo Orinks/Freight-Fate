@@ -4,15 +4,11 @@ import json
 class Settings:
     def __init__(self):
         self.use_imperial = True  # Default to imperial for US setting
-        self.speech_engine_mode = "default"  # Can be "default" or "sapi"
-<<<<<<< HEAD
-        self.sapi_voice_index = 0  # Default SAPI voice index
-=======
+        self.speech_engine_mode = "screen_reader"  # Can be "screen_reader" or "sapi"
         self.sapi_voice = None  # Name of selected SAPI voice
         self.speech_rate = 50   # Default normal speed
         self.speech_pitch = 50  # Default normal pitch
         self.auto_transmission = False  # Default to manual transmission
->>>>>>> main
         self.settings_file = self._get_settings_path()
         self.is_dirty = False
         self.load_settings()
@@ -36,15 +32,13 @@ class Settings:
                 with open(self.settings_file, 'r') as f:
                     data = json.load(f)
                     self.use_imperial = data.get('use_imperial', True)
-<<<<<<< HEAD
-                    self.speech_engine_mode = data.get('screen_reader_mode', "default")  # Keep old key for compatibility
-                    self.sapi_voice_index = data.get('sapi_voice_index', 0)
-                print(f"Settings loaded: Using {'imperial' if self.use_imperial else 'metric'} units")
-                print(f"Speech engine mode: {self.speech_engine_mode}")
-                print(f"SAPI voice index: {self.sapi_voice_index}")
-=======
-                    self.speech_engine_mode = data.get('screen_reader_mode', "default")  # Keep old key for backward compatibility
-                    self.sapi_voice = data.get('sapi_voice', None)
+                    self.speech_engine_mode = data.get('screen_reader_mode', "screen_reader")  # Keep old key for backward compatibility
+                    # Handle both old and new SAPI voice settings
+                    if 'sapi_voice_index' in data:
+                        # Convert old index-based setting to name-based
+                        self.sapi_voice = str(data['sapi_voice_index'])  # Store as string for compatibility
+                    else:
+                        self.sapi_voice = data.get('sapi_voice', None)
                     self.speech_rate = data.get('speech_rate', 50)
                     self.speech_pitch = data.get('speech_pitch', 50)
                     self.auto_transmission = data.get('auto_transmission', False)
@@ -55,7 +49,6 @@ class Settings:
                 print(f"Speech rate: {self.speech_rate}")
                 print(f"Speech pitch: {self.speech_pitch}")
                 print(f"Auto transmission: {self.auto_transmission}")
->>>>>>> main
         except Exception as e:
             print(f"Error loading settings: {e}")
         
@@ -64,16 +57,6 @@ class Settings:
         try:
             data = {
                 'use_imperial': self.use_imperial,
-<<<<<<< HEAD
-                'screen_reader_mode': self.speech_engine_mode,  # Keep old key for compatibility
-                'sapi_voice_index': self.sapi_voice_index
-            }
-            with open(self.settings_file, 'w') as f:
-                json.dump(data, f, indent=4)
-            print(f"Settings saved: Using {'imperial' if self.use_imperial else 'metric'} units")
-            print(f"Speech engine mode: {self.speech_engine_mode}")
-            print(f"SAPI voice index: {self.sapi_voice_index}")
-=======
                 'screen_reader_mode': self.speech_engine_mode,  # Keep old key for backward compatibility
                 'sapi_voice': self.sapi_voice,
                 'speech_rate': self.speech_rate,
@@ -89,7 +72,6 @@ class Settings:
             print(f"Speech rate: {self.speech_rate}")
             print(f"Speech pitch: {self.speech_pitch}")
             print(f"Auto transmission: {self.auto_transmission}")
->>>>>>> main
         except Exception as e:
             print(f"Error saving settings: {e}")
             
@@ -99,15 +81,14 @@ class Settings:
         self.is_dirty = True
         
     def toggle_speech_engine_mode(self):
-        """Toggle between default and SAPI speech engine modes."""
-        self.speech_engine_mode = "sapi" if self.speech_engine_mode == "default" else "default"
+        """Toggle between screen reader and SAPI speech engine modes."""
+        self.speech_engine_mode = "sapi" if self.speech_engine_mode == "screen_reader" else "screen_reader"
         self.is_dirty = True
         
-    def set_sapi_voice(self, index: int):
-        """Set the SAPI voice index."""
-        if self.sapi_voice_index != index:
-            self.sapi_voice_index = index
-            self.is_dirty = True
+    def toggle_transmission(self):
+        """Toggle between automatic and manual transmission."""
+        self.auto_transmission = not self.auto_transmission
+        self.is_dirty = True
             
     def get_speed_unit(self):
         """Get the current speed unit."""
@@ -159,17 +140,3 @@ class Settings:
         if include_unit:
             return f"{converted:.0f} {self.get_weight_unit()}"
         return f"{converted:.0f}"
-<<<<<<< HEAD
-
-=======
-        
-    def toggle_speech_engine_mode(self):
-        """Toggle between default and SAPI speech engine modes."""
-        self.speech_engine_mode = "sapi" if self.speech_engine_mode == "default" else "default"
-        self.is_dirty = True
-
-    def toggle_transmission(self):
-        """Toggle between automatic and manual transmission."""
-        self.auto_transmission = not self.auto_transmission
-        self.is_dirty = True
->>>>>>> main

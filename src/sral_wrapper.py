@@ -89,7 +89,6 @@ class SRALWrapper:
         """Get the current speech engine identifier."""
         return self.sral.SRAL_GetCurrentEngine()
     
-<<<<<<< HEAD
     def get_sapi_voices(self) -> list[str]:
         """Get list of available SAPI voices."""
         if self.get_current_engine() != SRALEngines.SAPI:
@@ -111,7 +110,6 @@ class SRALWrapper:
             return -1
         return self.sral.SRAL_GetCurrentSapiVoice()
 
-=======
     def set_rate(self, rate: int) -> bool:
         """Set the speech rate (0-100)."""
         return self.sral.SRAL_SetRate(ctypes.c_uint64(rate))
@@ -120,7 +118,6 @@ class SRALWrapper:
         """Get the current speech rate."""
         return self.sral.SRAL_GetRate()
     
->>>>>>> main
     def __del__(self):
         """Clean up SRAL when the wrapper is destroyed."""
         if hasattr(self, 'sral'):
