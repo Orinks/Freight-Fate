@@ -75,7 +75,16 @@ class DrivingState:
             'safe_driving_distance': 0.0,
             'total_distance': 0.0
         })
-        
+        # Ensure required keys exist even if TutorialManager/player_data changes elsewhere
+        pd = self.tutorial_manager.player_data
+        if isinstance(pd, dict):
+            pd.setdefault('visited_location_types', [])
+            pd.setdefault('distance_driven', 0.0)
+            pd.setdefault('accidents', 0)
+            pd.setdefault('violations', 0)
+            pd.setdefault('safe_driving_distance', 0.0)
+            pd.setdefault('total_distance', 0.0)
+
         # Tutorial state tracking
         self.controls_explained = False
         self.engine_started = False
@@ -146,6 +155,9 @@ class DrivingState:
             # Tutorial-specific input handling
             elif event.key == pygame.K_e and not self.engine_started:
                 self.engine_started = True
+                # Mark the truck engine as running for tutorial checks
+                if hasattr(self, 'truck') and self.truck:
+                    self.truck.engine_running = True
                 self.tutorial_manager.update_objective("engine_started")
             elif event.key == pygame.K_h:
                 current_obj = self.tutorial_manager.objectives[self.tutorial_manager.current_objective_index]
@@ -277,9 +289,11 @@ class DrivingState:
                 if not self.last_accident_pos or (self.truck.position - self.last_accident_pos) >= 1609:
                     self.tutorial_manager.update_objective("safe_mile")
         
-        # Update distance driven
-        self.tutorial_manager.player_data['distance_driven'] += abs(self.truck.speed * dt)
-        
+        # Update distance driven (robust to missing key)
+        pd = self.tutorial_manager.player_data
+        if isinstance(pd, dict):
+            pd['distance_driven'] = pd.get('distance_driven', 0.0) + abs(self.truck.speed * dt)
+
     def handle_collision(self):
         """Handle collision events."""
         if 'accidents' not in self.tutorial_manager.player_data:

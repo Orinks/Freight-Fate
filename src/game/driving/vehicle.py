@@ -41,7 +41,10 @@ class TruckPhysics:
         self.brake_temperature = 20.0  # Celsius
         self.fuel_level = 100.0  # percentage
         self.tire_wear = [100.0] * 18  # percentage for each tire (typical 18-wheeler)
-        
+
+        # Engine running state for tutorial and game logic
+        self.engine_running = False
+
         # Warning states
         self.warnings = {
             'engine_temp': False,
@@ -53,7 +56,10 @@ class TruckPhysics:
         # Previous state for detecting changes
         self.prev_throttle = 0.0
         self.prev_rpm = specs.engine.rpm_range[0]
-        
+
+        # Movement tracking for tutorial
+        self.has_moved = False
+
         # Collision detection
         self.collision_box = pygame.Rect(0, 0, 50, 30)  # Truck hitbox
         self.last_collision_time = 0
@@ -226,21 +232,24 @@ class TruckPhysics:
         self.velocity = max(0.0, self.velocity + self.acceleration * dt)
         
         # Update position
+        prev_position = self.position
         self.position += self.velocity * dt
-        
+        if not self.has_moved and abs(self.position - prev_position) > 0.01:
+            self.has_moved = True
+
         # Update engine RPM based on speed and gear ratio
         if self.current_gear > 0:  # Not in neutral
             wheel_rpm = self.velocity / (2 * math.pi * self.specs.wheel_radius) * 60
-            self.engine_rpm = wheel_rpm * self.specs.engine.gear_ratios[self.current_gear - 1]
+            self.engine_rpm = int(wheel_rpm * self.specs.engine.gear_ratios[self.current_gear - 1])
             # Clamp RPM to valid range
-            self.engine_rpm = max(self.specs.engine.rpm_range[0],
-                                min(self.specs.engine.rpm_range[1], self.engine_rpm))
+            self.engine_rpm = int(max(self.specs.engine.rpm_range[0],
+                                min(self.specs.engine.rpm_range[1], self.engine_rpm)))
         else:
             # In neutral, engine runs at idle plus some based on throttle
             idle_rpm = self.specs.engine.rpm_range[0]
             max_rpm = self.specs.engine.rpm_range[1]
-            self.engine_rpm = idle_rpm + (max_rpm - idle_rpm) * self.throttle
-        
+            self.engine_rpm = int(idle_rpm + (max_rpm - idle_rpm) * self.throttle)
+
         # Update vehicle systems
         self.update_temperatures(dt)
         self.update_fuel(dt)
