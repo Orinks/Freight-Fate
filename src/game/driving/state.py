@@ -66,12 +66,14 @@ class DrivingState:
         # Initialize map view
         self.map_view = None  # Will be initialized when needed
         
-        # Add tutorial manager
+        # Add tutorial manager with all required fields initialized
         self.tutorial_manager = TutorialManager(screen, tts_engine, {
             'visited_location_types': [],
             'distance_driven': 0.0,
             'accidents': 0,
-            'violations': 0
+            'violations': 0,
+            'safe_driving_distance': 0.0,
+            'total_distance': 0.0
         })
         
         # Tutorial state tracking
@@ -251,23 +253,25 @@ class DrivingState:
             pygame.display.flip()
         
     def _update_tutorial_objectives(self, dt):
-        """Track and update tutorial objectives."""
-        if not self.tutorial_manager.show_tutorial:
-            return
+        """Update tutorial objectives based on player actions."""
+        # Update tutorial objectives based on player actions
+        if not self.controls_explained and self.input_handler.any_control_used:
+            self.controls_explained = True
+            self.tutorial_manager.update_objective("controls_learned")
             
-        current_obj = self.tutorial_manager.objectives[self.tutorial_manager.current_objective_index]
-        
-        # Track practice driving completion
-        if current_obj.title == "Practice Driving" and not self.practice_complete:
-            if self.truck.speed > 5.0 and self.input_handler.brake_input > 0.5:
-                self.practice_complete = True
-                self.tutorial_manager.update_objective("practice_complete")
-        
-        # Track safe driving progress
-        if current_obj.title == "Safe Driving":
-            if self.safe_driving_start_pos is None:
-                self.safe_driving_start_pos = self.truck.position
+        if not self.engine_started and self.truck.engine_running:
+            self.engine_started = True
+            self.tutorial_manager.update_objective("engine_started")
             
+        if not self.practice_complete and self.truck.has_moved and self.truck.speed < 0.1:
+            self.practice_complete = True
+            self.tutorial_manager.update_objective("practice_complete")
+            
+        # Track safe driving
+        if self.safe_driving_start_pos is None and self.truck.speed > 5.0:
+            self.safe_driving_start_pos = self.truck.position
+        
+        if self.safe_driving_start_pos is not None:
             distance_driven = abs(self.truck.position - self.safe_driving_start_pos)
             if distance_driven >= 1609:  # 1 mile in meters
                 if not self.last_accident_pos or (self.truck.position - self.last_accident_pos) >= 1609:
@@ -278,6 +282,8 @@ class DrivingState:
         
     def handle_collision(self):
         """Handle collision events."""
+        if 'accidents' not in self.tutorial_manager.player_data:
+            self.tutorial_manager.player_data['accidents'] = 0
         self.tutorial_manager.player_data['accidents'] += 1
         self.last_accident_pos = self.truck.position
         if self.tts_engine:
@@ -285,10 +291,12 @@ class DrivingState:
             
     def handle_traffic_violation(self):
         """Handle traffic violation events."""
+        if 'violations' not in self.tutorial_manager.player_data:
+            self.tutorial_manager.player_data['violations'] = 0
         self.tutorial_manager.player_data['violations'] += 1
         if self.tts_engine:
-            self.tts_engine.output("Traffic violation detected! Follow the rules of the road.")
-
+            self.tts_engine.output("Traffic violation detected! Follow traffic rules.")
+            
     def render_environment(self):
         """Draw the environment, buildings, and roads relative to camera."""
         # Draw ground

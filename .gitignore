@@ -43,3 +43,6 @@ desktop.ini
 SRAL/
 nvdaControllerClient.dll
 sound_prompts.txt
+# Do not commit local SRAL repo or binaries
+sral/
+src/SRAL.dll

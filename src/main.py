@@ -1,7 +1,7 @@
 import os
 import json
 import pygame
-from sral_tts import SRALEngine
+from sral_wrapper import SRALEngines, SRALEngine
 from game.menu import Menu
 from game.route_selector import RouteSelector
 from game.job_board import JobBoard
