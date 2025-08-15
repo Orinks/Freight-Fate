@@ -165,3 +165,14 @@ class DrivingInputHandler:
             'steering': self.steering,
             'shift_keys': list(self.shift_keys_held)
         }
+
+    @property
+    def any_control_used(self) -> bool:
+        """True if the player has used any control input (throttle, brake, clutch, steering, or gear)."""
+        return (
+            (self.throttle_input or 0.0) > 0.0
+            or (self.brake_input or 0.0) > 0.0
+            or (self.clutch_input or 0.0) > 0.0
+            or abs(self.steering or 0.0) > 0.0
+            or bool(self.shift_keys_held)
+        )
