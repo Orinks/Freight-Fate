@@ -16,14 +16,14 @@ class DrivingState:
         self.settings = settings
         self.city = start_city
         self.location = start_location
-        
+
         # Obstacle tracking
         self.obstacles = []
-        
+
         # Announce starting location
         if self.tts_engine:
             self.tts_engine.output(f"Starting at {self.location['name']} in {self.city}")
-        
+
         # Initialize truck components
         engine = EngineDef(
             max_hp=800.0,
@@ -44,28 +44,28 @@ class DrivingState:
         self.truck.sound_manager = self.sound_manager  # Give truck access to sound manager
         self.transmission = Transmission(gear_ratios=engine.gear_ratios)
         self.transmission.sound_manager = self.sound_manager  # Give transmission access to sound manager
-        
+
         # Initialize HUD components with settings
         self.hud = DrivingHUD(self.screen, self.truck, self.transmission, self.settings)
         self.audio_hud = AudioHUD(self.tts_engine, self.truck, self.transmission, self.settings)
         self.audio_hud.speak(f"Starting at {self.location['name']} in {self.city}")
-        
+
         # Initialize input handler
         self.input_handler = DrivingInputHandler(self.truck, self.transmission)
         self.input_handler.truck = self.truck  # Give input handler access to truck for sound effects
         self.input_handler.set_settings(self.settings)
-        
+
         # Start engine sounds
         self.sound_manager.play_engine_start()
         self.sound_manager.play_engine_idle()
-        
+
         # Game state
         self.paused = False
         self.pause_menu = PauseMenu(self.screen, self.tts_engine, self.sound_manager)
-        
+
         # Initialize map view
         self.map_view = None  # Will be initialized when needed
-        
+
         # Add tutorial manager with all required fields initialized
         self.tutorial_manager = TutorialManager(screen, tts_engine, {
             'visited_location_types': [],
@@ -91,7 +91,12 @@ class DrivingState:
         self.practice_complete = False
         self.safe_driving_start_pos = None
         self.last_accident_pos = None
-        
+
+        # Track tutorial progress pacing
+        self._objective_idle_time = 0.0
+        self._hint_given_for_objective = False
+        self._last_objective_index = self.tutorial_manager.current_objective_index
+
         # Do not auto-complete any tutorial objective here; the tutorial introduction should run first.
 
         # Camera and environment setup
@@ -99,20 +104,20 @@ class DrivingState:
         self.camera_y = 0
         self.environment_width = 2000
         self.environment_height = 1000
-        
+
         # Define environment elements based on location type
         self.buildings = []
         self.roads = []
         self.setup_environment()
         self.update_obstacles()
-        
+
     def setup_environment(self):
         """Setup the environment based on location type."""
         location_type = self.location['type'].lower()
-        
+
         # Base road
         self.roads.append(pygame.Rect(0, 400, self.environment_width, 200))
-        
+
         # Add buildings based on location type
         if 'warehouse' in location_type:
             self.buildings.extend([
@@ -132,7 +137,7 @@ class DrivingState:
                 pygame.Rect(700, 100, 200, 200),  # Storage facility
                 pygame.Rect(100, 700, 400, 200),  # Loading area
             ])
-        
+
     def handle_input(self, event):
         """Handle input events."""
         if event.type == pygame.KEYDOWN:
@@ -171,20 +176,20 @@ class DrivingState:
                 if self.tts_engine:
                     self.tts_engine.output("Game resumed")
             return result
-                
+
         # Handle tutorial input first if tutorial is active
         if self.tutorial_manager:
             self.tutorial_manager.handle_event(event)
-                
+
         # Handle audio HUD input next
         if self.audio_hud.handle_input(event):
             print("Audio HUD handled input")  # Debug output
             return None
-                
+
         if not self.paused:
             # Handle driving input
             self.input_handler.handle_event(event)
-        
+
         return None
 
     def update_obstacles(self):
@@ -193,51 +198,54 @@ class DrivingState:
         # Add buildings as obstacles
         for building in self.buildings:
             self.obstacles.append(building)
-            
+
     def update(self, dt):
         """Update game state."""
         if not self.paused:
             # Update input handler first
             self.input_handler.update(dt)
-            
+
+            # Track tutorial pacing and provide timed hints
+            self._update_tutorial_pacing(dt)
+
             # Tutorial objective tracking
             self._update_tutorial_objectives(dt)
-            
+
             # Transfer input handler state to truck
             self.truck.throttle = self.input_handler.throttle_input
             self.truck.brake = self.input_handler.brake_input
             self.truck.clutch = self.input_handler.clutch_input
-            
+
             # Debug input state
             print(f"\rInput state - Throttle: {self.input_handler.throttle_input:.2f} | "
                   f"Brake: {self.input_handler.brake_input:.2f} | "
                   f"Clutch: {self.input_handler.clutch_input:.2f}", end='')
-            
+
             # Update vehicle physics with obstacles
             self.truck.update(dt, self.obstacles)
-            
+
             # Check if collision occurred and handle it
             if self.truck.check_collision(self.obstacles):
                 self.handle_collision()
-            
+
             # Update transmission with clutch state
             self.transmission.update(dt, self.input_handler.clutch_input)
-            
+
             # Update audio feedback
             self.audio_hud.update(dt)
-            
+
             # Update engine sound based on RPM
             self.sound_manager.update_engine_sound(self.truck.engine_rpm, self.truck.specs.engine.rpm_range[1])
-            
+
             # Update camera to follow truck
             self.camera_x = self.truck.position - (self.screen.get_width() / 2)
             self.camera_y = 0  # Keep vertical position fixed for side view
-            
+
             # Debug output
             print(f"\rSpeed: {self.truck.speed:.1f} km/h | "
                   f"Throttle: {self.truck.throttle:.2f} | "
                   f"Position: {self.truck.position:.1f}m", end='')
-        
+
     def render(self):
         """Render the current frame."""
         if self.map_view:
@@ -245,49 +253,82 @@ class DrivingState:
         else:
             # Clear screen with sky color
             self.screen.fill((135, 206, 235))  # Sky blue
-            
+
             # Draw environment
             self.render_environment()
-            
+
             # Draw HUD
             self.hud.render()
-            
+
             # Draw pause menu if paused
             if self.paused:
                 self.pause_menu.render()
-            
+
             # Render tutorial if active
             if self.tutorial_manager:
                 self.tutorial_manager.render()
-            
+
             # Update display
             pygame.display.flip()
-        
+
+    def _update_tutorial_pacing(self, dt: float):
+        """Keep the player oriented: give one gentle hint if idle too long on an objective."""
+        tm = self.tutorial_manager
+        if not tm or not tm.show_tutorial:
+            return
+        # Reset pacing on objective change
+        if tm.current_objective_index != self._last_objective_index:
+            self._last_objective_index = tm.current_objective_index
+            self._objective_idle_time = 0.0
+            self._hint_given_for_objective = False
+            return
+        # Accumulate idle time
+        self._objective_idle_time += dt
+        # After 20s of inactivity, offer one hint depending on objective
+        if not self._hint_given_for_objective and self._objective_idle_time >= 20.0:
+            title = tm.objectives[tm.current_objective_index].title
+            if title == "Basic Controls":
+                if self.tts_engine:
+                    self.tts_engine.output("Hint: Use arrow keys to drive. Up for throttle, down for brake. Press H for help.")
+            elif title == "Start Your Engine":
+                if self.tts_engine:
+                    self.tts_engine.output("Hint: Press E to start your engine.")
+            elif title == "Practice Driving":
+                if self.tts_engine:
+                    self.tts_engine.output("Hint: Gently press Up to move, then Down to stop.")
+            self._hint_given_for_objective = True
+
     def _update_tutorial_objectives(self, dt):
         """Update tutorial objectives based on player actions."""
         # Update tutorial objectives based on player actions
         if not self.controls_explained and self.input_handler.any_control_used:
             self.controls_explained = True
+            # Confirm to the player and complete the objective
+            if self.tts_engine:
+                self.tts_engine.output("Great! You've tried the basic controls.")
             self.tutorial_manager.update_objective("controls_learned")
-            
+            # Reset pacing for next objective
+            self._objective_idle_time = 0.0
+            self._hint_given_for_objective = False
+
         if not self.engine_started and self.truck.engine_running:
             self.engine_started = True
             self.tutorial_manager.update_objective("engine_started")
-            
+
         if not self.practice_complete and self.truck.has_moved and self.truck.speed < 0.1:
             self.practice_complete = True
             self.tutorial_manager.update_objective("practice_complete")
-            
+
         # Track safe driving
         if self.safe_driving_start_pos is None and self.truck.speed > 5.0:
             self.safe_driving_start_pos = self.truck.position
-        
+
         if self.safe_driving_start_pos is not None:
             distance_driven = abs(self.truck.position - self.safe_driving_start_pos)
             if distance_driven >= 1609:  # 1 mile in meters
                 if not self.last_accident_pos or (self.truck.position - self.last_accident_pos) >= 1609:
                     self.tutorial_manager.update_objective("safe_mile")
-        
+
         # Update distance driven (robust to missing key)
         pd = self.tutorial_manager.player_data
         if isinstance(pd, dict):
@@ -301,7 +342,7 @@ class DrivingState:
         self.last_accident_pos = self.truck.position
         if self.tts_engine:
             self.tts_engine.output("Collision detected! Drive more carefully.")
-            
+
     def handle_traffic_violation(self):
         """Handle traffic violation events."""
         if 'violations' not in self.tutorial_manager.player_data:
@@ -309,13 +350,13 @@ class DrivingState:
         self.tutorial_manager.player_data['violations'] += 1
         if self.tts_engine:
             self.tts_engine.output("Traffic violation detected! Follow traffic rules.")
-            
+
     def render_environment(self):
         """Draw the environment, buildings, and roads relative to camera."""
         # Draw ground
         ground_rect = pygame.Rect(0, 500, self.screen.get_width(), self.screen.get_height() - 500)
         pygame.draw.rect(self.screen, (34, 139, 34), ground_rect)  # Forest green
-        
+
         # Draw roads (shifted by camera)
         for road in self.roads:
             screen_rect = pygame.Rect(
@@ -325,7 +366,7 @@ class DrivingState:
                 road.height
             )
             pygame.draw.rect(self.screen, (128, 128, 128), screen_rect)  # Gray
-            
+
             # Draw road markings
             center_y = road.y + (road.height / 2)
             marking_length = 50
@@ -336,7 +377,7 @@ class DrivingState:
                                (start_x, center_y),
                                (start_x + marking_length, center_y), 3)
                 start_x += marking_length + marking_gap
-        
+
         # Draw buildings (shifted by camera)
         for building in self.buildings:
             screen_rect = pygame.Rect(
@@ -357,13 +398,13 @@ class DrivingState:
                         window_size - 10
                     )
                     pygame.draw.rect(self.screen, (173, 216, 230), window_rect)  # Light blue
-        
+
         # Draw truck
         truck_x = (self.screen.get_width() / 2) - 25  # Center of screen
         truck_y = 450  # Just above road
         truck_width = 50
         truck_height = 30
-        
+
         # Truck body (cab)
         pygame.draw.rect(self.screen, (255, 0, 0),  # Red
                         (truck_x, truck_y, truck_width * 0.4, truck_height))
