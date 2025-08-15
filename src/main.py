@@ -284,11 +284,11 @@ class FreightFate:
         }
         tutorial_manager = TutorialManager(self.screen, self.tts_engine, player_data)
         
-        # Start tutorial messages
+        # Start tutorial messages (introduction before any objectives)
         print("\nStarting tutorial initialization...")
         tutorial_manager.update_objective("start_tutorial")
-        print("Tutorial initialization complete")
-        
+        print("Tutorial introduction queued")
+
         # Initialize driving state with selected location and tutorial
         self.states['driving'] = DrivingState(
             screen=self.screen,

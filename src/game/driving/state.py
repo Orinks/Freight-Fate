@@ -92,9 +92,8 @@ class DrivingState:
         self.safe_driving_start_pos = None
         self.last_accident_pos = None
         
-        # Trigger first tutorial objective
-        self.tutorial_manager.update_objective("controls_learned")
-        
+        # Do not auto-complete any tutorial objective here; the tutorial introduction should run first.
+
         # Camera and environment setup
         self.camera_x = 0
         self.camera_y = 0
