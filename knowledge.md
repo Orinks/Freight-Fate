@@ -1,5 +1,3 @@
-<<<<<<< HEAD
-=======
 # Project Structure
 
 ## Sound Files
@@ -61,7 +59,6 @@ Missing sound files will use placeholder sounds.
   - Terminal: Terminal building, control tower, loading docks
   - Distribution: Distribution center, storage, loading area
 
->>>>>>> main
 # SRAL Library Usage
 
 ## Overview
@@ -97,8 +94,6 @@ SRAL (Screen Reader Abstraction Library) provides cross-platform text-to-speech 
 ## Dependencies
 - Requires SRAL.dll in same directory as Python wrapper
 - Linux needs libspeechd-dev and libx11-dev
-<<<<<<< HEAD
-=======
 
 ## Code Structure
 - Always import pygame in any module that uses pygame classes directly (Rect, Surface, etc.)
@@ -129,4 +124,3 @@ SRAL (Screen Reader Abstraction Library) provides cross-platform text-to-speech 
     - Shift takes 0.5 seconds to complete
     - Must hold clutch until shift completes
     - Releasing clutch too early cancels shift
->>>>>>> main
