@@ -1,94 +1,101 @@
 # Freight Fate
 
-An accessible cross-country trucking simulation game built with Python, featuring text-to-speech support and immersive audio experience.
+An accessible, audio-first cross-country trucking simulation. Haul freight
+between 21 American cities, manage fuel, weather, and deadlines, and build a
+driving career — entirely by ear.
+
+Freight Fate is designed for blind and low-vision players first: every screen
+is fully voiced through your screen reader (NVDA, JAWS, SAPI, VoiceOver,
+Speech Dispatcher, and more via [Prism](https://pypi.org/project/prismatoid/)),
+and the road speaks to you through a rich procedural soundscape. A simple
+visual display mirrors all speech for sighted players and helpers.
 
 ## Features
 
-- Cross-country route system with real-world distances
-- Weather simulation affecting driving conditions
-- Accessible interface with text-to-speech support
-- Realistic trucking mechanics (fuel, cargo, time management)
-- Economy system with earnings and upgrades
-- Mission and challenge system
-- Save/Load functionality
+- **Career mode** — accept jobs at city freight locations, deliver on time,
+  earn money and experience, level up, and unlock cargo endorsements
+  (refrigerated, high-value).
+- **Real driving** — a tuned Class 8 truck simulation: 450 horsepower,
+  ten gears (manual with clutch, or automatic), engine braking, grades,
+  stalls, brake fade, and honest fuel economy.
+- **A living road** — dynamic regional weather that changes grip and safe
+  speeds, construction and traffic zones, road hazards that demand quick
+  braking, rest stops for refueling, and roadside rescue when you run dry.
+- **Real-world weather (optional)** — flip Settings → Weather source to
+  "real world" and each city uses its live current conditions from the free
+  [Open-Meteo](https://open-meteo.com) API. If it is raining in Chicago right
+  now, it is raining in your game. Works without an API key and falls back to
+  simulated weather offline.
+- **Route planning** — multiple route options per job with distance, highways,
+  terrain, and weather forecasts.
+- **Original audio** — every sound effect and all three music tracks are
+  procedurally synthesized and dedicated to the public domain (CC0).
+- **Screen reader native** — menus with first-letter navigation, contextual
+  F1 help everywhere, on-demand information keys while driving, and three
+  speech verbosity levels.
 
 ## Installation
 
-1. Ensure you have Python 3.12 installed
-2. Clone this repository
-3. Create a virtual environment:
+Requires Python 3.10+ and [uv](https://docs.astral.sh/uv/).
+
 ```bash
-python -m venv venv
+git clone https://github.com/Orinks/Freight-fate.git
+cd Freight-fate
+uv sync
+uv run freight-fate
 ```
 
-4. Activate the virtual environment:
-- Windows:
-```bash
-venv\Scripts\activate
-```
-- Unix/MacOS:
-```bash
-source venv/bin/activate
-```
-
-5. Install the required dependencies:
-```bash
-pip install -r requirements.txt
-```
-
-6. Run the game:
-```bash
-python src/main.py
-```
-
-Note: The game requires Python 3.12 or later.
-
-## Project Structure
-
-```
-freight-fate/
-├── src/
-│   ├── main.py              # Main game entry point
-│   ├── audio/               # Audio interface and sound management
-│   │   └── sound_manager.py
-│   ├── game/                # Core game mechanics
-│   │   ├── truck.py        # Truck-related functionality
-│   │   ├── weather.py      # Weather simulation
-│   │   ├── economy.py      # Economy system
-│   │   └── missions.py     # Mission generation and management
-│   ├── data/               # Game data and configurations
-│   │   ├── routes.py       # Route system implementation
-│   │   └── cities.json     # City data and connections
-│   └── utils/              # Utility functions
-│       └── save_load.py    # Save/Load functionality
-├── assets/                 # Game assets (sounds, data files)
-│   └── sounds/
-├── tests/                  # Unit tests
-├── requirements.txt        # Project dependencies
-└── README.md              # Project documentation
-```
+On Linux you may need SDL and Speech Dispatcher development packages
+(`libsdl2`, `speech-dispatcher`).
 
 ## Controls
 
-- Arrow Keys: Navigate menus and control truck
-- Enter/Space: Select/Confirm
-- Escape: Back/Pause
-- F1: Toggle accessibility mode
-- M: Toggle music
-- +/-: Adjust volume
-- U: Toggle between imperial/metric units
+### Menus
 
-## Requirements
+| Key | Action |
+| --- | --- |
+| Up / Down | Navigate |
+| Enter | Select |
+| Escape | Back |
+| Home / End | First / last item |
+| Any letter | Jump to the next item starting with it |
+| F1 | Contextual help |
 
-- Python 3.12 or later
-- Pygame 2.5.2 or later
-- Screen reader compatible
-- Sound output device
+### Driving
 
-## Contributing
+| Key | Action |
+| --- | --- |
+| Up arrow (hold) | Throttle |
+| Down arrow (hold) | Brake |
+| E | Start / stop engine |
+| Left Shift (hold) | Clutch (manual mode) |
+| 1–0 | Gears 1–10 (manual mode) |
+| N | Neutral (manual mode) |
+| J | Engine brake toggle |
+| H | Horn |
+| T | Refuel and rest (stopped at a rest stop) |
+| Space | Speak speed, gear, RPM |
+| Tab | Full status report |
+| F | Fuel and range |
+| C | Clock, deadline, ETA |
+| R | Route progress |
+| V | Weather and forecast |
+| F1 | List all controls |
+| Escape | Pause menu |
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+## Development
+
+```bash
+uv sync --dev
+uv run pytest          # full test suite, headless
+uv run ruff check src tests tools
+uv run python tools/generate_audio.py   # regenerate all audio from source
+```
+
+The entire sound library is produced by `tools/generate_audio.py` with seeded
+randomness — see [CREDITS.md](src/freight_fate/assets/sounds/CREDITS.md).
 
 ## License
 
-[MIT License](LICENSE)
+Code is [MIT](LICENSE). All bundled audio is
+[CC0](https://creativecommons.org/publicdomain/zero/1.0/).

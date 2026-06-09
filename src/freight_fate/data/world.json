@@ -1,0 +1,838 @@
+{
+  "cities": {
+    "New York": {
+      "state": "New York",
+      "region": "northeast",
+      "locations": [
+        {
+          "name": "Port Authority Terminal",
+          "type": "terminal",
+          "cargo": [
+            "general",
+            "container"
+          ]
+        },
+        {
+          "name": "Hunts Point Market",
+          "type": "distribution",
+          "cargo": [
+            "food",
+            "retail"
+          ]
+        },
+        {
+          "name": "Newark Dock Complex",
+          "type": "port",
+          "cargo": [
+            "container",
+            "bulk"
+          ]
+        }
+      ],
+      "lat": 40.7128,
+      "lon": -74.006
+    },
+    "Boston": {
+      "state": "Massachusetts",
+      "region": "northeast",
+      "locations": [
+        {
+          "name": "Conley Container Terminal",
+          "type": "port",
+          "cargo": [
+            "container",
+            "bulk"
+          ]
+        },
+        {
+          "name": "Everett Distribution Center",
+          "type": "distribution",
+          "cargo": [
+            "retail",
+            "food"
+          ]
+        }
+      ],
+      "lat": 42.3601,
+      "lon": -71.0589
+    },
+    "Philadelphia": {
+      "state": "Pennsylvania",
+      "region": "northeast",
+      "locations": [
+        {
+          "name": "Packer Avenue Terminal",
+          "type": "port",
+          "cargo": [
+            "container",
+            "general"
+          ]
+        },
+        {
+          "name": "Northeast Freight Yard",
+          "type": "rail",
+          "cargo": [
+            "bulk",
+            "machinery"
+          ]
+        }
+      ],
+      "lat": 39.9526,
+      "lon": -75.1652
+    },
+    "Pittsburgh": {
+      "state": "Pennsylvania",
+      "region": "northeast",
+      "locations": [
+        {
+          "name": "Steel City Works",
+          "type": "warehouse",
+          "cargo": [
+            "machinery",
+            "bulk"
+          ]
+        },
+        {
+          "name": "Three Rivers Distribution",
+          "type": "distribution",
+          "cargo": [
+            "retail",
+            "general"
+          ]
+        }
+      ],
+      "lat": 40.4406,
+      "lon": -79.9959
+    },
+    "Cleveland": {
+      "state": "Ohio",
+      "region": "midwest",
+      "locations": [
+        {
+          "name": "Lakefront Bulk Terminal",
+          "type": "port",
+          "cargo": [
+            "bulk",
+            "machinery"
+          ]
+        },
+        {
+          "name": "Erie Shore Warehouse",
+          "type": "warehouse",
+          "cargo": [
+            "general",
+            "retail"
+          ]
+        }
+      ],
+      "lat": 41.4993,
+      "lon": -81.6944
+    },
+    "Chicago": {
+      "state": "Illinois",
+      "region": "midwest",
+      "locations": [
+        {
+          "name": "Cicero Rail Hub",
+          "type": "rail",
+          "cargo": [
+            "container",
+            "bulk"
+          ]
+        },
+        {
+          "name": "South Side Cold Storage",
+          "type": "distribution",
+          "cargo": [
+            "food",
+            "refrigerated"
+          ]
+        },
+        {
+          "name": "O'Hare Air Freight",
+          "type": "terminal",
+          "cargo": [
+            "electronics",
+            "general"
+          ]
+        }
+      ],
+      "lat": 41.8781,
+      "lon": -87.6298
+    },
+    "Indianapolis": {
+      "state": "Indiana",
+      "region": "midwest",
+      "locations": [
+        {
+          "name": "Crossroads Logistics Park",
+          "type": "distribution",
+          "cargo": [
+            "retail",
+            "general"
+          ]
+        },
+        {
+          "name": "Speedway Parts Depot",
+          "type": "warehouse",
+          "cargo": [
+            "machinery",
+            "electronics"
+          ]
+        }
+      ],
+      "lat": 39.7684,
+      "lon": -86.1581
+    },
+    "St. Louis": {
+      "state": "Missouri",
+      "region": "midwest",
+      "locations": [
+        {
+          "name": "Gateway Riverport",
+          "type": "port",
+          "cargo": [
+            "bulk",
+            "general"
+          ]
+        },
+        {
+          "name": "Mississippi Grain Terminal",
+          "type": "warehouse",
+          "cargo": [
+            "food",
+            "bulk"
+          ]
+        }
+      ],
+      "lat": 38.627,
+      "lon": -90.1994
+    },
+    "Nashville": {
+      "state": "Tennessee",
+      "region": "south",
+      "locations": [
+        {
+          "name": "Music City Freight",
+          "type": "terminal",
+          "cargo": [
+            "general",
+            "retail"
+          ]
+        },
+        {
+          "name": "Cumberland Distribution",
+          "type": "distribution",
+          "cargo": [
+            "food",
+            "retail"
+          ]
+        }
+      ],
+      "lat": 36.1627,
+      "lon": -86.7816
+    },
+    "Atlanta": {
+      "state": "Georgia",
+      "region": "south",
+      "locations": [
+        {
+          "name": "Hartsfield Cargo City",
+          "type": "terminal",
+          "cargo": [
+            "electronics",
+            "general"
+          ]
+        },
+        {
+          "name": "Fulton Industrial District",
+          "type": "warehouse",
+          "cargo": [
+            "machinery",
+            "retail"
+          ]
+        },
+        {
+          "name": "Peachtree Cold Chain",
+          "type": "distribution",
+          "cargo": [
+            "food",
+            "refrigerated"
+          ]
+        }
+      ],
+      "lat": 33.749,
+      "lon": -84.388
+    },
+    "Dallas": {
+      "state": "Texas",
+      "region": "plains",
+      "locations": [
+        {
+          "name": "Trinity Intermodal Yard",
+          "type": "rail",
+          "cargo": [
+            "container",
+            "machinery"
+          ]
+        },
+        {
+          "name": "Lone Star Distribution",
+          "type": "distribution",
+          "cargo": [
+            "retail",
+            "general"
+          ]
+        }
+      ],
+      "lat": 32.7767,
+      "lon": -96.797
+    },
+    "Kansas City": {
+      "state": "Missouri",
+      "region": "plains",
+      "locations": [
+        {
+          "name": "Stockyards Freight House",
+          "type": "warehouse",
+          "cargo": [
+            "food",
+            "bulk"
+          ]
+        },
+        {
+          "name": "Heartland Rail Center",
+          "type": "rail",
+          "cargo": [
+            "container",
+            "bulk"
+          ]
+        }
+      ],
+      "lat": 39.0997,
+      "lon": -94.5786
+    },
+    "Denver": {
+      "state": "Colorado",
+      "region": "rockies",
+      "locations": [
+        {
+          "name": "Mile High Logistics",
+          "type": "distribution",
+          "cargo": [
+            "retail",
+            "general"
+          ]
+        },
+        {
+          "name": "Front Range Equipment",
+          "type": "warehouse",
+          "cargo": [
+            "machinery",
+            "bulk"
+          ]
+        }
+      ],
+      "lat": 39.7392,
+      "lon": -104.9903
+    },
+    "Albuquerque": {
+      "state": "New Mexico",
+      "region": "southwest",
+      "locations": [
+        {
+          "name": "Rio Grande Crossdock",
+          "type": "distribution",
+          "cargo": [
+            "general",
+            "retail"
+          ]
+        },
+        {
+          "name": "Desert Gate Warehouse",
+          "type": "warehouse",
+          "cargo": [
+            "bulk",
+            "machinery"
+          ]
+        }
+      ],
+      "lat": 35.0844,
+      "lon": -106.6504
+    },
+    "Phoenix": {
+      "state": "Arizona",
+      "region": "southwest",
+      "locations": [
+        {
+          "name": "Sky Harbor Freight",
+          "type": "terminal",
+          "cargo": [
+            "electronics",
+            "general"
+          ]
+        },
+        {
+          "name": "Saguaro Produce Exchange",
+          "type": "distribution",
+          "cargo": [
+            "food",
+            "refrigerated"
+          ]
+        }
+      ],
+      "lat": 33.4484,
+      "lon": -112.074
+    },
+    "Salt Lake City": {
+      "state": "Utah",
+      "region": "rockies",
+      "locations": [
+        {
+          "name": "Wasatch Intermodal",
+          "type": "rail",
+          "cargo": [
+            "container",
+            "bulk"
+          ]
+        },
+        {
+          "name": "Great Basin Supply",
+          "type": "warehouse",
+          "cargo": [
+            "general",
+            "machinery"
+          ]
+        }
+      ],
+      "lat": 40.7608,
+      "lon": -111.891
+    },
+    "Las Vegas": {
+      "state": "Nevada",
+      "region": "southwest",
+      "locations": [
+        {
+          "name": "Mojave Freight Plaza",
+          "type": "terminal",
+          "cargo": [
+            "general",
+            "retail"
+          ]
+        },
+        {
+          "name": "Silver State Cold Storage",
+          "type": "distribution",
+          "cargo": [
+            "food",
+            "refrigerated"
+          ]
+        }
+      ],
+      "lat": 36.1699,
+      "lon": -115.1398
+    },
+    "Los Angeles": {
+      "state": "California",
+      "region": "west_coast",
+      "locations": [
+        {
+          "name": "San Pedro Container Port",
+          "type": "port",
+          "cargo": [
+            "container",
+            "electronics"
+          ]
+        },
+        {
+          "name": "Vernon Produce Terminal",
+          "type": "distribution",
+          "cargo": [
+            "food",
+            "refrigerated"
+          ]
+        },
+        {
+          "name": "Inland Empire Megacenter",
+          "type": "warehouse",
+          "cargo": [
+            "retail",
+            "general"
+          ]
+        }
+      ],
+      "lat": 34.0522,
+      "lon": -118.2437
+    },
+    "San Francisco": {
+      "state": "California",
+      "region": "west_coast",
+      "locations": [
+        {
+          "name": "Oakland Outer Harbor",
+          "type": "port",
+          "cargo": [
+            "container",
+            "bulk"
+          ]
+        },
+        {
+          "name": "Bay Area Tech Depot",
+          "type": "warehouse",
+          "cargo": [
+            "electronics",
+            "general"
+          ]
+        }
+      ],
+      "lat": 37.7749,
+      "lon": -122.4194
+    },
+    "Portland": {
+      "state": "Oregon",
+      "region": "northwest",
+      "locations": [
+        {
+          "name": "Willamette River Docks",
+          "type": "port",
+          "cargo": [
+            "bulk",
+            "container"
+          ]
+        },
+        {
+          "name": "Cascade Timber Yard",
+          "type": "warehouse",
+          "cargo": [
+            "bulk",
+            "machinery"
+          ]
+        }
+      ],
+      "lat": 45.5152,
+      "lon": -122.6784
+    },
+    "Seattle": {
+      "state": "Washington",
+      "region": "northwest",
+      "locations": [
+        {
+          "name": "Harbor Island Terminal",
+          "type": "port",
+          "cargo": [
+            "container",
+            "electronics"
+          ]
+        },
+        {
+          "name": "Duwamish Distribution",
+          "type": "distribution",
+          "cargo": [
+            "retail",
+            "food"
+          ]
+        }
+      ],
+      "lat": 47.6062,
+      "lon": -122.3321
+    }
+  },
+  "legs": [
+    {
+      "from": "New York",
+      "to": "Boston",
+      "miles": 215,
+      "highway": "I-95",
+      "terrain": "flat",
+      "stops": [
+        "Milford Travel Plaza",
+        "Charlton Service Area"
+      ]
+    },
+    {
+      "from": "New York",
+      "to": "Philadelphia",
+      "miles": 97,
+      "highway": "I-95",
+      "terrain": "flat",
+      "stops": [
+        "Molly Pitcher Service Area"
+      ]
+    },
+    {
+      "from": "Philadelphia",
+      "to": "Pittsburgh",
+      "miles": 305,
+      "highway": "I-76",
+      "terrain": "hills",
+      "stops": [
+        "Sideling Hill Plaza",
+        "New Stanton Plaza"
+      ]
+    },
+    {
+      "from": "Pittsburgh",
+      "to": "Cleveland",
+      "miles": 133,
+      "highway": "I-76",
+      "terrain": "hills",
+      "stops": [
+        "Glacier Hills Service Plaza"
+      ]
+    },
+    {
+      "from": "Cleveland",
+      "to": "Chicago",
+      "miles": 345,
+      "highway": "I-80",
+      "terrain": "flat",
+      "stops": [
+        "Maumee Travel Center",
+        "South Bend Truck Stop"
+      ]
+    },
+    {
+      "from": "Chicago",
+      "to": "Indianapolis",
+      "miles": 184,
+      "highway": "I-65",
+      "terrain": "flat",
+      "stops": [
+        "Lafayette Travel Plaza"
+      ]
+    },
+    {
+      "from": "Indianapolis",
+      "to": "Nashville",
+      "miles": 289,
+      "highway": "I-65",
+      "terrain": "hills",
+      "stops": [
+        "Columbus Fuel Stop",
+        "Bowling Green Plaza"
+      ]
+    },
+    {
+      "from": "Nashville",
+      "to": "Atlanta",
+      "miles": 250,
+      "highway": "I-24",
+      "terrain": "hills",
+      "stops": [
+        "Monteagle Mountain Stop",
+        "Dalton Travel Center"
+      ]
+    },
+    {
+      "from": "Indianapolis",
+      "to": "St. Louis",
+      "miles": 243,
+      "highway": "I-70",
+      "terrain": "flat",
+      "stops": [
+        "Effingham Crossroads"
+      ]
+    },
+    {
+      "from": "Chicago",
+      "to": "St. Louis",
+      "miles": 297,
+      "highway": "I-55",
+      "terrain": "flat",
+      "stops": [
+        "Bloomington Travel Plaza",
+        "Litchfield Fuel Stop"
+      ]
+    },
+    {
+      "from": "St. Louis",
+      "to": "Nashville",
+      "miles": 309,
+      "highway": "I-24",
+      "terrain": "hills",
+      "stops": [
+        "Paducah River Stop"
+      ]
+    },
+    {
+      "from": "St. Louis",
+      "to": "Kansas City",
+      "miles": 248,
+      "highway": "I-70",
+      "terrain": "flat",
+      "stops": [
+        "Columbia Midway Plaza"
+      ]
+    },
+    {
+      "from": "Kansas City",
+      "to": "Denver",
+      "miles": 605,
+      "highway": "I-70",
+      "terrain": "flat",
+      "stops": [
+        "Salina Travel Center",
+        "Hays Fuel Stop",
+        "Limon Crossroads"
+      ]
+    },
+    {
+      "from": "Denver",
+      "to": "Salt Lake City",
+      "miles": 520,
+      "highway": "I-80",
+      "terrain": "mountain",
+      "stops": [
+        "Laramie Summit Stop",
+        "Rock Springs Plaza"
+      ]
+    },
+    {
+      "from": "Denver",
+      "to": "Albuquerque",
+      "miles": 449,
+      "highway": "I-25",
+      "terrain": "mountain",
+      "stops": [
+        "Pueblo Travel Center",
+        "Raton Pass Stop"
+      ]
+    },
+    {
+      "from": "Albuquerque",
+      "to": "Phoenix",
+      "miles": 422,
+      "highway": "I-40",
+      "terrain": "mountain",
+      "stops": [
+        "Gallup Trading Post",
+        "Flagstaff Mountain Stop"
+      ]
+    },
+    {
+      "from": "Phoenix",
+      "to": "Los Angeles",
+      "miles": 373,
+      "highway": "I-10",
+      "terrain": "flat",
+      "stops": [
+        "Quartzsite Fuel Plaza",
+        "Palm Springs Oasis"
+      ]
+    },
+    {
+      "from": "Salt Lake City",
+      "to": "Las Vegas",
+      "miles": 421,
+      "highway": "I-15",
+      "terrain": "mountain",
+      "stops": [
+        "Beaver Canyon Stop",
+        "Mesquite Travel Plaza"
+      ]
+    },
+    {
+      "from": "Las Vegas",
+      "to": "Los Angeles",
+      "miles": 270,
+      "highway": "I-15",
+      "terrain": "mountain",
+      "stops": [
+        "Baker Desert Stop"
+      ]
+    },
+    {
+      "from": "Dallas",
+      "to": "Albuquerque",
+      "miles": 646,
+      "highway": "I-40",
+      "terrain": "flat",
+      "stops": [
+        "Wichita Falls Plaza",
+        "Amarillo Big Rig Stop",
+        "Tucumcari Crossing"
+      ]
+    },
+    {
+      "from": "Dallas",
+      "to": "St. Louis",
+      "miles": 630,
+      "highway": "I-44",
+      "terrain": "hills",
+      "stops": [
+        "Atoka Travel Center",
+        "Tulsa Fuel Plaza",
+        "Springfield Ozark Stop"
+      ]
+    },
+    {
+      "from": "Atlanta",
+      "to": "Dallas",
+      "miles": 780,
+      "highway": "I-20",
+      "terrain": "flat",
+      "stops": [
+        "Birmingham Freight Stop",
+        "Jackson Travel Plaza",
+        "Shreveport Fuel Center"
+      ]
+    },
+    {
+      "from": "Los Angeles",
+      "to": "San Francisco",
+      "miles": 382,
+      "highway": "I-5",
+      "terrain": "hills",
+      "stops": [
+        "Grapevine Summit Stop",
+        "Kettleman City Plaza"
+      ]
+    },
+    {
+      "from": "San Francisco",
+      "to": "Salt Lake City",
+      "miles": 736,
+      "highway": "I-80",
+      "terrain": "mountain",
+      "stops": [
+        "Donner Pass Stop",
+        "Reno Truck Plaza",
+        "Elko Fuel Stop"
+      ]
+    },
+    {
+      "from": "San Francisco",
+      "to": "Portland",
+      "miles": 635,
+      "highway": "I-5",
+      "terrain": "mountain",
+      "stops": [
+        "Redding Travel Center",
+        "Siskiyou Summit Stop",
+        "Eugene Fuel Plaza"
+      ]
+    },
+    {
+      "from": "Portland",
+      "to": "Seattle",
+      "miles": 174,
+      "highway": "I-5",
+      "terrain": "flat",
+      "stops": [
+        "Centralia Midway Stop"
+      ]
+    },
+    {
+      "from": "Portland",
+      "to": "Salt Lake City",
+      "miles": 767,
+      "highway": "I-84",
+      "terrain": "mountain",
+      "stops": [
+        "Pendleton Grade Stop",
+        "Boise Travel Plaza",
+        "Twin Falls Crossing"
+      ]
+    }
+  ]
+}

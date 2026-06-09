@@ -1,6 +1,0 @@
-# Sral==0.00  # Not available on PiPy; install from Github repo
-numpy==2.0.2
-pandas==2.2.3
-pygame==2.5.2
-pytest==8.3.4  # Keep only one version of pytest
-setuptools==75.6.0

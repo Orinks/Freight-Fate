@@ -1,0 +1,199 @@
+"""Dynamic weather with regional flavor, driving modifiers, and forecasts.
+
+Weather evolves as a Markov chain over game time. Each condition carries
+physics modifiers (grip, drag, visibility) and an ambience sound key.
+A deterministic seed makes trips reproducible in tests.
+"""
+
+from __future__ import annotations
+
+import random
+from dataclasses import dataclass
+from enum import Enum
+
+
+class WeatherKind(Enum):
+    CLEAR = "clear"
+    CLOUDY = "cloudy"
+    RAIN = "rain"
+    HEAVY_RAIN = "heavy rain"
+    THUNDERSTORM = "thunderstorm"
+    SNOW = "snow"
+    FOG = "fog"
+    WIND = "high winds"
+
+
+@dataclass(frozen=True)
+class WeatherEffects:
+    grip: float          # traction multiplier
+    drag_mult: float     # aerodynamic drag multiplier (headwinds)
+    visibility_mi: float
+    sound: str | None    # ambience loop key, e.g. "weather/rain_light"
+    wind: float          # 0..1 wind loop intensity
+    safe_speed_mph: float
+
+
+EFFECTS: dict[WeatherKind, WeatherEffects] = {
+    WeatherKind.CLEAR: WeatherEffects(1.00, 1.00, 10.0, None, 0.0, 70),
+    WeatherKind.CLOUDY: WeatherEffects(1.00, 1.00, 8.0, None, 0.1, 70),
+    WeatherKind.RAIN: WeatherEffects(0.80, 1.05, 4.0, "weather/rain_light", 0.2, 55),
+    WeatherKind.HEAVY_RAIN: WeatherEffects(0.62, 1.12, 1.5, "weather/rain_heavy", 0.4, 45),
+    WeatherKind.THUNDERSTORM: WeatherEffects(0.58, 1.18, 1.0, "weather/rain_heavy", 0.6, 40),
+    WeatherKind.SNOW: WeatherEffects(0.45, 1.08, 2.0, "weather/snow_wind", 0.5, 35),
+    WeatherKind.FOG: WeatherEffects(0.92, 1.00, 0.3, "weather/fog_horn", 0.1, 40),
+    WeatherKind.WIND: WeatherEffects(0.90, 1.25, 7.0, None, 0.9, 55),
+}
+
+# Per-region likelihood weights for each condition.
+REGION_WEIGHTS: dict[str, dict[WeatherKind, float]] = {
+    "northeast": {WeatherKind.CLEAR: 4, WeatherKind.CLOUDY: 3, WeatherKind.RAIN: 2,
+                  WeatherKind.HEAVY_RAIN: 1, WeatherKind.THUNDERSTORM: 0.5,
+                  WeatherKind.SNOW: 1, WeatherKind.FOG: 1, WeatherKind.WIND: 0.5},
+    "midwest": {WeatherKind.CLEAR: 4, WeatherKind.CLOUDY: 3, WeatherKind.RAIN: 2,
+                WeatherKind.HEAVY_RAIN: 1, WeatherKind.THUNDERSTORM: 1.5,
+                WeatherKind.SNOW: 1, WeatherKind.FOG: 0.5, WeatherKind.WIND: 1.5},
+    "south": {WeatherKind.CLEAR: 5, WeatherKind.CLOUDY: 2.5, WeatherKind.RAIN: 2,
+              WeatherKind.HEAVY_RAIN: 1.5, WeatherKind.THUNDERSTORM: 2,
+              WeatherKind.SNOW: 0.1, WeatherKind.FOG: 1, WeatherKind.WIND: 0.5},
+    "plains": {WeatherKind.CLEAR: 5, WeatherKind.CLOUDY: 2, WeatherKind.RAIN: 1.5,
+               WeatherKind.HEAVY_RAIN: 1, WeatherKind.THUNDERSTORM: 2,
+               WeatherKind.SNOW: 0.5, WeatherKind.FOG: 0.5, WeatherKind.WIND: 3},
+    "rockies": {WeatherKind.CLEAR: 4, WeatherKind.CLOUDY: 2.5, WeatherKind.RAIN: 1,
+                WeatherKind.HEAVY_RAIN: 0.5, WeatherKind.THUNDERSTORM: 1,
+                WeatherKind.SNOW: 2.5, WeatherKind.FOG: 1, WeatherKind.WIND: 2},
+    "southwest": {WeatherKind.CLEAR: 7, WeatherKind.CLOUDY: 1.5, WeatherKind.RAIN: 0.5,
+                  WeatherKind.HEAVY_RAIN: 0.5, WeatherKind.THUNDERSTORM: 1,
+                  WeatherKind.SNOW: 0.2, WeatherKind.FOG: 0.2, WeatherKind.WIND: 2},
+    "west_coast": {WeatherKind.CLEAR: 5, WeatherKind.CLOUDY: 3, WeatherKind.RAIN: 1.5,
+                   WeatherKind.HEAVY_RAIN: 0.5, WeatherKind.THUNDERSTORM: 0.3,
+                   WeatherKind.SNOW: 0.1, WeatherKind.FOG: 2, WeatherKind.WIND: 1},
+    "northwest": {WeatherKind.CLEAR: 3, WeatherKind.CLOUDY: 4, WeatherKind.RAIN: 3,
+                  WeatherKind.HEAVY_RAIN: 1.5, WeatherKind.THUNDERSTORM: 0.5,
+                  WeatherKind.SNOW: 1, WeatherKind.FOG: 2, WeatherKind.WIND: 1},
+}
+
+DEFAULT_WEIGHTS = REGION_WEIGHTS["midwest"]
+
+
+class WeatherSystem:
+    """Evolving weather for the current region of a trip.
+
+    With a ``provider`` (see :mod:`freight_fate.sim.real_weather`) attached,
+    real current conditions for the tracked city take priority; the simulated
+    Markov weather keeps running underneath as an offline fallback.
+    """
+
+    def __init__(self, region: str = "midwest", seed: int | None = None,
+                 provider=None) -> None:
+        self._rng = random.Random(seed)
+        self.region = region
+        self.provider = provider
+        self.city: str | None = None
+        self.city_coords: tuple[float, float] = (0.0, 0.0)
+        self.live = False  # True while real-world data is driving conditions
+        self.current = self._sample(region)
+        self.minutes_until_change = self._rng.uniform(25, 70)
+        self.thunder_cooldown = 0.0
+
+    def set_city(self, city: str, lat: float, lon: float) -> None:
+        """Track the city whose real weather should apply (provider mode)."""
+        self.city = city
+        self.city_coords = (lat, lon)
+
+    def _sample(self, region: str, near: WeatherKind | None = None) -> WeatherKind:
+        weights = REGION_WEIGHTS.get(region, DEFAULT_WEIGHTS).copy()
+        if near is not None:
+            # weather tends to evolve gradually: boost "adjacent" conditions
+            adjacency = {
+                WeatherKind.CLEAR: [WeatherKind.CLOUDY, WeatherKind.WIND],
+                WeatherKind.CLOUDY: [WeatherKind.CLEAR, WeatherKind.RAIN, WeatherKind.FOG],
+                WeatherKind.RAIN: [WeatherKind.CLOUDY, WeatherKind.HEAVY_RAIN],
+                WeatherKind.HEAVY_RAIN: [WeatherKind.RAIN, WeatherKind.THUNDERSTORM],
+                WeatherKind.THUNDERSTORM: [WeatherKind.HEAVY_RAIN, WeatherKind.RAIN],
+                WeatherKind.SNOW: [WeatherKind.CLOUDY, WeatherKind.SNOW],
+                WeatherKind.FOG: [WeatherKind.CLOUDY, WeatherKind.CLEAR],
+                WeatherKind.WIND: [WeatherKind.CLEAR, WeatherKind.CLOUDY],
+            }
+            for kind in adjacency.get(near, ()):
+                weights[kind] = weights.get(kind, 0.5) * 3.0
+            weights[near] = weights.get(near, 1.0) * 2.0
+        kinds = list(weights)
+        return self._rng.choices(kinds, [weights[k] for k in kinds])[0]
+
+    def set_region(self, region: str) -> None:
+        self.region = region
+
+    def update(self, game_minutes: float) -> WeatherKind | None:
+        """Advance by game minutes. Returns the new condition if it changed."""
+        self.thunder_cooldown = max(0.0, self.thunder_cooldown - game_minutes)
+
+        changed = self._poll_provider()
+        if self.live:
+            return changed
+
+        self.minutes_until_change -= game_minutes
+        if self.minutes_until_change > 0:
+            return None
+        self.minutes_until_change = self._rng.uniform(25, 70)
+        new = self._sample(self.region, near=self.current)
+        if new != self.current:
+            self.current = new
+            return new
+        return None
+
+    def _poll_provider(self) -> WeatherKind | None:
+        """Apply real-world conditions when a provider is attached.
+
+        Returns the new condition if real data changed it; otherwise None.
+        While real data is available the simulated transitions are paused.
+        """
+        if self.provider is None or self.city is None:
+            return None
+        lat, lon = self.city_coords
+        self.provider.request(self.city, lat, lon)
+        kind = self.provider.get(self.city)
+        if kind is None:
+            self.live = False
+            return None
+        self.live = True
+        if kind != self.current:
+            self.current = kind
+            return kind
+        return None
+
+    def should_thunder(self) -> bool:
+        """Occasional thunder strikes during a thunderstorm."""
+        if self.current is not WeatherKind.THUNDERSTORM or self.thunder_cooldown > 0:
+            return False
+        if self._rng.random() < 0.4:
+            self.thunder_cooldown = self._rng.uniform(2.0, 6.0)
+            return True
+        return False
+
+    @property
+    def effects(self) -> WeatherEffects:
+        return EFFECTS[self.current]
+
+    def forecast(self, segments: int = 3) -> list[WeatherKind]:
+        """Probable conditions ahead (informational, not binding)."""
+        rng = random.Random(self._rng.random())
+        out: list[WeatherKind] = []
+        cur = self.current
+        for _ in range(segments):
+            weights = REGION_WEIGHTS.get(self.region, DEFAULT_WEIGHTS).copy()
+            weights[cur] = weights.get(cur, 1.0) * 2.5
+            kinds = list(weights)
+            cur = rng.choices(kinds, [weights[k] for k in kinds])[0]
+            out.append(cur)
+        return out
+
+    def describe(self) -> str:
+        eff = self.effects
+        parts = [self.current.value]
+        if eff.visibility_mi < 2:
+            parts.append(f"visibility {eff.visibility_mi:g} miles")
+        if eff.grip < 0.7:
+            parts.append("slick roads")
+        if eff.wind > 0.6:
+            parts.append("strong crosswinds")
+        return ", ".join(parts)

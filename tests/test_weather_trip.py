@@ -1,0 +1,118 @@
+"""Weather system and trip simulation tests."""
+
+import itertools
+
+from freight_fate.sim import Trip, TruckState, WeatherKind, WeatherSystem
+from freight_fate.sim.trip import TripEventKind
+from freight_fate.sim.weather import EFFECTS, REGION_WEIGHTS
+
+
+def test_all_conditions_have_effects():
+    for kind in WeatherKind:
+        assert kind in EFFECTS
+
+
+def test_all_regions_in_world_have_weights(world):
+    regions = {c.region for c in world.cities.values()}
+    for region in regions:
+        assert region in REGION_WEIGHTS, f"no weather weights for {region}"
+
+
+def test_weather_is_deterministic_with_seed():
+    a = WeatherSystem("midwest", seed=7)
+    b = WeatherSystem("midwest", seed=7)
+    for _ in range(50):
+        assert a.update(13.0) == b.update(13.0)
+    assert a.current == b.current
+
+
+def test_weather_eventually_changes():
+    ws = WeatherSystem("northwest", seed=3)
+    changes = [ws.update(15.0) for _ in range(200)]
+    assert any(c is not None for c in changes)
+
+
+def test_bad_weather_reduces_grip():
+    assert EFFECTS[WeatherKind.SNOW].grip < EFFECTS[WeatherKind.CLEAR].grip
+    assert EFFECTS[WeatherKind.HEAVY_RAIN].grip < EFFECTS[WeatherKind.RAIN].grip
+
+
+def test_forecast_returns_requested_segments():
+    ws = WeatherSystem("south", seed=1)
+    assert len(ws.forecast(3)) == 3
+
+
+def make_trip(world, start="Chicago", end="Indianapolis", **kwargs):
+    route = world.route_options(start, end)[0]
+    truck = TruckState()
+    truck.transmission.automatic = True
+    truck.start_engine()
+    weather = WeatherSystem("midwest", seed=1)
+    return Trip(route, truck, weather, seed=2, **kwargs), truck
+
+
+def test_trip_completes_and_emits_arrival(world):
+    trip, truck = make_trip(world)
+    truck.throttle = 0.85
+    events = []
+    for i in itertools.count():
+        truck.auto_shift()
+        truck.update(1 / 60)
+        events += trip.update(1 / 60)
+        assert i < 60 * 60 * 30, "trip never finished"
+        if trip.finished:
+            break
+    kinds = {e.kind for e in events}
+    assert TripEventKind.ARRIVED in kinds
+    assert trip.remaining_miles == 0.0
+
+
+def test_trip_announces_stops_ahead(world):
+    trip, truck = make_trip(world)
+    truck.throttle = 0.85
+    events = []
+    for _ in range(60 * 60 * 10):
+        truck.auto_shift()
+        truck.update(1 / 60)
+        events += trip.update(1 / 60)
+        if trip.finished:
+            break
+    assert any(e.kind == TripEventKind.STOP_AHEAD for e in events)
+
+
+def test_zone_speed_limits_apply(world):
+    trip, _ = make_trip(world, "Atlanta", "Dallas")
+    assert trip.zones, "long route should have at least one zone"
+    zone = trip.zones[0]
+    inside = (zone.start_mi + zone.end_mi) / 2
+    limit, reason = trip.speed_limit_at(inside)
+    assert limit == zone.limit_mph
+    assert reason == zone.reason
+    limit, reason = trip.speed_limit_at(zone.end_mi + 50)
+    assert reason is None or limit != zone.limit_mph
+
+
+def test_grades_are_bounded(world):
+    trip, _ = make_trip(world, "Denver", "Salt Lake City")
+    for mile in range(0, int(trip.total_miles), 3):
+        assert abs(trip.grade_at(float(mile))) <= 0.08
+
+
+def test_time_scale_compresses_fuel_burn(world):
+    trip, truck = make_trip(world, time_scale=40.0)
+    truck.throttle = 0.9
+    for _ in range(60 * 30):
+        truck.auto_shift()
+        truck.update(1 / 60)
+        trip.update(1 / 60)
+    assert truck.fuel_burn_mult == 40.0
+    assert truck.fuel_gal < truck.specs.fuel_tank_gal - 0.5
+
+
+def test_progress_summary_mentions_highway(world):
+    trip, _ = make_trip(world)
+    text = trip.progress_summary()
+    assert "I-65" in text
+    assert "Indianapolis" in text
+    metric = trip.progress_summary(imperial=False)
+    assert "kilometers" in metric

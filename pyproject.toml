@@ -1,0 +1,60 @@
+[project]
+name = "freight-fate"
+version = "1.1.0"
+description = "An accessible, audio-first cross-country trucking simulation game"
+readme = "README.md"
+license = { file = "LICENSE" }
+requires-python = ">=3.10"
+authors = [{ name = "Orinks" }]
+keywords = ["game", "accessibility", "audio-game", "screen-reader", "trucking", "simulation"]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: End Users/Desktop",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: Microsoft :: Windows",
+    "Operating System :: POSIX :: Linux",
+    "Operating System :: MacOS",
+    "Programming Language :: Python :: 3 :: Only",
+    "Topic :: Games/Entertainment :: Simulation",
+]
+dependencies = [
+    "pygame>=2.6",
+    "prismatoid>=0.16",
+    "numpy>=1.26",
+]
+
+[project.scripts]
+freight-fate = "freight_fate.app:main"
+
+[project.urls]
+Repository = "https://github.com/Orinks/Freight-fate"
+
+[dependency-groups]
+dev = [
+    "pytest>=8.3",
+    "pytest-cov>=6.0",
+    "ruff>=0.8",
+    "soundfile>=0.14.0",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/freight_fate"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+markers = [
+    "smoke: headless end-to-end smoke tests",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "UP", "B", "SIM"]
+ignore = ["E501"]
