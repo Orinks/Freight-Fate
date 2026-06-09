@@ -266,6 +266,7 @@ class _BassBackend:
         self.sfx_volume = 0.8
         self.music_volume = 0.55
         self._loops: dict[int, tuple[str, float, object]] = {}  # slot -> (key, gain, stream)
+        self._retained: list = []  # streams kept alive until BASS finishes them
         self._music_track: str | None = None
         self._music_stream = None
         self._engine_running = False
@@ -309,6 +310,24 @@ class _BassBackend:
             return None
         return self._stream(path, looping)
 
+    def _retain(self, stream) -> None:
+        """Keep a reference until BASS finishes with the stream.
+
+        ``Channel.__del__`` frees the BASS handle when the Python object is
+        garbage collected, which would cut one-shots and fade-outs short the
+        moment the last reference is dropped. Finished streams (autofreed by
+        BASS) are pruned on each call.
+        """
+        alive = []
+        for s in self._retained:
+            try:
+                if s.is_playing:
+                    alive.append(s)
+            except self._BassError:
+                pass  # already stopped and autofreed
+        alive.append(stream)
+        self._retained = alive
+
     def _fade_out(self, stream, fade_ms: int) -> None:
         """Slide volume to -1: BASS stops (and autofrees) the channel at 0."""
         try:
@@ -316,6 +335,8 @@ class _BassBackend:
                             -1.0, max(0, int(fade_ms)))
         except self._BassError:
             log.debug("Fade-out failed; stream already gone", exc_info=True)
+            return
+        self._retain(stream)  # keep it alive for the duration of the fade
 
     # -- one-shots ----------------------------------------------------------
 
@@ -328,6 +349,8 @@ class _BassBackend:
             stream.play()
         except self._BassError:
             log.warning("Could not play %s", key, exc_info=True)
+            return
+        self._retain(stream)
 
     # -- loops on reserved slots ------------------------------------------------
 
@@ -488,6 +511,7 @@ class _BassBackend:
             self.stop_loop(ch, fade_ms=0)
         self.engine_stop(shutdown_sound=False)
         self.stop_music(fade_ms=0)
+        self._retained.clear()
         with contextlib.suppress(self._BassError):
             self._output.free()
         self.enabled = False
