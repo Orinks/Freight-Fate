@@ -11,6 +11,7 @@ import random
 from dataclasses import dataclass
 
 from ..data.world import World
+from .market import Market, market_condition
 
 
 @dataclass(frozen=True)
@@ -53,16 +54,19 @@ class Job:
     distance_mi: float       # shortest-route miles, used for pay and deadline
     pay: float
     deadline_game_h: float
+    market_mult: float = 1.0   # market multiplier already applied to pay
 
     def describe(self, index: int | None = None, total: int | None = None) -> str:
         prefix = f"Job {index} of {total}: " if index is not None else ""
+        condition = market_condition(self.market_mult)
+        market = f" Market is {condition}." if condition != "steady" else ""
         endorsement = ""
         if self.cargo.endorsement:
             endorsement = f" Requires {ENDORSEMENT_LABELS[self.cargo.endorsement]}."
         return (f"{prefix}{self.weight_tons:.0f} tons of {self.cargo.label} "
                 f"to {self.destination}. {self.distance_mi:.0f} miles. "
                 f"Pays {self.pay:,.0f} dollars. "
-                f"Deadline {self.deadline_game_h:.0f} hours.{endorsement}")
+                f"Deadline {self.deadline_game_h:.0f} hours.{market}{endorsement}")
 
     def payout(self, hours_taken: float, damage_pct: float, on_time_bonus: float = 0.15) -> float:
         """Final payment given delivery time and cargo condition."""
@@ -88,7 +92,7 @@ class JobBoard:
         self._rng = random.Random(seed)
 
     def offers(self, city: str, endorsements: set[str], count: int = 5,
-               level: int = 1) -> list[Job]:
+               level: int = 1, market: Market | None = None) -> list[Job]:
         jobs: list[Job] = []
         city_obj = self.world.cities[city]
         others = [c for c in self.world.city_names() if c != city]
@@ -108,16 +112,18 @@ class JobBoard:
             route = self.world.shortest_route(city, destination)
             if route is None or route.miles > max_miles:
                 continue
-            jobs.append(self._make_job(cargo, city, location.name, destination, route.miles))
+            jobs.append(self._make_job(cargo, city, location.name, destination,
+                                       route.miles, market))
         jobs.sort(key=lambda j: j.distance_mi)
         return jobs
 
     def _make_job(self, cargo: CargoType, origin: str, origin_location: str,
-                  destination: str, miles: float) -> Job:
+                  destination: str, miles: float, market: Market | None) -> Job:
         weight = self._rng.uniform(*cargo.weight_tons)
         rate = cargo.rate_per_mile * self._rng.uniform(0.9, 1.15)
-        pay = round(miles * rate * (1.0 + weight / 120.0), 2)
+        mult = market.multiplier(cargo.key) if market is not None else 1.0
+        pay = round(miles * rate * (1.0 + weight / 120.0) * mult, 2)
         # deadline: 50 mph average plus generous slack
         deadline = miles / 50.0 * self._rng.uniform(1.35, 1.7)
         return Job(cargo, weight, origin, origin_location, destination,
-                   round(miles, 1), pay, round(deadline, 1))
+                   round(miles, 1), pay, round(deadline, 1), market_mult=mult)

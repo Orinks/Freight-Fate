@@ -30,7 +30,9 @@ class TruckSpecs:
     peak_torque_rpm: float = 1_300.0
     driveline_efficiency: float = 0.85
     max_brake_decel_g: float = 0.35
+    brake_fade_temp_c: float = 400.0   # brakes fade above this temperature
     fuel_tank_gal: float = 150.0
+    fuel_burn_factor: float = 1.0      # model-specific thirst multiplier
     engine_brake_force_n: float = 25_000.0
 
 
@@ -138,7 +140,9 @@ class TruckState:
         if self.velocity_mps <= 0.0:
             return 0.0
         s = self.specs
-        fade = 1.0 if self.brake_temp_c < 400 else max(0.35, 1.0 - (self.brake_temp_c - 400) / 400)
+        fade_temp = s.brake_fade_temp_c
+        fade = (1.0 if self.brake_temp_c < fade_temp
+                else max(0.35, 1.0 - (self.brake_temp_c - fade_temp) / 400))
         service = s.mass_kg * G * s.max_brake_decel_g * self.brake * fade * self.grip
         jake = s.engine_brake_force_n if (self.engine_brake and self.engine_on
                                           and not self.transmission.in_neutral) else 0.0
@@ -195,7 +199,7 @@ class TruckState:
             return
         # ~0.8 gal/h at idle; load burn calibrated for ~6.5-7 mpg at 60 mph cruise
         power_kw = abs(self.drive_force()) * self.velocity_mps / 1000.0
-        burn = 0.00022 + power_kw * 1.5e-5
+        burn = (0.00022 + power_kw * 1.5e-5) * self.specs.fuel_burn_factor
         self.fuel_gal = max(0.0, self.fuel_gal - burn * dt * self.fuel_burn_mult)
         if self.fuel_gal <= 0.0:
             self.stop_engine()

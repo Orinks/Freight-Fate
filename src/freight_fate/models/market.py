@@ -1,0 +1,87 @@
+"""Freight market: per-cargo-class pay multipliers that drift day by day.
+
+Each cargo class carries a multiplier between 0.8 and 1.3 applied to job
+pay. Multipliers move once per in-game day with a seeded random walk, so a
+profile's market history is deterministic: replaying the same seed over the
+same days always lands on the same numbers. The whole state is persisted on
+the player profile.
+"""
+
+from __future__ import annotations
+
+import random
+from dataclasses import dataclass, field
+
+MARKET_MIN = 0.8
+MARKET_MAX = 1.3
+DAILY_DRIFT = 0.06
+
+# Cargo classes tracked by the market (mirrors jobs.CARGO_CATALOG; kept as a
+# literal so this module needs no imports from the job layer).
+MARKET_CARGO_KEYS = ("general", "retail", "container", "bulk", "machinery",
+                     "food", "refrigerated", "electronics")
+
+
+def market_condition(multiplier: float) -> str:
+    """Spoken one-word market condition for a multiplier."""
+    if multiplier >= 1.18:
+        return "hot"
+    if multiplier >= 1.07:
+        return "strong"
+    if multiplier <= 0.88:
+        return "cold"
+    if multiplier <= 0.97:
+        return "soft"
+    return "steady"
+
+
+def _clamp(value: float) -> float:
+    return max(MARKET_MIN, min(MARKET_MAX, value))
+
+
+@dataclass
+class Market:
+    seed: int = field(default_factory=lambda: random.randrange(2**31))
+    day: int = 0
+    multipliers: dict[str, float] = field(default_factory=dict)
+
+    def __post_init__(self) -> None:
+        if not self.multipliers:
+            rng = random.Random(self.seed)
+            self.multipliers = {key: round(rng.uniform(0.9, 1.15), 3)
+                                for key in MARKET_CARGO_KEYS}
+
+    def multiplier(self, cargo_key: str) -> float:
+        return self.multipliers.get(cargo_key, 1.0)
+
+    def condition(self, cargo_key: str) -> str:
+        return market_condition(self.multiplier(cargo_key))
+
+    def advance_to(self, day: int) -> bool:
+        """Walk the market forward to the given in-game day.
+
+        Each elapsed day every class drifts by a step drawn from a generator
+        seeded with (profile seed, day), so catching up several days at once
+        gives the same result as advancing one day at a time.
+        """
+        changed = False
+        while self.day < day:
+            self.day += 1
+            rng = random.Random(self.seed * 1_000_003 + self.day)
+            for key in sorted(self.multipliers):
+                step = rng.uniform(-DAILY_DRIFT, DAILY_DRIFT)
+                self.multipliers[key] = round(_clamp(self.multipliers[key] + step), 3)
+            changed = True
+        return changed
+
+    def summary(self) -> str:
+        """Spoken job-board headline naming the standout cargo classes."""
+        items = sorted(self.multipliers.items())
+        hot = sorted((kv for kv in items if kv[1] >= 1.07),
+                     key=lambda kv: kv[1], reverse=True)
+        cold = sorted((kv for kv in items if kv[1] <= 0.97), key=lambda kv: kv[1])
+        if not hot and not cold:
+            return "Freight market is steady across the board."
+        parts = [f"{key.replace('_', ' ')} {market_condition(mult)}"
+                 for key, mult in hot[:2] + cold[:2]]
+        return "Market watch: " + ", ".join(parts) + "."

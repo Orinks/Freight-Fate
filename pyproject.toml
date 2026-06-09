@@ -1,6 +1,6 @@
 [project]
 name = "freight-fate"
-version = "1.1.0"
+version = "1.2.0"
 description = "An accessible, audio-first cross-country trucking simulation game"
 readme = "README.md"
 license = { file = "LICENSE" }
@@ -21,6 +21,10 @@ dependencies = [
     "pygame>=2.6",
     "prismatoid>=0.16",
     "numpy>=1.26",
+    # Pinned exactly: PyPI's version ordering for this package is broken
+    # (0.83 from 2022 sorts above 0.8.8 from 2026), so any range resolves
+    # to the stale build that ships no Linux library.
+    "sound-lib==0.8.8",
 ]
 
 [project.scripts]

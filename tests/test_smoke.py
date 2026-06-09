@@ -35,10 +35,14 @@ def test_full_game_flow_headless():
         assert app.ctx.profile is not None
         assert app.ctx.profile.name == "Smoke"
 
-        # open job board, accept the first job
+        # open job board, accept the first job we hold the endorsement for
+        # (the board may show one locked "teaser" job, sometimes sorted first)
         app.state.handle_event(key_event(pygame.K_RETURN))
         assert isinstance(app.state, JobBoardState)
         assert app.state.jobs
+        board = app.state
+        while board.jobs[board.index].cargo.endorsement:
+            board.handle_event(key_event(pygame.K_DOWN))
         app.state.handle_event(key_event(pygame.K_RETURN))
         assert isinstance(app.state, RouteSelectState)
         app.state.handle_event(key_event(pygame.K_RETURN))
@@ -99,6 +103,101 @@ def test_menu_first_letter_navigation():
 
 
 @pytest.mark.smoke
+def test_garage_upgrade_and_truck_purchase_flow():
+    from freight_fate.app import App
+    from freight_fate.states.city import (
+        CityMenuState,
+        GarageState,
+        TruckShopState,
+        UpgradeShopState,
+    )
+    from freight_fate.states.main_menu import MainMenuState, NameEntryState
+
+    app = App()
+    try:
+        app.push_state(MainMenuState(app.ctx))
+        while app.state.items[app.state.index].text != "New career":
+            app.state.handle_event(key_event(pygame.K_DOWN))
+        app.state.handle_event(key_event(pygame.K_RETURN))
+        assert isinstance(app.state, NameEntryState)
+        app.state.handle_event(key_event(pygame.K_RETURN))  # default name
+        assert isinstance(app.state, CityMenuState)
+        p = app.ctx.profile
+        p.money = 200_000.0
+
+        # city -> garage -> upgrades
+        while not app.state.items[app.state.index].text.startswith("Garage"):
+            app.state.handle_event(key_event(pygame.K_DOWN))
+        app.state.handle_event(key_event(pygame.K_RETURN))
+        assert isinstance(app.state, GarageState)
+        while app.state.items[app.state.index].text != "Upgrades":
+            app.state.handle_event(key_event(pygame.K_DOWN))
+        app.state.handle_event(key_event(pygame.K_RETURN))
+        assert isinstance(app.state, UpgradeShopState)
+
+        # buy engine tune tier 1, then tier 2; a third press must not charge
+        shop = app.state
+        while "Engine tune" not in shop.items[shop.index].text:
+            shop.handle_event(key_event(pygame.K_DOWN))
+        shop.handle_event(key_event(pygame.K_RETURN))
+        assert p.upgrades.get("engine_tune") == 1
+        shop.handle_event(key_event(pygame.K_RETURN))
+        assert p.upgrades.get("engine_tune") == 2
+        money_after_tiers = p.money
+        shop.handle_event(key_event(pygame.K_RETURN))
+        assert p.upgrades.get("engine_tune") == 2
+        assert p.money == money_after_tiers
+        assert "owned" in shop.items[shop.index].text
+
+        # back to garage, then the truck shop
+        shop.handle_event(key_event(pygame.K_ESCAPE))
+        assert isinstance(app.state, GarageState)
+        while app.state.items[app.state.index].text != "Trucks":
+            app.state.handle_event(key_event(pygame.K_DOWN))
+        app.state.handle_event(key_event(pygame.K_RETURN))
+        assert isinstance(app.state, TruckShopState)
+
+        trucks = app.state
+        while "Heavy hauler" not in trucks.items[trucks.index].text:
+            trucks.handle_event(key_event(pygame.K_DOWN))
+        money_before = p.money
+        trucks.handle_event(key_event(pygame.K_RETURN))
+        assert p.truck == "heavy_hauler"
+        assert "heavy_hauler" in p.owned_trucks
+        assert p.money == money_before - 52_000.0
+        assert "currently driving" in trucks.items[trucks.index].text
+
+        # switch back to the standard rig (already owned, no charge)
+        money_before = p.money
+        while "Standard rig" not in trucks.items[trucks.index].text:
+            trucks.handle_event(key_event(pygame.K_DOWN))
+        trucks.handle_event(key_event(pygame.K_RETURN))
+        assert p.truck == "rig"
+        assert p.money == money_before
+    finally:
+        app.shutdown()
+
+
+@pytest.mark.smoke
+def test_upgrades_are_money_gated():
+    from freight_fate.app import App
+    from freight_fate.models.profile import Profile
+    from freight_fate.states.city import UpgradeShopState
+
+    app = App()
+    try:
+        app.ctx.profile = Profile(name="Broke")
+        app.ctx.profile.money = 10.0
+        app.push_state(UpgradeShopState(app.ctx))
+        shop = app.state
+        shop.handle_event(key_event(pygame.K_RETURN))
+        assert app.ctx.profile.upgrades == {}
+        assert app.ctx.profile.money == 10.0
+    finally:
+        app.shutdown()
+
+
+@pytest.mark.smoke
 def test_pause_and_abandon_returns_to_city():
     from freight_fate.app import App
     from freight_fate.states.city import CityMenuState
@@ -114,6 +213,9 @@ def test_pause_and_abandon_returns_to_city():
         assert isinstance(app.state, NameEntryState)
         app.state.handle_event(key_event(pygame.K_RETURN))  # default name
         app.state.handle_event(key_event(pygame.K_RETURN))  # job board
+        board = app.state
+        while board.jobs[board.index].cargo.endorsement:  # skip locked teasers
+            board.handle_event(key_event(pygame.K_DOWN))
         app.state.handle_event(key_event(pygame.K_RETURN))  # accept job
         app.state.handle_event(key_event(pygame.K_RETURN))  # pick route
         assert isinstance(app.state, DrivingState)

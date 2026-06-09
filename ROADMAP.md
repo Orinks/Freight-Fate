@@ -1,5 +1,14 @@
 # Freight Fate Roadmap
 
+## Shipped in 1.2.0
+
+- [x] Truck upgrades (engine tune, aerodynamic kit, long-range tank,
+      reinforced brakes) and a second purchasable truck (heavy hauler)
+- [x] Market fluctuations in cargo rates: per-class multipliers drifting
+      daily on a seeded random walk, spoken on the job board
+- [x] BASS audio backend (sound_lib) with real-time RPM-tracking engine
+      pitch; pygame.mixer kept as an automatic fallback
+
 ## Shipped in 1.1.0
 
 - [x] Optional real-world weather per city via the Open-Meteo API
@@ -58,7 +67,6 @@ Deliver -> Earn and level up -> Repeat
 
 ### Gameplay depth
 - [ ] Cargo loading/securing minigame
-- [ ] Truck upgrades (engine, tank, aerodynamics) and new trucks
 - [ ] Hours-of-service fatigue and mandatory rest planning
 - [ ] Special event jobs (oversize loads, urgent medical freight)
 - [ ] Trailer types with handling differences
@@ -71,7 +79,6 @@ Deliver -> Earn and level up -> Repeat
 ### Business
 - [ ] Company ownership: hire AI drivers, buy trucks
 - [ ] Loans and insurance
-- [ ] Market fluctuations in cargo rates
 
 ### Platforms and community
 - [ ] Binary releases (PyInstaller) per platform

@@ -193,6 +193,16 @@ HELP_PAGES = [
         "Fragile cargo, like electronics and fresh food, punishes rough driving.",
         "Repair your truck in the city garage. Damage reduces engine power.",
         "Higher levels unlock longer hauls and special cargo endorsements.",
+        "Cargo markets drift day by day. The job board calls out hot and cold",
+        "markets; hot cargo pays well above the usual rate.",
+    ]),
+    ("The garage", [
+        "Every city garage refuels and repairs your truck.",
+        "The Upgrades menu sells permanent improvements: an engine tune,",
+        "an aerodynamic kit, a long-range tank, and reinforced brakes.",
+        "The Trucks menu sells the heavy hauler: more torque and a bigger",
+        "tank, but worse aerodynamics and a thirstier engine.",
+        "Switch between trucks you own at any garage, free of charge.",
     ]),
 ]
 
