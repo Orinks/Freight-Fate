@@ -1,0 +1,173 @@
+"""Jobs, economy, career, profile, and settings tests."""
+
+import json
+
+from freight_fate.models import Career, Economy, JobBoard, Profile
+from freight_fate.models.career import level_for_xp
+from freight_fate.models.jobs import CARGO_CATALOG
+from freight_fate.settings import Settings
+
+# -- jobs ---------------------------------------------------------------------
+
+def test_job_offers_have_real_route_distances(world):
+    board = JobBoard(world, seed=3)
+    jobs = board.offers("Chicago", endorsements=set(), level=2)
+    assert jobs
+    for job in jobs:
+        route = world.shortest_route(job.origin, job.destination)
+        assert abs(route.miles - job.distance_mi) < 1.0
+        assert job.pay > 0
+        assert job.deadline_game_h > job.distance_mi / 70.0
+
+
+def test_endorsement_gating(world):
+    board = JobBoard(world, seed=4)
+    no_endorsements = board.offers("Los Angeles", endorsements=set(), count=5)
+    locked = [j for j in no_endorsements if j.cargo.endorsement]
+    # at most the single "teaser" job may require an endorsement
+    assert len(locked) <= 1
+
+
+def test_payout_on_time_beats_late():
+    from freight_fate.models.jobs import Job
+
+    job = Job(CARGO_CATALOG["general"], 15, "A", "Loc", "B", 300, 700.0, 9.0)
+    early = job.payout(hours_taken=5.0, damage_pct=0.0)
+    on_dot = job.payout(hours_taken=9.0, damage_pct=0.0)
+    late = job.payout(hours_taken=12.0, damage_pct=0.0)
+    assert early > on_dot >= late
+    assert late >= 700.0 * 0.4
+
+
+def test_payout_punishes_fragile_damage():
+    from freight_fate.models.jobs import Job
+
+    fragile = Job(CARGO_CATALOG["electronics"], 8, "A", "Loc", "B", 300, 1000.0, 9.0)
+    tough = Job(CARGO_CATALOG["bulk"], 8, "A", "Loc", "B", 300, 1000.0, 9.0)
+    assert fragile.payout(5.0, damage_pct=30.0) < tough.payout(5.0, damage_pct=30.0)
+
+
+# -- economy ---------------------------------------------------------------------
+
+def test_fuel_prices_vary_by_region():
+    eco = Economy(seed=1)
+    assert eco.fuel_price("west_coast") > eco.fuel_price("south")
+    assert eco.fuel_cost("midwest", 0) == 0.0
+    assert eco.fuel_cost("midwest", 10) > 30.0
+
+
+def test_repair_cost_scales_with_damage():
+    assert Economy.repair_cost(0) == 0.0
+    assert Economy.repair_cost(50) == 50 * 85.0
+
+
+# -- career ---------------------------------------------------------------------
+
+def test_level_thresholds():
+    assert level_for_xp(0) == 1
+    assert level_for_xp(999) == 1
+    assert level_for_xp(1000) == 2
+    assert level_for_xp(2500) == 3
+    assert level_for_xp(100_000) > 9
+
+
+def test_endorsements_unlock_with_levels():
+    c = Career()
+    assert c.endorsements == set()
+    c.xp = 1000
+    assert "refrigerated" in c.endorsements
+    c.xp = 4500
+    assert {"refrigerated", "high_value"} <= c.endorsements
+
+
+def test_record_delivery_announces_level_up():
+    c = Career(xp=950)
+    messages = c.record_delivery(miles=100, pay=300, on_time=True, damage_pct=0)
+    assert any("Level up" in m for m in messages)
+    assert c.deliveries == 1
+    assert c.on_time_deliveries == 1
+
+
+def test_reputation_moves_with_performance():
+    c = Career()
+    start = c.reputation
+    c.record_delivery(100, 300, on_time=True, damage_pct=0)
+    assert c.reputation > start
+    c.record_delivery(100, 300, on_time=False, damage_pct=40)
+    assert c.reputation < start + 2.0 + 0.01
+
+
+# -- profile ---------------------------------------------------------------------
+
+def test_profile_roundtrip():
+    p = Profile(name="Roundtrip Test")
+    p.money = 1234.5
+    p.career.xp = 2600
+    path = p.save()
+    loaded = Profile.load(path)
+    assert loaded.money == 1234.5
+    assert loaded.career.level == 3
+    assert loaded.name == "Roundtrip Test"
+
+
+def test_profile_save_is_atomic_and_versioned():
+    p = Profile(name="Atomic")
+    path = p.save()
+    data = json.loads(path.read_text())
+    assert data["version"] == 1
+    assert not path.with_suffix(".json.tmp").exists()
+
+
+def test_profile_ignores_unknown_fields():
+    p = Profile(name="Future")
+    path = p.save()
+    data = json.loads(path.read_text())
+    data["mystery_field"] = 42
+    path.write_text(json.dumps(data))
+    loaded = Profile.load(path)
+    assert loaded.name == "Future"
+
+
+def test_list_saves_and_delete():
+    a = Profile(name="Driver A")
+    a.save()
+    b = Profile(name="Driver B")
+    b.save()
+    names = {p.stem for p in Profile.list_saves()}
+    assert {"Driver A", "Driver B"} <= names
+    a.delete()
+    names = {p.stem for p in Profile.list_saves()}
+    assert "Driver A" not in names
+
+
+def test_profile_name_sanitized_for_filesystem():
+    p = Profile(name='Sketchy/Name<>:"|?*')
+    path = p.save()
+    assert path.exists()
+
+
+# -- settings ---------------------------------------------------------------------
+
+def test_settings_roundtrip():
+    s = Settings()
+    s.imperial_units = False
+    s.music_volume = 0.3
+    s.save()
+    loaded = Settings.load()
+    assert loaded.imperial_units is False
+    assert loaded.music_volume == 0.3
+
+
+def test_settings_survive_corrupt_file():
+    s = Settings()
+    s.save()
+    s.path.write_text("{not json")
+    loaded = Settings.load()
+    assert loaded.imperial_units is True  # defaults
+
+
+def test_unit_formatting():
+    s = Settings()
+    assert "miles per hour" in s.speed_text(60)
+    s.imperial_units = False
+    assert s.speed_text(60) == "97 kilometers per hour"

@@ -1,0 +1,1 @@
+INFO:freight_fate.speech:Speech backend: NVDA
