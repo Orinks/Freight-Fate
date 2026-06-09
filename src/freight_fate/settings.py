@@ -18,6 +18,7 @@ class Settings:
     imperial_units: bool = True
     automatic_transmission: bool = True   # friendlier default for new players
     time_scale: float = 20.0              # distance compression while driving
+    real_weather: bool = False            # live conditions from Open-Meteo
     master_volume: float = 1.0
     sfx_volume: float = 0.8
     music_volume: float = 0.55

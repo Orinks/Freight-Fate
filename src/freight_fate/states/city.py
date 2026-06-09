@@ -218,6 +218,14 @@ class RouteSelectState(MenuState):
         super().__init__(ctx)
         self.job = job
         self.routes = routes
+        # start fetching live weather for cities on the routes so the data is
+        # usually ready by the time the player asks for a forecast
+        provider = ctx.real_weather_provider()
+        if provider is not None:
+            for route in routes:
+                for name in route.cities:
+                    city = ctx.world.cities[name]
+                    provider.request(city.name, city.lat, city.lon)
 
     def announce_entry(self) -> None:
         self.ctx.say(f"Route planning to {self.job.destination}. "
@@ -245,6 +253,19 @@ class RouteSelectState(MenuState):
     def _speak_forecast(self, route: Route) -> None:
         from ..sim.weather import WeatherSystem
 
+        provider = self.ctx.real_weather_provider()
+        if provider is not None:
+            parts = []
+            for name in route.cities[1:][:5]:
+                kind = provider.get(name)
+                if kind is not None:
+                    parts.append(f"{name}: {kind.value}")
+            if parts:
+                self.ctx.say("Live weather along the route. " + ". ".join(parts) + ".")
+                return
+            self.ctx.say("Live weather is still loading. Try again in a moment, "
+                         "or check V while driving.")
+            return
         regions: list[str] = []
         for city_name in route.cities:
             region = self.ctx.world.cities[city_name].region

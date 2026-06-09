@@ -1,5 +1,19 @@
 # Changelog
 
+## 1.1.0 — 2026-06-09
+
+### Added
+- **Real-world weather** (Settings → Weather source): live current
+  conditions for each city from the free
+  [Open-Meteo](https://open-meteo.com) API (no key required). WMO weather
+  codes map onto the game's conditions, including strong-wind promotion.
+  Fetches run in background threads with a 15-minute cache; offline or on
+  any failure the simulated weather takes over seamlessly.
+- City coordinates in the world data.
+- With real weather enabled, route planning's W key speaks live conditions
+  for the cities along the route, and the V key while driving reports
+  "live conditions" for the city you are heading toward.
+
 ## 1.0.0 — 2026-06-09
 
 First release. Complete rewrite of the prototype.

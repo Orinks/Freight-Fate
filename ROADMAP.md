@@ -1,5 +1,10 @@
 # Freight Fate Roadmap
 
+## Shipped in 1.1.0
+
+- [x] Optional real-world weather per city via the Open-Meteo API
+      (Settings -> Weather source), with seamless offline fallback
+
 ## Shipped in 1.0.0
 
 The core loop from the original roadmap is complete:

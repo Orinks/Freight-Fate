@@ -128,13 +128,16 @@ class Trip:
         return 0
 
     @property
-    def current_region(self) -> str:
-        # region of the leg's destination city drives the weather
+    def current_target_city(self):
+        """City object the current leg is heading toward; drives the weather."""
         from ..data.world import get_world
 
-        leg_i = self.current_leg_index
-        city = self.route.cities[leg_i + 1]
-        return get_world().cities[city].region
+        name = self.route.cities[self.current_leg_index + 1]
+        return get_world().cities[name]
+
+    @property
+    def current_region(self) -> str:
+        return self.current_target_city.region
 
     def grade_at(self, mile: float) -> float:
         """Deterministic rolling grade profile from the leg's terrain."""
@@ -181,7 +184,9 @@ class Trip:
         # weather drives truck grip and evolves over game time
         game_min = dt * self.time_scale / 60.0
         self.game_minutes += game_min
-        self.weather.set_region(self.current_region)
+        target = self.current_target_city
+        self.weather.set_region(target.region)
+        self.weather.set_city(target.name, target.lat, target.lon)
         changed = self.weather.update(game_min)
         if changed is not None:
             self._emit(TripEventKind.WEATHER_CHANGE,

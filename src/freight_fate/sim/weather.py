@@ -76,14 +76,29 @@ DEFAULT_WEIGHTS = REGION_WEIGHTS["midwest"]
 
 
 class WeatherSystem:
-    """Evolving weather for the current region of a trip."""
+    """Evolving weather for the current region of a trip.
 
-    def __init__(self, region: str = "midwest", seed: int | None = None) -> None:
+    With a ``provider`` (see :mod:`freight_fate.sim.real_weather`) attached,
+    real current conditions for the tracked city take priority; the simulated
+    Markov weather keeps running underneath as an offline fallback.
+    """
+
+    def __init__(self, region: str = "midwest", seed: int | None = None,
+                 provider=None) -> None:
         self._rng = random.Random(seed)
         self.region = region
+        self.provider = provider
+        self.city: str | None = None
+        self.city_coords: tuple[float, float] = (0.0, 0.0)
+        self.live = False  # True while real-world data is driving conditions
         self.current = self._sample(region)
         self.minutes_until_change = self._rng.uniform(25, 70)
         self.thunder_cooldown = 0.0
+
+    def set_city(self, city: str, lat: float, lon: float) -> None:
+        """Track the city whose real weather should apply (provider mode)."""
+        self.city = city
+        self.city_coords = (lat, lon)
 
     def _sample(self, region: str, near: WeatherKind | None = None) -> WeatherKind:
         weights = REGION_WEIGHTS.get(region, DEFAULT_WEIGHTS).copy()
@@ -111,6 +126,11 @@ class WeatherSystem:
     def update(self, game_minutes: float) -> WeatherKind | None:
         """Advance by game minutes. Returns the new condition if it changed."""
         self.thunder_cooldown = max(0.0, self.thunder_cooldown - game_minutes)
+
+        changed = self._poll_provider()
+        if self.live:
+            return changed
+
         self.minutes_until_change -= game_minutes
         if self.minutes_until_change > 0:
             return None
@@ -119,6 +139,26 @@ class WeatherSystem:
         if new != self.current:
             self.current = new
             return new
+        return None
+
+    def _poll_provider(self) -> WeatherKind | None:
+        """Apply real-world conditions when a provider is attached.
+
+        Returns the new condition if real data changed it; otherwise None.
+        While real data is available the simulated transitions are paused.
+        """
+        if self.provider is None or self.city is None:
+            return None
+        lat, lon = self.city_coords
+        self.provider.request(self.city, lat, lon)
+        kind = self.provider.get(self.city)
+        if kind is None:
+            self.live = False
+            return None
+        self.live = True
+        if kind != self.current:
+            self.current = kind
+            return kind
         return None
 
     def should_thunder(self) -> bool:

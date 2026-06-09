@@ -21,6 +21,11 @@ visual display mirrors all speech for sighted players and helpers.
 - **A living road** — dynamic regional weather that changes grip and safe
   speeds, construction and traffic zones, road hazards that demand quick
   braking, rest stops for refueling, and roadside rescue when you run dry.
+- **Real-world weather (optional)** — flip Settings → Weather source to
+  "real world" and each city uses its live current conditions from the free
+  [Open-Meteo](https://open-meteo.com) API. If it is raining in Chicago right
+  now, it is raining in your game. Works without an API key and falls back to
+  simulated weather offline.
 - **Route planning** — multiple route options per job with distance, highways,
   terrain, and weather forecasts.
 - **Original audio** — every sound effect and all three music tracks are

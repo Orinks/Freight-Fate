@@ -37,6 +37,20 @@ class GameContext:
         self.world: World = app.world
         self.economy: Economy = app.economy
         self.profile: Profile | None = None
+        self._real_weather = None
+
+    def real_weather_provider(self):
+        """Shared Open-Meteo provider when real weather is enabled, else None.
+
+        Created lazily and kept for the whole session so its cache spans trips.
+        """
+        if not self.settings.real_weather:
+            return None
+        if self._real_weather is None:
+            from .sim.real_weather import RealWeatherProvider
+
+            self._real_weather = RealWeatherProvider()
+        return self._real_weather
 
     def say(self, text: str, interrupt: bool = True) -> None:
         self.speech.say(text, interrupt)

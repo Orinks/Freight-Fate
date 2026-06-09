@@ -36,7 +36,7 @@ class DrivingState(State):
         self.truck.damage_pct = profile.truck_damage_pct
         self.start_damage = profile.truck_damage_pct
         region = ctx.world.cities[job.origin].region
-        self.weather = WeatherSystem(region)
+        self.weather = WeatherSystem(region, provider=ctx.real_weather_provider())
         self.trip = Trip(route, self.truck, self.weather,
                          time_scale=ctx.settings.time_scale)
         self.tutorial = Tutorial(ctx) if not profile.tutorial_done else None
@@ -192,11 +192,13 @@ class DrivingState(State):
                          "The pay is shrinking, but finish the delivery.")
 
     def _speak_weather(self) -> None:
-        forecast = self.weather.forecast(2)
-        ahead = ", then ".join(k.value for k in forecast)
-        self.ctx.say(f"Currently {self.weather.describe()}. "
-                     f"Safe speed about {self.weather.effects.safe_speed_mph:.0f}. "
-                     f"Ahead: {ahead}.")
+        source = "Live conditions" if self.weather.live else "Currently"
+        parts = [f"{source} {self.weather.describe()}.",
+                 f"Safe speed about {self.weather.effects.safe_speed_mph:.0f}."]
+        if not self.weather.live:
+            ahead = ", then ".join(k.value for k in self.weather.forecast(2))
+            parts.append(f"Ahead: {ahead}.")
+        self.ctx.say(" ".join(parts))
 
     # -- per-frame update -----------------------------------------------------------------
 

@@ -271,6 +271,11 @@ class SettingsState(MenuState):
                      lambda: self._volume("music_volume", 0.1)),
             MenuItem(lambda: f"Speech verbosity: {['terse', 'normal', 'chatty'][s.speech_verbosity]}",
                      lambda: self._cycle_verbosity(1)),
+            MenuItem(lambda: f"Weather source: {'real world' if s.real_weather else 'simulated'}",
+                     lambda: self._toggle_real_weather(1),
+                     help="Real world uses live conditions for each city from "
+                          "Open-Meteo. Needs an internet connection; falls back "
+                          "to simulated weather offline."),
             MenuItem("Back", self.go_back),
         ]
 
@@ -287,7 +292,7 @@ class SettingsState(MenuState):
                    lambda d: self._volume("master_volume", 0.1 * d),
                    lambda d: self._volume("sfx_volume", 0.1 * d),
                    lambda d: self._volume("music_volume", 0.1 * d),
-                   self._cycle_verbosity]
+                   self._cycle_verbosity, self._toggle_real_weather]
         if self.index < len(actions):
             actions[self.index](direction)
 
@@ -325,6 +330,10 @@ class SettingsState(MenuState):
 
     def _cycle_verbosity(self, d: int) -> None:
         self.ctx.settings.speech_verbosity = (self.ctx.settings.speech_verbosity + d) % 3
+        self._announce()
+
+    def _toggle_real_weather(self, _d: int) -> None:
+        self.ctx.settings.real_weather = not self.ctx.settings.real_weather
         self._announce()
 
     def go_back(self) -> None:

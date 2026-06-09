@@ -28,6 +28,8 @@ class City:
     state: str
     region: str
     locations: tuple[Location, ...]
+    lat: float = 0.0
+    lon: float = 0.0
 
 
 @dataclass(frozen=True)
@@ -88,7 +90,8 @@ class World:
         for name, c in data["cities"].items():
             locs = tuple(Location(loc["name"], loc["type"], tuple(loc["cargo"]))
                          for loc in c["locations"])
-            self.cities[name] = City(name, c["state"], c["region"], locs)
+            self.cities[name] = City(name, c["state"], c["region"], locs,
+                                     float(c.get("lat", 0.0)), float(c.get("lon", 0.0)))
 
         self.legs: list[Leg] = [
             Leg(leg["from"], leg["to"], float(leg["miles"]), leg["highway"],
