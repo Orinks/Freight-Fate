@@ -1,5 +1,41 @@
 # Changelog
 
+## 1.2.0 — 2026-06-09
+
+### Added
+- **BASS audio backend** via [sound_lib](https://pypi.org/project/sound_lib/)
+  (pinned `==0.8.8`; PyPI's version ordering for this package is broken and an
+  unpinned install resolves to a stale 2022 build). The truck engine is now a
+  single loop whose playback frequency tracks RPM in real time, smoothed with
+  BASS attribute slides — no more four-band crossfade seams. pygame.mixer
+  remains as an automatic fallback when sound_lib/BASS cannot initialize
+  (`FREIGHT_FATE_AUDIO_BACKEND=pygame` forces it), and headless environments
+  use BASS's "no sound" device so CI runs the full audio pipeline silently.
+- **Garage upgrades** (Garage → Upgrades), money-gated and saved on the
+  profile: engine tune (+10% torque per tier, two tiers), aerodynamic kit
+  (−12% drag), long-range tank (+50 gallons), and reinforced brakes (fade
+  onset pushed 150 degrees hotter). Upgrades feed straight into the driving
+  physics.
+- **A second truck**: the heavy hauler (Garage → Trucks) — a quarter more
+  torque and a 200-gallon tank, but blunter aerodynamics and a thirstier
+  engine. Buy it once, then switch between owned trucks at any garage.
+- **Freight market**: every cargo class carries a pay multiplier (0.8–1.3)
+  that drifts each in-game day on a seeded random walk persisted in the
+  profile. Job descriptions call out hot, strong, soft, and cold markets,
+  and the job board opens with a spoken market watch headline.
+
+### Changed
+- Truck status and garage refueling respect the active truck's actual tank
+  size instead of assuming 150 gallons.
+- Save format version is now 2 (older saves load fine; new fields get
+  defaults).
+
+### Notes
+- BASS is proprietary software, free for non-commercial use. If Freight Fate
+  is ever sold commercially, a paid license from
+  [un4seen developments](https://www.un4seen.com/bass.html#license) is
+  required. See the README's license section.
+
 ## 1.1.0 — 2026-06-09
 
 ### Added

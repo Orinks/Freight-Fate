@@ -1,9 +1,10 @@
-"""City hub: job board, garage, career stats, and route selection."""
+"""City hub: job board, garage, upgrades, trucks, and route selection."""
 
 from __future__ import annotations
 
 from ..data.world import Route
 from ..models.jobs import Job, JobBoard
+from ..models.trucks import TRUCK_CATALOG, UPGRADE_CATALOG, TruckModel, Upgrade
 from .base import MenuItem, MenuState
 
 
@@ -55,8 +56,9 @@ class CityMenuState(MenuState):
 
     def _job_board(self) -> None:
         p = self.ctx.profile
+        p.market.advance_to(p.market_day())
         jobs = self._board.offers(p.current_city, p.career.endorsements,
-                                  level=p.career.level)
+                                  level=p.career.level, market=p.market)
         self._jobs_cache = jobs
         self.ctx.push_state(JobBoardState(self.ctx, jobs))
 
@@ -74,11 +76,15 @@ class CityMenuState(MenuState):
 
     def _truck_status(self) -> None:
         p = self.ctx.profile
-        fuel_pct = p.truck_fuel_gal / 150.0 * 100
+        specs = p.truck_specs()
+        truck = TRUCK_CATALOG.get(p.truck, TRUCK_CATALOG["rig"])
+        fuel_pct = p.truck_fuel_gal / specs.fuel_tank_gal * 100
         damage = p.truck_damage_pct
         condition = ("excellent" if damage < 5 else "good" if damage < 20
                      else "worn" if damage < 50 else "poor")
-        self.ctx.say(f"Fuel {fuel_pct:.0f} percent, {p.truck_fuel_gal:.0f} gallons. "
+        self.ctx.say(f"Driving the {truck.label}. "
+                     f"Fuel {fuel_pct:.0f} percent, {p.truck_fuel_gal:.0f} gallons "
+                     f"of {specs.fuel_tank_gal:.0f}. "
                      f"Truck condition {condition}, {damage:.0f} percent damage.")
 
     def _save(self) -> None:
@@ -112,15 +118,23 @@ class GarageState(MenuState):
                      help="Fill the tank at this region's diesel price."),
             MenuItem(self._repair_label, self._repair,
                      help="Restore the truck to full condition."),
+            MenuItem("Upgrades", self._upgrades,
+                     help="Buy performance upgrades for your truck: more torque, "
+                          "less drag, a bigger tank, stronger brakes."),
+            MenuItem("Trucks", self._trucks,
+                     help="Buy a new truck, or switch between trucks you own."),
             MenuItem("Back", self.go_back),
         ]
 
     def _region(self) -> str:
         return self.ctx.world.cities[self.ctx.profile.current_city].region
 
+    def _tank_gal(self) -> float:
+        return self.ctx.profile.truck_specs().fuel_tank_gal
+
     def _fuel_label(self) -> str:
         p = self.ctx.profile
-        need = 150.0 - p.truck_fuel_gal
+        need = self._tank_gal() - p.truck_fuel_gal
         if need < 1:
             return "Fuel: tank is full"
         cost = self.ctx.economy.fuel_cost(self._region(), need)
@@ -135,7 +149,8 @@ class GarageState(MenuState):
 
     def _refuel(self) -> None:
         p = self.ctx.profile
-        need = 150.0 - p.truck_fuel_gal
+        tank = self._tank_gal()
+        need = tank - p.truck_fuel_gal
         if need < 1:
             self.ctx.say("The tank is already full.")
             return
@@ -145,7 +160,7 @@ class GarageState(MenuState):
             self.ctx.say(f"Not enough money. You need {cost:,.0f} dollars.")
             return
         p.money -= cost
-        p.truck_fuel_gal = 150.0
+        p.truck_fuel_gal = tank
         self.ctx.audio.play("vehicle/fuel_pump")
         self.ctx.say(f"Tank filled. {cost:,.0f} dollars. "
                      f"You have {p.money:,.0f} dollars left.")
@@ -168,6 +183,120 @@ class GarageState(MenuState):
                      f"You have {p.money:,.0f} dollars left.")
         self.refresh()
 
+    def _upgrades(self) -> None:
+        self.ctx.push_state(UpgradeShopState(self.ctx))
+
+    def _trucks(self) -> None:
+        self.ctx.push_state(TruckShopState(self.ctx))
+
+
+class UpgradeShopState(MenuState):
+    title = "Upgrades"
+    intro_help = ("Each entry speaks the upgrade, its price, and what you already "
+                  "own. Enter buys the next tier. Press F1 on an upgrade to hear "
+                  "what it does. Escape returns to the garage.")
+
+    def announce_entry(self) -> None:
+        p = self.ctx.profile
+        self.ctx.say(f"Upgrades. You have {p.money:,.0f} dollars. {self.current_text()}")
+
+    def build_items(self) -> list[MenuItem]:
+        items = [MenuItem(lambda u=u: self._label(u), lambda u=u: self._buy(u),
+                          help=u.description)
+                 for u in UPGRADE_CATALOG.values()]
+        items.append(MenuItem("Back", self.go_back))
+        return items
+
+    def _label(self, upgrade: Upgrade) -> str:
+        owned = self.ctx.profile.upgrades.get(upgrade.key, 0)
+        if owned >= upgrade.max_tier:
+            tiers = f", tier {owned} of {upgrade.max_tier}" if upgrade.max_tier > 1 else ""
+            return f"{upgrade.label}: owned{tiers}"
+        price = upgrade.prices[owned]
+        if upgrade.max_tier > 1:
+            owned_part = f", tier {owned} owned" if owned else ""
+            return (f"{upgrade.label}, tier {owned + 1} of {upgrade.max_tier}: "
+                    f"{price:,.0f} dollars{owned_part}")
+        return f"{upgrade.label}: {price:,.0f} dollars"
+
+    def _buy(self, upgrade: Upgrade) -> None:
+        p = self.ctx.profile
+        owned = p.upgrades.get(upgrade.key, 0)
+        if owned >= upgrade.max_tier:
+            self.ctx.say(f"{upgrade.label} is already fully installed.")
+            return
+        price = upgrade.prices[owned]
+        if p.money < price:
+            self.ctx.audio.play("ui/error")
+            self.ctx.say(f"Not enough money. {upgrade.label} costs {price:,.0f} dollars "
+                         f"and you have {p.money:,.0f}.")
+            return
+        p.money -= price
+        p.upgrades[upgrade.key] = owned + 1
+        self.ctx.save_profile()
+        self.ctx.audio.play("ui/cash")
+        tier_part = (f" tier {owned + 1}" if upgrade.max_tier > 1 else "")
+        self.ctx.say(f"{upgrade.label}{tier_part} installed for {price:,.0f} dollars. "
+                     f"You have {p.money:,.0f} dollars left.")
+        self.refresh()
+
+
+class TruckShopState(MenuState):
+    title = "Trucks"
+    intro_help = ("Each entry speaks the truck, its price, and whether you own it. "
+                  "Enter buys a truck you do not own, or switches to one you do. "
+                  "Press F1 on a truck to hear its character. Escape returns to "
+                  "the garage.")
+
+    def announce_entry(self) -> None:
+        p = self.ctx.profile
+        self.ctx.say(f"Trucks. You have {p.money:,.0f} dollars. {self.current_text()}")
+
+    def build_items(self) -> list[MenuItem]:
+        items = [MenuItem(lambda m=m: self._label(m), lambda m=m: self._pick(m),
+                          help=m.description)
+                 for m in TRUCK_CATALOG.values()]
+        items.append(MenuItem("Back", self.go_back))
+        return items
+
+    def _label(self, model: TruckModel) -> str:
+        p = self.ctx.profile
+        name = model.label.capitalize()
+        if model.key == p.truck:
+            return f"{name}: currently driving"
+        if model.key in p.owned_trucks:
+            return f"{name}: owned, switch to it"
+        return f"{name}: buy for {model.price:,.0f} dollars"
+
+    def _pick(self, model: TruckModel) -> None:
+        p = self.ctx.profile
+        if model.key == p.truck:
+            self.ctx.say(f"You are already driving the {model.label}.")
+            return
+        if model.key not in p.owned_trucks:
+            if p.money < model.price:
+                self.ctx.audio.play("ui/error")
+                self.ctx.say(f"Not enough money. The {model.label} costs "
+                             f"{model.price:,.0f} dollars and you have {p.money:,.0f}.")
+                return
+            p.money -= model.price
+            p.owned_trucks.append(model.key)
+            self.ctx.audio.play("ui/cash")
+            self._switch_to(model)
+            self.ctx.say(f"You bought the {model.label} for {model.price:,.0f} dollars "
+                         f"and it is now your truck. You have {p.money:,.0f} dollars left.")
+            return
+        self.ctx.audio.play("vehicle/truck_door")
+        self._switch_to(model)
+        self.ctx.say(f"You are now driving the {model.label}.")
+
+    def _switch_to(self, model: TruckModel) -> None:
+        p = self.ctx.profile
+        p.truck = model.key
+        p.truck_fuel_gal = min(p.truck_fuel_gal, p.truck_specs().fuel_tank_gal)
+        self.ctx.save_profile()
+        self.refresh()
+
 
 class JobBoardState(MenuState):
     title = "Job board"
@@ -184,6 +313,7 @@ class JobBoardState(MenuState):
             self.ctx.say("Job board. No jobs available right now. Press Escape to go back.")
         else:
             self.ctx.say(f"Job board. {n} job{'s' if n != 1 else ''} available. "
+                         f"{self.ctx.profile.market.summary()} "
                          + self.current_text())
 
     def build_items(self) -> list[MenuItem]:

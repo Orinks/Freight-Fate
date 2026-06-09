@@ -30,9 +30,9 @@ class DrivingState(State):
         self.job = job
         self.route = route
         profile = ctx.profile
-        self.truck = TruckState()
+        self.truck = TruckState(specs=profile.truck_specs())
         self.truck.transmission.automatic = ctx.settings.automatic_transmission
-        self.truck.fuel_gal = profile.truck_fuel_gal
+        self.truck.fuel_gal = min(profile.truck_fuel_gal, self.truck.specs.fuel_tank_gal)
         self.truck.damage_pct = profile.truck_damage_pct
         self.start_damage = profile.truck_damage_pct
         region = ctx.world.cities[job.origin].region
@@ -530,6 +530,7 @@ class ArrivalState(MenuState):
         p.truck_damage_pct = d.truck.damage_pct
         announcements = p.career.record_delivery(job.distance_mi, pay, on_time, trip_damage)
         p.game_hours += hours
+        p.market.advance_to(p.market_day())
         self.ctx.save_profile()
 
         self.summary_parts.insert(0, (

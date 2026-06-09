@@ -18,6 +18,13 @@ visual display mirrors all speech for sighted players and helpers.
 - **Real driving** — a tuned Class 8 truck simulation: 450 horsepower,
   ten gears (manual with clutch, or automatic), engine braking, grades,
   stalls, brake fade, and honest fuel economy.
+- **Trucks and upgrades** — earn your way into a heavy hauler with more
+  torque and a bigger tank (and worse aerodynamics), and outfit any truck
+  with an engine tune, aerodynamic kit, long-range tank, or reinforced
+  brakes. Every purchase changes the physics.
+- **A living market** — each cargo class has a pay rate that drifts day by
+  day. The job board tells you when electronics are hot or bulk freight has
+  gone cold; chase the strong markets.
 - **A living road** — dynamic regional weather that changes grip and safe
   speeds, construction and traffic zones, road hazards that demand quick
   braking, rest stops for refueling, and roadside rescue when you run dry.
@@ -29,7 +36,10 @@ visual display mirrors all speech for sighted players and helpers.
 - **Route planning** — multiple route options per job with distance, highways,
   terrain, and weather forecasts.
 - **Original audio** — every sound effect and all three music tracks are
-  procedurally synthesized and dedicated to the public domain (CC0).
+  procedurally synthesized and dedicated to the public domain (CC0). Audio
+  plays through BASS (via [sound_lib](https://pypi.org/project/sound_lib/)),
+  with the engine note pitch-tracking RPM in real time; pygame.mixer takes
+  over automatically if BASS cannot initialize.
 - **Screen reader native** — menus with first-letter navigation, contextual
   F1 help everywhere, on-demand information keys while driving, and three
   speech verbosity levels.
@@ -99,3 +109,11 @@ randomness — see [CREDITS.md](src/freight_fate/assets/sounds/CREDITS.md).
 
 Code is [MIT](LICENSE). All bundled audio is
 [CC0](https://creativecommons.org/publicdomain/zero/1.0/).
+
+**BASS license caveat:** audio playback uses the
+[BASS](https://www.un4seen.com/) library (through the `sound_lib` Python
+package), which is proprietary and **free for non-commercial use only**. If
+Freight Fate is ever sold commercially (Steam, itch.io paid downloads, and
+so on), a paid license must be purchased from
+[un4seen developments](https://www.un4seen.com/bass.html#license) first.
+The game falls back to pygame.mixer automatically when BASS is unavailable.
