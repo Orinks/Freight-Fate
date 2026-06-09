@@ -89,6 +89,42 @@ def test_bass_engine_uses_single_pitched_loop(monkeypatch):
     a.shutdown()
 
 
+def test_bass_one_shots_survive_garbage_collection(monkeypatch):
+    # Channel.__del__ in sound_lib frees the BASS handle on garbage
+    # collection; the backend must hold a reference until playback ends,
+    # or every one-shot (menu sounds, horn, warnings) is cut off instantly
+    import gc
+
+    monkeypatch.delenv("FREIGHT_FATE_AUDIO_BACKEND", raising=False)
+    a = AudioEngine()
+    if a.backend_name != "bass":
+        pytest.skip("BASS backend unavailable")
+    impl = a._impl
+    a.play("ui/menu_move")
+    gc.collect()
+    assert impl._retained
+    assert impl._retained[-1].is_playing
+    a.shutdown()
+
+
+def test_bass_fading_loops_stay_alive_during_fade(monkeypatch):
+    import gc
+
+    monkeypatch.delenv("FREIGHT_FATE_AUDIO_BACKEND", raising=False)
+    a = AudioEngine()
+    if a.backend_name != "bass":
+        pytest.skip("BASS backend unavailable")
+    impl = a._impl
+    a.set_weather("weather/rain_light", 0.8)
+    assert impl._loops
+    a.set_weather(None)  # 1200 ms fade-out
+    gc.collect()
+    assert not impl._loops
+    assert impl._retained
+    assert impl._retained[-1].is_playing  # still fading, not cut off
+    a.shutdown()
+
+
 def test_bass_headless_uses_no_sound_device(monkeypatch):
     # conftest sets SDL_AUDIODRIVER=dummy, which must route BASS to the
     # "no sound" device so CI runs the full pipeline without hardware
