@@ -24,6 +24,7 @@ from __future__ import annotations
 import contextlib
 import logging
 import os
+import sys
 from pathlib import Path
 
 import pygame
@@ -285,8 +286,15 @@ class _BassBackend:
 
     def _stream(self, path: Path, looping: bool):
         """A fresh stream for one playback; autofreed once it stops."""
+        kwargs: dict = {"file": str(path), "autofree": True}
+        if sys.platform.startswith("linux"):
+            # BASS_UNICODE (UTF-16 paths) is Windows-only; sound_lib handles
+            # macOS itself but passes the flag on Linux, where BASS then
+            # rejects the file. Hand over a filesystem-encoded path instead.
+            kwargs["file"] = str(path).encode(sys.getfilesystemencoding())
+            kwargs["unicode"] = False
         try:
-            stream = self._FileStream(file=str(path), autofree=True)
+            stream = self._FileStream(**kwargs)
         except self._BassError:
             log.warning("Could not open stream: %s", path, exc_info=True)
             return None

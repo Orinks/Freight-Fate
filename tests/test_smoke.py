@@ -35,10 +35,14 @@ def test_full_game_flow_headless():
         assert app.ctx.profile is not None
         assert app.ctx.profile.name == "Smoke"
 
-        # open job board, accept the first job
+        # open job board, accept the first job we hold the endorsement for
+        # (the board may show one locked "teaser" job, sometimes sorted first)
         app.state.handle_event(key_event(pygame.K_RETURN))
         assert isinstance(app.state, JobBoardState)
         assert app.state.jobs
+        board = app.state
+        while board.jobs[board.index].cargo.endorsement:
+            board.handle_event(key_event(pygame.K_DOWN))
         app.state.handle_event(key_event(pygame.K_RETURN))
         assert isinstance(app.state, RouteSelectState)
         app.state.handle_event(key_event(pygame.K_RETURN))
@@ -209,6 +213,9 @@ def test_pause_and_abandon_returns_to_city():
         assert isinstance(app.state, NameEntryState)
         app.state.handle_event(key_event(pygame.K_RETURN))  # default name
         app.state.handle_event(key_event(pygame.K_RETURN))  # job board
+        board = app.state
+        while board.jobs[board.index].cargo.endorsement:  # skip locked teasers
+            board.handle_event(key_event(pygame.K_DOWN))
         app.state.handle_event(key_event(pygame.K_RETURN))  # accept job
         app.state.handle_event(key_event(pygame.K_RETURN))  # pick route
         assert isinstance(app.state, DrivingState)
