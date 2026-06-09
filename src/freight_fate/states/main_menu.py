@@ -10,6 +10,21 @@ from ..settings import TIME_SCALES
 from .base import MenuItem, MenuState, State
 
 
+def enter_world(ctx) -> None:
+    """Resume a saved mid-trip delivery if there is one, else the city hub."""
+    from .city import CityMenuState
+    from .driving import DrivingState
+
+    p = ctx.profile
+    if p.active_trip:
+        state = DrivingState.from_snapshot(ctx, p.active_trip)
+        if state is not None:
+            ctx.push_state(state)
+            return
+        p.active_trip = None  # unreadable snapshot; do not retry every load
+    ctx.push_state(CityMenuState(ctx))
+
+
 class MainMenuState(MenuState):
     title = "Freight Fate"
 
@@ -46,14 +61,15 @@ class MainMenuState(MenuState):
         self.ctx.say("Press Enter on Quit to exit the game.")
 
     def _continue(self) -> None:
-        from .city import CityMenuState
-
         path = Profile.list_saves()[0]
         self.ctx.profile = Profile.load(path)
         p = self.ctx.profile
-        self.ctx.say(f"Welcome back, {p.name}. You are in {p.current_city} "
-                     f"with {p.money:,.0f} dollars.", interrupt=True)
-        self.ctx.push_state(CityMenuState(self.ctx))
+        if p.active_trip:
+            self.ctx.say(f"Welcome back, {p.name}.", interrupt=True)
+        else:
+            self.ctx.say(f"Welcome back, {p.name}. You are in {p.current_city} "
+                         f"with {p.money:,.0f} dollars.", interrupt=True)
+        enter_world(self.ctx)
 
     def _load_menu(self) -> None:
         self.ctx.push_state(LoadDriverState(self.ctx))
@@ -78,19 +94,20 @@ class LoadDriverState(MenuState):
                 profile = Profile.load(path)
             except Exception:
                 continue
+            destination = (profile.active_trip or {}).get("job", {}).get("destination")
+            where = (f"on the road to {destination}" if destination
+                     else f"in {profile.current_city}")
             label = (f"{profile.name}: level {profile.career.level}, "
-                     f"{profile.money:,.0f} dollars, in {profile.current_city}")
+                     f"{profile.money:,.0f} dollars, {where}")
             items.append(MenuItem(label, lambda p=profile: self._pick(p)))
         items.append(MenuItem("Back", self.go_back))
         return items
 
     def _pick(self, profile: Profile) -> None:
-        from .city import CityMenuState
-
         self.ctx.profile = profile
         self.ctx.say(f"Welcome back, {profile.name}.")
         self.ctx.pop_state()
-        self.ctx.push_state(CityMenuState(self.ctx))
+        enter_world(self.ctx)
 
 
 class NameEntryState(State):

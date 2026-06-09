@@ -153,6 +153,22 @@ class World:
         legs.reverse()
         return Route(cities, legs)
 
+    def route_from_cities(self, cities: list[str]) -> Route | None:
+        """Rebuild a route from its city sequence (used by saved trips).
+
+        Returns None if any hop is missing, so callers can fall back
+        gracefully when a save references a road that no longer exists.
+        """
+        if len(cities) < 2:
+            return None
+        legs: list[Leg] = []
+        for a, b in zip(cities, cities[1:], strict=False):
+            leg = next((x for x in self._adjacency.get(a, ()) if x.other(a) == b), None)
+            if leg is None:
+                return None
+            legs.append(leg)
+        return Route(list(cities), legs)
+
     def route_options(self, start: str, end: str, count: int = 3) -> list[Route]:
         """Up to ``count`` distinct routes, fastest first."""
         routes: list[Route] = []

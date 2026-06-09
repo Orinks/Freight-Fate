@@ -7,14 +7,19 @@ information keys, and important changes announce themselves.
 
 from __future__ import annotations
 
+import logging
+import random
+
 import pygame
 
 from ..data.world import Route
-from ..models.jobs import Job
+from ..models.jobs import CARGO_CATALOG, Job
 from ..sim.trip import Trip, TripEventKind
 from ..sim.vehicle import TruckState
 from ..sim.weather import WeatherSystem
 from .base import MenuItem, MenuState, State
+
+log = logging.getLogger(__name__)
 
 GEAR_KEYS = {
     pygame.K_1: 1, pygame.K_2: 2, pygame.K_3: 3, pygame.K_4: 4, pygame.K_5: 5,
@@ -25,10 +30,12 @@ HAZARD_SAFE_MPH = 25.0
 
 
 class DrivingState(State):
-    def __init__(self, ctx, job: Job, route: Route) -> None:
+    def __init__(self, ctx, job: Job, route: Route, trip_seed: int | None = None) -> None:
         super().__init__(ctx)
         self.job = job
         self.route = route
+        self.trip_seed = trip_seed if trip_seed is not None else random.randrange(2**31)
+        self.resumed = False
         profile = ctx.profile
         self.truck = TruckState(specs=profile.truck_specs())
         self.truck.transmission.automatic = ctx.settings.automatic_transmission
@@ -38,7 +45,7 @@ class DrivingState(State):
         region = ctx.world.cities[job.origin].region
         self.weather = WeatherSystem(region, provider=ctx.real_weather_provider())
         self.trip = Trip(route, self.truck, self.weather,
-                         time_scale=ctx.settings.time_scale)
+                         time_scale=ctx.settings.time_scale, seed=self.trip_seed)
         self.tutorial = Tutorial(ctx) if not profile.tutorial_done else None
 
         self._hazard_deadline: float | None = None
@@ -50,6 +57,55 @@ class DrivingState(State):
         self._signal_timer = 0.0
         self._status_text = "Press E to start the engine."
 
+    # -- save and resume -----------------------------------------------------------
+
+    def snapshot(self) -> dict:
+        """Everything needed to resume this delivery from a save."""
+        job = self.job
+        return {
+            "job": {
+                "cargo": job.cargo.key,
+                "weight_tons": job.weight_tons,
+                "origin": job.origin,
+                "origin_location": job.origin_location,
+                "destination": job.destination,
+                "distance_mi": job.distance_mi,
+                "pay": job.pay,
+                "deadline_game_h": job.deadline_game_h,
+                "market_mult": job.market_mult,
+            },
+            "route_cities": list(self.route.cities),
+            "trip_seed": self.trip_seed,
+            "position_mi": self.trip.position_mi,
+            "game_minutes": self.trip.game_minutes,
+            "start_damage": self.start_damage,
+            "speeding_strikes": self.speeding_strikes,
+        }
+
+    @classmethod
+    def from_snapshot(cls, ctx, data: dict) -> DrivingState | None:
+        """Rebuild a saved delivery; None if the snapshot is unreadable."""
+        try:
+            j = data["job"]
+            cargo = CARGO_CATALOG[j["cargo"]]
+            route = ctx.world.route_from_cities(data["route_cities"])
+            if route is None:
+                return None
+            job = Job(cargo, float(j["weight_tons"]), j["origin"],
+                      j["origin_location"], j["destination"],
+                      float(j["distance_mi"]), float(j["pay"]),
+                      float(j["deadline_game_h"]),
+                      market_mult=float(j.get("market_mult", 1.0)))
+            state = cls(ctx, job, route, trip_seed=int(data["trip_seed"]))
+            state.resumed = True
+            state.start_damage = float(data["start_damage"])
+            state.speeding_strikes = int(data["speeding_strikes"])
+            state.trip.restore(float(data["position_mi"]), float(data["game_minutes"]))
+            return state
+        except (KeyError, TypeError, ValueError):
+            log.warning("Could not resume saved trip", exc_info=True)
+            return None
+
     # -- lifecycle ---------------------------------------------------------------
 
     def enter(self) -> None:
@@ -58,10 +114,21 @@ class DrivingState(State):
         self.ctx.audio.set_weather(self.weather.effects.sound)
         self.ctx.audio.set_wind(self.weather.effects.wind)
         mode = "automatic" if self.truck.transmission.automatic else "manual"
-        self.ctx.say(f"You are at the wheel. Transmission is {mode}. "
-                     f"Weather: {self.weather.describe()}. "
-                     "Press E to start the engine, F1 for the controls.",
-                     interrupt=False)
+        if self.resumed:
+            hours_used = self.trip.game_minutes / 60.0
+            self.ctx.say(
+                f"Resuming your delivery: {self.job.weight_tons:.0f} tons of "
+                f"{self.job.cargo.label} to {self.job.destination}. "
+                f"{self.trip.progress_summary(self.ctx.settings.imperial_units)} "
+                f"{hours_used:.1f} hours used of {self.job.deadline_game_h:.0f}. "
+                f"Transmission is {mode}. Weather: {self.weather.describe()}. "
+                "You are parked. Press E to start the engine.",
+                interrupt=False)
+        else:
+            self.ctx.say(f"You are at the wheel. Transmission is {mode}. "
+                         f"Weather: {self.weather.describe()}. "
+                         "Press E to start the engine, F1 for the controls.",
+                         interrupt=False)
         if self.tutorial:
             self.tutorial.begin()
 
@@ -453,7 +520,8 @@ class PauseMenuState(MenuState):
                      help="Give up this delivery. Costs five hundred dollars and "
                           "reputation, and returns you to the origin city."),
             MenuItem("Save and quit to main menu", self._quit_to_menu,
-                     help="The job is abandoned, but your money and progress are saved."),
+                     help="Your money, truck, and trip progress are saved. "
+                          "The delivery resumes from here when you continue."),
         ]
 
     def go_back(self) -> None:
@@ -486,6 +554,7 @@ class PauseMenuState(MenuState):
         p.career.reputation = max(0.0, p.career.reputation - 5.0)
         p.truck_fuel_gal = self.driving.truck.fuel_gal
         p.truck_damage_pct = self.driving.truck.damage_pct
+        p.active_trip = None
         self.ctx.save_profile()
         self.ctx.say(f"Job abandoned. You paid a five hundred dollar penalty and "
                      f"returned to {p.current_city}.", interrupt=True)
@@ -498,8 +567,10 @@ class PauseMenuState(MenuState):
         p = self.ctx.profile
         p.truck_fuel_gal = self.driving.truck.fuel_gal
         p.truck_damage_pct = self.driving.truck.damage_pct
+        p.active_trip = self.driving.snapshot()
         self.ctx.save_profile()
-        self.ctx.say("Saved. The delivery was left behind.", interrupt=True)
+        self.ctx.say("Saved. Your delivery will resume where you left off.",
+                     interrupt=True)
         self.ctx.reset_to(MainMenuState(self.ctx))
 
 
@@ -531,6 +602,7 @@ class ArrivalState(MenuState):
         announcements = p.career.record_delivery(job.distance_mi, pay, on_time, trip_damage)
         p.game_hours += hours
         p.market.advance_to(p.market_day())
+        p.active_trip = None
         self.ctx.save_profile()
 
         self.summary_parts.insert(0, (

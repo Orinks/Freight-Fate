@@ -173,6 +173,21 @@ class Trip:
         toward = self.route.cities[self.current_leg_index + 1]
         return f"{dist}. On {leg.highway} toward {toward}."
 
+    def restore(self, position_mi: float, game_minutes: float) -> None:
+        """Jump to a saved point without re-announcing what is behind it."""
+        self.position_mi = max(0.0, min(position_mi, self.total_miles))
+        self.game_minutes = game_minutes
+        for stop in self.stops:
+            if stop.at_mi <= self.position_mi:
+                self._announced_stops.add(stop.name)
+        for i, start in enumerate(self._leg_starts):
+            if i and self.position_mi >= start:
+                self._announced_cities.add(i)
+        for zone in self.zones:
+            if zone.start_mi <= self.position_mi <= zone.end_mi:
+                self._active_zone = zone
+                break
+
     # -- main update ----------------------------------------------------------------
 
     def update(self, dt: float) -> list[TripEvent]:

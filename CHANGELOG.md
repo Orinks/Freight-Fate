@@ -1,5 +1,22 @@
 # Changelog
 
+## 1.2.1 — 2026-06-09
+
+### Added
+- **Mid-trip save and resume.** "Save and quit to main menu" while driving
+  now snapshots the delivery — job, route, position on the route, clock,
+  speeding strikes, and trip damage baseline — into the profile. Continue
+  (and Load driver) resume the drive right where you left off, parked with
+  the engine off, with a spoken recap of cargo, destination, remaining
+  miles, and hours used. Construction and traffic zones reappear in the
+  same places thanks to a persisted trip seed, and stops or cities already
+  passed are not re-announced. The Load driver list shows mid-delivery
+  profiles as "on the road to <city>".
+
+### Fixed
+- "Save and quit to main menu" no longer silently discards the delivery
+  (previously Continue always returned to the city with the job gone).
+
 ## 1.2.0 — 2026-06-09
 
 ### Added

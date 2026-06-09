@@ -53,6 +53,7 @@ class Profile:
     truck: str = "rig"               # key into trucks.TRUCK_CATALOG
     owned_trucks: list[str] = field(default_factory=lambda: ["rig"])
     upgrades: dict[str, int] = field(default_factory=dict)  # upgrade key -> tier
+    active_trip: dict | None = None  # mid-delivery snapshot, see DrivingState
     career: Career = field(default_factory=Career)
     market: Market = field(default_factory=Market)
 
