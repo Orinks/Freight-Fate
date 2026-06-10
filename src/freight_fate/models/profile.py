@@ -14,10 +14,11 @@ import sys
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
 
+from ..sim.hos import HosClock
 from .career import Career
 from .market import Market
 
-SAVE_VERSION = 2
+SAVE_VERSION = 3
 STARTING_MONEY = 5_000.0
 DEFAULT_CITY = "Chicago"
 
@@ -54,8 +55,10 @@ class Profile:
     owned_trucks: list[str] = field(default_factory=lambda: ["rig"])
     upgrades: dict[str, int] = field(default_factory=dict)  # upgrade key -> tier
     active_trip: dict | None = None  # mid-delivery snapshot, see DrivingState
+    fatigue: float = 0.0             # 0 fresh .. 100 exhausted
     career: Career = field(default_factory=Career)
     market: Market = field(default_factory=Market)
+    hos: HosClock = field(default_factory=HosClock)  # hours-of-service shift clock
 
     # -- serialization -------------------------------------------------------
 
@@ -70,9 +73,10 @@ class Profile:
         d.pop("version", None)
         career = Career(**d.pop("career", {}))
         market = Market(**d.pop("market", {}))
-        known = {f for f in cls.__dataclass_fields__ if f not in ("career", "market")}
+        hos = HosClock.from_dict(d.pop("hos", None))  # absent in v2 saves: fresh clock
+        known = {f for f in cls.__dataclass_fields__ if f not in ("career", "market", "hos")}
         kwargs = {k: v for k, v in d.items() if k in known}
-        return cls(career=career, market=market, **kwargs)
+        return cls(career=career, market=market, hos=hos, **kwargs)
 
     # -- truck ------------------------------------------------------------------
 

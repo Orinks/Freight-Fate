@@ -1,5 +1,50 @@
 # Changelog
 
+## 1.5.0 — 2026-06-10
+
+"On the Clock": hours of service, fatigue, day and night, and overnight
+parking. Everything runs on the in-game clock (`settings.time_scale`
+compresses it as usual), never wall time.
+
+### Added
+- **Hours of service.** Simplified FMCSA rules per shift: 11 hours of
+  driving inside a 14-hour duty window, a 30-minute break required after
+  8 hours at the wheel, and a 10-hour sleep to reset. Spoken warnings at
+  2 hours, 1 hour, and 30 minutes before each limit (each fires once),
+  and at the violation itself. The C key now reports the clock time and
+  HOS status alongside the deadline; Tab includes it at normal and chatty
+  verbosity. Driving past a limit risks roadside inspections with
+  escalating fines (200 to 2,000 dollars) and reputation hits — never a
+  game over. A new Settings entry, "Hours of service", picks realistic,
+  relaxed (every limit 25 percent longer), or off.
+- **Rest stop menu.** Pressing T at a rest stop now opens a fully spoken
+  menu: refuel (as before), take a 30-minute break, or sleep 10 hours.
+  Resting advances the in-game clock, so the delivery deadline keeps
+  counting — that is the tension.
+- **Fatigue.** Builds with continuous driving (faster at night), eases
+  with breaks, and clears with sleep. A drowsy driver yawns, drifts onto
+  the rumble strip, hears spoken drowsiness warnings, and reacts late to
+  hazards (the reaction window shrinks up to 40 percent). Deterministic
+  under the trip seed.
+- **Day/night cycle.** Dawn, day, dusk, and night derived from the career
+  clock (new careers still start at 6 AM). Nights bring sparser traffic
+  zones, a higher hazard chance, a cricket-and-air night ambience layer,
+  and the previously unused "Night Haul" track while driving. V, Tab, and
+  C mention the time of day, and arrivals speak the clock ("It is 11 PM").
+- **Overnight truck parking.** Arriving at a rest stop between 8 PM and
+  4 AM, the lot may be full — more likely as the evening wears on,
+  deterministic per trip seed. A spoken menu offers driving on to the next
+  stop or shoulder parking: a full HOS reset but poor rest (fatigue floor
+  of 30) and a 15 percent chance of a 150-dollar ticket.
+- New manual page "Hours and rest"; F1 help on all new menus.
+- New procedural sounds: `ambient/night` and `driver/yawn`
+  (regenerate with `tools/generate_audio.py`).
+
+### Compatibility
+- Save format version is now 3. Old v2 profiles and pre-1.5 mid-trip
+  snapshots load cleanly, defaulting to a fresh HOS clock and a rested
+  driver.
+
 ## 1.4.0 — 2026-06-10
 
 ### Added

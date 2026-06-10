@@ -14,6 +14,8 @@ import pygame
 
 from ..data.world import Route
 from ..models.jobs import CARGO_CATALOG, Job
+from ..sim import hos
+from ..sim.hos import HosClock, clock_text, is_night, time_of_day
 from ..sim.trip import Trip, TripEventKind
 from ..sim.vehicle import TruckState
 from ..sim.weather import WeatherSystem
@@ -45,9 +47,15 @@ class DrivingState(State):
         region = ctx.world.cities[job.origin].region
         self.weather = WeatherSystem(region, provider=ctx.real_weather_provider())
         self.trip = Trip(route, self.truck, self.weather,
-                         time_scale=ctx.settings.time_scale, seed=self.trip_seed)
+                         time_scale=ctx.settings.time_scale, seed=self.trip_seed,
+                         start_hour=profile.game_hours % 24.0)
         self.tutorial = Tutorial(ctx) if not profile.tutorial_done else None
 
+        self.hos = profile.hos          # shift clock lives on the profile
+        self.hos_fine_count = 0         # escalates with each failed inspection
+        self._drowsy_said = False
+        self._severe_said = False
+        self._fatigue_cue_gm = 0.0      # game minutes since the last drowsy cue
         self._hazard_deadline: float | None = None
         self._speed_announce_timer = 0.0
         self._last_announced_mph = 0.0
@@ -80,6 +88,9 @@ class DrivingState(State):
             "game_minutes": self.trip.game_minutes,
             "start_damage": self.start_damage,
             "speeding_strikes": self.speeding_strikes,
+            "hos": self.hos.to_dict(),
+            "fatigue": self.ctx.profile.fatigue,
+            "hos_fine_count": self.hos_fine_count,
         }
 
     @classmethod
@@ -101,6 +112,14 @@ class DrivingState(State):
             state.start_damage = float(data["start_damage"])
             state.speeding_strikes = int(data["speeding_strikes"])
             state.trip.restore(float(data["position_mi"]), float(data["game_minutes"]))
+            # HOS and fatigue: absent in pre-1.5 snapshots, defaulting to a
+            # fresh clock and a rested driver.
+            if "hos" in data:
+                ctx.profile.hos = HosClock.from_dict(data["hos"])
+                state.hos = ctx.profile.hos
+            ctx.profile.fatigue = max(0.0, min(100.0, float(
+                data.get("fatigue", ctx.profile.fatigue))))
+            state.hos_fine_count = int(data.get("hos_fine_count", 0))
             return state
         except (KeyError, TypeError, ValueError):
             log.warning("Could not resume saved trip", exc_info=True)
@@ -114,6 +133,7 @@ class DrivingState(State):
         self.ctx.audio.set_weather(self.weather.effects.sound)
         self.ctx.audio.set_wind(self.weather.effects.wind)
         mode = "automatic" if self.truck.transmission.automatic else "manual"
+        now = clock_text(self.trip.current_hour)
         if self.resumed:
             hours_used = self.trip.game_minutes / 60.0
             self.ctx.say(
@@ -121,11 +141,13 @@ class DrivingState(State):
                 f"{self.job.cargo.label} to {self.job.destination}. "
                 f"{self.trip.progress_summary(self.ctx.settings.imperial_units)} "
                 f"{hours_used:.1f} hours used of {self.job.deadline_game_h:.0f}. "
-                f"Transmission is {mode}. Weather: {self.weather.describe()}. "
+                f"It is {now}. Transmission is {mode}. "
+                f"Weather: {self.weather.describe()}. "
                 "You are parked. Press E to start the engine.",
                 interrupt=False)
         else:
-            self.ctx.say(f"You are at the wheel. Transmission is {mode}. "
+            self.ctx.say(f"You are at the wheel. It is {now}. "
+                         f"Transmission is {mode}. "
                          f"Weather: {self.weather.describe()}. "
                          "Press E to start the engine, F1 for the controls.",
                          interrupt=False)
@@ -177,8 +199,10 @@ class DrivingState(State):
         elif key == pygame.K_F1:
             self.ctx.say(
                 "Hold Up arrow to accelerate, Down arrow to brake. E engine. "
-                "Space speed. Tab full status. F fuel. C clock and deadline. "
-                "R route. V weather. T rest stop when stopped at one. H horn. "
+                "Space speed. Tab full status. F fuel. "
+                "C clock, deadline, and hours of service. "
+                "R route. V weather. T rest stop menu when stopped at one: "
+                "refuel, take a break, or sleep. H horn. "
                 "J engine brake. Escape pause menu. "
                 + ("" if self.truck.transmission.automatic else
                    "Hold Left Shift for clutch, then 1 through 0 for gears, N for neutral."))
@@ -232,9 +256,15 @@ class DrivingState(State):
             f"speed limit {limit:.0f}" + (f" in a {reason} zone" if reason else ""),
             self.trip.progress_summary(self.ctx.settings.imperial_units),
             f"fuel {t.fuel_fraction * 100:.0f} percent",
+            f"it is {time_of_day(self.trip.current_hour)}",
         ]
         if t.damage_pct - self.start_damage > 1:
             parts.append(f"new damage {t.damage_pct - self.start_damage:.0f} percent")
+        if self.ctx.settings.speech_verbosity >= 1:
+            fatigue = self.ctx.profile.fatigue
+            if fatigue >= hos.FATIGUE_DROWSY:
+                parts.append(f"fatigue {fatigue:.0f} percent")
+            parts.append(self.hos.summary(self.ctx.settings.hos_mode).rstrip("."))
         self.ctx.say(". ".join(parts) + ".")
 
     def _speak_fuel(self) -> None:
@@ -248,19 +278,23 @@ class DrivingState(State):
         hours_used = self.trip.game_minutes / 60.0
         remaining = self.job.deadline_game_h - hours_used
         eta = self.trip.eta_game_hours()
+        now = f"It is {clock_text(self.trip.current_hour)}."
+        hos_part = self.hos.summary(self.ctx.settings.hos_mode)
         if remaining > 0:
             verdict = ("You are on schedule." if eta < remaining
                        else "You are running behind. Keep your speed up.")
-            self.ctx.say(f"{hours_used:.1f} hours on the road. "
+            self.ctx.say(f"{now} {hours_used:.1f} hours on the road. "
                          f"{remaining:.1f} hours until the deadline. "
-                         f"Estimated time to arrival {eta:.1f} hours. {verdict}")
+                         f"Estimated time to arrival {eta:.1f} hours. {verdict} "
+                         f"{hos_part}")
         else:
-            self.ctx.say(f"You are {-remaining:.1f} hours past the deadline. "
-                         "The pay is shrinking, but finish the delivery.")
+            self.ctx.say(f"{now} You are {-remaining:.1f} hours past the deadline. "
+                         f"The pay is shrinking, but finish the delivery. {hos_part}")
 
     def _speak_weather(self) -> None:
         source = "Live conditions" if self.weather.live else "Currently"
-        parts = [f"{source} {self.weather.describe()}.",
+        parts = [f"It is {time_of_day(self.trip.current_hour)}.",
+                 f"{source} {self.weather.describe()}.",
                  f"Safe speed about {self.weather.effects.safe_speed_mph:.0f}."]
         if not self.weather.live:
             ahead = ", then ".join(k.value for k in self.weather.forecast(2))
@@ -305,6 +339,7 @@ class DrivingState(State):
         for event in self.trip.update(dt):
             self._handle_trip_event(event)
 
+        self._update_hours_and_fatigue(dt)
         self._update_audio()
         self._update_announcements(dt)
         self._update_hazard(dt)
@@ -313,6 +348,53 @@ class DrivingState(State):
             self.tutorial.update(dt, t)
         if self.trip.finished:
             self._arrive()
+
+    def _update_hours_and_fatigue(self, dt: float) -> None:
+        """Advance the HOS shift clock and fatigue on game time, not wall time."""
+        gm = dt * self.trip.time_scale / 60.0   # game minutes this frame
+        moving = self.truck.speed_mph > 5.0
+        mode = self.ctx.settings.hos_mode
+        p = self.ctx.profile
+
+        if moving:
+            self.hos.drive(gm)
+        else:
+            self.hos.on_duty(gm)   # the 14-hour window runs even while parked
+        if mode != "off":
+            for message in self.hos.check_warnings(mode):
+                self.ctx.audio.play("ui/warning")
+                self.ctx.say(message, interrupt=False)
+        self.trip.hos_violation = mode != "off" and self.hos.in_violation(mode)
+
+        night = is_night(self.trip.current_hour)
+        if moving:
+            p.fatigue = min(100.0, p.fatigue + hos.fatigue_rate_per_min(night) * gm)
+        fatigue = p.fatigue
+        if fatigue >= hos.FATIGUE_SEVERE and not self._severe_said:
+            self._severe_said = True
+            self._fatigue_cue_gm = 0.0
+            self.ctx.audio.play("vehicle/rumble_strip", volume=0.8)
+            self.ctx.say("You are dangerously drowsy and drifting out of your "
+                         "lane. Sleep at the next rest stop.", interrupt=False)
+        elif fatigue >= hos.FATIGUE_DROWSY and not self._drowsy_said:
+            self._drowsy_said = True
+            self._fatigue_cue_gm = 0.0
+            self.ctx.audio.play("driver/yawn", volume=0.9)
+            self.ctx.say("You are getting drowsy. Take a break or sleep at a "
+                         "rest stop.", interrupt=False)
+        if fatigue < hos.FATIGUE_DROWSY:
+            self._drowsy_said = False
+        if fatigue < hos.FATIGUE_SEVERE:
+            self._severe_said = False
+        # periodic audio cues while drowsiness persists
+        if moving and fatigue >= hos.FATIGUE_DROWSY:
+            self._fatigue_cue_gm += gm
+            if self._fatigue_cue_gm >= 15.0:
+                self._fatigue_cue_gm = 0.0
+                if fatigue >= hos.FATIGUE_SEVERE:
+                    self.ctx.audio.play("vehicle/rumble_strip", volume=0.8)
+                else:
+                    self.ctx.audio.play("driver/yawn", volume=0.8)
 
     def _update_audio(self) -> None:
         t = self.truck
@@ -324,6 +406,12 @@ class DrivingState(State):
         eff = self.weather.effects
         audio.set_weather(eff.sound)
         audio.set_wind(eff.wind)
+        if is_night(self.trip.current_hour):
+            audio.set_ambient("ambient/night", volume=0.3)
+            audio.play_music("night_haul", fade_ms=4000)
+        else:
+            audio.set_ambient(None)
+            audio.play_music("open_road", fade_ms=4000)
         if self.weather.should_thunder():
             audio.play("weather/thunder", volume=0.9)
 
@@ -372,8 +460,13 @@ class DrivingState(State):
         kind = event.kind
         if kind == TripEventKind.HAZARD:
             self.ctx.audio.play("ui/warning")
-            self._hazard_deadline = event.data.get("deadline_s", 4.0)
+            window = event.data.get("deadline_s", 4.0)
+            # a drowsy driver reacts late: part of the window is already gone
+            self._hazard_deadline = window * hos.reaction_window_mult(
+                self.ctx.profile.fatigue)
             self.ctx.say(event.message, interrupt=True)
+        elif kind == TripEventKind.INSPECTION:
+            self._handle_inspection(event)
         elif kind == TripEventKind.WEATHER_CHANGE:
             self.ctx.say(event.message, interrupt=False)
         elif kind == TripEventKind.ARRIVED:
@@ -382,6 +475,19 @@ class DrivingState(State):
             self.ctx.say(event.message, interrupt=False)
         if kind == TripEventKind.ZONE_ENTER:
             self.ctx.audio.play("ui/notify", volume=0.7)
+
+    def _handle_inspection(self, event) -> None:
+        """Caught driving past an HOS limit: escalating fine, reputation hit."""
+        p = self.ctx.profile
+        fine = hos.HOS_FINES[min(self.hos_fine_count, len(hos.HOS_FINES) - 1)]
+        self.hos_fine_count += 1
+        p.money -= fine   # can go negative; never a game over
+        p.career.reputation = max(0.0, p.career.reputation - hos.HOS_REPUTATION_HIT)
+        self.ctx.audio.play("ui/error")
+        self.ctx.say(f"{event.message} You are over your hours of service. "
+                     f"Fined {fine:,.0f} dollars, and your reputation took a hit. "
+                     "Sleep 10 hours at a rest stop to reset your clock.",
+                     interrupt=True)
 
     def _try_rest_stop(self) -> None:
         stop = self.trip.nearest_stop_within()
@@ -392,23 +498,10 @@ class DrivingState(State):
         if self.truck.speed_mph > 3:
             self.ctx.say("Come to a complete stop first.")
             return
-        p = self.ctx.profile
-        region = self.trip.current_region
-        need = self.truck.specs.fuel_tank_gal - self.truck.fuel_gal
-        cost = self.ctx.economy.fuel_cost(region, need) + 35.0
-        if p.money < cost:
-            partial_gal = max(0.0, (p.money - 35.0) / self.ctx.economy.fuel_price(region))
-            if partial_gal < 5:
-                self.ctx.audio.play("ui/error")
-                self.ctx.say("You cannot afford fuel here.")
-                return
-            need = partial_gal
-            cost = self.ctx.economy.fuel_cost(region, need) + 35.0
-        p.money -= cost
-        self.truck.refuel(need)
-        self.ctx.audio.play("vehicle/fuel_pump")
-        self.ctx.say(f"Rested and refueled {need:.0f} gallons at {stop.name} "
-                     f"for {cost:,.0f} dollars. You have {p.money:,.0f} dollars.")
+        if hos.parking_is_full(self.trip_seed, stop.at_mi, self.trip.current_hour):
+            self.ctx.push_state(ParkingFullState(self.ctx, self, stop))
+        else:
+            self.ctx.push_state(RestStopState(self.ctx, self, stop))
 
     def _handle_out_of_fuel(self) -> None:
         if self._rescue_offered:
@@ -442,6 +535,9 @@ class DrivingState(State):
             f"Fuel: {t.fuel_fraction * 100:.0f}%   Damage: {t.damage_pct:.0f}%",
             f"Remaining: {self.trip.remaining_miles:.0f} of {self.trip.total_miles:.0f} miles",
             f"Weather: {self.weather.current.value}",
+            f"Clock: {clock_text(self.trip.current_hour)} "
+            f"({time_of_day(self.trip.current_hour)})   "
+            f"Fatigue: {self.ctx.profile.fatigue:.0f}%",
             "",
             self._status_text,
         ]
@@ -497,6 +593,173 @@ class Tutorial:
             else:
                 self.ctx.say("Reminder: hold Left Shift, press 1, then release "
                              "the shift key.", interrupt=False)
+
+
+def _advance_rest_clock(driving: DrivingState, minutes: float) -> None:
+    """Resting advances game time, so deadlines keep counting."""
+    driving.trip.game_minutes += minutes
+    driving.weather.update(minutes)
+
+
+def _deadline_text(driving: DrivingState) -> str:
+    remaining = driving.job.deadline_game_h - driving.trip.game_minutes / 60.0
+    if remaining > 0:
+        return f"{remaining:.1f} hours left to deliver."
+    return f"You are now {-remaining:.1f} hours past the deadline."
+
+
+class RestStopState(MenuState):
+    """Spoken rest stop menu: refuel, take a break, or sleep the night."""
+
+    intro_help = ("Use up and down arrows to navigate, Enter to select. "
+                  "Escape returns to the road. Breaks and sleep advance the "
+                  "clock, and your delivery deadline keeps counting.")
+
+    def __init__(self, ctx, driving: DrivingState, stop) -> None:
+        super().__init__(ctx)
+        self.driving = driving
+        self.stop = stop
+
+    @property
+    def title(self) -> str:  # type: ignore[override]
+        return self.stop.name
+
+    def announce_entry(self) -> None:
+        self.ctx.say(f"{self.stop.name}. "
+                     f"It is {clock_text(self.driving.trip.current_hour)}. "
+                     f"{self.current_text()}")
+
+    def build_items(self) -> list[MenuItem]:
+        return [
+            MenuItem(self._fuel_label, self._refuel,
+                     help="Fill the tank at this region's diesel price, "
+                          "plus a 35 dollar service fee."),
+            MenuItem("Take a 30-minute break", self._take_break,
+                     help="Satisfies the 30-minute break rule and eases fatigue. "
+                          "The clock and your deadline advance half an hour."),
+            MenuItem("Sleep 10 hours", self._sleep,
+                     help="A full reset: fresh hours of service and zero fatigue. "
+                          "The clock and your deadline advance 10 hours."),
+            MenuItem("Back to the road", self.go_back),
+        ]
+
+    def _fuel_label(self) -> str:
+        d = self.driving
+        need = d.truck.specs.fuel_tank_gal - d.truck.fuel_gal
+        if need < 1:
+            return "Fuel: tank is full"
+        cost = self.ctx.economy.fuel_cost(d.trip.current_region, need) + 35.0
+        return f"Refuel {need:.0f} gallons for {cost:,.0f} dollars"
+
+    def _refuel(self) -> None:
+        d = self.driving
+        p = self.ctx.profile
+        region = d.trip.current_region
+        need = d.truck.specs.fuel_tank_gal - d.truck.fuel_gal
+        if need < 1:
+            self.ctx.say("The tank is already full.")
+            return
+        cost = self.ctx.economy.fuel_cost(region, need) + 35.0
+        if p.money < cost:
+            partial_gal = max(0.0, (p.money - 35.0) / self.ctx.economy.fuel_price(region))
+            if partial_gal < 5:
+                self.ctx.audio.play("ui/error")
+                self.ctx.say("You cannot afford fuel here.")
+                return
+            need = partial_gal
+            cost = self.ctx.economy.fuel_cost(region, need) + 35.0
+        p.money -= cost
+        d.truck.refuel(need)
+        self.ctx.audio.play("vehicle/fuel_pump")
+        self.ctx.say(f"Refueled {need:.0f} gallons for {cost:,.0f} dollars. "
+                     f"You have {p.money:,.0f} dollars.")
+        self.refresh()
+
+    def _take_break(self) -> None:
+        d = self.driving
+        p = self.ctx.profile
+        _advance_rest_clock(d, 30.0)
+        d.hos.take_break(30.0)
+        p.fatigue = hos.rest_break(p.fatigue)
+        self.ctx.audio.play("ui/notify")
+        self.ctx.say(f"You took a 30-minute break. "
+                     f"It is {clock_text(d.trip.current_hour)}. "
+                     f"Your break requirement is reset and you feel a little "
+                     f"fresher. {_deadline_text(d)}")
+
+    def _sleep(self) -> None:
+        d = self.driving
+        p = self.ctx.profile
+        _advance_rest_clock(d, hos.SLEEP_MIN)
+        d.hos.sleep()
+        p.fatigue = hos.rest_sleep(p.fatigue)
+        self.ctx.audio.play("ui/notify")
+        self.ctx.say(f"You slept 10 hours and woke rested. "
+                     f"It is {clock_text(d.trip.current_hour)}. "
+                     f"Hours of service reset. {_deadline_text(d)}")
+
+    def go_back(self) -> None:
+        self.ctx.audio.play("ui/menu_back")
+        self.ctx.pop_state()
+        self.ctx.say("Back on the road. Press E to start the engine.",
+                     interrupt=True)
+
+
+class ParkingFullState(MenuState):
+    """The overnight lot is full: push on, or risk the shoulder."""
+
+    title = "Parking full"
+    intro_help = ("The truck parking here is full. Use up and down arrows and "
+                  "Enter to choose. Escape returns to the road to find "
+                  "another stop.")
+
+    def __init__(self, ctx, driving: DrivingState, stop) -> None:
+        super().__init__(ctx)
+        self.driving = driving
+        self.stop = stop
+
+    def announce_entry(self) -> None:
+        self.ctx.say(f"The truck parking at {self.stop.name} is full tonight. "
+                     f"It is {clock_text(self.driving.trip.current_hour)}. "
+                     f"{self.current_text()}")
+
+    def build_items(self) -> list[MenuItem]:
+        return [
+            MenuItem("Drive on to the next stop", self._drive_on,
+                     help="Return to the road and try the next rest stop."),
+            MenuItem("Park on the shoulder and sleep", self._shoulder,
+                     help="Ten hours of poor sleep. Resets your hours of "
+                          "service, but you will not wake fresh, and you risk "
+                          "a fine for illegal parking."),
+        ]
+
+    def go_back(self) -> None:
+        self._drive_on()
+
+    def _drive_on(self) -> None:
+        self.ctx.audio.play("ui/menu_back")
+        self.ctx.pop_state()
+        self.ctx.say("Back on the road. The next stop is announced as you "
+                     "approach it. Press E to start the engine.", interrupt=True)
+
+    def _shoulder(self) -> None:
+        d = self.driving
+        p = self.ctx.profile
+        _advance_rest_clock(d, hos.SLEEP_MIN)
+        d.hos.sleep()
+        p.fatigue = hos.rest_shoulder(p.fatigue)
+        parts = [f"You sleep poorly on the shoulder, woken again and again by "
+                 f"passing trucks. It is {clock_text(d.trip.current_hour)}. "
+                 f"Hours of service reset, but you are still tired."]
+        if hos.shoulder_fine_due(d.trip_seed, self.stop.at_mi):
+            p.money -= hos.SHOULDER_FINE
+            self.ctx.audio.play("ui/error")
+            parts.append(f"A trooper ticketed you for illegal parking: "
+                         f"{hos.SHOULDER_FINE:,.0f} dollars. "
+                         f"You have {p.money:,.0f} dollars.")
+        parts.append(_deadline_text(d))
+        self.ctx.pop_state()
+        self.ctx.say(" ".join(parts), interrupt=True)
 
 
 class PauseMenuState(MenuState):
@@ -609,6 +872,7 @@ class ArrivalState(MenuState):
             f"Delivered {job.weight_tons:.0f} tons of {job.cargo.label} to "
             f"{job.destination} in {hours:.1f} hours, "
             f"{'on time' if on_time else 'late'}. "
+            f"It is {clock_text(p.game_hours)}. "
             f"You earned {pay:,.0f} dollars and now have {p.money:,.0f}."))
         if trip_damage > 1:
             self.summary_parts.append(

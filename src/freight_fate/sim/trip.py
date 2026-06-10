@@ -14,10 +14,13 @@ from dataclasses import dataclass, field
 from enum import Enum
 
 from ..data.world import Route
+from .hos import is_night
 from .vehicle import TruckState
 from .weather import WeatherSystem
 
 BASE_SPEED_LIMIT_MPH = 70.0
+NIGHT_HAZARD_BONUS = 0.10          # extra hazard risk after dark
+NIGHT_TRAFFIC_KEEP = 0.4           # chance a traffic zone still forms at night
 
 
 class TripEventKind(Enum):
@@ -28,6 +31,7 @@ class TripEventKind(Enum):
     CITY_REACHED = "city_reached"
     HAZARD = "hazard"
     WEATHER_CHANGE = "weather_change"
+    INSPECTION = "inspection"
     ARRIVED = "arrived"
 
 
@@ -58,15 +62,20 @@ class Trip:
     """One delivery run along a chosen route."""
 
     def __init__(self, route: Route, truck: TruckState, weather: WeatherSystem,
-                 time_scale: float = 20.0, seed: int | None = None) -> None:
+                 time_scale: float = 20.0, seed: int | None = None,
+                 start_hour: float = 12.0) -> None:
         self.route = route
         self.truck = truck
         self.weather = weather
         self.time_scale = time_scale
+        self.start_hour = start_hour   # clock hour of day at departure
         self.position_mi = 0.0
         self.game_minutes = 0.0
         self.finished = False
+        self.hos_violation = False     # set by the UI layer; gates inspections
         self._rng = random.Random(seed)
+        # separate stream so inspections never disturb hazard/zone layout
+        self._insp_rng = random.Random(None if seed is None else seed ^ 0x5EED)
         self._events: list[TripEvent] = []
         self._leg_starts = self._compute_leg_starts()
         self.stops = self._place_stops()
@@ -75,6 +84,7 @@ class Trip:
         self._announced_cities: set[int] = set()
         self._active_zone: Zone | None = None
         self._hazard_check_mi = 5.0
+        self._inspection_check_mi = 10.0
 
     # -- layout -----------------------------------------------------------------
 
@@ -96,7 +106,13 @@ class Trip:
         return out
 
     def _place_zones(self) -> list[Zone]:
-        """Random construction/traffic zones, roughly one per 150 miles."""
+        """Random construction/traffic zones, roughly one per 150 miles.
+
+        At night most traffic zones never form: roads are sparse after dark,
+        so a departure in the night band yields fewer heavy-traffic stretches.
+        Deterministic for a given seed and departure hour.
+        """
+        night = is_night(self.start_hour)
         zones: list[Zone] = []
         total = self.route.miles
         n = max(0, int(total / 150))
@@ -105,7 +121,7 @@ class Trip:
             length = self._rng.uniform(3, 9)
             if self._rng.random() < 0.6:
                 zones.append(Zone(at, at + length, 45, "construction"))
-            else:
+            elif not night or self._rng.random() < NIGHT_TRAFFIC_KEEP:
                 zones.append(Zone(at, at + length, 50, "heavy traffic"))
         zones.sort(key=lambda z: z.start_mi)
         return zones
@@ -119,6 +135,11 @@ class Trip:
     @property
     def remaining_miles(self) -> float:
         return max(0.0, self.total_miles - self.position_mi)
+
+    @property
+    def current_hour(self) -> float:
+        """Clock hour of day right now (departure hour plus trip time)."""
+        return (self.start_hour + self.game_minutes / 60.0) % 24.0
 
     @property
     def current_leg_index(self) -> int:
@@ -218,6 +239,7 @@ class Trip:
         self._check_stops()
         self._check_cities()
         self._check_hazards(moved_mi)
+        self._check_inspections(moved_mi)
 
         if self.position_mi >= self.total_miles:
             self.position_mi = self.total_miles
@@ -270,17 +292,37 @@ class Trip:
                 self._emit(TripEventKind.CITY_REACHED,
                            f"Passing {city}. Continuing on {leg.highway} toward {nxt}.")
 
+    def _hazard_risk(self) -> float:
+        """Chance of a hazard at each check; worse in fog and after dark."""
+        vis = self.weather.effects.visibility_mi
+        risk = 0.25 + (0.25 if vis < 2 else 0.0)
+        if is_night(self.current_hour):
+            risk += NIGHT_HAZARD_BONUS
+        return risk
+
     def _check_hazards(self, moved_mi: float) -> None:
         """Occasional road hazards that demand braking."""
         self._hazard_check_mi -= moved_mi
         if self._hazard_check_mi > 0:
             return
         self._hazard_check_mi = self._rng.uniform(20, 60)
-        vis = self.weather.effects.visibility_mi
-        risk = 0.25 + (0.25 if vis < 2 else 0.0)
-        if self._rng.random() < risk:
+        if self._rng.random() < self._hazard_risk():
             hazard = self._rng.choice(["debris on the road", "a slow vehicle ahead",
                                        "an animal crossing"])
             self._emit(TripEventKind.HAZARD,
                        f"Caution: {hazard}! Brake now!",
                        deadline_s=self._rng.uniform(3.0, 4.5))
+
+    def _check_inspections(self, moved_mi: float) -> None:
+        """Random roadside inspections while driving past an HOS limit.
+
+        Uses its own random stream so enabling or violating hours of service
+        never changes the hazard and zone layout of a seeded trip.
+        """
+        self._inspection_check_mi -= moved_mi
+        if self._inspection_check_mi > 0:
+            return
+        self._inspection_check_mi = self._insp_rng.uniform(15, 40)
+        if self.hos_violation and self._insp_rng.random() < 0.5:
+            self._emit(TripEventKind.INSPECTION,
+                       "Weigh station ahead. Officers wave you in for a log check.")

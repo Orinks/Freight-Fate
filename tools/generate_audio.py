@@ -634,6 +634,41 @@ def gen_ambient() -> None:
         mix_at(x, reverb(clank, 1.8, 0.6) * 0.25, at)
     save_wav("ambient/warehouse.wav", seamless(stereoize(x, 0.5), 1.0), peak=0.4)
 
+    # night roadside: cricket chorus over a faint low air bed
+    dur = 12.0
+    bed = lowpass(brown(dur), 90) * 0.35
+    x = np.array(bed)
+    rng = np.random.default_rng(51)
+    for _ in range(26):
+        at = rng.random() * (dur - 0.6)
+        f = 4100 + rng.random() * 700           # cricket carrier
+        chirp_dur = 0.25 + rng.random() * 0.2
+        n = int(round(chirp_dur * SR))
+        t = np.arange(n) / SR
+        tone = np.sin(2 * np.pi * f * t)
+        trill = 0.5 + 0.5 * np.sign(np.sin(2 * np.pi * (22 + rng.random() * 8) * t))
+        envc = np.sin(np.linspace(0, np.pi, n)) ** 0.7
+        mix_at(x, tone * trill * envc * (0.05 + rng.random() * 0.04), at)
+    save_wav("ambient/night.wav", seamless(stereoize(x, 0.6), 1.0), peak=0.4)
+
+
+def gen_driver() -> None:
+    print("Driver sounds:")
+    # yawn: a breathy voiced glide, rising then sagging — stylized but readable
+    dur = 1.5
+    n = int(round(dur * SR))
+    t = np.arange(n) / SR
+    # voiced part: pitch rises 130->180 Hz then falls to 95 Hz
+    pitch = 130 + 70 * np.sin(np.pi * np.clip(t / dur, 0, 1)) - 35 * (t / dur)
+    phase = 2 * np.pi * np.cumsum(pitch) / SR
+    voice = np.sin(phase) + 0.45 * np.sin(2 * phase) + 0.2 * np.sin(3 * phase)
+    # mouth opens then closes: breath noise swelling with the vowel
+    breath = bandpass(white(dur), 300, 1800) * 0.5
+    breath *= 0.4 + 0.6 * np.sin(np.pi * np.clip(t / dur, 0, 1))
+    env = env_adsr(n, 0.25, 0.3, 0.75, 0.55)
+    x = (voice * 0.5 + breath) * env
+    save_wav("driver/yawn.wav", fade(lowpass(x, 2200), 0.03, 0.12), peak=0.5)
+
 
 # ---------------------------------------------------------------------------
 # Music
@@ -799,6 +834,7 @@ GENERATORS = {
     "vehicle": gen_vehicle,
     "weather": gen_weather,
     "ambient": gen_ambient,
+    "driver": gen_driver,
     "menu_theme": gen_menu_theme,
     "open_road": gen_open_road,
     "night_haul": gen_night_haul,

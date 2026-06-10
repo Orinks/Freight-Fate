@@ -7,6 +7,7 @@ import pygame
 from .. import __version__
 from ..models.profile import DEFAULT_CITY, Profile
 from ..settings import TIME_SCALES
+from ..sim.hos import HOS_MODES
 from .base import MenuItem, MenuState, State
 
 
@@ -243,7 +244,8 @@ HELP_PAGES = [
     ("Driving information keys", [
         "Space speaks your speed, gear, and RPM.",
         "Tab speaks a full status report.",
-        "F speaks fuel level and range. C speaks the clock and your deadline.",
+        "F speaks fuel level and range.",
+        "C speaks the clock, your deadline, and your hours of service.",
         "R speaks route progress. V speaks the weather and the forecast.",
         "Escape opens the pause menu.",
     ]),
@@ -252,8 +254,21 @@ HELP_PAGES = [
         "Hazards appear without warning. When you hear Brake now,",
         "slow below twenty five miles per hour quickly to avoid a collision.",
         "Rest stops are announced ahead. Stop there and press T",
-        "to refuel and repair. Fuel prices vary by region.",
+        "for the rest stop menu: refuel, take a break, or sleep.",
+        "Fuel prices vary by region.",
         "Running out of fuel means an expensive roadside rescue.",
+    ]),
+    ("Hours and rest", [
+        "You may drive eleven hours within a fourteen hour duty window,",
+        "with a thirty minute break required after eight hours of driving.",
+        "Spoken warnings come at two hours, one hour, and thirty minutes left.",
+        "Sleeping ten hours at a rest stop starts a fresh shift.",
+        "Driving past a limit risks fines at roadside inspections.",
+        "Fatigue builds as you drive, faster at night. A drowsy driver",
+        "yawns, drifts onto the rumble strip, and reacts late to hazards.",
+        "Late at night, truck parking may be full. Drive on, or risk",
+        "a ticket and poor sleep on the shoulder.",
+        "Tune all of this in Settings under Hours of service.",
     ]),
     ("Deliveries and money", [
         "Deliver before the deadline for a bonus. Late or damaged cargo pays less.",
@@ -340,6 +355,12 @@ class SettingsState(MenuState):
                      lambda: self._toggle_transmission(1)),
             MenuItem(lambda: f"Trip pacing: {self._pace_label()}",
                      lambda: self._cycle_pace(1)),
+            MenuItem(lambda: f"Hours of service: {s.hos_mode}",
+                     lambda: self._cycle_hos(1),
+                     help="Realistic enforces 11 hours of driving, a 14 hour "
+                          "duty window, and a 30-minute break after 8 hours. "
+                          "Relaxed makes every limit 25 percent longer. "
+                          "Off disables enforcement entirely."),
             MenuItem(lambda: f"Master volume: {round(s.master_volume * 100)} percent",
                      lambda: self._volume("master_volume", 0.1)),
             MenuItem(lambda: f"Sound effects volume: {round(s.sfx_volume * 100)} percent",
@@ -366,6 +387,7 @@ class SettingsState(MenuState):
 
     def _adjust(self, direction: int) -> None:
         actions = [self._toggle_units, self._toggle_transmission, self._cycle_pace,
+                   self._cycle_hos,
                    lambda d: self._volume("master_volume", 0.1 * d),
                    lambda d: self._volume("sfx_volume", 0.1 * d),
                    lambda d: self._volume("music_volume", 0.1 * d),
@@ -403,6 +425,15 @@ class SettingsState(MenuState):
         value = getattr(self.ctx.settings, attr)
         setattr(self.ctx.settings, attr, max(0.0, min(1.0, round(value + delta, 2))))
         self.ctx.apply_volumes()
+        self._announce()
+
+    def _cycle_hos(self, d: int) -> None:
+        modes = list(HOS_MODES)
+        try:
+            i = modes.index(self.ctx.settings.hos_mode)
+        except ValueError:
+            i = 0
+        self.ctx.settings.hos_mode = modes[(i + d) % len(modes)]
         self._announce()
 
     def _cycle_verbosity(self, d: int) -> None:

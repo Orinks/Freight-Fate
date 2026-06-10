@@ -114,7 +114,7 @@ def test_profile_save_is_atomic_and_versioned():
     p = Profile(name="Atomic")
     path = p.save()
     data = json.loads(path.read_text())
-    assert data["version"] == 2
+    assert data["version"] == 3
     assert not path.with_suffix(".json.tmp").exists()
 
 

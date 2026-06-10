@@ -1,5 +1,20 @@
 # Freight Fate Roadmap
 
+## Shipped in 1.5.0
+
+- [x] Hours-of-service fatigue and mandatory rest planning: 11-hour
+      driving and 14-hour duty limits on the in-game clock, a 30-minute
+      break rule, spoken countdown warnings, inspections with escalating
+      fines, and a realistic / relaxed / off setting
+- [x] Rest stop menu (T): refuel, take a 30-minute break, or sleep
+      10 hours while the delivery deadline keeps counting
+- [x] Fatigue 0-100 with drowsiness audio cues (yawns, rumble strip
+      drift) and slower hazard reactions; resets with sleep
+- [x] Day/night cycle from the career clock: night ambience and music,
+      sparser traffic, higher hazard risk, spoken clock time
+- [x] Overnight truck parking that can fill up late in the evening:
+      drive on or risk shoulder parking (poor rest, possible fine)
+
 ## Shipped in 1.4.0
 
 - [x] Denser, real-corridor map: 59 cities and 106 legs along real US
@@ -78,13 +93,13 @@ Deliver -> Earn and level up -> Repeat
 
 ### Gameplay depth
 - [ ] Cargo loading/securing minigame
-- [ ] Hours-of-service fatigue and mandatory rest planning
+- [x] Hours-of-service fatigue and mandatory rest planning (1.5.0)
 - [ ] Special event jobs (oversize loads, urgent medical freight)
 - [ ] Trailer types with handling differences
 
 ### World
 - [x] More cities and regional highways (1.4.0)
-- [ ] Seasons and day/night cycle with audio shifts
+- [x] Day/night cycle with audio shifts (1.5.0); seasons still open
 - [ ] City-specific ambience and landmarks
 
 ### Business

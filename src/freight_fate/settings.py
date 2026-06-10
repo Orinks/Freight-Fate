@@ -19,6 +19,7 @@ class Settings:
     automatic_transmission: bool = True   # friendlier default for new players
     time_scale: float = 20.0              # distance compression while driving
     real_weather: bool = False            # live conditions from Open-Meteo
+    hos_mode: str = "realistic"           # hours of service: realistic/relaxed/off
     master_volume: float = 1.0
     sfx_volume: float = 0.8
     music_volume: float = 0.55
@@ -48,6 +49,10 @@ class Settings:
             pass
         except (json.JSONDecodeError, OSError):
             log.warning("Could not read settings; using defaults", exc_info=True)
+        from .sim.hos import HOS_MODES
+
+        if s.hos_mode not in HOS_MODES:
+            s.hos_mode = "realistic"
         return s
 
     def speed_text(self, mph: float) -> str:
