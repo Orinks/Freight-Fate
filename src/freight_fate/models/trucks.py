@@ -38,7 +38,7 @@ TRUCK_CATALOG: dict[str, TruckModel] = {
         "blunt aerodynamics and a thirstier engine.",
         TruckSpecs(max_torque_nm=2_460.0, fuel_tank_gal=200.0,
                    drag_coefficient=0.75, fuel_burn_factor=1.2,
-                   mass_kg=37_500.0)),
+                   tractor_mass_kg=17_500.0, brake_rated_mass_kg=37_500.0)),
 }
 
 

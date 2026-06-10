@@ -12,11 +12,16 @@ log = logging.getLogger(__name__)
 
 TIME_SCALES = (10.0, 20.0, 40.0)
 
+# Lane-drift difficulty; "off" keeps the truck centered (the classic behavior
+# and the default, so existing saves are unchanged until players opt in).
+STEERING_ASSIST_LEVELS = ("off", "light", "realistic")
+
 
 @dataclass
 class Settings:
     imperial_units: bool = True
     automatic_transmission: bool = True   # friendlier default for new players
+    steering_assist: str = "off"          # off | light | realistic lane drift
     time_scale: float = 20.0              # distance compression while driving
     real_weather: bool = False            # live conditions from Open-Meteo
     master_volume: float = 1.0
@@ -48,6 +53,8 @@ class Settings:
             pass
         except (json.JSONDecodeError, OSError):
             log.warning("Could not read settings; using defaults", exc_info=True)
+        if s.steering_assist not in STEERING_ASSIST_LEVELS:
+            s.steering_assist = "off"
         return s
 
     def speed_text(self, mph: float) -> str:

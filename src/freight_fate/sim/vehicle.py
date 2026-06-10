@@ -4,6 +4,11 @@ Forces are computed in SI units on a longitudinal (1-D) model:
 engine drive force, aerodynamic drag, rolling resistance, grade force,
 and braking. The numbers are tuned around a loaded Class 8 tractor-trailer:
 ~36 t gross, ~450 hp, 10-speed box, ~70 mph top speed, ~6.5 mpg at cruise.
+
+Mass is split into the tractor (plus empty trailer) and the cargo on board.
+The driving state loads the active job's weight, so a 25-ton haul
+accelerates, climbs, brakes, and drinks fuel very differently from an
+8-ton one.
 """
 
 from __future__ import annotations
@@ -15,11 +20,14 @@ from .transmission import Transmission
 
 G = 9.81
 AIR_DENSITY = 1.225
+TON_KG = 907.18474                     # US short ton, matching Job.weight_tons
+DEFAULT_CARGO_KG = 20_000.0            # keeps the classic 36 t gross by default
+BRAKE_TRACTION_DECEL_G = 0.5           # tire limit on braking, scaled by grip
 
 
 @dataclass(frozen=True)
 class TruckSpecs:
-    mass_kg: float = 36_000.0          # loaded gross weight
+    tractor_mass_kg: float = 16_000.0  # tractor plus empty trailer
     drag_coefficient: float = 0.65
     frontal_area_m2: float = 10.0
     rolling_resistance: float = 0.0065
@@ -29,7 +37,8 @@ class TruckSpecs:
     max_rpm: float = 2_200.0
     peak_torque_rpm: float = 1_300.0
     driveline_efficiency: float = 0.85
-    max_brake_decel_g: float = 0.35
+    max_brake_decel_g: float = 0.35    # achieved at the brakes' rated gross weight
+    brake_rated_mass_kg: float = 36_000.0  # brakes are sized for this gross weight
     brake_fade_temp_c: float = 400.0   # brakes fade above this temperature
     fuel_tank_gal: float = 150.0
     fuel_burn_factor: float = 1.0      # model-specific thirst multiplier
@@ -40,6 +49,8 @@ class TruckSpecs:
 class TruckState:
     specs: TruckSpecs = field(default_factory=TruckSpecs)
     transmission: Transmission = field(default_factory=Transmission)
+
+    cargo_mass_kg: float = DEFAULT_CARGO_KG  # set from the active job's weight
 
     engine_on: bool = False
     velocity_mps: float = 0.0
@@ -64,6 +75,21 @@ class TruckState:
     def __post_init__(self) -> None:
         self.rpm = self.specs.idle_rpm
         self.fuel_gal = self.specs.fuel_tank_gal
+
+    # -- mass --------------------------------------------------------------------
+
+    @property
+    def total_mass_kg(self) -> float:
+        """Gross combined weight: tractor, trailer, and the current cargo."""
+        return self.specs.tractor_mass_kg + self.cargo_mass_kg
+
+    @property
+    def cargo_tons(self) -> float:
+        return self.cargo_mass_kg / TON_KG
+
+    def set_cargo_tons(self, tons: float) -> None:
+        """Load cargo by weight in tons (as listed on the job board)."""
+        self.cargo_mass_kg = max(0.0, tons) * TON_KG
 
     # -- engine ----------------------------------------------------------------
 
@@ -125,15 +151,16 @@ class TruckState:
         torque = self.torque_at(self.rpm) * self.throttle * self.health_factor
         force = torque * ratio * self.specs.driveline_efficiency / self.specs.wheel_radius_m
         # traction limit: drive wheels carry roughly a third of gross weight
-        traction_limit = self.specs.mass_kg * G * 0.33 * self.grip
+        traction_limit = self.total_mass_kg * G * 0.33 * self.grip
         return min(force, traction_limit)
 
     def resistance_force(self) -> float:
         s = self.specs
         v = self.velocity_mps
+        mass = self.total_mass_kg
         drag = 0.5 * AIR_DENSITY * s.drag_coefficient * s.frontal_area_m2 * v * abs(v)
-        rolling = s.mass_kg * G * s.rolling_resistance * (1.0 if v > 0.01 else 0.0)
-        grade_f = s.mass_kg * G * math.sin(math.atan(self.grade))
+        rolling = mass * G * s.rolling_resistance * (1.0 if v > 0.01 else 0.0)
+        grade_f = mass * G * math.sin(math.atan(self.grade))
         return drag + rolling + grade_f
 
     def brake_force(self) -> float:
@@ -143,20 +170,23 @@ class TruckState:
         fade_temp = s.brake_fade_temp_c
         fade = (1.0 if self.brake_temp_c < fade_temp
                 else max(0.35, 1.0 - (self.brake_temp_c - fade_temp) / 400))
-        service = s.mass_kg * G * s.max_brake_decel_g * self.brake * fade * self.grip
+        # The brakes deliver a fixed maximum force (sized for their rated gross
+        # weight), so a heavier load takes longer to stop; a light load stops
+        # quicker, up to what the tires can transmit at the current grip.
+        service = s.brake_rated_mass_kg * G * s.max_brake_decel_g * self.brake * fade
+        traction_cap = self.total_mass_kg * G * BRAKE_TRACTION_DECEL_G * self.grip
         jake = s.engine_brake_force_n if (self.engine_brake and self.engine_on
                                           and not self.transmission.in_neutral) else 0.0
-        return service + jake
+        return min(service, traction_cap) + jake
 
     # -- per-frame update ---------------------------------------------------------
 
     def update(self, dt: float) -> None:
-        s = self.specs
         tr = self.transmission
         tr.update(dt)
 
         net = self.drive_force() - self.resistance_force() - self.brake_force()
-        accel = net / s.mass_kg
+        accel = net / self.total_mass_kg
         self.velocity_mps = max(0.0, self.velocity_mps + accel * dt)
         self.odometer_mi += self.velocity_mps * dt / 1609.344
 

@@ -148,6 +148,22 @@ class Trip:
         phase = (hash(leg.highway) % 628) / 100.0
         return amplitude * math.sin(2 * math.pi * mile / wavelength + phase)
 
+    def curve_at(self, mile: float) -> float:
+        """Signed road curvature -1..1 from the leg's terrain; 0 is straight.
+
+        Flat interstate legs are mostly straight with the odd gentle bend;
+        mountain legs wind continuously. A dead zone in the underlying sine
+        keeps roughly a third of every leg dead straight.
+        """
+        leg = self.route.legs[self.current_leg_index]
+        amplitude = {"flat": 0.12, "hills": 0.45, "mountain": 0.85}.get(leg.terrain, 0.2)
+        wavelength = {"flat": 26.0, "hills": 11.0, "mountain": 6.5}.get(leg.terrain, 14.0)
+        phase = (hash(leg.highway) % 314) / 50.0
+        raw = math.sin(2 * math.pi * mile / wavelength + phase)
+        if abs(raw) < 0.35:
+            return 0.0
+        return math.copysign(amplitude * (abs(raw) - 0.35) / 0.65, raw)
+
     def speed_limit_at(self, mile: float) -> tuple[float, str | None]:
         for z in self.zones:
             if z.start_mi <= mile <= z.end_mi:

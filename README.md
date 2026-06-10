@@ -77,6 +77,7 @@ On Linux you may need SDL and Speech Dispatcher development packages
 | --- | --- |
 | Up arrow (hold) | Throttle |
 | Down arrow (hold) | Brake |
+| Left / Right arrows (hold) | Steer within your lane (steering assist on) |
 | E | Start / stop engine |
 | Left Shift (hold) | Clutch (manual mode) |
 | 1–0 | Gears 1–10 (manual mode) |
@@ -90,6 +91,7 @@ On Linux you may need SDL and Speech Dispatcher development packages
 | C | Clock, deadline, ETA |
 | R | Route progress |
 | V | Weather and forecast |
+| L | Lane position (steering assist on) |
 | F1 | List all controls |
 | Escape | Pause menu |
 

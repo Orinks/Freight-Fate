@@ -40,7 +40,8 @@ CH_ROAD = 4
 CH_WEATHER = 5
 CH_WEATHER_B = 6
 CH_AMBIENT = 7
-RESERVED = 8
+CH_RUMBLE = 8             # lane-edge rumble strip, panned hard to one side
+RESERVED = 9
 NUM_CHANNELS = 32
 
 # RPM centers for the pygame engine loop crossfade.
@@ -80,6 +81,7 @@ class _PygameBackend:
         self.music_volume = 0.55
         self._cache: dict[str, pygame.mixer.Sound] = {}
         self._loops: dict[int, tuple[str, float]] = {}  # channel -> (key, base gain)
+        self._pans: dict[int, float] = {}               # channel -> pan, -1..1
         self._music_track: str | None = None
         self._engine_running = False
         try:
@@ -150,7 +152,20 @@ class _PygameBackend:
             return
         _, gain = self._loops[channel]
         vol = max(0.0, min(1.0, gain * self.sfx_volume * self.master_volume))
-        pygame.mixer.Channel(channel).set_volume(vol)
+        pan = self._pans.get(channel, 0.0)
+        # Linear pan law that keeps a centered sound at full volume on both
+        # ears, so adding pan support does not change existing loudness.
+        pygame.mixer.Channel(channel).set_volume(
+            vol * min(1.0, 1.0 - pan), vol * min(1.0, 1.0 + pan))
+
+    def set_pan(self, channel: int, pan: float) -> None:
+        """Pan a loop slot, -1 full left .. +1 full right."""
+        self._pans[channel] = max(-1.0, min(1.0, pan))
+        self._apply_channel_volume(channel)
+
+    def set_engine_pan(self, pan: float) -> None:
+        for ch in CH_ENGINE:
+            self.set_pan(ch, pan)
 
     # -- truck engine crossfade ----------------------------------------------
 
@@ -248,6 +263,7 @@ class _BassBackend:
     def __init__(self) -> None:
         from sound_lib.external.pybass import (
             BASS_ATTRIB_FREQ,
+            BASS_ATTRIB_PAN,
             BASS_ATTRIB_VOL,
             BASS_ChannelSlideAttribute,
         )
@@ -261,17 +277,20 @@ class _BassBackend:
         self._slide = BASS_ChannelSlideAttribute
         self._ATTRIB_FREQ = BASS_ATTRIB_FREQ
         self._ATTRIB_VOL = BASS_ATTRIB_VOL
+        self._ATTRIB_PAN = BASS_ATTRIB_PAN
 
         self.master_volume = 1.0
         self.sfx_volume = 0.8
         self.music_volume = 0.55
         self._loops: dict[int, tuple[str, float, object]] = {}  # slot -> (key, gain, stream)
+        self._pans: dict[int, float] = {}                       # slot -> pan, -1..1
         self._retained: list = []  # streams kept alive until BASS finishes them
         self._music_track: str | None = None
         self._music_stream = None
         self._engine_running = False
         self._engine_stream = None
         self._engine_base_freq = 0.0
+        self._engine_pan = 0.0
 
         if os.environ.get("SDL_AUDIODRIVER", "").lower() == "dummy":
             self._output = Output(device=BASS_NO_SOUND_DEVICE)
@@ -372,6 +391,9 @@ class _BassBackend:
             del self._loops[channel]
             return
         self._apply_loop_volume(channel, fade_ms)
+        pan = self._pans.get(channel, 0.0)
+        if pan:
+            self._apply_pan(stream, pan, 0)
 
     def set_loop_volume(self, channel: int, volume: float) -> None:
         if channel in self._loops:
@@ -398,6 +420,27 @@ class _BassBackend:
         except self._BassError:
             del self._loops[channel]
 
+    def _apply_pan(self, stream, pan: float, slide_ms: int = 100) -> None:
+        """Slide a stream's stereo pan; a short slide avoids zipper noise."""
+        try:
+            self._bass_call(self._slide, stream.handle, self._ATTRIB_PAN,
+                            max(-1.0, min(1.0, pan)), max(0, int(slide_ms)))
+        except self._BassError:
+            log.debug("Could not pan stream", exc_info=True)
+
+    def set_pan(self, channel: int, pan: float) -> None:
+        """Pan a loop slot, -1 full left .. +1 full right."""
+        pan = max(-1.0, min(1.0, pan))
+        self._pans[channel] = pan
+        entry = self._loops.get(channel)
+        if entry is not None:
+            self._apply_pan(entry[2], pan)
+
+    def set_engine_pan(self, pan: float) -> None:
+        self._engine_pan = max(-1.0, min(1.0, pan))
+        if self._engine_stream is not None:
+            self._apply_pan(self._engine_stream, self._engine_pan)
+
     # -- truck engine: one loop, frequency tracks RPM ------------------------------
 
     def engine_start(self) -> None:
@@ -414,6 +457,8 @@ class _BassBackend:
             except self._BassError:
                 stream = None
         self._engine_stream = stream
+        if stream is not None and self._engine_pan:
+            self._apply_pan(stream, self._engine_pan, 0)
         self.set_engine_rpm(ENGINE_RPM_IDLE, throttle=0.0)
 
     def engine_stop(self, shutdown_sound: bool = True) -> None:
@@ -532,6 +577,8 @@ class _NullBackend:
                    fade_ms: int = 300) -> None: ...
     def set_loop_volume(self, channel: int, volume: float) -> None: ...
     def stop_loop(self, channel: int, fade_ms: int = 300) -> None: ...
+    def set_pan(self, channel: int, pan: float) -> None: ...
+    def set_engine_pan(self, pan: float) -> None: ...
     def engine_start(self) -> None: ...
     def engine_stop(self, shutdown_sound: bool = True) -> None: ...
     def set_engine_rpm(self, rpm: float, throttle: float = 0.0) -> None: ...
@@ -643,10 +690,34 @@ class AudioEngine:
         else:
             self.start_loop(CH_AMBIENT, key, volume=volume, fade_ms=800)
 
+    # -- lane keeping cues ------------------------------------------------------
+
+    def set_world_pan(self, pan: float) -> None:
+        """Pan the truck's own noise (engine and road) with lane position,
+        -1 full left .. +1 full right. The primary lane-drift cue."""
+        self._impl.set_engine_pan(pan)
+        self._impl.set_pan(CH_ROAD, pan)
+
+    def set_rumble(self, side: float, level: float) -> None:
+        """Rumble-strip loop in the ear of the lane edge being touched.
+
+        ``side`` < 0 plays in the left ear, > 0 in the right;
+        ``level`` 0..1 is loudness, 0 stops the loop.
+        """
+        if not self.enabled:
+            return
+        if level < 0.02:
+            self.stop_loop(CH_RUMBLE, fade_ms=150)
+        else:
+            self.start_loop(CH_RUMBLE, "vehicle/rumble_strip",
+                            volume=min(1.0, level), fade_ms=80)
+            self._impl.set_pan(CH_RUMBLE, 0.85 if side >= 0 else -0.85)
+
     def stop_world(self) -> None:
         """Stop engine, road, weather, and ambience (leaving UI sfx alone)."""
         self.engine_stop(shutdown_sound=False)
-        for ch in (CH_ROAD, CH_WEATHER, CH_WEATHER_B, CH_AMBIENT):
+        self.set_world_pan(0.0)
+        for ch in (CH_ROAD, CH_WEATHER, CH_WEATHER_B, CH_AMBIENT, CH_RUMBLE):
             self.stop_loop(ch, fade_ms=400)
 
     # -- music ----------------------------------------------------------------

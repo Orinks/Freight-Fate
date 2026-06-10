@@ -1,5 +1,20 @@
 # Freight Fate Roadmap
 
+## Shipped in 1.3.0
+
+- [x] Cargo weight in the physics: tractor and cargo mass are separate, the
+      active job's weight loads the truck, and acceleration, grade climbing,
+      braking distance, and fuel burn all respond to it
+- [x] Audio lane keeping: terrain-driven curves, crosswind gusts, and random
+      wander drift the truck in its lane; engine/road panning and a per-ear
+      rumble strip cue corrections with the Left/Right arrows, with an
+      off/light/realistic steering assist setting and an L lane-position key
+
+## Shipped in 1.2.1
+
+- [x] Mid-trip save and resume: quit while driving and continue the
+      delivery later from the same spot
+
 ## Shipped in 1.2.0
 
 - [x] Truck upgrades (engine tune, aerodynamic kit, long-range tank,

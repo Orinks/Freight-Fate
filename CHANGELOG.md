@@ -1,5 +1,41 @@
 # Changelog
 
+## 1.3.0 — 2026-06-10
+
+### Added
+- **Cargo weight drives the physics.** The truck's mass is now split into
+  the tractor (plus empty trailer) and the cargo actually on board, set
+  from the active job's listed weight. A 25-ton haul pulls away slower,
+  climbs grades slower, needs noticeably more road to stop (brakes deliver
+  a fixed maximum force sized for the rated gross weight, capped by tire
+  grip), and burns more fuel per mile; an 8-ton load feels distinctly
+  livelier. A max-weight load still climbs a 6% mountain grade in low
+  gears. The Tab status report now includes the load
+  ("hauling 25 tons of machinery").
+- **Audio lane keeping** (Settings → Steering assist and lane drift:
+  off / light / realistic, default off so existing saves drive exactly as
+  before). The truck slowly drifts in its lane from gentle random wander,
+  road curvature derived from each leg's terrain (flat legs are mostly
+  straight, mountain legs wind continuously), and crosswind gusts scaled
+  by the weather. Hold Left/Right arrows to steer back — analog-feel, like
+  the throttle — with heavier loads responding more sluggishly. Every cue
+  is audio: engine and road noise pan toward the side you are drifting, a
+  rumble strip sounds in the matching ear at the lane edge, and staying
+  fully off the lane for a couple of seconds scrubs speed, ticks cargo
+  damage, and speaks a warning. Tuned gentle: a calm flat leg needs a
+  correction roughly every half minute; mountain curves in a storm demand
+  real attention. L speaks your lane position on demand, Tab includes it,
+  F1 and the in-game manual document the new controls, and the tutorial
+  teaches them when assist is on. Lane position and load survive mid-trip
+  save and resume.
+- Stereo panning support in both audio backends (BASS pan slides;
+  pygame.mixer per-channel stereo volumes).
+
+### Changed
+- `TruckSpecs.mass_kg` is replaced by `tractor_mass_kg` +
+  `TruckState.cargo_mass_kg`; brake strength is now rated against
+  `brake_rated_mass_kg` instead of scaling with whatever is on board.
+
 ## 1.2.1 — 2026-06-09
 
 ### Added

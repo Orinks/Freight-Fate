@@ -6,7 +6,7 @@ import pygame
 
 from .. import __version__
 from ..models.profile import Profile
-from ..settings import TIME_SCALES
+from ..settings import STEERING_ASSIST_LEVELS, TIME_SCALES
 from .base import MenuItem, MenuState, State
 
 
@@ -189,12 +189,25 @@ HELP_PAGES = [
         "then press 1 through 0 for gears one through ten, or N for neutral.",
         "J toggles the engine brake for long downhill grades.",
         "H sounds the horn.",
+        "Heavy loads pull away slowly, climb slowly, and need longer to stop.",
+    ]),
+    ("Lane keeping", [
+        "With steering assist set to light or realistic in Settings,",
+        "the truck slowly drifts in its lane from curves, wind, and storms.",
+        "Hold the Left or Right arrow to steer back. Corrections are gentle:",
+        "on a calm flat highway you only need one every so often.",
+        "Your engine and road noise lean toward the side you are drifting.",
+        "A rumble strip in one ear means your tires are on that lane edge:",
+        "steer the other way. Stay off the lane too long and you will run",
+        "off the road, losing speed and damaging the cargo.",
+        "Heavier loads respond more slowly to the wheel.",
     ]),
     ("Driving information keys", [
         "Space speaks your speed, gear, and RPM.",
-        "Tab speaks a full status report.",
+        "Tab speaks a full status report, including your load and lane.",
         "F speaks fuel level and range. C speaks the clock and your deadline.",
         "R speaks route progress. V speaks the weather and the forecast.",
+        "L speaks your lane position when steering assist is on.",
         "Escape opens the pause menu.",
     ]),
     ("On the road", [
@@ -288,6 +301,13 @@ class SettingsState(MenuState):
                      lambda: self._toggle_units(1)),
             MenuItem(lambda: f"Transmission: {'automatic' if s.automatic_transmission else 'manual'}",
                      lambda: self._toggle_transmission(1)),
+            MenuItem(lambda: f"Steering assist and lane drift: {s.steering_assist}",
+                     lambda: self._cycle_assist(1),
+                     help="Off: the truck holds its lane by itself. Light: "
+                          "gentle drift, forgiving steering. Realistic: full "
+                          "drift from curves, crosswinds, and storms. While "
+                          "driving, steer with the Left and Right arrows and "
+                          "press L for your lane position."),
             MenuItem(lambda: f"Trip pacing: {self._pace_label()}",
                      lambda: self._cycle_pace(1)),
             MenuItem(lambda: f"Master volume: {round(s.master_volume * 100)} percent",
@@ -315,7 +335,8 @@ class SettingsState(MenuState):
             super().handle_event(event)
 
     def _adjust(self, direction: int) -> None:
-        actions = [self._toggle_units, self._toggle_transmission, self._cycle_pace,
+        actions = [self._toggle_units, self._toggle_transmission,
+                   self._cycle_assist, self._cycle_pace,
                    lambda d: self._volume("master_volume", 0.1 * d),
                    lambda d: self._volume("sfx_volume", 0.1 * d),
                    lambda d: self._volume("music_volume", 0.1 * d),
@@ -338,6 +359,15 @@ class SettingsState(MenuState):
 
     def _toggle_transmission(self, _d: int) -> None:
         self.ctx.settings.automatic_transmission = not self.ctx.settings.automatic_transmission
+        self._announce()
+
+    def _cycle_assist(self, d: int) -> None:
+        levels = list(STEERING_ASSIST_LEVELS)
+        try:
+            i = levels.index(self.ctx.settings.steering_assist)
+        except ValueError:
+            i = 0
+        self.ctx.settings.steering_assist = levels[(i + d) % len(levels)]
         self._announce()
 
     def _cycle_pace(self, d: int) -> None:

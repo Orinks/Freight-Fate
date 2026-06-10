@@ -14,6 +14,7 @@ import pygame
 
 from ..data.world import Route
 from ..models.jobs import CARGO_CATALOG, Job
+from ..sim.lane import LaneKeeping
 from ..sim.trip import Trip, TripEventKind
 from ..sim.vehicle import TruckState
 from ..sim.weather import WeatherSystem
@@ -39,6 +40,7 @@ class DrivingState(State):
         profile = ctx.profile
         self.truck = TruckState(specs=profile.truck_specs())
         self.truck.transmission.automatic = ctx.settings.automatic_transmission
+        self.truck.set_cargo_tons(job.weight_tons)
         self.truck.fuel_gal = min(profile.truck_fuel_gal, self.truck.specs.fuel_tank_gal)
         self.truck.damage_pct = profile.truck_damage_pct
         self.start_damage = profile.truck_damage_pct
@@ -46,8 +48,10 @@ class DrivingState(State):
         self.weather = WeatherSystem(region, provider=ctx.real_weather_provider())
         self.trip = Trip(route, self.truck, self.weather,
                          time_scale=ctx.settings.time_scale, seed=self.trip_seed)
+        self.lane = LaneKeeping(seed=self.trip_seed)
         self.tutorial = Tutorial(ctx) if not profile.tutorial_done else None
 
+        self._steer_input = 0.0
         self._hazard_deadline: float | None = None
         self._speed_announce_timer = 0.0
         self._last_announced_mph = 0.0
@@ -80,6 +84,8 @@ class DrivingState(State):
             "game_minutes": self.trip.game_minutes,
             "start_damage": self.start_damage,
             "speeding_strikes": self.speeding_strikes,
+            "cargo_mass_kg": self.truck.cargo_mass_kg,
+            "lane_offset": self.lane.offset,
         }
 
     @classmethod
@@ -101,6 +107,10 @@ class DrivingState(State):
             state.start_damage = float(data["start_damage"])
             state.speeding_strikes = int(data["speeding_strikes"])
             state.trip.restore(float(data["position_mi"]), float(data["game_minutes"]))
+            # Saves from before 1.3.0 lack these; the job weight covers the mass.
+            state.truck.cargo_mass_kg = float(
+                data.get("cargo_mass_kg", state.truck.cargo_mass_kg))
+            state.lane.offset = float(data.get("lane_offset", 0.0))
             return state
         except (KeyError, TypeError, ValueError):
             log.warning("Could not resume saved trip", exc_info=True)
@@ -174,9 +184,17 @@ class DrivingState(State):
             self.ctx.say(self.trip.progress_summary(self.ctx.settings.imperial_units))
         elif key == pygame.K_v:
             self._speak_weather()
+        elif key == pygame.K_l:
+            self._speak_lane()
         elif key == pygame.K_F1:
+            steering = (
+                "Hold Left and Right arrows to steer within your lane. "
+                "L lane position. "
+                if self.ctx.settings.steering_assist != "off" else "")
             self.ctx.say(
-                "Hold Up arrow to accelerate, Down arrow to brake. E engine. "
+                "Hold Up arrow to accelerate, Down arrow to brake. "
+                + steering +
+                "E engine. "
                 "Space speed. Tab full status. F fuel. C clock and deadline. "
                 "R route. V weather. T rest stop when stopped at one. H horn. "
                 "J engine brake. Escape pause menu. "
@@ -230,12 +248,22 @@ class DrivingState(State):
         parts = [
             self.ctx.settings.speed_text(t.speed_mph),
             f"speed limit {limit:.0f}" + (f" in a {reason} zone" if reason else ""),
+            f"hauling {self.job.weight_tons:.0f} tons of {self.job.cargo.label}",
             self.trip.progress_summary(self.ctx.settings.imperial_units),
             f"fuel {t.fuel_fraction * 100:.0f} percent",
         ]
+        if self.ctx.settings.steering_assist != "off":
+            parts.append(self.lane.describe().rstrip(".!"))
         if t.damage_pct - self.start_damage > 1:
             parts.append(f"new damage {t.damage_pct - self.start_damage:.0f} percent")
         self.ctx.say(". ".join(parts) + ".")
+
+    def _speak_lane(self) -> None:
+        if self.ctx.settings.steering_assist == "off":
+            self.ctx.say("Steering assist is off. The truck holds its lane "
+                         "by itself. Turn on lane drift in Settings.")
+        else:
+            self.ctx.say(self.lane.describe())
 
     def _speak_fuel(self) -> None:
         t = self.truck
@@ -286,6 +314,7 @@ class DrivingState(State):
         else:
             t.brake = max(0.0, t.brake - ramp * 3)
         t.transmission.clutch = 1.0 if keys[pygame.K_LSHIFT] or keys[pygame.K_RSHIFT] else 0.0
+        self._update_steering(keys, dt)
 
         if t.transmission.automatic and t.engine_on:
             new_gear = t.auto_shift()
@@ -314,6 +343,39 @@ class DrivingState(State):
         if self.trip.finished:
             self._arrive()
 
+    def _update_steering(self, keys, dt: float) -> None:
+        """Sample held Left/Right into an analog steering input and advance
+        the lane simulation; fires the off-road event when it says so."""
+        ramp = dt * 3.0
+        target = (-1.0 if keys[pygame.K_LEFT] else 0.0) + \
+                 (1.0 if keys[pygame.K_RIGHT] else 0.0)
+        if target:
+            delta = target - self._steer_input
+            self._steer_input += max(-ramp, min(ramp, delta))
+        else:  # hands off: the wheel returns to center quickly
+            decay = ramp * 2
+            self._steer_input -= max(-decay, min(decay, self._steer_input))
+        self.lane.steering = self._steer_input
+
+        assist = self.ctx.settings.steering_assist
+        curve = self.trip.curve_at(self.trip.position_mi)
+        wind = self.weather.effects.wind
+        mass_factor = self.truck.total_mass_kg / 36_000.0
+        if self.lane.update(dt, self.truck.velocity_mps, curve=curve,
+                            wind=wind, mass_factor=mass_factor, assist=assist):
+            self._off_road_event()
+
+    def _off_road_event(self) -> None:
+        t = self.truck
+        t.velocity_mps *= 0.7
+        t.damage_pct = min(100.0, t.damage_pct + 1.5)
+        self.ctx.audio.play("vehicle/tire_screech", volume=0.8)
+        side = "left" if self.lane.offset < 0 else "right"
+        back = "right" if side == "left" else "left"
+        self.ctx.say(f"You are off the road on the {side}! The cargo is "
+                     f"taking damage. Steer {back}, back into your lane.",
+                     interrupt=True)
+
     def _update_audio(self) -> None:
         t = self.truck
         audio = self.ctx.audio
@@ -321,6 +383,13 @@ class DrivingState(State):
             audio.engine_start()
         audio.set_engine_rpm(t.rpm, t.throttle)
         audio.set_road_noise(t.velocity_mps)
+        if self.ctx.settings.steering_assist == "off":
+            audio.set_world_pan(0.0)
+            audio.set_rumble(0, 0.0)
+        else:
+            audio.set_world_pan(self.lane.pan())
+            level = self.lane.rumble_level() if t.speed_mph > 5 else 0.0
+            audio.set_rumble(self.lane.side, level)
         eff = self.weather.effects
         audio.set_weather(eff.sound)
         audio.set_wind(eff.wind)
@@ -434,12 +503,15 @@ class DrivingState(State):
         t = self.truck
         limit, reason = self.trip.speed_limit_at(self.trip.position_mi)
         gear = "N" if t.transmission.in_neutral else str(t.transmission.gear)
+        lane = ("" if self.ctx.settings.steering_assist == "off"
+                else f"   Lane: {self.lane.describe()}")
         return [
             f"Driving to {self.job.destination}",
             "",
             f"Speed: {t.speed_mph:.0f} mph (limit {limit:.0f}{', ' + reason if reason else ''})",
             f"Gear: {gear}   RPM: {t.rpm:.0f}   {'ENGINE ON' if t.engine_on else 'engine off'}",
             f"Fuel: {t.fuel_fraction * 100:.0f}%   Damage: {t.damage_pct:.0f}%",
+            f"Load: {self.job.weight_tons:.0f} t {self.job.cargo.label}{lane}",
             f"Remaining: {self.trip.remaining_miles:.0f} of {self.trip.total_miles:.0f} miles",
             f"Weather: {self.weather.current.value}",
             "",
@@ -483,10 +555,18 @@ class Tutorial:
         self._timer += dt
         if self.stage == 2 and truck.speed_mph > 20:
             self.stage = 3
+            lane_tip = ""
+            if self.ctx.settings.steering_assist != "off":
+                lane_tip = (" The truck drifts in its lane: when the engine "
+                            "sound leans to one side, hold the opposite arrow "
+                            "to steer back. A rumble strip in one ear means "
+                            "you are at that lane edge. Press L anytime for "
+                            "your lane position.")
             self.ctx.say(
                 "You are rolling. Press Space anytime for your speed, Tab for a "
                 "full report, and F1 to hear all the controls. Watch for hazard "
-                "warnings, and brake hard when you hear them. Safe travels.",
+                "warnings, and brake hard when you hear them." + lane_tip +
+                " Safe travels.",
                 interrupt=False)
             self.ctx.profile.tutorial_done = True
             self.ctx.save_profile()
