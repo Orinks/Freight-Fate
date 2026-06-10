@@ -5,7 +5,7 @@ from __future__ import annotations
 import pygame
 
 from .. import __version__
-from ..models.profile import Profile
+from ..models.profile import DEFAULT_CITY, Profile
 from ..settings import TIME_SCALES
 from .base import MenuItem, MenuState, State
 
@@ -146,26 +146,76 @@ class NameEntryState(State):
             self.ctx.say(spoken)
 
     def _confirm(self) -> None:
-        from .city import CityMenuState
-
         name = self.name.strip() or "Driver"
-        existing = {p.stem.lower() for p in Profile.list_saves()}
-        profile = Profile(name=name)
-        self.ctx.profile = profile
-        profile.save()
-        if name.lower() in existing:
-            self.ctx.say(f"Loaded over existing driver named {name}.", interrupt=True)
         self.ctx.audio.play("ui/menu_select")
-        self.ctx.say(
-            f"Welcome aboard, {name}. Your career starts in {profile.current_city} "
-            f"with {profile.money:,.0f} dollars and a full tank. "
-            "Your first stop is the job board.", interrupt=True)
-        self.ctx.pop_state()
-        self.ctx.push_state(CityMenuState(self.ctx))
+        self.ctx.push_state(HomeTerminalState(self.ctx, name))
 
     def lines(self) -> list[str]:
         return ["New career", "", f"Driver name: {self.name}_",
                 "Press Enter to confirm, Escape to cancel, F2 to review."]
+
+
+REGION_LABELS = {
+    "northeast": "the Northeast",
+    "midwest": "the Midwest",
+    "south": "the South",
+    "plains": "the Plains",
+    "rockies": "the Rockies",
+    "southwest": "the Southwest",
+    "west_coast": "the West Coast",
+    "northwest": "the Pacific Northwest",
+}
+
+
+class HomeTerminalState(MenuState):
+    """Pick the home terminal city where a brand-new career begins."""
+
+    title = "Home terminal"
+    intro_help = ("Pick the city where your trucking career begins. Cities are "
+                  "grouped by region. Use up and down arrows, Home and End, or "
+                  "type a letter to jump to a city. Enter confirms your home "
+                  "terminal. Escape goes back to name entry.")
+
+    def __init__(self, ctx, driver_name: str) -> None:
+        super().__init__(ctx)
+        self.driver_name = driver_name
+        cities = sorted(ctx.world.cities.values(),
+                        key=lambda c: (REGION_LABELS.get(c.region, c.region), c.name))
+        self._cities = [c.name for c in cities]
+        if DEFAULT_CITY in self._cities:
+            self.index = self._cities.index(DEFAULT_CITY)
+
+    def announce_entry(self) -> None:
+        self.ctx.say("Home terminal. Pick the city where your career starts. "
+                     f"{self.current_text()}")
+
+    def build_items(self) -> list[MenuItem]:
+        items: list[MenuItem] = []
+        for name in self._cities:
+            city = self.ctx.world.cities[name]
+            region = REGION_LABELS.get(city.region, city.region)
+            items.append(MenuItem(f"{name}, {region}",
+                                  lambda n=name: self._pick(n),
+                                  help=f"Start your career in {name}, {city.state}."))
+        return items
+
+    def _pick(self, city: str) -> None:
+        from .city import CityMenuState
+
+        name = self.driver_name
+        existing = {p.stem.lower() for p in Profile.list_saves()}
+        profile = Profile(name=name, current_city=city)
+        self.ctx.profile = profile
+        profile.save()
+        self.ctx.pop_state()   # this picker
+        self.ctx.pop_state()   # name entry
+        self.ctx.push_state(CityMenuState(self.ctx))
+        loaded_over = (f"Loaded over existing driver named {name}. "
+                       if name.lower() in existing else "")
+        self.ctx.say(
+            f"{loaded_over}Welcome aboard, {name}. Your career starts in {city} "
+            f"with {profile.money:,.0f} dollars and a full tank. "
+            "Your first stop is the job board.", interrupt=True)
 
 
 HELP_PAGES = [

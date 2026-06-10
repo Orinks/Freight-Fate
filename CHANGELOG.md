@@ -1,5 +1,35 @@
 # Changelog
 
+## 1.4.0 — 2026-06-10
+
+### Added
+- **Home terminal picker.** A new career now asks where it should begin:
+  after name entry, a fully spoken menu lists every city labeled by region
+  ("Atlanta, the South"), with the usual arrow, Home/End, and first-letter
+  navigation plus F1 help. Defaults to Chicago; Escape returns to name
+  entry with the typed name intact. Existing profiles are untouched.
+- **A real interstate network.** The map grows from 21 cities and 27 legs
+  to 59 cities and 106 legs along real corridors (I-95, I-90, I-80, I-75,
+  I-70, I-65, I-40, I-35, I-10, I-5, and more), so neighboring cities sit
+  roughly 100-250 miles apart. Every new city has real coordinates for the
+  live-weather feature, a weather region, and freight locations with
+  regional identity: produce out of the Central Valley, autos around
+  Detroit, electronics at the container ports, grain and livestock across
+  the plains, machinery in the rust belt. Boston and Seattle are no longer
+  dead ends; no city has fewer than two highways.
+- **Career-arc job generation.** Rookie boards (levels 1-2) offer short
+  regional work: mostly single-leg hops to neighboring cities, capped
+  around 280-340 miles, with destinations weighted toward nearby cities so
+  freight follows plausible lanes. The distance cap grows with level and
+  cross-country hauls (600+ miles) unlock around level 4-5 as a dedicated
+  long-haul slot on the board. A flat hookup fee keeps short early runs
+  profitable after fuel.
+
+### Compatibility
+- All 21 original cities and all 27 original direct legs are preserved
+  verbatim, so old profiles and mid-trip snapshots (`route_cities`) load
+  and resume unchanged. A regression test pins every original adjacency.
+
 ## 1.2.1 — 2026-06-09
 
 ### Added

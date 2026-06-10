@@ -84,20 +84,43 @@ class Job:
         return round(pay, 2)
 
 
+# Career-arc distance caps: short regional hops while learning the ropes,
+# cross-country hauls unlocking as a progression reward around level 4-5.
+LEVEL_DISTANCE_CAPS = {1: 280.0, 2: 340.0, 3: 520.0, 4: 750.0, 5: 1100.0}
+LONG_HAUL_MILES = 600.0   # what counts as a cross-country haul
+HOOKUP_FEE = 120.0        # flat load/unload fee keeping short hops worthwhile
+
+
 class JobBoard:
-    """Generates job offers at a city, filtered by the player's endorsements."""
+    """Generates job offers at a city, filtered by the player's endorsements.
+
+    Destinations follow a career arc: low levels offer mostly single-leg hops
+    to neighboring cities, the distance cap grows with level, and every level
+    weights destination choice by proximity so freight follows plausible
+    lanes instead of teleporting across the country.
+    """
 
     def __init__(self, world: World, seed: int | None = None) -> None:
         self.world = world
         self._rng = random.Random(seed)
+        self._candidates_cache: dict[str, list[tuple[str, float, int]]] = {}
+
+    @staticmethod
+    def distance_cap(level: int) -> float:
+        if level in LEVEL_DISTANCE_CAPS:
+            return LEVEL_DISTANCE_CAPS[level]
+        return LEVEL_DISTANCE_CAPS[5] + 500.0 * (level - 5)
 
     def offers(self, city: str, endorsements: set[str], count: int = 5,
                level: int = 1, market: Market | None = None) -> list[Job]:
         jobs: list[Job] = []
         city_obj = self.world.cities[city]
-        others = [c for c in self.world.city_names() if c != city]
-        # early levels keep hauls regional so new players aren't buried
-        max_miles = 400 + level * 350
+        candidates = self._candidates(city)
+        cap = self.distance_cap(level)
+        reachable = [c for c in candidates if c[1] <= cap]
+        if not reachable:
+            # remote terminals (long legs all around): offer the nearest few
+            reachable = sorted(candidates, key=lambda c: c[1])[:4]
         attempts = 0
         while len(jobs) < count and attempts < count * 12:
             attempts += 1
@@ -108,21 +131,54 @@ class JobBoard:
             # a locked job may appear once in a while as a teaser, otherwise skip
             if locked and not (len(jobs) == count - 1 and self._rng.random() < 0.3):
                 continue
-            destination = self._rng.choice(others)
-            route = self.world.shortest_route(city, destination)
-            if route is None or route.miles > max_miles:
-                continue
+            destination, miles, _legs = self._choose_destination(reachable, level)
             jobs.append(self._make_job(cargo, city, location.name, destination,
-                                       route.miles, market))
+                                       miles, market))
         jobs.sort(key=lambda j: j.distance_mi)
         return jobs
+
+    def _candidates(self, city: str) -> list[tuple[str, float, int]]:
+        """(destination, route miles, route leg count) for every other city."""
+        cached = self._candidates_cache.get(city)
+        if cached is None:
+            cached = []
+            for dest in self.world.city_names():
+                if dest == city:
+                    continue
+                route = self.world.shortest_route(city, dest)
+                if route is not None:
+                    cached.append((dest, route.miles, len(route.legs)))
+            self._candidates_cache[city] = cached
+        return cached
+
+    def _choose_destination(self, candidates: list[tuple[str, float, int]],
+                            level: int) -> tuple[str, float, int]:
+        pool = candidates
+        if level <= 2:
+            # rookie runs: mostly direct hops, sometimes a two-leg trip
+            one = [c for c in candidates if c[2] == 1]
+            two = [c for c in candidates if c[2] == 2]
+            if one and (not two or self._rng.random() < 0.7):
+                pool = one
+            elif two:
+                pool = two
+        elif level == 3:
+            pool = [c for c in candidates if c[2] <= 3] or candidates
+        else:
+            # seasoned drivers see a dedicated cross-country slot now and then
+            long_hauls = [c for c in candidates if c[1] >= LONG_HAUL_MILES]
+            if long_hauls and self._rng.random() < 0.35:
+                pool = long_hauls
+        # nearer cities are likelier at every level: freight moves lane by lane
+        weights = [1.0 / c[1] for c in pool]
+        return self._rng.choices(pool, weights)[0]
 
     def _make_job(self, cargo: CargoType, origin: str, origin_location: str,
                   destination: str, miles: float, market: Market | None) -> Job:
         weight = self._rng.uniform(*cargo.weight_tons)
         rate = cargo.rate_per_mile * self._rng.uniform(0.9, 1.15)
         mult = market.multiplier(cargo.key) if market is not None else 1.0
-        pay = round(miles * rate * (1.0 + weight / 120.0) * mult, 2)
+        pay = round((HOOKUP_FEE + miles * rate * (1.0 + weight / 120.0)) * mult, 2)
         # deadline: 50 mph average plus generous slack
         deadline = miles / 50.0 * self._rng.uniform(1.35, 1.7)
         return Job(cargo, weight, origin, origin_location, destination,

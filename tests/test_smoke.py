@@ -13,7 +13,11 @@ def test_full_game_flow_headless():
     from freight_fate.app import App
     from freight_fate.states.city import CityMenuState, JobBoardState, RouteSelectState
     from freight_fate.states.driving import ArrivalState, DrivingState
-    from freight_fate.states.main_menu import MainMenuState, NameEntryState
+    from freight_fate.states.main_menu import (
+        HomeTerminalState,
+        MainMenuState,
+        NameEntryState,
+    )
 
     app = App()
     try:
@@ -31,9 +35,12 @@ def test_full_game_flow_headless():
         for ch in "Smoke":
             app.state.handle_event(key_event(ord(ch.lower()), ch))
         app.state.handle_event(key_event(pygame.K_RETURN))
+        assert isinstance(app.state, HomeTerminalState)
+        app.state.handle_event(key_event(pygame.K_RETURN))  # default: Chicago
         assert isinstance(app.state, CityMenuState)
         assert app.ctx.profile is not None
         assert app.ctx.profile.name == "Smoke"
+        assert app.ctx.profile.current_city == "Chicago"
 
         # open job board, accept the first job we hold the endorsement for
         # (the board may show one locked "teaser" job, sometimes sorted first)
@@ -121,6 +128,7 @@ def test_garage_upgrade_and_truck_purchase_flow():
         app.state.handle_event(key_event(pygame.K_RETURN))
         assert isinstance(app.state, NameEntryState)
         app.state.handle_event(key_event(pygame.K_RETURN))  # default name
+        app.state.handle_event(key_event(pygame.K_RETURN))  # default home terminal
         assert isinstance(app.state, CityMenuState)
         p = app.ctx.profile
         p.money = 200_000.0
@@ -212,6 +220,7 @@ def test_pause_and_abandon_returns_to_city():
         app.state.handle_event(key_event(pygame.K_RETURN))
         assert isinstance(app.state, NameEntryState)
         app.state.handle_event(key_event(pygame.K_RETURN))  # default name
+        app.state.handle_event(key_event(pygame.K_RETURN))  # default home terminal
         app.state.handle_event(key_event(pygame.K_RETURN))  # job board
         board = app.state
         while board.jobs[board.index].cargo.endorsement:  # skip locked teasers

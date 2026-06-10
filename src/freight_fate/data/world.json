@@ -535,6 +535,950 @@
       ],
       "lat": 47.6062,
       "lon": -122.3321
+    },
+    "Hartford": {
+      "state": "Connecticut",
+      "region": "northeast",
+      "locations": [
+        {
+          "name": "Brainard Field Cargo",
+          "type": "terminal",
+          "cargo": [
+            "general",
+            "retail"
+          ]
+        },
+        {
+          "name": "Connecticut River Warehouse",
+          "type": "warehouse",
+          "cargo": [
+            "machinery",
+            "general"
+          ]
+        }
+      ],
+      "lat": 41.7658,
+      "lon": -72.6734
+    },
+    "Buffalo": {
+      "state": "New York",
+      "region": "northeast",
+      "locations": [
+        {
+          "name": "Niagara Frontier Food Terminal",
+          "type": "distribution",
+          "cargo": [
+            "food",
+            "retail"
+          ]
+        },
+        {
+          "name": "Lake Erie Steel Yard",
+          "type": "warehouse",
+          "cargo": [
+            "machinery",
+            "bulk"
+          ]
+        }
+      ],
+      "lat": 42.8864,
+      "lon": -78.8784
+    },
+    "Baltimore": {
+      "state": "Maryland",
+      "region": "northeast",
+      "locations": [
+        {
+          "name": "Dundalk Marine Terminal",
+          "type": "port",
+          "cargo": [
+            "container",
+            "machinery"
+          ]
+        },
+        {
+          "name": "Seagirt Container Yard",
+          "type": "port",
+          "cargo": [
+            "container",
+            "electronics"
+          ]
+        },
+        {
+          "name": "Chesapeake Cold Storage",
+          "type": "distribution",
+          "cargo": [
+            "food",
+            "refrigerated"
+          ]
+        }
+      ],
+      "lat": 39.2904,
+      "lon": -76.6122
+    },
+    "Richmond": {
+      "state": "Virginia",
+      "region": "south",
+      "locations": [
+        {
+          "name": "James River Distribution",
+          "type": "distribution",
+          "cargo": [
+            "retail",
+            "general"
+          ]
+        },
+        {
+          "name": "Port of Richmond Docks",
+          "type": "port",
+          "cargo": [
+            "container",
+            "bulk"
+          ]
+        }
+      ],
+      "lat": 37.5407,
+      "lon": -77.436
+    },
+    "Raleigh": {
+      "state": "North Carolina",
+      "region": "south",
+      "locations": [
+        {
+          "name": "Research Triangle Depot",
+          "type": "warehouse",
+          "cargo": [
+            "electronics",
+            "general"
+          ]
+        },
+        {
+          "name": "Carolina Foods Crossdock",
+          "type": "distribution",
+          "cargo": [
+            "food",
+            "retail"
+          ]
+        }
+      ],
+      "lat": 35.7796,
+      "lon": -78.6382
+    },
+    "Charlotte": {
+      "state": "North Carolina",
+      "region": "south",
+      "locations": [
+        {
+          "name": "Queen City Intermodal",
+          "type": "rail",
+          "cargo": [
+            "container",
+            "general"
+          ]
+        },
+        {
+          "name": "Piedmont Distribution Park",
+          "type": "distribution",
+          "cargo": [
+            "retail",
+            "machinery"
+          ]
+        }
+      ],
+      "lat": 35.2271,
+      "lon": -80.8431
+    },
+    "Savannah": {
+      "state": "Georgia",
+      "region": "south",
+      "locations": [
+        {
+          "name": "Garden City Container Terminal",
+          "type": "port",
+          "cargo": [
+            "container",
+            "electronics"
+          ]
+        },
+        {
+          "name": "Coastal Georgia Warehouse",
+          "type": "warehouse",
+          "cargo": [
+            "general",
+            "bulk"
+          ]
+        }
+      ],
+      "lat": 32.0809,
+      "lon": -81.0912
+    },
+    "Jacksonville": {
+      "state": "Florida",
+      "region": "south",
+      "locations": [
+        {
+          "name": "Blount Island Terminal",
+          "type": "port",
+          "cargo": [
+            "container",
+            "machinery"
+          ]
+        },
+        {
+          "name": "North Florida Cold Chain",
+          "type": "distribution",
+          "cargo": [
+            "food",
+            "refrigerated"
+          ]
+        }
+      ],
+      "lat": 30.3322,
+      "lon": -81.6557
+    },
+    "Tampa": {
+      "state": "Florida",
+      "region": "south",
+      "locations": [
+        {
+          "name": "Port Tampa Bay Bulk Docks",
+          "type": "port",
+          "cargo": [
+            "bulk",
+            "container"
+          ]
+        },
+        {
+          "name": "Gulf Coast Produce Market",
+          "type": "distribution",
+          "cargo": [
+            "food",
+            "refrigerated"
+          ]
+        }
+      ],
+      "lat": 27.9506,
+      "lon": -82.4572
+    },
+    "Miami": {
+      "state": "Florida",
+      "region": "south",
+      "locations": [
+        {
+          "name": "PortMiami Container Yard",
+          "type": "port",
+          "cargo": [
+            "container",
+            "electronics"
+          ]
+        },
+        {
+          "name": "Doral Import Center",
+          "type": "distribution",
+          "cargo": [
+            "retail",
+            "food"
+          ]
+        }
+      ],
+      "lat": 25.7617,
+      "lon": -80.1918
+    },
+    "Birmingham": {
+      "state": "Alabama",
+      "region": "south",
+      "locations": [
+        {
+          "name": "Sloss Industrial Works",
+          "type": "warehouse",
+          "cargo": [
+            "machinery",
+            "bulk"
+          ]
+        },
+        {
+          "name": "Magic City Freight Depot",
+          "type": "terminal",
+          "cargo": [
+            "general",
+            "retail"
+          ]
+        }
+      ],
+      "lat": 33.5186,
+      "lon": -86.8104
+    },
+    "Memphis": {
+      "state": "Tennessee",
+      "region": "south",
+      "locations": [
+        {
+          "name": "Memphis Air Cargo Hub",
+          "type": "terminal",
+          "cargo": [
+            "electronics",
+            "general"
+          ]
+        },
+        {
+          "name": "Presidents Island Port",
+          "type": "port",
+          "cargo": [
+            "bulk",
+            "machinery"
+          ]
+        },
+        {
+          "name": "Delta Cold Storage",
+          "type": "distribution",
+          "cargo": [
+            "food",
+            "refrigerated"
+          ]
+        }
+      ],
+      "lat": 35.1495,
+      "lon": -90.049
+    },
+    "Little Rock": {
+      "state": "Arkansas",
+      "region": "south",
+      "locations": [
+        {
+          "name": "Arkansas River Port",
+          "type": "port",
+          "cargo": [
+            "bulk",
+            "general"
+          ]
+        },
+        {
+          "name": "Rock Region Distribution",
+          "type": "distribution",
+          "cargo": [
+            "retail",
+            "food"
+          ]
+        }
+      ],
+      "lat": 34.7465,
+      "lon": -92.2896
+    },
+    "New Orleans": {
+      "state": "Louisiana",
+      "region": "south",
+      "locations": [
+        {
+          "name": "Napoleon Avenue Wharf",
+          "type": "port",
+          "cargo": [
+            "container",
+            "bulk"
+          ]
+        },
+        {
+          "name": "Crescent City Cold Storage",
+          "type": "distribution",
+          "cargo": [
+            "food",
+            "refrigerated"
+          ]
+        }
+      ],
+      "lat": 29.9511,
+      "lon": -90.0715
+    },
+    "Houston": {
+      "state": "Texas",
+      "region": "south",
+      "locations": [
+        {
+          "name": "Bayport Container Terminal",
+          "type": "port",
+          "cargo": [
+            "container",
+            "electronics"
+          ]
+        },
+        {
+          "name": "Ship Channel Machinery Yard",
+          "type": "warehouse",
+          "cargo": [
+            "machinery",
+            "bulk"
+          ]
+        },
+        {
+          "name": "Gulfgate Distribution",
+          "type": "distribution",
+          "cargo": [
+            "retail",
+            "general"
+          ]
+        }
+      ],
+      "lat": 29.7604,
+      "lon": -95.3698
+    },
+    "San Antonio": {
+      "state": "Texas",
+      "region": "south",
+      "locations": [
+        {
+          "name": "Alamo Intermodal Yard",
+          "type": "rail",
+          "cargo": [
+            "container",
+            "general"
+          ]
+        },
+        {
+          "name": "Mission Trail Warehouse",
+          "type": "warehouse",
+          "cargo": [
+            "retail",
+            "machinery"
+          ]
+        }
+      ],
+      "lat": 29.4241,
+      "lon": -98.4936
+    },
+    "El Paso": {
+      "state": "Texas",
+      "region": "southwest",
+      "locations": [
+        {
+          "name": "Border Crossdock Plaza",
+          "type": "distribution",
+          "cargo": [
+            "general",
+            "electronics"
+          ]
+        },
+        {
+          "name": "Franklin Mountain Freight",
+          "type": "terminal",
+          "cargo": [
+            "retail",
+            "machinery"
+          ]
+        }
+      ],
+      "lat": 31.7619,
+      "lon": -106.485
+    },
+    "Tucson": {
+      "state": "Arizona",
+      "region": "southwest",
+      "locations": [
+        {
+          "name": "Old Pueblo Logistics",
+          "type": "distribution",
+          "cargo": [
+            "retail",
+            "general"
+          ]
+        },
+        {
+          "name": "Santa Cruz Produce Shed",
+          "type": "distribution",
+          "cargo": [
+            "food",
+            "refrigerated"
+          ]
+        }
+      ],
+      "lat": 32.2226,
+      "lon": -110.9747
+    },
+    "Knoxville": {
+      "state": "Tennessee",
+      "region": "south",
+      "locations": [
+        {
+          "name": "Forks of the River Industrial",
+          "type": "warehouse",
+          "cargo": [
+            "machinery",
+            "bulk"
+          ]
+        },
+        {
+          "name": "Smoky Mountain Crossdock",
+          "type": "distribution",
+          "cargo": [
+            "retail",
+            "general"
+          ]
+        }
+      ],
+      "lat": 35.9606,
+      "lon": -83.9207
+    },
+    "Louisville": {
+      "state": "Kentucky",
+      "region": "south",
+      "locations": [
+        {
+          "name": "Riverport Bourbon Warehouses",
+          "type": "warehouse",
+          "cargo": [
+            "food",
+            "general"
+          ]
+        },
+        {
+          "name": "Derby City Air Hub",
+          "type": "terminal",
+          "cargo": [
+            "electronics",
+            "retail"
+          ]
+        }
+      ],
+      "lat": 38.2527,
+      "lon": -85.7585
+    },
+    "Cincinnati": {
+      "state": "Ohio",
+      "region": "midwest",
+      "locations": [
+        {
+          "name": "Queensgate Rail Yard",
+          "type": "rail",
+          "cargo": [
+            "container",
+            "machinery"
+          ]
+        },
+        {
+          "name": "Ohio River Produce Terminal",
+          "type": "distribution",
+          "cargo": [
+            "food",
+            "retail"
+          ]
+        }
+      ],
+      "lat": 39.1031,
+      "lon": -84.512
+    },
+    "Columbus": {
+      "state": "Ohio",
+      "region": "midwest",
+      "locations": [
+        {
+          "name": "Rickenbacker Inland Port",
+          "type": "terminal",
+          "cargo": [
+            "container",
+            "electronics"
+          ]
+        },
+        {
+          "name": "Buckeye Distribution Campus",
+          "type": "distribution",
+          "cargo": [
+            "retail",
+            "general"
+          ]
+        }
+      ],
+      "lat": 39.9612,
+      "lon": -82.9988
+    },
+    "Detroit": {
+      "state": "Michigan",
+      "region": "midwest",
+      "locations": [
+        {
+          "name": "River Rouge Assembly Docks",
+          "type": "warehouse",
+          "cargo": [
+            "machinery",
+            "bulk"
+          ]
+        },
+        {
+          "name": "Motor City Parts Exchange",
+          "type": "distribution",
+          "cargo": [
+            "machinery",
+            "electronics"
+          ]
+        },
+        {
+          "name": "Eastern Market Cold Storage",
+          "type": "distribution",
+          "cargo": [
+            "food",
+            "retail"
+          ]
+        }
+      ],
+      "lat": 42.3314,
+      "lon": -83.0458
+    },
+    "Milwaukee": {
+      "state": "Wisconsin",
+      "region": "midwest",
+      "locations": [
+        {
+          "name": "Jones Island Bulk Port",
+          "type": "port",
+          "cargo": [
+            "bulk",
+            "machinery"
+          ]
+        },
+        {
+          "name": "Brew City Cold Chain",
+          "type": "distribution",
+          "cargo": [
+            "food",
+            "refrigerated"
+          ]
+        }
+      ],
+      "lat": 43.0389,
+      "lon": -87.9065
+    },
+    "Minneapolis": {
+      "state": "Minnesota",
+      "region": "midwest",
+      "locations": [
+        {
+          "name": "Upper Harbor Grain Terminal",
+          "type": "warehouse",
+          "cargo": [
+            "bulk",
+            "food"
+          ]
+        },
+        {
+          "name": "Twin Cities Intermodal",
+          "type": "rail",
+          "cargo": [
+            "container",
+            "retail"
+          ]
+        }
+      ],
+      "lat": 44.9778,
+      "lon": -93.265
+    },
+    "Des Moines": {
+      "state": "Iowa",
+      "region": "midwest",
+      "locations": [
+        {
+          "name": "Corn Belt Grain Elevators",
+          "type": "warehouse",
+          "cargo": [
+            "bulk",
+            "food"
+          ]
+        },
+        {
+          "name": "Capital Crossroads Crossdock",
+          "type": "distribution",
+          "cargo": [
+            "retail",
+            "general"
+          ]
+        }
+      ],
+      "lat": 41.5868,
+      "lon": -93.625
+    },
+    "Omaha": {
+      "state": "Nebraska",
+      "region": "plains",
+      "locations": [
+        {
+          "name": "Union Stockyards Freight",
+          "type": "warehouse",
+          "cargo": [
+            "food",
+            "bulk"
+          ]
+        },
+        {
+          "name": "Platte Valley Rail Center",
+          "type": "rail",
+          "cargo": [
+            "container",
+            "bulk"
+          ]
+        }
+      ],
+      "lat": 41.2565,
+      "lon": -95.9345
+    },
+    "Wichita": {
+      "state": "Kansas",
+      "region": "plains",
+      "locations": [
+        {
+          "name": "Air Capital Plant Docks",
+          "type": "warehouse",
+          "cargo": [
+            "machinery",
+            "electronics"
+          ]
+        },
+        {
+          "name": "Arkansas Valley Grain Co-op",
+          "type": "warehouse",
+          "cargo": [
+            "bulk",
+            "food"
+          ]
+        }
+      ],
+      "lat": 37.6872,
+      "lon": -97.3301
+    },
+    "Tulsa": {
+      "state": "Oklahoma",
+      "region": "plains",
+      "locations": [
+        {
+          "name": "Port of Catoosa",
+          "type": "port",
+          "cargo": [
+            "bulk",
+            "machinery"
+          ]
+        },
+        {
+          "name": "Green Country Distribution",
+          "type": "distribution",
+          "cargo": [
+            "retail",
+            "general"
+          ]
+        }
+      ],
+      "lat": 36.154,
+      "lon": -95.9928
+    },
+    "Oklahoma City": {
+      "state": "Oklahoma",
+      "region": "plains",
+      "locations": [
+        {
+          "name": "Stockyards City Freight",
+          "type": "warehouse",
+          "cargo": [
+            "food",
+            "bulk"
+          ]
+        },
+        {
+          "name": "Sooner Intermodal Yard",
+          "type": "rail",
+          "cargo": [
+            "container",
+            "general"
+          ]
+        }
+      ],
+      "lat": 35.4676,
+      "lon": -97.5164
+    },
+    "Amarillo": {
+      "state": "Texas",
+      "region": "plains",
+      "locations": [
+        {
+          "name": "Panhandle Cattle Exchange",
+          "type": "warehouse",
+          "cargo": [
+            "food",
+            "bulk"
+          ]
+        },
+        {
+          "name": "Route 66 Truck Terminal",
+          "type": "terminal",
+          "cargo": [
+            "general",
+            "retail"
+          ]
+        }
+      ],
+      "lat": 35.222,
+      "lon": -101.8313
+    },
+    "Cheyenne": {
+      "state": "Wyoming",
+      "region": "rockies",
+      "locations": [
+        {
+          "name": "High Plains Rail Yard",
+          "type": "rail",
+          "cargo": [
+            "container",
+            "bulk"
+          ]
+        },
+        {
+          "name": "Frontier Logistics Park",
+          "type": "distribution",
+          "cargo": [
+            "general",
+            "machinery"
+          ]
+        }
+      ],
+      "lat": 41.14,
+      "lon": -104.8202
+    },
+    "Sacramento": {
+      "state": "California",
+      "region": "west_coast",
+      "locations": [
+        {
+          "name": "Central Valley Produce Exchange",
+          "type": "distribution",
+          "cargo": [
+            "food",
+            "refrigerated"
+          ]
+        },
+        {
+          "name": "Port of West Sacramento",
+          "type": "port",
+          "cargo": [
+            "bulk",
+            "general"
+          ]
+        }
+      ],
+      "lat": 38.5816,
+      "lon": -121.4944
+    },
+    "Fresno": {
+      "state": "California",
+      "region": "west_coast",
+      "locations": [
+        {
+          "name": "San Joaquin Packing Sheds",
+          "type": "distribution",
+          "cargo": [
+            "food",
+            "refrigerated"
+          ]
+        },
+        {
+          "name": "Valley Ag Machinery Depot",
+          "type": "warehouse",
+          "cargo": [
+            "machinery",
+            "bulk"
+          ]
+        }
+      ],
+      "lat": 36.7378,
+      "lon": -119.7871
+    },
+    "San Diego": {
+      "state": "California",
+      "region": "west_coast",
+      "locations": [
+        {
+          "name": "Tenth Avenue Marine Terminal",
+          "type": "port",
+          "cargo": [
+            "container",
+            "machinery"
+          ]
+        },
+        {
+          "name": "Otay Mesa Crossdock",
+          "type": "distribution",
+          "cargo": [
+            "electronics",
+            "retail"
+          ]
+        }
+      ],
+      "lat": 32.7157,
+      "lon": -117.1611
+    },
+    "Reno": {
+      "state": "Nevada",
+      "region": "rockies",
+      "locations": [
+        {
+          "name": "Sierra Logistics Center",
+          "type": "distribution",
+          "cargo": [
+            "retail",
+            "general"
+          ]
+        },
+        {
+          "name": "Truckee Meadows Warehouse",
+          "type": "warehouse",
+          "cargo": [
+            "electronics",
+            "machinery"
+          ]
+        }
+      ],
+      "lat": 39.5296,
+      "lon": -119.8138
+    },
+    "Boise": {
+      "state": "Idaho",
+      "region": "rockies",
+      "locations": [
+        {
+          "name": "Treasure Valley Produce",
+          "type": "distribution",
+          "cargo": [
+            "food",
+            "refrigerated"
+          ]
+        },
+        {
+          "name": "Gem State Freight Yard",
+          "type": "terminal",
+          "cargo": [
+            "general",
+            "bulk"
+          ]
+        }
+      ],
+      "lat": 43.615,
+      "lon": -116.2023
+    },
+    "Spokane": {
+      "state": "Washington",
+      "region": "northwest",
+      "locations": [
+        {
+          "name": "Inland Empire Rail Yard",
+          "type": "rail",
+          "cargo": [
+            "container",
+            "bulk"
+          ]
+        },
+        {
+          "name": "Palouse Grain Terminal",
+          "type": "warehouse",
+          "cargo": [
+            "bulk",
+            "food"
+          ]
+        }
+      ],
+      "lat": 47.6588,
+      "lon": -117.426
     }
   },
   "legs": [
@@ -832,6 +1776,822 @@
         "Pendleton Grade Stop",
         "Boise Travel Plaza",
         "Twin Falls Crossing"
+      ]
+    },
+    {
+      "from": "Boston",
+      "to": "Hartford",
+      "miles": 102,
+      "highway": "I-84",
+      "terrain": "hills",
+      "stops": [
+        "Sturbridge Travel Plaza"
+      ]
+    },
+    {
+      "from": "Hartford",
+      "to": "New York",
+      "miles": 117,
+      "highway": "I-95",
+      "terrain": "flat",
+      "stops": [
+        "Darien Service Plaza"
+      ]
+    },
+    {
+      "from": "Philadelphia",
+      "to": "Baltimore",
+      "miles": 105,
+      "highway": "I-95",
+      "terrain": "flat",
+      "stops": [
+        "Maryland House Travel Plaza"
+      ]
+    },
+    {
+      "from": "Baltimore",
+      "to": "Pittsburgh",
+      "miles": 250,
+      "highway": "I-70",
+      "terrain": "hills",
+      "stops": [
+        "Breezewood Interchange",
+        "South Mountain Stop"
+      ]
+    },
+    {
+      "from": "Baltimore",
+      "to": "Richmond",
+      "miles": 155,
+      "highway": "I-95",
+      "terrain": "flat",
+      "stops": [
+        "Potomac Mills Travel Stop"
+      ]
+    },
+    {
+      "from": "Richmond",
+      "to": "Raleigh",
+      "miles": 170,
+      "highway": "I-85",
+      "terrain": "flat",
+      "stops": [
+        "Petersburg Fuel Stop"
+      ]
+    },
+    {
+      "from": "Raleigh",
+      "to": "Charlotte",
+      "miles": 168,
+      "highway": "I-85",
+      "terrain": "hills",
+      "stops": [
+        "Greensboro Freight Plaza"
+      ]
+    },
+    {
+      "from": "Charlotte",
+      "to": "Atlanta",
+      "miles": 245,
+      "highway": "I-85",
+      "terrain": "hills",
+      "stops": [
+        "Greenville Travel Center",
+        "Commerce Truck Stop"
+      ]
+    },
+    {
+      "from": "Charlotte",
+      "to": "Knoxville",
+      "miles": 230,
+      "highway": "I-40",
+      "terrain": "mountain",
+      "stops": [
+        "Asheville Mountain Stop",
+        "Pigeon River Gorge Stop"
+      ]
+    },
+    {
+      "from": "Charlotte",
+      "to": "Savannah",
+      "miles": 250,
+      "highway": "I-77",
+      "terrain": "flat",
+      "stops": [
+        "Columbia Midlands Stop"
+      ]
+    },
+    {
+      "from": "Savannah",
+      "to": "Jacksonville",
+      "miles": 140,
+      "highway": "I-95",
+      "terrain": "flat",
+      "stops": [
+        "Brunswick Travel Plaza"
+      ]
+    },
+    {
+      "from": "Savannah",
+      "to": "Atlanta",
+      "miles": 250,
+      "highway": "I-16",
+      "terrain": "flat",
+      "stops": [
+        "Macon Crossroads"
+      ]
+    },
+    {
+      "from": "Jacksonville",
+      "to": "Atlanta",
+      "miles": 345,
+      "highway": "I-75",
+      "terrain": "flat",
+      "stops": [
+        "Valdosta Truck Plaza",
+        "Tifton Fuel Stop"
+      ]
+    },
+    {
+      "from": "Jacksonville",
+      "to": "Tampa",
+      "miles": 200,
+      "highway": "I-75",
+      "terrain": "flat",
+      "stops": [
+        "Ocala Travel Center"
+      ]
+    },
+    {
+      "from": "Jacksonville",
+      "to": "Miami",
+      "miles": 345,
+      "highway": "I-95",
+      "terrain": "flat",
+      "stops": [
+        "Daytona Speedway Stop",
+        "Fort Pierce Plaza"
+      ]
+    },
+    {
+      "from": "Tampa",
+      "to": "Miami",
+      "miles": 280,
+      "highway": "I-75",
+      "terrain": "flat",
+      "stops": [
+        "Naples Gateway Plaza"
+      ]
+    },
+    {
+      "from": "Buffalo",
+      "to": "Cleveland",
+      "miles": 190,
+      "highway": "I-90",
+      "terrain": "flat",
+      "stops": [
+        "Erie Lakeside Stop"
+      ]
+    },
+    {
+      "from": "Buffalo",
+      "to": "New York",
+      "miles": 375,
+      "highway": "I-90",
+      "terrain": "hills",
+      "stops": [
+        "Syracuse Truck Plaza",
+        "Albany Crossroads"
+      ]
+    },
+    {
+      "from": "Atlanta",
+      "to": "Birmingham",
+      "miles": 147,
+      "highway": "I-20",
+      "terrain": "hills",
+      "stops": [
+        "Talladega Forest Stop"
+      ]
+    },
+    {
+      "from": "Birmingham",
+      "to": "Nashville",
+      "miles": 192,
+      "highway": "I-65",
+      "terrain": "hills",
+      "stops": [
+        "Cullman Travel Plaza"
+      ]
+    },
+    {
+      "from": "Birmingham",
+      "to": "Memphis",
+      "miles": 240,
+      "highway": "I-22",
+      "terrain": "hills",
+      "stops": [
+        "Tupelo Crossroads"
+      ]
+    },
+    {
+      "from": "Birmingham",
+      "to": "New Orleans",
+      "miles": 345,
+      "highway": "I-59",
+      "terrain": "flat",
+      "stops": [
+        "Meridian Fuel Stop",
+        "Slidell Travel Plaza"
+      ]
+    },
+    {
+      "from": "Memphis",
+      "to": "Nashville",
+      "miles": 210,
+      "highway": "I-40",
+      "terrain": "flat",
+      "stops": [
+        "Jackson Tennessee Plaza"
+      ]
+    },
+    {
+      "from": "Memphis",
+      "to": "Little Rock",
+      "miles": 137,
+      "highway": "I-40",
+      "terrain": "flat",
+      "stops": [
+        "Forrest City Truck Stop"
+      ]
+    },
+    {
+      "from": "Memphis",
+      "to": "St. Louis",
+      "miles": 285,
+      "highway": "I-55",
+      "terrain": "flat",
+      "stops": [
+        "Sikeston Travel Center"
+      ]
+    },
+    {
+      "from": "Little Rock",
+      "to": "Dallas",
+      "miles": 320,
+      "highway": "I-30",
+      "terrain": "flat",
+      "stops": [
+        "Texarkana State Line Stop"
+      ]
+    },
+    {
+      "from": "Little Rock",
+      "to": "Oklahoma City",
+      "miles": 340,
+      "highway": "I-40",
+      "terrain": "hills",
+      "stops": [
+        "Fort Smith River Stop"
+      ]
+    },
+    {
+      "from": "New Orleans",
+      "to": "Houston",
+      "miles": 350,
+      "highway": "I-10",
+      "terrain": "flat",
+      "stops": [
+        "Baton Rouge Fuel Plaza",
+        "Lake Charles Stop"
+      ]
+    },
+    {
+      "from": "Houston",
+      "to": "Dallas",
+      "miles": 240,
+      "highway": "I-45",
+      "terrain": "flat",
+      "stops": [
+        "Huntsville Piney Woods Stop"
+      ]
+    },
+    {
+      "from": "Houston",
+      "to": "San Antonio",
+      "miles": 197,
+      "highway": "I-10",
+      "terrain": "flat",
+      "stops": [
+        "Seguin Truck Stop"
+      ]
+    },
+    {
+      "from": "San Antonio",
+      "to": "Dallas",
+      "miles": 275,
+      "highway": "I-35",
+      "terrain": "hills",
+      "stops": [
+        "Austin Hill Country Stop",
+        "Waco Travel Plaza"
+      ]
+    },
+    {
+      "from": "San Antonio",
+      "to": "El Paso",
+      "miles": 550,
+      "highway": "I-10",
+      "terrain": "hills",
+      "stops": [
+        "Kerrville Hill Stop",
+        "Fort Stockton Plaza",
+        "Van Horn Fuel Stop"
+      ]
+    },
+    {
+      "from": "El Paso",
+      "to": "Albuquerque",
+      "miles": 265,
+      "highway": "I-25",
+      "terrain": "hills",
+      "stops": [
+        "Truth or Consequences Stop"
+      ]
+    },
+    {
+      "from": "El Paso",
+      "to": "Tucson",
+      "miles": 315,
+      "highway": "I-10",
+      "terrain": "flat",
+      "stops": [
+        "Las Cruces Crossing",
+        "Willcox Plaza"
+      ]
+    },
+    {
+      "from": "Tucson",
+      "to": "Phoenix",
+      "miles": 115,
+      "highway": "I-10",
+      "terrain": "flat",
+      "stops": [
+        "Picacho Peak Stop"
+      ]
+    },
+    {
+      "from": "Knoxville",
+      "to": "Nashville",
+      "miles": 180,
+      "highway": "I-40",
+      "terrain": "hills",
+      "stops": [
+        "Cookeville Plateau Stop"
+      ]
+    },
+    {
+      "from": "Knoxville",
+      "to": "Atlanta",
+      "miles": 215,
+      "highway": "I-75",
+      "terrain": "hills",
+      "stops": [
+        "Chattanooga Valley Stop"
+      ]
+    },
+    {
+      "from": "Detroit",
+      "to": "Cleveland",
+      "miles": 170,
+      "highway": "I-75",
+      "terrain": "flat",
+      "stops": [
+        "Toledo Glass City Stop"
+      ]
+    },
+    {
+      "from": "Detroit",
+      "to": "Chicago",
+      "miles": 280,
+      "highway": "I-94",
+      "terrain": "flat",
+      "stops": [
+        "Kalamazoo Travel Plaza",
+        "Michigan City Stop"
+      ]
+    },
+    {
+      "from": "Columbus",
+      "to": "Cleveland",
+      "miles": 142,
+      "highway": "I-71",
+      "terrain": "flat",
+      "stops": [
+        "Mansfield Midpoint Plaza"
+      ]
+    },
+    {
+      "from": "Columbus",
+      "to": "Cincinnati",
+      "miles": 107,
+      "highway": "I-71",
+      "terrain": "flat",
+      "stops": [
+        "Jeffersonville Outlet Stop"
+      ]
+    },
+    {
+      "from": "Columbus",
+      "to": "Pittsburgh",
+      "miles": 185,
+      "highway": "I-70",
+      "terrain": "hills",
+      "stops": [
+        "Wheeling River Stop"
+      ]
+    },
+    {
+      "from": "Columbus",
+      "to": "Indianapolis",
+      "miles": 175,
+      "highway": "I-70",
+      "terrain": "flat",
+      "stops": [
+        "Springfield Ohio Plaza"
+      ]
+    },
+    {
+      "from": "Cincinnati",
+      "to": "Indianapolis",
+      "miles": 110,
+      "highway": "I-74",
+      "terrain": "flat",
+      "stops": [
+        "Batesville Crossroads"
+      ]
+    },
+    {
+      "from": "Cincinnati",
+      "to": "Louisville",
+      "miles": 100,
+      "highway": "I-71",
+      "terrain": "hills",
+      "stops": [
+        "Sparta Speedway Stop"
+      ]
+    },
+    {
+      "from": "Louisville",
+      "to": "Indianapolis",
+      "miles": 115,
+      "highway": "I-65",
+      "terrain": "flat",
+      "stops": [
+        "Seymour Truck Plaza"
+      ]
+    },
+    {
+      "from": "Louisville",
+      "to": "Nashville",
+      "miles": 175,
+      "highway": "I-65",
+      "terrain": "hills",
+      "stops": [
+        "Horse Cave Stop"
+      ]
+    },
+    {
+      "from": "Milwaukee",
+      "to": "Chicago",
+      "miles": 92,
+      "highway": "I-94",
+      "terrain": "flat",
+      "stops": [
+        "Kenosha Travel Plaza"
+      ]
+    },
+    {
+      "from": "Milwaukee",
+      "to": "Minneapolis",
+      "miles": 337,
+      "highway": "I-94",
+      "terrain": "flat",
+      "stops": [
+        "Wisconsin Dells Stop",
+        "Eau Claire Fuel Plaza"
+      ]
+    },
+    {
+      "from": "Minneapolis",
+      "to": "Des Moines",
+      "miles": 245,
+      "highway": "I-35",
+      "terrain": "flat",
+      "stops": [
+        "Clear Lake Crossroads"
+      ]
+    },
+    {
+      "from": "Des Moines",
+      "to": "Omaha",
+      "miles": 137,
+      "highway": "I-80",
+      "terrain": "flat",
+      "stops": [
+        "Stuart Travel Plaza"
+      ]
+    },
+    {
+      "from": "Des Moines",
+      "to": "Kansas City",
+      "miles": 195,
+      "highway": "I-35",
+      "terrain": "flat",
+      "stops": [
+        "Bethany Square Stop"
+      ]
+    },
+    {
+      "from": "Des Moines",
+      "to": "Chicago",
+      "miles": 335,
+      "highway": "I-80",
+      "terrain": "flat",
+      "stops": [
+        "Iowa 80 Truckstop",
+        "Princeton Plaza"
+      ]
+    },
+    {
+      "from": "Omaha",
+      "to": "Kansas City",
+      "miles": 185,
+      "highway": "I-29",
+      "terrain": "flat",
+      "stops": [
+        "St. Joseph River Stop"
+      ]
+    },
+    {
+      "from": "Omaha",
+      "to": "Cheyenne",
+      "miles": 455,
+      "highway": "I-80",
+      "terrain": "flat",
+      "stops": [
+        "Kearney Archway Stop",
+        "North Platte Rail Stop",
+        "Sidney Plains Stop"
+      ]
+    },
+    {
+      "from": "Cheyenne",
+      "to": "Denver",
+      "miles": 100,
+      "highway": "I-25",
+      "terrain": "flat",
+      "stops": [
+        "Fort Collins Front Range Stop"
+      ]
+    },
+    {
+      "from": "Cheyenne",
+      "to": "Salt Lake City",
+      "miles": 435,
+      "highway": "I-80",
+      "terrain": "mountain",
+      "stops": [
+        "Elk Mountain Summit",
+        "Green River Stop"
+      ]
+    },
+    {
+      "from": "Oklahoma City",
+      "to": "Dallas",
+      "miles": 207,
+      "highway": "I-35",
+      "terrain": "flat",
+      "stops": [
+        "Ardmore Arbuckle Stop"
+      ]
+    },
+    {
+      "from": "Oklahoma City",
+      "to": "Tulsa",
+      "miles": 106,
+      "highway": "I-44",
+      "terrain": "flat",
+      "stops": [
+        "Stroud Halfway Stop"
+      ]
+    },
+    {
+      "from": "Oklahoma City",
+      "to": "Wichita",
+      "miles": 160,
+      "highway": "I-35",
+      "terrain": "flat",
+      "stops": [
+        "Blackwell Prairie Stop"
+      ]
+    },
+    {
+      "from": "Oklahoma City",
+      "to": "Amarillo",
+      "miles": 260,
+      "highway": "I-40",
+      "terrain": "flat",
+      "stops": [
+        "Elk City Route 66 Stop"
+      ]
+    },
+    {
+      "from": "Tulsa",
+      "to": "Kansas City",
+      "miles": 250,
+      "highway": "US-69",
+      "terrain": "flat",
+      "stops": [
+        "Big Cabin Truck Plaza"
+      ]
+    },
+    {
+      "from": "Wichita",
+      "to": "Kansas City",
+      "miles": 200,
+      "highway": "I-35",
+      "terrain": "flat",
+      "stops": [
+        "Emporia Flint Hills Stop"
+      ]
+    },
+    {
+      "from": "Amarillo",
+      "to": "Albuquerque",
+      "miles": 290,
+      "highway": "I-40",
+      "terrain": "flat",
+      "stops": [
+        "Santa Rosa Blue Hole Stop"
+      ]
+    },
+    {
+      "from": "Amarillo",
+      "to": "Dallas",
+      "miles": 365,
+      "highway": "US-287",
+      "terrain": "flat",
+      "stops": [
+        "Childress Big Sky Stop",
+        "Decatur Junction"
+      ]
+    },
+    {
+      "from": "Las Vegas",
+      "to": "Phoenix",
+      "miles": 300,
+      "highway": "US-93",
+      "terrain": "hills",
+      "stops": [
+        "Hoover Dam Overlook Stop",
+        "Wickenburg Plaza"
+      ]
+    },
+    {
+      "from": "Sacramento",
+      "to": "San Francisco",
+      "miles": 88,
+      "highway": "I-80",
+      "terrain": "flat",
+      "stops": [
+        "Vacaville Travel Plaza"
+      ]
+    },
+    {
+      "from": "Sacramento",
+      "to": "Reno",
+      "miles": 132,
+      "highway": "I-80",
+      "terrain": "mountain",
+      "stops": [
+        "Donner Summit Stop"
+      ]
+    },
+    {
+      "from": "Reno",
+      "to": "Salt Lake City",
+      "miles": 518,
+      "highway": "I-80",
+      "terrain": "hills",
+      "stops": [
+        "Lovelock Fuel Stop",
+        "Winnemucca Plaza",
+        "Wendover Salt Flats Stop"
+      ]
+    },
+    {
+      "from": "Reno",
+      "to": "Las Vegas",
+      "miles": 450,
+      "highway": "US-95",
+      "terrain": "hills",
+      "stops": [
+        "Hawthorne Depot Stop",
+        "Tonopah Crossroads"
+      ]
+    },
+    {
+      "from": "Sacramento",
+      "to": "Portland",
+      "miles": 580,
+      "highway": "I-5",
+      "terrain": "mountain",
+      "stops": [
+        "Mount Shasta Vista Stop",
+        "Grants Pass Plaza"
+      ]
+    },
+    {
+      "from": "Los Angeles",
+      "to": "San Diego",
+      "miles": 120,
+      "highway": "I-5",
+      "terrain": "flat",
+      "stops": [
+        "San Onofre Coastal Stop"
+      ]
+    },
+    {
+      "from": "San Diego",
+      "to": "Phoenix",
+      "miles": 355,
+      "highway": "I-8",
+      "terrain": "hills",
+      "stops": [
+        "El Centro Desert Stop",
+        "Yuma Crossing Plaza"
+      ]
+    },
+    {
+      "from": "Los Angeles",
+      "to": "Fresno",
+      "miles": 220,
+      "highway": "CA-99",
+      "terrain": "hills",
+      "stops": [
+        "Bakersfield Truck Plaza"
+      ]
+    },
+    {
+      "from": "Fresno",
+      "to": "Sacramento",
+      "miles": 170,
+      "highway": "CA-99",
+      "terrain": "flat",
+      "stops": [
+        "Modesto Almond Stop"
+      ]
+    },
+    {
+      "from": "Boise",
+      "to": "Salt Lake City",
+      "miles": 340,
+      "highway": "I-84",
+      "terrain": "hills",
+      "stops": [
+        "Burley Snake River Stop"
+      ]
+    },
+    {
+      "from": "Boise",
+      "to": "Portland",
+      "miles": 430,
+      "highway": "I-84",
+      "terrain": "mountain",
+      "stops": [
+        "La Grande Blue Mountain Stop"
+      ]
+    },
+    {
+      "from": "Spokane",
+      "to": "Seattle",
+      "miles": 280,
+      "highway": "I-90",
+      "terrain": "mountain",
+      "stops": [
+        "Moses Lake Basin Stop",
+        "Snoqualmie Summit Stop"
+      ]
+    },
+    {
+      "from": "Spokane",
+      "to": "Boise",
+      "miles": 425,
+      "highway": "US-95",
+      "terrain": "hills",
+      "stops": [
+        "Lewiston Grade Stop"
       ]
     }
   ]

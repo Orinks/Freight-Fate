@@ -18,6 +18,7 @@ def start_drive(app):
         app.state.handle_event(key_event(pygame.K_DOWN))
     app.state.handle_event(key_event(pygame.K_RETURN))
     app.state.handle_event(key_event(pygame.K_RETURN))  # default name
+    app.state.handle_event(key_event(pygame.K_RETURN))  # default home terminal
     app.state.handle_event(key_event(pygame.K_RETURN))  # job board
     board = app.state
     while board.jobs[board.index].cargo.endorsement:  # skip locked teasers
@@ -199,6 +200,42 @@ def test_corrupt_snapshot_falls_back_to_city():
         enter_world(app.ctx)
         assert isinstance(app.state, CityMenuState)
         assert app.ctx.profile.active_trip is None
+    finally:
+        app.shutdown()
+
+
+def test_old_map_snapshot_still_resumes():
+    """A mid-trip save written against the 21-city 1.2.x map must resume.
+
+    The route below only uses legs from the original map; they are required
+    to survive every map expansion (see ORIGINAL_ADJACENT_PAIRS in
+    test_world.py).
+    """
+    from freight_fate.app import App
+    from freight_fate.models.profile import Profile
+    from freight_fate.states.driving import DrivingState
+    from freight_fate.states.main_menu import enter_world
+
+    old_route = ["Chicago", "St. Louis", "Kansas City", "Denver"]
+    app = App()
+    try:
+        p = Profile(name="Old Save")
+        p.active_trip = {
+            "job": {"cargo": "general", "weight_tons": 14.0,
+                    "origin": "Chicago", "origin_location": "Cicero Rail Hub",
+                    "destination": "Denver", "distance_mi": 1150.0,
+                    "pay": 2800.0, "deadline_game_h": 31.0, "market_mult": 1.0},
+            "route_cities": old_route,
+            "trip_seed": 1234, "position_mi": 412.0, "game_minutes": 540.0,
+            "start_damage": 3.0, "speeding_strikes": 1,
+        }
+        app.ctx.profile = p
+        enter_world(app.ctx)
+        assert isinstance(app.state, DrivingState)
+        assert app.state.resumed
+        assert app.state.route.cities == old_route
+        assert app.state.trip.position_mi == 412.0
+        assert app.state.job.destination == "Denver"
     finally:
         app.shutdown()
 

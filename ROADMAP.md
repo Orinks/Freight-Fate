@@ -1,5 +1,16 @@
 # Freight Fate Roadmap
 
+## Shipped in 1.4.0
+
+- [x] Denser, real-corridor map: 59 cities and 106 legs along real US
+      interstates, regional freight identity per city, no dead ends,
+      full backward compatibility with old saves
+- [x] Home terminal picker at career start (fully spoken, grouped by
+      region, defaults to Chicago)
+- [x] Regional early-career job generation: single-leg neighbor hops at
+      low levels, proximity-weighted destinations, cross-country hauls
+      unlocking around level 4-5
+
 ## Shipped in 1.2.0
 
 - [x] Truck upgrades (engine tune, aerodynamic kit, long-range tank,
@@ -72,7 +83,7 @@ Deliver -> Earn and level up -> Repeat
 - [ ] Trailer types with handling differences
 
 ### World
-- [ ] More cities and regional highways
+- [x] More cities and regional highways (1.4.0)
 - [ ] Seasons and day/night cycle with audio shifts
 - [ ] City-specific ambience and landmarks
 
