@@ -5,9 +5,15 @@ VoiceOver, Speech Dispatcher, and many other backends behind one API. This
 module wraps it in a small game-friendly interface that:
 
 * never crashes the game if speech is unavailable (silent fallback),
+* picks the best backend that is actually usable on this machine: Prism's
+  registry lists every backend it was compiled with (NVDA first by static
+  priority) whether or not that screen reader is running, so the choice is
+  validated against ``is_supported_at_runtime`` and falls down the priority
+  list instead of binding to a screen reader that is not there,
 * prefers ``output`` (speech + braille) and falls back to ``speak``,
 * can be disabled with the ``FREIGHT_FATE_NO_SPEECH=1`` environment variable
-  (used by the headless test suite and CI).
+  (used by the headless test suite and CI), and forced to a specific backend
+  with ``FREIGHT_FATE_SPEECH_BACKEND=<name>`` (for example ``SAPI``).
 """
 
 from __future__ import annotations
@@ -16,6 +22,60 @@ import logging
 import os
 
 log = logging.getLogger(__name__)
+
+
+def _usable(backend) -> bool:
+    """True when the backend can actually speak on this machine right now."""
+    try:
+        features = backend.features
+    except Exception:
+        return False
+    return bool(features.is_supported_at_runtime
+                and (features.supports_output or features.supports_speak))
+
+
+def pick_backend(ctx, override: str | None = None):
+    """Choose a speech backend from a Prism context.
+
+    ``acquire_best`` ranks by static registry priority, which can return a
+    screen reader that is installed in the registry but not running (NVDA
+    outranks everything). Validate its runtime support, then fall back
+    through the remaining backends in priority order. Returns None when
+    nothing on the machine can speak.
+    """
+    if override:
+        try:
+            backend = ctx.acquire(ctx.id_of(override))
+            if _usable(backend):
+                return backend
+            log.warning("Requested speech backend %s is not usable; "
+                        "falling back to automatic choice", override)
+        except Exception:
+            log.warning("Requested speech backend %s not found; "
+                        "falling back to automatic choice", override,
+                        exc_info=True)
+    try:
+        best = ctx.acquire_best()
+        if _usable(best):
+            return best
+        log.info("Prism's preferred backend %s is not running; "
+                 "trying the others", getattr(best, "name", "?"))
+    except Exception:
+        log.debug("acquire_best failed", exc_info=True)
+    try:
+        ids = [ctx.id_of(i) for i in range(ctx.backends_count)]
+        ids.sort(key=ctx.priority_of, reverse=True)
+    except Exception:
+        log.warning("Could not enumerate speech backends", exc_info=True)
+        return None
+    for backend_id in ids:
+        try:
+            backend = ctx.acquire(backend_id)
+        except Exception:
+            continue
+        if _usable(backend):
+            return backend
+    return None
 
 
 class Speech:
@@ -37,9 +97,15 @@ class Speech:
             import prism
 
             self._ctx = prism.Context()
-            self._backend = self._ctx.acquire_best()
+            self._backend = pick_backend(
+                self._ctx, os.environ.get("FREIGHT_FATE_SPEECH_BACKEND"))
             self._prism_error = prism.PrismError
-            log.info("Speech backend: %s", self._backend.name)
+            if self._backend is None:
+                log.warning("No usable speech backend on this machine; "
+                            "continuing silently")
+                self._ctx = None
+            else:
+                log.info("Speech backend: %s", self._backend.name)
         except Exception:
             log.exception("Speech unavailable; continuing silently")
             self._ctx = None
