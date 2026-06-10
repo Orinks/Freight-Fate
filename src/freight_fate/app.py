@@ -133,11 +133,14 @@ class App:
 
     # -- main loop ------------------------------------------------------------
 
-    def run(self) -> None:
+    def run(self, max_frames: int | None = None) -> None:
+        """Main loop. ``max_frames`` runs that many frames then exits
+        cleanly; used by the --smoke build check."""
         from .states.main_menu import MainMenuState
 
         self.running = True
         self.push_state(MainMenuState(self.ctx))
+        frames = 0
         try:
             while self.running:
                 dt = self.clock.tick(FPS) / 1000.0
@@ -149,6 +152,9 @@ class App:
                 if self.state is not None:
                     self.state.update(dt)
                 self.render()
+                frames += 1
+                if max_frames is not None and frames >= max_frames:
+                    self.running = False
         finally:
             self.shutdown()
 
@@ -176,8 +182,9 @@ class App:
 
 def main() -> int:
     logging.basicConfig(level=os.environ.get("FREIGHT_FATE_LOG", "WARNING"))
+    smoke = "--smoke" in sys.argv[1:]   # CI: boot, render a few frames, exit 0
     try:
-        App().run()
+        App().run(max_frames=5 if smoke else None)
     except Exception:
         log.exception("Fatal error")
         return 1

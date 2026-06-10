@@ -29,3 +29,6 @@ desktop.ini
 # Logs
 *.log
 live_*.txt
+
+# Release packaging
+tools/_entry.py

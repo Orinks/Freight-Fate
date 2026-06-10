@@ -40,6 +40,9 @@ dev = [
     "ruff>=0.8",
     "soundfile>=0.14.0",
 ]
+build = [
+    "pyinstaller>=6.10",
+]
 
 [build-system]
 requires = ["hatchling"]

@@ -1,0 +1,190 @@
+name: Build
+
+on:
+  schedule:
+    # Nightly at 00:47 UTC, offset from AccessiWeather (00:17) and
+    # PortkeyDrop (00:27). GitHub Actions schedules are UTC-only and can
+    # queue late, so avoid :00/:30.
+    - cron: "47 0 * * *"
+  push:
+    tags: ['v*.*.*']
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Skip release creation'
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+concurrency:
+  group: build-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  PYTHON_VERSION: "3.12"
+
+jobs:
+  prepare:
+    name: Prepare
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    outputs:
+      should_build: ${{ steps.check.outputs.should_build }}
+      version: ${{ steps.check.outputs.version }}
+      is_nightly: ${{ steps.check.outputs.is_nightly }}
+      tag: ${{ steps.check.outputs.tag }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ startsWith(github.ref, 'refs/tags/') && github.ref || 'main' }}
+          fetch-depth: 0
+
+      - name: Check build conditions
+        id: check
+        run: |
+          VERSION=$(python3 -c "import tomllib; print(tomllib.load(open('pyproject.toml', 'rb'))['project']['version'])")
+
+          if [[ "$GITHUB_REF" == refs/tags/v* ]]; then
+            # Tagged stable release
+            echo "is_nightly=false" >> $GITHUB_OUTPUT
+            echo "should_build=true" >> $GITHUB_OUTPUT
+            echo "tag=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+            echo "version=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+          elif [[ "$GITHUB_EVENT_NAME" == "workflow_dispatch" ]]; then
+            # Manual snapshot dispatches are intentional force-builds.
+            echo "is_nightly=true" >> $GITHUB_OUTPUT
+            echo "should_build=true" >> $GITHUB_OUTPUT
+            echo "tag=nightly-$(date -u +%Y%m%d)" >> $GITHUB_OUTPUT
+            echo "version=$VERSION" >> $GITHUB_OUTPUT
+          else
+            # Scheduled developer snapshot from main - only when something
+            # user-facing changed since the previous snapshot.
+            echo "is_nightly=true" >> $GITHUB_OUTPUT
+            echo "tag=nightly-$(date -u +%Y%m%d)" >> $GITHUB_OUTPUT
+            echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+            LAST_TAG=$(git tag --list "nightly-*" --sort=-version:refname | head -1)
+
+            if [ -z "$LAST_TAG" ]; then
+              echo "should_build=true" >> $GITHUB_OUTPUT
+            else
+              USER_FACING_PATHS=$(git diff --name-only "$LAST_TAG"..HEAD -- \
+                src/ \
+                pyproject.toml \
+                tools/build_release.py | sed '/^$/d')
+
+              if [ -n "$USER_FACING_PATHS" ]; then
+                echo "should_build=true" >> $GITHUB_OUTPUT
+              else
+                echo "should_build=false" >> $GITHUB_OUTPUT
+              fi
+            fi
+          fi
+
+  build:
+    name: ${{ matrix.label }}
+    needs: prepare
+    if: needs.prepare.outputs.should_build == 'true'
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            label: Windows
+          - os: ubuntu-latest
+            label: Linux
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ needs.prepare.outputs.is_nightly == 'true' && 'main' || github.ref }}
+          fetch-depth: 0
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v8.2.0
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install dependencies
+        run: uv sync --group dev --group build
+
+      - name: Run tests
+        env:
+          SDL_VIDEODRIVER: dummy
+          SDL_AUDIODRIVER: dummy
+          FREIGHT_FATE_NO_SPEECH: "1"
+        run: uv run pytest -q
+
+      - name: Build
+        env:
+          SDL_VIDEODRIVER: dummy
+          SDL_AUDIODRIVER: dummy
+          FREIGHT_FATE_NO_SPEECH: "1"
+        run: >
+          uv run python tools/build_release.py
+          --tag "${{ needs.prepare.outputs.is_nightly == 'true' && needs.prepare.outputs.tag || needs.prepare.outputs.version }}"
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: ${{ matrix.label }}
+          path: |
+            dist/FreightFate-*.zip
+            dist/FreightFate-*.tar.gz
+
+  release:
+    name: Release
+    needs: [prepare, build]
+    if: always() && needs.prepare.outputs.should_build == 'true' && needs.build.result == 'success'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ needs.prepare.outputs.is_nightly == 'true' && 'main' || github.ref }}
+          fetch-depth: 0
+
+      - uses: actions/download-artifact@v7
+        with:
+          path: assets
+          merge-multiple: true
+
+      - name: Prepare release notes and checksums
+        env:
+          IS_NIGHTLY: ${{ needs.prepare.outputs.is_nightly }}
+          TAG: ${{ needs.prepare.outputs.tag }}
+        run: |
+          (cd assets && sha256sum * > checksums.txt)
+
+          if [ "$IS_NIGHTLY" = "true" ]; then
+            LAST_TAG=$(git tag --list "nightly-*" --sort=-version:refname | grep -v "^$TAG$" | head -1)
+            python3 tools/release_notes.py nightly \
+              --previous-tag "$LAST_TAG" --output notes.md
+          else
+            python3 tools/release_notes.py stable \
+              --version "$TAG" --output notes.md
+          fi
+
+      - name: Create release
+        if: ${{ inputs.dry_run != true }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          IS_NIGHTLY: ${{ needs.prepare.outputs.is_nightly }}
+          TAG: ${{ needs.prepare.outputs.tag }}
+          VERSION: ${{ needs.prepare.outputs.version }}
+        run: |
+          if [ "$IS_NIGHTLY" = "true" ]; then
+            gh release delete "$TAG" -y --cleanup-tag 2>/dev/null || true
+            gh release create "$TAG" assets/* --notes-file notes.md \
+              --title "Developer snapshot $(date -u +%Y-%m-%d)" \
+              --prerelease --target main
+          else
+            if gh release view "$TAG" &>/dev/null; then
+              gh release upload "$TAG" assets/* --clobber
+              gh release edit "$TAG" --notes-file notes.md --title "Freight Fate v${VERSION}"
+            else
+              gh release create "$TAG" assets/* --notes-file notes.md \
+                --title "Freight Fate v${VERSION}"
+            fi
+          fi
