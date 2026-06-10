@@ -1,7 +1,105 @@
 """Speech fallback and audio engine tests (headless-safe)."""
 
+from dataclasses import dataclass, field
+
 from freight_fate.audio import ASSETS, AudioEngine
-from freight_fate.speech import Speech
+from freight_fate.speech import Speech, pick_backend
+
+
+@dataclass
+class FakeFeatures:
+    is_supported_at_runtime: bool = True
+    supports_output: bool = True
+    supports_speak: bool = True
+
+
+@dataclass
+class FakeBackend:
+    name: str
+    priority: int
+    features: FakeFeatures = field(default_factory=FakeFeatures)
+
+
+class FakeContext:
+    """Mimics prism.Context: a static, priority-ordered backend registry."""
+
+    def __init__(self, backends: list[FakeBackend], best: str) -> None:
+        self._backends = {b.name: b for b in backends}
+        self._order = sorted(backends, key=lambda b: b.priority, reverse=True)
+        self._best = best
+
+    @property
+    def backends_count(self) -> int:
+        return len(self._order)
+
+    def id_of(self, index_or_name):
+        if isinstance(index_or_name, int):
+            return self._order[index_or_name].name
+        if index_or_name in self._backends:
+            return index_or_name
+        raise ValueError(index_or_name)
+
+    def priority_of(self, backend_id) -> int:
+        return self._backends[backend_id].priority
+
+    def acquire(self, backend_id):
+        return self._backends[backend_id]
+
+    def acquire_best(self):
+        return self._backends[self._best]
+
+
+def registry(nvda_running: bool) -> FakeContext:
+    """The shape of Prism's real registry: NVDA outranks everything even
+    when it is not running."""
+    return FakeContext(
+        [
+            FakeBackend("NVDA", 103, FakeFeatures(is_supported_at_runtime=nvda_running)),
+            FakeBackend("JAWS", 100, FakeFeatures(is_supported_at_runtime=False)),
+            FakeBackend("ONE_CORE", 98),
+            FakeBackend("SAPI", 97),
+        ],
+        best="NVDA",
+    )
+
+
+def test_running_screen_reader_wins():
+    assert pick_backend(registry(nvda_running=True)).name == "NVDA"
+
+
+def test_falls_past_not_running_screen_readers():
+    # NVDA is the registry's "best" but is not running: the highest-priority
+    # backend that actually works at runtime must win instead.
+    assert pick_backend(registry(nvda_running=False)).name == "ONE_CORE"
+
+
+def test_env_override_is_honored():
+    assert pick_backend(registry(nvda_running=False), "SAPI").name == "SAPI"
+
+
+def test_unusable_override_falls_back_to_automatic_choice():
+    assert pick_backend(registry(nvda_running=False), "JAWS").name == "ONE_CORE"
+    assert pick_backend(registry(nvda_running=False), "NoSuch").name == "ONE_CORE"
+
+
+def test_no_usable_backend_returns_none():
+    ctx = FakeContext(
+        [FakeBackend("NVDA", 103, FakeFeatures(is_supported_at_runtime=False))],
+        best="NVDA",
+    )
+    assert pick_backend(ctx) is None
+
+
+def test_backend_without_speak_or_output_is_skipped():
+    ctx = FakeContext(
+        [
+            FakeBackend("BRAILLE_ONLY", 103,
+                        FakeFeatures(supports_output=False, supports_speak=False)),
+            FakeBackend("SAPI", 97),
+        ],
+        best="BRAILLE_ONLY",
+    )
+    assert pick_backend(ctx).name == "SAPI"
 
 
 def test_speech_disabled_by_env_is_silent_and_safe():
@@ -41,7 +139,7 @@ def test_all_referenced_assets_exist():
 
     src = Path(__file__).parents[1] / "src" / "freight_fate"
     pattern = re.compile(
-        r"""["']((?:ui|engine|vehicle|weather|ambient)/[a-z_]+)["']""")
+        r"""["']((?:ui|engine|vehicle|weather|ambient|driver)/[a-z_]+)["']""")
     keys: set[str] = set()
     for py in src.rglob("*.py"):
         keys |= set(pattern.findall(py.read_text(encoding="utf-8")))

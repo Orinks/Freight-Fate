@@ -1,5 +1,15 @@
 # Changelog
 
+## Unreleased
+
+### Changed
+- **Portable saves.** Profiles and settings now live in a `saves` folder
+  inside the game's own directory (next to the executable in release
+  builds, the project root from source) instead of the per-user data
+  directory. Existing saves are migrated over automatically on first
+  launch; the originals are left in place. `FREIGHT_FATE_DATA_DIR`
+  still overrides the location.
+
 ## 1.5.0 — 2026-06-10
 
 "On the Clock": hours of service, fatigue, day and night, and overnight
@@ -39,6 +49,16 @@ compresses it as usual), never wall time.
 - New manual page "Hours and rest"; F1 help on all new menus.
 - New procedural sounds: `ambient/night` and `driver/yawn`
   (regenerate with `tools/generate_audio.py`).
+
+### Fixed
+- **Speech backend selection.** Prism's registry ranks NVDA above every
+  other backend whether or not NVDA is running, so on machines without it
+  the game bound to a dead NVDA connection and stayed silent. The backend
+  choice is now validated against actual runtime support and falls down
+  the priority list (JAWS, One Core, SAPI, Speech Dispatcher, ...) to the
+  best backend that can really speak. A new
+  `FREIGHT_FATE_SPEECH_BACKEND=<name>` environment variable forces a
+  specific backend for troubleshooting.
 
 ### Compatibility
 - Save format version is now 3. Old v2 profiles and pre-1.5 mid-trip
