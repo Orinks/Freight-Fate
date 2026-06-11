@@ -72,7 +72,22 @@ You need two tools installed and on your PATH:
 
 - [uv](https://docs.astral.sh/uv/getting-started/installation/) — manages
   Python and all dependencies for you (it downloads a suitable Python
-  automatically, so a system Python is not required).
+  automatically, so a system Python is not required). The official
+  installer puts uv on your PATH for you; close and reopen the terminal
+  afterwards so the change takes effect.
+
+  On Windows (PowerShell):
+
+  ```powershell
+  powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
+  ```
+
+  On macOS or Linux:
+
+  ```bash
+  curl -LsSf https://astral.sh/uv/install.sh | sh
+  ```
+
 - [git](https://git-scm.com/downloads) — required even after cloning,
   because one dependency (`sound_lib`) installs straight from a git
   repository. If `uv sync` fails resolving `sound_lib`, a missing git is
