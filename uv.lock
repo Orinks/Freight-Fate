@@ -391,7 +391,7 @@ requires-dist = [
     { name = "numpy", specifier = ">=1.26" },
     { name = "prismatoid", specifier = ">=0.16" },
     { name = "pygame", specifier = ">=2.6" },
-    { name = "sound-lib", specifier = "==0.8.8" },
+    { name = "sound-lib", git = "https://github.com/samtupy/sound_lib_macos_fixes.git" },
 ]
 
 [package.metadata.requires-dev]
@@ -419,18 +419,6 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/72/34/14ca021ce8e5dfedc35312d08ba8bf51fdd999c576889fc2c24cb97f4f10/iniconfig-2.3.0.tar.gz", hash = "sha256:c76315c77db068650d49c5b56314774a7804df16fee4402c1f19d6d15d8c4730", size = 20503, upload-time = "2025-10-18T21:55:43.219Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/cb/b1/3846dd7f199d53cb17f49cba7e651e9ce294d8497c8c150530ed11865bb8/iniconfig-2.3.0-py3-none-any.whl", hash = "sha256:f631c04d2c48c52b84d0d0549c99ff3859c98df65b3101406327ecc7d53fbf12", size = 7484, upload-time = "2025-10-18T21:55:41.639Z" },
-]
-
-[[package]]
-name = "libloader"
-version = "1.4.3"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "pywin32", marker = "sys_platform == 'win32'" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/d4/dd/58864bd93f74cd227996cec701713e27f6a57b1c189747cfefc9c9c2e00e/libloader-1.4.3.tar.gz", hash = "sha256:9c56b1ee2e866e314c35d1095d1e3b99c1c762e89a27bf26c98bd65d58f4e182", size = 6165, upload-time = "2026-01-14T03:18:21.731Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/97/cb/dac60d530791146d52e2dab3a16531963d03899ea37eec77cc03ea8c281d/libloader-1.4.3-py3-none-any.whl", hash = "sha256:4cfd541496bed79a2b5f72c316e16312ce1dd72fab6ed837801aa5e53299d6da", size = 6190, upload-time = "2026-01-14T03:18:20.84Z" },
 ]
 
 [[package]]
@@ -729,28 +717,6 @@ wheels = [
 ]
 
 [[package]]
-name = "platform-utils"
-version = "1.5.10"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "platformdirs" },
-    { name = "pywin32", marker = "sys_platform == 'win32'" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/80/9b/cb3a9d71f5ca4d56bbb82bb2c63dbe8065f1927224e7a4f1727e7170f12c/platform_utils-1.5.10.tar.gz", hash = "sha256:537c62c4a69a949a5232d302fbc41798b44d167a93cc97579a74fa8718314f83", size = 12664, upload-time = "2025-08-31T22:48:34.633Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/a8/af/425727da8f3a9c15ed6f42fc34a7fbe35dcae8bd76e7f24aaf6e3085b060/platform_utils-1.5.10-py3-none-any.whl", hash = "sha256:00cf7b5c7196347180de0f15769a4b152c65bccee13e5fdfaa3211f849e1d0ad", size = 9401, upload-time = "2025-08-31T22:48:33.497Z" },
-]
-
-[[package]]
-name = "platformdirs"
-version = "4.10.0"
-source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/d7/47/e4501f49c178ae1d9f4a75073fda4204f52647993f075a9db4d14930e0c5/platformdirs-4.10.0.tar.gz", hash = "sha256:31e761a6a0ca04faf7353ea759bdba55652be214725111e5aac52dfa29d4bef7", size = 31224, upload-time = "2026-05-28T03:32:53.587Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/81/e6/cd9575ac904136b3cbf7aa7ee819ef86eedb7274e46f230e94ea4342e729/platformdirs-4.10.0-py3-none-any.whl", hash = "sha256:fb516cdb12eb0d857d0cd85a7c57cea4d060bee4578d6cf5a14dfdf8cbf8784a", size = 22743, upload-time = "2026-05-28T03:32:52.175Z" },
-]
-
-[[package]]
 name = "pluggy"
 version = "1.6.0"
 source = { registry = "https://pypi.org/simple" }
@@ -965,31 +931,6 @@ wheels = [
 ]
 
 [[package]]
-name = "pywin32"
-version = "312"
-source = { registry = "https://pypi.org/simple" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/fe/1b/9cfdeac80ee45bebbbcb31f1b7b99a0d81a1c72de48d837be984e0e88b1d/pywin32-312-cp310-cp310-win32.whl", hash = "sha256:772235332b5d1024c696f11cea1ae4be7930f0a8b894bb43db14e3f435f1ff7e", size = 6361387, upload-time = "2026-06-04T07:49:14.329Z" },
-    { url = "https://files.pythonhosted.org/packages/33/b1/7afc96d041d982c27bc2df6f853d43f01fd273e3d39d04be3647ddeb533d/pywin32-312-cp310-cp310-win_amd64.whl", hash = "sha256:5dbc35d2b5320dc07f25fa31269cfb767471002b17de5eb067d03da68c7cb2db", size = 6926780, upload-time = "2026-06-04T07:49:16.881Z" },
-    { url = "https://files.pythonhosted.org/packages/ce/3a/4140da9ad54108e517f4a16b2d83da3033e08662144623e1239587cb7db6/pywin32-312-cp310-cp310-win_arm64.whl", hash = "sha256:3020656e34f1cf7faeb7bccd2b84653a607c6ff0c55ada85e6487d61716deabd", size = 4307203, upload-time = "2026-06-04T07:49:18.993Z" },
-    { url = "https://files.pythonhosted.org/packages/1f/f5/10a6e845a00fc5e7afd0a988b744f403d4d57162a28d160a093c4d9322f0/pywin32-312-cp311-cp311-win32.whl", hash = "sha256:17948aeadbdb091f0ced6ef0841620794e68327b94ee415571c1203594b7215c", size = 6362659, upload-time = "2026-06-04T07:49:21.349Z" },
-    { url = "https://files.pythonhosted.org/packages/35/c4/dcd2d62b5944b6d5db53413a5899016ccd57ffcb7278f3f81655d25d2027/pywin32-312-cp311-cp311-win_amd64.whl", hash = "sha256:d11417d84412f859b722fad0841b3614459ed0047f7542d8362e77884f6b6e8a", size = 6928825, upload-time = "2026-06-04T07:49:23.934Z" },
-    { url = "https://files.pythonhosted.org/packages/b7/56/3cbb433fe4501cdba2eb9040f56a4e1a8243faa4186b25295564d1a7a79d/pywin32-312-cp311-cp311-win_arm64.whl", hash = "sha256:b2200a054ca6d6625c4842fc56a4976a4b47f96b73dbe5538c3f813a80359f47", size = 6721875, upload-time = "2026-06-04T07:49:26.416Z" },
-    { url = "https://files.pythonhosted.org/packages/83/ff/32aa7d2ed0ab12b323aaa64f9b75e6ad4f8fd09f9ccfc28c79414d46838d/pywin32-312-cp312-cp312-win32.whl", hash = "sha256:dab4f65ac9c4e48400a2a0530c46c3c579cd5905ecd11b80692373915269208b", size = 6371877, upload-time = "2026-06-04T07:49:28.836Z" },
-    { url = "https://files.pythonhosted.org/packages/03/d9/77040d3b43df3f3be32ea289433d660d2727f5ba327bc73be835127d9d60/pywin32-312-cp312-cp312-win_amd64.whl", hash = "sha256:b457f6d628a47e8a7346ce22acb7e1a46a4a78b52e1d17e1af56871bd19a93bc", size = 6914841, upload-time = "2026-06-04T07:49:31.85Z" },
-    { url = "https://files.pythonhosted.org/packages/e3/cc/7b1ec671775756020a0ee7f4feeaf3c568f0ab86bd3900088cf986937a92/pywin32-312-cp312-cp312-win_arm64.whl", hash = "sha256:6017c58e12f6809fbb0555b75df144c2922a9ffd18e4b9b5afa863b6c1a9d950", size = 6727901, upload-time = "2026-06-04T07:49:34.244Z" },
-    { url = "https://files.pythonhosted.org/packages/2d/41/12fbfd7f36ed2146d8bc9de96c2741296bf0d490b98508496cff322e274c/pywin32-312-cp313-cp313-win32.whl", hash = "sha256:7a27df850933d16a8eabfbaeb73d52b273e2da667f80d70b01a89d1f6828d02c", size = 6370184, upload-time = "2026-06-04T07:49:36.253Z" },
-    { url = "https://files.pythonhosted.org/packages/ba/db/36a78e3403099d31d9746d13fdcde5accc43c1155f375a34d15983a479a7/pywin32-312-cp313-cp313-win_amd64.whl", hash = "sha256:c53e878d15a1c44788082bfe712a905433473aa38f86375b7cf8b45e3acbaaf9", size = 6914298, upload-time = "2026-06-04T07:49:38.876Z" },
-    { url = "https://files.pythonhosted.org/packages/84/37/c1697194092b76de9ed47ca124323f02c57ffc8a45c06f88a3d5acaf01eb/pywin32-312-cp313-cp313-win_arm64.whl", hash = "sha256:59aba5d5940842075343a5ddc6b11f1cdf0d1567fe745290359dfbcc7c2eb831", size = 6727640, upload-time = "2026-06-04T07:49:41.083Z" },
-    { url = "https://files.pythonhosted.org/packages/fc/2b/1f3cded5822fd49c02f40544cbb5f58c7cfd6b1694869fd476cb6170ee97/pywin32-312-cp314-cp314-win32.whl", hash = "sha256:a77a90fbb6881238d2ca9c6fd797b25817f3768fe78d214a90137ff055a75f5b", size = 6468928, upload-time = "2026-06-04T07:49:43.188Z" },
-    { url = "https://files.pythonhosted.org/packages/21/82/3bf86d2e2808902013132e1ce905a7da0da53790f3836c64bf44d55e24f3/pywin32-312-cp314-cp314-win_amd64.whl", hash = "sha256:a4dd3a848290ef724347b19f301045831d8e802fa4464f491b98b1e0a081432e", size = 7024157, upload-time = "2026-06-04T07:49:45.34Z" },
-    { url = "https://files.pythonhosted.org/packages/a4/0e/73f6d6800b4f27655abd9e9f6aaeaefcddb2b946e4674efa2bab184a7f7b/pywin32-312-cp314-cp314-win_arm64.whl", hash = "sha256:9fce94568364e0155e6dfb781ac5d95903be8baf28670632beab1b523f300daa", size = 6839598, upload-time = "2026-06-04T07:49:47.613Z" },
-    { url = "https://files.pythonhosted.org/packages/eb/61/caa39686032d2ebdd04ff0ab5cbe163126c0066d98e00c9018646e42393b/pywin32-312-cp315-cp315-win32.whl", hash = "sha256:5c1fbe4a937a73ae9297384a3da38518cbc694c68ad8a809b2e19acd350f03ed", size = 6471159, upload-time = "2026-06-04T07:49:50.035Z" },
-    { url = "https://files.pythonhosted.org/packages/0f/cd/7e1de64a4a6f69c04214169657ccab0d93a670ea50e35eb8f489d7378249/pywin32-312-cp315-cp315-win_amd64.whl", hash = "sha256:c2f03a0f73f804a13c2735b99392b0cd426bb4f2c4d0178e5ac966a0f21618d5", size = 7025293, upload-time = "2026-06-04T07:49:54.857Z" },
-    { url = "https://files.pythonhosted.org/packages/23/ed/4532e9388e65fa16b46776ef47ad631a64eda1631884488af707666350ed/pywin32-312-cp315-cp315-win_arm64.whl", hash = "sha256:a8597d28f267b39074aef51fa593530082b39cbe5a074226096857b1fed2dfb9", size = 6840337, upload-time = "2026-06-04T07:49:57.531Z" },
-]
-
-[[package]]
 name = "pywin32-ctypes"
 version = "0.2.3"
 source = { registry = "https://pypi.org/simple" }
@@ -1050,18 +991,12 @@ wheels = [
 [[package]]
 name = "sound-lib"
 version = "0.8.8"
-source = { registry = "https://pypi.org/simple" }
+source = { git = "https://github.com/samtupy/sound_lib_macos_fixes.git#2b4f6ee2036928f9b4e9e87df7424014734ab4d3" }
 dependencies = [
     { name = "beautifulsoup4" },
-    { name = "libloader" },
     { name = "lxml" },
-    { name = "platform-utils" },
     { name = "requests" },
     { name = "tqdm" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/0e/cb/d2f27c25c14bc8e37bc9028ca8ce637b09a12c1bccab8e162ff354e98c56/sound_lib-0.8.8.tar.gz", hash = "sha256:c4a8048df957265c882a10b18c33665ccb03b4657e9190079181cf8529f9ce08", size = 4891177, upload-time = "2026-01-15T07:46:45.809Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/ff/cd/512551d923ef9d1f20948b671843b6f23935ac9613cbb7eca4bc212f3f8d/sound_lib-0.8.8-py3-none-any.whl", hash = "sha256:e52167b9c66d13a16ff6ad40c00fe0e3afdf768de8b6470aa2af03f34320818b", size = 4915761, upload-time = "2026-01-15T07:46:48.188Z" },
 ]
 
 [[package]]

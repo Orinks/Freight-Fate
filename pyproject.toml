@@ -21,10 +21,7 @@ dependencies = [
     "pygame>=2.6",
     "prismatoid>=0.16",
     "numpy>=1.26",
-    # Pinned exactly: PyPI's version ordering for this package is broken
-    # (0.83 from 2022 sorts above 0.8.8 from 2026), so any range resolves
-    # to the stale build that ships no Linux library.
-    "sound-lib==0.8.8",
+    "sound_lib @ git+https://github.com/samtupy/sound_lib_macos_fixes.git",
 ]
 
 [project.scripts]
@@ -50,6 +47,9 @@ build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/freight_fate"]
+
+[tool.hatch.metadata]
+allow-direct-references = true
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

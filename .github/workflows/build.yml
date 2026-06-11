@@ -94,6 +94,8 @@ jobs:
         include:
           - os: windows-latest
             label: Windows
+          - os: macos-latest
+            label: macOS
           - os: ubuntu-latest
             label: Linux
     runs-on: ${{ matrix.os }}
