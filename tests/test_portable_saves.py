@@ -1,7 +1,6 @@
 """Portable save layout: game-directory storage and legacy migration."""
 
 import sys
-from pathlib import Path
 
 from freight_fate.models import profile as profile_mod
 
@@ -28,10 +27,12 @@ def test_data_dir_is_saves_inside_game_root(monkeypatch, tmp_path):
     assert profile_mod.data_dir() == game / "saves"
 
 
-def test_game_root_when_frozen(monkeypatch):
+def test_game_root_when_frozen(monkeypatch, tmp_path):
+    # a real temp path, so .resolve() behaves the same on Windows and Linux
+    exe = tmp_path / "Games" / "FreightFate" / "FreightFate.exe"
     monkeypatch.setattr(sys, "frozen", True, raising=False)
-    monkeypatch.setattr(sys, "executable", str(Path("C:/Games/FreightFate/FreightFate.exe")))
-    assert profile_mod.game_root() == Path("C:/Games/FreightFate")
+    monkeypatch.setattr(sys, "executable", str(exe))
+    assert profile_mod.game_root() == exe.resolve().parent
 
 
 def test_game_root_from_source_is_project_root():
