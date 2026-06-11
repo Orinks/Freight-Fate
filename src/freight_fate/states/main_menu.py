@@ -4,11 +4,12 @@ from __future__ import annotations
 
 import pygame
 
-from .. import __version__
+from .. import __version__, updater
 from ..models.profile import DEFAULT_CITY, Profile
 from ..settings import TIME_SCALES
 from ..sim.hos import HOS_MODES
 from .base import MenuItem, MenuState, State
+from .update import UpdateChecker, UpdateCheckState, UpdatePromptState
 
 
 def enter_world(ctx) -> None:
@@ -29,9 +30,27 @@ def enter_world(ctx) -> None:
 class MainMenuState(MenuState):
     title = "Freight Fate"
 
+    # one startup update check per game session, shared across instances
+    _update_checker: UpdateChecker | None = None
+    _update_prompted = False
+
     def enter(self) -> None:
         self.ctx.audio.play_music("menu_theme")
         super().enter()
+        cls = MainMenuState
+        if updater.is_frozen() and cls._update_checker is None:
+            cls._update_checker = UpdateChecker(self.ctx.settings)
+
+    def update(self, dt: float) -> None:
+        cls = MainMenuState
+        checker = cls._update_checker
+        if (cls._update_prompted or checker is None
+                or not checker.done.is_set()):
+            return
+        cls._update_prompted = True
+        info = checker.result
+        if info is not None and info.tag != self.ctx.settings.skipped_update:
+            self.ctx.push_state(UpdatePromptState(self.ctx, info))
 
     def announce_entry(self) -> None:
         self.ctx.say(
@@ -392,6 +411,15 @@ class SettingsState(MenuState):
                      help="Real world uses live conditions for each city from "
                           "Open-Meteo. Needs an internet connection; falls back "
                           "to simulated weather offline."),
+            MenuItem(lambda: ("Update channel: "
+                              f"{'developer snapshots' if self._channel() == 'dev' else 'stable releases'}"),
+                     lambda: self._toggle_update_channel(1),
+                     help="Stable releases are the finished, numbered "
+                          "versions. Developer snapshots are nightly builds "
+                          "of work in progress: new features sooner, but "
+                          "rough edges."),
+            MenuItem("Check for updates", self._check_updates,
+                     help="Look for a new version of the game right now."),
             MenuItem("Back", self.go_back),
         ]
 
@@ -410,7 +438,7 @@ class SettingsState(MenuState):
                    lambda d: self._volume("sfx_volume", 0.1 * d),
                    lambda d: self._volume("music_volume", 0.1 * d),
                    self._cycle_verbosity, self._toggle_sapi_events,
-                   self._toggle_real_weather]
+                   self._toggle_real_weather, self._toggle_update_channel]
         if self.index < len(actions):
             actions[self.index](direction)
 
@@ -466,6 +494,19 @@ class SettingsState(MenuState):
     def _toggle_real_weather(self, _d: int) -> None:
         self.ctx.settings.real_weather = not self.ctx.settings.real_weather
         self._announce()
+
+    def _channel(self) -> str:
+        return updater.resolve_channel(
+            self.ctx.settings.update_channel,
+            updater.load_build_info(__version__))
+
+    def _toggle_update_channel(self, _d: int) -> None:
+        self.ctx.settings.update_channel = (
+            "stable" if self._channel() == "dev" else "dev")
+        self._announce()
+
+    def _check_updates(self) -> None:
+        self.ctx.push_state(UpdateCheckState(self.ctx))
 
     def go_back(self) -> None:
         self.ctx.settings.save()

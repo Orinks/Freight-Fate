@@ -18,11 +18,13 @@ Run from the repository root: ``uv run python tools/build_release.py``
 from __future__ import annotations
 
 import argparse
+import json
 import shutil
 import subprocess
 import sys
 import tarfile
 import zipfile
+from datetime import datetime, timezone
 from pathlib import Path
 
 import tomllib
@@ -65,6 +67,22 @@ def run_pyinstaller() -> Path:
     cmd.append(str(entry))
     subprocess.run(cmd, check=True)
     return DIST / APP_NAME
+
+
+def stamp_build_info(build_dir: Path, label: str) -> None:
+    """Record what this build is, for the in-game updater.
+
+    ``label`` is either a nightly tag (``nightly-20260611``) or a plain
+    version (``1.5.0``); the release tag for the latter is ``v``-prefixed.
+    """
+    nightly = label.startswith("nightly-")
+    info = {
+        "tag": label if nightly else f"v{label}",
+        "channel": "dev" if nightly else "stable",
+        "built_at": datetime.now(timezone.utc).strftime("%Y-%m-%d"),
+    }
+    with open(build_dir / "build_info.json", "w", encoding="utf-8") as f:
+        json.dump(info, f, indent=2)
 
 
 def smoke_check(build_dir: Path) -> None:
@@ -111,6 +129,7 @@ def main() -> int:
     if (ROOT / "build").exists():
         shutil.rmtree(ROOT / "build")
     build_dir = run_pyinstaller()
+    stamp_build_info(build_dir, label)
     if not args.skip_smoke:
         smoke_check(build_dir)
     out = archive(build_dir, label)

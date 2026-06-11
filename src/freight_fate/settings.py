@@ -25,6 +25,8 @@ class Settings:
     music_volume: float = 0.55
     speech_verbosity: int = 1             # 0 terse, 1 normal, 2 chatty
     sapi_events: bool = True              # driving events on a separate SAPI voice
+    update_channel: str = ""              # "stable"/"dev"; "" follows this build's channel
+    skipped_update: str = ""              # release tag the player chose to skip
 
     @property
     def path(self):
@@ -54,6 +56,8 @@ class Settings:
 
         if s.hos_mode not in HOS_MODES:
             s.hos_mode = "realistic"
+        if s.update_channel not in ("", "stable", "dev"):
+            s.update_channel = ""
         return s
 
     def speed_text(self, mph: float) -> str:
