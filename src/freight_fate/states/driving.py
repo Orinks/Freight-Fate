@@ -36,6 +36,13 @@ MECHANIC_CALLOUT_FEE = 500.0
 MECHANIC_RATE_PER_PCT = 110.0     # premium over the garage's 85 per percent
 MECHANIC_WAIT_MIN = 90.0          # game minutes waiting for the truck to be fixed
 
+# Highway exits: signal inside the window, slow enough to make the ramp.
+EXIT_WINDOW_MI = 5.0              # how far out X can arm the upcoming exit
+RAMP_MAX_MPH = 45.0               # any faster and you blow past the exit
+RAMP_LENGTH_MI = 0.5              # deceleration lane plus ramp to the stop
+
+CRUISE_MIN_MPH = 20.0             # cruise control needs road speed to hold
+
 
 class DrivingState(State):
     def __init__(self, ctx, job: Job, route: Route, trip_seed: int | None = None) -> None:
@@ -69,6 +76,12 @@ class DrivingState(State):
         self.speeding_strikes = 0
         self._rescue_offered = False
         self._signal_timer = 0.0
+        self._exit_stop = None            # armed exit, set with X
+        self._ramp_mi: float | None = None   # ramp distance left, once taken
+        self._ramp_stop = None
+        self._ramp_end_said = False
+        self._cruise_mph: float | None = None
+        self._cruise_throttle = 0.0
         self._status_text = "Press E to start the engine."
 
     # -- save and resume -----------------------------------------------------------
@@ -190,6 +203,10 @@ class DrivingState(State):
             self.ctx.audio.play("vehicle/horn")
         elif key == pygame.K_t:
             self._try_rest_stop()
+        elif key == pygame.K_x:
+            self._take_exit()
+        elif key == pygame.K_k:
+            self._toggle_cruise()
         elif key == pygame.K_SPACE:
             self._speak_speed()
         elif key == pygame.K_TAB:
@@ -206,10 +223,13 @@ class DrivingState(State):
             self.ctx.say(
                 "Hold Up arrow to accelerate, Down arrow to brake. "
                 "Hold B for the emergency brake, the hardest possible stop. "
+                "K sets cruise control at your current speed; braking cancels. "
+                "X takes the next announced exit: slow to 45 for the ramp, "
+                "then brake to a stop for the rest stop menu. "
                 "E engine. Space speed. Tab full status. F fuel. "
                 "C clock, deadline, and hours of service. "
-                "R route. V weather. T rest stop menu when stopped at one: "
-                "refuel, take a break, or sleep. H horn. "
+                "R route. V weather. T rest stop menu when already stopped "
+                "at one: refuel, take a break, or sleep. H horn. "
                 "J engine brake. Escape pause menu. "
                 + ("" if self.truck.transmission.automatic else
                    "Hold Left Shift for clutch, then 1 through 0 for gears, N for neutral."))
@@ -269,6 +289,9 @@ class DrivingState(State):
             f"fuel {t.fuel_fraction * 100:.0f} percent",
             f"it is {time_of_day(self.trip.current_hour)}",
         ]
+        if self._cruise_mph is not None:
+            parts.insert(1, "cruise control set at "
+                            f"{self.ctx.settings.speed_text(self._cruise_mph)}")
         if t.damage_pct - self.start_damage > 1:
             parts.append(f"new damage {t.damage_pct - self.start_damage:.0f} percent")
         if self.ctx.settings.speech_verbosity >= 1:
@@ -345,6 +368,7 @@ class DrivingState(State):
             t.brake = 1.0
         t.emergency_brake = emergency
         t.transmission.clutch = 1.0 if keys[pygame.K_LSHIFT] or keys[pygame.K_RSHIFT] else 0.0
+        self._update_cruise(dt, braking, keys[pygame.K_UP])
 
         if t.transmission.automatic and t.engine_on:
             new_gear = t.auto_shift()
@@ -361,8 +385,10 @@ class DrivingState(State):
             elif t.fuel_gal <= 0:
                 self._handle_out_of_fuel()
 
+        pos_before = self.trip.position_mi
         for event in self.trip.update(dt):
             self._handle_trip_event(event)
+        self._update_exit(self.trip.position_mi - pos_before)
 
         self._update_hours_and_fatigue(dt)
         self._update_audio()
@@ -471,6 +497,8 @@ class DrivingState(State):
                                f"Total damage {self.truck.damage_pct:.0f} percent.")
 
     def _update_speeding(self, dt: float) -> None:
+        if self._ramp_mi is not None:
+            return   # the ramp is off the highway and unpatrolled
         limit, _ = self.trip.speed_limit_at(self.trip.position_mi)
         if self.truck.speed_mph > limit + 9:
             self._speeding_timer += dt
@@ -486,6 +514,10 @@ class DrivingState(State):
     def _handle_trip_event(self, event) -> None:
         kind = event.kind
         if kind == TripEventKind.HAZARD:
+            if self._ramp_mi is not None:
+                return   # off the highway: the hazard passes you by
+            if self._cruise_mph is not None:
+                self._cancel_cruise()   # hands back on the wheel to brake
             self.ctx.audio.play("ui/warning")
             window = event.data.get("deadline_s", 4.0)
             # a drowsy driver reacts late: part of the window is already gone
@@ -530,6 +562,101 @@ class DrivingState(State):
         else:
             self.ctx.push_state(RestStopState(self.ctx, self, stop))
 
+    def _take_exit(self) -> None:
+        if self._ramp_mi is not None:
+            self.ctx.say("You are already on the exit ramp. Brake to a stop.")
+            return
+        if self._exit_stop is not None:
+            self._exit_stop = None
+            self.ctx.say("Exit canceled. Staying on the highway.")
+            return
+        stop = self.trip.upcoming_stop(EXIT_WINDOW_MI)
+        if stop is None:
+            self.ctx.say("No exit coming up. Exits are announced as you "
+                         "approach them.")
+            return
+        self._exit_stop = stop
+        self.ctx.audio.play("ui/notify", volume=0.5)
+        ahead = stop.at_mi - self.trip.position_mi
+        self.ctx.say(f"Signaling for the {stop.name} exit, "
+                     f"{ahead:.1f} miles ahead. "
+                     f"Slow to {RAMP_MAX_MPH:.0f} or less for the ramp.")
+
+    def _update_exit(self, moved_mi: float) -> None:
+        """Advance an armed exit or an active ramp; opens the stop menu."""
+        if self._ramp_mi is not None:
+            self._ramp_mi -= moved_mi
+            if self._ramp_mi > 0:
+                return
+            if self.truck.speed_mph <= 3:
+                stop = self._ramp_stop
+                self._ramp_mi = None
+                self._ramp_stop = None
+                if hos.parking_is_full(self.trip_seed, stop.at_mi,
+                                       self.trip.current_hour):
+                    self.ctx.push_state(ParkingFullState(self.ctx, self, stop))
+                else:
+                    self.ctx.push_state(RestStopState(self.ctx, self, stop))
+            elif not self._ramp_end_said:
+                self._ramp_end_said = True
+                self.ctx.say_event(f"You are at {self._ramp_stop.name}. "
+                                   "Come to a complete stop.")
+            return
+        stop = self._exit_stop
+        if stop is None or self.trip.position_mi < stop.at_mi:
+            return
+        self._exit_stop = None
+        if self.truck.speed_mph <= RAMP_MAX_MPH:
+            self._ramp_mi = RAMP_LENGTH_MI
+            self._ramp_stop = stop
+            self._ramp_end_said = False
+            self._cancel_cruise()
+            self.ctx.audio.play("ui/notify", volume=0.7)
+            self.ctx.say_event(f"You take the exit for {stop.name}. "
+                               "Half a mile of ramp; brake to a stop at "
+                               "the end.")
+        else:
+            self.ctx.say_event("You were going too fast for the ramp and "
+                               f"missed the exit for {stop.name}.")
+
+    def _toggle_cruise(self) -> None:
+        t = self.truck
+        if self._cruise_mph is not None:
+            self._cancel_cruise()
+            self.ctx.say("Cruise control off.")
+            return
+        if not t.engine_on or t.speed_mph < CRUISE_MIN_MPH:
+            self.ctx.say("Cruise control needs the engine running and at "
+                         f"least {CRUISE_MIN_MPH:.0f} miles per hour.")
+            return
+        self._cruise_mph = t.speed_mph
+        self._cruise_throttle = t.throttle
+        self.ctx.audio.play("ui/notify", volume=0.5)
+        self.ctx.say("Cruise control set at "
+                     f"{self.ctx.settings.speed_text(t.speed_mph)}. "
+                     "K or braking cancels.")
+
+    def _cancel_cruise(self) -> None:
+        self._cruise_mph = None
+        self._cruise_throttle = 0.0
+
+    def _update_cruise(self, dt: float, braking: bool,
+                       accelerating: bool) -> None:
+        """Hold the set speed with a slow integrating throttle."""
+        if self._cruise_mph is None:
+            return
+        t = self.truck
+        if braking or t.emergency_brake or not t.engine_on or t.stalled:
+            self._cancel_cruise()
+            self.ctx.say_event("Cruise control off.", interrupt=False)
+            return
+        if accelerating:
+            return   # manual override; cruise resumes when the key lifts
+        error = self._cruise_mph - t.speed_mph
+        self._cruise_throttle = max(0.0, min(
+            1.0, self._cruise_throttle + error * 0.08 * dt))
+        t.throttle = self._cruise_throttle
+
     def _handle_out_of_fuel(self) -> None:
         if self._rescue_offered:
             return
@@ -558,7 +685,8 @@ class DrivingState(State):
             f"Driving to {self.job.destination}",
             "",
             f"Speed: {t.speed_mph:.0f} mph (limit {limit:.0f}{', ' + reason if reason else ''})",
-            f"Gear: {gear}   RPM: {t.rpm:.0f}   {'ENGINE ON' if t.engine_on else 'engine off'}",
+            f"Gear: {gear}   RPM: {t.rpm:.0f}   {'ENGINE ON' if t.engine_on else 'engine off'}"
+            + (f"   CRUISE {self._cruise_mph:.0f}" if self._cruise_mph is not None else ""),
             f"Fuel: {t.fuel_fraction * 100:.0f}%   Damage: {t.damage_pct:.0f}%",
             f"Remaining: {self.trip.remaining_miles:.0f} of {self.trip.total_miles:.0f} miles",
             f"Weather: {self.weather.current.value}",

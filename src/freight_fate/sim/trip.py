@@ -22,6 +22,35 @@ BASE_SPEED_LIMIT_MPH = 70.0
 NIGHT_HAZARD_BONUS = 0.10          # extra hazard risk after dark
 NIGHT_TRAFFIC_KEEP = 0.4           # chance a traffic zone still forms at night
 
+# Hazards that can appear anywhere in the country...
+GENERIC_HAZARDS = ("debris on the road", "a slow vehicle ahead",
+                   "an animal crossing")
+
+# ...and the local flavor each region adds to the draw.
+REGION_HAZARDS: dict[str, tuple[str, ...]] = {
+    "northeast": ("a sudden lane closure ahead",
+                  "stopped traffic around a fender bender"),
+    "midwest": ("a deer crossing the road",
+                "farm equipment pulling onto the highway"),
+    "south": ("retread debris from a blown tire",
+              "a sudden downpour flooding the right lane"),
+    "plains": ("a combine convoy crawling ahead",
+               "a crosswind gust shoving the trailer"),
+    "rockies": ("rockfall debris on the road",
+                "a runaway truck on the grade ahead"),
+    "southwest": ("a dust devil crossing the interstate",
+                  "tumbleweeds piling in your lane"),
+    "west_coast": ("a fog bank rolling across the lanes",
+                   "a stalled car jutting off the shoulder"),
+    "northwest": ("an elk crossing the road",
+                  "standing water in your lane"),
+}
+
+
+def hazard_choices(region: str) -> tuple[str, ...]:
+    """The hazard pool for a region: nationwide staples plus local flavor."""
+    return GENERIC_HAZARDS + REGION_HAZARDS.get(region, ())
+
 
 class TripEventKind(Enum):
     ZONE_ENTER = "zone_enter"
@@ -181,6 +210,16 @@ class Trip:
                 return stop
         return None
 
+    def upcoming_stop(self, within_mi: float = 5.0) -> RoadStop | None:
+        """The next stop whose exit lies ahead within the given distance."""
+        best: RoadStop | None = None
+        for stop in self.stops:
+            ahead = stop.at_mi - self.position_mi
+            if 0 <= ahead <= within_mi and (
+                    best is None or stop.at_mi < best.at_mi):
+                best = stop
+        return best
+
     # below this the truck is parked or crawling: estimate at highway pace
     ETA_MIN_MPH = 15.0
 
@@ -289,7 +328,7 @@ class Trip:
                 self._announced_stops.add(stop.name)
                 self._emit(TripEventKind.STOP_AHEAD,
                            f"{stop.name} in {ahead:.0f} miles. "
-                           "Press T while stopped there to refuel and rest.",
+                           "Press X to take the exit for it.",
                            stop=stop)
 
     def _check_cities(self) -> None:
@@ -319,8 +358,7 @@ class Trip:
             return
         self._hazard_check_mi = self._rng.uniform(20, 60)
         if self._rng.random() < self._hazard_risk():
-            hazard = self._rng.choice(["debris on the road", "a slow vehicle ahead",
-                                       "an animal crossing"])
+            hazard = self._rng.choice(hazard_choices(self.current_region))
             self._emit(TripEventKind.HAZARD,
                        f"Caution: {hazard}! Brake now!",
                        deadline_s=self._rng.uniform(3.0, 4.5))

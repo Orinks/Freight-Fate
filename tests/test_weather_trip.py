@@ -109,6 +109,30 @@ def test_time_scale_compresses_fuel_burn(world):
     assert truck.fuel_gal < truck.specs.fuel_tank_gal - 0.5
 
 
+def test_every_weather_region_has_local_hazards():
+    from freight_fate.sim.trip import GENERIC_HAZARDS, REGION_HAZARDS, hazard_choices
+
+    for region in REGION_WEIGHTS:
+        assert region in REGION_HAZARDS, f"no local hazards for {region}"
+        pool = hazard_choices(region)
+        assert set(GENERIC_HAZARDS) <= set(pool)
+        assert set(REGION_HAZARDS[region]) <= set(pool)
+    # unknown regions still get the nationwide staples
+    assert hazard_choices("atlantis") == GENERIC_HAZARDS
+
+
+def test_upcoming_stop_only_looks_ahead(world):
+    trip, _ = make_trip(world)
+    stop = trip.stops[0]
+    trip.position_mi = stop.at_mi - 3.0
+    assert trip.upcoming_stop(5.0) is stop
+    trip.position_mi = stop.at_mi - 10.0
+    assert trip.upcoming_stop(5.0) is None
+    trip.position_mi = stop.at_mi + 0.1   # just past: the exit is gone
+    next_stop = trip.upcoming_stop(5.0)
+    assert next_stop is not stop
+
+
 def test_eta_tracks_current_speed(world):
     """Regression: the C key's ETA was a constant 55 mph guess that never
     responded to how fast you were actually going."""

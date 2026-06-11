@@ -3,6 +3,23 @@
 ## Unreleased
 
 ### Added
+- **Highway exits.** Rest stops now sit at proper exits. They are
+  announced a few miles out ("Press X to take the exit for it"); X
+  signals for the exit (and X again cancels), you slow to 45 or less for
+  the ramp — any faster and you blow past it — then half a mile of ramp
+  and brake to a stop, and the rest stop menu opens by itself. The ramp
+  is off the highway: hazards and speeding checks pause while you are on
+  it. Pressing T while stopped on the highway at a stop still works.
+- **Cruise control.** K sets cruise at your current speed, like every
+  real semi, and holds it with a slow throttle governor through grades.
+  K again, any braking, the emergency brake, a stall, or taking an exit
+  cancels it — and a hazard warning hands control straight back to you.
+  Tab reports the set speed.
+- **Region-flavored road hazards.** The hazard pool now mixes nationwide
+  staples with local flavor for the region you are driving through: dust
+  devils and tumbleweeds in the Southwest, deer and farm equipment in
+  the Midwest, rockfall in the Rockies, elk and standing water in the
+  Pacific Northwest, and more.
 - **Separate voice for driving events.** Road events — hazard warnings,
   collisions, weather changes, rest stop and city announcements, HOS and
   fatigue warnings, speeding, inspections, speed callouts — now speak
@@ -57,6 +74,17 @@
   active trip now picks it up immediately.
 
 ### Changed
+- **Realistic deadlines.** Dispatch can no longer ask for the
+  impossible. Deadlines are now built from the hours a law-abiding
+  trucker actually needs — driving at an achievable 55 mph average, plus
+  the 30-minute break every 8 driving hours and a 10-hour sleep for
+  every 11-hour shift the distance demands — with 20 to 50 percent
+  shipper slack and a flat hour for fuel on top. San Antonio to Dallas
+  now quotes a workable 7-to-8-hour window instead of a sprint.
+- The state trooper / law enforcement system is designed and documented
+  at the top of ROADMAP.md as the next milestone (patrol intensity per
+  corridor, CB chatter warnings, pull-overs reusing the X signal flow,
+  immediate fines, and an enforcement setting).
 - **Portable saves.** Profiles and settings now live in a `saves` folder
   inside the game's own directory (next to the executable in release
   builds, the project root from source) instead of the per-user data

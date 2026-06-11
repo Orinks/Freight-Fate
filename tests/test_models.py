@@ -20,6 +20,31 @@ def test_job_offers_have_real_route_distances(world):
         assert job.deadline_game_h > job.distance_mi / 70.0
 
 
+def test_deadlines_allow_legal_driving(world):
+    """A deadline must cover the driving at an achievable average plus the
+    HOS breaks and sleep the distance demands - no impossible 5-hour
+    San Antonio to Dallas dispatches."""
+    from freight_fate.models.jobs import required_hours
+
+    for seed, level in ((1, 1), (2, 3), (3, 6)):
+        board = JobBoard(world, seed=seed)
+        for job in board.offers("San Antonio", endorsements=set(), level=level):
+            needed = required_hours(job.distance_mi)
+            assert job.deadline_game_h >= needed * 1.2, (
+                f"{job.origin} to {job.destination}: {job.distance_mi:.0f} mi "
+                f"needs {needed:.1f} h, deadline {job.deadline_game_h:.1f} h")
+
+
+def test_required_hours_includes_breaks_and_sleep():
+    from freight_fate.models.jobs import required_hours
+
+    assert required_hours(275) < 6.0            # SA-Dallas: just driving
+    medium = required_hours(495)                # 9 driving hours: one break
+    assert medium > 495 / 55.0
+    long_haul = required_hours(1150)            # ~21 h driving: sleep required
+    assert long_haul > 1150 / 55.0 + 10.0
+
+
 def test_endorsement_gating(world):
     board = JobBoard(world, seed=4)
     no_endorsements = board.offers("Los Angeles", endorsements=set(), count=5)

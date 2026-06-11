@@ -1,5 +1,41 @@
 # Freight Fate Roadmap
 
+## Next up: state troopers and law enforcement (design)
+
+Today speeding quietly accumulates "strikes" that become a lump-sum fine
+at delivery, and HOS violations roll a generic weigh-station inspection.
+Both should become one visible enforcement system with troopers you can
+hear, anticipate, and get pulled over by.
+
+### Design sketch
+
+- **Patrol presence.** Each route leg gets a patrol intensity from its
+  region and highway (urban corridors hot, empty plains cold, construction
+  zones always hot), modulated by time of day (speed traps at rush hour,
+  DUI patrols at night). The CB radio is the counterplay: chatter like
+  "bear at mile marker 12" gives attentive players a spoken heads-up a
+  few miles out.
+- **Getting pulled over.** Speeding 10+ over inside a patrol's window (or
+  blowing past a weigh station while flagged) triggers a siren behind you.
+  The player must signal with X (reusing the exit system's muscle memory),
+  brake to a stop on the shoulder, and sit through a spoken stop: license
+  and logbook check, then a ticket, a warning (reputation and demeanor
+  matter), or an order to a nearby weigh station for a full inspection.
+- **Consequences.** Immediate fines replace the silent at-delivery
+  deduction (escalating like HOS fines: 150 to 1,200 dollars), reputation
+  hits, and an "out of service" order for serious HOS violations: 10
+  hours parked where you stand. Ignoring the siren is a felony stop:
+  spike strips ahead, a huge fine, and possibly losing the load.
+- **Settings.** "Law enforcement: realistic / relaxed / off" mirroring
+  the HOS setting, so the simulation stays opt-in.
+- **Audio needed.** Siren approach/behind loops, CB radio squelch and
+  chatter, an officer voice channel (the SAPI event voice fits), spike
+  strip. All synthesizable in `tools/generate_audio.py` first, replaced
+  by real recordings later.
+- **Open questions.** Should troopers notice damage (a visibly wrecked
+  truck invites a stop)? Do warnings expire? Does reputation lower the
+  ticket odds, or just the fine?
+
 ## Shipped in 1.5.0
 
 - [x] Hours-of-service fatigue and mandatory rest planning: 11-hour
@@ -94,6 +130,11 @@ Deliver -> Earn and level up -> Repeat
 ### Gameplay depth
 - [ ] Cargo loading/securing minigame
 - [x] Hours-of-service fatigue and mandatory rest planning (1.5.0)
+- [x] Highway exits: signal with X, slow for the ramp, brake to the stop
+- [x] Cruise control (K), with hazard and braking auto-cancel
+- [x] Region-flavored road hazards (dust devils, deer, rockfall, ...)
+- [x] HOS-aware realistic deadlines (driving + breaks + sleep + slack)
+- [ ] State troopers and law enforcement (designed above, next milestone)
 - [ ] Special event jobs (oversize loads, urgent medical freight)
 - [ ] Trailer types with handling differences
 

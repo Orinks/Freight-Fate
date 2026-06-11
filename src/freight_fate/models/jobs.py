@@ -90,6 +90,19 @@ LEVEL_DISTANCE_CAPS = {1: 280.0, 2: 340.0, 3: 520.0, 4: 750.0, 5: 1100.0}
 LONG_HAUL_MILES = 600.0   # what counts as a cross-country haul
 HOOKUP_FEE = 120.0        # flat load/unload fee keeping short hops worthwhile
 
+# Deadline model: what a law-abiding trucker actually needs.
+DEADLINE_AVG_MPH = 55.0   # achievable interstate average through zones and weather
+
+
+def required_hours(miles: float) -> float:
+    """Honest hours for the run: driving at an achievable average, plus the
+    30-minute break every 8 driving hours and a 10-hour sleep for every
+    11-hour shift the distance demands. Dispatch cannot ask for less."""
+    drive_h = miles / DEADLINE_AVG_MPH
+    breaks_h = 0.5 * int(drive_h // 8)
+    sleeps_h = 10.0 * int(drive_h // 11)
+    return drive_h + breaks_h + sleeps_h
+
 
 class JobBoard:
     """Generates job offers at a city, filtered by the player's endorsements.
@@ -179,7 +192,8 @@ class JobBoard:
         rate = cargo.rate_per_mile * self._rng.uniform(0.9, 1.15)
         mult = market.multiplier(cargo.key) if market is not None else 1.0
         pay = round((HOOKUP_FEE + miles * rate * (1.0 + weight / 120.0)) * mult, 2)
-        # deadline: 50 mph average plus generous slack
-        deadline = miles / 50.0 * self._rng.uniform(1.35, 1.7)
+        # deadline: the honest HOS-compliant hours (driving, breaks, sleep),
+        # shipper slack on top, plus a flat hour for fuel and the unexpected
+        deadline = required_hours(miles) * self._rng.uniform(1.2, 1.5) + 1.0
         return Job(cargo, weight, origin, origin_location, destination,
                    round(miles, 1), pay, round(deadline, 1), market_mult=mult)
