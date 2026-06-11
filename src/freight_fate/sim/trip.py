@@ -181,8 +181,20 @@ class Trip:
                 return stop
         return None
 
-    def eta_game_hours(self, avg_mph: float = 55.0) -> float:
-        return self.remaining_miles / max(1.0, avg_mph)
+    # below this the truck is parked or crawling: estimate at highway pace
+    ETA_MIN_MPH = 15.0
+
+    def eta_game_hours(self, fallback_mph: float = 55.0) -> float:
+        """Hours to arrival at the current pace.
+
+        Tracks the truck's actual speed once it is meaningfully rolling, so
+        the estimate responds to how you are driving. Parked or crawling it
+        assumes a typical highway pace instead of promising infinity.
+        """
+        mph = self.truck.speed_mph
+        if mph < self.ETA_MIN_MPH:
+            mph = max(1.0, fallback_mph)
+        return self.remaining_miles / mph
 
     def progress_summary(self, imperial: bool = True) -> str:
         if imperial:

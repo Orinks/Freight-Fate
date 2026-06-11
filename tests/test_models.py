@@ -152,10 +152,16 @@ def test_settings_roundtrip():
     s = Settings()
     s.imperial_units = False
     s.music_volume = 0.3
+    s.sapi_events = False
     s.save()
     loaded = Settings.load()
     assert loaded.imperial_units is False
     assert loaded.music_volume == 0.3
+    assert loaded.sapi_events is False
+
+
+def test_sapi_events_default_on():
+    assert Settings().sapi_events is True
 
 
 def test_settings_survive_corrupt_file():

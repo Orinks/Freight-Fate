@@ -2,6 +2,60 @@
 
 ## Unreleased
 
+### Added
+- **Separate voice for driving events.** Road events — hazard warnings,
+  collisions, weather changes, rest stop and city announcements, HOS and
+  fatigue warnings, speeding, inspections, speed callouts — now speak
+  through a dedicated Windows SAPI voice, so a screen reader reading menus
+  or echoing keystrokes can no longer cut off a "Brake now!" mid-sentence.
+  A new Settings entry, "Driving event voice" (default: separate SAPI
+  voice), switches events back to the screen reader. When SAPI is
+  unavailable, or is already the main voice, events fall back to the main
+  channel automatically.
+- **Emergency brake.** Hold B while driving for the hardest possible stop:
+  instant full application plus the spring brakes (about 1.6 times the
+  service brakes, still subject to weather grip and brake fade), with a
+  loud air-dump cue. Use it for hazards and for rest stops you would
+  otherwise overshoot. Mentioned in the tutorial, F1 controls, and the
+  manual.
+- **Roadside mechanic.** The pause menu while driving now offers "Call a
+  roadside mechanic" once damage is past 25 percent: a field patch back
+  down to 25 percent damage for a 500-dollar callout plus 110 dollars per
+  percent repaired (a steep premium over the garage). The repair takes 90
+  in-game minutes against your deadline and duty window, and the bill is
+  due even if it puts you in debt — never a dead end.
+- **Time and weather in the city.** A new city menu entry speaks the
+  clock, the time of day, the day of your career, and current conditions
+  in town (live Open-Meteo data when real weather is enabled).
+- **Sleep in any city.** A new city menu entry, "Sleep 10 hours", gives a
+  full night at your terminal: fresh hours of service, zero fatigue, and
+  the clock advances 10 hours. Previously a spent duty window followed
+  you into the city with no remedy except driving — illegally — to the
+  first rest stop of the next run.
+
+### Fixed
+- **Collision stall soft-lock.** A hard collision could stop the truck
+  while the automatic transmission was still in a high gear; the engine
+  then stalled the instant it was restarted, every time, stranding the
+  player (it read as "too damaged to start", since the same crashes also
+  max out damage). The automatic now returns to first gear whenever the
+  truck is stopped in a higher gear, and restarting after a stall recovers
+  cleanly.
+- Pressing E with a bone-dry tank no longer dead-ends on "the engine will
+  not start": the out-of-fuel roadside rescue now triggers from there too.
+- **The C key's arrival estimate was a constant.** It always assumed
+  55 miles per hour, so it never responded to how fast you were actually
+  driving. It now tracks your current speed once you are meaningfully
+  rolling (and says so), falling back to a typical highway pace while
+  parked, and names the basis either way.
+- **Abandoning a job lost the hours you drove.** The world clock snapped
+  back to the departure time while hours of service and fatigue kept the
+  accrued wear, and the freight market did not advance. The time spent on
+  the failed run now counts.
+- **Trip pacing now applies mid-trip.** Changing "Trip pacing" from the
+  pause menu's settings was silently ignored until the next delivery; the
+  active trip now picks it up immediately.
+
 ### Changed
 - **Portable saves.** Profiles and settings now live in a `saves` folder
   inside the game's own directory (next to the executable in release

@@ -30,6 +30,12 @@ GEAR_KEYS = {
 
 HAZARD_SAFE_MPH = 25.0
 
+# Roadside mechanic: a field patch, not a garage restoration.
+FIELD_REPAIR_DAMAGE_PCT = 25.0    # damage level the patch repairs down to
+MECHANIC_CALLOUT_FEE = 500.0
+MECHANIC_RATE_PER_PCT = 110.0     # premium over the garage's 85 per percent
+MECHANIC_WAIT_MIN = 90.0          # game minutes waiting for the truck to be fixed
+
 
 class DrivingState(State):
     def __init__(self, ctx, job: Job, route: Route, trip_seed: int | None = None) -> None:
@@ -198,8 +204,9 @@ class DrivingState(State):
             self._speak_weather()
         elif key == pygame.K_F1:
             self.ctx.say(
-                "Hold Up arrow to accelerate, Down arrow to brake. E engine. "
-                "Space speed. Tab full status. F fuel. "
+                "Hold Up arrow to accelerate, Down arrow to brake. "
+                "Hold B for the emergency brake, the hardest possible stop. "
+                "E engine. Space speed. Tab full status. F fuel. "
                 "C clock, deadline, and hours of service. "
                 "R route. V weather. T rest stop menu when stopped at one: "
                 "refuel, take a break, or sleep. H horn. "
@@ -225,7 +232,11 @@ class DrivingState(State):
                     self.tutorial.on_engine_started()
             else:
                 self.ctx.audio.play("ui/error")
-                self.ctx.say("The engine will not start. The fuel tank is empty.")
+                if t.fuel_gal <= 0:
+                    # never a dead end: the roadside rescue always comes
+                    self._handle_out_of_fuel()
+                else:
+                    self.ctx.say("The engine will not start.")
 
     def _manual_shift(self, gear: int) -> None:
         result = self.truck.transmission.request_gear(gear)
@@ -278,6 +289,9 @@ class DrivingState(State):
         hours_used = self.trip.game_minutes / 60.0
         remaining = self.job.deadline_game_h - hours_used
         eta = self.trip.eta_game_hours()
+        basis = ("at your current speed"
+                 if self.truck.speed_mph >= self.trip.ETA_MIN_MPH
+                 else "at a typical highway pace")
         now = f"It is {clock_text(self.trip.current_hour)}."
         hos_part = self.hos.summary(self.ctx.settings.hos_mode)
         if remaining > 0:
@@ -285,8 +299,8 @@ class DrivingState(State):
                        else "You are running behind. Keep your speed up.")
             self.ctx.say(f"{now} {hours_used:.1f} hours on the road. "
                          f"{remaining:.1f} hours until the deadline. "
-                         f"Estimated time to arrival {eta:.1f} hours. {verdict} "
-                         f"{hos_part}")
+                         f"Estimated time to arrival {eta:.1f} hours {basis}. "
+                         f"{verdict} {hos_part}")
         else:
             self.ctx.say(f"{now} You are {-remaining:.1f} hours past the deadline. "
                          f"The pay is shrinking, but finish the delivery. {hos_part}")
@@ -305,6 +319,9 @@ class DrivingState(State):
 
     def update(self, dt: float) -> None:
         t = self.truck
+        # pacing can be changed from the pause menu mid-trip; keep the trip's
+        # clock compression in step with the setting
+        self.trip.time_scale = self.ctx.settings.time_scale
         keys = pygame.key.get_pressed()
         ramp = dt * 2.2
         if keys[pygame.K_UP]:
@@ -319,6 +336,14 @@ class DrivingState(State):
             t.brake = new_brake
         else:
             t.brake = max(0.0, t.brake - ramp * 3)
+        emergency = keys[pygame.K_b]
+        if emergency:
+            # no ramp: slams to full application instantly, plus spring brakes
+            if not t.emergency_brake and t.velocity_mps > 1:
+                self.ctx.audio.play("vehicle/brake_air", volume=1.0)
+            t.throttle = 0.0
+            t.brake = 1.0
+        t.emergency_brake = emergency
         t.transmission.clutch = 1.0 if keys[pygame.K_LSHIFT] or keys[pygame.K_RSHIFT] else 0.0
 
         if t.transmission.automatic and t.engine_on:
@@ -331,8 +356,8 @@ class DrivingState(State):
         if was_on and not t.engine_on:
             self.ctx.audio.engine_stop()
             if t.stalled:
-                self.ctx.say("The engine stalled. Press E to restart, and use a "
-                             "lower gear at low speed.")
+                self.ctx.say_event("The engine stalled. Press E to restart, and "
+                                   "use a lower gear at low speed.")
             elif t.fuel_gal <= 0:
                 self._handle_out_of_fuel()
 
@@ -363,7 +388,7 @@ class DrivingState(State):
         if mode != "off":
             for message in self.hos.check_warnings(mode):
                 self.ctx.audio.play("ui/warning")
-                self.ctx.say(message, interrupt=False)
+                self.ctx.say_event(message, interrupt=False)
         self.trip.hos_violation = mode != "off" and self.hos.in_violation(mode)
 
         night = is_night(self.trip.current_hour)
@@ -374,14 +399,15 @@ class DrivingState(State):
             self._severe_said = True
             self._fatigue_cue_gm = 0.0
             self.ctx.audio.play("vehicle/rumble_strip", volume=0.8)
-            self.ctx.say("You are dangerously drowsy and drifting out of your "
-                         "lane. Sleep at the next rest stop.", interrupt=False)
+            self.ctx.say_event("You are dangerously drowsy and drifting out of "
+                               "your lane. Sleep at the next rest stop.",
+                               interrupt=False)
         elif fatigue >= hos.FATIGUE_DROWSY and not self._drowsy_said:
             self._drowsy_said = True
             self._fatigue_cue_gm = 0.0
             self.ctx.audio.play("driver/yawn", volume=0.9)
-            self.ctx.say("You are getting drowsy. Take a break or sleep at a "
-                         "rest stop.", interrupt=False)
+            self.ctx.say_event("You are getting drowsy. Take a break or sleep "
+                               "at a rest stop.", interrupt=False)
         if fatigue < hos.FATIGUE_DROWSY:
             self._drowsy_said = False
         if fatigue < hos.FATIGUE_SEVERE:
@@ -425,14 +451,15 @@ class DrivingState(State):
             mph = self.truck.speed_mph
             if abs(mph - self._last_announced_mph) >= 5 and mph > 1:
                 self._last_announced_mph = mph
-                self.ctx.say(self.ctx.settings.speed_text(mph), interrupt=False)
+                self.ctx.say_event(self.ctx.settings.speed_text(mph),
+                                   interrupt=False)
 
     def _update_hazard(self, dt: float) -> None:
         if self._hazard_deadline is None:
             return
         if self.truck.speed_mph <= HAZARD_SAFE_MPH:
             self._hazard_deadline = None
-            self.ctx.say("Hazard avoided. Well done.", interrupt=False)
+            self.ctx.say_event("Hazard avoided. Well done.", interrupt=False)
             return
         self._hazard_deadline -= dt
         if self._hazard_deadline <= 0:
@@ -440,8 +467,8 @@ class DrivingState(State):
             self.ctx.audio.play("vehicle/collision")
             severity = min(1.0, self.truck.speed_mph / 70.0)
             self.truck.apply_collision(severity)
-            self.ctx.say(f"Collision! The truck took damage. "
-                         f"Total damage {self.truck.damage_pct:.0f} percent.")
+            self.ctx.say_event(f"Collision! The truck took damage. "
+                               f"Total damage {self.truck.damage_pct:.0f} percent.")
 
     def _update_speeding(self, dt: float) -> None:
         limit, _ = self.trip.speed_limit_at(self.trip.position_mi)
@@ -451,8 +478,8 @@ class DrivingState(State):
                 self._speeding_timer = 0.0
                 self.speeding_strikes += 1
                 self.ctx.audio.play("ui/warning")
-                self.ctx.say(f"You are speeding. The limit is {limit:.0f}.",
-                             interrupt=False)
+                self.ctx.say_event(f"You are speeding. The limit is {limit:.0f}.",
+                                   interrupt=False)
         else:
             self._speeding_timer = 0.0
 
@@ -464,15 +491,15 @@ class DrivingState(State):
             # a drowsy driver reacts late: part of the window is already gone
             self._hazard_deadline = window * hos.reaction_window_mult(
                 self.ctx.profile.fatigue)
-            self.ctx.say(event.message, interrupt=True)
+            self.ctx.say_event(event.message, interrupt=True)
         elif kind == TripEventKind.INSPECTION:
             self._handle_inspection(event)
         elif kind == TripEventKind.WEATHER_CHANGE:
-            self.ctx.say(event.message, interrupt=False)
+            self.ctx.say_event(event.message, interrupt=False)
         elif kind == TripEventKind.ARRIVED:
             pass  # handled by _arrive()
         else:
-            self.ctx.say(event.message, interrupt=False)
+            self.ctx.say_event(event.message, interrupt=False)
         if kind == TripEventKind.ZONE_ENTER:
             self.ctx.audio.play("ui/notify", volume=0.7)
 
@@ -484,10 +511,10 @@ class DrivingState(State):
         p.money -= fine   # can go negative; never a game over
         p.career.reputation = max(0.0, p.career.reputation - hos.HOS_REPUTATION_HIT)
         self.ctx.audio.play("ui/error")
-        self.ctx.say(f"{event.message} You are over your hours of service. "
-                     f"Fined {fine:,.0f} dollars, and your reputation took a hit. "
-                     "Sleep 10 hours at a rest stop to reset your clock.",
-                     interrupt=True)
+        self.ctx.say_event(f"{event.message} You are over your hours of service. "
+                           f"Fined {fine:,.0f} dollars, and your reputation took "
+                           "a hit. Sleep 10 hours at a rest stop to reset your "
+                           "clock.", interrupt=True)
 
     def _try_rest_stop(self) -> None:
         stop = self.trip.nearest_stop_within()
@@ -513,9 +540,9 @@ class DrivingState(State):
         self.truck.refuel(30.0)
         self._rescue_offered = False
         self.ctx.audio.play("ui/error")
-        self.ctx.say(f"You ran out of fuel. Roadside rescue brought thirty gallons "
-                     f"for {fee:,.0f} dollars. Press E to restart the engine, and "
-                     "plan your fuel stops.")
+        self.ctx.say_event(f"You ran out of fuel. Roadside rescue brought thirty "
+                           f"gallons for {fee:,.0f} dollars. Press E to restart "
+                           "the engine, and plan your fuel stops.")
 
     def _arrive(self) -> None:
         self.ctx.replace_state(ArrivalState(self.ctx, self))
@@ -582,7 +609,8 @@ class Tutorial:
             self.ctx.say(
                 "You are rolling. Press Space anytime for your speed, Tab for a "
                 "full report, and F1 to hear all the controls. Watch for hazard "
-                "warnings, and brake hard when you hear them. Safe travels.",
+                "warnings, and brake hard when you hear them. Hold B for the "
+                "emergency brake when you need to stop fast. Safe travels.",
                 interrupt=False)
             self.ctx.profile.tutorial_done = True
             self.ctx.save_profile()
@@ -778,6 +806,11 @@ class PauseMenuState(MenuState):
         return [
             MenuItem("Resume driving", self._resume),
             MenuItem("Trip status", self._status),
+            MenuItem(self._mechanic_label, self._mechanic,
+                     help="A mobile mechanic patches the truck up enough to "
+                          "drive on. Costs much more than a garage repair, "
+                          "takes an hour and a half, and the bill is due even "
+                          "if it puts you in debt."),
             MenuItem("Settings", self._settings),
             MenuItem("Abandon job", self._abandon,
                      help="Give up this delivery. Costs five hundred dollars and "
@@ -789,6 +822,40 @@ class PauseMenuState(MenuState):
 
     def go_back(self) -> None:
         self._resume()
+
+    def _mechanic_label(self) -> str:
+        damage = self.driving.truck.damage_pct
+        if damage <= FIELD_REPAIR_DAMAGE_PCT:
+            return "Call a roadside mechanic: not needed yet"
+        repaired = damage - FIELD_REPAIR_DAMAGE_PCT
+        cost = MECHANIC_CALLOUT_FEE + repaired * MECHANIC_RATE_PER_PCT
+        return f"Call a roadside mechanic: {cost:,.0f} dollars"
+
+    def _mechanic(self) -> None:
+        d = self.driving
+        damage = d.truck.damage_pct
+        if damage <= FIELD_REPAIR_DAMAGE_PCT:
+            self.ctx.say("The truck is running well enough. A roadside mechanic "
+                         f"can help once damage is past "
+                         f"{FIELD_REPAIR_DAMAGE_PCT:.0f} percent.")
+            return
+        if d.truck.speed_mph > 3:
+            self.ctx.say("Come to a complete stop first.")
+            return
+        p = self.ctx.profile
+        repaired = damage - FIELD_REPAIR_DAMAGE_PCT
+        cost = MECHANIC_CALLOUT_FEE + repaired * MECHANIC_RATE_PER_PCT
+        p.money -= cost   # the rescue is never refused; money can go negative
+        d.truck.damage_pct = FIELD_REPAIR_DAMAGE_PCT
+        _advance_rest_clock(d, MECHANIC_WAIT_MIN)
+        d.hos.on_duty(MECHANIC_WAIT_MIN)
+        self.ctx.audio.play("ui/notify")
+        self.refresh()
+        self.ctx.say(f"A mobile mechanic patched the truck up to "
+                     f"{FIELD_REPAIR_DAMAGE_PCT:.0f} percent damage for "
+                     f"{cost:,.0f} dollars. You have {p.money:,.0f} dollars. "
+                     f"The repair took an hour and a half: it is "
+                     f"{clock_text(d.trip.current_hour)}. {_deadline_text(d)}")
 
     def _resume(self) -> None:
         self.ctx.audio.play("ui/unpause")
@@ -817,6 +884,10 @@ class PauseMenuState(MenuState):
         p.career.reputation = max(0.0, p.career.reputation - 5.0)
         p.truck_fuel_gal = self.driving.truck.fuel_gal
         p.truck_damage_pct = self.driving.truck.damage_pct
+        # the hours spent on the failed run still happened: keep the world
+        # clock consistent with the HOS and fatigue already accrued
+        p.game_hours += self.driving.trip.game_minutes / 60.0
+        p.market.advance_to(p.market_day())
         p.active_trip = None
         self.ctx.save_profile()
         self.ctx.say(f"Job abandoned. You paid a five hundred dollar penalty and "

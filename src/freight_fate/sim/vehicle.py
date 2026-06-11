@@ -16,6 +16,10 @@ from .transmission import Transmission
 G = 9.81
 AIR_DENSITY = 1.225
 
+# Full service application plus the spring brakes: the hardest stop the rig
+# can make, still scaled by weather grip and brake fade.
+EMERGENCY_BRAKE_MULT = 1.6
+
 
 @dataclass(frozen=True)
 class TruckSpecs:
@@ -47,6 +51,7 @@ class TruckState:
     throttle: float = 0.0
     brake: float = 0.0
     engine_brake: bool = False
+    emergency_brake: bool = False
 
     fuel_gal: float = 150.0
     engine_temp_c: float = 60.0
@@ -143,7 +148,9 @@ class TruckState:
         fade_temp = s.brake_fade_temp_c
         fade = (1.0 if self.brake_temp_c < fade_temp
                 else max(0.35, 1.0 - (self.brake_temp_c - fade_temp) / 400))
-        service = s.mass_kg * G * s.max_brake_decel_g * self.brake * fade * self.grip
+        application = 1.0 if self.emergency_brake else self.brake
+        boost = EMERGENCY_BRAKE_MULT if self.emergency_brake else 1.0
+        service = s.mass_kg * G * s.max_brake_decel_g * application * boost * fade * self.grip
         jake = s.engine_brake_force_n if (self.engine_brake and self.engine_on
                                           and not self.transmission.in_neutral) else 0.0
         return service + jake
@@ -210,7 +217,8 @@ class TruckState:
         target = 60.0 + (28.0 + 45.0 * load if self.engine_on else 0.0)
         self.engine_temp_c += (target - self.engine_temp_c) * 0.03 * dt
 
-        heating = self.brake * self.velocity_mps * 2.2
+        applied = 1.0 if self.emergency_brake else self.brake
+        heating = applied * self.velocity_mps * 2.2
         cooling = (self.brake_temp_c - 20.0) * (0.02 + 0.004 * self.velocity_mps)
         self.brake_temp_c = max(20.0, self.brake_temp_c + (heating - cooling) * dt)
 

@@ -170,6 +170,50 @@ def test_abandoning_clears_the_saved_trip():
         app.shutdown()
 
 
+@pytest.mark.smoke
+def test_abandoning_keeps_the_hours_spent_driving():
+    """Regression: abandoning a job snapped the world clock back to the
+    departure time, while HOS and fatigue kept the accrued hours."""
+    from freight_fate.app import App
+    from freight_fate.states.city import CityMenuState
+    from freight_fate.states.driving import PauseMenuState
+
+    app = App()
+    try:
+        driving = start_drive(app)
+        drive_some(driving)
+        before = app.ctx.profile.game_hours
+        spent = driving.trip.game_minutes / 60.0
+        assert spent > 0
+        app.state.handle_event(key_event(pygame.K_ESCAPE))
+        pause = app.state
+        assert isinstance(pause, PauseMenuState)
+        while pause.items[pause.index].text != "Abandon job":
+            pause.handle_event(key_event(pygame.K_DOWN))
+        pause.handle_event(key_event(pygame.K_RETURN))
+        assert isinstance(app.state, CityMenuState)
+        assert app.ctx.profile.game_hours == pytest.approx(before + spent)
+    finally:
+        app.shutdown()
+
+
+@pytest.mark.smoke
+def test_trip_pacing_change_applies_to_the_active_trip():
+    """Regression: changing Trip pacing from the pause menu was silently
+    ignored until the next delivery."""
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        driving = start_drive(app)
+        assert driving.trip.time_scale == app.ctx.settings.time_scale
+        app.ctx.settings.time_scale = 40.0
+        driving.update(1 / 60)
+        assert driving.trip.time_scale == 40.0
+    finally:
+        app.shutdown()
+
+
 def test_snapshot_survives_profile_roundtrip():
     from freight_fate.app import App
 

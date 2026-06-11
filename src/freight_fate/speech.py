@@ -78,6 +78,34 @@ def pick_backend(ctx, override: str | None = None):
     return None
 
 
+EVENT_BACKEND = "SAPI"
+
+
+def pick_event_backend(ctx, main_backend, name: str = EVENT_BACKEND):
+    """A second, independent voice for driving events.
+
+    Screen readers interrupt the game's speech with their own chatter, so
+    critical announcements (hazards, warnings) can be cut off mid-sentence.
+    Routing events through a dedicated SAPI voice keeps the two streams
+    from talking over each other. Returns None when the main channel
+    already is that backend (nothing to separate) or it is unusable, in
+    which case events fall back to the main channel.
+    """
+    if main_backend is None:
+        return None
+    try:
+        if main_backend.name == name:
+            return None
+    except Exception:
+        return None
+    try:
+        backend = ctx.acquire(ctx.id_of(name))
+    except Exception:
+        log.info("Event speech backend %s not available", name, exc_info=True)
+        return None
+    return backend if _usable(backend) else None
+
+
 class Speech:
     """Speech output channel for the whole game.
 
@@ -89,6 +117,7 @@ class Speech:
     def __init__(self) -> None:
         self._ctx = None
         self._backend = None
+        self._event_backend = None
         self._prism_error: type[Exception] = Exception
         if os.environ.get("FREIGHT_FATE_NO_SPEECH"):
             log.info("Speech disabled via FREIGHT_FATE_NO_SPEECH")
@@ -106,10 +135,14 @@ class Speech:
                 self._ctx = None
             else:
                 log.info("Speech backend: %s", self._backend.name)
+                self._event_backend = pick_event_backend(self._ctx, self._backend)
+                if self._event_backend is not None:
+                    log.info("Event speech backend: %s", self._event_backend.name)
         except Exception:
             log.exception("Speech unavailable; continuing silently")
             self._ctx = None
             self._backend = None
+            self._event_backend = None
 
     @property
     def available(self) -> bool:
@@ -121,6 +154,15 @@ class Speech:
             return "none"
         try:
             return self._backend.name
+        except Exception:
+            return "unknown"
+
+    @property
+    def event_backend_name(self) -> str:
+        if self._event_backend is None:
+            return "none"
+        try:
+            return self._event_backend.name
         except Exception:
             return "unknown"
 
@@ -140,18 +182,43 @@ class Speech:
             log.exception("Unexpected speech failure; disabling speech")
             self._backend = None
 
-    def stop(self) -> None:
-        """Silence any in-progress speech."""
-        if self._backend is None:
+    def say_event(self, text: str, interrupt: bool = True) -> None:
+        """Speak on the dedicated event voice (SAPI), so the player's screen
+        reader cannot talk over it; falls back to the main channel."""
+        if not text:
+            return
+        backend = self._event_backend
+        if backend is None:
+            self.say(text, interrupt)
             return
         try:
-            if self._backend.features.supports_stop:
-                self._backend.stop()
+            features = backend.features
+            if features.supports_output:
+                backend.output(text, interrupt)
+            elif features.supports_speak:
+                backend.speak(text, interrupt)
+        except self._prism_error:
+            log.warning("Event speech output failed", exc_info=True)
         except Exception:
-            pass
+            log.exception("Unexpected event speech failure; "
+                          "falling back to the main voice")
+            self._event_backend = None
+            self.say(text, interrupt)
+
+    def stop(self) -> None:
+        """Silence any in-progress speech on both channels."""
+        for backend in (self._backend, self._event_backend):
+            if backend is None:
+                continue
+            try:
+                if backend.features.supports_stop:
+                    backend.stop()
+            except Exception:
+                pass
 
     def shutdown(self) -> None:
-        """Release the backend and context. Safe to call more than once."""
+        """Release the backends and context. Safe to call more than once."""
         self.stop()
         self._backend = None
+        self._event_backend = None
         self._ctx = None

@@ -2,9 +2,12 @@
 
 from __future__ import annotations
 
+import zlib
+
 from ..data.world import Route
 from ..models.jobs import Job, JobBoard
 from ..models.trucks import TRUCK_CATALOG, UPGRADE_CATALOG, TruckModel, Upgrade
+from ..sim.hos import clock_text, time_of_day
 from .base import MenuItem, MenuState
 
 
@@ -46,6 +49,13 @@ class CityMenuState(MenuState):
                      help="Hear your level, reputation, and lifetime numbers."),
             MenuItem("Truck status", self._truck_status,
                      help="Hear fuel and damage at a glance."),
+            MenuItem("Time and weather", self._time_weather,
+                     help="Hear the clock, the day of your career, and the "
+                          "conditions outside."),
+            MenuItem("Sleep 10 hours", self._sleep,
+                     help="A full night at your terminal: fresh hours of "
+                          "service and zero fatigue. The clock advances "
+                          "10 hours."),
             MenuItem("Save game", self._save, help="Write your progress to disk."),
             MenuItem("Settings", self._settings),
             MenuItem("Quit to main menu", self._to_main_menu),
@@ -86,6 +96,42 @@ class CityMenuState(MenuState):
                      f"Fuel {fuel_pct:.0f} percent, {p.truck_fuel_gal:.0f} gallons "
                      f"of {specs.fuel_tank_gal:.0f}. "
                      f"Truck condition {condition}, {damage:.0f} percent damage.")
+
+    def _time_weather(self) -> None:
+        from ..sim.weather import WeatherSystem
+
+        p = self.ctx.profile
+        city = self.ctx.world.cities[p.current_city]
+        hour = p.game_hours % 24.0
+        day = p.market_day() + 1
+        desc, live = None, False
+        provider = self.ctx.real_weather_provider()
+        if provider is not None:
+            provider.request(city.name, city.lat, city.lon)
+            kind = provider.get(city.name)
+            if kind is not None:
+                desc, live = kind.value, True
+        if desc is None:
+            # deterministic per city and hour, so asking twice agrees
+            seed = zlib.crc32(f"{city.name}:{int(p.game_hours)}".encode())
+            desc = WeatherSystem(city.region, seed=seed).describe()
+        source = "Live weather" if live else "Weather"
+        self.ctx.say(f"It is {clock_text(hour)}, {time_of_day(hour)}, "
+                     f"day {day} of your career. "
+                     f"{source} in {p.current_city}: {desc}.")
+
+    def _sleep(self) -> None:
+        p = self.ctx.profile
+        p.game_hours += 10.0
+        p.hos.sleep()
+        p.fatigue = 0.0
+        p.market.advance_to(p.market_day())
+        self.ctx.save_profile()
+        self.ctx.audio.play("ui/notify")
+        hour = p.game_hours % 24.0
+        self.ctx.say(f"You slept 10 hours and woke rested. It is "
+                     f"{clock_text(hour)}, {time_of_day(hour)}. "
+                     "Hours of service reset.")
 
     def _save(self) -> None:
         self.ctx.save_profile()

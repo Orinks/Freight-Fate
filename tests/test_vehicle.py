@@ -67,6 +67,35 @@ def test_high_gear_launch_stalls():
     assert not t.engine_on
 
 
+def test_hard_collision_stop_does_not_stall_an_automatic():
+    """Regression: collisions used to strand the truck stopped in a high
+    gear, where the engine stalled instantly on every restart."""
+    t = make_auto_truck()
+    t.throttle = 1.0
+    drive(t, 90)
+    assert t.transmission.gear >= 8
+    for _ in range(3):
+        t.apply_collision(0.9)
+    assert t.velocity_mps < 0.5  # shoved to a crawl, box still in a high gear
+    t.throttle = 0.0
+    drive(t, 5)
+    assert t.engine_on
+    assert not t.stalled
+    assert t.transmission.gear == 1
+
+
+def test_emergency_brake_outbrakes_service_brakes():
+    a = make_auto_truck()
+    b = make_auto_truck()
+    a.velocity_mps = b.velocity_mps = 30.0
+    a.brake = b.brake = 1.0
+    b.emergency_brake = True
+    for _ in range(120):
+        a.update(1 / 60)
+        b.update(1 / 60)
+    assert b.velocity_mps < a.velocity_mps
+
+
 def test_fuel_burns_under_load_and_engine_dies_empty():
     t = make_auto_truck()
     t.fuel_gal = 0.02

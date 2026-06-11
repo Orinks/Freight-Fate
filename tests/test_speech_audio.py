@@ -3,7 +3,7 @@
 from dataclasses import dataclass, field
 
 from freight_fate.audio import ASSETS, AudioEngine
-from freight_fate.speech import Speech, pick_backend
+from freight_fate.speech import Speech, pick_backend, pick_event_backend
 
 
 @dataclass
@@ -102,12 +102,47 @@ def test_backend_without_speak_or_output_is_skipped():
     assert pick_backend(ctx).name == "SAPI"
 
 
+def test_event_channel_uses_sapi_alongside_the_screen_reader():
+    ctx = registry(nvda_running=True)
+    main = pick_backend(ctx)
+    assert main.name == "NVDA"
+    assert pick_event_backend(ctx, main).name == "SAPI"
+
+
+def test_event_channel_skipped_when_main_voice_is_already_sapi():
+    ctx = FakeContext(
+        [
+            FakeBackend("NVDA", 103, FakeFeatures(is_supported_at_runtime=False)),
+            FakeBackend("SAPI", 97),
+        ],
+        best="NVDA",
+    )
+    main = pick_backend(ctx)
+    assert main.name == "SAPI"
+    assert pick_event_backend(ctx, main) is None
+
+
+def test_event_channel_absent_when_sapi_is_unusable():
+    ctx = FakeContext(
+        [
+            FakeBackend("NVDA", 103),
+            FakeBackend("SAPI", 97, FakeFeatures(is_supported_at_runtime=False)),
+        ],
+        best="NVDA",
+    )
+    main = pick_backend(ctx)
+    assert pick_event_backend(ctx, main) is None
+    assert pick_event_backend(ctx, None) is None
+
+
 def test_speech_disabled_by_env_is_silent_and_safe():
     s = Speech()
     assert not s.available
     assert s.backend_name == "none"
+    assert s.event_backend_name == "none"
     s.say("hello")        # must not raise
     s.say("")             # empty text is fine
+    s.say_event("hazard")  # falls back to the (absent) main voice safely
     s.stop()
     s.shutdown()
     s.shutdown()          # idempotent

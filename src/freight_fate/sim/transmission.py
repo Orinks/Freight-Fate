@@ -88,6 +88,13 @@ class Transmission:
                 self._shift_timer = SHIFT_TIME
                 return self.gear
             return None
+        if not moving and self.gear > 1:
+            # Stopped (or knocked to a crawl by a collision) in a high gear:
+            # a real automatic returns to first instead of lugging until the
+            # engine dies on every restart.
+            self.gear = 1
+            self._shift_timer = SHIFT_TIME
+            return self.gear
         if rpm > AUTO_UPSHIFT_RPM and self.gear < self.num_gears:
             self.gear += 1
             self._shift_timer = SHIFT_TIME

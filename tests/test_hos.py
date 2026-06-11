@@ -227,6 +227,14 @@ def test_clock_text():
     assert clock_text(30.0) == "6 AM"
 
 
+def test_clock_text_minute_rounding_carries_the_hour():
+    # 59.99 minutes must round up to the next hour, not speak "11:60 PM",
+    # and the AM/PM flip must follow the carried hour.
+    assert clock_text(23.9999) == "12 AM"
+    assert clock_text(11.9999) == "12 PM"
+    assert clock_text(12.9999) == "1 PM"
+
+
 def make_trip(world, start_hour, seed=2, start="Atlanta", end="Dallas"):
     from freight_fate.sim import Trip, TruckState, WeatherSystem
 
@@ -444,6 +452,36 @@ def test_parking_never_full_during_the_day():
         assert not (driving.trip.current_hour >= 20 or driving.trip.current_hour < 4)
         driving.handle_event(key_event(pygame.K_t))   # 6 AM start: lot has room
         assert isinstance(app.state, RestStopState)
+    finally:
+        app.shutdown()
+
+
+@pytest.mark.smoke
+def test_city_sleep_resets_hours_and_advances_the_clock():
+    """A spent duty window used to follow you into the city with no way to
+    sleep it off short of driving (illegally) to a rest stop."""
+    from freight_fate.app import App
+    from freight_fate.states.city import CityMenuState
+    from freight_fate.states.main_menu import MainMenuState
+
+    app = App()
+    try:
+        app.push_state(MainMenuState(app.ctx))
+        while app.state.items[app.state.index].text != "New career":
+            app.state.handle_event(key_event(pygame.K_DOWN))
+        app.state.handle_event(key_event(pygame.K_RETURN))
+        app.state.handle_event(key_event(pygame.K_RETURN))  # default name
+        app.state.handle_event(key_event(pygame.K_RETURN))  # home terminal
+        assert isinstance(app.state, CityMenuState)
+        p = app.ctx.profile
+        p.hos.drive(660)          # a fully spent shift
+        p.fatigue = 75.0
+        before = p.game_hours
+        select(app.state, "Sleep 10 hours")
+        assert p.game_hours == pytest.approx(before + 10.0)
+        assert p.hos.driving_min == 0.0
+        assert p.hos.duty_min == 0.0
+        assert p.fatigue == 0.0
     finally:
         app.shutdown()
 

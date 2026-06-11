@@ -109,6 +109,22 @@ def test_time_scale_compresses_fuel_burn(world):
     assert truck.fuel_gal < truck.specs.fuel_tank_gal - 0.5
 
 
+def test_eta_tracks_current_speed(world):
+    """Regression: the C key's ETA was a constant 55 mph guess that never
+    responded to how fast you were actually going."""
+    trip, truck = make_trip(world)
+    parked = trip.eta_game_hours()
+    assert parked > 0
+    truck.velocity_mps = 31.3   # ~70 mph
+    fast = trip.eta_game_hours()
+    truck.velocity_mps = 13.4   # ~30 mph
+    slow = trip.eta_game_hours()
+    assert fast < parked < slow  # parked assumes 55 mph, between the two
+    # parked or crawling falls back to highway pace, never infinity
+    truck.velocity_mps = 0.5
+    assert trip.eta_game_hours() == parked
+
+
 def test_progress_summary_mentions_highway(world):
     trip, _ = make_trip(world)
     text = trip.progress_summary()

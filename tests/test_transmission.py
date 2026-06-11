@@ -70,6 +70,16 @@ def test_auto_engages_first_from_neutral_on_throttle():
     assert tr.auto_update(600, throttle=0.5, moving=False) == 1
 
 
+def test_auto_drops_to_first_when_stopped_in_high_gear():
+    # Regression: a collision can stop the truck while the box is still in a
+    # high gear. The automatic must return to first instead of leaving the
+    # engine to lug and stall on every restart (a soft-lock).
+    tr = Transmission(automatic=True, gear=7)
+    assert tr.auto_update(400, throttle=0.0, moving=False) == 1
+    tr.update(1.0)
+    assert tr.auto_update(600, throttle=0.0, moving=False) is None  # stays put
+
+
 def test_auto_waits_for_shift_to_finish():
     tr = Transmission(automatic=True, gear=3)
     tr.auto_update(1800, 0.8, True)

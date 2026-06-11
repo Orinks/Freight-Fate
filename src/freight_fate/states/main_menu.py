@@ -235,6 +235,8 @@ HELP_PAGES = [
     ("Driving basics", [
         "E starts and stops the engine.",
         "Hold the Up arrow to accelerate, the Down arrow to brake.",
+        "Hold B for the emergency brake: the hardest possible stop,",
+        "for hazards and rest stops you would otherwise overshoot.",
         "In automatic mode the truck shifts for itself.",
         "In manual mode, hold Left Shift for the clutch,",
         "then press 1 through 0 for gears one through ten, or N for neutral.",
@@ -253,16 +255,19 @@ HELP_PAGES = [
         "Watch your speed: limits drop in construction and traffic zones.",
         "Hazards appear without warning. When you hear Brake now,",
         "slow below twenty five miles per hour quickly to avoid a collision.",
+        "Hold B for the emergency brake when normal braking is not enough.",
         "Rest stops are announced ahead. Stop there and press T",
         "for the rest stop menu: refuel, take a break, or sleep.",
         "Fuel prices vary by region.",
         "Running out of fuel means an expensive roadside rescue.",
+        "If collisions leave the truck badly damaged, open the pause menu",
+        "and call a roadside mechanic for a pricey field repair.",
     ]),
     ("Hours and rest", [
         "You may drive eleven hours within a fourteen hour duty window,",
         "with a thirty minute break required after eight hours of driving.",
         "Spoken warnings come at two hours, one hour, and thirty minutes left.",
-        "Sleeping ten hours at a rest stop starts a fresh shift.",
+        "Sleeping ten hours at a rest stop, or in any city, starts a fresh shift.",
         "Driving past a limit risks fines at roadside inspections.",
         "Fatigue builds as you drive, faster at night. A drowsy driver",
         "yawns, drifts onto the rumble strip, and reacts late to hazards.",
@@ -369,6 +374,14 @@ class SettingsState(MenuState):
                      lambda: self._volume("music_volume", 0.1)),
             MenuItem(lambda: f"Speech verbosity: {['terse', 'normal', 'chatty'][s.speech_verbosity]}",
                      lambda: self._cycle_verbosity(1)),
+            MenuItem(lambda: ("Driving event voice: "
+                              f"{'separate SAPI voice' if s.sapi_events else 'screen reader'}"),
+                     lambda: self._toggle_sapi_events(1),
+                     help="Speaks road events such as hazards, warnings, and "
+                          "weather changes through a separate Windows SAPI "
+                          "voice, so your screen reader cannot talk over "
+                          "them. Turn off to hear everything through the "
+                          "screen reader voice."),
             MenuItem(lambda: f"Weather source: {'real world' if s.real_weather else 'simulated'}",
                      lambda: self._toggle_real_weather(1),
                      help="Real world uses live conditions for each city from "
@@ -391,7 +404,8 @@ class SettingsState(MenuState):
                    lambda d: self._volume("master_volume", 0.1 * d),
                    lambda d: self._volume("sfx_volume", 0.1 * d),
                    lambda d: self._volume("music_volume", 0.1 * d),
-                   self._cycle_verbosity, self._toggle_real_weather]
+                   self._cycle_verbosity, self._toggle_sapi_events,
+                   self._toggle_real_weather]
         if self.index < len(actions):
             actions[self.index](direction)
 
@@ -438,6 +452,10 @@ class SettingsState(MenuState):
 
     def _cycle_verbosity(self, d: int) -> None:
         self.ctx.settings.speech_verbosity = (self.ctx.settings.speech_verbosity + d) % 3
+        self._announce()
+
+    def _toggle_sapi_events(self, _d: int) -> None:
+        self.ctx.settings.sapi_events = not self.ctx.settings.sapi_events
         self._announce()
 
     def _toggle_real_weather(self, _d: int) -> None:

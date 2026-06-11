@@ -55,6 +55,17 @@ class GameContext:
     def say(self, text: str, interrupt: bool = True) -> None:
         self.speech.say(text, interrupt)
 
+    def say_event(self, text: str, interrupt: bool = True) -> None:
+        """Driving event announcements (hazards, warnings, weather, ...).
+
+        Spoken on a separate SAPI voice when the player has that enabled, so
+        a screen reader reading menus or keystrokes cannot cut them off.
+        """
+        if self.settings.sapi_events:
+            self.speech.say_event(text, interrupt)
+        else:
+            self.speech.say(text, interrupt)
+
     # -- state stack ------------------------------------------------------------
 
     def push_state(self, state: State) -> None:
