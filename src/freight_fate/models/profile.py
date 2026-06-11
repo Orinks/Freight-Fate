@@ -14,6 +14,7 @@ so a crash mid-write can never corrupt an existing profile.
 
 from __future__ import annotations
 
+import contextlib
 import json
 import os
 import shutil
@@ -56,10 +57,9 @@ def _migrate_legacy(target: Path) -> None:
     legacy = _legacy_data_dir()
     if target.exists() or not legacy.is_dir():
         return
-    try:
+    # never block startup on a migration; old saves stay where they are
+    with contextlib.suppress(OSError):
         shutil.copytree(legacy, target)
-    except OSError:
-        pass  # never block startup on a migration; old saves stay where they are
 
 
 def data_dir() -> Path:

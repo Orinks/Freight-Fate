@@ -38,7 +38,8 @@ jobs:
     steps:
       - uses: actions/checkout@v6
         with:
-          ref: ${{ startsWith(github.ref, 'refs/tags/') && github.ref || 'main' }}
+          # nightlies snapshot the dev branch; stable releases build the tag
+          ref: ${{ startsWith(github.ref, 'refs/tags/') && github.ref || 'dev' }}
           fetch-depth: 0
 
       - name: Check build conditions
@@ -59,7 +60,7 @@ jobs:
             echo "tag=nightly-$(date -u +%Y%m%d)" >> $GITHUB_OUTPUT
             echo "version=$VERSION" >> $GITHUB_OUTPUT
           else
-            # Scheduled developer snapshot from main - only when something
+            # Scheduled developer snapshot from dev - only when something
             # user-facing changed since the previous snapshot.
             echo "is_nightly=true" >> $GITHUB_OUTPUT
             echo "tag=nightly-$(date -u +%Y%m%d)" >> $GITHUB_OUTPUT
@@ -100,7 +101,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6
         with:
-          ref: ${{ needs.prepare.outputs.is_nightly == 'true' && 'main' || github.ref }}
+          ref: ${{ needs.prepare.outputs.is_nightly == 'true' && 'dev' || github.ref }}
           fetch-depth: 0
 
       - name: Install uv
@@ -142,7 +143,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6
         with:
-          ref: ${{ needs.prepare.outputs.is_nightly == 'true' && 'main' || github.ref }}
+          ref: ${{ needs.prepare.outputs.is_nightly == 'true' && 'dev' || github.ref }}
           fetch-depth: 0
 
       - uses: actions/download-artifact@v7
@@ -178,7 +179,7 @@ jobs:
             gh release delete "$TAG" -y --cleanup-tag 2>/dev/null || true
             gh release create "$TAG" assets/* --notes-file notes.md \
               --title "Developer snapshot $(date -u +%Y-%m-%d)" \
-              --prerelease --target main
+              --prerelease --target dev
           else
             if gh release view "$TAG" &>/dev/null; then
               gh release upload "$TAG" assets/* --clobber
