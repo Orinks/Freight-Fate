@@ -44,9 +44,36 @@ visual display mirrors all speech for sighted players and helpers.
   F1 help everywhere, on-demand information keys while driving, and three
   speech verbosity levels.
 
-## Installation
+## Download and play
 
-Requires Python 3.10+ and [uv](https://docs.astral.sh/uv/).
+The easiest way to play is a prebuilt portable build from the
+[releases page](https://github.com/Orinks/Freight-fate/releases):
+
+- **Stable releases** (`v1.5.0` and so on) are the finished, numbered
+  versions — pick the latest one.
+- **Developer snapshots** (`nightly-...`, marked pre-release) are automatic
+  nightly builds of work in progress: new features sooner, rough edges
+  included.
+
+Download the archive for your platform, extract it anywhere, and run the
+game from the extracted `FreightFate` folder — `FreightFate.exe` on
+Windows, `FreightFate` on macOS and Linux. There is nothing to install,
+and saves live in your user data folder, not the game folder. The game
+checks for newer releases at the main menu and can download, install, and
+restart itself; switch between stable and snapshot updates in Settings
+under "Update channel".
+
+## Run from source
+
+You need two tools installed and on your PATH:
+
+- [uv](https://docs.astral.sh/uv/getting-started/installation/) — manages
+  Python and all dependencies for you (it downloads a suitable Python
+  automatically, so a system Python is not required).
+- [git](https://git-scm.com/downloads) — required even after cloning,
+  because one dependency (`sound_lib`) installs straight from a git
+  repository. If `uv sync` fails resolving `sound_lib`, a missing git is
+  almost always why.
 
 ```bash
 git clone https://github.com/Orinks/Freight-fate.git
@@ -55,8 +82,33 @@ uv sync
 uv run freight-fate
 ```
 
-On Linux you may need SDL and Speech Dispatcher development packages
-(`libsdl2`, `speech-dispatcher`).
+On Linux you also need SDL and Speech Dispatcher packages from your
+distribution (for example `libsdl2-2.0-0` and `speech-dispatcher` on
+Debian/Ubuntu).
+
+## Build a standalone copy
+
+`tools/build_release.py` produces the same portable build that the
+releases page ships, using PyInstaller:
+
+```bash
+uv sync --group build
+uv run python tools/build_release.py
+```
+
+This freezes the game into `dist/FreightFate/`, boots it once as a smoke
+check, and archives it as `dist/FreightFate-<version>-windows-portable.zip`
+(or `-macos.zip` / `-linux-x64.tar.gz`). Useful flags:
+
+- `--skip-smoke` — skip booting the frozen build (for cross-checking on
+  headless machines).
+- `--tag <label>` — override the version label in the archive name, as the
+  nightly workflow does.
+
+If the build succeeds but the archive seems to vanish on Windows, check
+your antivirus: freshly built unsigned PyInstaller executables are
+sometimes quarantined on sight. Add an exclusion for the `dist/` folder or
+restore the file from quarantine.
 
 ## Controls
 
