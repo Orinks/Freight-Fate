@@ -1,7 +1,13 @@
 """Player profile with atomic JSON save/load.
 
-Profiles live in the per-user data directory (override with the
-``FREIGHT_FATE_DATA_DIR`` environment variable, which the tests use).
+Freight Fate is portable: profiles and settings live in a ``saves``
+directory inside the game's own main directory — next to the executable
+in frozen builds, the project root when running from source. Nothing is
+written to per-user system folders. Override the location with the
+``FREIGHT_FATE_DATA_DIR`` environment variable (which the tests use).
+Saves from older versions, which lived in the per-user data directory,
+are migrated over automatically on first run.
+
 Saves are atomic: written to a temp file, then renamed over the old save,
 so a crash mid-write can never corrupt an existing profile.
 """
@@ -10,6 +16,7 @@ from __future__ import annotations
 
 import json
 import os
+import shutil
 import sys
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
@@ -22,11 +29,11 @@ SAVE_VERSION = 3
 STARTING_MONEY = 5_000.0
 DEFAULT_CITY = "Chicago"
 
+_legacy_checked = False
 
-def data_dir() -> Path:
-    override = os.environ.get("FREIGHT_FATE_DATA_DIR")
-    if override:
-        return Path(override)
+
+def _legacy_data_dir() -> Path:
+    """Where saves lived before the portable layout (per-user folders)."""
     if sys.platform == "win32":
         base = Path(os.environ.get("APPDATA", Path.home()))
     elif sys.platform == "darwin":
@@ -34,6 +41,37 @@ def data_dir() -> Path:
     else:
         base = Path(os.environ.get("XDG_DATA_HOME", Path.home() / ".local" / "share"))
     return base / "FreightFate"
+
+
+def game_root() -> Path:
+    """The game's main directory: the executable's directory when frozen,
+    the project root when running from source."""
+    if getattr(sys, "frozen", False):
+        return Path(sys.executable).resolve().parent
+    return Path(__file__).resolve().parents[3]
+
+
+def _migrate_legacy(target: Path) -> None:
+    """One-time copy of an old per-user save folder into the portable one."""
+    legacy = _legacy_data_dir()
+    if target.exists() or not legacy.is_dir():
+        return
+    try:
+        shutil.copytree(legacy, target)
+    except OSError:
+        pass  # never block startup on a migration; old saves stay where they are
+
+
+def data_dir() -> Path:
+    override = os.environ.get("FREIGHT_FATE_DATA_DIR")
+    if override:
+        return Path(override)
+    global _legacy_checked
+    portable = game_root() / "saves"
+    if not _legacy_checked:
+        _legacy_checked = True
+        _migrate_legacy(portable)
+    return portable
 
 
 def profiles_dir() -> Path:
