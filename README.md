@@ -58,9 +58,12 @@ The easiest way to play is a prebuilt portable build from the
 Download the archive for your platform, extract it anywhere, and run the
 game from the extracted `FreightFate` folder — `FreightFate.exe` on
 Windows, `FreightFate` on macOS and Linux. There is nothing to install,
-and saves live in your user data folder, not the game folder. The game
-checks for newer releases at the main menu and can download, install, and
-restart itself; switch between stable and snapshot updates in Settings
+and the game is truly portable: your saves and settings live in a `saves`
+folder inside the game folder, so you can move or copy the whole folder
+(USB stick included) and your career travels with it. The game checks for
+newer releases at the main menu and can download, install, and restart
+itself — updates replace only the game's own files and never touch the
+`saves` folder. Switch between stable and snapshot updates in Settings
 under "Update channel".
 
 ## Run from source

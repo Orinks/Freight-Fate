@@ -1,5 +1,6 @@
 """Update discovery, channel resolution, notes flattening, apply scripts."""
 
+import sys
 from pathlib import Path
 
 from freight_fate import updater
@@ -148,6 +149,12 @@ def test_write_apply_script_waits_for_pid_and_relaunches(tmp_path):
     assert str(new_root) in text
     assert "FreightFate" in text
     assert script.parent == tmp_path  # outside the staging dir it deletes
+    # portable saves live inside the install folder; the swap must not
+    # touch them (Windows excludes the dir, POSIX never purges the root)
+    if sys.platform == "win32":
+        assert "/XD _internal saves" in text
+    assert "/PURGE" not in text
+    assert f"rm -rf \"{install}\"" not in text
 
 
 # -- settings -----------------------------------------------------------------

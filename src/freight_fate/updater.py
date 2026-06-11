@@ -279,13 +279,15 @@ if not errorlevel 1 (
   goto wait
 )
 robocopy "{src}\\_internal" "{dst}\\_internal" /MIR /R:10 /W:1 >NUL
-robocopy "{src}" "{dst}" /R:10 /W:1 >NUL
+robocopy "{src}" "{dst}" /E /XD _internal saves /R:10 /W:1 >NUL
 start "" "{dst}\\{exe}"
 rmdir /s /q "{staging}"
 del "%~f0"
 """
 
 _POSIX_SCRIPT = """#!/bin/sh
+# the release archive never contains a saves folder, so the player's
+# portable saves under {dst}/saves survive the copy untouched
 while kill -0 {pid} 2>/dev/null; do sleep 1; done
 rm -rf "{dst}/_internal"
 cp -a "{src}/." "{dst}/"
