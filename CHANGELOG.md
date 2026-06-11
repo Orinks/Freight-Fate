@@ -1,5 +1,15 @@
 # Changelog
 
+## Unreleased
+
+### Changed
+- **Portable saves.** Profiles and settings now live in a `saves` folder
+  inside the game's own directory (next to the executable in release
+  builds, the project root from source) instead of the per-user data
+  directory. Existing saves are migrated over automatically on first
+  launch; the originals are left in place. `FREIGHT_FATE_DATA_DIR`
+  still overrides the location.
+
 ## 1.5.0 — 2026-06-10
 
 "On the Clock": hours of service, fatigue, day and night, and overnight

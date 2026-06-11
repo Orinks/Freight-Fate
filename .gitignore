@@ -32,3 +32,6 @@ live_*.txt
 
 # Release packaging
 tools/_entry.py
+
+# Portable save data (lives in the game directory)
+saves/
