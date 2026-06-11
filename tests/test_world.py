@@ -112,6 +112,50 @@ def test_legs_are_sane_and_unique(world):
         seen.add(pair)
 
 
+def leg_terrain(world, a, b):
+    route = world.route_from_cities([a, b])
+    assert route is not None, f"no direct leg {a}-{b}"
+    return route.legs[0].terrain
+
+
+def test_famous_corridors_have_real_terrain(world):
+    """Pin well-known trucking geography so it cannot drift back to flat.
+
+    Each entry names the grade or landform that earns the label.
+    """
+    expected = {
+        # the legendary grades
+        ("Nashville", "Atlanta"): "mountain",       # I-24 Monteagle Mountain
+        ("Knoxville", "Nashville"): "mountain",     # I-40 Cumberland Plateau
+        ("Charlotte", "Knoxville"): "mountain",     # I-40 Pigeon River Gorge
+        ("Philadelphia", "Pittsburgh"): "mountain",  # PA Turnpike Alleghenies
+        ("Baltimore", "Pittsburgh"): "mountain",    # Sideling Hill country
+        ("Sacramento", "Reno"): "mountain",         # I-80 Donner Pass
+        ("Denver", "Albuquerque"): "mountain",      # I-25 Raton Pass
+        ("Boise", "Portland"): "mountain",          # I-84 Cabbage Hill
+        ("Spokane", "Seattle"): "mountain",         # I-90 Snoqualmie Pass
+        ("Spokane", "Boise"): "mountain",           # US-95 White Bird grade
+        # honest rolling country
+        ("St. Louis", "Kansas City"): "hills",      # I-70 Missouri River hills
+        ("Wichita", "Kansas City"): "hills",        # I-35 Flint Hills
+        ("Oklahoma City", "Dallas"): "hills",       # I-35 Arbuckle Mountains
+        ("Memphis", "Nashville"): "hills",          # I-40 Highland Rim
+        ("Milwaukee", "Minneapolis"): "hills",      # I-94 driftless coulees
+        ("New York", "Boston"): "hills",            # I-95 rolling Connecticut
+        ("Richmond", "Raleigh"): "hills",           # I-85 piedmont
+        ("Phoenix", "Los Angeles"): "hills",        # I-10 San Gorgonio Pass
+        ("Amarillo", "Albuquerque"): "hills",       # I-40 Clines Corners climb
+        # genuinely flat country stays flat
+        ("Kansas City", "Denver"): "flat",          # I-70 across the high plains
+        ("Chicago", "St. Louis"): "flat",           # I-55 Illinois prairie
+        ("New Orleans", "Houston"): "flat",         # I-10 Gulf coastal plain
+        ("Omaha", "Cheyenne"): "flat",              # I-80 Platte River valley
+        ("Jacksonville", "Miami"): "flat",          # I-95 Florida coast
+    }
+    for (a, b), terrain in expected.items():
+        assert leg_terrain(world, a, b) == terrain, f"{a}-{b}"
+
+
 def test_dijkstra_connects_every_city_pair(world):
     names = world.city_names()
     for start in names:

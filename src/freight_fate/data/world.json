@@ -1487,7 +1487,7 @@
       "to": "Boston",
       "miles": 215,
       "highway": "I-95",
-      "terrain": "flat",
+      "terrain": "hills",
       "stops": [
         "Milford Travel Plaza",
         "Charlton Service Area"
@@ -1508,7 +1508,7 @@
       "to": "Pittsburgh",
       "miles": 305,
       "highway": "I-76",
-      "terrain": "hills",
+      "terrain": "mountain",
       "stops": [
         "Sideling Hill Plaza",
         "New Stanton Plaza"
@@ -1561,7 +1561,7 @@
       "to": "Atlanta",
       "miles": 250,
       "highway": "I-24",
-      "terrain": "hills",
+      "terrain": "mountain",
       "stops": [
         "Monteagle Mountain Stop",
         "Dalton Travel Center"
@@ -1603,7 +1603,7 @@
       "to": "Kansas City",
       "miles": 248,
       "highway": "I-70",
-      "terrain": "flat",
+      "terrain": "hills",
       "stops": [
         "Columbia Midway Plaza"
       ]
@@ -1658,7 +1658,7 @@
       "to": "Los Angeles",
       "miles": 373,
       "highway": "I-10",
-      "terrain": "flat",
+      "terrain": "hills",
       "stops": [
         "Quartzsite Fuel Plaza",
         "Palm Springs Oasis"
@@ -1714,7 +1714,7 @@
       "to": "Dallas",
       "miles": 780,
       "highway": "I-20",
-      "terrain": "flat",
+      "terrain": "hills",
       "stops": [
         "Birmingham Freight Stop",
         "Jackson Travel Plaza",
@@ -1813,7 +1813,7 @@
       "to": "Pittsburgh",
       "miles": 250,
       "highway": "I-70",
-      "terrain": "hills",
+      "terrain": "mountain",
       "stops": [
         "Breezewood Interchange",
         "South Mountain Stop"
@@ -1834,7 +1834,7 @@
       "to": "Raleigh",
       "miles": 170,
       "highway": "I-85",
-      "terrain": "flat",
+      "terrain": "hills",
       "stops": [
         "Petersburg Fuel Stop"
       ]
@@ -1876,7 +1876,7 @@
       "to": "Savannah",
       "miles": 250,
       "highway": "I-77",
-      "terrain": "flat",
+      "terrain": "hills",
       "stops": [
         "Columbia Midlands Stop"
       ]
@@ -1896,7 +1896,7 @@
       "to": "Atlanta",
       "miles": 250,
       "highway": "I-16",
-      "terrain": "flat",
+      "terrain": "hills",
       "stops": [
         "Macon Crossroads"
       ]
@@ -2010,7 +2010,7 @@
       "to": "Nashville",
       "miles": 210,
       "highway": "I-40",
-      "terrain": "flat",
+      "terrain": "hills",
       "stops": [
         "Jackson Tennessee Plaza"
       ]
@@ -2124,7 +2124,7 @@
       "to": "Tucson",
       "miles": 315,
       "highway": "I-10",
-      "terrain": "flat",
+      "terrain": "hills",
       "stops": [
         "Las Cruces Crossing",
         "Willcox Plaza"
@@ -2145,7 +2145,7 @@
       "to": "Nashville",
       "miles": 180,
       "highway": "I-40",
-      "terrain": "hills",
+      "terrain": "mountain",
       "stops": [
         "Cookeville Plateau Stop"
       ]
@@ -2276,7 +2276,7 @@
       "to": "Minneapolis",
       "miles": 337,
       "highway": "I-94",
-      "terrain": "flat",
+      "terrain": "hills",
       "stops": [
         "Wisconsin Dells Stop",
         "Eau Claire Fuel Plaza"
@@ -2307,7 +2307,7 @@
       "to": "Kansas City",
       "miles": 195,
       "highway": "I-35",
-      "terrain": "flat",
+      "terrain": "hills",
       "stops": [
         "Bethany Square Stop"
       ]
@@ -2371,7 +2371,7 @@
       "to": "Dallas",
       "miles": 207,
       "highway": "I-35",
-      "terrain": "flat",
+      "terrain": "hills",
       "stops": [
         "Ardmore Arbuckle Stop"
       ]
@@ -2411,7 +2411,7 @@
       "to": "Kansas City",
       "miles": 250,
       "highway": "US-69",
-      "terrain": "flat",
+      "terrain": "hills",
       "stops": [
         "Big Cabin Truck Plaza"
       ]
@@ -2421,7 +2421,7 @@
       "to": "Kansas City",
       "miles": 200,
       "highway": "I-35",
-      "terrain": "flat",
+      "terrain": "hills",
       "stops": [
         "Emporia Flint Hills Stop"
       ]
@@ -2431,7 +2431,7 @@
       "to": "Albuquerque",
       "miles": 290,
       "highway": "I-40",
-      "terrain": "flat",
+      "terrain": "hills",
       "stops": [
         "Santa Rosa Blue Hole Stop"
       ]
@@ -2589,7 +2589,7 @@
       "to": "Boise",
       "miles": 425,
       "highway": "US-95",
-      "terrain": "hills",
+      "terrain": "mountain",
       "stops": [
         "Lewiston Grade Stop"
       ]

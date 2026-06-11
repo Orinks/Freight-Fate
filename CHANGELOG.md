@@ -74,6 +74,19 @@
   active trip now picks it up immediately.
 
 ### Changed
+- **Real terrain on real highways.** A geography audit corrected 20 of
+  the 106 legs. The famous grades are now mountains: Monteagle on I-24
+  (Nashville-Atlanta), the Cumberland Plateau on I-40
+  (Knoxville-Nashville), the Pennsylvania Turnpike's Allegheny crossings
+  (Philadelphia-Pittsburgh and Baltimore-Pittsburgh), and US-95's Idaho
+  canyon country (Spokane-Boise). Rolling country stopped pretending to
+  be flat: I-70's Missouri River hills, the Flint Hills and Arbuckles on
+  I-35, Tennessee's Highland Rim on I-40, Wisconsin's driftless coulees
+  on I-94, the Carolinas' piedmont, Connecticut on I-95, and the desert
+  passes on I-10 (San Gorgonio, Texas Canyon) among others. Genuinely
+  flat country — the high plains, the Gulf coast, Florida, the Illinois
+  prairie — stays flat, and a regression test pins the well-known
+  corridors by name.
 - **Realistic deadlines.** Dispatch can no longer ask for the
   impossible. Deadlines are now built from the hours a law-abiding
   trucker actually needs — driving at an achievable 55 mph average, plus
