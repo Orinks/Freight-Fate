@@ -21,6 +21,7 @@ dependencies = [
     "pygame>=2.6",
     "prismatoid>=0.16",
     "numpy>=1.26",
+    "certifi>=2024.7.4",
     "sound_lib @ git+https://github.com/samtupy/sound_lib_macos_fixes.git",
 ]
 

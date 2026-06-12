@@ -31,6 +31,8 @@ from dataclasses import dataclass
 from functools import lru_cache
 from pathlib import Path
 
+from .net import ssl_context
+
 log = logging.getLogger(__name__)
 
 REPO = "Orinks/Freight-fate"
@@ -110,7 +112,7 @@ def _api_get(path: str):
         API_BASE + path,
         headers={"User-Agent": USER_AGENT, "Accept": "application/vnd.github+json"},
     )
-    with urllib.request.urlopen(req, timeout=TIMEOUT) as resp:
+    with urllib.request.urlopen(req, timeout=TIMEOUT, context=ssl_context()) as resp:
         return json.load(resp)
 
 
@@ -229,7 +231,8 @@ def download(info: UpdateInfo, dest_dir: Path, progress=None,
     dest = dest_dir / info.asset_name
     req = urllib.request.Request(info.asset_url, headers={"User-Agent": USER_AGENT})
     done = 0
-    with urllib.request.urlopen(req, timeout=TIMEOUT) as resp, open(dest, "wb") as f:
+    with urllib.request.urlopen(req, timeout=TIMEOUT,
+                                context=ssl_context()) as resp, open(dest, "wb") as f:
         total = int(resp.headers.get("Content-Length") or info.asset_size or 0)
         while True:
             if cancelled is not None and cancelled.is_set():

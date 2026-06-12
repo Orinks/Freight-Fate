@@ -191,8 +191,33 @@ class App:
         pygame.quit()
 
 
+def _configure_logging() -> None:
+    """Console logging from source; a fresh log file in the packaged game.
+
+    The windowed build has no console, so without a file every warning --
+    update failures especially -- vanishes. The log lives next to the saves
+    (game folder, saves/game.log) where a player can find and share it.
+    """
+    level = os.environ.get("FREIGHT_FATE_LOG", "WARNING")
+    handlers = None
+    from . import updater
+
+    if updater.is_frozen():
+        from .models.profile import data_dir
+
+        try:
+            log_path = data_dir() / "game.log"
+            log_path.parent.mkdir(parents=True, exist_ok=True)
+            handlers = [logging.FileHandler(log_path, mode="w", encoding="utf-8")]
+        except OSError:
+            pass  # unwritable disk: console-only is the best we can do
+    logging.basicConfig(
+        level=level, handlers=handlers,
+        format="%(asctime)s %(levelname)s %(name)s: %(message)s")
+
+
 def main() -> int:
-    logging.basicConfig(level=os.environ.get("FREIGHT_FATE_LOG", "WARNING"))
+    _configure_logging()
     smoke = "--smoke" in sys.argv[1:]   # CI: boot, render a few frames, exit 0
     try:
         App().run(max_frames=5 if smoke else None)

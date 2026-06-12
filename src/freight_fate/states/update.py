@@ -13,7 +13,7 @@ import threading
 
 import pygame
 
-from .. import __version__, updater
+from .. import __version__, net, updater
 from .base import MenuItem, MenuState, State
 
 log = logging.getLogger(__name__)
@@ -36,8 +36,9 @@ class UpdateChecker:
         try:
             self.result = updater.check_for_update(channel, __version__, build)
         except Exception as e:  # offline, rate-limited, GitHub down...
-            log.info("Update check failed: %s", e)
-            self.error = "Could not reach the update server."
+            log.warning("Update check failed: %r", e)
+            self.error = ("Could not reach the update server. "
+                          + net.describe_error(e))
         finally:
             self.done.set()
 
@@ -65,7 +66,7 @@ class UpdateCheckState(State):
         if c is None or not c.done.is_set() or self.message:
             return
         if c.error:
-            self.message = c.error + " Check your internet connection and try again."
+            self.message = c.error + " Try again in a little while."
         elif c.result is None:
             self.message = f"You are up to date. Freight Fate version {__version__}."
         else:
@@ -209,9 +210,9 @@ class UpdateDownloadState(State):
         except updater.UpdateCancelled:
             pass
         except Exception as e:
-            log.warning("Update download failed: %s", e)
-            self.error = ("The download failed. Check your internet "
-                          "connection and try again later.")
+            log.warning("Update download failed: %r", e)
+            self.error = (f"The download failed. {net.describe_error(e)} "
+                          "Try again later.")
         finally:
             self.done.set()
 

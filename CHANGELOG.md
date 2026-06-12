@@ -60,6 +60,20 @@
   first rest stop of the next run.
 
 ### Fixed
+- **Updater connections on macOS and Linux.** The packaged game's Python
+  runtime looks for certificate authorities at paths that only exist on
+  the build machine, so on macOS and Linux every secure connection — the
+  update check, the download, and the real-weather fetch (which silently
+  fell back to simulated weather) — could fail certificate verification.
+  The game now ships its own certificate bundle (certifi) and uses it
+  alongside the system store on every connection.
+- **Update errors now say what went wrong.** "Could not reach the update
+  server" covered everything from a dropped connection to a blocked DNS
+  lookup. The check and download now speak the actual reason — "The
+  secure connection could not be verified", "The server answered with
+  error 403", "The server address could not be found", and so on. The
+  packaged game also writes a session log to saves/game.log, so a
+  player can share the full error when reporting a problem.
 - **Hazard warnings were unbeatable at highway speed.** The reaction
   window was a fixed 3 to 4.5 seconds, but a full-service stop from 65
   to the safe 25 miles per hour takes about 5 — even the emergency brake

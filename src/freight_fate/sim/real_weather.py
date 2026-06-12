@@ -20,6 +20,7 @@ import urllib.parse
 import urllib.request
 from collections.abc import Callable
 
+from ..net import ssl_context
 from .weather import WeatherKind
 
 log = logging.getLogger(__name__)
@@ -74,7 +75,8 @@ def _default_fetch(lat: float, lon: float) -> tuple[int, float]:
         f"{API_URL}?{params}",
         headers={"User-Agent": "FreightFate/1.1 (accessible trucking game)"},
     )
-    with urllib.request.urlopen(req, timeout=FETCH_TIMEOUT_S) as resp:
+    with urllib.request.urlopen(req, timeout=FETCH_TIMEOUT_S,
+                                context=ssl_context()) as resp:
         data = json.loads(resp.read().decode("utf-8"))
     current = data["current"]
     return int(current["weather_code"]), float(current.get("wind_speed_10m", 0.0))
