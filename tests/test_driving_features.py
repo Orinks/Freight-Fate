@@ -159,3 +159,83 @@ def test_cruise_control_requires_road_speed_and_cancels_on_hazard():
         assert driving._cruise_mph is None
     finally:
         app.shutdown()
+
+
+# -- hazard reaction windows ---------------------------------------------------
+
+
+def clear_weather(driving):
+    """Pin the trip's weather to clear so grip stays 1.0 for the whole test."""
+    from freight_fate.sim.weather import WeatherKind
+
+    weather = driving.trip.weather
+    weather.provider = None
+    weather.live = False
+    weather.current = WeatherKind.CLEAR
+    weather.minutes_until_change = 1e9
+
+
+@pytest.mark.smoke
+def test_hazard_deadline_covers_braking_time_from_current_speed():
+    """A fixed 3-4.5 s window was unbeatable at highway speed: a full-service
+    stop from 65 to 25 mph alone takes ~5 s. The deadline must be the braking
+    time from the current speed plus the rolled reaction slack."""
+    from freight_fate.app import App
+    from freight_fate.sim.trip import TripEvent, TripEventKind
+    from freight_fate.states.driving import G, HAZARD_SAFE_MPH, MPH_PER_MPS
+
+    app = App()
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        t = driving.truck
+        t.velocity_mps = 29.0          # ~65 mph
+        t.grip, t.grade = 1.0, 0.0
+        hazard = TripEvent(TripEventKind.HAZARD, "Brake now!", {"deadline_s": 3.0})
+        driving._handle_trip_event(hazard)
+        brake_s = ((t.speed_mph - HAZARD_SAFE_MPH) / MPH_PER_MPS
+                   / (G * t.specs.max_brake_decel_g))
+        assert driving._hazard_deadline == pytest.approx(brake_s + 3.0, abs=0.01)
+        assert driving._hazard_deadline > 7.5
+    finally:
+        app.shutdown()
+
+
+@pytest.mark.smoke
+def test_service_brakes_beat_a_highway_hazard_after_human_reaction(monkeypatch):
+    """The taught response -- hear the warning, hold Down -- must succeed from
+    highway speed even with a slow human reaction, without the emergency brake."""
+    from freight_fate.app import App
+    from freight_fate.sim.trip import TripEvent, TripEventKind
+
+    app = App()
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        clear_weather(driving)
+        t = driving.truck
+        t.transmission.gear = 10
+        t.velocity_mps = 29.0          # ~65 mph
+        damage_before = t.damage_pct
+
+        held = set()
+
+        class FakeKeys:
+            def __getitem__(self, key):
+                return key in held
+
+        monkeypatch.setattr(pygame.key, "get_pressed", lambda: FakeKeys())
+
+        hazard = TripEvent(TripEventKind.HAZARD, "Brake now!", {"deadline_s": 3.0})
+        driving._handle_trip_event(hazard)
+        for _ in range(int(60 * 1.5)):      # hearing the warning: no input yet
+            driving.update(1 / 60)
+        held.add(pygame.K_DOWN)             # then service brakes only
+        for _ in range(60 * 20):
+            driving.update(1 / 60)
+            if driving._hazard_deadline is None:
+                break
+        assert driving._hazard_deadline is None
+        assert t.damage_pct == damage_before    # avoided, not collided
+    finally:
+        app.shutdown()

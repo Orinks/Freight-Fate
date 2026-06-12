@@ -359,8 +359,11 @@ class Trip:
         self._hazard_check_mi = self._rng.uniform(20, 60)
         if self._rng.random() < self._hazard_risk():
             hazard = self._rng.choice(hazard_choices(self.current_region))
+            # Lead with the action: the player can be on the brakes before
+            # the sentence finishes. deadline_s is the reaction slack on top
+            # of the braking time the driving state computes from speed.
             self._emit(TripEventKind.HAZARD,
-                       f"Caution: {hazard}! Brake now!",
+                       f"Brake now! {hazard[0].upper()}{hazard[1:]}.",
                        deadline_s=self._rng.uniform(3.0, 4.5))
 
     def _check_inspections(self, moved_mi: float) -> None:

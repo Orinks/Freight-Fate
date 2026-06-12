@@ -60,6 +60,18 @@
   first rest stop of the next run.
 
 ### Fixed
+- **Hazard warnings were unbeatable at highway speed.** The reaction
+  window was a fixed 3 to 4.5 seconds, but a full-service stop from 65
+  to the safe 25 miles per hour takes about 5 — even the emergency brake
+  could not make it once you add the time to hear the warning. The
+  deadline is now the braking time the truck actually needs from its
+  current speed (on the current surface and grade) plus the rolled
+  reaction window, so hitting the brakes promptly always succeeds — in
+  rain or snow you get the longer stop those surfaces really take.
+  Drowsiness now eats into the reaction part only instead of the whole
+  window, since a tired driver reacts late but the truck stops no
+  slower. Warnings also lead with "Brake now!" instead of ending with
+  it, so you can be on the brakes before the sentence finishes.
 - **Collision stall soft-lock.** A hard collision could stop the truck
   while the automatic transmission was still in a high gear; the engine
   then stalled the instant it was restarted, every time, stranding the

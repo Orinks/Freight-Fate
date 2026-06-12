@@ -17,7 +17,7 @@ from ..models.jobs import CARGO_CATALOG, Job
 from ..sim import hos
 from ..sim.hos import HosClock, clock_text, is_night, time_of_day
 from ..sim.trip import Trip, TripEventKind
-from ..sim.vehicle import TruckState
+from ..sim.vehicle import G, TruckState
 from ..sim.weather import WeatherSystem
 from .base import MenuItem, MenuState, State
 
@@ -29,6 +29,7 @@ GEAR_KEYS = {
 }
 
 HAZARD_SAFE_MPH = 25.0
+MPH_PER_MPS = 2.23694
 
 # Roadside mechanic: a field patch, not a garage restoration.
 FIELD_REPAIR_DAMAGE_PCT = 25.0    # damage level the patch repairs down to
@@ -480,6 +481,18 @@ class DrivingState(State):
                 self.ctx.say_event(self.ctx.settings.speed_text(mph),
                                    interrupt=False)
 
+    def _brake_budget_s(self) -> float:
+        """Seconds of full service braking to reach the hazard-safe speed.
+
+        Uses the truck's rated deceleration on the current surface, helped
+        uphill and hurt downhill, so a warning at 65 in the snow allows the
+        stop it actually takes there.
+        """
+        t = self.truck
+        over_mps = max(0.0, (t.speed_mph - HAZARD_SAFE_MPH) / MPH_PER_MPS)
+        decel = G * (t.specs.max_brake_decel_g * t.grip + t.grade)
+        return over_mps / max(decel, 0.5)
+
     def _update_hazard(self, dt: float) -> None:
         if self._hazard_deadline is None:
             return
@@ -519,10 +532,15 @@ class DrivingState(State):
             if self._cruise_mph is not None:
                 self._cancel_cruise()   # hands back on the wheel to brake
             self.ctx.audio.play("ui/warning")
-            window = event.data.get("deadline_s", 4.0)
-            # a drowsy driver reacts late: part of the window is already gone
-            self._hazard_deadline = window * hos.reaction_window_mult(
-                self.ctx.profile.fatigue)
+            # The deadline is braking physics plus reaction slack. The physics
+            # part is whatever full service brakes need from the current speed
+            # on this surface; the rolled window covers hearing the warning and
+            # getting on the pedal, and fatigue eats into that part only --
+            # a drowsy driver reacts late, but the truck stops no slower.
+            slack = event.data.get("deadline_s", 4.0)
+            self._hazard_deadline = (
+                self._brake_budget_s()
+                + slack * hos.reaction_window_mult(self.ctx.profile.fatigue))
             self.ctx.say_event(event.message, interrupt=True)
         elif kind == TripEventKind.INSPECTION:
             self._handle_inspection(event)
