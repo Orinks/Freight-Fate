@@ -1,5 +1,7 @@
 """Home terminal picker: default city, region labels, and the new-career flow."""
 
+import os
+
 import pygame
 
 
@@ -84,9 +86,55 @@ def test_existing_profiles_never_see_the_picker():
     try:
         Profile(name="Veteran", current_city="Denver").save()
         app.push_state(MainMenuState(app.ctx))
-        while app.state.items[app.state.index].text != "Continue":
+        while not app.state.items[app.state.index].text.startswith("Continue latest career"):
             app.state.handle_event(key_event(pygame.K_DOWN))
         app.state.handle_event(key_event(pygame.K_RETURN))
         assert app.ctx.profile.current_city == "Denver"
+    finally:
+        app.shutdown()
+
+
+def test_choose_career_loads_an_older_save_without_deleting_the_newest():
+    from freight_fate.app import App
+    from freight_fate.models.profile import Profile
+    from freight_fate.states.city import CityMenuState
+    from freight_fate.states.main_menu import LoadDriverState, MainMenuState
+
+    app = App()
+    try:
+        older = Profile(name="Veteran", current_city="Denver", money=12345.0)
+        older.career.xp = 1200.0
+        older.career.deliveries = 7
+        older_path = older.save()
+        newer = Profile(name="Rookie", current_city="Atlanta", money=5000.0)
+        newer_path = newer.save()
+        os.utime(older_path, (1_700_000_000, 1_700_000_000))
+        os.utime(newer_path, (1_800_000_000, 1_800_000_000))
+
+        app.push_state(MainMenuState(app.ctx))
+        labels = [item.text for item in app.state.items]
+        assert labels[0].startswith("Continue latest career: Rookie")
+        assert "Choose career" in labels
+
+        while app.state.items[app.state.index].text != "Choose career":
+            app.state.handle_event(key_event(pygame.K_DOWN))
+        app.state.handle_event(key_event(pygame.K_RETURN))
+        assert isinstance(app.state, LoadDriverState)
+
+        rows = [item.text for item in app.state.items]
+        assert rows[0].startswith("Rookie: level 1")
+        assert rows[1].startswith("Veteran: level 2")
+        assert "12,345 dollars" in rows[1]
+        assert "in Denver" in rows[1]
+        assert "7 deliveries" in rows[1]
+        assert "last saved" in rows[1]
+
+        while not app.state.items[app.state.index].text.startswith("Veteran:"):
+            app.state.handle_event(key_event(pygame.K_DOWN))
+        app.state.handle_event(key_event(pygame.K_RETURN))
+        assert isinstance(app.state, CityMenuState)
+        assert app.ctx.profile.name == "Veteran"
+        assert app.ctx.profile.current_city == "Denver"
+        assert newer_path.exists()
     finally:
         app.shutdown()

@@ -2,6 +2,9 @@
 
 from __future__ import annotations
 
+from datetime import datetime
+from pathlib import Path
+
 import pygame
 
 from .. import __version__, updater
@@ -14,6 +17,11 @@ from .update import UpdateChecker, UpdateCheckState, UpdatePromptState
 
 def enter_world(ctx) -> None:
     """Resume a saved mid-trip delivery if there is one, else the city hub."""
+    ctx.push_state(_world_entry_state(ctx))
+
+
+def _world_entry_state(ctx) -> State:
+    """Build the first playable state for the current profile."""
     from .city import CityMenuState
     from .driving import DrivingState
 
@@ -21,10 +29,46 @@ def enter_world(ctx) -> None:
     if p.active_trip:
         state = DrivingState.from_snapshot(ctx, p.active_trip)
         if state is not None:
-            ctx.push_state(state)
-            return
+            return state
         p.active_trip = None  # unreadable snapshot; do not retry every load
-    ctx.push_state(CityMenuState(ctx))
+    return CityMenuState(ctx)
+
+
+def _loadable_saves() -> list[tuple[Path, Profile]]:
+    """Return readable saves in newest-first order."""
+    saves = []
+    for path in Profile.list_saves():
+        try:
+            saves.append((path, Profile.load(path)))
+        except Exception:
+            continue
+    return saves
+
+
+def _career_location(profile: Profile) -> str:
+    destination = (profile.active_trip or {}).get("job", {}).get("destination")
+    if destination:
+        return f"on the road to {destination}"
+    return f"in {profile.current_city}"
+
+
+def _saved_label(path: Path) -> str:
+    stamp = datetime.fromtimestamp(path.stat().st_mtime)
+    hour = stamp.hour % 12 or 12
+    am_pm = "AM" if stamp.hour < 12 else "PM"
+    return f"{stamp:%b} {stamp.day}, {stamp.year} at {hour}:{stamp.minute:02d} {am_pm}"
+
+
+def _career_summary(path: Path, profile: Profile, *, include_saved: bool = True) -> str:
+    parts = [
+        f"{profile.name}: level {profile.career.level}",
+        f"{profile.money:,.0f} dollars",
+        _career_location(profile),
+        f"{profile.career.deliveries} deliveries",
+    ]
+    if include_saved:
+        parts.append(f"last saved {_saved_label(path)}")
+    return ", ".join(parts)
 
 
 class MainMenuState(MenuState):
@@ -60,13 +104,16 @@ class MainMenuState(MenuState):
 
     def build_items(self) -> list[MenuItem]:
         items: list[MenuItem] = []
-        saves = Profile.list_saves()
+        saves = _loadable_saves()
         if saves:
-            items.append(MenuItem("Continue", self._continue,
-                                  help="Load your most recent driver profile."))
-            if len(saves) > 1:
-                items.append(MenuItem("Load driver", self._load_menu,
-                                      help="Choose between saved driver profiles."))
+            latest_path, latest_profile = saves[0]
+            items.append(MenuItem(
+                f"Continue latest career: "
+                f"{_career_summary(latest_path, latest_profile, include_saved=False)}",
+                self._continue,
+                help=f"Load the newest save for {latest_profile.name}."))
+            items.append(MenuItem("Choose career", self._load_menu,
+                                  help="Choose any saved career instead of only the newest one."))
         items.append(MenuItem("New career", self._new_game,
                               help="Start a fresh trucking career."))
         items.append(MenuItem("How to play", self._help,
@@ -82,8 +129,12 @@ class MainMenuState(MenuState):
         self.ctx.say("Press Enter on Quit to exit the game.")
 
     def _continue(self) -> None:
-        path = Profile.list_saves()[0]
-        self.ctx.profile = Profile.load(path)
+        saves = _loadable_saves()
+        if not saves:
+            self.ctx.say("No saved careers found.")
+            self.refresh()
+            return
+        self.ctx.profile = saves[0][1]
         p = self.ctx.profile
         if p.active_trip:
             self.ctx.say(f"Welcome back, {p.name}.", interrupt=True)
@@ -106,29 +157,25 @@ class MainMenuState(MenuState):
 
 
 class LoadDriverState(MenuState):
-    title = "Load driver"
+    title = "Choose career"
+    intro_help = ("Use up and down arrows to choose a saved career. Enter loads "
+                  "the selected career. Escape goes back.")
 
     def build_items(self) -> list[MenuItem]:
         items = []
-        for path in Profile.list_saves():
-            try:
-                profile = Profile.load(path)
-            except Exception:
-                continue
-            destination = (profile.active_trip or {}).get("job", {}).get("destination")
-            where = (f"on the road to {destination}" if destination
-                     else f"in {profile.current_city}")
-            label = (f"{profile.name}: level {profile.career.level}, "
-                     f"{profile.money:,.0f} dollars, {where}")
-            items.append(MenuItem(label, lambda p=profile: self._pick(p)))
+        for path, profile in _loadable_saves():
+            label = _career_summary(path, profile)
+            items.append(MenuItem(
+                label,
+                lambda p=profile: self._pick(p),
+                help=f"Load {profile.name}, {_career_location(profile)}."))
         items.append(MenuItem("Back", self.go_back))
         return items
 
     def _pick(self, profile: Profile) -> None:
         self.ctx.profile = profile
         self.ctx.say(f"Welcome back, {profile.name}.")
-        self.ctx.pop_state()
-        enter_world(self.ctx)
+        self.ctx.replace_state(_world_entry_state(self.ctx))
 
 
 class NameEntryState(State):

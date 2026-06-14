@@ -77,7 +77,7 @@ def test_save_and_quit_then_continue_resumes_the_trip():
         assert p.active_trip["position_mi"] == position
 
         # Continue from the main menu must land back in the drive
-        while app.state.items[app.state.index].text != "Continue":
+        while not app.state.items[app.state.index].text.startswith("Continue latest career"):
             app.state.handle_event(key_event(pygame.K_DOWN))
         app.state.handle_event(key_event(pygame.K_RETURN))
         assert isinstance(app.state, DrivingState)
@@ -109,7 +109,7 @@ def test_resumed_trip_does_not_replay_passed_announcements():
         driving = start_drive(app)
         drive_some(driving)
         quit_to_menu(app)
-        while app.state.items[app.state.index].text != "Continue":
+        while not app.state.items[app.state.index].text.startswith("Continue latest career"):
             app.state.handle_event(key_event(pygame.K_DOWN))
         app.state.handle_event(key_event(pygame.K_RETURN))
         resumed = app.state
@@ -134,7 +134,7 @@ def test_delivery_clears_the_saved_trip():
         drive_some(driving)
         quit_to_menu(app)
         assert app.ctx.profile.active_trip is not None
-        while app.state.items[app.state.index].text != "Continue":
+        while not app.state.items[app.state.index].text.startswith("Continue latest career"):
             app.state.handle_event(key_event(pygame.K_DOWN))
         app.state.handle_event(key_event(pygame.K_RETURN))
         resumed = app.state
