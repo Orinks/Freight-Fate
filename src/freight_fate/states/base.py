@@ -89,6 +89,13 @@ class MenuState(State):
     def speak_current(self) -> None:
         self.ctx.say(self.current_text())
 
+    def current_help(self) -> str:
+        if not self.items:
+            return self.intro_help
+        item = self.items[self.index]
+        item_help = item.help or f"Select {item.text}."
+        return f"{self.intro_help} {item_help}".strip()
+
     def move(self, delta: int) -> None:
         if not self.items:
             return
@@ -130,8 +137,7 @@ class MenuState(State):
         elif key == pygame.K_ESCAPE:
             self.go_back()
         elif key == pygame.K_F1:
-            item_help = self.items[self.index].help if self.items else ""
-            self.ctx.say(f"{self.intro_help} {item_help}".strip())
+            self.ctx.say(self.current_help())
         elif event.unicode and event.unicode.isalnum():
             self._first_letter_jump(event.unicode.lower())
 

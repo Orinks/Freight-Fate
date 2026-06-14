@@ -149,8 +149,14 @@ def test_garage_upgrade_and_truck_purchase_flow():
             shop.handle_event(key_event(pygame.K_DOWN))
         shop.handle_event(key_event(pygame.K_RETURN))
         assert p.upgrades.get("engine_tune") == 1
+        from freight_fate.models.profile import Profile
+
+        reloaded = Profile.load(p.path)
+        assert reloaded.upgrades.get("engine_tune") == 1
         shop.handle_event(key_event(pygame.K_RETURN))
         assert p.upgrades.get("engine_tune") == 2
+        reloaded = Profile.load(p.path)
+        assert reloaded.upgrades.get("engine_tune") == 2
         money_after_tiers = p.money
         shop.handle_event(key_event(pygame.K_RETURN))
         assert p.upgrades.get("engine_tune") == 2
@@ -173,6 +179,9 @@ def test_garage_upgrade_and_truck_purchase_flow():
         assert p.truck == "heavy_hauler"
         assert "heavy_hauler" in p.owned_trucks
         assert p.money == money_before - 52_000.0
+        reloaded = Profile.load(p.path)
+        assert reloaded.truck == "heavy_hauler"
+        assert "heavy_hauler" in reloaded.owned_trucks
         assert "currently driving" in trucks.items[trucks.index].text
 
         # switch back to the standard rig (already owned, no charge)
@@ -182,6 +191,8 @@ def test_garage_upgrade_and_truck_purchase_flow():
         trucks.handle_event(key_event(pygame.K_RETURN))
         assert p.truck == "rig"
         assert p.money == money_before
+        reloaded = Profile.load(p.path)
+        assert reloaded.truck == "rig"
     finally:
         app.shutdown()
 

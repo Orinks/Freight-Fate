@@ -625,3 +625,37 @@ def test_settings_menu_cycles_hours_of_service():
         assert app.ctx.settings.hos_mode == "off"
     finally:
         app.shutdown()
+
+
+def test_settings_menu_saves_each_change():
+    from freight_fate.app import App
+    from freight_fate.settings import Settings
+    from freight_fate.states.main_menu import SettingsState
+
+    app = App()
+    try:
+        state = SettingsState(app.ctx)
+        app.push_state(state)
+        assert app.ctx.settings.imperial_units is True
+        state.handle_event(key_event(pygame.K_RETURN))
+        assert app.ctx.settings.imperial_units is False
+        assert Settings.load().imperial_units is False
+    finally:
+        app.shutdown()
+
+
+def test_settings_menu_f1_has_help_for_every_item():
+    from freight_fate.app import App
+    from freight_fate.states.main_menu import SettingsState
+
+    app = App()
+    try:
+        state = SettingsState(app.ctx)
+        app.push_state(state)
+        for i, item in enumerate(state.items):
+            state.index = i
+            text = state.current_help()
+            assert item.text in text or item.help
+            assert len(text) > len(state.intro_help)
+    finally:
+        app.shutdown()

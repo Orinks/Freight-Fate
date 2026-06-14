@@ -176,7 +176,8 @@ class WeatherSystem:
 
     def forecast(self, segments: int = 3) -> list[WeatherKind]:
         """Probable conditions ahead (informational, not binding)."""
-        rng = random.Random(self._rng.random())
+        rng = random.Random()
+        rng.setstate(self._rng.getstate())
         out: list[WeatherKind] = []
         cur = self.current
         for _ in range(segments):

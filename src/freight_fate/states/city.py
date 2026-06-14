@@ -57,8 +57,11 @@ class CityMenuState(MenuState):
                           "service and zero fatigue. The clock advances "
                           "10 hours."),
             MenuItem("Save game", self._save, help="Write your progress to disk."),
-            MenuItem("Settings", self._settings),
-            MenuItem("Quit to main menu", self._to_main_menu),
+            MenuItem("Settings", self._settings,
+                     help="Change units, transmission, volumes, weather, "
+                          "voices, update channel, and trip pacing."),
+            MenuItem("Quit to main menu", self._to_main_menu,
+                     help="Save your career and return to the title menu."),
         ]
         return items
 
@@ -169,7 +172,8 @@ class GarageState(MenuState):
                           "less drag, a bigger tank, stronger brakes."),
             MenuItem("Trucks", self._trucks,
                      help="Buy a new truck, or switch between trucks you own."),
-            MenuItem("Back", self.go_back),
+            MenuItem("Back", self.go_back,
+                     help="Return to the city menu."),
         ]
 
     def _region(self) -> str:

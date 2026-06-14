@@ -214,6 +214,55 @@ def test_trip_pacing_change_applies_to_the_active_trip():
         app.shutdown()
 
 
+@pytest.mark.smoke
+def test_weather_source_change_applies_to_the_active_trip(monkeypatch):
+    """Regression: the pause-menu setting changed the label, but the current
+    drive kept using the old weather source until the next job."""
+    from freight_fate.app import App
+
+    class Provider:
+        def request(self, city, lat, lon):
+            pass
+
+        def get(self, city):
+            return None
+
+    provider = Provider()
+    app = App()
+    try:
+        driving = start_drive(app)
+        assert driving.weather.provider is None
+        monkeypatch.setattr(app.ctx, "real_weather_provider", lambda: provider)
+
+        app.ctx.settings.real_weather = True
+        driving.update(1 / 60)
+        assert driving.weather.provider is provider
+
+        driving.weather.live = True
+        app.ctx.settings.real_weather = False
+        driving.update(1 / 60)
+        assert driving.weather.provider is None
+        assert driving.weather.live is False
+    finally:
+        app.shutdown()
+
+
+@pytest.mark.smoke
+def test_arrival_summary_calls_out_early_delivery_bonus():
+    from freight_fate.app import App
+    from freight_fate.states.driving import ArrivalState
+
+    app = App()
+    try:
+        driving = start_drive(app)
+        driving.trip.game_minutes = driving.job.deadline_game_h * 30.0
+        arrival = ArrivalState(app.ctx, driving)
+        assert any("Early delivery bonus" in part
+                   for part in arrival.summary_parts)
+    finally:
+        app.shutdown()
+
+
 def test_snapshot_survives_profile_roundtrip():
     from freight_fate.app import App
 

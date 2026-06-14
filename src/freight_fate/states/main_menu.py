@@ -72,7 +72,8 @@ class MainMenuState(MenuState):
         items.append(MenuItem("How to play", self._help,
                               help="Learn the controls and the goal of the game."))
         items.append(MenuItem("Settings", self._settings,
-                              help="Units, transmission mode, volumes, and pacing."))
+                              help="Units, transmission mode, volumes, weather, "
+                                   "voices, update channel, and trip pacing."))
         items.append(MenuItem("Quit", self.ctx.quit, help="Exit the game."))
         return items
 
@@ -379,11 +380,17 @@ class SettingsState(MenuState):
         s = self.ctx.settings
         return [
             MenuItem(lambda: f"Units: {'imperial, miles' if s.imperial_units else 'metric, kilometers'}",
-                     lambda: self._toggle_units(1)),
+                     lambda: self._toggle_units(1),
+                     help="Switch distance and speed readouts between miles "
+                          "and kilometers."),
             MenuItem(lambda: f"Transmission: {'automatic' if s.automatic_transmission else 'manual'}",
-                     lambda: self._toggle_transmission(1)),
+                     lambda: self._toggle_transmission(1),
+                     help="Automatic shifts for you. Manual uses clutch and "
+                          "number keys while driving."),
             MenuItem(lambda: f"Trip pacing: {self._pace_label()}",
-                     lambda: self._cycle_pace(1)),
+                     lambda: self._cycle_pace(1),
+                     help="Controls how quickly game time and distance pass "
+                          "during a drive."),
             MenuItem(lambda: f"Hours of service: {s.hos_mode}",
                      lambda: self._cycle_hos(1),
                      help="Realistic enforces 11 hours of driving, a 14 hour "
@@ -391,13 +398,18 @@ class SettingsState(MenuState):
                           "Relaxed makes every limit 25 percent longer. "
                           "Off disables enforcement entirely."),
             MenuItem(lambda: f"Master volume: {round(s.master_volume * 100)} percent",
-                     lambda: self._volume("master_volume", 0.1)),
+                     lambda: self._volume("master_volume", 0.1),
+                     help="Overall game volume. Use Left and Right arrows "
+                          "for smaller adjustments."),
             MenuItem(lambda: f"Sound effects volume: {round(s.sfx_volume * 100)} percent",
-                     lambda: self._volume("sfx_volume", 0.1)),
+                     lambda: self._volume("sfx_volume", 0.1),
+                     help="Engine, road, weather, menu, and alert sounds."),
             MenuItem(lambda: f"Music volume: {round(s.music_volume * 100)} percent",
-                     lambda: self._volume("music_volume", 0.1)),
+                     lambda: self._volume("music_volume", 0.1),
+                     help="Background music volume."),
             MenuItem(lambda: f"Speech verbosity: {['terse', 'normal', 'chatty'][s.speech_verbosity]}",
-                     lambda: self._cycle_verbosity(1)),
+                     lambda: self._cycle_verbosity(1),
+                     help="Controls how often driving status reminders speak."),
             MenuItem(lambda: ("Driving event voice: "
                               f"{'separate SAPI voice' if s.sapi_events else 'screen reader'}"),
                      lambda: self._toggle_sapi_events(1),
@@ -420,7 +432,8 @@ class SettingsState(MenuState):
                           "rough edges."),
             MenuItem("Check for updates", self._check_updates,
                      help="Look for a new version of the game right now."),
-            MenuItem("Back", self.go_back),
+            MenuItem("Back", self.go_back,
+                     help="Save settings and return to the previous menu."),
         ]
 
     def handle_event(self, event: pygame.event.Event) -> None:
@@ -448,6 +461,7 @@ class SettingsState(MenuState):
 
     def _announce(self) -> None:
         self.refresh()
+        self.ctx.settings.save()
         self.ctx.audio.play("ui/menu_select")
         self.speak_current()
 

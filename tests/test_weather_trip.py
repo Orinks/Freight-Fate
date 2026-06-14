@@ -42,6 +42,17 @@ def test_forecast_returns_requested_segments():
     assert len(ws.forecast(3)) == 3
 
 
+def test_forecast_does_not_regenerate_weather_timeline():
+    """Pressing V speaks a forecast; it must not change future weather."""
+    with_forecast = WeatherSystem("midwest", seed=9)
+    untouched = WeatherSystem("midwest", seed=9)
+    for _ in range(5):
+        assert len(with_forecast.forecast(2)) == 2
+    for _ in range(80):
+        assert with_forecast.update(10.0) == untouched.update(10.0)
+    assert with_forecast.current is untouched.current
+
+
 def make_trip(world, start="Chicago", end="Indianapolis", **kwargs):
     route = world.route_options(start, end)[0]
     truck = TruckState()

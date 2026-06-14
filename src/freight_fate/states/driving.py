@@ -60,6 +60,7 @@ class DrivingState(State):
         self.start_damage = profile.truck_damage_pct
         region = ctx.world.cities[job.origin].region
         self.weather = WeatherSystem(region, provider=ctx.real_weather_provider())
+        self._weather_source_real = ctx.settings.real_weather
         self.trip = Trip(route, self.truck, self.weather,
                          time_scale=ctx.settings.time_scale, seed=self.trip_seed,
                          start_hour=profile.game_hours % 24.0)
@@ -346,6 +347,7 @@ class DrivingState(State):
         # pacing can be changed from the pause menu mid-trip; keep the trip's
         # clock compression in step with the setting
         self.trip.time_scale = self.ctx.settings.time_scale
+        self._sync_weather_source()
         keys = pygame.key.get_pressed()
         ramp = dt * 2.2
         if keys[pygame.K_UP]:
@@ -467,6 +469,17 @@ class DrivingState(State):
             audio.play_music("open_road", fade_ms=4000)
         if self.weather.should_thunder():
             audio.play("weather/thunder", volume=0.9)
+
+    def _sync_weather_source(self) -> None:
+        real = self.ctx.settings.real_weather
+        if real == self._weather_source_real:
+            return
+        self._weather_source_real = real
+        self.weather.provider = self.ctx.real_weather_provider() if real else None
+        if not real:
+            self.weather.live = False
+        self.ctx.audio.set_weather(self.weather.effects.sound)
+        self.ctx.audio.set_wind(self.weather.effects.wind)
 
     def _update_announcements(self, dt: float) -> None:
         if self.ctx.settings.speech_verbosity == 0:
@@ -950,14 +963,18 @@ class PauseMenuState(MenuState):
 
     def build_items(self) -> list[MenuItem]:
         return [
-            MenuItem("Resume driving", self._resume),
-            MenuItem("Trip status", self._status),
+            MenuItem("Resume driving", self._resume,
+                     help="Return to the active delivery."),
+            MenuItem("Trip status", self._status,
+                     help="Hear cargo, destination, route progress, and time used."),
             MenuItem(self._mechanic_label, self._mechanic,
                      help="A mobile mechanic patches the truck up enough to "
                           "drive on. Costs much more than a garage repair, "
                           "takes an hour and a half, and the bill is due even "
                           "if it puts you in debt."),
-            MenuItem("Settings", self._settings),
+            MenuItem("Settings", self._settings,
+                     help="Change units, transmission, volumes, weather, "
+                          "voices, update channel, and trip pacing."),
             MenuItem("Abandon job", self._abandon,
                      help="Give up this delivery. Costs five hundred dollars and "
                           "reputation, and returns you to the origin city."),
@@ -1070,6 +1087,7 @@ class ArrivalState(MenuState):
         hours = d.trip.game_minutes / 60.0
         trip_damage = max(0.0, d.truck.damage_pct - d.start_damage)
         pay = job.payout(hours, trip_damage)
+        early_bonus = max(0.0, pay - job.payout(job.deadline_game_h, trip_damage))
         if d.speeding_strikes:
             fine = min(400.0, 80.0 * d.speeding_strikes)
             pay = max(0.0, pay - fine)
@@ -1091,6 +1109,9 @@ class ArrivalState(MenuState):
             f"{'on time' if on_time else 'late'}. "
             f"It is {clock_text(p.game_hours)}. "
             f"You earned {pay:,.0f} dollars and now have {p.money:,.0f}."))
+        if early_bonus >= 1.0:
+            self.summary_parts.append(
+                f"Early delivery bonus: {early_bonus:,.0f} dollars.")
         if trip_damage > 1:
             self.summary_parts.append(
                 f"The cargo run added {trip_damage:.0f} percent truck damage. "
