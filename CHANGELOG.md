@@ -16,6 +16,11 @@
   facility as an actual stop in the workflow instead of flavor text. After
   accepting a load, you check in at the listed facility, load only while
   stopped, then plan the loaded trip to the destination.
+- **Company terminal dispatch flow.** New careers and continued drives now
+  frame the service-area hub as a company terminal or yard instead of a
+  generic city spawn. Dispatches start with a local deadhead move from the
+  terminal to the shipper, and delivery settlement parks the truck at the
+  destination area's terminal or yard for the next assignment.
 - **Destination facility docking.** Deliveries no longer settle just
   because the truck reached the destination city. The game now warns at
   speed, keeps you in control until a full stop, opens a facility menu
@@ -34,6 +39,16 @@
   and brake to a stop, and the rest stop menu opens by itself. The ramp
   is off the highway: hazards and speeding checks pause while you are on
   it. Pressing T while stopped on the highway at a stop still works.
+- **Explicit highway stop positions.** Route data now stores named highway
+  amenities with explicit mile positions instead of spreading rest stops
+  evenly across a leg. The first curated offline seed uses sourced rest
+  areas and travel centers, validates stop positions, and keeps the game
+  playable without live map lookups.
+- **Reverse gear and missed-stop recovery.** Trucks can now back up.
+  Automatic players can hold Down while stopped to reverse slowly, then
+  touch Up to brake and return to forward drive; manual players can press
+  the clutch and Backspace for reverse. If you miss a rest stop, slow
+  down, back up carefully, stop, and press T.
 - **Cruise control.** K sets cruise at your current speed, matching common
   highway driving expectations, and holds it with a slow throttle governor
   through grades.
