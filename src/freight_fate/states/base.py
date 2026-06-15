@@ -58,6 +58,7 @@ class MenuState(State):
 
     title = "Menu"
     intro_help = "Use up and down arrows to navigate, Enter to select, Escape to go back."
+    open_sound_key = "ui/menu_open"
 
     def __init__(self, ctx: GameContext) -> None:
         super().__init__(ctx)
@@ -70,7 +71,7 @@ class MenuState(State):
     def enter(self) -> None:
         self.items = self.build_items()
         self.index = min(self.index, max(0, len(self.items) - 1))
-        self.ctx.audio.play("ui/menu_open")
+        self.ctx.audio.play(self.open_sound_key)
         self.announce_entry()
 
     def announce_entry(self) -> None:

@@ -88,6 +88,7 @@ class DrivingState(State):
         self._cruise_mph: float | None = None
         self._cruise_throttle = 0.0
         self._arrival_stop_said = False
+        self._arrival_full_stop_said = False
         self._arrival_menu_open = False
         self._status_text = "Press E to start the engine."
 
@@ -727,8 +728,11 @@ class DrivingState(State):
         self.ctx.replace_state(ArrivalState(self.ctx, self))
 
     def _handle_arrival_gate(self) -> None:
-        if self.truck.speed_mph <= DELIVERY_PARK_MPH:
+        if self.truck.speed_mph <= DOCKING_MAX_MPH:
             self._open_facility_arrival()
+            return
+        if self.truck.speed_mph <= DELIVERY_PARK_MPH:
+            self._handle_arrival_creep()
             return
         if self._arrival_stop_said:
             return
@@ -738,9 +742,21 @@ class DrivingState(State):
         self._set_status("Destination reached: slow down and park to deliver.")
         self.ctx.say_event(
             f"Destination facility ahead: {self._destination_facility_text()}. "
-            f"Slow below {DELIVERY_PARK_MPH:.0f} miles per hour and park to "
-            "complete the delivery.",
+            f"Slow below {DELIVERY_PARK_MPH:.0f} miles per hour, then come "
+            "to a full stop to open the facility menu.",
             interrupt=True)
+
+    def _handle_arrival_creep(self) -> None:
+        if self._arrival_full_stop_said:
+            return
+        self._arrival_full_stop_said = True
+        self._cancel_cruise()
+        self.ctx.audio.play("ui/notify", volume=0.7)
+        self._set_status("Destination gate reached: come to a full stop to dock.")
+        self.ctx.say_event(
+            f"You are at {self._destination_facility_text()}. Hold the brake "
+            "and come to a full stop; the facility menu opens when stopped.",
+            interrupt=False)
 
     def _open_facility_arrival(self) -> None:
         if self._arrival_menu_open:
@@ -1126,8 +1142,10 @@ class PauseMenuState(MenuState):
 
 class FacilityArrivalState(MenuState):
     title = "Destination facility"
+    open_sound_key = "facility/dock_gate"
     intro_help = ("Use up and down arrows to navigate, Enter to select. "
-                  "Dock and deliver completes the delivery.")
+                  "Check paperwork reviews the estimate. Dock and deliver "
+                  "completes the delivery.")
 
     def __init__(self, ctx, driving: DrivingState) -> None:
         super().__init__(ctx)
@@ -1148,6 +1166,10 @@ class FacilityArrivalState(MenuState):
             MenuItem("Dock and deliver", self._dock,
                      help="Back into the assigned dock, set the brakes, and "
                           "hand off the paperwork to complete this delivery."),
+            MenuItem("Check paperwork", self._paperwork,
+                     help="Review estimated pay, deadline, cargo condition, "
+                          "and any late or damage considerations without "
+                          "settling the delivery."),
             MenuItem("Check arrival status", self._status,
                      help="Hear the destination facility, cargo, speed, and "
                           "delivery instruction again."),
@@ -1166,6 +1188,29 @@ class FacilityArrivalState(MenuState):
             f"Docked at {self.facility}. Trailer secured and paperwork signed.",
             interrupt=True)
         d._arrive()
+
+    def _paperwork(self) -> None:
+        d = self.driving
+        job = d.job
+        hours = d.trip.game_minutes / 60.0
+        remaining = job.deadline_game_h - hours
+        trip_damage = max(0.0, d.truck.damage_pct - d.start_damage)
+        estimated_pay = job.payout(hours, trip_damage)
+        timing = (f"{remaining:.1f} hours remain before the deadline"
+                  if remaining >= 0
+                  else f"{-remaining:.1f} hours past the deadline")
+        if trip_damage > 1:
+            cargo_condition = (
+                f"Damage consideration: this run added {trip_damage:.0f} "
+                "percent truck damage, which may reduce final pay.")
+        else:
+            cargo_condition = "Cargo condition: no new damage recorded."
+        self.ctx.say(
+            f"Paperwork for {self.facility}: {job.weight_tons:.0f} tons of "
+            f"{job.cargo.label}. Rate sheet lists {job.pay:,.0f} dollars; "
+            f"current estimated payout is {estimated_pay:,.0f} dollars. "
+            f"{timing}. {cargo_condition} Dock and deliver when ready; "
+            "checking paperwork does not settle the load.")
 
     def _status(self) -> None:
         d = self.driving

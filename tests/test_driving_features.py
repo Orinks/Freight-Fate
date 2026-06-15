@@ -134,7 +134,7 @@ def test_delivery_requires_parking_at_destination(monkeypatch):
 
         assert isinstance(app.state, DrivingState)
         assert "Destination facility ahead" in events[-1]
-        assert "park to complete the delivery" in events[-1]
+        assert "full stop to open the facility menu" in events[-1]
         assert "slow down and park" in driving.lines()[-1]
 
         driving.truck.velocity_mps = 0.0
@@ -154,33 +154,59 @@ def test_delivery_requires_parking_at_destination(monkeypatch):
 
 
 @pytest.mark.smoke
-def test_docking_requires_a_full_stop(monkeypatch):
+def test_facility_menu_waits_for_full_stop(monkeypatch):
     from freight_fate.app import App
     from freight_fate.states.driving import DrivingState, FacilityArrivalState
 
     app = App()
+    events = []
+    played = []
     spoken = []
-    monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: spoken.append(text))
+    monkeypatch.setattr(app.ctx, "say_event",
+                        lambda text, interrupt=True: events.append(text))
+    monkeypatch.setattr(app.ctx, "say",
+                        lambda text, interrupt=True: spoken.append(text))
+    monkeypatch.setattr(app.ctx.audio, "play",
+                        lambda key, volume=1.0: played.append((key, volume)))
     try:
         driving = start_drive(app)
         quiet_trip(driving)
+        spoken.clear()
+        played.clear()
         driving.trip.finished = True
         driving.trip.position_mi = driving.trip.total_miles
         driving.truck.velocity_mps = 1.1   # about 2.5 mph: parked, not docked
 
         driving.update(1 / 60)
-        assert isinstance(app.state, FacilityArrivalState)
+        assert isinstance(app.state, DrivingState)
+        assert app.ctx.profile.career.deliveries == 0
+        assert "facility menu opens when stopped" in events[-1]
+        assert "full stop to dock" in driving.lines()[-1]
+        assert played[-1][0] == "ui/notify"
 
+        driving.truck.velocity_mps = 0.0
+        driving.update(1 / 60)
+
+        assert isinstance(app.state, FacilityArrivalState)
+        assert played[-1][0] == "facility/dock_gate"
+        assert all(key != "ui/menu_open" for key, _volume in played)
+        assert [item.text for item in app.state.items] == [
+            "Dock and deliver", "Check paperwork", "Check arrival status"]
+
+        app.state.handle_event(key_event(pygame.K_DOWN))
         app.state.handle_event(key_event(pygame.K_RETURN))
 
         assert isinstance(app.state, FacilityArrivalState)
         assert app.ctx.profile.career.deliveries == 0
-        assert "full stop before docking" in spoken[-1]
+        assert "Paperwork for" in spoken[-1]
+        assert "current estimated payout" in spoken[-1]
+        assert "hours remain before the deadline" in spoken[-1]
+        assert "Cargo condition" in spoken[-1]
+        assert "does not settle the load" in spoken[-1]
 
-        driving.truck.velocity_mps = 0.0
+        app.state.handle_event(key_event(pygame.K_UP))
         app.state.handle_event(key_event(pygame.K_RETURN))
-
-        assert not isinstance(app.state, DrivingState)
+        assert not isinstance(app.state, FacilityArrivalState)
         assert app.ctx.profile.career.deliveries == 1
     finally:
         app.shutdown()
