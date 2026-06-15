@@ -10,8 +10,23 @@
   line by line), "Remind me later", and "Skip this version". A new
   Settings entry, "Update channel", picks between stable releases and
   nightly developer snapshots — nightly builds follow the dev channel by
-  default, stable builds follow stable — and "Check for updates" looks
-  right now. Source checkouts are left alone; git manages those.
+  default, stable builds follow stable — and "Check for updates" checks
+  immediately. Source checkouts are left alone; git manages those.
+- **Real pickup and loading flow.** Job offers now name the origin
+  facility as an actual stop in the workflow instead of flavor text. After
+  accepting a load, you check in at the listed facility, load only while
+  stopped, then plan the loaded trip to the destination.
+- **Destination facility docking.** Deliveries no longer settle just
+  because the truck reached the destination city. The game now warns at
+  speed, keeps you in control until a full stop, opens a facility menu
+  with a dock/yard cue, and requires "Dock and deliver" before payment.
+  "Check paperwork" previews facility, cargo, payout, deadline, and damage
+  details without completing the load.
+- **Real freight facilities on job boards.** Cities now offer freight from
+  classified locations such as terminals, warehouses, ports, intermodal
+  yards, air cargo areas, manufacturing plants, food terminals, industrial
+  parks, retail distribution hubs, and bulk facilities. Cargo is filtered
+  by plausible facility type.
 - **Highway exits.** Rest stops now sit at proper exits. They are
   announced a few miles out ("Press X to take the exit for it"); X
   signals for the exit (and X again cancels), you slow to 45 or less for
@@ -19,8 +34,9 @@
   and brake to a stop, and the rest stop menu opens by itself. The ramp
   is off the highway: hazards and speeding checks pause while you are on
   it. Pressing T while stopped on the highway at a stop still works.
-- **Cruise control.** K sets cruise at your current speed, like every
-  real semi, and holds it with a slow throttle governor through grades.
+- **Cruise control.** K sets cruise at your current speed, matching common
+  highway driving expectations, and holds it with a slow throttle governor
+  through grades.
   K again, any braking, the emergency brake, a stall, or taking an exit
   cancels it — and a hazard warning hands control straight back to you.
   Tab reports the set speed.
@@ -107,8 +123,34 @@
 - **Trip pacing now applies mid-trip.** Changing "Trip pacing" from the
   pause menu's settings was silently ignored until the next delivery; the
   active trip now picks it up immediately.
+- **Unsafe engine shutdown blocked.** Pressing E at road speed no longer
+  shuts off the engine. The game now gives spoken feedback and requires a
+  safe low-speed stop before shutdown.
+- **Delivery at speed blocked.** Arriving at the destination at highway
+  speed no longer completes the job. Settlement now requires the full
+  stopped facility docking flow.
+- **Tampered saves are quarantined.** Career saves now carry an integrity
+  signature. Old unsigned saves migrate forward, but edited or corrupted
+  saves are moved aside instead of being loaded as valid career data.
+- **Implausible route detours filtered.** Route options now reject obvious
+  short-haul detours that send drivers far out of the way, while still
+  allowing meaningful alternate long-haul routes.
+- **State progress announcements improved.** Trips now announce state
+  crossings and nearby cities along the route, not only the destination
+  state.
 
 ### Changed
+- **Early career progression and pay.** Low-level jobs now pay enough to
+  make early progress feel worthwhile after operating costs, and higher
+  levels unlock clearer differences in range, cargo, endorsements, and
+  long-haul opportunities.
+- **Truck acceleration and shifting.** Loaded trucks reach safe highway
+  speeds more plausibly, top gear behaves more like mild overdrive, and
+  automatic shift cues are easier to hear without adding air-brake sounds
+  to gear changes.
+- **Freight market terminology.** Player-facing market wording now uses
+  trucking language: tight, loose, and steady, replacing the old generic
+  market labels.
 - **Real terrain on real highways.** A geography audit corrected 20 of
   the 106 legs. The famous grades are now mountains: Monteagle on I-24
   (Nashville-Atlanta), the Cumberland Plateau on I-40
