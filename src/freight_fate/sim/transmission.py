@@ -9,7 +9,9 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 
-GEAR_RATIOS = (14.8, 10.95, 8.09, 5.97, 4.46, 3.32, 2.45, 1.81, 1.35, 1.0)
+# Eaton-style 10-speed spread. Top gear is a mild overdrive so highway cruise
+# does not sit at redline while the lower gears keep loaded launch behavior.
+GEAR_RATIOS = (14.8, 10.95, 8.09, 5.97, 4.46, 3.32, 2.45, 1.81, 1.35, 0.86)
 FINAL_DRIVE = 3.55
 NEUTRAL = 0
 

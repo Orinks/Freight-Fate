@@ -70,7 +70,7 @@
         },
         {
           "name": "Northeast Freight Yard",
-          "type": "rail",
+          "type": "intermodal",
           "cargo": [
             "bulk",
             "machinery"
@@ -134,23 +134,23 @@
       "locations": [
         {
           "name": "Cicero Rail Hub",
-          "type": "rail",
+          "type": "intermodal",
           "cargo": [
             "container",
             "bulk"
           ]
         },
         {
-          "name": "South Side Cold Storage",
-          "type": "distribution",
+          "name": "Chicago International Produce Market",
+          "type": "food_terminal",
           "cargo": [
             "food",
             "refrigerated"
           ]
         },
         {
-          "name": "O'Hare Air Freight",
-          "type": "terminal",
+          "name": "O'Hare South Cargo Area",
+          "type": "air_cargo",
           "cargo": [
             "electronics",
             "general"
@@ -238,7 +238,7 @@
       "locations": [
         {
           "name": "Hartsfield Cargo City",
-          "type": "terminal",
+          "type": "air_cargo",
           "cargo": [
             "electronics",
             "general"
@@ -246,15 +246,15 @@
         },
         {
           "name": "Fulton Industrial District",
-          "type": "warehouse",
+          "type": "industrial_park",
           "cargo": [
             "machinery",
             "retail"
           ]
         },
         {
-          "name": "Peachtree Cold Chain",
-          "type": "distribution",
+          "name": "Atlanta State Farmers Market Cold Storage",
+          "type": "food_terminal",
           "cargo": [
             "food",
             "refrigerated"
@@ -270,7 +270,7 @@
       "locations": [
         {
           "name": "Trinity Intermodal Yard",
-          "type": "rail",
+          "type": "intermodal",
           "cargo": [
             "container",
             "machinery"
@@ -278,7 +278,7 @@
         },
         {
           "name": "Lone Star Distribution",
-          "type": "distribution",
+          "type": "retail_distribution",
           "cargo": [
             "retail",
             "general"
@@ -366,7 +366,7 @@
       "locations": [
         {
           "name": "Sky Harbor Freight",
-          "type": "terminal",
+          "type": "air_cargo",
           "cargo": [
             "electronics",
             "general"
@@ -446,15 +446,15 @@
         },
         {
           "name": "Vernon Produce Terminal",
-          "type": "distribution",
+          "type": "food_terminal",
           "cargo": [
             "food",
             "refrigerated"
           ]
         },
         {
-          "name": "Inland Empire Megacenter",
-          "type": "warehouse",
+          "name": "Inland Empire Distribution Center",
+          "type": "retail_distribution",
           "cargo": [
             "retail",
             "general"
@@ -670,7 +670,7 @@
       "locations": [
         {
           "name": "Queen City Intermodal",
-          "type": "rail",
+          "type": "intermodal",
           "cargo": [
             "container",
             "general"
@@ -790,7 +790,7 @@
       "locations": [
         {
           "name": "Sloss Industrial Works",
-          "type": "warehouse",
+          "type": "manufacturing",
           "cargo": [
             "machinery",
             "bulk"
@@ -814,14 +814,14 @@
       "locations": [
         {
           "name": "Memphis Air Cargo Hub",
-          "type": "terminal",
+          "type": "air_cargo",
           "cargo": [
             "electronics",
             "general"
           ]
         },
         {
-          "name": "Presidents Island Port",
+          "name": "President's Island River Port",
           "type": "port",
           "cargo": [
             "bulk",
@@ -829,8 +829,8 @@
           ]
         },
         {
-          "name": "Delta Cold Storage",
-          "type": "distribution",
+          "name": "Memphis Food Distribution Center",
+          "type": "food_terminal",
           "cargo": [
             "food",
             "refrigerated"
@@ -926,7 +926,7 @@
       "locations": [
         {
           "name": "Alamo Intermodal Yard",
-          "type": "rail",
+          "type": "intermodal",
           "cargo": [
             "container",
             "general"
@@ -934,7 +934,7 @@
         },
         {
           "name": "Mission Trail Warehouse",
-          "type": "warehouse",
+          "type": "retail_distribution",
           "cargo": [
             "retail",
             "machinery"
@@ -1094,7 +1094,7 @@
       "locations": [
         {
           "name": "River Rouge Assembly Docks",
-          "type": "warehouse",
+          "type": "manufacturing",
           "cargo": [
             "machinery",
             "bulk"
@@ -1222,7 +1222,7 @@
       "locations": [
         {
           "name": "Air Capital Plant Docks",
-          "type": "warehouse",
+          "type": "manufacturing",
           "cargo": [
             "machinery",
             "electronics"
@@ -1489,7 +1489,10 @@
       "highway": "I-95",
       "terrain": "hills",
       "stops": [
-        "Milford Travel Plaza",
+        {
+          "name": "Milford Service Plaza",
+          "type": "service_plaza"
+        },
         "Charlton Service Area"
       ]
     },
@@ -1542,7 +1545,10 @@
       "highway": "I-65",
       "terrain": "flat",
       "stops": [
-        "Lafayette Travel Plaza"
+        {
+          "name": "Lafayette I-65 Travel Plaza",
+          "type": "travel_center"
+        }
       ]
     },
     {
@@ -1692,9 +1698,9 @@
       "highway": "I-40",
       "terrain": "flat",
       "stops": [
-        "Wichita Falls Plaza",
-        "Amarillo Big Rig Stop",
-        "Tucumcari Crossing"
+        "Wichita Falls US-287 Travel Center",
+        "Amarillo I-40 Truck Plaza",
+        "Tucumcari I-40 Travel Center"
       ]
     },
     {
@@ -1716,8 +1722,11 @@
       "highway": "I-20",
       "terrain": "hills",
       "stops": [
-        "Birmingham Freight Stop",
-        "Jackson Travel Plaza",
+        {
+          "name": "Birmingham I-20 Truck Plaza",
+          "type": "truck_stop"
+        },
+        "Jackson I-20 Travel Center",
         "Shreveport Fuel Center"
       ]
     },
@@ -1728,8 +1737,8 @@
       "highway": "I-5",
       "terrain": "hills",
       "stops": [
-        "Grapevine Summit Stop",
-        "Kettleman City Plaza"
+        "Lebec Grapevine Truck Stop",
+        "Kettleman City I-5 Travel Center"
       ]
     },
     {
@@ -1971,7 +1980,10 @@
       "highway": "I-20",
       "terrain": "hills",
       "stops": [
-        "Talladega Forest Stop"
+        {
+          "name": "Talladega I-20 Travel Center",
+          "type": "travel_center"
+        }
       ]
     },
     {
@@ -2022,7 +2034,10 @@
       "highway": "I-40",
       "terrain": "flat",
       "stops": [
-        "Forrest City Truck Stop"
+        {
+          "name": "Forrest City I-40 Truck Stop",
+          "type": "truck_stop"
+        }
       ]
     },
     {
@@ -2093,8 +2108,14 @@
       "highway": "I-35",
       "terrain": "hills",
       "stops": [
-        "Austin Hill Country Stop",
-        "Waco Travel Plaza"
+        {
+          "name": "Austin I-35 Travel Center",
+          "type": "travel_center"
+        },
+        {
+          "name": "Waco I-35 Travel Plaza",
+          "type": "travel_center"
+        }
       ]
     },
     {
@@ -2519,7 +2540,10 @@
       "highway": "I-5",
       "terrain": "flat",
       "stops": [
-        "San Onofre Coastal Stop"
+        {
+          "name": "San Onofre Truck Parking",
+          "type": "truck_parking"
+        }
       ]
     },
     {

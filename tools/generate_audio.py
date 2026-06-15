@@ -652,6 +652,31 @@ def gen_ambient() -> None:
     save_wav("ambient/night.wav", seamless(stereoize(x, 0.6), 1.0), peak=0.4)
 
 
+def gen_facility() -> None:
+    print("Facility sounds:")
+    # Grounded dock/yard cue: air release, dock plate thump, and a distant gate motor.
+    dur = 0.95
+    n = int(round(dur * SR))
+    x = np.zeros(n)
+
+    hiss = highpass(white(0.42), 900) * np.exp(-np.linspace(0, 5.5, int(round(0.42 * SR))))
+    mix_at(x, hiss * 0.35, 0.0)
+
+    motor = sine(72, 0.7) * env_adsr(int(round(0.7 * SR)), 0.04, 0.1, 0.65, 0.24)
+    motor += lowpass(white(0.7), 190) * 0.18
+    mix_at(x, motor * 0.45, 0.10)
+
+    plate = lowpass(white(0.16), 260) * np.exp(-np.linspace(0, 12, int(round(0.16 * SR))))
+    clang = resonant(white(0.25), 740, q=10) * np.exp(-np.linspace(0, 9, int(round(0.25 * SR))))
+    mix_at(x, plate * 1.1, 0.42)
+    mix_at(x, clang * 0.22, 0.43)
+
+    relay = highpass(white(0.045), 2500) * np.exp(-np.linspace(0, 18, int(round(0.045 * SR))))
+    mix_at(x, relay * 0.22, 0.72)
+
+    save_wav("facility/dock_gate.wav", fade(soft_clip(x, 1.25), 0.005, 0.08), peak=0.55)
+
+
 def gen_driver() -> None:
     print("Driver sounds:")
     # yawn: a breathy voiced glide, rising then sagging — stylized but readable
@@ -834,6 +859,7 @@ GENERATORS = {
     "vehicle": gen_vehicle,
     "weather": gen_weather,
     "ambient": gen_ambient,
+    "facility": gen_facility,
     "driver": gen_driver,
     "menu_theme": gen_menu_theme,
     "open_road": gen_open_road,

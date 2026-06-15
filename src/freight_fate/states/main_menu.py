@@ -8,11 +8,13 @@ from pathlib import Path
 import pygame
 
 from .. import __version__, updater
-from ..models.profile import DEFAULT_CITY, Profile
+from ..models.profile import DEFAULT_CITY, Profile, ProfileIntegrityError
 from ..settings import TIME_SCALES
 from ..sim.hos import HOS_MODES
 from .base import MenuItem, MenuState, State
 from .update import UpdateChecker, UpdateCheckState, UpdatePromptState
+
+_last_invalid_saves: list[Path] = []
 
 
 def enter_world(ctx) -> None:
@@ -36,10 +38,14 @@ def _world_entry_state(ctx) -> State:
 
 def _loadable_saves() -> list[tuple[Path, Profile]]:
     """Return readable saves in newest-first order."""
+    global _last_invalid_saves
+    _last_invalid_saves = []
     saves = []
     for path in Profile.list_saves():
         try:
             saves.append((path, Profile.load(path)))
+        except ProfileIntegrityError:
+            _last_invalid_saves.append(path)
         except Exception:
             continue
     return saves
@@ -97,9 +103,17 @@ class MainMenuState(MenuState):
             self.ctx.push_state(UpdatePromptState(self.ctx, info))
 
     def announce_entry(self) -> None:
+        warning = ""
+        if _last_invalid_saves:
+            count = len(_last_invalid_saves)
+            warning = (f"{count} saved career failed its integrity check and "
+                       f"was moved aside. " if count == 1 else
+                       f"{count} saved careers failed integrity checks and "
+                       f"were moved aside. ")
         self.ctx.say(
             f"Welcome to Freight Fate, version {__version__}. "
-            f"An audio trucking adventure across America. {self.current_text()}",
+            f"An audio trucking adventure across America. {warning}"
+            f"{self.current_text()}",
         )
 
     def build_items(self) -> list[MenuItem]:
@@ -289,18 +303,19 @@ class HomeTerminalState(MenuState):
 HELP_PAGES = [
     ("The goal", [
         "You are an owner-operator truck driver building a freight career.",
-        "Pick up jobs at city freight locations, choose a route,",
+        "Pick up jobs at real freight facilities, choose a route,",
         "and deliver cargo across the country, on time and intact.",
-        "Earn money and experience, level up, and unlock cargo endorsements.",
+        "Earn money and experience, level up, and unlock better freight.",
     ]),
     ("Menus", [
         "All menus use Up and Down arrows, Enter to select, Escape to go back.",
         "Home and End jump to the first and last option.",
         "Type a letter to jump to options starting with that letter.",
         "Press F1 in any menu for contextual help.",
+        "Edited or corrupted career saves may be moved aside at the main menu.",
     ]),
     ("Driving basics", [
-        "E starts and stops the engine.",
+        "E starts the engine. To shut it down, slow below 5 miles per hour first.",
         "Hold the Up arrow to accelerate, the Down arrow to brake.",
         "Hold B for the emergency brake: the hardest possible stop,",
         "for hazards and rest stops you would otherwise overshoot.",
@@ -348,15 +363,26 @@ HELP_PAGES = [
         "Tune all of this in Settings under Hours of service.",
     ]),
     ("Deliveries and money", [
+        "The job board lists freight from facilities such as ports,",
+        "intermodal yards, warehouses, food terminals, industrial parks,",
+        "air cargo areas, manufacturing plants, and retail distribution hubs.",
+        "Each job names an origin facility and a destination facility.",
+        "Cargo follows the facility type, so a food terminal offers",
+        "different work than a port, warehouse, or factory.",
         "Deliver before the deadline for a bonus. Late or damaged cargo pays less.",
+        "At the destination, slow down and park at the facility",
+        "before the delivery settles.",
         "Fragile cargo, like electronics and fresh food, punishes rough driving.",
         "Repair your truck in the city garage. Damage reduces engine power.",
-        "Higher levels unlock longer hauls and special cargo endorsements.",
-        "Cargo markets drift day by day. The job board calls out hot and cold",
-        "markets; hot cargo pays well above the usual rate.",
+        "Higher levels widen distance caps, improve low-end pay,",
+        "and unlock refrigerated, heavy-haul, and high-value freight.",
+        "Cargo markets drift day by day. The job board calls out tight and loose",
+        "markets; tight cargo pays well above the usual rate.",
     ]),
     ("The garage", [
         "Every city garage refuels and repairs your truck.",
+        "If you cannot afford a full tank or full repair, the garage",
+        "buys as much fuel or repair work as your money covers.",
         "The Upgrades menu sells permanent improvements: an engine tune,",
         "an aerodynamic kit, a long-range tank, and reinforced brakes.",
         "The Trucks menu sells the heavy hauler: more torque and a bigger",

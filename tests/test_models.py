@@ -5,6 +5,7 @@ import json
 from freight_fate.models import Career, Economy, JobBoard, Profile
 from freight_fate.models.career import level_for_xp
 from freight_fate.models.jobs import CARGO_CATALOG
+from freight_fate.models.profile import SIGNATURE_FIELD, ProfileIntegrityError
 from freight_fate.settings import Settings
 
 # -- jobs ---------------------------------------------------------------------
@@ -43,6 +44,19 @@ def test_required_hours_includes_breaks_and_sleep():
     assert medium > 495 / 55.0
     long_haul = required_hours(1150)            # ~21 h driving: sleep required
     assert long_haul > 1150 / 55.0 + 10.0
+
+
+def test_northeast_short_corridor_deadline_uses_direct_route(world):
+    from freight_fate.models.jobs import required_hours
+
+    jobs = JobBoard(world, seed=3).offers("Philadelphia", endorsements=set(), level=1)
+    ny_jobs = [job for job in jobs if job.destination == "New York"]
+
+    assert ny_jobs
+    assert all(job.distance_mi == 97 for job in ny_jobs)
+    assert all(3.0 <= job.deadline_game_h <= 4.0 for job in ny_jobs)
+    assert all(job.deadline_game_h >= required_hours(job.distance_mi) * 1.2
+               for job in ny_jobs)
 
 
 def test_endorsement_gating(world):
@@ -101,8 +115,10 @@ def test_endorsements_unlock_with_levels():
     assert c.endorsements == set()
     c.xp = 1000
     assert "refrigerated" in c.endorsements
+    c.xp = 2500
+    assert {"refrigerated", "heavy_haul"} <= c.endorsements
     c.xp = 4500
-    assert {"refrigerated", "high_value"} <= c.endorsements
+    assert {"refrigerated", "heavy_haul", "high_value"} <= c.endorsements
 
 
 def test_record_delivery_announces_level_up():
@@ -140,6 +156,7 @@ def test_profile_save_is_atomic_and_versioned():
     path = p.save()
     data = json.loads(path.read_text())
     assert data["version"] == 3
+    assert SIGNATURE_FIELD in data
     assert not path.with_suffix(".json.tmp").exists()
 
 
@@ -151,6 +168,35 @@ def test_profile_ignores_unknown_fields():
     path.write_text(json.dumps(data))
     loaded = Profile.load(path)
     assert loaded.name == "Future"
+
+
+def test_profile_tampered_money_is_rejected_and_quarantined():
+    p = Profile(name="Tampered")
+    path = p.save()
+    data = json.loads(path.read_text())
+    data["money"] = 999_999.0
+    path.write_text(json.dumps(data))
+
+    import pytest
+
+    with pytest.raises(ProfileIntegrityError):
+        Profile.load(path)
+    assert not path.exists()
+    assert path.with_suffix(".json.invalid").exists()
+
+
+def test_unsigned_profile_loads_once_and_is_signed():
+    p = Profile(name="Unsigned")
+    data = p.to_dict()
+    data.pop(SIGNATURE_FIELD)
+    path = p.path
+    path.write_text(json.dumps(data))
+
+    loaded = Profile.load(path)
+
+    assert loaded.name == "Unsigned"
+    migrated = json.loads(path.read_text())
+    assert SIGNATURE_FIELD in migrated
 
 
 def test_list_saves_and_delete():

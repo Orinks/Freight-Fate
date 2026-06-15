@@ -126,7 +126,7 @@ def test_resumed_trip_does_not_replay_passed_announcements():
 @pytest.mark.smoke
 def test_delivery_clears_the_saved_trip():
     from freight_fate.app import App
-    from freight_fate.states.driving import ArrivalState
+    from freight_fate.states.driving import ArrivalState, FacilityArrivalState
 
     app = App()
     try:
@@ -140,7 +140,10 @@ def test_delivery_clears_the_saved_trip():
         resumed = app.state
         resumed.trip.position_mi = resumed.trip.total_miles  # teleport to arrival
         resumed.trip.update(1 / 60)
-        resumed._arrive()
+        resumed.truck.velocity_mps = 0.0
+        resumed._handle_arrival_gate()
+        assert isinstance(app.state, FacilityArrivalState)
+        app.state.handle_event(key_event(pygame.K_RETURN))
         assert isinstance(app.state, ArrivalState)
         assert app.ctx.profile.active_trip is None
     finally:

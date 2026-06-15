@@ -52,6 +52,37 @@ def test_route_options_are_distinct_and_sorted(world):
     assert miles == sorted(miles)
 
 
+def test_route_options_reject_out_of_direction_detours(world):
+    from freight_fate.data.world import _max_alternate_miles
+
+    for start, end in [
+        ("Philadelphia", "New York"),      # Northeast Corridor freight
+        ("Philadelphia", "Boston"),        # I-95 with plausible I-84 option
+        ("Atlanta", "Dallas"),             # I-20, not a St. Louis loop
+        ("Dallas", "Los Angeles"),         # Southwest corridors
+        ("Denver", "Seattle"),             # I-80/I-84 or US-95/I-90
+        ("New York", "Los Angeles"),       # long-haul alternatives still allowed
+    ]:
+        best = world.shortest_route(start, end)
+        options = world.route_options(start, end, count=5)
+        assert options
+        assert options[0].cities == best.cities
+        assert all(route.miles <= _max_alternate_miles(best.miles)
+                   for route in options)
+
+
+def test_northeast_corridors_prefer_i95_not_inland_loops(world):
+    philly_ny = world.route_options("Philadelphia", "New York", count=5)
+    assert [route.cities for route in philly_ny] == [["Philadelphia", "New York"]]
+    assert philly_ny[0].highways == ["I-95"]
+
+    philly_boston = world.route_options("Philadelphia", "Boston", count=5)
+    assert philly_boston[0].cities == ["Philadelphia", "New York", "Boston"]
+    assert philly_boston[0].highways == ["I-95"]
+    assert all("Pittsburgh" not in route.cities for route in philly_boston)
+    assert all("Buffalo" not in route.cities for route in philly_boston)
+
+
 def test_shortest_route_is_actually_shortest(world):
     direct = world.shortest_route("New York", "Boston")
     assert direct is not None
@@ -67,13 +98,43 @@ def test_unknown_city_raises(world):
 
 
 def test_every_city_has_locations_with_known_cargo(world):
+    from freight_fate.data.world import FREIGHT_LOCATION_TYPES
     from freight_fate.models.jobs import CARGO_CATALOG
 
     for city in world.cities.values():
         assert city.locations, f"{city.name} has no freight locations"
         for loc in city.locations:
+            assert loc.type in FREIGHT_LOCATION_TYPES, f"unknown location type {loc.type}"
             for cargo in loc.cargo:
                 assert cargo in CARGO_CATALOG, f"unknown cargo {cargo} at {loc.name}"
+
+
+def test_freight_location_categories_are_live(world):
+    types = {loc.type for city in world.cities.values() for loc in city.locations}
+    expected = {
+        "air_cargo",
+        "food_terminal",
+        "industrial_park",
+        "intermodal",
+        "manufacturing",
+        "port",
+        "retail_distribution",
+        "warehouse",
+    }
+    assert expected <= types
+
+
+def test_route_stops_have_trucker_relevant_types(world):
+    from freight_fate.data.world import STOP_TYPE_LABELS
+
+    route = world.shortest_route("San Antonio", "Dallas")
+    assert route is not None
+    assert route.stop_details
+    assert all(stop.type in STOP_TYPE_LABELS for stop in route.stop_details)
+    assert any(stop.spoken_name.startswith("travel center:") for stop in route.stop_details)
+
+    parking_route = world.shortest_route("Los Angeles", "San Diego")
+    assert any(stop.type == "truck_parking" for stop in parking_route.stop_details)
 
 
 def test_route_describe_mentions_miles_and_highway(world):

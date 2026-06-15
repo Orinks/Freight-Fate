@@ -94,6 +94,47 @@ def test_existing_profiles_never_see_the_picker():
         app.shutdown()
 
 
+def test_tampered_save_is_spoken_and_omitted_from_main_menu(monkeypatch):
+    import json
+
+    from freight_fate.app import App
+    from freight_fate.models.profile import Profile
+    from freight_fate.states.main_menu import MainMenuState
+
+    good = Profile(name="Honest", current_city="Denver")
+    good.save()
+    bad = Profile(name="Edited", current_city="Chicago")
+    bad_path = bad.save()
+    data = json.loads(bad_path.read_text())
+    data["money"] = 1_000_000.0
+    bad_path.write_text(json.dumps(data))
+
+    app = App()
+    spoken = []
+    monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: spoken.append(text))
+    try:
+        app.push_state(MainMenuState(app.ctx))
+        labels = [item.text for item in app.state.items]
+        assert labels[0].startswith("Continue latest career: Honest")
+        assert "failed its integrity check" in spoken[-1]
+        assert not bad_path.exists()
+        assert bad_path.with_suffix(".json.invalid").exists()
+    finally:
+        app.shutdown()
+
+
+def test_how_to_play_mentions_corrupted_save_recovery_without_prominent_page():
+    from freight_fate.states.main_menu import HELP_PAGES
+
+    titles = [title for title, _lines in HELP_PAGES]
+    help_text = " ".join(line for _title, lines in HELP_PAGES for line in lines).lower()
+
+    assert "Saved careers" not in titles
+    assert "edited or corrupted career saves may be moved aside" in help_text
+    assert "checked for integrity" not in help_text
+    assert "older unsigned saves" not in help_text
+
+
 def test_choose_career_loads_an_older_save_without_deleting_the_newest():
     from freight_fate.app import App
     from freight_fate.models.profile import Profile

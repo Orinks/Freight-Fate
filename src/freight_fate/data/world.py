@@ -14,12 +14,79 @@ from pathlib import Path
 
 WORLD_PATH = Path(__file__).parent / "world.json"
 
+# Alternate routes should feel like real dispatch choices, not graph leftovers.
+# A little extra mileage is fine for traffic, weather, grades, or avoiding a
+# metro corridor; hundreds of out-of-direction miles on a short lane are not.
+ALTERNATE_ROUTE_EXTRA_RATIO = 0.22
+ALTERNATE_ROUTE_MIN_EXTRA_MILES = 75.0
+ALTERNATE_ROUTE_MAX_EXTRA_MILES = 550.0
+
 
 @dataclass(frozen=True)
 class Location:
     name: str
     type: str
     cargo: tuple[str, ...]
+
+    @property
+    def label(self) -> str:
+        return LOCATION_TYPE_LABELS.get(self.type, self.type.replace("_", " "))
+
+    @property
+    def spoken_name(self) -> str:
+        return f"{self.label}: {self.name}"
+
+
+STOP_TYPE_LABELS = {
+    "truck_stop": "truck stop",
+    "travel_center": "travel center",
+    "service_plaza": "service plaza",
+    "public_rest_area": "public rest area",
+    "truck_parking": "truck parking",
+    "weigh_station": "weigh station",
+}
+
+FREIGHT_LOCATION_TYPES = {
+    "air_cargo",
+    "distribution",
+    "food_terminal",
+    "industrial_park",
+    "intermodal",
+    "manufacturing",
+    "port",
+    "rail",
+    "retail_distribution",
+    "terminal",
+    "warehouse",
+}
+
+LOCATION_TYPE_LABELS = {
+    "air_cargo": "air cargo area",
+    "distribution": "distribution center",
+    "food_terminal": "food terminal",
+    "industrial_park": "industrial park",
+    "intermodal": "intermodal yard",
+    "manufacturing": "manufacturing plant",
+    "port": "port",
+    "rail": "rail yard",
+    "retail_distribution": "retail distribution hub",
+    "terminal": "freight terminal",
+    "warehouse": "warehouse",
+}
+
+
+@dataclass(frozen=True)
+class Stop:
+    name: str
+    type: str = "travel_center"
+
+    @property
+    def label(self) -> str:
+        return STOP_TYPE_LABELS.get(self.type, "stop")
+
+    @property
+    def spoken_name(self) -> str:
+        return f"{self.label}: {self.name}"
 
 
 @dataclass(frozen=True)
@@ -39,7 +106,7 @@ class Leg:
     miles: float
     highway: str
     terrain: str  # flat | hills | mountain
-    stops: tuple[str, ...]
+    stops: tuple[Stop, ...]
 
     def other(self, city: str) -> str:
         return self.b if city == self.a else self.a
@@ -66,6 +133,10 @@ class Route:
 
     @property
     def stops(self) -> list[str]:
+        return [s.name for leg in self.legs for s in leg.stops]
+
+    @property
+    def stop_details(self) -> list[Stop]:
         return [s for leg in self.legs for s in leg.stops]
 
     @property
@@ -95,7 +166,7 @@ class World:
 
         self.legs: list[Leg] = [
             Leg(leg["from"], leg["to"], float(leg["miles"]), leg["highway"],
-                leg["terrain"], tuple(leg.get("stops", ())))
+                leg["terrain"], tuple(_parse_stop(s) for s in leg.get("stops", ())))
             for leg in data["legs"]
         ]
         self._adjacency: dict[str, list[Leg]] = {name: [] for name in self.cities}
@@ -174,12 +245,16 @@ class World:
         routes: list[Route] = []
         penalties: dict[Leg, float] = {}
         seen: set[tuple[str, ...]] = set()
-        for _ in range(count * 2):
+        best = self.shortest_route(start, end)
+        if best is None:
+            return routes
+        max_miles = _max_alternate_miles(best.miles)
+        for _ in range(count * 8):
             route = self.shortest_route(start, end, penalties)
             if route is None:
                 break
             key = tuple(route.cities)
-            if key not in seen:
+            if key not in seen and route.miles <= max_miles:
                 seen.add(key)
                 routes.append(route)
                 if len(routes) >= count:
@@ -191,6 +266,39 @@ class World:
 
 
 _world: World | None = None
+
+
+def _parse_stop(raw) -> Stop:
+    if isinstance(raw, dict):
+        name = str(raw.get("name", "")).strip()
+        stop_type = str(raw.get("type", "")).strip() or _classify_stop(name)
+        return Stop(name, stop_type)
+    name = str(raw)
+    return Stop(name, _classify_stop(name))
+
+
+def _classify_stop(name: str) -> str:
+    lower = name.lower()
+    if "weigh" in lower:
+        return "weigh_station"
+    if "parking" in lower:
+        return "truck_parking"
+    if "rest area" in lower:
+        return "public_rest_area"
+    if "service plaza" in lower:
+        return "service_plaza"
+    if "truck" in lower:
+        return "truck_stop"
+    if any(word in lower for word in ("travel", "fuel", "plaza", "center")):
+        return "travel_center"
+    return "travel_center"
+
+
+def _max_alternate_miles(best_miles: float) -> float:
+    extra = best_miles * ALTERNATE_ROUTE_EXTRA_RATIO
+    extra = max(ALTERNATE_ROUTE_MIN_EXTRA_MILES,
+                min(ALTERNATE_ROUTE_MAX_EXTRA_MILES, extra))
+    return best_miles + extra
 
 
 def get_world() -> World:

@@ -146,6 +146,8 @@ def test_old_save_without_truck_fields_loads_with_defaults():
     data = json.loads(path.read_text())
     for legacy_missing in ("truck", "owned_trucks", "upgrades", "market"):
         data.pop(legacy_missing, None)
+    data.pop("_signature", None)
+    data.pop("_signature_version", None)
     path.write_text(json.dumps(data))
     loaded = Profile.load(path)
     assert loaded.truck == "rig"

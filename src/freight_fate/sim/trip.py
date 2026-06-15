@@ -13,7 +13,7 @@ import random
 from dataclasses import dataclass, field
 from enum import Enum
 
-from ..data.world import Route
+from ..data.world import STOP_TYPE_LABELS, Route, get_world
 from .hos import is_night
 from .vehicle import TruckState
 from .weather import WeatherSystem
@@ -85,6 +85,15 @@ class Zone:
 class RoadStop:
     name: str
     at_mi: float
+    type: str = "travel_center"
+
+    @property
+    def label(self) -> str:
+        return STOP_TYPE_LABELS.get(self.type, "stop")
+
+    @property
+    def spoken_name(self) -> str:
+        return f"{self.label}: {self.name}"
 
 
 class Trip:
@@ -129,9 +138,9 @@ class Trip:
         out: list[RoadStop] = []
         for start, leg in zip(self._leg_starts, self.route.legs, strict=True):
             n = len(leg.stops)
-            for i, name in enumerate(leg.stops):
+            for i, stop in enumerate(leg.stops):
                 at = start + leg.miles * (i + 1) / (n + 1)
-                out.append(RoadStop(name, at))
+                out.append(RoadStop(stop.name, at, stop.type))
         return out
 
     def _place_zones(self) -> list[Zone]:
@@ -180,8 +189,6 @@ class Trip:
     @property
     def current_target_city(self):
         """City object the current leg is heading toward; drives the weather."""
-        from ..data.world import get_world
-
         name = self.route.cities[self.current_leg_index + 1]
         return get_world().cities[name]
 
@@ -243,7 +250,8 @@ class Trip:
                     f"of {self.total_miles * 1.609:.0f}")
         leg = self.route.legs[self.current_leg_index]
         toward = self.route.cities[self.current_leg_index + 1]
-        return f"{dist}. On {leg.highway} toward {toward}."
+        state = get_world().cities[toward].state
+        return f"{dist}. On {leg.highway} toward {toward}, {state}."
 
     def restore(self, position_mi: float, game_minutes: float) -> None:
         """Jump to a saved point without re-announcing what is behind it."""
@@ -327,7 +335,7 @@ class Trip:
             if 0 < ahead <= 5.0 and stop.name not in self._announced_stops:
                 self._announced_stops.add(stop.name)
                 self._emit(TripEventKind.STOP_AHEAD,
-                           f"{stop.name} in {ahead:.0f} miles. "
+                           f"{stop.spoken_name} in {ahead:.0f} miles. "
                            "Press X to take the exit for it.",
                            stop=stop)
 
@@ -337,11 +345,18 @@ class Trip:
                 continue
             if self.position_mi >= start:
                 self._announced_cities.add(i)
+                prev = self.route.cities[i - 1]
                 city = self.route.cities[i]
                 nxt = self.route.cities[i + 1]
                 leg = self.route.legs[i]
+                world = get_world()
+                city_state = world.cities[city].state
+                prev_state = world.cities[prev].state
+                crossing = (f"Crossing into {city_state}. "
+                            if city_state != prev_state else "")
                 self._emit(TripEventKind.CITY_REACHED,
-                           f"Passing {city}. Continuing on {leg.highway} toward {nxt}.")
+                           f"{crossing}Passing {city}, {city_state}. "
+                           f"Continuing on {leg.highway} toward {nxt}.")
 
     def _hazard_risk(self) -> float:
         """Chance of a hazard at each check; worse in fog and after dark."""

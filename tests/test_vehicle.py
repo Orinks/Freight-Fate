@@ -10,6 +10,32 @@ def drive(truck: TruckState, seconds: float, dt: float = 1 / 60) -> None:
         truck.update(dt)
 
 
+def time_to_speed(truck: TruckState, target_mph: float,
+                  limit_s: float = 240.0, dt: float = 1 / 60) -> float | None:
+    for step in range(int(limit_s / dt)):
+        truck.auto_shift()
+        truck.update(dt)
+        if truck.speed_mph >= target_mph:
+            return (step + 1) * dt
+    return None
+
+
+def acceleration_marks(truck: TruckState, targets: tuple[float, ...],
+                       limit_s: float = 240.0,
+                       dt: float = 1 / 60) -> dict[float, float | None]:
+    marks = {target: None for target in targets}
+    for step in range(int(limit_s / dt)):
+        truck.auto_shift()
+        truck.update(dt)
+        elapsed = (step + 1) * dt
+        for target in targets:
+            if marks[target] is None and truck.speed_mph >= target:
+                marks[target] = elapsed
+        if all(value is not None for value in marks.values()):
+            break
+    return marks
+
+
 def make_auto_truck() -> TruckState:
     t = TruckState()
     t.transmission.automatic = True
@@ -32,6 +58,27 @@ def test_full_throttle_reaches_highway_speed():
     drive(t, 120)
     assert 60 <= t.speed_mph <= 75
     assert t.transmission.gear == 10
+
+
+def test_loaded_rig_accelerates_to_highway_speed_believably():
+    t = make_auto_truck()
+    t.throttle = 1.0
+
+    marks = acceleration_marks(t, (60.0, 65.0, 70.0))
+
+    assert 50.0 <= marks[60.0] <= 75.0
+    assert marks[65.0] <= 90.0
+    assert marks[70.0] <= 125.0
+
+
+def test_highway_cruise_rpm_keeps_engine_audio_believable():
+    t = make_auto_truck()
+    t.throttle = 1.0
+    to_65 = time_to_speed(t, 65.0)
+
+    assert to_65 is not None
+    assert t.transmission.gear == 10
+    assert 1400.0 <= t.rpm <= 1900.0
 
 
 def test_truck_does_not_move_in_neutral():
