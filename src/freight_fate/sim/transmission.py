@@ -12,7 +12,9 @@ from dataclasses import dataclass, field
 # Eaton-style 10-speed spread. Top gear is a mild overdrive so highway cruise
 # does not sit at redline while the lower gears keep loaded launch behavior.
 GEAR_RATIOS = (14.8, 10.95, 8.09, 5.97, 4.46, 3.32, 2.45, 1.81, 1.35, 0.86)
+REVERSE_RATIO = 13.9
 FINAL_DRIVE = 3.55
+REVERSE = -1
 NEUTRAL = 0
 
 AUTO_UPSHIFT_RPM = 1750
@@ -30,7 +32,7 @@ class ShiftResult:
 @dataclass
 class Transmission:
     automatic: bool = False
-    gear: int = NEUTRAL  # 0 = neutral, 1..10
+    gear: int = NEUTRAL  # -1 = reverse, 0 = neutral, 1..10
     clutch: float = 0.0  # 0 engaged .. 1 fully pressed
     _shift_timer: float = field(default=0.0, repr=False)
 
@@ -43,6 +45,10 @@ class Transmission:
         return self.gear == NEUTRAL
 
     @property
+    def in_reverse(self) -> bool:
+        return self.gear == REVERSE
+
+    @property
     def shifting(self) -> bool:
         return self._shift_timer > 0.0
 
@@ -51,9 +57,13 @@ class Transmission:
         """Overall ratio engine->wheels; zero when no torque path exists."""
         if self.in_neutral or self.shifting or self.clutch > 0.5:
             return 0.0
+        if self.in_reverse:
+            return -REVERSE_RATIO * FINAL_DRIVE
         return GEAR_RATIOS[self.gear - 1] * FINAL_DRIVE
 
     def ratio_for(self, gear: int) -> float:
+        if gear == REVERSE:
+            return -REVERSE_RATIO * FINAL_DRIVE
         return GEAR_RATIOS[gear - 1] * FINAL_DRIVE if gear else 0.0
 
     # -- manual ----------------------------------------------------------------
@@ -62,7 +72,7 @@ class Transmission:
         """Manual gear selection. Requires the clutch to be pressed."""
         if self.automatic:
             return ShiftResult(False, "Transmission is in automatic mode")
-        if not NEUTRAL <= target <= self.num_gears:
+        if not REVERSE <= target <= self.num_gears:
             return ShiftResult(False, f"No gear {target}")
         if target == self.gear:
             return ShiftResult(False, f"Already in {self._gear_name(target)}")
@@ -83,6 +93,8 @@ class Transmission:
     def auto_update(self, rpm: float, throttle: float, moving: bool) -> int | None:
         """Pick a gear in automatic mode. Returns the new gear when it changes."""
         if not self.automatic or self.shifting:
+            return None
+        if self.in_reverse:
             return None
         if self.gear == NEUTRAL:
             if throttle > 0.05:
@@ -113,4 +125,6 @@ class Transmission:
 
     @staticmethod
     def _gear_name(gear: int) -> str:
+        if gear == REVERSE:
+            return "reverse"
         return "neutral" if gear == NEUTRAL else f"gear {gear}"

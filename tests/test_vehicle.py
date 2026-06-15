@@ -1,6 +1,7 @@
 """Truck physics tests."""
 
 from freight_fate.sim import TruckState
+from freight_fate.sim.transmission import REVERSE
 
 
 def drive(truck: TruckState, seconds: float, dt: float = 1 / 60) -> None:
@@ -87,6 +88,23 @@ def test_truck_does_not_move_in_neutral():
     t.throttle = 1.0
     drive(t, 5)
     assert t.velocity_mps == 0.0
+
+
+def test_truck_can_back_up_slowly_in_reverse():
+    t = TruckState()
+    t.start_engine()
+    t.transmission.automatic = False
+    t.transmission.clutch = 1.0
+    assert t.transmission.request_gear(REVERSE).ok
+    t.transmission.update(1.0)
+    t.transmission.clutch = 0.0
+    t.throttle = 0.4
+
+    drive(t, 5)
+
+    assert t.velocity_mps < 0.0
+    assert 1.0 < t.speed_mph <= 11.0
+    assert t.odometer_mi > 0.0
 
 
 def test_braking_stops_the_truck():

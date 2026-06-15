@@ -293,12 +293,15 @@ class Trip:
 
         moved_mi = self.truck.velocity_mps * dt * self.time_scale / 1609.344
         self.position_mi += moved_mi
+        if self.position_mi < 0.0:
+            self.position_mi = 0.0
 
         self._check_zones()
         self._check_stops()
         self._check_cities()
-        self._check_hazards(moved_mi)
-        self._check_inspections(moved_mi)
+        if moved_mi > 0.0:
+            self._check_hazards(moved_mi)
+            self._check_inspections(moved_mi)
 
         if self.position_mi >= self.total_miles:
             self.position_mi = self.total_miles

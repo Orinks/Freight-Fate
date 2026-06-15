@@ -1,6 +1,6 @@
 """Transmission behavior tests."""
 
-from freight_fate.sim.transmission import NEUTRAL, Transmission
+from freight_fate.sim.transmission import NEUTRAL, REVERSE, Transmission
 
 
 def test_starts_in_neutral():
@@ -42,11 +42,26 @@ def test_shift_to_neutral_never_needs_clutch():
     assert tr.in_neutral
 
 
+def test_manual_reverse_requires_clutch():
+    tr = Transmission()
+    result = tr.request_gear(REVERSE)
+    assert not result.ok
+    assert result.grind
+    tr.clutch = 1.0
+    result = tr.request_gear(REVERSE)
+    assert result.ok
+    assert tr.in_reverse
+    assert result.message == "reverse"
+    tr.update(1.0)
+    tr.clutch = 0.0
+    assert tr.drive_ratio < 0.0
+
+
 def test_invalid_gears_rejected():
     tr = Transmission()
     tr.clutch = 1.0
     assert not tr.request_gear(11).ok
-    assert not tr.request_gear(-1).ok
+    assert not tr.request_gear(-2).ok
 
 
 def test_manual_rejected_in_automatic_mode():
@@ -87,3 +102,9 @@ def test_auto_waits_for_shift_to_finish():
     assert tr.auto_update(1800, 0.8, True) is None
     tr.update(1.0)
     assert not tr.shifting
+
+
+def test_auto_does_not_shift_out_of_reverse():
+    tr = Transmission(automatic=True, gear=REVERSE)
+    assert tr.auto_update(1900, throttle=0.5, moving=True) is None
+    assert tr.in_reverse

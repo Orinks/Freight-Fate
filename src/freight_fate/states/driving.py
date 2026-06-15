@@ -16,6 +16,7 @@ from ..data.world import Route
 from ..models.jobs import CARGO_CATALOG, Job, facility_label
 from ..sim import hos
 from ..sim.hos import HosClock, clock_text, is_night, time_of_day
+from ..sim.transmission import REVERSE
 from ..sim.trip import Trip, TripEventKind
 from ..sim.vehicle import G, TruckState
 from ..sim.weather import WeatherSystem
@@ -229,6 +230,8 @@ class DrivingState(State):
             if result.ok:
                 self.ctx.audio.play("vehicle/gear_shift")
                 self.ctx.say("Neutral.")
+        elif key == pygame.K_BACKSPACE and not tr.automatic:
+            self._manual_shift(REVERSE)
         elif key in GEAR_KEYS and not tr.automatic:
             self._manual_shift(GEAR_KEYS[key])
         elif key == pygame.K_j:
@@ -265,6 +268,8 @@ class DrivingState(State):
                 "full stop, then dock and deliver from the facility menu. ")
             self.ctx.say(
                 "Hold Up arrow to accelerate, Down arrow to brake. "
+                "When stopped in automatic, hold Down arrow to reverse slowly; "
+                "touch Up arrow to brake and return to forward. "
                 "Hold B for the emergency brake, the hardest possible stop. "
                 "K sets cruise control at your current speed; braking cancels. "
                 "X takes the next announced exit: slow to 45 for the ramp, "
@@ -277,7 +282,8 @@ class DrivingState(State):
                 "at one: refuel, take a break, or sleep. H horn. "
                 "J engine brake. Escape pause menu. "
                 + ("" if self.truck.transmission.automatic else
-                   "Hold Left Shift for clutch, then 1 through 0 for gears, N for neutral."))
+                   "Hold Left Shift for clutch, then 1 through 0 for gears, "
+                   "Backspace for reverse, N for neutral."))
 
     def _toggle_engine(self) -> None:
         t = self.truck
@@ -328,9 +334,17 @@ class DrivingState(State):
 
     def _speak_speed(self) -> None:
         t = self.truck
-        gear = "neutral" if t.transmission.in_neutral else f"gear {t.transmission.gear}"
+        gear = self._gear_text()
         self.ctx.say(f"{self.ctx.settings.speed_text(t.speed_mph)}, {gear}, "
                      f"{t.rpm:.0f} RPM.")
+
+    def _gear_text(self) -> str:
+        tr = self.truck.transmission
+        if tr.in_neutral:
+            return "neutral"
+        if tr.in_reverse:
+            return "reverse"
+        return f"gear {tr.gear}"
 
     def _speak_full_status(self) -> None:
         t = self.truck
@@ -412,14 +426,19 @@ class DrivingState(State):
         self._sync_weather_source()
         keys = pygame.key.get_pressed()
         ramp = dt * 2.2
-        if keys[pygame.K_UP]:
+        accelerating = keys[pygame.K_UP]
+        braking_key = keys[pygame.K_DOWN]
+        backing = self._update_reverse_controls(accelerating, braking_key)
+        if accelerating and not backing:
             t.throttle = min(1.0, t.throttle + ramp)
+        elif backing:
+            t.throttle = min(0.45, t.throttle + ramp)
         else:
             t.throttle = max(0.0, t.throttle - ramp * 2)
-        braking = keys[pygame.K_DOWN]
+        braking = (braking_key and not backing) or (accelerating and t.velocity_mps < -0.1)
         if braking:
             new_brake = min(1.0, t.brake + ramp * 1.5)
-            if t.brake < 0.05 and new_brake >= 0.05 and t.velocity_mps > 1:
+            if t.brake < 0.05 and new_brake >= 0.05 and abs(t.velocity_mps) > 1:
                 self.ctx.audio.play("vehicle/brake_air", volume=0.6)
             t.brake = new_brake
         else:
@@ -427,13 +446,13 @@ class DrivingState(State):
         emergency = keys[pygame.K_b]
         if emergency:
             # no ramp: slams to full application instantly, plus spring brakes
-            if not t.emergency_brake and t.velocity_mps > 1:
+            if not t.emergency_brake and abs(t.velocity_mps) > 1:
                 self.ctx.audio.play("vehicle/brake_air", volume=1.0)
             t.throttle = 0.0
             t.brake = 1.0
         t.emergency_brake = emergency
         t.transmission.clutch = 1.0 if keys[pygame.K_LSHIFT] or keys[pygame.K_RSHIFT] else 0.0
-        self._update_cruise(dt, braking, keys[pygame.K_UP])
+        self._update_cruise(dt, braking, accelerating)
 
         if t.transmission.automatic and t.engine_on:
             new_gear = t.auto_shift()
@@ -467,6 +486,29 @@ class DrivingState(State):
                 self._handle_pickup_gate()
             else:
                 self._handle_arrival_gate()
+
+    def _update_reverse_controls(self, accelerating: bool, braking_key: bool) -> bool:
+        """Return True when the current key state means backing up."""
+        t = self.truck
+        tr = t.transmission
+        if not tr.automatic:
+            return tr.in_reverse and braking_key and not accelerating
+        if tr.in_reverse:
+            if accelerating and abs(t.velocity_mps) < 0.3:
+                tr.gear = 1
+                tr._shift_timer = 0.0
+                self.ctx.audio.play("vehicle/gear_shift", volume=0.55)
+                self._set_status("Forward gear selected.")
+                return False
+            return braking_key and not accelerating
+        if braking_key and not accelerating and t.speed_mph < 0.5:
+            tr.gear = REVERSE
+            tr._shift_timer = 0.0
+            self._cancel_cruise()
+            self.ctx.audio.play("vehicle/gear_shift", volume=0.55)
+            self._set_status("Reverse selected. Backing slowly.")
+            return True
+        return False
 
     def _update_hours_and_fatigue(self, dt: float) -> None:
         """Advance the HOS shift clock and fatigue on game time, not wall time."""

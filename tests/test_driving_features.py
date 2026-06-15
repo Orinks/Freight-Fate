@@ -260,6 +260,30 @@ def test_exit_flow_reaches_the_rest_stop_menu():
 
 
 @pytest.mark.smoke
+def test_can_back_up_to_a_missed_rest_stop_with_t_menu():
+    from freight_fate.app import App
+    from freight_fate.states.driving import ParkingFullState, RestStopState
+
+    app = App()
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        stop = driving.trip.stops[0]
+        driving.trip.position_mi = stop.at_mi + 0.7
+        driving.truck.velocity_mps = -1.0
+
+        driving.trip.update(60)
+        driving.truck.velocity_mps = 0.0
+        assert abs(driving.trip.position_mi - stop.at_mi) <= 1.5
+
+        driving.handle_event(key_event(pygame.K_t))
+
+        assert isinstance(app.state, (RestStopState, ParkingFullState))
+    finally:
+        app.shutdown()
+
+
+@pytest.mark.smoke
 def test_exit_missed_when_too_fast():
     from freight_fate.app import App
 

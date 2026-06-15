@@ -20,6 +20,7 @@ AIR_DENSITY = 1.225
 # Full service application plus the spring brakes: the hardest stop the rig
 # can make, still scaled by weather grip and brake fade.
 EMERGENCY_BRAKE_MULT = 1.6
+MAX_REVERSE_MPS = 4.5  # about 10 mph: backing speed, not road speed
 
 
 @dataclass(frozen=True)
@@ -105,10 +106,10 @@ class TruckState:
         """Engine RPM implied by road speed in the given gear."""
         tr = self.transmission
         ratio = tr.ratio_for(self.transmission.gear if gear is None else gear)
-        if ratio <= 0:
+        if ratio == 0:
             return self.rpm
-        wheel_rps = self.velocity_mps / (2 * math.pi * self.specs.wheel_radius_m)
-        return wheel_rps * 60.0 * ratio
+        wheel_rps = abs(self.velocity_mps) / (2 * math.pi * self.specs.wheel_radius_m)
+        return wheel_rps * 60.0 * abs(ratio)
 
     def auto_shift(self) -> int | None:
         """Run automatic shifting from road-speed-coupled RPM (immune to the
@@ -129,21 +130,23 @@ class TruckState:
         if ratio == 0.0:
             return 0.0
         torque = self.torque_at(self.rpm) * self.throttle * self.health_factor
-        force = torque * ratio * self.specs.driveline_efficiency / self.specs.wheel_radius_m
+        direction = -1.0 if ratio < 0 else 1.0
+        force = torque * abs(ratio) * self.specs.driveline_efficiency / self.specs.wheel_radius_m
         # traction limit: drive wheels carry roughly a third of gross weight
         traction_limit = self.specs.mass_kg * G * 0.33 * self.grip
-        return min(force, traction_limit)
+        return direction * min(force, traction_limit)
 
     def resistance_force(self) -> float:
         s = self.specs
         v = self.velocity_mps
+        direction = 1.0 if v > 0.01 else -1.0 if v < -0.01 else 0.0
         drag = 0.5 * AIR_DENSITY * s.drag_coefficient * s.frontal_area_m2 * v * abs(v)
-        rolling = s.mass_kg * G * s.rolling_resistance * (1.0 if v > 0.01 else 0.0)
+        rolling = s.mass_kg * G * s.rolling_resistance * direction
         grade_f = s.mass_kg * G * math.sin(math.atan(self.grade))
         return drag + rolling + grade_f
 
     def brake_force(self) -> float:
-        if self.velocity_mps <= 0.0:
+        if abs(self.velocity_mps) <= 0.01:
             return 0.0
         s = self.specs
         fade_temp = s.brake_fade_temp_c
@@ -154,7 +157,8 @@ class TruckState:
         service = s.mass_kg * G * s.max_brake_decel_g * application * boost * fade * self.grip
         jake = s.engine_brake_force_n if (self.engine_brake and self.engine_on
                                           and not self.transmission.in_neutral) else 0.0
-        return service + jake
+        direction = 1.0 if self.velocity_mps > 0 else -1.0
+        return direction * (service + jake)
 
     # -- per-frame update ---------------------------------------------------------
 
@@ -165,8 +169,18 @@ class TruckState:
 
         net = self.drive_force() - self.resistance_force() - self.brake_force()
         accel = net / s.mass_kg
-        self.velocity_mps = max(0.0, self.velocity_mps + accel * dt)
-        self.odometer_mi += self.velocity_mps * dt / 1609.344
+        old_v = self.velocity_mps
+        new_v = self.velocity_mps + accel * dt
+        drive_force = self.drive_force()
+        if ((old_v > 0.0 > new_v and drive_force <= 0.0)
+                or (old_v < 0.0 < new_v and drive_force >= 0.0)):
+            new_v = 0.0
+        if self.transmission.in_reverse:
+            new_v = max(-MAX_REVERSE_MPS, new_v)
+        elif new_v < 0.0:
+            new_v = 0.0
+        self.velocity_mps = new_v
+        self.odometer_mi += abs(self.velocity_mps) * dt / 1609.344
 
         self._update_rpm(dt)
         self._update_fuel(dt)
@@ -179,10 +193,10 @@ class TruckState:
             self.rpm = max(0.0, self.rpm - 1500 * dt)
             return
         ratio = tr.ratio_for(tr.gear) if not tr.in_neutral else 0.0
-        coupled = ratio > 0.0 and tr.clutch <= 0.5 and not tr.shifting
+        coupled = ratio != 0.0 and tr.clutch <= 0.5 and not tr.shifting
         if coupled:
-            wheel_rps = self.velocity_mps / (2 * math.pi * s.wheel_radius_m)
-            road_rpm = wheel_rps * 60.0 * ratio
+            wheel_rps = abs(self.velocity_mps) / (2 * math.pi * s.wheel_radius_m)
+            road_rpm = wheel_rps * 60.0 * abs(ratio)
             if road_rpm < s.idle_rpm:
                 # Launch regime: in a low gear the clutch slips and the engine
                 # holds idle-or-better. In a high gear the engine lugs and stalls.
@@ -206,7 +220,7 @@ class TruckState:
         if not self.engine_on:
             return
         # ~0.8 gal/h at idle; load burn calibrated for ~6.5-7 mpg at 60 mph cruise
-        power_kw = abs(self.drive_force()) * self.velocity_mps / 1000.0
+        power_kw = abs(self.drive_force()) * abs(self.velocity_mps) / 1000.0
         burn = (0.00022 + power_kw * 1.5e-5) * self.specs.fuel_burn_factor
         self.fuel_gal = max(0.0, self.fuel_gal - burn * dt * self.fuel_burn_mult)
         if self.fuel_gal <= 0.0:
@@ -219,8 +233,9 @@ class TruckState:
         self.engine_temp_c += (target - self.engine_temp_c) * 0.03 * dt
 
         applied = 1.0 if self.emergency_brake else self.brake
-        heating = applied * self.velocity_mps * 2.2
-        cooling = (self.brake_temp_c - 20.0) * (0.02 + 0.004 * self.velocity_mps)
+        speed = abs(self.velocity_mps)
+        heating = applied * speed * 2.2
+        cooling = (self.brake_temp_c - 20.0) * (0.02 + 0.004 * speed)
         self.brake_temp_c = max(20.0, self.brake_temp_c + (heating - cooling) * dt)
 
         if self.rpm > s.max_rpm * 0.98 and self.engine_on:
@@ -230,11 +245,11 @@ class TruckState:
 
     @property
     def speed_mph(self) -> float:
-        return self.velocity_mps * 2.23694
+        return abs(self.velocity_mps) * 2.23694
 
     @property
     def speed_kmh(self) -> float:
-        return self.velocity_mps * 3.6
+        return abs(self.velocity_mps) * 3.6
 
     @property
     def fuel_fraction(self) -> float:
