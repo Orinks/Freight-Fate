@@ -164,6 +164,37 @@ def test_progress_summary_mentions_highway(world):
     trip, _ = make_trip(world)
     text = trip.progress_summary()
     assert "I-65" in text
-    assert "Indianapolis" in text
+    assert "Indianapolis, Indiana" in text
     metric = trip.progress_summary(imperial=False)
     assert "kilometers" in metric
+
+
+def test_city_events_announce_state_crossings(world):
+    route = world.route_from_cities(["Chicago", "Cleveland", "Pittsburgh"])
+    truck = TruckState()
+    weather = WeatherSystem("midwest", seed=1)
+    trip = Trip(route, truck, weather, seed=2)
+    trip.position_mi = route.legs[0].miles
+
+    events = trip.update(0.0)
+
+    city_events = [e.message for e in events if e.kind == TripEventKind.CITY_REACHED]
+    assert city_events == [
+        "Crossing into Ohio. Passing Cleveland, Ohio. "
+        "Continuing on I-76 toward Pittsburgh."
+    ]
+
+
+def test_city_events_include_state_without_repeating_crossing(world):
+    route = world.route_from_cities(["New York", "Buffalo", "Cleveland"])
+    truck = TruckState()
+    weather = WeatherSystem("northeast", seed=1)
+    trip = Trip(route, truck, weather, seed=2)
+    trip.position_mi = route.legs[0].miles
+
+    events = trip.update(0.0)
+
+    city_events = [e.message for e in events if e.kind == TripEventKind.CITY_REACHED]
+    assert city_events == [
+        "Passing Buffalo, New York. Continuing on I-90 toward Cleveland."
+    ]
