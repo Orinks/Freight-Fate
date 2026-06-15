@@ -45,6 +45,7 @@ RAMP_LENGTH_MI = 0.5              # deceleration lane plus ramp to the stop
 CRUISE_MIN_MPH = 20.0             # cruise control needs road speed to hold
 ENGINE_SHUTDOWN_SAFE_MPH = 5.0    # prevent accidental kill-switch use at speed
 DELIVERY_PARK_MPH = 3.0           # destination settlement requires parking speed
+DOCKING_MAX_MPH = 1.0             # final dock/park action needs a full stop
 
 
 class DrivingState(State):
@@ -87,6 +88,7 @@ class DrivingState(State):
         self._cruise_mph: float | None = None
         self._cruise_throttle = 0.0
         self._arrival_stop_said = False
+        self._arrival_menu_open = False
         self._status_text = "Press E to start the engine."
 
     # -- save and resume -----------------------------------------------------------
@@ -726,7 +728,7 @@ class DrivingState(State):
 
     def _handle_arrival_gate(self) -> None:
         if self.truck.speed_mph <= DELIVERY_PARK_MPH:
-            self._arrive()
+            self._open_facility_arrival()
             return
         if self._arrival_stop_said:
             return
@@ -739,6 +741,15 @@ class DrivingState(State):
             f"Slow below {DELIVERY_PARK_MPH:.0f} miles per hour and park to "
             "complete the delivery.",
             interrupt=True)
+
+    def _open_facility_arrival(self) -> None:
+        if self._arrival_menu_open:
+            return
+        self._arrival_menu_open = True
+        self._cancel_cruise()
+        self.truck.throttle = 0.0
+        self._set_status("Parked at destination. Dock and deliver from the facility menu.")
+        self.ctx.replace_state(FacilityArrivalState(self.ctx, self))
 
     def _destination_facility_text(self) -> str:
         if self.job.destination_location:
@@ -1111,6 +1122,75 @@ class PauseMenuState(MenuState):
         self.ctx.say("Saved. Your delivery will resume where you left off.",
                      interrupt=True)
         self.ctx.reset_to(MainMenuState(self.ctx))
+
+
+class FacilityArrivalState(MenuState):
+    title = "Destination facility"
+    intro_help = ("Use up and down arrows to navigate, Enter to select. "
+                  "Dock and deliver completes the delivery.")
+
+    def __init__(self, ctx, driving: DrivingState) -> None:
+        super().__init__(ctx)
+        self.driving = driving
+
+    @property
+    def facility(self) -> str:
+        return self.driving._destination_facility_text()
+
+    def announce_entry(self) -> None:
+        self.ctx.audio.set_ambient("ambient/warehouse", volume=0.3)
+        self.ctx.say(
+            f"Arrived at {self.facility}. You are parked at the gate. "
+            f"{self.current_text()}")
+
+    def build_items(self) -> list[MenuItem]:
+        return [
+            MenuItem("Dock and deliver", self._dock,
+                     help="Back into the assigned dock, set the brakes, and "
+                          "hand off the paperwork to complete this delivery."),
+            MenuItem("Check arrival status", self._status,
+                     help="Hear the destination facility, cargo, speed, and "
+                          "delivery instruction again."),
+        ]
+
+    def _dock(self) -> None:
+        d = self.driving
+        if d.truck.speed_mph > DOCKING_MAX_MPH:
+            self.ctx.audio.play("ui/error")
+            self.ctx.say("Hold the brake and come to a full stop before docking.")
+            return
+        d.truck.throttle = 0.0
+        d.truck.brake = 1.0
+        d._set_status("Docked. Delivery paperwork signed.")
+        self.ctx.say(
+            f"Docked at {self.facility}. Trailer secured and paperwork signed.",
+            interrupt=True)
+        d._arrive()
+
+    def _status(self) -> None:
+        d = self.driving
+        self.ctx.say(
+            f"At {self.facility}. Hauling {d.job.weight_tons:.0f} tons of "
+            f"{d.job.cargo.label}. Current speed "
+            f"{self.ctx.settings.speed_text(d.truck.speed_mph)}. "
+            "Select Dock and deliver when stopped to complete the delivery.")
+
+    def go_back(self) -> None:
+        self.ctx.say("You are checked in at the destination. Select Dock and "
+                     "deliver to complete the job.")
+
+    def lines(self) -> list[str]:
+        return [
+            self.title,
+            "",
+            f"Facility: {self.facility}",
+            f"Speed: {self.driving.truck.speed_mph:.0f} mph",
+            "Docking required before delivery settlement.",
+            "",
+        ] + [
+            ("> " if i == self.index else "  ") + item.text
+            for i, item in enumerate(self.items)
+        ]
 
 
 class ArrivalState(MenuState):

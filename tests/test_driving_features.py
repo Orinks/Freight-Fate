@@ -115,12 +115,14 @@ def test_engine_shutdown_is_allowed_once_stopped():
 @pytest.mark.smoke
 def test_delivery_requires_parking_at_destination(monkeypatch):
     from freight_fate.app import App
-    from freight_fate.states.driving import ArrivalState, DrivingState
+    from freight_fate.states.driving import ArrivalState, DrivingState, FacilityArrivalState
 
     app = App()
     events = []
+    spoken = []
     monkeypatch.setattr(app.ctx, "say_event",
                         lambda text, interrupt=True: events.append(text))
+    monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: spoken.append(text))
     try:
         driving = start_drive(app)
         quiet_trip(driving)
@@ -138,7 +140,48 @@ def test_delivery_requires_parking_at_destination(monkeypatch):
         driving.truck.velocity_mps = 0.0
         driving.update(1 / 60)
 
+        assert isinstance(app.state, FacilityArrivalState)
+        assert app.state.items[app.state.index].text == "Dock and deliver"
+        assert "Docking required before delivery settlement." in app.state.lines()
+        assert app.ctx.profile.career.deliveries == 0
+
+        app.state.handle_event(key_event(pygame.K_RETURN))
+
         assert isinstance(app.state, ArrivalState)
+        assert any("Trailer secured and paperwork signed" in text for text in spoken)
+    finally:
+        app.shutdown()
+
+
+@pytest.mark.smoke
+def test_docking_requires_a_full_stop(monkeypatch):
+    from freight_fate.app import App
+    from freight_fate.states.driving import DrivingState, FacilityArrivalState
+
+    app = App()
+    spoken = []
+    monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: spoken.append(text))
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        driving.trip.finished = True
+        driving.trip.position_mi = driving.trip.total_miles
+        driving.truck.velocity_mps = 1.1   # about 2.5 mph: parked, not docked
+
+        driving.update(1 / 60)
+        assert isinstance(app.state, FacilityArrivalState)
+
+        app.state.handle_event(key_event(pygame.K_RETURN))
+
+        assert isinstance(app.state, FacilityArrivalState)
+        assert app.ctx.profile.career.deliveries == 0
+        assert "full stop before docking" in spoken[-1]
+
+        driving.truck.velocity_mps = 0.0
+        app.state.handle_event(key_event(pygame.K_RETURN))
+
+        assert not isinstance(app.state, DrivingState)
+        assert app.ctx.profile.career.deliveries == 1
     finally:
         app.shutdown()
 

@@ -47,7 +47,7 @@ def test_garage_offers_partial_fuel_and_repairs_when_cash_is_short():
 def test_full_game_flow_headless():
     from freight_fate.app import App
     from freight_fate.states.city import CityMenuState, JobBoardState, RouteSelectState
-    from freight_fate.states.driving import ArrivalState, DrivingState
+    from freight_fate.states.driving import ArrivalState, DrivingState, FacilityArrivalState
     from freight_fate.states.main_menu import (
         HomeTerminalState,
         MainMenuState,
@@ -108,8 +108,11 @@ def test_full_game_flow_headless():
             if driving._hazard_deadline is not None:
                 driving.truck.velocity_mps = 5.0
             if driving.trip.finished:
-                driving._arrive()
+                driving.truck.velocity_mps = 0.0
+                driving._handle_arrival_gate()
                 break
+        assert isinstance(app.state, FacilityArrivalState)
+        app.state.handle_event(key_event(pygame.K_RETURN))
         assert isinstance(app.state, ArrivalState)
         assert app.ctx.profile.money > money_before
         assert app.ctx.profile.career.deliveries == 1
