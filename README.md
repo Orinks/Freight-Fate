@@ -23,8 +23,8 @@ visual display mirrors all speech for sighted players and helpers.
   with an engine tune, aerodynamic kit, long-range tank, or reinforced
   brakes. Every purchase changes the physics.
 - **A living market** — each cargo class has a pay rate that drifts day by
-  day. The job board tells you when electronics are hot or bulk freight has
-  gone cold; chase the strong markets.
+  day. The job board tells you when electronics are tight or bulk freight has
+  gone loose; chase the tight markets.
 - **A living road** — dynamic regional weather that changes grip and safe
   speeds, construction and traffic zones, road hazards that demand quick
   braking, rest stops for refueling, and roadside rescue when you run dry.

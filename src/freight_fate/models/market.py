@@ -24,14 +24,10 @@ MARKET_CARGO_KEYS = ("general", "retail", "container", "bulk", "machinery",
 
 def market_condition(multiplier: float) -> str:
     """Spoken one-word market condition for a multiplier."""
-    if multiplier >= 1.18:
-        return "hot"
     if multiplier >= 1.07:
-        return "strong"
-    if multiplier <= 0.88:
-        return "cold"
+        return "tight"
     if multiplier <= 0.97:
-        return "soft"
+        return "loose"
     return "steady"
 
 
@@ -77,11 +73,11 @@ class Market:
     def summary(self) -> str:
         """Spoken job-board headline naming the standout cargo classes."""
         items = sorted(self.multipliers.items())
-        hot = sorted((kv for kv in items if kv[1] >= 1.07),
-                     key=lambda kv: kv[1], reverse=True)
-        cold = sorted((kv for kv in items if kv[1] <= 0.97), key=lambda kv: kv[1])
-        if not hot and not cold:
+        tight = sorted((kv for kv in items if kv[1] >= 1.07),
+                       key=lambda kv: kv[1], reverse=True)
+        loose = sorted((kv for kv in items if kv[1] <= 0.97), key=lambda kv: kv[1])
+        if not tight and not loose:
             return "Freight market is steady across the board."
         parts = [f"{key.replace('_', ' ')} {market_condition(mult)}"
-                 for key, mult in hot[:2] + cold[:2]]
+                 for key, mult in tight[:2] + loose[:2]]
         return "Market watch: " + ", ".join(parts) + "."

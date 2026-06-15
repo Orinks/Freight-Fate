@@ -263,7 +263,7 @@ compresses it as usual), never wall time.
   engine. Buy it once, then switch between owned trucks at any garage.
 - **Freight market**: every cargo class carries a pay multiplier (0.8–1.3)
   that drifts each in-game day on a seeded random walk persisted in the
-  profile. Job descriptions call out hot, strong, soft, and cold markets,
+  profile. Job descriptions call out tight and loose markets,
   and the job board opens with a spoken market watch headline.
 
 ### Changed

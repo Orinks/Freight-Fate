@@ -376,8 +376,8 @@ HELP_PAGES = [
         "Repair your truck in the city garage. Damage reduces engine power.",
         "Higher levels widen distance caps, improve low-end pay,",
         "and unlock refrigerated, heavy-haul, and high-value freight.",
-        "Cargo markets drift day by day. The job board calls out hot and cold",
-        "markets; hot cargo pays well above the usual rate.",
+        "Cargo markets drift day by day. The job board calls out tight and loose",
+        "markets; tight cargo pays well above the usual rate.",
     ]),
     ("The garage", [
         "Every city garage refuels and repairs your truck.",

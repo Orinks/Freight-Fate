@@ -55,11 +55,11 @@ def test_advance_reports_whether_anything_changed():
 
 
 def test_market_condition_labels():
-    assert market_condition(1.3) == "hot"
-    assert market_condition(1.1) == "strong"
+    assert market_condition(1.3) == "tight"
+    assert market_condition(1.1) == "tight"
     assert market_condition(1.0) == "steady"
-    assert market_condition(0.95) == "soft"
-    assert market_condition(0.8) == "cold"
+    assert market_condition(0.95) == "loose"
+    assert market_condition(0.8) == "loose"
 
 
 def test_summary_names_the_standouts():
@@ -67,24 +67,24 @@ def test_summary_names_the_standouts():
     m.multipliers["electronics"] = 1.3
     m.multipliers["bulk"] = 0.8
     summary = m.summary()
-    assert "electronics hot" in summary
-    assert "bulk cold" in summary
+    assert "electronics tight" in summary
+    assert "bulk loose" in summary
 
 
 def test_job_pay_scales_with_market(world):
-    hot = Market(seed=0)
-    hot.multipliers = {k: 1.3 for k in MARKET_CARGO_KEYS}
-    cold = Market(seed=0)
-    cold.multipliers = {k: 0.8 for k in MARKET_CARGO_KEYS}
+    tight = Market(seed=0)
+    tight.multipliers = {k: 1.3 for k in MARKET_CARGO_KEYS}
+    loose = Market(seed=0)
+    loose.multipliers = {k: 0.8 for k in MARKET_CARGO_KEYS}
     # identical board seeds generate the same jobs, so pay isolates the market
-    jobs_hot = JobBoard(world, seed=11).offers("Chicago", set(), market=hot)
-    jobs_cold = JobBoard(world, seed=11).offers("Chicago", set(), market=cold)
-    assert jobs_hot and len(jobs_hot) == len(jobs_cold)
-    for jh, jc in zip(jobs_hot, jobs_cold, strict=True):
+    jobs_tight = JobBoard(world, seed=11).offers("Chicago", set(), market=tight)
+    jobs_loose = JobBoard(world, seed=11).offers("Chicago", set(), market=loose)
+    assert jobs_tight and len(jobs_tight) == len(jobs_loose)
+    for jh, jc in zip(jobs_tight, jobs_loose, strict=True):
         assert jh.cargo.key == jc.cargo.key
         assert abs(jh.pay / jc.pay - 1.3 / 0.8) < 0.01
-        assert "Market is hot." in jh.describe()
-        assert "Market is cold." in jc.describe()
+        assert "Market is tight." in jh.describe()
+        assert "Market is loose." in jc.describe()
 
 
 def test_steady_market_is_not_called_out_per_job(world):
