@@ -52,6 +52,37 @@ def test_route_options_are_distinct_and_sorted(world):
     assert miles == sorted(miles)
 
 
+def test_route_options_reject_out_of_direction_detours(world):
+    from freight_fate.data.world import _max_alternate_miles
+
+    for start, end in [
+        ("Philadelphia", "New York"),      # Northeast Corridor freight
+        ("Philadelphia", "Boston"),        # I-95 with plausible I-84 option
+        ("Atlanta", "Dallas"),             # I-20, not a St. Louis loop
+        ("Dallas", "Los Angeles"),         # Southwest corridors
+        ("Denver", "Seattle"),             # I-80/I-84 or US-95/I-90
+        ("New York", "Los Angeles"),       # long-haul alternatives still allowed
+    ]:
+        best = world.shortest_route(start, end)
+        options = world.route_options(start, end, count=5)
+        assert options
+        assert options[0].cities == best.cities
+        assert all(route.miles <= _max_alternate_miles(best.miles)
+                   for route in options)
+
+
+def test_northeast_corridors_prefer_i95_not_inland_loops(world):
+    philly_ny = world.route_options("Philadelphia", "New York", count=5)
+    assert [route.cities for route in philly_ny] == [["Philadelphia", "New York"]]
+    assert philly_ny[0].highways == ["I-95"]
+
+    philly_boston = world.route_options("Philadelphia", "Boston", count=5)
+    assert philly_boston[0].cities == ["Philadelphia", "New York", "Boston"]
+    assert philly_boston[0].highways == ["I-95"]
+    assert all("Pittsburgh" not in route.cities for route in philly_boston)
+    assert all("Buffalo" not in route.cities for route in philly_boston)
+
+
 def test_shortest_route_is_actually_shortest(world):
     direct = world.shortest_route("New York", "Boston")
     assert direct is not None

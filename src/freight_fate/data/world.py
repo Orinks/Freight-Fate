@@ -14,6 +14,13 @@ from pathlib import Path
 
 WORLD_PATH = Path(__file__).parent / "world.json"
 
+# Alternate routes should feel like real dispatch choices, not graph leftovers.
+# A little extra mileage is fine for traffic, weather, grades, or avoiding a
+# metro corridor; hundreds of out-of-direction miles on a short lane are not.
+ALTERNATE_ROUTE_EXTRA_RATIO = 0.22
+ALTERNATE_ROUTE_MIN_EXTRA_MILES = 75.0
+ALTERNATE_ROUTE_MAX_EXTRA_MILES = 550.0
+
 
 @dataclass(frozen=True)
 class Location:
@@ -238,12 +245,16 @@ class World:
         routes: list[Route] = []
         penalties: dict[Leg, float] = {}
         seen: set[tuple[str, ...]] = set()
-        for _ in range(count * 2):
+        best = self.shortest_route(start, end)
+        if best is None:
+            return routes
+        max_miles = _max_alternate_miles(best.miles)
+        for _ in range(count * 8):
             route = self.shortest_route(start, end, penalties)
             if route is None:
                 break
             key = tuple(route.cities)
-            if key not in seen:
+            if key not in seen and route.miles <= max_miles:
                 seen.add(key)
                 routes.append(route)
                 if len(routes) >= count:
@@ -281,6 +292,13 @@ def _classify_stop(name: str) -> str:
     if any(word in lower for word in ("travel", "fuel", "plaza", "center")):
         return "travel_center"
     return "travel_center"
+
+
+def _max_alternate_miles(best_miles: float) -> float:
+    extra = best_miles * ALTERNATE_ROUTE_EXTRA_RATIO
+    extra = max(ALTERNATE_ROUTE_MIN_EXTRA_MILES,
+                min(ALTERNATE_ROUTE_MAX_EXTRA_MILES, extra))
+    return best_miles + extra
 
 
 def get_world() -> World:

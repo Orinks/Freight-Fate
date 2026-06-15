@@ -46,6 +46,19 @@ def test_required_hours_includes_breaks_and_sleep():
     assert long_haul > 1150 / 55.0 + 10.0
 
 
+def test_northeast_short_corridor_deadline_uses_direct_route(world):
+    from freight_fate.models.jobs import required_hours
+
+    jobs = JobBoard(world, seed=3).offers("Philadelphia", endorsements=set(), level=1)
+    ny_jobs = [job for job in jobs if job.destination == "New York"]
+
+    assert ny_jobs
+    assert all(job.distance_mi == 97 for job in ny_jobs)
+    assert all(3.0 <= job.deadline_game_h <= 4.0 for job in ny_jobs)
+    assert all(job.deadline_game_h >= required_hours(job.distance_mi) * 1.2
+               for job in ny_jobs)
+
+
 def test_endorsement_gating(world):
     board = JobBoard(world, seed=4)
     no_endorsements = board.offers("Los Angeles", endorsements=set(), count=5)
