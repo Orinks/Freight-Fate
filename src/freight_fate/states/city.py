@@ -60,7 +60,8 @@ class CityMenuState(MenuState):
                      help="A full night at your terminal: fresh hours of "
                           "service and zero fatigue. The clock advances "
                           "10 hours."),
-            MenuItem("Save game", self._save, help="Write your progress to disk."),
+            MenuItem("Save game", self._save,
+                     help="Write your career save to disk."),
             MenuItem("Settings", self._settings,
                      help="Change units, transmission, volumes, weather, "
                           "voices, update channel, and trip pacing."),

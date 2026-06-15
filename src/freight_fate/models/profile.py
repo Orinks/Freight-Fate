@@ -15,8 +15,11 @@ so a crash mid-write can never corrupt an existing profile.
 from __future__ import annotations
 
 import contextlib
+import hashlib
+import hmac
 import json
 import os
+import secrets
 import shutil
 import sys
 from dataclasses import asdict, dataclass, field
@@ -29,6 +32,10 @@ from .market import Market
 SAVE_VERSION = 3
 STARTING_MONEY = 5_000.0
 DEFAULT_CITY = "Chicago"
+SIGNATURE_FIELD = "_signature"
+SIGNATURE_VERSION_FIELD = "_signature_version"
+SIGNATURE_VERSION = 1
+SECRET_FILE = "profile.key"
 
 _legacy_checked = False
 
@@ -80,6 +87,61 @@ def profiles_dir() -> Path:
     return d
 
 
+class ProfileIntegrityError(ValueError):
+    """A save file failed its integrity signature check."""
+
+
+def _secret_path() -> Path:
+    return data_dir() / SECRET_FILE
+
+
+def _profile_secret() -> bytes:
+    """Per-install save signing key.
+
+    This is not DRM: local users can ultimately control local files. It stops
+    casual JSON edits from silently becoming trusted career state.
+    """
+    path = _secret_path()
+    try:
+        return bytes.fromhex(path.read_text(encoding="ascii").strip())
+    except (OSError, ValueError):
+        path.parent.mkdir(parents=True, exist_ok=True)
+        secret = secrets.token_bytes(32)
+        tmp = path.with_suffix(".tmp")
+        tmp.write_text(secret.hex(), encoding="ascii")
+        os.replace(tmp, path)
+        return secret
+
+
+def _signed_payload(data: dict) -> dict:
+    allowed = set(Profile.__dataclass_fields__) | {"version"}
+    return {key: data[key] for key in sorted(allowed) if key in data}
+
+
+def _signature_for(data: dict) -> str:
+    payload = json.dumps(_signed_payload(data), sort_keys=True,
+                         separators=(",", ":"), ensure_ascii=True)
+    return hmac.new(_profile_secret(), payload.encode("utf-8"),
+                    hashlib.sha256).hexdigest()
+
+
+def _is_signature_valid(data: dict) -> bool:
+    signature = data.get(SIGNATURE_FIELD)
+    if not isinstance(signature, str):
+        return False
+    return hmac.compare_digest(signature, _signature_for(data))
+
+
+def _quarantine(path: Path) -> Path:
+    target = path.with_suffix(path.suffix + ".invalid")
+    n = 1
+    while target.exists():
+        target = path.with_suffix(path.suffix + f".invalid{n}")
+        n += 1
+    os.replace(path, target)
+    return target
+
+
 @dataclass
 class Profile:
     name: str = "Driver"
@@ -103,12 +165,16 @@ class Profile:
     def to_dict(self) -> dict:
         d = asdict(self)
         d["version"] = SAVE_VERSION
+        d[SIGNATURE_VERSION_FIELD] = SIGNATURE_VERSION
+        d[SIGNATURE_FIELD] = _signature_for(d)
         return d
 
     @classmethod
     def from_dict(cls, d: dict) -> Profile:
         d = dict(d)
         d.pop("version", None)
+        d.pop(SIGNATURE_FIELD, None)
+        d.pop(SIGNATURE_VERSION_FIELD, None)
         career = Career(**d.pop("career", {}))
         market = Market(**d.pop("market", {}))
         hos = HosClock.from_dict(d.pop("hos", None))  # absent in v2 saves: fresh clock
@@ -145,7 +211,18 @@ class Profile:
     @classmethod
     def load(cls, path: Path) -> Profile:
         with open(path, encoding="utf-8") as f:
-            return cls.from_dict(json.load(f))
+            data = json.load(f)
+        if not isinstance(data, dict):
+            raise ProfileIntegrityError("Save file is not a profile object.")
+        signed = SIGNATURE_FIELD in data
+        if signed and not _is_signature_valid(data):
+            _quarantine(path)
+            raise ProfileIntegrityError(
+                "Save file failed its integrity check and was quarantined.")
+        profile = cls.from_dict(data)
+        if not signed:
+            profile.save()
+        return profile
 
     @staticmethod
     def list_saves() -> list[Path]:

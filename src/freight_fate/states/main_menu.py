@@ -8,11 +8,13 @@ from pathlib import Path
 import pygame
 
 from .. import __version__, updater
-from ..models.profile import DEFAULT_CITY, Profile
+from ..models.profile import DEFAULT_CITY, Profile, ProfileIntegrityError
 from ..settings import TIME_SCALES
 from ..sim.hos import HOS_MODES
 from .base import MenuItem, MenuState, State
 from .update import UpdateChecker, UpdateCheckState, UpdatePromptState
+
+_last_invalid_saves: list[Path] = []
 
 
 def enter_world(ctx) -> None:
@@ -36,10 +38,14 @@ def _world_entry_state(ctx) -> State:
 
 def _loadable_saves() -> list[tuple[Path, Profile]]:
     """Return readable saves in newest-first order."""
+    global _last_invalid_saves
+    _last_invalid_saves = []
     saves = []
     for path in Profile.list_saves():
         try:
             saves.append((path, Profile.load(path)))
+        except ProfileIntegrityError:
+            _last_invalid_saves.append(path)
         except Exception:
             continue
     return saves
@@ -97,9 +103,17 @@ class MainMenuState(MenuState):
             self.ctx.push_state(UpdatePromptState(self.ctx, info))
 
     def announce_entry(self) -> None:
+        warning = ""
+        if _last_invalid_saves:
+            count = len(_last_invalid_saves)
+            warning = (f"{count} saved career failed its integrity check and "
+                       f"was moved aside. " if count == 1 else
+                       f"{count} saved careers failed integrity checks and "
+                       f"were moved aside. ")
         self.ctx.say(
             f"Welcome to Freight Fate, version {__version__}. "
-            f"An audio trucking adventure across America. {self.current_text()}",
+            f"An audio trucking adventure across America. {warning}"
+            f"{self.current_text()}",
         )
 
     def build_items(self) -> list[MenuItem]:
@@ -298,6 +312,7 @@ HELP_PAGES = [
         "Home and End jump to the first and last option.",
         "Type a letter to jump to options starting with that letter.",
         "Press F1 in any menu for contextual help.",
+        "Edited or corrupted career saves may be moved aside at the main menu.",
     ]),
     ("Driving basics", [
         "E starts the engine. To shut it down, slow below 5 miles per hour first.",

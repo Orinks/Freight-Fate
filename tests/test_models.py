@@ -5,6 +5,7 @@ import json
 from freight_fate.models import Career, Economy, JobBoard, Profile
 from freight_fate.models.career import level_for_xp
 from freight_fate.models.jobs import CARGO_CATALOG
+from freight_fate.models.profile import SIGNATURE_FIELD, ProfileIntegrityError
 from freight_fate.settings import Settings
 
 # -- jobs ---------------------------------------------------------------------
@@ -142,6 +143,7 @@ def test_profile_save_is_atomic_and_versioned():
     path = p.save()
     data = json.loads(path.read_text())
     assert data["version"] == 3
+    assert SIGNATURE_FIELD in data
     assert not path.with_suffix(".json.tmp").exists()
 
 
@@ -153,6 +155,35 @@ def test_profile_ignores_unknown_fields():
     path.write_text(json.dumps(data))
     loaded = Profile.load(path)
     assert loaded.name == "Future"
+
+
+def test_profile_tampered_money_is_rejected_and_quarantined():
+    p = Profile(name="Tampered")
+    path = p.save()
+    data = json.loads(path.read_text())
+    data["money"] = 999_999.0
+    path.write_text(json.dumps(data))
+
+    import pytest
+
+    with pytest.raises(ProfileIntegrityError):
+        Profile.load(path)
+    assert not path.exists()
+    assert path.with_suffix(".json.invalid").exists()
+
+
+def test_unsigned_profile_loads_once_and_is_signed():
+    p = Profile(name="Unsigned")
+    data = p.to_dict()
+    data.pop(SIGNATURE_FIELD)
+    path = p.path
+    path.write_text(json.dumps(data))
+
+    loaded = Profile.load(path)
+
+    assert loaded.name == "Unsigned"
+    migrated = json.loads(path.read_text())
+    assert SIGNATURE_FIELD in migrated
 
 
 def test_list_saves_and_delete():

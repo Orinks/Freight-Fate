@@ -188,6 +188,8 @@ def test_v2_profile_loads_with_fresh_clock_and_no_fatigue():
     p = Profile(name="V2 Driver")
     data = p.to_dict()
     data["version"] = 2
+    data.pop("_signature", None)
+    data.pop("_signature_version", None)
     del data["hos"]
     del data["fatigue"]
     p.path.write_text(json.dumps(data))
