@@ -1,6 +1,6 @@
 [project]
 name = "freight-fate"
-version = "1.5.0"
+version = "1.6.0"
 description = "An accessible, audio-first cross-country trucking simulation game"
 readme = "README.md"
 license = { file = "LICENSE" }

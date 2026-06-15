@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 1.6.0 - 2026-06-15
 
 ### Added
 - **Auto-updater.** The packaged game now checks GitHub for new releases

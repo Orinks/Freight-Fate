@@ -73,7 +73,7 @@ def stamp_build_info(build_dir: Path, label: str) -> None:
     """Record what this build is, for the in-game updater.
 
     ``label`` is either a nightly tag (``nightly-20260611``) or a plain
-    version (``1.5.0``); the release tag for the latter is ``v``-prefixed.
+    version (``1.6.0``); the release tag for the latter is ``v``-prefixed.
     """
     nightly = label.startswith("nightly-")
     info = {

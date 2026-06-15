@@ -78,10 +78,21 @@ def load_build_info(version: str) -> BuildInfo | None:
     try:
         with open(install_root() / "build_info.json", encoding="utf-8") as f:
             data = json.load(f)
-        return BuildInfo(tag=str(data["tag"]), channel=str(data["channel"]),
-                         built_at=str(data.get("built_at", "")))
-    except (OSError, ValueError, KeyError):
+    except (OSError, ValueError):
         return BuildInfo(tag=f"v{version}", channel="stable", built_at="")
+    return build_info_from_dict(data, version)
+
+
+def build_info_from_dict(data: object, version: str) -> BuildInfo:
+    """Normalize a packaged build stamp, preserving useful partial data."""
+    if not isinstance(data, dict):
+        return BuildInfo(tag=f"v{version}", channel="stable", built_at="")
+    tag = str(data.get("tag") or f"v{version}")
+    channel = str(data.get("channel") or "")
+    if channel not in CHANNELS:
+        channel = "dev" if _nightly_date(tag) else "stable"
+    return BuildInfo(tag=tag, channel=channel,
+                     built_at=str(data.get("built_at") or ""))
 
 
 def resolve_channel(setting: str, build: BuildInfo | None) -> str:
@@ -180,11 +191,18 @@ def stable_update_from(release: dict, current_version: str) -> UpdateInfo | None
         release, f"Freight Fate version {tag.lstrip('v')}")
 
 
+def _nightly_releases_newest_first(releases: list[dict]) -> list[dict]:
+    nightlies = [
+        release for release in releases
+        if release.get("prerelease") and _nightly_date(release.get("tag_name", ""))
+    ]
+    return sorted(nightlies, key=lambda r: _nightly_date(r.get("tag_name", "")),
+                  reverse=True)
+
+
 def dev_update_from(releases: list[dict], build: BuildInfo | None) -> UpdateInfo | None:
-    for release in releases:
+    for release in _nightly_releases_newest_first(releases):
         tag = release.get("tag_name", "")
-        if not release.get("prerelease") or not _nightly_date(tag):
-            continue
         if build is not None:
             if tag == build.tag:
                 return None
@@ -289,10 +307,11 @@ del "%~f0"
 """
 
 _POSIX_SCRIPT = """#!/bin/sh
-# the release archive never contains a saves folder, so the player's
-# portable saves under {dst}/saves survive the copy untouched
+# Keep portable saves under {dst}/saves intact even if a bad archive includes
+# a top-level saves folder.
 while kill -0 {pid} 2>/dev/null; do sleep 1; done
 rm -rf "{dst}/_internal"
+rm -rf "{src}/saves"
 cp -a "{src}/." "{dst}/"
 rm -rf "{staging}"
 "{dst}/{exe}" &

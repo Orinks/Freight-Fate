@@ -1,12 +1,17 @@
 """Update discovery, channel resolution, notes flattening, apply scripts."""
 
+import importlib.util
+import json
 import sys
+import threading
 from pathlib import Path
+from types import SimpleNamespace
 
 from freight_fate import updater
 from freight_fate.settings import Settings
 from freight_fate.updater import (
     BuildInfo,
+    build_info_from_dict,
     dev_update_from,
     flatten_markdown,
     parse_version,
@@ -31,6 +36,15 @@ def release(tag, prerelease=False, body="", assets=("-windows-portable.zip",
             for suffix in assets
         ],
     }
+
+
+def load_build_release_module():
+    path = Path(__file__).resolve().parents[1] / "tools" / "build_release.py"
+    spec = importlib.util.spec_from_file_location("build_release", path)
+    assert spec is not None and spec.loader is not None
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
 
 
 # -- version parsing and channels --------------------------------------------
@@ -91,10 +105,61 @@ def test_dev_update_skips_non_nightlies_and_finds_newer():
     assert "2026-06-11" in info.title
 
 
+def test_dev_update_sorts_nightlies_before_comparing():
+    releases = [
+        release("nightly-20260610", prerelease=True),
+        release("nightly-20260612", prerelease=True),
+        release("nightly-20260611", prerelease=True),
+    ]
+    build = BuildInfo(tag="nightly-20260611", channel="dev", built_at="2026-06-11")
+    info = dev_update_from(releases, build)
+    assert info is not None
+    assert info.tag == "nightly-20260612"
+
+
 def test_dev_no_update_when_on_latest_nightly():
     releases = [release("nightly-20260611", prerelease=True)]
     build = BuildInfo(tag="nightly-20260611", channel="dev", built_at="2026-06-11")
     assert dev_update_from(releases, build) is None
+
+
+def test_dev_update_uses_partial_nightly_build_info():
+    build = build_info_from_dict({"tag": "nightly-20260611"}, "1.6.0")
+    assert build.channel == "dev"
+    assert build.tag == "nightly-20260611"
+
+    releases = [
+        release("nightly-20260611", prerelease=True),
+        release("nightly-20260610", prerelease=True),
+    ]
+    assert dev_update_from(releases, build) is None
+
+
+def test_build_info_malformed_falls_back_to_stable_version():
+    assert build_info_from_dict([], "1.6.0") == BuildInfo(
+        tag="v1.6.0", channel="stable", built_at="")
+
+
+def test_build_info_stamp_marks_stable_and_nightly_channels(tmp_path):
+    stamp_build_info = load_build_release_module().stamp_build_info
+
+    stable_dir = tmp_path / "stable"
+    stable_dir.mkdir()
+    stamp_build_info(stable_dir, "1.6.0")
+    stable = build_info_from_dict(json.loads(
+        (stable_dir / "build_info.json").read_text(encoding="utf-8")), "1.6.0")
+    assert stable.tag == "v1.6.0"
+    assert stable.channel == "stable"
+    assert stable.built_at
+
+    nightly_dir = tmp_path / "nightly"
+    nightly_dir.mkdir()
+    stamp_build_info(nightly_dir, "nightly-20260615")
+    nightly = build_info_from_dict(json.loads(
+        (nightly_dir / "build_info.json").read_text(encoding="utf-8")), "1.6.0")
+    assert nightly.tag == "nightly-20260615"
+    assert nightly.channel == "dev"
+    assert nightly.built_at
 
 
 def test_dev_stable_build_compares_by_build_date():
@@ -153,6 +218,8 @@ def test_write_apply_script_waits_for_pid_and_relaunches(tmp_path):
     # touch them (Windows excludes the dir, POSIX never purges the root)
     if sys.platform == "win32":
         assert "/XD _internal saves" in text
+    else:
+        assert f"rm -rf \"{new_root}/saves\"" in text
     assert "/PURGE" not in text
     assert f"rm -rf \"{install}\"" not in text
 
@@ -177,8 +244,57 @@ def test_settings_default_and_validation(tmp_path, monkeypatch):
 
 def test_build_info_none_when_not_frozen():
     assert not updater.is_frozen()
-    assert updater.load_build_info("1.5.0") is None
+    assert updater.load_build_info("1.6.0") is None
 
 
 def test_install_root_is_executable_dir():
     assert updater.install_root() == Path(updater.sys.executable).resolve().parent
+
+
+# -- update states ------------------------------------------------------------
+
+
+def test_manual_update_check_explains_source_builds(monkeypatch):
+    from freight_fate.states.update import UpdateCheckState
+
+    spoken = []
+    monkeypatch.setattr(updater, "is_frozen", lambda: False)
+    ctx = SimpleNamespace(say=lambda text: spoken.append(text))
+    state = UpdateCheckState(ctx)
+
+    state.enter()
+
+    assert state.checker is None
+    assert "This copy runs from source; update it with git." in state.message
+    assert spoken == [state.message + " Press Escape to go back."]
+
+
+def test_startup_update_prompt_respects_skipped_version():
+    from freight_fate.states.main_menu import MainMenuState
+
+    done = threading.Event()
+    done.set()
+    info = updater.UpdateInfo(
+        tag="v1.6.1",
+        title="Freight Fate version 1.6.1",
+        notes=[],
+        asset_name="FreightFate-1.6.1-windows-portable.zip",
+        asset_url="https://example.test/FreightFate.zip",
+        asset_size=1,
+    )
+    checker = SimpleNamespace(done=done, result=info)
+    pushed = []
+    ctx = SimpleNamespace(
+        settings=SimpleNamespace(skipped_update="v1.6.1"),
+        push_state=lambda state: pushed.append(state),
+    )
+
+    try:
+        MainMenuState._update_checker = checker
+        MainMenuState._update_prompted = False
+        MainMenuState(ctx).update(0.0)
+    finally:
+        MainMenuState._update_checker = None
+        MainMenuState._update_prompted = False
+
+    assert pushed == []

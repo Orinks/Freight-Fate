@@ -49,7 +49,7 @@ visual display mirrors all speech for sighted players and helpers.
 The easiest way to play is a prebuilt portable build from the
 [releases page](https://github.com/Orinks/Freight-fate/releases):
 
-- **Stable releases** (`v1.5.0` and so on) are the finished, numbered
+- **Stable releases** (`v1.6.0` and so on) are the finished, numbered
   versions — pick the latest one.
 - **Developer snapshots** (`nightly-...`, marked pre-release) are automatic
   nightly builds of work in progress: new features sooner, rough edges
