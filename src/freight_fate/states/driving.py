@@ -97,6 +97,7 @@ class DrivingState(State):
         """Everything needed to resume this delivery from a save."""
         job = self.job
         return {
+            "kind": "delivery",
             "job": {
                 "cargo": job.cargo.key,
                 "weight_tons": job.weight_tons,
@@ -169,7 +170,7 @@ class DrivingState(State):
         if self.resumed:
             hours_used = self.trip.game_minutes / 60.0
             self.ctx.say(
-                f"Resuming your delivery: {self.job.weight_tons:.0f} tons of "
+                f"Resuming your loaded delivery: {self.job.weight_tons:.0f} tons of "
                 f"{self.job.cargo.label} to {self.job.destination}. "
                 f"{self.trip.progress_summary(self.ctx.settings.imperial_units)} "
                 f"{hours_used:.1f} hours used of {self.job.deadline_game_h:.0f}. "
@@ -240,7 +241,8 @@ class DrivingState(State):
                 "X takes the next announced exit: slow to 45 for the ramp, "
                 "then brake to a stop for the rest stop menu. "
                 "E starts the engine, and stops it only below 5 miles per hour. "
-                "At your destination, stop and park to complete delivery. "
+                "Pickup and loading are complete. At your destination, come to a "
+                "full stop, then dock and deliver from the facility menu. "
                 "Space speed. Tab full status. F fuel. "
                 "C clock, deadline, and hours of service. "
                 "R route. V weather. T rest stop menu when already stopped "
@@ -727,7 +729,7 @@ class DrivingState(State):
         self.ctx.replace_state(ArrivalState(self.ctx, self))
 
     def _handle_arrival_gate(self) -> None:
-        if self.truck.speed_mph <= DELIVERY_PARK_MPH:
+        if self.truck.speed_mph <= DOCKING_MAX_MPH:
             self._open_facility_arrival()
             return
         if self._arrival_stop_said:
@@ -735,11 +737,16 @@ class DrivingState(State):
         self._arrival_stop_said = True
         self._cancel_cruise()
         self.ctx.audio.play("ui/warning")
-        self._set_status("Destination reached: slow down and park to deliver.")
+        if self.truck.speed_mph <= DELIVERY_PARK_MPH:
+            instruction = "Hold the brake to a full stop before the facility menu opens."
+            self._set_status("Destination gate reached: full stop required for docking.")
+        else:
+            instruction = (f"Slow below {DELIVERY_PARK_MPH:.0f} miles per hour, "
+                           "then hold the brake to a full stop.")
+            self._set_status("Destination reached: slow down and park to deliver.")
         self.ctx.say_event(
             f"Destination facility ahead: {self._destination_facility_text()}. "
-            f"Slow below {DELIVERY_PARK_MPH:.0f} miles per hour and park to "
-            "complete the delivery.",
+            f"{instruction} Docking completes the delivery.",
             interrupt=True)
 
     def _open_facility_arrival(self) -> None:
@@ -765,7 +772,7 @@ class DrivingState(State):
         limit, reason = self.trip.speed_limit_at(self.trip.position_mi)
         gear = "N" if t.transmission.in_neutral else str(t.transmission.gear)
         return [
-            f"Driving to {self.job.destination}",
+            f"Driving loaded to {self.job.destination}",
             "",
             f"Speed: {t.speed_mph:.0f} mph (limit {limit:.0f}{', ' + reason if reason else ''})",
             f"Gear: {gear}   RPM: {t.rpm:.0f}   {'ENGINE ON' if t.engine_on else 'engine off'}"

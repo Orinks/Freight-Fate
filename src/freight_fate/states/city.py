@@ -6,10 +6,50 @@ import zlib
 
 from ..data.world import Route
 from ..models.economy import REPAIR_COST_PER_PCT
-from ..models.jobs import Job, JobBoard, facility_label
+from ..models.jobs import CARGO_CATALOG, Job, JobBoard, facility_label
 from ..models.trucks import TRUCK_CATALOG, UPGRADE_CATALOG, TruckModel, Upgrade
 from ..sim.hos import clock_text, time_of_day
+from ..sim.vehicle import TruckState
 from .base import MenuItem, MenuState
+
+
+def _job_payload(job: Job) -> dict:
+    return {
+        "cargo": job.cargo.key,
+        "weight_tons": job.weight_tons,
+        "origin": job.origin,
+        "origin_location": job.origin_location,
+        "destination": job.destination,
+        "distance_mi": job.distance_mi,
+        "pay": job.pay,
+        "deadline_game_h": job.deadline_game_h,
+        "market_mult": job.market_mult,
+        "origin_type": job.origin_type,
+        "destination_location": job.destination_location,
+        "destination_type": job.destination_type,
+    }
+
+
+def _job_from_payload(data: dict) -> Job:
+    cargo = CARGO_CATALOG[data["cargo"]]
+    return Job(cargo, float(data["weight_tons"]), data["origin"],
+               data["origin_location"], data["destination"],
+               float(data["distance_mi"]), float(data["pay"]),
+               float(data["deadline_game_h"]),
+               market_mult=float(data.get("market_mult", 1.0)),
+               origin_type=str(data.get("origin_type", "terminal")),
+               destination_location=str(data.get("destination_location", "")),
+               destination_type=str(data.get("destination_type", "terminal")))
+
+
+def pickup_snapshot(job: Job, *, checked_in: bool = False,
+                    loaded: bool = False) -> dict:
+    return {
+        "kind": "pickup",
+        "job": _job_payload(job),
+        "checked_in": checked_in,
+        "loaded": loaded,
+    }
 
 
 class CityMenuState(MenuState):
@@ -380,10 +420,10 @@ class TruckShopState(MenuState):
 
 class JobBoardState(MenuState):
     title = "Job board"
-    intro_help = ("Each entry is one delivery job. Enter accepts the job and moves on "
-                  "to route planning. Jobs name their origin and destination "
-                  "facilities, and cargo depends on the facility type. Escape "
-                  "returns to the city.")
+    intro_help = ("Each entry is one delivery job. Enter accepts the job and creates "
+                  "a pickup objective at the named origin facility. Jobs name "
+                  "their origin and destination facilities, and cargo depends "
+                  "on the facility type. Escape returns to the city.")
 
     def __init__(self, ctx, jobs: list[Job]) -> None:
         super().__init__(ctx)
@@ -416,9 +456,178 @@ class JobBoardState(MenuState):
             self.ctx.say("You do not have the endorsement for this cargo yet. "
                          "Keep delivering to level up and unlock it.")
             return
-        routes = self.ctx.world.route_options(job.origin, job.destination)
-        self.ctx.say(f"Job accepted: {job.cargo.label} to {job.destination}.")
-        self.ctx.push_state(RouteSelectState(self.ctx, job, routes))
+        p.active_trip = pickup_snapshot(job)
+        self.ctx.save_profile()
+        self.ctx.say(
+            f"Job accepted. Pickup objective: check in at "
+            f"{facility_label(job.origin_type)} {job.origin_location}.")
+        self.ctx.push_state(PickupFacilityState(self.ctx, job))
+
+
+class PickupFacilityState(MenuState):
+    title = "Pickup facility"
+    intro_help = ("Use up and down arrows to navigate, Enter to select. "
+                  "Check in at the origin facility, then load cargo only after "
+                  "the truck is fully stopped. Escape repeats the pickup status.")
+
+    def __init__(self, ctx, job: Job, *, checked_in: bool = False,
+                 loaded: bool = False) -> None:
+        super().__init__(ctx)
+        self.job = job
+        self.checked_in = checked_in
+        self.loaded = loaded
+        self.truck = TruckState(specs=ctx.profile.truck_specs())
+
+    @classmethod
+    def from_snapshot(cls, ctx, data: dict) -> PickupFacilityState | None:
+        try:
+            return cls(ctx, _job_from_payload(data["job"]),
+                       checked_in=bool(data.get("checked_in", False)),
+                       loaded=bool(data.get("loaded", False)))
+        except (KeyError, TypeError, ValueError):
+            return None
+
+    @property
+    def facility(self) -> str:
+        return f"{facility_label(self.job.origin_type)} {self.job.origin_location}"
+
+    def announce_entry(self) -> None:
+        self.ctx.audio.set_ambient("ambient/warehouse", volume=0.3)
+        if self.loaded:
+            lead = (f"Loaded at {self.facility}. The trailer is sealed for "
+                    f"{self.job.destination}.")
+        elif self.checked_in:
+            lead = (f"Checked in at {self.facility}. You are assigned a dock "
+                    "for loading.")
+        else:
+            lead = (f"Pickup objective: {self.facility}. Check in with the "
+                    "shipping office before loading.")
+        self.ctx.say(f"{lead} {self.current_text()}")
+
+    def exit(self) -> None:
+        self.ctx.audio.set_ambient(None)
+
+    def build_items(self) -> list[MenuItem]:
+        if self.loaded:
+            primary = MenuItem(
+                "Plan destination route",
+                self._plan_route,
+                help="Choose the highway route for the loaded trip to the "
+                     "destination facility.")
+        elif self.checked_in:
+            primary = MenuItem(
+                "Load cargo at dock",
+                self._load,
+                help="Back into the assigned dock, set the brakes, and wait "
+                     "while the trailer is loaded and sealed.")
+        else:
+            primary = MenuItem(
+                "Check in at shipping office",
+                self._check_in,
+                help="Confirm the pickup number and receive the dock assignment.")
+        return [
+            primary,
+            MenuItem("Pickup status", self._status,
+                     help="Hear the origin facility, cargo, destination, and "
+                          "loading instruction."),
+            MenuItem("Save and quit to main menu", self._save_and_quit,
+                     help="Save this pickup objective so it resumes here later."),
+            MenuItem("Cancel pickup and return to city", self._cancel,
+                     help="Give up this job before departure and return to the "
+                          "city job board area."),
+        ]
+
+    def _save_state(self) -> None:
+        self.ctx.profile.active_trip = pickup_snapshot(
+            self.job, checked_in=self.checked_in, loaded=self.loaded)
+        self.ctx.save_profile()
+
+    def _check_in(self) -> None:
+        self.checked_in = True
+        self._save_state()
+        self.refresh(keep_index=False)
+        self.ctx.audio.play("ui/notify")
+        self.ctx.say(
+            f"Checked in at {self.facility}. Shipping assigned a dock. "
+            "Come to a full stop and select Load cargo at dock.")
+
+    def _load(self) -> None:
+        from .driving import DOCKING_MAX_MPH
+
+        if not self.checked_in:
+            self.ctx.say("Check in at the shipping office before loading.")
+            return
+        if self.truck.speed_mph > DOCKING_MAX_MPH:
+            self.ctx.audio.play("ui/error")
+            self.ctx.say("Hold the brake and come to a full stop before loading.")
+            return
+        self.truck.throttle = 0.0
+        self.truck.brake = 1.0
+        self.loaded = True
+        self._save_state()
+        self.refresh(keep_index=False)
+        self.ctx.audio.play("ui/notify")
+        self.ctx.say(
+            f"Loaded and sealed at {self.facility}. "
+            f"{self.job.weight_tons:.0f} tons of {self.job.cargo.label} are "
+            f"ready for {self.job.destination}. Plan the destination route.")
+
+    def _plan_route(self) -> None:
+        if not self.loaded:
+            self.ctx.say("Load the cargo before planning the destination route.")
+            return
+        routes = self.ctx.world.route_options(self.job.origin, self.job.destination)
+        if not routes:
+            self.ctx.audio.play("ui/error")
+            self.ctx.say("Dispatch cannot find a route for this load.")
+            return
+        self.ctx.push_state(RouteSelectState(self.ctx, self.job, routes))
+
+    def _status(self) -> None:
+        state = ("loaded and sealed" if self.loaded else
+                 "checked in, waiting to load" if self.checked_in else
+                 "not checked in")
+        self.ctx.say(
+            f"Pickup at {self.facility}: {state}. "
+            f"Cargo is {self.job.weight_tons:.0f} tons of {self.job.cargo.label}. "
+            f"Destination is {facility_label(self.job.destination_type)} "
+            f"{self.job.destination_location} in {self.job.destination}. "
+            f"Current speed {self.ctx.settings.speed_text(self.truck.speed_mph)}.")
+
+    def _save_and_quit(self) -> None:
+        from .main_menu import MainMenuState
+
+        self._save_state()
+        self.ctx.say("Saved. Your pickup objective will resume here.",
+                     interrupt=True)
+        self.ctx.reset_to(MainMenuState(self.ctx))
+
+    def _cancel(self) -> None:
+        self.ctx.profile.active_trip = None
+        self.ctx.save_profile()
+        self.ctx.say(f"Pickup canceled. Returned to {self.ctx.profile.current_city}.",
+                     interrupt=True)
+        self.ctx.reset_to(CityMenuState(self.ctx))
+
+    def go_back(self) -> None:
+        self._status()
+
+    def lines(self) -> list[str]:
+        state = ("Loaded and sealed" if self.loaded else
+                 "Checked in" if self.checked_in else "Check-in required")
+        return [
+            self.title,
+            "",
+            f"Facility: {self.facility}",
+            f"Cargo: {self.job.weight_tons:.0f} tons of {self.job.cargo.label}",
+            f"Destination: {self.job.destination}",
+            f"Status: {state}",
+            f"Speed: {self.truck.speed_mph:.0f} mph",
+            "",
+        ] + [
+            ("> " if i == self.index else "  ") + item.text
+            for i, item in enumerate(self.items)
+        ]
 
 
 class RouteSelectState(MenuState):
@@ -493,6 +702,9 @@ class RouteSelectState(MenuState):
     def _start(self, route: Route) -> None:
         from .driving import DrivingState
 
+        driving = DrivingState(self.ctx, self.job, route)
+        self.ctx.profile.active_trip = driving.snapshot()
+        self.ctx.save_profile()
         self.ctx.say(f"Departing {self.job.origin} for {self.job.destination} "
                      f"on {route.highways[0]}. Good luck out there.", interrupt=True)
-        self.ctx.push_state(DrivingState(self.ctx, self.job, route))
+        self.ctx.push_state(driving)

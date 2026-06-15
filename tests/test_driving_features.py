@@ -24,6 +24,9 @@ def start_drive(app):
     while board.jobs[board.index].cargo.endorsement:  # skip locked teasers
         board.handle_event(key_event(pygame.K_DOWN))
     app.state.handle_event(key_event(pygame.K_RETURN))  # accept job
+    app.state.handle_event(key_event(pygame.K_RETURN))  # check in at origin
+    app.state.handle_event(key_event(pygame.K_RETURN))  # load at dock
+    app.state.handle_event(key_event(pygame.K_RETURN))  # plan destination route
     app.state.handle_event(key_event(pygame.K_RETURN))  # pick route
     assert isinstance(app.state, DrivingState)
     return app.state
@@ -49,7 +52,7 @@ def test_driving_f1_describes_safe_shutdown_and_destination_parking(monkeypatch)
 
         help_text = spoken[-1]
         assert "stops it only below 5 miles per hour" in help_text
-        assert "stop and park to complete delivery" in help_text
+        assert "dock and deliver from the facility menu" in help_text
     finally:
         app.shutdown()
 
@@ -61,6 +64,10 @@ def test_how_to_play_documents_new_gameplay_systems():
 
     assert "slow below 5 miles per hour" in help_text
     assert "destination facility" in help_text
+    assert "check in at the origin facility" in help_text
+    assert "loading requires a full stop" in help_text
+    assert "loaded and sealed" in help_text
+    assert "dock and deliver" in help_text
     assert "ports" in help_text
     assert "intermodal yards" in help_text
     assert "food terminals" in help_text
@@ -134,7 +141,7 @@ def test_delivery_requires_parking_at_destination(monkeypatch):
 
         assert isinstance(app.state, DrivingState)
         assert "Destination facility ahead" in events[-1]
-        assert "park to complete the delivery" in events[-1]
+        assert "Docking completes the delivery" in events[-1]
         assert "slow down and park" in driving.lines()[-1]
 
         driving.truck.velocity_mps = 0.0
@@ -169,8 +176,14 @@ def test_docking_requires_a_full_stop(monkeypatch):
         driving.truck.velocity_mps = 1.1   # about 2.5 mph: parked, not docked
 
         driving.update(1 / 60)
+        assert isinstance(app.state, DrivingState)
+        assert "full stop required" in driving.lines()[-1]
+
+        driving.truck.velocity_mps = 0.0
+        driving.update(1 / 60)
         assert isinstance(app.state, FacilityArrivalState)
 
+        driving.truck.velocity_mps = 1.1
         app.state.handle_event(key_event(pygame.K_RETURN))
 
         assert isinstance(app.state, FacilityArrivalState)

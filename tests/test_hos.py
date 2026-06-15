@@ -338,6 +338,9 @@ def start_drive(app):
     while board.jobs[board.index].cargo.endorsement:  # skip locked teasers
         board.handle_event(key_event(pygame.K_DOWN))
     app.state.handle_event(key_event(pygame.K_RETURN))  # accept job
+    app.state.handle_event(key_event(pygame.K_RETURN))  # check in at origin
+    app.state.handle_event(key_event(pygame.K_RETURN))  # load at dock
+    app.state.handle_event(key_event(pygame.K_RETURN))  # plan destination route
     app.state.handle_event(key_event(pygame.K_RETURN))  # pick route
     assert isinstance(app.state, DrivingState)
     return app.state

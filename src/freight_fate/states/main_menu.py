@@ -24,12 +24,15 @@ def enter_world(ctx) -> None:
 
 def _world_entry_state(ctx) -> State:
     """Build the first playable state for the current profile."""
-    from .city import CityMenuState
+    from .city import CityMenuState, PickupFacilityState
     from .driving import DrivingState
 
     p = ctx.profile
     if p.active_trip:
-        state = DrivingState.from_snapshot(ctx, p.active_trip)
+        if p.active_trip.get("kind") == "pickup":
+            state = PickupFacilityState.from_snapshot(ctx, p.active_trip)
+        else:
+            state = DrivingState.from_snapshot(ctx, p.active_trip)
         if state is not None:
             return state
         p.active_trip = None  # unreadable snapshot; do not retry every load
@@ -52,7 +55,12 @@ def _loadable_saves() -> list[tuple[Path, Profile]]:
 
 
 def _career_location(profile: Profile) -> str:
-    destination = (profile.active_trip or {}).get("job", {}).get("destination")
+    trip = profile.active_trip or {}
+    job = trip.get("job", {})
+    destination = job.get("destination")
+    if trip.get("kind") == "pickup" and destination:
+        loaded = "loaded for" if trip.get("loaded") else "picking up for"
+        return f"{loaded} {destination}"
     if destination:
         return f"on the road to {destination}"
     return f"in {profile.current_city}"
@@ -303,8 +311,9 @@ class HomeTerminalState(MenuState):
 HELP_PAGES = [
     ("The goal", [
         "You are an owner-operator truck driver building a freight career.",
-        "Pick up jobs at real freight facilities, choose a route,",
-        "and deliver cargo across the country, on time and intact.",
+        "Accept freight from the job board, check in at the origin facility,",
+        "load the trailer, choose a destination route, and deliver cargo",
+        "across the country, on time and intact.",
         "Earn money and experience, level up, and unlock better freight.",
     ]),
     ("Menus", [
@@ -369,9 +378,12 @@ HELP_PAGES = [
         "Each job names an origin facility and a destination facility.",
         "Cargo follows the facility type, so a food terminal offers",
         "different work than a port, warehouse, or factory.",
+        "After accepting a job, check in at the origin facility.",
+        "Loading requires a full stop at the assigned dock.",
+        "Once loaded and sealed, choose the route to the destination.",
         "Deliver before the deadline for a bonus. Late or damaged cargo pays less.",
-        "At the destination, slow down and park at the facility",
-        "before the delivery settles.",
+        "At the destination facility, slow down, come to a full stop,",
+        "then dock and deliver before the settlement is paid.",
         "Fragile cargo, like electronics and fresh food, punishes rough driving.",
         "Repair your truck in the city garage. Damage reduces engine power.",
         "Higher levels widen distance caps, improve low-end pay,",
