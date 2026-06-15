@@ -242,6 +242,34 @@ def test_cruise_control_holds_the_set_speed():
 
 
 @pytest.mark.smoke
+def test_automatic_shift_uses_shift_cue_not_brake_air(monkeypatch):
+    from freight_fate.app import App
+
+    class NoKeys:
+        def __getitem__(self, _key):
+            return False
+
+    app = App()
+    played = []
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        monkeypatch.setattr(pygame.key, "get_pressed", lambda: NoKeys())
+        monkeypatch.setattr(app.ctx.audio, "play",
+                            lambda key, volume=1.0: played.append((key, volume)))
+        driving.truck.start_engine()
+        driving.truck.transmission.gear = 3
+        driving.truck.velocity_mps = 5.0
+
+        driving.update(0.0)
+
+        assert ("vehicle/gear_shift", 0.65) in played
+        assert all(key != "vehicle/brake_air" for key, _volume in played)
+    finally:
+        app.shutdown()
+
+
+@pytest.mark.smoke
 def test_cruise_control_requires_road_speed_and_cancels_on_hazard():
     from freight_fate.app import App
     from freight_fate.sim.trip import TripEvent, TripEventKind

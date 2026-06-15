@@ -3,7 +3,8 @@
 Forces are computed in SI units on a longitudinal (1-D) model:
 engine drive force, aerodynamic drag, rolling resistance, grade force,
 and braking. The numbers are tuned around a loaded Class 8 tractor-trailer:
-~36 t gross, ~450 hp, 10-speed box, ~70 mph top speed, ~6.5 mpg at cruise.
+~36 t gross, ~475 hp, 10-speed box with overdrive, ~70 mph governed top
+speed, and ~6.5 mpg at cruise.
 """
 
 from __future__ import annotations
@@ -28,7 +29,7 @@ class TruckSpecs:
     frontal_area_m2: float = 10.0
     rolling_resistance: float = 0.0065
     wheel_radius_m: float = 0.5
-    max_torque_nm: float = 1_966.0     # ~1450 lb-ft
+    max_torque_nm: float = 2_400.0     # ~1770 lb-ft
     idle_rpm: float = 600.0
     max_rpm: float = 2_200.0
     peak_torque_rpm: float = 1_300.0

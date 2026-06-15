@@ -395,7 +395,7 @@ class DrivingState(State):
         if t.transmission.automatic and t.engine_on:
             new_gear = t.auto_shift()
             if new_gear is not None:
-                self.ctx.audio.play("vehicle/gear_shift", volume=0.5)
+                self.ctx.audio.play("vehicle/gear_shift", volume=0.65)
 
         was_on = t.engine_on
         t.update(dt)
