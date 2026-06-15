@@ -46,13 +46,17 @@ CRUISE_MIN_MPH = 20.0             # cruise control needs road speed to hold
 ENGINE_SHUTDOWN_SAFE_MPH = 5.0    # prevent accidental kill-switch use at speed
 DELIVERY_PARK_MPH = 3.0           # destination settlement requires parking speed
 DOCKING_MAX_MPH = 1.0             # final dock/park action needs a full stop
+DRIVE_PHASE_PICKUP = "pickup"
+DRIVE_PHASE_DELIVERY = "delivery"
 
 
 class DrivingState(State):
-    def __init__(self, ctx, job: Job, route: Route, trip_seed: int | None = None) -> None:
+    def __init__(self, ctx, job: Job, route: Route, trip_seed: int | None = None,
+                 phase: str = DRIVE_PHASE_DELIVERY) -> None:
         super().__init__(ctx)
         self.job = job
         self.route = route
+        self.phase = phase
         self.trip_seed = trip_seed if trip_seed is not None else random.randrange(2**31)
         self.resumed = False
         profile = ctx.profile
@@ -95,10 +99,11 @@ class DrivingState(State):
     # -- save and resume -----------------------------------------------------------
 
     def snapshot(self) -> dict:
-        """Everything needed to resume this delivery from a save."""
+        """Everything needed to resume this active drive from a save."""
         job = self.job
+        kind = "pickup_drive" if self.phase == DRIVE_PHASE_PICKUP else "delivery"
         return {
-            "kind": "delivery",
+            "kind": kind,
             "job": {
                 "cargo": job.cargo.key,
                 "weight_tons": job.weight_tons,
@@ -114,6 +119,7 @@ class DrivingState(State):
                 "destination_type": job.destination_type,
             },
             "route_cities": list(self.route.cities),
+            "route_kind": "facility_approach" if self.phase == DRIVE_PHASE_PICKUP else "highway",
             "trip_seed": self.trip_seed,
             "position_mi": self.trip.position_mi,
             "game_minutes": self.trip.game_minutes,
@@ -126,11 +132,16 @@ class DrivingState(State):
 
     @classmethod
     def from_snapshot(cls, ctx, data: dict) -> DrivingState | None:
-        """Rebuild a saved delivery; None if the snapshot is unreadable."""
+        """Rebuild a saved active drive; None if the snapshot is unreadable."""
         try:
             j = data["job"]
             cargo = CARGO_CATALOG[j["cargo"]]
-            route = ctx.world.route_from_cities(data["route_cities"])
+            kind = str(data.get("kind", "delivery"))
+            phase = DRIVE_PHASE_PICKUP if kind == "pickup_drive" else DRIVE_PHASE_DELIVERY
+            if phase == DRIVE_PHASE_PICKUP:
+                route = ctx.world.facility_approach_route(j["origin"], j["origin_location"])
+            else:
+                route = ctx.world.route_from_cities(data["route_cities"])
             if route is None:
                 return None
             job = Job(cargo, float(j["weight_tons"]), j["origin"],
@@ -141,7 +152,8 @@ class DrivingState(State):
                       origin_type=str(j.get("origin_type", "terminal")),
                       destination_location=str(j.get("destination_location", "")),
                       destination_type=str(j.get("destination_type", "terminal")))
-            state = cls(ctx, job, route, trip_seed=int(data["trip_seed"]))
+            state = cls(ctx, job, route, trip_seed=int(data["trip_seed"]),
+                        phase=phase)
             state.resumed = True
             state.start_damage = float(data["start_damage"])
             state.speeding_strikes = int(data["speeding_strikes"])
@@ -170,17 +182,25 @@ class DrivingState(State):
         now = clock_text(self.trip.current_hour)
         if self.resumed:
             hours_used = self.trip.game_minutes / 60.0
+            drive_name = "pickup drive" if self.phase == DRIVE_PHASE_PICKUP else "loaded delivery"
+            destination = (self._pickup_facility_text()
+                           if self.phase == DRIVE_PHASE_PICKUP else self.job.destination)
+            progress = (self._pickup_progress_summary()
+                        if self.phase == DRIVE_PHASE_PICKUP else
+                        self.trip.progress_summary(self.ctx.settings.imperial_units))
             self.ctx.say(
-                f"Resuming your loaded delivery: {self.job.weight_tons:.0f} tons of "
-                f"{self.job.cargo.label} to {self.job.destination}. "
-                f"{self.trip.progress_summary(self.ctx.settings.imperial_units)} "
+                f"Resuming your {drive_name}: {self.job.weight_tons:.0f} tons of "
+                f"{self.job.cargo.label} to {destination}. "
+                f"{progress} "
                 f"{hours_used:.1f} hours used of {self.job.deadline_game_h:.0f}. "
                 f"It is {now}. Transmission is {mode}. "
                 f"Weather: {self.weather.describe()}. "
                 "You are parked. Press E to start the engine.",
                 interrupt=False)
         else:
-            self.ctx.say(f"You are at the wheel. It is {now}. "
+            objective = (f"Pickup objective: drive to {self._pickup_facility_text()}. "
+                         if self.phase == DRIVE_PHASE_PICKUP else "")
+            self.ctx.say(f"You are at the wheel. {objective}It is {now}. "
                          f"Transmission is {mode}. "
                          f"Weather: {self.weather.describe()}. "
                          "Press E to start the engine, F1 for the controls.",
@@ -235,6 +255,13 @@ class DrivingState(State):
         elif key == pygame.K_v:
             self._speak_weather()
         elif key == pygame.K_F1:
+            objective_help = (
+                f"Your current objective is pickup: drive to {self._pickup_facility_text()}, "
+                "come to a full stop at the gate, then use the pickup facility "
+                "menu to check in and load. "
+                if self.phase == DRIVE_PHASE_PICKUP else
+                "Pickup and loading are complete. At your destination, come to a "
+                "full stop, then dock and deliver from the facility menu. ")
             self.ctx.say(
                 "Hold Up arrow to accelerate, Down arrow to brake. "
                 "Hold B for the emergency brake, the hardest possible stop. "
@@ -242,8 +269,7 @@ class DrivingState(State):
                 "X takes the next announced exit: slow to 45 for the ramp, "
                 "then brake to a stop for the rest stop menu. "
                 "E starts the engine, and stops it only below 5 miles per hour. "
-                "Pickup and loading are complete. At your destination, come to a "
-                "full stop, then dock and deliver from the facility menu. "
+                f"{objective_help}"
                 "Space speed. Tab full status. F fuel. "
                 "C clock, deadline, and hours of service. "
                 "R route. V weather. T rest stop menu when already stopped "
@@ -308,10 +334,13 @@ class DrivingState(State):
     def _speak_full_status(self) -> None:
         t = self.truck
         limit, reason = self.trip.speed_limit_at(self.trip.position_mi)
+        progress = (self._pickup_progress_summary()
+                    if self.phase == DRIVE_PHASE_PICKUP else
+                    self.trip.progress_summary(self.ctx.settings.imperial_units))
         parts = [
             self.ctx.settings.speed_text(t.speed_mph),
             f"speed limit {limit:.0f}" + (f" in a {reason} zone" if reason else ""),
-            self.trip.progress_summary(self.ctx.settings.imperial_units),
+            progress,
             f"fuel {t.fuel_fraction * 100:.0f} percent",
             f"it is {time_of_day(self.trip.current_hour)}",
         ]
@@ -336,6 +365,14 @@ class DrivingState(State):
 
     def _speak_clock(self) -> None:
         hours_used = self.trip.game_minutes / 60.0
+        if self.phase == DRIVE_PHASE_PICKUP:
+            now = f"It is {clock_text(self.trip.current_hour)}."
+            self.ctx.say(
+                f"{now} Pickup drive to {self._pickup_facility_text()}. "
+                f"{self.trip.remaining_miles:.1f} miles remain. "
+                f"{hours_used:.1f} hours used before loading. "
+                f"{self.hos.summary(self.ctx.settings.hos_mode)}")
+            return
         remaining = self.job.deadline_game_h - hours_used
         eta = self.trip.eta_game_hours()
         basis = ("at your current speed"
@@ -425,7 +462,10 @@ class DrivingState(State):
         if self.tutorial:
             self.tutorial.update(dt, t)
         if self.trip.finished:
-            self._handle_arrival_gate()
+            if self.phase == DRIVE_PHASE_PICKUP:
+                self._handle_pickup_gate()
+            else:
+                self._handle_arrival_gate()
 
     def _update_hours_and_fatigue(self, dt: float) -> None:
         """Advance the HOS shift clock and fatigue on game time, not wall time."""
@@ -726,6 +766,56 @@ class DrivingState(State):
                            f"gallons for {fee:,.0f} dollars. Press E to restart "
                            "the engine, and plan your fuel stops.")
 
+    def _handle_pickup_gate(self) -> None:
+        if self.truck.speed_mph <= DOCKING_MAX_MPH:
+            self._open_pickup_arrival()
+            return
+        if self.truck.speed_mph <= DELIVERY_PARK_MPH:
+            self._handle_pickup_creep()
+            return
+        if self._arrival_stop_said:
+            return
+        self._arrival_stop_said = True
+        self._cancel_cruise()
+        self.ctx.audio.play("ui/warning")
+        self._set_status("Pickup facility ahead: slow down and park to load.")
+        self.ctx.say_event(
+            f"Pickup facility ahead: {self._pickup_facility_text()}. "
+            f"Slow below {DELIVERY_PARK_MPH:.0f} miles per hour, then come "
+            "to a full stop to check in and load.",
+            interrupt=True)
+
+    def _handle_pickup_creep(self) -> None:
+        if self._arrival_full_stop_said:
+            return
+        self._arrival_full_stop_said = True
+        self._cancel_cruise()
+        self.ctx.audio.play("ui/notify", volume=0.7)
+        self._set_status("Pickup gate reached: come to a full stop to load.")
+        self.ctx.say_event(
+            f"You are at {self._pickup_facility_text()}. Hold the brake and "
+            "come to a full stop; the pickup facility menu opens when stopped.",
+            interrupt=False)
+
+    def _open_pickup_arrival(self) -> None:
+        if self._arrival_menu_open:
+            return
+        from .city import PickupFacilityState, pickup_snapshot
+
+        p = self.ctx.profile
+        self._arrival_menu_open = True
+        self._cancel_cruise()
+        self.truck.throttle = 0.0
+        self.truck.brake = 1.0
+        p.truck_fuel_gal = self.truck.fuel_gal
+        p.truck_damage_pct = self.truck.damage_pct
+        p.game_hours += self.trip.game_minutes / 60.0
+        p.market.advance_to(p.market_day())
+        p.active_trip = pickup_snapshot(self.job)
+        self.ctx.save_profile()
+        self._set_status("Parked at pickup. Check in and load from the facility menu.")
+        self.ctx.replace_state(PickupFacilityState(self.ctx, self.job, driving=self))
+
     def _arrive(self) -> None:
         self.ctx.replace_state(ArrivalState(self.ctx, self))
 
@@ -775,6 +865,14 @@ class DrivingState(State):
                     f"{self.job.destination_location} in {self.job.destination}")
         return self.job.destination
 
+    def _pickup_facility_text(self) -> str:
+        return f"{facility_label(self.job.origin_type)} {self.job.origin_location}"
+
+    def _pickup_progress_summary(self) -> str:
+        return (f"{self.trip.remaining_miles:.1f} miles remaining of "
+                f"{self.trip.total_miles:.1f} to pickup at "
+                f"{self._pickup_facility_text()}.")
+
     def _set_status(self, text: str) -> None:
         self._status_text = text
 
@@ -782,14 +880,21 @@ class DrivingState(State):
         t = self.truck
         limit, reason = self.trip.speed_limit_at(self.trip.position_mi)
         gear = "N" if t.transmission.in_neutral else str(t.transmission.gear)
+        title = (f"Driving to pickup at {self._pickup_facility_text()}"
+                 if self.phase == DRIVE_PHASE_PICKUP else
+                 f"Driving loaded to {self.job.destination}")
+        remaining = (f"{self.trip.remaining_miles:.1f} of "
+                     f"{self.trip.total_miles:.1f} miles"
+                     if self.phase == DRIVE_PHASE_PICKUP else
+                     f"{self.trip.remaining_miles:.0f} of {self.trip.total_miles:.0f} miles")
         return [
-            f"Driving loaded to {self.job.destination}",
+            title,
             "",
             f"Speed: {t.speed_mph:.0f} mph (limit {limit:.0f}{', ' + reason if reason else ''})",
             f"Gear: {gear}   RPM: {t.rpm:.0f}   {'ENGINE ON' if t.engine_on else 'engine off'}"
             + (f"   CRUISE {self._cruise_mph:.0f}" if self._cruise_mph is not None else ""),
             f"Fuel: {t.fuel_fraction * 100:.0f}%   Damage: {t.damage_pct:.0f}%",
-            f"Remaining: {self.trip.remaining_miles:.0f} of {self.trip.total_miles:.0f} miles",
+            f"Remaining: {remaining}",
             f"Weather: {self.weather.current.value}",
             f"Clock: {clock_text(self.trip.current_hour)} "
             f"({time_of_day(self.trip.current_hour)})   "
@@ -1033,11 +1138,12 @@ class PauseMenuState(MenuState):
         super().enter()
 
     def build_items(self) -> list[MenuItem]:
+        drive_label = "pickup drive" if self.driving.phase == DRIVE_PHASE_PICKUP else "delivery"
         return [
             MenuItem("Resume driving", self._resume,
-                     help="Return to the active delivery."),
+                     help=f"Return to the active {drive_label}."),
             MenuItem("Trip status", self._status,
-                     help="Hear cargo, destination, route progress, and time used."),
+                     help="Hear cargo, objective, route progress, and time used."),
             MenuItem(self._mechanic_label, self._mechanic,
                      help="A mobile mechanic patches the truck up enough to "
                           "drive on. Costs much more than a garage repair, "
@@ -1047,11 +1153,11 @@ class PauseMenuState(MenuState):
                      help="Change units, transmission, volumes, weather, "
                           "voices, update channel, and trip pacing."),
             MenuItem("Abandon job", self._abandon,
-                     help="Give up this delivery. Costs five hundred dollars and "
+                     help="Give up this job. Costs five hundred dollars and "
                           "reputation, and returns you to the origin city."),
             MenuItem("Save and quit to main menu", self._quit_to_menu,
                      help="Your money, truck, and trip progress are saved. "
-                          "The delivery resumes from here when you continue."),
+                          "This drive resumes from here when you continue."),
         ]
 
     def go_back(self) -> None:
@@ -1099,6 +1205,13 @@ class PauseMenuState(MenuState):
     def _status(self) -> None:
         d = self.driving
         hours_used = d.trip.game_minutes / 60.0
+        if d.phase == DRIVE_PHASE_PICKUP:
+            self.ctx.say(
+                f"Driving to pickup at {d._pickup_facility_text()}. "
+                f"{d.job.weight_tons:.0f} tons of {d.job.cargo.label} are "
+                f"assigned for {d.job.destination}. "
+                f"{d._pickup_progress_summary()} {hours_used:.1f} hours used.")
+            return
         self.ctx.say(
             f"Hauling {d.job.weight_tons:.0f} tons of {d.job.cargo.label} "
             f"to {d.job.destination}. "
@@ -1137,7 +1250,8 @@ class PauseMenuState(MenuState):
         p.truck_damage_pct = self.driving.truck.damage_pct
         p.active_trip = self.driving.snapshot()
         self.ctx.save_profile()
-        self.ctx.say("Saved. Your delivery will resume where you left off.",
+        drive_label = "pickup drive" if self.driving.phase == DRIVE_PHASE_PICKUP else "delivery"
+        self.ctx.say(f"Saved. Your {drive_label} will resume where you left off.",
                      interrupt=True)
         self.ctx.reset_to(MainMenuState(self.ctx))
 
