@@ -56,6 +56,8 @@ def test_picking_a_city_sets_the_profile_start_city():
         p = app.ctx.profile
         assert p.name == "Southerner"
         assert p.current_city == "Atlanta"
+        assert app.state.title == "Atlanta Company Yard"
+        assert app.state.items[app.state.index].text == "Dispatch board"
         # the choice is already persisted to disk
         assert Profile.load(p.path).current_city == "Atlanta"
     finally:
@@ -166,7 +168,7 @@ def test_choose_career_loads_an_older_save_without_deleting_the_newest():
         assert rows[0].startswith("Rookie: level 1")
         assert rows[1].startswith("Veteran: level 2")
         assert "12,345 dollars" in rows[1]
-        assert "in Denver" in rows[1]
+        assert "at Denver Company Yard in Denver" in rows[1]
         assert "7 deliveries" in rows[1]
         assert "last saved" in rows[1]
 

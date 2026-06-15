@@ -82,7 +82,7 @@ def test_full_game_flow_headless():
         assert app.ctx.profile.name == "Smoke"
         assert app.ctx.profile.current_city == "Chicago"
 
-        # open job board, accept the first job we hold the endorsement for
+        # open dispatch board, accept the first job we hold the endorsement for
         # (the board may show one locked "teaser" job, sometimes sorted first)
         app.state.handle_event(key_event(pygame.K_RETURN))
         assert isinstance(app.state, JobBoardState)
@@ -136,9 +136,10 @@ def test_full_game_flow_headless():
         assert app.ctx.profile.career.deliveries == 1
         assert app.ctx.profile.current_city == driving.job.destination
 
-        # continue back to the city hub
+        # continue back to the destination terminal hub
         app.state.handle_event(key_event(pygame.K_RETURN))
         assert isinstance(app.state, CityMenuState)
+        assert app.state.title == app.ctx.world.home_terminal(driving.job.destination).name
 
         # render a frame of every reachable lines() output
         app.render()

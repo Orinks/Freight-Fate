@@ -1,4 +1,4 @@
-"""City hub: job board, garage, upgrades, trucks, and route selection."""
+"""Terminal hub: dispatch board, garage, upgrades, trucks, and route selection."""
 
 from __future__ import annotations
 
@@ -53,7 +53,7 @@ def pickup_snapshot(job: Job, *, checked_in: bool = False,
 
 
 class CityMenuState(MenuState):
-    """The hub screen while parked in a city."""
+    """The hub screen while parked at a company terminal or yard."""
 
     def __init__(self, ctx) -> None:
         super().__init__(ctx)
@@ -63,7 +63,9 @@ class CityMenuState(MenuState):
     @property
     def title(self) -> str:  # type: ignore[override]
         p = self.ctx.profile
-        return f"{p.current_city}" if p else "City"
+        if not p:
+            return "Terminal"
+        return self.ctx.world.home_terminal(p.current_city).name
 
     def enter(self) -> None:
         self.ctx.audio.play_music("menu_theme")
@@ -76,19 +78,21 @@ class CityMenuState(MenuState):
     def announce_entry(self) -> None:
         p = self.ctx.profile
         city = self.ctx.world.cities[p.current_city]
+        terminal = self.ctx.world.home_terminal(p.current_city)
         self.ctx.say(
-            f"{p.current_city}, {city.state}. You have {p.money:,.0f} dollars. "
+            f"Parked at {terminal.spoken_name} in the {p.current_city} "
+            f"service area, {city.state}. You have {p.money:,.0f} dollars. "
             f"{self.current_text()}")
 
     def build_items(self) -> list[MenuItem]:
         items = [
-            MenuItem("Job board", self._job_board,
-                     help="Browse jobs from local freight facilities, including "
-                          "ports, warehouses, food terminals, intermodal yards, "
-                          "and distribution hubs."),
+            MenuItem("Dispatch board", self._job_board,
+                     help="Browse terminal dispatches from local freight "
+                          "facilities, including ports, warehouses, food "
+                          "terminals, intermodal yards, and distribution hubs."),
             MenuItem(self._garage_label, self._garage,
-                     help="Refuel and repair your truck. If cash is short, the "
-                          "garage does partial work."),
+                     help="Refuel and repair your truck at the terminal garage. "
+                          "If cash is short, the garage does partial work."),
             MenuItem("Career stats", self._stats,
                      help="Hear your level, reputation, and lifetime numbers."),
             MenuItem("Truck status", self._truck_status,
@@ -97,7 +101,7 @@ class CityMenuState(MenuState):
                      help="Hear the clock, the day of your career, and the "
                           "conditions outside."),
             MenuItem("Sleep 10 hours", self._sleep,
-                     help="A full night at your terminal: fresh hours of "
+                     help="A full night in the terminal bunk room: fresh hours of "
                           "service and zero fatigue. The clock advances "
                           "10 hours."),
             MenuItem("Save game", self._save,
@@ -200,7 +204,7 @@ class CityMenuState(MenuState):
 
     def go_back(self) -> None:
         self.ctx.audio.play("ui/menu_back")
-        self.ctx.say("Use Quit to main menu to leave the city. Progress is saved automatically.")
+        self.ctx.say("Use Quit to main menu to leave the terminal. Progress is saved automatically.")
 
 
 class GarageState(MenuState):
@@ -220,7 +224,7 @@ class GarageState(MenuState):
             MenuItem("Trucks", self._trucks,
                      help="Buy a new truck, or switch between trucks you own."),
             MenuItem("Back", self.go_back,
-                     help="Return to the city menu."),
+                     help="Return to the terminal menu."),
         ]
 
     def _region(self) -> str:
@@ -419,11 +423,12 @@ class TruckShopState(MenuState):
 
 
 class JobBoardState(MenuState):
-    title = "Job board"
-    intro_help = ("Each entry is one delivery job. Enter accepts the job and creates "
-                  "a drivable pickup objective at the named origin facility. "
-                  "Jobs name their origin and destination facilities, and cargo "
-                  "depends on the facility type. Escape returns to the city.")
+    title = "Dispatch board"
+    intro_help = ("Each entry is one dispatch. Enter accepts the dispatch and "
+                  "creates a local deadhead pickup drive from your terminal to "
+                  "the named origin facility. Jobs name their origin and "
+                  "destination facilities, and cargo depends on the facility "
+                  "type. Escape returns to the terminal.")
 
     def __init__(self, ctx, jobs: list[Job]) -> None:
         super().__init__(ctx)
@@ -432,9 +437,9 @@ class JobBoardState(MenuState):
     def announce_entry(self) -> None:
         n = len(self.jobs)
         if n == 0:
-            self.ctx.say("Job board. No jobs available right now. Press Escape to go back.")
+            self.ctx.say("Dispatch board. No jobs available right now. Press Escape to go back.")
         else:
-            self.ctx.say(f"Job board. {n} job{'s' if n != 1 else ''} available. "
+            self.ctx.say(f"Dispatch board. {n} dispatch{'es' if n != 1 else ''} available. "
                          f"{self.ctx.profile.market.summary()} "
                          + self.current_text())
 
@@ -446,7 +451,7 @@ class JobBoardState(MenuState):
                 lambda j=job: self._accept(j),
                 help=f"From {facility_label(job.origin_type)} "
                      f"{job.origin_location}."))
-        items.append(MenuItem("Back to city", self.go_back))
+        items.append(MenuItem("Back to terminal", self.go_back))
         return items
 
     def _accept(self, job: Job) -> None:
@@ -459,13 +464,15 @@ class JobBoardState(MenuState):
         from .driving import DRIVE_PHASE_PICKUP, DrivingState
 
         route = self.ctx.world.facility_approach_route(job.origin, job.origin_location)
+        terminal = self.ctx.world.home_terminal(p.current_city)
         driving = DrivingState(self.ctx, job, route, phase=DRIVE_PHASE_PICKUP)
         p.active_trip = driving.snapshot()
         self.ctx.save_profile()
         self.ctx.say(
-            f"Job accepted. Drive to pickup at "
+            f"Dispatch accepted from {terminal.name}. Deadhead "
+            f"{route.miles:.1f} miles on {route.highways[0]} to pickup at "
             f"{facility_label(job.origin_type)} {job.origin_location}. "
-            f"{route.miles:.1f} miles on {route.highways[0]}.",
+            "Check in with the shipper when you arrive.",
             interrupt=True)
         self.ctx.push_state(driving)
 
@@ -545,9 +552,9 @@ class PickupFacilityState(MenuState):
                           "loading instruction."),
             MenuItem("Save and quit to main menu", self._save_and_quit,
                      help="Save this pickup objective so it resumes here later."),
-            MenuItem("Cancel pickup and return to city", self._cancel,
+            MenuItem("Cancel pickup and return to terminal", self._cancel,
                      help="Give up this job before departure and return to the "
-                          "city job board area."),
+                          "terminal dispatch board area."),
         ]
 
     def _save_state(self) -> None:
@@ -621,7 +628,8 @@ class PickupFacilityState(MenuState):
     def _cancel(self) -> None:
         self.ctx.profile.active_trip = None
         self.ctx.save_profile()
-        self.ctx.say(f"Pickup canceled. Returned to {self.ctx.profile.current_city}.",
+        terminal = self.ctx.world.home_terminal(self.ctx.profile.current_city)
+        self.ctx.say(f"Pickup canceled. Returned to {terminal.name}.",
                      interrupt=True)
         self.ctx.reset_to(CityMenuState(self.ctx))
 
@@ -653,7 +661,7 @@ class RouteSelectState(MenuState):
                   "Enter starts the drive.")
 
     def __init__(self, ctx, job: Job, routes: list[Route],
-                 back_label: str = "Back to job board") -> None:
+                 back_label: str = "Back to dispatch board") -> None:
         super().__init__(ctx)
         self.job = job
         self.routes = routes

@@ -198,7 +198,8 @@ class DrivingState(State):
                 "You are parked. Press E to start the engine.",
                 interrupt=False)
         else:
-            objective = (f"Pickup objective: drive to {self._pickup_facility_text()}. "
+            objective = (f"Pickup dispatch: deadhead from the terminal to "
+                         f"{self._pickup_facility_text()}. "
                          if self.phase == DRIVE_PHASE_PICKUP else "")
             self.ctx.say(f"You are at the wheel. {objective}It is {now}. "
                          f"Transmission is {mode}. "
@@ -880,7 +881,7 @@ class DrivingState(State):
         t = self.truck
         limit, reason = self.trip.speed_limit_at(self.trip.position_mi)
         gear = "N" if t.transmission.in_neutral else str(t.transmission.gear)
-        title = (f"Driving to pickup at {self._pickup_facility_text()}"
+        title = (f"Deadheading to pickup at {self._pickup_facility_text()}"
                  if self.phase == DRIVE_PHASE_PICKUP else
                  f"Driving loaded to {self.job.destination}")
         remaining = (f"{self.trip.remaining_miles:.1f} of "
@@ -1361,6 +1362,7 @@ class ArrivalState(MenuState):
         super().__init__(ctx)
         self.driving = driving
         self.summary_parts: list[str] = []
+        self.terminal = ctx.world.home_terminal(driving.job.destination)
         self._settle()
 
     def _settle(self) -> None:
@@ -1391,7 +1393,9 @@ class ArrivalState(MenuState):
             f"{job.destination} in {hours:.1f} hours, "
             f"{'on time' if on_time else 'late'}. "
             f"It is {clock_text(p.game_hours)}. "
-            f"You earned {pay:,.0f} dollars and now have {p.money:,.0f}."))
+            f"You earned {pay:,.0f} dollars and now have {p.money:,.0f}. "
+            f"After unloading, dispatch has you parked at "
+            f"{self.terminal.name} for the {job.destination} service area."))
         if early_bonus >= 1.0:
             self.summary_parts.append(
                 f"Early delivery bonus: {early_bonus:,.0f} dollars.")
@@ -1416,7 +1420,7 @@ class ArrivalState(MenuState):
 
     def build_items(self) -> list[MenuItem]:
         return [
-            MenuItem("Continue to " + self.driving.job.destination, self._continue),
+            MenuItem("Continue to " + self.terminal.name, self._continue),
             MenuItem("Hear the summary again",
                      lambda: self.ctx.say(" ".join(self.summary_parts))),
         ]

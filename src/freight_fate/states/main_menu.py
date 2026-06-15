@@ -18,7 +18,7 @@ _last_invalid_saves: list[Path] = []
 
 
 def enter_world(ctx) -> None:
-    """Resume a saved mid-trip delivery if there is one, else the city hub."""
+    """Resume a saved mid-trip delivery if there is one, else the terminal hub."""
     ctx.push_state(_world_entry_state(ctx))
 
 
@@ -55,6 +55,8 @@ def _loadable_saves() -> list[tuple[Path, Profile]]:
 
 
 def _career_location(profile: Profile) -> str:
+    from ..data.world import get_world
+
     trip = profile.active_trip or {}
     job = trip.get("job", {})
     destination = job.get("destination")
@@ -66,7 +68,11 @@ def _career_location(profile: Profile) -> str:
         return f"{loaded} {destination}"
     if destination:
         return f"on the road to {destination}"
-    return f"in {profile.current_city}"
+    try:
+        terminal = get_world().home_terminal(profile.current_city)
+        return f"at {terminal.name} in {profile.current_city}"
+    except KeyError:
+        return f"in {profile.current_city}"
 
 
 def _saved_label(path: Path) -> str:
@@ -164,7 +170,9 @@ class MainMenuState(MenuState):
         if p.active_trip:
             self.ctx.say(f"Welcome back, {p.name}.", interrupt=True)
         else:
-            self.ctx.say(f"Welcome back, {p.name}. You are in {p.current_city} "
+            terminal = self.ctx.world.home_terminal(p.current_city)
+            self.ctx.say(f"Welcome back, {p.name}. You are parked at "
+                         f"{terminal.name} in {p.current_city} "
                          f"with {p.money:,.0f} dollars.", interrupt=True)
         enter_world(self.ctx)
 
@@ -286,10 +294,12 @@ class HomeTerminalState(MenuState):
         items: list[MenuItem] = []
         for name in self._cities:
             city = self.ctx.world.cities[name]
+            terminal = self.ctx.world.home_terminal(name)
             region = REGION_LABELS.get(city.region, city.region)
             items.append(MenuItem(f"{name}, {region}",
                                   lambda n=name: self._pick(n),
-                                  help=f"Start your career in {name}, {city.state}."))
+                                  help=f"Start at {terminal.spoken_name} in "
+                                       f"{name}, {city.state}."))
         return items
 
     def _pick(self, city: str) -> None:
@@ -298,6 +308,7 @@ class HomeTerminalState(MenuState):
         name = self.driver_name
         existing = {p.stem.lower() for p in Profile.list_saves()}
         profile = Profile(name=name, current_city=city)
+        terminal = self.ctx.world.home_terminal(city)
         self.ctx.profile = profile
         profile.save()
         self.ctx.pop_state()   # this picker
@@ -306,15 +317,17 @@ class HomeTerminalState(MenuState):
         loaded_over = (f"Loaded over existing driver named {name}. "
                        if name.lower() in existing else "")
         self.ctx.say(
-            f"{loaded_over}Welcome aboard, {name}. Your career starts in {city} "
-            f"with {profile.money:,.0f} dollars and a full tank. "
-            "Your first stop is the job board.", interrupt=True)
+            f"{loaded_over}Welcome aboard, {name}. Your truck is parked at "
+            f"{terminal.spoken_name} in the {city} service area with "
+            f"{profile.money:,.0f} dollars and a full tank. "
+            "Your first stop is the dispatch board.", interrupt=True)
 
 
 HELP_PAGES = [
     ("The goal", [
         "You are an owner-operator truck driver building a freight career.",
-        "Accept freight from the job board, drive to the origin facility,",
+        "Start from your company terminal or yard in the service area.",
+        "Accept freight from the dispatch board, deadhead to the origin facility,",
         "check in and load the trailer there, choose a destination route,",
         "and deliver cargo across the country, on time and intact.",
         "Earn money and experience, level up, and unlock better freight.",
@@ -366,7 +379,7 @@ HELP_PAGES = [
         "You may drive eleven hours within a fourteen hour duty window,",
         "with a thirty minute break required after eight hours of driving.",
         "Spoken warnings come at two hours, one hour, and thirty minutes left.",
-        "Sleeping ten hours at a rest stop, or in any city, starts a fresh shift.",
+        "Sleeping ten hours at a rest stop, or at a terminal, starts a fresh shift.",
         "Driving past a limit risks fines at roadside inspections.",
         "Fatigue builds as you drive, faster at night. A drowsy driver",
         "yawns, drifts onto the rumble strip, and reacts late to hazards.",
@@ -375,13 +388,15 @@ HELP_PAGES = [
         "Tune all of this in Settings under Hours of service.",
     ]),
     ("Deliveries and money", [
-        "The job board lists freight from facilities such as ports,",
+        "The dispatch board lists freight for the current metro service area",
+        "from facilities such as ports,",
         "intermodal yards, warehouses, food terminals, industrial parks,",
         "air cargo areas, manufacturing plants, and retail distribution hubs.",
         "Each job names an origin facility and a destination facility.",
         "Cargo follows the facility type, so a food terminal offers",
         "different work than a port, warehouse, or factory.",
-        "After accepting a job, drive the local approach to the origin facility.",
+        "After accepting a dispatch, leave the terminal bobtail or with an empty trailer.",
+        "Pickup legs are local deadhead moves to the origin facility.",
         "At the pickup gate, come to a full stop before the facility menu opens.",
         "Check in, then load at the assigned dock.",
         "Loading requires the truck to be stopped.",
@@ -389,15 +404,16 @@ HELP_PAGES = [
         "Deliver before the deadline for a bonus. Late or damaged cargo pays less.",
         "At the destination facility, slow down, come to a full stop,",
         "then dock and deliver before the settlement is paid.",
+        "After settlement, the truck is parked at the destination service-area terminal.",
         "Fragile cargo, like electronics and fresh food, punishes rough driving.",
-        "Repair your truck in the city garage. Damage reduces engine power.",
+        "Repair your truck in the terminal garage. Damage reduces engine power.",
         "Higher levels widen distance caps, improve low-end pay,",
         "and unlock refrigerated, heavy-haul, and high-value freight.",
-        "Cargo markets drift day by day. The job board calls out tight and loose",
+        "Cargo markets drift day by day. The dispatch board calls out tight and loose",
         "markets; tight cargo pays well above the usual rate.",
     ]),
     ("The garage", [
-        "Every city garage refuels and repairs your truck.",
+        "Every terminal garage refuels and repairs your truck.",
         "If you cannot afford a full tank or full repair, the garage",
         "buys as much fuel or repair work as your money covers.",
         "The Upgrades menu sells permanent improvements: an engine tune,",

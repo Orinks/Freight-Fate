@@ -74,7 +74,8 @@ def test_how_to_play_documents_new_gameplay_systems():
 
     assert "slow below 5 miles per hour" in help_text
     assert "destination facility" in help_text
-    assert "drive the local approach to the origin facility" in help_text
+    assert "local deadhead moves to the origin facility" in help_text
+    assert "company terminal or yard" in help_text
     assert "pickup gate" in help_text
     assert "loading requires the truck to be stopped" in help_text
     assert "loaded and sealed" in help_text

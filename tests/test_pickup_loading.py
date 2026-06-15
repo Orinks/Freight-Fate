@@ -47,6 +47,8 @@ def test_accepting_job_starts_drivable_pickup_leg():
     from freight_fate.states.driving import DrivingState
 
     app = App()
+    spoken = []
+    app.ctx.say = lambda text, interrupt=True: spoken.append(text)
     try:
         pickup = accept_pickup_drive(app)
 
@@ -57,7 +59,13 @@ def test_accepting_job_starts_drivable_pickup_leg():
         assert pickup.route.miles > 2.0
         assert pickup.trip.total_miles == pickup.route.miles
         assert pickup.trip.remaining_miles == pickup.route.miles
-        assert "Driving to pickup" in pickup.lines()[0]
+        assert "Deadheading to pickup" in pickup.lines()[0]
+        dispatch_messages = [
+            text for text in spoken
+            if "Dispatch accepted from Chicago Company Yard" in text
+        ]
+        assert dispatch_messages
+        assert "Deadhead" in dispatch_messages[-1]
     finally:
         app.shutdown()
 
@@ -178,5 +186,5 @@ def test_pickup_arrival_state_and_loaded_planning_resume():
 def test_job_board_help_names_drivable_pickup_before_route_planning():
     from freight_fate.states.city import JobBoardState
 
-    assert "drivable pickup objective" in JobBoardState.intro_help
+    assert "local deadhead pickup drive from your terminal" in JobBoardState.intro_help
     assert "route planning" not in JobBoardState.intro_help

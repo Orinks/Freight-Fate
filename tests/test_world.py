@@ -109,6 +109,19 @@ def test_every_city_has_locations_with_known_cargo(world):
                 assert cargo in CARGO_CATALOG, f"unknown cargo {cargo} at {loc.name}"
 
 
+def test_home_terminal_prefers_explicit_terminal_and_falls_back_to_yard(world):
+    explicit = world.home_terminal("Nashville")
+    fallback = world.home_terminal("Chicago")
+
+    assert explicit.name == "Music City Freight"
+    assert explicit.label == "company terminal"
+    assert explicit.spoken_name == "company terminal: Music City Freight"
+    assert explicit.service_area == "Nashville, Tennessee"
+    assert fallback.name == "Chicago Company Yard"
+    assert fallback.label == "company yard"
+    assert fallback.spoken_name == "company yard: Chicago Company Yard"
+
+
 def test_freight_location_categories_are_live(world):
     types = {loc.type for city in world.cities.values() for loc in city.locations}
     expected = {

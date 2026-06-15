@@ -38,6 +38,26 @@ class Location:
         return f"{self.label}: {self.name}"
 
 
+@dataclass(frozen=True)
+class HomeTerminal:
+    name: str
+    city: str
+    state: str
+    kind: str
+
+    @property
+    def label(self) -> str:
+        return "company terminal" if self.kind == "terminal" else "company yard"
+
+    @property
+    def spoken_name(self) -> str:
+        return f"{self.label}: {self.name}"
+
+    @property
+    def service_area(self) -> str:
+        return f"{self.city}, {self.state}"
+
+
 STOP_TYPE_LABELS = {
     "truck_stop": "truck stop",
     "travel_center": "travel center",
@@ -222,8 +242,23 @@ class World:
                 return location
         raise KeyError(f"Unknown facility in {city}: {location_name}")
 
+    def home_terminal(self, city: str) -> HomeTerminal:
+        """Return the player's dispatch yard for a service area.
+
+        The world data mostly lists shippers and receivers rather than company
+        yards, so explicit terminal facilities are preferred and every other
+        city gets a stable fallback yard name.
+        """
+        if city not in self.cities:
+            raise KeyError(f"Unknown city: {city}")
+        city_obj = self.cities[city]
+        for location in city_obj.locations:
+            if location.type == "terminal":
+                return HomeTerminal(location.name, city, city_obj.state, "terminal")
+        return HomeTerminal(f"{city} Company Yard", city, city_obj.state, "company_yard")
+
     def facility_approach_route(self, city: str, location_name: str) -> Route:
-        """A short, drivable local route from the city truck area to a facility."""
+        """A short, drivable local route from the company terminal to a facility."""
         location = self.facility_location(city, location_name)
         base_miles = FACILITY_APPROACH_MILES.get(location.type, 4.0)
         seed = zlib.crc32(f"{city}:{location.name}:{location.type}".encode())
