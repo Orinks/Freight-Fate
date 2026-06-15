@@ -127,7 +127,9 @@ FACILITY_APPROACH_ROADS = {
 @dataclass(frozen=True)
 class Stop:
     name: str
+    at_mi: float
     type: str = "travel_center"
+    source: str = ""
 
     @property
     def label(self) -> str:
@@ -213,11 +215,15 @@ class World:
             self.cities[name] = City(name, c["state"], c["region"], locs,
                                      float(c.get("lat", 0.0)), float(c.get("lon", 0.0)))
 
-        self.legs: list[Leg] = [
-            Leg(leg["from"], leg["to"], float(leg["miles"]), leg["highway"],
-                leg["terrain"], tuple(_parse_stop(s) for s in leg.get("stops", ())))
-            for leg in data["legs"]
-        ]
+        self.legs: list[Leg] = []
+        for leg in data["legs"]:
+            miles = float(leg["miles"])
+            stops = tuple(_parse_stop(s, miles, leg["from"], leg["to"])
+                          for s in leg.get("stops", ()))
+            self.legs.append(
+                Leg(leg["from"], leg["to"], miles, leg["highway"],
+                    leg["terrain"], stops)
+            )
         self._adjacency: dict[str, list[Leg]] = {name: [] for name in self.cities}
         for leg in self.legs:
             self._adjacency[leg.a].append(leg)
@@ -351,13 +357,31 @@ class World:
 _world: World | None = None
 
 
-def _parse_stop(raw) -> Stop:
-    if isinstance(raw, dict):
-        name = str(raw.get("name", "")).strip()
-        stop_type = str(raw.get("type", "")).strip() or _classify_stop(name)
-        return Stop(name, stop_type)
-    name = str(raw)
-    return Stop(name, _classify_stop(name))
+def _parse_stop(raw, leg_miles: float, from_city: str, to_city: str) -> Stop:
+    if not isinstance(raw, dict):
+        raise ValueError(
+            f"{from_city} to {to_city} stop {raw!r} is missing explicit at_mi"
+        )
+    name = str(raw.get("name", "")).strip()
+    if not name:
+        raise ValueError(f"{from_city} to {to_city} has a stop without a name")
+    if "at_mi" not in raw:
+        raise ValueError(
+            f"{from_city} to {to_city} stop {name!r} is missing explicit at_mi"
+        )
+    at_mi = float(raw["at_mi"])
+    if not 0.0 < at_mi < leg_miles:
+        raise ValueError(
+            f"{from_city} to {to_city} stop {name!r} has at_mi {at_mi}, "
+            f"outside leg mileage 0-{leg_miles}"
+        )
+    stop_type = str(raw.get("type", "")).strip() or _classify_stop(name)
+    if stop_type not in STOP_TYPE_LABELS:
+        raise ValueError(
+            f"{from_city} to {to_city} stop {name!r} has unknown type {stop_type!r}"
+        )
+    source = str(raw.get("source", "")).strip()
+    return Stop(name, at_mi, stop_type, source)
 
 
 def _classify_stop(name: str) -> str:

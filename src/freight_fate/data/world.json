@@ -1487,56 +1487,35 @@
       "to": "Boston",
       "miles": 215,
       "highway": "I-95",
-      "terrain": "hills",
-      "stops": [
-        {
-          "name": "Milford Service Plaza",
-          "type": "service_plaza"
-        },
-        "Charlton Service Area"
-      ]
+      "terrain": "hills"
     },
     {
       "from": "New York",
       "to": "Philadelphia",
       "miles": 97,
       "highway": "I-95",
-      "terrain": "flat",
-      "stops": [
-        "Molly Pitcher Service Area"
-      ]
+      "terrain": "flat"
     },
     {
       "from": "Philadelphia",
       "to": "Pittsburgh",
       "miles": 305,
       "highway": "I-76",
-      "terrain": "mountain",
-      "stops": [
-        "Sideling Hill Plaza",
-        "New Stanton Plaza"
-      ]
+      "terrain": "mountain"
     },
     {
       "from": "Pittsburgh",
       "to": "Cleveland",
       "miles": 133,
       "highway": "I-76",
-      "terrain": "hills",
-      "stops": [
-        "Glacier Hills Service Plaza"
-      ]
+      "terrain": "hills"
     },
     {
       "from": "Cleveland",
       "to": "Chicago",
       "miles": 345,
       "highway": "I-80",
-      "terrain": "flat",
-      "stops": [
-        "Maumee Travel Center",
-        "South Bend Truck Stop"
-      ]
+      "terrain": "flat"
     },
     {
       "from": "Chicago",
@@ -1546,8 +1525,10 @@
       "terrain": "flat",
       "stops": [
         {
-          "name": "Lafayette I-65 Travel Plaza",
-          "type": "travel_center"
+          "name": "Loves Travel Stop Lafayette",
+          "type": "travel_center",
+          "at_mi": 122.0,
+          "source": "Loves store 874, Lafayette, I-65 Exit 175, truck parking: https://www.loves.com/locations/in/lafayette/loves-travel-stop-lafayette-874"
         }
       ]
     },
@@ -1556,32 +1537,21 @@
       "to": "Nashville",
       "miles": 289,
       "highway": "I-65",
-      "terrain": "hills",
-      "stops": [
-        "Columbus Fuel Stop",
-        "Bowling Green Plaza"
-      ]
+      "terrain": "hills"
     },
     {
       "from": "Nashville",
       "to": "Atlanta",
       "miles": 250,
       "highway": "I-24",
-      "terrain": "mountain",
-      "stops": [
-        "Monteagle Mountain Stop",
-        "Dalton Travel Center"
-      ]
+      "terrain": "mountain"
     },
     {
       "from": "Indianapolis",
       "to": "St. Louis",
       "miles": 243,
       "highway": "I-70",
-      "terrain": "flat",
-      "stops": [
-        "Effingham Crossroads"
-      ]
+      "terrain": "flat"
     },
     {
       "from": "Chicago",
@@ -1590,8 +1560,12 @@
       "highway": "I-55",
       "terrain": "flat",
       "stops": [
-        "Bloomington Travel Plaza",
-        "Litchfield Fuel Stop"
+        {
+          "name": "Funks Grove Rest Area",
+          "type": "public_rest_area",
+          "at_mi": 145.0,
+          "source": "IDOT truck parking page, I-55 Funks Grove Rest Area near mile marker 149: https://idot.illinois.gov/programs-and-projects/rail-and-freight/truck-parking.html"
+        }
       ]
     },
     {
@@ -1599,379 +1573,245 @@
       "to": "Nashville",
       "miles": 309,
       "highway": "I-24",
-      "terrain": "hills",
-      "stops": [
-        "Paducah River Stop"
-      ]
+      "terrain": "hills"
     },
     {
       "from": "St. Louis",
       "to": "Kansas City",
       "miles": 248,
       "highway": "I-70",
-      "terrain": "hills",
-      "stops": [
-        "Columbia Midway Plaza"
-      ]
+      "terrain": "hills"
     },
     {
       "from": "Kansas City",
       "to": "Denver",
       "miles": 605,
       "highway": "I-70",
-      "terrain": "flat",
-      "stops": [
-        "Salina Travel Center",
-        "Hays Fuel Stop",
-        "Limon Crossroads"
-      ]
+      "terrain": "flat"
     },
     {
       "from": "Denver",
       "to": "Salt Lake City",
       "miles": 520,
       "highway": "I-80",
-      "terrain": "mountain",
-      "stops": [
-        "Laramie Summit Stop",
-        "Rock Springs Plaza"
-      ]
+      "terrain": "mountain"
     },
     {
       "from": "Denver",
       "to": "Albuquerque",
       "miles": 449,
       "highway": "I-25",
-      "terrain": "mountain",
-      "stops": [
-        "Pueblo Travel Center",
-        "Raton Pass Stop"
-      ]
+      "terrain": "mountain"
     },
     {
       "from": "Albuquerque",
       "to": "Phoenix",
       "miles": 422,
       "highway": "I-40",
-      "terrain": "mountain",
-      "stops": [
-        "Gallup Trading Post",
-        "Flagstaff Mountain Stop"
-      ]
+      "terrain": "mountain"
     },
     {
       "from": "Phoenix",
       "to": "Los Angeles",
       "miles": 373,
       "highway": "I-10",
-      "terrain": "hills",
-      "stops": [
-        "Quartzsite Fuel Plaza",
-        "Palm Springs Oasis"
-      ]
+      "terrain": "hills"
     },
     {
       "from": "Salt Lake City",
       "to": "Las Vegas",
       "miles": 421,
       "highway": "I-15",
-      "terrain": "mountain",
-      "stops": [
-        "Beaver Canyon Stop",
-        "Mesquite Travel Plaza"
-      ]
+      "terrain": "mountain"
     },
     {
       "from": "Las Vegas",
       "to": "Los Angeles",
       "miles": 270,
       "highway": "I-15",
-      "terrain": "mountain",
-      "stops": [
-        "Baker Desert Stop"
-      ]
+      "terrain": "mountain"
     },
     {
       "from": "Dallas",
       "to": "Albuquerque",
       "miles": 646,
       "highway": "I-40",
-      "terrain": "flat",
-      "stops": [
-        "Wichita Falls US-287 Travel Center",
-        "Amarillo I-40 Truck Plaza",
-        "Tucumcari I-40 Travel Center"
-      ]
+      "terrain": "flat"
     },
     {
       "from": "Dallas",
       "to": "St. Louis",
       "miles": 630,
       "highway": "I-44",
-      "terrain": "hills",
-      "stops": [
-        "Atoka Travel Center",
-        "Tulsa Fuel Plaza",
-        "Springfield Ozark Stop"
-      ]
+      "terrain": "hills"
     },
     {
       "from": "Atlanta",
       "to": "Dallas",
       "miles": 780,
       "highway": "I-20",
-      "terrain": "hills",
-      "stops": [
-        {
-          "name": "Birmingham I-20 Truck Plaza",
-          "type": "truck_stop"
-        },
-        "Jackson I-20 Travel Center",
-        "Shreveport Fuel Center"
-      ]
+      "terrain": "hills"
     },
     {
       "from": "Los Angeles",
       "to": "San Francisco",
       "miles": 382,
       "highway": "I-5",
-      "terrain": "hills",
-      "stops": [
-        "Lebec Grapevine Truck Stop",
-        "Kettleman City I-5 Travel Center"
-      ]
+      "terrain": "hills"
     },
     {
       "from": "San Francisco",
       "to": "Salt Lake City",
       "miles": 736,
       "highway": "I-80",
-      "terrain": "mountain",
-      "stops": [
-        "Donner Pass Stop",
-        "Reno Truck Plaza",
-        "Elko Fuel Stop"
-      ]
+      "terrain": "mountain"
     },
     {
       "from": "San Francisco",
       "to": "Portland",
       "miles": 635,
       "highway": "I-5",
-      "terrain": "mountain",
-      "stops": [
-        "Redding Travel Center",
-        "Siskiyou Summit Stop",
-        "Eugene Fuel Plaza"
-      ]
+      "terrain": "mountain"
     },
     {
       "from": "Portland",
       "to": "Seattle",
       "miles": 174,
       "highway": "I-5",
-      "terrain": "flat",
-      "stops": [
-        "Centralia Midway Stop"
-      ]
+      "terrain": "flat"
     },
     {
       "from": "Portland",
       "to": "Salt Lake City",
       "miles": 767,
       "highway": "I-84",
-      "terrain": "mountain",
-      "stops": [
-        "Pendleton Grade Stop",
-        "Boise Travel Plaza",
-        "Twin Falls Crossing"
-      ]
+      "terrain": "mountain"
     },
     {
       "from": "Boston",
       "to": "Hartford",
       "miles": 102,
       "highway": "I-84",
-      "terrain": "hills",
-      "stops": [
-        "Sturbridge Travel Plaza"
-      ]
+      "terrain": "hills"
     },
     {
       "from": "Hartford",
       "to": "New York",
       "miles": 117,
       "highway": "I-95",
-      "terrain": "flat",
-      "stops": [
-        "Darien Service Plaza"
-      ]
+      "terrain": "flat"
     },
     {
       "from": "Philadelphia",
       "to": "Baltimore",
       "miles": 105,
       "highway": "I-95",
-      "terrain": "flat",
-      "stops": [
-        "Maryland House Travel Plaza"
-      ]
+      "terrain": "flat"
     },
     {
       "from": "Baltimore",
       "to": "Pittsburgh",
       "miles": 250,
       "highway": "I-70",
-      "terrain": "mountain",
-      "stops": [
-        "Breezewood Interchange",
-        "South Mountain Stop"
-      ]
+      "terrain": "mountain"
     },
     {
       "from": "Baltimore",
       "to": "Richmond",
       "miles": 155,
       "highway": "I-95",
-      "terrain": "flat",
-      "stops": [
-        "Potomac Mills Travel Stop"
-      ]
+      "terrain": "flat"
     },
     {
       "from": "Richmond",
       "to": "Raleigh",
       "miles": 170,
       "highway": "I-85",
-      "terrain": "hills",
-      "stops": [
-        "Petersburg Fuel Stop"
-      ]
+      "terrain": "hills"
     },
     {
       "from": "Raleigh",
       "to": "Charlotte",
       "miles": 168,
       "highway": "I-85",
-      "terrain": "hills",
-      "stops": [
-        "Greensboro Freight Plaza"
-      ]
+      "terrain": "hills"
     },
     {
       "from": "Charlotte",
       "to": "Atlanta",
       "miles": 245,
       "highway": "I-85",
-      "terrain": "hills",
-      "stops": [
-        "Greenville Travel Center",
-        "Commerce Truck Stop"
-      ]
+      "terrain": "hills"
     },
     {
       "from": "Charlotte",
       "to": "Knoxville",
       "miles": 230,
       "highway": "I-40",
-      "terrain": "mountain",
-      "stops": [
-        "Asheville Mountain Stop",
-        "Pigeon River Gorge Stop"
-      ]
+      "terrain": "mountain"
     },
     {
       "from": "Charlotte",
       "to": "Savannah",
       "miles": 250,
       "highway": "I-77",
-      "terrain": "hills",
-      "stops": [
-        "Columbia Midlands Stop"
-      ]
+      "terrain": "hills"
     },
     {
       "from": "Savannah",
       "to": "Jacksonville",
       "miles": 140,
       "highway": "I-95",
-      "terrain": "flat",
-      "stops": [
-        "Brunswick Travel Plaza"
-      ]
+      "terrain": "flat"
     },
     {
       "from": "Savannah",
       "to": "Atlanta",
       "miles": 250,
       "highway": "I-16",
-      "terrain": "hills",
-      "stops": [
-        "Macon Crossroads"
-      ]
+      "terrain": "hills"
     },
     {
       "from": "Jacksonville",
       "to": "Atlanta",
       "miles": 345,
       "highway": "I-75",
-      "terrain": "flat",
-      "stops": [
-        "Valdosta Truck Plaza",
-        "Tifton Fuel Stop"
-      ]
+      "terrain": "flat"
     },
     {
       "from": "Jacksonville",
       "to": "Tampa",
       "miles": 200,
       "highway": "I-75",
-      "terrain": "flat",
-      "stops": [
-        "Ocala Travel Center"
-      ]
+      "terrain": "flat"
     },
     {
       "from": "Jacksonville",
       "to": "Miami",
       "miles": 345,
       "highway": "I-95",
-      "terrain": "flat",
-      "stops": [
-        "Daytona Speedway Stop",
-        "Fort Pierce Plaza"
-      ]
+      "terrain": "flat"
     },
     {
       "from": "Tampa",
       "to": "Miami",
       "miles": 280,
       "highway": "I-75",
-      "terrain": "flat",
-      "stops": [
-        "Naples Gateway Plaza"
-      ]
+      "terrain": "flat"
     },
     {
       "from": "Buffalo",
       "to": "Cleveland",
       "miles": 190,
       "highway": "I-90",
-      "terrain": "flat",
-      "stops": [
-        "Erie Lakeside Stop"
-      ]
+      "terrain": "flat"
     },
     {
       "from": "Buffalo",
       "to": "New York",
       "miles": 375,
       "highway": "I-90",
-      "terrain": "hills",
-      "stops": [
-        "Syracuse Truck Plaza",
-        "Albany Crossroads"
-      ]
+      "terrain": "hills"
     },
     {
       "from": "Atlanta",
@@ -1981,8 +1821,10 @@
       "terrain": "hills",
       "stops": [
         {
-          "name": "Talladega I-20 Travel Center",
-          "type": "travel_center"
+          "name": "Pilot Travel Center Lincoln",
+          "type": "travel_center",
+          "at_mi": 101.0,
+          "source": "Pilot Travel Center Lincoln, AL, I-20 Exit 168, truck parking: https://locations.pilotflyingj.com/us/al/lincoln/75750-al-77"
         }
       ]
     },
@@ -1991,41 +1833,28 @@
       "to": "Nashville",
       "miles": 192,
       "highway": "I-65",
-      "terrain": "hills",
-      "stops": [
-        "Cullman Travel Plaza"
-      ]
+      "terrain": "hills"
     },
     {
       "from": "Birmingham",
       "to": "Memphis",
       "miles": 240,
       "highway": "I-22",
-      "terrain": "hills",
-      "stops": [
-        "Tupelo Crossroads"
-      ]
+      "terrain": "hills"
     },
     {
       "from": "Birmingham",
       "to": "New Orleans",
       "miles": 345,
       "highway": "I-59",
-      "terrain": "flat",
-      "stops": [
-        "Meridian Fuel Stop",
-        "Slidell Travel Plaza"
-      ]
+      "terrain": "flat"
     },
     {
       "from": "Memphis",
       "to": "Nashville",
       "miles": 210,
       "highway": "I-40",
-      "terrain": "hills",
-      "stops": [
-        "Jackson Tennessee Plaza"
-      ]
+      "terrain": "hills"
     },
     {
       "from": "Memphis",
@@ -2035,8 +1864,10 @@
       "terrain": "flat",
       "stops": [
         {
-          "name": "Forrest City I-40 Truck Stop",
-          "type": "truck_stop"
+          "name": "Forrest City I-40 Rest Area",
+          "type": "public_rest_area",
+          "at_mi": 49.0,
+          "source": "ARDOT welcome centers/rest areas PDF, Forrest City I-40 mile marker 242.6 with RV/truck parking: https://media.ark.org/ardot/Welcome-Centers-and-Rest-Areas-and-Accessibility-Barriers.pdf"
         }
       ]
     },
@@ -2045,61 +1876,42 @@
       "to": "St. Louis",
       "miles": 285,
       "highway": "I-55",
-      "terrain": "flat",
-      "stops": [
-        "Sikeston Travel Center"
-      ]
+      "terrain": "flat"
     },
     {
       "from": "Little Rock",
       "to": "Dallas",
       "miles": 320,
       "highway": "I-30",
-      "terrain": "flat",
-      "stops": [
-        "Texarkana State Line Stop"
-      ]
+      "terrain": "flat"
     },
     {
       "from": "Little Rock",
       "to": "Oklahoma City",
       "miles": 340,
       "highway": "I-40",
-      "terrain": "hills",
-      "stops": [
-        "Fort Smith River Stop"
-      ]
+      "terrain": "hills"
     },
     {
       "from": "New Orleans",
       "to": "Houston",
       "miles": 350,
       "highway": "I-10",
-      "terrain": "flat",
-      "stops": [
-        "Baton Rouge Fuel Plaza",
-        "Lake Charles Stop"
-      ]
+      "terrain": "flat"
     },
     {
       "from": "Houston",
       "to": "Dallas",
       "miles": 240,
       "highway": "I-45",
-      "terrain": "flat",
-      "stops": [
-        "Huntsville Piney Woods Stop"
-      ]
+      "terrain": "flat"
     },
     {
       "from": "Houston",
       "to": "San Antonio",
       "miles": 197,
       "highway": "I-10",
-      "terrain": "flat",
-      "stops": [
-        "Seguin Truck Stop"
-      ]
+      "terrain": "flat"
     },
     {
       "from": "San Antonio",
@@ -2109,12 +1921,22 @@
       "terrain": "hills",
       "stops": [
         {
-          "name": "Austin I-35 Travel Center",
-          "type": "travel_center"
+          "name": "Bell County Safety Rest Area",
+          "type": "public_rest_area",
+          "at_mi": 138.0,
+          "source": "TxDOT safety rest area list, Bell County IH-35 near Salado with mile posts 281/282: https://www.txdot.gov/discover/rest-areas-travel-information-centers/safety-rest-area-list.html"
         },
         {
-          "name": "Waco I-35 Travel Plaza",
-          "type": "travel_center"
+          "name": "Road Ranger Waco",
+          "type": "travel_center",
+          "at_mi": 185.0,
+          "source": "Road Ranger Waco, 6615 N Interstate Highway 35, I-35 Exit 342B: https://www.roadrangerusa.com/node/251"
+        },
+        {
+          "name": "Hill County Safety Rest Area",
+          "type": "public_rest_area",
+          "at_mi": 218.0,
+          "source": "TxDOT Hill County Safety Rest Area, IH-35 south of Hillsboro, separate truck parking: https://www.txdot.gov/discover/rest-areas-travel-information-centers/safety-rest-area-list/hill.html"
         }
       ]
     },
@@ -2123,73 +1945,49 @@
       "to": "El Paso",
       "miles": 550,
       "highway": "I-10",
-      "terrain": "hills",
-      "stops": [
-        "Kerrville Hill Stop",
-        "Fort Stockton Plaza",
-        "Van Horn Fuel Stop"
-      ]
+      "terrain": "hills"
     },
     {
       "from": "El Paso",
       "to": "Albuquerque",
       "miles": 265,
       "highway": "I-25",
-      "terrain": "hills",
-      "stops": [
-        "Truth or Consequences Stop"
-      ]
+      "terrain": "hills"
     },
     {
       "from": "El Paso",
       "to": "Tucson",
       "miles": 315,
       "highway": "I-10",
-      "terrain": "hills",
-      "stops": [
-        "Las Cruces Crossing",
-        "Willcox Plaza"
-      ]
+      "terrain": "hills"
     },
     {
       "from": "Tucson",
       "to": "Phoenix",
       "miles": 115,
       "highway": "I-10",
-      "terrain": "flat",
-      "stops": [
-        "Picacho Peak Stop"
-      ]
+      "terrain": "flat"
     },
     {
       "from": "Knoxville",
       "to": "Nashville",
       "miles": 180,
       "highway": "I-40",
-      "terrain": "mountain",
-      "stops": [
-        "Cookeville Plateau Stop"
-      ]
+      "terrain": "mountain"
     },
     {
       "from": "Knoxville",
       "to": "Atlanta",
       "miles": 215,
       "highway": "I-75",
-      "terrain": "hills",
-      "stops": [
-        "Chattanooga Valley Stop"
-      ]
+      "terrain": "hills"
     },
     {
       "from": "Detroit",
       "to": "Cleveland",
       "miles": 170,
       "highway": "I-75",
-      "terrain": "flat",
-      "stops": [
-        "Toledo Glass City Stop"
-      ]
+      "terrain": "flat"
     },
     {
       "from": "Detroit",
@@ -2198,8 +1996,18 @@
       "highway": "I-94",
       "terrain": "flat",
       "stops": [
-        "Kalamazoo Travel Plaza",
-        "Michigan City Stop"
+        {
+          "name": "Pilot Travel Center Battle Creek",
+          "type": "travel_center",
+          "at_mi": 118.0,
+          "source": "Pilot Travel Center Battle Creek, MI, I-94, truck parking: https://locations.pilotflyingj.com/us/mi/battle-creek/15901-11-mile-rd"
+        },
+        {
+          "name": "TA Sawyer",
+          "type": "travel_center",
+          "at_mi": 214.0,
+          "source": "TravelCenters of America TA Sawyer, I-94 Exit 12, 155 truck parking spaces: https://www.ta-petro.com/location/mi/ta-sawyer/"
+        }
       ]
     },
     {
@@ -2207,80 +2015,56 @@
       "to": "Cleveland",
       "miles": 142,
       "highway": "I-71",
-      "terrain": "flat",
-      "stops": [
-        "Mansfield Midpoint Plaza"
-      ]
+      "terrain": "flat"
     },
     {
       "from": "Columbus",
       "to": "Cincinnati",
       "miles": 107,
       "highway": "I-71",
-      "terrain": "flat",
-      "stops": [
-        "Jeffersonville Outlet Stop"
-      ]
+      "terrain": "flat"
     },
     {
       "from": "Columbus",
       "to": "Pittsburgh",
       "miles": 185,
       "highway": "I-70",
-      "terrain": "hills",
-      "stops": [
-        "Wheeling River Stop"
-      ]
+      "terrain": "hills"
     },
     {
       "from": "Columbus",
       "to": "Indianapolis",
       "miles": 175,
       "highway": "I-70",
-      "terrain": "flat",
-      "stops": [
-        "Springfield Ohio Plaza"
-      ]
+      "terrain": "flat"
     },
     {
       "from": "Cincinnati",
       "to": "Indianapolis",
       "miles": 110,
       "highway": "I-74",
-      "terrain": "flat",
-      "stops": [
-        "Batesville Crossroads"
-      ]
+      "terrain": "flat"
     },
     {
       "from": "Cincinnati",
       "to": "Louisville",
       "miles": 100,
       "highway": "I-71",
-      "terrain": "hills",
-      "stops": [
-        "Sparta Speedway Stop"
-      ]
+      "terrain": "hills"
     },
     {
       "from": "Louisville",
       "to": "Indianapolis",
       "miles": 115,
       "highway": "I-65",
-      "terrain": "flat",
-      "stops": [
-        "Seymour Truck Plaza"
-      ]
+      "terrain": "flat"
     },
     {
       "from": "Louisville",
       "to": "Nashville",
       "miles": 175,
       "highway": "I-65",
-      "terrain": "hills",
-      "stops": [
-        "Horse Cave Stop"
-      ]
+      "terrain": "hills"
     },
     {
       "from": "Milwaukee",
@@ -2289,7 +2073,12 @@
       "highway": "I-94",
       "terrain": "flat",
       "stops": [
-        "Kenosha Travel Plaza"
+        {
+          "name": "Kenosha Safety Rest Area",
+          "type": "public_rest_area",
+          "at_mi": 37.0,
+          "source": "WisDOT Safety Rest Area 26, I-94 Exit 347, truck parking: https://wisconsindot.gov/Pages/travel/road/rest-areas/26-kenosha.aspx"
+        }
       ]
     },
     {
@@ -2297,41 +2086,28 @@
       "to": "Minneapolis",
       "miles": 337,
       "highway": "I-94",
-      "terrain": "hills",
-      "stops": [
-        "Wisconsin Dells Stop",
-        "Eau Claire Fuel Plaza"
-      ]
+      "terrain": "hills"
     },
     {
       "from": "Minneapolis",
       "to": "Des Moines",
       "miles": 245,
       "highway": "I-35",
-      "terrain": "flat",
-      "stops": [
-        "Clear Lake Crossroads"
-      ]
+      "terrain": "flat"
     },
     {
       "from": "Des Moines",
       "to": "Omaha",
       "miles": 137,
       "highway": "I-80",
-      "terrain": "flat",
-      "stops": [
-        "Stuart Travel Plaza"
-      ]
+      "terrain": "flat"
     },
     {
       "from": "Des Moines",
       "to": "Kansas City",
       "miles": 195,
       "highway": "I-35",
-      "terrain": "hills",
-      "stops": [
-        "Bethany Square Stop"
-      ]
+      "terrain": "hills"
     },
     {
       "from": "Des Moines",
@@ -2340,8 +2116,12 @@
       "highway": "I-80",
       "terrain": "flat",
       "stops": [
-        "Iowa 80 Truckstop",
-        "Princeton Plaza"
+        {
+          "name": "Iowa 80 Truckstop",
+          "type": "truck_stop",
+          "at_mi": 177.0,
+          "source": "Iowa 80 Truckstop official page, 755 W. Iowa 80 Rd, I-80 Exit 284, Walcott: https://iowa80truckstop.com/"
+        }
       ]
     },
     {
@@ -2349,189 +2129,126 @@
       "to": "Kansas City",
       "miles": 185,
       "highway": "I-29",
-      "terrain": "flat",
-      "stops": [
-        "St. Joseph River Stop"
-      ]
+      "terrain": "flat"
     },
     {
       "from": "Omaha",
       "to": "Cheyenne",
       "miles": 455,
       "highway": "I-80",
-      "terrain": "flat",
-      "stops": [
-        "Kearney Archway Stop",
-        "North Platte Rail Stop",
-        "Sidney Plains Stop"
-      ]
+      "terrain": "flat"
     },
     {
       "from": "Cheyenne",
       "to": "Denver",
       "miles": 100,
       "highway": "I-25",
-      "terrain": "flat",
-      "stops": [
-        "Fort Collins Front Range Stop"
-      ]
+      "terrain": "flat"
     },
     {
       "from": "Cheyenne",
       "to": "Salt Lake City",
       "miles": 435,
       "highway": "I-80",
-      "terrain": "mountain",
-      "stops": [
-        "Elk Mountain Summit",
-        "Green River Stop"
-      ]
+      "terrain": "mountain"
     },
     {
       "from": "Oklahoma City",
       "to": "Dallas",
       "miles": 207,
       "highway": "I-35",
-      "terrain": "hills",
-      "stops": [
-        "Ardmore Arbuckle Stop"
-      ]
+      "terrain": "hills"
     },
     {
       "from": "Oklahoma City",
       "to": "Tulsa",
       "miles": 106,
       "highway": "I-44",
-      "terrain": "flat",
-      "stops": [
-        "Stroud Halfway Stop"
-      ]
+      "terrain": "flat"
     },
     {
       "from": "Oklahoma City",
       "to": "Wichita",
       "miles": 160,
       "highway": "I-35",
-      "terrain": "flat",
-      "stops": [
-        "Blackwell Prairie Stop"
-      ]
+      "terrain": "flat"
     },
     {
       "from": "Oklahoma City",
       "to": "Amarillo",
       "miles": 260,
       "highway": "I-40",
-      "terrain": "flat",
-      "stops": [
-        "Elk City Route 66 Stop"
-      ]
+      "terrain": "flat"
     },
     {
       "from": "Tulsa",
       "to": "Kansas City",
       "miles": 250,
       "highway": "US-69",
-      "terrain": "hills",
-      "stops": [
-        "Big Cabin Truck Plaza"
-      ]
+      "terrain": "hills"
     },
     {
       "from": "Wichita",
       "to": "Kansas City",
       "miles": 200,
       "highway": "I-35",
-      "terrain": "hills",
-      "stops": [
-        "Emporia Flint Hills Stop"
-      ]
+      "terrain": "hills"
     },
     {
       "from": "Amarillo",
       "to": "Albuquerque",
       "miles": 290,
       "highway": "I-40",
-      "terrain": "hills",
-      "stops": [
-        "Santa Rosa Blue Hole Stop"
-      ]
+      "terrain": "hills"
     },
     {
       "from": "Amarillo",
       "to": "Dallas",
       "miles": 365,
       "highway": "US-287",
-      "terrain": "flat",
-      "stops": [
-        "Childress Big Sky Stop",
-        "Decatur Junction"
-      ]
+      "terrain": "flat"
     },
     {
       "from": "Las Vegas",
       "to": "Phoenix",
       "miles": 300,
       "highway": "US-93",
-      "terrain": "hills",
-      "stops": [
-        "Hoover Dam Overlook Stop",
-        "Wickenburg Plaza"
-      ]
+      "terrain": "hills"
     },
     {
       "from": "Sacramento",
       "to": "San Francisco",
       "miles": 88,
       "highway": "I-80",
-      "terrain": "flat",
-      "stops": [
-        "Vacaville Travel Plaza"
-      ]
+      "terrain": "flat"
     },
     {
       "from": "Sacramento",
       "to": "Reno",
       "miles": 132,
       "highway": "I-80",
-      "terrain": "mountain",
-      "stops": [
-        "Donner Summit Stop"
-      ]
+      "terrain": "mountain"
     },
     {
       "from": "Reno",
       "to": "Salt Lake City",
       "miles": 518,
       "highway": "I-80",
-      "terrain": "hills",
-      "stops": [
-        "Lovelock Fuel Stop",
-        "Winnemucca Plaza",
-        "Wendover Salt Flats Stop"
-      ]
+      "terrain": "hills"
     },
     {
       "from": "Reno",
       "to": "Las Vegas",
       "miles": 450,
       "highway": "US-95",
-      "terrain": "hills",
-      "stops": [
-        "Hawthorne Depot Stop",
-        "Tonopah Crossroads"
-      ]
+      "terrain": "hills"
     },
     {
       "from": "Sacramento",
       "to": "Portland",
       "miles": 580,
       "highway": "I-5",
-      "terrain": "mountain",
-      "stops": [
-        "Mount Shasta Vista Stop",
-        "Grants Pass Plaza"
-      ]
+      "terrain": "mountain"
     },
     {
       "from": "Los Angeles",
@@ -2541,8 +2258,10 @@
       "terrain": "flat",
       "stops": [
         {
-          "name": "San Onofre Truck Parking",
-          "type": "truck_parking"
+          "name": "San Onofre Safety Roadside Rest Area",
+          "type": "public_rest_area",
+          "at_mi": 68.0,
+          "source": "Caltrans Safety Roadside Rest Areas program and San Onofre I-5 route context: https://dot.ca.gov/programs/design/lap-landscape-architecture-and-community-livability/lap-liv-h-safety-roadside-rest-areas"
         }
       ]
     },
@@ -2551,72 +2270,55 @@
       "to": "Phoenix",
       "miles": 355,
       "highway": "I-8",
-      "terrain": "hills",
-      "stops": [
-        "El Centro Desert Stop",
-        "Yuma Crossing Plaza"
-      ]
+      "terrain": "hills"
     },
     {
       "from": "Los Angeles",
       "to": "Fresno",
       "miles": 220,
       "highway": "CA-99",
-      "terrain": "hills",
-      "stops": [
-        "Bakersfield Truck Plaza"
-      ]
+      "terrain": "hills"
     },
     {
       "from": "Fresno",
       "to": "Sacramento",
       "miles": 170,
       "highway": "CA-99",
-      "terrain": "flat",
-      "stops": [
-        "Modesto Almond Stop"
-      ]
+      "terrain": "flat"
     },
     {
       "from": "Boise",
       "to": "Salt Lake City",
       "miles": 340,
       "highway": "I-84",
-      "terrain": "hills",
-      "stops": [
-        "Burley Snake River Stop"
-      ]
+      "terrain": "hills"
     },
     {
       "from": "Boise",
       "to": "Portland",
       "miles": 430,
       "highway": "I-84",
-      "terrain": "mountain",
-      "stops": [
-        "La Grande Blue Mountain Stop"
-      ]
+      "terrain": "mountain"
     },
     {
       "from": "Spokane",
       "to": "Seattle",
       "miles": 280,
       "highway": "I-90",
-      "terrain": "mountain",
-      "stops": [
-        "Moses Lake Basin Stop",
-        "Snoqualmie Summit Stop"
-      ]
+      "terrain": "mountain"
     },
     {
       "from": "Spokane",
       "to": "Boise",
       "miles": 425,
       "highway": "US-95",
-      "terrain": "mountain",
-      "stops": [
-        "Lewiston Grade Stop"
-      ]
+      "terrain": "mountain"
     }
-  ]
+  ],
+  "route_stop_data": {
+    "schema": 1,
+    "position_units": "route miles from each leg.from city toward leg.to city",
+    "strategy": "Offline curated seed from public DOT rest-area pages, operator location pages, and development-time map review. Runtime play never calls external route or amenity services.",
+    "license_notes": "OpenStreetMap-derived future imports require ODbL attribution/share-alike review. Current seed keeps source notes per stop and favors public agency/operator pages."
+  }
 }

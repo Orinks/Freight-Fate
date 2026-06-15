@@ -134,12 +134,20 @@ class Trip:
         return starts
 
     def _place_stops(self) -> list[RoadStop]:
-        """Spread each leg's named stops evenly along that leg."""
+        """Place each leg's named stops at its curated route mileage."""
         out: list[RoadStop] = []
-        for start, leg in zip(self._leg_starts, self.route.legs, strict=True):
-            n = len(leg.stops)
-            for i, stop in enumerate(leg.stops):
-                at = start + leg.miles * (i + 1) / (n + 1)
+        for i, (start, leg) in enumerate(zip(self._leg_starts, self.route.legs,
+                                             strict=True)):
+            from_city = self.route.cities[i]
+            leg_stops = sorted(
+                leg.stops,
+                key=lambda stop: _stop_offset_for_direction(stop.at_mi, leg.miles,
+                                                            from_city == leg.a),
+            )
+            for stop in leg_stops:
+                offset = _stop_offset_for_direction(stop.at_mi, leg.miles,
+                                                    from_city == leg.a)
+                at = start + offset
                 out.append(RoadStop(stop.name, at, stop.type))
         return out
 
@@ -397,3 +405,7 @@ class Trip:
         if self.hos_violation and self._insp_rng.random() < 0.5:
             self._emit(TripEventKind.INSPECTION,
                        "Weigh station ahead. Officers wave you in for a log check.")
+
+
+def _stop_offset_for_direction(at_mi: float, leg_miles: float, forward: bool) -> float:
+    return at_mi if forward else leg_miles - at_mi

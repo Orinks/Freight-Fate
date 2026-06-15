@@ -91,6 +91,28 @@ def test_trip_announces_stops_ahead(world):
     assert any(e.kind == TripEventKind.STOP_AHEAD for e in events)
 
 
+def test_trip_uses_explicit_stop_positions(world):
+    trip, _ = make_trip(world)
+
+    assert [stop.name for stop in trip.stops] == ["Loves Travel Stop Lafayette"]
+    assert trip.stops[0].at_mi == 122.0
+    assert trip.stops[0].at_mi != trip.route.miles / 2
+
+
+def test_trip_places_reverse_route_stops_from_travel_direction(world):
+    route = world.route_from_cities(["Dallas", "San Antonio"])
+    truck = TruckState()
+    weather = WeatherSystem("plains", seed=1)
+    trip = Trip(route, truck, weather, seed=2)
+
+    assert [stop.name for stop in trip.stops] == [
+        "Hill County Safety Rest Area",
+        "Road Ranger Waco",
+        "Bell County Safety Rest Area",
+    ]
+    assert [stop.at_mi for stop in trip.stops] == [57.0, 90.0, 137.0]
+
+
 def test_zone_speed_limits_apply(world):
     trip, _ = make_trip(world, "Atlanta", "Dallas")
     assert trip.zones, "long route should have at least one zone"

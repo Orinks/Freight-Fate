@@ -145,9 +145,68 @@ def test_route_stops_have_trucker_relevant_types(world):
     assert route.stop_details
     assert all(stop.type in STOP_TYPE_LABELS for stop in route.stop_details)
     assert any(stop.spoken_name.startswith("travel center:") for stop in route.stop_details)
+    assert all(stop.source for stop in route.stop_details)
 
     parking_route = world.shortest_route("Los Angeles", "San Diego")
-    assert any(stop.type == "truck_parking" for stop in parking_route.stop_details)
+    assert any(stop.type == "public_rest_area" for stop in parking_route.stop_details)
+
+
+def test_route_stops_have_explicit_valid_positions(world):
+    for leg in world.legs:
+        for stop in leg.stops:
+            assert 0.0 < stop.at_mi < leg.miles, f"{leg.a}-{leg.b}: {stop}"
+
+
+def test_world_rejects_missing_stop_position():
+    import pytest
+
+    from freight_fate.data.world import World
+
+    data = {
+        "cities": {
+            "A": {"state": "Test", "region": "midwest", "locations": []},
+            "B": {"state": "Test", "region": "midwest", "locations": []},
+        },
+        "legs": [
+            {
+                "from": "A",
+                "to": "B",
+                "miles": 100,
+                "highway": "I-1",
+                "terrain": "flat",
+                "stops": ["Synthetic midpoint"],
+            }
+        ],
+    }
+
+    with pytest.raises(ValueError, match="missing explicit at_mi"):
+        World(data)
+
+
+def test_world_rejects_out_of_range_stop_position():
+    import pytest
+
+    from freight_fate.data.world import World
+
+    data = {
+        "cities": {
+            "A": {"state": "Test", "region": "midwest", "locations": []},
+            "B": {"state": "Test", "region": "midwest", "locations": []},
+        },
+        "legs": [
+            {
+                "from": "A",
+                "to": "B",
+                "miles": 100,
+                "highway": "I-1",
+                "terrain": "flat",
+                "stops": [{"name": "Past the city", "type": "travel_center", "at_mi": 130}],
+            }
+        ],
+    }
+
+    with pytest.raises(ValueError, match="outside leg mileage"):
+        World(data)
 
 
 def test_route_describe_mentions_miles_and_highway(world):

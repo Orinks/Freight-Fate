@@ -150,10 +150,11 @@ def test_jobs_carry_destination_facility_metadata(world):
 
 def test_representative_stops_are_real_world_grounded(world):
     expected = {
-        ("Atlanta", "Birmingham"): "Talladega I-20 Travel Center",
-        ("Memphis", "Little Rock"): "Forrest City I-40 Truck Stop",
-        ("San Antonio", "Dallas"): "Waco I-35 Travel Plaza",
-        ("Los Angeles", "San Diego"): "San Onofre Truck Parking",
+        ("Atlanta", "Birmingham"): "Pilot Travel Center Lincoln",
+        ("Memphis", "Little Rock"): "Forrest City I-40 Rest Area",
+        ("San Antonio", "Dallas"): "Road Ranger Waco",
+        ("Los Angeles", "San Diego"): "San Onofre Safety Roadside Rest Area",
+        ("Des Moines", "Chicago"): "Iowa 80 Truckstop",
     }
     for (start, end), stop_name in expected.items():
         route = world.shortest_route(start, end)
