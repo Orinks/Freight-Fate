@@ -58,6 +58,9 @@ def _career_location(profile: Profile) -> str:
     trip = profile.active_trip or {}
     job = trip.get("job", {})
     destination = job.get("destination")
+    if trip.get("kind") == "pickup_drive":
+        facility = job.get("origin_location")
+        return f"driving to pickup at {facility or destination}"
     if trip.get("kind") == "pickup" and destination:
         loaded = "loaded for" if trip.get("loaded") else "picking up for"
         return f"{loaded} {destination}"
@@ -311,9 +314,9 @@ class HomeTerminalState(MenuState):
 HELP_PAGES = [
     ("The goal", [
         "You are an owner-operator truck driver building a freight career.",
-        "Accept freight from the job board, check in at the origin facility,",
-        "load the trailer, choose a destination route, and deliver cargo",
-        "across the country, on time and intact.",
+        "Accept freight from the job board, drive to the origin facility,",
+        "check in and load the trailer there, choose a destination route,",
+        "and deliver cargo across the country, on time and intact.",
         "Earn money and experience, level up, and unlock better freight.",
     ]),
     ("Menus", [
@@ -378,8 +381,10 @@ HELP_PAGES = [
         "Each job names an origin facility and a destination facility.",
         "Cargo follows the facility type, so a food terminal offers",
         "different work than a port, warehouse, or factory.",
-        "After accepting a job, check in at the origin facility.",
-        "Loading requires a full stop at the assigned dock.",
+        "After accepting a job, drive the local approach to the origin facility.",
+        "At the pickup gate, come to a full stop before the facility menu opens.",
+        "Check in, then load at the assigned dock.",
+        "Loading requires the truck to be stopped.",
         "Once loaded and sealed, choose the route to the destination.",
         "Deliver before the deadline for a bonus. Late or damaged cargo pays less.",
         "At the destination facility, slow down, come to a full stop,",

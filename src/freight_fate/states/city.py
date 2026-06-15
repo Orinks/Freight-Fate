@@ -421,9 +421,9 @@ class TruckShopState(MenuState):
 class JobBoardState(MenuState):
     title = "Job board"
     intro_help = ("Each entry is one delivery job. Enter accepts the job and creates "
-                  "a pickup objective at the named origin facility. Jobs name "
-                  "their origin and destination facilities, and cargo depends "
-                  "on the facility type. Escape returns to the city.")
+                  "a drivable pickup objective at the named origin facility. "
+                  "Jobs name their origin and destination facilities, and cargo "
+                  "depends on the facility type. Escape returns to the city.")
 
     def __init__(self, ctx, jobs: list[Job]) -> None:
         super().__init__(ctx)
@@ -456,12 +456,18 @@ class JobBoardState(MenuState):
             self.ctx.say("You do not have the endorsement for this cargo yet. "
                          "Keep delivering to level up and unlock it.")
             return
-        p.active_trip = pickup_snapshot(job)
+        from .driving import DRIVE_PHASE_PICKUP, DrivingState
+
+        route = self.ctx.world.facility_approach_route(job.origin, job.origin_location)
+        driving = DrivingState(self.ctx, job, route, phase=DRIVE_PHASE_PICKUP)
+        p.active_trip = driving.snapshot()
         self.ctx.save_profile()
         self.ctx.say(
-            f"Job accepted. Pickup objective: check in at "
-            f"{facility_label(job.origin_type)} {job.origin_location}.")
-        self.ctx.push_state(PickupFacilityState(self.ctx, job))
+            f"Job accepted. Drive to pickup at "
+            f"{facility_label(job.origin_type)} {job.origin_location}. "
+            f"{route.miles:.1f} miles on {route.highways[0]}.",
+            interrupt=True)
+        self.ctx.push_state(driving)
 
 
 class PickupFacilityState(MenuState):
@@ -471,12 +477,19 @@ class PickupFacilityState(MenuState):
                   "the truck is fully stopped. Escape repeats the pickup status.")
 
     def __init__(self, ctx, job: Job, *, checked_in: bool = False,
-                 loaded: bool = False) -> None:
+                 loaded: bool = False, driving=None) -> None:
         super().__init__(ctx)
         self.job = job
         self.checked_in = checked_in
         self.loaded = loaded
-        self.truck = TruckState(specs=ctx.profile.truck_specs())
+        self.driving = driving
+        if driving is not None:
+            self.truck = driving.truck
+        else:
+            self.truck = TruckState(specs=ctx.profile.truck_specs())
+            self.truck.fuel_gal = min(ctx.profile.truck_fuel_gal,
+                                      self.truck.specs.fuel_tank_gal)
+            self.truck.damage_pct = ctx.profile.truck_damage_pct
 
     @classmethod
     def from_snapshot(cls, ctx, data: dict) -> PickupFacilityState | None:
@@ -500,7 +513,7 @@ class PickupFacilityState(MenuState):
             lead = (f"Checked in at {self.facility}. You are assigned a dock "
                     "for loading.")
         else:
-            lead = (f"Pickup objective: {self.facility}. Check in with the "
+            lead = (f"Arrived at pickup: {self.facility}. Check in with the "
                     "shipping office before loading.")
         self.ctx.say(f"{lead} {self.current_text()}")
 
@@ -538,6 +551,8 @@ class PickupFacilityState(MenuState):
         ]
 
     def _save_state(self) -> None:
+        self.ctx.profile.truck_fuel_gal = self.truck.fuel_gal
+        self.ctx.profile.truck_damage_pct = self.truck.damage_pct
         self.ctx.profile.active_trip = pickup_snapshot(
             self.job, checked_in=self.checked_in, loaded=self.loaded)
         self.ctx.save_profile()
@@ -581,7 +596,8 @@ class PickupFacilityState(MenuState):
             self.ctx.audio.play("ui/error")
             self.ctx.say("Dispatch cannot find a route for this load.")
             return
-        self.ctx.push_state(RouteSelectState(self.ctx, self.job, routes))
+        self.ctx.push_state(RouteSelectState(self.ctx, self.job, routes,
+                                            back_label="Back to pickup facility"))
 
     def _status(self) -> None:
         state = ("loaded and sealed" if self.loaded else
@@ -636,10 +652,12 @@ class RouteSelectState(MenuState):
                   "Press W on a route to hear the weather forecast along it. "
                   "Enter starts the drive.")
 
-    def __init__(self, ctx, job: Job, routes: list[Route]) -> None:
+    def __init__(self, ctx, job: Job, routes: list[Route],
+                 back_label: str = "Back to job board") -> None:
         super().__init__(ctx)
         self.job = job
         self.routes = routes
+        self.back_label = back_label
         # start fetching live weather for cities on the routes so the data is
         # usually ready by the time the player asks for a forecast
         provider = ctx.real_weather_provider()
@@ -660,7 +678,7 @@ class RouteSelectState(MenuState):
             label = f"Route {i + 1}: {route.describe()}"
             items.append(MenuItem(label, lambda r=route: self._start(r),
                                   help="Via " + ", ".join(route.cities[1:-1] or ["no major cities"])))
-        items.append(MenuItem("Back to job board", self.go_back))
+        items.append(MenuItem(self.back_label, self.go_back))
         return items
 
     def handle_event(self, event) -> None:

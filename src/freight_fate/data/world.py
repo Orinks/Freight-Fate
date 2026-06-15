@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import heapq
 import json
+import zlib
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -72,6 +73,34 @@ LOCATION_TYPE_LABELS = {
     "retail_distribution": "retail distribution hub",
     "terminal": "freight terminal",
     "warehouse": "warehouse",
+}
+
+FACILITY_APPROACH_MILES = {
+    "air_cargo": 7.0,
+    "distribution": 4.0,
+    "food_terminal": 3.5,
+    "industrial_park": 5.0,
+    "intermodal": 6.0,
+    "manufacturing": 4.5,
+    "port": 8.0,
+    "rail": 5.5,
+    "retail_distribution": 4.0,
+    "terminal": 3.0,
+    "warehouse": 3.5,
+}
+
+FACILITY_APPROACH_ROADS = {
+    "air_cargo": "airport cargo access road",
+    "distribution": "distribution center access road",
+    "food_terminal": "food terminal access road",
+    "industrial_park": "industrial park access road",
+    "intermodal": "intermodal yard access road",
+    "manufacturing": "plant access road",
+    "port": "port access road",
+    "rail": "rail yard access road",
+    "retail_distribution": "retail distribution access road",
+    "terminal": "terminal access road",
+    "warehouse": "warehouse access road",
 }
 
 
@@ -184,6 +213,25 @@ class World:
 
     def neighbors(self, city: str) -> list[Leg]:
         return self._adjacency[city]
+
+    def facility_location(self, city: str, location_name: str) -> Location:
+        if city not in self.cities:
+            raise KeyError(f"Unknown city: {city}")
+        for location in self.cities[city].locations:
+            if location.name == location_name:
+                return location
+        raise KeyError(f"Unknown facility in {city}: {location_name}")
+
+    def facility_approach_route(self, city: str, location_name: str) -> Route:
+        """A short, drivable local route from the city truck area to a facility."""
+        location = self.facility_location(city, location_name)
+        base_miles = FACILITY_APPROACH_MILES.get(location.type, 4.0)
+        seed = zlib.crc32(f"{city}:{location.name}:{location.type}".encode())
+        offset = (seed % 7) * 0.25
+        miles = round(base_miles + offset, 1)
+        road = FACILITY_APPROACH_ROADS.get(location.type, "facility access road")
+        leg = Leg(city, city, miles, road, "flat", ())
+        return Route([city, city], [leg])
 
     def shortest_route(self, start: str, end: str,
                        penalties: dict[Leg, float] | None = None) -> Route | None:

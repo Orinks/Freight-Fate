@@ -10,6 +10,7 @@ def key_event(key, unicode=""):
 
 def start_drive(app):
     """New career, accept an unlocked job, pick a route; returns DrivingState."""
+    from freight_fate.states.city import PickupFacilityState, RouteSelectState
     from freight_fate.states.driving import DrivingState
     from freight_fate.states.main_menu import MainMenuState
 
@@ -24,11 +25,20 @@ def start_drive(app):
     while board.jobs[board.index].cargo.endorsement:  # skip locked teasers
         board.handle_event(key_event(pygame.K_DOWN))
     app.state.handle_event(key_event(pygame.K_RETURN))  # accept job
+    assert isinstance(app.state, DrivingState)
+    assert app.state.phase == "pickup"
+    app.state.trip.position_mi = app.state.trip.total_miles
+    app.state.trip.finished = True
+    app.state.truck.velocity_mps = 0.0
+    app.state.update(1 / 60)
+    assert isinstance(app.state, PickupFacilityState)
     app.state.handle_event(key_event(pygame.K_RETURN))  # check in at origin
     app.state.handle_event(key_event(pygame.K_RETURN))  # load at dock
     app.state.handle_event(key_event(pygame.K_RETURN))  # plan destination route
+    assert isinstance(app.state, RouteSelectState)
     app.state.handle_event(key_event(pygame.K_RETURN))  # pick route
     assert isinstance(app.state, DrivingState)
+    assert app.state.phase == "delivery"
     return app.state
 
 
@@ -64,8 +74,9 @@ def test_how_to_play_documents_new_gameplay_systems():
 
     assert "slow below 5 miles per hour" in help_text
     assert "destination facility" in help_text
-    assert "check in at the origin facility" in help_text
-    assert "loading requires a full stop" in help_text
+    assert "drive the local approach to the origin facility" in help_text
+    assert "pickup gate" in help_text
+    assert "loading requires the truck to be stopped" in help_text
     assert "loaded and sealed" in help_text
     assert "dock and deliver" in help_text
     assert "ports" in help_text

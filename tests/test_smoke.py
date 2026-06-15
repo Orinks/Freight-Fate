@@ -91,6 +91,12 @@ def test_full_game_flow_headless():
         while board.jobs[board.index].cargo.endorsement:
             board.handle_event(key_event(pygame.K_DOWN))
         app.state.handle_event(key_event(pygame.K_RETURN))
+        assert isinstance(app.state, DrivingState)
+        assert app.state.phase == "pickup"
+        app.state.trip.position_mi = app.state.trip.total_miles
+        app.state.trip.finished = True
+        app.state.truck.velocity_mps = 0.0
+        app.state.update(1 / 60)
         assert isinstance(app.state, PickupFacilityState)
         app.state.handle_event(key_event(pygame.K_RETURN))  # check in at origin
         assert "Load cargo at dock" in app.state.items[app.state.index].text
@@ -100,6 +106,7 @@ def test_full_game_flow_headless():
         assert isinstance(app.state, RouteSelectState)
         app.state.handle_event(key_event(pygame.K_RETURN))
         assert isinstance(app.state, DrivingState)
+        assert app.state.phase == "delivery"
 
         driving = app.state
         # start the engine and drive the whole trip with simulated input
@@ -286,6 +293,12 @@ def test_pause_and_abandon_returns_to_city():
         while board.jobs[board.index].cargo.endorsement:  # skip locked teasers
             board.handle_event(key_event(pygame.K_DOWN))
         app.state.handle_event(key_event(pygame.K_RETURN))  # accept job
+        assert isinstance(app.state, DrivingState)
+        assert app.state.phase == "pickup"
+        app.state.trip.position_mi = app.state.trip.total_miles
+        app.state.trip.finished = True
+        app.state.truck.velocity_mps = 0.0
+        app.state.update(1 / 60)
         assert isinstance(app.state, PickupFacilityState)
         app.state.handle_event(key_event(pygame.K_RETURN))  # check in at origin
         app.state.handle_event(key_event(pygame.K_RETURN))  # load at dock
@@ -293,6 +306,7 @@ def test_pause_and_abandon_returns_to_city():
         assert isinstance(app.state, RouteSelectState)
         app.state.handle_event(key_event(pygame.K_RETURN))  # pick route
         assert isinstance(app.state, DrivingState)
+        assert app.state.phase == "delivery"
         origin = app.state.job.origin
 
         app.state.handle_event(key_event(pygame.K_ESCAPE))
