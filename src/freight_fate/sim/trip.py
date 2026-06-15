@@ -13,7 +13,7 @@ import random
 from dataclasses import dataclass, field
 from enum import Enum
 
-from ..data.world import Route
+from ..data.world import STOP_TYPE_LABELS, Route
 from .hos import is_night
 from .vehicle import TruckState
 from .weather import WeatherSystem
@@ -85,6 +85,15 @@ class Zone:
 class RoadStop:
     name: str
     at_mi: float
+    type: str = "travel_center"
+
+    @property
+    def label(self) -> str:
+        return STOP_TYPE_LABELS.get(self.type, "stop")
+
+    @property
+    def spoken_name(self) -> str:
+        return f"{self.label}: {self.name}"
 
 
 class Trip:
@@ -129,9 +138,9 @@ class Trip:
         out: list[RoadStop] = []
         for start, leg in zip(self._leg_starts, self.route.legs, strict=True):
             n = len(leg.stops)
-            for i, name in enumerate(leg.stops):
+            for i, stop in enumerate(leg.stops):
                 at = start + leg.miles * (i + 1) / (n + 1)
-                out.append(RoadStop(name, at))
+                out.append(RoadStop(stop.name, at, stop.type))
         return out
 
     def _place_zones(self) -> list[Zone]:
@@ -327,7 +336,7 @@ class Trip:
             if 0 < ahead <= 5.0 and stop.name not in self._announced_stops:
                 self._announced_stops.add(stop.name)
                 self._emit(TripEventKind.STOP_AHEAD,
-                           f"{stop.name} in {ahead:.0f} miles. "
+                           f"{stop.spoken_name} in {ahead:.0f} miles. "
                            "Press X to take the exit for it.",
                            stop=stop)
 

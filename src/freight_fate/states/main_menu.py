@@ -289,9 +289,9 @@ class HomeTerminalState(MenuState):
 HELP_PAGES = [
     ("The goal", [
         "You are an owner-operator truck driver building a freight career.",
-        "Pick up jobs at city freight locations, choose a route,",
+        "Pick up jobs at real freight facilities, choose a route,",
         "and deliver cargo across the country, on time and intact.",
-        "Earn money and experience, level up, and unlock cargo endorsements.",
+        "Earn money and experience, level up, and unlock better freight.",
     ]),
     ("Menus", [
         "All menus use Up and Down arrows, Enter to select, Escape to go back.",
@@ -300,7 +300,7 @@ HELP_PAGES = [
         "Press F1 in any menu for contextual help.",
     ]),
     ("Driving basics", [
-        "E starts and stops the engine.",
+        "E starts the engine. To shut it down, slow below 5 miles per hour first.",
         "Hold the Up arrow to accelerate, the Down arrow to brake.",
         "Hold B for the emergency brake: the hardest possible stop,",
         "for hazards and rest stops you would otherwise overshoot.",
@@ -348,15 +348,26 @@ HELP_PAGES = [
         "Tune all of this in Settings under Hours of service.",
     ]),
     ("Deliveries and money", [
+        "The job board lists freight from facilities such as ports,",
+        "intermodal yards, warehouses, food terminals, industrial parks,",
+        "air cargo areas, manufacturing plants, and retail distribution hubs.",
+        "Each job names an origin facility and a destination facility.",
+        "Cargo follows the facility type, so a food terminal offers",
+        "different work than a port, warehouse, or factory.",
         "Deliver before the deadline for a bonus. Late or damaged cargo pays less.",
+        "At the destination, slow down and park at the facility",
+        "before the delivery settles.",
         "Fragile cargo, like electronics and fresh food, punishes rough driving.",
         "Repair your truck in the city garage. Damage reduces engine power.",
-        "Higher levels unlock longer hauls and special cargo endorsements.",
+        "Higher levels widen distance caps, improve low-end pay,",
+        "and unlock refrigerated, heavy-haul, and high-value freight.",
         "Cargo markets drift day by day. The job board calls out hot and cold",
         "markets; hot cargo pays well above the usual rate.",
     ]),
     ("The garage", [
         "Every city garage refuels and repairs your truck.",
+        "If you cannot afford a full tank or full repair, the garage",
+        "buys as much fuel or repair work as your money covers.",
         "The Upgrades menu sells permanent improvements: an engine tune,",
         "an aerodynamic kit, a long-range tank, and reinforced brakes.",
         "The Trucks menu sells the heavy hauler: more torque and a bigger",

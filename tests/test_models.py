@@ -101,8 +101,10 @@ def test_endorsements_unlock_with_levels():
     assert c.endorsements == set()
     c.xp = 1000
     assert "refrigerated" in c.endorsements
+    c.xp = 2500
+    assert {"refrigerated", "heavy_haul"} <= c.endorsements
     c.xp = 4500
-    assert {"refrigerated", "high_value"} <= c.endorsements
+    assert {"refrigerated", "heavy_haul", "high_value"} <= c.endorsements
 
 
 def test_record_delivery_announces_level_up():

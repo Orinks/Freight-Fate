@@ -10,12 +10,15 @@ LEVEL_XP = [0, 1000, 2500, 4500, 7000, 10_000, 14_000, 19_000, 25_000]
 # Endorsements unlocked automatically at these levels.
 ENDORSEMENT_LEVELS = {
     "refrigerated": 2,
+    "heavy_haul": 3,
     "high_value": 4,
 }
 
 ENDORSEMENT_ANNOUNCEMENTS = {
     "refrigerated": ("You earned the refrigerated endorsement. "
                      "Food and refrigerated cargo jobs are now available."),
+    "heavy_haul": ("You earned the heavy-haul endorsement. "
+                   "Heavy machinery jobs are now available."),
     "high_value": ("You earned the high-value endorsement. "
                    "Electronics jobs are now available."),
 }

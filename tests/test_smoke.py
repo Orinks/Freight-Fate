@@ -8,6 +8,41 @@ def key_event(key, unicode=""):
     return pygame.event.Event(pygame.KEYDOWN, key=key, unicode=unicode)
 
 
+def select(menu, label):
+    while not menu.items[menu.index].text.startswith(label):
+        menu.handle_event(key_event(pygame.K_DOWN))
+    menu.handle_event(key_event(pygame.K_RETURN))
+
+
+@pytest.mark.smoke
+def test_garage_offers_partial_fuel_and_repairs_when_cash_is_short():
+    from freight_fate.app import App
+    from freight_fate.models.profile import Profile
+    from freight_fate.states.city import GarageState
+
+    app = App()
+    try:
+        app.ctx.profile = Profile(name="Partial Garage")
+        p = app.ctx.profile
+        p.current_city = "Chicago"
+        app.push_state(GarageState(app.ctx))
+
+        p.money = 100.0
+        p.truck_fuel_gal = 0.0
+        select(app.state, "Refuel")
+        assert 1.0 <= p.truck_fuel_gal < p.truck_specs().fuel_tank_gal
+        assert p.money == pytest.approx(0.0, abs=0.01)
+
+        p.money = 170.0
+        p.truck_damage_pct = 10.0
+        app.state.refresh()
+        select(app.state, "Repair")
+        assert p.truck_damage_pct == pytest.approx(8.0)
+        assert p.money == pytest.approx(0.0)
+    finally:
+        app.shutdown()
+
+
 @pytest.mark.smoke
 def test_full_game_flow_headless():
     from freight_fate.app import App

@@ -21,6 +21,66 @@ class Location:
     type: str
     cargo: tuple[str, ...]
 
+    @property
+    def label(self) -> str:
+        return LOCATION_TYPE_LABELS.get(self.type, self.type.replace("_", " "))
+
+    @property
+    def spoken_name(self) -> str:
+        return f"{self.label}: {self.name}"
+
+
+STOP_TYPE_LABELS = {
+    "truck_stop": "truck stop",
+    "travel_center": "travel center",
+    "service_plaza": "service plaza",
+    "public_rest_area": "public rest area",
+    "truck_parking": "truck parking",
+    "weigh_station": "weigh station",
+}
+
+FREIGHT_LOCATION_TYPES = {
+    "air_cargo",
+    "distribution",
+    "food_terminal",
+    "industrial_park",
+    "intermodal",
+    "manufacturing",
+    "port",
+    "rail",
+    "retail_distribution",
+    "terminal",
+    "warehouse",
+}
+
+LOCATION_TYPE_LABELS = {
+    "air_cargo": "air cargo area",
+    "distribution": "distribution center",
+    "food_terminal": "food terminal",
+    "industrial_park": "industrial park",
+    "intermodal": "intermodal yard",
+    "manufacturing": "manufacturing plant",
+    "port": "port",
+    "rail": "rail yard",
+    "retail_distribution": "retail distribution hub",
+    "terminal": "freight terminal",
+    "warehouse": "warehouse",
+}
+
+
+@dataclass(frozen=True)
+class Stop:
+    name: str
+    type: str = "travel_center"
+
+    @property
+    def label(self) -> str:
+        return STOP_TYPE_LABELS.get(self.type, "stop")
+
+    @property
+    def spoken_name(self) -> str:
+        return f"{self.label}: {self.name}"
+
 
 @dataclass(frozen=True)
 class City:
@@ -39,7 +99,7 @@ class Leg:
     miles: float
     highway: str
     terrain: str  # flat | hills | mountain
-    stops: tuple[str, ...]
+    stops: tuple[Stop, ...]
 
     def other(self, city: str) -> str:
         return self.b if city == self.a else self.a
@@ -66,6 +126,10 @@ class Route:
 
     @property
     def stops(self) -> list[str]:
+        return [s.name for leg in self.legs for s in leg.stops]
+
+    @property
+    def stop_details(self) -> list[Stop]:
         return [s for leg in self.legs for s in leg.stops]
 
     @property
@@ -95,7 +159,7 @@ class World:
 
         self.legs: list[Leg] = [
             Leg(leg["from"], leg["to"], float(leg["miles"]), leg["highway"],
-                leg["terrain"], tuple(leg.get("stops", ())))
+                leg["terrain"], tuple(_parse_stop(s) for s in leg.get("stops", ())))
             for leg in data["legs"]
         ]
         self._adjacency: dict[str, list[Leg]] = {name: [] for name in self.cities}
@@ -191,6 +255,32 @@ class World:
 
 
 _world: World | None = None
+
+
+def _parse_stop(raw) -> Stop:
+    if isinstance(raw, dict):
+        name = str(raw.get("name", "")).strip()
+        stop_type = str(raw.get("type", "")).strip() or _classify_stop(name)
+        return Stop(name, stop_type)
+    name = str(raw)
+    return Stop(name, _classify_stop(name))
+
+
+def _classify_stop(name: str) -> str:
+    lower = name.lower()
+    if "weigh" in lower:
+        return "weigh_station"
+    if "parking" in lower:
+        return "truck_parking"
+    if "rest area" in lower:
+        return "public_rest_area"
+    if "service plaza" in lower:
+        return "service_plaza"
+    if "truck" in lower:
+        return "truck_stop"
+    if any(word in lower for word in ("travel", "fuel", "plaza", "center")):
+        return "travel_center"
+    return "travel_center"
 
 
 def get_world() -> World:

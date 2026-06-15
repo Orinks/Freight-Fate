@@ -35,7 +35,112 @@ def quiet_trip(driving):
     driving.trip._inspection_check_mi = 1e9
 
 
+def test_driving_f1_describes_safe_shutdown_and_destination_parking(monkeypatch):
+    from freight_fate.app import App
+
+    app = App()
+    spoken = []
+    monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: spoken.append(text))
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+
+        driving.handle_event(key_event(pygame.K_F1))
+
+        help_text = spoken[-1]
+        assert "stops it only below 5 miles per hour" in help_text
+        assert "stop and park to complete delivery" in help_text
+    finally:
+        app.shutdown()
+
+
+def test_how_to_play_documents_new_gameplay_systems():
+    from freight_fate.states.main_menu import HELP_PAGES
+
+    help_text = " ".join(line for _title, lines in HELP_PAGES for line in lines).lower()
+
+    assert "slow below 5 miles per hour" in help_text
+    assert "destination facility" in help_text
+    assert "ports" in help_text
+    assert "intermodal yards" in help_text
+    assert "food terminals" in help_text
+    assert "refrigerated, heavy-haul, and high-value freight" in help_text
+    assert "full tank or full repair" in help_text
+
+
 # -- highway exits -------------------------------------------------------------
+
+
+@pytest.mark.smoke
+def test_engine_shutdown_is_blocked_at_highway_speed(monkeypatch):
+    from freight_fate.app import App
+
+    app = App()
+    spoken = []
+    monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: spoken.append(text))
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        driving.handle_event(key_event(pygame.K_e))
+        assert driving.truck.engine_on
+        driving.truck.velocity_mps = 31.3
+
+        driving.handle_event(key_event(pygame.K_e))
+
+        assert driving.truck.engine_on
+        assert "Unsafe to shut the engine off" in spoken[-1]
+        assert "70 miles per hour" in spoken[-1]
+        assert "shutdown blocked" in driving.lines()[-1]
+    finally:
+        app.shutdown()
+
+
+@pytest.mark.smoke
+def test_engine_shutdown_is_allowed_once_stopped():
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        driving.handle_event(key_event(pygame.K_e))
+        assert driving.truck.engine_on
+        driving.truck.velocity_mps = 0.0
+        driving.handle_event(key_event(pygame.K_e))
+        assert not driving.truck.engine_on
+    finally:
+        app.shutdown()
+
+
+@pytest.mark.smoke
+def test_delivery_requires_parking_at_destination(monkeypatch):
+    from freight_fate.app import App
+    from freight_fate.states.driving import ArrivalState, DrivingState
+
+    app = App()
+    events = []
+    monkeypatch.setattr(app.ctx, "say_event",
+                        lambda text, interrupt=True: events.append(text))
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        driving.trip.finished = True
+        driving.trip.position_mi = driving.trip.total_miles
+        driving.truck.velocity_mps = 26.8
+
+        driving.update(1 / 60)
+
+        assert isinstance(app.state, DrivingState)
+        assert "Destination facility ahead" in events[-1]
+        assert "park to complete the delivery" in events[-1]
+        assert "slow down and park" in driving.lines()[-1]
+
+        driving.truck.velocity_mps = 0.0
+        driving.update(1 / 60)
+
+        assert isinstance(app.state, ArrivalState)
+    finally:
+        app.shutdown()
 
 
 @pytest.mark.smoke
@@ -182,7 +287,7 @@ def test_hazard_deadline_covers_braking_time_from_current_speed():
     time from the current speed plus the rolled reaction slack."""
     from freight_fate.app import App
     from freight_fate.sim.trip import TripEvent, TripEventKind
-    from freight_fate.states.driving import G, HAZARD_SAFE_MPH, MPH_PER_MPS
+    from freight_fate.states.driving import HAZARD_SAFE_MPH, MPH_PER_MPS, G
 
     app = App()
     try:

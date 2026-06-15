@@ -7,10 +7,11 @@ career system.
 
 from __future__ import annotations
 
+import math
 import random
 from dataclasses import dataclass
 
-from ..data.world import World
+from ..data.world import LOCATION_TYPE_LABELS, Location, World
 from .market import Market, market_condition
 
 
@@ -29,7 +30,8 @@ CARGO_CATALOG: dict[str, CargoType] = {
     "retail": CargoType("retail", "retail goods", 2.25, (6, 16), None),
     "container": CargoType("container", "shipping containers", 2.40, (12, 24), None),
     "bulk": CargoType("bulk", "bulk materials", 2.30, (15, 25), None),
-    "machinery": CargoType("machinery", "heavy machinery", 2.90, (15, 25), None, fragile=True),
+    "machinery": CargoType("machinery", "heavy machinery", 2.90, (15, 25),
+                           "heavy_haul", fragile=True),
     "food": CargoType("food", "fresh food", 2.60, (8, 18), "refrigerated", fragile=True),
     "refrigerated": CargoType("refrigerated", "refrigerated goods", 2.85, (8, 18),
                               "refrigerated", fragile=True),
@@ -40,8 +42,27 @@ CARGO_CATALOG: dict[str, CargoType] = {
 ENDORSEMENT_LABELS = {
     None: "standard CDL",
     "refrigerated": "refrigerated endorsement",
+    "heavy_haul": "heavy-haul endorsement",
     "high_value": "high-value endorsement",
 }
+
+FACILITY_CARGO: dict[str, set[str]] = {
+    "air_cargo": {"electronics", "general"},
+    "distribution": {"food", "general", "retail", "refrigerated"},
+    "food_terminal": {"food", "refrigerated"},
+    "industrial_park": {"bulk", "machinery", "retail"},
+    "intermodal": {"bulk", "container", "general"},
+    "manufacturing": {"bulk", "electronics", "machinery"},
+    "port": {"bulk", "container", "electronics", "machinery"},
+    "rail": {"bulk", "container", "machinery"},
+    "retail_distribution": {"general", "retail"},
+    "terminal": {"electronics", "general", "retail"},
+    "warehouse": {"bulk", "general", "machinery", "retail"},
+}
+
+
+def facility_label(location_type: str) -> str:
+    return LOCATION_TYPE_LABELS.get(location_type, location_type.replace("_", " "))
 
 
 @dataclass
@@ -55,6 +76,9 @@ class Job:
     pay: float
     deadline_game_h: float
     market_mult: float = 1.0   # market multiplier already applied to pay
+    origin_type: str = "terminal"
+    destination_location: str = ""
+    destination_type: str = "terminal"
 
     def describe(self, index: int | None = None, total: int | None = None) -> str:
         prefix = f"Job {index} of {total}: " if index is not None else ""
@@ -63,8 +87,14 @@ class Job:
         endorsement = ""
         if self.cargo.endorsement:
             endorsement = f" Requires {ENDORSEMENT_LABELS[self.cargo.endorsement]}."
+        origin = f"from {facility_label(self.origin_type)} {self.origin_location}"
+        if self.destination_location:
+            dest = (f"to {facility_label(self.destination_type)} "
+                    f"{self.destination_location} in {self.destination}")
+        else:
+            dest = f"to {self.destination}"
         return (f"{prefix}{self.weight_tons:.0f} tons of {self.cargo.label} "
-                f"to {self.destination}. {self.distance_mi:.0f} miles. "
+                f"{origin} {dest}. {self.distance_mi:.0f} miles. "
                 f"Pays {self.pay:,.0f} dollars. "
                 f"Deadline {self.deadline_game_h:.0f} hours.{market}{endorsement}")
 
@@ -86,9 +116,14 @@ class Job:
 
 # Career-arc distance caps: short regional hops while learning the ropes,
 # cross-country hauls unlocking as a progression reward around level 4-5.
-LEVEL_DISTANCE_CAPS = {1: 280.0, 2: 340.0, 3: 520.0, 4: 750.0, 5: 1100.0}
+LEVEL_DISTANCE_CAPS = {1: 300.0, 2: 450.0, 3: 650.0, 4: 850.0, 5: 1200.0}
 LONG_HAUL_MILES = 600.0   # what counts as a cross-country haul
 HOOKUP_FEE = 120.0        # flat load/unload fee keeping short hops worthwhile
+MINIMUM_PAY_BY_LEVEL = {
+    1: (700.0, 1.55),
+    2: (900.0, 1.65),
+    3: (1050.0, 1.75),
+}
 
 # Deadline model: what a law-abiding trucker actually needs.
 DEADLINE_AVG_MPH = 55.0   # achievable interstate average through zones and weather
@@ -99,9 +134,16 @@ def required_hours(miles: float) -> float:
     30-minute break every 8 driving hours and a 10-hour sleep for every
     11-hour shift the distance demands. Dispatch cannot ask for less."""
     drive_h = miles / DEADLINE_AVG_MPH
-    breaks_h = 0.5 * int(drive_h // 8)
-    sleeps_h = 10.0 * int(drive_h // 11)
+    breaks_h = 0.5 * max(0, math.ceil(max(0.0, drive_h - 8.0) / 8.0))
+    sleeps_h = 10.0 * max(0, math.ceil(max(0.0, drive_h - 11.0) / 11.0))
     return drive_h + breaks_h + sleeps_h
+
+
+def minimum_pay_for_level(miles: float, level: int) -> float:
+    """Dispatch minimums keep short early jobs worth the player's time."""
+    floor, per_mile = MINIMUM_PAY_BY_LEVEL.get(
+        min(level, max(MINIMUM_PAY_BY_LEVEL)), MINIMUM_PAY_BY_LEVEL[3])
+    return floor + miles * per_mile
 
 
 class JobBoard:
@@ -138,15 +180,17 @@ class JobBoard:
         while len(jobs) < count and attempts < count * 12:
             attempts += 1
             location = self._rng.choice(city_obj.locations)
-            cargo_key = self._rng.choice(location.cargo)
+            cargo_key = self._rng.choice(self._cargo_for_location(location))
             cargo = CARGO_CATALOG[cargo_key]
             locked = cargo.endorsement and cargo.endorsement not in endorsements
             # a locked job may appear once in a while as a teaser, otherwise skip
             if locked and not (len(jobs) == count - 1 and self._rng.random() < 0.3):
                 continue
             destination, miles, _legs = self._choose_destination(reachable, level)
+            dest_location = self._destination_location(destination, cargo)
             jobs.append(self._make_job(cargo, city, location.name, destination,
-                                       miles, market))
+                                       miles, market, level, location,
+                                       dest_location))
         jobs.sort(key=lambda j: j.distance_mi)
         return jobs
 
@@ -171,7 +215,11 @@ class JobBoard:
             # rookie runs: mostly direct hops, sometimes a two-leg trip
             one = [c for c in candidates if c[2] == 1]
             two = [c for c in candidates if c[2] == 2]
-            if one and (not two or self._rng.random() < 0.7):
+            if level == 1 and one and (not two or self._rng.random() < 0.8):
+                pool = one
+            elif level == 2 and two and self._rng.random() < 0.55:
+                pool = two
+            elif one:
                 pool = one
             elif two:
                 pool = two
@@ -186,14 +234,35 @@ class JobBoard:
         weights = [1.0 / c[1] for c in pool]
         return self._rng.choices(pool, weights)[0]
 
+    def _cargo_for_location(self, location: Location) -> tuple[str, ...]:
+        allowed = FACILITY_CARGO.get(location.type)
+        if not allowed:
+            return location.cargo
+        plausible = tuple(c for c in location.cargo if c in allowed)
+        return plausible or location.cargo
+
+    def _destination_location(self, city: str, cargo: CargoType) -> Location:
+        locations = self.world.cities[city].locations
+        plausible = [
+            loc for loc in locations
+            if cargo.key in self._cargo_for_location(loc)
+        ]
+        return self._rng.choice(plausible or list(locations))
+
     def _make_job(self, cargo: CargoType, origin: str, origin_location: str,
-                  destination: str, miles: float, market: Market | None) -> Job:
+                  destination: str, miles: float, market: Market | None,
+                  level: int, origin_facility: Location,
+                  destination_facility: Location) -> Job:
         weight = self._rng.uniform(*cargo.weight_tons)
         rate = cargo.rate_per_mile * self._rng.uniform(0.9, 1.15)
         mult = market.multiplier(cargo.key) if market is not None else 1.0
-        pay = round((HOOKUP_FEE + miles * rate * (1.0 + weight / 120.0)) * mult, 2)
+        base_pay = HOOKUP_FEE + miles * rate * (1.0 + weight / 120.0)
+        pay = round(max(base_pay, minimum_pay_for_level(miles, level)) * mult, 2)
         # deadline: the honest HOS-compliant hours (driving, breaks, sleep),
         # shipper slack on top, plus a flat hour for fuel and the unexpected
         deadline = required_hours(miles) * self._rng.uniform(1.2, 1.5) + 1.0
         return Job(cargo, weight, origin, origin_location, destination,
-                   round(miles, 1), pay, round(deadline, 1), market_mult=mult)
+                   round(miles, 1), pay, round(deadline, 1), market_mult=mult,
+                   origin_type=origin_facility.type,
+                   destination_location=destination_facility.name,
+                   destination_type=destination_facility.type)

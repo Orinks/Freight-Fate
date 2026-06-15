@@ -67,13 +67,43 @@ def test_unknown_city_raises(world):
 
 
 def test_every_city_has_locations_with_known_cargo(world):
+    from freight_fate.data.world import FREIGHT_LOCATION_TYPES
     from freight_fate.models.jobs import CARGO_CATALOG
 
     for city in world.cities.values():
         assert city.locations, f"{city.name} has no freight locations"
         for loc in city.locations:
+            assert loc.type in FREIGHT_LOCATION_TYPES, f"unknown location type {loc.type}"
             for cargo in loc.cargo:
                 assert cargo in CARGO_CATALOG, f"unknown cargo {cargo} at {loc.name}"
+
+
+def test_freight_location_categories_are_live(world):
+    types = {loc.type for city in world.cities.values() for loc in city.locations}
+    expected = {
+        "air_cargo",
+        "food_terminal",
+        "industrial_park",
+        "intermodal",
+        "manufacturing",
+        "port",
+        "retail_distribution",
+        "warehouse",
+    }
+    assert expected <= types
+
+
+def test_route_stops_have_trucker_relevant_types(world):
+    from freight_fate.data.world import STOP_TYPE_LABELS
+
+    route = world.shortest_route("San Antonio", "Dallas")
+    assert route is not None
+    assert route.stop_details
+    assert all(stop.type in STOP_TYPE_LABELS for stop in route.stop_details)
+    assert any(stop.spoken_name.startswith("travel center:") for stop in route.stop_details)
+
+    parking_route = world.shortest_route("Los Angeles", "San Diego")
+    assert any(stop.type == "truck_parking" for stop in parking_route.stop_details)
 
 
 def test_route_describe_mentions_miles_and_highway(world):

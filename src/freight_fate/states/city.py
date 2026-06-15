@@ -5,7 +5,8 @@ from __future__ import annotations
 import zlib
 
 from ..data.world import Route
-from ..models.jobs import Job, JobBoard
+from ..models.economy import REPAIR_COST_PER_PCT
+from ..models.jobs import Job, JobBoard, facility_label
 from ..models.trucks import TRUCK_CATALOG, UPGRADE_CATALOG, TruckModel, Upgrade
 from ..sim.hos import clock_text, time_of_day
 from .base import MenuItem, MenuState
@@ -42,9 +43,12 @@ class CityMenuState(MenuState):
     def build_items(self) -> list[MenuItem]:
         items = [
             MenuItem("Job board", self._job_board,
-                     help="Browse delivery jobs leaving this city."),
+                     help="Browse jobs from local freight facilities, including "
+                          "ports, warehouses, food terminals, intermodal yards, "
+                          "and distribution hubs."),
             MenuItem(self._garage_label, self._garage,
-                     help="Refuel and repair your truck. Costs vary by region."),
+                     help="Refuel and repair your truck. If cash is short, the "
+                          "garage does partial work."),
             MenuItem("Career stats", self._stats,
                      help="Hear your level, reputation, and lifetime numbers."),
             MenuItem("Truck status", self._truck_status,
@@ -164,9 +168,11 @@ class GarageState(MenuState):
     def build_items(self) -> list[MenuItem]:
         return [
             MenuItem(self._fuel_label, self._refuel,
-                     help="Fill the tank at this region's diesel price."),
+                     help="Fill the tank at this region's diesel price. If cash "
+                          "is short, buy as many gallons as you can afford."),
             MenuItem(self._repair_label, self._repair,
-                     help="Restore the truck to full condition."),
+                     help="Restore the truck to full condition. If cash is short, "
+                          "repair as much damage as you can afford."),
             MenuItem("Upgrades", self._upgrades,
                      help="Buy performance upgrades for your truck: more torque, "
                           "less drag, a bigger tank, stronger brakes."),
@@ -206,8 +212,20 @@ class GarageState(MenuState):
             return
         cost = self.ctx.economy.fuel_cost(self._region(), need)
         if p.money < cost:
-            self.ctx.audio.play("ui/error")
-            self.ctx.say(f"Not enough money. You need {cost:,.0f} dollars.")
+            price = self.ctx.economy.fuel_price(self._region())
+            gallons = p.money / price if price > 0 else 0.0
+            if gallons < 1:
+                self.ctx.audio.play("ui/error")
+                self.ctx.say("Not enough money for even one gallon of fuel.")
+                return
+            cost = self.ctx.economy.fuel_cost(self._region(), gallons)
+            p.money -= cost
+            p.truck_fuel_gal = min(tank, p.truck_fuel_gal + gallons)
+            self.ctx.audio.play("vehicle/fuel_pump")
+            self.ctx.say(f"Partial fuel: added {gallons:.0f} gallons for "
+                         f"{cost:,.0f} dollars. "
+                         f"You have {p.money:,.0f} dollars left.")
+            self.refresh()
             return
         p.money -= cost
         p.truck_fuel_gal = tank
@@ -223,8 +241,19 @@ class GarageState(MenuState):
             return
         cost = self.ctx.economy.repair_cost(p.truck_damage_pct)
         if p.money < cost:
-            self.ctx.audio.play("ui/error")
-            self.ctx.say(f"Not enough money. Repairs cost {cost:,.0f} dollars.")
+            repairable = p.money / REPAIR_COST_PER_PCT
+            if repairable < 1:
+                self.ctx.audio.play("ui/error")
+                self.ctx.say("Not enough money for one percent of repairs.")
+                return
+            cost = self.ctx.economy.repair_cost(repairable)
+            p.money -= cost
+            p.truck_damage_pct = max(0.0, p.truck_damage_pct - repairable)
+            self.ctx.audio.play("ui/notify")
+            self.ctx.say(f"Partial repairs fixed {repairable:.0f} percent damage "
+                         f"for {cost:,.0f} dollars. "
+                         f"You have {p.money:,.0f} dollars left.")
+            self.refresh()
             return
         p.money -= cost
         p.truck_damage_pct = 0.0
@@ -351,7 +380,9 @@ class TruckShopState(MenuState):
 class JobBoardState(MenuState):
     title = "Job board"
     intro_help = ("Each entry is one delivery job. Enter accepts the job and moves on "
-                  "to route planning. Escape returns to the city.")
+                  "to route planning. Jobs name their origin and destination "
+                  "facilities, and cargo depends on the facility type. Escape "
+                  "returns to the city.")
 
     def __init__(self, ctx, jobs: list[Job]) -> None:
         super().__init__(ctx)
@@ -372,7 +403,8 @@ class JobBoardState(MenuState):
             items.append(MenuItem(
                 job.describe(i + 1, len(self.jobs)),
                 lambda j=job: self._accept(j),
-                help="From " + job.origin_location + "."))
+                help=f"From {facility_label(job.origin_type)} "
+                     f"{job.origin_location}."))
         items.append(MenuItem("Back to city", self.go_back))
         return items
 

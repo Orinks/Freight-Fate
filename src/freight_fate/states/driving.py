@@ -13,7 +13,7 @@ import random
 import pygame
 
 from ..data.world import Route
-from ..models.jobs import CARGO_CATALOG, Job
+from ..models.jobs import CARGO_CATALOG, Job, facility_label
 from ..sim import hos
 from ..sim.hos import HosClock, clock_text, is_night, time_of_day
 from ..sim.trip import Trip, TripEventKind
@@ -43,6 +43,8 @@ RAMP_MAX_MPH = 45.0               # any faster and you blow past the exit
 RAMP_LENGTH_MI = 0.5              # deceleration lane plus ramp to the stop
 
 CRUISE_MIN_MPH = 20.0             # cruise control needs road speed to hold
+ENGINE_SHUTDOWN_SAFE_MPH = 5.0    # prevent accidental kill-switch use at speed
+DELIVERY_PARK_MPH = 3.0           # destination settlement requires parking speed
 
 
 class DrivingState(State):
@@ -84,6 +86,7 @@ class DrivingState(State):
         self._ramp_end_said = False
         self._cruise_mph: float | None = None
         self._cruise_throttle = 0.0
+        self._arrival_stop_said = False
         self._status_text = "Press E to start the engine."
 
     # -- save and resume -----------------------------------------------------------
@@ -102,6 +105,9 @@ class DrivingState(State):
                 "pay": job.pay,
                 "deadline_game_h": job.deadline_game_h,
                 "market_mult": job.market_mult,
+                "origin_type": job.origin_type,
+                "destination_location": job.destination_location,
+                "destination_type": job.destination_type,
             },
             "route_cities": list(self.route.cities),
             "trip_seed": self.trip_seed,
@@ -127,7 +133,10 @@ class DrivingState(State):
                       j["origin_location"], j["destination"],
                       float(j["distance_mi"]), float(j["pay"]),
                       float(j["deadline_game_h"]),
-                      market_mult=float(j.get("market_mult", 1.0)))
+                      market_mult=float(j.get("market_mult", 1.0)),
+                      origin_type=str(j.get("origin_type", "terminal")),
+                      destination_location=str(j.get("destination_location", "")),
+                      destination_type=str(j.get("destination_type", "terminal")))
             state = cls(ctx, job, route, trip_seed=int(data["trip_seed"]))
             state.resumed = True
             state.start_damage = float(data["start_damage"])
@@ -228,7 +237,9 @@ class DrivingState(State):
                 "K sets cruise control at your current speed; braking cancels. "
                 "X takes the next announced exit: slow to 45 for the ramp, "
                 "then brake to a stop for the rest stop menu. "
-                "E engine. Space speed. Tab full status. F fuel. "
+                "E starts the engine, and stops it only below 5 miles per hour. "
+                "At your destination, stop and park to complete delivery. "
+                "Space speed. Tab full status. F fuel. "
                 "C clock, deadline, and hours of service. "
                 "R route. V weather. T rest stop menu when already stopped "
                 "at one: refuel, take a break, or sleep. H horn. "
@@ -239,6 +250,14 @@ class DrivingState(State):
     def _toggle_engine(self) -> None:
         t = self.truck
         if t.engine_on:
+            if t.speed_mph > ENGINE_SHUTDOWN_SAFE_MPH:
+                self.ctx.audio.play("ui/error")
+                text = (f"Unsafe to shut the engine off at "
+                        f"{self.ctx.settings.speed_text(t.speed_mph)}. "
+                        "Brake below 5 miles per hour first.")
+                self._set_status("Engine shutdown blocked: slow down first.")
+                self.ctx.say(text)
+                return
             t.stop_engine()
             self.ctx.audio.engine_stop()
             self._set_status("Engine off.")
@@ -401,7 +420,7 @@ class DrivingState(State):
         if self.tutorial:
             self.tutorial.update(dt, t)
         if self.trip.finished:
-            self._arrive()
+            self._handle_arrival_gate()
 
     def _update_hours_and_fatigue(self, dt: float) -> None:
         """Advance the HOS shift clock and fatigue on game time, not wall time."""
@@ -609,7 +628,7 @@ class DrivingState(State):
         self._exit_stop = stop
         self.ctx.audio.play("ui/notify", volume=0.5)
         ahead = stop.at_mi - self.trip.position_mi
-        self.ctx.say(f"Signaling for the {stop.name} exit, "
+        self.ctx.say(f"Signaling for the {stop.spoken_name} exit, "
                      f"{ahead:.1f} miles ahead. "
                      f"Slow to {RAMP_MAX_MPH:.0f} or less for the ramp.")
 
@@ -630,7 +649,7 @@ class DrivingState(State):
                     self.ctx.push_state(RestStopState(self.ctx, self, stop))
             elif not self._ramp_end_said:
                 self._ramp_end_said = True
-                self.ctx.say_event(f"You are at {self._ramp_stop.name}. "
+                self.ctx.say_event(f"You are at {self._ramp_stop.spoken_name}. "
                                    "Come to a complete stop.")
             return
         stop = self._exit_stop
@@ -643,12 +662,12 @@ class DrivingState(State):
             self._ramp_end_said = False
             self._cancel_cruise()
             self.ctx.audio.play("ui/notify", volume=0.7)
-            self.ctx.say_event(f"You take the exit for {stop.name}. "
+            self.ctx.say_event(f"You take the exit for {stop.spoken_name}. "
                                "Half a mile of ramp; brake to a stop at "
                                "the end.")
         else:
             self.ctx.say_event("You were going too fast for the ramp and "
-                               f"missed the exit for {stop.name}.")
+                               f"missed the exit for {stop.spoken_name}.")
 
     def _toggle_cruise(self) -> None:
         t = self.truck
@@ -704,6 +723,28 @@ class DrivingState(State):
 
     def _arrive(self) -> None:
         self.ctx.replace_state(ArrivalState(self.ctx, self))
+
+    def _handle_arrival_gate(self) -> None:
+        if self.truck.speed_mph <= DELIVERY_PARK_MPH:
+            self._arrive()
+            return
+        if self._arrival_stop_said:
+            return
+        self._arrival_stop_said = True
+        self._cancel_cruise()
+        self.ctx.audio.play("ui/warning")
+        self._set_status("Destination reached: slow down and park to deliver.")
+        self.ctx.say_event(
+            f"Destination facility ahead: {self._destination_facility_text()}. "
+            f"Slow below {DELIVERY_PARK_MPH:.0f} miles per hour and park to "
+            "complete the delivery.",
+            interrupt=True)
+
+    def _destination_facility_text(self) -> str:
+        if self.job.destination_location:
+            return (f"{facility_label(self.job.destination_type)} "
+                    f"{self.job.destination_location} in {self.job.destination}")
+        return self.job.destination
 
     def _set_status(self, text: str) -> None:
         self._status_text = text
@@ -809,10 +850,10 @@ class RestStopState(MenuState):
 
     @property
     def title(self) -> str:  # type: ignore[override]
-        return self.stop.name
+        return self.stop.spoken_name
 
     def announce_entry(self) -> None:
-        self.ctx.say(f"{self.stop.name}. "
+        self.ctx.say(f"{self.stop.spoken_name}. "
                      f"It is {clock_text(self.driving.trip.current_hour)}. "
                      f"{self.current_text()}")
 
@@ -820,7 +861,8 @@ class RestStopState(MenuState):
         return [
             MenuItem(self._fuel_label, self._refuel,
                      help="Fill the tank at this region's diesel price, "
-                          "plus a 35 dollar service fee."),
+                          "plus a 35 dollar service fee. If cash is short, buy "
+                          "as many gallons as you can afford."),
             MenuItem("Take a 30-minute break", self._take_break,
                      help="Satisfies the 30-minute break rule and eases fatigue. "
                           "The clock and your deadline advance half an hour."),
@@ -906,7 +948,7 @@ class ParkingFullState(MenuState):
         self.stop = stop
 
     def announce_entry(self) -> None:
-        self.ctx.say(f"The truck parking at {self.stop.name} is full tonight. "
+        self.ctx.say(f"The truck parking at {self.stop.spoken_name} is full tonight. "
                      f"It is {clock_text(self.driving.trip.current_hour)}. "
                      f"{self.current_text()}")
 
