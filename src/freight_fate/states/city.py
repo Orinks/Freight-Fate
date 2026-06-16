@@ -530,10 +530,10 @@ class PickupFacilityState(MenuState):
     def build_items(self) -> list[MenuItem]:
         if self.loaded:
             primary = MenuItem(
-                "Plan destination route",
-                self._plan_route,
-                help="Choose the highway route for the loaded trip to the "
-                     "destination facility.")
+                "Depart for destination",
+                self._depart_for_destination,
+                help="Dispatch loads the navigation itinerary and starts the "
+                     "loaded trip to the destination facility.")
         elif self.checked_in:
             primary = MenuItem(
                 "Load cargo at dock",
@@ -592,19 +592,35 @@ class PickupFacilityState(MenuState):
         self.ctx.say(
             f"Loaded and sealed at {self.facility}. "
             f"{self.job.weight_tons:.0f} tons of {self.job.cargo.label} are "
-            f"ready for {self.job.destination}. Plan the destination route.")
+            f"ready for {self.job.destination}. Depart when ready.")
 
-    def _plan_route(self) -> None:
+    def _depart_for_destination(self) -> None:
         if not self.loaded:
-            self.ctx.say("Load the cargo before planning the destination route.")
+            self.ctx.say("Load the cargo before departing for the destination.")
             return
         routes = self.ctx.world.route_options(self.job.origin, self.job.destination)
         if not routes:
             self.ctx.audio.play("ui/error")
-            self.ctx.say("Dispatch cannot find a route for this load.")
+            self.ctx.say("Dispatch cannot find a navigation itinerary for this load.")
             return
-        self.ctx.push_state(RouteSelectState(self.ctx, self.job, routes,
-                                            back_label="Back to pickup facility"))
+        route = routes[0]
+        from .driving import DrivingState
+
+        driving = DrivingState(self.ctx, self.job, route)
+        self.ctx.profile.active_trip = driving.snapshot()
+        self.ctx.save_profile()
+        via = ", then ".join(route.highways)
+        next_context = driving.trip.next_navigation_context()
+        self.ctx.say(
+            f"Navigation set for {facility_label(self.job.destination_type)} "
+            f"{self.job.destination_location} in {self.job.destination}. "
+            f"Loaded trip is {route.miles:.0f} miles via {via}. "
+            f"{next_context} Departing now.",
+            interrupt=True)
+        self.ctx.push_state(driving)
+
+    def _plan_route(self) -> None:
+        self._depart_for_destination()
 
     def _status(self) -> None:
         state = ("loaded and sealed" if self.loaded else

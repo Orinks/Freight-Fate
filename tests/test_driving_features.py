@@ -10,7 +10,7 @@ def key_event(key, unicode=""):
 
 def start_drive(app):
     """New career, accept an unlocked job, pick a route; returns DrivingState."""
-    from freight_fate.states.city import PickupFacilityState, RouteSelectState
+    from freight_fate.states.city import PickupFacilityState
     from freight_fate.states.driving import DrivingState
     from freight_fate.states.main_menu import MainMenuState
 
@@ -34,9 +34,7 @@ def start_drive(app):
     assert isinstance(app.state, PickupFacilityState)
     app.state.handle_event(key_event(pygame.K_RETURN))  # check in at origin
     app.state.handle_event(key_event(pygame.K_RETURN))  # load at dock
-    app.state.handle_event(key_event(pygame.K_RETURN))  # plan destination route
-    assert isinstance(app.state, RouteSelectState)
-    app.state.handle_event(key_event(pygame.K_RETURN))  # pick route
+    app.state.handle_event(key_event(pygame.K_RETURN))  # depart for destination
     assert isinstance(app.state, DrivingState)
     assert app.state.phase == "delivery"
     return app.state
@@ -46,6 +44,7 @@ def quiet_trip(driving):
     """Push random hazards and inspections beyond this test's horizon."""
     driving.trip._hazard_check_mi = 1e9
     driving.trip._inspection_check_mi = 1e9
+    driving.trip.traffic_leads = []
 
 
 def test_driving_f1_describes_safe_shutdown_and_destination_parking(monkeypatch):
@@ -79,6 +78,15 @@ def test_how_to_play_documents_new_gameplay_systems():
     assert "pickup gate" in help_text
     assert "loading requires the truck to be stopped" in help_text
     assert "loaded and sealed" in help_text
+    assert "dispatch starts the destination itinerary" in help_text
+    assert "route choice is handled as navigation" in help_text
+    assert "navigation itinerary" in help_text
+    assert "gps announces state lines" in help_text
+    assert "slow lead vehicles" in help_text
+    assert "adaptive cruise" in help_text
+    assert "three second gap" in help_text
+    assert "touch the brakes to cancel" in help_text
+    assert "save" in help_text
     assert "dock and deliver" in help_text
     assert "ports" in help_text
     assert "intermodal yards" in help_text
@@ -260,6 +268,39 @@ def test_exit_flow_reaches_the_rest_stop_menu():
 
 
 @pytest.mark.smoke
+def test_rest_stop_menu_can_save_active_drive():
+    from freight_fate.app import App
+    from freight_fate.models.profile import Profile
+    from freight_fate.states.driving import ParkingFullState, RestStopState
+
+    app = App()
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        stop = driving.trip.stops[0]
+        driving.trip.position_mi = stop.at_mi
+        driving.truck.velocity_mps = 0.0
+        driving.handle_event(key_event(pygame.K_t))
+        assert isinstance(app.state, (RestStopState, ParkingFullState))
+        if isinstance(app.state, ParkingFullState):
+            return
+
+        while app.state.items[app.state.index].text != "Save at this stop":
+            app.state.handle_event(key_event(pygame.K_DOWN))
+        app.state.handle_event(key_event(pygame.K_RETURN))
+
+        saved = app.ctx.profile.active_trip
+        assert saved is not None
+        assert saved["kind"] == "delivery"
+        assert saved["route_kind"] == "corridor_itinerary"
+        assert saved["position_mi"] == stop.at_mi
+        loaded = Profile.load(app.ctx.profile.path)
+        assert loaded.active_trip == saved
+    finally:
+        app.shutdown()
+
+
+@pytest.mark.smoke
 def test_can_back_up_to_a_missed_rest_stop_with_t_menu():
     from freight_fate.app import App
     from freight_fate.states.driving import ParkingFullState, RestStopState
@@ -402,6 +443,37 @@ def test_cruise_control_requires_road_speed_and_cancels_on_hazard():
         hazard = TripEvent(TripEventKind.HAZARD, "Brake now!", {"deadline_s": 4.0})
         driving._handle_trip_event(hazard)
         assert driving._cruise_mph is None
+    finally:
+        app.shutdown()
+
+
+@pytest.mark.smoke
+def test_adaptive_cruise_follows_modeled_traffic(monkeypatch):
+    from freight_fate.app import App
+    from freight_fate.sim.trip import TrafficLead
+
+    app = App()
+    events = []
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        monkeypatch.setattr(app.ctx, "say_event",
+                            lambda text, interrupt=True: events.append(text))
+        driving.trip.traffic_leads = [
+            TrafficLead(driving.trip.position_mi + 0.08, 45.0, "slow lead traffic", 4.0)
+        ]
+        driving.handle_event(key_event(pygame.K_e))
+        driving.truck.transmission.gear = 10
+        driving.truck.velocity_mps = 29.0
+        driving.truck.throttle = 0.9
+        driving.handle_event(key_event(pygame.K_k))
+        driving.update(1 / 60)
+
+        assert driving._cruise_mph is not None
+        assert driving._acc_following
+        assert driving.truck.throttle < 0.9
+        assert driving.truck.brake > 0.0
+        assert "Traffic ahead, adaptive cruise reducing speed." in events
     finally:
         app.shutdown()
 

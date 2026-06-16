@@ -21,6 +21,8 @@ from .weather import WeatherSystem
 BASE_SPEED_LIMIT_MPH = 70.0
 NIGHT_HAZARD_BONUS = 0.10          # extra hazard risk after dark
 NIGHT_TRAFFIC_KEEP = 0.4           # chance a traffic zone still forms at night
+TRAFFIC_LOOKAHEAD_MI = 2.5
+TRAFFIC_WARNING_GAP_S = 2.2
 
 # Hazards that can appear anywhere in the country...
 GENERIC_HAZARDS = ("debris on the road", "a slow vehicle ahead",
@@ -61,6 +63,9 @@ class TripEventKind(Enum):
     HAZARD = "hazard"
     WEATHER_CHANGE = "weather_change"
     INSPECTION = "inspection"
+    GPS_CUE = "gps_cue"
+    STATE_CROSSING = "state_crossing"
+    CHECKPOINT = "checkpoint"
     ARRIVED = "arrived"
 
 
@@ -96,6 +101,41 @@ class RoadStop:
         return f"{self.label}: {self.name}"
 
 
+@dataclass
+class TrafficLead:
+    """A simple lead vehicle or traffic pack on the current itinerary."""
+
+    at_mi: float
+    speed_mph: float
+    reason: str
+    length_mi: float = 5.0
+
+    @property
+    def end_mi(self) -> float:
+        return self.at_mi + self.length_mi
+
+
+@dataclass(frozen=True)
+class TrafficContext:
+    lead: TrafficLead
+    gap_mi: float
+    closing_mph: float
+
+    @property
+    def gap_seconds(self) -> float:
+        speed = max(1.0, self.lead.speed_mph)
+        return self.gap_mi / speed * 3600.0
+
+
+@dataclass(frozen=True)
+class NavigationCue:
+    key: str
+    kind: str
+    at_mi: float
+    text: str
+    near_text: str = ""
+
+
 class Trip:
     """One delivery run along a chosen route."""
 
@@ -117,12 +157,16 @@ class Trip:
         self._events: list[TripEvent] = []
         self._leg_starts = self._compute_leg_starts()
         self.stops = self._place_stops()
+        self.traffic_leads = self._place_traffic()
+        self.navigation_cues = self._build_navigation_cues()
         self.zones = self._place_zones()
         self._announced_stops: set[str] = set()
         self._announced_cities: set[int] = set()
+        self._announced_navigation: set[str] = set()
         self._active_zone: Zone | None = None
         self._hazard_check_mi = 5.0
         self._inspection_check_mi = 10.0
+        self._traffic_warning_mi = 1.0
 
     # -- layout -----------------------------------------------------------------
 
@@ -151,6 +195,73 @@ class Trip:
                 out.append(RoadStop(stop.name, at, stop.type))
         return out
 
+    def _build_navigation_cues(self) -> list[NavigationCue]:
+        cues: list[NavigationCue] = []
+        for i, (start, leg) in enumerate(zip(self._leg_starts, self.route.legs,
+                                             strict=True)):
+            forward = self.route.cities[i] == leg.a
+            toward = self.route.cities[i + 1]
+            segment_miles = leg.miles
+            if segment_miles >= 40.0:
+                cues.append(NavigationCue(
+                    f"continue:{i}",
+                    "continue",
+                    start + 0.1,
+                    f"Continue on {leg.highway} for {segment_miles:.0f} miles "
+                    f"toward {toward}.",
+                ))
+            if i > 0 and self.route.legs[i - 1].highway != leg.highway:
+                cues.append(NavigationCue(
+                    f"maneuver:{i}",
+                    "maneuver",
+                    start,
+                    f"keep right for {leg.highway} toward {toward}",
+                    f"Keep right now for {leg.highway} toward {toward}.",
+                ))
+            for crossing in leg.state_crossings:
+                offset = _stop_offset_for_direction(crossing.at_mi, leg.miles, forward)
+                into_state = crossing.state if forward else crossing.from_state
+                from_state = crossing.from_state if forward else crossing.state
+                place = crossing.place
+                cues.append(NavigationCue(
+                    f"state:{i}:{crossing.at_mi}:{into_state}",
+                    "state_crossing",
+                    start + offset,
+                    f"crossing from {from_state} into {into_state} near {place}",
+                    f"Crossing into {into_state} near {place}.",
+                ))
+            for checkpoint in leg.checkpoints:
+                offset = _stop_offset_for_direction(checkpoint.at_mi, leg.miles, forward)
+                place = checkpoint.name
+                state = f", {checkpoint.state}" if checkpoint.state else ""
+                highway = checkpoint.highway or leg.highway
+                cues.append(NavigationCue(
+                    f"checkpoint:{i}:{checkpoint.at_mi}:{place}",
+                    "checkpoint",
+                    start + offset,
+                    f"{place}{state} on {highway}",
+                    f"Passing {place}{state} on {highway}.",
+                ))
+            for stop in leg.stops:
+                offset = _stop_offset_for_direction(stop.at_mi, leg.miles, forward)
+                cues.append(NavigationCue(
+                    f"rest_stop:{i}:{stop.at_mi}:{stop.name}",
+                    "rest_stop",
+                    start + offset,
+                    f"{stop.label} ahead",
+                    f"{stop.label.capitalize()} ahead in 1 mile; press X to take the exit.",
+                ))
+        for i, lead in enumerate(self.traffic_leads):
+            cues.append(NavigationCue(
+                f"traffic:{i}:{lead.at_mi:.1f}",
+                "traffic",
+                lead.at_mi,
+                f"{lead.reason} at {lead.speed_mph:.0f} miles per hour",
+                f"Traffic slowing ahead; target speed {lead.speed_mph:.0f}.",
+            ))
+        cues.sort(key=lambda cue: cue.at_mi)
+        return cues
+
     def _place_zones(self) -> list[Zone]:
         """Random construction/traffic zones, roughly one per 150 miles.
 
@@ -171,6 +282,27 @@ class Trip:
                 zones.append(Zone(at, at + length, 50, "heavy traffic"))
         zones.sort(key=lambda z: z.start_mi)
         return zones
+
+    def _place_traffic(self) -> list[TrafficLead]:
+        leads: list[TrafficLead] = []
+        for start, leg in zip(self._leg_starts, self.route.legs, strict=True):
+            if leg.miles < 70.0:
+                continue
+            metro_bias = 0.18 if leg.checkpoints else 0.0
+            density = min(0.78, 0.22 + leg.miles / 900.0 + metro_bias)
+            if self._rng.random() > density:
+                continue
+            at = start + self._rng.uniform(25.0, max(26.0, leg.miles - 20.0))
+            speed = self._rng.uniform(42.0, 58.0)
+            reason = self._rng.choice((
+                "slow lead traffic",
+                "traffic queue ahead",
+                "merging traffic",
+                "lane restriction",
+            ))
+            leads.append(TrafficLead(at, speed, reason, self._rng.uniform(3.0, 8.0)))
+        leads.sort(key=lambda lead: lead.at_mi)
+        return leads
 
     # -- queries -----------------------------------------------------------------
 
@@ -219,6 +351,24 @@ class Trip:
                 return z.limit_mph, z.reason
         return BASE_SPEED_LIMIT_MPH, None
 
+    def traffic_context(self) -> TrafficContext | None:
+        best: TrafficContext | None = None
+        for lead in self.traffic_leads:
+            gap = lead.at_mi - self.position_mi
+            if gap < -lead.length_mi or gap > TRAFFIC_LOOKAHEAD_MI:
+                continue
+            closing = max(0.0, self.truck.speed_mph - lead.speed_mph)
+            context = TrafficContext(lead, max(0.0, gap), closing)
+            if best is None or context.gap_mi < best.gap_mi:
+                best = context
+        return best
+
+    def traffic_target_speed(self) -> float | None:
+        context = self.traffic_context()
+        if context is None:
+            return None
+        return context.lead.speed_mph
+
     def nearest_stop_within(self, radius_mi: float = 1.5) -> RoadStop | None:
         for stop in self.stops:
             if abs(stop.at_mi - self.position_mi) <= radius_mi:
@@ -259,7 +409,31 @@ class Trip:
         leg = self.route.legs[self.current_leg_index]
         toward = self.route.cities[self.current_leg_index + 1]
         state = get_world().cities[toward].state
-        return f"{dist}. On {leg.highway} toward {toward}, {state}."
+        next_context = self.next_navigation_context()
+        return f"{dist}. On {leg.highway} toward {toward}, {state}. {next_context}"
+
+    def next_navigation_context(self) -> str:
+        cue = self.next_navigation_cue()
+        if cue is None:
+            return f"Destination {self.route.cities[-1]} ahead."
+        ahead = max(0.0, cue.at_mi - self.position_mi)
+        if cue.kind == "rest_stop":
+            return f"Next stop in {ahead:.0f} miles: {cue.text}."
+        if cue.kind == "state_crossing":
+            return f"Next state line in {ahead:.0f} miles: {cue.text}."
+        if cue.kind == "maneuver":
+            return f"Next maneuver in {ahead:.0f} miles: {cue.text}."
+        if cue.kind == "checkpoint":
+            return f"Next place in {ahead:.0f} miles: {cue.text}."
+        if cue.kind == "traffic":
+            return f"Traffic in {ahead:.0f} miles: {cue.text}."
+        return f"Next guidance in {ahead:.0f} miles: {cue.text}."
+
+    def next_navigation_cue(self) -> NavigationCue | None:
+        for cue in self.navigation_cues:
+            if cue.at_mi > self.position_mi + 0.05 and cue.kind != "continue":
+                return cue
+        return None
 
     def restore(self, position_mi: float, game_minutes: float) -> None:
         """Jump to a saved point without re-announcing what is behind it."""
@@ -268,6 +442,10 @@ class Trip:
         for stop in self.stops:
             if stop.at_mi <= self.position_mi:
                 self._announced_stops.add(stop.name)
+        for cue in self.navigation_cues:
+            if cue.at_mi <= self.position_mi:
+                self._announced_navigation.add(f"{cue.key}:advance")
+                self._announced_navigation.add(f"{cue.key}:near")
         for i, start in enumerate(self._leg_starts):
             if i and self.position_mi >= start:
                 self._announced_cities.add(i)
@@ -306,6 +484,7 @@ class Trip:
 
         self._check_zones()
         self._check_stops()
+        self._check_navigation_cues()
         self._check_cities()
         if moved_mi > 0.0:
             self._check_hazards(moved_mi)
@@ -350,6 +529,49 @@ class Trip:
                            "Press X to take the exit for it.",
                            stop=stop)
 
+    def _check_navigation_cues(self) -> None:
+        for cue in self.navigation_cues:
+            ahead = cue.at_mi - self.position_mi
+            if cue.kind == "continue":
+                key = f"{cue.key}:near"
+                if -0.5 <= ahead <= 0.5 and key not in self._announced_navigation:
+                    self._announced_navigation.add(key)
+                    self._emit(TripEventKind.GPS_CUE, cue.text, cue=cue)
+                continue
+            if cue.kind == "rest_stop":
+                key = f"{cue.key}:near"
+                if 0 < ahead <= 1.2 and key not in self._announced_navigation:
+                    self._announced_navigation.add(key)
+                    self._emit(TripEventKind.GPS_CUE, cue.near_text, cue=cue)
+                continue
+            if cue.kind == "traffic":
+                key = f"{cue.key}:advance"
+                if 0 < ahead <= 2.0 and key not in self._announced_navigation:
+                    self._announced_navigation.add(key)
+                    self._emit(
+                        TripEventKind.GPS_CUE,
+                        f"Traffic slowing ahead in {ahead:.0f} miles; {cue.text}.",
+                        cue=cue,
+                    )
+                continue
+            advance_key = f"{cue.key}:advance"
+            near_key = f"{cue.key}:near"
+            if 0 < ahead <= 2.0 and advance_key not in self._announced_navigation:
+                self._announced_navigation.add(advance_key)
+                if cue.kind == "maneuver":
+                    message = f"In {ahead:.0f} miles, {cue.text}."
+                else:
+                    message = f"In {ahead:.0f} miles, {cue.text}."
+                self._emit(TripEventKind.GPS_CUE, message, cue=cue)
+            if -0.1 <= ahead <= 0.1 and near_key not in self._announced_navigation:
+                self._announced_navigation.add(near_key)
+                if cue.kind == "state_crossing":
+                    self._emit(TripEventKind.STATE_CROSSING, cue.near_text, cue=cue)
+                elif cue.kind == "checkpoint":
+                    self._emit(TripEventKind.CHECKPOINT, cue.near_text, cue=cue)
+                else:
+                    self._emit(TripEventKind.GPS_CUE, cue.near_text, cue=cue)
+
     def _check_cities(self) -> None:
         for i, start in enumerate(self._leg_starts):
             if i == 0 or i in self._announced_cities:
@@ -379,6 +601,19 @@ class Trip:
 
     def _check_hazards(self, moved_mi: float) -> None:
         """Occasional road hazards that demand braking."""
+        context = self.traffic_context()
+        if (context is not None and context.closing_mph > 8.0
+                and context.gap_seconds <= TRAFFIC_WARNING_GAP_S
+                and self.position_mi >= self._traffic_warning_mi):
+            self._traffic_warning_mi = self.position_mi + 8.0
+            self._emit(
+                TripEventKind.HAZARD,
+                f"Brake now! {context.lead.reason.capitalize()} "
+                f"{context.gap_mi:.1f} miles ahead.",
+                deadline_s=2.5,
+                traffic=context,
+            )
+            return
         self._hazard_check_mi -= moved_mi
         if self._hazard_check_mi > 0:
             return

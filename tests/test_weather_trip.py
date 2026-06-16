@@ -3,7 +3,7 @@
 import itertools
 
 from freight_fate.sim import Trip, TruckState, WeatherKind, WeatherSystem
-from freight_fate.sim.trip import TripEventKind
+from freight_fate.sim.trip import NavigationCue, TrafficLead, TripEventKind
 from freight_fate.sim.weather import EFFECTS, REGION_WEIGHTS
 
 
@@ -187,8 +187,79 @@ def test_progress_summary_mentions_highway(world):
     text = trip.progress_summary()
     assert "I-65" in text
     assert "Indianapolis, Indiana" in text
+    assert "Next state line" in text
+    assert "Illinois into Indiana" in text
     metric = trip.progress_summary(imperial=False)
     assert "kilometers" in metric
+
+
+def test_gps_state_crossing_and_rest_stop_cues_deduplicate(world):
+    trip, _truck = make_trip(world)
+
+    trip.position_mi = 31.5
+    advance = trip.update(0.0)
+    repeat = trip.update(0.0)
+
+    assert [event.message for event in advance if event.kind == TripEventKind.GPS_CUE] == [
+        "In 2 miles, crossing from Illinois into Indiana near "
+        "the I-65 state line south of Hammond."
+    ]
+    assert not [event for event in repeat if event.kind == TripEventKind.GPS_CUE]
+
+    trip.position_mi = 33.0
+    crossing = trip.update(0.0)
+    assert [event.message for event in crossing
+            if event.kind == TripEventKind.STATE_CROSSING] == [
+        "Crossing into Indiana near the I-65 state line south of Hammond."
+    ]
+
+    trip.position_mi = 121.0
+    rest = trip.update(0.0)
+    assert any(
+        event.kind == TripEventKind.GPS_CUE
+        and event.message == "Travel center ahead in 1 mile; press X to take the exit."
+        for event in rest
+    )
+
+
+def test_gps_traffic_cue_deduplicates(world):
+    trip, _truck = make_trip(world)
+    trip.navigation_cues.append(NavigationCue(
+        "traffic:test",
+        "traffic",
+        10.0,
+        "traffic queue ahead at 45 miles per hour",
+        "Traffic slowing ahead; target speed 45.",
+    ))
+
+    trip.position_mi = 8.5
+    first = trip.update(0.0)
+    second = trip.update(0.0)
+
+    assert [event.message for event in first if event.kind == TripEventKind.GPS_CUE] == [
+        "Traffic slowing ahead in 2 miles; traffic queue ahead at 45 miles per hour."
+    ]
+    assert not [event for event in second if event.kind == TripEventKind.GPS_CUE]
+
+
+def test_traffic_context_and_warning_are_grounded_in_lead_vehicle(world):
+    trip, truck = make_trip(world)
+    truck.velocity_mps = 29.0
+    trip.position_mi = 9.98
+    trip.traffic_leads = [TrafficLead(10.0, 45.0, "traffic queue ahead", 4.0)]
+
+    context = trip.traffic_context()
+    assert context is not None
+    assert context.lead.speed_mph == 45.0
+    assert context.closing_mph > 15.0
+    assert trip.traffic_target_speed() == 45.0
+
+    events = trip.update(1.0)
+
+    hazards = [event for event in events if event.kind == TripEventKind.HAZARD]
+    assert hazards
+    assert "Traffic queue ahead" in hazards[0].message
+    assert "traffic" in hazards[0].data
 
 
 def test_city_events_announce_state_crossings(world):
