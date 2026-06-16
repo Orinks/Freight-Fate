@@ -324,7 +324,7 @@ def test_parking_fills_more_often_later_in_the_evening():
 
 def start_drive(app):
     """New career, accept an unlocked job, pick a route; returns DrivingState."""
-    from freight_fate.states.city import PickupFacilityState, RouteSelectState
+    from freight_fate.states.city import PickupFacilityState
     from freight_fate.states.driving import DrivingState
     from freight_fate.states.main_menu import MainMenuState
 
@@ -348,9 +348,7 @@ def start_drive(app):
     assert isinstance(app.state, PickupFacilityState)
     app.state.handle_event(key_event(pygame.K_RETURN))  # check in at origin
     app.state.handle_event(key_event(pygame.K_RETURN))  # load at dock
-    app.state.handle_event(key_event(pygame.K_RETURN))  # plan destination route
-    assert isinstance(app.state, RouteSelectState)
-    app.state.handle_event(key_event(pygame.K_RETURN))  # pick route
+    app.state.handle_event(key_event(pygame.K_RETURN))  # depart for destination
     assert isinstance(app.state, DrivingState)
     assert app.state.phase == "delivery"
     return app.state

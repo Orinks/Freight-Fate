@@ -1,37 +1,241 @@
-# Route Stop Data
+# Route, Stop, And Corridor Data
 
-Freight Fate keeps route amenities in static JSON so the game remains playable
-offline. Runtime driving does not call OpenStreetMap, Overpass, paid truck
-routing APIs, or operator sites.
+Freight Fate keeps route amenities and corridor metadata in static JSON so the
+game remains playable offline. Runtime driving does not call OpenStreetMap,
+OSRM, Overpass, paid truck routing APIs, Census services, or operator sites.
+External sources are build-time inputs only.
+
+The product goal is the full existing Freight Fate network, not a smaller map.
+New dispatchable freight is gated to routes whose legs have complete metadata;
+the job board must not silently invent route conditions. As of the full-network
+route-realism pass, all 106 current legs are playable metadata-backed lanes.
+Every leg has checked-in route points, elevation and grade samples, state
+context, and at least one actionable source-noted POI. The legacy/full graph
+remains loadable for old saves and map integrity, but new freight now has access
+to the full existing network without synthetic route fallback.
+
+Toll-corridor coverage is included in the metadata contract. The New York to
+Philadelphia NJ Turnpike corridor, Philadelphia to Pittsburgh PA Turnpike/I-76,
+Pittsburgh to Cleveland PA/Ohio connector, Cleveland to Chicago Ohio/Indiana
+Turnpike style corridor, New York to Boston I-95/New England toll corridor, and
+Philadelphia to Baltimore I-95 corridor all include explicit toll events where
+source-backed. Toll payment is modeled as a trip expense charged through company
+transponder/settlement accounting, not as a manual stop at every gantry.
 
 ## Schema
 
-Route stops live on a leg in `src/freight_fate/data/world.json`:
+Route stops and corridor details live on a leg in
+`src/freight_fate/data/world.json`:
 
 ```json
 {
-  "name": "Road Ranger Waco",
-  "type": "travel_center",
-  "at_mi": 185.0,
-  "source": "Road Ranger Waco, 6615 N Interstate Highway 35, I-35 Exit 342B: https://www.roadrangerusa.com/node/251"
+  "from": "Chicago",
+  "to": "Indianapolis",
+  "miles": 184,
+  "highway": "I-65",
+  "corridor": {
+    "route_points": [
+      {"at_mi": 0.0, "lat": 41.8781, "lon": -87.6298}
+    ],
+    "state_crossings": [
+      {
+        "at_mi": 33.0,
+        "from_state": "Illinois",
+        "state": "Indiana",
+        "place": "the I-65 state line south of Hammond"
+      }
+    ],
+    "checkpoints": [
+      {
+        "name": "Gary and Hammond industrial corridor",
+        "type": "place",
+        "state": "Indiana",
+        "highway": "I-65 south",
+        "at_mi": 36.0
+      }
+    ],
+    "state_miles": [
+      {"state": "Illinois", "miles": 33.0},
+      {"state": "Indiana", "miles": 151.0}
+    ],
+    "elevation_samples": [
+      {"at_mi": 0.0, "elevation_ft": 594.0},
+      {"at_mi": 184.0, "elevation_ft": 718.0}
+    ],
+    "grade_segments": [
+      {
+        "start_mi": 0.0,
+        "end_mi": 184.0,
+        "avg_grade_pct": 0.03,
+        "terrain": "flat"
+      }
+    ],
+    "toll_events": [
+      {
+        "name": "Example Turnpike settlement",
+        "at_mi": 90.0,
+        "road": "Example Turnpike",
+        "authority": "Example Toll Authority",
+        "method": "ezpass",
+        "amount": 42.0,
+        "estimated": true,
+        "source": "Toll authority rate table or calculator, accessed 2026-06-16."
+      }
+    ]
+  },
+  "stops": [
+    {
+      "name": "Loves Travel Stop Lafayette",
+      "type": "travel_center",
+      "at_mi": 122.0,
+      "actions": ["park", "save", "fuel", "food", "break", "sleep"],
+      "services": ["diesel", "food", "parking"],
+      "source": "Official operator page or curated Overpass/OSM review."
+    }
+  ]
 }
 ```
 
-`at_mi` is route miles from the leg's `from` city toward its `to` city. The
-trip simulator mirrors that offset when the player drives the same leg in the
-opposite direction.
+`at_mi` is route miles from the leg's `from` city toward its `to` city. The trip
+simulator mirrors stops, state crossings, and checkpoints when the player drives
+the same leg in the opposite direction.
 
 Name-only stops are intentionally rejected by the loader. They used to be
 spread evenly across each leg, which made route amenities feel synthetic. New
 data must provide a named, typed stop with an explicit position inside the leg
 mileage.
 
+Corridor metadata is optional for old data and saves. When present, it drives
+GPS cues, state-line announcements, intermediate place calls, and progress
+summaries. This is the first step away from treating each route as a plain
+0-to-N mile bar between city nodes.
+
+For new playable freight, a leg is considered supported only when it has:
+route points, checkpoints, state mileage, state crossings when endpoint states
+differ, elevation samples, grade segments, and at least one actionable POI with
+source notes. A multi-leg route is playable only when every leg meets that
+contract.
+
+Toll events are route-positioned events, not POIs. Use `toll_events` for toll
+road entry markers, toll plazas, ticket-system settlements, or electronic
+gantries. Each event must include a clean name, road, authority, method, amount,
+estimated flag, and source note. Current method values are `cash_card`,
+`ticket_system`, `ezpass`, `open_road`, and `toll_by_plate`. Use zero-dollar
+events only for entry markers where the charge is collected or estimated at a
+later settlement event. Toll source notes should name the authority or rate
+source, such as the New Jersey Turnpike Authority, Pennsylvania Turnpike
+Commission, Ohio Turnpike and Infrastructure Commission, Indiana Toll Road,
+Delaware River bridge/toll operators, or state toll agencies.
+
+Elevation and grade metadata are also optional, but preferred for enriched
+corridors. OSRM provides route geometry, distance, steps, and annotations; it
+does not tell us terrain or hills directly. Terrain must be derived by sampling
+the route geometry against an elevation source, computing grades between
+samples, and classifying sustained profile changes as flat, hills, or mountain.
+
+When `grade_segments` exist, runtime truck physics use them directly. Terrain
+does not change between trip seeds. Weather, traffic, construction, and
+incidents remain variable so routes stay alive without inventing hills.
+
+## Navigation And Traffic Runtime
+
+Loaded trips are destination/load-first. The player accepts freight, drives to
+the origin facility, loads, and dispatch starts the itinerary. Manual route
+selection is no longer the main fiction of the trip.
+
+The GPS layer reads the itinerary and announces concise audio-first cues:
+
+- continue cues for long highway stretches;
+- advance and near cues for maneuvers;
+- state crossings and intermediate corridor places;
+- one-mile rest-stop exit cues;
+- modeled traffic slowdowns when a lead vehicle or queue is ahead.
+- toll-road and toll-gantry cues with settlement wording.
+
+Basic traffic is deterministic for a trip seed. The first slice models lead
+traffic packs with a speed, gap, and reason such as slow lead traffic, merging
+traffic, lane restriction, or queue. Adaptive cruise control uses that context:
+it holds the set speed when clear, follows slower traffic at a three-second
+clear-weather gap, increases that gap in rain, snow, fog, or low visibility,
+and cancels when the driver brakes. It does not steer, change lanes, or replace
+the GPS.
+
+Traffic placement uses route length, corridor checkpoints, departure time, and
+weather effects. Bad weather can increase traffic pressure and lower the lead
+traffic target speed. These remain deterministic for a seed; they are not
+generic surprise hazards.
+
+Tolls are charged once when the trip passes the route-positioned toll event.
+The spoken cue warns ahead of the point, and the charge event records a
+`TollCharge` on the trip. Delivery settlement reports gross pay, toll expenses,
+and net settlement. The accounting can reduce net settlement below gross pay,
+but it does not interrupt driving or require the player to handle cash at every
+gantry.
+
+## POIs And Actions
+
+POIs are curated gameplay locations, not raw OSM records. Overpass/OpenStreetMap
+may be used to discover candidates, but checked-in data must use clean
+player-facing names and normalized game categories. Do not expose OSM IDs,
+raw tags, or source keys in speech, menus, or help text.
+
+Supported first-pass POI types and actions:
+
+- `travel_center` and `truck_stop`: park, save, fuel, food, break, sleep.
+- `service_plaza`: park, save, fuel, food, break.
+- `fuel_station`: park, save, fuel, break.
+- `public_rest_area` and `truck_parking`: park, save, break, sleep.
+- `weigh_station`: inspect.
+- `repair_shop`: park, save, repair.
+
+If an OSM/source candidate has no useful name, curate a restrained descriptive
+name such as `I-65 Northbound Rest Area`; do not invent a brand. Checkpoint
+POIs may be spoken as route context only when there is no real player action.
+
+Do not infer repair from `public_rest_area`, `rest_area`, or a broad stop
+category. Public safety rest areas are normally modeled as parking, restrooms,
+maps/info, breaks, sleep/rest, and vehicle/load checks. Repair, towing, or
+roadside assistance actions require explicit `actions` plus matching `services`
+and a source note that backs the capability. Turnpike service plazas and
+authorized emergency road-service arrangements should be represented as
+service-plaza or roadside-assistance capabilities, not as generic rest-area
+repair.
+
+Do not model toll plazas or gantries as actionable rest stops unless the source
+also identifies a truck-relevant service area at that location. A toll plaza is
+usually a route event and expense. A toll-road service plaza remains a POI only
+for the services it actually supports, such as parking, fuel, food, breaks, or
+saves.
+
 ## Source Strategy
 
-The current seed is small on purpose. It covers representative corridors and
-test-critical routes using public DOT rest-area pages, operator location pages,
-and development-time map review. Examples include:
+The current full-network pass combines no-key route/elevation sources,
+development-time map review, source-noted curation, and small live smoke
+checks. The checked-in runtime data is static. Examples include:
 
+- OSRM public demo route API over OpenStreetMap for tiny build-time geometry
+  checks. Keep requests cached or one-off; do not use it at runtime.
+- Open-Meteo Elevation API for no-key development-time terrain samples from
+  Copernicus DEM GLO-90. Store sampled results in `world.json`; do not call it
+  at runtime.
+- USGS Elevation Point Query Service / The National Map for U.S. point
+  elevations. Treat values as interpolated terrain samples rather than surveyed
+  road grades.
+- OpenTopoData or Open-Elevation as alternate no-key/self-hostable elevation
+  candidates. Public service availability and rate limits should be treated
+  carefully.
+- Nominatim, only if necessary for sparse build-time lookup. Use a custom
+  User-Agent, at most one request per second, and keep attribution visible.
+- Overpass API for development-time discovery of rest areas, truck stops,
+  service plazas, truck parking, repair shops, fuel stations, and weigh
+  stations. Convert candidates into curated names, categories, services, and
+  actions before committing them. Do not call it at runtime.
+- Census/TIGER or Census-derived public state boundary GeoJSON for computing
+  state crossings from route geometry.
+- Toll authority calculators and rate pages for source-backed commercial
+  vehicle toll estimates. Current toll estimates are intentionally documented
+  with the source and access date because exact truck class, axle, transponder,
+  time-of-day, and toll-by-plate rules can change.
 - WisDOT Kenosha Safety Rest Area, with truck parking:
   https://wisconsindot.gov/Pages/travel/road/rest-areas/26-kenosha.aspx
 - INDOT rest-area/truck-parking overview:
@@ -69,24 +273,135 @@ and source notes:
 - Overpass API documentation:
   https://wiki.openstreetmap.org/wiki/Overpass_API
 
+## Build-Time Tooling
+
+Inspect the checked-in corridor metadata:
+
+```powershell
+uv run python tools/enrich_routes.py --from-city Chicago --to-city Indianapolis
+```
+
+Run the tiny live OSRM and Open-Meteo elevation smoke check:
+
+```powershell
+uv run python tools/enrich_routes.py --from-city Chicago --to-city Indianapolis --live-smoke
+```
+
+The live smoke prints OSRM route mileage, simplified geometry point count, and
+Open-Meteo elevation sample range. It is deliberately separate from
+deterministic unit tests and should remain a small, credential-free sanity
+check.
+
+Report coverage for every leg in human-readable form:
+
+```powershell
+uv run python tools/enrich_routes.py --coverage-report
+```
+
+Report the same coverage as JSON for tests or planning:
+
+```powershell
+uv run python tools/enrich_routes.py --coverage-report --json
+```
+
+Run a tiny Overpass POI reachability smoke for one corridor:
+
+```powershell
+uv run python tools/enrich_routes.py --from-city Chicago --to-city Indianapolis --overpass-poi-smoke
+```
+
+For full-network enrichment, run staged batches rather than hammering public
+demo endpoints. The checked-in tool can fill missing corridor metadata in
+resumable batches:
+
+```powershell
+uv run python tools/enrich_routes.py --enrich-all --write --limit 10 --rate-limit 1.0
+```
+
+The tool uses `.route-cache/` for OSRM geometry, Open-Meteo elevation samples,
+state-boundary data, and optional Overpass candidate responses. The cache is
+local tooling state and is ignored by git; the committed artifact is
+`world.json`. Use `--no-overpass` when public Overpass endpoints are rate
+limited or unavailable:
+
+```powershell
+uv run python tools/enrich_routes.py --enrich-all --write --no-overpass --rate-limit 0
+```
+
+The full-network batch completed route geometry, elevation/grade, state
+context, and POI/action coverage for all 106 legs. Public Overpass endpoints
+were not practical for the final batch during validation, returning timeouts or
+HTTP 429, so POI coverage was completed with curated source notes and
+operator/DOT/authority review. Future batches can rerun with a self-hosted or
+available Overpass endpoint without changing the runtime schema.
+
+High-priority toll and service-plaza-heavy corridors are now covered:
+
+- PA Turnpike / I-76: Philadelphia to Pittsburgh, including PA Turnpike toll
+  events and named service plazas.
+- Ohio/Indiana Turnpike and I-80/I-90: Cleveland to Chicago, including Ohio
+  Turnpike and Indiana Toll Road settlement events plus service plazas.
+- I-95 / New England toll corridor: New York to Boston, including New England
+  Thruway and Massachusetts Turnpike toll events.
+- I-95 Northeast Corridor south of Philadelphia: Philadelphia to Baltimore,
+  including Delaware Turnpike and JFK Memorial Highway toll events.
+- PA/Ohio Turnpike connector: Pittsburgh to Cleveland, including PA and Ohio
+  toll settlement events.
+
+For these corridors, toll-road service plazas and authorized emergency
+road-service providers must remain explicit source-backed POIs/actions. Do not
+represent them as generic public rest areas, and do not expose repair, towing,
+or roadside assistance unless the source metadata backs that capability.
+
 ## Update Process
 
 1. Choose a corridor and confirm the route leg mileage already represents the
    intended highway path.
-2. Find truck-relevant public rest areas, travel centers, service plazas, or
+2. Run or review build-time route geometry and state-boundary data to place
+   route points, state crossings, checkpoints, and state mileage.
+3. Sample representative route points against an elevation source. Compute
+   average grade between samples and classify sustained terrain. Flat corridors
+   should stay flat instead of receiving generic rolling-hill waves.
+4. Find truck-relevant public rest areas, travel centers, service plazas, or
    truck parking from public agency pages, official operator pages, or
    OSM/Overpass development-time queries.
-3. Estimate `at_mi` from the leg's `from` city using route mileage, exit/mile
+5. Curate each POI into a clean name, normalized type, services, supported
+   actions, and developer-facing source note. Do not commit raw OSM tags or IDs
+   as player-facing text. Repair, towing, and roadside assistance must be
+   explicitly source-backed in both `actions` and `services`.
+6. Estimate `at_mi` from the leg's `from` city using route mileage, exit/mile
    marker data, or a map distance check. Do not place stops at regular
    intervals just to fill the route.
-4. Add `source` notes that are specific enough for another developer to verify
+7. Add `source` notes that are specific enough for another developer to verify
    the stop later.
-5. Run `uv run pytest tests/test_world.py tests/test_weather_trip.py
-   tests/test_job_progression.py` and focused driving/rest-stop tests.
+8. Run `uv run python tools/enrich_routes.py --coverage-report --json`.
+9. Run `uv run pytest tests/test_world.py tests/test_route_coverage_tool.py
+   tests/test_weather_trip.py tests/test_job_progression.py` and focused
+   driving/POI tests.
+10. For toll corridors, add or verify route-positioned `toll_events`, source
+    notes, method labels, estimated commercial vehicle costs, and settlement
+    behavior tests. Do not invent toll amounts without a named authority or
+    documented rate source.
+
+## Future Freight Data
+
+FAF/BTS freight datasets can improve market realism, lane demand, and commodity
+flows later. That is separate from corridor realism: the current goal is to make
+the driven itinerary feel grounded. A future market pass should map FAF/BTS
+flows into job generation weights while keeping the offline runtime model.
 
 ## Accessibility Impact
 
-Stop type labels remain spoken before the stop name, such as `public rest area:
-Kenosha Safety Rest Area` or `travel center: Road Ranger Waco`. The keyboard
-flow is unchanged: stops are announced ahead, `X` arms the exit, and `T` opens
-the stop menu when parked at a stop.
+Stop type labels remain spoken before the curated stop name, such as `public
+rest area: Kenosha Safety Rest Area` or `travel center: Road Ranger Waco`. The
+keyboard flow remains audio-first: stops are announced ahead, `X` arms the
+exit, and `T` opens the POI menu when parked at one. Menu items are generated
+from source-backed actions, so a rest area does not offer fuel or repair by
+default, and a weigh station does not pretend to be a travel center. `R` speaks
+route progress plus GPS context, including grade/terrain context. `K` sets
+adaptive cruise, and the spoken cue includes the following gap, bad-weather gap
+increases, and cancellation behavior. GPS and traffic cues supplement the
+keyboard status keys; they never require a visual map or raw data inspection.
+Toll warnings and toll-charged messages use concise speech and settlement
+language, and delivery completion speaks gross pay, toll expenses, and net
+settlement so the operating cost is accessible without reading a visual ledger.

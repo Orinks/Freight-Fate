@@ -15,7 +15,8 @@ def test_job_offers_have_real_route_distances(world):
     jobs = board.offers("Chicago", endorsements=set(), level=2)
     assert jobs
     for job in jobs:
-        route = world.shortest_route(job.origin, job.destination)
+        route = world.supported_route(job.origin, job.destination)
+        assert route is not None
         assert abs(route.miles - job.distance_mi) < 1.0
         assert job.pay > 0
         assert job.deadline_game_h > job.distance_mi / 70.0

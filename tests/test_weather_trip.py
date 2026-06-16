@@ -3,7 +3,7 @@
 import itertools
 
 from freight_fate.sim import Trip, TruckState, WeatherKind, WeatherSystem
-from freight_fate.sim.trip import TripEventKind
+from freight_fate.sim.trip import NavigationCue, TrafficLead, TripEventKind
 from freight_fate.sim.weather import EFFECTS, REGION_WEIGHTS
 
 
@@ -53,13 +53,13 @@ def test_forecast_does_not_regenerate_weather_timeline():
     assert with_forecast.current is untouched.current
 
 
-def make_trip(world, start="Chicago", end="Indianapolis", **kwargs):
+def make_trip(world, start="Chicago", end="Indianapolis", seed=2, **kwargs):
     route = world.route_options(start, end)[0]
     truck = TruckState()
     truck.transmission.automatic = True
     truck.start_engine()
     weather = WeatherSystem("midwest", seed=1)
-    return Trip(route, truck, weather, seed=2, **kwargs), truck
+    return Trip(route, truck, weather, seed=seed, **kwargs), truck
 
 
 def test_trip_completes_and_emits_arrival(world):
@@ -131,6 +131,57 @@ def test_grades_are_bounded(world):
         assert abs(trip.grade_at(float(mile))) <= 0.08
 
 
+def test_route_derived_flat_grade_is_stable_across_trip_seeds(world):
+    trip_a, _ = make_trip(world, seed=1)
+    trip_b, _ = make_trip(world, seed=99)
+    miles = [0.0, 20.0, 33.0, 72.0, 122.0, 183.0]
+
+    assert [trip_a.grade_at(mile) for mile in miles] == [
+        trip_b.grade_at(mile) for mile in miles
+    ]
+    assert max(abs(trip_a.grade_at(mile)) for mile in miles) < 0.002
+    assert {trip_a.terrain_at(mile) for mile in miles} == {"flat"}
+
+
+def test_traffic_varies_by_seed_but_route_grade_does_not(world):
+    trip_a, _ = make_trip(world, seed=1)
+    trip_b, _ = make_trip(world, seed=8)
+
+    assert [trip_a.grade_at(mile) for mile in (10.0, 80.0, 150.0)] == [
+        trip_b.grade_at(mile) for mile in (10.0, 80.0, 150.0)
+    ]
+    assert [(lead.at_mi, lead.speed_mph, lead.reason) for lead in trip_a.traffic_leads] != [
+        (lead.at_mi, lead.speed_mph, lead.reason) for lead in trip_b.traffic_leads
+    ]
+
+
+def test_traffic_model_applies_to_enriched_and_legacy_routes(world):
+    for cities in (["Chicago", "Indianapolis"], ["Chicago", "St. Louis"]):
+        route = world.route_from_cities(cities)
+        truck = TruckState()
+        weather = WeatherSystem("midwest", seed=1)
+        weather.current = WeatherKind.CLEAR
+        trip = Trip(route, truck, weather, seed=1)
+        assert trip.traffic_leads, cities
+
+
+def test_bad_weather_slows_modeled_traffic(world):
+    route = world.route_from_cities(["Chicago", "Indianapolis"])
+    clear_weather = WeatherSystem("midwest", seed=1)
+    clear_weather.current = WeatherKind.CLEAR
+    rain_weather = WeatherSystem("midwest", seed=1)
+    rain_weather.current = WeatherKind.HEAVY_RAIN
+
+    clear = Trip(route, TruckState(), clear_weather, seed=1)
+    rain = Trip(route, TruckState(), rain_weather, seed=1)
+
+    assert clear.traffic_leads
+    assert rain.traffic_leads
+    assert rain.traffic_leads[0].at_mi == clear.traffic_leads[0].at_mi
+    assert rain.traffic_leads[0].speed_mph < clear.traffic_leads[0].speed_mph
+    assert "visibility" in rain.traffic_leads[0].reason
+
+
 def test_time_scale_compresses_fuel_burn(world):
     trip, truck = make_trip(world, time_scale=40.0)
     truck.throttle = 0.9
@@ -187,8 +238,137 @@ def test_progress_summary_mentions_highway(world):
     text = trip.progress_summary()
     assert "I-65" in text
     assert "Indianapolis, Indiana" in text
+    assert "Grade level" in text
+    assert "Next state line" in text
+    assert "Illinois into Indiana" in text
     metric = trip.progress_summary(imperial=False)
     assert "kilometers" in metric
+
+
+def test_gps_state_crossing_and_rest_stop_cues_deduplicate(world):
+    trip, _truck = make_trip(world)
+
+    trip.position_mi = 31.5
+    advance = trip.update(0.0)
+    repeat = trip.update(0.0)
+
+    assert [event.message for event in advance if event.kind == TripEventKind.GPS_CUE] == [
+        "In 2 miles, crossing from Illinois into Indiana near "
+        "the I-65 state line south of Hammond."
+    ]
+    assert not [event for event in repeat if event.kind == TripEventKind.GPS_CUE]
+
+    trip.position_mi = 33.0
+    crossing = trip.update(0.0)
+    assert [event.message for event in crossing
+            if event.kind == TripEventKind.STATE_CROSSING] == [
+        "Crossing into Indiana near the I-65 state line south of Hammond."
+    ]
+
+    trip.position_mi = 121.0
+    rest = trip.update(0.0)
+    assert any(
+        event.kind == TripEventKind.GPS_CUE
+        and event.message == "Travel center ahead in 1 mile; press X to take the exit."
+        for event in rest
+    )
+
+
+def test_gps_traffic_cue_deduplicates(world):
+    trip, _truck = make_trip(world)
+    trip.navigation_cues.append(NavigationCue(
+        "traffic:test",
+        "traffic",
+        10.0,
+        "traffic queue ahead at 45 miles per hour",
+        "Traffic slowing ahead; target speed 45.",
+    ))
+
+    trip.position_mi = 8.5
+    first = trip.update(0.0)
+    second = trip.update(0.0)
+
+    assert [event.message for event in first if event.kind == TripEventKind.GPS_CUE] == [
+        "Traffic slowing ahead in 2 miles; traffic queue ahead at 45 miles per hour."
+    ]
+    assert not [event for event in second if event.kind == TripEventKind.GPS_CUE]
+
+
+def test_toll_cues_and_charges_deduplicate(world):
+    trip, _truck = make_trip(world, "New York", "Philadelphia")
+
+    trip.position_mi = 6.1
+    advance = trip.update(0.0)
+    repeat = trip.update(0.0)
+
+    assert [event.message for event in advance if event.kind == TripEventKind.GPS_CUE] == [
+        "ticket system toll point ahead: New Jersey Turnpike ticket entry. "
+        "estimated toll 18 dollars will be charged to settlement."
+    ]
+    assert not [event for event in repeat if event.kind == TripEventKind.GPS_CUE]
+
+    trip.position_mi = 8.0
+    charged = trip.update(0.0)
+    charged_again = trip.update(0.0)
+
+    assert [event.message for event in charged
+            if event.kind == TripEventKind.TOLL_CHARGED] == [
+        "ticket system toll charged at New Jersey Turnpike ticket entry: "
+        "Estimated 18 dollars, charged to settlement."
+    ]
+    assert trip.toll_expense == 18.0
+    assert not [event for event in charged_again
+                if event.kind == TripEventKind.TOLL_CHARGED]
+
+
+def test_non_toll_route_does_not_charge_tolls(world):
+    trip, _truck = make_trip(world, "Chicago", "Indianapolis")
+
+    trip.position_mi = trip.total_miles
+    events = trip.update(0.0)
+
+    assert trip.toll_expense == 0.0
+    assert not [event for event in events if event.kind == TripEventKind.TOLL_CHARGED]
+
+
+def test_zero_amount_toll_entry_marker_does_not_record_expense(world):
+    trip, _truck = make_trip(world, "Philadelphia", "Pittsburgh")
+
+    trip.position_mi = 16.1
+    advance = trip.update(0.0)
+    assert [event.message for event in advance if event.kind == TripEventKind.GPS_CUE] == [
+        "ticket system toll point ahead: Pennsylvania Turnpike eastern ticket entry. "
+        "entry will be recorded for later settlement."
+    ]
+
+    trip.position_mi = 18.0
+    entry = trip.update(0.0)
+    assert [event.message for event in entry if event.kind == TripEventKind.GPS_CUE] == [
+        "ticket system entry recorded at Pennsylvania Turnpike eastern ticket entry; "
+        "toll will be charged at settlement."
+    ]
+    assert trip.toll_expense == 0.0
+    assert not [event for event in entry if event.kind == TripEventKind.TOLL_CHARGED]
+
+
+def test_traffic_context_and_warning_are_grounded_in_lead_vehicle(world):
+    trip, truck = make_trip(world)
+    truck.velocity_mps = 29.0
+    trip.position_mi = 9.98
+    trip.traffic_leads = [TrafficLead(10.0, 45.0, "traffic queue ahead", 4.0)]
+
+    context = trip.traffic_context()
+    assert context is not None
+    assert context.lead.speed_mph == 45.0
+    assert context.closing_mph > 15.0
+    assert trip.traffic_target_speed() == 45.0
+
+    events = trip.update(1.0)
+
+    hazards = [event for event in events if event.kind == TripEventKind.HAZARD]
+    assert hazards
+    assert "Traffic queue ahead" in hazards[0].message
+    assert "traffic" in hazards[0].data
 
 
 def test_city_events_announce_state_crossings(world):

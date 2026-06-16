@@ -43,7 +43,7 @@ def arrive_at_pickup(app, speed_mps: float = 0.0):
 
 def test_accepting_job_starts_drivable_pickup_leg():
     from freight_fate.app import App
-    from freight_fate.states.city import PickupFacilityState, RouteSelectState
+    from freight_fate.states.city import PickupFacilityState
     from freight_fate.states.driving import DrivingState
 
     app = App()
@@ -54,7 +54,6 @@ def test_accepting_job_starts_drivable_pickup_leg():
 
         assert isinstance(app.state, DrivingState)
         assert not isinstance(app.state, PickupFacilityState)
-        assert not isinstance(app.state, RouteSelectState)
         assert app.ctx.profile.active_trip["kind"] == "pickup_drive"
         assert pickup.route.miles > 2.0
         assert pickup.trip.total_miles == pickup.route.miles
@@ -142,7 +141,7 @@ def test_save_resume_during_pickup_drive():
 
 def test_pickup_arrival_state_and_loaded_planning_resume():
     from freight_fate.app import App
-    from freight_fate.states.city import PickupFacilityState, RouteSelectState
+    from freight_fate.states.city import PickupFacilityState
 
     app = App()
     try:
@@ -175,10 +174,12 @@ def test_pickup_arrival_state_and_loaded_planning_resume():
 
         assert isinstance(app.state, PickupFacilityState)
         assert app.state.loaded
-        assert app.state.items[app.state.index].text == "Plan destination route"
+        assert app.state.items[app.state.index].text == "Depart for destination"
 
         app.state.handle_event(key_event(pygame.K_RETURN))
-        assert isinstance(app.state, RouteSelectState)
+        from freight_fate.states.driving import DrivingState
+
+        assert isinstance(app.state, DrivingState)
     finally:
         app.shutdown()
 

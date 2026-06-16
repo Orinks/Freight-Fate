@@ -61,11 +61,59 @@ class HomeTerminal:
 STOP_TYPE_LABELS = {
     "truck_stop": "truck stop",
     "travel_center": "travel center",
+    "fuel_station": "truck fuel station",
     "service_plaza": "service plaza",
     "public_rest_area": "public rest area",
     "truck_parking": "truck parking",
     "weigh_station": "weigh station",
+    "repair_shop": "repair shop",
 }
+
+POI_ACTIONS = {
+    "park",
+    "save",
+    "break",
+    "sleep",
+    "fuel",
+    "food",
+    "repair",
+    "roadside_assistance",
+    "towing",
+    "inspect",
+}
+
+RAW_POI_TEXT_MARKERS = (
+    "osm_id",
+    "openstreetmap id",
+    "amenity=",
+    "highway=",
+    "operator=",
+    "node/",
+    "way/",
+    "relation/",
+)
+
+TOLL_METHOD_LABELS = {
+    "cash_card": "cash or card",
+    "ticket_system": "ticket system",
+    "transponder": "transponder",
+    "open_road": "open-road tolling",
+    "toll_by_plate": "toll by plate",
+    "ezpass": "E-ZPass",
+}
+
+DEFAULT_POI_ACTIONS = {
+    "truck_stop": ("park", "save", "fuel", "food", "break", "sleep"),
+    "travel_center": ("park", "save", "fuel", "food", "break", "sleep"),
+    "fuel_station": ("park", "save", "fuel", "break"),
+    "service_plaza": ("park", "save", "fuel", "food", "break"),
+    "public_rest_area": ("park", "save", "break", "sleep"),
+    "truck_parking": ("park", "save", "break", "sleep"),
+    "weigh_station": ("inspect",),
+    "repair_shop": ("park", "save", "repair"),
+}
+
+SOURCE_BACKED_POI_ACTIONS = {"repair", "roadside_assistance", "towing"}
 
 FREIGHT_LOCATION_TYPES = {
     "air_cargo",
@@ -130,6 +178,8 @@ class Stop:
     at_mi: float
     type: str = "travel_center"
     source: str = ""
+    actions: tuple[str, ...] = ()
+    services: tuple[str, ...] = ()
 
     @property
     def label(self) -> str:
@@ -138,6 +188,86 @@ class Stop:
     @property
     def spoken_name(self) -> str:
         return f"{self.label}: {self.name}"
+
+
+@dataclass(frozen=True)
+class RoutePoint:
+    at_mi: float
+    lat: float
+    lon: float
+
+
+@dataclass(frozen=True)
+class ElevationSample:
+    at_mi: float
+    elevation_ft: float
+    source: str = ""
+
+
+@dataclass(frozen=True)
+class GradeSegment:
+    start_mi: float
+    end_mi: float
+    avg_grade_pct: float
+    terrain: str
+    source: str = ""
+
+
+@dataclass(frozen=True)
+class StateCrossing:
+    at_mi: float
+    from_state: str
+    state: str
+    place: str
+    source: str = ""
+
+
+@dataclass(frozen=True)
+class RouteCheckpoint:
+    name: str
+    at_mi: float
+    type: str = "place"
+    state: str = ""
+    highway: str = ""
+    source: str = ""
+
+    @property
+    def label(self) -> str:
+        if self.type == "highway_change":
+            return "highway change"
+        if self.type == "state_line":
+            return "state line"
+        return "corridor place"
+
+    @property
+    def spoken_name(self) -> str:
+        return f"{self.label}: {self.name}"
+
+
+@dataclass(frozen=True)
+class StateMileage:
+    state: str
+    miles: float
+
+
+@dataclass(frozen=True)
+class TollEvent:
+    name: str
+    at_mi: float
+    road: str
+    authority: str
+    method: str
+    amount: float
+    estimated: bool = True
+    source: str = ""
+
+    @property
+    def method_label(self) -> str:
+        return TOLL_METHOD_LABELS.get(self.method, self.method.replace("_", " "))
+
+    @property
+    def spoken_name(self) -> str:
+        return f"toll point: {self.name}"
 
 
 @dataclass(frozen=True)
@@ -158,9 +288,32 @@ class Leg:
     highway: str
     terrain: str  # flat | hills | mountain
     stops: tuple[Stop, ...]
+    route_points: tuple[RoutePoint, ...] = ()
+    elevation_samples: tuple[ElevationSample, ...] = ()
+    grade_segments: tuple[GradeSegment, ...] = ()
+    state_crossings: tuple[StateCrossing, ...] = ()
+    checkpoints: tuple[RouteCheckpoint, ...] = ()
+    state_miles: tuple[StateMileage, ...] = ()
+    toll_events: tuple[TollEvent, ...] = ()
 
     def other(self, city: str) -> str:
         return self.b if city == self.a else self.a
+
+    def metadata_complete(self, from_state: str, to_state: str) -> bool:
+        """True when a leg has enough real corridor data for new freight."""
+        if len(self.route_points) < 2:
+            return False
+        if not self.checkpoints:
+            return False
+        if not self.state_miles:
+            return False
+        if len(self.elevation_samples) < 2 or not self.grade_segments:
+            return False
+        if not self.stops:
+            return False
+        if any(not stop.source or not stop.actions for stop in self.stops):
+            return False
+        return from_state == to_state or bool(self.state_crossings)
 
 
 @dataclass
@@ -191,6 +344,22 @@ class Route:
         return [s for leg in self.legs for s in leg.stops]
 
     @property
+    def state_crossings(self) -> list[StateCrossing]:
+        return [c for leg in self.legs for c in leg.state_crossings]
+
+    @property
+    def toll_events(self) -> list[TollEvent]:
+        return [event for leg in self.legs for event in leg.toll_events]
+
+    @property
+    def estimated_tolls(self) -> float:
+        return sum(event.amount for event in self.toll_events)
+
+    @property
+    def checkpoints(self) -> list[RouteCheckpoint]:
+        return [c for leg in self.legs for c in leg.checkpoints]
+
+    @property
     def terrain_summary(self) -> str:
         kinds = {leg.terrain for leg in self.legs}
         if kinds == {"flat"}:
@@ -204,6 +373,9 @@ class Route:
         return (f"{self.miles:.0f} miles via {via}, "
                 f"{len(self.legs)} leg{'s' if len(self.legs) != 1 else ''}, "
                 f"terrain {self.terrain_summary}")
+
+    def metadata_complete(self, world: World) -> bool:
+        return all(world.leg_metadata_complete(leg) for leg in self.legs)
 
 
 class World:
@@ -220,9 +392,41 @@ class World:
             miles = float(leg["miles"])
             stops = tuple(_parse_stop(s, miles, leg["from"], leg["to"])
                           for s in leg.get("stops", ()))
+            corridor = leg.get("corridor", {})
+            route_points = tuple(
+                _parse_route_point(p, miles, leg["from"], leg["to"])
+                for p in corridor.get("route_points", ())
+            )
+            elevation_samples = tuple(
+                _parse_elevation_sample(s, miles, leg["from"], leg["to"])
+                for s in corridor.get("elevation_samples", ())
+            )
+            grade_segments = tuple(
+                _parse_grade_segment(s, miles, leg["from"], leg["to"])
+                for s in corridor.get("grade_segments", ())
+            )
+            state_crossings = tuple(
+                _parse_state_crossing(c, miles, leg["from"], leg["to"],
+                                      self.cities[leg["from"]].state)
+                for c in corridor.get("state_crossings", ())
+            )
+            checkpoints = tuple(
+                _parse_checkpoint(c, miles, leg["from"], leg["to"])
+                for c in corridor.get("checkpoints", ())
+            )
+            state_miles = tuple(
+                _parse_state_mileage(m, leg["from"], leg["to"])
+                for m in corridor.get("state_miles", ())
+            )
+            toll_events = tuple(
+                _parse_toll_event(e, miles, leg["from"], leg["to"], leg["highway"])
+                for e in corridor.get("toll_events", ())
+            )
             self.legs.append(
                 Leg(leg["from"], leg["to"], miles, leg["highway"],
-                    leg["terrain"], stops)
+                    leg["terrain"], stops, route_points, elevation_samples,
+                    grade_segments, state_crossings, checkpoints, state_miles,
+                    toll_events)
             )
         self._adjacency: dict[str, list[Leg]] = {name: [] for name in self.cities}
         for leg in self.legs:
@@ -275,8 +479,14 @@ class World:
         return Route([city, city], [leg])
 
     def shortest_route(self, start: str, end: str,
-                       penalties: dict[Leg, float] | None = None) -> Route | None:
-        """Dijkstra over leg miles, with optional per-leg penalty multipliers."""
+                       penalties: dict[Leg, float] | None = None,
+                       require_metadata: bool = False) -> Route | None:
+        """Dijkstra over leg miles, with optional per-leg penalty multipliers.
+
+        ``require_metadata`` is for new dispatchable freight. The default keeps
+        the historical full graph available for legacy saves and map integrity
+        checks while supported freight routes are enriched lane by lane.
+        """
         if start not in self.cities or end not in self.cities:
             raise KeyError(f"Unknown city: {start if start not in self.cities else end}")
         penalties = penalties or {}
@@ -292,6 +502,8 @@ class World:
             if city == end:
                 break
             for leg in self._adjacency[city]:
+                if require_metadata and not self.leg_metadata_complete(leg):
+                    continue
                 nxt = leg.other(city)
                 cost = leg.miles * penalties.get(leg, 1.0)
                 nd = d + cost
@@ -317,7 +529,9 @@ class World:
         """Rebuild a route from its city sequence (used by saved trips).
 
         Returns None if any hop is missing, so callers can fall back
-        gracefully when a save references a road that no longer exists.
+        gracefully when a save references a road that no longer exists. This is
+        intentionally the legacy/full graph path; new freight uses supported
+        route helpers so missing metadata cannot silently invent conditions.
         """
         if len(cities) < 2:
             return None
@@ -329,17 +543,30 @@ class World:
             legs.append(leg)
         return Route(list(cities), legs)
 
-    def route_options(self, start: str, end: str, count: int = 3) -> list[Route]:
+    def leg_metadata_complete(self, leg: Leg) -> bool:
+        return leg.metadata_complete(self.cities[leg.a].state, self.cities[leg.b].state)
+
+    def supported_route(self, start: str, end: str,
+                        penalties: dict[Leg, float] | None = None) -> Route | None:
+        return self.shortest_route(start, end, penalties, require_metadata=True)
+
+    def supported_route_options(self, start: str, end: str,
+                                count: int = 3) -> list[Route]:
+        return self.route_options(start, end, count, require_metadata=True)
+
+    def route_options(self, start: str, end: str, count: int = 3,
+                      require_metadata: bool = False) -> list[Route]:
         """Up to ``count`` distinct routes, fastest first."""
         routes: list[Route] = []
         penalties: dict[Leg, float] = {}
         seen: set[tuple[str, ...]] = set()
-        best = self.shortest_route(start, end)
+        best = self.shortest_route(start, end, require_metadata=require_metadata)
         if best is None:
             return routes
         max_miles = _max_alternate_miles(best.miles)
         for _ in range(count * 8):
-            route = self.shortest_route(start, end, penalties)
+            route = self.shortest_route(start, end, penalties,
+                                        require_metadata=require_metadata)
             if route is None:
                 break
             key = tuple(route.cities)
@@ -365,6 +592,11 @@ def _parse_stop(raw, leg_miles: float, from_city: str, to_city: str) -> Stop:
     name = str(raw.get("name", "")).strip()
     if not name:
         raise ValueError(f"{from_city} to {to_city} has a stop without a name")
+    lowered_name = name.lower()
+    if any(marker in lowered_name for marker in RAW_POI_TEXT_MARKERS):
+        raise ValueError(
+            f"{from_city} to {to_city} stop {name!r} exposes raw OSM/source text"
+        )
     if "at_mi" not in raw:
         raise ValueError(
             f"{from_city} to {to_city} stop {name!r} is missing explicit at_mi"
@@ -381,7 +613,201 @@ def _parse_stop(raw, leg_miles: float, from_city: str, to_city: str) -> Stop:
             f"{from_city} to {to_city} stop {name!r} has unknown type {stop_type!r}"
         )
     source = str(raw.get("source", "")).strip()
-    return Stop(name, at_mi, stop_type, source)
+    actions = tuple(str(action).strip() for action in raw.get(
+        "actions", DEFAULT_POI_ACTIONS[stop_type]))
+    if not actions:
+        raise ValueError(f"{from_city} to {to_city} stop {name!r} has no actions")
+    unknown = sorted(set(actions) - POI_ACTIONS)
+    if unknown:
+        raise ValueError(
+            f"{from_city} to {to_city} stop {name!r} has unknown actions {unknown}"
+        )
+    default_actions = set(DEFAULT_POI_ACTIONS[stop_type])
+    disallowed = sorted(set(actions) - default_actions)
+    if disallowed:
+        source_backed = set(disallowed) <= SOURCE_BACKED_POI_ACTIONS
+        if not source_backed:
+            raise ValueError(
+                f"{from_city} to {to_city} stop {name!r} actions {disallowed} "
+                f"do not match type {stop_type!r}"
+            )
+    services = tuple(
+        str(service).strip()
+        for service in raw.get("services", ())
+        if str(service).strip()
+    )
+    for action in SOURCE_BACKED_POI_ACTIONS & set(actions):
+        if action not in services:
+            raise ValueError(
+                f"{from_city} to {to_city} stop {name!r} action {action!r} "
+                "requires matching source-backed service metadata"
+            )
+        if not source:
+            raise ValueError(
+                f"{from_city} to {to_city} stop {name!r} action {action!r} "
+                "requires a source note"
+            )
+    return Stop(name, at_mi, stop_type, source, actions, services)
+
+
+def _parse_route_point(raw, leg_miles: float, from_city: str, to_city: str) -> RoutePoint:
+    if not isinstance(raw, dict):
+        raise ValueError(f"{from_city} to {to_city} route point must be an object")
+    at_mi = _parse_at_mi(raw, leg_miles, from_city, to_city, "route point",
+                         allow_endpoints=True)
+    lat = float(raw["lat"])
+    lon = float(raw["lon"])
+    if not -90.0 <= lat <= 90.0 or not -180.0 <= lon <= 180.0:
+        raise ValueError(f"{from_city} to {to_city} route point has invalid coordinates")
+    return RoutePoint(at_mi, lat, lon)
+
+
+def _parse_elevation_sample(raw, leg_miles: float, from_city: str,
+                            to_city: str) -> ElevationSample:
+    if not isinstance(raw, dict):
+        raise ValueError(f"{from_city} to {to_city} elevation sample must be an object")
+    at_mi = _parse_at_mi(raw, leg_miles, from_city, to_city, "elevation sample",
+                         allow_endpoints=True)
+    elevation_ft = float(raw["elevation_ft"])
+    if not -300.0 <= elevation_ft <= 20_500.0:
+        raise ValueError(
+            f"{from_city} to {to_city} elevation sample has invalid elevation"
+        )
+    source = str(raw.get("source", "")).strip()
+    return ElevationSample(at_mi, elevation_ft, source)
+
+
+def _parse_grade_segment(raw, leg_miles: float, from_city: str,
+                         to_city: str) -> GradeSegment:
+    if not isinstance(raw, dict):
+        raise ValueError(f"{from_city} to {to_city} grade segment must be an object")
+    if "start_mi" not in raw:
+        raise ValueError(
+            f"{from_city} to {to_city} grade segment is missing explicit start_mi"
+        )
+    start_mi = float(raw["start_mi"])
+    if not 0.0 <= start_mi <= leg_miles:
+        raise ValueError(
+            f"{from_city} to {to_city} grade segment start has start_mi {start_mi}, "
+            f"outside leg mileage 0-{leg_miles}"
+        )
+    end_mi = float(raw["end_mi"])
+    if not 0.0 <= end_mi <= leg_miles or end_mi <= start_mi:
+        raise ValueError(
+            f"{from_city} to {to_city} grade segment has invalid range "
+            f"{start_mi}-{end_mi}"
+        )
+    avg_grade_pct = float(raw["avg_grade_pct"])
+    if not -15.0 <= avg_grade_pct <= 15.0:
+        raise ValueError(
+            f"{from_city} to {to_city} grade segment has unrealistic grade "
+            f"{avg_grade_pct}"
+        )
+    terrain = str(raw.get("terrain", "")).strip() or "flat"
+    if terrain not in {"flat", "hills", "mountain"}:
+        raise ValueError(
+            f"{from_city} to {to_city} grade segment has unknown terrain {terrain!r}"
+        )
+    source = str(raw.get("source", "")).strip()
+    return GradeSegment(start_mi, end_mi, avg_grade_pct, terrain, source)
+
+
+def _parse_state_crossing(raw, leg_miles: float, from_city: str, to_city: str,
+                          default_from_state: str) -> StateCrossing:
+    if not isinstance(raw, dict):
+        raise ValueError(f"{from_city} to {to_city} state crossing must be an object")
+    at_mi = _parse_at_mi(raw, leg_miles, from_city, to_city, "state crossing")
+    state = str(raw.get("state", "")).strip()
+    if not state:
+        raise ValueError(f"{from_city} to {to_city} has a state crossing without a state")
+    from_state = str(raw.get("from_state", "")).strip() or default_from_state
+    place = str(raw.get("place", "")).strip() or "state line"
+    source = str(raw.get("source", "")).strip()
+    return StateCrossing(at_mi, from_state, state, place, source)
+
+
+def _parse_checkpoint(raw, leg_miles: float, from_city: str,
+                      to_city: str) -> RouteCheckpoint:
+    if not isinstance(raw, dict):
+        raise ValueError(f"{from_city} to {to_city} checkpoint must be an object")
+    name = str(raw.get("name", "")).strip()
+    if not name:
+        raise ValueError(f"{from_city} to {to_city} has a checkpoint without a name")
+    at_mi = _parse_at_mi(raw, leg_miles, from_city, to_city, f"checkpoint {name!r}")
+    checkpoint_type = str(raw.get("type", "")).strip() or "place"
+    state = str(raw.get("state", "")).strip()
+    highway = str(raw.get("highway", "")).strip()
+    source = str(raw.get("source", "")).strip()
+    return RouteCheckpoint(name, at_mi, checkpoint_type, state, highway, source)
+
+
+def _parse_state_mileage(raw, from_city: str, to_city: str) -> StateMileage:
+    if not isinstance(raw, dict):
+        raise ValueError(f"{from_city} to {to_city} state mileage must be an object")
+    state = str(raw.get("state", "")).strip()
+    if not state:
+        raise ValueError(f"{from_city} to {to_city} has state mileage without a state")
+    miles = float(raw["miles"])
+    if miles <= 0.0:
+        raise ValueError(f"{from_city} to {to_city} state mileage must be positive")
+    return StateMileage(state, miles)
+
+
+def _parse_toll_event(raw, leg_miles: float, from_city: str, to_city: str,
+                      default_road: str) -> TollEvent:
+    if not isinstance(raw, dict):
+        raise ValueError(f"{from_city} to {to_city} toll event must be an object")
+    name = str(raw.get("name", "")).strip()
+    if not name:
+        raise ValueError(f"{from_city} to {to_city} toll event has no name")
+    lowered_name = name.lower()
+    if any(marker in lowered_name for marker in RAW_POI_TEXT_MARKERS):
+        raise ValueError(
+            f"{from_city} to {to_city} toll event {name!r} exposes raw OSM/source text"
+        )
+    at_mi = _parse_at_mi(raw, leg_miles, from_city, to_city,
+                         f"toll event {name!r}")
+    road = str(raw.get("road", "")).strip() or default_road
+    authority = str(raw.get("authority", "")).strip()
+    method = str(raw.get("method", "")).strip()
+    source = str(raw.get("source", "")).strip()
+    if not authority:
+        raise ValueError(f"{from_city} to {to_city} toll event {name!r} has no authority")
+    if method not in TOLL_METHOD_LABELS:
+        raise ValueError(
+            f"{from_city} to {to_city} toll event {name!r} has unknown method {method!r}"
+        )
+    amount = float(raw["amount"])
+    if amount < 0.0 or amount > 500.0:
+        raise ValueError(
+            f"{from_city} to {to_city} toll event {name!r} has invalid amount"
+        )
+    if not source:
+        raise ValueError(f"{from_city} to {to_city} toll event {name!r} has no source")
+    return TollEvent(
+        name=name,
+        at_mi=at_mi,
+        road=road,
+        authority=authority,
+        method=method,
+        amount=amount,
+        estimated=bool(raw.get("estimated", True)),
+        source=source,
+    )
+
+
+def _parse_at_mi(raw: dict, leg_miles: float, from_city: str, to_city: str,
+                 label: str, *, allow_endpoints: bool = False) -> float:
+    if "at_mi" not in raw:
+        raise ValueError(f"{from_city} to {to_city} {label} is missing explicit at_mi")
+    at_mi = float(raw["at_mi"])
+    in_range = 0.0 <= at_mi <= leg_miles if allow_endpoints else 0.0 < at_mi < leg_miles
+    if not in_range:
+        raise ValueError(
+            f"{from_city} to {to_city} {label} has at_mi {at_mi}, "
+            f"outside leg mileage 0-{leg_miles}"
+        )
+    return at_mi
 
 
 def _classify_stop(name: str) -> str:
