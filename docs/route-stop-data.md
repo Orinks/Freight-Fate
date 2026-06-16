@@ -5,6 +5,14 @@ game remains playable offline. Runtime driving does not call OpenStreetMap,
 OSRM, Overpass, paid truck routing APIs, Census services, or operator sites.
 External sources are build-time inputs only.
 
+The product goal is the full existing Freight Fate network, not a smaller map.
+During the transition, new dispatchable freight is gated to routes whose legs
+have complete metadata. The legacy/full graph remains loadable for old saves
+and map integrity, but the job board must not silently invent route conditions
+for unsupported lanes. As of this slice the network has 106 legs, 9 of which
+are playable metadata-backed lanes; run the coverage command below for the
+current machine-readable count.
+
 ## Schema
 
 Route stops and corridor details live on a leg in
@@ -58,7 +66,10 @@ Route stops and corridor details live on a leg in
     {
       "name": "Loves Travel Stop Lafayette",
       "type": "travel_center",
-      "at_mi": 122.0
+      "at_mi": 122.0,
+      "actions": ["park", "save", "fuel", "food", "break", "sleep"],
+      "services": ["diesel", "food", "parking"],
+      "source": "Official operator page or curated Overpass/OSM review."
     }
   ]
 }
@@ -77,6 +88,12 @@ Corridor metadata is optional for old data and saves. When present, it drives
 GPS cues, state-line announcements, intermediate place calls, and progress
 summaries. This is the first step away from treating each route as a plain
 0-to-N mile bar between city nodes.
+
+For new playable freight, a leg is considered supported only when it has:
+route points, checkpoints, state mileage, state crossings when endpoint states
+differ, elevation samples, grade segments, and at least one actionable POI with
+source notes. A multi-leg route is playable only when every leg meets that
+contract.
 
 Elevation and grade metadata are also optional, but preferred for enriched
 corridors. OSRM provides route geometry, distance, steps, and annotations; it
@@ -105,9 +122,44 @@ The GPS layer reads the itinerary and announces concise audio-first cues:
 Basic traffic is deterministic for a trip seed. The first slice models lead
 traffic packs with a speed, gap, and reason such as slow lead traffic, merging
 traffic, lane restriction, or queue. Adaptive cruise control uses that context:
-it holds the set speed when clear, follows slower traffic at a three-second gap,
+it holds the set speed when clear, follows slower traffic at a three-second
+clear-weather gap, increases that gap in rain, snow, fog, or low visibility,
 and cancels when the driver brakes. It does not steer, change lanes, or replace
 the GPS.
+
+Traffic placement uses route length, corridor checkpoints, departure time, and
+weather effects. Bad weather can increase traffic pressure and lower the lead
+traffic target speed. These remain deterministic for a seed; they are not
+generic surprise hazards.
+
+## POIs And Actions
+
+POIs are curated gameplay locations, not raw OSM records. Overpass/OpenStreetMap
+may be used to discover candidates, but checked-in data must use clean
+player-facing names and normalized game categories. Do not expose OSM IDs,
+raw tags, or source keys in speech, menus, or help text.
+
+Supported first-pass POI types and actions:
+
+- `travel_center` and `truck_stop`: park, save, fuel, food, break, sleep.
+- `service_plaza`: park, save, fuel, food, break.
+- `fuel_station`: park, save, fuel, break.
+- `public_rest_area` and `truck_parking`: park, save, break, sleep.
+- `weigh_station`: inspect.
+- `repair_shop`: park, save, repair.
+
+If an OSM/source candidate has no useful name, curate a restrained descriptive
+name such as `I-65 Northbound Rest Area`; do not invent a brand. Checkpoint
+POIs may be spoken as route context only when there is no real player action.
+
+Do not infer repair from `public_rest_area`, `rest_area`, or a broad stop
+category. Public safety rest areas are normally modeled as parking, restrooms,
+maps/info, breaks, sleep/rest, and vehicle/load checks. Repair, towing, or
+roadside assistance actions require explicit `actions` plus matching `services`
+and a source note that backs the capability. Turnpike service plazas and
+authorized emergency road-service arrangements should be represented as
+service-plaza or roadside-assistance capabilities, not as generic rest-area
+repair.
 
 ## Source Strategy
 
@@ -130,7 +182,9 @@ include:
 - Nominatim, only if necessary for sparse build-time lookup. Use a custom
   User-Agent, at most one request per second, and keep attribution visible.
 - Overpass API for development-time discovery of rest areas, truck stops,
-  service plazas, truck parking, and weigh stations. Do not call it at runtime.
+  service plazas, truck parking, repair shops, fuel stations, and weigh
+  stations. Convert candidates into curated names, categories, services, and
+  actions before committing them. Do not call it at runtime.
 - Census/TIGER or Census-derived public state boundary GeoJSON for computing
   state crossings from route geometry.
 - WisDOT Kenosha Safety Rest Area, with truck parking:
@@ -189,6 +243,31 @@ Open-Meteo elevation sample range. It is deliberately separate from
 deterministic unit tests and should remain a small, credential-free sanity
 check.
 
+Report coverage for every leg in human-readable form:
+
+```powershell
+uv run python tools/enrich_routes.py --coverage-report
+```
+
+Report the same coverage as JSON for tests or planning:
+
+```powershell
+uv run python tools/enrich_routes.py --coverage-report --json
+```
+
+Run a tiny Overpass POI reachability smoke for one corridor:
+
+```powershell
+uv run python tools/enrich_routes.py --from-city Chicago --to-city Indianapolis --overpass-poi-smoke
+```
+
+For full-network enrichment, run staged batches rather than hammering public
+demo endpoints. Cache OSRM geometry, elevation samples, state-boundary
+intersections, and Overpass candidate responses; resume from the manifest after
+each small batch. If public demo capacity is not appropriate for all 106 legs,
+use self-hosted OSRM/Overpass or alternate mirrors and keep the same checked-in
+metadata schema.
+
 ## Update Process
 
 1. Choose a corridor and confirm the route leg mileage already represents the
@@ -201,13 +280,19 @@ check.
 4. Find truck-relevant public rest areas, travel centers, service plazas, or
    truck parking from public agency pages, official operator pages, or
    OSM/Overpass development-time queries.
-5. Estimate `at_mi` from the leg's `from` city using route mileage, exit/mile
+5. Curate each POI into a clean name, normalized type, services, supported
+   actions, and developer-facing source note. Do not commit raw OSM tags or IDs
+   as player-facing text. Repair, towing, and roadside assistance must be
+   explicitly source-backed in both `actions` and `services`.
+6. Estimate `at_mi` from the leg's `from` city using route mileage, exit/mile
    marker data, or a map distance check. Do not place stops at regular
    intervals just to fill the route.
-6. Add `source` notes that are specific enough for another developer to verify
+7. Add `source` notes that are specific enough for another developer to verify
    the stop later.
-7. Run `uv run pytest tests/test_world.py tests/test_weather_trip.py
-   tests/test_job_progression.py` and focused driving/rest-stop tests.
+8. Run `uv run python tools/enrich_routes.py --coverage-report --json`.
+9. Run `uv run pytest tests/test_world.py tests/test_route_coverage_tool.py
+   tests/test_weather_trip.py tests/test_job_progression.py` and focused
+   driving/POI tests.
 
 ## Future Freight Data
 
@@ -218,11 +303,13 @@ flows into job generation weights while keeping the offline runtime model.
 
 ## Accessibility Impact
 
-Stop type labels remain spoken before the stop name, such as `public rest area:
-Kenosha Safety Rest Area` or `travel center: Road Ranger Waco`. The keyboard
-flow remains audio-first: stops are announced ahead, `X` arms the exit, and `T`
-opens the stop menu when parked at a stop. `R` speaks route progress plus GPS
-context, including grade/terrain context. `K` sets adaptive cruise, and the
-spoken cue includes the following gap and cancellation behavior. GPS and
-traffic cues supplement the keyboard status keys; they never require a visual
-map.
+Stop type labels remain spoken before the curated stop name, such as `public
+rest area: Kenosha Safety Rest Area` or `travel center: Road Ranger Waco`. The
+keyboard flow remains audio-first: stops are announced ahead, `X` arms the
+exit, and `T` opens the POI menu when parked at one. Menu items are generated
+from source-backed actions, so a rest area does not offer fuel or repair by
+default, and a weigh station does not pretend to be a travel center. `R` speaks
+route progress plus GPS context, including grade/terrain context. `K` sets
+adaptive cruise, and the spoken cue includes the following gap, bad-weather gap
+increases, and cancellation behavior. GPS and traffic cues supplement the
+keyboard status keys; they never require a visual map or raw data inspection.

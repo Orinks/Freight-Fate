@@ -598,7 +598,8 @@ class PickupFacilityState(MenuState):
         if not self.loaded:
             self.ctx.say("Load the cargo before departing for the destination.")
             return
-        routes = self.ctx.world.route_options(self.job.origin, self.job.destination)
+        routes = self.ctx.world.supported_route_options(
+            self.job.origin, self.job.destination)
         if not routes:
             self.ctx.audio.play("ui/error")
             self.ctx.say("Dispatch cannot find a navigation itinerary for this load.")

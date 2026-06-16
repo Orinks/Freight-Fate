@@ -152,7 +152,9 @@ class JobBoard:
     Destinations follow a career arc: low levels offer mostly single-leg hops
     to neighboring cities, the distance cap grows with level, and every level
     weights destination choice by proximity so freight follows plausible
-    lanes instead of teleporting across the country.
+    lanes instead of teleporting across the country. New dispatches only use
+    metadata-supported corridors; the broad legacy graph remains available for
+    old saves while enrichment coverage expands.
     """
 
     def __init__(self, world: World, seed: int | None = None) -> None:
@@ -173,9 +175,11 @@ class JobBoard:
         candidates = self._candidates(city)
         cap = self.distance_cap(level)
         reachable = [c for c in candidates if c[1] <= cap]
-        if not reachable:
+        if not reachable and candidates:
             # remote terminals (long legs all around): offer the nearest few
             reachable = sorted(candidates, key=lambda c: c[1])[:4]
+        if not reachable:
+            return jobs
         attempts = 0
         while len(jobs) < count and attempts < count * 12:
             attempts += 1
@@ -202,7 +206,7 @@ class JobBoard:
             for dest in self.world.city_names():
                 if dest == city:
                     continue
-                route = self.world.shortest_route(city, dest)
+                route = self.world.supported_route(city, dest)
                 if route is not None:
                     cached.append((dest, route.miles, len(route.legs)))
             self._candidates_cache[city] = cached

@@ -87,7 +87,12 @@ def test_how_to_play_documents_new_gameplay_systems():
     assert "weather, traffic, and construction still vary" in help_text
     assert "slow lead vehicles" in help_text
     assert "adaptive cruise" in help_text
-    assert "three second gap" in help_text
+    assert "three second clear-weather gap" in help_text
+    assert "increase the following gap" in help_text
+    assert "route pois use clean place names" in help_text
+    assert "source-backed actions" in help_text
+    assert "roadside assistance appear only when the poi metadata supports them" in help_text
+    assert "unsupported lanes stay off the job board" in help_text
     assert "touch the brakes to cancel" in help_text
     assert "save" in help_text
     assert "dock and deliver" in help_text
@@ -304,6 +309,34 @@ def test_rest_stop_menu_can_save_active_drive():
 
 
 @pytest.mark.smoke
+def test_poi_menu_uses_curated_roadside_assistance_label():
+    from freight_fate.app import App
+    from freight_fate.sim.trip import RoadStop
+    from freight_fate.states.driving import RestStopState
+
+    app = App()
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        stop = RoadStop(
+            "Example Turnpike Service Plaza",
+            driving.trip.position_mi,
+            "service_plaza",
+            ("park", "save", "roadside_assistance"),
+            ("parking", "roadside_assistance"),
+        )
+        state = RestStopState(app.ctx, driving, stop)
+        texts = [
+            item.text if isinstance(item.text, str) else item.text()
+            for item in state.build_items()
+        ]
+        assert "Call roadside assistance" in texts
+        assert all("osm" not in text.lower() for text in texts)
+    finally:
+        app.shutdown()
+
+
+@pytest.mark.smoke
 def test_can_back_up_to_a_missed_rest_stop_with_t_menu():
     from freight_fate.app import App
     from freight_fate.states.driving import ParkingFullState, RestStopState
@@ -477,6 +510,45 @@ def test_adaptive_cruise_follows_modeled_traffic(monkeypatch):
         assert driving.truck.throttle < 0.9
         assert driving.truck.brake > 0.0
         assert "Traffic ahead, adaptive cruise reducing speed." in events
+    finally:
+        app.shutdown()
+
+
+@pytest.mark.smoke
+def test_adaptive_cruise_increases_gap_for_bad_weather(monkeypatch):
+    from freight_fate.app import App
+    from freight_fate.sim.trip import TrafficLead
+    from freight_fate.sim.weather import WeatherKind
+
+    app = App()
+    events = []
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        monkeypatch.setattr(app.ctx, "say_event",
+                            lambda text, interrupt=True: events.append(text))
+        driving.handle_event(key_event(pygame.K_e))
+        driving.truck.transmission.gear = 10
+        driving.truck.velocity_mps = 29.0
+        driving.truck.throttle = 0.5
+        driving.handle_event(key_event(pygame.K_k))
+
+        driving.trip.traffic_leads = [
+            TrafficLead(driving.trip.position_mi + 0.08, 65.0,
+                        "slow lead traffic", 4.0)
+        ]
+        driving.weather.current = WeatherKind.CLEAR
+        clear_gap = driving._acc_gap_seconds()
+        driving.update(1 / 60)
+        assert not driving._acc_following
+
+        driving.weather.current = WeatherKind.HEAVY_RAIN
+        wet_gap = driving._acc_gap_seconds()
+        driving.update(1 / 60)
+
+        assert wet_gap > clear_gap
+        assert driving._acc_following
+        assert "Wet roads, adaptive cruise increasing following gap." in events
     finally:
         app.shutdown()
 

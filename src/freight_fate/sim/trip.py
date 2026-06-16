@@ -91,6 +91,8 @@ class RoadStop:
     name: str
     at_mi: float
     type: str = "travel_center"
+    actions: tuple[str, ...] = ()
+    services: tuple[str, ...] = ()
 
     @property
     def label(self) -> str:
@@ -192,7 +194,8 @@ class Trip:
                 offset = _stop_offset_for_direction(stop.at_mi, leg.miles,
                                                     from_city == leg.a)
                 at = start + offset
-                out.append(RoadStop(stop.name, at, stop.type))
+                out.append(RoadStop(stop.name, at, stop.type,
+                                    stop.actions, stop.services))
         return out
 
     def _build_navigation_cues(self) -> list[NavigationCue]:
@@ -285,21 +288,41 @@ class Trip:
 
     def _place_traffic(self) -> list[TrafficLead]:
         leads: list[TrafficLead] = []
+        effects = self.weather.effects
+        bad_weather_bias = 0.0
+        if effects.grip < 0.9:
+            bad_weather_bias += (0.9 - effects.grip) * 0.45
+        if effects.visibility_mi < 3.0:
+            bad_weather_bias += (3.0 - effects.visibility_mi) * 0.05
+        night = is_night(self.start_hour)
         for start, leg in zip(self._leg_starts, self.route.legs, strict=True):
             if leg.miles < 70.0:
                 continue
             metro_bias = 0.18 if leg.checkpoints else 0.0
-            density = min(0.78, 0.22 + leg.miles / 900.0 + metro_bias)
+            night_bias = -0.08 if night else 0.0
+            density = min(0.86, max(0.05,
+                          0.22 + leg.miles / 900.0 + metro_bias
+                          + bad_weather_bias + night_bias))
             if self._rng.random() > density:
                 continue
             at = start + self._rng.uniform(25.0, max(26.0, leg.miles - 20.0))
-            speed = self._rng.uniform(42.0, 58.0)
+            weather_slowdown = max(
+                0.0,
+                min(16.0, (1.0 - effects.grip) * 22.0
+                    + max(0.0, 3.0 - effects.visibility_mi) * 1.5),
+            )
+            speed = max(28.0, self._rng.uniform(42.0, 58.0) - weather_slowdown)
             reason = self._rng.choice((
                 "slow lead traffic",
                 "traffic queue ahead",
                 "merging traffic",
                 "lane restriction",
             ))
+            if bad_weather_bias and self._rng.random() < 0.45:
+                reason = self._rng.choice((
+                    "traffic slowing for wet roads",
+                    "traffic slowing for low visibility",
+                ))
             leads.append(TrafficLead(at, speed, reason, self._rng.uniform(3.0, 8.0)))
         leads.sort(key=lambda lead: lead.at_mi)
         return leads

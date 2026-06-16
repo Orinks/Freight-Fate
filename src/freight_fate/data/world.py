@@ -61,11 +61,50 @@ class HomeTerminal:
 STOP_TYPE_LABELS = {
     "truck_stop": "truck stop",
     "travel_center": "travel center",
+    "fuel_station": "truck fuel station",
     "service_plaza": "service plaza",
     "public_rest_area": "public rest area",
     "truck_parking": "truck parking",
     "weigh_station": "weigh station",
+    "repair_shop": "repair shop",
 }
+
+POI_ACTIONS = {
+    "park",
+    "save",
+    "break",
+    "sleep",
+    "fuel",
+    "food",
+    "repair",
+    "roadside_assistance",
+    "towing",
+    "inspect",
+}
+
+RAW_POI_TEXT_MARKERS = (
+    "osm_id",
+    "openstreetmap id",
+    "amenity=",
+    "highway=",
+    "operator=",
+    "node/",
+    "way/",
+    "relation/",
+)
+
+DEFAULT_POI_ACTIONS = {
+    "truck_stop": ("park", "save", "fuel", "food", "break", "sleep"),
+    "travel_center": ("park", "save", "fuel", "food", "break", "sleep"),
+    "fuel_station": ("park", "save", "fuel", "break"),
+    "service_plaza": ("park", "save", "fuel", "food", "break"),
+    "public_rest_area": ("park", "save", "break", "sleep"),
+    "truck_parking": ("park", "save", "break", "sleep"),
+    "weigh_station": ("inspect",),
+    "repair_shop": ("park", "save", "repair"),
+}
+
+SOURCE_BACKED_POI_ACTIONS = {"repair", "roadside_assistance", "towing"}
 
 FREIGHT_LOCATION_TYPES = {
     "air_cargo",
@@ -130,6 +169,8 @@ class Stop:
     at_mi: float
     type: str = "travel_center"
     source: str = ""
+    actions: tuple[str, ...] = ()
+    services: tuple[str, ...] = ()
 
     @property
     def label(self) -> str:
@@ -228,6 +269,22 @@ class Leg:
     def other(self, city: str) -> str:
         return self.b if city == self.a else self.a
 
+    def metadata_complete(self, from_state: str, to_state: str) -> bool:
+        """True when a leg has enough real corridor data for new freight."""
+        if len(self.route_points) < 2:
+            return False
+        if not self.checkpoints:
+            return False
+        if not self.state_miles:
+            return False
+        if len(self.elevation_samples) < 2 or not self.grade_segments:
+            return False
+        if not self.stops:
+            return False
+        if any(not stop.source or not stop.actions for stop in self.stops):
+            return False
+        return from_state == to_state or bool(self.state_crossings)
+
 
 @dataclass
 class Route:
@@ -278,6 +335,9 @@ class Route:
         return (f"{self.miles:.0f} miles via {via}, "
                 f"{len(self.legs)} leg{'s' if len(self.legs) != 1 else ''}, "
                 f"terrain {self.terrain_summary}")
+
+    def metadata_complete(self, world: World) -> bool:
+        return all(world.leg_metadata_complete(leg) for leg in self.legs)
 
 
 class World:
@@ -376,8 +436,14 @@ class World:
         return Route([city, city], [leg])
 
     def shortest_route(self, start: str, end: str,
-                       penalties: dict[Leg, float] | None = None) -> Route | None:
-        """Dijkstra over leg miles, with optional per-leg penalty multipliers."""
+                       penalties: dict[Leg, float] | None = None,
+                       require_metadata: bool = False) -> Route | None:
+        """Dijkstra over leg miles, with optional per-leg penalty multipliers.
+
+        ``require_metadata`` is for new dispatchable freight. The default keeps
+        the historical full graph available for legacy saves and map integrity
+        checks while supported freight routes are enriched lane by lane.
+        """
         if start not in self.cities or end not in self.cities:
             raise KeyError(f"Unknown city: {start if start not in self.cities else end}")
         penalties = penalties or {}
@@ -393,6 +459,8 @@ class World:
             if city == end:
                 break
             for leg in self._adjacency[city]:
+                if require_metadata and not self.leg_metadata_complete(leg):
+                    continue
                 nxt = leg.other(city)
                 cost = leg.miles * penalties.get(leg, 1.0)
                 nd = d + cost
@@ -418,7 +486,9 @@ class World:
         """Rebuild a route from its city sequence (used by saved trips).
 
         Returns None if any hop is missing, so callers can fall back
-        gracefully when a save references a road that no longer exists.
+        gracefully when a save references a road that no longer exists. This is
+        intentionally the legacy/full graph path; new freight uses supported
+        route helpers so missing metadata cannot silently invent conditions.
         """
         if len(cities) < 2:
             return None
@@ -430,17 +500,30 @@ class World:
             legs.append(leg)
         return Route(list(cities), legs)
 
-    def route_options(self, start: str, end: str, count: int = 3) -> list[Route]:
+    def leg_metadata_complete(self, leg: Leg) -> bool:
+        return leg.metadata_complete(self.cities[leg.a].state, self.cities[leg.b].state)
+
+    def supported_route(self, start: str, end: str,
+                        penalties: dict[Leg, float] | None = None) -> Route | None:
+        return self.shortest_route(start, end, penalties, require_metadata=True)
+
+    def supported_route_options(self, start: str, end: str,
+                                count: int = 3) -> list[Route]:
+        return self.route_options(start, end, count, require_metadata=True)
+
+    def route_options(self, start: str, end: str, count: int = 3,
+                      require_metadata: bool = False) -> list[Route]:
         """Up to ``count`` distinct routes, fastest first."""
         routes: list[Route] = []
         penalties: dict[Leg, float] = {}
         seen: set[tuple[str, ...]] = set()
-        best = self.shortest_route(start, end)
+        best = self.shortest_route(start, end, require_metadata=require_metadata)
         if best is None:
             return routes
         max_miles = _max_alternate_miles(best.miles)
         for _ in range(count * 8):
-            route = self.shortest_route(start, end, penalties)
+            route = self.shortest_route(start, end, penalties,
+                                        require_metadata=require_metadata)
             if route is None:
                 break
             key = tuple(route.cities)
@@ -466,6 +549,11 @@ def _parse_stop(raw, leg_miles: float, from_city: str, to_city: str) -> Stop:
     name = str(raw.get("name", "")).strip()
     if not name:
         raise ValueError(f"{from_city} to {to_city} has a stop without a name")
+    lowered_name = name.lower()
+    if any(marker in lowered_name for marker in RAW_POI_TEXT_MARKERS):
+        raise ValueError(
+            f"{from_city} to {to_city} stop {name!r} exposes raw OSM/source text"
+        )
     if "at_mi" not in raw:
         raise ValueError(
             f"{from_city} to {to_city} stop {name!r} is missing explicit at_mi"
@@ -482,7 +570,41 @@ def _parse_stop(raw, leg_miles: float, from_city: str, to_city: str) -> Stop:
             f"{from_city} to {to_city} stop {name!r} has unknown type {stop_type!r}"
         )
     source = str(raw.get("source", "")).strip()
-    return Stop(name, at_mi, stop_type, source)
+    actions = tuple(str(action).strip() for action in raw.get(
+        "actions", DEFAULT_POI_ACTIONS[stop_type]))
+    if not actions:
+        raise ValueError(f"{from_city} to {to_city} stop {name!r} has no actions")
+    unknown = sorted(set(actions) - POI_ACTIONS)
+    if unknown:
+        raise ValueError(
+            f"{from_city} to {to_city} stop {name!r} has unknown actions {unknown}"
+        )
+    default_actions = set(DEFAULT_POI_ACTIONS[stop_type])
+    disallowed = sorted(set(actions) - default_actions)
+    if disallowed:
+        source_backed = set(disallowed) <= SOURCE_BACKED_POI_ACTIONS
+        if not source_backed:
+            raise ValueError(
+                f"{from_city} to {to_city} stop {name!r} actions {disallowed} "
+                f"do not match type {stop_type!r}"
+            )
+    services = tuple(
+        str(service).strip()
+        for service in raw.get("services", ())
+        if str(service).strip()
+    )
+    for action in SOURCE_BACKED_POI_ACTIONS & set(actions):
+        if action not in services:
+            raise ValueError(
+                f"{from_city} to {to_city} stop {name!r} action {action!r} "
+                "requires matching source-backed service metadata"
+            )
+        if not source:
+            raise ValueError(
+                f"{from_city} to {to_city} stop {name!r} action {action!r} "
+                "requires a source note"
+            )
+    return Stop(name, at_mi, stop_type, source, actions, services)
 
 
 def _parse_route_point(raw, leg_miles: float, from_city: str, to_city: str) -> RoutePoint:

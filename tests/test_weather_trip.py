@@ -155,6 +155,33 @@ def test_traffic_varies_by_seed_but_route_grade_does_not(world):
     ]
 
 
+def test_traffic_model_applies_to_enriched_and_legacy_routes(world):
+    for cities in (["Chicago", "Indianapolis"], ["Chicago", "St. Louis"]):
+        route = world.route_from_cities(cities)
+        truck = TruckState()
+        weather = WeatherSystem("midwest", seed=1)
+        weather.current = WeatherKind.CLEAR
+        trip = Trip(route, truck, weather, seed=1)
+        assert trip.traffic_leads, cities
+
+
+def test_bad_weather_slows_modeled_traffic(world):
+    route = world.route_from_cities(["Chicago", "Indianapolis"])
+    clear_weather = WeatherSystem("midwest", seed=1)
+    clear_weather.current = WeatherKind.CLEAR
+    rain_weather = WeatherSystem("midwest", seed=1)
+    rain_weather.current = WeatherKind.HEAVY_RAIN
+
+    clear = Trip(route, TruckState(), clear_weather, seed=1)
+    rain = Trip(route, TruckState(), rain_weather, seed=1)
+
+    assert clear.traffic_leads
+    assert rain.traffic_leads
+    assert rain.traffic_leads[0].at_mi == clear.traffic_leads[0].at_mi
+    assert rain.traffic_leads[0].speed_mph < clear.traffic_leads[0].speed_mph
+    assert "visibility" in rain.traffic_leads[0].reason
+
+
 def test_time_scale_compresses_fuel_burn(world):
     trip, truck = make_trip(world, time_scale=40.0)
     truck.throttle = 0.9

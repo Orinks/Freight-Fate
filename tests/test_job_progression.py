@@ -20,7 +20,8 @@ def test_level_one_offers_are_short_regional_hops(world, city):
         for job in jobs:
             total += 1
             assert job.distance_mi <= LEVEL_DISTANCE_CAPS[1]
-            route = world.shortest_route(job.origin, job.destination)
+            route = world.supported_route(job.origin, job.destination)
+            assert route is not None
             single += len(route.legs) == 1
     # mostly direct hops to neighboring cities, never more than two legs
     assert single / total >= 0.55
@@ -30,21 +31,24 @@ def test_level_one_and_two_never_exceed_two_legs(world):
     for seed in range(10):
         for level in (1, 2):
             for job in JobBoard(world, seed=seed).offers("Atlanta", set(), level=level):
-                route = world.shortest_route(job.origin, job.destination)
+                route = world.supported_route(job.origin, job.destination)
+                assert route is not None
                 assert len(route.legs) <= 2
 
 
 def test_level_two_adds_regional_two_leg_work(world):
-    # Atlanta's real-world-style board mixes airport cargo, industrial
-    # district loads, and cold-chain freight. Level 2 should visibly expand
-    # from neighboring-city rookie hops into nearby regional work.
+    # During metadata rollout, the supported board expands only through
+    # enriched lanes. Milwaukee can reach Indianapolis through Chicago once
+    # level 2 allows nearby two-leg work.
     level_one_two_leg = level_two_two_leg = 0
     for seed in range(40):
-        for job in JobBoard(world, seed=seed).offers("Atlanta", set(), level=1):
-            route = world.shortest_route(job.origin, job.destination)
+        for job in JobBoard(world, seed=seed).offers("Milwaukee", set(), level=1):
+            route = world.supported_route(job.origin, job.destination)
+            assert route is not None
             level_one_two_leg += len(route.legs) == 2
-        for job in JobBoard(world, seed=seed).offers("Atlanta", set(), level=2):
-            route = world.shortest_route(job.origin, job.destination)
+        for job in JobBoard(world, seed=seed).offers("Milwaukee", set(), level=2):
+            route = world.supported_route(job.origin, job.destination)
+            assert route is not None
             level_two_two_leg += len(route.legs) == 2
 
     assert level_two_two_leg > level_one_two_leg
@@ -67,7 +71,7 @@ def test_long_hauls_unlock_around_level_five(world):
         return max(job.distance_mi
                    for seed in range(30)
                    for job in JobBoard(world, seed=seed).offers(
-                       "Los Angeles", set(), level=level))
+                       "Phoenix", set(), level=level))
 
     assert longest(1) < LONG_HAUL_MILES
     assert longest(5) >= LONG_HAUL_MILES
@@ -101,7 +105,7 @@ def test_short_hauls_still_pay_for_fuel(world):
 
 
 def test_rookie_boards_have_rewarding_minimum_pay(world):
-    for city in ["Chicago", "Atlanta", "Memphis", "San Antonio", "Los Angeles"]:
+    for city in ["Chicago", "Atlanta", "Philadelphia", "San Antonio", "Los Angeles"]:
         for seed in range(15):
             for job in JobBoard(world, seed=seed).offers(city, set(), level=1):
                 assert job.pay >= minimum_pay_for_level(job.distance_mi, 1)
@@ -116,7 +120,7 @@ def test_representative_boards_use_truck_plausible_locations(world):
         "port",
         "retail_distribution",
     }
-    for city in ["Chicago", "Atlanta", "Memphis", "San Antonio", "Los Angeles"]:
+    for city in ["Chicago", "Atlanta", "Philadelphia", "San Antonio", "Los Angeles"]:
         assert {loc.type for loc in world.cities[city].locations} <= plausible_types
         jobs = JobBoard(world, seed=3).offers(city, set(), level=2)
         assert jobs
@@ -159,3 +163,25 @@ def test_representative_stops_are_real_world_grounded(world):
     for (start, end), stop_name in expected.items():
         route = world.shortest_route(start, end)
         assert stop_name in route.stops
+
+
+def test_new_dispatches_only_use_metadata_supported_routes(world):
+    for city in ["Chicago", "Atlanta", "Philadelphia", "San Antonio", "Los Angeles"]:
+        for seed in range(12):
+            for job in JobBoard(world, seed=seed).offers(city, set(), level=6):
+                route = world.supported_route(job.origin, job.destination)
+                assert route is not None
+                assert route.metadata_complete(world)
+
+
+def test_unsupported_legacy_routes_are_not_offered_for_new_dispatch(world):
+    assert world.shortest_route("Chicago", "St. Louis") is not None
+    assert world.supported_route("Chicago", "St. Louis") is None
+    jobs = JobBoard(world, seed=9).offers("Chicago", set(), level=6)
+    assert all(job.destination != "St. Louis" for job in jobs)
+
+
+def test_city_without_supported_corridor_has_empty_dispatch_board(world):
+    assert world.shortest_route("Memphis", "Nashville") is not None
+    assert world.supported_route("Memphis", "Nashville") is None
+    assert JobBoard(world, seed=4).offers("Memphis", set(), level=1) == []

@@ -44,7 +44,7 @@ RAMP_MAX_MPH = 45.0               # any faster and you blow past the exit
 RAMP_LENGTH_MI = 0.5              # deceleration lane plus ramp to the stop
 
 CRUISE_MIN_MPH = 20.0             # cruise control needs road speed to hold
-ACC_GAP_SECONDS = 3.0             # adaptive cruise following gap
+ACC_BASE_GAP_SECONDS = 3.0        # clear-weather adaptive cruise gap
 ENGINE_SHUTDOWN_SAFE_MPH = 5.0    # prevent accidental kill-switch use at speed
 DELIVERY_PARK_MPH = 3.0           # destination settlement requires parking speed
 DOCKING_MAX_MPH = 1.0             # final dock/park action needs a full stop
@@ -94,6 +94,7 @@ class DrivingState(State):
         self._cruise_mph: float | None = None
         self._cruise_throttle = 0.0
         self._acc_following = False
+        self._acc_weather_gap_said = False
         self._arrival_stop_said = False
         self._arrival_full_stop_said = False
         self._arrival_menu_open = False
@@ -277,15 +278,17 @@ class DrivingState(State):
                 "When stopped in automatic, hold Down arrow to reverse slowly; "
                 "touch Up arrow to brake and return to forward. "
                 "Hold B for the emergency brake, the hardest possible stop. "
-                "K sets adaptive cruise at your current speed; braking cancels. "
+                "K sets adaptive cruise at your current speed; bad weather "
+                "increases the following gap, and braking cancels. "
                 "X takes the next announced exit: slow to 45 for the ramp, "
                 "then brake to a stop for the rest stop menu. "
                 "E starts the engine, and stops it only below 5 miles per hour. "
                 f"{objective_help}"
                 "Space speed. Tab full status. F fuel. "
                 "C clock, deadline, and hours of service. "
-                "R route. V weather. T rest stop menu when already stopped "
-                "at one: refuel, take a break, sleep, or save. H horn. "
+                "R route. V weather. T route POI menu when already stopped "
+                "at one: available actions may include fuel, break, sleep, "
+                "inspect, roadside assistance, or save when source-backed. H horn. "
                 "J engine brake. Escape pause menu. "
                 + ("" if self.truck.transmission.automatic else
                    "Hold Left Shift for clutch, then 1 through 0 for gears, "
@@ -699,16 +702,21 @@ class DrivingState(State):
     def _try_rest_stop(self) -> None:
         stop = self.trip.nearest_stop_within()
         if stop is None:
-            self.ctx.say("There is no rest stop here. Stops are announced as you "
+            self.ctx.say("There is no route POI here. Stops are announced as you "
                          "approach them.")
             return
         if self.truck.speed_mph > 3:
             self.ctx.say("Come to a complete stop first.")
             return
-        if hos.parking_is_full(self.trip_seed, stop.at_mi, self.trip.current_hour):
+        self._open_poi_stop(stop)
+
+    def _open_poi_stop(self, stop) -> None:
+        can_sleep = "sleep" in stop.actions
+        if can_sleep and hos.parking_is_full(self.trip_seed, stop.at_mi,
+                                             self.trip.current_hour):
             self.ctx.push_state(ParkingFullState(self.ctx, self, stop))
-        else:
-            self.ctx.push_state(RestStopState(self.ctx, self, stop))
+            return
+        self.ctx.push_state(RestStopState(self.ctx, self, stop))
 
     def _take_exit(self) -> None:
         if self._ramp_mi is not None:
@@ -740,11 +748,7 @@ class DrivingState(State):
                 stop = self._ramp_stop
                 self._ramp_mi = None
                 self._ramp_stop = None
-                if hos.parking_is_full(self.trip_seed, stop.at_mi,
-                                       self.trip.current_hour):
-                    self.ctx.push_state(ParkingFullState(self.ctx, self, stop))
-                else:
-                    self.ctx.push_state(RestStopState(self.ctx, self, stop))
+                self._open_poi_stop(stop)
             elif not self._ramp_end_said:
                 self._ramp_end_said = True
                 self.ctx.say_event(f"You are at {self._ramp_stop.spoken_name}. "
@@ -780,16 +784,36 @@ class DrivingState(State):
         self._cruise_mph = t.speed_mph
         self._cruise_throttle = t.throttle
         self._acc_following = False
+        self._acc_weather_gap_said = False
+        gap = self._acc_gap_seconds()
         self.ctx.audio.play("ui/notify", volume=0.5)
         self.ctx.say("Adaptive cruise set at "
                       f"{self.ctx.settings.speed_text(t.speed_mph)}. "
-                      f"Following gap {ACC_GAP_SECONDS:.0f} seconds. "
+                      f"Following gap {gap:.0f} seconds. "
                       "K or braking cancels.")
 
     def _cancel_cruise(self) -> None:
         self._cruise_mph = None
         self._cruise_throttle = 0.0
         self._acc_following = False
+        self._acc_weather_gap_said = False
+
+    def _acc_gap_seconds(self) -> float:
+        effects = self.weather.effects
+        gap = ACC_BASE_GAP_SECONDS
+        if effects.grip < 0.9:
+            gap += (0.9 - effects.grip) * 4.2
+        if effects.visibility_mi < 3.0:
+            gap += (3.0 - effects.visibility_mi) * 0.5
+        return min(6.0, max(ACC_BASE_GAP_SECONDS, gap))
+
+    def _acc_weather_gap_text(self) -> str | None:
+        effects = self.weather.effects
+        if effects.grip < 0.9:
+            return "Wet roads, adaptive cruise increasing following gap."
+        if effects.visibility_mi < 3.0:
+            return "Low visibility, adaptive cruise increasing following gap."
+        return None
 
     def _update_cruise(self, dt: float, braking: bool,
                        accelerating: bool) -> None:
@@ -807,7 +831,12 @@ class DrivingState(State):
         context = self.trip.traffic_context()
         following = False
         if context is not None:
-            desired_gap = ACC_GAP_SECONDS
+            desired_gap = self._acc_gap_seconds()
+            reason = self._acc_weather_gap_text()
+            if (reason and not self._acc_weather_gap_said
+                    and context.gap_seconds <= desired_gap + 1.5):
+                self._acc_weather_gap_said = True
+                self.ctx.say_event(reason, interrupt=False)
             if context.gap_seconds <= desired_gap + 1.0 or context.lead.speed_mph < target_mph:
                 target_mph = min(target_mph, context.lead.speed_mph)
                 following = True
@@ -821,7 +850,8 @@ class DrivingState(State):
             1.0, self._cruise_throttle + error * 0.08 * dt))
         t.throttle = self._cruise_throttle
         if following and error < -2.0:
-            t.brake = max(t.brake, min(0.65, abs(error) / 30.0))
+            weather_brake = 0.45 if self.weather.effects.grip < 0.7 else 0.65
+            t.brake = max(t.brake, min(weather_brake, abs(error) / 30.0))
 
     def _handle_out_of_fuel(self) -> None:
         if self._rescue_offered:
@@ -1042,7 +1072,7 @@ def _deadline_text(driving: DrivingState) -> str:
 
 
 class RestStopState(MenuState):
-    """Spoken rest stop menu: refuel, take a break, or sleep the night."""
+    """Spoken route POI menu: actions come from the corridor metadata."""
 
     intro_help = ("Use up and down arrows to navigate, Enter to select. "
                   "Escape returns to the road. Breaks and sleep advance the "
@@ -1063,22 +1093,56 @@ class RestStopState(MenuState):
                      f"{self.current_text()}")
 
     def build_items(self) -> list[MenuItem]:
-        return [
-            MenuItem(self._fuel_label, self._refuel,
-                     help="Fill the tank at this region's diesel price, "
-                          "plus a 35 dollar service fee. If cash is short, buy "
-                          "as many gallons as you can afford."),
-            MenuItem("Take a 30-minute break", self._take_break,
-                     help="Satisfies the 30-minute break rule and eases fatigue. "
-                          "The clock and your deadline advance half an hour."),
-            MenuItem("Sleep 10 hours", self._sleep,
-                     help="A full reset: fresh hours of service and zero fatigue. "
-                          "The clock and your deadline advance 10 hours."),
-            MenuItem("Save at this stop", self._save_here,
-                     help="Save the active drive at this rest stop without "
-                          "leaving the road."),
-            MenuItem("Back to the road", self.go_back),
-        ]
+        actions = set(self.stop.actions)
+        items: list[MenuItem] = []
+        if "fuel" in actions:
+            items.append(MenuItem(
+                self._fuel_label, self._refuel,
+                help="Fill the tank at this region's diesel price, plus a "
+                     "35 dollar service fee. If cash is short, buy as many "
+                     "gallons as you can afford."))
+        if "food" in actions:
+            items.append(MenuItem(
+                "Food and coffee break", self._food_break,
+                help="A short off-duty break for food or coffee. The clock and "
+                     "your deadline advance fifteen minutes."))
+        if "break" in actions:
+            items.append(MenuItem(
+                "Take a 30-minute break", self._take_break,
+                help="Satisfies the 30-minute break rule and eases fatigue. "
+                     "The clock and your deadline advance half an hour."))
+        if "sleep" in actions:
+            items.append(MenuItem(
+                "Sleep 10 hours", self._sleep,
+                help="A full reset: fresh hours of service and zero fatigue. "
+                     "The clock and your deadline advance 10 hours."))
+        if "repair" in actions:
+            items.append(MenuItem(
+                "Use repair service", self._repair,
+                help="Pay the shop to repair truck damage before returning "
+                     "to the road."))
+        if "roadside_assistance" in actions:
+            items.append(MenuItem(
+                "Call roadside assistance", self._roadside_assistance,
+                help="Use the listed roadside assistance service for a field "
+                     "repair before returning to the road."))
+        if "towing" in actions:
+            items.append(MenuItem(
+                "Request towing service", self._roadside_assistance,
+                help="Use the listed towing service for roadside help before "
+                     "returning to the road."))
+        if "inspect" in actions:
+            items.append(MenuItem(
+                "Check in at inspection station", self._inspect,
+                help="Stop and record the inspection check-in before "
+                     "continuing."))
+        if "save" in actions:
+            items.append(MenuItem(
+                "Save at this stop", self._save_here,
+                help="Save the active drive at this route POI without "
+                     "leaving the road."))
+        items.append(MenuItem("Back to the road", self.go_back))
+        return items
 
     def _fuel_label(self) -> str:
         d = self.driving
@@ -1126,6 +1190,18 @@ class RestStopState(MenuState):
                      f"Your break requirement is reset and you feel a little "
                      f"fresher. {_deadline_text(d)}")
 
+    def _food_break(self) -> None:
+        d = self.driving
+        p = self.ctx.profile
+        _advance_rest_clock(d, 15.0)
+        d.hos.take_break(15.0)
+        p.fatigue = max(0.0, p.fatigue - 3.0)
+        self._save_here(silent=True)
+        self.ctx.audio.play("ui/notify")
+        self.ctx.say(f"You took a short food and coffee break. "
+                     f"It is {clock_text(d.trip.current_hour)}. "
+                     f"{_deadline_text(d)}")
+
     def _sleep(self) -> None:
         d = self.driving
         p = self.ctx.profile
@@ -1137,6 +1213,57 @@ class RestStopState(MenuState):
         self.ctx.say(f"You slept 10 hours and woke rested. "
                      f"It is {clock_text(d.trip.current_hour)}. "
                      f"Hours of service reset. {_deadline_text(d)}")
+
+    def _repair(self) -> None:
+        d = self.driving
+        p = self.ctx.profile
+        damage = d.truck.damage_pct
+        if damage < 1.0:
+            self.ctx.say("The truck does not need repair.")
+            return
+        cost = self.ctx.economy.repair_cost(damage)
+        if p.money < cost:
+            self.ctx.audio.play("ui/error")
+            self.ctx.say(f"Repair costs {cost:,.0f} dollars. You cannot afford it.")
+            return
+        p.money -= cost
+        d.truck.damage_pct = 0.0
+        _advance_rest_clock(d, 60.0)
+        d.hos.on_duty(60.0)
+        self._save_here(silent=True)
+        self.ctx.audio.play("ui/notify")
+        self.ctx.say(f"Truck repaired for {cost:,.0f} dollars. "
+                     f"It is {clock_text(d.trip.current_hour)}. "
+                     f"You have {p.money:,.0f} dollars. {_deadline_text(d)}")
+
+    def _roadside_assistance(self) -> None:
+        d = self.driving
+        p = self.ctx.profile
+        damage = d.truck.damage_pct
+        if damage < 1.0:
+            self.ctx.say("The truck does not need roadside assistance.")
+            return
+        repaired = max(0.0, damage - FIELD_REPAIR_DAMAGE_PCT)
+        cost = MECHANIC_CALLOUT_FEE + repaired * MECHANIC_RATE_PER_PCT
+        p.money -= cost
+        d.truck.damage_pct = min(damage, FIELD_REPAIR_DAMAGE_PCT)
+        _advance_rest_clock(d, MECHANIC_WAIT_MIN)
+        d.hos.on_duty(MECHANIC_WAIT_MIN)
+        self._save_here(silent=True)
+        self.ctx.audio.play("ui/notify")
+        self.ctx.say(f"Roadside assistance patched the truck to "
+                     f"{d.truck.damage_pct:.0f} percent damage for "
+                     f"{cost:,.0f} dollars. It is "
+                     f"{clock_text(d.trip.current_hour)}. {_deadline_text(d)}")
+
+    def _inspect(self) -> None:
+        d = self.driving
+        _advance_rest_clock(d, 10.0)
+        d.hos.on_duty(10.0)
+        self.ctx.audio.play("ui/notify")
+        self.ctx.say(f"Inspection check-in complete at {self.stop.spoken_name}. "
+                     f"It is {clock_text(d.trip.current_hour)}. "
+                     f"{_deadline_text(d)}")
 
     def _save_here(self, *, silent: bool = False) -> None:
         d = self.driving

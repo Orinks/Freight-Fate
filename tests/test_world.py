@@ -138,7 +138,7 @@ def test_freight_location_categories_are_live(world):
 
 
 def test_route_stops_have_trucker_relevant_types(world):
-    from freight_fate.data.world import STOP_TYPE_LABELS
+    from freight_fate.data.world import DEFAULT_POI_ACTIONS, POI_ACTIONS, STOP_TYPE_LABELS
 
     route = world.shortest_route("San Antonio", "Dallas")
     assert route is not None
@@ -146,15 +146,136 @@ def test_route_stops_have_trucker_relevant_types(world):
     assert all(stop.type in STOP_TYPE_LABELS for stop in route.stop_details)
     assert any(stop.spoken_name.startswith("travel center:") for stop in route.stop_details)
     assert all(stop.source for stop in route.stop_details)
+    assert all(stop.actions for stop in route.stop_details)
+    assert all(set(stop.actions) <= POI_ACTIONS for stop in route.stop_details)
+    assert all(set(stop.actions) <= set(DEFAULT_POI_ACTIONS[stop.type])
+               for stop in route.stop_details)
 
     parking_route = world.shortest_route("Los Angeles", "San Diego")
     assert any(stop.type == "public_rest_area" for stop in parking_route.stop_details)
+
+
+def test_public_rest_areas_do_not_imply_repair(world):
+    rest_area_actions = [
+        stop.actions
+        for leg in world.legs
+        for stop in leg.stops
+        if stop.type == "public_rest_area"
+    ]
+    assert rest_area_actions
+    assert all("repair" not in actions for actions in rest_area_actions)
+    assert all("roadside_assistance" not in actions for actions in rest_area_actions)
 
 
 def test_route_stops_have_explicit_valid_positions(world):
     for leg in world.legs:
         for stop in leg.stops:
             assert 0.0 < stop.at_mi < leg.miles, f"{leg.a}-{leg.b}: {stop}"
+
+
+def test_poi_names_are_curated_not_raw_osm_dump(world):
+    raw_markers = ("osm_id", "amenity=", "highway=", "operator=", "node/", "way/")
+    for leg in world.legs:
+        for stop in leg.stops:
+            lowered = stop.name.lower()
+            assert not any(marker in lowered for marker in raw_markers), stop.name
+            assert stop.spoken_name
+
+
+def test_world_rejects_raw_source_text_in_player_poi_name():
+    import pytest
+
+    from freight_fate.data.world import World
+
+    data = {
+        "cities": {
+            "A": {"state": "One", "region": "midwest", "lat": 40, "lon": -90,
+                  "locations": [{"name": "A Yard", "type": "terminal", "cargo": ["general"]}]},
+            "B": {"state": "One", "region": "midwest", "lat": 41, "lon": -91,
+                  "locations": [{"name": "B Yard", "type": "terminal", "cargo": ["general"]}]},
+        },
+        "legs": [{
+            "from": "A",
+            "to": "B",
+            "miles": 80,
+            "highway": "I-1",
+            "terrain": "flat",
+            "stops": [{
+                "name": "amenity=fuel node/123",
+                "type": "travel_center",
+                "at_mi": 30,
+                "source": "fixture",
+            }],
+        }],
+    }
+
+    with pytest.raises(ValueError, match="raw OSM"):
+        World(data)
+
+
+def test_repair_action_requires_matching_service_metadata():
+    import pytest
+
+    from freight_fate.data.world import World
+
+    data = {
+        "cities": {
+            "A": {"state": "One", "region": "midwest", "lat": 40, "lon": -90,
+                  "locations": [{"name": "A Yard", "type": "terminal", "cargo": ["general"]}]},
+            "B": {"state": "One", "region": "midwest", "lat": 41, "lon": -91,
+                  "locations": [{"name": "B Yard", "type": "terminal", "cargo": ["general"]}]},
+        },
+        "legs": [{
+            "from": "A",
+            "to": "B",
+            "miles": 80,
+            "highway": "I-1",
+            "terrain": "flat",
+            "stops": [{
+                "name": "Example Service Plaza",
+                "type": "service_plaza",
+                "at_mi": 30,
+                "source": "fixture source names emergency service provider",
+                "actions": ["park", "save", "repair"],
+                "services": ["parking"],
+            }],
+        }],
+    }
+
+    with pytest.raises(ValueError, match="matching source-backed service"):
+        World(data)
+
+
+def test_explicit_roadside_assistance_service_can_extend_plaza_actions():
+    from freight_fate.data.world import World
+
+    data = {
+        "cities": {
+            "A": {"state": "One", "region": "midwest", "lat": 40, "lon": -90,
+                  "locations": [{"name": "A Yard", "type": "terminal", "cargo": ["general"]}]},
+            "B": {"state": "One", "region": "midwest", "lat": 41, "lon": -91,
+                  "locations": [{"name": "B Yard", "type": "terminal", "cargo": ["general"]}]},
+        },
+        "legs": [{
+            "from": "A",
+            "to": "B",
+            "miles": 80,
+            "highway": "I-1",
+            "terrain": "flat",
+            "stops": [{
+                "name": "Example Turnpike Service Plaza",
+                "type": "service_plaza",
+                "at_mi": 30,
+                "source": "fixture source names authorized emergency road service",
+                "actions": ["park", "save", "fuel", "break", "roadside_assistance"],
+                "services": ["diesel", "parking", "roadside_assistance"],
+            }],
+        }],
+    }
+
+    stop = World(data).legs[0].stops[0]
+    assert "roadside_assistance" in stop.actions
+    assert "roadside_assistance" in stop.services
 
 
 def test_corridor_metadata_supports_offline_itineraries(world):
@@ -174,6 +295,17 @@ def test_corridor_metadata_supports_offline_itineraries(world):
     assert any(checkpoint.name == "Gary and Hammond industrial corridor"
                for checkpoint in leg.checkpoints)
     assert sum(state_miles.miles for state_miles in leg.state_miles) == leg.miles
+
+
+def test_supported_routes_require_complete_corridor_metadata(world):
+    supported = world.supported_route("Chicago", "Indianapolis")
+    assert supported is not None
+    assert supported.metadata_complete(world)
+
+    legacy = world.shortest_route("Chicago", "St. Louis")
+    assert legacy is not None
+    assert not legacy.metadata_complete(world)
+    assert world.supported_route("Chicago", "St. Louis") is None
 
 
 def test_world_rejects_missing_stop_position():
