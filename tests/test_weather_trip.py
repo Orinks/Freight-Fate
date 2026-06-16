@@ -294,6 +294,63 @@ def test_gps_traffic_cue_deduplicates(world):
     assert not [event for event in second if event.kind == TripEventKind.GPS_CUE]
 
 
+def test_toll_cues_and_charges_deduplicate(world):
+    trip, _truck = make_trip(world, "New York", "Philadelphia")
+
+    trip.position_mi = 6.1
+    advance = trip.update(0.0)
+    repeat = trip.update(0.0)
+
+    assert [event.message for event in advance if event.kind == TripEventKind.GPS_CUE] == [
+        "ticket system toll point ahead: New Jersey Turnpike ticket entry. "
+        "estimated toll 18 dollars will be charged to settlement."
+    ]
+    assert not [event for event in repeat if event.kind == TripEventKind.GPS_CUE]
+
+    trip.position_mi = 8.0
+    charged = trip.update(0.0)
+    charged_again = trip.update(0.0)
+
+    assert [event.message for event in charged
+            if event.kind == TripEventKind.TOLL_CHARGED] == [
+        "ticket system toll charged at New Jersey Turnpike ticket entry: "
+        "Estimated 18 dollars, charged to settlement."
+    ]
+    assert trip.toll_expense == 18.0
+    assert not [event for event in charged_again
+                if event.kind == TripEventKind.TOLL_CHARGED]
+
+
+def test_non_toll_route_does_not_charge_tolls(world):
+    trip, _truck = make_trip(world, "Chicago", "Indianapolis")
+
+    trip.position_mi = trip.total_miles
+    events = trip.update(0.0)
+
+    assert trip.toll_expense == 0.0
+    assert not [event for event in events if event.kind == TripEventKind.TOLL_CHARGED]
+
+
+def test_zero_amount_toll_entry_marker_does_not_record_expense(world):
+    trip, _truck = make_trip(world, "Philadelphia", "Pittsburgh")
+
+    trip.position_mi = 16.1
+    advance = trip.update(0.0)
+    assert [event.message for event in advance if event.kind == TripEventKind.GPS_CUE] == [
+        "ticket system toll point ahead: Pennsylvania Turnpike eastern ticket entry. "
+        "entry will be recorded for later settlement."
+    ]
+
+    trip.position_mi = 18.0
+    entry = trip.update(0.0)
+    assert [event.message for event in entry if event.kind == TripEventKind.GPS_CUE] == [
+        "ticket system entry recorded at Pennsylvania Turnpike eastern ticket entry; "
+        "toll will be charged at settlement."
+    ]
+    assert trip.toll_expense == 0.0
+    assert not [event for event in entry if event.kind == TripEventKind.TOLL_CHARGED]
+
+
 def test_traffic_context_and_warning_are_grounded_in_lead_vehicle(world):
     trip, truck = make_trip(world)
     truck.velocity_mps = 29.0

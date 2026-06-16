@@ -92,7 +92,9 @@ def test_how_to_play_documents_new_gameplay_systems():
     assert "route pois use clean place names" in help_text
     assert "source-backed actions" in help_text
     assert "roadside assistance appear only when the poi metadata supports them" in help_text
-    assert "unsupported lanes stay off the job board" in help_text
+    assert "all current dispatch lanes are metadata-backed" in help_text
+    assert "toll charges are recorded as trip expenses" in help_text
+    assert "gross pay, toll expenses, and net settlement" in help_text
     assert "touch the brakes to cancel" in help_text
     assert "save" in help_text
     assert "dock and deliver" in help_text
@@ -234,7 +236,9 @@ def test_facility_menu_waits_for_full_stop(monkeypatch):
         assert isinstance(app.state, FacilityArrivalState)
         assert app.ctx.profile.career.deliveries == 0
         assert "Paperwork for" in spoken[-1]
-        assert "current estimated payout" in spoken[-1]
+        assert "current gross payout" in spoken[-1]
+        assert "Toll expenses recorded so far" in spoken[-1]
+        assert "estimated net settlement" in spoken[-1]
         assert "hours remain before the deadline" in spoken[-1]
         assert "Cargo condition" in spoken[-1]
         assert "does not settle the load" in spoken[-1]
@@ -332,6 +336,51 @@ def test_poi_menu_uses_curated_roadside_assistance_label():
         ]
         assert "Call roadside assistance" in texts
         assert all("osm" not in text.lower() for text in texts)
+    finally:
+        app.shutdown()
+
+
+@pytest.mark.smoke
+def test_toll_route_delivery_settlement_records_expense(monkeypatch):
+    from freight_fate.app import App
+    from freight_fate.models.jobs import CARGO_CATALOG, Job
+    from freight_fate.models.profile import Profile
+    from freight_fate.states.driving import ArrivalState, DrivingState
+
+    app = App()
+    spoken = []
+    monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: spoken.append(text))
+    try:
+        app.ctx.profile = Profile(name="Toll Test", current_city="New York")
+        job = Job(
+            CARGO_CATALOG["electronics"],
+            18,
+            "New York",
+            "JFK Air Cargo",
+            "Philadelphia",
+            78,
+            2500,
+            12,
+            origin_type="air_cargo",
+            destination_location="Philadelphia Distribution Center",
+            destination_type="retail_distribution",
+        )
+        route = app.ctx.world.route_from_cities(["New York", "Philadelphia"])
+        driving = DrivingState(app.ctx, job, route, phase="delivery")
+        driving.trip.position_mi = 79.0
+        driving.trip.update(0.0)
+        assert driving.trip.toll_expense == 30.0
+
+        app.ctx.profile.money = 1000.0
+        app.ctx.push_state(ArrivalState(app.ctx, driving))
+
+        assert app.ctx.profile.money == pytest.approx(3845.0)
+        assert app.ctx.profile.career.total_earnings == pytest.approx(2845.0)
+        text = " ".join(app.state.summary_parts)
+        assert "Gross pay 2,875 dollars" in text
+        assert "Toll expenses 30 dollars" in text
+        assert "Net settlement 2,845 dollars" in text
+        assert "company transponder settlement" in text
     finally:
         app.shutdown()
 

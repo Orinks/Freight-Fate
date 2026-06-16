@@ -93,6 +93,15 @@ RAW_POI_TEXT_MARKERS = (
     "relation/",
 )
 
+TOLL_METHOD_LABELS = {
+    "cash_card": "cash or card",
+    "ticket_system": "ticket system",
+    "transponder": "transponder",
+    "open_road": "open-road tolling",
+    "toll_by_plate": "toll by plate",
+    "ezpass": "E-ZPass",
+}
+
 DEFAULT_POI_ACTIONS = {
     "truck_stop": ("park", "save", "fuel", "food", "break", "sleep"),
     "travel_center": ("park", "save", "fuel", "food", "break", "sleep"),
@@ -242,6 +251,26 @@ class StateMileage:
 
 
 @dataclass(frozen=True)
+class TollEvent:
+    name: str
+    at_mi: float
+    road: str
+    authority: str
+    method: str
+    amount: float
+    estimated: bool = True
+    source: str = ""
+
+    @property
+    def method_label(self) -> str:
+        return TOLL_METHOD_LABELS.get(self.method, self.method.replace("_", " "))
+
+    @property
+    def spoken_name(self) -> str:
+        return f"toll point: {self.name}"
+
+
+@dataclass(frozen=True)
 class City:
     name: str
     state: str
@@ -265,6 +294,7 @@ class Leg:
     state_crossings: tuple[StateCrossing, ...] = ()
     checkpoints: tuple[RouteCheckpoint, ...] = ()
     state_miles: tuple[StateMileage, ...] = ()
+    toll_events: tuple[TollEvent, ...] = ()
 
     def other(self, city: str) -> str:
         return self.b if city == self.a else self.a
@@ -316,6 +346,14 @@ class Route:
     @property
     def state_crossings(self) -> list[StateCrossing]:
         return [c for leg in self.legs for c in leg.state_crossings]
+
+    @property
+    def toll_events(self) -> list[TollEvent]:
+        return [event for leg in self.legs for event in leg.toll_events]
+
+    @property
+    def estimated_tolls(self) -> float:
+        return sum(event.amount for event in self.toll_events)
 
     @property
     def checkpoints(self) -> list[RouteCheckpoint]:
@@ -380,10 +418,15 @@ class World:
                 _parse_state_mileage(m, leg["from"], leg["to"])
                 for m in corridor.get("state_miles", ())
             )
+            toll_events = tuple(
+                _parse_toll_event(e, miles, leg["from"], leg["to"], leg["highway"])
+                for e in corridor.get("toll_events", ())
+            )
             self.legs.append(
                 Leg(leg["from"], leg["to"], miles, leg["highway"],
                     leg["terrain"], stops, route_points, elevation_samples,
-                    grade_segments, state_crossings, checkpoints, state_miles)
+                    grade_segments, state_crossings, checkpoints, state_miles,
+                    toll_events)
             )
         self._adjacency: dict[str, list[Leg]] = {name: [] for name in self.cities}
         for leg in self.legs:
@@ -708,6 +751,49 @@ def _parse_state_mileage(raw, from_city: str, to_city: str) -> StateMileage:
     if miles <= 0.0:
         raise ValueError(f"{from_city} to {to_city} state mileage must be positive")
     return StateMileage(state, miles)
+
+
+def _parse_toll_event(raw, leg_miles: float, from_city: str, to_city: str,
+                      default_road: str) -> TollEvent:
+    if not isinstance(raw, dict):
+        raise ValueError(f"{from_city} to {to_city} toll event must be an object")
+    name = str(raw.get("name", "")).strip()
+    if not name:
+        raise ValueError(f"{from_city} to {to_city} toll event has no name")
+    lowered_name = name.lower()
+    if any(marker in lowered_name for marker in RAW_POI_TEXT_MARKERS):
+        raise ValueError(
+            f"{from_city} to {to_city} toll event {name!r} exposes raw OSM/source text"
+        )
+    at_mi = _parse_at_mi(raw, leg_miles, from_city, to_city,
+                         f"toll event {name!r}")
+    road = str(raw.get("road", "")).strip() or default_road
+    authority = str(raw.get("authority", "")).strip()
+    method = str(raw.get("method", "")).strip()
+    source = str(raw.get("source", "")).strip()
+    if not authority:
+        raise ValueError(f"{from_city} to {to_city} toll event {name!r} has no authority")
+    if method not in TOLL_METHOD_LABELS:
+        raise ValueError(
+            f"{from_city} to {to_city} toll event {name!r} has unknown method {method!r}"
+        )
+    amount = float(raw["amount"])
+    if amount < 0.0 or amount > 500.0:
+        raise ValueError(
+            f"{from_city} to {to_city} toll event {name!r} has invalid amount"
+        )
+    if not source:
+        raise ValueError(f"{from_city} to {to_city} toll event {name!r} has no source")
+    return TollEvent(
+        name=name,
+        at_mi=at_mi,
+        road=road,
+        authority=authority,
+        method=method,
+        amount=amount,
+        estimated=bool(raw.get("estimated", True)),
+        source=source,
+    )
 
 
 def _parse_at_mi(raw: dict, leg_miles: float, from_city: str, to_city: str,

@@ -129,6 +129,13 @@ class DrivingState(State):
             "trip_seed": self.trip_seed,
             "position_mi": self.trip.position_mi,
             "game_minutes": self.trip.game_minutes,
+            "toll_charges": [
+                {
+                    "name": charge.name,
+                    "amount": charge.amount,
+                }
+                for charge in self.trip.toll_charges
+            ],
             "start_damage": self.start_damage,
             "speeding_strikes": self.speeding_strikes,
             "hos": self.hos.to_dict(),
@@ -164,6 +171,7 @@ class DrivingState(State):
             state.start_damage = float(data["start_damage"])
             state.speeding_strikes = int(data["speeding_strikes"])
             state.trip.restore(float(data["position_mi"]), float(data["game_minutes"]))
+            state.trip.restore_toll_charges(list(data.get("toll_charges", ())))
             # HOS and fatigue: absent in pre-1.5 snapshots, defaulting to a
             # fresh clock and a rested driver.
             if "hos" in data:
@@ -678,6 +686,9 @@ class DrivingState(State):
         elif kind == TripEventKind.INSPECTION:
             self._handle_inspection(event)
         elif kind == TripEventKind.WEATHER_CHANGE:
+            self.ctx.say_event(event.message, interrupt=False)
+        elif kind == TripEventKind.TOLL_CHARGED:
+            self.ctx.audio.play("ui/notify", volume=0.55)
             self.ctx.say_event(event.message, interrupt=False)
         elif kind == TripEventKind.ARRIVED:
             pass  # handled by _arrive()
@@ -1528,6 +1539,8 @@ class FacilityArrivalState(MenuState):
         remaining = job.deadline_game_h - hours
         trip_damage = max(0.0, d.truck.damage_pct - d.start_damage)
         estimated_pay = job.payout(hours, trip_damage)
+        tolls = d.trip.toll_expense
+        net_estimated_pay = estimated_pay - tolls
         timing = (f"{remaining:.1f} hours remain before the deadline"
                   if remaining >= 0
                   else f"{-remaining:.1f} hours past the deadline")
@@ -1540,7 +1553,9 @@ class FacilityArrivalState(MenuState):
         self.ctx.say(
             f"Paperwork for {self.facility}: {job.weight_tons:.0f} tons of "
             f"{job.cargo.label}. Rate sheet lists {job.pay:,.0f} dollars; "
-            f"current estimated payout is {estimated_pay:,.0f} dollars. "
+            f"current gross payout is {estimated_pay:,.0f} dollars. "
+            f"Toll expenses recorded so far are {tolls:,.0f} dollars, "
+            f"for an estimated net settlement of {net_estimated_pay:,.0f}. "
             f"{timing}. {cargo_condition} Dock and deliver when ready; "
             "checking paperwork does not settle the load.")
 
@@ -1586,18 +1601,22 @@ class ArrivalState(MenuState):
         job = d.job
         hours = d.trip.game_minutes / 60.0
         trip_damage = max(0.0, d.truck.damage_pct - d.start_damage)
-        pay = job.payout(hours, trip_damage)
-        early_bonus = max(0.0, pay - job.payout(job.deadline_game_h, trip_damage))
+        gross_pay = job.payout(hours, trip_damage)
+        pay = gross_pay
+        toll_expense = d.trip.toll_expense
+        early_bonus = max(0.0, gross_pay - job.payout(job.deadline_game_h, trip_damage))
         if d.speeding_strikes:
             fine = min(400.0, 80.0 * d.speeding_strikes)
             pay = max(0.0, pay - fine)
             self.summary_parts.append(f"Speeding fines cost you {fine:,.0f} dollars.")
+        net_pay = pay - toll_expense
         on_time = hours <= job.deadline_game_h
-        p.money += pay
+        p.money += net_pay
         p.current_city = job.destination
         p.truck_fuel_gal = d.truck.fuel_gal
         p.truck_damage_pct = d.truck.damage_pct
-        announcements = p.career.record_delivery(job.distance_mi, pay, on_time, trip_damage)
+        announcements = p.career.record_delivery(
+            job.distance_mi, net_pay, on_time, trip_damage)
         p.game_hours += hours
         p.market.advance_to(p.market_day())
         p.active_trip = None
@@ -1608,7 +1627,10 @@ class ArrivalState(MenuState):
             f"{job.destination} in {hours:.1f} hours, "
             f"{'on time' if on_time else 'late'}. "
             f"It is {clock_text(p.game_hours)}. "
-            f"You earned {pay:,.0f} dollars and now have {p.money:,.0f}. "
+            f"Gross pay {gross_pay:,.0f} dollars. "
+            f"Toll expenses {toll_expense:,.0f} dollars charged through the "
+            f"company transponder settlement. Net settlement {net_pay:,.0f} "
+            f"dollars, and you now have {p.money:,.0f}. "
             f"After unloading, dispatch has you parked at "
             f"{self.terminal.name} for the {job.destination} service area."))
         if early_bonus >= 1.0:

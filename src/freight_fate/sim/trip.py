@@ -13,7 +13,7 @@ import random
 from dataclasses import dataclass, field
 from enum import Enum
 
-from ..data.world import STOP_TYPE_LABELS, Route, get_world
+from ..data.world import STOP_TYPE_LABELS, Route, TollEvent, get_world
 from .hos import is_night
 from .vehicle import TruckState
 from .weather import WeatherSystem
@@ -66,6 +66,7 @@ class TripEventKind(Enum):
     GPS_CUE = "gps_cue"
     STATE_CROSSING = "state_crossing"
     CHECKPOINT = "checkpoint"
+    TOLL_CHARGED = "toll_charged"
     ARRIVED = "arrived"
 
 
@@ -130,6 +131,16 @@ class TrafficContext:
 
 
 @dataclass(frozen=True)
+class TollCharge:
+    event: TollEvent
+    amount: float
+
+    @property
+    def name(self) -> str:
+        return self.event.name
+
+
+@dataclass(frozen=True)
 class NavigationCue:
     key: str
     kind: str
@@ -161,10 +172,12 @@ class Trip:
         self.stops = self._place_stops()
         self.traffic_leads = self._place_traffic()
         self.navigation_cues = self._build_navigation_cues()
+        self.toll_charges: list[TollCharge] = []
         self.zones = self._place_zones()
         self._announced_stops: set[str] = set()
         self._announced_cities: set[int] = set()
         self._announced_navigation: set[str] = set()
+        self._charged_tolls: set[str] = set()
         self._active_zone: Zone | None = None
         self._hazard_check_mi = 5.0
         self._inspection_check_mi = 10.0
@@ -244,6 +257,24 @@ class Trip:
                     start + offset,
                     f"{place}{state} on {highway}",
                     f"Passing {place}{state} on {highway}.",
+                ))
+            for toll in leg.toll_events:
+                offset = _stop_offset_for_direction(toll.at_mi, leg.miles, forward)
+                if toll.amount > 0:
+                    estimate = "estimated " if toll.estimated else ""
+                    toll_text = (
+                        f"{estimate}toll {toll.amount:.0f} dollars will be "
+                        "charged to settlement."
+                    )
+                else:
+                    toll_text = "entry will be recorded for later settlement."
+                cues.append(NavigationCue(
+                    f"toll:{i}:{toll.at_mi}:{toll.name}",
+                    "toll",
+                    start + offset,
+                    f"toll road ahead: {toll.road}",
+                    f"{toll.method_label} toll point ahead: {toll.name}. "
+                    f"{toll_text}",
                 ))
             for stop in leg.stops:
                 offset = _stop_offset_for_direction(stop.at_mi, leg.miles, forward)
@@ -477,6 +508,8 @@ class Trip:
             return f"Next place in {ahead:.0f} miles: {cue.text}."
         if cue.kind == "traffic":
             return f"Traffic in {ahead:.0f} miles: {cue.text}."
+        if cue.kind == "toll":
+            return f"Toll point in {ahead:.0f} miles: {cue.text}."
         return f"Next guidance in {ahead:.0f} miles: {cue.text}."
 
     def next_navigation_cue(self) -> NavigationCue | None:
@@ -496,6 +529,13 @@ class Trip:
             if cue.at_mi <= self.position_mi:
                 self._announced_navigation.add(f"{cue.key}:advance")
                 self._announced_navigation.add(f"{cue.key}:near")
+        for i, (start, leg) in enumerate(zip(self._leg_starts, self.route.legs,
+                                             strict=True)):
+            forward = self.route.cities[i] == leg.a
+            for toll in leg.toll_events:
+                offset = _stop_offset_for_direction(toll.at_mi, leg.miles, forward)
+                if start + offset <= self.position_mi:
+                    self._charged_tolls.add(f"{i}:{toll.at_mi}:{toll.name}")
         for i, start in enumerate(self._leg_starts):
             if i and self.position_mi >= start:
                 self._announced_cities.add(i)
@@ -503,6 +543,22 @@ class Trip:
             if zone.start_mi <= self.position_mi <= zone.end_mi:
                 self._active_zone = zone
                 break
+
+    def restore_toll_charges(self, charges: list[dict]) -> None:
+        """Restore settlement toll expenses from an active-drive snapshot."""
+        by_name = {
+            toll.name: toll
+            for leg in self.route.legs
+            for toll in leg.toll_events
+        }
+        self.toll_charges = []
+        for raw in charges:
+            name = str(raw.get("name", "")).strip()
+            event = by_name.get(name)
+            if event is None:
+                continue
+            amount = float(raw.get("amount", event.amount))
+            self.toll_charges.append(TollCharge(event, amount))
 
     # -- main update ----------------------------------------------------------------
 
@@ -535,6 +591,7 @@ class Trip:
         self._check_zones()
         self._check_stops()
         self._check_navigation_cues()
+        self._check_tolls()
         self._check_cities()
         if moved_mi > 0.0:
             self._check_hazards(moved_mi)
@@ -604,6 +661,12 @@ class Trip:
                         cue=cue,
                     )
                 continue
+            if cue.kind == "toll":
+                advance_key = f"{cue.key}:advance"
+                if 0 < ahead <= 2.0 and advance_key not in self._announced_navigation:
+                    self._announced_navigation.add(advance_key)
+                    self._emit(TripEventKind.GPS_CUE, cue.near_text, cue=cue)
+                continue
             advance_key = f"{cue.key}:advance"
             near_key = f"{cue.key}:near"
             if 0 < ahead <= 2.0 and advance_key not in self._announced_navigation:
@@ -621,6 +684,40 @@ class Trip:
                     self._emit(TripEventKind.CHECKPOINT, cue.near_text, cue=cue)
                 else:
                     self._emit(TripEventKind.GPS_CUE, cue.near_text, cue=cue)
+
+    def _check_tolls(self) -> None:
+        for i, (start, leg) in enumerate(zip(self._leg_starts, self.route.legs,
+                                             strict=True)):
+            forward = self.route.cities[i] == leg.a
+            for toll in leg.toll_events:
+                offset = _stop_offset_for_direction(toll.at_mi, leg.miles, forward)
+                at_mi = start + offset
+                key = f"{i}:{toll.at_mi}:{toll.name}"
+                if self.position_mi < at_mi or key in self._charged_tolls:
+                    continue
+                self._charged_tolls.add(key)
+                if toll.amount <= 0:
+                    self._emit(
+                        TripEventKind.GPS_CUE,
+                        f"{toll.method_label} entry recorded at {toll.name}; "
+                        "toll will be charged at settlement.",
+                        toll=toll,
+                    )
+                    continue
+                charge = TollCharge(toll, toll.amount)
+                self.toll_charges.append(charge)
+                estimate = "Estimated " if toll.estimated else ""
+                self._emit(
+                    TripEventKind.TOLL_CHARGED,
+                    f"{toll.method_label} toll charged at {toll.name}: "
+                    f"{estimate}{toll.amount:.0f} dollars, charged to settlement.",
+                    toll=toll,
+                    amount=toll.amount,
+                )
+
+    @property
+    def toll_expense(self) -> float:
+        return sum(charge.amount for charge in self.toll_charges)
 
     def _check_cities(self) -> None:
         for i, start in enumerate(self._leg_starts):

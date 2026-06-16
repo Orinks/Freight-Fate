@@ -180,6 +180,9 @@ def test_poi_names_are_curated_not_raw_osm_dump(world):
             lowered = stop.name.lower()
             assert not any(marker in lowered for marker in raw_markers), stop.name
             assert stop.spoken_name
+        for toll in leg.toll_events:
+            lowered = toll.name.lower()
+            assert not any(marker in lowered for marker in raw_markers), toll.name
 
 
 def test_world_rejects_raw_source_text_in_player_poi_name():
@@ -302,10 +305,37 @@ def test_supported_routes_require_complete_corridor_metadata(world):
     assert supported is not None
     assert supported.metadata_complete(world)
 
-    legacy = world.shortest_route("Chicago", "St. Louis")
-    assert legacy is not None
-    assert not legacy.metadata_complete(world)
-    assert world.supported_route("Chicago", "St. Louis") is None
+    former_rollout_gap = world.supported_route("Chicago", "St. Louis")
+    assert former_rollout_gap is not None
+    assert former_rollout_gap.metadata_complete(world)
+
+    for leg in world.legs:
+        route = world.supported_route(leg.a, leg.b)
+        assert route is not None, f"{leg.a} to {leg.b} is not dispatch-supported"
+        assert route.metadata_complete(world)
+
+
+def test_toll_metadata_is_explicit_and_separate_from_service_plazas(world):
+    route = world.route_from_cities(["New York", "Philadelphia"])
+    assert route.toll_events
+    assert route.estimated_tolls > 0
+
+    toll_names = {event.name for event in route.toll_events}
+    stop_names = {stop.name for leg in route.legs for stop in leg.stops}
+    assert toll_names.isdisjoint(stop_names)
+
+    event = route.toll_events[0]
+    assert event.road == "New Jersey Turnpike"
+    assert event.authority == "New Jersey Turnpike Authority"
+    assert event.method == "ticket_system"
+    assert event.amount > 0
+    assert event.estimated
+    assert "toll" in event.source.lower()
+
+    plazas = [stop for leg in route.legs for stop in leg.stops
+              if stop.type == "service_plaza"]
+    assert plazas
+    assert all("fuel" in plaza.actions for plaza in plazas)
 
 
 def test_world_rejects_missing_stop_position():

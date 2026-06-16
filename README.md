@@ -1,8 +1,8 @@
 # Freight Fate
 
 An accessible, audio-first cross-country trucking simulation. Haul freight
-between 21 American cities, manage fuel, weather, and deadlines, and build a
-driving career — entirely by ear.
+between more than 45 American cities, manage fuel, tolls, weather, and
+deadlines, and build a driving career entirely by ear.
 
 Freight Fate is designed for blind and low-vision players first: every screen
 is fully voiced through your screen reader (NVDA, JAWS, SAPI, VoiceOver,
@@ -27,14 +27,16 @@ visual display mirrors all speech for sighted players and helpers.
   gone loose; chase the tight markets.
 - **A living road** — dynamic regional weather that changes grip and safe
   speeds, construction and traffic zones, road hazards that demand quick
-  braking, rest stops for refueling, and roadside rescue when you run dry.
+  braking, metadata-backed rest stops and service plazas, toll-road settlement
+  expenses, and roadside rescue when you run dry.
 - **Real-world weather (optional)** — flip Settings → Weather source to
   "real world" and each city uses its live current conditions from the free
   [Open-Meteo](https://open-meteo.com) API. If it is raining in Chicago right
   now, it is raining in your game. Works without an API key and falls back to
   simulated weather offline.
-- **Route planning** — multiple route options per job with distance, highways,
-  terrain, and weather forecasts.
+- **Route planning** — full-network metadata-backed route options per job with
+  distance, highways, state context, grade/terrain, toll events, POIs, and
+  weather forecasts.
 - **Original audio** — every sound effect and all three music tracks are
   procedurally synthesized and dedicated to the public domain (CC0). Audio
   plays through BASS (via [sound_lib](https://pypi.org/project/sound_lib/)),

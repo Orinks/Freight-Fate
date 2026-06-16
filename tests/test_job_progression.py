@@ -37,9 +37,8 @@ def test_level_one_and_two_never_exceed_two_legs(world):
 
 
 def test_level_two_adds_regional_two_leg_work(world):
-    # During metadata rollout, the supported board expands only through
-    # enriched lanes. Milwaukee can reach Indianapolis through Chicago once
-    # level 2 allows nearby two-leg work.
+    # Milwaukee can reach Indianapolis through Chicago once level 2 allows
+    # nearby two-leg work, and the full network now has metadata for both legs.
     level_one_two_leg = level_two_two_leg = 0
     for seed in range(40):
         for job in JobBoard(world, seed=seed).offers("Milwaukee", set(), level=1):
@@ -174,14 +173,21 @@ def test_new_dispatches_only_use_metadata_supported_routes(world):
                 assert route.metadata_complete(world)
 
 
-def test_unsupported_legacy_routes_are_not_offered_for_new_dispatch(world):
-    assert world.shortest_route("Chicago", "St. Louis") is not None
-    assert world.supported_route("Chicago", "St. Louis") is None
+def test_former_legacy_routes_are_now_metadata_supported_for_dispatch(world):
+    route = world.supported_route("Chicago", "St. Louis")
+    assert route is not None
+    assert route.metadata_complete(world)
     jobs = JobBoard(world, seed=9).offers("Chicago", set(), level=6)
-    assert all(job.destination != "St. Louis" for job in jobs)
+    assert jobs
+    assert all(world.supported_route(job.origin, job.destination) is not None
+               for job in jobs)
 
 
-def test_city_without_supported_corridor_has_empty_dispatch_board(world):
-    assert world.shortest_route("Memphis", "Nashville") is not None
-    assert world.supported_route("Memphis", "Nashville") is None
-    assert JobBoard(world, seed=4).offers("Memphis", set(), level=1) == []
+def test_formerly_blocked_city_has_supported_dispatch_board(world):
+    route = world.supported_route("Memphis", "Nashville")
+    assert route is not None
+    assert route.metadata_complete(world)
+    jobs = JobBoard(world, seed=4).offers("Memphis", set(), level=1)
+    assert jobs
+    assert all(world.supported_route(job.origin, job.destination) is not None
+               for job in jobs)
