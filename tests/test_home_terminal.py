@@ -181,3 +181,94 @@ def test_choose_career_loads_an_older_save_without_deleting_the_newest():
         assert newer_path.exists()
     finally:
         app.shutdown()
+
+
+def test_manage_careers_deletes_selected_save_without_touching_others():
+    from freight_fate.app import App
+    from freight_fate.models.profile import Profile
+    from freight_fate.states.main_menu import (
+        CareerActionsState,
+        ConfirmCareerActionState,
+        MainMenuState,
+        ManageCareersState,
+    )
+
+    app = App()
+    try:
+        keep = Profile(name="Keep Me", current_city="Denver")
+        keep_path = keep.save()
+        delete = Profile(name="Delete Me", current_city="Atlanta")
+        delete_path = delete.save()
+
+        app.push_state(MainMenuState(app.ctx))
+        while app.state.items[app.state.index].text != "Manage careers":
+            app.state.handle_event(key_event(pygame.K_DOWN))
+        app.state.handle_event(key_event(pygame.K_RETURN))
+        assert isinstance(app.state, ManageCareersState)
+
+        while not app.state.items[app.state.index].text.startswith("Delete Me:"):
+            app.state.handle_event(key_event(pygame.K_DOWN))
+        app.state.handle_event(key_event(pygame.K_RETURN))
+        assert isinstance(app.state, CareerActionsState)
+
+        while app.state.items[app.state.index].text != "Delete this career":
+            app.state.handle_event(key_event(pygame.K_DOWN))
+        app.state.handle_event(key_event(pygame.K_RETURN))
+        assert isinstance(app.state, ConfirmCareerActionState)
+        assert app.state.items[app.state.index].text == "Yes, delete Delete Me"
+        app.state.handle_event(key_event(pygame.K_RETURN))
+
+        assert isinstance(app.state, MainMenuState)
+        assert keep_path.exists()
+        assert not delete_path.exists()
+        labels = [item.text for item in app.state.items]
+        assert any(label.startswith("Continue latest career: Keep Me") for label in labels)
+    finally:
+        app.shutdown()
+
+
+def test_manage_careers_resets_selected_save_to_fresh_profile(monkeypatch):
+    from freight_fate.app import App
+    from freight_fate.models.profile import STARTING_MONEY, Profile
+    from freight_fate.states.main_menu import (
+        ConfirmCareerActionState,
+        MainMenuState,
+        ManageCareersState,
+    )
+
+    app = App()
+    spoken = []
+    monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: spoken.append(text))
+    try:
+        profile = Profile(name="Reset Me", current_city="Seattle", money=4321.0)
+        profile.career.xp = 3200.0
+        profile.career.deliveries = 11
+        profile.truck_damage_pct = 48.0
+        profile.active_trip = {"kind": "delivery", "job": {"destination": "Denver"}}
+        path = profile.save()
+
+        app.push_state(MainMenuState(app.ctx))
+        while app.state.items[app.state.index].text != "Manage careers":
+            app.state.handle_event(key_event(pygame.K_DOWN))
+        app.state.handle_event(key_event(pygame.K_RETURN))
+        assert isinstance(app.state, ManageCareersState)
+
+        app.state.handle_event(key_event(pygame.K_RETURN))
+        assert app.state.items[app.state.index].text == "Reset this career"
+        app.state.handle_event(key_event(pygame.K_RETURN))
+        assert isinstance(app.state, ConfirmCareerActionState)
+        assert "Resetting starts this driver over" in spoken[-1]
+        app.state.handle_event(key_event(pygame.K_RETURN))
+
+        assert isinstance(app.state, MainMenuState)
+        fresh = Profile.load(path)
+        assert fresh.name == "Reset Me"
+        assert fresh.current_city == "Seattle"
+        assert fresh.money == STARTING_MONEY
+        assert fresh.career.deliveries == 0
+        assert fresh.career.xp == 0
+        assert fresh.truck_damage_pct == 0
+        assert fresh.active_trip is None
+        assert "Reset Me reset" in spoken[-1]
+    finally:
+        app.shutdown()

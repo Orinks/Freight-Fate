@@ -164,6 +164,8 @@ class MainMenuState(MenuState):
                 help=f"Load the newest save for {latest_profile.name}."))
             items.append(MenuItem("Choose career", self._load_menu,
                                   help="Choose any saved career instead of only the newest one."))
+            items.append(MenuItem("Manage careers", self._manage_careers,
+                                  help="Reset or delete saved careers."))
         items.append(MenuItem("New career", self._new_game,
                               help="Start a fresh trucking career."))
         items.append(MenuItem("How to play", self._help,
@@ -198,6 +200,9 @@ class MainMenuState(MenuState):
     def _load_menu(self) -> None:
         self.ctx.push_state(LoadDriverState(self.ctx))
 
+    def _manage_careers(self) -> None:
+        self.ctx.push_state(ManageCareersState(self.ctx))
+
     def _new_game(self) -> None:
         self.ctx.push_state(NameEntryState(self.ctx))
 
@@ -228,6 +233,112 @@ class LoadDriverState(MenuState):
         self.ctx.profile = profile
         self.ctx.say(f"Welcome back, {profile.name}.")
         self.ctx.replace_state(_world_entry_state(self.ctx))
+
+
+class ManageCareersState(MenuState):
+    title = "Manage careers"
+    intro_help = ("Use up and down arrows to choose a saved career. Enter opens "
+                  "reset and delete actions. Escape goes back.")
+
+    def build_items(self) -> list[MenuItem]:
+        items = []
+        for path, profile in _loadable_saves():
+            label = _career_summary(path, profile)
+            items.append(MenuItem(
+                label,
+                lambda p=path, prof=profile: self._manage(p, prof),
+                help=f"Manage {profile.name}. Reset starts the career over; "
+                     "delete removes the save."))
+        items.append(MenuItem("Back", self.go_back))
+        return items
+
+    def _manage(self, path: Path, profile: Profile) -> None:
+        self.ctx.push_state(CareerActionsState(self.ctx, path, profile))
+
+
+class CareerActionsState(MenuState):
+    title = "Career actions"
+    intro_help = ("Choose an action for this saved career. Reset and delete both "
+                  "ask for confirmation. Escape goes back.")
+
+    def __init__(self, ctx, path: Path, profile: Profile) -> None:
+        super().__init__(ctx)
+        self.path = path
+        self.profile = profile
+
+    def announce_entry(self) -> None:
+        self.ctx.say(f"Actions for {_career_summary(self.path, self.profile)}. "
+                     f"{self.current_text()}")
+
+    def build_items(self) -> list[MenuItem]:
+        return [
+            MenuItem("Reset this career", self._reset,
+                     help="Start this driver over with a fresh truck, money, "
+                          "career stats, market, and hours of service clock."),
+            MenuItem("Delete this career", self._delete,
+                     help="Permanently remove this saved career file."),
+            MenuItem("Back", self.go_back),
+        ]
+
+    def _reset(self) -> None:
+        self.ctx.push_state(ConfirmCareerActionState(
+            self.ctx, self.path, self.profile, action="reset"))
+
+    def _delete(self) -> None:
+        self.ctx.push_state(ConfirmCareerActionState(
+            self.ctx, self.path, self.profile, action="delete"))
+
+
+class ConfirmCareerActionState(MenuState):
+    title = "Confirm career action"
+    open_sound_key = "ui/error"
+    intro_help = ("Use up and down arrows. Enter confirms the selected option. "
+                  "Escape cancels.")
+
+    def __init__(self, ctx, path: Path, profile: Profile, *, action: str) -> None:
+        super().__init__(ctx)
+        self.path = path
+        self.profile = profile
+        self.action = action
+
+    @property
+    def _action_label(self) -> str:
+        return "reset" if self.action == "reset" else "delete"
+
+    def announce_entry(self) -> None:
+        if self.action == "reset":
+            detail = ("Resetting starts this driver over at "
+                      f"{self.profile.current_city} with a fresh truck, "
+                      "starting money, no active trip, and no delivery history.")
+        else:
+            detail = "Deleting permanently removes this saved career."
+        self.ctx.say(
+            f"Confirm {self._action_label} for {self.profile.name}. {detail} "
+            f"{self.current_text()}")
+
+    def build_items(self) -> list[MenuItem]:
+        return [
+            MenuItem(f"Yes, {self._action_label} {self.profile.name}",
+                     self._confirm,
+                     help=f"Confirm and {self._action_label} this saved career."),
+            MenuItem("No, keep this career", self.go_back,
+                     help="Cancel and return to career actions."),
+        ]
+
+    def _confirm(self) -> None:
+        name = self.profile.name
+        if self.action == "reset":
+            fresh = Profile(name=name, current_city=self.profile.current_city)
+            fresh.save()
+            message = (f"{name} reset. The career starts over at "
+                       f"{fresh.current_city} with {fresh.money:,.0f} dollars.")
+        else:
+            self.path.unlink(missing_ok=True)
+            if self.ctx.profile is not None and self.ctx.profile.path == self.path:
+                self.ctx.profile = None
+            message = f"{name} deleted."
+        self.ctx.reset_to(MainMenuState(self.ctx))
+        self.ctx.say(message, interrupt=True)
 
 
 class NameEntryState(State):
@@ -357,6 +468,8 @@ HELP_PAGES = [
         "Home and End jump to the first and last option.",
         "Type a letter to jump to options starting with that letter.",
         "Press F1 in any menu for contextual help.",
+        "Manage careers on the main menu lets you reset or delete saved careers,",
+        "with a confirmation screen before anything destructive happens.",
         "Edited or corrupted career saves may be moved aside at the main menu.",
     ]),
     ("Driving basics", [
