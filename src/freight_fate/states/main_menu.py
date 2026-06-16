@@ -369,6 +369,8 @@ HELP_PAGES = [
         "Loaded trips follow a navigation itinerary built from highway corridors.",
         "Progress is not just city to city: GPS announces state lines,",
         "intermediate places, traffic, highway changes, and rest-stop exits.",
+        "Grades and terrain are route conditions, not random trip rolls.",
+        "Weather, traffic, and construction still vary by time, place, and seed.",
         "Watch your speed: limits drop in construction and traffic zones.",
         "Some hazards come from modeled traffic ahead, such as slow lead vehicles,",
         "merging traffic, lane restrictions, and queues.",

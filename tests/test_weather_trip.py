@@ -53,13 +53,13 @@ def test_forecast_does_not_regenerate_weather_timeline():
     assert with_forecast.current is untouched.current
 
 
-def make_trip(world, start="Chicago", end="Indianapolis", **kwargs):
+def make_trip(world, start="Chicago", end="Indianapolis", seed=2, **kwargs):
     route = world.route_options(start, end)[0]
     truck = TruckState()
     truck.transmission.automatic = True
     truck.start_engine()
     weather = WeatherSystem("midwest", seed=1)
-    return Trip(route, truck, weather, seed=2, **kwargs), truck
+    return Trip(route, truck, weather, seed=seed, **kwargs), truck
 
 
 def test_trip_completes_and_emits_arrival(world):
@@ -131,6 +131,30 @@ def test_grades_are_bounded(world):
         assert abs(trip.grade_at(float(mile))) <= 0.08
 
 
+def test_route_derived_flat_grade_is_stable_across_trip_seeds(world):
+    trip_a, _ = make_trip(world, seed=1)
+    trip_b, _ = make_trip(world, seed=99)
+    miles = [0.0, 20.0, 33.0, 72.0, 122.0, 183.0]
+
+    assert [trip_a.grade_at(mile) for mile in miles] == [
+        trip_b.grade_at(mile) for mile in miles
+    ]
+    assert max(abs(trip_a.grade_at(mile)) for mile in miles) < 0.002
+    assert {trip_a.terrain_at(mile) for mile in miles} == {"flat"}
+
+
+def test_traffic_varies_by_seed_but_route_grade_does_not(world):
+    trip_a, _ = make_trip(world, seed=1)
+    trip_b, _ = make_trip(world, seed=8)
+
+    assert [trip_a.grade_at(mile) for mile in (10.0, 80.0, 150.0)] == [
+        trip_b.grade_at(mile) for mile in (10.0, 80.0, 150.0)
+    ]
+    assert [(lead.at_mi, lead.speed_mph, lead.reason) for lead in trip_a.traffic_leads] != [
+        (lead.at_mi, lead.speed_mph, lead.reason) for lead in trip_b.traffic_leads
+    ]
+
+
 def test_time_scale_compresses_fuel_burn(world):
     trip, truck = make_trip(world, time_scale=40.0)
     truck.throttle = 0.9
@@ -187,6 +211,7 @@ def test_progress_summary_mentions_highway(world):
     text = trip.progress_summary()
     assert "I-65" in text
     assert "Indianapolis, Indiana" in text
+    assert "Grade level" in text
     assert "Next state line" in text
     assert "Illinois into Indiana" in text
     metric = trip.progress_summary(imperial=False)

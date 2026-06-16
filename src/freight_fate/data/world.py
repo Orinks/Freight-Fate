@@ -148,6 +148,22 @@ class RoutePoint:
 
 
 @dataclass(frozen=True)
+class ElevationSample:
+    at_mi: float
+    elevation_ft: float
+    source: str = ""
+
+
+@dataclass(frozen=True)
+class GradeSegment:
+    start_mi: float
+    end_mi: float
+    avg_grade_pct: float
+    terrain: str
+    source: str = ""
+
+
+@dataclass(frozen=True)
 class StateCrossing:
     at_mi: float
     from_state: str
@@ -203,6 +219,8 @@ class Leg:
     terrain: str  # flat | hills | mountain
     stops: tuple[Stop, ...]
     route_points: tuple[RoutePoint, ...] = ()
+    elevation_samples: tuple[ElevationSample, ...] = ()
+    grade_segments: tuple[GradeSegment, ...] = ()
     state_crossings: tuple[StateCrossing, ...] = ()
     checkpoints: tuple[RouteCheckpoint, ...] = ()
     state_miles: tuple[StateMileage, ...] = ()
@@ -281,6 +299,14 @@ class World:
                 _parse_route_point(p, miles, leg["from"], leg["to"])
                 for p in corridor.get("route_points", ())
             )
+            elevation_samples = tuple(
+                _parse_elevation_sample(s, miles, leg["from"], leg["to"])
+                for s in corridor.get("elevation_samples", ())
+            )
+            grade_segments = tuple(
+                _parse_grade_segment(s, miles, leg["from"], leg["to"])
+                for s in corridor.get("grade_segments", ())
+            )
             state_crossings = tuple(
                 _parse_state_crossing(c, miles, leg["from"], leg["to"],
                                       self.cities[leg["from"]].state)
@@ -296,8 +322,8 @@ class World:
             )
             self.legs.append(
                 Leg(leg["from"], leg["to"], miles, leg["highway"],
-                    leg["terrain"], stops, route_points, state_crossings,
-                    checkpoints, state_miles)
+                    leg["terrain"], stops, route_points, elevation_samples,
+                    grade_segments, state_crossings, checkpoints, state_miles)
             )
         self._adjacency: dict[str, list[Leg]] = {name: [] for name in self.cities}
         for leg in self.legs:
@@ -469,6 +495,56 @@ def _parse_route_point(raw, leg_miles: float, from_city: str, to_city: str) -> R
     if not -90.0 <= lat <= 90.0 or not -180.0 <= lon <= 180.0:
         raise ValueError(f"{from_city} to {to_city} route point has invalid coordinates")
     return RoutePoint(at_mi, lat, lon)
+
+
+def _parse_elevation_sample(raw, leg_miles: float, from_city: str,
+                            to_city: str) -> ElevationSample:
+    if not isinstance(raw, dict):
+        raise ValueError(f"{from_city} to {to_city} elevation sample must be an object")
+    at_mi = _parse_at_mi(raw, leg_miles, from_city, to_city, "elevation sample",
+                         allow_endpoints=True)
+    elevation_ft = float(raw["elevation_ft"])
+    if not -300.0 <= elevation_ft <= 20_500.0:
+        raise ValueError(
+            f"{from_city} to {to_city} elevation sample has invalid elevation"
+        )
+    source = str(raw.get("source", "")).strip()
+    return ElevationSample(at_mi, elevation_ft, source)
+
+
+def _parse_grade_segment(raw, leg_miles: float, from_city: str,
+                         to_city: str) -> GradeSegment:
+    if not isinstance(raw, dict):
+        raise ValueError(f"{from_city} to {to_city} grade segment must be an object")
+    if "start_mi" not in raw:
+        raise ValueError(
+            f"{from_city} to {to_city} grade segment is missing explicit start_mi"
+        )
+    start_mi = float(raw["start_mi"])
+    if not 0.0 <= start_mi <= leg_miles:
+        raise ValueError(
+            f"{from_city} to {to_city} grade segment start has start_mi {start_mi}, "
+            f"outside leg mileage 0-{leg_miles}"
+        )
+    end_mi = float(raw["end_mi"])
+    if not 0.0 <= end_mi <= leg_miles or end_mi <= start_mi:
+        raise ValueError(
+            f"{from_city} to {to_city} grade segment has invalid range "
+            f"{start_mi}-{end_mi}"
+        )
+    avg_grade_pct = float(raw["avg_grade_pct"])
+    if not -15.0 <= avg_grade_pct <= 15.0:
+        raise ValueError(
+            f"{from_city} to {to_city} grade segment has unrealistic grade "
+            f"{avg_grade_pct}"
+        )
+    terrain = str(raw.get("terrain", "")).strip() or "flat"
+    if terrain not in {"flat", "hills", "mountain"}:
+        raise ValueError(
+            f"{from_city} to {to_city} grade segment has unknown terrain {terrain!r}"
+        )
+    source = str(raw.get("source", "")).strip()
+    return GradeSegment(start_mi, end_mi, avg_grade_pct, terrain, source)
 
 
 def _parse_state_crossing(raw, leg_miles: float, from_city: str, to_city: str,

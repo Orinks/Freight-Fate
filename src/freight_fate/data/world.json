@@ -1557,6 +1557,68 @@
             "lon": -86.1581
           }
         ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 790.7,
+            "source": "Open-Meteo Elevation API development-time sample from Copernicus DEM GLO-90."
+          },
+          {
+            "at_mi": 23.0,
+            "elevation_ft": 600.4,
+            "source": "Open-Meteo Elevation API development-time sample from Copernicus DEM GLO-90."
+          },
+          {
+            "at_mi": 33.0,
+            "elevation_ft": 626.6,
+            "source": "Open-Meteo Elevation API development-time sample from Copernicus DEM GLO-90."
+          },
+          {
+            "at_mi": 71.0,
+            "elevation_ft": 666.0,
+            "source": "Open-Meteo Elevation API development-time sample from Copernicus DEM GLO-90."
+          },
+          {
+            "at_mi": 122.0,
+            "elevation_ft": 695.5,
+            "source": "Open-Meteo Elevation API development-time sample from Copernicus DEM GLO-90."
+          },
+          {
+            "at_mi": 184.0,
+            "elevation_ft": 702.1,
+            "source": "Open-Meteo Elevation API development-time sample from Copernicus DEM GLO-90."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 23.0,
+            "avg_grade_pct": -0.16,
+            "terrain": "flat",
+            "source": "Computed from checked-in elevation samples."
+          },
+          {
+            "start_mi": 23.0,
+            "end_mi": 33.0,
+            "avg_grade_pct": 0.05,
+            "terrain": "flat",
+            "source": "Computed from checked-in elevation samples."
+          },
+          {
+            "start_mi": 33.0,
+            "end_mi": 122.0,
+            "avg_grade_pct": 0.01,
+            "terrain": "flat",
+            "source": "Computed from checked-in elevation samples."
+          },
+          {
+            "start_mi": 122.0,
+            "end_mi": 184.0,
+            "avg_grade_pct": 0.0,
+            "terrain": "flat",
+            "source": "Computed from checked-in elevation samples."
+          }
+        ],
         "state_crossings": [
           {
             "at_mi": 33.0,

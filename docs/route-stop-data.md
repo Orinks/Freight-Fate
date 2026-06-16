@@ -40,6 +40,18 @@ Route stops and corridor details live on a leg in
     "state_miles": [
       {"state": "Illinois", "miles": 33.0},
       {"state": "Indiana", "miles": 151.0}
+    ],
+    "elevation_samples": [
+      {"at_mi": 0.0, "elevation_ft": 594.0},
+      {"at_mi": 184.0, "elevation_ft": 718.0}
+    ],
+    "grade_segments": [
+      {
+        "start_mi": 0.0,
+        "end_mi": 184.0,
+        "avg_grade_pct": 0.03,
+        "terrain": "flat"
+      }
     ]
   },
   "stops": [
@@ -65,6 +77,16 @@ Corridor metadata is optional for old data and saves. When present, it drives
 GPS cues, state-line announcements, intermediate place calls, and progress
 summaries. This is the first step away from treating each route as a plain
 0-to-N mile bar between city nodes.
+
+Elevation and grade metadata are also optional, but preferred for enriched
+corridors. OSRM provides route geometry, distance, steps, and annotations; it
+does not tell us terrain or hills directly. Terrain must be derived by sampling
+the route geometry against an elevation source, computing grades between
+samples, and classifying sustained profile changes as flat, hills, or mountain.
+
+When `grade_segments` exist, runtime truck physics use them directly. Terrain
+does not change between trip seeds. Weather, traffic, construction, and
+incidents remain variable so routes stay alive without inventing hills.
 
 ## Navigation And Traffic Runtime
 
@@ -96,6 +118,15 @@ include:
 
 - OSRM public demo route API over OpenStreetMap for tiny build-time geometry
   checks. Keep requests cached or one-off; do not use it at runtime.
+- Open-Meteo Elevation API for no-key development-time terrain samples from
+  Copernicus DEM GLO-90. Store sampled results in `world.json`; do not call it
+  at runtime.
+- USGS Elevation Point Query Service / The National Map for U.S. point
+  elevations. Treat values as interpolated terrain samples rather than surveyed
+  road grades.
+- OpenTopoData or Open-Elevation as alternate no-key/self-hostable elevation
+  candidates. Public service availability and rate limits should be treated
+  carefully.
 - Nominatim, only if necessary for sparse build-time lookup. Use a custom
   User-Agent, at most one request per second, and keep attribution visible.
 - Overpass API for development-time discovery of rest areas, truck stops,
@@ -147,15 +178,16 @@ Inspect the checked-in corridor metadata:
 uv run python tools/enrich_routes.py --from-city Chicago --to-city Indianapolis
 ```
 
-Run the tiny live OSRM smoke check:
+Run the tiny live OSRM and Open-Meteo elevation smoke check:
 
 ```powershell
 uv run python tools/enrich_routes.py --from-city Chicago --to-city Indianapolis --live-smoke
 ```
 
-The live smoke prints OSRM route mileage and simplified geometry point count.
-It is deliberately separate from deterministic unit tests and should remain a
-small, credential-free sanity check.
+The live smoke prints OSRM route mileage, simplified geometry point count, and
+Open-Meteo elevation sample range. It is deliberately separate from
+deterministic unit tests and should remain a small, credential-free sanity
+check.
 
 ## Update Process
 
@@ -163,15 +195,18 @@ small, credential-free sanity check.
    intended highway path.
 2. Run or review build-time route geometry and state-boundary data to place
    route points, state crossings, checkpoints, and state mileage.
-3. Find truck-relevant public rest areas, travel centers, service plazas, or
+3. Sample representative route points against an elevation source. Compute
+   average grade between samples and classify sustained terrain. Flat corridors
+   should stay flat instead of receiving generic rolling-hill waves.
+4. Find truck-relevant public rest areas, travel centers, service plazas, or
    truck parking from public agency pages, official operator pages, or
    OSM/Overpass development-time queries.
-4. Estimate `at_mi` from the leg's `from` city using route mileage, exit/mile
+5. Estimate `at_mi` from the leg's `from` city using route mileage, exit/mile
    marker data, or a map distance check. Do not place stops at regular
    intervals just to fill the route.
-5. Add `source` notes that are specific enough for another developer to verify
+6. Add `source` notes that are specific enough for another developer to verify
    the stop later.
-6. Run `uv run pytest tests/test_world.py tests/test_weather_trip.py
+7. Run `uv run pytest tests/test_world.py tests/test_weather_trip.py
    tests/test_job_progression.py` and focused driving/rest-stop tests.
 
 ## Future Freight Data
@@ -187,6 +222,7 @@ Stop type labels remain spoken before the stop name, such as `public rest area:
 Kenosha Safety Rest Area` or `travel center: Road Ranger Waco`. The keyboard
 flow remains audio-first: stops are announced ahead, `X` arms the exit, and `T`
 opens the stop menu when parked at a stop. `R` speaks route progress plus GPS
-context. `K` sets adaptive cruise, and the spoken cue includes the following
-gap and cancellation behavior. GPS and traffic cues supplement the keyboard
-status keys; they never require a visual map.
+context, including grade/terrain context. `K` sets adaptive cruise, and the
+spoken cue includes the following gap and cancellation behavior. GPS and
+traffic cues supplement the keyboard status keys; they never require a visual
+map.

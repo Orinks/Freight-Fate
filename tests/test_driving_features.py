@@ -82,6 +82,9 @@ def test_how_to_play_documents_new_gameplay_systems():
     assert "route choice is handled as navigation" in help_text
     assert "navigation itinerary" in help_text
     assert "gps announces state lines" in help_text
+    assert "grades and terrain are route conditions" in help_text
+    assert "not random trip rolls" in help_text
+    assert "weather, traffic, and construction still vary" in help_text
     assert "slow lead vehicles" in help_text
     assert "adaptive cruise" in help_text
     assert "three second gap" in help_text

@@ -164,6 +164,11 @@ def test_corridor_metadata_supports_offline_itineraries(world):
     assert leg.route_points
     assert leg.route_points[0].at_mi == 0.0
     assert leg.route_points[-1].at_mi == leg.miles
+    assert leg.elevation_samples
+    assert leg.elevation_samples[0].elevation_ft > 500.0
+    assert leg.grade_segments
+    assert {segment.terrain for segment in leg.grade_segments} == {"flat"}
+    assert max(abs(segment.avg_grade_pct) for segment in leg.grade_segments) < 0.2
     assert [crossing.state for crossing in leg.state_crossings] == ["Indiana"]
     assert leg.state_crossings[0].at_mi == 33.0
     assert any(checkpoint.name == "Gary and Hammond industrial corridor"

@@ -337,13 +337,37 @@ class Trip:
         return self.current_target_city.region
 
     def grade_at(self, mile: float) -> float:
-        """Deterministic rolling grade profile from the leg's terrain."""
-        leg_i = self.current_leg_index
+        """Route-derived grade when available, conservative fallback otherwise."""
+        leg_i, leg_start = self._leg_at_mile(mile)
         leg = self.route.legs[leg_i]
-        amplitude = {"flat": 0.008, "hills": 0.035, "mountain": 0.06}.get(leg.terrain, 0.01)
-        wavelength = {"flat": 18.0, "hills": 9.0, "mountain": 6.0}.get(leg.terrain, 12.0)
-        phase = (hash(leg.highway) % 628) / 100.0
-        return amplitude * math.sin(2 * math.pi * mile / wavelength + phase)
+        forward = self.route.cities[leg_i] == leg.a
+        offset = max(0.0, min(leg.miles, mile - leg_start))
+        sample_offset = offset if forward else leg.miles - offset
+        for segment in leg.grade_segments:
+            if segment.start_mi <= sample_offset <= segment.end_mi:
+                grade = segment.avg_grade_pct / 100.0
+                return grade if forward else -grade
+        return _fallback_grade(leg.terrain, mile, leg.highway)
+
+    def terrain_at(self, mile: float | None = None) -> str:
+        """Terrain classification for the current route mile."""
+        sample_mile = self.position_mi if mile is None else mile
+        leg_i, leg_start = self._leg_at_mile(sample_mile)
+        leg = self.route.legs[leg_i]
+        forward = self.route.cities[leg_i] == leg.a
+        offset = max(0.0, min(leg.miles, sample_mile - leg_start))
+        sample_offset = offset if forward else leg.miles - offset
+        for segment in leg.grade_segments:
+            if segment.start_mi <= sample_offset <= segment.end_mi:
+                return segment.terrain
+        return leg.terrain
+
+    def _leg_at_mile(self, mile: float) -> tuple[int, float]:
+        clamped = max(0.0, min(mile, self.total_miles))
+        for i in range(len(self.route.legs) - 1, -1, -1):
+            if clamped >= self._leg_starts[i]:
+                return i, self._leg_starts[i]
+        return 0, 0.0
 
     def speed_limit_at(self, mile: float) -> tuple[float, str | None]:
         for z in self.zones:
@@ -410,7 +434,10 @@ class Trip:
         toward = self.route.cities[self.current_leg_index + 1]
         state = get_world().cities[toward].state
         next_context = self.next_navigation_context()
-        return f"{dist}. On {leg.highway} toward {toward}, {state}. {next_context}"
+        terrain = self.terrain_at()
+        terrain_text = "Grade level" if terrain == "flat" else f"Terrain {terrain}"
+        return (f"{dist}. On {leg.highway} toward {toward}, {state}. "
+                f"{terrain_text}. {next_context}")
 
     def next_navigation_context(self) -> str:
         cue = self.next_navigation_cue()
@@ -644,3 +671,18 @@ class Trip:
 
 def _stop_offset_for_direction(at_mi: float, leg_miles: float, forward: bool) -> float:
     return at_mi if forward else leg_miles - at_mi
+
+
+def _fallback_grade(terrain: str, mile: float, highway: str) -> float:
+    """Auditable fallback for legs without elevation samples.
+
+    Flat roads stay level. Hills and mountains get a small deterministic profile
+    from the curated terrain label, but corridor metadata should replace this
+    as routes are enriched.
+    """
+    amplitude = {"flat": 0.0, "hills": 0.012, "mountain": 0.035}.get(terrain, 0.0)
+    if amplitude == 0.0:
+        return 0.0
+    wavelength = {"hills": 14.0, "mountain": 8.0}.get(terrain, 16.0)
+    phase = (sum(ord(ch) for ch in highway) % 628) / 100.0
+    return amplitude * math.sin(2 * math.pi * mile / wavelength + phase)
