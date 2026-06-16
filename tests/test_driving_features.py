@@ -98,9 +98,13 @@ def test_how_to_play_documents_new_gameplay_systems():
     assert "touch the brakes to cancel" in help_text
     assert "save" in help_text
     assert "dock and deliver" in help_text
-    assert "ports" in help_text
-    assert "intermodal yards" in help_text
-    assert "food terminals" in help_text
+    assert "each city on the map is a freight market" in help_text
+    assert "rail and intermodal ramps" in help_text
+    assert "parcel hubs" in help_text
+    assert "farms and grain elevators" in help_text
+    assert "chemical terminals" in help_text
+    assert "not every market supports every cargo equally" in help_text
+    assert "does not need thousands of city nodes" in help_text
     assert "refrigerated, heavy-haul, and high-value freight" in help_text
     assert "full tank or full repair" in help_text
 

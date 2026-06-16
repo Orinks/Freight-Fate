@@ -1,5 +1,13 @@
 # Freight Fate Roadmap
 
+## Current dev branch
+
+- [x] Realistic freight markets and facilities: metro route nodes now expand
+      into hundreds of representative shippers and receivers, with stable
+      facility IDs, ship/receive cargo roles, regional specialization, curated
+      source notes, deterministic offline templates, and save-compatible
+      facility-aware job generation.
+
 ## Next up: state troopers and law enforcement (design)
 
 Today speeding quietly accumulates "strikes" that become a lump-sum fine
