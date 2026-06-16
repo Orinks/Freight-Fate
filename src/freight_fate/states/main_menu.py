@@ -56,18 +56,37 @@ def _loadable_saves() -> list[tuple[Path, Profile]]:
 
 def _career_location(profile: Profile) -> str:
     from ..data.world import get_world
+    from ..models.jobs import facility_text
 
     trip = profile.active_trip or {}
     job = trip.get("job", {})
     destination = job.get("destination")
     if trip.get("kind") == "pickup_drive":
-        facility = job.get("origin_location")
-        return f"driving to pickup at {facility or destination}"
+        origin = str(job.get("origin") or profile.current_city)
+        facility = facility_text(
+            str(job.get("origin_type", "metro_market")),
+            str(job.get("origin_location", "")),
+            origin,
+            str(job.get("origin_locality", "")),
+        )
+        return f"driving to pickup at {facility}"
     if trip.get("kind") == "pickup" and destination:
         loaded = "loaded for" if trip.get("loaded") else "picking up for"
-        return f"{loaded} {destination}"
+        facility = facility_text(
+            str(job.get("destination_type", "metro_market")),
+            str(job.get("destination_location", "")),
+            str(destination),
+            str(job.get("destination_locality", "")),
+        )
+        return f"{loaded} {facility}"
     if destination:
-        return f"on the road to {destination}"
+        facility = facility_text(
+            str(job.get("destination_type", "metro_market")),
+            str(job.get("destination_location", "")),
+            str(destination),
+            str(job.get("destination_locality", "")),
+        )
+        return f"on the road to {facility}"
     try:
         terminal = get_world().home_terminal(profile.current_city)
         return f"at {terminal.name} in {profile.current_city}"

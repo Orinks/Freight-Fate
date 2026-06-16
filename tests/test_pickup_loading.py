@@ -55,6 +55,8 @@ def test_accepting_job_starts_drivable_pickup_leg():
         assert isinstance(app.state, DrivingState)
         assert not isinstance(app.state, PickupFacilityState)
         assert app.ctx.profile.active_trip["kind"] == "pickup_drive"
+        assert app.ctx.profile.active_trip["job"]["origin_facility_id"]
+        assert app.ctx.profile.active_trip["job"]["destination_facility_id"]
         assert pickup.route.miles > 2.0
         assert pickup.trip.total_miles == pickup.route.miles
         assert pickup.trip.remaining_miles == pickup.route.miles

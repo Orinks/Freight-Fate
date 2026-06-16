@@ -18,8 +18,24 @@ DAILY_DRIFT = 0.06
 
 # Cargo classes tracked by the market (mirrors jobs.CARGO_CATALOG; kept as a
 # literal so this module needs no imports from the job layer).
-MARKET_CARGO_KEYS = ("general", "retail", "container", "bulk", "machinery",
-                     "food", "refrigerated", "electronics")
+MARKET_CARGO_KEYS = (
+    "general",
+    "retail",
+    "parcel",
+    "container",
+    "bulk",
+    "grain",
+    "farm_inputs",
+    "construction",
+    "lumber_paper",
+    "automotive",
+    "machinery",
+    "steel",
+    "food",
+    "refrigerated",
+    "chemicals",
+    "electronics",
+)
 
 
 def market_condition(multiplier: float) -> str:

@@ -11,7 +11,7 @@ import math
 import random
 from dataclasses import dataclass
 
-from ..data.world import LOCATION_TYPE_LABELS, Location, World
+from ..data.world import FACILITY_CARGO_ROLES, LOCATION_TYPE_LABELS, Location, World
 from .market import Market, market_condition
 
 
@@ -23,18 +23,32 @@ class CargoType:
     weight_tons: tuple[float, float]
     endorsement: str | None    # required license endorsement, if any
     fragile: bool = False
+    min_level: int = 1
 
 
 CARGO_CATALOG: dict[str, CargoType] = {
     "general": CargoType("general", "general freight", 2.10, (8, 20), None),
     "retail": CargoType("retail", "retail goods", 2.25, (6, 16), None),
+    "parcel": CargoType("parcel", "parcel freight", 2.55, (4, 12), None),
     "container": CargoType("container", "shipping containers", 2.40, (12, 24), None),
     "bulk": CargoType("bulk", "bulk materials", 2.30, (15, 25), None),
+    "grain": CargoType("grain", "grain", 2.20, (18, 25), None),
+    "farm_inputs": CargoType("farm_inputs", "farm inputs", 2.35, (10, 22), None),
+    "construction": CargoType("construction", "construction materials", 2.35, (14, 25),
+                              None),
+    "lumber_paper": CargoType("lumber_paper", "lumber and paper products", 2.45,
+                              (10, 24), None, min_level=2),
+    "automotive": CargoType("automotive", "automotive parts", 2.75, (8, 20), None,
+                            fragile=True, min_level=2),
     "machinery": CargoType("machinery", "heavy machinery", 2.90, (15, 25),
                            "heavy_haul", fragile=True),
+    "steel": CargoType("steel", "steel products", 2.85, (16, 25), "heavy_haul",
+                       min_level=3),
     "food": CargoType("food", "fresh food", 2.60, (8, 18), "refrigerated", fragile=True),
     "refrigerated": CargoType("refrigerated", "refrigerated goods", 2.85, (8, 18),
                               "refrigerated", fragile=True),
+    "chemicals": CargoType("chemicals", "packaged industrial chemicals", 3.05,
+                           (10, 22), "high_value", min_level=4),
     "electronics": CargoType("electronics", "electronics", 3.30, (4, 12), "high_value",
                              fragile=True),
 }
@@ -47,22 +61,72 @@ ENDORSEMENT_LABELS = {
 }
 
 FACILITY_CARGO: dict[str, set[str]] = {
-    "air_cargo": {"electronics", "general"},
-    "distribution": {"food", "general", "retail", "refrigerated"},
-    "food_terminal": {"food", "refrigerated"},
-    "industrial_park": {"bulk", "machinery", "retail"},
-    "intermodal": {"bulk", "container", "general"},
-    "manufacturing": {"bulk", "electronics", "machinery"},
-    "port": {"bulk", "container", "electronics", "machinery"},
-    "rail": {"bulk", "container", "machinery"},
-    "retail_distribution": {"general", "retail"},
-    "terminal": {"electronics", "general", "retail"},
-    "warehouse": {"bulk", "general", "machinery", "retail"},
+    facility_type: set(roles.get("ships", ())) | set(roles.get("receives", ()))
+    for facility_type, roles in FACILITY_CARGO_ROLES.items()
+}
+
+MARKET_TAG_CARGO_BONUS = {
+    "agriculture": {"grain", "food", "refrigerated", "farm_inputs", "bulk"},
+    "air": {"electronics", "parcel", "general"},
+    "automotive": {"automotive", "steel", "machinery", "electronics"},
+    "border": {"retail", "container", "general", "parcel"},
+    "chemical": {"chemicals", "bulk"},
+    "cold_chain": {"food", "refrigerated"},
+    "construction": {"construction", "bulk", "steel", "lumber_paper"},
+    "energy": {"chemicals", "bulk"},
+    "food": {"food", "refrigerated", "grain"},
+    "industrial": {"steel", "machinery", "bulk", "construction"},
+    "intermodal": {"container", "general", "retail", "automotive"},
+    "lumber": {"lumber_paper", "construction"},
+    "manufacturing": {"machinery", "electronics", "automotive", "steel"},
+    "mining": {"bulk", "construction", "machinery"},
+    "parcel": {"parcel", "electronics"},
+    "port": {"container", "bulk", "automotive", "chemicals"},
+    "retail": {"retail", "general", "parcel"},
+    "river_port": {"bulk", "grain", "container"},
+    "steel": {"steel", "machinery", "construction"},
+}
+
+FACILITY_SELECTION_WEIGHTS = {
+    "company_yard": 0.45,
+    "cross_dock": 1.15,
+    "dry_warehouse": 1.0,
+    "grocery_retail_dc": 1.05,
+    "port_terminal": 1.25,
+    "intermodal_ramp": 1.25,
+    "parcel_hub": 1.15,
+    "farm_elevator": 1.15,
+    "food_processor": 1.0,
+    "cold_storage": 1.0,
+    "automotive_plant": 0.95,
+    "chemical_petroleum_terminal": 0.85,
+    "steel_industrial": 0.95,
+    "mine_quarry": 0.8,
+    "lumber_paper": 0.9,
 }
 
 
 def facility_label(location_type: str) -> str:
     return LOCATION_TYPE_LABELS.get(location_type, location_type.replace("_", " "))
+
+
+def facility_text(location_type: str, location_name: str, city: str,
+                  locality: str = "") -> str:
+    if location_type == "metro_market" or _is_legacy_facility_name(city, location_name):
+        return f"the {city} metro freight market"
+    place = f" near {locality}" if locality and locality not in location_name else ""
+    return f"{facility_label(location_type)} {location_name}{place} in {city}"
+
+
+def _is_legacy_facility_name(city: str, location_name: str) -> bool:
+    normalized = str(location_name or "").strip().lower()
+    city_lower = city.lower()
+    return normalized in {
+        "",
+        city_lower,
+        f"{city_lower} freight market",
+        f"{city_lower} metro freight market",
+    }
 
 
 @dataclass
@@ -79,6 +143,10 @@ class Job:
     origin_type: str = "terminal"
     destination_location: str = ""
     destination_type: str = "terminal"
+    origin_facility_id: str = ""
+    destination_facility_id: str = ""
+    origin_locality: str = ""
+    destination_locality: str = ""
 
     def describe(self, index: int | None = None, total: int | None = None) -> str:
         prefix = f"Job {index} of {total}: " if index is not None else ""
@@ -87,16 +155,31 @@ class Job:
         endorsement = ""
         if self.cargo.endorsement:
             endorsement = f" Requires {ENDORSEMENT_LABELS[self.cargo.endorsement]}."
-        origin = f"from {facility_label(self.origin_type)} {self.origin_location}"
-        if self.destination_location:
-            dest = (f"to {facility_label(self.destination_type)} "
-                    f"{self.destination_location} in {self.destination}")
-        else:
-            dest = f"to {self.destination}"
+        origin = "from " + self.origin_facility_text()
+        dest = "to " + self.destination_facility_text()
         return (f"{prefix}{self.weight_tons:.0f} tons of {self.cargo.label} "
                 f"{origin} {dest}. {self.distance_mi:.0f} miles. "
                 f"Pays {self.pay:,.0f} dollars. "
                 f"Deadline {self.deadline_game_h:.0f} hours.{market}{endorsement}")
+
+    def origin_facility_text(self) -> str:
+        return facility_text(
+            self.origin_type, self.origin_location, self.origin, self.origin_locality)
+
+    def destination_facility_text(self) -> str:
+        return facility_text(
+            self.destination_type,
+            self.destination_location,
+            self.destination,
+            self.destination_locality,
+        )
+
+    def locked_reason(self, endorsements: set[str], level: int) -> str:
+        if level < self.cargo.min_level:
+            return f"Level {self.cargo.min_level} drivers unlock this cargo."
+        if self.cargo.endorsement and self.cargo.endorsement not in endorsements:
+            return f"Requires {ENDORSEMENT_LABELS[self.cargo.endorsement]}."
+        return ""
 
     def payout(self, hours_taken: float, damage_pct: float, on_time_bonus: float = 0.15) -> float:
         """Final payment given delivery time and cargo condition."""
@@ -112,6 +195,61 @@ class Job:
         else:
             pay *= max(0.7, 1.0 - damage_pct / 200.0)
         return round(pay, 2)
+
+
+def job_payload(job: Job) -> dict:
+    return {
+        "cargo": job.cargo.key,
+        "weight_tons": job.weight_tons,
+        "origin": job.origin,
+        "origin_location": job.origin_location,
+        "origin_type": job.origin_type,
+        "origin_facility_id": job.origin_facility_id,
+        "origin_locality": job.origin_locality,
+        "destination": job.destination,
+        "destination_location": job.destination_location,
+        "destination_type": job.destination_type,
+        "destination_facility_id": job.destination_facility_id,
+        "destination_locality": job.destination_locality,
+        "distance_mi": job.distance_mi,
+        "pay": job.pay,
+        "deadline_game_h": job.deadline_game_h,
+        "market_mult": job.market_mult,
+    }
+
+
+def job_from_payload(data: dict) -> Job:
+    cargo = CARGO_CATALOG[data["cargo"]]
+    origin = str(data["origin"])
+    destination = str(data["destination"])
+    origin_location = str(
+        data.get("origin_location")
+        or data.get("origin_facility")
+        or f"{origin} freight market"
+    )
+    destination_location = str(
+        data.get("destination_location")
+        or data.get("destination_facility")
+        or f"{destination} freight market"
+    )
+    return Job(
+        cargo,
+        float(data["weight_tons"]),
+        origin,
+        origin_location,
+        destination,
+        float(data["distance_mi"]),
+        float(data["pay"]),
+        float(data["deadline_game_h"]),
+        market_mult=float(data.get("market_mult", 1.0)),
+        origin_type=str(data.get("origin_type", "metro_market")),
+        destination_location=destination_location,
+        destination_type=str(data.get("destination_type", "metro_market")),
+        origin_facility_id=str(data.get("origin_facility_id", "")),
+        destination_facility_id=str(data.get("destination_facility_id", "")),
+        origin_locality=str(data.get("origin_locality", "")),
+        destination_locality=str(data.get("destination_locality", "")),
+    )
 
 
 # Career-arc distance caps: short regional hops while learning the ropes,
@@ -181,17 +319,19 @@ class JobBoard:
         if not reachable:
             return jobs
         attempts = 0
-        while len(jobs) < count and attempts < count * 12:
+        while len(jobs) < count and attempts < count * 30:
             attempts += 1
-            location = self._rng.choice(city_obj.locations)
-            cargo_key = self._rng.choice(self._cargo_for_location(location))
+            location = self._choose_origin_location(city_obj, level)
+            cargo_key = self._choose_cargo_for_location(city_obj, location, level)
             cargo = CARGO_CATALOG[cargo_key]
             locked = cargo.endorsement and cargo.endorsement not in endorsements
             # a locked job may appear once in a while as a teaser, otherwise skip
             if locked and not (len(jobs) == count - 1 and self._rng.random() < 0.3):
                 continue
             destination, miles, _legs = self._choose_destination(reachable, level)
-            dest_location = self._destination_location(destination, cargo)
+            dest_location = self._destination_location(destination, cargo, level)
+            if dest_location is None:
+                continue
             jobs.append(self._make_job(cargo, city, location.name, destination,
                                        miles, market, level, location,
                                        dest_location))
@@ -238,20 +378,79 @@ class JobBoard:
         weights = [1.0 / c[1] for c in pool]
         return self._rng.choices(pool, weights)[0]
 
-    def _cargo_for_location(self, location: Location) -> tuple[str, ...]:
-        allowed = FACILITY_CARGO.get(location.type)
-        if not allowed:
-            return location.cargo
-        plausible = tuple(c for c in location.cargo if c in allowed)
-        return plausible or location.cargo
+    def _choose_origin_location(self, city, level: int) -> Location:
+        plausible = [
+            location
+            for location in city.locations
+            if location.min_level <= level and self._cargo_for_location(location, level=level)
+        ]
+        if not plausible:
+            plausible = list(city.locations)
+        weights = [self._facility_weight(city, location) for location in plausible]
+        return self._rng.choices(plausible, weights)[0]
 
-    def _destination_location(self, city: str, cargo: CargoType) -> Location:
+    def _choose_cargo_for_location(self, city, location: Location, level: int) -> str:
+        cargo_keys = self._cargo_for_location(location, level=level)
+        if not cargo_keys:
+            cargo_keys = tuple(cargo.key for cargo in CARGO_CATALOG.values()
+                               if cargo.min_level <= level)
+        weights = [self._cargo_weight(city, key) for key in cargo_keys]
+        return self._rng.choices(cargo_keys, weights)[0]
+
+    def _cargo_for_location(self, location: Location, role: str = "ships",
+                            level: int | None = None) -> tuple[str, ...]:
+        role_values = location.ships if role == "ships" else location.receives
+        if not role_values:
+            role_values = tuple(FACILITY_CARGO.get(location.type, ())) or location.cargo
+        allowed = []
+        for key in role_values:
+            cargo = CARGO_CATALOG.get(key)
+            if cargo is None:
+                continue
+            if level is not None and cargo.min_level > level:
+                continue
+            allowed.append(key)
+        return tuple(allowed)
+
+    def _destination_location(self, city: str, cargo: CargoType,
+                              level: int) -> Location | None:
         locations = self.world.cities[city].locations
         plausible = [
             loc for loc in locations
-            if cargo.key in self._cargo_for_location(loc)
+            if loc.min_level <= level and cargo.key in self._cargo_for_location(
+                loc, role="receives", level=level)
         ]
-        return self._rng.choice(plausible or list(locations))
+        if not plausible:
+            plausible = [
+                loc for loc in locations
+                if cargo.key in self._cargo_for_location(loc, role="receives")
+            ]
+        if not plausible:
+            return None
+        return self._rng.choices(
+            plausible,
+            [self._facility_weight(self.world.cities[city], loc) for loc in plausible],
+        )[0]
+
+    def _facility_weight(self, city, location: Location) -> float:
+        weight = FACILITY_SELECTION_WEIGHTS.get(location.type, 0.85)
+        for tag in city.market_tags:
+            boosted = MARKET_TAG_CARGO_BONUS.get(tag, set())
+            if boosted & set(location.ships + location.receives):
+                weight += 0.25
+        if location.template:
+            weight *= 0.9
+        return max(0.1, weight)
+
+    def _cargo_weight(self, city, cargo_key: str) -> float:
+        weight = 1.0
+        for tag in city.market_tags:
+            if cargo_key in MARKET_TAG_CARGO_BONUS.get(tag, set()):
+                weight += 0.65
+        cargo = CARGO_CATALOG[cargo_key]
+        if cargo.endorsement:
+            weight *= 0.8
+        return weight
 
     def _make_job(self, cargo: CargoType, origin: str, origin_location: str,
                   destination: str, miles: float, market: Market | None,
@@ -269,4 +468,8 @@ class JobBoard:
                    round(miles, 1), pay, round(deadline, 1), market_mult=mult,
                    origin_type=origin_facility.type,
                    destination_location=destination_facility.name,
-                   destination_type=destination_facility.type)
+                   destination_type=destination_facility.type,
+                   origin_facility_id=origin_facility.id,
+                   destination_facility_id=destination_facility.id,
+                   origin_locality=origin_facility.locality,
+                   destination_locality=destination_facility.locality)
