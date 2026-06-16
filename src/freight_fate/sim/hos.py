@@ -1,11 +1,14 @@
-"""Hours of service, fatigue, and the day/night clock.
+"""Hours of service, ELD duty status, fatigue, and the day/night clock.
 
 Simplified FMCSA-style rules running entirely on the in-game clock (the
-trip's ``game_minutes``, never wall time): 11 hours of driving and a 14
-hour duty window per shift, a 30-minute break required after 8 hours of
-driving, and a 10 hour sleep to reset the shift. The "relaxed" setting
-stretches every limit by 25 percent; "off" disables enforcement (the
-clock still ticks so switching modes mid-career stays honest).
+trip's ``game_minutes``, never wall time): 11 hours of driving after a
+10-hour reset, a 14-hour duty window after coming on duty, and a
+30-minute break after 8 cumulative hours of driving. The break may be any
+30 consecutive non-driving minutes, including on-duty-not-driving work.
+
+The model intentionally skips split sleeper and 60/70-hour cycle limits
+for now; the save schema records explicit duty statuses so those rules can
+be added without changing how drive, facility, and POI time is classified.
 
 Everything here is deterministic and pygame-free so the headless tests
 can exercise the rules directly.
@@ -13,10 +16,13 @@ can exercise the rules directly.
 
 from __future__ import annotations
 
+import math
 import random
 from dataclasses import dataclass, field
 
-HOS_MODES = ("realistic", "relaxed", "off")
+HOS_MODES = ("realistic", "relaxed", "debug_off")
+HOS_NON_ENFORCED_MODES = {"off", "debug_off"}
+DUTY_STATUSES = ("driving", "on_duty_not_driving", "off_duty", "sleeper_berth")
 
 BREAK_MIN = 30.0          # minimum break that resets the 8-hour rule
 SLEEP_MIN = 600.0         # a full 10-hour off-duty reset
@@ -34,40 +40,88 @@ WARNING_THRESHOLDS_MIN = (120.0, 60.0, 30.0)
 _THRESHOLD_PHRASES = {120.0: "2 hours", 60.0: "1 hour", 30.0: "30 minutes"}
 
 
+def _positive_minutes(minutes: float) -> float:
+    value = float(minutes)
+    if not math.isfinite(value) or value < 0.0:
+        raise ValueError("HOS time increments must be finite positive minutes")
+    return value
+
+
 @dataclass
 class HosClock:
-    """One shift's hours-of-service ledger, in game minutes."""
+    """One ELD-style shift ledger, in game minutes.
+
+    ``duty_min`` is the elapsed 14-hour window since the last qualifying
+    10-hour reset, not just on-duty labor. FMCSA's 14-hour window is not
+    extended by short off-duty breaks, so short breaks keep advancing it.
+    """
 
     driving_min: float = 0.0      # time at the wheel this shift
-    duty_min: float = 0.0         # everything since the shift started
+    duty_min: float = 0.0         # elapsed 14-hour duty window
     since_break_min: float = 0.0  # driving since the last 30-minute break
+    status: str = "off_duty"
+    non_driving_min: float = 0.0  # consecutive non-driving time
+    off_duty_min: float = 0.0     # consecutive off-duty/sleeper time
     warned: list[str] = field(default_factory=list)  # thresholds already spoken
 
     # -- time accounting ------------------------------------------------------
 
     def drive(self, minutes: float) -> None:
+        minutes = _positive_minutes(minutes)
         self.driving_min += minutes
         self.duty_min += minutes
         self.since_break_min += minutes
+        self.status = "driving"
+        self.non_driving_min = 0.0
+        self.off_duty_min = 0.0
 
     def on_duty(self, minutes: float) -> None:
-        """Engine-off or parked time: the duty window keeps running."""
+        """Work time away from the wheel: fueling, loading, inspections, service."""
+        minutes = _positive_minutes(minutes)
         self.duty_min += minutes
+        self.status = "on_duty_not_driving"
+        self.off_duty_min = 0.0
+        self._record_non_driving(minutes)
+
+    def off_duty(self, minutes: float) -> None:
+        """Off-duty time. Short breaks do not extend the 14-hour window."""
+        minutes = _positive_minutes(minutes)
+        self.duty_min += minutes
+        self.status = "off_duty"
+        self._record_non_driving(minutes)
+        self.off_duty_min += minutes
+        if self.off_duty_min >= SLEEP_MIN:
+            self.sleep(status="off_duty")
+
+    def sleeper(self, minutes: float) -> None:
+        """Sleeper-berth time. Split sleeper is not modeled yet."""
+        minutes = _positive_minutes(minutes)
+        self.duty_min += minutes
+        self.status = "sleeper_berth"
+        self._record_non_driving(minutes)
+        self.off_duty_min += minutes
+        if self.off_duty_min >= SLEEP_MIN:
+            self.sleep(status="sleeper_berth")
 
     def take_break(self, minutes: float) -> None:
-        """A short rest. Counts against the duty window; 30+ minutes
-        satisfies the break rule."""
-        self.duty_min += minutes
-        if minutes >= BREAK_MIN:
-            self.since_break_min = 0.0
-            self.warned = [w for w in self.warned if not w.startswith("break:")]
+        """A short off-duty rest. Kept for old callers and explicit break actions."""
+        self.off_duty(minutes)
 
-    def sleep(self) -> None:
+    def sleep(self, status: str = "sleeper_berth") -> None:
         """A full 10-hour off-duty reset: a fresh shift."""
         self.driving_min = 0.0
         self.duty_min = 0.0
         self.since_break_min = 0.0
+        self.status = status if status in DUTY_STATUSES else "sleeper_berth"
+        self.non_driving_min = SLEEP_MIN
+        self.off_duty_min = SLEEP_MIN
         self.warned.clear()
+
+    def _record_non_driving(self, minutes: float) -> None:
+        self.non_driving_min += minutes
+        if self.non_driving_min >= BREAK_MIN:
+            self.since_break_min = 0.0
+            self.warned = [w for w in self.warned if not w.startswith("break:")]
 
     # -- rule queries ----------------------------------------------------------
 
@@ -91,6 +145,13 @@ class HosClock:
         if not statuses:
             return None
         return min(rem for _, rem, _ in statuses)
+
+    def next_limit(self, mode: str) -> tuple[str, float, str] | None:
+        """Nearest enforced HOS limit as ``(kind, minutes, due_text)``."""
+        statuses = self._statuses(mode)
+        if not statuses:
+            return None
+        return min(statuses, key=lambda item: item[1])
 
     def in_violation(self, mode: str) -> bool:
         return any(rem <= 0 for _, rem, _ in self._statuses(mode))
@@ -127,8 +188,8 @@ class HosClock:
 
     def summary(self, mode: str) -> str:
         """Spoken status for the C key and Tab report."""
-        if mode == "off":
-            return "Hours of service enforcement is off."
+        if mode in HOS_NON_ENFORCED_MODES:
+            return "Hours of service is in debug bypass; the ELD clock still records time."
         drive_limit, duty_limit, break_after = LIMITS[mode]
         drive_left = max(0.0, drive_limit - self.driving_min) / 60.0
         duty_left = max(0.0, duty_limit - self.duty_min) / 60.0
@@ -136,7 +197,9 @@ class HosClock:
         if self.in_violation(mode):
             return ("Hours of service: you are past your limit. "
                     "Sleep 10 hours at a rest stop to reset.")
-        return (f"Hours of service: {drive_left:.1f} hours of driving left, "
+        status = self.status.replace("_", " ")
+        return (f"ELD status {status}. Hours of service: "
+                f"{drive_left:.1f} hours of driving left, "
                 f"break due in {break_left:.1f}, "
                 f"duty window closes in {duty_left:.1f}.")
 
@@ -144,7 +207,11 @@ class HosClock:
 
     def to_dict(self) -> dict:
         return {"driving_min": self.driving_min, "duty_min": self.duty_min,
-                "since_break_min": self.since_break_min, "warned": list(self.warned)}
+                "since_break_min": self.since_break_min,
+                "status": self.status,
+                "non_driving_min": self.non_driving_min,
+                "off_duty_min": self.off_duty_min,
+                "warned": list(self.warned)}
 
     @classmethod
     def from_dict(cls, data) -> HosClock:
@@ -152,10 +219,16 @@ class HosClock:
         if not isinstance(data, dict):
             return cls()
         try:
+            status = str(data.get("status", "off_duty"))
+            if status not in DUTY_STATUSES:
+                status = "off_duty"
             return cls(
                 driving_min=float(data.get("driving_min", 0.0)),
                 duty_min=float(data.get("duty_min", 0.0)),
                 since_break_min=float(data.get("since_break_min", 0.0)),
+                status=status,
+                non_driving_min=float(data.get("non_driving_min", 0.0)),
+                off_duty_min=float(data.get("off_duty_min", 0.0)),
                 warned=[str(w) for w in data.get("warned", [])],
             )
         except (TypeError, ValueError):

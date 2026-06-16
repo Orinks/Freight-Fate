@@ -395,16 +395,20 @@ HELP_PAGES = [
         "and call a roadside mechanic for a pricey field repair.",
     ]),
     ("Hours and rest", [
-        "You may drive eleven hours within a fourteen hour duty window,",
-        "with a thirty minute break required after eight hours of driving.",
+        "The ELD tracks driving, on-duty-not-driving, off-duty, and sleeper time.",
+        "You may drive eleven hours after ten consecutive hours off duty,",
+        "within a fourteen hour duty window after coming on duty.",
+        "A thirty minute break is required after eight cumulative hours of driving.",
+        "Any thirty consecutive non-driving minutes satisfy that break rule,",
+        "including loading, fueling, inspection, or explicit rest-stop breaks.",
         "Spoken warnings come at two hours, one hour, and thirty minutes left.",
         "Sleeping ten hours at a rest stop, or at a terminal, starts a fresh shift.",
-        "Driving past a limit risks fines at roadside inspections.",
+        "Driving past a limit risks route-backed inspections, fines, and out-of-service orders.",
         "Fatigue builds as you drive, faster at night. A drowsy driver",
         "yawns, drifts onto the rumble strip, and reacts late to hazards.",
         "Late at night, truck parking may be full. Drive on, or risk",
         "a ticket and poor sleep on the shoulder.",
-        "Tune all of this in Settings under Hours of service.",
+        "Settings keeps a debug HOS bypass for accessibility and bug escape only.",
     ]),
     ("Deliveries and money", [
         "The dispatch board lists freight for the current metro service area",
@@ -518,12 +522,13 @@ class SettingsState(MenuState):
                      lambda: self._cycle_pace(1),
                      help="Controls how quickly game time and distance pass "
                           "during a drive."),
-            MenuItem(lambda: f"Hours of service: {s.hos_mode}",
+            MenuItem(lambda: f"Hours of service: {self._hos_label()}",
                      lambda: self._cycle_hos(1),
                      help="Realistic enforces 11 hours of driving, a 14 hour "
                           "duty window, and a 30-minute break after 8 hours. "
-                          "Relaxed makes every limit 25 percent longer. "
-                          "Off disables enforcement entirely."),
+                          "Relaxed makes every limit 25 percent longer. Debug "
+                          "bypass records the ELD clock but disables enforcement "
+                          "as an accessibility and bug fallback."),
             MenuItem(lambda: f"Master volume: {round(s.master_volume * 100)} percent",
                      lambda: self._volume("master_volume", 0.1),
                      help="Overall game volume. Use Left and Right arrows "
@@ -585,6 +590,14 @@ class SettingsState(MenuState):
     def _pace_label(self) -> str:
         scale = self.ctx.settings.time_scale
         return {10.0: "relaxed", 20.0: "standard", 40.0: "fast"}.get(scale, f"{scale:g} times")
+
+    def _hos_label(self) -> str:
+        return {
+            "realistic": "realistic",
+            "relaxed": "relaxed",
+            "debug_off": "debug bypass",
+            "off": "debug bypass",
+        }.get(self.ctx.settings.hos_mode, "realistic")
 
     def _announce(self) -> None:
         self.refresh()

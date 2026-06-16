@@ -1,11 +1,25 @@
 # Freight Fate Roadmap
 
-## Next up: state troopers and law enforcement (design)
+## Next up: state troopers and law enforcement
 
-Today speeding quietly accumulates "strikes" that become a lump-sum fine
-at delivery, and HOS violations roll a generic weigh-station inspection.
-Both should become one visible enforcement system with troopers you can
-hear, anticipate, and get pulled over by.
+Speeding, HOS/ELD compliance, and route enforcement are now one visible
+system instead of unrelated end-of-trip deductions and generic random
+inspections. The first shipped slice uses route-backed contexts where the
+current corridor data supports them: weigh-station POIs, construction
+zones, checkpoints/high-patrol corridors, and seeded patrol windows.
+Events carry evidence such as HOS/ELD violations or construction-zone
+speeding, and serious HOS violations trigger an out-of-service 10-hour
+reset instead of only a fine.
+
+The ELD/HOS model is grounded in FMCSA's property-carrier summary:
+11 hours of driving after 10 consecutive hours off duty, a 14-hour
+driving window after coming on duty, a 30-minute break after 8 cumulative
+driving hours that may be any non-driving period, and 60/70-hour cycle
+rules with 34-hour restart as a future expansion. Primary references:
+https://www.fmcsa.dot.gov/regulations/hours-service/summary-hours-service-regulations
+and https://www.fmcsa.dot.gov/regulations/hours-of-service. ELD save data
+records duty status, time, and route evidence in the spirit of FMCSA's ELD
+function guidance: https://www.fmcsa.dot.gov/hours-service/elds/eld-functions-faqs.
 
 ### Design sketch
 
@@ -26,8 +40,11 @@ hear, anticipate, and get pulled over by.
   hits, and an "out of service" order for serious HOS violations: 10
   hours parked where you stand. Ignoring the siren is a felony stop:
   spike strips ahead, a huge fine, and possibly losing the load.
-- **Settings.** "Law enforcement: realistic / relaxed / off" mirroring
-  the HOS setting, so the simulation stays opt-in.
+- **Settings.** The normal HOS setting now defaults to realistic, keeps
+  relaxed for accessibility and pacing, and labels the non-enforced mode
+  as a debug bypass rather than ordinary play. A separate law-enforcement
+  setting remains open only if enforcement grows beyond HOS and route
+  safety evidence.
 - **Audio needed.** Siren approach/behind loops, CB radio squelch and
   chatter, an officer voice channel (the SAPI event voice fits), spike
   strip. All synthesizable in `tools/generate_audio.py` first, replaced

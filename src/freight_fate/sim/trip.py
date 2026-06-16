@@ -169,6 +169,7 @@ class Trip:
         self._hazard_check_mi = 5.0
         self._inspection_check_mi = 10.0
         self._traffic_warning_mi = 1.0
+        self._announced_enforcement: set[str] = set()
 
     # -- layout -----------------------------------------------------------------
 
@@ -496,6 +497,9 @@ class Trip:
             if cue.at_mi <= self.position_mi:
                 self._announced_navigation.add(f"{cue.key}:advance")
                 self._announced_navigation.add(f"{cue.key}:near")
+        for stop in self.stops:
+            if stop.at_mi <= self.position_mi and stop.type == "weigh_station":
+                self._announced_enforcement.add(f"weigh:{stop.name}:{stop.at_mi:.1f}")
         for i, start in enumerate(self._leg_starts):
             if i and self.position_mi >= start:
                 self._announced_cities.add(i)
@@ -678,18 +682,60 @@ class Trip:
                        deadline_s=self._rng.uniform(3.0, 4.5))
 
     def _check_inspections(self, moved_mi: float) -> None:
-        """Random roadside inspections while driving past an HOS limit.
+        """Route-backed inspections plus rare seeded patrols.
 
-        Uses its own random stream so enabling or violating hours of service
-        never changes the hazard and zone layout of a seeded trip.
+        The random stream is still separate so enforcement never changes
+        hazard or zone layout, but every event now names route context and
+        evidence instead of feeling like a generic dice roll.
         """
+        previous_mi = self.position_mi - moved_mi
+        for stop in self.stops:
+            key = f"weigh:{stop.name}:{stop.at_mi:.1f}"
+            if stop.type != "weigh_station" or key in self._announced_enforcement:
+                continue
+            if previous_mi < stop.at_mi <= self.position_mi:
+                self._announced_enforcement.add(key)
+                if self.hos_violation:
+                    self._emit(
+                        TripEventKind.INSPECTION,
+                        f"{stop.spoken_name} is open. Officers wave you in for an ELD check.",
+                        key=key,
+                        context="weigh_station",
+                        evidence=("HOS/ELD violation",),
+                    )
+                return
+
+        limit, reason = self.speed_limit_at(self.position_mi)
+        if reason == "construction" and self.truck.speed_mph > limit + 9:
+            key = f"construction:{round(self.position_mi)}"
+            if key not in self._announced_enforcement:
+                self._announced_enforcement.add(key)
+                self._emit(
+                    TripEventKind.INSPECTION,
+                    "Trooper in the construction zone clocks your speed.",
+                    key=key,
+                    context="construction_zone",
+                    evidence=("speeding in construction zone",),
+                )
+                return
+
         self._inspection_check_mi -= moved_mi
         if self._inspection_check_mi > 0:
             return
         self._inspection_check_mi = self._insp_rng.uniform(15, 40)
-        if self.hos_violation and self._insp_rng.random() < 0.5:
-            self._emit(TripEventKind.INSPECTION,
-                       "Weigh station ahead. Officers wave you in for a log check.")
+        if not self.hos_violation:
+            return
+        leg = self.route.legs[self.current_leg_index]
+        context = "checkpoint corridor" if leg.checkpoints else "patrol corridor"
+        if self._insp_rng.random() < (0.55 if leg.checkpoints else 0.25):
+            key = f"patrol:{self.current_leg_index}:{round(self.position_mi)}"
+            self._emit(
+                TripEventKind.INSPECTION,
+                f"CB reports a patrol on this {context}. A trooper stops you for a log check.",
+                key=key,
+                context=context,
+                evidence=("HOS/ELD violation",),
+            )
 
 
 def _stop_offset_for_direction(at_mi: float, leg_miles: float, forward: bool) -> float:

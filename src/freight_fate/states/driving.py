@@ -37,6 +37,9 @@ FIELD_REPAIR_DAMAGE_PCT = 25.0    # damage level the patch repairs down to
 MECHANIC_CALLOUT_FEE = 500.0
 MECHANIC_RATE_PER_PCT = 110.0     # premium over the garage's 85 per percent
 MECHANIC_WAIT_MIN = 90.0          # game minutes waiting for the truck to be fixed
+FUEL_STOP_MIN = 20.0              # fueling is on-duty-not-driving work
+INSPECTION_MIN = 15.0             # routine scale/inspection check-in time
+OUT_OF_SERVICE_MIN = hos.SLEEP_MIN
 
 # Highway exits: signal inside the window, slow enough to make the ramp.
 EXIT_WINDOW_MI = 5.0              # how far out X can arm the upcoming exit
@@ -77,6 +80,8 @@ class DrivingState(State):
 
         self.hos = profile.hos          # shift clock lives on the profile
         self.hos_fine_count = 0         # escalates with each failed inspection
+        self.enforcement_events: set[str] = set()
+        self.out_of_service_count = 0
         self._drowsy_said = False
         self._severe_said = False
         self._fatigue_cue_gm = 0.0      # game minutes since the last drowsy cue
@@ -134,6 +139,8 @@ class DrivingState(State):
             "hos": self.hos.to_dict(),
             "fatigue": self.ctx.profile.fatigue,
             "hos_fine_count": self.hos_fine_count,
+            "enforcement_events": sorted(self.enforcement_events),
+            "out_of_service_count": self.out_of_service_count,
         }
 
     @classmethod
@@ -172,6 +179,10 @@ class DrivingState(State):
             ctx.profile.fatigue = max(0.0, min(100.0, float(
                 data.get("fatigue", ctx.profile.fatigue))))
             state.hos_fine_count = int(data.get("hos_fine_count", 0))
+            state.enforcement_events = {
+                str(key) for key in data.get("enforcement_events", [])
+            }
+            state.out_of_service_count = int(data.get("out_of_service_count", 0))
             return state
         except (KeyError, TypeError, ValueError):
             log.warning("Could not resume saved trip", exc_info=True)
@@ -382,6 +393,9 @@ class DrivingState(State):
             if fatigue >= hos.FATIGUE_DROWSY:
                 parts.append(f"fatigue {fatigue:.0f} percent")
             parts.append(self.hos.summary(self.ctx.settings.hos_mode).rstrip("."))
+            context = self._hos_route_context()
+            if context:
+                parts.append(context)
         self.ctx.say(". ".join(parts) + ".")
 
     def _speak_fuel(self) -> None:
@@ -399,7 +413,8 @@ class DrivingState(State):
                 f"{now} Pickup drive to {self._pickup_facility_text()}. "
                 f"{self.trip.remaining_miles:.1f} miles remain. "
                 f"{hours_used:.1f} hours used before loading. "
-                f"{self.hos.summary(self.ctx.settings.hos_mode)}")
+                f"{self.hos.summary(self.ctx.settings.hos_mode)} "
+                f"{self._hos_route_context()}")
             return
         remaining = self.job.deadline_game_h - hours_used
         eta = self.trip.eta_game_hours()
@@ -408,6 +423,9 @@ class DrivingState(State):
                  else "at a typical highway pace")
         now = f"It is {clock_text(self.trip.current_hour)}."
         hos_part = self.hos.summary(self.ctx.settings.hos_mode)
+        hos_route = self._hos_route_context()
+        if hos_route:
+            hos_part = f"{hos_part} {hos_route}"
         if remaining > 0:
             verdict = ("You are on schedule." if eta < remaining
                        else "You are running behind. Keep your speed up.")
@@ -418,6 +436,25 @@ class DrivingState(State):
         else:
             self.ctx.say(f"{now} You are {-remaining:.1f} hours past the deadline. "
                          f"The pay is shrinking, but finish the delivery. {hos_part}")
+
+    def _hos_route_context(self) -> str:
+        mode = self.ctx.settings.hos_mode
+        next_limit = self.hos.next_limit(mode)
+        if next_limit is None:
+            return ""
+        kind, remaining_min, _due = next_limit
+        if remaining_min <= 0:
+            return "Nearest legal action: stop for a compliant break or 10-hour reset."
+        legal_miles = max(0.0, remaining_min / 60.0 * max(35.0, min(62.0, self.truck.speed_mph or 55.0)))
+        next_stop = self.trip.upcoming_stop(max(legal_miles + 5.0, 5.0))
+        action = "break" if kind == "break" else "sleep"
+        if next_stop is None:
+            return (f"No route stop is currently visible before the next {action} "
+                    f"limit, due in {remaining_min / 60.0:.1f} hours.")
+        ahead = max(0.0, next_stop.at_mi - self.trip.position_mi)
+        verdict = "before" if ahead <= legal_miles else "after"
+        return (f"Next legal stop: {next_stop.spoken_name} in {ahead:.0f} miles, "
+                f"{verdict} the next {action} limit.")
 
     def _speak_weather(self) -> None:
         source = "Live conditions" if self.weather.live else "Currently"
@@ -534,11 +571,13 @@ class DrivingState(State):
             self.hos.drive(gm)
         else:
             self.hos.on_duty(gm)   # the 14-hour window runs even while parked
-        if mode != "off":
+        if mode not in hos.HOS_NON_ENFORCED_MODES:
             for message in self.hos.check_warnings(mode):
                 self.ctx.audio.play("ui/warning")
                 self.ctx.say_event(message, interrupt=False)
-        self.trip.hos_violation = mode != "off" and self.hos.in_violation(mode)
+        self.trip.hos_violation = (
+            mode not in hos.HOS_NON_ENFORCED_MODES and self.hos.in_violation(mode)
+        )
 
         night = is_night(self.trip.current_hour)
         if moving:
@@ -687,17 +726,47 @@ class DrivingState(State):
             self.ctx.audio.play("ui/notify", volume=0.7)
 
     def _handle_inspection(self, event) -> None:
-        """Caught driving past an HOS limit: escalating fine, reputation hit."""
+        """Route-backed enforcement with stable evidence and no duplicate fines."""
+        event_key = str(event.data.get(
+            "key",
+            f"{event.message}:{round(self.trip.position_mi, 1)}:{self.hos_fine_count}",
+        ))
+        if event_key in self.enforcement_events:
+            return
+        self.enforcement_events.add(event_key)
         p = self.ctx.profile
         fine = hos.HOS_FINES[min(self.hos_fine_count, len(hos.HOS_FINES) - 1)]
         self.hos_fine_count += 1
         p.money -= fine   # can go negative; never a game over
         p.career.reputation = max(0.0, p.career.reputation - hos.HOS_REPUTATION_HIT)
+        evidence = list(event.data.get("evidence", ()))
+        if not evidence:
+            evidence = ["HOS/ELD violation"]
+        evidence_text = ", ".join(evidence)
         self.ctx.audio.play("ui/error")
-        self.ctx.say_event(f"{event.message} You are over your hours of service. "
-                           f"Fined {fine:,.0f} dollars, and your reputation took "
-                           "a hit. Sleep 10 hours at a rest stop to reset your "
-                           "clock.", interrupt=True)
+        serious_hos = (
+            self.ctx.settings.hos_mode not in hos.HOS_NON_ENFORCED_MODES
+            and self.hos.in_violation(self.ctx.settings.hos_mode)
+        )
+        message = (f"{event.message} Evidence: {evidence_text}. "
+                   f"Fined {fine:,.0f} dollars, and your reputation took a hit.")
+        if serious_hos:
+            self.ctx.say_event(
+                message + " Out of service order: parked for 10 hours to reset "
+                "your ELD clock.",
+                interrupt=True,
+            )
+            self._place_out_of_service()
+            return
+        self.ctx.say_event(message, interrupt=True)
+
+    def _place_out_of_service(self) -> None:
+        _advance_rest_clock(self, OUT_OF_SERVICE_MIN)
+        self.hos.sleep()
+        self.ctx.profile.fatigue = hos.rest_sleep(self.ctx.profile.fatigue)
+        self.out_of_service_count += 1
+        self.ctx.profile.active_trip = self.snapshot()
+        self.ctx.save_profile()
 
     def _try_rest_stop(self) -> None:
         stop = self.trip.nearest_stop_within()
@@ -1171,10 +1240,13 @@ class RestStopState(MenuState):
             cost = self.ctx.economy.fuel_cost(region, need) + 35.0
         p.money -= cost
         d.truck.refuel(need)
+        _advance_rest_clock(d, FUEL_STOP_MIN)
+        d.hos.on_duty(FUEL_STOP_MIN)
         self._save_here(silent=True)
         self.ctx.audio.play("vehicle/fuel_pump")
         self.ctx.say(f"Refueled {need:.0f} gallons for {cost:,.0f} dollars. "
-                     f"You have {p.money:,.0f} dollars.")
+                     f"You have {p.money:,.0f} dollars. Fueling took "
+                     f"{FUEL_STOP_MIN:.0f} minutes.")
         self.refresh()
 
     def _take_break(self) -> None:
@@ -1258,8 +1330,8 @@ class RestStopState(MenuState):
 
     def _inspect(self) -> None:
         d = self.driving
-        _advance_rest_clock(d, 10.0)
-        d.hos.on_duty(10.0)
+        _advance_rest_clock(d, INSPECTION_MIN)
+        d.hos.on_duty(INSPECTION_MIN)
         self.ctx.audio.play("ui/notify")
         self.ctx.say(f"Inspection check-in complete at {self.stop.spoken_name}. "
                      f"It is {clock_text(d.trip.current_hour)}. "
