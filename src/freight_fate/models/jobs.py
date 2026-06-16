@@ -7,11 +7,16 @@ career system.
 
 from __future__ import annotations
 
-import math
 import random
 from dataclasses import dataclass
 
-from ..data.world import FACILITY_CARGO_ROLES, LOCATION_TYPE_LABELS, Location, World
+from ..data.world import (
+    FACILITY_CARGO_ROLES,
+    LOCATION_TYPE_LABELS,
+    Location,
+    Route,
+    World,
+)
 from .market import Market, market_condition
 
 
@@ -267,14 +272,79 @@ MINIMUM_PAY_BY_LEVEL = {
 DEADLINE_AVG_MPH = 55.0   # achievable interstate average through zones and weather
 
 
+@dataclass(frozen=True)
+class HosPlan:
+    drive_h: float
+    breaks: int
+    sleeps: int
+    break_stop_count: int = 0
+    sleep_stop_count: int = 0
+
+    @property
+    def total_h(self) -> float:
+        return self.drive_h + self.breaks * 0.5 + self.sleeps * 10.0
+
+    def summary(self) -> str:
+        break_text = (
+            "no 30-minute break"
+            if self.breaks == 0 else
+            f"{self.breaks} 30-minute break{'s' if self.breaks != 1 else ''}"
+        )
+        sleep_text = (
+            "no 10-hour sleep"
+            if self.sleeps == 0 else
+            f"{self.sleeps} 10-hour sleep{'s' if self.sleeps != 1 else ''}"
+        )
+        coverage = ""
+        if self.break_stop_count or self.sleep_stop_count:
+            coverage = (f" Route has {self.break_stop_count} break-capable "
+                        f"stop{'s' if self.break_stop_count != 1 else ''} "
+                        f"and {self.sleep_stop_count} sleep-capable "
+                        f"stop{'s' if self.sleep_stop_count != 1 else ''}.")
+        return (f"Legal HOS plan: {self.drive_h:.1f} driving hours, "
+                f"{break_text}, {sleep_text}.{coverage}")
+
+
+def plan_hos(miles: float, route: Route | None = None) -> HosPlan:
+    """Estimate the FMCSA-compliant plan for a property-carrying trip.
+
+    Based on FMCSA's public HOS summary: 11 driving hours after 10 off-duty
+    hours, a 14-hour window, and a 30-minute break after 8 cumulative driving
+    hours. Split sleeper and 60/70-hour cycle limits are intentionally not
+    modeled in this route estimate.
+    """
+    drive_h = miles / DEADLINE_AVG_MPH
+    breaks = 0
+    sleeps = 0
+    remaining = drive_h
+    since_break = 0.0
+    drive_this_shift = 0.0
+    while remaining > 1e-6:
+        if since_break >= 8.0:
+            breaks += 1
+            since_break = 0.0
+        if drive_this_shift >= 11.0:
+            sleeps += 1
+            drive_this_shift = 0.0
+            since_break = 0.0
+        step = min(remaining, 8.0 - since_break, 11.0 - drive_this_shift)
+        remaining -= step
+        since_break += step
+        drive_this_shift += step
+    break_stops = sleep_stops = 0
+    if route is not None:
+        for stop in route.stop_details:
+            actions = set(stop.actions)
+            break_stops += "break" in actions or "food" in actions
+            sleep_stops += "sleep" in actions
+    return HosPlan(drive_h, breaks, sleeps, break_stops, sleep_stops)
+
+
 def required_hours(miles: float) -> float:
     """Honest hours for the run: driving at an achievable average, plus the
     30-minute break every 8 driving hours and a 10-hour sleep for every
     11-hour shift the distance demands. Dispatch cannot ask for less."""
-    drive_h = miles / DEADLINE_AVG_MPH
-    breaks_h = 0.5 * max(0, math.ceil(max(0.0, drive_h - 8.0) / 8.0))
-    sleeps_h = 10.0 * max(0, math.ceil(max(0.0, drive_h - 11.0) / 11.0))
-    return drive_h + breaks_h + sleeps_h
+    return plan_hos(miles).total_h
 
 
 def minimum_pay_for_level(miles: float, level: int) -> float:

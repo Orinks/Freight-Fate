@@ -4,7 +4,7 @@ import json
 
 from freight_fate.models import Career, Economy, JobBoard, Profile
 from freight_fate.models.career import level_for_xp
-from freight_fate.models.jobs import CARGO_CATALOG
+from freight_fate.models.jobs import CARGO_CATALOG, plan_hos
 from freight_fate.models.profile import SIGNATURE_FIELD, ProfileIntegrityError
 from freight_fate.settings import Settings
 
@@ -45,6 +45,14 @@ def test_required_hours_includes_breaks_and_sleep():
     assert medium > 495 / 55.0
     long_haul = required_hours(1150)            # ~21 h driving: sleep required
     assert long_haul > 1150 / 55.0 + 10.0
+
+
+def test_hos_plan_reports_breaks_sleeps_and_route_stop_coverage(world):
+    route = world.supported_route("Chicago", "Indianapolis")
+    plan = plan_hos(route.miles, route)
+    assert plan.drive_h == route.miles / 55.0
+    assert plan.break_stop_count >= 1
+    assert "Legal HOS plan" in plan.summary()
 
 
 def test_northeast_short_corridor_deadline_uses_direct_route(world):
@@ -234,6 +242,14 @@ def test_settings_roundtrip():
 
 def test_sapi_events_default_on():
     assert Settings().sapi_events is True
+
+
+def test_legacy_hos_off_setting_loads_as_debug_bypass():
+    s = Settings()
+    s.hos_mode = "off"
+    s.save()
+    loaded = Settings.load()
+    assert loaded.hos_mode == "debug_off"
 
 
 def test_settings_survive_corrupt_file():

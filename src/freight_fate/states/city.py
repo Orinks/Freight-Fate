@@ -11,11 +11,17 @@ from ..models.jobs import (
     JobBoard,
     job_from_payload,
     job_payload,
+    plan_hos,
 )
 from ..models.trucks import TRUCK_CATALOG, UPGRADE_CATALOG, TruckModel, Upgrade
 from ..sim.hos import clock_text, time_of_day
 from ..sim.vehicle import TruckState
 from .base import MenuItem, MenuState
+
+PICKUP_CHECK_IN_MIN = 15.0
+PICKUP_LOADING_MIN = 60.0
+TERMINAL_FUEL_MIN = 20.0
+TERMINAL_REPAIR_MIN = 60.0
 
 
 def _job_payload(job: Job) -> dict:
@@ -273,6 +279,9 @@ class GarageState(MenuState):
             cost = self.ctx.economy.fuel_cost(self._region(), gallons)
             p.money -= cost
             p.truck_fuel_gal = min(tank, p.truck_fuel_gal + gallons)
+            p.game_hours += TERMINAL_FUEL_MIN / 60.0
+            p.hos.on_duty(TERMINAL_FUEL_MIN)
+            self.ctx.save_profile()
             self.ctx.audio.play("vehicle/fuel_pump")
             self.ctx.say(f"Partial fuel: added {gallons:.0f} gallons for "
                          f"{cost:,.0f} dollars. "
@@ -281,6 +290,9 @@ class GarageState(MenuState):
             return
         p.money -= cost
         p.truck_fuel_gal = tank
+        p.game_hours += TERMINAL_FUEL_MIN / 60.0
+        p.hos.on_duty(TERMINAL_FUEL_MIN)
+        self.ctx.save_profile()
         self.ctx.audio.play("vehicle/fuel_pump")
         self.ctx.say(f"Tank filled. {cost:,.0f} dollars. "
                      f"You have {p.money:,.0f} dollars left.")
@@ -301,6 +313,9 @@ class GarageState(MenuState):
             cost = self.ctx.economy.repair_cost(repairable)
             p.money -= cost
             p.truck_damage_pct = max(0.0, p.truck_damage_pct - repairable)
+            p.game_hours += TERMINAL_REPAIR_MIN / 60.0
+            p.hos.on_duty(TERMINAL_REPAIR_MIN)
+            self.ctx.save_profile()
             self.ctx.audio.play("ui/notify")
             self.ctx.say(f"Partial repairs fixed {repairable:.0f} percent damage "
                          f"for {cost:,.0f} dollars. "
@@ -309,6 +324,9 @@ class GarageState(MenuState):
             return
         p.money -= cost
         p.truck_damage_pct = 0.0
+        p.game_hours += TERMINAL_REPAIR_MIN / 60.0
+        p.hos.on_duty(TERMINAL_REPAIR_MIN)
+        self.ctx.save_profile()
         self.ctx.audio.play("ui/notify")
         self.ctx.say(f"Truck repaired. {cost:,.0f} dollars. "
                      f"You have {p.money:,.0f} dollars left.")
@@ -453,10 +471,12 @@ class JobBoardState(MenuState):
     def build_items(self) -> list[MenuItem]:
         items = []
         for i, job in enumerate(self.jobs):
+            route = self.ctx.world.supported_route(job.origin, job.destination)
+            hos_summary = plan_hos(job.distance_mi, route).summary()
             items.append(MenuItem(
-                job.describe(i + 1, len(self.jobs)),
+                f"{job.describe(i + 1, len(self.jobs))} {hos_summary}",
                 lambda j=job: self._accept(j),
-                help=f"From {job.origin_facility_text()}."))
+                help=f"From {job.origin_facility_text()}. {hos_summary}"))
         items.append(MenuItem("Back to terminal", self.go_back))
         return items
 
@@ -572,6 +592,9 @@ class PickupFacilityState(MenuState):
         self.ctx.save_profile()
 
     def _check_in(self) -> None:
+        p = self.ctx.profile
+        p.game_hours += PICKUP_CHECK_IN_MIN / 60.0
+        p.hos.on_duty(PICKUP_CHECK_IN_MIN)
         self.checked_in = True
         self._save_state()
         self.refresh(keep_index=False)
@@ -592,6 +615,9 @@ class PickupFacilityState(MenuState):
             return
         self.truck.throttle = 0.0
         self.truck.brake = 1.0
+        p = self.ctx.profile
+        p.game_hours += PICKUP_LOADING_MIN / 60.0
+        p.hos.on_duty(PICKUP_LOADING_MIN)
         self.loaded = True
         self._save_state()
         self.refresh(keep_index=False)
@@ -599,7 +625,8 @@ class PickupFacilityState(MenuState):
         self.ctx.say(
             f"Loaded and sealed at {self.facility}. "
             f"{self.job.weight_tons:.0f} tons of {self.job.cargo.label} are "
-            f"ready for {self.job.destination}. Depart when ready.")
+            f"ready for {self.job.destination}. Loading took "
+            f"{PICKUP_LOADING_MIN:.0f} minutes. Depart when ready.")
 
     def _depart_for_destination(self) -> None:
         if not self.loaded:
@@ -619,10 +646,11 @@ class PickupFacilityState(MenuState):
         self.ctx.save_profile()
         via = ", then ".join(route.highways)
         next_context = driving.trip.next_navigation_context()
+        hos_summary = plan_hos(route.miles, route).summary()
         self.ctx.say(
             f"Navigation set for {self.job.destination_facility_text()}. "
             f"Loaded trip is {route.miles:.0f} miles via {via}. "
-            f"{next_context} Departing now.",
+            f"{hos_summary} {next_context} Departing now.",
             interrupt=True)
         self.ctx.push_state(driving)
 

@@ -38,6 +38,7 @@ def test_parked_time_counts_against_duty_window_only():
     assert c.duty_min == 60
     assert c.driving_min == 0
     assert c.since_break_min == 0
+    assert c.status == "on_duty_not_driving"
 
 
 def test_break_resets_break_rule_but_not_the_shift():
@@ -47,6 +48,17 @@ def test_break_resets_break_rule_but_not_the_shift():
     assert c.since_break_min == 0
     assert c.driving_min == 480
     assert c.duty_min == 510  # the break itself burns duty window
+    assert c.status == "off_duty"
+
+
+def test_on_duty_not_driving_satisfies_break_rule():
+    c = HosClock()
+    c.drive(480)
+    c.on_duty(30)
+    assert c.status == "on_duty_not_driving"
+    assert c.since_break_min == 0
+    assert c.driving_min == 480
+    assert c.duty_min == 510
 
 
 def test_short_break_does_not_satisfy_the_break_rule():
@@ -64,6 +76,7 @@ def test_sleep_resets_the_shift():
     assert c.driving_min == 0
     assert c.duty_min == 0
     assert c.since_break_min == 0
+    assert c.status == "sleeper_berth"
     assert c.warned == []
 
 
@@ -162,7 +175,7 @@ def test_off_mode_never_warns_or_violates():
     assert c.check_warnings("off") == []
     assert not c.in_violation("off")
     assert c.remaining_min("off") is None
-    assert "off" in c.summary("off")
+    assert "debug bypass" in c.summary("off")
 
 
 # -- serialization and compatibility ----------------------------------------------
@@ -173,6 +186,16 @@ def test_clock_roundtrips_through_dict():
     c.check_warnings("realistic")
     again = HosClock.from_dict(c.to_dict())
     assert again == c
+
+
+def test_legacy_clock_data_migrates_to_eld_fields():
+    data = {"driving_min": 120, "duty_min": 180, "since_break_min": 60}
+    clock = HosClock.from_dict(data)
+    assert clock.driving_min == 120
+    assert clock.duty_min == 180
+    assert clock.since_break_min == 60
+    assert clock.status == "off_duty"
+    assert clock.non_driving_min == 0
 
 
 def test_clock_from_garbage_is_fresh():
@@ -599,6 +622,58 @@ def test_inspection_fines_escalate_and_hit_reputation():
         app.shutdown()
 
 
+def test_route_backed_weigh_station_emits_evidence(world):
+    from freight_fate.sim.trip import RoadStop, TripEventKind
+
+    trip = make_trip(world, start_hour=12.0, seed=5,
+                     start="Chicago", end="Indianapolis")
+    trip.stops = [
+        RoadStop("Example Scale", 10.0, "weigh_station", ("inspect",), ())
+    ]
+    trip.position_mi = 10.1
+    trip.hos_violation = True
+    trip._events = []
+
+    trip._check_inspections(1.0)
+
+    events = [e for e in trip._events if e.kind == TripEventKind.INSPECTION]
+    assert len(events) == 1
+    assert events[0].data["context"] == "weigh_station"
+    assert events[0].data["evidence"] == ("HOS/ELD violation",)
+
+
+@pytest.mark.smoke
+def test_serious_hos_inspection_orders_out_of_service_reset():
+    from freight_fate.app import App
+    from freight_fate.sim.trip import TripEvent, TripEventKind
+
+    app = App()
+    try:
+        driving = start_drive(app)
+        p = app.ctx.profile
+        driving.hos.drive(481)
+        money = p.money
+        minutes = driving.trip.game_minutes
+        event = TripEvent(
+            TripEventKind.INSPECTION,
+            "Inspection station open.",
+            {"key": "scale:1", "evidence": ("HOS/ELD violation",)},
+        )
+
+        driving._handle_inspection(event)
+
+        assert p.money == money - hos.HOS_FINES[0]
+        assert driving.trip.game_minutes == minutes + hos.SLEEP_MIN
+        assert driving.hos.driving_min == 0
+        assert driving.out_of_service_count == 1
+
+        driving._handle_inspection(event)
+        assert p.money == money - hos.HOS_FINES[0]
+        assert driving.out_of_service_count == 1
+    finally:
+        app.shutdown()
+
+
 @pytest.mark.smoke
 def test_hos_clock_runs_on_game_time():
     from freight_fate.app import App
@@ -631,11 +706,11 @@ def test_settings_menu_cycles_hours_of_service():
         state.handle_event(key_event(pygame.K_RETURN))
         assert app.ctx.settings.hos_mode == "relaxed"
         state.handle_event(key_event(pygame.K_RETURN))
-        assert app.ctx.settings.hos_mode == "off"
+        assert app.ctx.settings.hos_mode == "debug_off"
         state.handle_event(key_event(pygame.K_RIGHT))
         assert app.ctx.settings.hos_mode == "realistic"
         state.handle_event(key_event(pygame.K_LEFT))
-        assert app.ctx.settings.hos_mode == "off"
+        assert app.ctx.settings.hos_mode == "debug_off"
     finally:
         app.shutdown()
 
