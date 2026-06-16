@@ -6,7 +6,12 @@ import zlib
 
 from ..data.world import Route
 from ..models.economy import REPAIR_COST_PER_PCT
-from ..models.jobs import CARGO_CATALOG, Job, JobBoard, facility_label
+from ..models.jobs import (
+    Job,
+    JobBoard,
+    job_from_payload,
+    job_payload,
+)
 from ..models.trucks import TRUCK_CATALOG, UPGRADE_CATALOG, TruckModel, Upgrade
 from ..sim.hos import clock_text, time_of_day
 from ..sim.vehicle import TruckState
@@ -14,32 +19,11 @@ from .base import MenuItem, MenuState
 
 
 def _job_payload(job: Job) -> dict:
-    return {
-        "cargo": job.cargo.key,
-        "weight_tons": job.weight_tons,
-        "origin": job.origin,
-        "origin_location": job.origin_location,
-        "destination": job.destination,
-        "distance_mi": job.distance_mi,
-        "pay": job.pay,
-        "deadline_game_h": job.deadline_game_h,
-        "market_mult": job.market_mult,
-        "origin_type": job.origin_type,
-        "destination_location": job.destination_location,
-        "destination_type": job.destination_type,
-    }
+    return job_payload(job)
 
 
 def _job_from_payload(data: dict) -> Job:
-    cargo = CARGO_CATALOG[data["cargo"]]
-    return Job(cargo, float(data["weight_tons"]), data["origin"],
-               data["origin_location"], data["destination"],
-               float(data["distance_mi"]), float(data["pay"]),
-               float(data["deadline_game_h"]),
-               market_mult=float(data.get("market_mult", 1.0)),
-               origin_type=str(data.get("origin_type", "terminal")),
-               destination_location=str(data.get("destination_location", "")),
-               destination_type=str(data.get("destination_type", "terminal")))
+    return job_from_payload(data)
 
 
 def pickup_snapshot(job: Job, *, checked_in: bool = False,
@@ -118,11 +102,34 @@ class CityMenuState(MenuState):
 
     def _job_board(self) -> None:
         p = self.ctx.profile
-        p.market.advance_to(p.market_day())
-        jobs = self._board.offers(p.current_city, p.career.endorsements,
-                                  level=p.career.level, market=p.market)
+        market_changed = p.market.advance_to(p.market_day())
+        key = self._dispatch_cache_key()
+        cache = p.dispatch_board_cache if not market_changed else None
+        if cache and cache.get("key") == key:
+            jobs = [_job_from_payload(payload)
+                    for payload in cache.get("jobs", [])]
+        else:
+            jobs = self._board.offers(p.current_city, p.career.endorsements,
+                                      level=p.career.level, market=p.market)
+            p.dispatch_board_cache = {
+                "key": key,
+                "jobs": [_job_payload(job) for job in jobs],
+            }
+            self.ctx.save_profile()
         self._jobs_cache = jobs
         self.ctx.push_state(JobBoardState(self.ctx, jobs))
+
+    def _dispatch_cache_key(self) -> dict:
+        p = self.ctx.profile
+        return {
+            "city": p.current_city,
+            "market_day": p.market_day(),
+            "market_seed": p.market.seed,
+            "market_state_day": p.market.day,
+            "level": p.career.level,
+            "endorsements": sorted(p.career.endorsements),
+            "count": 5,
+        }
 
     def _garage_label(self) -> str:
         p = self.ctx.profile
@@ -449,29 +456,29 @@ class JobBoardState(MenuState):
             items.append(MenuItem(
                 job.describe(i + 1, len(self.jobs)),
                 lambda j=job: self._accept(j),
-                help=f"From {facility_label(job.origin_type)} "
-                     f"{job.origin_location}."))
+                help=f"From {job.origin_facility_text()}."))
         items.append(MenuItem("Back to terminal", self.go_back))
         return items
 
     def _accept(self, job: Job) -> None:
         p = self.ctx.profile
-        if job.cargo.endorsement and job.cargo.endorsement not in p.career.endorsements:
+        locked = job.locked_reason(p.career.endorsements, p.career.level)
+        if locked:
             self.ctx.audio.play("ui/error")
-            self.ctx.say("You do not have the endorsement for this cargo yet. "
-                         "Keep delivering to level up and unlock it.")
+            self.ctx.say(f"{locked} Keep delivering to level up and unlock it.")
             return
         from .driving import DRIVE_PHASE_PICKUP, DrivingState
 
         route = self.ctx.world.facility_approach_route(job.origin, job.origin_location)
         terminal = self.ctx.world.home_terminal(p.current_city)
         driving = DrivingState(self.ctx, job, route, phase=DRIVE_PHASE_PICKUP)
+        p.dispatch_board_cache = None
         p.active_trip = driving.snapshot()
         self.ctx.save_profile()
         self.ctx.say(
             f"Dispatch accepted from {terminal.name}. Deadhead "
             f"{route.miles:.1f} miles on {route.highways[0]} to pickup at "
-            f"{facility_label(job.origin_type)} {job.origin_location}. "
+            f"{job.origin_facility_text()}. "
             "Check in with the shipper when you arrive.",
             interrupt=True)
         self.ctx.push_state(driving)
@@ -509,7 +516,7 @@ class PickupFacilityState(MenuState):
 
     @property
     def facility(self) -> str:
-        return f"{facility_label(self.job.origin_type)} {self.job.origin_location}"
+        return self.job.origin_facility_text()
 
     def announce_entry(self) -> None:
         self.ctx.audio.set_ambient("ambient/warehouse", volume=0.3)
@@ -613,8 +620,7 @@ class PickupFacilityState(MenuState):
         via = ", then ".join(route.highways)
         next_context = driving.trip.next_navigation_context()
         self.ctx.say(
-            f"Navigation set for {facility_label(self.job.destination_type)} "
-            f"{self.job.destination_location} in {self.job.destination}. "
+            f"Navigation set for {self.job.destination_facility_text()}. "
             f"Loaded trip is {route.miles:.0f} miles via {via}. "
             f"{next_context} Departing now.",
             interrupt=True)
@@ -630,8 +636,7 @@ class PickupFacilityState(MenuState):
         self.ctx.say(
             f"Pickup at {self.facility}: {state}. "
             f"Cargo is {self.job.weight_tons:.0f} tons of {self.job.cargo.label}. "
-            f"Destination is {facility_label(self.job.destination_type)} "
-            f"{self.job.destination_location} in {self.job.destination}. "
+            f"Destination is {self.job.destination_facility_text()}. "
             f"Current speed {self.ctx.settings.speed_text(self.truck.speed_mph)}.")
 
     def _save_and_quit(self) -> None:
@@ -644,6 +649,7 @@ class PickupFacilityState(MenuState):
 
     def _cancel(self) -> None:
         self.ctx.profile.active_trip = None
+        self.ctx.profile.dispatch_board_cache = None
         self.ctx.save_profile()
         terminal = self.ctx.world.home_terminal(self.ctx.profile.current_city)
         self.ctx.say(f"Pickup canceled. Returned to {terminal.name}.",

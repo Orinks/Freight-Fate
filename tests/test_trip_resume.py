@@ -347,6 +347,35 @@ def test_old_map_snapshot_still_resumes():
         app.shutdown()
 
 
+def test_bare_city_job_snapshot_gets_facility_fallback():
+    from freight_fate.app import App
+    from freight_fate.models.profile import Profile
+    from freight_fate.states.driving import DrivingState
+    from freight_fate.states.main_menu import enter_world
+
+    app = App()
+    try:
+        p = Profile(name="Bare City Save")
+        p.active_trip = {
+            "job": {"cargo": "general", "weight_tons": 14.0,
+                    "origin": "Chicago", "destination": "St. Louis",
+                    "distance_mi": 298.0, "pay": 1200.0,
+                    "deadline_game_h": 9.0, "market_mult": 1.0},
+            "route_cities": ["Chicago", "St. Louis"],
+            "trip_seed": 1234, "position_mi": 20.0, "game_minutes": 30.0,
+            "start_damage": 0.0, "speeding_strikes": 0,
+        }
+        app.ctx.profile = p
+        enter_world(app.ctx)
+
+        assert isinstance(app.state, DrivingState)
+        assert app.state.job.origin_facility_text() == "the Chicago metro freight market"
+        assert app.state.job.destination_facility_text() == (
+            "the St. Louis metro freight market")
+    finally:
+        app.shutdown()
+
+
 def test_route_from_cities_roundtrip(world):
     route = world.shortest_route("Chicago", "Denver")
     rebuilt = world.route_from_cities(route.cities)

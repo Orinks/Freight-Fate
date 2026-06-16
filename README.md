@@ -12,9 +12,16 @@ visual display mirrors all speech for sighted players and helpers.
 
 ## Features
 
-- **Career mode** — accept jobs at city freight locations, deliver on time,
-  earn money and experience, level up, and unlock cargo endorsements
-  (refrigerated, high-value).
+- **Career mode** — accept jobs inside metro freight markets, deadhead to
+  specific origin facilities, deliver to specific receivers, earn money and
+  experience, level up, and unlock cargo endorsements (refrigerated,
+  heavy-haul, high-value).
+- **Realistic freight markets** — the 59-city route graph acts as metro
+  service areas, while each market expands into representative ports, rail and
+  intermodal ramps, air cargo areas, parcel hubs, distribution centers, cold
+  storage, food processors, farms/elevators, manufacturing plants, steel and
+  automotive sites, chemical terminals, construction yards, mines/quarries,
+  lumber/paper facilities, cross-docks, and company yards.
 - **Real driving** — a tuned Class 8 truck simulation: 450 horsepower,
   ten gears (manual with clutch, or automatic), engine braking, grades,
   stalls, brake fade, and honest fuel economy.
@@ -23,8 +30,9 @@ visual display mirrors all speech for sighted players and helpers.
   with an engine tune, aerodynamic kit, long-range tank, or reinforced
   brakes. Every purchase changes the physics.
 - **A living market** — each cargo class has a pay rate that drifts day by
-  day. The job board tells you when electronics are tight or bulk freight has
-  gone loose; chase the tight markets.
+  day, and each metro weights freight by regional specialization. The job
+  board tells you when electronics are tight or bulk freight has gone loose;
+  chase the tight markets.
 - **A living road** — dynamic regional weather that changes grip and safe
   speeds, construction and traffic zones, road hazards that demand quick
   braking, metadata-backed rest stops and service plazas, toll-road settlement
@@ -36,7 +44,8 @@ visual display mirrors all speech for sighted players and helpers.
   simulated weather offline.
 - **Route planning** — full-network metadata-backed route options per job with
   distance, highways, state context, grade/terrain, toll events, POIs, and
-  weather forecasts.
+  weather forecasts. Facilities add local pickup and delivery realism without
+  pretending that every suburb or shipper needs a separate highway node.
 - **Original audio** — every sound effect and all three music tracks are
   procedurally synthesized and dedicated to the public domain (CC0). Audio
   plays through BASS (via [sound_lib](https://pypi.org/project/sound_lib/)),

@@ -56,18 +56,37 @@ def _loadable_saves() -> list[tuple[Path, Profile]]:
 
 def _career_location(profile: Profile) -> str:
     from ..data.world import get_world
+    from ..models.jobs import facility_text
 
     trip = profile.active_trip or {}
     job = trip.get("job", {})
     destination = job.get("destination")
     if trip.get("kind") == "pickup_drive":
-        facility = job.get("origin_location")
-        return f"driving to pickup at {facility or destination}"
+        origin = str(job.get("origin") or profile.current_city)
+        facility = facility_text(
+            str(job.get("origin_type", "metro_market")),
+            str(job.get("origin_location", "")),
+            origin,
+            str(job.get("origin_locality", "")),
+        )
+        return f"driving to pickup at {facility}"
     if trip.get("kind") == "pickup" and destination:
         loaded = "loaded for" if trip.get("loaded") else "picking up for"
-        return f"{loaded} {destination}"
+        facility = facility_text(
+            str(job.get("destination_type", "metro_market")),
+            str(job.get("destination_location", "")),
+            str(destination),
+            str(job.get("destination_locality", "")),
+        )
+        return f"{loaded} {facility}"
     if destination:
-        return f"on the road to {destination}"
+        facility = facility_text(
+            str(job.get("destination_type", "metro_market")),
+            str(job.get("destination_location", "")),
+            str(destination),
+            str(job.get("destination_locality", "")),
+        )
+        return f"on the road to {facility}"
     try:
         terminal = get_world().home_terminal(profile.current_city)
         return f"at {terminal.name} in {profile.current_city}"
@@ -326,8 +345,9 @@ class HomeTerminalState(MenuState):
 HELP_PAGES = [
     ("The goal", [
         "You are an owner-operator truck driver building a freight career.",
-        "Start from your company terminal or yard in the service area.",
-        "Accept freight from the dispatch board, deadhead to the origin facility,",
+        "Start from your company terminal or yard in a metro service area.",
+        "Each city on the map is a freight market, not the only destination there.",
+        "Accept freight from a specific shipper facility, deadhead to that pickup,",
         "check in and load the trailer there, then dispatch loads the navigation itinerary,",
         "and deliver cargo across the country, on time and intact.",
         "Earn money and experience, level up, and unlock better freight.",
@@ -409,13 +429,21 @@ HELP_PAGES = [
         "Tune all of this in Settings under Hours of service.",
     ]),
     ("Deliveries and money", [
-        "The dispatch board lists freight for the current metro service area",
-        "from facilities such as ports,",
-        "intermodal yards, warehouses, food terminals, industrial parks,",
-        "air cargo areas, manufacturing plants, and retail distribution hubs.",
+        "The dispatch board lists freight for the current metro service area.",
+        "A metro can contain ports, rail and intermodal ramps, air cargo areas,",
+        "parcel hubs, grocery distribution centers, dry warehouses, cold storage,",
+        "food processors, farms and grain elevators, manufacturing plants,",
+        "steel and industrial sites, automotive suppliers, chemical terminals,",
+        "construction yards, mines and quarries, lumber or paper facilities,",
+        "cross-docks, and company yards.",
         "Each job names an origin facility and a destination facility.",
-        "Cargo follows the facility type, so a food terminal offers",
-        "different work than a port, warehouse, or factory.",
+        "Cargo follows facility roles, so grain elevators ship different freight",
+        "than parcel hubs, ports, warehouses, factories, or cold storage.",
+        "Not every market supports every cargo equally.",
+        "Regional freight patterns shape the board: ports see containers and bulk,",
+        "agricultural regions see grain and food, industrial regions see steel,",
+        "machinery, automotive, chemicals, lumber, and construction materials.",
+        "Border and gateway metros often offer cross-dock logistics freight.",
         "After accepting a dispatch, leave the terminal bobtail or with an empty trailer.",
         "Pickup legs are local deadhead moves to the origin facility.",
         "At the pickup gate, come to a full stop before the facility menu opens.",
@@ -432,9 +460,20 @@ HELP_PAGES = [
         "Fragile cargo, like electronics and fresh food, punishes rough driving.",
         "Repair your truck in the terminal garage. Damage reduces engine power.",
         "Higher levels widen distance caps, improve low-end pay,",
-        "and unlock refrigerated, heavy-haul, and high-value freight.",
+        "and unlock more facility variety plus refrigerated, heavy-haul, and high-value freight.",
         "Cargo markets drift day by day. The dispatch board calls out tight and loose",
         "markets; tight cargo pays well above the usual rate.",
+    ]),
+    ("Markets and route coverage", [
+        "Freight Fate does not need thousands of city nodes to feel national.",
+        "The highway graph uses supported metro route nodes for driving.",
+        "Freight realism comes from facilities inside those metro markets.",
+        "A load may route from Chicago to Los Angeles, but the work can be",
+        "an intermodal ramp, cold storage, port terminal, parcel hub, or plant.",
+        "New dispatches still use only metadata-backed route corridors.",
+        "Facility data is offline and curated, with representative templates",
+        "when a metro needs common freight roles that are not hand-written yet.",
+        "Those templates are polished gameplay locations, not raw map tags.",
     ]),
     ("The garage", [
         "Every terminal garage refuels and repairs your truck.",

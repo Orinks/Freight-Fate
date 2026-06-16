@@ -111,20 +111,12 @@ def test_rookie_boards_have_rewarding_minimum_pay(world):
 
 
 def test_representative_boards_use_truck_plausible_locations(world):
-    plausible_types = {
-        "air_cargo",
-        "food_terminal",
-        "industrial_park",
-        "intermodal",
-        "port",
-        "retail_distribution",
-    }
     for city in ["Chicago", "Atlanta", "Philadelphia", "San Antonio", "Los Angeles"]:
-        assert {loc.type for loc in world.cities[city].locations} <= plausible_types
         jobs = JobBoard(world, seed=3).offers(city, set(), level=2)
         assert jobs
         assert all(any(job.origin_location == loc.name for loc in world.cities[city].locations)
                    for job in jobs)
+        assert all(job.origin_facility_id for job in jobs)
 
 
 def test_facility_type_filters_available_cargo(world):
@@ -134,6 +126,68 @@ def test_facility_type_filters_available_cargo(world):
         for job in jobs:
             allowed = FACILITY_CARGO[job.origin_type]
             assert job.cargo.key in allowed
+
+
+def test_jobs_match_shipper_and_receiver_roles(world):
+    for city in ["Chicago", "Fresno", "Houston", "Memphis", "Detroit"]:
+        for seed in range(12):
+            jobs = JobBoard(world, seed=seed).offers(
+                city, {"refrigerated", "heavy_haul", "high_value"}, level=5)
+            assert jobs
+            for job in jobs:
+                origin = world.facility_location(job.origin, job.origin_facility_id)
+                destination = world.facility_location(
+                    job.destination, job.destination_facility_id)
+                assert job.cargo.key in origin.ships
+                assert job.cargo.key in destination.receives
+                assert origin.name in job.describe()
+                assert destination.name in job.describe()
+
+
+def test_regional_specialization_shapes_generated_freight(world):
+    chicago_cargo = {
+        job.cargo.key
+        for seed in range(25)
+        for job in JobBoard(world, seed=seed).offers(
+            "Chicago", {"refrigerated", "heavy_haul", "high_value"}, level=5)
+    }
+    fresno_cargo = {
+        job.cargo.key
+        for seed in range(25)
+        for job in JobBoard(world, seed=seed).offers(
+            "Fresno", {"refrigerated", "heavy_haul", "high_value"}, level=5)
+    }
+    houston_types = {
+        job.origin_type
+        for seed in range(25)
+        for job in JobBoard(world, seed=seed).offers(
+            "Houston", {"refrigerated", "heavy_haul", "high_value"}, level=5)
+    }
+
+    assert {"container", "parcel"} & chicago_cargo
+    assert {"grain", "food", "refrigerated"} & fresno_cargo
+    assert "chemical_petroleum_terminal" in houston_types
+
+
+def test_higher_levels_unlock_more_facility_and_cargo_variety(world):
+    low_jobs = [
+        job
+        for seed in range(20)
+        for job in JobBoard(world, seed=seed).offers("Chicago", set(), level=1)
+    ]
+    high_jobs = [
+        job
+        for seed in range(20)
+        for job in JobBoard(world, seed=seed).offers(
+            "Chicago", {"refrigerated", "heavy_haul", "high_value"}, level=5)
+    ]
+
+    assert low_jobs and high_jobs
+    assert len({job.cargo.key for job in high_jobs}) > len(
+        {job.cargo.key for job in low_jobs})
+    assert len({job.origin_type for job in high_jobs}) > len(
+        {job.origin_type for job in low_jobs})
+    assert any(job.cargo.min_level > 1 or job.cargo.endorsement for job in high_jobs)
 
 
 def test_jobs_carry_destination_facility_metadata(world):

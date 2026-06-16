@@ -13,7 +13,7 @@ import random
 import pygame
 
 from ..data.world import Route
-from ..models.jobs import CARGO_CATALOG, Job, facility_label
+from ..models.jobs import Job, job_from_payload, job_payload
 from ..sim import hos
 from ..sim.hos import HosClock, clock_text, is_night, time_of_day
 from ..sim.transmission import REVERSE
@@ -108,20 +108,7 @@ class DrivingState(State):
         kind = "pickup_drive" if self.phase == DRIVE_PHASE_PICKUP else "delivery"
         return {
             "kind": kind,
-            "job": {
-                "cargo": job.cargo.key,
-                "weight_tons": job.weight_tons,
-                "origin": job.origin,
-                "origin_location": job.origin_location,
-                "destination": job.destination,
-                "distance_mi": job.distance_mi,
-                "pay": job.pay,
-                "deadline_game_h": job.deadline_game_h,
-                "market_mult": job.market_mult,
-                "origin_type": job.origin_type,
-                "destination_location": job.destination_location,
-                "destination_type": job.destination_type,
-            },
+            "job": job_payload(job),
             "route_cities": list(self.route.cities),
             "route_kind": ("facility_approach" if self.phase == DRIVE_PHASE_PICKUP
                            else "corridor_itinerary"),
@@ -148,7 +135,6 @@ class DrivingState(State):
         """Rebuild a saved active drive; None if the snapshot is unreadable."""
         try:
             j = data["job"]
-            cargo = CARGO_CATALOG[j["cargo"]]
             kind = str(data.get("kind", "delivery"))
             phase = DRIVE_PHASE_PICKUP if kind == "pickup_drive" else DRIVE_PHASE_DELIVERY
             if phase == DRIVE_PHASE_PICKUP:
@@ -157,14 +143,7 @@ class DrivingState(State):
                 route = ctx.world.route_from_cities(data["route_cities"])
             if route is None:
                 return None
-            job = Job(cargo, float(j["weight_tons"]), j["origin"],
-                      j["origin_location"], j["destination"],
-                      float(j["distance_mi"]), float(j["pay"]),
-                      float(j["deadline_game_h"]),
-                      market_mult=float(j.get("market_mult", 1.0)),
-                      origin_type=str(j.get("origin_type", "terminal")),
-                      destination_location=str(j.get("destination_location", "")),
-                      destination_type=str(j.get("destination_type", "terminal")))
+            job = job_from_payload(j)
             state = cls(ctx, job, route, trip_seed=int(data["trip_seed"]),
                         phase=phase)
             state.resumed = True
@@ -972,13 +951,10 @@ class DrivingState(State):
         self.ctx.replace_state(FacilityArrivalState(self.ctx, self))
 
     def _destination_facility_text(self) -> str:
-        if self.job.destination_location:
-            return (f"{facility_label(self.job.destination_type)} "
-                    f"{self.job.destination_location} in {self.job.destination}")
-        return self.job.destination
+        return self.job.destination_facility_text()
 
     def _pickup_facility_text(self) -> str:
-        return f"{facility_label(self.job.origin_type)} {self.job.origin_location}"
+        return self.job.origin_facility_text()
 
     def _pickup_progress_summary(self) -> str:
         return (f"{self.trip.remaining_miles:.1f} miles remaining of "

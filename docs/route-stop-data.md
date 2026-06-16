@@ -385,10 +385,13 @@ or roadside assistance unless the source metadata backs that capability.
 
 ## Future Freight Data
 
-FAF/BTS freight datasets can improve market realism, lane demand, and commodity
-flows later. That is separate from corridor realism: the current goal is to make
-the driven itinerary feel grounded. A future market pass should map FAF/BTS
-flows into job generation weights while keeping the offline runtime model.
+FAF/BTS freight datasets now guide the checked-in market and facility model
+without becoming runtime dependencies. See
+[`docs/freight-market-facilities.md`](freight-market-facilities.md) for the
+metro-market taxonomy, source strategy, representative facility templates, and
+role-aware job generation rules. Corridor realism still owns the driven
+itinerary: new freight must use metadata-backed routes, and freight-market
+expansion must not silently invent unsupported road conditions.
 
 ## Accessibility Impact
 

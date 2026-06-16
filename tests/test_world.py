@@ -104,9 +104,17 @@ def test_every_city_has_locations_with_known_cargo(world):
     for city in world.cities.values():
         assert city.locations, f"{city.name} has no freight locations"
         for loc in city.locations:
+            assert loc.id, f"{loc.name} has no stable id"
+            assert loc.city == city.name
             assert loc.type in FREIGHT_LOCATION_TYPES, f"unknown location type {loc.type}"
+            assert loc.spoken_name
+            assert loc.source_note
+            assert loc.roles
+            assert loc.ships or loc.receives
             for cargo in loc.cargo:
                 assert cargo in CARGO_CATALOG, f"unknown cargo {cargo} at {loc.name}"
+            for cargo in loc.ships + loc.receives:
+                assert cargo in CARGO_CATALOG, f"unknown role cargo {cargo} at {loc.name}"
 
 
 def test_home_terminal_prefers_explicit_terminal_and_falls_back_to_yard(world):
@@ -126,15 +134,33 @@ def test_freight_location_categories_are_live(world):
     types = {loc.type for city in world.cities.values() for loc in city.locations}
     expected = {
         "air_cargo",
-        "food_terminal",
-        "industrial_park",
-        "intermodal",
-        "manufacturing",
-        "port",
-        "retail_distribution",
-        "warehouse",
+        "automotive_plant",
+        "chemical_petroleum_terminal",
+        "cold_storage",
+        "company_yard",
+        "construction_materials_yard",
+        "cross_dock",
+        "dry_warehouse",
+        "farm_elevator",
+        "food_processor",
+        "grocery_retail_dc",
+        "intermodal_ramp",
+        "lumber_paper",
+        "manufacturing_plant",
+        "mine_quarry",
+        "parcel_hub",
+        "port_terminal",
+        "steel_industrial",
     }
     assert expected <= types
+
+
+def test_each_metro_expands_to_representative_facilities(world):
+    for city in world.cities.values():
+        assert len(city.locations) >= 6
+        assert city.market_tags
+        assert any(loc.template for loc in city.locations)
+        assert any(loc.type in {"company_yard", "terminal"} for loc in city.locations)
 
 
 def test_route_stops_have_trucker_relevant_types(world):
@@ -175,6 +201,11 @@ def test_route_stops_have_explicit_valid_positions(world):
 
 def test_poi_names_are_curated_not_raw_osm_dump(world):
     raw_markers = ("osm_id", "amenity=", "highway=", "operator=", "node/", "way/")
+    for city in world.cities.values():
+        for facility in city.locations:
+            lowered = facility.name.lower()
+            assert not any(marker in lowered for marker in raw_markers), facility.name
+            assert facility.spoken_name
     for leg in world.legs:
         for stop in leg.stops:
             lowered = stop.name.lower()
@@ -213,6 +244,27 @@ def test_world_rejects_raw_source_text_in_player_poi_name():
     }
 
     with pytest.raises(ValueError, match="raw OSM"):
+        World(data)
+
+
+def test_world_rejects_raw_source_text_in_player_facility_name():
+    import pytest
+
+    from freight_fate.data.world import World
+
+    data = {
+        "cities": {
+            "A": {"state": "One", "region": "midwest", "lat": 40, "lon": -90,
+                  "locations": [{"name": "warehouse way/123", "type": "terminal",
+                                 "cargo": ["general"]}]},
+            "B": {"state": "One", "region": "midwest", "lat": 41, "lon": -91,
+                  "locations": [{"name": "B Yard", "type": "terminal",
+                                 "cargo": ["general"]}]},
+        },
+        "legs": [],
+    }
+
+    with pytest.raises(ValueError, match="raw source text"):
         World(data)
 
 
