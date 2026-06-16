@@ -184,14 +184,18 @@ def test_generated_notes_flatten_to_speakable_lines(tmp_path, monkeypatch):
     release_notes = load_release_notes_module()
     repo = make_repo(
         tmp_path,
-        changelog("### Added\n- **Cruise control.** See [manual](https://example.test).\n"),
+        changelog(
+            "### Added\n"
+            "- **Cruise control.** See [manual](https://example.test)\n"
+            "  before setting speed.\n"
+        ),
     )
     monkeypatch.setattr(release_notes, "ROOT", repo)
 
     spoken = flatten_markdown(release_notes.nightly_notes())
 
     assert "Added" in spoken
-    assert "Cruise control. See manual." in spoken
+    assert "Cruise control. See manual before setting speed." in spoken
     assert all("**" not in line and "https://" not in line for line in spoken)
 
 

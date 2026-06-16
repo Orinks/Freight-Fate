@@ -130,6 +130,16 @@ def normalize_entry(entry: str) -> str:
     return entry.casefold().strip()
 
 
+def format_entry(entry: str) -> str:
+    lines = [line.strip() for line in entry.splitlines() if line.strip()]
+    if not lines:
+        return ""
+    marker_match = re.match(r"^([-*+]\s+)(.*)$", lines[0])
+    marker = marker_match.group(1) if marker_match else "- "
+    first_text = marker_match.group(2) if marker_match else lines[0]
+    return marker + " ".join([first_text, *lines[1:]])
+
+
 def format_sections(sections: list[ChangelogSection]) -> str:
     if not sections:
         return "- No user-facing changes"
@@ -140,7 +150,9 @@ def format_sections(sections: list[ChangelogSection]) -> str:
 
     chunks: list[str] = []
     for title in ordered_titles:
-        entries = "\n".join(dict.fromkeys(by_title[title]))
+        entries = "\n".join(
+            entry for entry in dict.fromkeys(format_entry(e) for e in by_title[title]) if entry
+        )
         chunks.append(f"## {title}\n{entries}")
     return "\n\n".join(chunks).strip()
 
