@@ -29,6 +29,38 @@ REQUIRED_METADATA_FIELDS = (
     "grade_segments",
     "pois",
 )
+HIGH_PRIORITY_REMAINING_CORRIDORS = (
+    {
+        "from": "Philadelphia",
+        "to": "Pittsburgh",
+        "label": "PA Turnpike / I-76 Allegheny corridor",
+        "why": "major toll corridor with service plazas, grades, tunnels, and emergency service modeling",
+    },
+    {
+        "from": "Cleveland",
+        "to": "Chicago",
+        "label": "Ohio/Indiana Turnpike and I-80/I-90 corridor",
+        "why": "major toll and service-plaza-heavy Midwest freight corridor",
+    },
+    {
+        "from": "New York",
+        "to": "Boston",
+        "label": "I-95 / New England toll corridor",
+        "why": "extends Northeast toll and service-plaza realism beyond the current NY-Philadelphia batch",
+    },
+    {
+        "from": "Philadelphia",
+        "to": "Baltimore",
+        "label": "I-95 Northeast Corridor south of Philadelphia",
+        "why": "connects the current NJ/Philadelphia lane to the broader Northeast freight network",
+    },
+    {
+        "from": "Pittsburgh",
+        "to": "Cleveland",
+        "label": "PA/Ohio Turnpike connector corridor",
+        "why": "ties the PA Turnpike batch into the Ohio Turnpike network",
+    },
+)
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -196,6 +228,12 @@ def coverage_report(data: dict[str, Any]) -> dict[str, Any]:
             "runtime_network_calls": False,
             "legacy_full_graph_available_for_old_saves": True,
         },
+        "current_batch_notes": [
+            "New York to Philadelphia includes source-backed NJ Turnpike-style "
+            "service plaza POIs. PA Turnpike and Ohio/Indiana Turnpike "
+            "corridors are not yet playable metadata-backed lanes.",
+        ],
+        "high_priority_remaining_corridors": _priority_status(leg_reports),
         "totals": totals,
         "percentages": percentages,
         "legs": leg_reports,
@@ -224,6 +262,17 @@ def format_coverage_report(report: dict[str, Any]) -> str:
         f"{totals['state_crossings_expected']} "
         f"({pct.get('state_crossings_expected_present', 0.0):.1f}%)",
         "",
+        "Current toll-corridor note:",
+        "- New York to Philadelphia has NJ Turnpike-style service plaza POIs.",
+        "- PA Turnpike and Ohio/Indiana Turnpike corridors are not complete yet.",
+        "",
+        "High-priority remaining corridors:",
+    ]
+    for item in report["high_priority_remaining_corridors"]:
+        status = "playable" if item["playable"] else "missing " + ", ".join(item["missing"])
+        lines.append(f"- {item['label']}: {status}")
+    lines += [
+        "",
         "Incomplete legs:",
     ]
     for leg in report["missing_playable"][:25]:
@@ -249,6 +298,24 @@ def _stop_actions(stop: dict[str, Any]) -> tuple[str, ...]:
         "repair_shop": ("park", "save", "repair"),
     }
     return tuple(stop.get("actions") or default_actions.get(stop.get("type"), ()))
+
+
+def _priority_status(leg_reports: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    out = []
+    for priority in HIGH_PRIORITY_REMAINING_CORRIDORS:
+        leg = next(
+            (
+                item for item in leg_reports
+                if item["from"] == priority["from"] and item["to"] == priority["to"]
+            ),
+            None,
+        )
+        out.append({
+            **priority,
+            "playable": bool(leg and leg["playable"]),
+            "missing": [] if leg is None else leg["missing"],
+        })
+    return out
 
 
 def _osrm_smoke(data: dict[str, Any], from_city: str, to_city: str) -> dict[str, Any]:

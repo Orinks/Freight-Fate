@@ -13,6 +13,14 @@ for unsupported lanes. As of this slice the network has 106 legs, 9 of which
 are playable metadata-backed lanes; run the coverage command below for the
 current machine-readable count.
 
+Current toll-corridor coverage is partial. The New York to Philadelphia
+supported lane includes NJ Turnpike-style service plaza POIs from New Jersey
+Turnpike Authority source notes, but the PA Turnpike / I-76 Philadelphia to
+Pittsburgh leg is not metadata-backed yet. The Ohio/Indiana Turnpike style
+Cleveland to Chicago leg, the New York to Boston I-95/New England toll
+corridor, Philadelphia to Baltimore I-95, and the Pittsburgh to Cleveland
+PA/Ohio connector are high-priority remaining corridors.
+
 ## Schema
 
 Route stops and corridor details live on a leg in
@@ -267,6 +275,19 @@ intersections, and Overpass candidate responses; resume from the manifest after
 each small batch. If public demo capacity is not appropriate for all 106 legs,
 use self-hosted OSRM/Overpass or alternate mirrors and keep the same checked-in
 metadata schema.
+
+High-priority toll and service-plaza-heavy corridors to enrich next:
+
+- PA Turnpike / I-76: Philadelphia to Pittsburgh.
+- Ohio/Indiana Turnpike and I-80/I-90: Cleveland to Chicago.
+- I-95 / New England toll corridor: New York to Boston.
+- I-95 Northeast Corridor south of Philadelphia: Philadelphia to Baltimore.
+- PA/Ohio Turnpike connector: Pittsburgh to Cleveland.
+
+For these corridors, model toll-road service plazas and authorized emergency
+road-service providers as explicit source-backed POIs/actions. Do not represent
+them as generic public rest areas, and do not expose repair, towing, or
+roadside assistance unless the source metadata backs that capability.
 
 ## Update Process
 
