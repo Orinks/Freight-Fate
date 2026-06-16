@@ -12,6 +12,7 @@ venv/
 # Tooling caches
 .pytest_cache/
 .ruff_cache/
+.route-cache/
 .coverage
 coverage.xml
 htmlcov/
