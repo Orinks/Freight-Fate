@@ -102,11 +102,34 @@ class CityMenuState(MenuState):
 
     def _job_board(self) -> None:
         p = self.ctx.profile
-        p.market.advance_to(p.market_day())
-        jobs = self._board.offers(p.current_city, p.career.endorsements,
-                                  level=p.career.level, market=p.market)
+        market_changed = p.market.advance_to(p.market_day())
+        key = self._dispatch_cache_key()
+        cache = p.dispatch_board_cache if not market_changed else None
+        if cache and cache.get("key") == key:
+            jobs = [_job_from_payload(payload)
+                    for payload in cache.get("jobs", [])]
+        else:
+            jobs = self._board.offers(p.current_city, p.career.endorsements,
+                                      level=p.career.level, market=p.market)
+            p.dispatch_board_cache = {
+                "key": key,
+                "jobs": [_job_payload(job) for job in jobs],
+            }
+            self.ctx.save_profile()
         self._jobs_cache = jobs
         self.ctx.push_state(JobBoardState(self.ctx, jobs))
+
+    def _dispatch_cache_key(self) -> dict:
+        p = self.ctx.profile
+        return {
+            "city": p.current_city,
+            "market_day": p.market_day(),
+            "market_seed": p.market.seed,
+            "market_state_day": p.market.day,
+            "level": p.career.level,
+            "endorsements": sorted(p.career.endorsements),
+            "count": 5,
+        }
 
     def _garage_label(self) -> str:
         p = self.ctx.profile
@@ -449,6 +472,7 @@ class JobBoardState(MenuState):
         route = self.ctx.world.facility_approach_route(job.origin, job.origin_location)
         terminal = self.ctx.world.home_terminal(p.current_city)
         driving = DrivingState(self.ctx, job, route, phase=DRIVE_PHASE_PICKUP)
+        p.dispatch_board_cache = None
         p.active_trip = driving.snapshot()
         self.ctx.save_profile()
         self.ctx.say(
@@ -625,6 +649,7 @@ class PickupFacilityState(MenuState):
 
     def _cancel(self) -> None:
         self.ctx.profile.active_trip = None
+        self.ctx.profile.dispatch_board_cache = None
         self.ctx.save_profile()
         terminal = self.ctx.world.home_terminal(self.ctx.profile.current_city)
         self.ctx.say(f"Pickup canceled. Returned to {terminal.name}.",

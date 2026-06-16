@@ -71,6 +71,38 @@ def test_accepting_job_starts_drivable_pickup_leg():
         app.shutdown()
 
 
+def test_dispatch_board_stays_stable_when_reopened():
+    from freight_fate.app import App
+    from freight_fate.states.city import CityMenuState, JobBoardState
+    from freight_fate.states.main_menu import MainMenuState
+
+    app = App()
+    try:
+        app.push_state(MainMenuState(app.ctx))
+        while app.state.items[app.state.index].text != "New career":
+            app.state.handle_event(key_event(pygame.K_DOWN))
+        app.state.handle_event(key_event(pygame.K_RETURN))
+        app.state.handle_event(key_event(pygame.K_RETURN))  # default name
+        app.state.handle_event(key_event(pygame.K_RETURN))  # default home terminal
+
+        assert isinstance(app.state, CityMenuState)
+        app.state.handle_event(key_event(pygame.K_RETURN))  # dispatch board
+        assert isinstance(app.state, JobBoardState)
+        first_board = [job.describe() for job in app.state.jobs]
+        assert first_board
+        assert app.ctx.profile.dispatch_board_cache
+
+        app.state.handle_event(key_event(pygame.K_ESCAPE))  # back to terminal
+        assert isinstance(app.state, CityMenuState)
+        app.state.handle_event(key_event(pygame.K_RETURN))  # dispatch board again
+        assert isinstance(app.state, JobBoardState)
+        second_board = [job.describe() for job in app.state.jobs]
+
+        assert second_board == first_board
+    finally:
+        app.shutdown()
+
+
 def test_facility_approach_route_has_real_mileage_and_label(world):
     jobs = world.cities["Chicago"].locations
     route = world.facility_approach_route("Chicago", jobs[0].name)
