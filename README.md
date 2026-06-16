@@ -183,6 +183,17 @@ uv run ruff check src tests tools
 uv run python tools/generate_audio.py   # regenerate all audio from source
 ```
 
+### Changelog and snapshots
+
+Player-facing changes should add a short bullet under `## Unreleased` in
+`CHANGELOG.md`. Developer snapshots use those curated entries for release
+notes; they do not turn git commit subjects into player-facing copy.
+
+Scheduled snapshots build only when new curated Unreleased entries are present,
+or when a commit message includes `nightly: build` or `[nightly build]` for an
+intentional snapshot refresh. Use `changelog: none` or `[skip changelog]` only
+when every commit in the change set is non-user-facing.
+
 The entire sound library is produced by `tools/generate_audio.py` with seeded
 randomness — see [CREDITS.md](src/freight_fate/assets/sounds/CREDITS.md).
 

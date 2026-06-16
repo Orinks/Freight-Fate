@@ -193,3 +193,15 @@ def test_generated_notes_flatten_to_speakable_lines(tmp_path, monkeypatch):
     assert "Added" in spoken
     assert "Cruise control. See manual." in spoken
     assert all("**" not in line and "https://" not in line for line in spoken)
+
+
+def test_build_workflow_uses_curated_nightly_decision_and_notes():
+    workflow = (
+        Path(__file__).resolve().parents[1] / ".github" / "workflows" / "build.yml"
+    ).read_text(encoding="utf-8")
+
+    assert "tools/release_notes.py should-build-nightly" in workflow
+    assert "--exclude-notes previous-notes.md" in workflow
+    assert "--exclude-stable-notes latest-stable-notes.md" in workflow
+    assert "tools/release_notes.py nightly" in workflow
+    assert "git diff --name-only \"$LAST_TAG\"..HEAD" not in workflow
