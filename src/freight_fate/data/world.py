@@ -141,6 +141,50 @@ class Stop:
 
 
 @dataclass(frozen=True)
+class RoutePoint:
+    at_mi: float
+    lat: float
+    lon: float
+
+
+@dataclass(frozen=True)
+class StateCrossing:
+    at_mi: float
+    from_state: str
+    state: str
+    place: str
+    source: str = ""
+
+
+@dataclass(frozen=True)
+class RouteCheckpoint:
+    name: str
+    at_mi: float
+    type: str = "place"
+    state: str = ""
+    highway: str = ""
+    source: str = ""
+
+    @property
+    def label(self) -> str:
+        if self.type == "highway_change":
+            return "highway change"
+        if self.type == "state_line":
+            return "state line"
+        return "corridor place"
+
+    @property
+    def spoken_name(self) -> str:
+        return f"{self.label}: {self.name}"
+
+
+@dataclass(frozen=True)
+class StateMileage:
+    state: str
+    miles: float
+
+
+@dataclass(frozen=True)
 class City:
     name: str
     state: str
@@ -158,6 +202,10 @@ class Leg:
     highway: str
     terrain: str  # flat | hills | mountain
     stops: tuple[Stop, ...]
+    route_points: tuple[RoutePoint, ...] = ()
+    state_crossings: tuple[StateCrossing, ...] = ()
+    checkpoints: tuple[RouteCheckpoint, ...] = ()
+    state_miles: tuple[StateMileage, ...] = ()
 
     def other(self, city: str) -> str:
         return self.b if city == self.a else self.a
@@ -191,6 +239,14 @@ class Route:
         return [s for leg in self.legs for s in leg.stops]
 
     @property
+    def state_crossings(self) -> list[StateCrossing]:
+        return [c for leg in self.legs for c in leg.state_crossings]
+
+    @property
+    def checkpoints(self) -> list[RouteCheckpoint]:
+        return [c for leg in self.legs for c in leg.checkpoints]
+
+    @property
     def terrain_summary(self) -> str:
         kinds = {leg.terrain for leg in self.legs}
         if kinds == {"flat"}:
@@ -220,9 +276,28 @@ class World:
             miles = float(leg["miles"])
             stops = tuple(_parse_stop(s, miles, leg["from"], leg["to"])
                           for s in leg.get("stops", ()))
+            corridor = leg.get("corridor", {})
+            route_points = tuple(
+                _parse_route_point(p, miles, leg["from"], leg["to"])
+                for p in corridor.get("route_points", ())
+            )
+            state_crossings = tuple(
+                _parse_state_crossing(c, miles, leg["from"], leg["to"],
+                                      self.cities[leg["from"]].state)
+                for c in corridor.get("state_crossings", ())
+            )
+            checkpoints = tuple(
+                _parse_checkpoint(c, miles, leg["from"], leg["to"])
+                for c in corridor.get("checkpoints", ())
+            )
+            state_miles = tuple(
+                _parse_state_mileage(m, leg["from"], leg["to"])
+                for m in corridor.get("state_miles", ())
+            )
             self.legs.append(
                 Leg(leg["from"], leg["to"], miles, leg["highway"],
-                    leg["terrain"], stops)
+                    leg["terrain"], stops, route_points, state_crossings,
+                    checkpoints, state_miles)
             )
         self._adjacency: dict[str, list[Leg]] = {name: [] for name in self.cities}
         for leg in self.legs:
@@ -382,6 +457,73 @@ def _parse_stop(raw, leg_miles: float, from_city: str, to_city: str) -> Stop:
         )
     source = str(raw.get("source", "")).strip()
     return Stop(name, at_mi, stop_type, source)
+
+
+def _parse_route_point(raw, leg_miles: float, from_city: str, to_city: str) -> RoutePoint:
+    if not isinstance(raw, dict):
+        raise ValueError(f"{from_city} to {to_city} route point must be an object")
+    at_mi = _parse_at_mi(raw, leg_miles, from_city, to_city, "route point",
+                         allow_endpoints=True)
+    lat = float(raw["lat"])
+    lon = float(raw["lon"])
+    if not -90.0 <= lat <= 90.0 or not -180.0 <= lon <= 180.0:
+        raise ValueError(f"{from_city} to {to_city} route point has invalid coordinates")
+    return RoutePoint(at_mi, lat, lon)
+
+
+def _parse_state_crossing(raw, leg_miles: float, from_city: str, to_city: str,
+                          default_from_state: str) -> StateCrossing:
+    if not isinstance(raw, dict):
+        raise ValueError(f"{from_city} to {to_city} state crossing must be an object")
+    at_mi = _parse_at_mi(raw, leg_miles, from_city, to_city, "state crossing")
+    state = str(raw.get("state", "")).strip()
+    if not state:
+        raise ValueError(f"{from_city} to {to_city} has a state crossing without a state")
+    from_state = str(raw.get("from_state", "")).strip() or default_from_state
+    place = str(raw.get("place", "")).strip() or "state line"
+    source = str(raw.get("source", "")).strip()
+    return StateCrossing(at_mi, from_state, state, place, source)
+
+
+def _parse_checkpoint(raw, leg_miles: float, from_city: str,
+                      to_city: str) -> RouteCheckpoint:
+    if not isinstance(raw, dict):
+        raise ValueError(f"{from_city} to {to_city} checkpoint must be an object")
+    name = str(raw.get("name", "")).strip()
+    if not name:
+        raise ValueError(f"{from_city} to {to_city} has a checkpoint without a name")
+    at_mi = _parse_at_mi(raw, leg_miles, from_city, to_city, f"checkpoint {name!r}")
+    checkpoint_type = str(raw.get("type", "")).strip() or "place"
+    state = str(raw.get("state", "")).strip()
+    highway = str(raw.get("highway", "")).strip()
+    source = str(raw.get("source", "")).strip()
+    return RouteCheckpoint(name, at_mi, checkpoint_type, state, highway, source)
+
+
+def _parse_state_mileage(raw, from_city: str, to_city: str) -> StateMileage:
+    if not isinstance(raw, dict):
+        raise ValueError(f"{from_city} to {to_city} state mileage must be an object")
+    state = str(raw.get("state", "")).strip()
+    if not state:
+        raise ValueError(f"{from_city} to {to_city} has state mileage without a state")
+    miles = float(raw["miles"])
+    if miles <= 0.0:
+        raise ValueError(f"{from_city} to {to_city} state mileage must be positive")
+    return StateMileage(state, miles)
+
+
+def _parse_at_mi(raw: dict, leg_miles: float, from_city: str, to_city: str,
+                 label: str, *, allow_endpoints: bool = False) -> float:
+    if "at_mi" not in raw:
+        raise ValueError(f"{from_city} to {to_city} {label} is missing explicit at_mi")
+    at_mi = float(raw["at_mi"])
+    in_range = 0.0 <= at_mi <= leg_miles if allow_endpoints else 0.0 < at_mi < leg_miles
+    if not in_range:
+        raise ValueError(
+            f"{from_city} to {to_city} {label} has at_mi {at_mi}, "
+            f"outside leg mileage 0-{leg_miles}"
+        )
+    return at_mi
 
 
 def _classify_stop(name: str) -> str:

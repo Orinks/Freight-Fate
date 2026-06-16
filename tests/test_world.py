@@ -157,6 +157,20 @@ def test_route_stops_have_explicit_valid_positions(world):
             assert 0.0 < stop.at_mi < leg.miles, f"{leg.a}-{leg.b}: {stop}"
 
 
+def test_corridor_metadata_supports_offline_itineraries(world):
+    route = world.route_from_cities(["Chicago", "Indianapolis"])
+    leg = route.legs[0]
+
+    assert leg.route_points
+    assert leg.route_points[0].at_mi == 0.0
+    assert leg.route_points[-1].at_mi == leg.miles
+    assert [crossing.state for crossing in leg.state_crossings] == ["Indiana"]
+    assert leg.state_crossings[0].at_mi == 33.0
+    assert any(checkpoint.name == "Gary and Hammond industrial corridor"
+               for checkpoint in leg.checkpoints)
+    assert sum(state_miles.miles for state_miles in leg.state_miles) == leg.miles
+
+
 def test_world_rejects_missing_stop_position():
     import pytest
 

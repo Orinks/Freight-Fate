@@ -1523,6 +1523,78 @@
       "miles": 184,
       "highway": "I-65",
       "terrain": "flat",
+      "corridor": {
+        "source": "Development-time OSRM route geometry over OpenStreetMap, checked in for offline runtime use.",
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 41.8781,
+            "lon": -87.6298
+          },
+          {
+            "at_mi": 23.0,
+            "lat": 41.5909,
+            "lon": -87.3372
+          },
+          {
+            "at_mi": 33.0,
+            "lat": 41.5061,
+            "lon": -87.4717
+          },
+          {
+            "at_mi": 71.0,
+            "lat": 40.9456,
+            "lon": -87.1509
+          },
+          {
+            "at_mi": 122.0,
+            "lat": 40.4167,
+            "lon": -86.8753
+          },
+          {
+            "at_mi": 184.0,
+            "lat": 39.7684,
+            "lon": -86.1581
+          }
+        ],
+        "state_crossings": [
+          {
+            "at_mi": 33.0,
+            "from_state": "Illinois",
+            "state": "Indiana",
+            "place": "the I-65 state line south of Hammond",
+            "source": "OSRM/OSM development-time geometry and public state boundary review."
+          }
+        ],
+        "checkpoints": [
+          {
+            "name": "Gary and Hammond industrial corridor",
+            "type": "place",
+            "state": "Indiana",
+            "highway": "I-65 south",
+            "at_mi": 36.0,
+            "source": "OSRM/OSM development-time route geometry."
+          },
+          {
+            "name": "Lafayette",
+            "type": "place",
+            "state": "Indiana",
+            "highway": "I-65 south",
+            "at_mi": 118.0,
+            "source": "OSRM/OSM development-time route geometry."
+          }
+        ],
+        "state_miles": [
+          {
+            "state": "Illinois",
+            "miles": 33.0
+          },
+          {
+            "state": "Indiana",
+            "miles": 151.0
+          }
+        ]
+      },
       "stops": [
         {
           "name": "Loves Travel Stop Lafayette",
