@@ -44,6 +44,8 @@ jobs:
 
       - name: Check build conditions
         id: check
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           VERSION=$(python3 -c "import tomllib; print(tomllib.load(open('pyproject.toml', 'rb'))['project']['version'])")
 
@@ -71,16 +73,19 @@ jobs:
             if [ -z "$LAST_TAG" ]; then
               echo "should_build=true" >> $GITHUB_OUTPUT
             else
-              USER_FACING_PATHS=$(git diff --name-only "$LAST_TAG"..HEAD -- \
-                src/ \
-                pyproject.toml \
-                tools/build_release.py | sed '/^$/d')
-
-              if [ -n "$USER_FACING_PATHS" ]; then
-                echo "should_build=true" >> $GITHUB_OUTPUT
-              else
-                echo "should_build=false" >> $GITHUB_OUTPUT
+              gh release view "$LAST_TAG" --json body -q .body > previous-notes.md || true
+              : > latest-stable-notes.md
+              LATEST_STABLE_TAG=$(gh api "repos/${GITHUB_REPOSITORY}/releases" \
+                --jq '[.[] | select(.draft == false and .prerelease == false)][0].tag_name // ""')
+              if [ -n "$LATEST_STABLE_TAG" ]; then
+                gh release view "$LATEST_STABLE_TAG" --json body -q .body > latest-stable-notes.md || true
               fi
+              python3 tools/release_notes.py should-build-nightly \
+                --previous-tag "$LAST_TAG" \
+                --exclude-notes previous-notes.md \
+                --latest-stable-tag "$LATEST_STABLE_TAG" \
+                --exclude-stable-notes latest-stable-notes.md \
+                >> "$GITHUB_OUTPUT"
             fi
           fi
 
@@ -155,6 +160,7 @@ jobs:
 
       - name: Prepare release notes and checksums
         env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           IS_NIGHTLY: ${{ needs.prepare.outputs.is_nightly }}
           TAG: ${{ needs.prepare.outputs.tag }}
         run: |
@@ -162,8 +168,15 @@ jobs:
 
           if [ "$IS_NIGHTLY" = "true" ]; then
             LAST_TAG=$(git tag --list "nightly-*" --sort=-version:refname | grep -v "^$TAG$" | head -1)
-            python3 tools/release_notes.py nightly \
-              --previous-tag "$LAST_TAG" --output notes.md
+            if [ -n "$LAST_TAG" ]; then
+              gh release view "$LAST_TAG" --json body -q .body > previous-notes.md || true
+              python3 tools/release_notes.py nightly \
+                --previous-tag "$LAST_TAG" \
+                --exclude-notes previous-notes.md \
+                --output notes.md
+            else
+              python3 tools/release_notes.py nightly --output notes.md
+            fi
           else
             python3 tools/release_notes.py stable \
               --version "$TAG" --output notes.md
