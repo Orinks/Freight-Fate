@@ -212,6 +212,9 @@ def test_representative_stops_are_real_world_grounded(world):
         ("San Antonio", "Dallas"): "Road Ranger Waco",
         ("Los Angeles", "San Diego"): "San Onofre Safety Roadside Rest Area",
         ("Des Moines", "Chicago"): "Iowa 80 Truckstop",
+        ("Houston", "Dallas"): "Pilot Travel Center Huntsville",
+        ("Los Angeles", "Fresno"): "Pilot Travel Center Bakersfield",
+        ("Fresno", "Sacramento"): "Flying J Travel Center Ripon",
     }
     for (start, end), stop_name in expected.items():
         route = world.shortest_route(start, end)
@@ -237,10 +240,14 @@ def test_former_legacy_routes_are_now_metadata_supported_for_dispatch(world):
                for job in jobs)
 
 
-def test_formerly_blocked_city_has_supported_dispatch_board(world):
+def test_placeholder_only_routes_stay_off_dispatch_board(world):
     route = world.supported_route("Memphis", "Nashville")
-    assert route is not None
-    assert route.metadata_complete(world)
+    assert route is None
+
+    supported = world.supported_route("Memphis", "Little Rock")
+    assert supported is not None
+    assert supported.metadata_complete(world)
+
     jobs = JobBoard(world, seed=4).offers("Memphis", set(), level=1)
     assert jobs
     assert all(world.supported_route(job.origin, job.destination) is not None

@@ -96,6 +96,7 @@ class RoadStop:
     type: str = "travel_center"
     actions: tuple[str, ...] = ()
     services: tuple[str, ...] = ()
+    parking: str = "unknown"
 
     @property
     def label(self) -> str:
@@ -104,6 +105,16 @@ class RoadStop:
     @property
     def spoken_name(self) -> str:
         return f"{self.label}: {self.name}"
+
+    @property
+    def parking_text(self) -> str:
+        return {
+            "confirmed": "confirmed truck parking",
+            "likely": "likely truck parking",
+            "limited": "limited truck parking",
+            "unknown": "parking not verified",
+            "none": "no truck parking",
+        }.get(self.parking, "parking not verified")
 
 
 @dataclass
@@ -209,11 +220,13 @@ class Trip:
                                                             from_city == leg.a),
             )
             for stop in leg_stops:
+                if not stop.curated or not stop.applies_to_direction(from_city == leg.a):
+                    continue
                 offset = _stop_offset_for_direction(stop.at_mi, leg.miles,
                                                     from_city == leg.a)
                 at = start + offset
                 out.append(RoadStop(stop.name, at, stop.type,
-                                    stop.actions, stop.services))
+                                    stop.actions, stop.services, stop.parking))
         return out
 
     def _build_navigation_cues(self) -> list[NavigationCue]:
@@ -282,13 +295,16 @@ class Trip:
                     f"{toll_text}",
                 ))
             for stop in leg.stops:
+                if not stop.curated or not stop.applies_to_direction(forward):
+                    continue
                 offset = _stop_offset_for_direction(stop.at_mi, leg.miles, forward)
                 cues.append(NavigationCue(
                     f"rest_stop:{i}:{stop.at_mi}:{stop.name}",
                     "rest_stop",
                     start + offset,
                     f"{stop.label} ahead",
-                    f"{stop.label.capitalize()} ahead in 1 mile; press X to take the exit.",
+                    f"{stop.label.capitalize()} ahead in 1 mile; "
+                    f"{stop.parking_label}; press X to take the exit.",
                 ))
         for i, lead in enumerate(self.traffic_leads):
             cues.append(NavigationCue(
@@ -657,6 +673,7 @@ class Trip:
                 self._announced_stops.add(stop.name)
                 self._emit(TripEventKind.STOP_AHEAD,
                            f"{stop.spoken_name} in {ahead:.0f} miles. "
+                           f"{stop.parking_text}. "
                            "Press X to take the exit for it.",
                            stop=stop)
 

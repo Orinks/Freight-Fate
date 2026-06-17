@@ -23,12 +23,16 @@ def test_route_coverage_report_is_machine_readable():
 
     assert report["metadata_contract"]["runtime_network_calls"] is False
     assert report["metadata_contract"]["legacy_full_graph_available_for_old_saves"] is True
-    assert "Full-network route geometry" in report["current_batch_notes"][0]
+    assert report["metadata_contract"]["placeholder_pois_do_not_count_for_dispatch"]
+    assert "Curated truck-stop coverage" in report["current_batch_notes"][0]
     assert report["totals"]["legs"] == 106
-    assert report["totals"]["playable"] == report["totals"]["legs"]
+    assert report["totals"]["playable"] < report["totals"]["legs"]
     assert report["totals"]["route_points"] == report["totals"]["legs"]
     assert report["totals"]["grade_segments"] == report["totals"]["legs"]
-    assert report["totals"]["pois_with_actions"] == report["totals"]["legs"]
+    assert report["totals"]["placeholder_pois"] > 0
+    assert report["totals"]["legs_with_placeholder_only"] > 0
+    assert report["totals"]["legs_with_curated_pois"] < report["totals"]["legs"]
+    assert report["totals"]["legs_with_sufficient_poi_density"] < report["totals"]["legs"]
     assert report["totals"]["state_crossings_expected_present"] == (
         report["totals"]["state_crossings_expected"]
     )
@@ -48,6 +52,17 @@ def test_route_coverage_report_is_machine_readable():
     )
     assert chicago_st_louis["playable"]
     assert chicago_st_louis["missing"] == []
+    assert chicago_st_louis["curated_poi_count"] >= (
+        chicago_st_louis["minimum_curated_pois"]
+    )
+
+    placeholder_only = next(
+        leg for leg in report["legs"]
+        if leg["from"] == "Indianapolis" and leg["to"] == "Nashville"
+    )
+    assert not placeholder_only["playable"]
+    assert placeholder_only["placeholder_poi_count"] == 1
+    assert "curated_pois" in placeholder_only["missing"]
 
     priorities = {
         item["label"]: item

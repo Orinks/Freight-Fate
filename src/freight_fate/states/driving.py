@@ -441,7 +441,7 @@ class DrivingState(State):
         ahead = max(0.0, next_stop.at_mi - self.trip.position_mi)
         verdict = "before" if ahead <= legal_miles else "after"
         return (f"Next legal stop: {next_stop.spoken_name} in {ahead:.0f} miles, "
-                f"{verdict} the next {action} limit.")
+                f"{next_stop.parking_text}, {verdict} the next {action} limit.")
 
     def _speak_weather(self) -> None:
         source = "Live conditions" if self.weather.live else "Currently"
@@ -1145,6 +1145,7 @@ class RestStopState(MenuState):
 
     def announce_entry(self) -> None:
         self.ctx.say(f"{self.stop.spoken_name}. "
+                     f"{self.stop.parking_text}. "
                      f"It is {clock_text(self.driving.trip.current_hour)}. "
                      f"{self.current_text()}")
 

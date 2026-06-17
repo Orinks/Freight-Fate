@@ -164,7 +164,13 @@ def test_each_metro_expands_to_representative_facilities(world):
 
 
 def test_route_stops_have_trucker_relevant_types(world):
-    from freight_fate.data.world import DEFAULT_POI_ACTIONS, POI_ACTIONS, STOP_TYPE_LABELS
+    from freight_fate.data.world import (
+        DEFAULT_POI_ACTIONS,
+        PARKING_CERTAINTY_LABELS,
+        POI_ACTIONS,
+        STOP_DIRECTIONS,
+        STOP_TYPE_LABELS,
+    )
 
     route = world.shortest_route("San Antonio", "Dallas")
     assert route is not None
@@ -173,6 +179,9 @@ def test_route_stops_have_trucker_relevant_types(world):
     assert any(stop.spoken_name.startswith("travel center:") for stop in route.stop_details)
     assert all(stop.source for stop in route.stop_details)
     assert all(stop.actions for stop in route.stop_details)
+    assert all(stop.curated for stop in route.stop_details)
+    assert all(stop.parking in PARKING_CERTAINTY_LABELS for stop in route.stop_details)
+    assert all(set(stop.directions) <= STOP_DIRECTIONS for stop in route.stop_details)
     assert all(set(stop.actions) <= POI_ACTIONS for stop in route.stop_details)
     assert all(set(stop.actions) <= set(DEFAULT_POI_ACTIONS[stop.type])
                for stop in route.stop_details)
@@ -197,6 +206,18 @@ def test_route_stops_have_explicit_valid_positions(world):
     for leg in world.legs:
         for stop in leg.stops:
             assert 0.0 < stop.at_mi < leg.miles, f"{leg.a}-{leg.b}: {stop}"
+            assert stop.directions
+            assert stop.parking
+
+
+def test_placeholder_pois_do_not_make_routes_supported(world):
+    route = world.route_from_cities(["Indianapolis", "Nashville"])
+    assert route is not None
+    assert route.stop_details
+    assert all(not stop.curated for stop in route.stop_details)
+
+    supported = world.supported_route("Indianapolis", "Nashville")
+    assert supported is None
 
 
 def test_poi_names_are_curated_not_raw_osm_dump(world):
@@ -353,17 +374,18 @@ def test_corridor_metadata_supports_offline_itineraries(world):
 
 
 def test_supported_routes_require_complete_corridor_metadata(world):
-    supported = world.supported_route("Chicago", "Indianapolis")
-    assert supported is not None
-    assert supported.metadata_complete(world)
-
-    former_rollout_gap = world.supported_route("Chicago", "St. Louis")
-    assert former_rollout_gap is not None
-    assert former_rollout_gap.metadata_complete(world)
-
-    for leg in world.legs:
-        route = world.supported_route(leg.a, leg.b)
-        assert route is not None, f"{leg.a} to {leg.b} is not dispatch-supported"
+    supported_pairs = [
+        ("Chicago", "Indianapolis"),
+        ("Chicago", "St. Louis"),
+        ("Memphis", "Little Rock"),
+        ("San Antonio", "Dallas"),
+        ("Des Moines", "Chicago"),
+        ("Phoenix", "Los Angeles"),
+        ("Denver", "Salt Lake City"),
+    ]
+    for start, end in supported_pairs:
+        route = world.supported_route(start, end)
+        assert route is not None, f"{start} to {end} is not dispatch-supported"
         assert route.metadata_complete(world)
 
 

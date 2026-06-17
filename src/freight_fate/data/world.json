@@ -1633,7 +1633,12 @@
             "diesel",
             "food",
             "parking"
-          ]
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated"
         }
       ]
     },
@@ -1660,7 +1665,12 @@
             "diesel",
             "food",
             "parking"
-          ]
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated"
         },
         {
           "name": "Woodrow Wilson Service Area",
@@ -1678,7 +1688,12 @@
             "diesel",
             "food",
             "parking"
-          ]
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated"
         }
       ],
       "corridor": {
@@ -1935,7 +1950,12 @@
             "diesel",
             "food",
             "parking"
-          ]
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated"
         },
         {
           "name": "Somerset Service Plaza",
@@ -1953,7 +1973,12 @@
             "diesel",
             "food",
             "parking"
-          ]
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated"
         }
       ]
     },
@@ -2097,7 +2122,12 @@
             "diesel",
             "food",
             "parking"
-          ]
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated"
         }
       ]
     },
@@ -2252,7 +2282,12 @@
             "diesel",
             "food",
             "parking"
-          ]
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated"
         },
         {
           "name": "Rolling Prairie Travel Plaza",
@@ -2270,7 +2305,12 @@
             "diesel",
             "food",
             "parking"
-          ]
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated"
         }
       ]
     },
@@ -2416,6 +2456,30 @@
       },
       "stops": [
         {
+          "name": "Pilot Travel Center Remington",
+          "type": "travel_center",
+          "at_mi": 94.0,
+          "source": "Pilot Flying J Remington official location page, I-65 Exit 201, confirms truck parking: https://locations.pilotflyingj.com/us/in/remington/4154-us-24",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "parking": "confirmed",
+          "directions": [
+            "both"
+          ],
+          "curation": "curated"
+        },
+        {
           "name": "Loves Travel Stop Lafayette",
           "type": "travel_center",
           "at_mi": 122.0,
@@ -2432,7 +2496,12 @@
             "diesel",
             "food",
             "parking"
-          ]
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated"
         }
       ]
     },
@@ -2563,7 +2632,12 @@
           "services": [
             "parking",
             "restrooms"
-          ]
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "unknown",
+          "curation": "placeholder"
         }
       ]
     },
@@ -2697,7 +2771,12 @@
           "services": [
             "parking",
             "restrooms"
-          ]
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "unknown",
+          "curation": "placeholder"
         }
       ]
     },
@@ -2824,7 +2903,12 @@
           "services": [
             "parking",
             "restrooms"
-          ]
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "unknown",
+          "curation": "placeholder"
         }
       ]
     },
@@ -2835,6 +2919,30 @@
       "highway": "I-55",
       "terrain": "flat",
       "stops": [
+        {
+          "name": "Love's Travel Stop Normal",
+          "type": "travel_center",
+          "at_mi": 132.0,
+          "source": "Love's Travel Stop Normal official location page, I-55 Exit 165, lists 111 truck parking spaces: https://www.loves.com/locations/il/normal/loves-travel-stop-normal-867",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "parking": "confirmed",
+          "directions": [
+            "both"
+          ],
+          "curation": "curated"
+        },
         {
           "name": "Funks Grove Rest Area",
           "type": "public_rest_area",
@@ -2849,7 +2957,12 @@
           "services": [
             "parking",
             "restrooms"
-          ]
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "limited",
+          "curation": "curated"
         }
       ],
       "corridor": {
@@ -3082,7 +3195,12 @@
           "services": [
             "parking",
             "restrooms"
-          ]
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "unknown",
+          "curation": "placeholder"
         }
       ]
     },
@@ -3189,7 +3307,12 @@
           "services": [
             "parking",
             "restrooms"
-          ]
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "unknown",
+          "curation": "placeholder"
         }
       ]
     },
@@ -3320,7 +3443,12 @@
           "services": [
             "parking",
             "restrooms"
-          ]
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "unknown",
+          "curation": "placeholder"
         }
       ]
     },
@@ -3345,7 +3473,36 @@
           "services": [
             "parking",
             "restrooms"
-          ]
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "limited",
+          "curation": "curated"
+        },
+        {
+          "name": "Pilot Travel Center Grand Junction",
+          "type": "travel_center",
+          "at_mi": 243.0,
+          "source": "Pilot Flying J Grand Junction official location page, I-70 Exit 26, confirms truck parking: https://locations.pilotflyingj.com/us/co/grand-junction/2195-hwy-6-and-50",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "parking": "confirmed",
+          "directions": [
+            "both"
+          ],
+          "curation": "curated"
         },
         {
           "name": "Love's Travel Stop Green River",
@@ -3364,7 +3521,12 @@
             "diesel",
             "food",
             "parking"
-          ]
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated"
         }
       ],
       "corridor": {
@@ -3599,7 +3761,12 @@
           "services": [
             "parking",
             "restrooms"
-          ]
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "unknown",
+          "curation": "placeholder"
         }
       ]
     },
@@ -3719,7 +3886,12 @@
           "services": [
             "parking",
             "restrooms"
-          ]
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "unknown",
+          "curation": "placeholder"
         }
       ]
     },
@@ -3730,6 +3902,30 @@
       "highway": "I-10",
       "terrain": "hills",
       "stops": [
+        {
+          "name": "TA Tonopah",
+          "type": "travel_center",
+          "at_mi": 51.0,
+          "source": "TravelCenters of America TA Tonopah official page, I-10 Exit 103, lists 407 truck parking spaces: https://www.ta-petro.com/location/az/ta-tonopah/",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "parking": "confirmed",
+          "directions": [
+            "both"
+          ],
+          "curation": "curated"
+        },
         {
           "name": "Love's Travel Stop Quartzsite",
           "type": "travel_center",
@@ -3747,7 +3943,36 @@
             "diesel",
             "food",
             "parking"
-          ]
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated"
+        },
+        {
+          "name": "Flying J Travel Center Ehrenberg",
+          "type": "travel_center",
+          "at_mi": 143.0,
+          "source": "Pilot Flying J Ehrenberg official location page, I-10 Exit 1, confirms truck parking: https://locations.pilotflyingj.com/us/az/ehrenberg/i-10-exit-1-frontage-road-n.",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "parking": "confirmed",
+          "directions": [
+            "both"
+          ],
+          "curation": "curated"
         },
         {
           "name": "Chiriaco Summit Travel Center",
@@ -3766,7 +3991,12 @@
             "diesel",
             "food",
             "parking"
-          ]
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated"
         }
       ],
       "corridor": {
@@ -3990,7 +4220,12 @@
           "services": [
             "parking",
             "restrooms"
-          ]
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "unknown",
+          "curation": "placeholder"
         }
       ]
     },
@@ -4018,7 +4253,12 @@
             "diesel",
             "food",
             "parking"
-          ]
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated"
         },
         {
           "name": "EddieWorld Yermo",
@@ -4037,7 +4277,12 @@
             "diesel",
             "food",
             "parking"
-          ]
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated"
         }
       ],
       "corridor": {
@@ -4247,7 +4492,12 @@
           "services": [
             "parking",
             "restrooms"
-          ]
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "unknown",
+          "curation": "placeholder"
         }
       ]
     },
@@ -4378,7 +4628,12 @@
           "services": [
             "parking",
             "restrooms"
-          ]
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "unknown",
+          "curation": "placeholder"
         }
       ]
     },
@@ -4531,7 +4786,12 @@
           "services": [
             "parking",
             "restrooms"
-          ]
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "unknown",
+          "curation": "placeholder"
         }
       ]
     },
@@ -4638,7 +4898,12 @@
           "services": [
             "parking",
             "restrooms"
-          ]
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "unknown",
+          "curation": "placeholder"
         }
       ]
     },
@@ -4769,7 +5034,12 @@
           "services": [
             "parking",
             "restrooms"
-          ]
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "unknown",
+          "curation": "placeholder"
         }
       ]
     },
@@ -4889,7 +5159,12 @@
           "services": [
             "parking",
             "restrooms"
-          ]
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "unknown",
+          "curation": "placeholder"
         }
       ]
     },
@@ -5023,7 +5298,12 @@
           "services": [
             "parking",
             "restrooms"
-          ]
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "unknown",
+          "curation": "placeholder"
         }
       ]
     },
@@ -5186,7 +5466,12 @@
           "services": [
             "parking",
             "restrooms"
-          ]
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "unknown",
+          "curation": "placeholder"
         }
       ]
     },
@@ -5306,7 +5591,12 @@
           "services": [
             "parking",
             "restrooms"
-          ]
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "unknown",
+          "curation": "placeholder"
         }
       ]
     },
@@ -5426,7 +5716,12 @@
           "services": [
             "parking",
             "restrooms"
-          ]
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "unknown",
+          "curation": "placeholder"
         }
       ]
     },
@@ -5581,7 +5876,12 @@
             "diesel",
             "food",
             "parking"
-          ]
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated"
         }
       ]
     },
@@ -5701,7 +6001,12 @@
           "services": [
             "parking",
             "restrooms"
-          ]
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "unknown",
+          "curation": "placeholder"
         }
       ]
     },
@@ -5832,7 +6137,12 @@
           "services": [
             "parking",
             "restrooms"
-          ]
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "unknown",
+          "curation": "placeholder"
         }
       ]
     },
@@ -5952,7 +6262,12 @@
           "services": [
             "parking",
             "restrooms"
-          ]
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "unknown",
+          "curation": "placeholder"
         }
       ]
     },
@@ -6059,7 +6374,12 @@
           "services": [
             "parking",
             "restrooms"
-          ]
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "unknown",
+          "curation": "placeholder"
         }
       ]
     },
@@ -6190,7 +6510,12 @@
           "services": [
             "parking",
             "restrooms"
-          ]
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "unknown",
+          "curation": "placeholder"
         }
       ]
     },
@@ -6310,7 +6635,12 @@
           "services": [
             "parking",
             "restrooms"
-          ]
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "unknown",
+          "curation": "placeholder"
         }
       ]
     },
@@ -6437,7 +6767,12 @@
           "services": [
             "parking",
             "restrooms"
-          ]
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "unknown",
+          "curation": "placeholder"
         }
       ]
     },
@@ -6557,7 +6892,12 @@
           "services": [
             "parking",
             "restrooms"
-          ]
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "unknown",
+          "curation": "placeholder"
         }
       ]
     },
@@ -6664,7 +7004,12 @@
           "services": [
             "parking",
             "restrooms"
-          ]
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "unknown",
+          "curation": "placeholder"
         }
       ]
     },
@@ -6784,7 +7129,12 @@
           "services": [
             "parking",
             "restrooms"
-          ]
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "unknown",
+          "curation": "placeholder"
         }
       ]
     },
@@ -6891,7 +7241,12 @@
           "services": [
             "parking",
             "restrooms"
-          ]
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "unknown",
+          "curation": "placeholder"
         }
       ]
     },
@@ -6998,7 +7353,12 @@
           "services": [
             "parking",
             "restrooms"
-          ]
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "unknown",
+          "curation": "placeholder"
         }
       ]
     },
@@ -7105,7 +7465,12 @@
           "services": [
             "parking",
             "restrooms"
-          ]
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "unknown",
+          "curation": "placeholder"
         }
       ]
     },
@@ -7236,7 +7601,12 @@
           "services": [
             "parking",
             "restrooms"
-          ]
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "unknown",
+          "curation": "placeholder"
         }
       ]
     },
@@ -7388,7 +7758,12 @@
           "services": [
             "parking",
             "restrooms"
-          ]
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "unknown",
+          "curation": "placeholder"
         }
       ]
     },
@@ -7416,7 +7791,12 @@
             "diesel",
             "food",
             "parking"
-          ]
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated"
         }
       ],
       "corridor": {
@@ -7636,7 +8016,12 @@
           "services": [
             "parking",
             "restrooms"
-          ]
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "unknown",
+          "curation": "placeholder"
         }
       ]
     },
@@ -7767,7 +8152,12 @@
           "services": [
             "parking",
             "restrooms"
-          ]
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "unknown",
+          "curation": "placeholder"
         }
       ]
     },
@@ -7898,7 +8288,12 @@
           "services": [
             "parking",
             "restrooms"
-          ]
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "unknown",
+          "curation": "placeholder"
         }
       ]
     },
@@ -8005,7 +8400,12 @@
           "services": [
             "parking",
             "restrooms"
-          ]
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "unknown",
+          "curation": "placeholder"
         }
       ]
     },
@@ -8016,6 +8416,30 @@
       "highway": "I-40",
       "terrain": "flat",
       "stops": [
+        {
+          "name": "Love's Travel Stop West Memphis",
+          "type": "travel_center",
+          "at_mi": 8.0,
+          "source": "Love's Travel Stop West Memphis official location page, I-40 Exit 280, lists truck services and parking: https://www.loves.com/locations/ar/west-memphis/loves-travel-stop-west-memphis-450",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "parking": "confirmed",
+          "directions": [
+            "both"
+          ],
+          "curation": "curated"
+        },
         {
           "name": "Forrest City I-40 Rest Area",
           "type": "public_rest_area",
@@ -8030,7 +8454,12 @@
           "services": [
             "parking",
             "restrooms"
-          ]
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "limited",
+          "curation": "curated"
         }
       ],
       "corridor": {
@@ -8256,7 +8685,12 @@
           "services": [
             "parking",
             "restrooms"
-          ]
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "unknown",
+          "curation": "placeholder"
         }
       ]
     },
@@ -8376,7 +8810,12 @@
           "services": [
             "parking",
             "restrooms"
-          ]
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "unknown",
+          "curation": "placeholder"
         }
       ]
     },
@@ -8496,7 +8935,12 @@
           "services": [
             "parking",
             "restrooms"
-          ]
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "unknown",
+          "curation": "placeholder"
         }
       ]
     },
@@ -8616,7 +9060,12 @@
           "services": [
             "parking",
             "restrooms"
-          ]
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "unknown",
+          "curation": "placeholder"
         }
       ]
     },
@@ -8710,6 +9159,30 @@
       },
       "stops": [
         {
+          "name": "Pilot Travel Center Huntsville",
+          "type": "travel_center",
+          "at_mi": 73.0,
+          "source": "Pilot Flying J Huntsville official location page, I-45 Exit 118, confirms truck parking: https://locations.pilotflyingj.com/us/tx/huntsville/639-tx-75",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "parking": "confirmed",
+          "directions": [
+            "both"
+          ],
+          "curation": "curated"
+        },
+        {
           "name": "I-45 corridor rest area",
           "type": "public_rest_area",
           "at_mi": 120.0,
@@ -8723,7 +9196,36 @@
           "services": [
             "parking",
             "restrooms"
-          ]
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "unknown",
+          "curation": "placeholder"
+        },
+        {
+          "name": "TA Express Fairfield",
+          "type": "travel_center",
+          "at_mi": 160.0,
+          "source": "TravelCenters of America TA Express Fairfield official page, I-45 Exit 198, lists 102 truck parking spaces: https://www.ta-petro.com/location/tx/ta-express-fairfield/",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "parking": "confirmed",
+          "directions": [
+            "both"
+          ],
+          "curation": "curated"
         }
       ]
     },
@@ -8830,7 +9332,12 @@
           "services": [
             "parking",
             "restrooms"
-          ]
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "unknown",
+          "curation": "placeholder"
         }
       ]
     },
@@ -8855,7 +9362,12 @@
           "services": [
             "parking",
             "restrooms"
-          ]
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "limited",
+          "curation": "curated"
         },
         {
           "name": "Road Ranger Waco",
@@ -8874,7 +9386,12 @@
             "diesel",
             "food",
             "parking"
-          ]
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated"
         },
         {
           "name": "Hill County Safety Rest Area",
@@ -8890,7 +9407,12 @@
           "services": [
             "parking",
             "restrooms"
-          ]
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "limited",
+          "curation": "curated"
         }
       ],
       "corridor": {
@@ -9084,7 +9606,12 @@
           "services": [
             "parking",
             "restrooms"
-          ]
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "unknown",
+          "curation": "placeholder"
         }
       ]
     },
@@ -9204,7 +9731,12 @@
           "services": [
             "parking",
             "restrooms"
-          ]
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "unknown",
+          "curation": "placeholder"
         }
       ]
     },
@@ -9335,7 +9867,12 @@
           "services": [
             "parking",
             "restrooms"
-          ]
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "unknown",
+          "curation": "placeholder"
         }
       ]
     },
@@ -9442,7 +9979,12 @@
           "services": [
             "parking",
             "restrooms"
-          ]
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "unknown",
+          "curation": "placeholder"
         }
       ]
     },
@@ -9549,7 +10091,12 @@
           "services": [
             "parking",
             "restrooms"
-          ]
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "unknown",
+          "curation": "placeholder"
         }
       ]
     },
@@ -9669,7 +10216,12 @@
           "services": [
             "parking",
             "restrooms"
-          ]
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "unknown",
+          "curation": "placeholder"
         }
       ]
     },
@@ -9789,7 +10341,12 @@
           "services": [
             "parking",
             "restrooms"
-          ]
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "unknown",
+          "curation": "placeholder"
         }
       ]
     },
@@ -9817,7 +10374,12 @@
             "diesel",
             "food",
             "parking"
-          ]
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated"
         },
         {
           "name": "TA Sawyer",
@@ -9836,7 +10398,12 @@
             "diesel",
             "food",
             "parking"
-          ]
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated"
         }
       ],
       "corridor": {
@@ -10049,7 +10616,12 @@
           "services": [
             "parking",
             "restrooms"
-          ]
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "unknown",
+          "curation": "placeholder"
         }
       ]
     },
@@ -10172,7 +10744,12 @@
           "services": [
             "parking",
             "restrooms"
-          ]
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "unknown",
+          "curation": "placeholder"
         }
       ]
     },
@@ -10303,7 +10880,12 @@
           "services": [
             "parking",
             "restrooms"
-          ]
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "unknown",
+          "curation": "placeholder"
         }
       ]
     },
@@ -10423,7 +11005,12 @@
           "services": [
             "parking",
             "restrooms"
-          ]
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "unknown",
+          "curation": "placeholder"
         }
       ]
     },
@@ -10554,7 +11141,12 @@
           "services": [
             "parking",
             "restrooms"
-          ]
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "unknown",
+          "curation": "placeholder"
         }
       ]
     },
@@ -10674,7 +11266,12 @@
           "services": [
             "parking",
             "restrooms"
-          ]
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "unknown",
+          "curation": "placeholder"
         }
       ]
     },
@@ -10794,7 +11391,12 @@
           "services": [
             "parking",
             "restrooms"
-          ]
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "unknown",
+          "curation": "placeholder"
         }
       ]
     },
@@ -10914,7 +11516,12 @@
           "services": [
             "parking",
             "restrooms"
-          ]
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "unknown",
+          "curation": "placeholder"
         }
       ]
     },
@@ -10939,7 +11546,12 @@
           "services": [
             "parking",
             "restrooms"
-          ]
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "limited",
+          "curation": "curated"
         }
       ],
       "corridor": {
@@ -11134,7 +11746,12 @@
           "services": [
             "parking",
             "restrooms"
-          ]
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "unknown",
+          "curation": "placeholder"
         }
       ]
     },
@@ -11254,7 +11871,12 @@
           "services": [
             "parking",
             "restrooms"
-          ]
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "unknown",
+          "curation": "placeholder"
         }
       ]
     },
@@ -11370,7 +11992,12 @@
           "services": [
             "parking",
             "restrooms"
-          ]
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "unknown",
+          "curation": "placeholder"
         }
       ]
     },
@@ -11490,7 +12117,12 @@
           "services": [
             "parking",
             "restrooms"
-          ]
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "unknown",
+          "curation": "placeholder"
         }
       ]
     },
@@ -11501,6 +12133,30 @@
       "highway": "I-80",
       "terrain": "flat",
       "stops": [
+        {
+          "name": "Love's Travel Stop Newton",
+          "type": "travel_center",
+          "at_mi": 34.0,
+          "source": "Love's Travel Stop Newton official location page, I-80 Exit 168, lists truck-service amenities: https://www.loves.com/locations/ia/newton/loves-travel-stop-newton-361",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "parking": "confirmed",
+          "directions": [
+            "both"
+          ],
+          "curation": "curated"
+        },
         {
           "name": "Iowa 80 Truckstop",
           "type": "truck_stop",
@@ -11518,7 +12174,36 @@
             "diesel",
             "food",
             "parking"
-          ]
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated"
+        },
+        {
+          "name": "Flying J Travel Center Davenport",
+          "type": "travel_center",
+          "at_mi": 190.0,
+          "source": "Pilot Flying J Davenport official location page, I-80 Exit 292, confirms truck parking: https://locations.pilotflyingj.com/us/ia/davenport/8200-northwest-blvd",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "parking": "confirmed",
+          "directions": [
+            "both"
+          ],
+          "curation": "curated"
         }
       ],
       "corridor": {
@@ -11744,7 +12429,12 @@
           "services": [
             "parking",
             "restrooms"
-          ]
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "unknown",
+          "curation": "placeholder"
         }
       ]
     },
@@ -11864,7 +12554,12 @@
           "services": [
             "parking",
             "restrooms"
-          ]
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "unknown",
+          "curation": "placeholder"
         }
       ]
     },
@@ -11984,7 +12679,12 @@
           "services": [
             "parking",
             "restrooms"
-          ]
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "unknown",
+          "curation": "placeholder"
         }
       ]
     },
@@ -12104,7 +12804,12 @@
           "services": [
             "parking",
             "restrooms"
-          ]
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "unknown",
+          "curation": "placeholder"
         }
       ]
     },
@@ -12224,7 +12929,12 @@
           "services": [
             "parking",
             "restrooms"
-          ]
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "unknown",
+          "curation": "placeholder"
         }
       ]
     },
@@ -12331,7 +13041,12 @@
           "services": [
             "parking",
             "restrooms"
-          ]
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "unknown",
+          "curation": "placeholder"
         }
       ]
     },
@@ -12451,7 +13166,12 @@
           "services": [
             "parking",
             "restrooms"
-          ]
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "unknown",
+          "curation": "placeholder"
         }
       ]
     },
@@ -12571,7 +13291,12 @@
           "services": [
             "parking",
             "restrooms"
-          ]
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "unknown",
+          "curation": "placeholder"
         }
       ]
     },
@@ -12698,7 +13423,12 @@
           "services": [
             "parking",
             "restrooms"
-          ]
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "unknown",
+          "curation": "placeholder"
         }
       ]
     },
@@ -12814,7 +13544,12 @@
           "services": [
             "parking",
             "restrooms"
-          ]
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "unknown",
+          "curation": "placeholder"
         }
       ]
     },
@@ -12934,7 +13669,12 @@
           "services": [
             "parking",
             "restrooms"
-          ]
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "unknown",
+          "curation": "placeholder"
         }
       ]
     },
@@ -13041,7 +13781,12 @@
           "services": [
             "parking",
             "restrooms"
-          ]
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "unknown",
+          "curation": "placeholder"
         }
       ]
     },
@@ -13161,7 +13906,12 @@
           "services": [
             "parking",
             "restrooms"
-          ]
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "unknown",
+          "curation": "placeholder"
         }
       ]
     },
@@ -13268,7 +14018,12 @@
           "services": [
             "parking",
             "restrooms"
-          ]
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "unknown",
+          "curation": "placeholder"
         }
       ]
     },
@@ -13388,7 +14143,12 @@
           "services": [
             "parking",
             "restrooms"
-          ]
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "unknown",
+          "curation": "placeholder"
         }
       ]
     },
@@ -13508,7 +14268,12 @@
           "services": [
             "parking",
             "restrooms"
-          ]
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "unknown",
+          "curation": "placeholder"
         }
       ]
     },
@@ -13615,7 +14380,12 @@
           "services": [
             "parking",
             "restrooms"
-          ]
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "unknown",
+          "curation": "placeholder"
         }
       ]
     },
@@ -13735,7 +14505,12 @@
           "services": [
             "parking",
             "restrooms"
-          ]
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "unknown",
+          "curation": "placeholder"
         }
       ]
     },
@@ -13760,7 +14535,12 @@
           "services": [
             "parking",
             "restrooms"
-          ]
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "limited",
+          "curation": "curated"
         }
       ],
       "corridor": {
@@ -13950,7 +14730,12 @@
           "services": [
             "parking",
             "restrooms"
-          ]
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "unknown",
+          "curation": "placeholder"
         }
       ]
     },
@@ -14057,7 +14842,60 @@
           "services": [
             "parking",
             "restrooms"
-          ]
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "unknown",
+          "curation": "placeholder"
+        },
+        {
+          "name": "Pilot Travel Center Bakersfield",
+          "type": "travel_center",
+          "at_mi": 115.0,
+          "source": "Pilot Flying J Bakersfield official location page, CA-99 corridor, confirms truck parking: https://locations.pilotflyingj.com/us/ca/bakersfield/17047-zachary-ave",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "parking": "confirmed",
+          "directions": [
+            "both"
+          ],
+          "curation": "curated"
+        },
+        {
+          "name": "Love's Travel Stop Tulare",
+          "type": "travel_center",
+          "at_mi": 170.0,
+          "source": "Love's Travel Stop Tulare official listing, CA-99 Exit 85, truck parking: https://www.loves.com/locations/ca/tulare/loves-travel-stop-tulare-382",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "parking": "confirmed",
+          "directions": [
+            "both"
+          ],
+          "curation": "curated"
         }
       ]
     },
@@ -14151,6 +14989,30 @@
       },
       "stops": [
         {
+          "name": "Love's Travel Stop Madera",
+          "type": "travel_center",
+          "at_mi": 25.0,
+          "source": "Love's Madera opening note, Highway 99, lists 95 truck parking spaces: https://www.loves.com/news/2020/february/loves-travel-stops-opens-in-madera-california",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "parking": "confirmed",
+          "directions": [
+            "both"
+          ],
+          "curation": "curated"
+        },
+        {
           "name": "CA-99 corridor rest area",
           "type": "public_rest_area",
           "at_mi": 85.0,
@@ -14164,7 +15026,36 @@
           "services": [
             "parking",
             "restrooms"
-          ]
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "unknown",
+          "curation": "placeholder"
+        },
+        {
+          "name": "Flying J Travel Center Ripon",
+          "type": "travel_center",
+          "at_mi": 110.0,
+          "source": "Pilot Flying J Ripon official location page, Highway 99, confirms truck parking: https://locations.pilotflyingj.com/us/ca/ripon/1501-n-jack-tone-rd",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "parking": "confirmed",
+          "directions": [
+            "both"
+          ],
+          "curation": "curated"
         }
       ]
     },
@@ -14284,7 +15175,12 @@
           "services": [
             "parking",
             "restrooms"
-          ]
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "unknown",
+          "curation": "placeholder"
         }
       ]
     },
@@ -14436,7 +15332,12 @@
           "services": [
             "parking",
             "restrooms"
-          ]
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "unknown",
+          "curation": "placeholder"
         }
       ]
     },
@@ -14543,7 +15444,12 @@
           "services": [
             "parking",
             "restrooms"
-          ]
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "unknown",
+          "curation": "placeholder"
         }
       ]
     },
@@ -14674,7 +15580,12 @@
           "services": [
             "parking",
             "restrooms"
-          ]
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "unknown",
+          "curation": "placeholder"
         }
       ]
     }
