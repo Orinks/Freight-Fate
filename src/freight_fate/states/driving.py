@@ -57,7 +57,8 @@ DRIVE_PHASE_DELIVERY = "delivery"
 
 class DrivingState(State):
     def __init__(self, ctx, job: Job, route: Route, trip_seed: int | None = None,
-                 phase: str = DRIVE_PHASE_DELIVERY) -> None:
+                 phase: str = DRIVE_PHASE_DELIVERY,
+                 start_hour: float | None = None) -> None:
         super().__init__(ctx)
         self.job = job
         self.route = route
@@ -73,9 +74,10 @@ class DrivingState(State):
         region = ctx.world.cities[job.origin].region
         self.weather = WeatherSystem(region, provider=ctx.real_weather_provider())
         self._weather_source_real = ctx.settings.real_weather
+        trip_start_hour = profile.game_hours % 24.0 if start_hour is None else start_hour
         self.trip = Trip(route, self.truck, self.weather,
                          time_scale=ctx.settings.time_scale, seed=self.trip_seed,
-                         start_hour=profile.game_hours % 24.0)
+                         start_hour=trip_start_hour)
         self.tutorial = Tutorial(ctx) if not profile.tutorial_done else None
 
         self.hos = profile.hos          # shift clock lives on the profile
@@ -119,6 +121,7 @@ class DrivingState(State):
                            else "corridor_itinerary"),
             "navigation_schema": 1,
             "trip_seed": self.trip_seed,
+            "start_hour": self.trip.start_hour,
             "position_mi": self.trip.position_mi,
             "game_minutes": self.trip.game_minutes,
             "toll_charges": [
@@ -151,8 +154,14 @@ class DrivingState(State):
             if route is None:
                 return None
             job = job_from_payload(j)
-            state = cls(ctx, job, route, trip_seed=int(data["trip_seed"]),
-                        phase=phase)
+            state = cls(
+                ctx,
+                job,
+                route,
+                trip_seed=int(data["trip_seed"]),
+                phase=phase,
+                start_hour=float(data.get("start_hour", ctx.profile.game_hours % 24.0)),
+            )
             state.resumed = True
             state.start_damage = float(data["start_damage"])
             state.speeding_strikes = int(data["speeding_strikes"])
