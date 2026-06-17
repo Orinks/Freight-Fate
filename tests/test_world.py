@@ -164,7 +164,13 @@ def test_each_metro_expands_to_representative_facilities(world):
 
 
 def test_route_stops_have_trucker_relevant_types(world):
-    from freight_fate.data.world import DEFAULT_POI_ACTIONS, POI_ACTIONS, STOP_TYPE_LABELS
+    from freight_fate.data.world import (
+        DEFAULT_POI_ACTIONS,
+        PARKING_CERTAINTY_LABELS,
+        POI_ACTIONS,
+        STOP_DIRECTIONS,
+        STOP_TYPE_LABELS,
+    )
 
     route = world.shortest_route("San Antonio", "Dallas")
     assert route is not None
@@ -173,6 +179,9 @@ def test_route_stops_have_trucker_relevant_types(world):
     assert any(stop.spoken_name.startswith("travel center:") for stop in route.stop_details)
     assert all(stop.source for stop in route.stop_details)
     assert all(stop.actions for stop in route.stop_details)
+    assert all(stop.curated for stop in route.stop_details)
+    assert all(stop.parking in PARKING_CERTAINTY_LABELS for stop in route.stop_details)
+    assert all(set(stop.directions) <= STOP_DIRECTIONS for stop in route.stop_details)
     assert all(set(stop.actions) <= POI_ACTIONS for stop in route.stop_details)
     assert all(set(stop.actions) <= set(DEFAULT_POI_ACTIONS[stop.type])
                for stop in route.stop_details)
@@ -197,6 +206,22 @@ def test_route_stops_have_explicit_valid_positions(world):
     for leg in world.legs:
         for stop in leg.stops:
             assert 0.0 < stop.at_mi < leg.miles, f"{leg.a}-{leg.b}: {stop}"
+            assert stop.directions
+            assert stop.parking
+
+
+def test_no_placeholder_pois_remain_in_current_route_network(world):
+    placeholders = [
+        (leg.a, leg.b, stop.name)
+        for leg in world.legs
+        for stop in leg.stops
+        if not stop.curated
+    ]
+    assert placeholders == []
+
+    route = world.supported_route("Memphis", "Nashville")
+    assert route is not None
+    assert route.metadata_complete(world)
 
 
 def test_poi_names_are_curated_not_raw_osm_dump(world):
@@ -353,18 +378,63 @@ def test_corridor_metadata_supports_offline_itineraries(world):
 
 
 def test_supported_routes_require_complete_corridor_metadata(world):
-    supported = world.supported_route("Chicago", "Indianapolis")
-    assert supported is not None
-    assert supported.metadata_complete(world)
+    from freight_fate.data.world import (
+        minimum_curated_pois,
+        minimum_fuel_capable_pois,
+    )
 
-    former_rollout_gap = world.supported_route("Chicago", "St. Louis")
-    assert former_rollout_gap is not None
-    assert former_rollout_gap.metadata_complete(world)
+    supported_pairs = [
+        ("Chicago", "Indianapolis"),
+        ("Chicago", "St. Louis"),
+        ("Memphis", "Little Rock"),
+        ("San Antonio", "Dallas"),
+        ("Des Moines", "Chicago"),
+        ("Phoenix", "Los Angeles"),
+        ("Denver", "Salt Lake City"),
+        ("New York", "Boston"),
+        ("Indianapolis", "Nashville"),
+        ("Nashville", "Atlanta"),
+        ("Kansas City", "Denver"),
+        ("Dallas", "Albuquerque"),
+    ]
+    for start, end in supported_pairs:
+        route = world.supported_route(start, end)
+        assert route is not None, f"{start} to {end} is not dispatch-supported"
+        assert route.metadata_complete(world)
 
     for leg in world.legs:
-        route = world.supported_route(leg.a, leg.b)
-        assert route is not None, f"{leg.a} to {leg.b} is not dispatch-supported"
-        assert route.metadata_complete(world)
+        assert world.leg_metadata_complete(leg), f"{leg.a}-{leg.b}"
+        curated = [stop for stop in leg.stops if stop.curated]
+        fuel_capable = [stop for stop in curated if "fuel" in stop.actions]
+        assert len(curated) >= minimum_curated_pois(leg.miles), f"{leg.a}-{leg.b}"
+        assert len(fuel_capable) >= minimum_fuel_capable_pois(leg.miles), f"{leg.a}-{leg.b}"
+        assert all(stop.source for stop in curated), f"{leg.a}-{leg.b}"
+        assert all(stop.actions for stop in curated), f"{leg.a}-{leg.b}"
+        assert all(stop.parking != "unknown" for stop in curated), f"{leg.a}-{leg.b}"
+        route = world.route_from_cities([leg.a, leg.b])
+        assert all(stop.curated for stop in route.stop_details), f"{leg.a}-{leg.b}"
+
+
+def test_tier_one_priority_corridors_keep_multi_stop_curated_fuel_support(world):
+    expected = {
+        ("Atlanta", "Dallas"): 3,
+        ("Dallas", "Albuquerque"): 3,
+        ("Dallas", "St. Louis"): 3,
+        ("Kansas City", "Denver"): 3,
+        ("San Francisco", "Salt Lake City"): 3,
+        ("San Francisco", "Portland"): 3,
+        ("Portland", "Salt Lake City"): 3,
+    }
+
+    for (start, end), minimum_stops in expected.items():
+        route = world.supported_route(start, end)
+        assert route is not None, f"{start} to {end} is not dispatch-supported"
+        curated = route.stop_details
+        fuel_capable = [stop for stop in curated if "fuel" in stop.actions]
+        assert len(curated) >= minimum_stops, f"{start}-{end}"
+        assert len(fuel_capable) >= 2, f"{start}-{end}"
+        assert any(stop.parking == "confirmed" for stop in curated), f"{start}-{end}"
+        assert all(stop.curated for stop in curated), f"{start}-{end}"
 
 
 def test_toll_metadata_is_explicit_and_separate_from_service_plazas(world):

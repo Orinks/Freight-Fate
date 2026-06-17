@@ -94,9 +94,26 @@ def test_trip_announces_stops_ahead(world):
 def test_trip_uses_explicit_stop_positions(world):
     trip, _ = make_trip(world)
 
-    assert [stop.name for stop in trip.stops] == ["Loves Travel Stop Lafayette"]
-    assert trip.stops[0].at_mi == 122.0
-    assert trip.stops[0].at_mi != trip.route.miles / 2
+    assert [stop.name for stop in trip.stops] == [
+        "Pilot Travel Center Remington",
+        "Loves Travel Stop Lafayette",
+    ]
+    assert [stop.at_mi for stop in trip.stops] == [94.0, 122.0]
+    assert all(stop.at_mi != trip.route.miles / 2 for stop in trip.stops)
+    assert all(stop.parking == "confirmed" for stop in trip.stops)
+
+
+def test_trip_uses_only_curated_pois_at_runtime(world):
+    route = world.route_from_cities(["Memphis", "Nashville"])
+    truck = TruckState()
+    weather = WeatherSystem("midwest", seed=1)
+    trip = Trip(route, truck, weather, seed=2)
+
+    assert route.raw_stop_details
+    assert all(stop.curated for stop in route.raw_stop_details)
+    assert route.stop_details
+    assert trip.stops
+    assert {stop.name for stop in trip.stops} <= {stop.name for stop in route.stop_details}
 
 
 def test_trip_places_reverse_route_stops_from_travel_direction(world):
@@ -324,7 +341,10 @@ def test_gps_state_crossing_and_rest_stop_cues_deduplicate(world):
     rest = trip.update(0.0)
     assert any(
         event.kind == TripEventKind.GPS_CUE
-        and event.message == "Travel center ahead in 1 mile; press X to take the exit."
+        and event.message == (
+            "Travel center ahead in 1 mile; confirmed truck parking; "
+            "press X to take the exit."
+        )
         for event in rest
     )
 

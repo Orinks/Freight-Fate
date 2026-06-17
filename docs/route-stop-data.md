@@ -7,12 +7,13 @@ External sources are build-time inputs only.
 
 The product goal is the full existing Freight Fate network, not a smaller map.
 New dispatchable freight is gated to routes whose legs have complete metadata;
-the job board must not silently invent route conditions. As of the full-network
-route-realism pass, all 106 current legs are playable metadata-backed lanes.
-Every leg has checked-in route points, elevation and grade samples, state
-context, and at least one actionable source-noted POI. The legacy/full graph
-remains loadable for old saves and map integrity, but new freight now has access
-to the full existing network without synthetic route fallback.
+the job board must not silently invent route conditions. The route-geometry
+layer now covers all 106 current legs with checked-in route points, elevation
+and grade samples, and state context. Curated truck-stop coverage is intentionally
+reported separately: generated midpoint POIs have been removed from the current
+106-leg network, and the coverage report must stay green before new legs become
+normal dispatch lanes. The legacy/full graph remains loadable for old saves and
+map integrity, but new freight uses the metadata-supported route gate.
 
 Toll-corridor coverage is included in the metadata contract. The New York to
 Philadelphia NJ Turnpike corridor, Philadelphia to Pittsburgh PA Turnpike/I-76,
@@ -90,6 +91,9 @@ Route stops and corridor details live on a leg in
       "at_mi": 122.0,
       "actions": ["park", "save", "fuel", "food", "break", "sleep"],
       "services": ["diesel", "food", "parking"],
+      "parking": "confirmed",
+      "directions": ["both"],
+      "curation": "curated",
       "source": "Official operator page or curated Overpass/OSM review."
     }
   ]
@@ -105,6 +109,23 @@ spread evenly across each leg, which made route amenities feel synthetic. New
 data must provide a named, typed stop with an explicit position inside the leg
 mileage.
 
+`parking` records truck-parking certainty, not a promise that a space is open
+right now. Current values are `confirmed`, `likely`, `limited`, `unknown`, and
+`none`. Use `confirmed` when an official operator or agency source states truck
+parking. Use `limited` for public rest areas or small lots where parking is
+available but capacity is not guaranteed. Use `unknown` only for quarantined or
+incomplete data; unknown parking does not satisfy the dispatch-support contract.
+
+`directions` defaults to `["both"]`. Use `["forward"]` or `["reverse"]` only
+when a ramp, rest area, service plaza, or weigh station applies to one travel
+direction on the stored leg. `at_mi` is still measured from the leg's `from`
+city, and the simulator mirrors it for reverse travel.
+
+`curation` is `curated` for source-backed data and `placeholder` for quarantined
+legacy/generated stop records. Placeholder POIs are preserved only so developers
+can see what still needs research. They do not make a leg dispatch-supported and
+the trip simulator does not speak or offer them as rest stops.
+
 Corridor metadata is optional for old data and saves. When present, it drives
 GPS cues, state-line announcements, intermediate place calls, and progress
 summaries. This is the first step away from treating each route as a plain
@@ -112,9 +133,12 @@ summaries. This is the first step away from treating each route as a plain
 
 For new playable freight, a leg is considered supported only when it has:
 route points, checkpoints, state mileage, state crossings when endpoint states
-differ, elevation samples, grade segments, and at least one actionable POI with
-source notes. A multi-leg route is playable only when every leg meets that
-contract.
+differ, elevation samples, grade segments, and enough curated actionable POIs
+for its length. The current density rule is one curated POI under 160 miles, two
+from 160 through 320 miles, and three beyond 320 miles. Legs at 160 miles or
+longer must also expose at least one curated fuel-capable stop so dispatchable
+freight never treats break-only coverage as enough for long-haul route support.
+A multi-leg route is playable only when every leg meets that contract.
 
 Toll events are route-positioned events, not POIs. Use `toll_events` for toll
 road entry markers, toll plazas, ticket-system settlements, or electronic
@@ -163,7 +187,9 @@ the GPS.
 Traffic placement uses route length, corridor checkpoints, departure time, and
 weather effects. Bad weather can increase traffic pressure and lower the lead
 traffic target speed. These remain deterministic for a seed; they are not
-generic surprise hazards.
+physical route facts. Seeds may vary traffic, weather, construction, delays, CB
+chatter, and hazards, but they must not place truck stops, rest areas, tolls,
+state lines, weigh stations, service plazas, grades, or facility approaches.
 
 Tolls are charged once when the trip passes the route-positioned toll event.
 The spoken cue warns ahead of the point, and the charge event records a
@@ -253,6 +279,24 @@ checks. The checked-in runtime data is static. Examples include:
   https://www.roadrangerusa.com/node/251
 - Loves Lafayette official location page:
   https://www.loves.com/locations/in/lafayette/loves-travel-stop-lafayette-874
+- Pilot Remington, Huntsville, Bakersfield, Grand Junction, Ehrenberg,
+  Davenport, and Ripon official location pages:
+  https://locations.pilotflyingj.com/us/in/remington/4154-us-24
+  https://locations.pilotflyingj.com/us/tx/huntsville/639-tx-75
+  https://locations.pilotflyingj.com/us/ca/bakersfield/17047-zachary-ave
+  https://locations.pilotflyingj.com/us/co/grand-junction/2195-hwy-6-and-50
+  https://locations.pilotflyingj.com/us/az/ehrenberg/i-10-exit-1-frontage-road-n.
+  https://locations.pilotflyingj.com/us/ia/davenport/8200-northwest-blvd
+  https://locations.pilotflyingj.com/us/ca/ripon/1501-n-jack-tone-rd
+- Loves Normal, West Memphis, Newton, Tulare, and Madera official/opening pages:
+  https://www.loves.com/locations/il/normal/loves-travel-stop-normal-867
+  https://www.loves.com/locations/ar/west-memphis/loves-travel-stop-west-memphis-450
+  https://www.loves.com/locations/ia/newton/loves-travel-stop-newton-361
+  https://www.loves.com/locations/ca/tulare/loves-travel-stop-tulare-382
+  https://www.loves.com/news/2020/february/loves-travel-stops-opens-in-madera-california
+- TravelCenters of America Tonopah and Fairfield official location pages:
+  https://www.ta-petro.com/location/az/ta-tonopah/
+  https://www.ta-petro.com/location/tx/ta-express-fairfield/
 - Pilot Travel Center Lincoln official location page:
   https://locations.pilotflyingj.com/us/al/lincoln/75750-al-77
 - IDOT truck parking page for I-55 rest areas:
@@ -292,7 +336,9 @@ Open-Meteo elevation sample range. It is deliberately separate from
 deterministic unit tests and should remain a small, credential-free sanity
 check.
 
-Report coverage for every leg in human-readable form:
+Report coverage for every leg in human-readable form. The report calls out
+placeholder-only legs and insufficient stop density instead of treating generated
+midpoint POIs as finished data:
 
 ```powershell
 uv run python tools/enrich_routes.py --coverage-report
@@ -304,11 +350,58 @@ Report the same coverage as JSON for tests or planning:
 uv run python tools/enrich_routes.py --coverage-report --json
 ```
 
+The JSON report is the whole-game acceptance artifact. It includes total legs,
+playable legs, placeholder-only legs, insufficient-density legs, and per-leg
+`unsupported_reasons`. For the current 106-leg network, `playable`,
+`legs_with_curated_pois`, and `legs_with_sufficient_poi_density` should all
+equal `legs`, while `placeholder_pois`, `legs_with_placeholder_only`, and
+`missing_playable` should be zero. Normal dispatch uses the same
+metadata-complete gate, so any future under-covered leg remains visible as data
+debt without appearing as an ordinary job.
+
 Run a tiny Overpass POI reachability smoke for one corridor:
 
 ```powershell
 uv run python tools/enrich_routes.py --from-city Chicago --to-city Indianapolis --overpass-poi-smoke
 ```
+
+Discover truck-relevant POI candidates near checked-in route geometry with the
+manual Overpass helper:
+
+```powershell
+uv run python tools/discover_route_pois.py --from-city Indianapolis --to-city Nashville --limit-points 3 --radius-m 12000
+```
+
+For whole-network planning, query small polite batches and review the candidate
+output before editing `world.json`:
+
+```powershell
+uv run python tools/discover_route_pois.py --all --max-legs 5 --limit-points 1 --radius-m 8000 --json
+```
+
+The helper queries `https://overpass-api.de/api/interpreter` for narrow
+route-adjacent rest areas, service areas, HGV-capable fuel/parking, weighbridge
+features, and common travel-center names. Its output is not committed directly;
+developers must still verify official operator, agency, or public source pages
+and curate clean player-facing names, actions, parking certainty, direction,
+and `at_mi` estimates.
+
+Curate public operator locator feeds into offline route POIs:
+
+```powershell
+uv run python tools/curate_route_pois.py --json
+uv run python tools/curate_route_pois.py --write-world --json
+```
+
+The curation helper reads Love's official store feed at
+`https://www.loves.com/api/fetch_stores` and Pilot Flying J's official
+paginated locator JSON at
+`https://locations.pilotflyingj.com/search?per=50&offset=N&locations=all`.
+It projects source coordinates onto checked-in route geometry, writes explicit
+`at_mi` estimates, and records the source endpoint or direct operator page in
+each stop note. A small hand-curated supplement covers corridors where those
+operator feeds do not provide enough stops, using public agency, toll-authority,
+rest-area, or truck-stop directory pages named in the source notes.
 
 For full-network enrichment, run staged batches rather than hammering public
 demo endpoints. The checked-in tool can fill missing corridor metadata in
@@ -329,11 +422,11 @@ uv run python tools/enrich_routes.py --enrich-all --write --no-overpass --rate-l
 ```
 
 The full-network batch completed route geometry, elevation/grade, state
-context, and POI/action coverage for all 106 legs. Public Overpass endpoints
-were not practical for the final batch during validation, returning timeouts or
-HTTP 429, so POI coverage was completed with curated source notes and
-operator/DOT/authority review. Future batches can rerun with a self-hosted or
-available Overpass endpoint without changing the runtime schema.
+context, and curated source-backed POI density for all 106 current legs.
+Earlier generated midpoint POIs have been replaced rather than counted. Future
+graph expansion must add named, source-backed truck stops, public rest areas,
+service plazas, truck parking, or weigh stations before a new leg is allowed
+into normal dispatch.
 
 High-priority toll and service-plaza-heavy corridors are now covered:
 
@@ -397,14 +490,16 @@ expansion must not silently invent unsupported road conditions.
 
 Stop type labels remain spoken before the curated stop name, such as `public
 rest area: Kenosha Safety Rest Area` or `travel center: Road Ranger Waco`. The
-keyboard flow remains audio-first: stops are announced ahead, `X` arms the
-exit, and `T` opens the POI menu when parked at one. Menu items are generated
-from source-backed actions, so a rest area does not offer fuel or repair by
-default, and a weigh station does not pretend to be a travel center. `R` speaks
-route progress plus GPS context, including grade/terrain context. `K` sets
-adaptive cruise, and the spoken cue includes the following gap, bad-weather gap
-increases, and cancellation behavior. GPS and traffic cues supplement the
-keyboard status keys; they never require a visual map or raw data inspection.
-Toll warnings and toll-charged messages use concise speech and settlement
-language, and delivery completion speaks gross pay, toll expenses, and net
-settlement so the operating cost is accessible without reading a visual ledger.
+keyboard flow remains audio-first: stops are announced ahead, the cue includes
+parking certainty such as `confirmed truck parking` or `limited truck parking`,
+`X` arms the exit, and `T` opens the POI menu when parked at one. Menu items are
+generated from source-backed actions, so a rest area does not offer fuel or
+repair by default, and a weigh station does not pretend to be a travel center.
+`R` speaks route progress plus GPS context, including grade/terrain context.
+`K` sets adaptive cruise, and the spoken cue includes the following gap,
+bad-weather gap increases, and cancellation behavior. GPS and traffic cues
+supplement the keyboard status keys; they never require a visual map or raw data
+inspection. Toll warnings and toll-charged messages use concise speech and
+settlement language, and delivery completion speaks gross pay, toll expenses,
+and net settlement so the operating cost is accessible without reading a visual
+ledger.

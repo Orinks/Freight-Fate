@@ -212,6 +212,9 @@ def test_representative_stops_are_real_world_grounded(world):
         ("San Antonio", "Dallas"): "Road Ranger Waco",
         ("Los Angeles", "San Diego"): "San Onofre Safety Roadside Rest Area",
         ("Des Moines", "Chicago"): "Iowa 80 Truckstop",
+        ("Houston", "Dallas"): "Pilot Travel Center Huntsville",
+        ("Los Angeles", "Fresno"): "Pilot Travel Center Bakersfield",
+        ("Fresno", "Sacramento"): "Flying J Travel Center Ripon",
     }
     for (start, end), stop_name in expected.items():
         route = world.shortest_route(start, end)
@@ -227,6 +230,19 @@ def test_new_dispatches_only_use_metadata_supported_routes(world):
                 assert route.metadata_complete(world)
 
 
+def test_whole_board_never_offers_unsupported_route_legs(world):
+    endorsements = {"refrigerated", "heavy_haul", "high_value"}
+    for city in world.city_names():
+        for seed in range(4):
+            jobs = JobBoard(world, seed=seed).offers(city, endorsements, level=6)
+            for job in jobs:
+                route = world.supported_route(job.origin, job.destination)
+                assert route is not None, f"{job.origin} to {job.destination}"
+                assert route.metadata_complete(world), f"{job.origin} to {job.destination}"
+                assert all(world.leg_metadata_complete(leg) for leg in route.legs)
+                assert all(stop.curated for stop in route.stop_details)
+
+
 def test_former_legacy_routes_are_now_metadata_supported_for_dispatch(world):
     route = world.supported_route("Chicago", "St. Louis")
     assert route is not None
@@ -237,10 +253,16 @@ def test_former_legacy_routes_are_now_metadata_supported_for_dispatch(world):
                for job in jobs)
 
 
-def test_formerly_blocked_city_has_supported_dispatch_board(world):
+def test_former_placeholder_only_routes_are_metadata_supported(world):
     route = world.supported_route("Memphis", "Nashville")
     assert route is not None
     assert route.metadata_complete(world)
+    assert all(stop.curated for stop in route.stop_details)
+
+    supported = world.supported_route("Memphis", "Little Rock")
+    assert supported is not None
+    assert supported.metadata_complete(world)
+
     jobs = JobBoard(world, seed=4).offers("Memphis", set(), level=1)
     assert jobs
     assert all(world.supported_route(job.origin, job.destination) is not None

@@ -86,6 +86,21 @@ STOP_TYPE_LABELS = {
     "repair_shop": "repair shop",
 }
 
+PARKING_CERTAINTY_LABELS = {
+    "confirmed": "confirmed truck parking",
+    "likely": "likely truck parking",
+    "limited": "limited truck parking",
+    "unknown": "parking not verified",
+    "none": "no truck parking",
+}
+
+STOP_CURATION_LEVELS = {"curated", "placeholder"}
+
+STOP_DIRECTIONS = {"both", "forward", "reverse"}
+
+POI_DENSITY_SHORT_LEG_MILES = 160.0
+POI_DENSITY_MEDIUM_LEG_MILES = 320.0
+
 POI_ACTIONS = {
     "park",
     "save",
@@ -579,6 +594,9 @@ class Stop:
     source: str = ""
     actions: tuple[str, ...] = ()
     services: tuple[str, ...] = ()
+    parking: str = "unknown"
+    directions: tuple[str, ...] = ("both",)
+    curation: str = "curated"
 
     @property
     def label(self) -> str:
@@ -587,6 +605,19 @@ class Stop:
     @property
     def spoken_name(self) -> str:
         return f"{self.label}: {self.name}"
+
+    @property
+    def parking_label(self) -> str:
+        return PARKING_CERTAINTY_LABELS[self.parking]
+
+    @property
+    def curated(self) -> bool:
+        return self.curation == "curated"
+
+    def applies_to_direction(self, forward: bool) -> bool:
+        if "both" in self.directions:
+            return True
+        return ("forward" if forward else "reverse") in self.directions
 
 
 @dataclass(frozen=True)
@@ -709,9 +740,18 @@ class Leg:
             return False
         if len(self.elevation_samples) < 2 or not self.grade_segments:
             return False
-        if not self.stops:
+        curated_stops = [stop for stop in self.stops if stop.curated]
+        if len(curated_stops) < minimum_curated_pois(self.miles):
             return False
-        if any(not stop.source or not stop.actions for stop in self.stops):
+        fuel_capable = [stop for stop in curated_stops if "fuel" in stop.actions]
+        if len(fuel_capable) < minimum_fuel_capable_pois(self.miles):
+            return False
+        if any(
+            not stop.source
+            or not stop.actions
+            or stop.parking == "unknown"
+            for stop in curated_stops
+        ):
             return False
         return from_state == to_state or bool(self.state_crossings)
 
@@ -737,10 +777,14 @@ class Route:
 
     @property
     def stops(self) -> list[str]:
-        return [s.name for leg in self.legs for s in leg.stops]
+        return [s.name for leg in self.legs for s in leg.stops if s.curated]
 
     @property
     def stop_details(self) -> list[Stop]:
+        return [s for leg in self.legs for s in leg.stops if s.curated]
+
+    @property
+    def raw_stop_details(self) -> list[Stop]:
         return [s for leg in self.legs for s in leg.stops]
 
     @property
@@ -1303,6 +1347,43 @@ def _parse_stop(raw, leg_miles: float, from_city: str, to_city: str) -> Stop:
         for service in raw.get("services", ())
         if str(service).strip()
     )
+    parking = str(raw.get("parking", "")).strip() or _default_parking_certainty(
+        stop_type, services, actions
+    )
+    if parking not in PARKING_CERTAINTY_LABELS:
+        raise ValueError(
+            f"{from_city} to {to_city} stop {name!r} has unknown parking "
+            f"certainty {parking!r}"
+        )
+    directions = tuple(
+        str(direction).strip()
+        for direction in raw.get("directions", ("both",))
+        if str(direction).strip()
+    )
+    if not directions:
+        raise ValueError(f"{from_city} to {to_city} stop {name!r} has no directions")
+    unknown_directions = sorted(set(directions) - STOP_DIRECTIONS)
+    if unknown_directions:
+        raise ValueError(
+            f"{from_city} to {to_city} stop {name!r} has unknown directions "
+            f"{unknown_directions}"
+        )
+    if "both" in directions and len(directions) > 1:
+        raise ValueError(
+            f"{from_city} to {to_city} stop {name!r} mixes 'both' with "
+            "direction-specific applicability"
+        )
+    curation = str(raw.get("curation", "")).strip() or _infer_stop_curation(name, source)
+    if curation not in STOP_CURATION_LEVELS:
+        raise ValueError(
+            f"{from_city} to {to_city} stop {name!r} has unknown curation "
+            f"{curation!r}"
+        )
+    if curation == "curated" and _infer_stop_curation(name, source) == "placeholder":
+        raise ValueError(
+            f"{from_city} to {to_city} stop {name!r} looks synthetic but is "
+            "marked curated"
+        )
     for action in SOURCE_BACKED_POI_ACTIONS & set(actions):
         if action not in services:
             raise ValueError(
@@ -1314,7 +1395,8 @@ def _parse_stop(raw, leg_miles: float, from_city: str, to_city: str) -> Stop:
                 f"{from_city} to {to_city} stop {name!r} action {action!r} "
                 "requires a source note"
             )
-    return Stop(name, at_mi, stop_type, source, actions, services)
+    return Stop(name, at_mi, stop_type, source, actions, services,
+                parking, directions, curation)
 
 
 def _parse_route_point(raw, leg_miles: float, from_city: str, to_city: str) -> RoutePoint:
@@ -1492,6 +1574,47 @@ def _classify_stop(name: str) -> str:
     if any(word in lower for word in ("travel", "fuel", "plaza", "center")):
         return "travel_center"
     return "travel_center"
+
+
+def _default_parking_certainty(
+    stop_type: str,
+    services: tuple[str, ...],
+    actions: tuple[str, ...],
+) -> str:
+    if "parking" not in services and "park" not in actions:
+        return "none"
+    if stop_type in {"truck_stop", "travel_center", "service_plaza"}:
+        return "likely"
+    if stop_type in {"public_rest_area", "truck_parking"}:
+        return "limited"
+    return "unknown"
+
+
+def _infer_stop_curation(name: str, source: str) -> str:
+    text = f"{name} {source}".lower()
+    synthetic_markers = (
+        "corridor rest area",
+        "corridor truck parking",
+        "corridor fuel stop",
+        "descriptive gameplay stop seeded",
+        "seeded for offline route coverage",
+        "no actionable overpass poi candidate",
+    )
+    return "placeholder" if any(marker in text for marker in synthetic_markers) else "curated"
+
+
+def minimum_curated_pois(miles: float) -> int:
+    if miles < POI_DENSITY_SHORT_LEG_MILES:
+        return 1
+    if miles <= POI_DENSITY_MEDIUM_LEG_MILES:
+        return 2
+    return 3
+
+
+def minimum_fuel_capable_pois(miles: float) -> int:
+    if miles < POI_DENSITY_SHORT_LEG_MILES:
+        return 0
+    return 1
 
 
 def _max_alternate_miles(best_miles: float) -> float:

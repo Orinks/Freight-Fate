@@ -3,6 +3,11 @@
 ## 1.6.0 - 2026-06-15
 
 ### Added
+- **Curated route-stop coverage contract.** Dispatch-supported freight now
+  relies on curated truck-relevant route stops only: placeholder midpoint
+  POIs no longer count as real route support, long-haul lanes must include
+  explicit fuel-capable stop coverage, and route summaries/GPS stop details
+  expose curated parking certainty from the checked-in offline dataset.
 - **Auto-updater.** The packaged game now checks GitHub for new releases
   when you reach the main menu. When one is found, a fully spoken prompt
   offers "Download and restart" (downloads the update, swaps it in, and

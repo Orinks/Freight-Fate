@@ -86,6 +86,7 @@ def test_save_and_quit_then_continue_resumes_the_trip():
         p = app.ctx.profile
         assert p.active_trip is not None
         assert p.active_trip["position_mi"] == position
+        assert p.active_trip["start_hour"] == driving.trip.start_hour
 
         # Continue from the main menu must land back in the drive
         while not app.state.items[app.state.index].text.startswith("Continue latest career"):
