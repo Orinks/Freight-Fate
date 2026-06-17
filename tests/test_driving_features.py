@@ -607,6 +607,76 @@ def test_adaptive_cruise_increases_gap_for_bad_weather(monkeypatch):
         app.shutdown()
 
 
+@pytest.mark.smoke
+def test_adaptive_cruise_disables_before_restricted_zone(monkeypatch):
+    from freight_fate.app import App
+    from freight_fate.sim.trip import TripEvent, TripEventKind, Zone
+
+    app = App()
+    events = []
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        monkeypatch.setattr(app.ctx, "say_event",
+                            lambda text, interrupt=True: events.append(text))
+        driving.handle_event(key_event(pygame.K_e))
+        driving.truck.transmission.gear = 10
+        driving.truck.velocity_mps = 26.8
+        driving.handle_event(key_event(pygame.K_k))
+        assert driving._cruise_mph is not None
+
+        zone = Zone(10.0, 15.0, 45.0, "construction")
+        event = TripEvent(
+            TripEventKind.GPS_CUE,
+            "In 2 miles, construction ahead. Speed limit 45.",
+            {"zone": zone},
+        )
+        driving._handle_trip_event(event)
+
+        assert driving._cruise_mph is None
+        assert events[-1] == (
+            "In 2 miles, construction ahead. Speed limit 45. "
+            "Adaptive cruise disabled; take manual speed control."
+        )
+    finally:
+        app.shutdown()
+
+
+@pytest.mark.smoke
+def test_adaptive_cruise_disables_for_heavy_traffic_zone_entry(monkeypatch):
+    from freight_fate.app import App
+    from freight_fate.sim.trip import TripEvent, TripEventKind, Zone
+
+    app = App()
+    events = []
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        monkeypatch.setattr(app.ctx, "say_event",
+                            lambda text, interrupt=True: events.append(text))
+        driving.handle_event(key_event(pygame.K_e))
+        driving.truck.transmission.gear = 10
+        driving.truck.velocity_mps = 26.8
+        driving.handle_event(key_event(pygame.K_k))
+        assert driving._cruise_mph is not None
+
+        zone = Zone(10.0, 15.0, 50.0, "heavy traffic")
+        event = TripEvent(
+            TripEventKind.ZONE_ENTER,
+            "heavy traffic ahead. Speed limit 50.",
+            {"zone": zone},
+        )
+        driving._handle_trip_event(event)
+
+        assert driving._cruise_mph is None
+        assert events[-1] == (
+            "heavy traffic ahead. Speed limit 50. "
+            "Adaptive cruise disabled; take manual speed control."
+        )
+    finally:
+        app.shutdown()
+
+
 # -- hazard reaction windows ---------------------------------------------------
 
 

@@ -635,15 +635,14 @@ class Trip:
 
     def _check_zones(self) -> None:
         for zone in self.zones:
-            if zone.reason != "construction":
-                continue
             key = _zone_key(zone)
             ahead = zone.start_mi - self.position_mi
             if 0 < ahead <= ZONE_WARNING_LOOKAHEAD_MI and key not in self._announced_zone_warnings:
                 self._announced_zone_warnings.add(key)
                 self._emit(
                     TripEventKind.GPS_CUE,
-                    f"In {ahead:.0f} miles, construction ahead. Speed limit {zone.limit_mph:.0f}.",
+                    f"In {ahead:.0f} miles, {zone.reason} ahead. "
+                    f"Speed limit {zone.limit_mph:.0f}.",
                     zone=zone,
                 )
         zone = None

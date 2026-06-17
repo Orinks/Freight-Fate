@@ -719,10 +719,32 @@ class DrivingState(State):
             self.ctx.say_event(event.message, interrupt=False)
         elif kind == TripEventKind.ARRIVED:
             pass  # handled by _arrive()
+        elif self._event_disables_cruise(event):
+            self._cancel_cruise_for_restricted_area(event.message)
         else:
             self.ctx.say_event(event.message, interrupt=False)
         if kind == TripEventKind.ZONE_ENTER:
             self.ctx.audio.play("ui/notify", volume=0.7)
+
+    def _event_disables_cruise(self, event) -> bool:
+        if self._cruise_mph is None:
+            return False
+        if event.kind == TripEventKind.ZONE_ENTER:
+            return True
+        if event.kind != TripEventKind.GPS_CUE:
+            return False
+        zone = event.data.get("zone")
+        if zone is None:
+            return False
+        return zone.reason in {"construction", "heavy traffic"}
+
+    def _cancel_cruise_for_restricted_area(self, message: str) -> None:
+        self._cancel_cruise()
+        self.ctx.audio.play("ui/notify", volume=0.55)
+        self.ctx.say_event(
+            f"{message} Adaptive cruise disabled; take manual speed control.",
+            interrupt=False,
+        )
 
     def _handle_inspection(self, event) -> None:
         """Route-backed enforcement with stable evidence and no duplicate fines."""
