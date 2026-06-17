@@ -103,16 +103,17 @@ def test_trip_uses_explicit_stop_positions(world):
     assert all(stop.parking == "confirmed" for stop in trip.stops)
 
 
-def test_trip_filters_placeholder_pois_from_runtime(world):
+def test_trip_uses_only_curated_pois_at_runtime(world):
     route = world.route_from_cities(["Memphis", "Nashville"])
     truck = TruckState()
     weather = WeatherSystem("midwest", seed=1)
     trip = Trip(route, truck, weather, seed=2)
 
     assert route.raw_stop_details
-    assert all(not stop.curated for stop in route.raw_stop_details)
-    assert route.stop_details == []
-    assert trip.stops == []
+    assert all(stop.curated for stop in route.raw_stop_details)
+    assert route.stop_details
+    assert trip.stops
+    assert {stop.name for stop in trip.stops} <= {stop.name for stop in route.stop_details}
 
 
 def test_trip_places_reverse_route_stops_from_travel_direction(world):

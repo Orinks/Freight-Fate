@@ -92,8 +92,8 @@ def test_how_to_play_documents_new_gameplay_systems():
     assert "route pois use clean place names" in help_text
     assert "source-backed actions" in help_text
     assert "roadside assistance appear only when the poi metadata supports them" in help_text
-    assert "truck stops are curated enough for the lane" in help_text
-    assert "placeholder pois are data gaps" in help_text
+    assert "enough curated truck-relevant pois for each lane" in help_text
+    assert "future route expansion must meet the same source-backed poi gate" in help_text
     assert "toll charges are recorded as trip expenses" in help_text
     assert "gross pay, toll expenses, and net settlement" in help_text
     assert "touch the brakes to cancel" in help_text

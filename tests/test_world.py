@@ -210,15 +210,18 @@ def test_route_stops_have_explicit_valid_positions(world):
             assert stop.parking
 
 
-def test_placeholder_pois_do_not_make_routes_supported(world):
-    route = world.route_from_cities(["Memphis", "Nashville"])
-    assert route is not None
-    assert route.raw_stop_details
-    assert all(not stop.curated for stop in route.raw_stop_details)
-    assert route.stop_details == []
+def test_no_placeholder_pois_remain_in_current_route_network(world):
+    placeholders = [
+        (leg.a, leg.b, stop.name)
+        for leg in world.legs
+        for stop in leg.stops
+        if not stop.curated
+    ]
+    assert placeholders == []
 
-    supported = world.supported_route("Memphis", "Nashville")
-    assert supported is None
+    route = world.supported_route("Memphis", "Nashville")
+    assert route is not None
+    assert route.metadata_complete(world)
 
 
 def test_poi_names_are_curated_not_raw_osm_dump(world):
@@ -397,9 +400,8 @@ def test_supported_routes_require_complete_corridor_metadata(world):
         assert route.metadata_complete(world)
 
     for leg in world.legs:
+        assert world.leg_metadata_complete(leg), f"{leg.a}-{leg.b}"
         curated = [stop for stop in leg.stops if stop.curated]
-        if not world.leg_metadata_complete(leg):
-            continue
         assert len(curated) >= minimum_curated_pois(leg.miles), f"{leg.a}-{leg.b}"
         assert all(stop.source for stop in curated), f"{leg.a}-{leg.b}"
         assert all(stop.actions for stop in curated), f"{leg.a}-{leg.b}"

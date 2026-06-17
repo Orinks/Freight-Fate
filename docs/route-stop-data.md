@@ -10,10 +10,10 @@ New dispatchable freight is gated to routes whose legs have complete metadata;
 the job board must not silently invent route conditions. The route-geometry
 layer now covers all 106 current legs with checked-in route points, elevation
 and grade samples, and state context. Curated truck-stop coverage is intentionally
-reported separately: placeholder midpoint POIs may remain in the legacy graph as
-data debt, but they do not count for dispatch support and are not announced as
-playable route stops. The legacy/full graph remains loadable for old saves and
-map integrity while curated stop coverage expands corridor by corridor.
+reported separately: generated midpoint POIs have been removed from the current
+106-leg network, and the coverage report must stay green before new legs become
+normal dispatch lanes. The legacy/full graph remains loadable for old saves and
+map integrity, but new freight uses the metadata-supported route gate.
 
 Toll-corridor coverage is included in the metadata contract. The New York to
 Philadelphia NJ Turnpike corridor, Philadelphia to Pittsburgh PA Turnpike/I-76,
@@ -350,8 +350,12 @@ uv run python tools/enrich_routes.py --coverage-report --json
 
 The JSON report is the whole-game acceptance artifact. It includes total legs,
 playable legs, placeholder-only legs, insufficient-density legs, and per-leg
-`unsupported_reasons`. Normal dispatch uses the same metadata-complete gate, so
-unsupported legs remain visible as data debt without appearing as ordinary jobs.
+`unsupported_reasons`. For the current 106-leg network, `playable`,
+`legs_with_curated_pois`, and `legs_with_sufficient_poi_density` should all
+equal `legs`, while `placeholder_pois`, `legs_with_placeholder_only`, and
+`missing_playable` should be zero. Normal dispatch uses the same
+metadata-complete gate, so any future under-covered leg remains visible as data
+debt without appearing as an ordinary job.
 
 Run a tiny Overpass POI reachability smoke for one corridor:
 
@@ -380,6 +384,23 @@ developers must still verify official operator, agency, or public source pages
 and curate clean player-facing names, actions, parking certainty, direction,
 and `at_mi` estimates.
 
+Curate public operator locator feeds into offline route POIs:
+
+```powershell
+uv run python tools/curate_route_pois.py --json
+uv run python tools/curate_route_pois.py --write-world --json
+```
+
+The curation helper reads Love's official store feed at
+`https://www.loves.com/api/fetch_stores` and Pilot Flying J's official
+paginated locator JSON at
+`https://locations.pilotflyingj.com/search?per=50&offset=N&locations=all`.
+It projects source coordinates onto checked-in route geometry, writes explicit
+`at_mi` estimates, and records the source endpoint or direct operator page in
+each stop note. A small hand-curated supplement covers corridors where those
+operator feeds do not provide enough stops, using public agency, toll-authority,
+rest-area, or truck-stop directory pages named in the source notes.
+
 For full-network enrichment, run staged batches rather than hammering public
 demo endpoints. The checked-in tool can fill missing corridor metadata in
 resumable batches:
@@ -398,14 +419,12 @@ limited or unavailable:
 uv run python tools/enrich_routes.py --enrich-all --write --no-overpass --rate-limit 0
 ```
 
-The full-network batch completed route geometry, elevation/grade, and state
-context for all 106 legs. Earlier generated midpoint POIs are now marked as
-placeholders. Current curated POI slices have made representative Northeast,
-Midwest, I-65, I-24/I-75, I-70, and I-40 corridors playable, while remaining
-placeholder-only or under-density legs are excluded from normal dispatch.
-Future batches should replace placeholders with named, source-backed truck
-stops, public rest areas, service plazas, truck parking, or weigh stations
-without changing the runtime schema.
+The full-network batch completed route geometry, elevation/grade, state
+context, and curated source-backed POI density for all 106 current legs.
+Earlier generated midpoint POIs have been replaced rather than counted. Future
+graph expansion must add named, source-backed truck stops, public rest areas,
+service plazas, truck parking, or weigh stations before a new leg is allowed
+into normal dispatch.
 
 High-priority toll and service-plaza-heavy corridors are now covered:
 

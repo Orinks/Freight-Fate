@@ -954,10 +954,10 @@ def coverage_report(data: dict[str, Any]) -> dict[str, Any]:
             "legacy_full_graph_available_for_old_saves": True,
         },
         "current_batch_notes": [
-            "Full-network route geometry, elevation, and state context are "
-            "checked in. Curated truck-stop coverage is intentionally reported "
-            "separately from placeholder POIs so generated midpoint stops cannot "
-            "hide route-data gaps.",
+            "Full-network route geometry, elevation, state context, and "
+            "source-backed truck-stop coverage are checked in for the current "
+            "106-leg network. Placeholder POIs remain quarantined by the "
+            "coverage contract and must not count for future dispatch lanes.",
         ],
         "high_priority_remaining_corridors": _priority_status(leg_reports),
         "totals": totals,

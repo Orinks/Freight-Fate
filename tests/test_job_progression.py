@@ -253,9 +253,11 @@ def test_former_legacy_routes_are_now_metadata_supported_for_dispatch(world):
                for job in jobs)
 
 
-def test_placeholder_only_routes_stay_off_dispatch_board(world):
+def test_former_placeholder_only_routes_are_metadata_supported(world):
     route = world.supported_route("Memphis", "Nashville")
-    assert route is None
+    assert route is not None
+    assert route.metadata_complete(world)
+    assert all(stop.curated for stop in route.stop_details)
 
     supported = world.supported_route("Memphis", "Little Rock")
     assert supported is not None
