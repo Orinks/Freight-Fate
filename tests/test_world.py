@@ -378,7 +378,10 @@ def test_corridor_metadata_supports_offline_itineraries(world):
 
 
 def test_supported_routes_require_complete_corridor_metadata(world):
-    from freight_fate.data.world import minimum_curated_pois
+    from freight_fate.data.world import (
+        minimum_curated_pois,
+        minimum_fuel_capable_pois,
+    )
 
     supported_pairs = [
         ("Chicago", "Indianapolis"),
@@ -402,12 +405,36 @@ def test_supported_routes_require_complete_corridor_metadata(world):
     for leg in world.legs:
         assert world.leg_metadata_complete(leg), f"{leg.a}-{leg.b}"
         curated = [stop for stop in leg.stops if stop.curated]
+        fuel_capable = [stop for stop in curated if "fuel" in stop.actions]
         assert len(curated) >= minimum_curated_pois(leg.miles), f"{leg.a}-{leg.b}"
+        assert len(fuel_capable) >= minimum_fuel_capable_pois(leg.miles), f"{leg.a}-{leg.b}"
         assert all(stop.source for stop in curated), f"{leg.a}-{leg.b}"
         assert all(stop.actions for stop in curated), f"{leg.a}-{leg.b}"
         assert all(stop.parking != "unknown" for stop in curated), f"{leg.a}-{leg.b}"
         route = world.route_from_cities([leg.a, leg.b])
         assert all(stop.curated for stop in route.stop_details), f"{leg.a}-{leg.b}"
+
+
+def test_tier_one_priority_corridors_keep_multi_stop_curated_fuel_support(world):
+    expected = {
+        ("Atlanta", "Dallas"): 3,
+        ("Dallas", "Albuquerque"): 3,
+        ("Dallas", "St. Louis"): 3,
+        ("Kansas City", "Denver"): 3,
+        ("San Francisco", "Salt Lake City"): 3,
+        ("San Francisco", "Portland"): 3,
+        ("Portland", "Salt Lake City"): 3,
+    }
+
+    for (start, end), minimum_stops in expected.items():
+        route = world.supported_route(start, end)
+        assert route is not None, f"{start} to {end} is not dispatch-supported"
+        curated = route.stop_details
+        fuel_capable = [stop for stop in curated if "fuel" in stop.actions]
+        assert len(curated) >= minimum_stops, f"{start}-{end}"
+        assert len(fuel_capable) >= 2, f"{start}-{end}"
+        assert any(stop.parking == "confirmed" for stop in curated), f"{start}-{end}"
+        assert all(stop.curated for stop in curated), f"{start}-{end}"
 
 
 def test_toll_metadata_is_explicit_and_separate_from_service_plazas(world):

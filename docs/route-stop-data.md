@@ -135,8 +135,10 @@ For new playable freight, a leg is considered supported only when it has:
 route points, checkpoints, state mileage, state crossings when endpoint states
 differ, elevation samples, grade segments, and enough curated actionable POIs
 for its length. The current density rule is one curated POI under 160 miles, two
-from 160 through 320 miles, and three beyond 320 miles. A multi-leg route is
-playable only when every leg meets that contract.
+from 160 through 320 miles, and three beyond 320 miles. Legs at 160 miles or
+longer must also expose at least one curated fuel-capable stop so dispatchable
+freight never treats break-only coverage as enough for long-haul route support.
+A multi-leg route is playable only when every leg meets that contract.
 
 Toll events are route-positioned events, not POIs. Use `toll_events` for toll
 road entry markers, toll plazas, ticket-system settlements, or electronic

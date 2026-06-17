@@ -743,6 +743,9 @@ class Leg:
         curated_stops = [stop for stop in self.stops if stop.curated]
         if len(curated_stops) < minimum_curated_pois(self.miles):
             return False
+        fuel_capable = [stop for stop in curated_stops if "fuel" in stop.actions]
+        if len(fuel_capable) < minimum_fuel_capable_pois(self.miles):
+            return False
         if any(
             not stop.source
             or not stop.actions
@@ -1606,6 +1609,12 @@ def minimum_curated_pois(miles: float) -> int:
     if miles <= POI_DENSITY_MEDIUM_LEG_MILES:
         return 2
     return 3
+
+
+def minimum_fuel_capable_pois(miles: float) -> int:
+    if miles < POI_DENSITY_SHORT_LEG_MILES:
+        return 0
+    return 1
 
 
 def _max_alternate_miles(best_miles: float) -> float:

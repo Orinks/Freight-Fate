@@ -48,6 +48,7 @@ REQUIRED_METADATA_FIELDS = (
     "grade_segments",
     "curated_pois",
     "poi_density",
+    "fuel_poi_support",
 )
 ELEVATION_SOURCE = (
     "Open-Meteo Elevation API development-time sample from Copernicus DEM GLO-90."
@@ -833,7 +834,9 @@ def coverage_report(data: dict[str, Any]) -> dict[str, Any]:
         "legs_with_curated_pois": 0,
         "legs_with_placeholder_only": 0,
         "legs_with_sufficient_poi_density": 0,
+        "legs_with_fuel_support": 0,
         "poi_density": 0,
+        "fuel_poi_support": 0,
         "toll_events": 0,
         "toll_legs": 0,
         "playable": 0,
@@ -854,6 +857,7 @@ def coverage_report(data: dict[str, Any]) -> dict[str, Any]:
             if _stop_is_placeholder(stop)
         ]
         min_pois = _minimum_curated_pois(float(leg["miles"]))
+        min_fuel_pois = _minimum_fuel_capable_pois(float(leg["miles"]))
         curated_pois_complete = bool(curated_stops) and all(
             stop.get("source")
             and _stop_actions(stop)
@@ -862,6 +866,9 @@ def coverage_report(data: dict[str, Any]) -> dict[str, Any]:
             for stop in curated_stops
         )
         sufficient_density = len(curated_stops) >= min_pois
+        sufficient_fuel_support = sum(
+            1 for stop in curated_stops if "fuel" in _stop_actions(stop)
+        ) >= min_fuel_pois
         present = {
             "route_points": len(corridor.get("route_points", [])) >= 2,
             "state_crossings": bool(corridor.get("state_crossings", [])),
@@ -873,6 +880,7 @@ def coverage_report(data: dict[str, Any]) -> dict[str, Any]:
             "pois_with_actions": curated_pois_complete,
             "curated_pois": curated_pois_complete,
             "poi_density": sufficient_density,
+            "fuel_poi_support": sufficient_fuel_support,
         }
         missing = [
             field for field in REQUIRED_METADATA_FIELDS
@@ -894,6 +902,7 @@ def coverage_report(data: dict[str, Any]) -> dict[str, Any]:
             bool(placeholder_stops) and not curated_stops
         )
         totals["legs_with_sufficient_poi_density"] += int(sufficient_density)
+        totals["legs_with_fuel_support"] += int(sufficient_fuel_support)
         totals["state_crossings_expected"] += int(expected_crossing)
         totals["state_crossings_expected_present"] += int(
             expected_crossing and present["state_crossings"]
@@ -913,11 +922,16 @@ def coverage_report(data: dict[str, Any]) -> dict[str, Any]:
                 curated_count=len(curated_stops),
                 placeholder_count=len(placeholder_stops),
                 minimum_curated_pois=min_pois,
+                fuel_capable_count=sum(
+                    1 for stop in curated_stops if "fuel" in _stop_actions(stop)
+                ),
+                minimum_fuel_capable_pois=min_fuel_pois,
             ),
             "poi_count": len(stops),
             "curated_poi_count": len(curated_stops),
             "placeholder_poi_count": len(placeholder_stops),
             "minimum_curated_pois": min_pois,
+            "minimum_fuel_capable_pois": min_fuel_pois,
             "poi_actions": sorted({
                 action for stop in curated_stops for action in _stop_actions(stop)
             }),
@@ -948,6 +962,10 @@ def coverage_report(data: dict[str, Any]) -> dict[str, Any]:
                 "under_160_mi": 1,
                 "160_to_320_mi": 2,
                 "over_320_mi": 3,
+            },
+            "minimum_fuel_capable_pois_by_length": {
+                "under_160_mi": 0,
+                "160_mi_and_over": 1,
             },
             "state_crossings_required_when_endpoint_states_differ": True,
             "runtime_network_calls": False,
@@ -990,6 +1008,9 @@ def format_coverage_report(report: dict[str, Any]) -> str:
         f"Sufficient curated stop density: "
         f"{totals['legs_with_sufficient_poi_density']} "
         f"({pct.get('legs_with_sufficient_poi_density', 0.0):.1f}%)",
+        f"Fuel-capable curated support: "
+        f"{totals['legs_with_fuel_support']} "
+        f"({pct.get('legs_with_fuel_support', 0.0):.1f}%)",
         f"Toll metadata: {totals['toll_events']} events on "
         f"{totals['toll_legs']} legs "
         f"({pct.get('toll_legs', 0.0):.1f}% of legs)",
@@ -1078,12 +1099,20 @@ def _minimum_curated_pois(miles: float) -> int:
     return 3
 
 
+def _minimum_fuel_capable_pois(miles: float) -> int:
+    if miles < 160.0:
+        return 0
+    return 1
+
+
 def _unsupported_reasons(
     missing: list[str],
     *,
     curated_count: int,
     placeholder_count: int,
     minimum_curated_pois: int,
+    fuel_capable_count: int,
+    minimum_fuel_capable_pois: int,
 ) -> list[str]:
     if not missing:
         return []
@@ -1098,8 +1127,13 @@ def _unsupported_reasons(
         reasons.append(
             f"insufficient curated POI density: {curated_count}/{minimum_curated_pois}"
         )
+    if "fuel_poi_support" in missing:
+        reasons.append(
+            "insufficient fuel-capable curated support: "
+            f"{fuel_capable_count}/{minimum_fuel_capable_pois}"
+        )
     for field in missing:
-        if field in {"curated_pois", "poi_density"}:
+        if field in {"curated_pois", "poi_density", "fuel_poi_support"}:
             continue
         reasons.append(f"missing {field}")
     return reasons
