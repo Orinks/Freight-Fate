@@ -23,6 +23,8 @@ NIGHT_HAZARD_BONUS = 0.10          # extra hazard risk after dark
 NIGHT_TRAFFIC_KEEP = 0.4           # chance a traffic zone still forms at night
 TRAFFIC_LOOKAHEAD_MI = 2.5
 TRAFFIC_WARNING_GAP_S = 2.2
+ZONE_WARNING_LOOKAHEAD_MI = 2.0
+CONSTRUCTION_ENFORCEMENT_GRACE_MI = 1.0
 
 # Hazards that can appear anywhere in the country...
 GENERIC_HAZARDS = ("debris on the road", "a slow vehicle ahead",
@@ -179,6 +181,8 @@ class Trip:
         self._announced_navigation: set[str] = set()
         self._charged_tolls: set[str] = set()
         self._active_zone: Zone | None = None
+        self._announced_zone_warnings: set[str] = set()
+        self._construction_zone_grace_start: dict[str, float] = {}
         self._hazard_check_mi = 5.0
         self._inspection_check_mi = 10.0
         self._traffic_warning_mi = 1.0
@@ -614,6 +618,18 @@ class Trip:
         self._events.append(TripEvent(kind, message, data))
 
     def _check_zones(self) -> None:
+        for zone in self.zones:
+            if zone.reason != "construction":
+                continue
+            key = _zone_key(zone)
+            ahead = zone.start_mi - self.position_mi
+            if 0 < ahead <= ZONE_WARNING_LOOKAHEAD_MI and key not in self._announced_zone_warnings:
+                self._announced_zone_warnings.add(key)
+                self._emit(
+                    TripEventKind.GPS_CUE,
+                    f"In {ahead:.0f} miles, construction ahead. Speed limit {zone.limit_mph:.0f}.",
+                    zone=zone,
+                )
         zone = None
         for z in self.zones:
             if z.start_mi <= self.position_mi <= z.end_mi:
@@ -621,10 +637,14 @@ class Trip:
                 break
         if zone is not self._active_zone:
             if zone is not None:
+                if zone.reason == "construction":
+                    self._construction_zone_grace_start[_zone_key(zone)] = zone.start_mi
                 self._emit(TripEventKind.ZONE_ENTER,
                            f"{zone.reason} ahead. Speed limit {zone.limit_mph:.0f}.",
                            zone=zone)
             elif self._active_zone is not None:
+                self._construction_zone_grace_start.pop(
+                    _zone_key(self._active_zone), None)
                 self._emit(TripEventKind.ZONE_EXIT,
                            f"End of {self._active_zone.reason} zone. "
                            f"Speed limit {BASE_SPEED_LIMIT_MPH:.0f}.")
@@ -804,6 +824,12 @@ class Trip:
 
         limit, reason = self.speed_limit_at(self.position_mi)
         if reason == "construction" and self.truck.speed_mph > limit + 9:
+            active_zone = self._active_zone
+            if active_zone is not None and active_zone.reason == "construction":
+                zone_key = _zone_key(active_zone)
+                grace_start = self._construction_zone_grace_start.get(zone_key, active_zone.start_mi)
+                if self.position_mi - grace_start < CONSTRUCTION_ENFORCEMENT_GRACE_MI:
+                    return
             key = f"construction:{round(self.position_mi)}"
             if key not in self._announced_enforcement:
                 self._announced_enforcement.add(key)
@@ -837,6 +863,10 @@ class Trip:
 
 def _stop_offset_for_direction(at_mi: float, leg_miles: float, forward: bool) -> float:
     return at_mi if forward else leg_miles - at_mi
+
+
+def _zone_key(zone: Zone) -> str:
+    return f"{zone.reason}:{zone.start_mi:.3f}:{zone.end_mi:.3f}:{zone.limit_mph:.0f}"
 
 
 def _fallback_grade(terrain: str, mile: float, highway: str) -> float:
