@@ -125,6 +125,61 @@ def test_zone_speed_limits_apply(world):
     assert reason is None or limit != zone.limit_mph
 
 
+def test_construction_zone_warns_before_entry(world):
+    trip, _ = make_trip(world, "Chicago", "Indianapolis", seed=12345)
+    zone = next(z for z in trip.zones if z.reason == "construction")
+
+    trip.position_mi = zone.start_mi - 2.0
+    events = trip.update(0.0)
+
+    warnings = [event.message for event in events if event.kind == TripEventKind.GPS_CUE]
+    assert warnings == [
+        f"In 2 miles, construction ahead. Speed limit {zone.limit_mph:.0f}."
+    ]
+
+
+def test_construction_zone_does_not_fine_on_entry_tick(world):
+    trip, truck = make_trip(world, "Chicago", "Indianapolis", seed=12345)
+    zone = next(z for z in trip.zones if z.reason == "construction")
+    truck.velocity_mps = 31.3   # about 70 mph
+
+    trip.position_mi = zone.start_mi - 0.2
+    moved_mi = 0.35
+    trip.position_mi += moved_mi
+    trip._check_zones()
+    trip._check_inspections(moved_mi)
+
+    kinds = [event.kind for event in trip._events]
+    assert TripEventKind.ZONE_ENTER in kinds
+    assert TripEventKind.INSPECTION not in kinds
+
+
+def test_construction_zone_speeding_fine_waits_for_grace_distance(world):
+    trip, truck = make_trip(world, "Chicago", "Indianapolis", seed=12345)
+    zone = next(z for z in trip.zones if z.reason == "construction")
+    truck.velocity_mps = 31.3   # about 70 mph
+
+    trip.position_mi = zone.start_mi - 2.0
+    advance = trip.update(0.0)
+    assert [event.message for event in advance if event.kind == TripEventKind.GPS_CUE] == [
+        f"In 2 miles, construction ahead. Speed limit {zone.limit_mph:.0f}."
+    ]
+
+    trip.position_mi = zone.start_mi + 0.3
+    trip._events = []
+    trip._check_zones()
+    trip._check_inspections(0.4)
+    assert not [event for event in trip._events if event.kind == TripEventKind.INSPECTION]
+
+    trip.position_mi = zone.start_mi + 1.1
+    trip._events = []
+    trip._check_inspections(0.8)
+    inspection = [event for event in trip._events if event.kind == TripEventKind.INSPECTION]
+    assert [event.message for event in inspection] == [
+        "Trooper in the construction zone clocks your speed."
+    ]
+
+
 def test_grades_are_bounded(world):
     trip, _ = make_trip(world, "Denver", "Salt Lake City")
     for mile in range(0, int(trip.total_miles), 3):
