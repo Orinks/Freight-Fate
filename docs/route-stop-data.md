@@ -7,12 +7,13 @@ External sources are build-time inputs only.
 
 The product goal is the full existing Freight Fate network, not a smaller map.
 New dispatchable freight is gated to routes whose legs have complete metadata;
-the job board must not silently invent route conditions. As of the full-network
-route-realism pass, all 106 current legs are playable metadata-backed lanes.
-Every leg has checked-in route points, elevation and grade samples, state
-context, and at least one actionable source-noted POI. The legacy/full graph
-remains loadable for old saves and map integrity, but new freight now has access
-to the full existing network without synthetic route fallback.
+the job board must not silently invent route conditions. The route-geometry
+layer now covers all 106 current legs with checked-in route points, elevation
+and grade samples, and state context. Curated truck-stop coverage is intentionally
+reported separately: placeholder midpoint POIs may remain in the legacy graph as
+data debt, but they do not count for dispatch support and are not announced as
+playable route stops. The legacy/full graph remains loadable for old saves and
+map integrity while curated stop coverage expands corridor by corridor.
 
 Toll-corridor coverage is included in the metadata contract. The New York to
 Philadelphia NJ Turnpike corridor, Philadelphia to Pittsburgh PA Turnpike/I-76,
@@ -90,6 +91,9 @@ Route stops and corridor details live on a leg in
       "at_mi": 122.0,
       "actions": ["park", "save", "fuel", "food", "break", "sleep"],
       "services": ["diesel", "food", "parking"],
+      "parking": "confirmed",
+      "directions": ["both"],
+      "curation": "curated",
       "source": "Official operator page or curated Overpass/OSM review."
     }
   ]
@@ -105,6 +109,23 @@ spread evenly across each leg, which made route amenities feel synthetic. New
 data must provide a named, typed stop with an explicit position inside the leg
 mileage.
 
+`parking` records truck-parking certainty, not a promise that a space is open
+right now. Current values are `confirmed`, `likely`, `limited`, `unknown`, and
+`none`. Use `confirmed` when an official operator or agency source states truck
+parking. Use `limited` for public rest areas or small lots where parking is
+available but capacity is not guaranteed. Use `unknown` only for quarantined or
+incomplete data; unknown parking does not satisfy the dispatch-support contract.
+
+`directions` defaults to `["both"]`. Use `["forward"]` or `["reverse"]` only
+when a ramp, rest area, service plaza, or weigh station applies to one travel
+direction on the stored leg. `at_mi` is still measured from the leg's `from`
+city, and the simulator mirrors it for reverse travel.
+
+`curation` is `curated` for source-backed data and `placeholder` for quarantined
+legacy/generated stop records. Placeholder POIs are preserved only so developers
+can see what still needs research. They do not make a leg dispatch-supported and
+the trip simulator does not speak or offer them as rest stops.
+
 Corridor metadata is optional for old data and saves. When present, it drives
 GPS cues, state-line announcements, intermediate place calls, and progress
 summaries. This is the first step away from treating each route as a plain
@@ -112,9 +133,10 @@ summaries. This is the first step away from treating each route as a plain
 
 For new playable freight, a leg is considered supported only when it has:
 route points, checkpoints, state mileage, state crossings when endpoint states
-differ, elevation samples, grade segments, and at least one actionable POI with
-source notes. A multi-leg route is playable only when every leg meets that
-contract.
+differ, elevation samples, grade segments, and enough curated actionable POIs
+for its length. The current density rule is one curated POI under 160 miles, two
+from 160 through 360 miles, and three beyond 360 miles. A multi-leg route is
+playable only when every leg meets that contract.
 
 Toll events are route-positioned events, not POIs. Use `toll_events` for toll
 road entry markers, toll plazas, ticket-system settlements, or electronic
@@ -163,7 +185,9 @@ the GPS.
 Traffic placement uses route length, corridor checkpoints, departure time, and
 weather effects. Bad weather can increase traffic pressure and lower the lead
 traffic target speed. These remain deterministic for a seed; they are not
-generic surprise hazards.
+physical route facts. Seeds may vary traffic, weather, construction, delays, CB
+chatter, and hazards, but they must not place truck stops, rest areas, tolls,
+state lines, weigh stations, service plazas, grades, or facility approaches.
 
 Tolls are charged once when the trip passes the route-positioned toll event.
 The spoken cue warns ahead of the point, and the charge event records a
@@ -253,6 +277,24 @@ checks. The checked-in runtime data is static. Examples include:
   https://www.roadrangerusa.com/node/251
 - Loves Lafayette official location page:
   https://www.loves.com/locations/in/lafayette/loves-travel-stop-lafayette-874
+- Pilot Remington, Huntsville, Bakersfield, Grand Junction, Ehrenberg,
+  Davenport, and Ripon official location pages:
+  https://locations.pilotflyingj.com/us/in/remington/4154-us-24
+  https://locations.pilotflyingj.com/us/tx/huntsville/639-tx-75
+  https://locations.pilotflyingj.com/us/ca/bakersfield/17047-zachary-ave
+  https://locations.pilotflyingj.com/us/co/grand-junction/2195-hwy-6-and-50
+  https://locations.pilotflyingj.com/us/az/ehrenberg/i-10-exit-1-frontage-road-n.
+  https://locations.pilotflyingj.com/us/ia/davenport/8200-northwest-blvd
+  https://locations.pilotflyingj.com/us/ca/ripon/1501-n-jack-tone-rd
+- Loves Normal, West Memphis, Newton, Tulare, and Madera official/opening pages:
+  https://www.loves.com/locations/il/normal/loves-travel-stop-normal-867
+  https://www.loves.com/locations/ar/west-memphis/loves-travel-stop-west-memphis-450
+  https://www.loves.com/locations/ia/newton/loves-travel-stop-newton-361
+  https://www.loves.com/locations/ca/tulare/loves-travel-stop-tulare-382
+  https://www.loves.com/news/2020/february/loves-travel-stops-opens-in-madera-california
+- TravelCenters of America Tonopah and Fairfield official location pages:
+  https://www.ta-petro.com/location/az/ta-tonopah/
+  https://www.ta-petro.com/location/tx/ta-express-fairfield/
 - Pilot Travel Center Lincoln official location page:
   https://locations.pilotflyingj.com/us/al/lincoln/75750-al-77
 - IDOT truck parking page for I-55 rest areas:
@@ -292,7 +334,9 @@ Open-Meteo elevation sample range. It is deliberately separate from
 deterministic unit tests and should remain a small, credential-free sanity
 check.
 
-Report coverage for every leg in human-readable form:
+Report coverage for every leg in human-readable form. The report calls out
+placeholder-only legs and insufficient stop density instead of treating generated
+midpoint POIs as finished data:
 
 ```powershell
 uv run python tools/enrich_routes.py --coverage-report
@@ -328,12 +372,11 @@ limited or unavailable:
 uv run python tools/enrich_routes.py --enrich-all --write --no-overpass --rate-limit 0
 ```
 
-The full-network batch completed route geometry, elevation/grade, state
-context, and POI/action coverage for all 106 legs. Public Overpass endpoints
-were not practical for the final batch during validation, returning timeouts or
-HTTP 429, so POI coverage was completed with curated source notes and
-operator/DOT/authority review. Future batches can rerun with a self-hosted or
-available Overpass endpoint without changing the runtime schema.
+The full-network batch completed route geometry, elevation/grade, and state
+context for all 106 legs. Earlier generated midpoint POIs are now marked as
+placeholders. Future batches should replace those placeholders with named,
+source-backed truck stops, public rest areas, service plazas, truck parking, or
+weigh stations without changing the runtime schema.
 
 High-priority toll and service-plaza-heavy corridors are now covered:
 
@@ -397,14 +440,16 @@ expansion must not silently invent unsupported road conditions.
 
 Stop type labels remain spoken before the curated stop name, such as `public
 rest area: Kenosha Safety Rest Area` or `travel center: Road Ranger Waco`. The
-keyboard flow remains audio-first: stops are announced ahead, `X` arms the
-exit, and `T` opens the POI menu when parked at one. Menu items are generated
-from source-backed actions, so a rest area does not offer fuel or repair by
-default, and a weigh station does not pretend to be a travel center. `R` speaks
-route progress plus GPS context, including grade/terrain context. `K` sets
-adaptive cruise, and the spoken cue includes the following gap, bad-weather gap
-increases, and cancellation behavior. GPS and traffic cues supplement the
-keyboard status keys; they never require a visual map or raw data inspection.
-Toll warnings and toll-charged messages use concise speech and settlement
-language, and delivery completion speaks gross pay, toll expenses, and net
-settlement so the operating cost is accessible without reading a visual ledger.
+keyboard flow remains audio-first: stops are announced ahead, the cue includes
+parking certainty such as `confirmed truck parking` or `limited truck parking`,
+`X` arms the exit, and `T` opens the POI menu when parked at one. Menu items are
+generated from source-backed actions, so a rest area does not offer fuel or
+repair by default, and a weigh station does not pretend to be a travel center.
+`R` speaks route progress plus GPS context, including grade/terrain context.
+`K` sets adaptive cruise, and the spoken cue includes the following gap,
+bad-weather gap increases, and cancellation behavior. GPS and traffic cues
+supplement the keyboard status keys; they never require a visual map or raw data
+inspection. Toll warnings and toll-charged messages use concise speech and
+settlement language, and delivery completion speaks gross pay, toll expenses,
+and net settlement so the operating cost is accessible without reading a visual
+ledger.
