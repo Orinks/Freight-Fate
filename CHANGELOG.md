@@ -1,13 +1,5 @@
 # Changelog
 
-## Unreleased
-
-### Changed
-- **Developer snapshot release notes.** Nightly builds now use curated
-  player-facing changelog entries, and scheduled snapshots build only for new
-  curated notes or an explicit nightly-build marker instead of raw git diffs or
-  commit subjects.
-
 ## 1.6.0 - 2026-06-15
 
 ### Added
