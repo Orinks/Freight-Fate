@@ -98,6 +98,9 @@ STOP_CURATION_LEVELS = {"curated", "placeholder"}
 
 STOP_DIRECTIONS = {"both", "forward", "reverse"}
 
+POI_DENSITY_SHORT_LEG_MILES = 160.0
+POI_DENSITY_MEDIUM_LEG_MILES = 320.0
+
 POI_ACTIONS = {
     "park",
     "save",
@@ -738,7 +741,7 @@ class Leg:
         if len(self.elevation_samples) < 2 or not self.grade_segments:
             return False
         curated_stops = [stop for stop in self.stops if stop.curated]
-        if not curated_stops:
+        if len(curated_stops) < minimum_curated_pois(self.miles):
             return False
         if any(
             not stop.source
@@ -771,10 +774,14 @@ class Route:
 
     @property
     def stops(self) -> list[str]:
-        return [s.name for leg in self.legs for s in leg.stops]
+        return [s.name for leg in self.legs for s in leg.stops if s.curated]
 
     @property
     def stop_details(self) -> list[Stop]:
+        return [s for leg in self.legs for s in leg.stops if s.curated]
+
+    @property
+    def raw_stop_details(self) -> list[Stop]:
         return [s for leg in self.legs for s in leg.stops]
 
     @property
@@ -1591,6 +1598,14 @@ def _infer_stop_curation(name: str, source: str) -> str:
         "no actionable overpass poi candidate",
     )
     return "placeholder" if any(marker in text for marker in synthetic_markers) else "curated"
+
+
+def minimum_curated_pois(miles: float) -> int:
+    if miles < POI_DENSITY_SHORT_LEG_MILES:
+        return 1
+    if miles <= POI_DENSITY_MEDIUM_LEG_MILES:
+        return 2
+    return 3
 
 
 def _max_alternate_miles(best_miles: float) -> float:

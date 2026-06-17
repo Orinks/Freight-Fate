@@ -1639,6 +1639,30 @@
           ],
           "parking": "confirmed",
           "curation": "curated"
+        },
+        {
+          "name": "Pilot Travel Center Sturbridge",
+          "type": "travel_center",
+          "at_mi": 174.0,
+          "source": "Pilot Flying J official Sturbridge, Massachusetts location page lists truck parking; at_mi estimated from the I-84/Massachusetts Turnpike approach west of Boston, accessed 2026-06-17: https://locations.pilotflyingj.com/us/ma/sturbridge/400-haynes-st",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated"
         }
       ]
     },
@@ -2267,6 +2291,29 @@
       },
       "stops": [
         {
+          "name": "Middle Ridge Service Plaza",
+          "type": "service_plaza",
+          "at_mi": 36.0,
+          "source": "Ohio Turnpike Middle Ridge official service plaza page, milepost 139.5 in Amherst; at_mi estimated from Cleveland-to-Amherst/Ohio Turnpike route distance, accessed 2026-06-17: https://www.ohioturnpike.org/truckers/service-plazas/middle-ridge",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated"
+        },
+        {
           "name": "Blue Heron Service Plaza",
           "type": "service_plaza",
           "at_mi": 86.0,
@@ -2619,25 +2666,52 @@
       },
       "stops": [
         {
-          "name": "I-65 corridor rest area",
-          "type": "public_rest_area",
-          "at_mi": 144.5,
-          "source": "State DOT rest-area/traveler information programs plus development-time OSRM/OpenStreetMap corridor review, accessed 2026-06-16; descriptive gameplay stop seeded for offline route coverage without raw OSM IDs. Sources include OpenStreetMap attribution https://www.openstreetmap.org/copyright and FHWA rest-area/truck-parking corridor context https://ops.fhwa.dot.gov/Freight/infrastructure/truck_parking/",
+          "name": "Love's Travel Stop Memphis",
+          "type": "travel_center",
+          "at_mi": 101.0,
+          "source": "Love's official Memphis, Indiana location page lists I-65 Exit 16 and truck parking; at_mi estimated from Indiana I-65 exit distance south of Indianapolis, accessed 2026-06-17: https://www.loves.com/locations/in/memphis/loves-travel-stop-memphis-355",
           "actions": [
             "park",
             "save",
+            "fuel",
+            "food",
             "break",
             "sleep"
           ],
           "services": [
-            "parking",
-            "restrooms"
+            "diesel",
+            "food",
+            "parking"
           ],
           "directions": [
             "both"
           ],
-          "parking": "unknown",
-          "curation": "placeholder"
+          "parking": "confirmed",
+          "curation": "curated"
+        },
+        {
+          "name": "Pilot Travel Center Franklin",
+          "type": "travel_center",
+          "at_mi": 250.0,
+          "source": "Pilot Flying J official Franklin, Kentucky location page lists diesel, showers, food, CAT scale, and truck parking; at_mi estimated from I-65 Kentucky Exit 6 near the Tennessee line, accessed 2026-06-17: https://locations.pilotflyingj.com/us/ky/franklin/2940-scottsville-rd",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated"
         }
       ]
     },
@@ -2758,25 +2832,48 @@
       },
       "stops": [
         {
-          "name": "I-24 corridor rest area",
-          "type": "public_rest_area",
-          "at_mi": 125.0,
-          "source": "State DOT rest-area/traveler information programs plus development-time OSRM/OpenStreetMap corridor review, accessed 2026-06-16; descriptive gameplay stop seeded for offline route coverage without raw OSM IDs. Sources include OpenStreetMap attribution https://www.openstreetmap.org/copyright and FHWA rest-area/truck-parking corridor context https://ops.fhwa.dot.gov/Freight/infrastructure/truck_parking/",
+          "name": "Love's Travel Stop Jasper",
+          "type": "travel_center",
+          "at_mi": 115.0,
+          "source": "Love's official Jasper, Tennessee location page lists I-24 Exit 158 and truck parking; at_mi estimated from Nashville-to-Jasper route distance, accessed 2026-06-17: https://www.loves.com/locations/tn/jasper/loves-travel-stop-jasper-490",
           "actions": [
             "park",
             "save",
+            "fuel",
+            "food",
             "break",
             "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated"
+        },
+        {
+          "name": "Georgia Visitor Information Center Ringgold",
+          "type": "public_rest_area",
+          "at_mi": 157.0,
+          "source": "Explore Georgia official Ringgold Visitor Information Center page lists I-75 South mile marker 352, parking on site, concessions, and restrooms; at_mi estimated from Nashville-to-Atlanta route distance through Chattanooga, accessed 2026-06-17: https://exploregeorgia.org/ringgold/visitors-services/services/georgia-visitor-information-center-ringgold",
+          "actions": [
+            "park",
+            "save",
+            "break"
           ],
           "services": [
             "parking",
             "restrooms"
           ],
           "directions": [
-            "both"
+            "forward"
           ],
-          "parking": "unknown",
-          "curation": "placeholder"
+          "parking": "limited",
+          "curation": "curated"
         }
       ]
     },
@@ -3430,10 +3527,58 @@
       },
       "stops": [
         {
-          "name": "I-70 corridor rest area",
-          "type": "public_rest_area",
-          "at_mi": 302.5,
-          "source": "State DOT rest-area/traveler information programs plus development-time OSRM/OpenStreetMap corridor review, accessed 2026-06-16; descriptive gameplay stop seeded for offline route coverage without raw OSM IDs. Sources include OpenStreetMap attribution https://www.openstreetmap.org/copyright and FHWA rest-area/truck-parking corridor context https://ops.fhwa.dot.gov/Freight/infrastructure/truck_parking/",
+          "name": "Pilot Travel Center Salina",
+          "type": "travel_center",
+          "at_mi": 181.0,
+          "source": "Pilot Flying J official Salina, Kansas location page at 1944 N 9th St lists diesel, showers, food, CAT scale, and truck parking; at_mi estimated from Kansas City-to-Salina route distance, accessed 2026-06-17: https://locations.pilotflyingj.com/us/ks/salina/1944-n-9th-st",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated"
+        },
+        {
+          "name": "Love's Travel Stop Abilene",
+          "type": "travel_center",
+          "at_mi": 205.0,
+          "source": "Love's official Abilene, Kansas location page lists I-70 Exit 272 and truck parking; at_mi estimated from Kansas City-to-Abilene route distance, accessed 2026-06-17: https://www.loves.com/locations/ks/abilene/loves-travel-stop-abilene-732",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated"
+        },
+        {
+          "name": "KDOT WaKeeney I-70 Truck Parking",
+          "type": "truck_parking",
+          "at_mi": 309.0,
+          "source": "Kansas DOT TPIMS public truck-parking map covers I-70 truck parking/rest-area availability; at_mi estimated from I-70 mile marker 132 near WaKeeney and Kansas City-to-Denver route distance, accessed 2026-06-17: https://tpims.ksdot.gov/",
           "actions": [
             "park",
             "save",
@@ -3447,8 +3592,8 @@
           "directions": [
             "both"
           ],
-          "parking": "unknown",
-          "curation": "placeholder"
+          "parking": "limited",
+          "curation": "curated"
         }
       ]
     },
@@ -4479,25 +4624,76 @@
       },
       "stops": [
         {
-          "name": "I-40 corridor rest area",
-          "type": "public_rest_area",
-          "at_mi": 323.0,
-          "source": "State DOT rest-area/traveler information programs plus development-time OSRM/OpenStreetMap corridor review, accessed 2026-06-16; descriptive gameplay stop seeded for offline route coverage without raw OSM IDs. Sources include OpenStreetMap attribution https://www.openstreetmap.org/copyright and FHWA rest-area/truck-parking corridor context https://ops.fhwa.dot.gov/Freight/infrastructure/truck_parking/",
+          "name": "Love's Travel Stop Amarillo",
+          "type": "travel_center",
+          "at_mi": 316.0,
+          "source": "Love's official Amarillo, Texas location page lists I-40 Exit 74 and truck parking; at_mi estimated from Dallas-to-Amarillo route distance, accessed 2026-06-17: https://www.loves.com/locations/tx/amarillo/loves-travel-stop-amarillo-200",
           "actions": [
             "park",
             "save",
+            "fuel",
+            "food",
             "break",
             "sleep"
           ],
           "services": [
-            "parking",
-            "restrooms"
+            "diesel",
+            "food",
+            "parking"
           ],
           "directions": [
             "both"
           ],
-          "parking": "unknown",
-          "curation": "placeholder"
+          "parking": "confirmed",
+          "curation": "curated"
+        },
+        {
+          "name": "Flying J Travel Center Amarillo",
+          "type": "travel_center",
+          "at_mi": 323.0,
+          "source": "Pilot Flying J official Amarillo, Texas location page at 9601 E I-40 lists diesel, showers, food, CAT scale, and truck parking; at_mi estimated from Dallas-to-Amarillo route distance, accessed 2026-06-17: https://locations.pilotflyingj.com/us/tx/amarillo/9601-e-i-40",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated"
+        },
+        {
+          "name": "TA Moriarty",
+          "type": "travel_center",
+          "at_mi": 603.0,
+          "source": "TravelCenters of America official TA Moriarty, New Mexico page lists 245 truck parking spaces; at_mi estimated from Moriarty's I-40 location east of Albuquerque, accessed 2026-06-17: https://www.ta-petro.com/location/nm/ta-moriarty/",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated"
         }
       ]
     },

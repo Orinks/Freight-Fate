@@ -58,11 +58,28 @@ def test_route_coverage_report_is_machine_readable():
 
     placeholder_only = next(
         leg for leg in report["legs"]
-        if leg["from"] == "Indianapolis" and leg["to"] == "Nashville"
+        if leg["from"] == "Indianapolis" and leg["to"] == "St. Louis"
     )
     assert not placeholder_only["playable"]
     assert placeholder_only["placeholder_poi_count"] == 1
     assert "curated_pois" in placeholder_only["missing"]
+    assert placeholder_only["unsupported_reasons"]
+
+    newly_curated = {
+        ("New York", "Boston"): 2,
+        ("Indianapolis", "Nashville"): 2,
+        ("Nashville", "Atlanta"): 2,
+        ("Kansas City", "Denver"): 3,
+        ("Dallas", "Albuquerque"): 3,
+    }
+    for (start, end), expected_count in newly_curated.items():
+        leg = next(
+            item for item in report["legs"]
+            if item["from"] == start and item["to"] == end
+        )
+        assert leg["playable"], f"{start} to {end}"
+        assert leg["curated_poi_count"] >= expected_count
+        assert leg["missing"] == []
 
     priorities = {
         item["label"]: item

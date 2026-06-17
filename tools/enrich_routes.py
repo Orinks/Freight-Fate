@@ -908,6 +908,12 @@ def coverage_report(data: dict[str, Any]) -> dict[str, Any]:
             "playable": playable,
             "present": present,
             "missing": missing,
+            "unsupported_reasons": _unsupported_reasons(
+                missing,
+                curated_count=len(curated_stops),
+                placeholder_count=len(placeholder_stops),
+                minimum_curated_pois=min_pois,
+            ),
             "poi_count": len(stops),
             "curated_poi_count": len(curated_stops),
             "placeholder_poi_count": len(placeholder_stops),
@@ -940,8 +946,8 @@ def coverage_report(data: dict[str, Any]) -> dict[str, Any]:
             "placeholder_pois_do_not_count_for_dispatch": True,
             "minimum_curated_pois_by_length": {
                 "under_160_mi": 1,
-                "160_to_360_mi": 2,
-                "over_360_mi": 3,
+                "160_to_320_mi": 2,
+                "over_320_mi": 3,
             },
             "state_crossings_required_when_endpoint_states_differ": True,
             "runtime_network_calls": False,
@@ -1067,9 +1073,36 @@ def _stop_is_placeholder(stop: dict[str, Any]) -> bool:
 def _minimum_curated_pois(miles: float) -> int:
     if miles < 160.0:
         return 1
-    if miles <= 360.0:
+    if miles <= 320.0:
         return 2
     return 3
+
+
+def _unsupported_reasons(
+    missing: list[str],
+    *,
+    curated_count: int,
+    placeholder_count: int,
+    minimum_curated_pois: int,
+) -> list[str]:
+    if not missing:
+        return []
+    reasons = []
+    if "curated_pois" in missing and placeholder_count and not curated_count:
+        reasons.append("placeholder-only POIs are quarantined and do not count")
+    elif "curated_pois" in missing:
+        reasons.append(
+            "curated POIs are missing required source, actions, directions, or parking certainty"
+        )
+    if "poi_density" in missing:
+        reasons.append(
+            f"insufficient curated POI density: {curated_count}/{minimum_curated_pois}"
+        )
+    for field in missing:
+        if field in {"curated_pois", "poi_density"}:
+            continue
+        reasons.append(f"missing {field}")
+    return reasons
 
 
 def _priority_status(leg_reports: list[dict[str, Any]]) -> list[dict[str, Any]]:

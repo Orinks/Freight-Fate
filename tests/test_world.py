@@ -211,12 +211,13 @@ def test_route_stops_have_explicit_valid_positions(world):
 
 
 def test_placeholder_pois_do_not_make_routes_supported(world):
-    route = world.route_from_cities(["Indianapolis", "Nashville"])
+    route = world.route_from_cities(["Memphis", "Nashville"])
     assert route is not None
-    assert route.stop_details
-    assert all(not stop.curated for stop in route.stop_details)
+    assert route.raw_stop_details
+    assert all(not stop.curated for stop in route.raw_stop_details)
+    assert route.stop_details == []
 
-    supported = world.supported_route("Indianapolis", "Nashville")
+    supported = world.supported_route("Memphis", "Nashville")
     assert supported is None
 
 
@@ -374,6 +375,8 @@ def test_corridor_metadata_supports_offline_itineraries(world):
 
 
 def test_supported_routes_require_complete_corridor_metadata(world):
+    from freight_fate.data.world import minimum_curated_pois
+
     supported_pairs = [
         ("Chicago", "Indianapolis"),
         ("Chicago", "St. Louis"),
@@ -382,11 +385,27 @@ def test_supported_routes_require_complete_corridor_metadata(world):
         ("Des Moines", "Chicago"),
         ("Phoenix", "Los Angeles"),
         ("Denver", "Salt Lake City"),
+        ("New York", "Boston"),
+        ("Indianapolis", "Nashville"),
+        ("Nashville", "Atlanta"),
+        ("Kansas City", "Denver"),
+        ("Dallas", "Albuquerque"),
     ]
     for start, end in supported_pairs:
         route = world.supported_route(start, end)
         assert route is not None, f"{start} to {end} is not dispatch-supported"
         assert route.metadata_complete(world)
+
+    for leg in world.legs:
+        curated = [stop for stop in leg.stops if stop.curated]
+        if not world.leg_metadata_complete(leg):
+            continue
+        assert len(curated) >= minimum_curated_pois(leg.miles), f"{leg.a}-{leg.b}"
+        assert all(stop.source for stop in curated), f"{leg.a}-{leg.b}"
+        assert all(stop.actions for stop in curated), f"{leg.a}-{leg.b}"
+        assert all(stop.parking != "unknown" for stop in curated), f"{leg.a}-{leg.b}"
+        route = world.route_from_cities([leg.a, leg.b])
+        assert all(stop.curated for stop in route.stop_details), f"{leg.a}-{leg.b}"
 
 
 def test_toll_metadata_is_explicit_and_separate_from_service_plazas(world):

@@ -135,7 +135,7 @@ For new playable freight, a leg is considered supported only when it has:
 route points, checkpoints, state mileage, state crossings when endpoint states
 differ, elevation samples, grade segments, and enough curated actionable POIs
 for its length. The current density rule is one curated POI under 160 miles, two
-from 160 through 360 miles, and three beyond 360 miles. A multi-leg route is
+from 160 through 320 miles, and three beyond 320 miles. A multi-leg route is
 playable only when every leg meets that contract.
 
 Toll events are route-positioned events, not POIs. Use `toll_events` for toll
@@ -348,11 +348,37 @@ Report the same coverage as JSON for tests or planning:
 uv run python tools/enrich_routes.py --coverage-report --json
 ```
 
+The JSON report is the whole-game acceptance artifact. It includes total legs,
+playable legs, placeholder-only legs, insufficient-density legs, and per-leg
+`unsupported_reasons`. Normal dispatch uses the same metadata-complete gate, so
+unsupported legs remain visible as data debt without appearing as ordinary jobs.
+
 Run a tiny Overpass POI reachability smoke for one corridor:
 
 ```powershell
 uv run python tools/enrich_routes.py --from-city Chicago --to-city Indianapolis --overpass-poi-smoke
 ```
+
+Discover truck-relevant POI candidates near checked-in route geometry with the
+manual Overpass helper:
+
+```powershell
+uv run python tools/discover_route_pois.py --from-city Indianapolis --to-city Nashville --limit-points 3 --radius-m 12000
+```
+
+For whole-network planning, query small polite batches and review the candidate
+output before editing `world.json`:
+
+```powershell
+uv run python tools/discover_route_pois.py --all --max-legs 5 --limit-points 1 --radius-m 8000 --json
+```
+
+The helper queries `https://overpass-api.de/api/interpreter` for narrow
+route-adjacent rest areas, service areas, HGV-capable fuel/parking, weighbridge
+features, and common travel-center names. Its output is not committed directly;
+developers must still verify official operator, agency, or public source pages
+and curate clean player-facing names, actions, parking certainty, direction,
+and `at_mi` estimates.
 
 For full-network enrichment, run staged batches rather than hammering public
 demo endpoints. The checked-in tool can fill missing corridor metadata in
@@ -374,9 +400,12 @@ uv run python tools/enrich_routes.py --enrich-all --write --no-overpass --rate-l
 
 The full-network batch completed route geometry, elevation/grade, and state
 context for all 106 legs. Earlier generated midpoint POIs are now marked as
-placeholders. Future batches should replace those placeholders with named,
-source-backed truck stops, public rest areas, service plazas, truck parking, or
-weigh stations without changing the runtime schema.
+placeholders. Current curated POI slices have made representative Northeast,
+Midwest, I-65, I-24/I-75, I-70, and I-40 corridors playable, while remaining
+placeholder-only or under-density legs are excluded from normal dispatch.
+Future batches should replace placeholders with named, source-backed truck
+stops, public rest areas, service plazas, truck parking, or weigh stations
+without changing the runtime schema.
 
 High-priority toll and service-plaza-heavy corridors are now covered:
 

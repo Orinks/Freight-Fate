@@ -104,13 +104,14 @@ def test_trip_uses_explicit_stop_positions(world):
 
 
 def test_trip_filters_placeholder_pois_from_runtime(world):
-    route = world.route_from_cities(["Indianapolis", "Nashville"])
+    route = world.route_from_cities(["Memphis", "Nashville"])
     truck = TruckState()
     weather = WeatherSystem("midwest", seed=1)
     trip = Trip(route, truck, weather, seed=2)
 
-    assert route.stop_details
-    assert all(not stop.curated for stop in route.stop_details)
+    assert route.raw_stop_details
+    assert all(not stop.curated for stop in route.raw_stop_details)
+    assert route.stop_details == []
     assert trip.stops == []
 
 

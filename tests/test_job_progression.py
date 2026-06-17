@@ -230,6 +230,19 @@ def test_new_dispatches_only_use_metadata_supported_routes(world):
                 assert route.metadata_complete(world)
 
 
+def test_whole_board_never_offers_unsupported_route_legs(world):
+    endorsements = {"refrigerated", "heavy_haul", "high_value"}
+    for city in world.city_names():
+        for seed in range(4):
+            jobs = JobBoard(world, seed=seed).offers(city, endorsements, level=6)
+            for job in jobs:
+                route = world.supported_route(job.origin, job.destination)
+                assert route is not None, f"{job.origin} to {job.destination}"
+                assert route.metadata_complete(world), f"{job.origin} to {job.destination}"
+                assert all(world.leg_metadata_complete(leg) for leg in route.legs)
+                assert all(stop.curated for stop in route.stop_details)
+
+
 def test_former_legacy_routes_are_now_metadata_supported_for_dispatch(world):
     route = world.supported_route("Chicago", "St. Louis")
     assert route is not None
