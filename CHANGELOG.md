@@ -153,6 +153,12 @@
 - **State progress announcements improved.** Trips now announce state
   crossings and nearby cities along the route, not only the destination
   state.
+- **Construction-zone warnings are actionable again.** Construction zones
+  now give a spoken GPS warning about 2 miles before the slowdown begins,
+  and troopers will not clock construction-zone speeding until you have
+  had about a mile inside the zone to react. Speech-first players can
+  slow down in time again instead of being fined on the same update that
+  first announces the zone.
 
 ### Changed
 - **Early career progression and pay.** Low-level jobs now pay enough to
