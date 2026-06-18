@@ -42,6 +42,23 @@ def pickup_snapshot(job: Job, *, checked_in: bool = False,
     }
 
 
+def route_planning_summary(route: Route) -> str:
+    hos_summary = plan_hos(route.miles, route).summary()
+    fuel_stops = sum("fuel" in stop.actions for stop in route.stop_details)
+    sleep_stops = sum("sleep" in stop.actions for stop in route.stop_details)
+    toll_text = (
+        f"Estimated carrier-paid toll exposure {route.estimated_tolls:,.0f} dollars."
+        if route.estimated_tolls > 0 else
+        "No sourced toll exposure on this itinerary."
+    )
+    return (
+        f"{hos_summary} Fuel-capable stops: {fuel_stops}. "
+        f"Sleep-capable stops: {sleep_stops}. {toll_text} "
+        f"Terrain: {route.terrain_summary}. Parking notes are static confidence, "
+        "not a guaranteed open space."
+    )
+
+
 class CityMenuState(MenuState):
     """The hub screen while parked at a company terminal or yard."""
 
@@ -471,12 +488,14 @@ class JobBoardState(MenuState):
     def build_items(self) -> list[MenuItem]:
         items = []
         for i, job in enumerate(self.jobs):
-            route = self.ctx.world.supported_route(job.origin, job.destination)
-            hos_summary = plan_hos(job.distance_mi, route).summary()
             items.append(MenuItem(
-                f"{job.describe(i + 1, len(self.jobs))} {hos_summary}",
+                job.describe(i + 1, len(self.jobs)),
                 lambda j=job: self._accept(j),
-                help=f"From {job.origin_facility_text()}. {hos_summary}"))
+                help=(
+                    f"Load offer from {job.origin_facility_text()} to "
+                    f"{job.destination_facility_text()}. Route inspection after "
+                    "pickup covers rest, fuel, toll, weather, and restrictions."
+                )))
         items.append(MenuItem("Back to terminal", self.go_back))
         return items
 
@@ -646,11 +665,11 @@ class PickupFacilityState(MenuState):
         self.ctx.save_profile()
         via = ", then ".join(route.highways)
         next_context = driving.trip.next_navigation_context()
-        hos_summary = plan_hos(route.miles, route).summary()
+        planning = route_planning_summary(route)
         self.ctx.say(
             f"Navigation set for {self.job.destination_facility_text()}. "
             f"Loaded trip is {route.miles:.0f} miles via {via}. "
-            f"{hos_summary} {next_context} Departing now.",
+            f"{planning} {next_context} Departing now.",
             interrupt=True)
         self.ctx.push_state(driving)
 
@@ -734,9 +753,13 @@ class RouteSelectState(MenuState):
     def build_items(self) -> list[MenuItem]:
         items = []
         for i, route in enumerate(self.routes):
-            label = f"Route {i + 1}: {route.describe()}"
+            label = f"Route {i + 1}: {route.describe()}. {route_planning_summary(route)}"
             items.append(MenuItem(label, lambda r=route: self._start(r),
-                                  help="Via " + ", ".join(route.cities[1:-1] or ["no major cities"])))
+                                  help=(
+                                      "Via "
+                                      + ", ".join(route.cities[1:-1] or ["no major cities"])
+                                      + ". Press W for weather."
+                                  )))
         items.append(MenuItem(self.back_label, self.go_back))
         return items
 

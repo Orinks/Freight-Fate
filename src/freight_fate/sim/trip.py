@@ -282,10 +282,10 @@ class Trip:
                     estimate = "estimated " if toll.estimated else ""
                     toll_text = (
                         f"{estimate}toll {toll.amount:.0f} dollars will be "
-                        "charged to settlement."
+                        "billed to carrier settlement."
                     )
                 else:
-                    toll_text = "entry will be recorded for later settlement."
+                    toll_text = "entry will be recorded for carrier settlement."
                 cues.append(NavigationCue(
                     f"toll:{i}:{toll.at_mi}:{toll.name}",
                     "toll",
@@ -740,7 +740,7 @@ class Trip:
                     self._emit(
                         TripEventKind.GPS_CUE,
                         f"{toll.method_label} entry recorded at {toll.name}; "
-                        "toll will be charged at settlement.",
+                        "toll will be billed at carrier settlement.",
                         toll=toll,
                     )
                     continue
@@ -750,7 +750,7 @@ class Trip:
                 self._emit(
                     TripEventKind.TOLL_CHARGED,
                     f"{toll.method_label} toll charged at {toll.name}: "
-                    f"{estimate}{toll.amount:.0f} dollars, charged to settlement.",
+                    f"{estimate}{toll.amount:.0f} dollars, billed to carrier settlement.",
                     toll=toll,
                     amount=toll.amount,
                 )

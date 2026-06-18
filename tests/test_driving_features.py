@@ -94,8 +94,10 @@ def test_how_to_play_documents_new_gameplay_systems():
     assert "roadside assistance appear only when the poi metadata supports them" in help_text
     assert "enough curated truck-relevant pois for each lane" in help_text
     assert "future route expansion must meet the same source-backed poi gate" in help_text
-    assert "toll charges are recorded as trip expenses" in help_text
-    assert "gross pay, toll expenses, and net settlement" in help_text
+    assert "tolls and approved accessorials are carrier-paid" in help_text
+    assert "driver-responsibility costs like speeding fines" in help_text
+    assert "gross pay, carrier-paid or reimbursed charges" in help_text
+    assert "net driver pay" in help_text
     assert "touch the brakes to cancel" in help_text
     assert "save" in help_text
     assert "dock and deliver" in help_text
@@ -108,6 +110,41 @@ def test_how_to_play_documents_new_gameplay_systems():
     assert "does not need thousands of city nodes" in help_text
     assert "refrigerated, heavy-haul, and high-value freight" in help_text
     assert "full tank or full repair" in help_text
+
+
+def test_dispatch_board_keeps_route_planning_out_of_load_offer():
+    from freight_fate.app import App
+    from freight_fate.models.jobs import JobBoard
+    from freight_fate.models.profile import Profile
+    from freight_fate.states.city import JobBoardState, route_planning_summary
+
+    app = App()
+    try:
+        app.ctx.profile = Profile(name="Dispatch Test", current_city="New York")
+        jobs = JobBoard(app.ctx.world, seed=2).offers(
+            "New York", {"refrigerated", "heavy_haul", "high_value"}, level=5)
+        assert jobs
+        state = JobBoardState(app.ctx, jobs)
+        items = state.build_items()
+        rows = [
+            item.text if isinstance(item.text, str) else item.text()
+            for item in items
+        ]
+
+        assert any("Equipment:" in row for row in rows)
+        assert all("Legal HOS plan" not in row for row in rows)
+        assert all("Route has" not in row for row in rows)
+        assert all("Fuel-capable stops" not in row for row in rows)
+        assert "Route inspection after pickup covers rest, fuel, toll" in items[0].help
+
+        toll_route = app.ctx.world.route_from_cities(["New York", "Philadelphia"])
+        summary = route_planning_summary(toll_route)
+        assert "Legal HOS plan" in summary
+        assert "Fuel-capable stops:" in summary
+        assert "Estimated carrier-paid toll exposure" in summary
+        assert "not a guaranteed open space" in summary
+    finally:
+        app.shutdown()
 
 
 # -- highway exits -------------------------------------------------------------
@@ -242,8 +279,9 @@ def test_facility_menu_waits_for_full_stop(monkeypatch):
         assert app.ctx.profile.career.deliveries == 0
         assert "Paperwork for" in spoken[-1]
         assert "current gross payout" in spoken[-1]
-        assert "Toll expenses recorded so far" in spoken[-1]
-        assert "estimated net settlement" in spoken[-1]
+        assert "Carrier-paid or reimbursed charges recorded so far" in spoken[-1]
+        assert "Those charges do not reduce driver pay" in spoken[-1]
+        assert "estimated net driver pay" in spoken[-1]
         assert "hours remain before the deadline" in spoken[-1]
         assert "Cargo condition" in spoken[-1]
         assert "does not settle the load" in spoken[-1]
@@ -379,13 +417,16 @@ def test_toll_route_delivery_settlement_records_expense(monkeypatch):
         app.ctx.profile.money = 1000.0
         app.ctx.push_state(ArrivalState(app.ctx, driving))
 
-        assert app.ctx.profile.money == pytest.approx(3845.0)
-        assert app.ctx.profile.career.total_earnings == pytest.approx(2845.0)
+        assert app.ctx.profile.money == pytest.approx(3875.0)
+        assert app.ctx.profile.career.total_earnings == pytest.approx(2875.0)
         text = " ".join(app.state.summary_parts)
         assert "Gross pay 2,875 dollars" in text
-        assert "Toll expenses 30 dollars" in text
-        assert "Net settlement 2,845 dollars" in text
-        assert "company transponder settlement" in text
+        assert "Carrier-paid or reimbursed charges 215 dollars" in text
+        assert "tolls 30" in text
+        assert "accessorials carrier-authorized unloading service 185 dollars" in text
+        assert "not deducted from driver pay" in text
+        assert "Driver-responsibility charges 0 dollars" in text
+        assert "Net driver pay 2,875 dollars" in text
     finally:
         app.shutdown()
 

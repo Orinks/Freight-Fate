@@ -191,12 +191,14 @@ physical route facts. Seeds may vary traffic, weather, construction, delays, CB
 chatter, and hazards, but they must not place truck stops, rest areas, tolls,
 state lines, weigh stations, service plazas, grades, or facility approaches.
 
-Tolls are charged once when the trip passes the route-positioned toll event.
+Tolls are recorded once when the trip passes the route-positioned toll event.
 The spoken cue warns ahead of the point, and the charge event records a
-`TollCharge` on the trip. Delivery settlement reports gross pay, toll expenses,
-and net settlement. The accounting can reduce net settlement below gross pay,
-but it does not interrupt driving or require the player to handle cash at every
-gantry.
+`TollCharge` on the trip. Delivery settlement reports gross pay, carrier-paid
+or reimbursed charges, driver-responsibility charges, and net driver pay. Toll
+charges are billed to the carrier/company settlement and do not reduce driver
+pay, but driver-caused costs such as speeding fines still do. This keeps money
+pressure without making routine approved business expenses feel like personal
+cash handling at every gantry.
 
 ## POIs And Actions
 
@@ -262,6 +264,10 @@ checks. The checked-in runtime data is static. Examples include:
   vehicle toll estimates. Current toll estimates are intentionally documented
   with the source and access date because exact truck class, axle, transponder,
   time-of-day, and toll-by-plate rules can change.
+- 49 U.S.C. 14103 and FMCSA lumper guidance for required loading/unloading
+  assistance responsibility. Required loading or unloading services should be
+  modeled as approved carrier/customer charges when authorized and receipted,
+  not as driver-fault deductions.
 - WisDOT Kenosha Safety Rest Area, with truck parking:
   https://wisconsindot.gov/Pages/travel/road/rest-areas/26-kenosha.aspx
 - INDOT rest-area/truck-parking overview:
@@ -500,6 +506,6 @@ repair by default, and a weigh station does not pretend to be a travel center.
 bad-weather gap increases, and cancellation behavior. GPS and traffic cues
 supplement the keyboard status keys; they never require a visual map or raw data
 inspection. Toll warnings and toll-charged messages use concise speech and
-settlement language, and delivery completion speaks gross pay, toll expenses,
-and net settlement so the operating cost is accessible without reading a visual
-ledger.
+carrier-settlement language, and delivery completion speaks gross pay,
+carrier-paid or reimbursed charges, driver-responsibility charges, and net
+driver pay so the ledger is accessible without reading a visual table.

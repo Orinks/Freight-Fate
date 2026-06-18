@@ -14,6 +14,11 @@ import pygame
 
 from ..data.world import Route
 from ..models.jobs import Job, job_from_payload, job_payload
+from ..models.settlement import (
+    carrier_accessorial_charges,
+    charge_summary,
+    charge_total,
+)
 from ..sim import hos
 from ..sim.hos import HosClock, clock_text, is_night, time_of_day
 from ..sim.transmission import REVERSE
@@ -53,6 +58,10 @@ DELIVERY_PARK_MPH = 3.0           # destination settlement requires parking spee
 DOCKING_MAX_MPH = 1.0             # final dock/park action needs a full stop
 DRIVE_PHASE_PICKUP = "pickup"
 DRIVE_PHASE_DELIVERY = "delivery"
+
+
+def _speeding_settlement_fine(strikes: int) -> float:
+    return min(400.0, 80.0 * strikes) if strikes else 0.0
 
 
 class DrivingState(State):
@@ -1624,7 +1633,10 @@ class FacilityArrivalState(MenuState):
         trip_damage = max(0.0, d.truck.damage_pct - d.start_damage)
         estimated_pay = job.payout(hours, trip_damage)
         tolls = d.trip.toll_expense
-        net_estimated_pay = estimated_pay - tolls
+        accessorials = carrier_accessorial_charges(job)
+        carrier_charges = tolls + charge_total(accessorials)
+        driver_charges = _speeding_settlement_fine(d.speeding_strikes)
+        net_estimated_pay = max(0.0, estimated_pay - driver_charges)
         timing = (f"{remaining:.1f} hours remain before the deadline"
                   if remaining >= 0
                   else f"{-remaining:.1f} hours past the deadline")
@@ -1638,8 +1650,13 @@ class FacilityArrivalState(MenuState):
             f"Paperwork for {self.facility}: {job.weight_tons:.0f} tons of "
             f"{job.cargo.label}. Rate sheet lists {job.pay:,.0f} dollars; "
             f"current gross payout is {estimated_pay:,.0f} dollars. "
-            f"Toll expenses recorded so far are {tolls:,.0f} dollars, "
-            f"for an estimated net settlement of {net_estimated_pay:,.0f}. "
+            f"Carrier-paid or reimbursed charges recorded so far are "
+            f"{carrier_charges:,.0f} dollars, including tolls "
+            f"{tolls:,.0f} and accessorials {charge_summary(accessorials)}. "
+            "Those charges do not reduce driver pay. "
+            f"Driver-responsibility charges are estimated at "
+            f"{driver_charges:,.0f} dollars, for estimated net driver pay "
+            f"{net_estimated_pay:,.0f}. "
             f"{timing}. {cargo_condition} Dock and deliver when ready; "
             "checking paperwork does not settle the load.")
 
@@ -1686,14 +1703,16 @@ class ArrivalState(MenuState):
         hours = d.trip.game_minutes / 60.0
         trip_damage = max(0.0, d.truck.damage_pct - d.start_damage)
         gross_pay = job.payout(hours, trip_damage)
-        pay = gross_pay
         toll_expense = d.trip.toll_expense
+        accessorials = carrier_accessorial_charges(job)
+        carrier_charges = toll_expense + charge_total(accessorials)
         early_bonus = max(0.0, gross_pay - job.payout(job.deadline_game_h, trip_damage))
-        if d.speeding_strikes:
-            fine = min(400.0, 80.0 * d.speeding_strikes)
-            pay = max(0.0, pay - fine)
-            self.summary_parts.append(f"Speeding fines cost you {fine:,.0f} dollars.")
-        net_pay = pay - toll_expense
+        driver_charges = _speeding_settlement_fine(d.speeding_strikes)
+        if driver_charges:
+            self.summary_parts.append(
+                f"Driver-responsibility charges: speeding fines cost you "
+                f"{driver_charges:,.0f} dollars.")
+        net_pay = max(0.0, gross_pay - driver_charges)
         on_time = hours <= job.deadline_game_h
         p.money += net_pay
         p.current_city = job.destination
@@ -1712,8 +1731,12 @@ class ArrivalState(MenuState):
             f"{'on time' if on_time else 'late'}. "
             f"It is {clock_text(p.game_hours)}. "
             f"Gross pay {gross_pay:,.0f} dollars. "
-            f"Toll expenses {toll_expense:,.0f} dollars charged through the "
-            f"company transponder settlement. Net settlement {net_pay:,.0f} "
+            f"Carrier-paid or reimbursed charges {carrier_charges:,.0f} dollars: "
+            f"tolls {toll_expense:,.0f}, accessorials "
+            f"{charge_summary(accessorials)}. "
+            "These are billed to carrier settlement and not deducted from driver pay. "
+            f"Driver-responsibility charges {driver_charges:,.0f} dollars. "
+            f"Net driver pay {net_pay:,.0f} "
             f"dollars, and you now have {p.money:,.0f}. "
             f"After unloading, dispatch has you parked at "
             f"{self.terminal.name} for the {job.destination} service area."))
