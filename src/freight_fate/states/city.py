@@ -59,6 +59,18 @@ def route_planning_summary(route: Route) -> str:
     )
 
 
+def route_departure_summary(route: Route) -> str:
+    toll_text = (
+        f" Carrier toll estimate {route.estimated_tolls:,.0f} dollars."
+        if route.estimated_tolls > 0 else
+        ""
+    )
+    return (
+        f"Loaded trip is {route.miles:.0f} miles via "
+        f"{', then '.join(route.highways)}.{toll_text}"
+    )
+
+
 class CityMenuState(MenuState):
     """The hub screen while parked at a company terminal or yard."""
 
@@ -801,12 +813,9 @@ class RouteSelectState(MenuState):
         driving = DrivingState(self.ctx, self.job, route)
         self.ctx.profile.active_trip = driving.snapshot()
         self.ctx.save_profile()
-        via = ", then ".join(route.highways)
         next_context = driving.trip.next_navigation_context()
-        planning = route_planning_summary(route)
         self.ctx.say(
             f"Navigation set for {self.job.destination_facility_text()}. "
-            f"Loaded trip is {route.miles:.0f} miles via {via}. "
-            f"{planning} {next_context} Departing now.",
+            f"{route_departure_summary(route)} {next_context} Departing now.",
             interrupt=True)
         self.ctx.push_state(driving)
