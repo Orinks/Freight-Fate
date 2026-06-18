@@ -1,5 +1,18 @@
 # Changelog
 
+## Unreleased
+
+### Added
+- **Air-brake startup and reservoir behavior.** Trucks now build air
+  pressure before departure, keep spring brakes engaged until the system is
+  ready, and model service and emergency reservoir pressure while driving so
+  braking feels more like a heavy truck without stranding new careers.
+
+### Fixed
+- **Driving status menu access.** Pressing Tab while driving now opens the
+  spoken status menu again, including load, trip, truck, route, and route-stop
+  details from the road.
+
 ## 1.6.0 - 2026-06-15
 
 ### Added
