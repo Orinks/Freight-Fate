@@ -437,7 +437,7 @@ class DrivingState(State):
             f"Limit: {limit:.0f} mph" + (f" in a {reason} zone" if reason else ""),
             f"Route: {progress}",
             f"Fuel: {t.fuel_fraction * 100:.0f} percent",
-            f"Air brakes: {self._air_status_text()}",
+            f"Air brakes: {self._air_status_text(detailed=True)}",
             f"Weather: {self.weather.describe()}",
             f"Clock: {time_of_day(self.trip.current_hour)}",
         ]
@@ -470,7 +470,7 @@ class DrivingState(State):
                 lines.append(f"Next legal stop: {context}")
         return lines
 
-    def _air_status_text(self) -> str:
+    def _air_status_text(self, *, detailed: bool = False) -> str:
         t = self.truck
         if t.spring_brakes_active:
             brake = "spring brakes active"
@@ -485,6 +485,18 @@ class DrivingState(State):
         else:
             pressure = "air building"
         compressor = "compressor building" if t.air_compressor_active else "compressor idle"
+        heat = (
+            "brakes hot" if t.brake_temp_c >= t.specs.brake_fade_temp_c
+            else "brakes warm" if t.brake_temp_c >= 180.0
+            else "brakes cool"
+        )
+        if detailed:
+            return (
+                f"primary {t.primary_air_psi:.0f} psi, "
+                f"secondary {t.secondary_air_psi:.0f} psi, "
+                f"trailer {t.trailer_air_psi:.0f} psi, "
+                f"{pressure}, {brake}, {compressor}, {heat}"
+            )
         return f"air {t.air_pressure_psi:.0f} psi, {pressure}, {brake}, {compressor}"
 
     def _speak_fuel(self) -> None:

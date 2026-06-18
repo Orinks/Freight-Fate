@@ -53,7 +53,10 @@ class TruckSpecs:
     air_cold_start_psi: float = 55.0
     air_build_idle_psi_per_s: float = 4.0
     air_build_fast_psi_per_s: float = 7.0
-    air_loss_per_application_psi: float = 4.0
+    air_loss_primary_per_application_psi: float = 4.5
+    air_loss_secondary_per_application_psi: float = 3.5
+    air_loss_trailer_per_application_psi: float = 2.0
+    air_loss_per_application_psi: float = 4.0  # legacy tuning reference
     air_loss_hold_psi_per_s: float = 0.25
 
 
@@ -70,7 +73,9 @@ class TruckState:
     engine_brake: bool = False
     emergency_brake: bool = False
     parking_brake: bool = False
-    air_pressure_psi: float = 125.0
+    primary_air_psi: float = 125.0
+    secondary_air_psi: float = 125.0
+    trailer_air_psi: float = 125.0
     air_compressor_active: bool = False
 
     fuel_gal: float = 150.0
@@ -214,6 +219,15 @@ class TruckState:
     # -- air brakes ---------------------------------------------------------------
 
     @property
+    def air_pressure_psi(self) -> float:
+        """Compatibility view: the lowest available service/supply reservoir."""
+        return min(self.primary_air_psi, self.secondary_air_psi, self.trailer_air_psi)
+
+    @air_pressure_psi.setter
+    def air_pressure_psi(self, value: float) -> None:
+        self._set_all_air_reservoirs(value)
+
+    @property
     def air_low_warning(self) -> bool:
         return self.air_pressure_psi <= self.specs.air_low_warning_psi
 
@@ -231,17 +245,14 @@ class TruckState:
 
     def set_cold_air_start(self) -> None:
         """Parked trip start: low air, spring/parking brakes set."""
-        self.air_pressure_psi = min(
-            self.specs.air_governor_cut_out_psi,
-            max(0.0, self.specs.air_cold_start_psi),
-        )
+        self._set_all_air_reservoirs(self.specs.air_cold_start_psi)
         self.parking_brake = True
         self.air_compressor_active = False
         self._last_service_air_application = 0.0
 
     def set_air_ready(self, *, parking_brake: bool = True) -> None:
         """Compatibility/default state: charged tanks, parked safely."""
-        self.air_pressure_psi = self.specs.air_governor_cut_out_psi
+        self._set_all_air_reservoirs(self.specs.air_governor_cut_out_psi)
         self.parking_brake = parking_brake
         self.air_compressor_active = False
         self._last_service_air_application = 0.0
@@ -253,14 +264,19 @@ class TruckState:
         if not self.air_ready:
             return False
         self.parking_brake = False
-        self.air_pressure_psi = max(0.0, self.air_pressure_psi - 1.0)
+        self.primary_air_psi = self._clamp_air_psi(self.primary_air_psi - 1.0)
+        self.secondary_air_psi = self._clamp_air_psi(self.secondary_air_psi - 1.0)
+        self.trailer_air_psi = self._clamp_air_psi(self.trailer_air_psi - 1.5)
         self._sync_air_compressor()
         return True
 
     def air_brake_snapshot(self) -> dict:
         return {
-            "schema": 1,
+            "schema": 2,
             "pressure_psi": round(self.air_pressure_psi, 1),
+            "primary_psi": round(self.primary_air_psi, 1),
+            "secondary_psi": round(self.secondary_air_psi, 1),
+            "trailer_psi": round(self.trailer_air_psi, 1),
             "parking_brake": self.parking_brake,
             "compressor_active": self.air_compressor_active,
         }
@@ -272,14 +288,10 @@ class TruckState:
             else:
                 self.set_cold_air_start()
             return
-        pressure = data.get("pressure_psi", self.specs.air_governor_cut_out_psi)
-        try:
-            self.air_pressure_psi = max(
-                0.0,
-                min(self.specs.air_governor_cut_out_psi, float(pressure)),
-            )
-        except (TypeError, ValueError):
-            self.air_pressure_psi = self.specs.air_governor_cut_out_psi
+        fallback = data.get("pressure_psi", self.specs.air_governor_cut_out_psi)
+        self.primary_air_psi = self._snapshot_air_value(data.get("primary_psi", fallback))
+        self.secondary_air_psi = self._snapshot_air_value(data.get("secondary_psi", fallback))
+        self.trailer_air_psi = self._snapshot_air_value(data.get("trailer_psi", fallback))
         self.parking_brake = bool(data.get("parking_brake", True))
         self.air_compressor_active = bool(data.get("compressor_active", False))
         self._last_service_air_application = 0.0
@@ -287,13 +299,29 @@ class TruckState:
             self.parking_brake = True
         self._sync_air_compressor()
 
+    def _clamp_air_psi(self, value: float) -> float:
+        return max(0.0, min(self.specs.air_governor_cut_out_psi, value))
+
+    def _snapshot_air_value(self, value: object) -> float:
+        try:
+            return self._clamp_air_psi(float(value))
+        except (TypeError, ValueError):
+            return self.specs.air_governor_cut_out_psi
+
+    def _set_all_air_reservoirs(self, value: float) -> None:
+        pressure = self._clamp_air_psi(value)
+        self.primary_air_psi = pressure
+        self.secondary_air_psi = pressure
+        self.trailer_air_psi = pressure
+
     def _sync_air_compressor(self) -> None:
         if not self.engine_on:
             self.air_compressor_active = False
             return
-        if self.air_pressure_psi <= self.specs.air_governor_cut_in_psi:
+        reservoirs = (self.primary_air_psi, self.secondary_air_psi, self.trailer_air_psi)
+        if min(reservoirs) <= self.specs.air_governor_cut_in_psi:
             self.air_compressor_active = True
-        elif self.air_pressure_psi >= self.specs.air_governor_cut_out_psi:
+        elif min(reservoirs) >= self.specs.air_governor_cut_out_psi:
             self.air_compressor_active = False
 
     def _update_air_system(self, dt: float) -> None:
@@ -309,10 +337,11 @@ class TruckState:
                 + (self.specs.air_build_fast_psi_per_s
                    - self.specs.air_build_idle_psi_per_s) * rpm_factor
             )
-            self.air_pressure_psi = min(
-                self.specs.air_governor_cut_out_psi,
-                self.air_pressure_psi + rate * dt,
-            )
+            self.primary_air_psi = self._clamp_air_psi(self.primary_air_psi + rate * dt)
+            self.secondary_air_psi = self._clamp_air_psi(
+                self.secondary_air_psi + rate * 0.96 * dt)
+            self.trailer_air_psi = self._clamp_air_psi(
+                self.trailer_air_psi + rate * 0.85 * dt)
         self._sync_air_compressor()
 
     def _consume_brake_air(self, dt: float) -> None:
@@ -320,11 +349,20 @@ class TruckState:
         if self.emergency_brake:
             application = 1.0
         rising = max(0.0, application - self._last_service_air_application)
+        hold = application * self.specs.air_loss_hold_psi_per_s * dt
         if rising > 0.0:
-            self.air_pressure_psi -= rising * self.specs.air_loss_per_application_psi
+            self.primary_air_psi -= rising * self.specs.air_loss_primary_per_application_psi
+            self.secondary_air_psi -= rising * self.specs.air_loss_secondary_per_application_psi
+            self.trailer_air_psi -= rising * self.specs.air_loss_trailer_per_application_psi
         if application > 0.0 and not self.parking_brake:
-            self.air_pressure_psi -= application * self.specs.air_loss_hold_psi_per_s * dt
-        self.air_pressure_psi = max(0.0, self.air_pressure_psi)
+            self.primary_air_psi -= hold * 1.15
+            self.secondary_air_psi -= hold * 0.95
+            self.trailer_air_psi -= hold * 0.55
+        if self.emergency_brake:
+            self.trailer_air_psi -= hold * 1.5
+        self.primary_air_psi = self._clamp_air_psi(self.primary_air_psi)
+        self.secondary_air_psi = self._clamp_air_psi(self.secondary_air_psi)
+        self.trailer_air_psi = self._clamp_air_psi(self.trailer_air_psi)
         self._last_service_air_application = application
 
     def _update_rpm(self, dt: float) -> None:

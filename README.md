@@ -184,8 +184,12 @@ Freight Fate models air pressure without asking players to run a full CDL
 inspection before every dispatch. A cold trip starts with low pressure and
 the parking brake set. Start the engine, wait for the compressor to build
 air to 100 psi, then press `P` to release the parking brake. Repeated brake
-applications consume air, low air warns around 60 psi, and spring brakes
-apply around 40 psi.
+applications draw from separate truck and trailer air tanks, low air warns
+around 60 psi, and spring brakes apply around 40 psi. Normal driving should
+feel familiar; the extra detail mostly gives clearer warnings if you pump the
+brakes hard, ignore low air, or drive damaged equipment. Press `Tab` while
+driving to review primary, secondary, and trailer air, compressor state,
+parking or spring brake state, and brake heat.
 
 The thresholds are grounded in official CDL and air-brake references:
 [FMCSA](https://www.fmcsa.dot.gov/sites/fmcsa.dot.gov/files/docs/brake_safety_systems_02-14.pdf)

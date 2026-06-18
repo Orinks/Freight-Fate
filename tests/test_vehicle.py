@@ -275,6 +275,33 @@ def test_brake_applications_consume_air_and_trigger_low_air_warning():
     assert t.air_low_warning
 
 
+def test_service_brakes_drain_separate_air_reservoirs():
+    t = TruckState()
+    t.set_air_ready(parking_brake=False)
+
+    t.brake = 1.0
+    t.update(0.1)
+
+    assert t.primary_air_psi < t.secondary_air_psi < t.trailer_air_psi
+    assert t.air_pressure_psi == pytest.approx(t.primary_air_psi)
+
+
+def test_compressor_builds_all_reservoirs_before_cutout():
+    t = TruckState()
+    t.primary_air_psi = 92.0
+    t.secondary_air_psi = 118.0
+    t.trailer_air_psi = 86.0
+    t.start_engine()
+
+    assert t.air_compressor_active
+    drive(t, 20)
+
+    assert t.primary_air_psi == pytest.approx(t.specs.air_governor_cut_out_psi)
+    assert t.secondary_air_psi == pytest.approx(t.specs.air_governor_cut_out_psi)
+    assert t.trailer_air_psi == pytest.approx(t.specs.air_governor_cut_out_psi)
+    assert not t.air_compressor_active
+
+
 def test_parking_brake_release_requires_ready_air_pressure():
     t = TruckState()
     t.set_cold_air_start()
@@ -300,3 +327,35 @@ def test_parking_brake_holds_truck_until_released():
     drive(t, 5)
 
     assert t.speed_mph > 1.0
+
+
+def test_air_brake_snapshot_preserves_richer_reservoir_state():
+    t = TruckState()
+    t.primary_air_psi = 91.2
+    t.secondary_air_psi = 103.4
+    t.trailer_air_psi = 97.6
+    t.parking_brake = False
+    t.air_compressor_active = True
+
+    restored = TruckState()
+    restored.restore_air_brake_snapshot(t.air_brake_snapshot(), default_ready=False)
+
+    assert restored.primary_air_psi == pytest.approx(91.2)
+    assert restored.secondary_air_psi == pytest.approx(103.4)
+    assert restored.trailer_air_psi == pytest.approx(97.6)
+    assert not restored.parking_brake
+
+
+def test_old_air_brake_snapshot_restores_all_reservoirs_from_pressure():
+    t = TruckState()
+
+    t.restore_air_brake_snapshot(
+        {"schema": 1, "pressure_psi": 88.0, "parking_brake": False},
+        default_ready=False,
+    )
+
+    assert t.primary_air_psi == pytest.approx(88.0)
+    assert t.secondary_air_psi == pytest.approx(88.0)
+    assert t.trailer_air_psi == pytest.approx(88.0)
+    assert t.air_pressure_psi == pytest.approx(88.0)
+    assert not t.parking_brake

@@ -478,6 +478,7 @@ HELP_PAGES = [
         "Start the engine and wait for air pressure to reach 100 psi.",
         "Press P to release or set the parking brake.",
         "If you hear low air, keep the parking brake set and let pressure build.",
+        "Hard repeated braking can use air faster than gentle normal driving.",
         "Hold the Up arrow to accelerate, the Down arrow to brake.",
         "In automatic, once stopped, keep holding the Down arrow to back up slowly.",
         "Touch the Up arrow to brake and return to forward drive.",
@@ -496,7 +497,7 @@ HELP_PAGES = [
     ]),
     ("Driving information keys", [
         "Space speaks your speed, gear, RPM, air pressure, and brake state.",
-        "Tab opens a driving status menu for speed, route, air brakes, weather, and hours.",
+        "Tab opens a driving status menu for speed, route, air tanks, weather, and hours.",
         "F speaks fuel level and range.",
         "C speaks the clock, your deadline, and your hours of service.",
         "R speaks route progress, GPS context, and the next stop or maneuver.",

@@ -239,8 +239,12 @@ def test_air_brake_help_and_status_are_spoken(monkeypatch):
         assert isinstance(app.state, DrivingStatusState)
         status_lines = [item.text for item in app.state.items]
         air_status = next(line for line in status_lines if line.startswith("Air brakes:"))
-        assert "air 55 psi" in air_status
+        assert "primary 55 psi" in air_status
+        assert "secondary 55 psi" in air_status
+        assert "trailer 55 psi" in air_status
         assert "parking brake set" in air_status
+        assert "compressor idle" in air_status
+        assert "brakes cool" in air_status
         assert any(line.startswith("Weather:") for line in status_lines)
 
         app.state.handle_event(key_event(pygame.K_ESCAPE))

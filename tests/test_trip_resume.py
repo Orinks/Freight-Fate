@@ -305,7 +305,9 @@ def test_snapshot_roundtrip_preserves_air_brake_state():
     app = App()
     try:
         driving = start_drive(app)
-        driving.truck.air_pressure_psi = 88.0
+        driving.truck.primary_air_psi = 88.0
+        driving.truck.secondary_air_psi = 92.0
+        driving.truck.trailer_air_psi = 95.0
         driving.truck.parking_brake = False
         snap = driving.snapshot()
 
@@ -313,6 +315,9 @@ def test_snapshot_roundtrip_preserves_air_brake_state():
 
         assert resumed is not None
         assert resumed.truck.air_pressure_psi == pytest.approx(88.0)
+        assert resumed.truck.primary_air_psi == pytest.approx(88.0)
+        assert resumed.truck.secondary_air_psi == pytest.approx(92.0)
+        assert resumed.truck.trailer_air_psi == pytest.approx(95.0)
         assert not resumed.truck.parking_brake
     finally:
         app.shutdown()
