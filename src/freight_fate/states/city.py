@@ -657,21 +657,17 @@ class PickupFacilityState(MenuState):
             self.ctx.audio.play("ui/error")
             self.ctx.say("Dispatch cannot find a navigation itinerary for this load.")
             return
-        route = routes[0]
-        from .driving import DrivingState
-
-        driving = DrivingState(self.ctx, self.job, route)
-        self.ctx.profile.active_trip = driving.snapshot()
-        self.ctx.save_profile()
-        via = ", then ".join(route.highways)
-        next_context = driving.trip.next_navigation_context()
-        planning = route_planning_summary(route)
         self.ctx.say(
-            f"Navigation set for {self.job.destination_facility_text()}. "
-            f"Loaded trip is {route.miles:.0f} miles via {via}. "
-            f"{planning} {next_context} Departing now.",
+            f"Route planning to {self.job.destination_facility_text()}. "
+            f"{len(routes)} realistic supported route "
+            f"option{'s' if len(routes) != 1 else ''} available.",
             interrupt=True)
-        self.ctx.push_state(driving)
+        self.ctx.push_state(RouteSelectState(
+            self.ctx,
+            self.job,
+            routes,
+            back_label="Back to pickup facility",
+        ))
 
     def _plan_route(self) -> None:
         self._depart_for_destination()
@@ -805,6 +801,12 @@ class RouteSelectState(MenuState):
         driving = DrivingState(self.ctx, self.job, route)
         self.ctx.profile.active_trip = driving.snapshot()
         self.ctx.save_profile()
-        self.ctx.say(f"Departing {self.job.origin} for {self.job.destination} "
-                     f"on {route.highways[0]}. Good luck out there.", interrupt=True)
+        via = ", then ".join(route.highways)
+        next_context = driving.trip.next_navigation_context()
+        planning = route_planning_summary(route)
+        self.ctx.say(
+            f"Navigation set for {self.job.destination_facility_text()}. "
+            f"Loaded trip is {route.miles:.0f} miles via {via}. "
+            f"{planning} {next_context} Departing now.",
+            interrupt=True)
         self.ctx.push_state(driving)

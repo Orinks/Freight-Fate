@@ -110,6 +110,10 @@ def test_full_game_flow_headless(monkeypatch):
         app.state.handle_event(key_event(pygame.K_RETURN))  # load at dock
         assert "Depart for destination" in app.state.items[app.state.index].text
         app.state.handle_event(key_event(pygame.K_RETURN))
+        from freight_fate.states.city import RouteSelectState
+
+        assert isinstance(app.state, RouteSelectState)
+        app.state.handle_event(key_event(pygame.K_RETURN))
         assert isinstance(app.state, DrivingState)
         assert app.state.phase == "delivery"
 
