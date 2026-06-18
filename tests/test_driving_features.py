@@ -90,40 +90,38 @@ def test_how_to_play_documents_new_gameplay_systems():
     assert "pickup gate" in help_text
     assert "loading requires the truck to be stopped" in help_text
     assert "loaded and sealed" in help_text
-    assert "dispatch starts the destination itinerary" in help_text
-    assert "route choice is handled as navigation" in help_text
-    assert "navigation itinerary" in help_text
+    assert "dispatch gives you the destination route" in help_text
+    assert "route choice happens after pickup" in help_text
+    assert "real highway corridors" in help_text
     assert "gps announces state lines" in help_text
-    assert "grades and terrain are route conditions" in help_text
-    assert "not random trip rolls" in help_text
+    assert "grades and terrain come from the route" in help_text
     assert "weather, traffic, and construction still vary" in help_text
     assert "slow lead vehicles" in help_text
     assert "adaptive cruise" in help_text
     assert "three second clear-weather gap" in help_text
     assert "increase the following gap" in help_text
-    assert "route pois use clean place names" in help_text
-    assert "source-backed actions" in help_text
-    assert "roadside assistance appear only when the poi metadata supports them" in help_text
-    assert "enough curated truck-relevant pois for each lane" in help_text
-    assert "future route expansion must meet the same source-backed poi gate" in help_text
-    assert "tolls and approved accessorials are carrier-paid" in help_text
-    assert "driver-responsibility costs like speeding fines" in help_text
+    assert "highway stops use clear place names" in help_text
+    assert "list the actions available there" in help_text
+    assert "call for help" in help_text
+    assert "tolls and approved company charges" in help_text
+    assert "costs you caused, like speeding fines" in help_text
     assert "gross pay, carrier-paid or reimbursed charges" in help_text
     assert "net driver pay" in help_text
     assert "touch the brakes to cancel" in help_text
     assert "save" in help_text
     assert "dock and deliver" in help_text
-    assert "each city on the map is a freight market" in help_text
+    assert "wider freight area with many possible shippers" in help_text
     assert "rail and intermodal ramps" in help_text
     assert "parcel hubs" in help_text
     assert "farms and grain elevators" in help_text
     assert "chemical terminals" in help_text
     assert "not every market supports every cargo equally" in help_text
-    assert "does not need thousands of city nodes" in help_text
+    assert "major freight areas instead of every town" in help_text
+    assert "routes with enough stops" in help_text
     assert "refrigerated, heavy-haul, and high-value freight" in help_text
     assert "full tank or full repair" in help_text
     assert "emergency shoulder sleep" in help_text
-    assert "resets the eld but leaves fatigue" in help_text
+    assert "resets your legal clock but leaves fatigue" in help_text
     assert "parking ticket or minor damage" in help_text
 
 
