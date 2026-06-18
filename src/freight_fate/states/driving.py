@@ -72,7 +72,11 @@ class DrivingState(State):
         self.truck.damage_pct = profile.truck_damage_pct
         self.start_damage = profile.truck_damage_pct
         region = ctx.world.cities[job.origin].region
-        self.weather = WeatherSystem(region, provider=ctx.real_weather_provider())
+        self.weather = WeatherSystem(
+            region,
+            seed=self.trip_seed,
+            provider=ctx.real_weather_provider(),
+        )
         self._weather_source_real = ctx.settings.real_weather
         trip_start_hour = profile.game_hours % 24.0 if start_hour is None else start_hour
         self.trip = Trip(route, self.truck, self.weather,

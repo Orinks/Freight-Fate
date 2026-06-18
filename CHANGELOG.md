@@ -96,6 +96,14 @@
   first rest stop of the next run.
 
 ### Fixed
+- **Developer snapshots recognize release-ready notes.** Scheduled nightly
+  builds now count player-facing entries that have already been curated
+  into the next version block, while still ignoring internal-only changelog
+  buckets unless a commit explicitly asks for a nightly build.
+- **Save resume keeps traffic zones stable.** Continuing a saved drive now
+  seeds trip weather from the saved trip seed too, so traffic and
+  construction-zone layouts regenerate consistently across operating
+  systems.
 - **Updater connections on macOS and Linux.** The packaged game's Python
   runtime looks for certificate authorities at paths that only exist on
   the build machine, so on macOS and Linux every secure connection — the

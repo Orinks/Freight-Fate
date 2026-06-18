@@ -47,6 +47,10 @@ def changelog(unreleased: str, stable: str = "") -> str:
     return f"# Changelog\n\n## Unreleased\n\n{unreleased}\n\n{stable}".rstrip() + "\n"
 
 
+def version_only_changelog(version_block: str, stable: str = "") -> str:
+    return f"# Changelog\n\n{version_block}\n\n{stable}".rstrip() + "\n"
+
+
 def test_nightly_notes_use_curated_unreleased_entries(tmp_path, monkeypatch):
     release_notes = load_release_notes_module()
     repo = make_repo(
@@ -100,6 +104,70 @@ def test_nightly_notes_exclude_entries_from_previous_nightly(tmp_path, monkeypat
 
     assert "- New curated note." in notes
     assert "- Old curated note." not in notes
+
+
+def test_nightly_notes_use_new_version_block_entries(tmp_path, monkeypatch):
+    release_notes = load_release_notes_module()
+    repo = make_repo(
+        tmp_path,
+        version_only_changelog(
+            "## 1.6.0 - 2026-06-15\n\n"
+            "### Added\n- Old player-facing note.\n"
+        ),
+    )
+    git(repo, "tag", "nightly-20260615")
+    (repo / "CHANGELOG.md").write_text(
+        version_only_changelog(
+            "## 1.6.0 - 2026-06-15\n\n"
+            "### Added\n"
+            "- Old player-facing note.\n"
+            "- New player-facing note.\n"
+        ),
+        encoding="utf-8",
+    )
+    commit(repo, "feat: add player-facing work")
+    monkeypatch.setattr(release_notes, "ROOT", repo)
+
+    notes = release_notes.nightly_notes(previous_tag="nightly-20260615")
+
+    assert "- New player-facing note." in notes
+    assert "- Old player-facing note." not in notes
+
+
+def test_should_build_nightly_ignores_internal_version_block_entries(
+    tmp_path, monkeypatch, capsys
+):
+    release_notes = load_release_notes_module()
+    repo = make_repo(
+        tmp_path,
+        version_only_changelog(
+            "## 1.6.0 - 2026-06-15\n\n"
+            "### Internal\n- Old build script cleanup.\n"
+        ),
+    )
+    git(repo, "tag", "nightly-20260615")
+    (repo / "CHANGELOG.md").write_text(
+        version_only_changelog(
+            "## 1.6.0 - 2026-06-15\n\n"
+            "### Internal\n"
+            "- Old build script cleanup.\n"
+            "- New test-only helper.\n"
+        ),
+        encoding="utf-8",
+    )
+    commit(repo, "test: add helper")
+    monkeypatch.setattr(release_notes, "ROOT", repo)
+    args = type("Args", (), {
+        "previous_tag": "nightly-20260615",
+        "exclude_notes": "",
+        "latest_stable_tag": "",
+        "exclude_stable_notes": "",
+        "head": "HEAD",
+    })()
+
+    assert release_notes.should_build_nightly_command(args) == 0
+
+    assert "should_build=false" in capsys.readouterr().out
 
 
 def test_nightly_notes_no_entry_behavior_is_explicit(tmp_path, monkeypatch):

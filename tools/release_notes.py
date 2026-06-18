@@ -23,6 +23,19 @@ NIGHTLY_HEADER = (
     "your save files stay compatible whenever possible, but back them up first."
 )
 SECTION_ORDER = ("Added", "Changed", "Improved", "Fixed", "Removed", "Deprecated", "Security")
+PLAYER_FACING_SECTIONS = SECTION_ORDER + ("Compatibility",)
+INTERNAL_SECTIONS = (
+    "Build",
+    "CI",
+    "Developer",
+    "Development",
+    "Docs",
+    "Documentation",
+    "Internal",
+    "Notes",
+    "Tests",
+    "Tooling",
+)
 NIGHTLY_BUILD_MARKERS = ("nightly: build", "[nightly build]")
 SKIP_CHANGELOG_MARKERS = ("changelog: none", "[skip changelog]")
 USER_FACING_PATH_PREFIXES = ("src/", "docs/")
@@ -39,6 +52,12 @@ USER_FACING_PATHS = {
 class ChangelogSection:
     title: str
     entries: tuple[str, ...]
+
+
+@dataclass(frozen=True)
+class ReleaseBlock:
+    heading: str
+    body: str
 
 
 def run_git(args: list[str]) -> str:
@@ -120,6 +139,41 @@ def parse_sections(markdown: str) -> list[ChangelogSection]:
     return sections
 
 
+def release_blocks(text: str) -> list[ReleaseBlock]:
+    matches = list(re.finditer(r"^##\s+(.+?)\s*$", text, re.MULTILINE))
+    blocks: list[ReleaseBlock] = []
+    for index, match in enumerate(matches):
+        start = match.end()
+        end = matches[index + 1].start() if index + 1 < len(matches) else len(text)
+        blocks.append(ReleaseBlock(match.group(1).strip(), text[start:end].strip()))
+    return blocks
+
+
+def eligible_sections(markdown: str) -> list[ChangelogSection]:
+    return [
+        section
+        for section in parse_sections(markdown)
+        if section.title in PLAYER_FACING_SECTIONS
+        and section.title not in INTERNAL_SECTIONS
+    ]
+
+
+def nightly_candidate_sections(text: str) -> list[ChangelogSection]:
+    """Player-facing changelog entries that can feed developer snapshots.
+
+    Release prep sometimes moves curated player-facing notes from
+    ``Unreleased`` into the next version block before the stable tag exists.
+    Scheduled nightlies still need those entries, while explicitly internal
+    buckets should not force a player snapshot.
+    """
+    sections: list[ChangelogSection] = []
+    for block in release_blocks(text):
+        heading = block.heading.casefold()
+        if heading.startswith("unreleased") or re.match(r"v?\d+\.\d+\.\d+", heading):
+            sections.extend(eligible_sections(block.body))
+    return sections
+
+
 def normalize_entry(entry: str) -> str:
     entry = re.sub(r"\[([^\]]+)\]\([^)]+\)", r"\1", entry)
     entry = re.sub(r"`([^`]+)`", r"\1", entry)
@@ -175,12 +229,12 @@ def sections_added_since(
     head_text: str,
     extra_excluded_entries: set[str] | None = None,
 ) -> list[ChangelogSection]:
-    base_entries = entries_from_sections(parse_sections(unreleased_block(changelog_at(base_ref))))
+    base_entries = entries_from_sections(nightly_candidate_sections(changelog_at(base_ref)))
     if extra_excluded_entries:
         base_entries.update(extra_excluded_entries)
 
     added: list[ChangelogSection] = []
-    for section in parse_sections(unreleased_block(head_text)):
+    for section in nightly_candidate_sections(head_text):
         entries = tuple(
             entry for entry in section.entries if normalize_entry(entry) not in base_entries
         )
@@ -201,7 +255,7 @@ def nightly_notes(previous_tag: str = "", exclude_notes: str = "") -> str:
     if previous_tag:
         sections = sections_added_since(previous_tag, changelog_text, excluded_entries)
     else:
-        sections = parse_sections(unreleased_block(changelog_text))
+        sections = nightly_candidate_sections(changelog_text)
     body = format_sections(sections)
     return f"{NIGHTLY_HEADER}\n\n## Changes since the previous snapshot\n\n{body}"
 
@@ -257,11 +311,11 @@ def changed_files(base: str, head: str) -> list[str]:
 
 
 def unreleased_added_entries(base: str, head: str) -> list[str]:
-    base_entries = entries_from_sections(parse_sections(unreleased_block(changelog_at(base))))
+    base_entries = entries_from_sections(nightly_candidate_sections(changelog_at(base)))
     head_text = changelog_at(head) if head != "HEAD" else changelog_file().read_text(encoding="utf-8")
     return [
         entry
-        for section in parse_sections(unreleased_block(head_text))
+        for section in nightly_candidate_sections(head_text)
         for entry in section.entries
         if normalize_entry(entry) not in base_entries
     ]
@@ -287,7 +341,7 @@ def check_command(args: argparse.Namespace) -> int:
 
     if not unreleased_added_entries(base, args.head):
         print(
-            "CHANGELOG.md changed, but no new bullet was added under ## Unreleased.",
+            "CHANGELOG.md changed, but no new player-facing bullet was added.",
             file=sys.stderr,
         )
         return 1
