@@ -545,6 +545,10 @@ HELP_PAGES = [
         "yawns, drifts onto the rumble strip, and reacts late to hazards.",
         "Late at night, truck parking may be full. Drive on, or risk",
         "a ticket and poor sleep on the shoulder.",
+        "If you are stopped away from a POI and truly out of legal or fatigue",
+        "options, the pause menu can offer emergency shoulder sleep.",
+        "The confirmation warns that it resets the ELD but leaves fatigue,",
+        "can draw a parking ticket or minor damage, and keeps the deadline running.",
         "Settings keeps a debug HOS bypass for accessibility and bug escape only.",
     ]),
     ("Deliveries and money", [

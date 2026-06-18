@@ -437,6 +437,52 @@ def test_tier_one_priority_corridors_keep_multi_stop_curated_fuel_support(world)
         assert all(stop.curated for stop in curated), f"{start}-{end}"
 
 
+def test_southern_hos_pressure_corridors_have_added_safe_stops(world):
+    expected = {
+        ("Dallas", "Albuquerque"): {
+            "Love's Travel Stop Wichita Falls",
+            "Flying J Travel Center Tucumcari",
+        },
+        ("Dallas", "St. Louis"): {
+            "Love's Travel Stop Ardmore",
+            "Love's Travel Stop Rolla",
+        },
+        ("Atlanta", "Dallas"): {
+            "Pilot Travel Center Tallapoosa",
+            "Love's Travel Stop Heflin",
+        },
+        ("Nashville", "Atlanta"): {"Flying J Travel Center Resaca"},
+    }
+    for pair, names in expected.items():
+        route = world.supported_route(*pair)
+        assert route is not None
+        stops = {stop.name: stop for stop in route.stop_details}
+        assert names <= set(stops)
+        for name in names:
+            stop = stops[name]
+            assert stop.curated
+            assert stop.parking == "confirmed"
+            assert {"park", "save", "fuel", "break", "sleep"} <= set(stop.actions)
+            assert "2026-06-18" in stop.source
+
+
+def test_southern_sleep_stop_gaps_are_no_longer_extreme(world):
+    def max_sleep_gap(start: str, end: str) -> float:
+        route = world.supported_route(start, end)
+        assert route is not None
+        points = [0.0]
+        points.extend(stop.at_mi for stop in route.stop_details
+                      if "sleep" in stop.actions)
+        points.append(route.miles)
+        points.sort()
+        return max(b - a for a, b in zip(points, points[1:], strict=False))
+
+    assert max_sleep_gap("Dallas", "Albuquerque") < 180.0
+    assert max_sleep_gap("Dallas", "St. Louis") < 185.0
+    assert max_sleep_gap("Atlanta", "Dallas") < 215.0
+    assert max_sleep_gap("Nashville", "Atlanta") < 120.0
+
+
 def test_toll_metadata_is_explicit_and_separate_from_service_plazas(world):
     route = world.route_from_cities(["New York", "Philadelphia"])
     assert route.toll_events

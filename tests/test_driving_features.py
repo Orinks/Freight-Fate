@@ -108,6 +108,9 @@ def test_how_to_play_documents_new_gameplay_systems():
     assert "does not need thousands of city nodes" in help_text
     assert "refrigerated, heavy-haul, and high-value freight" in help_text
     assert "full tank or full repair" in help_text
+    assert "emergency shoulder sleep" in help_text
+    assert "resets the eld but leaves fatigue" in help_text
+    assert "parking ticket or minor damage" in help_text
 
 
 # -- highway exits -------------------------------------------------------------
