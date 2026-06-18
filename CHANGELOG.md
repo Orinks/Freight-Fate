@@ -3,10 +3,19 @@
 ## Unreleased
 
 ### Added
+- **Route rest, toll, and settlement realism.** Route planning now uses richer
+  checked-in stop coverage, supports shoulder-sleep edge cases, accounts for
+  toll and settlement details more explicitly, and keeps those systems covered
+  by focused route, hours-of-service, weather, world-data, and settlement tests.
 - **Air-brake startup and reservoir behavior.** Trucks now build air
   pressure before departure, keep spring brakes engaged until the system is
   ready, and model service and emergency reservoir pressure while driving so
   braking feels more like a heavy truck without stranding new careers.
+
+### Changed
+- **How-to-play driving guidance.** The main-menu guidance for driving controls
+  is shorter and more direct, with the spoken tests updated around the simpler
+  wording.
 
 ### Fixed
 - **Driving status menu access.** Pressing Tab while driving now opens the
