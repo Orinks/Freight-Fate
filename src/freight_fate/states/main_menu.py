@@ -496,7 +496,7 @@ HELP_PAGES = [
     ]),
     ("Driving information keys", [
         "Space speaks your speed, gear, RPM, air pressure, and brake state.",
-        "Tab speaks a full status report including air pressure and brake state.",
+        "Tab opens a driving status menu for speed, route, air brakes, weather, and HOS.",
         "F speaks fuel level and range.",
         "C speaks the clock, your deadline, and your hours of service.",
         "R speaks route progress, GPS context, and the next stop or maneuver.",

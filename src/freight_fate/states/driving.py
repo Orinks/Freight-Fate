@@ -291,7 +291,7 @@ class DrivingState(State):
         elif key == pygame.K_SPACE:
             self._speak_speed()
         elif key == pygame.K_TAB:
-            self._speak_full_status()
+            self.ctx.push_state(DrivingStatusState(self.ctx, self))
         elif key == pygame.K_f:
             self._speak_fuel()
         elif key == pygame.K_c:
@@ -322,7 +322,7 @@ class DrivingState(State):
                 "Press P to release or set the parking brake; if pressure is "
                 "below 100 psi, wait with the engine running. "
                 f"{objective_help}"
-                "Space speed. Tab full status. F fuel. "
+                "Space speed. Tab status menu. F fuel. "
                 "C clock, deadline, and hours of service. "
                 "R route. V weather. T route POI menu when already stopped "
                 "at one: available actions may include fuel, break, sleep, "
@@ -424,38 +424,51 @@ class DrivingState(State):
             return "reverse"
         return f"gear {tr.gear}"
 
-    def _speak_full_status(self) -> None:
+    def status_lines(self) -> list[str]:
         t = self.truck
         limit, reason = self.trip.speed_limit_at(self.trip.position_mi)
-        progress = (self._pickup_progress_summary()
-                    if self.phase == DRIVE_PHASE_PICKUP else
-                    self.trip.progress_summary(self.ctx.settings.imperial_units))
-        parts = [
-            self.ctx.settings.speed_text(t.speed_mph),
-            f"speed limit {limit:.0f}" + (f" in a {reason} zone" if reason else ""),
-            progress,
-            f"fuel {t.fuel_fraction * 100:.0f} percent",
-            self._air_status_text(),
-            f"it is {time_of_day(self.trip.current_hour)}",
+        progress = (
+            self._pickup_progress_summary()
+            if self.phase == DRIVE_PHASE_PICKUP
+            else self.trip.progress_summary(self.ctx.settings.imperial_units)
+        )
+        lines = [
+            f"Speed: {self.ctx.settings.speed_text(t.speed_mph)}",
+            f"Limit: {limit:.0f} mph" + (f" in a {reason} zone" if reason else ""),
+            f"Route: {progress}",
+            f"Fuel: {t.fuel_fraction * 100:.0f} percent",
+            f"Air brakes: {self._air_status_text()}",
+            f"Weather: {self.weather.describe()}",
+            f"Clock: {time_of_day(self.trip.current_hour)}",
         ]
         if self._cruise_mph is not None:
-            parts.insert(1, "adaptive cruise set at "
-                            f"{self.ctx.settings.speed_text(self._cruise_mph)}")
+            lines.insert(
+                1,
+                "Cruise: adaptive cruise set at "
+                f"{self.ctx.settings.speed_text(self._cruise_mph)}",
+            )
             context = self.trip.traffic_context()
             if context is not None:
-                parts.insert(2, f"traffic ahead {context.gap_mi:.1f} miles, "
-                                f"{context.lead.speed_mph:.0f} miles per hour")
+                lines.insert(
+                    2,
+                    f"Traffic: lead vehicle {context.gap_mi:.1f} miles ahead, "
+                    f"{context.lead.speed_mph:.0f} mph",
+                )
         if t.damage_pct - self.start_damage > 1:
-            parts.append(f"new damage {t.damage_pct - self.start_damage:.0f} percent")
+            lines.append(
+                f"Damage: new damage {t.damage_pct - self.start_damage:.0f} percent"
+            )
         if self.ctx.settings.speech_verbosity >= 1:
             fatigue = self.ctx.profile.fatigue
             if fatigue >= hos.FATIGUE_DROWSY:
-                parts.append(f"fatigue {fatigue:.0f} percent")
-            parts.append(self.hos.summary(self.ctx.settings.hos_mode).rstrip("."))
+                lines.append(f"Fatigue: {fatigue:.0f} percent")
+            lines.append(
+                f"HOS: {self.hos.summary(self.ctx.settings.hos_mode).rstrip('.')}"
+            )
             context = self._hos_route_context()
             if context:
-                parts.append(context)
-        self.ctx.say(". ".join(parts) + ".")
+                lines.append(f"Next legal stop: {context}")
+        return lines
 
     def _air_status_text(self) -> str:
         t = self.truck
@@ -1711,6 +1724,43 @@ class ParkingFullState(MenuState):
             f"The truck parking at {self.stop.spoken_name} is full tonight.",
             self.stop.at_mi,
         ))
+
+
+class DrivingStatusState(MenuState):
+    """Compact review menu for live driving information."""
+
+    title = "Driving status"
+    intro_help = (
+        "Use up and down arrows to review status. Enter repeats the current "
+        "line. Escape returns to driving."
+    )
+
+    def __init__(self, ctx, driving: DrivingState) -> None:
+        super().__init__(ctx)
+        self.driving = driving
+
+    def build_items(self) -> list[MenuItem]:
+        items = [
+            MenuItem(
+                line,
+                lambda line=line: self.ctx.say(line),
+                help="Repeat this status line.",
+            )
+            for line in self.driving.status_lines()
+        ]
+        items.append(
+            MenuItem(
+                "Back to driving",
+                self.go_back,
+                help="Close status and resume driving.",
+            )
+        )
+        return items
+
+    def go_back(self) -> None:
+        self.ctx.audio.play("ui/menu_back")
+        self.ctx.pop_state()
+        self.ctx.say("Back to driving.", interrupt=True)
 
 
 class PauseMenuState(MenuState):

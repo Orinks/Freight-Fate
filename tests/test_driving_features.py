@@ -82,6 +82,7 @@ def test_how_to_play_documents_new_gameplay_systems():
     assert "wait for air pressure to reach 100 psi" in help_text
     assert "press p to release or set the parking brake" in help_text
     assert "low air" in help_text
+    assert "tab opens a driving status menu" in help_text
     assert "slow below 5 miles per hour" in help_text
     assert "destination facility" in help_text
     assert "local deadhead moves to the origin facility" in help_text
@@ -222,6 +223,7 @@ def test_air_brake_startup_blocks_movement_until_ready_and_released(monkeypatch)
 @pytest.mark.smoke
 def test_air_brake_help_and_status_are_spoken(monkeypatch):
     from freight_fate.app import App
+    from freight_fate.states.driving import DrivingState, DrivingStatusState
 
     app = App()
     spoken = []
@@ -236,8 +238,16 @@ def test_air_brake_help_and_status_are_spoken(monkeypatch):
         assert "Press P to release or set the parking brake" in spoken[-1]
 
         driving.handle_event(key_event(pygame.K_TAB))
-        assert "air 55 psi" in spoken[-1]
-        assert "parking brake set" in spoken[-1]
+        assert isinstance(app.state, DrivingStatusState)
+        status_lines = [item.text for item in app.state.items]
+        air_status = next(line for line in status_lines if line.startswith("Air brakes:"))
+        assert "air 55 psi" in air_status
+        assert "parking brake set" in air_status
+        assert any(line.startswith("Weather:") for line in status_lines)
+
+        app.state.handle_event(key_event(pygame.K_ESCAPE))
+        assert isinstance(app.state, DrivingState)
+        assert spoken[-1] == "Back to driving."
 
         driving.handle_event(key_event(pygame.K_SPACE))
         assert "air 55 psi" in spoken[-1]

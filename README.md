@@ -170,7 +170,7 @@ restore the file from quarantine.
 | H | Horn |
 | T | Refuel and rest (stopped at a rest stop) |
 | Space | Speak speed, gear, RPM |
-| Tab | Full status report |
+| Tab | Driving status menu |
 | F | Fuel and range |
 | C | Clock, deadline, ETA |
 | R | Route progress |
