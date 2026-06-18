@@ -23,8 +23,9 @@ visual display mirrors all speech for sighted players and helpers.
   automotive sites, chemical terminals, construction yards, mines/quarries,
   lumber/paper facilities, cross-docks, and company yards.
 - **Real driving** — a tuned Class 8 truck simulation: 450 horsepower,
-  ten gears (manual with clutch, or automatic), engine braking, grades,
-  stalls, brake fade, and honest fuel economy.
+  ten gears (manual with clutch, or automatic), air-brake pressure,
+  parking brakes, engine braking, grades, stalls, brake fade, and honest
+  fuel economy.
 - **Trucks and upgrades** — earn your way into a heavy hauler with more
   torque and a bigger tank (and worse aerodynamics), and outfit any truck
   with an engine tune, aerodynamic kit, long-range tank, or reinforced
@@ -161,6 +162,7 @@ restore the file from quarantine.
 | Up arrow (hold) | Throttle |
 | Down arrow (hold) | Brake |
 | E | Start / stop engine |
+| P | Release / set parking brake |
 | Left Shift (hold) | Clutch (manual mode) |
 | 1–0 | Gears 1–10 (manual mode) |
 | N | Neutral (manual mode) |
@@ -175,6 +177,28 @@ restore the file from quarantine.
 | V | Weather and forecast |
 | F1 | List all controls |
 | Escape | Pause menu |
+
+### Air-brake model
+
+Freight Fate models air pressure without asking players to run a full CDL
+inspection before every dispatch. A cold trip starts with low pressure and
+the parking brake set. Start the engine, wait for the compressor to build
+air to 100 psi, then press `P` to release the parking brake. Repeated brake
+applications consume air, low air warns around 60 psi, and spring brakes
+apply around 40 psi.
+
+The thresholds are grounded in official CDL and air-brake references:
+[FMCSA](https://www.fmcsa.dot.gov/sites/fmcsa.dot.gov/files/docs/brake_safety_systems_02-14.pdf)
+describes typical 110-130 psi compressor cut-out, cut-in about 20 psi lower,
+and an 85-to-100 psi build-up check; the
+[California DMV](https://www.dmv.ca.gov/portal/handbook/commercial-driver-handbook/section-5-air-brakes/)
+places low-air warnings between 55 and 75 psi; the
+[Georgia DDS](https://dds.georgia.gov/section-52-53) describes spring-brake
+and governor checks; and
+[SGI](https://sgi.sk.ca/air-brake/-/knowledge_base/air-brake/air-governor)
+lists 120-145 psi cut-out and 100 psi minimum cut-in. Build-up time is
+compressed for playability so startup is a short, understandable pause
+rather than minutes of waiting.
 
 ## Development
 

@@ -474,6 +474,10 @@ HELP_PAGES = [
     ]),
     ("Driving basics", [
         "E starts the engine. To shut it down, slow below 5 miles per hour first.",
+        "Air brakes need pressure before the truck can move.",
+        "Start the engine and wait for air pressure to reach 100 psi.",
+        "Press P to release or set the parking brake.",
+        "If you hear low air, keep the parking brake set and let pressure build.",
         "Hold the Up arrow to accelerate, the Down arrow to brake.",
         "In automatic, once stopped, keep holding the Down arrow to back up slowly.",
         "Touch the Up arrow to brake and return to forward drive.",
@@ -491,8 +495,8 @@ HELP_PAGES = [
         "H sounds the horn.",
     ]),
     ("Driving information keys", [
-        "Space speaks your speed, gear, and RPM.",
-        "Tab speaks a full status report.",
+        "Space speaks your speed, gear, RPM, air pressure, and brake state.",
+        "Tab speaks a full status report including air pressure and brake state.",
         "F speaks fuel level and range.",
         "C speaks the clock, your deadline, and your hours of service.",
         "R speaks route progress, GPS context, and the next stop or maneuver.",

@@ -7,6 +7,13 @@
       facility IDs, ship/receive cargo roles, regional specialization, curated
       source notes, deterministic offline templates, and save-compatible
       facility-aware job generation.
+- [x] Playable air-brake pressure mechanics: cold starts need a short air
+      build before the parking brake can release, service-brake applications
+      consume air, low-air and spring-brake thresholds are spoken, and active
+      trip saves preserve the air-brake state.
+- [ ] Dedicated air-system audio assets: replace the current spoken
+      compressor-ready cue with an air-dryer purge and low-air buzzer once the
+      sound library grows those effects.
 
 ## Next up: state troopers and law enforcement
 

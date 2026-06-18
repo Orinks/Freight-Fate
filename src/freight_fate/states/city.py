@@ -33,13 +33,16 @@ def _job_from_payload(data: dict) -> Job:
 
 
 def pickup_snapshot(job: Job, *, checked_in: bool = False,
-                    loaded: bool = False) -> dict:
-    return {
+                    loaded: bool = False, air_brake: dict | None = None) -> dict:
+    data = {
         "kind": "pickup",
         "job": _job_payload(job),
         "checked_in": checked_in,
         "loaded": loaded,
     }
+    if air_brake is not None:
+        data["air_brake"] = air_brake
+    return data
 
 
 def route_planning_summary(route: Route) -> str:
@@ -542,7 +545,7 @@ class PickupFacilityState(MenuState):
                   "the truck is fully stopped. Escape repeats the pickup status.")
 
     def __init__(self, ctx, job: Job, *, checked_in: bool = False,
-                 loaded: bool = False, driving=None) -> None:
+                 loaded: bool = False, driving=None, air_brake=None) -> None:
         super().__init__(ctx)
         self.job = job
         self.checked_in = checked_in
@@ -555,13 +558,15 @@ class PickupFacilityState(MenuState):
             self.truck.fuel_gal = min(ctx.profile.truck_fuel_gal,
                                       self.truck.specs.fuel_tank_gal)
             self.truck.damage_pct = ctx.profile.truck_damage_pct
+            self.truck.restore_air_brake_snapshot(air_brake, default_ready=True)
 
     @classmethod
     def from_snapshot(cls, ctx, data: dict) -> PickupFacilityState | None:
         try:
             return cls(ctx, _job_from_payload(data["job"]),
                        checked_in=bool(data.get("checked_in", False)),
-                       loaded=bool(data.get("loaded", False)))
+                       loaded=bool(data.get("loaded", False)),
+                       air_brake=data.get("air_brake"))
         except (KeyError, TypeError, ValueError):
             return None
 
@@ -619,7 +624,8 @@ class PickupFacilityState(MenuState):
         self.ctx.profile.truck_fuel_gal = self.truck.fuel_gal
         self.ctx.profile.truck_damage_pct = self.truck.damage_pct
         self.ctx.profile.active_trip = pickup_snapshot(
-            self.job, checked_in=self.checked_in, loaded=self.loaded)
+            self.job, checked_in=self.checked_in, loaded=self.loaded,
+            air_brake=self.truck.air_brake_snapshot())
         self.ctx.save_profile()
 
     def _check_in(self) -> None:
@@ -649,6 +655,7 @@ class PickupFacilityState(MenuState):
         p = self.ctx.profile
         p.game_hours += PICKUP_LOADING_MIN / 60.0
         p.hos.on_duty(PICKUP_LOADING_MIN)
+        self.truck.set_parking_brake()
         self.loaded = True
         self._save_state()
         self.refresh(keep_index=False)
@@ -679,6 +686,7 @@ class PickupFacilityState(MenuState):
             self.job,
             routes,
             back_label="Back to pickup facility",
+            air_brake=self.truck.air_brake_snapshot(),
         ))
 
     def _plan_route(self) -> None:
@@ -688,11 +696,13 @@ class PickupFacilityState(MenuState):
         state = ("loaded and sealed" if self.loaded else
                  "checked in, waiting to load" if self.checked_in else
                  "not checked in")
+        brake = "parking brake set" if self.truck.parking_brake else "parking brake released"
         self.ctx.say(
             f"Pickup at {self.facility}: {state}. "
             f"Cargo is {self.job.weight_tons:.0f} tons of {self.job.cargo.label}. "
             f"Destination is {self.job.destination_facility_text()}. "
-            f"Current speed {self.ctx.settings.speed_text(self.truck.speed_mph)}.")
+            f"Current speed {self.ctx.settings.speed_text(self.truck.speed_mph)}. "
+            f"Air pressure {self.truck.air_pressure_psi:.0f} psi, {brake}.")
 
     def _save_and_quit(self) -> None:
         from .main_menu import MainMenuState
@@ -725,6 +735,8 @@ class PickupFacilityState(MenuState):
             f"Destination: {self.job.destination}",
             f"Status: {state}",
             f"Speed: {self.truck.speed_mph:.0f} mph",
+            f"Air: {self.truck.air_pressure_psi:.0f} psi   "
+            f"{'parking set' if self.truck.parking_brake else 'parking released'}",
             "",
         ] + [
             ("> " if i == self.index else "  ") + item.text
@@ -739,11 +751,13 @@ class RouteSelectState(MenuState):
                   "Enter starts the drive.")
 
     def __init__(self, ctx, job: Job, routes: list[Route],
-                 back_label: str = "Back to dispatch board") -> None:
+                 back_label: str = "Back to dispatch board",
+                 air_brake=None) -> None:
         super().__init__(ctx)
         self.job = job
         self.routes = routes
         self.back_label = back_label
+        self.air_brake = air_brake
         # start fetching live weather for cities on the routes so the data is
         # usually ready by the time the player asks for a forecast
         provider = ctx.real_weather_provider()
@@ -811,6 +825,7 @@ class RouteSelectState(MenuState):
         from .driving import DrivingState
 
         driving = DrivingState(self.ctx, self.job, route)
+        driving.truck.restore_air_brake_snapshot(self.air_brake, default_ready=True)
         self.ctx.profile.active_trip = driving.snapshot()
         self.ctx.save_profile()
         next_context = driving.trip.next_navigation_context()

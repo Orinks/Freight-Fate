@@ -130,6 +130,7 @@ def test_full_game_flow_headless(monkeypatch):
         driving.handle_event(key_event(pygame.K_e))
         assert driving.truck.engine_on
         driving.truck.transmission.automatic = True
+        driving.truck.set_air_ready(parking_brake=False)
         money_before = app.ctx.profile.money
 
         for _frame in range(60 * 60 * 30):
@@ -293,7 +294,7 @@ def test_upgrades_are_money_gated():
 @pytest.mark.smoke
 def test_pause_and_abandon_returns_to_city():
     from freight_fate.app import App
-    from freight_fate.states.city import CityMenuState, PickupFacilityState
+    from freight_fate.states.city import CityMenuState, PickupFacilityState, RouteSelectState
     from freight_fate.states.driving import DrivingState, PauseMenuState
     from freight_fate.states.main_menu import MainMenuState, NameEntryState
 
@@ -321,6 +322,8 @@ def test_pause_and_abandon_returns_to_city():
         app.state.handle_event(key_event(pygame.K_RETURN))  # check in at origin
         app.state.handle_event(key_event(pygame.K_RETURN))  # load at dock
         app.state.handle_event(key_event(pygame.K_RETURN))  # depart for destination
+        assert isinstance(app.state, RouteSelectState)
+        app.state.handle_event(key_event(pygame.K_RETURN))  # accept planned route
         assert isinstance(app.state, DrivingState)
         assert app.state.phase == "delivery"
         origin = app.state.job.origin

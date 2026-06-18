@@ -8,9 +8,13 @@ def key_event(key, unicode=""):
     return pygame.event.Event(pygame.KEYDOWN, key=key, unicode=unicode)
 
 
+def release_air_brakes(driving):
+    driving.truck.set_air_ready(parking_brake=False)
+
+
 def start_drive(app):
     """New career, accept an unlocked job, pick a route; returns DrivingState."""
-    from freight_fate.states.city import PickupFacilityState
+    from freight_fate.states.city import PickupFacilityState, RouteSelectState
     from freight_fate.states.driving import DrivingState
     from freight_fate.states.main_menu import MainMenuState
 
@@ -35,8 +39,11 @@ def start_drive(app):
     app.state.handle_event(key_event(pygame.K_RETURN))  # check in at origin
     app.state.handle_event(key_event(pygame.K_RETURN))  # load at dock
     app.state.handle_event(key_event(pygame.K_RETURN))  # depart for destination
+    assert isinstance(app.state, RouteSelectState)
+    app.state.handle_event(key_event(pygame.K_RETURN))  # accept planned route
     assert isinstance(app.state, DrivingState)
     assert app.state.phase == "delivery"
+    release_air_brakes(app.state)
     return app.state
 
 
@@ -71,6 +78,10 @@ def test_how_to_play_documents_new_gameplay_systems():
 
     help_text = " ".join(line for _title, lines in HELP_PAGES for line in lines).lower()
 
+    assert "air brakes need pressure" in help_text
+    assert "wait for air pressure to reach 100 psi" in help_text
+    assert "press p to release or set the parking brake" in help_text
+    assert "low air" in help_text
     assert "slow below 5 miles per hour" in help_text
     assert "destination facility" in help_text
     assert "local deadhead moves to the origin facility" in help_text
@@ -146,6 +157,91 @@ def test_dispatch_board_keeps_route_planning_out_of_load_offer():
         assert "Fuel-capable stops:" in summary
         assert "Estimated carrier-paid toll exposure" in summary
         assert "not a guaranteed open space" in summary
+    finally:
+        app.shutdown()
+
+
+@pytest.mark.smoke
+def test_air_brake_startup_blocks_movement_until_ready_and_released(monkeypatch):
+    from freight_fate.app import App
+
+    class FakeKeys:
+        def __init__(self, held):
+            self.held = held
+
+        def __getitem__(self, key):
+            return key in self.held
+
+    app = App()
+    events = []
+    spoken = []
+    held = {pygame.K_UP}
+    monkeypatch.setattr(pygame.key, "get_pressed", lambda: FakeKeys(held))
+    monkeypatch.setattr(app.ctx, "say_event",
+                        lambda text, interrupt=True: events.append(text))
+    monkeypatch.setattr(app.ctx, "say",
+                        lambda text, interrupt=True: spoken.append(text))
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        driving.truck.set_cold_air_start()
+
+        driving.handle_event(key_event(pygame.K_e))
+        for _ in range(60):
+            driving.update(1 / 60)
+
+        assert driving.truck.speed_mph == 0.0
+        assert driving.truck.parking_brake
+        assert any("Wait for 100 psi" in text for text in events)
+
+        driving.handle_event(key_event(pygame.K_p))
+        assert driving.truck.parking_brake
+        assert "Parking brake stays set" in spoken[-1]
+
+        for _ in range(60 * 15):
+            driving.update(1 / 60)
+            if driving.truck.air_ready:
+                break
+
+        assert driving.truck.air_ready
+        assert any("Air pressure ready" in text for text in events)
+
+        driving.handle_event(key_event(pygame.K_p))
+        assert not driving.truck.parking_brake
+
+        for _ in range(60 * 5):
+            driving.update(1 / 60)
+            if driving.truck.speed_mph > 1.0:
+                break
+
+        assert driving.truck.speed_mph > 1.0
+    finally:
+        app.shutdown()
+
+
+@pytest.mark.smoke
+def test_air_brake_help_and_status_are_spoken(monkeypatch):
+    from freight_fate.app import App
+
+    app = App()
+    spoken = []
+    monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: spoken.append(text))
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        driving.truck.set_cold_air_start()
+
+        driving.handle_event(key_event(pygame.K_F1))
+        assert "Air pressure must build" in spoken[-1]
+        assert "Press P to release or set the parking brake" in spoken[-1]
+
+        driving.handle_event(key_event(pygame.K_TAB))
+        assert "air 55 psi" in spoken[-1]
+        assert "parking brake set" in spoken[-1]
+
+        driving.handle_event(key_event(pygame.K_SPACE))
+        assert "air 55 psi" in spoken[-1]
+        assert any(line.startswith("Air: 55 psi") for line in driving.lines())
     finally:
         app.shutdown()
 

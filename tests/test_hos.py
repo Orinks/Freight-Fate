@@ -384,6 +384,7 @@ def start_drive(app):
     app.state.handle_event(key_event(pygame.K_RETURN))  # accept planned route
     assert isinstance(app.state, DrivingState)
     assert app.state.phase == "delivery"
+    app.state.truck.set_air_ready(parking_brake=False)
     return app.state
 
 

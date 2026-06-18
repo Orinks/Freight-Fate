@@ -10,7 +10,7 @@ def key_event(key, unicode=""):
 
 def start_drive(app):
     """New career, accept an unlocked job, pick a route; returns DrivingState."""
-    from freight_fate.states.city import PickupFacilityState
+    from freight_fate.states.city import PickupFacilityState, RouteSelectState
     from freight_fate.states.driving import DrivingState
     from freight_fate.states.main_menu import MainMenuState
 
@@ -35,6 +35,8 @@ def start_drive(app):
     app.state.handle_event(key_event(pygame.K_RETURN))  # check in at origin
     app.state.handle_event(key_event(pygame.K_RETURN))  # load at dock
     app.state.handle_event(key_event(pygame.K_RETURN))  # depart for destination
+    assert isinstance(app.state, RouteSelectState)
+    app.state.handle_event(key_event(pygame.K_RETURN))  # accept planned route
     assert isinstance(app.state, DrivingState)
     assert app.state.phase == "delivery"
     return app.state
@@ -44,6 +46,7 @@ def drive_some(driving, miles: float = 8.0) -> None:
     """Advance the trip a few miles with simulated full-throttle frames."""
     driving.handle_event(key_event(pygame.K_e))
     driving.truck.transmission.automatic = True
+    driving.truck.set_air_ready(parking_brake=False)
     for _ in range(60 * 60 * 5):
         driving.truck.throttle = 0.9
         driving.truck.auto_shift()
@@ -295,6 +298,26 @@ def test_snapshot_survives_profile_roundtrip():
         app.shutdown()
 
 
+def test_snapshot_roundtrip_preserves_air_brake_state():
+    from freight_fate.app import App
+    from freight_fate.states.driving import DrivingState
+
+    app = App()
+    try:
+        driving = start_drive(app)
+        driving.truck.air_pressure_psi = 88.0
+        driving.truck.parking_brake = False
+        snap = driving.snapshot()
+
+        resumed = DrivingState.from_snapshot(app.ctx, snap)
+
+        assert resumed is not None
+        assert resumed.truck.air_pressure_psi == pytest.approx(88.0)
+        assert not resumed.truck.parking_brake
+    finally:
+        app.shutdown()
+
+
 def test_corrupt_snapshot_falls_back_to_city():
     from freight_fate.app import App
     from freight_fate.models.profile import Profile
@@ -344,6 +367,8 @@ def test_old_map_snapshot_still_resumes():
         assert app.state.route.cities == old_route
         assert app.state.trip.position_mi == 412.0
         assert app.state.job.destination == "Denver"
+        assert app.state.truck.air_ready
+        assert app.state.truck.parking_brake
     finally:
         app.shutdown()
 

@@ -1,5 +1,7 @@
 """Truck physics tests."""
 
+import pytest
+
 from freight_fate.sim import TruckState
 from freight_fate.sim.transmission import REVERSE
 
@@ -228,3 +230,73 @@ def test_brake_heat_builds_and_cools():
     for _ in range(6000):
         t._update_temps(1 / 60)
     assert t.brake_temp_c < hot
+
+
+def test_air_pressure_builds_when_engine_running_and_stops_at_cutout():
+    t = TruckState()
+    t.set_cold_air_start()
+
+    assert t.air_pressure_psi == 55.0
+    assert not t.air_compressor_active
+
+    drive(t, 5)
+    assert t.air_pressure_psi == 55.0
+
+    t.start_engine()
+    drive(t, 30)
+
+    assert t.air_pressure_psi == pytest.approx(t.specs.air_governor_cut_out_psi)
+    assert not t.air_compressor_active
+
+
+def test_air_compressor_cuts_in_when_pressure_drops_below_cut_in():
+    t = TruckState()
+    t.set_air_ready(parking_brake=False)
+    t.start_engine()
+    t.air_pressure_psi = t.specs.air_governor_cut_in_psi - 1.0
+
+    t.update(0.1)
+
+    assert t.air_compressor_active
+    assert t.air_pressure_psi > t.specs.air_governor_cut_in_psi - 1.0
+
+
+def test_brake_applications_consume_air_and_trigger_low_air_warning():
+    t = TruckState()
+    t.set_air_ready(parking_brake=False)
+
+    for _ in range(18):
+        t.brake = 1.0
+        t.update(0.1)
+        t.brake = 0.0
+        t.update(0.1)
+
+    assert t.air_pressure_psi < t.specs.air_low_warning_psi
+    assert t.air_low_warning
+
+
+def test_parking_brake_release_requires_ready_air_pressure():
+    t = TruckState()
+    t.set_cold_air_start()
+
+    assert not t.release_parking_brake()
+    assert t.parking_brake
+
+    t.air_pressure_psi = t.specs.air_parking_release_psi
+    assert t.release_parking_brake()
+    assert not t.parking_brake
+
+
+def test_parking_brake_holds_truck_until_released():
+    t = make_auto_truck()
+    t.set_air_ready(parking_brake=True)
+    t.throttle = 1.0
+
+    drive(t, 5)
+
+    assert t.speed_mph == 0.0
+
+    assert t.release_parking_brake()
+    drive(t, 5)
+
+    assert t.speed_mph > 1.0
