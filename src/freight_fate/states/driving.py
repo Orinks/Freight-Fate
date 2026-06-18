@@ -488,16 +488,16 @@ class DrivingState(State):
         if self.trip.nearest_stop_within() is not None:
             return None
         mode = self.ctx.settings.hos_mode
-        if mode in hos.HOS_NON_ENFORCED_MODES:
-            return None
-        if self.hos.in_violation(mode):
-            return ("You are already past your hours-of-service limit, and "
-                    "there is no route POI here.")
         fatigue = self.ctx.profile.fatigue
         if (fatigue >= hos.FATIGUE_SEVERE
                 and self._upcoming_stop_with_action("sleep", 30.0) is None):
             return ("Fatigue is severe, and no sleep-capable route stop is "
                     "within 30 miles.")
+        if mode in hos.HOS_NON_ENFORCED_MODES:
+            return None
+        if self.hos.in_violation(mode):
+            return ("You are already past your hours-of-service limit, and "
+                    "there is no route POI here.")
         next_limit = self.hos.next_limit(mode)
         if next_limit is None:
             return None
@@ -1263,10 +1263,11 @@ class ShoulderSleepConfirmationState(MenuState):
     def announce_entry(self) -> None:
         self.ctx.say(
             f"{self.title}. {self.reason} Shoulder sleep is emergency-only. "
-            "It advances ten hours and resets your ELD clock, but it is poor "
-            "sleep: you will not wake fully rested. You may be ticketed for "
-            "illegal parking, minor truck damage can happen, and the delivery "
-            f"deadline keeps counting. {self.current_text()}")
+            "It advances ten hours and gives you poor rest: you will not wake "
+            "fully rested. If hours of service are enforced, your ELD clock "
+            "will reset. You may be ticketed for illegal parking, minor truck "
+            "damage can happen, and the delivery deadline keeps counting. "
+            f"{self.current_text()}")
 
     def build_items(self) -> list[MenuItem]:
         return [

@@ -355,7 +355,7 @@ def test_parking_fills_more_often_later_in_the_evening():
 
 def start_drive(app):
     """New career, accept an unlocked job, pick a route; returns DrivingState."""
-    from freight_fate.states.city import PickupFacilityState
+    from freight_fate.states.city import PickupFacilityState, RouteSelectState
     from freight_fate.states.driving import DrivingState
     from freight_fate.states.main_menu import MainMenuState
 
@@ -380,6 +380,8 @@ def start_drive(app):
     app.state.handle_event(key_event(pygame.K_RETURN))  # check in at origin
     app.state.handle_event(key_event(pygame.K_RETURN))  # load at dock
     app.state.handle_event(key_event(pygame.K_RETURN))  # depart for destination
+    assert isinstance(app.state, RouteSelectState)
+    app.state.handle_event(key_event(pygame.K_RETURN))  # accept planned route
     assert isinstance(app.state, DrivingState)
     assert app.state.phase == "delivery"
     return app.state
@@ -534,8 +536,45 @@ def test_emergency_shoulder_sleep_pause_menu_constraints(monkeypatch):
 
         select(app.state, "Emergency shoulder sleep")
         assert isinstance(app.state, ShoulderSleepConfirmationState)
-        assert "resets your ELD clock" in spoken[-1]
+        assert "If hours of service are enforced" in spoken[-1]
         assert "minor truck damage" in spoken[-1]
+    finally:
+        app.shutdown()
+
+
+@pytest.mark.smoke
+def test_hos_off_still_allows_fatigue_emergency_shoulder_sleep(monkeypatch):
+    from freight_fate.app import App
+    from freight_fate.states.driving import PauseMenuState, ShoulderSleepConfirmationState
+
+    app = App()
+    spoken = []
+    monkeypatch.setattr(app.ctx, "say",
+                        lambda text, interrupt=True: spoken.append(text))
+    try:
+        app.ctx.settings.hos_mode = "debug_off"
+        driving = start_drive(app)
+        stop = park_at_first_stop(driving)
+
+        driving.trip.position_mi = stop.at_mi + 2.0
+        driving.truck.velocity_mps = 0.0
+        app.ctx.profile.fatigue = 20.0
+        assert driving.emergency_shoulder_sleep_reason() is None
+
+        app.ctx.profile.fatigue = hos.FATIGUE_SEVERE
+        reason = driving.emergency_shoulder_sleep_reason()
+        assert reason is not None
+        assert "Fatigue is severe" in reason
+
+        driving.handle_event(key_event(pygame.K_ESCAPE))
+        assert isinstance(app.state, PauseMenuState)
+        labels = [item.text for item in app.state.items]
+        assert "Emergency shoulder sleep" in labels
+
+        select(app.state, "Emergency shoulder sleep")
+        assert isinstance(app.state, ShoulderSleepConfirmationState)
+        assert "poor rest" in spoken[-1]
+        assert "If hours of service are enforced" in spoken[-1]
     finally:
         app.shutdown()
 
