@@ -14,6 +14,11 @@ import pygame
 
 from ..data.world import Route
 from ..models.jobs import Job, job_from_payload, job_payload
+from ..models.settlement import (
+    carrier_accessorial_charges,
+    charge_summary,
+    charge_total,
+)
 from ..sim import hos
 from ..sim.hos import HosClock, clock_text, is_night, time_of_day
 from ..sim.transmission import REVERSE
@@ -53,6 +58,10 @@ DELIVERY_PARK_MPH = 3.0           # destination settlement requires parking spee
 DOCKING_MAX_MPH = 1.0             # final dock/park action needs a full stop
 DRIVE_PHASE_PICKUP = "pickup"
 DRIVE_PHASE_DELIVERY = "delivery"
+
+
+def _speeding_settlement_fine(strikes: int) -> float:
+    return min(400.0, 80.0 * strikes) if strikes else 0.0
 
 
 class DrivingState(State):
@@ -445,7 +454,7 @@ class DrivingState(State):
         kind, remaining_min, _due = next_limit
         if remaining_min <= 0:
             return "Nearest legal action: stop for a compliant break or 10-hour reset."
-        legal_miles = max(0.0, remaining_min / 60.0 * max(35.0, min(62.0, self.truck.speed_mph or 55.0)))
+        legal_miles = self._legal_miles_for_hos(remaining_min)
         next_stop = self.trip.upcoming_stop(max(legal_miles + 5.0, 5.0))
         action = "break" if kind == "break" else "sleep"
         if next_stop is None:
@@ -455,6 +464,53 @@ class DrivingState(State):
         verdict = "before" if ahead <= legal_miles else "after"
         return (f"Next legal stop: {next_stop.spoken_name} in {ahead:.0f} miles, "
                 f"{next_stop.parking_text}, {verdict} the next {action} limit.")
+
+    def _legal_miles_for_hos(self, remaining_min: float) -> float:
+        pace = max(35.0, min(62.0, self.truck.speed_mph or 55.0))
+        return max(0.0, remaining_min / 60.0 * pace)
+
+    def _upcoming_stop_with_action(self, action: str, within_mi: float):
+        best = None
+        for stop in self.trip.stops:
+            ahead = stop.at_mi - self.trip.position_mi
+            if not 0 <= ahead <= within_mi:
+                continue
+            if action not in stop.actions or stop.parking == "none":
+                continue
+            if best is None or stop.at_mi < best.at_mi:
+                best = stop
+        return best
+
+    def emergency_shoulder_sleep_reason(self) -> str | None:
+        """Why shoulder sleep is available now, or None when it is not."""
+        if self.truck.speed_mph > 3:
+            return None
+        if self.trip.nearest_stop_within() is not None:
+            return None
+        mode = self.ctx.settings.hos_mode
+        fatigue = self.ctx.profile.fatigue
+        if (fatigue >= hos.FATIGUE_SEVERE
+                and self._upcoming_stop_with_action("sleep", 30.0) is None):
+            return ("Fatigue is severe, and no sleep-capable route stop is "
+                    "within 30 miles.")
+        if mode in hos.HOS_NON_ENFORCED_MODES:
+            return None
+        if self.hos.in_violation(mode):
+            return ("You are already past your hours-of-service limit, and "
+                    "there is no route POI here.")
+        next_limit = self.hos.next_limit(mode)
+        if next_limit is None:
+            return None
+        kind, remaining_min, _due = next_limit
+        if remaining_min > hos.SHOULDER_SLEEP_LIMIT_BUFFER_MIN:
+            return None
+        action = "break" if kind == "break" else "sleep"
+        legal_miles = self._legal_miles_for_hos(remaining_min)
+        if self._upcoming_stop_with_action(action, max(legal_miles + 5.0, 5.0)):
+            return None
+        return (f"Your next {action} limit is due in "
+                f"{remaining_min / 60.0:.1f} hours, and no suitable route "
+                "stop is visible before it.")
 
     def _speak_weather(self) -> None:
         source = "Live conditions" if self.weather.live else "Currently"
@@ -1162,6 +1218,77 @@ def _deadline_text(driving: DrivingState) -> str:
     return f"You are now {-remaining:.1f} hours past the deadline."
 
 
+def _perform_shoulder_sleep(driving: DrivingState, anchor_mi: float) -> str:
+    """Apply the emergency shoulder-sleep outcome and return spoken text."""
+    p = driving.ctx.profile
+    _advance_rest_clock(driving, hos.SLEEP_MIN)
+    driving.hos.sleep()
+    p.fatigue = hos.rest_shoulder(p.fatigue)
+    parts = [f"You sleep poorly on the shoulder, woken again and again by "
+             f"passing trucks. It is {clock_text(driving.trip.current_hour)}. "
+             f"Hours of service reset, but you are still tired."]
+    if hos.shoulder_fine_due(driving.trip_seed, anchor_mi):
+        p.money -= hos.SHOULDER_FINE
+        driving.ctx.audio.play("ui/error")
+        parts.append(f"A trooper ticketed you for illegal parking: "
+                     f"{hos.SHOULDER_FINE:,.0f} dollars. "
+                     f"You have {p.money:,.0f} dollars.")
+    if hos.shoulder_damage_due(driving.trip_seed, anchor_mi):
+        driving.truck.damage_pct = min(
+            100.0, driving.truck.damage_pct + hos.SHOULDER_DAMAGE_PCT)
+        parts.append(f"Roadside debris and wake turbulence added "
+                     f"{hos.SHOULDER_DAMAGE_PCT:.0f} percent truck damage.")
+    p.truck_fuel_gal = driving.truck.fuel_gal
+    p.truck_damage_pct = driving.truck.damage_pct
+    p.active_trip = driving.snapshot()
+    driving.ctx.save_profile()
+    parts.append(_deadline_text(driving))
+    return " ".join(parts)
+
+
+class ShoulderSleepConfirmationState(MenuState):
+    """Emergency shoulder sleep warning, shared by full lots and no-stop cases."""
+
+    title = "Emergency shoulder sleep"
+    intro_help = ("Use up and down arrows to navigate, Enter to select. "
+                  "Escape cancels and returns to the road.")
+
+    def __init__(self, ctx, driving: DrivingState, reason: str,
+                 anchor_mi: float | None = None) -> None:
+        super().__init__(ctx)
+        self.driving = driving
+        self.reason = reason
+        self.anchor_mi = anchor_mi
+
+    def announce_entry(self) -> None:
+        self.ctx.say(
+            f"{self.title}. {self.reason} Shoulder sleep is emergency-only. "
+            "It advances ten hours and gives you poor rest: you will not wake "
+            "fully rested. If hours of service are enforced, your ELD clock "
+            "will reset. You may be ticketed for illegal parking, minor truck "
+            "damage can happen, and the delivery deadline keeps counting. "
+            f"{self.current_text()}")
+
+    def build_items(self) -> list[MenuItem]:
+        return [
+            MenuItem("Sleep on the shoulder anyway", self._sleep,
+                     help="Accept poor emergency rest, possible ticket, "
+                          "possible minor truck damage, and deadline time loss."),
+            MenuItem("Cancel and keep looking for a safe stop", self.go_back,
+                     help="Return to the road without resting here."),
+        ]
+
+    def _sleep(self) -> None:
+        anchor = self.anchor_mi
+        if anchor is None:
+            anchor = self.driving.trip.position_mi
+        text = _perform_shoulder_sleep(self.driving, anchor)
+        self.ctx.pop_state()
+        if self.ctx._app.state is not self.driving:
+            self.ctx.pop_state()
+        self.ctx.say(text, interrupt=True)
+
+
 class RestStopState(MenuState):
     """Spoken route POI menu: actions come from the corridor metadata."""
 
@@ -1404,7 +1531,7 @@ class ParkingFullState(MenuState):
             MenuItem("Park on the shoulder and sleep", self._shoulder,
                      help="Ten hours of poor sleep. Resets your hours of "
                           "service, but you will not wake fresh, and you risk "
-                          "a fine for illegal parking."),
+                          "a fine for illegal parking or minor truck damage."),
         ]
 
     def go_back(self) -> None:
@@ -1417,23 +1544,12 @@ class ParkingFullState(MenuState):
                      "approach it. Press E to start the engine.", interrupt=True)
 
     def _shoulder(self) -> None:
-        d = self.driving
-        p = self.ctx.profile
-        _advance_rest_clock(d, hos.SLEEP_MIN)
-        d.hos.sleep()
-        p.fatigue = hos.rest_shoulder(p.fatigue)
-        parts = [f"You sleep poorly on the shoulder, woken again and again by "
-                 f"passing trucks. It is {clock_text(d.trip.current_hour)}. "
-                 f"Hours of service reset, but you are still tired."]
-        if hos.shoulder_fine_due(d.trip_seed, self.stop.at_mi):
-            p.money -= hos.SHOULDER_FINE
-            self.ctx.audio.play("ui/error")
-            parts.append(f"A trooper ticketed you for illegal parking: "
-                         f"{hos.SHOULDER_FINE:,.0f} dollars. "
-                         f"You have {p.money:,.0f} dollars.")
-        parts.append(_deadline_text(d))
-        self.ctx.pop_state()
-        self.ctx.say(" ".join(parts), interrupt=True)
+        self.ctx.push_state(ShoulderSleepConfirmationState(
+            self.ctx,
+            self.driving,
+            f"The truck parking at {self.stop.spoken_name} is full tonight.",
+            self.stop.at_mi,
+        ))
 
 
 class PauseMenuState(MenuState):
@@ -1450,7 +1566,7 @@ class PauseMenuState(MenuState):
 
     def build_items(self) -> list[MenuItem]:
         drive_label = "pickup drive" if self.driving.phase == DRIVE_PHASE_PICKUP else "delivery"
-        return [
+        items = [
             MenuItem("Resume driving", self._resume,
                      help=f"Return to the active {drive_label}."),
             MenuItem("Trip status", self._status,
@@ -1470,6 +1586,15 @@ class PauseMenuState(MenuState):
                      help="Your money, truck, and trip progress are saved. "
                           "This drive resumes from here when you continue."),
         ]
+        if self.driving.emergency_shoulder_sleep_reason() is not None:
+            items.insert(3, MenuItem(
+                "Emergency shoulder sleep",
+                self._emergency_shoulder_sleep,
+                help="Emergency-only poor sleep on the shoulder. Resets hours "
+                     "of service, but fatigue remains, you may be ticketed, "
+                     "minor truck damage can happen, and the deadline keeps "
+                     "running."))
+        return items
 
     def go_back(self) -> None:
         self._resume()
@@ -1507,6 +1632,16 @@ class PauseMenuState(MenuState):
                      f"{cost:,.0f} dollars. You have {p.money:,.0f} dollars. "
                      f"The repair took an hour and a half: it is "
                      f"{clock_text(d.trip.current_hour)}. {_deadline_text(d)}")
+
+    def _emergency_shoulder_sleep(self) -> None:
+        reason = self.driving.emergency_shoulder_sleep_reason()
+        if reason is None:
+            self.ctx.say("Emergency shoulder sleep is not available right now. "
+                         "Use a route stop for normal breaks and sleep.")
+            self.refresh()
+            return
+        self.ctx.push_state(ShoulderSleepConfirmationState(
+            self.ctx, self.driving, reason, self.driving.trip.position_mi))
 
     def _resume(self) -> None:
         self.ctx.audio.play("ui/unpause")
@@ -1624,7 +1759,10 @@ class FacilityArrivalState(MenuState):
         trip_damage = max(0.0, d.truck.damage_pct - d.start_damage)
         estimated_pay = job.payout(hours, trip_damage)
         tolls = d.trip.toll_expense
-        net_estimated_pay = estimated_pay - tolls
+        accessorials = carrier_accessorial_charges(job)
+        carrier_charges = tolls + charge_total(accessorials)
+        driver_charges = _speeding_settlement_fine(d.speeding_strikes)
+        net_estimated_pay = max(0.0, estimated_pay - driver_charges)
         timing = (f"{remaining:.1f} hours remain before the deadline"
                   if remaining >= 0
                   else f"{-remaining:.1f} hours past the deadline")
@@ -1638,8 +1776,13 @@ class FacilityArrivalState(MenuState):
             f"Paperwork for {self.facility}: {job.weight_tons:.0f} tons of "
             f"{job.cargo.label}. Rate sheet lists {job.pay:,.0f} dollars; "
             f"current gross payout is {estimated_pay:,.0f} dollars. "
-            f"Toll expenses recorded so far are {tolls:,.0f} dollars, "
-            f"for an estimated net settlement of {net_estimated_pay:,.0f}. "
+            f"Carrier-paid or reimbursed charges recorded so far are "
+            f"{carrier_charges:,.0f} dollars, including tolls "
+            f"{tolls:,.0f} and accessorials {charge_summary(accessorials)}. "
+            "Those charges do not reduce driver pay. "
+            f"Driver-responsibility charges are estimated at "
+            f"{driver_charges:,.0f} dollars, for estimated net driver pay "
+            f"{net_estimated_pay:,.0f}. "
             f"{timing}. {cargo_condition} Dock and deliver when ready; "
             "checking paperwork does not settle the load.")
 
@@ -1686,14 +1829,16 @@ class ArrivalState(MenuState):
         hours = d.trip.game_minutes / 60.0
         trip_damage = max(0.0, d.truck.damage_pct - d.start_damage)
         gross_pay = job.payout(hours, trip_damage)
-        pay = gross_pay
         toll_expense = d.trip.toll_expense
+        accessorials = carrier_accessorial_charges(job)
+        carrier_charges = toll_expense + charge_total(accessorials)
         early_bonus = max(0.0, gross_pay - job.payout(job.deadline_game_h, trip_damage))
-        if d.speeding_strikes:
-            fine = min(400.0, 80.0 * d.speeding_strikes)
-            pay = max(0.0, pay - fine)
-            self.summary_parts.append(f"Speeding fines cost you {fine:,.0f} dollars.")
-        net_pay = pay - toll_expense
+        driver_charges = _speeding_settlement_fine(d.speeding_strikes)
+        if driver_charges:
+            self.summary_parts.append(
+                f"Driver-responsibility charges: speeding fines cost you "
+                f"{driver_charges:,.0f} dollars.")
+        net_pay = max(0.0, gross_pay - driver_charges)
         on_time = hours <= job.deadline_game_h
         p.money += net_pay
         p.current_city = job.destination
@@ -1712,8 +1857,12 @@ class ArrivalState(MenuState):
             f"{'on time' if on_time else 'late'}. "
             f"It is {clock_text(p.game_hours)}. "
             f"Gross pay {gross_pay:,.0f} dollars. "
-            f"Toll expenses {toll_expense:,.0f} dollars charged through the "
-            f"company transponder settlement. Net settlement {net_pay:,.0f} "
+            f"Carrier-paid or reimbursed charges {carrier_charges:,.0f} dollars: "
+            f"tolls {toll_expense:,.0f}, accessorials "
+            f"{charge_summary(accessorials)}. "
+            "These are billed to carrier settlement and not deducted from driver pay. "
+            f"Driver-responsibility charges {driver_charges:,.0f} dollars. "
+            f"Net driver pay {net_pay:,.0f} "
             f"dollars, and you now have {p.money:,.0f}. "
             f"After unloading, dispatch has you parked at "
             f"{self.terminal.name} for the {job.destination} service area."))

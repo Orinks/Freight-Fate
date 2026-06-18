@@ -1,0 +1,145 @@
+"""Settlement accounting regression tests for neutral carrier charges."""
+
+import pytest
+
+
+def _job(cargo_key="electronics", *, origin="New York", destination="Philadelphia",
+         destination_type="dry_warehouse", pay=2500.0, deadline=12.0):
+    from freight_fate.models.jobs import CARGO_CATALOG, Job
+
+    return Job(
+        CARGO_CATALOG[cargo_key],
+        18.0,
+        origin,
+        f"{origin} pickup",
+        destination,
+        78.0,
+        pay,
+        deadline,
+        origin_type="air_cargo",
+        destination_location=f"{destination} receiver",
+        destination_type=destination_type,
+    )
+
+
+def _settle(app, job, route_cities, *, money=1000.0, speeding_strikes=0):
+    from freight_fate.models.profile import Profile
+    from freight_fate.states.driving import ArrivalState, DrivingState
+
+    app.ctx.profile = Profile(name="Settlement Audit", current_city=job.origin)
+    app.ctx.profile.money = money
+    route = app.ctx.world.route_from_cities(route_cities)
+    driving = DrivingState(app.ctx, job, route, phase="delivery")
+    driving.speeding_strikes = speeding_strikes
+    driving.trip.position_mi = driving.trip.total_miles
+    driving.trip.update(0.0)
+    gross = job.payout(driving.trip.game_minutes / 60.0, 0.0)
+    app.ctx.push_state(ArrivalState(app.ctx, driving))
+    return gross, " ".join(app.state.summary_parts)
+
+
+def test_carrier_paid_charges_do_not_increase_player_progression():
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        job = _job(destination_type="retail_distribution")
+        gross, summary = _settle(app, job, ["New York", "Philadelphia"], money=1000.0)
+        carrier_charges = 30.0 + 185.0
+
+        assert f"Carrier-paid or reimbursed charges {carrier_charges:,.0f} dollars" in summary
+        assert app.ctx.profile.money == pytest.approx(1000.0 + gross)
+        assert app.ctx.profile.career.total_earnings == pytest.approx(gross)
+        assert app.ctx.profile.career.xp == pytest.approx(job.distance_mi * 1.2)
+        assert app.ctx.profile.career.reputation == pytest.approx(52.0)
+    finally:
+        app.shutdown()
+
+
+def test_driver_responsibility_charges_reduce_driver_pay_but_not_carrier_charges():
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        job = _job(destination_type="retail_distribution")
+        gross, summary = _settle(
+            app,
+            job,
+            ["New York", "Philadelphia"],
+            money=1000.0,
+            speeding_strikes=2,
+        )
+
+        assert "Carrier-paid or reimbursed charges 215 dollars" in summary
+        assert "Driver-responsibility charges 160 dollars" in summary
+        assert app.ctx.profile.money == pytest.approx(1000.0 + gross - 160.0)
+        assert app.ctx.profile.career.total_earnings == pytest.approx(gross - 160.0)
+    finally:
+        app.shutdown()
+
+
+def test_restored_toll_charges_do_not_duplicate_or_pay_out():
+    from freight_fate.app import App
+    from freight_fate.models.jobs import job_payload
+    from freight_fate.models.profile import Profile
+    from freight_fate.sim.trip import TripEventKind
+    from freight_fate.states.driving import ArrivalState, DrivingState
+
+    app = App()
+    try:
+        job = _job()
+        app.ctx.profile = Profile(name="Old Toll Save", current_city="New York")
+        app.ctx.profile.money = 1000.0
+        snapshot = {
+            "kind": "delivery",
+            "job": job_payload(job),
+            "route_cities": ["New York", "Philadelphia"],
+            "trip_seed": 1234,
+            "start_hour": 8.0,
+            "position_mi": 79.0,
+            "game_minutes": 45.0,
+            "toll_charges": [
+                {"name": "New Jersey Turnpike ticket entry", "amount": 18.0},
+                {"name": "Delaware River Turnpike Toll Bridge settlement point", "amount": 12.0},
+            ],
+            "start_damage": 0.0,
+            "speeding_strikes": 0,
+        }
+
+        resumed = DrivingState.from_snapshot(app.ctx, snapshot)
+        assert resumed is not None
+        assert resumed.trip.toll_expense == pytest.approx(30.0)
+        events = resumed.trip.update(0.0)
+        assert resumed.trip.toll_expense == pytest.approx(30.0)
+        assert not [event for event in events if event.kind == TripEventKind.TOLL_CHARGED]
+
+        gross = job.payout(resumed.trip.game_minutes / 60.0, 0.0)
+        app.ctx.push_state(ArrivalState(app.ctx, resumed))
+        assert app.ctx.profile.money == pytest.approx(1000.0 + gross)
+        assert app.ctx.profile.career.total_earnings == pytest.approx(gross)
+    finally:
+        app.shutdown()
+
+
+def test_toll_route_does_not_pay_more_than_equal_non_toll_route():
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        toll_job = _job(origin="New York", destination="Philadelphia")
+        non_toll_job = _job(origin="Chicago", destination="Indianapolis")
+
+        toll_gross, toll_summary = _settle(
+            app, toll_job, ["New York", "Philadelphia"], money=1000.0)
+        toll_money = app.ctx.profile.money
+        toll_earnings = app.ctx.profile.career.total_earnings
+        non_toll_gross, non_toll_summary = _settle(
+            app, non_toll_job, ["Chicago", "Indianapolis"], money=1000.0)
+
+        assert toll_gross == pytest.approx(non_toll_gross)
+        assert "Carrier-paid or reimbursed charges 30 dollars" in toll_summary
+        assert "Carrier-paid or reimbursed charges 0 dollars" in non_toll_summary
+        assert toll_money == pytest.approx(app.ctx.profile.money)
+        assert toll_earnings == pytest.approx(app.ctx.profile.career.total_earnings)
+    finally:
+        app.shutdown()

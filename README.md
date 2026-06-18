@@ -36,7 +36,7 @@ visual display mirrors all speech for sighted players and helpers.
 - **A living road** — dynamic regional weather that changes grip and safe
   speeds, construction and traffic zones, road hazards that demand quick
   braking, curated rest stops and service plazas with parking certainty,
-  toll-road settlement expenses, and roadside rescue when you run dry.
+  carrier-paid toll-road settlement charges, and roadside rescue when you run dry.
 - **Real-world weather (optional)** — flip Settings → Weather source to
   "real world" and each city uses its live current conditions from the free
   [Open-Meteo](https://open-meteo.com) API. If it is raining in Chicago right

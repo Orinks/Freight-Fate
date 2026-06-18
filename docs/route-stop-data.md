@@ -191,12 +191,14 @@ physical route facts. Seeds may vary traffic, weather, construction, delays, CB
 chatter, and hazards, but they must not place truck stops, rest areas, tolls,
 state lines, weigh stations, service plazas, grades, or facility approaches.
 
-Tolls are charged once when the trip passes the route-positioned toll event.
+Tolls are recorded once when the trip passes the route-positioned toll event.
 The spoken cue warns ahead of the point, and the charge event records a
-`TollCharge` on the trip. Delivery settlement reports gross pay, toll expenses,
-and net settlement. The accounting can reduce net settlement below gross pay,
-but it does not interrupt driving or require the player to handle cash at every
-gantry.
+`TollCharge` on the trip. Delivery settlement reports gross pay, carrier-paid
+or reimbursed charges, driver-responsibility charges, and net driver pay. Toll
+charges are billed to the carrier/company settlement and do not reduce driver
+pay, but driver-caused costs such as speeding fines still do. This keeps money
+pressure without making routine approved business expenses feel like personal
+cash handling at every gantry.
 
 ## POIs And Actions
 
@@ -262,6 +264,10 @@ checks. The checked-in runtime data is static. Examples include:
   vehicle toll estimates. Current toll estimates are intentionally documented
   with the source and access date because exact truck class, axle, transponder,
   time-of-day, and toll-by-plate rules can change.
+- 49 U.S.C. 14103 and FMCSA lumper guidance for required loading/unloading
+  assistance responsibility. Required loading or unloading services should be
+  modeled as approved carrier/customer charges when authorized and receipted,
+  not as driver-fault deductions.
 - WisDOT Kenosha Safety Rest Area, with truck parking:
   https://wisconsindot.gov/Pages/travel/road/rest-areas/26-kenosha.aspx
 - INDOT rest-area/truck-parking overview:
@@ -446,6 +452,39 @@ road-service providers must remain explicit source-backed POIs/actions. Do not
 represent them as generic public rest areas, and do not expose repair, towing,
 or roadside assistance unless the source metadata backs that capability.
 
+## HOS Safe-Stopping Audit Notes
+
+The 2026-06-18 safe-stopping pass kept the existing full-network contract green
+but added a stricter HOS/fatigue lens for southern corridors. A leg can satisfy
+the minimum POI density rule and still feel poor when the first sleep/fuel stop
+is hundreds of miles away for a driver who is already near a break, shift, or
+fatigue limit.
+
+This pass added source-backed stops to reduce those pressure gaps:
+
+- Dallas to Albuquerque: Love's Travel Stop Wichita Falls and Flying J Travel
+  Center Tucumcari.
+- Dallas to St. Louis: Love's Travel Stop Ardmore and Love's Travel Stop
+  Rolla.
+- Atlanta to Dallas: Pilot Travel Center Tallapoosa and Love's Travel Stop
+  Heflin.
+- Nashville to Atlanta: Flying J Travel Center Resaca.
+
+Use the same lens when adding or reviewing long southern and southwestern
+corridors: check the maximum gap to a sleep-capable stop, check at least one
+early safe stop near the first 150 miles of long hauls, and do not treat
+limited public parking as guaranteed overnight truck parking. These are route
+planning cues and POI metadata, not dispatch-board promises that a space is
+available right now.
+
+Emergency shoulder sleep exists only as an HOS/fatigue fallback when the truck
+is stopped away from a route POI and the driver is already out of legal options
+or severe fatigue leaves no nearby sleep-capable stop. It is intentionally
+inferior to proper rest: ten hours pass and the ELD resets, but fatigue only
+drops to the shoulder-rest floor, tickets and minor damage are possible, and
+the delivery deadline keeps running. Keep the confirmation wording explicit and
+spoken before the player commits.
+
 ## Update Process
 
 1. Choose a corridor and confirm the route leg mileage already represents the
@@ -500,6 +539,6 @@ repair by default, and a weigh station does not pretend to be a travel center.
 bad-weather gap increases, and cancellation behavior. GPS and traffic cues
 supplement the keyboard status keys; they never require a visual map or raw data
 inspection. Toll warnings and toll-charged messages use concise speech and
-settlement language, and delivery completion speaks gross pay, toll expenses,
-and net settlement so the operating cost is accessible without reading a visual
-ledger.
+carrier-settlement language, and delivery completion speaks gross pay,
+carrier-paid or reimbursed charges, driver-responsibility charges, and net
+driver pay so the ledger is accessible without reading a visual table.

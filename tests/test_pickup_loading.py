@@ -211,8 +211,11 @@ def test_pickup_arrival_state_and_loaded_planning_resume():
         assert app.state.items[app.state.index].text == "Depart for destination"
 
         app.state.handle_event(key_event(pygame.K_RETURN))
+        from freight_fate.states.city import RouteSelectState
         from freight_fate.states.driving import DrivingState
 
+        assert isinstance(app.state, RouteSelectState)
+        app.state.handle_event(key_event(pygame.K_RETURN))
         assert isinstance(app.state, DrivingState)
     finally:
         app.shutdown()

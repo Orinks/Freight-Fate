@@ -110,8 +110,20 @@ def test_full_game_flow_headless(monkeypatch):
         app.state.handle_event(key_event(pygame.K_RETURN))  # load at dock
         assert "Depart for destination" in app.state.items[app.state.index].text
         app.state.handle_event(key_event(pygame.K_RETURN))
+        from freight_fate.states.city import RouteSelectState
+
+        assert isinstance(app.state, RouteSelectState)
+        app.state.handle_event(key_event(pygame.K_RETURN))
         assert isinstance(app.state, DrivingState)
         assert app.state.phase == "delivery"
+        departure = next(text for text in reversed(spoken)
+                         if "Navigation set for" in text)
+        assert "Navigation set for" in departure
+        assert "Loaded trip is" in departure
+        assert "Departing now" in departure
+        assert "Legal HOS plan" not in departure
+        assert "Fuel-capable stops" not in departure
+        assert "Parking notes" not in departure
 
         driving = app.state
         # start the engine and drive the whole trip with simulated input
