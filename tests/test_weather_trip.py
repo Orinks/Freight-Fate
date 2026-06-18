@@ -378,7 +378,7 @@ def test_toll_cues_and_charges_deduplicate(world):
 
     assert [event.message for event in advance if event.kind == TripEventKind.GPS_CUE] == [
         "ticket system toll point ahead: New Jersey Turnpike ticket entry. "
-        "estimated toll 18 dollars will be charged to settlement."
+        "estimated toll 18 dollars will be billed to carrier settlement."
     ]
     assert not [event for event in repeat if event.kind == TripEventKind.GPS_CUE]
 
@@ -389,7 +389,7 @@ def test_toll_cues_and_charges_deduplicate(world):
     assert [event.message for event in charged
             if event.kind == TripEventKind.TOLL_CHARGED] == [
         "ticket system toll charged at New Jersey Turnpike ticket entry: "
-        "Estimated 18 dollars, charged to settlement."
+        "Estimated 18 dollars, billed to carrier settlement."
     ]
     assert trip.toll_expense == 18.0
     assert not [event for event in charged_again
@@ -413,14 +413,14 @@ def test_zero_amount_toll_entry_marker_does_not_record_expense(world):
     advance = trip.update(0.0)
     assert [event.message for event in advance if event.kind == TripEventKind.GPS_CUE] == [
         "ticket system toll point ahead: Pennsylvania Turnpike eastern ticket entry. "
-        "entry will be recorded for later settlement."
+        "entry will be recorded for carrier settlement."
     ]
 
     trip.position_mi = 18.0
     entry = trip.update(0.0)
     assert [event.message for event in entry if event.kind == TripEventKind.GPS_CUE] == [
         "ticket system entry recorded at Pennsylvania Turnpike eastern ticket entry; "
-        "toll will be charged at settlement."
+        "toll will be billed at carrier settlement."
     ]
     assert trip.toll_expense == 0.0
     assert not [event for event in entry if event.kind == TripEventKind.TOLL_CHARGED]

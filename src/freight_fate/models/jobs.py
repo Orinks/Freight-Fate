@@ -29,6 +29,7 @@ class CargoType:
     endorsement: str | None    # required license endorsement, if any
     fragile: bool = False
     min_level: int = 1
+    equipment: str = "dry van"
 
 
 CARGO_CATALOG: dict[str, CargoType] = {
@@ -36,26 +37,34 @@ CARGO_CATALOG: dict[str, CargoType] = {
     "retail": CargoType("retail", "retail goods", 2.25, (6, 16), None),
     "parcel": CargoType("parcel", "parcel freight", 2.55, (4, 12), None),
     "container": CargoType("container", "shipping containers", 2.40, (12, 24), None),
-    "bulk": CargoType("bulk", "bulk materials", 2.30, (15, 25), None),
-    "grain": CargoType("grain", "grain", 2.20, (18, 25), None),
-    "farm_inputs": CargoType("farm_inputs", "farm inputs", 2.35, (10, 22), None),
+    "bulk": CargoType("bulk", "bulk materials", 2.30, (15, 25), None,
+                      equipment="bulk trailer"),
+    "grain": CargoType("grain", "grain", 2.20, (18, 25), None,
+                       equipment="hopper trailer"),
+    "farm_inputs": CargoType("farm_inputs", "farm inputs", 2.35, (10, 22), None,
+                             equipment="dry van or bulk trailer"),
     "construction": CargoType("construction", "construction materials", 2.35, (14, 25),
-                              None),
+                              None, equipment="flatbed or dry van"),
     "lumber_paper": CargoType("lumber_paper", "lumber and paper products", 2.45,
-                              (10, 24), None, min_level=2),
+                              (10, 24), None, min_level=2,
+                              equipment="flatbed or dry van"),
     "automotive": CargoType("automotive", "automotive parts", 2.75, (8, 20), None,
-                            fragile=True, min_level=2),
+                            fragile=True, min_level=2, equipment="dry van"),
     "machinery": CargoType("machinery", "heavy machinery", 2.90, (15, 25),
-                           "heavy_haul", fragile=True),
+                           "heavy_haul", fragile=True,
+                           equipment="heavy-haul trailer"),
     "steel": CargoType("steel", "steel products", 2.85, (16, 25), "heavy_haul",
-                       min_level=3),
-    "food": CargoType("food", "fresh food", 2.60, (8, 18), "refrigerated", fragile=True),
+                       min_level=3, equipment="flatbed trailer"),
+    "food": CargoType("food", "fresh food", 2.60, (8, 18), "refrigerated",
+                      fragile=True, equipment="refrigerated trailer"),
     "refrigerated": CargoType("refrigerated", "refrigerated goods", 2.85, (8, 18),
-                              "refrigerated", fragile=True),
+                              "refrigerated", fragile=True,
+                              equipment="refrigerated trailer"),
     "chemicals": CargoType("chemicals", "packaged industrial chemicals", 3.05,
-                           (10, 22), "high_value", min_level=4),
+                           (10, 22), "high_value", min_level=4,
+                           equipment="sealed van or tanker-compatible trailer"),
     "electronics": CargoType("electronics", "electronics", 3.30, (4, 12), "high_value",
-                             fragile=True),
+                             fragile=True, equipment="secure dry van"),
 }
 
 ENDORSEMENT_LABELS = {
@@ -156,7 +165,7 @@ class Job:
     def describe(self, index: int | None = None, total: int | None = None) -> str:
         prefix = f"Job {index} of {total}: " if index is not None else ""
         condition = market_condition(self.market_mult)
-        market = f" Market is {condition}." if condition != "steady" else ""
+        market = f" Lane note: Market is {condition}." if condition != "steady" else ""
         endorsement = ""
         if self.cargo.endorsement:
             endorsement = f" Requires {ENDORSEMENT_LABELS[self.cargo.endorsement]}."
@@ -165,7 +174,8 @@ class Job:
         return (f"{prefix}{self.weight_tons:.0f} tons of {self.cargo.label} "
                 f"{origin} {dest}. {self.distance_mi:.0f} miles. "
                 f"Pays {self.pay:,.0f} dollars. "
-                f"Deadline {self.deadline_game_h:.0f} hours.{market}{endorsement}")
+                f"Deadline {self.deadline_game_h:.0f} hours. "
+                f"Equipment: {self.cargo.equipment}.{market}{endorsement}")
 
     def origin_facility_text(self) -> str:
         return facility_text(
