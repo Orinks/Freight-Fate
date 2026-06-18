@@ -2874,6 +2874,30 @@
           ],
           "parking": "limited",
           "curation": "curated"
+        },
+        {
+          "name": "Flying J Travel Center Resaca",
+          "type": "travel_center",
+          "at_mi": 194.0,
+          "source": "Pilot Flying J official Resaca, Georgia location page lists truck parking; at_mi estimated from Ringgold toward Resaca on the Nashville-to-Atlanta I-75 segment, accessed 2026-06-18: https://locations.pilotflyingj.com/us/ga/resaca/288-resaca-beach-blvd-nw",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated"
         }
       ]
     },
@@ -4876,6 +4900,30 @@
       },
       "stops": [
         {
+          "name": "Love's Travel Stop Wichita Falls",
+          "type": "travel_center",
+          "at_mi": 140.0,
+          "source": "Love's official Wichita Falls, Texas location page lists truck parking; at_mi estimated from the Dallas-to-Albuquerque US-287 approach, accessed 2026-06-18: https://www.loves.com/locations/tx/wichita-falls/loves-travel-stop-wichita-falls-269",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated"
+        },
+        {
           "name": "Love's Travel Stop Amarillo",
           "type": "travel_center",
           "at_mi": 316.0,
@@ -4904,6 +4952,30 @@
           "type": "travel_center",
           "at_mi": 323.0,
           "source": "Pilot Flying J official Amarillo, Texas location page at 9601 E I-40 lists diesel, showers, food, CAT scale, and truck parking; at_mi estimated from Dallas-to-Amarillo route distance, accessed 2026-06-17: https://locations.pilotflyingj.com/us/tx/amarillo/9601-e-i-40",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated"
+        },
+        {
+          "name": "Flying J Travel Center Tucumcari",
+          "type": "travel_center",
+          "at_mi": 430.0,
+          "source": "Pilot Flying J official Tucumcari, New Mexico location page lists truck parking; at_mi estimated from Amarillo-to-Tucumcari distance on I-40, accessed 2026-06-18: https://locations.pilotflyingj.com/us/nm/tucumcari/2021-s-mountain-rd",
           "actions": [
             "park",
             "save",
@@ -5063,6 +5135,30 @@
       },
       "stops": [
         {
+          "name": "Love's Travel Stop Ardmore",
+          "type": "travel_center",
+          "at_mi": 100.0,
+          "source": "Love's official Ardmore, Oklahoma location page lists truck parking; at_mi estimated from Dallas to Ardmore on the I-35/I-44 St. Louis route, accessed 2026-06-18: https://www.loves.com/locations/ok/ardmore/loves-travel-stop-ardmore-266",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated"
+        },
+        {
           "name": "Love's Travel Stop Big Cabin",
           "type": "travel_center",
           "at_mi": 283.7,
@@ -5136,6 +5232,30 @@
             "both"
           ],
           "parking": "likely",
+          "curation": "curated"
+        },
+        {
+          "name": "Love's Travel Stop Rolla",
+          "type": "travel_center",
+          "at_mi": 527.0,
+          "source": "Love's official Rolla, Missouri location page lists I-44, store 341, and 89 truck parking spaces; at_mi estimated from Strafford toward Rolla on the Dallas-to-St. Louis I-44 route, accessed 2026-06-18: https://www.loves.com/locations/mo/rolla/loves-travel-stop-rolla-341",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
           "curation": "curated"
         }
       ]
@@ -5275,6 +5395,54 @@
         "source": "Development-time OSRM route geometry over OpenStreetMap, with Open-Meteo elevation samples, Census/OpenStreetMap state context, and curated corridor POIs checked in for offline runtime use."
       },
       "stops": [
+        {
+          "name": "Pilot Travel Center Tallapoosa",
+          "type": "travel_center",
+          "at_mi": 52.0,
+          "source": "Pilot Flying J official Tallapoosa, Georgia location page lists truck parking; at_mi estimated from Atlanta-to-Tallapoosa distance on I-20, accessed 2026-06-18: https://locations.pilotflyingj.com/us/ga/tallapoosa/882-ga-100",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated"
+        },
+        {
+          "name": "Love's Travel Stop Heflin",
+          "type": "travel_center",
+          "at_mi": 77.0,
+          "source": "Love's official Heflin, Alabama location page lists truck parking; at_mi estimated from Atlanta-to-Heflin distance on I-20, accessed 2026-06-18: https://www.loves.com/locations/al/heflin/loves-travel-stop-heflin-818",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated"
+        },
         {
           "name": "Pilot Travel Center Tuscaloosa",
           "type": "travel_center",

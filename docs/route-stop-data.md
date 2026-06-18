@@ -452,6 +452,39 @@ road-service providers must remain explicit source-backed POIs/actions. Do not
 represent them as generic public rest areas, and do not expose repair, towing,
 or roadside assistance unless the source metadata backs that capability.
 
+## HOS Safe-Stopping Audit Notes
+
+The 2026-06-18 safe-stopping pass kept the existing full-network contract green
+but added a stricter HOS/fatigue lens for southern corridors. A leg can satisfy
+the minimum POI density rule and still feel poor when the first sleep/fuel stop
+is hundreds of miles away for a driver who is already near a break, shift, or
+fatigue limit.
+
+This pass added source-backed stops to reduce those pressure gaps:
+
+- Dallas to Albuquerque: Love's Travel Stop Wichita Falls and Flying J Travel
+  Center Tucumcari.
+- Dallas to St. Louis: Love's Travel Stop Ardmore and Love's Travel Stop
+  Rolla.
+- Atlanta to Dallas: Pilot Travel Center Tallapoosa and Love's Travel Stop
+  Heflin.
+- Nashville to Atlanta: Flying J Travel Center Resaca.
+
+Use the same lens when adding or reviewing long southern and southwestern
+corridors: check the maximum gap to a sleep-capable stop, check at least one
+early safe stop near the first 150 miles of long hauls, and do not treat
+limited public parking as guaranteed overnight truck parking. These are route
+planning cues and POI metadata, not dispatch-board promises that a space is
+available right now.
+
+Emergency shoulder sleep exists only as an HOS/fatigue fallback when the truck
+is stopped away from a route POI and the driver is already out of legal options
+or severe fatigue leaves no nearby sleep-capable stop. It is intentionally
+inferior to proper rest: ten hours pass and the ELD resets, but fatigue only
+drops to the shoulder-rest floor, tickets and minor damage are possible, and
+the delivery deadline keeps running. Keep the confirmation wording explicit and
+spoken before the player commits.
+
 ## Update Process
 
 1. Choose a corridor and confirm the route leg mileage already represents the

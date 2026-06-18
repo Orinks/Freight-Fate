@@ -247,8 +247,11 @@ HOS_FINES = (200.0, 500.0, 1000.0, 2000.0)
 HOS_REPUTATION_HIT = 3.0
 FATIGUE_BREAK_RELIEF = 35.0
 FATIGUE_SHOULDER_FLOOR = 30.0
+SHOULDER_SLEEP_LIMIT_BUFFER_MIN = 30.0
 SHOULDER_FINE_CHANCE = 0.15
 SHOULDER_FINE = 150.0
+SHOULDER_DAMAGE_CHANCE = 0.10
+SHOULDER_DAMAGE_PCT = 3.0
 
 
 def fatigue_rate_per_min(night: bool) -> float:
@@ -351,3 +354,9 @@ def shoulder_fine_due(trip_seed: int, stop_mi: float) -> bool:
     """Deterministic 15 percent chance of a fine for shoulder parking."""
     rng = random.Random(f"shoulder:{trip_seed}:{round(stop_mi * 10)}")
     return rng.random() < SHOULDER_FINE_CHANCE
+
+
+def shoulder_damage_due(trip_seed: int, stop_mi: float) -> bool:
+    """Deterministic small chance of minor damage while sleeping on the shoulder."""
+    rng = random.Random(f"shoulder-damage:{trip_seed}:{round(stop_mi * 10)}")
+    return rng.random() < SHOULDER_DAMAGE_CHANCE
