@@ -161,7 +161,8 @@ def test_loading_at_pickup_uses_dock_sound(monkeypatch):
         pickup.handle_event(key_event(pygame.K_RETURN))  # check in
         pickup.handle_event(key_event(pygame.K_RETURN))  # load cargo
 
-        assert played[-1] == ("poi/dock_and_deliver", 0.75)
+        assert ("poi/dock_and_deliver", 0.75) in played
+        assert played[-1] == ("ui/level_up", 0.8)
     finally:
         app.shutdown()
 

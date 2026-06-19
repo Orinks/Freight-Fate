@@ -9,6 +9,7 @@ import sys
 import pygame
 
 from . import __version__
+from .achievements import AchievementAward, award
 from .audio import AudioEngine
 from .data.world import World, get_world
 from .models.economy import Economy
@@ -38,6 +39,8 @@ class GameContext:
         self.economy: Economy = app.economy
         self.profile: Profile | None = None
         self._real_weather = None
+        self.achievement_notice = ""
+        self.achievement_notice_timer = 0.0
 
     def real_weather_provider(self):
         """Shared Open-Meteo provider when real weather is enabled, else None.
@@ -91,6 +94,30 @@ class GameContext:
         self.audio.set_volumes(master=self.settings.master_volume,
                                sfx=self.settings.sfx_volume,
                                music=self.settings.music_volume)
+
+    def award_achievement(
+            self,
+            achievement_id: str,
+            *,
+            event: bool = False,
+            interrupt: bool = False,
+            announce: bool = True) -> AchievementAward | None:
+        if self.profile is None:
+            return None
+        result = award(self.profile, achievement_id)
+        if result is None:
+            return None
+        self.profile.save()
+        self.achievement_notice = result.message
+        self.achievement_notice_timer = 12.0
+        if not announce:
+            return result
+        self.audio.play("ui/level_up", volume=0.8)
+        if event:
+            self.say_event(result.message, interrupt=interrupt)
+        else:
+            self.say(result.message, interrupt=interrupt)
+        return result
 
 
 class App:
@@ -162,6 +189,13 @@ class App:
                         self.state.handle_event(event)
                 if self.state is not None:
                     self.state.update(dt)
+                if self.ctx.achievement_notice_timer > 0:
+                    self.ctx.achievement_notice_timer = max(
+                        0.0,
+                        self.ctx.achievement_notice_timer - dt,
+                    )
+                    if self.ctx.achievement_notice_timer == 0:
+                        self.ctx.achievement_notice = ""
                 self.render()
                 frames += 1
                 if max_frames is not None and frames >= max_frames:
@@ -174,7 +208,12 @@ class App:
         state = self.state
         if state is not None:
             y = 30
-            for i, line in enumerate(state.lines()[:18]):
+            base_lines = state.lines()
+            if self.ctx.achievement_notice:
+                lines = base_lines[:16] + ["", self.ctx.achievement_notice]
+            else:
+                lines = base_lines[:18]
+            for i, line in enumerate(lines[:18]):
                 font = self.font_big if i == 0 else self.font
                 color = HILIGHT_COLOR if line.startswith("> ") else TEXT_COLOR
                 surf = font.render(line, True, color)

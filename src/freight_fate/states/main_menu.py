@@ -8,6 +8,7 @@ from pathlib import Path
 import pygame
 
 from .. import __version__, updater
+from ..achievements import ACHIEVEMENTS, earned_ids
 from ..models.profile import DEFAULT_CITY, Profile, ProfileIntegrityError
 from ..settings import TIME_SCALES
 from ..sim.hos import HOS_MODES
@@ -168,6 +169,9 @@ class MainMenuState(MenuState):
                                   help="Reset or delete saved careers."))
         items.append(MenuItem("New career", self._new_game,
                               help="Start a fresh trucking career."))
+        items.append(MenuItem("Achievements", self._achievements,
+                              help="Review earned and locked achievements for "
+                                   "a saved career."))
         items.append(MenuItem("How to play", self._help,
                               help="Learn the controls and the goal of the game."))
         items.append(MenuItem("Settings", self._settings,
@@ -209,8 +213,88 @@ class MainMenuState(MenuState):
     def _help(self) -> None:
         self.ctx.push_state(HelpState(self.ctx))
 
+    def _achievements(self) -> None:
+        self.ctx.push_state(AchievementCareerState(self.ctx))
+
     def _settings(self) -> None:
         self.ctx.push_state(SettingsState(self.ctx))
+
+
+class AchievementCareerState(MenuState):
+    title = "Achievements"
+    intro_help = ("Choose a saved career to review achievements. Enter opens "
+                  "that driver's earned and locked achievements. Escape goes back.")
+
+    def announce_entry(self) -> None:
+        if not self.items or self.items[0].text == "Back":
+            self.ctx.say("Achievements. No saved careers yet. Start a career, "
+                         "then come back after the road has opinions.")
+            return
+        self.ctx.say(f"Achievements. {self.current_text()}")
+
+    def build_items(self) -> list[MenuItem]:
+        items = []
+        for _path, profile in _loadable_saves():
+            earned = len(earned_ids(profile))
+            total = len(ACHIEVEMENTS)
+            items.append(MenuItem(
+                f"{profile.name}: {earned} of {total} earned",
+                lambda p=profile: self._pick(p),
+                help=f"Review achievements for {profile.name}."))
+        items.append(MenuItem("Back", self.go_back))
+        return items
+
+    def _pick(self, profile: Profile) -> None:
+        self.ctx.push_state(AchievementsState(self.ctx, profile))
+
+
+class AchievementsState(MenuState):
+    intro_help = ("Use up and down arrows to review achievements. Earned and "
+                  "locked entries are both shown. Enter repeats the selected "
+                  "entry. Escape goes back.")
+
+    def __init__(self, ctx, profile: Profile) -> None:
+        super().__init__(ctx)
+        self.profile = profile
+
+    @property
+    def title(self) -> str:  # type: ignore[override]
+        return f"Achievements for {self.profile.name}"
+
+    def announce_entry(self) -> None:
+        earned = len(earned_ids(self.profile))
+        total = len(ACHIEVEMENTS)
+        self.ctx.say(
+            f"Achievements for {self.profile.name}. {earned} of {total} earned. "
+            "Locked achievements are shown as goals, with no story spoilers. "
+            f"{self.current_text()}")
+
+    def build_items(self) -> list[MenuItem]:
+        earned = earned_ids(self.profile)
+        items = [
+            MenuItem(self._summary_label, self._summary,
+                     help="Hear the total earned achievement count.")
+        ]
+        for achievement in ACHIEVEMENTS:
+            unlocked = achievement.id in earned
+            status = "Earned" if unlocked else "Locked"
+            label = f"{status}: {achievement.name} - {achievement.description}"
+            items.append(MenuItem(
+                label,
+                lambda text=label: self.ctx.say(text),
+                help=f"{achievement.category}. {achievement.description}"))
+        items.append(MenuItem("Back", self.go_back))
+        return items
+
+    def _summary_label(self) -> str:
+        earned = len(earned_ids(self.profile))
+        total = len(ACHIEVEMENTS)
+        return f"Summary: {earned} of {total} earned"
+
+    def _summary(self) -> None:
+        earned = len(earned_ids(self.profile))
+        total = len(ACHIEVEMENTS)
+        self.ctx.say(f"{self.profile.name} has earned {earned} of {total} achievements.")
 
 
 class LoadDriverState(MenuState):

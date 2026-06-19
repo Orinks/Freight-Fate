@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+### Added
+- **Achievements.** Careers now track a full achievement list across
+  deliveries, route events, weather, rest stops, garage work, truck care,
+  and career milestones, with a spoken main-menu achievement viewer and
+  a chime when new achievements unlock.
+
 ### Fixed
 - **Facility and settings audio fixes.** Terminal and yard screens now use
   the new facility-gate ambience, delivery completion no longer buries the

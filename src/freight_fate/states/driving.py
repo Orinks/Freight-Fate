@@ -12,6 +12,7 @@ import random
 
 import pygame
 
+from ..achievements import add_unique_stat
 from ..data.world import Route
 from ..models.jobs import Job, job_from_payload, job_payload
 from ..models.settlement import (
@@ -24,7 +25,7 @@ from ..sim.hos import HosClock, clock_text, is_night, time_of_day
 from ..sim.transmission import REVERSE
 from ..sim.trip import Trip, TripEventKind
 from ..sim.vehicle import G, TruckState
-from ..sim.weather import WeatherSystem
+from ..sim.weather import WeatherKind, WeatherSystem
 from .base import MenuItem, MenuState, State
 
 log = logging.getLogger(__name__)
@@ -280,6 +281,23 @@ class DrivingState(State):
                          interrupt=False)
         if self.tutorial:
             self.tutorial.begin()
+        if self.phase == DRIVE_PHASE_DELIVERY:
+            self._record_weather_achievement(event=False)
+            if not self.truck.transmission.automatic:
+                self.ctx.award_achievement("manual_driver", event=False, interrupt=False)
+
+    def _record_weather_achievement(self, *, event: bool = True) -> None:
+        p = self.ctx.profile
+        if p is None:
+            return
+        kind = self.weather.current
+        add_unique_stat(p, "weather_seen", kind.name)
+        if kind in {WeatherKind.RAIN, WeatherKind.HEAVY_RAIN}:
+            self.ctx.award_achievement("rain_driver", event=event)
+        elif kind in {WeatherKind.SNOW, WeatherKind.WIND}:
+            self.ctx.award_achievement("winter_or_wind", event=event)
+        elif kind in {WeatherKind.FOG, WeatherKind.THUNDERSTORM}:
+            self.ctx.award_achievement("low_visibility", event=event)
 
     def exit(self) -> None:
         self.ctx.audio.stop_world()
@@ -778,6 +796,7 @@ class DrivingState(State):
                 text = f"Air pressure ready at {t.air_pressure_psi:.0f} psi."
                 self._set_status("Air ready.")
             self.ctx.say_event(text, interrupt=False)
+            self.ctx.award_achievement("air_ready", event=True)
         elif not t.air_ready:
             self._air_ready_said = False
 
@@ -915,6 +934,7 @@ class DrivingState(State):
         if self.truck.speed_mph <= HAZARD_SAFE_MPH:
             self._hazard_deadline = None
             self.ctx.say_event("Hazard avoided. Well done.", interrupt=False)
+            self.ctx.award_achievement("hazard_avoided", event=True)
             return
         self._hazard_deadline -= dt
         if self._hazard_deadline <= 0:
@@ -963,9 +983,19 @@ class DrivingState(State):
             self._handle_inspection(event)
         elif kind == TripEventKind.WEATHER_CHANGE:
             self.ctx.say_event(event.message, interrupt=False)
+            self._record_weather_achievement()
         elif kind == TripEventKind.TOLL_CHARGED:
             self.ctx.audio.play(sound or "ui/notify", volume=0.55)
             self.ctx.say_event(event.message, interrupt=False)
+            self.ctx.award_achievement("toll_paid", event=True)
+        elif kind == TripEventKind.STATE_CROSSING:
+            cue = event.data.get("cue")
+            state = getattr(cue, "near_text", event.message)
+            add_unique_stat(self.ctx.profile, "states_crossed", str(state))
+            if sound is not None:
+                self.ctx.audio.play(sound, volume=0.65)
+            self.ctx.say_event(event.message, interrupt=False)
+            self.ctx.award_achievement("state_crossing", event=True)
         elif kind == TripEventKind.ARRIVED:
             pass  # handled by _arrive()
         elif self._event_disables_cruise(event):
@@ -976,6 +1006,15 @@ class DrivingState(State):
             self.ctx.say_event(event.message, interrupt=False)
         if kind == TripEventKind.ZONE_ENTER:
             self.ctx.audio.play(sound or "ui/notify", volume=0.7)
+            zone = event.data.get("zone")
+            if getattr(zone, "reason", "") == "construction":
+                self.ctx.award_achievement("construction_zone", event=True)
+            elif getattr(zone, "reason", "") == "heavy traffic":
+                self.ctx.award_achievement("traffic_slowing", event=True)
+        if kind == TripEventKind.GPS_CUE:
+            cue = event.data.get("cue")
+            if getattr(cue, "kind", "") == "traffic":
+                self.ctx.award_achievement("traffic_slowing", event=True)
 
     def _event_disables_cruise(self, event) -> bool:
         if self._cruise_mph is None:
@@ -1028,9 +1067,11 @@ class DrivingState(State):
                 "your ELD clock.",
                 interrupt=True,
             )
+            self.ctx.award_achievement("inspection", event=True)
             self._place_out_of_service()
             return
         self.ctx.say_event(message, interrupt=True)
+        self.ctx.award_achievement("inspection", event=True)
 
     def _place_out_of_service(self) -> None:
         _advance_rest_clock(self, OUT_OF_SERVICE_MIN)
@@ -1058,6 +1099,7 @@ class DrivingState(State):
             self.ctx.push_state(ParkingFullState(self.ctx, self, stop))
             return
         self.ctx.push_state(RestStopState(self.ctx, self, stop))
+        self.ctx.award_achievement("first_rest_stop")
 
     def _take_exit(self) -> None:
         if self._ramp_mi is not None:
@@ -1618,6 +1660,7 @@ class RestStopState(MenuState):
         self.ctx.say(f"Refueled {need:.0f} gallons for {cost:,.0f} dollars. "
                      f"You have {p.money:,.0f} dollars. Fueling took "
                      f"{FUEL_STOP_MIN:.0f} minutes.")
+        self.ctx.award_achievement("route_refuel")
         self.refresh()
 
     def _take_break(self) -> None:
@@ -1632,6 +1675,7 @@ class RestStopState(MenuState):
                      f"It is {clock_text(d.trip.current_hour)}. "
                      f"Your break requirement is reset and you feel a little "
                      f"fresher. {_deadline_text(d)}")
+        self.ctx.award_achievement("break_taken")
 
     def _food_break(self) -> None:
         d = self.driving
@@ -1648,6 +1692,7 @@ class RestStopState(MenuState):
     def _sleep(self) -> None:
         d = self.driving
         p = self.ctx.profile
+        before_fatigue = p.fatigue
         _advance_rest_clock(d, hos.SLEEP_MIN)
         d.hos.sleep()
         p.fatigue = hos.rest_sleep(p.fatigue)
@@ -1656,6 +1701,9 @@ class RestStopState(MenuState):
         self.ctx.say(f"You slept 10 hours and woke rested. "
                      f"It is {clock_text(d.trip.current_hour)}. "
                      f"Hours of service reset. {_deadline_text(d)}")
+        self.ctx.award_achievement("slept_on_route")
+        if before_fatigue < hos.FATIGUE_SEVERE:
+            self.ctx.award_achievement("sleep_before_exhaustion")
 
     def _repair(self) -> None:
         d = self.driving
@@ -1678,6 +1726,7 @@ class RestStopState(MenuState):
         self.ctx.say(f"Truck repaired for {cost:,.0f} dollars. "
                      f"It is {clock_text(d.trip.current_hour)}. "
                      f"You have {p.money:,.0f} dollars. {_deadline_text(d)}")
+        self.ctx.award_achievement("garage_repair")
 
     def _roadside_assistance(self) -> None:
         d = self.driving
@@ -1707,6 +1756,7 @@ class RestStopState(MenuState):
         self.ctx.say(f"Inspection check-in complete at {self.stop.spoken_name}. "
                      f"It is {clock_text(d.trip.current_hour)}. "
                      f"{_deadline_text(d)}")
+        self.ctx.award_achievement("inspection")
 
     def _save_here(self, *, silent: bool = False) -> None:
         d = self.driving
@@ -2082,6 +2132,7 @@ class ArrivalState(MenuState):
         super().__init__(ctx)
         self.driving = driving
         self.summary_parts: list[str] = []
+        self._achievement_messages: list[str] = []
         self.terminal = ctx.world.home_terminal(driving.job.destination)
         self._settle()
 
@@ -2137,12 +2188,73 @@ class ArrivalState(MenuState):
                 f"The cargo run added {trip_damage:.0f} percent truck damage. "
                 "Visit the garage when you can.")
         self.summary_parts.extend(announcements)
+        self._award_arrival_achievements(
+            on_time=on_time,
+            trip_damage=trip_damage,
+            toll_expense=toll_expense,
+            route_miles=d.route.miles,
+            speeding_strikes=d.speeding_strikes,
+        )
+        self.summary_parts.extend(self._achievement_messages)
         self._announcements = announcements
+
+    def _award_arrival_achievements(
+            self,
+            *,
+            on_time: bool,
+            trip_damage: float,
+            toll_expense: float,
+            route_miles: float,
+            speeding_strikes: int) -> None:
+        p = self.ctx.profile
+        route = self.driving.route
+        world = self.ctx.world
+        states = {world.cities[city].state for city in route.cities}
+        regions = {world.cities[city].region for city in route.cities}
+        region_count = 0
+        for region in regions:
+            region_count = add_unique_stat(p, "regions_visited", region)
+
+        ids = ["first_delivery"]
+        if on_time:
+            ids.append("first_on_time")
+        if trip_damage <= 1.0:
+            ids.append("clean_delivery")
+        if speeding_strikes == 0:
+            ids.append("speed_limit_saint")
+        if toll_expense > 0:
+            ids.append("toll_paid")
+        elif route_miles >= 300.0:
+            ids.append("no_toll_long")
+        if len(states) >= 2:
+            ids.append("state_crossing")
+        if len(states) >= 3:
+            ids.append("multi_state")
+        if len(regions) >= 3 or region_count >= 3:
+            ids.append("three_regions")
+        if route_miles >= 900.0:
+            ids.append("long_haul")
+        if p.career.deliveries >= 5:
+            ids.append("five_deliveries")
+        if p.career.deliveries >= 10:
+            ids.append("ten_deliveries")
+        if p.career.level >= 3:
+            ids.append("level_three")
+        if p.money >= 25_000.0:
+            ids.append("twenty_five_grand")
+        if p.career.total_miles >= 1_000.0:
+            ids.append("thousand_miles")
+
+        for achievement_id in ids:
+            result = self.ctx.award_achievement(achievement_id, announce=False)
+            if result is not None:
+                self._achievement_messages.append(result.message)
+        self.ctx.save_profile()
 
     def enter(self) -> None:
         self.ctx.audio.stop_world()
         self.ctx.audio.play("ui/job_complete")
-        if self._announcements:
+        if self._announcements or self._achievement_messages:
             self.ctx.audio.play("ui/level_up")
         self.ctx.audio.play("ui/cash")
         self.items = self.build_items()

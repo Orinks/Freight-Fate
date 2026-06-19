@@ -847,10 +847,11 @@ def test_adaptive_cruise_disables_for_heavy_traffic_zone_entry(monkeypatch):
         driving._handle_trip_event(event)
 
         assert driving._cruise_mph is None
-        assert events[-1] == (
+        assert events[-2] == (
             "heavy traffic ahead. Speed limit 50. "
             "Adaptive cruise disabled; take manual speed control."
         )
+        assert events[-1].startswith("New achievement! CB Etiquette Champion.")
     finally:
         app.shutdown()
 
