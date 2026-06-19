@@ -20,6 +20,7 @@ from ..models.settlement import (
     charge_summary,
     charge_total,
 )
+from ..music import select_drive_music
 from ..sim import hos
 from ..sim.hos import HosClock, clock_text, is_night, time_of_day
 from ..sim.transmission import REVERSE
@@ -124,6 +125,10 @@ class DrivingState(State):
         self.trip = Trip(route, self.truck, self.weather,
                          time_scale=ctx.settings.time_scale, seed=self.trip_seed,
                          start_hour=trip_start_hour)
+        self._day_music_track = select_drive_music(
+            self.route, self.trip_seed, 12.0, self.weather.current)
+        self._night_music_track = select_drive_music(
+            self.route, self.trip_seed, 0.0, self.weather.current)
         self.tutorial = Tutorial(ctx) if not profile.tutorial_done else None
 
         self.hos = profile.hos          # shift clock lives on the profile
@@ -244,7 +249,7 @@ class DrivingState(State):
 
     def enter(self) -> None:
         self.ctx.audio.stop_music(800)
-        self.ctx.audio.play_music("open_road", fade_ms=2500)
+        self.ctx.audio.play_music(self._current_music_track(), fade_ms=2500)
         self.ctx.audio.set_weather(self.weather.effects.sound)
         self.ctx.audio.set_wind(self.weather.effects.wind)
         mode = "automatic" if self.truck.transmission.automatic else "manual"
@@ -885,12 +890,16 @@ class DrivingState(State):
         audio.set_wind(eff.wind)
         if is_night(self.trip.current_hour):
             audio.set_ambient("ambient/night", volume=0.3)
-            audio.play_music("night_haul", fade_ms=4000)
         else:
             audio.set_ambient(None)
-            audio.play_music("open_road", fade_ms=4000)
+        audio.play_music(self._current_music_track(), fade_ms=4000)
         if self.weather.should_thunder():
             audio.play("weather/thunder", volume=0.9)
+
+    def _current_music_track(self) -> str:
+        if is_night(self.trip.current_hour):
+            return self._night_music_track
+        return self._day_music_track
 
     def _sync_weather_source(self) -> None:
         real = self.ctx.settings.real_weather

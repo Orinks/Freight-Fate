@@ -44,8 +44,23 @@ ElevenLabs terms for the generating account.
 | Track | File | Description |
 | --- | --- | --- |
 | Headlights West | `music/menu_theme.ogg` | Warm Americana for the main menu |
+| Keys To The Rig | `music/menu_first_rig.ogg` | First-owned-truck career menu bed |
+| Regional Lines | `music/menu_regional_carrier.ogg` | Regional carrier career menu bed |
+| Yard Lights | `music/menu_fleet_owner.ogg` | Fleet-owner career menu bed |
+| Coast To Coast Ledger | `music/menu_coast_to_coast.ogg` | Coast-to-coast career menu bed |
+| Million Mile Morning | `music/menu_legendary_haul.ogg` | Late-career menu bed |
 | Open Road | `music/open_road.ogg` | Easy mid-tempo groove for long hauls |
+| Desert Two-Lane | `music/drive_desert_two_lane.ogg` | Spacious daytime desert drive bed |
+| Mountain Grade | `music/drive_mountain_grade.ogg` | Measured daytime mountain drive bed |
+| Rain-Day Cruise | `music/drive_rain_day_cruise.ogg` | Gentle rainy daytime drive bed |
+| Urban Roll | `music/drive_urban_roll.ogg` | Light heavy-traffic daytime drive bed |
+| Dawn Push | `music/drive_dawn_push.ogg` | Soft early-morning daytime drive bed |
 | Night Haul | `music/night_haul.ogg` | Slow ambient pads for night driving |
+| Midnight Interstate | `music/night_midnight_interstate.ogg` | Quiet nighttime highway bed |
+| Neon Truck Stop | `music/night_neon_truck_stop.ogg` | Soft night truck-stop approach bed |
+| Rainy Night Miles | `music/night_rainy_miles.ogg` | Sparse rainy night drive bed |
+| Lonely Plains | `music/night_lonely_plains.ogg` | Open nighttime plains drive bed |
+| Mountain Night Pass | `music/night_mountain_pass.ogg` | Quiet mountain night drive bed |
 
 To regenerate the procedural assets from source (reproducible, seeded):
 
