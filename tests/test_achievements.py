@@ -95,10 +95,10 @@ def test_main_menu_achievement_path_is_keyboard_accessible(monkeypatch):
         app.state.handle_event(key_event(pygame.K_RETURN))
         assert isinstance(app.state, AchievementsState)
         assert app.state.current_text().startswith("Summary: 1 of")
-        assert any(item.text.startswith("Earned: Dockward") for item in app.state.items)
-        assert any(item.text.startswith("Locked: Load Duck") for item in app.state.items)
-        select(app.state, "Earned: Dock")
-        assert spoken[-1].startswith("Earned: Dockward")
+        assert any(item.text.startswith("Earned: Eastbound") for item in app.state.items)
+        assert any(item.text.startswith("Locked: Breaker, Breaker") for item in app.state.items)
+        select(app.state, "Earned: Eastbound")
+        assert spoken[-1].startswith("Earned: Eastbound")
     finally:
         app.shutdown()
 
@@ -204,6 +204,6 @@ def test_state_crossing_keeps_gameplay_prompt_before_achievement(monkeypatch):
         ))
 
         assert spoken[0] == "Crossing into Missouri near St. Louis."
-        assert spoken[1].startswith("New achievement! One Border, Many Boasts.")
+        assert spoken[1].startswith("New achievement! Two Places, So Far.")
     finally:
         app.shutdown()
