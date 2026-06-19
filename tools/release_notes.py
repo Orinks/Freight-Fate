@@ -158,18 +158,42 @@ def eligible_sections(markdown: str) -> list[ChangelogSection]:
     ]
 
 
-def nightly_candidate_sections(text: str) -> list[ChangelogSection]:
+def released_versions() -> set[str]:
+    """Versions that already have a published stable tag (``vX.Y.Z``).
+
+    A version block in the changelog is only "staged" until its stable tag
+    exists; once released it must not resurface in developer snapshots.
+    """
+    try:
+        tags = git_output_lines(["tag", "--list", "v*.*.*"])
+    except subprocess.CalledProcessError:
+        return set()
+    return {tag.removeprefix("v") for tag in tags}
+
+
+def nightly_candidate_sections(
+    text: str, released: set[str] | None = None
+) -> list[ChangelogSection]:
     """Player-facing changelog entries that can feed developer snapshots.
 
     Release prep sometimes moves curated player-facing notes from
     ``Unreleased`` into the next version block before the stable tag exists.
     Scheduled nightlies still need those entries, while explicitly internal
-    buckets should not force a player snapshot.
+    buckets should not force a player snapshot. A version block whose stable
+    tag already exists has shipped, so it is skipped to avoid re-advertising
+    released features in nightly notes.
     """
+    released = released or set()
     sections: list[ChangelogSection] = []
     for block in release_blocks(text):
-        heading = block.heading.casefold()
-        if heading.startswith("unreleased") or re.match(r"v?\d+\.\d+\.\d+", heading):
+        heading = block.heading.casefold().lstrip("[")
+        if heading.startswith("unreleased"):
+            sections.extend(eligible_sections(block.body))
+            continue
+        version_match = re.match(r"v?(\d+\.\d+\.\d+)", heading)
+        if version_match:
+            if version_match.group(1) in released:
+                continue  # already shipped under a stable tag
             sections.extend(eligible_sections(block.body))
     return sections
 
@@ -198,7 +222,9 @@ def format_sections(sections: list[ChangelogSection]) -> str:
     if not sections:
         return "- No user-facing changes"
 
-    by_title = {section.title: section.entries for section in sections}
+    by_title: dict[str, list[str]] = {}
+    for section in sections:
+        by_title.setdefault(section.title, []).extend(section.entries)
     ordered_titles = [title for title in SECTION_ORDER if title in by_title]
     ordered_titles.extend(title for title in by_title if title not in ordered_titles)
 
@@ -228,13 +254,18 @@ def sections_added_since(
     base_ref: str,
     head_text: str,
     extra_excluded_entries: set[str] | None = None,
+    released: set[str] | None = None,
 ) -> list[ChangelogSection]:
-    base_entries = entries_from_sections(nightly_candidate_sections(changelog_at(base_ref)))
+    if released is None:
+        released = released_versions()
+    base_entries = entries_from_sections(
+        nightly_candidate_sections(changelog_at(base_ref), released)
+    )
     if extra_excluded_entries:
         base_entries.update(extra_excluded_entries)
 
     added: list[ChangelogSection] = []
-    for section in nightly_candidate_sections(head_text):
+    for section in nightly_candidate_sections(head_text, released):
         entries = tuple(
             entry for entry in section.entries if normalize_entry(entry) not in base_entries
         )
@@ -252,10 +283,13 @@ def stable_notes(version: str) -> str:
 def nightly_notes(previous_tag: str = "", exclude_notes: str = "") -> str:
     changelog_text = changelog_file().read_text(encoding="utf-8")
     excluded_entries = excluded_entries_from_notes(exclude_notes)
+    released = released_versions()
     if previous_tag:
-        sections = sections_added_since(previous_tag, changelog_text, excluded_entries)
+        sections = sections_added_since(
+            previous_tag, changelog_text, excluded_entries, released
+        )
     else:
-        sections = nightly_candidate_sections(changelog_text)
+        sections = nightly_candidate_sections(changelog_text, released)
     body = format_sections(sections)
     return f"{NIGHTLY_HEADER}\n\n## Changes since the previous snapshot\n\n{body}"
 
@@ -311,11 +345,14 @@ def changed_files(base: str, head: str) -> list[str]:
 
 
 def unreleased_added_entries(base: str, head: str) -> list[str]:
-    base_entries = entries_from_sections(nightly_candidate_sections(changelog_at(base)))
+    released = released_versions()
+    base_entries = entries_from_sections(
+        nightly_candidate_sections(changelog_at(base), released)
+    )
     head_text = changelog_at(head) if head != "HEAD" else changelog_file().read_text(encoding="utf-8")
     return [
         entry
-        for section in nightly_candidate_sections(head_text)
+        for section in nightly_candidate_sections(head_text, released)
         for entry in section.entries
         if normalize_entry(entry) not in base_entries
     ]
