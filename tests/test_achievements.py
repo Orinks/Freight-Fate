@@ -71,6 +71,29 @@ def test_award_achievement_persists_and_deduplicates_notification(monkeypatch):
         app.shutdown()
 
 
+def test_event_achievement_speaks_through_screen_reader(monkeypatch):
+    from freight_fate.app import App
+    from freight_fate.models.profile import Profile
+
+    app = App()
+    try:
+        app.ctx.profile = Profile(name="Screen Reader Badges")
+        screen_reader = []
+        events = []
+        monkeypatch.setattr(app.ctx, "say",
+                            lambda text, interrupt=True: screen_reader.append(text))
+        monkeypatch.setattr(app.ctx, "say_event",
+                            lambda text, interrupt=True: events.append(text))
+
+        result = app.ctx.award_achievement("first_delivery", event=True)
+
+        assert result is not None
+        assert screen_reader == [result.message]
+        assert events == []
+    finally:
+        app.shutdown()
+
+
 def test_main_menu_achievement_path_is_keyboard_accessible(monkeypatch):
     from freight_fate.app import App
     from freight_fate.models.profile import Profile
@@ -186,9 +209,12 @@ def test_state_crossing_keeps_gameplay_prompt_before_achievement(monkeypatch):
         )
         route = app.ctx.world.supported_route_options(job.origin, job.destination)[0]
         driving = DrivingState(app.ctx, job, route)
-        spoken = []
+        events = []
+        screen_reader = []
         monkeypatch.setattr(app.ctx, "say_event",
-                            lambda text, interrupt=True: spoken.append(text))
+                            lambda text, interrupt=True: events.append(text))
+        monkeypatch.setattr(app.ctx, "say",
+                            lambda text, interrupt=True: screen_reader.append(text))
 
         cue = NavigationCue(
             "state:test",
@@ -203,7 +229,7 @@ def test_state_crossing_keeps_gameplay_prompt_before_achievement(monkeypatch):
             {"cue": cue},
         ))
 
-        assert spoken[0] == "Crossing into Missouri near St. Louis."
-        assert spoken[1].startswith("New achievement! Two Places, So Far.")
+        assert events == ["Crossing into Missouri near St. Louis."]
+        assert screen_reader[0].startswith("New achievement! Two Places, So Far.")
     finally:
         app.shutdown()

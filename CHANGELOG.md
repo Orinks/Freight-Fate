@@ -9,6 +9,10 @@
   snapshot may not load on an older stable release.
 
 ### Fixed
+- **Achievement speech routing.** Achievement unlocks now speak through the
+  screen reader voice instead of the separate driving-event voice, so players
+  who miss or interrupt an unlock can still review it later from the
+  Achievements menu.
 - **Facility and settings audio fixes.** Terminal and yard screens now use
   the new facility-gate ambience, delivery completion no longer buries the
   dock and settlement cues under a generic menu sound, and volume settings

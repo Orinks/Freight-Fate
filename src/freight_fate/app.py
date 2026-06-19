@@ -113,10 +113,7 @@ class GameContext:
         if not announce:
             return result
         self.audio.play("ui/level_up", volume=0.8)
-        if event:
-            self.say_event(result.message, interrupt=interrupt)
-        else:
-            self.say(result.message, interrupt=interrupt)
+        self.say(result.message, interrupt=interrupt)
         return result
 
 
