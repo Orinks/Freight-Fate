@@ -3,13 +3,10 @@
 ## Unreleased
 
 ### Added
-- **Achievements.** Careers now track a full achievement list across
-  deliveries, route events, weather, rest stops, garage work, truck care,
-  and career milestones, with a spoken main-menu achievement viewer and
-  a chime when new achievements unlock. Existing careers carry over and
-  earn achievements going forward; milestone badges backfill on your next
-  delivery. Note: a career saved on a developer snapshot may not load on
-  an older stable release.
+- **New achievement system.** Careers now track achievements across a range
+  of categories, with a spoken main-menu viewer and a chime when you unlock
+  one. Existing careers carry over. Note: a career saved on a developer
+  snapshot may not load on an older stable release.
 
 ### Fixed
 - **Facility and settings audio fixes.** Terminal and yard screens now use
