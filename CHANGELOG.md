@@ -3,10 +3,10 @@
 ## Unreleased
 
 ### Added
-- **Expanded music beds.** Freight Fate now includes more menu, daytime
-  driving, and nighttime driving music. The main menu picks a career-themed
-  bed from your save progress, and active drives pick a stable day/night bed
-  for the trip instead of shuffling while you are on the road.
+- **Expanded music beds.** Freight Fate now includes longer menu, daytime
+  driving, and nighttime driving music. Menus use a career-aware pool, and
+  active drives use stable day/night pools that rotate without reshuffling
+  abruptly while you are on the road.
 - **New achievement system.** Careers now track achievements across a range
   of categories, with a spoken main-menu viewer and a chime when you unlock
   one. Existing careers carry over. Note: a career saved on a developer

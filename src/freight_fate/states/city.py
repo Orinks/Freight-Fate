@@ -14,7 +14,7 @@ from ..models.jobs import (
     plan_hos,
 )
 from ..models.trucks import TRUCK_CATALOG, UPGRADE_CATALOG, TruckModel, Upgrade
-from ..music import select_menu_music
+from ..music import select_menu_music_sequence
 from ..sim.hos import clock_text, time_of_day
 from ..sim.vehicle import TruckState
 from .base import MenuItem, MenuState
@@ -91,7 +91,8 @@ class CityMenuState(MenuState):
         return self.ctx.world.home_terminal(p.current_city).name
 
     def enter(self) -> None:
-        self.ctx.audio.play_music(select_menu_music(self.ctx.profile))
+        sequence = select_menu_music_sequence(self.ctx.profile)
+        self.ctx.audio.play_music(self.ctx.next_music_track("menu", sequence))
         self.ctx.audio.set_ambient("poi/facility_gate", volume=0.35)
         super().enter()
 

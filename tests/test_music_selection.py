@@ -5,9 +5,12 @@ from pathlib import Path
 from freight_fate.music import (
     ALL_MUSIC_TRACKS,
     DAY_DRIVE_TRACKS,
+    GENERATED_MUSIC_TRACKS,
     NIGHT_DRIVE_TRACKS,
     select_drive_music,
+    select_drive_music_sequence,
     select_menu_music,
+    select_menu_music_sequence,
 )
 
 ASSETS = Path(__file__).parents[1] / "src" / "freight_fate" / "assets" / "sounds"
@@ -39,15 +42,37 @@ def test_menu_music_tracks_career_milestones():
     assert select_menu_music(legend) == "menu_legendary_haul"
 
 
-def test_drive_music_is_stable_for_trip_and_separates_day_night(world):
-    route = world.route_from_cities(["Denver", "Salt Lake City"])
-    day = select_drive_music(route, 12345, 13.0)
-    assert day == select_drive_music(route, 12345, 13.5)
-    assert day in {track.key for track in DAY_DRIVE_TRACKS}
+def test_menu_music_sequence_is_milestone_pool():
+    from freight_fate.models.profile import Profile
 
-    night = select_drive_music(route, 12345, 23.0)
-    assert night == select_drive_music(route, 12345, 23.5)
-    assert night in {track.key for track in NIGHT_DRIVE_TRACKS}
+    rookie = Profile(name="Rookie")
+    rookie_pool = select_menu_music_sequence(rookie)
+    assert rookie_pool[0] == "menu_theme"
+    assert len(rookie_pool) > 1
+    assert "menu_theme" in rookie_pool
+
+    coast = Profile(name="Coast")
+    coast.career.total_miles = 10_000
+    coast_pool = select_menu_music_sequence(coast)
+    assert coast_pool[0] == "menu_coast_to_coast"
+    assert len(coast_pool) > len(rookie_pool)
+    assert "menu_theme" in coast_pool
+
+
+def test_drive_music_sequence_is_stable_pool_for_trip_and_separates_day_night(world):
+    route = world.route_from_cities(["Denver", "Salt Lake City"])
+    day = select_drive_music_sequence(route, 12345, 13.0)
+    assert day == select_drive_music_sequence(route, 12345, 13.5)
+    assert len(day) == len(DAY_DRIVE_TRACKS)
+    assert len(set(day)) > 1
+    assert set(day) == {track.key for track in DAY_DRIVE_TRACKS}
+    assert select_drive_music(route, 12345, 13.0) == day[0]
+
+    night = select_drive_music_sequence(route, 12345, 23.0)
+    assert night == select_drive_music_sequence(route, 12345, 23.5)
+    assert len(night) == len(NIGHT_DRIVE_TRACKS)
+    assert len(set(night)) > 1
+    assert set(night) == {track.key for track in NIGHT_DRIVE_TRACKS}
     assert night != day
 
 
@@ -89,6 +114,28 @@ def test_main_menu_uses_latest_save_milestone_music(monkeypatch):
         app.shutdown()
 
 
+def test_menu_music_pool_advances_without_immediate_repeat(monkeypatch):
+    from freight_fate.app import App
+    from freight_fate.models.profile import Profile
+    from freight_fate.states.city import CityMenuState
+
+    app = App()
+    played = []
+    monkeypatch.setattr(app.ctx.audio, "play_music",
+                        lambda track, fade_ms=1500: played.append(track))
+    try:
+        app.ctx.profile = Profile(name="Menu Pool", current_city="Chicago")
+        app.ctx.profile.career.total_miles = 10_000
+        state = CityMenuState(app.ctx)
+        for _ in range(4):
+            state.enter()
+            state.exit()
+        assert len(set(played)) > 1
+        assert all(a != b for a, b in zip(played, played[1:], strict=False))
+    finally:
+        app.shutdown()
+
+
 def test_driving_state_uses_selected_drive_music(monkeypatch):
     from freight_fate.app import App
     from freight_fate.models.jobs import CARGO_CATALOG, Job
@@ -114,14 +161,56 @@ def test_driving_state_uses_selected_drive_music(monkeypatch):
         route = app.ctx.world.route_from_cities(["Denver", "Salt Lake City"])
         driving = DrivingState(app.ctx, job, route, trip_seed=12345, start_hour=14.0)
         app.push_state(driving)
-        assert played[-1] == driving._day_music_track
+        assert played[-1] == driving._day_music_sequence[0]
         assert played[-1] in {track.key for track in DAY_DRIVE_TRACKS}
 
         played.clear()
         driving.trip.restore(driving.trip.position_mi, 9.0 * 60.0)
         driving._update_audio()
-        assert played[-1] == driving._night_music_track
+        assert played[-1] == driving._night_music_sequence[0]
         assert played[-1] in {track.key for track in NIGHT_DRIVE_TRACKS}
+    finally:
+        app.shutdown()
+
+
+def test_night_driving_advances_through_music_pool(monkeypatch):
+    from freight_fate.app import App
+    from freight_fate.models.jobs import CARGO_CATALOG, Job
+    from freight_fate.models.profile import Profile
+    from freight_fate.music import music_track_duration_s
+    from freight_fate.states.driving import DrivingState
+
+    app = App()
+    played = []
+    monkeypatch.setattr(app.ctx.audio, "play_music",
+                        lambda track, fade_ms=1500: played.append(track))
+    try:
+        app.ctx.profile = Profile(name="Night Music", current_city="Denver")
+        job = Job(
+            CARGO_CATALOG["food"],
+            12,
+            "Denver",
+            "Denver Warehouse",
+            "Salt Lake City",
+            521,
+            4200,
+            16,
+        )
+        route = app.ctx.world.route_from_cities(["Denver", "Salt Lake City"])
+        driving = DrivingState(app.ctx, job, route, trip_seed=54321, start_hour=23.0)
+        app.push_state(driving)
+        first = played[-1]
+        duration = music_track_duration_s(first)
+
+        driving._update_audio(duration + 0.1)
+        second = played[-1]
+        driving._update_audio(music_track_duration_s(second) + 0.1)
+        third = played[-1]
+
+        assert first in {track.key for track in NIGHT_DRIVE_TRACKS}
+        assert second in {track.key for track in NIGHT_DRIVE_TRACKS}
+        assert third in {track.key for track in NIGHT_DRIVE_TRACKS}
+        assert len({first, second, third}) >= 3
     finally:
         app.shutdown()
 
@@ -132,3 +221,15 @@ def test_all_cataloged_music_tracks_exist():
         if not (ASSETS / "music" / f"{track.key}.ogg").exists()
     ]
     assert not missing
+
+
+def test_new_generated_music_tracks_are_at_least_one_minute():
+    import soundfile as sf
+
+    too_short = []
+    for track in GENERATED_MUSIC_TRACKS:
+        info = sf.info(str(ASSETS / "music" / f"{track.key}.ogg"))
+        duration = info.frames / info.samplerate
+        if duration < 60.0:
+            too_short.append((track.key, duration))
+    assert not too_short

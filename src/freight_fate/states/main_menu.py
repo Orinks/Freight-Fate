@@ -10,7 +10,7 @@ import pygame
 from .. import __version__, updater
 from ..achievements import ACHIEVEMENTS, earned_ids
 from ..models.profile import DEFAULT_CITY, Profile, ProfileIntegrityError
-from ..music import select_menu_music
+from ..music import select_menu_music_sequence
 from ..settings import TIME_SCALES
 from ..sim.hos import HOS_MODES
 from .base import MenuItem, MenuState, State
@@ -128,7 +128,8 @@ class MainMenuState(MenuState):
         if profile is None:
             saves = _loadable_saves()
             profile = saves[0][1] if saves else None
-        self.ctx.audio.play_music(select_menu_music(profile))
+        sequence = select_menu_music_sequence(profile)
+        self.ctx.audio.play_music(self.ctx.next_music_track("menu", sequence))
         cls = MainMenuState
         if updater.is_frozen() and cls._update_checker is None:
             cls._update_checker = UpdateChecker(self.ctx.settings)

@@ -20,7 +20,7 @@ from ..models.settlement import (
     charge_summary,
     charge_total,
 )
-from ..music import select_drive_music
+from ..music import music_track_duration_s, select_drive_music_sequence
 from ..sim import hos
 from ..sim.hos import HosClock, clock_text, is_night, time_of_day
 from ..sim.transmission import REVERSE
@@ -125,10 +125,14 @@ class DrivingState(State):
         self.trip = Trip(route, self.truck, self.weather,
                          time_scale=ctx.settings.time_scale, seed=self.trip_seed,
                          start_hour=trip_start_hour)
-        self._day_music_track = select_drive_music(
+        self._day_music_sequence = select_drive_music_sequence(
             self.route, self.trip_seed, 12.0, self.weather.current)
-        self._night_music_track = select_drive_music(
+        self._night_music_sequence = select_drive_music_sequence(
             self.route, self.trip_seed, 0.0, self.weather.current)
+        self._day_music_index = 0
+        self._night_music_index = 0
+        self._music_elapsed_s = 0.0
+        self._music_night = is_night(trip_start_hour)
         self.tutorial = Tutorial(ctx) if not profile.tutorial_done else None
 
         self.hos = profile.hos          # shift clock lives on the profile
@@ -249,7 +253,7 @@ class DrivingState(State):
 
     def enter(self) -> None:
         self.ctx.audio.stop_music(800)
-        self.ctx.audio.play_music(self._current_music_track(), fade_ms=2500)
+        self._play_current_music(fade_ms=2500)
         self.ctx.audio.set_weather(self.weather.effects.sound)
         self.ctx.audio.set_wind(self.weather.effects.wind)
         mode = "automatic" if self.truck.transmission.automatic else "manual"
@@ -735,7 +739,7 @@ class DrivingState(State):
         self._update_exit(self.trip.position_mi - pos_before)
 
         self._update_hours_and_fatigue(dt)
-        self._update_audio()
+        self._update_audio(dt)
         self._update_announcements(dt)
         self._update_hazard(dt)
         self._update_speeding(dt)
@@ -878,7 +882,7 @@ class DrivingState(State):
                 else:
                     self.ctx.audio.play("driver/yawn", volume=0.8)
 
-    def _update_audio(self) -> None:
+    def _update_audio(self, dt: float = 0.0) -> None:
         t = self.truck
         audio = self.ctx.audio
         if t.engine_on and not audio.engine_running:
@@ -888,18 +892,44 @@ class DrivingState(State):
         eff = self.weather.effects
         audio.set_weather(eff.sound)
         audio.set_wind(eff.wind)
-        if is_night(self.trip.current_hour):
+        night = is_night(self.trip.current_hour)
+        if night:
             audio.set_ambient("ambient/night", volume=0.3)
         else:
             audio.set_ambient(None)
-        audio.play_music(self._current_music_track(), fade_ms=4000)
+        self._update_music_rotation(night, dt)
         if self.weather.should_thunder():
             audio.play("weather/thunder", volume=0.9)
 
     def _current_music_track(self) -> str:
-        if is_night(self.trip.current_hour):
-            return self._night_music_track
-        return self._day_music_track
+        if self._music_night:
+            return self._night_music_sequence[self._night_music_index]
+        return self._day_music_sequence[self._day_music_index]
+
+    def _play_current_music(self, fade_ms: int = 4000) -> None:
+        self.ctx.audio.play_music(self._current_music_track(), fade_ms=fade_ms)
+
+    def _update_music_rotation(self, night: bool, dt: float) -> None:
+        if night != self._music_night:
+            self._music_night = night
+            self._music_elapsed_s = 0.0
+            self._play_current_music(fade_ms=4000)
+            return
+        self._music_elapsed_s += max(0.0, dt)
+        current = self._current_music_track()
+        if self._music_elapsed_s < music_track_duration_s(current):
+            self._play_current_music(fade_ms=4000)
+            return
+        self._music_elapsed_s = 0.0
+        if night:
+            self._night_music_index = (
+                self._night_music_index + 1
+            ) % len(self._night_music_sequence)
+        else:
+            self._day_music_index = (
+                self._day_music_index + 1
+            ) % len(self._day_music_sequence)
+        self._play_current_music(fade_ms=4000)
 
     def _sync_weather_source(self) -> None:
         real = self.ctx.settings.real_weather
