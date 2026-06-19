@@ -8,6 +8,7 @@ from freight_fate.audio import (
     ENGINE_RPM_IDLE,
     ENGINE_RPM_MAX,
     AudioEngine,
+    _asset_path,
     engine_freq_mult,
 )
 
@@ -70,6 +71,11 @@ def test_engine_freq_mult_mapping():
     assert abs(mid - (1.0 + ENGINE_FREQ_MAX_MULT) / 2) < 1e-9
 
 
+def test_sound_lookup_prefers_ogg_when_available():
+    assert _asset_path("weather/rain_light", ("ogg", "wav")).name == "rain_light.ogg"
+    assert _asset_path("weather/snow_wind", ("ogg", "wav")).name == "snow_wind.ogg"
+
+
 def test_bass_engine_uses_single_pitched_loop(monkeypatch):
     monkeypatch.delenv("FREIGHT_FATE_AUDIO_BACKEND", raising=False)
     a = AudioEngine()
@@ -86,6 +92,19 @@ def test_bass_engine_uses_single_pitched_loop(monkeypatch):
     a.engine_stop()
     assert not a.engine_running
     assert impl._engine_stream is None
+    a.shutdown()
+
+
+def test_road_noise_loop_tracks_speed(monkeypatch):
+    monkeypatch.delenv("FREIGHT_FATE_AUDIO_BACKEND", raising=False)
+    a = AudioEngine()
+    if a.backend_name != "bass":
+        pytest.skip("BASS backend unavailable")
+    a.set_road_noise(30.0)
+    assert audio.CH_ROAD in a._impl._loops
+    assert a._impl._loops[audio.CH_ROAD][0] == "vehicle/road"
+    a.set_road_noise(0.0)
+    assert audio.CH_ROAD not in a._impl._loops
     a.shutdown()
 
 

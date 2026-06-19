@@ -60,6 +60,37 @@ DRIVE_PHASE_PICKUP = "pickup"
 DRIVE_PHASE_DELIVERY = "delivery"
 
 
+def _route_event_sound(event) -> str | None:
+    kind = event.kind
+    if kind == TripEventKind.HAZARD:
+        return "events/hazard_warning"
+    if kind == TripEventKind.INSPECTION:
+        return "events/inspection_warning"
+    if kind == TripEventKind.TOLL_CHARGED:
+        return "events/toll_charged"
+    if kind in {TripEventKind.STATE_CROSSING, TripEventKind.CHECKPOINT}:
+        return "events/state_crossing"
+    if kind == TripEventKind.ZONE_ENTER:
+        zone = event.data.get("zone")
+        if zone is not None and zone.reason == "construction":
+            return "events/construction_zone"
+        return "events/traffic_slowing"
+    if kind == TripEventKind.GPS_CUE:
+        cue = event.data.get("cue")
+        cue_kind = getattr(cue, "kind", None)
+        if cue_kind == "traffic":
+            return "events/traffic_slowing"
+        if cue_kind == "toll":
+            return "events/toll_charged"
+    return None
+
+
+def _poi_ambient_key(stop) -> str:
+    if stop.type == "weigh_station":
+        return "poi/weigh_station_lane"
+    return "poi/rest_stop_night"
+
+
 def _speeding_settlement_fine(strikes: int) -> float:
     return min(400.0, 80.0 * strikes) if strikes else 0.0
 
@@ -911,12 +942,13 @@ class DrivingState(State):
 
     def _handle_trip_event(self, event) -> None:
         kind = event.kind
+        sound = _route_event_sound(event)
         if kind == TripEventKind.HAZARD:
             if self._ramp_mi is not None:
                 return   # off the highway: the hazard passes you by
             if self._cruise_mph is not None:
                 self._cancel_cruise()   # hands back on the wheel to brake
-            self.ctx.audio.play("ui/warning")
+            self.ctx.audio.play(sound or "ui/warning")
             # The deadline is braking physics plus reaction slack. The physics
             # part is whatever full service brakes need from the current speed
             # on this surface; the rolled window covers hearing the warning and
@@ -932,16 +964,18 @@ class DrivingState(State):
         elif kind == TripEventKind.WEATHER_CHANGE:
             self.ctx.say_event(event.message, interrupt=False)
         elif kind == TripEventKind.TOLL_CHARGED:
-            self.ctx.audio.play("ui/notify", volume=0.55)
+            self.ctx.audio.play(sound or "ui/notify", volume=0.55)
             self.ctx.say_event(event.message, interrupt=False)
         elif kind == TripEventKind.ARRIVED:
             pass  # handled by _arrive()
         elif self._event_disables_cruise(event):
             self._cancel_cruise_for_restricted_area(event.message)
         else:
+            if sound is not None and kind != TripEventKind.ZONE_ENTER:
+                self.ctx.audio.play(sound, volume=0.65)
             self.ctx.say_event(event.message, interrupt=False)
         if kind == TripEventKind.ZONE_ENTER:
-            self.ctx.audio.play("ui/notify", volume=0.7)
+            self.ctx.audio.play(sound or "ui/notify", volume=0.7)
 
     def _event_disables_cruise(self, event) -> bool:
         if self._cruise_mph is None:
@@ -1492,6 +1526,7 @@ class RestStopState(MenuState):
         return self.stop.spoken_name
 
     def announce_entry(self) -> None:
+        self.ctx.audio.set_ambient(_poi_ambient_key(self.stop), volume=0.35)
         self.ctx.say(f"{self.stop.spoken_name}. "
                      f"{self.stop.parking_text}. "
                      f"It is {clock_text(self.driving.trip.current_hour)}. "
@@ -1706,6 +1741,7 @@ class ParkingFullState(MenuState):
         self.stop = stop
 
     def announce_entry(self) -> None:
+        self.ctx.audio.set_ambient("poi/rest_stop_night", volume=0.35)
         self.ctx.say(f"The truck parking at {self.stop.spoken_name} is full tonight. "
                      f"It is {clock_text(self.driving.trip.current_hour)}. "
                      f"{self.current_text()}")
@@ -1943,7 +1979,7 @@ class FacilityArrivalState(MenuState):
         return self.driving._destination_facility_text()
 
     def announce_entry(self) -> None:
-        self.ctx.audio.set_ambient("ambient/warehouse", volume=0.3)
+        self.ctx.audio.set_ambient("poi/facility_gate", volume=0.35)
         self.ctx.say(
             f"Arrived at {self.facility}. You are parked at the gate. "
             f"{self.current_text()}")
@@ -1972,6 +2008,7 @@ class FacilityArrivalState(MenuState):
         d.truck.brake = 1.0
         d.truck.set_parking_brake()
         d._set_status("Docked. Delivery paperwork signed.")
+        self.ctx.audio.play("poi/dock_and_deliver", volume=0.75)
         self.ctx.say(
             f"Docked at {self.facility}. Trailer secured and paperwork signed.",
             interrupt=True)

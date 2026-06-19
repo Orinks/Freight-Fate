@@ -57,6 +57,14 @@ ENGINE_SLIDE_MS = 120
 BASS_NO_SOUND_DEVICE = 0
 
 
+def _asset_path(key: str, extensions: tuple[str, ...]) -> Path | None:
+    for ext in extensions:
+        path = ASSETS / f"{key}.{ext}"
+        if path.exists():
+            return path
+    return None
+
+
 def engine_freq_mult(rpm: float) -> float:
     """Playback-frequency multiplier for the BASS engine loop at ``rpm``.
 
@@ -99,7 +107,10 @@ class _PygameBackend:
             return None
         snd = self._cache.get(key)
         if snd is None:
-            path = ASSETS / (key + ".wav")
+            path = _asset_path(key, ("ogg", "wav"))
+            if path is None:
+                log.warning("Missing or unreadable sound: %s", ASSETS / f"{key}.ogg")
+                return None
             try:
                 snd = pygame.mixer.Sound(str(path))
             except (pygame.error, FileNotFoundError):
@@ -304,9 +315,9 @@ class _BassBackend:
         return stream
 
     def _sfx_stream(self, key: str, looping: bool = False):
-        path = ASSETS / (key + ".wav")
-        if not path.exists():
-            log.warning("Missing sound: %s", path)
+        path = _asset_path(key, ("ogg", "wav"))
+        if path is None:
+            log.warning("Missing sound: %s", ASSETS / (key + ".ogg"))
             return None
         return self._stream(path, looping)
 

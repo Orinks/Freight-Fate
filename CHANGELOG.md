@@ -3,6 +3,13 @@
 ## Unreleased
 
 ### Added
+- **Contextual route and weather audio.** Driving now uses in-cab rain, snow,
+  wind, fog horn, and thunder cues plus short route-event sounds for hazards,
+  construction zones, inspections, tolls, state crossings, rest stops, weigh
+  stations, facility gates, and docking. The road bed is back in the mix so
+  the cab does not feel dry while moving. The experimental vehicle engine sound
+  redesign is not included yet because playtesting exposed issues that need a
+  separate pass.
 - **Route rest, toll, and settlement realism.** Route planning now uses richer
   checked-in stop coverage, supports shoulder-sleep edge cases, accounts for
   toll and settlement details more explicitly, and keeps those systems covered

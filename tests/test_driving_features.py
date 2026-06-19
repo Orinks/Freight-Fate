@@ -54,6 +54,27 @@ def quiet_trip(driving):
     driving.trip.traffic_leads = []
 
 
+def test_trip_event_sounds_use_contextual_cues():
+    from freight_fate.sim.trip import TripEvent, TripEventKind, Zone
+    from freight_fate.states.driving import _route_event_sound
+
+    assert _route_event_sound(TripEvent(TripEventKind.HAZARD, "Brake now!")) == (
+        "events/hazard_warning"
+    )
+    assert _route_event_sound(TripEvent(TripEventKind.TOLL_CHARGED, "Toll")) == (
+        "events/toll_charged"
+    )
+    assert _route_event_sound(TripEvent(TripEventKind.STATE_CROSSING, "Crossing")) == (
+        "events/state_crossing"
+    )
+    event = TripEvent(
+        TripEventKind.ZONE_ENTER,
+        "construction ahead",
+        {"zone": Zone(1.0, 2.0, 45.0, "construction")},
+    )
+    assert _route_event_sound(event) == "events/construction_zone"
+
+
 def test_driving_f1_describes_safe_shutdown_and_destination_parking(monkeypatch):
     from freight_fate.app import App
 

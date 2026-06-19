@@ -174,12 +174,15 @@ def test_all_referenced_assets_exist():
 
     src = Path(__file__).parents[1] / "src" / "freight_fate"
     pattern = re.compile(
-        r"""["']((?:ui|engine|vehicle|weather|ambient|driver)/[a-z_]+)["']""")
+        r"""["']((?:ui|engine|vehicle|weather|ambient|driver|events|poi)/[a-z_]+)["']""")
     keys: set[str] = set()
     for py in src.rglob("*.py"):
         keys |= set(pattern.findall(py.read_text(encoding="utf-8")))
     assert keys, "expected to find sound keys in source"
-    missing = [k for k in keys if not (ASSETS / f"{k}.wav").exists()]
+    missing = [
+        k for k in keys
+        if not ((ASSETS / f"{k}.wav").exists() or (ASSETS / f"{k}.ogg").exists())
+    ]
     assert not missing, f"missing sound files: {missing}"
 
 
