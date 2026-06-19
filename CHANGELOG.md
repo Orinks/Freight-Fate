@@ -73,7 +73,7 @@
   through grades.
   K again, any braking, the emergency brake, a stall, or taking an exit
   cancels it — and a hazard warning hands control straight back to you.
-  Space reports the set speed.
+  Space reports speed.
 - **Region-flavored road hazards.** The hazard pool now mixes nationwide
   staples with local flavor for the region you are driving through: dust
   devils and tumbleweeds in the Southwest, deer and farm equipment in
