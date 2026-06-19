@@ -12,7 +12,7 @@
   the cab does not feel dry while moving. The experimental vehicle engine sound
   redesign is still being tuned and is not part of this release.
 - **Route rest, toll, and settlement realism.** Route planning now uses richer
-  stop coverage, handles shoulder-sleep edge cases more cleanly, and accounts
+  truck-stop data, handles shoulder-sleep edge cases more cleanly, and accounts
   for toll and settlement details more explicitly.
 - **Air-brake startup and reservoir behavior.** Trucks now build air
   pressure before departure, keep spring brakes engaged until the system is
@@ -20,10 +20,10 @@
   braking feels more like a heavy truck without stranding new careers.
 - **Driving status menu.** Pressing Tab while driving now opens a spoken status
   menu with load, trip, truck, route, and route-stop details from the road.
-- **Better route-stop coverage.** Dispatch-supported freight now
+- **Better route stops.** Dispatch-supported freight now
   relies on curated truck-relevant route stops only: placeholder midpoint
   POIs no longer count as real route support, long-haul lanes must include
-  explicit fuel-capable stop coverage, and route summaries/GPS stop details
+  explicit fuel-capable stops, and route summaries/GPS stop details
   now give clearer parking certainty.
 - **Auto-updater.** The packaged game now checks GitHub for new releases
   when you reach the main menu. When one is found, a fully spoken prompt
@@ -33,7 +33,7 @@
   Settings entry, "Update channel", picks between stable releases and preview
   builds, and "Check for updates" checks immediately.
 - **Real pickup and loading flow.** Job offers now name the origin
-  facility as an actual stop in the workflow instead of flavor text. After
+  facility as an actual stop on the trip instead of flavor text. After
   accepting a load, you check in at the listed facility, load only while
   stopped, then plan the loaded trip to the destination.
 - **Company terminal dispatch flow.** New careers and continued drives now
