@@ -13,17 +13,17 @@ Procedurally generated assets are dedicated to the public domain under
 generated assets are original project assets subject to the applicable
 ElevenLabs terms for the generating account.
 
-The donated truck interior recordings contributed to the project are used for
-selected vehicle cues.
+The donated truck interior recordings contributed by
+[Darren Duff](https://darrenduff.com/) are used for selected vehicle cues.
 
 ## Vehicle Recordings
 
 | Sound | File | Description |
 | --- | --- | --- |
-| Truck idle, interior | `engine/idle.ogg` | Donated in-cab idle loop |
-| Truck start, interior | `engine/start.ogg` | Donated in-cab engine-start cue |
-| Truck shutdown, interior | `engine/shutdown.ogg` | Donated in-cab shutdown cue |
-| Truck horn, interior | `vehicle/horn.ogg` | Donated in-cab horn cue, trimmed from Take 4 |
+| Truck idle, interior | `engine/idle.ogg` | Darren Duff in-cab idle loop |
+| Truck start, interior | `engine/start.ogg` | Darren Duff in-cab engine-start cue |
+| Truck shutdown, interior | `engine/shutdown.ogg` | Darren Duff in-cab shutdown cue |
+| Truck horn, interior | `vehicle/horn.ogg` | Darren Duff in-cab horn cue, trimmed from Take 4 |
 | Highway road bed | `vehicle/road.ogg` | ElevenLabs-generated in-cab road ambience |
 
 ## Weather
