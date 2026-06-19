@@ -2301,8 +2301,6 @@ class ArrivalState(MenuState):
 
     def enter(self) -> None:
         self.ctx.audio.stop_world()
-        sequence = select_menu_music_sequence(self.ctx.profile)
-        self.ctx.audio.play_music(self.ctx.next_music_track("menu", sequence))
         self.ctx.audio.play("ui/job_complete")
         if self._announcements or self._achievement_messages:
             self.ctx.audio.play("ui/level_up")

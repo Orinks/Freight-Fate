@@ -208,27 +208,29 @@ def test_destination_facility_uses_music_pool_and_keeps_facility_ambience(monkey
         app.shutdown()
 
 
-def test_delivery_complete_uses_music_pool(monkeypatch):
+def test_delivery_complete_keeps_current_music(monkeypatch):
     from freight_fate.app import App
     from freight_fate.models.profile import Profile
     from freight_fate.states.driving import ArrivalState, DrivingState
 
     app = App()
     played = []
+    cues = []
     monkeypatch.setattr(app.ctx.audio, "play_music",
                         lambda track, fade_ms=1500: played.append(track))
+    monkeypatch.setattr(app.ctx.audio, "play",
+                        lambda key, **_kwargs: cues.append(key))
     try:
         app.ctx.profile = Profile(name="Arrival Pool", current_city="Denver")
         app.ctx.profile.career.total_miles = 10_000
         job = _denver_to_salt_lake_job()
         route = app.ctx.world.route_from_cities(["Denver", "Salt Lake City"])
-        first = DrivingState(app.ctx, job, route, trip_seed=12345, start_hour=14.0)
-        second = DrivingState(app.ctx, job, route, trip_seed=12346, start_hour=14.0)
-        ArrivalState(app.ctx, first).enter()
-        ArrivalState(app.ctx, second).enter()
+        driving = DrivingState(app.ctx, job, route, trip_seed=12345, start_hour=14.0)
+        ArrivalState(app.ctx, driving).enter()
 
-        assert len(set(played)) > 1
-        assert played[0] != played[1]
+        assert played == []
+        assert "ui/job_complete" in cues
+        assert "ui/cash" in cues
     finally:
         app.shutdown()
 
