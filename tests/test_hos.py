@@ -400,6 +400,18 @@ def park_at_first_stop(driving):
     return stop
 
 
+def park_away_from_stops(driving, *, after_stop) -> None:
+    position = after_stop.at_mi + 2.0
+    while position < driving.trip.total_miles - 1.0:
+        driving.trip.position_mi = position
+        nearby = driving.trip.nearest_stop_within() is not None
+        sleep_ahead = driving._upcoming_stop_with_action("sleep", 30.0) is not None
+        if not nearby and not sleep_ahead:
+            return
+        position += 5.0
+    raise AssertionError("route has no shoulder-sleep test position away from stops")
+
+
 @pytest.mark.smoke
 def test_fatigued_driver_gets_a_shorter_hazard_window():
     from freight_fate.app import App
@@ -557,7 +569,7 @@ def test_hos_off_still_allows_fatigue_emergency_shoulder_sleep(monkeypatch):
         driving = start_drive(app)
         stop = park_at_first_stop(driving)
 
-        driving.trip.position_mi = stop.at_mi + 2.0
+        park_away_from_stops(driving, after_stop=stop)
         driving.truck.velocity_mps = 0.0
         app.ctx.profile.fatigue = 20.0
         assert driving.emergency_shoulder_sleep_reason() is None
