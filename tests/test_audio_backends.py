@@ -78,13 +78,13 @@ def test_sound_lookup_prefers_ogg_when_available():
     assert _asset_path("vehicle/road", ("ogg", "wav")).name == "road.ogg"
 
 
-def test_engine_trial_recordings_prefer_ogg_over_generated_wav():
+def test_engine_recordings_prefer_ogg_over_generated_wav():
     assert _asset_path("engine/idle", ("ogg", "wav")).name == "idle.ogg"
     assert _asset_path("engine/start", ("ogg", "wav")).name == "start.ogg"
     assert _asset_path("engine/shutdown", ("ogg", "wav")).name == "shutdown.ogg"
 
 
-def test_engine_start_trial_recording_is_short_one_shot():
+def test_engine_start_recording_is_short_one_shot():
     import soundfile as sf
 
     info = sf.info(str(_asset_path("engine/start", ("ogg", "wav"))))

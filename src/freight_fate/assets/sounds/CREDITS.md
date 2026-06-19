@@ -13,19 +13,18 @@ Procedurally generated assets are dedicated to the public domain under
 generated assets are original project assets subject to the applicable
 ElevenLabs terms for the generating account.
 
-The trial truck engine interior recordings were contributed to the project
-for evaluation and are currently used as candidate replacement vehicle sounds
-on the sound-trial branch.
+The donated truck interior recordings contributed to the project are used for
+selected vehicle cues.
 
-## Donated Trial Recordings
+## Vehicle Recordings
 
 | Sound | File | Description |
 | --- | --- | --- |
-| Truck idle, interior | `engine/idle.ogg` | Donated in-cab idle loop candidate |
-| Truck start, interior | `engine/start.ogg` | Donated in-cab engine-start candidate |
-| Truck shutdown, interior | `engine/shutdown.ogg` | Donated in-cab shutdown candidate |
-| Truck horn, interior | `vehicle/horn.ogg` | Donated in-cab horn candidate, trimmed from Take 4 |
-| Highway road bed | `vehicle/road.ogg` | ElevenLabs-generated in-cab road ambience candidate |
+| Truck idle, interior | `engine/idle.ogg` | Donated in-cab idle loop |
+| Truck start, interior | `engine/start.ogg` | Donated in-cab engine-start cue |
+| Truck shutdown, interior | `engine/shutdown.ogg` | Donated in-cab shutdown cue |
+| Truck horn, interior | `vehicle/horn.ogg` | Donated in-cab horn cue, trimmed from Take 4 |
+| Highway road bed | `vehicle/road.ogg` | ElevenLabs-generated in-cab road ambience |
 
 ## Weather
 
