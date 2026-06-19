@@ -174,7 +174,7 @@ def test_all_referenced_assets_exist():
 
     src = Path(__file__).parents[1] / "src" / "freight_fate"
     pattern = re.compile(
-        r"""["']((?:ui|engine|vehicle|weather|ambient|driver|events|poi)/[a-z_]+)["']""")
+        r"""["']((?:ui|engine|vehicle|weather|ambient|driver|events|facility|poi)/[a-z_]+)["']""")
     keys: set[str] = set()
     for py in src.rglob("*.py"):
         keys |= set(pattern.findall(py.read_text(encoding="utf-8")))

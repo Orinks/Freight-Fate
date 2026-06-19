@@ -121,8 +121,11 @@ def test_pickup_facility_waits_for_full_stop(monkeypatch):
 
     app = App()
     events = []
+    played = []
     monkeypatch.setattr(app.ctx, "say_event",
                         lambda text, interrupt=True: events.append(text))
+    monkeypatch.setattr(app.ctx.audio, "play",
+                        lambda key, volume=1.0: played.append((key, volume)))
     try:
         driving = accept_pickup_drive(app)
 
@@ -139,7 +142,26 @@ def test_pickup_facility_waits_for_full_stop(monkeypatch):
         driving.truck.velocity_mps = 0.0
         driving.update(1 / 60)
         assert isinstance(app.state, PickupFacilityState)
+        assert played[-1][0] == "facility/dock_gate"
         assert app.state.items[app.state.index].text == "Check in at shipping office"
+    finally:
+        app.shutdown()
+
+
+def test_loading_at_pickup_uses_dock_sound(monkeypatch):
+    from freight_fate.app import App
+
+    app = App()
+    played = []
+    monkeypatch.setattr(app.ctx.audio, "play",
+                        lambda key, volume=1.0: played.append((key, volume)))
+    try:
+        accept_pickup_drive(app)
+        pickup = arrive_at_pickup(app)
+        pickup.handle_event(key_event(pygame.K_RETURN))  # check in
+        pickup.handle_event(key_event(pygame.K_RETURN))  # load cargo
+
+        assert played[-1] == ("poi/dock_and_deliver", 0.75)
     finally:
         app.shutdown()
 

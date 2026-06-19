@@ -540,6 +540,7 @@ class JobBoardState(MenuState):
 
 class PickupFacilityState(MenuState):
     title = "Pickup facility"
+    open_sound_key = "facility/dock_gate"
     intro_help = ("Use up and down arrows to navigate, Enter to select. "
                   "Check in at the origin facility, then load cargo only after "
                   "the truck is fully stopped. Escape repeats the pickup status.")
@@ -575,7 +576,7 @@ class PickupFacilityState(MenuState):
         return self.job.origin_facility_text()
 
     def announce_entry(self) -> None:
-        self.ctx.audio.set_ambient("ambient/warehouse", volume=0.3)
+        self.ctx.audio.set_ambient("poi/facility_gate", volume=0.35)
         if self.loaded:
             lead = (f"Loaded at {self.facility}. The trailer is sealed for "
                     f"{self.job.destination}.")
@@ -659,7 +660,7 @@ class PickupFacilityState(MenuState):
         self.loaded = True
         self._save_state()
         self.refresh(keep_index=False)
-        self.ctx.audio.play("ui/notify")
+        self.ctx.audio.play("poi/dock_and_deliver", volume=0.75)
         self.ctx.say(
             f"Loaded and sealed at {self.facility}. "
             f"{self.job.weight_tons:.0f} tons of {self.job.cargo.label} are "

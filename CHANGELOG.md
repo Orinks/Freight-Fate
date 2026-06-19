@@ -26,6 +26,10 @@
   is shorter and more direct, with the spoken tests updated around the simpler
   wording.
 
+### Fixed
+- **Pickup facility sounds.** Pickup gates and loading now use the new facility
+  ambience and dock cues instead of the older generic menu notification sounds.
+
 ## 1.6.0 - 2026-06-15
 
 ### Added
