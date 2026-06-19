@@ -74,6 +74,7 @@ def test_engine_freq_mult_mapping():
 def test_sound_lookup_prefers_ogg_when_available():
     assert _asset_path("weather/rain_light", ("ogg", "wav")).name == "rain_light.ogg"
     assert _asset_path("weather/snow_wind", ("ogg", "wav")).name == "snow_wind.ogg"
+    assert _asset_path("vehicle/road", ("ogg", "wav")).name == "road.ogg"
 
 
 def test_engine_trial_recordings_prefer_ogg_over_generated_wav():
