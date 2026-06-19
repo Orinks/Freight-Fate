@@ -91,7 +91,7 @@ class CityMenuState(MenuState):
 
     def enter(self) -> None:
         self.ctx.audio.play_music("menu_theme")
-        self.ctx.audio.set_ambient("ambient/truck_stop", volume=0.35)
+        self.ctx.audio.set_ambient("poi/facility_gate", volume=0.35)
         super().enter()
 
     def exit(self) -> None:

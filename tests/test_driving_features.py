@@ -422,6 +422,11 @@ def test_facility_menu_waits_for_full_stop(monkeypatch):
         app.state.handle_event(key_event(pygame.K_RETURN))
         assert not isinstance(app.state, FacilityArrivalState)
         assert app.ctx.profile.career.deliveries == 1
+        played_keys = [key for key, _volume in played]
+        assert "poi/dock_and_deliver" in played_keys
+        assert "ui/job_complete" in played_keys
+        assert "ui/cash" in played_keys
+        assert "ui/menu_open" not in played_keys
     finally:
         app.shutdown()
 

@@ -792,6 +792,7 @@ class SettingsState(MenuState):
     def _volume(self, attr: str, delta: float) -> None:
         value = getattr(self.ctx.settings, attr)
         setattr(self.ctx.settings, attr, max(0.0, min(1.0, round(value + delta, 2))))
+        self.ctx.settings.save()
         self.ctx.apply_volumes()
         self._announce()
 

@@ -46,11 +46,14 @@ def test_picking_a_city_sets_the_profile_start_city():
     from freight_fate.states.city import CityMenuState
 
     app = App()
+    ambient = []
+    app.ctx.audio.set_ambient = lambda key, volume=0.7: ambient.append((key, volume))
     try:
         picker = open_picker(app, name="Southerner")
         # first-letter navigation, like every other menu
         while not picker.items[picker.index].text.startswith("Atlanta"):
             picker.handle_event(key_event(ord("a"), "a"))
+        ambient.clear()
         picker.handle_event(key_event(pygame.K_RETURN))
         assert isinstance(app.state, CityMenuState)
         p = app.ctx.profile
@@ -58,6 +61,7 @@ def test_picking_a_city_sets_the_profile_start_city():
         assert p.current_city == "Atlanta"
         assert app.state.title == "Atlanta Company Yard"
         assert app.state.items[app.state.index].text == "Dispatch board"
+        assert ("poi/facility_gate", 0.35) in ambient
         # the choice is already persisted to disk
         assert Profile.load(p.path).current_city == "Atlanta"
     finally:

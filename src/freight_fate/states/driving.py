@@ -2145,7 +2145,9 @@ class ArrivalState(MenuState):
         if self._announcements:
             self.ctx.audio.play("ui/level_up")
         self.ctx.audio.play("ui/cash")
-        super().enter()
+        self.items = self.build_items()
+        self.index = min(self.index, max(0, len(self.items) - 1))
+        self.announce_entry()
 
     def announce_entry(self) -> None:
         self.ctx.say(" ".join(self.summary_parts) +
