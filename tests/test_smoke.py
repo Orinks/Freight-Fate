@@ -89,13 +89,20 @@ def test_full_game_flow_headless(monkeypatch):
         assert app.ctx.profile.name == "Smoke"
         assert app.ctx.profile.current_city == "Chicago"
 
-        # open dispatch board, accept the first job we hold the endorsement for
-        # (the board may show one locked "teaser" job, sometimes sorted first)
+        # Open dispatch board and accept a short unlocked job so the bounded
+        # smoke run can finish while still driving below enforcement speeds.
         app.state.handle_event(key_event(pygame.K_RETURN))
         assert isinstance(app.state, JobBoardState)
         assert app.state.jobs
         board = app.state
-        while board.jobs[board.index].cargo.endorsement:
+        unlocked = [
+            (i, job)
+            for i, job in enumerate(board.jobs)
+            if not job.locked_reason(app.ctx.profile.career.endorsements, app.ctx.profile.career.level)
+        ]
+        assert unlocked
+        target_index, _job = min(unlocked, key=lambda item: item[1].distance_mi)
+        while board.index != target_index:
             board.handle_event(key_event(pygame.K_DOWN))
         app.state.handle_event(key_event(pygame.K_RETURN))
         assert isinstance(app.state, DrivingState)
@@ -133,8 +140,15 @@ def test_full_game_flow_headless(monkeypatch):
         driving.truck.set_air_ready(parking_brake=False)
         money_before = app.ctx.profile.money
 
-        for _frame in range(60 * 60 * 30):
-            driving.truck.throttle = 0.9
+        for _frame in range(60 * 60 * 40):
+            limit_mph, _reason = driving.trip.speed_limit_at(driving.trip.position_mi)
+            target_mph = max(25.0, limit_mph + 5.0)
+            if driving.truck.speed_mph > target_mph:
+                driving.truck.throttle = 0.0
+                driving.truck.brake = 0.5
+            else:
+                driving.truck.throttle = 0.8
+                driving.truck.brake = 0.0
             driving.truck.auto_shift()
             driving.truck.update(1 / 60)
             for event in driving.trip.update(1 / 60):
