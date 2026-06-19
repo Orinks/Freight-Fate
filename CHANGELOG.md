@@ -10,32 +10,28 @@
   construction zones, inspections, tolls, state crossings, rest stops, weigh
   stations, facility gates, and docking. The road bed is back in the mix so
   the cab does not feel dry while moving. The experimental vehicle engine sound
-  redesign is not included yet because playtesting exposed issues that need a
-  separate pass.
+  redesign is still being tuned and is not part of this release.
 - **Route rest, toll, and settlement realism.** Route planning now uses richer
-  checked-in stop coverage, supports shoulder-sleep edge cases, accounts for
-  toll and settlement details more explicitly, and keeps those systems covered
-  by focused route, hours-of-service, weather, world-data, and settlement tests.
+  stop coverage, handles shoulder-sleep edge cases more cleanly, and accounts
+  for toll and settlement details more explicitly.
 - **Air-brake startup and reservoir behavior.** Trucks now build air
   pressure before departure, keep spring brakes engaged until the system is
   ready, and model service and emergency reservoir pressure while driving so
   braking feels more like a heavy truck without stranding new careers.
 - **Driving status menu.** Pressing Tab while driving now opens a spoken status
   menu with load, trip, truck, route, and route-stop details from the road.
-- **Curated route-stop coverage contract.** Dispatch-supported freight now
+- **Better route-stop coverage.** Dispatch-supported freight now
   relies on curated truck-relevant route stops only: placeholder midpoint
   POIs no longer count as real route support, long-haul lanes must include
   explicit fuel-capable stop coverage, and route summaries/GPS stop details
-  expose curated parking certainty from the checked-in offline dataset.
+  now give clearer parking certainty.
 - **Auto-updater.** The packaged game now checks GitHub for new releases
   when you reach the main menu. When one is found, a fully spoken prompt
   offers "Download and restart" (downloads the update, swaps it in, and
   relaunches the game for you), "What's new" (reads the update's changelog
   line by line), "Remind me later", and "Skip this version". A new
-  Settings entry, "Update channel", picks between stable releases and
-  nightly developer snapshots — nightly builds follow the dev channel by
-  default, stable builds follow stable — and "Check for updates" checks
-  immediately. Source checkouts are left alone; git manages those.
+  Settings entry, "Update channel", picks between stable releases and preview
+  builds, and "Check for updates" checks immediately.
 - **Real pickup and loading flow.** Job offers now name the origin
   facility as an actual stop in the workflow instead of flavor text. After
   accepting a load, you check in at the listed facility, load only while
@@ -65,9 +61,8 @@
   it. Pressing T while stopped on the highway at a stop still works.
 - **Explicit highway stop positions.** Route data now stores named highway
   amenities with explicit mile positions instead of spreading rest stops
-  evenly across a leg. The first curated offline seed uses sourced rest
-  areas and travel centers, validates stop positions, and keeps the game
-  playable without live map lookups.
+  evenly across a leg. The first curated offline stop set uses sourced rest
+  areas and travel centers, keeping the game playable without live map lookups.
 - **Reverse gear and missed-stop recovery.** Trucks can now back up.
   Automatic players can hold Down while stopped to reverse slowly, then
   touch Up to brake and return to forward drive; manual players can press
@@ -117,10 +112,9 @@
 ### Fixed
 - **Pickup facility sounds.** Pickup gates and loading now use the new facility
   ambience and dock cues instead of the older generic menu notification sounds.
-- **Developer snapshots recognize release-ready notes.** Scheduled nightly
-  builds now count player-facing entries that have already been curated
-  into the next version block, while still ignoring internal-only changelog
-  buckets unless a commit explicitly asks for a nightly build.
+- **Preview builds stay in sync with release notes.** Preview builds now pick up
+  player-facing changes that have already been prepared for the next stable
+  release, so their "What's new" text no longer falls behind.
 - **Save resume keeps traffic zones stable.** Continuing a saved drive now
   seeds trip weather from the saved trip seed too, so traffic and
   construction-zone layouts regenerate consistently across operating
@@ -196,8 +190,7 @@
 
 ### Changed
 - **How-to-play driving guidance.** The main-menu guidance for driving controls
-  is shorter and more direct, with the spoken tests updated around the simpler
-  wording.
+  is shorter and more direct.
 - **Early career progression and pay.** Low-level jobs now pay enough to
   make early progress feel worthwhile after operating costs, and higher
   levels unlock clearer differences in range, cargo, endorsements, and
@@ -219,9 +212,8 @@
   I-35, Tennessee's Highland Rim on I-40, Wisconsin's driftless coulees
   on I-94, the Carolinas' piedmont, Connecticut on I-95, and the desert
   passes on I-10 (San Gorgonio, Texas Canyon) among others. Genuinely
-  flat country — the high plains, the Gulf coast, Florida, the Illinois
-  prairie — stays flat, and a regression test pins the well-known
-  corridors by name.
+  flat country — the high plains, the Gulf coast, Florida, and the Illinois
+  prairie — stays flat.
 - **Realistic deadlines.** Dispatch can no longer ask for the
   impossible. Deadlines are now built from the hours a law-abiding
   trucker actually needs — driving at an achievable 55 mph average, plus
@@ -229,16 +221,13 @@
   every 11-hour shift the distance demands — with 20 to 50 percent
   shipper slack and a flat hour for fuel on top. San Antonio to Dallas
   now quotes a workable 7-to-8-hour window instead of a sprint.
-- The state trooper / law enforcement system is designed and documented
-  at the top of ROADMAP.md as the next milestone (patrol intensity per
-  corridor, CB chatter warnings, pull-overs reusing the X signal flow,
-  immediate fines, and an enforcement setting).
+- **State trooper groundwork.** The next law-enforcement milestone is outlined:
+  patrol intensity by corridor, CB chatter warnings, pull-overs, immediate
+  fines, and an enforcement setting.
 - **Portable saves.** Profiles and settings now live in a `saves` folder
   inside the game's own directory (next to the executable in release
-  builds, the project root from source) instead of the per-user data
-  directory. Existing saves are migrated over automatically on first
-  launch; the originals are left in place. `FREIGHT_FATE_DATA_DIR`
-  still overrides the location.
+  builds) instead of the per-user data directory. Existing saves are migrated
+  over automatically on first launch; the originals are left in place.
 
 ## 1.5.0 — 2026-06-10
 
