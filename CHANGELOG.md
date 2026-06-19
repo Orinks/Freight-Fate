@@ -18,16 +18,13 @@
   pressure before departure, keep spring brakes engaged until the system is
   ready, and model service and emergency reservoir pressure while driving so
   braking feels more like a heavy truck without stranding new careers.
+- **Driving status menu.** Pressing Tab while driving now opens a spoken status
+  menu with load, trip, truck, route, and route-stop details from the road.
 
 ### Changed
 - **How-to-play driving guidance.** The main-menu guidance for driving controls
   is shorter and more direct, with the spoken tests updated around the simpler
   wording.
-
-### Fixed
-- **Driving status menu access.** Pressing Tab while driving now opens the
-  spoken status menu again, including load, trip, truck, route, and route-stop
-  details from the road.
 
 ## 1.6.0 - 2026-06-15
 
