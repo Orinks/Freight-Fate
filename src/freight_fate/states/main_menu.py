@@ -812,7 +812,8 @@ class SettingsState(MenuState):
                      help="Stable releases are the finished, numbered "
                           "versions. Developer snapshots are nightly builds "
                           "of work in progress: new features sooner, but "
-                          "rough edges."),
+                          "rough edges. A career saved on a snapshot may not "
+                          "load on an older stable release."),
             MenuItem("Check for updates", self._check_updates,
                      help="Look for a new version of the game right now."),
             MenuItem("Back", self.go_back,

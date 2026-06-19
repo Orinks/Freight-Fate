@@ -67,7 +67,8 @@ The easiest way to play is a prebuilt portable build from the
   versions — pick the latest one.
 - **Developer snapshots** (`nightly-...`, marked pre-release) are automatic
   nightly builds of work in progress: new features sooner, rough edges
-  included.
+  included. Heads up: a career saved on a developer snapshot may not load
+  on an older stable release, so treat nightly saves as one-way.
 
 Download the archive for your platform, extract it anywhere, and run the
 game from the extracted `FreightFate` folder — `FreightFate.exe` on
