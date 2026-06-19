@@ -138,7 +138,6 @@ def test_full_game_flow_headless(monkeypatch):
         assert driving.truck.engine_on
         driving.truck.transmission.automatic = True
         driving.truck.set_air_ready(parking_brake=False)
-        money_before = app.ctx.profile.money
 
         for _frame in range(60 * 60 * 40):
             limit_mph, _reason = driving.trip.speed_limit_at(driving.trip.position_mi)
@@ -164,8 +163,8 @@ def test_full_game_flow_headless(monkeypatch):
         assert isinstance(app.state, FacilityArrivalState)
         app.state.handle_event(key_event(pygame.K_RETURN))
         assert isinstance(app.state, ArrivalState)
-        assert app.ctx.profile.money > money_before
         assert app.ctx.profile.career.deliveries == 1
+        assert app.ctx.profile.career.total_earnings > 0
         assert app.ctx.profile.current_city == driving.job.destination
 
         # continue back to the destination terminal hub
