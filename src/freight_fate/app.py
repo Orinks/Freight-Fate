@@ -39,6 +39,8 @@ class GameContext:
         self.economy: Economy = app.economy
         self.profile: Profile | None = None
         self._real_weather = None
+        self._music_pool_positions: dict[tuple[str, tuple[str, ...]], int] = {}
+        self._music_pool_last: dict[str, str] = {}
         self.achievement_notice = ""
         self.achievement_notice_timer = 0.0
 
@@ -94,6 +96,23 @@ class GameContext:
         self.audio.set_volumes(master=self.settings.master_volume,
                                sfx=self.settings.sfx_volume,
                                music=self.settings.music_volume)
+
+    def next_music_track(self, pool_name: str, sequence: tuple[str, ...]) -> str:
+        """Advance a session-local music pool without immediate repeats."""
+        if not sequence:
+            return ""
+        if len(sequence) == 1:
+            track = sequence[0]
+            self._music_pool_last[pool_name] = track
+            return track
+        key = (pool_name, sequence)
+        index = (self._music_pool_positions.get(key, -1) + 1) % len(sequence)
+        if sequence[index] == self._music_pool_last.get(pool_name):
+            index = (index + 1) % len(sequence)
+        self._music_pool_positions[key] = index
+        track = sequence[index]
+        self._music_pool_last[pool_name] = track
+        return track
 
     def award_achievement(
             self,
