@@ -2,10 +2,10 @@ name: Build
 
 on:
   schedule:
-    # Nightly at 00:47 UTC, offset from AccessiWeather (00:17) and
+    # Nightly at 00:30 UTC, offset from AccessiWeather (00:17) and
     # PortkeyDrop (00:27). GitHub Actions schedules are UTC-only and can
-    # queue late, so avoid :00/:30.
-    - cron: "47 0 * * *"
+    # queue late.
+    - cron: "30 0 * * *"
   push:
     tags: ['v*.*.*']
   workflow_dispatch:
