@@ -13,6 +13,18 @@ Procedurally generated assets are dedicated to the public domain under
 generated assets are original project assets subject to the applicable
 ElevenLabs terms for the generating account.
 
+The trial truck engine interior recordings were contributed to the project
+for evaluation and are currently used as candidate replacement vehicle sounds
+on the sound-trial branch.
+
+## Donated Trial Recordings
+
+| Sound | File | Description |
+| --- | --- | --- |
+| Truck idle, interior | `engine/idle.ogg` | Donated in-cab idle loop candidate |
+| Truck start, interior | `engine/start.ogg` | Donated in-cab engine-start candidate |
+| Truck shutdown, interior | `engine/shutdown.ogg` | Donated in-cab shutdown candidate |
+
 ## Weather
 
 | Sound | File | Description |

@@ -76,6 +76,12 @@ def test_sound_lookup_prefers_ogg_when_available():
     assert _asset_path("weather/snow_wind", ("ogg", "wav")).name == "snow_wind.ogg"
 
 
+def test_engine_trial_recordings_prefer_ogg_over_generated_wav():
+    assert _asset_path("engine/idle", ("ogg", "wav")).name == "idle.ogg"
+    assert _asset_path("engine/start", ("ogg", "wav")).name == "start.ogg"
+    assert _asset_path("engine/shutdown", ("ogg", "wav")).name == "shutdown.ogg"
+
+
 def test_bass_engine_uses_single_pitched_loop(monkeypatch):
     monkeypatch.delenv("FREIGHT_FATE_AUDIO_BACKEND", raising=False)
     a = AudioEngine()
