@@ -83,6 +83,14 @@ def test_engine_trial_recordings_prefer_ogg_over_generated_wav():
     assert _asset_path("engine/shutdown", ("ogg", "wav")).name == "shutdown.ogg"
 
 
+def test_engine_start_trial_recording_is_short_one_shot():
+    import soundfile as sf
+
+    info = sf.info(str(_asset_path("engine/start", ("ogg", "wav"))))
+    duration = info.frames / info.samplerate
+    assert duration <= 4.25
+
+
 def test_bass_engine_uses_single_pitched_loop(monkeypatch):
     monkeypatch.delenv("FREIGHT_FATE_AUDIO_BACKEND", raising=False)
     a = AudioEngine()
