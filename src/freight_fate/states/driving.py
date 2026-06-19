@@ -20,7 +20,11 @@ from ..models.settlement import (
     charge_summary,
     charge_total,
 )
-from ..music import music_track_duration_s, select_drive_music_sequence
+from ..music import (
+    music_track_duration_s,
+    select_drive_music_sequence,
+    select_menu_music_sequence,
+)
 from ..sim import hos
 from ..sim.hos import HosClock, clock_text, is_night, time_of_day
 from ..sim.transmission import REVERSE
@@ -2067,6 +2071,11 @@ class FacilityArrivalState(MenuState):
     def facility(self) -> str:
         return self.driving._destination_facility_text()
 
+    def enter(self) -> None:
+        sequence = select_menu_music_sequence(self.ctx.profile)
+        self.ctx.audio.play_music(self.ctx.next_music_track("menu", sequence))
+        super().enter()
+
     def announce_entry(self) -> None:
         self.ctx.audio.set_ambient("poi/facility_gate", volume=0.35)
         self.ctx.say(
@@ -2292,6 +2301,8 @@ class ArrivalState(MenuState):
 
     def enter(self) -> None:
         self.ctx.audio.stop_world()
+        sequence = select_menu_music_sequence(self.ctx.profile)
+        self.ctx.audio.play_music(self.ctx.next_music_track("menu", sequence))
         self.ctx.audio.play("ui/job_complete")
         if self._announcements or self._achievement_messages:
             self.ctx.audio.play("ui/level_up")

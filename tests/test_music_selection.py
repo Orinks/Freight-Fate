@@ -16,6 +16,21 @@ from freight_fate.music import (
 ASSETS = Path(__file__).parents[1] / "src" / "freight_fate" / "assets" / "sounds"
 
 
+def _denver_to_salt_lake_job():
+    from freight_fate.models.jobs import CARGO_CATALOG, Job
+
+    return Job(
+        CARGO_CATALOG["food"],
+        12,
+        "Denver",
+        "Denver Warehouse",
+        "Salt Lake City",
+        521,
+        4200,
+        16,
+    )
+
+
 def test_menu_music_tracks_career_milestones():
     from freight_fate.models.profile import Profile
 
@@ -136,9 +151,90 @@ def test_menu_music_pool_advances_without_immediate_repeat(monkeypatch):
         app.shutdown()
 
 
+def test_pickup_facility_uses_music_pool_and_keeps_facility_ambience(monkeypatch):
+    from freight_fate.app import App
+    from freight_fate.models.profile import Profile
+    from freight_fate.states.city import PickupFacilityState
+
+    app = App()
+    played = []
+    ambient = []
+    monkeypatch.setattr(app.ctx.audio, "play_music",
+                        lambda track, fade_ms=1500: played.append(track))
+    monkeypatch.setattr(app.ctx.audio, "set_ambient",
+                        lambda key, volume=0.7: ambient.append((key, volume)))
+    try:
+        app.ctx.profile = Profile(name="Pickup Pool", current_city="Denver")
+        app.ctx.profile.career.total_miles = 10_000
+        state = PickupFacilityState(app.ctx, _denver_to_salt_lake_job())
+        for _ in range(3):
+            state.enter()
+            state.exit()
+
+        assert len(set(played)) > 1
+        assert all(a != b for a, b in zip(played, played[1:], strict=False))
+        assert ("poi/facility_gate", 0.35) in ambient
+        assert (None, 0.7) in ambient
+    finally:
+        app.shutdown()
+
+
+def test_destination_facility_uses_music_pool_and_keeps_facility_ambience(monkeypatch):
+    from freight_fate.app import App
+    from freight_fate.models.profile import Profile
+    from freight_fate.states.driving import DrivingState, FacilityArrivalState
+
+    app = App()
+    played = []
+    ambient = []
+    monkeypatch.setattr(app.ctx.audio, "play_music",
+                        lambda track, fade_ms=1500: played.append(track))
+    monkeypatch.setattr(app.ctx.audio, "set_ambient",
+                        lambda key, volume=0.7: ambient.append((key, volume)))
+    try:
+        app.ctx.profile = Profile(name="Destination Pool", current_city="Denver")
+        app.ctx.profile.career.total_miles = 10_000
+        job = _denver_to_salt_lake_job()
+        route = app.ctx.world.route_from_cities(["Denver", "Salt Lake City"])
+        driving = DrivingState(app.ctx, job, route, trip_seed=12345, start_hour=14.0)
+        state = FacilityArrivalState(app.ctx, driving)
+        for _ in range(3):
+            state.enter()
+
+        assert len(set(played)) > 1
+        assert all(a != b for a, b in zip(played, played[1:], strict=False))
+        assert ("poi/facility_gate", 0.35) in ambient
+    finally:
+        app.shutdown()
+
+
+def test_delivery_complete_uses_music_pool(monkeypatch):
+    from freight_fate.app import App
+    from freight_fate.models.profile import Profile
+    from freight_fate.states.driving import ArrivalState, DrivingState
+
+    app = App()
+    played = []
+    monkeypatch.setattr(app.ctx.audio, "play_music",
+                        lambda track, fade_ms=1500: played.append(track))
+    try:
+        app.ctx.profile = Profile(name="Arrival Pool", current_city="Denver")
+        app.ctx.profile.career.total_miles = 10_000
+        job = _denver_to_salt_lake_job()
+        route = app.ctx.world.route_from_cities(["Denver", "Salt Lake City"])
+        first = DrivingState(app.ctx, job, route, trip_seed=12345, start_hour=14.0)
+        second = DrivingState(app.ctx, job, route, trip_seed=12346, start_hour=14.0)
+        ArrivalState(app.ctx, first).enter()
+        ArrivalState(app.ctx, second).enter()
+
+        assert len(set(played)) > 1
+        assert played[0] != played[1]
+    finally:
+        app.shutdown()
+
+
 def test_driving_state_uses_selected_drive_music(monkeypatch):
     from freight_fate.app import App
-    from freight_fate.models.jobs import CARGO_CATALOG, Job
     from freight_fate.models.profile import Profile
     from freight_fate.states.driving import DrivingState
 
@@ -148,16 +244,7 @@ def test_driving_state_uses_selected_drive_music(monkeypatch):
                         lambda track, fade_ms=1500: played.append(track))
     try:
         app.ctx.profile = Profile(name="Music Test", current_city="Denver")
-        job = Job(
-            CARGO_CATALOG["food"],
-            12,
-            "Denver",
-            "Denver Warehouse",
-            "Salt Lake City",
-            521,
-            4200,
-            16,
-        )
+        job = _denver_to_salt_lake_job()
         route = app.ctx.world.route_from_cities(["Denver", "Salt Lake City"])
         driving = DrivingState(app.ctx, job, route, trip_seed=12345, start_hour=14.0)
         app.push_state(driving)
@@ -175,7 +262,6 @@ def test_driving_state_uses_selected_drive_music(monkeypatch):
 
 def test_night_driving_advances_through_music_pool(monkeypatch):
     from freight_fate.app import App
-    from freight_fate.models.jobs import CARGO_CATALOG, Job
     from freight_fate.models.profile import Profile
     from freight_fate.music import music_track_duration_s
     from freight_fate.states.driving import DrivingState
@@ -186,16 +272,7 @@ def test_night_driving_advances_through_music_pool(monkeypatch):
                         lambda track, fade_ms=1500: played.append(track))
     try:
         app.ctx.profile = Profile(name="Night Music", current_city="Denver")
-        job = Job(
-            CARGO_CATALOG["food"],
-            12,
-            "Denver",
-            "Denver Warehouse",
-            "Salt Lake City",
-            521,
-            4200,
-            16,
-        )
+        job = _denver_to_salt_lake_job()
         route = app.ctx.world.route_from_cities(["Denver", "Salt Lake City"])
         driving = DrivingState(app.ctx, job, route, trip_seed=54321, start_hour=23.0)
         app.push_state(driving)

@@ -588,6 +588,11 @@ class PickupFacilityState(MenuState):
     def facility(self) -> str:
         return self.job.origin_facility_text()
 
+    def enter(self) -> None:
+        sequence = select_menu_music_sequence(self.ctx.profile)
+        self.ctx.audio.play_music(self.ctx.next_music_track("menu", sequence))
+        super().enter()
+
     def announce_entry(self) -> None:
         self.ctx.audio.set_ambient("poi/facility_gate", volume=0.35)
         if self.loaded:

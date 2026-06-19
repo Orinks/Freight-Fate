@@ -40,6 +40,7 @@ class GameContext:
         self.profile: Profile | None = None
         self._real_weather = None
         self._music_pool_positions: dict[tuple[str, tuple[str, ...]], int] = {}
+        self._music_pool_last: dict[str, str] = {}
         self.achievement_notice = ""
         self.achievement_notice_timer = 0.0
 
@@ -101,11 +102,17 @@ class GameContext:
         if not sequence:
             return ""
         if len(sequence) == 1:
-            return sequence[0]
+            track = sequence[0]
+            self._music_pool_last[pool_name] = track
+            return track
         key = (pool_name, sequence)
         index = (self._music_pool_positions.get(key, -1) + 1) % len(sequence)
+        if sequence[index] == self._music_pool_last.get(pool_name):
+            index = (index + 1) % len(sequence)
         self._music_pool_positions[key] = index
-        return sequence[index]
+        track = sequence[index]
+        self._music_pool_last[pool_name] = track
+        return track
 
     def award_achievement(
             self,
