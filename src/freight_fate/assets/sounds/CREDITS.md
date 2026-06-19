@@ -24,6 +24,7 @@ on the sound-trial branch.
 | Truck idle, interior | `engine/idle.ogg` | Donated in-cab idle loop candidate |
 | Truck start, interior | `engine/start.ogg` | Donated in-cab engine-start candidate |
 | Truck shutdown, interior | `engine/shutdown.ogg` | Donated in-cab shutdown candidate |
+| Truck horn, interior | `vehicle/horn.ogg` | Donated in-cab horn candidate, trimmed from Take 4 |
 | Highway road bed | `vehicle/road.ogg` | ElevenLabs-generated in-cab road ambience candidate |
 
 ## Weather
