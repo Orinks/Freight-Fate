@@ -277,12 +277,18 @@ class AchievementsState(MenuState):
         ]
         for achievement in ACHIEVEMENTS:
             unlocked = achievement.id in earned
-            status = "Earned" if unlocked else "Locked"
-            label = f"{status}: {achievement.name} - {achievement.description}"
+            if unlocked:
+                label = f"Earned: {achievement.name} - {achievement.description}"
+                help_text = f"{achievement.category}. {achievement.description}"
+            else:
+                # Locked entries show only the title; the description stays
+                # hidden until the achievement is earned.
+                label = f"Locked: {achievement.name}"
+                help_text = f"{achievement.category}. Keep playing to unlock it."
             items.append(MenuItem(
                 label,
                 lambda text=label: self.ctx.say(text),
-                help=f"{achievement.category}. {achievement.description}"))
+                help=help_text))
         items.append(MenuItem("Back", self.go_back))
         return items
 
