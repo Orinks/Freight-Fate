@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 1.6.0 - 2026-06-19
+
 ### Added
 - **Contextual route and weather audio.** Driving now uses in-cab rain, snow,
   wind, fog horn, and thunder cues plus short route-event sounds for hazards,
@@ -20,19 +22,6 @@
   braking feels more like a heavy truck without stranding new careers.
 - **Driving status menu.** Pressing Tab while driving now opens a spoken status
   menu with load, trip, truck, route, and route-stop details from the road.
-
-### Changed
-- **How-to-play driving guidance.** The main-menu guidance for driving controls
-  is shorter and more direct, with the spoken tests updated around the simpler
-  wording.
-
-### Fixed
-- **Pickup facility sounds.** Pickup gates and loading now use the new facility
-  ambience and dock cues instead of the older generic menu notification sounds.
-
-## 1.6.0 - 2026-06-15
-
-### Added
 - **Curated route-stop coverage contract.** Dispatch-supported freight now
   relies on curated truck-relevant route stops only: placeholder midpoint
   POIs no longer count as real route support, long-haul lanes must include
@@ -126,6 +115,8 @@
   first rest stop of the next run.
 
 ### Fixed
+- **Pickup facility sounds.** Pickup gates and loading now use the new facility
+  ambience and dock cues instead of the older generic menu notification sounds.
 - **Developer snapshots recognize release-ready notes.** Scheduled nightly
   builds now count player-facing entries that have already been curated
   into the next version block, while still ignoring internal-only changelog
@@ -204,6 +195,9 @@
   first announces the zone.
 
 ### Changed
+- **How-to-play driving guidance.** The main-menu guidance for driving controls
+  is shorter and more direct, with the spoken tests updated around the simpler
+  wording.
 - **Early career progression and pay.** Low-level jobs now pay enough to
   make early progress feel worthwhile after operating costs, and higher
   levels unlock clearer differences in range, cargo, endorsements, and
