@@ -832,6 +832,8 @@ def test_adaptive_cruise_disables_for_heavy_traffic_zone_entry(monkeypatch):
         quiet_trip(driving)
         monkeypatch.setattr(app.ctx, "say_event",
                             lambda text, interrupt=True: events.append(text))
+        monkeypatch.setattr(app.ctx, "say",
+                            lambda text, interrupt=True: events.append(text))
         driving.handle_event(key_event(pygame.K_e))
         driving.truck.transmission.gear = 10
         driving.truck.velocity_mps = 26.8
