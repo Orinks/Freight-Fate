@@ -3,7 +3,8 @@
 Most sound effects and music tracks in this directory were procedurally
 synthesized for Freight Fate by `tools/generate_audio.py` in this repository.
 No third-party recordings or samples were used for those generated assets.
-The main menu theme is a Suno remake created by the project owner.
+The main menu and Night Haul themes are Suno remakes created by the project
+owner.
 
 The default sound_lib weather loops were generated for Freight Fate with
 ElevenLabs sound effects tooling, then reviewed and selected for the in-cab
@@ -69,7 +70,7 @@ The donated truck interior recordings contributed by
 | Rain-Day Cruise | `music/drive_rain_day_cruise.ogg` | Gentle rainy daytime drive bed |
 | Urban Roll | `music/drive_urban_roll.ogg` | Light heavy-traffic daytime drive bed |
 | Dawn Push | `music/drive_dawn_push.ogg` | Soft early-morning daytime drive bed |
-| Night Haul | `music/night_haul.ogg` | Slow ambient pads for night driving |
+| Night Haul | `music/night_haul.ogg` | Suno remake for night driving |
 | Midnight Interstate | `music/night_midnight_interstate.ogg` | Quiet nighttime highway bed |
 | Neon Truck Stop | `music/night_neon_truck_stop.ogg` | Soft night truck-stop approach bed |
 | Rainy Night Miles | `music/night_rainy_miles.ogg` | Sparse rainy night drive bed |

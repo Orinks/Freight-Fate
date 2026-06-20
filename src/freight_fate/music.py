@@ -35,7 +35,7 @@ DAY_DRIVE_TRACKS: tuple[MusicTrack, ...] = (
 )
 
 NIGHT_DRIVE_TRACKS: tuple[MusicTrack, ...] = (
-    MusicTrack("night_haul", "Night Haul", "Slow ambient pads for night driving", 62.0),
+    MusicTrack("night_haul", "Night Haul", "Slow ambient pads for night driving", 204.76),
     MusicTrack("night_midnight_interstate", "Midnight Interstate", "Low night highway bed", 75.0),
     MusicTrack("night_neon_truck_stop", "Neon Truck Stop", "Soft truck-stop approach bed", 75.0),
     MusicTrack("night_rainy_miles", "Rainy Night Miles", "Sparse rainy night bed", 75.0),
