@@ -61,12 +61,34 @@ def game_root() -> Path:
 
 def _migrate_legacy(target: Path) -> None:
     """One-time copy of an old per-user save folder into the portable one."""
-    legacy = _legacy_data_dir()
-    if target.exists() or not legacy.is_dir():
+    if target.exists():
         return
+    for source in _portable_migration_candidates():
+        if source.is_dir():
+            _copy_save_tree(source, target)
+            return
+    legacy = _legacy_data_dir()
+    if legacy.is_dir():
+        _copy_save_tree(legacy, target)
+
+
+def _copy_save_tree(source: Path, target: Path) -> None:
+    """Copy a save tree without blocking startup if the filesystem objects."""
     # never block startup on a migration; old saves stay where they are
     with contextlib.suppress(OSError):
-        shutil.copytree(legacy, target)
+        shutil.copytree(source, target)
+
+
+def _portable_migration_candidates() -> list[Path]:
+    """Nearby portable save roots from previous archive nesting layouts."""
+    root = game_root()
+    parent = root.parent
+    candidates = [
+        root / "FreightFate" / "saves",
+        parent / "saves",
+        parent / "FreightFate" / "saves",
+    ]
+    return [path for path in candidates if path != root / "saves"]
 
 
 def data_dir() -> Path:
