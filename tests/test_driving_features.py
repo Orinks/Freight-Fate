@@ -89,7 +89,7 @@ def test_driving_f1_describes_safe_shutdown_and_destination_parking(monkeypatch)
 
         help_text = spoken[-1]
         assert "stops it only below 5 miles per hour" in help_text
-        assert "dock and deliver from the facility menu" in help_text
+        assert "stop, then dock and deliver" in help_text
     finally:
         app.shutdown()
 
@@ -352,8 +352,9 @@ def test_delivery_requires_parking_at_destination(monkeypatch):
         driving.update(1 / 60)
 
         assert isinstance(app.state, DrivingState)
-        assert events[-1] == "Destination gate. Slow below 3, then stop."
-        assert "slow down and stop" in driving.lines()[-1]
+        assert "Destination ahead" in events[-1]
+        assert "Slow below 3 mph" in events[-1]
+        assert "slow below 3 mph" in driving.lines()[-1].lower()
 
         driving.truck.velocity_mps = 0.0
         driving.update(1 / 60)
@@ -398,7 +399,7 @@ def test_facility_menu_waits_for_full_stop(monkeypatch):
         driving.update(1 / 60)
         assert isinstance(app.state, DrivingState)
         assert app.ctx.profile.career.deliveries == 0
-        assert events[-1] == "Destination gate reached. Stop for the facility menu."
+        assert "Stop to dock" in events[-1]
         assert "stop to dock" in driving.lines()[-1]
         assert played[-1][0] == "ui/notify"
 
@@ -423,7 +424,7 @@ def test_facility_menu_waits_for_full_stop(monkeypatch):
         assert "estimated net driver pay" in spoken[-1]
         assert "hours remain before the deadline" in spoken[-1]
         assert "Cargo condition" in spoken[-1]
-        assert "does not settle the load" in spoken[-1]
+        assert "Dock and deliver to settle" in spoken[-1]
 
         app.state.handle_event(key_event(pygame.K_UP))
         app.state.handle_event(key_event(pygame.K_RETURN))

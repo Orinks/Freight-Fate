@@ -366,11 +366,10 @@ class DrivingState(State):
         elif key == pygame.K_F1:
             objective_help = (
                 f"Your current objective is pickup: drive to {self._pickup_facility_text()}, "
-                "come to a full stop at the gate, then use the pickup facility "
-                "menu to check in and load. "
+                "stop at the gate, then check in and load. "
                 if self.phase == DRIVE_PHASE_PICKUP else
-                "Pickup and loading are complete. At your destination, come to a "
-                "full stop, then dock and deliver from the facility menu. ")
+                "Pickup and loading are complete. At your destination, stop, "
+                "then dock and deliver. ")
             self.ctx.say(
                 "Hold Up arrow to accelerate, Down arrow to brake. "
                 "When stopped in automatic, hold Down arrow to reverse slowly; "
@@ -1305,9 +1304,10 @@ class DrivingState(State):
         self._arrival_stop_said = True
         self._cancel_cruise()
         self.ctx.audio.play("ui/warning")
-        self._set_status("Pickup gate ahead: slow down and stop to load.")
+        self._set_status("Pickup ahead: slow below 3 mph.")
         self.ctx.say_event(
-            f"Pickup gate. Slow below {DELIVERY_PARK_MPH:.0f}, then stop to load.",
+            f"Pickup ahead: {self._pickup_facility_text()}. "
+            f"Slow below {DELIVERY_PARK_MPH:.0f} mph.",
             interrupt=True)
 
     def _handle_pickup_creep(self) -> None:
@@ -1316,9 +1316,9 @@ class DrivingState(State):
         self._arrival_full_stop_said = True
         self._cancel_cruise()
         self.ctx.audio.play("ui/notify", volume=0.7)
-        self._set_status("Pickup gate reached: stop to load.")
+        self._set_status("Pickup gate: stop to check in.")
         self.ctx.say_event(
-            "Pickup gate reached. Stop to check in.",
+            f"At {self._pickup_facility_text()}. Stop to check in.",
             interrupt=False)
 
     def _open_pickup_arrival(self) -> None:
@@ -1338,7 +1338,7 @@ class DrivingState(State):
         p.market.advance_to(p.market_day())
         p.active_trip = pickup_snapshot(self.job, air_brake=self.truck.air_brake_snapshot())
         self.ctx.save_profile()
-        self._set_status("Parked at pickup. Check in and load from the facility menu.")
+        self._set_status("Parked at pickup. Check in and load.")
         self.ctx.replace_state(PickupFacilityState(self.ctx, self.job, driving=self))
 
     def _arrive(self) -> None:
@@ -1356,9 +1356,10 @@ class DrivingState(State):
         self._arrival_stop_said = True
         self._cancel_cruise()
         self.ctx.audio.play("ui/warning")
-        self._set_status("Destination gate ahead: slow down and stop.")
+        self._set_status("Destination ahead: slow below 3 mph.")
         self.ctx.say_event(
-            f"Destination gate. Slow below {DELIVERY_PARK_MPH:.0f}, then stop.",
+            f"Destination ahead: {self._destination_facility_text()}. "
+            f"Slow below {DELIVERY_PARK_MPH:.0f} mph.",
             interrupt=True)
 
     def _handle_arrival_creep(self) -> None:
@@ -1367,9 +1368,9 @@ class DrivingState(State):
         self._arrival_full_stop_said = True
         self._cancel_cruise()
         self.ctx.audio.play("ui/notify", volume=0.7)
-        self._set_status("Destination gate reached: stop to dock.")
+        self._set_status("Destination gate: stop to dock.")
         self.ctx.say_event(
-            "Destination gate reached. Stop for the facility menu.",
+            f"At {self._destination_facility_text()}. Stop to dock.",
             interrupt=False)
 
     def _open_facility_arrival(self) -> None:
@@ -1380,7 +1381,7 @@ class DrivingState(State):
         self.truck.throttle = 0.0
         self.truck.brake = 1.0
         self.truck.set_parking_brake()
-        self._set_status("Parked at destination. Dock and deliver from the facility menu.")
+        self._set_status("Parked at destination. Dock and deliver.")
         self.ctx.replace_state(FacilityArrivalState(self.ctx, self))
 
     def _destination_facility_text(self) -> str:
@@ -2053,9 +2054,8 @@ class PauseMenuState(MenuState):
 class FacilityArrivalState(MenuState):
     title = "Destination facility"
     open_sound_key = "facility/dock_gate"
-    intro_help = ("Use up and down arrows to navigate, Enter to select. "
-                  "Check paperwork reviews the estimate. Dock and deliver "
-                  "completes the delivery.")
+    intro_help = ("Use arrows to navigate, Enter to select. "
+                  "Dock and deliver completes the job.")
 
     def __init__(self, ctx, driving: DrivingState) -> None:
         super().__init__(ctx)
@@ -2073,28 +2073,23 @@ class FacilityArrivalState(MenuState):
     def announce_entry(self) -> None:
         self.ctx.audio.set_ambient("poi/facility_gate")
         self.ctx.say(
-            f"Arrived at {self.facility}. You are parked at the gate. "
-            f"{self.current_text()}")
+            f"At {self.facility}. {self.current_text()}")
 
     def build_items(self) -> list[MenuItem]:
         return [
             MenuItem("Dock and deliver", self._dock,
-                     help="Back into the assigned dock, set the brakes, and "
-                          "hand off the paperwork to complete this delivery."),
+                     help="Back into the dock and complete this delivery."),
             MenuItem("Check paperwork", self._paperwork,
-                     help="Review estimated pay, deadline, cargo condition, "
-                          "and any late or damage considerations without "
-                          "settling the delivery."),
+                     help="Review pay, deadline, cargo condition, and charges."),
             MenuItem("Check arrival status", self._status,
-                     help="Hear the destination facility, cargo, speed, and "
-                          "delivery instruction again."),
+                     help="Hear the facility, cargo, speed, and next step."),
         ]
 
     def _dock(self) -> None:
         d = self.driving
         if d.truck.speed_mph > DOCKING_MAX_MPH:
             self.ctx.audio.play("ui/error")
-            self.ctx.say("Hold the brake and come to a full stop before docking.")
+            self.ctx.say("Stop before docking.")
             return
         d.truck.throttle = 0.0
         d.truck.brake = 1.0
@@ -2138,8 +2133,7 @@ class FacilityArrivalState(MenuState):
             f"Driver-responsibility charges are estimated at "
             f"{driver_charges:,.0f} dollars, for estimated net driver pay "
             f"{net_estimated_pay:,.0f}. "
-            f"{timing}. {cargo_condition} Dock and deliver when ready; "
-            "checking paperwork does not settle the load.")
+            f"{timing}. {cargo_condition} Dock and deliver to settle.")
 
     def _status(self) -> None:
         d = self.driving
@@ -2147,11 +2141,10 @@ class FacilityArrivalState(MenuState):
             f"At {self.facility}. Hauling {d.job.weight_tons:.0f} tons of "
             f"{d.job.cargo.label}. Current speed "
             f"{self.ctx.settings.speed_text(d.truck.speed_mph)}. "
-            "Select Dock and deliver when stopped to complete the delivery.")
+            "Stop, then Dock and deliver.")
 
     def go_back(self) -> None:
-        self.ctx.say("You are checked in at the destination. Select Dock and "
-                     "deliver to complete the job.")
+        self.ctx.say("At destination. Dock and deliver to finish.")
 
     def lines(self) -> list[str]:
         return [

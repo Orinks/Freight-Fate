@@ -131,12 +131,13 @@ def test_pickup_facility_waits_for_full_stop(monkeypatch):
 
         arrive_at_pickup(app, speed_mps=26.8)
         assert isinstance(app.state, DrivingState)
-        assert events[-1] == "Pickup gate. Slow below 3, then stop to load."
+        assert "Pickup ahead" in events[-1]
+        assert "Slow below 3 mph" in events[-1]
 
         driving.truck.velocity_mps = 1.1
         driving.update(1 / 60)
         assert isinstance(app.state, DrivingState)
-        assert events[-1] == "Pickup gate reached. Stop to check in."
+        assert "Stop to check in" in events[-1]
 
         driving.truck.velocity_mps = 0.0
         driving.update(1 / 60)

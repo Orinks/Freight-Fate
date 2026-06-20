@@ -656,8 +656,8 @@ class PickupFacilityState(MenuState):
         self.refresh(keep_index=False)
         self.ctx.audio.play("ui/notify")
         self.ctx.say(
-            f"Checked in at {self.facility}. Shipping assigned a dock. "
-            "Come to a full stop and select Load cargo at dock.")
+            f"Checked in at {self.facility}. Dock assigned. "
+            "Stop, then load cargo.")
 
     def _load(self) -> None:
         from .driving import DOCKING_MAX_MPH
@@ -667,7 +667,7 @@ class PickupFacilityState(MenuState):
             return
         if self.truck.speed_mph > DOCKING_MAX_MPH:
             self.ctx.audio.play("ui/error")
-            self.ctx.say("Hold the brake and come to a full stop before loading.")
+            self.ctx.say("Stop before loading.")
             return
         self.truck.throttle = 0.0
         self.truck.brake = 1.0
