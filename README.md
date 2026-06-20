@@ -122,7 +122,9 @@ Debian/Ubuntu).
 ## Build a standalone copy
 
 `tools/build_release.py` produces the same portable build that the
-releases page ships, using PyInstaller:
+releases page ships, using Nuitka. macOS uses app mode with ad-hoc signing
+to avoid PyInstaller's bundled `Python.framework` launch failure on
+downloaded builds:
 
 ```bash
 uv sync --group build
@@ -139,9 +141,9 @@ check, and archives it as `dist/FreightFate-<version>-windows-portable.zip`
   nightly workflow does.
 
 If the build succeeds but the archive seems to vanish on Windows, check
-your antivirus: freshly built unsigned PyInstaller executables are
-sometimes quarantined on sight. Add an exclusion for the `dist/` folder or
-restore the file from quarantine.
+your antivirus: freshly built unsigned executables are sometimes
+quarantined on sight. Add an exclusion for the `dist/` folder or restore
+the file from quarantine.
 
 ## Controls
 

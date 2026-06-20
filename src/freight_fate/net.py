@@ -1,13 +1,12 @@
 """Shared HTTPS helpers: a TLS context that verifies everywhere, and
 speakable descriptions of network failures.
 
-Frozen (PyInstaller) builds ship a Python whose OpenSSL looks for CA
-certificates at paths baked in on the build machine; on macOS and Linux
-those usually do not exist on the player's computer, so every HTTPS
-request fails certificate verification. Loading certifi's bundle on top
-of the platform defaults makes verification work on all three platforms
-while keeping system-store extras (such as corporate proxy roots on
-Windows) trusted too.
+Frozen builds can ship a Python whose OpenSSL looks for CA certificates
+at paths baked in on the build machine; on macOS and Linux those usually
+do not exist on the player's computer, so every HTTPS request fails
+certificate verification. Loading certifi's bundle on top of the platform
+defaults makes verification work on all three platforms while keeping
+system-store extras (such as corporate proxy roots on Windows) trusted too.
 """
 
 from __future__ import annotations

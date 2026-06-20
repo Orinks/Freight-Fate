@@ -12,8 +12,8 @@ next to the executable (written by ``tools/build_release.py``) recording its
 tag, channel, and build date; that is how a nightly knows a newer nightly
 exists even though the project version number has not changed.
 
-Updates only apply to frozen (PyInstaller) builds. Source checkouts are
-managed by git and the updater stays out of the way.
+Updates only apply to frozen packaged builds. Source checkouts are managed
+by git and the updater stays out of the way.
 """
 
 from __future__ import annotations
