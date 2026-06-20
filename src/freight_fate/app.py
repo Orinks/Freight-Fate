@@ -123,8 +123,15 @@ class GameContext:
             pool_name: str,
             sequence: tuple[str, ...],
             *,
-            fade_ms: int = 1500) -> str:
-        """Play the next track from a pool and arm generated-bed rotation."""
+            fade_ms: int = 1500,
+            advance: bool = False) -> str:
+        """Play or refresh a pool without jarring compatible menu restarts."""
+        if (not advance
+                and self._music_rotation_pool is not None
+                and self._music_rotation_track is not None
+                and self._music_rotation_pool[0] == pool_name):
+            self._music_rotation_pool = (pool_name, sequence)
+            return self._music_rotation_track
         track = self.next_music_track(pool_name, sequence)
         if not track:
             self.clear_music_rotation()
@@ -146,7 +153,7 @@ class GameContext:
                 self._music_rotation_track):
             return
         pool_name, sequence = self._music_rotation_pool
-        self.play_music_sequence(pool_name, sequence)
+        self.play_music_sequence(pool_name, sequence, advance=True)
 
     def clear_music_rotation(self) -> None:
         self._music_rotation_pool = None
