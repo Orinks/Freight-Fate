@@ -39,7 +39,7 @@ dev = [
     "soundfile>=0.14.0",
 ]
 build = [
-    "pyinstaller>=6.10",
+    "nuitka>=4.0.8",
 ]
 
 [build-system]

@@ -1,6 +1,6 @@
-"""Build a standalone Freight Fate distribution with PyInstaller.
+"""Build a standalone Freight Fate distribution.
 
-Produces a one-directory build (fast startup, antivirus-friendly) and
+Produces a standalone build (fast startup, antivirus-friendly) and
 archives it for release:
 
 * Windows: ``dist/FreightFate-<label>-windows-portable.zip``
@@ -8,9 +8,10 @@ archives it for release:
 * macOS:   ``dist/FreightFate-<label>-macos.zip``
 
 ``<label>`` is the project version from pyproject.toml, or the value of
-``--tag`` (used for nightly developer snapshots). The bundle collects the
-game's assets, the BASS libraries shipped inside sound_lib, and Prism's
-native speech library.
+``--tag`` (used for nightly developer snapshots). Builds use Nuitka on all
+platforms. macOS uses app mode with ad-hoc signing to avoid the PyInstaller
+``Python.framework`` Gatekeeper failure mode while still not requiring an
+Apple Developer ID.
 
 Run from the repository root: ``uv run python tools/build_release.py``
 """
@@ -18,7 +19,9 @@ Run from the repository root: ``uv run python tools/build_release.py``
 from __future__ import annotations
 
 import argparse
+import importlib.util
 import json
+import platform
 import shutil
 import subprocess
 import sys
@@ -31,7 +34,12 @@ import tomllib
 
 ROOT = Path(__file__).resolve().parent.parent
 DIST = ROOT / "dist"
+BUILD = ROOT / "build"
 APP_NAME = "FreightFate"
+SRC_DIR = ROOT / "src"
+PACKAGE_DIR = SRC_DIR / "freight_fate"
+SOUND_LIB_NATIVE_EXTS = {".dll", ".dylib", ".so"}
+SOUND_LIB_ARCH_DIR = "x64"
 
 
 def project_version() -> str:
@@ -39,8 +47,19 @@ def project_version() -> str:
         return tomllib.load(f)["project"]["version"]
 
 
-def run_pyinstaller() -> Path:
-    """Freeze the game; returns the onedir build directory."""
+def nuitka_version(version: str) -> str:
+    """Convert the project version into Nuitka's numeric metadata format."""
+    base = version.split("+", 1)[0].split(".dev", 1)[0].split("a", 1)[0].split("b", 1)[0]
+    parts = [part for part in base.split(".") if part.isdigit()]
+    return ".".join((parts + ["0", "0", "0", "0"])[:4])
+
+
+def repo_path(path: Path) -> str:
+    """Return a POSIX path relative to the repository root."""
+    return path.relative_to(ROOT).as_posix()
+
+
+def write_entrypoint() -> Path:
     entry = ROOT / "tools" / "_entry.py"
     entry.write_text(
         "import sys\n\n"
@@ -49,24 +68,123 @@ def run_pyinstaller() -> Path:
         "    sys.exit(main())\n",
         encoding="utf-8",
     )
-    cmd = [
-        sys.executable, "-m", "PyInstaller",
-        "--noconfirm", "--clean",
-        "--name", APP_NAME,
-        "--distpath", str(DIST),
-        "--workpath", str(ROOT / "build"),
-        "--specpath", str(ROOT / "build"),
-        # game package data: sounds, music, and the world map JSON
-        "--collect-data", "freight_fate",
-        # native libraries loaded at runtime via ctypes
-        "--collect-all", "sound_lib",
-        "--collect-all", "prism",
+    return entry
+
+
+def sound_lib_lib_dir() -> Path:
+    """Locate sound_lib's native BASS library directory."""
+    spec = importlib.util.find_spec("sound_lib")
+    if not spec or not spec.submodule_search_locations:
+        raise RuntimeError("sound_lib is not installed; cannot build packaged audio support")
+    lib_dir = Path(next(iter(spec.submodule_search_locations))) / "lib"
+    if not lib_dir.exists():
+        raise RuntimeError(f"sound_lib native library directory was not found: {lib_dir}")
+    return lib_dir
+
+
+def sound_lib_target_dir(build_dir: Path) -> Path:
+    if build_dir.suffix == ".app":
+        return build_dir / "Contents" / "Resources" / "sound_lib" / "lib"
+    return build_dir / "sound_lib" / "lib"
+
+
+def mirror_sound_lib_flat_files_to_arch_dir(target_dir: Path) -> None:
+    """Support sound_lib loaders that still search sound_lib/lib/x64."""
+    flat_files = [path for path in target_dir.iterdir() if path.is_file()]
+    if not flat_files:
+        return
+    arch_dir = target_dir / SOUND_LIB_ARCH_DIR
+    arch_dir.mkdir(exist_ok=True)
+    for path in flat_files:
+        shutil.copy2(path, arch_dir / path.name)
+
+
+def stage_sound_lib_runtime_files(build_dir: Path) -> None:
+    source_dir = sound_lib_lib_dir()
+    target_dir = sound_lib_target_dir(build_dir)
+    if target_dir.exists():
+        shutil.rmtree(target_dir)
+    target_dir.parent.mkdir(parents=True, exist_ok=True)
+    shutil.copytree(source_dir, target_dir)
+    mirror_sound_lib_flat_files_to_arch_dir(target_dir)
+
+    native_files = [
+        path
+        for path in target_dir.rglob("*")
+        if path.is_file() and path.suffix.lower() in SOUND_LIB_NATIVE_EXTS
     ]
-    if sys.platform == "win32":
-        cmd.append("--windowed")
-    cmd.append(str(entry))
-    subprocess.run(cmd, check=True)
-    return DIST / APP_NAME
+    if not native_files:
+        raise RuntimeError(f"No sound_lib native libraries were staged under {target_dir}")
+
+
+def build_nuitka_command(entry: Path) -> list[str]:
+    """Build the Nuitka command for the current platform."""
+    system = platform.system()
+    output_dir = BUILD / "nuitka"
+    numeric_version = nuitka_version(project_version())
+    mode = "--mode=app" if system == "Darwin" else "--mode=standalone"
+    cmd = [
+        sys.executable,
+        "-m",
+        "nuitka",
+        mode,
+        "--assume-yes-for-downloads",
+        "--noinclude-pytest-mode=nofollow",
+        "--include-package-data=prism:_native/*",
+        "--include-package-data=sound_lib",
+        f"--include-data-dir={repo_path(PACKAGE_DIR / 'assets')}=freight_fate/assets",
+        f"--include-data-dir={repo_path(PACKAGE_DIR / 'data')}=freight_fate/data",
+        f"--output-dir={output_dir.as_posix()}",
+        f"--output-filename={APP_NAME}",
+        f"--product-name={APP_NAME}",
+        f"--file-description={APP_NAME}",
+        f"--product-version={numeric_version}",
+        f"--file-version={numeric_version}",
+        "--company-name=Orinks",
+    ]
+
+    if system == "Windows":
+        cmd.append("--windows-console-mode=disable")
+    elif system == "Darwin":
+        cmd.append(f"--macos-app-name={APP_NAME}")
+
+    cmd.append(repo_path(entry))
+    return cmd
+
+
+def find_nuitka_output(output_dir: Path) -> tuple[Path, str]:
+    app_candidates = sorted(
+        output_dir.glob("*.app"), key=lambda path: path.stat().st_mtime, reverse=True
+    )
+    for candidate in app_candidates:
+        if (candidate / "Contents" / "MacOS" / APP_NAME).exists():
+            return candidate, "app"
+
+    dist_candidates = sorted(
+        output_dir.glob("*.dist"), key=lambda path: path.stat().st_mtime, reverse=True
+    )
+    for candidate in dist_candidates:
+        exe = APP_NAME + (".exe" if sys.platform == "win32" else "")
+        if (candidate / exe).exists():
+            return candidate, "dist"
+
+    raise FileNotFoundError(f"Nuitka output was not found under {output_dir}")
+
+
+def run_nuitka() -> Path:
+    """Build and stage a standalone Nuitka distribution."""
+    entry = write_entrypoint()
+    output_dir = BUILD / "nuitka"
+    subprocess.run(build_nuitka_command(entry), cwd=ROOT, check=True)
+
+    source_dir, output_kind = find_nuitka_output(output_dir)
+    build_dir = DIST / (f"{APP_NAME}.app" if output_kind == "app" else APP_NAME)
+    if build_dir.exists():
+        shutil.rmtree(build_dir)
+    DIST.mkdir(parents=True, exist_ok=True)
+    shutil.copytree(source_dir, build_dir)
+    stage_sound_lib_runtime_files(build_dir)
+    return build_dir
 
 
 def stamp_build_info(build_dir: Path, label: str) -> None:
@@ -81,22 +199,39 @@ def stamp_build_info(build_dir: Path, label: str) -> None:
         "channel": "dev" if nightly else "stable",
         "built_at": datetime.now(timezone.utc).strftime("%Y-%m-%d"),
     }
-    with open(build_dir / "build_info.json", "w", encoding="utf-8") as f:
+    if build_dir.suffix == ".app":
+        info_path = build_dir / "Contents" / "MacOS" / "build_info.json"
+    else:
+        info_path = build_dir / "build_info.json"
+    with open(info_path, "w", encoding="utf-8") as f:
         json.dump(info, f, indent=2)
+
+
+def sign_distribution(build_dir: Path) -> None:
+    """Ad-hoc sign the finalized macOS app bundle."""
+    if sys.platform != "darwin":
+        return
+    subprocess.run(
+        ["codesign", "--force", "--deep", "--sign", "-", str(build_dir)],
+        check=True,
+    )
 
 
 def smoke_check(build_dir: Path) -> None:
     """Boot the frozen game for a few frames with dummy drivers."""
     import os
 
-    exe = build_dir / (APP_NAME + (".exe" if sys.platform == "win32" else ""))
+    if build_dir.suffix == ".app":
+        exe = build_dir / "Contents" / "MacOS" / APP_NAME
+    else:
+        exe = build_dir / (APP_NAME + (".exe" if sys.platform == "win32" else ""))
     env = {
         **os.environ,
         "SDL_VIDEODRIVER": "dummy",
         "SDL_AUDIODRIVER": "dummy",
         "FREIGHT_FATE_NO_SPEECH": "1",
     }
-    subprocess.run([str(exe), "--smoke"], check=True, env=env, timeout=120)
+    subprocess.run([str(exe), "--smoke"], check=True, cwd=exe.parent, env=env, timeout=120)
     print("Smoke check passed: the frozen build boots and renders.")
 
 
@@ -126,10 +261,11 @@ def main() -> int:
     args = parser.parse_args()
 
     label = args.tag or project_version()
-    if (ROOT / "build").exists():
-        shutil.rmtree(ROOT / "build")
-    build_dir = run_pyinstaller()
+    if BUILD.exists():
+        shutil.rmtree(BUILD)
+    build_dir = run_nuitka()
     stamp_build_info(build_dir, label)
+    sign_distribution(build_dir)
     if not args.skip_smoke:
         smoke_check(build_dir)
     out = archive(build_dir, label)
