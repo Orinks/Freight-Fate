@@ -144,6 +144,11 @@ def test_how_to_play_documents_new_gameplay_systems():
     assert "grades and terrain come from the route" in help_text
     assert "weather, traffic, and construction still vary" in help_text
     assert "slow lead vehicles" in help_text
+    assert "settings are split into pages" in help_text
+    assert "tab moves to the next page" in help_text
+    assert "trip pacing changes how quickly distance and game time pass" in help_text
+    assert "standard pacing is the normal freight fate pace" in help_text
+    assert "debug bypass turns hours enforcement off" in help_text
     assert "adaptive cruise" in help_text
     assert "three second clear-weather gap" in help_text
     assert "increase the following gap" in help_text
