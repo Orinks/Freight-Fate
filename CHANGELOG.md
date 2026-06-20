@@ -24,6 +24,9 @@
   snapshot may not load on an older stable release.
 
 ### Fixed
+- **Facility approach speed cues.** Pickup deadheads now use lower-speed
+  facility access roads, deliveries slow through a final receiver approach,
+  and the last gate prompts are shorter so stopping instructions land faster.
 - **Facility gate ambience.** Pickup and destination facility screens now use a
   quieter loading-dock ambience that stays away from truck-idle rumble.
 - **Preview sound volume.** The refreshed truck, road, weather, route, and
