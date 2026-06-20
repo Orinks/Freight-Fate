@@ -53,6 +53,7 @@ ENGINE_RPM_IDLE = 600.0
 ENGINE_RPM_MAX = 2200.0
 ENGINE_FREQ_MAX_MULT = 2.2
 ENGINE_SLIDE_MS = 120
+ENGINE_LOOP_GAIN = 1.0
 
 BASS_NO_SOUND_DEVICE = 0
 
@@ -85,7 +86,7 @@ class _PygameBackend:
         self.enabled = False
         self.master_volume = 1.0
         self.sfx_volume = 0.8
-        self.music_volume = 0.55
+        self.music_volume = 0.5
         self._cache: dict[str, pygame.mixer.Sound] = {}
         self._loops: dict[int, tuple[str, float]] = {}  # channel -> (key, base gain)
         self._music_track: str | None = None
@@ -187,11 +188,10 @@ class _PygameBackend:
         """Crossfade the four engine loops around the current RPM."""
         if not (self.enabled and self._engine_running):
             return
-        base = 0.5 + 0.35 * throttle
         for i, (_key, center) in enumerate(ENGINE_BANDS):
             # triangular weight, 1.0 at band center, 0 beyond ~600 rpm away
             w = max(0.0, 1.0 - abs(rpm - center) / 620.0)
-            self.set_loop_volume(CH_ENGINE[i], base * w)
+            self.set_loop_volume(CH_ENGINE[i], ENGINE_LOOP_GAIN * w)
 
     @property
     def engine_running(self) -> bool:
@@ -211,7 +211,7 @@ class _PygameBackend:
         try:
             pygame.mixer.music.load(str(path))
             pygame.mixer.music.set_volume(self.music_volume * self.master_volume)
-            pygame.mixer.music.play(loops=-1, fade_ms=fade_ms)
+            pygame.mixer.music.play(loops=0, fade_ms=fade_ms)
             self._music_track = track
         except pygame.error:
             log.warning("Could not play music %s", track, exc_info=True)
@@ -275,7 +275,7 @@ class _BassBackend:
 
         self.master_volume = 1.0
         self.sfx_volume = 0.8
-        self.music_volume = 0.55
+        self.music_volume = 0.5
         self._loops: dict[int, tuple[str, float, object]] = {}  # slot -> (key, gain, stream)
         self._retained: list = []  # streams kept alive until BASS finishes them
         self._music_track: str | None = None
@@ -442,8 +442,7 @@ class _BassBackend:
         if not (self._engine_running and self._engine_stream is not None):
             return
         target = self._engine_base_freq * engine_freq_mult(rpm)
-        gain = 0.5 + 0.35 * throttle
-        vol = max(0.0, min(1.0, gain * self.sfx_volume * self.master_volume))
+        vol = max(0.0, min(1.0, ENGINE_LOOP_GAIN * self.sfx_volume * self.master_volume))
         try:
             self._bass_call(self._slide, self._engine_stream.handle,
                             self._ATTRIB_FREQ, target, ENGINE_SLIDE_MS)
@@ -470,7 +469,7 @@ class _BassBackend:
             self._fade_out(self._music_stream, 800)
             self._music_stream = None
             self._music_track = None
-        stream = self._stream(path, looping=True)
+        stream = self._stream(path, looping=False)
         if stream is None:
             return
         try:
@@ -507,7 +506,7 @@ class _BassBackend:
         if self._engine_stream is not None:
             try:
                 self._engine_stream.set_volume(
-                    max(0.0, min(1.0, 0.5 * self.sfx_volume * self.master_volume)))
+                    max(0.0, min(1.0, ENGINE_LOOP_GAIN * self.sfx_volume * self.master_volume)))
             except self._BassError:
                 self._engine_stream = None
         if self._music_stream is not None:
@@ -536,7 +535,7 @@ class _NullBackend:
     engine_running = False
     master_volume = 1.0
     sfx_volume = 0.8
-    music_volume = 0.55
+    music_volume = 0.5
 
     def play(self, key: str, volume: float = 1.0) -> None: ...
     def start_loop(self, channel: int, key: str, volume: float = 1.0,
@@ -629,7 +628,7 @@ class AudioEngine:
         """Tire-on-asphalt loop whose volume tracks speed."""
         if not self.enabled:
             return
-        gain = min(0.9, speed_mps / 30.0)
+        gain = min(1.0, speed_mps / 30.0)
         if gain < 0.02:
             self.stop_loop(CH_ROAD, fade_ms=500)
         else:
@@ -646,9 +645,9 @@ class AudioEngine:
         if intensity < 0.05:
             self.stop_loop(CH_WEATHER_B, fade_ms=1500)
         else:
-            self.start_loop(CH_WEATHER_B, "weather/wind", volume=min(0.8, intensity), fade_ms=1500)
+            self.start_loop(CH_WEATHER_B, "weather/wind", volume=min(1.0, intensity), fade_ms=1500)
 
-    def set_ambient(self, key: str | None, volume: float = 0.7) -> None:
+    def set_ambient(self, key: str | None, volume: float = 1.0) -> None:
         if key is None:
             self.stop_loop(CH_AMBIENT, fade_ms=800)
         else:

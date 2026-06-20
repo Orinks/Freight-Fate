@@ -8,7 +8,9 @@ from pathlib import Path
 import pygame
 
 from .. import __version__, updater
+from ..achievements import ACHIEVEMENTS, earned_ids
 from ..models.profile import DEFAULT_CITY, Profile, ProfileIntegrityError
+from ..music import select_menu_music_sequence
 from ..settings import TIME_SCALES
 from ..sim.hos import HOS_MODES
 from .base import MenuItem, MenuState, State
@@ -121,13 +123,19 @@ class MainMenuState(MenuState):
     _update_prompted = False
 
     def enter(self) -> None:
-        self.ctx.audio.play_music("menu_theme")
         super().enter()
+        profile = self.ctx.profile
+        if profile is None:
+            saves = _loadable_saves()
+            profile = saves[0][1] if saves else None
+        sequence = select_menu_music_sequence(profile)
+        self.ctx.play_music_sequence("menu", sequence)
         cls = MainMenuState
         if updater.is_frozen() and cls._update_checker is None:
             cls._update_checker = UpdateChecker(self.ctx.settings)
 
     def update(self, dt: float) -> None:
+        super().update(dt)
         cls = MainMenuState
         checker = cls._update_checker
         if (cls._update_prompted or checker is None
@@ -168,6 +176,9 @@ class MainMenuState(MenuState):
                                   help="Reset or delete saved careers."))
         items.append(MenuItem("New career", self._new_game,
                               help="Start a fresh trucking career."))
+        items.append(MenuItem("Achievements", self._achievements,
+                              help="Review earned and locked achievements for "
+                                   "a saved career."))
         items.append(MenuItem("How to play", self._help,
                               help="Learn the controls and the goal of the game."))
         items.append(MenuItem("Settings", self._settings,
@@ -209,8 +220,94 @@ class MainMenuState(MenuState):
     def _help(self) -> None:
         self.ctx.push_state(HelpState(self.ctx))
 
+    def _achievements(self) -> None:
+        self.ctx.push_state(AchievementCareerState(self.ctx))
+
     def _settings(self) -> None:
         self.ctx.push_state(SettingsState(self.ctx))
+
+
+class AchievementCareerState(MenuState):
+    title = "Achievements"
+    intro_help = ("Choose a saved career to review achievements. Enter opens "
+                  "that driver's earned and locked achievements. Escape goes back.")
+
+    def announce_entry(self) -> None:
+        if not self.items or self.items[0].text == "Back":
+            self.ctx.say("Achievements. No saved careers yet. Start a career, "
+                         "then come back after the road has opinions.")
+            return
+        self.ctx.say(f"Achievements. {self.current_text()}")
+
+    def build_items(self) -> list[MenuItem]:
+        items = []
+        for _path, profile in _loadable_saves():
+            earned = len(earned_ids(profile))
+            total = len(ACHIEVEMENTS)
+            items.append(MenuItem(
+                f"{profile.name}: {earned} of {total} earned",
+                lambda p=profile: self._pick(p),
+                help=f"Review achievements for {profile.name}."))
+        items.append(MenuItem("Back", self.go_back))
+        return items
+
+    def _pick(self, profile: Profile) -> None:
+        self.ctx.push_state(AchievementsState(self.ctx, profile))
+
+
+class AchievementsState(MenuState):
+    intro_help = ("Use up and down arrows to review achievements. Earned and "
+                  "locked entries are both shown. Enter repeats the selected "
+                  "entry. Escape goes back.")
+
+    def __init__(self, ctx, profile: Profile) -> None:
+        super().__init__(ctx)
+        self.profile = profile
+
+    @property
+    def title(self) -> str:  # type: ignore[override]
+        return f"Achievements for {self.profile.name}"
+
+    def announce_entry(self) -> None:
+        earned = len(earned_ids(self.profile))
+        total = len(ACHIEVEMENTS)
+        self.ctx.say(
+            f"Achievements for {self.profile.name}. {earned} of {total} earned. "
+            "Locked achievements are shown as goals, with no story spoilers. "
+            f"{self.current_text()}")
+
+    def build_items(self) -> list[MenuItem]:
+        earned = earned_ids(self.profile)
+        items = [
+            MenuItem(self._summary_label, self._summary,
+                     help="Hear the total earned achievement count.")
+        ]
+        for achievement in ACHIEVEMENTS:
+            unlocked = achievement.id in earned
+            if unlocked:
+                label = f"Earned: {achievement.name} - {achievement.description}"
+                help_text = f"{achievement.category}. {achievement.description}"
+            else:
+                # Locked entries show only the title; the description stays
+                # hidden until the achievement is earned.
+                label = f"Locked: {achievement.name}"
+                help_text = f"{achievement.category}. Keep playing to unlock it."
+            items.append(MenuItem(
+                label,
+                lambda text=label: self.ctx.say(text),
+                help=help_text))
+        items.append(MenuItem("Back", self.go_back))
+        return items
+
+    def _summary_label(self) -> str:
+        earned = len(earned_ids(self.profile))
+        total = len(ACHIEVEMENTS)
+        return f"Summary: {earned} of {total} earned"
+
+    def _summary(self) -> None:
+        earned = len(earned_ids(self.profile))
+        total = len(ACHIEVEMENTS)
+        self.ctx.say(f"{self.profile.name} has earned {earned} of {total} achievements.")
 
 
 class LoadDriverState(MenuState):
@@ -574,15 +671,14 @@ HELP_PAGES = [
         "Border and gateway metros often offer cross-dock logistics freight.",
         "After accepting a dispatch, leave the terminal bobtail or with an empty trailer.",
         "Pickup legs are local deadhead moves to the origin facility.",
-        "At the pickup gate, come to a full stop before the facility menu opens.",
+        "At the pickup gate, stop to open the facility menu.",
         "Check in, then load at the assigned dock.",
         "Loading requires the truck to be stopped.",
         "Once loaded and sealed, dispatch gives you the destination route.",
         "GPS cues call out highway changes, state lines, places, and rest stops.",
         "The job is the load and destination; route choice happens after pickup.",
         "Deliver before the deadline for a bonus. Late or damaged cargo pays less.",
-        "At the destination facility, slow down, come to a full stop,",
-        "then dock and deliver before the settlement is paid.",
+        "At the destination facility, stop, then dock and deliver.",
         "Delivery settlement reports gross pay, carrier-paid or reimbursed charges,",
         "driver-responsibility charges, and net driver pay.",
         "After settlement, the truck is parked at the destination service-area terminal.",
@@ -728,7 +824,8 @@ class SettingsState(MenuState):
                      help="Stable releases are the finished, numbered "
                           "versions. Developer snapshots are nightly builds "
                           "of work in progress: new features sooner, but "
-                          "rough edges."),
+                          "rough edges. A career saved on a snapshot may not "
+                          "load on an older stable release."),
             MenuItem("Check for updates", self._check_updates,
                      help="Look for a new version of the game right now."),
             MenuItem("Back", self.go_back,
@@ -792,6 +889,7 @@ class SettingsState(MenuState):
     def _volume(self, attr: str, delta: float) -> None:
         value = getattr(self.ctx.settings, attr)
         setattr(self.ctx.settings, attr, max(0.0, min(1.0, round(value + delta, 2))))
+        self.ctx.settings.save()
         self.ctx.apply_volumes()
         self._announce()
 

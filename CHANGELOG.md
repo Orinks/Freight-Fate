@@ -2,6 +2,46 @@
 
 ## Unreleased
 
+### Added
+- **Music remakes.** The main menu theme, Open Road, and Night Haul now use
+  new Suno remakes while keeping their familiar Freight Fate music slots.
+- **Music rotation.** All menu and driving music beds now play once and rotate
+  through their active pool instead of looping.
+- **Music mix default.** New settings now start background music at half volume
+  so speech and driving cues stay comfortably in front.
+- **Expanded music beds.** Freight Fate now includes longer menu, facility,
+  daytime driving, and nighttime driving music. Menus and freight facility
+  screens use a career-aware pool, and active drives use stable day/night
+  pools that rotate without reshuffling abruptly while you are on the road.
+- **Truck cab sound refresh.** Engine start, idle, shutdown, horn, gear shift,
+  parking-brake set and release, and highway road ambience now use the updated
+  in-cab vehicle sound set, with donated truck recordings from
+  [Darren Duff](https://darrenduff.com/). The start cue is trimmed so the idle
+  loop takes over cleanly.
+- **New achievement system.** Careers now track achievements across a range
+  of categories, with a spoken main-menu viewer and a chime when you unlock
+  one. Existing careers carry over. Note: a career saved on a developer
+  snapshot may not load on an older stable release.
+
+### Fixed
+- **Facility approach speed cues.** Pickup deadheads now use lower-speed
+  facility access roads, deliveries slow through a final receiver approach,
+  and the last gate prompts are shorter so stopping instructions land faster.
+- **Facility gate ambience.** Pickup and destination facility screens now use a
+  quieter loading-dock ambience that stays away from truck-idle rumble.
+- **Preview sound volume.** The refreshed truck, road, weather, route, and
+  facility sounds now play at full source strength before the player's volume
+  settings are applied, so lowering and raising sound effects behaves more
+  predictably.
+- **Achievement speech routing.** Achievement unlocks now speak through the
+  screen reader voice instead of the separate driving-event voice, so players
+  who miss or interrupt an unlock can still review it later from the
+  Achievements menu.
+- **Facility and settings audio fixes.** Terminal and yard screens now use
+  the new facility-gate ambience, delivery completion no longer buries the
+  dock and settlement cues under a generic menu sound, and volume settings
+  persist into the next game session.
+
 ## 1.6.0 - 2026-06-19
 
 ### Added

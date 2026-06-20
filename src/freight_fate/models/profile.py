@@ -29,7 +29,7 @@ from ..sim.hos import HosClock
 from .career import Career
 from .market import Market
 
-SAVE_VERSION = 3
+SAVE_VERSION = 4
 STARTING_MONEY = 5_000.0
 DEFAULT_CITY = "Chicago"
 SIGNATURE_FIELD = "_signature"
@@ -201,6 +201,8 @@ class Profile:
     career: Career = field(default_factory=Career)
     market: Market = field(default_factory=Market)
     hos: HosClock = field(default_factory=HosClock)  # hours-of-service shift clock
+    achievements: list[str] = field(default_factory=list)
+    achievement_stats: dict = field(default_factory=dict)
 
     # -- serialization -------------------------------------------------------
 

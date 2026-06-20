@@ -14,6 +14,7 @@ from ..models.jobs import (
     plan_hos,
 )
 from ..models.trucks import TRUCK_CATALOG, UPGRADE_CATALOG, TruckModel, Upgrade
+from ..music import select_menu_music_sequence
 from ..sim.hos import clock_text, time_of_day
 from ..sim.vehicle import TruckState
 from .base import MenuItem, MenuState
@@ -90,8 +91,9 @@ class CityMenuState(MenuState):
         return self.ctx.world.home_terminal(p.current_city).name
 
     def enter(self) -> None:
-        self.ctx.audio.play_music("menu_theme")
-        self.ctx.audio.set_ambient("ambient/truck_stop", volume=0.35)
+        sequence = select_menu_music_sequence(self.ctx.profile)
+        self.ctx.play_music_sequence("menu", sequence)
+        self.ctx.audio.set_ambient("poi/facility_gate")
         super().enter()
 
     def exit(self) -> None:
@@ -219,6 +221,7 @@ class CityMenuState(MenuState):
 
     def _sleep(self) -> None:
         p = self.ctx.profile
+        before_fatigue = p.fatigue
         p.game_hours += 10.0
         p.hos.sleep()
         p.fatigue = 0.0
@@ -229,6 +232,8 @@ class CityMenuState(MenuState):
         self.ctx.say(f"You slept 10 hours and woke rested. It is "
                      f"{clock_text(hour)}, {time_of_day(hour)}. "
                      "Hours of service reset.")
+        if before_fatigue < 70.0:
+            self.ctx.award_achievement("sleep_before_exhaustion")
 
     def _save(self) -> None:
         self.ctx.save_profile()
@@ -318,6 +323,7 @@ class GarageState(MenuState):
             self.ctx.say(f"Partial fuel: added {gallons:.0f} gallons for "
                          f"{cost:,.0f} dollars. "
                          f"You have {p.money:,.0f} dollars left.")
+            self.ctx.award_achievement("route_refuel")
             self.refresh()
             return
         p.money -= cost
@@ -328,6 +334,7 @@ class GarageState(MenuState):
         self.ctx.audio.play("vehicle/fuel_pump")
         self.ctx.say(f"Tank filled. {cost:,.0f} dollars. "
                      f"You have {p.money:,.0f} dollars left.")
+        self.ctx.award_achievement("route_refuel")
         self.refresh()
 
     def _repair(self) -> None:
@@ -352,6 +359,7 @@ class GarageState(MenuState):
             self.ctx.say(f"Partial repairs fixed {repairable:.0f} percent damage "
                          f"for {cost:,.0f} dollars. "
                          f"You have {p.money:,.0f} dollars left.")
+            self.ctx.award_achievement("garage_repair")
             self.refresh()
             return
         p.money -= cost
@@ -362,6 +370,7 @@ class GarageState(MenuState):
         self.ctx.audio.play("ui/notify")
         self.ctx.say(f"Truck repaired. {cost:,.0f} dollars. "
                      f"You have {p.money:,.0f} dollars left.")
+        self.ctx.award_achievement("garage_repair")
         self.refresh()
 
     def _upgrades(self) -> None:
@@ -419,6 +428,7 @@ class UpgradeShopState(MenuState):
         tier_part = (f" tier {owned + 1}" if upgrade.max_tier > 1 else "")
         self.ctx.say(f"{upgrade.label}{tier_part} installed for {price:,.0f} dollars. "
                      f"You have {p.money:,.0f} dollars left.")
+        self.ctx.award_achievement("first_upgrade")
         self.refresh()
 
 
@@ -466,6 +476,8 @@ class TruckShopState(MenuState):
             self._switch_to(model)
             self.ctx.say(f"You bought the {model.label} for {model.price:,.0f} dollars "
                          f"and it is now your truck. You have {p.money:,.0f} dollars left.")
+            if model.key == "heavy_hauler":
+                self.ctx.award_achievement("heavy_hauler")
             return
         self.ctx.audio.play("vehicle/truck_door")
         self._switch_to(model)
@@ -536,6 +548,7 @@ class JobBoardState(MenuState):
             "Check in with the shipper when you arrive.",
             interrupt=True)
         self.ctx.push_state(driving)
+        self.ctx.award_achievement("first_dispatch")
 
 
 class PickupFacilityState(MenuState):
@@ -575,8 +588,13 @@ class PickupFacilityState(MenuState):
     def facility(self) -> str:
         return self.job.origin_facility_text()
 
+    def enter(self) -> None:
+        sequence = select_menu_music_sequence(self.ctx.profile)
+        self.ctx.play_music_sequence("menu", sequence)
+        super().enter()
+
     def announce_entry(self) -> None:
-        self.ctx.audio.set_ambient("poi/facility_gate", volume=0.35)
+        self.ctx.audio.set_ambient("poi/facility_gate")
         if self.loaded:
             lead = (f"Loaded at {self.facility}. The trailer is sealed for "
                     f"{self.job.destination}.")
@@ -638,8 +656,8 @@ class PickupFacilityState(MenuState):
         self.refresh(keep_index=False)
         self.ctx.audio.play("ui/notify")
         self.ctx.say(
-            f"Checked in at {self.facility}. Shipping assigned a dock. "
-            "Come to a full stop and select Load cargo at dock.")
+            f"Checked in at {self.facility}. Dock assigned. "
+            "Stop, then load cargo.")
 
     def _load(self) -> None:
         from .driving import DOCKING_MAX_MPH
@@ -649,7 +667,7 @@ class PickupFacilityState(MenuState):
             return
         if self.truck.speed_mph > DOCKING_MAX_MPH:
             self.ctx.audio.play("ui/error")
-            self.ctx.say("Hold the brake and come to a full stop before loading.")
+            self.ctx.say("Stop before loading.")
             return
         self.truck.throttle = 0.0
         self.truck.brake = 1.0
@@ -660,7 +678,8 @@ class PickupFacilityState(MenuState):
         self.loaded = True
         self._save_state()
         self.refresh(keep_index=False)
-        self.ctx.audio.play("poi/dock_and_deliver", volume=0.75)
+        self.ctx.audio.play("poi/dock_and_deliver")
+        self.ctx.award_achievement("first_pickup")
         self.ctx.say(
             f"Loaded and sealed at {self.facility}. "
             f"{self.job.weight_tons:.0f} tons of {self.job.cargo.label} are "

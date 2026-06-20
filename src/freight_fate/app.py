@@ -9,10 +9,12 @@ import sys
 import pygame
 
 from . import __version__
+from .achievements import AchievementAward, award
 from .audio import AudioEngine
 from .data.world import World, get_world
 from .models.economy import Economy
 from .models.profile import Profile
+from .music import music_track_duration_s
 from .settings import Settings
 from .speech import Speech
 from .states.base import State
@@ -38,6 +40,13 @@ class GameContext:
         self.economy: Economy = app.economy
         self.profile: Profile | None = None
         self._real_weather = None
+        self._music_pool_positions: dict[tuple[str, tuple[str, ...]], int] = {}
+        self._music_pool_last: dict[str, str] = {}
+        self._music_rotation_pool: tuple[str, tuple[str, ...]] | None = None
+        self._music_rotation_track: str | None = None
+        self._music_rotation_elapsed_s = 0.0
+        self.achievement_notice = ""
+        self.achievement_notice_timer = 0.0
 
     def real_weather_provider(self):
         """Shared Open-Meteo provider when real weather is enabled, else None.
@@ -91,6 +100,84 @@ class GameContext:
         self.audio.set_volumes(master=self.settings.master_volume,
                                sfx=self.settings.sfx_volume,
                                music=self.settings.music_volume)
+
+    def next_music_track(self, pool_name: str, sequence: tuple[str, ...]) -> str:
+        """Advance a session-local music pool without immediate repeats."""
+        if not sequence:
+            return ""
+        if len(sequence) == 1:
+            track = sequence[0]
+            self._music_pool_last[pool_name] = track
+            return track
+        key = (pool_name, sequence)
+        index = (self._music_pool_positions.get(key, -1) + 1) % len(sequence)
+        if sequence[index] == self._music_pool_last.get(pool_name):
+            index = (index + 1) % len(sequence)
+        self._music_pool_positions[key] = index
+        track = sequence[index]
+        self._music_pool_last[pool_name] = track
+        return track
+
+    def play_music_sequence(
+            self,
+            pool_name: str,
+            sequence: tuple[str, ...],
+            *,
+            fade_ms: int = 1500,
+            advance: bool = False) -> str:
+        """Play or refresh a pool without jarring compatible menu restarts."""
+        if (not advance
+                and self._music_rotation_pool is not None
+                and self._music_rotation_track is not None
+                and self._music_rotation_pool[0] == pool_name):
+            self._music_rotation_pool = (pool_name, sequence)
+            return self._music_rotation_track
+        track = self.next_music_track(pool_name, sequence)
+        if not track:
+            self.clear_music_rotation()
+            return track
+        self._music_rotation_pool = (pool_name, sequence)
+        self._music_rotation_track = track
+        self._music_rotation_elapsed_s = 0.0
+        self.audio.play_music(track, fade_ms=fade_ms)
+        return track
+
+    def update_music_rotation(self, dt: float) -> None:
+        """Advance music beds when their one-shot playback ends."""
+        if self._music_rotation_pool is None or self._music_rotation_track is None:
+            return
+        self._music_rotation_elapsed_s += max(0.0, dt)
+        if self._music_rotation_elapsed_s < music_track_duration_s(
+                self._music_rotation_track):
+            return
+        pool_name, sequence = self._music_rotation_pool
+        self.play_music_sequence(pool_name, sequence, advance=True)
+
+    def clear_music_rotation(self) -> None:
+        self._music_rotation_pool = None
+        self._music_rotation_track = None
+        self._music_rotation_elapsed_s = 0.0
+
+    def award_achievement(
+            self,
+            achievement_id: str,
+            *,
+            event: bool = False,
+            interrupt: bool = False,
+            announce: bool = True) -> AchievementAward | None:
+        if self.profile is None:
+            return None
+        result = award(self.profile, achievement_id)
+        if result is None:
+            return None
+        self.profile.save()
+        self.achievement_notice = result.message
+        self.achievement_notice_timer = 12.0
+        if not announce:
+            return result
+        self.audio.play("ui/level_up", volume=0.8)
+        self.say(result.message, interrupt=interrupt)
+        return result
 
 
 class App:
@@ -162,6 +249,13 @@ class App:
                         self.state.handle_event(event)
                 if self.state is not None:
                     self.state.update(dt)
+                if self.ctx.achievement_notice_timer > 0:
+                    self.ctx.achievement_notice_timer = max(
+                        0.0,
+                        self.ctx.achievement_notice_timer - dt,
+                    )
+                    if self.ctx.achievement_notice_timer == 0:
+                        self.ctx.achievement_notice = ""
                 self.render()
                 frames += 1
                 if max_frames is not None and frames >= max_frames:
@@ -174,7 +268,12 @@ class App:
         state = self.state
         if state is not None:
             y = 30
-            for i, line in enumerate(state.lines()[:18]):
+            base_lines = state.lines()
+            if self.ctx.achievement_notice:
+                lines = base_lines[:16] + ["", self.ctx.achievement_notice]
+            else:
+                lines = base_lines[:18]
+            for i, line in enumerate(lines[:18]):
                 font = self.font_big if i == 0 else self.font
                 color = HILIGHT_COLOR if line.startswith("> ") else TEXT_COLOR
                 surf = font.render(line, True, color)

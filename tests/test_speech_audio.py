@@ -187,5 +187,7 @@ def test_all_referenced_assets_exist():
 
 
 def test_music_tracks_exist():
-    for track in ("menu_theme", "open_road", "night_haul"):
+    from freight_fate.music import ALL_MUSIC_TRACKS
+
+    for track in (track.key for track in ALL_MUSIC_TRACKS):
         assert (ASSETS / "music" / f"{track}.ogg").exists(), track

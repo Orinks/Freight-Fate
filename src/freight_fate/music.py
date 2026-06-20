@@ -1,0 +1,136 @@
+"""Music catalog and deterministic track selection."""
+
+from __future__ import annotations
+
+import zlib
+from dataclasses import dataclass
+
+from .sim.hos import is_night
+
+
+@dataclass(frozen=True)
+class MusicTrack:
+    key: str
+    title: str
+    description: str
+    duration_s: float
+
+
+MENU_TRACKS: tuple[MusicTrack, ...] = (
+    MusicTrack("menu_theme", "Headlights West", "Warm Americana for new careers", 128.4),
+    MusicTrack("menu_first_rig", "Keys To The Rig", "Easy country-rock milestone bed", 75.0),
+    MusicTrack("menu_regional_carrier", "Regional Lines", "Confident heartland rock bed", 75.0),
+    MusicTrack("menu_fleet_owner", "Yard Lights", "Steady fleet-owner menu bed", 75.0),
+    MusicTrack("menu_coast_to_coast", "Coast To Coast Ledger", "Broad road-trip menu bed", 75.0),
+    MusicTrack("menu_legendary_haul", "Million Mile Morning", "Late-career Americana bed", 75.0),
+)
+
+DAY_DRIVE_TRACKS: tuple[MusicTrack, ...] = (
+    MusicTrack("open_road", "Open Road", "Easy mid-tempo groove for long hauls", 131.6),
+    MusicTrack("drive_desert_two_lane", "Desert Two-Lane", "Dry, spacious daytime road bed", 75.0),
+    MusicTrack("drive_mountain_grade", "Mountain Grade", "Measured climb-focused road bed", 75.0),
+    MusicTrack("drive_rain_day_cruise", "Rain-Day Cruise", "Gentle rainy daytime drive bed", 75.0),
+    MusicTrack("drive_urban_roll", "Urban Roll", "Light city traffic drive bed", 75.0),
+    MusicTrack("drive_dawn_push", "Dawn Push", "Soft early-morning drive bed", 75.0),
+)
+
+NIGHT_DRIVE_TRACKS: tuple[MusicTrack, ...] = (
+    MusicTrack("night_haul", "Night Haul", "Slow ambient pads for night driving", 204.76),
+    MusicTrack("night_midnight_interstate", "Midnight Interstate", "Low night highway bed", 75.0),
+    MusicTrack("night_neon_truck_stop", "Neon Truck Stop", "Soft truck-stop approach bed", 75.0),
+    MusicTrack("night_rainy_miles", "Rainy Night Miles", "Sparse rainy night bed", 75.0),
+    MusicTrack("night_lonely_plains", "Lonely Plains", "Open nighttime plains bed", 75.0),
+    MusicTrack("night_mountain_pass", "Mountain Night Pass", "Quiet mountain night bed", 75.0),
+)
+
+
+ALL_MUSIC_TRACKS: tuple[MusicTrack, ...] = (
+    MENU_TRACKS + DAY_DRIVE_TRACKS + NIGHT_DRIVE_TRACKS
+)
+
+_TRACKS_BY_KEY = {track.key: track for track in ALL_MUSIC_TRACKS}
+
+
+def select_menu_music(profile) -> str:
+    """Choose a menu bed from the player's broad career milestone."""
+    return MENU_TRACKS[_menu_milestone_index(profile)].key
+
+
+def _menu_milestone_index(profile) -> int:
+    if profile is None:
+        return 0
+    career = profile.career
+    level = career.level
+    deliveries = career.deliveries
+    miles = career.total_miles
+    owned = set(getattr(profile, "owned_trucks", ()))
+    truck = getattr(profile, "truck", "rig")
+    if level >= 9 or deliveries >= 40 or miles >= 20_000:
+        return 5
+    if level >= 7 or miles >= 10_000:
+        return 4
+    if level >= 5 or len(owned) >= 2:
+        return 3
+    if level >= 3 or miles >= 2_500:
+        return 2
+    if level >= 2 or deliveries >= 3 or truck != "rig":
+        return 1
+    return 0
+
+
+def select_menu_music_sequence(profile) -> tuple[str, ...]:
+    """Return a milestone-aware menu playlist with at least a small pool."""
+    primary_index = _menu_milestone_index(profile)
+    unlocked_count = max(2, primary_index + 1)
+    options = MENU_TRACKS[:unlocked_count]
+    primary = MENU_TRACKS[primary_index].key
+    career = getattr(profile, "career", None)
+    seed_key = "|".join((
+        str(getattr(profile, "name", "")),
+        str(getattr(profile, "current_city", "")),
+        str(getattr(career, "deliveries", 0)),
+        str(int(getattr(career, "total_miles", 0))),
+        primary,
+    ))
+    rest = sorted(
+        (track for track in options if track.key != primary),
+        key=lambda track: zlib.crc32(f"{seed_key}|{track.key}".encode()),
+    )
+    return (primary, *(track.key for track in rest))
+
+
+def _route_key(route) -> str:
+    pieces = [
+        ",".join(getattr(route, "cities", ()) or ()),
+        ",".join(getattr(route, "highways", ()) or ()),
+        str(getattr(route, "terrain_summary", "")),
+    ]
+    return "|".join(pieces)
+
+
+def select_drive_music_sequence(
+    route,
+    trip_seed: int,
+    hour: float,
+    weather_kind=None,
+) -> tuple[str, ...]:
+    """Return a stable, deterministic day or night driving playlist."""
+    options = NIGHT_DRIVE_TRACKS if is_night(hour) else DAY_DRIVE_TRACKS
+    weather = getattr(weather_kind, "name", str(weather_kind or ""))
+    seed_key = f"{trip_seed}|{weather}|{_route_key(route)}"
+    ordered = sorted(
+        options,
+        key=lambda track: zlib.crc32(f"{seed_key}|{track.key}".encode()),
+    )
+    return tuple(track.key for track in ordered)
+
+
+def select_drive_music(route, trip_seed: int, hour: float, weather_kind=None) -> str:
+    """Choose a stable day/night music bed for a trip context."""
+    return select_drive_music_sequence(route, trip_seed, hour, weather_kind)[0]
+
+
+def music_track_duration_s(track: str) -> float:
+    """Best-known duration for slow playlist rotation."""
+    info = _TRACKS_BY_KEY.get(track)
+    return info.duration_s if info is not None else 60.0

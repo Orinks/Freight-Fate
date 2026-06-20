@@ -848,6 +848,31 @@ def test_settings_menu_saves_each_change():
         app.shutdown()
 
 
+def test_settings_menu_volume_survives_new_app_session():
+    from freight_fate.app import App
+    from freight_fate.settings import Settings
+    from freight_fate.states.main_menu import SettingsState
+
+    app = App()
+    try:
+        state = SettingsState(app.ctx)
+        app.push_state(state)
+        while not state.items[state.index].text.startswith("Music volume"):
+            state.handle_event(key_event(pygame.K_DOWN))
+        state.handle_event(key_event(pygame.K_RIGHT))
+        assert app.ctx.settings.music_volume == 0.6
+        assert Settings.load().music_volume == 0.6
+    finally:
+        app.shutdown()
+
+    next_app = App()
+    try:
+        assert next_app.ctx.settings.music_volume == 0.6
+        assert next_app.ctx.audio.music_volume == 0.6
+    finally:
+        next_app.shutdown()
+
+
 def test_settings_menu_f1_has_help_for_every_item():
     from freight_fate.app import App
     from freight_fate.states.main_menu import SettingsState

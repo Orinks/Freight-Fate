@@ -46,11 +46,14 @@ def test_picking_a_city_sets_the_profile_start_city():
     from freight_fate.states.city import CityMenuState
 
     app = App()
+    ambient = []
+    app.ctx.audio.set_ambient = lambda key, volume=1.0: ambient.append((key, volume))
     try:
         picker = open_picker(app, name="Southerner")
         # first-letter navigation, like every other menu
         while not picker.items[picker.index].text.startswith("Atlanta"):
             picker.handle_event(key_event(ord("a"), "a"))
+        ambient.clear()
         picker.handle_event(key_event(pygame.K_RETURN))
         assert isinstance(app.state, CityMenuState)
         p = app.ctx.profile
@@ -58,6 +61,7 @@ def test_picking_a_city_sets_the_profile_start_city():
         assert p.current_city == "Atlanta"
         assert app.state.title == "Atlanta Company Yard"
         assert app.state.items[app.state.index].text == "Dispatch board"
+        assert ("poi/facility_gate", 1.0) in ambient
         # the choice is already persisted to disk
         assert Profile.load(p.path).current_city == "Atlanta"
     finally:
@@ -186,6 +190,7 @@ def test_choose_career_loads_an_older_save_without_deleting_the_newest():
 def test_manage_careers_deletes_selected_save_without_touching_others():
     from freight_fate.app import App
     from freight_fate.models.profile import Profile
+    from freight_fate.music import music_track_duration_s
     from freight_fate.states.main_menu import (
         CareerActionsState,
         ConfirmCareerActionState,
@@ -194,13 +199,19 @@ def test_manage_careers_deletes_selected_save_without_touching_others():
     )
 
     app = App()
+    played = []
+    app.ctx.audio.play_music = lambda track, fade_ms=1500: played.append(track)
     try:
         keep = Profile(name="Keep Me", current_city="Denver")
         keep_path = keep.save()
         delete = Profile(name="Delete Me", current_city="Atlanta")
+        delete.career.total_miles = 10_000
         delete_path = delete.save()
+        newer_time = keep_path.stat().st_mtime + 10.0
+        os.utime(delete_path, (newer_time, newer_time))
 
         app.push_state(MainMenuState(app.ctx))
+        assert played == ["menu_coast_to_coast"]
         while app.state.items[app.state.index].text != "Manage careers":
             app.state.handle_event(key_event(pygame.K_DOWN))
         app.state.handle_event(key_event(pygame.K_RETURN))
@@ -219,6 +230,9 @@ def test_manage_careers_deletes_selected_save_without_touching_others():
         app.state.handle_event(key_event(pygame.K_RETURN))
 
         assert isinstance(app.state, MainMenuState)
+        assert played == ["menu_coast_to_coast"]
+        app.state.update(music_track_duration_s("menu_coast_to_coast") + 0.1)
+        assert played == ["menu_coast_to_coast", "menu_theme"]
         assert keep_path.exists()
         assert not delete_path.exists()
         labels = [item.text for item in app.state.items]

@@ -12,6 +12,7 @@ import random
 
 import pygame
 
+from ..achievements import add_unique_stat
 from ..data.world import Route
 from ..models.jobs import Job, job_from_payload, job_payload
 from ..models.settlement import (
@@ -19,12 +20,17 @@ from ..models.settlement import (
     charge_summary,
     charge_total,
 )
+from ..music import (
+    music_track_duration_s,
+    select_drive_music_sequence,
+    select_menu_music_sequence,
+)
 from ..sim import hos
 from ..sim.hos import HosClock, clock_text, is_night, time_of_day
 from ..sim.transmission import REVERSE
 from ..sim.trip import Trip, TripEventKind
 from ..sim.vehicle import G, TruckState
-from ..sim.weather import WeatherSystem
+from ..sim.weather import WeatherKind, WeatherSystem
 from .base import MenuItem, MenuState, State
 
 log = logging.getLogger(__name__)
@@ -123,6 +129,14 @@ class DrivingState(State):
         self.trip = Trip(route, self.truck, self.weather,
                          time_scale=ctx.settings.time_scale, seed=self.trip_seed,
                          start_hour=trip_start_hour)
+        self._day_music_sequence = select_drive_music_sequence(
+            self.route, self.trip_seed, 12.0, self.weather.current)
+        self._night_music_sequence = select_drive_music_sequence(
+            self.route, self.trip_seed, 0.0, self.weather.current)
+        self._day_music_index = 0
+        self._night_music_index = 0
+        self._music_elapsed_s = 0.0
+        self._music_night = is_night(trip_start_hour)
         self.tutorial = Tutorial(ctx) if not profile.tutorial_done else None
 
         self.hos = profile.hos          # shift clock lives on the profile
@@ -242,8 +256,9 @@ class DrivingState(State):
     # -- lifecycle ---------------------------------------------------------------
 
     def enter(self) -> None:
+        self.ctx.clear_music_rotation()
         self.ctx.audio.stop_music(800)
-        self.ctx.audio.play_music("open_road", fade_ms=2500)
+        self._play_current_music(fade_ms=2500)
         self.ctx.audio.set_weather(self.weather.effects.sound)
         self.ctx.audio.set_wind(self.weather.effects.wind)
         mode = "automatic" if self.truck.transmission.automatic else "manual"
@@ -280,6 +295,23 @@ class DrivingState(State):
                          interrupt=False)
         if self.tutorial:
             self.tutorial.begin()
+        if self.phase == DRIVE_PHASE_DELIVERY:
+            self._record_weather_achievement(event=False)
+            if not self.truck.transmission.automatic:
+                self.ctx.award_achievement("manual_driver", event=False, interrupt=False)
+
+    def _record_weather_achievement(self, *, event: bool = True) -> None:
+        p = self.ctx.profile
+        if p is None:
+            return
+        kind = self.weather.current
+        add_unique_stat(p, "weather_seen", kind.name)
+        if kind in {WeatherKind.RAIN, WeatherKind.HEAVY_RAIN}:
+            self.ctx.award_achievement("rain_driver", event=event)
+        elif kind in {WeatherKind.SNOW, WeatherKind.WIND}:
+            self.ctx.award_achievement("winter_or_wind", event=event)
+        elif kind in {WeatherKind.FOG, WeatherKind.THUNDERSTORM}:
+            self.ctx.award_achievement("low_visibility", event=event)
 
     def exit(self) -> None:
         self.ctx.audio.stop_world()
@@ -334,11 +366,10 @@ class DrivingState(State):
         elif key == pygame.K_F1:
             objective_help = (
                 f"Your current objective is pickup: drive to {self._pickup_facility_text()}, "
-                "come to a full stop at the gate, then use the pickup facility "
-                "menu to check in and load. "
+                "stop at the gate, then check in and load. "
                 if self.phase == DRIVE_PHASE_PICKUP else
-                "Pickup and loading are complete. At your destination, come to a "
-                "full stop, then dock and deliver from the facility menu. ")
+                "Pickup and loading are complete. At your destination, stop, "
+                "then dock and deliver. ")
             self.ctx.say(
                 "Hold Up arrow to accelerate, Down arrow to brake. "
                 "When stopped in automatic, hold Down arrow to reverse slowly; "
@@ -406,7 +437,7 @@ class DrivingState(State):
         t = self.truck
         if t.parking_brake:
             if t.release_parking_brake():
-                self.ctx.audio.play("ui/notify", volume=0.55)
+                self.ctx.audio.play("vehicle/brake_release", volume=0.65)
                 self._set_status("Parking brake released.")
                 self.ctx.say("Parking brake released. Air pressure "
                              f"{t.air_pressure_psi:.0f} psi.")
@@ -422,7 +453,7 @@ class DrivingState(State):
         t.set_parking_brake()
         t.throttle = 0.0
         self._cancel_cruise()
-        self.ctx.audio.play("ui/notify", volume=0.55)
+        self.ctx.audio.play("vehicle/brake_set", volume=0.65)
         self._set_status("Parking brake set.")
         self.ctx.say(f"Parking brake set. Air pressure {t.air_pressure_psi:.0f} psi.")
 
@@ -712,7 +743,7 @@ class DrivingState(State):
         self._update_exit(self.trip.position_mi - pos_before)
 
         self._update_hours_and_fatigue(dt)
-        self._update_audio()
+        self._update_audio(dt)
         self._update_announcements(dt)
         self._update_hazard(dt)
         self._update_speeding(dt)
@@ -778,6 +809,7 @@ class DrivingState(State):
                 text = f"Air pressure ready at {t.air_pressure_psi:.0f} psi."
                 self._set_status("Air ready.")
             self.ctx.say_event(text, interrupt=False)
+            self.ctx.award_achievement("air_ready", event=True)
         elif not t.air_ready:
             self._air_ready_said = False
 
@@ -854,7 +886,7 @@ class DrivingState(State):
                 else:
                     self.ctx.audio.play("driver/yawn", volume=0.8)
 
-    def _update_audio(self) -> None:
+    def _update_audio(self, dt: float = 0.0) -> None:
         t = self.truck
         audio = self.ctx.audio
         if t.engine_on and not audio.engine_running:
@@ -864,14 +896,43 @@ class DrivingState(State):
         eff = self.weather.effects
         audio.set_weather(eff.sound)
         audio.set_wind(eff.wind)
-        if is_night(self.trip.current_hour):
-            audio.set_ambient("ambient/night", volume=0.3)
-            audio.play_music("night_haul", fade_ms=4000)
+        night = is_night(self.trip.current_hour)
+        if night:
+            audio.set_ambient("ambient/night")
         else:
             audio.set_ambient(None)
-            audio.play_music("open_road", fade_ms=4000)
+        self._update_music_rotation(night, dt)
         if self.weather.should_thunder():
-            audio.play("weather/thunder", volume=0.9)
+            audio.play("weather/thunder")
+
+    def _current_music_track(self) -> str:
+        if self._music_night:
+            return self._night_music_sequence[self._night_music_index]
+        return self._day_music_sequence[self._day_music_index]
+
+    def _play_current_music(self, fade_ms: int = 4000) -> None:
+        self.ctx.audio.play_music(self._current_music_track(), fade_ms=fade_ms)
+
+    def _update_music_rotation(self, night: bool, dt: float) -> None:
+        if night != self._music_night:
+            self._music_night = night
+            self._music_elapsed_s = 0.0
+            self._play_current_music(fade_ms=4000)
+            return
+        self._music_elapsed_s += max(0.0, dt)
+        current = self._current_music_track()
+        if self._music_elapsed_s < music_track_duration_s(current):
+            return
+        self._music_elapsed_s = 0.0
+        if night:
+            self._night_music_index = (
+                self._night_music_index + 1
+            ) % len(self._night_music_sequence)
+        else:
+            self._day_music_index = (
+                self._day_music_index + 1
+            ) % len(self._day_music_sequence)
+        self._play_current_music(fade_ms=4000)
 
     def _sync_weather_source(self) -> None:
         real = self.ctx.settings.real_weather
@@ -915,6 +976,7 @@ class DrivingState(State):
         if self.truck.speed_mph <= HAZARD_SAFE_MPH:
             self._hazard_deadline = None
             self.ctx.say_event("Hazard avoided. Well done.", interrupt=False)
+            self.ctx.award_achievement("hazard_avoided", event=True)
             return
         self._hazard_deadline -= dt
         if self._hazard_deadline <= 0:
@@ -963,19 +1025,38 @@ class DrivingState(State):
             self._handle_inspection(event)
         elif kind == TripEventKind.WEATHER_CHANGE:
             self.ctx.say_event(event.message, interrupt=False)
+            self._record_weather_achievement()
         elif kind == TripEventKind.TOLL_CHARGED:
-            self.ctx.audio.play(sound or "ui/notify", volume=0.55)
+            self.ctx.audio.play(sound or "ui/notify")
             self.ctx.say_event(event.message, interrupt=False)
+            self.ctx.award_achievement("toll_paid", event=True)
+        elif kind == TripEventKind.STATE_CROSSING:
+            cue = event.data.get("cue")
+            state = getattr(cue, "near_text", event.message)
+            add_unique_stat(self.ctx.profile, "states_crossed", str(state))
+            if sound is not None:
+                self.ctx.audio.play(sound)
+            self.ctx.say_event(event.message, interrupt=False)
+            self.ctx.award_achievement("state_crossing", event=True)
         elif kind == TripEventKind.ARRIVED:
             pass  # handled by _arrive()
         elif self._event_disables_cruise(event):
             self._cancel_cruise_for_restricted_area(event.message)
         else:
             if sound is not None and kind != TripEventKind.ZONE_ENTER:
-                self.ctx.audio.play(sound, volume=0.65)
+                self.ctx.audio.play(sound)
             self.ctx.say_event(event.message, interrupt=False)
         if kind == TripEventKind.ZONE_ENTER:
-            self.ctx.audio.play(sound or "ui/notify", volume=0.7)
+            self.ctx.audio.play(sound or "ui/notify")
+            zone = event.data.get("zone")
+            if getattr(zone, "reason", "") == "construction":
+                self.ctx.award_achievement("construction_zone", event=True)
+            elif getattr(zone, "reason", "") == "heavy traffic":
+                self.ctx.award_achievement("traffic_slowing", event=True)
+        if kind == TripEventKind.GPS_CUE:
+            cue = event.data.get("cue")
+            if getattr(cue, "kind", "") == "traffic":
+                self.ctx.award_achievement("traffic_slowing", event=True)
 
     def _event_disables_cruise(self, event) -> bool:
         if self._cruise_mph is None:
@@ -991,7 +1072,7 @@ class DrivingState(State):
 
     def _cancel_cruise_for_restricted_area(self, message: str) -> None:
         self._cancel_cruise()
-        self.ctx.audio.play("ui/notify", volume=0.55)
+        self.ctx.audio.play("ui/notify")
         self.ctx.say_event(
             f"{message} Adaptive cruise disabled; take manual speed control.",
             interrupt=False,
@@ -1028,9 +1109,11 @@ class DrivingState(State):
                 "your ELD clock.",
                 interrupt=True,
             )
+            self.ctx.award_achievement("inspection", event=True)
             self._place_out_of_service()
             return
         self.ctx.say_event(message, interrupt=True)
+        self.ctx.award_achievement("inspection", event=True)
 
     def _place_out_of_service(self) -> None:
         _advance_rest_clock(self, OUT_OF_SERVICE_MIN)
@@ -1058,6 +1141,7 @@ class DrivingState(State):
             self.ctx.push_state(ParkingFullState(self.ctx, self, stop))
             return
         self.ctx.push_state(RestStopState(self.ctx, self, stop))
+        self.ctx.award_achievement("first_rest_stop")
 
     def _take_exit(self) -> None:
         if self._ramp_mi is not None:
@@ -1220,11 +1304,10 @@ class DrivingState(State):
         self._arrival_stop_said = True
         self._cancel_cruise()
         self.ctx.audio.play("ui/warning")
-        self._set_status("Pickup facility ahead: slow down and park to load.")
+        self._set_status("Pickup ahead: slow below 3 mph.")
         self.ctx.say_event(
-            f"Pickup facility ahead: {self._pickup_facility_text()}. "
-            f"Slow below {DELIVERY_PARK_MPH:.0f} miles per hour, then come "
-            "to a full stop to check in and load.",
+            f"Pickup ahead: {self._pickup_facility_text()}. "
+            f"Slow below {DELIVERY_PARK_MPH:.0f} mph.",
             interrupt=True)
 
     def _handle_pickup_creep(self) -> None:
@@ -1233,10 +1316,9 @@ class DrivingState(State):
         self._arrival_full_stop_said = True
         self._cancel_cruise()
         self.ctx.audio.play("ui/notify", volume=0.7)
-        self._set_status("Pickup gate reached: come to a full stop to load.")
+        self._set_status("Pickup gate: stop to check in.")
         self.ctx.say_event(
-            f"You are at {self._pickup_facility_text()}. Hold the brake and "
-            "come to a full stop; the pickup facility menu opens when stopped.",
+            f"At {self._pickup_facility_text()}. Stop to check in.",
             interrupt=False)
 
     def _open_pickup_arrival(self) -> None:
@@ -1256,7 +1338,7 @@ class DrivingState(State):
         p.market.advance_to(p.market_day())
         p.active_trip = pickup_snapshot(self.job, air_brake=self.truck.air_brake_snapshot())
         self.ctx.save_profile()
-        self._set_status("Parked at pickup. Check in and load from the facility menu.")
+        self._set_status("Parked at pickup. Check in and load.")
         self.ctx.replace_state(PickupFacilityState(self.ctx, self.job, driving=self))
 
     def _arrive(self) -> None:
@@ -1274,11 +1356,10 @@ class DrivingState(State):
         self._arrival_stop_said = True
         self._cancel_cruise()
         self.ctx.audio.play("ui/warning")
-        self._set_status("Destination reached: slow down and park to deliver.")
+        self._set_status("Destination ahead: slow below 3 mph.")
         self.ctx.say_event(
-            f"Destination facility ahead: {self._destination_facility_text()}. "
-            f"Slow below {DELIVERY_PARK_MPH:.0f} miles per hour, then come "
-            "to a full stop to open the facility menu.",
+            f"Destination ahead: {self._destination_facility_text()}. "
+            f"Slow below {DELIVERY_PARK_MPH:.0f} mph.",
             interrupt=True)
 
     def _handle_arrival_creep(self) -> None:
@@ -1287,10 +1368,9 @@ class DrivingState(State):
         self._arrival_full_stop_said = True
         self._cancel_cruise()
         self.ctx.audio.play("ui/notify", volume=0.7)
-        self._set_status("Destination gate reached: come to a full stop to dock.")
+        self._set_status("Destination gate: stop to dock.")
         self.ctx.say_event(
-            f"You are at {self._destination_facility_text()}. Hold the brake "
-            "and come to a full stop; the facility menu opens when stopped.",
+            f"At {self._destination_facility_text()}. Stop to dock.",
             interrupt=False)
 
     def _open_facility_arrival(self) -> None:
@@ -1301,7 +1381,7 @@ class DrivingState(State):
         self.truck.throttle = 0.0
         self.truck.brake = 1.0
         self.truck.set_parking_brake()
-        self._set_status("Parked at destination. Dock and deliver from the facility menu.")
+        self._set_status("Parked at destination. Dock and deliver.")
         self.ctx.replace_state(FacilityArrivalState(self.ctx, self))
 
     def _destination_facility_text(self) -> str:
@@ -1526,7 +1606,7 @@ class RestStopState(MenuState):
         return self.stop.spoken_name
 
     def announce_entry(self) -> None:
-        self.ctx.audio.set_ambient(_poi_ambient_key(self.stop), volume=0.35)
+        self.ctx.audio.set_ambient(_poi_ambient_key(self.stop))
         self.ctx.say(f"{self.stop.spoken_name}. "
                      f"{self.stop.parking_text}. "
                      f"It is {clock_text(self.driving.trip.current_hour)}. "
@@ -1618,6 +1698,7 @@ class RestStopState(MenuState):
         self.ctx.say(f"Refueled {need:.0f} gallons for {cost:,.0f} dollars. "
                      f"You have {p.money:,.0f} dollars. Fueling took "
                      f"{FUEL_STOP_MIN:.0f} minutes.")
+        self.ctx.award_achievement("route_refuel")
         self.refresh()
 
     def _take_break(self) -> None:
@@ -1632,6 +1713,7 @@ class RestStopState(MenuState):
                      f"It is {clock_text(d.trip.current_hour)}. "
                      f"Your break requirement is reset and you feel a little "
                      f"fresher. {_deadline_text(d)}")
+        self.ctx.award_achievement("break_taken")
 
     def _food_break(self) -> None:
         d = self.driving
@@ -1648,6 +1730,7 @@ class RestStopState(MenuState):
     def _sleep(self) -> None:
         d = self.driving
         p = self.ctx.profile
+        before_fatigue = p.fatigue
         _advance_rest_clock(d, hos.SLEEP_MIN)
         d.hos.sleep()
         p.fatigue = hos.rest_sleep(p.fatigue)
@@ -1656,6 +1739,9 @@ class RestStopState(MenuState):
         self.ctx.say(f"You slept 10 hours and woke rested. "
                      f"It is {clock_text(d.trip.current_hour)}. "
                      f"Hours of service reset. {_deadline_text(d)}")
+        self.ctx.award_achievement("slept_on_route")
+        if before_fatigue < hos.FATIGUE_SEVERE:
+            self.ctx.award_achievement("sleep_before_exhaustion")
 
     def _repair(self) -> None:
         d = self.driving
@@ -1678,6 +1764,7 @@ class RestStopState(MenuState):
         self.ctx.say(f"Truck repaired for {cost:,.0f} dollars. "
                      f"It is {clock_text(d.trip.current_hour)}. "
                      f"You have {p.money:,.0f} dollars. {_deadline_text(d)}")
+        self.ctx.award_achievement("garage_repair")
 
     def _roadside_assistance(self) -> None:
         d = self.driving
@@ -1707,6 +1794,7 @@ class RestStopState(MenuState):
         self.ctx.say(f"Inspection check-in complete at {self.stop.spoken_name}. "
                      f"It is {clock_text(d.trip.current_hour)}. "
                      f"{_deadline_text(d)}")
+        self.ctx.award_achievement("inspection")
 
     def _save_here(self, *, silent: bool = False) -> None:
         d = self.driving
@@ -1741,7 +1829,7 @@ class ParkingFullState(MenuState):
         self.stop = stop
 
     def announce_entry(self) -> None:
-        self.ctx.audio.set_ambient("poi/rest_stop_night", volume=0.35)
+        self.ctx.audio.set_ambient("poi/rest_stop_night")
         self.ctx.say(f"The truck parking at {self.stop.spoken_name} is full tonight. "
                      f"It is {clock_text(self.driving.trip.current_hour)}. "
                      f"{self.current_text()}")
@@ -1966,9 +2054,8 @@ class PauseMenuState(MenuState):
 class FacilityArrivalState(MenuState):
     title = "Destination facility"
     open_sound_key = "facility/dock_gate"
-    intro_help = ("Use up and down arrows to navigate, Enter to select. "
-                  "Check paperwork reviews the estimate. Dock and deliver "
-                  "completes the delivery.")
+    intro_help = ("Use arrows to navigate, Enter to select. "
+                  "Dock and deliver completes the job.")
 
     def __init__(self, ctx, driving: DrivingState) -> None:
         super().__init__(ctx)
@@ -1978,37 +2065,37 @@ class FacilityArrivalState(MenuState):
     def facility(self) -> str:
         return self.driving._destination_facility_text()
 
+    def enter(self) -> None:
+        sequence = select_menu_music_sequence(self.ctx.profile)
+        self.ctx.play_music_sequence("menu", sequence)
+        super().enter()
+
     def announce_entry(self) -> None:
-        self.ctx.audio.set_ambient("poi/facility_gate", volume=0.35)
+        self.ctx.audio.set_ambient("poi/facility_gate")
         self.ctx.say(
-            f"Arrived at {self.facility}. You are parked at the gate. "
-            f"{self.current_text()}")
+            f"At {self.facility}. {self.current_text()}")
 
     def build_items(self) -> list[MenuItem]:
         return [
             MenuItem("Dock and deliver", self._dock,
-                     help="Back into the assigned dock, set the brakes, and "
-                          "hand off the paperwork to complete this delivery."),
+                     help="Back into the dock and complete this delivery."),
             MenuItem("Check paperwork", self._paperwork,
-                     help="Review estimated pay, deadline, cargo condition, "
-                          "and any late or damage considerations without "
-                          "settling the delivery."),
+                     help="Review pay, deadline, cargo condition, and charges."),
             MenuItem("Check arrival status", self._status,
-                     help="Hear the destination facility, cargo, speed, and "
-                          "delivery instruction again."),
+                     help="Hear the facility, cargo, speed, and next step."),
         ]
 
     def _dock(self) -> None:
         d = self.driving
         if d.truck.speed_mph > DOCKING_MAX_MPH:
             self.ctx.audio.play("ui/error")
-            self.ctx.say("Hold the brake and come to a full stop before docking.")
+            self.ctx.say("Stop before docking.")
             return
         d.truck.throttle = 0.0
         d.truck.brake = 1.0
         d.truck.set_parking_brake()
         d._set_status("Docked. Delivery paperwork signed.")
-        self.ctx.audio.play("poi/dock_and_deliver", volume=0.75)
+        self.ctx.audio.play("poi/dock_and_deliver")
         self.ctx.say(
             f"Docked at {self.facility}. Trailer secured and paperwork signed.",
             interrupt=True)
@@ -2046,8 +2133,7 @@ class FacilityArrivalState(MenuState):
             f"Driver-responsibility charges are estimated at "
             f"{driver_charges:,.0f} dollars, for estimated net driver pay "
             f"{net_estimated_pay:,.0f}. "
-            f"{timing}. {cargo_condition} Dock and deliver when ready; "
-            "checking paperwork does not settle the load.")
+            f"{timing}. {cargo_condition} Dock and deliver to settle.")
 
     def _status(self) -> None:
         d = self.driving
@@ -2055,11 +2141,10 @@ class FacilityArrivalState(MenuState):
             f"At {self.facility}. Hauling {d.job.weight_tons:.0f} tons of "
             f"{d.job.cargo.label}. Current speed "
             f"{self.ctx.settings.speed_text(d.truck.speed_mph)}. "
-            "Select Dock and deliver when stopped to complete the delivery.")
+            "Stop, then Dock and deliver.")
 
     def go_back(self) -> None:
-        self.ctx.say("You are checked in at the destination. Select Dock and "
-                     "deliver to complete the job.")
+        self.ctx.say("At destination. Dock and deliver to finish.")
 
     def lines(self) -> list[str]:
         return [
@@ -2082,6 +2167,7 @@ class ArrivalState(MenuState):
         super().__init__(ctx)
         self.driving = driving
         self.summary_parts: list[str] = []
+        self._achievement_messages: list[str] = []
         self.terminal = ctx.world.home_terminal(driving.job.destination)
         self._settle()
 
@@ -2137,15 +2223,78 @@ class ArrivalState(MenuState):
                 f"The cargo run added {trip_damage:.0f} percent truck damage. "
                 "Visit the garage when you can.")
         self.summary_parts.extend(announcements)
+        self._award_arrival_achievements(
+            on_time=on_time,
+            trip_damage=trip_damage,
+            toll_expense=toll_expense,
+            route_miles=d.route.miles,
+            speeding_strikes=d.speeding_strikes,
+        )
+        self.summary_parts.extend(self._achievement_messages)
         self._announcements = announcements
+
+    def _award_arrival_achievements(
+            self,
+            *,
+            on_time: bool,
+            trip_damage: float,
+            toll_expense: float,
+            route_miles: float,
+            speeding_strikes: int) -> None:
+        p = self.ctx.profile
+        route = self.driving.route
+        world = self.ctx.world
+        states = {world.cities[city].state for city in route.cities}
+        regions = {world.cities[city].region for city in route.cities}
+        region_count = 0
+        for region in regions:
+            region_count = add_unique_stat(p, "regions_visited", region)
+
+        ids = ["first_delivery"]
+        if on_time:
+            ids.append("first_on_time")
+        if trip_damage <= 1.0:
+            ids.append("clean_delivery")
+        if speeding_strikes == 0:
+            ids.append("speed_limit_saint")
+        if toll_expense > 0:
+            ids.append("toll_paid")
+        elif route_miles >= 300.0:
+            ids.append("no_toll_long")
+        if len(states) >= 2:
+            ids.append("state_crossing")
+        if len(states) >= 3:
+            ids.append("multi_state")
+        if len(regions) >= 3 or region_count >= 3:
+            ids.append("three_regions")
+        if route_miles >= 900.0:
+            ids.append("long_haul")
+        if p.career.deliveries >= 5:
+            ids.append("five_deliveries")
+        if p.career.deliveries >= 10:
+            ids.append("ten_deliveries")
+        if p.career.level >= 3:
+            ids.append("level_three")
+        if p.money >= 25_000.0:
+            ids.append("twenty_five_grand")
+        if p.career.total_miles >= 1_000.0:
+            ids.append("thousand_miles")
+
+        for achievement_id in ids:
+            result = self.ctx.award_achievement(achievement_id, announce=False)
+            if result is not None:
+                self._achievement_messages.append(result.message)
+        self.ctx.save_profile()
 
     def enter(self) -> None:
         self.ctx.audio.stop_world()
         self.ctx.audio.play("ui/job_complete")
-        if self._announcements:
+        if self._announcements or self._achievement_messages:
             self.ctx.audio.play("ui/level_up")
         self.ctx.audio.play("ui/cash")
-        super().enter()
+        self.items = self.build_items()
+        self.index = min(self.index, max(0, len(self.items) - 1))
+        self.announce_entry()
 
     def announce_entry(self) -> None:
         self.ctx.say(" ".join(self.summary_parts) +

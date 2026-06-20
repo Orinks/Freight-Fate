@@ -131,13 +131,13 @@ def test_pickup_facility_waits_for_full_stop(monkeypatch):
 
         arrive_at_pickup(app, speed_mps=26.8)
         assert isinstance(app.state, DrivingState)
-        assert "Pickup facility ahead" in events[-1]
-        assert "full stop to check in and load" in events[-1]
+        assert "Pickup ahead" in events[-1]
+        assert "Slow below 3 mph" in events[-1]
 
         driving.truck.velocity_mps = 1.1
         driving.update(1 / 60)
         assert isinstance(app.state, DrivingState)
-        assert "pickup facility menu opens when stopped" in events[-1]
+        assert "Stop to check in" in events[-1]
 
         driving.truck.velocity_mps = 0.0
         driving.update(1 / 60)
@@ -161,7 +161,8 @@ def test_loading_at_pickup_uses_dock_sound(monkeypatch):
         pickup.handle_event(key_event(pygame.K_RETURN))  # check in
         pickup.handle_event(key_event(pygame.K_RETURN))  # load cargo
 
-        assert played[-1] == ("poi/dock_and_deliver", 0.75)
+        assert ("poi/dock_and_deliver", 1.0) in played
+        assert played[-1] == ("ui/level_up", 0.8)
     finally:
         app.shutdown()
 

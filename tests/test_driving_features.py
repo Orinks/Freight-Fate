@@ -89,7 +89,7 @@ def test_driving_f1_describes_safe_shutdown_and_destination_parking(monkeypatch)
 
         help_text = spoken[-1]
         assert "stops it only below 5 miles per hour" in help_text
-        assert "dock and deliver from the facility menu" in help_text
+        assert "stop, then dock and deliver" in help_text
     finally:
         app.shutdown()
 
@@ -195,12 +195,15 @@ def test_air_brake_startup_blocks_movement_until_ready_and_released(monkeypatch)
     app = App()
     events = []
     spoken = []
+    played = []
     held = {pygame.K_UP}
     monkeypatch.setattr(pygame.key, "get_pressed", lambda: FakeKeys(held))
     monkeypatch.setattr(app.ctx, "say_event",
                         lambda text, interrupt=True: events.append(text))
     monkeypatch.setattr(app.ctx, "say",
                         lambda text, interrupt=True: spoken.append(text))
+    monkeypatch.setattr(app.ctx.audio, "play",
+                        lambda key, volume=1.0: played.append((key, volume)))
     try:
         driving = start_drive(app)
         quiet_trip(driving)
@@ -228,6 +231,7 @@ def test_air_brake_startup_blocks_movement_until_ready_and_released(monkeypatch)
 
         driving.handle_event(key_event(pygame.K_p))
         assert not driving.truck.parking_brake
+        assert ("vehicle/brake_release", 0.65) in played
 
         for _ in range(60 * 5):
             driving.update(1 / 60)
@@ -235,6 +239,10 @@ def test_air_brake_startup_blocks_movement_until_ready_and_released(monkeypatch)
                 break
 
         assert driving.truck.speed_mph > 1.0
+
+        driving.handle_event(key_event(pygame.K_p))
+        assert driving.truck.parking_brake
+        assert ("vehicle/brake_set", 0.65) in played
     finally:
         app.shutdown()
 
@@ -344,9 +352,9 @@ def test_delivery_requires_parking_at_destination(monkeypatch):
         driving.update(1 / 60)
 
         assert isinstance(app.state, DrivingState)
-        assert "Destination facility ahead" in events[-1]
-        assert "full stop to open the facility menu" in events[-1]
-        assert "slow down and park" in driving.lines()[-1]
+        assert "Destination ahead" in events[-1]
+        assert "Slow below 3 mph" in events[-1]
+        assert "slow below 3 mph" in driving.lines()[-1].lower()
 
         driving.truck.velocity_mps = 0.0
         driving.update(1 / 60)
@@ -391,8 +399,8 @@ def test_facility_menu_waits_for_full_stop(monkeypatch):
         driving.update(1 / 60)
         assert isinstance(app.state, DrivingState)
         assert app.ctx.profile.career.deliveries == 0
-        assert "facility menu opens when stopped" in events[-1]
-        assert "full stop to dock" in driving.lines()[-1]
+        assert "Stop to dock" in events[-1]
+        assert "stop to dock" in driving.lines()[-1]
         assert played[-1][0] == "ui/notify"
 
         driving.truck.velocity_mps = 0.0
@@ -416,12 +424,17 @@ def test_facility_menu_waits_for_full_stop(monkeypatch):
         assert "estimated net driver pay" in spoken[-1]
         assert "hours remain before the deadline" in spoken[-1]
         assert "Cargo condition" in spoken[-1]
-        assert "does not settle the load" in spoken[-1]
+        assert "Dock and deliver to settle" in spoken[-1]
 
         app.state.handle_event(key_event(pygame.K_UP))
         app.state.handle_event(key_event(pygame.K_RETURN))
         assert not isinstance(app.state, FacilityArrivalState)
         assert app.ctx.profile.career.deliveries == 1
+        played_keys = [key for key, _volume in played]
+        assert "poi/dock_and_deliver" in played_keys
+        assert "ui/job_complete" in played_keys
+        assert "ui/cash" in played_keys
+        assert "ui/menu_open" not in played_keys
     finally:
         app.shutdown()
 
@@ -827,6 +840,8 @@ def test_adaptive_cruise_disables_for_heavy_traffic_zone_entry(monkeypatch):
         quiet_trip(driving)
         monkeypatch.setattr(app.ctx, "say_event",
                             lambda text, interrupt=True: events.append(text))
+        monkeypatch.setattr(app.ctx, "say",
+                            lambda text, interrupt=True: events.append(text))
         driving.handle_event(key_event(pygame.K_e))
         driving.truck.transmission.gear = 10
         driving.truck.velocity_mps = 26.8
@@ -842,10 +857,11 @@ def test_adaptive_cruise_disables_for_heavy_traffic_zone_entry(monkeypatch):
         driving._handle_trip_event(event)
 
         assert driving._cruise_mph is None
-        assert events[-1] == (
+        assert events[-2] == (
             "heavy traffic ahead. Speed limit 50. "
             "Adaptive cruise disabled; take manual speed control."
         )
+        assert events[-1].startswith("New achievement! Mind the Bumper Gap.")
     finally:
         app.shutdown()
 

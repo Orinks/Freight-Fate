@@ -134,6 +134,49 @@ def test_nightly_notes_use_new_version_block_entries(tmp_path, monkeypatch):
     assert "- Old player-facing note." not in notes
 
 
+def test_nightly_notes_skip_already_released_version_block(tmp_path, monkeypatch):
+    release_notes = load_release_notes_module()
+    base = changelog(
+        "### Added\n- Pre-release staged note.\n",
+        "## 1.6.0 - 2026-06-15\n\n### Added\n- Shipped feature.\n",
+    )
+    repo = make_repo(tmp_path, base)
+    git(repo, "tag", "nightly-20260615")
+    git(repo, "tag", "v1.6.0")
+    (repo / "CHANGELOG.md").write_text(
+        changelog(
+            "### Added\n- Pre-release staged note.\n- **Achievements.** New badges.\n",
+            "## 1.6.0 - 2026-06-15\n\n### Added\n- Shipped feature.\n",
+        ),
+        encoding="utf-8",
+    )
+    commit(repo, "feat: achievements")
+    monkeypatch.setattr(release_notes, "ROOT", repo)
+
+    notes = release_notes.nightly_notes(previous_tag="nightly-20260615")
+
+    # New Unreleased work surfaces even though a released version block shares
+    # the same "Added" subsection title.
+    assert "- **Achievements.** New badges." in notes
+    # The shipped 1.6.0 block has a stable tag, so it is not re-advertised.
+    assert "- Shipped feature." not in notes
+    # Already carried in the previous snapshot.
+    assert "- Pre-release staged note." not in notes
+
+
+def test_format_sections_merges_duplicate_titles(tmp_path, monkeypatch):
+    release_notes = load_release_notes_module()
+    section = release_notes.ChangelogSection
+    out = release_notes.format_sections([
+        section("Added", ("- Unreleased badge.",)),
+        section("Added", ("- Staged feature.",)),
+    ])
+
+    assert out.count("## Added") == 1
+    assert "- Unreleased badge." in out
+    assert "- Staged feature." in out
+
+
 def test_should_build_nightly_ignores_internal_version_block_entries(
     tmp_path, monkeypatch, capsys
 ):
