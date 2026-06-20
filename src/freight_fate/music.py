@@ -48,9 +48,11 @@ ALL_MUSIC_TRACKS: tuple[MusicTrack, ...] = (
     MENU_TRACKS + DAY_DRIVE_TRACKS + NIGHT_DRIVE_TRACKS
 )
 
+LOOPING_MUSIC_TRACKS = frozenset({"menu_theme", "open_road", "night_haul"})
+
 GENERATED_MUSIC_TRACKS: tuple[MusicTrack, ...] = tuple(
     track for track in ALL_MUSIC_TRACKS
-    if track.key not in {"menu_theme", "open_road", "night_haul"}
+    if track.key not in LOOPING_MUSIC_TRACKS
 )
 
 _TRACKS_BY_KEY = {track.key: track for track in ALL_MUSIC_TRACKS}
@@ -139,3 +141,8 @@ def music_track_duration_s(track: str) -> float:
     """Best-known duration for slow playlist rotation."""
     info = _TRACKS_BY_KEY.get(track)
     return info.duration_s if info is not None else 60.0
+
+
+def music_track_loops(track: str) -> bool:
+    """Whether a compatibility music anchor should loop indefinitely."""
+    return track in LOOPING_MUSIC_TRACKS

@@ -35,7 +35,9 @@ class State:
         pass
 
     def update(self, dt: float) -> None:
-        pass
+        update_music_rotation = getattr(self.ctx, "update_music_rotation", None)
+        if update_music_rotation is not None:
+            update_music_rotation(dt)
 
     def lines(self) -> list[str]:
         """Visible text for the window, mirroring what speech says."""

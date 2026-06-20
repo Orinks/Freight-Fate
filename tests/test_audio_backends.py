@@ -93,6 +93,64 @@ def test_engine_start_recording_is_short_one_shot():
     assert duration <= 4.25
 
 
+def test_pygame_music_loops_only_compatibility_anchors(monkeypatch):
+    calls = []
+    backend = audio._PygameBackend.__new__(audio._PygameBackend)
+    backend.enabled = True
+    backend.master_volume = 1.0
+    backend.music_volume = 0.55
+    backend._music_track = None
+
+    monkeypatch.setattr(audio.pygame.mixer.music, "load", lambda path: None)
+    monkeypatch.setattr(audio.pygame.mixer.music, "set_volume", lambda volume: None)
+    monkeypatch.setattr(
+        audio.pygame.mixer.music,
+        "play",
+        lambda *, loops, fade_ms: calls.append((loops, fade_ms)),
+    )
+
+    backend.play_music("menu_first_rig", fade_ms=123)
+    backend._music_track = None
+    backend.play_music("menu_theme", fade_ms=456)
+
+    assert calls == [(0, 123), (-1, 456)]
+
+
+def test_bass_music_loops_only_compatibility_anchors(monkeypatch):
+    class FakeStream:
+        handle = 1
+
+        def set_volume(self, volume):
+            pass
+
+        def play(self):
+            pass
+
+    loop_flags = []
+    backend = audio._BassBackend.__new__(audio._BassBackend)
+    backend.master_volume = 1.0
+    backend.music_volume = 0.55
+    backend._music_track = None
+    backend._music_stream = None
+    backend._BassError = Exception
+    backend._ATTRIB_VOL = 0
+    backend._slide = object()
+    backend._bass_call = lambda *args: None
+
+    def fake_stream(path, looping):
+        loop_flags.append(looping)
+        return FakeStream()
+
+    monkeypatch.setattr(backend, "_stream", fake_stream)
+
+    backend.play_music("menu_first_rig", fade_ms=123)
+    backend._music_track = None
+    backend._music_stream = None
+    backend.play_music("menu_theme", fade_ms=456)
+
+    assert loop_flags == [False, True]
+
+
 def test_bass_engine_uses_single_pitched_loop(monkeypatch):
     monkeypatch.delenv("FREIGHT_FATE_AUDIO_BACKEND", raising=False)
     a = AudioEngine()
