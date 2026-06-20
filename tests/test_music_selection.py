@@ -162,7 +162,7 @@ def test_pickup_facility_uses_music_pool_and_keeps_facility_ambience(monkeypatch
     monkeypatch.setattr(app.ctx.audio, "play_music",
                         lambda track, fade_ms=1500: played.append(track))
     monkeypatch.setattr(app.ctx.audio, "set_ambient",
-                        lambda key, volume=0.7: ambient.append((key, volume)))
+                        lambda key, volume=1.0: ambient.append((key, volume)))
     try:
         app.ctx.profile = Profile(name="Pickup Pool", current_city="Denver")
         app.ctx.profile.career.total_miles = 10_000
@@ -173,8 +173,8 @@ def test_pickup_facility_uses_music_pool_and_keeps_facility_ambience(monkeypatch
 
         assert len(set(played)) > 1
         assert all(a != b for a, b in zip(played, played[1:], strict=False))
-        assert ("poi/facility_gate", 0.35) in ambient
-        assert (None, 0.7) in ambient
+        assert ("poi/facility_gate", 1.0) in ambient
+        assert (None, 1.0) in ambient
     finally:
         app.shutdown()
 
@@ -190,7 +190,7 @@ def test_destination_facility_uses_music_pool_and_keeps_facility_ambience(monkey
     monkeypatch.setattr(app.ctx.audio, "play_music",
                         lambda track, fade_ms=1500: played.append(track))
     monkeypatch.setattr(app.ctx.audio, "set_ambient",
-                        lambda key, volume=0.7: ambient.append((key, volume)))
+                        lambda key, volume=1.0: ambient.append((key, volume)))
     try:
         app.ctx.profile = Profile(name="Destination Pool", current_city="Denver")
         app.ctx.profile.career.total_miles = 10_000
@@ -203,7 +203,7 @@ def test_destination_facility_uses_music_pool_and_keeps_facility_ambience(monkey
 
         assert len(set(played)) > 1
         assert all(a != b for a, b in zip(played, played[1:], strict=False))
-        assert ("poi/facility_gate", 0.35) in ambient
+        assert ("poi/facility_gate", 1.0) in ambient
     finally:
         app.shutdown()
 

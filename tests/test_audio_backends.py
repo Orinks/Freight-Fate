@@ -5,6 +5,7 @@ import pytest
 from freight_fate import audio
 from freight_fate.audio import (
     ENGINE_FREQ_MAX_MULT,
+    ENGINE_LOOP_GAIN,
     ENGINE_RPM_IDLE,
     ENGINE_RPM_MAX,
     AudioEngine,
@@ -119,8 +120,24 @@ def test_road_noise_loop_tracks_speed(monkeypatch):
     a.set_road_noise(30.0)
     assert audio.CH_ROAD in a._impl._loops
     assert a._impl._loops[audio.CH_ROAD][0] == "vehicle/road"
+    assert a._impl._loops[audio.CH_ROAD][1] == 1.0
     a.set_road_noise(0.0)
     assert audio.CH_ROAD not in a._impl._loops
+    a.shutdown()
+
+
+def test_new_context_loops_enter_mixer_at_full_gain(monkeypatch):
+    monkeypatch.delenv("FREIGHT_FATE_AUDIO_BACKEND", raising=False)
+    a = AudioEngine()
+    if a.backend_name != "bass":
+        pytest.skip("BASS backend unavailable")
+    a.set_wind(2.0)
+    assert a._impl._loops[audio.CH_WEATHER_B][0] == "weather/wind"
+    assert a._impl._loops[audio.CH_WEATHER_B][1] == 1.0
+    a.set_ambient("poi/facility_gate")
+    assert a._impl._loops[audio.CH_AMBIENT][0] == "poi/facility_gate"
+    assert a._impl._loops[audio.CH_AMBIENT][1] == 1.0
+    assert ENGINE_LOOP_GAIN == 1.0
     a.shutdown()
 
 

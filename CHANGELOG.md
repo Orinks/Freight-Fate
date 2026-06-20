@@ -17,6 +17,10 @@
   snapshot may not load on an older stable release.
 
 ### Fixed
+- **Preview sound volume.** The refreshed truck, road, weather, route, and
+  facility sounds now play at full source strength before the player's volume
+  settings are applied, so lowering and raising sound effects behaves more
+  predictably.
 - **Achievement speech routing.** Achievement unlocks now speak through the
   screen reader voice instead of the separate driving-event voice, so players
   who miss or interrupt an unlock can still review it later from the

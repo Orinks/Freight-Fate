@@ -93,7 +93,7 @@ class CityMenuState(MenuState):
     def enter(self) -> None:
         sequence = select_menu_music_sequence(self.ctx.profile)
         self.ctx.audio.play_music(self.ctx.next_music_track("menu", sequence))
-        self.ctx.audio.set_ambient("poi/facility_gate", volume=0.35)
+        self.ctx.audio.set_ambient("poi/facility_gate")
         super().enter()
 
     def exit(self) -> None:
@@ -594,7 +594,7 @@ class PickupFacilityState(MenuState):
         super().enter()
 
     def announce_entry(self) -> None:
-        self.ctx.audio.set_ambient("poi/facility_gate", volume=0.35)
+        self.ctx.audio.set_ambient("poi/facility_gate")
         if self.loaded:
             lead = (f"Loaded at {self.facility}. The trailer is sealed for "
                     f"{self.job.destination}.")
@@ -678,7 +678,7 @@ class PickupFacilityState(MenuState):
         self.loaded = True
         self._save_state()
         self.refresh(keep_index=False)
-        self.ctx.audio.play("poi/dock_and_deliver", volume=0.75)
+        self.ctx.audio.play("poi/dock_and_deliver")
         self.ctx.award_achievement("first_pickup")
         self.ctx.say(
             f"Loaded and sealed at {self.facility}. "
