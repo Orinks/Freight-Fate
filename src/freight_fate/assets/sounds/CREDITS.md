@@ -18,7 +18,7 @@ ElevenLabs terms for the generating account.
 The current donated truck interior recordings contributed by
 [Darren Duff](https://darrenduff.com/) are used for selected vehicle cues.
 Darren also provided the louder/doubled-volume versions used for the current
-idle, start, shutdown, horn, gear-shift, and parking-brake cues.
+idle, start, and shutdown cues.
 
 ## Vehicle Recordings
 
