@@ -29,8 +29,6 @@ from pathlib import Path
 
 import pygame
 
-from .music import music_track_loops
-
 log = logging.getLogger(__name__)
 
 ASSETS = Path(__file__).parent / "assets" / "sounds"
@@ -88,7 +86,7 @@ class _PygameBackend:
         self.enabled = False
         self.master_volume = 1.0
         self.sfx_volume = 0.8
-        self.music_volume = 0.55
+        self.music_volume = 0.5
         self._cache: dict[str, pygame.mixer.Sound] = {}
         self._loops: dict[int, tuple[str, float]] = {}  # channel -> (key, base gain)
         self._music_track: str | None = None
@@ -213,8 +211,7 @@ class _PygameBackend:
         try:
             pygame.mixer.music.load(str(path))
             pygame.mixer.music.set_volume(self.music_volume * self.master_volume)
-            loops = -1 if music_track_loops(track) else 0
-            pygame.mixer.music.play(loops=loops, fade_ms=fade_ms)
+            pygame.mixer.music.play(loops=0, fade_ms=fade_ms)
             self._music_track = track
         except pygame.error:
             log.warning("Could not play music %s", track, exc_info=True)
@@ -278,7 +275,7 @@ class _BassBackend:
 
         self.master_volume = 1.0
         self.sfx_volume = 0.8
-        self.music_volume = 0.55
+        self.music_volume = 0.5
         self._loops: dict[int, tuple[str, float, object]] = {}  # slot -> (key, gain, stream)
         self._retained: list = []  # streams kept alive until BASS finishes them
         self._music_track: str | None = None
@@ -472,7 +469,7 @@ class _BassBackend:
             self._fade_out(self._music_stream, 800)
             self._music_stream = None
             self._music_track = None
-        stream = self._stream(path, looping=music_track_loops(track))
+        stream = self._stream(path, looping=False)
         if stream is None:
             return
         try:
@@ -538,7 +535,7 @@ class _NullBackend:
     engine_running = False
     master_volume = 1.0
     sfx_volume = 0.8
-    music_volume = 0.55
+    music_volume = 0.5
 
     def play(self, key: str, volume: float = 1.0) -> None: ...
     def start_loop(self, channel: int, key: str, volume: float = 1.0,

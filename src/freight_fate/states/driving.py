@@ -22,7 +22,6 @@ from ..models.settlement import (
 )
 from ..music import (
     music_track_duration_s,
-    music_track_loops,
     select_drive_music_sequence,
     select_menu_music_sequence,
 )
@@ -923,11 +922,7 @@ class DrivingState(State):
             return
         self._music_elapsed_s += max(0.0, dt)
         current = self._current_music_track()
-        if music_track_loops(current):
-            self._play_current_music(fade_ms=4000)
-            return
         if self._music_elapsed_s < music_track_duration_s(current):
-            self._play_current_music(fade_ms=4000)
             return
         self._music_elapsed_s = 0.0
         if night:

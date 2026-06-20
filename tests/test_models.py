@@ -244,6 +244,10 @@ def test_sapi_events_default_on():
     assert Settings().sapi_events is True
 
 
+def test_music_volume_defaults_to_half():
+    assert Settings().music_volume == 0.5
+
+
 def test_legacy_hos_off_setting_loads_as_debug_bypass():
     s = Settings()
     s.hos_mode = "off"

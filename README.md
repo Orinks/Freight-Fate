@@ -50,7 +50,7 @@ visual display mirrors all speech for sighted players and helpers.
   and delivery realism without pretending that every suburb or shipper needs a
   separate highway node.
 - **Original audio** — sound effects and music are original project assets,
-  with most generated procedurally and documented in the audio credits. Audio
+  with sources documented in the audio credits. Audio
   plays through BASS (via [sound_lib](https://pypi.org/project/sound_lib/)),
   with the engine note pitch-tracking RPM in real time; pygame.mixer takes
   over automatically if BASS cannot initialize.
@@ -227,8 +227,8 @@ or when a commit message includes `nightly: build` or `[nightly build]` for an
 intentional snapshot refresh. Use `changelog: none` or `[skip changelog]` only
 when every commit in the change set is non-user-facing.
 
-Most generated audio is produced by `tools/generate_audio.py` with seeded
-randomness — see [CREDITS.md](src/freight_fate/assets/sounds/CREDITS.md).
+Procedural sound assets can be produced by `tools/generate_audio.py` with
+seeded randomness — see [CREDITS.md](src/freight_fate/assets/sounds/CREDITS.md).
 
 ## License
 

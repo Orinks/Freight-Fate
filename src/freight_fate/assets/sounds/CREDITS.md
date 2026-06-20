@@ -1,6 +1,6 @@
 # Sound and Music Credits
 
-Most sound effects and music tracks in this directory were procedurally
+Most sound effects in this directory were procedurally
 synthesized for Freight Fate by `tools/generate_audio.py` in this repository.
 No third-party recordings or samples were used for those generated assets.
 The main menu and Night Haul themes are Suno remakes created by the project

@@ -14,7 +14,7 @@ from .audio import AudioEngine
 from .data.world import World, get_world
 from .models.economy import Economy
 from .models.profile import Profile
-from .music import music_track_duration_s, music_track_loops
+from .music import music_track_duration_s
 from .settings import Settings
 from .speech import Speech
 from .states.base import State
@@ -143,10 +143,8 @@ class GameContext:
         return track
 
     def update_music_rotation(self, dt: float) -> None:
-        """Advance generated music beds when their one-shot playback ends."""
+        """Advance music beds when their one-shot playback ends."""
         if self._music_rotation_pool is None or self._music_rotation_track is None:
-            return
-        if music_track_loops(self._music_rotation_track):
             return
         self._music_rotation_elapsed_s += max(0.0, dt)
         if self._music_rotation_elapsed_s < music_track_duration_s(
