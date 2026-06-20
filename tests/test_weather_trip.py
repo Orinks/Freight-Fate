@@ -142,6 +142,48 @@ def test_zone_speed_limits_apply(world):
     assert reason is None or limit != zone.limit_mph
 
 
+def test_delivery_final_miles_use_facility_approach_limits(world):
+    trip, _ = make_trip(world, "Chicago", "Indianapolis")
+
+    limit, reason = trip.speed_limit_at(trip.total_miles - 2.0)
+    assert limit == 35.0
+    assert reason == "destination approach"
+
+    limit, reason = trip.speed_limit_at(trip.total_miles - 0.2)
+    assert limit == 15.0
+    assert reason == "facility gate"
+
+
+def test_pickup_deadhead_route_uses_local_facility_limits(world):
+    route = world.facility_approach_route(
+        "Chicago", world.cities["Chicago"].locations[0].name)
+    truck = TruckState()
+    weather = WeatherSystem("midwest", seed=1)
+    trip = Trip(route, truck, weather, seed=2)
+
+    limit, reason = trip.speed_limit_at(0.1)
+    assert limit == 25.0
+    assert reason == "facility access road"
+
+    limit, reason = trip.speed_limit_at(trip.total_miles - 0.2)
+    assert limit == 15.0
+    assert reason == "facility gate"
+
+
+def test_facility_gate_warns_before_final_low_speed_zone(world):
+    route = world.facility_approach_route(
+        "Chicago", world.cities["Chicago"].locations[0].name)
+    truck = TruckState()
+    weather = WeatherSystem("midwest", seed=1)
+    trip = Trip(route, truck, weather, seed=2)
+
+    trip.position_mi = trip.total_miles - 2.0
+    events = trip.update(0.0)
+
+    warnings = [event.message for event in events if event.kind == TripEventKind.GPS_CUE]
+    assert "In 2 miles, facility gate ahead. Speed limit 15." in warnings
+
+
 def test_construction_zone_warns_before_entry(world):
     trip, _ = make_trip(world, "Chicago", "Indianapolis", seed=12345)
     zone = next(z for z in trip.zones if z.reason == "construction")

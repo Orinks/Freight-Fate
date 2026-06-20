@@ -174,6 +174,13 @@ Deliver -> Earn and level up -> Repeat
 - [x] More cities and regional highways (1.4.0)
 - [x] Day/night cycle with audio shifts (1.5.0); seasons still open
 - [ ] City-specific ambience and landmarks
+- [ ] Destination-local facility legs: after the highway trip reaches the
+      destination city, hand the player onto a short local approach to the
+      receiver gate. Route display and GPS cues should clearly separate
+      highway miles from local gate approach, saves should resume on the
+      correct leg, and facility data should carry enough road name, distance,
+      gate speed, and dock-approach detail to make warehouses, terminals,
+      ports, and industrial yards feel distinct.
 
 ### Business
 - [ ] Company ownership: hire AI drivers, buy trucks

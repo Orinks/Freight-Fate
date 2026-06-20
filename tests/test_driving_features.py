@@ -352,9 +352,8 @@ def test_delivery_requires_parking_at_destination(monkeypatch):
         driving.update(1 / 60)
 
         assert isinstance(app.state, DrivingState)
-        assert "Destination facility ahead" in events[-1]
-        assert "full stop to open the facility menu" in events[-1]
-        assert "slow down and park" in driving.lines()[-1]
+        assert events[-1] == "Destination gate. Slow below 3, then stop."
+        assert "slow down and stop" in driving.lines()[-1]
 
         driving.truck.velocity_mps = 0.0
         driving.update(1 / 60)
@@ -399,8 +398,8 @@ def test_facility_menu_waits_for_full_stop(monkeypatch):
         driving.update(1 / 60)
         assert isinstance(app.state, DrivingState)
         assert app.ctx.profile.career.deliveries == 0
-        assert "facility menu opens when stopped" in events[-1]
-        assert "full stop to dock" in driving.lines()[-1]
+        assert events[-1] == "Destination gate reached. Stop for the facility menu."
+        assert "stop to dock" in driving.lines()[-1]
         assert played[-1][0] == "ui/notify"
 
         driving.truck.velocity_mps = 0.0

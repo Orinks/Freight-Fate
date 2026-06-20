@@ -19,6 +19,11 @@ from .vehicle import TruckState
 from .weather import WeatherSystem
 
 BASE_SPEED_LIMIT_MPH = 70.0
+FACILITY_ACCESS_LIMIT_MPH = 25.0
+DESTINATION_APPROACH_LIMIT_MPH = 35.0
+FACILITY_GATE_LIMIT_MPH = 15.0
+DESTINATION_APPROACH_ZONE_MI = 3.0
+FACILITY_GATE_ZONE_MI = 0.5
 NIGHT_HAZARD_BONUS = 0.10          # extra hazard risk after dark
 NIGHT_TRAFFIC_KEEP = 0.4           # chance a traffic zone still forms at night
 TRAFFIC_LOOKAHEAD_MI = 2.5
@@ -335,8 +340,30 @@ class Trip:
                 zones.append(Zone(at, at + length, 45, "construction"))
             elif not night or self._rng.random() < NIGHT_TRAFFIC_KEEP:
                 zones.append(Zone(at, at + length, 50, "heavy traffic"))
+        zones.extend(self._facility_speed_zones())
         zones.sort(key=lambda z: z.start_mi)
         return zones
+
+    def _facility_speed_zones(self) -> list[Zone]:
+        """Low-speed facility access roads and final gate approaches."""
+        total = self.route.miles
+        if total <= 0:
+            return []
+        gate_start = max(0.0, total - FACILITY_GATE_ZONE_MI)
+        if self._is_facility_approach_route():
+            return [
+                Zone(0.0, total, FACILITY_ACCESS_LIMIT_MPH, "facility access road"),
+                Zone(gate_start, total, FACILITY_GATE_LIMIT_MPH, "facility gate"),
+            ]
+        approach_start = max(0.0, total - DESTINATION_APPROACH_ZONE_MI)
+        return [
+            Zone(approach_start, total, DESTINATION_APPROACH_LIMIT_MPH,
+                 "destination approach"),
+            Zone(gate_start, total, FACILITY_GATE_LIMIT_MPH, "facility gate"),
+        ]
+
+    def _is_facility_approach_route(self) -> bool:
+        return len(self.route.cities) >= 2 and self.route.cities[0] == self.route.cities[-1]
 
     def _place_traffic(self) -> list[TrafficLead]:
         leads: list[TrafficLead] = []
@@ -445,10 +472,16 @@ class Trip:
         return 0, 0.0
 
     def speed_limit_at(self, mile: float) -> tuple[float, str | None]:
-        for z in self.zones:
-            if z.start_mi <= mile <= z.end_mi:
-                return z.limit_mph, z.reason
+        zone = self._active_zone_at(mile)
+        if zone is not None:
+            return zone.limit_mph, zone.reason
         return BASE_SPEED_LIMIT_MPH, None
+
+    def _active_zone_at(self, mile: float) -> Zone | None:
+        active = [z for z in self.zones if z.start_mi <= mile <= z.end_mi]
+        if not active:
+            return None
+        return min(active, key=lambda z: z.limit_mph)
 
     def traffic_context(self) -> TrafficContext | None:
         best: TrafficContext | None = None
@@ -563,10 +596,7 @@ class Trip:
         for i, start in enumerate(self._leg_starts):
             if i and self.position_mi >= start:
                 self._announced_cities.add(i)
-        for zone in self.zones:
-            if zone.start_mi <= self.position_mi <= zone.end_mi:
-                self._active_zone = zone
-                break
+        self._active_zone = self._active_zone_at(self.position_mi)
 
     def restore_toll_charges(self, charges: list[dict]) -> None:
         """Restore settlement toll expenses from an active-drive snapshot."""
@@ -645,11 +675,7 @@ class Trip:
                     f"Speed limit {zone.limit_mph:.0f}.",
                     zone=zone,
                 )
-        zone = None
-        for z in self.zones:
-            if z.start_mi <= self.position_mi <= z.end_mi:
-                zone = z
-                break
+        zone = self._active_zone_at(self.position_mi)
         if zone is not self._active_zone:
             if zone is not None:
                 if zone.reason == "construction":

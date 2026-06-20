@@ -1305,11 +1305,9 @@ class DrivingState(State):
         self._arrival_stop_said = True
         self._cancel_cruise()
         self.ctx.audio.play("ui/warning")
-        self._set_status("Pickup facility ahead: slow down and park to load.")
+        self._set_status("Pickup gate ahead: slow down and stop to load.")
         self.ctx.say_event(
-            f"Pickup facility ahead: {self._pickup_facility_text()}. "
-            f"Slow below {DELIVERY_PARK_MPH:.0f} miles per hour, then come "
-            "to a full stop to check in and load.",
+            f"Pickup gate. Slow below {DELIVERY_PARK_MPH:.0f}, then stop to load.",
             interrupt=True)
 
     def _handle_pickup_creep(self) -> None:
@@ -1318,10 +1316,9 @@ class DrivingState(State):
         self._arrival_full_stop_said = True
         self._cancel_cruise()
         self.ctx.audio.play("ui/notify", volume=0.7)
-        self._set_status("Pickup gate reached: come to a full stop to load.")
+        self._set_status("Pickup gate reached: stop to load.")
         self.ctx.say_event(
-            f"You are at {self._pickup_facility_text()}. Hold the brake and "
-            "come to a full stop; the pickup facility menu opens when stopped.",
+            "Pickup gate reached. Stop to check in.",
             interrupt=False)
 
     def _open_pickup_arrival(self) -> None:
@@ -1359,11 +1356,9 @@ class DrivingState(State):
         self._arrival_stop_said = True
         self._cancel_cruise()
         self.ctx.audio.play("ui/warning")
-        self._set_status("Destination reached: slow down and park to deliver.")
+        self._set_status("Destination gate ahead: slow down and stop.")
         self.ctx.say_event(
-            f"Destination facility ahead: {self._destination_facility_text()}. "
-            f"Slow below {DELIVERY_PARK_MPH:.0f} miles per hour, then come "
-            "to a full stop to open the facility menu.",
+            f"Destination gate. Slow below {DELIVERY_PARK_MPH:.0f}, then stop.",
             interrupt=True)
 
     def _handle_arrival_creep(self) -> None:
@@ -1372,10 +1367,9 @@ class DrivingState(State):
         self._arrival_full_stop_said = True
         self._cancel_cruise()
         self.ctx.audio.play("ui/notify", volume=0.7)
-        self._set_status("Destination gate reached: come to a full stop to dock.")
+        self._set_status("Destination gate reached: stop to dock.")
         self.ctx.say_event(
-            f"You are at {self._destination_facility_text()}. Hold the brake "
-            "and come to a full stop; the facility menu opens when stopped.",
+            "Destination gate reached. Stop for the facility menu.",
             interrupt=False)
 
     def _open_facility_arrival(self) -> None:
