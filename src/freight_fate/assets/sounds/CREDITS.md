@@ -54,7 +54,7 @@ The donated truck interior recordings contributed by
 | Inspection warning | `events/inspection_warning.ogg` | Short inspection/weigh-station cue |
 | Rest stop at night | `poi/rest_stop_night.ogg` | Parked rest-stop ambience loop |
 | Weigh station lane | `poi/weigh_station_lane.ogg` | Parked weigh-station lane ambience loop |
-| Facility gate | `poi/facility_gate.ogg` | Parked pickup and destination gate ambience loop |
+| Facility gate | `poi/facility_gate.ogg` | ElevenLabs-generated loading-dock gate ambience loop |
 | Dock and deliver | `poi/dock_and_deliver.ogg` | Destination docking action cue |
 
 ## Music

@@ -24,6 +24,8 @@
   snapshot may not load on an older stable release.
 
 ### Fixed
+- **Facility gate ambience.** Pickup and destination facility screens now use a
+  quieter loading-dock ambience that stays away from truck-idle rumble.
 - **Preview sound volume.** The refreshed truck, road, weather, route, and
   facility sounds now play at full source strength before the player's volume
   settings are applied, so lowering and raising sound effects behaves more
