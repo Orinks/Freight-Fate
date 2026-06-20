@@ -860,15 +860,15 @@ def test_settings_menu_volume_survives_new_app_session():
         while not state.items[state.index].text.startswith("Music volume"):
             state.handle_event(key_event(pygame.K_DOWN))
         state.handle_event(key_event(pygame.K_RIGHT))
-        assert app.ctx.settings.music_volume == 0.65
-        assert Settings.load().music_volume == 0.65
+        assert app.ctx.settings.music_volume == 0.6
+        assert Settings.load().music_volume == 0.6
     finally:
         app.shutdown()
 
     next_app = App()
     try:
-        assert next_app.ctx.settings.music_volume == 0.65
-        assert next_app.ctx.audio.music_volume == 0.65
+        assert next_app.ctx.settings.music_volume == 0.6
+        assert next_app.ctx.audio.music_volume == 0.6
     finally:
         next_app.shutdown()
 

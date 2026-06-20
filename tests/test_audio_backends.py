@@ -12,6 +12,7 @@ from freight_fate.audio import (
     _asset_path,
     engine_freq_mult,
 )
+from freight_fate.music import ALL_MUSIC_TRACKS
 
 
 def exercise(a: AudioEngine) -> None:
@@ -91,6 +92,64 @@ def test_engine_start_recording_is_short_one_shot():
     info = sf.info(str(_asset_path("engine/start", ("ogg", "wav"))))
     duration = info.frames / info.samplerate
     assert duration <= 4.25
+
+
+def test_pygame_music_never_loops_catalog_tracks(monkeypatch):
+    calls = []
+    backend = audio._PygameBackend.__new__(audio._PygameBackend)
+    backend.enabled = True
+    backend.master_volume = 1.0
+    backend.music_volume = 0.5
+    backend._music_track = None
+
+    monkeypatch.setattr(audio.pygame.mixer.music, "load", lambda path: None)
+    monkeypatch.setattr(audio.pygame.mixer.music, "set_volume", lambda volume: None)
+    monkeypatch.setattr(
+        audio.pygame.mixer.music,
+        "play",
+        lambda *, loops, fade_ms: calls.append((loops, fade_ms)),
+    )
+
+    for track in ALL_MUSIC_TRACKS:
+        backend.play_music(track.key, fade_ms=123)
+        backend._music_track = None
+
+    assert calls == [(0, 123)] * len(ALL_MUSIC_TRACKS)
+
+
+def test_bass_music_never_loops_catalog_tracks(monkeypatch):
+    class FakeStream:
+        handle = 1
+
+        def set_volume(self, volume):
+            pass
+
+        def play(self):
+            pass
+
+    loop_flags = []
+    backend = audio._BassBackend.__new__(audio._BassBackend)
+    backend.master_volume = 1.0
+    backend.music_volume = 0.5
+    backend._music_track = None
+    backend._music_stream = None
+    backend._BassError = Exception
+    backend._ATTRIB_VOL = 0
+    backend._slide = object()
+    backend._bass_call = lambda *args: None
+
+    def fake_stream(path, looping):
+        loop_flags.append(looping)
+        return FakeStream()
+
+    monkeypatch.setattr(backend, "_stream", fake_stream)
+
+    for track in ALL_MUSIC_TRACKS:
+        backend.play_music(track.key, fade_ms=123)
+        backend._music_track = None
+        backend._music_stream = None
+
+    assert loop_flags == [False] * len(ALL_MUSIC_TRACKS)
 
 
 def test_bass_engine_uses_single_pitched_loop(monkeypatch):

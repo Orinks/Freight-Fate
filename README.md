@@ -49,8 +49,8 @@ visual display mirrors all speech for sighted players and helpers.
   data gaps instead of dispatch-ready truck stops. Facilities add local pickup
   and delivery realism without pretending that every suburb or shipper needs a
   separate highway node.
-- **Original audio** — every sound effect and all three music tracks are
-  procedurally synthesized and dedicated to the public domain (CC0). Audio
+- **Original audio** — sound effects and music are original project assets,
+  with sources documented in the audio credits. Audio
   plays through BASS (via [sound_lib](https://pypi.org/project/sound_lib/)),
   with the engine note pitch-tracking RPM in real time; pygame.mixer takes
   over automatically if BASS cannot initialize.
@@ -227,13 +227,13 @@ or when a commit message includes `nightly: build` or `[nightly build]` for an
 intentional snapshot refresh. Use `changelog: none` or `[skip changelog]` only
 when every commit in the change set is non-user-facing.
 
-The entire sound library is produced by `tools/generate_audio.py` with seeded
-randomness — see [CREDITS.md](src/freight_fate/assets/sounds/CREDITS.md).
+Procedural sound assets can be produced by `tools/generate_audio.py` with
+seeded randomness — see [CREDITS.md](src/freight_fate/assets/sounds/CREDITS.md).
 
 ## License
 
-Code is [MIT](LICENSE). All bundled audio is
-[CC0](https://creativecommons.org/publicdomain/zero/1.0/).
+Code is [MIT](LICENSE). Bundled audio credits and licensing notes are tracked in
+[CREDITS.md](src/freight_fate/assets/sounds/CREDITS.md).
 
 **BASS license caveat:** audio playback uses the
 [BASS](https://www.un4seen.com/) library (through the `sound_lib` Python

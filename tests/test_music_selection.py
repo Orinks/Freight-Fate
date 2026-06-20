@@ -5,8 +5,8 @@ from pathlib import Path
 from freight_fate.music import (
     ALL_MUSIC_TRACKS,
     DAY_DRIVE_TRACKS,
-    GENERATED_MUSIC_TRACKS,
     NIGHT_DRIVE_TRACKS,
+    music_track_duration_s,
     select_drive_music,
     select_drive_music_sequence,
     select_menu_music,
@@ -141,12 +141,82 @@ def test_menu_music_pool_advances_without_immediate_repeat(monkeypatch):
     try:
         app.ctx.profile = Profile(name="Menu Pool", current_city="Chicago")
         app.ctx.profile.career.total_miles = 10_000
-        state = CityMenuState(app.ctx)
-        for _ in range(4):
-            state.enter()
-            state.exit()
+        app.push_state(CityMenuState(app.ctx))
+        for _ in range(3):
+            app.state.update(music_track_duration_s(played[-1]) + 0.1)
         assert len(set(played)) > 1
         assert all(a != b for a, b in zip(played, played[1:], strict=False))
+    finally:
+        app.shutdown()
+
+
+def test_menu_music_advances_when_bed_duration_ends(monkeypatch):
+    from freight_fate.app import App
+    from freight_fate.models.profile import Profile
+    from freight_fate.states.city import CityMenuState
+
+    app = App()
+    played = []
+    monkeypatch.setattr(app.ctx.audio, "play_music",
+                        lambda track, fade_ms=1500: played.append(track))
+    try:
+        app.ctx.profile = Profile(name="Menu Timer", current_city="Chicago")
+        app.ctx.profile.career.total_miles = 10_000
+        app.push_state(CityMenuState(app.ctx))
+        first = played[-1]
+
+        app.state.update(music_track_duration_s(first) + 0.1)
+        second = played[-1]
+
+        assert first != second
+        assert all(a != b for a, b in zip(played, played[1:], strict=False))
+    finally:
+        app.shutdown()
+
+
+def test_menu_reload_refreshes_pool_without_restarting_current_bed(monkeypatch):
+    from freight_fate.app import App
+    from freight_fate.models.profile import Profile
+    from freight_fate.states.city import CityMenuState
+
+    app = App()
+    played = []
+    monkeypatch.setattr(app.ctx.audio, "play_music",
+                        lambda track, fade_ms=1500: played.append(track))
+    try:
+        app.ctx.profile = Profile(name="Menu Reload", current_city="Chicago")
+        app.ctx.profile.career.total_miles = 10_000
+        app.push_state(CityMenuState(app.ctx))
+        first = played[-1]
+
+        rookie = Profile(name="Rookie Reload", current_city="Chicago")
+        app.ctx.play_music_sequence("menu", select_menu_music_sequence(rookie))
+
+        assert played == [first]
+
+        app.state.update(music_track_duration_s(first) + 0.1)
+
+        assert played == [first, "menu_theme"]
+    finally:
+        app.shutdown()
+
+
+def test_menu_theme_rotates_after_its_duration(monkeypatch):
+    from freight_fate.app import App
+    from freight_fate.models.profile import Profile
+    from freight_fate.states.city import CityMenuState
+
+    app = App()
+    played = []
+    monkeypatch.setattr(app.ctx.audio, "play_music",
+                        lambda track, fade_ms=1500: played.append(track))
+    try:
+        app.ctx.profile = Profile(name="Legacy Menu", current_city="Chicago")
+        app.push_state(CityMenuState(app.ctx))
+
+        app.state.update(music_track_duration_s("menu_theme") + 0.1)
+
+        assert played == ["menu_theme", "menu_first_rig"]
     finally:
         app.shutdown()
 
@@ -171,8 +241,7 @@ def test_pickup_facility_uses_music_pool_and_keeps_facility_ambience(monkeypatch
             state.enter()
             state.exit()
 
-        assert len(set(played)) > 1
-        assert all(a != b for a, b in zip(played, played[1:], strict=False))
+        assert played == ["menu_coast_to_coast"]
         assert ("poi/facility_gate", 1.0) in ambient
         assert (None, 1.0) in ambient
     finally:
@@ -201,8 +270,7 @@ def test_destination_facility_uses_music_pool_and_keeps_facility_ambience(monkey
         for _ in range(3):
             state.enter()
 
-        assert len(set(played)) > 1
-        assert all(a != b for a, b in zip(played, played[1:], strict=False))
+        assert played == ["menu_coast_to_coast"]
         assert ("poi/facility_gate", 1.0) in ambient
     finally:
         app.shutdown()
@@ -294,6 +362,60 @@ def test_night_driving_advances_through_music_pool(monkeypatch):
         app.shutdown()
 
 
+def test_open_road_rotates_in_day_driving_pool(monkeypatch):
+    from freight_fate.app import App
+    from freight_fate.models.profile import Profile
+    from freight_fate.states.driving import DrivingState
+
+    app = App()
+    played = []
+    monkeypatch.setattr(app.ctx.audio, "play_music",
+                        lambda track, fade_ms=1500: played.append(track))
+    try:
+        app.ctx.profile = Profile(name="Day Anchor", current_city="Denver")
+        job = _denver_to_salt_lake_job()
+        route = app.ctx.world.route_from_cities(["Denver", "Salt Lake City"])
+        driving = DrivingState(app.ctx, job, route, trip_seed=12345, start_hour=14.0)
+        driving._day_music_sequence = ("open_road", "drive_desert_two_lane")
+        app.push_state(driving)
+
+        driving._update_audio(music_track_duration_s("open_road") - 0.1)
+        assert played == ["open_road"]
+
+        driving._update_audio(0.2)
+
+        assert played == ["open_road", "drive_desert_two_lane"]
+    finally:
+        app.shutdown()
+
+
+def test_night_haul_rotates_in_night_driving_pool(monkeypatch):
+    from freight_fate.app import App
+    from freight_fate.models.profile import Profile
+    from freight_fate.states.driving import DrivingState
+
+    app = App()
+    played = []
+    monkeypatch.setattr(app.ctx.audio, "play_music",
+                        lambda track, fade_ms=1500: played.append(track))
+    try:
+        app.ctx.profile = Profile(name="Night Anchor", current_city="Denver")
+        job = _denver_to_salt_lake_job()
+        route = app.ctx.world.route_from_cities(["Denver", "Salt Lake City"])
+        driving = DrivingState(app.ctx, job, route, trip_seed=12345, start_hour=23.0)
+        driving._night_music_sequence = ("night_haul", "night_midnight_interstate")
+        app.push_state(driving)
+
+        driving._update_audio(music_track_duration_s("night_haul") - 0.1)
+        assert played == ["night_haul"]
+
+        driving._update_audio(0.2)
+
+        assert played == ["night_haul", "night_midnight_interstate"]
+    finally:
+        app.shutdown()
+
+
 def test_all_cataloged_music_tracks_exist():
     missing = [
         track.key for track in ALL_MUSIC_TRACKS
@@ -302,11 +424,11 @@ def test_all_cataloged_music_tracks_exist():
     assert not missing
 
 
-def test_new_generated_music_tracks_are_at_least_one_minute():
+def test_all_cataloged_music_tracks_are_at_least_one_minute():
     import soundfile as sf
 
     too_short = []
-    for track in GENERATED_MUSIC_TRACKS:
+    for track in ALL_MUSIC_TRACKS:
         info = sf.info(str(ASSETS / "music" / f"{track.key}.ogg"))
         duration = info.frames / info.samplerate
         if duration < 60.0:

@@ -1,8 +1,10 @@
 # Sound and Music Credits
 
-Most sound effects and music tracks in this directory were procedurally
+Most sound effects in this directory were procedurally
 synthesized for Freight Fate by `tools/generate_audio.py` in this repository.
 No third-party recordings or samples were used for those generated assets.
+The main menu, Open Road, and Night Haul themes are Suno remakes created by the
+project owner.
 
 The default sound_lib weather loops were generated for Freight Fate with
 ElevenLabs sound effects tooling, then reviewed and selected for the in-cab
@@ -56,19 +58,19 @@ The donated truck interior recordings contributed by
 
 | Track | File | Description |
 | --- | --- | --- |
-| Headlights West | `music/menu_theme.ogg` | Warm Americana for the main menu |
+| Headlights West | `music/menu_theme.ogg` | Suno remake for the main menu |
 | Keys To The Rig | `music/menu_first_rig.ogg` | First-owned-truck career menu bed |
 | Regional Lines | `music/menu_regional_carrier.ogg` | Regional carrier career menu bed |
 | Yard Lights | `music/menu_fleet_owner.ogg` | Fleet-owner career menu bed |
 | Coast To Coast Ledger | `music/menu_coast_to_coast.ogg` | Coast-to-coast career menu bed |
 | Million Mile Morning | `music/menu_legendary_haul.ogg` | Late-career menu bed |
-| Open Road | `music/open_road.ogg` | Easy mid-tempo groove for long hauls |
+| Open Road | `music/open_road.ogg` | Suno remake for daytime driving |
 | Desert Two-Lane | `music/drive_desert_two_lane.ogg` | Spacious daytime desert drive bed |
 | Mountain Grade | `music/drive_mountain_grade.ogg` | Measured daytime mountain drive bed |
 | Rain-Day Cruise | `music/drive_rain_day_cruise.ogg` | Gentle rainy daytime drive bed |
 | Urban Roll | `music/drive_urban_roll.ogg` | Light heavy-traffic daytime drive bed |
 | Dawn Push | `music/drive_dawn_push.ogg` | Soft early-morning daytime drive bed |
-| Night Haul | `music/night_haul.ogg` | Slow ambient pads for night driving |
+| Night Haul | `music/night_haul.ogg` | Suno remake for night driving |
 | Midnight Interstate | `music/night_midnight_interstate.ogg` | Quiet nighttime highway bed |
 | Neon Truck Stop | `music/night_neon_truck_stop.ogg` | Soft night truck-stop approach bed |
 | Rainy Night Miles | `music/night_rainy_miles.ogg` | Sparse rainy night drive bed |

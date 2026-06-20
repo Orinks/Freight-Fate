@@ -22,7 +22,7 @@ class Settings:
     hos_mode: str = "realistic"           # hours of service: realistic/relaxed/debug_off
     master_volume: float = 1.0
     sfx_volume: float = 0.8
-    music_volume: float = 0.55
+    music_volume: float = 0.5
     speech_verbosity: int = 1             # 0 terse, 1 normal, 2 chatty
     sapi_events: bool = True              # driving events on a separate SAPI voice
     update_channel: str = ""              # "stable"/"dev"; "" follows this build's channel

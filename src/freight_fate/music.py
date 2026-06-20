@@ -17,7 +17,7 @@ class MusicTrack:
 
 
 MENU_TRACKS: tuple[MusicTrack, ...] = (
-    MusicTrack("menu_theme", "Headlights West", "Warm Americana for new careers", 52.0),
+    MusicTrack("menu_theme", "Headlights West", "Warm Americana for new careers", 128.4),
     MusicTrack("menu_first_rig", "Keys To The Rig", "Easy country-rock milestone bed", 75.0),
     MusicTrack("menu_regional_carrier", "Regional Lines", "Confident heartland rock bed", 75.0),
     MusicTrack("menu_fleet_owner", "Yard Lights", "Steady fleet-owner menu bed", 75.0),
@@ -26,7 +26,7 @@ MENU_TRACKS: tuple[MusicTrack, ...] = (
 )
 
 DAY_DRIVE_TRACKS: tuple[MusicTrack, ...] = (
-    MusicTrack("open_road", "Open Road", "Easy mid-tempo groove for long hauls", 61.0),
+    MusicTrack("open_road", "Open Road", "Easy mid-tempo groove for long hauls", 131.6),
     MusicTrack("drive_desert_two_lane", "Desert Two-Lane", "Dry, spacious daytime road bed", 75.0),
     MusicTrack("drive_mountain_grade", "Mountain Grade", "Measured climb-focused road bed", 75.0),
     MusicTrack("drive_rain_day_cruise", "Rain-Day Cruise", "Gentle rainy daytime drive bed", 75.0),
@@ -35,7 +35,7 @@ DAY_DRIVE_TRACKS: tuple[MusicTrack, ...] = (
 )
 
 NIGHT_DRIVE_TRACKS: tuple[MusicTrack, ...] = (
-    MusicTrack("night_haul", "Night Haul", "Slow ambient pads for night driving", 62.0),
+    MusicTrack("night_haul", "Night Haul", "Slow ambient pads for night driving", 204.76),
     MusicTrack("night_midnight_interstate", "Midnight Interstate", "Low night highway bed", 75.0),
     MusicTrack("night_neon_truck_stop", "Neon Truck Stop", "Soft truck-stop approach bed", 75.0),
     MusicTrack("night_rainy_miles", "Rainy Night Miles", "Sparse rainy night bed", 75.0),
@@ -46,11 +46,6 @@ NIGHT_DRIVE_TRACKS: tuple[MusicTrack, ...] = (
 
 ALL_MUSIC_TRACKS: tuple[MusicTrack, ...] = (
     MENU_TRACKS + DAY_DRIVE_TRACKS + NIGHT_DRIVE_TRACKS
-)
-
-GENERATED_MUSIC_TRACKS: tuple[MusicTrack, ...] = tuple(
-    track for track in ALL_MUSIC_TRACKS
-    if track.key not in {"menu_theme", "open_road", "night_haul"}
 )
 
 _TRACKS_BY_KEY = {track.key: track for track in ALL_MUSIC_TRACKS}

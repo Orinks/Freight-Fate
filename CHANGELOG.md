@@ -3,6 +3,12 @@
 ## Unreleased
 
 ### Added
+- **Music remakes.** The main menu theme, Open Road, and Night Haul now use
+  new Suno remakes while keeping their familiar Freight Fate music slots.
+- **Music rotation.** All menu and driving music beds now play once and rotate
+  through their active pool instead of looping.
+- **Music mix default.** New settings now start background music at half volume
+  so speech and driving cues stay comfortably in front.
 - **Expanded music beds.** Freight Fate now includes longer menu, facility,
   daytime driving, and nighttime driving music. Menus and freight facility
   screens use a career-aware pool, and active drives use stable day/night

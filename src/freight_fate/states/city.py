@@ -92,7 +92,7 @@ class CityMenuState(MenuState):
 
     def enter(self) -> None:
         sequence = select_menu_music_sequence(self.ctx.profile)
-        self.ctx.audio.play_music(self.ctx.next_music_track("menu", sequence))
+        self.ctx.play_music_sequence("menu", sequence)
         self.ctx.audio.set_ambient("poi/facility_gate")
         super().enter()
 
@@ -590,7 +590,7 @@ class PickupFacilityState(MenuState):
 
     def enter(self) -> None:
         sequence = select_menu_music_sequence(self.ctx.profile)
-        self.ctx.audio.play_music(self.ctx.next_music_track("menu", sequence))
+        self.ctx.play_music_sequence("menu", sequence)
         super().enter()
 
     def announce_entry(self) -> None:
