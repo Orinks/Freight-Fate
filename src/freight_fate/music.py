@@ -26,7 +26,7 @@ MENU_TRACKS: tuple[MusicTrack, ...] = (
 )
 
 DAY_DRIVE_TRACKS: tuple[MusicTrack, ...] = (
-    MusicTrack("open_road", "Open Road", "Easy mid-tempo groove for long hauls", 61.0),
+    MusicTrack("open_road", "Open Road", "Easy mid-tempo groove for long hauls", 131.6),
     MusicTrack("drive_desert_two_lane", "Desert Two-Lane", "Dry, spacious daytime road bed", 75.0),
     MusicTrack("drive_mountain_grade", "Mountain Grade", "Measured climb-focused road bed", 75.0),
     MusicTrack("drive_rain_day_cruise", "Rain-Day Cruise", "Gentle rainy daytime drive bed", 75.0),

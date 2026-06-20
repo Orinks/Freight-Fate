@@ -3,8 +3,8 @@
 Most sound effects in this directory were procedurally
 synthesized for Freight Fate by `tools/generate_audio.py` in this repository.
 No third-party recordings or samples were used for those generated assets.
-The main menu and Night Haul themes are Suno remakes created by the project
-owner.
+The main menu, Open Road, and Night Haul themes are Suno remakes created by the
+project owner.
 
 The default sound_lib weather loops were generated for Freight Fate with
 ElevenLabs sound effects tooling, then reviewed and selected for the in-cab
@@ -64,7 +64,7 @@ The donated truck interior recordings contributed by
 | Yard Lights | `music/menu_fleet_owner.ogg` | Fleet-owner career menu bed |
 | Coast To Coast Ledger | `music/menu_coast_to_coast.ogg` | Coast-to-coast career menu bed |
 | Million Mile Morning | `music/menu_legendary_haul.ogg` | Late-career menu bed |
-| Open Road | `music/open_road.ogg` | Easy mid-tempo groove for long hauls |
+| Open Road | `music/open_road.ogg` | Suno remake for daytime driving |
 | Desert Two-Lane | `music/drive_desert_two_lane.ogg` | Spacious daytime desert drive bed |
 | Mountain Grade | `music/drive_mountain_grade.ogg` | Measured daytime mountain drive bed |
 | Rain-Day Cruise | `music/drive_rain_day_cruise.ogg` | Gentle rainy daytime drive bed |
