@@ -17,7 +17,7 @@ class MusicTrack:
 
 
 MENU_TRACKS: tuple[MusicTrack, ...] = (
-    MusicTrack("menu_theme", "Headlights West", "Warm Americana for new careers", 52.0),
+    MusicTrack("menu_theme", "Headlights West", "Warm Americana for new careers", 128.4),
     MusicTrack("menu_first_rig", "Keys To The Rig", "Easy country-rock milestone bed", 75.0),
     MusicTrack("menu_regional_carrier", "Regional Lines", "Confident heartland rock bed", 75.0),
     MusicTrack("menu_fleet_owner", "Yard Lights", "Steady fleet-owner menu bed", 75.0),

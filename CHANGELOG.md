@@ -3,6 +3,8 @@
 ## Unreleased
 
 ### Added
+- **Main menu music remake.** The main menu theme now uses the new Suno remake
+  while keeping the same familiar Freight Fate menu slot.
 - **Expanded music beds.** Freight Fate now includes longer menu, facility,
   daytime driving, and nighttime driving music. Menus and freight facility
   screens use a career-aware pool, and active drives use stable day/night

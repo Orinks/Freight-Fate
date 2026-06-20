@@ -3,6 +3,7 @@
 Most sound effects and music tracks in this directory were procedurally
 synthesized for Freight Fate by `tools/generate_audio.py` in this repository.
 No third-party recordings or samples were used for those generated assets.
+The main menu theme is a Suno remake created by the project owner.
 
 The default sound_lib weather loops were generated for Freight Fate with
 ElevenLabs sound effects tooling, then reviewed and selected for the in-cab
@@ -56,7 +57,7 @@ The donated truck interior recordings contributed by
 
 | Track | File | Description |
 | --- | --- | --- |
-| Headlights West | `music/menu_theme.ogg` | Warm Americana for the main menu |
+| Headlights West | `music/menu_theme.ogg` | Suno remake for the main menu |
 | Keys To The Rig | `music/menu_first_rig.ogg` | First-owned-truck career menu bed |
 | Regional Lines | `music/menu_regional_carrier.ogg` | Regional carrier career menu bed |
 | Yard Lights | `music/menu_fleet_owner.ogg` | Fleet-owner career menu bed |
