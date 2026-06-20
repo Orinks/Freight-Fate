@@ -25,7 +25,8 @@ The donated truck interior recordings contributed by
 | Truck idle, interior | `engine/idle.ogg` | Darren Duff in-cab idle loop |
 | Truck start, interior | `engine/start.ogg` | Darren Duff in-cab engine-start cue |
 | Truck shutdown, interior | `engine/shutdown.ogg` | Darren Duff in-cab shutdown cue |
-| Truck horn, interior | `vehicle/horn.ogg` | Darren Duff in-cab horn cue, trimmed from Take 4 |
+| Truck horn, interior | `vehicle/horn.ogg` | Darren Duff in-cab horn cue, trimmed from Take 2 |
+| Gear shift, interior | `vehicle/gear_shift.ogg` | Darren Duff in-cab gear-shift cue, split from a two-shift source |
 | Highway road bed | `vehicle/road.ogg` | ElevenLabs-generated in-cab road ambience |
 
 ## Weather

@@ -13,10 +13,10 @@
   daytime driving, and nighttime driving music. Menus and freight facility
   screens use a career-aware pool, and active drives use stable day/night
   pools that rotate without reshuffling abruptly while you are on the road.
-- **Truck cab sound refresh.** Engine start, idle, shutdown, horn, and highway
-  road ambience now use the updated in-cab vehicle sound set, with donated
-  truck recordings from [Darren Duff](https://darrenduff.com/). The start cue
-  is trimmed so the idle loop takes over cleanly.
+- **Truck cab sound refresh.** Engine start, idle, shutdown, horn, gear shift,
+  and highway road ambience now use the updated in-cab vehicle sound set, with
+  donated truck recordings from [Darren Duff](https://darrenduff.com/). The
+  start cue is trimmed so the idle loop takes over cleanly.
 - **New achievement system.** Careers now track achievements across a range
   of categories, with a spoken main-menu viewer and a chime when you unlock
   one. Existing careers carry over. Note: a career saved on a developer

@@ -77,6 +77,7 @@ def test_sound_lookup_prefers_ogg_when_available():
     assert _asset_path("weather/rain_light", ("ogg", "wav")).name == "rain_light.ogg"
     assert _asset_path("weather/snow_wind", ("ogg", "wav")).name == "snow_wind.ogg"
     assert _asset_path("vehicle/horn", ("ogg", "wav")).name == "horn.ogg"
+    assert _asset_path("vehicle/gear_shift", ("ogg", "wav")).name == "gear_shift.ogg"
     assert _asset_path("vehicle/road", ("ogg", "wav")).name == "road.ogg"
 
 
@@ -92,6 +93,18 @@ def test_engine_start_recording_is_short_one_shot():
     info = sf.info(str(_asset_path("engine/start", ("ogg", "wav"))))
     duration = info.frames / info.samplerate
     assert duration <= 4.25
+
+
+def test_vehicle_horn_and_shift_recordings_are_short_one_shots():
+    import soundfile as sf
+
+    horn = sf.info(str(_asset_path("vehicle/horn", ("ogg", "wav"))))
+    horn_duration = horn.frames / horn.samplerate
+    assert horn_duration <= 1.0
+
+    shift = sf.info(str(_asset_path("vehicle/gear_shift", ("ogg", "wav"))))
+    shift_duration = shift.frames / shift.samplerate
+    assert shift_duration <= 0.8
 
 
 def test_pygame_music_never_loops_catalog_tracks(monkeypatch):
