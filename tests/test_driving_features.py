@@ -195,12 +195,15 @@ def test_air_brake_startup_blocks_movement_until_ready_and_released(monkeypatch)
     app = App()
     events = []
     spoken = []
+    played = []
     held = {pygame.K_UP}
     monkeypatch.setattr(pygame.key, "get_pressed", lambda: FakeKeys(held))
     monkeypatch.setattr(app.ctx, "say_event",
                         lambda text, interrupt=True: events.append(text))
     monkeypatch.setattr(app.ctx, "say",
                         lambda text, interrupt=True: spoken.append(text))
+    monkeypatch.setattr(app.ctx.audio, "play",
+                        lambda key, volume=1.0: played.append((key, volume)))
     try:
         driving = start_drive(app)
         quiet_trip(driving)
@@ -228,6 +231,7 @@ def test_air_brake_startup_blocks_movement_until_ready_and_released(monkeypatch)
 
         driving.handle_event(key_event(pygame.K_p))
         assert not driving.truck.parking_brake
+        assert ("vehicle/brake_release", 0.65) in played
 
         for _ in range(60 * 5):
             driving.update(1 / 60)
@@ -235,6 +239,10 @@ def test_air_brake_startup_blocks_movement_until_ready_and_released(monkeypatch)
                 break
 
         assert driving.truck.speed_mph > 1.0
+
+        driving.handle_event(key_event(pygame.K_p))
+        assert driving.truck.parking_brake
+        assert ("vehicle/brake_set", 0.65) in played
     finally:
         app.shutdown()
 

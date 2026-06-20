@@ -438,7 +438,7 @@ class DrivingState(State):
         t = self.truck
         if t.parking_brake:
             if t.release_parking_brake():
-                self.ctx.audio.play("ui/notify", volume=0.55)
+                self.ctx.audio.play("vehicle/brake_release", volume=0.65)
                 self._set_status("Parking brake released.")
                 self.ctx.say("Parking brake released. Air pressure "
                              f"{t.air_pressure_psi:.0f} psi.")
@@ -454,7 +454,7 @@ class DrivingState(State):
         t.set_parking_brake()
         t.throttle = 0.0
         self._cancel_cruise()
-        self.ctx.audio.play("ui/notify", volume=0.55)
+        self.ctx.audio.play("vehicle/brake_set", volume=0.65)
         self._set_status("Parking brake set.")
         self.ctx.say(f"Parking brake set. Air pressure {t.air_pressure_psi:.0f} psi.")
 

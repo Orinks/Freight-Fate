@@ -27,6 +27,8 @@ The donated truck interior recordings contributed by
 | Truck shutdown, interior | `engine/shutdown.ogg` | Darren Duff in-cab shutdown cue |
 | Truck horn, interior | `vehicle/horn.ogg` | Darren Duff in-cab horn cue, trimmed from Take 2 |
 | Gear shift, interior | `vehicle/gear_shift.ogg` | Darren Duff in-cab gear-shift cue, split from a two-shift source |
+| Parking brake release, interior | `vehicle/brake_release.ogg` | Darren Duff in-cab air-brake cue |
+| Parking brake set, interior | `vehicle/brake_set.ogg` | Darren Duff in-cab brake-set cue |
 | Highway road bed | `vehicle/road.ogg` | ElevenLabs-generated in-cab road ambience |
 
 ## Weather
