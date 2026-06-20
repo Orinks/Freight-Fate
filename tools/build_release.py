@@ -84,7 +84,7 @@ def sound_lib_lib_dir() -> Path:
 
 def sound_lib_target_dir(build_dir: Path) -> Path:
     if build_dir.suffix == ".app":
-        return build_dir / "Contents" / "Resources" / "sound_lib" / "lib"
+        return build_dir / "Contents" / "MacOS" / "sound_lib" / "lib"
     return build_dir / "sound_lib" / "lib"
 
 
