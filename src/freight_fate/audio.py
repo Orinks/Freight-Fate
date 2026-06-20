@@ -29,6 +29,8 @@ from pathlib import Path
 
 import pygame
 
+from .music import music_track_loops
+
 log = logging.getLogger(__name__)
 
 ASSETS = Path(__file__).parent / "assets" / "sounds"
@@ -211,7 +213,8 @@ class _PygameBackend:
         try:
             pygame.mixer.music.load(str(path))
             pygame.mixer.music.set_volume(self.music_volume * self.master_volume)
-            pygame.mixer.music.play(loops=-1, fade_ms=fade_ms)
+            loops = -1 if music_track_loops(track) else 0
+            pygame.mixer.music.play(loops=loops, fade_ms=fade_ms)
             self._music_track = track
         except pygame.error:
             log.warning("Could not play music %s", track, exc_info=True)
@@ -469,7 +472,7 @@ class _BassBackend:
             self._fade_out(self._music_stream, 800)
             self._music_stream = None
             self._music_track = None
-        stream = self._stream(path, looping=True)
+        stream = self._stream(path, looping=music_track_loops(track))
         if stream is None:
             return
         try:

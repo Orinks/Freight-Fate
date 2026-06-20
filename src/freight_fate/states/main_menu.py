@@ -129,12 +129,13 @@ class MainMenuState(MenuState):
             saves = _loadable_saves()
             profile = saves[0][1] if saves else None
         sequence = select_menu_music_sequence(profile)
-        self.ctx.audio.play_music(self.ctx.next_music_track("menu", sequence))
+        self.ctx.play_music_sequence("menu", sequence)
         cls = MainMenuState
         if updater.is_frozen() and cls._update_checker is None:
             cls._update_checker = UpdateChecker(self.ctx.settings)
 
     def update(self, dt: float) -> None:
+        super().update(dt)
         cls = MainMenuState
         checker = cls._update_checker
         if (cls._update_prompted or checker is None

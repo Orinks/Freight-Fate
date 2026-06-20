@@ -14,6 +14,7 @@ from .audio import AudioEngine
 from .data.world import World, get_world
 from .models.economy import Economy
 from .models.profile import Profile
+from .music import music_track_duration_s, music_track_loops
 from .settings import Settings
 from .speech import Speech
 from .states.base import State
@@ -41,6 +42,9 @@ class GameContext:
         self._real_weather = None
         self._music_pool_positions: dict[tuple[str, tuple[str, ...]], int] = {}
         self._music_pool_last: dict[str, str] = {}
+        self._music_rotation_pool: tuple[str, tuple[str, ...]] | None = None
+        self._music_rotation_track: str | None = None
+        self._music_rotation_elapsed_s = 0.0
         self.achievement_notice = ""
         self.achievement_notice_timer = 0.0
 
@@ -113,6 +117,48 @@ class GameContext:
         track = sequence[index]
         self._music_pool_last[pool_name] = track
         return track
+
+    def play_music_sequence(
+            self,
+            pool_name: str,
+            sequence: tuple[str, ...],
+            *,
+            fade_ms: int = 1500,
+            advance: bool = False) -> str:
+        """Play or refresh a pool without jarring compatible menu restarts."""
+        if (not advance
+                and self._music_rotation_pool is not None
+                and self._music_rotation_track is not None
+                and self._music_rotation_pool[0] == pool_name):
+            self._music_rotation_pool = (pool_name, sequence)
+            return self._music_rotation_track
+        track = self.next_music_track(pool_name, sequence)
+        if not track:
+            self.clear_music_rotation()
+            return track
+        self._music_rotation_pool = (pool_name, sequence)
+        self._music_rotation_track = track
+        self._music_rotation_elapsed_s = 0.0
+        self.audio.play_music(track, fade_ms=fade_ms)
+        return track
+
+    def update_music_rotation(self, dt: float) -> None:
+        """Advance generated music beds when their one-shot playback ends."""
+        if self._music_rotation_pool is None or self._music_rotation_track is None:
+            return
+        if music_track_loops(self._music_rotation_track):
+            return
+        self._music_rotation_elapsed_s += max(0.0, dt)
+        if self._music_rotation_elapsed_s < music_track_duration_s(
+                self._music_rotation_track):
+            return
+        pool_name, sequence = self._music_rotation_pool
+        self.play_music_sequence(pool_name, sequence, advance=True)
+
+    def clear_music_rotation(self) -> None:
+        self._music_rotation_pool = None
+        self._music_rotation_track = None
+        self._music_rotation_elapsed_s = 0.0
 
     def award_achievement(
             self,

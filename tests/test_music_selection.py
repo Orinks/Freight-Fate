@@ -7,6 +7,8 @@ from freight_fate.music import (
     DAY_DRIVE_TRACKS,
     GENERATED_MUSIC_TRACKS,
     NIGHT_DRIVE_TRACKS,
+    music_track_duration_s,
+    music_track_loops,
     select_drive_music,
     select_drive_music_sequence,
     select_menu_music,
@@ -141,12 +143,84 @@ def test_menu_music_pool_advances_without_immediate_repeat(monkeypatch):
     try:
         app.ctx.profile = Profile(name="Menu Pool", current_city="Chicago")
         app.ctx.profile.career.total_miles = 10_000
-        state = CityMenuState(app.ctx)
-        for _ in range(4):
-            state.enter()
-            state.exit()
+        app.push_state(CityMenuState(app.ctx))
+        for _ in range(3):
+            app.state.update(music_track_duration_s(played[-1]) + 0.1)
         assert len(set(played)) > 1
         assert all(a != b for a, b in zip(played, played[1:], strict=False))
+    finally:
+        app.shutdown()
+
+
+def test_menu_generated_music_advances_when_bed_duration_ends(monkeypatch):
+    from freight_fate.app import App
+    from freight_fate.models.profile import Profile
+    from freight_fate.states.city import CityMenuState
+
+    app = App()
+    played = []
+    monkeypatch.setattr(app.ctx.audio, "play_music",
+                        lambda track, fade_ms=1500: played.append(track))
+    try:
+        app.ctx.profile = Profile(name="Menu Timer", current_city="Chicago")
+        app.ctx.profile.career.total_miles = 10_000
+        app.push_state(CityMenuState(app.ctx))
+        first = played[-1]
+
+        app.state.update(music_track_duration_s(first) + 0.1)
+        second = played[-1]
+
+        assert not music_track_loops(first)
+        assert first != second
+        assert all(a != b for a, b in zip(played, played[1:], strict=False))
+    finally:
+        app.shutdown()
+
+
+def test_menu_reload_refreshes_pool_without_restarting_current_bed(monkeypatch):
+    from freight_fate.app import App
+    from freight_fate.models.profile import Profile
+    from freight_fate.states.city import CityMenuState
+
+    app = App()
+    played = []
+    monkeypatch.setattr(app.ctx.audio, "play_music",
+                        lambda track, fade_ms=1500: played.append(track))
+    try:
+        app.ctx.profile = Profile(name="Menu Reload", current_city="Chicago")
+        app.ctx.profile.career.total_miles = 10_000
+        app.push_state(CityMenuState(app.ctx))
+        first = played[-1]
+
+        rookie = Profile(name="Rookie Reload", current_city="Chicago")
+        app.ctx.play_music_sequence("menu", select_menu_music_sequence(rookie))
+
+        assert played == [first]
+
+        app.state.update(music_track_duration_s(first) + 0.1)
+
+        assert played == [first, "menu_theme"]
+    finally:
+        app.shutdown()
+
+
+def test_legacy_menu_theme_keeps_looping_anchor(monkeypatch):
+    from freight_fate.app import App
+    from freight_fate.models.profile import Profile
+    from freight_fate.states.city import CityMenuState
+
+    app = App()
+    played = []
+    monkeypatch.setattr(app.ctx.audio, "play_music",
+                        lambda track, fade_ms=1500: played.append(track))
+    try:
+        app.ctx.profile = Profile(name="Legacy Menu", current_city="Chicago")
+        app.push_state(CityMenuState(app.ctx))
+
+        app.state.update(music_track_duration_s("menu_theme") + 5.0)
+
+        assert played == ["menu_theme"]
+        assert music_track_loops("menu_theme")
     finally:
         app.shutdown()
 
@@ -171,8 +245,7 @@ def test_pickup_facility_uses_music_pool_and_keeps_facility_ambience(monkeypatch
             state.enter()
             state.exit()
 
-        assert len(set(played)) > 1
-        assert all(a != b for a, b in zip(played, played[1:], strict=False))
+        assert played == ["menu_coast_to_coast"]
         assert ("poi/facility_gate", 1.0) in ambient
         assert (None, 1.0) in ambient
     finally:
@@ -201,8 +274,7 @@ def test_destination_facility_uses_music_pool_and_keeps_facility_ambience(monkey
         for _ in range(3):
             state.enter()
 
-        assert len(set(played)) > 1
-        assert all(a != b for a, b in zip(played, played[1:], strict=False))
+        assert played == ["menu_coast_to_coast"]
         assert ("poi/facility_gate", 1.0) in ambient
     finally:
         app.shutdown()

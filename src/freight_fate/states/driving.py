@@ -22,6 +22,7 @@ from ..models.settlement import (
 )
 from ..music import (
     music_track_duration_s,
+    music_track_loops,
     select_drive_music_sequence,
     select_menu_music_sequence,
 )
@@ -256,6 +257,7 @@ class DrivingState(State):
     # -- lifecycle ---------------------------------------------------------------
 
     def enter(self) -> None:
+        self.ctx.clear_music_rotation()
         self.ctx.audio.stop_music(800)
         self._play_current_music(fade_ms=2500)
         self.ctx.audio.set_weather(self.weather.effects.sound)
@@ -921,6 +923,9 @@ class DrivingState(State):
             return
         self._music_elapsed_s += max(0.0, dt)
         current = self._current_music_track()
+        if music_track_loops(current):
+            self._play_current_music(fade_ms=4000)
+            return
         if self._music_elapsed_s < music_track_duration_s(current):
             self._play_current_music(fade_ms=4000)
             return
@@ -2073,7 +2078,7 @@ class FacilityArrivalState(MenuState):
 
     def enter(self) -> None:
         sequence = select_menu_music_sequence(self.ctx.profile)
-        self.ctx.audio.play_music(self.ctx.next_music_track("menu", sequence))
+        self.ctx.play_music_sequence("menu", sequence)
         super().enter()
 
     def announce_entry(self) -> None:
