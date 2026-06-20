@@ -64,3 +64,31 @@ def test_migration_never_overwrites_portable_saves(monkeypatch, tmp_path):
     target = profile_mod.data_dir()
     assert (target / "profiles" / "Current.json").is_file()
     assert not (target / "profiles" / "Old.json").exists()
+
+
+def test_nested_install_migrates_parent_portable_saves(monkeypatch, tmp_path):
+    game = tmp_path / "freightfate" / "FreightFate"
+    game.mkdir(parents=True)
+    old_profile = tmp_path / "freightfate" / "saves" / "profiles" / "Driver.json"
+    old_profile.parent.mkdir(parents=True)
+    old_profile.write_text("{}", encoding="utf-8")
+    _reset(monkeypatch, tmp_path, game_dir=game)
+
+    target = profile_mod.data_dir()
+    assert target == game / "saves"
+    assert (target / "profiles" / "Driver.json").is_file()
+    assert old_profile.is_file()
+
+
+def test_parent_install_migrates_nested_portable_saves(monkeypatch, tmp_path):
+    game = tmp_path / "freightfate"
+    game.mkdir(parents=True)
+    old_profile = game / "FreightFate" / "saves" / "profiles" / "Driver.json"
+    old_profile.parent.mkdir(parents=True)
+    old_profile.write_text("{}", encoding="utf-8")
+    _reset(monkeypatch, tmp_path, game_dir=game)
+
+    target = profile_mod.data_dir()
+    assert target == game / "saves"
+    assert (target / "profiles" / "Driver.json").is_file()
+    assert old_profile.is_file()
