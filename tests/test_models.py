@@ -232,11 +232,17 @@ def test_settings_roundtrip():
     s = Settings()
     s.imperial_units = False
     s.music_volume = 0.3
+    s.weather_volume = 0.4
+    s.engine_volume = 0.7
+    s.ui_volume = 0.8
     s.sapi_events = False
     s.save()
     loaded = Settings.load()
     assert loaded.imperial_units is False
     assert loaded.music_volume == 0.3
+    assert loaded.weather_volume == 0.4
+    assert loaded.engine_volume == 0.7
+    assert loaded.ui_volume == 0.8
     assert loaded.sapi_events is False
 
 
@@ -246,6 +252,13 @@ def test_sapi_events_default_on():
 
 def test_music_volume_defaults_to_half():
     assert Settings().music_volume == 0.5
+
+
+def test_split_audio_volume_defaults_prioritize_cues_over_background():
+    s = Settings()
+    assert s.ui_volume > s.music_volume
+    assert s.ui_volume > s.weather_volume
+    assert s.ui_volume > s.engine_volume
 
 
 def test_legacy_hos_off_setting_loads_as_debug_bypass():

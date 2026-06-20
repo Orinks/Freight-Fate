@@ -99,7 +99,10 @@ class GameContext:
     def apply_volumes(self) -> None:
         self.audio.set_volumes(master=self.settings.master_volume,
                                sfx=self.settings.sfx_volume,
-                               music=self.settings.music_volume)
+                               music=self.settings.music_volume,
+                               weather=self.settings.weather_volume,
+                               engine=self.settings.engine_volume,
+                               ui=self.settings.ui_volume)
 
     def next_music_track(self, pool_name: str, sequence: tuple[str, ...]) -> str:
         """Advance a session-local music pool without immediate repeats."""
@@ -318,11 +321,19 @@ def _configure_logging() -> None:
 def main() -> int:
     _configure_logging()
     smoke = "--smoke" in sys.argv[1:]   # CI: boot, render a few frames, exit 0
+    from .single_instance import SingleInstanceGuard
+
+    guard = SingleInstanceGuard()
+    if not guard.acquire():
+        log.warning("Freight Fate is already running.")
+        return 0
     try:
         App().run(max_frames=5 if smoke else None)
     except Exception:
         log.exception("Fatal error")
         return 1
+    finally:
+        guard.release()
     return 0
 
 

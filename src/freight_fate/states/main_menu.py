@@ -766,70 +766,96 @@ class HelpState(State):
 
 
 class SettingsState(MenuState):
-    title = "Settings"
-    intro_help = ("Use up and down arrows to pick a setting. Enter or Right arrow "
-                  "changes it. Left arrow changes it the other way. Escape saves and goes back.")
+    intro_help = (
+        "Use Tab and Shift plus Tab to switch settings screens. Use up and "
+        "down arrows to pick a setting. Right arrow or Enter changes the "
+        "selected setting forward, and Left arrow changes it backward. Escape "
+        "saves and goes back."
+    )
+    screens = ("Gameplay", "Audio", "Speech and weather", "Updates")
+
+    def __init__(self, ctx) -> None:
+        super().__init__(ctx)
+        self.screen_index = 0
+
+    @property
+    def title(self) -> str:  # type: ignore[override]
+        return f"{self.screens[self.screen_index]} {self.screen_index + 1}/{len(self.screens)}"
+
+    @property
+    def category(self) -> str:
+        return ("gameplay", "audio", "speech", "updates")[self.screen_index]
+
+    def announce_entry(self) -> None:
+        self.ctx.say(
+            f"{self.title}. {self.current_text()} "
+            "Tab moves to the next settings screen."
+        )
 
     def build_items(self) -> list[MenuItem]:
         s = self.ctx.settings
+        if self.category == "gameplay":
+            return [
+                MenuItem(
+                    lambda: f"Units: {'imperial, miles' if s.imperial_units else 'metric, kilometers'}",
+                    lambda: self._toggle_units(1),
+                    help="Switch distance and speed readouts between miles and kilometers."),
+                MenuItem(
+                    lambda: f"Transmission: {'automatic' if s.automatic_transmission else 'manual'}",
+                    lambda: self._toggle_transmission(1),
+                    help="Automatic shifts for you. Manual uses clutch and number keys."),
+                MenuItem(lambda: f"Trip pacing: {self._pace_label()}",
+                         lambda: self._cycle_pace(1),
+                         help="Controls how quickly game time and distance pass."),
+                MenuItem(lambda: f"Hours of service: {self._hos_label()}",
+                         lambda: self._cycle_hos(1),
+                         help="Realistic, relaxed, or debug bypass hours rules."),
+                MenuItem("Back", self.go_back),
+            ]
+        if self.category == "audio":
+            return [
+                MenuItem(lambda: f"Master volume: {round(s.master_volume * 100)} percent",
+                         lambda: self._volume("master_volume", 0.1),
+                         help="Overall game volume."),
+                MenuItem(lambda: f"Gameplay cues volume: {round(s.sfx_volume * 100)} percent",
+                         lambda: self._volume("sfx_volume", 0.1),
+                         help="Horn, alerts, road, facility, and gameplay cue sounds."),
+                MenuItem(lambda: f"Weather sounds volume: {round(s.weather_volume * 100)} percent",
+                         lambda: self._volume("weather_volume", 0.1),
+                         help="Rain, wind, thunder, snow, and fog sounds."),
+                MenuItem(lambda: f"Engine sounds volume: {round(s.engine_volume * 100)} percent",
+                         lambda: self._volume("engine_volume", 0.1),
+                         help="Engine start, shutdown, and running engine sounds."),
+                MenuItem(lambda: f"Music volume: {round(s.music_volume * 100)} percent",
+                         lambda: self._volume("music_volume", 0.1),
+                         help="Background music volume."),
+                MenuItem(lambda: f"Menu and UI sounds volume: {round(s.ui_volume * 100)} percent",
+                         lambda: self._volume("ui_volume", 0.1),
+                         help="Menu movement, selection, warning, and cash sounds."),
+                MenuItem("Back", self.go_back),
+            ]
+        if self.category == "speech":
+            return [
+                MenuItem(lambda: f"Speech verbosity: {['terse', 'normal', 'chatty'][s.speech_verbosity]}",
+                         lambda: self._cycle_verbosity(1),
+                         help="Controls how often driving status reminders speak."),
+                MenuItem(lambda: ("Driving event voice: "
+                                  f"{'separate SAPI voice' if s.sapi_events else 'screen reader'}"),
+                         lambda: self._toggle_sapi_events(1),
+                         help="Speaks road events through SAPI or the screen reader voice."),
+                MenuItem(lambda: f"Weather source: {'real world' if s.real_weather else 'simulated'}",
+                         lambda: self._toggle_real_weather(1),
+                         help="Real world uses live city conditions when available."),
+                MenuItem("Back", self.go_back),
+            ]
         return [
-            MenuItem(lambda: f"Units: {'imperial, miles' if s.imperial_units else 'metric, kilometers'}",
-                     lambda: self._toggle_units(1),
-                     help="Switch distance and speed readouts between miles "
-                          "and kilometers."),
-            MenuItem(lambda: f"Transmission: {'automatic' if s.automatic_transmission else 'manual'}",
-                     lambda: self._toggle_transmission(1),
-                     help="Automatic shifts for you. Manual uses clutch and "
-                          "number keys while driving."),
-            MenuItem(lambda: f"Trip pacing: {self._pace_label()}",
-                     lambda: self._cycle_pace(1),
-                     help="Controls how quickly game time and distance pass "
-                          "during a drive."),
-            MenuItem(lambda: f"Hours of service: {self._hos_label()}",
-                     lambda: self._cycle_hos(1),
-                     help="Realistic enforces 11 hours of driving, a 14 hour "
-                          "duty window, and a 30-minute break after 8 hours. "
-                          "Relaxed makes every limit 25 percent longer. Debug "
-                          "bypass records the ELD clock but disables enforcement "
-                          "as an accessibility and bug fallback."),
-            MenuItem(lambda: f"Master volume: {round(s.master_volume * 100)} percent",
-                     lambda: self._volume("master_volume", 0.1),
-                     help="Overall game volume. Use Left and Right arrows "
-                          "for smaller adjustments."),
-            MenuItem(lambda: f"Sound effects volume: {round(s.sfx_volume * 100)} percent",
-                     lambda: self._volume("sfx_volume", 0.1),
-                     help="Engine, road, weather, menu, and alert sounds."),
-            MenuItem(lambda: f"Music volume: {round(s.music_volume * 100)} percent",
-                     lambda: self._volume("music_volume", 0.1),
-                     help="Background music volume."),
-            MenuItem(lambda: f"Speech verbosity: {['terse', 'normal', 'chatty'][s.speech_verbosity]}",
-                     lambda: self._cycle_verbosity(1),
-                     help="Controls how often driving status reminders speak."),
-            MenuItem(lambda: ("Driving event voice: "
-                              f"{'separate SAPI voice' if s.sapi_events else 'screen reader'}"),
-                     lambda: self._toggle_sapi_events(1),
-                     help="Speaks road events such as hazards, warnings, and "
-                          "weather changes through a separate Windows SAPI "
-                          "voice, so your screen reader cannot talk over "
-                          "them. Turn off to hear everything through the "
-                          "screen reader voice."),
-            MenuItem(lambda: f"Weather source: {'real world' if s.real_weather else 'simulated'}",
-                     lambda: self._toggle_real_weather(1),
-                     help="Real world uses live conditions for each city from "
-                          "Open-Meteo. Needs an internet connection; falls back "
-                          "to simulated weather offline."),
             MenuItem(lambda: ("Update channel: "
                               f"{'developer snapshots' if self._channel() == 'dev' else 'stable releases'}"),
                      lambda: self._toggle_update_channel(1),
-                     help="Stable releases are the finished, numbered "
-                          "versions. Developer snapshots are nightly builds "
-                          "of work in progress: new features sooner, but "
-                          "rough edges. A career saved on a snapshot may not "
-                          "load on an older stable release."),
+                     help="Choose stable releases or developer snapshots."),
             MenuItem("Check for updates", self._check_updates,
                      help="Look for a new version of the game right now."),
-            MenuItem("Back", self.go_back,
-                     help="Save settings and return to the previous menu."),
+            MenuItem("Back", self.go_back),
         ]
 
     def handle_event(self, event: pygame.event.Event) -> None:
@@ -837,23 +863,47 @@ class SettingsState(MenuState):
             self._adjust(1)
         elif event.type == pygame.KEYDOWN and event.key == pygame.K_LEFT:
             self._adjust(-1)
+        elif event.type == pygame.KEYDOWN and event.key == pygame.K_TAB:
+            self._change_screen(
+                -1 if getattr(event, "mod", 0) & pygame.KMOD_SHIFT else 1
+            )
         else:
             super().handle_event(event)
 
+    def _change_screen(self, direction: int) -> None:
+        self.screen_index = (self.screen_index + direction) % len(self.screens)
+        self.ctx.audio.play("ui/menu_move")
+        self.refresh(keep_index=False)
+        self.ctx.say(f"{self.title}. {self.current_text()}")
+
     def _adjust(self, direction: int) -> None:
-        actions = [self._toggle_units, self._toggle_transmission, self._cycle_pace,
-                   self._cycle_hos,
-                   lambda d: self._volume("master_volume", 0.1 * d),
-                   lambda d: self._volume("sfx_volume", 0.1 * d),
-                   lambda d: self._volume("music_volume", 0.1 * d),
-                   self._cycle_verbosity, self._toggle_sapi_events,
-                   self._toggle_real_weather, self._toggle_update_channel]
+        actions = {
+            "gameplay": [
+                self._toggle_units, self._toggle_transmission,
+                self._cycle_pace, self._cycle_hos,
+            ],
+            "audio": [
+                lambda d: self._volume("master_volume", 0.1 * d),
+                lambda d: self._volume("sfx_volume", 0.1 * d),
+                lambda d: self._volume("weather_volume", 0.1 * d),
+                lambda d: self._volume("engine_volume", 0.1 * d),
+                lambda d: self._volume("music_volume", 0.1 * d),
+                lambda d: self._volume("ui_volume", 0.1 * d),
+            ],
+            "speech": [
+                self._cycle_verbosity,
+                self._toggle_sapi_events,
+                self._toggle_real_weather,
+            ],
+            "updates": [self._toggle_update_channel],
+        }[self.category]
         if self.index < len(actions):
             actions[self.index](direction)
 
     def _pace_label(self) -> str:
         scale = self.ctx.settings.time_scale
-        return {10.0: "relaxed", 20.0: "standard", 40.0: "fast"}.get(scale, f"{scale:g} times")
+        return {10.0: "relaxed", 20.0: "standard", 40.0: "fast"}.get(
+            scale, f"{scale:g} times")
 
     def _hos_label(self) -> str:
         return {
@@ -874,7 +924,8 @@ class SettingsState(MenuState):
         self._announce()
 
     def _toggle_transmission(self, _d: int) -> None:
-        self.ctx.settings.automatic_transmission = not self.ctx.settings.automatic_transmission
+        self.ctx.settings.automatic_transmission = (
+            not self.ctx.settings.automatic_transmission)
         self._announce()
 
     def _cycle_pace(self, d: int) -> None:

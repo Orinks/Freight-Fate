@@ -18,8 +18,8 @@ from freight_fate.sim.hos import (
 )
 
 
-def key_event(key, unicode=""):
-    return pygame.event.Event(pygame.KEYDOWN, key=key, unicode=unicode)
+def key_event(key, unicode="", mod=0):
+    return pygame.event.Event(pygame.KEYDOWN, key=key, unicode=unicode, mod=mod)
 
 
 # -- clock math -------------------------------------------------------------------
@@ -841,6 +841,8 @@ def test_settings_menu_saves_each_change():
         state = SettingsState(app.ctx)
         app.push_state(state)
         assert app.ctx.settings.imperial_units is True
+        while not state.items[state.index].text.startswith("Units"):
+            state.handle_event(key_event(pygame.K_DOWN))
         state.handle_event(key_event(pygame.K_RETURN))
         assert app.ctx.settings.imperial_units is False
         assert Settings.load().imperial_units is False
@@ -857,11 +859,21 @@ def test_settings_menu_volume_survives_new_app_session():
     try:
         state = SettingsState(app.ctx)
         app.push_state(state)
+        state.handle_event(key_event(pygame.K_TAB))
+        assert state.title == "Audio 2/4"
         while not state.items[state.index].text.startswith("Music volume"):
             state.handle_event(key_event(pygame.K_DOWN))
         state.handle_event(key_event(pygame.K_RIGHT))
         assert app.ctx.settings.music_volume == 0.6
         assert Settings.load().music_volume == 0.6
+        while not state.items[state.index].text.startswith("Weather sounds volume"):
+            state.handle_event(key_event(pygame.K_UP))
+        state.handle_event(key_event(pygame.K_RIGHT))
+        assert app.ctx.settings.weather_volume == 0.75
+        assert Settings.load().weather_volume == 0.75
+        state.handle_event(key_event(pygame.K_LEFT))
+        assert app.ctx.settings.weather_volume == 0.65
+        assert Settings.load().weather_volume == 0.65
     finally:
         app.shutdown()
 
@@ -869,6 +881,8 @@ def test_settings_menu_volume_survives_new_app_session():
     try:
         assert next_app.ctx.settings.music_volume == 0.6
         assert next_app.ctx.audio.music_volume == 0.6
+        assert next_app.ctx.settings.weather_volume == 0.65
+        assert next_app.ctx.audio.weather_volume == 0.65
     finally:
         next_app.shutdown()
 
@@ -881,10 +895,36 @@ def test_settings_menu_f1_has_help_for_every_item():
     try:
         state = SettingsState(app.ctx)
         app.push_state(state)
-        for i, item in enumerate(state.items):
-            state.index = i
-            text = state.current_help()
-            assert item.text in text or item.help
-            assert len(text) > len(state.intro_help)
+        for screen_index in range(len(state.screens)):
+            state.screen_index = screen_index
+            state.refresh(keep_index=False)
+            for i, item in enumerate(state.items):
+                state.index = i
+                text = state.current_help()
+                assert item.text in text or item.help
+                assert len(text) > len(state.intro_help)
+    finally:
+        app.shutdown()
+
+
+def test_settings_menu_pages_like_status_panel():
+    from freight_fate.app import App
+    from freight_fate.states.main_menu import SettingsState
+
+    app = App()
+    try:
+        state = SettingsState(app.ctx)
+        app.push_state(state)
+
+        assert state.title == "Gameplay 1/4"
+        state.handle_event(key_event(pygame.K_TAB))
+        assert state.title == "Audio 2/4"
+        state.handle_event(key_event(pygame.K_TAB))
+        assert state.title == "Speech and weather 3/4"
+        state.handle_event(key_event(pygame.K_TAB, mod=pygame.KMOD_SHIFT))
+        assert state.title == "Audio 2/4"
+        assert state.items[state.index].text.startswith("Master volume")
+        state.handle_event(key_event(pygame.K_DOWN))
+        assert state.items[state.index].text.startswith("Gameplay cues volume")
     finally:
         app.shutdown()

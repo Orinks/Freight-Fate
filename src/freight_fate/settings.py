@@ -23,6 +23,9 @@ class Settings:
     master_volume: float = 1.0
     sfx_volume: float = 0.8
     music_volume: float = 0.5
+    weather_volume: float = 0.65
+    engine_volume: float = 0.55
+    ui_volume: float = 0.9
     speech_verbosity: int = 1             # 0 terse, 1 normal, 2 chatty
     sapi_events: bool = True              # driving events on a separate SAPI voice
     update_channel: str = ""              # "stable"/"dev"; "" follows this build's channel
@@ -60,6 +63,11 @@ class Settings:
             s.hos_mode = "realistic"
         if s.update_channel not in ("", "stable", "dev"):
             s.update_channel = ""
+        for attr in (
+            "master_volume", "sfx_volume", "music_volume",
+            "weather_volume", "engine_volume", "ui_volume",
+        ):
+            setattr(s, attr, max(0.0, min(1.0, float(getattr(s, attr)))))
         return s
 
     def speed_text(self, mph: float) -> str:
