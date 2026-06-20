@@ -35,6 +35,16 @@ def test_game_root_when_frozen(monkeypatch, tmp_path):
     assert profile_mod.game_root() == exe.resolve().parent
 
 
+def test_game_root_for_macos_app_is_bundle_parent(monkeypatch, tmp_path):
+    exe = (
+        tmp_path / "Games" / "FreightFate.app" / "Contents" / "MacOS" / "FreightFate"
+    )
+    monkeypatch.setattr(sys, "frozen", True, raising=False)
+    monkeypatch.setattr(sys, "executable", str(exe))
+    monkeypatch.setattr(sys, "platform", "darwin")
+    assert profile_mod.game_root() == (tmp_path / "Games").resolve()
+
+
 def test_game_root_from_source_is_project_root():
     root = profile_mod.game_root()
     assert (root / "src" / "freight_fate").is_dir()
@@ -90,5 +100,25 @@ def test_parent_install_migrates_nested_portable_saves(monkeypatch, tmp_path):
 
     target = profile_mod.data_dir()
     assert target == game / "saves"
+    assert (target / "profiles" / "Driver.json").is_file()
+    assert old_profile.is_file()
+
+
+def test_macos_app_migrates_bundle_internal_saves(monkeypatch, tmp_path):
+    exe = (
+        tmp_path / "Games" / "FreightFate.app" / "Contents" / "MacOS" / "FreightFate"
+    )
+    old_profile = exe.parent / "saves" / "profiles" / "Driver.json"
+    old_profile.parent.mkdir(parents=True)
+    old_profile.write_text("{}", encoding="utf-8")
+    monkeypatch.delenv("FREIGHT_FATE_DATA_DIR", raising=False)
+    monkeypatch.setattr(profile_mod, "_legacy_checked", False)
+    monkeypatch.setattr(profile_mod, "_legacy_data_dir", lambda: tmp_path / "legacy")
+    monkeypatch.setattr(sys, "frozen", True, raising=False)
+    monkeypatch.setattr(sys, "executable", str(exe))
+    monkeypatch.setattr(sys, "platform", "darwin")
+
+    target = profile_mod.data_dir()
+    assert target == (tmp_path / "Games" / "saves").resolve()
     assert (target / "profiles" / "Driver.json").is_file()
     assert old_profile.is_file()

@@ -55,8 +55,25 @@ def game_root() -> Path:
     """The game's main directory: the executable's directory when frozen,
     the project root when running from source."""
     if getattr(sys, "frozen", False):
-        return Path(sys.executable).resolve().parent
+        exe_dir = _frozen_executable_dir()
+        app_bundle = _macos_app_bundle(exe_dir)
+        if app_bundle is not None:
+            return app_bundle.parent
+        return exe_dir
     return Path(__file__).resolve().parents[3]
+
+
+def _frozen_executable_dir() -> Path:
+    return Path(sys.executable).resolve().parent
+
+
+def _macos_app_bundle(exe_dir: Path) -> Path | None:
+    if sys.platform != "darwin":
+        return None
+    if exe_dir.name != "MacOS" or exe_dir.parent.name != "Contents":
+        return None
+    bundle = exe_dir.parent.parent
+    return bundle if bundle.suffix == ".app" else None
 
 
 def _migrate_legacy(target: Path) -> None:
@@ -88,6 +105,8 @@ def _portable_migration_candidates() -> list[Path]:
         parent / "saves",
         parent / "FreightFate" / "saves",
     ]
+    if getattr(sys, "frozen", False):
+        candidates.append(_frozen_executable_dir() / "saves")
     return [path for path in candidates if path != root / "saves"]
 
 
