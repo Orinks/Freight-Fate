@@ -99,6 +99,18 @@ def mirror_sound_lib_flat_files_to_arch_dir(target_dir: Path) -> None:
         shutil.copy2(path, arch_dir / path.name)
 
 
+def add_macos_dylib_aliases(target_dir: Path) -> None:
+    """Provide lib*.dylib names for sound_lib's macOS library finder."""
+    if sys.platform != "darwin":
+        return
+    for path in target_dir.rglob("*.dylib"):
+        if path.name.startswith("lib"):
+            continue
+        alias = path.with_name(f"lib{path.name}")
+        if not alias.exists():
+            shutil.copy2(path, alias)
+
+
 def stage_sound_lib_runtime_files(build_dir: Path) -> None:
     source_dir = sound_lib_lib_dir()
     target_dir = sound_lib_target_dir(build_dir)
@@ -107,6 +119,7 @@ def stage_sound_lib_runtime_files(build_dir: Path) -> None:
     target_dir.parent.mkdir(parents=True, exist_ok=True)
     shutil.copytree(source_dir, target_dir)
     mirror_sound_lib_flat_files_to_arch_dir(target_dir)
+    add_macos_dylib_aliases(target_dir)
 
     native_files = [
         path
