@@ -40,6 +40,7 @@ SRC_DIR = ROOT / "src"
 PACKAGE_DIR = SRC_DIR / "freight_fate"
 SOUND_LIB_NATIVE_EXTS = {".dll", ".dylib", ".so"}
 SOUND_LIB_ARCH_DIR = "x64"
+PRISM_NATIVE_EXTS = {".dll", ".dylib", ".so"}
 
 
 def project_version() -> str:
@@ -88,6 +89,19 @@ def sound_lib_target_dir(build_dir: Path) -> Path:
     return build_dir / "sound_lib" / "lib"
 
 
+def package_dir(package_name: str) -> Path:
+    spec = importlib.util.find_spec(package_name)
+    if not spec or not spec.submodule_search_locations:
+        raise RuntimeError(f"{package_name} is not installed; cannot package it")
+    return Path(next(iter(spec.submodule_search_locations)))
+
+
+def runtime_root(build_dir: Path) -> Path:
+    if build_dir.suffix == ".app":
+        return build_dir / "Contents" / "MacOS"
+    return build_dir
+
+
 def mirror_sound_lib_flat_files_to_arch_dir(target_dir: Path) -> None:
     """Support sound_lib loaders that still search sound_lib/lib/x64."""
     flat_files = [path for path in target_dir.iterdir() if path.is_file()]
@@ -128,6 +142,35 @@ def stage_sound_lib_runtime_files(build_dir: Path) -> None:
     ]
     if not native_files:
         raise RuntimeError(f"No sound_lib native libraries were staged under {target_dir}")
+
+
+def prism_native_dir() -> Path:
+    """Locate Prism's native screen reader bridge library directory."""
+    native_dir = package_dir("prism") / "_native"
+    if not native_dir.exists():
+        raise RuntimeError(f"Prism native library directory was not found: {native_dir}")
+    return native_dir
+
+
+def prism_target_dir(build_dir: Path) -> Path:
+    return runtime_root(build_dir) / "prism" / "_native"
+
+
+def stage_prism_runtime_files(build_dir: Path) -> None:
+    source_dir = prism_native_dir()
+    target_dir = prism_target_dir(build_dir)
+    if target_dir.exists():
+        shutil.rmtree(target_dir)
+    target_dir.parent.mkdir(parents=True, exist_ok=True)
+    shutil.copytree(source_dir, target_dir)
+
+    native_files = [
+        path
+        for path in target_dir.rglob("*")
+        if path.is_file() and path.suffix.lower() in PRISM_NATIVE_EXTS
+    ]
+    if not native_files:
+        raise RuntimeError(f"No Prism native libraries were staged under {target_dir}")
 
 
 def build_nuitka_command(entry: Path) -> list[str]:
@@ -197,7 +240,33 @@ def run_nuitka() -> Path:
     DIST.mkdir(parents=True, exist_ok=True)
     shutil.copytree(source_dir, build_dir)
     stage_sound_lib_runtime_files(build_dir)
+    stage_prism_runtime_files(build_dir)
     return build_dir
+
+
+def verify_packaged_payload(build_dir: Path) -> None:
+    root = runtime_root(build_dir)
+
+    required = [
+        root / "freight_fate" / "assets" / "sounds",
+        root / "freight_fate" / "data" / "world.json",
+        root / "sound_lib" / "lib",
+        root / "prism" / "_native",
+    ]
+    missing = [path for path in required if not path.exists()]
+    if missing:
+        raise RuntimeError(
+            "Packaged payload is incomplete: "
+            + ", ".join(str(path.relative_to(root)) for path in missing)
+        )
+
+    prism_native = [
+        path
+        for path in (root / "prism" / "_native").rglob("*")
+        if path.is_file() and path.suffix.lower() in PRISM_NATIVE_EXTS
+    ]
+    if not prism_native:
+        raise RuntimeError("Prism native speech libraries are missing from the package")
 
 
 def stamp_build_info(build_dir: Path, label: str) -> None:
@@ -278,6 +347,7 @@ def main() -> int:
         shutil.rmtree(BUILD)
     build_dir = run_nuitka()
     stamp_build_info(build_dir, label)
+    verify_packaged_payload(build_dir)
     sign_distribution(build_dir)
     if not args.skip_smoke:
         smoke_check(build_dir)
