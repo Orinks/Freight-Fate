@@ -99,9 +99,9 @@ def test_payout_punishes_fragile_damage():
 
 def test_fuel_prices_vary_by_region():
     eco = Economy(seed=1)
-    assert eco.fuel_price("west_coast") > eco.fuel_price("south")
-    assert eco.fuel_cost("midwest", 0) == 0.0
-    assert eco.fuel_cost("midwest", 10) > 30.0
+    assert eco.fuel_price("california") > eco.fuel_price("gulf_coast")
+    assert eco.fuel_cost("great_lakes", 0) == 0.0
+    assert eco.fuel_cost("great_lakes", 10) > 30.0
 
 
 def test_repair_cost_scales_with_damage():

@@ -19,15 +19,15 @@ def test_all_regions_in_world_have_weights(world):
 
 
 def test_weather_is_deterministic_with_seed():
-    a = WeatherSystem("midwest", seed=7)
-    b = WeatherSystem("midwest", seed=7)
+    a = WeatherSystem("great_lakes", seed=7)
+    b = WeatherSystem("great_lakes", seed=7)
     for _ in range(50):
         assert a.update(13.0) == b.update(13.0)
     assert a.current == b.current
 
 
 def test_weather_eventually_changes():
-    ws = WeatherSystem("northwest", seed=3)
+    ws = WeatherSystem("pacific_northwest", seed=3)
     changes = [ws.update(15.0) for _ in range(200)]
     assert any(c is not None for c in changes)
 
@@ -38,14 +38,14 @@ def test_bad_weather_reduces_grip():
 
 
 def test_forecast_returns_requested_segments():
-    ws = WeatherSystem("south", seed=1)
+    ws = WeatherSystem("atlantic_southeast", seed=1)
     assert len(ws.forecast(3)) == 3
 
 
 def test_forecast_does_not_regenerate_weather_timeline():
     """Pressing V speaks a forecast; it must not change future weather."""
-    with_forecast = WeatherSystem("midwest", seed=9)
-    untouched = WeatherSystem("midwest", seed=9)
+    with_forecast = WeatherSystem("great_lakes", seed=9)
+    untouched = WeatherSystem("great_lakes", seed=9)
     for _ in range(5):
         assert len(with_forecast.forecast(2)) == 2
     for _ in range(80):
@@ -58,7 +58,7 @@ def make_trip(world, start="Chicago", end="Indianapolis", seed=2, **kwargs):
     truck = TruckState()
     truck.transmission.automatic = True
     truck.start_engine()
-    weather = WeatherSystem("midwest", seed=1)
+    weather = WeatherSystem("great_lakes", seed=1)
     return Trip(route, truck, weather, seed=seed, **kwargs), truck
 
 
@@ -106,7 +106,7 @@ def test_trip_uses_explicit_stop_positions(world):
 def test_trip_uses_only_curated_pois_at_runtime(world):
     route = world.route_from_cities(["Memphis", "Nashville"])
     truck = TruckState()
-    weather = WeatherSystem("midwest", seed=1)
+    weather = WeatherSystem("great_lakes", seed=1)
     trip = Trip(route, truck, weather, seed=2)
 
     assert route.raw_stop_details
@@ -119,7 +119,7 @@ def test_trip_uses_only_curated_pois_at_runtime(world):
 def test_trip_places_reverse_route_stops_from_travel_direction(world):
     route = world.route_from_cities(["Dallas", "San Antonio"])
     truck = TruckState()
-    weather = WeatherSystem("plains", seed=1)
+    weather = WeatherSystem("southern_plains", seed=1)
     trip = Trip(route, truck, weather, seed=2)
 
     assert [stop.name for stop in trip.stops] == [
@@ -158,7 +158,7 @@ def test_pickup_deadhead_route_uses_local_facility_limits(world):
     route = world.facility_approach_route(
         "Chicago", world.cities["Chicago"].locations[0].name)
     truck = TruckState()
-    weather = WeatherSystem("midwest", seed=1)
+    weather = WeatherSystem("great_lakes", seed=1)
     trip = Trip(route, truck, weather, seed=2)
 
     limit, reason = trip.speed_limit_at(0.1)
@@ -174,7 +174,7 @@ def test_facility_gate_warns_before_final_low_speed_zone(world):
     route = world.facility_approach_route(
         "Chicago", world.cities["Chicago"].locations[0].name)
     truck = TruckState()
-    weather = WeatherSystem("midwest", seed=1)
+    weather = WeatherSystem("great_lakes", seed=1)
     trip = Trip(route, truck, weather, seed=2)
 
     trip.position_mi = trip.total_miles - 2.0
@@ -273,7 +273,7 @@ def test_traffic_model_applies_to_enriched_and_legacy_routes(world):
     for cities in (["Chicago", "Indianapolis"], ["Chicago", "St. Louis"]):
         route = world.route_from_cities(cities)
         truck = TruckState()
-        weather = WeatherSystem("midwest", seed=1)
+        weather = WeatherSystem("great_lakes", seed=1)
         weather.current = WeatherKind.CLEAR
         trip = Trip(route, truck, weather, seed=1)
         assert trip.traffic_leads, cities
@@ -281,9 +281,9 @@ def test_traffic_model_applies_to_enriched_and_legacy_routes(world):
 
 def test_bad_weather_slows_modeled_traffic(world):
     route = world.route_from_cities(["Chicago", "Indianapolis"])
-    clear_weather = WeatherSystem("midwest", seed=1)
+    clear_weather = WeatherSystem("great_lakes", seed=1)
     clear_weather.current = WeatherKind.CLEAR
-    rain_weather = WeatherSystem("midwest", seed=1)
+    rain_weather = WeatherSystem("great_lakes", seed=1)
     rain_weather.current = WeatherKind.HEAVY_RAIN
 
     clear = Trip(route, TruckState(), clear_weather, seed=1)
@@ -491,7 +491,7 @@ def test_traffic_context_and_warning_are_grounded_in_lead_vehicle(world):
 def test_city_events_announce_state_crossings(world):
     route = world.route_from_cities(["Chicago", "Cleveland", "Pittsburgh"])
     truck = TruckState()
-    weather = WeatherSystem("midwest", seed=1)
+    weather = WeatherSystem("great_lakes", seed=1)
     trip = Trip(route, truck, weather, seed=2)
     trip.position_mi = route.legs[0].miles
 

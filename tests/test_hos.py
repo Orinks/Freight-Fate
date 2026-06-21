@@ -266,7 +266,7 @@ def make_trip(world, start_hour, seed=2, start="Atlanta", end="Dallas"):
     route = world.route_options(start, end)[0]
     truck = TruckState()
     truck.transmission.automatic = True
-    weather = WeatherSystem("south", seed=1)
+    weather = WeatherSystem("atlantic_southeast", seed=1)
     return Trip(route, truck, weather, seed=seed, start_hour=start_hour)
 
 

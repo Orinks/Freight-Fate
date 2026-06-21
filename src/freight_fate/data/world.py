@@ -446,13 +446,19 @@ BASE_MARKET_FACILITY_TYPES = (
 
 REGION_MARKET_TAGS = {
     "northeast": ("port", "intermodal", "industrial", "retail"),
-    "midwest": ("intermodal", "agriculture", "industrial", "manufacturing"),
-    "south": ("port", "retail", "manufacturing", "food"),
-    "plains": ("agriculture", "intermodal", "energy"),
+    "appalachia": ("industrial", "mining", "manufacturing"),
+    "great_lakes": ("intermodal", "manufacturing", "automotive", "agriculture"),
+    "heartland": ("agriculture", "intermodal", "food"),
+    "southern_plains": ("energy", "agriculture", "intermodal", "retail"),
+    "mid_south": ("parcel", "manufacturing", "food"),
+    "atlantic_southeast": ("port", "manufacturing", "retail", "food"),
+    "gulf_coast": ("port", "energy", "chemical", "food"),
+    "florida": ("port", "food", "retail", "cold_chain"),
     "rockies": ("mining", "intermodal", "construction"),
-    "southwest": ("border", "construction", "food", "mining"),
-    "west_coast": ("port", "food", "retail", "intermodal"),
-    "northwest": ("port", "lumber", "agriculture", "intermodal"),
+    "great_basin": ("intermodal", "mining", "retail"),
+    "desert_southwest": ("border", "construction", "food", "mining"),
+    "california": ("port", "food", "retail", "intermodal"),
+    "pacific_northwest": ("port", "lumber", "agriculture", "intermodal"),
 }
 
 STATE_MARKET_TAGS = {

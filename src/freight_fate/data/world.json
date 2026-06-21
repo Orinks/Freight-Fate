@@ -82,7 +82,7 @@
     },
     "Pittsburgh": {
       "state": "Pennsylvania",
-      "region": "northeast",
+      "region": "appalachia",
       "locations": [
         {
           "name": "Steel City Works",
@@ -106,7 +106,7 @@
     },
     "Cleveland": {
       "state": "Ohio",
-      "region": "midwest",
+      "region": "great_lakes",
       "locations": [
         {
           "name": "Lakefront Bulk Terminal",
@@ -130,7 +130,7 @@
     },
     "Chicago": {
       "state": "Illinois",
-      "region": "midwest",
+      "region": "great_lakes",
       "locations": [
         {
           "name": "Cicero Rail Hub",
@@ -162,7 +162,7 @@
     },
     "Indianapolis": {
       "state": "Indiana",
-      "region": "midwest",
+      "region": "great_lakes",
       "locations": [
         {
           "name": "Crossroads Logistics Park",
@@ -186,7 +186,7 @@
     },
     "St. Louis": {
       "state": "Missouri",
-      "region": "midwest",
+      "region": "heartland",
       "locations": [
         {
           "name": "Gateway Riverport",
@@ -210,7 +210,7 @@
     },
     "Nashville": {
       "state": "Tennessee",
-      "region": "south",
+      "region": "mid_south",
       "locations": [
         {
           "name": "Music City Freight",
@@ -234,7 +234,7 @@
     },
     "Atlanta": {
       "state": "Georgia",
-      "region": "south",
+      "region": "atlantic_southeast",
       "locations": [
         {
           "name": "Hartsfield Cargo City",
@@ -266,7 +266,7 @@
     },
     "Dallas": {
       "state": "Texas",
-      "region": "plains",
+      "region": "southern_plains",
       "locations": [
         {
           "name": "Trinity Intermodal Yard",
@@ -290,7 +290,7 @@
     },
     "Kansas City": {
       "state": "Missouri",
-      "region": "plains",
+      "region": "heartland",
       "locations": [
         {
           "name": "Stockyards Freight House",
@@ -338,7 +338,7 @@
     },
     "Albuquerque": {
       "state": "New Mexico",
-      "region": "southwest",
+      "region": "desert_southwest",
       "locations": [
         {
           "name": "Rio Grande Crossdock",
@@ -362,7 +362,7 @@
     },
     "Phoenix": {
       "state": "Arizona",
-      "region": "southwest",
+      "region": "desert_southwest",
       "locations": [
         {
           "name": "Sky Harbor Freight",
@@ -410,7 +410,7 @@
     },
     "Las Vegas": {
       "state": "Nevada",
-      "region": "southwest",
+      "region": "desert_southwest",
       "locations": [
         {
           "name": "Mojave Freight Plaza",
@@ -434,7 +434,7 @@
     },
     "Los Angeles": {
       "state": "California",
-      "region": "west_coast",
+      "region": "california",
       "locations": [
         {
           "name": "San Pedro Container Port",
@@ -466,7 +466,7 @@
     },
     "San Francisco": {
       "state": "California",
-      "region": "west_coast",
+      "region": "california",
       "locations": [
         {
           "name": "Oakland Outer Harbor",
@@ -490,7 +490,7 @@
     },
     "Portland": {
       "state": "Oregon",
-      "region": "northwest",
+      "region": "pacific_northwest",
       "locations": [
         {
           "name": "Willamette River Docks",
@@ -514,7 +514,7 @@
     },
     "Seattle": {
       "state": "Washington",
-      "region": "northwest",
+      "region": "pacific_northwest",
       "locations": [
         {
           "name": "Harbor Island Terminal",
@@ -562,7 +562,7 @@
     },
     "Buffalo": {
       "state": "New York",
-      "region": "northeast",
+      "region": "great_lakes",
       "locations": [
         {
           "name": "Niagara Frontier Food Terminal",
@@ -618,7 +618,7 @@
     },
     "Richmond": {
       "state": "Virginia",
-      "region": "south",
+      "region": "atlantic_southeast",
       "locations": [
         {
           "name": "James River Distribution",
@@ -642,7 +642,7 @@
     },
     "Raleigh": {
       "state": "North Carolina",
-      "region": "south",
+      "region": "atlantic_southeast",
       "locations": [
         {
           "name": "Research Triangle Depot",
@@ -666,7 +666,7 @@
     },
     "Charlotte": {
       "state": "North Carolina",
-      "region": "south",
+      "region": "atlantic_southeast",
       "locations": [
         {
           "name": "Queen City Intermodal",
@@ -690,7 +690,7 @@
     },
     "Savannah": {
       "state": "Georgia",
-      "region": "south",
+      "region": "atlantic_southeast",
       "locations": [
         {
           "name": "Garden City Container Terminal",
@@ -714,7 +714,7 @@
     },
     "Jacksonville": {
       "state": "Florida",
-      "region": "south",
+      "region": "florida",
       "locations": [
         {
           "name": "Blount Island Terminal",
@@ -738,7 +738,7 @@
     },
     "Tampa": {
       "state": "Florida",
-      "region": "south",
+      "region": "florida",
       "locations": [
         {
           "name": "Port Tampa Bay Bulk Docks",
@@ -762,7 +762,7 @@
     },
     "Miami": {
       "state": "Florida",
-      "region": "south",
+      "region": "florida",
       "locations": [
         {
           "name": "PortMiami Container Yard",
@@ -786,7 +786,7 @@
     },
     "Birmingham": {
       "state": "Alabama",
-      "region": "south",
+      "region": "mid_south",
       "locations": [
         {
           "name": "Sloss Industrial Works",
@@ -810,7 +810,7 @@
     },
     "Memphis": {
       "state": "Tennessee",
-      "region": "south",
+      "region": "mid_south",
       "locations": [
         {
           "name": "Memphis Air Cargo Hub",
@@ -842,7 +842,7 @@
     },
     "Little Rock": {
       "state": "Arkansas",
-      "region": "south",
+      "region": "mid_south",
       "locations": [
         {
           "name": "Arkansas River Port",
@@ -866,7 +866,7 @@
     },
     "New Orleans": {
       "state": "Louisiana",
-      "region": "south",
+      "region": "gulf_coast",
       "locations": [
         {
           "name": "Napoleon Avenue Wharf",
@@ -890,7 +890,7 @@
     },
     "Houston": {
       "state": "Texas",
-      "region": "south",
+      "region": "gulf_coast",
       "locations": [
         {
           "name": "Bayport Container Terminal",
@@ -922,7 +922,7 @@
     },
     "San Antonio": {
       "state": "Texas",
-      "region": "south",
+      "region": "gulf_coast",
       "locations": [
         {
           "name": "Alamo Intermodal Yard",
@@ -946,7 +946,7 @@
     },
     "El Paso": {
       "state": "Texas",
-      "region": "southwest",
+      "region": "desert_southwest",
       "locations": [
         {
           "name": "Border Crossdock Plaza",
@@ -970,7 +970,7 @@
     },
     "Tucson": {
       "state": "Arizona",
-      "region": "southwest",
+      "region": "desert_southwest",
       "locations": [
         {
           "name": "Old Pueblo Logistics",
@@ -994,7 +994,7 @@
     },
     "Knoxville": {
       "state": "Tennessee",
-      "region": "south",
+      "region": "appalachia",
       "locations": [
         {
           "name": "Forks of the River Industrial",
@@ -1018,7 +1018,7 @@
     },
     "Louisville": {
       "state": "Kentucky",
-      "region": "south",
+      "region": "mid_south",
       "locations": [
         {
           "name": "Riverport Bourbon Warehouses",
@@ -1042,7 +1042,7 @@
     },
     "Cincinnati": {
       "state": "Ohio",
-      "region": "midwest",
+      "region": "great_lakes",
       "locations": [
         {
           "name": "Queensgate Rail Yard",
@@ -1066,7 +1066,7 @@
     },
     "Columbus": {
       "state": "Ohio",
-      "region": "midwest",
+      "region": "great_lakes",
       "locations": [
         {
           "name": "Rickenbacker Inland Port",
@@ -1090,7 +1090,7 @@
     },
     "Detroit": {
       "state": "Michigan",
-      "region": "midwest",
+      "region": "great_lakes",
       "locations": [
         {
           "name": "River Rouge Assembly Docks",
@@ -1122,7 +1122,7 @@
     },
     "Milwaukee": {
       "state": "Wisconsin",
-      "region": "midwest",
+      "region": "great_lakes",
       "locations": [
         {
           "name": "Jones Island Bulk Port",
@@ -1146,7 +1146,7 @@
     },
     "Minneapolis": {
       "state": "Minnesota",
-      "region": "midwest",
+      "region": "great_lakes",
       "locations": [
         {
           "name": "Upper Harbor Grain Terminal",
@@ -1170,7 +1170,7 @@
     },
     "Des Moines": {
       "state": "Iowa",
-      "region": "midwest",
+      "region": "heartland",
       "locations": [
         {
           "name": "Corn Belt Grain Elevators",
@@ -1194,7 +1194,7 @@
     },
     "Omaha": {
       "state": "Nebraska",
-      "region": "plains",
+      "region": "heartland",
       "locations": [
         {
           "name": "Union Stockyards Freight",
@@ -1218,7 +1218,7 @@
     },
     "Wichita": {
       "state": "Kansas",
-      "region": "plains",
+      "region": "southern_plains",
       "locations": [
         {
           "name": "Air Capital Plant Docks",
@@ -1242,7 +1242,7 @@
     },
     "Tulsa": {
       "state": "Oklahoma",
-      "region": "plains",
+      "region": "southern_plains",
       "locations": [
         {
           "name": "Port of Catoosa",
@@ -1266,7 +1266,7 @@
     },
     "Oklahoma City": {
       "state": "Oklahoma",
-      "region": "plains",
+      "region": "southern_plains",
       "locations": [
         {
           "name": "Stockyards City Freight",
@@ -1290,7 +1290,7 @@
     },
     "Amarillo": {
       "state": "Texas",
-      "region": "plains",
+      "region": "southern_plains",
       "locations": [
         {
           "name": "Panhandle Cattle Exchange",
@@ -1338,7 +1338,7 @@
     },
     "Sacramento": {
       "state": "California",
-      "region": "west_coast",
+      "region": "california",
       "locations": [
         {
           "name": "Central Valley Produce Exchange",
@@ -1362,7 +1362,7 @@
     },
     "Fresno": {
       "state": "California",
-      "region": "west_coast",
+      "region": "california",
       "locations": [
         {
           "name": "San Joaquin Packing Sheds",
@@ -1386,7 +1386,7 @@
     },
     "San Diego": {
       "state": "California",
-      "region": "west_coast",
+      "region": "california",
       "locations": [
         {
           "name": "Tenth Avenue Marine Terminal",
@@ -1410,7 +1410,7 @@
     },
     "Reno": {
       "state": "Nevada",
-      "region": "rockies",
+      "region": "great_basin",
       "locations": [
         {
           "name": "Sierra Logistics Center",
@@ -1434,7 +1434,7 @@
     },
     "Boise": {
       "state": "Idaho",
-      "region": "rockies",
+      "region": "great_basin",
       "locations": [
         {
           "name": "Treasure Valley Produce",
@@ -1458,7 +1458,7 @@
     },
     "Spokane": {
       "state": "Washington",
-      "region": "northwest",
+      "region": "pacific_northwest",
       "locations": [
         {
           "name": "Inland Empire Rail Yard",

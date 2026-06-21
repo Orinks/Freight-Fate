@@ -9,6 +9,7 @@ import pygame
 
 from .. import __version__, updater
 from ..achievements import ACHIEVEMENTS, earned_ids
+from ..data.regions import REGION_LABELS
 from ..models.profile import DEFAULT_CITY, Profile, ProfileIntegrityError
 from ..music import select_menu_music_sequence
 from ..settings import TIME_SCALES
@@ -480,18 +481,6 @@ class NameEntryState(State):
     def lines(self) -> list[str]:
         return ["New career", "", f"Driver name: {self.name}_",
                 "Press Enter to confirm, Escape to cancel, F2 to review."]
-
-
-REGION_LABELS = {
-    "northeast": "the Northeast",
-    "midwest": "the Midwest",
-    "south": "the South",
-    "plains": "the Plains",
-    "rockies": "the Rockies",
-    "southwest": "the Southwest",
-    "west_coast": "the West Coast",
-    "northwest": "the Pacific Northwest",
-}
 
 
 class HomeTerminalState(MenuState):
