@@ -76,6 +76,18 @@ def test_parse_ors_route_elevation_feeds_existing_grade_helper():
     assert "terrain" in segments[0]
 
 
+def test_ors_corridor_samples_carry_elevation():
+    parsed = enrich_routes.parse_ors_route(_mock_ors_payload())
+    samples, elevations = enrich_routes.ors_corridor_samples(
+        parsed, parsed["miles"], sample_count=3)
+    assert len(samples) == 3 == len(elevations)
+    assert samples[0]["at_mi"] == 0.0
+    assert samples[-1]["at_mi"] == pytest.approx(parsed["miles"])
+    # endpoints map to the route's first and last elevations (metres -> feet)
+    assert elevations[0] == pytest.approx(180.0 * 3.28084, abs=0.1)
+    assert elevations[-1] == pytest.approx(220.0 * 3.28084, abs=0.1)
+
+
 def test_has_tollway_false_when_no_toll_segments():
     payload = _mock_ors_payload()
     payload["features"][0]["properties"]["extras"]["tollways"]["values"] = [[0, 2, 0]]

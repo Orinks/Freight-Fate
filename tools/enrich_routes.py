@@ -73,6 +73,15 @@ CORRIDOR_SOURCE = (
     "elevation samples, Census/OpenStreetMap state context, and curated "
     "corridor POIs checked in for offline runtime use."
 )
+ORS_ELEVATION_SOURCE = (
+    "OpenRouteService driving-hgv route elevation over OpenStreetMap "
+    "(SRTM/elevation), sampled at development time."
+)
+ORS_CORRIDOR_SOURCE = (
+    "Development-time OpenRouteService driving-hgv (truck) route geometry and "
+    "elevation over OpenStreetMap, with Census/OpenStreetMap state context and "
+    "curated corridor POIs checked in for offline runtime use."
+)
 HIGH_PRIORITY_REMAINING_CORRIDORS = (
     {
         "from": "Philadelphia",
@@ -120,6 +129,14 @@ def main(argv: list[str] | None = None) -> int:
                              f"request for the corridor. Requires the "
                              f"{ORS_API_KEY_ENV} environment variable (a free "
                              "OpenRouteService key, build-time only).")
+    parser.add_argument("--ors-compare", action="store_true",
+                        help="Read-only: compare the ORS driving-hgv corridor "
+                             "for --from-city/--to-city against the checked-in "
+                             f"data. Requires {ORS_API_KEY_ENV}.")
+    parser.add_argument("--engine", choices=("osrm", "ors"), default="osrm",
+                        help="Routing engine for --enrich-all. 'ors' uses the "
+                             "driving-hgv truck profile (needs ORS_API_KEY and "
+                             "the tooling group); 'osrm' (default) is car.")
     parser.add_argument("--coverage-report", action="store_true",
                         help="Report metadata coverage for every world leg.")
     parser.add_argument("--json", action="store_true",
@@ -142,6 +159,15 @@ def main(argv: list[str] | None = None) -> int:
 
     data = json.loads(WORLD_PATH.read_text(encoding="utf-8"))
     if args.enrich_all:
+        api_key = None
+        if args.engine == "ors":
+            api_key = ors_api_key()
+            if api_key is None:
+                raise SystemExit(
+                    f"--engine ors needs the {ORS_API_KEY_ENV} environment "
+                    "variable and the tooling group "
+                    "(uv run --group tooling ...)."
+                )
         result = enrich_all_routes(
             data,
             cache_dir=Path(args.cache_dir),
@@ -149,6 +175,8 @@ def main(argv: list[str] | None = None) -> int:
             write=args.write,
             rate_limit_s=args.rate_limit,
             use_overpass=not args.no_overpass,
+            engine=args.engine,
+            api_key=api_key,
         )
         if args.write:
             WORLD_PATH.write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")
@@ -200,6 +228,27 @@ def main(argv: list[str] | None = None) -> int:
             f"{ors['steepness_segments']} steepness segments, "
             f"tollway {'yes' if ors['has_tollway'] else 'no'}"
         )
+    if args.ors_compare:
+        api_key = ors_api_key()
+        if api_key is None:
+            raise SystemExit(
+                f"--ors-compare needs the {ORS_API_KEY_ENV} environment "
+                "variable and the tooling group (uv run --group tooling ...)."
+            )
+        cmp = _ors_compare(data, args.from_city, args.to_city, api_key,
+                           Path(args.cache_dir), args.rate_limit)
+        current_grade = (f"{cmp['current_avg_grade_pct']}%"
+                         if cmp["current_avg_grade_pct"] is not None else "n/a")
+        print(
+            "ORS vs checked-in: "
+            f"miles {cmp['ors_miles']:.1f} vs {cmp['leg_miles']:.0f}; "
+            f"terrain {cmp['ors_terrain']} vs {cmp['current_terrain']}; "
+            f"avg grade {cmp['ors_avg_grade_pct']}% vs {current_grade}; "
+            f"elevation {cmp['ors_min_ft']:.0f}-{cmp['ors_max_ft']:.0f} ft; "
+            f"{cmp['ors_points']} ORS points; "
+            f"tollway {'yes' if cmp['ors_has_tollway'] else 'no'} "
+            f"(checked-in toll events: {cmp['current_toll_events']})"
+        )
     if args.overpass_poi_smoke:
         pois = _overpass_poi_smoke(corridor)
         print(
@@ -218,6 +267,8 @@ def enrich_all_routes(
     write: bool,
     rate_limit_s: float,
     use_overpass: bool,
+    engine: str = "osrm",
+    api_key: str | None = None,
 ) -> dict[str, Any]:
     cache_dir.mkdir(parents=True, exist_ok=True)
     state_shapes = _load_state_shapes(cache_dir, rate_limit_s)
@@ -233,10 +284,19 @@ def enrich_all_routes(
             continue
         processed += 1
         try:
-            route = _cached_osrm_route(data, leg, cache_dir, rate_limit_s)
-            geometry = route["geometry"]["coordinates"]
-            samples = _sample_geometry(geometry, float(leg["miles"]))
-            elevations = _cached_elevations(samples, cache_dir, rate_limit_s)
+            if engine == "ors":
+                parsed = _cached_ors_route(data, leg, cache_dir, rate_limit_s, api_key)
+                geometry = parsed["coordinates"]
+                samples, elevations = ors_corridor_samples(parsed, float(leg["miles"]))
+                elevation_source = ORS_ELEVATION_SOURCE
+                corridor_source = ORS_CORRIDOR_SOURCE
+            else:
+                route = _cached_osrm_route(data, leg, cache_dir, rate_limit_s)
+                geometry = route["geometry"]["coordinates"]
+                samples = _sample_geometry(geometry, float(leg["miles"]))
+                elevations = _cached_elevations(samples, cache_dir, rate_limit_s)
+                elevation_source = ELEVATION_SOURCE
+                corridor_source = CORRIDOR_SOURCE
             if "route_points" in needs:
                 corridor["route_points"] = [
                     {"at_mi": round(point["at_mi"], 1),
@@ -249,7 +309,7 @@ def enrich_all_routes(
                     {
                         "at_mi": round(point["at_mi"], 1),
                         "elevation_ft": round(elevation, 1),
-                        "source": ELEVATION_SOURCE,
+                        "source": elevation_source,
                     }
                     for point, elevation in zip(samples, elevations, strict=True)
                 ]
@@ -265,7 +325,7 @@ def enrich_all_routes(
                 elif "state_crossings" in corridor:
                     corridor.pop("state_crossings")
             if not corridor.get("source"):
-                corridor["source"] = CORRIDOR_SOURCE
+                corridor["source"] = corridor_source
             if "pois" in needs and use_overpass:
                 stop = _discover_poi(data, leg, samples, cache_dir, rate_limit_s)
                 if stop is not None:
@@ -1307,6 +1367,101 @@ def parse_ors_route(payload: dict[str, Any]) -> dict[str, Any]:
         "elevations_ft": elevations_ft,
         "steepness": steepness,
         "has_tollway": has_tollway,
+    }
+
+
+def _cached_ors_route(
+    data: dict[str, Any],
+    leg: dict[str, Any],
+    cache_dir: Path,
+    rate_limit_s: float,
+    api_key: str,
+) -> dict[str, Any]:
+    """Parsed ORS driving-hgv route for a leg, caching the raw GeoJSON.
+
+    Caching keeps re-runs off the rate-limited API; the committed artifact is
+    still ``world.json``, and ``.route-cache/`` stays local (git-ignored).
+    """
+    cities = data["cities"]
+    path = _cache_file(cache_dir, "ors", f"{leg['from']}--{leg['to']}--{leg['highway']}")
+    if path.exists():
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    else:
+        payload = fetch_ors_hgv_route(cities[leg["from"]], cities[leg["to"]], api_key)
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(json.dumps(payload, sort_keys=True), encoding="utf-8")
+        if rate_limit_s > 0:
+            time.sleep(rate_limit_s)
+    return parse_ors_route(payload)
+
+
+def ors_corridor_samples(
+    parsed: dict[str, Any],
+    leg_miles: float,
+    sample_count: int = 5,
+) -> tuple[list[dict[str, float]], list[float]]:
+    """Evenly spaced corridor samples plus their elevation, from a parsed ORS
+    route. Mirrors :func:`_sample_geometry` but carries the per-vertex elevation
+    ORS returns inline, so no separate elevation request is needed.
+    """
+    coords = parsed["coordinates"]
+    elevations = parsed["elevations_ft"]
+    if len(coords) < 2:
+        raise RuntimeError("ORS route geometry has fewer than two points")
+    distances = [0.0]
+    for prev, cur in zip(coords, coords[1:], strict=False):
+        distances.append(distances[-1] + _haversine_miles(prev[1], prev[0], cur[1], cur[0]))
+    total = distances[-1] or 1.0
+    desired = [leg_miles * i / (sample_count - 1) for i in range(sample_count)]
+    samples: list[dict[str, float]] = []
+    sample_elevations: list[float] = []
+    for at_mi in desired:
+        target = total * at_mi / leg_miles if leg_miles else 0.0
+        index = next(
+            (i for i, dist in enumerate(distances) if dist >= target),
+            len(distances) - 1,
+        )
+        lon, lat = coords[index]
+        samples.append({"at_mi": at_mi, "lat": float(lat), "lon": float(lon)})
+        sample_elevations.append(
+            elevations[index] if index < len(elevations)
+            else (elevations[-1] if elevations else 0.0)
+        )
+    samples[0]["at_mi"] = 0.0
+    samples[-1]["at_mi"] = leg_miles
+    return samples, sample_elevations
+
+
+def _ors_compare(
+    data: dict[str, Any],
+    from_city: str,
+    to_city: str,
+    api_key: str,
+    cache_dir: Path,
+    rate_limit_s: float,
+) -> dict[str, Any]:
+    """Read-only sanity check: ORS-derived corridor vs the checked-in one."""
+    leg = _find_leg(data, from_city, to_city)
+    if leg is None:
+        raise SystemExit(f"No direct world leg {from_city} to {to_city}")
+    parsed = _cached_ors_route(data, leg, cache_dir, rate_limit_s, api_key)
+    miles = float(leg["miles"])
+    samples, elevations = ors_corridor_samples(parsed, miles)
+    ors_grade = _grade_segments(samples, elevations, leg)[0]
+    corridor = leg.get("corridor", {})
+    current_grades = corridor.get("grade_segments") or [{}]
+    return {
+        "leg_miles": miles,
+        "ors_miles": parsed["miles"],
+        "ors_points": len(parsed["coordinates"]),
+        "ors_min_ft": min(elevations) if elevations else 0.0,
+        "ors_max_ft": max(elevations) if elevations else 0.0,
+        "ors_avg_grade_pct": ors_grade["avg_grade_pct"],
+        "ors_terrain": ors_grade["terrain"],
+        "current_terrain": current_grades[0].get("terrain", leg.get("terrain")),
+        "current_avg_grade_pct": current_grades[0].get("avg_grade_pct"),
+        "ors_has_tollway": parsed["has_tollway"],
+        "current_toll_events": len(corridor.get("toll_events", ())),
     }
 
 
