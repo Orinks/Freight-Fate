@@ -1920,26 +1920,63 @@ def _poi_offers_text(stop) -> str:
 
 
 class DrivingStatusState(MenuState):
-    """Review panel for live driving, driver, and route-map information."""
+    """Live driving status, grouped into screens you open one at a time.
 
+    A tabbed layout (Right/Left to cycle Route, Driver, Map) needs visible tabs
+    to make sense, so each screen is its own spoken submenu instead, matching
+    the rest of the game's menus.
+    """
+
+    title = "Driving status"
     intro_help = (
-        "Use up and down arrows to review the current screen. Right arrow "
-        "moves to the next screen, Left arrow moves to the previous screen. "
-        "Enter repeats the current line. Escape returns to driving."
+        "Use up and down arrows to pick a status screen, Enter to open it, and "
+        "Escape to return to driving. Each screen lists its status lines."
     )
-    screens = ("Route", "Driver", "Map")
+    SCREENS = (("Route", "route"), ("Driver", "driver"), ("Map", "map"))
 
     def __init__(self, ctx, driving: DrivingState) -> None:
         super().__init__(ctx)
         self.driving = driving
-        self.screen_index = 0
+
+    def build_items(self) -> list[MenuItem]:
+        items = [
+            MenuItem(label, lambda key=key: self._open(key),
+                     help=f"Open the {label.lower()} status screen.")
+            for label, key in self.SCREENS
+        ]
+        items.append(
+            MenuItem("Back to driving", self.go_back,
+                     help="Close status and resume driving.")
+        )
+        return items
+
+    def _open(self, screen: str) -> None:
+        self.ctx.push_state(
+            DrivingStatusScreenState(self.ctx, self.driving, screen))
+
+    def go_back(self) -> None:
+        self.ctx.audio.play("ui/menu_back")
+        self.ctx.pop_state()
+        self.ctx.say("Back to driving.", interrupt=True)
+
+
+class DrivingStatusScreenState(MenuState):
+    """One screen of live driving status as a reviewable list of lines."""
+
+    intro_help = (
+        "Use up and down arrows to review each line. Enter repeats the current "
+        "line. Escape goes back to the status screens."
+    )
+    TITLES = {"route": "Route", "driver": "Driver", "map": "Map"}
+
+    def __init__(self, ctx, driving: DrivingState, screen: str) -> None:
+        super().__init__(ctx)
+        self.driving = driving
+        self.screen = screen
 
     @property
     def title(self) -> str:  # type: ignore[override]
-        return (
-            f"Driving status - {self.screens[self.screen_index]} "
-            f"({self.screen_index + 1}/{len(self.screens)})"
-        )
+        return self.TITLES.get(self.screen, "Status")
 
     def build_items(self) -> list[MenuItem]:
         items = [
@@ -1948,40 +1985,16 @@ class DrivingStatusState(MenuState):
                 lambda line=line: self.ctx.say(line),
                 help="Repeat this status line.",
             )
-            for line in self._screen_lines()
+            for line in self._lines()
         ]
-        items.append(
-            MenuItem(
-                "Back to driving",
-                self.go_back,
-                help="Close status and resume driving.",
-            )
-        )
+        items.append(MenuItem("Back", self.go_back,
+                              help="Back to the status screens."))
         return items
 
-    def announce_entry(self) -> None:
-        self.ctx.say(
-            f"{self.title}. {self.current_text()} Right arrow for the next screen."
-        )
-
-    def handle_event(self, event: pygame.event.Event) -> None:
-        if event.type == pygame.KEYDOWN and event.key == pygame.K_RIGHT:
-            self._change_screen(1)
-        elif event.type == pygame.KEYDOWN and event.key == pygame.K_LEFT:
-            self._change_screen(-1)
-        else:
-            super().handle_event(event)
-
-    def _change_screen(self, direction: int) -> None:
-        self.screen_index = (self.screen_index + direction) % len(self.screens)
-        self.ctx.audio.play("ui/menu_move")
-        self.refresh(keep_index=False)
-        self.ctx.say(f"{self.title}. {self.current_text()}")
-
-    def _screen_lines(self) -> list[str]:
-        if self.screen_index == 1:
+    def _lines(self) -> list[str]:
+        if self.screen == "driver":
             return self._driver_lines()
-        if self.screen_index == 2:
+        if self.screen == "map":
             return self._map_lines()
         return self.driving.status_lines()
 
@@ -2043,11 +2056,6 @@ class DrivingStatusState(MenuState):
                 f"Estimated carrier-paid toll exposure: {route.estimated_tolls:,.0f} dollars."
             )
         return lines
-
-    def go_back(self) -> None:
-        self.ctx.audio.play("ui/menu_back")
-        self.ctx.pop_state()
-        self.ctx.say("Back to driving.", interrupt=True)
 
 
 class PauseMenuState(MenuState):
