@@ -68,13 +68,22 @@ class GameContext:
     def say_event(self, text: str, interrupt: bool = True) -> None:
         """Driving event announcements (hazards, warnings, weather, ...).
 
-        Spoken on a separate SAPI voice when the player has that enabled, so
-        a screen reader reading menus or keystrokes cannot cut them off.
+        With the dedicated SAPI event voice enabled, events speak on their own
+        channel, where ``interrupt`` only cuts off a previous event -- so an
+        urgent cue can still jump ahead of a stale one without touching the
+        screen reader.
+
+        With it disabled the player has chosen to hear events through their
+        screen reader. There we never interrupt, even for critical events: an
+        interrupt would chop the screen reader off mid-word as it reads menus,
+        keystrokes, or a prior announcement. Queuing instead lets the event
+        follow the current utterance, which the screen reader handles in its
+        own time.
         """
         if self.settings.sapi_events:
             self.speech.say_event(text, interrupt)
         else:
-            self.speech.say(text, interrupt)
+            self.speech.say(text, interrupt=False)
 
     # -- state stack ------------------------------------------------------------
 

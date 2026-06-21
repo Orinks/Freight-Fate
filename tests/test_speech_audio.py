@@ -319,6 +319,53 @@ def test_event_backend_none_when_no_separate_voice_exists():
     assert s.event_backend_name == "none"
 
 
+class _RecordingSpeech:
+    """Captures which channel a GameContext routes event speech to."""
+
+    def __init__(self) -> None:
+        self.say_calls: list[tuple[str, bool]] = []
+        self.event_calls: list[tuple[str, bool]] = []
+
+    def say(self, text: str, interrupt: bool = True) -> None:
+        self.say_calls.append((text, interrupt))
+
+    def say_event(self, text: str, interrupt: bool = True) -> None:
+        self.event_calls.append((text, interrupt))
+
+
+def test_events_via_screen_reader_never_interrupt_even_when_critical():
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        rec = _RecordingSpeech()
+        app.ctx.speech = rec
+        app.ctx.settings.sapi_events = False  # event voice = screen reader
+        app.ctx.say_event("Brake now!", interrupt=True)  # a critical event
+        # not on a separate voice, and queued (interrupt forced False) so it
+        # does not chop the screen reader off mid-word
+        assert rec.event_calls == []
+        assert rec.say_calls == [("Brake now!", False)]
+    finally:
+        app.shutdown()
+
+
+def test_events_on_separate_sapi_voice_keep_requested_interrupt():
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        rec = _RecordingSpeech()
+        app.ctx.speech = rec
+        app.ctx.settings.sapi_events = True  # dedicated SAPI event voice
+        app.ctx.say_event("Brake now!", interrupt=True)
+        app.ctx.say_event("Weather changing.", interrupt=False)
+        assert rec.say_calls == []
+        assert rec.event_calls == [("Brake now!", True), ("Weather changing.", False)]
+    finally:
+        app.shutdown()
+
+
 def test_speech_disabled_by_env_is_silent_and_safe():
     s = Speech()
     assert not s.available
