@@ -359,6 +359,30 @@ tunnels. Those gaps are filled by separate sources:
    (`discover_route_pois.py`, `curate_route_pois.py`), and bridges/tunnels via
    Overpass (above), curated into clean player-facing names — no raw OSM text.
 
+### Expansion status (batches)
+
+- **Batch 1 (done):** Toledo, OH and Fort Wayne, IN (great_lakes), four short
+  interstate legs (Detroit-Toledo, Cleveland-Toledo, Toledo-Fort Wayne,
+  Indianapolis-Fort Wayne). Pipeline used: `pick_nodes` -> add nodes/legs ->
+  `enrich_all --engine ors` (geometry/elevation/grades/state) ->
+  `curate_route_pois` (one source-backed Love's/Flying J per leg). Coverage
+  stayed 110/110 playable.
+
+The binding constraint is **POI density**, not routing. Overpass auto-discovery
+in `enrich_all` rarely yields a *named* gate-passing POI, so it is the operator
+feeds (`curate_route_pois`, Love's/Pilot) that actually make a leg dispatchable.
+Practical rules learned:
+
+- Prefer new legs on **major interstates** (reliable Love's/Pilot/TA coverage).
+- Keep first legs **short (<160 mi)** so one curated POI satisfies the gate
+  (160+ needs two or three plus a fuel-capable stop).
+- **Urban metro twin legs** (e.g. Dallas-Fort Worth on I-30) often have no
+  on-corridor truck stop; route such hubs via a POI-bearing corridor
+  (I-35W/I-20/US-287) or hand-curate one sourced stop. Fort Worth is deferred
+  for this reason.
+- Each batch ends green: run the coverage report and bump the leg count in
+  `tests/test_route_coverage_tool.py`.
+
 ### Streamed tier (optional online overlay)
 
 When online, the optional tier fetches additional secondary corridors and POIs
