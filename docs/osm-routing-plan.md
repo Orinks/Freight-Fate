@@ -277,10 +277,15 @@ Findings from the first comparisons, to handle before/within a `--write` batch:
   Denver-Salt Lake City ~490 vs 520). A `--write` batch would change leg miles,
   which feed pay and deadlines, so regeneration of existing legs is a deliberate
   step, not automatic. New expansion legs take ORS miles as authoritative.
-- **Grade detail:** `_grade_segments` still emits one averaged segment, which
-  washes out up/down mountain profiles (avg grade ~0 despite a 4287-7920 ft
-  range). Terrain classification still catches "mountain". Emitting multiple
-  segments from the samples is a future refinement, not ORS-specific.
+- **Grade detail (done):** ORS legs now sample denser (~1 point per 30 mi) and
+  build multiple terrain-grouped grade segments (`grade_segments_from_samples`)
+  instead of one averaged segment, so up/down structure survives (Denver-Salt
+  Lake City went from one ~0% segment to seven). The gate stays lenient so
+  legacy OSRM legs (single averaged segment) still pass. Finer mountain
+  detection from the ORS `steepness` extra (OSM-way resolution, vs ~30 mi
+  sampling) remains a future refinement. ORS `tollway_detected` is stored and
+  the coverage report surfaces a non-blocking `toll_review` advisory for tolled
+  legs lacking curated `toll_events` (e.g. Cleveland-Toledo, Ohio Turnpike).
 
 Operational notes: rate limits are per-endpoint on the free tier (directions a
 few thousand/day); the resumable batch + `.route-cache` handle polite staging,
