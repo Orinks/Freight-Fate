@@ -27,7 +27,9 @@ class _FakeKernel32:
 
 def _patch_windows(monkeypatch, kernel32: _FakeKernel32) -> None:
     monkeypatch.setattr("sys.platform", "win32")
-    monkeypatch.setattr(ctypes, "WinDLL", lambda *args, **kwargs: kernel32)
+    # ctypes.WinDLL only exists on Windows; raising=False lets this test mock
+    # the Windows mutex path on Linux/macOS CI runners too.
+    monkeypatch.setattr(ctypes, "WinDLL", lambda *args, **kwargs: kernel32, raising=False)
     monkeypatch.setattr(ctypes, "get_last_error", lambda: kernel32.last_error)
 
 
