@@ -253,23 +253,56 @@ unit-tested without network or the SDK in `tests/test_ors_pipeline.py`
 (including that ORS elevation feeds the existing `_grade_segments`). Default
 behavior is unchanged; OSRM is still the active engine until the key lands.
 
-Remaining (needs the key to verify):
+**Live and wired** (key set, validated against `api.heigit.org`):
 
-1. Free HeiGIT/OpenRouteService account; set the key in the `ORS_API_KEY`
-   environment variable (build tooling only; never bundled or used at runtime).
-   Validate with `uv run --group tooling python tools/enrich_routes.py
-   --from-city Chicago --to-city Indianapolis --ors-smoke`.
-2. Wire the ORS path into `enrich_all_routes` behind an engine switch, mapping
-   responses into the corridor schema: `route_points`, `elevation_samples`
-   (from ORS 3D geometry, dropping the separate Open-Meteo elevation call),
-   `grade_segments` (from steepness), `toll_events` candidates (from tollways);
-   `state_crossings` and `state_miles` stay on the Census-boundary step.
-3. Keep OSRM as a fallback so the pipeline degrades gracefully and existing
-   cached corridors keep working. Use `.route-cache/` as today.
-4. Respect rate limits (about 2,500 requests/day, 40/min on the free tier).
-   The existing resumable batch + cache design already handles polite staging.
-   For large batches, document Docker self-hosting (needs the regional/national
-   OSM extract plus RAM) as the unlimited path.
+1. Key set in `ORS_API_KEY`; base URL points at HeiGIT
+   (`ORS_DEFAULT_BASE_URL`, override `ORS_BASE_URL`). Validate with
+   `uv run --group tooling python tools/enrich_routes.py --from-city Chicago
+   --to-city Indianapolis --ors-smoke`.
+2. `enrich_all_routes` has an `--engine {osrm,ors}` switch. With `ors`, corridor
+   `route_points`, `elevation_samples` (from ORS inline 3D geometry, no separate
+   Open-Meteo call), and `grade_segments` come from the driving-hgv route;
+   `state_crossings`/`state_miles` stay on the Census step; ORS responses cache
+   in `.route-cache/ors`. OSRM remains the default. `--ors-compare` gives a
+   read-only ORS-vs-checked-in sanity check.
+
+Findings from the first comparisons, to handle before/within a `--write` batch:
+
+- **Tollways:** ORS flags tolled segments the curated data may not model yet
+  (e.g. a toll near Chicago on Chicago-Indianapolis). The tollway flag only says
+  *a leg has tolls*; compliant `toll_events` still need a named authority,
+  amount, method, and source, so toll curation stays manual — treat the flag as
+  a "needs toll review" signal.
+- **Mileage shifts:** the ORS truck route can differ from curated miles (e.g.
+  Denver-Salt Lake City ~490 vs 520). A `--write` batch would change leg miles,
+  which feed pay and deadlines, so regeneration of existing legs is a deliberate
+  step, not automatic. New expansion legs take ORS miles as authoritative.
+- **Grade detail:** `_grade_segments` still emits one averaged segment, which
+  washes out up/down mountain profiles (avg grade ~0 despite a 4287-7920 ft
+  range). Terrain classification still catches "mountain". Emitting multiple
+  segments from the samples is a future refinement, not ORS-specific.
+
+Operational notes: rate limits are per-endpoint on the free tier (directions a
+few thousand/day); the resumable batch + `.route-cache` handle polite staging,
+and Docker self-hosting (regional/national OSM extract plus RAM) is the unlimited
+path for large batches. OSRM stays as a graceful fallback.
+
+### Other ORS/HeiGIT APIs (optional, for later workstreams)
+
+Beyond directions, the ORS suite has endpoints worth using as the map grows
+(each has its own free-tier daily quota):
+
+- **Matrix** — many-to-many time/distance; efficient for choosing new-node
+  adjacencies in Workstream C without N separate directions calls.
+- **POIs (places)** — category POI search (fuel, parking, etc.) within a
+  bbox/polygon/around a route; an alternative source to the existing Overpass
+  tooling, on the same OSM data, still requiring curation of names/actions.
+- **Elevation** (point/line) — standalone elevation; mostly redundant now that
+  directions returns elevation inline, but useful for non-routed points (facility
+  or city elevation).
+- **Geocoder (Pelias)** — name/address -> coordinates; handy for placing specific
+  named facilities precisely (GeoNames/Census still drive the node list).
+- Snapping, isochrones, optimization, matching, export are not needed here.
 
 ### Licensing / attribution
 
