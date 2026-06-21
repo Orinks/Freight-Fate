@@ -1479,6 +1479,20 @@
       ],
       "lat": 47.6588,
       "lon": -117.426
+    },
+    "Toledo": {
+      "state": "Ohio",
+      "region": "great_lakes",
+      "locations": [],
+      "lat": 41.6528,
+      "lon": -83.5379
+    },
+    "Fort Wayne": {
+      "state": "Indiana",
+      "region": "great_lakes",
+      "locations": [],
+      "lat": 41.0793,
+      "lon": -85.1394
     }
   },
   "legs": [
@@ -18563,6 +18577,497 @@
             "both"
           ],
           "parking": "limited",
+          "curation": "curated"
+        }
+      ]
+    },
+    {
+      "from": "Detroit",
+      "to": "Toledo",
+      "miles": 60,
+      "highway": "I-75",
+      "terrain": "flat",
+      "corridor": {
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 42.3314,
+            "lon": -83.0458
+          },
+          {
+            "at_mi": 15.0,
+            "lat": 42.20984,
+            "lon": -83.22709
+          },
+          {
+            "at_mi": 30.0,
+            "lat": 42.01004,
+            "lon": -83.30986
+          },
+          {
+            "at_mi": 45.0,
+            "lat": 41.83193,
+            "lon": -83.4281
+          },
+          {
+            "at_mi": 60.0,
+            "lat": 41.65281,
+            "lon": -83.53789
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 672.6,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 15.0,
+            "elevation_ft": 609.6,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 30.0,
+            "elevation_ft": 585.6,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 45.0,
+            "elevation_ft": 567.6,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 60.0,
+            "elevation_ft": 595.5,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 60.0,
+            "avg_grade_pct": -0.02,
+            "terrain": "flat",
+            "source": "Open-Meteo elevation samples summarized for corridor terrain."
+          }
+        ],
+        "checkpoints": [
+          {
+            "name": "I-75 corridor between Detroit and Toledo",
+            "at_mi": 30.0,
+            "type": "place",
+            "state": "Ohio",
+            "highway": "I-75",
+            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
+          }
+        ],
+        "state_miles": [
+          {
+            "state": "Michigan",
+            "miles": 53.1
+          },
+          {
+            "state": "Ohio",
+            "miles": 6.9
+          }
+        ],
+        "state_crossings": [
+          {
+            "at_mi": 53.1,
+            "from_state": "Michigan",
+            "state": "Ohio",
+            "place": "Michigan-Ohio line on I-75",
+            "source": "Computed from OSRM route geometry and public U.S. state boundary GeoJSON."
+          }
+        ],
+        "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
+      },
+      "stops": [
+        {
+          "name": "Love's Travel Stop Frenchtown",
+          "type": "travel_center",
+          "at_mi": 33.9,
+          "source": "Love's official store feed lists store 645 in Frenchtown, MI on I-75, exit 18/Nadeau Rd; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.2 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking",
+            "restrooms"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "likely",
+          "curation": "curated"
+        }
+      ]
+    },
+    {
+      "from": "Cleveland",
+      "to": "Toledo",
+      "miles": 116,
+      "highway": "I-90",
+      "terrain": "flat",
+      "corridor": {
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 41.49926,
+            "lon": -81.69449
+          },
+          {
+            "at_mi": 29.0,
+            "lat": 41.38895,
+            "lon": -82.16899
+          },
+          {
+            "at_mi": 58.0,
+            "lat": 41.33399,
+            "lon": -82.67338
+          },
+          {
+            "at_mi": 87.0,
+            "lat": 41.43685,
+            "lon": -83.22435
+          },
+          {
+            "at_mi": 116.0,
+            "lat": 41.65281,
+            "lon": -83.53789
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 667.0,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 29.0,
+            "elevation_ft": 738.2,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 58.0,
+            "elevation_ft": 675.9,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 87.0,
+            "elevation_ft": 603.7,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 116.0,
+            "elevation_ft": 595.5,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 116.0,
+            "avg_grade_pct": -0.01,
+            "terrain": "flat",
+            "source": "Open-Meteo elevation samples summarized for corridor terrain."
+          }
+        ],
+        "checkpoints": [
+          {
+            "name": "I-90 corridor between Cleveland and Toledo",
+            "at_mi": 58.0,
+            "type": "place",
+            "state": "Ohio",
+            "highway": "I-90",
+            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
+          }
+        ],
+        "state_miles": [
+          {
+            "state": "Ohio",
+            "miles": 116.0
+          }
+        ],
+        "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
+      },
+      "stops": [
+        {
+          "name": "Love's Travel Stop Milan Township",
+          "type": "travel_center",
+          "at_mi": 54.8,
+          "source": "Love's official store feed lists store 980 in Milan Township, OH on I-90, exit 118/Hwy-250; at_mi estimated by projecting source coordinates onto checked-in route geometry (1.3 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking",
+            "restrooms"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "likely",
+          "curation": "curated"
+        }
+      ]
+    },
+    {
+      "from": "Toledo",
+      "to": "Fort Wayne",
+      "miles": 96,
+      "highway": "US-24",
+      "terrain": "flat",
+      "corridor": {
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 41.65281,
+            "lon": -83.53789
+          },
+          {
+            "at_mi": 24.0,
+            "lat": 41.43291,
+            "lon": -83.88052
+          },
+          {
+            "at_mi": 48.0,
+            "lat": 41.31406,
+            "lon": -84.3194
+          },
+          {
+            "at_mi": 72.0,
+            "lat": 41.16912,
+            "lon": -84.73369
+          },
+          {
+            "at_mi": 96.0,
+            "lat": 41.07929,
+            "lon": -85.1394
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 595.5,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 24.0,
+            "elevation_ft": 669.0,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 48.0,
+            "elevation_ft": 728.3,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 72.0,
+            "elevation_ft": 731.3,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 96.0,
+            "elevation_ft": 802.2,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 96.0,
+            "avg_grade_pct": 0.04,
+            "terrain": "flat",
+            "source": "Open-Meteo elevation samples summarized for corridor terrain."
+          }
+        ],
+        "checkpoints": [
+          {
+            "name": "US-24 corridor between Toledo and Fort Wayne",
+            "at_mi": 48.0,
+            "type": "place",
+            "state": "Indiana",
+            "highway": "US-24",
+            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
+          }
+        ],
+        "state_miles": [
+          {
+            "state": "Ohio",
+            "miles": 76.0
+          },
+          {
+            "state": "Indiana",
+            "miles": 20.0
+          }
+        ],
+        "state_crossings": [
+          {
+            "at_mi": 76.0,
+            "from_state": "Ohio",
+            "state": "Indiana",
+            "place": "Ohio-Indiana line on US-24",
+            "source": "Computed from OSRM route geometry and public U.S. state boundary GeoJSON."
+          }
+        ],
+        "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
+      },
+      "stops": [
+        {
+          "name": "Love's Travel Stop Napoleon",
+          "type": "travel_center",
+          "at_mi": 35.3,
+          "source": "Love's official store feed lists store 841 in Napoleon, OH on US Hwy 24, exit 41/Industrial Dr; at_mi estimated by projecting source coordinates onto checked-in route geometry (2.9 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking",
+            "restrooms"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "likely",
+          "curation": "curated"
+        }
+      ]
+    },
+    {
+      "from": "Indianapolis",
+      "to": "Fort Wayne",
+      "miles": 125,
+      "highway": "I-69",
+      "terrain": "flat",
+      "corridor": {
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 39.76802,
+            "lon": -86.15827
+          },
+          {
+            "at_mi": 31.2,
+            "lat": 39.99173,
+            "lon": -85.79196
+          },
+          {
+            "at_mi": 62.5,
+            "lat": 40.34486,
+            "lon": -85.55866
+          },
+          {
+            "at_mi": 93.8,
+            "lat": 40.77638,
+            "lon": -85.38558
+          },
+          {
+            "at_mi": 125.0,
+            "lat": 41.07929,
+            "lon": -85.1394
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 800.2,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 31.2,
+            "elevation_ft": 846.5,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 62.5,
+            "elevation_ft": 885.8,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 93.8,
+            "elevation_ft": 836.6,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 125.0,
+            "elevation_ft": 802.2,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 125.0,
+            "avg_grade_pct": 0.0,
+            "terrain": "flat",
+            "source": "Open-Meteo elevation samples summarized for corridor terrain."
+          }
+        ],
+        "checkpoints": [
+          {
+            "name": "I-69 corridor between Indianapolis and Fort Wayne",
+            "at_mi": 62.5,
+            "type": "place",
+            "state": "Indiana",
+            "highway": "I-69",
+            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
+          }
+        ],
+        "state_miles": [
+          {
+            "state": "Indiana",
+            "miles": 125.0
+          }
+        ],
+        "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
+      },
+      "stops": [
+        {
+          "name": "Flying J Travel Center Marion",
+          "type": "travel_center",
+          "at_mi": 76.5,
+          "source": "Pilot Flying J official locator lists Flying J Travel Center store 1086 in Marion, IN with 80 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (4.0 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/in/marion/6255-in-18",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "restrooms",
+            "parking",
+            "scale"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
           "curation": "curated"
         }
       ]
