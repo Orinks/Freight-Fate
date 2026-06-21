@@ -239,21 +239,33 @@ Replace/augment the car-only OSRM build step with truck-aware OpenRouteService.
 
 ### Implementation
 
-1. Free HeiGIT/OpenRouteService account; API key read from an environment
-   variable in build tooling only (never bundled, never used at runtime).
-2. Add an ORS client to [`tools/enrich_routes.py`](../tools/enrich_routes.py)
-   alongside the existing OSRM path. Map ORS responses into the existing
-   corridor schema: `route_points`, `elevation_samples`, `grade_segments`
-   (from steepness), `toll_events` candidates (from tollways), `state_crossings`
-   and `state_miles` (still via the existing Census-boundary step).
+**Scaffold done** (ready for a key): `tools/enrich_routes.py` has the ORS
+driving-hgv client (`fetch_ors_hgv_route`), the pure response mapper
+(`parse_ors_route` -> miles, 2D coordinates, per-vertex elevation in feet,
+steepness, tollway flag), the `ORS_API_KEY` env helper (`ors_api_key`), and a
+credential-gated `--ors-smoke` CLI that runs one real corridor request and
+prints distance, points, elevation range, steepness segments, and tollway
+yes/no. The mapping is unit-tested without network in `tests/test_ors_pipeline.py`
+(including that ORS elevation feeds the existing `_grade_segments`). Default
+behavior is unchanged; OSRM is still the active engine until the key lands.
+
+Remaining (needs the key to verify):
+
+1. Free HeiGIT/OpenRouteService account; set the key in the `ORS_API_KEY`
+   environment variable (build tooling only; never bundled or used at runtime).
+   Validate with `uv run python tools/enrich_routes.py --from-city Chicago
+   --to-city Indianapolis --ors-smoke`.
+2. Wire the ORS path into `enrich_all_routes` behind an engine switch, mapping
+   responses into the corridor schema: `route_points`, `elevation_samples`
+   (from ORS 3D geometry, dropping the separate Open-Meteo elevation call),
+   `grade_segments` (from steepness), `toll_events` candidates (from tollways);
+   `state_crossings` and `state_miles` stay on the Census-boundary step.
 3. Keep OSRM as a fallback so the pipeline degrades gracefully and existing
    cached corridors keep working. Use `.route-cache/` as today.
 4. Respect rate limits (about 2,500 requests/day, 40/min on the free tier).
    The existing resumable batch + cache design already handles polite staging.
    For large batches, document Docker self-hosting (needs the regional/national
    OSM extract plus RAM) as the unlimited path.
-5. Extend the build smoke check (the current `--live-smoke`) with an ORS HGV
-   smoke that is credential-gated and skipped in CI when no key is present.
 
 ### Licensing / attribution
 

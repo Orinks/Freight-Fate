@@ -1,7 +1,9 @@
 """Build-time route enrichment helpers for corridor metadata.
 
 Runtime gameplay stays offline. This tool either reads checked-in world data or
-performs tiny live OSRM/Open-Meteo smoke checks for one representative corridor.
+performs tiny live smoke checks for one representative corridor: no-key
+OSRM/Open-Meteo, or OpenRouteService driving-hgv (truck) routing when an
+``ORS_API_KEY`` is set in the environment.
 """
 
 from __future__ import annotations
@@ -10,6 +12,7 @@ import argparse
 import hashlib
 import json
 import math
+import os
 import sys
 import time
 import urllib.error
@@ -24,6 +27,14 @@ CACHE_PATH = ROOT / ".route-cache"
 USER_AGENT = "Freight-Fate route-enrichment smoke (https://github.com/Orinks/Freight-Fate)"
 OSRM_ROUTE_URL = "https://router.project-osrm.org/route/v1/driving/{coords}"
 OPEN_METEO_ELEVATION_URL = "https://api.open-meteo.com/v1/elevation"
+# OpenRouteService heavy-goods (truck) routing. Build-time only; the key lives
+# in the environment and is never bundled or read at runtime. One driving-hgv
+# request returns truck-legal geometry with elevation plus steepness and
+# tollway extras -- the inputs the corridor builders already consume.
+ORS_DIRECTIONS_URL = "https://api.openrouteservice.org/v2/directions/{profile}/geojson"
+ORS_HGV_PROFILE = "driving-hgv"
+ORS_API_KEY_ENV = "ORS_API_KEY"
+ORS_EXTRA_INFO = ("steepness", "tollways", "waytype")
 OVERPASS_URL = "https://overpass-api.de/api/interpreter"
 OVERPASS_URLS = (
     OVERPASS_URL,
@@ -100,6 +111,11 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--to-city", default="Indianapolis")
     parser.add_argument("--live-smoke", action="store_true",
                         help="Make tiny no-key OSRM and elevation requests.")
+    parser.add_argument("--ors-smoke", action="store_true",
+                        help="Make a tiny OpenRouteService driving-hgv (truck) "
+                             f"request for the corridor. Requires the "
+                             f"{ORS_API_KEY_ENV} environment variable (a free "
+                             "OpenRouteService key, build-time only).")
     parser.add_argument("--coverage-report", action="store_true",
                         help="Report metadata coverage for every world leg.")
     parser.add_argument("--json", action="store_true",
@@ -162,6 +178,23 @@ def main(argv: list[str] | None = None) -> int:
             "Open-Meteo elevation smoke: "
             f"{elevation['samples']} samples, "
             f"{elevation['min_ft']:.0f}-{elevation['max_ft']:.0f} feet"
+        )
+    if args.ors_smoke:
+        api_key = ors_api_key()
+        if api_key is None:
+            raise SystemExit(
+                f"ORS smoke needs the {ORS_API_KEY_ENV} environment variable "
+                "(a free OpenRouteService key). It is build-time only and is "
+                "never bundled or read at runtime."
+            )
+        ors = _ors_smoke(data, args.from_city, args.to_city, api_key)
+        print(
+            "OpenRouteService HGV smoke: "
+            f"{ors['miles']:.1f} miles, "
+            f"{ors['points']} geometry points, "
+            f"elevation {ors['min_ft']:.0f}-{ors['max_ft']:.0f} feet, "
+            f"{ors['steepness_segments']} steepness segments, "
+            f"tollway {'yes' if ors['has_tollway'] else 'no'}"
         )
     if args.overpass_poi_smoke:
         pois = _overpass_poi_smoke(corridor)
@@ -1177,6 +1210,112 @@ def _osrm_smoke(data: dict[str, Any], from_city: str, to_city: str) -> dict[str,
         "code": payload.get("code", "unknown"),
         "miles": float(route["distance"]) / 1609.344,
         "points": len(route.get("geometry", {}).get("coordinates", [])),
+    }
+
+
+def ors_api_key() -> str | None:
+    """The OpenRouteService key from the environment, or None when unset.
+
+    Build-time only: the key is read here in the tooling and is never bundled
+    with the game or read at runtime.
+    """
+    key = os.environ.get(ORS_API_KEY_ENV, "").strip()
+    return key or None
+
+
+def _ors_request_body(start: dict[str, Any], end: dict[str, Any]) -> bytes:
+    body = {
+        "coordinates": [
+            [float(start["lon"]), float(start["lat"])],
+            [float(end["lon"]), float(end["lat"])],
+        ],
+        "elevation": True,
+        "extra_info": list(ORS_EXTRA_INFO),
+    }
+    return json.dumps(body).encode("utf-8")
+
+
+def fetch_ors_hgv_route(
+    start: dict[str, Any],
+    end: dict[str, Any],
+    api_key: str,
+    *,
+    timeout_s: float = OSRM_TIMEOUT_S + 15,
+) -> dict[str, Any]:
+    """Live OpenRouteService driving-hgv request returning the raw GeoJSON.
+
+    Build-time only. Kept separate from :func:`parse_ors_route` so the mapping
+    can be unit-tested against a captured response without any network.
+    """
+    url = ORS_DIRECTIONS_URL.format(profile=ORS_HGV_PROFILE)
+    req = urllib.request.Request(
+        url,
+        data=_ors_request_body(start, end),
+        headers={
+            "User-Agent": USER_AGENT,
+            "Authorization": api_key,
+            "Content-Type": "application/json",
+            "Accept": "application/geo+json",
+        },
+    )
+    with urllib.request.urlopen(req, timeout=timeout_s) as resp:
+        return json.loads(resp.read().decode("utf-8"))
+
+
+def parse_ors_route(payload: dict[str, Any]) -> dict[str, Any]:
+    """Map an ORS driving-hgv GeoJSON response onto corridor-ready fields.
+
+    Pure (no network) so it is unit-testable against a captured response.
+    Returns the summary distance in miles, 2D ``[lon, lat]`` coordinates (the
+    shape :func:`_sample_geometry` consumes), per-vertex elevation in feet
+    (ORS returns 3D coordinates when ``elevation`` is requested, so no separate
+    Open-Meteo elevation call is needed), the steepness extra-info segments, and
+    whether the route touches any tollway.
+    """
+    features = payload.get("features") or []
+    if not features:
+        raise RuntimeError("ORS response has no route features")
+    feature = features[0]
+    coords3d = feature.get("geometry", {}).get("coordinates", [])
+    if len(coords3d) < 2:
+        raise RuntimeError("ORS route geometry has fewer than two points")
+    coordinates = [[float(point[0]), float(point[1])] for point in coords3d]
+    elevations_ft = [
+        float(point[2]) * 3.28084 if len(point) > 2 else 0.0
+        for point in coords3d
+    ]
+    props = feature.get("properties", {})
+    distance_m = float(props.get("summary", {}).get("distance", 0.0))
+    extras = props.get("extras", {})
+    steepness = extras.get("steepness", {}).get("values", [])
+    tollways = extras.get("tollways", {}).get("values", [])
+    has_tollway = any(len(value) >= 3 and value[2] for value in tollways)
+    return {
+        "miles": distance_m / 1609.344,
+        "coordinates": coordinates,
+        "elevations_ft": elevations_ft,
+        "steepness": steepness,
+        "has_tollway": has_tollway,
+    }
+
+
+def _ors_smoke(
+    data: dict[str, Any],
+    from_city: str,
+    to_city: str,
+    api_key: str,
+) -> dict[str, Any]:
+    cities = data["cities"]
+    payload = fetch_ors_hgv_route(cities[from_city], cities[to_city], api_key)
+    parsed = parse_ors_route(payload)
+    elevations = parsed["elevations_ft"]
+    return {
+        "miles": parsed["miles"],
+        "points": len(parsed["coordinates"]),
+        "min_ft": min(elevations) if elevations else 0.0,
+        "max_ft": max(elevations) if elevations else 0.0,
+        "steepness_segments": len(parsed["steepness"]),
+        "has_tollway": parsed["has_tollway"],
     }
 
 
