@@ -35,6 +35,10 @@ OPEN_METEO_ELEVATION_URL = "https://api.open-meteo.com/v1/elevation"
 ORS_HGV_PROFILE = "driving-hgv"
 ORS_API_KEY_ENV = "ORS_API_KEY"
 ORS_EXTRA_INFO = ("steepness", "tollways", "waytype")
+# HeiGIT now serves the API at api.heigit.org; the SDK still defaults to the
+# deprecated api.openrouteservice.org, so point it at the current host. The full
+# endpoint becomes {base}/v2/directions/{profile}. Override with ORS_BASE_URL.
+ORS_DEFAULT_BASE_URL = "https://api.heigit.org/openrouteservice"
 OVERPASS_URL = "https://overpass-api.de/api/interpreter"
 OVERPASS_URLS = (
     OVERPASS_URL,
@@ -1262,8 +1266,10 @@ def fetch_ors_hgv_route(
             "The OpenRouteService SDK is not installed. It is a build-time "
             "dependency: run with `uv run --group tooling ...`."
         ) from exc
+    base_url = os.environ.get("ORS_BASE_URL", ORS_DEFAULT_BASE_URL)
     client = openrouteservice.Client(
-        key=api_key, timeout=timeout_s, retry_over_query_limit=True)
+        key=api_key, base_url=base_url, timeout=timeout_s,
+        retry_over_query_limit=True)
     return client.directions(**_ors_directions_kwargs(start, end))
 
 
