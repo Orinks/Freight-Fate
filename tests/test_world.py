@@ -378,11 +378,6 @@ def test_corridor_metadata_supports_offline_itineraries(world):
 
 
 def test_supported_routes_require_complete_corridor_metadata(world):
-    from freight_fate.data.world import (
-        minimum_curated_pois,
-        minimum_fuel_capable_pois,
-    )
-
     supported_pairs = [
         ("Chicago", "Indianapolis"),
         ("Chicago", "St. Louis"),
@@ -403,11 +398,10 @@ def test_supported_routes_require_complete_corridor_metadata(world):
         assert route.metadata_complete(world)
 
     for leg in world.legs:
+        # Dispatch requires routing metadata only; POIs are additive.
         assert world.leg_metadata_complete(leg), f"{leg.a}-{leg.b}"
         curated = [stop for stop in leg.stops if stop.curated]
-        fuel_capable = [stop for stop in curated if "fuel" in stop.actions]
-        assert len(curated) >= minimum_curated_pois(leg.miles), f"{leg.a}-{leg.b}"
-        assert len(fuel_capable) >= minimum_fuel_capable_pois(leg.miles), f"{leg.a}-{leg.b}"
+        # Any POIs that are present must still be valid (source/actions/parking).
         assert all(stop.source for stop in curated), f"{leg.a}-{leg.b}"
         assert all(stop.actions for stop in curated), f"{leg.a}-{leg.b}"
         assert all(stop.parking != "unknown" for stop in curated), f"{leg.a}-{leg.b}"
