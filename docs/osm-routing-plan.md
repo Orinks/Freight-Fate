@@ -373,20 +373,26 @@ tunnels. Those gaps are filled by separate sources:
   `curate_route_pois` (one source-backed Love's/Flying J per leg). Coverage
   stayed 110/110 playable.
 
-The binding constraint is **POI density**, not routing. Overpass auto-discovery
-in `enrich_all` rarely yields a *named* gate-passing POI, so it is the operator
-feeds (`curate_route_pois`, Love's/Pilot) that actually make a leg dispatchable.
-Practical rules learned:
+**Update:** the POI gate has since been removed (dispatch now gates on routing
+metadata only; POIs are additive). Batch 1 above predates that change -- it
+shows the old POI-curation bottleneck that motivated the gate relaxation. The
+current playbook is much lighter:
 
-- Prefer new legs on **major interstates** (reliable Love's/Pilot/TA coverage).
-- Keep first legs **short (<160 mi)** so one curated POI satisfies the gate
-  (160+ needs two or three plus a fuel-capable stop).
-- **Urban metro twin legs** (e.g. Dallas-Fort Worth on I-30) often have no
-  on-corridor truck stop; route such hubs via a POI-bearing corridor
-  (I-35W/I-20/US-287) or hand-curate one sourced stop. Fort Worth is deferred
-  for this reason.
-- Each batch ends green: run the coverage report and bump the leg count in
-  `tests/test_route_coverage_tool.py`.
+1. `pick_nodes` to choose interstate-adjacent metros (prune artifacts).
+2. Add the city nodes (`locations: []` -> template facilities, classifier-derived
+   regions) and their legs to `world.json`.
+3. `enrich_all --engine ors --write` -- routing metadata alone makes each leg
+   dispatchable (no POI curation required); HOS fallbacks cover stop-less legs.
+4. `--adopt-ors-miles --write` so new legs carry real ORS truck distance.
+5. Optionally `curate_route_pois --write-world` to raise POI quality where
+   operator feeds reach the corridor (purely additive).
+6. End green: run the coverage report (legs playable on routing; `poi_review`
+   and `toll_review` are advisory) and bump the leg count in
+   `tests/test_route_coverage_tool.py`.
+
+Urban metro-twin legs (e.g. Dallas-Fort Worth on I-30) still make poor *POI*
+corridors, but they no longer block dispatch, so Fort Worth can be added now if
+desired.
 
 ### Streamed tier (optional online overlay)
 
