@@ -569,11 +569,12 @@ HELP_PAGES = [
         "Edited or corrupted career saves may be moved aside at the main menu.",
     ]),
     ("Settings", [
-        "Settings are split into pages. Tab moves to the next page,",
-        "and Shift plus Tab moves to the previous page.",
-        "Use Up and Down arrows to choose a setting on the current page.",
+        "Settings are grouped into categories: Gameplay, Audio, Speech and",
+        "weather, and Updates. Open a category to see its settings.",
+        "Use Up and Down arrows to choose a setting inside a category.",
         "Use Right arrow or Enter to change the selected setting forward.",
-        "Use Left arrow to change it backward. Escape saves and goes back.",
+        "Use Left arrow to change it backward. Escape goes back, and changes",
+        "are saved as you make them.",
         "Gameplay settings change how the game feels, not your save progress.",
         "Units switches speed and distance between miles and kilometers.",
         "Transmission chooses automatic shifting or manual shifting.",
@@ -585,7 +586,7 @@ HELP_PAGES = [
         "Realistic uses the full driving, duty, break, and rest rules.",
         "Relaxed keeps the clock but gives a more forgiving schedule,",
         "with longer limits and fewer penalties during normal play.",
-        "Audio volumes have their own help text on the Audio page with F1.",
+        "Audio volumes have their own help text in the Audio category with F1.",
     ]),
     ("Driving basics", [
         "E starts the engine. To shut it down, slow below 5 miles per hour first.",
@@ -784,31 +785,75 @@ class HelpState(State):
 
 
 class SettingsState(MenuState):
-    intro_help = (
-        "Use Tab and Shift plus Tab to switch settings screens. Use up and "
-        "down arrows to pick a setting. Right arrow or Enter changes the "
-        "selected setting forward, and Left arrow changes it backward. Escape "
-        "saves and goes back."
-    )
-    screens = ("Gameplay", "Audio", "Speech and weather", "Updates")
+    """Top-level settings: a category picker that opens per-category submenus.
 
-    def __init__(self, ctx) -> None:
+    A tabbed multi-page layout reads poorly without a screen to show the tabs,
+    so each category is its own spoken submenu instead, matching every other
+    menu's navigation model.
+    """
+
+    title = "Settings"
+    intro_help = (
+        "Settings are grouped into categories. Use up and down arrows to pick a "
+        "category, Enter to open it, and Escape to go back. Each category opens "
+        "its own list of settings."
+    )
+
+    CATEGORIES = (
+        ("Gameplay", "gameplay"),
+        ("Audio", "audio"),
+        ("Speech and weather", "speech"),
+        ("Updates", "updates"),
+    )
+
+    def build_items(self) -> list[MenuItem]:
+        items = [
+            MenuItem(label, lambda key=key: self._open(key),
+                     help=f"Open {label.lower()} settings.")
+            for label, key in self.CATEGORIES
+        ]
+        items.append(MenuItem("Back", self.go_back))
+        return items
+
+    def _open(self, category: str) -> None:
+        self.ctx.push_state(SettingsCategoryState(self.ctx, category))
+
+    def go_back(self) -> None:
+        self.ctx.settings.save()
+        self.ctx.audio.play("ui/menu_back")
+        self.ctx.say("Settings saved.")
+        self.ctx.pop_state()
+
+
+class SettingsCategoryState(MenuState):
+    """One category of settings as a spoken list.
+
+    Up and down pick a setting; Right arrow or Enter changes it forward and Left
+    changes it backward (the same per-item adjust model as the old tabbed
+    screen, minus the tab switching). Escape returns to the settings categories,
+    and each change is saved as it is made.
+    """
+
+    intro_help = (
+        "Use up and down arrows to pick a setting. Right arrow or Enter changes "
+        "the selected setting forward, and Left arrow changes it backward. "
+        "Escape goes back to the settings categories."
+    )
+
+    TITLES = {
+        "gameplay": "Gameplay",
+        "audio": "Audio",
+        "speech": "Speech and weather",
+        "updates": "Updates",
+    }
+
+    def __init__(self, ctx, category: str) -> None:
         super().__init__(ctx)
-        self.screen_index = 0
+        self.category = category
 
     @property
     def title(self) -> str:  # type: ignore[override]
-        return f"{self.screens[self.screen_index]} {self.screen_index + 1}/{len(self.screens)}"
-
-    @property
-    def category(self) -> str:
-        return ("gameplay", "audio", "speech", "updates")[self.screen_index]
-
-    def announce_entry(self) -> None:
-        self.ctx.say(
-            f"{self.title}. {self.current_text()} "
-            "Tab moves to the next settings screen."
-        )
+        return self.TITLES.get(self.category, "Settings")
 
     def build_items(self) -> list[MenuItem]:
         s = self.ctx.settings
@@ -881,18 +926,8 @@ class SettingsState(MenuState):
             self._adjust(1)
         elif event.type == pygame.KEYDOWN and event.key == pygame.K_LEFT:
             self._adjust(-1)
-        elif event.type == pygame.KEYDOWN and event.key == pygame.K_TAB:
-            self._change_screen(
-                -1 if getattr(event, "mod", 0) & pygame.KMOD_SHIFT else 1
-            )
         else:
             super().handle_event(event)
-
-    def _change_screen(self, direction: int) -> None:
-        self.screen_index = (self.screen_index + direction) % len(self.screens)
-        self.ctx.audio.play("ui/menu_move")
-        self.refresh(keep_index=False)
-        self.ctx.say(f"{self.title}. {self.current_text()}")
 
     def _adjust(self, direction: int) -> None:
         actions = {
@@ -997,7 +1032,8 @@ class SettingsState(MenuState):
         self.ctx.push_state(UpdateCheckState(self.ctx))
 
     def go_back(self) -> None:
+        # Settings are saved as each change is made; just return to the
+        # category list (the top-level picker says "Settings saved" on exit).
         self.ctx.settings.save()
         self.ctx.audio.play("ui/menu_back")
-        self.ctx.say("Settings saved.")
         self.ctx.pop_state()
