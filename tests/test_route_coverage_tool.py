@@ -32,11 +32,11 @@ def test_route_coverage_report_is_machine_readable():
     assert report["totals"]["grade_segments"] == report["totals"]["legs"]
     assert report["totals"]["placeholder_pois"] == 0
     assert report["totals"]["legs_with_placeholder_only"] == 0
-    assert report["totals"]["legs_with_curated_pois"] == report["totals"]["legs"]
-    assert (
-        report["totals"]["legs_with_sufficient_poi_density"]
-        == report["totals"]["legs"]
-    )
+    # POIs are an additive quality layer now, not a dispatch gate.
+    assert report["metadata_contract"]["pois_are_advisory_not_required_for_dispatch"]
+    assert "curated_pois" not in report["metadata_contract"]["playable_requires"]
+    assert isinstance(report["poi_review"], list)
+    assert isinstance(report["toll_review"], list)
     assert report["totals"]["state_crossings_expected_present"] == (
         report["totals"]["state_crossings_expected"]
     )
@@ -97,7 +97,7 @@ def test_route_coverage_report_is_machine_readable():
     assert priorities["I-95 Northeast Corridor south of Philadelphia"]["playable"]
 
 
-def test_route_coverage_report_enforces_whole_network_poi_contract():
+def test_route_coverage_report_enforces_routing_contract():
     result = subprocess.run(
         [
             sys.executable,
@@ -112,9 +112,11 @@ def test_route_coverage_report_enforces_whole_network_poi_contract():
     report = json.loads(result.stdout)
 
     for leg in report["legs"]:
+        # Dispatch gates on routing metadata only; POIs are advisory.
         assert leg["playable"], f"{leg['from']} to {leg['to']}"
         assert leg["missing"] == []
         assert leg["unsupported_reasons"] == []
         assert leg["placeholder_poi_count"] == 0
-        assert leg["curated_poi_count"] >= leg["minimum_curated_pois"]
-        assert leg["present"]["pois_with_actions"]
+        # Where a leg does have curated POIs, they must be valid (actioned).
+        if leg["curated_poi_count"]:
+            assert leg["present"]["pois_with_actions"], f"{leg['from']} to {leg['to']}"

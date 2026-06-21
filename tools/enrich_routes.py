@@ -55,16 +55,19 @@ SIMPLE_STATES_GEOJSON_URL = (
     "https://raw.githubusercontent.com/PublicaMundi/MappingAPI/master/data/geojson/us-states.json"
 )
 OSRM_TIMEOUT_S = 12
+# Dispatch gates on routing completeness only. Curated POIs are an additive
+# quality layer (auto-sourced; reported via the non-blocking POI advisory), not a
+# dispatch requirement -- the runtime HOS fallbacks keep a stop-less leg playable.
 REQUIRED_METADATA_FIELDS = (
     "route_points",
     "checkpoints",
     "state_miles",
     "elevation_samples",
     "grade_segments",
-    "curated_pois",
-    "poi_density",
-    "fuel_poi_support",
 )
+# A long leg with no fuel-capable curated stop leans on the roadside-fuel
+# fallback; flag it for optional curation without blocking dispatch.
+LONG_LEG_POI_ADVISORY_MI = 250.0
 ELEVATION_SOURCE = (
     "Open-Meteo Elevation API development-time sample from Copernicus DEM GLO-90."
 )
@@ -1058,10 +1061,12 @@ def coverage_report(data: dict[str, Any]) -> dict[str, Any]:
         "toll_events": 0,
         "toll_legs": 0,
         "toll_review_pending": 0,
+        "poi_review_pending": 0,
         "playable": 0,
     }
     leg_reports = []
     toll_review: list[dict[str, Any]] = []
+    poi_review: list[dict[str, Any]] = []
     for leg in legs:
         corridor = leg.get("corridor", {})
         stops = leg.get("stops", [])
@@ -1122,6 +1127,18 @@ def coverage_report(data: dict[str, Any]) -> dict[str, Any]:
                 "to": leg["to"],
                 "highway": leg["highway"],
                 "note": "ORS flags a tollway but no toll_events are curated.",
+            })
+        fuel_capable = sum(
+            1 for stop in curated_stops if "fuel" in _stop_actions(stop))
+        if float(leg["miles"]) >= LONG_LEG_POI_ADVISORY_MI and fuel_capable == 0:
+            totals["poi_review_pending"] += 1
+            poi_review.append({
+                "from": leg["from"],
+                "to": leg["to"],
+                "highway": leg["highway"],
+                "miles": leg["miles"],
+                "note": ("Long leg with no fuel-capable curated stop; leans on "
+                         "the roadside-fuel fallback. Curation optional."),
             })
         totals["curated_pois"] += len(curated_stops)
         totals["placeholder_pois"] += len(placeholder_stops)
@@ -1185,13 +1202,14 @@ def coverage_report(data: dict[str, Any]) -> dict[str, Any]:
     return {
         "metadata_contract": {
             "playable_requires": list(REQUIRED_METADATA_FIELDS),
+            "pois_are_advisory_not_required_for_dispatch": True,
             "placeholder_pois_do_not_count_for_dispatch": True,
-            "minimum_curated_pois_by_length": {
+            "advisory_minimum_curated_pois_by_length": {
                 "under_160_mi": 1,
                 "160_to_320_mi": 2,
                 "over_320_mi": 3,
             },
-            "minimum_fuel_capable_pois_by_length": {
+            "advisory_minimum_fuel_capable_pois_by_length": {
                 "under_160_mi": 0,
                 "160_mi_and_over": 1,
             },
@@ -1200,14 +1218,16 @@ def coverage_report(data: dict[str, Any]) -> dict[str, Any]:
             "legacy_full_graph_available_for_old_saves": True,
         },
         "current_batch_notes": [
-            "Route geometry, elevation, state context, and source-backed "
-            "truck-stop coverage are checked in for the current "
-            f"{len(legs)}-leg network. Geometry and elevation come from OSRM or "
-            "the OpenRouteService driving-hgv route (elevation inline); "
-            "placeholder POIs remain quarantined by the coverage contract and "
-            "must not count for dispatch lanes.",
+            "Dispatch gates on routing metadata (geometry, elevation, grade, "
+            f"state context) for the current {len(legs)}-leg network, from OSRM "
+            "or the OpenRouteService driving-hgv route (elevation inline). "
+            "Curated source-backed truck-stop coverage is now an additive "
+            "quality layer, not a dispatch requirement; placeholder POIs stay "
+            "quarantined and never count as curated. Long legs without a "
+            "fuel/rest stop are flagged in poi_review, not blocked.",
         ],
         "toll_review": toll_review,
+        "poi_review": poi_review,
         "high_priority_remaining_corridors": _priority_status(leg_reports),
         "totals": totals,
         "percentages": percentages,
@@ -1336,38 +1356,14 @@ def _minimum_fuel_capable_pois(miles: float) -> int:
     return 1
 
 
-def _unsupported_reasons(
-    missing: list[str],
-    *,
-    curated_count: int,
-    placeholder_count: int,
-    minimum_curated_pois: int,
-    fuel_capable_count: int,
-    minimum_fuel_capable_pois: int,
-) -> list[str]:
-    if not missing:
-        return []
-    reasons = []
-    if "curated_pois" in missing and placeholder_count and not curated_count:
-        reasons.append("placeholder-only POIs are quarantined and do not count")
-    elif "curated_pois" in missing:
-        reasons.append(
-            "curated POIs are missing required source, actions, directions, or parking certainty"
-        )
-    if "poi_density" in missing:
-        reasons.append(
-            f"insufficient curated POI density: {curated_count}/{minimum_curated_pois}"
-        )
-    if "fuel_poi_support" in missing:
-        reasons.append(
-            "insufficient fuel-capable curated support: "
-            f"{fuel_capable_count}/{minimum_fuel_capable_pois}"
-        )
-    for field in missing:
-        if field in {"curated_pois", "poi_density", "fuel_poi_support"}:
-            continue
-        reasons.append(f"missing {field}")
-    return reasons
+def _unsupported_reasons(missing: list[str], **_poi_advisory: int) -> list[str]:
+    """Blocking (routing) reasons a leg is not dispatchable.
+
+    POIs are advisory and never appear in ``missing`` anymore, so they are not
+    reported here; the extra keyword arguments are accepted for call-site
+    compatibility and ignored.
+    """
+    return [f"missing {field}" for field in missing]
 
 
 def _priority_status(leg_reports: list[dict[str, Any]]) -> list[dict[str, Any]]:

@@ -737,7 +737,17 @@ class Leg:
         return self.b if city == self.a else self.a
 
     def metadata_complete(self, from_state: str, to_state: str) -> bool:
-        """True when a leg has enough real corridor data for new freight."""
+        """True when a leg has enough real corridor data to be dispatchable.
+
+        Dispatch gates on *routing* completeness: route geometry, elevation and
+        grade, state mileage, and a state crossing when the endpoints differ --
+        all of which the ORS driving-hgv pipeline produces automatically, so the
+        map can scale without hand work. Curated truck-stop POIs are an additive
+        quality layer (auto-sourced; see the coverage report's POI/fuel
+        advisory), not a dispatch requirement: a stop-less leg stays playable via
+        the HOS fallbacks (roadside fuel rescue, emergency shoulder sleep). POI
+        data that *is* present is still validated at load by ``_parse_stop``.
+        """
         if len(self.route_points) < 2:
             return False
         if not self.checkpoints:
@@ -745,19 +755,6 @@ class Leg:
         if not self.state_miles:
             return False
         if len(self.elevation_samples) < 2 or not self.grade_segments:
-            return False
-        curated_stops = [stop for stop in self.stops if stop.curated]
-        if len(curated_stops) < minimum_curated_pois(self.miles):
-            return False
-        fuel_capable = [stop for stop in curated_stops if "fuel" in stop.actions]
-        if len(fuel_capable) < minimum_fuel_capable_pois(self.miles):
-            return False
-        if any(
-            not stop.source
-            or not stop.actions
-            or stop.parking == "unknown"
-            for stop in curated_stops
-        ):
             return False
         return from_state == to_state or bool(self.state_crossings)
 
