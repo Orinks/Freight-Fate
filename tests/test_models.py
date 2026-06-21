@@ -68,6 +68,24 @@ def test_northeast_short_corridor_deadline_uses_direct_route(world):
                for job in ny_jobs)
 
 
+def test_deadlines_cover_required_hos_time_across_the_network(world):
+    """Every generated job's deadline must cover the honest HOS time (driving at
+    the planning pace plus mandatory breaks and 10-hour sleeps). This is the
+    achievability invariant the deadline formula guarantees; the test guards it
+    across the whole expanded network and all levels, including the corrected
+    ORS mileages."""
+    from freight_fate.models.jobs import required_hours
+
+    endorsements = {"refrigerated", "heavy_haul", "high_value"}
+    for city in world.city_names():
+        for seed in range(3):
+            jobs = JobBoard(world, seed=seed).offers(
+                city, endorsements, count=5, level=5)
+            for job in jobs:
+                assert job.deadline_game_h >= required_hours(job.distance_mi), (
+                    f"{city} -> {job.destination} ({job.distance_mi} mi)")
+
+
 def test_endorsement_gating(world):
     board = JobBoard(world, seed=4)
     no_endorsements = board.offers("Los Angeles", endorsements=set(), count=5)
