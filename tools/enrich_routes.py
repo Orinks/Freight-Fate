@@ -137,6 +137,15 @@ def main(argv: list[str] | None = None) -> int:
                         help="Routing engine for --enrich-all. 'ors' uses the "
                              "driving-hgv truck profile (needs ORS_API_KEY and "
                              "the tooling group); 'osrm' (default) is car.")
+    parser.add_argument("--refresh-geometry", action="store_true",
+                        help="Re-derive route_points, elevation_samples, and "
+                             "grade_segments for selected legs from --engine, "
+                             "preserving curated miles, POIs, tolls, and named "
+                             "crossings/checkpoints. Use with --only and --write.")
+    parser.add_argument("--only", default="",
+                        help="Comma-separated 'From:To' legs for "
+                             "--refresh-geometry, e.g. "
+                             "'Denver:Salt Lake City,Philadelphia:Pittsburgh'.")
     parser.add_argument("--coverage-report", action="store_true",
                         help="Report metadata coverage for every world leg.")
     parser.add_argument("--json", action="store_true",
@@ -182,6 +191,34 @@ def main(argv: list[str] | None = None) -> int:
             WORLD_PATH.write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")
         print(json.dumps(result, indent=2, sort_keys=True) if args.json
               else format_enrichment_result(result))
+        return 0
+    if args.refresh_geometry:
+        api_key = None
+        if args.engine == "ors":
+            api_key = ors_api_key()
+            if api_key is None:
+                raise SystemExit(
+                    f"--engine ors needs the {ORS_API_KEY_ENV} environment "
+                    "variable and the tooling group "
+                    "(uv run --group tooling ...)."
+                )
+        result = refresh_corridors(
+            data,
+            cache_dir=Path(args.cache_dir),
+            rate_limit_s=args.rate_limit,
+            engine=args.engine,
+            api_key=api_key,
+            only=_parse_only(args.only),
+        )
+        if args.write:
+            WORLD_PATH.write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")
+        if args.json:
+            print(json.dumps(result, indent=2, sort_keys=True))
+        else:
+            totals = result["coverage_totals"]
+            print(f"Refreshed {len(result['refreshed'])} corridor(s) via "
+                  f"{args.engine}; playable {totals['playable']}/{totals['legs']}"
+                  f"{' (written)' if args.write else ' (dry run)'}")
         return 0
     if args.coverage_report:
         report = coverage_report(data)
@@ -358,6 +395,76 @@ def enrich_all_routes(
         "blockers": blockers,
         "coverage_totals": report["totals"],
     }
+
+
+def _parse_only(value: str) -> set[tuple[str, str]]:
+    pairs: set[tuple[str, str]] = set()
+    for item in (value or "").split(","):
+        item = item.strip()
+        if not item:
+            continue
+        if ":" not in item:
+            raise SystemExit(f"--only entries must be 'From:To', got {item!r}")
+        a, b = item.split(":", 1)
+        pairs.add((a.strip(), b.strip()))
+    return pairs
+
+
+def refresh_corridors(
+    data: dict[str, Any],
+    *,
+    cache_dir: Path,
+    rate_limit_s: float,
+    engine: str,
+    api_key: str | None,
+    only: set[tuple[str, str]],
+) -> dict[str, Any]:
+    """Re-derive the geometry/terrain layer of selected legs from a routing
+    engine, preserving every curated field.
+
+    Only ``route_points``, ``elevation_samples``, ``grade_segments``, and the
+    corridor source note are rewritten. Curated miles, POIs/stops, toll events,
+    and the hand-named state crossings and checkpoints are left untouched, so a
+    regeneration improves truck-legal geometry and real elevation without losing
+    curation or changing pay/deadline-affecting mileage.
+    """
+    cache_dir.mkdir(parents=True, exist_ok=True)
+    refreshed: list[dict[str, Any]] = []
+    for leg in data["legs"]:
+        key = (leg["from"], leg["to"])
+        if only and key not in only and (leg["to"], leg["from"]) not in only:
+            continue
+        corridor = leg.setdefault("corridor", {})
+        miles = float(leg["miles"])
+        if engine == "ors":
+            parsed = _cached_ors_route(data, leg, cache_dir, rate_limit_s, api_key)
+            samples, elevations = ors_corridor_samples(parsed, miles)
+            elevation_source = ORS_ELEVATION_SOURCE
+            corridor_source = ORS_CORRIDOR_SOURCE
+        else:
+            route = _cached_osrm_route(data, leg, cache_dir, rate_limit_s)
+            samples = _sample_geometry(route["geometry"]["coordinates"], miles)
+            elevations = _cached_elevations(samples, cache_dir, rate_limit_s)
+            elevation_source = ELEVATION_SOURCE
+            corridor_source = CORRIDOR_SOURCE
+        corridor["route_points"] = [
+            {"at_mi": round(p["at_mi"], 1),
+             "lat": round(p["lat"], 5),
+             "lon": round(p["lon"], 5)}
+            for p in samples
+        ]
+        corridor["elevation_samples"] = [
+            {"at_mi": round(p["at_mi"], 1),
+             "elevation_ft": round(e, 1),
+             "source": elevation_source}
+            for p, e in zip(samples, elevations, strict=True)
+        ]
+        corridor["grade_segments"] = _grade_segments(samples, elevations, leg)
+        corridor["source"] = corridor_source
+        refreshed.append({"from": leg["from"], "to": leg["to"],
+                          "engine": engine, "points": len(samples)})
+    return {"refreshed": refreshed,
+            "coverage_totals": coverage_report(data)["totals"]}
 
 
 def format_enrichment_result(result: dict[str, Any]) -> str:

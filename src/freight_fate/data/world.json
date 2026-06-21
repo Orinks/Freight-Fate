@@ -1862,18 +1862,18 @@
           },
           {
             "at_mi": 76.2,
-            "lat": 40.2261,
-            "lon": -76.51288
+            "lat": 40.22695,
+            "lon": -76.38844
           },
           {
             "at_mi": 152.5,
-            "lat": 40.08721,
-            "lon": -77.82947
+            "lat": 40.12999,
+            "lon": -77.74318
           },
           {
             "at_mi": 228.8,
-            "lat": 40.00064,
-            "lon": -79.04734
+            "lat": 39.98383,
+            "lon": -78.95355
           },
           {
             "at_mi": 305.0,
@@ -1884,28 +1884,28 @@
         "elevation_samples": [
           {
             "at_mi": 0.0,
-            "elevation_ft": 105.0,
-            "source": "Open-Meteo Elevation API development-time sample from Copernicus DEM GLO-90."
+            "elevation_ft": 82.0,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
           },
           {
             "at_mi": 76.2,
-            "elevation_ft": 649.6,
-            "source": "Open-Meteo Elevation API development-time sample from Copernicus DEM GLO-90."
+            "elevation_ft": 502.0,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
           },
           {
             "at_mi": 152.5,
-            "elevation_ft": 958.0,
-            "source": "Open-Meteo Elevation API development-time sample from Copernicus DEM GLO-90."
+            "elevation_ft": 856.3,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
           },
           {
             "at_mi": 228.8,
-            "elevation_ft": 2322.8,
-            "source": "Open-Meteo Elevation API development-time sample from Copernicus DEM GLO-90."
+            "elevation_ft": 2326.1,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
           },
           {
             "at_mi": 305.0,
-            "elevation_ft": 774.3,
-            "source": "Open-Meteo Elevation API development-time sample from Copernicus DEM GLO-90."
+            "elevation_ft": 731.6,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
           }
         ],
         "grade_segments": [
@@ -1933,7 +1933,7 @@
             "miles": 305.0
           }
         ],
-        "source": "Development-time OSRM route geometry over OpenStreetMap, with Open-Meteo elevation samples, Census/OpenStreetMap state context, and curated corridor POIs checked in for offline runtime use.",
+        "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
         "toll_events": [
           {
             "name": "Pennsylvania Turnpike eastern ticket entry",
@@ -3789,22 +3789,27 @@
         }
       ],
       "corridor": {
-        "source": "Development-time OSRM route geometry over OpenStreetMap, with Open-Meteo elevation samples and curated corridor POIs checked in for offline runtime use.",
+        "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
         "route_points": [
           {
             "at_mi": 0.0,
-            "lat": 39.7392,
-            "lon": -104.9903
+            "lat": 39.73847,
+            "lon": -104.99029
           },
           {
-            "at_mi": 97.0,
-            "lat": 39.6403,
-            "lon": -106.3742
+            "at_mi": 130.0,
+            "lat": 40.29237,
+            "lon": -106.48273
           },
           {
-            "at_mi": 243.0,
-            "lat": 39.0639,
-            "lon": -108.5506
+            "at_mi": 260.0,
+            "lat": 40.38745,
+            "lon": -108.34833
+          },
+          {
+            "at_mi": 390.0,
+            "lat": 40.15841,
+            "lon": -110.26155
           },
           {
             "at_mi": 520.0,
@@ -3815,45 +3820,36 @@
         "elevation_samples": [
           {
             "at_mi": 0.0,
-            "elevation_ft": 5246.1,
-            "source": "Open-Meteo Elevation API development-time sample from Copernicus DEM GLO-90."
+            "elevation_ft": 5259.2,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
           },
           {
-            "at_mi": 97.0,
-            "elevation_ft": 8179.1,
-            "source": "Open-Meteo Elevation API development-time sample from Copernicus DEM GLO-90."
+            "at_mi": 130.0,
+            "elevation_ft": 7919.9,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
           },
           {
-            "at_mi": 243.0,
-            "elevation_ft": 4586.6,
-            "source": "Open-Meteo Elevation API development-time sample from Copernicus DEM GLO-90."
+            "at_mi": 260.0,
+            "elevation_ft": 6439.6,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 390.0,
+            "elevation_ft": 5387.1,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
           },
           {
             "at_mi": 520.0,
-            "elevation_ft": 4271.7,
-            "source": "Open-Meteo Elevation API development-time sample from Copernicus DEM GLO-90."
+            "elevation_ft": 4287.4,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
           }
         ],
         "grade_segments": [
           {
             "start_mi": 0.0,
-            "end_mi": 97.0,
-            "avg_grade_pct": 0.57,
-            "terrain": "mountain",
-            "source": "Open-Meteo elevation samples summarized for corridor terrain."
-          },
-          {
-            "start_mi": 97.0,
-            "end_mi": 243.0,
-            "avg_grade_pct": -0.47,
-            "terrain": "mountain",
-            "source": "Open-Meteo elevation samples summarized for corridor terrain."
-          },
-          {
-            "start_mi": 243.0,
             "end_mi": 520.0,
-            "avg_grade_pct": -0.02,
-            "terrain": "hills",
+            "avg_grade_pct": -0.04,
+            "terrain": "mountain",
             "source": "Open-Meteo elevation samples summarized for corridor terrain."
           }
         ],
