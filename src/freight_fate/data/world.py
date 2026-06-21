@@ -912,9 +912,24 @@ class World:
             self._facilities_by_id[location.id] = location
 
     @classmethod
-    def load(cls, path: Path = WORLD_PATH) -> World:
+    def load(cls, path: Path = WORLD_PATH,
+             overlay: Path | None = None) -> World:
+        """Load the world, optionally merging an additive overlay on top.
+
+        The checked-in base at ``path`` is the deterministic source of truth.
+        An optional ``overlay`` (extra cities and legs fetched online and cached
+        for later offline play, per docs/osm-routing-plan.md) is merged
+        additively: it can only add cities and legs the base does not already
+        have, never override the base. With no overlay the result is exactly the
+        base world, so the offline/deterministic path is unchanged. The runtime
+        ``get_world`` deliberately does not pass an overlay yet; this is the
+        loader capability the online tier will build on.
+        """
         with open(path, encoding="utf-8") as f:
-            return cls(json.load(f))
+            data = json.load(f)
+        if overlay is not None and overlay.exists():
+            data = _merge_overlay(data, json.loads(overlay.read_text(encoding="utf-8")))
+        return cls(data)
 
     def city_names(self) -> list[str]:
         return sorted(self.cities)
@@ -1091,6 +1106,37 @@ class World:
 
 
 _world: World | None = None
+
+
+def _leg_pair_key(leg: dict) -> frozenset:
+    return frozenset((leg.get("from"), leg.get("to")))
+
+
+def _merge_overlay(base: dict, overlay: dict) -> dict:
+    """Return ``base`` with overlay cities and legs added, never overridden.
+
+    The merge is purely additive so the checked-in base stays authoritative:
+    a city already present by name keeps its base definition, and a leg already
+    present (by unordered endpoint pair) keeps its base definition. Only genuinely
+    new cities and legs from the overlay are appended. The base dict is not
+    mutated.
+    """
+    merged = dict(base)
+    cities = dict(base.get("cities", {}))
+    for name, city in overlay.get("cities", {}).items():
+        if name not in cities:
+            cities[name] = city
+    merged["cities"] = cities
+
+    legs = list(base.get("legs", []))
+    seen = {_leg_pair_key(leg) for leg in legs}
+    for leg in overlay.get("legs", []):
+        key = _leg_pair_key(leg)
+        if key not in seen:
+            seen.add(key)
+            legs.append(leg)
+    merged["legs"] = legs
+    return merged
 
 
 def _parse_location(raw: dict, city: str, city_lat: float, city_lon: float) -> Location:

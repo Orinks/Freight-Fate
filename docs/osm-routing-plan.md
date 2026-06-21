@@ -309,11 +309,14 @@ surface, and it is always optional.
 
 ### Components
 
-1. **World overlay loader.** `World.load` merges the checked-in base with an
-   optional overlay (extra cities, legs, POIs). Stable facility IDs and leg
-   identity must be preserved so saves keep resolving; the loader keeps
-   `_facilities_by_id` uniqueness and the `route_from_cities` legacy path
-   working.
+1. **World overlay loader.** *Done (foundation).* `World.load(path, overlay=...)`
+   merges the checked-in base with an optional overlay of extra cities and legs,
+   purely additively: the overlay can only add cities/legs the base lacks, never
+   override the base, and with no overlay the result is exactly the base world
+   (offline/deterministic path unchanged). `get_world` deliberately does not pass
+   an overlay yet, so runtime is untouched until the online tier wires it in.
+   Still to do when wiring: the user-data overlay path, and preserving stable
+   facility IDs / the `route_from_cities` legacy path across overlay loads.
 2. **`RealRouteProvider`** (new, sibling to `RealWeatherProvider`): given an
    origin/destination, fetch a fresh HGV route in the background and cache it.
    Used at job-accept/dispatch to optionally upgrade an accepted job's route
