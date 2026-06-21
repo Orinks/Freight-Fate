@@ -822,11 +822,9 @@ def test_settings_menu_cycles_hours_of_service():
         state.handle_event(key_event(pygame.K_RETURN))
         assert app.ctx.settings.hos_mode == "relaxed"
         state.handle_event(key_event(pygame.K_RETURN))
-        assert app.ctx.settings.hos_mode == "debug_off"
-        state.handle_event(key_event(pygame.K_RIGHT))
         assert app.ctx.settings.hos_mode == "realistic"
         state.handle_event(key_event(pygame.K_LEFT))
-        assert app.ctx.settings.hos_mode == "debug_off"
+        assert app.ctx.settings.hos_mode == "relaxed"
     finally:
         app.shutdown()
 

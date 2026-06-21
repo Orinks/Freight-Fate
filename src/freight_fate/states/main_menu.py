@@ -12,7 +12,6 @@ from ..achievements import ACHIEVEMENTS, earned_ids
 from ..models.profile import DEFAULT_CITY, Profile, ProfileIntegrityError
 from ..music import select_menu_music_sequence
 from ..settings import TIME_SCALES
-from ..sim.hos import HOS_MODES
 from .base import MenuItem, MenuState, State
 from .update import UpdateChecker, UpdateCheckState, UpdatePromptState
 
@@ -584,8 +583,8 @@ HELP_PAGES = [
         "Fast pacing makes long trips move quicker, but decisions arrive sooner.",
         "Hours of service changes how strict the legal driving clock is.",
         "Realistic uses the full driving, duty, break, and rest rules.",
-        "Relaxed keeps the clock but gives a more forgiving schedule.",
-        "Debug bypass turns hours enforcement off for testing or casual experimenting.",
+        "Relaxed keeps the clock but gives a more forgiving schedule,",
+        "with longer limits and fewer penalties during normal play.",
         "Audio volumes have their own help text on the Audio page with F1.",
     ]),
     ("Driving basics", [
@@ -670,7 +669,7 @@ HELP_PAGES = [
         "options, the pause menu can offer emergency shoulder sleep.",
         "The confirmation warns that it resets your legal clock but leaves fatigue,",
         "can draw a parking ticket or minor damage, and keeps the deadline running.",
-        "Settings can make hours rules gentler or turn enforcement off.",
+        "Settings can make hours rules gentler.",
     ]),
     ("Deliveries and money", [
         "The dispatch board lists freight for the current metro service area.",
@@ -828,7 +827,7 @@ class SettingsState(MenuState):
                          help="Controls how quickly game time and distance pass."),
                 MenuItem(lambda: f"Hours of service: {self._hos_label()}",
                          lambda: self._cycle_hos(1),
-                         help="Realistic, relaxed, or debug bypass hours rules."),
+                         help="Choose realistic or relaxed hours rules."),
                 MenuItem("Back", self.go_back),
             ]
         if self.category == "audio":
@@ -964,7 +963,7 @@ class SettingsState(MenuState):
         self._announce()
 
     def _cycle_hos(self, d: int) -> None:
-        modes = list(HOS_MODES)
+        modes = ["realistic", "relaxed"]
         try:
             i = modes.index(self.ctx.settings.hos_mode)
         except ValueError:
