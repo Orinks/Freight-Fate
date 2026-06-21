@@ -158,6 +158,12 @@ def main(argv: list[str] | None = None) -> int:
                              "distance (rescaling corridor positions). Drives "
                              "pay/deadlines. Needs ORS_API_KEY + tooling group; "
                              "use with --write (and optionally --only).")
+    parser.add_argument("--add-overpass-pois", action="store_true",
+                        help="Additively enrich legs with named OpenStreetMap "
+                             "truck POIs of any brand (Overpass). Use with "
+                             "--write, --per-leg, and optionally --only.")
+    parser.add_argument("--per-leg", type=int, default=2,
+                        help="Max new POIs per leg for --add-overpass-pois.")
     parser.add_argument("--coverage-report", action="store_true",
                         help="Report metadata coverage for every world leg.")
     parser.add_argument("--json", action="store_true",
@@ -226,6 +232,26 @@ def main(argv: list[str] | None = None) -> int:
             totals = result["coverage_totals"]
             print(f"Adopted ORS miles for {len(result['changed'])} leg(s); "
                   f"playable {totals['playable']}/{totals['legs']}"
+                  f"{' (written)' if args.write else ' (dry run)'}")
+        return 0
+    if args.add_overpass_pois:
+        result = add_overpass_pois(
+            data,
+            cache_dir=Path(args.cache_dir),
+            rate_limit_s=args.rate_limit,
+            only=_parse_only(args.only),
+            per_leg=args.per_leg,
+        )
+        if args.write:
+            WORLD_PATH.write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")
+        if args.json:
+            print(json.dumps(result, indent=2, sort_keys=True))
+        else:
+            totals = result["coverage_totals"]
+            print(f"Added {result['added_pois']} OSM POIs to "
+                  f"{result['updated_legs']} legs; playable "
+                  f"{totals['playable']}/{totals['legs']}; "
+                  f"{len(result['legs_without_any_poi'])} legs still without a POI"
                   f"{' (written)' if args.write else ' (dry run)'}")
         return 0
     if args.refresh_geometry:
@@ -762,6 +788,131 @@ def _poi_from_overpass(
         ),
         "actions": actions,
         "services": services,
+    }
+
+
+OVERPASS_POI_SOURCE = (
+    "OpenStreetMap/Overpass development-time corridor amenity query, accessed "
+    "2026-06-21; curated into a gameplay POI (clean name, normalized category) "
+    "without raw OSM IDs."
+)
+
+
+def _overpass_named_candidates(
+    leg: dict[str, Any],
+    samples: list[dict[str, float]],
+    cache_dir: Path,
+    rate_limit_s: float,
+    want: int,
+) -> list[dict[str, Any]]:
+    """Named truck-relevant POIs of any brand near a leg, from OpenStreetMap.
+
+    Brand-agnostic: returns Love's, Pilot, TA, Road Ranger, Kwik Trip,
+    independents, rest areas, service plazas, and HGV truck parking alike --
+    whatever OSM has a real name for. Unnamed amenities are skipped (no synthetic
+    placeholders). Deduped by name, capped at ``want``.
+    """
+    candidate_points = [samples[len(samples) // 2]]
+    if len(samples) >= 4:
+        candidate_points += [samples[1], samples[-2]]
+    if len(samples) >= 6:
+        candidate_points += [samples[len(samples) // 4], samples[3 * len(samples) // 4]]
+    seen: set[str] = set()
+    out: list[dict[str, Any]] = []
+    for point in candidate_points:
+        query = f"""
+        [out:json][timeout:25];
+        (
+          node["amenity"="fuel"](around:6000,{point['lat']},{point['lon']});
+          way["amenity"="fuel"](around:6000,{point['lat']},{point['lon']});
+          node["highway"~"services|rest_area"](around:6000,{point['lat']},{point['lon']});
+          way["highway"~"services|rest_area"](around:6000,{point['lat']},{point['lon']});
+          node["amenity"="parking"]["hgv"="yes"](around:6000,{point['lat']},{point['lon']});
+        );
+        out tags center 25;
+        """
+        try:
+            payload = _cached_overpass_json(
+                cache_dir,
+                f"named--{leg['from']}--{leg['to']}--{point['at_mi']:.1f}",
+                urllib.parse.urlencode({"data": query}).encode("utf-8"),
+                rate_limit_s=rate_limit_s,
+            )
+        except (TimeoutError, OSError, urllib.error.URLError, urllib.error.HTTPError):
+            continue
+        at_mi = round(max(1.0, min(float(leg["miles"]) - 1.0, point["at_mi"])), 1)
+        for element in payload.get("elements", []):
+            tags = element.get("tags", {})
+            raw = tags.get("name") or tags.get("brand") or ""
+            try:
+                name = _clean_poi_name(raw)
+            except ValueError:
+                continue
+            if not name or name.lower() in seen:
+                continue
+            seen.add(name.lower())
+            stop_type = _stop_type_from_tags(tags)
+            out.append({
+                "name": name,
+                "type": stop_type,
+                "at_mi": at_mi,
+                "source": OVERPASS_POI_SOURCE,
+                "actions": _actions_for_stop_type(stop_type),
+                "services": _services_for_stop_type(stop_type),
+            })
+            if len(out) >= want:
+                return out
+    return out
+
+
+def add_overpass_pois(
+    data: dict[str, Any],
+    *,
+    cache_dir: Path,
+    rate_limit_s: float,
+    only: set[tuple[str, str]],
+    per_leg: int = 2,
+) -> dict[str, Any]:
+    """Additively enrich legs with named OSM truck POIs of any brand.
+
+    Purely additive (POIs do not gate dispatch): adds up to ``per_leg`` new
+    named stops per leg, deduped against existing Love's/Pilot curation. Robust
+    to Overpass hiccups -- a leg that errors or finds nothing is simply skipped,
+    and the cache makes re-runs resumable.
+    """
+    cache_dir.mkdir(parents=True, exist_ok=True)
+    added = updated = 0
+    still_empty: list[str] = []
+    for leg in data["legs"]:
+        key = (leg["from"], leg["to"])
+        if only and key not in only and (leg["to"], leg["from"]) not in only:
+            continue
+        points = leg.get("corridor", {}).get("route_points", [])
+        if len(points) < 2:
+            continue
+        stops = leg.setdefault("stops", [])
+        existing = {str(s.get("name", "")).lower() for s in stops}
+        cands = _overpass_named_candidates(
+            leg, points, cache_dir, rate_limit_s, per_leg + len(existing) + 3)
+        fresh = []
+        for cand in cands:
+            if cand["name"].lower() in existing:
+                continue
+            fresh.append(cand)
+            existing.add(cand["name"].lower())
+            if len(fresh) >= per_leg:
+                break
+        if fresh:
+            leg["stops"] = sorted(stops + fresh, key=lambda s: float(s["at_mi"]))
+            added += len(fresh)
+            updated += 1
+        elif not stops:
+            still_empty.append(f"{leg['from']}-{leg['to']}")
+    return {
+        "added_pois": added,
+        "updated_legs": updated,
+        "legs_without_any_poi": still_empty,
+        "coverage_totals": coverage_report(data)["totals"],
     }
 
 

@@ -28886,6 +28886,676 @@
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
       }
+    },
+    {
+      "from": "Dallas",
+      "to": "Fort Worth",
+      "miles": 32,
+      "highway": "I-30",
+      "terrain": "flat",
+      "corridor": {
+        "tollway_detected": false,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 32.77594,
+            "lon": -96.79675
+          },
+          {
+            "at_mi": 8.0,
+            "lat": 32.76576,
+            "lon": -96.92625
+          },
+          {
+            "at_mi": 16.0,
+            "lat": 32.75989,
+            "lon": -97.06316
+          },
+          {
+            "at_mi": 24.0,
+            "lat": 32.75988,
+            "lon": -97.20175
+          },
+          {
+            "at_mi": 32.0,
+            "lat": 32.7555,
+            "lon": -97.33079
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 477.4,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 8.0,
+            "elevation_ft": 442.9,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 16.0,
+            "elevation_ft": 544.6,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 24.0,
+            "elevation_ft": 682.4,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 32.0,
+            "elevation_ft": 646.3,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 32.0,
+            "avg_grade_pct": 0.1,
+            "terrain": "flat",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          }
+        ],
+        "checkpoints": [
+          {
+            "name": "I-30 corridor between Dallas and Fort Worth",
+            "at_mi": 16.0,
+            "type": "place",
+            "state": "Texas",
+            "highway": "I-30",
+            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
+          }
+        ],
+        "state_miles": [
+          {
+            "state": "Texas",
+            "miles": 32.0
+          }
+        ],
+        "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
+      }
+    },
+    {
+      "from": "Akron",
+      "to": "Cleveland",
+      "miles": 39,
+      "highway": "I-77",
+      "terrain": "flat",
+      "corridor": {
+        "tollway_detected": false,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 41.08125,
+            "lon": -81.51906
+          },
+          {
+            "at_mi": 9.8,
+            "lat": 41.11941,
+            "lon": -81.63887
+          },
+          {
+            "at_mi": 19.5,
+            "lat": 41.24854,
+            "lon": -81.62915
+          },
+          {
+            "at_mi": 29.2,
+            "lat": 41.39069,
+            "lon": -81.65287
+          },
+          {
+            "at_mi": 39.0,
+            "lat": 41.49926,
+            "lon": -81.69449
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 983.3,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 9.8,
+            "elevation_ft": 1030.2,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 19.5,
+            "elevation_ft": 997.4,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 29.2,
+            "elevation_ft": 839.9,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 39.0,
+            "elevation_ft": 667.0,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 39.0,
+            "avg_grade_pct": -0.15,
+            "terrain": "flat",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          }
+        ],
+        "checkpoints": [
+          {
+            "name": "I-77 corridor between Akron and Cleveland",
+            "at_mi": 19.5,
+            "type": "place",
+            "state": "Ohio",
+            "highway": "I-77",
+            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
+          }
+        ],
+        "state_miles": [
+          {
+            "state": "Ohio",
+            "miles": 39.0
+          }
+        ],
+        "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
+      }
+    },
+    {
+      "from": "San Jose",
+      "to": "San Francisco",
+      "miles": 49,
+      "highway": "US-101",
+      "terrain": "flat",
+      "corridor": {
+        "tollway_detected": false,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 37.3382,
+            "lon": -121.8863
+          },
+          {
+            "at_mi": 12.2,
+            "lat": 37.40831,
+            "lon": -122.06873
+          },
+          {
+            "at_mi": 24.5,
+            "lat": 37.51011,
+            "lon": -122.25165
+          },
+          {
+            "at_mi": 36.8,
+            "lat": 37.62411,
+            "lon": -122.4009
+          },
+          {
+            "at_mi": 49.0,
+            "lat": 37.77494,
+            "lon": -122.41945
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 75.5,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 12.2,
+            "elevation_ft": 37.7,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 24.5,
+            "elevation_ft": -9.8,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 36.8,
+            "elevation_ft": -19.7,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 49.0,
+            "elevation_ft": 64.0,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 49.0,
+            "avg_grade_pct": -0.0,
+            "terrain": "flat",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          }
+        ],
+        "checkpoints": [
+          {
+            "name": "US-101 corridor between San Jose and San Francisco",
+            "at_mi": 24.5,
+            "type": "place",
+            "state": "California",
+            "highway": "US-101",
+            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
+          }
+        ],
+        "state_miles": [
+          {
+            "state": "California",
+            "miles": 49.0
+          }
+        ],
+        "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
+      }
+    },
+    {
+      "from": "Baltimore",
+      "to": "Washington",
+      "miles": 46,
+      "highway": "I-95",
+      "terrain": "flat",
+      "corridor": {
+        "tollway_detected": false,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 39.29041,
+            "lon": -76.6122
+          },
+          {
+            "at_mi": 11.5,
+            "lat": 39.19604,
+            "lon": -76.7682
+          },
+          {
+            "at_mi": 23.0,
+            "lat": 39.07462,
+            "lon": -76.90526
+          },
+          {
+            "at_mi": 34.5,
+            "lat": 38.95714,
+            "lon": -76.86506
+          },
+          {
+            "at_mi": 46.0,
+            "lat": 38.90718,
+            "lon": -77.03694
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 114.8,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 11.5,
+            "elevation_ft": 238.5,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 23.0,
+            "elevation_ft": 272.0,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 34.5,
+            "elevation_ft": 177.2,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 46.0,
+            "elevation_ft": 101.7,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 46.0,
+            "avg_grade_pct": -0.01,
+            "terrain": "flat",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          }
+        ],
+        "checkpoints": [
+          {
+            "name": "I-95 corridor between Baltimore and Washington",
+            "at_mi": 23.0,
+            "type": "place",
+            "state": "District of Columbia",
+            "highway": "I-95",
+            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
+          }
+        ],
+        "state_miles": [
+          {
+            "state": "Maryland",
+            "miles": 40.4
+          },
+          {
+            "state": "District of Columbia",
+            "miles": 5.6
+          }
+        ],
+        "state_crossings": [
+          {
+            "at_mi": 40.4,
+            "from_state": "Maryland",
+            "state": "District of Columbia",
+            "place": "Maryland-District of Columbia line on I-95",
+            "source": "Computed from OSRM route geometry and public U.S. state boundary GeoJSON."
+          }
+        ],
+        "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
+      }
+    },
+    {
+      "from": "Boston",
+      "to": "Worcester",
+      "miles": 44,
+      "highway": "I-90",
+      "terrain": "flat",
+      "corridor": {
+        "tollway_detected": true,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 42.35966,
+            "lon": -71.05845
+          },
+          {
+            "at_mi": 11.0,
+            "lat": 42.3461,
+            "lon": -71.24813
+          },
+          {
+            "at_mi": 22.0,
+            "lat": 42.30454,
+            "lon": -71.44634
+          },
+          {
+            "at_mi": 33.0,
+            "lat": 42.22742,
+            "lon": -71.62656
+          },
+          {
+            "at_mi": 44.0,
+            "lat": 42.26264,
+            "lon": -71.8025
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 98.4,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 11.0,
+            "elevation_ft": 86.6,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 22.0,
+            "elevation_ft": 201.1,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 33.0,
+            "elevation_ft": 599.4,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 44.0,
+            "elevation_ft": 520.0,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 44.0,
+            "avg_grade_pct": 0.18,
+            "terrain": "flat",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          }
+        ],
+        "checkpoints": [
+          {
+            "name": "I-90 corridor between Boston and Worcester",
+            "at_mi": 22.0,
+            "type": "place",
+            "state": "Massachusetts",
+            "highway": "I-90",
+            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
+          }
+        ],
+        "state_miles": [
+          {
+            "state": "Massachusetts",
+            "miles": 44.0
+          }
+        ],
+        "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
+      }
+    },
+    {
+      "from": "Stockton",
+      "to": "Sacramento",
+      "miles": 49,
+      "highway": "I-5",
+      "terrain": "flat",
+      "corridor": {
+        "tollway_detected": false,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 37.95764,
+            "lon": -121.29078
+          },
+          {
+            "at_mi": 12.2,
+            "lat": 38.09622,
+            "lon": -121.38617
+          },
+          {
+            "at_mi": 24.5,
+            "lat": 38.25769,
+            "lon": -121.44884
+          },
+          {
+            "at_mi": 36.8,
+            "lat": 38.43086,
+            "lon": -121.48819
+          },
+          {
+            "at_mi": 49.0,
+            "lat": 38.5816,
+            "lon": -121.49441
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 17.7,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 12.2,
+            "elevation_ft": 9.8,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 24.5,
+            "elevation_ft": 6.6,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 36.8,
+            "elevation_ft": 9.8,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 49.0,
+            "elevation_ft": 60.7,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 49.0,
+            "avg_grade_pct": 0.02,
+            "terrain": "flat",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          }
+        ],
+        "checkpoints": [
+          {
+            "name": "I-5 corridor between Stockton and Sacramento",
+            "at_mi": 24.5,
+            "type": "place",
+            "state": "California",
+            "highway": "I-5",
+            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
+          }
+        ],
+        "state_miles": [
+          {
+            "state": "California",
+            "miles": 49.0
+          }
+        ],
+        "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
+      }
+    },
+    {
+      "from": "Fort Collins",
+      "to": "Cheyenne",
+      "miles": 47,
+      "highway": "I-25",
+      "terrain": "flat",
+      "corridor": {
+        "tollway_detected": false,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 40.5853,
+            "lon": -105.08432
+          },
+          {
+            "at_mi": 11.7,
+            "lat": 40.6944,
+            "lon": -105.00032
+          },
+          {
+            "at_mi": 23.5,
+            "lat": 40.86209,
+            "lon": -104.95913
+          },
+          {
+            "at_mi": 35.3,
+            "lat": 41.01779,
+            "lon": -104.90358
+          },
+          {
+            "at_mi": 47.0,
+            "lat": 41.13978,
+            "lon": -104.82006
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 5019.7,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 11.7,
+            "elevation_ft": 5183.4,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 23.5,
+            "elevation_ft": 5731.6,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 35.3,
+            "elevation_ft": 6128.6,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 47.0,
+            "elevation_ft": 6097.4,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 11.7,
+            "avg_grade_pct": 0.28,
+            "terrain": "flat",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          },
+          {
+            "start_mi": 11.7,
+            "end_mi": 23.5,
+            "avg_grade_pct": 0.92,
+            "terrain": "hills",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          },
+          {
+            "start_mi": 23.5,
+            "end_mi": 47.0,
+            "avg_grade_pct": 0.31,
+            "terrain": "flat",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          }
+        ],
+        "checkpoints": [
+          {
+            "name": "I-25 corridor between Fort Collins and Cheyenne",
+            "at_mi": 23.5,
+            "type": "place",
+            "state": "Wyoming",
+            "highway": "I-25",
+            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
+          }
+        ],
+        "state_miles": [
+          {
+            "state": "Colorado",
+            "miles": 34.5
+          },
+          {
+            "state": "Wyoming",
+            "miles": 12.5
+          }
+        ],
+        "state_crossings": [
+          {
+            "at_mi": 34.5,
+            "from_state": "Colorado",
+            "state": "Wyoming",
+            "place": "Colorado-Wyoming line on I-25",
+            "source": "Computed from OSRM route geometry and public U.S. state boundary GeoJSON."
+          }
+        ],
+        "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
+      }
     }
   ],
   "route_stop_data": {

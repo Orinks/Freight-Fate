@@ -577,7 +577,9 @@ def test_legs_are_sane_and_unique(world):
         assert leg.a in world.cities, f"unknown endpoint {leg.a}"
         assert leg.b in world.cities, f"unknown endpoint {leg.b}"
         assert leg.terrain in {"flat", "hills", "mountain"}, leg
-        assert 50 <= leg.miles <= 800, f"absurd mileage: {leg}"
+        # Real metro-twin corridors (Dallas-Fort Worth ~33 mi) are legitimate
+        # short freight lanes; only ban truly trivial or cross-country single legs.
+        assert 25 <= leg.miles <= 800, f"absurd mileage: {leg}"
         pair = frozenset((leg.a, leg.b))
         assert pair not in seen, f"duplicate leg {leg.a}-{leg.b}"
         seen.add(pair)
