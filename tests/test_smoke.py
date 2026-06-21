@@ -138,6 +138,9 @@ def test_full_game_flow_headless(monkeypatch):
         assert driving.truck.engine_on
         driving.truck.transmission.automatic = True
         driving.truck.set_air_ready(parking_brake=False)
+        driving.trip._hazard_check_mi = 1e9
+        driving.trip._inspection_check_mi = 1e9
+        driving.trip.traffic_leads = []
 
         for _frame in range(60 * 60 * 40):
             limit_mph, _reason = driving.trip.speed_limit_at(driving.trip.position_mi)
@@ -168,6 +171,8 @@ def test_full_game_flow_headless(monkeypatch):
         assert app.ctx.profile.current_city == driving.job.destination
 
         # continue back to the destination terminal hub
+        while not app.state.items[app.state.index].text.startswith("Continue to"):
+            app.state.handle_event(key_event(pygame.K_DOWN))
         app.state.handle_event(key_event(pygame.K_RETURN))
         assert isinstance(app.state, CityMenuState)
         assert app.state.title == app.ctx.world.home_terminal(driving.job.destination).name

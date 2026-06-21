@@ -256,6 +256,9 @@ class DrivingState(State):
     # -- lifecycle ---------------------------------------------------------------
 
     def enter(self) -> None:
+        if getattr(self, "_entered_once", False):
+            return
+        self._entered_once = True
         self.ctx.clear_music_rotation()
         self.ctx.audio.stop_music(800)
         self._play_current_music(fade_ms=2500)
@@ -1862,18 +1865,81 @@ class ParkingFullState(MenuState):
         ))
 
 
-class DrivingStatusState(MenuState):
-    """Compact review menu for live driving information."""
+POI_ACTION_LABELS = {
+    "park": "parking",
+    "save": "save point",
+    "fuel": "fuel",
+    "food": "food and coffee",
+    "break": "30-minute rest break",
+    "sleep": "sleep or long rest",
+    "repair": "repairs",
+    "roadside_assistance": "roadside assistance",
+    "towing": "towing",
+    "inspect": "inspection check-in",
+}
 
-    title = "Driving status"
+POI_SERVICE_LABELS = {
+    "diesel": "diesel",
+    "food": "food",
+    "parking": "truck parking",
+    "truck_parking": "truck parking",
+    "restrooms": "restrooms",
+    "scale": "scale",
+    "repair": "repair",
+    "roadside_assistance": "roadside assistance",
+    "towing": "towing",
+}
+
+
+def _join_phrase(parts: list[str]) -> str:
+    if not parts:
+        return ""
+    if len(parts) == 1:
+        return parts[0]
+    return ", ".join(parts[:-1]) + f", and {parts[-1]}"
+
+
+def _poi_offers_text(stop) -> str:
+    offers = [
+        POI_ACTION_LABELS[action]
+        for action in stop.actions
+        if action in POI_ACTION_LABELS
+    ]
+    services = [
+        POI_SERVICE_LABELS.get(service, service.replace("_", " "))
+        for service in stop.services
+    ]
+    parts = []
+    if offers:
+        parts.append(f"offers {_join_phrase(offers)}")
+    if services:
+        parts.append(f"listed services: {_join_phrase(services)}")
+    if getattr(stop, "parking_text", ""):
+        parts.append(stop.parking_text)
+    return "; ".join(parts) if parts else "services not listed"
+
+
+class DrivingStatusState(MenuState):
+    """Review panel for live driving, driver, and route-map information."""
+
     intro_help = (
-        "Use up and down arrows to review status. Enter repeats the current "
-        "line. Escape returns to driving."
+        "Use up and down arrows to review the current screen. Right arrow "
+        "moves to the next screen, Left arrow moves to the previous screen. "
+        "Enter repeats the current line. Escape returns to driving."
     )
+    screens = ("Route", "Driver", "Map")
 
     def __init__(self, ctx, driving: DrivingState) -> None:
         super().__init__(ctx)
         self.driving = driving
+        self.screen_index = 0
+
+    @property
+    def title(self) -> str:  # type: ignore[override]
+        return (
+            f"Driving status - {self.screens[self.screen_index]} "
+            f"({self.screen_index + 1}/{len(self.screens)})"
+        )
 
     def build_items(self) -> list[MenuItem]:
         items = [
@@ -1882,7 +1948,7 @@ class DrivingStatusState(MenuState):
                 lambda line=line: self.ctx.say(line),
                 help="Repeat this status line.",
             )
-            for line in self.driving.status_lines()
+            for line in self._screen_lines()
         ]
         items.append(
             MenuItem(
@@ -1892,6 +1958,91 @@ class DrivingStatusState(MenuState):
             )
         )
         return items
+
+    def announce_entry(self) -> None:
+        self.ctx.say(
+            f"{self.title}. {self.current_text()} Right arrow for the next screen."
+        )
+
+    def handle_event(self, event: pygame.event.Event) -> None:
+        if event.type == pygame.KEYDOWN and event.key == pygame.K_RIGHT:
+            self._change_screen(1)
+        elif event.type == pygame.KEYDOWN and event.key == pygame.K_LEFT:
+            self._change_screen(-1)
+        else:
+            super().handle_event(event)
+
+    def _change_screen(self, direction: int) -> None:
+        self.screen_index = (self.screen_index + direction) % len(self.screens)
+        self.ctx.audio.play("ui/menu_move")
+        self.refresh(keep_index=False)
+        self.ctx.say(f"{self.title}. {self.current_text()}")
+
+    def _screen_lines(self) -> list[str]:
+        if self.screen_index == 1:
+            return self._driver_lines()
+        if self.screen_index == 2:
+            return self._map_lines()
+        return self.driving.status_lines()
+
+    def _driver_lines(self) -> list[str]:
+        d = self.driving
+        t = d.truck
+        profile = self.ctx.profile
+        hours_used = d.trip.game_minutes / 60.0
+        deadline = d.job.deadline_game_h - hours_used
+        deadline_text = (
+            f"{deadline:.1f} hours before the deadline"
+            if deadline >= 0
+            else f"{-deadline:.1f} hours past the deadline"
+        )
+        return [
+            f"Driver: {profile.name}",
+            f"Money: {profile.money:,.0f} dollars",
+            f"Load: {d.job.weight_tons:.0f} tons of {d.job.cargo.label}",
+            f"Objective: {'pickup at ' + d._pickup_facility_text() if d.phase == DRIVE_PHASE_PICKUP else 'deliver to ' + d._destination_facility_text()}",
+            f"Truck: fuel {t.fuel_fraction * 100:.0f} percent, damage {t.damage_pct:.0f} percent",
+            f"Transmission: {'automatic' if t.transmission.automatic else 'manual'}, {d._gear_text()}",
+            f"Fatigue: {profile.fatigue:.0f} percent",
+            f"Hours: {d.hos.summary(self.ctx.settings.hos_mode).rstrip('.')}",
+            f"Time: {clock_text(d.trip.current_hour)}, {deadline_text}",
+        ]
+
+    def _map_lines(self) -> list[str]:
+        d = self.driving
+        route = d.route
+        lines = [
+            f"Route: {' to '.join(route.cities)}",
+            f"Highways: {_join_phrase(route.highways)}",
+            f"Progress: {d.trip.position_mi:.0f} miles driven, {d.trip.remaining_miles:.0f} miles remaining",
+            f"Guidance: {d.trip.next_navigation_context()}",
+        ]
+        upcoming = [
+            stop
+            for stop in d.trip.stops
+            if stop.at_mi >= d.trip.position_mi - 0.05
+        ][:5]
+        if upcoming:
+            for stop in upcoming:
+                ahead = max(0.0, stop.at_mi - d.trip.position_mi)
+                lines.append(
+                    f"Stop in {ahead:.0f} miles: {stop.spoken_name}; "
+                    f"{_poi_offers_text(stop)}."
+                )
+        else:
+            lines.append("Stops: no more listed route stops before destination.")
+        next_cues = [
+            cue for cue in d.trip.navigation_cues
+            if cue.at_mi > d.trip.position_mi + 0.05 and cue.kind != "rest_stop"
+        ][:4]
+        for cue in next_cues:
+            ahead = max(0.0, cue.at_mi - d.trip.position_mi)
+            lines.append(f"Map point in {ahead:.0f} miles: {cue.text}.")
+        if route.estimated_tolls > 0:
+            lines.append(
+                f"Estimated carrier-paid toll exposure: {route.estimated_tolls:,.0f} dollars."
+            )
+        return lines
 
     def go_back(self) -> None:
         self.ctx.audio.play("ui/menu_back")
@@ -2162,12 +2313,20 @@ class FacilityArrivalState(MenuState):
 
 class ArrivalState(MenuState):
     title = "Delivery complete"
+    intro_help = (
+        "Use up and down arrows to review the current summary screen. Right "
+        "arrow moves to the next screen, Left arrow moves to the previous "
+        "screen. Enter repeats the current line. Escape continues."
+    )
+    screen_names = ("Overview", "Pay", "Truck and route", "Career")
 
     def __init__(self, ctx, driving: DrivingState) -> None:
         super().__init__(ctx)
         self.driving = driving
         self.summary_parts: list[str] = []
         self._achievement_messages: list[str] = []
+        self.summary_screens: list[tuple[str, list[str]]] = []
+        self.screen_index = 0
         self.terminal = ctx.world.home_terminal(driving.job.destination)
         self._settle()
 
@@ -2231,6 +2390,47 @@ class ArrivalState(MenuState):
             speeding_strikes=d.speeding_strikes,
         )
         self.summary_parts.extend(self._achievement_messages)
+        timing = "On time" if on_time else "Late"
+        bonus_text = (
+            f"Early delivery bonus: {early_bonus:,.0f} dollars"
+            if early_bonus >= 1.0 else "No early delivery bonus on this run"
+        )
+        cargo_condition = (
+            f"Truck damage added on this run: {trip_damage:.0f} percent"
+            if trip_damage > 1 else "No new damage recorded"
+        )
+        career_lines = announcements + self._achievement_messages
+        if not career_lines:
+            career_lines = ["No new career messages."]
+        self.summary_screens = [
+            ("Overview", [
+                f"Delivered {job.weight_tons:.0f} tons of {job.cargo.label} "
+                f"to {job.destination}.",
+                f"Trip time: {hours:.1f} hours, {timing.lower()}.",
+                f"It is {clock_text(p.game_hours)}.",
+                f"Parked at {self.terminal.name} for the "
+                f"{job.destination} service area.",
+            ]),
+            ("Pay", [
+                f"Gross pay: {gross_pay:,.0f} dollars.",
+                f"Carrier-paid or reimbursed charges: {carrier_charges:,.0f} "
+                f"dollars, including tolls {toll_expense:,.0f} and "
+                f"accessorials {charge_summary(accessorials)}.",
+                "Carrier charges are not deducted from driver pay.",
+                f"Driver-responsibility charges: {driver_charges:,.0f} dollars.",
+                f"Net driver pay: {net_pay:,.0f} dollars.",
+                f"Money after settlement: {p.money:,.0f} dollars.",
+                bonus_text + ".",
+            ]),
+            ("Truck and route", [
+                f"Route: {' to '.join(d.route.cities)}.",
+                f"Distance credited: {job.distance_mi:.0f} miles.",
+                cargo_condition + ".",
+                f"Fuel remaining: {d.truck.fuel_fraction * 100:.0f} percent.",
+                f"Truck damage now: {d.truck.damage_pct:.0f} percent.",
+            ]),
+            ("Career", career_lines),
+        ]
         self._announcements = announcements
 
     def _award_arrival_achievements(
@@ -2297,15 +2497,39 @@ class ArrivalState(MenuState):
         self.announce_entry()
 
     def announce_entry(self) -> None:
-        self.ctx.say(" ".join(self.summary_parts) +
-                     " Press Enter to continue.", interrupt=False)
+        self.ctx.say(
+            f"{self._screen_title()}. {self.current_text()} "
+            "Right arrow for more settlement details.",
+            interrupt=False,
+        )
 
     def build_items(self) -> list[MenuItem]:
-        return [
-            MenuItem("Continue to " + self.terminal.name, self._continue),
-            MenuItem("Hear the summary again",
-                     lambda: self.ctx.say(" ".join(self.summary_parts))),
+        _name, lines = self.summary_screens[self.screen_index]
+        items = [
+            MenuItem(line, lambda line=line: self.ctx.say(line),
+                     help="Repeat this settlement line.")
+            for line in lines
         ]
+        items.append(MenuItem("Continue to " + self.terminal.name, self._continue))
+        return items
+
+    def _screen_title(self) -> str:
+        name, _lines = self.summary_screens[self.screen_index]
+        return f"Delivery complete - {name} ({self.screen_index + 1}/{len(self.summary_screens)})"
+
+    def handle_event(self, event: pygame.event.Event) -> None:
+        if event.type == pygame.KEYDOWN and event.key == pygame.K_RIGHT:
+            self._change_screen(1)
+        elif event.type == pygame.KEYDOWN and event.key == pygame.K_LEFT:
+            self._change_screen(-1)
+        else:
+            super().handle_event(event)
+
+    def _change_screen(self, direction: int) -> None:
+        self.screen_index = (self.screen_index + direction) % len(self.summary_screens)
+        self.ctx.audio.play("ui/menu_move")
+        self.refresh(keep_index=False)
+        self.ctx.say(f"{self._screen_title()}. {self.current_text()}")
 
     def go_back(self) -> None:
         self._continue()
@@ -2316,7 +2540,8 @@ class ArrivalState(MenuState):
         self.ctx.replace_state(CityMenuState(self.ctx))
 
     def lines(self) -> list[str]:
-        return [self.title, ""] + self.summary_parts + [""] + [
+        name, lines = self.summary_screens[self.screen_index]
+        return [f"{self.title} - {name}", ""] + lines + [""] + [
             ("> " if i == self.index else "  ") + item.text
             for i, item in enumerate(self.items)
         ]

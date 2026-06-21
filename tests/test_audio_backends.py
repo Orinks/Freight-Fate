@@ -73,10 +73,29 @@ def test_engine_freq_mult_mapping():
     assert abs(mid - (1.0 + ENGINE_FREQ_MAX_MULT) / 2) < 1e-9
 
 
+def test_split_volume_settings_apply_to_silent_backend():
+    backend = audio._NullBackend()
+    backend.set_volumes(
+        master=0.8,
+        sfx=0.7,
+        music=0.6,
+        weather=0.5,
+        engine=0.4,
+        ui=0.9,
+    )
+
+    assert backend.master_volume == 0.8
+    assert backend.sfx_volume == 0.7
+    assert backend.music_volume == 0.6
+    assert backend.weather_volume == 0.5
+    assert backend.engine_volume == 0.4
+    assert backend.ui_volume == 0.9
+
+
 def test_sound_lookup_prefers_ogg_when_available():
     assert _asset_path("weather/rain_light", ("ogg", "wav")).name == "rain_light.ogg"
     assert _asset_path("weather/snow_wind", ("ogg", "wav")).name == "snow_wind.ogg"
-    assert _asset_path("vehicle/brake_air", ("ogg", "wav")).name == "brake_air.wav"
+    assert _asset_path("vehicle/brake_air", ("ogg", "wav")).name == "brake_air.ogg"
     assert _asset_path("vehicle/brake_release", ("ogg", "wav")).name == "brake_release.ogg"
     assert _asset_path("vehicle/brake_set", ("ogg", "wav")).name == "brake_set.ogg"
     assert _asset_path("vehicle/horn", ("ogg", "wav")).name == "horn.ogg"

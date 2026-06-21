@@ -94,6 +94,32 @@ def test_driving_f1_describes_safe_shutdown_and_destination_parking(monkeypatch)
         app.shutdown()
 
 
+def test_closing_status_panel_does_not_restart_drive_music(monkeypatch):
+    from freight_fate.app import App
+    from freight_fate.states.driving import DrivingStatusState
+
+    app = App()
+    played = []
+    monkeypatch.setattr(
+        app.ctx.audio,
+        "play_music",
+        lambda track, fade_ms=1500: played.append((track, fade_ms)),
+    )
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        played.clear()
+
+        driving.handle_event(key_event(pygame.K_TAB))
+        assert isinstance(app.state, DrivingStatusState)
+        app.state.handle_event(key_event(pygame.K_ESCAPE))
+
+        assert app.state is driving
+        assert played == []
+    finally:
+        app.shutdown()
+
+
 def test_how_to_play_documents_new_gameplay_systems():
     from freight_fate.states.main_menu import HELP_PAGES
 
@@ -118,6 +144,12 @@ def test_how_to_play_documents_new_gameplay_systems():
     assert "grades and terrain come from the route" in help_text
     assert "weather, traffic, and construction still vary" in help_text
     assert "slow lead vehicles" in help_text
+    assert "settings are split into pages" in help_text
+    assert "tab moves to the next page" in help_text
+    assert "trip pacing changes how quickly distance and game time pass" in help_text
+    assert "standard pacing is the normal freight fate pace" in help_text
+    assert "relaxed keeps the clock but gives a more forgiving schedule" in help_text
+    assert "longer limits and fewer penalties" in help_text
     assert "adaptive cruise" in help_text
     assert "three second clear-weather gap" in help_text
     assert "increase the following gap" in help_text
@@ -275,6 +307,18 @@ def test_air_brake_help_and_status_are_spoken(monkeypatch):
         assert "compressor idle" in air_status
         assert "brakes cool" in air_status
         assert any(line.startswith("Weather:") for line in status_lines)
+
+        app.state.handle_event(key_event(pygame.K_RIGHT))
+        assert app.state.screen_index == 1
+        driver_lines = [item.text for item in app.state.items]
+        assert any(line.startswith("Driver:") for line in driver_lines)
+        assert any(line.startswith("Hours:") for line in driver_lines)
+
+        app.state.handle_event(key_event(pygame.K_RIGHT))
+        assert app.state.screen_index == 2
+        map_lines = [item.text for item in app.state.items]
+        assert any(line.startswith("Route:") for line in map_lines)
+        assert any("offers" in line for line in map_lines)
 
         app.state.handle_event(key_event(pygame.K_ESCAPE))
         assert isinstance(app.state, DrivingState)
@@ -529,6 +573,46 @@ def test_poi_menu_uses_curated_roadside_assistance_label():
 
 
 @pytest.mark.smoke
+def test_status_map_screen_describes_source_backed_poi_services():
+    from freight_fate.app import App
+    from freight_fate.models.jobs import CARGO_CATALOG, Job
+    from freight_fate.models.profile import Profile
+    from freight_fate.states.driving import DrivingState, DrivingStatusState
+
+    app = App()
+    try:
+        app.ctx.profile = Profile(name="Map Test", current_city="New York")
+        job = Job(
+            CARGO_CATALOG["electronics"],
+            18,
+            "New York",
+            "JFK Air Cargo",
+            "Philadelphia",
+            78,
+            2500,
+            12,
+            origin_type="air_cargo",
+            destination_location="Philadelphia Distribution Center",
+            destination_type="retail_distribution",
+        )
+        route = app.ctx.world.route_from_cities(["New York", "Philadelphia"])
+        driving = DrivingState(app.ctx, job, route, phase="delivery")
+        quiet_trip(driving)
+        state = DrivingStatusState(app.ctx, driving)
+        state.screen_index = 2
+        app.push_state(state)
+
+        text = " ".join(item.text for item in state.items)
+        assert "offers" in text
+        assert "fuel" in text
+        assert "food" in text
+        assert "sleep or long rest" in text or "30-minute rest break" in text
+        assert "listed services" in text
+    finally:
+        app.shutdown()
+
+
+@pytest.mark.smoke
 def test_toll_route_delivery_settlement_records_expense(monkeypatch):
     from freight_fate.app import App
     from freight_fate.models.jobs import CARGO_CATALOG, Job
@@ -572,6 +656,18 @@ def test_toll_route_delivery_settlement_records_expense(monkeypatch):
         assert "not deducted from driver pay" in text
         assert "Driver-responsibility charges 0 dollars" in text
         assert "Net driver pay 2,875 dollars" in text
+
+        assert app.state.screen_index == 0
+        assert app.state.lines()[0] == "Delivery complete - Overview"
+        app.state.handle_event(key_event(pygame.K_RIGHT))
+        assert app.state.screen_index == 1
+        pay_lines = [item.text for item in app.state.items]
+        assert any(line.startswith("Gross pay: 2,875 dollars") for line in pay_lines)
+        assert any("Carrier-paid or reimbursed charges" in line for line in pay_lines)
+        app.state.handle_event(key_event(pygame.K_RIGHT))
+        assert app.state.screen_index == 2
+        route_lines = [item.text for item in app.state.items]
+        assert any(line.startswith("Route: New York to Philadelphia") for line in route_lines)
     finally:
         app.shutdown()
 

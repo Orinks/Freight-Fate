@@ -213,7 +213,6 @@ rather than minutes of waiting.
 uv sync --dev
 uv run pytest          # full test suite, headless
 uv run ruff check src tests tools
-uv run python tools/generate_audio.py   # regenerate all audio from source
 ```
 
 ### Changelog and snapshots
@@ -227,8 +226,10 @@ or when a commit message includes `nightly: build` or `[nightly build]` for an
 intentional snapshot refresh. Use `changelog: none` or `[skip changelog]` only
 when every commit in the change set is non-user-facing.
 
-Procedural sound assets can be produced by `tools/generate_audio.py` with
-seeded randomness — see [CREDITS.md](src/freight_fate/assets/sounds/CREDITS.md).
+Bundled audio assets ship as Ogg Vorbis files under
+`src/freight_fate/assets/sounds/` — see
+[CREDITS.md](src/freight_fate/assets/sounds/CREDITS.md) for provenance and
+licensing.
 
 ## License
 

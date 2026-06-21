@@ -18,6 +18,8 @@
   in-cab vehicle sound set, with donated truck recordings from
   [Darren Duff](https://darrenduff.com/). The start cue is trimmed so the idle
   loop takes over cleanly.
+- **Night driving ambience.** Night drives now play a new recorded in-cab
+  night ambience loop.
 - **New achievement system.** Careers now track achievements across a range
   of categories, with a spoken main-menu viewer and a chime when you unlock
   one. Existing careers carry over. Note: a career saved on a developer
