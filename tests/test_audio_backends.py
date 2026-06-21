@@ -95,7 +95,7 @@ def test_split_volume_settings_apply_to_silent_backend():
 def test_sound_lookup_prefers_ogg_when_available():
     assert _asset_path("weather/rain_light", ("ogg", "wav")).name == "rain_light.ogg"
     assert _asset_path("weather/snow_wind", ("ogg", "wav")).name == "snow_wind.ogg"
-    assert _asset_path("vehicle/brake_air", ("ogg", "wav")).name == "brake_air.wav"
+    assert _asset_path("vehicle/brake_air", ("ogg", "wav")).name == "brake_air.ogg"
     assert _asset_path("vehicle/brake_release", ("ogg", "wav")).name == "brake_release.ogg"
     assert _asset_path("vehicle/brake_set", ("ogg", "wav")).name == "brake_set.ogg"
     assert _asset_path("vehicle/horn", ("ogg", "wav")).name == "horn.ogg"
