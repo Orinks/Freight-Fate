@@ -49,6 +49,9 @@
   the new facility-gate ambience, delivery completion no longer buries the
   dock and settlement cues under a generic menu sound, and volume settings
   persist into the next game session.
+- **Menu navigation polish.** Delivery completion now presents settlement,
+  route, truck, and career details in one continuous list, while Settings keeps
+  its category menus for easier browsing.
 
 ## 1.6.0 - 2026-06-19
 
