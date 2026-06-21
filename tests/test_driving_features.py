@@ -144,8 +144,8 @@ def test_how_to_play_documents_new_gameplay_systems():
     assert "grades and terrain come from the route" in help_text
     assert "weather, traffic, and construction still vary" in help_text
     assert "slow lead vehicles" in help_text
-    assert "settings are split into pages" in help_text
-    assert "tab moves to the next page" in help_text
+    assert "settings are grouped into categories" in help_text
+    assert "open a category to see its settings" in help_text
     assert "trip pacing changes how quickly distance and game time pass" in help_text
     assert "standard pacing is the normal freight fate pace" in help_text
     assert "relaxed keeps the clock but gives a more forgiving schedule" in help_text
