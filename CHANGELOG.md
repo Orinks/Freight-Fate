@@ -26,6 +26,12 @@
   snapshot may not load on an older stable release.
 
 ### Fixed
+- **Updater works in packaged builds again.** Nuitka builds do not set the
+  PyInstaller-era ``sys.frozen`` flag, so the game mistook every packaged copy
+  for a source checkout: "Check for updates" reported running from source, the
+  startup update check never ran, and ``saves/game.log`` was never written.
+  Packaged builds are now detected correctly, restoring update checks, install,
+  and crash logging.
 - **Facility approach speed cues.** Pickup deadheads now use lower-speed
   facility access roads, deliveries slow through a final receiver approach,
   and the last gate prompts are shorter so stopping instructions land faster.

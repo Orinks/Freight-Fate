@@ -26,6 +26,7 @@ from dataclasses import asdict, dataclass, field
 from pathlib import Path
 
 from ..sim.hos import HosClock
+from ..updater import is_frozen
 from .career import Career
 from .market import Market
 
@@ -54,7 +55,7 @@ def _legacy_data_dir() -> Path:
 def game_root() -> Path:
     """The game's main directory: the executable's directory when frozen,
     the project root when running from source."""
-    if getattr(sys, "frozen", False):
+    if is_frozen():
         exe_dir = _frozen_executable_dir()
         app_bundle = _macos_app_bundle(exe_dir)
         if app_bundle is not None:
@@ -105,7 +106,7 @@ def _portable_migration_candidates() -> list[Path]:
         parent / "saves",
         parent / "FreightFate" / "saves",
     ]
-    if getattr(sys, "frozen", False):
+    if is_frozen():
         candidates.append(_frozen_executable_dir() / "saves")
     return [path for path in candidates if path != root / "saves"]
 

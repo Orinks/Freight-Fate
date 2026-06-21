@@ -35,6 +35,17 @@ def test_game_root_when_frozen(monkeypatch, tmp_path):
     assert profile_mod.game_root() == exe.resolve().parent
 
 
+def test_game_root_when_nuitka_compiled(monkeypatch, tmp_path):
+    # Nuitka builds do not set sys.frozen; is_frozen() detects them via the
+    # __compiled__ global instead. game_root must still resolve to the
+    # executable's directory, not the source-checkout fallback.
+    monkeypatch.delattr(sys, "frozen", raising=False)
+    monkeypatch.setattr("freight_fate.updater.__compiled__", object(), raising=False)
+    exe = tmp_path / "Games" / "FreightFate" / "FreightFate.exe"
+    monkeypatch.setattr(sys, "executable", str(exe))
+    assert profile_mod.game_root() == exe.resolve().parent
+
+
 def test_game_root_for_macos_app_is_bundle_parent(monkeypatch, tmp_path):
     exe = (
         tmp_path / "Games" / "FreightFate.app" / "Contents" / "MacOS" / "FreightFate"
