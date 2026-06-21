@@ -212,10 +212,14 @@ eastern Sierra, and Snake River Plain boundaries that separate `rockies`,
 
 ### Accessibility note
 
-The new-career terminal picker groups cities by region and supports type-ahead.
-Finer regions improve grouping. When the city list grows large (Workstream C),
-revisit whether the picker should become region submenus rather than one long
-flat list. Flag for accessibility review at implementation time.
+**Done.** The new-career picker is now two spoken levels: a region list
+(`HomeTerminalState`) whose entries name each region and its city count, then a
+per-region city list (`HomeCityState`). Both keep the standard menu model
+(arrows, Home/End, Enter, Escape, F1, first-letter jump); region menu names drop
+the leading "the" so type-ahead works. This keeps spoken navigation manageable
+as the map grows toward national coverage instead of one long flat city list.
+Escape steps back city list -> region list -> name entry. The default flow still
+lands on the default city's region and then the default city.
 
 ---
 
@@ -334,9 +338,10 @@ surface, and it is always optional.
 - **Region boundaries need sign-off.** The taxonomy and polygon edges affect
   weather, hazards, fuel price, music, and labels. Lock the region list before
   populating the flavor tables.
-- **Terminal-picker accessibility at scale.** A flat list of hundreds of cities
-  is poor for screen-reader navigation. Decide on region submenus / better
-  type-ahead before the list grows; route through accessibility review.
+- **Terminal-picker accessibility at scale.** Resolved for now: the picker is a
+  two-level region -> city submenu (see Workstream A accessibility note). As the
+  city count per region grows, revisit whether very large regions need a further
+  split (for example by state) so no single city list becomes unwieldy.
 - **Determinism guarantee.** The overlay and online tier must never make an
   in-progress trip non-reproducible. Tests should assert that, with no overlay
   and no network, the world and a given trip seed are identical to today.

@@ -483,35 +483,99 @@ class NameEntryState(State):
                 "Press Enter to confirm, Escape to cancel, F2 to review."]
 
 
-class HomeTerminalState(MenuState):
-    """Pick the home terminal city where a brand-new career begins."""
+def _region_menu_name(region: str) -> str:
+    """Region label suited to a menu item and first-letter jump.
 
-    title = "Home terminal"
-    intro_help = ("Pick the city where your trucking career begins. Cities are "
-                  "grouped by region. Use up and down arrows, Home and End, or "
-                  "type a letter to jump to a city. Enter confirms your home "
-                  "terminal. Escape goes back to name entry.")
+    The spoken labels read naturally as prose ("in the Great Lakes"), but a
+    list where every entry starts with "the" defeats type-ahead, so the leading
+    article is dropped for menu display.
+    """
+    label = REGION_LABELS.get(region, region.replace("_", " "))
+    return label[4:] if label.startswith("the ") else label
+
+
+class HomeTerminalState(MenuState):
+    """Pick the region of the country where a brand-new career begins.
+
+    Region selection is the first of two levels: choosing a region opens a
+    :class:`HomeCityState` listing only that region's cities. A short region
+    list keeps the spoken navigation manageable as the map grows toward national
+    coverage, instead of one long flat list of every city.
+    """
+
+    title = "Home region"
+    intro_help = ("Pick the part of the country where your trucking career "
+                  "begins. Use up and down arrows, Home and End, or type a "
+                  "letter to jump to a region. Enter opens that region's cities. "
+                  "Escape goes back to name entry.")
 
     def __init__(self, ctx, driver_name: str) -> None:
         super().__init__(ctx)
         self.driver_name = driver_name
-        cities = sorted(ctx.world.cities.values(),
-                        key=lambda c: (REGION_LABELS.get(c.region, c.region), c.name))
-        self._cities = [c.name for c in cities]
+        by_region: dict[str, list[str]] = {}
+        for city in ctx.world.cities.values():
+            by_region.setdefault(city.region, []).append(city.name)
+        for names in by_region.values():
+            names.sort()
+        self._cities_by_region = by_region
+        self._regions = sorted(by_region, key=_region_menu_name)
+        default = ctx.world.cities[DEFAULT_CITY].region \
+            if DEFAULT_CITY in ctx.world.cities else None
+        if default in self._regions:
+            self.index = self._regions.index(default)
+
+    def announce_entry(self) -> None:
+        self.ctx.say("Home region. Pick the part of the country where your "
+                     f"career starts. {self.current_text()}")
+
+    def build_items(self) -> list[MenuItem]:
+        items: list[MenuItem] = []
+        for region in self._regions:
+            name = _region_menu_name(region)
+            count = len(self._cities_by_region[region])
+            noun = "city" if count == 1 else "cities"
+            items.append(MenuItem(
+                f"{name} ({count} {noun})",
+                lambda r=region: self._pick_region(r),
+                help=f"Open {name} to choose a starting city. "
+                     f"{count} {noun} available."))
+        return items
+
+    def _pick_region(self, region: str) -> None:
+        self.ctx.push_state(HomeCityState(
+            self.ctx, self.driver_name, region,
+            self._cities_by_region[region]))
+
+
+class HomeCityState(MenuState):
+    """Pick the home terminal city within a chosen region."""
+
+    title = "Home terminal"
+    intro_help = ("Pick the city where your trucking career begins. Use up and "
+                  "down arrows, Home and End, or type a letter to jump to a "
+                  "city. Enter confirms your home terminal. Escape goes back to "
+                  "the region list.")
+
+    def __init__(self, ctx, driver_name: str, region: str,
+                 city_names: list[str]) -> None:
+        super().__init__(ctx)
+        self.driver_name = driver_name
+        self.region = region
+        self._cities = list(city_names)
         if DEFAULT_CITY in self._cities:
             self.index = self._cities.index(DEFAULT_CITY)
 
     def announce_entry(self) -> None:
-        self.ctx.say("Home terminal. Pick the city where your career starts. "
-                     f"{self.current_text()}")
+        region = _region_menu_name(self.region)
+        self.ctx.say(f"{region} terminals. Pick the city where your career "
+                     f"starts. {self.current_text()}")
 
     def build_items(self) -> list[MenuItem]:
         items: list[MenuItem] = []
         for name in self._cities:
             city = self.ctx.world.cities[name]
             terminal = self.ctx.world.home_terminal(name)
-            region = REGION_LABELS.get(city.region, city.region)
-            items.append(MenuItem(f"{name}, {region}",
+            items.append(MenuItem(f"{name}, {city.state}",
                                   lambda n=name: self._pick(n),
                                   help=f"Start at {terminal.spoken_name} in "
                                        f"{name}, {city.state}."))
@@ -526,7 +590,8 @@ class HomeTerminalState(MenuState):
         terminal = self.ctx.world.home_terminal(city)
         self.ctx.profile = profile
         profile.save()
-        self.ctx.pop_state()   # this picker
+        self.ctx.pop_state()   # this city picker
+        self.ctx.pop_state()   # region picker
         self.ctx.pop_state()   # name entry
         self.ctx.push_state(CityMenuState(self.ctx))
         loaded_over = (f"Loaded over existing driver named {name}. "
