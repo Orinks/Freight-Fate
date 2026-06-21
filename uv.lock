@@ -377,6 +377,9 @@ dev = [
     { name = "ruff" },
     { name = "soundfile" },
 ]
+tooling = [
+    { name = "openrouteservice" },
+]
 
 [package.metadata]
 requires-dist = [
@@ -395,6 +398,7 @@ dev = [
     { name = "ruff", specifier = ">=0.8" },
     { name = "soundfile", specifier = ">=0.14.0" },
 ]
+tooling = [{ name = "openrouteservice", specifier = ">=2.2.0" }]
 
 [[package]]
 name = "idna"
@@ -683,6 +687,18 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/1a/9c/c531f2293b91265d8b48e9b329f54fdd7ffae73cb4134ea10cca4237e9cc/numpy-2.4.6-pp311-pypy311_pp73-manylinux_2_27_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:5dbbdb29840ca3d91ee0fece42fc29278886d908280bfec0a5846c6f901a3eb0", size = 15798374, upload-time = "2026-05-18T23:37:02.674Z" },
     { url = "https://files.pythonhosted.org/packages/1a/b0/413077f6b1153ed3cba361401c6783bbad6114804a000cc22eb71c13e190/numpy-2.4.6-pp311-pypy311_pp73-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:8ad03c0965fb3c692200e74d458ca28c1dbb4ce96f9a479a8aa041ad5fabca02", size = 16747286, upload-time = "2026-05-18T23:37:06.327Z" },
     { url = "https://files.pythonhosted.org/packages/15/ce/e5ec180bc41812edcd8daeb8639d205622c0e8c02259d8ab25a0201b3c2a/numpy-2.4.6-pp311-pypy311_pp73-win_amd64.whl", hash = "sha256:2803abfebfc990042cd494d8ce2d5f82e9d847af6d35ec486923aa19dbad5e73", size = 12504263, upload-time = "2026-05-18T23:37:09.715Z" },
+]
+
+[[package]]
+name = "openrouteservice"
+version = "2.3.3"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "requests" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/c7/c2/2a9784750f244d6f2ae982f7e2862383af4c6d8d9e9ca793603500d04d16/openrouteservice-2.3.3.tar.gz", hash = "sha256:3696e0428533cf6bbcb9586c3bcfca7b5e7aaa269650ff16a862a7f61b857f4a", size = 29130, upload-time = "2021-02-02T19:26:40.918Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/67/1a/e6944e4cfd7c5386b15e4b4056084b3c8c676aca0a215d8b507a6cbc1263/openrouteservice-2.3.3-py3-none-any.whl", hash = "sha256:a84fe298b1de7a4fb1d8aa19798687f4f66fe212e5206667c703ca2c7e5de0ce", size = 33749, upload-time = "2021-02-02T19:26:39.676Z" },
 ]
 
 [[package]]

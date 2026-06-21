@@ -27,11 +27,11 @@ CACHE_PATH = ROOT / ".route-cache"
 USER_AGENT = "Freight-Fate route-enrichment smoke (https://github.com/Orinks/Freight-Fate)"
 OSRM_ROUTE_URL = "https://router.project-osrm.org/route/v1/driving/{coords}"
 OPEN_METEO_ELEVATION_URL = "https://api.open-meteo.com/v1/elevation"
-# OpenRouteService heavy-goods (truck) routing. Build-time only; the key lives
-# in the environment and is never bundled or read at runtime. One driving-hgv
-# request returns truck-legal geometry with elevation plus steepness and
-# tollway extras -- the inputs the corridor builders already consume.
-ORS_DIRECTIONS_URL = "https://api.openrouteservice.org/v2/directions/{profile}/geojson"
+# OpenRouteService heavy-goods (truck) routing via the official `openrouteservice`
+# SDK. Build-time only (the `tooling` dependency group); the key lives in the
+# environment and is never bundled or read at runtime. One driving-hgv request
+# returns truck-legal geometry with elevation plus steepness and tollway extras
+# -- the inputs the corridor builders already consume.
 ORS_HGV_PROFILE = "driving-hgv"
 ORS_API_KEY_ENV = "ORS_API_KEY"
 ORS_EXTRA_INFO = ("steepness", "tollways", "waytype")
@@ -1223,16 +1223,21 @@ def ors_api_key() -> str | None:
     return key or None
 
 
-def _ors_request_body(start: dict[str, Any], end: dict[str, Any]) -> bytes:
-    body = {
+def _ors_directions_kwargs(start: dict[str, Any], end: dict[str, Any]) -> dict[str, Any]:
+    """The driving-hgv directions request as SDK keyword arguments.
+
+    Pure, so it is unit-testable without the SDK installed.
+    """
+    return {
         "coordinates": [
             [float(start["lon"]), float(start["lat"])],
             [float(end["lon"]), float(end["lat"])],
         ],
+        "profile": ORS_HGV_PROFILE,
+        "format": "geojson",
         "elevation": True,
         "extra_info": list(ORS_EXTRA_INFO),
     }
-    return json.dumps(body).encode("utf-8")
 
 
 def fetch_ors_hgv_route(
@@ -1244,22 +1249,22 @@ def fetch_ors_hgv_route(
 ) -> dict[str, Any]:
     """Live OpenRouteService driving-hgv request returning the raw GeoJSON.
 
-    Build-time only. Kept separate from :func:`parse_ors_route` so the mapping
-    can be unit-tested against a captured response without any network.
+    Uses the official ``openrouteservice`` SDK (build-time ``tooling`` group),
+    which handles auth and rate-limit retries. Kept separate from
+    :func:`parse_ors_route` so the mapping can be unit-tested without network or
+    the SDK installed. The SDK is imported lazily so the rest of this tool runs
+    with the standard library alone.
     """
-    url = ORS_DIRECTIONS_URL.format(profile=ORS_HGV_PROFILE)
-    req = urllib.request.Request(
-        url,
-        data=_ors_request_body(start, end),
-        headers={
-            "User-Agent": USER_AGENT,
-            "Authorization": api_key,
-            "Content-Type": "application/json",
-            "Accept": "application/geo+json",
-        },
-    )
-    with urllib.request.urlopen(req, timeout=timeout_s) as resp:
-        return json.loads(resp.read().decode("utf-8"))
+    try:
+        import openrouteservice
+    except ImportError as exc:
+        raise SystemExit(
+            "The OpenRouteService SDK is not installed. It is a build-time "
+            "dependency: run with `uv run --group tooling ...`."
+        ) from exc
+    client = openrouteservice.Client(
+        key=api_key, timeout=timeout_s, retry_over_query_limit=True)
+    return client.directions(**_ors_directions_kwargs(start, end))
 
 
 def parse_ors_route(payload: dict[str, Any]) -> dict[str, Any]:

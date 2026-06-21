@@ -41,6 +41,12 @@ dev = [
 build = [
     "nuitka>=4.0.8",
 ]
+# Build-time route-enrichment tooling only (tools/enrich_routes.py --ors-smoke
+# and ORS-backed corridor generation). Never a runtime dependency, so the
+# shipped game stays dependency-light. Run with `uv run --group tooling ...`.
+tooling = [
+    "openrouteservice>=2.2.0",
+]
 
 [build-system]
 requires = ["hatchling"]

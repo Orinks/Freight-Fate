@@ -239,13 +239,17 @@ Replace/augment the car-only OSRM build step with truck-aware OpenRouteService.
 
 ### Implementation
 
-**Scaffold done** (ready for a key): `tools/enrich_routes.py` has the ORS
-driving-hgv client (`fetch_ors_hgv_route`), the pure response mapper
+**Scaffold done** (ready for a key): `tools/enrich_routes.py` uses the official
+`openrouteservice` Python SDK (a build-time-only `tooling` dependency group, so
+the shipped game stays dependency-light; the runtime online tier will stay on
+stdlib `urllib` like the Open-Meteo provider). It has the driving-hgv client
+(`fetch_ors_hgv_route`, lazy-imports the SDK), the pure response mapper
 (`parse_ors_route` -> miles, 2D coordinates, per-vertex elevation in feet,
-steepness, tollway flag), the `ORS_API_KEY` env helper (`ors_api_key`), and a
-credential-gated `--ors-smoke` CLI that runs one real corridor request and
-prints distance, points, elevation range, steepness segments, and tollway
-yes/no. The mapping is unit-tested without network in `tests/test_ors_pipeline.py`
+steepness, tollway flag), the request-kwargs builder (`_ors_directions_kwargs`),
+the `ORS_API_KEY` env helper (`ors_api_key`), and a credential-gated
+`--ors-smoke` CLI that runs one real corridor request and prints distance,
+points, elevation range, steepness segments, and tollway yes/no. The mapping is
+unit-tested without network or the SDK in `tests/test_ors_pipeline.py`
 (including that ORS elevation feeds the existing `_grade_segments`). Default
 behavior is unchanged; OSRM is still the active engine until the key lands.
 
@@ -253,8 +257,8 @@ Remaining (needs the key to verify):
 
 1. Free HeiGIT/OpenRouteService account; set the key in the `ORS_API_KEY`
    environment variable (build tooling only; never bundled or used at runtime).
-   Validate with `uv run python tools/enrich_routes.py --from-city Chicago
-   --to-city Indianapolis --ors-smoke`.
+   Validate with `uv run --group tooling python tools/enrich_routes.py
+   --from-city Chicago --to-city Indianapolis --ors-smoke`.
 2. Wire the ORS path into `enrich_all_routes` behind an engine switch, mapping
    responses into the corridor schema: `route_points`, `elevation_samples`
    (from ORS 3D geometry, dropping the separate Open-Meteo elevation call),

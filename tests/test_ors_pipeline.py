@@ -94,12 +94,12 @@ def test_ors_api_key_reads_environment(monkeypatch):
     assert enrich_routes.ors_api_key() == "test-key"
 
 
-def test_ors_request_body_is_hgv_with_elevation_and_extras():
-    import json
-
-    body = json.loads(enrich_routes._ors_request_body(
-        {"lon": -87.63, "lat": 41.88}, {"lon": -86.16, "lat": 39.77}))
-    assert body["coordinates"] == [[-87.63, 41.88], [-86.16, 39.77]]
-    assert body["elevation"] is True
-    assert "steepness" in body["extra_info"]
-    assert "tollways" in body["extra_info"]
+def test_ors_directions_kwargs_request_hgv_with_elevation_and_extras():
+    kwargs = enrich_routes._ors_directions_kwargs(
+        {"lon": -87.63, "lat": 41.88}, {"lon": -86.16, "lat": 39.77})
+    assert kwargs["coordinates"] == [[-87.63, 41.88], [-86.16, 39.77]]
+    assert kwargs["profile"] == "driving-hgv"
+    assert kwargs["format"] == "geojson"
+    assert kwargs["elevation"] is True
+    assert "steepness" in kwargs["extra_info"]
+    assert "tollways" in kwargs["extra_info"]
