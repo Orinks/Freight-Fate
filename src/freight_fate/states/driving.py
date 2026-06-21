@@ -2322,19 +2322,16 @@ class FacilityArrivalState(MenuState):
 class ArrivalState(MenuState):
     title = "Delivery complete"
     intro_help = (
-        "Use up and down arrows to review the current summary screen. Right "
-        "arrow moves to the next screen, Left arrow moves to the previous "
-        "screen. Enter repeats the current line. Escape continues."
+        "Use up and down arrows to review the delivery summary. Enter repeats "
+        "the current line. Escape continues."
     )
-    screen_names = ("Overview", "Pay", "Truck and route", "Career")
 
     def __init__(self, ctx, driving: DrivingState) -> None:
         super().__init__(ctx)
         self.driving = driving
         self.summary_parts: list[str] = []
         self._achievement_messages: list[str] = []
-        self.summary_screens: list[tuple[str, list[str]]] = []
-        self.screen_index = 0
+        self.summary_lines: list[str] = []
         self.terminal = ctx.world.home_terminal(driving.job.destination)
         self._settle()
 
@@ -2410,34 +2407,28 @@ class ArrivalState(MenuState):
         career_lines = announcements + self._achievement_messages
         if not career_lines:
             career_lines = ["No new career messages."]
-        self.summary_screens = [
-            ("Overview", [
-                f"Delivered {job.weight_tons:.0f} tons of {job.cargo.label} "
-                f"to {job.destination}.",
-                f"Trip time: {hours:.1f} hours, {timing.lower()}.",
-                f"It is {clock_text(p.game_hours)}.",
-                f"Parked at {self.terminal.name} for the "
-                f"{job.destination} service area.",
-            ]),
-            ("Pay", [
-                f"Gross pay: {gross_pay:,.0f} dollars.",
-                f"Carrier-paid or reimbursed charges: {carrier_charges:,.0f} "
-                f"dollars, including tolls {toll_expense:,.0f} and "
-                f"accessorials {charge_summary(accessorials)}.",
-                "Carrier charges are not deducted from driver pay.",
-                f"Driver-responsibility charges: {driver_charges:,.0f} dollars.",
-                f"Net driver pay: {net_pay:,.0f} dollars.",
-                f"Money after settlement: {p.money:,.0f} dollars.",
-                bonus_text + ".",
-            ]),
-            ("Truck and route", [
-                f"Route: {' to '.join(d.route.cities)}.",
-                f"Distance credited: {job.distance_mi:.0f} miles.",
-                cargo_condition + ".",
-                f"Fuel remaining: {d.truck.fuel_fraction * 100:.0f} percent.",
-                f"Truck damage now: {d.truck.damage_pct:.0f} percent.",
-            ]),
-            ("Career", career_lines),
+        self.summary_lines = [
+            f"Delivered {job.weight_tons:.0f} tons of {job.cargo.label} "
+            f"to {job.destination}.",
+            f"Trip time: {hours:.1f} hours, {timing.lower()}.",
+            f"It is {clock_text(p.game_hours)}.",
+            f"Parked at {self.terminal.name} for the "
+            f"{job.destination} service area.",
+            f"Gross pay: {gross_pay:,.0f} dollars.",
+            f"Carrier-paid or reimbursed charges: {carrier_charges:,.0f} "
+            f"dollars, including tolls {toll_expense:,.0f} and "
+            f"accessorials {charge_summary(accessorials)}.",
+            "Carrier charges are not deducted from driver pay.",
+            f"Driver-responsibility charges: {driver_charges:,.0f} dollars.",
+            f"Net driver pay: {net_pay:,.0f} dollars.",
+            f"Money after settlement: {p.money:,.0f} dollars.",
+            bonus_text + ".",
+            f"Route: {' to '.join(d.route.cities)}.",
+            f"Distance credited: {job.distance_mi:.0f} miles.",
+            cargo_condition + ".",
+            f"Fuel remaining: {d.truck.fuel_fraction * 100:.0f} percent.",
+            f"Truck damage now: {d.truck.damage_pct:.0f} percent.",
+            *career_lines,
         ]
         self._announcements = announcements
 
@@ -2506,38 +2497,18 @@ class ArrivalState(MenuState):
 
     def announce_entry(self) -> None:
         self.ctx.say(
-            f"{self._screen_title()}. {self.current_text()} "
-            "Right arrow for more settlement details.",
+            f"{self.title}. {self.current_text()}",
             interrupt=False,
         )
 
     def build_items(self) -> list[MenuItem]:
-        _name, lines = self.summary_screens[self.screen_index]
         items = [
             MenuItem(line, lambda line=line: self.ctx.say(line),
                      help="Repeat this settlement line.")
-            for line in lines
+            for line in self.summary_lines
         ]
         items.append(MenuItem("Continue to " + self.terminal.name, self._continue))
         return items
-
-    def _screen_title(self) -> str:
-        name, _lines = self.summary_screens[self.screen_index]
-        return f"Delivery complete - {name} ({self.screen_index + 1}/{len(self.summary_screens)})"
-
-    def handle_event(self, event: pygame.event.Event) -> None:
-        if event.type == pygame.KEYDOWN and event.key == pygame.K_RIGHT:
-            self._change_screen(1)
-        elif event.type == pygame.KEYDOWN and event.key == pygame.K_LEFT:
-            self._change_screen(-1)
-        else:
-            super().handle_event(event)
-
-    def _change_screen(self, direction: int) -> None:
-        self.screen_index = (self.screen_index + direction) % len(self.summary_screens)
-        self.ctx.audio.play("ui/menu_move")
-        self.refresh(keep_index=False)
-        self.ctx.say(f"{self._screen_title()}. {self.current_text()}")
 
     def go_back(self) -> None:
         self._continue()
@@ -2548,8 +2519,7 @@ class ArrivalState(MenuState):
         self.ctx.replace_state(CityMenuState(self.ctx))
 
     def lines(self) -> list[str]:
-        name, lines = self.summary_screens[self.screen_index]
-        return [f"{self.title} - {name}", ""] + lines + [""] + [
+        return [self.title, ""] + self.summary_lines + [""] + [
             ("> " if i == self.index else "  ") + item.text
             for i, item in enumerate(self.items)
         ]
