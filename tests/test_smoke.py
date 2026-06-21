@@ -142,7 +142,14 @@ def test_full_game_flow_headless(monkeypatch):
         driving.trip._inspection_check_mi = 1e9
         driving.trip.traffic_leads = []
 
-        for _frame in range(60 * 60 * 40):
+        # The dispatch board's shortest unlocked job varies run to run, so a
+        # flat frame budget flaked when the only short job was still long
+        # enough to outlast it. Size the ceiling to this trip's distance with
+        # a conservative crawl-speed floor; the loop still breaks the moment
+        # the trip finishes, so normal runs cost the same.
+        crawl_mph = 15.0
+        max_frames = int(driving.trip.total_miles / crawl_mph * 3600 * 60) + 60 * 60
+        for _frame in range(max_frames):
             limit_mph, _reason = driving.trip.speed_limit_at(driving.trip.position_mi)
             target_mph = max(25.0, limit_mph + 5.0)
             if driving.truck.speed_mph > target_mph:
@@ -163,6 +170,10 @@ def test_full_game_flow_headless(monkeypatch):
                 driving.truck.velocity_mps = 0.0
                 driving._handle_arrival_gate()
                 break
+        else:  # never hit trip.finished -- a real stall, not just a tight cap
+            raise AssertionError(
+                f"delivery never finished in {max_frames} frames: "
+                f"{driving.trip.position_mi:.1f}/{driving.trip.total_miles:.1f} mi")
         assert isinstance(app.state, FacilityArrivalState)
         app.state.handle_event(key_event(pygame.K_RETURN))
         assert isinstance(app.state, ArrivalState)
