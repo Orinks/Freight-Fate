@@ -54,6 +54,18 @@ def quiet_trip(driving):
     driving.trip.traffic_leads = []
 
 
+def open_status_screen(app, label):
+    """From the open driving status picker, open a named screen submenu."""
+    from freight_fate.states.driving import DrivingStatusScreenState
+
+    picker = app.state
+    while picker.items[picker.index].text != label:
+        picker.handle_event(key_event(pygame.K_DOWN))
+    picker.handle_event(key_event(pygame.K_RETURN))
+    assert isinstance(app.state, DrivingStatusScreenState)
+    return app.state
+
+
 def test_trip_event_sounds_use_contextual_cues():
     from freight_fate.sim.trip import TripEvent, TripEventKind, Zone
     from freight_fate.states.driving import _route_event_sound
@@ -298,6 +310,7 @@ def test_air_brake_help_and_status_are_spoken(monkeypatch):
 
         driving.handle_event(key_event(pygame.K_TAB))
         assert isinstance(app.state, DrivingStatusState)
+        open_status_screen(app, "Route")
         status_lines = [item.text for item in app.state.items]
         air_status = next(line for line in status_lines if line.startswith("Air brakes:"))
         assert "primary 55 psi" in air_status
@@ -308,19 +321,20 @@ def test_air_brake_help_and_status_are_spoken(monkeypatch):
         assert "brakes cool" in air_status
         assert any(line.startswith("Weather:") for line in status_lines)
 
-        app.state.handle_event(key_event(pygame.K_RIGHT))
-        assert app.state.screen_index == 1
+        app.state.handle_event(key_event(pygame.K_ESCAPE))  # back to the screen picker
+        open_status_screen(app, "Driver")
         driver_lines = [item.text for item in app.state.items]
         assert any(line.startswith("Driver:") for line in driver_lines)
         assert any(line.startswith("Hours:") for line in driver_lines)
 
-        app.state.handle_event(key_event(pygame.K_RIGHT))
-        assert app.state.screen_index == 2
+        app.state.handle_event(key_event(pygame.K_ESCAPE))
+        open_status_screen(app, "Map")
         map_lines = [item.text for item in app.state.items]
         assert any(line.startswith("Route:") for line in map_lines)
         assert any("offers" in line for line in map_lines)
 
-        app.state.handle_event(key_event(pygame.K_ESCAPE))
+        app.state.handle_event(key_event(pygame.K_ESCAPE))  # screen -> picker
+        app.state.handle_event(key_event(pygame.K_ESCAPE))  # picker -> driving
         assert isinstance(app.state, DrivingState)
         assert spoken[-1] == "Back to driving."
 
@@ -577,7 +591,7 @@ def test_status_map_screen_describes_source_backed_poi_services():
     from freight_fate.app import App
     from freight_fate.models.jobs import CARGO_CATALOG, Job
     from freight_fate.models.profile import Profile
-    from freight_fate.states.driving import DrivingState, DrivingStatusState
+    from freight_fate.states.driving import DrivingState, DrivingStatusScreenState
 
     app = App()
     try:
@@ -598,9 +612,8 @@ def test_status_map_screen_describes_source_backed_poi_services():
         route = app.ctx.world.route_from_cities(["New York", "Philadelphia"])
         driving = DrivingState(app.ctx, job, route, phase="delivery")
         quiet_trip(driving)
-        state = DrivingStatusState(app.ctx, driving)
-        state.screen_index = 2
-        app.push_state(state)
+        state = DrivingStatusScreenState(app.ctx, driving, "map")
+        state.items = state.build_items()
 
         text = " ".join(item.text for item in state.items)
         assert "offers" in text
