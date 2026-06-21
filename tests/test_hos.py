@@ -902,16 +902,16 @@ def test_settings_menu_f1_has_help_for_every_item():
         for i, item in enumerate(picker.items):
             picker.index = i
             text = picker.current_help()
-            assert item.text in text or item.help
-            assert len(text) > len(picker.intro_help)
+            assert text == (item.help or f"{item.text}.")
+            assert picker.intro_help not in text
         for category in ("gameplay", "audio", "speech", "updates"):
             cat = SettingsCategoryState(app.ctx, category)
             cat.items = cat.build_items()
             for i, item in enumerate(cat.items):
                 cat.index = i
                 text = cat.current_help()
-                assert item.text in text or item.help
-                assert len(text) > len(cat.intro_help)
+                assert text == (item.help or f"{item.text}.")
+                assert cat.intro_help not in text
     finally:
         app.shutdown()
 

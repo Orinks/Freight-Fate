@@ -57,20 +57,27 @@ class Upgrade:
 UPGRADE_CATALOG: dict[str, Upgrade] = {
     "engine_tune": Upgrade(
         "engine_tune", "Engine tune",
-        "Ten percent more torque per tier. Two tiers available.",
+        "Gives the truck more pulling power. It helps with heavy freight, "
+        "hill climbs, mountain grades, and starting from a stop with a load. "
+        "Buy it when heavy loads and steep routes feel sluggish.",
         (12_000.0, 26_000.0)),
     "aero_kit": Upgrade(
         "aero_kit", "Aerodynamic kit",
-        "Roof fairing and side skirts cut drag twelve percent, "
-        "saving fuel at highway speed.",
+        "Makes the truck burn less fuel at highway speed. It does not add "
+        "more fuel capacity; it makes the same tank last longer. Buy it to "
+        "save diesel money over long highway miles.",
         (9_000.0,)),
     "long_range_tank": Upgrade(
         "long_range_tank", "Long-range tank",
-        "Adds fifty gallons of fuel capacity.",
+        "Adds fifty gallons of fuel capacity. It does not make the truck more "
+        "efficient; it lets you carry more fuel. Buy it for more distance "
+        "between fuel stops and more route flexibility.",
         (7_500.0,)),
     "reinforced_brakes": Upgrade(
         "reinforced_brakes", "Reinforced brakes",
-        "High-temperature linings resist brake fade on long descents.",
+        "Keeps braking power strong for longer when the brakes get hot. It "
+        "helps on mountain descents, with heavy freight, and during emergency "
+        "stops. Buy it when downhill control matters more than speed or range.",
         (6_500.0,)),
 }
 

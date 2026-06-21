@@ -185,6 +185,12 @@ def test_how_to_play_documents_new_gameplay_systems():
     assert "routes with enough stops" in help_text
     assert "refrigerated, heavy-haul, and high-value freight" in help_text
     assert "full tank or full repair" in help_text
+    assert "engine tune gives more pulling power" in help_text
+    assert "aerodynamic kit burns less fuel" in help_text
+    assert "same tank, fewer gallons per mile" in help_text
+    assert "long-range tank carries fifty more gallons" in help_text
+    assert "more fuel onboard, not better efficiency" in help_text
+    assert "emergency stops" in help_text
     assert "emergency shoulder sleep" in help_text
     assert "resets your legal clock but leaves fatigue" in help_text
     assert "parking ticket or minor damage" in help_text

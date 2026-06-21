@@ -321,6 +321,34 @@ def test_upgrades_are_money_gated():
 
 
 @pytest.mark.smoke
+def test_upgrade_f1_help_explains_player_benefits():
+    from freight_fate.app import App
+    from freight_fate.models.profile import Profile
+    from freight_fate.states.city import UpgradeShopState
+
+    app = App()
+    try:
+        app.ctx.profile = Profile(name="Helper")
+        app.push_state(UpgradeShopState(app.ctx))
+        help_by_label = {}
+        for item in app.state.items:
+            label = item.text.split(":", 1)[0].split(",", 1)[0].lower()
+            help_by_label[label] = item.help.lower()
+
+        assert "more pulling power" in help_by_label["engine tune"]
+        assert "heavy freight" in help_by_label["engine tune"]
+        assert "burn less fuel at highway speed" in help_by_label["aerodynamic kit"]
+        assert "same tank last longer" in help_by_label["aerodynamic kit"]
+        assert "fifty gallons" in help_by_label["long-range tank"]
+        assert "carry more fuel" in help_by_label["long-range tank"]
+        assert "more distance between fuel stops" in help_by_label["long-range tank"]
+        assert "emergency stops" in help_by_label["reinforced brakes"]
+        assert "downhill control" in help_by_label["reinforced brakes"]
+    finally:
+        app.shutdown()
+
+
+@pytest.mark.smoke
 def test_pause_and_abandon_returns_to_city():
     from freight_fate.app import App
     from freight_fate.states.city import CityMenuState, PickupFacilityState, RouteSelectState
