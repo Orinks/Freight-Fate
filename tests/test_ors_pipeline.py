@@ -94,6 +94,35 @@ def test_has_tollway_false_when_no_toll_segments():
     assert enrich_routes.parse_ors_route(payload)["has_tollway"] is False
 
 
+def test_grade_segments_from_samples_keeps_up_and_down_structure():
+    at = [0.0, 20.0, 40.0, 60.0, 80.0]
+    samples = [{"at_mi": m, "lat": 40.0, "lon": -100.0} for m in at]
+    elevations = [1000.0, 6000.0, 6050.0, 1000.0, 1010.0]  # climb, flat, drop, flat
+    leg = {"miles": 80.0, "terrain": "flat", "from": "A", "to": "B"}
+    segs = enrich_routes.grade_segments_from_samples(samples, elevations, leg)
+    assert len(segs) >= 3
+    terrains = {s["terrain"] for s in segs}
+    assert "mountain" in terrains and "flat" in terrains
+    assert segs[0]["start_mi"] == 0.0 and segs[-1]["end_mi"] == 80.0
+    for a, b in zip(segs, segs[1:], strict=False):  # contiguous coverage
+        assert a["end_mi"] == b["start_mi"]
+    assert all(-15.0 <= s["avg_grade_pct"] <= 15.0 for s in segs)
+
+
+def test_grade_segments_from_samples_single_when_uniform():
+    samples = [{"at_mi": m, "lat": 40.0, "lon": -100.0} for m in (0.0, 30.0, 60.0, 90.0)]
+    elevations = [500.0, 505.0, 500.0, 505.0]  # all flat
+    leg = {"miles": 90.0, "terrain": "flat", "from": "A", "to": "B"}
+    segs = enrich_routes.grade_segments_from_samples(samples, elevations, leg)
+    assert len(segs) == 1 and segs[0]["terrain"] == "flat"
+
+
+def test_ors_sample_count_scales_with_distance():
+    assert enrich_routes._ors_sample_count(40) == 5      # short legs get a floor
+    assert enrich_routes._ors_sample_count(490) == 18     # ~1 per 30 mi
+    assert enrich_routes._ors_sample_count(2000) == 25    # capped
+
+
 def test_parse_ors_route_rejects_empty_response():
     with pytest.raises(RuntimeError):
         enrich_routes.parse_ors_route({"features": []})

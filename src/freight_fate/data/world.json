@@ -1875,19 +1875,54 @@
             "lon": -75.16521
           },
           {
-            "at_mi": 76.2,
-            "lat": 40.22695,
-            "lon": -76.38844
+            "at_mi": 27.7,
+            "lat": 40.07133,
+            "lon": -75.55997
           },
           {
-            "at_mi": 152.5,
-            "lat": 40.12999,
-            "lon": -77.74318
+            "at_mi": 55.5,
+            "lat": 40.19745,
+            "lon": -76.00822
           },
           {
-            "at_mi": 228.8,
-            "lat": 39.98383,
-            "lon": -78.95355
+            "at_mi": 83.2,
+            "lat": 40.22656,
+            "lon": -76.50812
+          },
+          {
+            "at_mi": 110.9,
+            "lat": 40.19635,
+            "lon": -77.01712
+          },
+          {
+            "at_mi": 138.6,
+            "lat": 40.179,
+            "lon": -77.51602
+          },
+          {
+            "at_mi": 166.4,
+            "lat": 40.04937,
+            "lon": -77.96116
+          },
+          {
+            "at_mi": 194.1,
+            "lat": 40.00525,
+            "lon": -78.41378
+          },
+          {
+            "at_mi": 221.8,
+            "lat": 39.96348,
+            "lon": -78.83116
+          },
+          {
+            "at_mi": 249.5,
+            "lat": 40.11862,
+            "lon": -79.27007
+          },
+          {
+            "at_mi": 277.3,
+            "lat": 40.28926,
+            "lon": -79.66953
           },
           {
             "at_mi": 305.0,
@@ -1902,18 +1937,53 @@
             "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
           },
           {
-            "at_mi": 76.2,
-            "elevation_ft": 502.0,
+            "at_mi": 27.7,
+            "elevation_ft": 562.0,
             "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
           },
           {
-            "at_mi": 152.5,
+            "at_mi": 55.5,
+            "elevation_ft": 485.6,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 83.2,
+            "elevation_ft": 636.5,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 110.9,
+            "elevation_ft": 471.8,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 138.6,
+            "elevation_ft": 643.0,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 166.4,
             "elevation_ft": 856.3,
             "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
           },
           {
-            "at_mi": 228.8,
-            "elevation_ft": 2326.1,
+            "at_mi": 194.1,
+            "elevation_ft": 1100.7,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 221.8,
+            "elevation_ft": 2229.3,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 249.5,
+            "elevation_ft": 2094.8,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 277.3,
+            "elevation_ft": 1056.4,
             "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
           },
           {
@@ -1927,8 +1997,8 @@
             "start_mi": 0.0,
             "end_mi": 305.0,
             "avg_grade_pct": 0.04,
-            "terrain": "mountain",
-            "source": "Open-Meteo elevation samples summarized for corridor terrain."
+            "terrain": "flat",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
           }
         ],
         "checkpoints": [
@@ -1969,7 +2039,8 @@
             "estimated": true,
             "source": "Pennsylvania Turnpike Commission toll calculator, accessed 2026-06-16; estimated 5-axle commercial vehicle cross-state toll: https://www.paturnpike.com/toll-calculator"
           }
-        ]
+        ],
+        "tollway_detected": true
       },
       "stops": [
         {
@@ -3811,9 +3882,44 @@
             "lon": -104.99029
           },
           {
-            "at_mi": 130.0,
-            "lat": 40.29237,
-            "lon": -106.48273
+            "at_mi": 28.9,
+            "lat": 39.73801,
+            "lon": -105.43126
+          },
+          {
+            "at_mi": 57.8,
+            "lat": 39.69898,
+            "lon": -105.86846
+          },
+          {
+            "at_mi": 86.7,
+            "lat": 39.80706,
+            "lon": -106.1872
+          },
+          {
+            "at_mi": 115.6,
+            "lat": 40.11853,
+            "lon": -106.42908
+          },
+          {
+            "at_mi": 144.4,
+            "lat": 40.38992,
+            "lon": -106.64755
+          },
+          {
+            "at_mi": 173.3,
+            "lat": 40.48953,
+            "lon": -106.96121
+          },
+          {
+            "at_mi": 202.2,
+            "lat": 40.52783,
+            "lon": -107.43074
+          },
+          {
+            "at_mi": 231.1,
+            "lat": 40.52435,
+            "lon": -107.91227
           },
           {
             "at_mi": 260.0,
@@ -3821,9 +3927,44 @@
             "lon": -108.34833
           },
           {
-            "at_mi": 390.0,
-            "lat": 40.15841,
-            "lon": -110.26155
+            "at_mi": 288.9,
+            "lat": 40.25121,
+            "lon": -108.7921
+          },
+          {
+            "at_mi": 317.8,
+            "lat": 40.32846,
+            "lon": -109.27459
+          },
+          {
+            "at_mi": 346.7,
+            "lat": 40.35063,
+            "lon": -109.62322
+          },
+          {
+            "at_mi": 375.6,
+            "lat": 40.23299,
+            "lon": -110.06742
+          },
+          {
+            "at_mi": 404.4,
+            "lat": 40.17619,
+            "lon": -110.50757
+          },
+          {
+            "at_mi": 433.3,
+            "lat": 40.20098,
+            "lon": -110.98845
+          },
+          {
+            "at_mi": 462.2,
+            "lat": 40.40438,
+            "lon": -111.30952
+          },
+          {
+            "at_mi": 491.1,
+            "lat": 40.72362,
+            "lon": -111.5151
           },
           {
             "at_mi": 520.0,
@@ -3838,8 +3979,43 @@
             "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
           },
           {
-            "at_mi": 130.0,
-            "elevation_ft": 7919.9,
+            "at_mi": 28.9,
+            "elevation_ft": 7490.5,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 57.8,
+            "elevation_ft": 10446.2,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 86.7,
+            "elevation_ft": 8187.3,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 115.6,
+            "elevation_ft": 7631.2,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 144.4,
+            "elevation_ft": 9534.8,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 173.3,
+            "elevation_ft": 6555.1,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 202.2,
+            "elevation_ft": 6253.3,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 231.1,
+            "elevation_ft": 6114.5,
             "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
           },
           {
@@ -3848,8 +4024,43 @@
             "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
           },
           {
-            "at_mi": 390.0,
-            "elevation_ft": 5387.1,
+            "at_mi": 288.9,
+            "elevation_ft": 5870.4,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 317.8,
+            "elevation_ft": 5183.7,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 346.7,
+            "elevation_ft": 5095.1,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 375.6,
+            "elevation_ft": 5344.5,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 404.4,
+            "elevation_ft": 5843.2,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 433.3,
+            "elevation_ft": 7426.2,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 462.2,
+            "elevation_ft": 6532.2,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 491.1,
+            "elevation_ft": 6397.6,
             "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
           },
           {
@@ -3861,10 +4072,52 @@
         "grade_segments": [
           {
             "start_mi": 0.0,
+            "end_mi": 86.7,
+            "avg_grade_pct": 0.64,
+            "terrain": "hills",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          },
+          {
+            "start_mi": 86.7,
+            "end_mi": 115.6,
+            "avg_grade_pct": -0.36,
+            "terrain": "flat",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          },
+          {
+            "start_mi": 115.6,
+            "end_mi": 173.3,
+            "avg_grade_pct": -0.35,
+            "terrain": "hills",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          },
+          {
+            "start_mi": 173.3,
+            "end_mi": 404.4,
+            "avg_grade_pct": -0.06,
+            "terrain": "flat",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          },
+          {
+            "start_mi": 404.4,
+            "end_mi": 433.3,
+            "avg_grade_pct": 1.04,
+            "terrain": "hills",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          },
+          {
+            "start_mi": 433.3,
+            "end_mi": 491.1,
+            "avg_grade_pct": -0.34,
+            "terrain": "flat",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          },
+          {
+            "start_mi": 491.1,
             "end_mi": 520.0,
-            "avg_grade_pct": -0.04,
-            "terrain": "mountain",
-            "source": "Open-Meteo elevation samples summarized for corridor terrain."
+            "avg_grade_pct": -1.38,
+            "terrain": "hills",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
           }
         ],
         "state_crossings": [
@@ -3911,7 +4164,8 @@
             "state": "Utah",
             "miles": 145.0
           }
-        ]
+        ],
+        "tollway_detected": false
       }
     },
     {
@@ -18648,7 +18902,7 @@
             "end_mi": 60.0,
             "avg_grade_pct": -0.02,
             "terrain": "flat",
-            "source": "Open-Meteo elevation samples summarized for corridor terrain."
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
           }
         ],
         "checkpoints": [
@@ -18680,7 +18934,8 @@
             "source": "Computed from OSRM route geometry and public U.S. state boundary GeoJSON."
           }
         ],
-        "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
+        "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
+        "tollway_detected": false
       },
       "stops": [
         {
@@ -18777,7 +19032,7 @@
             "end_mi": 116.0,
             "avg_grade_pct": -0.01,
             "terrain": "flat",
-            "source": "Open-Meteo elevation samples summarized for corridor terrain."
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
           }
         ],
         "checkpoints": [
@@ -18796,7 +19051,8 @@
             "miles": 116.0
           }
         ],
-        "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
+        "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
+        "tollway_detected": true
       },
       "stops": [
         {
@@ -18893,7 +19149,7 @@
             "end_mi": 96.0,
             "avg_grade_pct": 0.04,
             "terrain": "flat",
-            "source": "Open-Meteo elevation samples summarized for corridor terrain."
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
           }
         ],
         "checkpoints": [
@@ -18925,7 +19181,8 @@
             "source": "Computed from OSRM route geometry and public U.S. state boundary GeoJSON."
           }
         ],
-        "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
+        "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
+        "tollway_detected": false
       },
       "stops": [
         {
@@ -18969,19 +19226,24 @@
             "lon": -86.15827
           },
           {
-            "at_mi": 31.2,
-            "lat": 39.99173,
-            "lon": -85.79196
+            "at_mi": 25.0,
+            "lat": 39.99089,
+            "lon": -85.91488
           },
           {
-            "at_mi": 62.5,
-            "lat": 40.34486,
-            "lon": -85.55866
+            "at_mi": 50.0,
+            "lat": 40.1663,
+            "lon": -85.56663
           },
           {
-            "at_mi": 93.8,
-            "lat": 40.77638,
-            "lon": -85.38558
+            "at_mi": 75.0,
+            "lat": 40.53622,
+            "lon": -85.55026
+          },
+          {
+            "at_mi": 100.0,
+            "lat": 40.8553,
+            "lon": -85.34454
           },
           {
             "at_mi": 125.0,
@@ -18996,18 +19258,23 @@
             "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
           },
           {
-            "at_mi": 31.2,
+            "at_mi": 25.0,
             "elevation_ft": 846.5,
             "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
           },
           {
-            "at_mi": 62.5,
-            "elevation_ft": 885.8,
+            "at_mi": 50.0,
+            "elevation_ft": 918.6,
             "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
           },
           {
-            "at_mi": 93.8,
-            "elevation_ft": 836.6,
+            "at_mi": 75.0,
+            "elevation_ft": 872.7,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 100.0,
+            "elevation_ft": 803.8,
             "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
           },
           {
@@ -19022,7 +19289,7 @@
             "end_mi": 125.0,
             "avg_grade_pct": 0.0,
             "terrain": "flat",
-            "source": "Open-Meteo elevation samples summarized for corridor terrain."
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
           }
         ],
         "checkpoints": [
@@ -19041,7 +19308,8 @@
             "miles": 125.0
           }
         ],
-        "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
+        "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
+        "tollway_detected": false
       },
       "stops": [
         {

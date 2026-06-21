@@ -82,6 +82,10 @@ ORS_CORRIDOR_SOURCE = (
     "elevation over OpenStreetMap, with Census/OpenStreetMap state context and "
     "curated corridor POIs checked in for offline runtime use."
 )
+ORS_GRADE_SOURCE = (
+    "OpenRouteService route elevation profile segmented by terrain "
+    "(development-time)."
+)
 HIGH_PRIORITY_REMAINING_CORRIDORS = (
     {
         "from": "Philadelphia",
@@ -324,9 +328,12 @@ def enrich_all_routes(
             if engine == "ors":
                 parsed = _cached_ors_route(data, leg, cache_dir, rate_limit_s, api_key)
                 geometry = parsed["coordinates"]
-                samples, elevations = ors_corridor_samples(parsed, float(leg["miles"]))
+                samples, elevations = ors_corridor_samples(
+                    parsed, float(leg["miles"]),
+                    sample_count=_ors_sample_count(float(leg["miles"])))
                 elevation_source = ORS_ELEVATION_SOURCE
                 corridor_source = ORS_CORRIDOR_SOURCE
+                corridor["tollway_detected"] = parsed["has_tollway"]
             else:
                 route = _cached_osrm_route(data, leg, cache_dir, rate_limit_s)
                 geometry = route["geometry"]["coordinates"]
@@ -351,7 +358,10 @@ def enrich_all_routes(
                     for point, elevation in zip(samples, elevations, strict=True)
                 ]
             if "grade_segments" in needs:
-                corridor["grade_segments"] = _grade_segments(samples, elevations, leg)
+                corridor["grade_segments"] = (
+                    grade_segments_from_samples(samples, elevations, leg)
+                    if engine == "ors"
+                    else _grade_segments(samples, elevations, leg))
             if "checkpoints" in needs:
                 corridor["checkpoints"] = _checkpoints(data, leg, samples)
             if "state_miles" in needs or "state_crossings" in needs:
@@ -438,15 +448,19 @@ def refresh_corridors(
         miles = float(leg["miles"])
         if engine == "ors":
             parsed = _cached_ors_route(data, leg, cache_dir, rate_limit_s, api_key)
-            samples, elevations = ors_corridor_samples(parsed, miles)
+            samples, elevations = ors_corridor_samples(
+                parsed, miles, sample_count=_ors_sample_count(miles))
             elevation_source = ORS_ELEVATION_SOURCE
             corridor_source = ORS_CORRIDOR_SOURCE
+            corridor["tollway_detected"] = parsed["has_tollway"]
+            grade_segments = grade_segments_from_samples(samples, elevations, leg)
         else:
             route = _cached_osrm_route(data, leg, cache_dir, rate_limit_s)
             samples = _sample_geometry(route["geometry"]["coordinates"], miles)
             elevations = _cached_elevations(samples, cache_dir, rate_limit_s)
             elevation_source = ELEVATION_SOURCE
             corridor_source = CORRIDOR_SOURCE
+            grade_segments = _grade_segments(samples, elevations, leg)
         corridor["route_points"] = [
             {"at_mi": round(p["at_mi"], 1),
              "lat": round(p["lat"], 5),
@@ -459,7 +473,7 @@ def refresh_corridors(
              "source": elevation_source}
             for p, e in zip(samples, elevations, strict=True)
         ]
-        corridor["grade_segments"] = _grade_segments(samples, elevations, leg)
+        corridor["grade_segments"] = grade_segments
         corridor["source"] = corridor_source
         refreshed.append({"from": leg["from"], "to": leg["to"],
                           "engine": engine, "points": len(samples)})
@@ -1043,9 +1057,11 @@ def coverage_report(data: dict[str, Any]) -> dict[str, Any]:
         "fuel_poi_support": 0,
         "toll_events": 0,
         "toll_legs": 0,
+        "toll_review_pending": 0,
         "playable": 0,
     }
     leg_reports = []
+    toll_review: list[dict[str, Any]] = []
     for leg in legs:
         corridor = leg.get("corridor", {})
         stops = leg.get("stops", [])
@@ -1099,6 +1115,14 @@ def coverage_report(data: dict[str, Any]) -> dict[str, Any]:
         toll_events = corridor.get("toll_events", [])
         totals["toll_events"] += len(toll_events)
         totals["toll_legs"] += int(bool(toll_events))
+        if corridor.get("tollway_detected") and not toll_events:
+            totals["toll_review_pending"] += 1
+            toll_review.append({
+                "from": leg["from"],
+                "to": leg["to"],
+                "highway": leg["highway"],
+                "note": "ORS flags a tollway but no toll_events are curated.",
+            })
         totals["curated_pois"] += len(curated_stops)
         totals["placeholder_pois"] += len(placeholder_stops)
         totals["legs_with_curated_pois"] += int(bool(curated_stops))
@@ -1176,11 +1200,14 @@ def coverage_report(data: dict[str, Any]) -> dict[str, Any]:
             "legacy_full_graph_available_for_old_saves": True,
         },
         "current_batch_notes": [
-            "Full-network route geometry, elevation, state context, and "
-            "source-backed truck-stop coverage are checked in for the current "
-            "106-leg network. Placeholder POIs remain quarantined by the "
-            "coverage contract and must not count for future dispatch lanes.",
+            "Route geometry, elevation, state context, and source-backed "
+            "truck-stop coverage are checked in for the current "
+            f"{len(legs)}-leg network. Geometry and elevation come from OSRM or "
+            "the OpenRouteService driving-hgv route (elevation inline); "
+            "placeholder POIs remain quarantined by the coverage contract and "
+            "must not count for dispatch lanes.",
         ],
+        "toll_review": toll_review,
         "high_priority_remaining_corridors": _priority_status(leg_reports),
         "totals": totals,
         "percentages": percentages,
@@ -1537,6 +1564,70 @@ def ors_corridor_samples(
     samples[0]["at_mi"] = 0.0
     samples[-1]["at_mi"] = leg_miles
     return samples, sample_elevations
+
+
+def _ors_sample_count(miles: float) -> int:
+    """Corridor sample count for ORS legs.
+
+    ORS returns elevation inline (no per-point Open-Meteo call), so denser
+    sampling is cheap and gives real terrain. Roughly one sample per 30 miles,
+    clamped so short legs still get a usable profile and long legs stay compact.
+    """
+    return max(5, min(25, int(miles // 30) + 2))
+
+
+def _terrain_for_grade(abs_grade_pct: float) -> str:
+    if abs_grade_pct > 3.0:
+        return "mountain"
+    if abs_grade_pct > 0.8:
+        return "hills"
+    return "flat"
+
+
+def grade_segments_from_samples(
+    samples: list[dict[str, float]],
+    elevations_ft: list[float],
+    leg: dict[str, Any],
+) -> list[dict[str, Any]]:
+    """Multiple grade segments grouping consecutive same-terrain intervals.
+
+    Unlike the single averaged segment, this keeps real up/down structure (a
+    mountain leg shows its climbs and descents instead of washing out to ~0%).
+    Falls back to the single-segment builder when samples are too sparse.
+    """
+    if len(samples) < 3:
+        return _grade_segments(samples, elevations_ft, leg)
+    intervals: list[tuple[float, float, float, str]] = []
+    for start, end, elev_a, elev_b in zip(
+        samples, samples[1:], elevations_ft, elevations_ft[1:], strict=False
+    ):
+        run_mi = max(0.1, end["at_mi"] - start["at_mi"])
+        grade = (elev_b - elev_a) / (run_mi * 5280.0) * 100.0
+        intervals.append((start["at_mi"], end["at_mi"], grade,
+                          _terrain_for_grade(abs(grade))))
+    segments: list[dict[str, Any]] = []
+    seg_start, seg_end, grades, terrain = (
+        intervals[0][0], intervals[0][1], [intervals[0][2]], intervals[0][3])
+    for start, end, grade, kind in intervals[1:]:
+        if kind == terrain:
+            seg_end = end
+            grades.append(grade)
+        else:
+            segments.append(_grade_segment(seg_start, seg_end, grades, terrain))
+            seg_start, seg_end, grades, terrain = start, end, [grade], kind
+    segments.append(_grade_segment(seg_start, seg_end, grades, terrain))
+    return segments
+
+
+def _grade_segment(start_mi: float, end_mi: float, grades: list[float],
+                   terrain: str) -> dict[str, Any]:
+    return {
+        "start_mi": round(start_mi, 1),
+        "end_mi": round(end_mi, 1),
+        "avg_grade_pct": round(sum(grades) / len(grades), 2),
+        "terrain": terrain,
+        "source": ORS_GRADE_SOURCE,
+    }
 
 
 def _ors_compare(
