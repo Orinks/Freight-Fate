@@ -670,17 +670,18 @@ def test_toll_route_delivery_settlement_records_expense(monkeypatch):
         assert "Driver-responsibility charges 0 dollars" in text
         assert "Net driver pay 2,875 dollars" in text
 
-        assert app.state.screen_index == 0
-        assert app.state.lines()[0] == "Delivery complete - Overview"
+        assert not hasattr(app.state, "screen_index")
+        assert app.state.lines()[0] == "Delivery complete"
+        summary_lines = [item.text for item in app.state.items]
+        assert any(line.startswith("Delivered 18 tons of electronics") for line in summary_lines)
+        assert any(line.startswith("Gross pay: 2,875 dollars") for line in summary_lines)
+        assert any("Carrier-paid or reimbursed charges" in line for line in summary_lines)
+        assert any(line.startswith("Route: New York to Philadelphia") for line in summary_lines)
+
+        old_index = app.state.index
         app.state.handle_event(key_event(pygame.K_RIGHT))
-        assert app.state.screen_index == 1
-        pay_lines = [item.text for item in app.state.items]
-        assert any(line.startswith("Gross pay: 2,875 dollars") for line in pay_lines)
-        assert any("Carrier-paid or reimbursed charges" in line for line in pay_lines)
-        app.state.handle_event(key_event(pygame.K_RIGHT))
-        assert app.state.screen_index == 2
-        route_lines = [item.text for item in app.state.items]
-        assert any(line.startswith("Route: New York to Philadelphia") for line in route_lines)
+        assert app.state.index == old_index
+        assert [item.text for item in app.state.items] == summary_lines
     finally:
         app.shutdown()
 
