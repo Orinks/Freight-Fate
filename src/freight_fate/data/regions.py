@@ -76,6 +76,7 @@ STATE_REGION: dict[str, str] = {
     "New Jersey": "northeast",
     "Delaware": "northeast",
     "Maryland": "northeast",
+    "District of Columbia": "northeast",
     # Appalachia
     "West Virginia": "appalachia",
     # Great Lakes / industrial Midwest
