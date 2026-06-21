@@ -283,11 +283,39 @@ release materials and per-record source notes.
 
 Grow from 59 cities toward national coverage in staged, always-green batches.
 
+### Data sources: which cities, which structures
+
+ORS connects nodes but does not choose them, and the current ORS `waycategory`
+extra only flags tollways, fords, ferries, steps, and highways — not bridges or
+tunnels. Those gaps are filled by separate sources:
+
+- **New city nodes:** a populated-places dataset supplies name, state,
+  coordinates, and population so the next tier of US metros can be picked and
+  ranked. Preferred: GeoNames (free, CC BY; the `cities5000`/`cities15000` or
+  `US.txt` dumps include population and admin1/state). Alternative: the Census
+  Gazetteer "Places" files (Census is already used for state boundaries) joined
+  with Census population estimates. Rank candidates by freight importance using
+  FAF/BTS (already the market-model guidance), not raw population alone, so the
+  map gains freight hubs (a Memphis) rather than just large suburbs. The
+  build-time region classifier (`data/regions.py`) then assigns each new node's
+  region from its coordinates, and the stored-equals-derived test keeps it
+  honest.
+- **Bridges, tunnels, and named crossings:** OpenStreetMap via Overpass
+  (`bridge=yes`, `tunnel=yes`, named structures), projected onto the checked-in
+  route geometry the same way POIs and checkpoints are. Curate notable named
+  structures (for example the Eisenhower Tunnel or the Chesapeake Bay Bridge) as
+  route checkpoints/events with game-authored spoken cues; tolled crossings
+  cross-reference toll-authority data into `toll_events`, and pass/tunnel summit
+  context comes from the elevation source. ORS extras are not a reliable source
+  for these.
+
 ### Bundled tier (static, deterministic)
 
-1. Expand the node set in stages (for example 59 -> ~150 -> ~300 cities), adding
-   key interchange nodes so truck routing follows realistic corridors rather
-   than long city-to-city straight hops.
+1. Pick new nodes from GeoNames/Census (above) in stages (for example
+   59 -> ~150 -> ~300 cities), plus key interchange nodes so truck routing
+   follows realistic corridors rather than long city-to-city straight hops.
+   Choose each new node's adjacencies (nearest neighbours along real corridors)
+   before routing.
 2. Generate legs between adjacent nodes via ORS HGV, then auto-enrich each leg
    to the metadata-complete contract (route points, elevation/grade, state
    context, source-backed POIs at the required density).
@@ -295,8 +323,8 @@ Grow from 59 cities toward national coverage in staged, always-green batches.
    batch. A leg only becomes a normal dispatch lane once it passes the gate; the
    legacy/full graph stays loadable for old saves.
 4. Harvest POIs via the existing Overpass and operator-feed tooling
-   (`discover_route_pois.py`, `curate_route_pois.py`), curated into clean
-   player-facing names — no raw OSM text.
+   (`discover_route_pois.py`, `curate_route_pois.py`), and bridges/tunnels via
+   Overpass (above), curated into clean player-facing names — no raw OSM text.
 
 ### Streamed tier (optional online overlay)
 
