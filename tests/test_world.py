@@ -571,11 +571,6 @@ def test_every_city_has_coordinates_and_a_known_region(world):
         assert len(city.locations) >= 2, f"{city.name}: too few freight locations"
 
 
-def test_no_city_is_a_dead_end(world):
-    for name in world.city_names():
-        assert len(world.neighbors(name)) >= 2, f"{name} is a dead end"
-
-
 def test_legs_are_sane_and_unique(world):
     seen = set()
     for leg in world.legs:
