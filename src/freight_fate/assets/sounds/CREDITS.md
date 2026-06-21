@@ -1,16 +1,17 @@
 # Sound and Music Credits
 
-Most sound effects in this directory were procedurally
-synthesized for Freight Fate by `tools/generate_audio.py` in this repository.
-No third-party recordings or samples were used for those generated assets.
-The main menu, Open Road, and Night Haul themes are Suno remakes created by the
-project owner.
+Sound effects in this directory come from a few sources, documented per file in
+the tables below: original effects created for Freight Fate (no third-party
+recordings or samples), donated in-cab truck recordings from Darren Duff used
+for selected vehicle cues, and weather and road loops produced with ElevenLabs
+sound effects tooling. The main menu, Open Road, and Night Haul themes are Suno
+remakes created by the project owner.
 
 The default sound_lib weather loops were generated for Freight Fate with
 ElevenLabs sound effects tooling, then reviewed and selected for the in-cab
 weather mix.
 
-Procedurally generated assets are dedicated to the public domain under
+These original project sound effects are dedicated to the public domain under
 [CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/). ElevenLabs
 generated assets are original project assets subject to the applicable
 ElevenLabs terms for the generating account.
@@ -81,9 +82,3 @@ idle, start, and shutdown cues.
 | Rainy Night Miles | `music/night_rainy_miles.ogg` | Sparse rainy night drive bed |
 | Lonely Plains | `music/night_lonely_plains.ogg` | Open nighttime plains drive bed |
 | Mountain Night Pass | `music/night_mountain_pass.ogg` | Quiet mountain night drive bed |
-
-To regenerate the procedural assets from source (reproducible, seeded):
-
-```
-uv run python tools/generate_audio.py
-```

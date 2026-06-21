@@ -62,8 +62,8 @@ function guidance: https://www.fmcsa.dot.gov/hours-service/elds/eld-functions-fa
   safety evidence.
 - **Audio needed.** Siren approach/behind loops, CB radio squelch and
   chatter, an officer voice channel (the SAPI event voice fits), spike
-  strip. All synthesizable in `tools/generate_audio.py` first, replaced
-  by real recordings later.
+  strip. Added as Ogg Vorbis assets under
+  `src/freight_fate/assets/sounds/`.
 - **Open questions.** Should troopers notice damage (a visibly wrecked
   truck invites a stop)? Do warnings expire? Does reputation lower the
   ticket odds, or just the fine?
