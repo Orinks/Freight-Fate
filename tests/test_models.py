@@ -62,7 +62,7 @@ def test_northeast_short_corridor_deadline_uses_direct_route(world):
     ny_jobs = [job for job in jobs if job.destination == "New York"]
 
     assert ny_jobs
-    assert all(job.distance_mi == 97 for job in ny_jobs)
+    assert all(job.distance_mi == 94 for job in ny_jobs)
     assert all(3.0 <= job.deadline_game_h <= 4.0 for job in ny_jobs)
     assert all(job.deadline_game_h >= required_hours(job.distance_mi) * 1.2
                for job in ny_jobs)

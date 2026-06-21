@@ -107,7 +107,8 @@ def test_rookie_boards_have_rewarding_minimum_pay(world):
     for city in ["Chicago", "Atlanta", "Philadelphia", "San Antonio", "Los Angeles"]:
         for seed in range(15):
             for job in JobBoard(world, seed=seed).offers(city, set(), level=1):
-                assert job.pay >= minimum_pay_for_level(job.distance_mi, 1)
+                # pay is rounded to cents, so compare against the floor to cents
+                assert job.pay >= round(minimum_pay_for_level(job.distance_mi, 1), 2)
 
 
 def test_representative_boards_use_truck_plausible_locations(world):

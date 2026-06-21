@@ -98,7 +98,7 @@ def test_trip_uses_explicit_stop_positions(world):
         "Pilot Travel Center Remington",
         "Loves Travel Stop Lafayette",
     ]
-    assert [stop.at_mi for stop in trip.stops] == [94.0, 122.0]
+    assert [stop.at_mi for stop in trip.stops] == [93.5, 121.3]
     assert all(stop.at_mi != trip.route.miles / 2 for stop in trip.stops)
     assert all(stop.parking == "confirmed" for stop in trip.stops)
 
@@ -127,7 +127,7 @@ def test_trip_places_reverse_route_stops_from_travel_direction(world):
         "Road Ranger Waco",
         "Bell County Safety Rest Area",
     ]
-    assert [stop.at_mi for stop in trip.stops] == [57.0, 90.0, 137.0]
+    assert [round(stop.at_mi, 1) for stop in trip.stops] == [56.8, 89.7, 136.5]
 
 
 def test_zone_speed_limits_apply(world):
@@ -362,7 +362,7 @@ def test_progress_summary_mentions_highway(world):
 def test_gps_state_crossing_and_rest_stop_cues_deduplicate(world):
     trip, _truck = make_trip(world)
 
-    trip.position_mi = 31.5
+    trip.position_mi = 30.8
     advance = trip.update(0.0)
     repeat = trip.update(0.0)
 
@@ -372,14 +372,14 @@ def test_gps_state_crossing_and_rest_stop_cues_deduplicate(world):
     ]
     assert not [event for event in repeat if event.kind == TripEventKind.GPS_CUE]
 
-    trip.position_mi = 33.0
+    trip.position_mi = 32.8
     crossing = trip.update(0.0)
     assert [event.message for event in crossing
             if event.kind == TripEventKind.STATE_CROSSING] == [
         "Crossing into Indiana near the I-65 state line south of Hammond."
     ]
 
-    trip.position_mi = 121.0
+    trip.position_mi = 120.3
     rest = trip.update(0.0)
     assert any(
         event.kind == TripEventKind.GPS_CUE

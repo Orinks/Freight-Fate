@@ -151,8 +151,13 @@ def main(argv: list[str] | None = None) -> int:
                              "crossings/checkpoints. Use with --only and --write.")
     parser.add_argument("--only", default="",
                         help="Comma-separated 'From:To' legs for "
-                             "--refresh-geometry, e.g. "
+                             "--refresh-geometry / --adopt-ors-miles, e.g. "
                              "'Denver:Salt Lake City,Philadelphia:Pittsburgh'.")
+    parser.add_argument("--adopt-ors-miles", action="store_true",
+                        help="Rewrite leg mileage to the real ORS driving-hgv "
+                             "distance (rescaling corridor positions). Drives "
+                             "pay/deadlines. Needs ORS_API_KEY + tooling group; "
+                             "use with --write (and optionally --only).")
     parser.add_argument("--coverage-report", action="store_true",
                         help="Report metadata coverage for every world leg.")
     parser.add_argument("--json", action="store_true",
@@ -198,6 +203,30 @@ def main(argv: list[str] | None = None) -> int:
             WORLD_PATH.write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")
         print(json.dumps(result, indent=2, sort_keys=True) if args.json
               else format_enrichment_result(result))
+        return 0
+    if args.adopt_ors_miles:
+        api_key = ors_api_key()
+        if api_key is None:
+            raise SystemExit(
+                f"--adopt-ors-miles needs the {ORS_API_KEY_ENV} environment "
+                "variable and the tooling group (uv run --group tooling ...)."
+            )
+        result = adopt_ors_miles(
+            data,
+            cache_dir=Path(args.cache_dir),
+            rate_limit_s=args.rate_limit,
+            api_key=api_key,
+            only=_parse_only(args.only),
+        )
+        if args.write:
+            WORLD_PATH.write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")
+        if args.json:
+            print(json.dumps(result, indent=2, sort_keys=True))
+        else:
+            totals = result["coverage_totals"]
+            print(f"Adopted ORS miles for {len(result['changed'])} leg(s); "
+                  f"playable {totals['playable']}/{totals['legs']}"
+                  f"{' (written)' if args.write else ' (dry run)'}")
         return 0
     if args.refresh_geometry:
         api_key = None
@@ -482,6 +511,86 @@ def refresh_corridors(
                           "engine": engine, "points": len(samples)})
     return {"refreshed": refreshed,
             "coverage_totals": coverage_report(data)["totals"]}
+
+
+def _rescale_corridor_positions(leg: dict[str, Any], factor: float,
+                                new_miles: float) -> None:
+    """Scale every at_mi position in a leg to a new total mileage.
+
+    Keeps the corridor consistent (endpoints land exactly on 0 and new_miles)
+    and clamps interior positions strictly inside the leg so the world loader's
+    range validators still accept stops, crossings, checkpoints, and tolls.
+    """
+    corridor = leg.get("corridor", {})
+
+    def interior(value: float) -> float:
+        return max(0.1, min(round(new_miles - 0.1, 1), round(value * factor, 1)))
+
+    for endpoint_field in ("route_points", "elevation_samples"):
+        points = corridor.get(endpoint_field, [])
+        for point in points:
+            point["at_mi"] = round(min(new_miles, max(0.0, point["at_mi"] * factor)), 1)
+        if points:
+            points[0]["at_mi"] = 0.0
+            points[-1]["at_mi"] = round(new_miles, 1)
+
+    segments = corridor.get("grade_segments", [])
+    for seg in segments:
+        seg["start_mi"] = round(min(new_miles, max(0.0, seg["start_mi"] * factor)), 1)
+        seg["end_mi"] = round(min(new_miles, max(0.0, seg["end_mi"] * factor)), 1)
+        if seg["end_mi"] <= seg["start_mi"]:
+            seg["end_mi"] = round(min(new_miles, seg["start_mi"] + 0.1), 1)
+    if segments:
+        segments[0]["start_mi"] = 0.0
+        segments[-1]["end_mi"] = round(new_miles, 1)
+
+    for field in ("state_crossings", "checkpoints", "toll_events"):
+        for item in corridor.get(field, []):
+            item["at_mi"] = interior(item["at_mi"])
+    for stop in leg.get("stops", []):
+        stop["at_mi"] = interior(stop["at_mi"])
+
+    # state_miles is a per-state breakdown, not an at_mi; scale it so it still
+    # sums to the leg total, fixing rounding drift on the last entry.
+    state_miles = corridor.get("state_miles", [])
+    for entry in state_miles:
+        entry["miles"] = round(entry["miles"] * factor, 1)
+    if state_miles:
+        drift = round(new_miles - sum(e["miles"] for e in state_miles), 1)
+        state_miles[-1]["miles"] = round(state_miles[-1]["miles"] + drift, 1)
+
+
+def adopt_ors_miles(
+    data: dict[str, Any],
+    *,
+    cache_dir: Path,
+    rate_limit_s: float,
+    api_key: str | None,
+    only: set[tuple[str, str]],
+) -> dict[str, Any]:
+    """Rewrite leg mileage to the real ORS driving-hgv distance.
+
+    Leg miles drive pay and deadlines, so accurate truck distances correct the
+    economy. Every corridor at_mi position is rescaled to the new total so
+    curated stops/crossings/tolls stay valid; their lat/lon and curation are
+    otherwise preserved.
+    """
+    cache_dir.mkdir(parents=True, exist_ok=True)
+    changed: list[dict[str, Any]] = []
+    for leg in data["legs"]:
+        key = (leg["from"], leg["to"])
+        if only and key not in only and (leg["to"], leg["from"]) not in only:
+            continue
+        old_miles = float(leg["miles"])
+        parsed = _cached_ors_route(data, leg, cache_dir, rate_limit_s, api_key)
+        new_miles = round(parsed["miles"])
+        if new_miles <= 0 or new_miles == old_miles:
+            continue
+        leg["miles"] = new_miles
+        _rescale_corridor_positions(leg, new_miles / old_miles, float(new_miles))
+        changed.append({"from": leg["from"], "to": leg["to"],
+                        "old_miles": old_miles, "new_miles": new_miles})
+    return {"changed": changed, "coverage_totals": coverage_report(data)["totals"]}
 
 
 def format_enrichment_result(result: dict[str, Any]) -> str:
