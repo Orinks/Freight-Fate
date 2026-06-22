@@ -1,6 +1,14 @@
 """Transmission behavior tests."""
 
-from freight_fate.sim.transmission import NEUTRAL, REVERSE, Transmission
+from freight_fate.sim.transmission import (
+    AUTO_UPSHIFT_RPM,
+    FINAL_DRIVE,
+    GEAR_RATIOS,
+    NEUTRAL,
+    REVERSE,
+    Transmission,
+)
+from freight_fate.sim.vehicle import TruckSpecs
 
 
 def test_starts_in_neutral():
@@ -108,3 +116,23 @@ def test_auto_does_not_shift_out_of_reverse():
     tr = Transmission(automatic=True, gear=REVERSE)
     assert tr.auto_update(1900, throttle=0.5, moving=True) is None
     assert tr.in_reverse
+
+
+def _rpm_at_speed_mph(speed_mph: float, gear: int) -> float:
+    specs = TruckSpecs()
+    meters_per_second = speed_mph / 2.23694
+    wheel_rps = meters_per_second / (2 * 3.141592653589793 * specs.wheel_radius_m)
+    return wheel_rps * 60.0 * GEAR_RATIOS[gear - 1] * FINAL_DRIVE
+
+
+def test_upper_automatic_gears_are_not_reached_at_city_speed():
+    # Regression for issue #15: the previous hybrid ratio set shifted from
+    # 9th into 10th in the mid-40 mph range, making the upper gears feel
+    # compressed. At 46 mph, 9th should still be below the upshift threshold.
+    assert _rpm_at_speed_mph(46.0, 9) < AUTO_UPSHIFT_RPM
+    assert _rpm_at_speed_mph(58.0, 9) >= AUTO_UPSHIFT_RPM
+
+
+def test_top_gear_cruises_in_diesel_rpm_band():
+    rpm = _rpm_at_speed_mph(60.0, 10)
+    assert 1200 <= rpm <= 1500

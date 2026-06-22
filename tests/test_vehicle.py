@@ -59,7 +59,7 @@ def test_full_throttle_reaches_highway_speed():
     t = make_auto_truck()
     t.throttle = 1.0
     drive(t, 120)
-    assert 60 <= t.speed_mph <= 75
+    assert 60 <= t.speed_mph <= 76
     assert t.transmission.gear == 10
 
 

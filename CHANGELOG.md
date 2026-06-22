@@ -26,6 +26,9 @@
   snapshot may not load on an older stable release.
 
 ### Fixed
+- **Upper gear spacing.** Automatic shifting now holds 9th gear longer before
+  entering overdrive 10th, so the truck no longer reaches top gear around
+  city-road speeds.
 - **Portable save folders.** Snapshot builds now move nearby duplicate
   portable save folders into the active `FreightFate\saves` folder instead of
   leaving players with two likely save locations after extraction or updates.
