@@ -165,6 +165,10 @@ def main(argv: list[str] | None = None) -> int:
                              "--write, --per-leg, and optionally --only.")
     parser.add_argument("--per-leg", type=int, default=2,
                         help="Max new POIs per leg for --add-overpass-pois.")
+    parser.add_argument("--prune-non-truck-pois", action="store_true",
+                        help="Remove auto-discovered non-truck POIs (generic car "
+                             "fuel) network-wide, keeping curated stops and "
+                             "truck-relevant ones. Use with --write.")
     parser.add_argument("--coverage-report", action="store_true",
                         help="Report metadata coverage for every world leg.")
     parser.add_argument("--json", action="store_true",
@@ -253,6 +257,19 @@ def main(argv: list[str] | None = None) -> int:
                   f"{result['updated_legs']} legs; playable "
                   f"{totals['playable']}/{totals['legs']}; "
                   f"{len(result['legs_without_any_poi'])} legs still without a POI"
+                  f"{' (written)' if args.write else ' (dry run)'}")
+        return 0
+    if args.prune_non_truck_pois:
+        result = prune_non_truck_pois(data)
+        if args.write:
+            WORLD_PATH.write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")
+        if args.json:
+            print(json.dumps(result, indent=2, sort_keys=True))
+        else:
+            totals = result["coverage_totals"]
+            print(f"Pruned {result['removed_pois']} non-truck POIs; "
+                  f"{result['legs_emptied']} legs now stop-less; playable "
+                  f"{totals['playable']}/{totals['legs']}"
                   f"{' (written)' if args.write else ' (dry run)'}")
         return 0
     if args.refresh_geometry:
@@ -900,7 +917,8 @@ def _overpass_named_candidates(
 # Truck-stop brands / keywords (highest-value POIs for a freight game).
 _TRUCK_POI_KEYWORDS = (
     "love's", "loves travel", "pilot", "flying j", "ta travel", "travelcenters",
-    "petro", "road ranger", "ambest", "sapp bros", "kwik trip", "kwik star",
+    "petro stopping", "ta petro", "road ranger", "ambest", "sapp bros",
+    "kwik trip", "kwik star", "one9", "roady", "mr. fuel", "busy bee",
     "travel center", "travel plaza", "travel stop", "truck stop", "truckstop",
     "service plaza", "truck plaza",
 )
@@ -921,9 +939,11 @@ _RETAIL_SHOP_TAGS = {"supermarket", "wholesale", "department_store", "convenienc
 def _truck_relevance(tags: dict[str, str], name: str) -> int | None:
     """Rank a candidate POI for a freight game; ``None`` means drop it.
 
-    Service plazas, rest areas, HGV-tagged stops and named truck-stop brands
-    rank highest; plain corridor fuel stays eligible as a fallback; warehouse
-    and grocery retail fuel is rejected outright.
+    Truck-relevant only: service plazas, rest areas, HGV-tagged or HGV-diesel
+    fuel, dedicated truck parking, and named truck-stop brands. A plain
+    ``amenity=fuel`` car station with no truck signal is dropped -- a Class-8
+    driver does not pull a 70-foot rig into a corner Shell. Warehouse/grocery
+    retail and OSM mistags are rejected too.
     """
     low = name.lower()
     if len(low.strip()) < 2:
@@ -936,15 +956,23 @@ def _truck_relevance(tags: dict[str, str], name: str) -> int | None:
         return None
     amenity = tags.get("amenity", "")
     highway = tags.get("highway", "")
-    hgv = tags.get("hgv", "")
+    hgv = tags.get("hgv", "") in {"yes", "designated"}
+    hgv_diesel = tags.get("fuel:HGV_diesel", "") in {"yes", "designated"}
+    is_brand = any(word in low for word in _TRUCK_POI_KEYWORDS)
+    truck_signal = (
+        highway in {"services", "rest_area"}
+        or hgv or hgv_diesel or is_brand or amenity == "parking"
+    )
+    if not truck_signal:
+        return None  # generic car fuel -- not a truck stop
     score = 0
     if highway == "services":
         score += 10
     if highway == "rest_area":
         score += 8
-    if hgv in {"yes", "designated"}:
+    if hgv or hgv_diesel:
         score += 8
-    if any(word in low for word in _TRUCK_POI_KEYWORDS):
+    if is_brand:
         score += 10
     if amenity == "fuel":
         score += 3
@@ -1012,6 +1040,55 @@ def add_overpass_pois(
     }
 
 
+_TRUCK_STOP_TYPES = {"travel_center", "truck_stop", "service_plaza",
+                     "public_rest_area", "truck_parking"}
+
+
+def _stop_is_truck_relevant(stop: dict[str, Any]) -> bool:
+    """Whether a stored stop is somewhere a Class-8 driver actually stops.
+
+    Raw OSM tags are not retained on the stored stop, so this judges by the
+    stored type and name: keep service plazas, rest areas, truck parking,
+    travel/truck centers, and named truck-stop brands; a plain ``fuel_station``
+    (generic car gas) is not truck-relevant.
+    """
+    if str(stop.get("type", "")) in _TRUCK_STOP_TYPES:
+        return True
+    low = str(stop.get("name", "")).lower()
+    return any(word in low for word in _TRUCK_POI_KEYWORDS)
+
+
+def prune_non_truck_pois(data: dict[str, Any]) -> dict[str, Any]:
+    """Strip auto-discovered non-truck POIs (generic car fuel) network-wide.
+
+    Only Overpass-discovered stops are filtered; curated (hand-verified) stops
+    are always kept. Purely subtractive -- POIs are advisory and dispatch gates
+    on routing metadata, so a leg left stop-less stays playable.
+    """
+    removed = legs_emptied = 0
+    for leg in data["legs"]:
+        stops = leg.get("stops", [])
+        if not stops:
+            continue
+        kept = []
+        for stop in stops:
+            src = str(stop.get("source", ""))
+            is_overpass = "Overpass" in src and "amenity query" in src
+            if is_overpass and not _stop_is_truck_relevant(stop):
+                removed += 1
+                continue
+            kept.append(stop)
+        if len(kept) != len(stops):
+            leg["stops"] = kept
+            if not kept:
+                legs_emptied += 1
+    return {
+        "removed_pois": removed,
+        "legs_emptied": legs_emptied,
+        "coverage_totals": coverage_report(data)["totals"],
+    }
+
+
 def _stop_type_from_tags(tags: dict[str, str]) -> str:
     amenity = tags.get("amenity", "")
     highway = tags.get("highway", "")
@@ -1024,6 +1101,11 @@ def _stop_type_from_tags(tags: dict[str, str]) -> str:
         return "truck_parking"
     if "truck" in name or "travel" in name:
         return "travel_center"
+    if amenity == "fuel" and (
+        tags.get("hgv", "") in {"yes", "designated"}
+        or tags.get("fuel:HGV_diesel", "") in {"yes", "designated"}
+    ):
+        return "travel_center"  # truck-capable fuel; keep it truck-typed
     if amenity == "fuel":
         return "fuel_station"
     return "travel_center"
