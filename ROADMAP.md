@@ -183,6 +183,15 @@ Deliver -> Earn and level up -> Repeat
       ports, and industrial yards feel distinct.
 
 ### Business
+- [ ] Company-driver to owner-operator career arc. Resolve the current
+      thematic mismatch: the mechanics are already owner-operator (you buy and
+      upgrade your own trucks and pay fuel, repairs, and tolls), but the
+      progression flavor reads like a company driver. Reframe as a single arc --
+      *start* as a company driver (paid per mile, no asset costs or fixed
+      overhead), then earn your way to owning a truck, at which point fuel,
+      maintenance, insurance, and any loan payment come out of revenue. Expand
+      the career ladder (~20 levels; today `LEVEL_XP` tables 9 then +1500/level)
+      to pace that transition and the matching upgrade unlocks.
 - [ ] Company ownership: hire AI drivers, buy trucks
 - [ ] Loans and insurance
 
