@@ -518,10 +518,24 @@ when OSM has one).
 
 ## Risks And Open Questions
 
-- **`world.json` size at scale.** It is ~580 KB for 59 cities; at ~300 cities it
-  could reach several MB and is currently fully loaded into memory at startup.
-  Plan: consider gzip-on-disk, sharding by region, or lazy loading before the
-  node count gets large. Decide the threshold during Workstream C.
+- **`world.json` size at scale.** ~580 KB for 59 cities; ~1.5 MB at 137 cities;
+  several MB by ~500, all loaded into memory at startup. The real thresholds are
+  startup parse time and git churn, not RAM (a few MB is nothing). It gzips ~94%
+  (1.48 MB -> 99 KB), so the verbosity compresses away. Decision on the storage
+  format:
+  - **Keep `world.json` as the git-tracked source of truth.** The whole
+    expansion pipeline (pick_nodes -> add -> enrich -> review the diff -> commit
+    per batch) depends on a human-readable, diffable, mergeable file. A SQLite
+    `.db` as source would be an opaque binary blob: unreviewable diffs,
+    unmergeable conflicts, and worse git churn than the JSON line-diffs. Do not
+    make SQLite the source.
+  - **If/when runtime memory or startup parse bites (~hundreds of cities),
+    compile JSON -> SQLite at build/package time** as a generated artifact (never
+    committed). Gives indexed, lazy, low-memory loading while authoring stays
+    diffable; `sqlite3` is stdlib, so no new runtime dependency.
+  - **Cheaper interim wins first:** ship `world.json.gz` (decompress at load,
+    ~94% smaller distribution, ~10 lines of stdlib `gzip`) and/or shard by region
+    for lazy loading. Decide the trigger during Workstream C.
 - **ORS rate limits vs. batch size.** Hundreds of cities means thousands of
   legs. The free tier needs multi-day polite batches; Docker self-hosting is the
   unlimited path but needs the OSM extract and RAM. Confirm which we use for the
