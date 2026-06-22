@@ -964,14 +964,21 @@ def add_overpass_pois(
             continue
         stops = leg.setdefault("stops", [])
         existing = {str(s.get("name", "")).lower() for s in stops}
+        taken_mi = [float(s["at_mi"]) for s in stops]
         cands = _overpass_named_candidates(
-            leg, points, cache_dir, rate_limit_s, per_leg + len(existing) + 3)
+            leg, points, cache_dir, rate_limit_s, per_leg + len(existing) + 6)
         fresh = []
         for cand in cands:
             if cand["name"].lower() in existing:
                 continue
+            at = float(cand["at_mi"])
+            # Keep stops visibly apart on the corridor: a cluster of POIs found
+            # near one sample point would otherwise land on nearly the same mile.
+            if any(abs(at - t) < MIN_STOP_SPACING_MI for t in taken_mi):
+                continue
             fresh.append(cand)
             existing.add(cand["name"].lower())
+            taken_mi.append(at)
             if len(fresh) >= per_leg:
                 break
         if fresh:
@@ -1030,6 +1037,13 @@ def _actions_for_stop_type(stop_type: str) -> list[str]:
         "weigh_station": ["inspect"],
         "repair_shop": ["park", "save", "repair"],
     }[stop_type]
+
+
+# Minimum spacing between a newly-added POI and any existing stop. Several real
+# truck stops often cluster at one interchange; surfacing them on near-identical
+# miles reads as a "two stops on the same mile" bug while driving, so pick stops
+# that are genuinely spread along the corridor instead.
+MIN_STOP_SPACING_MI = 10.0
 
 
 def _nearest_free_mile(
