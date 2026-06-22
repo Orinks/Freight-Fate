@@ -94,13 +94,17 @@ def test_trip_announces_stops_ahead(world):
 def test_trip_uses_explicit_stop_positions(world):
     trip, _ = make_trip(world)
 
-    assert [stop.name for stop in trip.stops] == [
-        "Pilot Travel Center Remington",
-        "Loves Travel Stop Lafayette",
-    ]
-    assert [stop.at_mi for stop in trip.stops] == [93.5, 121.3]
+    by_name = {stop.name: stop for stop in trip.stops}
+    # Hand-curated stops keep their explicit checked-in positions and parking,
+    # even with additive OpenStreetMap stops now interleaved on the leg.
+    assert by_name["Pilot Travel Center Remington"].at_mi == 93.5
+    assert by_name["Loves Travel Stop Lafayette"].at_mi == 121.3
+    assert by_name["Pilot Travel Center Remington"].parking == "confirmed"
+    assert by_name["Loves Travel Stop Lafayette"].parking == "confirmed"
+    # No stop sits at the naive route midpoint, and every stop (curated or
+    # discovered) declares a concrete, non-unknown parking value.
     assert all(stop.at_mi != trip.route.miles / 2 for stop in trip.stops)
-    assert all(stop.parking == "confirmed" for stop in trip.stops)
+    assert all(stop.parking != "unknown" for stop in trip.stops)
 
 
 def test_trip_uses_only_curated_pois_at_runtime(world):
@@ -122,12 +126,15 @@ def test_trip_places_reverse_route_stops_from_travel_direction(world):
     weather = WeatherSystem("southern_plains", seed=1)
     trip = Trip(route, truck, weather, seed=2)
 
-    assert [stop.name for stop in trip.stops] == [
-        "Hill County Safety Rest Area",
-        "Road Ranger Waco",
-        "Bell County Safety Rest Area",
-    ]
-    assert [round(stop.at_mi, 1) for stop in trip.stops] == [56.8, 89.7, 136.5]
+    positions = {stop.name: round(stop.at_mi, 1) for stop in trip.stops}
+    # Curated stops are positioned from the direction of travel (not the raw
+    # stored order); additive OSM stops do not displace them.
+    assert positions["Hill County Safety Rest Area"] == 56.8
+    assert positions["Road Ranger Waco"] == 89.7
+    assert positions["Bell County Safety Rest Area"] == 136.5
+    # Every stop stays ordered along the direction of travel.
+    ats = [stop.at_mi for stop in trip.stops]
+    assert ats == sorted(ats)
 
 
 def test_zone_speed_limits_apply(world):
@@ -353,10 +360,16 @@ def test_progress_summary_mentions_highway(world):
     assert "I-65" in text
     assert "Indianapolis, Indiana" in text
     assert "Grade level" in text
-    assert "Next state line" in text
-    assert "Illinois into Indiana" in text
+    # The summary reports the nearest upcoming cue; an early stop leads here.
+    assert "Next stop" in text
     metric = trip.progress_summary(imperial=False)
     assert "kilometers" in metric
+
+    # Once past that stop, the summary surfaces the upcoming state-line crossing.
+    trip.position_mi = 25.0
+    state_text = trip.progress_summary()
+    assert "Next state line" in state_text
+    assert "Illinois into Indiana" in state_text
 
 
 def test_gps_state_crossing_and_rest_stop_cues_deduplicate(world):

@@ -396,7 +396,21 @@ def select(menu, label):
 
 
 def park_at_first_stop(driving):
-    stop = driving.trip.stops[0]
+    # Prefer a sleep-capable stop the truck can actually open: additive
+    # service-plaza/fuel POIs may now sort ahead of the curated overnight stops,
+    # and the rest / parking-full menus only apply where sleeping is offered.
+    # nearest_stop_within returns the first stop within range in sorted order, so
+    # skip sleepers shadowed by a nearer non-sleep stop.
+    stops = driving.trip.stops
+
+    def opens_here(stop):
+        for other in stops:
+            if abs(other.at_mi - stop.at_mi) <= 1.5:
+                return other is stop
+        return False
+
+    stop = next((s for s in stops if "sleep" in s.actions and opens_here(s)),
+                stops[0])
     driving.trip.position_mi = stop.at_mi
     return stop
 
