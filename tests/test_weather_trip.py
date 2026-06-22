@@ -362,15 +362,19 @@ def test_progress_summary_mentions_highway(world):
 def test_gps_state_crossing_and_rest_stop_cues_deduplicate(world):
     trip, _truck = make_trip(world)
 
-    trip.position_mi = 31.5
+    trip.position_mi = 23.0
     advance = trip.update(0.0)
     repeat = trip.update(0.0)
 
     assert [event.message for event in advance if event.kind == TripEventKind.GPS_CUE] == [
-        "In 2 miles, crossing from Illinois into Indiana near "
+        "In 10 miles, crossing from Illinois into Indiana near "
         "the I-65 state line south of Hammond."
     ]
     assert not [event for event in repeat if event.kind == TripEventKind.GPS_CUE]
+
+    trip.position_mi = 31.5
+    near = trip.update(0.0)
+    assert not [event for event in near if event.kind == TripEventKind.GPS_CUE]
 
     trip.position_mi = 33.0
     crossing = trip.update(0.0)

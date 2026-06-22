@@ -29,6 +29,7 @@ NIGHT_TRAFFIC_KEEP = 0.4           # chance a traffic zone still forms at night
 TRAFFIC_LOOKAHEAD_MI = 2.5
 TRAFFIC_WARNING_GAP_S = 2.2
 ZONE_WARNING_LOOKAHEAD_MI = 2.0
+STATE_CROSSING_WARNING_LOOKAHEAD_MI = 10.0
 CONSTRUCTION_ENFORCEMENT_GRACE_MI = 1.0
 
 # Hazards that can appear anywhere in the country...
@@ -735,7 +736,11 @@ class Trip:
                 continue
             advance_key = f"{cue.key}:advance"
             near_key = f"{cue.key}:near"
-            if 0 < ahead <= 2.0 and advance_key not in self._announced_navigation:
+            lookahead = (
+                STATE_CROSSING_WARNING_LOOKAHEAD_MI
+                if cue.kind == "state_crossing" else 2.0
+            )
+            if 0 < ahead <= lookahead and advance_key not in self._announced_navigation:
                 self._announced_navigation.add(advance_key)
                 if cue.kind == "maneuver":
                     message = f"In {ahead:.0f} miles, {cue.text}."
