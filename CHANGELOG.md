@@ -26,6 +26,9 @@
   snapshot may not load on an older stable release.
 
 ### Fixed
+- **State-line timing.** State crossing previews now speak about 10 miles out
+  instead of 2 miles out, giving the preview and crossing announcements more
+  room at highway speed.
 - **Upper gear spacing.** Automatic shifting now holds 9th gear longer before
   entering overdrive 10th, so the truck no longer reaches top gear around
   city-road speeds.
