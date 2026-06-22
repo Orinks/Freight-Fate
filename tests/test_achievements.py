@@ -118,10 +118,10 @@ def test_main_menu_achievement_path_is_keyboard_accessible(monkeypatch):
         app.state.handle_event(key_event(pygame.K_RETURN))
         assert isinstance(app.state, AchievementsState)
         assert app.state.current_text().startswith("Summary: 1 of")
-        assert any(item.text.startswith("Earned: Eastbound") for item in app.state.items)
+        assert any(item.text.startswith("Earned: Signed") for item in app.state.items)
         assert any(item.text.startswith("Locked: Breaker, Breaker") for item in app.state.items)
-        select(app.state, "Earned: Eastbound")
-        assert spoken[-1].startswith("Earned: Eastbound")
+        select(app.state, "Earned: Signed")
+        assert spoken[-1].startswith("Earned: Signed")
     finally:
         app.shutdown()
 
@@ -160,6 +160,43 @@ def test_delivery_settlement_awards_core_achievements(monkeypatch):
         assert any(part.startswith("New achievement!") for part in arrival.summary_parts)
         reloaded = Profile.load(p.path)
         assert set(reloaded.achievements) == earned
+    finally:
+        app.shutdown()
+
+
+def test_eastbound_badge_fires_only_on_an_eastbound_delivery(monkeypatch):
+    from freight_fate.app import App
+    from freight_fate.achievements import ACHIEVEMENT_BY_ID
+    from freight_fate.models.jobs import JobBoard
+    from freight_fate.models.profile import Profile
+    from freight_fate.states.driving import ArrivalState, DrivingState
+
+    # The first-delivery badge is direction-neutral now; "eastbound" is its own.
+    assert "eastbound" not in ACHIEVEMENT_BY_ID["first_delivery"].name.lower()
+
+    app = App()
+    try:
+        app.ctx.profile = Profile(name="Eastbound Run")
+        p = app.ctx.profile
+        p.current_city = "Chicago"
+        world = app.ctx.world
+        origin_lon = world.cities["Chicago"].lon
+        job = next(
+            job for job in JobBoard(world).offers(
+                "Chicago", p.career.endorsements, level=5, market=p.market)
+            if not job.locked_reason(p.career.endorsements, p.career.level)
+            and world.cities[job.destination].lon > origin_lon + 1.0  # net eastbound
+        )
+        route = world.supported_route_options(job.origin, job.destination)[0]
+        driving = DrivingState(app.ctx, job, route)
+        driving.trip.game_minutes = job.deadline_game_h * 30.0
+        driving.speeding_strikes = 0
+        monkeypatch.setattr(app.ctx, "say", lambda *_a, **_k: None)
+
+        ArrivalState(app.ctx, driving)
+
+        assert "eastbound_delivery" in p.achievements
+        assert "westbound_delivery" not in p.achievements
     finally:
         app.shutdown()
 

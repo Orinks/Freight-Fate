@@ -2393,6 +2393,7 @@ class ArrivalState(MenuState):
             toll_expense=toll_expense,
             route_miles=d.route.miles,
             speeding_strikes=d.speeding_strikes,
+            gross_pay=gross_pay,
         )
         self.summary_parts.extend(self._achievement_messages)
         timing = "On time" if on_time else "Late"
@@ -2439,7 +2440,8 @@ class ArrivalState(MenuState):
             trip_damage: float,
             toll_expense: float,
             route_miles: float,
-            speeding_strikes: int) -> None:
+            speeding_strikes: int,
+            gross_pay: float = 0.0) -> None:
         p = self.ctx.profile
         route = self.driving.route
         world = self.ctx.world
@@ -2478,6 +2480,67 @@ class ArrivalState(MenuState):
             ids.append("twenty_five_grand")
         if p.career.total_miles >= 1_000.0:
             ids.append("thousand_miles")
+
+        # -- Landmarks: direction, famous corridors, and city-arrival badges --
+        origin, dest = route.cities[0], route.cities[-1]
+        origin_lon = world.cities[origin].lon
+        dest_lon = world.cities[dest].lon
+        if dest_lon - origin_lon > 1.0:
+            ids.append("eastbound_delivery")
+        if origin_lon - dest_lon > 1.0:
+            ids.append("westbound_delivery")
+        if abs(dest_lon - origin_lon) >= 35.0:
+            ids.append("coast_to_coast")
+        route66 = {"Chicago", "St. Louis", "Tulsa", "Oklahoma City",
+                   "Amarillo", "Albuquerque", "Flagstaff", "Los Angeles"}
+        if origin in route66 and dest in route66:
+            ids.append("route66_run")
+        city_badge = {
+            "Amarillo": "amarillo_arrival", "Phoenix": "phoenix_arrival",
+            "Wichita": "wichita_arrival", "Lubbock": "lubbock_arrival",
+            "Bakersfield": "bakersfield_arrival", "Tulsa": "tulsa_arrival",
+            "Las Vegas": "vegas_arrival",
+        }
+        if dest in city_badge:
+            ids.append(city_badge[dest])
+        if world.cities[dest].state == "Georgia":
+            ids.append("georgia_arrival")
+        if "Detroit" in (origin, dest):
+            ids.append("detroit_run")
+
+        # -- Challenges: grind milestones, long hauls, spotless runs ----------
+        if region_count >= 14:
+            ids.append("all_regions")
+        if p.career.deliveries >= 50:
+            ids.append("fifty_deliveries")
+        if p.career.deliveries >= 100:
+            ids.append("hundred_deliveries")
+        if p.career.total_miles >= 10_000.0:
+            ids.append("ten_thousand_miles")
+        if p.career.total_miles >= 50_000.0:
+            ids.append("fifty_thousand_miles")
+        if p.money >= 100_000.0:
+            ids.append("hundred_grand")
+        if p.career.level >= 10:
+            ids.append("max_level")
+        if p.career.reputation >= 100.0:
+            ids.append("top_reputation")
+        if gross_pay >= 4_000.0:
+            ids.append("big_payday")
+        if route_miles >= 1_200.0 and on_time and trip_damage <= 1.0:
+            ids.append("grueling_clean")
+        if any(leg.terrain == "mountain" for leg in route.legs) and trip_damage <= 1.0:
+            ids.append("mountain_clean")
+        if len(route.legs) >= 4:
+            ids.append("multi_leg_haul")
+        # Five consecutive on-time, undamaged, ticket-free deliveries.
+        stats = p.achievement_stats if isinstance(p.achievement_stats, dict) else {}
+        p.achievement_stats = stats
+        perfect = on_time and trip_damage <= 1.0 and speeding_strikes == 0
+        streak = int(stats.get("perfect_streak", 0)) + 1 if perfect else 0
+        stats["perfect_streak"] = streak
+        if streak >= 5:
+            ids.append("perfect_streak")
 
         for achievement_id in ids:
             result = self.ctx.award_achievement(achievement_id, announce=False)
