@@ -22,6 +22,13 @@ from freight_fate.data.world import WORLD_PATH, minimum_curated_pois
 
 LOVES_ENDPOINT = "https://www.loves.com/api/fetch_stores"
 PILOT_ENDPOINT = "https://locations.pilotflyingj.com/search"
+# FHWA "Jason's Law" truck parking inventory (public rest areas / welcome centers
+# with truck-parking spot counts), published as NTAD via the BTS ArcGIS hub.
+# Fills corridors the major chains don't cover -- official government data.
+JASONS_LAW_ENDPOINT = (
+    "https://services.arcgis.com/xOi1kZaI0eWDREZv/arcgis/rest/services/"
+    "NTAD_Truck_Stop_Parking/FeatureServer/0/query"
+)
 USER_AGENT = "FreightFateRouteCuration/1.0"
 ACCESSED_DATE = "2026-06-17"
 EARTH_RADIUS_MI = 3958.7613
@@ -304,10 +311,15 @@ def main() -> None:
     parser.add_argument("--radius-miles", type=float, default=20.0)
     parser.add_argument("--write-world", action="store_true")
     parser.add_argument("--json", action="store_true")
+    parser.add_argument("--include-jasons-law", action="store_true",
+                        help="Also pull the FHWA Jason's Law public truck-parking "
+                             "inventory to fill corridors the chains miss.")
     args = parser.parse_args()
 
     data = json.loads(args.world.read_text(encoding="utf-8"))
     candidates = fetch_loves_candidates() + fetch_pilot_candidates()
+    if args.include_jasons_law:
+        candidates += fetch_jasons_law_candidates()
     report = curate_world(data, candidates, args.radius_miles)
     if args.write_world:
         args.world.write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")
@@ -411,6 +423,79 @@ def fetch_pilot_candidates() -> list[Candidate]:
         if offset >= int(response["count"]) or not entities:
             break
         time.sleep(0.1)
+    return out
+
+
+_DIRECTION_TOKENS = {"EB", "WB", "NB", "SB", "N", "S", "E", "W",
+                     "NORTH", "SOUTH", "EAST", "WEST"}
+
+
+def _strip_direction(route: str) -> str:
+    """'I-10 EB' -> 'I-10' so the FHWA route matches a leg's highway shield."""
+    parts = route.replace("/", " ").split()
+    while parts and parts[-1].upper().strip(".") in _DIRECTION_TOKENS:
+        parts = parts[:-1]
+    return " ".join(parts)
+
+
+def fetch_jasons_law_candidates() -> list[Candidate]:
+    """Public truck-parking facilities from the FHWA Jason's Law inventory.
+
+    Government source covering corridors the major chains miss -- rest areas and
+    welcome centers with real truck-parking spot counts. Typed as public rest
+    areas (legal overnight parking, no guaranteed fuel/food).
+    """
+    params = urllib.parse.urlencode(
+        {"where": "1=1", "outFields": "*", "outSR": "4326", "f": "geojson"})
+    payload = _read_json(f"{JASONS_LAW_ENDPOINT}?{params}", accept_json=True)
+    out: list[Candidate] = []
+    for feature in payload.get("features", []):
+        props = feature.get("properties", {})
+        coords = (feature.get("geometry") or {}).get("coordinates") or [None, None]
+        lon, lat = coords[0], coords[1]
+        if lat is None or lon is None:
+            continue
+        raw_route = str(props.get("highway_route", "") or "").strip()
+        highway = _strip_direction(raw_route)
+        municipality = str(props.get("municipality", "") or "").strip()
+        state = str(props.get("state", "") or "").strip()
+        spots = props.get("number_of_spots")
+        name = str(props.get("nhs_rest_stop", "") or "").strip()
+        # Skip mandatory inspection/weigh facilities -- not a chooseable rest stop.
+        if "weigh" in name.lower() or "inspection" in name.lower():
+            continue
+        # Dataset placeholders ("NA", "NHS Rest Stop or Truck Facility 19") ->
+        # use a descriptive highway/municipality fallback instead.
+        if (name.upper() in {"NA", "N/A", "NONE"}
+                or name.lower().startswith("nhs rest stop or truck facility")):
+            name = ""
+        if not name:
+            near = f" near {municipality}" if municipality else ""
+            name = f"{highway or 'Corridor'} truck parking{near}"
+        spots_text = (f" with {int(spots)} truck parking spaces"
+                      if isinstance(spots, (int, float)) and spots else "")
+        out.append(
+            Candidate(
+                provider="jasons_law",
+                key=str(props.get("OBJECTID")),
+                name=name,
+                poi_type="public_rest_area",
+                lat=float(lat),
+                lon=float(lon),
+                highway=highway,
+                exit_text=(f"mile post {props.get('mile_post')}"
+                           if props.get("mile_post") else ""),
+                source_url=JASONS_LAW_ENDPOINT,
+                source_note=(
+                    f"FHWA Jason's Law truck parking inventory (NTAD via BTS) "
+                    f"lists {name} on {raw_route or 'the corridor'} in "
+                    f"{municipality}, {state}{spots_text}"
+                ),
+                parking="confirmed",
+                services=("parking", "restrooms"),
+                actions=("park", "save", "break", "sleep"),
+            )
+        )
     return out
 
 
