@@ -2179,6 +2179,34 @@
       "region": "desert_southwest",
       "state": "New Mexico",
       "locations": []
+    },
+    "Pocatello": {
+      "lat": 42.8713,
+      "lon": -112.44553,
+      "region": "great_basin",
+      "state": "Idaho",
+      "locations": []
+    },
+    "Idaho Falls": {
+      "lat": 43.46658,
+      "lon": -112.03414,
+      "region": "great_basin",
+      "state": "Idaho",
+      "locations": []
+    },
+    "Twin Falls": {
+      "lat": 42.56297,
+      "lon": -114.46087,
+      "region": "great_basin",
+      "state": "Idaho",
+      "locations": []
+    },
+    "Elko": {
+      "lat": 40.83242,
+      "lon": -115.76312,
+      "region": "great_basin",
+      "state": "Nevada",
+      "locations": []
     }
   },
   "legs": [
@@ -34215,7 +34243,48 @@
       "to": "San Francisco",
       "highway": "US-101",
       "miles": 110,
-      "stops": [],
+      "stops": [
+        {
+          "name": "Rotten Robbie #31",
+          "type": "travel_center",
+          "at_mi": 27.5,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ]
+        },
+        {
+          "name": "Pacific Pride",
+          "type": "travel_center",
+          "at_mi": 55.0,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ]
+        }
+      ],
       "corridor": {
         "tollway_detected": true,
         "route_points": [
@@ -35682,7 +35751,25 @@
       "to": "San Jose",
       "highway": "I-680",
       "miles": 77,
-      "stops": [],
+      "stops": [
+        {
+          "name": "Rest Stop",
+          "type": "public_rest_area",
+          "at_mi": 19.3,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "limited",
+          "actions": [
+            "park",
+            "save",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "parking",
+            "restrooms"
+          ]
+        }
+      ],
       "corridor": {
         "tollway_detected": false,
         "route_points": [
@@ -35773,7 +35860,48 @@
       "to": "Salinas",
       "highway": "I-680",
       "miles": 134,
-      "stops": [],
+      "stops": [
+        {
+          "name": "Pacific Pride",
+          "type": "travel_center",
+          "at_mi": 80.4,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ]
+        },
+        {
+          "name": "Rotten Robbie #31",
+          "type": "travel_center",
+          "at_mi": 107.2,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ]
+        }
+      ],
       "corridor": {
         "tollway_detected": false,
         "route_points": [
@@ -45573,7 +45701,27 @@
       "to": "Greensboro",
       "highway": "I-73",
       "miles": 105,
-      "stops": [],
+      "stops": [
+        {
+          "name": "Love's Travel Stop",
+          "type": "service_plaza",
+          "at_mi": 78.8,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ]
+        }
+      ],
       "corridor": {
         "tollway_detected": false,
         "route_points": [
@@ -47544,7 +47692,28 @@
       "to": "Baltimore",
       "highway": "I-95",
       "miles": 141,
-      "stops": [],
+      "stops": [
+        {
+          "name": "Rutter's",
+          "type": "travel_center",
+          "at_mi": 28.2,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ]
+        }
+      ],
       "corridor": {
         "tollway_detected": false,
         "route_points": [
@@ -56189,6 +56358,1663 @@
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
       },
       "terrain": "flat"
+    },
+    {
+      "from": "Pocatello",
+      "to": "Twin Falls",
+      "highway": "I-15",
+      "miles": 120,
+      "stops": [],
+      "corridor": {
+        "tollway_detected": false,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 42.87129,
+            "lon": -112.44554
+          },
+          {
+            "at_mi": 24.0,
+            "lat": 42.80128,
+            "lon": -112.81502
+          },
+          {
+            "at_mi": 48.0,
+            "lat": 42.60354,
+            "lon": -113.18598
+          },
+          {
+            "at_mi": 72.0,
+            "lat": 42.569,
+            "lon": -113.65397
+          },
+          {
+            "at_mi": 96.0,
+            "lat": 42.57619,
+            "lon": -114.12569
+          },
+          {
+            "at_mi": 120.0,
+            "lat": 42.56289,
+            "lon": -114.46075
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 4466.9,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 24.0,
+            "elevation_ft": 4410.8,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 48.0,
+            "elevation_ft": 4393.0,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 72.0,
+            "elevation_ft": 4152.6,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 96.0,
+            "elevation_ft": 4133.9,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 120.0,
+            "elevation_ft": 3736.9,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 120.0,
+            "avg_grade_pct": -0.11,
+            "terrain": "flat",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          }
+        ],
+        "checkpoints": [
+          {
+            "name": "I-15 corridor between Pocatello and Twin Falls",
+            "at_mi": 72.0,
+            "type": "place",
+            "state": "Idaho",
+            "highway": "I-15",
+            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
+          }
+        ],
+        "state_miles": [
+          {
+            "state": "Idaho",
+            "miles": 120.0
+          }
+        ],
+        "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
+      },
+      "terrain": "flat"
+    },
+    {
+      "from": "Pocatello",
+      "to": "Salt Lake City",
+      "highway": "I-15",
+      "miles": 165,
+      "stops": [
+        {
+          "name": "Flying J Travel Center McCammon",
+          "type": "travel_center",
+          "at_mi": 21.0,
+          "source": "Pilot Flying J official locator lists Flying J Travel Center store 641 in McCammon, ID with 84 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (2.2 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/id/mccammon/587-e-us-30",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "restrooms",
+            "parking",
+            "scale"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated"
+        },
+        {
+          "name": "Weber Canyon Rest Area, I-84 Eastbound",
+          "type": "public_rest_area",
+          "at_mi": 137.5,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "limited",
+          "actions": [
+            "park",
+            "save",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "parking",
+            "restrooms"
+          ]
+        }
+      ],
+      "corridor": {
+        "tollway_detected": false,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 42.87129,
+            "lon": -112.44554
+          },
+          {
+            "at_mi": 27.5,
+            "lat": 42.57181,
+            "lon": -112.18138
+          },
+          {
+            "at_mi": 55.0,
+            "lat": 42.20396,
+            "lon": -112.23905
+          },
+          {
+            "at_mi": 82.5,
+            "lat": 41.81802,
+            "lon": -112.17979
+          },
+          {
+            "at_mi": 110.0,
+            "lat": 41.45725,
+            "lon": -112.0556
+          },
+          {
+            "at_mi": 137.5,
+            "lat": 41.12886,
+            "lon": -111.90853
+          },
+          {
+            "at_mi": 165.0,
+            "lat": 40.7608,
+            "lon": -111.891
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 4466.9,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 27.5,
+            "elevation_ft": 4678.5,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 55.0,
+            "elevation_ft": 4727.7,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 82.5,
+            "elevation_ft": 4545.9,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 110.0,
+            "elevation_ft": 4245.4,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 137.5,
+            "elevation_ft": 4563.3,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 165.0,
+            "elevation_ft": 4287.4,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 165.0,
+            "avg_grade_pct": -0.02,
+            "terrain": "flat",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          }
+        ],
+        "checkpoints": [
+          {
+            "name": "I-15 corridor between Pocatello and Salt Lake City",
+            "at_mi": 82.5,
+            "type": "place",
+            "state": "Utah",
+            "highway": "I-15",
+            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
+          }
+        ],
+        "state_miles": [
+          {
+            "state": "Idaho",
+            "miles": 70.1
+          },
+          {
+            "state": "Utah",
+            "miles": 94.9
+          }
+        ],
+        "state_crossings": [
+          {
+            "at_mi": 70.1,
+            "from_state": "Idaho",
+            "state": "Utah",
+            "place": "Idaho-Utah line on I-15",
+            "source": "Computed from OSRM route geometry and public U.S. state boundary GeoJSON."
+          }
+        ],
+        "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
+      },
+      "terrain": "flat"
+    },
+    {
+      "from": "Pocatello",
+      "to": "Provo",
+      "highway": "I-15",
+      "miles": 209,
+      "stops": [
+        {
+          "name": "Brigham (SB)",
+          "type": "public_rest_area",
+          "at_mi": 103.9,
+          "source": "FHWA Jason's Law truck parking inventory (NTAD via BTS) lists Brigham (SB) on I-15 in Brigham City, UT with 12 truck parking spaces, mile post 367; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.0 mi from simplified corridor line), accessed 2026-06-17: https://services.arcgis.com/xOi1kZaI0eWDREZv/arcgis/rest/services/NTAD_Truck_Stop_Parking/FeatureServer/0/query",
+          "actions": [
+            "park",
+            "save",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "parking",
+            "restrooms"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated"
+        },
+        {
+          "name": "Flying J Travel Center",
+          "type": "service_plaza",
+          "at_mi": 156.8,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ]
+        }
+      ],
+      "corridor": {
+        "tollway_detected": false,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 42.87129,
+            "lon": -112.44554
+          },
+          {
+            "at_mi": 26.1,
+            "lat": 42.61184,
+            "lon": -112.19752
+          },
+          {
+            "at_mi": 52.2,
+            "lat": 42.24486,
+            "lon": -112.22481
+          },
+          {
+            "at_mi": 78.4,
+            "lat": 41.88045,
+            "lon": -112.17035
+          },
+          {
+            "at_mi": 104.5,
+            "lat": 41.5441,
+            "lon": -112.06755
+          },
+          {
+            "at_mi": 130.6,
+            "lat": 41.18464,
+            "lon": -112.0111
+          },
+          {
+            "at_mi": 156.8,
+            "lat": 40.86324,
+            "lon": -111.90078
+          },
+          {
+            "at_mi": 182.9,
+            "lat": 40.49403,
+            "lon": -111.89128
+          },
+          {
+            "at_mi": 209.0,
+            "lat": 40.23379,
+            "lon": -111.65853
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 4466.9,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 26.1,
+            "elevation_ft": 4770.3,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 52.2,
+            "elevation_ft": 4903.2,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 78.4,
+            "elevation_ft": 4452.1,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 104.5,
+            "elevation_ft": 4219.2,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 130.6,
+            "elevation_ft": 4445.5,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 156.8,
+            "elevation_ft": 4344.8,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 182.9,
+            "elevation_ft": 4486.2,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 209.0,
+            "elevation_ft": 4570.2,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 209.0,
+            "avg_grade_pct": 0.01,
+            "terrain": "flat",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          }
+        ],
+        "checkpoints": [
+          {
+            "name": "I-15 corridor between Pocatello and Provo",
+            "at_mi": 104.5,
+            "type": "place",
+            "state": "Utah",
+            "highway": "I-15",
+            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
+          }
+        ],
+        "state_miles": [
+          {
+            "state": "Idaho",
+            "miles": 70.4
+          },
+          {
+            "state": "Utah",
+            "miles": 138.6
+          }
+        ],
+        "state_crossings": [
+          {
+            "at_mi": 70.4,
+            "from_state": "Idaho",
+            "state": "Utah",
+            "place": "Idaho-Utah line on I-15",
+            "source": "Computed from OSRM route geometry and public U.S. state boundary GeoJSON."
+          }
+        ],
+        "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
+      },
+      "terrain": "flat"
+    },
+    {
+      "from": "Idaho Falls",
+      "to": "Twin Falls",
+      "highway": "I-86",
+      "miles": 164,
+      "stops": [
+        {
+          "name": "Massacre Rocks W",
+          "type": "public_rest_area",
+          "at_mi": 78.1,
+          "source": "FHWA Jason's Law truck parking inventory (NTAD via BTS) lists Massacre Rocks W on I-86W in Heglar, ID with 20 truck parking spaces, mile post 31; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.6 mi from simplified corridor line), accessed 2026-06-17: https://services.arcgis.com/xOi1kZaI0eWDREZv/arcgis/rest/services/NTAD_Truck_Stop_Parking/FeatureServer/0/query",
+          "actions": [
+            "park",
+            "save",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "parking",
+            "restrooms"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated"
+        },
+        {
+          "name": "Coldwater E",
+          "type": "public_rest_area",
+          "at_mi": 89.8,
+          "source": "FHWA Jason's Law truck parking inventory (NTAD via BTS) lists Coldwater E on I-86E in Heglar, ID with 23 truck parking spaces, mile post 19; at_mi estimated by projecting source coordinates onto checked-in route geometry (1.3 mi from simplified corridor line), accessed 2026-06-17: https://services.arcgis.com/xOi1kZaI0eWDREZv/arcgis/rest/services/NTAD_Truck_Stop_Parking/FeatureServer/0/query",
+          "actions": [
+            "park",
+            "save",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "parking",
+            "restrooms"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated"
+        }
+      ],
+      "corridor": {
+        "tollway_detected": false,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 43.46658,
+            "lon": -112.03448
+          },
+          {
+            "at_mi": 27.3,
+            "lat": 43.17815,
+            "lon": -112.38201
+          },
+          {
+            "at_mi": 54.7,
+            "lat": 42.89014,
+            "lon": -112.62192
+          },
+          {
+            "at_mi": 82.0,
+            "lat": 42.65714,
+            "lon": -113.00617
+          },
+          {
+            "at_mi": 109.3,
+            "lat": 42.57021,
+            "lon": -113.52414
+          },
+          {
+            "at_mi": 136.7,
+            "lat": 42.57624,
+            "lon": -114.05735
+          },
+          {
+            "at_mi": 164.0,
+            "lat": 42.56289,
+            "lon": -114.46075
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 4704.7,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 27.3,
+            "elevation_ft": 4478.3,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 54.7,
+            "elevation_ft": 4433.4,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 82.0,
+            "elevation_ft": 4211.0,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 109.3,
+            "elevation_ft": 4307.7,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 136.7,
+            "elevation_ft": 4074.8,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 164.0,
+            "elevation_ft": 3736.9,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 164.0,
+            "avg_grade_pct": -0.11,
+            "terrain": "flat",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          }
+        ],
+        "checkpoints": [
+          {
+            "name": "I-86 corridor between Idaho Falls and Twin Falls",
+            "at_mi": 82.0,
+            "type": "place",
+            "state": "Idaho",
+            "highway": "I-86",
+            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
+          }
+        ],
+        "state_miles": [
+          {
+            "state": "Idaho",
+            "miles": 164.0
+          }
+        ],
+        "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
+      },
+      "terrain": "flat"
+    },
+    {
+      "from": "Idaho Falls",
+      "to": "Salt Lake City",
+      "highway": "I-15",
+      "miles": 214,
+      "stops": [
+        {
+          "name": "Flying J Travel Center",
+          "type": "service_plaza",
+          "at_mi": 160.5,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ]
+        },
+        {
+          "name": "Flying J",
+          "type": "fuel_station",
+          "at_mi": 187.3,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "limited",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "break"
+          ],
+          "services": [
+            "diesel",
+            "parking"
+          ]
+        }
+      ],
+      "corridor": {
+        "tollway_detected": false,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 43.46658,
+            "lon": -112.03448
+          },
+          {
+            "at_mi": 26.7,
+            "lat": 43.18996,
+            "lon": -112.37168
+          },
+          {
+            "at_mi": 53.5,
+            "lat": 42.81766,
+            "lon": -112.38585
+          },
+          {
+            "at_mi": 80.3,
+            "lat": 42.50701,
+            "lon": -112.1699
+          },
+          {
+            "at_mi": 107.0,
+            "lat": 42.16503,
+            "lon": -112.22222
+          },
+          {
+            "at_mi": 133.7,
+            "lat": 41.78478,
+            "lon": -112.17274
+          },
+          {
+            "at_mi": 160.5,
+            "lat": 41.43744,
+            "lon": -112.0572
+          },
+          {
+            "at_mi": 187.3,
+            "lat": 41.11664,
+            "lon": -111.90884
+          },
+          {
+            "at_mi": 214.0,
+            "lat": 40.7608,
+            "lon": -111.891
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 4704.7,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 26.7,
+            "elevation_ft": 4475.1,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 53.5,
+            "elevation_ft": 4527.6,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 80.3,
+            "elevation_ft": 4783.5,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 107.0,
+            "elevation_ft": 4612.9,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 133.7,
+            "elevation_ft": 4557.1,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 160.5,
+            "elevation_ft": 4229.0,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 187.3,
+            "elevation_ft": 4763.8,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 214.0,
+            "elevation_ft": 4287.4,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 214.0,
+            "avg_grade_pct": -0.04,
+            "terrain": "flat",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          }
+        ],
+        "checkpoints": [
+          {
+            "name": "I-15 corridor between Idaho Falls and Salt Lake City",
+            "at_mi": 107.0,
+            "type": "place",
+            "state": "Utah",
+            "highway": "I-15",
+            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
+          }
+        ],
+        "state_miles": [
+          {
+            "state": "Idaho",
+            "miles": 119.0
+          },
+          {
+            "state": "Utah",
+            "miles": 95.0
+          }
+        ],
+        "state_crossings": [
+          {
+            "at_mi": 119.0,
+            "from_state": "Idaho",
+            "state": "Utah",
+            "place": "Idaho-Utah line on I-15",
+            "source": "Computed from OSRM route geometry and public U.S. state boundary GeoJSON."
+          }
+        ],
+        "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
+      },
+      "terrain": "flat"
+    },
+    {
+      "from": "Idaho Falls",
+      "to": "Boise",
+      "highway": "I-84",
+      "miles": 280,
+      "stops": [
+        {
+          "name": "Cotterell W",
+          "type": "public_rest_area",
+          "at_mi": 103.4,
+          "source": "FHWA Jason's Law truck parking inventory (NTAD via BTS) lists Cotterell W on I-84W in Idahome, ID with 4 truck parking spaces, mile post 229; at_mi estimated by projecting source coordinates onto checked-in route geometry (5.9 mi from simplified corridor line), accessed 2026-06-17: https://services.arcgis.com/xOi1kZaI0eWDREZv/arcgis/rest/services/NTAD_Truck_Stop_Parking/FeatureServer/0/query",
+          "actions": [
+            "park",
+            "save",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "parking",
+            "restrooms"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated"
+        },
+        {
+          "name": "Flying J Travel Center",
+          "type": "service_plaza",
+          "at_mi": 155.5,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ]
+        }
+      ],
+      "corridor": {
+        "tollway_detected": false,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 43.46658,
+            "lon": -112.03448
+          },
+          {
+            "at_mi": 31.1,
+            "lat": 43.12387,
+            "lon": -112.38881
+          },
+          {
+            "at_mi": 62.2,
+            "lat": 42.85543,
+            "lon": -112.73878
+          },
+          {
+            "at_mi": 93.3,
+            "lat": 42.6,
+            "lon": -113.22249
+          },
+          {
+            "at_mi": 124.5,
+            "lat": 42.56889,
+            "lon": -113.82337
+          },
+          {
+            "at_mi": 155.5,
+            "lat": 42.62898,
+            "lon": -114.40771
+          },
+          {
+            "at_mi": 186.7,
+            "lat": 42.88916,
+            "lon": -114.88617
+          },
+          {
+            "at_mi": 217.8,
+            "lat": 42.95536,
+            "lon": -115.44336
+          },
+          {
+            "at_mi": 248.9,
+            "lat": 43.26893,
+            "lon": -115.87149
+          },
+          {
+            "at_mi": 280.0,
+            "lat": 43.61502,
+            "lon": -116.20228
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 4704.7,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 31.1,
+            "elevation_ft": 4484.9,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 62.2,
+            "elevation_ft": 4416.0,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 93.3,
+            "elevation_ft": 4302.8,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 124.5,
+            "elevation_ft": 4143.0,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 155.5,
+            "elevation_ft": 3728.7,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 186.7,
+            "elevation_ft": 3277.6,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 217.8,
+            "elevation_ft": 2602.7,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 248.9,
+            "elevation_ft": 3211.9,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 280.0,
+            "elevation_ft": 2734.6,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 280.0,
+            "avg_grade_pct": -0.15,
+            "terrain": "flat",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          }
+        ],
+        "checkpoints": [
+          {
+            "name": "I-84 corridor between Idaho Falls and Boise",
+            "at_mi": 155.5,
+            "type": "place",
+            "state": "Idaho",
+            "highway": "I-84",
+            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
+          }
+        ],
+        "state_miles": [
+          {
+            "state": "Idaho",
+            "miles": 280.0
+          }
+        ],
+        "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
+      },
+      "terrain": "flat"
+    },
+    {
+      "from": "Twin Falls",
+      "to": "Boise",
+      "highway": "I-84",
+      "miles": 128,
+      "stops": [
+        {
+          "name": "Bliss W",
+          "type": "public_rest_area",
+          "at_mi": 45.8,
+          "source": "FHWA Jason's Law truck parking inventory (NTAD via BTS) lists Bliss W on I-84W in Mellon Valley, ID with 49 truck parking spaces, mile post 133; at_mi estimated by projecting source coordinates onto checked-in route geometry (1.4 mi from simplified corridor line), accessed 2026-06-17: https://services.arcgis.com/xOi1kZaI0eWDREZv/arcgis/rest/services/NTAD_Truck_Stop_Parking/FeatureServer/0/query",
+          "actions": [
+            "park",
+            "save",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "parking",
+            "restrooms"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated"
+        }
+      ],
+      "corridor": {
+        "tollway_detected": false,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 42.56289,
+            "lon": -114.46075
+          },
+          {
+            "at_mi": 25.6,
+            "lat": 42.79767,
+            "lon": -114.75529
+          },
+          {
+            "at_mi": 51.2,
+            "lat": 42.95619,
+            "lon": -115.17522
+          },
+          {
+            "at_mi": 76.8,
+            "lat": 43.06449,
+            "lon": -115.59389
+          },
+          {
+            "at_mi": 102.4,
+            "lat": 43.34186,
+            "lon": -115.94989
+          },
+          {
+            "at_mi": 128.0,
+            "lat": 43.61502,
+            "lon": -116.20228
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 3736.9,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 25.6,
+            "elevation_ft": 3389.1,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 51.2,
+            "elevation_ft": 2736.2,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 76.8,
+            "elevation_ft": 3185.7,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 102.4,
+            "elevation_ft": 3297.2,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 128.0,
+            "elevation_ft": 2734.6,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 128.0,
+            "avg_grade_pct": -0.14,
+            "terrain": "flat",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          }
+        ],
+        "checkpoints": [
+          {
+            "name": "I-84 corridor between Twin Falls and Boise",
+            "at_mi": 76.8,
+            "type": "place",
+            "state": "Idaho",
+            "highway": "I-84",
+            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
+          }
+        ],
+        "state_miles": [
+          {
+            "state": "Idaho",
+            "miles": 128.0
+          }
+        ],
+        "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
+      },
+      "terrain": "flat"
+    },
+    {
+      "from": "Twin Falls",
+      "to": "Elko",
+      "highway": "I-80",
+      "miles": 166,
+      "stops": [
+        {
+          "name": "Pequop Rest Stop",
+          "type": "public_rest_area",
+          "at_mi": 110.7,
+          "source": "FHWA Jason's Law truck parking inventory (NTAD via BTS) lists Pequop Rest Stop on I-80 in Oasis, NV with 24 truck parking spaces, mile post 373; at_mi estimated by projecting source coordinates onto checked-in route geometry (17.8 mi from simplified corridor line), accessed 2026-06-17: https://services.arcgis.com/xOi1kZaI0eWDREZv/arcgis/rest/services/NTAD_Truck_Stop_Parking/FeatureServer/0/query",
+          "actions": [
+            "park",
+            "save",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "parking",
+            "restrooms"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated"
+        },
+        {
+          "name": "Flying J Travel Center Wells",
+          "type": "travel_center",
+          "at_mi": 115.3,
+          "source": "Pilot Flying J official locator lists Flying J Travel Center store 692 in Wells, NV with 91 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (2.9 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/nv/wells/156-us-93",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "restrooms",
+            "parking"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated"
+        }
+      ],
+      "corridor": {
+        "tollway_detected": false,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 42.56289,
+            "lon": -114.46075
+          },
+          {
+            "at_mi": 27.7,
+            "lat": 42.25504,
+            "lon": -114.57468
+          },
+          {
+            "at_mi": 55.3,
+            "lat": 41.88805,
+            "lon": -114.7086
+          },
+          {
+            "at_mi": 83.0,
+            "lat": 41.52186,
+            "lon": -114.77082
+          },
+          {
+            "at_mi": 110.7,
+            "lat": 41.15919,
+            "lon": -114.89463
+          },
+          {
+            "at_mi": 138.3,
+            "lat": 41.03229,
+            "lon": -115.3789
+          },
+          {
+            "at_mi": 166.0,
+            "lat": 40.83253,
+            "lon": -115.76299
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 3736.9,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 27.7,
+            "elevation_ft": 4783.5,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 55.3,
+            "elevation_ft": 5329.4,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 83.0,
+            "elevation_ft": 5884.8,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 110.7,
+            "elevation_ft": 5744.8,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 138.3,
+            "elevation_ft": 5295.3,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 166.0,
+            "elevation_ft": 5095.1,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 166.0,
+            "avg_grade_pct": 0.16,
+            "terrain": "flat",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          }
+        ],
+        "checkpoints": [
+          {
+            "name": "I-80 corridor between Twin Falls and Elko",
+            "at_mi": 83.0,
+            "type": "place",
+            "state": "Nevada",
+            "highway": "I-80",
+            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
+          }
+        ],
+        "state_miles": [
+          {
+            "state": "Idaho",
+            "miles": 48.1
+          },
+          {
+            "state": "Nevada",
+            "miles": 117.9
+          }
+        ],
+        "state_crossings": [
+          {
+            "at_mi": 48.1,
+            "from_state": "Idaho",
+            "state": "Nevada",
+            "place": "Idaho-Nevada line on I-80",
+            "source": "Computed from OSRM route geometry and public U.S. state boundary GeoJSON."
+          }
+        ],
+        "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
+      },
+      "terrain": "flat"
+    },
+    {
+      "from": "Elko",
+      "to": "Boise",
+      "highway": "I-80",
+      "miles": 293,
+      "stops": [
+        {
+          "name": "Love's Travel Stop Wells",
+          "type": "travel_center",
+          "at_mi": 47.4,
+          "source": "Love's official store feed lists store 365 in Wells, NV on I-80, exit 352; at_mi estimated by projecting source coordinates onto checked-in route geometry (7.8 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking",
+            "restrooms"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "likely",
+          "curation": "curated"
+        },
+        {
+          "name": "Flying J Travel Center Wells",
+          "type": "travel_center",
+          "at_mi": 47.4,
+          "source": "Pilot Flying J official locator lists Flying J Travel Center store 692 in Wells, NV with 91 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (7.9 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/nv/wells/156-us-93",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "restrooms",
+            "parking"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated"
+        }
+      ],
+      "corridor": {
+        "tollway_detected": false,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 40.83253,
+            "lon": -115.76299
+          },
+          {
+            "at_mi": 36.6,
+            "lat": 41.08548,
+            "lon": -115.19256
+          },
+          {
+            "at_mi": 73.2,
+            "lat": 41.40494,
+            "lon": -114.75501
+          },
+          {
+            "at_mi": 109.9,
+            "lat": 41.895,
+            "lon": -114.70622
+          },
+          {
+            "at_mi": 146.5,
+            "lat": 42.38078,
+            "lon": -114.5736
+          },
+          {
+            "at_mi": 183.1,
+            "lat": 42.74556,
+            "lon": -114.62915
+          },
+          {
+            "at_mi": 219.8,
+            "lat": 42.96951,
+            "lon": -115.23907
+          },
+          {
+            "at_mi": 256.4,
+            "lat": 43.2041,
+            "lon": -115.8019
+          },
+          {
+            "at_mi": 293.0,
+            "lat": 43.61502,
+            "lon": -116.20228
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 5095.1,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 36.6,
+            "elevation_ft": 5502.0,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 73.2,
+            "elevation_ft": 5764.4,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 109.9,
+            "elevation_ft": 5303.5,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 146.5,
+            "elevation_ft": 4472.4,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 183.1,
+            "elevation_ft": 3477.7,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 219.8,
+            "elevation_ft": 2704.1,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 256.4,
+            "elevation_ft": 3182.4,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 293.0,
+            "elevation_ft": 2734.6,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 293.0,
+            "avg_grade_pct": -0.2,
+            "terrain": "flat",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          }
+        ],
+        "checkpoints": [
+          {
+            "name": "I-80 corridor between Elko and Boise",
+            "at_mi": 146.5,
+            "type": "place",
+            "state": "Idaho",
+            "highway": "I-80",
+            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
+          }
+        ],
+        "state_miles": [
+          {
+            "state": "Nevada",
+            "miles": 117.7
+          },
+          {
+            "state": "Idaho",
+            "miles": 175.3
+          }
+        ],
+        "state_crossings": [
+          {
+            "at_mi": 117.7,
+            "from_state": "Nevada",
+            "state": "Idaho",
+            "place": "Nevada-Idaho line on I-80",
+            "source": "Computed from OSRM route geometry and public U.S. state boundary GeoJSON."
+          }
+        ],
+        "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
+      },
+      "terrain": "flat"
+    },
+    {
+      "from": "Elko",
+      "to": "Salt Lake City",
+      "highway": "I-80",
+      "miles": 230,
+      "stops": [
+        {
+          "name": "Salt Flats Rest Area, I-80 Eastbound",
+          "type": "public_rest_area",
+          "at_mi": 115.0,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "limited",
+          "actions": [
+            "park",
+            "save",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "parking",
+            "restrooms"
+          ]
+        },
+        {
+          "name": "Grassy Mountain (EB)",
+          "type": "public_rest_area",
+          "at_mi": 163.6,
+          "source": "FHWA Jason's Law truck parking inventory (NTAD via BTS) lists Grassy Mountain (EB) on I-80 in N/A, UT with 15 truck parking spaces, mile post 54; at_mi estimated by projecting source coordinates onto checked-in route geometry (2.1 mi from simplified corridor line), accessed 2026-06-17: https://services.arcgis.com/xOi1kZaI0eWDREZv/arcgis/rest/services/NTAD_Truck_Stop_Parking/FeatureServer/0/query",
+          "actions": [
+            "park",
+            "save",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "parking",
+            "restrooms"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated"
+        }
+      ],
+      "corridor": {
+        "tollway_detected": false,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 40.83253,
+            "lon": -115.76299
+          },
+          {
+            "at_mi": 28.8,
+            "lat": 41.06978,
+            "lon": -115.29866
+          },
+          {
+            "at_mi": 57.5,
+            "lat": 41.11247,
+            "lon": -114.80938
+          },
+          {
+            "at_mi": 86.2,
+            "lat": 40.92538,
+            "lon": -114.32809
+          },
+          {
+            "at_mi": 115.0,
+            "lat": 40.73888,
+            "lon": -113.87584
+          },
+          {
+            "at_mi": 143.8,
+            "lat": 40.72797,
+            "lon": -113.37582
+          },
+          {
+            "at_mi": 172.5,
+            "lat": 40.811,
+            "lon": -112.86972
+          },
+          {
+            "at_mi": 201.2,
+            "lat": 40.66542,
+            "lon": -112.36814
+          },
+          {
+            "at_mi": 230.0,
+            "lat": 40.7608,
+            "lon": -111.891
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 5095.1,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 28.8,
+            "elevation_ft": 5364.2,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 57.5,
+            "elevation_ft": 6145.0,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 86.2,
+            "elevation_ft": 5946.5,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 115.0,
+            "elevation_ft": 4209.3,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 143.8,
+            "elevation_ft": 4232.3,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 172.5,
+            "elevation_ft": 4530.8,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 201.2,
+            "elevation_ft": 4209.3,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 230.0,
+            "elevation_ft": 4287.4,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 86.2,
+            "avg_grade_pct": 0.18,
+            "terrain": "flat",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          },
+          {
+            "start_mi": 86.2,
+            "end_mi": 115.0,
+            "avg_grade_pct": -1.1,
+            "terrain": "hills",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          },
+          {
+            "start_mi": 115.0,
+            "end_mi": 230.0,
+            "avg_grade_pct": 0.01,
+            "terrain": "flat",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          }
+        ],
+        "checkpoints": [
+          {
+            "name": "I-80 corridor between Elko and Salt Lake City",
+            "at_mi": 115.0,
+            "type": "place",
+            "state": "Utah",
+            "highway": "I-80",
+            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
+          }
+        ],
+        "state_miles": [
+          {
+            "state": "Nevada",
+            "miles": 108.6
+          },
+          {
+            "state": "Utah",
+            "miles": 121.4
+          }
+        ],
+        "state_crossings": [
+          {
+            "at_mi": 108.6,
+            "from_state": "Nevada",
+            "state": "Utah",
+            "place": "Nevada-Utah line on I-80",
+            "source": "Computed from OSRM route geometry and public U.S. state boundary GeoJSON."
+          }
+        ],
+        "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
+      },
+      "terrain": "hills"
     }
   ],
   "route_stop_data": {
