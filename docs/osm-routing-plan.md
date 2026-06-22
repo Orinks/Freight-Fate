@@ -440,6 +440,82 @@ surface, and it is always optional.
 
 ---
 
+## Workstream E: Corridor Cues As Signage
+
+With ORS truck miles now authoritative (Workstream B) and OSM POIs mapped across
+the network, the remaining corridor data the game speaks while driving is the
+navigation/orientation layer. This workstream decides what to do with it.
+
+### What we surface today
+
+Three derived layers, announced as the truck drives (see `Trip.next_navigation_context`):
+
+- **`state_crossings`** -> "crossing from Illinois into Indiana near the I-65
+  state line south of Hammond".
+- **`checkpoints`** (named places) -> "Next place in N miles: Lafayette" --
+  control-city-style orientation.
+- **`grade_segments` / `elevation_samples`** -> terrain and grade cues;
+  **`state_miles`** -> per-state mileage.
+
+### Decision: keep it, but make it consequential
+
+The cues are the orientation backbone of an audio-first sim, and each maps to
+something real drivers track. The value is the **consequence**, not the
+narration, so the work is to wire cues to gameplay rather than add more lines:
+
+- **State lines are meaningful** (IFTA fuel-tax jurisdiction, speed-limit and
+  chain-law changes, ports-of-entry / weigh stations cluster at borders). Keep
+  the crossing as an *event* and hang a consequence on it (speed-limit change,
+  weigh-station stop, fuel-price shift).
+- **Checkpoints / control cities** are how truckers orient against guide signs.
+  Cheap and already derived -- keep.
+- **Grades** are the highest-value cue (brake checks, runaway ramps, chain-up
+  areas) and already have dense ORS data; extend the existing grade warnings.
+
+### On "use state sign data instead of 'crossing state line'"
+
+Data-reality check, because it constrains the design:
+
+- **Welcome-to-X signs are not reliably in OSM** -- no standard tag, near-zero
+  coverage. Announcements cannot be driven off real welcome-sign data.
+- **What is available and sign-like:** OSM exit **`destination` /
+  `destination:ref`** tags (the control cities printed on green guide signs),
+  highway **`ref`** (route shields, well mapped), OSM **`highway=milestone`**
+  (mile markers, patchy in the US), and **ORS step instructions** (the directions
+  response already returns per-step `instruction` + road `name`/`ref` -- the
+  authentic "what the sign says as you approach" source we already pay for).
+
+So the better version of the idea is not synthetic welcome-sign data; it is to
+read **ORS steps + OSM `destination`/`ref`** and phrase navigation the way
+signage actually reads ("In 2 miles, I-465 toward Indianapolis"), keeping the
+state crossing but upgrading its *content* from a generic line to sign-derived
+text plus real border context (welcome center / port-of-entry / weigh station
+when OSM has one).
+
+### Proposed work items
+
+1. **Sign-derived navigation phrasing.** Extend the ORS pipeline to capture
+   step `instruction`/`name`/`ref` and exit `destination` tags into the corridor
+   at build time (still offline at runtime, like every other corridor field).
+2. **State crossing -> consequence + context.** Attach a speed-limit / weigh
+   station / fuel-tax effect to the crossing event and enrich its text with the
+   actual border facility when present.
+3. **Re-introduce weigh stations as a distinct cue.** They are filtered out of
+   the POI stop list (you do not choose to stop there), but a mandatory-stop
+   border cue is exactly the kind of consequence above.
+4. **Grades -> existing brake/runaway warnings**, driven by the ORS steepness
+   extra already stored.
+
+### Constraints
+
+- **Build-time, not runtime.** All of the above is derived into `world.json`
+  during the ORS build, so the offline/deterministic runtime path is unchanged
+  (same rule as the rest of Workstream B/D).
+- **Accessibility.** New cues follow the existing spoken-label conventions and
+  the "never interrupt the screen reader for driving events" rule.
+
+---
+
 ## Risks And Open Questions
 
 - **`world.json` size at scale.** It is ~580 KB for 59 cities; at ~300 cities it
@@ -471,6 +547,8 @@ surface, and it is always optional.
    offline path provably unchanged.
 4. **Workstream C (expansion).** Staged node growth and streamed overlay, kept
    green by the coverage report at each batch.
+5. **Workstream E (corridor cues as signage).** After ORS data is authoritative;
+   build-time enrichment of navigation text + per-crossing consequences.
 
 ## Acceptance Artifacts
 
@@ -480,3 +558,6 @@ surface, and it is always optional.
   unchanged.
 - Credential-gated ORS HGV build smoke, skipped in CI without a key.
 - Attribution present in release materials and source notes (OSM/ODbL, ORS).
+- Corridor cues (Workstream E) derived at build time only: offline-determinism
+  test still passes with no network, and each state crossing carries a
+  consequence, not just narration.
