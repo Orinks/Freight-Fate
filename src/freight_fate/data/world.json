@@ -32536,7 +32536,34 @@
       "to": "Oceanside",
       "highway": "I-215",
       "miles": 70,
-      "stops": [],
+      "stops": [
+        {
+          "name": "Pilot Dealer Perris",
+          "type": "travel_center",
+          "at_mi": 13.0,
+          "source": "Pilot Flying J official locator lists Pilot Dealer store 1458 in Perris, CA with 36 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (1.0 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/ca/perris/23261-cajalco-expressway",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "restrooms",
+            "parking",
+            "scale"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated"
+        }
+      ],
       "corridor": {
         "tollway_detected": false,
         "route_points": [
@@ -32830,7 +32857,34 @@
       "to": "Victorville",
       "highway": "I-15",
       "miles": 84,
-      "stops": [],
+      "stops": [
+        {
+          "name": "Pilot Travel Center Hesperia",
+          "type": "travel_center",
+          "at_mi": 71.9,
+          "source": "Pilot Flying J official locator lists Pilot Travel Center store 381 in Hesperia, CA with 217 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.1 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/ca/hesperia/8701-us-395",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "restrooms",
+            "parking",
+            "scale"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated"
+        }
+      ],
       "corridor": {
         "tollway_detected": false,
         "route_points": [
@@ -33026,7 +33080,34 @@
       "to": "Lancaster",
       "highway": "I-5",
       "miles": 104,
-      "stops": [],
+      "stops": [
+        {
+          "name": "Pilot Travel Center Castaic",
+          "type": "travel_center",
+          "at_mi": 66.5,
+          "source": "Pilot Flying J official locator lists Pilot Travel Center store 372 in Castaic, CA with 54 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (17.1 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/ca/castaic/31642-castiac-rd",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "restrooms",
+            "parking",
+            "scale"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated"
+        }
+      ],
       "corridor": {
         "tollway_detected": false,
         "route_points": [
@@ -33516,7 +33597,34 @@
       "to": "Stockton",
       "highway": "I-5",
       "miles": 106,
-      "stops": [],
+      "stops": [
+        {
+          "name": "Flying J Travel Center Lodi",
+          "type": "travel_center",
+          "at_mi": 92.8,
+          "source": "Pilot Flying J official locator lists Flying J Travel Center store 617 in Lodi, CA with 197 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (5.8 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/ca/lodi/15100-thorton-rd",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "restrooms",
+            "parking",
+            "scale"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated"
+        }
+      ],
       "corridor": {
         "tollway_detected": false,
         "route_points": [
@@ -33807,7 +33915,34 @@
       "to": "Victorville",
       "highway": "I-215",
       "miles": 117,
-      "stops": [],
+      "stops": [
+        {
+          "name": "Pilot Dealer Perris",
+          "type": "travel_center",
+          "at_mi": 55.7,
+          "source": "Pilot Flying J official locator lists Pilot Dealer store 1458 in Perris, CA with 36 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.1 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/ca/perris/23261-cajalco-expressway",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "restrooms",
+            "parking",
+            "scale"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated"
+        }
+      ],
       "corridor": {
         "tollway_detected": false,
         "route_points": [
@@ -34600,7 +34735,33 @@
       "to": "Bakersfield",
       "highway": "CA-99",
       "miles": 81,
-      "stops": [],
+      "stops": [
+        {
+          "name": "Pilot Travel Center Bakersfield",
+          "type": "travel_center",
+          "at_mi": 66.5,
+          "source": "Pilot Flying J official locator lists Pilot Travel Center store 613 in Bakersfield, CA with 218 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (7.0 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/ca/bakersfield/17047-zachary-ave",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "restrooms",
+            "parking"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated"
+        }
+      ],
       "corridor": {
         "tollway_detected": false,
         "route_points": [
@@ -34792,7 +34953,58 @@
       "to": "Lancaster",
       "highway": "CA-99",
       "miles": 168,
-      "stops": [],
+      "stops": [
+        {
+          "name": "Pilot Travel Center Bakersfield",
+          "type": "travel_center",
+          "at_mi": 66.5,
+          "source": "Pilot Flying J official locator lists Pilot Travel Center store 613 in Bakersfield, CA with 218 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (9.3 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/ca/bakersfield/17047-zachary-ave",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "restrooms",
+            "parking"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated"
+        },
+        {
+          "name": "Love's Travel Stop Bakersfield",
+          "type": "travel_center",
+          "at_mi": 84.0,
+          "source": "Love's official store feed lists store 830 in Bakersfield, CA on CA Hwy-99, exit 18/Taft Hwy; at_mi estimated by projecting source coordinates onto checked-in route geometry (6.7 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking",
+            "restrooms"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "likely",
+          "curation": "curated"
+        }
+      ],
       "corridor": {
         "tollway_detected": false,
         "route_points": [
@@ -34917,7 +35129,34 @@
       "to": "Los Angeles",
       "highway": "I-15",
       "miles": 85,
-      "stops": [],
+      "stops": [
+        {
+          "name": "Pilot Travel Center Hesperia",
+          "type": "travel_center",
+          "at_mi": 12.3,
+          "source": "Pilot Flying J official locator lists Pilot Travel Center store 381 in Hesperia, CA with 217 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.1 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/ca/hesperia/8701-us-395",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "restrooms",
+            "parking",
+            "scale"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated"
+        }
+      ],
       "corridor": {
         "tollway_detected": true,
         "route_points": [
@@ -35113,7 +35352,33 @@
       "to": "Santa Rosa",
       "highway": "I-5",
       "miles": 153,
-      "stops": [],
+      "stops": [
+        {
+          "name": "Love's Travel Stop Williams",
+          "type": "travel_center",
+          "at_mi": 64.4,
+          "source": "Love's official store feed lists store 652 in Williams, CA on I-5, exit 578/Hwy 20; at_mi estimated by projecting source coordinates onto checked-in route geometry (8.6 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking",
+            "restrooms"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "likely",
+          "curation": "curated"
+        }
+      ],
       "corridor": {
         "tollway_detected": false,
         "route_points": [
@@ -35204,7 +35469,33 @@
       "to": "Fairfield",
       "highway": "I-80",
       "miles": 122,
-      "stops": [],
+      "stops": [
+        {
+          "name": "Pilot Dealer Sacramento",
+          "type": "travel_center",
+          "at_mi": 85.5,
+          "source": "Pilot Flying J official locator lists Pilot Dealer store 879 in Sacramento, CA with 275 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (12.9 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/ca/sacramento/2828-el-centro-rd",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "restrooms",
+            "parking"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated"
+        }
+      ],
       "corridor": {
         "tollway_detected": false,
         "route_points": [
@@ -35852,6 +36143,32 @@
             "parking",
             "restrooms"
           ]
+        },
+        {
+          "name": "Flying J Travel Center Edinburg",
+          "type": "travel_center",
+          "at_mi": 148.5,
+          "source": "Pilot Flying J official locator lists Flying J Travel Center store 727 in Edinburg, TX with 200 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (2.9 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/tx/edinburg/1305-e-monte-cristo-rd",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "restrooms",
+            "parking",
+            "scale"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated"
         }
       ],
       "corridor": {
@@ -36575,6 +36892,31 @@
             "food",
             "parking"
           ]
+        },
+        {
+          "name": "Love's Travel Stop Harlingen",
+          "type": "travel_center",
+          "at_mi": 30.4,
+          "source": "Love's official store feed lists store 885 in Harlingen, TX on I-69, exit 30/Templeton St; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.1 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking",
+            "restrooms"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "likely",
+          "curation": "curated"
         }
       ],
       "corridor": {
@@ -36687,7 +37029,59 @@
       "to": "Laredo",
       "highway": "I-69",
       "miles": 205,
-      "stops": [],
+      "stops": [
+        {
+          "name": "Love's Travel Stop Harlingen",
+          "type": "travel_center",
+          "at_mi": 29.3,
+          "source": "Love's official store feed lists store 885 in Harlingen, TX on I-69, exit 30/Templeton St; at_mi estimated by projecting source coordinates onto checked-in route geometry (5.0 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking",
+            "restrooms"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "likely",
+          "curation": "curated"
+        },
+        {
+          "name": "Flying J Travel Center Edinburg",
+          "type": "travel_center",
+          "at_mi": 54.1,
+          "source": "Pilot Flying J official locator lists Flying J Travel Center store 727 in Edinburg, TX with 200 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (10.2 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/tx/edinburg/1305-e-monte-cristo-rd",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "restrooms",
+            "parking",
+            "scale"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated"
+        }
+      ],
       "corridor": {
         "tollway_detected": false,
         "route_points": [
@@ -36808,7 +37202,34 @@
       "to": "Fort Worth",
       "highway": "I-35",
       "miles": 58,
-      "stops": [],
+      "stops": [
+        {
+          "name": "Pilot Travel Center Fort Worth",
+          "type": "travel_center",
+          "at_mi": 49.7,
+          "source": "Pilot Flying J official locator lists Pilot Travel Center store 434 in Fort Worth, TX with 181 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (11.9 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/tx/fort-worth/2400-alliance-gateway-fwy",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "restrooms",
+            "parking",
+            "scale"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated"
+        }
+      ],
       "corridor": {
         "tollway_detected": true,
         "route_points": [
@@ -37109,7 +37530,33 @@
       "to": "Austin",
       "highway": "I-35",
       "miles": 67,
-      "stops": [],
+      "stops": [
+        {
+          "name": "Flying J Dealer Jarrell",
+          "type": "travel_center",
+          "at_mi": 29.2,
+          "source": "Pilot Flying J official locator lists Flying J Dealer store 507 in Jarrell, TX with 140 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (6.1 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/tx/jarrell/11710-n-i-35",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "restrooms",
+            "parking"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated"
+        }
+      ],
       "corridor": {
         "tollway_detected": false,
         "route_points": [
@@ -37699,7 +38146,58 @@
       "to": "Amarillo",
       "highway": "I-27",
       "miles": 240,
-      "stops": [],
+      "stops": [
+        {
+          "name": "Flying J Travel Center Lubbock",
+          "type": "travel_center",
+          "at_mi": 118.2,
+          "source": "Pilot Flying J official locator lists Flying J Travel Center store 733 in Lubbock, TX with 69 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.4 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/tx/lubbock/602-4th-st",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "restrooms",
+            "parking"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated"
+        },
+        {
+          "name": "Love's Travel Stop Tulia",
+          "type": "travel_center",
+          "at_mi": 187.5,
+          "source": "Love's official store feed lists store 984 in Tulia, TX on I-27, exit 74/Hwy-86; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.2 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking",
+            "restrooms"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "likely",
+          "curation": "curated"
+        }
+      ],
       "corridor": {
         "tollway_detected": false,
         "route_points": [
@@ -38565,7 +39063,34 @@
       "to": "Wichita Falls",
       "highway": "I-20",
       "miles": 153,
-      "stops": [],
+      "stops": [
+        {
+          "name": "Flying J Travel Center Abilene",
+          "type": "travel_center",
+          "at_mi": 3.4,
+          "source": "Pilot Flying J official locator lists Flying J Travel Center store 738 in Abilene, TX with 200 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (7.5 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/tx/abilene/i-20-exit-277-101-n-fm-707",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "restrooms",
+            "parking",
+            "scale"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated"
+        }
+      ],
       "corridor": {
         "tollway_detected": false,
         "route_points": [
@@ -39181,7 +39706,33 @@
       "to": "Houston",
       "highway": "I-10",
       "miles": 86,
-      "stops": [],
+      "stops": [
+        {
+          "name": "Love's Travel Stop Baytown",
+          "type": "travel_center",
+          "at_mi": 64.9,
+          "source": "Love's official store feed lists store 904 in Baytown, TX on I-10, exit 789; at_mi estimated by projecting source coordinates onto checked-in route geometry (6.2 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking",
+            "restrooms"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "likely",
+          "curation": "curated"
+        }
+      ],
       "corridor": {
         "tollway_detected": false,
         "route_points": [
@@ -39383,7 +39934,34 @@
       "to": "Houston",
       "highway": "I-45",
       "miles": 95,
-      "stops": [],
+      "stops": [
+        {
+          "name": "Flying J Travel Center Houston",
+          "type": "travel_center",
+          "at_mi": 76.1,
+          "source": "Pilot Flying J official locator lists Flying J Travel Center store 729 in Houston, TX with 183 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (7.4 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/tx/houston/15919-north-fwy",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "restrooms",
+            "parking",
+            "scale"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated"
+        }
+      ],
       "corridor": {
         "tollway_detected": true,
         "route_points": [
@@ -39723,7 +40301,33 @@
       "to": "McKinney",
       "highway": "US-287",
       "miles": 133,
-      "stops": [],
+      "stops": [
+        {
+          "name": "Love's Travel Stop Rhome",
+          "type": "travel_center",
+          "at_mi": 81.0,
+          "source": "Love's official store feed lists store 380 in Rhome, TX on Hwy 287, exit Hwy 114; at_mi estimated by projecting source coordinates onto checked-in route geometry (12.9 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking",
+            "restrooms"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "likely",
+          "curation": "curated"
+        }
+      ],
       "corridor": {
         "tollway_detected": false,
         "route_points": [
@@ -39824,7 +40428,33 @@
       "to": "Oklahoma City",
       "highway": "I-44",
       "miles": 139,
-      "stops": [],
+      "stops": [
+        {
+          "name": "Love's Travel Stop Lawton",
+          "type": "travel_center",
+          "at_mi": 58.8,
+          "source": "Love's official store feed lists store 263 in Lawton, OK on I-44, exit 45; at_mi estimated by projecting source coordinates onto checked-in route geometry (4.0 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking",
+            "restrooms"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "likely",
+          "curation": "curated"
+        }
+      ],
       "corridor": {
         "tollway_detected": true,
         "route_points": [
@@ -40060,7 +40690,34 @@
       "to": "Dallas",
       "highway": "I-20",
       "miles": 98,
-      "stops": [],
+      "stops": [
+        {
+          "name": "Pilot Dealer Canton",
+          "type": "travel_center",
+          "at_mi": 32.7,
+          "source": "Pilot Flying J official locator lists Pilot Dealer store 883 in Canton, TX with 100 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.1 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/tx/canton/9800-i-20-frontage-rd",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "restrooms",
+            "parking",
+            "scale"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated"
+        }
+      ],
       "corridor": {
         "tollway_detected": false,
         "route_points": [
@@ -40151,7 +40808,32 @@
       "to": "Tampa",
       "highway": "I-75",
       "miles": 134,
-      "stops": [],
+      "stops": [
+        {
+          "name": "ONE9 Travel Center Ellenton",
+          "type": "travel_center",
+          "at_mi": 94.1,
+          "source": "Pilot Flying J official locator lists ONE9 Travel Center store 89 in Ellenton, FL; at_mi estimated by projecting source coordinates onto checked-in route geometry (2.5 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/fl/ellenton/1526-51st-ave-e",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "restrooms"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "limited",
+          "curation": "curated"
+        }
+      ],
       "corridor": {
         "tollway_detected": true,
         "route_points": [
@@ -40575,6 +41257,31 @@
       "miles": 161,
       "stops": [
         {
+          "name": "Love's Travel Stop Nashville",
+          "type": "travel_center",
+          "at_mi": 45.8,
+          "source": "Love's official store feed lists store 429 in Nashville, TN on I-65, exit 87; at_mi estimated by projecting source coordinates onto checked-in route geometry (2.0 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking",
+            "restrooms"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "likely",
+          "curation": "curated"
+        },
+        {
           "name": "The Bug Man",
           "type": "service_plaza",
           "at_mi": 80.5,
@@ -40718,6 +41425,31 @@
       "highway": "I-65",
       "miles": 195,
       "stops": [
+        {
+          "name": "ONE9 Travel Center Sonora",
+          "type": "travel_center",
+          "at_mi": 140.5,
+          "source": "Pilot Flying J official locator lists ONE9 Travel Center store 392 in Sonora, KY with 100 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (9.9 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/ky/sonora/450-e-western-ave",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "restrooms",
+            "parking"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated"
+        },
         {
           "name": "Pilot Travel Center",
           "type": "service_plaza",
@@ -41420,6 +42152,31 @@
       "miles": 175,
       "stops": [
         {
+          "name": "Love's Travel Stop McComb",
+          "type": "travel_center",
+          "at_mi": 81.5,
+          "source": "Love's official store feed lists store 393 in McComb, MS on I-55, exit 13; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.0 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking",
+            "restrooms"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "likely",
+          "curation": "curated"
+        },
+        {
           "name": "Big Boss Travel Plaza",
           "type": "service_plaza",
           "at_mi": 145.8,
@@ -41754,6 +42511,31 @@
             "food",
             "parking"
           ]
+        },
+        {
+          "name": "Love's Travel Stop Toomsuba",
+          "type": "travel_center",
+          "at_mi": 104.4,
+          "source": "Love's official store feed lists store 343 in Toomsuba, MS on I-20, exit 165; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.4 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking",
+            "restrooms"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "likely",
+          "curation": "curated"
         }
       ],
       "corridor": {
@@ -42494,7 +43276,34 @@
       "to": "Savannah",
       "highway": "I-95",
       "miles": 147,
-      "stops": [],
+      "stops": [
+        {
+          "name": "Pilot Travel Center Hardeeville",
+          "type": "travel_center",
+          "at_mi": 131.9,
+          "source": "Pilot Flying J official locator lists Pilot Travel Center store 4569 in Hardeeville, SC with 90 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.8 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/sc/hardeeville/15976-whyte-hardee-blvd",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "restrooms",
+            "parking",
+            "scale"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated"
+        }
+      ],
       "corridor": {
         "tollway_detected": false,
         "route_points": [
@@ -42996,7 +43805,34 @@
       "to": "Atlanta",
       "highway": "I-85",
       "miles": 73,
-      "stops": [],
+      "stops": [
+        {
+          "name": "Pilot Travel Center Braselton",
+          "type": "travel_center",
+          "at_mi": 27.9,
+          "source": "Pilot Flying J official locator lists Pilot Travel Center store 66 in Braselton, GA with 70 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (10.6 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/ga/braselton/5888-hwy-53",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "restrooms",
+            "parking",
+            "scale"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated"
+        }
+      ],
       "corridor": {
         "tollway_detected": true,
         "route_points": [
@@ -43087,7 +43923,58 @@
       "to": "Chattanooga",
       "highway": "I-75",
       "miles": 177,
-      "stops": [],
+      "stops": [
+        {
+          "name": "Love's Travel Stop Emerson",
+          "type": "travel_center",
+          "at_mi": 95.1,
+          "source": "Love's official store feed lists store 359 in Emerson, GA on I-75, exit 283; at_mi estimated by projecting source coordinates onto checked-in route geometry (3.2 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking",
+            "restrooms"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "likely",
+          "curation": "curated"
+        },
+        {
+          "name": "Love's Travel Stop Calhoun",
+          "type": "travel_center",
+          "at_mi": 122.9,
+          "source": "Love's official store feed lists store 735 in Calhoun, GA on I-75, exit 310; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.5 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking",
+            "restrooms"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "likely",
+          "curation": "curated"
+        }
+      ],
       "corridor": {
         "tollway_detected": true,
         "route_points": [
@@ -43212,6 +44099,31 @@
       "highway": "I-20",
       "miles": 163,
       "stops": [
+        {
+          "name": "Love's Travel Stop Thomson",
+          "type": "travel_center",
+          "at_mi": 64.3,
+          "source": "Love's official store feed lists store 354 in Thomson, GA on I-20, exit 172; at_mi estimated by projecting source coordinates onto checked-in route geometry (5.3 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking",
+            "restrooms"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "likely",
+          "curation": "curated"
+        },
         {
           "name": "Truck Stop 44",
           "type": "service_plaza",
@@ -43557,7 +44469,33 @@
       "to": "Cape Coral",
       "highway": "I-75",
       "miles": 138,
-      "stops": [],
+      "stops": [
+        {
+          "name": "Love's Travel Stop North Fort Myers",
+          "type": "travel_center",
+          "at_mi": 122.0,
+          "source": "Love's official store feed lists store 495 in North Fort Myers, FL on I-75, exit 143; at_mi estimated by projecting source coordinates onto checked-in route geometry (5.1 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking",
+            "restrooms"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "likely",
+          "curation": "curated"
+        }
+      ],
       "corridor": {
         "tollway_detected": true,
         "route_points": [
@@ -43658,7 +44596,33 @@
       "to": "Orlando",
       "highway": "I-95",
       "miles": 74,
-      "stops": [],
+      "stops": [
+        {
+          "name": "Love's Travel Stop Mims",
+          "type": "travel_center",
+          "at_mi": 38.1,
+          "source": "Love's official store feed lists store 868 in Mims, FL on I-95, exit 223/FL Hwy-46; at_mi estimated by projecting source coordinates onto checked-in route geometry (15.5 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking",
+            "restrooms"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "likely",
+          "curation": "curated"
+        }
+      ],
       "corridor": {
         "tollway_detected": true,
         "route_points": [
@@ -43749,7 +44713,33 @@
       "to": "Lakeland",
       "highway": "I-4",
       "miles": 107,
-      "stops": [],
+      "stops": [
+        {
+          "name": "Love's Travel Stop Davenport",
+          "type": "travel_center",
+          "at_mi": 80.2,
+          "source": "Love's official store feed lists store 627 in Davenport, FL on I-4, exit 55 @ Hwy 27 NB; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.9 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking",
+            "restrooms"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "likely",
+          "curation": "curated"
+        }
+      ],
       "corridor": {
         "tollway_detected": true,
         "route_points": [
@@ -43931,7 +44921,34 @@
       "to": "Raleigh",
       "highway": "I-40",
       "miles": 130,
-      "stops": [],
+      "stops": [
+        {
+          "name": "Pilot Travel Center Warsaw",
+          "type": "travel_center",
+          "at_mi": 62.5,
+          "source": "Pilot Flying J official locator lists Pilot Travel Center store 6996 in Warsaw, NC with 10 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (1.5 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/nc/warsaw/2574-w-nc-hwy-24",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "restrooms",
+            "parking",
+            "scale"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated"
+        }
+      ],
       "corridor": {
         "tollway_detected": false,
         "route_points": [
@@ -44487,7 +45504,58 @@
       "to": "Raleigh",
       "highway": "I-40",
       "miles": 164,
-      "stops": [],
+      "stops": [
+        {
+          "name": "ONE9 Travel Center McLeansville",
+          "type": "travel_center",
+          "at_mi": 98.4,
+          "source": "Pilot Flying J official locator lists ONE9 Travel Center store 7937 in McLeansville, NC; at_mi estimated by projecting source coordinates onto checked-in route geometry (12.5 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/nc/mcleansville/907-knox-rd",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "restrooms"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "limited",
+          "curation": "curated"
+        },
+        {
+          "name": "Flying J Travel Center Haw River",
+          "type": "travel_center",
+          "at_mi": 112.5,
+          "source": "Pilot Flying J official locator lists Flying J Travel Center store 682 in Haw River, NC with 251 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (3.2 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/nc/haw-river/1043-jimmie-kerr-rd",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "restrooms",
+            "parking",
+            "scale"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated"
+        }
+      ],
       "corridor": {
         "tollway_detected": false,
         "route_points": [
@@ -45058,7 +46126,33 @@
       "to": "Rochester",
       "highway": "I-90",
       "miles": 86,
-      "stops": [],
+      "stops": [
+        {
+          "name": "Love's Travel Stop Waterloo",
+          "type": "travel_center",
+          "at_mi": 40.2,
+          "source": "Love's official store feed lists store 820 in Waterloo, NY on I-90, exit 41 SWC; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.7 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking",
+            "restrooms"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "likely",
+          "curation": "curated"
+        }
+      ],
       "corridor": {
         "tollway_detected": true,
         "route_points": [
@@ -46092,7 +47186,34 @@
       "to": "New York",
       "highway": "I-78",
       "miles": 93,
-      "stops": [],
+      "stops": [
+        {
+          "name": "Pilot Travel Center Hampton",
+          "type": "travel_center",
+          "at_mi": 35.4,
+          "source": "Pilot Flying J official locator lists Pilot Travel Center store 190 in Hampton, NJ with 50 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (1.2 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/nj/hampton/66-nj-173",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "restrooms",
+            "parking",
+            "scale"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated"
+        }
+      ],
       "corridor": {
         "tollway_detected": true,
         "route_points": [
@@ -46321,7 +47442,34 @@
       "to": "Bridgeport",
       "highway": "I-78",
       "miles": 157,
-      "stops": [],
+      "stops": [
+        {
+          "name": "Pilot Travel Center Hampton",
+          "type": "travel_center",
+          "at_mi": 35.9,
+          "source": "Pilot Flying J official locator lists Pilot Travel Center store 190 in Hampton, NJ with 50 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (2.4 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/nj/hampton/66-nj-173",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "restrooms",
+            "parking",
+            "scale"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated"
+        }
+      ],
       "corridor": {
         "tollway_detected": true,
         "route_points": [
@@ -46457,7 +47605,34 @@
       "to": "Louisville",
       "highway": "I-64",
       "miles": 119,
-      "stops": [],
+      "stops": [
+        {
+          "name": "Pilot Travel Center Leavenworth",
+          "type": "travel_center",
+          "at_mi": 82.7,
+          "source": "Pilot Flying J official locator lists Pilot Travel Center store 478 in Leavenworth, IN with 75 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.4 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/in/leavenworth/6921-in-66",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "restrooms",
+            "parking",
+            "scale"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated"
+        }
+      ],
       "corridor": {
         "tollway_detected": false,
         "route_points": [
@@ -47022,7 +48197,58 @@
       "to": "Sioux Falls",
       "highway": "I-29",
       "miles": 248,
-      "stops": [],
+      "stops": [
+        {
+          "name": "Love's Travel Stop Fargo",
+          "type": "travel_center",
+          "at_mi": 3.7,
+          "source": "Love's official store feed lists store 353 in Fargo, ND on I-29, exit 62; at_mi estimated by projecting source coordinates onto checked-in route geometry (2.3 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking",
+            "restrooms"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "likely",
+          "curation": "curated"
+        },
+        {
+          "name": "Flying J Travel Center Sioux Falls",
+          "type": "travel_center",
+          "at_mi": 243.4,
+          "source": "Pilot Flying J official locator lists Flying J Travel Center store 716 in Sioux Falls, SD with 158 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (1.6 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/sd/sioux-falls/5201-n-granite-ln",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "restrooms",
+            "parking"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated"
+        }
+      ],
       "corridor": {
         "tollway_detected": false,
         "route_points": [
@@ -47186,7 +48412,83 @@
       "to": "Omaha",
       "highway": "I-29",
       "miles": 425,
-      "stops": [],
+      "stops": [
+        {
+          "name": "Love's Travel Stop Fargo",
+          "type": "travel_center",
+          "at_mi": 3.7,
+          "source": "Love's official store feed lists store 353 in Fargo, ND on I-29, exit 62; at_mi estimated by projecting source coordinates onto checked-in route geometry (2.3 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking",
+            "restrooms"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "likely",
+          "curation": "curated"
+        },
+        {
+          "name": "Flying J Travel Center Sioux Falls",
+          "type": "travel_center",
+          "at_mi": 241.6,
+          "source": "Pilot Flying J official locator lists Flying J Travel Center store 716 in Sioux Falls, SD with 158 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.3 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/sd/sioux-falls/5201-n-granite-ln",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "restrooms",
+            "parking"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated"
+        },
+        {
+          "name": "Love's Travel Stop Sioux City",
+          "type": "travel_center",
+          "at_mi": 332.2,
+          "source": "Love's official store feed lists store 479 in Sioux City, IA on I-29, exit 143; at_mi estimated by projecting source coordinates onto checked-in route geometry (1.4 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking",
+            "restrooms"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "likely",
+          "curation": "curated"
+        }
+      ],
       "corridor": {
         "tollway_detected": false,
         "route_points": [
@@ -47689,7 +48991,33 @@
       "to": "Fort Wayne",
       "highway": "I-69",
       "miles": 146,
-      "stops": [],
+      "stops": [
+        {
+          "name": "Love's Travel Stop Angola",
+          "type": "travel_center",
+          "at_mi": 104.6,
+          "source": "Love's official store feed lists store 551 in Angola, IN on I-69, exit 348; at_mi estimated by projecting source coordinates onto checked-in route geometry (1.2 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking",
+            "restrooms"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "likely",
+          "curation": "curated"
+        }
+      ],
       "corridor": {
         "tollway_detected": false,
         "route_points": [
@@ -47803,7 +49131,33 @@
       "to": "Davenport",
       "highway": "I-74",
       "miles": 98,
-      "stops": [],
+      "stops": [
+        {
+          "name": "Love's Travel Stop Knoxville",
+          "type": "travel_center",
+          "at_mi": 43.6,
+          "source": "Love's official store feed lists store 685 in Knoxville, IL on I-74, exit 51; at_mi estimated by projecting source coordinates onto checked-in route geometry (4.2 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking",
+            "restrooms"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "likely",
+          "curation": "curated"
+        }
+      ],
       "corridor": {
         "tollway_detected": false,
         "route_points": [
@@ -48028,7 +49382,34 @@
       "to": "Grand Rapids",
       "highway": "I-96",
       "miles": 68,
-      "stops": [],
+      "stops": [
+        {
+          "name": "ONE9 Travel Center Ionia",
+          "type": "travel_center",
+          "at_mi": 33.0,
+          "source": "Pilot Flying J official locator lists ONE9 Travel Center store 23 in Ionia, MI with 20 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.5 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/mi/ionia/7205-s-state-rd",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "restrooms",
+            "parking",
+            "scale"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated"
+        }
+      ],
       "corridor": {
         "tollway_detected": false,
         "route_points": [
@@ -48851,7 +50232,85 @@
       "to": "Grand Rapids",
       "highway": "I-94",
       "miles": 382,
-      "stops": [],
+      "stops": [
+        {
+          "name": "Pilot Travel Center Oak Creek",
+          "type": "travel_center",
+          "at_mi": 128.7,
+          "source": "Pilot Flying J official locator lists Pilot Travel Center store 40 in Oak Creek, WI with 150 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (1.4 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/wi/oak-creek/2031-w-ryan-rd",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "restrooms",
+            "parking",
+            "scale"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated"
+        },
+        {
+          "name": "Love's Travel Stop South Holland",
+          "type": "travel_center",
+          "at_mi": 218.2,
+          "source": "Love's official store feed lists store 606 in South Holland, IL on I-94, exit 73B @ 162nd St; at_mi estimated by projecting source coordinates onto checked-in route geometry (8.1 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking",
+            "restrooms"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "likely",
+          "curation": "curated"
+        },
+        {
+          "name": "Pilot Travel Center Benton Harbor",
+          "type": "travel_center",
+          "at_mi": 301.4,
+          "source": "Pilot Flying J official locator lists Pilot Travel Center store 666 in Benton Harbor, MI with 135 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (3.9 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/mi/benton-harbor/1860-e-napier-ave",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "restrooms",
+            "parking",
+            "scale"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated"
+        }
+      ],
       "corridor": {
         "tollway_detected": true,
         "route_points": [
@@ -49366,7 +50825,34 @@
       "to": "Grand Rapids",
       "highway": "I-196",
       "miles": 115,
-      "stops": [],
+      "stops": [
+        {
+          "name": "Pilot Travel Center Holland",
+          "type": "travel_center",
+          "at_mi": 87.1,
+          "source": "Pilot Flying J official locator lists Pilot Travel Center store 1021 in Holland, MI with 74 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.3 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/mi/holland/853-interchange-dr",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "restrooms",
+            "parking",
+            "scale"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated"
+        }
+      ],
       "corridor": {
         "tollway_detected": true,
         "route_points": [
@@ -49619,7 +51105,33 @@
       "to": "Worcester",
       "highway": "I-90",
       "miles": 131,
-      "stops": [],
+      "stops": [
+        {
+          "name": "Pilot Travel Center Chicopee",
+          "type": "travel_center",
+          "at_mi": 85.0,
+          "source": "Pilot Flying J official locator lists Pilot Travel Center store 1327 in Chicopee, MA with 25 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.6 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/ma/chicopee/357-burnett-rd",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "restrooms",
+            "parking"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated"
+        }
+      ],
       "corridor": {
         "tollway_detected": true,
         "route_points": [
@@ -49747,7 +51259,33 @@
       "to": "Bridgeport",
       "highway": "I-90",
       "miles": 136,
-      "stops": [],
+      "stops": [
+        {
+          "name": "Love's Travel Stop Canaan",
+          "type": "travel_center",
+          "at_mi": 32.3,
+          "source": "Love's official store feed lists store 611 in Canaan, NY on I-90, exit B3; at_mi estimated by projecting source coordinates onto checked-in route geometry (2.8 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking",
+            "restrooms"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "likely",
+          "curation": "curated"
+        }
+      ],
       "corridor": {
         "tollway_detected": true,
         "route_points": [
@@ -49872,7 +51410,33 @@
       "to": "Spokane",
       "highway": "I-90",
       "miles": 140,
-      "stops": [],
+      "stops": [
+        {
+          "name": "Love's Travel Stop Ritzville",
+          "type": "travel_center",
+          "at_mi": 79.8,
+          "source": "Love's official store feed lists store 514 in Ritzville, WA on I-90, exit 221; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.6 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking",
+            "restrooms"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "likely",
+          "curation": "curated"
+        }
+      ],
       "corridor": {
         "tollway_detected": false,
         "route_points": [
@@ -49983,7 +51547,59 @@
       "to": "Portland",
       "highway": "I-84",
       "miles": 219,
-      "stops": [],
+      "stops": [
+        {
+          "name": "Love's Travel Stop Boardman",
+          "type": "travel_center",
+          "at_mi": 60.4,
+          "source": "Love's official store feed lists store 650 in Boardman, OR on I-84, exit 159; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.5 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking",
+            "restrooms"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "likely",
+          "curation": "curated"
+        },
+        {
+          "name": "Pilot Travel Center Wasco",
+          "type": "travel_center",
+          "at_mi": 115.7,
+          "source": "Pilot Flying J official locator lists Pilot Travel Center store 195 in Wasco, OR with 37 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.6 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/or/wasco/91485-biggs-rufus-hwy",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "restrooms",
+            "parking",
+            "scale"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated"
+        }
+      ],
       "corridor": {
         "tollway_detected": false,
         "route_points": [
@@ -50643,6 +52259,56 @@
             "food",
             "parking"
           ]
+        },
+        {
+          "name": "Love's Travel Stop Troutdale",
+          "type": "travel_center",
+          "at_mi": 123.8,
+          "source": "Love's official store feed lists store 449 in Troutdale, OR on I-84, exit 17; at_mi estimated by projecting source coordinates onto checked-in route geometry (2.7 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking",
+            "restrooms"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "likely",
+          "curation": "curated"
+        },
+        {
+          "name": "Love's Travel Stop Boardman",
+          "type": "travel_center",
+          "at_mi": 266.4,
+          "source": "Love's official store feed lists store 650 in Boardman, OR on I-84, exit 159; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.6 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking",
+            "restrooms"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "likely",
+          "curation": "curated"
         }
       ],
       "corridor": {
@@ -50881,6 +52547,32 @@
             "parking",
             "restrooms"
           ]
+        },
+        {
+          "name": "Flying J Travel Center Olympia",
+          "type": "travel_center",
+          "at_mi": 162.4,
+          "source": "Pilot Flying J official locator lists Flying J Travel Center store 1169 in Olympia, WA with 74 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (3.5 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/wa/olympia/2725-93rd-ave-sw",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "restrooms",
+            "parking",
+            "scale"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated"
         }
       ],
       "corridor": {
@@ -51292,6 +52984,31 @@
       "miles": 453,
       "stops": [
         {
+          "name": "Love's Travel Stop Hardin",
+          "type": "travel_center",
+          "at_mi": 45.9,
+          "source": "Love's official store feed lists store 679 in Hardin, MT on I-90, exit 495/Hwy 47; at_mi estimated by projecting source coordinates onto checked-in route geometry (6.4 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking",
+            "restrooms"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "likely",
+          "curation": "curated"
+        },
+        {
           "name": "Black Diamond Trail Rest Area",
           "type": "public_rest_area",
           "at_mi": 120.8,
@@ -51307,6 +53024,31 @@
             "parking",
             "restrooms"
           ]
+        },
+        {
+          "name": "Love's Travel Stop Buffalo",
+          "type": "travel_center",
+          "at_mi": 163.1,
+          "source": "Love's official store feed lists store 965 in Buffalo, WY on I-90, exit 58/Hwy-16; at_mi estimated by projecting source coordinates onto checked-in route geometry (3.8 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking",
+            "restrooms"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "likely",
+          "curation": "curated"
         }
       ],
       "corridor": {
@@ -51522,7 +53264,85 @@
       "to": "Salt Lake City",
       "highway": "I-15",
       "miles": 554,
-      "stops": [],
+      "stops": [
+        {
+          "name": "Flying J Travel Center Idaho Falls",
+          "type": "travel_center",
+          "at_mi": 345.0,
+          "source": "Pilot Flying J official locator lists Flying J Travel Center store 1043 in Idaho Falls, ID with 97 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.5 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/id/idaho-falls/6485-w-overland-dr",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "restrooms",
+            "parking",
+            "scale"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated"
+        },
+        {
+          "name": "Flying J Travel Center McCammon",
+          "type": "travel_center",
+          "at_mi": 408.7,
+          "source": "Pilot Flying J official locator lists Flying J Travel Center store 641 in McCammon, ID with 84 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (1.2 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/id/mccammon/587-e-us-30",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "restrooms",
+            "parking",
+            "scale"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated"
+        },
+        {
+          "name": "Love's Travel Stop Brigham City",
+          "type": "travel_center",
+          "at_mi": 495.6,
+          "source": "Love's official store feed lists store 686 in Brigham City, UT on I-15, exit 363; at_mi estimated by projecting source coordinates onto checked-in route geometry (1.6 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking",
+            "restrooms"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "likely",
+          "curation": "curated"
+        }
+      ],
       "corridor": {
         "tollway_detected": false,
         "route_points": [
@@ -51822,6 +53642,31 @@
           ]
         },
         {
+          "name": "Love's Travel Stop Buffalo",
+          "type": "travel_center",
+          "at_mi": 162.9,
+          "source": "Love's official store feed lists store 965 in Buffalo, WY on I-90, exit 58/Hwy-16; at_mi estimated by projecting source coordinates onto checked-in route geometry (3.8 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking",
+            "restrooms"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "likely",
+          "curation": "curated"
+        },
+        {
           "name": "Dwyer Junction Rest Area",
           "type": "public_rest_area",
           "at_mi": 372.8,
@@ -52074,6 +53919,56 @@
       "highway": "I-84",
       "miles": 384,
       "stops": [
+        {
+          "name": "Flying J Travel Center Snowville",
+          "type": "travel_center",
+          "at_mi": 152.0,
+          "source": "Pilot Flying J official locator lists Flying J Travel Center store 774 in Snowville, UT with 36 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (1.0 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/ut/snowville/90-s-stone-rd",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "restrooms",
+            "parking"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated"
+        },
+        {
+          "name": "Love's Travel Stop Heyburn",
+          "type": "travel_center",
+          "at_mi": 224.0,
+          "source": "Love's official store feed lists store 334 in Heyburn, ID on I-84, exit 211/US Hwy-30; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.4 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking",
+            "restrooms"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "likely",
+          "curation": "curated"
+        },
         {
           "name": "Bliss Rest Area, I-84 Eastbound",
           "type": "public_rest_area",
@@ -52331,6 +54226,31 @@
             "food",
             "parking"
           ]
+        },
+        {
+          "name": "Pilot Dealer Littlefield",
+          "type": "travel_center",
+          "at_mi": 284.8,
+          "source": "Pilot Flying J official locator lists Pilot Dealer store 1185 in Littlefield, AZ with 23 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (1.1 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/az/littlefield/4031-fleet-st",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "restrooms",
+            "parking"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated"
         }
       ],
       "corridor": {
@@ -52611,6 +54531,32 @@
             "parking",
             "restrooms"
           ]
+        },
+        {
+          "name": "Flying J Travel Center Rawlins",
+          "type": "travel_center",
+          "at_mi": 303.6,
+          "source": "Pilot Flying J official locator lists Flying J Travel Center store 763 in Rawlins, WY with 200 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.3 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/wy/rawlins/i-80-johnson-rd",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "restrooms",
+            "parking",
+            "scale"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated"
         }
       ],
       "corridor": {
@@ -52841,7 +54787,33 @@
       "to": "Denver",
       "highway": "I-25",
       "miles": 113,
-      "stops": [],
+      "stops": [
+        {
+          "name": "Pilot Travel Center Colorado Springs",
+          "type": "travel_center",
+          "at_mi": 60.9,
+          "source": "Pilot Flying J official locator lists Pilot Travel Center store 1110 in Colorado Springs, CO with 72 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.2 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/co/colorado-springs/15455-terrazzo-drive",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "restrooms",
+            "parking"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated"
+        }
+      ],
       "corridor": {
         "tollway_detected": true,
         "route_points": [
@@ -52964,6 +54936,31 @@
       "highway": "I-25",
       "miles": 178,
       "stops": [
+        {
+          "name": "Pilot Travel Center Colorado Springs",
+          "type": "travel_center",
+          "at_mi": 61.4,
+          "source": "Pilot Flying J official locator lists Pilot Travel Center store 1110 in Colorado Springs, CO with 72 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.3 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/co/colorado-springs/15455-terrazzo-drive",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "restrooms",
+            "parking"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated"
+        },
         {
           "name": "Love's Travel Stop",
           "type": "service_plaza",
@@ -53104,7 +55101,58 @@
       "to": "Cheyenne",
       "highway": "I-25",
       "miles": 215,
-      "stops": [],
+      "stops": [
+        {
+          "name": "Pilot Travel Center Colorado Springs",
+          "type": "travel_center",
+          "at_mi": 61.1,
+          "source": "Pilot Flying J official locator lists Pilot Travel Center store 1110 in Colorado Springs, CO with 72 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (1.6 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/co/colorado-springs/15455-terrazzo-drive",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "restrooms",
+            "parking"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated"
+        },
+        {
+          "name": "Love's Travel Stop Berthoud",
+          "type": "travel_center",
+          "at_mi": 153.1,
+          "source": "Love's official store feed lists store 668 in Berthoud, CO on I-25, exit 250/E State Hwy 56; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.2 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking",
+            "restrooms"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "likely",
+          "curation": "curated"
+        }
+      ],
       "corridor": {
         "tollway_detected": true,
         "route_points": [
@@ -53414,7 +55462,58 @@
       "to": "Tucson",
       "highway": "I-10",
       "miles": 275,
-      "stops": [],
+      "stops": [
+        {
+          "name": "Flying J Travel Center Lordsburg",
+          "type": "travel_center",
+          "at_mi": 115.9,
+          "source": "Pilot Flying J official locator lists Flying J Travel Center store 690 in Lordsburg, NM with 265 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (4.3 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/nm/lordsburg/11-old-hwy-70",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "restrooms",
+            "parking"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated"
+        },
+        {
+          "name": "Love's Travel Stop Willcox",
+          "type": "travel_center",
+          "at_mi": 192.5,
+          "source": "Love's official store feed lists store 831 in Willcox, AZ on I-10, exit 340/Fort Grant Rd; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.3 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking",
+            "restrooms"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "likely",
+          "curation": "curated"
+        }
+      ],
       "corridor": {
         "tollway_detected": false,
         "route_points": [
@@ -53579,6 +55678,31 @@
       "highway": "I-10",
       "miles": 350,
       "stops": [
+        {
+          "name": "Xpress Fuel Travel Center Clint",
+          "type": "travel_center",
+          "at_mi": 69.5,
+          "source": "Pilot Flying J official locator lists Xpress Fuel Travel Center store 1262 in Clint, TX with 53 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (1.1 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/tx/clint/1590-fm1110",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "restrooms",
+            "parking"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated"
+        },
         {
           "name": "Ward County Eastbound Rest Area",
           "type": "public_rest_area",
