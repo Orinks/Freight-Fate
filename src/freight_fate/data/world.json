@@ -1717,6 +1717,97 @@
       "locations": [],
       "lat": 42.2711,
       "lon": -89.094
+    },
+    "Riverside": {
+      "lat": 33.95335,
+      "lon": -117.39616,
+      "region": "california",
+      "state": "California",
+      "locations": []
+    },
+    "Santa Ana": {
+      "lat": 33.74557,
+      "lon": -117.86783,
+      "region": "california",
+      "state": "California",
+      "locations": []
+    },
+    "Oxnard": {
+      "lat": 34.1975,
+      "lon": -119.17705,
+      "region": "california",
+      "state": "California",
+      "locations": []
+    },
+    "Santa Rosa": {
+      "lat": 38.44047,
+      "lon": -122.71443,
+      "region": "california",
+      "state": "California",
+      "locations": []
+    },
+    "Oceanside": {
+      "lat": 33.19587,
+      "lon": -117.37948,
+      "region": "california",
+      "state": "California",
+      "locations": []
+    },
+    "Lancaster": {
+      "lat": 34.69804,
+      "lon": -118.13674,
+      "region": "california",
+      "state": "California",
+      "locations": []
+    },
+    "Salinas": {
+      "lat": 36.67774,
+      "lon": -121.6555,
+      "region": "california",
+      "state": "California",
+      "locations": []
+    },
+    "Valencia": {
+      "lat": 34.44361,
+      "lon": -118.60953,
+      "region": "california",
+      "state": "California",
+      "locations": []
+    },
+    "Visalia": {
+      "lat": 36.33023,
+      "lon": -119.29206,
+      "region": "california",
+      "state": "California",
+      "locations": []
+    },
+    "Victorville": {
+      "lat": 34.53611,
+      "lon": -117.29116,
+      "region": "california",
+      "state": "California",
+      "locations": []
+    },
+    "Chico": {
+      "lat": 39.72849,
+      "lon": -121.83748,
+      "region": "california",
+      "state": "California",
+      "locations": []
+    },
+    "Fairfield": {
+      "lat": 38.24936,
+      "lon": -122.03997,
+      "region": "california",
+      "state": "California",
+      "locations": []
+    },
+    "Santa Maria": {
+      "lat": 34.95303,
+      "lon": -120.43572,
+      "region": "california",
+      "state": "California",
+      "locations": []
     }
   },
   "legs": [
@@ -34082,6 +34173,4010 @@
           ]
         }
       ]
+    },
+    {
+      "from": "Riverside",
+      "to": "Oceanside",
+      "highway": "I-215",
+      "miles": 70,
+      "stops": [
+        {
+          "name": "Food 4 Less",
+          "type": "fuel_station",
+          "at_mi": 17.5,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "limited",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "break"
+          ],
+          "services": [
+            "diesel",
+            "parking"
+          ]
+        },
+        {
+          "name": "Shell",
+          "type": "fuel_station",
+          "at_mi": 35.0,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "limited",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "break"
+          ],
+          "services": [
+            "diesel",
+            "parking"
+          ]
+        }
+      ],
+      "corridor": {
+        "tollway_detected": false,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 33.95324,
+            "lon": -117.39616
+          },
+          {
+            "at_mi": 17.5,
+            "lat": 33.78883,
+            "lon": -117.22389
+          },
+          {
+            "at_mi": 35.0,
+            "lat": 33.55536,
+            "lon": -117.18099
+          },
+          {
+            "at_mi": 52.5,
+            "lat": 33.32742,
+            "lon": -117.16335
+          },
+          {
+            "at_mi": 70.0,
+            "lat": 33.19586,
+            "lon": -117.37949
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 833.3,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 17.5,
+            "elevation_ft": 1440.3,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 35.0,
+            "elevation_ft": 1138.5,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 52.5,
+            "elevation_ft": 269.0,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 70.0,
+            "elevation_ft": 73.8,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 35.0,
+            "avg_grade_pct": 0.19,
+            "terrain": "flat",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          },
+          {
+            "start_mi": 35.0,
+            "end_mi": 52.5,
+            "avg_grade_pct": -1.06,
+            "terrain": "hills",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          },
+          {
+            "start_mi": 52.5,
+            "end_mi": 70.0,
+            "avg_grade_pct": -0.24,
+            "terrain": "flat",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          }
+        ],
+        "checkpoints": [
+          {
+            "name": "I-215 corridor between Riverside and Oceanside",
+            "at_mi": 35.0,
+            "type": "place",
+            "state": "California",
+            "highway": "I-215",
+            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
+          }
+        ],
+        "state_miles": [
+          {
+            "state": "California",
+            "miles": 70.0
+          }
+        ],
+        "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
+      },
+      "terrain": "hills"
+    },
+    {
+      "from": "Riverside",
+      "to": "Lancaster",
+      "highway": "I-215",
+      "miles": 85,
+      "stops": [
+        {
+          "name": "Arco",
+          "type": "fuel_station",
+          "at_mi": 21.3,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "limited",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "break"
+          ],
+          "services": [
+            "diesel",
+            "parking"
+          ]
+        },
+        {
+          "name": "Chevron",
+          "type": "fuel_station",
+          "at_mi": 42.5,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "limited",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "break"
+          ],
+          "services": [
+            "diesel",
+            "parking"
+          ]
+        }
+      ],
+      "corridor": {
+        "tollway_detected": false,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 33.95324,
+            "lon": -117.39616
+          },
+          {
+            "at_mi": 21.3,
+            "lat": 34.20458,
+            "lon": -117.37889
+          },
+          {
+            "at_mi": 42.5,
+            "lat": 34.42057,
+            "lon": -117.60778
+          },
+          {
+            "at_mi": 63.7,
+            "lat": 34.52035,
+            "lon": -117.93715
+          },
+          {
+            "at_mi": 85.0,
+            "lat": 34.69803,
+            "lon": -118.13688
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 833.3,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 21.3,
+            "elevation_ft": 1843.8,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 42.5,
+            "elevation_ft": 4363.5,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 63.7,
+            "elevation_ft": 2996.4,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 85.0,
+            "elevation_ft": 2362.2,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 63.7,
+            "avg_grade_pct": 0.69,
+            "terrain": "hills",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          },
+          {
+            "start_mi": 63.7,
+            "end_mi": 85.0,
+            "avg_grade_pct": -0.61,
+            "terrain": "flat",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          }
+        ],
+        "checkpoints": [
+          {
+            "name": "I-215 corridor between Riverside and Lancaster",
+            "at_mi": 42.5,
+            "type": "place",
+            "state": "California",
+            "highway": "I-215",
+            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
+          }
+        ],
+        "state_miles": [
+          {
+            "state": "California",
+            "miles": 85.0
+          }
+        ],
+        "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
+      },
+      "terrain": "hills"
+    },
+    {
+      "from": "Riverside",
+      "to": "Valencia",
+      "highway": "I-210",
+      "miles": 95,
+      "stops": [
+        {
+          "name": "Chevron",
+          "type": "fuel_station",
+          "at_mi": 47.5,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "limited",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "break"
+          ],
+          "services": [
+            "diesel",
+            "parking"
+          ]
+        }
+      ],
+      "corridor": {
+        "tollway_detected": false,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 33.95324,
+            "lon": -117.39616
+          },
+          {
+            "at_mi": 23.8,
+            "lat": 33.97493,
+            "lon": -117.69637
+          },
+          {
+            "at_mi": 47.5,
+            "lat": 34.13558,
+            "lon": -118.00507
+          },
+          {
+            "at_mi": 71.2,
+            "lat": 34.27088,
+            "lon": -118.34316
+          },
+          {
+            "at_mi": 95.0,
+            "lat": 34.4436,
+            "lon": -118.60955
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 833.3,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 23.8,
+            "elevation_ft": 603.7,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 47.5,
+            "elevation_ft": 449.5,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 71.2,
+            "elevation_ft": 1151.6,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 95.0,
+            "elevation_ft": 1032.8,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 95.0,
+            "avg_grade_pct": 0.04,
+            "terrain": "flat",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          }
+        ],
+        "checkpoints": [
+          {
+            "name": "I-210 corridor between Riverside and Valencia",
+            "at_mi": 47.5,
+            "type": "place",
+            "state": "California",
+            "highway": "I-210",
+            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
+          }
+        ],
+        "state_miles": [
+          {
+            "state": "California",
+            "miles": 95.0
+          }
+        ],
+        "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
+      },
+      "terrain": "flat"
+    },
+    {
+      "from": "Santa Ana",
+      "to": "Victorville",
+      "highway": "I-15",
+      "miles": 84,
+      "stops": [
+        {
+          "name": "Mobil",
+          "type": "fuel_station",
+          "at_mi": 42.0,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "limited",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "break"
+          ],
+          "services": [
+            "diesel",
+            "parking"
+          ]
+        }
+      ],
+      "corridor": {
+        "tollway_detected": false,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 33.74555,
+            "lon": -117.86783
+          },
+          {
+            "at_mi": 21.1,
+            "lat": 34.02271,
+            "lon": -117.81287
+          },
+          {
+            "at_mi": 42.0,
+            "lat": 34.13547,
+            "lon": -117.58539
+          },
+          {
+            "at_mi": 62.9,
+            "lat": 34.3126,
+            "lon": -117.47559
+          },
+          {
+            "at_mi": 84.0,
+            "lat": 34.53553,
+            "lon": -117.29181
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 128.0,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 21.1,
+            "elevation_ft": 764.4,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 42.0,
+            "elevation_ft": 1515.7,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 62.9,
+            "elevation_ft": 3143.0,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 84.0,
+            "elevation_ft": 2752.6,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 42.0,
+            "avg_grade_pct": 0.7,
+            "terrain": "flat",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          },
+          {
+            "start_mi": 42.0,
+            "end_mi": 62.9,
+            "avg_grade_pct": 1.64,
+            "terrain": "hills",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          },
+          {
+            "start_mi": 62.9,
+            "end_mi": 84.0,
+            "avg_grade_pct": -0.39,
+            "terrain": "flat",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          }
+        ],
+        "checkpoints": [
+          {
+            "name": "I-15 corridor between Santa Ana and Victorville",
+            "at_mi": 42.0,
+            "type": "place",
+            "state": "California",
+            "highway": "I-15",
+            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
+          }
+        ],
+        "state_miles": [
+          {
+            "state": "California",
+            "miles": 84.0
+          }
+        ],
+        "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
+      },
+      "terrain": "hills"
+    },
+    {
+      "from": "Santa Ana",
+      "to": "Valencia",
+      "highway": "I-5",
+      "miles": 73,
+      "stops": [
+        {
+          "name": "Chevron",
+          "type": "fuel_station",
+          "at_mi": 36.5,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "limited",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "break"
+          ],
+          "services": [
+            "diesel",
+            "parking"
+          ]
+        }
+      ],
+      "corridor": {
+        "tollway_detected": false,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 33.74555,
+            "lon": -117.86783
+          },
+          {
+            "at_mi": 18.2,
+            "lat": 33.91465,
+            "lon": -118.07712
+          },
+          {
+            "at_mi": 36.5,
+            "lat": 34.10587,
+            "lon": -118.25435
+          },
+          {
+            "at_mi": 54.8,
+            "lat": 34.28743,
+            "lon": -118.46339
+          },
+          {
+            "at_mi": 73.0,
+            "lat": 34.4436,
+            "lon": -118.60955
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 128.0,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 18.2,
+            "elevation_ft": 108.3,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 36.5,
+            "elevation_ft": 377.3,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 54.8,
+            "elevation_ft": 1174.5,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 73.0,
+            "elevation_ft": 1032.8,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 73.0,
+            "avg_grade_pct": 0.23,
+            "terrain": "flat",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          }
+        ],
+        "checkpoints": [
+          {
+            "name": "I-5 corridor between Santa Ana and Valencia",
+            "at_mi": 36.5,
+            "type": "place",
+            "state": "California",
+            "highway": "I-5",
+            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
+          }
+        ],
+        "state_miles": [
+          {
+            "state": "California",
+            "miles": 73.0
+          }
+        ],
+        "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
+      },
+      "terrain": "flat"
+    },
+    {
+      "from": "Santa Ana",
+      "to": "Lancaster",
+      "highway": "I-5",
+      "miles": 104,
+      "stops": [
+        {
+          "name": "Chevron",
+          "type": "fuel_station",
+          "at_mi": 52.0,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "limited",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "break"
+          ],
+          "services": [
+            "diesel",
+            "parking"
+          ]
+        }
+      ],
+      "corridor": {
+        "tollway_detected": false,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 33.74555,
+            "lon": -117.86783
+          },
+          {
+            "at_mi": 26.0,
+            "lat": 34.00537,
+            "lon": -118.154
+          },
+          {
+            "at_mi": 52.0,
+            "lat": 34.25526,
+            "lon": -118.43334
+          },
+          {
+            "at_mi": 78.0,
+            "lat": 34.48044,
+            "lon": -118.29168
+          },
+          {
+            "at_mi": 104.0,
+            "lat": 34.69803,
+            "lon": -118.13688
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 128.0,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 26.0,
+            "elevation_ft": 154.2,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 52.0,
+            "elevation_ft": 951.4,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 78.0,
+            "elevation_ft": 2702.8,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 104.0,
+            "elevation_ft": 2362.2,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 52.0,
+            "avg_grade_pct": 0.39,
+            "terrain": "flat",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          },
+          {
+            "start_mi": 52.0,
+            "end_mi": 78.0,
+            "avg_grade_pct": 1.66,
+            "terrain": "hills",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          },
+          {
+            "start_mi": 78.0,
+            "end_mi": 104.0,
+            "avg_grade_pct": -0.32,
+            "terrain": "flat",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          }
+        ],
+        "checkpoints": [
+          {
+            "name": "I-5 corridor between Santa Ana and Lancaster",
+            "at_mi": 52.0,
+            "type": "place",
+            "state": "California",
+            "highway": "I-5",
+            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
+          }
+        ],
+        "state_miles": [
+          {
+            "state": "California",
+            "miles": 104.0
+          }
+        ],
+        "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
+      },
+      "terrain": "hills"
+    },
+    {
+      "from": "Oxnard",
+      "to": "Los Angeles",
+      "highway": "US-101",
+      "miles": 61,
+      "stops": [
+        {
+          "name": "Arco",
+          "type": "fuel_station",
+          "at_mi": 15.2,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "limited",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "break"
+          ],
+          "services": [
+            "diesel",
+            "parking"
+          ]
+        },
+        {
+          "name": "Speedway",
+          "type": "fuel_station",
+          "at_mi": 30.5,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "limited",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "break"
+          ],
+          "services": [
+            "diesel",
+            "parking"
+          ]
+        }
+      ],
+      "corridor": {
+        "tollway_detected": false,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 34.19768,
+            "lon": -119.17705
+          },
+          {
+            "at_mi": 15.2,
+            "lat": 34.19358,
+            "lon": -118.94782
+          },
+          {
+            "at_mi": 30.5,
+            "lat": 34.14545,
+            "lon": -118.70082
+          },
+          {
+            "at_mi": 45.8,
+            "lat": 34.15713,
+            "lon": -118.44945
+          },
+          {
+            "at_mi": 61.0,
+            "lat": 34.05233,
+            "lon": -118.24356
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 62.3,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 15.2,
+            "elevation_ft": 764.1,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 30.5,
+            "elevation_ft": 771.0,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 45.8,
+            "elevation_ft": 676.8,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 61.0,
+            "elevation_ft": 300.2,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 15.2,
+            "avg_grade_pct": 0.83,
+            "terrain": "hills",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          },
+          {
+            "start_mi": 15.2,
+            "end_mi": 61.0,
+            "avg_grade_pct": -0.18,
+            "terrain": "flat",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          }
+        ],
+        "checkpoints": [
+          {
+            "name": "US-101 corridor between Oxnard and Los Angeles",
+            "at_mi": 30.5,
+            "type": "place",
+            "state": "California",
+            "highway": "US-101",
+            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
+          }
+        ],
+        "state_miles": [
+          {
+            "state": "California",
+            "miles": 61.0
+          }
+        ],
+        "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
+      },
+      "terrain": "hills"
+    },
+    {
+      "from": "Oxnard",
+      "to": "Lancaster",
+      "highway": "CA-14",
+      "miles": 103,
+      "stops": [
+        {
+          "name": "Simi Petroleum",
+          "type": "fuel_station",
+          "at_mi": 25.7,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "limited",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "break"
+          ],
+          "services": [
+            "diesel",
+            "parking"
+          ]
+        },
+        {
+          "name": "76",
+          "type": "fuel_station",
+          "at_mi": 51.5,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "limited",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "break"
+          ],
+          "services": [
+            "diesel",
+            "parking"
+          ]
+        }
+      ],
+      "corridor": {
+        "tollway_detected": false,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 34.19768,
+            "lon": -119.17705
+          },
+          {
+            "at_mi": 25.7,
+            "lat": 34.2478,
+            "lon": -118.83971
+          },
+          {
+            "at_mi": 51.5,
+            "lat": 34.27075,
+            "lon": -118.48868
+          },
+          {
+            "at_mi": 77.3,
+            "lat": 34.48059,
+            "lon": -118.29112
+          },
+          {
+            "at_mi": 103.0,
+            "lat": 34.69803,
+            "lon": -118.13688
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 62.3,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 25.7,
+            "elevation_ft": 803.8,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 51.5,
+            "elevation_ft": 951.4,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 77.3,
+            "elevation_ft": 2716.5,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 103.0,
+            "elevation_ft": 2362.2,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 51.5,
+            "avg_grade_pct": 0.42,
+            "terrain": "flat",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          },
+          {
+            "start_mi": 51.5,
+            "end_mi": 77.3,
+            "avg_grade_pct": 1.65,
+            "terrain": "hills",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          },
+          {
+            "start_mi": 77.3,
+            "end_mi": 103.0,
+            "avg_grade_pct": -0.33,
+            "terrain": "flat",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          }
+        ],
+        "checkpoints": [
+          {
+            "name": "CA-14 corridor between Oxnard and Lancaster",
+            "at_mi": 51.5,
+            "type": "place",
+            "state": "California",
+            "highway": "CA-14",
+            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
+          }
+        ],
+        "state_miles": [
+          {
+            "state": "California",
+            "miles": 103.0
+          }
+        ],
+        "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
+      },
+      "terrain": "hills"
+    },
+    {
+      "from": "Oxnard",
+      "to": "Santa Ana",
+      "highway": "I-5",
+      "miles": 94,
+      "stops": [
+        {
+          "name": "76",
+          "type": "fuel_station",
+          "at_mi": 47.0,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "limited",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "break"
+          ],
+          "services": [
+            "diesel",
+            "parking"
+          ]
+        }
+      ],
+      "corridor": {
+        "tollway_detected": false,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 34.19768,
+            "lon": -119.17705
+          },
+          {
+            "at_mi": 23.5,
+            "lat": 34.1543,
+            "lon": -118.82036
+          },
+          {
+            "at_mi": 47.0,
+            "lat": 34.15556,
+            "lon": -118.43456
+          },
+          {
+            "at_mi": 70.5,
+            "lat": 33.97643,
+            "lon": -118.12589
+          },
+          {
+            "at_mi": 94.0,
+            "lat": 33.74555,
+            "lon": -117.86783
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 62.3,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 23.5,
+            "elevation_ft": 948.2,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 47.0,
+            "elevation_ft": 652.9,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 70.5,
+            "elevation_ft": 164.4,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 94.0,
+            "elevation_ft": 128.0,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 94.0,
+            "avg_grade_pct": 0.01,
+            "terrain": "flat",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          }
+        ],
+        "checkpoints": [
+          {
+            "name": "I-5 corridor between Oxnard and Santa Ana",
+            "at_mi": 47.0,
+            "type": "place",
+            "state": "California",
+            "highway": "I-5",
+            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
+          }
+        ],
+        "state_miles": [
+          {
+            "state": "California",
+            "miles": 94.0
+          }
+        ],
+        "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
+      },
+      "terrain": "flat"
+    },
+    {
+      "from": "Santa Rosa",
+      "to": "Sacramento",
+      "highway": "I-80",
+      "miles": 95,
+      "stops": [
+        {
+          "name": "Bonneau Gas",
+          "type": "fuel_station",
+          "at_mi": 23.8,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "limited",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "break"
+          ],
+          "services": [
+            "diesel",
+            "parking"
+          ]
+        },
+        {
+          "name": "Arco",
+          "type": "fuel_station",
+          "at_mi": 47.5,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "limited",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "break"
+          ],
+          "services": [
+            "diesel",
+            "parking"
+          ]
+        }
+      ],
+      "corridor": {
+        "tollway_detected": false,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 38.44034,
+            "lon": -122.71432
+          },
+          {
+            "at_mi": 23.8,
+            "lat": 38.23714,
+            "lon": -122.51687
+          },
+          {
+            "at_mi": 47.5,
+            "lat": 38.20819,
+            "lon": -122.14901
+          },
+          {
+            "at_mi": 71.2,
+            "lat": 38.45174,
+            "lon": -121.85095
+          },
+          {
+            "at_mi": 95.0,
+            "lat": 38.5816,
+            "lon": -121.49441
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 173.9,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 23.8,
+            "elevation_ft": 329.7,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 47.5,
+            "elevation_ft": 63.0,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 71.2,
+            "elevation_ft": 68.9,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 95.0,
+            "elevation_ft": 60.7,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 95.0,
+            "avg_grade_pct": -0.03,
+            "terrain": "flat",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          }
+        ],
+        "checkpoints": [
+          {
+            "name": "I-80 corridor between Santa Rosa and Sacramento",
+            "at_mi": 47.5,
+            "type": "place",
+            "state": "California",
+            "highway": "I-80",
+            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
+          }
+        ],
+        "state_miles": [
+          {
+            "state": "California",
+            "miles": 95.0
+          }
+        ],
+        "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
+      },
+      "terrain": "flat"
+    },
+    {
+      "from": "Santa Rosa",
+      "to": "Stockton",
+      "highway": "I-5",
+      "miles": 106,
+      "stops": [
+        {
+          "name": "Chevron",
+          "type": "fuel_station",
+          "at_mi": 53.0,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "limited",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "break"
+          ],
+          "services": [
+            "diesel",
+            "parking"
+          ]
+        }
+      ],
+      "corridor": {
+        "tollway_detected": false,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 38.44034,
+            "lon": -122.71432
+          },
+          {
+            "at_mi": 26.6,
+            "lat": 38.25494,
+            "lon": -122.48096
+          },
+          {
+            "at_mi": 53.0,
+            "lat": 38.24039,
+            "lon": -122.06262
+          },
+          {
+            "at_mi": 79.4,
+            "lat": 38.13998,
+            "lon": -121.62379
+          },
+          {
+            "at_mi": 106.0,
+            "lat": 37.95764,
+            "lon": -121.29078
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 173.9,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 26.6,
+            "elevation_ft": 42.0,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 53.0,
+            "elevation_ft": 9.8,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 79.4,
+            "elevation_ft": -6.6,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 106.0,
+            "elevation_ft": 17.7,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 106.0,
+            "avg_grade_pct": -0.03,
+            "terrain": "flat",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          }
+        ],
+        "checkpoints": [
+          {
+            "name": "I-5 corridor between Santa Rosa and Stockton",
+            "at_mi": 53.0,
+            "type": "place",
+            "state": "California",
+            "highway": "I-5",
+            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
+          }
+        ],
+        "state_miles": [
+          {
+            "state": "California",
+            "miles": 106.0
+          }
+        ],
+        "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
+      },
+      "terrain": "flat"
+    },
+    {
+      "from": "Santa Rosa",
+      "to": "San Jose",
+      "highway": "I-880",
+      "miles": 100,
+      "stops": [
+        {
+          "name": "Chevron",
+          "type": "fuel_station",
+          "at_mi": 50.0,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "limited",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "break"
+          ],
+          "services": [
+            "diesel",
+            "parking"
+          ]
+        },
+        {
+          "name": "National Petroleum",
+          "type": "fuel_station",
+          "at_mi": 75.0,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "limited",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "break"
+          ],
+          "services": [
+            "diesel",
+            "parking"
+          ]
+        }
+      ],
+      "corridor": {
+        "tollway_detected": false,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 38.44034,
+            "lon": -122.71432
+          },
+          {
+            "at_mi": 25.0,
+            "lat": 38.13209,
+            "lon": -122.5639
+          },
+          {
+            "at_mi": 50.0,
+            "lat": 37.90144,
+            "lon": -122.31524
+          },
+          {
+            "at_mi": 75.0,
+            "lat": 37.62836,
+            "lon": -122.08226
+          },
+          {
+            "at_mi": 100.0,
+            "lat": 37.3382,
+            "lon": -121.8863
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 173.9,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 25.0,
+            "elevation_ft": 4.6,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 50.0,
+            "elevation_ft": 3.3,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 75.0,
+            "elevation_ft": 13.1,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 100.0,
+            "elevation_ft": 75.5,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 100.0,
+            "avg_grade_pct": -0.02,
+            "terrain": "flat",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          }
+        ],
+        "checkpoints": [
+          {
+            "name": "I-880 corridor between Santa Rosa and San Jose",
+            "at_mi": 50.0,
+            "type": "place",
+            "state": "California",
+            "highway": "I-880",
+            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
+          }
+        ],
+        "state_miles": [
+          {
+            "state": "California",
+            "miles": 100.0
+          }
+        ],
+        "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
+      },
+      "terrain": "flat"
+    },
+    {
+      "from": "Oceanside",
+      "to": "Los Angeles",
+      "highway": "I-5",
+      "miles": 84,
+      "stops": [
+        {
+          "name": "Rayzilla Viewpoint",
+          "type": "public_rest_area",
+          "at_mi": 21.0,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "limited",
+          "actions": [
+            "park",
+            "save",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "parking",
+            "restrooms"
+          ]
+        },
+        {
+          "name": "Laguna Hills Car Wash",
+          "type": "fuel_station",
+          "at_mi": 42.0,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "limited",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "break"
+          ],
+          "services": [
+            "diesel",
+            "parking"
+          ]
+        }
+      ],
+      "corridor": {
+        "tollway_detected": false,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 33.19586,
+            "lon": -117.37949
+          },
+          {
+            "at_mi": 21.0,
+            "lat": 33.41484,
+            "lon": -117.60287
+          },
+          {
+            "at_mi": 42.0,
+            "lat": 33.65424,
+            "lon": -117.74255
+          },
+          {
+            "at_mi": 63.0,
+            "lat": 33.86567,
+            "lon": -117.99653
+          },
+          {
+            "at_mi": 84.0,
+            "lat": 34.05233,
+            "lon": -118.24356
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 73.8,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 21.0,
+            "elevation_ft": 187.0,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 42.0,
+            "elevation_ft": 246.1,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 63.0,
+            "elevation_ft": 82.0,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 84.0,
+            "elevation_ft": 300.2,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 84.0,
+            "avg_grade_pct": 0.05,
+            "terrain": "flat",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          }
+        ],
+        "checkpoints": [
+          {
+            "name": "I-5 corridor between Oceanside and Los Angeles",
+            "at_mi": 42.0,
+            "type": "place",
+            "state": "California",
+            "highway": "I-5",
+            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
+          }
+        ],
+        "state_miles": [
+          {
+            "state": "California",
+            "miles": 84.0
+          }
+        ],
+        "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
+      },
+      "terrain": "flat"
+    },
+    {
+      "from": "Oceanside",
+      "to": "Victorville",
+      "highway": "I-215",
+      "miles": 117,
+      "stops": [
+        {
+          "name": "Circle K",
+          "type": "fuel_station",
+          "at_mi": 58.5,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "limited",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "break"
+          ],
+          "services": [
+            "diesel",
+            "parking"
+          ]
+        }
+      ],
+      "corridor": {
+        "tollway_detected": false,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 33.19586,
+            "lon": -117.37949
+          },
+          {
+            "at_mi": 29.2,
+            "lat": 33.48662,
+            "lon": -117.14269
+          },
+          {
+            "at_mi": 58.5,
+            "lat": 33.87819,
+            "lon": -117.26633
+          },
+          {
+            "at_mi": 87.8,
+            "lat": 34.2204,
+            "lon": -117.39913
+          },
+          {
+            "at_mi": 117.0,
+            "lat": 34.53553,
+            "lon": -117.29181
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 73.8,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 29.2,
+            "elevation_ft": 1010.5,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 58.5,
+            "elevation_ft": 1525.6,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 87.8,
+            "elevation_ft": 2030.8,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 117.0,
+            "elevation_ft": 2752.6,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 117.0,
+            "avg_grade_pct": 0.47,
+            "terrain": "flat",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          }
+        ],
+        "checkpoints": [
+          {
+            "name": "I-215 corridor between Oceanside and Victorville",
+            "at_mi": 58.5,
+            "type": "place",
+            "state": "California",
+            "highway": "I-215",
+            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
+          }
+        ],
+        "state_miles": [
+          {
+            "state": "California",
+            "miles": 117.0
+          }
+        ],
+        "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
+      },
+      "terrain": "flat"
+    },
+    {
+      "from": "Lancaster",
+      "to": "Bakersfield",
+      "highway": "CA-58",
+      "miles": 89,
+      "stops": [
+        {
+          "name": "Pemex",
+          "type": "fuel_station",
+          "at_mi": 22.2,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "limited",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "break"
+          ],
+          "services": [
+            "diesel",
+            "parking"
+          ]
+        },
+        {
+          "name": "Pilot Travel Center",
+          "type": "service_plaza",
+          "at_mi": 44.5,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ]
+        }
+      ],
+      "corridor": {
+        "tollway_detected": false,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 34.69803,
+            "lon": -118.13688
+          },
+          {
+            "at_mi": 22.2,
+            "lat": 34.99355,
+            "lon": -118.15938
+          },
+          {
+            "at_mi": 44.5,
+            "lat": 35.11538,
+            "lon": -118.37703
+          },
+          {
+            "at_mi": 66.8,
+            "lat": 35.27001,
+            "lon": -118.68212
+          },
+          {
+            "at_mi": 89.0,
+            "lat": 35.37324,
+            "lon": -119.0187
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 2362.2,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 22.2,
+            "elevation_ft": 2654.2,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 44.5,
+            "elevation_ft": 3981.3,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 66.8,
+            "elevation_ft": 1811.0,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 89.0,
+            "elevation_ft": 410.1,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 22.2,
+            "avg_grade_pct": 0.27,
+            "terrain": "flat",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          },
+          {
+            "start_mi": 22.2,
+            "end_mi": 89.0,
+            "avg_grade_pct": -0.7,
+            "terrain": "hills",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          }
+        ],
+        "checkpoints": [
+          {
+            "name": "CA-58 corridor between Lancaster and Bakersfield",
+            "at_mi": 44.5,
+            "type": "place",
+            "state": "California",
+            "highway": "CA-58",
+            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
+          }
+        ],
+        "state_miles": [
+          {
+            "state": "California",
+            "miles": 89.0
+          }
+        ],
+        "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
+      },
+      "terrain": "hills"
+    },
+    {
+      "from": "Salinas",
+      "to": "San Francisco",
+      "highway": "US-101",
+      "miles": 110,
+      "stops": [
+        {
+          "name": "Pacific Pride",
+          "type": "fuel_station",
+          "at_mi": 55.0,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "limited",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "break"
+          ],
+          "services": [
+            "diesel",
+            "parking"
+          ]
+        }
+      ],
+      "corridor": {
+        "tollway_detected": true,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 36.67757,
+            "lon": -121.6555
+          },
+          {
+            "at_mi": 27.5,
+            "lat": 37.00126,
+            "lon": -121.55596
+          },
+          {
+            "at_mi": 55.0,
+            "lat": 37.32001,
+            "lon": -121.83285
+          },
+          {
+            "at_mi": 82.5,
+            "lat": 37.64642,
+            "lon": -122.09494
+          },
+          {
+            "at_mi": 110.0,
+            "lat": 37.77494,
+            "lon": -122.41945
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 51.5,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 27.5,
+            "elevation_ft": 189.0,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 55.0,
+            "elevation_ft": 118.1,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 82.5,
+            "elevation_ft": 39.4,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 110.0,
+            "elevation_ft": 64.0,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 110.0,
+            "avg_grade_pct": 0.0,
+            "terrain": "flat",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          }
+        ],
+        "checkpoints": [
+          {
+            "name": "US-101 corridor between Salinas and San Francisco",
+            "at_mi": 55.0,
+            "type": "place",
+            "state": "California",
+            "highway": "US-101",
+            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
+          }
+        ],
+        "state_miles": [
+          {
+            "state": "California",
+            "miles": 110.0
+          }
+        ],
+        "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
+      },
+      "terrain": "flat"
+    },
+    {
+      "from": "Salinas",
+      "to": "Stockton",
+      "highway": "I-5",
+      "miles": 131,
+      "stops": [
+        {
+          "name": "Love's Travel Stop",
+          "type": "service_plaza",
+          "at_mi": 65.5,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ]
+        },
+        {
+          "name": "Joe's Travel Plaza",
+          "type": "travel_center",
+          "at_mi": 98.2,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ]
+        }
+      ],
+      "corridor": {
+        "tollway_detected": false,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 36.67757,
+            "lon": -121.6555
+          },
+          {
+            "at_mi": 32.8,
+            "lat": 36.9378,
+            "lon": -121.3868
+          },
+          {
+            "at_mi": 65.5,
+            "lat": 37.11372,
+            "lon": -121.0214
+          },
+          {
+            "at_mi": 98.2,
+            "lat": 37.53529,
+            "lon": -121.26114
+          },
+          {
+            "at_mi": 131.0,
+            "lat": 37.95764,
+            "lon": -121.29078
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 51.5,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 32.8,
+            "elevation_ft": 190.3,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 65.5,
+            "elevation_ft": 155.8,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 98.2,
+            "elevation_ft": 270.7,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 131.0,
+            "elevation_ft": 17.7,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 131.0,
+            "avg_grade_pct": -0.01,
+            "terrain": "flat",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          }
+        ],
+        "checkpoints": [
+          {
+            "name": "I-5 corridor between Salinas and Stockton",
+            "at_mi": 65.5,
+            "type": "place",
+            "state": "California",
+            "highway": "I-5",
+            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
+          }
+        ],
+        "state_miles": [
+          {
+            "state": "California",
+            "miles": 131.0
+          }
+        ],
+        "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
+      },
+      "terrain": "flat"
+    },
+    {
+      "from": "Salinas",
+      "to": "Fresno",
+      "highway": "CA-156",
+      "miles": 141,
+      "stops": [
+        {
+          "name": "San Benito Petroleum",
+          "type": "fuel_station",
+          "at_mi": 28.2,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "limited",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "break"
+          ],
+          "services": [
+            "diesel",
+            "parking"
+          ]
+        },
+        {
+          "name": "Pilot Travel Center",
+          "type": "service_plaza",
+          "at_mi": 112.8,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ]
+        }
+      ],
+      "corridor": {
+        "tollway_detected": false,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 36.67757,
+            "lon": -121.6555
+          },
+          {
+            "at_mi": 28.2,
+            "lat": 36.8924,
+            "lon": -121.42821
+          },
+          {
+            "at_mi": 56.4,
+            "lat": 37.08239,
+            "lon": -121.09458
+          },
+          {
+            "at_mi": 84.6,
+            "lat": 37.04774,
+            "lon": -120.59416
+          },
+          {
+            "at_mi": 112.8,
+            "lat": 37.01813,
+            "lon": -120.129
+          },
+          {
+            "at_mi": 141.0,
+            "lat": 36.73778,
+            "lon": -119.78713
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 51.5,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 28.2,
+            "elevation_ft": 226.4,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 56.4,
+            "elevation_ft": 483.3,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 84.6,
+            "elevation_ft": 116.5,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 112.8,
+            "elevation_ft": 255.9,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 141.0,
+            "elevation_ft": 323.2,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 141.0,
+            "avg_grade_pct": 0.04,
+            "terrain": "flat",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          }
+        ],
+        "checkpoints": [
+          {
+            "name": "CA-156 corridor between Salinas and Fresno",
+            "at_mi": 84.6,
+            "type": "place",
+            "state": "California",
+            "highway": "CA-156",
+            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
+          }
+        ],
+        "state_miles": [
+          {
+            "state": "California",
+            "miles": 141.0
+          }
+        ],
+        "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
+      },
+      "terrain": "flat"
+    },
+    {
+      "from": "Valencia",
+      "to": "Bakersfield",
+      "highway": "I-5",
+      "miles": 75,
+      "stops": [
+        {
+          "name": "Water",
+          "type": "public_rest_area",
+          "at_mi": 37.5,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "limited",
+          "actions": [
+            "park",
+            "save",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "parking",
+            "restrooms"
+          ]
+        },
+        {
+          "name": "Shell",
+          "type": "fuel_station",
+          "at_mi": 56.3,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "limited",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "break"
+          ],
+          "services": [
+            "diesel",
+            "parking"
+          ]
+        }
+      ],
+      "corridor": {
+        "tollway_detected": false,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 34.4436,
+            "lon": -118.60955
+          },
+          {
+            "at_mi": 18.7,
+            "lat": 34.66416,
+            "lon": -118.76066
+          },
+          {
+            "at_mi": 37.5,
+            "lat": 34.87213,
+            "lon": -118.88938
+          },
+          {
+            "at_mi": 56.3,
+            "lat": 35.12631,
+            "lon": -118.98946
+          },
+          {
+            "at_mi": 75.0,
+            "lat": 35.37324,
+            "lon": -119.0187
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 1032.8,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 18.7,
+            "elevation_ft": 2752.6,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 37.5,
+            "elevation_ft": 3221.8,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 56.3,
+            "elevation_ft": 341.2,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 75.0,
+            "elevation_ft": 410.1,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 18.7,
+            "avg_grade_pct": 1.61,
+            "terrain": "hills",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          },
+          {
+            "start_mi": 18.7,
+            "end_mi": 37.5,
+            "avg_grade_pct": 0.44,
+            "terrain": "flat",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          },
+          {
+            "start_mi": 37.5,
+            "end_mi": 56.3,
+            "avg_grade_pct": -2.69,
+            "terrain": "hills",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          },
+          {
+            "start_mi": 56.3,
+            "end_mi": 75.0,
+            "avg_grade_pct": 0.06,
+            "terrain": "flat",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          }
+        ],
+        "checkpoints": [
+          {
+            "name": "I-5 corridor between Valencia and Bakersfield",
+            "at_mi": 37.5,
+            "type": "place",
+            "state": "California",
+            "highway": "I-5",
+            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
+          }
+        ],
+        "state_miles": [
+          {
+            "state": "California",
+            "miles": 75.0
+          }
+        ],
+        "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
+      },
+      "terrain": "hills"
+    },
+    {
+      "from": "Valencia",
+      "to": "Victorville",
+      "highway": "I-15",
+      "miles": 91,
+      "stops": [
+        {
+          "name": "Pilot Travel Center",
+          "type": "service_plaza",
+          "at_mi": 45.5,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ]
+        }
+      ],
+      "corridor": {
+        "tollway_detected": false,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 34.4436,
+            "lon": -118.60955
+          },
+          {
+            "at_mi": 22.7,
+            "lat": 34.44578,
+            "lon": -118.36197
+          },
+          {
+            "at_mi": 45.5,
+            "lat": 34.54232,
+            "lon": -118.0298
+          },
+          {
+            "at_mi": 68.3,
+            "lat": 34.49884,
+            "lon": -117.65071
+          },
+          {
+            "at_mi": 91.0,
+            "lat": 34.53553,
+            "lon": -117.29181
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 1032.8,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 22.7,
+            "elevation_ft": 1928.5,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 45.5,
+            "elevation_ft": 2765.7,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 68.3,
+            "elevation_ft": 3392.4,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 91.0,
+            "elevation_ft": 2752.6,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 91.0,
+            "avg_grade_pct": 0.37,
+            "terrain": "flat",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          }
+        ],
+        "checkpoints": [
+          {
+            "name": "I-15 corridor between Valencia and Victorville",
+            "at_mi": 45.5,
+            "type": "place",
+            "state": "California",
+            "highway": "I-15",
+            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
+          }
+        ],
+        "state_miles": [
+          {
+            "state": "California",
+            "miles": 91.0
+          }
+        ],
+        "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
+      },
+      "terrain": "flat"
+    },
+    {
+      "from": "Visalia",
+      "to": "Bakersfield",
+      "highway": "CA-99",
+      "miles": 81,
+      "stops": [
+        {
+          "name": "Arco",
+          "type": "fuel_station",
+          "at_mi": 20.2,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "limited",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "break"
+          ],
+          "services": [
+            "diesel",
+            "parking"
+          ]
+        },
+        {
+          "name": "Shell",
+          "type": "fuel_station",
+          "at_mi": 40.5,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "limited",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "break"
+          ],
+          "services": [
+            "diesel",
+            "parking"
+          ]
+        }
+      ],
+      "corridor": {
+        "tollway_detected": false,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 36.33016,
+            "lon": -119.29206
+          },
+          {
+            "at_mi": 20.2,
+            "lat": 36.18858,
+            "lon": -119.09501
+          },
+          {
+            "at_mi": 40.5,
+            "lat": 35.89171,
+            "lon": -119.05351
+          },
+          {
+            "at_mi": 60.8,
+            "lat": 35.62362,
+            "lon": -119.08531
+          },
+          {
+            "at_mi": 81.0,
+            "lat": 35.37324,
+            "lon": -119.0187
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 357.6,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 20.2,
+            "elevation_ft": 382.2,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 40.5,
+            "elevation_ft": 541.3,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 60.8,
+            "elevation_ft": 790.0,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 81.0,
+            "elevation_ft": 410.1,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 81.0,
+            "avg_grade_pct": 0.01,
+            "terrain": "flat",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          }
+        ],
+        "checkpoints": [
+          {
+            "name": "CA-99 corridor between Visalia and Bakersfield",
+            "at_mi": 40.5,
+            "type": "place",
+            "state": "California",
+            "highway": "CA-99",
+            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
+          }
+        ],
+        "state_miles": [
+          {
+            "state": "California",
+            "miles": 81.0
+          }
+        ],
+        "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
+      },
+      "terrain": "flat"
+    },
+    {
+      "from": "Visalia",
+      "to": "Santa Maria",
+      "highway": "CA-41",
+      "miles": 167,
+      "stops": [
+        {
+          "name": "Chevron",
+          "type": "fuel_station",
+          "at_mi": 33.4,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "limited",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "break"
+          ],
+          "services": [
+            "diesel",
+            "parking"
+          ]
+        },
+        {
+          "name": "Conserv Fuel",
+          "type": "fuel_station",
+          "at_mi": 133.6,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "limited",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "break"
+          ],
+          "services": [
+            "diesel",
+            "parking"
+          ]
+        }
+      ],
+      "corridor": {
+        "tollway_detected": false,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 36.33016,
+            "lon": -119.29206
+          },
+          {
+            "at_mi": 33.4,
+            "lat": 36.2333,
+            "lon": -119.81634
+          },
+          {
+            "at_mi": 66.8,
+            "lat": 35.82483,
+            "lon": -120.09404
+          },
+          {
+            "at_mi": 100.2,
+            "lat": 35.65952,
+            "lon": -120.57279
+          },
+          {
+            "at_mi": 133.6,
+            "lat": 35.29666,
+            "lon": -120.62991
+          },
+          {
+            "at_mi": 167.0,
+            "lat": 34.95306,
+            "lon": -120.43572
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 357.6,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 33.4,
+            "elevation_ft": 196.9,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 66.8,
+            "elevation_ft": 728.3,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 100.2,
+            "elevation_ft": 921.3,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 133.6,
+            "elevation_ft": 427.8,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 167.0,
+            "elevation_ft": 229.7,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 167.0,
+            "avg_grade_pct": -0.02,
+            "terrain": "flat",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          }
+        ],
+        "checkpoints": [
+          {
+            "name": "CA-41 corridor between Visalia and Santa Maria",
+            "at_mi": 100.2,
+            "type": "place",
+            "state": "California",
+            "highway": "CA-41",
+            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
+          }
+        ],
+        "state_miles": [
+          {
+            "state": "California",
+            "miles": 167.0
+          }
+        ],
+        "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
+      },
+      "terrain": "flat"
+    },
+    {
+      "from": "Visalia",
+      "to": "Lancaster",
+      "highway": "CA-99",
+      "miles": 168,
+      "stops": [
+        {
+          "name": "Valero",
+          "type": "fuel_station",
+          "at_mi": 28.0,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "limited",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "break"
+          ],
+          "services": [
+            "diesel",
+            "parking"
+          ]
+        },
+        {
+          "name": "Shell",
+          "type": "fuel_station",
+          "at_mi": 84.0,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "limited",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "break"
+          ],
+          "services": [
+            "diesel",
+            "parking"
+          ]
+        }
+      ],
+      "corridor": {
+        "tollway_detected": false,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 36.33016,
+            "lon": -119.29206
+          },
+          {
+            "at_mi": 28.0,
+            "lat": 36.09134,
+            "lon": -119.03961
+          },
+          {
+            "at_mi": 56.0,
+            "lat": 35.69009,
+            "lon": -119.06636
+          },
+          {
+            "at_mi": 84.0,
+            "lat": 35.35273,
+            "lon": -118.96211
+          },
+          {
+            "at_mi": 112.0,
+            "lat": 35.20121,
+            "lon": -118.52485
+          },
+          {
+            "at_mi": 140.0,
+            "lat": 35.06938,
+            "lon": -118.17436
+          },
+          {
+            "at_mi": 168.0,
+            "lat": 34.69803,
+            "lon": -118.13688
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 357.6,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 28.0,
+            "elevation_ft": 433.1,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 56.0,
+            "elevation_ft": 761.5,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 84.0,
+            "elevation_ft": 385.5,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 112.0,
+            "elevation_ft": 3064.3,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 140.0,
+            "elevation_ft": 2854.3,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 168.0,
+            "elevation_ft": 2362.2,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 84.0,
+            "avg_grade_pct": 0.01,
+            "terrain": "flat",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          },
+          {
+            "start_mi": 84.0,
+            "end_mi": 112.0,
+            "avg_grade_pct": 1.98,
+            "terrain": "hills",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          },
+          {
+            "start_mi": 112.0,
+            "end_mi": 168.0,
+            "avg_grade_pct": -0.26,
+            "terrain": "flat",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          }
+        ],
+        "checkpoints": [
+          {
+            "name": "CA-99 corridor between Visalia and Lancaster",
+            "at_mi": 84.0,
+            "type": "place",
+            "state": "California",
+            "highway": "CA-99",
+            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
+          }
+        ],
+        "state_miles": [
+          {
+            "state": "California",
+            "miles": 168.0
+          }
+        ],
+        "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
+      },
+      "terrain": "hills"
+    },
+    {
+      "from": "Victorville",
+      "to": "Los Angeles",
+      "highway": "I-15",
+      "miles": 85,
+      "stops": [
+        {
+          "name": "Mobil",
+          "type": "fuel_station",
+          "at_mi": 42.5,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "limited",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "break"
+          ],
+          "services": [
+            "diesel",
+            "parking"
+          ]
+        }
+      ],
+      "corridor": {
+        "tollway_detected": true,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 34.53553,
+            "lon": -117.29181
+          },
+          {
+            "at_mi": 21.3,
+            "lat": 34.317,
+            "lon": -117.47994
+          },
+          {
+            "at_mi": 42.5,
+            "lat": 34.1357,
+            "lon": -117.58618
+          },
+          {
+            "at_mi": 63.7,
+            "lat": 34.1294,
+            "lon": -117.94195
+          },
+          {
+            "at_mi": 85.0,
+            "lat": 34.05233,
+            "lon": -118.24356
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 2752.6,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 21.3,
+            "elevation_ft": 3189.0,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 42.5,
+            "elevation_ft": 1512.5,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 63.7,
+            "elevation_ft": 548.9,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 85.0,
+            "elevation_ft": 300.2,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 21.3,
+            "avg_grade_pct": 0.44,
+            "terrain": "flat",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          },
+          {
+            "start_mi": 21.3,
+            "end_mi": 63.7,
+            "avg_grade_pct": -1.33,
+            "terrain": "hills",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          },
+          {
+            "start_mi": 63.7,
+            "end_mi": 85.0,
+            "avg_grade_pct": -0.25,
+            "terrain": "flat",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          }
+        ],
+        "checkpoints": [
+          {
+            "name": "I-15 corridor between Victorville and Los Angeles",
+            "at_mi": 42.5,
+            "type": "place",
+            "state": "California",
+            "highway": "I-15",
+            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
+          }
+        ],
+        "state_miles": [
+          {
+            "state": "California",
+            "miles": 85.0
+          }
+        ],
+        "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
+      },
+      "terrain": "hills"
+    },
+    {
+      "from": "Chico",
+      "to": "Sacramento",
+      "highway": "I-5",
+      "miles": 89,
+      "stops": [
+        {
+          "name": "Quik Stop",
+          "type": "fuel_station",
+          "at_mi": 44.5,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "limited",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "break"
+          ],
+          "services": [
+            "diesel",
+            "parking"
+          ]
+        }
+      ],
+      "corridor": {
+        "tollway_detected": false,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 39.72857,
+            "lon": -121.83757
+          },
+          {
+            "at_mi": 22.2,
+            "lat": 39.46519,
+            "lon": -121.6884
+          },
+          {
+            "at_mi": 44.5,
+            "lat": 39.1486,
+            "lon": -121.63555
+          },
+          {
+            "at_mi": 66.8,
+            "lat": 38.86943,
+            "lon": -121.54358
+          },
+          {
+            "at_mi": 89.0,
+            "lat": 38.5816,
+            "lon": -121.49441
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 203.4,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 22.2,
+            "elevation_ft": 105.0,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 44.5,
+            "elevation_ft": 59.1,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 66.8,
+            "elevation_ft": 32.8,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 89.0,
+            "elevation_ft": 60.7,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 89.0,
+            "avg_grade_pct": -0.03,
+            "terrain": "flat",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          }
+        ],
+        "checkpoints": [
+          {
+            "name": "I-5 corridor between Chico and Sacramento",
+            "at_mi": 44.5,
+            "type": "place",
+            "state": "California",
+            "highway": "I-5",
+            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
+          }
+        ],
+        "state_miles": [
+          {
+            "state": "California",
+            "miles": 89.0
+          }
+        ],
+        "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
+      },
+      "terrain": "flat"
+    },
+    {
+      "from": "Chico",
+      "to": "Santa Rosa",
+      "highway": "I-5",
+      "miles": 153,
+      "stops": [
+        {
+          "name": "Chevron",
+          "type": "fuel_station",
+          "at_mi": 38.3,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "limited",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "break"
+          ],
+          "services": [
+            "diesel",
+            "parking"
+          ]
+        }
+      ],
+      "corridor": {
+        "tollway_detected": false,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 39.72857,
+            "lon": -121.83757
+          },
+          {
+            "at_mi": 38.3,
+            "lat": 39.49848,
+            "lon": -122.19896
+          },
+          {
+            "at_mi": 76.5,
+            "lat": 39.06005,
+            "lon": -122.34557
+          },
+          {
+            "at_mi": 114.7,
+            "lat": 38.81537,
+            "lon": -122.5727
+          },
+          {
+            "at_mi": 153.0,
+            "lat": 38.44034,
+            "lon": -122.71432
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 203.4,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 38.3,
+            "elevation_ft": 111.5,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 76.5,
+            "elevation_ft": 990.2,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 114.7,
+            "elevation_ft": 1155.8,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 153.0,
+            "elevation_ft": 173.9,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 153.0,
+            "avg_grade_pct": -0.0,
+            "terrain": "flat",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          }
+        ],
+        "checkpoints": [
+          {
+            "name": "I-5 corridor between Chico and Santa Rosa",
+            "at_mi": 76.5,
+            "type": "place",
+            "state": "California",
+            "highway": "I-5",
+            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
+          }
+        ],
+        "state_miles": [
+          {
+            "state": "California",
+            "miles": 153.0
+          }
+        ],
+        "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
+      },
+      "terrain": "flat"
+    },
+    {
+      "from": "Chico",
+      "to": "Fairfield",
+      "highway": "I-80",
+      "miles": 122,
+      "stops": [
+        {
+          "name": "Knights Landing Grocery Bait & Tackle",
+          "type": "fuel_station",
+          "at_mi": 73.2,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "limited",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "break"
+          ],
+          "services": [
+            "diesel",
+            "parking"
+          ]
+        },
+        {
+          "name": "Chevron",
+          "type": "fuel_station",
+          "at_mi": 97.6,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "limited",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "break"
+          ],
+          "services": [
+            "diesel",
+            "parking"
+          ]
+        }
+      ],
+      "corridor": {
+        "tollway_detected": false,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 39.72857,
+            "lon": -121.83757
+          },
+          {
+            "at_mi": 24.4,
+            "lat": 39.4373,
+            "lon": -121.68821
+          },
+          {
+            "at_mi": 48.8,
+            "lat": 39.09675,
+            "lon": -121.63451
+          },
+          {
+            "at_mi": 73.2,
+            "lat": 38.79281,
+            "lon": -121.75098
+          },
+          {
+            "at_mi": 97.6,
+            "lat": 38.49228,
+            "lon": -121.79986
+          },
+          {
+            "at_mi": 122.0,
+            "lat": 38.24922,
+            "lon": -122.03997
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 203.4,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 24.4,
+            "elevation_ft": 101.7,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 48.8,
+            "elevation_ft": 49.2,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 73.2,
+            "elevation_ft": 32.8,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 97.6,
+            "elevation_ft": 59.1,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 122.0,
+            "elevation_ft": 13.1,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 122.0,
+            "avg_grade_pct": -0.03,
+            "terrain": "flat",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          }
+        ],
+        "checkpoints": [
+          {
+            "name": "I-80 corridor between Chico and Fairfield",
+            "at_mi": 73.2,
+            "type": "place",
+            "state": "California",
+            "highway": "I-80",
+            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
+          }
+        ],
+        "state_miles": [
+          {
+            "state": "California",
+            "miles": 122.0
+          }
+        ],
+        "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
+      },
+      "terrain": "flat"
+    },
+    {
+      "from": "Fairfield",
+      "to": "San Jose",
+      "highway": "I-680",
+      "miles": 77,
+      "stops": [
+        {
+          "name": "Iwatani",
+          "type": "fuel_station",
+          "at_mi": 38.5,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "limited",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "break"
+          ],
+          "services": [
+            "diesel",
+            "parking"
+          ]
+        }
+      ],
+      "corridor": {
+        "tollway_detected": false,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 38.24922,
+            "lon": -122.03997
+          },
+          {
+            "at_mi": 19.3,
+            "lat": 38.03458,
+            "lon": -122.11813
+          },
+          {
+            "at_mi": 38.5,
+            "lat": 37.81335,
+            "lon": -121.99345
+          },
+          {
+            "at_mi": 57.7,
+            "lat": 37.56567,
+            "lon": -121.90105
+          },
+          {
+            "at_mi": 77.0,
+            "lat": 37.3382,
+            "lon": -121.8863
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 13.1,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 19.3,
+            "elevation_ft": 75.8,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 38.5,
+            "elevation_ft": 390.4,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 57.7,
+            "elevation_ft": 572.8,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 77.0,
+            "elevation_ft": 75.5,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 77.0,
+            "avg_grade_pct": 0.02,
+            "terrain": "flat",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          }
+        ],
+        "checkpoints": [
+          {
+            "name": "I-680 corridor between Fairfield and San Jose",
+            "at_mi": 38.5,
+            "type": "place",
+            "state": "California",
+            "highway": "I-680",
+            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
+          }
+        ],
+        "state_miles": [
+          {
+            "state": "California",
+            "miles": 77.0
+          }
+        ],
+        "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
+      },
+      "terrain": "flat"
+    },
+    {
+      "from": "Fairfield",
+      "to": "Salinas",
+      "highway": "I-680",
+      "miles": 134,
+      "stops": [
+        {
+          "name": "Pacific Pride",
+          "type": "fuel_station",
+          "at_mi": 80.4,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "limited",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "break"
+          ],
+          "services": [
+            "diesel",
+            "parking"
+          ]
+        }
+      ],
+      "corridor": {
+        "tollway_detected": false,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 38.24922,
+            "lon": -122.03997
+          },
+          {
+            "at_mi": 26.8,
+            "lat": 37.95684,
+            "lon": -122.053
+          },
+          {
+            "at_mi": 53.6,
+            "lat": 37.6119,
+            "lon": -121.8752
+          },
+          {
+            "at_mi": 80.4,
+            "lat": 37.30122,
+            "lon": -121.81507
+          },
+          {
+            "at_mi": 107.2,
+            "lat": 36.98977,
+            "lon": -121.55805
+          },
+          {
+            "at_mi": 134.0,
+            "lat": 36.67757,
+            "lon": -121.6555
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 13.1,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 26.8,
+            "elevation_ft": 45.9,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 53.6,
+            "elevation_ft": 282.2,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 80.4,
+            "elevation_ft": 147.6,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 107.2,
+            "elevation_ft": 193.6,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 134.0,
+            "elevation_ft": 51.5,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 134.0,
+            "avg_grade_pct": 0.01,
+            "terrain": "flat",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          }
+        ],
+        "checkpoints": [
+          {
+            "name": "I-680 corridor between Fairfield and Salinas",
+            "at_mi": 80.4,
+            "type": "place",
+            "state": "California",
+            "highway": "I-680",
+            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
+          }
+        ],
+        "state_miles": [
+          {
+            "state": "California",
+            "miles": 134.0
+          }
+        ],
+        "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
+      },
+      "terrain": "flat"
+    },
+    {
+      "from": "Santa Maria",
+      "to": "Bakersfield",
+      "highway": "CA-166",
+      "miles": 128,
+      "stops": [
+        {
+          "name": "Shell",
+          "type": "fuel_station",
+          "at_mi": 96.0,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "limited",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "break"
+          ],
+          "services": [
+            "diesel",
+            "parking"
+          ]
+        }
+      ],
+      "corridor": {
+        "tollway_detected": false,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 34.95306,
+            "lon": -120.43572
+          },
+          {
+            "at_mi": 32.0,
+            "lat": 35.0935,
+            "lon": -120.0434
+          },
+          {
+            "at_mi": 64.0,
+            "lat": 34.93413,
+            "lon": -119.53597
+          },
+          {
+            "at_mi": 96.0,
+            "lat": 35.05893,
+            "lon": -119.10043
+          },
+          {
+            "at_mi": 128.0,
+            "lat": 35.37324,
+            "lon": -119.0187
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 229.7,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 32.0,
+            "elevation_ft": 1397.6,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 64.0,
+            "elevation_ft": 2371.1,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 96.0,
+            "elevation_ft": 518.4,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 128.0,
+            "elevation_ft": 410.1,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 32.0,
+            "avg_grade_pct": 0.88,
+            "terrain": "hills",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          },
+          {
+            "start_mi": 32.0,
+            "end_mi": 64.0,
+            "avg_grade_pct": 0.74,
+            "terrain": "flat",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          },
+          {
+            "start_mi": 64.0,
+            "end_mi": 96.0,
+            "avg_grade_pct": -1.4,
+            "terrain": "hills",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          },
+          {
+            "start_mi": 96.0,
+            "end_mi": 128.0,
+            "avg_grade_pct": -0.08,
+            "terrain": "flat",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          }
+        ],
+        "checkpoints": [
+          {
+            "name": "CA-166 corridor between Santa Maria and Bakersfield",
+            "at_mi": 64.0,
+            "type": "place",
+            "state": "California",
+            "highway": "CA-166",
+            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
+          }
+        ],
+        "state_miles": [
+          {
+            "state": "California",
+            "miles": 128.0
+          }
+        ],
+        "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
+      },
+      "terrain": "hills"
+    },
+    {
+      "from": "Santa Maria",
+      "to": "Oxnard",
+      "highway": "US-101",
+      "miles": 114,
+      "stops": [
+        {
+          "name": "Conserv Fuel",
+          "type": "fuel_station",
+          "at_mi": 28.4,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "limited",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "break"
+          ],
+          "services": [
+            "diesel",
+            "parking"
+          ]
+        },
+        {
+          "name": "American Supreme Gas",
+          "type": "fuel_station",
+          "at_mi": 85.6,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "limited",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "break"
+          ],
+          "services": [
+            "diesel",
+            "parking"
+          ]
+        }
+      ],
+      "corridor": {
+        "tollway_detected": false,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 34.95306,
+            "lon": -120.43572
+          },
+          {
+            "at_mi": 28.4,
+            "lat": 34.66414,
+            "lon": -120.17596
+          },
+          {
+            "at_mi": 57.0,
+            "lat": 34.45881,
+            "lon": -119.99131
+          },
+          {
+            "at_mi": 85.6,
+            "lat": 34.40214,
+            "lon": -119.52091
+          },
+          {
+            "at_mi": 114.0,
+            "lat": 34.19768,
+            "lon": -119.17705
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 229.7,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 28.4,
+            "elevation_ft": 588.3,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 57.0,
+            "elevation_ft": 160.8,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 85.6,
+            "elevation_ft": 19.7,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 114.0,
+            "elevation_ft": 62.3,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 114.0,
+            "avg_grade_pct": -0.03,
+            "terrain": "flat",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          }
+        ],
+        "checkpoints": [
+          {
+            "name": "US-101 corridor between Santa Maria and Oxnard",
+            "at_mi": 57.0,
+            "type": "place",
+            "state": "California",
+            "highway": "US-101",
+            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
+          }
+        ],
+        "state_miles": [
+          {
+            "state": "California",
+            "miles": 114.0
+          }
+        ],
+        "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
+      },
+      "terrain": "flat"
+    },
+    {
+      "from": "Santa Maria",
+      "to": "Valencia",
+      "highway": "US-101",
+      "miles": 155,
+      "stops": [
+        {
+          "name": "Flying J Travel Center",
+          "type": "service_plaza",
+          "at_mi": 124.0,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ]
+        }
+      ],
+      "corridor": {
+        "tollway_detected": false,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 34.95306,
+            "lon": -120.43572
+          },
+          {
+            "at_mi": 31.0,
+            "lat": 35.09637,
+            "lon": -120.06234
+          },
+          {
+            "at_mi": 62.0,
+            "lat": 34.93431,
+            "lon": -119.56831
+          },
+          {
+            "at_mi": 93.0,
+            "lat": 35.05871,
+            "lon": -119.15374
+          },
+          {
+            "at_mi": 124.0,
+            "lat": 34.79562,
+            "lon": -118.85765
+          },
+          {
+            "at_mi": 155.0,
+            "lat": 34.4436,
+            "lon": -118.60955
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 229.7,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 31.0,
+            "elevation_ft": 1333.3,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 62.0,
+            "elevation_ft": 2334.3,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 93.0,
+            "elevation_ft": 574.1,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 124.0,
+            "elevation_ft": 3887.8,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 155.0,
+            "elevation_ft": 1032.8,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 31.0,
+            "avg_grade_pct": 0.81,
+            "terrain": "hills",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          },
+          {
+            "start_mi": 31.0,
+            "end_mi": 62.0,
+            "avg_grade_pct": 0.73,
+            "terrain": "flat",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          },
+          {
+            "start_mi": 62.0,
+            "end_mi": 155.0,
+            "avg_grade_pct": -0.32,
+            "terrain": "hills",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          }
+        ],
+        "checkpoints": [
+          {
+            "name": "US-101 corridor between Santa Maria and Valencia",
+            "at_mi": 93.0,
+            "type": "place",
+            "state": "California",
+            "highway": "US-101",
+            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
+          }
+        ],
+        "state_miles": [
+          {
+            "state": "California",
+            "miles": 155.0
+          }
+        ],
+        "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
+      },
+      "terrain": "hills"
     }
   ],
   "route_stop_data": {
