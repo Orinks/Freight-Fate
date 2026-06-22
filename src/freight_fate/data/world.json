@@ -1913,6 +1913,118 @@
       "region": "southern_plains",
       "state": "Texas",
       "locations": []
+    },
+    "Cape Coral": {
+      "lat": 26.56285,
+      "lon": -81.94953,
+      "region": "florida",
+      "state": "Florida",
+      "locations": []
+    },
+    "Clarksville": {
+      "lat": 36.52977,
+      "lon": -87.35945,
+      "region": "mid_south",
+      "state": "Tennessee",
+      "locations": []
+    },
+    "Murfreesboro": {
+      "lat": 35.84562,
+      "lon": -86.39027,
+      "region": "mid_south",
+      "state": "Tennessee",
+      "locations": []
+    },
+    "Port Saint Lucie": {
+      "lat": 27.29393,
+      "lon": -80.35033,
+      "region": "florida",
+      "state": "Florida",
+      "locations": []
+    },
+    "Jackson": {
+      "lat": 32.29876,
+      "lon": -90.18481,
+      "region": "mid_south",
+      "state": "Mississippi",
+      "locations": []
+    },
+    "Gainesville": {
+      "lat": 29.65163,
+      "lon": -82.32483,
+      "region": "florida",
+      "state": "Florida",
+      "locations": []
+    },
+    "Columbia": {
+      "lat": 34.00071,
+      "lon": -81.03481,
+      "region": "atlantic_southeast",
+      "state": "South Carolina",
+      "locations": []
+    },
+    "Charleston": {
+      "lat": 32.77632,
+      "lon": -79.93275,
+      "region": "atlantic_southeast",
+      "state": "South Carolina",
+      "locations": []
+    },
+    "Coral Springs": {
+      "lat": 26.27119,
+      "lon": -80.2706,
+      "region": "florida",
+      "state": "Florida",
+      "locations": []
+    },
+    "Athens": {
+      "lat": 33.96095,
+      "lon": -83.37794,
+      "region": "atlantic_southeast",
+      "state": "Georgia",
+      "locations": []
+    },
+    "West Palm Beach": {
+      "lat": 26.71534,
+      "lon": -80.05337,
+      "region": "florida",
+      "state": "Florida",
+      "locations": []
+    },
+    "Palm Bay": {
+      "lat": 28.03446,
+      "lon": -80.58866,
+      "region": "florida",
+      "state": "Florida",
+      "locations": []
+    },
+    "Wilmington": {
+      "lat": 34.23556,
+      "lon": -77.94604,
+      "region": "atlantic_southeast",
+      "state": "North Carolina",
+      "locations": []
+    },
+    "Tuscaloosa": {
+      "lat": 33.20984,
+      "lon": -87.56917,
+      "region": "mid_south",
+      "state": "Alabama",
+      "locations": []
+    },
+    "Lakeland": {
+      "lat": 28.03947,
+      "lon": -81.9498,
+      "region": "florida",
+      "state": "Florida",
+      "locations": []
+    },
+    "Roanoke": {
+      "lat": 37.27097,
+      "lon": -79.94143,
+      "region": "atlantic_southeast",
+      "state": "Virginia",
+      "locations": []
     }
   },
   "legs": [
@@ -38787,7 +38899,27 @@
       "to": "San Antonio",
       "highway": "I-35",
       "miles": 156,
-      "stops": [],
+      "stops": [
+        {
+          "name": "Love's Travel Stop",
+          "type": "service_plaza",
+          "at_mi": 130.0,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ]
+        }
+      ],
       "corridor": {
         "tollway_detected": false,
         "route_points": [
@@ -40814,7 +40946,25 @@
       "to": "Kansas City",
       "highway": "I-70",
       "miles": 63,
-      "stops": [],
+      "stops": [
+        {
+          "name": "Love's",
+          "type": "fuel_station",
+          "at_mi": 31.5,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "limited",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "break"
+          ],
+          "services": [
+            "diesel",
+            "parking"
+          ]
+        }
+      ],
       "corridor": {
         "tollway_detected": true,
         "route_points": [
@@ -42924,6 +43074,4933 @@
           {
             "state": "Texas",
             "miles": 98.0
+          }
+        ],
+        "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
+      },
+      "terrain": "flat"
+    },
+    {
+      "from": "Cape Coral",
+      "to": "Tampa",
+      "highway": "I-75",
+      "miles": 134,
+      "stops": [
+        {
+          "name": "Sunoco",
+          "type": "fuel_station",
+          "at_mi": 67.0,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "limited",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "break"
+          ],
+          "services": [
+            "diesel",
+            "parking"
+          ]
+        },
+        {
+          "name": "Mobil",
+          "type": "fuel_station",
+          "at_mi": 100.4,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "limited",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "break"
+          ],
+          "services": [
+            "diesel",
+            "parking"
+          ]
+        }
+      ],
+      "corridor": {
+        "tollway_detected": true,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 26.56285,
+            "lon": -81.94953
+          },
+          {
+            "at_mi": 33.6,
+            "lat": 26.94619,
+            "lon": -82.0205
+          },
+          {
+            "at_mi": 67.0,
+            "lat": 27.16324,
+            "lon": -82.42896
+          },
+          {
+            "at_mi": 100.4,
+            "lat": 27.61816,
+            "lon": -82.48252
+          },
+          {
+            "at_mi": 134.0,
+            "lat": 27.95058,
+            "lon": -82.45727
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 17.1,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 33.6,
+            "elevation_ft": 15.4,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 67.0,
+            "elevation_ft": 26.9,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 100.4,
+            "elevation_ft": 39.4,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 134.0,
+            "elevation_ft": 96.8,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 134.0,
+            "avg_grade_pct": 0.01,
+            "terrain": "flat",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          }
+        ],
+        "checkpoints": [
+          {
+            "name": "I-75 corridor between Cape Coral and Tampa",
+            "at_mi": 67.0,
+            "type": "place",
+            "state": "Florida",
+            "highway": "I-75",
+            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
+          }
+        ],
+        "state_miles": [
+          {
+            "state": "Florida",
+            "miles": 134.0
+          }
+        ],
+        "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
+      },
+      "terrain": "flat"
+    },
+    {
+      "from": "Cape Coral",
+      "to": "Lakeland",
+      "highway": "I-75",
+      "miles": 118,
+      "stops": [
+        {
+          "name": "Charlotte County Truck Stop Northbound",
+          "type": "public_rest_area",
+          "at_mi": 23.6,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "limited",
+          "actions": [
+            "park",
+            "save",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "parking",
+            "restrooms"
+          ]
+        },
+        {
+          "name": "Sunoco",
+          "type": "fuel_station",
+          "at_mi": 94.4,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "limited",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "break"
+          ],
+          "services": [
+            "diesel",
+            "parking"
+          ]
+        }
+      ],
+      "corridor": {
+        "tollway_detected": false,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 26.56285,
+            "lon": -81.94953
+          },
+          {
+            "at_mi": 23.6,
+            "lat": 26.82749,
+            "lon": -82.02114
+          },
+          {
+            "at_mi": 47.2,
+            "lat": 27.10882,
+            "lon": -81.92835
+          },
+          {
+            "at_mi": 70.8,
+            "lat": 27.42182,
+            "lon": -81.79563
+          },
+          {
+            "at_mi": 94.4,
+            "lat": 27.75408,
+            "lon": -81.8015
+          },
+          {
+            "at_mi": 118.0,
+            "lat": 28.03967,
+            "lon": -81.94983
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 17.1,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 23.6,
+            "elevation_ft": 23.0,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 47.2,
+            "elevation_ft": 49.2,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 70.8,
+            "elevation_ft": 78.7,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 94.4,
+            "elevation_ft": 164.0,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 118.0,
+            "elevation_ft": 203.4,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 118.0,
+            "avg_grade_pct": 0.03,
+            "terrain": "flat",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          }
+        ],
+        "checkpoints": [
+          {
+            "name": "I-75 corridor between Cape Coral and Lakeland",
+            "at_mi": 70.8,
+            "type": "place",
+            "state": "Florida",
+            "highway": "I-75",
+            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
+          }
+        ],
+        "state_miles": [
+          {
+            "state": "Florida",
+            "miles": 118.0
+          }
+        ],
+        "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
+      },
+      "terrain": "flat"
+    },
+    {
+      "from": "Cape Coral",
+      "to": "Coral Springs",
+      "highway": "I-75",
+      "miles": 137,
+      "stops": [
+        {
+          "name": "Chevron",
+          "type": "fuel_station",
+          "at_mi": 27.4,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "limited",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "break"
+          ],
+          "services": [
+            "diesel",
+            "parking"
+          ]
+        }
+      ],
+      "corridor": {
+        "tollway_detected": true,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 26.56285,
+            "lon": -81.94953
+          },
+          {
+            "at_mi": 27.4,
+            "lat": 26.30699,
+            "lon": -81.74317
+          },
+          {
+            "at_mi": 54.8,
+            "lat": 26.1534,
+            "lon": -81.43222
+          },
+          {
+            "at_mi": 82.2,
+            "lat": 26.16973,
+            "lon": -81.00817
+          },
+          {
+            "at_mi": 109.6,
+            "lat": 26.1461,
+            "lon": -80.55699
+          },
+          {
+            "at_mi": 137.0,
+            "lat": 26.27119,
+            "lon": -80.27099
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 17.1,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 27.4,
+            "elevation_ft": 27.9,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 54.8,
+            "elevation_ft": 32.8,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 82.2,
+            "elevation_ft": 39.4,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 109.6,
+            "elevation_ft": 29.5,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 137.0,
+            "elevation_ft": 19.7,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 137.0,
+            "avg_grade_pct": 0.0,
+            "terrain": "flat",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          }
+        ],
+        "checkpoints": [
+          {
+            "name": "I-75 corridor between Cape Coral and Coral Springs",
+            "at_mi": 82.2,
+            "type": "place",
+            "state": "Florida",
+            "highway": "I-75",
+            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
+          }
+        ],
+        "state_miles": [
+          {
+            "state": "Florida",
+            "miles": 137.0
+          }
+        ],
+        "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
+      },
+      "terrain": "flat"
+    },
+    {
+      "from": "Clarksville",
+      "to": "Murfreesboro",
+      "highway": "I-24",
+      "miles": 84,
+      "stops": [
+        {
+          "name": "Shell",
+          "type": "fuel_station",
+          "at_mi": 21.0,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "limited",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "break"
+          ],
+          "services": [
+            "diesel",
+            "parking"
+          ]
+        },
+        {
+          "name": "Pilot Travel Center",
+          "type": "service_plaza",
+          "at_mi": 63.0,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ]
+        }
+      ],
+      "corridor": {
+        "tollway_detected": false,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 36.52977,
+            "lon": -87.35945
+          },
+          {
+            "at_mi": 21.0,
+            "lat": 36.43149,
+            "lon": -87.07178
+          },
+          {
+            "at_mi": 42.0,
+            "lat": 36.25098,
+            "lon": -86.78468
+          },
+          {
+            "at_mi": 63.0,
+            "lat": 36.00731,
+            "lon": -86.61278
+          },
+          {
+            "at_mi": 84.0,
+            "lat": 35.84561,
+            "lon": -86.39022
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 475.7,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 21.0,
+            "elevation_ft": 705.4,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 42.0,
+            "elevation_ft": 579.1,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 63.0,
+            "elevation_ft": 662.7,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 84.0,
+            "elevation_ft": 616.8,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 84.0,
+            "avg_grade_pct": 0.03,
+            "terrain": "flat",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          }
+        ],
+        "checkpoints": [
+          {
+            "name": "I-24 corridor between Clarksville and Murfreesboro",
+            "at_mi": 42.0,
+            "type": "place",
+            "state": "Tennessee",
+            "highway": "I-24",
+            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
+          }
+        ],
+        "state_miles": [
+          {
+            "state": "Tennessee",
+            "miles": 84.0
+          }
+        ],
+        "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
+      },
+      "terrain": "flat"
+    },
+    {
+      "from": "Clarksville",
+      "to": "Huntsville",
+      "highway": "I-65",
+      "miles": 161,
+      "stops": [
+        {
+          "name": "The Bug Man",
+          "type": "service_plaza",
+          "at_mi": 80.5,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ]
+        }
+      ],
+      "corridor": {
+        "tollway_detected": false,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 36.52977,
+            "lon": -87.35945
+          },
+          {
+            "at_mi": 26.8,
+            "lat": 36.37865,
+            "lon": -86.99024
+          },
+          {
+            "at_mi": 53.7,
+            "lat": 36.10786,
+            "lon": -86.72047
+          },
+          {
+            "at_mi": 80.5,
+            "lat": 35.81737,
+            "lon": -86.4025
+          },
+          {
+            "at_mi": 107.3,
+            "lat": 35.44762,
+            "lon": -86.47319
+          },
+          {
+            "at_mi": 134.2,
+            "lat": 35.1084,
+            "lon": -86.56628
+          },
+          {
+            "at_mi": 161.0,
+            "lat": 34.73035,
+            "lon": -86.58606
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 475.7,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 26.8,
+            "elevation_ft": 608.6,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 53.7,
+            "elevation_ft": 522.3,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 80.5,
+            "elevation_ft": 597.1,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 107.3,
+            "elevation_ft": 764.4,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 134.2,
+            "elevation_ft": 702.1,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 161.0,
+            "elevation_ft": 626.6,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 161.0,
+            "avg_grade_pct": 0.02,
+            "terrain": "flat",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          }
+        ],
+        "checkpoints": [
+          {
+            "name": "I-65 corridor between Clarksville and Huntsville",
+            "at_mi": 80.5,
+            "type": "place",
+            "state": "Alabama",
+            "highway": "I-65",
+            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
+          }
+        ],
+        "state_miles": [
+          {
+            "state": "Tennessee",
+            "miles": 142.2
+          },
+          {
+            "state": "Alabama",
+            "miles": 18.8
+          }
+        ],
+        "state_crossings": [
+          {
+            "at_mi": 142.2,
+            "from_state": "Tennessee",
+            "state": "Alabama",
+            "place": "Tennessee-Alabama line on I-65",
+            "source": "Computed from OSRM route geometry and public U.S. state boundary GeoJSON."
+          }
+        ],
+        "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
+      },
+      "terrain": "flat"
+    },
+    {
+      "from": "Clarksville",
+      "to": "Louisville",
+      "highway": "I-65",
+      "miles": 195,
+      "stops": [],
+      "corridor": {
+        "tollway_detected": false,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 36.52977,
+            "lon": -87.35945
+          },
+          {
+            "at_mi": 32.5,
+            "lat": 36.96673,
+            "lon": -87.46572
+          },
+          {
+            "at_mi": 65.0,
+            "lat": 37.25446,
+            "lon": -87.19082
+          },
+          {
+            "at_mi": 97.5,
+            "lat": 37.3849,
+            "lon": -86.66052
+          },
+          {
+            "at_mi": 130.0,
+            "lat": 37.5399,
+            "lon": -86.13136
+          },
+          {
+            "at_mi": 162.5,
+            "lat": 37.8194,
+            "lon": -85.7326
+          },
+          {
+            "at_mi": 195.0,
+            "lat": 38.25273,
+            "lon": -85.75849
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 475.7,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 32.5,
+            "elevation_ft": 695.5,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 65.0,
+            "elevation_ft": 472.4,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 97.5,
+            "elevation_ft": 565.9,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 130.0,
+            "elevation_ft": 741.5,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 162.5,
+            "elevation_ft": 446.9,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 195.0,
+            "elevation_ft": 487.2,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 195.0,
+            "avg_grade_pct": 0.0,
+            "terrain": "flat",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          }
+        ],
+        "checkpoints": [
+          {
+            "name": "I-65 corridor between Clarksville and Louisville",
+            "at_mi": 97.5,
+            "type": "place",
+            "state": "Kentucky",
+            "highway": "I-65",
+            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
+          }
+        ],
+        "state_miles": [
+          {
+            "state": "Tennessee",
+            "miles": 9.9
+          },
+          {
+            "state": "Kentucky",
+            "miles": 185.1
+          }
+        ],
+        "state_crossings": [
+          {
+            "at_mi": 9.9,
+            "from_state": "Tennessee",
+            "state": "Kentucky",
+            "place": "Tennessee-Kentucky line on I-65",
+            "source": "Computed from OSRM route geometry and public U.S. state boundary GeoJSON."
+          }
+        ],
+        "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
+      },
+      "terrain": "flat"
+    },
+    {
+      "from": "Murfreesboro",
+      "to": "Huntsville",
+      "highway": "US-231",
+      "miles": 83,
+      "stops": [
+        {
+          "name": "Chevron",
+          "type": "fuel_station",
+          "at_mi": 62.2,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "limited",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "break"
+          ],
+          "services": [
+            "diesel",
+            "parking"
+          ]
+        }
+      ],
+      "corridor": {
+        "tollway_detected": false,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 35.84561,
+            "lon": -86.39022
+          },
+          {
+            "at_mi": 20.8,
+            "lat": 35.55206,
+            "lon": -86.44889
+          },
+          {
+            "at_mi": 41.5,
+            "lat": 35.29739,
+            "lon": -86.54639
+          },
+          {
+            "at_mi": 62.2,
+            "lat": 35.01763,
+            "lon": -86.57641
+          },
+          {
+            "at_mi": 83.0,
+            "lat": 34.73035,
+            "lon": -86.58606
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 616.8,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 20.8,
+            "elevation_ft": 794.0,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 41.5,
+            "elevation_ft": 953.7,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 62.2,
+            "elevation_ft": 882.5,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 83.0,
+            "elevation_ft": 626.6,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 83.0,
+            "avg_grade_pct": 0.0,
+            "terrain": "flat",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          }
+        ],
+        "checkpoints": [
+          {
+            "name": "US-231 corridor between Murfreesboro and Huntsville",
+            "at_mi": 41.5,
+            "type": "place",
+            "state": "Alabama",
+            "highway": "US-231",
+            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
+          }
+        ],
+        "state_miles": [
+          {
+            "state": "Tennessee",
+            "miles": 64.1
+          },
+          {
+            "state": "Alabama",
+            "miles": 18.9
+          }
+        ],
+        "state_crossings": [
+          {
+            "at_mi": 64.1,
+            "from_state": "Tennessee",
+            "state": "Alabama",
+            "place": "Tennessee-Alabama line on US-231",
+            "source": "Computed from OSRM route geometry and public U.S. state boundary GeoJSON."
+          }
+        ],
+        "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
+      },
+      "terrain": "flat"
+    },
+    {
+      "from": "Murfreesboro",
+      "to": "Chattanooga",
+      "highway": "I-24",
+      "miles": 101,
+      "stops": [
+        {
+          "name": "Pilot Travel Center",
+          "type": "service_plaza",
+          "at_mi": 50.5,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ]
+        }
+      ],
+      "corridor": {
+        "tollway_detected": false,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 35.84561,
+            "lon": -86.39022
+          },
+          {
+            "at_mi": 25.2,
+            "lat": 35.5416,
+            "lon": -86.17848
+          },
+          {
+            "at_mi": 50.5,
+            "lat": 35.27752,
+            "lon": -85.89149
+          },
+          {
+            "at_mi": 75.8,
+            "lat": 35.05048,
+            "lon": -85.64654
+          },
+          {
+            "at_mi": 101.0,
+            "lat": 35.04576,
+            "lon": -85.3097
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 616.8,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 25.2,
+            "elevation_ft": 1153.2,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 50.5,
+            "elevation_ft": 1052.5,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 75.8,
+            "elevation_ft": 692.3,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 101.0,
+            "elevation_ft": 682.4,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 101.0,
+            "avg_grade_pct": 0.01,
+            "terrain": "flat",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          }
+        ],
+        "checkpoints": [
+          {
+            "name": "I-24 corridor between Murfreesboro and Chattanooga",
+            "at_mi": 50.5,
+            "type": "place",
+            "state": "Tennessee",
+            "highway": "I-24",
+            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
+          }
+        ],
+        "state_miles": [
+          {
+            "state": "Tennessee",
+            "miles": 96.4
+          },
+          {
+            "state": "Georgia",
+            "miles": 4.6
+          }
+        ],
+        "state_crossings": [
+          {
+            "at_mi": 88.0,
+            "from_state": "Tennessee",
+            "state": "Georgia",
+            "place": "Tennessee-Georgia line on I-24",
+            "source": "Computed from OSRM route geometry and public U.S. state boundary GeoJSON."
+          },
+          {
+            "at_mi": 92.6,
+            "from_state": "Georgia",
+            "state": "Tennessee",
+            "place": "Georgia-Tennessee line on I-24",
+            "source": "Computed from OSRM route geometry and public U.S. state boundary GeoJSON."
+          }
+        ],
+        "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
+      },
+      "terrain": "flat"
+    },
+    {
+      "from": "Port Saint Lucie",
+      "to": "Palm Bay",
+      "highway": "I-95",
+      "miles": 65,
+      "stops": [
+        {
+          "name": "Flying J Travel Center",
+          "type": "service_plaza",
+          "at_mi": 16.3,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ]
+        },
+        {
+          "name": "TA",
+          "type": "service_plaza",
+          "at_mi": 32.5,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ]
+        }
+      ],
+      "corridor": {
+        "tollway_detected": false,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 27.29438,
+            "lon": -80.35033
+          },
+          {
+            "at_mi": 16.3,
+            "lat": 27.46202,
+            "lon": -80.41243
+          },
+          {
+            "at_mi": 32.5,
+            "lat": 27.66146,
+            "lon": -80.52594
+          },
+          {
+            "at_mi": 48.7,
+            "lat": 27.87221,
+            "lon": -80.59152
+          },
+          {
+            "at_mi": 65.0,
+            "lat": 28.03445,
+            "lon": -80.58866
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 31.2,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 16.3,
+            "elevation_ft": 36.1,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 32.5,
+            "elevation_ft": 37.7,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 48.7,
+            "elevation_ft": 36.1,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 65.0,
+            "elevation_ft": 29.5,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 65.0,
+            "avg_grade_pct": -0.0,
+            "terrain": "flat",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          }
+        ],
+        "checkpoints": [
+          {
+            "name": "I-95 corridor between Port Saint Lucie and Palm Bay",
+            "at_mi": 32.5,
+            "type": "place",
+            "state": "Florida",
+            "highway": "I-95",
+            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
+          }
+        ],
+        "state_miles": [
+          {
+            "state": "Florida",
+            "miles": 65.0
+          }
+        ],
+        "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
+      },
+      "terrain": "flat"
+    },
+    {
+      "from": "Port Saint Lucie",
+      "to": "Coral Springs",
+      "highway": "SR-869",
+      "miles": 83,
+      "stops": [
+        {
+          "name": "BP",
+          "type": "fuel_station",
+          "at_mi": 41.5,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "limited",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "break"
+          ],
+          "services": [
+            "diesel",
+            "parking"
+          ]
+        }
+      ],
+      "corridor": {
+        "tollway_detected": true,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 27.29438,
+            "lon": -80.35033
+          },
+          {
+            "at_mi": 20.8,
+            "lat": 27.04596,
+            "lon": -80.23956
+          },
+          {
+            "at_mi": 41.5,
+            "lat": 26.7596,
+            "lon": -80.13405
+          },
+          {
+            "at_mi": 62.2,
+            "lat": 26.48383,
+            "lon": -80.17268
+          },
+          {
+            "at_mi": 83.0,
+            "lat": 26.27119,
+            "lon": -80.27099
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 31.2,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 20.8,
+            "elevation_ft": 29.5,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 41.5,
+            "elevation_ft": 23.0,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 62.2,
+            "elevation_ft": 26.2,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 83.0,
+            "elevation_ft": 19.7,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 83.0,
+            "avg_grade_pct": -0.0,
+            "terrain": "flat",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          }
+        ],
+        "checkpoints": [
+          {
+            "name": "SR-869 corridor between Port Saint Lucie and Coral Springs",
+            "at_mi": 41.5,
+            "type": "place",
+            "state": "Florida",
+            "highway": "SR-869",
+            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
+          }
+        ],
+        "state_miles": [
+          {
+            "state": "Florida",
+            "miles": 83.0
+          }
+        ],
+        "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
+      },
+      "terrain": "flat"
+    },
+    {
+      "from": "Port Saint Lucie",
+      "to": "Miami",
+      "highway": "I-95",
+      "miles": 115,
+      "stops": [
+        {
+          "name": "Mobil",
+          "type": "fuel_station",
+          "at_mi": 69.0,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "limited",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "break"
+          ],
+          "services": [
+            "diesel",
+            "parking"
+          ]
+        },
+        {
+          "name": "RaceTrac",
+          "type": "fuel_station",
+          "at_mi": 92.0,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "limited",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "break"
+          ],
+          "services": [
+            "diesel",
+            "parking"
+          ]
+        }
+      ],
+      "corridor": {
+        "tollway_detected": true,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 27.29438,
+            "lon": -80.35033
+          },
+          {
+            "at_mi": 23.0,
+            "lat": 27.01874,
+            "lon": -80.22384
+          },
+          {
+            "at_mi": 46.0,
+            "lat": 26.71346,
+            "lon": -80.13757
+          },
+          {
+            "at_mi": 69.0,
+            "lat": 26.37976,
+            "lon": -80.17105
+          },
+          {
+            "at_mi": 92.0,
+            "lat": 26.07545,
+            "lon": -80.21593
+          },
+          {
+            "at_mi": 115.0,
+            "lat": 25.7617,
+            "lon": -80.1918
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 31.2,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 23.0,
+            "elevation_ft": 26.2,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 46.0,
+            "elevation_ft": 38.4,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 69.0,
+            "elevation_ft": 29.5,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 92.0,
+            "elevation_ft": 9.8,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 115.0,
+            "elevation_ft": 95.1,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 115.0,
+            "avg_grade_pct": 0.01,
+            "terrain": "flat",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          }
+        ],
+        "checkpoints": [
+          {
+            "name": "I-95 corridor between Port Saint Lucie and Miami",
+            "at_mi": 69.0,
+            "type": "place",
+            "state": "Florida",
+            "highway": "I-95",
+            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
+          }
+        ],
+        "state_miles": [
+          {
+            "state": "Florida",
+            "miles": 115.0
+          }
+        ],
+        "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
+      },
+      "terrain": "flat"
+    },
+    {
+      "from": "Jackson",
+      "to": "Baton Rouge",
+      "highway": "I-55",
+      "miles": 175,
+      "stops": [
+        {
+          "name": "Big Boss Travel Plaza",
+          "type": "service_plaza",
+          "at_mi": 145.8,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ]
+        }
+      ],
+      "corridor": {
+        "tollway_detected": false,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 32.29871,
+            "lon": -90.18482
+          },
+          {
+            "at_mi": 29.2,
+            "lat": 31.93486,
+            "lon": -90.39813
+          },
+          {
+            "at_mi": 58.3,
+            "lat": 31.5229,
+            "lon": -90.47945
+          },
+          {
+            "at_mi": 87.5,
+            "lat": 31.10532,
+            "lon": -90.48647
+          },
+          {
+            "at_mi": 116.7,
+            "lat": 30.67431,
+            "lon": -90.53281
+          },
+          {
+            "at_mi": 145.8,
+            "lat": 30.47454,
+            "lon": -90.7308
+          },
+          {
+            "at_mi": 175.0,
+            "lat": 30.45147,
+            "lon": -91.1871
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 310.0,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 29.2,
+            "elevation_ft": 469.2,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 58.3,
+            "elevation_ft": 479.0,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 87.5,
+            "elevation_ft": 347.8,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 116.7,
+            "elevation_ft": 134.5,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 145.8,
+            "elevation_ft": 49.2,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 175.0,
+            "elevation_ft": 137.8,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 175.0,
+            "avg_grade_pct": -0.02,
+            "terrain": "flat",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          }
+        ],
+        "checkpoints": [
+          {
+            "name": "I-55 corridor between Jackson and Baton Rouge",
+            "at_mi": 87.5,
+            "type": "place",
+            "state": "Louisiana",
+            "highway": "I-55",
+            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
+          }
+        ],
+        "state_miles": [
+          {
+            "state": "Mississippi",
+            "miles": 95.2
+          },
+          {
+            "state": "Louisiana",
+            "miles": 79.8
+          }
+        ],
+        "state_crossings": [
+          {
+            "at_mi": 95.2,
+            "from_state": "Mississippi",
+            "state": "Louisiana",
+            "place": "Mississippi-Louisiana line on I-55",
+            "source": "Computed from OSRM route geometry and public U.S. state boundary GeoJSON."
+          }
+        ],
+        "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
+      },
+      "terrain": "flat"
+    },
+    {
+      "from": "Jackson",
+      "to": "New Orleans",
+      "highway": "I-55",
+      "miles": 186,
+      "stops": [
+        {
+          "name": "Fleetway Travel Center",
+          "type": "service_plaza",
+          "at_mi": 53.2,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ]
+        },
+        {
+          "name": "TA Express",
+          "type": "service_plaza",
+          "at_mi": 159.5,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ]
+        }
+      ],
+      "corridor": {
+        "tollway_detected": false,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 32.29871,
+            "lon": -90.18482
+          },
+          {
+            "at_mi": 26.5,
+            "lat": 31.9718,
+            "lon": -90.37986
+          },
+          {
+            "at_mi": 53.2,
+            "lat": 31.58881,
+            "lon": -90.47057
+          },
+          {
+            "at_mi": 79.7,
+            "lat": 31.21276,
+            "lon": -90.48386
+          },
+          {
+            "at_mi": 106.3,
+            "lat": 30.83255,
+            "lon": -90.53322
+          },
+          {
+            "at_mi": 132.8,
+            "lat": 30.45765,
+            "lon": -90.47423
+          },
+          {
+            "at_mi": 159.5,
+            "lat": 30.09631,
+            "lon": -90.43931
+          },
+          {
+            "at_mi": 186.0,
+            "lat": 29.95109,
+            "lon": -90.07147
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 310.0,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 26.5,
+            "elevation_ft": 413.4,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 53.2,
+            "elevation_ft": 498.7,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 79.7,
+            "elevation_ft": 446.2,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 106.3,
+            "elevation_ft": 242.8,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 132.8,
+            "elevation_ft": 52.5,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 159.5,
+            "elevation_ft": 20.0,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 186.0,
+            "elevation_ft": 32.8,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 186.0,
+            "avg_grade_pct": -0.03,
+            "terrain": "flat",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          }
+        ],
+        "checkpoints": [
+          {
+            "name": "I-55 corridor between Jackson and New Orleans",
+            "at_mi": 106.3,
+            "type": "place",
+            "state": "Louisiana",
+            "highway": "I-55",
+            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
+          }
+        ],
+        "state_miles": [
+          {
+            "state": "Mississippi",
+            "miles": 94.9
+          },
+          {
+            "state": "Louisiana",
+            "miles": 91.1
+          }
+        ],
+        "state_crossings": [
+          {
+            "at_mi": 94.9,
+            "from_state": "Mississippi",
+            "state": "Louisiana",
+            "place": "Mississippi-Louisiana line on I-55",
+            "source": "Computed from OSRM route geometry and public U.S. state boundary GeoJSON."
+          }
+        ],
+        "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
+      },
+      "terrain": "flat"
+    },
+    {
+      "from": "Jackson",
+      "to": "Tuscaloosa",
+      "highway": "I-20",
+      "miles": 186,
+      "stops": [
+        {
+          "name": "Marathon",
+          "type": "fuel_station",
+          "at_mi": 26.6,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "limited",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "break"
+          ],
+          "services": [
+            "diesel",
+            "parking"
+          ]
+        },
+        {
+          "name": "Love's Travel Stop",
+          "type": "service_plaza",
+          "at_mi": 53.1,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ]
+        }
+      ],
+      "corridor": {
+        "tollway_detected": false,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 32.29871,
+            "lon": -90.18482
+          },
+          {
+            "at_mi": 26.6,
+            "lat": 32.28996,
+            "lon": -89.76087
+          },
+          {
+            "at_mi": 53.1,
+            "lat": 32.32351,
+            "lon": -89.34643
+          },
+          {
+            "at_mi": 79.7,
+            "lat": 32.34407,
+            "lon": -88.90026
+          },
+          {
+            "at_mi": 106.3,
+            "lat": 32.41073,
+            "lon": -88.47383
+          },
+          {
+            "at_mi": 132.9,
+            "lat": 32.67966,
+            "lon": -88.16475
+          },
+          {
+            "at_mi": 159.4,
+            "lat": 32.9484,
+            "lon": -87.84294
+          },
+          {
+            "at_mi": 186.0,
+            "lat": 33.20983,
+            "lon": -87.56916
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 310.0,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 26.6,
+            "elevation_ft": 397.0,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 53.1,
+            "elevation_ft": 502.0,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 79.7,
+            "elevation_ft": 456.0,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 106.3,
+            "elevation_ft": 278.5,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 132.9,
+            "elevation_ft": 177.8,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 159.4,
+            "elevation_ft": 248.0,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 186.0,
+            "elevation_ft": 224.4,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 186.0,
+            "avg_grade_pct": -0.01,
+            "terrain": "flat",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          }
+        ],
+        "checkpoints": [
+          {
+            "name": "I-20 corridor between Jackson and Tuscaloosa",
+            "at_mi": 106.3,
+            "type": "place",
+            "state": "Alabama",
+            "highway": "I-20",
+            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
+          }
+        ],
+        "state_miles": [
+          {
+            "state": "Mississippi",
+            "miles": 111.3
+          },
+          {
+            "state": "Alabama",
+            "miles": 74.7
+          }
+        ],
+        "state_crossings": [
+          {
+            "at_mi": 111.3,
+            "from_state": "Mississippi",
+            "state": "Alabama",
+            "place": "Mississippi-Alabama line on I-20",
+            "source": "Computed from OSRM route geometry and public U.S. state boundary GeoJSON."
+          }
+        ],
+        "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
+      },
+      "terrain": "flat"
+    },
+    {
+      "from": "Gainesville",
+      "to": "Jacksonville",
+      "highway": "I-10",
+      "miles": 71,
+      "stops": [
+        {
+          "name": "Pilot",
+          "type": "fuel_station",
+          "at_mi": 17.7,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "limited",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "break"
+          ],
+          "services": [
+            "diesel",
+            "parking"
+          ]
+        },
+        {
+          "name": "Pilot Travel Center",
+          "type": "service_plaza",
+          "at_mi": 53.3,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ]
+        }
+      ],
+      "corridor": {
+        "tollway_detected": false,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 29.65163,
+            "lon": -82.32501
+          },
+          {
+            "at_mi": 17.7,
+            "lat": 29.84536,
+            "lon": -82.15949
+          },
+          {
+            "at_mi": 35.5,
+            "lat": 30.07949,
+            "lon": -82.06402
+          },
+          {
+            "at_mi": 53.3,
+            "lat": 30.29768,
+            "lon": -81.93709
+          },
+          {
+            "at_mi": 71.0,
+            "lat": 30.33213,
+            "lon": -81.65572
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 118.1,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 17.7,
+            "elevation_ft": 137.8,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 35.5,
+            "elevation_ft": 170.6,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 53.3,
+            "elevation_ft": 98.4,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 71.0,
+            "elevation_ft": 39.4,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 71.0,
+            "avg_grade_pct": -0.02,
+            "terrain": "flat",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          }
+        ],
+        "checkpoints": [
+          {
+            "name": "I-10 corridor between Gainesville and Jacksonville",
+            "at_mi": 35.5,
+            "type": "place",
+            "state": "Florida",
+            "highway": "I-10",
+            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
+          }
+        ],
+        "state_miles": [
+          {
+            "state": "Florida",
+            "miles": 71.0
+          }
+        ],
+        "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
+      },
+      "terrain": "flat"
+    },
+    {
+      "from": "Gainesville",
+      "to": "Orlando",
+      "highway": "I-75",
+      "miles": 115,
+      "stops": [
+        {
+          "name": "Pilot Travel Center",
+          "type": "service_plaza",
+          "at_mi": 28.7,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ]
+        }
+      ],
+      "corridor": {
+        "tollway_detected": true,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 29.65163,
+            "lon": -82.32501
+          },
+          {
+            "at_mi": 28.7,
+            "lat": 29.3193,
+            "lon": -82.21112
+          },
+          {
+            "at_mi": 57.5,
+            "lat": 28.91888,
+            "lon": -82.1122
+          },
+          {
+            "at_mi": 86.3,
+            "lat": 28.64273,
+            "lon": -81.78976
+          },
+          {
+            "at_mi": 115.0,
+            "lat": 28.53832,
+            "lon": -81.3792
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 118.1,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 28.7,
+            "elevation_ft": 123.0,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 57.5,
+            "elevation_ft": 59.1,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 86.3,
+            "elevation_ft": 94.5,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 115.0,
+            "elevation_ft": 155.2,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 115.0,
+            "avg_grade_pct": 0.01,
+            "terrain": "flat",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          }
+        ],
+        "checkpoints": [
+          {
+            "name": "I-75 corridor between Gainesville and Orlando",
+            "at_mi": 57.5,
+            "type": "place",
+            "state": "Florida",
+            "highway": "I-75",
+            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
+          }
+        ],
+        "state_miles": [
+          {
+            "state": "Florida",
+            "miles": 115.0
+          }
+        ],
+        "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
+      },
+      "terrain": "flat"
+    },
+    {
+      "from": "Gainesville",
+      "to": "Lakeland",
+      "highway": "I-75",
+      "miles": 144,
+      "stops": [
+        {
+          "name": "Pilot Travel Center",
+          "type": "service_plaza",
+          "at_mi": 28.8,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ]
+        }
+      ],
+      "corridor": {
+        "tollway_detected": true,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 29.65163,
+            "lon": -82.32501
+          },
+          {
+            "at_mi": 28.8,
+            "lat": 29.3193,
+            "lon": -82.21112
+          },
+          {
+            "at_mi": 57.6,
+            "lat": 28.91888,
+            "lon": -82.1122
+          },
+          {
+            "at_mi": 86.4,
+            "lat": 28.64078,
+            "lon": -81.79815
+          },
+          {
+            "at_mi": 115.2,
+            "lat": 28.26143,
+            "lon": -81.65985
+          },
+          {
+            "at_mi": 144.0,
+            "lat": 28.03967,
+            "lon": -81.94983
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 118.1,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 28.8,
+            "elevation_ft": 123.0,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 57.6,
+            "elevation_ft": 59.1,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 86.4,
+            "elevation_ft": 114.8,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 115.2,
+            "elevation_ft": 210.0,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 144.0,
+            "elevation_ft": 203.4,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 144.0,
+            "avg_grade_pct": 0.01,
+            "terrain": "flat",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          }
+        ],
+        "checkpoints": [
+          {
+            "name": "I-75 corridor between Gainesville and Lakeland",
+            "at_mi": 86.4,
+            "type": "place",
+            "state": "Florida",
+            "highway": "I-75",
+            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
+          }
+        ],
+        "state_miles": [
+          {
+            "state": "Florida",
+            "miles": 144.0
+          }
+        ],
+        "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
+      },
+      "terrain": "flat"
+    },
+    {
+      "from": "Columbia",
+      "to": "Charlotte",
+      "highway": "I-77",
+      "miles": 93,
+      "stops": [
+        {
+          "name": "Exxon",
+          "type": "fuel_station",
+          "at_mi": 23.2,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "limited",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "break"
+          ],
+          "services": [
+            "diesel",
+            "parking"
+          ]
+        },
+        {
+          "name": "ONE9 Travel Center",
+          "type": "service_plaza",
+          "at_mi": 69.8,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ]
+        }
+      ],
+      "corridor": {
+        "tollway_detected": false,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 34.0008,
+            "lon": -81.03485
+          },
+          {
+            "at_mi": 23.2,
+            "lat": 34.29037,
+            "lon": -80.9969
+          },
+          {
+            "at_mi": 46.5,
+            "lat": 34.62423,
+            "lon": -81.0223
+          },
+          {
+            "at_mi": 69.8,
+            "lat": 34.94594,
+            "lon": -80.97467
+          },
+          {
+            "at_mi": 93.0,
+            "lat": 35.22716,
+            "lon": -80.84316
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 293.6,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 23.2,
+            "elevation_ft": 462.6,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 46.5,
+            "elevation_ft": 411.7,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 69.8,
+            "elevation_ft": 521.7,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 93.0,
+            "elevation_ft": 880.9,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 93.0,
+            "avg_grade_pct": 0.11,
+            "terrain": "flat",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          }
+        ],
+        "checkpoints": [
+          {
+            "name": "I-77 corridor between Columbia and Charlotte",
+            "at_mi": 46.5,
+            "type": "place",
+            "state": "North Carolina",
+            "highway": "I-77",
+            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
+          }
+        ],
+        "state_miles": [
+          {
+            "state": "South Carolina",
+            "miles": 81.6
+          },
+          {
+            "state": "North Carolina",
+            "miles": 11.4
+          }
+        ],
+        "state_crossings": [
+          {
+            "at_mi": 81.6,
+            "from_state": "South Carolina",
+            "state": "North Carolina",
+            "place": "South Carolina-North Carolina line on I-77",
+            "source": "Computed from OSRM route geometry and public U.S. state boundary GeoJSON."
+          }
+        ],
+        "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
+      },
+      "terrain": "flat"
+    },
+    {
+      "from": "Columbia",
+      "to": "Charleston",
+      "highway": "I-26",
+      "miles": 116,
+      "stops": [
+        {
+          "name": "Mr. Fuel Travel Center",
+          "type": "service_plaza",
+          "at_mi": 92.8,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ]
+        }
+      ],
+      "corridor": {
+        "tollway_detected": false,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 34.0008,
+            "lon": -81.03485
+          },
+          {
+            "at_mi": 23.2,
+            "lat": 33.75658,
+            "lon": -80.94869
+          },
+          {
+            "at_mi": 46.4,
+            "lat": 33.47098,
+            "lon": -80.74724
+          },
+          {
+            "at_mi": 69.6,
+            "lat": 33.23955,
+            "lon": -80.4597
+          },
+          {
+            "at_mi": 92.8,
+            "lat": 33.03575,
+            "lon": -80.14642
+          },
+          {
+            "at_mi": 116.0,
+            "lat": 32.77631,
+            "lon": -79.93275
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 293.6,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 23.2,
+            "elevation_ft": 278.2,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 46.4,
+            "elevation_ft": 182.1,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 69.6,
+            "elevation_ft": 101.7,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 92.8,
+            "elevation_ft": 85.3,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 116.0,
+            "elevation_ft": 23.0,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 116.0,
+            "avg_grade_pct": -0.04,
+            "terrain": "flat",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          }
+        ],
+        "checkpoints": [
+          {
+            "name": "I-26 corridor between Columbia and Charleston",
+            "at_mi": 69.6,
+            "type": "place",
+            "state": "South Carolina",
+            "highway": "I-26",
+            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
+          }
+        ],
+        "state_miles": [
+          {
+            "state": "South Carolina",
+            "miles": 116.0
+          }
+        ],
+        "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
+      },
+      "terrain": "flat"
+    },
+    {
+      "from": "Columbia",
+      "to": "Savannah",
+      "highway": "I-95",
+      "miles": 147,
+      "stops": [
+        {
+          "name": "BP",
+          "type": "fuel_station",
+          "at_mi": 24.5,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "limited",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "break"
+          ],
+          "services": [
+            "diesel",
+            "parking"
+          ]
+        }
+      ],
+      "corridor": {
+        "tollway_detected": false,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 34.0008,
+            "lon": -81.03485
+          },
+          {
+            "at_mi": 24.5,
+            "lat": 33.72329,
+            "lon": -81.10025
+          },
+          {
+            "at_mi": 49.0,
+            "lat": 33.38046,
+            "lon": -81.13507
+          },
+          {
+            "at_mi": 73.5,
+            "lat": 33.0442,
+            "lon": -81.21996
+          },
+          {
+            "at_mi": 98.0,
+            "lat": 32.69528,
+            "lon": -81.24271
+          },
+          {
+            "at_mi": 122.5,
+            "lat": 32.38571,
+            "lon": -81.09752
+          },
+          {
+            "at_mi": 147.0,
+            "lat": 32.0809,
+            "lon": -81.09121
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 293.6,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 24.5,
+            "elevation_ft": 314.3,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 49.0,
+            "elevation_ft": 196.2,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 73.5,
+            "elevation_ft": 160.8,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 98.0,
+            "elevation_ft": 101.7,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 122.5,
+            "elevation_ft": 39.4,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 147.0,
+            "elevation_ft": 82.0,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 147.0,
+            "avg_grade_pct": -0.03,
+            "terrain": "flat",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          }
+        ],
+        "checkpoints": [
+          {
+            "name": "I-95 corridor between Columbia and Savannah",
+            "at_mi": 73.5,
+            "type": "place",
+            "state": "Georgia",
+            "highway": "I-95",
+            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
+          }
+        ],
+        "state_miles": [
+          {
+            "state": "South Carolina",
+            "miles": 143.3
+          },
+          {
+            "state": "Georgia",
+            "miles": 3.7
+          }
+        ],
+        "state_crossings": [
+          {
+            "at_mi": 143.3,
+            "from_state": "South Carolina",
+            "state": "Georgia",
+            "place": "South Carolina-Georgia line on I-95",
+            "source": "Computed from OSRM route geometry and public U.S. state boundary GeoJSON."
+          }
+        ],
+        "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
+      },
+      "terrain": "flat"
+    },
+    {
+      "from": "Charleston",
+      "to": "Savannah",
+      "highway": "US-17",
+      "miles": 108,
+      "stops": [],
+      "corridor": {
+        "tollway_detected": false,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 32.77631,
+            "lon": -79.93275
+          },
+          {
+            "at_mi": 27.0,
+            "lat": 32.75724,
+            "lon": -80.3718
+          },
+          {
+            "at_mi": 54.0,
+            "lat": 32.60868,
+            "lon": -80.75081
+          },
+          {
+            "at_mi": 81.0,
+            "lat": 32.40424,
+            "lon": -81.01752
+          },
+          {
+            "at_mi": 108.0,
+            "lat": 32.0809,
+            "lon": -81.09121
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 23.0,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 27.0,
+            "elevation_ft": 29.5,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 54.0,
+            "elevation_ft": 49.2,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 81.0,
+            "elevation_ft": 59.1,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 108.0,
+            "elevation_ft": 82.0,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 108.0,
+            "avg_grade_pct": 0.01,
+            "terrain": "flat",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          }
+        ],
+        "checkpoints": [
+          {
+            "name": "US-17 corridor between Charleston and Savannah",
+            "at_mi": 54.0,
+            "type": "place",
+            "state": "Georgia",
+            "highway": "US-17",
+            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
+          }
+        ],
+        "state_miles": [
+          {
+            "state": "South Carolina",
+            "miles": 104.3
+          },
+          {
+            "state": "Georgia",
+            "miles": 3.7
+          }
+        ],
+        "state_crossings": [
+          {
+            "at_mi": 104.3,
+            "from_state": "South Carolina",
+            "state": "Georgia",
+            "place": "South Carolina-Georgia line on US-17",
+            "source": "Computed from OSRM route geometry and public U.S. state boundary GeoJSON."
+          }
+        ],
+        "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
+      },
+      "terrain": "flat"
+    },
+    {
+      "from": "Charleston",
+      "to": "Wilmington",
+      "highway": "US-17",
+      "miles": 168,
+      "stops": [
+        {
+          "name": "circle k",
+          "type": "fuel_station",
+          "at_mi": 144.0,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "limited",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "break"
+          ],
+          "services": [
+            "diesel",
+            "parking"
+          ]
+        }
+      ],
+      "corridor": {
+        "tollway_detected": false,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 32.77631,
+            "lon": -79.93275
+          },
+          {
+            "at_mi": 24.0,
+            "lat": 32.98168,
+            "lon": -79.65886
+          },
+          {
+            "at_mi": 48.0,
+            "lat": 33.2174,
+            "lon": -79.37988
+          },
+          {
+            "at_mi": 72.0,
+            "lat": 33.43377,
+            "lon": -79.13742
+          },
+          {
+            "at_mi": 96.0,
+            "lat": 33.71181,
+            "lon": -78.90545
+          },
+          {
+            "at_mi": 120.0,
+            "lat": 33.90606,
+            "lon": -78.58577
+          },
+          {
+            "at_mi": 144.0,
+            "lat": 34.04726,
+            "lon": -78.22671
+          },
+          {
+            "at_mi": 168.0,
+            "lat": 34.23556,
+            "lon": -77.94605
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 23.0,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 24.0,
+            "elevation_ft": 19.7,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 48.0,
+            "elevation_ft": 45.9,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 72.0,
+            "elevation_ft": 3.3,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 96.0,
+            "elevation_ft": 3.3,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 120.0,
+            "elevation_ft": -6.6,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 144.0,
+            "elevation_ft": 36.1,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 168.0,
+            "elevation_ft": 24.6,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 168.0,
+            "avg_grade_pct": 0.0,
+            "terrain": "flat",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          }
+        ],
+        "checkpoints": [
+          {
+            "name": "US-17 corridor between Charleston and Wilmington",
+            "at_mi": 96.0,
+            "type": "place",
+            "state": "North Carolina",
+            "highway": "US-17",
+            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
+          }
+        ],
+        "state_miles": [
+          {
+            "state": "South Carolina",
+            "miles": 119.2
+          },
+          {
+            "state": "North Carolina",
+            "miles": 48.8
+          }
+        ],
+        "state_crossings": [
+          {
+            "at_mi": 119.2,
+            "from_state": "South Carolina",
+            "state": "North Carolina",
+            "place": "South Carolina-North Carolina line on US-17",
+            "source": "Computed from OSRM route geometry and public U.S. state boundary GeoJSON."
+          }
+        ],
+        "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
+      },
+      "terrain": "flat"
+    },
+    {
+      "from": "Coral Springs",
+      "to": "Palm Bay",
+      "highway": "I-95",
+      "miles": 143,
+      "stops": [
+        {
+          "name": "West Palm Beach Service Plaza",
+          "type": "service_plaza",
+          "at_mi": 28.6,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ]
+        },
+        {
+          "name": "Port Saint Lucie - Fort Pierce Service Plaza",
+          "type": "service_plaza",
+          "at_mi": 85.8,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ]
+        }
+      ],
+      "corridor": {
+        "tollway_detected": true,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 26.27119,
+            "lon": -80.27099
+          },
+          {
+            "at_mi": 28.6,
+            "lat": 26.58709,
+            "lon": -80.17325
+          },
+          {
+            "at_mi": 57.2,
+            "lat": 26.98794,
+            "lon": -80.18991
+          },
+          {
+            "at_mi": 85.8,
+            "lat": 27.34747,
+            "lon": -80.37417
+          },
+          {
+            "at_mi": 114.4,
+            "lat": 27.70524,
+            "lon": -80.54117
+          },
+          {
+            "at_mi": 143.0,
+            "lat": 28.03445,
+            "lon": -80.58866
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 19.7,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 28.6,
+            "elevation_ft": 29.5,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 57.2,
+            "elevation_ft": 26.2,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 85.8,
+            "elevation_ft": 32.8,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 114.4,
+            "elevation_ft": 38.4,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 143.0,
+            "elevation_ft": 29.5,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 143.0,
+            "avg_grade_pct": 0.0,
+            "terrain": "flat",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          }
+        ],
+        "checkpoints": [
+          {
+            "name": "I-95 corridor between Coral Springs and Palm Bay",
+            "at_mi": 85.8,
+            "type": "place",
+            "state": "Florida",
+            "highway": "I-95",
+            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
+          }
+        ],
+        "state_miles": [
+          {
+            "state": "Florida",
+            "miles": 143.0
+          }
+        ],
+        "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
+      },
+      "terrain": "flat"
+    },
+    {
+      "from": "Athens",
+      "to": "Atlanta",
+      "highway": "I-85",
+      "miles": 73,
+      "stops": [
+        {
+          "name": "Circle K",
+          "type": "fuel_station",
+          "at_mi": 36.5,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "limited",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "break"
+          ],
+          "services": [
+            "diesel",
+            "parking"
+          ]
+        }
+      ],
+      "corridor": {
+        "tollway_detected": true,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 33.96095,
+            "lon": -83.37796
+          },
+          {
+            "at_mi": 18.3,
+            "lat": 33.95886,
+            "lon": -83.6147
+          },
+          {
+            "at_mi": 36.5,
+            "lat": 33.97446,
+            "lon": -83.91592
+          },
+          {
+            "at_mi": 54.7,
+            "lat": 33.91389,
+            "lon": -84.20422
+          },
+          {
+            "at_mi": 73.0,
+            "lat": 33.74886,
+            "lon": -84.38751
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 754.9,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 18.3,
+            "elevation_ft": 836.6,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 36.5,
+            "elevation_ft": 1002.3,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 54.7,
+            "elevation_ft": 1053.1,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 73.0,
+            "elevation_ft": 1069.6,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 73.0,
+            "avg_grade_pct": 0.08,
+            "terrain": "flat",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          }
+        ],
+        "checkpoints": [
+          {
+            "name": "I-85 corridor between Athens and Atlanta",
+            "at_mi": 36.5,
+            "type": "place",
+            "state": "Georgia",
+            "highway": "I-85",
+            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
+          }
+        ],
+        "state_miles": [
+          {
+            "state": "Georgia",
+            "miles": 73.0
+          }
+        ],
+        "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
+      },
+      "terrain": "flat"
+    },
+    {
+      "from": "Athens",
+      "to": "Chattanooga",
+      "highway": "I-75",
+      "miles": 177,
+      "stops": [
+        {
+          "name": "Shell",
+          "type": "fuel_station",
+          "at_mi": 88.5,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "limited",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "break"
+          ],
+          "services": [
+            "diesel",
+            "parking"
+          ]
+        }
+      ],
+      "corridor": {
+        "tollway_detected": true,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 33.96095,
+            "lon": -83.37796
+          },
+          {
+            "at_mi": 29.5,
+            "lat": 33.96205,
+            "lon": -83.79647
+          },
+          {
+            "at_mi": 59.0,
+            "lat": 33.90104,
+            "lon": -84.27093
+          },
+          {
+            "at_mi": 88.5,
+            "lat": 34.08065,
+            "lon": -84.63841
+          },
+          {
+            "at_mi": 118.0,
+            "lat": 34.37516,
+            "lon": -84.90915
+          },
+          {
+            "at_mi": 147.5,
+            "lat": 34.78174,
+            "lon": -85.00046
+          },
+          {
+            "at_mi": 177.0,
+            "lat": 35.04576,
+            "lon": -85.3097
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 754.9,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 29.5,
+            "elevation_ft": 974.4,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 59.0,
+            "elevation_ft": 1030.2,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 88.5,
+            "elevation_ft": 944.9,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 118.0,
+            "elevation_ft": 783.1,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 147.5,
+            "elevation_ft": 789.0,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 177.0,
+            "elevation_ft": 682.4,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 177.0,
+            "avg_grade_pct": -0.01,
+            "terrain": "flat",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          }
+        ],
+        "checkpoints": [
+          {
+            "name": "I-75 corridor between Athens and Chattanooga",
+            "at_mi": 88.5,
+            "type": "place",
+            "state": "Tennessee",
+            "highway": "I-75",
+            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
+          }
+        ],
+        "state_miles": [
+          {
+            "state": "Georgia",
+            "miles": 172.0
+          },
+          {
+            "state": "Tennessee",
+            "miles": 5.0
+          }
+        ],
+        "state_crossings": [
+          {
+            "at_mi": 172.0,
+            "from_state": "Georgia",
+            "state": "Tennessee",
+            "place": "Georgia-Tennessee line on I-75",
+            "source": "Computed from OSRM route geometry and public U.S. state boundary GeoJSON."
+          }
+        ],
+        "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
+      },
+      "terrain": "flat"
+    },
+    {
+      "from": "Athens",
+      "to": "Columbia",
+      "highway": "I-20",
+      "miles": 163,
+      "stops": [
+        {
+          "name": "AM/PM",
+          "type": "fuel_station",
+          "at_mi": 81.5,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "limited",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "break"
+          ],
+          "services": [
+            "diesel",
+            "parking"
+          ]
+        },
+        {
+          "name": "Truck Stop 44",
+          "type": "service_plaza",
+          "at_mi": 135.9,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ]
+        }
+      ],
+      "corridor": {
+        "tollway_detected": false,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 33.96095,
+            "lon": -83.37796
+          },
+          {
+            "at_mi": 27.1,
+            "lat": 33.79687,
+            "lon": -82.98753
+          },
+          {
+            "at_mi": 54.4,
+            "lat": 33.63788,
+            "lon": -82.59587
+          },
+          {
+            "at_mi": 81.5,
+            "lat": 33.48673,
+            "lon": -82.23048
+          },
+          {
+            "at_mi": 108.6,
+            "lat": 33.62312,
+            "lon": -81.82063
+          },
+          {
+            "at_mi": 135.9,
+            "lat": 33.83041,
+            "lon": -81.43253
+          },
+          {
+            "at_mi": 163.0,
+            "lat": 34.0008,
+            "lon": -81.03485
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 754.9,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 27.1,
+            "elevation_ft": 528.5,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 54.4,
+            "elevation_ft": 364.2,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 81.5,
+            "elevation_ft": 370.7,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 108.6,
+            "elevation_ft": 439.6,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 135.9,
+            "elevation_ft": 442.9,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 163.0,
+            "elevation_ft": 293.6,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 163.0,
+            "avg_grade_pct": -0.06,
+            "terrain": "flat",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          }
+        ],
+        "checkpoints": [
+          {
+            "name": "I-20 corridor between Athens and Columbia",
+            "at_mi": 81.5,
+            "type": "place",
+            "state": "South Carolina",
+            "highway": "I-20",
+            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
+          }
+        ],
+        "state_miles": [
+          {
+            "state": "Georgia",
+            "miles": 94.9
+          },
+          {
+            "state": "South Carolina",
+            "miles": 68.1
+          }
+        ],
+        "state_crossings": [
+          {
+            "at_mi": 94.9,
+            "from_state": "Georgia",
+            "state": "South Carolina",
+            "place": "Georgia-South Carolina line on I-20",
+            "source": "Computed from OSRM route geometry and public U.S. state boundary GeoJSON."
+          }
+        ],
+        "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
+      },
+      "terrain": "flat"
+    },
+    {
+      "from": "West Palm Beach",
+      "to": "Miami",
+      "highway": "I-95",
+      "miles": 71,
+      "stops": [
+        {
+          "name": "Valero",
+          "type": "fuel_station",
+          "at_mi": 35.5,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "limited",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "break"
+          ],
+          "services": [
+            "diesel",
+            "parking"
+          ]
+        }
+      ],
+      "corridor": {
+        "tollway_detected": true,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 26.71534,
+            "lon": -80.05345
+          },
+          {
+            "at_mi": 17.8,
+            "lat": 26.4717,
+            "lon": -80.0891
+          },
+          {
+            "at_mi": 35.5,
+            "lat": 26.23448,
+            "lon": -80.13656
+          },
+          {
+            "at_mi": 53.2,
+            "lat": 25.99076,
+            "lon": -80.16603
+          },
+          {
+            "at_mi": 71.0,
+            "lat": 25.7617,
+            "lon": -80.1918
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 76.4,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 17.8,
+            "elevation_ft": 42.7,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 35.5,
+            "elevation_ft": 29.5,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 53.2,
+            "elevation_ft": 29.5,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 71.0,
+            "elevation_ft": 95.1,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 71.0,
+            "avg_grade_pct": 0.0,
+            "terrain": "flat",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          }
+        ],
+        "checkpoints": [
+          {
+            "name": "I-95 corridor between West Palm Beach and Miami",
+            "at_mi": 35.5,
+            "type": "place",
+            "state": "Florida",
+            "highway": "I-95",
+            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
+          }
+        ],
+        "state_miles": [
+          {
+            "state": "Florida",
+            "miles": 71.0
+          }
+        ],
+        "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
+      },
+      "terrain": "flat"
+    },
+    {
+      "from": "West Palm Beach",
+      "to": "Palm Bay",
+      "highway": "I-95",
+      "miles": 110,
+      "stops": [],
+      "corridor": {
+        "tollway_detected": true,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 26.71534,
+            "lon": -80.05345
+          },
+          {
+            "at_mi": 27.5,
+            "lat": 27.0212,
+            "lon": -80.22648
+          },
+          {
+            "at_mi": 55.0,
+            "lat": 27.37926,
+            "lon": -80.38625
+          },
+          {
+            "at_mi": 82.5,
+            "lat": 27.72703,
+            "lon": -80.54607
+          },
+          {
+            "at_mi": 110.0,
+            "lat": 28.03445,
+            "lon": -80.58866
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 76.4,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 27.5,
+            "elevation_ft": 29.5,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 55.0,
+            "elevation_ft": 32.8,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 82.5,
+            "elevation_ft": 42.7,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 110.0,
+            "elevation_ft": 29.5,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 110.0,
+            "avg_grade_pct": -0.01,
+            "terrain": "flat",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          }
+        ],
+        "checkpoints": [
+          {
+            "name": "I-95 corridor between West Palm Beach and Palm Bay",
+            "at_mi": 55.0,
+            "type": "place",
+            "state": "Florida",
+            "highway": "I-95",
+            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
+          }
+        ],
+        "state_miles": [
+          {
+            "state": "Florida",
+            "miles": 110.0
+          }
+        ],
+        "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
+      },
+      "terrain": "flat"
+    },
+    {
+      "from": "West Palm Beach",
+      "to": "Cape Coral",
+      "highway": "I-75",
+      "miles": 138,
+      "stops": [],
+      "corridor": {
+        "tollway_detected": true,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 26.71534,
+            "lon": -80.05345
+          },
+          {
+            "at_mi": 27.6,
+            "lat": 26.72473,
+            "lon": -80.44016
+          },
+          {
+            "at_mi": 55.2,
+            "lat": 26.69612,
+            "lon": -80.80397
+          },
+          {
+            "at_mi": 82.8,
+            "lat": 26.7686,
+            "lon": -81.22343
+          },
+          {
+            "at_mi": 110.4,
+            "lat": 26.71225,
+            "lon": -81.64839
+          },
+          {
+            "at_mi": 138.0,
+            "lat": 26.56285,
+            "lon": -81.94953
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 76.4,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 27.6,
+            "elevation_ft": 16.7,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 55.2,
+            "elevation_ft": 29.5,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 82.8,
+            "elevation_ft": 29.5,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 110.4,
+            "elevation_ft": 23.0,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 138.0,
+            "elevation_ft": 17.1,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 138.0,
+            "avg_grade_pct": -0.01,
+            "terrain": "flat",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          }
+        ],
+        "checkpoints": [
+          {
+            "name": "I-75 corridor between West Palm Beach and Cape Coral",
+            "at_mi": 82.8,
+            "type": "place",
+            "state": "Florida",
+            "highway": "I-75",
+            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
+          }
+        ],
+        "state_miles": [
+          {
+            "state": "Florida",
+            "miles": 138.0
+          }
+        ],
+        "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
+      },
+      "terrain": "flat"
+    },
+    {
+      "from": "Palm Bay",
+      "to": "Orlando",
+      "highway": "I-95",
+      "miles": 74,
+      "stops": [
+        {
+          "name": "Mobil",
+          "type": "fuel_station",
+          "at_mi": 18.5,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "limited",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "break"
+          ],
+          "services": [
+            "diesel",
+            "parking"
+          ]
+        },
+        {
+          "name": "Shell",
+          "type": "fuel_station",
+          "at_mi": 37.0,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "limited",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "break"
+          ],
+          "services": [
+            "diesel",
+            "parking"
+          ]
+        }
+      ],
+      "corridor": {
+        "tollway_detected": true,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 28.03445,
+            "lon": -80.58866
+          },
+          {
+            "at_mi": 18.5,
+            "lat": 28.22373,
+            "lon": -80.71649
+          },
+          {
+            "at_mi": 37.0,
+            "lat": 28.44233,
+            "lon": -80.86524
+          },
+          {
+            "at_mi": 55.5,
+            "lat": 28.45179,
+            "lon": -81.16203
+          },
+          {
+            "at_mi": 74.0,
+            "lat": 28.53832,
+            "lon": -81.3792
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 29.5,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 18.5,
+            "elevation_ft": 36.1,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 37.0,
+            "elevation_ft": 29.5,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 55.5,
+            "elevation_ft": 95.1,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 74.0,
+            "elevation_ft": 155.2,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 74.0,
+            "avg_grade_pct": 0.03,
+            "terrain": "flat",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          }
+        ],
+        "checkpoints": [
+          {
+            "name": "I-95 corridor between Palm Bay and Orlando",
+            "at_mi": 37.0,
+            "type": "place",
+            "state": "Florida",
+            "highway": "I-95",
+            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
+          }
+        ],
+        "state_miles": [
+          {
+            "state": "Florida",
+            "miles": 74.0
+          }
+        ],
+        "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
+      },
+      "terrain": "flat"
+    },
+    {
+      "from": "Palm Bay",
+      "to": "Lakeland",
+      "highway": "I-4",
+      "miles": 107,
+      "stops": [
+        {
+          "name": "Speedway",
+          "type": "fuel_station",
+          "at_mi": 53.5,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "limited",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "break"
+          ],
+          "services": [
+            "diesel",
+            "parking"
+          ]
+        }
+      ],
+      "corridor": {
+        "tollway_detected": true,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 28.03445,
+            "lon": -80.58866
+          },
+          {
+            "at_mi": 26.8,
+            "lat": 28.1297,
+            "lon": -80.99591
+          },
+          {
+            "at_mi": 53.5,
+            "lat": 28.29007,
+            "lon": -81.34618
+          },
+          {
+            "at_mi": 80.2,
+            "lat": 28.23313,
+            "lon": -81.64949
+          },
+          {
+            "at_mi": 107.0,
+            "lat": 28.03967,
+            "lon": -81.94983
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 29.5,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 26.8,
+            "elevation_ft": 65.6,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 53.5,
+            "elevation_ft": 76.1,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 80.2,
+            "elevation_ft": 167.3,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 107.0,
+            "elevation_ft": 203.4,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 107.0,
+            "avg_grade_pct": 0.03,
+            "terrain": "flat",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          }
+        ],
+        "checkpoints": [
+          {
+            "name": "I-4 corridor between Palm Bay and Lakeland",
+            "at_mi": 53.5,
+            "type": "place",
+            "state": "Florida",
+            "highway": "I-4",
+            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
+          }
+        ],
+        "state_miles": [
+          {
+            "state": "Florida",
+            "miles": 107.0
+          }
+        ],
+        "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
+      },
+      "terrain": "flat"
+    },
+    {
+      "from": "Wilmington",
+      "to": "Fayetteville",
+      "highway": "NC-87",
+      "miles": 90,
+      "stops": [],
+      "corridor": {
+        "tollway_detected": false,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 34.23556,
+            "lon": -77.94605
+          },
+          {
+            "at_mi": 22.5,
+            "lat": 34.36745,
+            "lon": -78.26224
+          },
+          {
+            "at_mi": 45.0,
+            "lat": 34.58432,
+            "lon": -78.53702
+          },
+          {
+            "at_mi": 67.5,
+            "lat": 34.76375,
+            "lon": -78.80771
+          },
+          {
+            "at_mi": 90.0,
+            "lat": 35.05272,
+            "lon": -78.87842
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 24.6,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 22.5,
+            "elevation_ft": 42.7,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 45.0,
+            "elevation_ft": 98.4,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 67.5,
+            "elevation_ft": 141.1,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 90.0,
+            "elevation_ft": 110.9,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 90.0,
+            "avg_grade_pct": 0.02,
+            "terrain": "flat",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          }
+        ],
+        "checkpoints": [
+          {
+            "name": "NC-87 corridor between Wilmington and Fayetteville",
+            "at_mi": 45.0,
+            "type": "place",
+            "state": "North Carolina",
+            "highway": "NC-87",
+            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
+          }
+        ],
+        "state_miles": [
+          {
+            "state": "North Carolina",
+            "miles": 90.0
+          }
+        ],
+        "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
+      },
+      "terrain": "flat"
+    },
+    {
+      "from": "Wilmington",
+      "to": "Raleigh",
+      "highway": "I-40",
+      "miles": 130,
+      "stops": [],
+      "corridor": {
+        "tollway_detected": false,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 34.23556,
+            "lon": -77.94605
+          },
+          {
+            "at_mi": 26.0,
+            "lat": 34.53593,
+            "lon": -77.89323
+          },
+          {
+            "at_mi": 52.0,
+            "lat": 34.88991,
+            "lon": -78.00203
+          },
+          {
+            "at_mi": 78.0,
+            "lat": 35.18033,
+            "lon": -78.26472
+          },
+          {
+            "at_mi": 104.0,
+            "lat": 35.45662,
+            "lon": -78.53709
+          },
+          {
+            "at_mi": 130.0,
+            "lat": 35.77956,
+            "lon": -78.6382
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 24.6,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 26.0,
+            "elevation_ft": 38.4,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 52.0,
+            "elevation_ft": 101.7,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 78.0,
+            "elevation_ft": 170.6,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 104.0,
+            "elevation_ft": 223.1,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 130.0,
+            "elevation_ft": 362.5,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 130.0,
+            "avg_grade_pct": 0.05,
+            "terrain": "flat",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          }
+        ],
+        "checkpoints": [
+          {
+            "name": "I-40 corridor between Wilmington and Raleigh",
+            "at_mi": 78.0,
+            "type": "place",
+            "state": "North Carolina",
+            "highway": "I-40",
+            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
+          }
+        ],
+        "state_miles": [
+          {
+            "state": "North Carolina",
+            "miles": 130.0
+          }
+        ],
+        "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
+      },
+      "terrain": "flat"
+    },
+    {
+      "from": "Tuscaloosa",
+      "to": "Montgomery",
+      "highway": "I-359",
+      "miles": 106,
+      "stops": [
+        {
+          "name": "Chilton County Rest Area",
+          "type": "public_rest_area",
+          "at_mi": 53.0,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "limited",
+          "actions": [
+            "park",
+            "save",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "parking",
+            "restrooms"
+          ]
+        }
+      ],
+      "corridor": {
+        "tollway_detected": false,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 33.20983,
+            "lon": -87.56916
+          },
+          {
+            "at_mi": 26.5,
+            "lat": 33.01964,
+            "lon": -87.25591
+          },
+          {
+            "at_mi": 53.0,
+            "lat": 32.80027,
+            "lon": -86.91271
+          },
+          {
+            "at_mi": 79.5,
+            "lat": 32.52293,
+            "lon": -86.62434
+          },
+          {
+            "at_mi": 106.0,
+            "lat": 32.3668,
+            "lon": -86.30003
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 224.4,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 26.5,
+            "elevation_ft": 301.2,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 53.0,
+            "elevation_ft": 547.9,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 79.5,
+            "elevation_ft": 441.9,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 106.0,
+            "elevation_ft": 244.4,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 106.0,
+            "avg_grade_pct": 0.0,
+            "terrain": "flat",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          }
+        ],
+        "checkpoints": [
+          {
+            "name": "I-359 corridor between Tuscaloosa and Montgomery",
+            "at_mi": 53.0,
+            "type": "place",
+            "state": "Alabama",
+            "highway": "I-359",
+            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
+          }
+        ],
+        "state_miles": [
+          {
+            "state": "Alabama",
+            "miles": 106.0
+          }
+        ],
+        "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
+      },
+      "terrain": "flat"
+    },
+    {
+      "from": "Tuscaloosa",
+      "to": "Huntsville",
+      "highway": "I-65",
+      "miles": 156,
+      "stops": [
+        {
+          "name": "Petro Stopping Centers",
+          "type": "service_plaza",
+          "at_mi": 31.2,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ]
+        }
+      ],
+      "corridor": {
+        "tollway_detected": false,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 33.20983,
+            "lon": -87.56916
+          },
+          {
+            "at_mi": 31.2,
+            "lat": 33.27047,
+            "lon": -87.10675
+          },
+          {
+            "at_mi": 62.4,
+            "lat": 33.59897,
+            "lon": -86.80688
+          },
+          {
+            "at_mi": 93.6,
+            "lat": 34.02898,
+            "lon": -86.87166
+          },
+          {
+            "at_mi": 124.8,
+            "lat": 34.46739,
+            "lon": -86.89832
+          },
+          {
+            "at_mi": 156.0,
+            "lat": 34.73035,
+            "lon": -86.58606
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 224.4,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 31.2,
+            "elevation_ft": 564.3,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 62.4,
+            "elevation_ft": 570.9,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 93.6,
+            "elevation_ft": 456.0,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 124.8,
+            "elevation_ft": 705.4,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 156.0,
+            "elevation_ft": 626.6,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 156.0,
+            "avg_grade_pct": 0.05,
+            "terrain": "flat",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          }
+        ],
+        "checkpoints": [
+          {
+            "name": "I-65 corridor between Tuscaloosa and Huntsville",
+            "at_mi": 93.6,
+            "type": "place",
+            "state": "Alabama",
+            "highway": "I-65",
+            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
+          }
+        ],
+        "state_miles": [
+          {
+            "state": "Alabama",
+            "miles": 156.0
+          }
+        ],
+        "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
+      },
+      "terrain": "flat"
+    },
+    {
+      "from": "Lakeland",
+      "to": "Port Saint Lucie",
+      "highway": "SR-60",
+      "miles": 127,
+      "stops": [
+        {
+          "name": "Love's Travel Stop",
+          "type": "service_plaza",
+          "at_mi": 25.4,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ]
+        }
+      ],
+      "corridor": {
+        "tollway_detected": true,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 28.03967,
+            "lon": -81.94983
+          },
+          {
+            "at_mi": 25.4,
+            "lat": 27.90314,
+            "lon": -81.62804
+          },
+          {
+            "at_mi": 50.8,
+            "lat": 27.80531,
+            "lon": -81.24452
+          },
+          {
+            "at_mi": 76.2,
+            "lat": 27.66913,
+            "lon": -80.8785
+          },
+          {
+            "at_mi": 101.6,
+            "lat": 27.48577,
+            "lon": -80.5639
+          },
+          {
+            "at_mi": 127.0,
+            "lat": 27.29438,
+            "lon": -80.35033
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 203.4,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 25.4,
+            "elevation_ft": 131.2,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 50.8,
+            "elevation_ft": 68.9,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 76.2,
+            "elevation_ft": 85.3,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 101.6,
+            "elevation_ft": 36.4,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 127.0,
+            "elevation_ft": 31.2,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 127.0,
+            "avg_grade_pct": -0.02,
+            "terrain": "flat",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          }
+        ],
+        "checkpoints": [
+          {
+            "name": "SR-60 corridor between Lakeland and Port Saint Lucie",
+            "at_mi": 76.2,
+            "type": "place",
+            "state": "Florida",
+            "highway": "SR-60",
+            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
+          }
+        ],
+        "state_miles": [
+          {
+            "state": "Florida",
+            "miles": 127.0
+          }
+        ],
+        "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
+      },
+      "terrain": "flat"
+    },
+    {
+      "from": "Roanoke",
+      "to": "Greensboro",
+      "highway": "I-73",
+      "miles": 105,
+      "stops": [
+        {
+          "name": "Sheetz",
+          "type": "fuel_station",
+          "at_mi": 26.2,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "limited",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "break"
+          ],
+          "services": [
+            "diesel",
+            "parking"
+          ]
+        }
+      ],
+      "corridor": {
+        "tollway_detected": false,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 37.27086,
+            "lon": -79.94143
+          },
+          {
+            "at_mi": 26.2,
+            "lat": 36.96766,
+            "lon": -79.87293
+          },
+          {
+            "at_mi": 52.5,
+            "lat": 36.65188,
+            "lon": -79.92027
+          },
+          {
+            "at_mi": 78.8,
+            "lat": 36.38199,
+            "lon": -79.66251
+          },
+          {
+            "at_mi": 105.0,
+            "lat": 36.07257,
+            "lon": -79.792
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 967.8,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 26.2,
+            "elevation_ft": 1181.1,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 52.5,
+            "elevation_ft": 934.4,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 78.8,
+            "elevation_ft": 725.1,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 105.0,
+            "elevation_ft": 849.7,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 105.0,
+            "avg_grade_pct": -0.02,
+            "terrain": "flat",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          }
+        ],
+        "checkpoints": [
+          {
+            "name": "I-73 corridor between Roanoke and Greensboro",
+            "at_mi": 52.5,
+            "type": "place",
+            "state": "North Carolina",
+            "highway": "I-73",
+            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
+          }
+        ],
+        "state_miles": [
+          {
+            "state": "Virginia",
+            "miles": 64.1
+          },
+          {
+            "state": "North Carolina",
+            "miles": 40.9
+          }
+        ],
+        "state_crossings": [
+          {
+            "at_mi": 64.1,
+            "from_state": "Virginia",
+            "state": "North Carolina",
+            "place": "Virginia-North Carolina line on I-73",
+            "source": "Computed from OSRM route geometry and public U.S. state boundary GeoJSON."
+          }
+        ],
+        "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
+      },
+      "terrain": "flat"
+    },
+    {
+      "from": "Roanoke",
+      "to": "Raleigh",
+      "highway": "I-40",
+      "miles": 164,
+      "stops": [
+        {
+          "name": "Lucky 2",
+          "type": "fuel_station",
+          "at_mi": 32.8,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "limited",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "break"
+          ],
+          "services": [
+            "diesel",
+            "parking"
+          ]
+        }
+      ],
+      "corridor": {
+        "tollway_detected": false,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 37.27086,
+            "lon": -79.94143
+          },
+          {
+            "at_mi": 32.8,
+            "lat": 36.88692,
+            "lon": -79.8654
+          },
+          {
+            "at_mi": 65.6,
+            "lat": 36.53205,
+            "lon": -79.78272
+          },
+          {
+            "at_mi": 98.4,
+            "lat": 36.19522,
+            "lon": -79.51114
+          },
+          {
+            "at_mi": 131.2,
+            "lat": 36.00228,
+            "lon": -79.07985
+          },
+          {
+            "at_mi": 164.0,
+            "lat": 35.77956,
+            "lon": -78.6382
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 967.8,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 32.8,
+            "elevation_ft": 1137.8,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 65.6,
+            "elevation_ft": 749.7,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 98.4,
+            "elevation_ft": 737.2,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 131.2,
+            "elevation_ft": 513.1,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 164.0,
+            "elevation_ft": 362.5,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 164.0,
+            "avg_grade_pct": -0.08,
+            "terrain": "flat",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          }
+        ],
+        "checkpoints": [
+          {
+            "name": "I-40 corridor between Roanoke and Raleigh",
+            "at_mi": 98.4,
+            "type": "place",
+            "state": "North Carolina",
+            "highway": "I-40",
+            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
+          }
+        ],
+        "state_miles": [
+          {
+            "state": "Virginia",
+            "miles": 63.8
+          },
+          {
+            "state": "North Carolina",
+            "miles": 100.2
+          }
+        ],
+        "state_crossings": [
+          {
+            "at_mi": 63.8,
+            "from_state": "Virginia",
+            "state": "North Carolina",
+            "place": "Virginia-North Carolina line on I-40",
+            "source": "Computed from OSRM route geometry and public U.S. state boundary GeoJSON."
+          }
+        ],
+        "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
+      },
+      "terrain": "flat"
+    },
+    {
+      "from": "Roanoke",
+      "to": "Richmond",
+      "highway": "I-64",
+      "miles": 165,
+      "stops": [
+        {
+          "name": "Murphy Express",
+          "type": "fuel_station",
+          "at_mi": 137.5,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "limited",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "break"
+          ],
+          "services": [
+            "diesel",
+            "parking"
+          ]
+        }
+      ],
+      "corridor": {
+        "tollway_detected": true,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 37.27086,
+            "lon": -79.94143
+          },
+          {
+            "at_mi": 27.5,
+            "lat": 37.33387,
+            "lon": -79.5438
+          },
+          {
+            "at_mi": 55.0,
+            "lat": 37.38615,
+            "lon": -79.102
+          },
+          {
+            "at_mi": 82.5,
+            "lat": 37.45658,
+            "lon": -78.69082
+          },
+          {
+            "at_mi": 110.0,
+            "lat": 37.47571,
+            "lon": -78.28983
+          },
+          {
+            "at_mi": 137.5,
+            "lat": 37.52412,
+            "lon": -77.8305
+          },
+          {
+            "at_mi": 165.0,
+            "lat": 37.54073,
+            "lon": -77.43597
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 967.8,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 27.5,
+            "elevation_ft": 924.5,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 55.0,
+            "elevation_ft": 714.2,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 82.5,
+            "elevation_ft": 741.8,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 110.0,
+            "elevation_ft": 429.5,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 137.5,
+            "elevation_ft": 429.8,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 165.0,
+            "elevation_ft": 200.1,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 165.0,
+            "avg_grade_pct": -0.09,
+            "terrain": "flat",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          }
+        ],
+        "checkpoints": [
+          {
+            "name": "I-64 corridor between Roanoke and Richmond",
+            "at_mi": 82.5,
+            "type": "place",
+            "state": "Virginia",
+            "highway": "I-64",
+            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
+          }
+        ],
+        "state_miles": [
+          {
+            "state": "Virginia",
+            "miles": 165.0
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
