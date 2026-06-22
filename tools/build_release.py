@@ -317,6 +317,26 @@ def smoke_check(build_dir: Path) -> None:
     print("Smoke check passed: the frozen build boots and renders.")
 
 
+def strip_user_data(build_dir: Path) -> None:
+    """Remove any saves/logs left in the build before archiving.
+
+    Freight Fate is portable: a frozen build keeps profiles in a ``saves`` folder
+    next to the exe. The smoke check boots the build (and ``profile.py`` may even
+    migrate a nearby dev save into it), so a ``saves`` folder appears in the
+    build tree. It must NEVER ship -- it would leak the builder's profile and
+    signing key, or on CI ship a throwaway profile. The real saves live in the
+    user's own game folder / AppData and are untouched by this.
+    """
+    roots = [build_dir]
+    if build_dir.suffix == ".app":
+        roots.append(build_dir / "Contents" / "MacOS")
+    for root in roots:
+        saves = root / "saves"
+        if saves.exists():
+            shutil.rmtree(saves, ignore_errors=True)
+            print(f"Stripped bundled '{saves.name}/' from the build (never ship saves).")
+
+
 def archive(build_dir: Path, label: str) -> Path:
     if sys.platform == "win32":
         out = DIST / f"{APP_NAME}-{label}-windows-portable.zip"
@@ -351,6 +371,7 @@ def main() -> int:
     sign_distribution(build_dir)
     if not args.skip_smoke:
         smoke_check(build_dir)
+    strip_user_data(build_dir)  # smoke check leaves a saves/ folder; never ship it
     out = archive(build_dir, label)
     print(f"Built {out} ({out.stat().st_size / 1e6:.1f} MB)")
     return 0
