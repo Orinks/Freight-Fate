@@ -26087,6 +26087,27 @@
       },
       "stops": [
         {
+          "name": "Clear Lake",
+          "type": "public_rest_area",
+          "at_mi": 85.5,
+          "source": "FHWA Jason's Law truck parking inventory (NTAD via BTS) lists Clear Lake on I-90E in Jackson, MN with 7 truck parking spaces, mile post 69; at_mi estimated by projecting source coordinates onto checked-in route geometry (15.2 mi from simplified corridor line), accessed 2026-06-17: https://services.arcgis.com/xOi1kZaI0eWDREZv/arcgis/rest/services/NTAD_Truck_Stop_Parking/FeatureServer/0/query",
+          "actions": [
+            "park",
+            "save",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "parking",
+            "restrooms"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated"
+        },
+        {
           "name": "Kwik Trip",
           "type": "fuel_station",
           "at_mi": 209.7,
@@ -29626,6 +29647,27 @@
       },
       "stops": [
         {
+          "name": "CT Rest Area- North Stonington SB",
+          "type": "public_rest_area",
+          "at_mi": 49.0,
+          "source": "FHWA Jason's Law truck parking inventory (NTAD via BTS) lists CT Rest Area- North Stonington SB on I-95S in North Stonington, CT with 34 truck parking spaces, mile post 93; at_mi estimated by projecting source coordinates onto checked-in route geometry (14.1 mi from simplified corridor line), accessed 2026-06-17: https://services.arcgis.com/xOi1kZaI0eWDREZv/arcgis/rest/services/NTAD_Truck_Stop_Parking/FeatureServer/0/query",
+          "actions": [
+            "park",
+            "save",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "parking",
+            "restrooms"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated"
+        },
+        {
           "name": "Pilot Travel Center Milford",
           "type": "travel_center",
           "at_mi": 111.0,
@@ -32152,7 +32194,29 @@
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
       },
-      "stops": []
+      "stops": [
+        {
+          "name": "I-95 I-495 truck parking near College Park",
+          "type": "public_rest_area",
+          "at_mi": 27.3,
+          "source": "FHWA Jason's Law truck parking inventory (NTAD via BTS) lists I-95 I-495 truck parking near College Park on I-95/I-495 in College Park, MD with 18 truck parking spaces, mile post 27; at_mi estimated by projecting source coordinates onto checked-in route geometry (3.5 mi from simplified corridor line), accessed 2026-06-17: https://services.arcgis.com/xOi1kZaI0eWDREZv/arcgis/rest/services/NTAD_Truck_Stop_Parking/FeatureServer/0/query",
+          "actions": [
+            "park",
+            "save",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "parking",
+            "restrooms"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated"
+        }
+      ]
     },
     {
       "from": "Boston",
@@ -35261,7 +35325,29 @@
       "to": "Sacramento",
       "highway": "I-5",
       "miles": 89,
-      "stops": [],
+      "stops": [
+        {
+          "name": "Elkhorn",
+          "type": "public_rest_area",
+          "at_mi": 81.2,
+          "source": "FHWA Jason's Law truck parking inventory (NTAD via BTS) lists Elkhorn on I-5 S in Sacramento, CA with 14 truck parking spaces, mile post PM 34.1; at_mi estimated by projecting source coordinates onto checked-in route geometry (5.4 mi from simplified corridor line), accessed 2026-06-17: https://services.arcgis.com/xOi1kZaI0eWDREZv/arcgis/rest/services/NTAD_Truck_Stop_Parking/FeatureServer/0/query",
+          "actions": [
+            "park",
+            "save",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "parking",
+            "restrooms"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated"
+        }
+      ],
       "corridor": {
         "tollway_detected": false,
         "route_points": [
@@ -41043,7 +41129,29 @@
       "to": "Coral Springs",
       "highway": "I-75",
       "miles": 137,
-      "stops": [],
+      "stops": [
+        {
+          "name": "I-75S truck parking near Big Cypress",
+          "type": "public_rest_area",
+          "at_mi": 77.7,
+          "source": "FHWA Jason's Law truck parking inventory (NTAD via BTS) lists I-75S truck parking near Big Cypress on I-75S in Big Cypress, FL with 15 truck parking spaces, mile post 63; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.0 mi from simplified corridor line), accessed 2026-06-17: https://services.arcgis.com/xOi1kZaI0eWDREZv/arcgis/rest/services/NTAD_Truck_Stop_Parking/FeatureServer/0/query",
+          "actions": [
+            "park",
+            "save",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "parking",
+            "restrooms"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated"
+        }
+      ],
       "corridor": {
         "tollway_detected": true,
         "route_points": [
@@ -42049,7 +42157,29 @@
       "to": "Miami",
       "highway": "I-95",
       "miles": 115,
-      "stops": [],
+      "stops": [
+        {
+          "name": "I-95N truck parking near Palm City",
+          "type": "public_rest_area",
+          "at_mi": 12.4,
+          "source": "FHWA Jason's Law truck parking inventory (NTAD via BTS) lists I-95N truck parking near Palm City on I-95N in Palm City, FL with 60 truck parking spaces, mile post 106; at_mi estimated by projecting source coordinates onto checked-in route geometry (3.4 mi from simplified corridor line), accessed 2026-06-17: https://services.arcgis.com/xOi1kZaI0eWDREZv/arcgis/rest/services/NTAD_Truck_Stop_Parking/FeatureServer/0/query",
+          "actions": [
+            "park",
+            "save",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "parking",
+            "restrooms"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated"
+        }
+      ],
       "corridor": {
         "tollway_detected": true,
         "route_points": [
@@ -43531,7 +43661,50 @@
       "to": "Wilmington",
       "highway": "US-17",
       "miles": 168,
-      "stops": [],
+      "stops": [
+        {
+          "name": "Little River Welcome Center",
+          "type": "public_rest_area",
+          "at_mi": 118.4,
+          "source": "FHWA Jason's Law truck parking inventory (NTAD via BTS) lists Little River Welcome Center on US-17S in Little River, SC with 7 truck parking spaces, mile post 35; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.7 mi from simplified corridor line), accessed 2026-06-17: https://services.arcgis.com/xOi1kZaI0eWDREZv/arcgis/rest/services/NTAD_Truck_Stop_Parking/FeatureServer/0/query",
+          "actions": [
+            "park",
+            "save",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "parking",
+            "restrooms"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated"
+        },
+        {
+          "name": "Brunswick County Rest Area",
+          "type": "public_rest_area",
+          "at_mi": 132.0,
+          "source": "FHWA Jason's Law truck parking inventory (NTAD via BTS) lists Brunswick County Rest Area on US-17 in Shallotte, NC with 8 truck parking spaces, mile post NA; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.1 mi from simplified corridor line), accessed 2026-06-17: https://services.arcgis.com/xOi1kZaI0eWDREZv/arcgis/rest/services/NTAD_Truck_Stop_Parking/FeatureServer/0/query",
+          "actions": [
+            "park",
+            "save",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "parking",
+            "restrooms"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated"
+        }
+      ],
       "corridor": {
         "tollway_detected": false,
         "route_points": [
@@ -45669,7 +45842,50 @@
       "to": "Richmond",
       "highway": "I-64",
       "miles": 165,
-      "stops": [],
+      "stops": [
+        {
+          "name": "Goochland Safety Rest Area West",
+          "type": "public_rest_area",
+          "at_mi": 143.0,
+          "source": "FHWA Jason's Law truck parking inventory (NTAD via BTS) lists Goochland Safety Rest Area West on I-64W in Goochland, VA with 9 truck parking spaces, mile post 168; at_mi estimated by projecting source coordinates onto checked-in route geometry (12.3 mi from simplified corridor line), accessed 2026-06-17: https://services.arcgis.com/xOi1kZaI0eWDREZv/arcgis/rest/services/NTAD_Truck_Stop_Parking/FeatureServer/0/query",
+          "actions": [
+            "park",
+            "save",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "parking",
+            "restrooms"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated"
+        },
+        {
+          "name": "Goochland Safety Rest Area East",
+          "type": "public_rest_area",
+          "at_mi": 144.0,
+          "source": "FHWA Jason's Law truck parking inventory (NTAD via BTS) lists Goochland Safety Rest Area East on I-64E in Goochland, VA with 9 truck parking spaces, mile post 169; at_mi estimated by projecting source coordinates onto checked-in route geometry (11.9 mi from simplified corridor line), accessed 2026-06-17: https://services.arcgis.com/xOi1kZaI0eWDREZv/arcgis/rest/services/NTAD_Truck_Stop_Parking/FeatureServer/0/query",
+          "actions": [
+            "park",
+            "save",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "parking",
+            "restrooms"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated"
+        }
+      ],
       "corridor": {
         "tollway_detected": true,
         "route_points": [
@@ -49500,7 +49716,29 @@
       "to": "Detroit",
       "highway": "I-96",
       "miles": 94,
-      "stops": [],
+      "stops": [
+        {
+          "name": "I-96E truck parking near Oak Grove",
+          "type": "public_rest_area",
+          "at_mi": 34.9,
+          "source": "FHWA Jason's Law truck parking inventory (NTAD via BTS) lists I-96E truck parking near Oak Grove on I-96E in Oak Grove, MI with 21 truck parking spaces, mile post 135; at_mi estimated by projecting source coordinates onto checked-in route geometry (1.0 mi from simplified corridor line), accessed 2026-06-17: https://services.arcgis.com/xOi1kZaI0eWDREZv/arcgis/rest/services/NTAD_Truck_Stop_Parking/FeatureServer/0/query",
+          "actions": [
+            "park",
+            "save",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "parking",
+            "restrooms"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated"
+        }
+      ],
       "corridor": {
         "tollway_detected": false,
         "route_points": [
@@ -49591,7 +49829,29 @@
       "to": "Worcester",
       "highway": "I-495",
       "miles": 67,
-      "stops": [],
+      "stops": [
+        {
+          "name": "Rest Area NB",
+          "type": "public_rest_area",
+          "at_mi": 33.2,
+          "source": "FHWA Jason's Law truck parking inventory (NTAD via BTS) lists Rest Area NB on I-495 in Chelmsford, MA with 12 truck parking spaces, mile post 87; at_mi estimated by projecting source coordinates onto checked-in route geometry (3.7 mi from simplified corridor line), accessed 2026-06-17: https://services.arcgis.com/xOi1kZaI0eWDREZv/arcgis/rest/services/NTAD_Truck_Stop_Parking/FeatureServer/0/query",
+          "actions": [
+            "park",
+            "save",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "parking",
+            "restrooms"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated"
+        }
+      ],
       "corridor": {
         "tollway_detected": true,
         "route_points": [
@@ -49695,7 +49955,29 @@
       "to": "Providence",
       "highway": "I-495",
       "miles": 101,
-      "stops": [],
+      "stops": [
+        {
+          "name": "Rest Area NB",
+          "type": "public_rest_area",
+          "at_mi": 34.1,
+          "source": "FHWA Jason's Law truck parking inventory (NTAD via BTS) lists Rest Area NB on I-495 in Chelmsford, MA with 12 truck parking spaces, mile post 87; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.6 mi from simplified corridor line), accessed 2026-06-17: https://services.arcgis.com/xOi1kZaI0eWDREZv/arcgis/rest/services/NTAD_Truck_Stop_Parking/FeatureServer/0/query",
+          "actions": [
+            "park",
+            "save",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "parking",
+            "restrooms"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated"
+        }
+      ],
       "corridor": {
         "tollway_detected": true,
         "route_points": [
