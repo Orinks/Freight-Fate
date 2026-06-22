@@ -26,6 +26,9 @@
   snapshot may not load on an older stable release.
 
 ### Fixed
+- **Portable save folders.** Snapshot builds now move nearby duplicate
+  portable save folders into the active `FreightFate\saves` folder instead of
+  leaving players with two likely save locations after extraction or updates.
 - **Clearer help.** F1 help now focuses on what the selected item does for the
   player instead of repeating menu controls, and garage upgrade help explains
   how each upgrade changes the truck.
