@@ -706,17 +706,12 @@ def _discover_poi(
     if len(samples) >= 4:
         candidate_points.extend([samples[1], samples[-2]])
     for point in candidate_points:
+        box = _bbox(point["lat"], point["lon"], 5000)
         query = f"""
-        [out:json][timeout:20];
+        [out:json][timeout:40];
         (
-          node["amenity"="fuel"](
-            around:5000,{point['lat']},{point['lon']});
-          way["amenity"="fuel"](
-            around:5000,{point['lat']},{point['lon']});
-          node["highway"~"services|rest_area"](
-            around:5000,{point['lat']},{point['lon']});
-          way["highway"~"services|rest_area"](
-            around:5000,{point['lat']},{point['lon']});
+          nwr["amenity"="fuel"]({box});
+          nwr["highway"~"services|rest_area"]({box});
         );
         out tags center 12;
         """
@@ -727,7 +722,7 @@ def _discover_poi(
                 urllib.parse.urlencode({"data": query}).encode("utf-8"),
                 rate_limit_s=rate_limit_s,
             )
-        except (TimeoutError, OSError):
+        except (TimeoutError, OSError, RuntimeError):
             continue
         stop = _poi_from_overpass(data, leg, point, payload.get("elements", []))
         if stop is not None:
@@ -786,6 +781,7 @@ def _poi_from_overpass(
             f"accessed 2026-06-16 near {leg['from']} to {leg['to']} via "
             f"{leg['highway']}; curated into gameplay POI without raw OSM IDs."
         ),
+        "parking": _parking_for_stop_type(stop_type),
         "actions": actions,
         "services": services,
     }
@@ -796,6 +792,19 @@ OVERPASS_POI_SOURCE = (
     "2026-06-21; curated into a gameplay POI (clean name, normalized category) "
     "without raw OSM IDs."
 )
+
+
+def _bbox(lat: float, lon: float, radius_m: float) -> str:
+    """A ``south,west,north,east`` box roughly ``radius_m`` around a point.
+
+    Used as an Overpass bbox filter instead of ``around:``. On the public
+    Overpass instances ``around:`` radius filters over broad amenity unions
+    routinely time out (server aborts at 30-60s with an empty ``remark``
+    payload); the equivalent bbox query returns the same POIs in a few seconds.
+    """
+    dlat = radius_m / 111_320.0
+    dlon = radius_m / (111_320.0 * max(0.1, math.cos(math.radians(lat))))
+    return f"{lat - dlat},{lon - dlon},{lat + dlat},{lon + dlon}"
 
 
 def _overpass_named_candidates(
@@ -817,17 +826,18 @@ def _overpass_named_candidates(
         candidate_points += [samples[1], samples[-2]]
     if len(samples) >= 6:
         candidate_points += [samples[len(samples) // 4], samples[3 * len(samples) // 4]]
-    seen: set[str] = set()
-    out: list[dict[str, Any]] = []
+    # Gather across points, then rank: truck stops first, generic corridor fuel
+    # as a fallback, warehouse/grocery retail fuel dropped entirely. Keeping the
+    # best per name means one slow point doesn't starve the leg of good POIs.
+    best: dict[str, tuple[int, dict[str, Any]]] = {}
     for point in candidate_points:
+        box = _bbox(point["lat"], point["lon"], 6000)
         query = f"""
-        [out:json][timeout:25];
+        [out:json][timeout:40];
         (
-          node["amenity"="fuel"](around:6000,{point['lat']},{point['lon']});
-          way["amenity"="fuel"](around:6000,{point['lat']},{point['lon']});
-          node["highway"~"services|rest_area"](around:6000,{point['lat']},{point['lon']});
-          way["highway"~"services|rest_area"](around:6000,{point['lat']},{point['lon']});
-          node["amenity"="parking"]["hgv"="yes"](around:6000,{point['lat']},{point['lon']});
+          nwr["amenity"="fuel"]["name"]({box});
+          nwr["highway"~"services|rest_area"]["name"]({box});
+          nwr["amenity"="parking"]["hgv"="yes"]["name"]({box});
         );
         out tags center 25;
         """
@@ -838,8 +848,9 @@ def _overpass_named_candidates(
                 urllib.parse.urlencode({"data": query}).encode("utf-8"),
                 rate_limit_s=rate_limit_s,
             )
-        except (TimeoutError, OSError, urllib.error.URLError, urllib.error.HTTPError):
-            continue
+        except (TimeoutError, OSError, urllib.error.URLError,
+                urllib.error.HTTPError, RuntimeError):
+            continue  # skip this point/leg; all endpoints failed or timed out
         at_mi = round(max(1.0, min(float(leg["miles"]) - 1.0, point["at_mi"])), 1)
         for element in payload.get("elements", []):
             tags = element.get("tags", {})
@@ -848,21 +859,82 @@ def _overpass_named_candidates(
                 name = _clean_poi_name(raw)
             except ValueError:
                 continue
-            if not name or name.lower() in seen:
+            if not name:
                 continue
-            seen.add(name.lower())
+            score = _truck_relevance(tags, name)
+            if score is None:
+                continue  # retail/grocery fuel -- not a truck stop
             stop_type = _stop_type_from_tags(tags)
-            out.append({
+            cand = {
                 "name": name,
                 "type": stop_type,
                 "at_mi": at_mi,
                 "source": OVERPASS_POI_SOURCE,
+                "parking": _parking_for_stop_type(stop_type),
                 "actions": _actions_for_stop_type(stop_type),
                 "services": _services_for_stop_type(stop_type),
-            })
-            if len(out) >= want:
-                return out
-    return out
+            }
+            existing = best.get(name.lower())
+            if existing is None or score > existing[0]:
+                best[name.lower()] = (score, cand)
+    ranked = sorted(best.values(), key=lambda item: item[0], reverse=True)
+    return [cand for _score, cand in ranked[:want]]
+
+
+# Truck-stop brands / keywords (highest-value POIs for a freight game).
+_TRUCK_POI_KEYWORDS = (
+    "love's", "loves travel", "pilot", "flying j", "ta travel", "travelcenters",
+    "petro", "road ranger", "ambest", "sapp bros", "kwik trip", "kwik star",
+    "travel center", "travel plaza", "travel stop", "truck stop", "truckstop",
+    "service plaza", "truck plaza",
+)
+# Warehouse-club / grocery fuel: real OSM amenity=fuel points, but not truck
+# stops (members-only pumps, no big-rig access -- Buc-ee's famously bans trucks).
+_RETAIL_FUEL_KEYWORDS = (
+    "sam's club", "sams club", "costco", "bj's", "walmart", "kroger", "meijer",
+    "safeway", "albertsons", "h-e-b", "heb ", "buc-ee", "bucee", "wegmans",
+    "publix", "giant eagle", "fred meyer", "king soopers", "stop & shop",
+    "stop and shop", "woodman",
+)
+# Names that are not a place a driver stops for fuel/rest -- OSM mistags or
+# mandatory-only facilities that shouldn't surface as a chooseable stop.
+_NON_STOP_KEYWORDS = ("cleaning service", "weigh station", "inspection station")
+_RETAIL_SHOP_TAGS = {"supermarket", "wholesale", "department_store", "convenience"}
+
+
+def _truck_relevance(tags: dict[str, str], name: str) -> int | None:
+    """Rank a candidate POI for a freight game; ``None`` means drop it.
+
+    Service plazas, rest areas, HGV-tagged stops and named truck-stop brands
+    rank highest; plain corridor fuel stays eligible as a fallback; warehouse
+    and grocery retail fuel is rejected outright.
+    """
+    low = name.lower()
+    if len(low.strip()) < 2:
+        return None  # meaningless single-char names ("B")
+    if any(word in low for word in _RETAIL_FUEL_KEYWORDS):
+        return None
+    if any(word in low for word in _NON_STOP_KEYWORDS):
+        return None
+    if tags.get("shop", "") in _RETAIL_SHOP_TAGS:
+        return None
+    amenity = tags.get("amenity", "")
+    highway = tags.get("highway", "")
+    hgv = tags.get("hgv", "")
+    score = 0
+    if highway == "services":
+        score += 10
+    if highway == "rest_area":
+        score += 8
+    if hgv in {"yes", "designated"}:
+        score += 8
+    if any(word in low for word in _TRUCK_POI_KEYWORDS):
+        score += 10
+    if amenity == "fuel":
+        score += 3
+    if amenity == "parking":
+        score += 1
+    return score
 
 
 def add_overpass_pois(
@@ -904,6 +976,7 @@ def add_overpass_pois(
                 break
         if fresh:
             leg["stops"] = sorted(stops + fresh, key=lambda s: float(s["at_mi"]))
+            _spread_stop_positions(leg["stops"], leg["miles"])
             added += len(fresh)
             updated += 1
         elif not stops:
@@ -957,6 +1030,59 @@ def _actions_for_stop_type(stop_type: str) -> list[str]:
         "weigh_station": ["inspect"],
         "repair_shop": ["park", "save", "repair"],
     }[stop_type]
+
+
+def _nearest_free_mile(
+    target: float, taken: list[float], min_gap: float, lo: float, hi: float,
+) -> float:
+    """Closest mile to ``target`` that is >= ``min_gap`` from every taken mile."""
+    def is_free(mile: float) -> bool:
+        return all(abs(mile - t) >= min_gap - 1e-9 for t in taken)
+
+    target = round(min(hi, max(lo, target)), 1)
+    if is_free(target):
+        return target
+    step = 0.5
+    for k in range(1, int((hi - lo) / step) + 2):
+        for cand in (round(target + k * step, 1), round(target - k * step, 1)):
+            if lo <= cand <= hi and is_free(cand):
+                return cand
+    return target
+
+
+def _spread_stop_positions(
+    stops: list[dict[str, Any]], leg_miles: float, *, min_gap: float = 1.0,
+) -> list[dict[str, Any]]:
+    """Give every stop its own truck-mile marker.
+
+    Discovered POIs inherit their corridor sample point's mileage, so several
+    can land on the same mile (and on top of a curated stop). Curated stops keep
+    their authoritative positions; each discovered stop is nudged to the nearest
+    free mile at least ``min_gap`` apart, staying within the leg."""
+    lo, hi = 1.0, max(1.0, round(float(leg_miles) - 1.0, 1))
+    taken = [round(float(s["at_mi"]), 1)
+             for s in stops if s.get("source") != OVERPASS_POI_SOURCE]
+    movable = sorted(
+        (s for s in stops if s.get("source") == OVERPASS_POI_SOURCE),
+        key=lambda s: float(s["at_mi"]))
+    for stop in movable:
+        at = _nearest_free_mile(float(stop["at_mi"]), taken, min_gap, lo, hi)
+        stop["at_mi"] = at
+        taken.append(at)
+    stops.sort(key=lambda s: float(s["at_mi"]))
+    return stops
+
+
+def _parking_for_stop_type(stop_type: str) -> str:
+    """Explicit truck-parking availability for a discovered POI.
+
+    The coverage contract treats ``parking == "unknown"`` as incomplete, so a
+    discovered stop must declare a concrete value. Big travel centers and
+    service plazas reliably have it; rest areas and dedicated truck lots have
+    some; a generic fuel station offers a pull-in at best, not overnight."""
+    if stop_type in {"truck_stop", "travel_center", "service_plaza"}:
+        return "likely"
+    return "limited"
 
 
 def _clean_poi_name(value: str) -> str:
@@ -1211,6 +1337,21 @@ def _cached_post_json(
     return payload
 
 
+def _overpass_is_error(payload: dict[str, Any]) -> bool:
+    """True if an Overpass HTTP-200 body is actually a server-side failure.
+
+    Overpass reports query timeouts and rate limits as a 200 response carrying
+    an empty ``elements`` list plus a ``remark`` -- so a naive cache treats the
+    failure as a valid "nothing here" answer. A genuinely empty area returns no
+    ``remark``, so only remark-bearing bodies are failures.
+    """
+    remark = str(payload.get("remark", "")).lower()
+    return any(
+        token in remark
+        for token in ("runtime error", "timed out", "rate_limited", "too many")
+    )
+
+
 def _cached_overpass_json(
     cache_dir: Path,
     key: str,
@@ -1220,9 +1361,13 @@ def _cached_overpass_json(
 ) -> dict[str, Any]:
     path = _cache_file(cache_dir, "overpass", key)
     if path.exists():
-        return json.loads(path.read_text(encoding="utf-8"))
+        cached = json.loads(path.read_text(encoding="utf-8"))
+        if not _overpass_is_error(cached):
+            return cached
+        path.unlink()  # drop a stale failure so this run can retry it
     last_error: Exception | None = None
     for url in OVERPASS_URLS:
+        per_url = _cache_file(cache_dir, "overpass", f"{key}--{_hash_key(url)}")
         try:
             payload = _cached_post_json(
                 cache_dir,
@@ -1232,13 +1377,21 @@ def _cached_overpass_json(
                 body,
                 rate_limit_s=rate_limit_s,
             )
-            path.parent.mkdir(parents=True, exist_ok=True)
-            path.write_text(json.dumps(payload, indent=2, sort_keys=True),
-                            encoding="utf-8")
-            return payload
         except (TimeoutError, urllib.error.HTTPError, urllib.error.URLError, OSError) as exc:
             last_error = exc
+            per_url.unlink(missing_ok=True)
             continue
+        if _overpass_is_error(payload):
+            # Server aborted (timeout / rate limit). Don't cache the failure;
+            # try the next endpoint instead.
+            last_error = RuntimeError(
+                f"Overpass error from {url}: {payload.get('remark', '').strip()}")
+            per_url.unlink(missing_ok=True)
+            continue
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(json.dumps(payload, indent=2, sort_keys=True),
+                        encoding="utf-8")
+        return payload
     if last_error is not None:
         raise last_error
     raise RuntimeError("No Overpass endpoint configured")
