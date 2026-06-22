@@ -9,9 +9,9 @@ archives it for release:
 
 ``<label>`` is the project version from pyproject.toml, or the value of
 ``--tag`` (used for nightly developer snapshots). Builds use Nuitka on all
-platforms. macOS uses app mode with ad-hoc signing to avoid the PyInstaller
-``Python.framework`` Gatekeeper failure mode while still not requiring an
-Apple Developer ID.
+platforms. macOS uses Nuitka's app mode with ad-hoc signing so Gatekeeper
+does not block the unsigned bundle on downloaded builds, while still not
+requiring an Apple Developer ID.
 
 Run from the repository root: ``uv run python tools/build_release.py``
 """

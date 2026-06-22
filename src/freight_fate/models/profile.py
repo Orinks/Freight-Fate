@@ -26,6 +26,7 @@ from dataclasses import asdict, dataclass, field
 from pathlib import Path
 
 from ..sim.hos import HosClock
+from ..updater import is_frozen
 from .career import Career
 from .market import Market
 
@@ -54,7 +55,7 @@ def _legacy_data_dir() -> Path:
 def game_root() -> Path:
     """The game's main directory: the executable's directory when frozen,
     the project root when running from source."""
-    if getattr(sys, "frozen", False):
+    if is_frozen():
         exe_dir = _frozen_executable_dir()
         app_bundle = _macos_app_bundle(exe_dir)
         if app_bundle is not None:
@@ -77,16 +78,32 @@ def _macos_app_bundle(exe_dir: Path) -> Path | None:
 
 
 def _migrate_legacy(target: Path) -> None:
-    """One-time copy of an old per-user save folder into the portable one."""
+    """One-time migration of old save folders into the portable one."""
+    if _migrate_nearby_portable_saves(target):
+        return
     if target.exists():
         return
-    for source in _portable_migration_candidates():
-        if source.is_dir():
-            _copy_save_tree(source, target)
-            return
     legacy = _legacy_data_dir()
     if legacy.is_dir():
         _copy_save_tree(legacy, target)
+
+
+def _migrate_nearby_portable_saves(target: Path) -> bool:
+    """Move earlier portable layouts into the current save root.
+
+    These folders are already user-owned portable save folders near the game,
+    so leaving them behind creates two plausible save locations. Per-user
+    legacy folders are still copied, not moved.
+    """
+    for source in _portable_migration_candidates():
+        if not source.is_dir():
+            continue
+        if not target.exists():
+            _move_save_tree(source, target)
+            return target.exists()
+        _merge_save_tree(source, target)
+        return True
+    return False
 
 
 def _copy_save_tree(source: Path, target: Path) -> None:
@@ -94,6 +111,29 @@ def _copy_save_tree(source: Path, target: Path) -> None:
     # never block startup on a migration; old saves stay where they are
     with contextlib.suppress(OSError):
         shutil.copytree(source, target)
+
+
+def _move_save_tree(source: Path, target: Path) -> None:
+    """Move a nearby portable save folder into the active location."""
+    with contextlib.suppress(OSError):
+        target.parent.mkdir(parents=True, exist_ok=True)
+        shutil.move(str(source), str(target))
+
+
+def _merge_save_tree(source: Path, target: Path) -> None:
+    """Merge a duplicate nearby save folder without overwriting current saves."""
+    with contextlib.suppress(OSError):
+        for path in sorted(source.rglob("*")):
+            dest = target / path.relative_to(source)
+            if path.is_dir():
+                dest.mkdir(parents=True, exist_ok=True)
+            elif not dest.exists():
+                dest.parent.mkdir(parents=True, exist_ok=True)
+                shutil.move(str(path), str(dest))
+        # Remove the duplicate tree only when every file was moved or already
+        # existed in the active tree.
+        if not any(path.is_file() for path in source.rglob("*")):
+            shutil.rmtree(source, ignore_errors=True)
 
 
 def _portable_migration_candidates() -> list[Path]:
@@ -105,7 +145,7 @@ def _portable_migration_candidates() -> list[Path]:
         parent / "saves",
         parent / "FreightFate" / "saves",
     ]
-    if getattr(sys, "frozen", False):
+    if is_frozen():
         candidates.append(_frozen_executable_dir() / "saves")
     return [path for path in candidates if path != root / "saves"]
 

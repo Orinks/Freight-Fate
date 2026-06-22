@@ -26,6 +26,21 @@
   snapshot may not load on an older stable release.
 
 ### Fixed
+- **Upper gear spacing.** Automatic shifting now holds 9th gear longer before
+  entering overdrive 10th, so the truck no longer reaches top gear around
+  city-road speeds.
+- **Portable save folders.** Snapshot builds now move nearby duplicate
+  portable save folders into the active `FreightFate\saves` folder instead of
+  leaving players with two likely save locations after extraction or updates.
+- **Clearer help.** F1 help now focuses on what the selected item does for the
+  player instead of repeating menu controls, and garage upgrade help explains
+  how each upgrade changes the truck.
+- **Updater works in packaged builds again.** Nuitka builds do not set the
+  PyInstaller-era ``sys.frozen`` flag, so the game mistook every packaged copy
+  for a source checkout: "Check for updates" reported running from source, the
+  startup update check never ran, and ``saves/game.log`` was never written.
+  Packaged builds are now detected correctly, restoring update checks, install,
+  and crash logging.
 - **Facility approach speed cues.** Pickup deadheads now use lower-speed
   facility access roads, deliveries slow through a final receiver approach,
   and the last gate prompts are shorter so stopping instructions land faster.
@@ -43,6 +58,12 @@
   the new facility-gate ambience, delivery completion no longer buries the
   dock and settlement cues under a generic menu sound, and volume settings
   persist into the next game session.
+- **Status and settings navigation.** The driving status panel now opens into
+  clear route, driver, truck, and map-style status screens, and Settings uses
+  category menus for gameplay, audio, speech, weather, and updates.
+- **Menu navigation polish.** Delivery completion now presents settlement,
+  route, truck, and career details in one continuous list, while Settings keeps
+  its category menus for easier browsing.
 
 ## 1.6.0 - 2026-06-19
 

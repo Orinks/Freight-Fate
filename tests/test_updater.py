@@ -247,6 +247,15 @@ def test_build_info_none_when_not_frozen():
     assert updater.load_build_info("1.6.0") is None
 
 
+def test_is_frozen_detects_nuitka(monkeypatch):
+    # Nuitka (the build backend) never sets sys.frozen; it marks compiled
+    # modules with a __compiled__ global. Simulate that and confirm the
+    # updater recognizes the packaged build.
+    assert not updater.is_frozen()
+    monkeypatch.setattr(updater, "__compiled__", object(), raising=False)
+    assert updater.is_frozen()
+
+
 def test_install_root_is_executable_dir():
     assert updater.install_root() == Path(updater.sys.executable).resolve().parent
 

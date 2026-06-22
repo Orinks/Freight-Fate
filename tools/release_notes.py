@@ -103,7 +103,7 @@ def version_block(text: str, version: str) -> str:
     )
 
 
-def parse_sections(markdown: str) -> list[ChangelogSection]:
+def parse_sections(markdown: str, *, min_heading_level: int = 3) -> list[ChangelogSection]:
     sections: list[ChangelogSection] = []
     current_title = ""
     current_entries: list[str] = []
@@ -123,10 +123,12 @@ def parse_sections(markdown: str) -> list[ChangelogSection]:
         current_entries = []
 
     for line in markdown.splitlines():
-        heading = re.match(r"^#{3,6}\s+(.+?)\s*$", line)
+        heading = re.match(r"^(#{2,6})\s+(.+?)\s*$", line)
         if heading:
+            if len(heading.group(1)) < min_heading_level:
+                continue
             flush_section()
-            current_title = heading.group(1)
+            current_title = heading.group(2)
             continue
         if re.match(r"^[-*+]\s+", line):
             flush_entry()
@@ -247,7 +249,9 @@ def excluded_entries_from_notes(path: str) -> set[str]:
     notes_path = Path(path)
     if not notes_path.exists():
         return set()
-    return entries_from_sections(parse_sections(notes_path.read_text(encoding="utf-8")))
+    return entries_from_sections(
+        parse_sections(notes_path.read_text(encoding="utf-8"), min_heading_level=2)
+    )
 
 
 def sections_added_since(

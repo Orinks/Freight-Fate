@@ -35,6 +35,17 @@ def test_game_root_when_frozen(monkeypatch, tmp_path):
     assert profile_mod.game_root() == exe.resolve().parent
 
 
+def test_game_root_when_nuitka_compiled(monkeypatch, tmp_path):
+    # Nuitka builds do not set sys.frozen; is_frozen() detects them via the
+    # __compiled__ global instead. game_root must still resolve to the
+    # executable's directory, not the source-checkout fallback.
+    monkeypatch.delattr(sys, "frozen", raising=False)
+    monkeypatch.setattr("freight_fate.updater.__compiled__", object(), raising=False)
+    exe = tmp_path / "Games" / "FreightFate" / "FreightFate.exe"
+    monkeypatch.setattr(sys, "executable", str(exe))
+    assert profile_mod.game_root() == exe.resolve().parent
+
+
 def test_game_root_for_macos_app_is_bundle_parent(monkeypatch, tmp_path):
     exe = (
         tmp_path / "Games" / "FreightFate.app" / "Contents" / "MacOS" / "FreightFate"
@@ -76,7 +87,7 @@ def test_migration_never_overwrites_portable_saves(monkeypatch, tmp_path):
     assert not (target / "profiles" / "Old.json").exists()
 
 
-def test_nested_install_migrates_parent_portable_saves(monkeypatch, tmp_path):
+def test_nested_install_moves_parent_portable_saves(monkeypatch, tmp_path):
     game = tmp_path / "freightfate" / "FreightFate"
     game.mkdir(parents=True)
     old_profile = tmp_path / "freightfate" / "saves" / "profiles" / "Driver.json"
@@ -87,10 +98,10 @@ def test_nested_install_migrates_parent_portable_saves(monkeypatch, tmp_path):
     target = profile_mod.data_dir()
     assert target == game / "saves"
     assert (target / "profiles" / "Driver.json").is_file()
-    assert old_profile.is_file()
+    assert not (tmp_path / "freightfate" / "saves").exists()
 
 
-def test_parent_install_migrates_nested_portable_saves(monkeypatch, tmp_path):
+def test_parent_install_moves_nested_portable_saves(monkeypatch, tmp_path):
     game = tmp_path / "freightfate"
     game.mkdir(parents=True)
     old_profile = game / "FreightFate" / "saves" / "profiles" / "Driver.json"
@@ -101,10 +112,27 @@ def test_parent_install_migrates_nested_portable_saves(monkeypatch, tmp_path):
     target = profile_mod.data_dir()
     assert target == game / "saves"
     assert (target / "profiles" / "Driver.json").is_file()
-    assert old_profile.is_file()
+    assert not (game / "FreightFate" / "saves").exists()
 
 
-def test_macos_app_migrates_bundle_internal_saves(monkeypatch, tmp_path):
+def test_existing_active_saves_merge_parent_duplicate(monkeypatch, tmp_path):
+    game = tmp_path / "freightfate" / "FreightFate"
+    game.mkdir(parents=True)
+    active_profile = game / "saves" / "profiles" / "Current.json"
+    active_profile.parent.mkdir(parents=True)
+    active_profile.write_text("{}", encoding="utf-8")
+    duplicate_profile = tmp_path / "freightfate" / "saves" / "profiles" / "Old.json"
+    duplicate_profile.parent.mkdir(parents=True)
+    duplicate_profile.write_text("{}", encoding="utf-8")
+    _reset(monkeypatch, tmp_path, game_dir=game)
+
+    target = profile_mod.data_dir()
+    assert (target / "profiles" / "Current.json").is_file()
+    assert (target / "profiles" / "Old.json").is_file()
+    assert not (tmp_path / "freightfate" / "saves").exists()
+
+
+def test_macos_app_moves_bundle_internal_saves(monkeypatch, tmp_path):
     exe = (
         tmp_path / "Games" / "FreightFate.app" / "Contents" / "MacOS" / "FreightFate"
     )
@@ -121,4 +149,4 @@ def test_macos_app_migrates_bundle_internal_saves(monkeypatch, tmp_path):
     target = profile_mod.data_dir()
     assert target == (tmp_path / "Games" / "saves").resolve()
     assert (target / "profiles" / "Driver.json").is_file()
-    assert old_profile.is_file()
+    assert not (exe.parent / "saves").exists()

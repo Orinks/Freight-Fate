@@ -96,8 +96,7 @@ class MenuState(State):
         if not self.items:
             return self.intro_help
         item = self.items[self.index]
-        item_help = item.help or f"Select {item.text}."
-        return f"{self.intro_help} {item_help}".strip()
+        return item.help or f"{item.text}."
 
     def move(self, delta: int) -> None:
         if not self.items:

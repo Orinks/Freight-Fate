@@ -122,8 +122,8 @@ Debian/Ubuntu).
 ## Build a standalone copy
 
 `tools/build_release.py` produces the same portable build that the
-releases page ships, using Nuitka. macOS uses app mode with ad-hoc signing
-to avoid PyInstaller's bundled `Python.framework` launch failure on
+releases page ships, using Nuitka. macOS uses Nuitka's app mode with
+ad-hoc signing so Gatekeeper does not block the unsigned bundle on
 downloaded builds:
 
 ```bash

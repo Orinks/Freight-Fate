@@ -823,23 +823,34 @@ def test_hos_clock_runs_on_game_time():
         app.shutdown()
 
 
+def open_settings_category(app, label):
+    """Open the settings picker and drill into a named category submenu."""
+    from freight_fate.states.main_menu import SettingsCategoryState, SettingsState
+
+    picker = SettingsState(app.ctx)
+    app.push_state(picker)
+    while picker.items[picker.index].text != label:
+        picker.handle_event(key_event(pygame.K_DOWN))
+    picker.handle_event(key_event(pygame.K_RETURN))
+    assert isinstance(app.state, SettingsCategoryState)
+    return app.state
+
+
 @pytest.mark.smoke
 def test_settings_menu_cycles_hours_of_service():
     from freight_fate.app import App
-    from freight_fate.states.main_menu import SettingsState
 
     app = App()
     try:
         assert app.ctx.settings.hos_mode == "realistic"
-        state = SettingsState(app.ctx)
-        app.push_state(state)
-        while not state.items[state.index].text.startswith("Hours of service"):
-            state.handle_event(key_event(pygame.K_DOWN))
-        state.handle_event(key_event(pygame.K_RETURN))
+        cat = open_settings_category(app, "Gameplay")
+        while not cat.items[cat.index].text.startswith("Hours of service"):
+            cat.handle_event(key_event(pygame.K_DOWN))
+        cat.handle_event(key_event(pygame.K_RETURN))
         assert app.ctx.settings.hos_mode == "relaxed"
-        state.handle_event(key_event(pygame.K_RETURN))
+        cat.handle_event(key_event(pygame.K_RETURN))
         assert app.ctx.settings.hos_mode == "realistic"
-        state.handle_event(key_event(pygame.K_LEFT))
+        cat.handle_event(key_event(pygame.K_LEFT))
         assert app.ctx.settings.hos_mode == "relaxed"
     finally:
         app.shutdown()
@@ -848,16 +859,14 @@ def test_settings_menu_cycles_hours_of_service():
 def test_settings_menu_saves_each_change():
     from freight_fate.app import App
     from freight_fate.settings import Settings
-    from freight_fate.states.main_menu import SettingsState
 
     app = App()
     try:
-        state = SettingsState(app.ctx)
-        app.push_state(state)
+        cat = open_settings_category(app, "Gameplay")
         assert app.ctx.settings.imperial_units is True
-        while not state.items[state.index].text.startswith("Units"):
-            state.handle_event(key_event(pygame.K_DOWN))
-        state.handle_event(key_event(pygame.K_RETURN))
+        while not cat.items[cat.index].text.startswith("Units"):
+            cat.handle_event(key_event(pygame.K_DOWN))
+        cat.handle_event(key_event(pygame.K_RETURN))
         assert app.ctx.settings.imperial_units is False
         assert Settings.load().imperial_units is False
     finally:
@@ -867,25 +876,22 @@ def test_settings_menu_saves_each_change():
 def test_settings_menu_volume_survives_new_app_session():
     from freight_fate.app import App
     from freight_fate.settings import Settings
-    from freight_fate.states.main_menu import SettingsState
 
     app = App()
     try:
-        state = SettingsState(app.ctx)
-        app.push_state(state)
-        state.handle_event(key_event(pygame.K_TAB))
-        assert state.title == "Audio 2/4"
-        while not state.items[state.index].text.startswith("Music volume"):
-            state.handle_event(key_event(pygame.K_DOWN))
-        state.handle_event(key_event(pygame.K_RIGHT))
+        cat = open_settings_category(app, "Audio")
+        assert cat.title == "Audio"
+        while not cat.items[cat.index].text.startswith("Music volume"):
+            cat.handle_event(key_event(pygame.K_DOWN))
+        cat.handle_event(key_event(pygame.K_RIGHT))
         assert app.ctx.settings.music_volume == 0.6
         assert Settings.load().music_volume == 0.6
-        while not state.items[state.index].text.startswith("Weather sounds volume"):
-            state.handle_event(key_event(pygame.K_UP))
-        state.handle_event(key_event(pygame.K_RIGHT))
+        while not cat.items[cat.index].text.startswith("Weather sounds volume"):
+            cat.handle_event(key_event(pygame.K_UP))
+        cat.handle_event(key_event(pygame.K_RIGHT))
         assert app.ctx.settings.weather_volume == 0.75
         assert Settings.load().weather_volume == 0.75
-        state.handle_event(key_event(pygame.K_LEFT))
+        cat.handle_event(key_event(pygame.K_LEFT))
         assert app.ctx.settings.weather_volume == 0.65
         assert Settings.load().weather_volume == 0.65
     finally:
@@ -903,42 +909,57 @@ def test_settings_menu_volume_survives_new_app_session():
 
 def test_settings_menu_f1_has_help_for_every_item():
     from freight_fate.app import App
-    from freight_fate.states.main_menu import SettingsState
+    from freight_fate.states.main_menu import SettingsCategoryState, SettingsState
 
     app = App()
     try:
-        state = SettingsState(app.ctx)
-        app.push_state(state)
-        for screen_index in range(len(state.screens)):
-            state.screen_index = screen_index
-            state.refresh(keep_index=False)
-            for i, item in enumerate(state.items):
-                state.index = i
-                text = state.current_help()
-                assert item.text in text or item.help
-                assert len(text) > len(state.intro_help)
+        picker = SettingsState(app.ctx)
+        picker.items = picker.build_items()
+        for i, item in enumerate(picker.items):
+            picker.index = i
+            text = picker.current_help()
+            assert text == (item.help or f"{item.text}.")
+            assert picker.intro_help not in text
+        for category in ("gameplay", "audio", "speech", "updates"):
+            cat = SettingsCategoryState(app.ctx, category)
+            cat.items = cat.build_items()
+            for i, item in enumerate(cat.items):
+                cat.index = i
+                text = cat.current_help()
+                assert text == (item.help or f"{item.text}.")
+                assert cat.intro_help not in text
     finally:
         app.shutdown()
 
 
-def test_settings_menu_pages_like_status_panel():
+def test_settings_menu_uses_category_submenus():
     from freight_fate.app import App
-    from freight_fate.states.main_menu import SettingsState
+    from freight_fate.states.main_menu import SettingsCategoryState, SettingsState
 
     app = App()
+    spoken = []
+    app.ctx.say = lambda text, interrupt=True: spoken.append(text)
     try:
-        state = SettingsState(app.ctx)
-        app.push_state(state)
+        picker = SettingsState(app.ctx)
+        app.push_state(picker)
+        labels = [item.text for item in picker.items]
+        assert labels == ["Gameplay", "Audio", "Speech and weather", "Updates", "Back"]
 
-        assert state.title == "Gameplay 1/4"
-        state.handle_event(key_event(pygame.K_TAB))
-        assert state.title == "Audio 2/4"
-        state.handle_event(key_event(pygame.K_TAB))
-        assert state.title == "Speech and weather 3/4"
-        state.handle_event(key_event(pygame.K_TAB, mod=pygame.KMOD_SHIFT))
-        assert state.title == "Audio 2/4"
-        assert state.items[state.index].text.startswith("Master volume")
-        state.handle_event(key_event(pygame.K_DOWN))
-        assert state.items[state.index].text.startswith("Gameplay cues volume")
+        # opening a category enters its own submenu
+        while picker.items[picker.index].text != "Audio":
+            picker.handle_event(key_event(pygame.K_DOWN))
+        picker.handle_event(key_event(pygame.K_RETURN))
+        assert isinstance(app.state, SettingsCategoryState)
+        assert app.state.title == "Audio"
+        assert app.state.items[app.state.index].text.startswith("Master volume")
+
+        # Escape returns to the category picker, not straight out
+        app.state.handle_event(key_event(pygame.K_ESCAPE))
+        assert isinstance(app.state, SettingsState)
+
+        # Escape from the picker saves and leaves the settings area
+        spoken.clear()
+        app.state.handle_event(key_event(pygame.K_ESCAPE))
+        assert "Settings saved." in spoken
     finally:
         app.shutdown()

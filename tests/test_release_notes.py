@@ -106,6 +106,38 @@ def test_nightly_notes_exclude_entries_from_previous_nightly(tmp_path, monkeypat
     assert "- Old curated note." not in notes
 
 
+def test_nightly_notes_exclude_previous_release_body_sections(tmp_path, monkeypatch):
+    release_notes = load_release_notes_module()
+    repo = make_repo(tmp_path, changelog("### Fixed\n- **Updater.** Packaged updates work.\n"))
+    git(repo, "tag", "nightly-20260615")
+    (repo / "CHANGELOG.md").write_text(
+        changelog(
+            "### Fixed\n"
+            "- **Updater.** Packaged updates work.\n"
+            "- **Help.** Upgrade help explains what to buy.\n"
+        ),
+        encoding="utf-8",
+    )
+    commit(repo, "docs: improve help")
+    previous_notes = repo / "previous-notes.md"
+    previous_notes.write_text(
+        "Automated developer snapshot.\n\n"
+        "## Changes since the previous snapshot\n\n"
+        "## Fixed\n"
+        "- **Updater.** Packaged updates work.\n",
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(release_notes, "ROOT", repo)
+
+    notes = release_notes.nightly_notes(
+        previous_tag="nightly-20260615",
+        exclude_notes=str(previous_notes),
+    )
+
+    assert "- **Help.** Upgrade help explains what to buy." in notes
+    assert "- **Updater.** Packaged updates work." not in notes
+
+
 def test_nightly_notes_use_new_version_block_entries(tmp_path, monkeypatch):
     release_notes = load_release_notes_module()
     repo = make_repo(

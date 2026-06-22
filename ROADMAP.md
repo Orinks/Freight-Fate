@@ -187,7 +187,7 @@ Deliver -> Earn and level up -> Repeat
 - [ ] Loans and insurance
 
 ### Platforms and community
-- [ ] Binary releases (PyInstaller) per platform
+- [x] Binary releases (Nuitka) per platform
 - [ ] Steam/itch.io distribution
 - [ ] Localization of all speech strings
 - [ ] Optional online leaderboards

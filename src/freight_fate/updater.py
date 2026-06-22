@@ -57,7 +57,15 @@ class BuildInfo:
 
 
 def is_frozen() -> bool:
-    return bool(getattr(sys, "frozen", False))
+    """True when running as a packaged build rather than a source checkout.
+
+    Covers PyInstaller / cx_Freeze, which set ``sys.frozen``, and Nuitka --
+    the current build backend (see ``tools/build_release.py``) -- which does
+    not set ``sys.frozen``. Nuitka instead marks every compiled module with a
+    ``__compiled__`` global, so a packaged build is detectable here even
+    though ``sys.frozen`` is absent.
+    """
+    return bool(getattr(sys, "frozen", False)) or "__compiled__" in globals()
 
 
 def install_root() -> Path:
