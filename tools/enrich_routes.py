@@ -428,6 +428,14 @@ def enrich_all_routes(
                     grade_segments_from_samples(samples, elevations, leg)
                     if engine == "ors"
                     else _grade_segments(samples, elevations, leg))
+                # Label the leg's coarse terrain from the real grades. Only new
+                # legs reach here (fully-enriched legs are skipped above), so a
+                # placeholder "flat" on a freshly-added mountain leg is corrected
+                # without rewriting existing curated terrain.
+                rank = {"flat": 0, "hills": 1, "mountain": 2}
+                terrains = [s.get("terrain", "flat") for s in corridor["grade_segments"]]
+                if terrains:
+                    leg["terrain"] = max(terrains, key=lambda t: rank.get(t, 0))
             if "checkpoints" in needs:
                 corridor["checkpoints"] = _checkpoints(data, leg, samples)
             if "state_miles" in needs or "state_crossings" in needs:
