@@ -2341,23 +2341,6 @@
           "curation": "curated"
         },
         {
-          "name": "Shell",
-          "type": "fuel_station",
-          "at_mi": 109.5,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        },
-        {
           "name": "Pilot Travel Center Sturbridge",
           "type": "travel_center",
           "at_mi": 177.2,
@@ -2787,23 +2770,6 @@
           ],
           "parking": "confirmed",
           "curation": "curated"
-        },
-        {
-          "name": "Sunoco",
-          "type": "fuel_station",
-          "at_mi": 166.4,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
         },
         {
           "name": "Somerset Service Plaza",
@@ -3380,23 +3346,6 @@
           "services": [
             "diesel",
             "food",
-            "parking"
-          ]
-        },
-        {
-          "name": "Family Express",
-          "type": "fuel_station",
-          "at_mi": 70.6,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
             "parking"
           ]
         },
@@ -4106,23 +4055,6 @@
           ],
           "parking": "limited",
           "curation": "curated"
-        },
-        {
-          "name": "Shell",
-          "type": "fuel_station",
-          "at_mi": 225.8,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
         }
       ],
       "corridor": {
@@ -4820,23 +4752,6 @@
       "terrain": "mountain",
       "stops": [
         {
-          "name": "Phillips 66",
-          "type": "fuel_station",
-          "at_mi": 27.2,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        },
-        {
           "name": "Vail Pass Rest Area",
           "type": "public_rest_area",
           "at_mi": 91.4,
@@ -4904,23 +4819,6 @@
           ],
           "parking": "confirmed",
           "curation": "curated"
-        },
-        {
-          "name": "Chevron",
-          "type": "fuel_station",
-          "at_mi": 462.8,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
         }
       ],
       "corridor": {
@@ -5678,23 +5576,6 @@
           ],
           "parking": "confirmed",
           "curation": "curated"
-        },
-        {
-          "name": "Chevron",
-          "type": "fuel_station",
-          "at_mi": 269.3,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
         }
       ],
       "corridor": {
@@ -6490,23 +6371,6 @@
           "curation": "curated"
         },
         {
-          "name": "Circle K",
-          "type": "fuel_station",
-          "at_mi": 166.0,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        },
-        {
           "name": "Love's Travel Stop Big Cabin",
           "type": "travel_center",
           "at_mi": 299.0,
@@ -6858,23 +6722,6 @@
           ],
           "parking": "confirmed",
           "curation": "curated"
-        },
-        {
-          "name": "Chevron",
-          "type": "fuel_station",
-          "at_mi": 391.5,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
         },
         {
           "name": "Flying J Travel Center Greenwood",
@@ -7391,23 +7238,6 @@
           "curation": "curated"
         },
         {
-          "name": "Sunshine Gas",
-          "type": "fuel_station",
-          "at_mi": 158.3,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        },
-        {
           "name": "EZ Trip Dealer Yreka",
           "type": "travel_center",
           "at_mi": 303.9,
@@ -7593,23 +7423,6 @@
       },
       "stops": [
         {
-          "name": "Longview Convenience",
-          "type": "fuel_station",
-          "at_mi": 45.2,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        },
-        {
           "name": "Love's Travel Stop Napavine",
           "type": "travel_center",
           "at_mi": 80.3,
@@ -7633,23 +7446,6 @@
           ],
           "parking": "likely",
           "curation": "curated"
-        },
-        {
-          "name": "76",
-          "type": "fuel_station",
-          "at_mi": 90.5,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
         },
         {
           "name": "Pilot Travel Center Olympia",
@@ -8235,23 +8031,6 @@
           ],
           "parking": "confirmed",
           "curation": "curated"
-        },
-        {
-          "name": "Gulf",
-          "type": "fuel_station",
-          "at_mi": 61.5,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
         }
       ]
     },
@@ -8741,23 +8520,6 @@
       },
       "stops": [
         {
-          "name": "MAPCO",
-          "type": "fuel_station",
-          "at_mi": 77.0,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        },
-        {
           "name": "Love's Travel Stop Ruther Glen",
           "type": "travel_center",
           "at_mi": 118.2,
@@ -9087,23 +8849,6 @@
           "curation": "curated"
         },
         {
-          "name": "Mobil",
-          "type": "fuel_station",
-          "at_mi": 73.0,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        },
-        {
           "name": "Pilot Travel Center Salisbury",
           "type": "travel_center",
           "at_mi": 113.2,
@@ -9313,23 +9058,6 @@
           ],
           "parking": "confirmed",
           "curation": "curated"
-        },
-        {
-          "name": "Petro Express",
-          "type": "fuel_station",
-          "at_mi": 183.0,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
         }
       ]
     },
@@ -9459,23 +9187,6 @@
           ],
           "parking": "likely",
           "curation": "curated"
-        },
-        {
-          "name": "Speedway",
-          "type": "fuel_station",
-          "at_mi": 115.0,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
         },
         {
           "name": "Pilot Travel Center Waynesville",
@@ -9987,23 +9698,6 @@
           "curation": "curated"
         },
         {
-          "name": "Chevron",
-          "type": "fuel_station",
-          "at_mi": 62.0,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        },
-        {
           "name": "Pilot Travel Center Dublin",
           "type": "travel_center",
           "at_mi": 97.0,
@@ -10028,23 +9722,6 @@
           ],
           "parking": "confirmed",
           "curation": "curated"
-        },
-        {
-          "name": "Shell",
-          "type": "fuel_station",
-          "at_mi": 186.0,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
         }
       ]
     },
@@ -10546,23 +10223,6 @@
           "curation": "curated"
         },
         {
-          "name": "Mobil",
-          "type": "fuel_station",
-          "at_mi": 173.0,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        },
-        {
           "name": "Love's Travel Stop Fort Pierce",
           "type": "travel_center",
           "at_mi": 216.7,
@@ -10679,23 +10339,6 @@
       },
       "stops": [
         {
-          "name": "RaceTrac",
-          "type": "fuel_station",
-          "at_mi": 66.2,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        },
-        {
           "name": "Pilot Travel Center Punta Gorda",
           "type": "travel_center",
           "at_mi": 91.0,
@@ -10745,23 +10388,6 @@
           ],
           "parking": "likely",
           "curation": "curated"
-        },
-        {
-          "name": "Chevron",
-          "type": "fuel_station",
-          "at_mi": 132.5,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
         }
       ]
     },
@@ -10902,23 +10528,6 @@
           ],
           "parking": "likely",
           "curation": "curated"
-        },
-        {
-          "name": "Citgo",
-          "type": "fuel_station",
-          "at_mi": 94.5,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
         },
         {
           "name": "Love's Travel Stop Austinburg",
@@ -11190,23 +10799,6 @@
           ],
           "parking": "likely",
           "curation": "curated"
-        },
-        {
-          "name": "Airline Petroleum",
-          "type": "fuel_station",
-          "at_mi": 294.7,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
         }
       ]
     },
@@ -11217,23 +10809,6 @@
       "highway": "I-20",
       "terrain": "hills",
       "stops": [
-        {
-          "name": "MPG",
-          "type": "fuel_station",
-          "at_mi": 54.6,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        },
         {
           "name": "Pilot Travel Center Lincoln",
           "type": "travel_center",
@@ -11463,23 +11038,6 @@
       },
       "stops": [
         {
-          "name": "Pure",
-          "type": "fuel_station",
-          "at_mi": 48.0,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        },
-        {
           "name": "Pilot Travel Center Decatur",
           "type": "travel_center",
           "at_mi": 67.5,
@@ -11704,23 +11262,6 @@
           ],
           "parking": "likely",
           "curation": "curated"
-        },
-        {
-          "name": "Marathon",
-          "type": "fuel_station",
-          "at_mi": 117.0,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
         },
         {
           "name": "Pilot Travel Center New Albany",
@@ -12070,23 +11611,6 @@
           ],
           "parking": "confirmed",
           "curation": "curated"
-        },
-        {
-          "name": "Exxon",
-          "type": "fuel_station",
-          "at_mi": 104.5,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
         },
         {
           "name": "Pilot Travel Center Hurricane Mills",
@@ -13067,23 +12591,6 @@
           "curation": "curated"
         },
         {
-          "name": "Chevron",
-          "type": "fuel_station",
-          "at_mi": 174.0,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        },
-        {
           "name": "Love's Travel Stop Beaumont",
           "type": "travel_center",
           "at_mi": 268.4,
@@ -13200,23 +12707,6 @@
       },
       "stops": [
         {
-          "name": "Chevron",
-          "type": "fuel_station",
-          "at_mi": 59.8,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        },
-        {
           "name": "Pilot Travel Center Huntsville",
           "type": "travel_center",
           "at_mi": 72.7,
@@ -13263,23 +12753,6 @@
             "both"
           ],
           "curation": "curated"
-        },
-        {
-          "name": "Conoco",
-          "type": "fuel_station",
-          "at_mi": 179.2,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
         }
       ]
     },
@@ -13469,23 +12942,6 @@
       "highway": "I-35",
       "terrain": "hills",
       "stops": [
-        {
-          "name": "Texaco",
-          "type": "fuel_station",
-          "at_mi": 79.7,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        },
         {
           "name": "Bell County Safety Rest Area",
           "type": "public_rest_area",
@@ -14439,23 +13895,6 @@
       },
       "stops": [
         {
-          "name": "Marathon",
-          "type": "fuel_station",
-          "at_mi": 45.0,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        },
-        {
           "name": "Pilot Travel Center Crossville",
           "type": "travel_center",
           "at_mi": 61.1,
@@ -14890,23 +14329,6 @@
             "food",
             "parking"
           ]
-        },
-        {
-          "name": "Speedway",
-          "type": "fuel_station",
-          "at_mi": 84.0,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
         }
       ]
     },
@@ -14917,23 +14339,6 @@
       "highway": "I-94",
       "terrain": "flat",
       "stops": [
-        {
-          "name": "BP",
-          "type": "fuel_station",
-          "at_mi": 71.2,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        },
         {
           "name": "Pilot Travel Center Battle Creek",
           "type": "travel_center",
@@ -14957,23 +14362,6 @@
           ],
           "parking": "confirmed",
           "curation": "curated"
-        },
-        {
-          "name": "Citgo",
-          "type": "fuel_station",
-          "at_mi": 142.5,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
         },
         {
           "name": "TA Sawyer",
@@ -15197,23 +14585,6 @@
       },
       "stops": [
         {
-          "name": "Marathon",
-          "type": "fuel_station",
-          "at_mi": 35.8,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        },
-        {
           "name": "Love's Travel Stop Burbank",
           "type": "travel_center",
           "at_mi": 84.9,
@@ -15237,23 +14608,6 @@
           ],
           "parking": "likely",
           "curation": "curated"
-        },
-        {
-          "name": "Petro USA",
-          "type": "fuel_station",
-          "at_mi": 107.2,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
         }
       ]
     },
@@ -15406,23 +14760,6 @@
           ],
           "parking": "confirmed",
           "curation": "curated"
-        },
-        {
-          "name": "Marathon",
-          "type": "fuel_station",
-          "at_mi": 79.5,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
         }
       ]
     },
@@ -15563,23 +14900,6 @@
           ],
           "parking": "likely",
           "curation": "curated"
-        },
-        {
-          "name": "BP",
-          "type": "fuel_station",
-          "at_mi": 90.5,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
         },
         {
           "name": "Pilot Travel Center Belmont",
@@ -16052,23 +15372,6 @@
           "curation": "curated"
         },
         {
-          "name": "Speedway",
-          "type": "fuel_station",
-          "at_mi": 50.0,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        },
-        {
           "name": "Oldham County (Crestwood) Northbound Rest Area",
           "type": "public_rest_area",
           "at_mi": 75.0,
@@ -16189,23 +15492,6 @@
         "source": "Development-time OSRM route geometry over OpenStreetMap, with Open-Meteo elevation samples, Census/OpenStreetMap state context, and curated corridor POIs checked in for offline runtime use."
       },
       "stops": [
-        {
-          "name": "Moto Gas Station",
-          "type": "fuel_station",
-          "at_mi": 28.5,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        },
         {
           "name": "Love's Travel Stop Whiteland",
           "type": "travel_center",
@@ -16378,23 +15664,6 @@
           ],
           "parking": "confirmed",
           "curation": "curated"
-        },
-        {
-          "name": "Park City Shell",
-          "type": "fuel_station",
-          "at_mi": 87.0,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
         },
         {
           "name": "Flying J Travel Center Franklin",
@@ -17531,23 +16800,6 @@
           "curation": "curated"
         },
         {
-          "name": "Sinclair",
-          "type": "fuel_station",
-          "at_mi": 92.0,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        },
-        {
           "name": "Love's Travel Stop Saint Joseph",
           "type": "travel_center",
           "at_mi": 121.3,
@@ -17899,23 +17151,6 @@
           ],
           "parking": "likely",
           "curation": "curated"
-        },
-        {
-          "name": "Conoco",
-          "type": "fuel_station",
-          "at_mi": 51.0,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
         }
       ]
     },
@@ -18423,23 +17658,6 @@
           ],
           "parking": "likely",
           "curation": "curated"
-        },
-        {
-          "name": "Philips 66",
-          "type": "fuel_station",
-          "at_mi": 79.5,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
         }
       ]
     },
@@ -19110,23 +18328,6 @@
           ],
           "parking": "confirmed",
           "curation": "curated"
-        },
-        {
-          "name": "Phillips 66",
-          "type": "fuel_station",
-          "at_mi": 146.2,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
         }
       ]
     },
@@ -19232,23 +18433,6 @@
         "source": "Development-time OSRM route geometry over OpenStreetMap, with Open-Meteo elevation samples, Census/OpenStreetMap state context, and curated corridor POIs checked in for offline runtime use."
       },
       "stops": [
-        {
-          "name": "Phillips 66",
-          "type": "fuel_station",
-          "at_mi": 72.0,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        },
         {
           "name": "Love's Travel Stop Tucumcari",
           "type": "travel_center",
@@ -19754,40 +18938,6 @@
           ],
           "parking": "confirmed",
           "curation": "curated"
-        },
-        {
-          "name": "Chevron",
-          "type": "fuel_station",
-          "at_mi": 44.0,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        },
-        {
-          "name": "Golden Gate Petroleum",
-          "type": "fuel_station",
-          "at_mi": 66.0,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
         }
       ]
     },
@@ -19917,23 +19067,6 @@
           ],
           "parking": "confirmed",
           "curation": "curated"
-        },
-        {
-          "name": "Chevron",
-          "type": "fuel_station",
-          "at_mi": 33.0,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
         },
         {
           "name": "Alpha - Omega Rest Area",
@@ -20443,23 +19576,6 @@
           "curation": "curated"
         },
         {
-          "name": "Speedway",
-          "type": "fuel_station",
-          "at_mi": 144.5,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        },
-        {
           "name": "Pilot Travel Center Central Point",
           "type": "travel_center",
           "at_mi": 286.5,
@@ -20714,23 +19830,6 @@
         "source": "Development-time OSRM route geometry over OpenStreetMap, with Open-Meteo elevation samples, Census/OpenStreetMap state context, and curated corridor POIs checked in for offline runtime use."
       },
       "stops": [
-        {
-          "name": "Seeley Market and Gas",
-          "type": "fuel_station",
-          "at_mi": 88.8,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        },
         {
           "name": "ONE9 Dealer El Centro",
           "type": "travel_center",
@@ -21060,40 +20159,6 @@
             "both"
           ],
           "curation": "curated"
-        },
-        {
-          "name": "AmeriGas",
-          "type": "fuel_station",
-          "at_mi": 42.2,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        },
-        {
-          "name": "Chevron",
-          "type": "fuel_station",
-          "at_mi": 84.5,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
         },
         {
           "name": "Flying J Travel Center Ripon",
@@ -21690,23 +20755,6 @@
           ],
           "parking": "likely",
           "curation": "curated"
-        },
-        {
-          "name": "Shell",
-          "type": "fuel_station",
-          "at_mi": 209.2,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
         }
       ]
     },
@@ -22336,40 +21384,6 @@
           ],
           "parking": "likely",
           "curation": "curated"
-        },
-        {
-          "name": "Marathon Gas - Newman's Carryout",
-          "type": "fuel_station",
-          "at_mi": 49.5,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        },
-        {
-          "name": "Sunoco",
-          "type": "fuel_station",
-          "at_mi": 74.2,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
         }
       ]
     },
@@ -22474,23 +21488,6 @@
       },
       "stops": [
         {
-          "name": "Speedway",
-          "type": "fuel_station",
-          "at_mi": 25.8,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        },
-        {
           "name": "Flying J Travel Center Marion",
           "type": "travel_center",
           "at_mi": 78.9,
@@ -22515,23 +21512,6 @@
           ],
           "parking": "confirmed",
           "curation": "curated"
-        },
-        {
-          "name": "Union 66",
-          "type": "fuel_station",
-          "at_mi": 103.2,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
         }
       ]
     },
@@ -22653,23 +21633,6 @@
           "services": [
             "parking",
             "restrooms"
-          ]
-        },
-        {
-          "name": "Valero",
-          "type": "fuel_station",
-          "at_mi": 54.5,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
           ]
         },
         {
@@ -22802,23 +21765,6 @@
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
       },
       "stops": [
-        {
-          "name": "Petrol",
-          "type": "fuel_station",
-          "at_mi": 12.5,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        },
         {
           "name": "Interstate 95 Rest Area",
           "type": "public_rest_area",
@@ -23091,23 +22037,6 @@
       },
       "stops": [
         {
-          "name": "Speedway",
-          "type": "fuel_station",
-          "at_mi": 32.5,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        },
-        {
           "name": "RT. 15 New Canaan NB Service Plaza",
           "type": "public_rest_area",
           "at_mi": 48.8,
@@ -23215,42 +22144,7 @@
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
       },
-      "stops": [
-        {
-          "name": "Fuel First",
-          "type": "fuel_station",
-          "at_mi": 14.8,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        },
-        {
-          "name": "Valero",
-          "type": "fuel_station",
-          "at_mi": 29.5,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        }
-      ]
+      "stops": []
     },
     {
       "from": "Buffalo",
@@ -23911,23 +22805,6 @@
           ],
           "parking": "confirmed",
           "curation": "curated"
-        },
-        {
-          "name": "7-Eleven",
-          "type": "fuel_station",
-          "at_mi": 53.5,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
         }
       ]
     },
@@ -24021,23 +22898,6 @@
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
       },
       "stops": [
-        {
-          "name": "Wawa",
-          "type": "fuel_station",
-          "at_mi": 21.0,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        },
         {
           "name": "Love's Travel Stop Auburndale",
           "type": "travel_center",
@@ -24166,23 +23026,6 @@
       },
       "stops": [
         {
-          "name": "Shell",
-          "type": "fuel_station",
-          "at_mi": 28.2,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        },
-        {
           "name": "Love's Travel Stop Ormond Beach",
           "type": "travel_center",
           "at_mi": 62.3,
@@ -24206,23 +23049,6 @@
           ],
           "parking": "likely",
           "curation": "curated"
-        },
-        {
-          "name": "Valero",
-          "type": "fuel_station",
-          "at_mi": 84.6,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
         }
       ]
     },
@@ -24336,23 +23162,6 @@
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
       },
       "stops": [
-        {
-          "name": "Mobil",
-          "type": "fuel_station",
-          "at_mi": 28.2,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        },
         {
           "name": "Love's Travel Stop Lee",
           "type": "travel_center",
@@ -24723,23 +23532,6 @@
       },
       "stops": [
         {
-          "name": "Circle K",
-          "type": "fuel_station",
-          "at_mi": 28.0,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        },
-        {
           "name": "Love's Travel Stop Evergreen",
           "type": "travel_center",
           "at_mi": 87.7,
@@ -24763,23 +23555,6 @@
           ],
           "parking": "likely",
           "curation": "curated"
-        },
-        {
-          "name": "Chevron",
-          "type": "fuel_station",
-          "at_mi": 140.0,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
         },
         {
           "name": "Flying J Travel Center Hope Hull",
@@ -24898,25 +23673,7 @@
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
       },
-      "stops": [
-        {
-          "name": "Exxon",
-          "type": "fuel_station",
-          "at_mi": 20.2,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        }
-      ]
+      "stops": []
     },
     {
       "from": "Shreveport",
@@ -25077,23 +23834,6 @@
           "curation": "curated"
         },
         {
-          "name": "Valero",
-          "type": "fuel_station",
-          "at_mi": 107.5,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        },
-        {
           "name": "Pilot Dealer Canton",
           "type": "travel_center",
           "at_mi": 122.5,
@@ -25118,23 +23858,6 @@
           ],
           "parking": "confirmed",
           "curation": "curated"
-        },
-        {
-          "name": "Murphy USA",
-          "type": "fuel_station",
-          "at_mi": 161.2,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
         }
       ]
     },
@@ -25252,23 +23975,6 @@
           ],
           "parking": "likely",
           "curation": "curated"
-        },
-        {
-          "name": "Cannon",
-          "type": "fuel_station",
-          "at_mi": 68.2,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
         }
       ]
     },
@@ -25464,23 +24170,6 @@
           ],
           "parking": "likely",
           "curation": "curated"
-        },
-        {
-          "name": "Chevron",
-          "type": "fuel_station",
-          "at_mi": 133.3,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
         }
       ]
     },
@@ -25734,23 +24423,6 @@
       },
       "stops": [
         {
-          "name": "Sunoco",
-          "type": "fuel_station",
-          "at_mi": 23.0,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        },
-        {
           "name": "Pilot Travel Center Cornersville",
           "type": "travel_center",
           "at_mi": 39.7,
@@ -25775,23 +24447,6 @@
           ],
           "parking": "confirmed",
           "curation": "curated"
-        },
-        {
-          "name": "Kwik Sak",
-          "type": "fuel_station",
-          "at_mi": 92.0,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
         }
       ]
     },
@@ -25916,23 +24571,6 @@
       },
       "stops": [
         {
-          "name": "Exxon",
-          "type": "fuel_station",
-          "at_mi": 26.8,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        },
-        {
           "name": "Love's Travel Stop Hillsboro",
           "type": "travel_center",
           "at_mi": 63.2,
@@ -25956,23 +24594,6 @@
           ],
           "parking": "likely",
           "curation": "curated"
-        },
-        {
-          "name": "BP",
-          "type": "fuel_station",
-          "at_mi": 80.4,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
         }
       ]
     },
@@ -26817,23 +25438,6 @@
           ],
           "parking": "confirmed",
           "curation": "curated"
-        },
-        {
-          "name": "Murphy USA",
-          "type": "fuel_station",
-          "at_mi": 135.0,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
         }
       ]
     },
@@ -27071,23 +25675,6 @@
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
       },
       "stops": [
-        {
-          "name": "Cenex",
-          "type": "fuel_station",
-          "at_mi": 14.5,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        },
         {
           "name": "Flying J Travel Center Gretna",
           "type": "travel_center",
@@ -27343,23 +25930,6 @@
           ],
           "parking": "confirmed",
           "curation": "curated"
-        },
-        {
-          "name": "Casey's",
-          "type": "fuel_station",
-          "at_mi": 103.5,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
         }
       ]
     },
@@ -27516,23 +26086,6 @@
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
       },
       "stops": [
-        {
-          "name": "BP",
-          "type": "fuel_station",
-          "at_mi": 131.1,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        },
         {
           "name": "Kwik Trip",
           "type": "fuel_station",
@@ -28361,23 +26914,6 @@
           "curation": "curated"
         },
         {
-          "name": "Alon",
-          "type": "fuel_station",
-          "at_mi": 189.0,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        },
-        {
           "name": "Love's Travel Stop Las Vegas",
           "type": "travel_center",
           "at_mi": 254.7,
@@ -28620,42 +27156,7 @@
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
       },
-      "stops": [
-        {
-          "name": "Pleasanton Gas Station",
-          "type": "fuel_station",
-          "at_mi": 23.4,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        },
-        {
-          "name": "Arco",
-          "type": "fuel_station",
-          "at_mi": 70.2,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        }
-      ]
+      "stops": []
     },
     {
       "from": "Bakersfield",
@@ -28812,23 +27313,6 @@
           ],
           "parking": "confirmed",
           "curation": "curated"
-        },
-        {
-          "name": "Arco",
-          "type": "fuel_station",
-          "at_mi": 84.0,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
         }
       ]
     },
@@ -28922,23 +27406,6 @@
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
       },
       "stops": [
-        {
-          "name": "76",
-          "type": "fuel_station",
-          "at_mi": 27.2,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        },
         {
           "name": "Love's Travel Stop Tulare",
           "type": "travel_center",
@@ -29091,23 +27558,6 @@
             "food",
             "parking"
           ]
-        },
-        {
-          "name": "Angle Petroleum",
-          "type": "fuel_station",
-          "at_mi": 41.5,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
         }
       ]
     },
@@ -29202,23 +27652,6 @@
       },
       "stops": [
         {
-          "name": "Shell",
-          "type": "fuel_station",
-          "at_mi": 19.5,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        },
-        {
           "name": "Love's Travel Stop Waddy",
           "type": "travel_center",
           "at_mi": 37.5,
@@ -29242,23 +27675,6 @@
           ],
           "parking": "likely",
           "curation": "curated"
-        },
-        {
-          "name": "Thorntons",
-          "type": "fuel_station",
-          "at_mi": 58.5,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
         }
       ]
     },
@@ -29403,23 +27819,6 @@
           ],
           "parking": "likely",
           "curation": "curated"
-        },
-        {
-          "name": "Shell",
-          "type": "fuel_station",
-          "at_mi": 41.0,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
         },
         {
           "name": "Mr. Fuel Travel Center",
@@ -29895,23 +28294,6 @@
           "services": [
             "parking",
             "restrooms"
-          ]
-        },
-        {
-          "name": "Shell",
-          "type": "fuel_station",
-          "at_mi": 133.3,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
           ]
         }
       ]
@@ -30578,23 +28960,6 @@
           ],
           "parking": "likely",
           "curation": "curated"
-        },
-        {
-          "name": "Mobil",
-          "type": "fuel_station",
-          "at_mi": 43.0,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
         }
       ]
     },
@@ -31113,40 +29478,6 @@
           ],
           "parking": "likely",
           "curation": "curated"
-        },
-        {
-          "name": "Valero",
-          "type": "fuel_station",
-          "at_mi": 93.5,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        },
-        {
-          "name": "Speedway",
-          "type": "fuel_station",
-          "at_mi": 155.8,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
         }
       ]
     },
@@ -31294,23 +29625,6 @@
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
       },
       "stops": [
-        {
-          "name": "Ravi Petro",
-          "type": "fuel_station",
-          "at_mi": 52.8,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        },
         {
           "name": "Pilot Travel Center Milford",
           "type": "travel_center",
@@ -31753,23 +30067,6 @@
       },
       "stops": [
         {
-          "name": "Mobil",
-          "type": "fuel_station",
-          "at_mi": 28.6,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        },
-        {
           "name": "ONE9 Dealer Valley View",
           "type": "travel_center",
           "at_mi": 50.2,
@@ -32156,23 +30453,6 @@
           ],
           "parking": "likely",
           "curation": "curated"
-        },
-        {
-          "name": "Circle K",
-          "type": "fuel_station",
-          "at_mi": 79.8,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
         }
       ]
     },
@@ -32286,23 +30566,6 @@
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
       },
       "stops": [
-        {
-          "name": "ARCO",
-          "type": "fuel_station",
-          "at_mi": 75.0,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        },
         {
           "name": "Pilot Travel Center",
           "type": "service_plaza",
@@ -32424,40 +30687,6 @@
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
       },
       "stops": [
-        {
-          "name": "ampm",
-          "type": "fuel_station",
-          "at_mi": 25.2,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        },
-        {
-          "name": "Arco",
-          "type": "fuel_station",
-          "at_mi": 75.6,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        },
         {
           "name": "Pilot Travel Center Madera",
           "type": "travel_center",
@@ -32627,23 +30856,6 @@
       },
       "stops": [
         {
-          "name": "Valero",
-          "type": "fuel_station",
-          "at_mi": 26.1,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        },
-        {
           "name": "Pilot Travel Center Bunkie",
           "type": "travel_center",
           "at_mi": 69.3,
@@ -32693,23 +30905,6 @@
           ],
           "parking": "likely",
           "curation": "curated"
-        },
-        {
-          "name": "Chevron",
-          "type": "fuel_station",
-          "at_mi": 130.6,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
         }
       ]
     },
@@ -33055,40 +31250,6 @@
       },
       "stops": [
         {
-          "name": "Sunoco",
-          "type": "fuel_station",
-          "at_mi": 27.2,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        },
-        {
-          "name": "Anson Mart",
-          "type": "fuel_station",
-          "at_mi": 81.6,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        },
-        {
           "name": "Pilot Dealer Monroe",
           "type": "travel_center",
           "at_mi": 116.3,
@@ -33248,23 +31409,6 @@
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
       },
       "stops": [
-        {
-          "name": "Casey's General Store",
-          "type": "fuel_station",
-          "at_mi": 27.0,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        },
         {
           "name": "Love's Travel Stop Council Bluffs",
           "type": "travel_center",
@@ -33477,42 +31621,7 @@
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
       },
-      "stops": [
-        {
-          "name": "Phillips 66",
-          "type": "fuel_station",
-          "at_mi": 29.5,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        },
-        {
-          "name": "Exxon",
-          "type": "fuel_station",
-          "at_mi": 294.5,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        }
-      ]
+      "stops": []
     },
     {
       "from": "Virginia Beach",
@@ -33646,25 +31755,7 @@
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
       },
-      "stops": [
-        {
-          "name": "Exxon",
-          "type": "fuel_station",
-          "at_mi": 30.0,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        }
-      ]
+      "stops": []
     },
     {
       "from": "Dallas",
@@ -33755,25 +31846,7 @@
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
       },
-      "stops": [
-        {
-          "name": "Snap-N-Go",
-          "type": "fuel_station",
-          "at_mi": 16.0,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        }
-      ]
+      "stops": []
     },
     {
       "from": "Akron",
@@ -33975,25 +32048,7 @@
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
       },
-      "stops": [
-        {
-          "name": "Arco",
-          "type": "fuel_station",
-          "at_mi": 24.5,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        }
-      ]
+      "stops": []
     },
     {
       "from": "Baltimore",
@@ -34097,42 +32152,7 @@
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
       },
-      "stops": [
-        {
-          "name": "Royal Farms",
-          "type": "fuel_station",
-          "at_mi": 11.5,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        },
-        {
-          "name": "Exxon",
-          "type": "fuel_station",
-          "at_mi": 23.0,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        }
-      ]
+      "stops": []
     },
     {
       "from": "Boston",
@@ -34372,23 +32392,6 @@
             "food",
             "parking"
           ]
-        },
-        {
-          "name": "Chevron",
-          "type": "fuel_station",
-          "at_mi": 24.5,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
         }
       ]
     },
@@ -34510,23 +32513,6 @@
       },
       "stops": [
         {
-          "name": "Shell",
-          "type": "fuel_station",
-          "at_mi": 11.7,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        },
-        {
           "name": "Southeast Wyoming Welcome Center",
           "type": "public_rest_area",
           "at_mi": 35.3,
@@ -34550,42 +32536,7 @@
       "to": "Oceanside",
       "highway": "I-215",
       "miles": 70,
-      "stops": [
-        {
-          "name": "Food 4 Less",
-          "type": "fuel_station",
-          "at_mi": 17.5,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        },
-        {
-          "name": "Shell",
-          "type": "fuel_station",
-          "at_mi": 35.0,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        }
-      ],
+      "stops": [],
       "corridor": {
         "tollway_detected": false,
         "route_points": [
@@ -34690,42 +32641,7 @@
       "to": "Lancaster",
       "highway": "I-215",
       "miles": 85,
-      "stops": [
-        {
-          "name": "Arco",
-          "type": "fuel_station",
-          "at_mi": 21.3,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        },
-        {
-          "name": "Chevron",
-          "type": "fuel_station",
-          "at_mi": 42.5,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        }
-      ],
+      "stops": [],
       "corridor": {
         "tollway_detected": false,
         "route_points": [
@@ -34823,25 +32739,7 @@
       "to": "Valencia",
       "highway": "I-210",
       "miles": 95,
-      "stops": [
-        {
-          "name": "Chevron",
-          "type": "fuel_station",
-          "at_mi": 47.5,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        }
-      ],
+      "stops": [],
       "corridor": {
         "tollway_detected": false,
         "route_points": [
@@ -34932,25 +32830,7 @@
       "to": "Victorville",
       "highway": "I-15",
       "miles": 84,
-      "stops": [
-        {
-          "name": "Mobil",
-          "type": "fuel_station",
-          "at_mi": 42.0,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        }
-      ],
+      "stops": [],
       "corridor": {
         "tollway_detected": false,
         "route_points": [
@@ -35055,25 +32935,7 @@
       "to": "Valencia",
       "highway": "I-5",
       "miles": 73,
-      "stops": [
-        {
-          "name": "Chevron",
-          "type": "fuel_station",
-          "at_mi": 36.5,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        }
-      ],
+      "stops": [],
       "corridor": {
         "tollway_detected": false,
         "route_points": [
@@ -35164,25 +33026,7 @@
       "to": "Lancaster",
       "highway": "I-5",
       "miles": 104,
-      "stops": [
-        {
-          "name": "Chevron",
-          "type": "fuel_station",
-          "at_mi": 52.0,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        }
-      ],
+      "stops": [],
       "corridor": {
         "tollway_detected": false,
         "route_points": [
@@ -35287,42 +33131,7 @@
       "to": "Los Angeles",
       "highway": "US-101",
       "miles": 61,
-      "stops": [
-        {
-          "name": "Arco",
-          "type": "fuel_station",
-          "at_mi": 15.2,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        },
-        {
-          "name": "Speedway",
-          "type": "fuel_station",
-          "at_mi": 30.5,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        }
-      ],
+      "stops": [],
       "corridor": {
         "tollway_detected": false,
         "route_points": [
@@ -35420,42 +33229,7 @@
       "to": "Lancaster",
       "highway": "CA-14",
       "miles": 103,
-      "stops": [
-        {
-          "name": "Simi Petroleum",
-          "type": "fuel_station",
-          "at_mi": 25.7,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        },
-        {
-          "name": "76",
-          "type": "fuel_station",
-          "at_mi": 51.5,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        }
-      ],
+      "stops": [],
       "corridor": {
         "tollway_detected": false,
         "route_points": [
@@ -35560,25 +33334,7 @@
       "to": "Santa Ana",
       "highway": "I-5",
       "miles": 94,
-      "stops": [
-        {
-          "name": "76",
-          "type": "fuel_station",
-          "at_mi": 47.0,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        }
-      ],
+      "stops": [],
       "corridor": {
         "tollway_detected": false,
         "route_points": [
@@ -35669,42 +33425,7 @@
       "to": "Sacramento",
       "highway": "I-80",
       "miles": 95,
-      "stops": [
-        {
-          "name": "Bonneau Gas",
-          "type": "fuel_station",
-          "at_mi": 23.8,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        },
-        {
-          "name": "Arco",
-          "type": "fuel_station",
-          "at_mi": 47.5,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        }
-      ],
+      "stops": [],
       "corridor": {
         "tollway_detected": false,
         "route_points": [
@@ -35795,25 +33516,7 @@
       "to": "Stockton",
       "highway": "I-5",
       "miles": 106,
-      "stops": [
-        {
-          "name": "Chevron",
-          "type": "fuel_station",
-          "at_mi": 53.0,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        }
-      ],
+      "stops": [],
       "corridor": {
         "tollway_detected": false,
         "route_points": [
@@ -35904,42 +33607,7 @@
       "to": "San Jose",
       "highway": "I-880",
       "miles": 100,
-      "stops": [
-        {
-          "name": "Chevron",
-          "type": "fuel_station",
-          "at_mi": 50.0,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        },
-        {
-          "name": "National Petroleum",
-          "type": "fuel_station",
-          "at_mi": 75.0,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        }
-      ],
+      "stops": [],
       "corridor": {
         "tollway_detected": false,
         "route_points": [
@@ -36047,23 +33715,6 @@
             "parking",
             "restrooms"
           ]
-        },
-        {
-          "name": "Laguna Hills Car Wash",
-          "type": "fuel_station",
-          "at_mi": 42.0,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
         }
       ],
       "corridor": {
@@ -36156,25 +33807,7 @@
       "to": "Victorville",
       "highway": "I-215",
       "miles": 117,
-      "stops": [
-        {
-          "name": "Circle K",
-          "type": "fuel_station",
-          "at_mi": 58.5,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        }
-      ],
+      "stops": [],
       "corridor": {
         "tollway_detected": false,
         "route_points": [
@@ -36266,23 +33899,6 @@
       "highway": "CA-58",
       "miles": 89,
       "stops": [
-        {
-          "name": "Pemex",
-          "type": "fuel_station",
-          "at_mi": 22.2,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        },
         {
           "name": "Pilot Travel Center",
           "type": "service_plaza",
@@ -36400,25 +34016,7 @@
       "to": "San Francisco",
       "highway": "US-101",
       "miles": 110,
-      "stops": [
-        {
-          "name": "Pacific Pride",
-          "type": "fuel_station",
-          "at_mi": 55.0,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        }
-      ],
+      "stops": [],
       "corridor": {
         "tollway_detected": true,
         "route_points": [
@@ -36642,23 +34240,6 @@
       "miles": 141,
       "stops": [
         {
-          "name": "San Benito Petroleum",
-          "type": "fuel_station",
-          "at_mi": 28.2,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        },
-        {
           "name": "Pilot Travel Center",
           "type": "service_plaza",
           "at_mi": 112.8,
@@ -36794,23 +34375,6 @@
           "services": [
             "parking",
             "restrooms"
-          ]
-        },
-        {
-          "name": "Shell",
-          "type": "fuel_station",
-          "at_mi": 56.3,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
           ]
         }
       ],
@@ -37036,42 +34600,7 @@
       "to": "Bakersfield",
       "highway": "CA-99",
       "miles": 81,
-      "stops": [
-        {
-          "name": "Arco",
-          "type": "fuel_station",
-          "at_mi": 20.2,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        },
-        {
-          "name": "Shell",
-          "type": "fuel_station",
-          "at_mi": 40.5,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        }
-      ],
+      "stops": [],
       "corridor": {
         "tollway_detected": false,
         "route_points": [
@@ -37162,42 +34691,7 @@
       "to": "Santa Maria",
       "highway": "CA-41",
       "miles": 167,
-      "stops": [
-        {
-          "name": "Chevron",
-          "type": "fuel_station",
-          "at_mi": 33.4,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        },
-        {
-          "name": "Conserv Fuel",
-          "type": "fuel_station",
-          "at_mi": 133.6,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        }
-      ],
+      "stops": [],
       "corridor": {
         "tollway_detected": false,
         "route_points": [
@@ -37298,42 +34792,7 @@
       "to": "Lancaster",
       "highway": "CA-99",
       "miles": 168,
-      "stops": [
-        {
-          "name": "Valero",
-          "type": "fuel_station",
-          "at_mi": 28.0,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        },
-        {
-          "name": "Shell",
-          "type": "fuel_station",
-          "at_mi": 84.0,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        }
-      ],
+      "stops": [],
       "corridor": {
         "tollway_detected": false,
         "route_points": [
@@ -37458,25 +34917,7 @@
       "to": "Los Angeles",
       "highway": "I-15",
       "miles": 85,
-      "stops": [
-        {
-          "name": "Mobil",
-          "type": "fuel_station",
-          "at_mi": 42.5,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        }
-      ],
+      "stops": [],
       "corridor": {
         "tollway_detected": true,
         "route_points": [
@@ -37581,25 +35022,7 @@
       "to": "Sacramento",
       "highway": "I-5",
       "miles": 89,
-      "stops": [
-        {
-          "name": "Quik Stop",
-          "type": "fuel_station",
-          "at_mi": 44.5,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        }
-      ],
+      "stops": [],
       "corridor": {
         "tollway_detected": false,
         "route_points": [
@@ -37690,25 +35113,7 @@
       "to": "Santa Rosa",
       "highway": "I-5",
       "miles": 153,
-      "stops": [
-        {
-          "name": "Chevron",
-          "type": "fuel_station",
-          "at_mi": 38.3,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        }
-      ],
+      "stops": [],
       "corridor": {
         "tollway_detected": false,
         "route_points": [
@@ -37799,42 +35204,7 @@
       "to": "Fairfield",
       "highway": "I-80",
       "miles": 122,
-      "stops": [
-        {
-          "name": "Knights Landing Grocery Bait & Tackle",
-          "type": "fuel_station",
-          "at_mi": 73.2,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        },
-        {
-          "name": "Chevron",
-          "type": "fuel_station",
-          "at_mi": 97.6,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        }
-      ],
+      "stops": [],
       "corridor": {
         "tollway_detected": false,
         "route_points": [
@@ -37935,25 +35305,7 @@
       "to": "San Jose",
       "highway": "I-680",
       "miles": 77,
-      "stops": [
-        {
-          "name": "Iwatani",
-          "type": "fuel_station",
-          "at_mi": 38.5,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        }
-      ],
+      "stops": [],
       "corridor": {
         "tollway_detected": false,
         "route_points": [
@@ -38044,25 +35396,7 @@
       "to": "Salinas",
       "highway": "I-680",
       "miles": 134,
-      "stops": [
-        {
-          "name": "Pacific Pride",
-          "type": "fuel_station",
-          "at_mi": 80.4,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        }
-      ],
+      "stops": [],
       "corridor": {
         "tollway_detected": false,
         "route_points": [
@@ -38163,25 +35497,7 @@
       "to": "Bakersfield",
       "highway": "CA-166",
       "miles": 128,
-      "stops": [
-        {
-          "name": "Shell",
-          "type": "fuel_station",
-          "at_mi": 96.0,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        }
-      ],
+      "stops": [],
       "corridor": {
         "tollway_detected": false,
         "route_points": [
@@ -38293,42 +35609,7 @@
       "to": "Oxnard",
       "highway": "US-101",
       "miles": 114,
-      "stops": [
-        {
-          "name": "Conserv Fuel",
-          "type": "fuel_station",
-          "at_mi": 28.4,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        },
-        {
-          "name": "American Supreme Gas",
-          "type": "fuel_station",
-          "at_mi": 85.6,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        }
-      ],
+      "stops": [],
       "corridor": {
         "tollway_detected": false,
         "route_points": [
@@ -38934,25 +36215,7 @@
       "to": "McAllen",
       "highway": "US-83",
       "miles": 145,
-      "stops": [
-        {
-          "name": "Stripes",
-          "type": "fuel_station",
-          "at_mi": 116.0,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        }
-      ],
+      "stops": [],
       "corridor": {
         "tollway_detected": false,
         "route_points": [
@@ -39424,25 +36687,7 @@
       "to": "Laredo",
       "highway": "I-69",
       "miles": 205,
-      "stops": [
-        {
-          "name": "Valero",
-          "type": "fuel_station",
-          "at_mi": 58.6,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        }
-      ],
+      "stops": [],
       "corridor": {
         "tollway_detected": false,
         "route_points": [
@@ -39563,25 +36808,7 @@
       "to": "Fort Worth",
       "highway": "I-35",
       "miles": 58,
-      "stops": [
-        {
-          "name": "Chevron",
-          "type": "fuel_station",
-          "at_mi": 14.5,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        }
-      ],
+      "stops": [],
       "corridor": {
         "tollway_detected": true,
         "route_points": [
@@ -39672,42 +36899,7 @@
       "to": "Tyler",
       "highway": "US-69",
       "miles": 108,
-      "stops": [
-        {
-          "name": "Mr.J's",
-          "type": "fuel_station",
-          "at_mi": 27.0,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        },
-        {
-          "name": "Chevron",
-          "type": "fuel_station",
-          "at_mi": 81.0,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        }
-      ],
+      "stops": [],
       "corridor": {
         "tollway_detected": false,
         "route_points": [
@@ -39799,23 +36991,6 @@
       "highway": "I-35",
       "miles": 128,
       "stops": [
-        {
-          "name": "Chevron",
-          "type": "fuel_station",
-          "at_mi": 25.6,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        },
         {
           "name": "Hill County Northbound Rest Area",
           "type": "public_rest_area",
@@ -39934,25 +37109,7 @@
       "to": "Austin",
       "highway": "I-35",
       "miles": 67,
-      "stops": [
-        {
-          "name": "Shell",
-          "type": "fuel_station",
-          "at_mi": 50.3,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        }
-      ],
+      "stops": [],
       "corridor": {
         "tollway_detected": false,
         "route_points": [
@@ -40044,23 +37201,6 @@
       "highway": "I-14",
       "miles": 114,
       "stops": [
-        {
-          "name": "Valero",
-          "type": "fuel_station",
-          "at_mi": 28.4,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        },
         {
           "name": "Love's Travel Stop",
           "type": "service_plaza",
@@ -40559,42 +37699,7 @@
       "to": "Amarillo",
       "highway": "I-27",
       "miles": 240,
-      "stops": [
-        {
-          "name": "Allsup's",
-          "type": "fuel_station",
-          "at_mi": 53.3,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        },
-        {
-          "name": "Alon",
-          "type": "fuel_station",
-          "at_mi": 133.3,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        }
-      ],
+      "stops": [],
       "corridor": {
         "tollway_detected": false,
         "route_points": [
@@ -40847,23 +37952,6 @@
       "highway": "I-35",
       "miles": 89,
       "stops": [
-        {
-          "name": "Exxon",
-          "type": "fuel_station",
-          "at_mi": 22.3,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        },
         {
           "name": "Pilot",
           "type": "fuel_station",
@@ -41353,25 +38441,7 @@
       "to": "Lincoln",
       "highway": "I-70",
       "miles": 167,
-      "stops": [
-        {
-          "name": "Nitty Gritty Gas & Thrift",
-          "type": "fuel_station",
-          "at_mi": 139.2,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        }
-      ],
+      "stops": [],
       "corridor": {
         "tollway_detected": false,
         "route_points": [
@@ -41858,23 +38928,6 @@
       "miles": 135,
       "stops": [
         {
-          "name": "RaceTrac",
-          "type": "fuel_station",
-          "at_mi": 81.0,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        },
-        {
           "name": "TA Express",
           "type": "service_plaza",
           "at_mi": 108.0,
@@ -42128,25 +39181,7 @@
       "to": "Houston",
       "highway": "I-10",
       "miles": 86,
-      "stops": [
-        {
-          "name": "Chevron",
-          "type": "fuel_station",
-          "at_mi": 43.0,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        }
-      ],
+      "stops": [],
       "corridor": {
         "tollway_detected": false,
         "route_points": [
@@ -42237,25 +39272,7 @@
       "to": "College Station",
       "highway": "TX-99",
       "miles": 165,
-      "stops": [
-        {
-          "name": "all time",
-          "type": "fuel_station",
-          "at_mi": 82.5,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        }
-      ],
+      "stops": [],
       "corridor": {
         "tollway_detected": true,
         "route_points": [
@@ -42366,42 +39383,7 @@
       "to": "Houston",
       "highway": "I-45",
       "miles": 95,
-      "stops": [
-        {
-          "name": "Brookshire Brothers",
-          "type": "fuel_station",
-          "at_mi": 23.8,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        },
-        {
-          "name": "Conoco",
-          "type": "fuel_station",
-          "at_mi": 47.5,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        }
-      ],
+      "stops": [],
       "corridor": {
         "tollway_detected": true,
         "route_points": [
@@ -42493,23 +39475,6 @@
       "highway": "I-35",
       "miles": 107,
       "stops": [
-        {
-          "name": "Shell",
-          "type": "fuel_station",
-          "at_mi": 26.8,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        },
         {
           "name": "Elgin Travel Center",
           "type": "service_plaza",
@@ -42758,25 +39723,7 @@
       "to": "McKinney",
       "highway": "US-287",
       "miles": 133,
-      "stops": [
-        {
-          "name": "Alsups",
-          "type": "fuel_station",
-          "at_mi": 106.4,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        }
-      ],
+      "stops": [],
       "corridor": {
         "tollway_detected": false,
         "route_points": [
@@ -43113,42 +40060,7 @@
       "to": "Dallas",
       "highway": "I-20",
       "miles": 98,
-      "stops": [
-        {
-          "name": "Shamrock",
-          "type": "fuel_station",
-          "at_mi": 49.0,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        },
-        {
-          "name": "Murphy USA",
-          "type": "fuel_station",
-          "at_mi": 73.5,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        }
-      ],
+      "stops": [],
       "corridor": {
         "tollway_detected": false,
         "route_points": [
@@ -43239,42 +40151,7 @@
       "to": "Tampa",
       "highway": "I-75",
       "miles": 134,
-      "stops": [
-        {
-          "name": "Sunoco",
-          "type": "fuel_station",
-          "at_mi": 67.0,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        },
-        {
-          "name": "Mobil",
-          "type": "fuel_station",
-          "at_mi": 100.4,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        }
-      ],
+      "stops": [],
       "corridor": {
         "tollway_detected": true,
         "route_points": [
@@ -43382,23 +40259,6 @@
             "parking",
             "restrooms"
           ]
-        },
-        {
-          "name": "Sunoco",
-          "type": "fuel_station",
-          "at_mi": 94.4,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
         }
       ],
       "corridor": {
@@ -43501,25 +40361,7 @@
       "to": "Coral Springs",
       "highway": "I-75",
       "miles": 137,
-      "stops": [
-        {
-          "name": "Chevron",
-          "type": "fuel_station",
-          "at_mi": 27.4,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        }
-      ],
+      "stops": [],
       "corridor": {
         "tollway_detected": true,
         "route_points": [
@@ -43621,23 +40463,6 @@
       "highway": "I-24",
       "miles": 84,
       "stops": [
-        {
-          "name": "Shell",
-          "type": "fuel_station",
-          "at_mi": 21.0,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        },
         {
           "name": "Pilot Travel Center",
           "type": "service_plaza",
@@ -44036,25 +40861,7 @@
       "to": "Huntsville",
       "highway": "US-231",
       "miles": 83,
-      "stops": [
-        {
-          "name": "Chevron",
-          "type": "fuel_station",
-          "at_mi": 62.2,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        }
-      ],
+      "stops": [],
       "corridor": {
         "tollway_detected": false,
         "route_points": [
@@ -44419,25 +41226,7 @@
       "to": "Coral Springs",
       "highway": "SR-869",
       "miles": 83,
-      "stops": [
-        {
-          "name": "BP",
-          "type": "fuel_station",
-          "at_mi": 41.5,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        }
-      ],
+      "stops": [],
       "corridor": {
         "tollway_detected": true,
         "route_points": [
@@ -44528,42 +41317,7 @@
       "to": "Miami",
       "highway": "I-95",
       "miles": 115,
-      "stops": [
-        {
-          "name": "Mobil",
-          "type": "fuel_station",
-          "at_mi": 69.0,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        },
-        {
-          "name": "RaceTrac",
-          "type": "fuel_station",
-          "at_mi": 92.0,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        }
-      ],
+      "stops": [],
       "corridor": {
         "tollway_detected": true,
         "route_points": [
@@ -44982,23 +41736,6 @@
       "highway": "I-20",
       "miles": 186,
       "stops": [
-        {
-          "name": "Marathon",
-          "type": "fuel_station",
-          "at_mi": 26.6,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        },
         {
           "name": "Love's Travel Stop",
           "type": "service_plaza",
@@ -45514,23 +42251,6 @@
       "miles": 93,
       "stops": [
         {
-          "name": "Exxon",
-          "type": "fuel_station",
-          "at_mi": 23.2,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        },
-        {
           "name": "ONE9 Travel Center",
           "type": "service_plaza",
           "at_mi": 69.8,
@@ -45774,25 +42494,7 @@
       "to": "Savannah",
       "highway": "I-95",
       "miles": 147,
-      "stops": [
-        {
-          "name": "BP",
-          "type": "fuel_station",
-          "at_mi": 24.5,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        }
-      ],
+      "stops": [],
       "corridor": {
         "tollway_detected": false,
         "route_points": [
@@ -45916,25 +42618,7 @@
       "to": "Savannah",
       "highway": "US-17",
       "miles": 108,
-      "stops": [
-        {
-          "name": "Circle C express",
-          "type": "fuel_station",
-          "at_mi": 54.0,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        }
-      ],
+      "stops": [],
       "corridor": {
         "tollway_detected": false,
         "route_points": [
@@ -46038,25 +42722,7 @@
       "to": "Wilmington",
       "highway": "US-17",
       "miles": 168,
-      "stops": [
-        {
-          "name": "circle k",
-          "type": "fuel_station",
-          "at_mi": 144.0,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        }
-      ],
+      "stops": [],
       "corridor": {
         "tollway_detected": false,
         "route_points": [
@@ -46330,25 +42996,7 @@
       "to": "Atlanta",
       "highway": "I-85",
       "miles": 73,
-      "stops": [
-        {
-          "name": "Circle K",
-          "type": "fuel_station",
-          "at_mi": 36.5,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        }
-      ],
+      "stops": [],
       "corridor": {
         "tollway_detected": true,
         "route_points": [
@@ -46439,25 +43087,7 @@
       "to": "Chattanooga",
       "highway": "I-75",
       "miles": 177,
-      "stops": [
-        {
-          "name": "Shell",
-          "type": "fuel_station",
-          "at_mi": 88.5,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        }
-      ],
+      "stops": [],
       "corridor": {
         "tollway_detected": true,
         "route_points": [
@@ -46582,23 +43212,6 @@
       "highway": "I-20",
       "miles": 163,
       "stops": [
-        {
-          "name": "AM/PM",
-          "type": "fuel_station",
-          "at_mi": 81.5,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        },
         {
           "name": "Truck Stop 44",
           "type": "service_plaza",
@@ -46742,25 +43355,7 @@
       "to": "Miami",
       "highway": "I-95",
       "miles": 71,
-      "stops": [
-        {
-          "name": "Valero",
-          "type": "fuel_station",
-          "at_mi": 35.5,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        }
-      ],
+      "stops": [],
       "corridor": {
         "tollway_detected": true,
         "route_points": [
@@ -46962,25 +43557,7 @@
       "to": "Cape Coral",
       "highway": "I-75",
       "miles": 138,
-      "stops": [
-        {
-          "name": "Luna",
-          "type": "fuel_station",
-          "at_mi": 82.8,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        }
-      ],
+      "stops": [],
       "corridor": {
         "tollway_detected": true,
         "route_points": [
@@ -47081,42 +43658,7 @@
       "to": "Orlando",
       "highway": "I-95",
       "miles": 74,
-      "stops": [
-        {
-          "name": "Mobil",
-          "type": "fuel_station",
-          "at_mi": 18.5,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        },
-        {
-          "name": "Shell",
-          "type": "fuel_station",
-          "at_mi": 37.0,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        }
-      ],
+      "stops": [],
       "corridor": {
         "tollway_detected": true,
         "route_points": [
@@ -47207,25 +43749,7 @@
       "to": "Lakeland",
       "highway": "I-4",
       "miles": 107,
-      "stops": [
-        {
-          "name": "Speedway",
-          "type": "fuel_station",
-          "at_mi": 53.5,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        }
-      ],
+      "stops": [],
       "corridor": {
         "tollway_detected": true,
         "route_points": [
@@ -47316,25 +43840,7 @@
       "to": "Fayetteville",
       "highway": "NC-87",
       "miles": 90,
-      "stops": [
-        {
-          "name": "Marathon",
-          "type": "fuel_station",
-          "at_mi": 67.5,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        }
-      ],
+      "stops": [],
       "corridor": {
         "tollway_detected": false,
         "route_points": [
@@ -47425,25 +43931,7 @@
       "to": "Raleigh",
       "highway": "I-40",
       "miles": 130,
-      "stops": [
-        {
-          "name": "GOGAS #14",
-          "type": "fuel_station",
-          "at_mi": 26.0,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        }
-      ],
+      "stops": [],
       "corridor": {
         "tollway_detected": false,
         "route_points": [
@@ -47895,25 +44383,7 @@
       "to": "Greensboro",
       "highway": "I-73",
       "miles": 105,
-      "stops": [
-        {
-          "name": "Sheetz",
-          "type": "fuel_station",
-          "at_mi": 26.2,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        }
-      ],
+      "stops": [],
       "corridor": {
         "tollway_detected": false,
         "route_points": [
@@ -48017,25 +44487,7 @@
       "to": "Raleigh",
       "highway": "I-40",
       "miles": 164,
-      "stops": [
-        {
-          "name": "Lucky 2",
-          "type": "fuel_station",
-          "at_mi": 32.8,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        }
-      ],
+      "stops": [],
       "corridor": {
         "tollway_detected": false,
         "route_points": [
@@ -48149,25 +44601,7 @@
       "to": "Richmond",
       "highway": "I-64",
       "miles": 165,
-      "stops": [
-        {
-          "name": "Murphy Express",
-          "type": "fuel_station",
-          "at_mi": 137.5,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        }
-      ],
+      "stops": [],
       "corridor": {
         "tollway_detected": true,
         "route_points": [
@@ -48390,23 +44824,6 @@
       "highway": "I-294",
       "miles": 112,
       "stops": [
-        {
-          "name": "Mobil",
-          "type": "fuel_station",
-          "at_mi": 56.0,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        },
         {
           "name": "Kenosha Truck Stop",
           "type": "service_plaza",
@@ -48641,25 +45058,7 @@
       "to": "Rochester",
       "highway": "I-90",
       "miles": 86,
-      "stops": [
-        {
-          "name": "7-Eleven",
-          "type": "fuel_station",
-          "at_mi": 64.5,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        }
-      ],
+      "stops": [],
       "corridor": {
         "tollway_detected": true,
         "route_points": [
@@ -48751,23 +45150,6 @@
       "highway": "I-90",
       "miles": 145,
       "stops": [
-        {
-          "name": "Stewart's",
-          "type": "fuel_station",
-          "at_mi": 87.0,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        },
         {
           "name": "Pattersonville Travel Plaza",
           "type": "service_plaza",
@@ -48889,23 +45271,6 @@
       "highway": "I-90",
       "miles": 149,
       "stops": [
-        {
-          "name": "Kwik Fill",
-          "type": "fuel_station",
-          "at_mi": 74.5,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        },
         {
           "name": "Flying J Travel Center",
           "type": "service_plaza",
@@ -49038,23 +45403,6 @@
       "miles": 70,
       "stops": [
         {
-          "name": "Speedway",
-          "type": "fuel_station",
-          "at_mi": 35.0,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        },
-        {
           "name": "Pilot Travel Center",
           "type": "service_plaza",
           "at_mi": 52.5,
@@ -49164,42 +45512,7 @@
       "to": "Fort Wayne",
       "highway": "US-33",
       "miles": 120,
-      "stops": [
-        {
-          "name": "Sunoco",
-          "type": "fuel_station",
-          "at_mi": 24.0,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        },
-        {
-          "name": "D&D Marathon",
-          "type": "fuel_station",
-          "at_mi": 96.0,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        }
-      ],
+      "stops": [],
       "corridor": {
         "tollway_detected": false,
         "route_points": [
@@ -49313,42 +45626,7 @@
       "to": "Indianapolis",
       "highway": "TBD",
       "miles": 113,
-      "stops": [
-        {
-          "name": "Valero",
-          "type": "fuel_station",
-          "at_mi": 22.6,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        },
-        {
-          "name": "Pacific Pride",
-          "type": "fuel_station",
-          "at_mi": 90.4,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        }
-      ],
+      "stops": [],
       "corridor": {
         "tollway_detected": false,
         "route_points": [
@@ -49573,23 +45851,6 @@
       "miles": 122,
       "stops": [
         {
-          "name": "The Depot Express",
-          "type": "fuel_station",
-          "at_mi": 24.4,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        },
-        {
           "name": "Kwik Star",
           "type": "fuel_station",
           "at_mi": 73.2,
@@ -49707,42 +45968,7 @@
       "to": "Rockford",
       "highway": "US-20",
       "miles": 162,
-      "stops": [
-        {
-          "name": "Tapken's",
-          "type": "fuel_station",
-          "at_mi": 27.0,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        },
-        {
-          "name": "Mobil",
-          "type": "fuel_station",
-          "at_mi": 135.0,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        }
-      ],
+      "stops": [],
       "corridor": {
         "tollway_detected": false,
         "route_points": [
@@ -49866,25 +46092,7 @@
       "to": "New York",
       "highway": "I-78",
       "miles": 93,
-      "stops": [
-        {
-          "name": "Conoco",
-          "type": "fuel_station",
-          "at_mi": 69.8,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        }
-      ],
+      "stops": [],
       "corridor": {
         "tollway_detected": true,
         "route_points": [
@@ -49999,42 +46207,7 @@
       "to": "Baltimore",
       "highway": "I-95",
       "miles": 141,
-      "stops": [
-        {
-          "name": "Rutter's",
-          "type": "fuel_station",
-          "at_mi": 28.2,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        },
-        {
-          "name": "Amerigreen Fuels",
-          "type": "fuel_station",
-          "at_mi": 84.6,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        }
-      ],
+      "stops": [],
       "corridor": {
         "tollway_detected": false,
         "route_points": [
@@ -50148,25 +46321,7 @@
       "to": "Bridgeport",
       "highway": "I-78",
       "miles": 157,
-      "stops": [
-        {
-          "name": "Speedway",
-          "type": "fuel_station",
-          "at_mi": 125.6,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        }
-      ],
+      "stops": [],
       "corridor": {
         "tollway_detected": true,
         "route_points": [
@@ -50425,23 +46580,6 @@
             "food",
             "parking"
           ]
-        },
-        {
-          "name": "Dyno Mart Convience Store",
-          "type": "fuel_station",
-          "at_mi": 80.2,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
         }
       ],
       "corridor": {
@@ -50558,25 +46696,7 @@
       "to": "Nashville",
       "highway": "I-24",
       "miles": 162,
-      "stops": [
-        {
-          "name": "Speedway",
-          "type": "fuel_station",
-          "at_mi": 135.0,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        }
-      ],
+      "stops": [],
       "corridor": {
         "tollway_detected": false,
         "route_points": [
@@ -51066,25 +47186,7 @@
       "to": "Omaha",
       "highway": "I-29",
       "miles": 425,
-      "stops": [
-        {
-          "name": "34 Stop",
-          "type": "fuel_station",
-          "at_mi": 212.5,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        }
-      ],
+      "stops": [],
       "corridor": {
         "tollway_detected": false,
         "route_points": [
@@ -51587,42 +47689,7 @@
       "to": "Fort Wayne",
       "highway": "I-69",
       "miles": 146,
-      "stops": [
-        {
-          "name": "Speedway",
-          "type": "fuel_station",
-          "at_mi": 29.2,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        },
-        {
-          "name": "BP",
-          "type": "fuel_station",
-          "at_mi": 116.8,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        }
-      ],
+      "stops": [],
       "corridor": {
         "tollway_detected": false,
         "route_points": [
@@ -51736,25 +47803,7 @@
       "to": "Davenport",
       "highway": "I-74",
       "miles": 98,
-      "stops": [
-        {
-          "name": "Hy-Vee Gas",
-          "type": "fuel_station",
-          "at_mi": 49.0,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        }
-      ],
+      "stops": [],
       "corridor": {
         "tollway_detected": false,
         "route_points": [
@@ -51979,25 +48028,7 @@
       "to": "Grand Rapids",
       "highway": "I-96",
       "miles": 68,
-      "stops": [
-        {
-          "name": "Campau Corner",
-          "type": "fuel_station",
-          "at_mi": 51.0,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        }
-      ],
+      "stops": [],
       "corridor": {
         "tollway_detected": false,
         "route_points": [
@@ -52088,25 +48119,7 @@
       "to": "Detroit",
       "highway": "I-96",
       "miles": 94,
-      "stops": [
-        {
-          "name": "Mobil",
-          "type": "fuel_station",
-          "at_mi": 47.0,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        }
-      ],
+      "stops": [],
       "corridor": {
         "tollway_detected": false,
         "route_points": [
@@ -52197,25 +48210,7 @@
       "to": "Worcester",
       "highway": "I-495",
       "miles": 67,
-      "stops": [
-        {
-          "name": "BP",
-          "type": "fuel_station",
-          "at_mi": 33.5,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        }
-      ],
+      "stops": [],
       "corridor": {
         "tollway_detected": true,
         "route_points": [
@@ -52319,25 +48314,7 @@
       "to": "Providence",
       "highway": "I-495",
       "miles": 101,
-      "stops": [
-        {
-          "name": "Doherty's Garage",
-          "type": "fuel_station",
-          "at_mi": 50.5,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        }
-      ],
+      "stops": [],
       "corridor": {
         "tollway_detected": true,
         "route_points": [
@@ -52874,42 +48851,7 @@
       "to": "Grand Rapids",
       "highway": "I-94",
       "miles": 382,
-      "stops": [
-        {
-          "name": "Speedway",
-          "type": "fuel_station",
-          "at_mi": 109.1,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        },
-        {
-          "name": "BP",
-          "type": "fuel_station",
-          "at_mi": 327.3,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        }
-      ],
+      "stops": [],
       "corridor": {
         "tollway_detected": true,
         "route_points": [
@@ -53066,23 +49008,6 @@
       "highway": "I-88",
       "miles": 124,
       "stops": [
-        {
-          "name": "Casey's",
-          "type": "fuel_station",
-          "at_mi": 62.0,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        },
         {
           "name": "Love's Travel Stop",
           "type": "service_plaza",
@@ -53336,23 +49261,6 @@
             "food",
             "parking"
           ]
-        },
-        {
-          "name": "Phillips 66",
-          "type": "fuel_station",
-          "at_mi": 72.1,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
         }
       ],
       "corridor": {
@@ -53458,25 +49366,7 @@
       "to": "Grand Rapids",
       "highway": "I-196",
       "miles": 115,
-      "stops": [
-        {
-          "name": "BP",
-          "type": "fuel_station",
-          "at_mi": 28.8,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        }
-      ],
+      "stops": [],
       "corridor": {
         "tollway_detected": true,
         "route_points": [
@@ -53729,42 +49619,7 @@
       "to": "Worcester",
       "highway": "I-90",
       "miles": 131,
-      "stops": [
-        {
-          "name": "Cumberland Farms",
-          "type": "fuel_station",
-          "at_mi": 78.6,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        },
-        {
-          "name": "Gulf",
-          "type": "fuel_station",
-          "at_mi": 104.8,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        }
-      ],
+      "stops": [],
       "corridor": {
         "tollway_detected": true,
         "route_points": [
@@ -53892,42 +49747,7 @@
       "to": "Bridgeport",
       "highway": "I-90",
       "miles": 136,
-      "stops": [
-        {
-          "name": "Cumberland Farms",
-          "type": "fuel_station",
-          "at_mi": 81.6,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        },
-        {
-          "name": "Valero",
-          "type": "fuel_station",
-          "at_mi": 108.8,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        }
-      ],
+      "stops": [],
       "corridor": {
         "tollway_detected": true,
         "route_points": [
@@ -54821,23 +50641,6 @@
           "services": [
             "diesel",
             "food",
-            "parking"
-          ]
-        },
-        {
-          "name": "Towne Pump",
-          "type": "fuel_station",
-          "at_mi": 65.4,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
             "parking"
           ]
         }
@@ -56272,23 +52075,6 @@
       "miles": 384,
       "stops": [
         {
-          "name": "7-Eleven",
-          "type": "fuel_station",
-          "at_mi": 27.5,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        },
-        {
           "name": "Bliss Rest Area, I-84 Eastbound",
           "type": "public_rest_area",
           "at_mi": 301.7,
@@ -57055,25 +52841,7 @@
       "to": "Denver",
       "highway": "I-25",
       "miles": 113,
-      "stops": [
-        {
-          "name": "Conoco",
-          "type": "fuel_station",
-          "at_mi": 90.4,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        }
-      ],
+      "stops": [],
       "corridor": {
         "tollway_detected": true,
         "route_points": [
@@ -57196,23 +52964,6 @@
       "highway": "I-25",
       "miles": 178,
       "stops": [
-        {
-          "name": "Chief Petro-Card",
-          "type": "fuel_station",
-          "at_mi": 50.9,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        },
         {
           "name": "Love's Travel Stop",
           "type": "service_plaza",
@@ -57353,25 +53104,7 @@
       "to": "Cheyenne",
       "highway": "I-25",
       "miles": 215,
-      "stops": [
-        {
-          "name": "Valero",
-          "type": "fuel_station",
-          "at_mi": 53.8,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        }
-      ],
+      "stops": [],
       "corridor": {
         "tollway_detected": true,
         "route_points": [
@@ -57681,42 +53414,7 @@
       "to": "Tucson",
       "highway": "I-10",
       "miles": 275,
-      "stops": [
-        {
-          "name": "Diamond Shamrock",
-          "type": "fuel_station",
-          "at_mi": 55.0,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        },
-        {
-          "name": "Conserv Fuel Road Forks",
-          "type": "fuel_station",
-          "at_mi": 137.5,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "break"
-          ],
-          "services": [
-            "diesel",
-            "parking"
-          ]
-        }
-      ],
+      "stops": [],
       "corridor": {
         "tollway_detected": false,
         "route_points": [
