@@ -13,6 +13,7 @@ import hashlib
 import json
 import math
 import os
+import re
 import sys
 import time
 import urllib.error
@@ -383,6 +384,13 @@ def enrich_all_routes(
             continue
         processed += 1
         try:
+            # New legs are added with a "TBD" shield; label them from OSRM's ref
+            # field so 100+ legs don't need hand-assigned highways. Done before
+            # the ORS fetch so its cache key uses the final highway.
+            if str(leg.get("highway", "")).upper() in ("", "TBD"):
+                derived_hw = _osrm_primary_highway(data, leg, cache_dir, rate_limit_s)
+                if derived_hw:
+                    leg["highway"] = derived_hw
             if engine == "ors":
                 parsed = _cached_ors_route(data, leg, cache_dir, rate_limit_s, api_key)
                 geometry = parsed["coordinates"]
@@ -1925,6 +1933,51 @@ def parse_ors_route(payload: dict[str, Any]) -> dict[str, Any]:
         "steepness": steepness,
         "has_tollway": has_tollway,
     }
+
+
+_OSRM_REF_RE = re.compile(r"([A-Za-z]{1,3})\s*-?\s*(\d+)")
+
+
+def _osrm_primary_highway(
+    data: dict[str, Any], leg: dict[str, Any], cache_dir: Path, rate_limit_s: float,
+) -> str:
+    """Dominant route shield for a leg, from OSRM's step ``ref`` field.
+
+    OSRM separates the highway ref ("I 40") from the road name, so the
+    longest-distance ref is reliably the through highway -- unlike ORS step
+    names, which often carry only a concurrent US/state route. Interstates win
+    when present, else the longest ref (so California's CA-99 legs label
+    correctly too). Free and key-less; used only to *label* new legs -- the
+    truck route itself still comes from ORS. Returns "" if OSRM is unavailable.
+    """
+    cities = data["cities"]
+    start, end = cities[leg["from"]], cities[leg["to"]]
+    coords = f"{start['lon']},{start['lat']};{end['lon']},{end['lat']}"
+    params = {"overview": "false", "steps": "true",
+              "alternatives": "false", "geometries": "geojson"}
+    try:
+        payload = _cached_json(
+            cache_dir, "osrm-steps", f"{leg['from']}--{leg['to']}",
+            OSRM_ROUTE_URL.format(coords=coords) + "?" + urllib.parse.urlencode(params),
+            rate_limit_s=rate_limit_s)
+    except (TimeoutError, OSError, urllib.error.URLError, urllib.error.HTTPError):
+        return ""
+    if payload.get("code") != "Ok" or not payload.get("routes"):
+        return ""
+    by_ref: dict[str, float] = {}
+    for route_leg in payload["routes"][0].get("legs", []):
+        for step in route_leg.get("steps", []):
+            dist = float(step.get("distance", 0.0))
+            for part in str(step.get("ref", "") or "").split(";"):
+                match = _OSRM_REF_RE.search(part)
+                if match:
+                    ref = f"{match.group(1).upper()}-{match.group(2)}"
+                    by_ref[ref] = by_ref.get(ref, 0.0) + dist
+    if not by_ref:
+        return ""
+    interstates = {r: d for r, d in by_ref.items() if r.startswith("I-")}
+    pool = interstates or by_ref
+    return max(pool, key=pool.__getitem__)
 
 
 def _cached_ors_route(
