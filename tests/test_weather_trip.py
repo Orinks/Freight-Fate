@@ -7,6 +7,20 @@ from freight_fate.sim.trip import NavigationCue, TrafficLead, TripEventKind
 from freight_fate.sim.weather import EFFECTS, REGION_WEIGHTS
 
 
+def _gps_events(events):
+    """GPS-cue events, excluding additive interchange/exit cues. Tests below
+    target one specific cue (toll, state line, construction, traffic); curated
+    interchanges share the GPS-cue stream, so filter them out to keep those
+    assertions about the cue they mean."""
+    return [e for e in events
+            if e.kind == TripEventKind.GPS_CUE
+            and getattr(e.data.get("cue"), "kind", "") != "interchange"]
+
+
+def _gps_messages(events):
+    return [e.message for e in _gps_events(events)]
+
+
 def test_all_conditions_have_effects():
     for kind in WeatherKind:
         assert kind in EFFECTS
@@ -198,7 +212,7 @@ def test_construction_zone_warns_before_entry(world):
     trip.position_mi = zone.start_mi - 2.0
     events = trip.update(0.0)
 
-    warnings = [event.message for event in events if event.kind == TripEventKind.GPS_CUE]
+    warnings = _gps_messages(events)
     assert warnings == [
         f"In 2 miles, construction ahead. Speed limit {zone.limit_mph:.0f}."
     ]
@@ -227,7 +241,7 @@ def test_construction_zone_speeding_fine_waits_for_grace_distance(world):
 
     trip.position_mi = zone.start_mi - 2.0
     advance = trip.update(0.0)
-    assert [event.message for event in advance if event.kind == TripEventKind.GPS_CUE] == [
+    assert _gps_messages(advance) == [
         f"In 2 miles, construction ahead. Speed limit {zone.limit_mph:.0f}."
     ]
 
@@ -379,15 +393,15 @@ def test_gps_state_crossing_and_rest_stop_cues_deduplicate(world):
     advance = trip.update(0.0)
     repeat = trip.update(0.0)
 
-    assert [event.message for event in advance if event.kind == TripEventKind.GPS_CUE] == [
+    assert _gps_messages(advance) == [
         "In 10 miles, crossing from Illinois into Indiana near "
         "the I-65 state line south of Hammond."
     ]
-    assert not [event for event in repeat if event.kind == TripEventKind.GPS_CUE]
+    assert not _gps_events(repeat)
 
     trip.position_mi = 31.5
     near = trip.update(0.0)
-    assert not [event for event in near if event.kind == TripEventKind.GPS_CUE]
+    assert not _gps_events(near)
 
     trip.position_mi = 32.8
     crossing = trip.update(0.0)
@@ -422,10 +436,10 @@ def test_gps_traffic_cue_deduplicates(world):
     first = trip.update(0.0)
     second = trip.update(0.0)
 
-    assert [event.message for event in first if event.kind == TripEventKind.GPS_CUE] == [
+    assert _gps_messages(first) == [
         "Traffic slowing ahead in 2 miles; traffic queue ahead at 45 miles per hour."
     ]
-    assert not [event for event in second if event.kind == TripEventKind.GPS_CUE]
+    assert not _gps_events(second)
 
 
 def test_toll_cues_and_charges_deduplicate(world):
@@ -435,11 +449,11 @@ def test_toll_cues_and_charges_deduplicate(world):
     advance = trip.update(0.0)
     repeat = trip.update(0.0)
 
-    assert [event.message for event in advance if event.kind == TripEventKind.GPS_CUE] == [
+    assert _gps_messages(advance) == [
         "ticket system toll point ahead: New Jersey Turnpike ticket entry. "
         "estimated toll 18 dollars will be billed to carrier settlement."
     ]
-    assert not [event for event in repeat if event.kind == TripEventKind.GPS_CUE]
+    assert not _gps_events(repeat)
 
     trip.position_mi = 8.0
     charged = trip.update(0.0)
@@ -470,14 +484,14 @@ def test_zero_amount_toll_entry_marker_does_not_record_expense(world):
 
     trip.position_mi = 16.1
     advance = trip.update(0.0)
-    assert [event.message for event in advance if event.kind == TripEventKind.GPS_CUE] == [
+    assert _gps_messages(advance) == [
         "ticket system toll point ahead: Pennsylvania Turnpike eastern ticket entry. "
         "entry will be recorded for carrier settlement."
     ]
 
     trip.position_mi = 18.0
     entry = trip.update(0.0)
-    assert [event.message for event in entry if event.kind == TripEventKind.GPS_CUE] == [
+    assert _gps_messages(entry) == [
         "ticket system entry recorded at Pennsylvania Turnpike eastern ticket entry; "
         "toll will be billed at carrier settlement."
     ]

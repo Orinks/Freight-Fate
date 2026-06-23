@@ -707,6 +707,48 @@ class TollEvent:
 
 
 @dataclass(frozen=True)
+class Interchange:
+    """A highway exit/junction along a leg, sourced from OpenStreetMap.
+
+    ``exit_ref`` is the signed exit number ("7", "7A"), empty when OSM has no
+    ``ref`` on the junction node. ``destinations`` is the green-sign control
+    text (``destination`` tag) split into places; ``via`` is the route the exit
+    feeds (``destination:ref``), normalized for speech ("US 1 North" ->
+    "US-1 North"). All three may be sparse; the spoken phrase degrades
+    gracefully so a bare exit number still reads cleanly.
+    """
+
+    at_mi: float
+    exit_ref: str = ""
+    name: str = ""
+    destinations: tuple[str, ...] = ()
+    via: str = ""
+    highway: str = ""
+    source: str = ""
+
+    @property
+    def spoken_phrase(self) -> str:
+        """Lower-case lead phrase, e.g. 'exit 7 for US-1 North toward Trenton
+        and New York'. Built to slot into 'In 3 miles, {phrase}.'"""
+        head = f"exit {self.exit_ref}" if self.exit_ref else "exit"
+        parts = [head]
+        via = _format_route_ref(self.via)
+        if via:
+            parts.append(f"for {via}")
+        dest = _join_destinations(self.destinations)
+        if dest:
+            parts.append(f"toward {dest}")
+        elif self.name and not self.exit_ref:
+            parts.append(f"for {self.name}")
+        return " ".join(parts)
+
+    @property
+    def near_phrase(self) -> str:
+        phrase = self.spoken_phrase
+        return f"{phrase[0].upper()}{phrase[1:]} now."
+
+
+@dataclass(frozen=True)
 class City:
     name: str
     state: str
@@ -732,6 +774,7 @@ class Leg:
     checkpoints: tuple[RouteCheckpoint, ...] = ()
     state_miles: tuple[StateMileage, ...] = ()
     toll_events: tuple[TollEvent, ...] = ()
+    interchanges: tuple[Interchange, ...] = ()
 
     def other(self, city: str) -> str:
         return self.b if city == self.a else self.a
@@ -807,6 +850,10 @@ class Route:
         return [c for leg in self.legs for c in leg.checkpoints]
 
     @property
+    def interchanges(self) -> list[Interchange]:
+        return [x for leg in self.legs for x in leg.interchanges]
+
+    @property
     def terrain_summary(self) -> str:
         kinds = {leg.terrain for leg in self.legs}
         if kinds == {"flat"}:
@@ -877,11 +924,15 @@ class World:
                 _parse_toll_event(e, miles, leg["from"], leg["to"], leg["highway"])
                 for e in corridor.get("toll_events", ())
             )
+            interchanges = tuple(
+                _parse_interchange(x, miles, leg["from"], leg["to"], leg["highway"])
+                for x in corridor.get("interchanges", ())
+            )
             self.legs.append(
                 Leg(leg["from"], leg["to"], miles, leg["highway"],
                     leg["terrain"], stops, route_points, elevation_samples,
                     grade_segments, state_crossings, checkpoints, state_miles,
-                    toll_events)
+                    toll_events, interchanges)
             )
         self._adjacency: dict[str, list[Leg]] = {name: [] for name in self.cities}
         for leg in self.legs:
@@ -1592,6 +1643,75 @@ def _parse_toll_event(raw, leg_miles: float, from_city: str, to_city: str,
         estimated=bool(raw.get("estimated", True)),
         source=source,
     )
+
+
+def _parse_interchange(raw, leg_miles: float, from_city: str, to_city: str,
+                       default_highway: str) -> Interchange:
+    if not isinstance(raw, dict):
+        raise ValueError(f"{from_city} to {to_city} interchange must be an object")
+    exit_ref = str(raw.get("exit_ref", "")).strip()
+    name = str(raw.get("name", "")).strip()
+    via = str(raw.get("via", "")).strip()
+    raw_dests = raw.get("destinations", ())
+    if isinstance(raw_dests, str):
+        raw_dests = [raw_dests]
+    destinations = tuple(
+        d for d in (str(item).strip() for item in raw_dests) if d
+    )
+    label = f"interchange {exit_ref or name or '(unnamed)'!r}"
+    at_mi = _parse_at_mi(raw, leg_miles, from_city, to_city, label)
+    # An interchange must carry *something* sayable beyond a milepost.
+    if not (exit_ref or destinations or name):
+        raise ValueError(
+            f"{from_city} to {to_city} interchange at {at_mi} has no exit ref, "
+            "destinations, or name"
+        )
+    blob = " ".join((name, via, *destinations)).lower()
+    if any(marker in blob for marker in RAW_POI_TEXT_MARKERS):
+        raise ValueError(
+            f"{from_city} to {to_city} {label} exposes raw OSM/source text"
+        )
+    highway = str(raw.get("highway", "")).strip() or default_highway
+    source = str(raw.get("source", "")).strip()
+    if not source:
+        raise ValueError(f"{from_city} to {to_city} {label} has no source")
+    return Interchange(
+        at_mi=at_mi,
+        exit_ref=exit_ref,
+        name=name,
+        destinations=destinations,
+        via=via,
+        highway=highway,
+        source=source,
+    )
+
+
+def _format_route_ref(value: str) -> str:
+    """Speech-friendly route ref: 'US 1 North' -> 'US-1 North', 'I 95' ->
+    'I-95'. Multiple refs ('I 95 North;NJTP North') join with ' and '."""
+    out: list[str] = []
+    for chunk in str(value).split(";"):
+        ref = " ".join(chunk.split())
+        if not ref:
+            continue
+        # Hyphenate a leading shield token + number: "US 1" -> "US-1".
+        parts = ref.split(" ")
+        if len(parts) >= 2 and parts[1][:1].isdigit():
+            parts[0:2] = [f"{parts[0]}-{parts[1]}"]
+        out.append(" ".join(parts))
+    return " and ".join(out)
+
+
+def _join_destinations(destinations: tuple[str, ...]) -> str:
+    """['Trenton', 'New York'] -> 'Trenton and New York'; Oxford-comma 3+."""
+    items = [d for d in destinations if d]
+    if not items:
+        return ""
+    if len(items) == 1:
+        return items[0]
+    if len(items) == 2:
+        return f"{items[0]} and {items[1]}"
+    return f"{', '.join(items[:-1])}, and {items[-1]}"
 
 
 def _parse_at_mi(raw: dict, leg_miles: float, from_city: str, to_city: str,

@@ -312,6 +312,15 @@ class Trip:
                     f"{toll.method_label} toll point ahead: {toll.name}. "
                     f"{toll_text}",
                 ))
+            for ix in leg.interchanges:
+                offset = _stop_offset_for_direction(ix.at_mi, leg.miles, forward)
+                cues.append(NavigationCue(
+                    f"interchange:{i}:{ix.at_mi}:{ix.exit_ref}",
+                    "interchange",
+                    start + offset,
+                    ix.spoken_phrase,
+                    ix.near_phrase,
+                ))
             for stop in leg.stops:
                 if not stop.curated or not stop.applies_to_direction(forward):
                     continue
@@ -573,6 +582,8 @@ class Trip:
             return f"Next maneuver in {ahead:.0f} miles: {cue.text}."
         if cue.kind == "checkpoint":
             return f"Next place in {ahead:.0f} miles: {cue.text}."
+        if cue.kind == "interchange":
+            return f"Next exit in {ahead:.0f} miles: {cue.text}."
         if cue.kind == "traffic":
             return f"Traffic in {ahead:.0f} miles: {cue.text}."
         if cue.kind == "toll":
