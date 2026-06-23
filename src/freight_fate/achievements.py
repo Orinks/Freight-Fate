@@ -341,7 +341,7 @@ ACHIEVEMENTS: tuple[Achievement, ...] = (
     Achievement(
         "georgia_arrival",
         "Midnight Freight to Georgia",
-        "Delivered somewhere in Georgia, maybe well after dark. No first-class ticket -- just a sleeper, a thermos, and a place you'd rather be.",
+        "Delivered somewhere in Georgia with the freight rolling in well after dark. No first-class ticket -- just a sleeper, a thermos, and a place you'd rather be.",
         "Landmarks",
         "Gladys Knight & the Pips - Midnight Train to Georgia",
     ),

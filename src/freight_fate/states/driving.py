@@ -2530,8 +2530,8 @@ class ArrivalState(MenuState):
         }
         if dest in city_badge:
             ids.append(city_badge[dest])
-        if world.cities[dest].state == "Georgia":
-            ids.append("georgia_arrival")
+        if world.cities[dest].state == "Georgia" and is_night(self.driving.trip.current_hour):
+            ids.append("georgia_arrival")  # "Midnight Freight" -- night runs only
         if "Detroit" in (origin, dest):
             ids.append("detroit_run")
 
