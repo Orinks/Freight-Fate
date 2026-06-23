@@ -47,6 +47,7 @@ build = [
 # and ORS-backed corridor generation). Never a runtime dependency, so the
 # shipped game stays dependency-light. Run with `uv run --group tooling ...`.
 tooling = [
+    "osmium>=4.0.2",
     "openrouteservice>=2.2.0",
 ]
 
