@@ -3086,6 +3086,241 @@
             "estimated": true,
             "source": "MassDOT E-ZPass MA toll calculator, accessed 2026-06-16; estimated commercial vehicle corridor toll where Boston routing uses the Mass Pike approach: https://www.mass.gov/ezdrivema"
           }
+        ],
+        "interchanges": [
+          {
+            "at_mi": 12.8,
+            "exit_ref": "4A",
+            "name": "",
+            "destinations": [
+              "Cross Bronx Expressway",
+              "George Washington Bridge",
+              "Trenton, NJ"
+            ],
+            "via": "I 95 South",
+            "highway": "I-95",
+            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/"
+          },
+          {
+            "at_mi": 14.9,
+            "exit_ref": "6A",
+            "name": "",
+            "destinations": [
+              "Whitestone Bridge",
+              "Queens",
+              "Zerega Avenue"
+            ],
+            "via": "I 678 South",
+            "highway": "I-95",
+            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/"
+          },
+          {
+            "at_mi": 17.5,
+            "exit_ref": "8A",
+            "name": "",
+            "destinations": [
+              "Orchard Beach",
+              "City Island",
+              "Westchester Avenue"
+            ],
+            "via": "I 95 South",
+            "highway": "I-95",
+            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/"
+          },
+          {
+            "at_mi": 27.0,
+            "exit_ref": "18B",
+            "name": "",
+            "destinations": [
+              "Mamaroneck",
+              "White Plains",
+              "Mamaroneck Avenue East"
+            ],
+            "via": "I 95 South",
+            "highway": "I-95",
+            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/"
+          },
+          {
+            "at_mi": 29.7,
+            "exit_ref": "9",
+            "name": "",
+            "destinations": [
+              "George Washington Bridge",
+              "Stillwell Avenue",
+              "New Haven"
+            ],
+            "via": "I 95 South",
+            "highway": "I-95",
+            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/"
+          },
+          {
+            "at_mi": 32.5,
+            "exit_ref": "13",
+            "name": "",
+            "destinations": [
+              "Conner Street",
+              "Baychester Avenue",
+              "New England Thruway"
+            ],
+            "via": "I 95 North",
+            "highway": "I-95",
+            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/"
+          },
+          {
+            "at_mi": 34.7,
+            "exit_ref": "15",
+            "name": "",
+            "destinations": [
+              "New Rochelle",
+              "The Pelhams",
+              "Pelhams"
+            ],
+            "via": "US 1",
+            "highway": "I-95",
+            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/"
+          },
+          {
+            "at_mi": 37.8,
+            "exit_ref": "5",
+            "name": "",
+            "destinations": [
+              "Riverside",
+              "Old Greenwich",
+              "New York City"
+            ],
+            "via": "US 1",
+            "highway": "I-95",
+            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/"
+          },
+          {
+            "at_mi": 39.9,
+            "exit_ref": "7",
+            "name": "",
+            "destinations": [
+              "Greenwich Avenue",
+              "New Haven",
+              "Atlantic Street"
+            ],
+            "via": "CT 137 North",
+            "highway": "I-95",
+            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/"
+          },
+          {
+            "at_mi": 42.6,
+            "exit_ref": "19",
+            "name": "",
+            "destinations": [
+              "Rye",
+              "Harrison",
+              "New Haven"
+            ],
+            "via": "I 95 North",
+            "highway": "I-95",
+            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/"
+          },
+          {
+            "at_mi": 44.7,
+            "exit_ref": "",
+            "name": "",
+            "destinations": [
+              "Tokeneke Road",
+              "Rowayton",
+              "New York City"
+            ],
+            "via": "CT 136",
+            "highway": "I-95",
+            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/"
+          },
+          {
+            "at_mi": 48.9,
+            "exit_ref": "22",
+            "name": "",
+            "destinations": [
+              "White Plains",
+              "New York City",
+              "Midland Avenue"
+            ],
+            "via": "I 287 West",
+            "highway": "I-95",
+            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/"
+          },
+          {
+            "at_mi": 53.0,
+            "exit_ref": "18",
+            "name": "",
+            "destinations": [
+              "Sherwood Island Connector",
+              "New York City"
+            ],
+            "via": "I 95 South",
+            "highway": "I-95",
+            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/"
+          },
+          {
+            "at_mi": 58.6,
+            "exit_ref": "23",
+            "name": "",
+            "destinations": [
+              "Kings Highway",
+              "New York City",
+              "New Haven"
+            ],
+            "via": "US 1",
+            "highway": "I-95",
+            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/"
+          },
+          {
+            "at_mi": 61.1,
+            "exit_ref": "26",
+            "name": "",
+            "destinations": [
+              "Fairfield Avenue",
+              "Wordin Avenue",
+              "New Haven"
+            ],
+            "via": "CT 130",
+            "highway": "I-95",
+            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/"
+          },
+          {
+            "at_mi": 116.7,
+            "exit_ref": "38",
+            "name": "",
+            "destinations": [
+              "Merritt and Wilbur Cross Parkways",
+              "New Haven",
+              "Bridgeport"
+            ],
+            "via": "CT 15",
+            "highway": "I-95",
+            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/"
+          },
+          {
+            "at_mi": 139.1,
+            "exit_ref": "37",
+            "name": "",
+            "destinations": [
+              "High Street",
+              "Milford",
+              "Newton"
+            ],
+            "via": "MA 16",
+            "highway": "I-95",
+            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/"
+          },
+          {
+            "at_mi": 206.6,
+            "exit_ref": "37A",
+            "name": "",
+            "destinations": [
+              "Newton",
+              "Wellesley",
+              "Providence Rhode Island"
+            ],
+            "via": "MA 16",
+            "highway": "I-95",
+            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/"
+          }
         ]
       },
       "stops": [
@@ -3315,6 +3550,211 @@
           {
             "state": "Pennsylvania",
             "miles": 18.5
+          }
+        ],
+        "interchanges": [
+          {
+            "at_mi": 7.2,
+            "exit_ref": "15W",
+            "name": "",
+            "destinations": [
+              "Newark",
+              "Kearny",
+              "Lincoln Tunnel"
+            ],
+            "via": "I 280",
+            "highway": "I-95",
+            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/"
+          },
+          {
+            "at_mi": 10.5,
+            "exit_ref": "14-14C",
+            "name": "",
+            "destinations": [
+              "Newark Airport",
+              "Holland Tunnel",
+              "Lincoln Tunnel"
+            ],
+            "via": "I 78;US 1;US 9",
+            "highway": "I-95",
+            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/"
+          },
+          {
+            "at_mi": 15.9,
+            "exit_ref": "13A",
+            "name": "",
+            "destinations": [
+              "Elizabeth Seaport",
+              "Newark Airport",
+              "New Jersey Turnpike"
+            ],
+            "via": "NJTP;I 95",
+            "highway": "I-95",
+            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/"
+          },
+          {
+            "at_mi": 18.2,
+            "exit_ref": "13",
+            "name": "",
+            "destinations": [
+              "Elizabeth",
+              "Staten Island"
+            ],
+            "via": "I 278",
+            "highway": "I-95",
+            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/"
+          },
+          {
+            "at_mi": 21.4,
+            "exit_ref": "12",
+            "name": "",
+            "destinations": [
+              "Carteret",
+              "Rahway"
+            ],
+            "via": "",
+            "highway": "I-95",
+            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/"
+          },
+          {
+            "at_mi": 24.0,
+            "exit_ref": "",
+            "name": "",
+            "destinations": [
+              "Thomas Edison Service Area"
+            ],
+            "via": "",
+            "highway": "I-95",
+            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/"
+          },
+          {
+            "at_mi": 26.0,
+            "exit_ref": "11",
+            "name": "",
+            "destinations": [
+              "Garden State Parkway",
+              "Woodbridge",
+              "Shore Points"
+            ],
+            "via": "GSP;US 9",
+            "highway": "I-95",
+            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/"
+          },
+          {
+            "at_mi": 29.1,
+            "exit_ref": "10",
+            "name": "",
+            "destinations": [
+              "Metuchen",
+              "Perth Amboy",
+              "New Jersey Turnpike"
+            ],
+            "via": "I 287 North;NJ 440 North",
+            "highway": "I-95",
+            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/"
+          },
+          {
+            "at_mi": 33.6,
+            "exit_ref": "9",
+            "name": "",
+            "destinations": [
+              "New Brunswick",
+              "East Brunswick",
+              "New Jersey Turnpike"
+            ],
+            "via": "NJ 18;US 1",
+            "highway": "I-95",
+            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/"
+          },
+          {
+            "at_mi": 74.0,
+            "exit_ref": "42",
+            "name": "",
+            "destinations": [
+              "Levittown",
+              "Bristol"
+            ],
+            "via": "US 13",
+            "highway": "I-95",
+            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/"
+          },
+          {
+            "at_mi": 77.9,
+            "exit_ref": "37",
+            "name": "",
+            "destinations": [
+              "Street Road",
+              "Bristol Pike",
+              "New York"
+            ],
+            "via": "PA 132 West",
+            "highway": "I-95",
+            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/"
+          },
+          {
+            "at_mi": 82.2,
+            "exit_ref": "32",
+            "name": "",
+            "destinations": [
+              "Academy Road",
+              "Linden Avenue",
+              "Central Philadelphia"
+            ],
+            "via": "I 95 South",
+            "highway": "I-95",
+            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/"
+          },
+          {
+            "at_mi": 84.4,
+            "exit_ref": "30",
+            "name": "",
+            "destinations": [
+              "New York",
+              "Cottman Avenue",
+              "Rhawn Street"
+            ],
+            "via": "I 95 North",
+            "highway": "I-95",
+            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/"
+          },
+          {
+            "at_mi": 87.2,
+            "exit_ref": "27",
+            "name": "",
+            "destinations": [
+              "New York",
+              "Trenton",
+              "Central Philadelphia"
+            ],
+            "via": "I 95 North",
+            "highway": "I-95",
+            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/"
+          },
+          {
+            "at_mi": 89.2,
+            "exit_ref": "25",
+            "name": "",
+            "destinations": [
+              "Allegheny Avenue",
+              "Castor Avenue",
+              "Central Philadelphia"
+            ],
+            "via": "I 95 South",
+            "highway": "I-95",
+            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/"
+          },
+          {
+            "at_mi": 92.0,
+            "exit_ref": "22",
+            "name": "",
+            "destinations": [
+              "Central Philadelphia",
+              "Independence Hall",
+              "Callowhill Street"
+            ],
+            "via": "I 676;US 30",
+            "highway": "I-95",
+            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/"
           }
         ]
       }
