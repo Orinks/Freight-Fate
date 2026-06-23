@@ -267,6 +267,6 @@ def test_state_crossing_keeps_gameplay_prompt_before_achievement(monkeypatch):
         ))
 
         assert events == ["Crossing into Missouri near St. Louis."]
-        assert screen_reader[0].startswith("New achievement! Two Places, So Far.")
+        assert screen_reader[0].startswith("New achievement! Kept It Between the Lines.")
     finally:
         app.shutdown()

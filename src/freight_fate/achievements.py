@@ -80,10 +80,10 @@ ACHIEVEMENTS: tuple[Achievement, ...] = (
     ),
     Achievement(
         "ten_deliveries",
-        "Ten Loads, Good Buddy",
-        "Ten career deliveries in the books. That's a whole line of receipts now, ten-four, not just big talk crackling over the CB.",
+        "What a Long, Strange Haul",
+        "Ten career deliveries in the books. It has been a long, strange stretch of road to get here, and the receipts are piling up faster than the war stories.",
         "Career",
-        "C.W. McCall - Convoy",
+        "Grateful Dead - Truckin'",
     ),
     Achievement(
         "level_three",
@@ -115,17 +115,17 @@ ACHIEVEMENTS: tuple[Achievement, ...] = (
     ),
     Achievement(
         "state_crossing",
-        "Two Places, So Far",
-        "You crossed your first state line with freight aboard. A long way from having been most everywhere, man, but the list officially has two names on it now.",
+        "Kept It Between the Lines",
+        "You crossed your first state line with freight aboard. One side to the other, you kept the rig between the lines and the load rode clean across the border.",
         "Routes",
-        "Johnny Cash - I've Been Everywhere",
+        "Johnny Cash - I Walk the Line",
     ),
     Achievement(
         "multi_state",
         "Been Most Everywhere, Man",
         "One route, three states. Still working up to a list of towns long enough to rattle off in one breath, but the map had to stop and clear its throat.",
         "Routes",
-        "Hank Snow / Johnny Cash - I've Been Everywhere",
+        "Hank Snow - I've Been Everywhere",
     ),
     Achievement(
         "three_regions",
@@ -157,10 +157,10 @@ ACHIEVEMENTS: tuple[Achievement, ...] = (
     ),
     Achievement(
         "winter_or_wind",
-        "Roll On Through the Snow",
-        "Snow or crosswind, you kept the trailer in line and the wheels turning. Traction won the argument it always picks a fight over.",
+        "A Mile Past the Last Marker",
+        "Snow or crosswind, you kept the trailer in line and the wheels turning. The kind of grim stretch that earns roadside markers stayed in your mirror, not the headlines.",
         "Weather",
-        "Alabama - Roll On (Eighteen Wheeler)",
+        "Dick Curless - A Tombstone Every Mile",
     ),
     Achievement(
         "low_visibility",
@@ -185,10 +185,10 @@ ACHIEVEMENTS: tuple[Achievement, ...] = (
     ),
     Achievement(
         "traffic_slowing",
-        "Mind the Bumper Gap",
-        "Heavy traffic, and you kept the bumper gap sane. No tangled-up mess for the whole CB channel to retell about you later, good buddy.",
+        "Bumper-to-Bumper Blues",
+        "Heavy traffic, and you kept the following distance sane. The road runs long and life moves fast on it, so you let the jam breathe instead of tailgating into a mess.",
         "Road events",
-        "C.W. McCall - Convoy",
+        "Tom Cochrane - Life Is a Highway",
     ),
     Achievement(
         "inspection",
@@ -234,10 +234,10 @@ ACHIEVEMENTS: tuple[Achievement, ...] = (
     ),
     Achievement(
         "garage_repair",
-        "Fixed It Piece by Piece",
-        "You fixed the rig in a proper garage instead of cobbling it together from borrowed parts hauled out one at a time. Every receipt left with a clean conscience.",
+        "A Working Man's Receipt",
+        "You fixed the rig in a proper garage instead of cobbling it together from borrowed parts. Honest work and an honest bill, and the truck rolled out earning its keep again.",
         "Truck care",
-        "Johnny Cash - One Piece at a Time",
+        "Merle Haggard - Workin' Man Blues",
     ),
     Achievement(
         "first_upgrade",
@@ -376,10 +376,10 @@ ACHIEVEMENTS: tuple[Achievement, ...] = (
     ),
     Achievement(
         "hundred_deliveries",
-        "A Hundred Loads Deep",
-        "One hundred deliveries in the book. There's no easy run, they say -- you just went and proved it a hundred separate times.",
+        "Just Keep Rollin' On",
+        "One hundred deliveries in the book. You never made a fuss about it, just kept the wheels rolling down the road, load after load, until the number turned serious.",
         "Challenges",
-        "Dave Dudley - There Ain't No Easy Run",
+        "Lynyrd Skynyrd - Call Me the Breeze",
     ),
     Achievement(
         "ten_thousand_miles",
