@@ -188,24 +188,32 @@ def _cached_post(query: str, rate_limit: float) -> dict[str, Any] | None:
     if cf.exists():
         return json.loads(cf.read_text(encoding="utf-8"))
     body = urllib.parse.urlencode({"data": query}).encode("utf-8")
-    for url in OVERPASS_MIRRORS:
-        req = urllib.request.Request(
-            url, data=body,
-            headers={"User-Agent": USER_AGENT,
-                     "Content-Type": "application/x-www-form-urlencoded"})
-        try:
-            with urllib.request.urlopen(req, timeout=120) as resp:
-                payload = json.loads(resp.read().decode("utf-8"))
-        except (TimeoutError, OSError, urllib.error.URLError) as exc:
-            code = getattr(exc, "code", "")
-            print(f"    Overpass {url.split('/')[2]} -> {type(exc).__name__} "
-                  f"{code}; trying next mirror")
-            continue
-        CACHE_DIR.mkdir(parents=True, exist_ok=True)
-        cf.write_text(json.dumps(payload), encoding="utf-8")
-        if rate_limit > 0:
-            time.sleep(rate_limit)
-        return payload
+    # Public Overpass throttles bulk use (429) and sheds load (504). Sweep the
+    # mirrors a few times with exponential backoff so a long crawl rides out a
+    # rate-limit window instead of dropping the leg. Cache makes a re-run free.
+    for attempt in range(4):
+        for url in OVERPASS_MIRRORS:
+            req = urllib.request.Request(
+                url, data=body,
+                headers={"User-Agent": USER_AGENT,
+                         "Content-Type": "application/x-www-form-urlencoded"})
+            try:
+                with urllib.request.urlopen(req, timeout=120) as resp:
+                    payload = json.loads(resp.read().decode("utf-8"))
+            except (TimeoutError, OSError, urllib.error.URLError) as exc:
+                code = getattr(exc, "code", "")
+                print(f"    Overpass {url.split('/')[2]} -> {type(exc).__name__} "
+                      f"{code}; trying next mirror")
+                continue
+            CACHE_DIR.mkdir(parents=True, exist_ok=True)
+            cf.write_text(json.dumps(payload), encoding="utf-8")
+            if rate_limit > 0:
+                time.sleep(rate_limit)
+            return payload
+        backoff = 15.0 * (attempt + 1)
+        print(f"    all mirrors busy; backing off {backoff:.0f}s "
+              f"(attempt {attempt + 1}/4)")
+        time.sleep(backoff)
     return None
 
 
