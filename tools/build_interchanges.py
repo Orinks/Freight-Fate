@@ -35,7 +35,7 @@ import time
 import urllib.error
 import urllib.parse
 import urllib.request
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
@@ -56,8 +56,11 @@ SAMPLE_SPACING_MI = 10.0   # how often to drop an Overpass probe along the leg
 PROBE_RADIUS_M = 9_000     # search radius per probe
 RAMP_NEAR_M = 350.0        # a ramp this close to a junction belongs to it
 LOCAL_CORRIDOR_M = 200.0   # local PBF features must snap this close to a leg
+LOCAL_PBF_PREFILTER_PAD_M = PROBE_RADIUS_M
 MIN_EXIT_SPACING_MI = 2.0  # collapse exits closer than this (keep the richer)
 MAX_DESTINATIONS = 3       # cap control cities per exit for speech brevity
+LOCAL_INDEX_CACHE_VERSION = 1
+LOCAL_INDEX_PROGRESS_INTERVAL_SEC = 60.0
 
 
 @dataclass(frozen=True, slots=True)
@@ -71,6 +74,36 @@ class LocalOsmFeature:
 class LocalOsmIndex:
     junctions: list[LocalOsmFeature]
     ramps: list[LocalOsmFeature]
+
+
+@dataclass(frozen=True, slots=True)
+class _LocalRampWay:
+    node_ids: tuple[int, ...]
+    tags: dict[str, str]
+
+
+LocalBounds = tuple[float, float, float, float]
+
+
+@dataclass(slots=True)
+class _LocalIndexProgress:
+    label: str
+    interval_sec: float = LOCAL_INDEX_PROGRESS_INTERVAL_SEC
+    started: float = field(init=False)
+    last: float = field(init=False)
+
+    def __post_init__(self) -> None:
+        self.started = time.monotonic()
+        self.last = self.started
+
+    def maybe(self, message: str) -> None:
+        now = time.monotonic()
+        if self.interval_sec <= 0 or now - self.last < self.interval_sec:
+            return
+        self.last = now
+        elapsed = now - self.started
+        print(f"    {self.label}: {message} after {elapsed / 60.0:.1f} min",
+              flush=True)
 
 
 # --- geometry ---------------------------------------------------------------
@@ -143,9 +176,147 @@ def _geometry_bounds(geom: list[tuple[float, float, float]],
 
 
 def _inside_bounds(lat: float, lon: float,
-                   bounds: tuple[float, float, float, float]) -> bool:
+                   bounds: LocalBounds) -> bool:
     min_lat, max_lat, min_lon, max_lon = bounds
     return min_lat <= lat <= max_lat and min_lon <= lon <= max_lon
+
+
+def _inside_any_bounds(lat: float, lon: float, bounds: list[LocalBounds]) -> bool:
+    return any(_inside_bounds(lat, lon, item) for item in bounds)
+
+
+def _segment_bounds(
+    a: dict[str, Any], b: dict[str, Any], pad_m: float
+) -> LocalBounds:
+    min_lat = min(float(a["lat"]), float(b["lat"]))
+    max_lat = max(float(a["lat"]), float(b["lat"]))
+    min_lon = min(float(a["lon"]), float(b["lon"]))
+    max_lon = max(float(a["lon"]), float(b["lon"]))
+    mid_lat = (min_lat + max_lat) / 2.0
+    lat_pad = pad_m / 111_320.0
+    lon_scale = max(0.2, math.cos(math.radians(mid_lat)))
+    lon_pad = pad_m / (111_320.0 * lon_scale)
+    return min_lat - lat_pad, max_lat + lat_pad, min_lon - lon_pad, max_lon + lon_pad
+
+
+def _route_corridor_bounds(
+    route_points: list[dict[str, Any]], pad_m: float = LOCAL_PBF_PREFILTER_PAD_M
+) -> list[LocalBounds]:
+    if len(route_points) < 2:
+        return []
+    return [
+        _segment_bounds(start, end, pad_m)
+        for start, end in zip(route_points, route_points[1:], strict=False)
+    ]
+
+
+def _local_prefilter_bounds(legs: list[dict[str, Any]]) -> list[LocalBounds]:
+    bounds: list[LocalBounds] = []
+    for leg in legs:
+        route_points = list(leg.get("corridor", {}).get("route_points", ()))
+        bounds.extend(_route_corridor_bounds(route_points))
+    return bounds
+
+
+def _bounds_digest(bounds: list[LocalBounds]) -> str:
+    payload = json.dumps(
+        [[round(value, 7) for value in item] for item in bounds],
+        separators=(",", ":"),
+    )
+    return hashlib.sha256(payload.encode("utf-8")).hexdigest()
+
+
+def _pbf_metadata(pbf_path: Path) -> dict[str, Any]:
+    stat = pbf_path.stat()
+    return {
+        "path": str(pbf_path.resolve()),
+        "size": stat.st_size,
+        "mtime_ns": stat.st_mtime_ns,
+    }
+
+
+def _default_local_index_cache(pbf_path: Path) -> Path:
+    name = pbf_path.name
+    for suffix in (".osm.pbf", ".pbf"):
+        if name.endswith(suffix):
+            name = name[:-len(suffix)]
+            break
+    return pbf_path.with_name(f"{name}.interchanges.json")
+
+
+def _feature_to_json(feature: LocalOsmFeature) -> dict[str, Any]:
+    return {"lat": feature.lat, "lon": feature.lon, "tags": feature.tags}
+
+
+def _feature_from_json(raw: dict[str, Any]) -> LocalOsmFeature:
+    return LocalOsmFeature(
+        lat=float(raw["lat"]),
+        lon=float(raw["lon"]),
+        tags={str(k): str(v) for k, v in raw.get("tags", {}).items()},
+    )
+
+
+def _write_local_index_cache(
+    cache_path: Path,
+    index: LocalOsmIndex,
+    pbf_path: Path,
+    bounds: list[LocalBounds],
+) -> None:
+    cache_path.parent.mkdir(parents=True, exist_ok=True)
+    payload = {
+        "version": LOCAL_INDEX_CACHE_VERSION,
+        "pbf": _pbf_metadata(pbf_path),
+        "bounds_digest": _bounds_digest(bounds),
+        "junctions": [_feature_to_json(feature) for feature in index.junctions],
+        "ramps": [_feature_to_json(feature) for feature in index.ramps],
+    }
+    cache_path.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
+
+
+def _read_local_index_cache(
+    cache_path: Path,
+    pbf_path: Path,
+    bounds: list[LocalBounds],
+) -> LocalOsmIndex | None:
+    if not cache_path.exists():
+        return None
+    try:
+        payload = json.loads(cache_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        print(f"    ignoring unreadable local index cache {cache_path}: {exc}",
+              flush=True)
+        return None
+    if payload.get("version") != LOCAL_INDEX_CACHE_VERSION:
+        return None
+    if payload.get("pbf") != _pbf_metadata(pbf_path):
+        return None
+    if payload.get("bounds_digest") != _bounds_digest(bounds):
+        return None
+    return LocalOsmIndex(
+        junctions=[_feature_from_json(item) for item in payload.get("junctions", [])],
+        ramps=[_feature_from_json(item) for item in payload.get("ramps", [])],
+    )
+
+
+def load_or_build_local_index(
+    pbf_path: Path,
+    bounds: list[LocalBounds],
+    cache_path: Path,
+    rebuild: bool = False,
+) -> LocalOsmIndex:
+    if not rebuild:
+        cached = _read_local_index_cache(cache_path, pbf_path, bounds)
+        if cached is not None:
+            print(
+                f"Loaded local OSM interchange index cache: {cache_path} "
+                f"({len(cached.junctions)} junctions, {len(cached.ramps)} ramps)",
+                flush=True,
+            )
+            return cached
+    index = build_local_index(pbf_path, bounds)
+    _write_local_index_cache(cache_path, index, pbf_path, bounds)
+    print(f"    wrote local OSM interchange index cache: {cache_path}", flush=True)
+    return index
 
 
 # --- Overpass ---------------------------------------------------------------
@@ -195,7 +366,11 @@ def _post_overpass(query: str, rate_limit: float) -> dict[str, Any] | None:
 
 # --- local OSM extracts -----------------------------------------------------
 
-def build_local_index(pbf_path: Path) -> LocalOsmIndex:
+def build_local_index(
+    pbf_path: Path,
+    bounds: list[LocalBounds],
+    progress_interval_sec: float = LOCAL_INDEX_PROGRESS_INTERVAL_SEC,
+) -> LocalOsmIndex:
     try:
         import osmium  # type: ignore[import-not-found]
     except ImportError as exc:
@@ -204,45 +379,129 @@ def build_local_index(pbf_path: Path) -> LocalOsmIndex:
             "uv sync --group dev --group tooling"
         ) from exc
 
+    pass1 = _LocalIndexProgress("PBF pass 1", progress_interval_sec)
+
     class InterchangeHandler(osmium.SimpleHandler):  # type: ignore[name-defined]
         def __init__(self) -> None:
             super().__init__()
             self.junctions: list[LocalOsmFeature] = []
-            self.ramps: list[LocalOsmFeature] = []
+            self.ramp_ways: list[_LocalRampWay] = []
+            self.ramp_node_ids: set[int] = set()
+            self.nodes_seen = 0
+            self.ways_seen = 0
 
         def node(self, node: Any) -> None:
+            self.nodes_seen += 1
+            pass1.maybe(
+                f"{self.nodes_seen:,} nodes, {self.ways_seen:,} ways; "
+                f"retained {len(self.junctions):,} junctions and "
+                f"{len(self.ramp_ways):,} ramp ways"
+            )
             tags = {str(k): str(v) for k, v in node.tags}
             if tags.get("highway") != "motorway_junction":
                 return
             if not node.location.valid():
                 return
+            lat = float(node.location.lat)
+            lon = float(node.location.lon)
+            if not _inside_any_bounds(lat, lon, bounds):
+                return
             self.junctions.append(LocalOsmFeature(
-                lat=float(node.location.lat),
-                lon=float(node.location.lon),
+                lat=lat,
+                lon=lon,
                 tags=tags,
             ))
 
         def way(self, way: Any) -> None:
+            self.ways_seen += 1
+            pass1.maybe(
+                f"{self.nodes_seen:,} nodes, {self.ways_seen:,} ways; "
+                f"retained {len(self.junctions):,} junctions and "
+                f"{len(self.ramp_ways):,} ramp ways"
+            )
             tags = {str(k): str(v) for k, v in way.tags}
             if tags.get("highway") != "motorway_link" or not tags.get("destination"):
                 return
-            coords: list[tuple[float, float]] = []
+            node_ids: list[int] = []
             for node_ref in way.nodes:
-                loc = node_ref.location
-                if loc.valid():
-                    coords.append((float(loc.lat), float(loc.lon)))
-            if not coords:
+                node_id = getattr(node_ref, "ref", None)
+                if node_id is not None:
+                    node_ids.append(int(node_id))
+            if not node_ids:
                 return
-            lat = sum(p[0] for p in coords) / len(coords)
-            lon = sum(p[1] for p in coords) / len(coords)
-            self.ramps.append(LocalOsmFeature(lat=lat, lon=lon, tags=tags))
+            self.ramp_ways.append(_LocalRampWay(
+                node_ids=tuple(node_ids),
+                tags={
+                    "highway": "motorway_link",
+                    "destination": str(tags.get("destination", "")),
+                    "destination:ref": str(tags.get("destination:ref", "")),
+                },
+            ))
+            self.ramp_node_ids.update(node_ids)
+
+    pass2 = _LocalIndexProgress("PBF pass 2", progress_interval_sec)
+
+    class RampNodeHandler(osmium.SimpleHandler):  # type: ignore[name-defined]
+        def __init__(self, wanted: set[int]) -> None:
+            super().__init__()
+            self.wanted = wanted
+            self.coords: dict[int, tuple[float, float]] = {}
+            self.nodes_seen = 0
+
+        def node(self, node: Any) -> None:
+            self.nodes_seen += 1
+            pass2.maybe(
+                f"{self.nodes_seen:,} nodes; resolved "
+                f"{len(self.coords):,}/{len(self.wanted):,} ramp node locations"
+            )
+            node_id = int(node.id)
+            if node_id not in self.wanted:
+                return
+            if not node.location.valid():
+                return
+            self.coords[node_id] = (
+                float(node.location.lat),
+                float(node.location.lon),
+            )
 
     handler = InterchangeHandler()
     try:
-        handler.apply_file(str(pbf_path), locations=True)
+        print(f"    building local index from PBF pass 1: {pbf_path}", flush=True)
+        handler.apply_file(str(pbf_path))
     except RuntimeError as exc:
         raise SystemExit(f"Could not read OSM PBF {pbf_path}: {exc}") from exc
-    return LocalOsmIndex(junctions=handler.junctions, ramps=handler.ramps)
+
+    ramps: list[LocalOsmFeature] = []
+    if handler.ramp_node_ids:
+        ramp_nodes = RampNodeHandler(handler.ramp_node_ids)
+        try:
+            print(
+                f"    resolving {len(handler.ramp_node_ids):,} ramp node locations "
+                "from PBF pass 2",
+                flush=True,
+            )
+            ramp_nodes.apply_file(str(pbf_path))
+        except RuntimeError as exc:
+            raise SystemExit(f"Could not read OSM PBF {pbf_path}: {exc}") from exc
+        for ramp in handler.ramp_ways:
+            coords = [
+                ramp_nodes.coords[node_id]
+                for node_id in ramp.node_ids
+                if node_id in ramp_nodes.coords
+            ]
+            if not coords:
+                continue
+            lat = sum(p[0] for p in coords) / len(coords)
+            lon = sum(p[1] for p in coords) / len(coords)
+            if _inside_any_bounds(lat, lon, bounds):
+                ramps.append(LocalOsmFeature(lat=lat, lon=lon, tags=ramp.tags))
+
+    print(
+        f"    retained {len(handler.junctions):,} route-bbox junctions and "
+        f"{len(ramps):,} route-bbox destination ramps from local extract",
+        flush=True,
+    )
+    return LocalOsmIndex(junctions=handler.junctions, ramps=ramps)
 
 
 def _local_candidates(index: LocalOsmIndex,
@@ -497,19 +756,12 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--pbf", type=Path,
                         help=("Read OSM interchange candidates from a local Geofabrik/"
                               "OpenStreetMap .osm.pbf extract instead of Overpass."))
+    parser.add_argument("--local-index-cache", type=Path,
+                        help=("Reusable JSON cache for route-filtered local OSM "
+                              "interchange features. Defaults beside --pbf."))
+    parser.add_argument("--rebuild-local-index", action="store_true",
+                        help="Ignore any existing --local-index-cache and rebuild it.")
     args = parser.parse_args(argv)
-
-    local_index: LocalOsmIndex | None = None
-    if args.pbf:
-        if not args.pbf.exists():
-            raise SystemExit(f"OSM PBF not found: {args.pbf}")
-        print(f"Reading local OSM extract: {args.pbf}", flush=True)
-        local_index = build_local_index(args.pbf)
-        print(
-            f"    indexed {len(local_index.junctions)} motorway junctions and "
-            f"{len(local_index.ramps)} destination-tagged motorway ramps",
-            flush=True,
-        )
 
     data = json.loads(WORLD_PATH.read_text(encoding="utf-8"))
     legs = data["legs"]
@@ -519,19 +771,49 @@ def main(argv: list[str] | None = None) -> int:
         if not legs:
             raise SystemExit(f"No leg {args.only!r}")
 
-    total_added = 0
-    updated_legs = 0
     eligible = 0
-    processed = 0
+    index_legs: list[dict[str, Any]] = []
+    process_legs: list[dict[str, Any]] = []
     for leg in legs:
         if _shield_pattern(str(leg.get("highway", ""))) is None:
             continue
         eligible += 1
+        index_legs.append(leg)
         corridor = leg.setdefault("corridor", {})
         if corridor.get("interchanges") and not args.force:
             continue
-        if args.max_legs and processed >= args.max_legs:
+        if args.max_legs and len(process_legs) >= args.max_legs:
             break
+        process_legs.append(leg)
+
+    local_index: LocalOsmIndex | None = None
+    if args.pbf:
+        if not args.pbf.exists():
+            raise SystemExit(f"OSM PBF not found: {args.pbf}")
+        bounds = _local_prefilter_bounds(index_legs)
+        cache_path = args.local_index_cache or _default_local_index_cache(args.pbf)
+        print(
+            f"Reading local OSM extract: {args.pbf} "
+            f"({len(bounds)} route segment bbox filters, cache {cache_path})",
+            flush=True,
+        )
+        local_index = load_or_build_local_index(
+            args.pbf,
+            bounds,
+            cache_path,
+            rebuild=args.rebuild_local_index,
+        )
+        print(
+            f"    using {len(local_index.junctions)} motorway junctions and "
+            f"{len(local_index.ramps)} destination-tagged motorway ramps",
+            flush=True,
+        )
+
+    total_added = 0
+    updated_legs = 0
+    processed = 0
+    for leg in process_legs:
+        corridor = leg.setdefault("corridor", {})
         processed += 1
         label = f"{leg['from']}->{leg['to']} ({leg['highway']})"
         print(f"[{processed}] {label}", flush=True)
