@@ -104,6 +104,21 @@ class GameContext:
                                engine=self.settings.engine_volume,
                                ui=self.settings.ui_volume)
 
+    def apply_speech(self) -> None:
+        self.speech.select_event_backend(
+            self.settings.event_backend if self.settings.sapi_events else None)
+        # If the saved voice was not on this machine (e.g. a Windows save's
+        # SAPI opened on macOS), record the one actually used so the menu and
+        # later sessions reflect reality.
+        if self.settings.sapi_events:
+            actual = self.speech.event_backend_name
+            if actual not in ("none", "unknown") and actual != self.settings.event_backend:
+                self.settings.event_backend = actual
+        self.speech.configure(rate=self.settings.speech_rate,
+                              pitch=self.settings.speech_pitch,
+                              volume=self.settings.speech_volume,
+                              voice=self.settings.speech_voice or None)
+
     def next_music_track(self, pool_name: str, sequence: tuple[str, ...]) -> str:
         """Advance a session-local music pool without immediate repeats."""
         if not sequence:
@@ -200,6 +215,7 @@ class App:
         self.economy = Economy()
         self.ctx = GameContext(self)
         self.ctx.apply_volumes()
+        self.ctx.apply_speech()
 
         self.states: list[State] = []
         self.running = False

@@ -135,6 +135,154 @@ def test_event_channel_absent_when_sapi_is_unusable():
     assert pick_event_backend(ctx, None) is None
 
 
+@dataclass
+class FakeParamFeatures:
+    is_supported_at_runtime: bool = True
+    supports_output: bool = True
+    supports_speak: bool = True
+    supports_set_rate: bool = False
+    supports_set_pitch: bool = False
+    supports_set_volume: bool = False
+    supports_set_voice: bool = False
+    supports_count_voices: bool = False
+    supports_get_voice_name: bool = False
+
+
+class RecordingBackend:
+    """A backend that records the parameters Speech.configure pushes to it."""
+
+    def __init__(self, name, voices, features):
+        self.name = name
+        self._voices = list(voices)
+        self.features = features
+        self.rate = None
+        self.pitch = None
+        self.volume = None
+        self.voice = None
+
+    @property
+    def voices_count(self):
+        return len(self._voices)
+
+    def get_voice_name(self, idx):
+        return self._voices[idx]
+
+
+def _configurable_speech():
+    """A Speech with an unsupported main voice and a fully adjustable event
+    voice -- the common real layout (running NVDA plus a SAPI event voice)."""
+    s = Speech()  # FREIGHT_FATE_NO_SPEECH (conftest) leaves it empty
+    main = RecordingBackend("NVDA", [], FakeParamFeatures())
+    event = RecordingBackend(
+        "SAPI", ["David", "Zira"],
+        FakeParamFeatures(supports_set_rate=True, supports_set_pitch=True,
+                          supports_set_volume=True, supports_set_voice=True,
+                          supports_count_voices=True, supports_get_voice_name=True))
+    s._backend = main
+    s._event_backend = event
+    return s, main, event
+
+
+def test_configure_pushes_params_to_supporting_backends_only():
+    s, main, event = _configurable_speech()
+    s.configure(rate=0.8, pitch=0.3, volume=0.5, voice="Zira")
+    assert (event.rate, event.pitch, event.volume, event.voice) == (0.8, 0.3, 0.5, 1)
+    # the unsupported main voice is left untouched
+    assert (main.rate, main.pitch, main.volume, main.voice) == (None, None, None, None)
+
+
+def test_supports_and_voice_names_reflect_backend_features():
+    s, _main, _event = _configurable_speech()
+    assert s.supports_rate and s.supports_pitch and s.supports_volume
+    assert s.voice_names() == ["David", "Zira"]
+
+
+def test_configure_skips_unknown_voice_name():
+    s, _main, event = _configurable_speech()
+    s.configure(voice="Nonexistent")
+    assert event.voice is None
+
+
+def test_no_configurable_backend_reports_no_support():
+    s = Speech()
+    s._backend = RecordingBackend("NVDA", [], FakeParamFeatures())
+    s._event_backend = None
+    assert not s.supports_rate
+    assert not s.supports_pitch
+    assert not s.supports_volume
+    assert s.voice_names() == []
+    s.configure(rate=0.9, voice="David")  # must not raise
+
+
+def _multi_voice_ctx():
+    """A registry shaped like a real Windows box with NVDA running: the screen
+    reader plus two controllable software voices."""
+    params = dict(supports_set_rate=True, supports_set_pitch=True,
+                  supports_set_volume=True, supports_set_voice=True,
+                  supports_count_voices=True, supports_get_voice_name=True)
+    return FakeContext(
+        [
+            FakeBackend("NVDA", 103, FakeParamFeatures()),
+            FakeBackend("OneCore", 98, FakeParamFeatures(**params)),
+            FakeBackend("SAPI", 97, FakeParamFeatures(**params)),
+        ],
+        best="NVDA",
+    )
+
+
+def test_event_backend_options_lists_software_voices_by_priority():
+    s = Speech()
+    s._ctx = _multi_voice_ctx()
+    s._backend = s._ctx.acquire("NVDA")  # the main voice is excluded
+    assert s.event_backend_options() == ["OneCore", "SAPI"]
+
+
+def test_select_event_backend_switches_and_clears():
+    s = Speech()
+    s._ctx = _multi_voice_ctx()
+    s._backend = s._ctx.acquire("NVDA")
+    s.select_event_backend("OneCore")
+    assert s.event_backend_name == "OneCore"
+    s.select_event_backend(None)               # back to the main voice
+    assert s.event_backend_name == "none"
+    # Asking for the main voice by name is not a real separate option, so the
+    # preference falls back to the best available one (None is how you pick the
+    # main voice for events).
+    s.select_event_backend("NVDA")
+    assert s.event_backend_name == "OneCore"
+
+
+def test_event_backend_falls_back_to_platform_voice():
+    # A macOS-shaped registry: VoiceOver running, AVSpeech as the software voice,
+    # no SAPI. A Windows save's "SAPI" preference must still land on a real voice.
+    params = dict(supports_set_rate=True, supports_set_pitch=True,
+                  supports_set_volume=True, supports_set_voice=True,
+                  supports_count_voices=True, supports_get_voice_name=True)
+    ctx = FakeContext(
+        [
+            FakeBackend("VoiceOver", 103, FakeParamFeatures()),
+            FakeBackend("AVSpeech", 98, FakeParamFeatures(**params)),
+        ],
+        best="VoiceOver",
+    )
+    s = Speech()
+    s._ctx = ctx
+    s._backend = ctx.acquire("VoiceOver")
+    s.select_event_backend("SAPI")             # not on this machine
+    assert s.event_backend_name == "AVSpeech"  # best available wins
+
+
+def test_event_backend_none_when_no_separate_voice_exists():
+    # Only a screen reader is usable: there is nothing to separate onto.
+    ctx = FakeContext([FakeBackend("VoiceOver", 103, FakeParamFeatures())],
+                      best="VoiceOver")
+    s = Speech()
+    s._ctx = ctx
+    s._backend = ctx.acquire("VoiceOver")
+    s.select_event_backend("SAPI")
+    assert s.event_backend_name == "none"
+
+
 def test_speech_disabled_by_env_is_silent_and_safe():
     s = Speech()
     assert not s.available

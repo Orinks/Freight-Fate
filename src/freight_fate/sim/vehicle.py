@@ -378,10 +378,16 @@ class TruckState:
             road_rpm = wheel_rps * 60.0 * abs(ratio)
             if road_rpm < s.idle_rpm:
                 # Launch regime: in a low gear the clutch slips and the engine
-                # holds idle-or-better. In a high gear the engine lugs and stalls.
+                # holds idle-or-better. In a high gear the engine lugs.
                 if tr.gear >= 4 and road_rpm < s.idle_rpm * 0.5:
-                    self.stall()
-                    return
+                    if not tr.automatic:
+                        self.stall()
+                        return
+                    # A real automatic kicks down rather than lugging to a
+                    # stall while still rolling. The RPM-threshold downshift
+                    # can be outrun by a hard deceleration during the shift
+                    # delay, so force the drop here.
+                    tr.kickdown()
                 self.rpm = max(s.idle_rpm, s.idle_rpm + (s.max_rpm - s.idle_rpm)
                                * self.throttle * 0.3)
             else:
