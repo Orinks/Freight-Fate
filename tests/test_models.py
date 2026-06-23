@@ -58,8 +58,15 @@ def test_hos_plan_reports_breaks_sleeps_and_route_stop_coverage(world):
 def test_northeast_short_corridor_deadline_uses_direct_route(world):
     from freight_fate.models.jobs import required_hours
 
-    jobs = JobBoard(world, seed=3).offers("Philadelphia", endorsements=set(), level=1)
-    ny_jobs = [job for job in jobs if job.destination == "New York"]
+    # Search seeds: map expansion (new nearby NJ/PA nodes) shifts any single
+    # seed's offer mix, so pin the route invariant, not one seed's lottery.
+    ny_jobs = [
+        job
+        for seed in range(40)
+        for job in JobBoard(world, seed=seed).offers(
+            "Philadelphia", endorsements=set(), level=1)
+        if job.destination == "New York"
+    ]
 
     assert ny_jobs
     assert all(job.distance_mi == 94 for job in ny_jobs)

@@ -2207,6 +2207,438 @@
       "region": "great_basin",
       "state": "Nevada",
       "locations": []
+    },
+    "Newark": {
+      "state": "New Jersey",
+      "region": "northeast",
+      "locations": [
+        {
+          "name": "Port Newark Container Terminal",
+          "type": "port",
+          "cargo": [
+            "container",
+            "general"
+          ]
+        },
+        {
+          "name": "Meadowlands Distribution Center",
+          "type": "distribution",
+          "cargo": [
+            "retail",
+            "food"
+          ]
+        }
+      ],
+      "lat": 40.7357,
+      "lon": -74.1724
+    },
+    "Trenton": {
+      "state": "New Jersey",
+      "region": "northeast",
+      "locations": [
+        {
+          "name": "Trenton Freight Terminal",
+          "type": "terminal",
+          "cargo": [
+            "general",
+            "machinery"
+          ]
+        },
+        {
+          "name": "Hamilton Distribution Park",
+          "type": "distribution",
+          "cargo": [
+            "retail",
+            "electronics"
+          ]
+        }
+      ],
+      "lat": 40.2171,
+      "lon": -74.7429
+    },
+    "Atlantic City": {
+      "state": "New Jersey",
+      "region": "northeast",
+      "locations": [
+        {
+          "name": "Egg Harbor Distribution",
+          "type": "distribution",
+          "cargo": [
+            "food",
+            "refrigerated"
+          ]
+        },
+        {
+          "name": "Atlantic Coast Warehouse",
+          "type": "warehouse",
+          "cargo": [
+            "retail",
+            "general"
+          ]
+        }
+      ],
+      "lat": 39.3642,
+      "lon": -74.4231
+    },
+    "Salisbury": {
+      "state": "Maryland",
+      "region": "northeast",
+      "locations": [
+        {
+          "name": "Delmarva Poultry Cold Storage",
+          "type": "distribution",
+          "cargo": [
+            "food",
+            "refrigerated"
+          ]
+        },
+        {
+          "name": "Salisbury Distribution Center",
+          "type": "warehouse",
+          "cargo": [
+            "retail",
+            "general"
+          ]
+        }
+      ],
+      "lat": 38.3607,
+      "lon": -75.5994
+    },
+    "Burlington": {
+      "state": "Vermont",
+      "region": "northeast",
+      "locations": [
+        {
+          "name": "Burlington Freight Depot",
+          "type": "terminal",
+          "cargo": [
+            "general",
+            "food"
+          ]
+        },
+        {
+          "name": "Champlain Valley Warehouse",
+          "type": "warehouse",
+          "cargo": [
+            "retail",
+            "machinery"
+          ]
+        }
+      ],
+      "lat": 44.4759,
+      "lon": -73.2121
+    },
+    "Norfolk": {
+      "state": "Virginia",
+      "region": "atlantic_southeast",
+      "locations": [
+        {
+          "name": "Norfolk International Terminals",
+          "type": "port",
+          "cargo": [
+            "container",
+            "machinery"
+          ]
+        },
+        {
+          "name": "Hampton Roads Distribution",
+          "type": "distribution",
+          "cargo": [
+            "retail",
+            "refrigerated"
+          ]
+        }
+      ],
+      "lat": 36.8468,
+      "lon": -76.2852
+    },
+    "Harrisburg": {
+      "state": "Pennsylvania",
+      "region": "northeast",
+      "locations": [
+        {
+          "name": "Capital Region Intermodal",
+          "type": "intermodal",
+          "cargo": [
+            "container",
+            "machinery"
+          ]
+        },
+        {
+          "name": "Harrisburg Distribution Hub",
+          "type": "distribution",
+          "cargo": [
+            "retail",
+            "general"
+          ]
+        }
+      ],
+      "lat": 40.2737,
+      "lon": -76.8844
+    },
+    "Scranton": {
+      "state": "Pennsylvania",
+      "region": "northeast",
+      "locations": [
+        {
+          "name": "Scranton Intermodal Terminal",
+          "type": "intermodal",
+          "cargo": [
+            "container",
+            "general"
+          ]
+        },
+        {
+          "name": "Lackawanna Distribution Center",
+          "type": "distribution",
+          "cargo": [
+            "retail",
+            "food"
+          ]
+        }
+      ],
+      "lat": 41.4092,
+      "lon": -75.6649
+    },
+    "Erie": {
+      "state": "Pennsylvania",
+      "region": "appalachia",
+      "locations": [
+        {
+          "name": "Port of Erie",
+          "type": "port",
+          "cargo": [
+            "bulk",
+            "container"
+          ]
+        },
+        {
+          "name": "Erie Manufacturing Works",
+          "type": "manufacturing",
+          "cargo": [
+            "machinery",
+            "general"
+          ]
+        }
+      ],
+      "lat": 42.1292,
+      "lon": -80.0851
+    },
+    "Binghamton": {
+      "state": "New York",
+      "region": "northeast",
+      "locations": [
+        {
+          "name": "Binghamton Rail Yard",
+          "type": "rail",
+          "cargo": [
+            "machinery",
+            "bulk"
+          ]
+        },
+        {
+          "name": "Southern Tier Warehouse",
+          "type": "warehouse",
+          "cargo": [
+            "general",
+            "electronics"
+          ]
+        }
+      ],
+      "lat": 42.0987,
+      "lon": -75.918
+    },
+    "New Haven": {
+      "state": "Connecticut",
+      "region": "northeast",
+      "locations": [
+        {
+          "name": "New Haven Port Terminal",
+          "type": "port",
+          "cargo": [
+            "bulk",
+            "general"
+          ]
+        },
+        {
+          "name": "Long Wharf Distribution",
+          "type": "distribution",
+          "cargo": [
+            "food",
+            "retail"
+          ]
+        }
+      ],
+      "lat": 41.3081,
+      "lon": -72.9282
+    },
+    "Augusta": {
+      "state": "Georgia",
+      "region": "atlantic_southeast",
+      "locations": [
+        {
+          "name": "Savannah River Terminal",
+          "type": "terminal",
+          "cargo": [
+            "bulk",
+            "machinery"
+          ]
+        },
+        {
+          "name": "Augusta Distribution Center",
+          "type": "distribution",
+          "cargo": [
+            "retail",
+            "general"
+          ]
+        }
+      ],
+      "lat": 33.471,
+      "lon": -81.9748
+    },
+    "Macon": {
+      "state": "Georgia",
+      "region": "atlantic_southeast",
+      "locations": [
+        {
+          "name": "Macon Intermodal Park",
+          "type": "intermodal",
+          "cargo": [
+            "container",
+            "retail"
+          ]
+        },
+        {
+          "name": "Middle Georgia Distribution",
+          "type": "distribution",
+          "cargo": [
+            "food",
+            "general"
+          ]
+        }
+      ],
+      "lat": 32.8407,
+      "lon": -83.6324
+    },
+    "Greenville": {
+      "state": "South Carolina",
+      "region": "atlantic_southeast",
+      "locations": [
+        {
+          "name": "Upstate Inland Port",
+          "type": "intermodal",
+          "cargo": [
+            "container",
+            "machinery"
+          ]
+        },
+        {
+          "name": "Greenville Distribution Center",
+          "type": "distribution",
+          "cargo": [
+            "retail",
+            "electronics"
+          ]
+        }
+      ],
+      "lat": 34.8526,
+      "lon": -82.394
+    },
+    "Charleston, West Virginia": {
+      "state": "West Virginia",
+      "region": "appalachia",
+      "locations": [
+        {
+          "name": "Kanawha Valley Chemical Terminal",
+          "type": "terminal",
+          "cargo": [
+            "bulk",
+            "general"
+          ]
+        },
+        {
+          "name": "Charleston Distribution Center",
+          "type": "distribution",
+          "cargo": [
+            "retail",
+            "food"
+          ]
+        }
+      ],
+      "lat": 38.3498,
+      "lon": -81.6326
+    },
+    "Portland, Maine": {
+      "state": "Maine",
+      "region": "northeast",
+      "locations": [
+        {
+          "name": "Portland Marine Terminal",
+          "type": "port",
+          "cargo": [
+            "container",
+            "refrigerated"
+          ]
+        },
+        {
+          "name": "Casco Bay Cold Storage",
+          "type": "distribution",
+          "cargo": [
+            "food",
+            "refrigerated"
+          ]
+        }
+      ],
+      "lat": 43.6615,
+      "lon": -70.2553
+    },
+    "Springfield, Massachusetts": {
+      "state": "Massachusetts",
+      "region": "northeast",
+      "locations": [
+        {
+          "name": "Springfield Rail Yard",
+          "type": "rail",
+          "cargo": [
+            "machinery",
+            "bulk"
+          ]
+        },
+        {
+          "name": "Pioneer Valley Distribution",
+          "type": "distribution",
+          "cargo": [
+            "retail",
+            "food"
+          ]
+        }
+      ],
+      "lat": 42.1015,
+      "lon": -72.5898
+    },
+    "Wilmington, Delaware": {
+      "state": "Delaware",
+      "region": "northeast",
+      "locations": [
+        {
+          "name": "Port of Wilmington",
+          "type": "port",
+          "cargo": [
+            "container",
+            "refrigerated"
+          ]
+        },
+        {
+          "name": "Wilmington Chemical Terminal",
+          "type": "terminal",
+          "cargo": [
+            "bulk",
+            "general"
+          ]
+        }
+      ],
+      "lat": 39.746,
+      "lon": -75.5466
     }
   },
   "legs": [
@@ -58015,6 +58447,5369 @@
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
       },
       "terrain": "hills"
+    },
+    {
+      "from": "Newark",
+      "to": "New York",
+      "miles": 11,
+      "highway": "I-78",
+      "terrain": "flat",
+      "corridor": {
+        "tollway_detected": true,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 40.73567,
+            "lon": -74.17241
+          },
+          {
+            "at_mi": 2.8,
+            "lat": 40.7452,
+            "lon": -74.13494
+          },
+          {
+            "at_mi": 5.5,
+            "lat": 40.74303,
+            "lon": -74.08547
+          },
+          {
+            "at_mi": 8.2,
+            "lat": 40.72989,
+            "lon": -74.03797
+          },
+          {
+            "at_mi": 11.0,
+            "lat": 40.71215,
+            "lon": -74.00562
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 50.9,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 2.8,
+            "elevation_ft": -2.6,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 5.5,
+            "elevation_ft": 9.8,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 8.2,
+            "elevation_ft": 19.7,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 11.0,
+            "elevation_ft": 62.3,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 11.0,
+            "avg_grade_pct": 0.02,
+            "terrain": "flat",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          }
+        ],
+        "checkpoints": [
+          {
+            "name": "I-78 corridor between Newark and New York",
+            "at_mi": 5.5,
+            "type": "place",
+            "state": "New York",
+            "highway": "I-78",
+            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
+          }
+        ],
+        "state_miles": [
+          {
+            "state": "New Jersey",
+            "miles": 9.4
+          },
+          {
+            "state": "New York",
+            "miles": 1.6
+          }
+        ],
+        "state_crossings": [
+          {
+            "at_mi": 9.4,
+            "from_state": "New Jersey",
+            "state": "New York",
+            "place": "New Jersey-New York line on I-78",
+            "source": "Computed from OSRM route geometry and public U.S. state boundary GeoJSON."
+          }
+        ],
+        "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
+      }
+    },
+    {
+      "from": "Newark",
+      "to": "Philadelphia",
+      "miles": 85,
+      "highway": "I-95",
+      "terrain": "flat",
+      "corridor": {
+        "tollway_detected": true,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 40.73567,
+            "lon": -74.17241
+          },
+          {
+            "at_mi": 21.2,
+            "lat": 40.50554,
+            "lon": -74.37739
+          },
+          {
+            "at_mi": 42.5,
+            "lat": 40.23393,
+            "lon": -74.54159
+          },
+          {
+            "at_mi": 63.8,
+            "lat": 40.07351,
+            "lon": -74.85039
+          },
+          {
+            "at_mi": 85.0,
+            "lat": 39.9526,
+            "lon": -75.16521
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 50.9,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 21.2,
+            "elevation_ft": 59.1,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 42.5,
+            "elevation_ft": 131.2,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 63.8,
+            "elevation_ft": 9.8,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 85.0,
+            "elevation_ft": 82.0,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 85.0,
+            "avg_grade_pct": 0.01,
+            "terrain": "flat",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          }
+        ],
+        "checkpoints": [
+          {
+            "name": "I-95 corridor between Newark and Philadelphia",
+            "at_mi": 42.5,
+            "type": "place",
+            "state": "Pennsylvania",
+            "highway": "I-95",
+            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
+          }
+        ],
+        "state_miles": [
+          {
+            "state": "New Jersey",
+            "miles": 82.7
+          },
+          {
+            "state": "Pennsylvania",
+            "miles": 2.3
+          }
+        ],
+        "state_crossings": [
+          {
+            "at_mi": 82.7,
+            "from_state": "New Jersey",
+            "state": "Pennsylvania",
+            "place": "New Jersey-Pennsylvania line on I-95",
+            "source": "Computed from OSRM route geometry and public U.S. state boundary GeoJSON."
+          }
+        ],
+        "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
+      }
+    },
+    {
+      "from": "Newark",
+      "to": "Trenton",
+      "miles": 50,
+      "highway": "I-95",
+      "terrain": "flat",
+      "corridor": {
+        "tollway_detected": false,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 40.73567,
+            "lon": -74.17241
+          },
+          {
+            "at_mi": 12.5,
+            "lat": 40.58525,
+            "lon": -74.2806
+          },
+          {
+            "at_mi": 25.0,
+            "lat": 40.46287,
+            "lon": -74.45502
+          },
+          {
+            "at_mi": 37.5,
+            "lat": 40.34295,
+            "lon": -74.62426
+          },
+          {
+            "at_mi": 50.0,
+            "lat": 40.21705,
+            "lon": -74.74288
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 50.9,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 12.5,
+            "elevation_ft": 73.8,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 25.0,
+            "elevation_ft": 88.6,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 37.5,
+            "elevation_ft": 95.1,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 50.0,
+            "elevation_ft": 77.1,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 50.0,
+            "avg_grade_pct": 0.01,
+            "terrain": "flat",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          }
+        ],
+        "checkpoints": [
+          {
+            "name": "I-95 corridor between Newark and Trenton",
+            "at_mi": 25.0,
+            "type": "place",
+            "state": "New Jersey",
+            "highway": "I-95",
+            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
+          }
+        ],
+        "state_miles": [
+          {
+            "state": "New Jersey",
+            "miles": 50.0
+          }
+        ],
+        "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
+      }
+    },
+    {
+      "from": "Newark",
+      "to": "Allentown",
+      "miles": 82,
+      "highway": "I-78",
+      "terrain": "flat",
+      "corridor": {
+        "tollway_detected": true,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 40.73567,
+            "lon": -74.17241
+          },
+          {
+            "at_mi": 20.5,
+            "lat": 40.64736,
+            "lon": -74.49953
+          },
+          {
+            "at_mi": 41.0,
+            "lat": 40.63867,
+            "lon": -74.88263
+          },
+          {
+            "at_mi": 61.5,
+            "lat": 40.66971,
+            "lon": -75.21965
+          },
+          {
+            "at_mi": 82.0,
+            "lat": 40.60807,
+            "lon": -75.49001
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 50.9,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 20.5,
+            "elevation_ft": 280.5,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 41.0,
+            "elevation_ft": 255.9,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 61.5,
+            "elevation_ft": 393.7,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 82.0,
+            "elevation_ft": 354.3,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 82.0,
+            "avg_grade_pct": 0.07,
+            "terrain": "flat",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          }
+        ],
+        "checkpoints": [
+          {
+            "name": "I-78 corridor between Newark and Allentown",
+            "at_mi": 41.0,
+            "type": "place",
+            "state": "Pennsylvania",
+            "highway": "I-78",
+            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
+          }
+        ],
+        "state_miles": [
+          {
+            "state": "New Jersey",
+            "miles": 60.8
+          },
+          {
+            "state": "Pennsylvania",
+            "miles": 21.2
+          }
+        ],
+        "state_crossings": [
+          {
+            "at_mi": 60.8,
+            "from_state": "New Jersey",
+            "state": "Pennsylvania",
+            "place": "New Jersey-Pennsylvania line on I-78",
+            "source": "Computed from OSRM route geometry and public U.S. state boundary GeoJSON."
+          }
+        ],
+        "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
+      }
+    },
+    {
+      "from": "Trenton",
+      "to": "Philadelphia",
+      "miles": 34,
+      "highway": "I-295",
+      "terrain": "flat",
+      "corridor": {
+        "tollway_detected": true,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 40.21705,
+            "lon": -74.74288
+          },
+          {
+            "at_mi": 8.5,
+            "lat": 40.19405,
+            "lon": -74.87924
+          },
+          {
+            "at_mi": 17.0,
+            "lat": 40.08968,
+            "lon": -74.92439
+          },
+          {
+            "at_mi": 25.5,
+            "lat": 40.01552,
+            "lon": -75.05345
+          },
+          {
+            "at_mi": 34.0,
+            "lat": 39.9526,
+            "lon": -75.16521
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 77.1,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 8.5,
+            "elevation_ft": 185.7,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 17.0,
+            "elevation_ft": 55.4,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 25.5,
+            "elevation_ft": 31.5,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 34.0,
+            "elevation_ft": 82.0,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 34.0,
+            "avg_grade_pct": 0.0,
+            "terrain": "flat",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          }
+        ],
+        "checkpoints": [
+          {
+            "name": "I-295 corridor between Trenton and Philadelphia",
+            "at_mi": 17.0,
+            "type": "place",
+            "state": "Pennsylvania",
+            "highway": "I-295",
+            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
+          }
+        ],
+        "state_miles": [
+          {
+            "state": "New Jersey",
+            "miles": 2.9
+          },
+          {
+            "state": "Pennsylvania",
+            "miles": 31.1
+          }
+        ],
+        "state_crossings": [
+          {
+            "at_mi": 2.9,
+            "from_state": "New Jersey",
+            "state": "Pennsylvania",
+            "place": "New Jersey-Pennsylvania line on I-295",
+            "source": "Computed from OSRM route geometry and public U.S. state boundary GeoJSON."
+          }
+        ],
+        "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
+      }
+    },
+    {
+      "from": "Trenton",
+      "to": "Atlantic City",
+      "miles": 71,
+      "highway": "US-206",
+      "terrain": "flat",
+      "corridor": {
+        "tollway_detected": false,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 40.21705,
+            "lon": -74.74288
+          },
+          {
+            "at_mi": 17.8,
+            "lat": 39.98114,
+            "lon": -74.73615
+          },
+          {
+            "at_mi": 35.5,
+            "lat": 39.72892,
+            "lon": -74.73128
+          },
+          {
+            "at_mi": 53.2,
+            "lat": 39.53174,
+            "lon": -74.65186
+          },
+          {
+            "at_mi": 71.0,
+            "lat": 39.3642,
+            "lon": -74.42311
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 77.1,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 17.8,
+            "elevation_ft": 39.4,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 35.5,
+            "elevation_ft": 62.3,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 53.2,
+            "elevation_ft": 62.3,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 71.0,
+            "elevation_ft": 16.4,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 71.0,
+            "avg_grade_pct": -0.02,
+            "terrain": "flat",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          }
+        ],
+        "checkpoints": [
+          {
+            "name": "US-206 corridor between Trenton and Atlantic City",
+            "at_mi": 35.5,
+            "type": "place",
+            "state": "New Jersey",
+            "highway": "US-206",
+            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
+          }
+        ],
+        "state_miles": [
+          {
+            "state": "New Jersey",
+            "miles": 71.0
+          }
+        ],
+        "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
+      }
+    },
+    {
+      "from": "Atlantic City",
+      "to": "Philadelphia",
+      "miles": 63,
+      "highway": "I-676",
+      "terrain": "flat",
+      "corridor": {
+        "tollway_detected": true,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 39.3642,
+            "lon": -74.42311
+          },
+          {
+            "at_mi": 15.8,
+            "lat": 39.48668,
+            "lon": -74.64814
+          },
+          {
+            "at_mi": 31.5,
+            "lat": 39.64269,
+            "lon": -74.86546
+          },
+          {
+            "at_mi": 47.2,
+            "lat": 39.80248,
+            "lon": -75.05506
+          },
+          {
+            "at_mi": 63.0,
+            "lat": 39.9526,
+            "lon": -75.16521
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 16.4,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 15.8,
+            "elevation_ft": 75.5,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 31.5,
+            "elevation_ft": 111.5,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 47.2,
+            "elevation_ft": 95.1,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 63.0,
+            "elevation_ft": 82.0,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 63.0,
+            "avg_grade_pct": 0.02,
+            "terrain": "flat",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          }
+        ],
+        "checkpoints": [
+          {
+            "name": "I-676 corridor between Atlantic City and Philadelphia",
+            "at_mi": 31.5,
+            "type": "place",
+            "state": "Pennsylvania",
+            "highway": "I-676",
+            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
+          }
+        ],
+        "state_miles": [
+          {
+            "state": "New Jersey",
+            "miles": 60.8
+          },
+          {
+            "state": "Pennsylvania",
+            "miles": 2.2
+          }
+        ],
+        "state_crossings": [
+          {
+            "at_mi": 60.8,
+            "from_state": "New Jersey",
+            "state": "Pennsylvania",
+            "place": "New Jersey-Pennsylvania line on I-676",
+            "source": "Computed from OSRM route geometry and public U.S. state boundary GeoJSON."
+          }
+        ],
+        "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
+      }
+    },
+    {
+      "from": "Salisbury",
+      "to": "Baltimore",
+      "miles": 110,
+      "highway": "I-97",
+      "terrain": "flat",
+      "corridor": {
+        "tollway_detected": false,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 38.36067,
+            "lon": -75.59949
+          },
+          {
+            "at_mi": 27.4,
+            "lat": 38.55331,
+            "lon": -75.99882
+          },
+          {
+            "at_mi": 55.0,
+            "lat": 38.89362,
+            "lon": -76.06149
+          },
+          {
+            "at_mi": 82.6,
+            "lat": 39.02801,
+            "lon": -76.45924
+          },
+          {
+            "at_mi": 110.0,
+            "lat": 39.29041,
+            "lon": -76.6122
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 29.5,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 27.4,
+            "elevation_ft": 18.7,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 55.0,
+            "elevation_ft": 52.5,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 82.6,
+            "elevation_ft": 56.4,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 110.0,
+            "elevation_ft": 114.8,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 110.0,
+            "avg_grade_pct": 0.02,
+            "terrain": "flat",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          }
+        ],
+        "checkpoints": [
+          {
+            "name": "I-97 corridor between Salisbury and Baltimore",
+            "at_mi": 55.0,
+            "type": "place",
+            "state": "Maryland",
+            "highway": "I-97",
+            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
+          }
+        ],
+        "state_miles": [
+          {
+            "state": "Maryland",
+            "miles": 110.0
+          }
+        ],
+        "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
+      }
+    },
+    {
+      "from": "Salisbury",
+      "to": "Norfolk",
+      "miles": 134,
+      "highway": "I-264",
+      "terrain": "flat",
+      "corridor": {
+        "tollway_detected": true,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 38.36067,
+            "lon": -75.59949
+          },
+          {
+            "at_mi": 26.8,
+            "lat": 38.08074,
+            "lon": -75.59289
+          },
+          {
+            "at_mi": 53.6,
+            "lat": 37.74636,
+            "lon": -75.63597
+          },
+          {
+            "at_mi": 80.4,
+            "lat": 37.42679,
+            "lon": -75.89052
+          },
+          {
+            "at_mi": 107.2,
+            "lat": 37.0863,
+            "lon": -76.0036
+          },
+          {
+            "at_mi": 134.0,
+            "lat": 36.84679,
+            "lon": -76.28521
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 29.5,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 26.8,
+            "elevation_ft": 6.6,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 53.6,
+            "elevation_ft": 29.9,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 80.4,
+            "elevation_ft": 32.8,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 107.2,
+            "elevation_ft": 4.6,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 134.0,
+            "elevation_ft": 39.4,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 134.0,
+            "avg_grade_pct": 0.0,
+            "terrain": "flat",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          }
+        ],
+        "checkpoints": [
+          {
+            "name": "I-264 corridor between Salisbury and Norfolk",
+            "at_mi": 80.4,
+            "type": "place",
+            "state": "Virginia",
+            "highway": "I-264",
+            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
+          }
+        ],
+        "state_miles": [
+          {
+            "state": "Maryland",
+            "miles": 35.6
+          },
+          {
+            "state": "Virginia",
+            "miles": 98.4
+          }
+        ],
+        "state_crossings": [
+          {
+            "at_mi": 35.6,
+            "from_state": "Maryland",
+            "state": "Virginia",
+            "place": "Maryland-Virginia line on I-264",
+            "source": "Computed from OSRM route geometry and public U.S. state boundary GeoJSON."
+          }
+        ],
+        "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
+      }
+    },
+    {
+      "from": "Burlington",
+      "to": "Albany",
+      "miles": 158,
+      "highway": "I-87",
+      "terrain": "flat",
+      "corridor": {
+        "tollway_detected": false,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 44.47596,
+            "lon": -73.2121
+          },
+          {
+            "at_mi": 26.3,
+            "lat": 44.12514,
+            "lon": -73.18516
+          },
+          {
+            "at_mi": 52.7,
+            "lat": 43.78353,
+            "lon": -73.06361
+          },
+          {
+            "at_mi": 79.0,
+            "lat": 43.43949,
+            "lon": -72.98932
+          },
+          {
+            "at_mi": 105.3,
+            "lat": 43.08964,
+            "lon": -73.10317
+          },
+          {
+            "at_mi": 131.7,
+            "lat": 42.84874,
+            "lon": -73.40229
+          },
+          {
+            "at_mi": 158.0,
+            "lat": 42.65261,
+            "lon": -73.75628
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 201.8,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 26.3,
+            "elevation_ft": 319.9,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 52.7,
+            "elevation_ft": 453.4,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 79.0,
+            "elevation_ft": 649.6,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 105.3,
+            "elevation_ft": 1008.9,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 131.7,
+            "elevation_ft": 780.2,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 158.0,
+            "elevation_ft": 210.0,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 158.0,
+            "avg_grade_pct": 0.0,
+            "terrain": "flat",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          }
+        ],
+        "checkpoints": [
+          {
+            "name": "I-87 corridor between Burlington and Albany",
+            "at_mi": 79.0,
+            "type": "place",
+            "state": "New York",
+            "highway": "I-87",
+            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
+          }
+        ],
+        "state_miles": [
+          {
+            "state": "Vermont",
+            "miles": 123.4
+          },
+          {
+            "state": "New York",
+            "miles": 34.6
+          }
+        ],
+        "state_crossings": [
+          {
+            "at_mi": 123.4,
+            "from_state": "Vermont",
+            "state": "New York",
+            "place": "Vermont-New York line on I-87",
+            "source": "Computed from OSRM route geometry and public U.S. state boundary GeoJSON."
+          }
+        ],
+        "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
+      }
+    },
+    {
+      "from": "Burlington",
+      "to": "Manchester",
+      "miles": 166,
+      "highway": "I-89",
+      "terrain": "flat",
+      "corridor": {
+        "tollway_detected": true,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 44.47596,
+            "lon": -73.2121
+          },
+          {
+            "at_mi": 27.7,
+            "lat": 44.32707,
+            "lon": -72.74059
+          },
+          {
+            "at_mi": 55.3,
+            "lat": 44.00151,
+            "lon": -72.62315
+          },
+          {
+            "at_mi": 83.0,
+            "lat": 43.71007,
+            "lon": -72.41419
+          },
+          {
+            "at_mi": 110.7,
+            "lat": 43.47625,
+            "lon": -72.10198
+          },
+          {
+            "at_mi": 138.3,
+            "lat": 43.22584,
+            "lon": -71.73285
+          },
+          {
+            "at_mi": 166.0,
+            "lat": 42.99562,
+            "lon": -71.45479
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 201.8,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 27.7,
+            "elevation_ft": 436.4,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 55.3,
+            "elevation_ft": 1404.2,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 83.0,
+            "elevation_ft": 426.5,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 110.7,
+            "elevation_ft": 1181.1,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 138.3,
+            "elevation_ft": 413.4,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 166.0,
+            "elevation_ft": 257.5,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 166.0,
+            "avg_grade_pct": 0.01,
+            "terrain": "flat",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          }
+        ],
+        "checkpoints": [
+          {
+            "name": "I-89 corridor between Burlington and Manchester",
+            "at_mi": 83.0,
+            "type": "place",
+            "state": "New Hampshire",
+            "highway": "I-89",
+            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
+          }
+        ],
+        "state_miles": [
+          {
+            "state": "Vermont",
+            "miles": 90.6
+          },
+          {
+            "state": "New Hampshire",
+            "miles": 75.4
+          }
+        ],
+        "state_crossings": [
+          {
+            "at_mi": 90.6,
+            "from_state": "Vermont",
+            "state": "New Hampshire",
+            "place": "Vermont-New Hampshire line on I-89",
+            "source": "Computed from OSRM route geometry and public U.S. state boundary GeoJSON."
+          }
+        ],
+        "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
+      }
+    },
+    {
+      "from": "Norfolk",
+      "to": "Virginia Beach",
+      "miles": 18,
+      "highway": "I-264",
+      "terrain": "flat",
+      "corridor": {
+        "tollway_detected": false,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 36.84679,
+            "lon": -76.28521
+          },
+          {
+            "at_mi": 4.5,
+            "lat": 36.84437,
+            "lon": -76.20638
+          },
+          {
+            "at_mi": 9.0,
+            "lat": 36.83242,
+            "lon": -76.12106
+          },
+          {
+            "at_mi": 13.5,
+            "lat": 36.84048,
+            "lon": -76.0496
+          },
+          {
+            "at_mi": 18.0,
+            "lat": 36.85316,
+            "lon": -75.97807
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 39.4,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 4.5,
+            "elevation_ft": 23.0,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 9.0,
+            "elevation_ft": 23.0,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 13.5,
+            "elevation_ft": 21.3,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 18.0,
+            "elevation_ft": 13.1,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 18.0,
+            "avg_grade_pct": -0.02,
+            "terrain": "flat",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          }
+        ],
+        "checkpoints": [
+          {
+            "name": "I-264 corridor between Norfolk and Virginia Beach",
+            "at_mi": 9.0,
+            "type": "place",
+            "state": "Virginia",
+            "highway": "I-264",
+            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
+          }
+        ],
+        "state_miles": [
+          {
+            "state": "Virginia",
+            "miles": 18.0
+          }
+        ],
+        "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
+      }
+    },
+    {
+      "from": "Norfolk",
+      "to": "Richmond",
+      "miles": 98,
+      "highway": "I-64",
+      "terrain": "flat",
+      "corridor": {
+        "tollway_detected": true,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 36.84679,
+            "lon": -76.28521
+          },
+          {
+            "at_mi": 24.6,
+            "lat": 36.95349,
+            "lon": -76.60013
+          },
+          {
+            "at_mi": 49.0,
+            "lat": 37.13608,
+            "lon": -76.89375
+          },
+          {
+            "at_mi": 73.4,
+            "lat": 37.28669,
+            "lon": -77.24993
+          },
+          {
+            "at_mi": 98.0,
+            "lat": 37.54073,
+            "lon": -77.43597
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 39.4,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 24.6,
+            "elevation_ft": 55.4,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 49.0,
+            "elevation_ft": 111.5,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 73.4,
+            "elevation_ft": 84.6,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 98.0,
+            "elevation_ft": 200.1,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 98.0,
+            "avg_grade_pct": 0.03,
+            "terrain": "flat",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          }
+        ],
+        "checkpoints": [
+          {
+            "name": "I-64 corridor between Norfolk and Richmond",
+            "at_mi": 49.0,
+            "type": "place",
+            "state": "Virginia",
+            "highway": "I-64",
+            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
+          }
+        ],
+        "state_miles": [
+          {
+            "state": "Virginia",
+            "miles": 98.0
+          }
+        ],
+        "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
+      }
+    },
+    {
+      "from": "Norfolk",
+      "to": "Raleigh",
+      "miles": 189,
+      "highway": "I-95",
+      "terrain": "flat",
+      "corridor": {
+        "tollway_detected": true,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 36.84679,
+            "lon": -76.28521
+          },
+          {
+            "at_mi": 27.0,
+            "lat": 36.69241,
+            "lon": -76.60643
+          },
+          {
+            "at_mi": 54.0,
+            "lat": 36.42077,
+            "lon": -76.90939
+          },
+          {
+            "at_mi": 81.0,
+            "lat": 36.10748,
+            "lon": -77.18112
+          },
+          {
+            "at_mi": 108.0,
+            "lat": 35.8504,
+            "lon": -77.42319
+          },
+          {
+            "at_mi": 135.0,
+            "lat": 35.97263,
+            "lon": -77.84229
+          },
+          {
+            "at_mi": 162.0,
+            "lat": 35.86087,
+            "lon": -78.26983
+          },
+          {
+            "at_mi": 189.0,
+            "lat": 35.77956,
+            "lon": -78.6382
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 39.4,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 27.0,
+            "elevation_ft": 88.6,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 54.0,
+            "elevation_ft": 23.0,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 81.0,
+            "elevation_ft": 72.2,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 108.0,
+            "elevation_ft": 53.5,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 135.0,
+            "elevation_ft": 131.2,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 162.0,
+            "elevation_ft": 255.9,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 189.0,
+            "elevation_ft": 362.5,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 189.0,
+            "avg_grade_pct": 0.03,
+            "terrain": "flat",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          }
+        ],
+        "checkpoints": [
+          {
+            "name": "I-95 corridor between Norfolk and Raleigh",
+            "at_mi": 108.0,
+            "type": "place",
+            "state": "North Carolina",
+            "highway": "I-95",
+            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
+          }
+        ],
+        "state_miles": [
+          {
+            "state": "Virginia",
+            "miles": 41.5
+          },
+          {
+            "state": "North Carolina",
+            "miles": 147.5
+          }
+        ],
+        "state_crossings": [
+          {
+            "at_mi": 41.5,
+            "from_state": "Virginia",
+            "state": "North Carolina",
+            "place": "Virginia-North Carolina line on I-95",
+            "source": "Computed from OSRM route geometry and public U.S. state boundary GeoJSON."
+          }
+        ],
+        "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
+      }
+    },
+    {
+      "from": "Harrisburg",
+      "to": "Philadelphia",
+      "miles": 106,
+      "highway": "I-76",
+      "terrain": "flat",
+      "corridor": {
+        "tollway_detected": true,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 40.27362,
+            "lon": -76.88459
+          },
+          {
+            "at_mi": 26.5,
+            "lat": 40.22844,
+            "lon": -76.45202
+          },
+          {
+            "at_mi": 53.0,
+            "lat": 40.17556,
+            "lon": -75.98518
+          },
+          {
+            "at_mi": 79.5,
+            "lat": 40.07753,
+            "lon": -75.54599
+          },
+          {
+            "at_mi": 106.0,
+            "lat": 39.9526,
+            "lon": -75.16521
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 337.9,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 26.5,
+            "elevation_ft": 605.0,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 53.0,
+            "elevation_ft": 568.6,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 79.5,
+            "elevation_ft": 437.7,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 106.0,
+            "elevation_ft": 82.0,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 106.0,
+            "avg_grade_pct": -0.04,
+            "terrain": "flat",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          }
+        ],
+        "checkpoints": [
+          {
+            "name": "I-76 corridor between Harrisburg and Philadelphia",
+            "at_mi": 53.0,
+            "type": "place",
+            "state": "Pennsylvania",
+            "highway": "I-76",
+            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
+          }
+        ],
+        "state_miles": [
+          {
+            "state": "Pennsylvania",
+            "miles": 106.0
+          }
+        ],
+        "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
+      }
+    },
+    {
+      "from": "Harrisburg",
+      "to": "Baltimore",
+      "miles": 80,
+      "highway": "I-83",
+      "terrain": "flat",
+      "corridor": {
+        "tollway_detected": false,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 40.27362,
+            "lon": -76.88459
+          },
+          {
+            "at_mi": 20.0,
+            "lat": 40.03779,
+            "lon": -76.7477
+          },
+          {
+            "at_mi": 40.0,
+            "lat": 39.79853,
+            "lon": -76.67653
+          },
+          {
+            "at_mi": 60.0,
+            "lat": 39.53392,
+            "lon": -76.66454
+          },
+          {
+            "at_mi": 80.0,
+            "lat": 39.29041,
+            "lon": -76.6122
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 337.9,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 20.0,
+            "elevation_ft": 439.6,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 40.0,
+            "elevation_ft": 944.9,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 60.0,
+            "elevation_ft": 347.8,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 80.0,
+            "elevation_ft": 114.8,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 80.0,
+            "avg_grade_pct": -0.05,
+            "terrain": "flat",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          }
+        ],
+        "checkpoints": [
+          {
+            "name": "I-83 corridor between Harrisburg and Baltimore",
+            "at_mi": 40.0,
+            "type": "place",
+            "state": "Maryland",
+            "highway": "I-83",
+            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
+          }
+        ],
+        "state_miles": [
+          {
+            "state": "Pennsylvania",
+            "miles": 45.5
+          },
+          {
+            "state": "Maryland",
+            "miles": 34.5
+          }
+        ],
+        "state_crossings": [
+          {
+            "at_mi": 45.5,
+            "from_state": "Pennsylvania",
+            "state": "Maryland",
+            "place": "Pennsylvania-Maryland line on I-83",
+            "source": "Computed from OSRM route geometry and public U.S. state boundary GeoJSON."
+          }
+        ],
+        "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
+      }
+    },
+    {
+      "from": "Harrisburg",
+      "to": "Allentown",
+      "miles": 81,
+      "highway": "I-78",
+      "terrain": "flat",
+      "corridor": {
+        "tollway_detected": false,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 40.27362,
+            "lon": -76.88459
+          },
+          {
+            "at_mi": 20.2,
+            "lat": 40.41391,
+            "lon": -76.58174
+          },
+          {
+            "at_mi": 40.5,
+            "lat": 40.49826,
+            "lon": -76.19306
+          },
+          {
+            "at_mi": 60.8,
+            "lat": 40.57913,
+            "lon": -75.84334
+          },
+          {
+            "at_mi": 81.0,
+            "lat": 40.60807,
+            "lon": -75.49001
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 337.9,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 20.2,
+            "elevation_ft": 429.8,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 40.5,
+            "elevation_ft": 638.1,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 60.8,
+            "elevation_ft": 463.6,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 81.0,
+            "elevation_ft": 354.3,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 81.0,
+            "avg_grade_pct": 0.0,
+            "terrain": "flat",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          }
+        ],
+        "checkpoints": [
+          {
+            "name": "I-78 corridor between Harrisburg and Allentown",
+            "at_mi": 40.5,
+            "type": "place",
+            "state": "Pennsylvania",
+            "highway": "I-78",
+            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
+          }
+        ],
+        "state_miles": [
+          {
+            "state": "Pennsylvania",
+            "miles": 81.0
+          }
+        ],
+        "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
+      }
+    },
+    {
+      "from": "Harrisburg",
+      "to": "Pittsburgh",
+      "miles": 205,
+      "highway": "I-76",
+      "terrain": "hills",
+      "corridor": {
+        "tollway_detected": true,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 40.27362,
+            "lon": -76.88459
+          },
+          {
+            "at_mi": 29.2,
+            "lat": 40.20396,
+            "lon": -77.34462
+          },
+          {
+            "at_mi": 58.6,
+            "lat": 40.08927,
+            "lon": -77.84465
+          },
+          {
+            "at_mi": 87.8,
+            "lat": 39.98916,
+            "lon": -78.30839
+          },
+          {
+            "at_mi": 117.2,
+            "lat": 39.98303,
+            "lon": -78.77241
+          },
+          {
+            "at_mi": 146.4,
+            "lat": 40.10745,
+            "lon": -79.2188
+          },
+          {
+            "at_mi": 175.8,
+            "lat": 40.2641,
+            "lon": -79.6573
+          },
+          {
+            "at_mi": 205.0,
+            "lat": 40.44061,
+            "lon": -79.99594
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 337.9,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 29.2,
+            "elevation_ft": 492.1,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 58.6,
+            "elevation_ft": 1042.0,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 87.8,
+            "elevation_ft": 1072.8,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 117.2,
+            "elevation_ft": 1472.1,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 146.4,
+            "elevation_ft": 2703.4,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 175.8,
+            "elevation_ft": 1015.4,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 205.0,
+            "elevation_ft": 731.6,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 117.2,
+            "avg_grade_pct": 0.19,
+            "terrain": "flat",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          },
+          {
+            "start_mi": 117.2,
+            "end_mi": 175.8,
+            "avg_grade_pct": -0.15,
+            "terrain": "hills",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          },
+          {
+            "start_mi": 175.8,
+            "end_mi": 205.0,
+            "avg_grade_pct": -0.19,
+            "terrain": "flat",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          }
+        ],
+        "checkpoints": [
+          {
+            "name": "I-76 corridor between Harrisburg and Pittsburgh",
+            "at_mi": 117.2,
+            "type": "place",
+            "state": "Pennsylvania",
+            "highway": "I-76",
+            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
+          }
+        ],
+        "state_miles": [
+          {
+            "state": "Pennsylvania",
+            "miles": 205.0
+          }
+        ],
+        "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
+      }
+    },
+    {
+      "from": "Harrisburg",
+      "to": "Scranton",
+      "miles": 121,
+      "highway": "I-81",
+      "terrain": "hills",
+      "corridor": {
+        "tollway_detected": false,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 40.27362,
+            "lon": -76.88459
+          },
+          {
+            "at_mi": 24.2,
+            "lat": 40.43438,
+            "lon": -76.5182
+          },
+          {
+            "at_mi": 48.4,
+            "lat": 40.69499,
+            "lon": -76.37082
+          },
+          {
+            "at_mi": 72.6,
+            "lat": 40.87745,
+            "lon": -76.02027
+          },
+          {
+            "at_mi": 96.8,
+            "lat": 41.17916,
+            "lon": -75.93592
+          },
+          {
+            "at_mi": 121.0,
+            "lat": 41.4091,
+            "lon": -75.66474
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 337.9,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 24.2,
+            "elevation_ft": 518.4,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 48.4,
+            "elevation_ft": 1566.6,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 72.6,
+            "elevation_ft": 1774.9,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 96.8,
+            "elevation_ft": 1391.1,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 121.0,
+            "elevation_ft": 772.6,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 24.2,
+            "avg_grade_pct": 0.14,
+            "terrain": "flat",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          },
+          {
+            "start_mi": 24.2,
+            "end_mi": 48.4,
+            "avg_grade_pct": 0.82,
+            "terrain": "hills",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          },
+          {
+            "start_mi": 48.4,
+            "end_mi": 121.0,
+            "avg_grade_pct": -0.21,
+            "terrain": "flat",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          }
+        ],
+        "checkpoints": [
+          {
+            "name": "I-81 corridor between Harrisburg and Scranton",
+            "at_mi": 72.6,
+            "type": "place",
+            "state": "Pennsylvania",
+            "highway": "I-81",
+            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
+          }
+        ],
+        "state_miles": [
+          {
+            "state": "Pennsylvania",
+            "miles": 121.0
+          }
+        ],
+        "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
+      }
+    },
+    {
+      "from": "Scranton",
+      "to": "Allentown",
+      "miles": 76,
+      "highway": "I-476",
+      "terrain": "hills",
+      "corridor": {
+        "tollway_detected": true,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 41.4091,
+            "lon": -75.66474
+          },
+          {
+            "at_mi": 19.1,
+            "lat": 41.2162,
+            "lon": -75.80288
+          },
+          {
+            "at_mi": 38.0,
+            "lat": 40.99222,
+            "lon": -75.63192
+          },
+          {
+            "at_mi": 56.9,
+            "lat": 40.79277,
+            "lon": -75.63478
+          },
+          {
+            "at_mi": 76.0,
+            "lat": 40.60807,
+            "lon": -75.49001
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 772.6,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 19.1,
+            "elevation_ft": 1758.9,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 38.0,
+            "elevation_ft": 1624.0,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 56.9,
+            "elevation_ft": 392.1,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 76.0,
+            "elevation_ft": 354.3,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 19.1,
+            "avg_grade_pct": 1.12,
+            "terrain": "hills",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          },
+          {
+            "start_mi": 19.1,
+            "end_mi": 38.0,
+            "avg_grade_pct": -0.15,
+            "terrain": "flat",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          },
+          {
+            "start_mi": 38.0,
+            "end_mi": 56.9,
+            "avg_grade_pct": -1.39,
+            "terrain": "hills",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          },
+          {
+            "start_mi": 56.9,
+            "end_mi": 76.0,
+            "avg_grade_pct": -0.04,
+            "terrain": "flat",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          }
+        ],
+        "checkpoints": [
+          {
+            "name": "I-476 corridor between Scranton and Allentown",
+            "at_mi": 38.0,
+            "type": "place",
+            "state": "Pennsylvania",
+            "highway": "I-476",
+            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
+          }
+        ],
+        "state_miles": [
+          {
+            "state": "Pennsylvania",
+            "miles": 76.0
+          }
+        ],
+        "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
+      }
+    },
+    {
+      "from": "Scranton",
+      "to": "Binghamton",
+      "miles": 60,
+      "highway": "I-81",
+      "terrain": "flat",
+      "corridor": {
+        "tollway_detected": false,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 41.4091,
+            "lon": -75.66474
+          },
+          {
+            "at_mi": 15.1,
+            "lat": 41.60213,
+            "lon": -75.64776
+          },
+          {
+            "at_mi": 30.0,
+            "lat": 41.79988,
+            "lon": -75.68783
+          },
+          {
+            "at_mi": 44.9,
+            "lat": 41.99789,
+            "lon": -75.75175
+          },
+          {
+            "at_mi": 60.0,
+            "lat": 42.09887,
+            "lon": -75.91794
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 772.6,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 15.1,
+            "elevation_ft": 1213.9,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 30.0,
+            "elevation_ft": 1253.3,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 44.9,
+            "elevation_ft": 882.5,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 60.0,
+            "elevation_ft": 871.1,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 60.0,
+            "avg_grade_pct": 0.03,
+            "terrain": "flat",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          }
+        ],
+        "checkpoints": [
+          {
+            "name": "I-81 corridor between Scranton and Binghamton",
+            "at_mi": 30.0,
+            "type": "place",
+            "state": "New York",
+            "highway": "I-81",
+            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
+          }
+        ],
+        "state_miles": [
+          {
+            "state": "Pennsylvania",
+            "miles": 45.6
+          },
+          {
+            "state": "New York",
+            "miles": 14.4
+          }
+        ],
+        "state_crossings": [
+          {
+            "at_mi": 45.6,
+            "from_state": "Pennsylvania",
+            "state": "New York",
+            "place": "Pennsylvania-New York line on I-81",
+            "source": "Computed from OSRM route geometry and public U.S. state boundary GeoJSON."
+          }
+        ],
+        "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
+      }
+    },
+    {
+      "from": "Binghamton",
+      "to": "Syracuse",
+      "miles": 73,
+      "highway": "I-81",
+      "terrain": "flat",
+      "corridor": {
+        "tollway_detected": false,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 42.09887,
+            "lon": -75.91794
+          },
+          {
+            "at_mi": 18.2,
+            "lat": 42.33364,
+            "lon": -75.9706
+          },
+          {
+            "at_mi": 36.5,
+            "lat": 42.5694,
+            "lon": -76.11815
+          },
+          {
+            "at_mi": 54.8,
+            "lat": 42.79625,
+            "lon": -76.12334
+          },
+          {
+            "at_mi": 73.0,
+            "lat": 43.04812,
+            "lon": -76.14744
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 871.1,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 18.2,
+            "elevation_ft": 981.0,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 36.5,
+            "elevation_ft": 1195.9,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 54.8,
+            "elevation_ft": 1240.2,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 73.0,
+            "elevation_ft": 415.0,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 73.0,
+            "avg_grade_pct": -0.11,
+            "terrain": "flat",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          }
+        ],
+        "checkpoints": [
+          {
+            "name": "I-81 corridor between Binghamton and Syracuse",
+            "at_mi": 36.5,
+            "type": "place",
+            "state": "New York",
+            "highway": "I-81",
+            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
+          }
+        ],
+        "state_miles": [
+          {
+            "state": "New York",
+            "miles": 73.0
+          }
+        ],
+        "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
+      }
+    },
+    {
+      "from": "Binghamton",
+      "to": "Albany",
+      "miles": 138,
+      "highway": "I-88",
+      "terrain": "flat",
+      "corridor": {
+        "tollway_detected": true,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 42.09887,
+            "lon": -75.91794
+          },
+          {
+            "at_mi": 27.6,
+            "lat": 42.23247,
+            "lon": -75.50403
+          },
+          {
+            "at_mi": 55.2,
+            "lat": 42.42919,
+            "lon": -75.11951
+          },
+          {
+            "at_mi": 82.8,
+            "lat": 42.61661,
+            "lon": -74.67076
+          },
+          {
+            "at_mi": 110.4,
+            "lat": 42.73124,
+            "lon": -74.18463
+          },
+          {
+            "at_mi": 138.0,
+            "lat": 42.65261,
+            "lon": -73.75628
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 871.1,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 27.6,
+            "elevation_ft": 1066.9,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 55.2,
+            "elevation_ft": 1059.7,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 82.8,
+            "elevation_ft": 1498.0,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 110.4,
+            "elevation_ft": 1101.4,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 138.0,
+            "elevation_ft": 210.0,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 138.0,
+            "avg_grade_pct": -0.09,
+            "terrain": "flat",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          }
+        ],
+        "checkpoints": [
+          {
+            "name": "I-88 corridor between Binghamton and Albany",
+            "at_mi": 82.8,
+            "type": "place",
+            "state": "New York",
+            "highway": "I-88",
+            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
+          }
+        ],
+        "state_miles": [
+          {
+            "state": "New York",
+            "miles": 138.0
+          }
+        ],
+        "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
+      }
+    },
+    {
+      "from": "Erie",
+      "to": "Pittsburgh",
+      "miles": 127,
+      "highway": "I-79",
+      "terrain": "flat",
+      "corridor": {
+        "tollway_detected": false,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 42.12921,
+            "lon": -80.08508
+          },
+          {
+            "at_mi": 25.4,
+            "lat": 41.80251,
+            "lon": -80.17588
+          },
+          {
+            "at_mi": 50.8,
+            "lat": 41.45918,
+            "lon": -80.16492
+          },
+          {
+            "at_mi": 76.2,
+            "lat": 41.09875,
+            "lon": -80.14258
+          },
+          {
+            "at_mi": 101.6,
+            "lat": 40.76141,
+            "lon": -80.12059
+          },
+          {
+            "at_mi": 127.0,
+            "lat": 40.44061,
+            "lon": -79.99594
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 657.8,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 25.4,
+            "elevation_ft": 1450.1,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 50.8,
+            "elevation_ft": 1359.9,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 76.2,
+            "elevation_ft": 1256.6,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 101.6,
+            "elevation_ft": 1105.6,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 127.0,
+            "elevation_ft": 731.6,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 127.0,
+            "avg_grade_pct": 0.01,
+            "terrain": "flat",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          }
+        ],
+        "checkpoints": [
+          {
+            "name": "I-79 corridor between Erie and Pittsburgh",
+            "at_mi": 76.2,
+            "type": "place",
+            "state": "Pennsylvania",
+            "highway": "I-79",
+            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
+          }
+        ],
+        "state_miles": [
+          {
+            "state": "Pennsylvania",
+            "miles": 127.0
+          }
+        ],
+        "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
+      }
+    },
+    {
+      "from": "Erie",
+      "to": "Buffalo",
+      "miles": 93,
+      "highway": "I-90",
+      "terrain": "flat",
+      "corridor": {
+        "tollway_detected": true,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 42.12921,
+            "lon": -80.08508
+          },
+          {
+            "at_mi": 23.2,
+            "lat": 42.27038,
+            "lon": -79.72951
+          },
+          {
+            "at_mi": 46.5,
+            "lat": 42.45537,
+            "lon": -79.36447
+          },
+          {
+            "at_mi": 69.8,
+            "lat": 42.62997,
+            "lon": -78.99599
+          },
+          {
+            "at_mi": 93.0,
+            "lat": 42.88646,
+            "lon": -78.8788
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 657.8,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 23.2,
+            "elevation_ft": 656.8,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 46.5,
+            "elevation_ft": 623.4,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 69.8,
+            "elevation_ft": 711.9,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 93.0,
+            "elevation_ft": 630.9,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 93.0,
+            "avg_grade_pct": -0.01,
+            "terrain": "flat",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          }
+        ],
+        "checkpoints": [
+          {
+            "name": "I-90 corridor between Erie and Buffalo",
+            "at_mi": 46.5,
+            "type": "place",
+            "state": "New York",
+            "highway": "I-90",
+            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
+          }
+        ],
+        "state_miles": [
+          {
+            "state": "Pennsylvania",
+            "miles": 21.3
+          },
+          {
+            "state": "New York",
+            "miles": 71.7
+          }
+        ],
+        "state_crossings": [
+          {
+            "at_mi": 21.3,
+            "from_state": "Pennsylvania",
+            "state": "New York",
+            "place": "Pennsylvania-New York line on I-90",
+            "source": "Computed from OSRM route geometry and public U.S. state boundary GeoJSON."
+          }
+        ],
+        "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
+      }
+    },
+    {
+      "from": "Erie",
+      "to": "Cleveland",
+      "miles": 102,
+      "highway": "I-90",
+      "terrain": "flat",
+      "corridor": {
+        "tollway_detected": false,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 42.12921,
+            "lon": -80.08508
+          },
+          {
+            "at_mi": 25.5,
+            "lat": 41.94336,
+            "lon": -80.42997
+          },
+          {
+            "at_mi": 51.0,
+            "lat": 41.78501,
+            "lon": -80.85878
+          },
+          {
+            "at_mi": 76.5,
+            "lat": 41.6488,
+            "lon": -81.30003
+          },
+          {
+            "at_mi": 102.0,
+            "lat": 41.49926,
+            "lon": -81.69449
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 657.8,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 25.5,
+            "elevation_ft": 784.1,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 51.0,
+            "elevation_ft": 843.2,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 76.5,
+            "elevation_ft": 844.8,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 102.0,
+            "elevation_ft": 667.0,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 102.0,
+            "avg_grade_pct": 0.0,
+            "terrain": "flat",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          }
+        ],
+        "checkpoints": [
+          {
+            "name": "I-90 corridor between Erie and Cleveland",
+            "at_mi": 51.0,
+            "type": "place",
+            "state": "Ohio",
+            "highway": "I-90",
+            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
+          }
+        ],
+        "state_miles": [
+          {
+            "state": "Pennsylvania",
+            "miles": 30.3
+          },
+          {
+            "state": "Ohio",
+            "miles": 71.7
+          }
+        ],
+        "state_crossings": [
+          {
+            "at_mi": 30.3,
+            "from_state": "Pennsylvania",
+            "state": "Ohio",
+            "place": "Pennsylvania-Ohio line on I-90",
+            "source": "Computed from OSRM route geometry and public U.S. state boundary GeoJSON."
+          }
+        ],
+        "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
+      }
+    },
+    {
+      "from": "New Haven",
+      "to": "Bridgeport",
+      "miles": 21,
+      "highway": "I-95",
+      "terrain": "flat",
+      "corridor": {
+        "tollway_detected": false,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 41.30806,
+            "lon": -72.9281
+          },
+          {
+            "at_mi": 5.3,
+            "lat": 41.30137,
+            "lon": -73.02458
+          },
+          {
+            "at_mi": 10.5,
+            "lat": 41.30464,
+            "lon": -73.09956
+          },
+          {
+            "at_mi": 15.7,
+            "lat": 41.23763,
+            "lon": -73.15358
+          },
+          {
+            "at_mi": 21.0,
+            "lat": 41.18618,
+            "lon": -73.19526
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 57.4,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 5.3,
+            "elevation_ft": 150.9,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 10.5,
+            "elevation_ft": 177.2,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 15.7,
+            "elevation_ft": 210.0,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 21.0,
+            "elevation_ft": 54.1,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 21.0,
+            "avg_grade_pct": -0.0,
+            "terrain": "flat",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          }
+        ],
+        "checkpoints": [
+          {
+            "name": "I-95 corridor between New Haven and Bridgeport",
+            "at_mi": 10.5,
+            "type": "place",
+            "state": "Connecticut",
+            "highway": "I-95",
+            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
+          }
+        ],
+        "state_miles": [
+          {
+            "state": "Connecticut",
+            "miles": 21.0
+          }
+        ],
+        "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
+      }
+    },
+    {
+      "from": "New Haven",
+      "to": "Hartford",
+      "miles": 38,
+      "highway": "I-91",
+      "terrain": "flat",
+      "corridor": {
+        "tollway_detected": false,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 41.30806,
+            "lon": -72.9281
+          },
+          {
+            "at_mi": 9.5,
+            "lat": 41.40345,
+            "lon": -72.83657
+          },
+          {
+            "at_mi": 19.0,
+            "lat": 41.52349,
+            "lon": -72.77063
+          },
+          {
+            "at_mi": 28.5,
+            "lat": 41.65265,
+            "lon": -72.72714
+          },
+          {
+            "at_mi": 38.0,
+            "lat": 41.7658,
+            "lon": -72.6734
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 57.4,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 9.5,
+            "elevation_ft": 64.0,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 19.0,
+            "elevation_ft": 283.5,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 28.5,
+            "elevation_ft": 98.4,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 38.0,
+            "elevation_ft": 119.8,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 38.0,
+            "avg_grade_pct": 0.03,
+            "terrain": "flat",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          }
+        ],
+        "checkpoints": [
+          {
+            "name": "I-91 corridor between New Haven and Hartford",
+            "at_mi": 19.0,
+            "type": "place",
+            "state": "Connecticut",
+            "highway": "I-91",
+            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
+          }
+        ],
+        "state_miles": [
+          {
+            "state": "Connecticut",
+            "miles": 38.0
+          }
+        ],
+        "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
+      }
+    },
+    {
+      "from": "New Haven",
+      "to": "New York",
+      "miles": 85,
+      "highway": "I-95",
+      "terrain": "flat",
+      "corridor": {
+        "tollway_detected": true,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 41.30806,
+            "lon": -72.9281
+          },
+          {
+            "at_mi": 21.2,
+            "lat": 41.17852,
+            "lon": -73.19518
+          },
+          {
+            "at_mi": 42.5,
+            "lat": 41.0533,
+            "lon": -73.52913
+          },
+          {
+            "at_mi": 63.8,
+            "lat": 40.88138,
+            "lon": -73.83077
+          },
+          {
+            "at_mi": 85.0,
+            "lat": 40.71215,
+            "lon": -74.00562
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 57.4,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 21.2,
+            "elevation_ft": 59.1,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 42.5,
+            "elevation_ft": 43.3,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 63.8,
+            "elevation_ft": 26.9,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 85.0,
+            "elevation_ft": 62.3,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 85.0,
+            "avg_grade_pct": 0.0,
+            "terrain": "flat",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          }
+        ],
+        "checkpoints": [
+          {
+            "name": "I-95 corridor between New Haven and New York",
+            "at_mi": 42.5,
+            "type": "place",
+            "state": "New York",
+            "highway": "I-95",
+            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
+          }
+        ],
+        "state_miles": [
+          {
+            "state": "Connecticut",
+            "miles": 51.0
+          },
+          {
+            "state": "New York",
+            "miles": 34.0
+          }
+        ],
+        "state_crossings": [
+          {
+            "at_mi": 51.0,
+            "from_state": "Connecticut",
+            "state": "New York",
+            "place": "Connecticut-New York line on I-95",
+            "source": "Computed from OSRM route geometry and public U.S. state boundary GeoJSON."
+          }
+        ],
+        "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
+      }
+    },
+    {
+      "from": "Augusta",
+      "to": "Atlanta",
+      "miles": 148,
+      "highway": "I-20",
+      "terrain": "flat",
+      "corridor": {
+        "tollway_detected": false,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 33.47149,
+            "lon": -81.97455
+          },
+          {
+            "at_mi": 24.7,
+            "lat": 33.50479,
+            "lon": -82.38286
+          },
+          {
+            "at_mi": 49.3,
+            "lat": 33.50079,
+            "lon": -82.78352
+          },
+          {
+            "at_mi": 74.0,
+            "lat": 33.54621,
+            "lon": -83.19966
+          },
+          {
+            "at_mi": 98.7,
+            "lat": 33.58915,
+            "lon": -83.61804
+          },
+          {
+            "at_mi": 123.3,
+            "lat": 33.65667,
+            "lon": -84.01573
+          },
+          {
+            "at_mi": 148.0,
+            "lat": 33.74886,
+            "lon": -84.38751
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 142.7,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 24.7,
+            "elevation_ft": 518.4,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 49.3,
+            "elevation_ft": 585.6,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 74.0,
+            "elevation_ft": 603.7,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 98.7,
+            "elevation_ft": 748.0,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 123.3,
+            "elevation_ft": 920.3,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 148.0,
+            "elevation_ft": 1069.6,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 148.0,
+            "avg_grade_pct": 0.1,
+            "terrain": "flat",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          }
+        ],
+        "checkpoints": [
+          {
+            "name": "I-20 corridor between Augusta and Atlanta",
+            "at_mi": 74.0,
+            "type": "place",
+            "state": "Georgia",
+            "highway": "I-20",
+            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
+          }
+        ],
+        "state_miles": [
+          {
+            "state": "Georgia",
+            "miles": 148.0
+          }
+        ],
+        "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
+      }
+    },
+    {
+      "from": "Augusta",
+      "to": "Columbia",
+      "miles": 71,
+      "highway": "I-20",
+      "terrain": "flat",
+      "corridor": {
+        "tollway_detected": false,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 33.47149,
+            "lon": -81.97455
+          },
+          {
+            "at_mi": 17.8,
+            "lat": 33.62986,
+            "lon": -81.8003
+          },
+          {
+            "at_mi": 35.5,
+            "lat": 33.74875,
+            "lon": -81.53187
+          },
+          {
+            "at_mi": 53.2,
+            "lat": 33.91949,
+            "lon": -81.30939
+          },
+          {
+            "at_mi": 71.0,
+            "lat": 34.0008,
+            "lon": -81.03485
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 142.7,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 17.8,
+            "elevation_ft": 426.5,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 35.5,
+            "elevation_ft": 505.9,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 53.2,
+            "elevation_ft": 419.9,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 71.0,
+            "elevation_ft": 293.6,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 71.0,
+            "avg_grade_pct": 0.04,
+            "terrain": "flat",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          }
+        ],
+        "checkpoints": [
+          {
+            "name": "I-20 corridor between Augusta and Columbia",
+            "at_mi": 35.5,
+            "type": "place",
+            "state": "South Carolina",
+            "highway": "I-20",
+            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
+          }
+        ],
+        "state_miles": [
+          {
+            "state": "Georgia",
+            "miles": 2.0
+          },
+          {
+            "state": "South Carolina",
+            "miles": 69.0
+          }
+        ],
+        "state_crossings": [
+          {
+            "at_mi": 2.0,
+            "from_state": "Georgia",
+            "state": "South Carolina",
+            "place": "Georgia-South Carolina line on I-20",
+            "source": "Computed from OSRM route geometry and public U.S. state boundary GeoJSON."
+          }
+        ],
+        "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
+      }
+    },
+    {
+      "from": "Augusta",
+      "to": "Savannah",
+      "miles": 132,
+      "highway": "GA-21",
+      "terrain": "flat",
+      "corridor": {
+        "tollway_detected": false,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 33.47149,
+            "lon": -81.97455
+          },
+          {
+            "at_mi": 26.4,
+            "lat": 33.13656,
+            "lon": -82.036
+          },
+          {
+            "at_mi": 52.8,
+            "lat": 32.81672,
+            "lon": -81.91809
+          },
+          {
+            "at_mi": 79.2,
+            "lat": 32.66926,
+            "lon": -81.56766
+          },
+          {
+            "at_mi": 105.6,
+            "lat": 32.35988,
+            "lon": -81.31618
+          },
+          {
+            "at_mi": 132.0,
+            "lat": 32.0809,
+            "lon": -81.09121
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 142.7,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 26.4,
+            "elevation_ft": 246.1,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 52.8,
+            "elevation_ft": 249.3,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 79.2,
+            "elevation_ft": 229.7,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 105.6,
+            "elevation_ft": 108.3,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 132.0,
+            "elevation_ft": 82.0,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 132.0,
+            "avg_grade_pct": -0.01,
+            "terrain": "flat",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          }
+        ],
+        "checkpoints": [
+          {
+            "name": "GA-21 corridor between Augusta and Savannah",
+            "at_mi": 79.2,
+            "type": "place",
+            "state": "Georgia",
+            "highway": "GA-21",
+            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
+          }
+        ],
+        "state_miles": [
+          {
+            "state": "Georgia",
+            "miles": 132.0
+          }
+        ],
+        "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
+      }
+    },
+    {
+      "from": "Augusta",
+      "to": "Macon",
+      "miles": 123,
+      "highway": "GA-540",
+      "terrain": "flat",
+      "corridor": {
+        "tollway_detected": false,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 33.47149,
+            "lon": -81.97455
+          },
+          {
+            "at_mi": 24.6,
+            "lat": 33.28171,
+            "lon": -82.29403
+          },
+          {
+            "at_mi": 49.2,
+            "lat": 33.05532,
+            "lon": -82.59459
+          },
+          {
+            "at_mi": 73.8,
+            "lat": 32.96039,
+            "lon": -82.97633
+          },
+          {
+            "at_mi": 98.4,
+            "lat": 32.92979,
+            "lon": -83.29133
+          },
+          {
+            "at_mi": 123.0,
+            "lat": 32.84071,
+            "lon": -83.63239
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 142.7,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 24.6,
+            "elevation_ft": 344.5,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 49.2,
+            "elevation_ft": 387.1,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 73.8,
+            "elevation_ft": 290.0,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 98.4,
+            "elevation_ft": 352.0,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 123.0,
+            "elevation_ft": 388.5,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 123.0,
+            "avg_grade_pct": 0.04,
+            "terrain": "flat",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          }
+        ],
+        "checkpoints": [
+          {
+            "name": "GA-540 corridor between Augusta and Macon",
+            "at_mi": 73.8,
+            "type": "place",
+            "state": "Georgia",
+            "highway": "GA-540",
+            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
+          }
+        ],
+        "state_miles": [
+          {
+            "state": "Georgia",
+            "miles": 123.0
+          }
+        ],
+        "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
+      }
+    },
+    {
+      "from": "Macon",
+      "to": "Atlanta",
+      "miles": 84,
+      "highway": "I-75",
+      "terrain": "flat",
+      "corridor": {
+        "tollway_detected": false,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 32.84071,
+            "lon": -83.63239
+          },
+          {
+            "at_mi": 21.0,
+            "lat": 33.02226,
+            "lon": -83.89851
+          },
+          {
+            "at_mi": 42.0,
+            "lat": 33.26863,
+            "lon": -84.10006
+          },
+          {
+            "at_mi": 63.0,
+            "lat": 33.53042,
+            "lon": -84.25755
+          },
+          {
+            "at_mi": 84.0,
+            "lat": 33.74886,
+            "lon": -84.38751
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 388.5,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 21.0,
+            "elevation_ft": 577.4,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 42.0,
+            "elevation_ft": 738.2,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 63.0,
+            "elevation_ft": 795.6,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 84.0,
+            "elevation_ft": 1069.6,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 84.0,
+            "avg_grade_pct": 0.14,
+            "terrain": "flat",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          }
+        ],
+        "checkpoints": [
+          {
+            "name": "I-75 corridor between Macon and Atlanta",
+            "at_mi": 42.0,
+            "type": "place",
+            "state": "Georgia",
+            "highway": "I-75",
+            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
+          }
+        ],
+        "state_miles": [
+          {
+            "state": "Georgia",
+            "miles": 84.0
+          }
+        ],
+        "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
+      }
+    },
+    {
+      "from": "Macon",
+      "to": "Savannah",
+      "miles": 165,
+      "highway": "I-16",
+      "terrain": "flat",
+      "corridor": {
+        "tollway_detected": false,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 32.84071,
+            "lon": -83.63239
+          },
+          {
+            "at_mi": 23.6,
+            "lat": 32.61621,
+            "lon": -83.35303
+          },
+          {
+            "at_mi": 47.1,
+            "lat": 32.49595,
+            "lon": -82.97387
+          },
+          {
+            "at_mi": 70.7,
+            "lat": 32.42928,
+            "lon": -82.57164
+          },
+          {
+            "at_mi": 94.3,
+            "lat": 32.37782,
+            "lon": -82.197
+          },
+          {
+            "at_mi": 117.9,
+            "lat": 32.29346,
+            "lon": -81.81523
+          },
+          {
+            "at_mi": 141.4,
+            "lat": 32.1717,
+            "lon": -81.44787
+          },
+          {
+            "at_mi": 165.0,
+            "lat": 32.0809,
+            "lon": -81.09121
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 388.5,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 23.6,
+            "elevation_ft": 498.7,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 47.1,
+            "elevation_ft": 278.9,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 70.7,
+            "elevation_ft": 288.7,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 94.3,
+            "elevation_ft": 252.6,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 117.9,
+            "elevation_ft": 134.5,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 141.4,
+            "elevation_ft": 108.3,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 165.0,
+            "elevation_ft": 82.0,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 165.0,
+            "avg_grade_pct": -0.03,
+            "terrain": "flat",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          }
+        ],
+        "checkpoints": [
+          {
+            "name": "I-16 corridor between Macon and Savannah",
+            "at_mi": 94.3,
+            "type": "place",
+            "state": "Georgia",
+            "highway": "I-16",
+            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
+          }
+        ],
+        "state_miles": [
+          {
+            "state": "Georgia",
+            "miles": 165.0
+          }
+        ],
+        "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
+      }
+    },
+    {
+      "from": "Greenville",
+      "to": "Atlanta",
+      "miles": 145,
+      "highway": "I-85",
+      "terrain": "flat",
+      "corridor": {
+        "tollway_detected": true,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 34.85265,
+            "lon": -82.39417
+          },
+          {
+            "at_mi": 24.1,
+            "lat": 34.5987,
+            "lon": -82.65764
+          },
+          {
+            "at_mi": 48.4,
+            "lat": 34.47734,
+            "lon": -83.04798
+          },
+          {
+            "at_mi": 72.5,
+            "lat": 34.29687,
+            "lon": -83.40973
+          },
+          {
+            "at_mi": 96.6,
+            "lat": 34.11759,
+            "lon": -83.76254
+          },
+          {
+            "at_mi": 120.9,
+            "lat": 33.95945,
+            "lon": -84.11474
+          },
+          {
+            "at_mi": 145.0,
+            "lat": 33.74886,
+            "lon": -84.38751
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 1013.8,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 24.1,
+            "elevation_ft": 672.6,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 48.4,
+            "elevation_ft": 772.6,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 72.5,
+            "elevation_ft": 714.6,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 96.6,
+            "elevation_ft": 902.9,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 120.9,
+            "elevation_ft": 984.6,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 145.0,
+            "elevation_ft": 1069.6,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 145.0,
+            "avg_grade_pct": 0.01,
+            "terrain": "flat",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          }
+        ],
+        "checkpoints": [
+          {
+            "name": "I-85 corridor between Greenville and Atlanta",
+            "at_mi": 72.5,
+            "type": "place",
+            "state": "Georgia",
+            "highway": "I-85",
+            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
+          }
+        ],
+        "state_miles": [
+          {
+            "state": "South Carolina",
+            "miles": 47.1
+          },
+          {
+            "state": "Georgia",
+            "miles": 97.9
+          }
+        ],
+        "state_crossings": [
+          {
+            "at_mi": 47.1,
+            "from_state": "South Carolina",
+            "state": "Georgia",
+            "place": "South Carolina-Georgia line on I-85",
+            "source": "Computed from OSRM route geometry and public U.S. state boundary GeoJSON."
+          }
+        ],
+        "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
+      }
+    },
+    {
+      "from": "Greenville",
+      "to": "Charlotte",
+      "miles": 102,
+      "highway": "I-85",
+      "terrain": "flat",
+      "corridor": {
+        "tollway_detected": false,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 34.85265,
+            "lon": -82.39417
+          },
+          {
+            "at_mi": 25.5,
+            "lat": 34.96476,
+            "lon": -82.01879
+          },
+          {
+            "at_mi": 51.0,
+            "lat": 35.10652,
+            "lon": -81.61288
+          },
+          {
+            "at_mi": 76.5,
+            "lat": 35.27658,
+            "lon": -81.22978
+          },
+          {
+            "at_mi": 102.0,
+            "lat": 35.22716,
+            "lon": -80.84316
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 1013.8,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 25.5,
+            "elevation_ft": 882.5,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 51.0,
+            "elevation_ft": 613.5,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 76.5,
+            "elevation_ft": 823.5,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 102.0,
+            "elevation_ft": 880.9,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 102.0,
+            "avg_grade_pct": -0.02,
+            "terrain": "flat",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          }
+        ],
+        "checkpoints": [
+          {
+            "name": "I-85 corridor between Greenville and Charlotte",
+            "at_mi": 51.0,
+            "type": "place",
+            "state": "North Carolina",
+            "highway": "I-85",
+            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
+          }
+        ],
+        "state_miles": [
+          {
+            "state": "South Carolina",
+            "miles": 61.5
+          },
+          {
+            "state": "North Carolina",
+            "miles": 40.5
+          }
+        ],
+        "state_crossings": [
+          {
+            "at_mi": 61.5,
+            "from_state": "South Carolina",
+            "state": "North Carolina",
+            "place": "South Carolina-North Carolina line on I-85",
+            "source": "Computed from OSRM route geometry and public U.S. state boundary GeoJSON."
+          }
+        ],
+        "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
+      }
+    },
+    {
+      "from": "Greenville",
+      "to": "Columbia",
+      "miles": 103,
+      "highway": "I-26",
+      "terrain": "flat",
+      "corridor": {
+        "tollway_detected": false,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 34.85265,
+            "lon": -82.39417
+          },
+          {
+            "at_mi": 25.7,
+            "lat": 34.62781,
+            "lon": -82.1038
+          },
+          {
+            "at_mi": 51.5,
+            "lat": 34.42719,
+            "lon": -81.72693
+          },
+          {
+            "at_mi": 77.3,
+            "lat": 34.20967,
+            "lon": -81.38358
+          },
+          {
+            "at_mi": 103.0,
+            "lat": 34.0008,
+            "lon": -81.03485
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 1013.8,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 25.7,
+            "elevation_ft": 744.8,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 51.5,
+            "elevation_ft": 564.3,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 77.3,
+            "elevation_ft": 492.1,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 103.0,
+            "elevation_ft": 293.6,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 103.0,
+            "avg_grade_pct": -0.12,
+            "terrain": "flat",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          }
+        ],
+        "checkpoints": [
+          {
+            "name": "I-26 corridor between Greenville and Columbia",
+            "at_mi": 51.5,
+            "type": "place",
+            "state": "South Carolina",
+            "highway": "I-26",
+            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
+          }
+        ],
+        "state_miles": [
+          {
+            "state": "South Carolina",
+            "miles": 103.0
+          }
+        ],
+        "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
+      }
+    },
+    {
+      "from": "Charleston, West Virginia",
+      "to": "Pittsburgh",
+      "miles": 219,
+      "highway": "I-79",
+      "terrain": "flat",
+      "corridor": {
+        "tollway_detected": false,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 38.34978,
+            "lon": -81.63258
+          },
+          {
+            "at_mi": 31.3,
+            "lat": 38.74174,
+            "lon": -81.67477
+          },
+          {
+            "at_mi": 62.6,
+            "lat": 39.08074,
+            "lon": -81.54747
+          },
+          {
+            "at_mi": 93.9,
+            "lat": 39.38269,
+            "lon": -81.25779
+          },
+          {
+            "at_mi": 125.1,
+            "lat": 39.65971,
+            "lon": -80.85781
+          },
+          {
+            "at_mi": 156.4,
+            "lat": 39.99844,
+            "lon": -80.74236
+          },
+          {
+            "at_mi": 187.7,
+            "lat": 40.15496,
+            "lon": -80.28471
+          },
+          {
+            "at_mi": 219.0,
+            "lat": 40.44061,
+            "lon": -79.99594
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 634.8,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 31.3,
+            "elevation_ft": 787.4,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 62.6,
+            "elevation_ft": 707.0,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 93.9,
+            "elevation_ft": 613.5,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 125.1,
+            "elevation_ft": 643.0,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 156.4,
+            "elevation_ft": 639.8,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 187.7,
+            "elevation_ft": 1159.8,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 219.0,
+            "elevation_ft": 731.6,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 219.0,
+            "avg_grade_pct": 0.01,
+            "terrain": "flat",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          }
+        ],
+        "checkpoints": [
+          {
+            "name": "I-79 corridor between Charleston, West Virginia and Pittsburgh",
+            "at_mi": 125.1,
+            "type": "place",
+            "state": "Pennsylvania",
+            "highway": "I-79",
+            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
+          }
+        ],
+        "state_miles": [
+          {
+            "state": "West Virginia",
+            "miles": 153.2
+          },
+          {
+            "state": "Ohio",
+            "miles": 21.1
+          },
+          {
+            "state": "Pennsylvania",
+            "miles": 44.7
+          }
+        ],
+        "state_crossings": [
+          {
+            "at_mi": 91.3,
+            "from_state": "West Virginia",
+            "state": "Ohio",
+            "place": "West Virginia-Ohio line on I-79",
+            "source": "Computed from OSRM route geometry and public U.S. state boundary GeoJSON."
+          },
+          {
+            "at_mi": 95.5,
+            "from_state": "Ohio",
+            "state": "West Virginia",
+            "place": "Ohio-West Virginia line on I-79",
+            "source": "Computed from OSRM route geometry and public U.S. state boundary GeoJSON."
+          },
+          {
+            "at_mi": 98.6,
+            "from_state": "West Virginia",
+            "state": "Ohio",
+            "place": "West Virginia-Ohio line on I-79",
+            "source": "Computed from OSRM route geometry and public U.S. state boundary GeoJSON."
+          },
+          {
+            "at_mi": 100.7,
+            "from_state": "Ohio",
+            "state": "West Virginia",
+            "place": "Ohio-West Virginia line on I-79",
+            "source": "Computed from OSRM route geometry and public U.S. state boundary GeoJSON."
+          },
+          {
+            "at_mi": 127.4,
+            "from_state": "West Virginia",
+            "state": "Ohio",
+            "place": "West Virginia-Ohio line on I-79",
+            "source": "Computed from OSRM route geometry and public U.S. state boundary GeoJSON."
+          },
+          {
+            "at_mi": 127.8,
+            "from_state": "Ohio",
+            "state": "West Virginia",
+            "place": "Ohio-West Virginia line on I-79",
+            "source": "Computed from OSRM route geometry and public U.S. state boundary GeoJSON."
+          },
+          {
+            "at_mi": 130.9,
+            "from_state": "West Virginia",
+            "state": "Ohio",
+            "place": "West Virginia-Ohio line on I-79",
+            "source": "Computed from OSRM route geometry and public U.S. state boundary GeoJSON."
+          },
+          {
+            "at_mi": 142.3,
+            "from_state": "Ohio",
+            "state": "West Virginia",
+            "place": "Ohio-West Virginia line on I-79",
+            "source": "Computed from OSRM route geometry and public U.S. state boundary GeoJSON."
+          },
+          {
+            "at_mi": 144.2,
+            "from_state": "West Virginia",
+            "state": "Ohio",
+            "place": "West Virginia-Ohio line on I-79",
+            "source": "Computed from OSRM route geometry and public U.S. state boundary GeoJSON."
+          },
+          {
+            "at_mi": 147.2,
+            "from_state": "Ohio",
+            "state": "West Virginia",
+            "place": "Ohio-West Virginia line on I-79",
+            "source": "Computed from OSRM route geometry and public U.S. state boundary GeoJSON."
+          },
+          {
+            "at_mi": 174.2,
+            "from_state": "West Virginia",
+            "state": "Pennsylvania",
+            "place": "West Virginia-Pennsylvania line on I-79",
+            "source": "Computed from OSRM route geometry and public U.S. state boundary GeoJSON."
+          }
+        ],
+        "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
+      }
+    },
+    {
+      "from": "Charleston, West Virginia",
+      "to": "Roanoke",
+      "miles": 181,
+      "highway": "I-64",
+      "terrain": "hills",
+      "corridor": {
+        "tollway_detected": true,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 38.34978,
+            "lon": -81.63258
+          },
+          {
+            "at_mi": 36.2,
+            "lat": 38.00952,
+            "lon": -81.34971
+          },
+          {
+            "at_mi": 72.4,
+            "lat": 37.61014,
+            "lon": -81.1215
+          },
+          {
+            "at_mi": 108.6,
+            "lat": 37.36009,
+            "lon": -80.81412
+          },
+          {
+            "at_mi": 144.8,
+            "lat": 37.15508,
+            "lon": -80.41215
+          },
+          {
+            "at_mi": 181.0,
+            "lat": 37.27086,
+            "lon": -79.94143
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 634.8,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 36.2,
+            "elevation_ft": 1147.0,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 72.4,
+            "elevation_ft": 2982.3,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 108.6,
+            "elevation_ft": 1532.2,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 144.8,
+            "elevation_ft": 2092.2,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 181.0,
+            "elevation_ft": 967.8,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 36.2,
+            "avg_grade_pct": 0.34,
+            "terrain": "flat",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          },
+          {
+            "start_mi": 36.2,
+            "end_mi": 108.6,
+            "avg_grade_pct": 0.13,
+            "terrain": "hills",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          },
+          {
+            "start_mi": 108.6,
+            "end_mi": 181.0,
+            "avg_grade_pct": -0.19,
+            "terrain": "flat",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          }
+        ],
+        "checkpoints": [
+          {
+            "name": "I-64 corridor between Charleston, West Virginia and Roanoke",
+            "at_mi": 108.6,
+            "type": "place",
+            "state": "Virginia",
+            "highway": "I-64",
+            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
+          }
+        ],
+        "state_miles": [
+          {
+            "state": "West Virginia",
+            "miles": 109.2
+          },
+          {
+            "state": "Virginia",
+            "miles": 71.8
+          }
+        ],
+        "state_crossings": [
+          {
+            "at_mi": 109.2,
+            "from_state": "West Virginia",
+            "state": "Virginia",
+            "place": "West Virginia-Virginia line on I-64",
+            "source": "Computed from OSRM route geometry and public U.S. state boundary GeoJSON."
+          }
+        ],
+        "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
+      }
+    },
+    {
+      "from": "Charleston, West Virginia",
+      "to": "Richmond",
+      "miles": 317,
+      "highway": "I-64",
+      "terrain": "hills",
+      "corridor": {
+        "tollway_detected": true,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 38.34978,
+            "lon": -81.63258
+          },
+          {
+            "at_mi": 31.7,
+            "lat": 38.0663,
+            "lon": -81.37629
+          },
+          {
+            "at_mi": 63.4,
+            "lat": 37.74646,
+            "lon": -81.16403
+          },
+          {
+            "at_mi": 95.1,
+            "lat": 37.88799,
+            "lon": -80.66725
+          },
+          {
+            "at_mi": 126.8,
+            "lat": 37.8008,
+            "lon": -80.20235
+          },
+          {
+            "at_mi": 158.5,
+            "lat": 37.79557,
+            "lon": -79.71803
+          },
+          {
+            "at_mi": 190.2,
+            "lat": 37.87708,
+            "lon": -79.3041
+          },
+          {
+            "at_mi": 221.9,
+            "lat": 38.0468,
+            "lon": -78.90592
+          },
+          {
+            "at_mi": 253.6,
+            "lat": 38.00069,
+            "lon": -78.35029
+          },
+          {
+            "at_mi": 285.3,
+            "lat": 37.76517,
+            "lon": -77.86973
+          },
+          {
+            "at_mi": 317.0,
+            "lat": 37.54073,
+            "lon": -77.43597
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 634.8,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 31.7,
+            "elevation_ft": 916.7,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 63.4,
+            "elevation_ft": 2409.1,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 95.1,
+            "elevation_ft": 2516.4,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 126.8,
+            "elevation_ft": 2275.9,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 158.5,
+            "elevation_ft": 1148.6,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 190.2,
+            "elevation_ft": 1691.9,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 221.9,
+            "elevation_ft": 1423.9,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 253.6,
+            "elevation_ft": 426.5,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 285.3,
+            "elevation_ft": 376.3,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 317.0,
+            "elevation_ft": 200.1,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 31.7,
+            "avg_grade_pct": 0.19,
+            "terrain": "flat",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          },
+          {
+            "start_mi": 31.7,
+            "end_mi": 63.4,
+            "avg_grade_pct": 1.0,
+            "terrain": "hills",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          },
+          {
+            "start_mi": 63.4,
+            "end_mi": 317.0,
+            "avg_grade_pct": -0.19,
+            "terrain": "flat",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          }
+        ],
+        "checkpoints": [
+          {
+            "name": "I-64 corridor between Charleston, West Virginia and Richmond",
+            "at_mi": 158.5,
+            "type": "place",
+            "state": "Virginia",
+            "highway": "I-64",
+            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
+          }
+        ],
+        "state_miles": [
+          {
+            "state": "West Virginia",
+            "miles": 124.9
+          },
+          {
+            "state": "Virginia",
+            "miles": 192.1
+          }
+        ],
+        "state_crossings": [
+          {
+            "at_mi": 124.9,
+            "from_state": "West Virginia",
+            "state": "Virginia",
+            "place": "West Virginia-Virginia line on I-64",
+            "source": "Computed from OSRM route geometry and public U.S. state boundary GeoJSON."
+          }
+        ],
+        "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
+      }
+    },
+    {
+      "from": "Portland, Maine",
+      "to": "Manchester",
+      "miles": 95,
+      "highway": "I-95",
+      "terrain": "flat",
+      "corridor": {
+        "tollway_detected": true,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 43.66144,
+            "lon": -70.25545
+          },
+          {
+            "at_mi": 23.8,
+            "lat": 43.42997,
+            "lon": -70.54766
+          },
+          {
+            "at_mi": 47.5,
+            "lat": 43.12302,
+            "lon": -70.72442
+          },
+          {
+            "at_mi": 71.2,
+            "lat": 43.01586,
+            "lon": -71.03127
+          },
+          {
+            "at_mi": 95.0,
+            "lat": 42.99562,
+            "lon": -71.45479
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 59.1,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 23.8,
+            "elevation_ft": 85.3,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 47.5,
+            "elevation_ft": 49.2,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 71.2,
+            "elevation_ft": 140.7,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 95.0,
+            "elevation_ft": 257.5,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 95.0,
+            "avg_grade_pct": 0.04,
+            "terrain": "flat",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          }
+        ],
+        "checkpoints": [
+          {
+            "name": "I-95 corridor between Portland, Maine and Manchester",
+            "at_mi": 47.5,
+            "type": "place",
+            "state": "New Hampshire",
+            "highway": "I-95",
+            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
+          }
+        ],
+        "state_miles": [
+          {
+            "state": "Maine",
+            "miles": 51.2
+          },
+          {
+            "state": "New Hampshire",
+            "miles": 43.8
+          }
+        ],
+        "state_crossings": [
+          {
+            "at_mi": 51.2,
+            "from_state": "Maine",
+            "state": "New Hampshire",
+            "place": "Maine-New Hampshire line on I-95",
+            "source": "Computed from OSRM route geometry and public U.S. state boundary GeoJSON."
+          }
+        ],
+        "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
+      }
+    },
+    {
+      "from": "Portland, Maine",
+      "to": "Boston",
+      "miles": 108,
+      "highway": "I-95",
+      "terrain": "flat",
+      "corridor": {
+        "tollway_detected": true,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 43.66144,
+            "lon": -70.25545
+          },
+          {
+            "at_mi": 27.0,
+            "lat": 43.32867,
+            "lon": -70.60527
+          },
+          {
+            "at_mi": 54.0,
+            "lat": 43.05778,
+            "lon": -70.80497
+          },
+          {
+            "at_mi": 81.0,
+            "lat": 42.692,
+            "lon": -70.97148
+          },
+          {
+            "at_mi": 108.0,
+            "lat": 42.35966,
+            "lon": -71.05845
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 59.1,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 27.0,
+            "elevation_ft": 124.7,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 54.0,
+            "elevation_ft": 42.7,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 81.0,
+            "elevation_ft": 95.1,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 108.0,
+            "elevation_ft": 98.4,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 108.0,
+            "avg_grade_pct": 0.01,
+            "terrain": "flat",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          }
+        ],
+        "checkpoints": [
+          {
+            "name": "I-95 corridor between Portland, Maine and Boston",
+            "at_mi": 54.0,
+            "type": "place",
+            "state": "Massachusetts",
+            "highway": "I-95",
+            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
+          }
+        ],
+        "state_miles": [
+          {
+            "state": "Maine",
+            "miles": 51.1
+          },
+          {
+            "state": "New Hampshire",
+            "miles": 16.0
+          },
+          {
+            "state": "Massachusetts",
+            "miles": 40.9
+          }
+        ],
+        "state_crossings": [
+          {
+            "at_mi": 51.1,
+            "from_state": "Maine",
+            "state": "New Hampshire",
+            "place": "Maine-New Hampshire line on I-95",
+            "source": "Computed from OSRM route geometry and public U.S. state boundary GeoJSON."
+          },
+          {
+            "at_mi": 67.1,
+            "from_state": "New Hampshire",
+            "state": "Massachusetts",
+            "place": "New Hampshire-Massachusetts line on I-95",
+            "source": "Computed from OSRM route geometry and public U.S. state boundary GeoJSON."
+          }
+        ],
+        "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
+      }
+    },
+    {
+      "from": "Springfield, Massachusetts",
+      "to": "Hartford",
+      "miles": 26,
+      "highway": "I-91",
+      "terrain": "flat",
+      "corridor": {
+        "tollway_detected": false,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 42.10158,
+            "lon": -72.58971
+          },
+          {
+            "at_mi": 6.5,
+            "lat": 42.01418,
+            "lon": -72.58665
+          },
+          {
+            "at_mi": 13.0,
+            "lat": 41.92592,
+            "lon": -72.60964
+          },
+          {
+            "at_mi": 19.5,
+            "lat": 41.85019,
+            "lon": -72.66489
+          },
+          {
+            "at_mi": 26.0,
+            "lat": 41.7658,
+            "lon": -72.6734
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 116.1,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 6.5,
+            "elevation_ft": 121.4,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 13.0,
+            "elevation_ft": 91.9,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 19.5,
+            "elevation_ft": 157.5,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 26.0,
+            "elevation_ft": 119.8,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 26.0,
+            "avg_grade_pct": 0.0,
+            "terrain": "flat",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          }
+        ],
+        "checkpoints": [
+          {
+            "name": "I-91 corridor between Springfield, Massachusetts and Hartford",
+            "at_mi": 13.0,
+            "type": "place",
+            "state": "Connecticut",
+            "highway": "I-91",
+            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
+          }
+        ],
+        "state_miles": [
+          {
+            "state": "Massachusetts",
+            "miles": 5.5
+          },
+          {
+            "state": "Connecticut",
+            "miles": 20.5
+          }
+        ],
+        "state_crossings": [
+          {
+            "at_mi": 5.5,
+            "from_state": "Massachusetts",
+            "state": "Connecticut",
+            "place": "Massachusetts-Connecticut line on I-91",
+            "source": "Computed from OSRM route geometry and public U.S. state boundary GeoJSON."
+          }
+        ],
+        "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
+      }
+    },
+    {
+      "from": "Springfield, Massachusetts",
+      "to": "Worcester",
+      "miles": 52,
+      "highway": "I-90",
+      "terrain": "flat",
+      "corridor": {
+        "tollway_detected": true,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 42.10158,
+            "lon": -72.58971
+          },
+          {
+            "at_mi": 13.0,
+            "lat": 42.15803,
+            "lon": -72.41407
+          },
+          {
+            "at_mi": 26.0,
+            "lat": 42.16814,
+            "lon": -72.18238
+          },
+          {
+            "at_mi": 39.0,
+            "lat": 42.15806,
+            "lon": -71.95879
+          },
+          {
+            "at_mi": 52.0,
+            "lat": 42.26264,
+            "lon": -71.8025
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 116.1,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 13.0,
+            "elevation_ft": 308.4,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 26.0,
+            "elevation_ft": 810.4,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 39.0,
+            "elevation_ft": 816.9,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 52.0,
+            "elevation_ft": 520.0,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 52.0,
+            "avg_grade_pct": 0.15,
+            "terrain": "flat",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          }
+        ],
+        "checkpoints": [
+          {
+            "name": "I-90 corridor between Springfield, Massachusetts and Worcester",
+            "at_mi": 26.0,
+            "type": "place",
+            "state": "Massachusetts",
+            "highway": "I-90",
+            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
+          }
+        ],
+        "state_miles": [
+          {
+            "state": "Massachusetts",
+            "miles": 52.0
+          }
+        ],
+        "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
+      }
+    },
+    {
+      "from": "Springfield, Massachusetts",
+      "to": "Albany",
+      "miles": 87,
+      "highway": "I-90",
+      "terrain": "hills",
+      "corridor": {
+        "tollway_detected": true,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 42.10158,
+            "lon": -72.58971
+          },
+          {
+            "at_mi": 21.7,
+            "lat": 42.17242,
+            "lon": -72.90539
+          },
+          {
+            "at_mi": 43.5,
+            "lat": 42.29632,
+            "lon": -73.25547
+          },
+          {
+            "at_mi": 65.3,
+            "lat": 42.45374,
+            "lon": -73.57623
+          },
+          {
+            "at_mi": 87.0,
+            "lat": 42.65261,
+            "lon": -73.75628
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 116.1,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 21.7,
+            "elevation_ft": 1133.2,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 43.5,
+            "elevation_ft": 931.1,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 65.3,
+            "elevation_ft": 403.9,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 87.0,
+            "elevation_ft": 210.0,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 21.7,
+            "avg_grade_pct": 0.91,
+            "terrain": "hills",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          },
+          {
+            "start_mi": 21.7,
+            "end_mi": 87.0,
+            "avg_grade_pct": -0.27,
+            "terrain": "flat",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          }
+        ],
+        "checkpoints": [
+          {
+            "name": "I-90 corridor between Springfield, Massachusetts and Albany",
+            "at_mi": 43.5,
+            "type": "place",
+            "state": "New York",
+            "highway": "I-90",
+            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
+          }
+        ],
+        "state_miles": [
+          {
+            "state": "Massachusetts",
+            "miles": 53.2
+          },
+          {
+            "state": "New York",
+            "miles": 33.8
+          }
+        ],
+        "state_crossings": [
+          {
+            "at_mi": 53.2,
+            "from_state": "Massachusetts",
+            "state": "New York",
+            "place": "Massachusetts-New York line on I-90",
+            "source": "Computed from OSRM route geometry and public U.S. state boundary GeoJSON."
+          }
+        ],
+        "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
+      }
+    },
+    {
+      "from": "Springfield, Massachusetts",
+      "to": "New Haven",
+      "miles": 64,
+      "highway": "I-91",
+      "terrain": "flat",
+      "corridor": {
+        "tollway_detected": false,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 42.10158,
+            "lon": -72.58971
+          },
+          {
+            "at_mi": 16.0,
+            "lat": 41.89609,
+            "lon": -72.64162
+          },
+          {
+            "at_mi": 32.0,
+            "lat": 41.69574,
+            "lon": -72.70514
+          },
+          {
+            "at_mi": 48.0,
+            "lat": 41.47531,
+            "lon": -72.7721
+          },
+          {
+            "at_mi": 64.0,
+            "lat": 41.30806,
+            "lon": -72.9281
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 116.1,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 16.0,
+            "elevation_ft": 137.8,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 32.0,
+            "elevation_ft": 301.8,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 48.0,
+            "elevation_ft": 305.1,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 64.0,
+            "elevation_ft": 57.4,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 64.0,
+            "avg_grade_pct": -0.02,
+            "terrain": "flat",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          }
+        ],
+        "checkpoints": [
+          {
+            "name": "I-91 corridor between Springfield, Massachusetts and New Haven",
+            "at_mi": 32.0,
+            "type": "place",
+            "state": "Connecticut",
+            "highway": "I-91",
+            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
+          }
+        ],
+        "state_miles": [
+          {
+            "state": "Massachusetts",
+            "miles": 5.5
+          },
+          {
+            "state": "Connecticut",
+            "miles": 58.5
+          }
+        ],
+        "state_crossings": [
+          {
+            "at_mi": 5.5,
+            "from_state": "Massachusetts",
+            "state": "Connecticut",
+            "place": "Massachusetts-Connecticut line on I-91",
+            "source": "Computed from OSRM route geometry and public U.S. state boundary GeoJSON."
+          }
+        ],
+        "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
+      }
+    },
+    {
+      "from": "Wilmington, Delaware",
+      "to": "Philadelphia",
+      "miles": 30,
+      "highway": "I-95",
+      "terrain": "flat",
+      "corridor": {
+        "tollway_detected": false,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 39.74594,
+            "lon": -75.54644
+          },
+          {
+            "at_mi": 7.5,
+            "lat": 39.80735,
+            "lon": -75.46319
+          },
+          {
+            "at_mi": 15.0,
+            "lat": 39.86448,
+            "lon": -75.34803
+          },
+          {
+            "at_mi": 22.5,
+            "lat": 39.89684,
+            "lon": -75.21373
+          },
+          {
+            "at_mi": 30.0,
+            "lat": 39.9526,
+            "lon": -75.16521
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 142.7,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 7.5,
+            "elevation_ft": 101.0,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 15.0,
+            "elevation_ft": 32.8,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 22.5,
+            "elevation_ft": 13.1,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 30.0,
+            "elevation_ft": 82.0,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 30.0,
+            "avg_grade_pct": -0.04,
+            "terrain": "flat",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          }
+        ],
+        "checkpoints": [
+          {
+            "name": "I-95 corridor between Wilmington, Delaware and Philadelphia",
+            "at_mi": 15.0,
+            "type": "place",
+            "state": "Pennsylvania",
+            "highway": "I-95",
+            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
+          }
+        ],
+        "state_miles": [
+          {
+            "state": "Delaware",
+            "miles": 7.9
+          },
+          {
+            "state": "Pennsylvania",
+            "miles": 22.1
+          }
+        ],
+        "state_crossings": [
+          {
+            "at_mi": 7.9,
+            "from_state": "Delaware",
+            "state": "Pennsylvania",
+            "place": "Delaware-Pennsylvania line on I-95",
+            "source": "Computed from OSRM route geometry and public U.S. state boundary GeoJSON."
+          }
+        ],
+        "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
+      }
+    },
+    {
+      "from": "Wilmington, Delaware",
+      "to": "Baltimore",
+      "miles": 75,
+      "highway": "I-95",
+      "terrain": "flat",
+      "corridor": {
+        "tollway_detected": true,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 39.74594,
+            "lon": -75.54644
+          },
+          {
+            "at_mi": 18.8,
+            "lat": 39.64555,
+            "lon": -75.83594
+          },
+          {
+            "at_mi": 37.5,
+            "lat": 39.55594,
+            "lon": -76.15548
+          },
+          {
+            "at_mi": 56.2,
+            "lat": 39.4003,
+            "lon": -76.42791
+          },
+          {
+            "at_mi": 75.0,
+            "lat": 39.29041,
+            "lon": -76.6122
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 142.7,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 18.8,
+            "elevation_ft": 166.3,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 37.5,
+            "elevation_ft": 277.2,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 56.2,
+            "elevation_ft": 147.6,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 75.0,
+            "elevation_ft": 114.8,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 75.0,
+            "avg_grade_pct": -0.01,
+            "terrain": "flat",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          }
+        ],
+        "checkpoints": [
+          {
+            "name": "I-95 corridor between Wilmington, Delaware and Baltimore",
+            "at_mi": 37.5,
+            "type": "place",
+            "state": "Maryland",
+            "highway": "I-95",
+            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
+          }
+        ],
+        "state_miles": [
+          {
+            "state": "Delaware",
+            "miles": 15.8
+          },
+          {
+            "state": "Maryland",
+            "miles": 59.2
+          }
+        ],
+        "state_crossings": [
+          {
+            "at_mi": 15.8,
+            "from_state": "Delaware",
+            "state": "Maryland",
+            "place": "Delaware-Maryland line on I-95",
+            "source": "Computed from OSRM route geometry and public U.S. state boundary GeoJSON."
+          }
+        ],
+        "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
+      }
+    },
+    {
+      "from": "Wilmington, Delaware",
+      "to": "Salisbury",
+      "miles": 108,
+      "highway": "I-95",
+      "terrain": "flat",
+      "corridor": {
+        "tollway_detected": true,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 39.74594,
+            "lon": -75.54644
+          },
+          {
+            "at_mi": 27.0,
+            "lat": 39.43978,
+            "lon": -75.66245
+          },
+          {
+            "at_mi": 54.0,
+            "lat": 39.1185,
+            "lon": -75.53504
+          },
+          {
+            "at_mi": 81.0,
+            "lat": 38.73027,
+            "lon": -75.5913
+          },
+          {
+            "at_mi": 108.0,
+            "lat": 38.36067,
+            "lon": -75.59949
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 142.7,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 27.0,
+            "elevation_ft": 20.7,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 54.0,
+            "elevation_ft": 39.4,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 81.0,
+            "elevation_ft": 36.1,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 108.0,
+            "elevation_ft": 29.5,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 108.0,
+            "avg_grade_pct": -0.02,
+            "terrain": "flat",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          }
+        ],
+        "checkpoints": [
+          {
+            "name": "I-95 corridor between Wilmington, Delaware and Salisbury",
+            "at_mi": 54.0,
+            "type": "place",
+            "state": "Maryland",
+            "highway": "I-95",
+            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
+          }
+        ],
+        "state_miles": [
+          {
+            "state": "Delaware",
+            "miles": 100.5
+          },
+          {
+            "state": "Maryland",
+            "miles": 7.5
+          }
+        ],
+        "state_crossings": [
+          {
+            "at_mi": 100.5,
+            "from_state": "Delaware",
+            "state": "Maryland",
+            "place": "Delaware-Maryland line on I-95",
+            "source": "Computed from OSRM route geometry and public U.S. state boundary GeoJSON."
+          }
+        ],
+        "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
+      }
     }
   ],
   "route_stop_data": {

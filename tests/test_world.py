@@ -73,8 +73,13 @@ def test_route_options_reject_out_of_direction_detours(world):
 
 def test_northeast_corridors_prefer_i95_not_inland_loops(world):
     philly_ny = world.route_options("Philadelphia", "New York", count=5)
-    assert [route.cities for route in philly_ny] == [["Philadelphia", "New York"]]
+    # Best option is the direct I-95 hop. The NJ Turnpike alternate via
+    # Trenton/Newark is the real I-95 corridor, so it is allowed; loops inland
+    # through the Alleghenies (Pittsburgh/Harrisburg) or Great Lakes are not.
+    assert philly_ny[0].cities == ["Philadelphia", "New York"]
     assert philly_ny[0].highways == ["I-95"]
+    inland = {"Pittsburgh", "Buffalo", "Harrisburg", "Scranton", "Binghamton"}
+    assert all(inland.isdisjoint(route.cities) for route in philly_ny)
 
     philly_boston = world.route_options("Philadelphia", "Boston", count=5)
     assert philly_boston[0].cities == ["Philadelphia", "New York", "Boston"]
@@ -577,9 +582,10 @@ def test_legs_are_sane_and_unique(world):
         assert leg.a in world.cities, f"unknown endpoint {leg.a}"
         assert leg.b in world.cities, f"unknown endpoint {leg.b}"
         assert leg.terrain in {"flat", "hills", "mountain"}, leg
-        # Real metro-twin corridors (Dallas-Fort Worth ~33 mi) are legitimate
-        # short freight lanes; only ban truly trivial or cross-country single legs.
-        assert 25 <= leg.miles <= 800, f"absurd mileage: {leg}"
+        # Real metro-twin and drayage corridors (Newark-NYC ~11 mi, Norfolk-
+        # Virginia Beach ~18, New Haven-Bridgeport ~21) are legitimate short
+        # freight lanes; only ban truly trivial or cross-country single legs.
+        assert 10 <= leg.miles <= 800, f"absurd mileage: {leg}"
         pair = frozenset((leg.a, leg.b))
         assert pair not in seen, f"duplicate leg {leg.a}-{leg.b}"
         seen.add(pair)

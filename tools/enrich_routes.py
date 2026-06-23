@@ -151,9 +151,11 @@ def main(argv: list[str] | None = None) -> int:
                              "preserving curated miles, POIs, tolls, and named "
                              "crossings/checkpoints. Use with --only and --write.")
     parser.add_argument("--only", default="",
-                        help="Comma-separated 'From:To' legs for "
+                        help="Semicolon-separated 'From:To' legs for "
                              "--refresh-geometry / --adopt-ors-miles, e.g. "
-                             "'Denver:Salt Lake City,Philadelphia:Pittsburgh'.")
+                             "'Denver:Salt Lake City;Philadelphia:Pittsburgh'. "
+                             "Semicolons (not commas) so comma-bearing city "
+                             "names like 'Charleston, West Virginia' parse.")
     parser.add_argument("--adopt-ors-miles", action="store_true",
                         help="Rewrite leg mileage to the real ORS driving-hgv "
                              "distance (rescaling corridor positions). Drives "
@@ -499,8 +501,11 @@ def enrich_all_routes(
 
 
 def _parse_only(value: str) -> set[tuple[str, str]]:
+    # Legs are separated by ';' (not ',') so city names containing a comma
+    # (e.g. "Charleston, West Virginia", disambiguated from Charleston, SC) parse
+    # correctly. 'From:To' splits on the first ':'.
     pairs: set[tuple[str, str]] = set()
-    for item in (value or "").split(","):
+    for item in (value or "").split(";"):
         item = item.strip()
         if not item:
             continue
