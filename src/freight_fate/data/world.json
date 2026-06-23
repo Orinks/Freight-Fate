@@ -2639,6 +2639,318 @@
       ],
       "lat": 39.746,
       "lon": -75.5466
+    },
+    "Fort Smith": {
+      "state": "Arkansas",
+      "region": "mid_south",
+      "locations": [
+        {
+          "name": "River Valley Distribution",
+          "type": "distribution",
+          "cargo": [
+            "retail",
+            "general"
+          ]
+        },
+        {
+          "name": "Fort Smith Freight Terminal",
+          "type": "terminal",
+          "cargo": [
+            "machinery",
+            "bulk"
+          ]
+        }
+      ],
+      "lat": 35.3859,
+      "lon": -94.3986
+    },
+    "Dover": {
+      "state": "Delaware",
+      "region": "northeast",
+      "locations": [
+        {
+          "name": "Dover Distribution Center",
+          "type": "distribution",
+          "cargo": [
+            "retail",
+            "food"
+          ]
+        },
+        {
+          "name": "Kent County Warehouse",
+          "type": "warehouse",
+          "cargo": [
+            "general",
+            "electronics"
+          ]
+        }
+      ],
+      "lat": 39.1582,
+      "lon": -75.5244
+    },
+    "Bangor": {
+      "state": "Maine",
+      "region": "northeast",
+      "locations": [
+        {
+          "name": "Bangor Freight Terminal",
+          "type": "terminal",
+          "cargo": [
+            "general",
+            "food"
+          ]
+        },
+        {
+          "name": "Penobscot Distribution",
+          "type": "distribution",
+          "cargo": [
+            "retail",
+            "refrigerated"
+          ]
+        }
+      ],
+      "lat": 44.8012,
+      "lon": -68.7778
+    },
+    "Duluth": {
+      "state": "Minnesota",
+      "region": "great_lakes",
+      "locations": [
+        {
+          "name": "Port of Duluth-Superior",
+          "type": "port",
+          "cargo": [
+            "bulk",
+            "container"
+          ]
+        },
+        {
+          "name": "Twin Ports Distribution",
+          "type": "distribution",
+          "cargo": [
+            "retail",
+            "general"
+          ]
+        }
+      ],
+      "lat": 46.7833,
+      "lon": -92.1066
+    },
+    "Gulfport": {
+      "state": "Mississippi",
+      "region": "mid_south",
+      "locations": [
+        {
+          "name": "Port of Gulfport",
+          "type": "port",
+          "cargo": [
+            "container",
+            "refrigerated"
+          ]
+        },
+        {
+          "name": "Gulf Coast Distribution",
+          "type": "distribution",
+          "cargo": [
+            "retail",
+            "food"
+          ]
+        }
+      ],
+      "lat": 30.3674,
+      "lon": -89.0928
+    },
+    "Missoula": {
+      "state": "Montana",
+      "region": "rockies",
+      "locations": [
+        {
+          "name": "Missoula Freight Yard",
+          "type": "rail",
+          "cargo": [
+            "machinery",
+            "bulk"
+          ]
+        },
+        {
+          "name": "Bitterroot Distribution",
+          "type": "distribution",
+          "cargo": [
+            "retail",
+            "general"
+          ]
+        }
+      ],
+      "lat": 46.8721,
+      "lon": -113.994
+    },
+    "Portsmouth": {
+      "state": "New Hampshire",
+      "region": "northeast",
+      "locations": [
+        {
+          "name": "Port of New Hampshire",
+          "type": "port",
+          "cargo": [
+            "bulk",
+            "general"
+          ]
+        },
+        {
+          "name": "Seacoast Distribution",
+          "type": "distribution",
+          "cargo": [
+            "retail",
+            "food"
+          ]
+        }
+      ],
+      "lat": 43.0718,
+      "lon": -70.7626
+    },
+    "Bismarck": {
+      "state": "North Dakota",
+      "region": "heartland",
+      "locations": [
+        {
+          "name": "Bismarck Distribution Center",
+          "type": "distribution",
+          "cargo": [
+            "retail",
+            "general"
+          ]
+        },
+        {
+          "name": "Missouri Valley Warehouse",
+          "type": "warehouse",
+          "cargo": [
+            "machinery",
+            "bulk"
+          ]
+        }
+      ],
+      "lat": 46.8083,
+      "lon": -100.7837
+    },
+    "Rapid City": {
+      "state": "South Dakota",
+      "region": "heartland",
+      "locations": [
+        {
+          "name": "Black Hills Distribution",
+          "type": "distribution",
+          "cargo": [
+            "retail",
+            "general"
+          ]
+        },
+        {
+          "name": "Rapid City Freight Terminal",
+          "type": "terminal",
+          "cargo": [
+            "machinery",
+            "bulk"
+          ]
+        }
+      ],
+      "lat": 44.0805,
+      "lon": -103.231
+    },
+    "Montpelier": {
+      "state": "Vermont",
+      "region": "northeast",
+      "locations": [
+        {
+          "name": "Montpelier Freight Depot",
+          "type": "terminal",
+          "cargo": [
+            "general",
+            "food"
+          ]
+        },
+        {
+          "name": "Central Vermont Warehouse",
+          "type": "warehouse",
+          "cargo": [
+            "retail",
+            "machinery"
+          ]
+        }
+      ],
+      "lat": 44.2601,
+      "lon": -72.5754
+    },
+    "Morgantown": {
+      "state": "West Virginia",
+      "region": "appalachia",
+      "locations": [
+        {
+          "name": "Morgantown Distribution",
+          "type": "distribution",
+          "cargo": [
+            "retail",
+            "general"
+          ]
+        },
+        {
+          "name": "Monongahela Industrial Park",
+          "type": "industrial_park",
+          "cargo": [
+            "machinery",
+            "bulk"
+          ]
+        }
+      ],
+      "lat": 39.6295,
+      "lon": -79.9559
+    },
+    "Rock Springs": {
+      "state": "Wyoming",
+      "region": "rockies",
+      "locations": [
+        {
+          "name": "Rock Springs Freight Terminal",
+          "type": "terminal",
+          "cargo": [
+            "bulk",
+            "machinery"
+          ]
+        },
+        {
+          "name": "Sweetwater Distribution",
+          "type": "distribution",
+          "cargo": [
+            "retail",
+            "general"
+          ]
+        }
+      ],
+      "lat": 41.5875,
+      "lon": -109.2029
+    },
+    "Newport": {
+      "state": "Rhode Island",
+      "region": "northeast",
+      "locations": [
+        {
+          "name": "Newport Distribution",
+          "type": "distribution",
+          "cargo": [
+            "retail",
+            "general"
+          ]
+        },
+        {
+          "name": "Aquidneck Warehouse",
+          "type": "warehouse",
+          "cargo": [
+            "food",
+            "general"
+          ]
+        }
+      ],
+      "lat": 41.4901,
+      "lon": -71.3128
     }
   },
   "legs": [
@@ -64993,6 +65305,4279 @@
             "restrooms",
             "parking",
             "scale"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated"
+        }
+      ]
+    },
+    {
+      "from": "Fort Smith",
+      "to": "Little Rock",
+      "miles": 159,
+      "highway": "I-540",
+      "terrain": "flat",
+      "corridor": {
+        "tollway_detected": false,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 35.38591,
+            "lon": -94.3986
+          },
+          {
+            "at_mi": 26.5,
+            "lat": 35.52741,
+            "lon": -94.00976
+          },
+          {
+            "at_mi": 53.0,
+            "lat": 35.48004,
+            "lon": -93.55796
+          },
+          {
+            "at_mi": 79.5,
+            "lat": 35.32025,
+            "lon": -93.17425
+          },
+          {
+            "at_mi": 106.0,
+            "lat": 35.17882,
+            "lon": -92.75524
+          },
+          {
+            "at_mi": 132.5,
+            "lat": 35.02459,
+            "lon": -92.4095
+          },
+          {
+            "at_mi": 159.0,
+            "lat": 34.7465,
+            "lon": -92.28958
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 436.4,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 26.5,
+            "elevation_ft": 459.3,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 53.0,
+            "elevation_ft": 513.5,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 79.5,
+            "elevation_ft": 400.3,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 106.0,
+            "elevation_ft": 385.5,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 132.5,
+            "elevation_ft": 265.7,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 159.0,
+            "elevation_ft": 347.4,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 159.0,
+            "avg_grade_pct": -0.01,
+            "terrain": "flat",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          }
+        ],
+        "checkpoints": [
+          {
+            "name": "I-540 corridor between Fort Smith and Little Rock",
+            "at_mi": 79.5,
+            "type": "place",
+            "state": "Arkansas",
+            "highway": "I-540",
+            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
+          }
+        ],
+        "state_miles": [
+          {
+            "state": "Arkansas",
+            "miles": 159.0
+          }
+        ],
+        "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
+      },
+      "stops": []
+    },
+    {
+      "from": "Fort Smith",
+      "to": "Tulsa",
+      "miles": 118,
+      "highway": "I-40",
+      "terrain": "flat",
+      "corridor": {
+        "tollway_detected": true,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 35.38591,
+            "lon": -94.3986
+          },
+          {
+            "at_mi": 23.6,
+            "lat": 35.44815,
+            "lon": -94.781
+          },
+          {
+            "at_mi": 47.2,
+            "lat": 35.49634,
+            "lon": -95.17232
+          },
+          {
+            "at_mi": 70.8,
+            "lat": 35.79865,
+            "lon": -95.31713
+          },
+          {
+            "at_mi": 94.4,
+            "lat": 35.99706,
+            "lon": -95.63453
+          },
+          {
+            "at_mi": 118.0,
+            "lat": 36.154,
+            "lon": -95.9928
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 436.4,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 23.6,
+            "elevation_ft": 534.8,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 47.2,
+            "elevation_ft": 492.8,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 70.8,
+            "elevation_ft": 508.5,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 94.4,
+            "elevation_ft": 629.3,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 118.0,
+            "elevation_ft": 733.3,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 118.0,
+            "avg_grade_pct": 0.04,
+            "terrain": "flat",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          }
+        ],
+        "checkpoints": [
+          {
+            "name": "I-40 corridor between Fort Smith and Tulsa",
+            "at_mi": 70.8,
+            "type": "place",
+            "state": "Oklahoma",
+            "highway": "I-40",
+            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
+          }
+        ],
+        "state_miles": [
+          {
+            "state": "Arkansas",
+            "miles": 2.0
+          },
+          {
+            "state": "Oklahoma",
+            "miles": 116.0
+          }
+        ],
+        "state_crossings": [
+          {
+            "at_mi": 2.0,
+            "from_state": "Arkansas",
+            "state": "Oklahoma",
+            "place": "Arkansas-Oklahoma line on I-40",
+            "source": "Computed from OSRM route geometry and public U.S. state boundary GeoJSON."
+          }
+        ],
+        "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
+      },
+      "stops": [
+        {
+          "name": "Muskogee Rest Area EB",
+          "type": "public_rest_area",
+          "at_mi": 47.4,
+          "source": "FHWA Jason's Law truck parking inventory (NTAD via BTS) lists Muskogee Rest Area EB on I-40E in Muskogee, OK with 3 truck parking spaces, mile post 283; at_mi estimated by projecting source coordinates onto checked-in route geometry (3.2 mi from simplified corridor line), accessed 2026-06-17: https://services.arcgis.com/xOi1kZaI0eWDREZv/arcgis/rest/services/NTAD_Truck_Stop_Parking/FeatureServer/0/query",
+          "actions": [
+            "park",
+            "save",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "parking",
+            "restrooms"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated"
+        }
+      ]
+    },
+    {
+      "from": "Dover",
+      "to": "Wilmington, Delaware",
+      "miles": 51,
+      "highway": "I-95",
+      "terrain": "flat",
+      "corridor": {
+        "tollway_detected": true,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 39.1582,
+            "lon": -75.5244
+          },
+          {
+            "at_mi": 12.7,
+            "lat": 39.28718,
+            "lon": -75.59214
+          },
+          {
+            "at_mi": 25.5,
+            "lat": 39.44941,
+            "lon": -75.6727
+          },
+          {
+            "at_mi": 38.3,
+            "lat": 39.61547,
+            "lon": -75.64566
+          },
+          {
+            "at_mi": 51.0,
+            "lat": 39.74594,
+            "lon": -75.54644
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 39.4,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 12.7,
+            "elevation_ft": 44.3,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 25.5,
+            "elevation_ft": 42.7,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 38.3,
+            "elevation_ft": 39.4,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 51.0,
+            "elevation_ft": 142.7,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 51.0,
+            "avg_grade_pct": 0.04,
+            "terrain": "flat",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          }
+        ],
+        "checkpoints": [
+          {
+            "name": "I-95 corridor between Dover and Wilmington, Delaware",
+            "at_mi": 25.5,
+            "type": "place",
+            "state": "Delaware",
+            "highway": "I-95",
+            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
+          }
+        ],
+        "state_miles": [
+          {
+            "state": "Delaware",
+            "miles": 51.0
+          }
+        ],
+        "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
+      },
+      "stops": [
+        {
+          "name": "I-95 truck parking near North East",
+          "type": "public_rest_area",
+          "at_mi": 35.3,
+          "source": "FHWA Jason's Law truck parking inventory (NTAD via BTS) lists I-95 truck parking near North East on I-95 in North East, MD with 73 truck parking spaces, mile post 99; at_mi estimated by projecting source coordinates onto checked-in route geometry (19.2 mi from simplified corridor line), accessed 2026-06-17: https://services.arcgis.com/xOi1kZaI0eWDREZv/arcgis/rest/services/NTAD_Truck_Stop_Parking/FeatureServer/0/query",
+          "actions": [
+            "park",
+            "save",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "parking",
+            "restrooms"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated"
+        }
+      ]
+    },
+    {
+      "from": "Dover",
+      "to": "Salisbury",
+      "miles": 57,
+      "highway": "US-13",
+      "terrain": "flat",
+      "corridor": {
+        "tollway_detected": false,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 39.1582,
+            "lon": -75.5244
+          },
+          {
+            "at_mi": 14.2,
+            "lat": 38.9596,
+            "lon": -75.56512
+          },
+          {
+            "at_mi": 28.5,
+            "lat": 38.75778,
+            "lon": -75.59387
+          },
+          {
+            "at_mi": 42.8,
+            "lat": 38.55736,
+            "lon": -75.55635
+          },
+          {
+            "at_mi": 57.0,
+            "lat": 38.36067,
+            "lon": -75.59949
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 39.4,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 14.2,
+            "elevation_ft": 59.1,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 28.5,
+            "elevation_ft": 39.4,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 42.8,
+            "elevation_ft": 13.1,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 57.0,
+            "elevation_ft": 29.5,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 57.0,
+            "avg_grade_pct": -0.0,
+            "terrain": "flat",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          }
+        ],
+        "checkpoints": [
+          {
+            "name": "US-13 corridor between Dover and Salisbury",
+            "at_mi": 28.5,
+            "type": "place",
+            "state": "Maryland",
+            "highway": "US-13",
+            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
+          }
+        ],
+        "state_miles": [
+          {
+            "state": "Delaware",
+            "miles": 49.6
+          },
+          {
+            "state": "Maryland",
+            "miles": 7.4
+          }
+        ],
+        "state_crossings": [
+          {
+            "at_mi": 49.6,
+            "from_state": "Delaware",
+            "state": "Maryland",
+            "place": "Delaware-Maryland line on US-13",
+            "source": "Computed from OSRM route geometry and public U.S. state boundary GeoJSON."
+          }
+        ],
+        "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
+      },
+      "stops": []
+    },
+    {
+      "from": "Bangor",
+      "to": "Portland, Maine",
+      "miles": 129,
+      "highway": "I-95",
+      "terrain": "flat",
+      "corridor": {
+        "tollway_detected": true,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 44.80118,
+            "lon": -68.7778
+          },
+          {
+            "at_mi": 25.8,
+            "lat": 44.81375,
+            "lon": -69.2464
+          },
+          {
+            "at_mi": 51.6,
+            "lat": 44.60188,
+            "lon": -69.59587
+          },
+          {
+            "at_mi": 77.4,
+            "lat": 44.2843,
+            "lon": -69.80678
+          },
+          {
+            "at_mi": 103.2,
+            "lat": 43.94493,
+            "lon": -69.97638
+          },
+          {
+            "at_mi": 129.0,
+            "lat": 43.66144,
+            "lon": -70.25545
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 144.4,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 25.8,
+            "elevation_ft": 226.4,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 51.6,
+            "elevation_ft": 111.5,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 77.4,
+            "elevation_ft": 239.5,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 103.2,
+            "elevation_ft": 121.4,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 129.0,
+            "elevation_ft": 59.1,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 129.0,
+            "avg_grade_pct": -0.01,
+            "terrain": "flat",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          }
+        ],
+        "checkpoints": [
+          {
+            "name": "I-95 corridor between Bangor and Portland, Maine",
+            "at_mi": 77.4,
+            "type": "place",
+            "state": "Maine",
+            "highway": "I-95",
+            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
+          }
+        ],
+        "state_miles": [
+          {
+            "state": "Maine",
+            "miles": 129.0
+          }
+        ],
+        "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
+      },
+      "stops": [
+        {
+          "name": "I-95 truck parking near Sidney",
+          "type": "public_rest_area",
+          "at_mi": 68.3,
+          "source": "FHWA Jason's Law truck parking inventory (NTAD via BTS) lists I-95 truck parking near Sidney on I-95 S in Sidney, ME with 6 truck parking spaces, mile post NA; at_mi estimated by projecting source coordinates onto checked-in route geometry (1.1 mi from simplified corridor line), accessed 2026-06-17: https://services.arcgis.com/xOi1kZaI0eWDREZv/arcgis/rest/services/NTAD_Truck_Stop_Parking/FeatureServer/0/query",
+          "actions": [
+            "park",
+            "save",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "parking",
+            "restrooms"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated"
+        }
+      ]
+    },
+    {
+      "from": "Bangor",
+      "to": "Manchester",
+      "miles": 228,
+      "highway": "I-95",
+      "terrain": "flat",
+      "corridor": {
+        "tollway_detected": true,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 44.80118,
+            "lon": -68.7778
+          },
+          {
+            "at_mi": 28.5,
+            "lat": 44.83377,
+            "lon": -69.29118
+          },
+          {
+            "at_mi": 57.1,
+            "lat": 44.55716,
+            "lon": -69.67478
+          },
+          {
+            "at_mi": 85.5,
+            "lat": 44.18041,
+            "lon": -69.85917
+          },
+          {
+            "at_mi": 114.0,
+            "lat": 43.98712,
+            "lon": -70.30977
+          },
+          {
+            "at_mi": 142.5,
+            "lat": 43.59194,
+            "lon": -70.38488
+          },
+          {
+            "at_mi": 170.9,
+            "lat": 43.23392,
+            "lon": -70.63425
+          },
+          {
+            "at_mi": 199.5,
+            "lat": 43.00057,
+            "lon": -70.94202
+          },
+          {
+            "at_mi": 228.0,
+            "lat": 42.99562,
+            "lon": -71.45479
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 144.4,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 28.5,
+            "elevation_ft": 224.1,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 57.1,
+            "elevation_ft": 337.9,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 85.5,
+            "elevation_ft": 137.8,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 114.0,
+            "elevation_ft": 306.8,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 142.5,
+            "elevation_ft": 21.3,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 170.9,
+            "elevation_ft": 187.0,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 199.5,
+            "elevation_ft": 36.1,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 228.0,
+            "elevation_ft": 257.5,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 228.0,
+            "avg_grade_pct": 0.01,
+            "terrain": "flat",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          }
+        ],
+        "checkpoints": [
+          {
+            "name": "I-95 corridor between Bangor and Manchester",
+            "at_mi": 114.0,
+            "type": "place",
+            "state": "New Hampshire",
+            "highway": "I-95",
+            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
+          }
+        ],
+        "state_miles": [
+          {
+            "state": "Maine",
+            "miles": 184.2
+          },
+          {
+            "state": "New Hampshire",
+            "miles": 43.8
+          }
+        ],
+        "state_crossings": [
+          {
+            "at_mi": 184.2,
+            "from_state": "Maine",
+            "state": "New Hampshire",
+            "place": "Maine-New Hampshire line on I-95",
+            "source": "Computed from OSRM route geometry and public U.S. state boundary GeoJSON."
+          }
+        ],
+        "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
+      },
+      "stops": [
+        {
+          "name": "I-95, I-295 truck parking near West Gardiner",
+          "type": "public_rest_area",
+          "at_mi": 83.2,
+          "source": "FHWA Jason's Law truck parking inventory (NTAD via BTS) lists I-95, I-295 truck parking near West Gardiner on I-95, I-295 in West Gardiner, ME with 45 truck parking spaces, mile post NA; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.9 mi from simplified corridor line), accessed 2026-06-17: https://services.arcgis.com/xOi1kZaI0eWDREZv/arcgis/rest/services/NTAD_Truck_Stop_Parking/FeatureServer/0/query",
+          "actions": [
+            "park",
+            "save",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "parking",
+            "restrooms"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated"
+        },
+        {
+          "name": "I-95 truck parking near Kennebunk",
+          "type": "public_rest_area",
+          "at_mi": 158.0,
+          "source": "FHWA Jason's Law truck parking inventory (NTAD via BTS) lists I-95 truck parking near Kennebunk on I-95 N in Kennebunk, ME with 37 truck parking spaces, mile post NA; at_mi estimated by projecting source coordinates onto checked-in route geometry (2.1 mi from simplified corridor line), accessed 2026-06-17: https://services.arcgis.com/xOi1kZaI0eWDREZv/arcgis/rest/services/NTAD_Truck_Stop_Parking/FeatureServer/0/query",
+          "actions": [
+            "park",
+            "save",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "parking",
+            "restrooms"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated"
+        }
+      ]
+    },
+    {
+      "from": "Duluth",
+      "to": "Minneapolis",
+      "miles": 152,
+      "highway": "I-35",
+      "terrain": "flat",
+      "corridor": {
+        "tollway_detected": false,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 46.78317,
+            "lon": -92.10638
+          },
+          {
+            "at_mi": 25.3,
+            "lat": 46.62171,
+            "lon": -92.54025
+          },
+          {
+            "at_mi": 50.7,
+            "lat": 46.32371,
+            "lon": -92.82581
+          },
+          {
+            "at_mi": 76.0,
+            "lat": 45.97999,
+            "lon": -92.95466
+          },
+          {
+            "at_mi": 101.3,
+            "lat": 45.61682,
+            "lon": -92.99244
+          },
+          {
+            "at_mi": 126.7,
+            "lat": 45.25735,
+            "lon": -93.02048
+          },
+          {
+            "at_mi": 152.0,
+            "lat": 44.97777,
+            "lon": -93.26503
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 695.9,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 25.3,
+            "elevation_ft": 1128.6,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 50.7,
+            "elevation_ft": 1058.4,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 76.0,
+            "elevation_ft": 993.4,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 101.3,
+            "elevation_ft": 910.4,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 126.7,
+            "elevation_ft": 884.5,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 152.0,
+            "elevation_ft": 877.6,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 152.0,
+            "avg_grade_pct": 0.02,
+            "terrain": "flat",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          }
+        ],
+        "checkpoints": [
+          {
+            "name": "I-35 corridor between Duluth and Minneapolis",
+            "at_mi": 76.0,
+            "type": "place",
+            "state": "Minnesota",
+            "highway": "I-35",
+            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
+          }
+        ],
+        "state_miles": [
+          {
+            "state": "Minnesota",
+            "miles": 152.0
+          }
+        ],
+        "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
+      },
+      "stops": [
+        {
+          "name": "Kettle River",
+          "type": "public_rest_area",
+          "at_mi": 58.6,
+          "source": "FHWA Jason's Law truck parking inventory (NTAD via BTS) lists Kettle River on I-35N in Askov, MN with 10 truck parking spaces, mile post 198; at_mi estimated by projecting source coordinates onto checked-in route geometry (1.4 mi from simplified corridor line), accessed 2026-06-17: https://services.arcgis.com/xOi1kZaI0eWDREZv/arcgis/rest/services/NTAD_Truck_Stop_Parking/FeatureServer/0/query",
+          "actions": [
+            "park",
+            "save",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "parking",
+            "restrooms"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated"
+        }
+      ]
+    },
+    {
+      "from": "Duluth",
+      "to": "Fargo",
+      "miles": 256,
+      "highway": "I-35",
+      "terrain": "flat",
+      "corridor": {
+        "tollway_detected": false,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 46.78317,
+            "lon": -92.10638
+          },
+          {
+            "at_mi": 28.5,
+            "lat": 46.67098,
+            "lon": -92.6289
+          },
+          {
+            "at_mi": 56.9,
+            "lat": 46.63014,
+            "lon": -93.20705
+          },
+          {
+            "at_mi": 85.4,
+            "lat": 46.53339,
+            "lon": -93.72083
+          },
+          {
+            "at_mi": 113.8,
+            "lat": 46.35987,
+            "lon": -94.1902
+          },
+          {
+            "at_mi": 142.2,
+            "lat": 46.35186,
+            "lon": -94.77287
+          },
+          {
+            "at_mi": 170.6,
+            "lat": 46.49485,
+            "lon": -95.32193
+          },
+          {
+            "at_mi": 199.1,
+            "lat": 46.74042,
+            "lon": -95.75616
+          },
+          {
+            "at_mi": 227.5,
+            "lat": 46.87751,
+            "lon": -96.28018
+          },
+          {
+            "at_mi": 256.0,
+            "lat": 46.87719,
+            "lon": -96.78983
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 695.9,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 28.5,
+            "elevation_ft": 1305.8,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 56.9,
+            "elevation_ft": 1222.1,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 85.4,
+            "elevation_ft": 1194.2,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 113.8,
+            "elevation_ft": 1181.1,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 142.2,
+            "elevation_ft": 1235.9,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 170.6,
+            "elevation_ft": 1394.4,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 199.1,
+            "elevation_ft": 1425.5,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 227.5,
+            "elevation_ft": 1227.0,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 256.0,
+            "elevation_ft": 908.8,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 256.0,
+            "avg_grade_pct": 0.02,
+            "terrain": "flat",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          }
+        ],
+        "checkpoints": [
+          {
+            "name": "I-35 corridor between Duluth and Fargo",
+            "at_mi": 142.2,
+            "type": "place",
+            "state": "North Dakota",
+            "highway": "I-35",
+            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
+          }
+        ],
+        "state_miles": [
+          {
+            "state": "Minnesota",
+            "miles": 255.9
+          },
+          {
+            "state": "North Dakota",
+            "miles": 0.1
+          }
+        ],
+        "state_crossings": [
+          {
+            "at_mi": 255.9,
+            "from_state": "Minnesota",
+            "state": "North Dakota",
+            "place": "Minnesota-North Dakota line on I-35",
+            "source": "Computed from OSRM route geometry and public U.S. state boundary GeoJSON."
+          }
+        ],
+        "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
+      },
+      "stops": [
+        {
+          "name": "Thompson Hill Travel Information Center",
+          "type": "public_rest_area",
+          "at_mi": 6.1,
+          "source": "FHWA Jason's Law truck parking inventory (NTAD via BTS) lists Thompson Hill Travel Information Center on I-35N in Duluth, MN with 10 truck parking spaces, mile post 250; at_mi estimated by projecting source coordinates onto checked-in route geometry (2.1 mi from simplified corridor line), accessed 2026-06-17: https://services.arcgis.com/xOi1kZaI0eWDREZv/arcgis/rest/services/NTAD_Truck_Stop_Parking/FeatureServer/0/query",
+          "actions": [
+            "park",
+            "save",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "parking",
+            "restrooms"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated"
+        },
+        {
+          "name": "Culkin",
+          "type": "public_rest_area",
+          "at_mi": 28.5,
+          "source": "FHWA Jason's Law truck parking inventory (NTAD via BTS) lists Culkin on I-35N in Mahtowa, MN with 11 truck parking spaces, mile post 226; at_mi estimated by projecting source coordinates onto checked-in route geometry (7.9 mi from simplified corridor line), accessed 2026-06-17: https://services.arcgis.com/xOi1kZaI0eWDREZv/arcgis/rest/services/NTAD_Truck_Stop_Parking/FeatureServer/0/query",
+          "actions": [
+            "park",
+            "save",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "parking",
+            "restrooms"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated"
+        }
+      ]
+    },
+    {
+      "from": "Gulfport",
+      "to": "New Orleans",
+      "miles": 79,
+      "highway": "I-10",
+      "terrain": "flat",
+      "corridor": {
+        "tollway_detected": false,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 30.3674,
+            "lon": -89.09282
+          },
+          {
+            "at_mi": 19.8,
+            "lat": 30.38388,
+            "lon": -89.34095
+          },
+          {
+            "at_mi": 39.5,
+            "lat": 30.30163,
+            "lon": -89.64961
+          },
+          {
+            "at_mi": 59.2,
+            "lat": 30.13669,
+            "lon": -89.87027
+          },
+          {
+            "at_mi": 79.0,
+            "lat": 29.95109,
+            "lon": -90.07147
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 73.8,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 19.8,
+            "elevation_ft": 65.6,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 39.5,
+            "elevation_ft": 26.2,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 59.2,
+            "elevation_ft": 0.0,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 79.0,
+            "elevation_ft": 32.8,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 79.0,
+            "avg_grade_pct": -0.01,
+            "terrain": "flat",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          }
+        ],
+        "checkpoints": [
+          {
+            "name": "I-10 corridor between Gulfport and New Orleans",
+            "at_mi": 39.5,
+            "type": "place",
+            "state": "Louisiana",
+            "highway": "I-10",
+            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
+          }
+        ],
+        "state_miles": [
+          {
+            "state": "Mississippi",
+            "miles": 39.8
+          },
+          {
+            "state": "Louisiana",
+            "miles": 39.2
+          }
+        ],
+        "state_crossings": [
+          {
+            "at_mi": 39.8,
+            "from_state": "Mississippi",
+            "state": "Louisiana",
+            "place": "Mississippi-Louisiana line on I-10",
+            "source": "Computed from OSRM route geometry and public U.S. state boundary GeoJSON."
+          }
+        ],
+        "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
+      },
+      "stops": [
+        {
+          "name": "NHS Welcome Center\nHancock County Welcome Center",
+          "type": "public_rest_area",
+          "at_mi": 36.4,
+          "source": "FHWA Jason's Law truck parking inventory (NTAD via BTS) lists NHS Welcome Center\nHancock County Welcome Center on I-10 @ MS 607 in Pearlington, MS with 20 truck parking spaces, mile post 2; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.1 mi from simplified corridor line), accessed 2026-06-17: https://services.arcgis.com/xOi1kZaI0eWDREZv/arcgis/rest/services/NTAD_Truck_Stop_Parking/FeatureServer/0/query",
+          "actions": [
+            "park",
+            "save",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "parking",
+            "restrooms"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated"
+        }
+      ]
+    },
+    {
+      "from": "Gulfport",
+      "to": "Jackson",
+      "miles": 161,
+      "highway": "I-20",
+      "terrain": "flat",
+      "corridor": {
+        "tollway_detected": false,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 30.3674,
+            "lon": -89.09282
+          },
+          {
+            "at_mi": 26.9,
+            "lat": 30.75213,
+            "lon": -89.13515
+          },
+          {
+            "at_mi": 53.6,
+            "lat": 31.1239,
+            "lon": -89.22476
+          },
+          {
+            "at_mi": 80.5,
+            "lat": 31.4184,
+            "lon": -89.40832
+          },
+          {
+            "at_mi": 107.4,
+            "lat": 31.74486,
+            "lon": -89.64451
+          },
+          {
+            "at_mi": 134.1,
+            "lat": 32.01512,
+            "lon": -89.94375
+          },
+          {
+            "at_mi": 161.0,
+            "lat": 32.29871,
+            "lon": -90.18482
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 73.8,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 26.9,
+            "elevation_ft": 216.5,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 53.6,
+            "elevation_ft": 255.9,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 80.5,
+            "elevation_ft": 249.3,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 107.4,
+            "elevation_ft": 338.6,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 134.1,
+            "elevation_ft": 334.6,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 161.0,
+            "elevation_ft": 310.0,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 161.0,
+            "avg_grade_pct": 0.03,
+            "terrain": "flat",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          }
+        ],
+        "checkpoints": [
+          {
+            "name": "I-20 corridor between Gulfport and Jackson",
+            "at_mi": 80.5,
+            "type": "place",
+            "state": "Mississippi",
+            "highway": "I-20",
+            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
+          }
+        ],
+        "state_miles": [
+          {
+            "state": "Mississippi",
+            "miles": 161.0
+          }
+        ],
+        "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
+      },
+      "stops": []
+    },
+    {
+      "from": "Missoula",
+      "to": "Billings",
+      "miles": 343,
+      "highway": "I-90",
+      "terrain": "flat",
+      "corridor": {
+        "tollway_detected": false,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 46.8721,
+            "lon": -113.994
+          },
+          {
+            "at_mi": 31.2,
+            "lat": 46.70222,
+            "lon": -113.47351
+          },
+          {
+            "at_mi": 62.4,
+            "lat": 46.58196,
+            "lon": -112.90083
+          },
+          {
+            "at_mi": 93.6,
+            "lat": 46.20868,
+            "lon": -112.77722
+          },
+          {
+            "at_mi": 124.7,
+            "lat": 45.93143,
+            "lon": -112.45073
+          },
+          {
+            "at_mi": 155.9,
+            "lat": 45.89207,
+            "lon": -111.852
+          },
+          {
+            "at_mi": 187.1,
+            "lat": 45.81048,
+            "lon": -111.24644
+          },
+          {
+            "at_mi": 218.3,
+            "lat": 45.66168,
+            "lon": -110.72849
+          },
+          {
+            "at_mi": 249.4,
+            "lat": 45.74698,
+            "lon": -110.17605
+          },
+          {
+            "at_mi": 280.6,
+            "lat": 45.71156,
+            "lon": -109.62974
+          },
+          {
+            "at_mi": 311.8,
+            "lat": 45.59833,
+            "lon": -109.06768
+          },
+          {
+            "at_mi": 343.0,
+            "lat": 45.7833,
+            "lon": -108.5007
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 3215.2,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 31.2,
+            "elevation_ft": 3698.8,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 62.4,
+            "elevation_ft": 4208.3,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 93.6,
+            "elevation_ft": 4770.3,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 124.7,
+            "elevation_ft": 5814.6,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 155.9,
+            "elevation_ft": 5255.9,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 187.1,
+            "elevation_ft": 4357.0,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 218.3,
+            "elevation_ft": 5152.6,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 249.4,
+            "elevation_ft": 4256.9,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 280.6,
+            "elevation_ft": 3789.4,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 311.8,
+            "elevation_ft": 3579.7,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 343.0,
+            "elevation_ft": 3131.6,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 343.0,
+            "avg_grade_pct": -0.0,
+            "terrain": "flat",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          }
+        ],
+        "checkpoints": [
+          {
+            "name": "I-90 corridor between Missoula and Billings",
+            "at_mi": 187.1,
+            "type": "place",
+            "state": "Montana",
+            "highway": "I-90",
+            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
+          }
+        ],
+        "state_miles": [
+          {
+            "state": "Montana",
+            "miles": 343.0
+          }
+        ],
+        "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
+      },
+      "stops": [
+        {
+          "name": "Anaconda",
+          "type": "public_rest_area",
+          "at_mi": 100.2,
+          "source": "FHWA Jason's Law truck parking inventory (NTAD via BTS) lists Anaconda on I-90E in Anaconda, MT with 15 truck parking spaces, mile post 208; at_mi estimated by projecting source coordinates onto checked-in route geometry (6.2 mi from simplified corridor line), accessed 2026-06-17: https://services.arcgis.com/xOi1kZaI0eWDREZv/arcgis/rest/services/NTAD_Truck_Stop_Parking/FeatureServer/0/query",
+          "actions": [
+            "park",
+            "save",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "parking",
+            "restrooms"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated"
+        },
+        {
+          "name": "Pilot Dealer Three Forks",
+          "type": "travel_center",
+          "at_mi": 168.1,
+          "source": "Pilot Flying J official locator lists Pilot Dealer store 910 in Three Forks, MT with 90 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (4.0 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/mt/three-forks/10800-us-287",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "restrooms",
+            "parking",
+            "scale"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated"
+        },
+        {
+          "name": "Greycliff EB",
+          "type": "public_rest_area",
+          "at_mi": 273.2,
+          "source": "FHWA Jason's Law truck parking inventory (NTAD via BTS) lists Greycliff EB on I-90E in Greycliff, MT with 22 truck parking spaces, mile post 381; at_mi estimated by projecting source coordinates onto checked-in route geometry (1.0 mi from simplified corridor line), accessed 2026-06-17: https://services.arcgis.com/xOi1kZaI0eWDREZv/arcgis/rest/services/NTAD_Truck_Stop_Parking/FeatureServer/0/query",
+          "actions": [
+            "park",
+            "save",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "parking",
+            "restrooms"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated"
+        }
+      ]
+    },
+    {
+      "from": "Missoula",
+      "to": "Spokane",
+      "miles": 198,
+      "highway": "I-90",
+      "terrain": "flat",
+      "corridor": {
+        "tollway_detected": false,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 46.8721,
+            "lon": -113.994
+          },
+          {
+            "at_mi": 28.2,
+            "lat": 46.99235,
+            "lon": -114.44048
+          },
+          {
+            "at_mi": 56.6,
+            "lat": 47.17258,
+            "lon": -114.86271
+          },
+          {
+            "at_mi": 84.8,
+            "lat": 47.36983,
+            "lon": -115.33674
+          },
+          {
+            "at_mi": 113.2,
+            "lat": 47.46513,
+            "lon": -115.83868
+          },
+          {
+            "at_mi": 141.4,
+            "lat": 47.55707,
+            "lon": -116.38383
+          },
+          {
+            "at_mi": 169.8,
+            "lat": 47.70911,
+            "lon": -116.85942
+          },
+          {
+            "at_mi": 198.0,
+            "lat": 47.659,
+            "lon": -117.42595
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 3215.2,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 28.2,
+            "elevation_ft": 2979.0,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 56.6,
+            "elevation_ft": 2690.3,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 84.8,
+            "elevation_ft": 3021.7,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 113.2,
+            "elevation_ft": 3133.5,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 141.4,
+            "elevation_ft": 2135.8,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 169.8,
+            "elevation_ft": 2243.8,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 198.0,
+            "elevation_ft": 1927.5,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 198.0,
+            "avg_grade_pct": -0.12,
+            "terrain": "flat",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          }
+        ],
+        "checkpoints": [
+          {
+            "name": "I-90 corridor between Missoula and Spokane",
+            "at_mi": 113.2,
+            "type": "place",
+            "state": "Washington",
+            "highway": "I-90",
+            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
+          }
+        ],
+        "state_miles": [
+          {
+            "state": "Montana",
+            "miles": 106.9
+          },
+          {
+            "state": "Idaho",
+            "miles": 71.8
+          },
+          {
+            "state": "Washington",
+            "miles": 19.3
+          }
+        ],
+        "state_crossings": [
+          {
+            "at_mi": 106.9,
+            "from_state": "Montana",
+            "state": "Idaho",
+            "place": "Montana-Idaho line on I-90",
+            "source": "Computed from OSRM route geometry and public U.S. state boundary GeoJSON."
+          },
+          {
+            "at_mi": 178.7,
+            "from_state": "Idaho",
+            "state": "Washington",
+            "place": "Idaho-Washington line on I-90",
+            "source": "Computed from OSRM route geometry and public U.S. state boundary GeoJSON."
+          }
+        ],
+        "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
+      },
+      "stops": [
+        {
+          "name": "Pilot Licensed Location Superior",
+          "type": "travel_center",
+          "at_mi": 58.3,
+          "source": "Pilot Flying J official locator lists Pilot Licensed Location store 911 in Superior, MT with 10 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.4 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/mt/superior/27-diamond-road",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "restrooms",
+            "parking"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated"
+        },
+        {
+          "name": "Dena Mora EB",
+          "type": "public_rest_area",
+          "at_mi": 101.2,
+          "source": "FHWA Jason's Law truck parking inventory (NTAD via BTS) lists Dena Mora EB on I-90E in Saltese, MT with 15 truck parking spaces, mile post 4; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.4 mi from simplified corridor line), accessed 2026-06-17: https://services.arcgis.com/xOi1kZaI0eWDREZv/arcgis/rest/services/NTAD_Truck_Stop_Parking/FeatureServer/0/query",
+          "actions": [
+            "park",
+            "save",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "parking",
+            "restrooms"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated"
+        }
+      ]
+    },
+    {
+      "from": "Portsmouth",
+      "to": "Portland, Maine",
+      "miles": 52,
+      "highway": "I-95",
+      "terrain": "flat",
+      "corridor": {
+        "tollway_detected": true,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 43.07184,
+            "lon": -70.76251
+          },
+          {
+            "at_mi": 13.0,
+            "lat": 43.2218,
+            "lon": -70.63747
+          },
+          {
+            "at_mi": 26.0,
+            "lat": 43.39335,
+            "lon": -70.56896
+          },
+          {
+            "at_mi": 39.0,
+            "lat": 43.54812,
+            "lon": -70.43097
+          },
+          {
+            "at_mi": 52.0,
+            "lat": 43.66144,
+            "lon": -70.25545
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 34.4,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 13.0,
+            "elevation_ft": 134.5,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 26.0,
+            "elevation_ft": 121.4,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 39.0,
+            "elevation_ft": 144.4,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 52.0,
+            "elevation_ft": 59.1,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 52.0,
+            "avg_grade_pct": 0.01,
+            "terrain": "flat",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          }
+        ],
+        "checkpoints": [
+          {
+            "name": "I-95 corridor between Portsmouth and Portland, Maine",
+            "at_mi": 26.0,
+            "type": "place",
+            "state": "Maine",
+            "highway": "I-95",
+            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
+          }
+        ],
+        "state_miles": [
+          {
+            "state": "New Hampshire",
+            "miles": 1.9
+          },
+          {
+            "state": "Maine",
+            "miles": 50.1
+          }
+        ],
+        "state_crossings": [
+          {
+            "at_mi": 1.9,
+            "from_state": "New Hampshire",
+            "state": "Maine",
+            "place": "New Hampshire-Maine line on I-95",
+            "source": "Computed from OSRM route geometry and public U.S. state boundary GeoJSON."
+          }
+        ],
+        "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
+      },
+      "stops": [
+        {
+          "name": "I-95 truck parking near Kennebunk",
+          "type": "public_rest_area",
+          "at_mi": 27.2,
+          "source": "FHWA Jason's Law truck parking inventory (NTAD via BTS) lists I-95 truck parking near Kennebunk on I-95 S in Kennebunk, ME with 40 truck parking spaces, mile post NA; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.3 mi from simplified corridor line), accessed 2026-06-17: https://services.arcgis.com/xOi1kZaI0eWDREZv/arcgis/rest/services/NTAD_Truck_Stop_Parking/FeatureServer/0/query",
+          "actions": [
+            "park",
+            "save",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "parking",
+            "restrooms"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated"
+        }
+      ]
+    },
+    {
+      "from": "Portsmouth",
+      "to": "Manchester",
+      "miles": 45,
+      "highway": "I-95",
+      "terrain": "flat",
+      "corridor": {
+        "tollway_detected": true,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 43.07184,
+            "lon": -70.76251
+          },
+          {
+            "at_mi": 11.2,
+            "lat": 42.96422,
+            "lon": -70.8611
+          },
+          {
+            "at_mi": 22.5,
+            "lat": 43.02348,
+            "lon": -71.0589
+          },
+          {
+            "at_mi": 33.8,
+            "lat": 43.04147,
+            "lon": -71.26574
+          },
+          {
+            "at_mi": 45.0,
+            "lat": 42.99562,
+            "lon": -71.45479
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 34.4,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 11.2,
+            "elevation_ft": 62.3,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 22.5,
+            "elevation_ft": 147.6,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 33.8,
+            "elevation_ft": 450.5,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 45.0,
+            "elevation_ft": 257.5,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 45.0,
+            "avg_grade_pct": 0.1,
+            "terrain": "flat",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          }
+        ],
+        "checkpoints": [
+          {
+            "name": "I-95 corridor between Portsmouth and Manchester",
+            "at_mi": 22.5,
+            "type": "place",
+            "state": "New Hampshire",
+            "highway": "I-95",
+            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
+          }
+        ],
+        "state_miles": [
+          {
+            "state": "New Hampshire",
+            "miles": 45.0
+          }
+        ],
+        "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
+      },
+      "stops": [
+        {
+          "name": "Seabrook Rest Area",
+          "type": "public_rest_area",
+          "at_mi": 11.2,
+          "source": "FHWA Jason's Law truck parking inventory (NTAD via BTS) lists Seabrook Rest Area on I-95N in Seabrook, NH with 70 truck parking spaces, mile post 0.5; at_mi estimated by projecting source coordinates onto checked-in route geometry (5.6 mi from simplified corridor line), accessed 2026-06-17: https://services.arcgis.com/xOi1kZaI0eWDREZv/arcgis/rest/services/NTAD_Truck_Stop_Parking/FeatureServer/0/query",
+          "actions": [
+            "park",
+            "save",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "parking",
+            "restrooms"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated"
+        }
+      ]
+    },
+    {
+      "from": "Portsmouth",
+      "to": "Boston",
+      "miles": 58,
+      "highway": "I-95",
+      "terrain": "flat",
+      "corridor": {
+        "tollway_detected": true,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 43.07184,
+            "lon": -70.76251
+          },
+          {
+            "at_mi": 14.5,
+            "lat": 42.90734,
+            "lon": -70.87671
+          },
+          {
+            "at_mi": 29.0,
+            "lat": 42.7178,
+            "lon": -70.96028
+          },
+          {
+            "at_mi": 43.5,
+            "lat": 42.52124,
+            "lon": -70.99789
+          },
+          {
+            "at_mi": 58.0,
+            "lat": 42.35966,
+            "lon": -71.05845
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 34.4,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 14.5,
+            "elevation_ft": 60.0,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 29.0,
+            "elevation_ft": 114.8,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 43.5,
+            "elevation_ft": 150.9,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 58.0,
+            "elevation_ft": 98.4,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 58.0,
+            "avg_grade_pct": 0.02,
+            "terrain": "flat",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          }
+        ],
+        "checkpoints": [
+          {
+            "name": "I-95 corridor between Portsmouth and Boston",
+            "at_mi": 29.0,
+            "type": "place",
+            "state": "Massachusetts",
+            "highway": "I-95",
+            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
+          }
+        ],
+        "state_miles": [
+          {
+            "state": "New Hampshire",
+            "miles": 17.0
+          },
+          {
+            "state": "Massachusetts",
+            "miles": 41.0
+          }
+        ],
+        "state_crossings": [
+          {
+            "at_mi": 17.0,
+            "from_state": "New Hampshire",
+            "state": "Massachusetts",
+            "place": "New Hampshire-Massachusetts line on I-95",
+            "source": "Computed from OSRM route geometry and public U.S. state boundary GeoJSON."
+          }
+        ],
+        "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
+      },
+      "stops": [
+        {
+          "name": "Service Plaza SB",
+          "type": "public_rest_area",
+          "at_mi": 16.5,
+          "source": "FHWA Jason's Law truck parking inventory (NTAD via BTS) lists Service Plaza SB on I-95 in Salisbury, MA with 24 truck parking spaces, mile post 0.2; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.2 mi from simplified corridor line), accessed 2026-06-17: https://services.arcgis.com/xOi1kZaI0eWDREZv/arcgis/rest/services/NTAD_Truck_Stop_Parking/FeatureServer/0/query",
+          "actions": [
+            "park",
+            "save",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "parking",
+            "restrooms"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated"
+        }
+      ]
+    },
+    {
+      "from": "Bismarck",
+      "to": "Fargo",
+      "miles": 194,
+      "highway": "I-94",
+      "terrain": "flat",
+      "corridor": {
+        "tollway_detected": false,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 46.80854,
+            "lon": -100.7837
+          },
+          {
+            "at_mi": 24.3,
+            "lat": 46.83625,
+            "lon": -100.2967
+          },
+          {
+            "at_mi": 48.5,
+            "lat": 46.87613,
+            "lon": -99.80454
+          },
+          {
+            "at_mi": 72.7,
+            "lat": 46.8777,
+            "lon": -99.29559
+          },
+          {
+            "at_mi": 97.0,
+            "lat": 46.89219,
+            "lon": -98.7781
+          },
+          {
+            "at_mi": 121.3,
+            "lat": 46.90687,
+            "lon": -98.28537
+          },
+          {
+            "at_mi": 145.5,
+            "lat": 46.91983,
+            "lon": -97.7614
+          },
+          {
+            "at_mi": 169.7,
+            "lat": 46.87574,
+            "lon": -97.28461
+          },
+          {
+            "at_mi": 194.0,
+            "lat": 46.87719,
+            "lon": -96.78983
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 1702.8,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 24.3,
+            "elevation_ft": 1919.3,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 48.5,
+            "elevation_ft": 1774.9,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 72.7,
+            "elevation_ft": 1889.8,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 97.0,
+            "elevation_ft": 1512.5,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 121.3,
+            "elevation_ft": 1458.0,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 145.5,
+            "elevation_ft": 1229.3,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 169.7,
+            "elevation_ft": 935.0,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 194.0,
+            "elevation_ft": 908.8,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 194.0,
+            "avg_grade_pct": -0.07,
+            "terrain": "flat",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          }
+        ],
+        "checkpoints": [
+          {
+            "name": "I-94 corridor between Bismarck and Fargo",
+            "at_mi": 97.0,
+            "type": "place",
+            "state": "North Dakota",
+            "highway": "I-94",
+            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
+          }
+        ],
+        "state_miles": [
+          {
+            "state": "North Dakota",
+            "miles": 193.7
+          },
+          {
+            "state": "Minnesota",
+            "miles": 0.3
+          }
+        ],
+        "state_crossings": [
+          {
+            "at_mi": 193.7,
+            "from_state": "North Dakota",
+            "state": "Minnesota",
+            "place": "North Dakota-Minnesota line on I-94",
+            "source": "Computed from OSRM route geometry and public U.S. state boundary GeoJSON."
+          },
+          {
+            "at_mi": 193.9,
+            "from_state": "Minnesota",
+            "state": "North Dakota",
+            "place": "Minnesota-North Dakota line on I-94",
+            "source": "Computed from OSRM route geometry and public U.S. state boundary GeoJSON."
+          }
+        ],
+        "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
+      },
+      "stops": [
+        {
+          "name": "Medina WB",
+          "type": "public_rest_area",
+          "at_mi": 65.8,
+          "source": "FHWA Jason's Law truck parking inventory (NTAD via BTS) lists Medina WB on I-94W in Medina, ND with 6 truck parking spaces, mile post 223; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.2 mi from simplified corridor line), accessed 2026-06-17: https://services.arcgis.com/xOi1kZaI0eWDREZv/arcgis/rest/services/NTAD_Truck_Stop_Parking/FeatureServer/0/query",
+          "actions": [
+            "park",
+            "save",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "parking",
+            "restrooms"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated"
+        },
+        {
+          "name": "Love's Travel Stop Valley City",
+          "type": "travel_center",
+          "at_mi": 134.2,
+          "source": "Love's official store feed lists store 849 in Valley City, ND on I-94, exit 292; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.2 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking",
+            "restrooms"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "likely",
+          "curation": "curated"
+        }
+      ]
+    },
+    {
+      "from": "Bismarck",
+      "to": "Billings",
+      "miles": 414,
+      "highway": "I-94",
+      "terrain": "flat",
+      "corridor": {
+        "tollway_detected": false,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 46.80854,
+            "lon": -100.7837
+          },
+          {
+            "at_mi": 25.9,
+            "lat": 46.86135,
+            "lon": -101.30697
+          },
+          {
+            "at_mi": 51.7,
+            "lat": 46.86194,
+            "lon": -101.85249
+          },
+          {
+            "at_mi": 77.6,
+            "lat": 46.87734,
+            "lon": -102.38125
+          },
+          {
+            "at_mi": 103.5,
+            "lat": 46.89073,
+            "lon": -102.9172
+          },
+          {
+            "at_mi": 129.4,
+            "lat": 46.90821,
+            "lon": -103.44759
+          },
+          {
+            "at_mi": 155.3,
+            "lat": 46.93309,
+            "lon": -103.98057
+          },
+          {
+            "at_mi": 181.1,
+            "lat": 47.06699,
+            "lon": -104.46133
+          },
+          {
+            "at_mi": 207.0,
+            "lat": 46.97662,
+            "lon": -104.8577
+          },
+          {
+            "at_mi": 232.9,
+            "lat": 46.78442,
+            "lon": -105.30974
+          },
+          {
+            "at_mi": 258.7,
+            "lat": 46.5194,
+            "lon": -105.68536
+          },
+          {
+            "at_mi": 284.6,
+            "lat": 46.31247,
+            "lon": -106.08967
+          },
+          {
+            "at_mi": 310.5,
+            "lat": 46.26648,
+            "lon": -106.62019
+          },
+          {
+            "at_mi": 336.4,
+            "lat": 46.26349,
+            "lon": -107.14411
+          },
+          {
+            "at_mi": 362.3,
+            "lat": 46.12232,
+            "lon": -107.57891
+          },
+          {
+            "at_mi": 388.1,
+            "lat": 45.96438,
+            "lon": -108.05885
+          },
+          {
+            "at_mi": 414.0,
+            "lat": 45.7833,
+            "lon": -108.5007
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 1702.8,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 25.9,
+            "elevation_ft": 2057.1,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 51.7,
+            "elevation_ft": 2185.0,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 77.6,
+            "elevation_ft": 2441.9,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 103.5,
+            "elevation_ft": 2529.5,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 129.4,
+            "elevation_ft": 2510.8,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 155.3,
+            "elevation_ft": 2728.0,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 181.1,
+            "elevation_ft": 2478.7,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 207.0,
+            "elevation_ft": 2198.2,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 232.9,
+            "elevation_ft": 2257.2,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 258.7,
+            "elevation_ft": 2605.0,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 284.6,
+            "elevation_ft": 2509.8,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 310.5,
+            "elevation_ft": 2719.8,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 336.4,
+            "elevation_ft": 2654.2,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 362.3,
+            "elevation_ft": 2844.5,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 388.1,
+            "elevation_ft": 2969.2,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 414.0,
+            "elevation_ft": 3131.6,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 414.0,
+            "avg_grade_pct": 0.06,
+            "terrain": "flat",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          }
+        ],
+        "checkpoints": [
+          {
+            "name": "I-94 corridor between Bismarck and Billings",
+            "at_mi": 207.0,
+            "type": "place",
+            "state": "Montana",
+            "highway": "I-94",
+            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
+          }
+        ],
+        "state_miles": [
+          {
+            "state": "North Dakota",
+            "miles": 158.9
+          },
+          {
+            "state": "Montana",
+            "miles": 255.1
+          }
+        ],
+        "state_crossings": [
+          {
+            "at_mi": 158.9,
+            "from_state": "North Dakota",
+            "state": "Montana",
+            "place": "North Dakota-Montana line on I-94",
+            "source": "Computed from OSRM route geometry and public U.S. state boundary GeoJSON."
+          }
+        ],
+        "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
+      },
+      "stops": [
+        {
+          "name": "Flying J Travel Center Beach",
+          "type": "travel_center",
+          "at_mi": 156.5,
+          "source": "Pilot Flying J official locator lists Flying J Travel Center store 684 in Beach, ND with 89 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.7 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/nd/beach/i-94-nd-16",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "restrooms",
+            "parking",
+            "scale"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated"
+        },
+        {
+          "name": "Bad Route",
+          "type": "public_rest_area",
+          "at_mi": 216.5,
+          "source": "FHWA Jason's Law truck parking inventory (NTAD via BTS) lists Bad Route on I-94E in Fallon, MT with 16 truck parking spaces, mile post 192; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.5 mi from simplified corridor line), accessed 2026-06-17: https://services.arcgis.com/xOi1kZaI0eWDREZv/arcgis/rest/services/NTAD_Truck_Stop_Parking/FeatureServer/0/query",
+          "actions": [
+            "park",
+            "save",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "parking",
+            "restrooms"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated"
+        },
+        {
+          "name": "Hathaway WB",
+          "type": "public_rest_area",
+          "at_mi": 295.4,
+          "source": "FHWA Jason's Law truck parking inventory (NTAD via BTS) lists Hathaway WB on I-94W in Hathaway, MT with 11 truck parking spaces, mile post 112; at_mi estimated by projecting source coordinates onto checked-in route geometry (1.7 mi from simplified corridor line), accessed 2026-06-17: https://services.arcgis.com/xOi1kZaI0eWDREZv/arcgis/rest/services/NTAD_Truck_Stop_Parking/FeatureServer/0/query",
+          "actions": [
+            "park",
+            "save",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "parking",
+            "restrooms"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated"
+        }
+      ]
+    },
+    {
+      "from": "Rapid City",
+      "to": "Sioux Falls",
+      "miles": 349,
+      "highway": "I-90",
+      "terrain": "flat",
+      "corridor": {
+        "tollway_detected": false,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 44.08059,
+            "lon": -103.23154
+          },
+          {
+            "at_mi": 24.9,
+            "lat": 44.10343,
+            "lon": -102.76537
+          },
+          {
+            "at_mi": 49.9,
+            "lat": 44.02742,
+            "lon": -102.33286
+          },
+          {
+            "at_mi": 74.8,
+            "lat": 43.84881,
+            "lon": -101.91756
+          },
+          {
+            "at_mi": 99.7,
+            "lat": 43.85162,
+            "lon": -101.42296
+          },
+          {
+            "at_mi": 124.6,
+            "lat": 43.90091,
+            "lon": -100.94502
+          },
+          {
+            "at_mi": 149.6,
+            "lat": 43.90857,
+            "lon": -100.43508
+          },
+          {
+            "at_mi": 174.5,
+            "lat": 43.8972,
+            "lon": -99.96591
+          },
+          {
+            "at_mi": 199.4,
+            "lat": 43.84401,
+            "lon": -99.49135
+          },
+          {
+            "at_mi": 224.4,
+            "lat": 43.75236,
+            "lon": -99.06554
+          },
+          {
+            "at_mi": 249.3,
+            "lat": 43.70836,
+            "lon": -98.54543
+          },
+          {
+            "at_mi": 274.2,
+            "lat": 43.69406,
+            "lon": -98.08847
+          },
+          {
+            "at_mi": 299.1,
+            "lat": 43.66521,
+            "lon": -97.59439
+          },
+          {
+            "at_mi": 324.1,
+            "lat": 43.64979,
+            "lon": -97.09762
+          },
+          {
+            "at_mi": 349.0,
+            "lat": 43.54456,
+            "lon": -96.731
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 3256.2,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 24.9,
+            "elevation_ft": 2910.1,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 49.9,
+            "elevation_ft": 2523.0,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 74.8,
+            "elevation_ft": 2549.2,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 99.7,
+            "elevation_ft": 2375.3,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 124.6,
+            "elevation_ft": 2204.7,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 149.6,
+            "elevation_ft": 2119.4,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 174.5,
+            "elevation_ft": 1758.5,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 199.4,
+            "elevation_ft": 1747.0,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 224.4,
+            "elevation_ft": 1648.6,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 249.3,
+            "elevation_ft": 1551.8,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 274.2,
+            "elevation_ft": 1318.9,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 299.1,
+            "elevation_ft": 1397.6,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 324.1,
+            "elevation_ft": 1656.8,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 349.0,
+            "elevation_ft": 1463.3,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 349.0,
+            "avg_grade_pct": -0.09,
+            "terrain": "flat",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          }
+        ],
+        "checkpoints": [
+          {
+            "name": "I-90 corridor between Rapid City and Sioux Falls",
+            "at_mi": 174.5,
+            "type": "place",
+            "state": "South Dakota",
+            "highway": "I-90",
+            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
+          }
+        ],
+        "state_miles": [
+          {
+            "state": "South Dakota",
+            "miles": 349.0
+          }
+        ],
+        "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
+      },
+      "stops": [
+        {
+          "name": "I-90W truck parking near Cactus Flats",
+          "type": "public_rest_area",
+          "at_mi": 81.9,
+          "source": "FHWA Jason's Law truck parking inventory (NTAD via BTS) lists I-90W truck parking near Cactus Flats on I-90W in Cactus Flats, SD with 10 truck parking spaces, mile post 137; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.8 mi from simplified corridor line), accessed 2026-06-17: https://services.arcgis.com/xOi1kZaI0eWDREZv/arcgis/rest/services/NTAD_Truck_Stop_Parking/FeatureServer/0/query",
+          "actions": [
+            "park",
+            "save",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "parking",
+            "restrooms"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated"
+        },
+        {
+          "name": "I-90W truck parking near Presho",
+          "type": "public_rest_area",
+          "at_mi": 164.9,
+          "source": "FHWA Jason's Law truck parking inventory (NTAD via BTS) lists I-90W truck parking near Presho on I-90W in Presho, SD with 13 truck parking spaces, mile post 221; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.2 mi from simplified corridor line), accessed 2026-06-17: https://services.arcgis.com/xOi1kZaI0eWDREZv/arcgis/rest/services/NTAD_Truck_Stop_Parking/FeatureServer/0/query",
+          "actions": [
+            "park",
+            "save",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "parking",
+            "restrooms"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated"
+        },
+        {
+          "name": "I-90W truck parking near White Lake",
+          "type": "public_rest_area",
+          "at_mi": 245.9,
+          "source": "FHWA Jason's Law truck parking inventory (NTAD via BTS) lists I-90W truck parking near White Lake on I-90W in White Lake, SD with 9 truck parking spaces, mile post 301; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.4 mi from simplified corridor line), accessed 2026-06-17: https://services.arcgis.com/xOi1kZaI0eWDREZv/arcgis/rest/services/NTAD_Truck_Stop_Parking/FeatureServer/0/query",
+          "actions": [
+            "park",
+            "save",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "parking",
+            "restrooms"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated"
+        }
+      ]
+    },
+    {
+      "from": "Rapid City",
+      "to": "Billings",
+      "miles": 322,
+      "highway": "I-90",
+      "terrain": "flat",
+      "corridor": {
+        "tollway_detected": false,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 44.08059,
+            "lon": -103.23154
+          },
+          {
+            "at_mi": 26.8,
+            "lat": 44.38539,
+            "lon": -103.4858
+          },
+          {
+            "at_mi": 53.7,
+            "lat": 44.57601,
+            "lon": -103.85942
+          },
+          {
+            "at_mi": 80.5,
+            "lat": 44.86576,
+            "lon": -104.14548
+          },
+          {
+            "at_mi": 107.3,
+            "lat": 45.10632,
+            "lon": -104.59159
+          },
+          {
+            "at_mi": 134.2,
+            "lat": 45.2853,
+            "lon": -105.05974
+          },
+          {
+            "at_mi": 161.0,
+            "lat": 45.47454,
+            "lon": -105.51627
+          },
+          {
+            "at_mi": 187.8,
+            "lat": 45.5716,
+            "lon": -106.03755
+          },
+          {
+            "at_mi": 214.7,
+            "lat": 45.63482,
+            "lon": -106.56585
+          },
+          {
+            "at_mi": 241.5,
+            "lat": 45.52801,
+            "lon": -107.08068
+          },
+          {
+            "at_mi": 268.3,
+            "lat": 45.67591,
+            "lon": -107.50073
+          },
+          {
+            "at_mi": 295.2,
+            "lat": 45.78119,
+            "lon": -107.99282
+          },
+          {
+            "at_mi": 322.0,
+            "lat": 45.7833,
+            "lon": -108.5007
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 3256.2,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 26.8,
+            "elevation_ft": 3613.2,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 53.7,
+            "elevation_ft": 3333.3,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 80.5,
+            "elevation_ft": 3415.4,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 107.3,
+            "elevation_ft": 3461.3,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 134.2,
+            "elevation_ft": 3320.2,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 161.0,
+            "elevation_ft": 3474.4,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 187.8,
+            "elevation_ft": 3278.9,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 214.7,
+            "elevation_ft": 3921.9,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 241.5,
+            "elevation_ft": 3779.5,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 268.3,
+            "elevation_ft": 2965.9,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 295.2,
+            "elevation_ft": 3272.0,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 322.0,
+            "elevation_ft": 3131.6,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 322.0,
+            "avg_grade_pct": -0.01,
+            "terrain": "flat",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          }
+        ],
+        "checkpoints": [
+          {
+            "name": "I-90 corridor between Rapid City and Billings",
+            "at_mi": 161.0,
+            "type": "place",
+            "state": "Montana",
+            "highway": "I-90",
+            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
+          }
+        ],
+        "state_miles": [
+          {
+            "state": "South Dakota",
+            "miles": 75.5
+          },
+          {
+            "state": "Wyoming",
+            "miles": 19.8
+          },
+          {
+            "state": "Montana",
+            "miles": 226.7
+          }
+        ],
+        "state_crossings": [
+          {
+            "at_mi": 75.5,
+            "from_state": "South Dakota",
+            "state": "Wyoming",
+            "place": "South Dakota-Wyoming line on I-90",
+            "source": "Computed from OSRM route geometry and public U.S. state boundary GeoJSON."
+          },
+          {
+            "at_mi": 95.2,
+            "from_state": "Wyoming",
+            "state": "Montana",
+            "place": "Wyoming-Montana line on I-90",
+            "source": "Computed from OSRM route geometry and public U.S. state boundary GeoJSON."
+          }
+        ],
+        "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
+      },
+      "stops": [
+        {
+          "name": "Aladdin NE Wyoming Info Center and Rest Area",
+          "type": "public_rest_area",
+          "at_mi": 61.4,
+          "source": "FHWA Jason's Law truck parking inventory (NTAD via BTS) lists Aladdin NE Wyoming Info Center and Rest Area on I-90 in NA, WY with 12 truck parking spaces, mile post Exit 199; at_mi estimated by projecting source coordinates onto checked-in route geometry (15.8 mi from simplified corridor line), accessed 2026-06-17: https://services.arcgis.com/xOi1kZaI0eWDREZv/arcgis/rest/services/NTAD_Truck_Stop_Parking/FeatureServer/0/query",
+          "actions": [
+            "park",
+            "save",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "parking",
+            "restrooms"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated"
+        },
+        {
+          "name": "Love's Travel Stop Hardin",
+          "type": "travel_center",
+          "at_mi": 275.4,
+          "source": "Love's official store feed lists store 679 in Hardin, MT on I-90, exit 495/Hwy 47; at_mi estimated by projecting source coordinates onto checked-in route geometry (3.2 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking",
+            "restrooms"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "likely",
+          "curation": "curated"
+        },
+        {
+          "name": "Hardin EB",
+          "type": "public_rest_area",
+          "at_mi": 295.6,
+          "source": "FHWA Jason's Law truck parking inventory (NTAD via BTS) lists Hardin EB on I-90E in Pompey Pillar, MT with 12 truck parking spaces, mile post 476; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.1 mi from simplified corridor line), accessed 2026-06-17: https://services.arcgis.com/xOi1kZaI0eWDREZv/arcgis/rest/services/NTAD_Truck_Stop_Parking/FeatureServer/0/query",
+          "actions": [
+            "park",
+            "save",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "parking",
+            "restrooms"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated"
+        }
+      ]
+    },
+    {
+      "from": "Montpelier",
+      "to": "Burlington",
+      "miles": 39,
+      "highway": "I-89",
+      "terrain": "flat",
+      "corridor": {
+        "tollway_detected": false,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 44.2601,
+            "lon": -72.5754
+          },
+          {
+            "at_mi": 9.8,
+            "lat": 44.31708,
+            "lon": -72.72282
+          },
+          {
+            "at_mi": 19.5,
+            "lat": 44.37729,
+            "lon": -72.89293
+          },
+          {
+            "at_mi": 29.2,
+            "lat": 44.43366,
+            "lon": -73.0621
+          },
+          {
+            "at_mi": 39.0,
+            "lat": 44.47596,
+            "lon": -73.2121
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 534.8,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 9.8,
+            "elevation_ft": 464.9,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 19.5,
+            "elevation_ft": 329.1,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 29.2,
+            "elevation_ft": 519.0,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 39.0,
+            "elevation_ft": 201.8,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 39.0,
+            "avg_grade_pct": -0.15,
+            "terrain": "flat",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          }
+        ],
+        "checkpoints": [
+          {
+            "name": "I-89 corridor between Montpelier and Burlington",
+            "at_mi": 19.5,
+            "type": "place",
+            "state": "Vermont",
+            "highway": "I-89",
+            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
+          }
+        ],
+        "state_miles": [
+          {
+            "state": "Vermont",
+            "miles": 39.0
+          }
+        ],
+        "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
+      },
+      "stops": [
+        {
+          "name": "Waterbury South Parking Area",
+          "type": "public_rest_area",
+          "at_mi": 15.1,
+          "source": "FHWA Jason's Law truck parking inventory (NTAD via BTS) lists Waterbury South Parking Area on I-89S in Waterbury, VT with 3 truck parking spaces, mile post 66; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.8 mi from simplified corridor line), accessed 2026-06-17: https://services.arcgis.com/xOi1kZaI0eWDREZv/arcgis/rest/services/NTAD_Truck_Stop_Parking/FeatureServer/0/query",
+          "actions": [
+            "park",
+            "save",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "parking",
+            "restrooms"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated"
+        }
+      ]
+    },
+    {
+      "from": "Montpelier",
+      "to": "Manchester",
+      "miles": 130,
+      "highway": "I-89",
+      "terrain": "flat",
+      "corridor": {
+        "tollway_detected": true,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 44.2601,
+            "lon": -72.5754
+          },
+          {
+            "at_mi": 26.0,
+            "lat": 43.91562,
+            "lon": -72.61358
+          },
+          {
+            "at_mi": 52.0,
+            "lat": 43.65999,
+            "lon": -72.35783
+          },
+          {
+            "at_mi": 78.0,
+            "lat": 43.44351,
+            "lon": -72.07379
+          },
+          {
+            "at_mi": 104.0,
+            "lat": 43.2131,
+            "lon": -71.71683
+          },
+          {
+            "at_mi": 130.0,
+            "lat": 42.99562,
+            "lon": -71.45479
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 534.8,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 26.0,
+            "elevation_ft": 1231.0,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 52.0,
+            "elevation_ft": 708.0,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 78.0,
+            "elevation_ft": 1264.1,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 104.0,
+            "elevation_ft": 393.0,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 130.0,
+            "elevation_ft": 257.5,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 130.0,
+            "avg_grade_pct": -0.04,
+            "terrain": "flat",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          }
+        ],
+        "checkpoints": [
+          {
+            "name": "I-89 corridor between Montpelier and Manchester",
+            "at_mi": 78.0,
+            "type": "place",
+            "state": "New Hampshire",
+            "highway": "I-89",
+            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
+          }
+        ],
+        "state_miles": [
+          {
+            "state": "Vermont",
+            "miles": 55.0
+          },
+          {
+            "state": "New Hampshire",
+            "miles": 75.0
+          }
+        ],
+        "state_crossings": [
+          {
+            "at_mi": 55.0,
+            "from_state": "Vermont",
+            "state": "New Hampshire",
+            "place": "Vermont-New Hampshire line on I-89",
+            "source": "Computed from OSRM route geometry and public U.S. state boundary GeoJSON."
+          }
+        ],
+        "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
+      },
+      "stops": [
+        {
+          "name": "Lebanon Rest Area",
+          "type": "public_rest_area",
+          "at_mi": 56.9,
+          "source": "FHWA Jason's Law truck parking inventory (NTAD via BTS) lists Lebanon Rest Area on I-89S in Lebanon, NH with 8 truck parking spaces, mile post 57; at_mi estimated by projecting source coordinates onto checked-in route geometry (3.0 mi from simplified corridor line), accessed 2026-06-17: https://services.arcgis.com/xOi1kZaI0eWDREZv/arcgis/rest/services/NTAD_Truck_Stop_Parking/FeatureServer/0/query",
+          "actions": [
+            "park",
+            "save",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "parking",
+            "restrooms"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated"
+        }
+      ]
+    },
+    {
+      "from": "Morgantown",
+      "to": "Pittsburgh",
+      "miles": 71,
+      "highway": "I-79",
+      "terrain": "flat",
+      "corridor": {
+        "tollway_detected": true,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 39.6296,
+            "lon": -79.9561
+          },
+          {
+            "at_mi": 17.8,
+            "lat": 39.79812,
+            "lon": -79.782
+          },
+          {
+            "at_mi": 35.5,
+            "lat": 40.02343,
+            "lon": -79.76762
+          },
+          {
+            "at_mi": 53.2,
+            "lat": 40.24261,
+            "lon": -79.87131
+          },
+          {
+            "at_mi": 71.0,
+            "lat": 40.44061,
+            "lon": -79.99594
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 905.5,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 17.8,
+            "elevation_ft": 1057.4,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 35.5,
+            "elevation_ft": 1175.5,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 53.2,
+            "elevation_ft": 1016.7,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 71.0,
+            "elevation_ft": 731.6,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 71.0,
+            "avg_grade_pct": -0.05,
+            "terrain": "flat",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          }
+        ],
+        "checkpoints": [
+          {
+            "name": "I-79 corridor between Morgantown and Pittsburgh",
+            "at_mi": 35.5,
+            "type": "place",
+            "state": "Pennsylvania",
+            "highway": "I-79",
+            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
+          }
+        ],
+        "state_miles": [
+          {
+            "state": "West Virginia",
+            "miles": 11.7
+          },
+          {
+            "state": "Pennsylvania",
+            "miles": 59.3
+          }
+        ],
+        "state_crossings": [
+          {
+            "at_mi": 11.7,
+            "from_state": "West Virginia",
+            "state": "Pennsylvania",
+            "place": "West Virginia-Pennsylvania line on I-79",
+            "source": "Computed from OSRM route geometry and public U.S. state boundary GeoJSON."
+          }
+        ],
+        "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
+      },
+      "stops": [
+        {
+          "name": "I-79N truck parking near Whiteley",
+          "type": "public_rest_area",
+          "at_mi": 6.1,
+          "source": "FHWA Jason's Law truck parking inventory (NTAD via BTS) lists I-79N truck parking near Whiteley on I-79N in Whiteley, PA with 16 truck parking spaces, mile post 6; at_mi estimated by projecting source coordinates onto checked-in route geometry (12.2 mi from simplified corridor line), accessed 2026-06-17: https://services.arcgis.com/xOi1kZaI0eWDREZv/arcgis/rest/services/NTAD_Truck_Stop_Parking/FeatureServer/0/query",
+          "actions": [
+            "park",
+            "save",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "parking",
+            "restrooms"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated"
+        }
+      ]
+    },
+    {
+      "from": "Morgantown",
+      "to": "Charleston, West Virginia",
+      "miles": 156,
+      "highway": "I-79",
+      "terrain": "flat",
+      "corridor": {
+        "tollway_detected": false,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 39.6296,
+            "lon": -79.9561
+          },
+          {
+            "at_mi": 26.0,
+            "lat": 39.37704,
+            "lon": -80.21224
+          },
+          {
+            "at_mi": 52.0,
+            "lat": 39.05756,
+            "lon": -80.40048
+          },
+          {
+            "at_mi": 78.0,
+            "lat": 38.81025,
+            "lon": -80.66611
+          },
+          {
+            "at_mi": 104.0,
+            "lat": 38.61971,
+            "lon": -80.90307
+          },
+          {
+            "at_mi": 130.0,
+            "lat": 38.54726,
+            "lon": -81.30372
+          },
+          {
+            "at_mi": 156.0,
+            "lat": 38.34978,
+            "lon": -81.63258
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 905.5,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 26.0,
+            "elevation_ft": 1192.3,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 52.0,
+            "elevation_ft": 1207.0,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 78.0,
+            "elevation_ft": 794.3,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 104.0,
+            "elevation_ft": 1158.1,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 130.0,
+            "elevation_ft": 705.4,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 156.0,
+            "elevation_ft": 634.8,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 156.0,
+            "avg_grade_pct": -0.03,
+            "terrain": "flat",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          }
+        ],
+        "checkpoints": [
+          {
+            "name": "I-79 corridor between Morgantown and Charleston, West Virginia",
+            "at_mi": 78.0,
+            "type": "place",
+            "state": "West Virginia",
+            "highway": "I-79",
+            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
+          }
+        ],
+        "state_miles": [
+          {
+            "state": "West Virginia",
+            "miles": 156.0
+          }
+        ],
+        "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
+      },
+      "stops": [
+        {
+          "name": "Pilot Travel Center Sutton",
+          "type": "travel_center",
+          "at_mi": 85.3,
+          "source": "Pilot Flying J official locator lists Pilot Travel Center store 474 in Sutton, WV with 56 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (5.1 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/wv/sutton/270-scott-fork-rd",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "restrooms",
+            "parking"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated"
+        }
+      ]
+    },
+    {
+      "from": "Rock Springs",
+      "to": "Cheyenne",
+      "miles": 258,
+      "highway": "I-80",
+      "terrain": "hills",
+      "corridor": {
+        "tollway_detected": false,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 41.58768,
+            "lon": -109.20295
+          },
+          {
+            "at_mi": 25.8,
+            "lat": 41.67623,
+            "lon": -108.77101
+          },
+          {
+            "at_mi": 51.6,
+            "lat": 41.63087,
+            "lon": -108.27946
+          },
+          {
+            "at_mi": 77.4,
+            "lat": 41.71477,
+            "lon": -107.7872
+          },
+          {
+            "at_mi": 103.2,
+            "lat": 41.77587,
+            "lon": -107.32027
+          },
+          {
+            "at_mi": 129.0,
+            "lat": 41.74144,
+            "lon": -106.83803
+          },
+          {
+            "at_mi": 154.8,
+            "lat": 41.68687,
+            "lon": -106.38059
+          },
+          {
+            "at_mi": 180.6,
+            "lat": 41.47322,
+            "lon": -106.00402
+          },
+          {
+            "at_mi": 206.4,
+            "lat": 41.30272,
+            "lon": -105.61211
+          },
+          {
+            "at_mi": 232.2,
+            "lat": 41.10661,
+            "lon": -105.25057
+          },
+          {
+            "at_mi": 258.0,
+            "lat": 41.13978,
+            "lon": -104.82006
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 6412.7,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 25.8,
+            "elevation_ft": 6515.4,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 51.6,
+            "elevation_ft": 6958.7,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 77.4,
+            "elevation_ft": 7109.6,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 103.2,
+            "elevation_ft": 6950.1,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 129.0,
+            "elevation_ft": 6843.8,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 154.8,
+            "elevation_ft": 7309.7,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 180.6,
+            "elevation_ft": 7618.1,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 206.4,
+            "elevation_ft": 7169.6,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 232.2,
+            "elevation_ft": 7687.0,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 258.0,
+            "elevation_ft": 6097.4,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 232.2,
+            "avg_grade_pct": 0.1,
+            "terrain": "flat",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          },
+          {
+            "start_mi": 232.2,
+            "end_mi": 258.0,
+            "avg_grade_pct": -1.09,
+            "terrain": "hills",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          }
+        ],
+        "checkpoints": [
+          {
+            "name": "I-80 corridor between Rock Springs and Cheyenne",
+            "at_mi": 129.0,
+            "type": "place",
+            "state": "Wyoming",
+            "highway": "I-80",
+            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
+          }
+        ],
+        "state_miles": [
+          {
+            "state": "Wyoming",
+            "miles": 258.0
+          }
+        ],
+        "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
+      },
+      "stops": [
+        {
+          "name": "Turnout westbound",
+          "type": "public_rest_area",
+          "at_mi": 83.3,
+          "source": "FHWA Jason's Law truck parking inventory (NTAD via BTS) lists Turnout westbound on I-80 in NA, WY with 16 truck parking spaces, mile post MM 190; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.7 mi from simplified corridor line), accessed 2026-06-17: https://services.arcgis.com/xOi1kZaI0eWDREZv/arcgis/rest/services/NTAD_Truck_Stop_Parking/FeatureServer/0/query",
+          "actions": [
+            "park",
+            "save",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "parking",
+            "restrooms"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated"
+        },
+        {
+          "name": "Wagonhound rest area",
+          "type": "public_rest_area",
+          "at_mi": 161.4,
+          "source": "FHWA Jason's Law truck parking inventory (NTAD via BTS) lists Wagonhound rest area on I-80 in NA, WY with 25 truck parking spaces, mile post Exit 267; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.2 mi from simplified corridor line), accessed 2026-06-17: https://services.arcgis.com/xOi1kZaI0eWDREZv/arcgis/rest/services/NTAD_Truck_Stop_Parking/FeatureServer/0/query",
+          "actions": [
+            "park",
+            "save",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "parking",
+            "restrooms"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated"
+        }
+      ]
+    },
+    {
+      "from": "Rock Springs",
+      "to": "Salt Lake City",
+      "miles": 184,
+      "highway": "I-80",
+      "terrain": "hills",
+      "corridor": {
+        "tollway_detected": false,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 41.58768,
+            "lon": -109.20295
+          },
+          {
+            "at_mi": 26.3,
+            "lat": 41.54381,
+            "lon": -109.65352
+          },
+          {
+            "at_mi": 52.6,
+            "lat": 41.4333,
+            "lon": -110.10844
+          },
+          {
+            "at_mi": 78.9,
+            "lat": 41.29804,
+            "lon": -110.59514
+          },
+          {
+            "at_mi": 105.1,
+            "lat": 41.2467,
+            "lon": -111.03975
+          },
+          {
+            "at_mi": 131.4,
+            "lat": 41.0053,
+            "lon": -111.38368
+          },
+          {
+            "at_mi": 157.7,
+            "lat": 40.72471,
+            "lon": -111.53613
+          },
+          {
+            "at_mi": 184.0,
+            "lat": 40.7608,
+            "lon": -111.891
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 6412.7,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 26.3,
+            "elevation_ft": 6223.8,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 52.6,
+            "elevation_ft": 6709.3,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 78.9,
+            "elevation_ft": 6932.4,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 105.1,
+            "elevation_ft": 6756.6,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 131.4,
+            "elevation_ft": 5708.7,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 157.7,
+            "elevation_ft": 6378.0,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 184.0,
+            "elevation_ft": 4287.4,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 157.7,
+            "avg_grade_pct": -0.0,
+            "terrain": "flat",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          },
+          {
+            "start_mi": 157.7,
+            "end_mi": 184.0,
+            "avg_grade_pct": -1.53,
+            "terrain": "hills",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          }
+        ],
+        "checkpoints": [
+          {
+            "name": "I-80 corridor between Rock Springs and Salt Lake City",
+            "at_mi": 105.1,
+            "type": "place",
+            "state": "Utah",
+            "highway": "I-80",
+            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
+          }
+        ],
+        "state_miles": [
+          {
+            "state": "Wyoming",
+            "miles": 105.9
+          },
+          {
+            "state": "Utah",
+            "miles": 78.1
+          }
+        ],
+        "state_crossings": [
+          {
+            "at_mi": 105.9,
+            "from_state": "Wyoming",
+            "state": "Utah",
+            "place": "Wyoming-Utah line on I-80",
+            "source": "Computed from OSRM route geometry and public U.S. state boundary GeoJSON."
+          }
+        ],
+        "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
+      },
+      "stops": [
+        {
+          "name": "North Lyman Rest area",
+          "type": "public_rest_area",
+          "at_mi": 63.2,
+          "source": "FHWA Jason's Law truck parking inventory (NTAD via BTS) lists North Lyman Rest area on I-80 in NA, WY with 8 truck parking spaces, mile post Exit 41; at_mi estimated by projecting source coordinates onto checked-in route geometry (1.0 mi from simplified corridor line), accessed 2026-06-17: https://services.arcgis.com/xOi1kZaI0eWDREZv/arcgis/rest/services/NTAD_Truck_Stop_Parking/FeatureServer/0/query",
+          "actions": [
+            "park",
+            "save",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "parking",
+            "restrooms"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated"
+        },
+        {
+          "name": "Echo Canyon (EB)",
+          "type": "public_rest_area",
+          "at_mi": 133.1,
+          "source": "FHWA Jason's Law truck parking inventory (NTAD via BTS) lists Echo Canyon (EB) on I-80 in Echo, UT with 5 truck parking spaces, mile post 169; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.5 mi from simplified corridor line), accessed 2026-06-17: https://services.arcgis.com/xOi1kZaI0eWDREZv/arcgis/rest/services/NTAD_Truck_Stop_Parking/FeatureServer/0/query",
+          "actions": [
+            "park",
+            "save",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "parking",
+            "restrooms"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated"
+        }
+      ]
+    },
+    {
+      "from": "Newport",
+      "to": "Providence",
+      "miles": 34,
+      "highway": "I-95",
+      "terrain": "flat",
+      "corridor": {
+        "tollway_detected": true,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 41.4901,
+            "lon": -71.31283
+          },
+          {
+            "at_mi": 8.5,
+            "lat": 41.52718,
+            "lon": -71.43602
+          },
+          {
+            "at_mi": 17.0,
+            "lat": 41.61926,
+            "lon": -71.48669
+          },
+          {
+            "at_mi": 25.5,
+            "lat": 41.73292,
+            "lon": -71.45249
+          },
+          {
+            "at_mi": 34.0,
+            "lat": 41.82388,
+            "lon": -71.41265
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": -32.8,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 8.5,
+            "elevation_ft": 61.0,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 17.0,
+            "elevation_ft": -2.3,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 25.5,
+            "elevation_ft": -43.6,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 34.0,
+            "elevation_ft": -55.8,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 34.0,
+            "avg_grade_pct": -0.02,
+            "terrain": "flat",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          }
+        ],
+        "checkpoints": [
+          {
+            "name": "I-95 corridor between Newport and Providence",
+            "at_mi": 17.0,
+            "type": "place",
+            "state": "Rhode Island",
+            "highway": "I-95",
+            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
+          }
+        ],
+        "state_miles": [
+          {
+            "state": "Rhode Island",
+            "miles": 34.0
+          }
+        ],
+        "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
+      },
+      "stops": [
+        {
+          "name": "Rhode Island Visitor Center",
+          "type": "public_rest_area",
+          "at_mi": 13.0,
+          "source": "FHWA Jason's Law truck parking inventory (NTAD via BTS) lists Rhode Island Visitor Center on I-95 N in Richmond, RI with 16 truck parking spaces, mile post MP 6.3; at_mi estimated by projecting source coordinates onto checked-in route geometry (13.4 mi from simplified corridor line), accessed 2026-06-17: https://services.arcgis.com/xOi1kZaI0eWDREZv/arcgis/rest/services/NTAD_Truck_Stop_Parking/FeatureServer/0/query",
+          "actions": [
+            "park",
+            "save",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "parking",
+            "restrooms"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated"
+        }
+      ]
+    },
+    {
+      "from": "Newport",
+      "to": "New Haven",
+      "miles": 104,
+      "highway": "I-95",
+      "terrain": "flat",
+      "corridor": {
+        "tollway_detected": true,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 41.4901,
+            "lon": -71.31283
+          },
+          {
+            "at_mi": 26.0,
+            "lat": 41.38943,
+            "lon": -71.62505
+          },
+          {
+            "at_mi": 52.0,
+            "lat": 41.36389,
+            "lon": -72.02029
+          },
+          {
+            "at_mi": 78.0,
+            "lat": 41.29113,
+            "lon": -72.4618
+          },
+          {
+            "at_mi": 104.0,
+            "lat": 41.30806,
+            "lon": -72.9281
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": -32.8,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 26.0,
+            "elevation_ft": 72.2,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 52.0,
+            "elevation_ft": 154.2,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 78.0,
+            "elevation_ft": 96.8,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          },
+          {
+            "at_mi": 104.0,
+            "elevation_ft": 57.4,
+            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 104.0,
+            "avg_grade_pct": 0.02,
+            "terrain": "flat",
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+          }
+        ],
+        "checkpoints": [
+          {
+            "name": "I-95 corridor between Newport and New Haven",
+            "at_mi": 52.0,
+            "type": "place",
+            "state": "Connecticut",
+            "highway": "I-95",
+            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
+          }
+        ],
+        "state_miles": [
+          {
+            "state": "Rhode Island",
+            "miles": 40.1
+          },
+          {
+            "state": "Connecticut",
+            "miles": 63.9
+          }
+        ],
+        "state_crossings": [
+          {
+            "at_mi": 40.1,
+            "from_state": "Rhode Island",
+            "state": "Connecticut",
+            "place": "Rhode Island-Connecticut line on I-95",
+            "source": "Computed from OSRM route geometry and public U.S. state boundary GeoJSON."
+          }
+        ],
+        "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
+      },
+      "stops": [
+        {
+          "name": "CT Rest Area- North Stonington SB",
+          "type": "public_rest_area",
+          "at_mi": 40.6,
+          "source": "FHWA Jason's Law truck parking inventory (NTAD via BTS) lists CT Rest Area- North Stonington SB on I-95S in North Stonington, CT with 34 truck parking spaces, mile post 93; at_mi estimated by projecting source coordinates onto checked-in route geometry (2.9 mi from simplified corridor line), accessed 2026-06-17: https://services.arcgis.com/xOi1kZaI0eWDREZv/arcgis/rest/services/NTAD_Truck_Stop_Parking/FeatureServer/0/query",
+          "actions": [
+            "park",
+            "save",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "parking",
+            "restrooms"
           ],
           "directions": [
             "both"
