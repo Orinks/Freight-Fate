@@ -65,14 +65,17 @@ def quit_to_menu(app):
     app.state.handle_event(key_event(pygame.K_ESCAPE))
     assert isinstance(app.state, PauseMenuState)
     pause = app.state
-    while pause.items[pause.index].text != "Save and quit to main menu":
+    while pause.items[pause.index].text != "Quit to main menu":
         pause.handle_event(key_event(pygame.K_DOWN))
     pause.handle_event(key_event(pygame.K_RETURN))
     assert isinstance(app.state, MainMenuState)
 
 
 @pytest.mark.smoke
-def test_save_and_quit_then_continue_resumes_the_trip():
+def test_quit_mid_drive_resumes_from_the_last_stop():
+    # Saving is stops-only: quitting mid-drive does not persist the in-progress
+    # position, so Continue resumes the leg from where it was last departed
+    # (here, the origin terminal at the leg start), not from mid-drive.
     from freight_fate.app import App
     from freight_fate.states.driving import DrivingState
 
@@ -80,19 +83,15 @@ def test_save_and_quit_then_continue_resumes_the_trip():
     try:
         driving = start_drive(app)
         job, route = driving.job, driving.route
-        strikes = driving.speeding_strikes = 2
         drive_some(driving)
-        position = driving.trip.position_mi
-        minutes = driving.trip.game_minutes
-        zones = driving.trip.zones
+        assert driving.trip.position_mi > 0.0   # we actually moved up the leg
         quit_to_menu(app)
 
         p = app.ctx.profile
         assert p.active_trip is not None
-        assert p.active_trip["position_mi"] == position
-        assert p.active_trip["start_hour"] == driving.trip.start_hour
+        assert p.active_trip["position_mi"] == 0.0   # leg start, not mid-drive
 
-        # Continue from the main menu must land back in the drive
+        # Continue from the main menu lands back in the drive at the leg start
         while not app.state.items[app.state.index].text.startswith("Continue latest career"):
             app.state.handle_event(key_event(pygame.K_DOWN))
         app.state.handle_event(key_event(pygame.K_RETURN))
@@ -100,14 +99,8 @@ def test_save_and_quit_then_continue_resumes_the_trip():
         resumed = app.state
         assert resumed.resumed
         assert resumed.job.destination == job.destination
-        assert resumed.job.pay == job.pay
-        assert resumed.job.deadline_game_h == job.deadline_game_h
         assert resumed.route.cities == route.cities
-        assert abs(resumed.trip.position_mi - position) < 1e-6
-        assert abs(resumed.trip.game_minutes - minutes) < 1e-6
-        assert resumed.speeding_strikes == strikes
-        # same trip seed -> identical construction/traffic zone layout
-        assert resumed.trip.zones == zones
+        assert resumed.trip.position_mi == 0.0
         # the truck resumes parked
         assert not resumed.truck.engine_on
         assert resumed.truck.velocity_mps == 0.0

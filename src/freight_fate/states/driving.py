@@ -60,8 +60,8 @@ RAMP_LENGTH_MI = 0.5              # deceleration lane plus ramp to the stop
 CRUISE_MIN_MPH = 20.0             # cruise control needs road speed to hold
 ACC_BASE_GAP_SECONDS = 3.0        # clear-weather adaptive cruise gap
 ENGINE_SHUTDOWN_SAFE_MPH = 5.0    # prevent accidental kill-switch use at speed
-DELIVERY_PARK_MPH = 3.0           # destination settlement requires parking speed
-DOCKING_MAX_MPH = 1.0             # final dock/park action needs a full stop
+DELIVERY_PARK_MPH = 3.0           # within this, the gate prompts you to stop
+DOCKING_MAX_MPH = 0.5            # dock/settle/rest actions need a complete stop
 DRIVE_PHASE_PICKUP = "pickup"
 DRIVE_PHASE_DELIVERY = "delivery"
 
@@ -1132,7 +1132,7 @@ class DrivingState(State):
             self.ctx.say("There is no route POI here. Stops are announced as you "
                          "approach them.")
             return
-        if self.truck.speed_mph > 3:
+        if self.truck.speed_mph > DOCKING_MAX_MPH:
             self.ctx.say("Come to a complete stop first.")
             return
         self._open_poi_stop(stop)
@@ -1172,7 +1172,7 @@ class DrivingState(State):
             self._ramp_mi -= moved_mi
             if self._ramp_mi > 0:
                 return
-            if self.truck.speed_mph <= 3:
+            if self.truck.speed_mph <= DOCKING_MAX_MPH:
                 stop = self._ramp_stop
                 self._ramp_mi = None
                 self._ramp_stop = None
@@ -1307,10 +1307,10 @@ class DrivingState(State):
         self._arrival_stop_said = True
         self._cancel_cruise()
         self.ctx.audio.play("ui/warning")
-        self._set_status("Pickup ahead: slow below 3 mph.")
+        self._set_status("Pickup ahead: slow down and come to a complete stop.")
         self.ctx.say_event(
             f"Pickup ahead: {self._pickup_facility_text()}. "
-            f"Slow below {DELIVERY_PARK_MPH:.0f} mph.",
+            "Slow down and come to a complete stop at the gate.",
             interrupt=True)
 
     def _handle_pickup_creep(self) -> None:
@@ -1359,10 +1359,10 @@ class DrivingState(State):
         self._arrival_stop_said = True
         self._cancel_cruise()
         self.ctx.audio.play("ui/warning")
-        self._set_status("Destination ahead: slow below 3 mph.")
+        self._set_status("Destination ahead: slow down and come to a complete stop.")
         self.ctx.say_event(
             f"Destination ahead: {self._destination_facility_text()}. "
-            f"Slow below {DELIVERY_PARK_MPH:.0f} mph.",
+            "Slow down and come to a complete stop at the gate.",
             interrupt=True)
 
     def _handle_arrival_creep(self) -> None:
@@ -2088,9 +2088,10 @@ class PauseMenuState(MenuState):
             MenuItem("Abandon job", self._abandon,
                      help="Give up this job. Costs five hundred dollars and "
                           "reputation, and returns you to the origin city."),
-            MenuItem("Save and quit to main menu", self._quit_to_menu,
-                     help="Your money, truck, and trip progress are saved. "
-                          "This drive resumes from here when you continue."),
+            MenuItem("Quit to main menu", self._quit_to_menu,
+                     help="You can only save at a stop, so this drive is not "
+                          "saved in progress. It resumes from your last stop "
+                          "when you continue. Use Abandon job to drop the load."),
         ]
         if self.driving.emergency_shoulder_sleep_reason() is not None:
             items.insert(3, MenuItem(
@@ -2199,14 +2200,14 @@ class PauseMenuState(MenuState):
     def _quit_to_menu(self) -> None:
         from .main_menu import MainMenuState
 
-        p = self.ctx.profile
-        p.truck_fuel_gal = self.driving.truck.fuel_gal
-        p.truck_damage_pct = self.driving.truck.damage_pct
-        p.active_trip = self.driving.snapshot()
-        self.ctx.save_profile()
+        # Saving happens only at stops, so a mid-drive quit writes nothing: the
+        # on-disk save still points at your last stop, and Continue resumes the
+        # leg from there. In-progress leg driving is intentionally not preserved.
         drive_label = "pickup drive" if self.driving.phase == DRIVE_PHASE_PICKUP else "delivery"
-        self.ctx.say(f"Saved. Your {drive_label} will resume where you left off.",
-                     interrupt=True)
+        self.ctx.say(
+            f"Returning to the title. You can only save at a stop, so this "
+            f"{drive_label} will resume from your last stop, not from here.",
+            interrupt=True)
         self.ctx.reset_to(MainMenuState(self.ctx))
 
 

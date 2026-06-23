@@ -418,8 +418,8 @@ def test_delivery_requires_parking_at_destination(monkeypatch):
 
         assert isinstance(app.state, DrivingState)
         assert "Destination ahead" in events[-1]
-        assert "Slow below 3 mph" in events[-1]
-        assert "slow below 3 mph" in driving.lines()[-1].lower()
+        assert "come to a complete stop" in events[-1].lower()
+        assert "complete stop" in driving.lines()[-1].lower()
 
         driving.truck.velocity_mps = 0.0
         driving.update(1 / 60)
