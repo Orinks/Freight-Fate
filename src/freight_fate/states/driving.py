@@ -2522,17 +2522,25 @@ class ArrivalState(MenuState):
                    "Amarillo", "Albuquerque", "Flagstaff", "Los Angeles"}
         if origin in route66 and dest in route66:
             ids.append("route66_run")
-        city_badge = {
-            "Amarillo": "amarillo_arrival", "Phoenix": "phoenix_arrival",
-            "Wichita": "wichita_arrival", "Lubbock": "lubbock_arrival",
-            "Bakersfield": "bakersfield_arrival", "Tulsa": "tulsa_arrival",
-            "Las Vegas": "vegas_arrival",
+        arrival_hour = self.driving.trip.current_hour
+        # Plain "deliver into this city" badges (titles claim nothing extra).
+        simple_arrival = {
+            "Phoenix": "phoenix_arrival", "Wichita": "wichita_arrival",
+            "Bakersfield": "bakersfield_arrival", "Las Vegas": "vegas_arrival",
         }
-        if dest in city_badge:
-            ids.append(city_badge[dest])
-        if world.cities[dest].state == "Georgia" and is_night(self.driving.trip.current_hour):
-            ids.append("georgia_arrival")  # "Midnight Freight" -- night runs only
-        if "Detroit" in (origin, dest):
+        if dest in simple_arrival:
+            ids.append(simple_arrival[dest])
+        # Badges whose title names a condition, so the condition is enforced:
+        if dest == "Amarillo" and 5.0 <= arrival_hour < 12.0:   # "by Daybreak"
+            ids.append("amarillo_arrival")
+        if dest == "Tulsa" and on_time:                         # "Right on Schedule"
+            ids.append("tulsa_arrival")
+        if world.cities[dest].state == "Georgia" and is_night(arrival_hour):
+            ids.append("georgia_arrival")                       # "Midnight Freight"
+        # Departures: the title puts the city in the rearview / "out of" it.
+        if origin == "Lubbock":                                 # "in the Rearview"
+            ids.append("lubbock_arrival")
+        if origin == "Detroit":                                 # "Last Load Out of"
             ids.append("detroit_run")
 
         # -- Challenges: grind milestones, long hauls, spotless runs ----------

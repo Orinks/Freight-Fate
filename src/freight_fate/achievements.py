@@ -292,7 +292,7 @@ ACHIEVEMENTS: tuple[Achievement, ...] = (
     Achievement(
         "amarillo_arrival",
         "Amarillo by Daybreak",
-        "Backed into the dock in Amarillo. You weren't quite riding in on a pony, but the Panhandle wind made up the difference.",
+        "Rolled into Amarillo in the early light, the load on the dock by daybreak. You weren't quite riding in on a pony, but the Panhandle dawn made up the difference.",
         "Landmarks",
         "George Strait - Amarillo by Morning",
     ),
@@ -313,7 +313,7 @@ ACHIEVEMENTS: tuple[Achievement, ...] = (
     Achievement(
         "lubbock_arrival",
         "Lubbock in the Rearview",
-        "Backed into the dock in Lubbock, out on the high plains. They say happiness is a hometown shrinking in the rearview mirror -- but tonight the freight came first.",
+        "Rolled out of Lubbock with a load, the high plains opening up ahead. They say happiness is a hometown shrinking in the rearview mirror, and tonight the freight led the way.",
         "Landmarks",
         "Mac Davis - Texas in My Rear View Mirror",
     ),
@@ -327,7 +327,7 @@ ACHIEVEMENTS: tuple[Achievement, ...] = (
     Achievement(
         "tulsa_arrival",
         "Tulsa, Right on Schedule",
-        "Pulled into Tulsa with the clock on your side. However long the run took, the dock was glad to see you when you got there.",
+        "Pulled into Tulsa with the clock on your side and the load in on time. You ran it tight, and the dock was glad to see you right when they expected you.",
         "Landmarks",
         "Don Williams - Tulsa Time",
     ),
@@ -348,7 +348,7 @@ ACHIEVEMENTS: tuple[Achievement, ...] = (
     Achievement(
         "detroit_run",
         "Last Load Out of Detroit",
-        "You ran a load into or out of Detroit. The home you left keeps calling, but the freight pays better than the homesickness does.",
+        "You hauled a load out of Detroit and pointed it down the road. The home you left keeps calling, but the freight pays better than the homesickness does.",
         "Landmarks",
         "Bobby Bare - Detroit City",
     ),
