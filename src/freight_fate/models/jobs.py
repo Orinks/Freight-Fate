@@ -390,6 +390,13 @@ def minimum_pay_for_level(miles: float, level: int) -> float:
     return floor + miles * per_mile
 
 
+# Reachable-destination candidates depend only on the (static) world, not the
+# board seed. Cache them once across all JobBoard instances, keyed by world: the
+# city hub and the tests spin up many fresh boards, and recomputing a supported
+# route to every city each time scaled terribly as the network grew to 160+.
+_CANDIDATES_CACHE: dict[int, dict[str, list[tuple[str, float, int]]]] = {}
+
+
 class JobBoard:
     """Generates job offers at a city, filtered by the player's endorsements.
 
@@ -404,7 +411,6 @@ class JobBoard:
     def __init__(self, world: World, seed: int | None = None) -> None:
         self.world = world
         self._rng = random.Random(seed)
-        self._candidates_cache: dict[str, list[tuple[str, float, int]]] = {}
 
     @staticmethod
     def distance_cap(level: int) -> float:
@@ -475,7 +481,8 @@ class JobBoard:
 
     def _candidates(self, city: str) -> list[tuple[str, float, int]]:
         """(destination, route miles, route leg count) for every other city."""
-        cached = self._candidates_cache.get(city)
+        per_world = _CANDIDATES_CACHE.setdefault(id(self.world), {})
+        cached = per_world.get(city)
         if cached is None:
             cached = []
             for dest in self.world.city_names():
@@ -484,7 +491,7 @@ class JobBoard:
                 route = self.world.supported_route(city, dest)
                 if route is not None:
                     cached.append((dest, route.miles, len(route.legs)))
-            self._candidates_cache[city] = cached
+            per_world[city] = cached
         return cached
 
     def _choose_destination(self, candidates: list[tuple[str, float, int]],
