@@ -165,8 +165,8 @@ def test_delivery_settlement_awards_core_achievements(monkeypatch):
 
 
 def test_eastbound_badge_fires_only_on_an_eastbound_delivery(monkeypatch):
-    from freight_fate.app import App
     from freight_fate.achievements import ACHIEVEMENT_BY_ID
+    from freight_fate.app import App
     from freight_fate.models.jobs import JobBoard
     from freight_fate.models.profile import Profile
     from freight_fate.states.driving import ArrivalState, DrivingState
