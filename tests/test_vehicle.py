@@ -134,6 +134,22 @@ def test_high_gear_launch_stalls():
     assert not t.engine_on
 
 
+def test_rolling_automatic_kicks_down_instead_of_stalling():
+    """Regression: a hard deceleration could leave an automatic lugging in a
+    high gear in the one frame the shift delay blocked the RPM downshift, and
+    the engine stalled while still rolling (above the 'stopped -> first' reset).
+    It must kick down a gear and keep running instead."""
+    t = make_auto_truck()
+    t.transmission.gear = 5
+    t.velocity_mps = 0.7          # rolling, but lugging below idle*0.5 in 5th
+    t.throttle = 0.8
+    t.transmission._shift_timer = 1 / 60   # shift lock expires inside this frame
+    t.update(1 / 60)
+    assert t.engine_on
+    assert not t.stalled
+    assert t.transmission.gear == 4   # dropped one gear
+
+
 def test_hard_collision_stop_does_not_stall_an_automatic():
     """Regression: collisions used to strand the truck stopped in a high
     gear, where the engine stalled instantly on every restart."""

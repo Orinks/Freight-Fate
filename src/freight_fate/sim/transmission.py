@@ -119,6 +119,17 @@ class Transmission:
             return self.gear
         return None
 
+    def kickdown(self) -> int | None:
+        """Emergency single downshift to keep an automatic out of a lugging
+        gear while still rolling. The normal RPM-threshold downshift can be
+        outrun by a hard deceleration during the shift delay; this forces the
+        drop so the engine kicks down instead of stalling. No-op in manual."""
+        if not self.automatic or self.gear <= 1:
+            return None
+        self.gear -= 1
+        self._shift_timer = SHIFT_TIME
+        return self.gear
+
     def update(self, dt: float) -> None:
         if self._shift_timer > 0.0:
             self._shift_timer = max(0.0, self._shift_timer - dt)
