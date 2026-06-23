@@ -505,6 +505,27 @@ when OSM has one).
    border cue is exactly the kind of consequence above.
 4. **Grades -> existing brake/runaway warnings**, driven by the ORS steepness
    extra already stored.
+5. **Bridges and tunnels (named crossings).** Add notable spans/tunnels as a cue
+   layer, split by cost:
+
+   *Light tier (do first; reuses systems we already have):* curate named bridges
+   and tunnels (Eisenhower-Johnson Tunnel, Chesapeake Bay Bridge, the I-95
+   Baltimore Harbor / Fort McHenry tunnels) as `RouteCheckpoint`s with authored
+   spoken cues; fold tolled crossings into the existing `toll_events`; optionally
+   raise a high-profile-vehicle wind advisory on long spans via the weather wind
+   system (`audio.set_wind`, the `winter_or_wind` achievement already exist).
+   Purely additive and screen-reader-native. Source from OSM Overpass
+   (`bridge=yes` / `tunnel=yes` + `name`), projected onto corridor geometry like
+   POIs/checkpoints -- ORS `waycategory` does NOT reliably flag bridges/tunnels.
+
+   *Heavy tier (defer; needs new systems):* hazmat and height/clearance
+   restrictions (placarded loads are banned in the Holland/Lincoln/Baltimore
+   tunnels; over-height loads get turned around). These need a new hazmat cargo
+   type / truck-dimension model AND restriction-aware routing (a banned tunnel
+   forces an alternate leg), so they are their own workstream, not a bolt-on.
+   Good payoff later -- hazmat loads pay more but must detour around tunnels --
+   but today endorsements are only refrigerated/heavy_haul/high_value and trucks
+   have no modeled height/weight, so the restriction has nothing to bind to yet.
 
 ### Constraints
 
