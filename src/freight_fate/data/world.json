@@ -58549,7 +58549,28 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
-      }
+      },
+      "stops": [
+        {
+          "name": "Alexander Hamilton Service Area",
+          "type": "service_plaza",
+          "at_mi": 5.5,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ]
+        }
+      ]
     },
     {
       "from": "Newark",
@@ -58652,7 +58673,30 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
-      }
+      },
+      "stops": [
+        {
+          "name": "Richard Stockton",
+          "type": "public_rest_area",
+          "at_mi": 48.8,
+          "source": "FHWA Jason's Law truck parking inventory (NTAD via BTS) lists Richard Stockton on I-95 SB in Hamilton, NJ with 42 truck parking spaces, mile post 58.7; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.3 mi from simplified corridor line), accessed 2026-06-17: https://services.arcgis.com/xOi1kZaI0eWDREZv/arcgis/rest/services/NTAD_Truck_Stop_Parking/FeatureServer/0/query",
+          "actions": [
+            "park",
+            "save",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "parking",
+            "restrooms"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated"
+        }
+      ]
     },
     {
       "from": "Newark",
@@ -58742,7 +58786,30 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
-      }
+      },
+      "stops": [
+        {
+          "name": "Joyce Kilmer",
+          "type": "public_rest_area",
+          "at_mi": 26.8,
+          "source": "FHWA Jason's Law truck parking inventory (NTAD via BTS) lists Joyce Kilmer on I-95 NB in East Brunswick, NJ with 53 truck parking spaces, mile post 78.7; at_mi estimated by projecting source coordinates onto checked-in route geometry (2.7 mi from simplified corridor line), accessed 2026-06-17: https://services.arcgis.com/xOi1kZaI0eWDREZv/arcgis/rest/services/NTAD_Truck_Stop_Parking/FeatureServer/0/query",
+          "actions": [
+            "park",
+            "save",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "parking",
+            "restrooms"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated"
+        }
+      ]
     },
     {
       "from": "Newark",
@@ -58845,7 +58912,35 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
-      }
+      },
+      "stops": [
+        {
+          "name": "Pilot Travel Center Hampton",
+          "type": "travel_center",
+          "at_mi": 46.1,
+          "source": "Pilot Flying J official locator lists Pilot Travel Center store 190 in Hampton, NJ with 50 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.7 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/nj/hampton/66-nj-173",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "restrooms",
+            "parking",
+            "scale"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated"
+        }
+      ]
     },
     {
       "from": "Trenton",
@@ -58948,7 +59043,8 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
-      }
+      },
+      "stops": []
     },
     {
       "from": "Trenton",
@@ -59038,7 +59134,8 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
-      }
+      },
+      "stops": []
     },
     {
       "from": "Atlantic City",
@@ -59141,7 +59238,8 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
-      }
+      },
+      "stops": []
     },
     {
       "from": "Salisbury",
@@ -59231,7 +59329,8 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
-      }
+      },
+      "stops": []
     },
     {
       "from": "Salisbury",
@@ -59344,7 +59443,8 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
-      }
+      },
+      "stops": []
     },
     {
       "from": "Burlington",
@@ -59467,7 +59567,30 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
-      }
+      },
+      "stops": [
+        {
+          "name": "Clifton Park",
+          "type": "public_rest_area",
+          "at_mi": 148.0,
+          "source": "FHWA Jason's Law truck parking inventory (NTAD via BTS) lists Clifton Park on I-87N in Clifton Park, NY with 28 truck parking spaces, mile post 14; at_mi estimated by projecting source coordinates onto checked-in route geometry (13.0 mi from simplified corridor line), accessed 2026-06-17: https://services.arcgis.com/xOi1kZaI0eWDREZv/arcgis/rest/services/NTAD_Truck_Stop_Parking/FeatureServer/0/query",
+          "actions": [
+            "park",
+            "save",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "parking",
+            "restrooms"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated"
+        }
+      ]
     },
     {
       "from": "Burlington",
@@ -59590,7 +59713,47 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
-      }
+      },
+      "stops": [
+        {
+          "name": "Vermont Welcome Center - Sharon",
+          "type": "public_rest_area",
+          "at_mi": 83.0,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "limited",
+          "actions": [
+            "park",
+            "save",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "parking",
+            "restrooms"
+          ]
+        },
+        {
+          "name": "Springfield Rest Area",
+          "type": "public_rest_area",
+          "at_mi": 111.1,
+          "source": "FHWA Jason's Law truck parking inventory (NTAD via BTS) lists Springfield Rest Area on I-89N in Springfield, NH with 10 truck parking spaces, mile post 39; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.4 mi from simplified corridor line), accessed 2026-06-17: https://services.arcgis.com/xOi1kZaI0eWDREZv/arcgis/rest/services/NTAD_Truck_Stop_Parking/FeatureServer/0/query",
+          "actions": [
+            "park",
+            "save",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "parking",
+            "restrooms"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated"
+        }
+      ]
     },
     {
       "from": "Norfolk",
@@ -59680,7 +59843,8 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
-      }
+      },
+      "stops": []
     },
     {
       "from": "Norfolk",
@@ -59770,7 +59934,30 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
-      }
+      },
+      "stops": [
+        {
+          "name": "New Kent Safety Rest Area East/Welcome Center",
+          "type": "public_rest_area",
+          "at_mi": 81.7,
+          "source": "FHWA Jason's Law truck parking inventory (NTAD via BTS) lists New Kent Safety Rest Area East/Welcome Center on I-64E in New Kent, VA with 70 truck parking spaces, mile post 213; at_mi estimated by projecting source coordinates onto checked-in route geometry (17.1 mi from simplified corridor line), accessed 2026-06-17: https://services.arcgis.com/xOi1kZaI0eWDREZv/arcgis/rest/services/NTAD_Truck_Stop_Parking/FeatureServer/0/query",
+          "actions": [
+            "park",
+            "save",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "parking",
+            "restrooms"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated"
+        }
+      ]
     },
     {
       "from": "Norfolk",
@@ -59903,7 +60090,50 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
-      }
+      },
+      "stops": [
+        {
+          "name": "Pilot",
+          "type": "travel_center",
+          "at_mi": 27.0,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ]
+        },
+        {
+          "name": "Nash County Rest Area NBL",
+          "type": "public_rest_area",
+          "at_mi": 135.0,
+          "source": "FHWA Jason's Law truck parking inventory (NTAD via BTS) lists Nash County Rest Area NBL on I-95N in Gold Rock, NC with 17 truck parking spaces, mile post 142; at_mi estimated by projecting source coordinates onto checked-in route geometry (3.7 mi from simplified corridor line), accessed 2026-06-17: https://services.arcgis.com/xOi1kZaI0eWDREZv/arcgis/rest/services/NTAD_Truck_Stop_Parking/FeatureServer/0/query",
+          "actions": [
+            "park",
+            "save",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "parking",
+            "restrooms"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated"
+        }
+      ]
     },
     {
       "from": "Harrisburg",
@@ -59993,7 +60223,28 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
-      }
+      },
+      "stops": [
+        {
+          "name": "Bomansville Service Plaza",
+          "type": "service_plaza",
+          "at_mi": 53.0,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ]
+        }
+      ]
     },
     {
       "from": "Harrisburg",
@@ -60096,7 +60347,30 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
-      }
+      },
+      "stops": [
+        {
+          "name": "I-83N truck parking near Shrewsbury",
+          "type": "public_rest_area",
+          "at_mi": 43.5,
+          "source": "FHWA Jason's Law truck parking inventory (NTAD via BTS) lists I-83N truck parking near Shrewsbury on I-83N in Shrewsbury, PA with 12 truck parking spaces, mile post 2; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.7 mi from simplified corridor line), accessed 2026-06-17: https://services.arcgis.com/xOi1kZaI0eWDREZv/arcgis/rest/services/NTAD_Truck_Stop_Parking/FeatureServer/0/query",
+          "actions": [
+            "park",
+            "save",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "parking",
+            "restrooms"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated"
+        }
+      ]
     },
     {
       "from": "Harrisburg",
@@ -60186,7 +60460,28 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
-      }
+      },
+      "stops": [
+        {
+          "name": "Love's Travel Stop",
+          "type": "service_plaza",
+          "at_mi": 20.2,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ]
+        }
+      ]
     },
     {
       "from": "Harrisburg",
@@ -60320,7 +60615,49 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
-      }
+      },
+      "stops": [
+        {
+          "name": "Cumberland Valley Service Plaza",
+          "type": "service_plaza",
+          "at_mi": 29.2,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ]
+        },
+        {
+          "name": "I-76 E - PTC Mainline truck parking near Somerset Twp",
+          "type": "public_rest_area",
+          "at_mi": 133.5,
+          "source": "FHWA Jason's Law truck parking inventory (NTAD via BTS) lists I-76 E - PTC Mainline truck parking near Somerset Twp on I-76 E - PTC Mainline in Somerset Twp, PA with 75 truck parking spaces, mile post MP 112.3; at_mi estimated by projecting source coordinates onto checked-in route geometry (3.9 mi from simplified corridor line), accessed 2026-06-17: https://services.arcgis.com/xOi1kZaI0eWDREZv/arcgis/rest/services/NTAD_Truck_Stop_Parking/FeatureServer/0/query",
+          "actions": [
+            "park",
+            "save",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "parking",
+            "restrooms"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated"
+        }
+      ]
     },
     {
       "from": "Harrisburg",
@@ -60434,7 +60771,48 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
-      }
+      },
+      "stops": [
+        {
+          "name": "Love's Travel Stop",
+          "type": "service_plaza",
+          "at_mi": 24.2,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ]
+        },
+        {
+          "name": "Nelly Travel Plaza",
+          "type": "travel_center",
+          "at_mi": 96.8,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ]
+        }
+      ]
     },
     {
       "from": "Scranton",
@@ -60545,7 +60923,28 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
-      }
+      },
+      "stops": [
+        {
+          "name": "Hickory Run Service Plaza",
+          "type": "service_plaza",
+          "at_mi": 38.0,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ]
+        }
+      ]
     },
     {
       "from": "Scranton",
@@ -60648,7 +61047,44 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
-      }
+      },
+      "stops": [
+        {
+          "name": "Flying J Travel Center",
+          "type": "service_plaza",
+          "at_mi": 30.0,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ]
+        },
+        {
+          "name": "Truck Parking",
+          "type": "truck_parking",
+          "at_mi": 44.9,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "limited",
+          "actions": [
+            "park",
+            "save",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "parking"
+          ]
+        }
+      ]
     },
     {
       "from": "Binghamton",
@@ -60738,7 +61174,26 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
-      }
+      },
+      "stops": [
+        {
+          "name": "Whitney Point Rest Area",
+          "type": "public_rest_area",
+          "at_mi": 18.2,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "limited",
+          "actions": [
+            "park",
+            "save",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "parking",
+            "restrooms"
+          ]
+        }
+      ]
     },
     {
       "from": "Binghamton",
@@ -60838,7 +61293,26 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
-      }
+      },
+      "stops": [
+        {
+          "name": "East Worcester Rest Area",
+          "type": "public_rest_area",
+          "at_mi": 82.8,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "limited",
+          "actions": [
+            "park",
+            "save",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "parking",
+            "restrooms"
+          ]
+        }
+      ]
     },
     {
       "from": "Erie",
@@ -60938,7 +61412,26 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
-      }
+      },
+      "stops": [
+        {
+          "name": "Rest Area",
+          "type": "public_rest_area",
+          "at_mi": 25.4,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "limited",
+          "actions": [
+            "park",
+            "save",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "parking",
+            "restrooms"
+          ]
+        }
+      ]
     },
     {
       "from": "Erie",
@@ -61041,7 +61534,47 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
-      }
+      },
+      "stops": [
+        {
+          "name": "Love's Travel Stop",
+          "type": "service_plaza",
+          "at_mi": 23.2,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ]
+        },
+        {
+          "name": "Angola Travel Plaza",
+          "type": "service_plaza",
+          "at_mi": 69.8,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ]
+        }
+      ]
     },
     {
       "from": "Erie",
@@ -61144,7 +61677,28 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
-      }
+      },
+      "stops": [
+        {
+          "name": "Pilot Travel Center",
+          "type": "service_plaza",
+          "at_mi": 51.0,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ]
+        }
+      ]
     },
     {
       "from": "New Haven",
@@ -61234,7 +61788,26 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
-      }
+      },
+      "stops": [
+        {
+          "name": "Rest Area CT-15 (South Bound)",
+          "type": "public_rest_area",
+          "at_mi": 10.5,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "limited",
+          "actions": [
+            "park",
+            "save",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "parking",
+            "restrooms"
+          ]
+        }
+      ]
     },
     {
       "from": "New Haven",
@@ -61324,7 +61897,28 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
-      }
+      },
+      "stops": [
+        {
+          "name": "Rest Area CT-15 (South Bound)",
+          "type": "service_plaza",
+          "at_mi": 9.5,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ]
+        }
+      ]
     },
     {
       "from": "New Haven",
@@ -61427,7 +62021,30 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
-      }
+      },
+      "stops": [
+        {
+          "name": "CT Service Plaza- Darien SB",
+          "type": "public_rest_area",
+          "at_mi": 40.7,
+          "source": "FHWA Jason's Law truck parking inventory (NTAD via BTS) lists CT Service Plaza- Darien SB on I-95S in Darien, CT with 70 truck parking spaces, mile post 10; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.3 mi from simplified corridor line), accessed 2026-06-17: https://services.arcgis.com/xOi1kZaI0eWDREZv/arcgis/rest/services/NTAD_Truck_Stop_Parking/FeatureServer/0/query",
+          "actions": [
+            "park",
+            "save",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "parking",
+            "restrooms"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated"
+        }
+      ]
     },
     {
       "from": "Augusta",
@@ -61537,7 +62154,35 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
-      }
+      },
+      "stops": [
+        {
+          "name": "Flying J Travel Center Greensboro",
+          "type": "travel_center",
+          "at_mi": 66.9,
+          "source": "Pilot Flying J official locator lists Flying J Travel Center store 633 in Greensboro, GA with 189 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (1.0 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/ga/greensboro/3600-ga-77",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "restrooms",
+            "parking",
+            "scale"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated"
+        }
+      ]
     },
     {
       "from": "Augusta",
@@ -61640,7 +62285,48 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
-      }
+      },
+      "stops": [
+        {
+          "name": "Pilot",
+          "type": "travel_center",
+          "at_mi": 17.8,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ]
+        },
+        {
+          "name": "Love's Travel Stop",
+          "type": "service_plaza",
+          "at_mi": 53.2,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ]
+        }
+      ]
     },
     {
       "from": "Augusta",
@@ -61740,7 +62426,28 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
-      }
+      },
+      "stops": [
+        {
+          "name": "Love's Travel Stop",
+          "type": "service_plaza",
+          "at_mi": 105.6,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ]
+        }
+      ]
     },
     {
       "from": "Augusta",
@@ -61840,7 +62547,8 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
-      }
+      },
+      "stops": []
     },
     {
       "from": "Macon",
@@ -61930,7 +62638,47 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
-      }
+      },
+      "stops": [
+        {
+          "name": "QuikTrip",
+          "type": "service_plaza",
+          "at_mi": 21.0,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ]
+        },
+        {
+          "name": "JP Travel Center",
+          "type": "service_plaza",
+          "at_mi": 42.0,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ]
+        }
+      ]
     },
     {
       "from": "Macon",
@@ -62050,7 +62798,47 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
-      }
+      },
+      "stops": [
+        {
+          "name": "Pilot Travel Center",
+          "type": "service_plaza",
+          "at_mi": 47.1,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ]
+        },
+        {
+          "name": "Love's Travel Stop",
+          "type": "service_plaza",
+          "at_mi": 141.4,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ]
+        }
+      ]
     },
     {
       "from": "Greenville",
@@ -62173,7 +62961,28 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
-      }
+      },
+      "stops": [
+        {
+          "name": "QuikTrip",
+          "type": "service_plaza",
+          "at_mi": 24.1,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ]
+        }
+      ]
     },
     {
       "from": "Greenville",
@@ -62276,7 +63085,35 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
-      }
+      },
+      "stops": [
+        {
+          "name": "ONE9 Travel Center Gaffney",
+          "type": "travel_center",
+          "at_mi": 45.4,
+          "source": "Pilot Flying J official locator lists ONE9 Travel Center store 453 in Gaffney, SC with 100 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.2 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/sc/gaffney/909-hyatt-st",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "restrooms",
+            "parking",
+            "scale"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated"
+        }
+      ]
     },
     {
       "from": "Greenville",
@@ -62366,7 +63203,30 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
-      }
+      },
+      "stops": [
+        {
+          "name": "NEWBERRY REST AREA",
+          "type": "public_rest_area",
+          "at_mi": 53.1,
+          "source": "FHWA Jason's Law truck parking inventory (NTAD via BTS) lists NEWBERRY REST AREA on I-26E in Kinards, SC with 45 truck parking spaces, mile post 63; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.1 mi from simplified corridor line), accessed 2026-06-17: https://services.arcgis.com/xOi1kZaI0eWDREZv/arcgis/rest/services/NTAD_Truck_Stop_Parking/FeatureServer/0/query",
+          "actions": [
+            "park",
+            "save",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "parking",
+            "restrooms"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated"
+        }
+      ]
     },
     {
       "from": "Charleston, West Virginia",
@@ -62573,7 +63433,49 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
-      }
+      },
+      "stops": [
+        {
+          "name": "Love's Travel Stop",
+          "type": "service_plaza",
+          "at_mi": 31.3,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ]
+        },
+        {
+          "name": "I-79S truck parking near South Fayette",
+          "type": "public_rest_area",
+          "at_mi": 205.5,
+          "source": "FHWA Jason's Law truck parking inventory (NTAD via BTS) lists I-79S truck parking near South Fayette on I-79S in South Fayette, PA with 17 truck parking spaces, mile post 50; at_mi estimated by projecting source coordinates onto checked-in route geometry (1.4 mi from simplified corridor line), accessed 2026-06-17: https://services.arcgis.com/xOi1kZaI0eWDREZv/arcgis/rest/services/NTAD_Truck_Stop_Parking/FeatureServer/0/query",
+          "actions": [
+            "park",
+            "save",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "parking",
+            "restrooms"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated"
+        }
+      ]
     },
     {
       "from": "Charleston, West Virginia",
@@ -62700,7 +63602,30 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
-      }
+      },
+      "stops": [
+        {
+          "name": "Elkridge Rest Stop SB",
+          "type": "public_rest_area",
+          "at_mi": 30.6,
+          "source": "FHWA Jason's Law truck parking inventory (NTAD via BTS) lists Elkridge Rest Stop SB on I-64 in Elkridge, WV with 18 truck parking spaces, mile post 69; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.8 mi from simplified corridor line), accessed 2026-06-17: https://services.arcgis.com/xOi1kZaI0eWDREZv/arcgis/rest/services/NTAD_Truck_Stop_Parking/FeatureServer/0/query",
+          "actions": [
+            "park",
+            "save",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "parking",
+            "restrooms"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated"
+        }
+      ]
     },
     {
       "from": "Charleston, West Virginia",
@@ -62877,7 +63802,55 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
-      }
+      },
+      "stops": [
+        {
+          "name": "White Sulpher Springs Welcome Center WB",
+          "type": "public_rest_area",
+          "at_mi": 120.7,
+          "source": "FHWA Jason's Law truck parking inventory (NTAD via BTS) lists White Sulpher Springs Welcome Center WB on I-64W in Dickson, WV with 8 truck parking spaces, mile post 179; at_mi estimated by projecting source coordinates onto checked-in route geometry (2.2 mi from simplified corridor line), accessed 2026-06-17: https://services.arcgis.com/xOi1kZaI0eWDREZv/arcgis/rest/services/NTAD_Truck_Stop_Parking/FeatureServer/0/query",
+          "actions": [
+            "park",
+            "save",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "parking",
+            "restrooms"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated"
+        },
+        {
+          "name": "Love's Travel Stop Staunton",
+          "type": "travel_center",
+          "at_mi": 206.3,
+          "source": "Love's official store feed lists store 706 in Staunton, VA on I-64, exit 213; at_mi estimated by projecting source coordinates onto checked-in route geometry (4.6 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking",
+            "restrooms"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "likely",
+          "curation": "curated"
+        }
+      ]
     },
     {
       "from": "Portland, Maine",
@@ -62980,7 +63953,48 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
-      }
+      },
+      "stops": [
+        {
+          "name": "Kennebunk Service Plaza",
+          "type": "service_plaza",
+          "at_mi": 23.8,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ]
+        },
+        {
+          "name": "Irving",
+          "type": "travel_center",
+          "at_mi": 47.5,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ]
+        }
+      ]
     },
     {
       "from": "Portland, Maine",
@@ -63094,7 +64108,30 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
-      }
+      },
+      "stops": [
+        {
+          "name": "I-95 truck parking near Kittery",
+          "type": "public_rest_area",
+          "at_mi": 45.9,
+          "source": "FHWA Jason's Law truck parking inventory (NTAD via BTS) lists I-95 truck parking near Kittery on I-95 N in Kittery, ME with 75 truck parking spaces, mile post NA; at_mi estimated by projecting source coordinates onto checked-in route geometry (1.6 mi from simplified corridor line), accessed 2026-06-17: https://services.arcgis.com/xOi1kZaI0eWDREZv/arcgis/rest/services/NTAD_Truck_Stop_Parking/FeatureServer/0/query",
+          "actions": [
+            "park",
+            "save",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "parking",
+            "restrooms"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated"
+        }
+      ]
     },
     {
       "from": "Springfield, Massachusetts",
@@ -63197,7 +64234,8 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
-      }
+      },
+      "stops": []
     },
     {
       "from": "Springfield, Massachusetts",
@@ -63287,7 +64325,47 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
-      }
+      },
+      "stops": [
+        {
+          "name": "Ludlow Service Plaza Eastbound",
+          "type": "service_plaza",
+          "at_mi": 13.0,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ]
+        },
+        {
+          "name": "Charlton Service Plaza Westbound",
+          "type": "service_plaza",
+          "at_mi": 39.0,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ]
+        }
+      ]
     },
     {
       "from": "Springfield, Massachusetts",
@@ -63397,7 +64475,28 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
-      }
+      },
+      "stops": [
+        {
+          "name": "Blandford Service Plaza Eastbound",
+          "type": "service_plaza",
+          "at_mi": 21.7,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ]
+        }
+      ]
     },
     {
       "from": "Springfield, Massachusetts",
@@ -63500,7 +64599,26 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
-      }
+      },
+      "stops": [
+        {
+          "name": "Wallingford Rest Area",
+          "type": "public_rest_area",
+          "at_mi": 48.0,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "limited",
+          "actions": [
+            "park",
+            "save",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "parking",
+            "restrooms"
+          ]
+        }
+      ]
     },
     {
       "from": "Wilmington, Delaware",
@@ -63603,7 +64721,30 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
-      }
+      },
+      "stops": [
+        {
+          "name": "I-95N truck parking near Lower Chichester",
+          "type": "public_rest_area",
+          "at_mi": 9.3,
+          "source": "FHWA Jason's Law truck parking inventory (NTAD via BTS) lists I-95N truck parking near Lower Chichester on I-95N in Lower Chichester, PA with 11 truck parking spaces, mile post 1; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.2 mi from simplified corridor line), accessed 2026-06-17: https://services.arcgis.com/xOi1kZaI0eWDREZv/arcgis/rest/services/NTAD_Truck_Stop_Parking/FeatureServer/0/query",
+          "actions": [
+            "park",
+            "save",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "parking",
+            "restrooms"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated"
+        }
+      ]
     },
     {
       "from": "Wilmington, Delaware",
@@ -63706,7 +64847,29 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
-      }
+      },
+      "stops": [
+        {
+          "name": "White Marsh Truck Stop",
+          "type": "travel_center",
+          "at_mi": 56.2,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ]
+        }
+      ]
     },
     {
       "from": "Wilmington, Delaware",
@@ -63809,7 +64972,35 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use."
-      }
+      },
+      "stops": [
+        {
+          "name": "Flying J Travel Center North East",
+          "type": "travel_center",
+          "at_mi": 17.2,
+          "source": "Pilot Flying J official locator lists Flying J Travel Center store 784 in North East, MD with 185 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (18.3 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/md/north-east/1-center-dr",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "restrooms",
+            "parking",
+            "scale"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated"
+        }
+      ]
     }
   ],
   "route_stop_data": {
