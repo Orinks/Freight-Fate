@@ -182,7 +182,7 @@ def test_eastbound_badge_fires_only_on_an_eastbound_delivery(monkeypatch):
         world = app.ctx.world
         origin_lon = world.cities["Chicago"].lon
         job = next(
-            job for job in JobBoard(world).offers(
+            job for job in JobBoard(world, seed=11).offers(
                 "Chicago", p.career.endorsements, level=5, market=p.market)
             if not job.locked_reason(p.career.endorsements, p.career.level)
             and world.cities[job.destination].lon > origin_lon + 1.0  # net eastbound

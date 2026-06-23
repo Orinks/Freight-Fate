@@ -75,6 +75,11 @@ def route_departure_summary(route: Route) -> str:
     )
 
 
+# How far you can bobtail (drive empty) to shop another city's board. Generous
+# and level-independent so a thin start city is never a dead end.
+BOBTAIL_RANGE_MI = 400.0
+
+
 class CityMenuState(MenuState):
     """The hub screen while parked at a company terminal or yard."""
 
@@ -114,6 +119,10 @@ class CityMenuState(MenuState):
                      help="Browse terminal dispatches from local freight "
                           "facilities, including ports, warehouses, food "
                           "terminals, intermodal yards, and distribution hubs."),
+            MenuItem("Bobtail to a nearby city", self._bobtail,
+                     help="Drive empty to a nearby city to shop its dispatch "
+                          "board. Costs fuel and hours of service; no load, no "
+                          "pay. Use it when local jobs are thin."),
             MenuItem(self._garage_label, self._garage,
                      help="Refuel and repair your truck at the terminal garage. "
                           "If cash is short, the garage does partial work."),
@@ -170,6 +179,18 @@ class CityMenuState(MenuState):
             "endorsements": sorted(p.career.endorsements),
             "count": 5,
         }
+
+    def _bobtail(self) -> None:
+        p = self.ctx.profile
+        cands = sorted(self._board._candidates(p.current_city), key=lambda c: c[1])
+        nearby = [c[0] for c in cands if c[1] <= BOBTAIL_RANGE_MI][:8]
+        if not nearby:  # never strand a remote start: offer the nearest few
+            nearby = [c[0] for c in cands[:3]]
+        if not nearby:
+            self.ctx.audio.play("ui/error")
+            self.ctx.say("No nearby cities are reachable from here.")
+            return
+        self.ctx.push_state(BobtailDestState(self.ctx, nearby))
 
     def _garage_label(self) -> str:
         p = self.ctx.profile
@@ -255,6 +276,57 @@ class CityMenuState(MenuState):
     def go_back(self) -> None:
         self.ctx.audio.play("ui/menu_back")
         self.ctx.say("Use Quit to main menu to leave the terminal. Progress is saved automatically.")
+
+
+class BobtailDestState(MenuState):
+    """Pick a nearby city to bobtail (drive empty) to, to shop its board."""
+
+    title = "Bobtail to a nearby city"
+    intro_help = ("Pick a nearby city to drive to empty. You will see its "
+                  "dispatch board on arrival. No load and no pay; this costs "
+                  "fuel and hours of service. Escape returns to the terminal.")
+
+    def __init__(self, ctx, cities: list[str]) -> None:
+        self._cities = cities
+        super().__init__(ctx)
+
+    def build_items(self) -> list[MenuItem]:
+        items: list[MenuItem] = []
+        world = self.ctx.world
+        here = self.ctx.profile.current_city
+        for name in self._cities:
+            route = world.supported_route(here, name)
+            miles = route.miles if route is not None else 0.0
+            city = world.cities[name]
+            label = (f"{name}, {city.state} -- "
+                     f"{self.ctx.settings.distance_text(miles)} empty")
+            items.append(MenuItem(label, lambda n=name: self._start(n),
+                                  help=f"Drive empty to {name} to shop its board."))
+        items.append(MenuItem("Back to terminal", self.go_back))
+        return items
+
+    def _start(self, dest: str) -> None:
+        from ..models.jobs import make_reposition_job
+        from .driving import DrivingState
+
+        p = self.ctx.profile
+        job = make_reposition_job(self.ctx.world, p.current_city, dest)
+        route = self.ctx.world.supported_route(p.current_city, dest)
+        if job is None or route is None:
+            self.ctx.audio.play("ui/error")
+            self.ctx.say("No route to that city right now.")
+            return
+        driving = DrivingState(self.ctx, job, route)
+        p.dispatch_board_cache = None
+        p.active_trip = driving.snapshot()
+        self.ctx.save_profile()
+        self.ctx.say(
+            f"Bobtailing empty to {dest}, {route.miles:.0f} miles on "
+            f"{route.highways[0]}. No load and no pay -- you will see the {dest} "
+            "dispatch board on arrival. Check in at the city terminal when you "
+            "get there.",
+            interrupt=True)
+        self.ctx.push_state(driving)
 
 
 class GarageState(MenuState):

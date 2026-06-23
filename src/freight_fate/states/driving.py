@@ -2335,12 +2335,38 @@ class ArrivalState(MenuState):
         self.terminal = ctx.world.home_terminal(driving.job.destination)
         self._settle()
 
+    def _settle_bobtail(self, hours: float, trip_damage: float) -> None:
+        """Empty reposition run: relocate to the destination city, no pay."""
+        d = self.driving
+        p = self.ctx.profile
+        job = d.job
+        self.title = "Repositioned"
+        p.current_city = job.destination
+        p.truck_fuel_gal = d.truck.fuel_gal
+        p.truck_damage_pct = d.truck.damage_pct
+        p.game_hours += hours
+        p.market.advance_to(p.market_day())
+        p.active_trip = None
+        self.ctx.save_profile()
+        self.summary_parts.insert(0, (
+            f"Bobtailed empty to {job.destination} in {hours:.1f} hours. "
+            f"It is {clock_text(p.game_hours)}. No load and no pay, but you are "
+            f"parked at {self.terminal.name} and can shop the {job.destination} "
+            f"dispatch board. Fuel {d.truck.fuel_fraction * 100:.0f} percent."))
+        if trip_damage > 1:
+            self.summary_parts.append(
+                f"The empty run added {trip_damage:.0f} percent truck damage. "
+                "Visit the garage when you can.")
+
     def _settle(self) -> None:
         d = self.driving
         p = self.ctx.profile
         job = d.job
         hours = d.trip.game_minutes / 60.0
         trip_damage = max(0.0, d.truck.damage_pct - d.start_damage)
+        if job.bobtail:
+            self._settle_bobtail(hours, trip_damage)
+            return
         gross_pay = job.payout(hours, trip_damage)
         toll_expense = d.trip.toll_expense
         accessorials = carrier_accessorial_charges(job)

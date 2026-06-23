@@ -397,8 +397,8 @@ def select(menu, label):
 
 def park_at_first_stop(driving):
     # Prefer a sleep-capable stop the truck can actually open: additive
-    # service-plaza/fuel POIs may now sort ahead of the curated overnight stops,
-    # and the rest / parking-full menus only apply where sleeping is offered.
+    # service-plaza/fuel POIs may sort ahead of the curated overnight stops, and
+    # the rest / parking-full menus only apply where sleeping is offered.
     # nearest_stop_within returns the first stop within range in sorted order, so
     # skip sleepers shadowed by a nearer non-sleep stop.
     stops = driving.trip.stops
@@ -409,8 +409,18 @@ def park_at_first_stop(driving):
                 return other is stop
         return False
 
-    stop = next((s for s in stops if "sleep" in s.actions and opens_here(s)),
-                stops[0])
+    stop = next((s for s in stops if "sleep" in s.actions and opens_here(s)), None)
+    if stop is None:
+        # Job-board variety means some routes carry no sleep-capable stop; inject
+        # a deterministic one so the sleep / parking-full tests never depend on
+        # which route the career happened to draw.
+        from freight_fate.sim.trip import RoadStop
+        stop = RoadStop(
+            name="Test Travel Center", at_mi=max(1.0, driving.trip.total_miles * 0.5),
+            type="travel_center",
+            actions=("park", "save", "fuel", "food", "break", "sleep"),
+            services=("diesel", "food", "parking"), parking="confirmed")
+        driving.trip.stops = [stop]
     driving.trip.position_mi = stop.at_mi
     return stop
 

@@ -161,6 +161,7 @@ class Job:
     destination_facility_id: str = ""
     origin_locality: str = ""
     destination_locality: str = ""
+    bobtail: bool = False      # empty reposition run: relocate, no cargo or pay
 
     def describe(self, index: int | None = None, total: int | None = None) -> str:
         prefix = f"Job {index} of {total}: " if index is not None else ""
@@ -230,6 +231,7 @@ def job_payload(job: Job) -> dict:
         "pay": job.pay,
         "deadline_game_h": job.deadline_game_h,
         "market_mult": job.market_mult,
+        "bobtail": job.bobtail,
     }
 
 
@@ -264,6 +266,30 @@ def job_from_payload(data: dict) -> Job:
         destination_facility_id=str(data.get("destination_facility_id", "")),
         origin_locality=str(data.get("origin_locality", "")),
         destination_locality=str(data.get("destination_locality", "")),
+        bobtail=bool(data.get("bobtail", False)),
+    )
+
+
+def make_reposition_job(world: World, origin: str, destination: str) -> Job | None:
+    """A zero-pay empty 'bobtail' run to relocate to a nearby city.
+
+    Reuses the normal delivery drive (so HOS, fuel, weather, and save/resume all
+    apply) but carries no cargo and pays nothing; on arrival the player simply
+    parks at the destination city's hub and can shop its dispatch board.
+    """
+    route = world.supported_route(origin, destination)
+    if route is None:
+        return None
+    miles = round(route.miles, 1)
+    dest = world.cities[destination]
+    dest_loc = dest.locations[0] if dest.locations else None
+    return Job(
+        CARGO_CATALOG["general"], 0.0, origin, "company yard", destination,
+        miles, 0.0, required_hours(miles) * 3.0 + 24.0,
+        origin_type="company_yard",
+        destination_location=dest_loc.name if dest_loc else f"{destination} yard",
+        destination_type=dest_loc.type if dest_loc else "company_yard",
+        bobtail=True,
     )
 
 
@@ -398,6 +424,10 @@ class JobBoard:
             reachable = sorted(candidates, key=lambda c: c[1])[:4]
         if not reachable:
             return jobs
+        # Pick a spread of DISTINCT destinations up front so the board never
+        # collapses to one back-and-forth city (a start with a single nearby
+        # neighbour used to be locked into one route). Nearer cities stay likelier.
+        dest_cycle = self._spread_destinations(reachable, level, count)
         attempts = 0
         while len(jobs) < count and attempts < count * 30:
             attempts += 1
@@ -408,7 +438,7 @@ class JobBoard:
             # a locked job may appear once in a while as a teaser, otherwise skip
             if locked and not (len(jobs) == count - 1 and self._rng.random() < 0.3):
                 continue
-            destination, miles, _legs = self._choose_destination(reachable, level)
+            destination, miles, _legs = dest_cycle[len(jobs) % len(dest_cycle)]
             dest_location = self._destination_location(destination, cargo, level)
             if dest_location is None:
                 continue
@@ -417,6 +447,31 @@ class JobBoard:
                                        dest_location))
         jobs.sort(key=lambda j: j.distance_mi)
         return jobs
+
+    def _spread_destinations(
+        self, reachable: list[tuple[str, float, int]], level: int, count: int,
+    ) -> list[tuple[str, float, int]]:
+        """A weighted spread of distinct destinations (nearer = likelier).
+
+        Aims for at least three distinct cities (or as many as the network
+        allows) so the dispatch board offers real choices instead of repeating
+        one destination. Rookies still lean toward short hauls.
+        """
+        best: dict[str, tuple[str, float, int]] = {}
+        for cand in reachable:
+            if cand[0] not in best or cand[1] < best[cand[0]][1]:
+                best[cand[0]] = cand
+        pool = list(best.values())
+        target = min(len(pool), max(3, count))
+        exponent = 2.0 if level <= 2 else 1.0
+        chosen: list[tuple[str, float, int]] = []
+        available = pool[:]
+        while available and len(chosen) < target:
+            weights = [1.0 / (cand[1] ** exponent) for cand in available]
+            pick = self._rng.choices(available, weights)[0]
+            chosen.append(pick)
+            available.remove(pick)
+        return chosen or pool
 
     def _candidates(self, city: str) -> list[tuple[str, float, int]]:
         """(destination, route miles, route leg count) for every other city."""
@@ -435,27 +490,17 @@ class JobBoard:
     def _choose_destination(self, candidates: list[tuple[str, float, int]],
                             level: int) -> tuple[str, float, int]:
         pool = candidates
-        if level <= 2:
-            # rookie runs: mostly direct hops, sometimes a two-leg trip
-            one = [c for c in candidates if c[2] == 1]
-            two = [c for c in candidates if c[2] == 2]
-            if level == 1 and one and (not two or self._rng.random() < 0.8):
-                pool = one
-            elif level == 2 and two and self._rng.random() < 0.55:
-                pool = two
-            elif one:
-                pool = one
-            elif two:
-                pool = two
-        elif level == 3:
-            pool = [c for c in candidates if c[2] <= 3] or candidates
-        else:
+        if level >= 4:
             # seasoned drivers see a dedicated cross-country slot now and then
             long_hauls = [c for c in candidates if c[1] >= LONG_HAUL_MILES]
             if long_hauls and self._rng.random() < 0.35:
                 pool = long_hauls
-        # nearer cities are likelier at every level: freight moves lane by lane
-        weights = [1.0 / c[1] for c in pool]
+        # Nearer destinations are likelier, and rookies lean harder toward short
+        # hauls (squared distance falloff). Crucially the pool is never narrowed
+        # to a single-leg-only set -- that locked sparse start cities into one
+        # back-and-forth route. Leg count no longer gates which cities appear.
+        exponent = 2.0 if level <= 2 else 1.0
+        weights = [1.0 / (c[1] ** exponent) for c in pool]
         return self._rng.choices(pool, weights)[0]
 
     def _choose_origin_location(self, city, level: int) -> Location:

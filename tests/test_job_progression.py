@@ -13,44 +13,73 @@ from freight_fate.models.jobs import (
 
 @pytest.mark.parametrize("city", ["Atlanta", "Philadelphia", "Chicago"])
 def test_level_one_offers_are_short_regional_hops(world, city):
-    single = total = 0
+    # Rookie reach is gated by the distance cap and proximity weighting, not by
+    # leg count: jobs stay regional and lean short, but the board offers variety
+    # (it is no longer locked to one back-and-forth destination).
+    cap = LEVEL_DISTANCE_CAPS[1]
+    near = total = 0
+    destinations: set[str] = set()
     for seed in range(20):
         jobs = JobBoard(world, seed=seed).offers(city, set(), level=1)
         assert jobs
         for job in jobs:
             total += 1
-            assert job.distance_mi <= LEVEL_DISTANCE_CAPS[1]
-            route = world.supported_route(job.origin, job.destination)
-            assert route is not None
-            single += len(route.legs) == 1
-    # mostly direct hops to neighboring cities, never more than two legs
-    assert single / total >= 0.55
+            assert job.distance_mi <= cap                # within the regional cap
+            near += job.distance_mi <= cap * 0.6         # proximity favors near cities
+            destinations.add(job.destination)
+    assert near / total >= 0.5                            # predominantly short hauls
+    assert len(destinations) >= 3                         # variety, not one repeated route
 
 
-def test_level_one_and_two_never_exceed_two_legs(world):
+def test_level_one_and_two_stay_within_the_regional_cap(world):
+    # The distance cap keeps rookie work regional; leg count no longer gates it.
     for seed in range(10):
         for level in (1, 2):
+            cap = LEVEL_DISTANCE_CAPS[level]
             for job in JobBoard(world, seed=seed).offers("Atlanta", set(), level=level):
                 route = world.supported_route(job.origin, job.destination)
                 assert route is not None
-                assert len(route.legs) <= 2
+                assert job.distance_mi <= cap
 
 
-def test_level_two_adds_regional_two_leg_work(world):
-    # Milwaukee can reach Indianapolis through Chicago once level 2 allows
-    # nearby two-leg work, and the full network now has metadata for both legs.
-    level_one_two_leg = level_two_two_leg = 0
-    for seed in range(40):
-        for job in JobBoard(world, seed=seed).offers("Milwaukee", set(), level=1):
-            route = world.supported_route(job.origin, job.destination)
-            assert route is not None
-            level_one_two_leg += len(route.legs) == 2
-        for job in JobBoard(world, seed=seed).offers("Milwaukee", set(), level=2):
-            route = world.supported_route(job.origin, job.destination)
-            assert route is not None
-            level_two_two_leg += len(route.legs) == 2
+def test_higher_level_reaches_farther_destinations(world):
+    # Level 2's larger cap lets it take jobs to cities level 1 cannot reach.
+    def max_distance(level: int) -> float:
+        return max(job.distance_mi
+                   for seed in range(40)
+                   for job in JobBoard(world, seed=seed).offers(
+                       "Milwaukee", set(), level=level))
 
-    assert level_two_two_leg > level_one_two_leg
+    assert max_distance(2) > max_distance(1)
+
+
+def test_bobtail_relocates_to_a_nearby_city_without_pay():
+    from freight_fate.app import App
+    from freight_fate.models.jobs import make_reposition_job
+    from freight_fate.models.profile import Profile
+    from freight_fate.states.driving import ArrivalState, DrivingState
+
+    app = App()
+    try:
+        app.ctx.profile = Profile(name="Bobtail")
+        p = app.ctx.profile
+        p.current_city = "Denver"
+        money_before = p.money
+        job = make_reposition_job(app.ctx.world, "Denver", "Cheyenne")
+        assert job is not None and job.bobtail and job.pay == 0.0
+        route = app.ctx.world.supported_route("Denver", "Cheyenne")
+        driving = DrivingState(app.ctx, job, route)
+        driving.trip.game_minutes = 120.0
+        # a bobtail run survives save/resume as a bobtail run
+        assert DrivingState.from_snapshot(app.ctx, driving.snapshot()).job.bobtail
+
+        ArrivalState(app.ctx, driving)
+
+        assert p.current_city == "Cheyenne"   # relocated to the new hub
+        assert p.money == money_before        # no pay for an empty run
+        assert p.career.deliveries == 0       # not counted as a delivery
+    finally:
+        app.shutdown()
 
 
 def test_distance_cap_rises_with_level(world):
