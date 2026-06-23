@@ -747,6 +747,12 @@ class Interchange:
         phrase = self.spoken_phrase
         return f"{phrase[0].upper()}{phrase[1:]} now."
 
+    @property
+    def exit_label(self) -> str:
+        """Short signed label for a stop's ramp, e.g. 'exit 7'; empty when OSM
+        has no exit number for this junction."""
+        return f"exit {self.exit_ref}" if self.exit_ref else ""
+
 
 @dataclass(frozen=True)
 class City:

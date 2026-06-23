@@ -11,6 +11,7 @@ from freight_fate.data.world import (
     _parse_interchange,
 )
 from freight_fate.sim import Trip, TruckState, WeatherSystem
+from freight_fate.sim.trip import _leg_heading, _nearest_exit_label
 
 # --- phrasing ---------------------------------------------------------------
 
@@ -173,3 +174,103 @@ def test_next_navigation_context_mentions_exit(world):
     assert trip.next_navigation_context() == (
         "Next exit in 10 miles: exit 21 for US-52 West toward Lafayette."
     )
+
+
+# --- Scope A: grounded exits, ramps, onramps --------------------------------
+
+def test_interchange_exit_label_property():
+    assert Interchange(at_mi=5.0, exit_ref="7", source="x").exit_label == "exit 7"
+    assert Interchange(at_mi=5.0, destinations=("Camden",), source="x").exit_label == ""
+
+
+def test_leg_heading_follows_route_numbering(world):
+    # Odd routes are signed N/S even where the geometry runs diagonally
+    # (I-95 NY->Philadelphia trends southwest but is signed South).
+    assert _leg_heading("I-95", "New York", "Philadelphia") == "South"
+    assert _leg_heading("I-95", "Philadelphia", "New York") == "North"
+    # Even routes are signed E/W.
+    assert _leg_heading("I-80", "Chicago", "Cleveland") == "East"
+    assert _leg_heading("I-80", "Cleveland", "Chicago") == "West"
+    # No route number -> no heading.
+    assert _leg_heading("Local Road", "Chicago", "Cleveland") == ""
+
+
+def _leg0_curated_stop(route):
+    leg = route.legs[0]
+    forward = route.cities[0] == leg.a
+    stop = next(s for s in leg.stops
+                if s.curated and s.applies_to_direction(forward))
+    return leg, stop
+
+
+def test_nearest_exit_label_respects_tolerance(world):
+    base = world.route_options("Chicago", "Indianapolis")[0].legs[0]
+    leg = dataclasses.replace(base, interchanges=(
+        Interchange(at_mi=50.0, exit_ref="7", source="x"),
+        Interchange(at_mi=80.0, exit_ref="", destinations=("Town",), source="x"),
+    ))
+    assert _nearest_exit_label(leg, 51.0) == "exit 7"     # within 2.0 mi
+    assert _nearest_exit_label(leg, 55.0) == ""           # too far
+    assert _nearest_exit_label(leg, 80.0) == ""           # nearest has no ref
+
+
+def test_place_stops_attaches_exit_label(world):
+    route = world.route_options("Chicago", "Indianapolis")[0]
+    leg, target = _leg0_curated_stop(route)
+    ix = Interchange(at_mi=target.at_mi, exit_ref="21", destinations=("Lafayette",),
+                     via="US 52 West", highway=leg.highway, source="OSM")
+    route.legs[0] = dataclasses.replace(leg, interchanges=(ix,))
+    trip = Trip(route, TruckState(), WeatherSystem("great_lakes", seed=1), seed=2)
+    placed = next(s for s in trip.stops if s.name == target.name)
+    assert placed.exit_label == "exit 21"
+
+
+def test_rest_stop_cue_names_exit_when_linked(world):
+    route = world.route_options("Chicago", "Indianapolis")[0]
+    leg, target = _leg0_curated_stop(route)
+    ix = Interchange(at_mi=target.at_mi, exit_ref="21", destinations=("Lafayette",),
+                     via="US 52 West", highway=leg.highway, source="OSM")
+    route.legs[0] = dataclasses.replace(leg, interchanges=(ix,))
+    trip = Trip(route, TruckState(), WeatherSystem("great_lakes", seed=1), seed=2)
+    cue = next(c for c in trip.navigation_cues
+               if c.kind == "rest_stop" and target.name in c.key)
+    assert "at exit 21" in cue.near_text
+
+
+def test_rest_stop_cue_generic_without_linked_exit(world):
+    route = world.route_options("Chicago", "Indianapolis")[0]
+    _leg, target = _leg0_curated_stop(route)
+    trip = Trip(route, TruckState(), WeatherSystem("great_lakes", seed=1), seed=2)
+    cue = next(c for c in trip.navigation_cues
+               if c.kind == "rest_stop" and target.name in c.key)
+    assert "exit" in cue.near_text  # "press X to take the exit"
+    assert "at exit" not in cue.near_text  # no fabricated exit number
+
+
+def test_first_leg_has_onramp_cue(world):
+    route = world.route_options("Chicago", "Indianapolis")[0]
+    trip = Trip(route, TruckState(), WeatherSystem("great_lakes", seed=1), seed=2)
+    onramps = [c for c in trip.navigation_cues if c.kind == "onramp"]
+    assert len(onramps) == 1
+    text = onramps[0].near_text
+    assert text.startswith(f"Merge onto {route.legs[0].highway} South toward ")
+    assert "Indianapolis" in text and "miles." in text
+
+
+def test_onramp_cue_fires_at_drive_start(world):
+    route = world.route_options("Chicago", "Indianapolis")[0]
+    truck = TruckState()
+    truck.transmission.automatic = True
+    truck.start_engine()
+    trip = Trip(route, truck, WeatherSystem("great_lakes", seed=1), seed=2)
+    truck.throttle = 0.85
+    seen = []
+    for _ in range(60 * 120):
+        truck.auto_shift()
+        truck.update(1 / 60)
+        for ev in trip.update(1 / 60):
+            if "Merge onto" in ev.message:
+                seen.append(ev.message)
+        if seen:
+            break
+    assert seen and seen[0].startswith("Merge onto")

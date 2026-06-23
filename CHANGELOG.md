@@ -3,6 +3,16 @@
 ## Unreleased
 
 ### Added
+- **Highway exit callouts.** Interstate drives now announce upcoming
+  interchanges the way a real sign reads them -- "In 2 miles, exit 7 for
+  US-1 North toward Trenton and New York" -- with the exit number, the route
+  you would take, and its control cities. Exit data is sourced from
+  OpenStreetMap and snapped onto each corridor.
+- **Grounded exits and onramps.** When a rest stop sits at a real interchange,
+  the exit prompt and ramp now name its number ("Signaling for exit 113, the
+  Petro Stopping Centers"; "You take exit 113"). Each run also opens with an
+  onramp callout -- "Merge onto I-65 South toward Indianapolis" -- and highway
+  changes name the new road and direction.
 - **Music remakes.** The main menu theme, Open Road, and Night Haul now use
   new Suno remakes while keeping their familiar Freight Fate music slots.
 - **Music rotation.** All menu and driving music beds now play once and rotate

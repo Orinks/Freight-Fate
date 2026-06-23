@@ -380,8 +380,9 @@ class DrivingState(State):
                 "Hold B for the emergency brake, the hardest possible stop. "
                 "K sets adaptive cruise at your current speed; bad weather "
                 "increases the following gap, and braking cancels. "
-                "X takes the next announced exit: slow to 45 for the ramp, "
-                "then brake to a stop for the rest stop menu. "
+                "X takes the next announced exit, called out by its number "
+                "when known: slow to 45 for the ramp, then brake to a stop for "
+                "the rest stop menu. "
                 "E starts the engine, and stops it only below 5 miles per hour. "
                 "Air pressure must build before the truck can move. "
                 "Press P to release or set the parking brake; if pressure is "
@@ -1162,8 +1163,11 @@ class DrivingState(State):
         self._exit_stop = stop
         self.ctx.audio.play("ui/notify", volume=0.5)
         ahead = stop.at_mi - self.trip.position_mi
-        self.ctx.say(f"Signaling for the {stop.spoken_name} exit, "
-                     f"{ahead:.1f} miles ahead. "
+        if stop.exit_label:
+            head = f"Signaling for {stop.exit_label}, {stop.spoken_name},"
+        else:
+            head = f"Signaling for the {stop.spoken_name} exit,"
+        self.ctx.say(f"{head} {ahead:.1f} miles ahead. "
                      f"Slow to {RAMP_MAX_MPH:.0f} or less for the ramp.")
 
     def _update_exit(self, moved_mi: float) -> None:
@@ -1192,12 +1196,15 @@ class DrivingState(State):
             self._ramp_end_said = False
             self._cancel_cruise()
             self.ctx.audio.play("ui/notify", volume=0.7)
-            self.ctx.say_event(f"You take the exit for {stop.spoken_name}. "
-                               "Half a mile of ramp; brake to a stop at "
-                               "the end.")
+            take = (f"You take {stop.exit_label} for {stop.spoken_name}."
+                    if stop.exit_label
+                    else f"You take the exit for {stop.spoken_name}.")
+            self.ctx.say_event(f"{take} Half a mile of ramp; brake to a stop "
+                               "at the end.")
         else:
+            missed = stop.exit_label if stop.exit_label else "the exit"
             self.ctx.say_event("You were going too fast for the ramp and "
-                               f"missed the exit for {stop.spoken_name}.")
+                               f"missed {missed} for {stop.spoken_name}.")
 
     def _toggle_cruise(self) -> None:
         t = self.truck
