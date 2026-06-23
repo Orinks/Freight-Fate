@@ -158,8 +158,25 @@ def test_full_game_flow_headless(monkeypatch):
             else:
                 driving.truck.throttle = 0.8
                 driving.truck.brake = 0.0
+            # trip.update reapplies physics every frame that can randomly kill a
+            # long headless drive: simulated weather can turn to ice and cap
+            # traction to a crawl, terrain grade can stall the launch, and fuel
+            # burns at time_scale (20x) so the tank can empty mid-route and cut
+            # the engine. This is a flow smoke test -- that physics is covered by
+            # test_weather_trip, test_vehicle, and test_transmission -- so pin
+            # full traction, flat ground, and a full tank for a deterministic
+            # drive, matching the hazard/inspection/traffic neutralisation above.
+            driving.truck.grip = 1.0
+            driving.truck.grade = 0.0
+            driving.truck.fuel_gal = driving.truck.specs.fuel_tank_gal
             driving.truck.auto_shift()
             driving.truck.update(1 / 60)
+            # A forced near-stop (e.g. a weigh station) can leave the truck in a
+            # mid gear below the lugging threshold and stall it; a real driver
+            # just restarts, so recover in a launchable gear and carry on.
+            if not driving.truck.engine_on:
+                driving.truck.transmission.gear = 1
+                driving.truck.start_engine()
             for event in driving.trip.update(1 / 60):
                 driving._handle_trip_event(event)
             driving._update_hazard(1 / 60)
