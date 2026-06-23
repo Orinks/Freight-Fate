@@ -36,3 +36,6 @@ tools/_entry.py
 
 # Portable save data (lives in the game directory)
 saves/
+
+# here.now publish state (contains claimToken write-secret)
+.herenow_site.json
