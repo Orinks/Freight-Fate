@@ -78,6 +78,10 @@ def pick_backend(ctx, override: str | None = None):
     return None
 
 
+# Preferred separate event voice per platform; the first one that exists wins.
+# These are the controllable software TTS engines, not screen readers: SAPI is
+# Windows, AVSpeech is macOS, Speech Dispatcher is Linux. ``select_event_backend``
+# falls back to whatever the machine actually has, so this is only a hint.
 EVENT_BACKEND = "SAPI"
 
 
@@ -86,7 +90,8 @@ def pick_event_backend(ctx, main_backend, name: str = EVENT_BACKEND):
 
     Screen readers interrupt the game's speech with their own chatter, so
     critical announcements (hazards, warnings) can be cut off mid-sentence.
-    Routing events through a dedicated SAPI voice keeps the two streams
+    Routing events through a dedicated software voice (SAPI on Windows,
+    AVSpeech on macOS, Speech Dispatcher on Linux) keeps the two streams
     from talking over each other. Returns None when the main channel
     already is that backend (nothing to separate) or it is unusable, in
     which case events fall back to the main channel.
@@ -135,9 +140,9 @@ class Speech:
                 self._ctx = None
             else:
                 log.info("Speech backend: %s", self._backend.name)
-                self._event_backend = pick_event_backend(self._ctx, self._backend)
+                self.select_event_backend(EVENT_BACKEND)
                 if self._event_backend is not None:
-                    log.info("Event speech backend: %s", self._event_backend.name)
+                    log.info("Event speech backend: %s", self.event_backend_name)
         except Exception:
             log.exception("Speech unavailable; continuing silently")
             self._ctx = None
@@ -165,6 +170,142 @@ class Speech:
             return self._event_backend.name
         except Exception:
             return "unknown"
+
+    # -- adjustable parameters -------------------------------------------------
+    #
+    # Prism exposes rate, pitch, volume (each a 0..1 float) and voice (an index)
+    # per backend, gated by feature flags. Running screen readers such as NVDA
+    # report no support -- they own those settings themselves -- while software
+    # voices like SAPI and OneCore support all of them. A change is pushed to
+    # every backend that supports it, so the main voice and the separate event
+    # voice stay in sync.
+
+    def _backends(self):
+        return [b for b in (self._backend, self._event_backend) if b is not None]
+
+    def _any_supports(self, feature: str) -> bool:
+        for backend in self._backends():
+            try:
+                if getattr(backend.features, feature):
+                    return True
+            except Exception:
+                continue
+        return False
+
+    @property
+    def supports_rate(self) -> bool:
+        return self._any_supports("supports_set_rate")
+
+    @property
+    def supports_pitch(self) -> bool:
+        return self._any_supports("supports_set_pitch")
+
+    @property
+    def supports_volume(self) -> bool:
+        return self._any_supports("supports_set_volume")
+
+    def event_backend_options(self) -> list[str]:
+        """Usable backends that can serve as a separate event voice.
+
+        These are the controllable software voices (SAPI, OneCore, ...) other
+        than the main voice -- screen readers are excluded because they cannot
+        be driven independently. Ordered by Prism's registry priority."""
+        if self._ctx is None or self._backend is None:
+            return []
+        try:
+            main_name = self._backend.name
+        except Exception:
+            return []
+        try:
+            ids = [self._ctx.id_of(i) for i in range(self._ctx.backends_count)]
+        except Exception:
+            return []
+        options: list[str] = []
+        for backend_id in ids:
+            try:
+                backend = self._ctx.acquire(backend_id)
+                name = backend.name
+                if name == main_name or not _usable(backend):
+                    continue
+                features = backend.features
+                if features.supports_set_voice or features.supports_set_rate:
+                    options.append(name)
+            except Exception:
+                continue
+        return options
+
+    def select_event_backend(self, name: str | None) -> None:
+        """Choose which backend speaks driving events (None = the main voice).
+
+        ``name`` is a preference: if that backend is not on this machine (for
+        example a Windows save's ``SAPI`` opened on macOS), the best available
+        separate software voice is used instead, so the feature works the same
+        on every platform. Falls back to the main voice only when there is no
+        separate voice at all."""
+        if self._ctx is None or self._backend is None:
+            return
+        if not name:
+            self._event_backend = None
+            return
+        options = self.event_backend_options()
+        if name not in options and options:
+            name = options[0]
+        self._event_backend = pick_event_backend(self._ctx, self._backend, name)
+
+    def voice_names(self) -> list[str]:
+        """Installed voice names from the first backend that lets us pick one.
+
+        Empty when no backend supports voice selection (for example when the
+        only voice is a running screen reader)."""
+        for backend in self._backends():
+            try:
+                features = backend.features
+                if (features.supports_set_voice
+                        and features.supports_count_voices
+                        and features.supports_get_voice_name):
+                    return [backend.get_voice_name(i)
+                            for i in range(backend.voices_count)]
+            except Exception:
+                continue
+        return []
+
+    def configure(self, *, rate: float | None = None, pitch: float | None = None,
+                  volume: float | None = None, voice: str | None = None) -> None:
+        """Push speech parameters to every backend that supports them.
+
+        Unsupported parameters (and backends) are skipped silently, and any
+        backend failure is logged without disturbing the others or the game."""
+        for backend in self._backends():
+            self._configure_backend(backend, rate, pitch, volume, voice)
+
+    def _configure_backend(self, backend, rate, pitch, volume, voice) -> None:
+        try:
+            features = backend.features
+        except Exception:
+            return
+        for value, supported, attr in (
+            (rate, "supports_set_rate", "rate"),
+            (pitch, "supports_set_pitch", "pitch"),
+            (volume, "supports_set_volume", "volume"),
+        ):
+            if value is None or not getattr(features, supported, False):
+                continue
+            try:
+                setattr(backend, attr, float(value))
+            except Exception:
+                log.warning("Could not set speech %s on %s", attr,
+                            getattr(backend, "name", "?"), exc_info=True)
+        if voice and (features.supports_set_voice
+                      and features.supports_count_voices
+                      and features.supports_get_voice_name):
+            try:
+                for i in range(backend.voices_count):
+                    if backend.get_voice_name(i) == voice:
+                        backend.voice = i
+                        break
+            except Exception:
+                log.warning("Could not set speech voice on %s",
+                            getattr(backend, "name", "?"), exc_info=True)
 
     def say(self, text: str, interrupt: bool = True) -> None:
         """Speak (and braille, where supported) the given text."""

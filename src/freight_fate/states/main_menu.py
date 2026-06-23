@@ -902,19 +902,10 @@ class SettingsCategoryState(MenuState):
                 MenuItem("Back", self.go_back),
             ]
         if self.category == "speech":
-            return [
-                MenuItem(lambda: f"Speech verbosity: {['terse', 'normal', 'chatty'][s.speech_verbosity]}",
-                         lambda: self._cycle_verbosity(1),
-                         help="Controls how often driving status reminders speak."),
-                MenuItem(lambda: ("Driving event voice: "
-                                  f"{'separate SAPI voice' if s.sapi_events else 'screen reader'}"),
-                         lambda: self._toggle_sapi_events(1),
-                         help="Speaks road events through SAPI or the screen reader voice."),
-                MenuItem(lambda: f"Weather source: {'real world' if s.real_weather else 'simulated'}",
-                         lambda: self._toggle_real_weather(1),
-                         help="Real world uses live city conditions when available."),
-                MenuItem("Back", self.go_back),
-            ]
+            items = [MenuItem(label, (lambda a=action: a(1)), help=help_text)
+                     for label, action, help_text in self._speech_control_specs()]
+            items.append(MenuItem("Back", self.go_back))
+            return items
         return [
             MenuItem(lambda: ("Update channel: "
                               f"{'developer snapshots' if self._channel() == 'dev' else 'stable releases'}"),
@@ -934,28 +925,69 @@ class SettingsCategoryState(MenuState):
             super().handle_event(event)
 
     def _adjust(self, direction: int) -> None:
-        actions = {
-            "gameplay": [
-                self._toggle_units, self._toggle_transmission,
-                self._cycle_pace, self._cycle_hos,
-            ],
-            "audio": [
-                lambda d: self._volume("master_volume", 0.1 * d),
-                lambda d: self._volume("sfx_volume", 0.1 * d),
-                lambda d: self._volume("weather_volume", 0.1 * d),
-                lambda d: self._volume("engine_volume", 0.1 * d),
-                lambda d: self._volume("music_volume", 0.1 * d),
-                lambda d: self._volume("ui_volume", 0.1 * d),
-            ],
-            "speech": [
-                self._cycle_verbosity,
-                self._toggle_sapi_events,
-                self._toggle_real_weather,
-            ],
-            "updates": [self._toggle_update_channel],
-        }[self.category]
+        if self.category == "speech":
+            actions = [action for _, action, _ in self._speech_control_specs()]
+        else:
+            actions = {
+                "gameplay": [
+                    self._toggle_units, self._toggle_transmission,
+                    self._cycle_pace, self._cycle_hos,
+                ],
+                "audio": [
+                    lambda d: self._volume("master_volume", 0.1 * d),
+                    lambda d: self._volume("sfx_volume", 0.1 * d),
+                    lambda d: self._volume("weather_volume", 0.1 * d),
+                    lambda d: self._volume("engine_volume", 0.1 * d),
+                    lambda d: self._volume("music_volume", 0.1 * d),
+                    lambda d: self._volume("ui_volume", 0.1 * d),
+                ],
+                "updates": [self._toggle_update_channel],
+            }[self.category]
         if self.index < len(actions):
             actions[self.index](direction)
+
+    def _speech_control_specs(self):
+        """Speech-category controls as (label, action, help) triples.
+
+        Built dynamically so the menu and the left/right adjust handler stay in
+        sync, and so rate, pitch, volume, and voice only appear when the active
+        voices actually support them (a running screen reader does not)."""
+        s = self.ctx.settings
+        speech = self.ctx.speech
+        specs = [
+            (lambda: f"Speech verbosity: {['terse', 'normal', 'chatty'][s.speech_verbosity]}",
+             self._cycle_verbosity,
+             "Controls how often driving status reminders speak."),
+            (lambda: f"Driving event voice: {self._event_voice_label()}",
+             self._cycle_event_voice,
+             "Speaks road events through the main voice or a separate SAPI or "
+             "OneCore voice, so a screen reader cannot cut them off."),
+        ]
+        if speech.supports_rate:
+            specs.append((
+                lambda: f"Speech rate: {round(s.speech_rate * 100)} percent",
+                lambda d: self._adjust_speech("speech_rate", 0.1 * d),
+                "How fast the game's voice speaks, where the voice allows it."))
+        if speech.supports_pitch:
+            specs.append((
+                lambda: f"Speech pitch: {round(s.speech_pitch * 100)} percent",
+                lambda d: self._adjust_speech("speech_pitch", 0.1 * d),
+                "How high or low the game's voice sounds."))
+        if speech.supports_volume:
+            specs.append((
+                lambda: f"Speech volume: {round(s.speech_volume * 100)} percent",
+                lambda d: self._adjust_speech("speech_volume", 0.1 * d),
+                "Loudness of the game's voice, separate from sound volume."))
+        if speech.voice_names():
+            specs.append((
+                lambda: f"Speech voice: {s.speech_voice or 'default'}",
+                self._cycle_voice,
+                "Which installed voice the game speaks with."))
+        specs.append((
+            lambda: f"Weather source: {'real world' if s.real_weather else 'simulated'}",
+            self._toggle_real_weather,
+            "Real world uses live city conditions when available."))
+        return specs
 
     def _pace_label(self) -> str:
         scale = self.ctx.settings.time_scale
@@ -1014,8 +1046,49 @@ class SettingsCategoryState(MenuState):
         self.ctx.settings.speech_verbosity = (self.ctx.settings.speech_verbosity + d) % 3
         self._announce()
 
-    def _toggle_sapi_events(self, _d: int) -> None:
-        self.ctx.settings.sapi_events = not self.ctx.settings.sapi_events
+    _EVENT_BACKEND_NAMES = {"OneCore": "Windows OneCore"}
+
+    def _event_voice_label(self) -> str:
+        s = self.ctx.settings
+        if not s.sapi_events:
+            return "main voice"
+        return self._EVENT_BACKEND_NAMES.get(s.event_backend, s.event_backend)
+
+    def _cycle_event_voice(self, d: int) -> None:
+        s = self.ctx.settings
+        # None = the main voice; the rest are the available separate voices.
+        options = [None, *self.ctx.speech.event_backend_options()]
+        current = s.event_backend if s.sapi_events else None
+        i = options.index(current) if current in options else 0
+        choice = options[(i + d) % len(options)]
+        if choice is None:
+            s.sapi_events = False
+        else:
+            s.sapi_events = True
+            s.event_backend = choice
+        self.ctx.settings.save()
+        self.ctx.apply_speech()
+        self._announce()
+
+    def _adjust_speech(self, attr: str, delta: float) -> None:
+        value = getattr(self.ctx.settings, attr)
+        setattr(self.ctx.settings, attr, max(0.0, min(1.0, round(value + delta, 2))))
+        self.ctx.settings.save()
+        self.ctx.apply_speech()
+        self._announce()
+
+    def _cycle_voice(self, d: int) -> None:
+        voices = self.ctx.speech.voice_names()
+        if not voices:
+            return
+        current = self.ctx.settings.speech_voice
+        if current in voices:
+            i = (voices.index(current) + d) % len(voices)
+        else:
+            i = 0 if d >= 0 else len(voices) - 1
+        self.ctx.settings.speech_voice = voices[i]
+        self.ctx.settings.save()
+        self.ctx.apply_speech()
         self._announce()
 
     def _toggle_real_weather(self, _d: int) -> None:

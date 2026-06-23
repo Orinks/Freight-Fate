@@ -27,7 +27,12 @@ class Settings:
     engine_volume: float = 0.55
     ui_volume: float = 0.9
     speech_verbosity: int = 1             # 0 terse, 1 normal, 2 chatty
-    sapi_events: bool = True              # driving events on a separate SAPI voice
+    sapi_events: bool = True              # driving events on a separate voice
+    event_backend: str = "SAPI"          # which voice that is (e.g. SAPI/OneCore)
+    speech_rate: float = 0.5              # voice speed, 0..1 (backend default ~0.5)
+    speech_pitch: float = 0.5             # voice pitch, 0..1 (backend default ~0.5)
+    speech_volume: float = 1.0            # voice loudness, 0..1
+    speech_voice: str = ""               # installed voice name; "" = backend default
     update_channel: str = ""              # "stable"/"dev"; "" follows this build's channel
     skipped_update: str = ""              # release tag the player chose to skip
 
@@ -63,9 +68,12 @@ class Settings:
             s.hos_mode = "realistic"
         if s.update_channel not in ("", "stable", "dev"):
             s.update_channel = ""
+        if not isinstance(s.event_backend, str) or not s.event_backend:
+            s.event_backend = "SAPI"
         for attr in (
             "master_volume", "sfx_volume", "music_volume",
             "weather_volume", "engine_volume", "ui_volume",
+            "speech_rate", "speech_pitch", "speech_volume",
         ):
             setattr(s, attr, max(0.0, min(1.0, float(getattr(s, attr)))))
         return s
