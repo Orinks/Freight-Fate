@@ -7,13 +7,19 @@ import random
 # Diesel $/gal by region, nudged by a per-session market wobble.
 REGION_FUEL_PRICE = {
     "northeast": 4.15,
-    "midwest": 3.70,
-    "south": 3.55,
-    "plains": 3.60,
-    "rockies": 3.85,
-    "southwest": 3.95,
-    "west_coast": 4.85,
-    "northwest": 4.35,
+    "appalachia": 3.95,
+    "great_lakes": 3.75,
+    "heartland": 3.60,
+    "southern_plains": 3.45,
+    "mid_south": 3.45,
+    "atlantic_southeast": 3.65,
+    "gulf_coast": 3.40,
+    "florida": 3.85,
+    "rockies": 3.95,
+    "great_basin": 4.10,
+    "desert_southwest": 4.00,
+    "california": 5.10,
+    "pacific_northwest": 4.45,
 }
 
 REPAIR_COST_PER_PCT = 85.0     # $ per percent of damage repaired

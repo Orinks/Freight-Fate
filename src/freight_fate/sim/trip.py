@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import math
 import random
+import re
 from dataclasses import dataclass, field
 from enum import Enum
 
@@ -40,20 +41,32 @@ GENERIC_HAZARDS = ("debris on the road", "a slow vehicle ahead",
 REGION_HAZARDS: dict[str, tuple[str, ...]] = {
     "northeast": ("a sudden lane closure ahead",
                   "stopped traffic around a fender bender"),
-    "midwest": ("a deer crossing the road",
-                "farm equipment pulling onto the highway"),
-    "south": ("retread debris from a blown tire",
-              "a sudden downpour flooding the right lane"),
-    "plains": ("a combine convoy crawling ahead",
-               "a crosswind gust shoving the trailer"),
+    "appalachia": ("a runaway-truck ramp warning on the steep grade",
+                   "fog settling in the hollow ahead"),
+    "great_lakes": ("a lake-effect snow squall whiting out the lane",
+                    "a deer crossing the road"),
+    "heartland": ("farm equipment pulling onto the highway",
+                  "a sudden downpour flooding the right lane"),
+    "southern_plains": ("a crosswind gust shoving the trailer",
+                        "hail hammering the windshield"),
+    "mid_south": ("a sudden downpour flooding the right lane",
+                  "retread debris from a blown tire"),
+    "atlantic_southeast": ("stopped traffic around a fender bender",
+                           "a sudden thunderstorm downpour"),
+    "gulf_coast": ("standing water flooding the lane",
+                   "a fog bank rolling across the lanes"),
+    "florida": ("a sudden thunderstorm downpour",
+                "stopped traffic around a fender bender"),
     "rockies": ("rockfall debris on the road",
                 "a runaway truck on the grade ahead"),
-    "southwest": ("a dust devil crossing the interstate",
-                  "tumbleweeds piling in your lane"),
-    "west_coast": ("a fog bank rolling across the lanes",
+    "great_basin": ("a crosswind gust shoving the trailer",
+                    "snow drifting across the mountain pass"),
+    "desert_southwest": ("a dust devil crossing the interstate",
+                         "tumbleweeds piling in your lane"),
+    "california": ("a fog bank rolling across the lanes",
                    "a stalled car jutting off the shoulder"),
-    "northwest": ("an elk crossing the road",
-                  "standing water in your lane"),
+    "pacific_northwest": ("an elk crossing the road",
+                          "standing water in your lane"),
 }
 
 
@@ -103,6 +116,7 @@ class RoadStop:
     actions: tuple[str, ...] = ()
     services: tuple[str, ...] = ()
     parking: str = "unknown"
+    exit_label: str = ""   # "exit 7" when a real OSM interchange sits here
 
     @property
     def label(self) -> str:
@@ -231,8 +245,10 @@ class Trip:
                 offset = _stop_offset_for_direction(stop.at_mi, leg.miles,
                                                     from_city == leg.a)
                 at = start + offset
+                exit_label = _nearest_exit_label(leg, stop.at_mi)
                 out.append(RoadStop(stop.name, at, stop.type,
-                                    stop.actions, stop.services, stop.parking))
+                                    stop.actions, stop.services, stop.parking,
+                                    exit_label))
         return out
 
     def _build_navigation_cues(self) -> list[NavigationCue]:
@@ -241,8 +257,21 @@ class Trip:
                                              strict=True)):
             forward = self.route.cities[i] == leg.a
             toward = self.route.cities[i + 1]
+            heading = _leg_heading(leg.highway, self.route.cities[i], toward)
+            shield = f"{leg.highway} {heading}".strip()
             segment_miles = leg.miles
-            if segment_miles >= 40.0:
+            if i == 0:
+                # The onramp doubles as the first leg's "continue", carrying the
+                # distance, so the two do not announce the same thing at launch.
+                cues.append(NavigationCue(
+                    "onramp:0",
+                    "onramp",
+                    start + 0.05,
+                    f"merge onto {shield} toward {toward}",
+                    f"Merge onto {shield} toward {toward}; "
+                    f"{segment_miles:.0f} miles.",
+                ))
+            elif segment_miles >= 40.0:
                 cues.append(NavigationCue(
                     f"continue:{i}",
                     "continue",
@@ -255,8 +284,8 @@ class Trip:
                     f"maneuver:{i}",
                     "maneuver",
                     start,
-                    f"keep right for {leg.highway} toward {toward}",
-                    f"Keep right now for {leg.highway} toward {toward}.",
+                    f"keep right for {shield} toward {toward}",
+                    f"Keep right now for {shield} toward {toward}.",
                 ))
             for crossing in leg.state_crossings:
                 offset = _stop_offset_for_direction(crossing.at_mi, leg.miles, forward)
@@ -300,16 +329,27 @@ class Trip:
                     f"{toll.method_label} toll point ahead: {toll.name}. "
                     f"{toll_text}",
                 ))
+            for ix in leg.interchanges:
+                offset = _stop_offset_for_direction(ix.at_mi, leg.miles, forward)
+                cues.append(NavigationCue(
+                    f"interchange:{i}:{ix.at_mi}:{ix.exit_ref}",
+                    "interchange",
+                    start + offset,
+                    ix.spoken_phrase,
+                    ix.near_phrase,
+                ))
             for stop in leg.stops:
                 if not stop.curated or not stop.applies_to_direction(forward):
                     continue
                 offset = _stop_offset_for_direction(stop.at_mi, leg.miles, forward)
+                exit_label = _nearest_exit_label(leg, stop.at_mi)
+                at_part = f" at {exit_label}" if exit_label else ""
                 cues.append(NavigationCue(
                     f"rest_stop:{i}:{stop.at_mi}:{stop.name}",
                     "rest_stop",
                     start + offset,
-                    f"{stop.label} ahead",
-                    f"{stop.label.capitalize()} ahead in 1 mile; "
+                    f"{stop.label} ahead{at_part}",
+                    f"{stop.label.capitalize()}{at_part} ahead in 1 mile; "
                     f"{stop.parking_label}; press X to take the exit.",
                 ))
         for i, lead in enumerate(self.traffic_leads):
@@ -557,10 +597,12 @@ class Trip:
             return f"Next stop in {ahead:.0f} miles: {cue.text}."
         if cue.kind == "state_crossing":
             return f"Next state line in {ahead:.0f} miles: {cue.text}."
-        if cue.kind == "maneuver":
+        if cue.kind in ("maneuver", "onramp"):
             return f"Next maneuver in {ahead:.0f} miles: {cue.text}."
         if cue.kind == "checkpoint":
             return f"Next place in {ahead:.0f} miles: {cue.text}."
+        if cue.kind == "interchange":
+            return f"Next exit in {ahead:.0f} miles: {cue.text}."
         if cue.kind == "traffic":
             return f"Traffic in {ahead:.0f} miles: {cue.text}."
         if cue.kind == "toll":
@@ -569,7 +611,23 @@ class Trip:
 
     def next_navigation_cue(self) -> NavigationCue | None:
         for cue in self.navigation_cues:
-            if cue.at_mi > self.position_mi + 0.05 and cue.kind != "continue":
+            if (
+                cue.at_mi > self.position_mi + 0.05
+                and cue.kind not in ("continue", "interchange")
+            ):
+                return cue
+        return None
+
+    def next_exit_context(self) -> str:
+        cue = self.next_exit_cue()
+        if cue is None:
+            return "No listed highway exit ahead before the destination."
+        ahead = max(0.0, cue.at_mi - self.position_mi)
+        return f"Next listed exit in {ahead:.0f} miles: {cue.text}."
+
+    def next_exit_cue(self) -> NavigationCue | None:
+        for cue in self.navigation_cues:
+            if cue.at_mi > self.position_mi + 0.05 and cue.kind == "interchange":
                 return cue
         return None
 
@@ -697,8 +755,9 @@ class Trip:
             ahead = stop.at_mi - self.position_mi
             if 0 < ahead <= 5.0 and stop.name not in self._announced_stops:
                 self._announced_stops.add(stop.name)
+                exit_part = f" at {stop.exit_label}" if stop.exit_label else ""
                 self._emit(TripEventKind.STOP_AHEAD,
-                           f"{stop.spoken_name} in {ahead:.0f} miles. "
+                           f"{stop.spoken_name}{exit_part} in {ahead:.0f} miles. "
                            f"{stop.parking_text}. "
                            "Press X to take the exit for it.",
                            stop=stop)
@@ -706,11 +765,14 @@ class Trip:
     def _check_navigation_cues(self) -> None:
         for cue in self.navigation_cues:
             ahead = cue.at_mi - self.position_mi
-            if cue.kind == "continue":
+            if cue.kind == "interchange":
+                continue
+            if cue.kind in ("continue", "onramp"):
                 key = f"{cue.key}:near"
                 if -0.5 <= ahead <= 0.5 and key not in self._announced_navigation:
                     self._announced_navigation.add(key)
-                    self._emit(TripEventKind.GPS_CUE, cue.text, cue=cue)
+                    self._emit(TripEventKind.GPS_CUE, cue.near_text or cue.text,
+                               cue=cue)
                 continue
             if cue.kind == "rest_stop":
                 key = f"{cue.key}:near"
@@ -910,6 +972,41 @@ class Trip:
 
 def _stop_offset_for_direction(at_mi: float, leg_miles: float, forward: bool) -> float:
     return at_mi if forward else leg_miles - at_mi
+
+
+def _leg_heading(highway: str, from_city: str, to_city: str) -> str:
+    """Signed heading for onramp/merge framing ("Merge onto I-95 South...").
+
+    Uses the US route-numbering convention -- odd routes are signed
+    north/south, even routes east/west -- so the spoken direction matches real
+    signage even where a leg runs diagonally (I-95 NY->Philadelphia is signed
+    South though the geometry trends southwest). The sign comes from the
+    endpoints' coordinates on the route's primary axis. Empty when the highway
+    has no number or a city lacks coordinates."""
+    match = re.search(r"\d+", highway)
+    if not match:
+        return ""
+    cities = get_world().cities
+    a, b = cities.get(from_city), cities.get(to_city)
+    if a is None or b is None or (a.lat == 0.0 and a.lon == 0.0):
+        return ""
+    if int(match.group()) % 2 == 1:   # odd -> north/south route
+        return "North" if b.lat >= a.lat else "South"
+    return "East" if b.lon >= a.lon else "West"   # even -> east/west route
+
+
+def _nearest_exit_label(leg, at_mi: float, tol_mi: float = 2.0) -> str:
+    """Signed exit label of the interchange nearest a stop on the same leg, in
+    the leg's native (a->b) frame. Empty when none is within ``tol_mi`` or the
+    nearest junction carries no exit number -- stops then keep generic wording."""
+    best_label = ""
+    best_dist = tol_mi
+    for ix in leg.interchanges:
+        dist = abs(ix.at_mi - at_mi)
+        if dist <= best_dist and ix.exit_label:
+            best_dist = dist
+            best_label = ix.exit_label
+    return best_label
 
 
 def _zone_key(zone: Zone) -> str:

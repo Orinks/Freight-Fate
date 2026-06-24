@@ -266,7 +266,7 @@ def make_trip(world, start_hour, seed=2, start="Atlanta", end="Dallas"):
     route = world.route_options(start, end)[0]
     truck = TruckState()
     truck.transmission.automatic = True
-    weather = WeatherSystem("south", seed=1)
+    weather = WeatherSystem("atlantic_southeast", seed=1)
     return Trip(route, truck, weather, seed=seed, start_hour=start_hour)
 
 
@@ -364,6 +364,7 @@ def start_drive(app):
         app.state.handle_event(key_event(pygame.K_DOWN))
     app.state.handle_event(key_event(pygame.K_RETURN))
     app.state.handle_event(key_event(pygame.K_RETURN))  # default name
+    app.state.handle_event(key_event(pygame.K_RETURN))  # default region
     app.state.handle_event(key_event(pygame.K_RETURN))  # default home terminal
     app.state.handle_event(key_event(pygame.K_RETURN))  # job board
     board = app.state
@@ -395,7 +396,31 @@ def select(menu, label):
 
 
 def park_at_first_stop(driving):
-    stop = driving.trip.stops[0]
+    # Prefer a sleep-capable stop the truck can actually open: additive
+    # service-plaza/fuel POIs may sort ahead of the curated overnight stops, and
+    # the rest / parking-full menus only apply where sleeping is offered.
+    # nearest_stop_within returns the first stop within range in sorted order, so
+    # skip sleepers shadowed by a nearer non-sleep stop.
+    stops = driving.trip.stops
+
+    def opens_here(stop):
+        for other in stops:
+            if abs(other.at_mi - stop.at_mi) <= 1.5:
+                return other is stop
+        return False
+
+    stop = next((s for s in stops if "sleep" in s.actions and opens_here(s)), None)
+    if stop is None:
+        # Job-board variety means some routes carry no sleep-capable stop; inject
+        # a deterministic one so the sleep / parking-full tests never depend on
+        # which route the career happened to draw.
+        from freight_fate.sim.trip import RoadStop
+        stop = RoadStop(
+            name="Test Travel Center", at_mi=max(1.0, driving.trip.total_miles * 0.5),
+            type="travel_center",
+            actions=("park", "save", "fuel", "food", "break", "sleep"),
+            services=("diesel", "food", "parking"), parking="confirmed")
+        driving.trip.stops = [stop]
     driving.trip.position_mi = stop.at_mi
     return stop
 
@@ -623,6 +648,7 @@ def test_city_sleep_resets_hours_and_advances_the_clock():
             app.state.handle_event(key_event(pygame.K_DOWN))
         app.state.handle_event(key_event(pygame.K_RETURN))
         app.state.handle_event(key_event(pygame.K_RETURN))  # default name
+        app.state.handle_event(key_event(pygame.K_RETURN))  # default region
         app.state.handle_event(key_event(pygame.K_RETURN))  # home terminal
         assert isinstance(app.state, CityMenuState)
         p = app.ctx.profile
@@ -836,6 +862,26 @@ def test_settings_menu_cycles_hours_of_service():
         assert app.ctx.settings.hos_mode == "realistic"
         cat.handle_event(key_event(pygame.K_LEFT))
         assert app.ctx.settings.hos_mode == "relaxed"
+    finally:
+        app.shutdown()
+
+
+@pytest.mark.smoke
+def test_settings_menu_cycles_lane_drift():
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        assert app.ctx.settings.steering_assist == "off"
+        cat = open_settings_category(app, "Gameplay")
+        while not cat.items[cat.index].text.startswith("Lane drift"):
+            cat.handle_event(key_event(pygame.K_DOWN))
+        cat.handle_event(key_event(pygame.K_RETURN))
+        assert app.ctx.settings.steering_assist == "light"
+        cat.handle_event(key_event(pygame.K_RETURN))
+        assert app.ctx.settings.steering_assist == "realistic"
+        cat.handle_event(key_event(pygame.K_LEFT))
+        assert app.ctx.settings.steering_assist == "light"
     finally:
         app.shutdown()
 

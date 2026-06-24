@@ -20,6 +20,7 @@ class Settings:
     time_scale: float = 20.0              # distance compression while driving
     real_weather: bool = False            # live conditions from Open-Meteo
     hos_mode: str = "realistic"           # hours of service: realistic/relaxed/debug_off
+    steering_assist: str = "off"          # off/light/realistic lane drift
     master_volume: float = 1.0
     sfx_volume: float = 0.8
     music_volume: float = 0.5
@@ -66,6 +67,8 @@ class Settings:
             s.hos_mode = "debug_off"
         if s.hos_mode not in HOS_MODES:
             s.hos_mode = "realistic"
+        if s.steering_assist not in ("off", "light", "realistic"):
+            s.steering_assist = "off"
         if s.update_channel not in ("", "stable", "dev"):
             s.update_channel = ""
         if not isinstance(s.event_backend, str) or not s.event_backend:

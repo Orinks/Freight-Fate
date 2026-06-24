@@ -92,7 +92,7 @@ def test_provider_refetches_after_ttl():
 
 def test_weather_system_applies_live_conditions():
     p = SyncProvider(fetch=lambda lat, lon: (65, 5.0))  # heavy rain
-    ws = WeatherSystem("southwest", seed=1, provider=p)
+    ws = WeatherSystem("desert_southwest", seed=1, provider=p)
     ws.set_city("Phoenix", 33.45, -112.07)
     changed = ws.update(1.0)
     assert ws.live
@@ -106,7 +106,7 @@ def test_weather_system_applies_live_conditions():
 
 def test_weather_system_falls_back_when_offline():
     p = SyncProvider(fetch=lambda lat, lon: (_ for _ in ()).throw(OSError()))
-    ws = WeatherSystem("midwest", seed=2, provider=p)
+    ws = WeatherSystem("great_lakes", seed=2, provider=p)
     ws.set_city("Chicago", 41.88, -87.63)
     changes = [ws.update(15.0) for _ in range(200)]
     assert not ws.live
@@ -114,7 +114,7 @@ def test_weather_system_falls_back_when_offline():
 
 
 def test_weather_system_without_provider_unchanged():
-    ws = WeatherSystem("midwest", seed=3)
+    ws = WeatherSystem("great_lakes", seed=3)
     ws.update(1.0)
     assert not ws.live
 

@@ -24,18 +24,44 @@ def open_picker(app, name=""):
     return app.state
 
 
-def test_picker_lists_every_city_with_region_and_defaults_to_chicago(world):
+def test_region_picker_lists_regions_and_defaults_to_chicagos_region(world):
     from freight_fate.app import App
-    from freight_fate.states.main_menu import REGION_LABELS
+    from freight_fate.states.main_menu import _region_menu_name
 
     app = App()
     try:
         picker = open_picker(app)
-        assert picker.items[picker.index].text.startswith("Chicago")
-        assert len(picker.items) == len(world.cities)
-        labels = {item.text for item in picker.items}
-        for city in world.cities.values():
-            assert f"{city.name}, {REGION_LABELS[city.region]}" in labels
+        # defaults to the region that contains the default city (Chicago)
+        default_region = world.cities["Chicago"].region
+        assert picker.items[picker.index].text.startswith(
+            _region_menu_name(default_region))
+        # one item per region that actually has cities
+        regions_with_cities = {c.region for c in world.cities.values()}
+        assert len(picker.items) == len(regions_with_cities)
+        # every region item names its city count
+        for item in picker.items:
+            assert "cit" in item.text  # "1 city" or "N cities"
+    finally:
+        app.shutdown()
+
+
+def test_region_opens_a_city_submenu_listing_only_that_regions_cities(world):
+    from freight_fate.app import App
+    from freight_fate.states.main_menu import HomeCityState, _region_menu_name
+
+    app = App()
+    try:
+        picker = open_picker(app)
+        great_lakes = _region_menu_name("great_lakes")
+        while not picker.items[picker.index].text.startswith(great_lakes):
+            picker.handle_event(key_event(pygame.K_DOWN))
+        picker.handle_event(key_event(pygame.K_RETURN))
+        assert isinstance(app.state, HomeCityState)
+        listed = {item.text.split(",")[0] for item in app.state.items}
+        expected = {c.name for c in world.cities.values()
+                    if c.region == "great_lakes"}
+        assert listed == expected
+        assert "Chicago" in listed
     finally:
         app.shutdown()
 
@@ -44,17 +70,25 @@ def test_picking_a_city_sets_the_profile_start_city():
     from freight_fate.app import App
     from freight_fate.models.profile import Profile
     from freight_fate.states.city import CityMenuState
+    from freight_fate.states.main_menu import HomeCityState, _region_menu_name
 
     app = App()
     ambient = []
     app.ctx.audio.set_ambient = lambda key, volume=1.0: ambient.append((key, volume))
     try:
         picker = open_picker(app, name="Southerner")
-        # first-letter navigation, like every other menu
-        while not picker.items[picker.index].text.startswith("Atlanta"):
-            picker.handle_event(key_event(ord("a"), "a"))
-        ambient.clear()
+        # drill into Atlanta's region, then pick the city
+        atlanta_region = app.ctx.world.cities["Atlanta"].region
+        target = _region_menu_name(atlanta_region)
+        while not picker.items[picker.index].text.startswith(target):
+            picker.handle_event(key_event(pygame.K_DOWN))
         picker.handle_event(key_event(pygame.K_RETURN))
+        assert isinstance(app.state, HomeCityState)
+        city_picker = app.state
+        while not city_picker.items[city_picker.index].text.startswith("Atlanta"):
+            city_picker.handle_event(key_event(pygame.K_DOWN))
+        ambient.clear()
+        city_picker.handle_event(key_event(pygame.K_RETURN))
         assert isinstance(app.state, CityMenuState)
         p = app.ctx.profile
         assert p.name == "Southerner"
@@ -79,6 +113,22 @@ def test_escape_returns_to_name_entry_keeping_the_typed_name():
         assert isinstance(app.state, NameEntryState)
         assert app.state.name == "Bob"
         assert app.ctx.profile is None  # nothing created until a city is picked
+    finally:
+        app.shutdown()
+
+
+def test_escape_from_city_list_returns_to_region_picker():
+    from freight_fate.app import App
+    from freight_fate.states.main_menu import HomeCityState, HomeTerminalState
+
+    app = App()
+    try:
+        picker = open_picker(app, name="Bob")
+        picker.handle_event(key_event(pygame.K_RETURN))  # open a region
+        assert isinstance(app.state, HomeCityState)
+        app.state.handle_event(key_event(pygame.K_ESCAPE))
+        assert isinstance(app.state, HomeTerminalState)
+        assert app.ctx.profile is None  # still nothing created
     finally:
         app.shutdown()
 

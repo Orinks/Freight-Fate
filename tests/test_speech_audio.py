@@ -191,6 +191,20 @@ def test_configure_pushes_params_to_supporting_backends_only():
     assert (main.rate, main.pitch, main.volume, main.voice) == (None, None, None, None)
 
 
+def test_configure_preserves_onecore_default_pitch_at_midpoint():
+    s = Speech()
+    event = RecordingBackend(
+        "OneCore", [],
+        FakeParamFeatures(supports_set_rate=True, supports_set_pitch=True),
+    )
+    s._event_backend = event
+    s.configure(rate=0.5, pitch=0.5)
+    assert event.rate == 0.5
+    assert event.pitch is None
+    s.configure(pitch=0.7)
+    assert event.pitch == 0.7
+
+
 def test_supports_and_voice_names_reflect_backend_features():
     s, _main, _event = _configurable_speech()
     assert s.supports_rate and s.supports_pitch and s.supports_volume

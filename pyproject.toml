@@ -35,11 +35,20 @@ Repository = "https://github.com/Orinks/Freight-fate"
 dev = [
     "pytest>=8.3",
     "pytest-cov>=6.0",
+    "pytest-xdist>=3.6",
+    "pytest-timeout>=2.3",
     "ruff>=0.8",
     "soundfile>=0.14.0",
 ]
 build = [
     "nuitka>=4.0.8",
+]
+# Build-time route-enrichment tooling only (tools/enrich_routes.py --ors-smoke
+# and ORS-backed corridor generation). Never a runtime dependency, so the
+# shipped game stays dependency-light. Run with `uv run --group tooling ...`.
+tooling = [
+    "osmium>=4.0.2",
+    "openrouteservice>=2.2.0",
 ]
 
 [build-system]
@@ -54,7 +63,9 @@ allow-direct-references = true
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-addopts = "-q"
+# Per-test timeout (thread method works on Windows) so a hung simulation fails
+# fast with a stack trace instead of stalling the whole run.
+addopts = "-q --timeout=120 --timeout-method=thread"
 markers = [
     "smoke: headless end-to-end smoke tests",
 ]

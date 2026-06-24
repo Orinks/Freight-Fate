@@ -3,6 +3,19 @@
 ## Unreleased
 
 ### Added
+- **Highway exit callouts.** Interstate drives now announce upcoming
+  interchanges the way a real sign reads them -- "In 2 miles, exit 7 for
+  US-1 North toward Trenton and New York" -- with the exit number, the route
+  you would take, and its control cities. Exit data is sourced from
+  OpenStreetMap and snapped onto each corridor.
+- **Grounded exits and onramps.** When a rest stop sits at a real interchange,
+  the exit prompt and ramp now name its number ("Signaling for exit 113, the
+  Petro Stopping Centers"; "You take exit 113"). Each run also opens with an
+  onramp callout -- "Merge onto I-65 South toward Indianapolis" -- and highway
+  changes name the new road and direction.
+- **Optional lane drift.** Gameplay settings now include off, light, and
+  realistic drift so players can add a gentle steering task, rumble-strip
+  warnings, and off-road consequences without making the default drive harder.
 - **Packaged changelog.** Portable builds now include `CHANGELOG.md` in the
   game folder so release notes are available offline.
 - **Player manual.** A new public manual now gathers install, career,
@@ -31,6 +44,19 @@
   snapshot may not load on an older stable release.
 
 ### Fixed
+- **Destination exits.** Delivery routes now require taking the real signed
+  exit for the destination when one is listed, instead of completing just by
+  driving to the end of the highway corridor.
+- **Destination exit callouts.** Destination exits now announce the signed exit
+  and toward cities before the ramp, then tell you to press X; adaptive cruise
+  cancellation includes that exit guidance.
+- **OneCore pitch.** Windows OneCore speech now keeps its native default pitch
+  unless the player changes the pitch setting.
+- **Quieter exit guidance.** Ordinary highway exits now stay available in the
+  route screen without being announced during the drive unless they lead to a
+  stop you can actually take.
+- **Route key priority.** Pressing R now keeps the next actionable route detail
+  first, while Shift+R reports the next listed highway exit.
 - **State-line timing.** State crossing previews now speak about 10 miles out
   instead of 2 miles out, giving the preview and crossing announcements more
   room at highway speed.

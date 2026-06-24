@@ -7,6 +7,20 @@ from freight_fate.sim.trip import NavigationCue, TrafficLead, TripEventKind
 from freight_fate.sim.weather import EFFECTS, REGION_WEIGHTS
 
 
+def _gps_events(events):
+    """GPS-cue events, excluding additive interchange/exit cues. Tests below
+    target one specific cue (toll, state line, construction, traffic); curated
+    interchanges share the GPS-cue stream, so filter them out to keep those
+    assertions about the cue they mean."""
+    return [e for e in events
+            if e.kind == TripEventKind.GPS_CUE
+            and getattr(e.data.get("cue"), "kind", "") != "interchange"]
+
+
+def _gps_messages(events):
+    return [e.message for e in _gps_events(events)]
+
+
 def test_all_conditions_have_effects():
     for kind in WeatherKind:
         assert kind in EFFECTS
@@ -19,15 +33,15 @@ def test_all_regions_in_world_have_weights(world):
 
 
 def test_weather_is_deterministic_with_seed():
-    a = WeatherSystem("midwest", seed=7)
-    b = WeatherSystem("midwest", seed=7)
+    a = WeatherSystem("great_lakes", seed=7)
+    b = WeatherSystem("great_lakes", seed=7)
     for _ in range(50):
         assert a.update(13.0) == b.update(13.0)
     assert a.current == b.current
 
 
 def test_weather_eventually_changes():
-    ws = WeatherSystem("northwest", seed=3)
+    ws = WeatherSystem("pacific_northwest", seed=3)
     changes = [ws.update(15.0) for _ in range(200)]
     assert any(c is not None for c in changes)
 
@@ -38,14 +52,14 @@ def test_bad_weather_reduces_grip():
 
 
 def test_forecast_returns_requested_segments():
-    ws = WeatherSystem("south", seed=1)
+    ws = WeatherSystem("atlantic_southeast", seed=1)
     assert len(ws.forecast(3)) == 3
 
 
 def test_forecast_does_not_regenerate_weather_timeline():
     """Pressing V speaks a forecast; it must not change future weather."""
-    with_forecast = WeatherSystem("midwest", seed=9)
-    untouched = WeatherSystem("midwest", seed=9)
+    with_forecast = WeatherSystem("great_lakes", seed=9)
+    untouched = WeatherSystem("great_lakes", seed=9)
     for _ in range(5):
         assert len(with_forecast.forecast(2)) == 2
     for _ in range(80):
@@ -58,7 +72,7 @@ def make_trip(world, start="Chicago", end="Indianapolis", seed=2, **kwargs):
     truck = TruckState()
     truck.transmission.automatic = True
     truck.start_engine()
-    weather = WeatherSystem("midwest", seed=1)
+    weather = WeatherSystem("great_lakes", seed=1)
     return Trip(route, truck, weather, seed=seed, **kwargs), truck
 
 
@@ -94,19 +108,23 @@ def test_trip_announces_stops_ahead(world):
 def test_trip_uses_explicit_stop_positions(world):
     trip, _ = make_trip(world)
 
-    assert [stop.name for stop in trip.stops] == [
-        "Pilot Travel Center Remington",
-        "Loves Travel Stop Lafayette",
-    ]
-    assert [stop.at_mi for stop in trip.stops] == [94.0, 122.0]
+    by_name = {stop.name: stop for stop in trip.stops}
+    # Hand-curated stops keep their explicit checked-in positions and parking,
+    # even with additive OpenStreetMap stops now interleaved on the leg.
+    assert by_name["Pilot Travel Center Remington"].at_mi == 93.5
+    assert by_name["Loves Travel Stop Lafayette"].at_mi == 121.3
+    assert by_name["Pilot Travel Center Remington"].parking == "confirmed"
+    assert by_name["Loves Travel Stop Lafayette"].parking == "confirmed"
+    # No stop sits at the naive route midpoint, and every stop (curated or
+    # discovered) declares a concrete, non-unknown parking value.
     assert all(stop.at_mi != trip.route.miles / 2 for stop in trip.stops)
-    assert all(stop.parking == "confirmed" for stop in trip.stops)
+    assert all(stop.parking != "unknown" for stop in trip.stops)
 
 
 def test_trip_uses_only_curated_pois_at_runtime(world):
     route = world.route_from_cities(["Memphis", "Nashville"])
     truck = TruckState()
-    weather = WeatherSystem("midwest", seed=1)
+    weather = WeatherSystem("great_lakes", seed=1)
     trip = Trip(route, truck, weather, seed=2)
 
     assert route.raw_stop_details
@@ -119,15 +137,18 @@ def test_trip_uses_only_curated_pois_at_runtime(world):
 def test_trip_places_reverse_route_stops_from_travel_direction(world):
     route = world.route_from_cities(["Dallas", "San Antonio"])
     truck = TruckState()
-    weather = WeatherSystem("plains", seed=1)
+    weather = WeatherSystem("southern_plains", seed=1)
     trip = Trip(route, truck, weather, seed=2)
 
-    assert [stop.name for stop in trip.stops] == [
-        "Hill County Safety Rest Area",
-        "Road Ranger Waco",
-        "Bell County Safety Rest Area",
-    ]
-    assert [stop.at_mi for stop in trip.stops] == [57.0, 90.0, 137.0]
+    positions = {stop.name: round(stop.at_mi, 1) for stop in trip.stops}
+    # Curated stops are positioned from the direction of travel (not the raw
+    # stored order); additive OSM stops do not displace them.
+    assert positions["Hill County Safety Rest Area"] == 56.8
+    assert positions["Road Ranger Waco"] == 89.7
+    assert positions["Bell County Safety Rest Area"] == 136.5
+    # Every stop stays ordered along the direction of travel.
+    ats = [stop.at_mi for stop in trip.stops]
+    assert ats == sorted(ats)
 
 
 def test_zone_speed_limits_apply(world):
@@ -158,7 +179,7 @@ def test_pickup_deadhead_route_uses_local_facility_limits(world):
     route = world.facility_approach_route(
         "Chicago", world.cities["Chicago"].locations[0].name)
     truck = TruckState()
-    weather = WeatherSystem("midwest", seed=1)
+    weather = WeatherSystem("great_lakes", seed=1)
     trip = Trip(route, truck, weather, seed=2)
 
     limit, reason = trip.speed_limit_at(0.1)
@@ -174,7 +195,7 @@ def test_facility_gate_warns_before_final_low_speed_zone(world):
     route = world.facility_approach_route(
         "Chicago", world.cities["Chicago"].locations[0].name)
     truck = TruckState()
-    weather = WeatherSystem("midwest", seed=1)
+    weather = WeatherSystem("great_lakes", seed=1)
     trip = Trip(route, truck, weather, seed=2)
 
     trip.position_mi = trip.total_miles - 2.0
@@ -191,7 +212,7 @@ def test_construction_zone_warns_before_entry(world):
     trip.position_mi = zone.start_mi - 2.0
     events = trip.update(0.0)
 
-    warnings = [event.message for event in events if event.kind == TripEventKind.GPS_CUE]
+    warnings = _gps_messages(events)
     assert warnings == [
         f"In 2 miles, construction ahead. Speed limit {zone.limit_mph:.0f}."
     ]
@@ -220,7 +241,7 @@ def test_construction_zone_speeding_fine_waits_for_grace_distance(world):
 
     trip.position_mi = zone.start_mi - 2.0
     advance = trip.update(0.0)
-    assert [event.message for event in advance if event.kind == TripEventKind.GPS_CUE] == [
+    assert _gps_messages(advance) == [
         f"In 2 miles, construction ahead. Speed limit {zone.limit_mph:.0f}."
     ]
 
@@ -273,7 +294,7 @@ def test_traffic_model_applies_to_enriched_and_legacy_routes(world):
     for cities in (["Chicago", "Indianapolis"], ["Chicago", "St. Louis"]):
         route = world.route_from_cities(cities)
         truck = TruckState()
-        weather = WeatherSystem("midwest", seed=1)
+        weather = WeatherSystem("great_lakes", seed=1)
         weather.current = WeatherKind.CLEAR
         trip = Trip(route, truck, weather, seed=1)
         assert trip.traffic_leads, cities
@@ -281,9 +302,9 @@ def test_traffic_model_applies_to_enriched_and_legacy_routes(world):
 
 def test_bad_weather_slows_modeled_traffic(world):
     route = world.route_from_cities(["Chicago", "Indianapolis"])
-    clear_weather = WeatherSystem("midwest", seed=1)
+    clear_weather = WeatherSystem("great_lakes", seed=1)
     clear_weather.current = WeatherKind.CLEAR
-    rain_weather = WeatherSystem("midwest", seed=1)
+    rain_weather = WeatherSystem("great_lakes", seed=1)
     rain_weather.current = WeatherKind.HEAVY_RAIN
 
     clear = Trip(route, TruckState(), clear_weather, seed=1)
@@ -353,10 +374,16 @@ def test_progress_summary_mentions_highway(world):
     assert "I-65" in text
     assert "Indianapolis, Indiana" in text
     assert "Grade level" in text
-    assert "Next state line" in text
-    assert "Illinois into Indiana" in text
+    # The summary reports the nearest upcoming cue; an early stop leads here.
+    assert "Next stop" in text
     metric = trip.progress_summary(imperial=False)
     assert "kilometers" in metric
+
+    # Once past that stop, the summary surfaces the upcoming state-line crossing.
+    trip.position_mi = 25.0
+    state_text = trip.progress_summary()
+    assert "Next state line" in state_text
+    assert "Illinois into Indiana" in state_text
 
 
 def test_gps_state_crossing_and_rest_stop_cues_deduplicate(world):
@@ -366,29 +393,29 @@ def test_gps_state_crossing_and_rest_stop_cues_deduplicate(world):
     advance = trip.update(0.0)
     repeat = trip.update(0.0)
 
-    assert [event.message for event in advance if event.kind == TripEventKind.GPS_CUE] == [
+    assert _gps_messages(advance) == [
         "In 10 miles, crossing from Illinois into Indiana near "
         "the I-65 state line south of Hammond."
     ]
-    assert not [event for event in repeat if event.kind == TripEventKind.GPS_CUE]
+    assert not _gps_events(repeat)
 
     trip.position_mi = 31.5
     near = trip.update(0.0)
-    assert not [event for event in near if event.kind == TripEventKind.GPS_CUE]
+    assert not _gps_events(near)
 
-    trip.position_mi = 33.0
+    trip.position_mi = 32.8
     crossing = trip.update(0.0)
     assert [event.message for event in crossing
             if event.kind == TripEventKind.STATE_CROSSING] == [
         "Crossing into Indiana near the I-65 state line south of Hammond."
     ]
 
-    trip.position_mi = 121.0
+    trip.position_mi = 120.3
     rest = trip.update(0.0)
     assert any(
         event.kind == TripEventKind.GPS_CUE
         and event.message == (
-            "Travel center ahead in 1 mile; confirmed truck parking; "
+            "Travel center at exit 175 ahead in 1 mile; confirmed truck parking; "
             "press X to take the exit."
         )
         for event in rest
@@ -409,10 +436,10 @@ def test_gps_traffic_cue_deduplicates(world):
     first = trip.update(0.0)
     second = trip.update(0.0)
 
-    assert [event.message for event in first if event.kind == TripEventKind.GPS_CUE] == [
+    assert _gps_messages(first) == [
         "Traffic slowing ahead in 2 miles; traffic queue ahead at 45 miles per hour."
     ]
-    assert not [event for event in second if event.kind == TripEventKind.GPS_CUE]
+    assert not _gps_events(second)
 
 
 def test_toll_cues_and_charges_deduplicate(world):
@@ -422,11 +449,11 @@ def test_toll_cues_and_charges_deduplicate(world):
     advance = trip.update(0.0)
     repeat = trip.update(0.0)
 
-    assert [event.message for event in advance if event.kind == TripEventKind.GPS_CUE] == [
+    assert _gps_messages(advance) == [
         "ticket system toll point ahead: New Jersey Turnpike ticket entry. "
         "estimated toll 18 dollars will be billed to carrier settlement."
     ]
-    assert not [event for event in repeat if event.kind == TripEventKind.GPS_CUE]
+    assert not _gps_events(repeat)
 
     trip.position_mi = 8.0
     charged = trip.update(0.0)
@@ -457,14 +484,14 @@ def test_zero_amount_toll_entry_marker_does_not_record_expense(world):
 
     trip.position_mi = 16.1
     advance = trip.update(0.0)
-    assert [event.message for event in advance if event.kind == TripEventKind.GPS_CUE] == [
+    assert _gps_messages(advance) == [
         "ticket system toll point ahead: Pennsylvania Turnpike eastern ticket entry. "
         "entry will be recorded for carrier settlement."
     ]
 
     trip.position_mi = 18.0
     entry = trip.update(0.0)
-    assert [event.message for event in entry if event.kind == TripEventKind.GPS_CUE] == [
+    assert _gps_messages(entry) == [
         "ticket system entry recorded at Pennsylvania Turnpike eastern ticket entry; "
         "toll will be billed at carrier settlement."
     ]
@@ -495,7 +522,7 @@ def test_traffic_context_and_warning_are_grounded_in_lead_vehicle(world):
 def test_city_events_announce_state_crossings(world):
     route = world.route_from_cities(["Chicago", "Cleveland", "Pittsburgh"])
     truck = TruckState()
-    weather = WeatherSystem("midwest", seed=1)
+    weather = WeatherSystem("great_lakes", seed=1)
     trip = Trip(route, truck, weather, seed=2)
     trip.position_mi = route.legs[0].miles
 

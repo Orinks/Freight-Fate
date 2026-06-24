@@ -371,6 +371,18 @@ Run a tiny Overpass POI reachability smoke for one corridor:
 uv run python tools/enrich_routes.py --from-city Chicago --to-city Indianapolis --overpass-poi-smoke
 ```
 
+Discover highway interchange candidates for the checked-in Interstate corridors
+from a downloaded Geofabrik/OpenStreetMap extract instead of hundreds of
+Overpass requests:
+
+```powershell
+uv run --group tooling python tools/build_interchanges.py --pbf path/to/us-latest.osm.pbf --write
+```
+
+Omit `--write` for a dry run, and use `--only "New York->Philadelphia"` or
+`--max-legs N` while reviewing a smaller batch. The PBF mode still uses the
+existing cached OSRM geometry step for route snapping.
+
 Discover truck-relevant POI candidates near checked-in route geometry with the
 manual Overpass helper:
 

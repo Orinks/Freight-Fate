@@ -58,14 +58,39 @@ def test_hos_plan_reports_breaks_sleeps_and_route_stop_coverage(world):
 def test_northeast_short_corridor_deadline_uses_direct_route(world):
     from freight_fate.models.jobs import required_hours
 
-    jobs = JobBoard(world, seed=3).offers("Philadelphia", endorsements=set(), level=1)
-    ny_jobs = [job for job in jobs if job.destination == "New York"]
+    # Search seeds: map expansion (new nearby NJ/PA nodes) shifts any single
+    # seed's offer mix, so pin the route invariant, not one seed's lottery.
+    ny_jobs = [
+        job
+        for seed in range(40)
+        for job in JobBoard(world, seed=seed).offers(
+            "Philadelphia", endorsements=set(), level=1)
+        if job.destination == "New York"
+    ]
 
     assert ny_jobs
-    assert all(job.distance_mi == 97 for job in ny_jobs)
+    assert all(job.distance_mi == 94 for job in ny_jobs)
     assert all(3.0 <= job.deadline_game_h <= 4.0 for job in ny_jobs)
     assert all(job.deadline_game_h >= required_hours(job.distance_mi) * 1.2
                for job in ny_jobs)
+
+
+def test_deadlines_cover_required_hos_time_across_the_network(world):
+    """Every generated job's deadline must cover the honest HOS time (driving at
+    the planning pace plus mandatory breaks and 10-hour sleeps). This is the
+    achievability invariant the deadline formula guarantees; the test guards it
+    across the whole expanded network and all levels, including the corrected
+    ORS mileages."""
+    from freight_fate.models.jobs import required_hours
+
+    endorsements = {"refrigerated", "heavy_haul", "high_value"}
+    for city in world.city_names():
+        for seed in range(3):
+            jobs = JobBoard(world, seed=seed).offers(
+                city, endorsements, count=5, level=5)
+            for job in jobs:
+                assert job.deadline_game_h >= required_hours(job.distance_mi), (
+                    f"{city} -> {job.destination} ({job.distance_mi} mi)")
 
 
 def test_endorsement_gating(world):
@@ -99,9 +124,9 @@ def test_payout_punishes_fragile_damage():
 
 def test_fuel_prices_vary_by_region():
     eco = Economy(seed=1)
-    assert eco.fuel_price("west_coast") > eco.fuel_price("south")
-    assert eco.fuel_cost("midwest", 0) == 0.0
-    assert eco.fuel_cost("midwest", 10) > 30.0
+    assert eco.fuel_price("california") > eco.fuel_price("gulf_coast")
+    assert eco.fuel_cost("great_lakes", 0) == 0.0
+    assert eco.fuel_cost("great_lakes", 10) > 30.0
 
 
 def test_repair_cost_scales_with_damage():

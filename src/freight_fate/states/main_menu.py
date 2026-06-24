@@ -9,6 +9,7 @@ import pygame
 
 from .. import __version__, updater
 from ..achievements import ACHIEVEMENTS, earned_ids
+from ..data.regions import REGION_LABELS
 from ..models.profile import DEFAULT_CITY, Profile, ProfileIntegrityError
 from ..music import select_menu_music_sequence
 from ..settings import TIME_SCALES
@@ -482,47 +483,99 @@ class NameEntryState(State):
                 "Press Enter to confirm, Escape to cancel, F2 to review."]
 
 
-REGION_LABELS = {
-    "northeast": "the Northeast",
-    "midwest": "the Midwest",
-    "south": "the South",
-    "plains": "the Plains",
-    "rockies": "the Rockies",
-    "southwest": "the Southwest",
-    "west_coast": "the West Coast",
-    "northwest": "the Pacific Northwest",
-}
+def _region_menu_name(region: str) -> str:
+    """Region label suited to a menu item and first-letter jump.
+
+    The spoken labels read naturally as prose ("in the Great Lakes"), but a
+    list where every entry starts with "the" defeats type-ahead, so the leading
+    article is dropped for menu display.
+    """
+    label = REGION_LABELS.get(region, region.replace("_", " "))
+    return label[4:] if label.startswith("the ") else label
 
 
 class HomeTerminalState(MenuState):
-    """Pick the home terminal city where a brand-new career begins."""
+    """Pick the region of the country where a brand-new career begins.
 
-    title = "Home terminal"
-    intro_help = ("Pick the city where your trucking career begins. Cities are "
-                  "grouped by region. Use up and down arrows, Home and End, or "
-                  "type a letter to jump to a city. Enter confirms your home "
-                  "terminal. Escape goes back to name entry.")
+    Region selection is the first of two levels: choosing a region opens a
+    :class:`HomeCityState` listing only that region's cities. A short region
+    list keeps the spoken navigation manageable as the map grows toward national
+    coverage, instead of one long flat list of every city.
+    """
+
+    title = "Home region"
+    intro_help = ("Pick the part of the country where your trucking career "
+                  "begins. Use up and down arrows, Home and End, or type a "
+                  "letter to jump to a region. Enter opens that region's cities. "
+                  "Escape goes back to name entry.")
 
     def __init__(self, ctx, driver_name: str) -> None:
         super().__init__(ctx)
         self.driver_name = driver_name
-        cities = sorted(ctx.world.cities.values(),
-                        key=lambda c: (REGION_LABELS.get(c.region, c.region), c.name))
-        self._cities = [c.name for c in cities]
+        by_region: dict[str, list[str]] = {}
+        for city in ctx.world.cities.values():
+            by_region.setdefault(city.region, []).append(city.name)
+        for names in by_region.values():
+            names.sort()
+        self._cities_by_region = by_region
+        self._regions = sorted(by_region, key=_region_menu_name)
+        default = ctx.world.cities[DEFAULT_CITY].region \
+            if DEFAULT_CITY in ctx.world.cities else None
+        if default in self._regions:
+            self.index = self._regions.index(default)
+
+    def announce_entry(self) -> None:
+        self.ctx.say("Home region. Pick the part of the country where your "
+                     f"career starts. {self.current_text()}")
+
+    def build_items(self) -> list[MenuItem]:
+        items: list[MenuItem] = []
+        for region in self._regions:
+            name = _region_menu_name(region)
+            count = len(self._cities_by_region[region])
+            noun = "city" if count == 1 else "cities"
+            items.append(MenuItem(
+                f"{name} ({count} {noun})",
+                lambda r=region: self._pick_region(r),
+                help=f"Open {name} to choose a starting city. "
+                     f"{count} {noun} available."))
+        return items
+
+    def _pick_region(self, region: str) -> None:
+        self.ctx.push_state(HomeCityState(
+            self.ctx, self.driver_name, region,
+            self._cities_by_region[region]))
+
+
+class HomeCityState(MenuState):
+    """Pick the home terminal city within a chosen region."""
+
+    title = "Home terminal"
+    intro_help = ("Pick the city where your trucking career begins. Use up and "
+                  "down arrows, Home and End, or type a letter to jump to a "
+                  "city. Enter confirms your home terminal. Escape goes back to "
+                  "the region list.")
+
+    def __init__(self, ctx, driver_name: str, region: str,
+                 city_names: list[str]) -> None:
+        super().__init__(ctx)
+        self.driver_name = driver_name
+        self.region = region
+        self._cities = list(city_names)
         if DEFAULT_CITY in self._cities:
             self.index = self._cities.index(DEFAULT_CITY)
 
     def announce_entry(self) -> None:
-        self.ctx.say("Home terminal. Pick the city where your career starts. "
-                     f"{self.current_text()}")
+        region = _region_menu_name(self.region)
+        self.ctx.say(f"{region} terminals. Pick the city where your career "
+                     f"starts. {self.current_text()}")
 
     def build_items(self) -> list[MenuItem]:
         items: list[MenuItem] = []
         for name in self._cities:
             city = self.ctx.world.cities[name]
             terminal = self.ctx.world.home_terminal(name)
-            region = REGION_LABELS.get(city.region, city.region)
-            items.append(MenuItem(f"{name}, {region}",
+            items.append(MenuItem(f"{name}, {city.state}",
                                   lambda n=name: self._pick(n),
                                   help=f"Start at {terminal.spoken_name} in "
                                        f"{name}, {city.state}."))
@@ -537,7 +590,8 @@ class HomeTerminalState(MenuState):
         terminal = self.ctx.world.home_terminal(city)
         self.ctx.profile = profile
         profile.save()
-        self.ctx.pop_state()   # this picker
+        self.ctx.pop_state()   # this city picker
+        self.ctx.pop_state()   # region picker
         self.ctx.pop_state()   # name entry
         self.ctx.push_state(CityMenuState(self.ctx))
         loaded_over = (f"Loaded over existing driver named {name}. "
@@ -586,6 +640,9 @@ HELP_PAGES = [
         "Realistic uses the full driving, duty, break, and rest rules.",
         "Relaxed keeps the clock but gives a more forgiving schedule,",
         "with longer limits and fewer penalties during normal play.",
+        "Lane drift adds an optional lane-position task while you drive.",
+        "Off keeps the truck centered. Light adds gentle drift.",
+        "Realistic adds stronger drift, rumble-strip warnings, and consequences.",
         "Audio volumes have their own help text in the Audio category with F1.",
     ]),
     ("Driving basics", [
@@ -617,6 +674,8 @@ HELP_PAGES = [
         "F speaks fuel level and range.",
         "C speaks the clock, your deadline, and your hours of service.",
         "R speaks route progress, GPS context, and the next stop or maneuver.",
+        "Shift R speaks the next listed highway exit for route context.",
+        "L speaks lane position when lane drift is enabled.",
         "V speaks the weather and the forecast.",
         "Escape opens the pause menu.",
     ]),
@@ -645,6 +704,11 @@ HELP_PAGES = [
         "Press X to signal for the exit, slow to forty five for the ramp,",
         "then brake to a stop for the rest stop menu:",
         "refuel, take a break, sleep, or save. Too fast and you miss the exit.",
+        "Destination exits are announced with their signed exit and toward cities.",
+        "Press X for the destination exit too, then brake to the receiver gate.",
+        "If you miss the destination exit, back up until it is ahead, then press X.",
+        "Ordinary pass-by exits stay out of automatic speech;",
+        "use Shift R when you want the next listed exit for context.",
         "T still opens the menu if you simply stop on the highway at one.",
         "If you miss a stop, slow down, back up carefully to it, stop, then press T.",
         "Fuel prices vary by region.",
@@ -877,6 +941,9 @@ class SettingsCategoryState(MenuState):
                 MenuItem(lambda: f"Hours of service: {self._hos_label()}",
                          lambda: self._cycle_hos(1),
                          help="Choose realistic or relaxed hours rules."),
+                MenuItem(lambda: f"Lane drift: {self._steering_label()}",
+                         lambda: self._cycle_steering(1),
+                         help="Choose whether lane drift is off, light, or realistic."),
                 MenuItem("Back", self.go_back),
             ]
         if self.category == "audio":
@@ -931,7 +998,7 @@ class SettingsCategoryState(MenuState):
             actions = {
                 "gameplay": [
                     self._toggle_units, self._toggle_transmission,
-                    self._cycle_pace, self._cycle_hos,
+                    self._cycle_pace, self._cycle_hos, self._cycle_steering,
                 ],
                 "audio": [
                     lambda d: self._volume("master_volume", 0.1 * d),
@@ -1002,6 +1069,13 @@ class SettingsCategoryState(MenuState):
             "off": "debug bypass",
         }.get(self.ctx.settings.hos_mode, "realistic")
 
+    def _steering_label(self) -> str:
+        return {
+            "off": "off",
+            "light": "light",
+            "realistic": "realistic",
+        }.get(self.ctx.settings.steering_assist, "off")
+
     def _announce(self) -> None:
         self.refresh()
         self.ctx.settings.save()
@@ -1040,6 +1114,15 @@ class SettingsCategoryState(MenuState):
         except ValueError:
             i = 0
         self.ctx.settings.hos_mode = modes[(i + d) % len(modes)]
+        self._announce()
+
+    def _cycle_steering(self, d: int) -> None:
+        modes = ["off", "light", "realistic"]
+        try:
+            i = modes.index(self.ctx.settings.steering_assist)
+        except ValueError:
+            i = 0
+        self.ctx.settings.steering_assist = modes[(i + d) % len(modes)]
         self._announce()
 
     def _cycle_verbosity(self, d: int) -> None:

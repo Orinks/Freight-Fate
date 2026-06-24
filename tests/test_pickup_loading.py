@@ -16,6 +16,7 @@ def accept_pickup_drive(app):
         app.state.handle_event(key_event(pygame.K_DOWN))
     app.state.handle_event(key_event(pygame.K_RETURN))
     app.state.handle_event(key_event(pygame.K_RETURN))  # default name
+    app.state.handle_event(key_event(pygame.K_RETURN))  # default region
     app.state.handle_event(key_event(pygame.K_RETURN))  # default home terminal
     app.state.handle_event(key_event(pygame.K_RETURN))  # job board
     board = app.state
@@ -83,6 +84,7 @@ def test_dispatch_board_stays_stable_when_reopened():
             app.state.handle_event(key_event(pygame.K_DOWN))
         app.state.handle_event(key_event(pygame.K_RETURN))
         app.state.handle_event(key_event(pygame.K_RETURN))  # default name
+        app.state.handle_event(key_event(pygame.K_RETURN))  # default region
         app.state.handle_event(key_event(pygame.K_RETURN))  # default home terminal
 
         assert isinstance(app.state, CityMenuState)
@@ -132,7 +134,7 @@ def test_pickup_facility_waits_for_full_stop(monkeypatch):
         arrive_at_pickup(app, speed_mps=26.8)
         assert isinstance(app.state, DrivingState)
         assert "Pickup ahead" in events[-1]
-        assert "Slow below 3 mph" in events[-1]
+        assert "come to a complete stop" in events[-1].lower()
 
         driving.truck.velocity_mps = 1.1
         driving.update(1 / 60)
@@ -167,19 +169,22 @@ def test_loading_at_pickup_uses_dock_sound(monkeypatch):
         app.shutdown()
 
 
-def test_save_resume_during_pickup_drive():
+def test_quit_during_pickup_drive_resumes_from_the_last_stop():
+    # Saving happens only at stops, so quitting mid-pickup-drive does not save
+    # the in-progress position: the leg resumes from where it was last departed.
     from freight_fate.app import App
     from freight_fate.states.driving import DrivingState, PauseMenuState
 
     app = App()
     try:
         driving = accept_pickup_drive(app)
-        driving.trip.restore(1.5, 12.0)
+        driving.trip.restore(1.5, 12.0)   # drove a little into the pickup leg
 
         driving.handle_event(key_event(pygame.K_ESCAPE))
         assert isinstance(app.state, PauseMenuState)
         pause = app.state
-        while pause.items[pause.index].text != "Save and quit to main menu":
+        assert not any(item.text == "Save and quit to main menu" for item in pause.items)
+        while pause.items[pause.index].text != "Quit to main menu":
             pause.handle_event(key_event(pygame.K_DOWN))
         pause.handle_event(key_event(pygame.K_RETURN))
 
@@ -188,10 +193,9 @@ def test_save_resume_during_pickup_drive():
         app.state.handle_event(key_event(pygame.K_RETURN))
 
         assert isinstance(app.state, DrivingState)
-        assert app.state.resumed
         assert app.state.phase == "pickup"
-        assert app.state.trip.position_mi == 1.5
-        assert app.state.trip.game_minutes == 12.0
+        # in-progress driving was not saved; the leg restarts from the terminal
+        assert app.state.trip.position_mi == 0.0
     finally:
         app.shutdown()
 

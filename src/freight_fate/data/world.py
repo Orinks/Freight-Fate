@@ -446,13 +446,19 @@ BASE_MARKET_FACILITY_TYPES = (
 
 REGION_MARKET_TAGS = {
     "northeast": ("port", "intermodal", "industrial", "retail"),
-    "midwest": ("intermodal", "agriculture", "industrial", "manufacturing"),
-    "south": ("port", "retail", "manufacturing", "food"),
-    "plains": ("agriculture", "intermodal", "energy"),
+    "appalachia": ("industrial", "mining", "manufacturing"),
+    "great_lakes": ("intermodal", "manufacturing", "automotive", "agriculture"),
+    "heartland": ("agriculture", "intermodal", "food"),
+    "southern_plains": ("energy", "agriculture", "intermodal", "retail"),
+    "mid_south": ("parcel", "manufacturing", "food"),
+    "atlantic_southeast": ("port", "manufacturing", "retail", "food"),
+    "gulf_coast": ("port", "energy", "chemical", "food"),
+    "florida": ("port", "food", "retail", "cold_chain"),
     "rockies": ("mining", "intermodal", "construction"),
-    "southwest": ("border", "construction", "food", "mining"),
-    "west_coast": ("port", "food", "retail", "intermodal"),
-    "northwest": ("port", "lumber", "agriculture", "intermodal"),
+    "great_basin": ("intermodal", "mining", "retail"),
+    "desert_southwest": ("border", "construction", "food", "mining"),
+    "california": ("port", "food", "retail", "intermodal"),
+    "pacific_northwest": ("port", "lumber", "agriculture", "intermodal"),
 }
 
 STATE_MARKET_TAGS = {
@@ -701,6 +707,54 @@ class TollEvent:
 
 
 @dataclass(frozen=True)
+class Interchange:
+    """A highway exit/junction along a leg, sourced from OpenStreetMap.
+
+    ``exit_ref`` is the signed exit number ("7", "7A"), empty when OSM has no
+    ``ref`` on the junction node. ``destinations`` is the green-sign control
+    text (``destination`` tag) split into places; ``via`` is the route the exit
+    feeds (``destination:ref``), normalized for speech ("US 1 North" ->
+    "US-1 North"). All three may be sparse; the spoken phrase degrades
+    gracefully so a bare exit number still reads cleanly.
+    """
+
+    at_mi: float
+    exit_ref: str = ""
+    name: str = ""
+    destinations: tuple[str, ...] = ()
+    via: str = ""
+    highway: str = ""
+    source: str = ""
+
+    @property
+    def spoken_phrase(self) -> str:
+        """Lower-case lead phrase, e.g. 'exit 7 for US-1 North toward Trenton
+        and New York'. Built to slot into 'In 3 miles, {phrase}.'"""
+        head = f"exit {self.exit_ref}" if self.exit_ref else "exit"
+        parts = [head]
+        via = _format_route_ref(self.via)
+        if via:
+            parts.append(f"for {via}")
+        dest = _join_destinations(self.destinations)
+        if dest:
+            parts.append(f"toward {dest}")
+        elif self.name and not self.exit_ref:
+            parts.append(f"for {self.name}")
+        return " ".join(parts)
+
+    @property
+    def near_phrase(self) -> str:
+        phrase = self.spoken_phrase
+        return f"{phrase[0].upper()}{phrase[1:]} now."
+
+    @property
+    def exit_label(self) -> str:
+        """Short signed label for a stop's ramp, e.g. 'exit 7'; empty when OSM
+        has no exit number for this junction."""
+        return f"exit {self.exit_ref}" if self.exit_ref else ""
+
+
+@dataclass(frozen=True)
 class City:
     name: str
     state: str
@@ -726,12 +780,23 @@ class Leg:
     checkpoints: tuple[RouteCheckpoint, ...] = ()
     state_miles: tuple[StateMileage, ...] = ()
     toll_events: tuple[TollEvent, ...] = ()
+    interchanges: tuple[Interchange, ...] = ()
 
     def other(self, city: str) -> str:
         return self.b if city == self.a else self.a
 
     def metadata_complete(self, from_state: str, to_state: str) -> bool:
-        """True when a leg has enough real corridor data for new freight."""
+        """True when a leg has enough real corridor data to be dispatchable.
+
+        Dispatch gates on *routing* completeness: route geometry, elevation and
+        grade, state mileage, and a state crossing when the endpoints differ --
+        all of which the ORS driving-hgv pipeline produces automatically, so the
+        map can scale without hand work. Curated truck-stop POIs are an additive
+        quality layer (auto-sourced; see the coverage report's POI/fuel
+        advisory), not a dispatch requirement: a stop-less leg stays playable via
+        the HOS fallbacks (roadside fuel rescue, emergency shoulder sleep). POI
+        data that *is* present is still validated at load by ``_parse_stop``.
+        """
         if len(self.route_points) < 2:
             return False
         if not self.checkpoints:
@@ -739,19 +804,6 @@ class Leg:
         if not self.state_miles:
             return False
         if len(self.elevation_samples) < 2 or not self.grade_segments:
-            return False
-        curated_stops = [stop for stop in self.stops if stop.curated]
-        if len(curated_stops) < minimum_curated_pois(self.miles):
-            return False
-        fuel_capable = [stop for stop in curated_stops if "fuel" in stop.actions]
-        if len(fuel_capable) < minimum_fuel_capable_pois(self.miles):
-            return False
-        if any(
-            not stop.source
-            or not stop.actions
-            or stop.parking == "unknown"
-            for stop in curated_stops
-        ):
             return False
         return from_state == to_state or bool(self.state_crossings)
 
@@ -802,6 +854,10 @@ class Route:
     @property
     def checkpoints(self) -> list[RouteCheckpoint]:
         return [c for leg in self.legs for c in leg.checkpoints]
+
+    @property
+    def interchanges(self) -> list[Interchange]:
+        return [x for leg in self.legs for x in leg.interchanges]
 
     @property
     def terrain_summary(self) -> str:
@@ -874,16 +930,21 @@ class World:
                 _parse_toll_event(e, miles, leg["from"], leg["to"], leg["highway"])
                 for e in corridor.get("toll_events", ())
             )
+            interchanges = tuple(
+                _parse_interchange(x, miles, leg["from"], leg["to"], leg["highway"])
+                for x in corridor.get("interchanges", ())
+            )
             self.legs.append(
                 Leg(leg["from"], leg["to"], miles, leg["highway"],
                     leg["terrain"], stops, route_points, elevation_samples,
                     grade_segments, state_crossings, checkpoints, state_miles,
-                    toll_events)
+                    toll_events, interchanges)
             )
         self._adjacency: dict[str, list[Leg]] = {name: [] for name in self.cities}
         for leg in self.legs:
             self._adjacency[leg.a].append(leg)
             self._adjacency[leg.b].append(leg)
+        self._supported_route_cache: dict[tuple[str, str], Route | None] = {}
 
     def _validate_city_locations(self, city: str, locations: tuple[Location, ...]) -> None:
         if not locations:
@@ -906,9 +967,24 @@ class World:
             self._facilities_by_id[location.id] = location
 
     @classmethod
-    def load(cls, path: Path = WORLD_PATH) -> World:
+    def load(cls, path: Path = WORLD_PATH,
+             overlay: Path | None = None) -> World:
+        """Load the world, optionally merging an additive overlay on top.
+
+        The checked-in base at ``path`` is the deterministic source of truth.
+        An optional ``overlay`` (extra cities and legs fetched online and cached
+        for later offline play, per docs/osm-routing-plan.md) is merged
+        additively: it can only add cities and legs the base does not already
+        have, never override the base. With no overlay the result is exactly the
+        base world, so the offline/deterministic path is unchanged. The runtime
+        ``get_world`` deliberately does not pass an overlay yet; this is the
+        loader capability the online tier will build on.
+        """
         with open(path, encoding="utf-8") as f:
-            return cls(json.load(f))
+            data = json.load(f)
+        if overlay is not None and overlay.exists():
+            data = _merge_overlay(data, json.loads(overlay.read_text(encoding="utf-8")))
+        return cls(data)
 
     def city_names(self) -> list[str]:
         return sorted(self.cities)
@@ -993,6 +1069,7 @@ class World:
         if start not in self.cities or end not in self.cities:
             raise KeyError(f"Unknown city: {start if start not in self.cities else end}")
         penalties = penalties or {}
+        has_penalties = bool(penalties)
         dist: dict[str, float] = {start: 0.0}
         prev: dict[str, tuple[str, Leg]] = {}
         heap: list[tuple[float, str]] = [(0.0, start)]
@@ -1008,7 +1085,7 @@ class World:
                 if require_metadata and not self.leg_metadata_complete(leg):
                     continue
                 nxt = leg.other(city)
-                cost = leg.miles * penalties.get(leg, 1.0)
+                cost = leg.miles * penalties.get(leg, 1.0) if has_penalties else leg.miles
                 nd = d + cost
                 if nd < dist.get(nxt, float("inf")):
                     dist[nxt] = nd
@@ -1051,7 +1128,17 @@ class World:
 
     def supported_route(self, start: str, end: str,
                         penalties: dict[Leg, float] | None = None) -> Route | None:
-        return self.shortest_route(start, end, penalties, require_metadata=True)
+        if penalties:
+            return self.shortest_route(start, end, penalties, require_metadata=True)
+        key = (start, end)
+        if key not in self._supported_route_cache:
+            self._supported_route_cache[key] = self.shortest_route(
+                start, end, require_metadata=True
+            )
+        route = self._supported_route_cache[key]
+        if route is None:
+            return None
+        return Route(list(route.cities), list(route.legs))
 
     def supported_route_options(self, start: str, end: str,
                                 count: int = 3) -> list[Route]:
@@ -1085,6 +1172,37 @@ class World:
 
 
 _world: World | None = None
+
+
+def _leg_pair_key(leg: dict) -> frozenset:
+    return frozenset((leg.get("from"), leg.get("to")))
+
+
+def _merge_overlay(base: dict, overlay: dict) -> dict:
+    """Return ``base`` with overlay cities and legs added, never overridden.
+
+    The merge is purely additive so the checked-in base stays authoritative:
+    a city already present by name keeps its base definition, and a leg already
+    present (by unordered endpoint pair) keeps its base definition. Only genuinely
+    new cities and legs from the overlay are appended. The base dict is not
+    mutated.
+    """
+    merged = dict(base)
+    cities = dict(base.get("cities", {}))
+    for name, city in overlay.get("cities", {}).items():
+        if name not in cities:
+            cities[name] = city
+    merged["cities"] = cities
+
+    legs = list(base.get("legs", []))
+    seen = {_leg_pair_key(leg) for leg in legs}
+    for leg in overlay.get("legs", []):
+        key = _leg_pair_key(leg)
+        if key not in seen:
+            seen.add(key)
+            legs.append(leg)
+    merged["legs"] = legs
+    return merged
 
 
 def _parse_location(raw: dict, city: str, city_lat: float, city_lon: float) -> Location:
@@ -1543,6 +1661,75 @@ def _parse_toll_event(raw, leg_miles: float, from_city: str, to_city: str,
         estimated=bool(raw.get("estimated", True)),
         source=source,
     )
+
+
+def _parse_interchange(raw, leg_miles: float, from_city: str, to_city: str,
+                       default_highway: str) -> Interchange:
+    if not isinstance(raw, dict):
+        raise ValueError(f"{from_city} to {to_city} interchange must be an object")
+    exit_ref = str(raw.get("exit_ref", "")).strip()
+    name = str(raw.get("name", "")).strip()
+    via = str(raw.get("via", "")).strip()
+    raw_dests = raw.get("destinations", ())
+    if isinstance(raw_dests, str):
+        raw_dests = [raw_dests]
+    destinations = tuple(
+        d for d in (str(item).strip() for item in raw_dests) if d
+    )
+    label = f"interchange {exit_ref or name or '(unnamed)'!r}"
+    at_mi = _parse_at_mi(raw, leg_miles, from_city, to_city, label)
+    # An interchange must carry *something* sayable beyond a milepost.
+    if not (exit_ref or destinations or name):
+        raise ValueError(
+            f"{from_city} to {to_city} interchange at {at_mi} has no exit ref, "
+            "destinations, or name"
+        )
+    blob = " ".join((name, via, *destinations)).lower()
+    if any(marker in blob for marker in RAW_POI_TEXT_MARKERS):
+        raise ValueError(
+            f"{from_city} to {to_city} {label} exposes raw OSM/source text"
+        )
+    highway = str(raw.get("highway", "")).strip() or default_highway
+    source = str(raw.get("source", "")).strip()
+    if not source:
+        raise ValueError(f"{from_city} to {to_city} {label} has no source")
+    return Interchange(
+        at_mi=at_mi,
+        exit_ref=exit_ref,
+        name=name,
+        destinations=destinations,
+        via=via,
+        highway=highway,
+        source=source,
+    )
+
+
+def _format_route_ref(value: str) -> str:
+    """Speech-friendly route ref: 'US 1 North' -> 'US-1 North', 'I 95' ->
+    'I-95'. Multiple refs ('I 95 North;NJTP North') join with ' and '."""
+    out: list[str] = []
+    for chunk in str(value).split(";"):
+        ref = " ".join(chunk.split())
+        if not ref:
+            continue
+        # Hyphenate a leading shield token + number: "US 1" -> "US-1".
+        parts = ref.split(" ")
+        if len(parts) >= 2 and parts[1][:1].isdigit():
+            parts[0:2] = [f"{parts[0]}-{parts[1]}"]
+        out.append(" ".join(parts))
+    return " and ".join(out)
+
+
+def _join_destinations(destinations: tuple[str, ...]) -> str:
+    """['Trenton', 'New York'] -> 'Trenton and New York'; Oxford-comma 3+."""
+    items = [d for d in destinations if d]
+    if not items:
+        return ""
+    if len(items) == 1:
+        return items[0]
+    if len(items) == 2:
+        return f"{items[0]} and {items[1]}"
+    return f"{', '.join(items[:-1])}, and {items[-1]}"
 
 
 def _parse_at_mi(raw: dict, leg_miles: float, from_city: str, to_city: str,

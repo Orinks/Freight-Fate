@@ -27,8 +27,9 @@ from ..music import (
 )
 from ..sim import hos
 from ..sim.hos import HosClock, clock_text, is_night, time_of_day
+from ..sim.lane import LaneKeeping
 from ..sim.transmission import REVERSE
-from ..sim.trip import Trip, TripEventKind
+from ..sim.trip import RoadStop, Trip, TripEventKind
 from ..sim.vehicle import G, TruckState
 from ..sim.weather import WeatherKind, WeatherSystem
 from .base import MenuItem, MenuState, State
@@ -56,12 +57,13 @@ OUT_OF_SERVICE_MIN = hos.SLEEP_MIN
 EXIT_WINDOW_MI = 5.0              # how far out X can arm the upcoming exit
 RAMP_MAX_MPH = 45.0               # any faster and you blow past the exit
 RAMP_LENGTH_MI = 0.5              # deceleration lane plus ramp to the stop
+DESTINATION_EXIT_BEFORE_END_MI = 1.0
 
 CRUISE_MIN_MPH = 20.0             # cruise control needs road speed to hold
 ACC_BASE_GAP_SECONDS = 3.0        # clear-weather adaptive cruise gap
 ENGINE_SHUTDOWN_SAFE_MPH = 5.0    # prevent accidental kill-switch use at speed
-DELIVERY_PARK_MPH = 3.0           # destination settlement requires parking speed
-DOCKING_MAX_MPH = 1.0             # final dock/park action needs a full stop
+DELIVERY_PARK_MPH = 3.0           # within this, the gate prompts you to stop
+DOCKING_MAX_MPH = 0.5            # dock/settle/rest actions need a complete stop
 DRIVE_PHASE_PICKUP = "pickup"
 DRIVE_PHASE_DELIVERY = "delivery"
 
@@ -129,6 +131,7 @@ class DrivingState(State):
         self.trip = Trip(route, self.truck, self.weather,
                          time_scale=ctx.settings.time_scale, seed=self.trip_seed,
                          start_hour=trip_start_hour)
+        self.lane = LaneKeeping(seed=self.trip_seed)
         self._day_music_sequence = select_drive_music_sequence(
             self.route, self.trip_seed, 12.0, self.weather.current)
         self._night_music_sequence = select_drive_music_sequence(
@@ -157,6 +160,9 @@ class DrivingState(State):
         self._ramp_mi: float | None = None   # ramp distance left, once taken
         self._ramp_stop = None
         self._ramp_end_said = False
+        self._destination_exit_taken = False
+        self._missed_destination_exit_said = False
+        self._destination_exit_announced_key = ""
         self._cruise_mph: float | None = None
         self._cruise_throttle = 0.0
         self._acc_following = False
@@ -168,6 +174,7 @@ class DrivingState(State):
         self._low_air_said = False
         self._spring_brake_said = False
         self._brake_lockout_cue_timer = 0.0
+        self._lane_rumble_timer = 0.0
         self._status_text = "Press E to start the engine."
 
     # -- save and resume -----------------------------------------------------------
@@ -202,6 +209,7 @@ class DrivingState(State):
             "hos_fine_count": self.hos_fine_count,
             "enforcement_events": sorted(self.enforcement_events),
             "out_of_service_count": self.out_of_service_count,
+            "lane_offset": self.lane.offset,
         }
 
     @classmethod
@@ -248,6 +256,7 @@ class DrivingState(State):
                 str(key) for key in data.get("enforcement_events", [])
             }
             state.out_of_service_count = int(data.get("out_of_service_count", 0))
+            state.lane.offset = float(data.get("lane_offset", 0.0))
             return state
         except (KeyError, TypeError, ValueError):
             log.warning("Could not resume saved trip", exc_info=True)
@@ -363,9 +372,14 @@ class DrivingState(State):
         elif key == pygame.K_c:
             self._speak_clock()
         elif key == pygame.K_r:
-            self.ctx.say(self.trip.progress_summary(self.ctx.settings.imperial_units))
+            if event.mod & pygame.KMOD_SHIFT:
+                self.ctx.say(self.trip.next_exit_context())
+            else:
+                self.ctx.say(self.trip.progress_summary(self.ctx.settings.imperial_units))
         elif key == pygame.K_v:
             self._speak_weather()
+        elif key == pygame.K_l:
+            self.ctx.say(self.lane.describe())
         elif key == pygame.K_F1:
             objective_help = (
                 f"Your current objective is pickup: drive to {self._pickup_facility_text()}, "
@@ -380,8 +394,9 @@ class DrivingState(State):
                 "Hold B for the emergency brake, the hardest possible stop. "
                 "K sets adaptive cruise at your current speed; bad weather "
                 "increases the following gap, and braking cancels. "
-                "X takes the next announced exit: slow to 45 for the ramp, "
-                "then brake to a stop for the rest stop menu. "
+                "X takes the next announced exit, called out by its number "
+                "when known: slow to 45 for the ramp, then brake to a stop for "
+                "the rest stop menu. "
                 "E starts the engine, and stops it only below 5 miles per hour. "
                 "Air pressure must build before the truck can move. "
                 "Press P to release or set the parking brake; if pressure is "
@@ -389,7 +404,9 @@ class DrivingState(State):
                 f"{objective_help}"
                 "Space speed. Tab status menu. F fuel. "
                 "C clock, deadline, and hours of service. "
-                "R route. V weather. T route POI menu when already stopped "
+                "R route. Shift R next listed highway exit. V weather. L lane position. "
+                "Left and Right arrows steer when lane drift is enabled. "
+                "T route POI menu when already stopped "
                 "at one: available actions may include fuel, break, sleep, "
                 "inspect, roadside assistance, or save when source-backed. H horn. "
                 "J engine brake. Escape pause menu. "
@@ -690,6 +707,7 @@ class DrivingState(State):
         keys = pygame.key.get_pressed()
         ramp = dt * 2.2
         self._brake_lockout_cue_timer = max(0.0, self._brake_lockout_cue_timer - dt)
+        self._lane_rumble_timer = max(0.0, self._lane_rumble_timer - dt)
         accelerating = keys[pygame.K_UP]
         braking_key = keys[pygame.K_DOWN]
         backing = self._update_reverse_controls(accelerating, braking_key)
@@ -718,6 +736,7 @@ class DrivingState(State):
             t.brake = 1.0
         t.emergency_brake = emergency
         t.transmission.clutch = 1.0 if keys[pygame.K_LSHIFT] or keys[pygame.K_RSHIFT] else 0.0
+        self._update_lane(keys, dt)
         self._update_cruise(dt, braking, accelerating)
 
         if t.transmission.automatic and t.engine_on:
@@ -743,6 +762,7 @@ class DrivingState(State):
         pos_before = self.trip.position_mi
         for event in self.trip.update(dt):
             self._handle_trip_event(event)
+        self._check_destination_exit()
         self._update_exit(self.trip.position_mi - pos_before)
 
         self._update_hours_and_fatigue(dt)
@@ -755,6 +775,10 @@ class DrivingState(State):
         if self.trip.finished:
             if self.phase == DRIVE_PHASE_PICKUP:
                 self._handle_pickup_gate()
+            elif self._ramp_mi is not None:
+                return
+            elif not self._destination_exit_taken:
+                self._handle_missed_destination_exit()
             else:
                 self._handle_arrival_gate()
 
@@ -889,6 +913,31 @@ class DrivingState(State):
                 else:
                     self.ctx.audio.play("driver/yawn", volume=0.8)
 
+    def _update_lane(self, keys, dt: float) -> None:
+        mode = self.ctx.settings.steering_assist
+        steer = 0.0
+        if keys[pygame.K_LEFT]:
+            steer -= 1.0
+        if keys[pygame.K_RIGHT]:
+            steer += 1.0
+        self.lane.steering = steer
+        leg = self.route.legs[self.trip.current_leg_index]
+        curve = 0.0
+        if leg.terrain == "hills":
+            curve = 0.25
+        elif leg.terrain == "mountain":
+            curve = 0.55
+        if self._ramp_mi is not None:
+            curve += 0.35
+        wind = self.weather.effects.wind
+        if self.lane.update(dt, self.truck.velocity_mps, curve=curve, wind=wind, assist=mode):
+            self.ctx.audio.play("vehicle/rumble_strip", volume=1.0)
+            self.truck.damage_pct = min(100.0, self.truck.damage_pct + 1.0)
+            self.ctx.say_event(
+                f"{self.lane.describe()} Steer back toward the lane center.",
+                interrupt=False,
+            )
+
     def _update_audio(self, dt: float = 0.0) -> None:
         t = self.truck
         audio = self.ctx.audio
@@ -899,6 +948,14 @@ class DrivingState(State):
         eff = self.weather.effects
         audio.set_weather(eff.sound)
         audio.set_wind(eff.wind)
+        rumble = self.lane.rumble_level()
+        if (
+            rumble > 0.0
+            and self.ctx.settings.steering_assist != "off"
+            and self._lane_rumble_timer <= 0.0
+        ):
+            self._lane_rumble_timer = 0.8
+            audio.play("vehicle/rumble_strip", volume=0.25 + rumble * 0.45)
         night = is_night(self.trip.current_hour)
         if night:
             audio.set_ambient("ambient/night")
@@ -1132,7 +1189,7 @@ class DrivingState(State):
             self.ctx.say("There is no route POI here. Stops are announced as you "
                          "approach them.")
             return
-        if self.truck.speed_mph > 3:
+        if self.truck.speed_mph > DOCKING_MAX_MPH:
             self.ctx.say("Come to a complete stop first.")
             return
         self._open_poi_stop(stop)
@@ -1154,7 +1211,7 @@ class DrivingState(State):
             self._exit_stop = None
             self.ctx.say("Exit canceled. Staying on the highway.")
             return
-        stop = self.trip.upcoming_stop(EXIT_WINDOW_MI)
+        stop = self._upcoming_exit_stop()
         if stop is None:
             self.ctx.say("No exit coming up. Exits are announced as you "
                          "approach them.")
@@ -1162,9 +1219,122 @@ class DrivingState(State):
         self._exit_stop = stop
         self.ctx.audio.play("ui/notify", volume=0.5)
         ahead = stop.at_mi - self.trip.position_mi
-        self.ctx.say(f"Signaling for the {stop.spoken_name} exit, "
-                     f"{ahead:.1f} miles ahead. "
+        if stop.type == "delivery_destination":
+            head = (f"Signaling for {self._destination_exit_phrase(stop)}, "
+                    f"destination exit for {stop.name},")
+        elif stop.exit_label:
+            head = f"Signaling for {stop.exit_label}, {stop.spoken_name},"
+        else:
+            head = f"Signaling for the {stop.spoken_name} exit,"
+        self.ctx.say(f"{head} {ahead:.1f} miles ahead. "
                      f"Slow to {RAMP_MAX_MPH:.0f} or less for the ramp.")
+
+    def _upcoming_exit_stop(self):
+        stop = self.trip.upcoming_stop(EXIT_WINDOW_MI)
+        destination = self._destination_exit_stop()
+        if destination is None:
+            return stop
+        ahead = destination.at_mi - self.trip.position_mi
+        if not (0 <= ahead <= EXIT_WINDOW_MI):
+            return stop
+        if stop is None or destination.at_mi <= stop.at_mi:
+            return destination
+        return stop
+
+    def _destination_exit_stop(self):
+        if self.phase != DRIVE_PHASE_DELIVERY or self._destination_exit_taken:
+            return None
+        details = self._destination_exit_details()
+        if details is None:
+            at_mi = max(0.0, self.trip.total_miles - DESTINATION_EXIT_BEFORE_END_MI)
+            exit_label = ""
+            exit_phrase = ""
+        else:
+            at_mi, exit_label, exit_phrase = details
+        if at_mi <= self.trip.position_mi + 0.05:
+            return None
+        stop = RoadStop(
+            self._destination_facility_text(),
+            at_mi,
+            "delivery_destination",
+            ("deliver",),
+            exit_label=exit_label,
+        )
+        stop.exit_phrase = exit_phrase
+        return stop
+
+    def _destination_exit_label(self) -> str:
+        details = self._destination_exit_details()
+        return "" if details is None else details[1]
+
+    def _destination_exit_key(self, stop) -> str:
+        return f"{stop.at_mi:.3f}:{stop.exit_label}:{stop.name}"
+
+    def _destination_exit_phrase(self, stop) -> str:
+        phrase = getattr(stop, "exit_phrase", "")
+        if phrase:
+            return phrase
+        if stop.exit_label:
+            return f"{stop.exit_label} for {stop.name}"
+        return f"the exit for {stop.name}"
+
+    def _destination_exit_announcement(self, stop, ahead: float) -> str:
+        phrase = self._destination_exit_phrase(stop)
+        return (f"In {ahead:.0f} miles, {phrase}, destination exit. "
+                "Press X to take it.")
+
+    def _check_destination_exit(self) -> None:
+        stop = self._destination_exit_stop()
+        if stop is None:
+            return
+        ahead = stop.at_mi - self.trip.position_mi
+        if not (0 < ahead <= EXIT_WINDOW_MI):
+            return
+        key = self._destination_exit_key(stop)
+        if key == self._destination_exit_announced_key:
+            return
+        self._destination_exit_announced_key = key
+        message = self._destination_exit_announcement(stop, ahead)
+        if self._cruise_mph is not None:
+            self._cancel_cruise()
+            message += " Adaptive cruise disabled; take manual speed control."
+        self.ctx.audio.play("ui/notify", volume=0.7)
+        self.ctx.say_event(message, interrupt=False)
+
+    def _destination_exit_details(
+            self, *, include_past: bool = False) -> tuple[float, str, str] | None:
+        if not self.route.legs:
+            return None
+        destination = self.route.cities[-1].casefold()
+        candidates = []
+        for i in range(len(self.route.legs) - 1, -1, -1):
+            leg = self.route.legs[i]
+            forward = self.route.cities[i] == leg.a
+            target = leg.miles if forward else 0.0
+            for ix in leg.interchanges:
+                if not ix.exit_label:
+                    continue
+                offset = ix.at_mi if forward else leg.miles - ix.at_mi
+                route_mile = self.trip._leg_starts[i] + offset
+                if not include_past and route_mile <= self.trip.position_mi + 0.05:
+                    continue
+                dist_from_destination = abs(ix.at_mi - target)
+                matches_destination = any(
+                    destination in part.casefold() for part in ix.destinations)
+                candidates.append((
+                    not matches_destination,
+                    len(self.route.legs) - 1 - i,
+                    dist_from_destination,
+                    route_mile,
+                    ix.exit_label,
+                    ix.spoken_phrase,
+                ))
+            if candidates and not candidates[0][0]:
+                break
+        if not candidates:
+            return None
+        candidates.sort()
+        return candidates[0][3], candidates[0][4], candidates[0][5]
 
     def _update_exit(self, moved_mi: float) -> None:
         """Advance an armed exit or an active ramp; opens the stop menu."""
@@ -1172,15 +1342,20 @@ class DrivingState(State):
             self._ramp_mi -= moved_mi
             if self._ramp_mi > 0:
                 return
-            if self.truck.speed_mph <= 3:
+            if self.truck.speed_mph <= DOCKING_MAX_MPH:
                 stop = self._ramp_stop
                 self._ramp_mi = None
                 self._ramp_stop = None
-                self._open_poi_stop(stop)
+                if stop.type == "delivery_destination":
+                    self._open_facility_arrival()
+                else:
+                    self._open_poi_stop(stop)
             elif not self._ramp_end_said:
                 self._ramp_end_said = True
-                self.ctx.say_event(f"You are at {self._ramp_stop.spoken_name}. "
-                                   "Come to a complete stop.")
+                place = (self._ramp_stop.name
+                         if self._ramp_stop.type == "delivery_destination"
+                         else self._ramp_stop.spoken_name)
+                self.ctx.say_event(f"You are at {place}. Come to a complete stop.")
             return
         stop = self._exit_stop
         if stop is None or self.trip.position_mi < stop.at_mi:
@@ -1190,14 +1365,24 @@ class DrivingState(State):
             self._ramp_mi = RAMP_LENGTH_MI
             self._ramp_stop = stop
             self._ramp_end_said = False
+            self._destination_exit_taken = stop.type == "delivery_destination"
             self._cancel_cruise()
             self.ctx.audio.play("ui/notify", volume=0.7)
-            self.ctx.say_event(f"You take the exit for {stop.spoken_name}. "
-                               "Half a mile of ramp; brake to a stop at "
-                               "the end.")
+            if stop.type == "delivery_destination":
+                take = (f"You take {self._destination_exit_phrase(stop)}, "
+                        f"destination exit for {stop.name}.")
+            else:
+                take = (f"You take {stop.exit_label} for {stop.spoken_name}."
+                        if stop.exit_label
+                        else f"You take the exit for {stop.spoken_name}.")
+            self.ctx.say_event(f"{take} Half a mile of ramp; brake to a stop "
+                               "at the end.")
         else:
+            missed = stop.exit_label if stop.exit_label else "the exit"
+            place = (self._destination_exit_phrase(stop)
+                     if stop.type == "delivery_destination" else stop.spoken_name)
             self.ctx.say_event("You were going too fast for the ramp and "
-                               f"missed the exit for {stop.spoken_name}.")
+                               f"missed {missed} for {place}.")
 
     def _toggle_cruise(self) -> None:
         t = self.truck
@@ -1307,10 +1492,10 @@ class DrivingState(State):
         self._arrival_stop_said = True
         self._cancel_cruise()
         self.ctx.audio.play("ui/warning")
-        self._set_status("Pickup ahead: slow below 3 mph.")
+        self._set_status("Pickup ahead: slow down and come to a complete stop.")
         self.ctx.say_event(
             f"Pickup ahead: {self._pickup_facility_text()}. "
-            f"Slow below {DELIVERY_PARK_MPH:.0f} mph.",
+            "Slow down and come to a complete stop at the gate.",
             interrupt=True)
 
     def _handle_pickup_creep(self) -> None:
@@ -1347,6 +1532,21 @@ class DrivingState(State):
     def _arrive(self) -> None:
         self.ctx.replace_state(ArrivalState(self.ctx, self))
 
+    def _handle_missed_destination_exit(self) -> None:
+        self.trip.finished = False
+        self._exit_stop = None
+        self._cancel_cruise()
+        if self._missed_destination_exit_said:
+            return
+        self._missed_destination_exit_said = True
+        self.ctx.audio.play("ui/warning")
+        self._set_status("Destination exit missed. Back up until it is ahead, then press X.")
+        self.ctx.say_event(
+            f"You missed the destination exit for {self._destination_facility_text()}. "
+            "Back up until the exit is ahead, then press X to signal for it.",
+            interrupt=True,
+        )
+
     def _handle_arrival_gate(self) -> None:
         if self.truck.speed_mph <= DOCKING_MAX_MPH:
             self._open_facility_arrival()
@@ -1359,10 +1559,10 @@ class DrivingState(State):
         self._arrival_stop_said = True
         self._cancel_cruise()
         self.ctx.audio.play("ui/warning")
-        self._set_status("Destination ahead: slow below 3 mph.")
+        self._set_status("Destination ahead: slow down and come to a complete stop.")
         self.ctx.say_event(
             f"Destination ahead: {self._destination_facility_text()}. "
-            f"Slow below {DELIVERY_PARK_MPH:.0f} mph.",
+            "Slow down and come to a complete stop at the gate.",
             interrupt=True)
 
     def _handle_arrival_creep(self) -> None:
@@ -2088,9 +2288,10 @@ class PauseMenuState(MenuState):
             MenuItem("Abandon job", self._abandon,
                      help="Give up this job. Costs five hundred dollars and "
                           "reputation, and returns you to the origin city."),
-            MenuItem("Save and quit to main menu", self._quit_to_menu,
-                     help="Your money, truck, and trip progress are saved. "
-                          "This drive resumes from here when you continue."),
+            MenuItem("Quit to main menu", self._quit_to_menu,
+                     help="You can only save at a stop, so this drive is not "
+                          "saved in progress. It resumes from your last stop "
+                          "when you continue. Use Abandon job to drop the load."),
         ]
         if self.driving.emergency_shoulder_sleep_reason() is not None:
             items.insert(3, MenuItem(
@@ -2199,14 +2400,14 @@ class PauseMenuState(MenuState):
     def _quit_to_menu(self) -> None:
         from .main_menu import MainMenuState
 
-        p = self.ctx.profile
-        p.truck_fuel_gal = self.driving.truck.fuel_gal
-        p.truck_damage_pct = self.driving.truck.damage_pct
-        p.active_trip = self.driving.snapshot()
-        self.ctx.save_profile()
+        # Saving happens only at stops, so a mid-drive quit writes nothing: the
+        # on-disk save still points at your last stop, and Continue resumes the
+        # leg from there. In-progress leg driving is intentionally not preserved.
         drive_label = "pickup drive" if self.driving.phase == DRIVE_PHASE_PICKUP else "delivery"
-        self.ctx.say(f"Saved. Your {drive_label} will resume where you left off.",
-                     interrupt=True)
+        self.ctx.say(
+            f"Returning to the title. You can only save at a stop, so this "
+            f"{drive_label} will resume from your last stop, not from here.",
+            interrupt=True)
         self.ctx.reset_to(MainMenuState(self.ctx))
 
 
@@ -2335,12 +2536,38 @@ class ArrivalState(MenuState):
         self.terminal = ctx.world.home_terminal(driving.job.destination)
         self._settle()
 
+    def _settle_bobtail(self, hours: float, trip_damage: float) -> None:
+        """Empty reposition run: relocate to the destination city, no pay."""
+        d = self.driving
+        p = self.ctx.profile
+        job = d.job
+        self.title = "Repositioned"
+        p.current_city = job.destination
+        p.truck_fuel_gal = d.truck.fuel_gal
+        p.truck_damage_pct = d.truck.damage_pct
+        p.game_hours += hours
+        p.market.advance_to(p.market_day())
+        p.active_trip = None
+        self.ctx.save_profile()
+        self.summary_parts.insert(0, (
+            f"Bobtailed empty to {job.destination} in {hours:.1f} hours. "
+            f"It is {clock_text(p.game_hours)}. No load and no pay, but you are "
+            f"parked at {self.terminal.name} and can shop the {job.destination} "
+            f"dispatch board. Fuel {d.truck.fuel_fraction * 100:.0f} percent."))
+        if trip_damage > 1:
+            self.summary_parts.append(
+                f"The empty run added {trip_damage:.0f} percent truck damage. "
+                "Visit the garage when you can.")
+
     def _settle(self) -> None:
         d = self.driving
         p = self.ctx.profile
         job = d.job
         hours = d.trip.game_minutes / 60.0
         trip_damage = max(0.0, d.truck.damage_pct - d.start_damage)
+        if job.bobtail:
+            self._settle_bobtail(hours, trip_damage)
+            return
         gross_pay = job.payout(hours, trip_damage)
         toll_expense = d.trip.toll_expense
         accessorials = carrier_accessorial_charges(job)
@@ -2393,6 +2620,7 @@ class ArrivalState(MenuState):
             toll_expense=toll_expense,
             route_miles=d.route.miles,
             speeding_strikes=d.speeding_strikes,
+            gross_pay=gross_pay,
         )
         self.summary_parts.extend(self._achievement_messages)
         timing = "On time" if on_time else "Late"
@@ -2439,7 +2667,8 @@ class ArrivalState(MenuState):
             trip_damage: float,
             toll_expense: float,
             route_miles: float,
-            speeding_strikes: int) -> None:
+            speeding_strikes: int,
+            gross_pay: float = 0.0) -> None:
         p = self.ctx.profile
         route = self.driving.route
         world = self.ctx.world
@@ -2478,6 +2707,75 @@ class ArrivalState(MenuState):
             ids.append("twenty_five_grand")
         if p.career.total_miles >= 1_000.0:
             ids.append("thousand_miles")
+
+        # -- Landmarks: direction, famous corridors, and city-arrival badges --
+        origin, dest = route.cities[0], route.cities[-1]
+        origin_lon = world.cities[origin].lon
+        dest_lon = world.cities[dest].lon
+        if dest_lon - origin_lon > 1.0:
+            ids.append("eastbound_delivery")
+        if origin_lon - dest_lon > 1.0:
+            ids.append("westbound_delivery")
+        if abs(dest_lon - origin_lon) >= 35.0:
+            ids.append("coast_to_coast")
+        route66 = {"Chicago", "St. Louis", "Tulsa", "Oklahoma City",
+                   "Amarillo", "Albuquerque", "Flagstaff", "Los Angeles"}
+        if origin in route66 and dest in route66:
+            ids.append("route66_run")
+        arrival_hour = self.driving.trip.current_hour
+        # Plain "deliver into this city" badges (titles claim nothing extra).
+        simple_arrival = {
+            "Phoenix": "phoenix_arrival", "Wichita": "wichita_arrival",
+            "Bakersfield": "bakersfield_arrival", "Las Vegas": "vegas_arrival",
+        }
+        if dest in simple_arrival:
+            ids.append(simple_arrival[dest])
+        # Badges whose title names a condition, so the condition is enforced:
+        if dest == "Amarillo" and 5.0 <= arrival_hour < 12.0:   # "by Daybreak"
+            ids.append("amarillo_arrival")
+        if dest == "Tulsa" and on_time:                         # "Right on Schedule"
+            ids.append("tulsa_arrival")
+        if world.cities[dest].state == "Georgia" and is_night(arrival_hour):
+            ids.append("georgia_arrival")                       # "Midnight Freight"
+        # Departures: the title puts the city in the rearview / "out of" it.
+        if origin == "Lubbock":                                 # "in the Rearview"
+            ids.append("lubbock_arrival")
+        if origin == "Detroit":                                 # "Last Load Out of"
+            ids.append("detroit_run")
+
+        # -- Challenges: grind milestones, long hauls, spotless runs ----------
+        if region_count >= 14:
+            ids.append("all_regions")
+        if p.career.deliveries >= 50:
+            ids.append("fifty_deliveries")
+        if p.career.deliveries >= 100:
+            ids.append("hundred_deliveries")
+        if p.career.total_miles >= 10_000.0:
+            ids.append("ten_thousand_miles")
+        if p.career.total_miles >= 50_000.0:
+            ids.append("fifty_thousand_miles")
+        if p.money >= 100_000.0:
+            ids.append("hundred_grand")
+        if p.career.level >= 10:
+            ids.append("max_level")
+        if p.career.reputation >= 100.0:
+            ids.append("top_reputation")
+        if gross_pay >= 4_000.0:
+            ids.append("big_payday")
+        if route_miles >= 1_200.0 and on_time and trip_damage <= 1.0:
+            ids.append("grueling_clean")
+        if any(leg.terrain == "mountain" for leg in route.legs) and trip_damage <= 1.0:
+            ids.append("mountain_clean")
+        if len(route.legs) >= 4:
+            ids.append("multi_leg_haul")
+        # Five consecutive on-time, undamaged, ticket-free deliveries.
+        stats = p.achievement_stats if isinstance(p.achievement_stats, dict) else {}
+        p.achievement_stats = stats
+        perfect = on_time and trip_damage <= 1.0 and speeding_strikes == 0
+        streak = int(stats.get("perfect_streak", 0)) + 1 if perfect else 0
+        stats["perfect_streak"] = streak
+        if streak >= 5:
+            ids.append("perfect_streak")
 
         for achievement_id in ids:
             result = self.ctx.award_achievement(achievement_id, announce=False)
