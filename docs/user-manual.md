@@ -454,9 +454,9 @@ Speech and weather settings include:
 | --- | --- |
 | Speech verbosity | Controls how often driving status reminders run. |
 | Driving event voice | Routes road events through the main voice or a separate software voice when available. |
-| Speech rate | Appears only when the current speech backend supports rate changes. |
-| Speech pitch | Appears only when the current speech backend supports pitch changes. |
-| Speech volume | Appears only when the current speech backend supports volume changes. |
+| Speech rate | Appears only when the current voice source supports rate changes. |
+| Speech pitch | Appears only when the current voice source supports pitch changes. |
+| Speech volume | Appears only when the current voice source supports volume changes. |
 | Speech voice | Appears only when selectable voices are available. |
 | Weather source | Switches between simulated weather and live city conditions when available. |
 
@@ -465,12 +465,12 @@ Speech and weather settings include:
 Freight Fate is built to be playable by ear. Menus, status screens, update
 flows, driving alerts, route information, and settlement summaries are available
 through the game's audio and text output. The window mirrors the same
-information as plain text for sighted players and helpers.
+core menu and status information as plain text.
 
 Freight Fate can use NVDA, JAWS, SAPI, VoiceOver, Speech Dispatcher, and other
-available voice backends. It chooses a backend that is usable on the current
-machine. If the preferred screen reader is not running, the game can fall back
-to another available voice.
+available voices. It chooses a voice that is usable on the current machine. If
+the preferred screen reader is not running, the game can fall back to another
+available voice.
 
 Driving events can use a separate software voice when available, so road alerts
 do not fight with a screen reader's own speech.
