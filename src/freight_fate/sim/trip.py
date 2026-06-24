@@ -749,6 +749,8 @@ class Trip:
     def _check_navigation_cues(self) -> None:
         for cue in self.navigation_cues:
             ahead = cue.at_mi - self.position_mi
+            if cue.kind == "interchange":
+                continue
             if cue.kind in ("continue", "onramp"):
                 key = f"{cue.key}:near"
                 if -0.5 <= ahead <= 0.5 and key not in self._announced_navigation:

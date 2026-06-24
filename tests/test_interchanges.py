@@ -118,7 +118,7 @@ def test_interchange_produces_navigation_cue(world):
     assert "Lafayette" in cues[0].text
 
 
-def test_interchange_cue_fires_during_drive(world):
+def test_interchange_cue_stays_silent_during_drive(world):
     route, _ = _route_with_interchange(world)
     truck = TruckState()
     truck.transmission.automatic = True
@@ -135,8 +135,7 @@ def test_interchange_cue_fires_during_drive(world):
                 seen.append(ev.message)
         if trip.finished:
             break
-    assert any("exit 21" in m for m in seen), seen
-    assert any("Lafayette" in m for m in seen), seen
+    assert seen == []
 
 
 def test_reverse_direction_mirrors_interchange_position(world):
