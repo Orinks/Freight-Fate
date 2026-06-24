@@ -501,7 +501,9 @@ def test_destination_exit_announces_and_disables_cruise(monkeypatch):
         driving._check_destination_exit()
 
         assert driving._cruise_mph is None
-        assert "Destination exit ahead" in events[-1]
+        assert "exit " in events[-1]
+        assert "toward" in events[-1]
+        assert "destination exit" in events[-1]
         assert "Press X to take it" in events[-1]
         assert "Adaptive cruise disabled" in events[-1]
     finally:
@@ -529,7 +531,7 @@ def test_delivery_does_not_complete_without_taking_destination_exit(monkeypatch)
         assert not driving.trip.finished
         assert driving.trip.position_mi == driving.trip.total_miles
         assert driving._destination_exit_stop() is None
-        exit_mi, _label = driving._destination_exit_details(include_past=True)
+        exit_mi, _label, _phrase = driving._destination_exit_details(include_past=True)
         driving.trip.position_mi = exit_mi - 1.0
         assert driving._destination_exit_stop() is not None
         assert "missed the destination exit" in events[-1].lower()

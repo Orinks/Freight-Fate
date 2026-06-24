@@ -42,9 +42,9 @@
 - **Destination exits.** Delivery routes now require taking the real signed
   exit for the destination when one is listed, instead of completing just by
   driving to the end of the highway corridor.
-- **Destination exit callouts.** Destination exits now announce before the
-  ramp and tell you to press X; adaptive cruise cancellation includes that
-  exit guidance.
+- **Destination exit callouts.** Destination exits now announce the signed exit
+  and toward cities before the ramp, then tell you to press X; adaptive cruise
+  cancellation includes that exit guidance.
 - **OneCore pitch.** Windows OneCore speech now keeps its native default pitch
   unless the player changes the pitch setting.
 - **Quieter exit guidance.** Ordinary highway exits now stay available in the

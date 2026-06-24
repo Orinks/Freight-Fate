@@ -1220,8 +1220,8 @@ class DrivingState(State):
         self.ctx.audio.play("ui/notify", volume=0.5)
         ahead = stop.at_mi - self.trip.position_mi
         if stop.type == "delivery_destination":
-            head = (f"Signaling for {stop.exit_label}, {stop.name},"
-                    if stop.exit_label else f"Signaling for the {stop.name} exit,")
+            head = (f"Signaling for {self._destination_exit_phrase(stop)}, "
+                    f"destination exit for {stop.name},")
         elif stop.exit_label:
             head = f"Signaling for {stop.exit_label}, {stop.spoken_name},"
         else:
@@ -1248,17 +1248,20 @@ class DrivingState(State):
         if details is None:
             at_mi = max(0.0, self.trip.total_miles - DESTINATION_EXIT_BEFORE_END_MI)
             exit_label = ""
+            exit_phrase = ""
         else:
-            at_mi, exit_label = details
+            at_mi, exit_label, exit_phrase = details
         if at_mi <= self.trip.position_mi + 0.05:
             return None
-        return RoadStop(
+        stop = RoadStop(
             self._destination_facility_text(),
             at_mi,
             "delivery_destination",
             ("deliver",),
             exit_label=exit_label,
         )
+        stop.exit_phrase = exit_phrase
+        return stop
 
     def _destination_exit_label(self) -> str:
         details = self._destination_exit_details()
@@ -1267,11 +1270,17 @@ class DrivingState(State):
     def _destination_exit_key(self, stop) -> str:
         return f"{stop.at_mi:.3f}:{stop.exit_label}:{stop.name}"
 
-    def _destination_exit_announcement(self, stop, ahead: float) -> str:
+    def _destination_exit_phrase(self, stop) -> str:
+        phrase = getattr(stop, "exit_phrase", "")
+        if phrase:
+            return phrase
         if stop.exit_label:
-            return (f"Destination exit ahead: {stop.exit_label} for {stop.name} "
-                    f"in {ahead:.0f} miles. Press X to take it.")
-        return (f"Destination exit ahead for {stop.name} in {ahead:.0f} miles. "
+            return f"{stop.exit_label} for {stop.name}"
+        return f"the exit for {stop.name}"
+
+    def _destination_exit_announcement(self, stop, ahead: float) -> str:
+        phrase = self._destination_exit_phrase(stop)
+        return (f"In {ahead:.0f} miles, {phrase}, destination exit. "
                 "Press X to take it.")
 
     def _check_destination_exit(self) -> None:
@@ -1292,7 +1301,8 @@ class DrivingState(State):
         self.ctx.audio.play("ui/notify", volume=0.7)
         self.ctx.say_event(message, interrupt=False)
 
-    def _destination_exit_details(self, *, include_past: bool = False) -> tuple[float, str] | None:
+    def _destination_exit_details(
+            self, *, include_past: bool = False) -> tuple[float, str, str] | None:
         if not self.route.legs:
             return None
         destination = self.route.cities[-1].casefold()
@@ -1317,13 +1327,14 @@ class DrivingState(State):
                     dist_from_destination,
                     route_mile,
                     ix.exit_label,
+                    ix.spoken_phrase,
                 ))
             if candidates and not candidates[0][0]:
                 break
         if not candidates:
             return None
         candidates.sort()
-        return candidates[0][3], candidates[0][4]
+        return candidates[0][3], candidates[0][4], candidates[0][5]
 
     def _update_exit(self, moved_mi: float) -> None:
         """Advance an armed exit or an active ramp; opens the stop menu."""
@@ -1358,8 +1369,8 @@ class DrivingState(State):
             self._cancel_cruise()
             self.ctx.audio.play("ui/notify", volume=0.7)
             if stop.type == "delivery_destination":
-                take = (f"You take {stop.exit_label} for {stop.name}."
-                        if stop.exit_label else f"You take the exit for {stop.name}.")
+                take = (f"You take {self._destination_exit_phrase(stop)}, "
+                        f"destination exit for {stop.name}.")
             else:
                 take = (f"You take {stop.exit_label} for {stop.spoken_name}."
                         if stop.exit_label
@@ -1368,7 +1379,8 @@ class DrivingState(State):
                                "at the end.")
         else:
             missed = stop.exit_label if stop.exit_label else "the exit"
-            place = stop.name if stop.type == "delivery_destination" else stop.spoken_name
+            place = (self._destination_exit_phrase(stop)
+                     if stop.type == "delivery_destination" else stop.spoken_name)
             self.ctx.say_event("You were going too fast for the ramp and "
                                f"missed {missed} for {place}.")
 
