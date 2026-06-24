@@ -55,6 +55,23 @@ def quiet_trip(driving):
     driving.trip.traffic_leads = []
 
 
+def take_destination_exit(driving):
+    """Move onto the delivery ramp and stop at the destination gate."""
+    destination = driving._destination_exit_stop()
+    assert destination is not None
+    driving._exit_stop = destination
+    driving.trip.position_mi = destination.at_mi
+    driving.truck.velocity_mps = 0.0
+    driving._update_exit(0.0)
+    driving._update_exit(driving._ramp_mi)
+
+
+def mark_destination_exit_taken(driving):
+    driving._destination_exit_taken = True
+    driving.trip.finished = True
+    driving.trip.position_mi = driving.trip.total_miles
+
+
 def open_status_screen(app, label):
     """From the open driving status picker, open a named screen submenu."""
     from freight_fate.states.driving import DrivingStatusScreenState
@@ -410,8 +427,7 @@ def test_delivery_requires_parking_at_destination(monkeypatch):
     try:
         driving = start_drive(app)
         quiet_trip(driving)
-        driving.trip.finished = True
-        driving.trip.position_mi = driving.trip.total_miles
+        mark_destination_exit_taken(driving)
         driving.truck.velocity_mps = 26.8
 
         driving.update(1 / 60)
@@ -437,6 +453,78 @@ def test_delivery_requires_parking_at_destination(monkeypatch):
         app.shutdown()
 
 
+def test_delivery_exit_uses_real_destination_interchange():
+    from freight_fate.app import App
+    from freight_fate.models.jobs import CARGO_CATALOG, Job
+    from freight_fate.models.profile import Profile
+    from freight_fate.states.driving import DrivingState
+
+    app = App()
+    try:
+        app.ctx.profile = Profile(name="Rochester Exit", current_city="Buffalo")
+        route = app.ctx.world.supported_route("Buffalo", "Rochester")
+        job = Job(
+            CARGO_CATALOG["general"],
+            12.0,
+            "Buffalo",
+            "company yard",
+            "Rochester",
+            route.miles,
+            1000.0,
+            12.0,
+            destination_location="Rochester freight market",
+        )
+        driving = DrivingState(app.ctx, job, route, phase="delivery")
+        destination = driving._destination_exit_stop()
+
+        assert destination is not None
+        assert destination.exit_label
+        assert destination.at_mi == pytest.approx(67.5, abs=0.2)
+    finally:
+        app.shutdown()
+
+
+def test_delivery_does_not_complete_without_taking_destination_exit(monkeypatch):
+    from freight_fate.app import App
+    from freight_fate.states.driving import DrivingState
+
+    app = App()
+    events = []
+    monkeypatch.setattr(app.ctx, "say_event",
+                        lambda text, interrupt=True: events.append(text))
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        driving.trip.position_mi = driving.trip.total_miles
+        driving.trip.finished = True
+        driving.truck.velocity_mps = 0.0
+
+        driving.update(1 / 60)
+
+        assert isinstance(app.state, DrivingState)
+        assert not driving.trip.finished
+        assert driving._destination_exit_stop() is not None
+        assert "missed the destination exit" in events[-1].lower()
+    finally:
+        app.shutdown()
+
+
+def test_destination_exit_opens_delivery_gate():
+    from freight_fate.app import App
+    from freight_fate.states.driving import FacilityArrivalState
+
+    app = App()
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        take_destination_exit(driving)
+
+        assert isinstance(app.state, FacilityArrivalState)
+        assert app.state.items[app.state.index].text == "Dock and deliver"
+    finally:
+        app.shutdown()
+
+
 @pytest.mark.smoke
 def test_facility_menu_waits_for_full_stop(monkeypatch):
     from freight_fate.app import App
@@ -457,8 +545,7 @@ def test_facility_menu_waits_for_full_stop(monkeypatch):
         quiet_trip(driving)
         spoken.clear()
         played.clear()
-        driving.trip.finished = True
-        driving.trip.position_mi = driving.trip.total_miles
+        mark_destination_exit_taken(driving)
         driving.truck.velocity_mps = 1.1   # about 2.5 mph: parked, not docked
 
         driving.update(1 / 60)

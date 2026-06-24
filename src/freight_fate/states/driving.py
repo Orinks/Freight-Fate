@@ -29,7 +29,7 @@ from ..sim import hos
 from ..sim.hos import HosClock, clock_text, is_night, time_of_day
 from ..sim.lane import LaneKeeping
 from ..sim.transmission import REVERSE
-from ..sim.trip import Trip, TripEventKind
+from ..sim.trip import RoadStop, Trip, TripEventKind
 from ..sim.vehicle import G, TruckState
 from ..sim.weather import WeatherKind, WeatherSystem
 from .base import MenuItem, MenuState, State
@@ -57,6 +57,7 @@ OUT_OF_SERVICE_MIN = hos.SLEEP_MIN
 EXIT_WINDOW_MI = 5.0              # how far out X can arm the upcoming exit
 RAMP_MAX_MPH = 45.0               # any faster and you blow past the exit
 RAMP_LENGTH_MI = 0.5              # deceleration lane plus ramp to the stop
+DESTINATION_EXIT_BEFORE_END_MI = 1.0
 
 CRUISE_MIN_MPH = 20.0             # cruise control needs road speed to hold
 ACC_BASE_GAP_SECONDS = 3.0        # clear-weather adaptive cruise gap
@@ -159,6 +160,8 @@ class DrivingState(State):
         self._ramp_mi: float | None = None   # ramp distance left, once taken
         self._ramp_stop = None
         self._ramp_end_said = False
+        self._destination_exit_taken = False
+        self._missed_destination_exit_said = False
         self._cruise_mph: float | None = None
         self._cruise_throttle = 0.0
         self._acc_following = False
@@ -770,6 +773,10 @@ class DrivingState(State):
         if self.trip.finished:
             if self.phase == DRIVE_PHASE_PICKUP:
                 self._handle_pickup_gate()
+            elif self._ramp_mi is not None:
+                return
+            elif not self._destination_exit_taken:
+                self._handle_missed_destination_exit()
             else:
                 self._handle_arrival_gate()
 
@@ -1202,7 +1209,7 @@ class DrivingState(State):
             self._exit_stop = None
             self.ctx.say("Exit canceled. Staying on the highway.")
             return
-        stop = self.trip.upcoming_stop(EXIT_WINDOW_MI)
+        stop = self._upcoming_exit_stop()
         if stop is None:
             self.ctx.say("No exit coming up. Exits are announced as you "
                          "approach them.")
@@ -1210,12 +1217,81 @@ class DrivingState(State):
         self._exit_stop = stop
         self.ctx.audio.play("ui/notify", volume=0.5)
         ahead = stop.at_mi - self.trip.position_mi
-        if stop.exit_label:
+        if stop.type == "delivery_destination":
+            head = (f"Signaling for {stop.exit_label}, {stop.name},"
+                    if stop.exit_label else f"Signaling for the {stop.name} exit,")
+        elif stop.exit_label:
             head = f"Signaling for {stop.exit_label}, {stop.spoken_name},"
         else:
             head = f"Signaling for the {stop.spoken_name} exit,"
         self.ctx.say(f"{head} {ahead:.1f} miles ahead. "
                      f"Slow to {RAMP_MAX_MPH:.0f} or less for the ramp.")
+
+    def _upcoming_exit_stop(self):
+        stop = self.trip.upcoming_stop(EXIT_WINDOW_MI)
+        destination = self._destination_exit_stop()
+        if destination is None:
+            return stop
+        ahead = destination.at_mi - self.trip.position_mi
+        if not (0 <= ahead <= EXIT_WINDOW_MI):
+            return stop
+        if stop is None or destination.at_mi <= stop.at_mi:
+            return destination
+        return stop
+
+    def _destination_exit_stop(self):
+        if self.phase != DRIVE_PHASE_DELIVERY or self._destination_exit_taken:
+            return None
+        details = self._destination_exit_details()
+        if details is None:
+            at_mi = max(0.0, self.trip.total_miles - DESTINATION_EXIT_BEFORE_END_MI)
+            exit_label = ""
+        else:
+            at_mi, exit_label = details
+        return RoadStop(
+            self._destination_facility_text(),
+            at_mi,
+            "delivery_destination",
+            ("deliver",),
+            exit_label=exit_label,
+        )
+
+    def _destination_exit_label(self) -> str:
+        details = self._destination_exit_details()
+        return "" if details is None else details[1]
+
+    def _destination_exit_details(self, *, include_past: bool = False) -> tuple[float, str] | None:
+        if not self.route.legs:
+            return None
+        destination = self.route.cities[-1].casefold()
+        candidates = []
+        for i in range(len(self.route.legs) - 1, -1, -1):
+            leg = self.route.legs[i]
+            forward = self.route.cities[i] == leg.a
+            target = leg.miles if forward else 0.0
+            for ix in leg.interchanges:
+                if not ix.exit_label:
+                    continue
+                offset = ix.at_mi if forward else leg.miles - ix.at_mi
+                route_mile = self.trip._leg_starts[i] + offset
+                if not include_past and route_mile <= self.trip.position_mi + 0.05:
+                    continue
+                dist_from_destination = abs(ix.at_mi - target)
+                matches_destination = any(
+                    destination in part.casefold() for part in ix.destinations)
+                candidates.append((
+                    not matches_destination,
+                    len(self.route.legs) - 1 - i,
+                    dist_from_destination,
+                    route_mile,
+                    ix.exit_label,
+                ))
+            if candidates and not candidates[0][0]:
+                break
+        if not candidates:
+            return None
+        candidates.sort()
+        return candidates[0][3], candidates[0][4]
 
     def _update_exit(self, moved_mi: float) -> None:
         """Advance an armed exit or an active ramp; opens the stop menu."""
@@ -1227,11 +1303,16 @@ class DrivingState(State):
                 stop = self._ramp_stop
                 self._ramp_mi = None
                 self._ramp_stop = None
-                self._open_poi_stop(stop)
+                if stop.type == "delivery_destination":
+                    self._open_facility_arrival()
+                else:
+                    self._open_poi_stop(stop)
             elif not self._ramp_end_said:
                 self._ramp_end_said = True
-                self.ctx.say_event(f"You are at {self._ramp_stop.spoken_name}. "
-                                   "Come to a complete stop.")
+                place = (self._ramp_stop.name
+                         if self._ramp_stop.type == "delivery_destination"
+                         else self._ramp_stop.spoken_name)
+                self.ctx.say_event(f"You are at {place}. Come to a complete stop.")
             return
         stop = self._exit_stop
         if stop is None or self.trip.position_mi < stop.at_mi:
@@ -1241,17 +1322,23 @@ class DrivingState(State):
             self._ramp_mi = RAMP_LENGTH_MI
             self._ramp_stop = stop
             self._ramp_end_said = False
+            self._destination_exit_taken = stop.type == "delivery_destination"
             self._cancel_cruise()
             self.ctx.audio.play("ui/notify", volume=0.7)
-            take = (f"You take {stop.exit_label} for {stop.spoken_name}."
-                    if stop.exit_label
-                    else f"You take the exit for {stop.spoken_name}.")
+            if stop.type == "delivery_destination":
+                take = (f"You take {stop.exit_label} for {stop.name}."
+                        if stop.exit_label else f"You take the exit for {stop.name}.")
+            else:
+                take = (f"You take {stop.exit_label} for {stop.spoken_name}."
+                        if stop.exit_label
+                        else f"You take the exit for {stop.spoken_name}.")
             self.ctx.say_event(f"{take} Half a mile of ramp; brake to a stop "
                                "at the end.")
         else:
             missed = stop.exit_label if stop.exit_label else "the exit"
+            place = stop.name if stop.type == "delivery_destination" else stop.spoken_name
             self.ctx.say_event("You were going too fast for the ramp and "
-                               f"missed {missed} for {stop.spoken_name}.")
+                               f"missed {missed} for {place}.")
 
     def _toggle_cruise(self) -> None:
         t = self.truck
@@ -1400,6 +1487,25 @@ class DrivingState(State):
 
     def _arrive(self) -> None:
         self.ctx.replace_state(ArrivalState(self.ctx, self))
+
+    def _handle_missed_destination_exit(self) -> None:
+        details = self._destination_exit_details(include_past=True)
+        exit_mi = details[0] if details is not None else self.trip.total_miles
+        retry_mi = max(0.0, exit_mi - EXIT_WINDOW_MI)
+        self.trip.finished = False
+        self.trip.position_mi = min(self.trip.position_mi, retry_mi)
+        self._exit_stop = None
+        self._cancel_cruise()
+        if self._missed_destination_exit_said:
+            return
+        self._missed_destination_exit_said = True
+        self.ctx.audio.play("ui/warning")
+        self._set_status("Destination exit missed. Press X before the exit.")
+        self.ctx.say_event(
+            f"You missed the destination exit for {self._destination_facility_text()}. "
+            "Use X to signal for the exit before reaching the destination.",
+            interrupt=True,
+        )
 
     def _handle_arrival_gate(self) -> None:
         if self.truck.speed_mph <= DOCKING_MAX_MPH:

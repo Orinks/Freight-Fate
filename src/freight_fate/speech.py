@@ -290,6 +290,8 @@ class Speech:
         ):
             if value is None or not getattr(features, supported, False):
                 continue
+            if attr == "pitch" and _preserve_backend_default_pitch(backend, value):
+                continue
             try:
                 setattr(backend, attr, float(value))
             except Exception:
@@ -363,3 +365,14 @@ class Speech:
         self._backend = None
         self._event_backend = None
         self._ctx = None
+
+
+def _preserve_backend_default_pitch(backend, value: float) -> bool:
+    """Some backends, notably OneCore, use their own native default pitch.
+
+    Prism reports that default as NaN on Windows. Forcing the neutral settings
+    value onto it changes the sound, so leave pitch untouched until the player
+    deliberately moves the setting away from the midpoint.
+    """
+    name = getattr(backend, "name", "")
+    return name.lower() in {"onecore", "one_core"} and float(value) == 0.5

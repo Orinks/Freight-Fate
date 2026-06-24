@@ -39,6 +39,11 @@
   snapshot may not load on an older stable release.
 
 ### Fixed
+- **Destination exits.** Delivery routes now require taking the real signed
+  exit for the destination when one is listed, instead of completing just by
+  driving to the end of the highway corridor.
+- **OneCore pitch.** Windows OneCore speech now keeps its native default pitch
+  unless the player changes the pitch setting.
 - **Quieter exit guidance.** Ordinary highway exits now stay available in the
   route screen without being announced during the drive unless they lead to a
   stop you can actually take.
