@@ -295,3 +295,29 @@ def test_onramp_cue_fires_at_drive_start(world):
         if seen:
             break
     assert seen and seen[0].startswith("Merge onto")
+
+
+# --- text cleanup: exit-ref whitespace + via-redundant destinations ---------
+
+def test_parse_normalizes_exit_ref_whitespace():
+    ix = _parse_interchange(_raw(exit_ref="103 B"), 50.0, "A", "B", "I-70")
+    assert ix.exit_ref == "103B"
+    assert ix.exit_label == "exit 103B"
+
+
+def test_spoken_phrase_drops_via_redundant_destination():
+    ix = Interchange(at_mi=5.0, exit_ref="101A", via="I 70",
+                     destinations=("I 70 East", "Parsons Avenue"), source="x")
+    assert ix.spoken_phrase == "exit 101A for I-70 toward Parsons Avenue"
+
+
+def test_spoken_phrase_via_only_when_all_destinations_redundant():
+    ix = Interchange(at_mi=5.0, exit_ref="101A", via="I 70",
+                     destinations=("I 70 East",), source="x")
+    assert ix.spoken_phrase == "exit 101A for I-70"
+
+
+def test_spoken_phrase_keeps_unrelated_destinations():
+    ix = Interchange(at_mi=5.0, exit_ref="7", via="US 1 North",
+                     destinations=("Trenton", "New York"), source="x")
+    assert ix.spoken_phrase == "exit 7 for US-1 North toward Trenton and New York"

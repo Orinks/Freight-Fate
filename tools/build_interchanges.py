@@ -760,7 +760,8 @@ def _assemble(junctions: dict[int, dict[str, Any]], ramps: list[dict[str, Any]],
     exits: list[dict[str, Any]] = []
     for group in by_key.values():
         at_mi = sum(n["at_mi"] for n in group) / len(group)
-        ref = next((n["ref"] for n in group if n["ref"]), "")
+        # Collapse stray internal spaces in OSM exit refs ("103 B" -> "103B").
+        ref = re.sub(r"\s+", "", next((n["ref"] for n in group if n["ref"]), ""))
         name = next((n["name"] for n in group if n["name"]), "")
         # Gather destinations from ramps near any node in this group.
         dests: list[str] = []

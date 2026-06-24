@@ -191,10 +191,8 @@ class Speech:
             return False
 
     def _any_supports(self, feature: str) -> bool:
-        for backend in self._backends():
-            if self._backend_supports(backend, feature):
-                return True
-        return False
+        return any(self._backend_supports(backend, feature)
+                   for backend in self._backends())
 
     @property
     def supports_rate(self) -> bool:

@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import heapq
 import json
+import re
 import zlib
 from dataclasses import dataclass
 from pathlib import Path
@@ -735,7 +736,7 @@ class Interchange:
         via = _format_route_ref(self.via)
         if via:
             parts.append(f"for {via}")
-        dest = _join_destinations(self.destinations)
+        dest = _join_destinations(_destinations_without_via(self.via, self.destinations))
         if dest:
             parts.append(f"toward {dest}")
         elif self.name and not self.exit_ref:
@@ -1667,7 +1668,9 @@ def _parse_interchange(raw, leg_miles: float, from_city: str, to_city: str,
                        default_highway: str) -> Interchange:
     if not isinstance(raw, dict):
         raise ValueError(f"{from_city} to {to_city} interchange must be an object")
-    exit_ref = str(raw.get("exit_ref", "")).strip()
+    # OSM exit refs occasionally carry stray internal spaces ("103 B"); a real
+    # exit number never does, so collapse them ("103 B" -> "103B").
+    exit_ref = re.sub(r"\s+", "", str(raw.get("exit_ref", "")).strip())
     name = str(raw.get("name", "")).strip()
     via = str(raw.get("via", "")).strip()
     raw_dests = raw.get("destinations", ())
@@ -1718,6 +1721,24 @@ def _format_route_ref(value: str) -> str:
             parts[0:2] = [f"{parts[0]}-{parts[1]}"]
         out.append(" ".join(parts))
     return " and ".join(out)
+
+
+def _route_token(value: str) -> str:
+    """Leading route shield of a string, normalized for comparison:
+    'I 70 East' -> 'I70', 'US 1 North' -> 'US1', 'Trenton' -> ''."""
+    match = re.match(r"\s*((?:I|US|[A-Za-z]{2})[-\s]?\d+)", str(value).strip())
+    return re.sub(r"[-\s]", "", match.group(1)).upper() if match else ""
+
+
+def _destinations_without_via(via: str, destinations: tuple[str, ...]) -> tuple[str, ...]:
+    """Drop destinations that merely restate the via route (via 'I 70' with a
+    destination of 'I 70 East'), so the spoken phrase never says it twice. The
+    via itself still carries the route, so emptying the list reads cleanly
+    ('exit 101A for I-70')."""
+    token = _route_token(via)
+    if not token:
+        return destinations
+    return tuple(d for d in destinations if _route_token(d) != token)
 
 
 def _join_destinations(destinations: tuple[str, ...]) -> str:
