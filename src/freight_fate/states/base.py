@@ -22,6 +22,11 @@ if TYPE_CHECKING:
 class State:
     """Base class for all game screens."""
 
+    # Which controller mapping this screen uses: "menu" (D-pad navigation,
+    # A/B select/back) or "driving" (analog throttle/brake/steer plus the
+    # driving action buttons). See :mod:`freight_fate.controller`.
+    controller_mode = "menu"
+
     def __init__(self, ctx: GameContext) -> None:
         self.ctx = ctx
 

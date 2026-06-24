@@ -44,6 +44,10 @@ GEAR_KEYS = {
 HAZARD_SAFE_MPH = 25.0
 MPH_PER_MPS = 2.23694
 
+# Analog throttle/brake past this (0..1) counts as an active pedal press,
+# matching how a held arrow key reads as full input.
+CONTROL_THRESHOLD = 0.05
+
 # Roadside mechanic: a field patch, not a garage restoration.
 FIELD_REPAIR_DAMAGE_PCT = 25.0    # damage level the patch repairs down to
 MECHANIC_CALLOUT_FEE = 500.0
@@ -104,6 +108,8 @@ def _speeding_settlement_fine(strikes: int) -> float:
 
 
 class DrivingState(State):
+    controller_mode = "driving"
+
     def __init__(self, ctx, job: Job, route: Route, trip_seed: int | None = None,
                  phase: str = DRIVE_PHASE_DELIVERY,
                  start_hour: float | None = None) -> None:
@@ -418,6 +424,9 @@ class DrivingState(State):
                 "at one: available actions may include fuel, break, sleep, "
                 "inspect, roadside assistance, or save when source-backed. H horn. "
                 "J engine brake. Escape pause menu. "
+                "On a game controller, the right trigger accelerates, the left "
+                "trigger brakes, the left stick steers, and hold B for the "
+                "emergency brake. "
                 + ("" if self.truck.transmission.automatic else
                    "Hold Left Shift for clutch, then 1 through 0 for gears, "
                    "Backspace for reverse, N for neutral."))
@@ -718,29 +727,43 @@ class DrivingState(State):
         self.trip.time_scale = self.ctx.settings.time_scale
         self._sync_weather_source()
         keys = pygame.key.get_pressed()
+        pad = self.ctx.controller_input()
         ramp = dt * 2.2
         self._brake_lockout_cue_timer = max(0.0, self._brake_lockout_cue_timer - dt)
         self._lane_rumble_timer = max(0.0, self._lane_rumble_timer - dt)
-        accelerating = keys[pygame.K_UP]
-        braking_key = keys[pygame.K_DOWN]
+        # Keyboard reads as full input; the controller adds analog throttle and
+        # brake, so the larger of the two pedals wins.
+        accel_input = max(1.0 if keys[pygame.K_UP] else 0.0, pad.throttle)
+        brake_input = max(1.0 if keys[pygame.K_DOWN] else 0.0, pad.brake)
+        accelerating = accel_input > CONTROL_THRESHOLD
+        braking_key = brake_input > CONTROL_THRESHOLD
         backing = self._update_reverse_controls(accelerating, braking_key)
         if accelerating and not backing and t.air_brakes_holding:
             self._maybe_say_air_brake_lockout()
         if accelerating and not backing:
-            t.throttle = min(1.0, t.throttle + ramp)
+            # Ramp toward the requested level so a part-pulled trigger holds a
+            # partial throttle; a held key (accel_input 1.0) ramps to full.
+            if t.throttle < accel_input:
+                t.throttle = min(accel_input, t.throttle + ramp)
+            else:
+                t.throttle = max(accel_input, t.throttle - ramp * 2)
         elif backing:
             t.throttle = min(0.45, t.throttle + ramp)
         else:
             t.throttle = max(0.0, t.throttle - ramp * 2)
         braking = (braking_key and not backing) or (accelerating and t.velocity_mps < -0.1)
         if braking:
-            new_brake = min(1.0, t.brake + ramp * 1.5)
+            brake_target = brake_input if braking_key else 1.0
+            if t.brake < brake_target:
+                new_brake = min(brake_target, t.brake + ramp * 1.5)
+            else:
+                new_brake = max(brake_target, t.brake - ramp * 1.5)
             if t.brake < 0.05 and new_brake >= 0.05 and abs(t.velocity_mps) > 1:
                 self.ctx.audio.play("vehicle/brake_air", volume=0.6)
             t.brake = new_brake
         else:
             t.brake = max(0.0, t.brake - ramp * 3)
-        emergency = keys[pygame.K_b]
+        emergency = keys[pygame.K_b] or pad.emergency
         if emergency:
             # no ramp: slams to full application instantly, plus spring brakes
             if not t.emergency_brake and abs(t.velocity_mps) > 1:
@@ -748,8 +771,10 @@ class DrivingState(State):
             t.throttle = 0.0
             t.brake = 1.0
         t.emergency_brake = emergency
-        t.transmission.clutch = 1.0 if keys[pygame.K_LSHIFT] or keys[pygame.K_RSHIFT] else 0.0
-        self._update_lane(keys, dt)
+        t.transmission.clutch = (
+            1.0 if keys[pygame.K_LSHIFT] or keys[pygame.K_RSHIFT] or pad.clutch
+            else 0.0)
+        self._update_lane(keys, dt, pad)
         self._update_cruise(dt, braking, accelerating)
 
         if t.transmission.automatic and t.engine_on:
@@ -926,13 +951,16 @@ class DrivingState(State):
                 else:
                     self.ctx.audio.play("driver/yawn", volume=0.8)
 
-    def _update_lane(self, keys, dt: float) -> None:
+    def _update_lane(self, keys, dt: float, pad=None) -> None:
         mode = self.ctx.settings.steering_assist
         steer = 0.0
         if keys[pygame.K_LEFT]:
             steer -= 1.0
         if keys[pygame.K_RIGHT]:
             steer += 1.0
+        if pad is not None:
+            steer += pad.steer
+        steer = max(-1.0, min(1.0, steer))
         self.lane.steering = steer
         leg = self.route.legs[self.trip.current_leg_index]
         curve = 0.0
@@ -945,6 +973,7 @@ class DrivingState(State):
         wind = self.weather.effects.wind
         if self.lane.update(dt, self.truck.velocity_mps, curve=curve, wind=wind, assist=mode):
             self.ctx.audio.play("vehicle/rumble_strip", volume=1.0)
+            self.ctx.rumble(0.4, 0.7, 500)
             self.truck.damage_pct = min(100.0, self.truck.damage_pct + 1.0)
             self.ctx.say_event(
                 f"{self.lane.describe()} Steer back toward the lane center.",
@@ -1055,6 +1084,7 @@ class DrivingState(State):
         if self._hazard_deadline <= 0:
             self._hazard_deadline = None
             self.ctx.audio.play("vehicle/collision")
+            self.ctx.rumble(0.9, 0.9, 800)
             severity = min(1.0, self.truck.speed_mph / 70.0)
             self.truck.apply_collision(severity)
             self.ctx.say_event(f"Collision! The truck took damage. "
@@ -1084,6 +1114,7 @@ class DrivingState(State):
             if self._cruise_mph is not None:
                 self._cancel_cruise()   # hands back on the wheel to brake
             self.ctx.audio.play(sound or "ui/warning")
+            self.ctx.rumble(0.6, 0.6, 400)
             # The deadline is braking physics plus reaction slack. The physics
             # part is whatever full service brakes need from the current speed
             # on this surface; the rolled window covers hearing the warning and

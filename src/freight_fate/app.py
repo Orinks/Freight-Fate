@@ -11,6 +11,7 @@ import pygame
 from . import __version__
 from .achievements import AchievementAward, award
 from .audio import AudioEngine
+from .controller import NEUTRAL_INPUT, ControllerInput, ControllerManager
 from .data.world import World, get_world
 from .models.economy import Economy
 from .models.profile import Profile
@@ -35,6 +36,7 @@ class GameContext:
         self._app = app
         self.speech: Speech = app.speech
         self.audio: AudioEngine = app.audio
+        self.controller: ControllerManager | None = getattr(app, "controller", None)
         self.settings: Settings = app.settings
         self.world: World = app.world
         self.economy: Economy = app.economy
@@ -74,6 +76,21 @@ class GameContext:
             self.speech.say_event(text, interrupt)
         else:
             self.speech.say(text, interrupt)
+
+    # -- controller -------------------------------------------------------------
+
+    def controller_input(self) -> ControllerInput:
+        """Analog gamepad state for this frame, or neutral when none is in use."""
+        if self.controller is not None and self.settings.controller_enabled:
+            return self.controller.read()
+        return NEUTRAL_INPUT
+
+    def rumble(self, low: float, high: float, duration_ms: int) -> None:
+        """Vibrate the gamepad when controller support and rumble are enabled."""
+        if (self.controller is not None
+                and self.settings.controller_enabled
+                and self.settings.controller_rumble):
+            self.controller.rumble(low, high, duration_ms)
 
     # -- state stack ------------------------------------------------------------
 
@@ -213,6 +230,9 @@ class App:
         self.audio = AudioEngine()
         self.world = get_world()
         self.economy = Economy()
+        self.controller = ControllerManager()
+        self.controller.preferred_name = self.settings.controller_device
+        self.controller.start()
         self.ctx = GameContext(self)
         self.ctx.apply_volumes()
         self.ctx.apply_speech()
@@ -264,8 +284,19 @@ class App:
                 for event in pygame.event.get():
                     if event.type == pygame.QUIT:
                         self.running = False
-                    elif self.state is not None:
-                        self.state.handle_event(event)
+                        continue
+                    if self.controller.handle_system_event(event):
+                        continue
+                    state = self.state
+                    if state is None:
+                        continue
+                    mode = getattr(state, "controller_mode", "menu")
+                    synthetic = self.controller.translate(event, mode)
+                    if synthetic is None:
+                        state.handle_event(event)
+                    else:
+                        for key_event in synthetic:
+                            state.handle_event(key_event)
                 if self.state is not None:
                     self.state.update(dt)
                 if self.ctx.achievement_notice_timer > 0:

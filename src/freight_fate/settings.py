@@ -21,6 +21,9 @@ class Settings:
     real_weather: bool = False            # live conditions from Open-Meteo
     hos_mode: str = "realistic"           # hours of service: realistic/relaxed/debug_off
     steering_assist: str = "off"          # off/light/realistic lane drift
+    controller_enabled: bool = True       # use a connected gamepad if present
+    controller_rumble: bool = True        # vibration feedback for road cues
+    controller_device: str = ""           # preferred pad name; "" = first found
     master_volume: float = 1.0
     sfx_volume: float = 0.8
     music_volume: float = 0.5

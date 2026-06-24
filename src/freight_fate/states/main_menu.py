@@ -679,6 +679,26 @@ HELP_PAGES = [
         "V speaks the weather and the forecast.",
         "Escape opens the pause menu.",
     ]),
+    ("Game controllers", [
+        "Freight Fate supports a game controller alongside the keyboard.",
+        "A connected controller is detected automatically; you can turn it off",
+        "in Gameplay settings, along with rumble feedback.",
+        "If more than one controller is plugged in, the Controller device",
+        "setting cycles between them, and your choice is remembered.",
+        "In menus, the D-pad or left stick moves through options,",
+        "A selects, B goes back, the bumpers jump to the first and last option,",
+        "and X or Y repeats the contextual help.",
+        "While driving, the right trigger accelerates and the left trigger brakes.",
+        "The left stick steers when lane drift is enabled.",
+        "Hold B for the emergency brake, the hardest possible stop.",
+        "A starts the engine, Y sets or releases the parking brake, X sounds the horn.",
+        "The left bumper takes the next exit, the right bumper sets adaptive cruise.",
+        "Start opens the pause menu, and the View or Back button speaks your speed.",
+        "Click the left stick for the rest-stop menu, the right stick for lane position.",
+        "The D-pad reads out route, weather, fuel, and the clock.",
+        "Rumble plays for rumble strips, hazard warnings, and collisions.",
+        "Manual transmission shifting still uses the keyboard.",
+    ]),
     ("On the road", [
         "Loaded trips follow a route made from real highway corridors.",
         "Progress is not just city to city: GPS announces state lines,",
@@ -944,6 +964,20 @@ class SettingsCategoryState(MenuState):
                 MenuItem(lambda: f"Lane drift: {self._steering_label()}",
                          lambda: self._cycle_steering(1),
                          help="Choose whether lane drift is off, light, or realistic."),
+                MenuItem(lambda: f"Controller: {'on' if s.controller_enabled else 'off'}",
+                         lambda: self._toggle_controller(1),
+                         help="Use a connected game controller for menus and "
+                              "driving: triggers throttle and brake, left stick "
+                              "steers, buttons cover the driving actions."),
+                MenuItem(lambda: f"Controller rumble: {'on' if s.controller_rumble else 'off'}",
+                         lambda: self._toggle_rumble(1),
+                         help="Vibration feedback for rumble strips, hazard "
+                              "warnings, and collisions."),
+                MenuItem(lambda: f"Controller device: {self._controller_device_label()}",
+                         lambda: self._cycle_controller_device(1),
+                         help="Choose which connected controller to use when "
+                              "more than one is plugged in. The choice is "
+                              "remembered for next time."),
                 MenuItem("Back", self.go_back),
             ]
         if self.category == "audio":
@@ -999,6 +1033,8 @@ class SettingsCategoryState(MenuState):
                 "gameplay": [
                     self._toggle_units, self._toggle_transmission,
                     self._cycle_pace, self._cycle_hos, self._cycle_steering,
+                    self._toggle_controller, self._toggle_rumble,
+                    self._cycle_controller_device,
                 ],
                 "audio": [
                     lambda d: self._volume("master_volume", 0.1 * d),
@@ -1131,6 +1167,38 @@ class SettingsCategoryState(MenuState):
         except ValueError:
             i = 0
         self.ctx.settings.steering_assist = modes[(i + d) % len(modes)]
+        self._announce()
+
+    def _toggle_controller(self, _d: int) -> None:
+        self.ctx.settings.controller_enabled = not self.ctx.settings.controller_enabled
+        self._announce()
+
+    def _toggle_rumble(self, _d: int) -> None:
+        self.ctx.settings.controller_rumble = not self.ctx.settings.controller_rumble
+        self._announce()
+
+    def _controller_device_label(self) -> str:
+        ctrl = self.ctx.controller
+        if ctrl is None:
+            return "none detected"
+        if ctrl.connected:
+            return ctrl.name
+        names = ctrl.device_names()
+        return names[0] if names else "none detected"
+
+    def _cycle_controller_device(self, d: int) -> None:
+        ctrl = self.ctx.controller
+        names = ctrl.device_names() if ctrl is not None else []
+        if not names:
+            self.ctx.audio.play("ui/error")
+            self.ctx.say("No game controllers are connected.")
+            return
+        if len(names) == 1:
+            # Only one pad: nothing to cycle, but pin it as the saved choice.
+            ctrl.select(0)
+        else:
+            ctrl.select_next(d)
+        self.ctx.settings.controller_device = ctrl.name
         self._announce()
 
     def _cycle_verbosity(self, d: int) -> None:
