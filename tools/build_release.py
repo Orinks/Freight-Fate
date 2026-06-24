@@ -173,6 +173,14 @@ def stage_prism_runtime_files(build_dir: Path) -> None:
         raise RuntimeError(f"No Prism native libraries were staged under {target_dir}")
 
 
+def stage_release_docs(build_dir: Path) -> None:
+    """Copy player-facing release documents into the packaged runtime."""
+    changelog = ROOT / "CHANGELOG.md"
+    if not changelog.exists():
+        raise RuntimeError(f"Changelog was not found: {changelog}")
+    shutil.copy2(changelog, runtime_root(build_dir) / "CHANGELOG.md")
+
+
 def build_nuitka_command(entry: Path) -> list[str]:
     """Build the Nuitka command for the current platform."""
     system = platform.system()
@@ -248,6 +256,7 @@ def verify_packaged_payload(build_dir: Path) -> None:
     root = runtime_root(build_dir)
 
     required = [
+        root / "CHANGELOG.md",
         root / "freight_fate" / "assets" / "sounds",
         root / "freight_fate" / "data" / "world.json",
         root / "sound_lib" / "lib",
@@ -367,6 +376,7 @@ def main() -> int:
         shutil.rmtree(BUILD)
     build_dir = run_nuitka()
     stamp_build_info(build_dir, label)
+    stage_release_docs(build_dir)
     verify_packaged_payload(build_dir)
     sign_distribution(build_dir)
     if not args.skip_smoke:

@@ -3,6 +3,8 @@
 ## Unreleased
 
 ### Added
+- **Packaged changelog.** Portable builds now include `CHANGELOG.md` in the
+  game folder so release notes are available offline.
 - **Player manual.** A new public manual now gathers install, career,
   dispatch, driving, saves, settings, accessibility, and troubleshooting
   guidance in one linkable place.
