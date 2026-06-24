@@ -773,6 +773,9 @@ class DrivingState(State):
             elif t.fuel_gal <= 0:
                 self._handle_out_of_fuel()
 
+        # Keep the trip's spoken-distance units in step with a live settings
+        # change; the setter only re-renders cues when the choice actually flips.
+        self.trip.imperial = self.ctx.settings.imperial_units
         pos_before = self.trip.position_mi
         for event in self.trip.update(dt):
             self._handle_trip_event(event)

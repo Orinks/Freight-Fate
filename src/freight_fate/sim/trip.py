@@ -196,9 +196,10 @@ class Trip:
         self.weather = weather
         self.time_scale = time_scale
         self.start_hour = start_hour   # clock hour of day at departure
-        # Spoken/listed navigation distances follow the player's unit choice,
-        # captured at trip start. Set before cues are built below.
-        self.imperial = imperial
+        # Spoken/listed navigation distances follow the player's unit choice.
+        # Backing field set before cues are built below; the property setter
+        # re-renders baked cues if the player changes units mid-trip.
+        self._imperial = imperial
         self.position_mi = 0.0
         self.game_minutes = 0.0
         self.finished = False
@@ -225,6 +226,21 @@ class Trip:
         self._traffic_warning_mi = 1.0
         self._announced_enforcement: set[str] = set()
 
+    @property
+    def imperial(self) -> bool:
+        return self._imperial
+
+    @imperial.setter
+    def imperial(self, value: bool) -> None:
+        if value == self._imperial:
+            return
+        self._imperial = value
+        # Re-render baked cue distances (onramp, continue, rest stop) so a
+        # mid-trip unit change updates guidance already laid out on the route.
+        # Cue keys are distance-independent, so announcement de-duplication
+        # carries over unchanged.
+        self.navigation_cues = self._build_navigation_cues()
+
     def _distance_text(self, miles: float) -> str:
         """Spoken distance in the player's units (miles or kilometers)."""
         if self.imperial:
@@ -236,6 +252,12 @@ class Trip:
         if self.imperial:
             return f"{miles:.1f} miles"
         return f"{miles * 1.609344:.1f} kilometers"
+
+    def _speed_value(self, mph: float) -> str:
+        """Bare speed-limit number in the player's units (no unit word)."""
+        if self.imperial:
+            return f"{mph:.0f}"
+        return f"{mph * 1.609344:.0f}"
 
     # -- layout -----------------------------------------------------------------
 
@@ -761,7 +783,7 @@ class Trip:
                 self._emit(
                     TripEventKind.GPS_CUE,
                     f"In {self._distance_text(ahead)}, {zone.reason} ahead. "
-                    f"Speed limit {zone.limit_mph:.0f}.",
+                    f"Speed limit {self._speed_value(zone.limit_mph)}.",
                     zone=zone,
                 )
         zone = self._active_zone_at(self.position_mi)
@@ -770,14 +792,15 @@ class Trip:
                 if zone.reason == "construction":
                     self._construction_zone_grace_start[_zone_key(zone)] = zone.start_mi
                 self._emit(TripEventKind.ZONE_ENTER,
-                           f"{zone.reason} ahead. Speed limit {zone.limit_mph:.0f}.",
+                           f"{zone.reason} ahead. "
+                           f"Speed limit {self._speed_value(zone.limit_mph)}.",
                            zone=zone)
             elif self._active_zone is not None:
                 self._construction_zone_grace_start.pop(
                     _zone_key(self._active_zone), None)
                 self._emit(TripEventKind.ZONE_EXIT,
                            f"End of {self._active_zone.reason} zone. "
-                           f"Speed limit {BASE_SPEED_LIMIT_MPH:.0f}.")
+                           f"Speed limit {self._speed_value(BASE_SPEED_LIMIT_MPH)}.")
             self._active_zone = zone
 
     def _check_stops(self) -> None:

@@ -78,6 +78,11 @@
   exit, traffic, and construction-zone callouts -- and the Map status screen now
   give distances in kilometers in metric mode instead of miles, matching the
   rest of the metric driving readouts.
+- **Metric speed limits.** Construction and traffic zone callouts now speak the
+  posted speed limit as a metric value in metric mode instead of the mph number.
+- **Live unit switching.** Switching between miles and kilometers mid-drive now
+  updates spoken navigation guidance right away, including the distances already
+  laid out along the current route.
 - **Packaged update checks.** The updater now recognizes standalone packaged
   folders more reliably, so switching to developer snapshots does not leave
   the update screen thinking the game is running from source.

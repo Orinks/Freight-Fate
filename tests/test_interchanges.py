@@ -363,3 +363,35 @@ def test_metric_drive_speaks_distances_in_kilometers(world):
     blob = " ".join(nav)
     assert "kilometers" in blob
     assert "mile" not in blob
+
+
+def test_unit_toggle_rerenders_baked_navigation_cues(world):
+    route = world.route_options("Chicago", "Indianapolis")[0]
+    trip = Trip(route, TruckState(), WeatherSystem("great_lakes", seed=1), seed=2)
+
+    def cue_blob() -> str:
+        return " ".join(f"{c.text} {c.near_text}" for c in trip.navigation_cues)
+
+    assert "miles" in cue_blob() and "kilometers" not in cue_blob()
+    # Switching units mid-trip re-renders the distances already on the route.
+    trip.imperial = False
+    assert "kilometers" in cue_blob() and "mile" not in cue_blob()
+    trip.imperial = True
+    assert "miles" in cue_blob() and "kilometers" not in cue_blob()
+
+
+def test_metric_zone_warning_uses_metric_speed_limit(world):
+    from freight_fate.sim.trip import TripEventKind, Zone
+
+    route = world.route_options("Chicago", "Indianapolis")[0]
+    trip = Trip(route, TruckState(), WeatherSystem("great_lakes", seed=1),
+                seed=2, imperial=False)
+    trip.zones = [Zone(5.0, 10.0, 45.0, "construction")]
+    trip._announced_zone_warnings.clear()
+    trip.position_mi = 4.0  # within the 2-mile warning lookahead of the zone
+
+    msgs = [ev.message for ev in trip.update(0.0)
+            if ev.kind == TripEventKind.GPS_CUE]
+    blob = " ".join(msgs)
+    assert "Speed limit 72" in blob   # 45 mph rendered as 72 km/h
+    assert "Speed limit 45" not in blob
