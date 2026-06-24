@@ -415,7 +415,7 @@ def test_gps_state_crossing_and_rest_stop_cues_deduplicate(world):
     assert any(
         event.kind == TripEventKind.GPS_CUE
         and event.message == (
-            "Travel center ahead in 1 mile; confirmed truck parking; "
+            "Travel center at exit 175 ahead in 1 mile; confirmed truck parking; "
             "press X to take the exit."
         )
         for event in rest

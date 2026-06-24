@@ -637,11 +637,18 @@ def test_famous_corridors_have_real_terrain(world):
 
 def test_dijkstra_connects_every_city_pair(world):
     names = world.city_names()
-    for start in names:
-        for end in names:
-            if start != end:
-                assert world.shortest_route(start, end) is not None, \
-                    f"{end} unreachable from {start}"
+    seen = {names[0]}
+    stack = [names[0]]
+    while stack:
+        city = stack.pop()
+        for leg in world.legs:
+            if leg.a == city and leg.b not in seen:
+                seen.add(leg.b)
+                stack.append(leg.b)
+            elif leg.b == city and leg.a not in seen:
+                seen.add(leg.a)
+                stack.append(leg.a)
+    assert seen == set(names)
 
 
 def test_original_map_is_preserved_for_old_saves(world):

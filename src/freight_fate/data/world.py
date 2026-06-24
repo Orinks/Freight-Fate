@@ -944,6 +944,7 @@ class World:
         for leg in self.legs:
             self._adjacency[leg.a].append(leg)
             self._adjacency[leg.b].append(leg)
+        self._supported_route_cache: dict[tuple[str, str], Route | None] = {}
 
     def _validate_city_locations(self, city: str, locations: tuple[Location, ...]) -> None:
         if not locations:
@@ -1068,6 +1069,7 @@ class World:
         if start not in self.cities or end not in self.cities:
             raise KeyError(f"Unknown city: {start if start not in self.cities else end}")
         penalties = penalties or {}
+        has_penalties = bool(penalties)
         dist: dict[str, float] = {start: 0.0}
         prev: dict[str, tuple[str, Leg]] = {}
         heap: list[tuple[float, str]] = [(0.0, start)]
@@ -1083,7 +1085,7 @@ class World:
                 if require_metadata and not self.leg_metadata_complete(leg):
                     continue
                 nxt = leg.other(city)
-                cost = leg.miles * penalties.get(leg, 1.0)
+                cost = leg.miles * penalties.get(leg, 1.0) if has_penalties else leg.miles
                 nd = d + cost
                 if nd < dist.get(nxt, float("inf")):
                     dist[nxt] = nd
@@ -1126,7 +1128,17 @@ class World:
 
     def supported_route(self, start: str, end: str,
                         penalties: dict[Leg, float] | None = None) -> Route | None:
-        return self.shortest_route(start, end, penalties, require_metadata=True)
+        if penalties:
+            return self.shortest_route(start, end, penalties, require_metadata=True)
+        key = (start, end)
+        if key not in self._supported_route_cache:
+            self._supported_route_cache[key] = self.shortest_route(
+                start, end, require_metadata=True
+            )
+        route = self._supported_route_cache[key]
+        if route is None:
+            return None
+        return Route(list(route.cities), list(route.legs))
 
     def supported_route_options(self, start: str, end: str,
                                 count: int = 3) -> list[Route]:

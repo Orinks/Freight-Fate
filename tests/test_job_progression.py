@@ -262,11 +262,16 @@ def test_new_dispatches_only_use_metadata_supported_routes(world):
 
 def test_whole_board_never_offers_unsupported_route_legs(world):
     endorsements = {"refrigerated", "heavy_haul", "high_value"}
+    routes = {}
     for city in world.city_names():
         for seed in range(4):
             jobs = JobBoard(world, seed=seed).offers(city, endorsements, level=6)
             for job in jobs:
-                route = world.supported_route(job.origin, job.destination)
+                key = (job.origin, job.destination)
+                route = routes.get(key)
+                if route is None:
+                    route = world.supported_route(job.origin, job.destination)
+                    routes[key] = route
                 assert route is not None, f"{job.origin} to {job.destination}"
                 assert route.metadata_complete(world), f"{job.origin} to {job.destination}"
                 assert all(world.leg_metadata_complete(leg) for leg in route.legs)

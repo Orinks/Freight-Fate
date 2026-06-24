@@ -15,7 +15,8 @@ driving.
 2. Extract the archive into a folder you control.
 3. Open the extracted `FreightFate` folder.
 4. Run `FreightFate.exe` on Windows, or `FreightFate` on macOS or Linux.
-5. Choose **New career**, enter a driver name, and pick a home terminal.
+5. Choose **New career**, enter a driver name, pick a home region, and pick a
+   home terminal.
 6. Open the dispatch board, accept a job, and follow the current objective.
 
 The game is portable. Saves, settings, save identity files, and packaged-game
@@ -77,8 +78,9 @@ The main menu can include:
 
 A new driver starts with 5,000 dollars, the standard rig, a full tank, a fresh
 career record, and a company terminal or yard in the chosen metro service area.
-The home-terminal picker starts on Chicago by default, but any listed terminal
-can be your starting city.
+The home-terminal picker starts with a region list, then opens the cities in
+that region. Chicago is the default starting area, but any listed terminal can
+be your starting city.
 
 The normal career loop is:
 
@@ -89,8 +91,8 @@ The normal career loop is:
 5. Drive the loaded trip.
 6. Use route stops for fuel, breaks, sleep, saves, inspections, or repairs when
    the stop supports those actions.
-7. Arrive at the destination facility.
-8. Stop, dock, deliver, and review settlement.
+7. Take the signed destination exit when it is announced.
+8. Stop at the destination facility, dock, deliver, and review settlement.
 9. Continue from the destination terminal.
 
 ## Menu Controls
@@ -227,7 +229,9 @@ Driving controls are active while the road view is focused:
 | F | Report fuel level and estimated range. |
 | C | Report clock, deadline, estimated arrival, and hours of service. |
 | R | Report route progress and GPS context. |
+| Shift+R | Report the next listed highway exit. |
 | V | Report weather and forecast. |
+| L | Report lane position when lane drift is enabled. |
 | F1 | Show the driving control list and current objective. |
 | Escape | Open the pause menu. |
 
@@ -290,6 +294,17 @@ Stops are reported as you approach them. A one-mile cue tells you when to take
 an exit. Press X to signal for the exit, slow to 45 miles per hour or less, and
 brake to a stop at the end of the ramp.
 
+Destination exits work the same way. When your delivery exit is ahead, the game
+announces the signed exit and toward cities, marks it as the destination exit,
+and tells you to press X. If adaptive cruise is set, the destination-exit callout
+cancels cruise so you can take manual speed control. If you miss the destination
+exit, the delivery does not complete; back up until the exit is ahead again,
+then press X to take it.
+
+Ordinary highway exits that do not lead to a current action are not announced
+during the drive. Press Shift+R if you want the next listed exit for route
+context.
+
 Stop actions depend on that stop's data. A stop may offer:
 
 - Fuel.
@@ -340,6 +355,7 @@ Use these keys when you need status without leaving the road:
 | F | Fuel level and estimated range. |
 | C | Clock, deadline, estimated arrival, and hours of service. |
 | R | Route progress and GPS context. |
+| Shift+R | Next listed highway exit. |
 | V | Weather and forecast. |
 | Tab | Grouped driving status screens. |
 
@@ -383,7 +399,8 @@ folder, including `saves`.
 ## Destination And Settlement
 
 At the destination, slow down for the facility gate, stop, and choose **Dock
-and deliver**. You can also review paperwork before settling.
+and deliver**. On highway deliveries, take the announced destination exit first.
+You can also review paperwork before settling.
 
 The destination menu includes:
 
@@ -418,6 +435,7 @@ Gameplay settings include:
 | Transmission | Switch between automatic and manual transmission. |
 | Trip pacing | Choose relaxed, standard, or fast pacing. |
 | Hours of service | Choose realistic or relaxed hours rules. |
+| Lane drift | Choose whether lane drift is off, light, or realistic. |
 
 Audio settings include:
 

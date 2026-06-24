@@ -175,12 +175,15 @@ the file from quarantine.
 | N | Neutral (manual mode) |
 | J | Engine brake toggle |
 | H | Horn |
+| X | Arm / cancel the next actionable exit |
 | T | Refuel and rest (stopped at a rest stop) |
 | Space | Speak speed, gear, RPM |
 | Tab | Driving status menu |
 | F | Fuel and range |
 | C | Clock, deadline, ETA |
 | R | Route progress |
+| Shift+R | Next listed highway exit |
+| L | Lane position |
 | V | Weather and forecast |
 | F1 | List all controls |
 | Escape | Pause menu |
