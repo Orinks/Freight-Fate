@@ -321,3 +321,45 @@ def test_spoken_phrase_keeps_unrelated_destinations():
     ix = Interchange(at_mi=5.0, exit_ref="7", via="US 1 North",
                      destinations=("Trenton", "New York"), source="x")
     assert ix.spoken_phrase == "exit 7 for US-1 North toward Trenton and New York"
+
+
+# --- metric navigation distances --------------------------------------------
+
+def test_metric_navigation_cues_use_kilometers(world):
+    route = world.route_options("Chicago", "Indianapolis")[0]
+    metric = Trip(route, TruckState(), WeatherSystem("great_lakes", seed=1),
+                  seed=2, imperial=False)
+    blob = " ".join(f"{c.text} {c.near_text}" for c in metric.navigation_cues)
+    assert "kilometers" in blob
+    assert "mile" not in blob
+
+    # The default (imperial) trip keeps miles, so existing drives are unchanged.
+    imperial = Trip(route, TruckState(), WeatherSystem("great_lakes", seed=1),
+                    seed=2)
+    blob_i = " ".join(f"{c.text} {c.near_text}" for c in imperial.navigation_cues)
+    assert "miles" in blob_i
+
+
+def test_metric_drive_speaks_distances_in_kilometers(world):
+    from freight_fate.sim.trip import TripEventKind
+
+    route = world.route_options("Chicago", "Indianapolis")[0]
+    truck = TruckState()
+    truck.transmission.automatic = True
+    truck.start_engine()
+    trip = Trip(route, truck, WeatherSystem("great_lakes", seed=1),
+                seed=2, imperial=False)
+    truck.throttle = 0.85
+    nav: list[str] = []
+    for _ in range(60 * 60 * 12):
+        truck.auto_shift()
+        truck.update(1 / 60)
+        for ev in trip.update(1 / 60):
+            if ev.kind in (TripEventKind.GPS_CUE, TripEventKind.STOP_AHEAD):
+                nav.append(ev.message)
+        if trip.finished:
+            break
+    assert nav, "expected navigation announcements on a long metric drive"
+    blob = " ".join(nav)
+    assert "kilometers" in blob
+    assert "mile" not in blob

@@ -130,7 +130,8 @@ class DrivingState(State):
         trip_start_hour = profile.game_hours % 24.0 if start_hour is None else start_hour
         self.trip = Trip(route, self.truck, self.weather,
                          time_scale=ctx.settings.time_scale, seed=self.trip_seed,
-                         start_hour=trip_start_hour)
+                         start_hour=trip_start_hour,
+                         imperial=ctx.settings.imperial_units)
         self.lane = LaneKeeping(seed=self.trip_seed)
         self._day_music_sequence = select_drive_music_sequence(
             self.route, self.trip_seed, 12.0, self.weather.current)
@@ -2262,11 +2263,13 @@ class DrivingStatusScreenState(MenuState):
     def _map_lines(self) -> list[str]:
         d = self.driving
         route = d.route
+        settings = self.ctx.settings
         lines = [
             f"Route: {' to '.join(route.cities)}",
             f"Highways: {_join_phrase(route.highways)}",
-            f"Progress: {d.trip.position_mi:.0f} miles driven, {d.trip.remaining_miles:.0f} miles remaining",
-            f"Guidance: {d.trip.next_navigation_context()}",
+            f"Progress: {settings.distance_text(d.trip.position_mi)} driven, "
+            f"{settings.distance_text(d.trip.remaining_miles)} remaining",
+            f"Guidance: {d.trip.next_navigation_context(settings.imperial_units)}",
         ]
         upcoming = [
             stop
@@ -2277,7 +2280,7 @@ class DrivingStatusScreenState(MenuState):
             for stop in upcoming:
                 ahead = max(0.0, stop.at_mi - d.trip.position_mi)
                 lines.append(
-                    f"Stop in {ahead:.0f} miles: {stop.spoken_name}; "
+                    f"Stop in {settings.distance_text(ahead)}: {stop.spoken_name}; "
                     f"{_poi_offers_text(stop)}."
                 )
         else:
@@ -2288,9 +2291,10 @@ class DrivingStatusScreenState(MenuState):
         ][:4]
         for cue in next_cues:
             ahead = max(0.0, cue.at_mi - d.trip.position_mi)
-            speed = (f" at {cue.speed_mph:.0f} miles per hour"
+            speed = (f" at {settings.speed_text(cue.speed_mph)}"
                      if cue.speed_mph is not None else "")
-            lines.append(f"Map point in {ahead:.0f} miles: {cue.text}{speed}.")
+            lines.append(
+                f"Map point in {settings.distance_text(ahead)}: {cue.text}{speed}.")
         if route.estimated_tolls > 0:
             lines.append(
                 f"Estimated carrier-paid toll exposure: {route.estimated_tolls:,.0f} dollars."
