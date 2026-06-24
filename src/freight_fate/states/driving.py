@@ -2288,7 +2288,9 @@ class DrivingStatusScreenState(MenuState):
         ][:4]
         for cue in next_cues:
             ahead = max(0.0, cue.at_mi - d.trip.position_mi)
-            lines.append(f"Map point in {ahead:.0f} miles: {cue.text}.")
+            speed = (f" at {cue.speed_mph:.0f} miles per hour"
+                     if cue.speed_mph is not None else "")
+            lines.append(f"Map point in {ahead:.0f} miles: {cue.text}{speed}.")
         if route.estimated_tolls > 0:
             lines.append(
                 f"Estimated carrier-paid toll exposure: {route.estimated_tolls:,.0f} dollars."

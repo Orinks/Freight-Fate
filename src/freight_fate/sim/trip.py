@@ -180,6 +180,9 @@ class NavigationCue:
     at_mi: float
     text: str
     near_text: str = ""
+    # Speed carried unformatted so display code can render it in the player's
+    # chosen units. Only traffic cues set this; others leave it None.
+    speed_mph: float | None = None
 
 
 class Trip:
@@ -357,8 +360,9 @@ class Trip:
                 f"traffic:{i}:{lead.at_mi:.1f}",
                 "traffic",
                 lead.at_mi,
-                f"{lead.reason} at {lead.speed_mph:.0f} miles per hour",
+                lead.reason,
                 f"Traffic slowing ahead; target speed {lead.speed_mph:.0f}.",
+                speed_mph=lead.speed_mph,
             ))
         cues.sort(key=lambda cue: cue.at_mi)
         return cues
@@ -608,7 +612,13 @@ class Trip:
         if cue.kind == "interchange":
             return f"Next exit in {ahead_text}: {cue.text}."
         if cue.kind == "traffic":
-            return f"Traffic in {ahead_text}: {cue.text}."
+            speed = ""
+            if cue.speed_mph is not None:
+                speed = " at " + (
+                    f"{cue.speed_mph:.0f} miles per hour" if imperial
+                    else f"{cue.speed_mph * 1.609344:.0f} kilometers per hour"
+                )
+            return f"Traffic in {ahead_text}: {cue.text}{speed}."
         if cue.kind == "toll":
             return f"Toll point in {ahead_text}: {cue.text}."
         return f"Next guidance in {ahead_text}: {cue.text}."
@@ -788,9 +798,12 @@ class Trip:
                 key = f"{cue.key}:advance"
                 if 0 < ahead <= 2.0 and key not in self._announced_navigation:
                     self._announced_navigation.add(key)
+                    speed = (f" at {cue.speed_mph:.0f} miles per hour"
+                             if cue.speed_mph is not None else "")
                     self._emit(
                         TripEventKind.GPS_CUE,
-                        f"Traffic slowing ahead in {ahead:.0f} miles; {cue.text}.",
+                        f"Traffic slowing ahead in {ahead:.0f} miles; "
+                        f"{cue.text}{speed}.",
                         cue=cue,
                     )
                 continue
