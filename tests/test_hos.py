@@ -867,14 +867,14 @@ def test_settings_menu_cycles_hours_of_service():
 
 
 @pytest.mark.smoke
-def test_settings_menu_cycles_steering_assist():
+def test_settings_menu_cycles_lane_drift():
     from freight_fate.app import App
 
     app = App()
     try:
         assert app.ctx.settings.steering_assist == "off"
         cat = open_settings_category(app, "Gameplay")
-        while not cat.items[cat.index].text.startswith("Steering assist"):
+        while not cat.items[cat.index].text.startswith("Lane drift"):
             cat.handle_event(key_event(pygame.K_DOWN))
         cat.handle_event(key_event(pygame.K_RETURN))
         assert app.ctx.settings.steering_assist == "light"

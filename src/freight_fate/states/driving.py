@@ -398,7 +398,7 @@ class DrivingState(State):
                 "Space speed. Tab status menu. F fuel. "
                 "C clock, deadline, and hours of service. "
                 "R route. V weather. L lane position. "
-                "Left and Right arrows steer when lane assist is enabled. "
+                "Left and Right arrows steer when lane drift is enabled. "
                 "T route POI menu when already stopped "
                 "at one: available actions may include fuel, break, sleep, "
                 "inspect, roadside assistance, or save when source-backed. H horn. "

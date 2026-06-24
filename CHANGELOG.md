@@ -13,8 +13,8 @@
   Petro Stopping Centers"; "You take exit 113"). Each run also opens with an
   onramp callout -- "Merge onto I-65 South toward Indianapolis" -- and highway
   changes name the new road and direction.
-- **Optional steering assist.** Gameplay settings now include off, light, and
-  realistic lane drift so players can add a gentle steering task, rumble-strip
+- **Optional lane drift.** Gameplay settings now include off, light, and
+  realistic drift so players can add a gentle steering task, rumble-strip
   warnings, and off-road consequences without making the default drive harder.
 - **Music remakes.** The main menu theme, Open Road, and Night Haul now use
   new Suno remakes while keeping their familiar Freight Fate music slots.

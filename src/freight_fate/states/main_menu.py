@@ -931,7 +931,7 @@ class SettingsCategoryState(MenuState):
                 MenuItem(lambda: f"Hours of service: {self._hos_label()}",
                          lambda: self._cycle_hos(1),
                          help="Choose realistic or relaxed hours rules."),
-                MenuItem(lambda: f"Steering assist: {self._steering_label()}",
+                MenuItem(lambda: f"Lane drift: {self._steering_label()}",
                          lambda: self._cycle_steering(1),
                          help="Choose whether lane drift is off, light, or realistic."),
                 MenuItem("Back", self.go_back),
