@@ -160,7 +160,7 @@ def test_reverse_direction_mirrors_interchange_position(world):
     assert fwd_cue.at_mi == pytest.approx(rev_leg.miles - rev_cue.at_mi, abs=0.2)
 
 
-def test_next_navigation_context_mentions_exit(world):
+def test_next_exit_context_mentions_flavor_exit(world):
     from freight_fate.sim.trip import NavigationCue
 
     route, _ = _route_with_interchange(world)
@@ -170,8 +170,29 @@ def test_next_navigation_context_mentions_exit(world):
                       "exit 21 for US-52 West toward Lafayette", "")
     ]
     trip.position_mi = 40.0
+    assert trip.next_navigation_context() == "Destination Indianapolis ahead."
+    assert trip.next_exit_context() == (
+        "Next listed exit in 10 miles: exit 21 for US-52 West toward Lafayette."
+    )
+
+
+def test_next_navigation_context_prioritizes_actionable_stop_over_exit(world):
+    from freight_fate.sim.trip import NavigationCue
+
+    route, _ = _route_with_interchange(world)
+    trip = Trip(route, TruckState(), WeatherSystem("great_lakes", seed=1), seed=2)
+    trip.navigation_cues = [
+        NavigationCue("interchange:0:40:21", "interchange", 40.0,
+                      "exit 21 for US-52 West toward Lafayette", ""),
+        NavigationCue("rest_stop:0:50:pilot", "rest_stop", 50.0,
+                      "travel center ahead at exit 26", ""),
+    ]
+    trip.position_mi = 30.0
     assert trip.next_navigation_context() == (
-        "Next exit in 10 miles: exit 21 for US-52 West toward Lafayette."
+        "Next stop in 20 miles: travel center ahead at exit 26."
+    )
+    assert trip.next_exit_context() == (
+        "Next listed exit in 10 miles: exit 21 for US-52 West toward Lafayette."
     )
 
 

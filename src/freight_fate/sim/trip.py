@@ -611,7 +611,23 @@ class Trip:
 
     def next_navigation_cue(self) -> NavigationCue | None:
         for cue in self.navigation_cues:
-            if cue.at_mi > self.position_mi + 0.05 and cue.kind != "continue":
+            if (
+                cue.at_mi > self.position_mi + 0.05
+                and cue.kind not in ("continue", "interchange")
+            ):
+                return cue
+        return None
+
+    def next_exit_context(self) -> str:
+        cue = self.next_exit_cue()
+        if cue is None:
+            return "No listed highway exit ahead before the destination."
+        ahead = max(0.0, cue.at_mi - self.position_mi)
+        return f"Next listed exit in {ahead:.0f} miles: {cue.text}."
+
+    def next_exit_cue(self) -> NavigationCue | None:
+        for cue in self.navigation_cues:
+            if cue.at_mi > self.position_mi + 0.05 and cue.kind == "interchange":
                 return cue
         return None
 

@@ -42,6 +42,8 @@
 - **Quieter exit guidance.** Ordinary highway exits now stay available in the
   route screen without being announced during the drive unless they lead to a
   stop you can actually take.
+- **Route key priority.** Pressing R now keeps the next actionable route detail
+  first, while Shift+R reports the next listed highway exit.
 - **State-line timing.** State crossing previews now speak about 10 miles out
   instead of 2 miles out, giving the preview and crossing announcements more
   room at highway speed.

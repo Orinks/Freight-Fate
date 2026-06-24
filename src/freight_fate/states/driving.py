@@ -368,7 +368,10 @@ class DrivingState(State):
         elif key == pygame.K_c:
             self._speak_clock()
         elif key == pygame.K_r:
-            self.ctx.say(self.trip.progress_summary(self.ctx.settings.imperial_units))
+            if event.mod & pygame.KMOD_SHIFT:
+                self.ctx.say(self.trip.next_exit_context())
+            else:
+                self.ctx.say(self.trip.progress_summary(self.ctx.settings.imperial_units))
         elif key == pygame.K_v:
             self._speak_weather()
         elif key == pygame.K_l:
@@ -397,7 +400,7 @@ class DrivingState(State):
                 f"{objective_help}"
                 "Space speed. Tab status menu. F fuel. "
                 "C clock, deadline, and hours of service. "
-                "R route. V weather. L lane position. "
+                "R route. Shift R next listed highway exit. V weather. L lane position. "
                 "Left and Right arrows steer when lane drift is enabled. "
                 "T route POI menu when already stopped "
                 "at one: available actions may include fuel, break, sleep, "
