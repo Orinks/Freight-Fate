@@ -48,6 +48,16 @@ class State:
         """Visible text for the window, mirroring what speech says."""
         return []
 
+    def presence(self):
+        """Broad, privacy-safe activity for Discord Rich Presence, or None.
+
+        Returns a :class:`~freight_fate.discord_presence.PresenceState` (or
+        ``None`` to leave presence unchanged). The app polls the active state
+        each frame and hands the result to the presence service; states only
+        report status here and never touch Discord itself.
+        """
+        return None
+
 
 @dataclass
 class MenuItem:

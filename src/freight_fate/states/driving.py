@@ -1645,6 +1645,24 @@ class DrivingState(State):
     def _set_status(self, text: str) -> None:
         self._status_text = text
 
+    def presence(self):
+        from ..discord_presence import driving_presence
+        from ..models.trucks import TRUCK_CATALOG
+
+        total = self.trip.total_miles or 1.0
+        fraction = self.trip.position_mi / total
+        moving = self.truck.speed_mph >= 1.0
+        truck = TRUCK_CATALOG.get(self.ctx.profile.truck) if self.ctx.profile else None
+        return driving_presence(
+            phase=self.phase,
+            origin=self.job.origin,
+            destination=self.job.destination,
+            cargo=self.job.cargo.label,
+            fraction=fraction,
+            moving=moving,
+            truck_label=truck.label if truck else "",
+        )
+
     def lines(self) -> list[str]:
         t = self.truck
         limit, reason = self.trip.speed_limit_at(self.trip.position_mi)
@@ -1851,6 +1869,13 @@ class RestStopState(MenuState):
     @property
     def title(self) -> str:  # type: ignore[override]
         return self.stop.spoken_name
+
+    def presence(self):
+        from ..discord_presence import PresenceState
+
+        base = self.driving.presence()
+        detail = base.detail if base is not None else ""
+        return PresenceState("Resting at a stop", detail)
 
     def announce_entry(self) -> None:
         self.ctx.audio.set_ambient(_poi_ambient_key(self.stop))
@@ -2314,6 +2339,13 @@ class PauseMenuState(MenuState):
         self.ctx.audio.stop_world()
         super().enter()
 
+    def presence(self):
+        from ..discord_presence import PresenceState
+
+        base = self.driving.presence()
+        detail = base.detail if base is not None else ""
+        return PresenceState("Paused", detail)
+
     def build_items(self) -> list[MenuItem]:
         drive_label = "pickup drive" if self.driving.phase == DRIVE_PHASE_PICKUP else "delivery"
         items = [
@@ -2468,6 +2500,12 @@ class FacilityArrivalState(MenuState):
     @property
     def facility(self) -> str:
         return self.driving._destination_facility_text()
+
+    def presence(self):
+        from ..discord_presence import PresenceState
+
+        return PresenceState("Delivering", f"{self.driving.job.cargo.label} to "
+                             f"{self.driving.job.destination}")
 
     def enter(self) -> None:
         sequence = select_menu_music_sequence(self.ctx.profile)

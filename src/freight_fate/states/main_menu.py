@@ -191,6 +191,11 @@ class MainMenuState(MenuState):
         self.ctx.audio.play("ui/menu_back")
         self.ctx.say("Press Enter on Quit to exit the game.")
 
+    def presence(self):
+        from ..discord_presence import PresenceState
+
+        return PresenceState("In the main menu")
+
     def _continue(self) -> None:
         saves = _loadable_saves()
         if not saves:
@@ -643,6 +648,10 @@ HELP_PAGES = [
         "Lane drift adds an optional lane-position task while you drive.",
         "Off keeps the truck centered. Light adds gentle drift.",
         "Realistic adds stronger drift, rumble-strip warnings, and consequences.",
+        "Discord presence shows your broad activity in Discord when it is running,",
+        "like the main menu, driving a route, or resting, with the route and cargo.",
+        "Only general game status is shared, never your saves or personal details.",
+        "It is on by default and has no effect if Discord is closed.",
         "Audio volumes have their own help text in the Audio category with F1.",
     ]),
     ("Driving basics", [
@@ -978,6 +987,12 @@ class SettingsCategoryState(MenuState):
                          help="Choose which connected controller to use when "
                               "more than one is plugged in. The choice is "
                               "remembered for next time."),
+                MenuItem(lambda: f"Discord presence: {'on' if s.discord_presence else 'off'}",
+                         lambda: self._toggle_discord_presence(1),
+                         help="Show broad activity in Discord, like the main menu, "
+                              "driving a route, or resting. Only general game status "
+                              "is shared, never your save files or personal details. "
+                              "Has no effect if Discord is not running."),
                 MenuItem("Back", self.go_back),
             ]
         if self.category == "audio":
@@ -1035,6 +1050,7 @@ class SettingsCategoryState(MenuState):
                     self._cycle_pace, self._cycle_hos, self._cycle_steering,
                     self._toggle_controller, self._toggle_rumble,
                     self._cycle_controller_device,
+                    self._toggle_discord_presence,
                 ],
                 "audio": [
                     lambda d: self._volume("master_volume", 0.1 * d),
@@ -1199,6 +1215,11 @@ class SettingsCategoryState(MenuState):
         else:
             ctrl.select_next(d)
         self.ctx.settings.controller_device = ctrl.name
+        self._announce()
+
+    def _toggle_discord_presence(self, _d: int) -> None:
+        self.ctx.settings.discord_presence = not self.ctx.settings.discord_presence
+        self.ctx.apply_presence()
         self._announce()
 
     def _cycle_verbosity(self, d: int) -> None:

@@ -57,6 +57,12 @@ visual display mirrors all speech for sighted players and helpers.
 - **Screen reader native** — menus with first-letter navigation, contextual
   F1 help everywhere, on-demand information keys while driving, and three
   speech verbosity levels.
+- **Discord Rich Presence (optional)** — when Discord is running, your profile
+  can show what you are up to: in the main menu, at the terminal, driving a
+  route, resting, or delivering, with the broad route and cargo. Only general
+  game activity is shared — never your save files or personal details — and it
+  is on by default but easily switched off in Settings → Gameplay → Discord
+  presence. The game starts and runs perfectly whether or not Discord is open.
 
 ## Download and play
 

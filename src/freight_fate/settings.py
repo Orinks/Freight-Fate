@@ -39,6 +39,7 @@ class Settings:
     speech_voice: str = ""               # installed voice name; "" = backend default
     update_channel: str = ""              # "stable"/"dev"; "" follows this build's channel
     skipped_update: str = ""              # release tag the player chose to skip
+    discord_presence: bool = True         # show broad activity in Discord (privacy-safe)
 
     @property
     def path(self):
