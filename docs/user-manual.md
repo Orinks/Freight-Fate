@@ -16,9 +16,9 @@ driving.
 3. Open the extracted `FreightFate` folder.
 4. Run `FreightFate.exe` on Windows, or `FreightFate` on macOS or Linux.
 5. Choose **New career**, enter a driver name, and pick a home terminal.
-6. Open the dispatch board, accept a job, and follow the spoken objective.
+6. Open the dispatch board, accept a job, and follow the current objective.
 
-The game is portable. Saves, settings, the save-signing key, and packaged-game
+The game is portable. Saves, settings, save identity files, and packaged-game
 logs live in the `saves` folder inside the game folder.
 
 ## Install, Updates, And Snapshots
@@ -69,7 +69,7 @@ The main menu can include:
 | Continue latest career | Loads the newest readable save. |
 | Choose career | Opens a list of saved careers. |
 | Manage careers | Opens reset and delete actions with confirmation. |
-| New career | Starts spoken name entry and home-terminal selection. |
+| New career | Starts name entry and home-terminal selection. |
 | Achievements | Reviews earned and locked achievements for a saved career. |
 | How to play | Opens the built-in help reader. |
 | Settings | Opens gameplay, audio, speech and weather, and update settings. |
@@ -104,13 +104,13 @@ Most menus use the same keyboard pattern:
 | Escape | Go back, cancel, or repeat a status message when leaving is not useful. |
 | Home or End | Jump to the first or last choice. |
 | Letter or number | Jump to the next choice starting with that character. |
-| F1 | Speak help for the current item. |
+| F1 | Show help for the current item. |
 
-Menus announce the title, selected item, and item position, such as `2 of 6`.
+Menus provide the title, selected item, and item position, such as `2 of 6`.
 F1 help explains what the current item does.
 
-New career name entry speaks typed characters. Use Backspace to delete, F2 to
-review the current name, Enter to confirm, and Escape to cancel.
+New career name entry supports Backspace to delete, F2 to review the current
+name, Enter to confirm, and Escape to cancel.
 
 The built-in How to play reader uses:
 
@@ -130,9 +130,9 @@ Your terminal is the safe hub between jobs. Public terminal actions include:
 | --- | --- |
 | Dispatch board | Browse freight offers from local facilities. |
 | Garage | Refuel, repair, buy upgrades, buy trucks, or switch owned trucks. |
-| Career stats | Hear level, reputation, deliveries, and career totals. |
-| Truck status | Hear truck model, fuel, tank size, and damage condition. |
-| Time and weather | Hear the clock, career day, and current city weather. |
+| Career stats | Review level, reputation, deliveries, and career totals. |
+| Truck status | Review truck model, fuel, tank size, and damage condition. |
+| Time and weather | Review the clock, career day, and current city weather. |
 | Sleep 10 hours | Rest at the terminal and reset hours of service. |
 | Save game | Save the current career. |
 | Settings | Open settings categories. |
@@ -159,7 +159,7 @@ storage, food processors, farms and grain elevators, manufacturing plants,
 construction yards, mines, lumber or paper facilities, cross-docks, and other
 freight locations.
 
-Each job speaks:
+Each job lists:
 
 - Cargo and weight.
 - Origin facility.
@@ -193,7 +193,7 @@ the shipper. At the pickup gate:
 Check-in takes 15 in-game minutes. Loading takes 60 in-game minutes. Both count
 as on-duty time.
 
-Route planning appears after pickup and loading. Each route option speaks:
+Route planning appears after pickup and loading. Each route option lists:
 
 - Distance and highways.
 - Legal hours plan.
@@ -202,7 +202,7 @@ Route planning appears after pickup and loading. Each route option speaks:
 - Terrain summary.
 - Parking confidence notes.
 
-Press W on a route option to hear weather along it. With real-world weather
+Press W on a route option to check weather along it. With real-world weather
 enabled, the game uses live city conditions when available. Otherwise it uses
 the simulated forecast.
 
@@ -218,17 +218,17 @@ Driving controls are active while the road view is focused:
 | E | Start the engine. Stop the engine only below 5 miles per hour. |
 | P | Release or set the parking brake. |
 | K | Set or cancel adaptive cruise control. Braking also cancels it. |
-| X | Arm or cancel the next announced exit when it is close enough. |
+| X | Arm or cancel the next exit when it is close enough. |
 | T | Open the route point-of-interest menu when stopped at a supported stop. |
 | J | Toggle the engine brake. |
 | H | Sound the horn. |
-| Space | Speak speed, gear, RPM, air pressure, and brake state. |
+| Space | Report speed, gear, RPM, air pressure, and brake state. |
 | Tab | Open the driving status menu. |
-| F | Speak fuel level and estimated range. |
-| C | Speak clock, deadline, estimated arrival, and hours of service. |
-| R | Speak route progress and GPS context. |
-| V | Speak weather and forecast. |
-| F1 | Speak the driving control list and current objective. |
+| F | Report fuel level and estimated range. |
+| C | Report clock, deadline, estimated arrival, and hours of service. |
+| R | Report route progress and GPS context. |
+| V | Report weather and forecast. |
+| F1 | Show the driving control list and current objective. |
 | Escape | Open the pause menu. |
 
 Manual transmission adds:
@@ -240,7 +240,7 @@ Manual transmission adds:
 | N | Neutral. |
 | Backspace | Reverse. |
 
-If you shift manually without the clutch, the game speaks a gear-grinding
+If you shift manually without the clutch, the game gives a gear-grinding
 warning.
 
 ## Truck Behavior
@@ -261,8 +261,8 @@ The truck simulation includes:
 - Fuel burn.
 - Damage that reduces performance.
 
-Repeated hard braking can use air faster than normal driving. If you hear low
-air, stop safely, set the parking brake, and let pressure build.
+Repeated hard braking can use air faster than normal driving. If low air is
+reported, stop safely, set the parking brake, and let pressure build.
 
 Adaptive cruise requires the engine to be running and the truck to be moving at
 least 20 miles per hour. Press K to set cruise at your current speed. Weather
@@ -271,11 +271,12 @@ speed. Cruise does not steer, change lanes, or replace your attention.
 
 ## Road Events, Weather, And Rest Stops
 
-The road can speak traffic, construction, state lines, city pass-throughs,
+The road can report traffic, construction, state lines, city pass-throughs,
 checkpoints, toll points, route stops, and weather changes.
 
-Hazards can happen while moving. When you hear "Brake now", slow below 25 miles
-per hour quickly to avoid a collision. Fatigue shortens the reaction window.
+Hazards can happen while moving. When a "Brake now" warning appears, slow below
+25 miles per hour quickly to avoid a collision. Fatigue shortens the reaction
+window.
 
 Construction and traffic zones lower the speed limit. Speeding in a
 construction zone can trigger enforcement.
@@ -283,9 +284,9 @@ construction zone can trigger enforcement.
 Weather affects safe speed, traction, braking, visibility, traffic pressure,
 adaptive cruise following distance, and audio layers such as rain, wind,
 thunder, snow, and fog. Press V while driving for current conditions. In
-simulated weather, V also speaks what is coming next.
+simulated weather, V also gives the upcoming forecast.
 
-Stops are announced as you approach them. A one-mile cue tells you when to take
+Stops are reported as you approach them. A one-mile cue tells you when to take
 an exit. Press X to signal for the exit, slow to 45 miles per hour or less, and
 brake to a stop at the end of the ramp.
 
@@ -314,7 +315,7 @@ Freight Fate tracks an ELD-style hours clock. In realistic mode:
 - You need a 30-minute break after 8 cumulative hours of driving.
 - Sleeping 10 hours resets the shift clock.
 
-The game speaks warnings at 2 hours, 1 hour, and 30 minutes before a limit.
+The game gives warnings at 2 hours, 1 hour, and 30 minutes before a limit.
 Driving past a limit risks inspections, fines, reputation loss, and
 out-of-service orders.
 
@@ -342,7 +343,7 @@ Use these keys when you need status without leaving the road:
 | V | Weather and forecast. |
 | Tab | Grouped driving status screens. |
 
-Tab opens the Driving status menu. It has three spoken screens:
+Tab opens the Driving status menu. It has three review screens:
 
 | Screen | Information |
 | --- | --- |
@@ -360,7 +361,7 @@ Escape opens the pause menu during a drive. Public pause choices include:
 | Choice | What It Does |
 | --- | --- |
 | Resume driving | Return to the active drive. |
-| Trip status | Speak cargo, objective, route progress, time used, and air status. |
+| Trip status | Review cargo, objective, route progress, time used, and air status. |
 | Call a roadside mechanic | Patch severe truck damage enough to continue, at a high cost. |
 | Emergency shoulder sleep | Appears only when the game detects a true hours or fatigue emergency. |
 | Settings | Open settings during the drive. |
@@ -390,9 +391,9 @@ The destination menu includes:
 | --- | --- |
 | Dock and deliver | Complete the delivery and open settlement. |
 | Check paperwork | Review facility, cargo, payout, deadline, damage, tolls, approved charges, driver charges, and net pay before settlement. |
-| Check arrival status | Hear facility, cargo, speed, and next step. |
+| Check arrival status | Review facility, cargo, speed, and next step. |
 
-Settlement speaks cargo delivered, trip time, on-time status, gross pay,
+Settlement reports cargo delivered, trip time, on-time status, gross pay,
 carrier-paid or reimbursed charges, driver-responsibility charges, net driver
 pay, money after settlement, fuel, truck damage, career messages, and
 achievements.
@@ -433,7 +434,7 @@ Speech and weather settings include:
 
 | Setting | Purpose |
 | --- | --- |
-| Speech verbosity | Controls how often driving status reminders speak. |
+| Speech verbosity | Controls how often driving status reminders run. |
 | Driving event voice | Routes road events through the main voice or a separate software voice when available. |
 | Speech rate | Appears only when the current speech backend supports rate changes. |
 | Speech pitch | Appears only when the current speech backend supports pitch changes. |
@@ -444,15 +445,14 @@ Speech and weather settings include:
 ## Audio, Speech, And Accessibility
 
 Freight Fate is built to be playable by ear. Menus, status screens, update
-flows, driving alerts, route information, and settlement summaries speak
-through the game's speech output. The window mirrors the same information as
-plain text for sighted players and helpers.
+flows, driving alerts, route information, and settlement summaries are available
+through the game's audio and text output. The window mirrors the same
+information as plain text for sighted players and helpers.
 
-All game speech goes through Prism, provided by the `prismatoid` package. Prism
-can use NVDA, JAWS, SAPI, VoiceOver, Speech Dispatcher, and other available
-backends. Freight Fate chooses a backend that is usable on the current machine.
-If the preferred screen reader is not running, the game can fall back to another
-available voice.
+Freight Fate can use NVDA, JAWS, SAPI, VoiceOver, Speech Dispatcher, and other
+available voice backends. It chooses a backend that is usable on the current
+machine. If the preferred screen reader is not running, the game can fall back
+to another available voice.
 
 Driving events can use a separate software voice when available, so road alerts
 do not fight with a screen reader's own speech.
@@ -477,9 +477,9 @@ Useful accessibility patterns:
 - Use F1 when you are unsure what the selected item does.
 - Use Space, F, C, R, V, and Tab while driving instead of waiting for automatic
   reminders.
-- Use the status menu when you want reviewable lines instead of one long spoken
+- Use the status menu when you want reviewable lines instead of one long status
   message.
-- Lower music or ambience if speech or route cues are hard to hear.
+- Lower music or ambience if speech or route cues are hard to follow.
 - Treat route stop menus as data-backed: if a stop does not list fuel, repair,
   or sleep, that stop is not currently documented as supporting that action.
 
@@ -510,7 +510,7 @@ of interest, and press T when the stop supports a menu.
 
 Stable and snapshot release notes are on the
 [Freight Fate releases page](https://github.com/Orinks/Freight-Fate/releases).
-The in-game What's new reader can also speak notes for an available update.
+The in-game What's new reader can also review notes for an available update.
 
 For deeper data reference, see:
 
