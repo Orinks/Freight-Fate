@@ -81,6 +81,10 @@ itself — updates replace only the game's own files and never touch the
 `saves` folder. Switch between stable and snapshot updates in Settings
 under "Update channel".
 
+For a complete player-facing guide to installing, careers, dispatch, driving,
+route stops, saves, settings, audio, speech, and troubleshooting, see the
+[Freight Fate Player Manual](docs/user-manual.md).
+
 ## Run from source
 
 You need two tools installed and on your PATH:

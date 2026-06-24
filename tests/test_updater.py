@@ -162,6 +162,43 @@ def test_build_info_stamp_marks_stable_and_nightly_channels(tmp_path):
     assert nightly.built_at
 
 
+def test_release_docs_are_staged_with_build_payload(tmp_path, monkeypatch):
+    build_release = load_build_release_module()
+    source_root = tmp_path / "repo"
+    source_root.mkdir()
+    (source_root / "CHANGELOG.md").write_text(
+        "# Changelog\n\n## Unreleased\n", encoding="utf-8")
+    monkeypatch.setattr(build_release, "ROOT", source_root)
+
+    build_dir = tmp_path / "FreightFate"
+    build_dir.mkdir()
+    build_release.stage_release_docs(build_dir)
+
+    assert (build_dir / "CHANGELOG.md").read_text(
+        encoding="utf-8").startswith("# Changelog")
+
+
+def test_packaged_payload_requires_changelog(tmp_path):
+    build_release = load_build_release_module()
+    build_dir = tmp_path / "FreightFate"
+    (build_dir / "freight_fate" / "assets" / "sounds").mkdir(parents=True)
+    (build_dir / "freight_fate" / "data").mkdir(parents=True)
+    (build_dir / "freight_fate" / "data" / "world.json").write_text(
+        "{}", encoding="utf-8")
+    (build_dir / "sound_lib" / "lib").mkdir(parents=True)
+    (build_dir / "prism" / "_native").mkdir(parents=True)
+    native_suffix = next(iter(build_release.PRISM_NATIVE_EXTS))
+    (build_dir / "prism" / "_native" / f"bridge{native_suffix}").write_text(
+        "", encoding="utf-8")
+
+    try:
+        build_release.verify_packaged_payload(build_dir)
+    except RuntimeError as exc:
+        assert "CHANGELOG.md" in str(exc)
+    else:
+        raise AssertionError("verify_packaged_payload accepted a missing changelog")
+
+
 def test_dev_stable_build_compares_by_build_date():
     releases = [release("nightly-20260611", prerelease=True)]
     older = BuildInfo(tag="v1.5.0", channel="stable", built_at="2026-06-01")

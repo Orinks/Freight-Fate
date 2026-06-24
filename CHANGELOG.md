@@ -16,6 +16,11 @@
 - **Optional lane drift.** Gameplay settings now include off, light, and
   realistic drift so players can add a gentle steering task, rumble-strip
   warnings, and off-road consequences without making the default drive harder.
+- **Packaged changelog.** Portable builds now include `CHANGELOG.md` in the
+  game folder so release notes are available offline.
+- **Player manual.** A new public manual now gathers install, career,
+  dispatch, driving, saves, settings, accessibility, and troubleshooting
+  guidance in one linkable place.
 - **Music remakes.** The main menu theme, Open Road, and Night Haul now use
   new Suno remakes while keeping their familiar Freight Fate music slots.
 - **Music rotation.** All menu and driving music beds now play once and rotate
