@@ -993,3 +993,61 @@ def test_settings_menu_uses_category_submenus():
         assert "Settings saved." in spoken
     finally:
         app.shutdown()
+
+
+def test_speech_setting_adjustment_previews_adjusted_voice(monkeypatch):
+    from freight_fate.app import App
+    from freight_fate.states.main_menu import SettingsCategoryState
+
+    class PreviewSpeech:
+        supports_rate = True
+        supports_pitch = False
+        supports_volume = False
+        event_backend_name = "none"
+
+        def __init__(self):
+            self.previews = []
+
+        def event_backend_options(self):
+            return []
+
+        def select_event_backend(self, _name):
+            return None
+
+        def configure(self, **_kwargs):
+            return None
+
+        def voice_names(self):
+            return []
+
+        def say_adjustment_preview(self, setting, text, interrupt=True):
+            self.previews.append((setting, text, interrupt))
+            return True
+
+        def shutdown(self):
+            return None
+
+    app = App()
+    fallback_spoken = []
+    preview = PreviewSpeech()
+    monkeypatch.setattr(app.ctx, "speech", preview)
+    monkeypatch.setattr(app, "speech", preview)
+    monkeypatch.setattr(app.ctx, "say",
+                        lambda text, interrupt=True: fallback_spoken.append(text))
+    try:
+        menu = SettingsCategoryState(app.ctx, "speech")
+        app.push_state(menu)
+        while not app.state.items[app.state.index].text.startswith("Speech rate"):
+            app.state.handle_event(key_event(pygame.K_DOWN))
+
+        fallback_spoken.clear()
+        app.state.handle_event(key_event(pygame.K_RIGHT))
+
+        assert preview.previews
+        setting, text, interrupt = preview.previews[-1]
+        assert setting == "speech_rate"
+        assert text.startswith("Speech rate:")
+        assert interrupt is True
+        assert fallback_spoken == []
+    finally:
+        app.shutdown()

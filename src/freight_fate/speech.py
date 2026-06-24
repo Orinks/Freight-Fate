@@ -183,13 +183,17 @@ class Speech:
     def _backends(self):
         return [b for b in (self._backend, self._event_backend) if b is not None]
 
+    @staticmethod
+    def _backend_supports(backend, feature: str) -> bool:
+        try:
+            return bool(getattr(backend.features, feature))
+        except Exception:
+            return False
+
     def _any_supports(self, feature: str) -> bool:
         for backend in self._backends():
-            try:
-                if getattr(backend.features, feature):
-                    return True
-            except Exception:
-                continue
+            if self._backend_supports(backend, feature):
+                return True
         return False
 
     @property
@@ -309,20 +313,26 @@ class Speech:
                 log.warning("Could not set speech voice on %s",
                             getattr(backend, "name", "?"), exc_info=True)
 
+    def _speak_with_backend(self, backend, text: str, interrupt: bool) -> bool:
+        try:
+            features = backend.features
+            if features.supports_output:
+                backend.output(text, interrupt)
+                return True
+            elif features.supports_speak:
+                backend.speak(text, interrupt)
+                return True
+        except self._prism_error:
+            log.warning("Speech output failed", exc_info=True)
+        except Exception:
+            log.exception("Unexpected speech failure")
+        return False
+
     def say(self, text: str, interrupt: bool = True) -> None:
         """Speak (and braille, where supported) the given text."""
         if self._backend is None or not text:
             return
-        try:
-            features = self._backend.features
-            if features.supports_output:
-                self._backend.output(text, interrupt)
-            elif features.supports_speak:
-                self._backend.speak(text, interrupt)
-        except self._prism_error:
-            log.warning("Speech output failed", exc_info=True)
-        except Exception:
-            log.exception("Unexpected speech failure; disabling speech")
+        if not self._speak_with_backend(self._backend, text, interrupt):
             self._backend = None
 
     def say_event(self, text: str, interrupt: bool = True) -> None:
@@ -334,19 +344,31 @@ class Speech:
         if backend is None:
             self.say(text, interrupt)
             return
-        try:
-            features = backend.features
-            if features.supports_output:
-                backend.output(text, interrupt)
-            elif features.supports_speak:
-                backend.speak(text, interrupt)
-        except self._prism_error:
-            log.warning("Event speech output failed", exc_info=True)
-        except Exception:
-            log.exception("Unexpected event speech failure; "
-                          "falling back to the main voice")
+        if not self._speak_with_backend(backend, text, interrupt):
             self._event_backend = None
             self.say(text, interrupt)
+
+    _PREVIEW_FEATURES = {
+        "speech_rate": "supports_set_rate",
+        "speech_pitch": "supports_set_pitch",
+        "speech_volume": "supports_set_volume",
+        "speech_voice": "supports_set_voice",
+    }
+
+    def say_adjustment_preview(
+            self, setting: str, text: str, interrupt: bool = True) -> bool:
+        """Speak a settings preview through the voice affected by the setting.
+
+        If the main screen reader cannot be configured but a separate SAPI or
+        OneCore voice can, preview changes through that configurable voice.
+        """
+        feature = self._PREVIEW_FEATURES.get(setting)
+        if feature is None or not text:
+            return False
+        for backend in self._backends():
+            if self._backend_supports(backend, feature):
+                return self._speak_with_backend(backend, text, interrupt)
+        return False
 
     def stop(self) -> None:
         """Silence any in-progress speech on both channels."""

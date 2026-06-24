@@ -1082,6 +1082,14 @@ class SettingsCategoryState(MenuState):
         self.ctx.audio.play("ui/menu_select")
         self.speak_current()
 
+    def _announce_speech_preview(self, setting: str) -> None:
+        self.refresh()
+        self.ctx.settings.save()
+        self.ctx.audio.play("ui/menu_select")
+        text = self.current_text()
+        if not self.ctx.speech.say_adjustment_preview(setting, text):
+            self.ctx.say(text)
+
     def _toggle_units(self, _d: int) -> None:
         self.ctx.settings.imperial_units = not self.ctx.settings.imperial_units
         self._announce()
@@ -1158,7 +1166,7 @@ class SettingsCategoryState(MenuState):
         setattr(self.ctx.settings, attr, max(0.0, min(1.0, round(value + delta, 2))))
         self.ctx.settings.save()
         self.ctx.apply_speech()
-        self._announce()
+        self._announce_speech_preview(attr)
 
     def _cycle_voice(self, d: int) -> None:
         voices = self.ctx.speech.voice_names()
@@ -1172,7 +1180,7 @@ class SettingsCategoryState(MenuState):
         self.ctx.settings.speech_voice = voices[i]
         self.ctx.settings.save()
         self.ctx.apply_speech()
-        self._announce()
+        self._announce_speech_preview("speech_voice")
 
     def _toggle_real_weather(self, _d: int) -> None:
         self.ctx.settings.real_weather = not self.ctx.settings.real_weather

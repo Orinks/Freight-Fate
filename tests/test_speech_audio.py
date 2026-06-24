@@ -159,6 +159,7 @@ class RecordingBackend:
         self.pitch = None
         self.volume = None
         self.voice = None
+        self.spoken = []
 
     @property
     def voices_count(self):
@@ -166,6 +167,12 @@ class RecordingBackend:
 
     def get_voice_name(self, idx):
         return self._voices[idx]
+
+    def output(self, text, interrupt=True):
+        self.spoken.append((text, interrupt))
+
+    def speak(self, text, interrupt=True):
+        self.output(text, interrupt)
 
 
 def _configurable_speech():
@@ -189,6 +196,21 @@ def test_configure_pushes_params_to_supporting_backends_only():
     assert (event.rate, event.pitch, event.volume, event.voice) == (0.8, 0.3, 0.5, 1)
     # the unsupported main voice is left untouched
     assert (main.rate, main.pitch, main.volume, main.voice) == (None, None, None, None)
+
+
+def test_adjustment_preview_uses_configurable_voice():
+    s, main, event = _configurable_speech()
+
+    assert s.say_adjustment_preview("speech_rate", "Speech rate: 60 percent.")
+
+    assert main.spoken == []
+    assert event.spoken == [("Speech rate: 60 percent.", True)]
+
+
+def test_adjustment_preview_falls_back_when_setting_is_not_configurable():
+    s, _main, _event = _configurable_speech()
+
+    assert not s.say_adjustment_preview("speech_verbosity", "Speech verbosity: normal.")
 
 
 def test_configure_preserves_onecore_default_pitch_at_midpoint():

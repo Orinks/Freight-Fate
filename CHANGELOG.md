@@ -48,6 +48,9 @@
   snapshot may not load on an older stable release.
 
 ### Fixed
+- **Speech setting previews.** Adjusting speech rate, pitch, volume, or voice
+  now previews with the voice being changed, so a selected SAPI or OneCore
+  voice speaks its own new setting.
 - **Truck idling.** The diesel now stays running through pickup check-in,
   loading, route planning, loaded departure, and active-drive resume instead
   of forcing a fresh engine start.
