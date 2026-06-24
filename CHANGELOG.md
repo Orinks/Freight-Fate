@@ -71,6 +71,9 @@
 - **Metric driving status.** Metric mode now reports driving status,
   speed limits, traffic, pickup distance, and legal-stop distance in metric
   units instead of mixing in mph or miles.
+- **Metric traffic speed.** The traffic-queue speed shown in the route line now
+  reads in kilometers per hour in metric mode, instead of staying in miles per
+  hour next to the already-metric distance.
 - **Packaged update checks.** The updater now recognizes standalone packaged
   folders more reliably, so switching to developer snapshots does not leave
   the update screen thinking the game is running from source.
