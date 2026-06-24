@@ -2592,6 +2592,7 @@ class ArrivalState(MenuState):
         self.driving = driving
         self.summary_parts: list[str] = []
         self._achievement_messages: list[str] = []
+        self._announcements: list[str] = []
         self.summary_lines: list[str] = []
         self.terminal = ctx.world.home_terminal(driving.job.destination)
         self._settle()
@@ -2618,6 +2619,8 @@ class ArrivalState(MenuState):
             self.summary_parts.append(
                 f"The empty run added {trip_damage:.0f} percent truck damage. "
                 "Visit the garage when you can.")
+        # The arrival screen and announcement read summary_lines, not parts.
+        self.summary_lines = list(self.summary_parts)
 
     def _settle(self) -> None:
         d = self.driving
