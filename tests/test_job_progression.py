@@ -73,11 +73,17 @@ def test_bobtail_relocates_to_a_nearby_city_without_pay():
         # a bobtail run survives save/resume as a bobtail run
         assert DrivingState.from_snapshot(app.ctx, driving.snapshot()).job.bobtail
 
-        ArrivalState(app.ctx, driving)
+        # Push the state so enter() runs -- this is the path that crashed when
+        # the bobtail settle left _announcements unset and summary_lines empty.
+        app.ctx.push_state(ArrivalState(app.ctx, driving))
+        arrival = app.state
 
         assert p.current_city == "Cheyenne"   # relocated to the new hub
         assert p.money == money_before        # no pay for an empty run
         assert p.career.deliveries == 0       # not counted as a delivery
+        # The repositioned arrival screen carries its summary.
+        assert arrival.summary_lines
+        assert any("Cheyenne" in line for line in arrival.summary_lines)
     finally:
         app.shutdown()
 

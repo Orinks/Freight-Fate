@@ -180,6 +180,9 @@ class NavigationCue:
     at_mi: float
     text: str
     near_text: str = ""
+    # Speed carried unformatted so display code can render it in the player's
+    # chosen units. Only traffic cues set this; others leave it None.
+    speed_mph: float | None = None
 
 
 class Trip:
@@ -187,12 +190,16 @@ class Trip:
 
     def __init__(self, route: Route, truck: TruckState, weather: WeatherSystem,
                  time_scale: float = 20.0, seed: int | None = None,
-                 start_hour: float = 12.0) -> None:
+                 start_hour: float = 12.0, imperial: bool = True) -> None:
         self.route = route
         self.truck = truck
         self.weather = weather
         self.time_scale = time_scale
         self.start_hour = start_hour   # clock hour of day at departure
+        # Spoken/listed navigation distances follow the player's unit choice.
+        # Backing field set before cues are built below; the property setter
+        # re-renders baked cues if the player changes units mid-trip.
+        self._imperial = imperial
         self.position_mi = 0.0
         self.game_minutes = 0.0
         self.finished = False
@@ -218,6 +225,39 @@ class Trip:
         self._inspection_check_mi = 10.0
         self._traffic_warning_mi = 1.0
         self._announced_enforcement: set[str] = set()
+
+    @property
+    def imperial(self) -> bool:
+        return self._imperial
+
+    @imperial.setter
+    def imperial(self, value: bool) -> None:
+        if value == self._imperial:
+            return
+        self._imperial = value
+        # Re-render baked cue distances (onramp, continue, rest stop) so a
+        # mid-trip unit change updates guidance already laid out on the route.
+        # Cue keys are distance-independent, so announcement de-duplication
+        # carries over unchanged.
+        self.navigation_cues = self._build_navigation_cues()
+
+    def _distance_text(self, miles: float) -> str:
+        """Spoken distance in the player's units (miles or kilometers)."""
+        if self.imperial:
+            return f"{miles:.0f} miles"
+        return f"{miles * 1.609344:.0f} kilometers"
+
+    def _gap_text(self, miles: float) -> str:
+        """Short following-gap distance (one decimal) in the player's units."""
+        if self.imperial:
+            return f"{miles:.1f} miles"
+        return f"{miles * 1.609344:.1f} kilometers"
+
+    def _speed_value(self, mph: float) -> str:
+        """Bare speed-limit number in the player's units (no unit word)."""
+        if self.imperial:
+            return f"{mph:.0f}"
+        return f"{mph * 1.609344:.0f}"
 
     # -- layout -----------------------------------------------------------------
 
@@ -269,15 +309,15 @@ class Trip:
                     start + 0.05,
                     f"merge onto {shield} toward {toward}",
                     f"Merge onto {shield} toward {toward}; "
-                    f"{segment_miles:.0f} miles.",
+                    f"{self._distance_text(segment_miles)}.",
                 ))
             elif segment_miles >= 40.0:
                 cues.append(NavigationCue(
                     f"continue:{i}",
                     "continue",
                     start + 0.1,
-                    f"Continue on {leg.highway} for {segment_miles:.0f} miles "
-                    f"toward {toward}.",
+                    f"Continue on {leg.highway} for "
+                    f"{self._distance_text(segment_miles)} toward {toward}.",
                 ))
             if i > 0 and self.route.legs[i - 1].highway != leg.highway:
                 cues.append(NavigationCue(
@@ -349,7 +389,8 @@ class Trip:
                     "rest_stop",
                     start + offset,
                     f"{stop.label} ahead{at_part}",
-                    f"{stop.label.capitalize()}{at_part} ahead in 1 mile; "
+                    f"{stop.label.capitalize()}{at_part} ahead in "
+                    f"{'1 mile' if self.imperial else self._distance_text(1.0)}; "
                     f"{stop.parking_label}; press X to take the exit.",
                 ))
         for i, lead in enumerate(self.traffic_leads):
@@ -357,8 +398,9 @@ class Trip:
                 f"traffic:{i}:{lead.at_mi:.1f}",
                 "traffic",
                 lead.at_mi,
-                f"{lead.reason} at {lead.speed_mph:.0f} miles per hour",
+                lead.reason,
                 f"Traffic slowing ahead; target speed {lead.speed_mph:.0f}.",
+                speed_mph=lead.speed_mph,
             ))
         cues.sort(key=lambda cue: cue.at_mi)
         return cues
@@ -608,7 +650,13 @@ class Trip:
         if cue.kind == "interchange":
             return f"Next exit in {ahead_text}: {cue.text}."
         if cue.kind == "traffic":
-            return f"Traffic in {ahead_text}: {cue.text}."
+            speed = ""
+            if cue.speed_mph is not None:
+                speed = " at " + (
+                    f"{cue.speed_mph:.0f} miles per hour" if imperial
+                    else f"{cue.speed_mph * 1.609344:.0f} kilometers per hour"
+                )
+            return f"Traffic in {ahead_text}: {cue.text}{speed}."
         if cue.kind == "toll":
             return f"Toll point in {ahead_text}: {cue.text}."
         return f"Next guidance in {ahead_text}: {cue.text}."
@@ -627,7 +675,7 @@ class Trip:
         if cue is None:
             return "No listed highway exit ahead before the destination."
         ahead = max(0.0, cue.at_mi - self.position_mi)
-        return f"Next listed exit in {ahead:.0f} miles: {cue.text}."
+        return f"Next listed exit in {self._distance_text(ahead)}: {cue.text}."
 
     def next_exit_cue(self) -> NavigationCue | None:
         for cue in self.navigation_cues:
@@ -734,8 +782,8 @@ class Trip:
                 self._announced_zone_warnings.add(key)
                 self._emit(
                     TripEventKind.GPS_CUE,
-                    f"In {ahead:.0f} miles, {zone.reason} ahead. "
-                    f"Speed limit {zone.limit_mph:.0f}.",
+                    f"In {self._distance_text(ahead)}, {zone.reason} ahead. "
+                    f"Speed limit {self._speed_value(zone.limit_mph)}.",
                     zone=zone,
                 )
         zone = self._active_zone_at(self.position_mi)
@@ -744,14 +792,15 @@ class Trip:
                 if zone.reason == "construction":
                     self._construction_zone_grace_start[_zone_key(zone)] = zone.start_mi
                 self._emit(TripEventKind.ZONE_ENTER,
-                           f"{zone.reason} ahead. Speed limit {zone.limit_mph:.0f}.",
+                           f"{zone.reason} ahead. "
+                           f"Speed limit {self._speed_value(zone.limit_mph)}.",
                            zone=zone)
             elif self._active_zone is not None:
                 self._construction_zone_grace_start.pop(
                     _zone_key(self._active_zone), None)
                 self._emit(TripEventKind.ZONE_EXIT,
                            f"End of {self._active_zone.reason} zone. "
-                           f"Speed limit {BASE_SPEED_LIMIT_MPH:.0f}.")
+                           f"Speed limit {self._speed_value(BASE_SPEED_LIMIT_MPH)}.")
             self._active_zone = zone
 
     def _check_stops(self) -> None:
@@ -761,7 +810,8 @@ class Trip:
                 self._announced_stops.add(stop.name)
                 exit_part = f" at {stop.exit_label}" if stop.exit_label else ""
                 self._emit(TripEventKind.STOP_AHEAD,
-                           f"{stop.spoken_name}{exit_part} in {ahead:.0f} miles. "
+                           f"{stop.spoken_name}{exit_part} in "
+                           f"{self._distance_text(ahead)}. "
                            f"{stop.parking_text}. "
                            "Press X to take the exit for it.",
                            stop=stop)
@@ -788,9 +838,12 @@ class Trip:
                 key = f"{cue.key}:advance"
                 if 0 < ahead <= 2.0 and key not in self._announced_navigation:
                     self._announced_navigation.add(key)
+                    speed = (f" at {cue.speed_mph:.0f} miles per hour"
+                             if cue.speed_mph is not None else "")
                     self._emit(
                         TripEventKind.GPS_CUE,
-                        f"Traffic slowing ahead in {ahead:.0f} miles; {cue.text}.",
+                        f"Traffic slowing ahead in {self._distance_text(ahead)}; "
+                        f"{cue.text}{speed}.",
                         cue=cue,
                     )
                 continue
@@ -808,10 +861,7 @@ class Trip:
             )
             if 0 < ahead <= lookahead and advance_key not in self._announced_navigation:
                 self._announced_navigation.add(advance_key)
-                if cue.kind == "maneuver":
-                    message = f"In {ahead:.0f} miles, {cue.text}."
-                else:
-                    message = f"In {ahead:.0f} miles, {cue.text}."
+                message = f"In {self._distance_text(ahead)}, {cue.text}."
                 self._emit(TripEventKind.GPS_CUE, message, cue=cue)
             if -0.1 <= ahead <= 0.1 and near_key not in self._announced_navigation:
                 self._announced_navigation.add(near_key)
@@ -893,7 +943,7 @@ class Trip:
             self._emit(
                 TripEventKind.HAZARD,
                 f"Brake now! {context.lead.reason.capitalize()} "
-                f"{context.gap_mi:.1f} miles ahead.",
+                f"{self._gap_text(context.gap_mi)} ahead.",
                 deadline_s=2.5,
                 traffic=context,
             )
