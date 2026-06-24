@@ -166,8 +166,13 @@ def test_build_local_index_prefilters_streamed_features(
         def apply_file(
             self,
             filename: str,
+            filters: list[Any] | None = None,
         ) -> None:
-            calls.append({"filename": filename, "handler": type(self).__name__})
+            calls.append({
+                "filename": filename,
+                "handler": type(self).__name__,
+                "filters": len(filters or []),
+            })
             if hasattr(self, "node"):
                 self.node(FakeNode(
                     1,
@@ -195,7 +200,11 @@ def test_build_local_index_prefilters_streamed_features(
                     {"highway": "motorway_link", "destination": "Wrong Road"},
                 ))
 
-    fake_osmium = SimpleNamespace(SimpleHandler=FakeSimpleHandler)
+    fake_filter = SimpleNamespace(
+        TagFilter=lambda *_args: "tag-filter",
+        IdFilter=lambda *_args: "id-filter",
+    )
+    fake_osmium = SimpleNamespace(SimpleHandler=FakeSimpleHandler, filter=fake_filter)
     monkeypatch.setitem(sys.modules, "osmium", fake_osmium)
     bounds = build_interchanges._route_corridor_bounds([
         {"lat": 40.0000, "lon": -75.0000},
@@ -209,8 +218,8 @@ def test_build_local_index_prefilters_streamed_features(
     )
 
     assert calls == [
-        {"filename": "fake.osm.pbf", "handler": "InterchangeHandler"},
-        {"filename": "fake.osm.pbf", "handler": "RampNodeHandler"},
+        {"filename": "fake.osm.pbf", "handler": "InterchangeHandler", "filters": 1},
+        {"filename": "fake.osm.pbf", "handler": "RampNodeHandler", "filters": 1},
     ]
     assert [feature.tags["ref"] for feature in index.junctions] == ["27"]
     assert [feature.tags["destination"] for feature in index.ramps] == ["Trenton"]
@@ -238,12 +247,12 @@ def test_local_index_cache_round_trips(tmp_path: Path):
         ],
     )
 
-    build_interchanges._write_local_index_cache(cache, index, pbf, bounds)
-    loaded = build_interchanges._read_local_index_cache(cache, pbf, bounds)
+    build_interchanges._write_local_index_cache(cache, index, [pbf], bounds)
+    loaded = build_interchanges._read_local_index_cache(cache, [pbf], bounds)
 
     assert loaded == index
     assert build_interchanges._read_local_index_cache(
-        cache, pbf, [(41.0, 41.1, -75.1, -74.9)]
+        cache, [pbf], [(41.0, 41.1, -75.1, -74.9)]
     ) is None
 
 
@@ -265,11 +274,34 @@ def test_load_or_build_local_index_uses_valid_cache(
             )
         ],
     )
-    build_interchanges._write_local_index_cache(cache, index, pbf, bounds)
+    build_interchanges._write_local_index_cache(cache, index, [pbf], bounds)
 
     def fail_build(*_args: Any, **_kwargs: Any) -> None:
         raise AssertionError("cache hit should not rescan the PBF")
 
     monkeypatch.setattr(build_interchanges, "build_local_index", fail_build)
 
-    assert build_interchanges.load_or_build_local_index(pbf, bounds, cache) == index
+    assert build_interchanges.load_or_build_local_index([pbf], bounds, cache) == index
+
+
+def test_load_local_index_cache_only_does_not_need_pbf(
+    tmp_path: Path,
+):
+    pbf = tmp_path / "tiny.osm.pbf"
+    pbf.write_bytes(b"pbf")
+    cache = tmp_path / "tiny.interchanges.json"
+    bounds = [(39.9, 40.2, -75.1, -74.9)]
+    index = build_interchanges.LocalOsmIndex(
+        junctions=[
+            build_interchanges.LocalOsmFeature(
+                40.0,
+                -75.0,
+                {"highway": "motorway_junction", "ref": "27"},
+            )
+        ],
+        ramps=[],
+    )
+    build_interchanges._write_local_index_cache(cache, index, [pbf], bounds)
+    pbf.unlink()
+
+    assert build_interchanges.load_local_index_cache_only(cache, bounds) == index

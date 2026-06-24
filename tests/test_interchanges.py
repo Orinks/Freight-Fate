@@ -239,7 +239,8 @@ def test_rest_stop_cue_names_exit_when_linked(world):
 
 def test_rest_stop_cue_generic_without_linked_exit(world):
     route = world.route_options("Chicago", "Indianapolis")[0]
-    _leg, target = _leg0_curated_stop(route)
+    leg, target = _leg0_curated_stop(route)
+    route.legs[0] = dataclasses.replace(leg, interchanges=())
     trip = Trip(route, TruckState(), WeatherSystem("great_lakes", seed=1), seed=2)
     cue = next(c for c in trip.navigation_cues
                if c.kind == "rest_stop" and target.name in c.key)
