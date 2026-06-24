@@ -398,6 +398,7 @@ def test_engine_shutdown_is_blocked_at_highway_speed(monkeypatch):
 
 def test_metric_status_lines_do_not_mix_mph_and_miles(monkeypatch):
     from freight_fate.app import App
+    from freight_fate.sim.trip import NavigationCue
 
     app = App()
     monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: None)
@@ -407,11 +408,22 @@ def test_metric_status_lines_do_not_mix_mph_and_miles(monkeypatch):
         quiet_trip(driving)
         driving.truck.velocity_mps = 26.8
         driving._cruise_mph = 60.0
-        driving.trip.traffic_leads = []
+        # Force a known traffic cue ahead so the route line always renders the
+        # traffic speed. The speed used to be baked into the cue text as mph at
+        # build time, so it leaked imperial units in metric mode -- but only when
+        # a traffic lead randomly landed in range, which made this test flaky.
+        driving.trip.navigation_cues = [
+            NavigationCue("traffic:test", "traffic",
+                          driving.trip.position_mi + 5.0,
+                          "traffic queue ahead", speed_mph=50.0),
+        ]
 
         lines = driving.status_lines()
 
         assert any("kilometers per hour" in line for line in lines)
+        # 50 mph rendered in metric, not "miles per hour".
+        assert any("traffic queue ahead at 80 kilometers per hour" in line
+                   for line in lines)
         assert not any(" mph" in line for line in lines)
         assert not any(" miles" in line for line in lines)
     finally:

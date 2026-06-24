@@ -58,6 +58,9 @@
   `~/Library/Application Support/FreightFate` instead of beside the app in
   Applications, matching macOS conventions. Existing saves found next to or
   inside the app bundle are moved into the new location on first launch.
+- **Empty reposition arrivals.** Finishing a bobtail (empty reposition) run no
+  longer crashes on arrival. The "Repositioned" summary screen now opens and
+  reads its relocation summary instead of failing as you reach the new city.
 - **Speech setting previews.** Adjusting speech rate, pitch, volume, or voice
   now previews with the voice being changed, so a selected SAPI or OneCore
   voice speaks its own new setting.
@@ -75,6 +78,18 @@
 - **Metric driving status.** Metric mode now reports driving status,
   speed limits, traffic, pickup distance, and legal-stop distance in metric
   units instead of mixing in mph or miles.
+- **Metric traffic speed.** The traffic-queue speed shown in the route line now
+  reads in kilometers per hour in metric mode, instead of staying in miles per
+  hour next to the already-metric distance.
+- **Metric navigation cues.** Spoken GPS guidance -- onramp, continue, stop,
+  exit, traffic, and construction-zone callouts -- and the Map status screen now
+  give distances in kilometers in metric mode instead of miles, matching the
+  rest of the metric driving readouts.
+- **Metric speed limits.** Construction and traffic zone callouts now speak the
+  posted speed limit as a metric value in metric mode instead of the mph number.
+- **Live unit switching.** Switching between miles and kilometers mid-drive now
+  updates spoken navigation guidance right away, including the distances already
+  laid out along the current route.
 - **Packaged update checks.** The updater now recognizes standalone packaged
   folders more reliably, so switching to developer snapshots does not leave
   the update screen thinking the game is running from source.

@@ -136,7 +136,8 @@ class DrivingState(State):
         trip_start_hour = profile.game_hours % 24.0 if start_hour is None else start_hour
         self.trip = Trip(route, self.truck, self.weather,
                          time_scale=ctx.settings.time_scale, seed=self.trip_seed,
-                         start_hour=trip_start_hour)
+                         start_hour=trip_start_hour,
+                         imperial=ctx.settings.imperial_units)
         self.lane = LaneKeeping(seed=self.trip_seed)
         self._day_music_sequence = select_drive_music_sequence(
             self.route, self.trip_seed, 12.0, self.weather.current)
@@ -797,6 +798,9 @@ class DrivingState(State):
             elif t.fuel_gal <= 0:
                 self._handle_out_of_fuel()
 
+        # Keep the trip's spoken-distance units in step with a live settings
+        # change; the setter only re-renders cues when the choice actually flips.
+        self.trip.imperial = self.ctx.settings.imperial_units
         pos_before = self.trip.position_mi
         for event in self.trip.update(dt):
             self._handle_trip_event(event)
@@ -2293,11 +2297,13 @@ class DrivingStatusScreenState(MenuState):
     def _map_lines(self) -> list[str]:
         d = self.driving
         route = d.route
+        settings = self.ctx.settings
         lines = [
             f"Route: {' to '.join(route.cities)}",
             f"Highways: {_join_phrase(route.highways)}",
-            f"Progress: {d.trip.position_mi:.0f} miles driven, {d.trip.remaining_miles:.0f} miles remaining",
-            f"Guidance: {d.trip.next_navigation_context()}",
+            f"Progress: {settings.distance_text(d.trip.position_mi)} driven, "
+            f"{settings.distance_text(d.trip.remaining_miles)} remaining",
+            f"Guidance: {d.trip.next_navigation_context(settings.imperial_units)}",
         ]
         upcoming = [
             stop
@@ -2308,7 +2314,7 @@ class DrivingStatusScreenState(MenuState):
             for stop in upcoming:
                 ahead = max(0.0, stop.at_mi - d.trip.position_mi)
                 lines.append(
-                    f"Stop in {ahead:.0f} miles: {stop.spoken_name}; "
+                    f"Stop in {settings.distance_text(ahead)}: {stop.spoken_name}; "
                     f"{_poi_offers_text(stop)}."
                 )
         else:
@@ -2319,7 +2325,10 @@ class DrivingStatusScreenState(MenuState):
         ][:4]
         for cue in next_cues:
             ahead = max(0.0, cue.at_mi - d.trip.position_mi)
-            lines.append(f"Map point in {ahead:.0f} miles: {cue.text}.")
+            speed = (f" at {settings.speed_text(cue.speed_mph)}"
+                     if cue.speed_mph is not None else "")
+            lines.append(
+                f"Map point in {settings.distance_text(ahead)}: {cue.text}{speed}.")
         if route.estimated_tolls > 0:
             lines.append(
                 f"Estimated carrier-paid toll exposure: {route.estimated_tolls:,.0f} dollars."
@@ -2614,6 +2623,7 @@ class ArrivalState(MenuState):
         self.driving = driving
         self.summary_parts: list[str] = []
         self._achievement_messages: list[str] = []
+        self._announcements: list[str] = []
         self.summary_lines: list[str] = []
         self.terminal = ctx.world.home_terminal(driving.job.destination)
         self._settle()
@@ -2640,6 +2650,8 @@ class ArrivalState(MenuState):
             self.summary_parts.append(
                 f"The empty run added {trip_damage:.0f} percent truck damage. "
                 "Visit the garage when you can.")
+        # The arrival screen and announcement read summary_lines, not parts.
+        self.summary_lines = list(self.summary_parts)
 
     def _settle(self) -> None:
         d = self.driving
