@@ -65,7 +65,15 @@ def is_frozen() -> bool:
     ``__compiled__`` global, so a packaged build is detectable here even
     though ``sys.frozen`` is absent.
     """
-    return bool(getattr(sys, "frozen", False)) or "__compiled__" in globals()
+    if bool(getattr(sys, "frozen", False)) or "__compiled__" in globals():
+        return True
+    root = install_root()
+    exe_name = Path(sys.executable).stem.lower()
+    return exe_name == APP_NAME.lower() and (
+        (root / "build_info.json").exists()
+        or (root / "freight_fate").exists()
+        or (root / "_internal").exists()
+    )
 
 
 def install_root() -> Path:

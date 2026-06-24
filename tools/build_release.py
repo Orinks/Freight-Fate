@@ -178,7 +178,13 @@ def stage_release_docs(build_dir: Path) -> None:
     changelog = ROOT / "CHANGELOG.md"
     if not changelog.exists():
         raise RuntimeError(f"Changelog was not found: {changelog}")
-    shutil.copy2(changelog, runtime_root(build_dir) / "CHANGELOG.md")
+    root = runtime_root(build_dir)
+    shutil.copy2(changelog, root / "CHANGELOG.md")
+
+    manual = ROOT / "docs" / "user-manual.md"
+    if not manual.exists():
+        raise RuntimeError(f"User manual was not found: {manual}")
+    shutil.copy2(manual, root / "USER_MANUAL.md")
 
 
 def build_nuitka_command(entry: Path) -> list[str]:
@@ -257,6 +263,7 @@ def verify_packaged_payload(build_dir: Path) -> None:
 
     required = [
         root / "CHANGELOG.md",
+        root / "USER_MANUAL.md",
         root / "freight_fate" / "assets" / "sounds",
         root / "freight_fate" / "data" / "world.json",
         root / "sound_lib" / "lib",

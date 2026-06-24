@@ -582,32 +582,36 @@ class Trip:
         leg = self.route.legs[self.current_leg_index]
         toward = self.route.cities[self.current_leg_index + 1]
         state = get_world().cities[toward].state
-        next_context = self.next_navigation_context()
+        next_context = self.next_navigation_context(imperial)
         terrain = self.terrain_at()
         terrain_text = "Grade level" if terrain == "flat" else f"Terrain {terrain}"
         return (f"{dist}. On {leg.highway} toward {toward}, {state}. "
                 f"{terrain_text}. {next_context}")
 
-    def next_navigation_context(self) -> str:
+    def next_navigation_context(self, imperial: bool = True) -> str:
         cue = self.next_navigation_cue()
         if cue is None:
             return f"Destination {self.route.cities[-1]} ahead."
         ahead = max(0.0, cue.at_mi - self.position_mi)
+        ahead_text = (
+            f"{ahead:.0f} miles" if imperial
+            else f"{ahead * 1.609344:.0f} kilometers"
+        )
         if cue.kind == "rest_stop":
-            return f"Next stop in {ahead:.0f} miles: {cue.text}."
+            return f"Next stop in {ahead_text}: {cue.text}."
         if cue.kind == "state_crossing":
-            return f"Next state line in {ahead:.0f} miles: {cue.text}."
+            return f"Next state line in {ahead_text}: {cue.text}."
         if cue.kind in ("maneuver", "onramp"):
-            return f"Next maneuver in {ahead:.0f} miles: {cue.text}."
+            return f"Next maneuver in {ahead_text}: {cue.text}."
         if cue.kind == "checkpoint":
-            return f"Next place in {ahead:.0f} miles: {cue.text}."
+            return f"Next place in {ahead_text}: {cue.text}."
         if cue.kind == "interchange":
-            return f"Next exit in {ahead:.0f} miles: {cue.text}."
+            return f"Next exit in {ahead_text}: {cue.text}."
         if cue.kind == "traffic":
-            return f"Traffic in {ahead:.0f} miles: {cue.text}."
+            return f"Traffic in {ahead_text}: {cue.text}."
         if cue.kind == "toll":
-            return f"Toll point in {ahead:.0f} miles: {cue.text}."
-        return f"Next guidance in {ahead:.0f} miles: {cue.text}."
+            return f"Toll point in {ahead_text}: {cue.text}."
+        return f"Next guidance in {ahead_text}: {cue.text}."
 
     def next_navigation_cue(self) -> NavigationCue | None:
         for cue in self.navigation_cues:

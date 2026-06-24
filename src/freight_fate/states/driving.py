@@ -516,11 +516,12 @@ class DrivingState(State):
         )
         lines = [
             f"Speed: {self.ctx.settings.speed_text(t.speed_mph)}",
-            f"Limit: {limit:.0f} mph" + (f" in a {reason} zone" if reason else ""),
+            f"Limit: {self.ctx.settings.speed_text(limit)}"
+            + (f" in a {reason} zone" if reason else ""),
             f"Route: {progress}",
             f"Fuel: {t.fuel_fraction * 100:.0f} percent",
             f"Air brakes: {self._air_status_text(detailed=True)}",
-            f"Weather: {self.weather.describe()}",
+            f"Weather: {self.weather.describe(self.ctx.settings.imperial_units)}",
             f"Clock: {time_of_day(self.trip.current_hour)}",
         ]
         if self._cruise_mph is not None:
@@ -533,8 +534,9 @@ class DrivingState(State):
             if context is not None:
                 lines.insert(
                     2,
-                    f"Traffic: lead vehicle {context.gap_mi:.1f} miles ahead, "
-                    f"{context.lead.speed_mph:.0f} mph",
+                    "Traffic: lead vehicle "
+                    f"{self.ctx.settings.distance_text(context.gap_mi)} ahead, "
+                    f"{self.ctx.settings.speed_text(context.lead.speed_mph)}",
                 )
         if t.damage_pct - self.start_damage > 1:
             lines.append(
@@ -594,7 +596,7 @@ class DrivingState(State):
             now = f"It is {clock_text(self.trip.current_hour)}."
             self.ctx.say(
                 f"{now} Pickup drive to {self._pickup_facility_text()}. "
-                f"{self.trip.remaining_miles:.1f} miles remain. "
+                f"{self.ctx.settings.distance_text(self.trip.remaining_miles)} remain. "
                 f"{hours_used:.1f} hours used before loading. "
                 f"{self.hos.summary(self.ctx.settings.hos_mode)} "
                 f"{self._hos_route_context()}")
@@ -636,8 +638,11 @@ class DrivingState(State):
                     f"limit, due in {remaining_min / 60.0:.1f} hours.")
         ahead = max(0.0, next_stop.at_mi - self.trip.position_mi)
         verdict = "before" if ahead <= legal_miles else "after"
-        return (f"Next legal stop: {next_stop.spoken_name} in {ahead:.0f} miles, "
-                f"{next_stop.parking_text}, {verdict} the next {action} limit.")
+        return (
+            f"Next legal stop: {next_stop.spoken_name} in "
+            f"{self.ctx.settings.distance_text(ahead)}, {next_stop.parking_text}, "
+            f"{verdict} the next {action} limit."
+        )
 
     def _legal_miles_for_hos(self, remaining_min: float) -> float:
         pace = max(35.0, min(62.0, self.truck.speed_mph or 55.0))

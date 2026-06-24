@@ -166,8 +166,11 @@ def test_release_docs_are_staged_with_build_payload(tmp_path, monkeypatch):
     build_release = load_build_release_module()
     source_root = tmp_path / "repo"
     source_root.mkdir()
+    (source_root / "docs").mkdir()
     (source_root / "CHANGELOG.md").write_text(
         "# Changelog\n\n## Unreleased\n", encoding="utf-8")
+    (source_root / "docs" / "user-manual.md").write_text(
+        "# Freight Fate User Manual\n", encoding="utf-8")
     monkeypatch.setattr(build_release, "ROOT", source_root)
 
     build_dir = tmp_path / "FreightFate"
@@ -176,9 +179,11 @@ def test_release_docs_are_staged_with_build_payload(tmp_path, monkeypatch):
 
     assert (build_dir / "CHANGELOG.md").read_text(
         encoding="utf-8").startswith("# Changelog")
+    assert (build_dir / "USER_MANUAL.md").read_text(
+        encoding="utf-8").startswith("# Freight Fate User Manual")
 
 
-def test_packaged_payload_requires_changelog(tmp_path):
+def test_packaged_payload_requires_release_docs(tmp_path):
     build_release = load_build_release_module()
     build_dir = tmp_path / "FreightFate"
     (build_dir / "freight_fate" / "assets" / "sounds").mkdir(parents=True)
@@ -195,8 +200,20 @@ def test_packaged_payload_requires_changelog(tmp_path):
         build_release.verify_packaged_payload(build_dir)
     except RuntimeError as exc:
         assert "CHANGELOG.md" in str(exc)
+        assert "USER_MANUAL.md" in str(exc)
     else:
-        raise AssertionError("verify_packaged_payload accepted a missing changelog")
+        raise AssertionError("verify_packaged_payload accepted missing docs")
+
+
+def test_nuitka_standalone_folder_counts_as_packaged_build(tmp_path, monkeypatch):
+    exe = tmp_path / "FreightFate.exe"
+    exe.write_text("", encoding="utf-8")
+    (tmp_path / "freight_fate").mkdir()
+    monkeypatch.setattr(updater.sys, "executable", str(exe))
+    monkeypatch.delattr(updater, "__compiled__", raising=False)
+    monkeypatch.setattr(updater.sys, "frozen", False, raising=False)
+
+    assert updater.is_frozen()
 
 
 def test_dev_stable_build_compares_by_build_date():

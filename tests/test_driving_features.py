@@ -396,6 +396,28 @@ def test_engine_shutdown_is_blocked_at_highway_speed(monkeypatch):
         app.shutdown()
 
 
+def test_metric_status_lines_do_not_mix_mph_and_miles(monkeypatch):
+    from freight_fate.app import App
+
+    app = App()
+    monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: None)
+    try:
+        app.ctx.settings.imperial_units = False
+        driving = start_drive(app)
+        quiet_trip(driving)
+        driving.truck.velocity_mps = 26.8
+        driving._cruise_mph = 60.0
+        driving.trip.traffic_leads = []
+
+        lines = driving.status_lines()
+
+        assert any("kilometers per hour" in line for line in lines)
+        assert not any(" mph" in line for line in lines)
+        assert not any(" miles" in line for line in lines)
+    finally:
+        app.shutdown()
+
+
 @pytest.mark.smoke
 def test_engine_shutdown_is_allowed_once_stopped():
     from freight_fate.app import App

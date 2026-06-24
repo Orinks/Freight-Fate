@@ -206,11 +206,15 @@ class WeatherSystem:
             out.append(cur)
         return out
 
-    def describe(self) -> str:
+    def describe(self, imperial: bool = True) -> str:
         eff = self.effects
         parts = [self.current.value]
         if eff.visibility_mi < 2:
-            parts.append(f"visibility {eff.visibility_mi:g} miles")
+            if imperial:
+                visibility = f"{eff.visibility_mi:g} miles"
+            else:
+                visibility = f"{eff.visibility_mi * 1.609344:g} kilometers"
+            parts.append(f"visibility {visibility}")
         if eff.grip < 0.7:
             parts.append("slick roads")
         if eff.wind > 0.6:

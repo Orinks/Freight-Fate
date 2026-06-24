@@ -16,8 +16,9 @@
 - **Optional lane drift.** Gameplay settings now include off, light, and
   realistic drift so players can add a gentle steering task, rumble-strip
   warnings, and off-road consequences without making the default drive harder.
-- **Packaged changelog.** Portable builds now include `CHANGELOG.md` in the
-  game folder so release notes are available offline.
+- **Packaged changelog and manual.** Portable builds now include
+  `CHANGELOG.md` and `USER_MANUAL.md` in the game folder so release notes and
+  the player manual are available offline.
 - **Player manual.** A new public manual now gathers install, career,
   dispatch, driving, saves, settings, accessibility, and troubleshooting
   guidance in one linkable place.
@@ -52,6 +53,12 @@
   cancellation includes that exit guidance.
 - **OneCore pitch.** Windows OneCore speech now keeps its native default pitch
   unless the player changes the pitch setting.
+- **Metric driving status.** Metric mode now reports driving status,
+  speed limits, traffic, pickup distance, and legal-stop distance in metric
+  units instead of mixing in mph or miles.
+- **Packaged update checks.** The updater now recognizes standalone packaged
+  folders more reliably, so switching to developer snapshots does not leave
+  the update screen thinking the game is running from source.
 - **Quieter exit guidance.** Ordinary highway exits now stay available in the
   route screen without being announced during the drive unless they lead to a
   stop you can actually take.
