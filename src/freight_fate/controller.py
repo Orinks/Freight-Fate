@@ -189,12 +189,37 @@ class ControllerManager:
         return names
 
     def _preferred_index(self) -> int:
-        """Index of the preferred device by name, or 0 when it is not present."""
+        """Index of the device to attach when starting.
+
+        A saved preferred name wins. With no saved choice, prefer a device SDL
+        recognises as a game controller so a flight stick or wheel sharing the
+        bus is not grabbed ahead of an actual pad; otherwise fall back to the
+        first device.
+        """
         if self.preferred_name:
             for index, name in enumerate(self.device_names()):
                 if name == self.preferred_name:
                     return index
-        return 0
+        gamepad = self._first_gamepad_index()
+        return gamepad if gamepad is not None else 0
+
+    def _first_gamepad_index(self) -> int | None:
+        """First device SDL maps as a game controller, or ``None`` if unknown.
+
+        Only consulted for the real joystick backend; with an injected fake
+        module (tests) it returns ``None`` so selection stays index-based.
+        """
+        if self._module is not pygame.joystick:
+            return None
+        try:
+            from pygame._sdl2 import controller as sdl2_controller
+            sdl2_controller.init()
+            for index in range(self.device_count()):
+                if sdl2_controller.is_controller(index):
+                    return index
+        except Exception:  # pragma: no cover - older or headless SDL
+            return None
+        return None
 
     def select(self, index: int) -> bool:
         """Switch to the controller at ``index``; records it as preferred."""
@@ -264,14 +289,36 @@ class ControllerManager:
 
     # -- discrete input translation ------------------------------------------------
 
+    def _owns(self, event: pygame.event.Event) -> bool:
+        """Whether an input event came from the active controller.
+
+        A flight stick, racing wheel, or second pad on the same machine emits
+        the same joystick event types. Without this check their input would
+        drive the game too -- and because a HOTAS throttle rests off-center and
+        streams motion endlessly, it both steals menu navigation and corrupts
+        the per-axis nav state shared by :meth:`_nav_edge`. Events with no
+        ``instance_id`` (the synthetic events used in tests) and the case of no
+        active device are treated as owned, so behaviour there is unchanged.
+        """
+        if self._instance_id is None:
+            return True
+        eid = getattr(event, "instance_id", None)
+        return eid is None or eid == self._instance_id
+
     def translate(self, event: pygame.event.Event, mode: str = "menu"):
         """Translate a joystick input event into synthetic key events.
 
         Returns ``None`` for events that are not controller input (so the caller
         dispatches them unchanged), an empty list for controller events consumed
-        without a key (analog motion), or a list of synthetic ``KEYDOWN`` events.
+        without a key (analog motion, or input from another device), or a list
+        of synthetic ``KEYDOWN`` events.
         """
         etype = event.type
+        if etype not in (
+                pygame.JOYBUTTONDOWN, pygame.JOYHATMOTION, pygame.JOYAXISMOTION):
+            return None
+        if not self._owns(event):
+            return []
         if etype == pygame.JOYBUTTONDOWN:
             table = _DRIVING_BUTTON_KEYS if mode == "driving" else _MENU_BUTTON_KEYS
             key = table.get(event.button)
@@ -280,9 +327,7 @@ class ControllerManager:
             table = _DRIVING_HAT_KEYS if mode == "driving" else _MENU_HAT_KEYS
             key = table.get(tuple(event.value))
             return [_key_event(key)] if key is not None else []
-        if etype == pygame.JOYAXISMOTION:
-            return self._axis_events(event, mode)
-        return None
+        return self._axis_events(event, mode)
 
     def _axis_events(self, event: pygame.event.Event, mode: str):
         # While driving the sticks and triggers are analog, polled by read().

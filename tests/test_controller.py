@@ -178,6 +178,27 @@ def test_axis_motion_is_consumed_silently_while_driving():
     assert mgr.translate(axis_event(AXIS_RIGHT_TRIGGER, 0.5), "driving") == []
 
 
+def test_translate_ignores_input_from_other_devices():
+    # A flight stick or second pad on the bus must not drive the game; only the
+    # active controller's events translate. (A HOTAS throttle resting off-center
+    # streams axis motion that otherwise steals menu navigation.)
+    js = FakeJoystick(instance_id=7)
+    mgr = ControllerManager(joystick_module=FakeModule([js]))
+    mgr.start()
+    mine = pygame.event.Event(pygame.JOYHATMOTION, value=(0, -1), instance_id=7)
+    other = pygame.event.Event(pygame.JOYHATMOTION, value=(0, -1), instance_id=99)
+    noisy = pygame.event.Event(pygame.JOYAXISMOTION, axis=AXIS_LEFT_Y, value=0.9,
+                               instance_id=99)
+    assert [e.key for e in mgr.translate(mine, "menu")] == [pygame.K_DOWN]
+    assert mgr.translate(other, "menu") == []
+    assert mgr.translate(noisy, "menu") == []
+    # The other device's noise must not have armed the shared nav state: the
+    # active pad's first push still registers a move.
+    active = pygame.event.Event(pygame.JOYAXISMOTION, axis=AXIS_LEFT_Y, value=0.9,
+                                instance_id=7)
+    assert [e.key for e in mgr.translate(active, "menu")] == [pygame.K_DOWN]
+
+
 # -- deadzone and analog reads -----------------------------------------------------
 
 
