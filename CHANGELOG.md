@@ -3,6 +3,9 @@
 ## Unreleased
 
 ### Added
+- **Player manual.** A new public manual now gathers install, career,
+  dispatch, driving, saves, settings, accessibility, and troubleshooting
+  guidance in one linkable place.
 - **Music remakes.** The main menu theme, Open Road, and Night Haul now use
   new Suno remakes while keeping their familiar Freight Fate music slots.
 - **Music rotation.** All menu and driving music beds now play once and rotate
