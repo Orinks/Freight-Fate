@@ -1248,6 +1248,8 @@ class DrivingState(State):
             exit_label = ""
         else:
             at_mi, exit_label = details
+        if at_mi <= self.trip.position_mi + 0.05:
+            return None
         return RoadStop(
             self._destination_facility_text(),
             at_mi,
@@ -1489,21 +1491,17 @@ class DrivingState(State):
         self.ctx.replace_state(ArrivalState(self.ctx, self))
 
     def _handle_missed_destination_exit(self) -> None:
-        details = self._destination_exit_details(include_past=True)
-        exit_mi = details[0] if details is not None else self.trip.total_miles
-        retry_mi = max(0.0, exit_mi - EXIT_WINDOW_MI)
         self.trip.finished = False
-        self.trip.position_mi = min(self.trip.position_mi, retry_mi)
         self._exit_stop = None
         self._cancel_cruise()
         if self._missed_destination_exit_said:
             return
         self._missed_destination_exit_said = True
         self.ctx.audio.play("ui/warning")
-        self._set_status("Destination exit missed. Press X before the exit.")
+        self._set_status("Destination exit missed. Back up until it is ahead, then press X.")
         self.ctx.say_event(
             f"You missed the destination exit for {self._destination_facility_text()}. "
-            "Use X to signal for the exit before reaching the destination.",
+            "Back up until the exit is ahead, then press X to signal for it.",
             interrupt=True,
         )
 
