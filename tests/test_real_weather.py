@@ -104,6 +104,28 @@ def test_weather_system_applies_live_conditions():
     assert ws.current is WeatherKind.HEAVY_RAIN
 
 
+def test_weather_system_holds_clear_while_live_data_pending():
+    """With a provider attached, weather starts clear and holds -- no simulated
+    warm-up -- until live data (or a confirmed offline state) arrives."""
+    class Pending:
+        def request(self, city, lat, lon):
+            pass
+
+        def get(self, city):
+            return None
+
+        def unavailable(self, city):
+            return False  # still fetching, not offline
+
+    ws = WeatherSystem("pacific_northwest", seed=1, provider=Pending())
+    ws.set_city("Seattle", 47.61, -122.33)
+    assert ws.current is WeatherKind.CLEAR
+    for _ in range(200):
+        assert ws.update(30.0) is None  # no simulated transitions while pending
+    assert ws.current is WeatherKind.CLEAR
+    assert not ws.live
+
+
 def test_weather_system_falls_back_when_offline():
     p = SyncProvider(fetch=lambda lat, lon: (_ for _ in ()).throw(OSError()))
     ws = WeatherSystem("great_lakes", seed=2, provider=p)

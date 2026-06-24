@@ -54,6 +54,12 @@
   snapshot may not load on an older stable release.
 
 ### Fixed
+- **Real weather warm-up.** With real weather enabled, a drive now starts in
+  neutral clear conditions and waits for live data, instead of briefly showing a
+  simulated condition that the live data immediately replaced. That warm-up
+  flicker could also wrongly unlock a weather achievement (for example, a rain
+  achievement for weather you never drove in). Simulated weather still runs as
+  the offline fallback when live data cannot be reached.
 - **macOS save location.** Saves now live in
   `~/Library/Application Support/FreightFate` instead of beside the app in
   Applications, matching macOS conventions. Existing saves found next to or

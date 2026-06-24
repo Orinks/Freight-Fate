@@ -109,6 +109,18 @@ class RealWeatherProvider:
                 return None  # too stale to trust
             return kind
 
+    def unavailable(self, city: str) -> bool:
+        """True when live data is not usable *and* a fetch has failed.
+
+        Lets callers tell a still-loading first fetch (hold steady, no warm-up
+        flicker) apart from a genuine offline state (fall back to simulated
+        weather). False while a request is in flight or data is cached.
+        """
+        with self._lock:
+            if city in self._cache or city in self._inflight:
+                return False
+            return city in self._failed_at
+
     def request(self, city: str, lat: float, lon: float) -> None:
         """Ensure fresh data for ``city`` is available or being fetched."""
         now = self._clock()
