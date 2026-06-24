@@ -204,6 +204,7 @@ class DrivingState(State):
             "start_damage": self.start_damage,
             "speeding_strikes": self.speeding_strikes,
             "air_brake": self.truck.air_brake_snapshot(),
+            "engine_on": self.truck.engine_on,
             "hos": self.hos.to_dict(),
             "fatigue": self.ctx.profile.fatigue,
             "hos_fine_count": self.hos_fine_count,
@@ -241,6 +242,8 @@ class DrivingState(State):
             state.trip.restore_toll_charges(list(data.get("toll_charges", ())))
             state.truck.restore_air_brake_snapshot(
                 data.get("air_brake"), default_ready=True)
+            if bool(data.get("engine_on", False)):
+                state.truck.start_engine()
             state._air_ready_said = state.truck.air_ready
             state._low_air_said = state.truck.air_low_warning
             state._spring_brake_said = state.truck.spring_brakes_active
@@ -290,7 +293,7 @@ class DrivingState(State):
                 f"{hours_used:.1f} hours used of {self.job.deadline_game_h:.0f}. "
                 f"It is {now}. Transmission is {mode}. "
                 f"Weather: {self.weather.describe()}. "
-                "You are parked. Press E to start the engine. "
+                f"You are parked. {self._engine_entry_instruction()} "
                 "When air pressure is ready, press P to release the parking brake.",
                 interrupt=False)
         else:
@@ -302,7 +305,7 @@ class DrivingState(State):
             self.ctx.say(f"You are at the wheel. {objective}It is {now}. "
                          f"Transmission is {mode}. "
                          f"Weather: {self.weather.describe()}. "
-                         "Press E to start the engine and build air pressure. "
+                         f"{self._engine_entry_instruction()} "
                          "F1 lists the controls.",
                          interrupt=False)
         if self.tutorial:
@@ -311,6 +314,11 @@ class DrivingState(State):
             self._record_weather_achievement(event=False)
             if not self.truck.transmission.automatic:
                 self.ctx.award_achievement("manual_driver", event=False, interrupt=False)
+
+    def _engine_entry_instruction(self) -> str:
+        if self.truck.engine_on:
+            return "Engine idling; build air pressure if needed."
+        return "Press E to start the engine and build air pressure."
 
     def _record_weather_achievement(self, *, event: bool = True) -> None:
         p = self.ctx.profile

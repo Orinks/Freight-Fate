@@ -248,6 +248,33 @@ def test_pickup_arrival_state_and_loaded_planning_resume():
         app.shutdown()
 
 
+def test_departing_loaded_trip_keeps_idling_engine():
+    from freight_fate.app import App
+    from freight_fate.states.city import RouteSelectState
+    from freight_fate.states.driving import DrivingState
+
+    app = App()
+    try:
+        pickup_drive = accept_pickup_drive(app)
+        pickup_drive.truck.start_engine()
+        pickup = arrive_at_pickup(app)
+        assert pickup.truck.engine_on
+
+        pickup.handle_event(key_event(pygame.K_RETURN))  # check in
+        pickup.handle_event(key_event(pygame.K_RETURN))  # load
+        assert pickup.truck.engine_on
+        pickup.handle_event(key_event(pygame.K_RETURN))  # depart for destination
+        assert isinstance(app.state, RouteSelectState)
+        app.state.handle_event(key_event(pygame.K_RETURN))
+
+        assert isinstance(app.state, DrivingState)
+        assert app.state.phase == "delivery"
+        assert app.state.truck.engine_on
+        assert app.ctx.profile.active_trip["engine_on"] is True
+    finally:
+        app.shutdown()
+
+
 def test_job_board_help_names_drivable_pickup_before_route_planning():
     from freight_fate.states.city import JobBoardState
 

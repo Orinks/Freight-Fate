@@ -58,6 +58,24 @@ def drive_some(driving, miles: float = 8.0) -> None:
     assert driving.trip.position_mi >= miles
 
 
+def test_active_drive_snapshot_restores_idling_engine():
+    from freight_fate.app import App
+    from freight_fate.states.driving import DrivingState
+
+    app = App()
+    try:
+        driving = start_drive(app)
+        driving.truck.start_engine()
+        snapshot = driving.snapshot()
+
+        resumed = DrivingState.from_snapshot(app.ctx, snapshot)
+
+        assert resumed is not None
+        assert resumed.truck.engine_on
+    finally:
+        app.shutdown()
+
+
 def quit_to_menu(app):
     from freight_fate.states.driving import PauseMenuState
     from freight_fate.states.main_menu import MainMenuState

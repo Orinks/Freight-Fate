@@ -45,6 +45,9 @@
   snapshot may not load on an older stable release.
 
 ### Fixed
+- **Truck idling.** The diesel now stays running through pickup check-in,
+  loading, route planning, loaded departure, and active-drive resume instead
+  of forcing a fresh engine start.
 - **Destination exits.** Delivery routes now require taking the real signed
   exit for the destination when one is listed, instead of completing just by
   driving to the end of the highway corridor.
