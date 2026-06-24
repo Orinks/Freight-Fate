@@ -484,6 +484,30 @@ def test_delivery_exit_uses_real_destination_interchange():
         app.shutdown()
 
 
+def test_destination_exit_announces_and_disables_cruise(monkeypatch):
+    from freight_fate.app import App
+
+    app = App()
+    events = []
+    monkeypatch.setattr(app.ctx, "say_event",
+                        lambda text, interrupt=True: events.append(text))
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        destination = driving._destination_exit_stop()
+        driving.trip.position_mi = destination.at_mi - 4.0
+        driving._cruise_mph = 60.0
+
+        driving._check_destination_exit()
+
+        assert driving._cruise_mph is None
+        assert "Destination exit ahead" in events[-1]
+        assert "Press X to take it" in events[-1]
+        assert "Adaptive cruise disabled" in events[-1]
+    finally:
+        app.shutdown()
+
+
 def test_delivery_does_not_complete_without_taking_destination_exit(monkeypatch):
     from freight_fate.app import App
     from freight_fate.states.driving import DrivingState

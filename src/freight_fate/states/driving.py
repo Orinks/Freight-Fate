@@ -162,6 +162,7 @@ class DrivingState(State):
         self._ramp_end_said = False
         self._destination_exit_taken = False
         self._missed_destination_exit_said = False
+        self._destination_exit_announced_key = ""
         self._cruise_mph: float | None = None
         self._cruise_throttle = 0.0
         self._acc_following = False
@@ -761,6 +762,7 @@ class DrivingState(State):
         pos_before = self.trip.position_mi
         for event in self.trip.update(dt):
             self._handle_trip_event(event)
+        self._check_destination_exit()
         self._update_exit(self.trip.position_mi - pos_before)
 
         self._update_hours_and_fatigue(dt)
@@ -1261,6 +1263,34 @@ class DrivingState(State):
     def _destination_exit_label(self) -> str:
         details = self._destination_exit_details()
         return "" if details is None else details[1]
+
+    def _destination_exit_key(self, stop) -> str:
+        return f"{stop.at_mi:.3f}:{stop.exit_label}:{stop.name}"
+
+    def _destination_exit_announcement(self, stop, ahead: float) -> str:
+        if stop.exit_label:
+            return (f"Destination exit ahead: {stop.exit_label} for {stop.name} "
+                    f"in {ahead:.0f} miles. Press X to take it.")
+        return (f"Destination exit ahead for {stop.name} in {ahead:.0f} miles. "
+                "Press X to take it.")
+
+    def _check_destination_exit(self) -> None:
+        stop = self._destination_exit_stop()
+        if stop is None:
+            return
+        ahead = stop.at_mi - self.trip.position_mi
+        if not (0 < ahead <= EXIT_WINDOW_MI):
+            return
+        key = self._destination_exit_key(stop)
+        if key == self._destination_exit_announced_key:
+            return
+        self._destination_exit_announced_key = key
+        message = self._destination_exit_announcement(stop, ahead)
+        if self._cruise_mph is not None:
+            self._cancel_cruise()
+            message += " Adaptive cruise disabled; take manual speed control."
+        self.ctx.audio.play("ui/notify", volume=0.7)
+        self.ctx.say_event(message, interrupt=False)
 
     def _destination_exit_details(self, *, include_past: bool = False) -> tuple[float, str] | None:
         if not self.route.legs:
