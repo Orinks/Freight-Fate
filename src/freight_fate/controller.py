@@ -23,6 +23,7 @@ from __future__ import annotations
 
 import contextlib
 import logging
+import os
 from dataclasses import dataclass
 
 import pygame
@@ -94,6 +95,38 @@ _DRIVING_HAT_KEYS = {
 }
 
 
+# Player-facing control names per input scheme, for in-game prompts. Each entry
+# is (keyboard phrase, controller phrase): the keyboard phrase reads naturally
+# after "Press"/"Hold" (e.g. "Press E", "Hold the Up arrow"), and the controller
+# phrase names the physical control descriptively so it is clear when spoken by
+# a screen reader. The mappings mirror the button/hat/analog tables above.
+ACTION_HINTS = {
+    "engine": ("E", "the A button"),
+    "parking_brake": ("P", "the Y button"),
+    "horn": ("H", "the X button"),
+    "accelerate": ("the Up arrow", "the right trigger"),
+    "brake": ("the Down arrow", "the left trigger"),
+    "emergency": ("B", "the B button"),
+    "steer": ("the Left and Right arrows", "the left stick"),
+    "take_exit": ("X", "the left bumper"),
+    "cruise": ("K", "the right bumper"),
+    "status_menu": ("Tab", "the Back button"),
+    "pause": ("Escape", "the Start button"),
+    "poi_menu": ("T", "the left stick button"),
+    "lane": ("L", "the right stick button"),
+    "route": ("R", "the D-pad up"),
+    "weather": ("V", "the D-pad down"),
+    "fuel": ("F", "the D-pad left"),
+    "clock": ("C", "the D-pad right"),
+}
+
+
+def control_hint(action: str, *, controller: bool) -> str:
+    """The player-facing name of a control for the active input scheme."""
+    keyboard, pad = ACTION_HINTS[action]
+    return pad if controller else keyboard
+
+
 @dataclass(frozen=True)
 class ControllerInput:
     """A frame's worth of analog controller state for the driving loop."""
@@ -146,7 +179,15 @@ class ControllerManager:
     # -- device lifecycle ----------------------------------------------------------
 
     def start(self) -> None:
-        """Initialise the joystick subsystem and attach the preferred pad, if any."""
+        """Initialise the joystick subsystem and attach the preferred pad, if any.
+
+        Setting ``FREIGHT_FATE_NO_CONTROLLER`` skips real-hardware detection (for
+        headless tests and CI). It is ignored when a fake joystick module is
+        injected, so unit tests can still exercise device handling.
+        """
+        if (self._module is pygame.joystick
+                and os.environ.get("FREIGHT_FATE_NO_CONTROLLER")):
+            return
         try:
             if not self._module.get_init():
                 self._module.init()

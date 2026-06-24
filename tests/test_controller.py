@@ -19,6 +19,7 @@ from freight_fate.controller import (
     NEUTRAL_INPUT,
     ControllerManager,
     apply_deadzone,
+    control_hint,
 )
 
 
@@ -197,6 +198,19 @@ def test_translate_ignores_input_from_other_devices():
     active = pygame.event.Event(pygame.JOYAXISMOTION, axis=AXIS_LEFT_Y, value=0.9,
                                 instance_id=7)
     assert [e.key for e in mgr.translate(active, "menu")] == [pygame.K_DOWN]
+
+
+# -- control hints -----------------------------------------------------------------
+
+
+def test_control_hint_switches_phrasing_by_scheme():
+    # Keyboard prompts read naturally after "Press"/"Hold"; controller prompts
+    # name the physical control descriptively.
+    assert control_hint("engine", controller=False) == "E"
+    assert control_hint("engine", controller=True) == "the A button"
+    assert control_hint("accelerate", controller=False) == "the Up arrow"
+    assert control_hint("accelerate", controller=True) == "the right trigger"
+    assert control_hint("take_exit", controller=True) == "the left bumper"
 
 
 # -- deadzone and analog reads -----------------------------------------------------

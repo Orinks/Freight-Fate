@@ -118,7 +118,7 @@ def test_driving_f1_describes_safe_shutdown_and_destination_parking(monkeypatch)
         driving.handle_event(key_event(pygame.K_F1))
 
         help_text = spoken[-1]
-        assert "stops it only below 5 miles per hour" in help_text
+        assert "it stops only below 5 miles per hour" in help_text
         assert "stop, then dock and deliver" in help_text
     finally:
         app.shutdown()
@@ -330,7 +330,7 @@ def test_air_brake_help_and_status_are_spoken(monkeypatch):
 
         driving.handle_event(key_event(pygame.K_F1))
         assert "Air pressure must build" in spoken[-1]
-        assert "Press P to release or set the parking brake" in spoken[-1]
+        assert "Release or set the parking brake with P" in spoken[-1]
 
         driving.handle_event(key_event(pygame.K_TAB))
         assert isinstance(app.state, DrivingStatusState)

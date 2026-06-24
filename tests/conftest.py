@@ -6,6 +6,10 @@ os.environ.setdefault("SDL_VIDEODRIVER", "dummy")
 os.environ.setdefault("SDL_AUDIODRIVER", "dummy")
 os.environ.setdefault("FREIGHT_FATE_NO_SPEECH", "1")
 os.environ.setdefault("PYGAME_HIDE_SUPPORT_PROMPT", "1")
+# Don't attach physical controllers during tests: in-game prompt wording depends
+# on whether a controller is active, and a pad plugged into the dev machine would
+# otherwise make those assertions hardware-dependent.
+os.environ.setdefault("FREIGHT_FATE_NO_CONTROLLER", "1")
 
 import pytest
 

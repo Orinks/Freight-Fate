@@ -11,7 +11,12 @@ import pygame
 from . import __version__
 from .achievements import AchievementAward, award
 from .audio import AudioEngine
-from .controller import NEUTRAL_INPUT, ControllerInput, ControllerManager
+from .controller import (
+    NEUTRAL_INPUT,
+    ControllerInput,
+    ControllerManager,
+    control_hint,
+)
 from .data.world import World, get_world
 from .discord_presence import DiscordPresence
 from .models.economy import Economy
@@ -79,6 +84,21 @@ class GameContext:
             self.speech.say(text, interrupt)
 
     # -- controller -------------------------------------------------------------
+
+    @property
+    def using_controller(self) -> bool:
+        """Whether a controller is the active input, so prompts name its buttons."""
+        return (self.controller is not None
+                and self.controller.connected
+                and self.settings.controller_enabled)
+
+    def control(self, action: str) -> str:
+        """Player-facing name of an action's control for the active input scheme.
+
+        Lets one prompt read "Press E" on a keyboard and "Press the A button"
+        on a controller without each caller branching. See ``ACTION_HINTS``.
+        """
+        return control_hint(action, controller=self.using_controller)
 
     def controller_input(self) -> ControllerInput:
         """Analog gamepad state for this frame, or neutral when none is in use."""

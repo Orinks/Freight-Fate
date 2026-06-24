@@ -182,7 +182,7 @@ class DrivingState(State):
         self._spring_brake_said = False
         self._brake_lockout_cue_timer = 0.0
         self._lane_rumble_timer = 0.0
-        self._status_text = "Press E to start the engine."
+        self._status_text = f"Press {self.ctx.control('engine')} to start the engine."
 
     # -- save and resume -----------------------------------------------------------
 
@@ -301,7 +301,8 @@ class DrivingState(State):
                 f"It is {now}. Transmission is {mode}. "
                 f"Weather: {self.weather.describe()}. "
                 f"You are parked. {self._engine_entry_instruction()} "
-                "When air pressure is ready, press P to release the parking brake.",
+                "When air pressure is ready, release the parking brake with "
+                f"{self.ctx.control('parking_brake')}.",
                 interrupt=False)
         else:
             objective = (f"Pickup dispatch: deadhead from the terminal to "
@@ -325,7 +326,8 @@ class DrivingState(State):
     def _engine_entry_instruction(self) -> str:
         if self.truck.engine_on:
             return "Engine idling; build air pressure if needed."
-        return "Press E to start the engine and build air pressure."
+        return (f"Press {self.ctx.control('engine')} to start the engine and "
+                "build air pressure.")
 
     def _record_weather_achievement(self, *, event: bool = True) -> None:
         p = self.ctx.profile
@@ -402,32 +404,37 @@ class DrivingState(State):
                 if self.phase == DRIVE_PHASE_PICKUP else
                 "Pickup and loading are complete. At your destination, stop, "
                 "then dock and deliver. ")
+            c = self.ctx.control
+            pad = self.ctx.using_controller
             self.ctx.say(
-                "Hold Up arrow to accelerate, Down arrow to brake. "
-                "When stopped in automatic, hold Down arrow to reverse slowly; "
-                "touch Up arrow to brake and return to forward. "
-                "Hold B for the emergency brake, the hardest possible stop. "
-                "K sets adaptive cruise at your current speed; bad weather "
-                "increases the following gap, and braking cancels. "
-                "X takes the next announced exit, called out by its number "
-                "when known: slow to 45 for the ramp, then brake to a stop for "
-                "the rest stop menu. "
-                "E starts the engine, and stops it only below 5 miles per hour. "
-                "Air pressure must build before the truck can move. "
-                "Press P to release or set the parking brake; if pressure is "
-                "below 100 psi, wait with the engine running. "
+                f"Hold {c('accelerate')} to accelerate, {c('brake')} to brake. "
+                f"When stopped in automatic, hold {c('brake')} to reverse slowly; "
+                f"touch {c('accelerate')} to brake and return to forward. "
+                f"Hold {c('emergency')} for the emergency brake, the hardest "
+                "possible stop. "
+                f"Set adaptive cruise at your current speed with {c('cruise')}; "
+                "bad weather increases the following gap, and braking cancels. "
+                f"Take the next announced exit with {c('take_exit')}, called out "
+                "by its number when known: slow to 45 for the ramp, then brake "
+                "to a stop for the rest stop menu. "
+                f"Start the engine with {c('engine')}; it stops only below 5 "
+                "miles per hour. Air pressure must build before the truck can "
+                f"move. Release or set the parking brake with {c('parking_brake')}; "
+                "if pressure is below 100 psi, wait with the engine running. "
                 f"{objective_help}"
-                "Space speed. Tab status menu. F fuel. "
-                "C clock, deadline, and hours of service. "
-                "R route. Shift R next listed highway exit. V weather. L lane position. "
-                "Left and Right arrows steer when lane drift is enabled. "
-                "T route POI menu when already stopped "
-                "at one: available actions may include fuel, break, sleep, "
-                "inspect, roadside assistance, or save when source-backed. H horn. "
-                "J engine brake. Escape pause menu. "
-                "On a game controller, the right trigger accelerates, the left "
-                "trigger brakes, the left stick steers, and hold B for the "
-                "emergency brake. "
+                f"Open the status menu with {c('status_menu')}, check fuel with "
+                f"{c('fuel')}, the clock, deadline, and hours of service with "
+                f"{c('clock')}, route with {c('route')}, weather with "
+                f"{c('weather')}, and lane position with {c('lane')}. "
+                f"Steer with {c('steer')} when lane drift is enabled. "
+                f"Open the route POI menu with {c('poi_menu')} when already "
+                "stopped at one: available actions may include fuel, break, "
+                "sleep, inspect, roadside assistance, or save when source-backed. "
+                f"Sound the horn with {c('horn')}. Open the pause menu with "
+                f"{c('pause')}. "
+                + ("" if pad else
+                   "Press Space for your speed, Shift R for the next listed "
+                   "highway exit, and J for the engine brake. ")
                 + ("" if self.truck.transmission.automatic else
                    "Hold Left Shift for clutch, then 1 through 0 for gears, "
                    "Backspace for reverse, N for neutral."))
@@ -464,12 +471,13 @@ class DrivingState(State):
 
     def _air_start_instruction(self) -> str:
         t = self.truck
+        brake = self.ctx.control('parking_brake')
         if t.parking_brake:
             if t.air_ready:
-                return "Air pressure ready. Press P to release the parking brake."
+                return f"Air pressure ready. Release the parking brake with {brake}."
             return (f"Air pressure {t.air_pressure_psi:.0f} psi. "
-                    "Wait for 100 psi, then press P to release the parking brake.")
-        return "Air pressure ready. Hold the Up arrow to drive."
+                    f"Wait for 100 psi, then release the parking brake with {brake}.")
+        return f"Air pressure ready. Hold {self.ctx.control('accelerate')} to drive."
 
     def _toggle_parking_brake(self) -> None:
         t = self.truck
@@ -793,8 +801,9 @@ class DrivingState(State):
         if was_on and not t.engine_on:
             self.ctx.audio.engine_stop()
             if t.stalled:
-                self.ctx.say_event("The engine stalled. Press E to restart, and "
-                                   "use a lower gear at low speed.")
+                self.ctx.say_event(
+                    f"The engine stalled. Press {self.ctx.control('engine')} to "
+                    "restart, and use a lower gear at low speed.")
             elif t.fuel_gal <= 0:
                 self._handle_out_of_fuel()
 
@@ -837,12 +846,12 @@ class DrivingState(State):
             self._set_status("Waiting for air pressure before the truck can move.")
             self.ctx.say_event(
                 f"Air pressure {t.air_pressure_psi:.0f} psi. Wait for 100 psi, "
-                "then press P to release the parking brake.",
+                f"then release the parking brake with {self.ctx.control('parking_brake')}.",
                 interrupt=False)
         elif t.parking_brake:
-            self._set_status("Parking brake set. Press P to release it.")
-            self.ctx.say_event("Parking brake set. Press P to release it.",
-                               interrupt=False)
+            release = f"Parking brake set. Release it with {self.ctx.control('parking_brake')}."
+            self._set_status(release)
+            self.ctx.say_event(release, interrupt=False)
 
     def _update_air_brake_announcements(
             self, was_ready: bool, was_low: bool, was_spring: bool) -> None:
@@ -871,9 +880,10 @@ class DrivingState(State):
             self._air_ready_said = True
             self.ctx.audio.play("ui/notify", volume=0.65)
             if t.parking_brake:
+                brake = self.ctx.control('parking_brake')
                 text = (f"Air pressure ready at {t.air_pressure_psi:.0f} psi. "
-                        "Press P to release the parking brake.")
-                self._set_status("Air ready. Press P to release the parking brake.")
+                        f"Release the parking brake with {brake}.")
+                self._set_status(f"Air ready. Release the parking brake with {brake}.")
             else:
                 text = f"Air pressure ready at {t.air_pressure_psi:.0f} psi."
                 self._set_status("Air ready.")
@@ -1329,7 +1339,7 @@ class DrivingState(State):
     def _destination_exit_announcement(self, stop, ahead: float) -> str:
         phrase = self._destination_exit_phrase(stop)
         return (f"In {ahead:.0f} miles, {phrase}, destination exit. "
-                "Press X to take it.")
+                f"Press {self.ctx.control('take_exit')} to take it.")
 
     def _check_destination_exit(self) -> None:
         stop = self._destination_exit_stop()
@@ -1525,7 +1535,8 @@ class DrivingState(State):
         self._rescue_offered = False
         self.ctx.audio.play("ui/error")
         self.ctx.say_event(f"You ran out of fuel. Roadside rescue brought thirty "
-                           f"gallons for {fee:,.0f} dollars. Press E to restart "
+                           f"gallons for {fee:,.0f} dollars. Press "
+                           f"{self.ctx.control('engine')} to restart "
                            "the engine, and plan your fuel stops.")
 
     def _handle_pickup_gate(self) -> None:
@@ -1588,10 +1599,12 @@ class DrivingState(State):
             return
         self._missed_destination_exit_said = True
         self.ctx.audio.play("ui/warning")
-        self._set_status("Destination exit missed. Back up until it is ahead, then press X.")
+        take_exit = self.ctx.control('take_exit')
+        self._set_status(
+            f"Destination exit missed. Back up until it is ahead, then press {take_exit}.")
         self.ctx.say_event(
             f"You missed the destination exit for {self._destination_facility_text()}. "
-            "Back up until the exit is ahead, then press X to signal for it.",
+            f"Back up until the exit is ahead, then press {take_exit} to signal for it.",
             interrupt=True,
         )
 
@@ -1710,21 +1723,24 @@ class Tutorial:
     def begin(self) -> None:
         self.ctx.say(
             "This is your first run, so let's walk through it. "
-            "First: press E to start the engine.", interrupt=False)
+            f"First: press {self.ctx.control('engine')} to start the engine.",
+            interrupt=False)
 
     def on_engine_started(self) -> None:
         if self.stage == 0:
             self.stage = 1
             self._timer = 0.0
             self._hinted = False
+            brake = self.ctx.control('parking_brake')
             if self.ctx.settings.automatic_transmission:
                 self.ctx.say("Now let air pressure build. When you hear air ready, "
-                             "press P to release the parking brake, then hold the "
-                             "Up arrow to accelerate. The transmission shifts for you.",
+                             f"release the parking brake with {brake}, then hold "
+                             f"{self.ctx.control('accelerate')} to accelerate. The "
+                             "transmission shifts for you.",
                              interrupt=False)
             else:
                 self.ctx.say("Now let air pressure build. When you hear air ready, "
-                             "press P to release the parking brake, then hold Left "
+                             f"release the parking brake with {brake}, then hold Left "
                              "Shift, press 1 for first gear, and release the clutch.",
                              interrupt=False)
 
@@ -1733,8 +1749,10 @@ class Tutorial:
             self.stage = 2
             self._timer = 0.0
             self._hinted = False
-            self.ctx.say("Parking brake released. Now hold the Up arrow to accelerate.",
-                         interrupt=False)
+            self.ctx.say(
+                "Parking brake released. Now hold "
+                f"{self.ctx.control('accelerate')} to accelerate.",
+                interrupt=False)
         elif self.stage == 1:
             self._timer = 0.0
             self._hinted = False
@@ -1746,28 +1764,35 @@ class Tutorial:
             self.stage = 2
             self._timer = 0.0
             self._hinted = False
-            self.ctx.say("In gear. Now hold the Up arrow to accelerate.",
-                         interrupt=False)
+            self.ctx.say(
+                f"In gear. Now hold {self.ctx.control('accelerate')} to accelerate.",
+                interrupt=False)
 
     def update(self, dt: float, truck) -> None:
         self._timer += dt
         if self.stage == 2 and truck.speed_mph > 20:
             self.stage = 3
+            speed_hint = ("" if self.ctx.using_controller
+                          else "Press Space anytime for your speed. ")
             self.ctx.say(
-                "You are rolling. Press Space anytime for your speed, Tab for a "
-                "full report, and F1 to hear all the controls. Watch for hazard "
-                "warnings, and brake hard when you hear them. Hold B for the "
-                "emergency brake when you need to stop fast. Safe travels.",
+                "You are rolling. " + speed_hint
+                + f"Open a full report with {self.ctx.control('status_menu')}, and "
+                "press F1 to hear all the controls. Watch for hazard warnings, and "
+                f"brake hard when you hear them. Hold {self.ctx.control('emergency')} "
+                "for the emergency brake when you need to stop fast. Safe travels.",
                 interrupt=False)
             self.ctx.profile.tutorial_done = True
             self.ctx.save_profile()
         elif self.stage in (0, 1) and self._timer > 25 and not self._hinted:
             self._hinted = True
             if self.stage == 0:
-                self.ctx.say("Reminder: press E to start the engine.", interrupt=False)
+                self.ctx.say(
+                    f"Reminder: press {self.ctx.control('engine')} to start the engine.",
+                    interrupt=False)
             elif truck.parking_brake:
                 self.ctx.say("Reminder: wait for air pressure to reach 100 psi, "
-                             "then press P to release the parking brake.",
+                             "then release the parking brake with "
+                             f"{self.ctx.control('parking_brake')}.",
                              interrupt=False)
             else:
                 self.ctx.say("Reminder: hold Left Shift, press 1, then release "
@@ -2087,8 +2112,9 @@ class RestStopState(MenuState):
     def go_back(self) -> None:
         self.ctx.audio.play("ui/menu_back")
         self.ctx.pop_state()
-        self.ctx.say("Back on the road. Press E to start the engine.",
-                     interrupt=True)
+        self.ctx.say(
+            f"Back on the road. Press {self.ctx.control('engine')} to start the engine.",
+            interrupt=True)
 
 
 class ParkingFullState(MenuState):
@@ -2127,7 +2153,8 @@ class ParkingFullState(MenuState):
         self.ctx.audio.play("ui/menu_back")
         self.ctx.pop_state()
         self.ctx.say("Back on the road. The next stop is announced as you "
-                     "approach it. Press E to start the engine.", interrupt=True)
+                     f"approach it. Press {self.ctx.control('engine')} to start "
+                     "the engine.", interrupt=True)
 
     def _shoulder(self) -> None:
         self.ctx.push_state(ShoulderSleepConfirmationState(
