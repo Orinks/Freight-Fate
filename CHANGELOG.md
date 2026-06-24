@@ -54,6 +54,10 @@
   snapshot may not load on an older stable release.
 
 ### Fixed
+- **macOS save location.** Saves now live in
+  `~/Library/Application Support/FreightFate` instead of beside the app in
+  Applications, matching macOS conventions. Existing saves found next to or
+  inside the app bundle are moved into the new location on first launch.
 - **Empty reposition arrivals.** Finishing a bobtail (empty reposition) run no
   longer crashes on arrival. The "Repositioned" summary screen now opens and
   reads its relocation summary instead of failing as you reach the new city.

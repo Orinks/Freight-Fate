@@ -19,8 +19,10 @@ driving.
    home terminal.
 6. Open the dispatch board, accept a job, and follow the current objective.
 
-The game is portable. Saves, settings, save identity files, and packaged-game
-logs live in the `saves` folder inside the game folder.
+On Windows and Linux the game is portable: saves, settings, save identity
+files, and packaged-game logs live in the `saves` folder inside the game
+folder. On macOS the app lives in Applications and cannot write beside itself,
+so those files live in `~/Library/Application Support/FreightFate` instead.
 
 ## Install, Updates, And Snapshots
 
@@ -393,8 +395,10 @@ The main menu can continue the latest career, choose another career, reset a
 career, or delete a career. If a saved career fails its integrity check, the
 game moves it aside and warns you at startup.
 
-To move Freight Fate to another folder or drive, copy the whole `FreightFate`
-folder, including `saves`.
+To move Freight Fate to another folder or drive on Windows or Linux, copy the
+whole `FreightFate` folder, including `saves`. On macOS the saves stay in
+`~/Library/Application Support/FreightFate` and follow your user account, so
+moving the app does not move them.
 
 ## Destination And Settlement
 
