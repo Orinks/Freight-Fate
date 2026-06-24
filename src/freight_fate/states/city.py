@@ -106,6 +106,14 @@ class CityMenuState(MenuState):
     def exit(self) -> None:
         self.ctx.audio.set_ambient(None)
 
+    def presence(self):
+        from ..discord_presence import PresenceState
+
+        p = self.ctx.profile
+        city = p.current_city if p else ""
+        detail = f"{city} service area" if city else ""
+        return PresenceState("At the terminal", detail)
+
     def announce_entry(self) -> None:
         p = self.ctx.profile
         city = self.ctx.world.cities[p.current_city]
@@ -665,6 +673,17 @@ class PickupFacilityState(MenuState):
     @property
     def facility(self) -> str:
         return self.job.origin_facility_text()
+
+    def presence(self):
+        from ..discord_presence import PresenceState
+
+        if self.loaded:
+            activity = "Loaded and ready to roll"
+        elif self.checked_in:
+            activity = "Loading at the dock"
+        else:
+            activity = "At a pickup facility"
+        return PresenceState(activity, f"{self.job.cargo.label} for {self.job.destination}")
 
     def enter(self) -> None:
         sequence = select_menu_music_sequence(self.ctx.profile)

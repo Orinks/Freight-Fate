@@ -317,6 +317,40 @@ def test_garage_upgrade_and_truck_purchase_flow():
 
 
 @pytest.mark.smoke
+def test_discord_presence_toggle_is_accessible_and_wired(monkeypatch):
+    """The Discord presence setting is a spoken, keyboard-driven menu item that
+    flips the saved setting and notifies the presence service -- and presence is
+    constructed dormant (never started) so it touches nothing until the game
+    loop runs."""
+    from freight_fate.app import App
+    from freight_fate.states.main_menu import SettingsCategoryState
+
+    app = App()
+    try:
+        spoken: list[str] = []
+        monkeypatch.setattr(app.ctx, "say",
+                            lambda text, interrupt=True: spoken.append(text))
+        toggles: list[bool] = []
+        monkeypatch.setattr(app.presence, "set_enabled", toggles.append)
+
+        app.push_state(SettingsCategoryState(app.ctx, "gameplay"))
+        menu = app.state
+        idx = next(i for i, item in enumerate(menu.items)
+                   if item.text.startswith("Discord presence"))
+        menu.index = idx
+        assert menu.items[idx].help  # spoken help text exists for F1
+        before = app.ctx.settings.discord_presence
+
+        menu.handle_event(key_event(pygame.K_RETURN))  # activate to toggle
+        assert app.ctx.settings.discord_presence != before
+        assert menu.items[idx].text.endswith("off" if before else "on")
+        assert spoken and spoken[-1].startswith("Discord presence:")
+        assert toggles == [app.ctx.settings.discord_presence]
+    finally:
+        app.shutdown()
+
+
+@pytest.mark.smoke
 def test_upgrades_are_money_gated():
     from freight_fate.app import App
     from freight_fate.models.profile import Profile

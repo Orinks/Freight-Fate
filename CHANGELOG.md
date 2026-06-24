@@ -3,6 +3,12 @@
 ## Unreleased
 
 ### Added
+- **Discord Rich Presence (optional).** When Discord is running, your profile
+  can show broad game activity -- the main menu, the terminal, driving a route,
+  resting, or delivering -- with high-level route and cargo context. Only
+  general game status is shared, never save files or personal details. It is on
+  by default and can be switched off in Settings → Gameplay → Discord presence,
+  and the game starts, plays, and exits cleanly whether or not Discord is open.
 - **Bigger freight map.** The playable network grows to 194 cities and
   438 routed legs, adding many more regional hubs, shorter connector lanes,
   and route-backed freight choices across the country for the next snapshot.

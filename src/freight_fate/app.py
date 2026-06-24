@@ -12,6 +12,7 @@ from . import __version__
 from .achievements import AchievementAward, award
 from .audio import AudioEngine
 from .data.world import World, get_world
+from .discord_presence import DiscordPresence
 from .models.economy import Economy
 from .models.profile import Profile
 from .music import music_track_duration_s
@@ -103,6 +104,10 @@ class GameContext:
                                weather=self.settings.weather_volume,
                                engine=self.settings.engine_volume,
                                ui=self.settings.ui_volume)
+
+    def apply_presence(self) -> None:
+        """Reflect the Discord presence setting (e.g. after a settings change)."""
+        self._app.presence.set_enabled(self.settings.discord_presence)
 
     def apply_speech(self) -> None:
         self.speech.select_event_backend(
@@ -213,6 +218,7 @@ class App:
         self.audio = AudioEngine()
         self.world = get_world()
         self.economy = Economy()
+        self.presence = DiscordPresence(enabled=self.settings.discord_presence)
         self.ctx = GameContext(self)
         self.ctx.apply_volumes()
         self.ctx.apply_speech()
@@ -257,6 +263,7 @@ class App:
 
         self.running = True
         self.push_state(MainMenuState(self.ctx))
+        self.presence.start()   # after init; never blocks if Discord is absent
         frames = 0
         try:
             while self.running:
@@ -268,6 +275,7 @@ class App:
                         self.state.handle_event(event)
                 if self.state is not None:
                     self.state.update(dt)
+                    self.presence.update(self.state.presence())
                 if self.ctx.achievement_notice_timer > 0:
                     self.ctx.achievement_notice_timer = max(
                         0.0,
@@ -304,6 +312,7 @@ class App:
         if self.ctx.profile is not None:
             self.ctx.profile.save()
         self.settings.save()
+        self.presence.shutdown()
         self.audio.shutdown()
         self.speech.shutdown()
         pygame.quit()
