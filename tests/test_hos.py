@@ -866,6 +866,26 @@ def test_settings_menu_cycles_hours_of_service():
         app.shutdown()
 
 
+@pytest.mark.smoke
+def test_settings_menu_cycles_steering_assist():
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        assert app.ctx.settings.steering_assist == "off"
+        cat = open_settings_category(app, "Gameplay")
+        while not cat.items[cat.index].text.startswith("Steering assist"):
+            cat.handle_event(key_event(pygame.K_DOWN))
+        cat.handle_event(key_event(pygame.K_RETURN))
+        assert app.ctx.settings.steering_assist == "light"
+        cat.handle_event(key_event(pygame.K_RETURN))
+        assert app.ctx.settings.steering_assist == "realistic"
+        cat.handle_event(key_event(pygame.K_LEFT))
+        assert app.ctx.settings.steering_assist == "light"
+    finally:
+        app.shutdown()
+
+
 def test_settings_menu_saves_each_change():
     from freight_fate.app import App
     from freight_fate.settings import Settings

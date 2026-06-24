@@ -27,6 +27,7 @@ from ..music import (
 )
 from ..sim import hos
 from ..sim.hos import HosClock, clock_text, is_night, time_of_day
+from ..sim.lane import LaneKeeping
 from ..sim.transmission import REVERSE
 from ..sim.trip import Trip, TripEventKind
 from ..sim.vehicle import G, TruckState
@@ -129,6 +130,7 @@ class DrivingState(State):
         self.trip = Trip(route, self.truck, self.weather,
                          time_scale=ctx.settings.time_scale, seed=self.trip_seed,
                          start_hour=trip_start_hour)
+        self.lane = LaneKeeping(seed=self.trip_seed)
         self._day_music_sequence = select_drive_music_sequence(
             self.route, self.trip_seed, 12.0, self.weather.current)
         self._night_music_sequence = select_drive_music_sequence(
@@ -168,6 +170,7 @@ class DrivingState(State):
         self._low_air_said = False
         self._spring_brake_said = False
         self._brake_lockout_cue_timer = 0.0
+        self._lane_rumble_timer = 0.0
         self._status_text = "Press E to start the engine."
 
     # -- save and resume -----------------------------------------------------------
@@ -202,6 +205,7 @@ class DrivingState(State):
             "hos_fine_count": self.hos_fine_count,
             "enforcement_events": sorted(self.enforcement_events),
             "out_of_service_count": self.out_of_service_count,
+            "lane_offset": self.lane.offset,
         }
 
     @classmethod
@@ -248,6 +252,7 @@ class DrivingState(State):
                 str(key) for key in data.get("enforcement_events", [])
             }
             state.out_of_service_count = int(data.get("out_of_service_count", 0))
+            state.lane.offset = float(data.get("lane_offset", 0.0))
             return state
         except (KeyError, TypeError, ValueError):
             log.warning("Could not resume saved trip", exc_info=True)
@@ -366,6 +371,8 @@ class DrivingState(State):
             self.ctx.say(self.trip.progress_summary(self.ctx.settings.imperial_units))
         elif key == pygame.K_v:
             self._speak_weather()
+        elif key == pygame.K_l:
+            self.ctx.say(self.lane.describe())
         elif key == pygame.K_F1:
             objective_help = (
                 f"Your current objective is pickup: drive to {self._pickup_facility_text()}, "
@@ -390,7 +397,9 @@ class DrivingState(State):
                 f"{objective_help}"
                 "Space speed. Tab status menu. F fuel. "
                 "C clock, deadline, and hours of service. "
-                "R route. V weather. T route POI menu when already stopped "
+                "R route. V weather. L lane position. "
+                "Left and Right arrows steer when lane assist is enabled. "
+                "T route POI menu when already stopped "
                 "at one: available actions may include fuel, break, sleep, "
                 "inspect, roadside assistance, or save when source-backed. H horn. "
                 "J engine brake. Escape pause menu. "
@@ -691,6 +700,7 @@ class DrivingState(State):
         keys = pygame.key.get_pressed()
         ramp = dt * 2.2
         self._brake_lockout_cue_timer = max(0.0, self._brake_lockout_cue_timer - dt)
+        self._lane_rumble_timer = max(0.0, self._lane_rumble_timer - dt)
         accelerating = keys[pygame.K_UP]
         braking_key = keys[pygame.K_DOWN]
         backing = self._update_reverse_controls(accelerating, braking_key)
@@ -719,6 +729,7 @@ class DrivingState(State):
             t.brake = 1.0
         t.emergency_brake = emergency
         t.transmission.clutch = 1.0 if keys[pygame.K_LSHIFT] or keys[pygame.K_RSHIFT] else 0.0
+        self._update_lane(keys, dt)
         self._update_cruise(dt, braking, accelerating)
 
         if t.transmission.automatic and t.engine_on:
@@ -890,6 +901,31 @@ class DrivingState(State):
                 else:
                     self.ctx.audio.play("driver/yawn", volume=0.8)
 
+    def _update_lane(self, keys, dt: float) -> None:
+        mode = self.ctx.settings.steering_assist
+        steer = 0.0
+        if keys[pygame.K_LEFT]:
+            steer -= 1.0
+        if keys[pygame.K_RIGHT]:
+            steer += 1.0
+        self.lane.steering = steer
+        leg = self.route.legs[self.trip.current_leg_index]
+        curve = 0.0
+        if leg.terrain == "hills":
+            curve = 0.25
+        elif leg.terrain == "mountain":
+            curve = 0.55
+        if self._ramp_mi is not None:
+            curve += 0.35
+        wind = self.weather.effects.wind
+        if self.lane.update(dt, self.truck.velocity_mps, curve=curve, wind=wind, assist=mode):
+            self.ctx.audio.play("vehicle/rumble_strip", volume=1.0)
+            self.truck.damage_pct = min(100.0, self.truck.damage_pct + 1.0)
+            self.ctx.say_event(
+                f"{self.lane.describe()} Steer back toward the lane center.",
+                interrupt=False,
+            )
+
     def _update_audio(self, dt: float = 0.0) -> None:
         t = self.truck
         audio = self.ctx.audio
@@ -900,6 +936,14 @@ class DrivingState(State):
         eff = self.weather.effects
         audio.set_weather(eff.sound)
         audio.set_wind(eff.wind)
+        rumble = self.lane.rumble_level()
+        if (
+            rumble > 0.0
+            and self.ctx.settings.steering_assist != "off"
+            and self._lane_rumble_timer <= 0.0
+        ):
+            self._lane_rumble_timer = 0.8
+            audio.play("vehicle/rumble_strip", volume=0.25 + rumble * 0.45)
         night = is_night(self.trip.current_hour)
         if night:
             audio.set_ambient("ambient/night")

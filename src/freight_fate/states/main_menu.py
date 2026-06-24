@@ -931,6 +931,9 @@ class SettingsCategoryState(MenuState):
                 MenuItem(lambda: f"Hours of service: {self._hos_label()}",
                          lambda: self._cycle_hos(1),
                          help="Choose realistic or relaxed hours rules."),
+                MenuItem(lambda: f"Steering assist: {self._steering_label()}",
+                         lambda: self._cycle_steering(1),
+                         help="Choose whether lane drift is off, light, or realistic."),
                 MenuItem("Back", self.go_back),
             ]
         if self.category == "audio":
@@ -985,7 +988,7 @@ class SettingsCategoryState(MenuState):
             actions = {
                 "gameplay": [
                     self._toggle_units, self._toggle_transmission,
-                    self._cycle_pace, self._cycle_hos,
+                    self._cycle_pace, self._cycle_hos, self._cycle_steering,
                 ],
                 "audio": [
                     lambda d: self._volume("master_volume", 0.1 * d),
@@ -1056,6 +1059,13 @@ class SettingsCategoryState(MenuState):
             "off": "debug bypass",
         }.get(self.ctx.settings.hos_mode, "realistic")
 
+    def _steering_label(self) -> str:
+        return {
+            "off": "off",
+            "light": "light",
+            "realistic": "realistic",
+        }.get(self.ctx.settings.steering_assist, "off")
+
     def _announce(self) -> None:
         self.refresh()
         self.ctx.settings.save()
@@ -1094,6 +1104,15 @@ class SettingsCategoryState(MenuState):
         except ValueError:
             i = 0
         self.ctx.settings.hos_mode = modes[(i + d) % len(modes)]
+        self._announce()
+
+    def _cycle_steering(self, d: int) -> None:
+        modes = ["off", "light", "realistic"]
+        try:
+            i = modes.index(self.ctx.settings.steering_assist)
+        except ValueError:
+            i = 0
+        self.ctx.settings.steering_assist = modes[(i + d) % len(modes)]
         self._announce()
 
     def _cycle_verbosity(self, d: int) -> None:
