@@ -11,7 +11,7 @@
   and the game starts, plays, and exits cleanly whether or not Discord is open.
 - **Bigger freight map.** The playable network grows to 194 cities and
   438 routed legs, adding many more regional hubs, shorter connector lanes,
-  and route-backed freight choices across the country for the next snapshot.
+  and route-backed freight choices across the country.
 - **Highway exit callouts.** Interstate drives now announce upcoming
   interchanges the way a real sign reads them -- "In 2 miles, exit 7 for
   US-1 North toward Trenton and New York" -- with the exit number, the route
