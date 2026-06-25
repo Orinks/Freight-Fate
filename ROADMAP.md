@@ -342,13 +342,17 @@ fit for an audio-first game.
   and reception fades into static and drops out as you leave range -- then the
   next town's stations fade in.
 
-- **Satellite fallback.** An always-available pseudo-satellite station for when
-  no local FM is in range -- the role the suggester pitched as "AFN." Note:
-  real AFN (American Forces Network, the DoD's satellite radio/TV for overseas
-  service members) is encrypted and not legally receivable by the public inside
-  the U.S., so a domestic trucker would really have SiriusXM. Open question:
-  brand the fallback as a fictionalized "forces/satellite network" that keeps
-  the AFN vibe without the licensing/realism wrinkle.
+- **Satellite fallback: AFN.** An always-available station for when no local
+  FM is in range -- AFN (American Forces Network), which has exactly the right
+  always-on, ad-free, slightly-institutional vibe. AFN's *overseas over-the-air
+  and decoder-box* broadcasts are encrypted, but its internet radio (AFN 360)
+  is publicly streamable to anyone, so it can be used directly. Public stream
+  URL (Triton/StreamTheWorld, AFN Pacific):
+  `https://playerservices.streamtheworld.com/api/livestream-redirect/AFNP_OKN_SC`.
+  AFN is ad-free and U.S. government-produced, but the music it airs is still
+  commercially licensed, so the streamer-safe toggle still applies to it. This
+  is the one station that is always in range, so it doubles as the graceful
+  fallback when a local stream rots or drops out.
 
 - **Audio sourcing: real streams, with the real work being technical not
   legal.** The friend's stream-URL list is the primary source. The gotchas to
