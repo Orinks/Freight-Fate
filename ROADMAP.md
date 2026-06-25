@@ -109,9 +109,17 @@ consequences, and the trooper/enforcement milestone below.
 
 Net-new realism candidates, roughly by area:
 
-- **Weather and seasons.** Tie weather to the career calendar so snow is a
-  cold-season risk and thunderstorms a summer one; add temperature so ice
-  forms near freezing; let real-weather mode drive hazard context too.
+- [x] **Weather and seasons.** Shipped: the career clock now yields a day of
+  the year and season, and `sim/season.py` models a regional temperature
+  (seasonal + daily swing). Temperature reconciles the simulated draw --
+  precipitation falls as snow when freezing, snow thaws to rain when warm,
+  storms need warmth -- so snow is a cold-season risk and thunderstorms a
+  warm-season one, and the weather-gated hazards inherit that automatically
+  (winter ice/squalls, summer hail). Seasons are opt-in via `WeatherSystem`'s
+  `game_hours` so seed-based tests stay deterministic; real-weather mode keeps
+  driving conditions (and thus hazard context) from live data. Follow-up:
+  black-ice risk on clear cold mornings after wet roads (currently ice rides
+  on active snow), and seasonal daylight length.
 - **Physics and the truck.** Cargo-weight-aware gross mass is done for
   acceleration, grade lugging, fuel burn, and now braking: the foundation
   brakes have a fixed force ceiling sized for the rated gross, so loads over

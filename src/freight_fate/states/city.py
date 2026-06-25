@@ -276,10 +276,13 @@ class CityMenuState(MenuState):
         if desc is None:
             # deterministic per city and hour, so asking twice agrees
             seed = zlib.crc32(f"{city.name}:{int(p.game_hours)}".encode())
-            desc = WeatherSystem(city.region, seed=seed).describe()
+            desc = WeatherSystem(city.region, seed=seed,
+                                 game_hours=p.game_hours).describe()
         source = "Live weather" if live else "Weather"
+        from ..sim.season import season
+
         self.ctx.say(f"It is {clock_text(hour)}, {time_of_day(hour)}, "
-                     f"day {day} of your career. "
+                     f"day {day} of your career, in {season(p.game_hours)}. "
                      f"{source} in {p.current_city}: {desc}.")
 
     def _sleep(self) -> None:

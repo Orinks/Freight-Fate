@@ -102,10 +102,15 @@ class WeatherSystem:
     """
 
     def __init__(self, region: str = "heartland", seed: int | None = None,
-                 provider=None) -> None:
+                 provider=None, game_hours: float | None = None) -> None:
         self._rng = random.Random(seed)
         self.region = region
         self.provider = provider
+        # Career clock at this point in the trip. When provided, weather is
+        # season- and temperature-aware (snow only when cold, storms only when
+        # warm); when None, the simulated draw is used as-is so seed-based
+        # tests stay deterministic. It advances with the trip in update().
+        self.game_hours = game_hours
         self.city: str | None = None
         self.city_coords: tuple[float, float] = (0.0, 0.0)
         self.live = False  # True while real-world data is driving conditions
@@ -113,9 +118,26 @@ class WeatherSystem:
         # than showing a simulated warm-up condition that the real data would
         # immediately replace. Simulated weather only appears if the provider
         # turns out to be offline (see update()).
-        self.current = WeatherKind.CLEAR if provider is not None else self._sample(region)
+        self.current = (WeatherKind.CLEAR if provider is not None
+                        else self._seasonal(self._sample(region)))
         self.minutes_until_change = self._rng.uniform(25, 70)
         self.thunder_cooldown = 0.0
+
+    def _temperature(self) -> float | None:
+        """Modeled outdoor temperature in Celsius, or None when seasons are off."""
+        if self.game_hours is None:
+            return None
+        from .season import temperature_c
+
+        return temperature_c(self.region, self.game_hours)
+
+    def _seasonal(self, kind: "WeatherKind") -> "WeatherKind":
+        """Reconcile a simulated condition with the season's temperature."""
+        if self.game_hours is None:
+            return kind
+        from .season import adjust_for_temperature
+
+        return adjust_for_temperature(kind, self._temperature())
 
     def set_city(self, city: str, lat: float, lon: float) -> None:
         """Track the city whose real weather should apply (provider mode)."""
@@ -148,6 +170,8 @@ class WeatherSystem:
     def update(self, game_minutes: float) -> WeatherKind | None:
         """Advance by game minutes. Returns the new condition if it changed."""
         self.thunder_cooldown = max(0.0, self.thunder_cooldown - game_minutes)
+        if self.game_hours is not None:
+            self.game_hours += game_minutes / 60.0  # advance the career clock
 
         changed = self._poll_provider()
         if self.live:
@@ -164,7 +188,7 @@ class WeatherSystem:
         if self.minutes_until_change > 0:
             return None
         self.minutes_until_change = self._rng.uniform(25, 70)
-        new = self._sample(self.region, near=self.current)
+        new = self._seasonal(self._sample(self.region, near=self.current))
         if new != self.current:
             self.current = new
             return new
@@ -220,6 +244,20 @@ class WeatherSystem:
     def effects(self) -> WeatherEffects:
         return EFFECTS[self.current]
 
+    @property
+    def temperature_c(self) -> float | None:
+        """Modeled outdoor temperature in Celsius, or None when seasons are off."""
+        return self._temperature()
+
+    @property
+    def season(self) -> str | None:
+        """Current season from the career clock, or None when seasons are off."""
+        if self.game_hours is None:
+            return None
+        from .season import season
+
+        return season(self.game_hours)
+
     def forecast(self, segments: int = 3) -> list[WeatherKind]:
         """Probable conditions ahead (informational, not binding)."""
         rng = random.Random()
@@ -230,13 +268,19 @@ class WeatherSystem:
             weights = REGION_WEIGHTS.get(self.region, DEFAULT_WEIGHTS).copy()
             weights[cur] = weights.get(cur, 1.0) * 2.5
             kinds = list(weights)
-            cur = rng.choices(kinds, [weights[k] for k in kinds])[0]
+            cur = self._seasonal(rng.choices(kinds, [weights[k] for k in kinds])[0])
             out.append(cur)
         return out
 
     def describe(self, imperial: bool = True) -> str:
         eff = self.effects
         parts = [self.current.value]
+        temp_c = self._temperature()
+        if temp_c is not None:
+            if imperial:
+                parts.append(f"{temp_c * 9 / 5 + 32:.0f} degrees")
+            else:
+                parts.append(f"{temp_c:.0f} degrees Celsius")
         if eff.visibility_mi < 2:
             if imperial:
                 visibility = f"{eff.visibility_mi:g} miles"

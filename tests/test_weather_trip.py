@@ -34,6 +34,50 @@ def test_all_regions_in_world_have_weights(world):
         assert region in REGION_WEIGHTS, f"no weather weights for {region}"
 
 
+def _season_conditions(region, game_hours, steps=400, seed=5):
+    """Conditions seen across a run with the career clock set to a season."""
+    ws = WeatherSystem(region, seed=seed, game_hours=game_hours)
+    seen = {ws.current}
+    for _ in range(steps):
+        ws.update(60.0)  # advance about an hour per step
+        seen.add(ws.current)
+    return seen
+
+
+def test_summer_runs_have_no_snow():
+    from freight_fate.sim.season import CAREER_START_DAY_OF_YEAR
+
+    summer_hours = (200 - CAREER_START_DAY_OF_YEAR) * 24.0  # mid July
+    seen = _season_conditions("great_lakes", summer_hours)
+    assert WeatherKind.SNOW not in seen
+
+
+def test_winter_runs_have_snow_but_no_thunderstorms():
+    from freight_fate.sim.season import CAREER_START_DAY_OF_YEAR
+
+    winter_hours = ((15 - CAREER_START_DAY_OF_YEAR) % 365.0) * 24.0  # mid January
+    seen = _season_conditions("great_lakes", winter_hours)
+    assert WeatherKind.SNOW in seen
+    assert WeatherKind.THUNDERSTORM not in seen
+
+
+def test_seasonal_weather_is_deterministic_with_seed():
+    winter_hours = ((15 - 80.0) % 365.0) * 24.0
+    a = WeatherSystem("rockies", seed=11, game_hours=winter_hours)
+    b = WeatherSystem("rockies", seed=11, game_hours=winter_hours)
+    for _ in range(80):
+        assert a.update(45.0) == b.update(45.0)
+    assert a.current == b.current
+    assert a.season == b.season == "winter"
+
+
+def test_seasons_off_by_default_leaves_temperature_unknown():
+    ws = WeatherSystem("heartland", seed=1)
+    assert ws.game_hours is None
+    assert ws.temperature_c is None
+    assert ws.season is None
+
+
 def test_weather_is_deterministic_with_seed():
     a = WeatherSystem("great_lakes", seed=7)
     b = WeatherSystem("great_lakes", seed=7)

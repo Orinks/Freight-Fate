@@ -3,6 +3,16 @@
 ## Unreleased
 
 ### Added
+- **Seasons and temperature.** Your career now moves through the year, and the
+  weather follows. A regional temperature model (a seasonal swing plus a
+  day-night swing, warmer in the desert and Gulf, colder across the northern
+  tier) decides whether precipitation falls as rain or snow and whether storms
+  can brew, so snow is a cold-season risk, thunderstorms a warm-season one, and
+  a Great Lakes January night freezes while a Gulf Coast one does not. Because
+  hazards are weather-gated, snow squalls and ice now show up in winter and
+  hail in summer, on their own. The terminal time-and-weather readout names the
+  season, and weather reports include the temperature in your units. Real
+  weather mode still drives conditions from live data.
 - **Cargo weight now changes how the truck drives.** Gross weight is the
   tractor-and-trailer tare plus the actual payload, so a heavy load pulls away
   gently, lugs harder on grades, and burns more fuel, while a light load or an

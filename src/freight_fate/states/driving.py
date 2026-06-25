@@ -132,6 +132,7 @@ class DrivingState(State):
             region,
             seed=self.trip_seed,
             provider=ctx.real_weather_provider(),
+            game_hours=profile.game_hours,
         )
         self._weather_source_real = ctx.settings.real_weather
         trip_start_hour = profile.game_hours % 24.0 if start_hour is None else start_hour
