@@ -1095,8 +1095,7 @@ class SettingsCategoryState(MenuState):
         return {
             "realistic": "realistic",
             "relaxed": "relaxed",
-            "debug_off": "debug bypass",
-            "off": "debug bypass",
+            "debug_off": "off (developer)",
         }.get(self.ctx.settings.hos_mode, "realistic")
 
     def _steering_label(self) -> str:
