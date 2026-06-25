@@ -87,9 +87,28 @@ is ready first and fold the rest in.
   out West (e.g. great_basin 80, southern_plains/rockies 75) -- and drops to
   an urban limit within `URBAN_RADIUS_MI` of a city. Changes are spoken as a
   GPS cue, zone-exit restores the corridor limit (not a flat 70), and the
-  speeding check is judged against it. Follow-ups: truck-specific limits
-  (California/Oregon ~55 for trucks), and using real OSM `maxspeed` per leg
-  where available instead of the highway/region approximation.
+  speeding check is judged against it.
+
+  **Important caveat:** the mph *values* are a hand-written, real-world-informed
+  approximation, NOT sourced data. The leg `highway` name and `region` are
+  real, but `corridor_speed_limit` applies one number per (highway-class,
+  region) -- there is no `maxspeed` field on `Leg` today. Next slice (planned):
+  replace the approximation with real OSM `maxspeed`.
+
+  *Next-session plan -- OSM `maxspeed`:*
+  - The project already pulls OSM and snaps it onto corridors
+    (`tools/build_interchanges.py`, `tools/enrich_routes.py`); extend that
+    pipeline to also read the `maxspeed` tag on each highway way.
+  - Bake a real posted limit onto each `Leg` (a single value, or a
+    per-offset profile for stretches where it changes), stored in the world
+    data alongside `highway`.
+  - Have `speed_limit_at` / `_corridor_limit_at` prefer the baked OSM value
+    and fall back to `corridor_speed_limit(highway, region)` only where OSM
+    has no tag. Keep the urban-near-city reduction and the spoken cue.
+  - Watch for: OSM `maxspeed` is often missing or in km/h (`"50"`, `"55 mph"`,
+    `"none"`); normalize units and skip/`None` the unparseable; note that many
+    rural Interstate ways simply have no tag, so the heuristic stays the
+    backstop. Also fold in truck-specific limits (California/Oregon ~55).
 
 - **Speeding leeway and consequences.** Leeway already exists: a strike is
   only recorded above `limit + 9` mph held for 6 s (`_update_speeding`),
