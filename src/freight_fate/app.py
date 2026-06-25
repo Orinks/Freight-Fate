@@ -325,11 +325,14 @@ def _configure_logging() -> None:
     update failures especially -- vanishes. The log lives next to the saves
     (game folder, saves/game.log) where a player can find and share it.
     """
-    level = os.environ.get("FREIGHT_FATE_LOG", "WARNING")
-    handlers = None
     from . import updater
 
-    if updater.is_frozen():
+    packaged = updater.is_frozen()
+    default_level = "INFO" if packaged else "WARNING"
+    level = os.environ.get("FREIGHT_FATE_LOG", default_level)
+    handlers = None
+
+    if packaged:
         from .models.profile import data_dir
 
         try:
@@ -339,7 +342,7 @@ def _configure_logging() -> None:
         except OSError:
             pass  # unwritable disk: console-only is the best we can do
     logging.basicConfig(
-        level=level, handlers=handlers,
+        level=level, handlers=handlers, force=True,
         format="%(asctime)s %(levelname)s %(name)s: %(message)s")
 
 
