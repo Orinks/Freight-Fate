@@ -205,6 +205,51 @@ Net-new realism candidates, roughly by area:
 - **Business realism.** The company-driver→owner-operator arc, loans, and
   insurance already sketched under Business.
 
+## Planned for 1.7: in-cab logbook (Record of Duty Status)
+
+The game talks about an ELD and the shipped `TrafficStopState` already runs a
+spoken "license/logbook check," but there is no actual logbook behind it. Today's
+`HosClock` (`sim/hos.py`) is an aggregate ledger -- it accumulates driving, duty,
+and since-break minutes and tracks the current duty status, but keeps no
+chronological history. A real ELD logbook is a Record of Duty Status (RODS): a
+timeline of duty-status segments with timestamps and locations. 1.7 adds that,
+and graduates the trooper logbook check from cosmetic narration to reading real
+entries. (The 60/70-hour cycle and 34-hour restart that a RODS window would
+unlock are deferred to a later milestone.)
+
+### Design sketch
+
+- **Data model.** A `DutyLog` of ordered `DutySegment`s: status (the existing
+  `DUTY_STATUSES` -- driving / on_duty_not_driving / off_duty / sleeper_berth),
+  start and end hour on the career clock (`profile.game_hours`), a short location
+  string ("I-90 near Toledo", "Chicago terminal"), and an optional note ("fuel
+  stop", "out-of-service order").
+- **Recording with coalescing.** `drive()` runs every frame, so the log must not
+  append a row per tick. `DutyLog.record(status, now_hour, location)` extends the
+  current segment when the status is unchanged and only opens a new one on an
+  actual transition, capturing location where the segment starts (as real RODS
+  logs location at status changes). A continuous driving stint becomes one row,
+  on-ramp to rest stop.
+- **Architecture.** Keep `HosClock` pure and pygame-free (the headless tests
+  drive it directly). The `DutyLog` lives on the `Profile` alongside `hos`, and
+  is recorded from the layer that already knows the absolute clock and place --
+  the driving/city/rest code that calls `_advance_rest_clock` and
+  `hos.drive/on_duty/off_duty`. `DutyLog` stays unit-testable standalone. Prune
+  to a rolling ~8-day window (192 game-hours) to bound save size.
+- **Persistence.** Additive `duty_log` field in `Profile.to_dict`/`from_dict`
+  with a tolerant load like `HosClock.from_dict`; absent in old saves means an
+  empty log. Fully backward compatible.
+- **Player surface.** A fully spoken Logbook screen (first-letter nav, consistent
+  with the rest of the UI), reachable from the city menu and the driving Tab
+  status menu. Shows current status, today's hours-in-each-status grid, the
+  running limits the clock already computes, and a chronological list of recent
+  segments ("7:00 AM-11:30 AM, driving, 4.5 hrs, I-90 from Chicago"). No new
+  global hotkey needed -- C and Tab already cover live HOS.
+- **Real enforcement (in scope for 1.7).** `TrafficStopState`'s logbook check
+  reads the recorded RODS instead of only the `hos_violation` flag, and cites
+  specifics in the spoken stop and evidence ("11.5 hours driving since your last
+  10-hour reset") rather than a generic "HOS/ELD violation."
+
 ## State troopers and law enforcement
 
 Speeding, HOS/ELD compliance, and route enforcement are now one visible
@@ -263,11 +308,12 @@ function guidance: https://www.fmcsa.dot.gov/hours-service/elds/eld-functions-fa
   hits, and an "out of service" order for serious HOS violations: 10
   hours parked where you stand. Ignoring the siren is a felony stop:
   spike strips ahead, a huge fine, and possibly losing the load.
-- **Settings.** The normal HOS setting now defaults to realistic, keeps
-  relaxed for accessibility and pacing, and labels the non-enforced mode
-  as a debug bypass rather than ordinary play. A separate law-enforcement
-  setting remains open only if enforcement grows beyond HOS and route
-  safety evidence.
+- **Settings.** HOS defaults to realistic and keeps relaxed for
+  accessibility and pacing. There is no player-facing non-enforced mode:
+  enforcement-off survives only as an internal developer bypass
+  (`debug_off`), and legacy 1.5.0 "off" saves now load as realistic. A
+  separate law-enforcement setting remains open only if enforcement grows
+  beyond HOS and route safety evidence.
 - **Audio needed.** Siren approach/behind loops, CB radio squelch and
   chatter, an officer voice channel (the SAPI event voice fits), spike
   strip. Added as Ogg Vorbis assets under
@@ -374,7 +420,10 @@ Deliver -> Earn and level up -> Repeat
 - [x] Cruise control (K), with hazard and braking auto-cancel
 - [x] Region-flavored road hazards (dust devils, deer, rockfall, ...)
 - [x] HOS-aware realistic deadlines (driving + breaks + sleep + slack)
-- [ ] State troopers and law enforcement (designed above, next milestone)
+- [ ] In-cab logbook / Record of Duty Status, with the trooper logbook
+      check reading real entries (planned for 1.7, designed above)
+- [ ] State troopers and law enforcement (speeding pull-overs shipped;
+      CB heads-up, felony stop, weigh-station, damage-triggered slices pending)
 - [ ] Special event jobs (oversize loads, urgent medical freight)
 - [ ] Trailer types with handling differences
 
