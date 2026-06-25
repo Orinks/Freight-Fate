@@ -21,6 +21,7 @@ from __future__ import annotations
 import argparse
 import importlib.util
 import json
+import os
 import platform
 import shutil
 import subprocess
@@ -41,6 +42,7 @@ PACKAGE_DIR = SRC_DIR / "freight_fate"
 SOUND_LIB_NATIVE_EXTS = {".dll", ".dylib", ".so"}
 SOUND_LIB_ARCH_DIR = "x64"
 PRISM_NATIVE_EXTS = {".dll", ".dylib", ".so"}
+PRISM_DEPENDENCY_DIR = "prismatoid.libs"
 
 
 def platform_native_exts() -> set[str]:
@@ -160,6 +162,12 @@ def prism_native_dir() -> Path:
     return native_dir
 
 
+def prism_dependency_dir() -> Path | None:
+    """Locate auditwheel-bundled Prism shared library dependencies."""
+    dependency_dir = package_dir("prism").parent / PRISM_DEPENDENCY_DIR
+    return dependency_dir if dependency_dir.exists() else None
+
+
 def native_files(root: Path, exts: set[str] | None = None) -> list[Path]:
     suffixes = exts or platform_native_exts()
     return [
@@ -191,10 +199,15 @@ def verify_release_dependencies() -> None:
             "Prism native speech libraries are missing for this platform "
             f"({expected}) under {native_dir}"
         )
+    verify_prism_native_linkage(native_dir, prism_dependency_dir())
 
 
 def prism_target_dir(build_dir: Path) -> Path:
     return runtime_root(build_dir) / "prism" / "_native"
+
+
+def prism_dependency_target_dir(build_dir: Path) -> Path:
+    return runtime_root(build_dir) / PRISM_DEPENDENCY_DIR
 
 
 def stage_prism_runtime_files(build_dir: Path) -> None:
@@ -212,6 +225,46 @@ def stage_prism_runtime_files(build_dir: Path) -> None:
     ]
     if not native_files:
         raise RuntimeError(f"No Prism native libraries were staged under {target_dir}")
+
+    dependency_dir = prism_dependency_dir()
+    if dependency_dir is not None:
+        dependency_target = prism_dependency_target_dir(build_dir)
+        if dependency_target.exists():
+            shutil.rmtree(dependency_target)
+        shutil.copytree(dependency_dir, dependency_target)
+
+
+def verify_prism_native_linkage(native_dir: Path, dependency_dir: Path | None = None) -> None:
+    """On Linux, prove Prism's bundled shared libraries can be resolved."""
+    if not sys.platform.startswith("linux"):
+        return
+    prism_libs = [
+        path for path in native_files(native_dir, {".so"}) if path.name.startswith("libprism")
+    ]
+    if not prism_libs:
+        return
+    if dependency_dir is None or not native_files(dependency_dir, {".so"}):
+        raise RuntimeError(
+            "Prism Linux shared library dependencies are missing from the package: "
+            f"{PRISM_DEPENDENCY_DIR}"
+        )
+
+    search_paths = os.pathsep.join(str(path) for path in (native_dir, dependency_dir))
+    env = {**os.environ, "LD_LIBRARY_PATH": search_paths}
+    for prism_lib in prism_libs:
+        result = subprocess.run(
+            ["ldd", str(prism_lib)],
+            check=False,
+            capture_output=True,
+            text=True,
+            env=env,
+        )
+        output = f"{result.stdout}\n{result.stderr}".strip()
+        if result.returncode != 0 or "not found" in output:
+            raise RuntimeError(
+                f"Prism native library has unresolved Linux dependencies: {prism_lib}\n"
+                f"{output}"
+            )
 
 
 def stage_release_docs(build_dir: Path) -> None:
@@ -313,6 +366,8 @@ def verify_packaged_payload(build_dir: Path) -> None:
         root / "sound_lib" / "lib",
         root / "prism" / "_native",
     ]
+    if sys.platform.startswith("linux"):
+        required.append(root / PRISM_DEPENDENCY_DIR)
     missing = [path for path in required if not path.exists()]
     if missing:
         raise RuntimeError(
@@ -332,6 +387,10 @@ def verify_packaged_payload(build_dir: Path) -> None:
             "Prism native speech libraries are missing from the package "
             f"for this platform ({expected})"
         )
+    verify_prism_native_linkage(
+        root / "prism" / "_native",
+        root / PRISM_DEPENDENCY_DIR if (root / PRISM_DEPENDENCY_DIR).exists() else None,
+    )
 
     if not native_files(root / "sound_lib" / "lib"):
         expected = ", ".join(sorted(platform_native_exts()))
