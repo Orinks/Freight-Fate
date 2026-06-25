@@ -12,7 +12,7 @@ from freight_fate.data.regions import (
 )
 from freight_fate.data.world import MARKET_TAG_FACILITY_TYPES, REGION_MARKET_TAGS
 from freight_fate.models.economy import REGION_FUEL_PRICE
-from freight_fate.sim.trip import REGION_HAZARDS
+from freight_fate.sim.trip import HAZARDS
 from freight_fate.sim.weather import REGION_WEIGHTS
 
 
@@ -45,7 +45,6 @@ def test_reno_is_great_basin_not_rockies(world):
 
 @pytest.mark.parametrize("table_name,table", [
     ("REGION_WEIGHTS", REGION_WEIGHTS),
-    ("REGION_HAZARDS", REGION_HAZARDS),
     ("REGION_FUEL_PRICE", REGION_FUEL_PRICE),
     ("REGION_MARKET_TAGS", REGION_MARKET_TAGS),
     ("REGION_LABELS", REGION_LABELS),
@@ -53,6 +52,20 @@ def test_reno_is_great_basin_not_rockies(world):
 def test_every_region_covered_in_flavor_tables(table_name, table):
     missing = [region for region in REGIONS if region not in table]
     assert not missing, f"{table_name} is missing regions: {missing}"
+
+
+def test_every_region_has_local_hazard_flavor():
+    """Every canonical region is named by at least one region-specific hazard,
+    so no region falls back to only the nationwide staples."""
+    tagged = {region for hazard in HAZARDS if hazard.regions for region in hazard.regions}
+    missing = [region for region in REGIONS if region not in tagged]
+    assert not missing, f"regions with no local hazard flavor: {missing}"
+
+
+def test_hazard_region_tags_are_canonical():
+    for hazard in HAZARDS:
+        for region in hazard.regions or ():
+            assert region in REGIONS, f"{hazard.text!r} tags unknown region {region!r}"
 
 
 def test_market_tags_are_valid(world):

@@ -3,6 +3,14 @@
 ## Unreleased
 
 ### Added
+- **Grounded, context-aware road hazards.** Hazards now only happen where and
+  when they plausibly would. Standing water and hydroplaning need wet weather;
+  snow squalls, bridge-deck ice, and black ice on shaded grades need snow;
+  dense-fog brake-lights need fog; crosswind shoves and dust storms need high
+  wind in open country; rockfall and runaway-truck hazards need mountain
+  terrain. Deer and elk are biased to dawn, dusk, and night, with regional
+  species. The implausible ones are gone -- no more farm equipment merging
+  onto the interstate or a dust devil on a clear, calm day.
 - **Relaxed mode now actually relaxes the road.** In relaxed hours-of-service
   mode, random road hazards are much rarer, so the drive centers on driver
   responsibility -- hours, fueling, repairs, and fatigue -- instead of constant

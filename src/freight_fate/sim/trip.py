@@ -15,9 +15,9 @@ from dataclasses import dataclass, field
 from enum import Enum
 
 from ..data.world import STOP_TYPE_LABELS, Route, TollEvent, get_world
-from .hos import is_night
+from .hos import is_night, time_of_day
 from .vehicle import TruckState
-from .weather import WeatherSystem
+from .weather import WeatherKind, WeatherSystem
 
 BASE_SPEED_LIMIT_MPH = 70.0
 FACILITY_ACCESS_LIMIT_MPH = 25.0
@@ -33,46 +33,109 @@ ZONE_WARNING_LOOKAHEAD_MI = 2.0
 STATE_CROSSING_WARNING_LOOKAHEAD_MI = 10.0
 CONSTRUCTION_ENFORCEMENT_GRACE_MI = 1.0
 
-# Hazards that can appear anywhere in the country...
-GENERIC_HAZARDS = ("debris on the road", "a slow vehicle ahead",
-                   "an animal crossing")
+# Road hazards are grounded in what actually puts a tractor-trailer on the
+# brakes on an interstate, and in *where and when* it happens. Each hazard is
+# tagged with the conditions under which it is plausible; a hazard is only ever
+# drawn when the current region, weather, terrain, and time of day all allow
+# it. This replaces an earlier flat region pool that could, say, announce farm
+# equipment merging onto a freeway or a dust devil on a clear calm day.
 
-# ...and the local flavor each region adds to the draw.
-REGION_HAZARDS: dict[str, tuple[str, ...]] = {
-    "northeast": ("a sudden lane closure ahead",
-                  "stopped traffic around a fender bender"),
-    "appalachia": ("a runaway-truck ramp warning on the steep grade",
-                   "fog settling in the hollow ahead"),
-    "great_lakes": ("a lake-effect snow squall whiting out the lane",
-                    "a deer crossing the road"),
-    "heartland": ("farm equipment pulling onto the highway",
-                  "a sudden downpour flooding the right lane"),
-    "southern_plains": ("a crosswind gust shoving the trailer",
-                        "hail hammering the windshield"),
-    "mid_south": ("a sudden downpour flooding the right lane",
-                  "retread debris from a blown tire"),
-    "atlantic_southeast": ("stopped traffic around a fender bender",
-                           "a sudden thunderstorm downpour"),
-    "gulf_coast": ("standing water flooding the lane",
-                   "a fog bank rolling across the lanes"),
-    "florida": ("a sudden thunderstorm downpour",
-                "stopped traffic around a fender bender"),
-    "rockies": ("rockfall debris on the road",
-                "a runaway truck on the grade ahead"),
-    "great_basin": ("a crosswind gust shoving the trailer",
-                    "snow drifting across the mountain pass"),
-    "desert_southwest": ("a dust devil crossing the interstate",
-                         "tumbleweeds piling in your lane"),
-    "california": ("a fog bank rolling across the lanes",
-                   "a stalled car jutting off the shoulder"),
-    "pacific_northwest": ("an elk crossing the road",
-                          "standing water in your lane"),
-}
+# Open, exposed country where high wind genuinely shoves a loaded trailer.
+_CROSSWIND_REGIONS = ("southern_plains", "heartland", "great_basin",
+                      "desert_southwest", "rockies")
+# Wet-road weather where standing water and hydroplaning are real risks.
+_WET = (WeatherKind.RAIN, WeatherKind.HEAVY_RAIN, WeatherKind.THUNDERSTORM)
+_HEAVY_WET = (WeatherKind.HEAVY_RAIN, WeatherKind.THUNDERSTORM)
+# Times wildlife actually moves onto the road.
+_WILDLIFE_TIMES = frozenset({"dawn", "dusk", "night"})
 
 
-def hazard_choices(region: str) -> tuple[str, ...]:
-    """The hazard pool for a region: nationwide staples plus local flavor."""
-    return GENERIC_HAZARDS + REGION_HAZARDS.get(region, ())
+@dataclass(frozen=True)
+class HazardDef:
+    """One grounded road hazard and the conditions under which it can occur.
+
+    A ``None`` on ``regions``/``weather``/``terrain`` means "no restriction on
+    that axis". ``animal`` hazards are biased to dawn, dusk, and night, when
+    wildlife is actually on the move. Selection weights by ``weight`` *after*
+    the eligibility filter, so context shapes both which hazards are possible
+    and how likely each one is.
+    """
+
+    text: str
+    weight: float = 1.0
+    regions: tuple[str, ...] | None = None
+    weather: tuple[WeatherKind, ...] | None = None
+    terrain: tuple[str, ...] | None = None
+    animal: bool = False
+
+
+HAZARDS: tuple[HazardDef, ...] = (
+    # Nationwide staples: plausible on any interstate, in any conditions.
+    HazardDef("debris on the road", 1.2),
+    HazardDef("retread debris from a blown tire", 1.0),
+    HazardDef("a vehicle stopped on the shoulder", 1.0),
+    HazardDef("a slow vehicle ahead", 0.9),
+    HazardDef("a sudden lane closure ahead", 0.8),
+    HazardDef("stopped traffic around a fender bender", 0.9),
+    # Wildlife: dawn/dusk/night, regional species.
+    HazardDef("a deer crossing the road", 1.3, animal=True,
+              regions=("northeast", "appalachia", "great_lakes", "heartland",
+                       "mid_south", "atlantic_southeast", "southern_plains",
+                       "gulf_coast", "florida", "california")),
+    HazardDef("an elk crossing the road", 1.1, animal=True,
+              regions=("rockies", "great_basin", "pacific_northwest")),
+    HazardDef("an animal on the road", 0.7, animal=True),  # generic fallback
+    # Wet weather only.
+    HazardDef("standing water flooding the lane", 1.1, weather=_WET),
+    HazardDef("the trailer hydroplaning on standing water", 1.0, weather=_HEAVY_WET),
+    HazardDef("hail hammering the windshield", 0.7,
+              weather=(WeatherKind.THUNDERSTORM,),
+              regions=("southern_plains", "heartland", "mid_south", "rockies",
+                       "great_lakes")),
+    # Snow and ice only.
+    HazardDef("a snow squall whiting out the lane", 1.0, weather=(WeatherKind.SNOW,)),
+    HazardDef("ice on the bridge deck", 1.0, weather=(WeatherKind.SNOW,)),
+    HazardDef("black ice on the shaded grade", 1.1, weather=(WeatherKind.SNOW,),
+              terrain=("mountain", "hills")),
+    # Dense fog only.
+    HazardDef("brake lights looming in dense fog", 1.2, weather=(WeatherKind.FOG,)),
+    # High wind: crosswind shove and blowing debris in open country.
+    HazardDef("a crosswind gust shoving the trailer", 1.2,
+              weather=(WeatherKind.WIND,), regions=_CROSSWIND_REGIONS),
+    HazardDef("a dust storm dropping visibility", 0.9, weather=(WeatherKind.WIND,),
+              regions=("desert_southwest", "southern_plains", "great_basin")),
+    HazardDef("tumbleweeds piling in your lane", 0.5, weather=(WeatherKind.WIND,),
+              regions=("desert_southwest", "great_basin", "southern_plains")),
+    # Mountain terrain only.
+    HazardDef("rockfall debris on the road", 1.0, terrain=("mountain",),
+              regions=("rockies", "appalachia", "great_basin",
+                       "pacific_northwest", "california")),
+    HazardDef("a runaway truck on the grade ahead", 0.8, terrain=("mountain",)),
+)
+
+
+def eligible_hazards(region: str, weather: WeatherKind, terrain: str,
+                     game_hours: float) -> list[tuple[str, float]]:
+    """Hazards plausible for the current context, as ``(text, weight)`` pairs.
+
+    Filters the catalog by region, weather, and terrain, then biases wildlife
+    toward the dawn/dusk/night hours when animals are actually on the road.
+    The nationwide staples have no restrictions, so the list is never empty.
+    """
+    nocturnal = time_of_day(game_hours) in _WILDLIFE_TIMES
+    out: list[tuple[str, float]] = []
+    for hazard in HAZARDS:
+        if hazard.regions is not None and region not in hazard.regions:
+            continue
+        if hazard.weather is not None and weather not in hazard.weather:
+            continue
+        if hazard.terrain is not None and terrain not in hazard.terrain:
+            continue
+        weight = hazard.weight
+        if hazard.animal:
+            weight *= 2.2 if nocturnal else 0.25
+        out.append((hazard.text, weight))
+    return out
 
 
 class TripEventKind(Enum):
@@ -960,7 +1023,13 @@ class Trip:
             return
         self._hazard_check_mi = self._rng.uniform(20, 60)
         if self._rng.random() < self._hazard_risk():
-            hazard = self._rng.choice(hazard_choices(self.current_region))
+            choices = eligible_hazards(
+                self.current_region, self.weather.current,
+                self.terrain_at(self.position_mi), self.current_hour)
+            if not choices:
+                return
+            texts, weights = zip(*choices, strict=True)
+            hazard = self._rng.choices(texts, weights)[0]
             # Lead with the action: the player can be on the brakes before
             # the sentence finishes. deadline_s is the reaction slack on top
             # of the braking time the driving state computes from speed.

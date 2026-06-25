@@ -53,6 +53,19 @@ is ready first and fold the rest in.
   `realistic` mode is unchanged. Possible follow-up: also thin out traffic
   density and reduce inspection/patrol frequency in relaxed mode.
 
+- [x] **Grounded, context-aware hazards.** Shipped: the flat per-region
+  string pool (which could announce farm equipment merging onto a freeway
+  or a dust devil on a clear day) is replaced by a tagged `HAZARDS`
+  catalog and `eligible_hazards(region, weather, terrain, hour)`. A hazard
+  is only drawn when region, weather, terrain, *and* time of day all allow
+  it: standing water/hydroplaning need wet weather; snow squalls, bridge
+  ice, and shaded-grade black ice need snow; fog brake-lights need fog;
+  crosswind and dust storms need high wind in open regions; rockfall and
+  runaway-truck need mountain terrain; deer/elk are dawn/dusk/night-biased
+  with regional species. Follow-up ideas: tie hazard *frequency* to
+  corridor traffic density and proximity to metros; seasonal weather so
+  snow is winter-only; condition animal strikes on rural vs urban miles.
+
 ### Driving feel
 
 - **Gear / launch realism.** Loaded low-gear acceleration is too brisk:
@@ -83,6 +96,34 @@ is ready first and fold the rest in.
   (below) is the intended home for visible, immediate enforcement (getting
   pulled over, on-the-spot fines). Confirm the ~10 mph leeway feels right
   and make the strike→cost link audible when a strike is recorded.
+
+### Realism north star (ongoing)
+
+The guiding goal for 1.6 and beyond: make every system as true to real
+trucking as the 2-D, audio-first design allows, short of a 3-D driving
+model. New realism ideas land here, then graduate into a concrete slice
+above when picked up. Existing items already serving this goal: grounded
+hazards (done), corridor speed limits, gear/launch realism, drowsiness
+consequences, and the trooper/enforcement milestone below.
+
+Net-new realism candidates, roughly by area:
+
+- **Weather and seasons.** Tie weather to the career calendar so snow is a
+  cold-season risk and thunderstorms a summer one; add temperature so ice
+  forms near freezing; let real-weather mode drive hazard context too.
+- **Physics and the truck.** Cargo-weight-aware gross mass (heavier loads
+  accelerate and stop slower, burn more fuel, lug harder on grades); tire
+  and brake wear over a truck's life; realistic grade-based fuel burn.
+- **Traffic and corridors.** Hazard and congestion frequency scaled by how
+  busy a corridor actually is (urban interstates dense, empty plains
+  sparse); rush-hour slowdowns near metros; realistic merge/exit traffic.
+- **Hours of service.** Split-sleeper provision and the 60/70-hour cycle
+  with 34-hour restart (the HOS model intentionally skips these today).
+- **Local delivery realism.** The destination-local approach legs already
+  sketched under World: surface-street miles, gate speeds, and dock
+  approaches after the highway portion.
+- **Business realism.** The company-driver→owner-operator arc, loans, and
+  insurance already sketched under Business.
 
 ## Next up: state troopers and law enforcement
 

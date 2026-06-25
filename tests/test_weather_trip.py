@@ -342,16 +342,63 @@ def test_time_scale_compresses_fuel_burn(world):
     assert truck.fuel_gal < truck.specs.fuel_tank_gal - 0.5
 
 
-def test_every_weather_region_has_local_hazards():
-    from freight_fate.sim.trip import GENERIC_HAZARDS, REGION_HAZARDS, hazard_choices
+def test_every_region_has_clear_day_hazards():
+    """Every region always has plausible clear, calm, daytime hazards: the
+    nationwide staples are never filtered out."""
+    from freight_fate.sim.trip import WeatherKind, eligible_hazards
 
-    for region in REGION_WEIGHTS:
-        assert region in REGION_HAZARDS, f"no local hazards for {region}"
-        pool = hazard_choices(region)
-        assert set(GENERIC_HAZARDS) <= set(pool)
-        assert set(REGION_HAZARDS[region]) <= set(pool)
-    # unknown regions still get the nationwide staples
-    assert hazard_choices("atlantis") == GENERIC_HAZARDS
+    noon = 12.0
+    for region in list(REGION_WEIGHTS) + ["atlantis"]:
+        pool = dict(eligible_hazards(region, WeatherKind.CLEAR, "flat", noon))
+        assert "debris on the road" in pool
+        # No weather- or terrain-specific hazard leaks into a clear flat day:
+        # nothing about snow, fog, wind, water, or mountain rockfall. (Wildlife
+        # is not weather-gated -- it stays eligible but heavily down-weighted
+        # by day -- so animal hazards are deliberately not excluded here.)
+        text = " ".join(pool)
+        for word in ("snow", "ice", "fog", "crosswind", "dust", "water",
+                     "hail", "rockfall", "tumbleweed"):
+            assert word not in text, f"{word!r} should not occur on a clear day"
+
+
+def test_weather_and_terrain_gate_hazards():
+    from freight_fate.sim.trip import WeatherKind, eligible_hazards
+
+    # Snow hazards only appear when it is snowing.
+    clear = dict(eligible_hazards("great_lakes", WeatherKind.CLEAR, "flat", 12.0))
+    snowy = dict(eligible_hazards("great_lakes", WeatherKind.SNOW, "flat", 12.0))
+    assert not any("snow" in t or "ice" in t for t in clear)
+    assert any("snow" in t for t in snowy)
+
+    # Rockfall is a mountain-terrain hazard, not a flatland one.
+    flat = dict(eligible_hazards("rockies", WeatherKind.CLEAR, "flat", 12.0))
+    mountain = dict(eligible_hazards("rockies", WeatherKind.CLEAR, "mountain", 12.0))
+    assert "rockfall debris on the road" not in flat
+    assert "rockfall debris on the road" in mountain
+
+    # The dropped, implausible hazards are gone for good.
+    everything = {
+        t
+        for region in REGION_WEIGHTS
+        for weather in WeatherKind
+        for terrain in ("flat", "hills", "mountain")
+        for t, _ in eligible_hazards(region, weather, terrain, 3.0)
+    }
+    assert not any("farm equipment" in t for t in everything)
+    assert not any("dust devil" in t for t in everything)
+
+
+def test_wildlife_is_biased_to_dawn_dusk_and_night():
+    """Deer and elk are far likelier at night than at midday, and the same
+    catalog drives both -- only the time of day changes the weight."""
+    from freight_fate.sim.trip import WeatherKind, eligible_hazards
+
+    day = dict(eligible_hazards("great_lakes", WeatherKind.CLEAR, "flat", 12.0))
+    night = dict(eligible_hazards("great_lakes", WeatherKind.CLEAR, "flat", 23.0))
+    deer = "a deer crossing the road"
+    assert night[deer] > day[deer]
+    # Non-animal staples keep the same weight regardless of the hour.
+    assert night["debris on the road"] == day["debris on the road"]
 
 
 def test_upcoming_stop_only_looks_ahead(world):
