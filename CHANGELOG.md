@@ -9,6 +9,11 @@
   empty pickup deadhead is noticeably brisker. Heavier freight is now a real
   trade-off, not just a number on the dispatch board. The driving status screen
   shows gross tonnage alongside the cargo weight.
+- **Load-sensitive braking.** The foundation brakes have a fixed force ceiling
+  sized for the rated gross, so a load heavier than the rated weight is
+  brake-capacity limited: it decelerates more gently, takes longer to stop, and
+  heats and fades the brakes sooner. Loads at or below the rated gross brake
+  exactly as before. Overloading a run now bites on a downgrade or a panic stop.
 - **Grounded, context-aware road hazards.** Hazards now only happen where and
   when they plausibly would. Standing water and hydroplaning need wet weather;
   snow squalls, bridge-deck ice, and black ice on shaded grades need snow;

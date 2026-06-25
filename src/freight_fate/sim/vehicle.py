@@ -204,7 +204,16 @@ class TruckState:
         holding = self.air_brakes_holding
         application = 1.0 if self.emergency_brake or holding else self.brake
         boost = EMERGENCY_BRAKE_MULT if self.emergency_brake or holding else 1.0
-        service = self.gross_mass_kg * G * s.max_brake_decel_g * application * boost * fade * self.grip
+        effort = G * s.max_brake_decel_g * application * boost * fade
+        # Tire friction scales with the weight on the tires (and weather grip);
+        # the foundation brakes have a fixed force ceiling sized for the rated
+        # gross (``specs.mass_kg``). A load at or below the rated weight reaches
+        # the friction-limited deceleration (unchanged behavior), but a heavier
+        # load is brake-capacity limited -- the brakes cannot generate enough
+        # force for its mass, so it decelerates more gently and stops longer.
+        friction = self.gross_mass_kg * effort * self.grip
+        capacity = s.mass_kg * effort
+        service = min(friction, capacity)
         jake = s.engine_brake_force_n if (self.engine_brake and self.engine_on
                                           and not self.transmission.in_neutral) else 0.0
         direction = 1.0 if self.velocity_mps > 0 else -1.0
@@ -443,7 +452,10 @@ class TruckState:
 
         applied = 1.0 if self.emergency_brake or self.air_brakes_holding else self.brake
         speed = abs(self.velocity_mps)
-        heating = applied * speed * 2.2
+        # Heavier loads dump more kinetic energy into the brakes, so a load over
+        # the rated gross heats and fades sooner; at the rated gross this is 1.0.
+        load_factor = self.gross_mass_kg / s.mass_kg
+        heating = applied * speed * 2.2 * load_factor
         cooling = (self.brake_temp_c - 20.0) * (0.02 + 0.004 * speed)
         self.brake_temp_c = max(20.0, self.brake_temp_c + (heating - cooling) * dt)
 

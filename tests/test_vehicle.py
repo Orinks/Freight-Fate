@@ -106,6 +106,47 @@ def test_heavier_load_burns_more_fuel_reaching_speed():
     assert (heavy_start - heavy.fuel_gal) > (light_start - light.fuel_gal)
 
 
+def test_load_over_rated_gross_brakes_more_gently():
+    from freight_fate.sim.vehicle import KG_PER_TON, REFERENCE_CARGO_KG
+
+    truck = make_auto_truck()
+    truck.velocity_mps = 25.0
+    truck.brake = 1.0
+    truck.grip = 1.0
+
+    def decel(cargo_kg: float) -> float:
+        truck.cargo_kg = cargo_kg
+        return abs(truck.brake_force()) / truck.gross_mass_kg
+
+    rated = decel(REFERENCE_CARGO_KG)                   # gross == rated gross
+    light = decel(4 * KG_PER_TON)                       # well under rated
+    heavy = decel(REFERENCE_CARGO_KG + 6 * KG_PER_TON)  # over rated gross
+
+    # At or below the rated gross, braking is friction-limited and the
+    # deceleration does not depend on mass.
+    assert light == pytest.approx(rated)
+    # Over the rated gross the foundation brakes cannot keep up, so the rig
+    # decelerates more gently -- a longer stop.
+    assert heavy < rated
+
+
+def test_heavier_load_heats_brakes_faster():
+    from freight_fate.sim.vehicle import KG_PER_TON
+
+    light = make_auto_truck()
+    heavy = make_auto_truck()
+    light.cargo_kg = 0.0
+    heavy.cargo_kg = 25 * KG_PER_TON
+    light.throttle = heavy.throttle = 0.0
+    light.brake = heavy.brake = 1.0
+    for _ in range(60):   # one second of hard braking from 25 m/s
+        light.velocity_mps = max(light.velocity_mps, 25.0)
+        heavy.velocity_mps = max(heavy.velocity_mps, 25.0)
+        light.update(1 / 60)
+        heavy.update(1 / 60)
+    assert heavy.brake_temp_c > light.brake_temp_c
+
+
 def test_engine_start_requires_fuel():
     t = TruckState()
     t.fuel_gal = 0.0

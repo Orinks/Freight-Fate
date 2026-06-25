@@ -113,12 +113,12 @@ Net-new realism candidates, roughly by area:
   cold-season risk and thunderstorms a summer one; add temperature so ice
   forms near freezing; let real-weather mode drive hazard context too.
 - **Physics and the truck.** Cargo-weight-aware gross mass is done for
-  acceleration, grade lugging, and fuel burn. Remaining: make braking
-  load-sensitive too -- today brake force scales with mass so deceleration
-  is mass-independent and a loaded rig stops in the same distance as an
-  empty one; cap brake capacity and scale brake heating by gross weight so
-  heavy loads stop longer and fade sooner. Also: tire and brake wear over a
-  truck's life, and finer grade-based fuel burn.
+  acceleration, grade lugging, fuel burn, and now braking: the foundation
+  brakes have a fixed force ceiling sized for the rated gross, so loads over
+  the rated weight are brake-capacity limited -- they stop longer and heat
+  the brakes faster -- while loads at or below the rated gross are unchanged.
+  Remaining: tire and brake wear over a truck's life, and finer grade-based
+  fuel burn.
 - **Traffic and corridors.** Hazard and congestion frequency scaled by how
   busy a corridor actually is (urban interstates dense, empty plains
   sparse); rush-hour slowdowns near metros; realistic merge/exit traffic.
