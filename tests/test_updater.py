@@ -186,13 +186,22 @@ def test_release_docs_are_staged_with_build_payload(tmp_path, monkeypatch):
 def test_packaged_payload_requires_release_docs(tmp_path):
     build_release = load_build_release_module()
     build_dir = tmp_path / "FreightFate"
+    exe = build_dir / ("FreightFate.exe" if sys.platform == "win32" else "FreightFate")
+    exe.parent.mkdir(parents=True)
+    exe.write_text("", encoding="utf-8")
+    if sys.platform != "win32":
+        exe.chmod(0o755)
+    (build_dir / "build_info.json").write_text("{}", encoding="utf-8")
     (build_dir / "freight_fate" / "assets" / "sounds").mkdir(parents=True)
     (build_dir / "freight_fate" / "data").mkdir(parents=True)
     (build_dir / "freight_fate" / "data" / "world.json").write_text(
         "{}", encoding="utf-8")
     (build_dir / "sound_lib" / "lib").mkdir(parents=True)
+    sound_suffix = next(iter(build_release.platform_native_exts()))
+    (build_dir / "sound_lib" / "lib" / f"bass{sound_suffix}").write_text(
+        "", encoding="utf-8")
     (build_dir / "prism" / "_native").mkdir(parents=True)
-    native_suffix = next(iter(build_release.PRISM_NATIVE_EXTS))
+    native_suffix = next(iter(build_release.platform_native_exts()))
     (build_dir / "prism" / "_native" / f"bridge{native_suffix}").write_text(
         "", encoding="utf-8")
 
@@ -203,6 +212,87 @@ def test_packaged_payload_requires_release_docs(tmp_path):
         assert "USER_MANUAL.md" in str(exc)
     else:
         raise AssertionError("verify_packaged_payload accepted missing docs")
+
+
+def test_packaged_payload_requires_platform_prism_native(tmp_path):
+    build_release = load_build_release_module()
+    build_dir = tmp_path / "FreightFate"
+    exe = build_dir / ("FreightFate.exe" if sys.platform == "win32" else "FreightFate")
+    exe.parent.mkdir(parents=True)
+    exe.write_text("", encoding="utf-8")
+    if sys.platform != "win32":
+        exe.chmod(0o755)
+    (build_dir / "build_info.json").write_text("{}", encoding="utf-8")
+    (build_dir / "CHANGELOG.md").write_text("# Changelog\n", encoding="utf-8")
+    (build_dir / "USER_MANUAL.md").write_text("# Manual\n", encoding="utf-8")
+    (build_dir / "freight_fate" / "assets" / "sounds").mkdir(parents=True)
+    (build_dir / "freight_fate" / "data").mkdir(parents=True)
+    (build_dir / "freight_fate" / "data" / "world.json").write_text(
+        "{}", encoding="utf-8")
+    (build_dir / "sound_lib" / "lib").mkdir(parents=True)
+    sound_suffix = next(iter(build_release.platform_native_exts()))
+    (build_dir / "sound_lib" / "lib" / f"bass{sound_suffix}").write_text(
+        "", encoding="utf-8")
+    (build_dir / "prism" / "_native").mkdir(parents=True)
+    wrong_suffix = ".dll" if ".dll" not in build_release.platform_native_exts() else ".so"
+    (build_dir / "prism" / "_native" / f"bridge{wrong_suffix}").write_text(
+        "", encoding="utf-8")
+
+    try:
+        build_release.verify_packaged_payload(build_dir)
+    except RuntimeError as exc:
+        assert "Prism native speech libraries are missing" in str(exc)
+    else:
+        raise AssertionError("verify_packaged_payload accepted missing platform Prism")
+
+
+def test_packaged_payload_requires_runnable_posix_executable(tmp_path, monkeypatch):
+    build_release = load_build_release_module()
+    monkeypatch.setattr(build_release.sys, "platform", "linux")
+    build_dir = tmp_path / "FreightFate"
+    exe = build_dir / "FreightFate"
+    exe.parent.mkdir(parents=True)
+    exe.write_text("", encoding="utf-8")
+    exe.chmod(0o644)
+    (build_dir / "build_info.json").write_text("{}", encoding="utf-8")
+    (build_dir / "CHANGELOG.md").write_text("# Changelog\n", encoding="utf-8")
+    (build_dir / "USER_MANUAL.md").write_text("# Manual\n", encoding="utf-8")
+    (build_dir / "freight_fate" / "assets" / "sounds").mkdir(parents=True)
+    (build_dir / "freight_fate" / "data").mkdir(parents=True)
+    (build_dir / "freight_fate" / "data" / "world.json").write_text(
+        "{}", encoding="utf-8")
+    (build_dir / "sound_lib" / "lib").mkdir(parents=True)
+    (build_dir / "sound_lib" / "lib" / "libbass.so").write_text("", encoding="utf-8")
+    (build_dir / "prism" / "_native").mkdir(parents=True)
+    (build_dir / "prism" / "_native" / "bridge.so").write_text("", encoding="utf-8")
+
+    try:
+        build_release.verify_packaged_payload(build_dir)
+    except RuntimeError as exc:
+        assert "updates cannot restart" in str(exc)
+    else:
+        raise AssertionError("verify_packaged_payload accepted non-runnable executable")
+
+
+def test_release_dependency_check_requires_platform_native_files(tmp_path, monkeypatch):
+    build_release = load_build_release_module()
+    monkeypatch.setattr(build_release.sys, "platform", "linux")
+    sound_dir = tmp_path / "sound_lib" / "lib"
+    prism_dir = tmp_path / "prism" / "_native"
+    sound_dir.mkdir(parents=True)
+    prism_dir.mkdir(parents=True)
+    (sound_dir / "bass.dll").write_text("", encoding="utf-8")
+    (prism_dir / "bridge.dll").write_text("", encoding="utf-8")
+    monkeypatch.setattr(build_release, "sound_lib_lib_dir", lambda: sound_dir)
+    monkeypatch.setattr(build_release, "prism_native_dir", lambda: prism_dir)
+    monkeypatch.setattr(build_release.importlib, "import_module", lambda _name: object())
+
+    try:
+        build_release.verify_release_dependencies()
+    except RuntimeError as exc:
+        assert "sound_lib native audio libraries are missing" in str(exc)
+    else:
+        raise AssertionError("dependency check accepted missing Linux natives")
 
 
 def test_nuitka_standalone_folder_counts_as_packaged_build(tmp_path, monkeypatch):

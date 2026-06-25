@@ -126,6 +126,9 @@ jobs:
           FREIGHT_FATE_NO_SPEECH: "1"
         run: uv run pytest -q
 
+      - name: Check release dependencies
+        run: uv run python tools/build_release.py --check-dependencies
+
       - name: Build
         env:
           SDL_VIDEODRIVER: dummy
