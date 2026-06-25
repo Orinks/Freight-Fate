@@ -204,7 +204,7 @@ Net-new realism candidates, roughly by area:
 - **Business realism.** The company-driver→owner-operator arc, loans, and
   insurance already sketched under Business.
 
-## Next up: state troopers and law enforcement
+## State troopers and law enforcement
 
 Speeding, HOS/ELD compliance, and route enforcement are now one visible
 system instead of unrelated end-of-trip deductions and generic random
@@ -214,6 +214,20 @@ zones, checkpoints/high-patrol corridors, and seeded patrol windows.
 Events carry evidence such as HOS/ELD violations or construction-zone
 speeding, and serious HOS violations trigger an out-of-service 10-hour
 reset instead of only a fine.
+
+- [x] **Speeding pull-overs (interactive traffic stop).** Shipped: routes seed
+  `PatrolWindow`s by highway class, region, and time of day (`Trip._place_patrols`
+  / `active_patrol_at`), construction zones always hot, scaled down by relaxed
+  mode's `hazard_scale`. A sustained speeding strike inside a window rolls
+  against patrol intensity (`DrivingState._trooper_catches_speeder`); a hit lights
+  you up (`events/police_siren`), you signal with X and brake to a stop, and
+  `TrafficStopState` runs a spoken license/logbook check ending in an immediate
+  on-the-spot ticket (`SPEEDING_TICKET_FINES`, paid now) or a warning. Ignoring
+  the lights past `PULL_OVER_IGNORE_MI` is logged as evasion. Disabled in the
+  debug HOS bypass. Uncaught speeding still accrues the silent settlement strike.
+  *Next trooper slices:* CB-radio heads-up chatter, felony stop / spike strips,
+  weigh-station "blow past while flagged", real Ogg siren/CB assets, damage-
+  triggered stops.
 
 The ELD/HOS model is grounded in FMCSA's property-carrier summary:
 11 hours of driving after 10 consecutive hours off duty, a 14-hour

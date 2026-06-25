@@ -119,6 +119,13 @@ def _speeding_settlement_fine(strikes: int) -> float:
 # against the leg's real OSM maxspeed rather than a flat number.
 SPEEDING_LEEWAY_MPH = 9.0
 SPEEDING_HOLD_S = 6.0
+# On-the-spot speeding tickets, escalating per ticket within a trip. Paid
+# immediately when a trooper pulls you over (unlike the silent at-delivery
+# strikes, which stand in for the cost of speeding nobody caught).
+SPEEDING_TICKET_FINES = (150.0, 300.0, 600.0, 1200.0)
+# Travel this far still moving after the lights come on and it counts as
+# ignoring the stop -- a heavier fine and a bigger reputation hit.
+PULL_OVER_IGNORE_MI = 2.0
 
 
 class DrivingState(State):
@@ -186,6 +193,19 @@ class DrivingState(State):
         self._last_announced_mph = 0.0
         self._speeding_timer = 0.0
         self.speeding_strikes = 0
+        # Trooper pull-overs: a strike inside a patrol window may get you stopped
+        # for an immediate ticket, separate from the silent at-delivery strikes.
+        self.speeding_tickets = 0
+        self.ticket_fines_paid = 0.0
+        self._pull_over: str | None = None   # None | "lights" | "stopping"
+        self._pull_over_start_mi = 0.0
+        self._pull_over_signaled = False
+        self._pull_over_over = 0.0            # mph over the limit when clocked
+        self._pull_over_limit = 0.0           # posted limit when clocked
+        # Deterministic, save-safe stream for "did a patrol catch you" rolls, kept
+        # apart from the trip's hazard/zone/inspection streams.
+        self._patrol_rng = random.Random(
+            None if trip_seed is None else trip_seed ^ 0xB0A1)
         self._rescue_offered = False
         self._signal_timer = 0.0
         self._exit_stop = None            # armed exit, set with X
@@ -242,6 +262,8 @@ class DrivingState(State):
             "hos_fine_count": self.hos_fine_count,
             "enforcement_events": sorted(self.enforcement_events),
             "out_of_service_count": self.out_of_service_count,
+            "speeding_tickets": self.speeding_tickets,
+            "ticket_fines_paid": self.ticket_fines_paid,
             "lane_offset": self.lane.offset,
         }
 
@@ -291,6 +313,8 @@ class DrivingState(State):
                 str(key) for key in data.get("enforcement_events", [])
             }
             state.out_of_service_count = int(data.get("out_of_service_count", 0))
+            state.speeding_tickets = int(data.get("speeding_tickets", 0))
+            state.ticket_fines_paid = float(data.get("ticket_fines_paid", 0.0))
             state.lane.offset = float(data.get("lane_offset", 0.0))
             return state
         except (KeyError, TypeError, ValueError):
@@ -400,7 +424,10 @@ class DrivingState(State):
         elif key == pygame.K_t:
             self._try_rest_stop()
         elif key == pygame.K_x:
-            self._take_exit()
+            if self._pull_over is not None:
+                self._signal_pull_over()
+            else:
+                self._take_exit()
         elif key == pygame.K_k:
             self._toggle_cruise()
         elif key == pygame.K_SPACE:
@@ -863,6 +890,7 @@ class DrivingState(State):
         self._update_hazard(dt)
         self._update_microsleep(keys, dt)
         self._update_speeding(dt)
+        self._update_pull_over(dt)
         if self.tutorial:
             self.tutorial.update(dt, t)
         if self.trip.finished:
@@ -1232,11 +1260,19 @@ class DrivingState(State):
     def _update_speeding(self, dt: float) -> None:
         if self._ramp_mi is not None:
             return   # the ramp is off the highway and unpatrolled
+        if self._pull_over is not None:
+            return   # already being pulled over; don't pile on strikes
         limit, _ = self.trip.speed_limit_at(self.trip.position_mi)
         if self.truck.speed_mph > limit + SPEEDING_LEEWAY_MPH:
             self._speeding_timer += dt
             if self._speeding_timer > SPEEDING_HOLD_S:
                 self._speeding_timer = 0.0
+                # Caught by a patrol -> an immediate pull-over and ticket. Not
+                # caught -> the silent at-delivery strike (the safety/insurance
+                # cost of speeding nobody saw). Never both for one instance.
+                if self._trooper_catches_speeder(limit):
+                    self._begin_pull_over(limit)
+                    return
                 before = _speeding_settlement_fine(self.speeding_strikes)
                 self.speeding_strikes += 1
                 after = _speeding_settlement_fine(self.speeding_strikes)
@@ -1255,6 +1291,75 @@ class DrivingState(State):
                         interrupt=False)
         else:
             self._speeding_timer = 0.0
+
+    def _trooper_catches_speeder(self, limit: float) -> bool:
+        """Whether a patrol clocks this speeding strike, by patrol intensity."""
+        if self.ctx.settings.hos_mode in hos.HOS_NON_ENFORCED_MODES:
+            return False   # enforcement is bypassed in the debug mode
+        patrol = self.trip.active_patrol_at(self.trip.position_mi)
+        if patrol is None:
+            return False
+        return self._patrol_rng.random() < patrol.intensity
+
+    def _begin_pull_over(self, limit: float) -> None:
+        """A trooper has lit you up: announce it and wait for the stop."""
+        self._pull_over = "lights"
+        self._pull_over_start_mi = self.trip.position_mi
+        self._pull_over_signaled = False
+        self._pull_over_limit = limit
+        self._pull_over_over = max(0.0, self.truck.speed_mph - limit)
+        patrol = self.trip.active_patrol_at(self.trip.position_mi)
+        where = patrol.reason if patrol is not None else "patrol"
+        self.ctx.audio.play("events/police_siren")
+        self.ctx.say_event(
+            f"Lights and siren behind you. A trooper on this {where} clocked you "
+            f"at {self.truck.speed_mph:.0f} in a {limit:.0f}. Signal with X and "
+            "brake to a stop on the shoulder.",
+            interrupt=True)
+
+    def _signal_pull_over(self) -> None:
+        """X during a pull-over: signal and ease over (better demeanor)."""
+        if self._pull_over == "lights":
+            self._pull_over = "stopping"
+            self._pull_over_signaled = True
+            self.ctx.audio.play("ui/notify", volume=0.5)
+            self.ctx.say("Signaling and easing onto the shoulder. Brake to a "
+                         "full stop.")
+        else:
+            self.ctx.say("Pulling over. Brake to a full stop on the shoulder.")
+
+    def _update_pull_over(self, dt: float) -> None:
+        if self._pull_over is None:
+            return
+        if self.truck.speed_mph <= DOCKING_MAX_MPH:
+            self._open_traffic_stop()
+            return
+        if self.trip.position_mi - self._pull_over_start_mi >= PULL_OVER_IGNORE_MI:
+            self._evade_pull_over()
+
+    def _open_traffic_stop(self) -> None:
+        signaled = self._pull_over_signaled
+        over, limit = self._pull_over_over, self._pull_over_limit
+        self._pull_over = None
+        self.ctx.push_state(
+            TrafficStopState(self.ctx, self, signaled=signaled, over=over,
+                             limit=limit))
+
+    def _evade_pull_over(self) -> None:
+        """Drove on with the lights behind: a heavier fine, logged as evasion."""
+        self._pull_over = None
+        p = self.ctx.profile
+        fine = SPEEDING_TICKET_FINES[-1] * 1.5
+        self.speeding_tickets += 1
+        self.ticket_fines_paid += fine
+        p.money -= fine
+        p.career.reputation = max(0.0, p.career.reputation
+                                  - hos.HOS_REPUTATION_HIT * 2.0)
+        self.ctx.audio.play("ui/error")
+        self.ctx.say_event(
+            f"You ran from the traffic stop. That is logged as evasion: a "
+            f"{fine:,.0f} dollar fine and a serious reputation hit.",
+            interrupt=True)
 
     def _handle_trip_event(self, event) -> None:
         kind = event.kind
@@ -2023,6 +2128,80 @@ class ShoulderSleepConfirmationState(MenuState):
         if self.ctx._app.state is not self.driving:
             self.ctx.pop_state()
         self.ctx.say(text, interrupt=True)
+
+
+class TrafficStopState(MenuState):
+    """A roadside traffic stop after a speeding pull-over: a spoken license and
+    logbook check, an on-the-spot ticket or a warning, then back to the road."""
+
+    intro_help = ("The trooper has already decided. Press Enter or Escape to "
+                  "pull back onto the highway when you are ready.")
+
+    def __init__(self, ctx, driving: DrivingState, *, signaled: bool,
+                 over: float, limit: float) -> None:
+        super().__init__(ctx)
+        self.driving = driving
+        self.signaled = signaled
+        self.over = over
+        self.limit = limit
+        self._outcome_text = ""
+        self._resolve()
+
+    @property
+    def title(self) -> str:  # type: ignore[override]
+        return "Traffic stop"
+
+    def presence(self):
+        from ..discord_presence import PresenceState
+
+        base = self.driving.presence()
+        detail = base.detail if base is not None else ""
+        return PresenceState("Pulled over", detail)
+
+    def _resolve(self) -> None:
+        """Decide the outcome and apply any ticket immediately."""
+        p = self.ctx.profile
+        d = self.driving
+        rep = p.career.reputation
+        first = d.speeding_tickets == 0
+        # A warning for a first, marginal stop, or for a well-regarded driver who
+        # pulled over promptly and wasn't egregiously over; otherwise a ticket.
+        warning = ((first and self.over < 15.0)
+                   or (rep >= 70.0 and self.signaled and self.over < 20.0))
+        if warning:
+            self._outcome_text = (
+                f"You were {self.over:.0f} over the {self.limit:.0f}. The trooper "
+                "lets you off with a warning this time. Keep it down.")
+            return
+        fine = SPEEDING_TICKET_FINES[
+            min(d.speeding_tickets, len(SPEEDING_TICKET_FINES) - 1)]
+        d.speeding_tickets += 1
+        d.ticket_fines_paid += fine
+        p.money -= fine
+        hit = hos.HOS_REPUTATION_HIT * (0.7 if self.signaled else 1.0)
+        p.career.reputation = max(0.0, rep - hit)
+        self.ctx.audio.play("ui/error")
+        self._outcome_text = (
+            f"You were {self.over:.0f} over the {self.limit:.0f}. Speeding "
+            f"ticket: {fine:,.0f} dollars, paid on the spot, and a reputation "
+            "hit.")
+
+    def announce_entry(self) -> None:
+        polite = (" You signaled and pulled over promptly."
+                  if self.signaled else "")
+        self.ctx.say(
+            f"You stop on the shoulder and the trooper walks up for a license "
+            f"and logbook check.{polite} {self._outcome_text} {self.current_text()}",
+            interrupt=True)
+
+    def build_items(self) -> list[MenuItem]:
+        return [MenuItem("Pull back onto the highway", self.go_back,
+                         help="Signal, check your mirror, and merge back up to "
+                              "speed.")]
+
+    def go_back(self) -> None:
+        self.ctx.pop_state()
+        self.ctx.say("Back on the highway. Watch your speed.", interrupt=True)
 
 
 class RestStopState(MenuState):
@@ -2884,6 +3063,12 @@ class ArrivalState(MenuState):
             self.summary_parts.append(
                 f"Driver-responsibility charges: speeding fines cost you "
                 f"{driver_charges:,.0f} dollars.")
+        # Tickets from being pulled over were already paid on the spot; report
+        # them for transparency but don't deduct again at settlement.
+        if d.speeding_tickets:
+            self.summary_parts.append(
+                f"On-the-spot speeding tickets this trip: {d.speeding_tickets}, "
+                f"already paid, {d.ticket_fines_paid:,.0f} dollars.")
         net_pay = max(0.0, gross_pay - driver_charges)
         advance_repaid = round(min(p.pay_advance, net_pay), 2)
         if advance_repaid > 0:

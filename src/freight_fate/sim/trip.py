@@ -112,6 +112,13 @@ CONSTRUCTION_ENFORCEMENT_GRACE_MI = 1.0
 # it. This replaces an earlier flat region pool that could, say, announce farm
 # equipment merging onto a freeway or a dust devil on a clear calm day.
 
+# Patrol density by region: dense, urbanized states run hot; wide-open country
+# runs cold. Regions not listed sit at the neutral baseline.
+_HOT_PATROL_REGIONS = ("northeast", "california", "great_lakes", "florida",
+                       "atlantic_southeast", "mid_south")
+_COLD_PATROL_REGIONS = ("great_basin", "southern_plains", "rockies",
+                        "desert_southwest", "heartland")
+
 # Open, exposed country where high wind genuinely shoves a loaded trailer.
 _CROSSWIND_REGIONS = ("southern_plains", "heartland", "great_basin",
                       "desert_southwest", "rockies")
@@ -244,6 +251,21 @@ class Zone:
 
 
 @dataclass
+class PatrolWindow:
+    """A stretch of road where a state trooper may be watching.
+
+    ``intensity`` (0-1) is the chance a sustained speeding strike inside the
+    window actually gets you pulled over -- higher on busy interstates, in
+    construction, and at rush hour or night, lower out on empty plains. The
+    ``reason`` is a short spoken label ("speed trap", "construction patrol")."""
+
+    start_mi: float
+    end_mi: float
+    intensity: float
+    reason: str
+
+
+@dataclass
 class RoadStop:
     name: str
     at_mi: float
@@ -355,6 +377,7 @@ class Trip:
         self.navigation_cues = self._build_navigation_cues()
         self.toll_charges: list[TollCharge] = []
         self.zones = self._place_zones()
+        self.patrols = self._place_patrols()
         self._announced_stops: set[str] = set()
         self._announced_cities: set[int] = set()
         self._announced_navigation: set[str] = set()
@@ -589,6 +612,52 @@ class Trip:
 
     def _is_facility_approach_route(self) -> bool:
         return len(self.route.cities) >= 2 and self.route.cities[0] == self.route.cities[-1]
+
+    def _patrol_intensity_at(self, mile: float) -> float:
+        """How heavily a stretch is patrolled (0-1), from highway, region, and
+        time of day. Busy interstates and dense regions run hotter; empty plains
+        run cold; night adds a DUI-patrol bump."""
+        leg_i, _ = self._leg_at_mile(mile)
+        cls = _highway_class(self.route.legs[leg_i].highway)
+        base = {"interstate": 0.5, "us_highway": 0.35}.get(cls, 0.25)
+        region = self._region_at(mile)
+        if region in _HOT_PATROL_REGIONS:
+            base *= 1.3
+        elif region in _COLD_PATROL_REGIONS:
+            base *= 0.7
+        if is_night(self.start_hour):
+            base *= 1.15
+        return base
+
+    def _place_patrols(self) -> list[PatrolWindow]:
+        """Seed trooper patrol windows along the route, roughly one per 120
+        miles, plus an always-hot window over every construction zone.
+
+        Uses the inspection RNG so enforcement never perturbs hazard/zone
+        layout, and scales the count by ``hazard_scale`` so relaxed mode stays
+        relaxed. Deterministic for a given seed and departure hour."""
+        patrols: list[PatrolWindow] = []
+        total = self.route.miles
+        n = max(0, int(total / 120.0 * min(1.0, self.hazard_scale)))
+        for _ in range(n):
+            at = self._insp_rng.uniform(10, max(11, total - 15))
+            length = self._insp_rng.uniform(3, 8)
+            intensity = self._patrol_intensity_at(at) * self.hazard_scale
+            patrols.append(PatrolWindow(at, at + length,
+                                        max(0.1, min(0.95, intensity)),
+                                        "speed trap"))
+        for zone in self.zones:
+            if zone.reason == "construction":
+                patrols.append(PatrolWindow(zone.start_mi, zone.end_mi,
+                                            min(0.95, 0.9 * self.hazard_scale),
+                                            "construction patrol"))
+        patrols.sort(key=lambda p: p.start_mi)
+        return patrols
+
+    def active_patrol_at(self, mile: float) -> PatrolWindow | None:
+        """The hottest patrol window covering a mile, or ``None``."""
+        active = [p for p in self.patrols if p.start_mi <= mile <= p.end_mi]
+        return max(active, key=lambda p: p.intensity) if active else None
 
     def _place_traffic(self) -> list[TrafficLead]:
         leads: list[TrafficLead] = []

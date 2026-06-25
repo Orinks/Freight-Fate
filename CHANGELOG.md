@@ -28,6 +28,16 @@
   seconds.
 
 ### Added
+- **State troopers can pull you over for speeding.** Routes now have patrol
+  windows -- hotter on busy interstates, in construction, and in dense regions,
+  cooler out on the plains, with a night DUI bump. Speed badly inside one and a
+  trooper lights you up: signal with X, brake to a stop on the shoulder, and sit
+  through a license and logbook check that ends in an on-the-spot ticket (paid
+  immediately, escalating with each stop) or a warning if it's a first, marginal
+  stop or your reputation is strong. Run from the stop and it's logged as
+  evasion -- a heavier fine and a serious reputation hit. Speeding the patrols
+  don't catch still accrues the quieter safety-record cost at settlement.
+  Relaxed mode keeps patrols light; the debug HOS bypass disables them entirely.
 - **Consult the controls without leaving a drive.** The pause menu now has a
   "Controls and help" entry that opens the how-to-play reference straight to the
   driving keys -- page through it, read it line by line, then escape back to the

@@ -55,6 +55,7 @@ idle, start, and shutdown cues.
 | Toll charged | `events/toll_charged.ogg` | Short toll/transponder cue |
 | State crossing | `events/state_crossing.ogg` | Short route milestone cue |
 | Inspection warning | `events/inspection_warning.ogg` | Short inspection/weigh-station cue |
+| Police siren | `events/police_siren.wav` | Placeholder synthesized wail siren for trooper pull-overs (CC0 original); to be replaced with an ElevenLabs siren |
 | Rest stop at night | `poi/rest_stop_night.ogg` | Parked rest-stop ambience loop |
 | Weigh station lane | `poi/weigh_station_lane.ogg` | Parked weigh-station lane ambience loop |
 | Facility gate | `poi/facility_gate.ogg` | ElevenLabs-generated loading-dock gate ambience loop |
