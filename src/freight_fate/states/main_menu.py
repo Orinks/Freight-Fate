@@ -679,6 +679,7 @@ HELP_PAGES = [
     ]),
     ("Driving information keys", [
         "Space speaks your speed, gear, RPM, air pressure, and brake state.",
+        "S speaks the posted speed limit here, the zone if any, and how far over you are.",
         "Tab opens a driving status menu for speed, route, air tanks, weather, and hours.",
         "F speaks fuel level and range.",
         "C speaks the clock, your deadline, and your hours of service.",
@@ -686,6 +687,8 @@ HELP_PAGES = [
         "Shift R speaks the next listed highway exit for route context.",
         "L speaks lane position when lane drift is enabled.",
         "V speaks the weather and the forecast.",
+        "A repeats the last route announcement, in case you missed it.",
+        "U speaks what is coming up: imposed speed limits, stops, and exits ahead.",
         "Escape opens the pause menu.",
     ]),
     ("On the road", [
@@ -809,12 +812,20 @@ HELP_PAGES = [
 ]
 
 
+def controls_help_page() -> int:
+    """Index of the driving-keys page, so callers can open help straight to it."""
+    for i, (title, _lines) in enumerate(HELP_PAGES):
+        if title == "Driving information keys":
+            return i
+    return 0
+
+
 class HelpState(State):
     """Page-by-page, line-by-line spoken manual."""
 
-    def __init__(self, ctx) -> None:
+    def __init__(self, ctx, start_page: int = 0) -> None:
         super().__init__(ctx)
-        self.page = 0
+        self.page = max(0, min(start_page, len(HELP_PAGES) - 1))
         self.line = -1  # -1 = page title
 
     def enter(self) -> None:

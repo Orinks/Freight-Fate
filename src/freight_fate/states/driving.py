@@ -2541,6 +2541,10 @@ class PauseMenuState(MenuState):
                      help=f"Return to the active {drive_label}."),
             MenuItem("Trip status", self._status,
                      help="Hear cargo, objective, route progress, and time used."),
+            MenuItem("Controls and help", self._controls,
+                     help="Open the how-to-play reference at the driving keys. "
+                          "Left and Right arrows change pages, Up and Down read "
+                          "line by line, Escape returns here."),
             MenuItem(self._mechanic_label, self._mechanic,
                      help="A mobile mechanic patches the truck up enough to "
                           "drive on. Costs much more than a garage repair, "
@@ -2558,7 +2562,7 @@ class PauseMenuState(MenuState):
                           "when you continue. Use Abandon job to drop the load."),
         ]
         if self.driving.emergency_shoulder_sleep_reason() is not None:
-            items.insert(3, MenuItem(
+            items.insert(4, MenuItem(
                 "Emergency shoulder sleep",
                 self._emergency_shoulder_sleep,
                 help="Emergency-only poor sleep on the shoulder. Resets hours "
@@ -2636,6 +2640,11 @@ class PauseMenuState(MenuState):
             f"{d.trip.progress_summary(self.ctx.settings.imperial_units)} "
             f"{hours_used:.1f} hours used of {d.job.deadline_game_h:.0f}. "
             f"{d._air_status_text()}.")
+
+    def _controls(self) -> None:
+        from .main_menu import HelpState, controls_help_page
+
+        self.ctx.push_state(HelpState(self.ctx, start_page=controls_help_page()))
 
     def _settings(self) -> None:
         from .main_menu import SettingsState

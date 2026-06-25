@@ -39,9 +39,13 @@ From a batch of player reports:
   pygame backend), and the lane rumble sets it from `lane.offset` so the strip
   sounds from the side you drifted toward. Follow-up if wanted: pan other
   lateral cues (e.g. a lead vehicle to one side) the same way.
-- [ ] **Consultable keys reference.** F1 lists keys in one spoken block and
-  the manual has the table, but players want something easier to consult --
-  an in-game scrollable keys screen and/or an HTML export of the manual.
+- [x] **Consultable keys reference.** Shipped: the pause menu's "Controls and
+  help" opens the navigable how-to-play reference straight to the driving-keys
+  page (`controls_help_page()` + `HelpState(start_page=...)`), so the key list
+  is reachable mid-drive instead of only the F1 firehose; the keys page now
+  lists S/A/U. The manual is also exported to `USER_MANUAL.html` (a small
+  dependency-free Markdown->HTML converter, `tools/manual_html.py`) and shipped
+  in portable builds beside `USER_MANUAL.md`.
 - [ ] **Ambient-cue spacing (anti-stacking).** Priority handling fixes the
   critical case; still worth spacing or coalescing simultaneous low-priority
   cues so a burst of chatter does not pile up. Lower priority than the above.

@@ -17,6 +17,13 @@
   seconds.
 
 ### Added
+- **Consult the controls without leaving a drive.** The pause menu now has a
+  "Controls and help" entry that opens the how-to-play reference straight to the
+  driving keys -- page through it, read it line by line, then escape back to the
+  road. The keys list also now includes S, A, and U.
+- **HTML player manual.** Portable builds now ship `USER_MANUAL.html` alongside
+  the Markdown one: the same manual rendered as a clean, accessible web page
+  (semantic headings and real tables) you can open in any browser.
 - **Three new on-demand driving keys.** **S** reads the posted speed limit where
   you are -- the zone if any, and how far over you are -- so you no longer have
   to dig into the status menu. **A** repeats the last route announcement, for

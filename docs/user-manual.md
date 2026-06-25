@@ -394,6 +394,7 @@ Escape opens the pause menu during a drive. Public pause choices include:
 | --- | --- |
 | Resume driving | Return to the active drive. |
 | Trip status | Review cargo, objective, route progress, time used, and air status. |
+| Controls and help | Open the how-to-play reference at the driving keys, page by page, without leaving the drive. |
 | Call a roadside mechanic | Patch severe truck damage enough to continue, at a high cost. |
 | Emergency shoulder sleep | Appears only when the game detects a true hours or fatigue emergency. |
 | Settings | Open settings during the drive. |
