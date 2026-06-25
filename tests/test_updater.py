@@ -244,6 +244,8 @@ def test_packaged_payload_requires_platform_prism_native(tmp_path):
     wrong_suffix = ".dll" if ".dll" not in build_release.platform_native_exts() else ".so"
     (build_dir / "prism" / "_native" / f"bridge{wrong_suffix}").write_text(
         "", encoding="utf-8")
+    if build_release.sys.platform.startswith("linux"):
+        add_linux_prism_dependency_dir(build_release, build_dir)
 
     try:
         build_release.verify_packaged_payload(build_dir)
