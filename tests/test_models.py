@@ -286,12 +286,14 @@ def test_split_audio_volume_defaults_prioritize_cues_over_background():
     assert s.ui_volume > s.engine_volume
 
 
-def test_legacy_hos_off_setting_loads_as_debug_bypass():
+def test_legacy_hos_off_setting_loads_as_realistic():
+    # The 1.5.0 player-facing "off" mode is gone; legacy saves fall through to
+    # the realistic default rather than silently disabling enforcement.
     s = Settings()
     s.hos_mode = "off"
     s.save()
     loaded = Settings.load()
-    assert loaded.hos_mode == "debug_off"
+    assert loaded.hos_mode == "realistic"
 
 
 def test_settings_survive_corrupt_file():
