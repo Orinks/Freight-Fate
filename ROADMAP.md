@@ -314,16 +314,26 @@ always-available fallback when you are out of range of anything local. A
 community suggestion; the right kind of immersion for long hauls and a natural
 fit for an audio-first game.
 
-- **Optional, and streamer-safe by default.** A hard requirement: the feature
-  must default to content the player can broadcast on YouTube/Twitch without
-  DMCA strikes. Anything that risks a strike (e.g. real station audio) lives
-  behind an explicit, off-by-default toggle so streamers are safe unless they
-  opt in knowing the risk.
+- **Direction (decided):** use real stations via their public internet stream
+  URLs (a friend has a curated list). The game is free and non-commercial, and
+  it acts as a *tuner* -- it points the player's own client at a stream the
+  station already broadcasts publicly, not hosting or rebroadcasting audio
+  (the TuneIn / car-head-unit model). Free and non-commercial is not a blanket
+  copyright exemption, but the tuner-to-public-stream posture plus no money
+  changing hands keeps practical risk low for a small game.
+
+- **Streamer-safe toggle still required.** Independent of the game's own
+  posture: a player who streams a session to YouTube/Twitch with copyrighted
+  station audio can still get the VOD struck. So real-stream radio stays an
+  explicit toggle (and a "mute radio for streaming" switch), with an owned
+  royalty-free station and the satellite fallback as the always-safe default
+  audio, so streamers are protected unless they opt in.
 
 - **Geography-gated reception.** Stations are data, not magic: a JSON catalog
-  per station with call sign, format/genre, transmitter latitude/longitude,
-  ERP (effective radiated power), and antenna HAAT, plus a derived
-  `range_miles`. Range is estimated from public FCC license data (FM Query /
+  per station with call sign, format/genre, public stream URL and its audio
+  format (so the loader can skip unsupported transports), transmitter
+  latitude/longitude, ERP (effective radiated power), and antenna HAAT, plus a
+  derived `range_miles`. Range is estimated from public FCC license data (FM Query /
   LMS) using the F(50,50) protected-contour idea -- power and antenna height,
   refined by terrain -- so you can only pull in stations whose coverage
   actually reaches you. The truck's geo-position is interpolated in
@@ -340,15 +350,17 @@ fit for an audio-first game.
   brand the fallback as a fictionalized "forces/satellite network" that keeps
   the AFN vibe without the licensing/realism wrinkle.
 
-- **Audio sourcing (the crux).** Three options, in rising streamer-safety:
-  (a) point at stations' public internet streams -- most authentic, but
-  redistribution is legally gray, stream URLs rot, and it forces the
-  streamer-safe toggle off; (b) curated CC0/royalty-free "stations" with
-  regional genre flavor and DJ/station-ID patter we own outright -- fully
-  streamer-safe and reliable, less literally real, and a clean fit with the
-  existing music system and the planned move to real/commissioned audio;
-  (c) hybrid -- owned content by default, real streams as the opt-in add-on.
-  Lean (b) as the shippable default with (c) as the power-user toggle.
+- **Audio sourcing: real streams, with the real work being technical not
+  legal.** The friend's stream-URL list is the primary source. The gotchas to
+  build around: (1) streams rot -- URLs change and stations go dark, so
+  reception must fail gracefully and fall back to the satellite/owned station,
+  never dead air or a crash; (2) codec/transport -- the BASS/sound_lib backend
+  handles Icecast/Shoutcast MP3/AAC easily, but HLS (`.m3u8`) needs more work,
+  so the catalog should record stream format and the loader should skip
+  unsupported ones; (3) some stations geo-block or require their own app, so a
+  few URLs won't work for a third-party player and the catalog needs a
+  reachable/working flag. Keep an owned royalty-free station and the satellite
+  fallback for offline play and the streamer-safe default.
 
 - **Accessibility is the feature, not a checkbox.** Tuning must be fully
   spoken and keyboard-driven: seek/scan up and down the dial, announce call
