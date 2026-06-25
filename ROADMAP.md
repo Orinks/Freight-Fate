@@ -22,6 +22,33 @@ edges rather than adding new systems. Several items overlap the trooper
 milestone below (speeding consequences especially); ship whichever slice
 is ready first and fold the rest in.
 
+### Player feedback round (accessibility/UX)
+
+From a batch of player reports:
+
+- [x] **Quick info keys.** S reads the posted speed limit (was buried in the
+  Tab menu); A repeats the last route announcement; U reads what is coming
+  up (imposed limits, stops, exits ahead).
+- [x] **Announcement priority and lead time.** Safety cues (zone entry,
+  construction/traffic warnings, checkpoints) preempt ambient chatter on the
+  event voice instead of queuing behind it; zone warnings lead by real time
+  (scaled by speed and `time_scale`) instead of a flat 2 miles that compressed
+  to a few seconds at highway speed.
+- [ ] **Directional lane-drift rumble.** Pan the rumble-strip sound to the
+  side you have drifted toward so the player knows which way to steer back.
+  Now feasible -- `sound_lib`/BASS supports stereo panning (the project does
+  not use the pygame mixer for audio); wire a pan argument through the audio
+  layer's play/loop calls and set it from the lane offset sign.
+- [ ] **Consultable keys reference.** F1 lists keys in one spoken block and
+  the manual has the table, but players want something easier to consult --
+  an in-game scrollable keys screen and/or an HTML export of the manual.
+- [ ] **Ambient-cue spacing (anti-stacking).** Priority handling fixes the
+  critical case; still worth spacing or coalescing simultaneous low-priority
+  cues so a burst of chatter does not pile up. Lower priority than the above.
+- Confirmed-good: routing announcements through the SAPI event voice avoids
+  contention with the player's primary screen reader; keep it the recommended
+  default and documented.
+
 ### Driver economics
 
 - [x] **Negative-balance recovery (softlock fix).** Shipped as a

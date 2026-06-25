@@ -1274,7 +1274,8 @@ class DrivingState(State):
         else:
             if sound is not None and kind != TripEventKind.ZONE_ENTER:
                 self.ctx.audio.play(sound)
-            self.ctx.say_event(event.message, interrupt=False)
+            self.ctx.say_event(event.message,
+                               interrupt=self._is_critical_event(event))
         if kind == TripEventKind.ZONE_ENTER:
             self.ctx.audio.play(sound or "ui/notify")
             zone = event.data.get("zone")
@@ -1286,6 +1287,22 @@ class DrivingState(State):
             cue = event.data.get("cue")
             if getattr(cue, "kind", "") == "traffic":
                 self.ctx.award_achievement("traffic_slowing", event=True)
+
+    def _is_critical_event(self, event) -> bool:
+        """Safety announcements that must preempt ambient chatter on the event
+        voice -- zone entries, checkpoints, and zone-ahead/traffic warnings --
+        versus informational cues (weather, tolls, state lines, stops) that
+        should queue and yield rather than bury a warning you need to act on."""
+        if event.kind in (TripEventKind.HAZARD, TripEventKind.ZONE_ENTER,
+                          TripEventKind.CHECKPOINT):
+            return True
+        if event.kind == TripEventKind.GPS_CUE:
+            if event.data.get("zone") is not None:
+                return True
+            cue = event.data.get("cue")
+            if getattr(cue, "kind", "") == "traffic":
+                return True
+        return False
 
     def _event_disables_cruise(self, event) -> bool:
         if self._cruise_mph is None:
@@ -1302,9 +1319,11 @@ class DrivingState(State):
     def _cancel_cruise_for_restricted_area(self, message: str) -> None:
         self._cancel_cruise()
         self.ctx.audio.play("ui/notify")
+        # A restricted area (construction, heavy traffic) is a safety cue: it
+        # preempts ambient chatter rather than queuing behind it.
         self.ctx.say_event(
             f"{message} Adaptive cruise disabled; take manual speed control.",
-            interrupt=False,
+            interrupt=True,
         )
 
     def _handle_inspection(self, event) -> None:

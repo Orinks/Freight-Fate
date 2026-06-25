@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+### Changed
+- **Safety announcements no longer get buried, and you get more warning.** Zone
+  entries, construction and traffic warnings, and checkpoints now preempt
+  ambient chatter (weather, tolls, state lines) on the event voice instead of
+  queuing behind it -- so a "construction ahead" never arrives after you have
+  already entered the zone. Zone warnings also lead by real time now, not a
+  flat distance: the heads-up scales with your speed and pacing, so 70 mph at
+  high time compression gets a usefully earlier callout instead of a couple of
+  seconds.
+
 ### Added
 - **Three new on-demand driving keys.** **S** reads the posted speed limit where
   you are -- the zone if any, and how far over you are -- so you no longer have
