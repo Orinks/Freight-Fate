@@ -53,6 +53,13 @@
   one. Existing careers carry over. Note: a career saved on a developer
   snapshot may not load on an older stable release.
 
+### Changed
+- **Real weather now uses the National Weather Service.** Optional live weather
+  switched from Open-Meteo to the U.S. National Weather Service API
+  (api.weather.gov). It is still free and needs no API key, reads each city's
+  nearest official station for current conditions, and keeps the same seamless
+  fallback to simulated weather when offline.
+
 ### Fixed
 - **Real weather warm-up.** With real weather enabled, a drive now starts in
   neutral clear conditions and waits for live data, instead of briefly showing a

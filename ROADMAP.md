@@ -105,7 +105,7 @@ function guidance: https://www.fmcsa.dot.gov/hours-service/elds/eld-functions-fa
 
 ## Shipped in 1.1.0
 
-- [x] Optional real-world weather per city via the Open-Meteo API
+- [x] Optional real-world weather per city via the National Weather Service API
       (Settings -> Weather source), with seamless offline fallback
 
 ## Shipped in 1.0.0

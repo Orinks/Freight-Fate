@@ -1,32 +1,48 @@
-"""Real-weather (Open-Meteo) provider tests. No network access: the fetch
-function is injected everywhere."""
+"""Real-weather (NWS) provider tests. No network access: the fetch function
+is injected everywhere."""
 
 import threading
 
-from freight_fate.sim.real_weather import CACHE_TTL_S, RealWeatherProvider, map_wmo
+from freight_fate.sim.real_weather import CACHE_TTL_S, RealWeatherProvider, map_condition
 from freight_fate.sim.weather import WeatherKind, WeatherSystem
 
-# -- WMO code mapping ----------------------------------------------------------
+# -- NWS condition mapping -----------------------------------------------------
 
-def test_wmo_mapping_basics():
-    assert map_wmo(0) is WeatherKind.CLEAR
-    assert map_wmo(3) is WeatherKind.CLOUDY
-    assert map_wmo(45) is WeatherKind.FOG
-    assert map_wmo(61) is WeatherKind.RAIN
-    assert map_wmo(65) is WeatherKind.HEAVY_RAIN
-    assert map_wmo(75) is WeatherKind.SNOW
-    assert map_wmo(95) is WeatherKind.THUNDERSTORM
+def test_condition_mapping_basics():
+    assert map_condition("Clear") is WeatherKind.CLEAR
+    assert map_condition("Sunny") is WeatherKind.CLEAR
+    assert map_condition("Mostly Cloudy") is WeatherKind.CLOUDY
+    assert map_condition("Overcast") is WeatherKind.CLOUDY
+    assert map_condition("Patchy Fog") is WeatherKind.FOG
+    assert map_condition("Light Rain") is WeatherKind.RAIN
+    assert map_condition("Rain Showers") is WeatherKind.RAIN
+    assert map_condition("Heavy Rain") is WeatherKind.HEAVY_RAIN
+    assert map_condition("Snow") is WeatherKind.SNOW
+    assert map_condition("Wintry Mix") is WeatherKind.SNOW
+    assert map_condition("Thunderstorm") is WeatherKind.THUNDERSTORM
 
 
-def test_wmo_unknown_code_defaults_to_cloudy():
-    assert map_wmo(42) is WeatherKind.CLOUDY
+def test_condition_unknown_or_empty_defaults_to_cloudy():
+    assert map_condition("") is WeatherKind.CLOUDY
+    assert map_condition("Volcanic Eruption") is WeatherKind.CLOUDY
+
+
+def test_condition_precipitation_beats_clouds_and_storms_beat_rain():
+    # cloud keyword present but rain wins
+    assert map_condition("Cloudy with Rain") is WeatherKind.RAIN
+    # thunder wins over rain
+    assert map_condition("Thunderstorms and Rain") is WeatherKind.THUNDERSTORM
+    # snow wins over rain (e.g. wintry mix described with rain)
+    assert map_condition("Rain and Snow") is WeatherKind.SNOW
 
 
 def test_strong_wind_promotes_clear_to_windy():
-    assert map_wmo(0, wind_kmh=45.0) is WeatherKind.WIND
-    assert map_wmo(0, wind_kmh=10.0) is WeatherKind.CLEAR
+    assert map_condition("Clear", wind_kmh=45.0) is WeatherKind.WIND
+    assert map_condition("Clear", wind_kmh=10.0) is WeatherKind.CLEAR
     # wind never overrides precipitation
-    assert map_wmo(63, wind_kmh=60.0) is WeatherKind.RAIN
+    assert map_condition("Light Rain", wind_kmh=60.0) is WeatherKind.RAIN
+    # an explicit windy phrase maps to wind on its own
+    assert map_condition("Breezy") is WeatherKind.WIND
 
 
 # -- provider ----------------------------------------------------------------
@@ -49,7 +65,7 @@ def test_provider_fetches_and_caches():
 
     def fake_fetch(lat, lon):
         calls.append((lat, lon))
-        return 61, 12.0  # rain
+        return "Light Rain", 12.0
 
     p = SyncProvider(fetch=fake_fetch)
     assert p.get("Chicago") is None
@@ -75,10 +91,10 @@ def test_provider_failure_is_silent_and_rate_limited():
 
 def test_provider_refetches_after_ttl():
     now = [0.0]
-    codes = iter([0, 95])
+    conditions = iter(["Clear", "Thunderstorm"])
 
     def fake_fetch(lat, lon):
-        return next(codes), 0.0
+        return next(conditions), 0.0
 
     p = SyncProvider(fetch=fake_fetch, clock=lambda: now[0])
     p.request("Dallas", 32.8, -96.8)
@@ -91,7 +107,7 @@ def test_provider_refetches_after_ttl():
 # -- weather system integration ------------------------------------------------
 
 def test_weather_system_applies_live_conditions():
-    p = SyncProvider(fetch=lambda lat, lon: (65, 5.0))  # heavy rain
+    p = SyncProvider(fetch=lambda lat, lon: ("Heavy Rain", 5.0))
     ws = WeatherSystem("desert_southwest", seed=1, provider=p)
     ws.set_city("Phoenix", 33.45, -112.07)
     changed = ws.update(1.0)

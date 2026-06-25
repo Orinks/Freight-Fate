@@ -18,7 +18,7 @@ class Settings:
     imperial_units: bool = True
     automatic_transmission: bool = True   # friendlier default for new players
     time_scale: float = 20.0              # distance compression while driving
-    real_weather: bool = False            # live conditions from Open-Meteo
+    real_weather: bool = False            # live conditions from the NWS API
     hos_mode: str = "realistic"           # hours of service: realistic/relaxed/debug_off
     steering_assist: str = "off"          # off/light/realistic lane drift
     master_volume: float = 1.0

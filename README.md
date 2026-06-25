@@ -40,9 +40,9 @@ visual display mirrors all speech for sighted players and helpers.
   carrier-paid toll-road settlement charges, and roadside rescue when you run dry.
 - **Real-world weather (optional)** — flip Settings → Weather source to
   "real world" and each city uses its live current conditions from the free
-  [Open-Meteo](https://open-meteo.com) API. If it is raining in Chicago right
-  now, it is raining in your game. Works without an API key and falls back to
-  simulated weather offline.
+  [National Weather Service](https://www.weather.gov/documentation/services-web-api)
+  API. If it is raining in Chicago right now, it is raining in your game. Works
+  without an API key and falls back to simulated weather offline.
 - **Route planning** — route options per job with distance, highways, state
   context, grade/terrain, toll events, curated POIs, and weather forecasts.
   Geometry coverage is broad, while generated placeholder POIs are reported as

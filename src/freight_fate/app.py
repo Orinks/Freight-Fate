@@ -50,7 +50,7 @@ class GameContext:
         self.achievement_notice_timer = 0.0
 
     def real_weather_provider(self):
-        """Shared Open-Meteo provider when real weather is enabled, else None.
+        """Shared NWS provider when real weather is enabled, else None.
 
         Created lazily and kept for the whole session so its cache spans trips.
         """

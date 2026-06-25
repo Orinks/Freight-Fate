@@ -1,12 +1,16 @@
-"""Real-world weather via the Open-Meteo API (https://open-meteo.com).
+"""Real-world weather via the U.S. National Weather Service API
+(https://api.weather.gov).
 
-Open-Meteo is free for non-commercial use and needs no API key. The provider
-fetches current conditions for a city in a background thread and caches them,
-so the game loop never blocks on the network. When a fetch fails or hasn't
-landed yet, callers get ``None`` and the simulated weather carries on — the
-game works identically offline.
+The NWS API is a free, public government service that needs no API key (it
+only asks for an identifying ``User-Agent``). The provider resolves a city's
+nearest observation station once, then fetches the latest observation in a
+background thread and caches it, so the game loop never blocks on the network.
+When a fetch fails or hasn't landed yet, callers get ``None`` and the simulated
+weather carries on -- the game works identically offline.
 
-WMO weather interpretation codes are mapped onto the game's
+The NWS only covers the United States and its territories, which is exactly the
+game's map. Each observation's free-text condition (e.g. "Mostly Cloudy",
+"Light Rain", "Fog") is mapped onto the game's
 :class:`~freight_fate.sim.weather.WeatherKind` conditions.
 """
 
@@ -25,61 +29,112 @@ from .weather import WeatherKind
 
 log = logging.getLogger(__name__)
 
-API_URL = "https://api.open-meteo.com/v1/forecast"
+API_ROOT = "https://api.weather.gov"
+# NWS asks every client to identify itself; a contact URL is recommended.
+USER_AGENT = "FreightFate/1.1 (accessible trucking game; https://orinks.net)"
 FETCH_TIMEOUT_S = 8.0
 CACHE_TTL_S = 15 * 60.0          # current weather is fresh enough for 15 min
 RETRY_AFTER_S = 60.0             # wait before retrying a failed city
 STRONG_WIND_KMH = 38.0
 
-# WMO weather interpretation codes -> game weather.
-# https://open-meteo.com/en/docs (weather_code documentation)
-_WMO_MAP: dict[int, WeatherKind] = {
-    0: WeatherKind.CLEAR,
-    1: WeatherKind.CLEAR,
-    2: WeatherKind.CLOUDY,
-    3: WeatherKind.CLOUDY,
-    45: WeatherKind.FOG,
-    48: WeatherKind.FOG,
-    51: WeatherKind.RAIN, 53: WeatherKind.RAIN, 55: WeatherKind.RAIN,
-    56: WeatherKind.RAIN, 57: WeatherKind.RAIN,
-    61: WeatherKind.RAIN, 63: WeatherKind.RAIN,
-    65: WeatherKind.HEAVY_RAIN,
-    66: WeatherKind.HEAVY_RAIN, 67: WeatherKind.HEAVY_RAIN,
-    71: WeatherKind.SNOW, 73: WeatherKind.SNOW, 75: WeatherKind.SNOW,
-    77: WeatherKind.SNOW,
-    80: WeatherKind.RAIN, 81: WeatherKind.RAIN,
-    82: WeatherKind.HEAVY_RAIN,
-    85: WeatherKind.SNOW, 86: WeatherKind.SNOW,
-    95: WeatherKind.THUNDERSTORM, 96: WeatherKind.THUNDERSTORM,
-    99: WeatherKind.THUNDERSTORM,
-}
+# Keyword groups for mapping NWS condition text onto game weather. Checked in
+# priority order: the first group whose keyword appears in the text wins, so
+# precipitation and storms beat plain cloud cover. NWS phrases are title-cased
+# (e.g. "Chance Light Rain", "Patchy Fog"); matching is case-insensitive.
+_CONDITION_RULES: tuple[tuple[WeatherKind, tuple[str, ...]], ...] = (
+    (WeatherKind.THUNDERSTORM, ("thunder", "t-storm", "tstorm", "squall")),
+    (WeatherKind.SNOW, ("snow", "sleet", "flurr", "blizzard", "wintry",
+                        "ice", "icy", "freezing", "frost")),
+    (WeatherKind.HEAVY_RAIN, ("heavy rain", "heavy shower")),
+    (WeatherKind.RAIN, ("rain", "shower", "drizzle", "spray")),
+    (WeatherKind.FOG, ("fog", "mist", "haze", "smoke", "ash", "dust", "sand")),
+    (WeatherKind.WIND, ("wind", "breez", "blust", "gale")),
+    (WeatherKind.CLOUDY, ("cloud", "overcast")),
+    (WeatherKind.CLEAR, ("clear", "sunny", "fair", "sun")),
+)
 
 
-def map_wmo(code: int, wind_kmh: float = 0.0) -> WeatherKind:
-    """Map a WMO weather code (plus wind speed) to a game condition."""
-    kind = _WMO_MAP.get(code, WeatherKind.CLOUDY)
+def map_condition(text: str, wind_kmh: float = 0.0) -> WeatherKind:
+    """Map an NWS condition phrase (plus wind speed) to a game condition.
+
+    Unrecognized or empty text falls back to cloudy -- a safe neutral that the
+    next fetch can refine. Strong wind promotes an otherwise clear or cloudy
+    sky to high winds, but never overrides precipitation.
+    """
+    lowered = (text or "").lower()
+    kind = WeatherKind.CLOUDY
+    for candidate, keywords in _CONDITION_RULES:
+        if any(word in lowered for word in keywords):
+            kind = candidate
+            break
     if kind in (WeatherKind.CLEAR, WeatherKind.CLOUDY) and wind_kmh >= STRONG_WIND_KMH:
         return WeatherKind.WIND
     return kind
 
 
-def _default_fetch(lat: float, lon: float) -> tuple[int, float]:
-    """Fetch (weather_code, wind_speed_kmh) from Open-Meteo. Raises on failure."""
-    params = urllib.parse.urlencode({
-        "latitude": f"{lat:.4f}",
-        "longitude": f"{lon:.4f}",
-        "current": "weather_code,wind_speed_10m",
-        "wind_speed_unit": "kmh",
+def _get_json(url: str) -> dict:
+    """Fetch and decode a JSON document from the NWS API. Raises on failure."""
+    req = urllib.request.Request(url, headers={
+        "User-Agent": USER_AGENT,
+        "Accept": "application/geo+json",
     })
-    req = urllib.request.Request(
-        f"{API_URL}?{params}",
-        headers={"User-Agent": "FreightFate/1.1 (accessible trucking game)"},
-    )
     with urllib.request.urlopen(req, timeout=FETCH_TIMEOUT_S,
                                 context=ssl_context()) as resp:
-        data = json.loads(resp.read().decode("utf-8"))
-    current = data["current"]
-    return int(current["weather_code"]), float(current.get("wind_speed_10m", 0.0))
+        return json.loads(resp.read().decode("utf-8"))
+
+
+# Resolving a city's nearest observation station is stable, so cache it across
+# refreshes (keyed by coarse coordinates) to avoid repeating the two lookups.
+_station_cache: dict[tuple[float, float], str] = {}
+_station_lock = threading.Lock()
+
+
+def _resolve_station_obs_url(lat: float, lon: float) -> str:
+    """Return the 'latest observation' URL for the station nearest a point.
+
+    Walks the NWS discovery chain: ``/points`` yields the station list URL, and
+    that list yields the nearest station. The result is cached per location.
+    """
+    key = (round(lat, 2), round(lon, 2))
+    with _station_lock:
+        cached = _station_cache.get(key)
+    if cached is not None:
+        return cached
+
+    point = _get_json(f"{API_ROOT}/points/{lat:.4f},{lon:.4f}")
+    stations_url = point["properties"]["observationStations"]
+    stations = _get_json(stations_url)
+    station_urls = stations.get("observationStations") or []
+    if not station_urls:
+        raise ValueError(f"no observation stations near {lat:.4f},{lon:.4f}")
+    obs_url = f"{station_urls[0]}/observations/latest"
+
+    with _station_lock:
+        _station_cache[key] = obs_url
+    return obs_url
+
+
+def _wind_to_kmh(wind: dict | None) -> float:
+    """Convert an NWS windSpeed measurement to km/h, tolerating null values."""
+    if not wind or wind.get("value") is None:
+        return 0.0
+    value = float(wind["value"])
+    unit = str(wind.get("unitCode", ""))
+    if "m_s" in unit or "m/s" in unit:        # metres per second
+        return value * 3.6
+    if "mi_h" in unit or "mph" in unit:       # miles per hour
+        return value * 1.609344
+    return value                              # already km/h (wmoUnit:km_h-1)
+
+
+def _default_fetch(lat: float, lon: float) -> tuple[str, float]:
+    """Fetch (condition_text, wind_speed_kmh) from NWS. Raises on failure."""
+    obs_url = _resolve_station_obs_url(lat, lon)
+    data = _get_json(obs_url)
+    props = data["properties"]
+    text = props.get("textDescription") or ""
+    wind_kmh = _wind_to_kmh(props.get("windSpeed"))
+    return text, wind_kmh
 
 
 class RealWeatherProvider:
@@ -90,7 +145,7 @@ class RealWeatherProvider:
     A custom ``fetch`` callable can be injected for tests.
     """
 
-    def __init__(self, fetch: Callable[[float, float], tuple[int, float]] | None = None,
+    def __init__(self, fetch: Callable[[float, float], tuple[str, float]] | None = None,
                  clock: Callable[[], float] = time.monotonic) -> None:
         self._fetch = fetch or _default_fetch
         self._clock = clock
@@ -140,13 +195,13 @@ class RealWeatherProvider:
 
     def _worker(self, city: str, lat: float, lon: float) -> None:
         try:
-            code, wind = self._fetch(lat, lon)
-            kind = map_wmo(code, wind)
+            text, wind = self._fetch(lat, lon)
+            kind = map_condition(text, wind)
             with self._lock:
                 self._cache[city] = (kind, self._clock())
                 self._failed_at.pop(city, None)
-            log.info("Real weather for %s: %s (WMO %s, wind %.0f km/h)",
-                     city, kind.value, code, wind)
+            log.info("Real weather for %s: %s (NWS %r, wind %.0f km/h)",
+                     city, kind.value, text, wind)
         except Exception:
             with self._lock:
                 self._failed_at[city] = self._clock()
