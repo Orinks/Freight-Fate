@@ -190,11 +190,14 @@ class Trip:
 
     def __init__(self, route: Route, truck: TruckState, weather: WeatherSystem,
                  time_scale: float = 20.0, seed: int | None = None,
-                 start_hour: float = 12.0, imperial: bool = True) -> None:
+                 start_hour: float = 12.0, imperial: bool = True,
+                 hazard_scale: float = 1.0) -> None:
         self.route = route
         self.truck = truck
         self.weather = weather
         self.time_scale = time_scale
+        # Multiplier on random road-hazard frequency (relaxed mode lowers it).
+        self.hazard_scale = max(0.0, hazard_scale)
         self.start_hour = start_hour   # clock hour of day at departure
         # Spoken/listed navigation distances follow the player's unit choice.
         # Backing field set before cues are built below; the property setter
@@ -926,12 +929,16 @@ class Trip:
                            f"Continuing on {leg.highway} toward {nxt}.")
 
     def _hazard_risk(self) -> float:
-        """Chance of a hazard at each check; worse in fog and after dark."""
+        """Chance of a hazard at each check; worse in fog and after dark.
+
+        Scaled by ``hazard_scale`` so relaxed mode keeps hazards rare while
+        weather and night still make the hazards that do occur likelier.
+        """
         vis = self.weather.effects.visibility_mi
         risk = 0.25 + (0.25 if vis < 2 else 0.0)
         if is_night(self.current_hour):
             risk += NIGHT_HAZARD_BONUS
-        return risk
+        return risk * self.hazard_scale
 
     def _check_hazards(self, moved_mi: float) -> None:
         """Occasional road hazards that demand braking."""

@@ -134,6 +134,7 @@ Your terminal is the safe hub between jobs. Public terminal actions include:
 | --- | --- |
 | Dispatch board | Browse freight offers from local facilities. |
 | Garage | Refuel, repair, buy upgrades, buy trucks, or switch owned trucks. |
+| Request pay advance | Draw cash against your next load when you are broke. |
 | Career stats | Review level, reputation, deliveries, and career totals. |
 | Truck status | Review truck model, fuel, tank size, and damage condition. |
 | Time and weather | Review the clock, career day, and current city weather. |
@@ -144,6 +145,12 @@ Your terminal is the safe hub between jobs. Public terminal actions include:
 
 The garage can do partial fuel or repair work when you cannot afford a full
 tank or full repair.
+
+If your balance goes negative and you cannot afford fuel, **Request pay
+advance** fronts you cash against your next load (also available at in-trip
+rest stops, drawn against the load you are hauling). The advance is offered
+only while cash is low, is capped, and is repaid automatically out of your
+next delivery settlement, so a negative balance is never a dead end.
 
 The garage sells:
 

@@ -277,6 +277,7 @@ class Profile:
     active_trip: dict | None = None  # mid-delivery snapshot, see DrivingState
     dispatch_board_cache: dict | None = None
     fatigue: float = 0.0             # 0 fresh .. 100 exhausted
+    pay_advance: float = 0.0         # outstanding dispatcher advance owed, repaid at delivery
     career: Career = field(default_factory=Career)
     market: Market = field(default_factory=Market)
     hos: HosClock = field(default_factory=HosClock)  # hours-of-service shift clock

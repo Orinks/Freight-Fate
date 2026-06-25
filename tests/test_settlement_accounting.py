@@ -22,12 +22,14 @@ def _job(cargo_key="electronics", *, origin="New York", destination="Philadelphi
     )
 
 
-def _settle(app, job, route_cities, *, money=1000.0, speeding_strikes=0):
+def _settle(app, job, route_cities, *, money=1000.0, speeding_strikes=0,
+            pay_advance=0.0):
     from freight_fate.models.profile import Profile
     from freight_fate.states.driving import ArrivalState, DrivingState
 
     app.ctx.profile = Profile(name="Settlement Audit", current_city=job.origin)
     app.ctx.profile.money = money
+    app.ctx.profile.pay_advance = pay_advance
     route = app.ctx.world.route_from_cities(route_cities)
     driving = DrivingState(app.ctx, job, route, phase="delivery")
     driving.speeding_strikes = speeding_strikes
@@ -74,6 +76,55 @@ def test_driver_responsibility_charges_reduce_driver_pay_but_not_carrier_charges
         assert "Driver-responsibility charges 160 dollars" in summary
         assert app.ctx.profile.money == pytest.approx(1000.0 + gross - 160.0)
         assert app.ctx.profile.career.total_earnings == pytest.approx(gross - 160.0)
+    finally:
+        app.shutdown()
+
+
+def test_pay_advance_is_repaid_from_settlement():
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        job = _job(destination_type="retail_distribution")
+        gross, summary = _settle(
+            app,
+            job,
+            ["New York", "Philadelphia"],
+            money=-200.0,
+            pay_advance=500.0,
+        )
+
+        assert "Pay advance repaid from this settlement: 500 dollars" in summary
+        assert app.ctx.profile.pay_advance == pytest.approx(0.0)
+        # Net pay is reduced by the repaid advance; the bank reflects it.
+        assert app.ctx.profile.money == pytest.approx(-200.0 + gross - 500.0)
+        assert app.ctx.profile.career.total_earnings == pytest.approx(gross - 500.0)
+    finally:
+        app.shutdown()
+
+
+def test_pay_advance_repayment_never_drives_net_pay_negative():
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        # A small payout against a larger outstanding advance: repay only what
+        # the settlement can cover, carry the rest, and never claw the bank
+        # below the settlement itself.
+        job = _job(destination_type="retail_distribution", pay=300.0)
+        gross, summary = _settle(
+            app,
+            job,
+            ["New York", "Philadelphia"],
+            money=0.0,
+            pay_advance=1500.0,
+        )
+
+        repaid = min(1500.0, gross)
+        assert app.ctx.profile.pay_advance == pytest.approx(1500.0 - repaid)
+        assert app.ctx.profile.money == pytest.approx(gross - repaid)
+        assert app.ctx.profile.money >= 0.0
+        assert "still outstanding" in summary
     finally:
         app.shutdown()
 
