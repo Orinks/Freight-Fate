@@ -703,7 +703,7 @@ class DrivingState(State):
         source = "Live conditions" if self.weather.live else "Currently"
         parts = [f"It is {time_of_day(self.trip.current_hour)}.",
                  f"{source} {self.weather.describe()}.",
-                 f"Safe speed about {self.weather.effects.safe_speed_mph:.0f}."]
+                f"Safe speed about {(self.weather.effects.safe_speed_mph if self.ctx.settings.imperial_units else self.weather.effects.safe_speed_mph * 1.609):.0f}."]
         if not self.weather.live:
             ahead = ", then ".join(k.value for k in self.weather.forecast(2))
             parts.append(f"Ahead: {ahead}.")
