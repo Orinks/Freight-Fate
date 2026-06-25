@@ -9,6 +9,10 @@ def _reset(monkeypatch, tmp_path, game_dir=None, legacy_dir=None):
     """Point both roots at controlled temp locations."""
     monkeypatch.delenv("FREIGHT_FATE_DATA_DIR", raising=False)
     monkeypatch.setattr(profile_mod, "_legacy_checked", False)
+    # These cover the portable Windows/Linux layout (saves beside the game).
+    # Pin a non-darwin platform so the macOS Application Support branch in
+    # _save_root() does not divert them when the test host is a Mac.
+    monkeypatch.setattr(sys, "platform", "linux")
     game = game_dir or tmp_path / "game"
     game.mkdir(parents=True, exist_ok=True)
     monkeypatch.setattr(profile_mod, "game_root", lambda: game)
