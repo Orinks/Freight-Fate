@@ -295,7 +295,8 @@ Deliver -> Earn and level up -> Repeat
 
 ### World
 - [x] More cities and regional highways (1.4.0)
-- [x] Day/night cycle with audio shifts (1.5.0); seasons still open
+- [x] Day/night cycle with audio shifts (1.5.0); seasons and a regional
+      temperature model now shipped too
 - [ ] City-specific ambience and landmarks
 - [ ] Destination-local facility legs: after the highway trip reaches the
       destination city, hand the player onto a short local approach to the
@@ -304,6 +305,63 @@ Deliver -> Earn and level up -> Repeat
       correct leg, and facility data should carry enough road name, distance,
       gate speed, and dock-approach detail to make warehouses, terminals,
       ports, and industrial yards feel distinct.
+
+### In-cab radio (1.7 / 1.8 candidate)
+
+A truck radio you can tune as you drive: pull in the local FM stations for
+wherever you are on the map, with a satellite-style network as the
+always-available fallback when you are out of range of anything local. A
+community suggestion; the right kind of immersion for long hauls and a natural
+fit for an audio-first game.
+
+- **Optional, and streamer-safe by default.** A hard requirement: the feature
+  must default to content the player can broadcast on YouTube/Twitch without
+  DMCA strikes. Anything that risks a strike (e.g. real station audio) lives
+  behind an explicit, off-by-default toggle so streamers are safe unless they
+  opt in knowing the risk.
+
+- **Geography-gated reception.** Stations are data, not magic: a JSON catalog
+  per station with call sign, format/genre, transmitter latitude/longitude,
+  ERP (effective radiated power), and antenna HAAT, plus a derived
+  `range_miles`. Range is estimated from public FCC license data (FM Query /
+  LMS) using the F(50,50) protected-contour idea -- power and antenna height,
+  refined by terrain -- so you can only pull in stations whose coverage
+  actually reaches you. The truck's geo-position is interpolated in
+  latitude/longitude along the current route leg (cities already carry
+  lat/lon), signal strength falls off toward the edge of a station's contour,
+  and reception fades into static and drops out as you leave range -- then the
+  next town's stations fade in.
+
+- **Satellite fallback.** An always-available pseudo-satellite station for when
+  no local FM is in range -- the role the suggester pitched as "AFN." Note:
+  real AFN (American Forces Network, the DoD's satellite radio/TV for overseas
+  service members) is encrypted and not legally receivable by the public inside
+  the U.S., so a domestic trucker would really have SiriusXM. Open question:
+  brand the fallback as a fictionalized "forces/satellite network" that keeps
+  the AFN vibe without the licensing/realism wrinkle.
+
+- **Audio sourcing (the crux).** Three options, in rising streamer-safety:
+  (a) point at stations' public internet streams -- most authentic, but
+  redistribution is legally gray, stream URLs rot, and it forces the
+  streamer-safe toggle off; (b) curated CC0/royalty-free "stations" with
+  regional genre flavor and DJ/station-ID patter we own outright -- fully
+  streamer-safe and reliable, less literally real, and a clean fit with the
+  existing music system and the planned move to real/commissioned audio;
+  (c) hybrid -- owned content by default, real streams as the opt-in add-on.
+  Lean (b) as the shippable default with (c) as the power-user toggle.
+
+- **Accessibility is the feature, not a checkbox.** Tuning must be fully
+  spoken and keyboard-driven: seek/scan up and down the dial, announce call
+  sign + format + signal strength, audibly fade as you move in and out of
+  range, a station list and favorites, and a dedicated radio volume in
+  Settings. This is core UX for the game's audience, designed in from the
+  start.
+
+- **Ties to existing systems.** Reuses regions and city lat/lon, the music
+  backend, and the day/night + seasons clock (programming could shift by time
+  of day or season). Open questions: ship the full FCC-derived dataset or a
+  curated subset; how granular the range/terrain model needs to be; and
+  per-genre licensing for any owned music library.
 
 ### Business
 - [ ] Company-driver to owner-operator career arc. Resolve the current
