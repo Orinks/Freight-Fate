@@ -174,6 +174,7 @@ class DrivingState(State):
         self._microsleep_cooldown_gm = 0.0
         self._microsleep_misses = 0     # consecutive nods drifted off the road
         self._hazard_deadline: float | None = None
+        self._last_event_message = ""   # last spoken route announcement, for replay
         self._speed_announce_timer = 0.0
         self._last_announced_mph = 0.0
         self._speeding_timer = 0.0
@@ -412,6 +413,12 @@ class DrivingState(State):
             self._speak_weather()
         elif key == pygame.K_l:
             self.ctx.say(self.lane.describe())
+        elif key == pygame.K_s:
+            self._speak_speed_limit()
+        elif key == pygame.K_a:
+            self._speak_last_announcement()
+        elif key == pygame.K_u:
+            self._speak_upcoming()
         elif key == pygame.K_F1:
             objective_help = (
                 f"Your current objective is pickup: drive to {self._pickup_facility_text()}, "
@@ -434,9 +441,11 @@ class DrivingState(State):
                 "Press P to release or set the parking brake; if pressure is "
                 "below 100 psi, wait with the engine running. "
                 f"{objective_help}"
-                "Space speed. Tab status menu. F fuel. "
+                "Space speed. S posted speed limit. Tab status menu. F fuel. "
                 "C clock, deadline, and hours of service. "
                 "R route. Shift R next listed highway exit. V weather. L lane position. "
+                "A repeats the last announcement. U reads what is coming up: "
+                "imposed limits, stops, and exits ahead. "
                 "Left and Right arrows steer when lane drift is enabled. "
                 "T route POI menu when already stopped "
                 "at one: available actions may include fuel, break, sleep, "
@@ -529,6 +538,42 @@ class DrivingState(State):
         gear = self._gear_text()
         self.ctx.say(f"{self.ctx.settings.speed_text(t.speed_mph)}, {gear}, "
                      f"{t.rpm:.0f} RPM, {self._air_status_text()}.")
+
+    def _speak_speed_limit(self) -> None:
+        """S: the posted limit here, the zone if any, and how far over you are."""
+        limit, reason = self.trip.speed_limit_at(self.trip.position_mi)
+        zone = f", in a {reason} zone" if reason else ""
+        over = self.truck.speed_mph - limit
+        comparison = f" You are about {over:.0f} over." if over >= 1 else ""
+        self.ctx.say(
+            f"Speed limit {self.ctx.settings.speed_text(limit)}{zone}.{comparison}")
+
+    def _speak_last_announcement(self) -> None:
+        """A: replay the last route announcement, for one you missed."""
+        if self._last_event_message:
+            self.ctx.say(self._last_event_message)
+        else:
+            self.ctx.say("No recent announcement to repeat.")
+
+    def _speak_upcoming(self, within_mi: float = 15.0) -> None:
+        """U: what is coming up -- imposed limits, stops, and exits ahead."""
+        s = self.ctx.settings
+        pos = self.trip.position_mi
+        parts: list[str] = []
+        zone = self.trip.next_zone_within(within_mi)
+        if zone is not None:
+            parts.append(f"{zone.reason} in {s.distance_text(zone.start_mi - pos)}, "
+                         f"speed limit {s.speed_text(zone.limit_mph)}")
+        stop = self.trip.upcoming_stop(within_mi)
+        if stop is not None:
+            parts.append(f"{stop.spoken_name} in {s.distance_text(stop.at_mi - pos)}")
+        cue = self.trip.next_exit_cue()
+        if cue is not None and 0 < cue.at_mi - pos <= within_mi:
+            parts.append(f"in {s.distance_text(cue.at_mi - pos)}, {cue.text}")
+        if not parts:
+            self.ctx.say(f"Nothing notable in the next {s.distance_text(within_mi)}.")
+            return
+        self.ctx.say("Coming up: " + ". ".join(parts) + ".")
 
     def _gear_text(self) -> str:
         tr = self.truck.transmission
@@ -1187,6 +1232,8 @@ class DrivingState(State):
     def _handle_trip_event(self, event) -> None:
         kind = event.kind
         sound = _route_event_sound(event)
+        if event.message:
+            self._last_event_message = event.message   # replayable with A
         if kind == TripEventKind.HAZARD:
             if self._ramp_mi is not None:
                 return   # off the highway: the hazard passes you by

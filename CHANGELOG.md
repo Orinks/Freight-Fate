@@ -3,6 +3,12 @@
 ## Unreleased
 
 ### Added
+- **Three new on-demand driving keys.** **S** reads the posted speed limit where
+  you are -- the zone if any, and how far over you are -- so you no longer have
+  to dig into the status menu. **A** repeats the last route announcement, for
+  the one you missed before you could react. **U** reads what is coming up:
+  imposed speed limits, stops, and exits ahead, so a zone or gate never blindsides
+  you. All three are listed in F1 help and the manual.
 - **Drowsiness has real consequences now.** Push past severe fatigue and you
   start to nod off: a rumble-strip jolt and a warning give you a moment to steer
   or brake and stay awake. Catch it and you carry on; miss it and you drift onto

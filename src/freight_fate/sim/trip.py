@@ -696,6 +696,12 @@ class Trip:
             return min(base, URBAN_LIMIT_MPH)
         return base
 
+    def next_zone_within(self, within_mi: float) -> Zone | None:
+        """The nearest speed zone whose start lies ahead within the distance."""
+        ahead = [z for z in self.zones
+                 if 0 < z.start_mi - self.position_mi <= within_mi]
+        return min(ahead, key=lambda z: z.start_mi) if ahead else None
+
     def _active_zone_at(self, mile: float) -> Zone | None:
         active = [z for z in self.zones if z.start_mi <= mile <= z.end_mi]
         if not active:

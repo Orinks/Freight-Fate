@@ -234,6 +234,7 @@ Driving controls are active while the road view is focused:
 | J | Toggle the engine brake. |
 | H | Sound the horn. |
 | Space | Report speed, gear, RPM, air pressure, and brake state. |
+| S | Report the posted speed limit here, the zone if any, and how far over you are. |
 | Tab | Open the driving status menu. |
 | F | Report fuel level and estimated range. |
 | C | Report clock, deadline, estimated arrival, and hours of service. |
@@ -241,6 +242,8 @@ Driving controls are active while the road view is focused:
 | Shift+R | Report the next listed highway exit. |
 | V | Report weather and forecast. |
 | L | Report lane position when lane drift is enabled. |
+| A | Repeat the last route announcement, in case you missed it. |
+| U | Report what is coming up: imposed speed limits, stops, and exits ahead. |
 | F1 | Show the driving control list and current objective. |
 | Escape | Open the pause menu. |
 
