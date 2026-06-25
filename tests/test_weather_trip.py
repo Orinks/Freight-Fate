@@ -2,6 +2,8 @@
 
 import itertools
 
+import pytest
+
 from freight_fate.sim import Trip, TruckState, WeatherKind, WeatherSystem
 from freight_fate.sim.trip import NavigationCue, TrafficLead, TripEventKind
 from freight_fate.sim.weather import EFFECTS, REGION_WEIGHTS
@@ -74,6 +76,18 @@ def make_trip(world, start="Chicago", end="Indianapolis", seed=2, **kwargs):
     truck.start_engine()
     weather = WeatherSystem("great_lakes", seed=1)
     return Trip(route, truck, weather, seed=seed, **kwargs), truck
+
+
+def test_relaxed_hazard_scale_lowers_hazard_risk(world):
+    """Relaxed mode keeps random road hazards rare via the hazard scale."""
+    from freight_fate.sim.hos import RELAXED_HAZARD_SCALE
+
+    normal, _ = make_trip(world, seed=4)
+    relaxed, _ = make_trip(world, seed=4, hazard_scale=RELAXED_HAZARD_SCALE)
+    # Same route, weather, and clock: the only difference is the scale.
+    assert relaxed._hazard_risk() == pytest.approx(
+        normal._hazard_risk() * RELAXED_HAZARD_SCALE)
+    assert relaxed._hazard_risk() < normal._hazard_risk()
 
 
 def test_trip_completes_and_emits_arrival(world):

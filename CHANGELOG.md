@@ -3,6 +3,17 @@
 ## Unreleased
 
 ### Added
+- **Relaxed mode now actually relaxes the road.** In relaxed hours-of-service
+  mode, random road hazards are much rarer, so the drive centers on driver
+  responsibility -- hours, fueling, repairs, and fatigue -- instead of constant
+  emergency braking. Realistic mode is unchanged. The Settings help for Hours
+  of service spells out the difference.
+- **Dispatcher pay advances (no more soft lock).** A broke driver who can no
+  longer afford fuel can now draw a cash advance against the next load -- from
+  the terminal hub or any in-trip rest stop -- and it is repaid automatically
+  out of the next delivery settlement. The advance is offered only while cash
+  is low and is capped, so it stays a recovery line rather than free money. A
+  negative balance is no longer a dead end.
 - **Discord Rich Presence (optional).** When Discord is running, your profile
   can show broad game activity -- the main menu, the terminal, driving a route,
   resting, or delivering -- with high-level route and cargo context. Only

@@ -5,7 +5,11 @@ from __future__ import annotations
 import zlib
 
 from ..data.world import Route
-from ..models.economy import REPAIR_COST_PER_PCT
+from ..models.economy import (
+    REPAIR_COST_PER_PCT,
+    pay_advance_grant,
+    pay_advance_unavailable_reason,
+)
 from ..models.jobs import (
     Job,
     JobBoard,
@@ -136,6 +140,10 @@ class CityMenuState(MenuState):
             MenuItem(self._garage_label, self._garage,
                      help="Refuel and repair your truck at the terminal garage. "
                           "If cash is short, the garage does partial work."),
+            MenuItem(self._pay_advance_label, self._request_pay_advance,
+                     help="Draw cash against your next load when you are broke "
+                          "and cannot afford fuel. Repaid automatically out of "
+                          "your next delivery settlement."),
             MenuItem("Career stats", self._stats,
                      help="Hear your level, reputation, and lifetime numbers."),
             MenuItem("Truck status", self._truck_status,
@@ -210,6 +218,30 @@ class CityMenuState(MenuState):
 
     def _garage(self) -> None:
         self.ctx.push_state(GarageState(self.ctx))
+
+    def _pay_advance_label(self) -> str:
+        p = self.ctx.profile
+        grant = pay_advance_grant(p.money, p.pay_advance)
+        if grant > 0:
+            return f"Request pay advance: {grant:,.0f} dollars"
+        return "Request pay advance"
+
+    def _request_pay_advance(self) -> None:
+        p = self.ctx.profile
+        grant = pay_advance_grant(p.money, p.pay_advance)
+        if grant <= 0:
+            self.ctx.audio.play("ui/error")
+            self.ctx.say(pay_advance_unavailable_reason(p.money, p.pay_advance))
+            return
+        p.money += grant
+        p.pay_advance = round(p.pay_advance + grant, 2)
+        self.ctx.save_profile()
+        self.ctx.audio.play("ui/notify")
+        self.ctx.say(
+            f"Pay advance approved: {grant:,.0f} dollars against your next load. "
+            f"It will be deducted at delivery. You have {p.money:,.0f} dollars, "
+            f"with {p.pay_advance:,.0f} dollars of advance still to repay.")
+        self.refresh()
 
     def _stats(self) -> None:
         self.ctx.say(self.ctx.profile.career.summary())

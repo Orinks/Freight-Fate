@@ -949,7 +949,10 @@ class SettingsCategoryState(MenuState):
                          help="Controls how quickly game time and distance pass."),
                 MenuItem(lambda: f"Hours of service: {self._hos_label()}",
                          lambda: self._cycle_hos(1),
-                         help="Choose realistic or relaxed hours rules."),
+                         help="Realistic enforces full hours rules and normal "
+                              "road hazards. Relaxed eases the hours limits and "
+                              "makes road hazards rare, so you can focus on "
+                              "driver responsibility: hours, fueling, and repairs."),
                 MenuItem(lambda: f"Lane drift: {self._steering_label()}",
                          lambda: self._cycle_steering(1),
                          help="Choose whether lane drift is off, light, or realistic."),

@@ -14,6 +14,7 @@ import pygame
 
 from ..achievements import add_unique_stat
 from ..data.world import Route
+from ..models.economy import pay_advance_grant, pay_advance_unavailable_reason
 from ..models.jobs import Job, job_from_payload, job_payload
 from ..models.settlement import (
     carrier_accessorial_charges,
@@ -131,7 +132,8 @@ class DrivingState(State):
         self.trip = Trip(route, self.truck, self.weather,
                          time_scale=ctx.settings.time_scale, seed=self.trip_seed,
                          start_hour=trip_start_hour,
-                         imperial=ctx.settings.imperial_units)
+                         imperial=ctx.settings.imperial_units,
+                         hazard_scale=hos.hazard_scale(ctx.settings.hos_mode))
         self.lane = LaneKeeping(seed=self.trip_seed)
         self._day_music_sequence = select_drive_music_sequence(
             self.route, self.trip_seed, 12.0, self.weather.current)
@@ -1906,8 +1908,38 @@ class RestStopState(MenuState):
                 "Save at this stop", self._save_here,
                 help="Save the active drive at this route POI without "
                      "leaving the road."))
+        items.append(MenuItem(
+            self._pay_advance_label, self._request_pay_advance,
+            help="Draw cash against this load when you are broke and cannot "
+                 "afford fuel. Repaid automatically out of your delivery "
+                 "settlement."))
         items.append(MenuItem("Back to the road", self.go_back))
         return items
+
+    def _pay_advance_label(self) -> str:
+        p = self.ctx.profile
+        grant = pay_advance_grant(p.money, p.pay_advance)
+        if grant > 0:
+            return f"Request pay advance: {grant:,.0f} dollars"
+        return "Request pay advance"
+
+    def _request_pay_advance(self) -> None:
+        p = self.ctx.profile
+        grant = pay_advance_grant(p.money, p.pay_advance)
+        if grant <= 0:
+            self.ctx.audio.play("ui/error")
+            self.ctx.say(pay_advance_unavailable_reason(p.money, p.pay_advance))
+            return
+        p.money += grant
+        p.pay_advance = round(p.pay_advance + grant, 2)
+        self._save_here(silent=True)
+        self.ctx.audio.play("ui/notify")
+        self.ctx.say(
+            f"Pay advance approved: {grant:,.0f} dollars against your "
+            f"{self.driving.job.destination} load. It will be deducted at "
+            f"delivery. You have {p.money:,.0f} dollars, with "
+            f"{p.pay_advance:,.0f} dollars of advance still to repay.")
+        self.refresh()
 
     def _fuel_label(self) -> str:
         d = self.driving
@@ -2533,6 +2565,11 @@ class FacilityArrivalState(MenuState):
         carrier_charges = tolls + charge_total(accessorials)
         driver_charges = _speeding_settlement_fine(d.speeding_strikes)
         net_estimated_pay = max(0.0, estimated_pay - driver_charges)
+        advance_due = round(min(self.ctx.profile.pay_advance, net_estimated_pay), 2)
+        net_estimated_pay = round(net_estimated_pay - advance_due, 2)
+        advance_note = (
+            f" A pay advance of {advance_due:,.0f} dollars will be repaid from "
+            "this settlement." if advance_due > 0 else "")
         timing = (f"{remaining:.1f} hours remain before the deadline"
                   if remaining >= 0
                   else f"{-remaining:.1f} hours past the deadline")
@@ -2552,7 +2589,7 @@ class FacilityArrivalState(MenuState):
             "Those charges do not reduce driver pay. "
             f"Driver-responsibility charges are estimated at "
             f"{driver_charges:,.0f} dollars, for estimated net driver pay "
-            f"{net_estimated_pay:,.0f}. "
+            f"{net_estimated_pay:,.0f}.{advance_note} "
             f"{timing}. {cargo_condition} Dock and deliver to settle.")
 
     def _status(self) -> None:
@@ -2642,6 +2679,16 @@ class ArrivalState(MenuState):
                 f"Driver-responsibility charges: speeding fines cost you "
                 f"{driver_charges:,.0f} dollars.")
         net_pay = max(0.0, gross_pay - driver_charges)
+        advance_repaid = round(min(p.pay_advance, net_pay), 2)
+        if advance_repaid > 0:
+            net_pay = round(net_pay - advance_repaid, 2)
+            p.pay_advance = round(p.pay_advance - advance_repaid, 2)
+            outstanding = (
+                f" {p.pay_advance:,.0f} dollars of advance still outstanding."
+                if p.pay_advance >= 1.0 else "")
+            self.summary_parts.append(
+                f"Pay advance repaid from this settlement: "
+                f"{advance_repaid:,.0f} dollars.{outstanding}")
         on_time = hours <= job.deadline_game_h
         p.money += net_pay
         p.current_city = job.destination
@@ -2698,6 +2745,13 @@ class ArrivalState(MenuState):
         career_lines = announcements + self._achievement_messages
         if not career_lines:
             career_lines = ["No new career messages."]
+        advance_lines = []
+        if advance_repaid > 0:
+            advance_lines.append(
+                f"Pay advance repaid: {advance_repaid:,.0f} dollars.")
+        if p.pay_advance >= 1.0:
+            advance_lines.append(
+                f"Pay advance still outstanding: {p.pay_advance:,.0f} dollars.")
         self.summary_lines = [
             f"Delivered {job.weight_tons:.0f} tons of {job.cargo.label} "
             f"to {job.destination}.",
@@ -2711,6 +2765,7 @@ class ArrivalState(MenuState):
             f"accessorials {charge_summary(accessorials)}.",
             "Carrier charges are not deducted from driver pay.",
             f"Driver-responsibility charges: {driver_charges:,.0f} dollars.",
+            *advance_lines,
             f"Net driver pay: {net_pay:,.0f} dollars.",
             f"Money after settlement: {p.money:,.0f} dollars.",
             bonus_text + ".",

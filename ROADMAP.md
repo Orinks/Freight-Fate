@@ -15,6 +15,75 @@
       compressor-ready cue with an air-dryer purge and low-air buzzer once the
       sound library grows those effects.
 
+## Next up: 1.6 polish and realism
+
+A consolidation pass focused on closing realism gaps and removing rough
+edges rather than adding new systems. Several items overlap the trooper
+milestone below (speeding consequences especially); ship whichever slice
+is ready first and fold the rest in.
+
+### Driver economics
+
+- [x] **Negative-balance recovery (softlock fix).** Shipped as a
+  **dispatcher pay advance**: from the terminal hub or any in-trip rest
+  stop, a broke driver (cash under $400) can draw $500 against the next
+  load, capped at $1,500 outstanding, repaid automatically out of the next
+  delivery settlement (never below zero, remainder carried). Tracked on
+  `Profile.pay_advance`; deterministic and save-compatible. Money still
+  goes negative freely for fines/tows by design, but broke-and-empty is no
+  longer a dead end.
+
+### Fatigue and driver responsibility
+
+- **Drowsiness consequences.** Today fatigue only narrows hazard reaction
+  windows (`hos.reaction_window_mult`) and plays yawn / rumble-strip
+  audio; with hazards rare it has little teeth. Add real stakes: severe
+  fatigue (`FATIGUE_SEVERE`, 80+) should cause occasional involuntary
+  **microsleep lane drift** events (a forced lane-keeping correction or a
+  rumble-strip wake with a short reaction window), escalating toward a
+  forced stop. Tie into the relaxed-mode philosophy below: in relaxed
+  mode drowsiness, fueling, HOS, and repairs become the *main* thing the
+  player manages.
+
+- [x] **Relaxed mode should feel relaxed.** Shipped: `Trip` now takes a
+  `hazard_scale` and relaxed mode passes `hos.hazard_scale("relaxed")`
+  (0.2), so random road hazards are ~5x rarer while weather and night
+  still modulate the ones that occur. Driver-responsibility systems
+  (hours of service, fueling, repairs, fatigue) carry the relaxed loop;
+  `realistic` mode is unchanged. Possible follow-up: also thin out traffic
+  density and reduce inspection/patrol frequency in relaxed mode.
+
+### Driving feel
+
+- **Gear / launch realism.** Loaded low-gear acceleration is too brisk:
+  truck mass is fixed at 36 t and the launch is traction-limited at
+  ~0.33 g, so 1st-3rd blip past quickly and the automatic upshifts almost
+  instantly (`AUTO_UPSHIFT_RPM` 1750). A loaded tractor-trailer should
+  pull away gently and lug through the low gears. Options: lower the
+  effective launch traction / drive force at low speed, make gross mass
+  cargo-weight-aware so heavy loads accelerate slower, and/or widen the
+  low-gear dwell before the auto upshifts. Needs playtesting to keep it
+  from feeling sluggish to the point of frustration.
+
+### Speed limits and speeding
+
+- **Corridor highway speed limits.** `speed_limit_at` returns a flat
+  `BASE_SPEED_LIMIT_MPH` (70) everywhere except construction/zone
+  overrides. Route legs already carry a `highway` name; map highway class
+  / region to a posted limit (rural interstate 70-80, urban 55-65, two-lane
+  lower) and surface it through the same zone/announcement plumbing so the
+  posted limit changes by corridor. Where real OSM `maxspeed` data is
+  available for a corridor, prefer it.
+
+- **Speeding leeway and consequences.** Leeway already exists: a strike is
+  only recorded above `limit + 9` mph held for 6 s (`_update_speeding`),
+  and strikes already convert to settlement fines
+  (`_speeding_settlement_fine`). What's missing is *salience* and
+  *immediacy* — the cost lands silently at delivery. The trooper milestone
+  (below) is the intended home for visible, immediate enforcement (getting
+  pulled over, on-the-spot fines). Confirm the ~10 mph leeway feels right
+  and make the strike→cost link audible when a strike is recorded.
+
 ## Next up: state troopers and law enforcement
 
 Speeding, HOS/ELD compliance, and route enforcement are now one visible
