@@ -120,26 +120,35 @@ From a batch of player reports:
   GPS cue, zone-exit restores the corridor limit (not a flat 70), and the
   speeding check is judged against it.
 
-  **Important caveat:** the mph *values* are a hand-written, real-world-informed
-  approximation, NOT sourced data. The leg `highway` name and `region` are
-  real, but `corridor_speed_limit` applies one number per (highway-class,
-  region) -- there is no `maxspeed` field on `Leg` today. Next slice (planned):
-  replace the approximation with real OSM `maxspeed`.
+- [x] **Real OSM `maxspeed`.** Shipped and baked: every one of the 438 legs now
+  carries a `speed_limits` profile -- a step function of real posted limits from
+  OpenStreetMap `maxspeed` (mph, normalized at build time) -- and
+  `_corridor_limit_at` prefers it, falling back to `corridor_speed_limit(highway,
+  region)` only where a leg has no baked profile. The urban-near-city reduction
+  and the spoken limit-change cue are unchanged. The full bake produced 3,113
+  samples (227 truck-specific `maxspeed:hgv`), correctly capturing Western 80 mph
+  Great Basin stretches, California/Oregon truck-55/60, and Texas 85 mph.
+  - Pipeline (local PBF, primary): `tools/build_interchanges.py --maxspeed`
+    reuses the interchange reader to stream `maxspeed`/`maxspeed:hgv` off the
+    corridor highway ways in local per-state Geofabrik extracts
+    (`~/.cache/freight-fate-osm/regions/<state>-latest.osm.pbf`, auto-selected
+    from the states each leg touches), snaps them to the checked-in OSRM
+    geometry, and bakes a median-smoothed step profile. Its own index cache
+    (`*.maxspeed.json`) keeps the interchange cache untouched.
+  - Pipeline (Overpass, fallback): `tools/enrich_routes.py --add-maxspeed` does
+    the same from the public Overpass API per route point when no local extract
+    is available. Both are additive and idempotent.
+  - `parse_osm_maxspeed` handles `"55 mph"`, bare `"55"` (assumed mph on the
+    US-only map; OSM's km/h default is available via `default_kmh`), metric
+    `"90 km/h"`, `"none"`/`"signals"`, and `;`/`,` lists (first general token
+    wins). Unparseable -> `None`, so the heuristic stays the backstop.
 
-  *Next-session plan -- OSM `maxspeed`:*
-  - The project already pulls OSM and snaps it onto corridors
-    (`tools/build_interchanges.py`, `tools/enrich_routes.py`); extend that
-    pipeline to also read the `maxspeed` tag on each highway way.
-  - Bake a real posted limit onto each `Leg` (a single value, or a
-    per-offset profile for stretches where it changes), stored in the world
-    data alongside `highway`.
-  - Have `speed_limit_at` / `_corridor_limit_at` prefer the baked OSM value
-    and fall back to `corridor_speed_limit(highway, region)` only where OSM
-    has no tag. Keep the urban-near-city reduction and the spoken cue.
-  - Watch for: OSM `maxspeed` is often missing or in km/h (`"50"`, `"55 mph"`,
-    `"none"`); normalize units and skip/`None` the unparseable; note that many
-    rural Interstate ways simply have no tag, so the heuristic stays the
-    backstop. Also fold in truck-specific limits (California/Oregon ~55).
+  **Re-baking:** to refresh after a map change, run `uv run --group tooling
+  python tools/build_interchanges.py --maxspeed --force --write` (per-state
+  extracts auto-selected; `--only 'From->To'` for one leg). The bake is
+  network-free (cached OSRM geometry or local route-point interpolation) and
+  idempotent. The heuristic stays the backstop for any future leg OSM has no
+  `maxspeed` on.
 
 - **Speeding leeway and consequences.** Leeway already exists: a strike is
   only recorded above `limit + 9` mph held for 6 s (`_update_speeding`),

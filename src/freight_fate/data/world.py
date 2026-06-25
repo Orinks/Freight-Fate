@@ -651,6 +651,22 @@ class GradeSegment:
 
 
 @dataclass(frozen=True)
+class SpeedLimitSample:
+    """A posted speed limit in effect from ``at_mi`` until the next sample.
+
+    Baked from real OpenStreetMap ``maxspeed`` tags at build time (see
+    ``tools/enrich_routes.py``) and stored already normalized to mph, so the
+    runtime never sees a raw OSM string. The samples form a step function along
+    the leg: the limit at any mile is the last sample whose ``at_mi`` is at or
+    before it. ``hgv`` marks a truck-specific limit (``maxspeed:hgv``)."""
+
+    at_mi: float
+    mph: float
+    source: str = ""
+    hgv: bool = False
+
+
+@dataclass(frozen=True)
 class StateCrossing:
     at_mi: float
     from_state: str
@@ -782,6 +798,7 @@ class Leg:
     state_miles: tuple[StateMileage, ...] = ()
     toll_events: tuple[TollEvent, ...] = ()
     interchanges: tuple[Interchange, ...] = ()
+    speed_limits: tuple[SpeedLimitSample, ...] = ()
 
     def other(self, city: str) -> str:
         return self.b if city == self.a else self.a
@@ -935,11 +952,13 @@ class World:
                 _parse_interchange(x, miles, leg["from"], leg["to"], leg["highway"])
                 for x in corridor.get("interchanges", ())
             )
+            speed_limits = _parse_speed_limits(
+                corridor.get("speed_limits", ()), miles, leg["from"], leg["to"])
             self.legs.append(
                 Leg(leg["from"], leg["to"], miles, leg["highway"],
                     leg["terrain"], stops, route_points, elevation_samples,
                     grade_segments, state_crossings, checkpoints, state_miles,
-                    toll_events, interchanges)
+                    toll_events, interchanges, speed_limits)
             )
         self._adjacency: dict[str, list[Leg]] = {name: [] for name in self.cities}
         for leg in self.legs:
@@ -1578,6 +1597,33 @@ def _parse_grade_segment(raw, leg_miles: float, from_city: str,
         )
     source = str(raw.get("source", "")).strip()
     return GradeSegment(start_mi, end_mi, avg_grade_pct, terrain, source)
+
+
+def _parse_speed_limit(raw, leg_miles: float, from_city: str,
+                       to_city: str) -> SpeedLimitSample:
+    if not isinstance(raw, dict):
+        raise ValueError(f"{from_city} to {to_city} speed limit must be an object")
+    at_mi = _parse_at_mi(raw, leg_miles, from_city, to_city, "speed limit",
+                         allow_endpoints=True)
+    mph = float(raw["mph"])
+    if not 5.0 <= mph <= 85.0:
+        raise ValueError(
+            f"{from_city} to {to_city} speed limit has unrealistic mph {mph}"
+        )
+    source = str(raw.get("source", "")).strip()
+    return SpeedLimitSample(at_mi, mph, source, bool(raw.get("hgv", False)))
+
+
+def _parse_speed_limits(raw_samples, leg_miles: float, from_city: str,
+                        to_city: str) -> tuple[SpeedLimitSample, ...]:
+    """Parse the baked maxspeed profile, ordered along the leg.
+
+    Sorting by ``at_mi`` lets the runtime treat it as a step function without
+    trusting the order the samples happen to be stored in."""
+    samples = tuple(
+        _parse_speed_limit(s, leg_miles, from_city, to_city) for s in raw_samples
+    )
+    return tuple(sorted(samples, key=lambda s: s.at_mi))
 
 
 def _parse_state_crossing(raw, leg_miles: float, from_city: str, to_city: str,

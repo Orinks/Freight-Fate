@@ -167,6 +167,11 @@ def main(argv: list[str] | None = None) -> int:
                              "--write, --per-leg, and optionally --only.")
     parser.add_argument("--per-leg", type=int, default=2,
                         help="Max new POIs per leg for --add-overpass-pois.")
+    parser.add_argument("--add-maxspeed", action="store_true",
+                        help="Bake real OpenStreetMap maxspeed onto legs as a "
+                             "speed_limits profile (Overpass). The runtime "
+                             "prefers it over the highway/region heuristic. Use "
+                             "with --write and optionally --only.")
     parser.add_argument("--prune-non-truck-pois", action="store_true",
                         help="Remove auto-discovered non-truck POIs (generic car "
                              "fuel) network-wide, keeping curated stops and "
@@ -259,6 +264,23 @@ def main(argv: list[str] | None = None) -> int:
                   f"{result['updated_legs']} legs; playable "
                   f"{totals['playable']}/{totals['legs']}; "
                   f"{len(result['legs_without_any_poi'])} legs still without a POI"
+                  f"{' (written)' if args.write else ' (dry run)'}")
+        return 0
+    if args.add_maxspeed:
+        result = bake_maxspeed(
+            data,
+            cache_dir=Path(args.cache_dir),
+            rate_limit_s=args.rate_limit,
+            only=_parse_only(args.only),
+        )
+        if args.write:
+            WORLD_PATH.write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")
+        if args.json:
+            print(json.dumps(result, indent=2, sort_keys=True))
+        else:
+            print(f"Baked OSM maxspeed onto {len(result['baked_legs'])} leg(s); "
+                  f"{len(result['legs_without_maxspeed'])} without a corridor "
+                  f"maxspeed tag"
                   f"{' (written)' if args.write else ' (dry run)'}")
         return 0
     if args.prune_non_truck_pois:
@@ -1041,6 +1063,170 @@ def add_overpass_pois(
         "added_pois": added,
         "updated_legs": updated,
         "legs_without_any_poi": still_empty,
+        "coverage_totals": coverage_report(data)["totals"],
+    }
+
+
+MAXSPEED_SOURCE = (
+    "OpenStreetMap maxspeed tags on the corridor highway ways (Overpass), "
+    "development-time, normalized to mph; maxspeed:hgv preferred where tagged."
+)
+KMH_TO_MPH = 0.621371
+# OSM `maxspeed` values that carry no numeric posted limit -- leave the leg to
+# the runtime heuristic rather than inventing a number.
+_MAXSPEED_NON_NUMERIC = {"none", "signals", "walk", "variable", "no", "unknown"}
+_MAXSPEED_NUMBER = re.compile(r"(\d+(?:\.\d+)?)")
+# Mainline corridor way classes worth a posted limit; service/link roads ignored.
+_MAXSPEED_HIGHWAY_CLASSES = ("motorway", "trunk", "primary", "secondary")
+
+
+def parse_osm_maxspeed(raw: Any, *, default_kmh: bool = False) -> float | None:
+    """Normalize a raw OSM ``maxspeed`` value to mph, or ``None`` if unusable.
+
+    Handles the common shapes: ``"55 mph"``, a bare ``"55"`` (assumed mph for the
+    US map unless ``default_kmh``, matching OSM's km/h default for non-US data),
+    metric ``"90 km/h"``/``"100 kmh"``, the ``"none"``/``"signals"`` non-values,
+    and lists like ``"55 mph; 50 mph"`` (the first parseable token wins, i.e. the
+    general limit before conditional ones). Results are rounded to the nearest
+    5 mph and clamped to a sane truck range; anything unparseable returns
+    ``None`` so the caller can fall back to the heuristic."""
+    if raw is None:
+        return None
+    for token in re.split(r"[;,]", str(raw)):
+        token = token.strip().lower()
+        if not token or token in _MAXSPEED_NON_NUMERIC:
+            continue
+        if "knots" in token:
+            continue
+        match = _MAXSPEED_NUMBER.search(token)
+        if not match:
+            continue
+        value = float(match.group(1))
+        if "mph" in token:
+            mph = value
+        elif any(unit in token for unit in ("km/h", "kmh", "kph")):
+            mph = value * KMH_TO_MPH
+        else:
+            mph = value * KMH_TO_MPH if default_kmh else value
+        mph = round(mph / 5.0) * 5.0
+        if mph < 5.0:
+            continue
+        return min(85.0, mph)
+    return None
+
+
+def _maxspeed_from_tags(tags: dict[str, str]) -> tuple[float, bool] | None:
+    """Posted mph for a highway way, preferring the truck-specific tag.
+
+    Returns ``(mph, is_hgv)`` or ``None`` when the way has no usable maxspeed."""
+    hgv_mph = parse_osm_maxspeed(tags.get("maxspeed:hgv"))
+    if hgv_mph is not None:
+        return hgv_mph, True
+    mph = parse_osm_maxspeed(tags.get("maxspeed"))
+    if mph is not None:
+        return mph, False
+    return None
+
+
+def _maxspeed_at_point(
+    leg: dict[str, Any],
+    point: dict[str, float],
+    cache_dir: Path,
+    rate_limit_s: float,
+) -> tuple[float, bool] | None:
+    """Best posted limit on the corridor's highway near one route point.
+
+    Queries OSM ways carrying a ``maxspeed`` within a short radius and prefers
+    the way whose ``ref`` matches the leg's highway shield (e.g. ``I 95``), so a
+    parallel frontage road's 45 mph doesn't override the interstate."""
+    box = _bbox(point["lat"], point["lon"], 400)
+    classes = "|".join(_MAXSPEED_HIGHWAY_CLASSES)
+    query = f"""
+    [out:json][timeout:40];
+    way["highway"~"{classes}"]["maxspeed"]({box});
+    out tags 40;
+    """
+    try:
+        payload = _cached_overpass_json(
+            cache_dir,
+            f"maxspeed--{leg['from']}--{leg['to']}--{point['at_mi']:.1f}",
+            urllib.parse.urlencode({"data": query}).encode("utf-8"),
+            rate_limit_s=rate_limit_s,
+        )
+    except (TimeoutError, OSError, urllib.error.URLError,
+            urllib.error.HTTPError, RuntimeError):
+        return None
+    shield = _highway_digits(str(leg.get("highway", "")))
+    best: tuple[float, bool] | None = None
+    best_on_shield = False
+    for element in payload.get("elements", []):
+        tags = element.get("tags", {})
+        parsed = _maxspeed_from_tags(tags)
+        if parsed is None:
+            continue
+        mph, is_hgv = parsed
+        on_shield = bool(shield) and _highway_digits(tags.get("ref", "")) == shield
+        # A way matching the leg's shield always wins; otherwise keep the highest
+        # posted limit found (the mainline, not a ramp or frontage road).
+        if on_shield and not best_on_shield:
+            best, best_on_shield = (mph, is_hgv), True
+        elif on_shield == best_on_shield and (best is None or mph > best[0]):
+            best = (mph, is_hgv)
+    return best
+
+
+def _highway_digits(highway: str) -> str:
+    """The route number from a shield/ref, e.g. ``I-95`` or ``I 95`` -> ``95``."""
+    digits = re.findall(r"\d+", str(highway))
+    return digits[0] if digits else ""
+
+
+def bake_maxspeed(
+    data: dict[str, Any],
+    *,
+    cache_dir: Path,
+    rate_limit_s: float,
+    only: set[tuple[str, str]],
+) -> dict[str, Any]:
+    """Bake a real OSM ``maxspeed`` profile onto each leg from its route points.
+
+    Additive and idempotent: samples the posted limit at each checked-in route
+    point, collapses consecutive equal values into a step function, and stores it
+    as ``corridor.speed_limits`` (mph, already normalized). Legs where OSM has no
+    maxspeed on the corridor are left without a profile, so the runtime keeps
+    using the highway/region heuristic for them."""
+    cache_dir.mkdir(parents=True, exist_ok=True)
+    baked: list[dict[str, Any]] = []
+    skipped: list[str] = []
+    for leg in data["legs"]:
+        key = (leg["from"], leg["to"])
+        if only and key not in only and (leg["to"], leg["from"]) not in only:
+            continue
+        points = leg.get("corridor", {}).get("route_points", [])
+        if len(points) < 2:
+            skipped.append(f"{leg['from']}-{leg['to']}")
+            continue
+        samples: list[dict[str, Any]] = []
+        for point in points:
+            result = _maxspeed_at_point(leg, point, cache_dir, rate_limit_s)
+            if result is None:
+                continue
+            mph, is_hgv = result
+            at_mi = round(float(point["at_mi"]), 1)
+            # Collapse a repeated limit into the step function it represents.
+            if samples and samples[-1]["mph"] == mph and samples[-1]["hgv"] == is_hgv:
+                continue
+            samples.append({"at_mi": at_mi, "mph": mph,
+                            "source": MAXSPEED_SOURCE, "hgv": is_hgv})
+        if samples:
+            leg.setdefault("corridor", {})["speed_limits"] = samples
+            baked.append({"from": leg["from"], "to": leg["to"],
+                          "samples": len(samples)})
+        else:
+            skipped.append(f"{leg['from']}-{leg['to']}")
+    return {
+        "baked_legs": baked,
+        "legs_without_maxspeed": skipped,
         "coverage_totals": coverage_report(data)["totals"],
     }
 

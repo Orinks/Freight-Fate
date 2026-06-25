@@ -14,18 +14,19 @@ import re
 from dataclasses import dataclass, field
 from enum import Enum
 
-from ..data.world import STOP_TYPE_LABELS, Route, TollEvent, get_world
+from ..data.world import STOP_TYPE_LABELS, Leg, Route, TollEvent, get_world
 from .hos import is_night, time_of_day
 from .vehicle import TruckState
 from .weather import WeatherKind, WeatherSystem
 
 BASE_SPEED_LIMIT_MPH = 70.0
 
-# Posted speed limit by corridor, replacing a flat nationwide number. Derived
-# from the highway class (Interstate / US highway / state route) and region --
-# rural Interstates run faster out West -- and dropped to an urban limit near
-# cities. A grounded approximation from highway and region; real OSM maxspeed
-# data could refine it per leg later.
+# Posted speed limit by corridor. Where a leg carries a baked OSM ``maxspeed``
+# profile (see ``Leg.speed_limits``), the runtime uses that real posted limit;
+# otherwise it falls back to this heuristic, derived from the highway class
+# (Interstate / US highway / state route) and region -- rural Interstates run
+# faster out West -- and dropped to an urban limit near cities. The heuristic is
+# a grounded approximation, the backstop for legs OSM has no maxspeed tag on.
 URBAN_LIMIT_MPH = 55.0
 URBAN_RADIUS_MI = 6.0     # urban speed reduction within this distance of a city
 US_HIGHWAY_LIMIT_MPH = 65.0
@@ -67,6 +68,24 @@ def corridor_speed_limit(highway: str, region: str) -> float:
     if cls == "us_highway":
         return US_HIGHWAY_LIMIT_MPH
     return STATE_ROUTE_LIMIT_MPH
+
+
+def _leg_speed_limit_at(leg: Leg, offset_mi: float) -> float | None:
+    """Baked OSM posted limit at a leg-relative offset, or ``None`` if unbaked.
+
+    The samples are a step function (already sorted by ``at_mi`` at load time):
+    the limit in effect is the last sample at or before the offset. Before the
+    first sample, the first sample applies."""
+    samples = leg.speed_limits
+    if not samples:
+        return None
+    chosen = samples[0]
+    for sample in samples:
+        if sample.at_mi <= offset_mi:
+            chosen = sample
+        else:
+            break
+    return chosen.mph
 FACILITY_ACCESS_LIMIT_MPH = 25.0
 DESTINATION_APPROACH_LIMIT_MPH = 35.0
 FACILITY_GATE_LIMIT_MPH = 15.0
@@ -693,11 +712,17 @@ class Trip:
         return any(abs(mile - mp) <= URBAN_RADIUS_MI for mp in self._city_mileposts)
 
     def _corridor_limit_at(self, mile: float) -> float:
-        """Posted limit for the corridor: highway- and region-derived, dropped
-        to the urban limit on the city stretches."""
-        leg_i, _ = self._leg_at_mile(mile)
-        base = corridor_speed_limit(self.route.legs[leg_i].highway,
-                                    self._region_at(mile))
+        """Posted limit for the corridor, dropped to the urban limit on the city
+        stretches.
+
+        Prefers a real baked OSM ``maxspeed`` for the leg when present, falling
+        back to the highway- and region-derived heuristic where OSM has no tag.
+        """
+        leg_i, leg_start = self._leg_at_mile(mile)
+        leg = self.route.legs[leg_i]
+        baked = _leg_speed_limit_at(leg, mile - leg_start)
+        base = (baked if baked is not None
+                else corridor_speed_limit(leg.highway, self._region_at(mile)))
         if self._near_city(mile):
             return min(base, URBAN_LIMIT_MPH)
         return base

@@ -3,6 +3,12 @@
 ## Unreleased
 
 ### Changed
+- **Posted speed limits can now come from real map data.** Where a corridor
+  carries an OpenStreetMap `maxspeed` tag, the game uses that real posted limit
+  instead of the highway/region approximation -- and falls back to the
+  approximation only on stretches OSM has not tagged. Limits are baked at build
+  time (truck-specific `maxspeed:hgv` preferred where present); the urban
+  reduction near cities and the spoken limit-change cue are unchanged.
 - **The lane-drift rumble is now directional.** When you wander toward a lane
   edge, the rumble strip plays from that side -- drift right and you hear it on
   the right -- so the ear it lands in tells you which way to steer back. Uses
