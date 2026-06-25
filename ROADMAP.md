@@ -81,13 +81,15 @@ is ready first and fold the rest in.
 
 ### Speed limits and speeding
 
-- **Corridor highway speed limits.** `speed_limit_at` returns a flat
-  `BASE_SPEED_LIMIT_MPH` (70) everywhere except construction/zone
-  overrides. Route legs already carry a `highway` name; map highway class
-  / region to a posted limit (rural interstate 70-80, urban 55-65, two-lane
-  lower) and surface it through the same zone/announcement plumbing so the
-  posted limit changes by corridor. Where real OSM `maxspeed` data is
-  available for a corridor, prefer it.
+- [x] **Corridor highway speed limits.** Shipped: `speed_limit_at` now
+  derives the open-road limit from `corridor_speed_limit(highway, region)`
+  -- Interstate vs US highway vs state route, with rural Interstates faster
+  out West (e.g. great_basin 80, southern_plains/rockies 75) -- and drops to
+  an urban limit within `URBAN_RADIUS_MI` of a city. Changes are spoken as a
+  GPS cue, zone-exit restores the corridor limit (not a flat 70), and the
+  speeding check is judged against it. Follow-ups: truck-specific limits
+  (California/Oregon ~55 for trucks), and using real OSM `maxspeed` per leg
+  where available instead of the highway/region approximation.
 
 - **Speeding leeway and consequences.** Leeway already exists: a strike is
   only recorded above `limit + 9` mph held for 6 s (`_update_speeding`),

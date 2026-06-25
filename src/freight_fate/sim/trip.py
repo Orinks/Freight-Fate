@@ -20,6 +20,53 @@ from .vehicle import TruckState
 from .weather import WeatherKind, WeatherSystem
 
 BASE_SPEED_LIMIT_MPH = 70.0
+
+# Posted speed limit by corridor, replacing a flat nationwide number. Derived
+# from the highway class (Interstate / US highway / state route) and region --
+# rural Interstates run faster out West -- and dropped to an urban limit near
+# cities. A grounded approximation from highway and region; real OSM maxspeed
+# data could refine it per leg later.
+URBAN_LIMIT_MPH = 55.0
+URBAN_RADIUS_MI = 6.0     # urban speed reduction within this distance of a city
+US_HIGHWAY_LIMIT_MPH = 65.0
+STATE_ROUTE_LIMIT_MPH = 60.0
+
+# Rural Interstate posted limit by region.
+INTERSTATE_RURAL_LIMIT_MPH: dict[str, float] = {
+    "great_basin": 80.0,
+    "southern_plains": 75.0,
+    "desert_southwest": 75.0,
+    "rockies": 75.0,
+    "gulf_coast": 75.0,
+    "heartland": 70.0,
+    "great_lakes": 70.0,
+    "mid_south": 70.0,
+    "atlantic_southeast": 70.0,
+    "florida": 70.0,
+    "appalachia": 70.0,
+    "pacific_northwest": 70.0,
+    "northeast": 65.0,
+    "california": 65.0,
+}
+
+
+def _highway_class(highway: str) -> str:
+    h = (highway or "").strip().upper()
+    if h.startswith(("I-", "I ", "INTERSTATE")):
+        return "interstate"
+    if h.startswith("US"):
+        return "us_highway"
+    return "state_route"
+
+
+def corridor_speed_limit(highway: str, region: str) -> float:
+    """Open-road posted limit for a corridor from its highway class and region."""
+    cls = _highway_class(highway)
+    if cls == "interstate":
+        return INTERSTATE_RURAL_LIMIT_MPH.get(region, BASE_SPEED_LIMIT_MPH)
+    if cls == "us_highway":
+        return US_HIGHWAY_LIMIT_MPH
+    return STATE_ROUTE_LIMIT_MPH
 FACILITY_ACCESS_LIMIT_MPH = 25.0
 DESTINATION_APPROACH_LIMIT_MPH = 35.0
 FACILITY_GATE_LIMIT_MPH = 15.0
@@ -275,6 +322,9 @@ class Trip:
         self._insp_rng = random.Random(None if seed is None else seed ^ 0x5EED)
         self._events: list[TripEvent] = []
         self._leg_starts = self._compute_leg_starts()
+        # Mileposts of every city on the route (leg starts plus the final
+        # destination), used to drop the speed limit for the urban stretch.
+        self._city_mileposts = list(self._leg_starts) + [self.total_miles]
         self.stops = self._place_stops()
         self.traffic_leads = self._place_traffic()
         self.navigation_cues = self._build_navigation_cues()
@@ -285,6 +335,7 @@ class Trip:
         self._announced_navigation: set[str] = set()
         self._charged_tolls: set[str] = set()
         self._active_zone: Zone | None = None
+        self._announced_speed_limit: float | None = None  # last spoken corridor limit
         self._announced_zone_warnings: set[str] = set()
         self._construction_zone_grace_start: dict[str, float] = {}
         self._hazard_check_mi = 5.0
@@ -624,7 +675,26 @@ class Trip:
         zone = self._active_zone_at(mile)
         if zone is not None:
             return zone.limit_mph, zone.reason
-        return BASE_SPEED_LIMIT_MPH, None
+        return self._corridor_limit_at(mile), None
+
+    def _region_at(self, mile: float) -> str:
+        """Region of the corridor at a mile (the leg's destination city)."""
+        leg_i, _ = self._leg_at_mile(mile)
+        city = self.route.cities[min(leg_i + 1, len(self.route.cities) - 1)]
+        return get_world().cities[city].region
+
+    def _near_city(self, mile: float) -> bool:
+        return any(abs(mile - mp) <= URBAN_RADIUS_MI for mp in self._city_mileposts)
+
+    def _corridor_limit_at(self, mile: float) -> float:
+        """Posted limit for the corridor: highway- and region-derived, dropped
+        to the urban limit on the city stretches."""
+        leg_i, _ = self._leg_at_mile(mile)
+        base = corridor_speed_limit(self.route.legs[leg_i].highway,
+                                    self._region_at(mile))
+        if self._near_city(mile):
+            return min(base, URBAN_LIMIT_MPH)
+        return base
 
     def _active_zone_at(self, mile: float) -> Zone | None:
         active = [z for z in self.zones if z.start_mi <= mile <= z.end_mi]
@@ -753,6 +823,8 @@ class Trip:
         """Jump to a saved point without re-announcing what is behind it."""
         self.position_mi = max(0.0, min(position_mi, self.total_miles))
         self.game_minutes = game_minutes
+        # Seed the spoken limit at the resume point so it is not re-announced.
+        self._announced_speed_limit = self._corridor_limit_at(self.position_mi)
         for stop in self.stops:
             if stop.at_mi <= self.position_mi:
                 self._announced_stops.add(stop.name)
@@ -820,6 +892,7 @@ class Trip:
             self.position_mi = 0.0
 
         self._check_zones()
+        self._check_speed_limit()
         self._check_stops()
         self._check_navigation_cues()
         self._check_tolls()
@@ -864,10 +937,27 @@ class Trip:
             elif self._active_zone is not None:
                 self._construction_zone_grace_start.pop(
                     _zone_key(self._active_zone), None)
+                resumed = self._corridor_limit_at(self.position_mi)
+                self._announced_speed_limit = resumed
                 self._emit(TripEventKind.ZONE_EXIT,
                            f"End of {self._active_zone.reason} zone. "
-                           f"Speed limit {self._speed_value(BASE_SPEED_LIMIT_MPH)}.")
+                           f"Speed limit {self._speed_value(resumed)}.")
             self._active_zone = zone
+
+    def _check_speed_limit(self) -> None:
+        """Announce a changed posted limit on the open road (signs at a region
+        or urban boundary). While a zone is active the zone owns the spoken
+        limit, so this stays quiet until the zone clears."""
+        if self._active_zone is not None:
+            return
+        limit = self._corridor_limit_at(self.position_mi)
+        if self._announced_speed_limit is None:
+            self._announced_speed_limit = limit   # seed at departure, no cue
+            return
+        if limit != self._announced_speed_limit:
+            self._announced_speed_limit = limit
+            self._emit(TripEventKind.GPS_CUE,
+                       f"Speed limit {self._speed_value(limit)}.")
 
     def _check_stops(self) -> None:
         for stop in self.stops:

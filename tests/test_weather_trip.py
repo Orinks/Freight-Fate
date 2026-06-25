@@ -134,6 +134,53 @@ def test_relaxed_hazard_scale_lowers_hazard_risk(world):
     assert relaxed._hazard_risk() < normal._hazard_risk()
 
 
+def test_corridor_speed_limit_by_highway_and_region():
+    from freight_fate.sim.trip import BASE_SPEED_LIMIT_MPH, corridor_speed_limit
+
+    # Rural Interstates run faster out West, slower in the Northeast.
+    assert corridor_speed_limit("I-80", "great_basin") == 80
+    assert corridor_speed_limit("I-90", "northeast") == 65
+    assert corridor_speed_limit("I-70", "heartland") == 70
+    # US highways and state routes are slower than Interstates.
+    assert corridor_speed_limit("US-30", "heartland") == 65
+    assert corridor_speed_limit("SR-99", "california") == 60
+    # An unknown region on an Interstate falls back to the base limit.
+    assert corridor_speed_limit("I-5", "atlantis") == BASE_SPEED_LIMIT_MPH
+
+
+def test_speed_limit_varies_by_corridor_and_drops_in_cities(world):
+    from freight_fate.sim.trip import URBAN_LIMIT_MPH
+
+    trip, _ = make_trip(world)  # Chicago -> Indianapolis, an Interstate corridor
+    # Near the origin city the limit drops to the urban value.
+    near_city, reason = trip.speed_limit_at(1.0)
+    assert reason is None
+    assert near_city == URBAN_LIMIT_MPH
+    # Out on the open road it is the faster corridor limit.
+    open_road, reason = trip.speed_limit_at(trip.total_miles / 2)
+    assert reason is None
+    assert open_road >= 65
+    assert open_road > near_city
+
+
+def test_speed_limit_change_is_announced_crossing_out_of_a_city(world):
+    from freight_fate.sim.trip import URBAN_RADIUS_MI, TripEventKind
+
+    trip, truck = make_trip(world)
+    truck.throttle = 0.95
+    messages = []
+    for _ in range(8000):
+        truck.auto_shift()
+        truck.update(1 / 60)
+        for event in trip.update(1 / 60):
+            if event.kind == TripEventKind.GPS_CUE:
+                messages.append(event.message)
+        if trip.position_mi > URBAN_RADIUS_MI + 4:
+            break
+    # Leaving the urban stretch raises the posted limit, and that is spoken.
+    assert any("Speed limit" in m for m in messages)
+
+
 def test_trip_completes_and_emits_arrival(world):
     trip, truck = make_trip(world)
     truck.throttle = 0.85

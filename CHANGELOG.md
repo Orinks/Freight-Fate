@@ -3,6 +3,13 @@
 ## Unreleased
 
 ### Added
+- **Posted speed limits that change by corridor.** The flat 70 everywhere is
+  gone. The limit now comes from the highway and region -- rural Interstates run
+  70 in the Midwest and East, 75-80 across the West, US highways and state
+  routes slower -- and drops to an urban limit on the city stretches. Crossing
+  into a new limit is spoken like a sign ("Speed limit 75"), the limit restores
+  correctly when you leave a construction zone, and speeding is judged against
+  the corridor you are actually on.
 - **Seasons and temperature.** Your career now moves through the year, and the
   weather follows. A regional temperature model (a seasonal swing plus a
   day-night swing, warmer in the desert and Gulf, colder across the northern
