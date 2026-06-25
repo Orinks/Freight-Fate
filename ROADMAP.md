@@ -68,15 +68,16 @@ is ready first and fold the rest in.
 
 ### Driving feel
 
-- **Gear / launch realism.** Loaded low-gear acceleration is too brisk:
-  truck mass is fixed at 36 t and the launch is traction-limited at
-  ~0.33 g, so 1st-3rd blip past quickly and the automatic upshifts almost
-  instantly (`AUTO_UPSHIFT_RPM` 1750). A loaded tractor-trailer should
-  pull away gently and lug through the low gears. Options: lower the
-  effective launch traction / drive force at low speed, make gross mass
-  cargo-weight-aware so heavy loads accelerate slower, and/or widen the
-  low-gear dwell before the auto upshifts. Needs playtesting to keep it
-  from feeling sluggish to the point of frustration.
+- **Gear / launch realism.** Partly addressed: gross mass is now
+  cargo-weight-aware (tare + payload), so a heavy load accelerates slower,
+  lugs on grades, and burns more fuel, and an empty deadhead is light and
+  brisk -- the truck mass is no longer a flat 36 t. **Still open:** the
+  launch itself is too brisk even fully loaded, because it is
+  traction-limited at ~0.33 g and the automatic upshifts almost instantly
+  (`AUTO_UPSHIFT_RPM` 1750). Remaining options: lower the effective launch
+  traction / drive force at low speed and/or widen the low-gear dwell
+  before the auto upshifts. Needs playtesting to avoid feeling sluggish to
+  the point of frustration.
 
 ### Speed limits and speeding
 
@@ -111,9 +112,13 @@ Net-new realism candidates, roughly by area:
 - **Weather and seasons.** Tie weather to the career calendar so snow is a
   cold-season risk and thunderstorms a summer one; add temperature so ice
   forms near freezing; let real-weather mode drive hazard context too.
-- **Physics and the truck.** Cargo-weight-aware gross mass (heavier loads
-  accelerate and stop slower, burn more fuel, lug harder on grades); tire
-  and brake wear over a truck's life; realistic grade-based fuel burn.
+- **Physics and the truck.** Cargo-weight-aware gross mass is done for
+  acceleration, grade lugging, and fuel burn. Remaining: make braking
+  load-sensitive too -- today brake force scales with mass so deceleration
+  is mass-independent and a loaded rig stops in the same distance as an
+  empty one; cap brake capacity and scale brake heating by gross weight so
+  heavy loads stop longer and fade sooner. Also: tire and brake wear over a
+  truck's life, and finer grade-based fuel burn.
 - **Traffic and corridors.** Hazard and congestion frequency scaled by how
   busy a corridor actually is (urban interstates dense, empty plains
   sparse); rush-hour slowdowns near metros; realistic merge/exit traffic.

@@ -22,10 +22,17 @@ AIR_DENSITY = 1.225
 EMERGENCY_BRAKE_MULT = 1.6
 MAX_REVERSE_MPS = 4.5  # about 10 mph: backing speed, not road speed
 
+KG_PER_TON = 1000.0  # game cargo "tons" are treated as metric tonnes
+# Reference loaded Class 8: ~36 t gross at a full ~21.5 t payload, leaving a
+# ~14.5 t tractor-and-empty-trailer tare. A TruckState's default cargo equals
+# this reference payload, so an unconfigured truck keeps the original loaded
+# behavior; lighter loads (and empty deadheads) weigh proportionally less.
+REFERENCE_CARGO_KG = 21_500.0
+
 
 @dataclass(frozen=True)
 class TruckSpecs:
-    mass_kg: float = 36_000.0          # loaded gross weight
+    mass_kg: float = 36_000.0          # gross weight at the reference payload
     drag_coefficient: float = 0.65
     frontal_area_m2: float = 10.0
     rolling_resistance: float = 0.0065
@@ -83,6 +90,7 @@ class TruckState:
     brake_temp_c: float = 20.0
     damage_pct: float = 0.0      # 0 = pristine, 100 = wrecked
     odometer_mi: float = 0.0
+    cargo_kg: float = REFERENCE_CARGO_KG  # payload aboard; default = full reference load
 
     # environment, set each frame by the trip/weather layer
     grade: float = 0.0           # +uphill, e.g. 0.06 = 6%
@@ -128,6 +136,21 @@ class TruckState:
         """Power multiplier from accumulated damage."""
         return max(0.3, 1.0 - self.damage_pct / 150.0)
 
+    @property
+    def tare_kg(self) -> float:
+        """Tractor plus empty trailer: gross weight carrying no payload."""
+        return max(0.0, self.specs.mass_kg - REFERENCE_CARGO_KG)
+
+    @property
+    def gross_mass_kg(self) -> float:
+        """Current gross weight: tare plus the payload aboard.
+
+        Drives acceleration, grade and rolling resistance, braking, and (via
+        the forces) fuel burn, so a heavy load pulls away gently, lugs on
+        grades, and stops longer, while an empty deadhead is light and brisk.
+        """
+        return self.tare_kg + max(0.0, self.cargo_kg)
+
     def coupled_rpm(self, gear: int | None = None) -> float:
         """Engine RPM implied by road speed in the given gear."""
         tr = self.transmission
@@ -159,7 +182,7 @@ class TruckState:
         direction = -1.0 if ratio < 0 else 1.0
         force = torque * abs(ratio) * self.specs.driveline_efficiency / self.specs.wheel_radius_m
         # traction limit: drive wheels carry roughly a third of gross weight
-        traction_limit = self.specs.mass_kg * G * 0.33 * self.grip
+        traction_limit = self.gross_mass_kg * G * 0.33 * self.grip
         return direction * min(force, traction_limit)
 
     def resistance_force(self) -> float:
@@ -167,8 +190,8 @@ class TruckState:
         v = self.velocity_mps
         direction = 1.0 if v > 0.01 else -1.0 if v < -0.01 else 0.0
         drag = 0.5 * AIR_DENSITY * s.drag_coefficient * s.frontal_area_m2 * v * abs(v)
-        rolling = s.mass_kg * G * s.rolling_resistance * direction
-        grade_f = s.mass_kg * G * math.sin(math.atan(self.grade))
+        rolling = self.gross_mass_kg * G * s.rolling_resistance * direction
+        grade_f = self.gross_mass_kg * G * math.sin(math.atan(self.grade))
         return drag + rolling + grade_f
 
     def brake_force(self) -> float:
@@ -181,7 +204,7 @@ class TruckState:
         holding = self.air_brakes_holding
         application = 1.0 if self.emergency_brake or holding else self.brake
         boost = EMERGENCY_BRAKE_MULT if self.emergency_brake or holding else 1.0
-        service = s.mass_kg * G * s.max_brake_decel_g * application * boost * fade * self.grip
+        service = self.gross_mass_kg * G * s.max_brake_decel_g * application * boost * fade * self.grip
         jake = s.engine_brake_force_n if (self.engine_brake and self.engine_on
                                           and not self.transmission.in_neutral) else 0.0
         direction = 1.0 if self.velocity_mps > 0 else -1.0
@@ -196,7 +219,7 @@ class TruckState:
         self._update_air_system(dt)
 
         net = self.drive_force() - self.resistance_force() - self.brake_force()
-        accel = net / s.mass_kg
+        accel = net / self.gross_mass_kg
         old_v = self.velocity_mps
         new_v = self.velocity_mps + accel * dt
         drive_force = self.drive_force()

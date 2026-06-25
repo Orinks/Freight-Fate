@@ -487,6 +487,34 @@ def test_delivery_requires_parking_at_destination(monkeypatch):
         app.shutdown()
 
 
+def test_cargo_mass_is_loaded_on_delivery_and_empty_on_pickup():
+    from freight_fate.app import App
+    from freight_fate.models.jobs import CARGO_CATALOG, Job
+    from freight_fate.models.profile import Profile
+    from freight_fate.sim.vehicle import KG_PER_TON
+    from freight_fate.states.driving import DrivingState
+
+    app = App()
+    try:
+        app.ctx.profile = Profile(name="Load Mass", current_city="Buffalo")
+        route = app.ctx.world.supported_route("Buffalo", "Rochester")
+        job = Job(
+            CARGO_CATALOG["general"], 18.0, "Buffalo", "company yard",
+            "Rochester", route.miles, 1000.0, 12.0,
+            destination_location="Rochester freight market",
+        )
+        loaded = DrivingState(app.ctx, job, route, phase="delivery")
+        assert loaded.truck.cargo_kg == pytest.approx(18 * KG_PER_TON)
+        assert loaded.truck.gross_mass_kg > loaded.truck.tare_kg
+
+        # The pickup deadhead runs empty: no payload aboard yet.
+        empty = DrivingState(app.ctx, job, route, phase="pickup")
+        assert empty.truck.cargo_kg == 0.0
+        assert empty.truck.gross_mass_kg == pytest.approx(empty.truck.tare_kg)
+    finally:
+        app.shutdown()
+
+
 def test_delivery_exit_uses_real_destination_interchange():
     from freight_fate.app import App
     from freight_fate.models.jobs import CARGO_CATALOG, Job

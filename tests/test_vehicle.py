@@ -46,6 +46,66 @@ def make_auto_truck() -> TruckState:
     return t
 
 
+def test_gross_mass_includes_cargo_payload():
+    from freight_fate.sim.vehicle import KG_PER_TON, REFERENCE_CARGO_KG
+
+    t = TruckState()
+    # Default cargo equals the reference payload, so gross stays the tuned 36 t.
+    assert t.cargo_kg == REFERENCE_CARGO_KG
+    assert t.gross_mass_kg == pytest.approx(t.specs.mass_kg)
+    tare = t.tare_kg
+    assert tare == pytest.approx(t.specs.mass_kg - REFERENCE_CARGO_KG)
+    # An empty deadhead is just the tractor and empty trailer.
+    t.cargo_kg = 0.0
+    assert t.gross_mass_kg == pytest.approx(tare)
+    # A heavier load weighs proportionally more.
+    t.cargo_kg = 25 * KG_PER_TON
+    assert t.gross_mass_kg == pytest.approx(tare + 25 * KG_PER_TON)
+
+
+def test_heavier_load_accelerates_slower():
+    from freight_fate.sim.vehicle import KG_PER_TON
+
+    light = make_auto_truck()
+    light.cargo_kg = 0.0                 # empty deadhead
+    heavy = make_auto_truck()
+    heavy.cargo_kg = 25 * KG_PER_TON     # a 25-ton load
+    light.throttle = heavy.throttle = 1.0
+    light_t = time_to_speed(light, 50.0)
+    heavy_t = time_to_speed(heavy, 50.0)
+    assert light_t is not None and heavy_t is not None
+    assert heavy_t > light_t
+
+
+def test_heavier_load_raises_grade_resistance():
+    from freight_fate.sim.vehicle import KG_PER_TON
+
+    light = make_auto_truck()
+    heavy = make_auto_truck()
+    light.cargo_kg = 0.0
+    heavy.cargo_kg = 25 * KG_PER_TON
+    # Same speed on the same climb: the loaded rig fights more rolling and
+    # grade resistance, which is what makes it lug uphill.
+    for t in (light, heavy):
+        t.velocity_mps = 25.0
+        t.grade = 0.04
+    assert heavy.resistance_force() > light.resistance_force()
+
+
+def test_heavier_load_burns_more_fuel_reaching_speed():
+    from freight_fate.sim.vehicle import KG_PER_TON
+
+    light = make_auto_truck()
+    heavy = make_auto_truck()
+    light.cargo_kg = 0.0
+    heavy.cargo_kg = 25 * KG_PER_TON
+    light.throttle = heavy.throttle = 1.0
+    light_start, heavy_start = light.fuel_gal, heavy.fuel_gal
+    time_to_speed(light, 50.0)
+    time_to_speed(heavy, 50.0)
+    assert (heavy_start - heavy.fuel_gal) > (light_start - light.fuel_gal)
+
+
 def test_engine_start_requires_fuel():
     t = TruckState()
     t.fuel_gal = 0.0

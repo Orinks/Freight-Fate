@@ -31,7 +31,7 @@ from ..sim.hos import HosClock, clock_text, is_night, time_of_day
 from ..sim.lane import LaneKeeping
 from ..sim.transmission import REVERSE
 from ..sim.trip import RoadStop, Trip, TripEventKind
-from ..sim.vehicle import G, TruckState
+from ..sim.vehicle import G, KG_PER_TON, TruckState
 from ..sim.weather import WeatherKind, WeatherSystem
 from .base import MenuItem, MenuState, State
 
@@ -116,6 +116,12 @@ class DrivingState(State):
         self.resumed = False
         profile = ctx.profile
         self.truck = TruckState(specs=profile.truck_specs())
+        # Loaded delivery runs carry the job's payload; pickup deadheads and
+        # empty bobtail repositions run light. Gross weight drives the physics,
+        # so a heavy load pulls away gently and lugs on grades.
+        self.truck.cargo_kg = (
+            job.weight_tons * KG_PER_TON
+            if phase == DRIVE_PHASE_DELIVERY else 0.0)
         self.truck.transmission.automatic = ctx.settings.automatic_transmission
         self.truck.fuel_gal = min(profile.truck_fuel_gal, self.truck.specs.fuel_tank_gal)
         self.truck.damage_pct = profile.truck_damage_pct
@@ -2286,7 +2292,8 @@ class DrivingStatusScreenState(MenuState):
         return [
             f"Driver: {profile.name}",
             f"Money: {profile.money:,.0f} dollars",
-            f"Load: {d.job.weight_tons:.0f} tons of {d.job.cargo.label}",
+            f"Load: {d.job.weight_tons:.0f} tons of {d.job.cargo.label}, "
+            f"gross {d.truck.gross_mass_kg / KG_PER_TON:.0f} tons",
             f"Objective: {'pickup at ' + d._pickup_facility_text() if d.phase == DRIVE_PHASE_PICKUP else 'deliver to ' + d._destination_facility_text()}",
             f"Truck: fuel {t.fuel_fraction * 100:.0f} percent, damage {t.damage_pct:.0f} percent",
             f"Transmission: {'automatic' if t.transmission.automatic else 'manual'}, {d._gear_text()}",

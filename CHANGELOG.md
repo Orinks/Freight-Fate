@@ -3,6 +3,12 @@
 ## Unreleased
 
 ### Added
+- **Cargo weight now changes how the truck drives.** Gross weight is the
+  tractor-and-trailer tare plus the actual payload, so a heavy load pulls away
+  gently, lugs harder on grades, and burns more fuel, while a light load or an
+  empty pickup deadhead is noticeably brisker. Heavier freight is now a real
+  trade-off, not just a number on the dispatch board. The driving status screen
+  shows gross tonnage alongside the cargo weight.
 - **Grounded, context-aware road hazards.** Hazards now only happen where and
   when they plausibly would. Standing water and hydroplaning need wet weather;
   snow squalls, bridge-deck ice, and black ice on shaded grades need snow;
