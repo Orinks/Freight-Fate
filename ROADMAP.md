@@ -35,15 +35,15 @@ is ready first and fold the rest in.
 
 ### Fatigue and driver responsibility
 
-- **Drowsiness consequences.** Today fatigue only narrows hazard reaction
-  windows (`hos.reaction_window_mult`) and plays yawn / rumble-strip
-  audio; with hazards rare it has little teeth. Add real stakes: severe
-  fatigue (`FATIGUE_SEVERE`, 80+) should cause occasional involuntary
-  **microsleep lane drift** events (a forced lane-keeping correction or a
-  rumble-strip wake with a short reaction window), escalating toward a
-  forced stop. Tie into the relaxed-mode philosophy below: in relaxed
-  mode drowsiness, fueling, HOS, and repairs become the *main* thing the
-  player manages.
+- [x] **Drowsiness consequences.** Shipped: at severe fatigue
+  (`FATIGUE_SEVERE`, 80+) the driver involuntarily nods off on a shrinking
+  interval. Each microsleep plays a rumble-strip jolt with a short reaction
+  window; steering or braking catches it (works with steering-assist off),
+  but missing it drifts off the road for damage and scrubbed speed, and a
+  third consecutive miss forces a stop. Independent of HOS mode (fatigue is
+  physiological), so in relaxed mode -- where hazards are rare -- managing
+  fatigue, fuel, and rest becomes the core of the drive. Possible follow-up:
+  a dedicated microsleep/yawn audio asset instead of reusing the rumble strip.
 
 - [x] **Relaxed mode should feel relaxed.** Shipped: `Trip` now takes a
   `hazard_scale` and relaxed mode passes `hos.hazard_scale("relaxed")`

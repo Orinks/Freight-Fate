@@ -344,8 +344,12 @@ Driving past a limit risks inspections, fines, reputation loss, and
 out-of-service orders.
 
 Fatigue rises while driving, faster at night. Drowsiness adds yawn and rumble
-strip cues and makes hazards harder to react to. A 30-minute break reduces
-fatigue. A proper 10-hour sleep clears it.
+strip cues and makes hazards harder to react to. Once fatigue is severe you
+start to nod off: a rumble-strip jolt and a warning give you a brief window to
+steer or brake and stay awake. Catch it and you carry on; miss it and you drift
+onto the shoulder, taking damage and losing speed, and a third miss in a row
+forces you off the road. A 30-minute break reduces fatigue; a proper 10-hour
+sleep clears it. Plan your rest before you get there.
 
 Emergency shoulder sleep is a fallback, not normal rest. It can appear in the
 pause menu only when you are stopped away from a route point of interest and

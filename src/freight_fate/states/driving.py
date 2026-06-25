@@ -68,6 +68,16 @@ DOCKING_MAX_MPH = 0.5            # dock/settle/rest actions need a complete stop
 DRIVE_PHASE_PICKUP = "pickup"
 DRIVE_PHASE_DELIVERY = "delivery"
 
+# Microsleeps: once fatigue is severe, the driver involuntarily nods off and
+# must respond (steer or brake) within a short window or drift off the road.
+# They come faster the more exhausted you are, and escalate to a forced stop.
+MICROSLEEP_REACTION_S = 2.2       # real seconds to respond before drifting off
+MICROSLEEP_BASE_GM = 9.0          # game-minutes between nods at the severe threshold
+MICROSLEEP_MIN_GM = 3.0           # ...shrinking to this nearer total exhaustion
+MICROSLEEP_COOLDOWN_GM = 4.0      # quiet period after one resolves
+MICROSLEEP_SHOULDER_DAMAGE_PCT = 6.0
+MICROSLEEP_FORCE_STOP_MISSES = 3  # consecutive misses that force a stop
+
 
 def _route_event_sound(event) -> str | None:
     kind = event.kind
@@ -159,6 +169,10 @@ class DrivingState(State):
         self._drowsy_said = False
         self._severe_said = False
         self._fatigue_cue_gm = 0.0      # game minutes since the last drowsy cue
+        self._microsleep_deadline: float | None = None  # reaction window, real seconds
+        self._microsleep_gm = 0.0       # game minutes since the last nod
+        self._microsleep_cooldown_gm = 0.0
+        self._microsleep_misses = 0     # consecutive nods drifted off the road
         self._hazard_deadline: float | None = None
         self._speed_announce_timer = 0.0
         self._last_announced_mph = 0.0
@@ -795,6 +809,7 @@ class DrivingState(State):
         self._update_audio(dt)
         self._update_announcements(dt)
         self._update_hazard(dt)
+        self._update_microsleep(keys, dt)
         self._update_speeding(dt)
         if self.tutorial:
             self.tutorial.update(dt, t)
@@ -938,6 +953,7 @@ class DrivingState(State):
                     self.ctx.audio.play("vehicle/rumble_strip", volume=0.8)
                 else:
                     self.ctx.audio.play("driver/yawn", volume=0.8)
+        self._accrue_microsleep(gm, moving, fatigue)
 
     def _update_lane(self, keys, dt: float) -> None:
         mode = self.ctx.settings.steering_assist
@@ -1072,6 +1088,86 @@ class DrivingState(State):
             self.truck.apply_collision(severity)
             self.ctx.say_event(f"Collision! The truck took damage. "
                                f"Total damage {self.truck.damage_pct:.0f} percent.")
+
+    # -- microsleeps (severe fatigue) ----------------------------------------------
+
+    def _microsleep_interval_gm(self, fatigue: float) -> float:
+        """Game-minutes between nods; shrinks from base toward the floor as
+        exhaustion deepens past the severe threshold."""
+        span = max(1.0, 100.0 - hos.FATIGUE_SEVERE)
+        t = min(1.0, max(0.0, (fatigue - hos.FATIGUE_SEVERE) / span))
+        return MICROSLEEP_BASE_GM + (MICROSLEEP_MIN_GM - MICROSLEEP_BASE_GM) * t
+
+    def _accrue_microsleep(self, gm: float, moving: bool, fatigue: float) -> None:
+        """Build toward the next involuntary nod-off while severely fatigued."""
+        if self._microsleep_cooldown_gm > 0.0:
+            self._microsleep_cooldown_gm = max(0.0, self._microsleep_cooldown_gm - gm)
+        if not moving or fatigue < hos.FATIGUE_SEVERE:
+            self._microsleep_gm = 0.0
+            return
+        # One demand on the driver at a time, and not right after the last nod.
+        if (self._microsleep_deadline is not None
+                or self._hazard_deadline is not None
+                or self._microsleep_cooldown_gm > 0.0):
+            return
+        self._microsleep_gm += gm
+        if self._microsleep_gm >= self._microsleep_interval_gm(fatigue):
+            self._microsleep_gm = 0.0
+            self._begin_microsleep()
+
+    def _begin_microsleep(self) -> None:
+        self._cancel_cruise()   # the nod takes your hands off the wheel
+        self._microsleep_deadline = MICROSLEEP_REACTION_S
+        self.ctx.audio.play("vehicle/rumble_strip", volume=1.0)
+        self.ctx.say_event(
+            "You are nodding off. Steer or brake now to stay awake!",
+            interrupt=True)
+
+    def _update_microsleep(self, keys, dt: float) -> None:
+        if self._microsleep_deadline is None:
+            return
+        # Already crawling: the nod passes without leaving the road.
+        if self.truck.speed_mph <= HAZARD_SAFE_MPH:
+            self._resolve_microsleep(silent=True)
+            return
+        reacted = (keys[pygame.K_LEFT] or keys[pygame.K_RIGHT]
+                   or keys[pygame.K_DOWN] or keys[pygame.K_b])
+        if reacted:
+            self._resolve_microsleep()
+            return
+        self._microsleep_deadline -= dt
+        if self._microsleep_deadline <= 0:
+            self._microsleep_deadline = None
+            self._microsleep_drift_off_road()
+
+    def _resolve_microsleep(self, *, silent: bool = False) -> None:
+        self._microsleep_deadline = None
+        self._microsleep_cooldown_gm = MICROSLEEP_COOLDOWN_GM
+        self._microsleep_misses = 0
+        if not silent:
+            self.ctx.say_event("You caught it. Pull over and sleep before the "
+                               "next one.", interrupt=False)
+
+    def _microsleep_drift_off_road(self) -> None:
+        self._microsleep_misses += 1
+        self._microsleep_cooldown_gm = MICROSLEEP_COOLDOWN_GM
+        t = self.truck
+        self.ctx.audio.play("vehicle/rumble_strip", volume=1.0)
+        t.damage_pct = min(100.0, t.damage_pct + MICROSLEEP_SHOULDER_DAMAGE_PCT)
+        t.velocity_mps *= 0.8   # wandering onto the shoulder scrubs speed
+        if self._microsleep_misses >= MICROSLEEP_FORCE_STOP_MISSES:
+            self._microsleep_misses = 0
+            t.throttle = 0.0
+            t.brake = 1.0
+            self.ctx.say_event(
+                "You cannot stay awake. You drift onto the shoulder and jolt "
+                "awake on the brakes. Stop and sleep before you wreck.",
+                interrupt=True)
+        else:
+            self.ctx.say_event(
+                f"You nodded off and drifted onto the rumble strip. The truck "
+                f"took damage, now {t.damage_pct:.0f} percent. Pull over and "
+                "sleep.", interrupt=True)
 
     def _update_speeding(self, dt: float) -> None:
         if self._ramp_mi is not None:

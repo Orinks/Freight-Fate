@@ -3,6 +3,13 @@
 ## Unreleased
 
 ### Added
+- **Drowsiness has real consequences now.** Push past severe fatigue and you
+  start to nod off: a rumble-strip jolt and a warning give you a moment to steer
+  or brake and stay awake. Catch it and you carry on; miss it and you drift onto
+  the shoulder for damage and lost speed. Keep driving exhausted and the nods
+  come faster and harder until a third miss forces you off the road. Sleep is no
+  longer optional once you are running on empty -- and in relaxed mode, where
+  hazards are rare, managing fatigue becomes the heart of the drive.
 - **Posted speed limits that change by corridor.** The flat 70 everywhere is
   gone. The limit now comes from the highway and region -- rural Interstates run
   70 in the Midwest and East, 75-80 across the West, US highways and state
