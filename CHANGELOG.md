@@ -3,6 +3,10 @@
 ## Unreleased
 
 ### Changed
+- **The lane-drift rumble is now directional.** When you wander toward a lane
+  edge, the rumble strip plays from that side -- drift right and you hear it on
+  the right -- so the ear it lands in tells you which way to steer back. Uses
+  the BASS backend's stereo panning.
 - **Safety announcements no longer get buried, and you get more warning.** Zone
   entries, construction and traffic warnings, and checkpoints now preempt
   ambient chatter (weather, tolls, state lines) on the event voice instead of

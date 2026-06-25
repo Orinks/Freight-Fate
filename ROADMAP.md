@@ -34,11 +34,11 @@ From a batch of player reports:
   event voice instead of queuing behind it; zone warnings lead by real time
   (scaled by speed and `time_scale`) instead of a flat 2 miles that compressed
   to a few seconds at highway speed.
-- [ ] **Directional lane-drift rumble.** Pan the rumble-strip sound to the
-  side you have drifted toward so the player knows which way to steer back.
-  Now feasible -- `sound_lib`/BASS supports stereo panning (the project does
-  not use the pygame mixer for audio); wire a pan argument through the audio
-  layer's play/loop calls and set it from the lane offset sign.
+- [x] **Directional lane-drift rumble.** Shipped: `AudioEngine.play` takes a
+  `pan` argument (BASS `BASS_ATTRIB_PAN`, with a stereo-volume fallback for the
+  pygame backend), and the lane rumble sets it from `lane.offset` so the strip
+  sounds from the side you drifted toward. Follow-up if wanted: pan other
+  lateral cues (e.g. a lead vehicle to one side) the same way.
 - [ ] **Consultable keys reference.** F1 lists keys in one spoken block and
   the manual has the table, but players want something easier to consult --
   an in-game scrollable keys screen and/or an HTML export of the manual.

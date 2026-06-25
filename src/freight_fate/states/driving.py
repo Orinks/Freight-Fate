@@ -1018,12 +1018,19 @@ class DrivingState(State):
             curve += 0.35
         wind = self.weather.effects.wind
         if self.lane.update(dt, self.truck.velocity_mps, curve=curve, wind=wind, assist=mode):
-            self.ctx.audio.play("vehicle/rumble_strip", volume=1.0)
+            self.ctx.audio.play("vehicle/rumble_strip", volume=1.0,
+                                pan=self._lane_pan())
             self.truck.damage_pct = min(100.0, self.truck.damage_pct + 1.0)
             self.ctx.say_event(
                 f"{self.lane.describe()} Steer back toward the lane center.",
                 interrupt=False,
             )
+
+    def _lane_pan(self) -> float:
+        """Stereo pan for the rumble strip: it comes from the side you have
+        drifted toward (negative left, positive right), so the side you hear it
+        on is the side to steer away from."""
+        return max(-1.0, min(1.0, self.lane.offset))
 
     def _update_audio(self, dt: float = 0.0) -> None:
         t = self.truck
@@ -1042,7 +1049,8 @@ class DrivingState(State):
             and self._lane_rumble_timer <= 0.0
         ):
             self._lane_rumble_timer = 0.8
-            audio.play("vehicle/rumble_strip", volume=0.25 + rumble * 0.45)
+            audio.play("vehicle/rumble_strip", volume=0.25 + rumble * 0.45,
+                       pan=self._lane_pan())
         night = is_night(self.trip.current_hour)
         if night:
             audio.set_ambient("ambient/night")

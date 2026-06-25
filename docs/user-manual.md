@@ -453,7 +453,7 @@ Gameplay settings include:
 | Transmission | Switch between automatic and manual transmission. |
 | Trip pacing | Choose relaxed, standard, or fast pacing. |
 | Hours of service | Choose realistic or relaxed hours rules. |
-| Lane drift | Choose whether lane drift is off, light, or realistic. |
+| Lane drift | Choose whether lane drift is off, light, or realistic. When on, the rumble strip is panned to the side you have drifted toward, so the side you hear it on is the side to steer away from. |
 | Discord presence | Show broad activity in Discord (menu, terminal, driving, resting, delivering) with high-level route and cargo. Only general game status is shared, never your saves or personal details. On by default; no effect if Discord is closed. |
 
 Audio settings include:

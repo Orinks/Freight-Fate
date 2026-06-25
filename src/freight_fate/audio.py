@@ -143,13 +143,19 @@ class _PygameBackend:
 
     # -- one-shots ----------------------------------------------------------
 
-    def play(self, key: str, volume: float = 1.0) -> None:
+    def play(self, key: str, volume: float = 1.0, pan: float = 0.0) -> None:
         snd = self._sound(key)
         if snd is None:
             return
-        snd.set_volume(max(0.0, min(1.0, volume * self._category_volume(
-            _one_shot_category(key)) * self.master_volume)))
-        snd.play()
+        vol = max(0.0, min(1.0, volume * self._category_volume(
+            _one_shot_category(key)) * self.master_volume))
+        snd.set_volume(vol)
+        channel = snd.play()
+        if channel is not None and pan:
+            pan = max(-1.0, min(1.0, pan))
+            left = vol * (1.0 - max(0.0, pan))
+            right = vol * (1.0 + min(0.0, pan))
+            channel.set_volume(left, right)
 
     # -- loops on reserved channels ------------------------------------------
 
@@ -297,7 +303,9 @@ class _BassBackend:
     def __init__(self) -> None:
         from sound_lib.external.pybass import (
             BASS_ATTRIB_FREQ,
+            BASS_ATTRIB_PAN,
             BASS_ATTRIB_VOL,
+            BASS_ChannelSetAttribute,
             BASS_ChannelSlideAttribute,
         )
         from sound_lib.main import BassError, bass_call
@@ -308,8 +316,10 @@ class _BassBackend:
         self._BassError = BassError
         self._bass_call = bass_call
         self._slide = BASS_ChannelSlideAttribute
+        self._set_attr = BASS_ChannelSetAttribute
         self._ATTRIB_FREQ = BASS_ATTRIB_FREQ
         self._ATTRIB_VOL = BASS_ATTRIB_VOL
+        self._ATTRIB_PAN = BASS_ATTRIB_PAN
 
         self.master_volume = 1.0
         self.sfx_volume = 0.8
@@ -392,13 +402,16 @@ class _BassBackend:
 
     # -- one-shots ----------------------------------------------------------
 
-    def play(self, key: str, volume: float = 1.0) -> None:
+    def play(self, key: str, volume: float = 1.0, pan: float = 0.0) -> None:
         stream = self._sfx_stream(key)
         if stream is None:
             return
         try:
             stream.set_volume(max(0.0, min(1.0, volume * self._category_volume(
                 _one_shot_category(key)) * self.master_volume)))
+            if pan:
+                self._bass_call(self._set_attr, stream.handle, self._ATTRIB_PAN,
+                                max(-1.0, min(1.0, pan)))
             stream.play()
         except self._BassError:
             log.warning("Could not play %s", key, exc_info=True)
@@ -602,7 +615,7 @@ class _NullBackend:
         self.engine_volume = 0.55
         self.ui_volume = 0.9
 
-    def play(self, key: str, volume: float = 1.0) -> None: ...
+    def play(self, key: str, volume: float = 1.0, pan: float = 0.0) -> None: ...
     def start_loop(self, channel: int, key: str, volume: float = 1.0,
                    fade_ms: int = 300) -> None: ...
     def set_loop_volume(self, channel: int, volume: float) -> None: ...
@@ -685,8 +698,9 @@ class AudioEngine:
 
     # -- one-shots and loops ------------------------------------------------------
 
-    def play(self, key: str, volume: float = 1.0) -> None:
-        self._impl.play(key, volume)
+    def play(self, key: str, volume: float = 1.0, pan: float = 0.0) -> None:
+        """Play a one-shot. ``pan`` -1.0 = full left, 0 = center, 1.0 = right."""
+        self._impl.play(key, volume, pan)
 
     def start_loop(self, channel: int, key: str, volume: float = 1.0, fade_ms: int = 300) -> None:
         self._impl.start_loop(channel, key, volume, fade_ms)
