@@ -48,6 +48,12 @@ def load_build_release_module():
     return module
 
 
+def add_linux_prism_dependency_dir(build_release, build_dir: Path) -> None:
+    dependency_dir = build_dir / build_release.PRISM_DEPENDENCY_DIR
+    dependency_dir.mkdir(parents=True)
+    (dependency_dir / "libglibmm-test.so").write_text("", encoding="utf-8")
+
+
 # -- version parsing and channels --------------------------------------------
 
 
@@ -250,6 +256,7 @@ def test_packaged_payload_requires_platform_prism_native(tmp_path):
 def test_packaged_payload_requires_runnable_posix_executable(tmp_path, monkeypatch):
     build_release = load_build_release_module()
     monkeypatch.setattr(build_release.sys, "platform", "linux")
+    monkeypatch.setattr(build_release, "verify_prism_native_linkage", lambda *_args: None)
     build_dir = tmp_path / "FreightFate"
     exe = build_dir / "FreightFate"
     exe.parent.mkdir(parents=True)
@@ -266,6 +273,7 @@ def test_packaged_payload_requires_runnable_posix_executable(tmp_path, monkeypat
     (build_dir / "sound_lib" / "lib" / "libbass.so").write_text("", encoding="utf-8")
     (build_dir / "prism" / "_native").mkdir(parents=True)
     (build_dir / "prism" / "_native" / "bridge.so").write_text("", encoding="utf-8")
+    add_linux_prism_dependency_dir(build_release, build_dir)
 
     try:
         build_release.verify_packaged_payload(build_dir)
@@ -294,6 +302,56 @@ def test_release_dependency_check_requires_platform_native_files(tmp_path, monke
         assert "sound_lib native audio libraries are missing" in str(exc)
     else:
         raise AssertionError("dependency check accepted missing Linux natives")
+
+
+def test_stage_prism_runtime_files_copies_linux_dependency_bundle(tmp_path, monkeypatch):
+    build_release = load_build_release_module()
+    prism_dir = tmp_path / "site-packages" / "prism" / "_native"
+    dependency_dir = tmp_path / "site-packages" / build_release.PRISM_DEPENDENCY_DIR
+    prism_dir.mkdir(parents=True)
+    dependency_dir.mkdir()
+    (prism_dir / "libprism.so").write_text("", encoding="utf-8")
+    (dependency_dir / "libglibmm-test.so").write_text("", encoding="utf-8")
+    monkeypatch.setattr(build_release, "prism_native_dir", lambda: prism_dir)
+    monkeypatch.setattr(build_release, "prism_dependency_dir", lambda: dependency_dir)
+
+    build_dir = tmp_path / "FreightFate"
+    build_release.stage_prism_runtime_files(build_dir)
+
+    assert (build_dir / "prism" / "_native" / "libprism.so").exists()
+    assert (
+        build_dir
+        / build_release.PRISM_DEPENDENCY_DIR
+        / "libglibmm-test.so"
+    ).exists()
+
+
+def test_linux_packaged_payload_requires_prism_dependency_bundle(tmp_path, monkeypatch):
+    build_release = load_build_release_module()
+    monkeypatch.setattr(build_release.sys, "platform", "linux")
+    build_dir = tmp_path / "FreightFate"
+    exe = build_dir / "FreightFate"
+    exe.parent.mkdir(parents=True)
+    exe.write_text("", encoding="utf-8")
+    exe.chmod(0o755)
+    (build_dir / "build_info.json").write_text("{}", encoding="utf-8")
+    (build_dir / "CHANGELOG.md").write_text("# Changelog\n", encoding="utf-8")
+    (build_dir / "USER_MANUAL.md").write_text("# Manual\n", encoding="utf-8")
+    (build_dir / "freight_fate" / "assets" / "sounds").mkdir(parents=True)
+    (build_dir / "freight_fate" / "data").mkdir(parents=True)
+    (build_dir / "freight_fate" / "data" / "world.json").write_text(
+        "{}", encoding="utf-8")
+    (build_dir / "sound_lib" / "lib").mkdir(parents=True)
+    (build_dir / "sound_lib" / "lib" / "libbass.so").write_text("", encoding="utf-8")
+    (build_dir / "prism" / "_native").mkdir(parents=True)
+    (build_dir / "prism" / "_native" / "libprism.so").write_text("", encoding="utf-8")
+
+    try:
+        build_release.verify_packaged_payload(build_dir)
+    except RuntimeError as exc:
+        assert build_release.PRISM_DEPENDENCY_DIR in str(exc)
+    else:
+        raise AssertionError("verify_packaged_payload accepted missing Prism deps")
 
 
 def test_nuitka_standalone_folder_counts_as_packaged_build(tmp_path, monkeypatch):
