@@ -126,7 +126,7 @@
 - **Updater works in packaged builds again.** Nuitka builds do not set the
   PyInstaller-era ``sys.frozen`` flag, so the game mistook every packaged copy
   for a source checkout: "Check for updates" reported running from source, the
-  startup update check never ran, and ``saves/game.log`` was never written.
+  startup update check never ran, and ``logs/game.log`` was never written.
   Packaged builds are now detected correctly, restoring update checks, install,
   and crash logging.
 - **Facility approach speed cues.** Pickup deadheads now use lower-speed
@@ -282,7 +282,7 @@
   lookup. The check and download now speak the actual reason — "The
   secure connection could not be verified", "The server answered with
   error 403", "The server address could not be found", and so on. The
-  packaged game also writes a session log to saves/game.log, so a
+  packaged game also writes a session log to logs/game.log, so a
   player can share the full error when reporting a problem.
 - **Hazard warnings were unbeatable at highway speed.** The reaction
   window was a fixed 3 to 4.5 seconds, but a full-service stop from 65

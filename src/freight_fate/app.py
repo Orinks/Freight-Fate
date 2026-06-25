@@ -322,8 +322,9 @@ def _configure_logging() -> None:
     """Console logging from source; a fresh log file in the packaged game.
 
     The windowed build has no console, so without a file every warning --
-    update failures especially -- vanishes. The log lives next to the saves
-    (game folder, saves/game.log) where a player can find and share it.
+    update failures especially -- vanishes. The log lives in the game folder
+    (logs/game.log) where a player can find and share it without mixing it
+    with durable saves.
     """
     from . import updater
 
@@ -333,10 +334,10 @@ def _configure_logging() -> None:
     handlers = None
 
     if packaged:
-        from .models.profile import data_dir
+        from .models.profile import game_root
 
         try:
-            log_path = data_dir() / "game.log"
+            log_path = game_root() / "logs" / "game.log"
             log_path.parent.mkdir(parents=True, exist_ok=True)
             handlers = [logging.FileHandler(log_path, mode="w", encoding="utf-8")]
         except OSError:

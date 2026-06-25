@@ -435,13 +435,13 @@ def test_packaged_logging_writes_info_to_game_log(tmp_path, monkeypatch):
 
     monkeypatch.delenv("FREIGHT_FATE_LOG", raising=False)
     monkeypatch.setattr("freight_fate.updater.is_frozen", lambda: True)
-    monkeypatch.setattr("freight_fate.models.profile.data_dir", lambda: tmp_path)
+    monkeypatch.setattr("freight_fate.models.profile.game_root", lambda: tmp_path)
 
     try:
         app._configure_logging()
         logging.getLogger("freight_fate.speech").info("Speech backend: Speech Dispatcher")
         logging.shutdown()
-        text = (tmp_path / "game.log").read_text(encoding="utf-8")
+        text = (tmp_path / "logs" / "game.log").read_text(encoding="utf-8")
     finally:
         for handler in list(root.handlers):
             root.removeHandler(handler)
