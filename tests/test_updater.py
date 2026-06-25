@@ -2,6 +2,7 @@
 
 import importlib.util
 import json
+import logging
 import sys
 import threading
 from pathlib import Path
@@ -420,6 +421,36 @@ def test_manual_update_check_explains_source_builds(monkeypatch):
     assert state.checker is None
     assert "This copy runs from source; update it with git." in state.message
     assert spoken == [state.message + " Press Escape to go back."]
+
+
+def test_packaged_logging_writes_info_to_game_log(tmp_path, monkeypatch):
+    from freight_fate import app
+
+    root = logging.getLogger()
+    old_handlers = list(root.handlers)
+    old_level = root.level
+    for handler in old_handlers:
+        root.removeHandler(handler)
+    root.addHandler(logging.NullHandler())
+
+    monkeypatch.delenv("FREIGHT_FATE_LOG", raising=False)
+    monkeypatch.setattr("freight_fate.updater.is_frozen", lambda: True)
+    monkeypatch.setattr("freight_fate.models.profile.data_dir", lambda: tmp_path)
+
+    try:
+        app._configure_logging()
+        logging.getLogger("freight_fate.speech").info("Speech backend: Speech Dispatcher")
+        logging.shutdown()
+        text = (tmp_path / "game.log").read_text(encoding="utf-8")
+    finally:
+        for handler in list(root.handlers):
+            root.removeHandler(handler)
+            handler.close()
+        for handler in old_handlers:
+            root.addHandler(handler)
+        root.setLevel(old_level)
+
+    assert "Speech backend: Speech Dispatcher" in text
 
 
 def test_startup_update_prompt_respects_skipped_version():
