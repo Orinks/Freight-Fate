@@ -1346,7 +1346,8 @@ class DrivingState(State):
                              limit=limit))
 
     def _evade_pull_over(self) -> None:
-        """Drove on with the lights behind: a heavier fine, logged as evasion."""
+        """Drove on with the lights behind: spike strips end it, logged as a
+        felony stop with a heavy fine and reputation hit."""
         self._pull_over = None
         p = self.ctx.profile
         fine = SPEEDING_TICKET_FINES[-1] * 1.5
@@ -1355,10 +1356,11 @@ class DrivingState(State):
         p.money -= fine
         p.career.reputation = max(0.0, p.career.reputation
                                   - hos.HOS_REPUTATION_HIT * 2.0)
-        self.ctx.audio.play("ui/error")
+        self.ctx.audio.play("events/spike_strip")
         self.ctx.say_event(
-            f"You ran from the traffic stop. That is logged as evasion: a "
-            f"{fine:,.0f} dollar fine and a serious reputation hit.",
+            f"You ran from the traffic stop, so troopers laid spike strips across "
+            f"the lane. That is a felony stop: a {fine:,.0f} dollar fine and a "
+            "serious reputation hit.",
             interrupt=True)
 
     def _handle_trip_event(self, event) -> None:

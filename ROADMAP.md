@@ -225,9 +225,13 @@ reset instead of only a fine.
   on-the-spot ticket (`SPEEDING_TICKET_FINES`, paid now) or a warning. Ignoring
   the lights past `PULL_OVER_IGNORE_MI` is logged as evasion. Disabled in the
   debug HOS bypass. Uncaught speeding still accrues the silent settlement strike.
-  *Next trooper slices:* CB-radio heads-up chatter, felony stop / spike strips,
-  weigh-station "blow past while flagged", real Ogg siren/CB assets, damage-
-  triggered stops.
+  Real ElevenLabs audio is in: `events/police_siren.ogg` (used now),
+  `events/spike_strip.ogg` (felony-stop sound on evasion), and
+  `events/cb_radio_chatter.ogg` (staged for the CB slice). Regenerate via
+  `tools/generate_sounds.py`.
+  *Next trooper slices:* the CB-radio heads-up mechanic ("bear at mile marker
+  12"), a full felony stop (losing the load), weigh-station "blow past while
+  flagged", damage-triggered stops.
 
 The ELD/HOS model is grounded in FMCSA's property-carrier summary:
 11 hours of driving after 10 consecutive hours off duty, a 14-hour
