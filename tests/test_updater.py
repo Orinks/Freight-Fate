@@ -51,7 +51,7 @@ def load_build_release_module():
 def add_linux_prism_dependency_dir(build_release, build_dir: Path) -> None:
     dependency_dir = build_dir / build_release.PRISM_DEPENDENCY_DIR
     dependency_dir.mkdir(parents=True)
-    (dependency_dir / "libglibmm-test.so").write_text("", encoding="utf-8")
+    (dependency_dir / "libglibmm-test.so.1.3.0").write_text("", encoding="utf-8")
 
 
 # -- version parsing and channels --------------------------------------------
@@ -313,7 +313,7 @@ def test_stage_prism_runtime_files_copies_linux_dependency_bundle(tmp_path, monk
     prism_dir.mkdir(parents=True)
     dependency_dir.mkdir()
     (prism_dir / "libprism.so").write_text("", encoding="utf-8")
-    (dependency_dir / "libglibmm-test.so").write_text("", encoding="utf-8")
+    (dependency_dir / "libglibmm-test.so.1.3.0").write_text("", encoding="utf-8")
     monkeypatch.setattr(build_release, "prism_native_dir", lambda: prism_dir)
     monkeypatch.setattr(build_release, "prism_dependency_dir", lambda: dependency_dir)
 
@@ -324,7 +324,7 @@ def test_stage_prism_runtime_files_copies_linux_dependency_bundle(tmp_path, monk
     assert (
         build_dir
         / build_release.PRISM_DEPENDENCY_DIR
-        / "libglibmm-test.so"
+        / "libglibmm-test.so.1.3.0"
     ).exists()
 
 
