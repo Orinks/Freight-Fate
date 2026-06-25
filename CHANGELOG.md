@@ -3,6 +3,11 @@
 ## Unreleased
 
 ### Changed
+- **Speeding now costs you out loud, the moment it happens.** When a speeding
+  strike is recorded, the cab calls out the running fine ("Speeding strike. The
+  limit is 65. Speeding fines now total 160 dollars, due at delivery.") instead
+  of the cost landing silently on your settlement. Judged against the corridor's
+  real posted limit, with the usual ~10 mph leeway before a strike lands.
 - **Posted speed limits can now come from real map data.** Where a corridor
   carries an OpenStreetMap `maxspeed` tag, the game uses that real posted limit
   instead of the highway/region approximation -- and falls back to the

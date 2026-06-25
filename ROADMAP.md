@@ -150,14 +150,15 @@ From a batch of player reports:
   idempotent. The heuristic stays the backstop for any future leg OSM has no
   `maxspeed` on.
 
-- **Speeding leeway and consequences.** Leeway already exists: a strike is
-  only recorded above `limit + 9` mph held for 6 s (`_update_speeding`),
-  and strikes already convert to settlement fines
-  (`_speeding_settlement_fine`). What's missing is *salience* and
-  *immediacy* — the cost lands silently at delivery. The trooper milestone
-  (below) is the intended home for visible, immediate enforcement (getting
-  pulled over, on-the-spot fines). Confirm the ~10 mph leeway feels right
-  and make the strike→cost link audible when a strike is recorded.
+- [x] **Speeding leeway and consequences.** Shipped: when a strike is recorded
+  (`_update_speeding`), the cab now speaks the running speeding-fine total
+  immediately ("Speeding strike. The limit is 65. Speeding fines now total 160
+  dollars, due at delivery."), and says when the fine has hit its cap, instead
+  of the cost only surfacing as a silent settlement deduction. The leeway and
+  hold window are now named constants (`SPEEDING_LEEWAY_MPH = 9`,
+  `SPEEDING_HOLD_S = 6`) and judged against the leg's real OSM limit. The
+  trooper milestone (below) remains the home for *visible, immediate*
+  enforcement: getting pulled over and on-the-spot fines.
 
 ### Realism north star (ongoing)
 

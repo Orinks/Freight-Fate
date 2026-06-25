@@ -114,6 +114,13 @@ def _speeding_settlement_fine(strikes: int) -> float:
     return min(400.0, 80.0 * strikes) if strikes else 0.0
 
 
+# A strike is recorded only above the posted limit plus this leeway, held for the
+# sustained window below -- roughly real-world ticketing tolerance, now judged
+# against the leg's real OSM maxspeed rather than a flat number.
+SPEEDING_LEEWAY_MPH = 9.0
+SPEEDING_HOLD_S = 6.0
+
+
 class DrivingState(State):
     def __init__(self, ctx, job: Job, route: Route, trip_seed: int | None = None,
                  phase: str = DRIVE_PHASE_DELIVERY,
@@ -1226,14 +1233,26 @@ class DrivingState(State):
         if self._ramp_mi is not None:
             return   # the ramp is off the highway and unpatrolled
         limit, _ = self.trip.speed_limit_at(self.trip.position_mi)
-        if self.truck.speed_mph > limit + 9:
+        if self.truck.speed_mph > limit + SPEEDING_LEEWAY_MPH:
             self._speeding_timer += dt
-            if self._speeding_timer > 6.0:
+            if self._speeding_timer > SPEEDING_HOLD_S:
                 self._speeding_timer = 0.0
+                before = _speeding_settlement_fine(self.speeding_strikes)
                 self.speeding_strikes += 1
+                after = _speeding_settlement_fine(self.speeding_strikes)
                 self.ctx.audio.play("ui/warning")
-                self.ctx.say_event(f"You are speeding. The limit is {limit:.0f}.",
-                                   interrupt=False)
+                # Surface the cost the moment the strike lands instead of only as a
+                # silent deduction at delivery, so the price of speeding is felt now.
+                if after > before:
+                    self.ctx.say_event(
+                        f"Speeding strike. The limit is {limit:.0f}. Speeding "
+                        f"fines now total {after:,.0f} dollars, due at delivery.",
+                        interrupt=False)
+                else:
+                    self.ctx.say_event(
+                        f"Speeding strike. The limit is {limit:.0f}. Your speeding "
+                        f"fines are already at the {after:,.0f}-dollar maximum.",
+                        interrupt=False)
         else:
             self._speeding_timer = 0.0
 
