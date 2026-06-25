@@ -29,7 +29,13 @@ NIGHT_HAZARD_BONUS = 0.10          # extra hazard risk after dark
 NIGHT_TRAFFIC_KEEP = 0.4           # chance a traffic zone still forms at night
 TRAFFIC_LOOKAHEAD_MI = 2.5
 TRAFFIC_WARNING_GAP_S = 2.2
-ZONE_WARNING_LOOKAHEAD_MI = 2.0
+ZONE_WARNING_LOOKAHEAD_MI = 2.0    # minimum distance heads-up for a zone
+# Distance compression (time_scale) and speed eat into how much *real* time a
+# fixed-distance warning gives -- 2 miles at 70 mph and 20x is only ~5 seconds.
+# Scale the lead distance with speed and pacing for a roughly constant real-time
+# heads-up, clamped between the base distance and a sane maximum.
+ZONE_WARNING_REAL_S = 12.0         # target real seconds of warning
+ZONE_WARNING_MAX_MI = 8.0
 STATE_CROSSING_WARNING_LOOKAHEAD_MI = 10.0
 CONSTRUCTION_ENFORCEMENT_GRACE_MI = 1.0
 
@@ -777,11 +783,19 @@ class Trip:
     def _emit(self, kind: TripEventKind, message: str, **data) -> None:
         self._events.append(TripEvent(kind, message, data))
 
+    def _zone_warning_lookahead_mi(self) -> float:
+        """Lead distance for a zone warning, scaled so the player gets roughly
+        ``ZONE_WARNING_REAL_S`` of real time despite speed and time compression."""
+        speed = max(self.truck.speed_mph, 30.0)
+        miles = ZONE_WARNING_REAL_S * speed * self.time_scale / 3600.0
+        return max(ZONE_WARNING_LOOKAHEAD_MI, min(miles, ZONE_WARNING_MAX_MI))
+
     def _check_zones(self) -> None:
+        lookahead = self._zone_warning_lookahead_mi()
         for zone in self.zones:
             key = _zone_key(zone)
             ahead = zone.start_mi - self.position_mi
-            if 0 < ahead <= ZONE_WARNING_LOOKAHEAD_MI and key not in self._announced_zone_warnings:
+            if 0 < ahead <= lookahead and key not in self._announced_zone_warnings:
                 self._announced_zone_warnings.add(key)
                 self._emit(
                     TripEventKind.GPS_CUE,
