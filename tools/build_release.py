@@ -177,6 +177,14 @@ def native_files(root: Path, exts: set[str] | None = None) -> list[Path]:
     ]
 
 
+def linux_shared_library_files(root: Path) -> list[Path]:
+    return [
+        path
+        for path in root.rglob("*")
+        if path.is_file() and ".so" in path.name
+    ]
+
+
 def verify_release_dependencies() -> None:
     """Fail early when a platform build lacks runtime dependencies."""
     importlib.import_module("pygame")
@@ -243,7 +251,7 @@ def verify_prism_native_linkage(native_dir: Path, dependency_dir: Path | None = 
     ]
     if not prism_libs:
         return
-    if dependency_dir is None or not native_files(dependency_dir, {".so"}):
+    if dependency_dir is None or not linux_shared_library_files(dependency_dir):
         raise RuntimeError(
             "Prism Linux shared library dependencies are missing from the package: "
             f"{PRISM_DEPENDENCY_DIR}"
