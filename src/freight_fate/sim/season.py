@@ -15,6 +15,7 @@ it directly, and it is shared by the simulated weather and any display.
 
 from __future__ import annotations
 
+import datetime
 import math
 
 from .weather import WeatherKind
@@ -60,6 +61,21 @@ _WARMEST_HOUR = 15.0
 def day_of_year(game_hours: float) -> float:
     """Day of the year (0..365) for a point on the career clock."""
     return (CAREER_START_DAY_OF_YEAR + game_hours / 24.0) % DAYS_PER_YEAR
+
+
+def real_clock_game_hours(now: datetime.datetime | None = None) -> float:
+    """A ``game_hours`` value equivalent to the real wall-clock date and time.
+
+    Lets the season and temperature helpers run off the real calendar -- used
+    when live weather is on, so the season the game reports matches the live
+    conditions -- without special-casing them: the returned value reproduces
+    the real day of the year and clock hour.
+    """
+    now = now or datetime.datetime.now()
+    doy = now.timetuple().tm_yday  # 1..366
+    hour = now.hour + now.minute / 60.0
+    days_offset = (doy - CAREER_START_DAY_OF_YEAR) % DAYS_PER_YEAR
+    return days_offset * 24.0 + hour
 
 
 def season(game_hours: float) -> str:

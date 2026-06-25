@@ -119,9 +119,13 @@ Net-new realism candidates, roughly by area:
   warm-season one, and the weather-gated hazards inherit that automatically
   (winter ice/squalls, summer hail). Seasons are opt-in via `WeatherSystem`'s
   `game_hours` so seed-based tests stay deterministic; real-weather mode keeps
-  driving conditions (and thus hazard context) from live data. Follow-up:
-  black-ice risk on clear cold mornings after wet roads (currently ice rides
-  on active snow), and seasonal daylight length.
+  driving conditions (and thus hazard context) from live data, and with live
+  weather on the season follows the real-world calendar so it matches those
+  conditions. Follow-up: pull the actual NWS observation temperature (the
+  provider already fetches the observation; it just doesn't extract
+  `temperature` yet) so live mode shows real degrees instead of the climate
+  model; black-ice risk on clear cold mornings after wet roads (currently ice
+  rides on active snow); and seasonal daylight length.
 - **Physics and the truck.** Cargo-weight-aware gross mass is done for
   acceleration, grade lugging, fuel burn, and now braking: the foundation
   brakes have a fixed force ceiling sized for the rated gross, so loads over

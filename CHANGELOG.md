@@ -18,8 +18,9 @@
   a Great Lakes January night freezes while a Gulf Coast one does not. Because
   hazards are weather-gated, snow squalls and ice now show up in winter and
   hail in summer, on their own. The terminal time-and-weather readout names the
-  season, and weather reports include the temperature in your units. Real
-  weather mode still drives conditions from live data.
+  season, and weather reports include the temperature in your units. With live
+  weather turned on, the season follows the real-world calendar so it matches
+  the live conditions you are pulling in; otherwise it follows your career clock.
 - **Cargo weight now changes how the truck drives.** Gross weight is the
   tractor-and-trailer tare plus the actual payload, so a heavy load pulls away
   gently, lugs harder on grades, and burns more fuel, while a light load or an

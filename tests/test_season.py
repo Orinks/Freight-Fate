@@ -1,5 +1,7 @@
 """Career calendar, seasons, and the regional temperature model."""
 
+import datetime
+
 import pytest
 
 from freight_fate.sim.season import (
@@ -8,11 +10,12 @@ from freight_fate.sim.season import (
     adjust_for_temperature,
     day_of_year,
     is_freezing,
+    real_clock_game_hours,
     season,
     temperature_c,
     temperature_text,
 )
-from freight_fate.sim.weather import WeatherKind
+from freight_fate.sim.weather import WeatherKind, WeatherSystem
 
 
 def _hours_for_day(target_doy: float) -> float:
@@ -80,6 +83,40 @@ def test_dry_conditions_and_unknown_temperature_pass_through():
         assert adjust_for_temperature(kind, 35.0) is kind
     # No temperature known: leave the sampled condition alone.
     assert adjust_for_temperature(WeatherKind.SNOW, None) is WeatherKind.SNOW
+
+
+def test_real_clock_game_hours_maps_to_the_real_date():
+    jan = datetime.datetime(2026, 1, 15, 3, 0)   # mid January, 3 AM
+    jul = datetime.datetime(2026, 7, 15, 15, 0)  # mid July, 3 PM
+    assert season(real_clock_game_hours(jan)) == "winter"
+    assert season(real_clock_game_hours(jul)) == "summer"
+    # The clock hour is preserved (pre-dawn vs mid-afternoon).
+    assert real_clock_game_hours(jan) % 24 == pytest.approx(3.0)
+    assert real_clock_game_hours(jul) % 24 == pytest.approx(15.0)
+
+
+def test_live_weather_makes_season_follow_the_real_clock():
+    # A career clock parked in summer...
+    summer_career = ((200 - CAREER_START_DAY_OF_YEAR) % 365.0) * 24.0
+
+    # ...with no live weather, the season is the career season.
+    offline = WeatherSystem("great_lakes", seed=1, game_hours=summer_career)
+    assert offline.season == "summer"
+
+    # ...but with a provider (live weather on), the season tracks the real
+    # calendar instead, regardless of the career clock.
+    class _Provider:  # minimal stand-in; no city set, so it stays offline
+        def request(self, *a):
+            pass
+
+        def get(self, *a):
+            return None
+
+    live = WeatherSystem("great_lakes", seed=1, game_hours=summer_career,
+                         provider=_Provider())
+    assert live.season == season(real_clock_game_hours())
+    assert live.temperature_c == pytest.approx(
+        temperature_c("great_lakes", real_clock_game_hours()), abs=0.5)
 
 
 def test_temperature_text_uses_player_units():

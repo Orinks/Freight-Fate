@@ -123,21 +123,37 @@ class WeatherSystem:
         self.minutes_until_change = self._rng.uniform(25, 70)
         self.thunder_cooldown = 0.0
 
+    def _season_clock(self) -> float | None:
+        """Clock that drives season and temperature.
+
+        With live weather enabled (a provider is attached), seasons follow the
+        real calendar so the reported season matches the live conditions;
+        otherwise they follow the career clock, and are off entirely when no
+        career clock was supplied.
+        """
+        if self.provider is not None:
+            from .season import real_clock_game_hours
+
+            return real_clock_game_hours()
+        return self.game_hours
+
     def _temperature(self) -> float | None:
         """Modeled outdoor temperature in Celsius, or None when seasons are off."""
-        if self.game_hours is None:
+        clock = self._season_clock()
+        if clock is None:
             return None
         from .season import temperature_c
 
-        return temperature_c(self.region, self.game_hours)
+        return temperature_c(self.region, clock)
 
     def _seasonal(self, kind: "WeatherKind") -> "WeatherKind":
         """Reconcile a simulated condition with the season's temperature."""
-        if self.game_hours is None:
+        temp = self._temperature()
+        if temp is None:
             return kind
         from .season import adjust_for_temperature
 
-        return adjust_for_temperature(kind, self._temperature())
+        return adjust_for_temperature(kind, temp)
 
     def set_city(self, city: str, lat: float, lon: float) -> None:
         """Track the city whose real weather should apply (provider mode)."""
@@ -251,12 +267,13 @@ class WeatherSystem:
 
     @property
     def season(self) -> str | None:
-        """Current season from the career clock, or None when seasons are off."""
-        if self.game_hours is None:
+        """Current season (real calendar with live weather, else career clock)."""
+        clock = self._season_clock()
+        if clock is None:
             return None
         from .season import season
 
-        return season(self.game_hours)
+        return season(clock)
 
     def forecast(self, segments: int = 3) -> list[WeatherKind]:
         """Probable conditions ahead (informational, not binding)."""

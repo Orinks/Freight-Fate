@@ -273,16 +273,19 @@ class CityMenuState(MenuState):
             kind = provider.get(city.name)
             if kind is not None:
                 desc, live = kind.value, True
+        from ..sim.season import real_clock_game_hours, season
+
+        # With live weather on, the season follows the real calendar so it
+        # matches the real conditions; otherwise it follows the career clock.
+        season_hours = real_clock_game_hours() if provider is not None else p.game_hours
         if desc is None:
             # deterministic per city and hour, so asking twice agrees
             seed = zlib.crc32(f"{city.name}:{int(p.game_hours)}".encode())
             desc = WeatherSystem(city.region, seed=seed,
-                                 game_hours=p.game_hours).describe()
+                                 game_hours=season_hours).describe()
         source = "Live weather" if live else "Weather"
-        from ..sim.season import season
-
         self.ctx.say(f"It is {clock_text(hour)}, {time_of_day(hour)}, "
-                     f"day {day} of your career, in {season(p.game_hours)}. "
+                     f"day {day} of your career, in {season(season_hours)}. "
                      f"{source} in {p.current_city}: {desc}.")
 
     def _sleep(self) -> None:
