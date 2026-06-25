@@ -43,6 +43,14 @@ SOUND_LIB_ARCH_DIR = "x64"
 PRISM_NATIVE_EXTS = {".dll", ".dylib", ".so"}
 
 
+def platform_native_exts() -> set[str]:
+    if sys.platform == "win32":
+        return {".dll"}
+    if sys.platform == "darwin":
+        return {".dylib"}
+    return {".so"}
+
+
 def project_version() -> str:
     with open(ROOT / "pyproject.toml", "rb") as f:
         return tomllib.load(f)["project"]["version"]
@@ -150,6 +158,39 @@ def prism_native_dir() -> Path:
     if not native_dir.exists():
         raise RuntimeError(f"Prism native library directory was not found: {native_dir}")
     return native_dir
+
+
+def native_files(root: Path, exts: set[str] | None = None) -> list[Path]:
+    suffixes = exts or platform_native_exts()
+    return [
+        path
+        for path in root.rglob("*")
+        if path.is_file() and path.suffix.lower() in suffixes
+    ]
+
+
+def verify_release_dependencies() -> None:
+    """Fail early when a platform build lacks runtime dependencies."""
+    importlib.import_module("pygame")
+    importlib.import_module("numpy")
+    importlib.import_module("certifi")
+    importlib.import_module("prism")
+    importlib.import_module("sound_lib")
+
+    sound_lib_dir = sound_lib_lib_dir()
+    if not native_files(sound_lib_dir):
+        raise RuntimeError(
+            "sound_lib native audio libraries are missing for this platform: "
+            f"{sound_lib_dir}"
+        )
+
+    native_dir = prism_native_dir()
+    if not native_files(native_dir):
+        expected = ", ".join(sorted(platform_native_exts()))
+        raise RuntimeError(
+            "Prism native speech libraries are missing for this platform "
+            f"({expected}) under {native_dir}"
+        )
 
 
 def prism_target_dir(build_dir: Path) -> Path:
@@ -260,8 +301,11 @@ def run_nuitka() -> Path:
 
 def verify_packaged_payload(build_dir: Path) -> None:
     root = runtime_root(build_dir)
+    exe = root / (APP_NAME + (".exe" if sys.platform == "win32" else ""))
 
     required = [
+        exe,
+        root / "build_info.json",
         root / "CHANGELOG.md",
         root / "USER_MANUAL.md",
         root / "freight_fate" / "assets" / "sounds",
@@ -276,13 +320,25 @@ def verify_packaged_payload(build_dir: Path) -> None:
             + ", ".join(str(path.relative_to(root)) for path in missing)
         )
 
-    prism_native = [
-        path
-        for path in (root / "prism" / "_native").rglob("*")
-        if path.is_file() and path.suffix.lower() in PRISM_NATIVE_EXTS
-    ]
-    if not prism_native:
-        raise RuntimeError("Prism native speech libraries are missing from the package")
+    if sys.platform != "win32" and not exe.stat().st_mode & 0o111:
+        raise RuntimeError(
+            f"Packaged executable is not runnable, so updates cannot restart: "
+            f"{exe.relative_to(root)}"
+        )
+
+    if not native_files(root / "prism" / "_native"):
+        expected = ", ".join(sorted(platform_native_exts()))
+        raise RuntimeError(
+            "Prism native speech libraries are missing from the package "
+            f"for this platform ({expected})"
+        )
+
+    if not native_files(root / "sound_lib" / "lib"):
+        expected = ", ".join(sorted(platform_native_exts()))
+        raise RuntimeError(
+            "sound_lib native audio libraries are missing from the package "
+            f"for this platform ({expected})"
+        )
 
 
 def stamp_build_info(build_dir: Path, label: str) -> None:
@@ -376,9 +432,17 @@ def main() -> int:
                         help="release label override, e.g. nightly-20260610")
     parser.add_argument("--skip-smoke", action="store_true",
                         help="skip booting the frozen build")
+    parser.add_argument("--check-dependencies", action="store_true",
+                        help="only verify release-critical runtime dependencies")
     args = parser.parse_args()
 
+    if args.check_dependencies:
+        verify_release_dependencies()
+        print("Release dependency check passed.")
+        return 0
+
     label = args.tag or project_version()
+    verify_release_dependencies()
     if BUILD.exists():
         shutil.rmtree(BUILD)
     build_dir = run_nuitka()
