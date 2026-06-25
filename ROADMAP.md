@@ -11,9 +11,10 @@
       build before the parking brake can release, service-brake applications
       consume air, low-air and spring-brake thresholds are spoken, and active
       trip saves preserve the air-brake state.
-- [ ] Dedicated air-system audio assets: replace the current spoken
-      compressor-ready cue with an air-dryer purge and low-air buzzer once the
-      sound library grows those effects.
+- [x] Dedicated air-system audio assets: the compressor-ready cue now plays a
+      real air-dryer purge (`vehicle/air_dryer_purge.ogg`) and the low-air /
+      spring-brake warnings a low-air buzzer (`vehicle/low_air_buzzer.ogg`),
+      both ElevenLabs-generated; the spoken cues are kept for accessibility.
 
 ## Next up: 1.6 polish and realism
 

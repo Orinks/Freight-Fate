@@ -296,6 +296,8 @@ def test_air_brake_startup_blocks_movement_until_ready_and_released(monkeypatch)
 
         assert driving.truck.air_ready
         assert any("Air pressure ready" in text for text in events)
+        # The compressor-ready cue is now a real air-dryer purge, not a UI beep.
+        assert any(key == "vehicle/air_dryer_purge" for key, _volume in played)
 
         driving.handle_event(key_event(pygame.K_p))
         assert not driving.truck.parking_brake

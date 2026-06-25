@@ -928,7 +928,7 @@ class DrivingState(State):
         t = self.truck
         if t.air_low_warning and t.engine_on and (not was_low or not self._low_air_said):
             self._low_air_said = True
-            self.ctx.audio.play("ui/warning", volume=0.7)
+            self.ctx.audio.play("vehicle/low_air_buzzer", volume=0.7)
             self.ctx.say_event(
                 f"Low air warning: {t.air_pressure_psi:.0f} psi. "
                 "Keep the parking brake set until pressure builds.",
@@ -938,7 +938,7 @@ class DrivingState(State):
 
         if t.spring_brakes_active and not was_spring and not self._spring_brake_said:
             self._spring_brake_said = True
-            self.ctx.audio.play("ui/warning", volume=0.9)
+            self.ctx.audio.play("vehicle/low_air_buzzer", volume=0.9)
             self.ctx.say_event(
                 "Spring brakes applied from low air pressure. Stop and let the "
                 "compressor rebuild air before moving.",
@@ -948,7 +948,7 @@ class DrivingState(State):
 
         if t.air_ready and not was_ready and not self._air_ready_said:
             self._air_ready_said = True
-            self.ctx.audio.play("ui/notify", volume=0.65)
+            self.ctx.audio.play("vehicle/air_dryer_purge", volume=0.65)
             if t.parking_brake:
                 text = (f"Air pressure ready at {t.air_pressure_psi:.0f} psi. "
                         "Press P to release the parking brake.")

@@ -32,6 +32,8 @@ idle, start, and shutdown cues.
 | Gear shift, interior | `vehicle/gear_shift.ogg` | Darren Duff in-cab gear-shift cue, split from a two-shift source |
 | Parking brake release, interior | `vehicle/brake_release.ogg` | Darren Duff in-cab air-brake cue |
 | Parking brake set, interior | `vehicle/brake_set.ogg` | Darren Duff in-cab brake-set cue |
+| Air dryer purge | `vehicle/air_dryer_purge.ogg` | ElevenLabs-generated compressor cut-out purge, played when air pressure is ready |
+| Low air buzzer | `vehicle/low_air_buzzer.ogg` | ElevenLabs-generated low-air-pressure / spring-brake warning buzzer |
 | Highway road bed | `vehicle/road.ogg` | ElevenLabs-generated in-cab road ambience |
 
 ## Weather

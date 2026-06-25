@@ -40,6 +40,14 @@ SPECS: dict[str, tuple[str, float, float]] = {
         "Heavy truck tires running over a police spike strip, sharp puncture then "
         "rushing air hiss of a deflating tire, no music",
         3.0, 0.5),
+    "vehicle/air_dryer_purge": (
+        "Truck air brake system air dryer purge, a single sharp pneumatic hiss "
+        "and pop as the compressor cuts out, heard in the cab, no music",
+        2.0, 0.6),
+    "vehicle/low_air_buzzer": (
+        "Truck low air pressure warning buzzer, a steady harsh electronic alarm "
+        "buzz on the dash, no music",
+        2.5, 0.6),
 }
 
 

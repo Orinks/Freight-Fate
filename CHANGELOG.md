@@ -3,6 +3,10 @@
 ## Unreleased
 
 ### Changed
+- **The air-brake system has real sounds now.** When pressure builds, you hear
+  an air-dryer purge as the compressor cuts out instead of a generic beep, and
+  low-air and spring-brake warnings sound a proper low-air buzzer. The spoken
+  cues are unchanged, so nothing is lost if you rely on them.
 - **Speeding now costs you out loud, the moment it happens.** When a speeding
   strike is recorded, the cab calls out the running fine ("Speeding strike. The
   limit is 65. Speeding fines now total 160 dollars, due at delivery.") instead
