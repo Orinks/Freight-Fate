@@ -2,22 +2,6 @@
 
 ## Unreleased
 
-### Added
-- **Night music for menus and late hauls.** Two new piano-ballad beds join the
-  rotation: a quiet night menu theme that leads the menu playlist whenever a
-  career is loaded after dark (the title screen included, when its clock reads
-  night), and a late-night driving bed that rotates into the night-drive pool.
-  Daytime menus and drives are unchanged.
-
-### Fixed
-- **No more implausible interstate hazards.** The random road-hazard pool no
-  longer surfaces things that can't happen on a limited-access interstate, or
-  that are really weather rather than a brake-now event: farm equipment merging
-  onto the highway, sudden downpours and thunderstorm downpours, and hail. Real
-  weather still arrives through the weather system, and genuine road hazards --
-  standing water, whiteout squalls, debris, stopped traffic, crosswinds,
-  wildlife, rockfall -- stay.
-
 ## 1.7.0 - 2026-06-26
 
 ### Added
@@ -78,6 +62,8 @@
   loop takes over cleanly.
 - **Night driving ambience.** Night drives now play a new recorded in-cab
   night ambience loop.
+- **More music.** New night beds: a menu theme for careers loaded after dark,
+  and a late-night driving piece.
 - **New achievement system.** Careers now track achievements across a range
   of categories, with a spoken main-menu viewer and a chime when you unlock
   one. Existing careers carry over. Note: a career saved on a developer
@@ -117,6 +103,13 @@
   just under the stop threshold (or idled in gear) could keep drifting down the
   road while the driver slept. Returning to the road now reminds you to release
   the parking brake with P.
+- **No more implausible interstate hazards.** The random road-hazard pool no
+  longer surfaces things that can't happen on a limited-access interstate, or
+  that are really weather rather than a brake-now event: farm equipment merging
+  onto the highway, sudden downpours and thunderstorm downpours, and hail. Real
+  weather still arrives through the weather system, and genuine road hazards --
+  standing water, whiteout squalls, debris, stopped traffic, crosswinds,
+  wildlife, rockfall -- stay.
 - **Phantom state-line crossings.** Highways that run alongside a river border
   -- I-84 down the Columbia Gorge most of all -- no longer announce a flurry of
   back-and-forth state crossings the driver never makes. I-84 hugs the Oregon
