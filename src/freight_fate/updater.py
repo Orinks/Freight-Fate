@@ -12,6 +12,11 @@ next to the executable (written by ``tools/build_release.py``) recording its
 tag, channel, and build date; that is how a nightly knows a newer nightly
 exists even though the project version number has not changed.
 
+The ``dev`` channel is not a one-way nightly track: once dev work is promoted
+to a stable release, the nightly that follows is content-identical. So when a
+stable release is at least as new (by date) as the newest nightly, dev
+followers are steered onto stable instead of the equivalent nightly.
+
 Updates only apply to frozen packaged builds. Source checkouts are managed
 by git and the updater stays out of the way.
 """
@@ -216,20 +221,99 @@ def _nightly_releases_newest_first(releases: list[dict]) -> list[dict]:
                   reverse=True)
 
 
-def dev_update_from(releases: list[dict], build: BuildInfo | None) -> UpdateInfo | None:
-    for release in _nightly_releases_newest_first(releases):
-        tag = release.get("tag_name", "")
-        if build is not None:
-            if tag == build.tag:
-                return None
-            build_date = (_nightly_date(build.tag)
-                          or build.built_at.replace("-", ""))
-            if build_date and _nightly_date(tag) <= build_date:
-                return None
-        date = _nightly_date(tag)
+def _latest_stable_release(releases: list[dict]) -> dict | None:
+    """The highest-versioned non-prerelease in the list, or None."""
+    stables = [
+        release for release in releases
+        if not release.get("prerelease")
+        and parse_version(release.get("tag_name", "")) > (0,)
+    ]
+    if not stables:
+        return None
+    return max(stables, key=lambda r: parse_version(r.get("tag_name", "")))
+
+
+def _release_date(release: dict | None) -> str:
+    """A release's date as ``YYYYMMDD``: the nightly tag date for snapshots,
+    else the ``published_at`` date for tagged releases; '' when unknown."""
+    if release is None:
+        return ""
+    nightly = _nightly_date(release.get("tag_name", ""))
+    if nightly:
+        return nightly
+    published = str(release.get("published_at") or "")
+    return published[:10].replace("-", "") if published else ""
+
+
+def _build_date(build: BuildInfo | None) -> str:
+    """This build's date as ``YYYYMMDD``: the nightly tag date, else the
+    stamped build date; '' when unknown."""
+    if build is None:
+        return ""
+    return _nightly_date(build.tag) or build.built_at.replace("-", "")
+
+
+def _stable_newer_than_build(release: dict, build: BuildInfo | None,
+                             build_date: str) -> bool:
+    """Whether ``release`` (a stable build) is an upgrade for the running copy.
+
+    A stable build compares by version (two builds can share a date but differ
+    in version); a nightly build compares by date, since the version number is
+    typically unchanged across the dev-to-stable promotion."""
+    tag = release.get("tag_name", "")
+    if build is not None and tag == build.tag:
+        return False
+    if build is not None and not _nightly_date(build.tag):
+        return parse_version(tag) > parse_version(build.tag)
+    stable_date = _release_date(release)
+    return not (build_date and stable_date and stable_date <= build_date)
+
+
+def _nightly_newer_than_build(release: dict, build: BuildInfo | None,
+                              build_date: str) -> bool:
+    tag = release.get("tag_name", "")
+    if build is not None:
+        if tag == build.tag:
+            return False
+        if build_date and _nightly_date(tag) <= build_date:
+            return False
+    return True
+
+
+def dev_update_from(releases: list[dict], build: BuildInfo | None,
+                    stable: dict | None = None) -> UpdateInfo | None:
+    """The update to offer a dev-channel player.
+
+    Normally this is the newest nightly snapshot. But once dev work is
+    promoted to a stable release, the nightly that follows is content-identical
+    to that stable. So whenever the latest stable is at least as new (by date)
+    as the newest nightly, steer the player onto stable instead -- ties favor
+    stable, the promoted build -- so dev followers converge back rather than
+    chasing an equivalent nightly. ``stable`` is the latest stable release
+    (from ``/releases/latest``); when omitted it is derived from ``releases``.
+    """
+    nightlies = _nightly_releases_newest_first(releases)
+    latest_nightly = nightlies[0] if nightlies else None
+    if stable is None:
+        stable = _latest_stable_release(releases)
+
+    build_date = _build_date(build)
+    nightly_date = _release_date(latest_nightly)
+    stable_date = _release_date(stable)
+
+    if stable is not None and stable_date and stable_date >= nightly_date:
+        if _stable_newer_than_build(stable, build, build_date):
+            tag = stable.get("tag_name", "")
+            return _update_from_release(
+                stable, f"Freight Fate version {tag.lstrip('v')}")
+        return None  # already on the newest stable; nothing newer on dev
+
+    if latest_nightly is not None and _nightly_newer_than_build(
+            latest_nightly, build, build_date):
+        date = _nightly_date(latest_nightly.get("tag_name", ""))
         spoken = f"{date[:4]}-{date[4:6]}-{date[6:]}"
         return _update_from_release(
-            release, f"Freight Fate developer snapshot {spoken}")
+            latest_nightly, f"Freight Fate developer snapshot {spoken}")
     return None
 
 
@@ -238,7 +322,16 @@ def check_for_update(channel: str, current_version: str,
     """Query GitHub for a newer release on ``channel``. Raises OSError on
     network trouble; returns None when already up to date."""
     if channel == "dev":
-        return dev_update_from(_api_get("/releases?per_page=20"), build)
+        # Nightlies come from the release list; the latest stable is fetched
+        # on its own so a long run of nightlies can't paginate it out of view.
+        releases = _api_get("/releases?per_page=20")
+        try:
+            stable = _api_get("/releases/latest")
+        except urllib.error.HTTPError as e:
+            if e.code != 404:  # 404 == no stable release published yet
+                raise
+            stable = None
+        return dev_update_from(releases, build, stable)
     try:
         release = _api_get("/releases/latest")
     except urllib.error.HTTPError as e:

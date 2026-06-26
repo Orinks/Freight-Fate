@@ -23,13 +23,15 @@ from freight_fate.updater import (
 )
 
 
-def release(tag, prerelease=False, body="", assets=("-windows-portable.zip",
-                                                    "-macos.zip",
-                                                    "-linux-x64.tar.gz")):
+def release(tag, prerelease=False, body="", published="",
+            assets=("-windows-portable.zip",
+                    "-macos.zip",
+                    "-linux-x64.tar.gz")):
     return {
         "tag_name": tag,
         "prerelease": prerelease,
         "body": body,
+        "published_at": published,
         "assets": [
             {"name": f"FreightFate-{tag}{suffix}",
              "browser_download_url": f"https://example.test/{tag}/{suffix}",
@@ -379,6 +381,53 @@ def test_dev_stable_build_compares_by_build_date():
     newer = BuildInfo(tag="v1.6.0", channel="stable", built_at="2026-06-11")
     assert dev_update_from(releases, older) is not None
     assert dev_update_from(releases, newer) is None
+
+
+def test_dev_steered_to_stable_when_it_postdates_newest_nightly():
+    # Dev work was promoted to stable this afternoon; the nightly the user is
+    # on predates it. They should be offered stable, not left on nightlies.
+    stable = release("v1.7.0", published="2026-06-26T15:00:00Z")
+    releases = [stable, release("nightly-20260625", prerelease=True)]
+    build = BuildInfo(tag="nightly-20260625", channel="dev", built_at="2026-06-25")
+    info = dev_update_from(releases, build, stable)
+    assert info is not None
+    assert info.tag == "v1.7.0"
+    assert "1.7.0" in info.title
+
+
+def test_dev_ties_favor_stable_over_equivalent_nightly():
+    # Tonight's nightly is content-identical to the stable released earlier the
+    # same day. A dev user on an older nightly should land on stable, not the
+    # equivalent same-day nightly.
+    stable = release("v1.7.0", published="2026-06-26T15:00:00Z")
+    releases = [
+        stable,
+        release("nightly-20260626", prerelease=True),
+        release("nightly-20260625", prerelease=True),
+    ]
+    build = BuildInfo(tag="nightly-20260625", channel="dev", built_at="2026-06-25")
+    info = dev_update_from(releases, build, stable)
+    assert info is not None
+    assert info.tag == "v1.7.0"
+
+
+def test_dev_on_promoted_stable_is_not_pulled_onto_equivalent_nightly():
+    # A dev user who already took the stable update must not be churned onto
+    # the content-identical nightly that builds the same evening.
+    stable = release("v1.7.0", published="2026-06-26T15:00:00Z")
+    releases = [stable, release("nightly-20260626", prerelease=True)]
+    build = BuildInfo(tag="v1.7.0", channel="stable", built_at="2026-06-26")
+    assert dev_update_from(releases, build, stable) is None
+
+
+def test_dev_resumes_nightlies_once_they_outpace_stable():
+    # Days later dev advances past stable again; nightlies resume.
+    stable = release("v1.7.0", published="2026-06-26T15:00:00Z")
+    releases = [stable, release("nightly-20260630", prerelease=True)]
+    build = BuildInfo(tag="v1.7.0", channel="stable", built_at="2026-06-26")
+    info = dev_update_from(releases, build, stable)
+    assert info is not None
+    assert info.tag == "nightly-20260630"
 
 
 # -- assets and notes ---------------------------------------------------------
