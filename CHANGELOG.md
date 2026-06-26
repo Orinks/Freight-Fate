@@ -87,10 +87,12 @@
   grades are now derived from OpenRouteService's heavy-goods (driving-hgv)
   profile. The original cross-country legs (NY-Boston, the I-70/I-80 spine, and
   about a hundred others) were still on the car-routing engine; they now match
-  the rest of the network with truck-legal paths and real truck elevation, so a
-  few legs' terrain rating shifts to reflect the grades a rig actually climbs.
-  Distances were already accurate, so pay and deadlines are unchanged. Routing
-  stays fully offline at runtime -- this is a development-time data refresh.
+  the rest of the network with truck-legal paths and real truck elevation. Their
+  grade profiles are finer too -- the old car-engine legs had a single grade per
+  corridor, where the truck engine breaks each into the real run of climbs and
+  descents -- though no leg's overall terrain rating changed. Distances were
+  already accurate, so pay and deadlines are unchanged. Routing stays fully
+  offline at runtime -- this is a development-time data refresh.
 - **Real weather now uses the National Weather Service.** Optional live weather
   switched from Open-Meteo to the U.S. National Weather Service API
   (api.weather.gov). It is still free and needs no API key, reads each city's
