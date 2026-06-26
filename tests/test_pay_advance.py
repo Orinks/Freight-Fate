@@ -11,12 +11,15 @@ from freight_fate.models.economy import (
 
 def test_no_advance_when_cash_is_healthy():
     assert pay_advance_grant(PAY_ADVANCE_ELIGIBLE_BELOW, 0.0) == 0.0
+    assert pay_advance_grant(10.0, 0.0) == 0.0
+    assert pay_advance_grant(400.0, 0.0) == 0.0
     assert pay_advance_grant(5000.0, 0.0) == 0.0
 
 
 def test_advance_available_when_broke():
     assert pay_advance_grant(-300.0, 0.0) == PAY_ADVANCE_GRANT
     assert pay_advance_grant(0.0, 0.0) == PAY_ADVANCE_GRANT
+    assert pay_advance_grant(9.99, 0.0) == PAY_ADVANCE_GRANT
 
 
 def test_advance_is_capped_by_the_outstanding_limit():

@@ -33,7 +33,7 @@ REST_COST = 35.0               # flat cost of a rest stop visit (food, parking)
 # driver fuel money against a load in transit.
 PAY_ADVANCE_LIMIT = 1500.0          # most you can owe at once
 PAY_ADVANCE_GRANT = 500.0           # cash per request
-PAY_ADVANCE_ELIGIBLE_BELOW = 400.0  # only offered when nearly broke
+PAY_ADVANCE_ELIGIBLE_BELOW = 10.0   # only offered at single-digit cash or worse
 
 
 def pay_advance_grant(money: float, outstanding: float) -> float:
