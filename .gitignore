@@ -39,3 +39,7 @@ saves/
 
 # here.now publish state (contains claimToken write-secret)
 .herenow_site.json
+
+# Build-time secrets (ORS_API_KEY for OpenRouteService driving-hgv enrichment).
+# Never bundled or read at runtime; sourced only by the route tooling.
+.env
