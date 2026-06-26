@@ -2,8 +2,8 @@
 
 Sound effects in this directory come from a few sources, documented per file in
 the tables below: original effects created for Freight Fate (no third-party
-recordings or samples), donated in-cab truck recordings from Darren Duff used
-for selected vehicle cues, and weather and road loops produced with ElevenLabs
+recordings or samples), authorized in-cab truck sounds Darren Duff found and
+shared for selected vehicle cues, and weather and road loops produced with ElevenLabs
 sound effects tooling. The main menu, Open Road, and Night Haul themes are Suno
 remakes created by the project owner.
 
@@ -16,23 +16,23 @@ These original project sound effects are dedicated to the public domain under
 generated assets are original project assets subject to the applicable
 ElevenLabs terms for the generating account.
 
-The current donated truck interior recordings contributed by
-[Darren Duff](https://darrenduff.com/) are used for selected vehicle cues.
-Darren also provided the louder/doubled-volume versions used for the current
-idle, start, and shutdown cues.
+The in-cab truck sounds used for selected vehicle cues are authorized sounds
+that [Darren Duff](https://darrenduff.com/) found, liked, and sent along for the
+project. Darren also shared the louder/doubled-volume versions used for the
+current idle, start, and shutdown cues.
 
-## Vehicle Recordings
+## Vehicle Sounds
 
 | Sound | File | Description |
 | --- | --- | --- |
-| Truck idle, interior | `engine/idle.ogg` | Darren Duff in-cab idle loop |
-| Truck start, interior | `engine/start.ogg` | Darren Duff in-cab engine-start cue |
-| Truck shutdown, interior | `engine/shutdown.ogg` | Darren Duff in-cab shutdown cue |
-| Truck horn, interior | `vehicle/horn.ogg` | Darren Duff in-cab horn cue, trimmed from Take 2 |
-| Gear shift, interior | `vehicle/gear_shift.ogg` | Darren Duff in-cab gear-shift cue, split from a two-shift source |
-| Parking brake release, interior | `vehicle/brake_release.ogg` | Darren Duff in-cab air-brake cue |
-| Parking brake set, interior | `vehicle/brake_set.ogg` | Darren Duff in-cab brake-set cue |
-| Driver yawn | `driver/yawn.ogg` | Darren Duff drowsiness yawn cue |
+| Truck idle, interior | `engine/idle.ogg` | In-cab idle loop, shared by Darren Duff |
+| Truck start, interior | `engine/start.ogg` | In-cab engine-start cue, shared by Darren Duff |
+| Truck shutdown, interior | `engine/shutdown.ogg` | In-cab shutdown cue, shared by Darren Duff |
+| Truck horn, interior | `vehicle/horn.ogg` | In-cab horn cue (trimmed from Take 2), shared by Darren Duff |
+| Gear shift, interior | `vehicle/gear_shift.ogg` | In-cab gear-shift cue (split from a two-shift source), shared by Darren Duff |
+| Parking brake release, interior | `vehicle/brake_release.ogg` | In-cab air-brake cue, shared by Darren Duff |
+| Parking brake set, interior | `vehicle/brake_set.ogg` | In-cab brake-set cue, shared by Darren Duff |
+| Driver yawn | `driver/yawn.ogg` | Drowsiness yawn cue, shared by Darren Duff |
 | Highway road bed | `vehicle/road.ogg` | ElevenLabs-generated in-cab road ambience |
 
 ## Weather

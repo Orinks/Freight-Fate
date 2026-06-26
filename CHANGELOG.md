@@ -56,16 +56,16 @@
   screens use a career-aware pool, and active drives use stable day/night
   pools that rotate without reshuffling abruptly while you are on the road.
 - **Truck cab sound refresh.** Engine start, idle, shutdown, horn, gear shift,
-  parking-brake set and release, and highway road ambience now use the updated
-  in-cab vehicle sound set, with donated truck recordings from
-  [Darren Duff](https://darrenduff.com/). The start cue is trimmed so the idle
-  loop takes over cleanly.
+  parking-brake set and release, and highway road ambience now use an updated
+  in-cab vehicle sound set, thanks to [Darren Duff](https://darrenduff.com/),
+  who found and sent along authorized sounds for the cab cues. The start cue is
+  trimmed so the idle loop takes over cleanly.
 - **Night driving ambience.** Night drives now play a new recorded in-cab
   night ambience loop.
 - **More music.** New night beds: a menu theme for careers loaded after dark,
   and a late-night driving piece.
-- **New drowsiness yawn.** The fatigue yawn cue uses a fresh recording, thanks
-  to [Darren Duff](https://darrenduff.com/).
+- **New drowsiness yawn.** The fatigue yawn cue uses a fresh sound, thanks to
+  [Darren Duff](https://darrenduff.com/).
 - **New achievement system.** Careers now track achievements across a range
   of categories, with a spoken main-menu viewer and a chime when you unlock
   one. Existing careers carry over. Note: a career saved on a developer
