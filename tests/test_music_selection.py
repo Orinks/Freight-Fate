@@ -74,6 +74,29 @@ def test_menu_music_sequence_is_milestone_pool():
     assert "menu_theme" in coast_pool
 
 
+def test_menu_music_uses_night_theme_after_dark():
+    from freight_fate.models.profile import Profile
+
+    # A daytime career still gets its milestone bed.
+    day = Profile(name="Rookie")
+    day.game_hours = 12.0
+    assert select_menu_music(day) == "menu_theme"
+    assert select_menu_music_sequence(day)[0] == "menu_theme"
+
+    # The same career loaded at night opens on the night bed, with the
+    # milestone beds still rotating in after it.
+    night = Profile(name="Rookie")
+    night.game_hours = 23.0
+    assert select_menu_music(night) == "menu_theme_night"
+    seq = select_menu_music_sequence(night)
+    assert seq[0] == "menu_theme_night"
+    assert "menu_theme" in seq
+    assert len(seq) > 1
+
+    # No loaded career (title screen, no saves) falls back to the day bed.
+    assert select_menu_music(None) == "menu_theme"
+
+
 def test_drive_music_sequence_is_stable_pool_for_trip_and_separates_day_night(world):
     route = world.route_from_cities(["Denver", "Salt Lake City"])
     day = select_drive_music_sequence(route, 12345, 13.0)

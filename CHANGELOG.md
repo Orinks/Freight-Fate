@@ -4,25 +4,8 @@
 
 ## 1.7.0 - 2026-06-26
 
-### Fixed
-- **The truck can no longer roll away while you rest.** Opening a truck
-  stop or rest-stop menu now sets the parking brake and cuts the throttle, the
-  same way pulling into a pickup or delivery does. Before, a rig that crept in
-  just under the stop threshold (or idled in gear) could keep drifting down the
-  road while the driver slept. Returning to the road now reminds you to release
-  the parking brake with P.
-
-### Changed
-- **Safety announcements no longer get buried, and you get more warning.** Zone
-  entries, construction and traffic warnings, and checkpoints now preempt
-  ambient chatter (weather, tolls, state lines) on the event voice instead of
-  queuing behind it -- so a "construction ahead" never arrives after you have
-  already entered the zone. Zone warnings also lead by real time now, not a
-  flat distance: the heads-up scales with your speed and pacing, so 70 mph at
-  high time compression gets a usefully earlier callout instead of a couple of
-  seconds.
-
 ### Added
+
 - **Relaxed mode now actually relaxes the road.** In relaxed hours-of-service
   mode, random road hazards are much rarer, so the drive centers on driver
   responsibility -- hours, fueling, repairs, and fatigue -- instead of constant
@@ -73,18 +56,30 @@
   screens use a career-aware pool, and active drives use stable day/night
   pools that rotate without reshuffling abruptly while you are on the road.
 - **Truck cab sound refresh.** Engine start, idle, shutdown, horn, gear shift,
-  parking-brake set and release, and highway road ambience now use the updated
-  in-cab vehicle sound set, with donated truck recordings from
-  [Darren Duff](https://darrenduff.com/). The start cue is trimmed so the idle
-  loop takes over cleanly.
+  parking-brake set and release, and highway road ambience now use an updated
+  in-cab vehicle sound set, thanks to [Darren Duff](https://darrenduff.com/).
+  The start cue is trimmed so the idle loop takes over cleanly.
 - **Night driving ambience.** Night drives now play a new recorded in-cab
   night ambience loop.
+- **More music.** New night beds: a menu theme for careers loaded after dark,
+  and a late-night driving piece.
+- **New drowsiness yawn.** The fatigue yawn cue uses a fresh sound, thanks to
+  [Darren Duff](https://darrenduff.com/).
 - **New achievement system.** Careers now track achievements across a range
   of categories, with a spoken main-menu viewer and a chime when you unlock
   one. Existing careers carry over. Note: a career saved on a developer
   snapshot may not load on an older stable release.
 
 ### Changed
+
+- **Safety announcements no longer get buried, and you get more warning.** Zone
+  entries, construction and traffic warnings, and checkpoints now preempt
+  ambient chatter (weather, tolls, state lines) on the event voice instead of
+  queuing behind it -- so a "construction ahead" never arrives after you have
+  already entered the zone. Zone warnings also lead by real time now, not a
+  flat distance: the heads-up scales with your speed and pacing, so 70 mph at
+  high time compression gets a usefully earlier callout instead of a couple of
+  seconds.
 - **Truck-legal routing everywhere.** Every corridor's geometry, elevation, and
   grades are now derived from OpenRouteService's heavy-goods (driving-hgv)
   profile. The original cross-country legs (NY-Boston, the I-70/I-80 spine, and
@@ -102,6 +97,20 @@
   fallback to simulated weather when offline.
 
 ### Fixed
+
+- **The truck can no longer roll away while you rest.** Opening a truck
+  stop or rest-stop menu now sets the parking brake and cuts the throttle, the
+  same way pulling into a pickup or delivery does. Before, a rig that crept in
+  just under the stop threshold (or idled in gear) could keep drifting down the
+  road while the driver slept. Returning to the road now reminds you to release
+  the parking brake with P.
+- **No more implausible interstate hazards.** The random road-hazard pool no
+  longer surfaces things that can't happen on a limited-access interstate, or
+  that are really weather rather than a brake-now event: farm equipment merging
+  onto the highway, sudden downpours and thunderstorm downpours, and hail. Real
+  weather still arrives through the weather system, and genuine road hazards --
+  standing water, whiteout squalls, debris, stopped traffic, crosswinds,
+  wildlife, rockfall -- stay.
 - **Phantom state-line crossings.** Highways that run alongside a river border
   -- I-84 down the Columbia Gorge most of all -- no longer announce a flurry of
   back-and-forth state crossings the driver never makes. I-84 hugs the Oregon
@@ -120,6 +129,7 @@
   redundant direct Salem-Seattle and Salem-Tri-Cities legs are gone; those trips
   now compose through Portland with correct per-highway signage (I-5 out of
   Salem, I-84 only once you reach the Columbia).
+- **Real weather warm-up.** With real weather enabled, a drive now starts in
   neutral clear conditions and waits for live data, instead of briefly showing a
   simulated condition that the live data immediately replaced. That warm-up
   flicker could also wrongly unlock a weather achievement (for example, a rain

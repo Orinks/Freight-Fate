@@ -41,18 +41,34 @@ NIGHT_DRIVE_TRACKS: tuple[MusicTrack, ...] = (
     MusicTrack("night_rainy_miles", "Rainy Night Miles", "Sparse rainy night bed", 75.0),
     MusicTrack("night_lonely_plains", "Lonely Plains", "Open nighttime plains bed", 75.0),
     MusicTrack("night_mountain_pass", "Mountain Night Pass", "Quiet mountain night bed", 75.0),
+    MusicTrack("night_small_hours", "Small Hours", "Slow piano ballad for late-night hauls", 159.6),
 )
+
+# Played at the menu (and the title screen of a loaded career) when the career
+# clock reads night, in place of the daytime milestone bed.
+MENU_NIGHT_TRACK = MusicTrack(
+    "menu_theme_night", "Midnight Keys", "Quiet piano ballad for night menus", 169.9)
 
 
 ALL_MUSIC_TRACKS: tuple[MusicTrack, ...] = (
-    MENU_TRACKS + DAY_DRIVE_TRACKS + NIGHT_DRIVE_TRACKS
+    MENU_TRACKS + (MENU_NIGHT_TRACK,) + DAY_DRIVE_TRACKS + NIGHT_DRIVE_TRACKS
 )
 
 _TRACKS_BY_KEY = {track.key: track for track in ALL_MUSIC_TRACKS}
 
 
+def _profile_is_night(profile) -> bool:
+    """True when the loaded career's clock currently reads night."""
+    if profile is None:
+        return False
+    hour = (getattr(profile, "game_hours", 0.0) or 0.0) % 24.0
+    return is_night(hour)
+
+
 def select_menu_music(profile) -> str:
-    """Choose a menu bed from the player's broad career milestone."""
+    """Choose a menu bed: the night theme after dark, else the milestone bed."""
+    if _profile_is_night(profile):
+        return MENU_NIGHT_TRACK.key
     return MENU_TRACKS[_menu_milestone_index(profile)].key
 
 
@@ -79,11 +95,21 @@ def _menu_milestone_index(profile) -> int:
 
 
 def select_menu_music_sequence(profile) -> tuple[str, ...]:
-    """Return a milestone-aware menu playlist with at least a small pool."""
+    """Menu playlist: the night theme leads after dark, else the milestone bed.
+
+    The milestone beds still rotate in after the night theme, so a career loaded
+    at night opens on the quiet night bed and keeps its usual variety.
+    """
     primary_index = _menu_milestone_index(profile)
     unlocked_count = max(2, primary_index + 1)
     options = MENU_TRACKS[:unlocked_count]
-    primary = MENU_TRACKS[primary_index].key
+    milestone_primary = MENU_TRACKS[primary_index].key
+    if _profile_is_night(profile):
+        primary = MENU_NIGHT_TRACK.key
+        pool = options
+    else:
+        primary = milestone_primary
+        pool = tuple(track for track in options if track.key != milestone_primary)
     career = getattr(profile, "career", None)
     seed_key = "|".join((
         str(getattr(profile, "name", "")),
@@ -93,7 +119,7 @@ def select_menu_music_sequence(profile) -> tuple[str, ...]:
         primary,
     ))
     rest = sorted(
-        (track for track in options if track.key != primary),
+        pool,
         key=lambda track: zlib.crc32(f"{seed_key}|{track.key}".encode()),
     )
     return (primary, *(track.key for track in rest))
