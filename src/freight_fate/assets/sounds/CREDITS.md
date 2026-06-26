@@ -70,6 +70,7 @@ idle, start, and shutdown cues.
 | Yard Lights | `music/menu_fleet_owner.ogg` | Fleet-owner career menu bed |
 | Coast To Coast Ledger | `music/menu_coast_to_coast.ogg` | Coast-to-coast career menu bed |
 | Million Mile Morning | `music/menu_legendary_haul.ogg` | Late-career menu bed |
+| Midnight Keys | `music/menu_theme_night.ogg` | Night piano ballad menu bed (career loaded after dark) |
 | Open Road | `music/open_road.ogg` | Suno remake for daytime driving |
 | Desert Two-Lane | `music/drive_desert_two_lane.ogg` | Spacious daytime desert drive bed |
 | Mountain Grade | `music/drive_mountain_grade.ogg` | Measured daytime mountain drive bed |
@@ -82,3 +83,4 @@ idle, start, and shutdown cues.
 | Rainy Night Miles | `music/night_rainy_miles.ogg` | Sparse rainy night drive bed |
 | Lonely Plains | `music/night_lonely_plains.ogg` | Open nighttime plains drive bed |
 | Mountain Night Pass | `music/night_mountain_pass.ogg` | Quiet mountain night drive bed |
+| Small Hours | `music/night_small_hours.ogg` | Late-night piano ballad drive bed |

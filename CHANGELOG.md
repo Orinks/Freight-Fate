@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+### Added
+- **Night music for menus and late hauls.** Two new piano-ballad beds join the
+  rotation: a quiet night menu theme that leads the menu playlist whenever a
+  career is loaded after dark (the title screen included, when its clock reads
+  night), and a late-night driving bed that rotates into the night-drive pool.
+  Daytime menus and drives are unchanged.
+
 ## 1.7.0 - 2026-06-26
 
 ### Added
