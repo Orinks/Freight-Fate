@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 1.7.0 - 2026-06-26
+
 ### Fixed
 - **The truck can no longer roll away while you rest.** Opening a truck
   stop or rest-stop menu now sets the parking brake and cuts the throttle, the
