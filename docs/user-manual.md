@@ -19,8 +19,10 @@ driving.
    home terminal.
 6. Open the dispatch board, accept a job, and follow the current objective.
 
-The game is portable. Saves, settings, save identity files, and packaged-game
-logs live in the `saves` folder inside the game folder.
+On Windows and Linux the game is portable: saves, settings, save identity
+files, and packaged-game logs live in the `saves` folder inside the game
+folder. On macOS the app lives in Applications and cannot write beside itself,
+so those files live in `~/Library/Application Support/FreightFate` instead.
 
 ## Install, Updates, And Snapshots
 
@@ -132,6 +134,7 @@ Your terminal is the safe hub between jobs. Public terminal actions include:
 | --- | --- |
 | Dispatch board | Browse freight offers from local facilities. |
 | Garage | Refuel, repair, buy upgrades, buy trucks, or switch owned trucks. |
+| Request pay advance | Draw cash against your next load when you are broke. |
 | Career stats | Review level, reputation, deliveries, and career totals. |
 | Truck status | Review truck model, fuel, tank size, and damage condition. |
 | Time and weather | Review the clock, career day, and current city weather. |
@@ -142,6 +145,12 @@ Your terminal is the safe hub between jobs. Public terminal actions include:
 
 The garage can do partial fuel or repair work when you cannot afford a full
 tank or full repair.
+
+If your balance goes negative and you cannot afford fuel, **Request pay
+advance** fronts you cash against your next load (also available at in-trip
+rest stops, drawn against the load you are hauling). The advance is offered
+only while cash is low, is capped, and is repaid automatically out of your
+next delivery settlement, so a negative balance is never a dead end.
 
 The garage sells:
 
@@ -393,8 +402,10 @@ The main menu can continue the latest career, choose another career, reset a
 career, or delete a career. If a saved career fails its integrity check, the
 game moves it aside and warns you at startup.
 
-To move Freight Fate to another folder or drive, copy the whole `FreightFate`
-folder, including `saves`.
+To move Freight Fate to another folder or drive on Windows or Linux, copy the
+whole `FreightFate` folder, including `saves`. On macOS the saves stay in
+`~/Library/Application Support/FreightFate` and follow your user account, so
+moving the app does not move them.
 
 ## Destination And Settlement
 
@@ -436,6 +447,7 @@ Gameplay settings include:
 | Trip pacing | Choose relaxed, standard, or fast pacing. |
 | Hours of service | Choose realistic or relaxed hours rules. |
 | Lane drift | Choose whether lane drift is off, light, or realistic. |
+| Discord presence | Show broad activity in Discord (menu, terminal, driving, resting, delivering) with high-level route and cargo. Only general game status is shared, never your saves or personal details. On by default; no effect if Discord is closed. |
 
 Audio settings include:
 

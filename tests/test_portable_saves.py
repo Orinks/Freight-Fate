@@ -9,6 +9,10 @@ def _reset(monkeypatch, tmp_path, game_dir=None, legacy_dir=None):
     """Point both roots at controlled temp locations."""
     monkeypatch.delenv("FREIGHT_FATE_DATA_DIR", raising=False)
     monkeypatch.setattr(profile_mod, "_legacy_checked", False)
+    # These cover the portable Windows/Linux layout (saves beside the game).
+    # Pin a non-darwin platform so the macOS Application Support branch in
+    # _save_root() does not divert them when the test host is a Mac.
+    monkeypatch.setattr(sys, "platform", "linux")
     game = game_dir or tmp_path / "game"
     game.mkdir(parents=True, exist_ok=True)
     monkeypatch.setattr(profile_mod, "game_root", lambda: game)
@@ -132,21 +136,59 @@ def test_existing_active_saves_merge_parent_duplicate(monkeypatch, tmp_path):
     assert not (tmp_path / "freightfate" / "saves").exists()
 
 
+def test_macos_uses_application_support(monkeypatch, tmp_path):
+    """macOS saves land in Application Support, never beside the app bundle."""
+    monkeypatch.delenv("FREIGHT_FATE_DATA_DIR", raising=False)
+    monkeypatch.setattr(profile_mod, "_legacy_checked", False)
+    monkeypatch.setattr(sys, "platform", "darwin")
+    app_support = tmp_path / "Application Support" / "FreightFate"
+    monkeypatch.setattr(profile_mod, "_macos_data_dir", lambda: app_support)
+    # The app bundle sits in an admin-owned /Applications-style folder.
+    applications = tmp_path / "Applications"
+    applications.mkdir()
+    monkeypatch.setattr(profile_mod, "game_root", lambda: applications)
+
+    assert profile_mod.data_dir() == app_support
+
+
 def test_macos_app_moves_bundle_internal_saves(monkeypatch, tmp_path):
+    """Saves an earlier build dropped beside/inside the bundle migrate into
+    Application Support rather than staying in /Applications."""
     exe = (
         tmp_path / "Games" / "FreightFate.app" / "Contents" / "MacOS" / "FreightFate"
     )
     old_profile = exe.parent / "saves" / "profiles" / "Driver.json"
     old_profile.parent.mkdir(parents=True)
     old_profile.write_text("{}", encoding="utf-8")
+    app_support = tmp_path / "Application Support" / "FreightFate"
     monkeypatch.delenv("FREIGHT_FATE_DATA_DIR", raising=False)
     monkeypatch.setattr(profile_mod, "_legacy_checked", False)
-    monkeypatch.setattr(profile_mod, "_legacy_data_dir", lambda: tmp_path / "legacy")
+    monkeypatch.setattr(profile_mod, "_macos_data_dir", lambda: app_support)
     monkeypatch.setattr(sys, "frozen", True, raising=False)
     monkeypatch.setattr(sys, "executable", str(exe))
     monkeypatch.setattr(sys, "platform", "darwin")
 
     target = profile_mod.data_dir()
-    assert target == (tmp_path / "Games" / "saves").resolve()
+    assert target == app_support
     assert (target / "profiles" / "Driver.json").is_file()
     assert not (exe.parent / "saves").exists()
+
+
+def test_macos_moves_saves_beside_app_bundle(monkeypatch, tmp_path):
+    """The reported bug: saves dropped in /Applications next to the .app are
+    relocated into Application Support."""
+    applications = tmp_path / "Applications"
+    beside = applications / "saves" / "profiles" / "Driver.json"
+    beside.parent.mkdir(parents=True)
+    beside.write_text("{}", encoding="utf-8")
+    app_support = tmp_path / "Application Support" / "FreightFate"
+    monkeypatch.delenv("FREIGHT_FATE_DATA_DIR", raising=False)
+    monkeypatch.setattr(profile_mod, "_legacy_checked", False)
+    monkeypatch.setattr(sys, "platform", "darwin")
+    monkeypatch.setattr(profile_mod, "_macos_data_dir", lambda: app_support)
+    monkeypatch.setattr(profile_mod, "game_root", lambda: applications)
+
+    target = profile_mod.data_dir()
+    assert target == app_support
+    assert (target / "profiles" / "Driver.json").is_file()
+    assert not (applications / "saves").exists()

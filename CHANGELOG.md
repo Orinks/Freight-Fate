@@ -2,10 +2,47 @@
 
 ## Unreleased
 
+## 1.7.0 - 2026-06-26
+
+### Fixed
+- **The truck can no longer roll away while you rest.** Opening a truck
+  stop or rest-stop menu now sets the parking brake and cuts the throttle, the
+  same way pulling into a pickup or delivery does. Before, a rig that crept in
+  just under the stop threshold (or idled in gear) could keep drifting down the
+  road while the driver slept. Returning to the road now reminds you to release
+  the parking brake with P.
+
+### Changed
+- **Safety announcements no longer get buried, and you get more warning.** Zone
+  entries, construction and traffic warnings, and checkpoints now preempt
+  ambient chatter (weather, tolls, state lines) on the event voice instead of
+  queuing behind it -- so a "construction ahead" never arrives after you have
+  already entered the zone. Zone warnings also lead by real time now, not a
+  flat distance: the heads-up scales with your speed and pacing, so 70 mph at
+  high time compression gets a usefully earlier callout instead of a couple of
+  seconds.
+
 ### Added
+- **Relaxed mode now actually relaxes the road.** In relaxed hours-of-service
+  mode, random road hazards are much rarer, so the drive centers on driver
+  responsibility -- hours, fueling, repairs, and fatigue -- instead of constant
+  emergency braking. Realistic mode is unchanged. The Settings help for Hours
+  of service spells out the difference.
+- **Dispatcher pay advances (no more soft lock).** A broke driver who can no
+  longer afford fuel can now draw a cash advance against the next load -- from
+  the terminal hub or any in-trip rest stop -- and it is repaid automatically
+  out of the next delivery settlement. The advance is offered only while cash
+  is low and is capped, so it stays a recovery line rather than free money. A
+  negative balance is no longer a dead end.
+- **Discord Rich Presence (optional).** When Discord is running, your profile
+  can show broad game activity -- the main menu, the terminal, driving a route,
+  resting, or delivering -- with high-level route and cargo context. Only
+  general game status is shared, never save files or personal details. It is on
+  by default and can be switched off in Settings → Gameplay → Discord presence,
+  and the game starts, plays, and exits cleanly whether or not Discord is open.
 - **Bigger freight map.** The playable network grows to 194 cities and
-  438 routed legs, adding many more regional hubs, shorter connector lanes,
-  and route-backed freight choices across the country for the next snapshot.
+  437 routed legs, adding many more regional hubs, shorter connector lanes,
+  and route-backed freight choices across the country.
 - **Highway exit callouts.** Interstate drives now announce upcoming
   interchanges the way a real sign reads them -- "In 2 miles, exit 7 for
   US-1 North toward Trenton and New York" -- with the exit number, the route
@@ -47,7 +84,54 @@
   one. Existing careers carry over. Note: a career saved on a developer
   snapshot may not load on an older stable release.
 
+### Changed
+- **Truck-legal routing everywhere.** Every corridor's geometry, elevation, and
+  grades are now derived from OpenRouteService's heavy-goods (driving-hgv)
+  profile. The original cross-country legs (NY-Boston, the I-70/I-80 spine, and
+  about a hundred others) were still on the car-routing engine; they now match
+  the rest of the network with truck-legal paths and real truck elevation. Their
+  grade profiles are finer too -- the old car-engine legs had a single grade per
+  corridor, where the truck engine breaks each into the real run of climbs and
+  descents -- though no leg's overall terrain rating changed. Distances were
+  already accurate, so pay and deadlines are unchanged. Routing stays fully
+  offline at runtime -- this is a development-time data refresh.
+- **Real weather now uses the National Weather Service.** Optional live weather
+  switched from Open-Meteo to the U.S. National Weather Service API
+  (api.weather.gov). It is still free and needs no API key, reads each city's
+  nearest official station for current conditions, and keeps the same seamless
+  fallback to simulated weather when offline.
+
 ### Fixed
+- **Phantom state-line crossings.** Highways that run alongside a river border
+  -- I-84 down the Columbia Gorge most of all -- no longer announce a flurry of
+  back-and-forth state crossings the driver never makes. I-84 hugs the Oregon
+  bank of the Columbia (the Oregon/Washington line) for about 100 miles without
+  ever crossing it, but corridor sampling against a simplified boundary used to
+  flicker across the line and fabricate the crossings; a Portland run could call
+  the Oregon/Washington line four times before the real Oregon/Idaho border. The
+  baked route data is now scrubbed of these round trips (71 across 20 legs,
+  including I-5, I-24, I-29, I-79, and I-90 corridors), and the enrichment
+  pipeline guards against re-introducing them.
+- **Salem connected to Portland.** Salem now has a direct I-5 leg to Portland
+  (about 46 miles). Before, Salem was wired to Seattle and Tri-Cities but not to
+  Portland right next door, so a Salem-to-Portland run routed 176 miles the
+  wrong way -- south to Eugene and back north through Salem -- and long hauls out
+  of Salem were labeled I-84 from the start even though they leave on I-5. The
+  redundant direct Salem-Seattle and Salem-Tri-Cities legs are gone; those trips
+  now compose through Portland with correct per-highway signage (I-5 out of
+  Salem, I-84 only once you reach the Columbia).
+  neutral clear conditions and waits for live data, instead of briefly showing a
+  simulated condition that the live data immediately replaced. That warm-up
+  flicker could also wrongly unlock a weather achievement (for example, a rain
+  achievement for weather you never drove in). Simulated weather still runs as
+  the offline fallback when live data cannot be reached.
+- **macOS save location.** Saves now live in
+  `~/Library/Application Support/FreightFate` instead of beside the app in
+  Applications, matching macOS conventions. Existing saves found next to or
+  inside the app bundle are moved into the new location on first launch.
+- **Empty reposition arrivals.** Finishing a bobtail (empty reposition) run no
+  longer crashes on arrival. The "Repositioned" summary screen now opens and
+  reads its relocation summary instead of failing as you reach the new city.
 - **Speech setting previews.** Adjusting speech rate, pitch, volume, or voice
   now previews with the voice being changed, so a selected SAPI or OneCore
   voice speaks its own new setting.
@@ -65,6 +149,18 @@
 - **Metric driving status.** Metric mode now reports driving status,
   speed limits, traffic, pickup distance, and legal-stop distance in metric
   units instead of mixing in mph or miles.
+- **Metric traffic speed.** The traffic-queue speed shown in the route line now
+  reads in kilometers per hour in metric mode, instead of staying in miles per
+  hour next to the already-metric distance.
+- **Metric navigation cues.** Spoken GPS guidance -- onramp, continue, stop,
+  exit, traffic, and construction-zone callouts -- and the Map status screen now
+  give distances in kilometers in metric mode instead of miles, matching the
+  rest of the metric driving readouts.
+- **Metric speed limits.** Construction and traffic zone callouts now speak the
+  posted speed limit as a metric value in metric mode instead of the mph number.
+- **Live unit switching.** Switching between miles and kilometers mid-drive now
+  updates spoken navigation guidance right away, including the distances already
+  laid out along the current route.
 - **Packaged update checks.** The updater now recognizes standalone packaged
   folders more reliably, so switching to developer snapshots does not leave
   the update screen thinking the game is running from source.

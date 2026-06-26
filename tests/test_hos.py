@@ -18,6 +18,15 @@ from freight_fate.sim.hos import (
 )
 
 
+def test_hazard_scale_only_relaxes_relaxed_mode():
+    from freight_fate.sim.hos import RELAXED_HAZARD_SCALE, hazard_scale
+
+    assert hazard_scale("relaxed") == RELAXED_HAZARD_SCALE
+    assert hazard_scale("relaxed") < 1.0
+    assert hazard_scale("realistic") == 1.0
+    assert hazard_scale("debug_off") == 1.0
+
+
 def key_event(key, unicode="", mod=0):
     return pygame.event.Event(pygame.KEYDOWN, key=key, unicode=unicode, mod=mod)
 
@@ -175,7 +184,7 @@ def test_off_mode_never_warns_or_violates():
     assert c.check_warnings("off") == []
     assert not c.in_violation("off")
     assert c.remaining_min("off") is None
-    assert "debug bypass" in c.summary("off")
+    assert "developer mode" in c.summary("off")
 
 
 # -- serialization and compatibility ----------------------------------------------

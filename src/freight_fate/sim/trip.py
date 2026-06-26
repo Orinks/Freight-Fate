@@ -29,7 +29,13 @@ NIGHT_HAZARD_BONUS = 0.10          # extra hazard risk after dark
 NIGHT_TRAFFIC_KEEP = 0.4           # chance a traffic zone still forms at night
 TRAFFIC_LOOKAHEAD_MI = 2.5
 TRAFFIC_WARNING_GAP_S = 2.2
-ZONE_WARNING_LOOKAHEAD_MI = 2.0
+ZONE_WARNING_LOOKAHEAD_MI = 2.0    # minimum distance heads-up for a zone
+# Distance compression (time_scale) and speed eat into how much *real* time a
+# fixed-distance warning gives -- 2 miles at 70 mph and 20x is only ~5 seconds.
+# Scale the lead distance with speed and pacing for a roughly constant real-time
+# heads-up, clamped between the base distance and a sane maximum.
+ZONE_WARNING_REAL_S = 12.0         # target real seconds of warning
+ZONE_WARNING_MAX_MI = 8.0
 STATE_CROSSING_WARNING_LOOKAHEAD_MI = 10.0
 CONSTRUCTION_ENFORCEMENT_GRACE_MI = 1.0
 
@@ -190,11 +196,14 @@ class Trip:
 
     def __init__(self, route: Route, truck: TruckState, weather: WeatherSystem,
                  time_scale: float = 20.0, seed: int | None = None,
-                 start_hour: float = 12.0, imperial: bool = True) -> None:
+                 start_hour: float = 12.0, imperial: bool = True,
+                 hazard_scale: float = 1.0) -> None:
         self.route = route
         self.truck = truck
         self.weather = weather
         self.time_scale = time_scale
+        # Multiplier on random road-hazard frequency (relaxed mode lowers it).
+        self.hazard_scale = max(0.0, hazard_scale)
         self.start_hour = start_hour   # clock hour of day at departure
         # Spoken/listed navigation distances follow the player's unit choice.
         # Backing field set before cues are built below; the property setter
@@ -774,11 +783,19 @@ class Trip:
     def _emit(self, kind: TripEventKind, message: str, **data) -> None:
         self._events.append(TripEvent(kind, message, data))
 
+    def _zone_warning_lookahead_mi(self) -> float:
+        """Lead distance for a zone warning, scaled so the player gets roughly
+        ``ZONE_WARNING_REAL_S`` of real time despite speed and time compression."""
+        speed = max(self.truck.speed_mph, 30.0)
+        miles = ZONE_WARNING_REAL_S * speed * self.time_scale / 3600.0
+        return max(ZONE_WARNING_LOOKAHEAD_MI, min(miles, ZONE_WARNING_MAX_MI))
+
     def _check_zones(self) -> None:
+        lookahead = self._zone_warning_lookahead_mi()
         for zone in self.zones:
             key = _zone_key(zone)
             ahead = zone.start_mi - self.position_mi
-            if 0 < ahead <= ZONE_WARNING_LOOKAHEAD_MI and key not in self._announced_zone_warnings:
+            if 0 < ahead <= lookahead and key not in self._announced_zone_warnings:
                 self._announced_zone_warnings.add(key)
                 self._emit(
                     TripEventKind.GPS_CUE,
@@ -926,12 +943,16 @@ class Trip:
                            f"Continuing on {leg.highway} toward {nxt}.")
 
     def _hazard_risk(self) -> float:
-        """Chance of a hazard at each check; worse in fog and after dark."""
+        """Chance of a hazard at each check; worse in fog and after dark.
+
+        Scaled by ``hazard_scale`` so relaxed mode keeps hazards rare while
+        weather and night still make the hazards that do occur likelier.
+        """
         vis = self.weather.effects.visibility_mi
         risk = 0.25 + (0.25 if vis < 2 else 0.0)
         if is_night(self.current_hour):
             risk += NIGHT_HAZARD_BONUS
-        return risk
+        return risk * self.hazard_scale
 
     def _check_hazards(self, moved_mi: float) -> None:
         """Occasional road hazards that demand braking."""

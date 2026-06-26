@@ -1,12 +1,16 @@
 """Player profile with atomic JSON save/load.
 
-Freight Fate is portable: profiles and settings live in a ``saves``
-directory inside the game's own main directory — next to the executable
-in frozen builds, the project root when running from source. Nothing is
-written to per-user system folders. Override the location with the
-``FREIGHT_FATE_DATA_DIR`` environment variable (which the tests use).
-Saves from older versions, which lived in the per-user data directory,
-are migrated over automatically on first run.
+On Windows and Linux, Freight Fate is portable: profiles and settings live
+in a ``saves`` directory inside the game's own main directory — next to the
+executable in frozen builds, the project root when running from source.
+
+macOS apps live in ``/Applications`` and must not write beside themselves
+(that folder is admin-owned and often read-only), so on macOS saves go in the
+standard per-user ``~/Library/Application Support/FreightFate`` folder.
+
+Override the location with the ``FREIGHT_FATE_DATA_DIR`` environment variable
+(which the tests use). Saves from older versions or misplaced layouts are
+migrated into the active location automatically on first run.
 
 Saves are atomic: written to a temp file, then renamed over the old save,
 so a crash mid-write can never corrupt an existing profile.
@@ -41,15 +45,36 @@ SECRET_FILE = "profile.key"
 _legacy_checked = False
 
 
+def _macos_data_dir() -> Path:
+    """The standard per-user save location on macOS."""
+    return Path.home() / "Library" / "Application Support" / "FreightFate"
+
+
 def _legacy_data_dir() -> Path:
-    """Where saves lived before the portable layout (per-user folders)."""
+    """Where saves lived before the portable layout (per-user folders).
+
+    On macOS this is also the *current* save location, since app bundles
+    cannot store saves beside themselves.
+    """
     if sys.platform == "win32":
         base = Path(os.environ.get("APPDATA", Path.home()))
     elif sys.platform == "darwin":
-        base = Path.home() / "Library" / "Application Support"
+        return _macos_data_dir()
     else:
         base = Path(os.environ.get("XDG_DATA_HOME", Path.home() / ".local" / "share"))
     return base / "FreightFate"
+
+
+def _save_root() -> Path:
+    """The active save directory for this platform.
+
+    Windows and Linux keep the portable ``saves`` folder next to the game.
+    macOS uses the per-user Application Support folder so the app never has to
+    write into ``/Applications``.
+    """
+    if sys.platform == "darwin":
+        return _macos_data_dir()
+    return game_root() / "saves"
 
 
 def game_root() -> Path:
@@ -84,7 +109,7 @@ def _migrate_legacy(target: Path) -> None:
     if target.exists():
         return
     legacy = _legacy_data_dir()
-    if legacy.is_dir():
+    if legacy != target and legacy.is_dir():
         _copy_save_tree(legacy, target)
 
 
@@ -137,17 +162,31 @@ def _merge_save_tree(source: Path, target: Path) -> None:
 
 
 def _portable_migration_candidates() -> list[Path]:
-    """Nearby portable save roots from previous archive nesting layouts."""
+    """Nearby save roots to fold into the active location.
+
+    Covers previous archive nesting layouts and, on macOS, the misplaced
+    ``saves`` folder beside the app bundle (or inside it) that earlier builds
+    created in ``/Applications``.
+    """
     root = game_root()
     parent = root.parent
     candidates = [
+        root / "saves",
         root / "FreightFate" / "saves",
         parent / "saves",
         parent / "FreightFate" / "saves",
     ]
     if is_frozen():
         candidates.append(_frozen_executable_dir() / "saves")
-    return [path for path in candidates if path != root / "saves"]
+    target = _save_root()
+    seen: set[Path] = set()
+    result: list[Path] = []
+    for path in candidates:
+        if path == target or path in seen:
+            continue
+        seen.add(path)
+        result.append(path)
+    return result
 
 
 def data_dir() -> Path:
@@ -155,11 +194,11 @@ def data_dir() -> Path:
     if override:
         return Path(override)
     global _legacy_checked
-    portable = game_root() / "saves"
+    target = _save_root()
     if not _legacy_checked:
         _legacy_checked = True
-        _migrate_legacy(portable)
-    return portable
+        _migrate_legacy(target)
+    return target
 
 
 def profiles_dir() -> Path:
@@ -238,6 +277,8 @@ class Profile:
     active_trip: dict | None = None  # mid-delivery snapshot, see DrivingState
     dispatch_board_cache: dict | None = None
     fatigue: float = 0.0             # 0 fresh .. 100 exhausted
+    pay_advance: float = 0.0         # outstanding dispatcher advance owed, repaid at delivery
+    pay_advance_used_for_load: bool = False
     career: Career = field(default_factory=Career)
     market: Market = field(default_factory=Market)
     hos: HosClock = field(default_factory=HosClock)  # hours-of-service shift clock

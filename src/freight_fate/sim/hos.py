@@ -35,6 +35,18 @@ LIMITS = {
     "relaxed": tuple(x * 1.25 for x in _REALISTIC),
 }
 
+# Relaxed mode keeps random road hazards rare so the player can focus on
+# driver responsibility -- hours of service, fueling, repairs, fatigue --
+# instead of constant emergency braking. Realistic and debug modes leave
+# hazard frequency untouched.
+RELAXED_HAZARD_SCALE = 0.2
+
+
+def hazard_scale(mode: str) -> float:
+    """Random road-hazard frequency multiplier for a difficulty mode."""
+    return RELAXED_HAZARD_SCALE if mode == "relaxed" else 1.0
+
+
 WARNING_THRESHOLDS_MIN = (120.0, 60.0, 30.0)
 
 _THRESHOLD_PHRASES = {120.0: "2 hours", 60.0: "1 hour", 30.0: "30 minutes"}
@@ -189,7 +201,8 @@ class HosClock:
     def summary(self, mode: str) -> str:
         """Spoken status for the C key and Tab report."""
         if mode in HOS_NON_ENFORCED_MODES:
-            return "Hours of service is in debug bypass; the ELD clock still records time."
+            return ("Hours of service enforcement is off in developer mode; "
+                    "the ELD clock still records time.")
         drive_limit, duty_limit, break_after = LIMITS[mode]
         drive_left = max(0.0, drive_limit - self.driving_min) / 60.0
         duty_left = max(0.0, duty_limit - self.duty_min) / 60.0

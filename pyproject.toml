@@ -1,6 +1,6 @@
 [project]
 name = "freight-fate"
-version = "1.6.0"
+version = "1.7.0"
 description = "An accessible, audio-first cross-country trucking simulation game"
 readme = "README.md"
 license = { file = "LICENSE" }
@@ -23,6 +23,9 @@ dependencies = [
     "numpy>=1.26",
     "certifi>=2024.7.4",
     "sound_lib @ git+https://github.com/samtupy/sound_lib_macos_fixes.git",
+    # Optional Discord Rich Presence. Imported defensively: if it is ever
+    # absent, or Discord is closed, the game still starts, plays, and exits.
+    "pypresence>=4.3",
 ]
 
 [project.scripts]

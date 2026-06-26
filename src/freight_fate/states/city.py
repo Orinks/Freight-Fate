@@ -5,7 +5,11 @@ from __future__ import annotations
 import zlib
 
 from ..data.world import Route
-from ..models.economy import REPAIR_COST_PER_PCT
+from ..models.economy import (
+    REPAIR_COST_PER_PCT,
+    pay_advance_grant,
+    pay_advance_unavailable_reason,
+)
 from ..models.jobs import (
     Job,
     JobBoard,
@@ -106,6 +110,14 @@ class CityMenuState(MenuState):
     def exit(self) -> None:
         self.ctx.audio.set_ambient(None)
 
+    def presence(self):
+        from ..discord_presence import PresenceState
+
+        p = self.ctx.profile
+        city = p.current_city if p else ""
+        detail = f"{city} service area" if city else ""
+        return PresenceState("At the terminal", detail)
+
     def announce_entry(self) -> None:
         p = self.ctx.profile
         city = self.ctx.world.cities[p.current_city]
@@ -147,6 +159,12 @@ class CityMenuState(MenuState):
             MenuItem("Quit to main menu", self._to_main_menu,
                      help="Save your career and return to the title menu."),
         ]
+        if self._pay_advance_available():
+            items.insert(3, MenuItem(
+                self._pay_advance_label, self._request_pay_advance,
+                help="Draw cash against your next load when you are broke "
+                     "and cannot afford fuel. Repaid automatically out of "
+                     "your next delivery settlement."))
         return items
 
     # -- actions -----------------------------------------------------------------
@@ -202,6 +220,39 @@ class CityMenuState(MenuState):
 
     def _garage(self) -> None:
         self.ctx.push_state(GarageState(self.ctx))
+
+    def _pay_advance_label(self) -> str:
+        p = self.ctx.profile
+        grant = pay_advance_grant(
+            p.money, p.pay_advance, p.pay_advance_used_for_load)
+        if grant > 0:
+            return f"Request pay advance: {grant:,.0f} dollars"
+        return "Request pay advance"
+
+    def _pay_advance_available(self) -> bool:
+        p = self.ctx.profile
+        return pay_advance_grant(
+            p.money, p.pay_advance, p.pay_advance_used_for_load) > 0
+
+    def _request_pay_advance(self) -> None:
+        p = self.ctx.profile
+        grant = pay_advance_grant(
+            p.money, p.pay_advance, p.pay_advance_used_for_load)
+        if grant <= 0:
+            self.ctx.audio.play("ui/error")
+            self.ctx.say(pay_advance_unavailable_reason(
+                p.money, p.pay_advance, p.pay_advance_used_for_load))
+            return
+        p.money += grant
+        p.pay_advance = round(p.pay_advance + grant, 2)
+        p.pay_advance_used_for_load = True
+        self.ctx.save_profile()
+        self.ctx.audio.play("ui/notify")
+        self.ctx.say(
+            f"Pay advance approved: {grant:,.0f} dollars against your next load. "
+            f"It will be deducted at delivery. You have {p.money:,.0f} dollars, "
+            f"with {p.pay_advance:,.0f} dollars of advance still to repay.")
+        self.refresh()
 
     def _stats(self) -> None:
         self.ctx.say(self.ctx.profile.career.summary())
@@ -665,6 +716,17 @@ class PickupFacilityState(MenuState):
     @property
     def facility(self) -> str:
         return self.job.origin_facility_text()
+
+    def presence(self):
+        from ..discord_presence import PresenceState
+
+        if self.loaded:
+            activity = "Loaded and ready to roll"
+        elif self.checked_in:
+            activity = "Loading at the dock"
+        else:
+            activity = "At a pickup facility"
+        return PresenceState(activity, f"{self.job.cargo.label} for {self.job.destination}")
 
     def enter(self) -> None:
         sequence = select_menu_music_sequence(self.ctx.profile)

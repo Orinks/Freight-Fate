@@ -14,6 +14,7 @@ import pygame
 
 from ..achievements import add_unique_stat
 from ..data.world import Route
+from ..models.economy import pay_advance_grant, pay_advance_unavailable_reason
 from ..models.jobs import Job, job_from_payload, job_payload
 from ..models.settlement import (
     carrier_accessorial_charges,
@@ -131,7 +132,8 @@ class DrivingState(State):
         self.trip = Trip(route, self.truck, self.weather,
                          time_scale=ctx.settings.time_scale, seed=self.trip_seed,
                          start_hour=trip_start_hour,
-                         imperial=ctx.settings.imperial_units)
+                         imperial=ctx.settings.imperial_units,
+                         hazard_scale=hos.hazard_scale(ctx.settings.hos_mode))
         self.lane = LaneKeeping(seed=self.trip_seed)
         self._day_music_sequence = select_drive_music_sequence(
             self.route, self.trip_seed, 12.0, self.weather.current)
@@ -1122,7 +1124,8 @@ class DrivingState(State):
         else:
             if sound is not None and kind != TripEventKind.ZONE_ENTER:
                 self.ctx.audio.play(sound)
-            self.ctx.say_event(event.message, interrupt=False)
+            self.ctx.say_event(event.message,
+                               interrupt=self._is_critical_event(event))
         if kind == TripEventKind.ZONE_ENTER:
             self.ctx.audio.play(sound or "ui/notify")
             zone = event.data.get("zone")
@@ -1134,6 +1137,22 @@ class DrivingState(State):
             cue = event.data.get("cue")
             if getattr(cue, "kind", "") == "traffic":
                 self.ctx.award_achievement("traffic_slowing", event=True)
+
+    def _is_critical_event(self, event) -> bool:
+        """Safety announcements that must preempt ambient chatter on the event
+        voice -- zone entries, checkpoints, and zone-ahead/traffic warnings --
+        versus informational cues (weather, tolls, state lines, stops) that
+        should queue and yield rather than bury a warning you need to act on."""
+        if event.kind in (TripEventKind.HAZARD, TripEventKind.ZONE_ENTER,
+                          TripEventKind.CHECKPOINT):
+            return True
+        if event.kind == TripEventKind.GPS_CUE:
+            if event.data.get("zone") is not None:
+                return True
+            cue = event.data.get("cue")
+            if getattr(cue, "kind", "") == "traffic":
+                return True
+        return False
 
     def _event_disables_cruise(self, event) -> bool:
         if self._cruise_mph is None:
@@ -1150,9 +1169,11 @@ class DrivingState(State):
     def _cancel_cruise_for_restricted_area(self, message: str) -> None:
         self._cancel_cruise()
         self.ctx.audio.play("ui/notify")
+        # A restricted area (construction, heavy traffic) is a safety cue: it
+        # preempts ambient chatter rather than queuing behind it.
         self.ctx.say_event(
             f"{message} Adaptive cruise disabled; take manual speed control.",
-            interrupt=False,
+            interrupt=True,
         )
 
     def _handle_inspection(self, event) -> None:
@@ -1212,6 +1233,14 @@ class DrivingState(State):
         self._open_poi_stop(stop)
 
     def _open_poi_stop(self, stop) -> None:
+        # Secure the truck before handing off to the stop menu: zero the
+        # throttle, apply the service brake, and set the parking brake. A truck
+        # that rolled in just under the docking threshold (or idled in gear)
+        # would otherwise keep creeping while the driver rests -- napping while
+        # the rig drifts down the freeway. Mirrors the pickup/delivery arrivals.
+        self.truck.throttle = 0.0
+        self.truck.brake = 1.0
+        self.truck.set_parking_brake()
         can_sleep = "sleep" in stop.actions
         if can_sleep and hos.parking_is_full(self.trip_seed, stop.at_mi,
                                              self.trip.current_hour):
@@ -1618,6 +1647,24 @@ class DrivingState(State):
     def _set_status(self, text: str) -> None:
         self._status_text = text
 
+    def presence(self):
+        from ..discord_presence import driving_presence
+        from ..models.trucks import TRUCK_CATALOG
+
+        total = self.trip.total_miles or 1.0
+        fraction = self.trip.position_mi / total
+        moving = self.truck.speed_mph >= 1.0
+        truck = TRUCK_CATALOG.get(self.ctx.profile.truck) if self.ctx.profile else None
+        return driving_presence(
+            phase=self.phase,
+            origin=self.job.origin,
+            destination=self.job.destination,
+            cargo=self.job.cargo.label,
+            fraction=fraction,
+            moving=moving,
+            truck_label=truck.label if truck else "",
+        )
+
     def lines(self) -> list[str]:
         t = self.truck
         limit, reason = self.trip.speed_limit_at(self.trip.position_mi)
@@ -1825,6 +1872,13 @@ class RestStopState(MenuState):
     def title(self) -> str:  # type: ignore[override]
         return self.stop.spoken_name
 
+    def presence(self):
+        from ..discord_presence import PresenceState
+
+        base = self.driving.presence()
+        detail = base.detail if base is not None else ""
+        return PresenceState("Resting at a stop", detail)
+
     def announce_entry(self) -> None:
         self.ctx.audio.set_ambient(_poi_ambient_key(self.stop))
         self.ctx.say(f"{self.stop.spoken_name}. "
@@ -1881,8 +1935,48 @@ class RestStopState(MenuState):
                 "Save at this stop", self._save_here,
                 help="Save the active drive at this route POI without "
                      "leaving the road."))
+        if self._pay_advance_available():
+            items.append(MenuItem(
+                self._pay_advance_label, self._request_pay_advance,
+                help="Draw cash against this load when you are broke and cannot "
+                     "afford fuel. Repaid automatically out of your delivery "
+                     "settlement."))
         items.append(MenuItem("Back to the road", self.go_back))
         return items
+
+    def _pay_advance_label(self) -> str:
+        p = self.ctx.profile
+        grant = pay_advance_grant(
+            p.money, p.pay_advance, p.pay_advance_used_for_load)
+        if grant > 0:
+            return f"Request pay advance: {grant:,.0f} dollars"
+        return "Request pay advance"
+
+    def _pay_advance_available(self) -> bool:
+        p = self.ctx.profile
+        return pay_advance_grant(
+            p.money, p.pay_advance, p.pay_advance_used_for_load) > 0
+
+    def _request_pay_advance(self) -> None:
+        p = self.ctx.profile
+        grant = pay_advance_grant(
+            p.money, p.pay_advance, p.pay_advance_used_for_load)
+        if grant <= 0:
+            self.ctx.audio.play("ui/error")
+            self.ctx.say(pay_advance_unavailable_reason(
+                p.money, p.pay_advance, p.pay_advance_used_for_load))
+            return
+        p.money += grant
+        p.pay_advance = round(p.pay_advance + grant, 2)
+        p.pay_advance_used_for_load = True
+        self._save_here(silent=True)
+        self.ctx.audio.play("ui/notify")
+        self.ctx.say(
+            f"Pay advance approved: {grant:,.0f} dollars against your "
+            f"{self.driving.job.destination} load. It will be deducted at "
+            f"delivery. You have {p.money:,.0f} dollars, with "
+            f"{p.pay_advance:,.0f} dollars of advance still to repay.")
+        self.refresh()
 
     def _fuel_label(self) -> str:
         d = self.driving
@@ -2031,8 +2125,9 @@ class RestStopState(MenuState):
     def go_back(self) -> None:
         self.ctx.audio.play("ui/menu_back")
         self.ctx.pop_state()
-        self.ctx.say("Back on the road. Press E to start the engine.",
-                     interrupt=True)
+        self.ctx.say("Back on the road. The parking brake is set. Press E to "
+                     "start the engine if needed, then P to release the brake "
+                     "and drive on.", interrupt=True)
 
 
 class ParkingFullState(MenuState):
@@ -2292,6 +2387,13 @@ class PauseMenuState(MenuState):
         self.ctx.audio.stop_world()
         super().enter()
 
+    def presence(self):
+        from ..discord_presence import PresenceState
+
+        base = self.driving.presence()
+        detail = base.detail if base is not None else ""
+        return PresenceState("Paused", detail)
+
     def build_items(self) -> list[MenuItem]:
         drive_label = "pickup drive" if self.driving.phase == DRIVE_PHASE_PICKUP else "delivery"
         items = [
@@ -2413,6 +2515,7 @@ class PauseMenuState(MenuState):
         p.game_hours += self.driving.trip.game_minutes / 60.0
         p.market.advance_to(p.market_day())
         p.active_trip = None
+        p.pay_advance_used_for_load = False
         self.ctx.save_profile()
         self.ctx.say(f"Job abandoned. You paid a five hundred dollar penalty and "
                      f"returned to {p.current_city}.", interrupt=True)
@@ -2446,6 +2549,12 @@ class FacilityArrivalState(MenuState):
     @property
     def facility(self) -> str:
         return self.driving._destination_facility_text()
+
+    def presence(self):
+        from ..discord_presence import PresenceState
+
+        return PresenceState("Delivering", f"{self.driving.job.cargo.label} to "
+                             f"{self.driving.job.destination}")
 
     def enter(self) -> None:
         sequence = select_menu_music_sequence(self.ctx.profile)
@@ -2495,6 +2604,11 @@ class FacilityArrivalState(MenuState):
         carrier_charges = tolls + charge_total(accessorials)
         driver_charges = _speeding_settlement_fine(d.speeding_strikes)
         net_estimated_pay = max(0.0, estimated_pay - driver_charges)
+        advance_due = round(min(self.ctx.profile.pay_advance, net_estimated_pay), 2)
+        net_estimated_pay = round(net_estimated_pay - advance_due, 2)
+        advance_note = (
+            f" A pay advance of {advance_due:,.0f} dollars will be repaid from "
+            "this settlement." if advance_due > 0 else "")
         timing = (f"{remaining:.1f} hours remain before the deadline"
                   if remaining >= 0
                   else f"{-remaining:.1f} hours past the deadline")
@@ -2514,7 +2628,7 @@ class FacilityArrivalState(MenuState):
             "Those charges do not reduce driver pay. "
             f"Driver-responsibility charges are estimated at "
             f"{driver_charges:,.0f} dollars, for estimated net driver pay "
-            f"{net_estimated_pay:,.0f}. "
+            f"{net_estimated_pay:,.0f}.{advance_note} "
             f"{timing}. {cargo_condition} Dock and deliver to settle.")
 
     def _status(self) -> None:
@@ -2571,6 +2685,7 @@ class ArrivalState(MenuState):
         p.game_hours += hours
         p.market.advance_to(p.market_day())
         p.active_trip = None
+        p.pay_advance_used_for_load = False
         self.ctx.save_profile()
         self.summary_parts.insert(0, (
             f"Bobtailed empty to {job.destination} in {hours:.1f} hours. "
@@ -2604,6 +2719,16 @@ class ArrivalState(MenuState):
                 f"Driver-responsibility charges: speeding fines cost you "
                 f"{driver_charges:,.0f} dollars.")
         net_pay = max(0.0, gross_pay - driver_charges)
+        advance_repaid = round(min(p.pay_advance, net_pay), 2)
+        if advance_repaid > 0:
+            net_pay = round(net_pay - advance_repaid, 2)
+            p.pay_advance = round(p.pay_advance - advance_repaid, 2)
+            outstanding = (
+                f" {p.pay_advance:,.0f} dollars of advance still outstanding."
+                if p.pay_advance >= 1.0 else "")
+            self.summary_parts.append(
+                f"Pay advance repaid from this settlement: "
+                f"{advance_repaid:,.0f} dollars.{outstanding}")
         on_time = hours <= job.deadline_game_h
         p.money += net_pay
         p.current_city = job.destination
@@ -2614,6 +2739,7 @@ class ArrivalState(MenuState):
         p.game_hours += hours
         p.market.advance_to(p.market_day())
         p.active_trip = None
+        p.pay_advance_used_for_load = False
         self.ctx.save_profile()
 
         self.summary_parts.insert(0, (
@@ -2660,6 +2786,13 @@ class ArrivalState(MenuState):
         career_lines = announcements + self._achievement_messages
         if not career_lines:
             career_lines = ["No new career messages."]
+        advance_lines = []
+        if advance_repaid > 0:
+            advance_lines.append(
+                f"Pay advance repaid: {advance_repaid:,.0f} dollars.")
+        if p.pay_advance >= 1.0:
+            advance_lines.append(
+                f"Pay advance still outstanding: {p.pay_advance:,.0f} dollars.")
         self.summary_lines = [
             f"Delivered {job.weight_tons:.0f} tons of {job.cargo.label} "
             f"to {job.destination}.",
@@ -2673,6 +2806,7 @@ class ArrivalState(MenuState):
             f"accessorials {charge_summary(accessorials)}.",
             "Carrier charges are not deducted from driver pay.",
             f"Driver-responsibility charges: {driver_charges:,.0f} dollars.",
+            *advance_lines,
             f"Net driver pay: {net_pay:,.0f} dollars.",
             f"Money after settlement: {p.money:,.0f} dollars.",
             bonus_text + ".",

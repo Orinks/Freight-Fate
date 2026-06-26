@@ -109,7 +109,11 @@ class WeatherSystem:
         self.city: str | None = None
         self.city_coords: tuple[float, float] = (0.0, 0.0)
         self.live = False  # True while real-world data is driving conditions
-        self.current = self._sample(region)
+        # With real weather enabled, start neutral and wait for live data rather
+        # than showing a simulated warm-up condition that the real data would
+        # immediately replace. Simulated weather only appears if the provider
+        # turns out to be offline (see update()).
+        self.current = WeatherKind.CLEAR if provider is not None else self._sample(region)
         self.minutes_until_change = self._rng.uniform(25, 70)
         self.thunder_cooldown = 0.0
 
@@ -149,6 +153,13 @@ class WeatherSystem:
         if self.live:
             return changed
 
+        if self.provider is not None and not self._provider_offline():
+            # Real weather is enabled and still loading: hold the current
+            # condition (clear at the start of a drive) instead of running a
+            # simulated warm-up. Only fall through to simulation when the
+            # provider is genuinely offline.
+            return None
+
         self.minutes_until_change -= game_minutes
         if self.minutes_until_change > 0:
             return None
@@ -158,6 +169,23 @@ class WeatherSystem:
             self.current = new
             return new
         return None
+
+    def _provider_offline(self) -> bool:
+        """Whether the provider has no usable data and a fetch has failed.
+
+        While a first fetch is still pending this is False, so the system holds
+        steady instead of flickering through simulated weather. Providers that
+        do not report availability (test fakes) are treated as still loading.
+        """
+        if self.provider is None or self.city is None:
+            return False
+        checker = getattr(self.provider, "unavailable", None)
+        if checker is None:
+            return False
+        try:
+            return bool(checker(self.city))
+        except Exception:  # pragma: no cover - defensive
+            return False
 
     def _poll_provider(self) -> WeatherKind | None:
         """Apply real-world conditions when a provider is attached.

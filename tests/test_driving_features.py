@@ -717,6 +717,30 @@ def test_rest_stop_menu_can_save_active_drive():
 
 
 @pytest.mark.smoke
+def test_opening_a_route_stop_secures_the_truck():
+    """A truck that rolled in just under the docking threshold must be parked
+    when the stop menu opens, so it cannot creep while the driver rests."""
+    from freight_fate.app import App
+    from freight_fate.states.driving import ParkingFullState, RestStopState
+
+    app = App()
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        stop = driving.trip.stops[0]
+        driving.trip.position_mi = stop.at_mi
+        driving.truck.velocity_mps = 0.0
+        driving.truck.parking_brake = False   # rolled in still un-parked
+        driving.truck.throttle = 0.4          # idling in gear, creeping
+        driving.handle_event(key_event(pygame.K_t))
+        assert isinstance(app.state, (RestStopState, ParkingFullState))
+        assert driving.truck.parking_brake    # menu open => truck secured
+        assert driving.truck.throttle == 0.0
+    finally:
+        app.shutdown()
+
+
+@pytest.mark.smoke
 def test_poi_menu_uses_curated_roadside_assistance_label():
     from freight_fate.app import App
     from freight_fate.sim.trip import RoadStop
@@ -1210,5 +1234,68 @@ def test_service_brakes_beat_a_highway_hazard_after_human_reaction(monkeypatch):
                 break
         assert driving._hazard_deadline is None
         assert t.damage_pct == damage_before    # avoided, not collided
+    finally:
+        app.shutdown()
+
+
+class _FakeWeatherProvider:
+    """Returns ``kind`` for any city; ``None`` models data not yet fetched."""
+
+    def __init__(self, kind=None):
+        self.kind = kind
+
+    def request(self, city, lat, lon):
+        pass
+
+    def get(self, city):
+        return self.kind
+
+
+def test_real_weather_starts_clear_with_no_simulated_warmup(monkeypatch):
+    """Regression: with real weather enabled, a drive starts neutral (clear) and
+    holds until live data arrives, instead of showing a provisional simulated
+    condition. So no momentary simulated rain can unlock an achievement."""
+    from freight_fate.app import App
+    from freight_fate.sim.weather import WeatherKind
+
+    provider = _FakeWeatherProvider(kind=None)  # data not fetched yet
+    app = App()
+    monkeypatch.setattr(app.ctx, "real_weather_provider", lambda: provider)
+    app.ctx.settings.real_weather = True
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        assert driving.weather.provider is provider
+        assert driving.weather.current is WeatherKind.CLEAR
+        assert driving.weather.live is False
+
+        # While the fetch is still pending, weather holds clear -- no simulated
+        # transitions, so no weather achievement fires.
+        for _ in range(10):
+            driving.update(1 / 60)
+        assert driving.weather.current is WeatherKind.CLEAR
+        assert "rain_driver" not in driving.ctx.profile.achievements
+    finally:
+        app.shutdown()
+
+
+def test_real_weather_applies_and_awards_live_condition(monkeypatch):
+    """Once live conditions arrive, they take over from clear and award their
+    achievement -- e.g. genuine live rain unlocks the rain achievement."""
+    from freight_fate.app import App
+    from freight_fate.sim.weather import WeatherKind
+
+    provider = _FakeWeatherProvider(kind=WeatherKind.RAIN)
+    app = App()
+    monkeypatch.setattr(app.ctx, "real_weather_provider", lambda: provider)
+    app.ctx.settings.real_weather = True
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        for _ in range(5):
+            driving.update(1 / 60)
+        assert driving.weather.live is True
+        assert driving.weather.current is WeatherKind.RAIN
+        assert "rain_driver" in driving.ctx.profile.achievements
     finally:
         app.shutdown()

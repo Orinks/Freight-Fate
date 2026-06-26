@@ -18,8 +18,8 @@ class Settings:
     imperial_units: bool = True
     automatic_transmission: bool = True   # friendlier default for new players
     time_scale: float = 20.0              # distance compression while driving
-    real_weather: bool = False            # live conditions from Open-Meteo
-    hos_mode: str = "realistic"           # hours of service: realistic/relaxed/debug_off
+    real_weather: bool = False            # live conditions from the NWS API
+    hos_mode: str = "realistic"           # hours of service: realistic/relaxed (debug_off is an internal dev bypass)
     steering_assist: str = "off"          # off/light/realistic lane drift
     master_volume: float = 1.0
     sfx_volume: float = 0.8
@@ -36,6 +36,7 @@ class Settings:
     speech_voice: str = ""               # installed voice name; "" = backend default
     update_channel: str = ""              # "stable"/"dev"; "" follows this build's channel
     skipped_update: str = ""              # release tag the player chose to skip
+    discord_presence: bool = True         # show broad activity in Discord (privacy-safe)
 
     @property
     def path(self):
@@ -63,8 +64,9 @@ class Settings:
             log.warning("Could not read settings; using defaults", exc_info=True)
         from .sim.hos import HOS_MODES
 
-        if s.hos_mode == "off":
-            s.hos_mode = "debug_off"
+        # Legacy 1.5.0 saves carried a player-selectable "off" mode. It is no
+        # longer offered, so such saves fall through to the realistic default
+        # below. debug_off stays valid as an internal dev/test bypass only.
         if s.hos_mode not in HOS_MODES:
             s.hos_mode = "realistic"
         if s.steering_assist not in ("off", "light", "realistic"):

@@ -191,6 +191,11 @@ class MainMenuState(MenuState):
         self.ctx.audio.play("ui/menu_back")
         self.ctx.say("Press Enter on Quit to exit the game.")
 
+    def presence(self):
+        from ..discord_presence import PresenceState
+
+        return PresenceState("In the main menu")
+
     def _continue(self) -> None:
         saves = _loadable_saves()
         if not saves:
@@ -643,6 +648,10 @@ HELP_PAGES = [
         "Lane drift adds an optional lane-position task while you drive.",
         "Off keeps the truck centered. Light adds gentle drift.",
         "Realistic adds stronger drift, rumble-strip warnings, and consequences.",
+        "Discord presence shows your broad activity in Discord when it is running,",
+        "like the main menu, driving a route, or resting, with the route and cargo.",
+        "Only general game status is shared, never your saves or personal details.",
+        "It is on by default and has no effect if Discord is closed.",
         "Audio volumes have their own help text in the Audio category with F1.",
     ]),
     ("Driving basics", [
@@ -940,10 +949,19 @@ class SettingsCategoryState(MenuState):
                          help="Controls how quickly game time and distance pass."),
                 MenuItem(lambda: f"Hours of service: {self._hos_label()}",
                          lambda: self._cycle_hos(1),
-                         help="Choose realistic or relaxed hours rules."),
+                         help="Realistic enforces full hours rules and normal "
+                              "road hazards. Relaxed eases the hours limits and "
+                              "makes road hazards rare, so you can focus on "
+                              "driver responsibility: hours, fueling, and repairs."),
                 MenuItem(lambda: f"Lane drift: {self._steering_label()}",
                          lambda: self._cycle_steering(1),
                          help="Choose whether lane drift is off, light, or realistic."),
+                MenuItem(lambda: f"Discord presence: {'on' if s.discord_presence else 'off'}",
+                         lambda: self._toggle_discord_presence(1),
+                         help="Show broad activity in Discord, like the main menu, "
+                              "driving a route, or resting. Only general game status "
+                              "is shared, never your save files or personal details. "
+                              "Has no effect if Discord is not running."),
                 MenuItem("Back", self.go_back),
             ]
         if self.category == "audio":
@@ -999,6 +1017,7 @@ class SettingsCategoryState(MenuState):
                 "gameplay": [
                     self._toggle_units, self._toggle_transmission,
                     self._cycle_pace, self._cycle_hos, self._cycle_steering,
+                    self._toggle_discord_presence,
                 ],
                 "audio": [
                     lambda d: self._volume("master_volume", 0.1 * d),
@@ -1065,8 +1084,7 @@ class SettingsCategoryState(MenuState):
         return {
             "realistic": "realistic",
             "relaxed": "relaxed",
-            "debug_off": "debug bypass",
-            "off": "debug bypass",
+            "debug_off": "off (developer)",
         }.get(self.ctx.settings.hos_mode, "realistic")
 
     def _steering_label(self) -> str:
@@ -1131,6 +1149,11 @@ class SettingsCategoryState(MenuState):
         except ValueError:
             i = 0
         self.ctx.settings.steering_assist = modes[(i + d) % len(modes)]
+        self._announce()
+
+    def _toggle_discord_presence(self, _d: int) -> None:
+        self.ctx.settings.discord_presence = not self.ctx.settings.discord_presence
+        self.ctx.apply_presence()
         self._announce()
 
     def _cycle_verbosity(self, d: int) -> None:
