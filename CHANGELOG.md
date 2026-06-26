@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+### Fixed
+
+- **Snapshot players move to stable when it catches up.** On the developer
+  snapshot channel, the game now offers the stable release whenever it is as
+  new as -- or newer than -- the latest nightly, so once dev work ships in a
+  stable build you converge back onto stable instead of being left on an
+  equivalent nightly.
+
 ## 1.7.0 - 2026-06-26
 
 ### Added
