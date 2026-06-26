@@ -23,13 +23,14 @@ def _job(cargo_key="electronics", *, origin="New York", destination="Philadelphi
 
 
 def _settle(app, job, route_cities, *, money=1000.0, speeding_strikes=0,
-            pay_advance=0.0):
+            pay_advance=0.0, pay_advance_used_for_load=False):
     from freight_fate.models.profile import Profile
     from freight_fate.states.driving import ArrivalState, DrivingState
 
     app.ctx.profile = Profile(name="Settlement Audit", current_city=job.origin)
     app.ctx.profile.money = money
     app.ctx.profile.pay_advance = pay_advance
+    app.ctx.profile.pay_advance_used_for_load = pay_advance_used_for_load
     route = app.ctx.world.route_from_cities(route_cities)
     driving = DrivingState(app.ctx, job, route, phase="delivery")
     driving.speeding_strikes = speeding_strikes
@@ -96,6 +97,7 @@ def test_pay_advance_is_repaid_from_settlement():
 
         assert "Pay advance repaid from this settlement: 500 dollars" in summary
         assert app.ctx.profile.pay_advance == pytest.approx(0.0)
+        assert app.ctx.profile.pay_advance_used_for_load is False
         # Net pay is reduced by the repaid advance; the bank reflects it.
         assert app.ctx.profile.money == pytest.approx(-200.0 + gross - 500.0)
         assert app.ctx.profile.career.total_earnings == pytest.approx(gross - 500.0)
@@ -125,6 +127,26 @@ def test_pay_advance_repayment_never_drives_net_pay_negative():
         assert app.ctx.profile.money == pytest.approx(gross - repaid)
         assert app.ctx.profile.money >= 0.0
         assert "still outstanding" in summary
+    finally:
+        app.shutdown()
+
+
+def test_pay_advance_load_cooldown_resets_at_settlement():
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        job = _job(destination_type="retail_distribution")
+        _settle(
+            app,
+            job,
+            ["New York", "Philadelphia"],
+            money=-200.0,
+            pay_advance=500.0,
+            pay_advance_used_for_load=True,
+        )
+
+        assert app.ctx.profile.pay_advance_used_for_load is False
     finally:
         app.shutdown()
 

@@ -23,6 +23,12 @@ def test_advance_available_when_broke():
     assert pay_advance_grant(0.0, 0.0) == PAY_ADVANCE_GRANT
 
 
+def test_advance_only_once_per_load():
+    assert pay_advance_grant(0.0, 0.0, used_for_load=True) == 0.0
+    assert "already taken" in pay_advance_unavailable_reason(
+        0.0, 0.0, used_for_load=True)
+
+
 def test_advance_is_capped_by_the_outstanding_limit():
     # Almost at the ceiling: only the remaining headroom is offered.
     near_limit = PAY_ADVANCE_LIMIT - 100.0
@@ -58,6 +64,14 @@ def test_terminal_pay_advance_option_only_appears_when_available():
             for text in _menu_texts(state.build_items())
         )
 
+        state._request_pay_advance()
+        assert app.ctx.profile.pay_advance_used_for_load is True
+        assert not any(
+            text.startswith("Request pay advance")
+            for text in _menu_texts(state.build_items())
+        )
+
+        app.ctx.profile.pay_advance_used_for_load = False
         app.ctx.profile.pay_advance = PAY_ADVANCE_LIMIT
         assert not any(
             text.startswith("Request pay advance")
@@ -113,6 +127,14 @@ def test_rest_stop_pay_advance_option_only_appears_when_available():
             for text in _menu_texts(state.build_items())
         )
 
+        state._request_pay_advance()
+        assert app.ctx.profile.pay_advance_used_for_load is True
+        assert not any(
+            text.startswith("Request pay advance")
+            for text in _menu_texts(state.build_items())
+        )
+
+        app.ctx.profile.pay_advance_used_for_load = False
         app.ctx.profile.pay_advance = PAY_ADVANCE_LIMIT
         assert not any(
             text.startswith("Request pay advance")

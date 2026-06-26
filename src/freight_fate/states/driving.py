@@ -1946,24 +1946,29 @@ class RestStopState(MenuState):
 
     def _pay_advance_label(self) -> str:
         p = self.ctx.profile
-        grant = pay_advance_grant(p.money, p.pay_advance)
+        grant = pay_advance_grant(
+            p.money, p.pay_advance, p.pay_advance_used_for_load)
         if grant > 0:
             return f"Request pay advance: {grant:,.0f} dollars"
         return "Request pay advance"
 
     def _pay_advance_available(self) -> bool:
         p = self.ctx.profile
-        return pay_advance_grant(p.money, p.pay_advance) > 0
+        return pay_advance_grant(
+            p.money, p.pay_advance, p.pay_advance_used_for_load) > 0
 
     def _request_pay_advance(self) -> None:
         p = self.ctx.profile
-        grant = pay_advance_grant(p.money, p.pay_advance)
+        grant = pay_advance_grant(
+            p.money, p.pay_advance, p.pay_advance_used_for_load)
         if grant <= 0:
             self.ctx.audio.play("ui/error")
-            self.ctx.say(pay_advance_unavailable_reason(p.money, p.pay_advance))
+            self.ctx.say(pay_advance_unavailable_reason(
+                p.money, p.pay_advance, p.pay_advance_used_for_load))
             return
         p.money += grant
         p.pay_advance = round(p.pay_advance + grant, 2)
+        p.pay_advance_used_for_load = True
         self._save_here(silent=True)
         self.ctx.audio.play("ui/notify")
         self.ctx.say(
@@ -2510,6 +2515,7 @@ class PauseMenuState(MenuState):
         p.game_hours += self.driving.trip.game_minutes / 60.0
         p.market.advance_to(p.market_day())
         p.active_trip = None
+        p.pay_advance_used_for_load = False
         self.ctx.save_profile()
         self.ctx.say(f"Job abandoned. You paid a five hundred dollar penalty and "
                      f"returned to {p.current_city}.", interrupt=True)
@@ -2679,6 +2685,7 @@ class ArrivalState(MenuState):
         p.game_hours += hours
         p.market.advance_to(p.market_day())
         p.active_trip = None
+        p.pay_advance_used_for_load = False
         self.ctx.save_profile()
         self.summary_parts.insert(0, (
             f"Bobtailed empty to {job.destination} in {hours:.1f} hours. "
@@ -2732,6 +2739,7 @@ class ArrivalState(MenuState):
         p.game_hours += hours
         p.market.advance_to(p.market_day())
         p.active_trip = None
+        p.pay_advance_used_for_load = False
         self.ctx.save_profile()
 
         self.summary_parts.insert(0, (
