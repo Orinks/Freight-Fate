@@ -57,9 +57,8 @@
   pools that rotate without reshuffling abruptly while you are on the road.
 - **Truck cab sound refresh.** Engine start, idle, shutdown, horn, gear shift,
   parking-brake set and release, and highway road ambience now use an updated
-  in-cab vehicle sound set, thanks to [Darren Duff](https://darrenduff.com/),
-  who found and sent along authorized sounds for the cab cues. The start cue is
-  trimmed so the idle loop takes over cleanly.
+  in-cab vehicle sound set, thanks to [Darren Duff](https://darrenduff.com/).
+  The start cue is trimmed so the idle loop takes over cleanly.
 - **Night driving ambience.** Night drives now play a new recorded in-cab
   night ambience loop.
 - **More music.** New night beds: a menu theme for careers loaded after dark,
