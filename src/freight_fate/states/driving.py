@@ -31,7 +31,7 @@ from ..sim.hos import HosClock, clock_text, is_night, time_of_day
 from ..sim.lane import LaneKeeping
 from ..sim.transmission import REVERSE
 from ..sim.trip import RoadStop, Trip, TripEventKind
-from ..sim.vehicle import G, KG_PER_TON, TruckState
+from ..sim.vehicle import KG_PER_TON, G, TruckState
 from ..sim.weather import WeatherKind, WeatherSystem
 from .base import MenuItem, MenuState, State
 
@@ -2293,30 +2293,40 @@ class RestStopState(MenuState):
                 "Save at this stop", self._save_here,
                 help="Save the active drive at this route POI without "
                      "leaving the road."))
-        items.append(MenuItem(
-            self._pay_advance_label, self._request_pay_advance,
-            help="Draw cash against this load when you are broke and cannot "
-                 "afford fuel. Repaid automatically out of your delivery "
-                 "settlement."))
+        if self._pay_advance_available():
+            items.append(MenuItem(
+                self._pay_advance_label, self._request_pay_advance,
+                help="Draw cash against this load when you are broke and cannot "
+                     "afford fuel. Repaid automatically out of your delivery "
+                     "settlement."))
         items.append(MenuItem("Back to the road", self.go_back))
         return items
 
     def _pay_advance_label(self) -> str:
         p = self.ctx.profile
-        grant = pay_advance_grant(p.money, p.pay_advance)
+        grant = pay_advance_grant(
+            p.money, p.pay_advance, p.pay_advance_used_for_load)
         if grant > 0:
             return f"Request pay advance: {grant:,.0f} dollars"
         return "Request pay advance"
 
+    def _pay_advance_available(self) -> bool:
+        p = self.ctx.profile
+        return pay_advance_grant(
+            p.money, p.pay_advance, p.pay_advance_used_for_load) > 0
+
     def _request_pay_advance(self) -> None:
         p = self.ctx.profile
-        grant = pay_advance_grant(p.money, p.pay_advance)
+        grant = pay_advance_grant(
+            p.money, p.pay_advance, p.pay_advance_used_for_load)
         if grant <= 0:
             self.ctx.audio.play("ui/error")
-            self.ctx.say(pay_advance_unavailable_reason(p.money, p.pay_advance))
+            self.ctx.say(pay_advance_unavailable_reason(
+                p.money, p.pay_advance, p.pay_advance_used_for_load))
             return
         p.money += grant
         p.pay_advance = round(p.pay_advance + grant, 2)
+        p.pay_advance_used_for_load = True
         self._save_here(silent=True)
         self.ctx.audio.play("ui/notify")
         self.ctx.say(
@@ -2873,6 +2883,7 @@ class PauseMenuState(MenuState):
         p.game_hours += self.driving.trip.game_minutes / 60.0
         p.market.advance_to(p.market_day())
         p.active_trip = None
+        p.pay_advance_used_for_load = False
         self.ctx.save_profile()
         self.ctx.say(f"Job abandoned. You paid a five hundred dollar penalty and "
                      f"returned to {p.current_city}.", interrupt=True)
@@ -3042,6 +3053,7 @@ class ArrivalState(MenuState):
         p.game_hours += hours
         p.market.advance_to(p.market_day())
         p.active_trip = None
+        p.pay_advance_used_for_load = False
         self.ctx.save_profile()
         self.summary_parts.insert(0, (
             f"Bobtailed empty to {job.destination} in {hours:.1f} hours. "
@@ -3101,6 +3113,7 @@ class ArrivalState(MenuState):
         p.game_hours += hours
         p.market.advance_to(p.market_day())
         p.active_trip = None
+        p.pay_advance_used_for_load = False
         self.ctx.save_profile()
 
         self.summary_parts.insert(0, (

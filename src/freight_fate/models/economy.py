@@ -36,13 +36,14 @@ PAY_ADVANCE_GRANT = 500.0           # cash per request
 PAY_ADVANCE_ELIGIBLE_BELOW = 400.0  # only offered when nearly broke
 
 
-def pay_advance_grant(money: float, outstanding: float) -> float:
+def pay_advance_grant(money: float, outstanding: float,
+                      used_for_load: bool = False) -> float:
     """Dollars a dispatcher will advance now, or 0 when none is available.
 
     Available only while cash is low (a recovery tool) and only up to the
     outstanding-advance ceiling, so it can never become a bottomless loan.
     """
-    if money >= PAY_ADVANCE_ELIGIBLE_BELOW:
+    if used_for_load or money >= PAY_ADVANCE_ELIGIBLE_BELOW:
         return 0.0
     headroom = PAY_ADVANCE_LIMIT - max(0.0, outstanding)
     if headroom < 1.0:
@@ -50,8 +51,12 @@ def pay_advance_grant(money: float, outstanding: float) -> float:
     return round(min(PAY_ADVANCE_GRANT, headroom), 2)
 
 
-def pay_advance_unavailable_reason(money: float, outstanding: float) -> str:
+def pay_advance_unavailable_reason(money: float, outstanding: float,
+                                   used_for_load: bool = False) -> str:
     """Spoken explanation for why no advance is available right now."""
+    if used_for_load:
+        return ("You have already taken a pay advance for this load. Deliver "
+                "it before drawing another.")
     if money >= PAY_ADVANCE_ELIGIBLE_BELOW:
         return ("A pay advance is only for getting unstuck when cash is low. "
                 f"You have {money:,.0f} dollars.")

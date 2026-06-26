@@ -1468,6 +1468,112 @@ def _checkpoints(
     }]
 
 
+STATE_CONTEXT_SOURCE = (
+    "Computed from OSRM route geometry and public U.S. state boundary GeoJSON."
+)
+
+# Highways that run alongside a river border -- I-84 hugging the Oregon bank of
+# the Columbia is the worst offender -- make per-vertex point-in-polygon sampling
+# flicker across the simplified boundary line, fabricating a string of crossings
+# the driver never actually makes. Collapse any *round trip* (a dip into a
+# neighbor state that returns to the state it came from) that is short in both
+# absolute and relative terms back into the surrounding state. Genuine
+# pass-throughs (state A -> B -> C) are never touched, and any excursion long
+# enough to clear the fraction gate survives for human review.
+STATE_CROSSING_MIN_DWELL_MI = 15.0
+STATE_CROSSING_MIN_DWELL_FRACTION = 0.10
+
+
+def coalesce_short_states(
+    sequence: list[dict[str, Any]],
+    leg_miles: float,
+    min_dwell_mi: float = STATE_CROSSING_MIN_DWELL_MI,
+    min_dwell_fraction: float = STATE_CROSSING_MIN_DWELL_FRACTION,
+) -> list[dict[str, Any]]:
+    """Drop short round-trip state excursions from a state sequence.
+
+    ``sequence`` is the ordered list of ``{"state", "at_mi"}`` boundaries that
+    begins at mile 0; the final segment runs to ``leg_miles``. A segment whose
+    two neighbors are the *same* state and that is shorter than both
+    ``min_dwell_mi`` miles and ``min_dwell_fraction`` of the leg is boundary
+    noise and gets merged away. The first and last segments are always kept so a
+    leg's endpoint states survive.
+    """
+    if len(sequence) <= 2:
+        return sequence
+    threshold = max(min_dwell_mi, leg_miles * min_dwell_fraction)
+    segments: list[list[Any]] = []
+    for i, item in enumerate(sequence):
+        start = item["at_mi"]
+        end = sequence[i + 1]["at_mi"] if i + 1 < len(sequence) else leg_miles
+        segments.append([item["state"], start, end])
+    while len(segments) > 2:
+        excursions = [
+            i
+            for i in range(1, len(segments) - 1)
+            if segments[i - 1][0] == segments[i + 1][0]
+            and (segments[i][2] - segments[i][1]) < threshold
+        ]
+        if not excursions:
+            break
+        i = min(excursions, key=lambda k: segments[k][2] - segments[k][1])
+        del segments[i]
+        coalesced = [segments[0]]
+        for seg in segments[1:]:
+            if seg[0] == coalesced[-1][0]:
+                coalesced[-1][2] = seg[2]
+            else:
+                coalesced.append(seg)
+        segments = coalesced
+    return [{"state": seg[0], "at_mi": seg[1]} for seg in segments]
+
+
+def crossings_from_sequence(
+    sequence: list[dict[str, Any]],
+    leg_miles: float,
+    highway: str,
+) -> list[dict[str, Any]]:
+    """Turn an ordered state sequence into state-crossing records."""
+    crossings: list[dict[str, Any]] = []
+    for prev, cur in zip(sequence, sequence[1:], strict=False):
+        if prev["state"] == cur["state"]:
+            continue
+        crossings.append({
+            "at_mi": round(max(0.1, min(leg_miles - 0.1, cur["at_mi"])), 1),
+            "from_state": prev["state"],
+            "state": cur["state"],
+            "place": f"{prev['state']}-{cur['state']} line on {highway}",
+            "source": STATE_CONTEXT_SOURCE,
+        })
+    return crossings
+
+
+def state_miles_from_sequence(
+    sequence: list[dict[str, Any]],
+    leg_miles: float,
+    endpoint_states: tuple[str, str],
+) -> list[dict[str, Any]]:
+    """Sum per-state mileage from an ordered state sequence."""
+    mileage: dict[str, float] = {}
+    bounds = sequence + [{"state": sequence[-1]["state"], "at_mi": leg_miles}]
+    for prev, cur in zip(bounds, bounds[1:], strict=False):
+        miles = max(0.0, cur["at_mi"] - prev["at_mi"])
+        mileage[prev["state"]] = mileage.get(prev["state"], 0.0) + miles
+    if not mileage:
+        mileage[endpoint_states[0]] = leg_miles
+    state_miles = [
+        {"state": state, "miles": round(miles, 1)}
+        for state, miles in mileage.items()
+        if miles > 0
+    ]
+    total = sum(item["miles"] for item in state_miles)
+    if state_miles and abs(total - leg_miles) >= 0.1:
+        state_miles[-1]["miles"] = round(
+            state_miles[-1]["miles"] + leg_miles - total, 1
+        )
+    return state_miles
+
+
 def _state_context(
     data: dict[str, Any],
     leg: dict[str, Any],
@@ -1498,31 +1604,9 @@ def _state_context(
         sequence.insert(0, {"state": sequence[0]["state"], "at_mi": 0.0})
     if sequence[-1]["state"] != endpoint_states[1]:
         sequence.append({"state": endpoint_states[1], "at_mi": leg_miles})
-    crossings = []
-    for prev, cur in zip(sequence, sequence[1:], strict=False):
-        if prev["state"] == cur["state"]:
-            continue
-        crossings.append({
-            "at_mi": round(max(0.1, min(leg_miles - 0.1, cur["at_mi"])), 1),
-            "from_state": prev["state"],
-            "state": cur["state"],
-            "place": f"{prev['state']}-{cur['state']} line on {leg['highway']}",
-            "source": "Computed from OSRM route geometry and public U.S. state boundary GeoJSON.",
-        })
-    state_miles: list[dict[str, Any]] = []
-    mileage: dict[str, float] = {}
-    bounds = sequence + [{"state": sequence[-1]["state"], "at_mi": leg_miles}]
-    for prev, cur in zip(bounds, bounds[1:], strict=False):
-        miles = max(0.0, cur["at_mi"] - prev["at_mi"])
-        mileage[prev["state"]] = mileage.get(prev["state"], 0.0) + miles
-    if not mileage:
-        mileage[endpoint_states[0]] = leg_miles
-    for state, miles in mileage.items():
-        if miles > 0:
-            state_miles.append({"state": state, "miles": round(miles, 1)})
-    total = sum(item["miles"] for item in state_miles)
-    if state_miles and abs(total - leg_miles) >= 0.1:
-        state_miles[-1]["miles"] = round(state_miles[-1]["miles"] + leg_miles - total, 1)
+    sequence = coalesce_short_states(sequence, leg_miles)
+    crossings = crossings_from_sequence(sequence, leg_miles, leg["highway"])
+    state_miles = state_miles_from_sequence(sequence, leg_miles, endpoint_states)
     return {"state_miles": state_miles, "state_crossings": crossings}
 
 

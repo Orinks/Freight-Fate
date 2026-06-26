@@ -531,7 +531,7 @@ If Check for updates says the copy is running from source, download a packaged
 release archive from the releases page and play from that folder.
 
 If an update cannot reach the server, check your internet connection and try
-again later. The game writes packaged-build logs to `saves/game.log`, which can
+again later. The game writes packaged-build logs to `logs/game.log`, which can
 help when reporting update or startup problems.
 
 If your save is missing after extracting or updating, look for another nearby

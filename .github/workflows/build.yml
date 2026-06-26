@@ -126,6 +126,9 @@ jobs:
           FREIGHT_FATE_NO_SPEECH: "1"
         run: uv run pytest -q
 
+      - name: Check release dependencies
+        run: uv run python tools/build_release.py --check-dependencies
+
       - name: Build
         env:
           SDL_VIDEODRIVER: dummy
@@ -204,3 +207,43 @@ jobs:
                 --title "Freight Fate v${VERSION}"
             fi
           fi
+
+      - name: Send build notification
+        if: ${{ inputs.dry_run != true }}
+        env:
+          ORINKS_BUILD_NOTIFICATION_TOKEN: ${{ secrets.ORINKS_BUILD_NOTIFICATION_TOKEN }}
+          IS_NIGHTLY: ${{ needs.prepare.outputs.is_nightly }}
+        run: |
+          if [ -z "$ORINKS_BUILD_NOTIFICATION_TOKEN" ]; then
+            echo "ORINKS_BUILD_NOTIFICATION_TOKEN is not configured; skipping notification."
+            exit 0
+          fi
+
+          python - <<'PY'
+          import json
+          import os
+          import urllib.request
+
+          product = "Freight Fate"
+          release_kind = "developer snapshot" if os.environ["IS_NIGHTLY"] == "true" else "stable release"
+          payload = {
+              "product": product,
+              "title": f"{product} {release_kind} available",
+              "body": f"A new {product} {release_kind} is ready to download.",
+              "url": "/freight-fate/downloads",
+          }
+          request = urllib.request.Request(
+              "https://www.orinks.net/api/notifications/send",
+              data=json.dumps(payload).encode("utf-8"),
+              headers={
+                  "Authorization": f"Bearer {os.environ['ORINKS_BUILD_NOTIFICATION_TOKEN']}",
+                  "Content-Type": "application/json",
+              },
+              method="POST",
+          )
+          try:
+              with urllib.request.urlopen(request, timeout=30) as response:
+                  print(response.read().decode("utf-8"))
+          except Exception as exc:
+              print(f"Build notification failed: {exc}")
+          PY

@@ -331,24 +331,28 @@ def _configure_logging() -> None:
     """Console logging from source; a fresh log file in the packaged game.
 
     The windowed build has no console, so without a file every warning --
-    update failures especially -- vanishes. The log lives next to the saves
-    (game folder, saves/game.log) where a player can find and share it.
+    update failures especially -- vanishes. The log lives in the game folder
+    (logs/game.log) where a player can find and share it without mixing it
+    with durable saves.
     """
-    level = os.environ.get("FREIGHT_FATE_LOG", "WARNING")
-    handlers = None
     from . import updater
 
-    if updater.is_frozen():
-        from .models.profile import data_dir
+    packaged = updater.is_frozen()
+    default_level = "INFO" if packaged else "WARNING"
+    level = os.environ.get("FREIGHT_FATE_LOG", default_level)
+    handlers = None
+
+    if packaged:
+        from .models.profile import game_root
 
         try:
-            log_path = data_dir() / "game.log"
+            log_path = game_root() / "logs" / "game.log"
             log_path.parent.mkdir(parents=True, exist_ok=True)
             handlers = [logging.FileHandler(log_path, mode="w", encoding="utf-8")]
         except OSError:
             pass  # unwritable disk: console-only is the best we can do
     logging.basicConfig(
-        level=level, handlers=handlers,
+        level=level, handlers=handlers, force=True,
         format="%(asctime)s %(levelname)s %(name)s: %(message)s")
 
 

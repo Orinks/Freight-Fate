@@ -27,6 +27,15 @@ from freight_fate.sim.hos import (
 )
 
 
+def test_hazard_scale_only_relaxes_relaxed_mode():
+    from freight_fate.sim.hos import RELAXED_HAZARD_SCALE, hazard_scale
+
+    assert hazard_scale("relaxed") == RELAXED_HAZARD_SCALE
+    assert hazard_scale("relaxed") < 1.0
+    assert hazard_scale("realistic") == 1.0
+    assert hazard_scale("debug_off") == 1.0
+
+
 def key_event(key, unicode="", mod=0):
     return pygame.event.Event(pygame.KEYDOWN, key=key, unicode=unicode, mod=mod)
 

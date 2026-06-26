@@ -125,7 +125,7 @@
   by default and can be switched off in Settings → Gameplay → Discord presence,
   and the game starts, plays, and exits cleanly whether or not Discord is open.
 - **Bigger freight map.** The playable network grows to 194 cities and
-  438 routed legs, adding many more regional hubs, shorter connector lanes,
+  437 routed legs, adding many more regional hubs, shorter connector lanes,
   and route-backed freight choices across the country.
 - **Highway exit callouts.** Interstate drives now announce upcoming
   interchanges the way a real sign reads them -- "In 2 miles, exit 7 for
@@ -169,6 +169,16 @@
   snapshot may not load on an older stable release.
 
 ### Changed
+- **Truck-legal routing everywhere.** Every corridor's geometry, elevation, and
+  grades are now derived from OpenRouteService's heavy-goods (driving-hgv)
+  profile. The original cross-country legs (NY-Boston, the I-70/I-80 spine, and
+  about a hundred others) were still on the car-routing engine; they now match
+  the rest of the network with truck-legal paths and real truck elevation. Their
+  grade profiles are finer too -- the old car-engine legs had a single grade per
+  corridor, where the truck engine breaks each into the real run of climbs and
+  descents -- though no leg's overall terrain rating changed. Distances were
+  already accurate, so pay and deadlines are unchanged. Routing stays fully
+  offline at runtime -- this is a development-time data refresh.
 - **Real weather now uses the National Weather Service.** Optional live weather
   switched from Open-Meteo to the U.S. National Weather Service API
   (api.weather.gov). It is still free and needs no API key, reads each city's
@@ -176,7 +186,24 @@
   fallback to simulated weather when offline.
 
 ### Fixed
-- **Real weather warm-up.** With real weather enabled, a drive now starts in
+- **Phantom state-line crossings.** Highways that run alongside a river border
+  -- I-84 down the Columbia Gorge most of all -- no longer announce a flurry of
+  back-and-forth state crossings the driver never makes. I-84 hugs the Oregon
+  bank of the Columbia (the Oregon/Washington line) for about 100 miles without
+  ever crossing it, but corridor sampling against a simplified boundary used to
+  flicker across the line and fabricate the crossings; a Portland run could call
+  the Oregon/Washington line four times before the real Oregon/Idaho border. The
+  baked route data is now scrubbed of these round trips (71 across 20 legs,
+  including I-5, I-24, I-29, I-79, and I-90 corridors), and the enrichment
+  pipeline guards against re-introducing them.
+- **Salem connected to Portland.** Salem now has a direct I-5 leg to Portland
+  (about 46 miles). Before, Salem was wired to Seattle and Tri-Cities but not to
+  Portland right next door, so a Salem-to-Portland run routed 176 miles the
+  wrong way -- south to Eugene and back north through Salem -- and long hauls out
+  of Salem were labeled I-84 from the start even though they leave on I-5. The
+  redundant direct Salem-Seattle and Salem-Tri-Cities legs are gone; those trips
+  now compose through Portland with correct per-highway signage (I-5 out of
+  Salem, I-84 only once you reach the Columbia).
   neutral clear conditions and waits for live data, instead of briefly showing a
   simulated condition that the live data immediately replaced. That warm-up
   flicker could also wrongly unlock a weather achievement (for example, a rain
@@ -241,7 +268,7 @@
 - **Updater works in packaged builds again.** Nuitka builds do not set the
   PyInstaller-era ``sys.frozen`` flag, so the game mistook every packaged copy
   for a source checkout: "Check for updates" reported running from source, the
-  startup update check never ran, and ``saves/game.log`` was never written.
+  startup update check never ran, and ``logs/game.log`` was never written.
   Packaged builds are now detected correctly, restoring update checks, install,
   and crash logging.
 - **Facility approach speed cues.** Pickup deadheads now use lower-speed
@@ -397,7 +424,7 @@
   lookup. The check and download now speak the actual reason — "The
   secure connection could not be verified", "The server answered with
   error 403", "The server address could not be found", and so on. The
-  packaged game also writes a session log to saves/game.log, so a
+  packaged game also writes a session log to logs/game.log, so a
   player can share the full error when reporting a problem.
 - **Hazard warnings were unbeatable at highway speed.** The reaction
   window was a fixed 3 to 4.5 seconds, but a full-service stop from 65
