@@ -90,6 +90,16 @@
   fallback to simulated weather when offline.
 
 ### Fixed
+- **Phantom state-line crossings.** Highways that run alongside a river border
+  -- I-84 down the Columbia Gorge most of all -- no longer announce a flurry of
+  back-and-forth state crossings the driver never makes. I-84 hugs the Oregon
+  bank of the Columbia (the Oregon/Washington line) for about 100 miles without
+  ever crossing it, but corridor sampling against a simplified boundary used to
+  flicker across the line and fabricate the crossings; a Portland run could call
+  the Oregon/Washington line four times before the real Oregon/Idaho border. The
+  baked route data is now scrubbed of these round trips (71 across 20 legs,
+  including I-5, I-24, I-29, I-79, and I-90 corridors), and the enrichment
+  pipeline guards against re-introducing them.
 - **Real weather warm-up.** With real weather enabled, a drive now starts in
   neutral clear conditions and waits for live data, instead of briefly showing a
   simulated condition that the live data immediately replaced. That warm-up
