@@ -140,10 +140,6 @@ class CityMenuState(MenuState):
             MenuItem(self._garage_label, self._garage,
                      help="Refuel and repair your truck at the terminal garage. "
                           "If cash is short, the garage does partial work."),
-            MenuItem(self._pay_advance_label, self._request_pay_advance,
-                     help="Draw cash against your next load when you are broke "
-                          "and cannot afford fuel. Repaid automatically out of "
-                          "your next delivery settlement."),
             MenuItem("Career stats", self._stats,
                      help="Hear your level, reputation, and lifetime numbers."),
             MenuItem("Truck status", self._truck_status,
@@ -163,6 +159,12 @@ class CityMenuState(MenuState):
             MenuItem("Quit to main menu", self._to_main_menu,
                      help="Save your career and return to the title menu."),
         ]
+        if self._pay_advance_available():
+            items.insert(3, MenuItem(
+                self._pay_advance_label, self._request_pay_advance,
+                help="Draw cash against your next load when you are broke "
+                     "and cannot afford fuel. Repaid automatically out of "
+                     "your next delivery settlement."))
         return items
 
     # -- actions -----------------------------------------------------------------
@@ -225,6 +227,10 @@ class CityMenuState(MenuState):
         if grant > 0:
             return f"Request pay advance: {grant:,.0f} dollars"
         return "Request pay advance"
+
+    def _pay_advance_available(self) -> bool:
+        p = self.ctx.profile
+        return pay_advance_grant(p.money, p.pay_advance) > 0
 
     def _request_pay_advance(self) -> None:
         p = self.ctx.profile

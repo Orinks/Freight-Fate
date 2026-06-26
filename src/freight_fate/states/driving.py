@@ -1935,11 +1935,12 @@ class RestStopState(MenuState):
                 "Save at this stop", self._save_here,
                 help="Save the active drive at this route POI without "
                      "leaving the road."))
-        items.append(MenuItem(
-            self._pay_advance_label, self._request_pay_advance,
-            help="Draw cash against this load when you are broke and cannot "
-                 "afford fuel. Repaid automatically out of your delivery "
-                 "settlement."))
+        if self._pay_advance_available():
+            items.append(MenuItem(
+                self._pay_advance_label, self._request_pay_advance,
+                help="Draw cash against this load when you are broke and cannot "
+                     "afford fuel. Repaid automatically out of your delivery "
+                     "settlement."))
         items.append(MenuItem("Back to the road", self.go_back))
         return items
 
@@ -1949,6 +1950,10 @@ class RestStopState(MenuState):
         if grant > 0:
             return f"Request pay advance: {grant:,.0f} dollars"
         return "Request pay advance"
+
+    def _pay_advance_available(self) -> bool:
+        p = self.ctx.profile
+        return pay_advance_grant(p.money, p.pay_advance) > 0
 
     def _request_pay_advance(self) -> None:
         p = self.ctx.profile
