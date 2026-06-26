@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+### Fixed
+- **The truck can no longer roll away while you rest.** Opening a truck
+  stop or rest-stop menu now sets the parking brake and cuts the throttle, the
+  same way pulling into a pickup or delivery does. Before, a rig that crept in
+  just under the stop threshold (or idled in gear) could keep drifting down the
+  road while the driver slept. Returning to the road now reminds you to release
+  the parking brake with P.
+
 ### Changed
 - **Safety announcements no longer get buried, and you get more warning.** Zone
   entries, construction and traffic warnings, and checkpoints now preempt

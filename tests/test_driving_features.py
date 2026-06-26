@@ -717,6 +717,30 @@ def test_rest_stop_menu_can_save_active_drive():
 
 
 @pytest.mark.smoke
+def test_opening_a_route_stop_secures_the_truck():
+    """A truck that rolled in just under the docking threshold must be parked
+    when the stop menu opens, so it cannot creep while the driver rests."""
+    from freight_fate.app import App
+    from freight_fate.states.driving import ParkingFullState, RestStopState
+
+    app = App()
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        stop = driving.trip.stops[0]
+        driving.trip.position_mi = stop.at_mi
+        driving.truck.velocity_mps = 0.0
+        driving.truck.parking_brake = False   # rolled in still un-parked
+        driving.truck.throttle = 0.4          # idling in gear, creeping
+        driving.handle_event(key_event(pygame.K_t))
+        assert isinstance(app.state, (RestStopState, ParkingFullState))
+        assert driving.truck.parking_brake    # menu open => truck secured
+        assert driving.truck.throttle == 0.0
+    finally:
+        app.shutdown()
+
+
+@pytest.mark.smoke
 def test_poi_menu_uses_curated_roadside_assistance_label():
     from freight_fate.app import App
     from freight_fate.sim.trip import RoadStop
