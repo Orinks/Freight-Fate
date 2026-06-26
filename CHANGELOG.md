@@ -39,7 +39,7 @@
   by default and can be switched off in Settings → Gameplay → Discord presence,
   and the game starts, plays, and exits cleanly whether or not Discord is open.
 - **Bigger freight map.** The playable network grows to 194 cities and
-  438 routed legs, adding many more regional hubs, shorter connector lanes,
+  437 routed legs, adding many more regional hubs, shorter connector lanes,
   and route-backed freight choices across the country.
 - **Highway exit callouts.** Interstate drives now announce upcoming
   interchanges the way a real sign reads them -- "In 2 miles, exit 7 for
@@ -100,7 +100,14 @@
   baked route data is now scrubbed of these round trips (71 across 20 legs,
   including I-5, I-24, I-29, I-79, and I-90 corridors), and the enrichment
   pipeline guards against re-introducing them.
-- **Real weather warm-up.** With real weather enabled, a drive now starts in
+- **Salem connected to Portland.** Salem now has a direct I-5 leg to Portland
+  (about 46 miles). Before, Salem was wired to Seattle and Tri-Cities but not to
+  Portland right next door, so a Salem-to-Portland run routed 176 miles the
+  wrong way -- south to Eugene and back north through Salem -- and long hauls out
+  of Salem were labeled I-84 from the start even though they leave on I-5. The
+  redundant direct Salem-Seattle and Salem-Tri-Cities legs are gone; those trips
+  now compose through Portland with correct per-highway signage (I-5 out of
+  Salem, I-84 only once you reach the Columbia).
   neutral clear conditions and waits for live data, instead of briefly showing a
   simulated condition that the live data immediately replaced. That warm-up
   flicker could also wrongly unlock a weather achievement (for example, a rain
