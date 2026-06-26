@@ -233,7 +233,7 @@ jobs:
               "url": "/freight-fate/downloads",
           }
           request = urllib.request.Request(
-              "https://orinks.net/api/notifications/send",
+              "https://www.orinks.net/api/notifications/send",
               data=json.dumps(payload).encode("utf-8"),
               headers={
                   "Authorization": f"Bearer {os.environ['ORINKS_BUILD_NOTIFICATION_TOKEN']}",
@@ -241,6 +241,9 @@ jobs:
               },
               method="POST",
           )
-          with urllib.request.urlopen(request, timeout=30) as response:
-              print(response.read().decode("utf-8"))
+          try:
+              with urllib.request.urlopen(request, timeout=30) as response:
+                  print(response.read().decode("utf-8"))
+          except Exception as exc:
+              print(f"Build notification failed: {exc}")
           PY
