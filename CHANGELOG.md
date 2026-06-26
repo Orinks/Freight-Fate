@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+### Fixed
+- **The truck can no longer roll away while you rest.** Opening a truck
+  stop or rest-stop menu now sets the parking brake and cuts the throttle, the
+  same way pulling into a pickup or delivery does. Before, a rig that crept in
+  just under the stop threshold (or idled in gear) could keep drifting down the
+  road while the driver slept. Returning to the road now reminds you to release
+  the parking brake with P.
+
 ### Changed
 - **The air-brake system has real sounds now.** When pressure builds, you hear
   an air-dryer purge as the compressor cuts out instead of a generic beep, and

@@ -1517,6 +1517,14 @@ class DrivingState(State):
         self._open_poi_stop(stop)
 
     def _open_poi_stop(self, stop) -> None:
+        # Secure the truck before handing off to the stop menu: zero the
+        # throttle, apply the service brake, and set the parking brake. A truck
+        # that rolled in just under the docking threshold (or idled in gear)
+        # would otherwise keep creeping while the driver rests -- napping while
+        # the rig drifts down the freeway. Mirrors the pickup/delivery arrivals.
+        self.truck.throttle = 0.0
+        self.truck.brake = 1.0
+        self.truck.set_parking_brake()
         can_sleep = "sleep" in stop.actions
         if can_sleep and hos.parking_is_full(self.trip_seed, stop.at_mi,
                                              self.trip.current_hour):
@@ -2465,8 +2473,9 @@ class RestStopState(MenuState):
     def go_back(self) -> None:
         self.ctx.audio.play("ui/menu_back")
         self.ctx.pop_state()
-        self.ctx.say("Back on the road. Press E to start the engine.",
-                     interrupt=True)
+        self.ctx.say("Back on the road. The parking brake is set. Press E to "
+                     "start the engine if needed, then P to release the brake "
+                     "and drive on.", interrupt=True)
 
 
 class ParkingFullState(MenuState):
