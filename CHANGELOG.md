@@ -64,6 +64,7 @@
   night ambience loop.
 - **More music.** New night beds: a menu theme for careers loaded after dark,
   and a late-night driving piece.
+- **New drowsiness yawn.** The fatigue yawn cue uses a fresh recording.
 - **New achievement system.** Careers now track achievements across a range
   of categories, with a spoken main-menu viewer and a chime when you unlock
   one. Existing careers carry over. Note: a career saved on a developer
