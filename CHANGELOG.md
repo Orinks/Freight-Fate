@@ -9,6 +9,15 @@
   night), and a late-night driving bed that rotates into the night-drive pool.
   Daytime menus and drives are unchanged.
 
+### Fixed
+- **No more implausible interstate hazards.** The random road-hazard pool no
+  longer surfaces things that can't happen on a limited-access interstate, or
+  that are really weather rather than a brake-now event: farm equipment merging
+  onto the highway, sudden downpours and thunderstorm downpours, and hail. Real
+  weather still arrives through the weather system, and genuine road hazards --
+  standing water, whiteout squalls, debris, stopped traffic, crosswinds,
+  wildlife, rockfall -- stay.
+
 ## 1.7.0 - 2026-06-26
 
 ### Added
