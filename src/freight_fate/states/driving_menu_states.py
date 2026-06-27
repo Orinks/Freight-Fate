@@ -1,6 +1,7 @@
 # ruff: noqa: F403,F405
 from __future__ import annotations
 
+from .base import TimedMessageState
 from .driving_core import *
 from .driving_rest_states import ShoulderSleepConfirmationState
 
@@ -18,7 +19,12 @@ class DrivingStatusState(MenuState):
         "Use up and down arrows to pick a status screen, Enter to open it, and "
         "Escape to return to driving. Each screen lists its status lines."
     )
-    SCREENS = (("Route", "route"), ("Driver", "driver"), ("Map", "map"))
+    SCREENS = (
+        ("Route", "route"),
+        ("Driver", "driver"),
+        ("Map", "map"),
+        ("Radio", "radio"),
+    )
 
     def __init__(self, ctx, driving: DrivingState) -> None:
         super().__init__(ctx)
@@ -53,7 +59,12 @@ class DrivingStatusScreenState(MenuState):
         "Use up and down arrows to review each line. Enter repeats the current "
         "line. Escape goes back to the status screens."
     )
-    TITLES = {"route": "Route", "driver": "Driver", "map": "Map"}
+    TITLES = {
+        "route": "Route",
+        "driver": "Driver",
+        "map": "Map",
+        "radio": "Radio",
+    }
 
     def __init__(self, ctx, driving: DrivingState, screen: str) -> None:
         super().__init__(ctx)
@@ -82,6 +93,8 @@ class DrivingStatusScreenState(MenuState):
             return self._driver_lines()
         if self.screen == "map":
             return self._map_lines()
+        if self.screen == "radio":
+            return self._radio_lines()
         return self.driving.status_lines()
 
     def _driver_lines(self) -> list[str]:
@@ -95,17 +108,27 @@ class DrivingStatusScreenState(MenuState):
             if deadline >= 0
             else f"{-deadline:.1f} hours past the deadline"
         )
+        load_line = (
+            "Load: no cargo, local city service drive"
+            if d.phase == DRIVE_PHASE_CITY_SERVICE else
+            f"Load: {d.job.weight_tons:.0f} tons of {d.job.cargo.label}, "
+            f"gross {d.truck.gross_mass_kg / KG_PER_TON:.0f} tons"
+        )
+        time_line = (
+            f"Time: {clock_text(d.trip.current_hour)}, {hours_used:.1f} hours used"
+            if d.phase == DRIVE_PHASE_CITY_SERVICE else
+            f"Time: {clock_text(d.trip.current_hour)}, {deadline_text}"
+        )
         return [
             f"Driver: {profile.name}",
             f"Money: {profile.money:,.0f} dollars",
-            f"Load: {d.job.weight_tons:.0f} tons of {d.job.cargo.label}, "
-            f"gross {d.truck.gross_mass_kg / KG_PER_TON:.0f} tons",
-            f"Objective: {'pickup at ' + d._pickup_facility_text() if d.phase == DRIVE_PHASE_PICKUP else 'deliver to ' + d._destination_facility_text()}",
+            load_line,
+            f"Objective: {d._objective_text()}",
             f"Truck: fuel {t.fuel_fraction * 100:.0f} percent, damage {t.damage_pct:.0f} percent",
             f"Transmission: {'automatic' if t.transmission.automatic else 'manual'}, {d._gear_text()}",
             f"Fatigue: {profile.fatigue:.0f} percent",
             f"Hours: {d.hos.summary(self.ctx.settings.hos_mode).rstrip('.')}",
-            f"Time: {clock_text(d.trip.current_hour)}, {deadline_text}",
+            time_line,
         ]
 
     def _map_lines(self) -> list[str]:
@@ -147,6 +170,28 @@ class DrivingStatusScreenState(MenuState):
             lines.append(
                 f"Estimated carrier-paid toll exposure: {route.estimated_tolls:,.0f} dollars."
             )
+        return lines
+
+    def _radio_lines(self) -> list[str]:
+        d = self.driving
+        d._sync_radio_settings()
+        settings = self.ctx.settings
+        position = d.radio.position
+        lines = [
+            d.radio.status_text(),
+            (
+                "Real public streams: on, streamer-safe mode off"
+                if settings.radio_real_streams and not settings.radio_streamer_safe
+                else "Real public streams are hidden unless real streams are on and streamer-safe mode is off."
+            ),
+            "Tune with left and right brackets. Press M to toggle radio from the cab.",
+        ]
+        if position is not None:
+            lines.append(
+                f"Approximate truck radio position: {position[0]:.2f}, {position[1]:.2f}."
+            )
+        lines.append("Receivable stations:")
+        lines.extend(d.radio.station_list_lines(limit=16))
         return lines
 
 
@@ -369,12 +414,26 @@ class FacilityArrivalState(MenuState):
         d.truck.throttle = 0.0
         d.truck.brake = 1.0
         d.truck.set_parking_brake()
-        d._set_status("Docked. Delivery paperwork signed.")
-        self.ctx.audio.play("poi/dock_and_deliver")
-        self.ctx.say(
-            f"Docked at {self.facility}. Trailer secured and paperwork signed.",
-            interrupt=True)
-        d._arrive()
+        d._set_status("Docked. Unloading cargo.")
+
+        def complete() -> None:
+            _advance_rest_clock(d, UNLOADING_MIN)
+            d.hos.on_duty(UNLOADING_MIN)
+            d._set_status("Unloaded. Delivery paperwork signed.")
+            d._arrive()
+
+        self.ctx.replace_state(TimedMessageState(
+            self.ctx,
+            title="Unloading cargo",
+            message=(
+                f"Docked at {self.facility}. Unloading "
+                f"{d.job.weight_tons:.0f} tons of {d.job.cargo.label}; "
+                "paperwork is being signed."
+            ),
+            status="Unloading cargo. Please wait.",
+            seconds=UNLOADING_WAIT_S,
+            on_complete=complete,
+            sound_key="poi/dock_and_deliver"))
 
     def _paperwork(self) -> None:
         d = self.driving
@@ -492,12 +551,31 @@ class ArrivalState(MenuState):
         if job.bobtail:
             self._settle_bobtail(hours, trip_damage)
             return
-        gross_pay = job.payout(hours, trip_damage)
+        gross_base = job.payout(hours, trip_damage)
         toll_expense = d.trip.toll_expense
         accessorials = carrier_accessorial_charges(job)
         carrier_charges = toll_expense + charge_total(accessorials)
-        early_bonus = max(0.0, gross_pay - job.payout(job.deadline_game_h, trip_damage))
         driver_charges = _speeding_settlement_fine(d.speeding_strikes)
+        business = build_business_settlement(
+            p.business_status,
+            job,
+            gross_base,
+            on_time=hours <= job.deadline_game_h,
+            driver_charges=driver_charges,
+            carrier_key=getattr(p, "carrier_key", ""),
+            owned_trailers=getattr(p, "owned_trailers", ()),
+        )
+        deadline_business = build_business_settlement(
+            p.business_status,
+            job,
+            job.payout(job.deadline_game_h, trip_damage),
+            on_time=True,
+            driver_charges=driver_charges,
+            carrier_key=getattr(p, "carrier_key", ""),
+            owned_trailers=getattr(p, "owned_trailers", ()),
+        )
+        gross_pay = business.gross_pay
+        early_bonus = max(0.0, gross_pay - deadline_business.gross_pay)
         if driver_charges:
             self.summary_parts.append(
                 f"Driver-responsibility charges: speeding fines cost you "
@@ -508,7 +586,11 @@ class ArrivalState(MenuState):
             self.summary_parts.append(
                 f"On-the-spot speeding tickets this trip: {d.speeding_tickets}, "
                 f"already paid, {d.ticket_fines_paid:,.0f} dollars.")
-        net_pay = max(0.0, gross_pay - driver_charges)
+        if business.business_charges:
+            self.summary_parts.append(
+                f"Owner-operator business costs: "
+                f"{business.business_charge_summary}.")
+        net_pay = business.net_before_advance
         advance_repaid = round(min(p.pay_advance, net_pay), 2)
         if advance_repaid > 0:
             net_pay = round(net_pay - advance_repaid, 2)
@@ -537,11 +619,13 @@ class ArrivalState(MenuState):
             f"{job.destination} in {hours:.1f} hours, "
             f"{'on time' if on_time else 'late'}. "
             f"It is {clock_text(p.game_hours)}. "
-            f"Gross pay {gross_pay:,.0f} dollars. "
+            f"{pay_label(p.business_status)} {gross_pay:,.0f} dollars. "
             f"Carrier-paid or reimbursed charges {carrier_charges:,.0f} dollars: "
             f"tolls {toll_expense:,.0f}, accessorials "
             f"{charge_summary(accessorials)}. "
             "These are billed to carrier settlement and not deducted from driver pay. "
+            f"Business status: {business.status_label}. "
+            f"Business costs {business.business_charge_total:,.0f} dollars. "
             f"Driver-responsibility charges {driver_charges:,.0f} dollars. "
             f"Net driver pay {net_pay:,.0f} "
             f"dollars, and you now have {p.money:,.0f}. "
@@ -583,6 +667,12 @@ class ArrivalState(MenuState):
         if p.pay_advance >= 1.0:
             advance_lines.append(
                 f"Pay advance still outstanding: {p.pay_advance:,.0f} dollars.")
+        business_cost_lines = []
+        if business.business_charges:
+            business_cost_lines = [
+                f"Business costs: {business.business_charge_total:,.0f} dollars.",
+                f"Business cost detail: {business.business_charge_summary}.",
+            ]
         self.summary_lines = [
             f"Delivered {job.weight_tons:.0f} tons of {job.cargo.label} "
             f"to {job.destination}.",
@@ -590,11 +680,13 @@ class ArrivalState(MenuState):
             f"It is {clock_text(p.game_hours)}.",
             f"Parked at {self.terminal.name} for the "
             f"{job.destination} service area.",
-            f"Gross pay: {gross_pay:,.0f} dollars.",
+            f"{pay_label(p.business_status)}: {gross_pay:,.0f} dollars.",
             f"Carrier-paid or reimbursed charges: {carrier_charges:,.0f} "
             f"dollars, including tolls {toll_expense:,.0f} and "
             f"accessorials {charge_summary(accessorials)}.",
             "Carrier charges are not deducted from driver pay.",
+            f"Business status: {business.status_label}.",
+            *business_cost_lines,
             f"Driver-responsibility charges: {driver_charges:,.0f} dollars.",
             *advance_lines,
             f"Net driver pay: {net_pay:,.0f} dollars.",

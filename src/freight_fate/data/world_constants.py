@@ -21,6 +21,13 @@ STOP_CURATION_LEVELS = {"curated", "placeholder"}
 
 STOP_DIRECTIONS = {"both", "forward", "reverse"}
 
+# Alternate routes should feel like real dispatch choices, not graph leftovers.
+# A little extra mileage is fine for traffic, weather, grades, or avoiding a
+# metro corridor; hundreds of out-of-direction miles on a short lane are not.
+ALTERNATE_ROUTE_EXTRA_RATIO = 0.22
+ALTERNATE_ROUTE_MIN_EXTRA_MILES = 75.0
+ALTERNATE_ROUTE_MAX_EXTRA_MILES = 550.0
+
 POI_DENSITY_SHORT_LEG_MILES = 160.0
 POI_DENSITY_MEDIUM_LEG_MILES = 320.0
 
@@ -56,6 +63,29 @@ TOLL_METHOD_LABELS = {
     "toll_by_plate": "toll by plate",
     "ezpass": "E-ZPass",
 }
+
+CITY_SERVICE_SOURCE_NOTES = {
+    "freight_market": (
+        "Representative city service POI derived from the metro freight market "
+        "and checked-in facility taxonomy."
+    ),
+    "garage": (
+        "Representative terminal garage service POI derived from the home terminal."
+    ),
+    "truck_dealer": (
+        "Representative truck dealer service POI for the metro service area."
+    ),
+}
+
+CITY_SERVICE_LABELS = {
+    "freight_market": "freight market office",
+    "garage": "garage",
+    "truck_dealer": "truck dealer",
+}
+
+CITY_SERVICE_ORDER = ("freight_market", "garage", "truck_dealer")
+
+CITY_SERVICE_SOURCE_TYPES = {"osm", "ors", "operator", "fallback"}
 
 DEFAULT_POI_ACTIONS = {
     "truck_stop": ("park", "save", "fuel", "food", "break", "sleep"),

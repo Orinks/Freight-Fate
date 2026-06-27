@@ -3,8 +3,21 @@
 import pygame
 
 
+class HeldKeys:
+    def __init__(self, *pressed: int) -> None:
+        self.pressed = set(pressed)
+
+    def __getitem__(self, key: int) -> bool:
+        return key in self.pressed
+
+
 def key_event(key, unicode=""):
     return pygame.event.Event(pygame.KEYDOWN, key=key, unicode=unicode)
+
+
+def finish_timed_state(app):
+    while getattr(app.state, "remaining", 0) > 0:
+        app.state.update(1 / 60)
 
 
 def release_air_brakes(driving):
@@ -13,7 +26,7 @@ def release_air_brakes(driving):
 
 def start_drive(app):
     """New career, accept an unlocked job, pick a route; returns DrivingState."""
-    from freight_fate.states.city import PickupFacilityState, RouteSelectState
+    from freight_fate.states.city import CityMenuState, PickupFacilityState, RouteSelectState
     from freight_fate.states.driving import DrivingState
     from freight_fate.states.main_menu import MainMenuState
 
@@ -25,6 +38,8 @@ def start_drive(app):
     app.state.handle_event(key_event(pygame.K_RETURN))  # default region
     app.state.handle_event(key_event(pygame.K_RETURN))  # default home terminal
     app.state.handle_event(key_event(pygame.K_RETURN))  # job board
+    if isinstance(app.state, CityMenuState):
+        app.state.handle_event(key_event(pygame.K_RETURN))  # dispatch board
     board = app.state
     while board.jobs[board.index].cargo.endorsement:  # skip locked teasers
         board.handle_event(key_event(pygame.K_DOWN))
@@ -35,9 +50,11 @@ def start_drive(app):
     app.state.trip.finished = True
     app.state.truck.velocity_mps = 0.0
     app.state.update(1 / 60)
+    finish_timed_state(app)
     assert isinstance(app.state, PickupFacilityState)
     app.state.handle_event(key_event(pygame.K_RETURN))  # check in at origin
     app.state.handle_event(key_event(pygame.K_RETURN))  # load at dock
+    finish_timed_state(app)
     app.state.handle_event(key_event(pygame.K_RETURN))  # depart for destination
     assert isinstance(app.state, RouteSelectState)
     app.state.handle_event(key_event(pygame.K_RETURN))  # accept planned route
@@ -65,10 +82,12 @@ def take_destination_exit(driving):
     destination = driving._destination_exit_stop()
     assert destination is not None
     driving._exit_stop = destination
+    driving._exit_lane_alignment = 1.0
     driving.trip.position_mi = destination.at_mi
     driving.truck.velocity_mps = 0.0
     driving._update_exit(0.0)
     driving._update_exit(driving._ramp_mi)
+    finish_timed_state(driving.ctx._app)
 
 
 def mark_destination_exit_taken(driving):

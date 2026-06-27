@@ -121,6 +121,142 @@ class TrafficStopState(MenuState):
         self.ctx.say("Back on the highway. Watch your speed.", interrupt=True)
 
 
+class EnforcementStopState(MenuState):
+    """Roadside enforcement stop for non-speeding violations."""
+
+    intro_help = ("Press Enter or Escape to pull back onto the highway when "
+                  "you are ready.")
+
+    def __init__(
+            self, ctx, driving: DrivingState, *, title: str, summary: str,
+            fine: float, reputation_hit: float, signaled: bool,
+            return_message: str) -> None:
+        super().__init__(ctx)
+        self.driving = driving
+        self._title = title
+        self.summary = summary
+        self.fine = fine
+        self.reputation_hit = reputation_hit
+        self.signaled = signaled
+        self.return_message = return_message
+        self._outcome_text = ""
+        self._resolve()
+
+    @property
+    def title(self) -> str:  # type: ignore[override]
+        return self._title
+
+    def presence(self):
+        from ..discord_presence import PresenceState
+
+        base = self.driving.presence()
+        detail = base.detail if base is not None else ""
+        return PresenceState("Pulled over", detail)
+
+    def _resolve(self) -> None:
+        p = self.ctx.profile
+        d = self.driving
+        d.ticket_fines_paid += self.fine
+        p.money -= self.fine
+        hit = self.reputation_hit * (0.8 if self.signaled else 1.0)
+        p.career.reputation = max(0.0, p.career.reputation - hit)
+        self.ctx.audio.play("ui/error")
+        self._outcome_text = (
+            f"Fine: {self.fine:,.0f} dollars, paid on the spot, and a "
+            "reputation hit.")
+
+    def announce_entry(self) -> None:
+        polite = (" You signaled and pulled over promptly."
+                  if self.signaled else "")
+        self.ctx.say(
+            f"You stop on the shoulder for an enforcement inspection.{polite} "
+            f"{self.summary} {self._outcome_text} {self.current_text()}",
+            interrupt=True)
+
+    def build_items(self) -> list[MenuItem]:
+        return [MenuItem("Pull back onto the highway", self.go_back,
+                         help="Signal, check your mirror, and merge back up to "
+                              "speed.")]
+
+    def go_back(self) -> None:
+        self.ctx.pop_state()
+        self.ctx.say(self.return_message, interrupt=True)
+
+
+class FelonyStopState(MenuState):
+    """Failure-to-stop outcome after the player ignores an active siren."""
+
+    title = "Felony stop"
+    intro_help = ("Press Enter or Escape to continue from the terminal after "
+                  "the enforcement stop.")
+
+    def __init__(self, ctx, driving: DrivingState) -> None:
+        super().__init__(ctx)
+        self.driving = driving
+        self.load_lost = (
+            driving.phase == DRIVE_PHASE_DELIVERY and not driving.job.bobtail
+        )
+        self._summary = ""
+        self._resolve()
+
+    def _resolve(self) -> None:
+        d = self.driving
+        p = self.ctx.profile
+        d.failure_to_stop_count += 1
+        d.ticket_fines_paid += FAILURE_TO_STOP_FINE
+        p.money -= FAILURE_TO_STOP_FINE
+        p.career.reputation = max(
+            0.0, p.career.reputation - hos.HOS_REPUTATION_HIT * 3.0)
+        d.truck.damage_pct = min(
+            100.0, d.truck.damage_pct + FAILURE_TO_STOP_DAMAGE_PCT)
+        d.truck.velocity_mps = 0.0
+        d.truck.throttle = 0.0
+        d.truck.brake = 1.0
+        d.truck.set_parking_brake()
+        _advance_rest_clock(d, FAILURE_TO_STOP_PROCESSING_MIN,
+                            "on_duty_not_driving",
+                            "felony failure-to-stop enforcement")
+        d.hos.on_duty(FAILURE_TO_STOP_PROCESSING_MIN)
+        p.truck_fuel_gal = d.truck.fuel_gal
+        p.truck_damage_pct = d.truck.damage_pct
+        p.game_hours += d.trip.game_minutes / 60.0
+        p.market.advance_to(p.market_day())
+        p.active_trip = None
+        p.pay_advance_used_for_load = False
+        self.ctx.save_profile()
+
+        load_text = (
+            f"Dispatch cancels the {d.job.cargo.label} load; there is no pay "
+            "for this run."
+            if self.load_lost else
+            "There was no loaded trailer to lose, but the active assignment is canceled."
+        )
+        self._summary = (
+            "Troopers laid spike strips across the lane after you kept driving "
+            "with lights and siren behind you. "
+            f"Felony failure-to-stop fine: {FAILURE_TO_STOP_FINE:,.0f} dollars, "
+            "paid on the spot, with a major reputation hit. "
+            f"Spike strips added {FAILURE_TO_STOP_DAMAGE_PCT:.0f} percent truck "
+            f"damage, and processing took {FAILURE_TO_STOP_PROCESSING_MIN / 60.0:.0f} "
+            f"hours. {load_text} You are released back to "
+            f"{self.ctx.world.home_terminal(p.current_city).spoken_name}."
+        )
+
+    def announce_entry(self) -> None:
+        self.ctx.say(
+            f"{self.title}. {self._summary} {self.current_text()}",
+            interrupt=True)
+
+    def build_items(self) -> list[MenuItem]:
+        return [MenuItem("Return to terminal", self.go_back,
+                         help="End the canceled run and continue from the city terminal.")]
+
+    def go_back(self) -> None:
+        from .city import CityMenuState
+
+        self.ctx.reset_to(CityMenuState(self.ctx))
+
+
 class RestStopState(MenuState):
     """Spoken route POI menu: actions come from the corridor metadata."""
 
@@ -164,7 +300,8 @@ class RestStopState(MenuState):
             items.append(MenuItem(
                 "Food and coffee break", self._food_break,
                 help="A short off-duty break for food or coffee. The clock and "
-                     "your deadline advance fifteen minutes."))
+                     "your deadline advance fifteen minutes. Coffee eases fatigue "
+                     "a little, but does not satisfy the 30-minute break rule."))
         if "break" in actions:
             items.append(MenuItem(
                 "Take a 30-minute break", self._take_break,
@@ -305,13 +442,16 @@ class RestStopState(MenuState):
     def _food_break(self) -> None:
         d = self.driving
         p = self.ctx.profile
-        _advance_rest_clock(d, 15.0)
+        _advance_rest_clock(d, 15.0, "off_duty", "food and coffee")
         d.hos.take_break(15.0)
-        p.fatigue = max(0.0, p.fatigue - 3.0)
+        p.fatigue = hos.rest_coffee_break(p.fatigue)
         self._save_here(silent=True)
         self.ctx.audio.play("ui/notify")
         self.ctx.say(f"You took a short food and coffee break. "
                      f"It is {clock_text(d.trip.current_hour)}. "
+                     "The coffee helps you stay alert a little longer, but "
+                     "this short stop does not reset your 30-minute break "
+                     "requirement. "
                      f"{_deadline_text(d)}")
 
     def _sleep(self) -> None:

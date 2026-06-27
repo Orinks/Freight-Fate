@@ -15,27 +15,22 @@ import zlib
 from pathlib import Path
 
 from .world_constants import *
+from .world_local_data import (
+    load_city_service_data,
+    load_local_approaches,
+    load_local_geometries,
+)
 from .world_models import *
 
 WORLD_PATH = Path(__file__).parent / "world.json"
-CITY_SERVICES_PATH = Path(__file__).parent / "city_services.json"
-LOCAL_APPROACHES_PATH = Path(__file__).parent / "local_approaches.json"
-LOCAL_GEOMETRY_PATH = Path(__file__).parent / "local_geometry.json"
-
-# Alternate routes should feel like real dispatch choices, not graph leftovers.
-# A little extra mileage is fine for traffic, weather, grades, or avoiding a
-# metro corridor; hundreds of out-of-direction miles on a short lane are not.
-ALTERNATE_ROUTE_EXTRA_RATIO = 0.22
-ALTERNATE_ROUTE_MIN_EXTRA_MILES = 75.0
-ALTERNATE_ROUTE_MAX_EXTRA_MILES = 550.0
 
 class World:
     def __init__(self, data: dict) -> None:
         self.cities: dict[str, City] = {}
         self._facilities_by_id: dict[str, Location] = {}
-        self._city_service_data = _load_city_service_data()
-        self._local_approaches = _load_local_approaches()
-        self._local_geometries = _load_local_geometries()
+        self._city_service_data = load_city_service_data()
+        self._local_approaches = load_local_approaches()
+        self._local_geometries = load_local_geometries()
         for name, c in data["cities"].items():
             lat = float(c.get("lat", 0.0))
             lon = float(c.get("lon", 0.0))

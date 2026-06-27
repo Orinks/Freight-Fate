@@ -132,6 +132,22 @@ class DrivingState(DrivingControlsMixin, DrivingUpdateMixin, DrivingEventMixin, 
         self._pending_ambient_event: tuple[str, str | None] | None = None
         self._status_text = "Press E to start the engine."
 
+    def _absolute_game_hour(self, trip_minutes: float | None = None) -> float:
+        if trip_minutes is None:
+            trip_minutes = self.trip.game_minutes
+        return self.ctx.profile.game_hours + trip_minutes / 60.0
+
+    def _logbook_location(self) -> str:
+        if self.phase == DRIVE_PHASE_PICKUP:
+            return f"local route to {self._pickup_facility_text()}"
+        if not self.route.legs:
+            return self.job.destination
+        index = max(0, min(self.trip.current_leg_index, len(self.route.legs) - 1))
+        leg = self.route.legs[index]
+        start = self.route.cities[index]
+        end = self.route.cities[index + 1]
+        return f"{leg.highway} from {start} to {end}"
+
     # -- save and resume -----------------------------------------------------------
 
     def snapshot(self) -> dict:
@@ -358,6 +374,8 @@ from .driving_menu_states import (  # noqa: E402,F401
     PauseMenuState,
 )
 from .driving_rest_states import (  # noqa: E402,F401
+    EnforcementStopState,
+    FelonyStopState,
     ParkingFullState,
     RestStopState,
     ShoulderSleepConfirmationState,

@@ -15,6 +15,7 @@ import pygame
 
 from ..achievements import add_unique_stat
 from ..data.world import Route
+from ..models.business import build_business_settlement, pay_label
 from ..models.economy import pay_advance_grant, pay_advance_unavailable_reason
 from ..models.jobs import Job, job_from_payload, job_payload
 from ..models.settlement import (
@@ -26,6 +27,13 @@ from ..music import (
     music_track_duration_s,
     select_drive_music_sequence,
     select_menu_music_sequence,
+)
+from ..radio import (
+    SAFE_ROUTE_PLAYLIST,
+    RadioPlaybackError,
+    RadioState,
+    RadioStation,
+    truck_position,
 )
 from ..sim import hos
 from ..sim.hos import HosClock, clock_text, is_night, time_of_day
@@ -54,12 +62,20 @@ MECHANIC_WAIT_MIN = 90.0          # game minutes waiting for the truck to be fix
 FUEL_STOP_MIN = 20.0              # fueling is on-duty-not-driving work
 INSPECTION_MIN = 15.0             # routine scale/inspection check-in time
 OUT_OF_SERVICE_MIN = hos.SLEEP_MIN
+STOP_PULL_IN_MIN = 5.0
+STOP_PULL_IN_WAIT_S = 1.0
 
 # Highway exits: signal inside the window, slow enough to make the ramp.
 EXIT_WINDOW_MI = 5.0              # how far out X can arm the upcoming exit
+EXIT_LANE_PREP_MI = 2.0           # where GPS starts asking for the exit lane
+EXIT_COMMIT_WINDOW_MI = 0.4       # generous gore-window grace after the marker
+EXIT_LANE_READY = 0.85            # accumulated right-lane commitment
+EXIT_LANE_OFFSET_READY = 0.45     # right-side lane position also counts
 RAMP_MAX_MPH = 45.0               # any faster and you blow past the exit
 RAMP_LENGTH_MI = 0.5              # deceleration lane plus ramp to the stop
 DESTINATION_EXIT_BEFORE_END_MI = 1.0
+UNLOADING_MIN = 45.0              # receiver dock work before settlement
+UNLOADING_WAIT_S = 1.5
 
 CRUISE_MIN_MPH = 20.0             # cruise control needs road speed to hold
 CRUISE_STEP_MPH = 5.0             # set-point change per Accel/Coast (+/-) tap
@@ -73,6 +89,7 @@ DELIVERY_PARK_MPH = 3.0           # within this, the gate prompts you to stop
 DOCKING_MAX_MPH = 0.5            # dock/settle/rest actions need a complete stop
 DRIVE_PHASE_PICKUP = "pickup"
 DRIVE_PHASE_DELIVERY = "delivery"
+DRIVE_PHASE_CITY_SERVICE = "city_service"
 
 # Microsleeps: once fatigue is severe, the driver involuntarily nods off and
 # must respond (steer or brake) within a short window or drift off the road.
@@ -101,6 +118,10 @@ def _route_event_sound(event) -> str | None:
             return "events/construction_zone"
         return "events/traffic_slowing"
     if kind == TripEventKind.GPS_CUE:
+        if event.data.get("cb_patrol") is not None:
+            return "events/cb_radio_chatter"
+        if event.data.get("traffic_pressure") is not None:
+            return "events/traffic_slowing"
         cue = event.data.get("cue")
         cue_kind = getattr(cue, "kind", None)
         if cue_kind == "traffic":
@@ -120,6 +141,27 @@ def _speeding_settlement_fine(strikes: int) -> float:
     return min(400.0, 80.0 * strikes) if strikes else 0.0
 
 
+class _DrivingRadioBackend:
+    """Adapts radio station choices onto the existing safe music backend."""
+
+    def __init__(self, driving: DrivingState) -> None:
+        self.driving = driving
+
+    def play_station(self, station: RadioStation, volume: float) -> None:
+        if station.real_stream:
+            raise RadioPlaybackError("external stream playback is not available")
+        self.driving._apply_radio_volume()
+        if station.fallback:
+            self.driving.ctx.audio.stop_music(600)
+        elif station.track_key:
+            self.driving.ctx.audio.play_music(station.track_key, fade_ms=900)
+        else:
+            self.driving._play_current_music(fade_ms=900)
+
+    def stop_radio(self) -> None:
+        self.driving.ctx.audio.stop_music(600)
+
+
 # A strike is recorded only above the posted limit plus this leeway, held for the
 # sustained window below -- roughly real-world ticketing tolerance, now judged
 # against the leg's real OSM maxspeed rather than a flat number.
@@ -132,6 +174,17 @@ SPEEDING_TICKET_FINES = (150.0, 300.0, 600.0, 1200.0)
 # Travel this far still moving after the lights come on and it counts as
 # ignoring the stop -- a heavier fine and a bigger reputation hit.
 PULL_OVER_IGNORE_MI = 2.0
+FAILURE_TO_STOP_WARNING_MI = 0.8
+FAILURE_TO_STOP_FINAL_WARNING_MI = 1.5
+FAILURE_TO_STOP_FINE = 2500.0
+FAILURE_TO_STOP_DAMAGE_PCT = 12.0
+FAILURE_TO_STOP_PROCESSING_MIN = 180.0
+WEIGH_STATION_NOTICE_MI = 2.0
+WEIGH_STATION_BYPASS_MPH = 15.0
+WEIGH_STATION_BYPASS_FINE = 750.0
+UNSAFE_DAMAGE_STOP_PCT = 65.0
+UNSAFE_DAMAGE_FINE = 900.0
+AMBIENT_EVENT_SPACING_S = 2.5     # keep low-priority chatter from stacking
 
 
 
@@ -211,10 +264,21 @@ class Tutorial:
                              "the shift key.", interrupt=False)
 
 
-def _advance_rest_clock(driving: DrivingState, minutes: float) -> None:
+def _advance_rest_clock(
+        driving: DrivingState, minutes: float, duty_status: str | None = None,
+        note: str = "") -> None:
     """Resting advances game time, so deadlines keep counting."""
+    start_hour = driving._absolute_game_hour()
     driving.trip.game_minutes += minutes
     driving.weather.update(minutes)
+    if duty_status is not None:
+        driving.ctx.profile.duty_log.record(
+            duty_status,
+            start_hour,
+            driving._absolute_game_hour(),
+            driving._logbook_location(),
+            note,
+        )
 
 
 def _deadline_text(driving: DrivingState) -> str:

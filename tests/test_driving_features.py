@@ -3,6 +3,8 @@
 import pygame
 import pytest
 from driving_feature_helpers import (
+    HeldKeys,
+    finish_timed_state,
     key_event,
     mark_destination_exit_taken,
     open_status_screen,
@@ -843,6 +845,8 @@ def test_toll_route_delivery_settlement_records_expense(monkeypatch):
             job.payout(driving.trip.game_minutes / 60.0, 0.0),
             on_time=True,
             driver_charges=0.0,
+            carrier_key=getattr(app.ctx.profile, "carrier_key", ""),
+            owned_trailers=getattr(app.ctx.profile, "owned_trailers", ()),
         )
         app.ctx.push_state(ArrivalState(app.ctx, driving))
 

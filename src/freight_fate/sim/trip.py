@@ -5,15 +5,15 @@ from __future__ import annotations
 
 import random
 
-from ..data.world import Leg, Route, get_world
-from .hos import is_night
+from ..data.world import Leg, Route
 from .trip_models import *
+from .trip_road_events import TripRoadEventMixin
 from .trip_route_helpers import *
 from .vehicle import TruckState
-from .weather import WeatherKind, WeatherSystem
+from .weather import WeatherSystem
 
 
-class Trip:
+class Trip(TripRoadEventMixin):
     """One delivery run along a chosen route."""
 
     def __init__(self, route: Route, truck: TruckState, weather: WeatherSystem,
@@ -963,173 +963,6 @@ class Trip:
                     cb_patrol=patrol,
                 )
                 return
-
-    def _check_tolls(self) -> None:
-        for i, (start, leg) in enumerate(zip(self._leg_starts, self.route.legs,
-                                             strict=True)):
-            forward = self.route.cities[i] == leg.a
-            for toll in leg.toll_events:
-                offset = _stop_offset_for_direction(toll.at_mi, leg.miles, forward)
-                at_mi = start + offset
-                key = f"{i}:{toll.at_mi}:{toll.name}"
-                if self.position_mi < at_mi or key in self._charged_tolls:
-                    continue
-                self._charged_tolls.add(key)
-                if toll.amount <= 0:
-                    self._emit(
-                        TripEventKind.GPS_CUE,
-                        f"{toll.method_label} entry recorded at {toll.name}; "
-                        "toll will be billed at carrier settlement.",
-                        toll=toll,
-                    )
-                    continue
-                charge = TollCharge(toll, toll.amount)
-                self.toll_charges.append(charge)
-                estimate = "Estimated " if toll.estimated else ""
-                self._emit(
-                    TripEventKind.TOLL_CHARGED,
-                    f"{toll.method_label} toll charged at {toll.name}: "
-                    f"{estimate}{toll.amount:.0f} dollars, billed to carrier settlement.",
-                    toll=toll,
-                    amount=toll.amount,
-                )
-
-    @property
-    def toll_expense(self) -> float:
-        return sum(charge.amount for charge in self.toll_charges)
-
-    def _check_cities(self) -> None:
-        for i, start in enumerate(self._leg_starts):
-            if i == 0 or i in self._announced_cities:
-                continue
-            if self.position_mi >= start:
-                self._announced_cities.add(i)
-                prev = self.route.cities[i - 1]
-                city = self.route.cities[i]
-                nxt = self.route.cities[i + 1]
-                leg = self.route.legs[i]
-                world = get_world()
-                city_state = world.cities[city].state
-                prev_state = world.cities[prev].state
-                crossing = (f"Crossing into {city_state}. "
-                            if city_state != prev_state else "")
-                self._emit(TripEventKind.CITY_REACHED,
-                           f"{crossing}Passing {city}, {city_state}. "
-                           f"Continuing on {leg.highway} toward {nxt}.")
-
-    def _hazard_risk(self) -> float:
-        """Chance of a hazard at each check; worse in fog and after dark.
-
-        Scaled by ``hazard_scale`` so relaxed mode keeps hazards rare while
-        weather and night still make the hazards that do occur likelier.
-        """
-        vis = self.weather.effects.visibility_mi
-        risk = 0.25 + (0.25 if vis < 2 else 0.0)
-        if is_night(self.current_hour):
-            risk += NIGHT_HAZARD_BONUS
-        return risk * self.hazard_scale
-
-    def _corridor_hazard_factor_at(self, mile: float) -> float:
-        """Relative hazard-check frequency for the current corridor.
-
-        Busy urban interstates and checkpoint corridors get checked a little
-        sooner; sparse rural state/US routes and wide-open regions get more
-        breathing room. Weather and relaxed-mode odds still apply separately.
-        """
-        leg_i, _ = self._leg_at_mile(mile)
-        leg = self.route.legs[leg_i]
-        cls = _highway_class(leg.highway)
-        factor = {"interstate": 1.05, "us_highway": 0.92}.get(cls, 0.82)
-        factor += min(0.18, len(leg.checkpoints) * 0.06)
-        region = self._region_at(mile)
-        if region in _HOT_PATROL_REGIONS:
-            factor += 0.12
-        elif region in _COLD_PATROL_REGIONS:
-            factor -= 0.12
-        if self._near_city(mile):
-            factor += 0.18
-        return max(CORRIDOR_HAZARD_MIN_FACTOR,
-                   min(CORRIDOR_HAZARD_MAX_FACTOR, factor))
-
-    def _next_hazard_check_interval_mi(self) -> float:
-        base = self._rng.uniform(20, 60)
-        return base / self._corridor_hazard_factor_at(self.position_mi)
-
-    def _check_hazards(self, moved_mi: float) -> None:
-        """Occasional road hazards that demand braking."""
-        context = self.traffic_context()
-        if (context is not None and context.closing_mph > 8.0
-                and context.gap_seconds <= TRAFFIC_WARNING_GAP_S
-                and self.position_mi >= self._traffic_warning_mi):
-            self._traffic_warning_mi = self.position_mi + 8.0
-            self._emit(
-                TripEventKind.HAZARD,
-                f"Brake now! {context.lead.reason.capitalize()} "
-                f"{self._gap_text(context.gap_mi)} ahead.",
-                deadline_s=2.5,
-                traffic=context,
-            )
-            return
-        self._hazard_check_mi -= moved_mi
-        if self._hazard_check_mi > 0:
-            return
-        self._hazard_check_mi = self._next_hazard_check_interval_mi()
-        if self._rng.random() < self._hazard_risk():
-            choices = eligible_hazards(
-                self.current_region, self.weather.current,
-                self.terrain_at(self.position_mi), self.current_hour)
-            if not choices:
-                return
-            texts, weights = zip(*choices, strict=True)
-            hazard = self._rng.choices(texts, weights)[0]
-            # Lead with the action: the player can be on the brakes before
-            # the sentence finishes. deadline_s is the reaction slack on top
-            # of the braking time the driving state computes from speed, cut
-            # short in low visibility -- you see the hazard later in fog/rain.
-            self._emit(TripEventKind.HAZARD,
-                       f"Brake now! {hazard[0].upper()}{hazard[1:]}.",
-                       deadline_s=(self._rng.uniform(3.0, 4.5)
-                                   * self._visibility_reaction_factor()))
-
-    def _visibility_reaction_factor(self) -> float:
-        """Fraction of the normal hazard reaction slack you get: low visibility
-        means you see a hazard later, so less time to react. 1.0 in clear air,
-        floored so a hazard is never physically impossible to answer."""
-        vis = self.weather.effects.visibility_mi
-        if vis >= 3.0:
-            return 1.0
-        return max(0.4, vis / 3.0)
-
-    def _conditions_incident_text(self) -> str:
-        """The traction-loss phrase for the current conditions."""
-        kind = self.weather.current
-        if kind == WeatherKind.SNOW:
-            return "The trailer is sliding on the snow, too fast for the conditions."
-        if kind in (WeatherKind.RAIN, WeatherKind.HEAVY_RAIN,
-                    WeatherKind.THUNDERSTORM):
-            return "Hydroplaning on the wet road, too fast for the conditions."
-        return "Losing traction, too fast for the conditions."
-
-    def _check_conditions_speed(self, moved_mi: float) -> None:
-        """Driving well over the weather's safe speed risks a traction-loss
-        incident, so the safe-speed readout has teeth instead of being flavor.
-        Risk scales with how far over you are and how slick the road is."""
-        eff = self.weather.effects
-        over = self.truck.speed_mph - eff.safe_speed_mph
-        if over <= CONDITIONS_SPEED_MARGIN_MPH or eff.grip >= CONDITIONS_GRIP_CEILING:
-            self._conditions_check_mi = CONDITIONS_CHECK_MI
-            return
-        self._conditions_check_mi -= moved_mi
-        if self._conditions_check_mi > 0:
-            return
-        self._conditions_check_mi = CONDITIONS_CHECK_MI
-        severity = min(1.0, (over - CONDITIONS_SPEED_MARGIN_MPH) / 25.0)
-        risk = (severity * (1.0 - eff.grip) * CONDITIONS_INCIDENT_RISK
-                * self.hazard_scale)
-        if self._cond_rng.random() < risk:
-            self._emit(TripEventKind.HAZARD,
-                       f"Brake now! {self._conditions_incident_text()}",
-                       deadline_s=max(1.5, 2.5 * self._visibility_reaction_factor()))
 
     def _random_inspection_odds(self, leg: Leg) -> float:
         """Odds a random roadside log-check fires when the driver is in HOS

@@ -27,6 +27,8 @@ def test_cruise_control_holds_the_set_speed(monkeypatch):
         driving = start_drive(app)
         quiet_trip(driving)
         driving.trip.zones = []
+        driving.trip.traffic_pressures = []
+        driving._destination_exit_taken = True          # isolate cruise from exit setup
         open_limits(driving)                           # isolate hold from the limit cap
         t = driving.truck
         driving.handle_event(key_event(pygame.K_e))   # engine on

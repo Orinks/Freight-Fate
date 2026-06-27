@@ -1,12 +1,45 @@
 # ruff: noqa: F403,F405
 from __future__ import annotations
 
+from .base import TimedMessageState
 from .driving_core import *
 from .driving_menu_states import ArrivalState, FacilityArrivalState
 from .driving_rest_states import ParkingFullState, RestStopState
 
 
 class DrivingEventMixin:
+    def _speak_ambient_event(self, message: str, sound: str | None = None) -> None:
+        if self._hazard_deadline is not None or self._ambient_event_cooldown_s > 0.0:
+            self._pending_ambient_event = (message, sound)
+            return
+        if sound is not None:
+            self.ctx.audio.play(sound)
+        self.ctx.say_event(message, interrupt=False)
+        self._ambient_event_cooldown_s = AMBIENT_EVENT_SPACING_S
+
+    def _update_ambient_events(self, dt: float) -> None:
+        if self._ambient_event_cooldown_s > 0.0:
+            self._ambient_event_cooldown_s = max(0.0, self._ambient_event_cooldown_s - dt)
+        if self._hazard_deadline is not None:
+            return
+        if self._ambient_event_cooldown_s > 0.0 or self._pending_ambient_event is None:
+            return
+        message, sound = self._pending_ambient_event
+        self._pending_ambient_event = None
+        self._speak_ambient_event(message, sound)
+
+    def _should_space_ambient_event(self, event) -> bool:
+        if event.kind == TripEventKind.WEATHER_CHANGE:
+            return True
+        if event.kind == TripEventKind.GPS_CUE:
+            cue = event.data.get("cue")
+            return (
+                event.data.get("cb_patrol") is not None
+                or event.data.get("traffic_pressure") is not None
+                or getattr(cue, "kind", "") == "toll"
+            )
+        return False
+
     def _handle_trip_event(self, event) -> None:
         kind = event.kind
         sound = _route_event_sound(event)
@@ -17,6 +50,7 @@ class DrivingEventMixin:
                 return   # off the highway: the hazard passes you by
             if self._cruise_mph is not None:
                 self._cancel_cruise()   # hands back on the wheel to brake
+            self._pending_ambient_event = None
             self.ctx.audio.play(sound or "ui/warning")
             # The deadline is braking physics plus reaction slack. The physics
             # part is whatever full service brakes need from the current speed
@@ -31,29 +65,37 @@ class DrivingEventMixin:
         elif kind == TripEventKind.INSPECTION:
             self._handle_inspection(event)
         elif kind == TripEventKind.WEATHER_CHANGE:
-            self.ctx.say_event(event.message, interrupt=False)
+            self._speak_ambient_event(event.message)
             self._record_weather_achievement()
         elif kind == TripEventKind.TOLL_CHARGED:
-            self.ctx.audio.play(sound or "ui/notify")
-            self.ctx.say_event(event.message, interrupt=False)
+            self._speak_ambient_event(event.message, sound or "ui/notify")
             self.ctx.award_achievement("toll_paid", event=True)
         elif kind == TripEventKind.STATE_CROSSING:
             cue = event.data.get("cue")
             state = getattr(cue, "near_text", event.message)
             add_unique_stat(self.ctx.profile, "states_crossed", str(state))
-            if sound is not None:
-                self.ctx.audio.play(sound)
-            self.ctx.say_event(event.message, interrupt=False)
+            self._speak_ambient_event(event.message, sound)
             self.ctx.award_achievement("state_crossing", event=True)
         elif kind == TripEventKind.ARRIVED:
             pass  # handled by _arrive()
         elif self._event_disables_cruise(event):
             self._cancel_cruise_for_restricted_area(event.message)
         else:
-            if sound is not None and kind != TripEventKind.ZONE_ENTER:
-                self.ctx.audio.play(sound)
-            self.ctx.say_event(event.message,
-                               interrupt=self._is_critical_event(event))
+            critical = self._is_critical_event(event)
+            if critical:
+                self._pending_ambient_event = None
+                if sound is not None and kind != TripEventKind.ZONE_ENTER:
+                    self.ctx.audio.play(sound)
+                self.ctx.say_event(event.message, interrupt=True)
+            elif self._should_space_ambient_event(event):
+                self._speak_ambient_event(
+                    event.message,
+                    sound if kind != TripEventKind.ZONE_ENTER else None,
+                )
+            else:
+                if sound is not None and kind != TripEventKind.ZONE_ENTER:
+                    self.ctx.audio.play(sound)
+                self.ctx.say_event(event.message, interrupt=False)
         if kind == TripEventKind.ZONE_ENTER:
             self.ctx.audio.play(sound or "ui/notify")
             zone = event.data.get("zone")
@@ -63,7 +105,10 @@ class DrivingEventMixin:
                 self.ctx.award_achievement("traffic_slowing", event=True)
         if kind == TripEventKind.GPS_CUE:
             cue = event.data.get("cue")
-            if getattr(cue, "kind", "") == "traffic":
+            if (
+                getattr(cue, "kind", "") == "traffic"
+                or event.data.get("traffic_pressure") is not None
+            ):
                 self.ctx.award_achievement("traffic_slowing", event=True)
 
     def _is_critical_event(self, event) -> bool:
@@ -160,7 +205,7 @@ class DrivingEventMixin:
             return
         self._open_poi_stop(stop)
 
-    def _open_poi_stop(self, stop) -> None:
+    def _open_poi_stop(self, stop, *, settle: bool = False) -> None:
         # Secure the truck before handing off to the stop menu: zero the
         # throttle, apply the service brake, and set the parking brake. A truck
         # that rolled in just under the docking threshold (or idled in gear)
@@ -169,6 +214,30 @@ class DrivingEventMixin:
         self.truck.throttle = 0.0
         self.truck.brake = 1.0
         self.truck.set_parking_brake()
+
+        if settle:
+            _advance_rest_clock(self, STOP_PULL_IN_MIN)
+            self.hos.on_duty(STOP_PULL_IN_MIN)
+            self.ctx.profile.active_trip = self.snapshot()
+            self.ctx.save_profile()
+
+            def complete() -> None:
+                self.ctx.pop_state()
+                self._open_poi_stop(stop, settle=False)
+
+            self.ctx.push_state(TimedMessageState(
+                self.ctx,
+                title="Pulling into stop",
+                message=(
+                    f"Pulling into {stop.spoken_name}. "
+                    "Brakes set; menu opening in a moment."
+                ),
+                status="Pulling into the route stop. Please wait.",
+                seconds=STOP_PULL_IN_WAIT_S,
+                on_complete=complete,
+                sound_key="ui/notify"))
+            return
+
         can_sleep = "sleep" in stop.actions
         if can_sleep and hos.parking_is_full(self.trip_seed, stop.at_mi,
                                              self.trip.current_hour):
@@ -183,6 +252,7 @@ class DrivingEventMixin:
             return
         if self._exit_stop is not None:
             self._exit_stop = None
+            self._reset_exit_lane_state()
             self.ctx.say("Exit canceled. Staying on the highway.")
             return
         stop = self._upcoming_exit_stop()
@@ -191,6 +261,7 @@ class DrivingEventMixin:
                          "approach them.")
             return
         self._exit_stop = stop
+        self._reset_exit_lane_state()
         self.ctx.audio.play("ui/notify", volume=0.5)
         ahead = stop.at_mi - self.trip.position_mi
         if stop.type == "delivery_destination":
@@ -201,7 +272,86 @@ class DrivingEventMixin:
         else:
             head = f"Signaling for the {stop.spoken_name} exit,"
         self.ctx.say(f"{head} {ahead:.1f} miles ahead. "
-                     f"Slow to {RAMP_MAX_MPH:.0f} or less for the ramp.")
+                     "Move right for the exit lane, then slow to "
+                     f"{RAMP_MAX_MPH:.0f} or less for the ramp.")
+
+    def _reset_exit_lane_state(self) -> None:
+        self._exit_lane_alignment = 0.0
+        self._exit_lane_prompt_said = False
+        self._exit_lane_ready_said = False
+        self._exit_commit_said = False
+
+    def _exit_lane_ready(self) -> bool:
+        return (
+            self._exit_lane_alignment >= EXIT_LANE_READY
+            or self.lane.offset >= EXIT_LANE_OFFSET_READY
+        )
+
+    def _update_exit_preparation(self, keys, dt: float) -> None:
+        stop = self._exit_stop
+        if stop is None or self._ramp_mi is not None:
+            self._reset_exit_lane_state()
+            return
+        ahead = stop.at_mi - self.trip.position_mi
+        if ahead < -EXIT_COMMIT_WINDOW_MI:
+            return
+
+        right = keys[pygame.K_RIGHT]
+        left = keys[pygame.K_LEFT]
+        if right:
+            self._exit_lane_alignment += dt / 1.2
+        elif left:
+            self._exit_lane_alignment -= dt / 0.8
+        elif (
+            self._exit_lane_ready_said
+            and self._exit_lane_alignment >= EXIT_LANE_READY
+            and self.lane.offset >= -0.25
+        ):
+            self._exit_lane_alignment = max(
+                self._exit_lane_alignment, EXIT_LANE_READY)
+        elif self.lane.offset >= EXIT_LANE_OFFSET_READY:
+            self._exit_lane_alignment += dt / 2.0
+        elif self.lane.offset < -0.25:
+            self._exit_lane_alignment -= dt / 0.8
+        else:
+            self._exit_lane_alignment -= dt / 4.0
+        self._exit_lane_alignment = max(0.0, min(1.0, self._exit_lane_alignment))
+
+        if 0 < ahead <= EXIT_LANE_PREP_MI and not self._exit_lane_prompt_said:
+            self._exit_lane_prompt_said = True
+            pressure = self._active_exit_pressure(stop)
+            pressure_text = (
+                " Traffic is tight, so hold the lane and let the gap open."
+                if pressure is not None and pressure.intensity >= 0.35 else ""
+            )
+            self.ctx.say_event(
+                f"Exit lane in {ahead:.1f} miles. Signal is on; steer right "
+                f"for the exit lane and slow to {RAMP_MAX_MPH:.0f}.{pressure_text}",
+                interrupt=False,
+            )
+        if (
+            0 < ahead <= EXIT_LANE_PREP_MI
+            and self._exit_lane_ready()
+            and not self._exit_lane_ready_said
+        ):
+            self._exit_lane_ready_said = True
+            self.ctx.say("Exit lane set. Hold this lane and keep slowing.")
+        if 0 <= ahead <= EXIT_COMMIT_WINDOW_MI and not self._exit_commit_said:
+            self._exit_commit_said = True
+            self.ctx.say_event(
+                "At the exit gore. Hold the exit lane and stay under "
+                f"{RAMP_MAX_MPH:.0f}.",
+                interrupt=False,
+            )
+
+    def _active_exit_pressure(self, stop) -> object | None:
+        sample_mi = min(self.trip.position_mi, stop.at_mi)
+        pressure = self.trip.traffic_pressure_at(sample_mi)
+        if pressure is None or pressure.kind != "exit":
+            return None
+        if pressure.start_mi <= stop.at_mi <= pressure.end_mi + 0.2:
+            return pressure
+        return None
 
     def _upcoming_exit_stop(self):
         stop = self.trip.upcoming_stop(EXIT_WINDOW_MI)
@@ -255,7 +405,7 @@ class DrivingEventMixin:
     def _destination_exit_announcement(self, stop, ahead: float) -> str:
         phrase = self._destination_exit_phrase(stop)
         return (f"In {ahead:.0f} miles, {phrase}, destination exit. "
-                "Press X to take it.")
+                "Press X to signal, move right for the exit lane, and slow down.")
 
     def _check_destination_exit(self) -> None:
         stop = self._destination_exit_stop()
@@ -323,7 +473,7 @@ class DrivingEventMixin:
                 if stop.type == "delivery_destination":
                     self._open_facility_arrival()
                 else:
-                    self._open_poi_stop(stop)
+                    self._open_poi_stop(stop, settle=True)
             elif not self._ramp_end_said:
                 self._ramp_end_said = True
                 place = (self._ramp_stop.name
@@ -335,7 +485,39 @@ class DrivingEventMixin:
         if stop is None or self.trip.position_mi < stop.at_mi:
             return
         self._exit_stop = None
+        if self.trip.position_mi > stop.at_mi + EXIT_COMMIT_WINDOW_MI:
+            self._reset_exit_lane_state()
+            pressure = self._active_exit_pressure(stop)
+            if pressure is not None and pressure.intensity >= 0.35:
+                self.ctx.say_event(
+                    "You missed the exit window in heavy traffic and stayed on "
+                    "the highway."
+                )
+            else:
+                self.ctx.say_event(
+                    "You missed the exit window and stayed on the highway."
+                )
+            return
+        if not self._exit_lane_ready():
+            self._reset_exit_lane_state()
+            place = (self._destination_exit_phrase(stop)
+                     if stop.type == "delivery_destination" else stop.spoken_name)
+            pressure = self._active_exit_pressure(stop)
+            missed = stop.exit_label if stop.exit_label else "the exit"
+            if pressure is not None:
+                self.ctx.say_event(
+                    "Traffic boxed you out of the exit lane at the gore, so "
+                    f"you missed {missed} for {place}. Stay on the highway and "
+                    "recover at the next safe exit."
+                )
+            else:
+                self.ctx.say_event(
+                    f"You missed {missed} for {place}: you were not in the "
+                    "exit lane. Stay on the highway and recover at the next safe exit."
+                )
+            return
         if self.truck.speed_mph <= RAMP_MAX_MPH:
+            self._reset_exit_lane_state()
             self._ramp_mi = RAMP_LENGTH_MI
             self._ramp_stop = stop
             self._ramp_end_said = False
@@ -357,6 +539,7 @@ class DrivingEventMixin:
                      if stop.type == "delivery_destination" else stop.spoken_name)
             self.ctx.say_event("You were going too fast for the ramp and "
                                f"missed {missed} for {place}.")
+            self._reset_exit_lane_state()
 
     def _toggle_cruise(self) -> None:
         t = self.truck
@@ -534,12 +717,28 @@ class DrivingEventMixin:
         self.truck.set_parking_brake()
         p.truck_fuel_gal = self.truck.fuel_gal
         p.truck_damage_pct = self.truck.damage_pct
-        p.game_hours += self.trip.game_minutes / 60.0
+        p.game_hours += (self.trip.game_minutes + STOP_PULL_IN_MIN) / 60.0
+        p.hos.on_duty(STOP_PULL_IN_MIN)
         p.market.advance_to(p.market_day())
         p.active_trip = pickup_snapshot(self.job, air_brake=self.truck.air_brake_snapshot())
         self.ctx.save_profile()
-        self._set_status("Parked at pickup. Check in and load.")
-        self.ctx.replace_state(PickupFacilityState(self.ctx, self.job, driving=self))
+        self._set_status("Pulling into pickup. Check-in menu opening.")
+
+        def complete() -> None:
+            self._set_status("Parked at pickup. Check in and load.")
+            self.ctx.replace_state(PickupFacilityState(self.ctx, self.job, driving=self))
+
+        self.ctx.replace_state(TimedMessageState(
+            self.ctx,
+            title="Pulling into pickup",
+            message=(
+                f"Pulling into {self._pickup_facility_text()}. "
+                "Setting the brakes and rolling to the check-in lane."
+            ),
+            status="Pulling into the pickup facility. Please wait.",
+            seconds=STOP_PULL_IN_WAIT_S,
+            on_complete=complete,
+            sound_key="ui/notify"))
 
     def _arrive(self) -> None:
         self.ctx.replace_state(ArrivalState(self.ctx, self))
@@ -596,8 +795,25 @@ class DrivingEventMixin:
         self.truck.throttle = 0.0
         self.truck.brake = 1.0
         self.truck.set_parking_brake()
-        self._set_status("Parked at destination. Dock and deliver.")
-        self.ctx.replace_state(FacilityArrivalState(self.ctx, self))
+        _advance_rest_clock(self, STOP_PULL_IN_MIN)
+        self.hos.on_duty(STOP_PULL_IN_MIN)
+        self._set_status("Pulling into destination. Dock menu opening.")
+
+        def complete() -> None:
+            self._set_status("Parked at destination. Dock and deliver.")
+            self.ctx.replace_state(FacilityArrivalState(self.ctx, self))
+
+        self.ctx.replace_state(TimedMessageState(
+            self.ctx,
+            title="Pulling into destination",
+            message=(
+                f"Pulling into {self._destination_facility_text()}. "
+                "Brakes set; dock menu opening in a moment."
+            ),
+            status="Pulling into the destination facility. Please wait.",
+            seconds=STOP_PULL_IN_WAIT_S,
+            on_complete=complete,
+            sound_key="ui/notify"))
 
     def _destination_facility_text(self) -> str:
         return self.job.destination_facility_text()
@@ -605,10 +821,116 @@ class DrivingEventMixin:
     def _pickup_facility_text(self) -> str:
         return self.job.origin_facility_text()
 
+    def _city_service_text(self) -> str:
+        try:
+            return self.ctx.world.city_service(
+                self.job.origin, self.city_service_key).spoken_name
+        except KeyError:
+            return self.job.destination_location or "city service"
+
+    def _objective_text(self) -> str:
+        if self.phase == DRIVE_PHASE_PICKUP:
+            return "pickup at " + self._pickup_facility_text()
+        if self.phase == DRIVE_PHASE_CITY_SERVICE:
+            return "city service " + self._city_service_text()
+        return "deliver to " + self._destination_facility_text()
+
     def _pickup_progress_summary(self) -> str:
         return (f"{self.trip.remaining_miles:.1f} miles remaining of "
                 f"{self.trip.total_miles:.1f} to pickup at "
                 f"{self._pickup_facility_text()}.")
+
+    def _city_service_progress_summary(self) -> str:
+        return (f"{self.trip.remaining_miles:.1f} miles remaining of "
+                f"{self.trip.total_miles:.1f} to {self._city_service_text()}.")
+
+    def _handle_city_service_gate(self) -> None:
+        if self.truck.speed_mph <= DOCKING_MAX_MPH:
+            first_ready = not self._city_service_enter_ready
+            self._city_service_enter_ready = True
+            if first_ready:
+                p = self.ctx.profile
+                self._cancel_cruise()
+                self.truck.throttle = 0.0
+                self.truck.brake = 1.0
+                self.truck.set_parking_brake()
+                p.truck_fuel_gal = self.truck.fuel_gal
+                p.truck_damage_pct = self.truck.damage_pct
+                p.active_trip = self.snapshot()
+                self.ctx.save_profile()
+                self._set_status("Parked at city service. Press Enter to go inside.")
+                self.ctx.audio.play("ui/notify", volume=0.7)
+                self.ctx.say_event(
+                    f"Parked at {self._city_service_text()}. Press Enter to go inside.",
+                    interrupt=False,
+                )
+            return
+        if self.truck.speed_mph <= DELIVERY_PARK_MPH:
+            if self._arrival_full_stop_said:
+                return
+            self._arrival_full_stop_said = True
+            self._cancel_cruise()
+            self.ctx.audio.play("ui/notify", volume=0.7)
+            self._set_status("City service ahead: stop, then press Enter.")
+            self.ctx.say_event(
+                f"At {self._city_service_text()}. Stop, then press Enter to go inside.",
+                interrupt=False,
+            )
+            return
+        if self._arrival_stop_said:
+            return
+        self._arrival_stop_said = True
+        self._cancel_cruise()
+        self.ctx.audio.play("ui/warning")
+        self._set_status("City service ahead: slow down and stop.")
+        self.ctx.say_event(
+            f"City service ahead: {self._city_service_text()}. "
+            "Slow down and come to a complete stop.",
+            interrupt=True,
+        )
+
+    def _enter_city_service(self) -> None:
+        if self.phase != DRIVE_PHASE_CITY_SERVICE:
+            return
+        if not self.trip.finished:
+            self.ctx.say(f"Keep following the GPS to {self._city_service_text()}.")
+            return
+        if self.truck.speed_mph > DOCKING_MAX_MPH:
+            self.ctx.audio.play("ui/error")
+            self.ctx.say("Stop before going inside.")
+            return
+        self._open_city_service()
+
+    def _open_city_service(self) -> None:
+        if self._arrival_menu_open:
+            return
+        from .city import CityMenuState, GarageState, TruckShopState, open_freight_market
+
+        p = self.ctx.profile
+        self._arrival_menu_open = True
+        self._cancel_cruise()
+        self.truck.throttle = 0.0
+        self.truck.brake = 1.0
+        self.truck.set_parking_brake()
+        p.truck_fuel_gal = self.truck.fuel_gal
+        p.truck_damage_pct = self.truck.damage_pct
+        p.game_hours += self.trip.game_minutes / 60.0
+        p.market.advance_to(p.market_day())
+        p.active_trip = None
+        self.ctx.save_profile()
+        service = self.ctx.world.city_service(p.current_city, self.city_service_key)
+        self._set_status(f"Inside {service.name}.")
+        self.ctx.audio.play("vehicle/truck_door")
+        self.ctx.reset_to(CityMenuState(self.ctx))
+        if service.key == "freight_market":
+            open_freight_market(self.ctx)
+        elif service.key == "garage":
+            self.ctx.push_state(GarageState(self.ctx))
+        elif service.key == "truck_dealer":
+            self.ctx.push_state(GarageState(self.ctx))
+            self.ctx.push_state(TruckShopState(self.ctx))
+        else:
+            self.ctx.say(f"Inside {service.spoken_name}.", interrupt=True)
 
     def _set_status(self, text: str) -> None:
         self._status_text = text

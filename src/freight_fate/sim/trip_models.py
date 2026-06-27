@@ -86,17 +86,25 @@ DESTINATION_APPROACH_ZONE_MI = 3.0
 FACILITY_GATE_ZONE_MI = 0.5
 NIGHT_HAZARD_BONUS = 0.10          # extra hazard risk after dark
 NIGHT_TRAFFIC_KEEP = 0.4           # chance a traffic zone still forms at night
+RUSH_HOUR_WINDOWS = ((6.5, 9.0), (16.0, 18.5))
 TRAFFIC_LOOKAHEAD_MI = 2.5
 TRAFFIC_WARNING_GAP_S = 2.2
+TRAFFIC_PRESSURE_LOOKAHEAD_MI = 2.5
+TRAFFIC_PRESSURE_MIN_INTENSITY = 0.12
+CONSTRUCTION_TAPER_MI = 1.0
+CONSTRUCTION_TAPER_LIMIT_MPH = 55.0
+CORRIDOR_HAZARD_MIN_FACTOR = 0.75
+CORRIDOR_HAZARD_MAX_FACTOR = 1.45
+CB_PATROL_LOOKAHEAD_MI = 5.0
 ZONE_WARNING_LOOKAHEAD_MI = 2.0    # minimum distance heads-up for a zone
 # Distance compression (time_scale) and speed eat into how much *real* time a
 # fixed-distance warning gives -- 2 miles at 70 mph and 20x is only ~5 seconds.
 # Scale the lead distance with speed and pacing for a roughly constant real-time
 # heads-up, clamped between the base distance and a sane maximum.
-ZONE_WARNING_REAL_S = 12.0         # target real seconds of warning
-ZONE_WARNING_MAX_MI = 8.0
+ZONE_WARNING_REAL_S = 18.0         # target real seconds of warning
+ZONE_WARNING_MAX_MI = 10.0
 STATE_CROSSING_WARNING_LOOKAHEAD_MI = 10.0
-CONSTRUCTION_ENFORCEMENT_GRACE_MI = 1.0
+CONSTRUCTION_ENFORCEMENT_GRACE_MI = 1.5
 # Driving faster than the weather's safe speed risks a traction-loss incident,
 # so the safe-speed readout has teeth. Risk scales with how far over you are and
 # how little grip the conditions leave; only adverse grip counts.
@@ -318,6 +326,30 @@ class TrafficContext:
     def gap_seconds(self) -> float:
         speed = max(1.0, self.lead.speed_mph)
         return self.gap_mi / speed * 3600.0
+
+
+@dataclass(frozen=True)
+class TrafficPressure:
+    """A short stretch where merging or exiting needs extra spacing."""
+
+    start_mi: float
+    end_mi: float
+    kind: str
+    direction: str
+    intensity: float
+    target_speed_mph: float
+    reason: str
+
+
+def _patrol_key(patrol: PatrolWindow) -> str:
+    return f"{patrol.reason}:{patrol.start_mi:.3f}:{patrol.end_mi:.3f}"
+
+
+def _traffic_pressure_key(pressure: TrafficPressure) -> str:
+    return (
+        f"{pressure.kind}:{pressure.start_mi:.3f}:"
+        f"{pressure.end_mi:.3f}:{pressure.reason}"
+    )
 
 
 @dataclass(frozen=True)

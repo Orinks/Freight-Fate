@@ -47,6 +47,9 @@ class DrivingControlsMixin:
             self._adjust_cruise(-CRUISE_STEP_MPH)
         elif key == pygame.K_SPACE:
             self._speak_speed()
+        elif key in (pygame.K_RETURN, pygame.K_KP_ENTER):
+            if self.phase == DRIVE_PHASE_CITY_SERVICE:
+                self._enter_city_service()
         elif key == pygame.K_TAB:
             self.ctx.push_state(DrivingStatusState(self.ctx, self))
         elif key == pygame.K_f:
@@ -68,6 +71,14 @@ class DrivingControlsMixin:
             self._speak_last_announcement()
         elif key == pygame.K_u:
             self._speak_upcoming()
+        elif key == pygame.K_m:
+            self._toggle_radio()
+        elif key == pygame.K_LEFTBRACKET:
+            self._tune_radio(-1)
+        elif key == pygame.K_RIGHTBRACKET:
+            self._tune_radio(1)
+        elif key == pygame.K_y:
+            self._speak_radio_status()
         elif key == pygame.K_F1:
             objective_help = (
                 f"Your current objective is pickup: drive to {self._pickup_facility_text()}, "
@@ -88,8 +99,15 @@ class DrivingControlsMixin:
                 "X takes the next announced exit, called out by its number "
                 "when known: slow to 45 for the ramp, then brake to a stop for "
                 "the rest stop menu. X also signals a pull-over if a trooper "
-                "lights you up for speeding: signal, then brake to a stop. "
+                "lights you up for speeding, scale bypass, or unsafe equipment: "
+                "signal, then brake to a stop. Ignoring the lights gives staged "
+                "failure-to-stop warnings, then a felony stop that can cancel "
+                "the active load. "
                 "C also speaks the date and season. "
+                "M toggles the in-cab radio, left and right brackets tune it, "
+                "and Y speaks radio station, volume, and streamer-safe status. "
+                "The Tab status menu includes a radio screen with the currently "
+                "receivable stations. "
                 "E starts the engine, and stops it only below 5 miles per hour. "
                 "Air pressure must build before the truck can move. "
                 "Press P to release or set the parking brake; if pressure is "
@@ -216,11 +234,44 @@ class DrivingControlsMixin:
         parts: list[str] = []
         zone = self.trip.next_zone_within(within_mi)
         if zone is not None:
-            parts.append(f"{zone.reason} in {s.distance_text(zone.start_mi - pos)}, "
-                         f"speed limit {s.speed_text(zone.limit_mph)}")
+            paired = None
+            if zone.reason == "construction merge":
+                paired = next(
+                    (
+                        z for z in self.trip.zones
+                        if z.reason == "construction"
+                        and abs(z.start_mi - zone.end_mi) < 0.01
+                    ),
+                    None,
+                )
+            if paired is not None:
+                parts.append(
+                    f"construction taper in {s.distance_text(zone.start_mi - pos)}, "
+                    f"merge left, speed limit {s.speed_text(zone.limit_mph)}, "
+                    f"then work zone {s.speed_text(paired.limit_mph)}")
+            else:
+                parts.append(f"{zone.reason} in {s.distance_text(zone.start_mi - pos)}, "
+                             f"speed limit {s.speed_text(zone.limit_mph)}")
         stop = self.trip.upcoming_stop(within_mi)
         if stop is not None:
             parts.append(f"{stop.spoken_name} in {s.distance_text(stop.at_mi - pos)}")
+        pressure = self.trip.next_traffic_pressure_within(within_mi)
+        if pressure is not None:
+            parts.append(
+                f"{pressure.reason} in {s.distance_text(pressure.start_mi - pos)}, "
+                f"move {pressure.direction} and target "
+                f"{s.speed_text(pressure.target_speed_mph)}"
+            )
+        if self.ctx.settings.hos_mode not in hos.HOS_NON_ENFORCED_MODES:
+            patrol = self.trip.next_patrol_within(within_mi)
+            if patrol is not None:
+                ahead = patrol.start_mi - pos
+                if ahead <= 0:
+                    parts.append(f"Patrol active now on this {patrol.reason}")
+                else:
+                    parts.append(
+                        f"Patrol in {s.distance_text(ahead)} on this {patrol.reason}"
+                    )
         cue = self.trip.next_exit_cue()
         if cue is not None and 0 < cue.at_mi - pos <= within_mi:
             parts.append(f"in {s.distance_text(cue.at_mi - pos)}, {cue.text}")
@@ -253,6 +304,7 @@ class DrivingControlsMixin:
             f"Fuel: {t.fuel_fraction * 100:.0f} percent",
             f"Air brakes: {self._air_status_text(detailed=True)}",
             f"Weather: {self.weather.describe(self.ctx.settings.imperial_units)}",
+            f"Radio: {self.radio.status_text()}",
             f"Calendar: {self._calendar_phrase() or 'unknown'}",
             f"Clock: {clock_text(self.trip.current_hour)} "
             f"({time_of_day(self.trip.current_hour)})",

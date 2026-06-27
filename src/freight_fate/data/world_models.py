@@ -59,6 +59,32 @@ class HomeTerminal:
 
 
 @dataclass(frozen=True)
+class CityService:
+    key: str
+    name: str
+    city: str
+    state: str
+    kind: str
+    source_note: str
+    lat: float = 0.0
+    lon: float = 0.0
+    approach_miles: float = 0.0
+    approach_road: str = ""
+    source_type: str = "fallback"
+    source_ref: str = ""
+    fallback: bool = True
+    fallback_reason: str = ""
+
+    @property
+    def label(self) -> str:
+        return CITY_SERVICE_LABELS.get(self.kind, self.kind.replace("_", " "))
+
+    @property
+    def spoken_name(self) -> str:
+        return f"{self.label}: {self.name}"
+
+
+@dataclass(frozen=True)
 class Stop:
     name: str
     at_mi: float
@@ -186,6 +212,45 @@ class TollEvent:
     @property
     def spoken_name(self) -> str:
         return f"toll point: {self.name}"
+
+
+@dataclass(frozen=True)
+class LocalApproach:
+    target_id: str
+    target_type: str
+    city: str
+    name: str
+    approach_miles: float
+    road: str
+    source_type: str
+    estimated: bool
+    fallback: bool = False
+    fallback_reason: str = ""
+    distance_to_road_mi: float = 0.0
+    turn_segments: tuple[str, ...] = ()
+
+
+@dataclass(frozen=True)
+class LocalGeometrySegment:
+    road: str
+    miles: float
+    cue: str
+    speed_mph: float = 25.0
+
+
+@dataclass(frozen=True)
+class LocalGeometry:
+    target_id: str
+    target_type: str
+    city: str
+    name: str
+    turn_level: bool
+    source_type: str
+    estimated: bool
+    fallback: bool
+    fallback_reason: str
+    total_miles: float
+    segments: tuple[LocalGeometrySegment, ...] = ()
 
 
 @dataclass(frozen=True)
