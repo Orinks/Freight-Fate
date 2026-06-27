@@ -96,6 +96,13 @@ From a batch of player reports:
   fatigue, fuel, and rest becomes the core of the drive. Possible follow-up:
   a dedicated microsleep/yawn audio asset instead of reusing the rumble strip.
 
+- [x] **Coffee-break alertness tuning.** Shipped: food-and-coffee stops now
+  ease fatigue enough to help you stay alert a little longer, while still
+  staying much weaker than a 30-minute break and never satisfying the HOS
+  break rule. Remaining balance follow-up: watch playtest feedback around
+  night fatigue pacing and the gap between a quick coffee stop, a real break,
+  and proper sleep.
+
 - [x] **Relaxed mode should feel relaxed.** Shipped: `Trip` now takes a
   `hazard_scale` and relaxed mode passes `hos.hazard_scale("relaxed")`
   (0.2), so random road hazards are ~5x rarer while weather and night

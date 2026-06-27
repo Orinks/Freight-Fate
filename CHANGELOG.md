@@ -74,6 +74,9 @@
   interruptions. Fixed checkpoints (weigh stations) and construction-zone
   enforcement are unchanged: a real violation still catches you. Realistic mode
   is untouched.
+- **Coffee helps alertness a little longer.** Food-and-coffee stops now ease
+  fatigue more than before, but they still do not satisfy the 30-minute break
+  rule and remain much weaker than a full break or proper sleep.
 - **Live weather now reports the real temperature.** With live weather on, the
   cab speaks the actual temperature from the nearest National Weather Service
   station instead of the modeled seasonal estimate, so the degrees match the
