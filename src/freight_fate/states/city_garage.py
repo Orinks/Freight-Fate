@@ -187,16 +187,16 @@ class GarageState(MenuState):
         self.refresh()
 
     def _upgrades(self) -> None:
-        from .city import UpgradeShopState
+        from .city_business import UpgradeShopState
 
         self.ctx.push_state(UpgradeShopState(self.ctx))
 
     def _trucks(self) -> None:
-        from .city import TruckShopState
+        from .city_business import TruckShopState
 
         self.ctx.push_state(TruckShopState(self.ctx))
 
     def _trailers(self) -> None:
-        from .city import TrailerProgramState
+        from .city_business import TrailerProgramState
 
         self.ctx.push_state(TrailerProgramState(self.ctx))

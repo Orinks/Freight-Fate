@@ -10,7 +10,6 @@ from __future__ import annotations
 
 import heapq
 import json
-import zlib
 from pathlib import Path
 
 from .world_constants import *
@@ -37,7 +36,6 @@ from .world_parsing import (
     _parse_state_mileage,
     _parse_stop,
     _parse_toll_event,
-    _slug,
 )
 from .world_parsing import (
     minimum_curated_pois as minimum_curated_pois,
@@ -45,6 +43,7 @@ from .world_parsing import (
 from .world_parsing import (
     minimum_fuel_capable_pois as minimum_fuel_capable_pois,
 )
+from .world_services import WorldServiceMixin
 
 WORLD_PATH = Path(__file__).parent / "world.json"
 WORLD_DATA_PATH = Path(__file__).parent / "world_data"
@@ -54,8 +53,7 @@ ALTERNATE_ROUTE_EXTRA_RATIO = 0.22
 ALTERNATE_ROUTE_MIN_EXTRA_MILES = 75.0
 ALTERNATE_ROUTE_MAX_EXTRA_MILES = 550.0
 
-
-class World:
+class World(WorldServiceMixin):
     def __init__(self, data: dict) -> None:
         self.cities: dict[str, City] = {}
         self._facilities_by_id: dict[str, Location] = {}
@@ -227,138 +225,6 @@ class World:
             if location.type == "company_yard":
                 return HomeTerminal(location.name, city, city_obj.state, "company_yard")
         return HomeTerminal(f"{city} Company Yard", city, city_obj.state, "company_yard")
-
-    def city_services(self, city: str) -> tuple[CityService, ...]:
-        """Service POIs available for local city driving.
-
-        Source-backed entries from ``city_services.json`` are preferred per
-        service key. Missing keys stay available as representative fallback
-        services so the existing offline menu contract remains complete.
-        """
-        if city not in self.cities:
-            raise KeyError(f"Unknown city: {city}")
-        source_entries = self._city_service_data.get(city, {})
-        services: list[CityService] = []
-        for key in CITY_SERVICE_ORDER:
-            raw = source_entries.get(key)
-            if raw is None:
-                services.append(self._fallback_city_service(city, key))
-                continue
-            city_obj = self.cities[city]
-            services.append(CityService(
-                key=key,
-                name=str(raw["name"]).strip(),
-                city=city,
-                state=city_obj.state,
-                kind=str(raw.get("kind", key)).strip() or key,
-                source_note=str(raw.get("source_note", "")).strip(),
-                lat=float(raw.get("lat", 0.0)),
-                lon=float(raw.get("lon", 0.0)),
-                approach_miles=round(float(raw["approach_miles"]), 1),
-                approach_road=str(raw["approach_road"]).strip(),
-                source_type=str(raw.get("source_type", "osm")).strip(),
-                source_ref=str(raw.get("source_ref", "")).strip(),
-                fallback=bool(raw.get("fallback", False)),
-                fallback_reason=str(raw.get("fallback_reason", "")).strip(),
-            ))
-        return tuple(services)
-
-    def _fallback_city_service(self, city: str, key: str) -> CityService:
-        city_obj = self.cities[city]
-        terminal = self.home_terminal(city)
-        names = {
-            "freight_market": f"{city} Freight Market Office",
-            "garage": f"{terminal.name} Garage",
-            "truck_dealer": f"{city} Truck Dealer",
-        }
-        return CityService(
-            key=key,
-            name=names[key],
-            city=city,
-            state=city_obj.state,
-            kind=key,
-            source_note=CITY_SERVICE_SOURCE_NOTES[key],
-            fallback_reason="No checked-in source-backed city service entry for this role.",
-        )
-
-    def city_service(self, city: str, key: str) -> CityService:
-        for service in self.city_services(city):
-            if service.key == key:
-                return service
-        raise KeyError(f"Unknown service in {city}: {key}")
-
-    def local_approach(self, target_id: str) -> LocalApproach | None:
-        return self._local_approaches.get(target_id)
-
-    def local_geometry(self, target_id: str) -> LocalGeometry | None:
-        return self._local_geometries.get(target_id)
-
-    def city_service_approach(self, city: str, key: str) -> LocalApproach | None:
-        return self.local_approach(f"city_service:{_slug(city)}:{key}")
-
-    def city_service_geometry(self, city: str, key: str) -> LocalGeometry | None:
-        return self.local_geometry(f"city_service:{_slug(city)}:{key}")
-
-    def facility_approach(self, city: str, location_name: str) -> LocalApproach | None:
-        location = self.facility_location(city, location_name)
-        return self.local_approach(f"facility:{location.id}")
-
-    def facility_endpoint(self, city: str, location_name: str) -> FacilityEndpoint | None:
-        location = self.facility_location(city, location_name)
-        return self._facility_endpoints.get(location.id)
-
-    def facility_geometry(self, city: str, location_name: str) -> LocalGeometry | None:
-        location = self.facility_location(city, location_name)
-        return self.local_geometry(f"facility:{location.id}")
-
-    def city_service_route(self, city: str, key: str) -> Route:
-        """A short, drivable local route from the terminal to a city service."""
-        service = self.city_service(city, key)
-        geometry = self.city_service_geometry(city, key)
-        if geometry is not None and geometry.turn_level and geometry.segments:
-            legs = [
-                Leg(city, city, segment.miles, segment.road, "flat", ())
-                for segment in geometry.segments
-            ]
-            return Route([city] * (len(legs) + 1), legs)
-        approach = self.city_service_approach(city, key)
-        if approach is not None:
-            miles = approach.approach_miles
-            road = approach.road
-        elif service.approach_miles > 0:
-            miles = service.approach_miles
-            road = (
-                service.approach_road
-                or CITY_SERVICE_APPROACH_ROADS.get(service.kind, "city service road")
-            )
-        else:
-            base_miles = CITY_SERVICE_APPROACH_MILES.get(service.kind, 3.0)
-            seed = zlib.crc32(f"{city}:service:{service.key}".encode())
-            offset = (seed % 5) * 0.2
-            miles = round(base_miles + offset, 1)
-            road = CITY_SERVICE_APPROACH_ROADS.get(service.kind, "city service road")
-        leg = Leg(city, city, miles, road, "flat", ())
-        return Route([city, city], [leg])
-
-    def facility_approach_route(self, city: str, location_name: str) -> Route:
-        """A short, drivable local route from the company terminal to a facility."""
-        location = self.facility_location(city, location_name)
-        endpoint = self._facility_endpoints.get(location.id)
-        approach = self.local_approach(f"facility:{location.id}")
-        if endpoint is not None and endpoint.source_backed and not endpoint.fallback:
-            miles = endpoint.approach_miles
-            road = approach.road if approach is not None else endpoint.approach_road
-        elif approach is not None:
-            miles = approach.approach_miles
-            road = approach.road
-        else:
-            base_miles = FACILITY_APPROACH_MILES.get(location.type, 4.0)
-            seed = zlib.crc32(f"{city}:{location.name}:{location.type}".encode())
-            offset = (seed % 7) * 0.25
-            miles = round(base_miles + offset, 1)
-            road = FACILITY_APPROACH_ROADS.get(location.type, "facility access road")
-        leg = Leg(city, city, miles, road, "flat", ())
-        return Route([city, city], [leg])
 
     def shortest_route(self, start: str, end: str,
                        penalties: dict[Leg, float] | None = None,
