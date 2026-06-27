@@ -76,6 +76,10 @@
   use an assigned carrier tractor with carrier-paid fuel and routine repairs;
   buying, switching, and upgrading owned tractors waits until the leased-on
   owner-operator path.
+- **City service drives use sourced local service names across the map.** The
+  garage, freight/logistics office, and truck dealer drives now prefer
+  checked-in source-backed local service data for every supported city, with
+  representative fallbacks only where no suitable sourced role is available.
 - **Rush hour makes traffic feel busier.** Starting a trip during morning or
   afternoon commute windows now raises modeled traffic density, especially near
   metro/checkpoint corridors, and can slow lead traffic with commuter or merge

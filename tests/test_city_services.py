@@ -29,16 +29,54 @@ def test_city_services_are_source_backed(world):
 
 
 def test_city_services_fallback_when_no_source_data(world):
-    services = world.city_services("Nashville")
+    services = world.city_services("Erie")
 
     assert [service.key for service in services] == [
         "freight_market",
         "garage",
         "truck_dealer",
     ]
-    assert all(service.fallback for service in services)
-    assert all(service.source_type == "fallback" for service in services)
+    assert not services[0].fallback
+    assert not services[1].fallback
+    assert services[2].fallback
+    assert services[2].source_type == "fallback"
+    assert services[2].fallback_reason
     assert all(service.source_note for service in services)
+
+
+def test_city_service_data_covers_every_supported_city(world):
+    raw_markers = ("osm_id", "amenity=", "highway=", "operator=", "node/", "way/")
+
+    source_backed = 0
+    fallback = 0
+    for city in world.city_names():
+        services = world.city_services(city)
+        assert [service.key for service in services] == [
+            "freight_market",
+            "garage",
+            "truck_dealer",
+        ]
+        for service in services:
+            assert service.spoken_name
+            assert not any(marker in service.spoken_name.lower() for marker in raw_markers)
+            assert service.source_note
+            route = world.city_service_route(city, service.key)
+            assert route.miles > 0
+            assert route.highways[0]
+            if service.fallback:
+                fallback += 1
+                assert service.source_type == "fallback"
+                assert service.fallback_reason
+            else:
+                source_backed += 1
+                assert service.source_type == "osm"
+                assert service.lat
+                assert service.lon
+                assert service.approach_miles > 0
+                assert service.approach_road
+
+    assert source_backed == 494
+    assert fallback == 88
 
 
 def test_city_service_drive_requires_enter_before_opening(monkeypatch):

@@ -73,3 +73,40 @@ def test_build_city_services_from_tiny_osm_fixture(tmp_path):
     assert all(entry["fallback"] is False for entry in entries)
     assert all(entry["approach_road"] == "Freight Yard Road" for entry in entries)
     assert not any("node/" in entry["name"].lower() for entry in entries)
+
+
+def test_build_all_supported_marks_missing_extracts_as_fallback(tmp_path, monkeypatch):
+    tool = _load_tool()
+    world_path = tmp_path / "world.json"
+    world_path.write_text(
+        """{
+  "cities": {
+    "Fixture City": {
+      "state": "Example State",
+      "region": "midwest",
+      "lat": 40.0,
+      "lon": -90.0,
+      "locations": [
+        {"name": "Fixture Yard", "type": "terminal", "cargo": ["general"]}
+      ]
+    }
+  },
+  "legs": []
+}
+""",
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(tool, "WORLD_PATH", world_path)
+
+    payload = tool.build_all_supported(tmp_path / "missing-cache")
+
+    entries = payload["cities"]["Fixture City"]
+    assert [entry["key"] for entry in entries] == [
+        "freight_market",
+        "garage",
+        "truck_dealer",
+    ]
+    assert all(entry["fallback"] for entry in entries)
+    assert all(entry["source_type"] == "fallback" for entry in entries)
+    assert all("Missing local OSM extract" in entry["fallback_reason"] for entry in entries)
+    assert payload["coverage"]["fallback"] == 3

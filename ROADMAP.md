@@ -266,15 +266,17 @@ garage, or truck dealer, drive a short local service route, stop at the
 destination, and press Enter to go inside. This keeps the current terminal menu
 available while moving city services toward a drive-to-location model.
 
-- [x] **Source-backed city service POI foundation.** Chicago now loads
-  source-backed service POIs from checked-in `city_services.json`: Coyote
-  Logistics as the freight-market/logistics office, Carimichael Truck Repair as
-  the garage/repair stop, and Rush Truck Centers as the truck dealer. The data
-  was baked from the local OpenStreetMap Illinois extract at
-  `C:\Users\joshu\.cache\freight-fate-osm\regions\illinois-latest.osm.pbf`
-  using `tools/build_city_services.py`; it stores service coordinates,
-  approximate approach mileage, and nearby named road context. Cities without a
-  sourced service still use internally marked representative fallback entries.
+- [x] **Source-backed city service POI foundation.** Every supported city now
+  has three checked-in service roles in `city_services.json`: freight/logistics
+  office, garage/repair, and truck dealer. The full-map bake used local
+  Geofabrik-style state extracts from
+  `C:\Users\joshu\.cache\freight-fate-osm\regions\` through
+  `tools/build_city_services.py --all-supported`; runtime remains offline. The
+  current data covers 194 cities and 582 service roles: 494 roles are
+  source-backed from OSM and 88 truck-dealer roles are explicit fallback records
+  with machine-readable fallback reasons. Source-backed roles carry coordinates,
+  approach mileage, and road/context; fallback roles are not described as real
+  POIs.
 - [x] **Local service driving phase.** City service drives use the existing
   truck physics, GPS/status surfaces, save/resume path, and spoken driving help.
   Arrival does not auto-open the menu: the truck must be fully stopped, then the
@@ -283,8 +285,8 @@ available while moving city services toward a drive-to-location model.
   as no-cargo local service drives, not `0 tons` freight loads, and F1/arrival
   prompts name the Enter-to-enter contract.
 - [x] **Player/data docs.** The manual and freight-market data notes describe
-  city service drives as the current representative foundation and point future
-  data work at OSM/ORS/operator-source enrichment.
+  source-backed service coverage, explicit fallback behavior, and the rule that
+  raw OSM tags, IDs, and source keys stay out of player-facing speech.
 
 Follow-up hooks for the roadmap worker:
 
@@ -292,12 +294,15 @@ Follow-up hooks for the roadmap worker:
   city tour that visits the garage, truck dealer, freight market office, and
   terminal services before the first dispatch. Keep it skippable/replayable and
   spoken as GPS guidance, not as a forced tutorial wall.
-- **OSM/ORS service-POI enrichment.** Extend the Chicago proof pipeline to more
-  metros using bounded local Geofabrik extracts first, then only the smallest
-  necessary download if cache coverage is missing. Add ORS HGV or OSRM local
-  geometry for turn-level approaches after source-backed POI coordinates exist.
-  Runtime stays offline and deterministic; no raw OSM tags, IDs, or source keys
-  in player speech.
+- **Turn-level local geometry.** Add ORS HGV or OSRM local geometry for
+  source-backed approaches so GPS can cue actual turns, lane changes, and final
+  pull-ins instead of only source coordinates plus approach mileage/context.
+  Runtime should still read checked-in compact data.
+- **Fallback reduction and data quality.** Keep extending the build-time
+  classifier and optional operator-source inputs for the 88 fallback truck
+  dealer roles, but do not invent dealers where OSM/operator data is missing.
+  Keep bounded local extracts first, and only download the smallest missing
+  state extract after reporting the absent path.
 - **Enter-to-enter polish.** Add pull-in/park sounds and brief exterior/office
   transition cues when entering and leaving services. Keep the keyboard contract
   simple: stop, Enter to enter, menu action, Back/Escape returns to the truck or

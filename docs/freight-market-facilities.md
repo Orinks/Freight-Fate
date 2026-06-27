@@ -5,10 +5,10 @@ the routeable set of supported metro nodes, while each metro expands into
 origin and destination facilities: terminals, ports, intermodal ramps,
 warehouses, food facilities, plants, yards, and other trucking locations.
 
-This is intentionally representative, not exhaustive. The goal is to make a
-59-metro map feel like a national freight network without pretending the game
-contains every U.S. town, shipper, receiver, industrial park, or distribution
-center.
+This is intentionally representative, not exhaustive. The goal is to make the
+supported city map feel like a national freight network without pretending the
+game contains every U.S. town, shipper, receiver, industrial park, or
+distribution center.
 
 ## Runtime Contract
 
@@ -111,13 +111,15 @@ loads checked-in `city_services.json` first, then falls back per missing service
 to representative POIs derived from terminal and metro market data. Runtime
 play stays offline and deterministic.
 
-Chicago is the first source-backed proof slice. Its freight market office,
-garage, and truck dealer come from the local OpenStreetMap Illinois extract at
-`C:\Users\joshu\.cache\freight-fate-osm\regions\illinois-latest.osm.pbf`,
-filtered by `tools/build_city_services.py` within a bounded Chicago radius. The
-baked data stores source coordinates, approximate approach mileage, and a
-nearby named approach road. Other cities remain representative fallback until
-their local extracts are curated.
+The source-backed city-service pass now covers every supported city in
+`world.json`. `tools/build_city_services.py --all-supported` streams the local
+Geofabrik-style extracts under
+`C:\Users\joshu\.cache\freight-fate-osm\regions\` at build time and writes a
+compact checked-in `city_services.json`. The current bake covers 194 cities and
+582 service roles: 494 are source-backed from OSM and 88 are explicit fallback
+truck-dealer roles where no realistic local dealer candidate was found in the
+bounded city radius. The data stores source coordinates, approximate approach
+mileage, and an approach road/context for every role.
 
 The freight market office is a grounded mapping, not an OSM tag named "freight
 market": it maps to a logistics, freight-forwarder, distribution, terminal, or
@@ -127,7 +129,7 @@ repair, truck sales, or named truck brands/dealers over generic car POIs.
 
 Player speech should still say the service plainly, such as `garage: Carimichael
 Truck Repair`, and should not expose raw OSM tags, IDs, or source keys. Source
-references stay internal for auditing.
+references and fallback reasons stay internal for auditing.
 
 The next data pass should keep service POIs separate from career ownership and
 settlement systems. OSM/Overpass and ORS can improve where service drives go;

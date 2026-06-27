@@ -92,6 +92,7 @@ class CityService:
     source_type: str = "fallback"
     source_ref: str = ""
     fallback: bool = True
+    fallback_reason: str = ""
 
     @property
     def label(self) -> str:
@@ -993,6 +994,12 @@ def _load_city_service_data(path: Path = CITY_SERVICES_PATH) -> dict[str, dict[s
                 raise ValueError(
                     f"{path} city {city!r} service {name!r} has no source note"
                 )
+            fallback = bool(entry.get("fallback", False))
+            fallback_reason = str(entry.get("fallback_reason", "")).strip()
+            if fallback and not fallback_reason:
+                raise ValueError(
+                    f"{path} city {city!r} service {name!r} is fallback without a reason"
+                )
             approach_miles = float(entry.get("approach_miles", 0.0))
             if approach_miles <= 0.0 or approach_miles > 50.0:
                 raise ValueError(
@@ -1216,6 +1223,7 @@ class World:
                 source_type=str(raw.get("source_type", "osm")).strip(),
                 source_ref=str(raw.get("source_ref", "")).strip(),
                 fallback=bool(raw.get("fallback", False)),
+                fallback_reason=str(raw.get("fallback_reason", "")).strip(),
             ))
         return tuple(services)
 
@@ -1234,6 +1242,7 @@ class World:
             state=city_obj.state,
             kind=key,
             source_note=CITY_SERVICE_SOURCE_NOTES[key],
+            fallback_reason="No checked-in source-backed city service entry for this role.",
         )
 
     def city_service(self, city: str, key: str) -> CityService:
