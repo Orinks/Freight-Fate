@@ -1,7 +1,9 @@
 # Changelog
 
 ## Unreleased
+### Fixed
 
+When pressing V, if you selected to use the metric system, speed limits are in KM/h
 ### Added
 - **Bigger freight map.** The playable network grows to 194 cities and
   438 routed legs, adding many more regional hubs, shorter connector lanes,
