@@ -16,8 +16,9 @@ The first owner-operator step is modeled as a leased-on owner-operator, not full
 motor-carrier authority. That keeps the game focused on driving and load choice:
 the player buys into a tractor position and pays operating costs, but the
 carrier still anchors dispatch, trailers, authority support, settlement, and
-reimbursed accessorials. Full independent authority, direct load-board play, and
-fleet ownership remain later roadmap work.
+reimbursed accessorials. The later own-authority step is intentionally limited:
+it unlocks direct freight and extra business overhead, but does not pretend to
+simulate every DOT, MC, insurance, broker, or tax detail.
 
 The progression intentionally avoids making lease-purchase the happy path. The
 FMCSA Truck Leasing Task Force exists because lease and lease-purchase
@@ -51,17 +52,22 @@ costs active from day one.
   use carrier-provided trailers. Leased-on owner-operators start with a dry van
   trailer program and can add reefer, flatbed, or bulk programs from the garage.
   Missing specialty programs lock matching cargo until the player adds them.
+- Own authority and direct freight: prepared owner-operators can activate a
+  limited own-authority mode from Business status after level-20 prep, 75
+  deliveries, reputation 92, a specialty trailer program, no pay advance, and
+  enough cash to pay 15,000 dollars while keeping 35,000 dollars working
+  capital. Direct freight pays higher gross revenue, then settlement deducts
+  insurance, compliance, trailer program, truck reserve, and factoring costs.
 - Progression: level 5 starts owner-operator preparation, but the leased-on
   buy-in does not unlock until level 15 with 35 deliveries, reputation 80, no
   pay advance, and enough cash for a 35,000 dollar buy-in while keeping 10,000
   dollars of working capital.
 - The design remains a driving career, not a fleet-management sim. It adds one
   terminal menu and settlement math; it does not add driver hiring, tax filing,
-  direct broker negotiation, or full authority management.
+  direct broker negotiation, or full authority paperwork management.
 - Level-20 owner-operators can set aside an authority prep reserve when
-  their reputation, delivery count, and working capital are ready. This is a
-  playable savings milestone for a future motor-carrier authority feature, not
-  current independent authority.
+  their reputation, delivery count, and working capital are ready. It is the
+  prerequisite for the later own-authority activation gate.
 
 ## Career Start Choices
 
@@ -96,21 +102,27 @@ costs active from day one.
 | 17 | Established Owner-Operator | Higher-trust leased-on business status. |
 | 18 | Equipment Planner | Trailer/equipment planning is a future hook. |
 | 19 | Authority Candidate | Independent authority readiness appears. |
-| 20 | Independent Operator | Current owner-operator arc is complete. |
+| 20 | Independent Operator | Authority prep and the final own-authority gate can unlock. |
 
-Full independent motor-carrier authority is not implemented in this slice.
-Level 20 means the player has completed the owner-operator career arc and is
-ready for a later authority system, not that Freight Fate has become a fleet or
-brokerage simulator.
+Level 20 completes the owner-operator career arc. A prepared player can now
+activate Freight Fate's first own-authority mode, which adds direct freight and
+extra settlement overhead. It is still not a fleet or brokerage simulator.
 
 ## Authority Prep Reserve
 
 Authority readiness is the first concrete hook toward true authority without
 turning Freight Fate into a compliance sim. A leased-on owner-operator at level
 20 can set aside a 12,500 dollar reserve after 60 deliveries, reputation 90, and
-25,000 dollars of working capital. The reserve marks the profile as ready for a
-future authority system and keeps the current game grounded: dispatch, trailers,
-insurance support, and settlement still run through the leased-on carrier.
+25,000 dollars of working capital. After that, the player can activate own
+authority with 75 deliveries, reputation 92, at least one specialty trailer
+program, no pay advance, and enough cash to pay the 15,000 dollar startup cost
+while keeping 35,000 dollars of working capital.
+
+The active own-authority mode changes the dispatch board to direct freight.
+Listed pay has higher gross upside, and settlement adds insurance, compliance,
+trailer program, truck reserve, and factoring costs. This represents the
+business responsibility at a playable scale; it does not model every filing,
+broker agreement, or delayed-pay negotiation.
 
 ## Trailer Programs
 
@@ -132,12 +144,11 @@ tanker work.
 
 ## Follow-Up Realism Hooks
 
-- True authority should be a later, optional step. It should cover
-  motor-carrier authority, insurance filings, broker/load-board access,
-  settlement or factoring timing, and more compliance overhead.
-- Authority prep now has a reserve gate and save flag; the future work is
-  turning that prepared state into a real authority application, insurance, and
-  direct-freight gameplay loop.
+- Own authority now has a first playable step. Future work should deepen it
+  with real authority application timing, insurance filings, broker/load-board
+  tiers, delayed settlement or factoring choices, and clearer compliance
+  overhead.
+- Authority prep remains the entry gate for that advanced authority work.
 - Trailer ownership should be a later authority or dealer slice. Current
   gameplay has leased-on trailer program slots and cargo fit; future work can
   add owned trailer condition, financing, tanker cargo, and trailer resale.
@@ -145,7 +156,7 @@ tanker work.
   categories, but player-facing settlement text should stay concise and avoid
   dense finance jargon.
 - Freight-market pricing should keep company-driver wages, leased-on gross
-  revenue, and future true-authority spot or broker rates distinct.
+  revenue, and own-authority spot or broker rates distinct.
 - Lease-purchase remains a realism caveat and caution, not the default success
   path. Fleet hiring and company ownership stay separate from this driving arc.
 - A future save-schema cleanup can rename internal `truck` and `owned_trucks`
@@ -156,6 +167,8 @@ tanker work.
 
 - FMCSA operating authority overview:
   https://www.fmcsa.dot.gov/registration/get-mc-number-authority-operate
+- FMCSA registration overview:
+  https://www.fmcsa.dot.gov/registration/getting-started
 - FMCSA insurance filing requirements:
   https://www.fmcsa.dot.gov/registration/insurance-filing-requirements
 - FMCSA hours-of-service summary:

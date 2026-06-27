@@ -37,7 +37,7 @@ from .career_ladder import STARTER_CARRIER_NAME
 from .market import Market
 from .start_options import DEFAULT_START_KEY, START_MODE_COMPANY
 
-SAVE_VERSION = 8
+SAVE_VERSION = 9
 STARTING_MONEY = 5_000.0
 DEFAULT_CITY = "Chicago"
 SIGNATURE_FIELD = "_signature"

@@ -4,18 +4,24 @@ import pygame
 import pytest
 
 from freight_fate.models.business import (
+    AUTHORITY_ACTIVATION_COST,
+    AUTHORITY_ACTIVATION_DELIVERIES,
+    AUTHORITY_ACTIVATION_REPUTATION,
+    AUTHORITY_ACTIVATION_WORKING_CAPITAL,
     AUTHORITY_READY_DELIVERIES,
     AUTHORITY_READY_LEVEL,
     AUTHORITY_READY_REPUTATION,
     AUTHORITY_READY_RESERVE,
     AUTHORITY_READY_WORKING_CAPITAL,
     COMPANY_DRIVER,
+    INDEPENDENT_AUTHORITY,
     LEASED_OWNER_OPERATOR,
     OWNER_OPERATOR_BUY_IN,
     OWNER_OPERATOR_DELIVERIES,
     OWNER_OPERATOR_LEVEL,
     OWNER_OPERATOR_REPUTATION,
     OWNER_OPERATOR_WORKING_CAPITAL,
+    authority_activation_eligibility,
     authority_readiness_eligibility,
     business_path_label,
     business_status_summary,
@@ -499,6 +505,118 @@ def test_business_status_menu_sets_authority_readiness_reserve():
         assert any("Authority prep reserve: set" in item.text for item in app.state.items)
     finally:
         app.shutdown()
+
+
+def test_authority_activation_requires_prep_and_specialty_program():
+    from freight_fate.models.profile import Profile
+
+    p = Profile(name="Authority Activate", current_city="Chicago")
+    p.business_status = LEASED_OWNER_OPERATOR
+    p.owned_trucks = ["rig"]
+    p.career.xp = LEVEL_XP[AUTHORITY_READY_LEVEL - 1]
+    p.career.deliveries = AUTHORITY_ACTIVATION_DELIVERIES
+    p.career.reputation = AUTHORITY_ACTIVATION_REPUTATION
+    p.money = AUTHORITY_ACTIVATION_COST + AUTHORITY_ACTIVATION_WORKING_CAPITAL
+
+    ok, reasons = authority_activation_eligibility(p)
+    assert not ok
+    assert any("prep reserve" in reason for reason in reasons)
+
+    p.authority_readiness = True
+    ok, reasons = authority_activation_eligibility(p)
+    assert not ok
+    assert any("specialty trailer" in reason for reason in reasons)
+
+    p.trailer_programs = ["dry_van", "reefer"]
+    ok, reasons = authority_activation_eligibility(p)
+    assert ok
+    assert reasons == ()
+
+
+def test_business_status_menu_activates_own_authority():
+    from freight_fate.app import App
+    from freight_fate.models.profile import Profile
+    from freight_fate.states.city import BusinessStatusState
+
+    app = App()
+    try:
+        app.ctx.profile = Profile(name="Own Authority", current_city="Chicago")
+        p = app.ctx.profile
+        p.business_status = LEASED_OWNER_OPERATOR
+        p.owned_trucks = ["rig"]
+        p.trailer_programs = ["dry_van", "reefer"]
+        p.authority_readiness = True
+        p.career.xp = LEVEL_XP[AUTHORITY_READY_LEVEL - 1]
+        p.career.deliveries = AUTHORITY_ACTIVATION_DELIVERIES
+        p.career.reputation = AUTHORITY_ACTIVATION_REPUTATION
+        p.money = AUTHORITY_ACTIVATION_COST + AUTHORITY_ACTIVATION_WORKING_CAPITAL + 750
+        p.dispatch_board_cache = {"old": True}
+
+        app.push_state(BusinessStatusState(app.ctx))
+        while "Activate own authority" not in app.state.items[app.state.index].text:
+            app.state.handle_event(key_event(pygame.K_DOWN))
+        app.state.handle_event(key_event(pygame.K_RETURN))
+
+        assert p.business_status == INDEPENDENT_AUTHORITY
+        assert p.money == pytest.approx(AUTHORITY_ACTIVATION_WORKING_CAPITAL + 750)
+        assert p.dispatch_board_cache is None
+        assert "Direct freight" in business_status_summary(p)
+        assert any("Own authority active" in item.text for item in app.state.items)
+    finally:
+        app.shutdown()
+
+
+def test_direct_freight_board_pays_more_and_uses_direct_label(world):
+    from freight_fate.app import App
+    from freight_fate.models.jobs import JobBoard
+    from freight_fate.models.profile import Profile
+    from freight_fate.states.city import JobBoardState
+
+    base = JobBoard(world, seed=44).offers(
+        "Chicago", {"refrigerated", "heavy_haul", "high_value"}, level=20)
+    direct = JobBoard(world, seed=44).offers(
+        "Chicago",
+        {"refrigerated", "heavy_haul", "high_value"},
+        level=20,
+        direct_freight=True,
+    )
+
+    assert base
+    assert direct
+    assert direct[0].pay > base[0].pay
+
+    app = App()
+    try:
+        app.ctx.profile = Profile(name="Direct Board", current_city="Chicago")
+        p = app.ctx.profile
+        p.business_status = INDEPENDENT_AUTHORITY
+        p.owned_trucks = ["rig"]
+        p.trailer_programs = ["dry_van", "reefer", "flatbed", "bulk"]
+        app.push_state(JobBoardState(app.ctx, [direct[0]]))
+
+        assert "Direct gross" in app.state.items[0].text
+        assert "Trailer program:" in app.state.items[0].text
+    finally:
+        app.shutdown()
+
+
+def test_independent_authority_settlement_adds_business_overhead():
+    from freight_fate.models.business import build_business_settlement
+    from freight_fate.models.jobs import CARGO_CATALOG, Job
+
+    job = Job(
+        CARGO_CATALOG["general"], 12.0, "Chicago", "yard", "Milwaukee", 100.0, 1500.0, 6.0)
+
+    leased = build_business_settlement(
+        LEASED_OWNER_OPERATOR, job, job.pay, on_time=True, driver_charges=0.0)
+    direct = build_business_settlement(
+        INDEPENDENT_AUTHORITY, job, job.pay, on_time=True, driver_charges=0.0)
+
+    labels = {charge.label for charge in direct.business_charges}
+    assert "authority compliance reserve" in labels
+    assert "factoring fee" in labels
+    assert direct.status_label == "own authority"
+    assert direct.business_charge_total > leased.business_charge_total
 
 
 def test_company_driver_board_labels_carrier_gross(world):

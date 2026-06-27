@@ -197,14 +197,17 @@ maintenance reserve, insurance reserve, trailer program, truck payment reserve,
 and settlement fees. You can reach that through the level-15 company-driver
 buy-in, or choose the owner-operator start for a higher-risk career from day
 one. The carrier still handles dispatch and reimbursed accessorials so the game
-stays focused on driving. Level 20 completes the current owner-operator arc as
-an authority-ready independent operator; full motor-carrier authority is still
-future work.
+stays focused on driving.
 
 At level 20, established owner-operators can set aside an authority prep reserve
 from **Business status** after enough deliveries, reputation, and working
-capital. This prepares the save for future true-authority gameplay. It does not
-yet unlock direct brokers, insurance filings, or player-owned trailers.
+capital. After that, the final own-authority gate requires 75 deliveries,
+reputation 92, at least one specialty trailer program, no pay advance, and
+enough cash to pay the startup cost while keeping working capital. Activating
+own authority unlocks direct freight on the dispatch board. Direct freight has
+higher gross revenue, but settlement also deducts insurance, compliance,
+trailer, truck, and factoring costs. It is a playable business step, not a full
+paperwork or broker-contract simulation.
 
 City service drives are a first step toward more local city driving. Pick a
 service, follow the spoken GPS, stop at the destination, and press Enter to go
@@ -260,6 +263,9 @@ Company drivers use carrier-provided trailers, so trailer program locks do not
 block their approved loads. Owner-operators start with a dry van program.
 Specialty cargo may say it needs a reefer, flatbed, or bulk trailer program;
 add that program from the garage before accepting the load.
+
+Own-authority drivers see direct freight on the same board. The listed pay is
+direct freight gross; the extra business costs are shown at settlement.
 
 Deliveries earn money, experience, reputation, and career stats. Leveling up can
 unlock longer dispatch distances, better early-career minimum pay, more cargo

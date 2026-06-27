@@ -694,20 +694,24 @@ fit for an audio-first game.
       working-capital gate, owned-tractor garage access, higher gross revenue,
       and operating-cost deductions. A higher-risk owner-operator start is also
       available for experienced-driver fantasy play. Level-20
-      owner-operators can now set aside an authority prep reserve as a
-      future-system boundary. Full authority, loans, and fleet ownership remain
-      future work.
+      owner-operators can now set aside an authority prep reserve, then unlock
+      a limited own-authority direct-freight mode once the final gates are met.
+      Loans, full paperwork simulation, and fleet ownership remain future work.
 - [x] Trailer program and cargo compatibility slice. Cargo now maps to dry van,
       reefer, flatbed, or bulk trailer programs. Company drivers keep
       carrier-provided trailers. Leased-on owner-operators start with dry van
       access and can add specialty trailer programs from the garage; missing
       programs lock matching loads with clear dispatch-board text.
-- [ ] True authority and direct freight. Later optional slice for operating
-      under the player's own motor-carrier authority. Cover Department of
-      Transportation and motor-carrier authority, insurance filings,
-      broker/load-board access, factoring or settlement timing, and higher
-      compliance overhead. The current authority prep reserve should be
-      the entry gate for this later system.
+- [x] True authority and direct freight first slice. Prepared owner-operators
+      can activate own authority from Business status after delivery,
+      reputation, cash, trailer-program, and advance-clearance gates. Dispatch
+      then marks loads as direct freight with higher gross revenue, and
+      settlement adds insurance, compliance, trailer, truck, and factoring
+      overhead. This is not a full DOT/MC paperwork or broker contract sim.
+- [ ] Advanced authority realism. Build on the current own-authority state with
+      richer insurance filings, DOT/MC application timing, broker/load-board
+      access tiers, factoring or delayed settlement choices, and clearer
+      compliance overhead.
 - [ ] Trailer ownership and advanced leasing. Build on the current trailer
       program model with true player-owned trailers, condition, financing,
       resale, tanker cargo, washout, and authority-specific cargo-fit choices.
@@ -715,9 +719,9 @@ fit for an audio-first game.
       real cost categories such as fuel, maintenance reserve, insurance, truck
       payment, trailer program, and settlement/factoring fees, while keeping
       settlement speech short and understandable.
-- [ ] Freight-market pricing realism. Separate company-driver wages,
-      leased-on gross revenue, and future true-authority spot or broker rates;
-      let tight/loose markets affect upside without hiding the player's net pay.
+- [ ] Freight-market pricing realism. Continue separating company-driver wages,
+      leased-on gross revenue, and own-authority spot or broker rates; let
+      tight/loose markets affect upside without hiding the player's net pay.
 - [ ] Business realism caveats. Keep lease-purchase risk visible as caution,
       not the golden path. Avoid payday-loan-like traps, and keep fleet hiring
       separate from the driving-career loop.

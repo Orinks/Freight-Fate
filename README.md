@@ -31,7 +31,8 @@ visual display mirrors all speech for sighted players and helpers.
   assigned equipment plus modest wage and dispatch tradeoffs, or start as a
   higher-risk leased-on owner-operator with owned starter equipment and real
   operating costs. Owner-operators can add specialty trailer programs for
-  reefer, flatbed, and bulk freight.
+  reefer, flatbed, and bulk freight, then prepare for a limited own-authority
+  direct-freight mode at the end of the career arc.
 - **Trucks and upgrades** — owner-operators can earn their way into a heavy
   hauler with more torque and a bigger tank (and worse aerodynamics), and
   outfit any truck with an engine tune, aerodynamic kit, long-range tank, or

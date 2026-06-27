@@ -59,6 +59,11 @@
   in one burst. Safety cues and actionable GPS distances still speak immediately.
 
 ### Changed
+- **Authority prep now leads to a first own-authority mode.** Qualified
+  owner-operators can pay the startup cost from Business status, unlock direct
+  freight on the dispatch board, and see insurance, compliance, trailer, truck,
+  and factoring costs in settlement without turning the game into a compliance
+  simulator.
 - **Trailer fit now matters for owner-operators.** Company drivers still use
   carrier-provided trailers, while leased-on owner-operators start with dry van
   access and can add reefer, flatbed, or bulk trailer programs from the garage.
@@ -68,9 +73,8 @@
   grain or bulk, and high-value jobs. Some training loads also have more
   forgiving deadlines.
 - **Owner-operators now have an authority prep milestone.** Qualified
-  level-20 owner-operators can set aside a reserve from Business status, marking
-  the save ready for a future true-authority system without pretending direct
-  broker authority is live yet.
+  level-20 owner-operators can set aside a reserve from Business status before
+  taking the later own-authority step.
 - **New careers now offer grounded start choices.** Pick from several
   fictional company-driver carriers with assigned equipment and modest wage or
   freight tradeoffs, or choose a higher-risk owner-operator start with owned

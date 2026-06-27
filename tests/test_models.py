@@ -5,6 +5,7 @@ import json
 from freight_fate.models import Career, Economy, JobBoard, Profile
 from freight_fate.models.business import (
     COMPANY_DRIVER,
+    INDEPENDENT_AUTHORITY,
     LEASED_OWNER_OPERATOR,
     business_status_summary,
 )
@@ -211,7 +212,7 @@ def test_profile_save_is_atomic_and_versioned():
     p = Profile(name="Atomic")
     path = p.save()
     data = json.loads(path.read_text())
-    assert data["version"] == 8
+    assert data["version"] == 9
     assert SIGNATURE_FIELD in data
     assert not path.with_suffix(".json.tmp").exists()
 
@@ -228,6 +229,18 @@ def test_old_save_without_business_status_loads_as_company_driver():
 
     assert loaded.business_status == COMPANY_DRIVER
     assert STARTER_CARRIER_NAME in business_status_summary(loaded)
+
+
+def test_independent_authority_status_round_trips():
+    p = Profile(name="Authority Save")
+    p.business_status = INDEPENDENT_AUTHORITY
+    p.owned_trucks = ["rig"]
+    path = p.save()
+
+    loaded = Profile.load(path)
+
+    assert loaded.business_status == INDEPENDENT_AUTHORITY
+    assert loaded.owns_equipment()
 
 
 def test_old_save_without_carrier_loads_with_starter_company():

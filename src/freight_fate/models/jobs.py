@@ -17,6 +17,7 @@ from ..data.world import (
     Route,
     World,
 )
+from .business_constants import DIRECT_FREIGHT_PAY_MULT
 from .market import Market, market_condition
 from .start_options import DEFAULT_START_KEY, start_option
 from .trailers import equipment_text_for_cargo, required_program_text, trailer_keys_for_cargo
@@ -448,6 +449,7 @@ class JobBoard:
         level: int = 1,
         market: Market | None = None,
         carrier_key: str | None = None,
+        direct_freight: bool = False,
     ) -> list[Job]:
         jobs: list[Job] = []
         city_obj = self.world.cities[city]
@@ -482,7 +484,7 @@ class JobBoard:
                 continue
             jobs.append(self._make_job(cargo, city, location.name, destination,
                                        miles, market, level, location,
-                                       dest_location, carrier_key))
+                                       dest_location, carrier_key, direct_freight))
         jobs.sort(key=lambda j: j.distance_mi)
         return jobs
 
@@ -675,12 +677,14 @@ class JobBoard:
                   destination: str, miles: float, market: Market | None,
                   level: int, origin_facility: Location,
                   destination_facility: Location,
-                  carrier_key: str = DEFAULT_START_KEY) -> Job:
+                  carrier_key: str = DEFAULT_START_KEY,
+                  direct_freight: bool = False) -> Job:
         weight = self._rng.uniform(*cargo.weight_tons)
         rate = cargo.rate_per_mile * self._rng.uniform(0.9, 1.15)
         mult = market.multiplier(cargo.key) if market is not None else 1.0
         base_pay = HOOKUP_FEE + miles * rate * (1.0 + weight / 120.0)
-        pay = round(max(base_pay, minimum_pay_for_level(miles, level)) * mult, 2)
+        direct_mult = DIRECT_FREIGHT_PAY_MULT if direct_freight else 1.0
+        pay = round(max(base_pay, minimum_pay_for_level(miles, level)) * mult * direct_mult, 2)
         # deadline: the honest HOS-compliant hours (driving, breaks, sleep),
         # shipper slack on top, plus a flat hour for fuel and the unexpected
         deadline = (

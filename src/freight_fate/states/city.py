@@ -6,9 +6,12 @@ import zlib
 
 from ..data.world import Route
 from ..models.business import (
+    AUTHORITY_ACTIVATION_COST,
     AUTHORITY_READY_RESERVE,
+    INDEPENDENT_AUTHORITY,
     LEASED_OWNER_OPERATOR,
     OWNER_OPERATOR_BUY_IN,
+    authority_activation_eligibility,
     authority_readiness_eligibility,
     business_path_label,
     business_status_summary,
@@ -412,6 +415,7 @@ def open_freight_market(ctx) -> list[Job]:
             level=p.career.level,
             market=p.market,
             carrier_key=getattr(p, "carrier_key", ""),
+            direct_freight=p.business_status == INDEPENDENT_AUTHORITY,
         )
         p.dispatch_board_cache = {
             "key": key,
@@ -751,11 +755,27 @@ class BusinessStatusState(MenuState):
                     "Owner-operator path locked", self._summary,
                     help="Hear the remaining requirements."))
         else:
-            if has_authority_readiness(p):
+            if p.business_status == INDEPENDENT_AUTHORITY:
+                items.append(MenuItem(
+                    "Own authority active", self._summary,
+                    help="Direct freight is available. Settlement includes "
+                         "insurance, compliance, and factoring costs."))
+            elif has_authority_readiness(p):
                 items.append(MenuItem(
                     "Authority prep reserve: set", self._summary,
-                    help="Own authority and direct broker freight are future "
-                         "systems; this career has set aside the prep reserve."))
+                    help="This career has set aside the prep reserve for "
+                         "own-authority startup."))
+                ok, _reasons = authority_activation_eligibility(p)
+                if ok:
+                    items.append(MenuItem(
+                        f"Activate own authority: {AUTHORITY_ACTIVATION_COST:,.0f} dollars",
+                        self._activate_authority,
+                        help="Start direct freight with higher gross revenue "
+                             "and more business overhead."))
+                else:
+                    items.append(MenuItem(
+                        "Own authority locked", self._next_unlock,
+                        help="Hear the remaining own-authority requirements."))
             else:
                 ok, _reasons = authority_readiness_eligibility(p)
                 if ok:
@@ -763,8 +783,8 @@ class BusinessStatusState(MenuState):
                         f"Commit {AUTHORITY_READY_RESERVE:,.0f} dollars "
                         "to authority prep",
                         self._set_authority_readiness,
-                        help="Set aside money for a future own-authority system. "
-                             "This does not unlock direct broker freight yet."))
+                        help="Set aside money for the later own-authority "
+                             "activation gate."))
                 else:
                     items.append(MenuItem(
                         "Authority prep locked", self._next_unlock,
@@ -835,9 +855,31 @@ class BusinessStatusState(MenuState):
         self.ctx.say(
             f"Authority prep reserve set aside: "
             f"{AUTHORITY_READY_RESERVE:,.0f} dollars. You have "
-            f"{p.money:,.0f} dollars left. Your own motor-carrier authority, "
-            "direct broker freight, and trailer ownership are future systems; "
-            "for now you remain leased on.")
+            f"{p.money:,.0f} dollars left. Own authority can unlock after "
+            "the final delivery, reputation, trailer program, and cash gates. "
+            "For now you remain leased on.")
+        self.refresh()
+
+    def _activate_authority(self) -> None:
+        p = self.ctx.profile
+        ok, reasons = authority_activation_eligibility(p)
+        if not ok:
+            self.ctx.audio.play("ui/error")
+            self.ctx.say("Own authority locked. " + " ".join(reasons))
+            self.refresh()
+            return
+        p.money -= AUTHORITY_ACTIVATION_COST
+        p.business_status = INDEPENDENT_AUTHORITY
+        p.dispatch_board_cache = None
+        self.ctx.save_profile()
+        self.ctx.audio.play("ui/cash")
+        self.ctx.say(
+            f"Own authority active. Startup cost "
+            f"{AUTHORITY_ACTIVATION_COST:,.0f} dollars. You have "
+            f"{p.money:,.0f} dollars left. Dispatch now lists direct freight. "
+            "Settlement includes insurance, compliance, trailer, truck, and "
+            "factoring costs."
+        )
         self.refresh()
 
 
@@ -1109,12 +1151,23 @@ class JobBoardState(MenuState):
         if n == 0:
             self.ctx.say("Dispatch board. No jobs available right now. Press Escape to go back.")
         else:
-            business_note = (
-                "Listed amounts are owner-operator gross revenue. Trailer "
-                "program needs are listed on each job. "
-                if is_owner_operator(self.ctx.profile.business_status)
-                else "Listed amounts are carrier gross; your settlement pays driver wages. "
-            )
+            status = self.ctx.profile.business_status
+            if status == INDEPENDENT_AUTHORITY:
+                business_note = (
+                    "Listed amounts are direct freight gross. Insurance, "
+                    "compliance, trailer, truck, and factoring costs come out "
+                    "at settlement. "
+                )
+            elif is_owner_operator(status):
+                business_note = (
+                    "Listed amounts are owner-operator gross revenue. Trailer "
+                    "program needs are listed on each job. "
+                )
+            else:
+                business_note = (
+                    "Listed amounts are carrier gross; your settlement pays "
+                    "driver wages. "
+                )
             self.ctx.say(f"Dispatch board. {n} dispatch{'es' if n != 1 else ''} available. "
                          f"{business_note}{self.ctx.profile.market.summary()} "
                          + self.current_text())
