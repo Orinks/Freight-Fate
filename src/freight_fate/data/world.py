@@ -14,7 +14,8 @@ import zlib
 from dataclasses import dataclass
 from pathlib import Path
 
-WORLD_PATH = Path(__file__).parent / "world.json"
+WORLD_PATH = Path(__file__).parent / "world_data"
+WORLD_INDEX_PATH = WORLD_PATH / "index.json"
 
 # Alternate routes should feel like real dispatch choices, not graph leftovers.
 # A little extra mileage is fine for traffic, weather, grades, or avoiding a
@@ -968,7 +969,7 @@ class World:
             self._facilities_by_id[location.id] = location
 
     @classmethod
-    def load(cls, path: Path = WORLD_PATH,
+    def load(cls, root: Path = WORLD_PATH,
              overlay: Path | None = None) -> World:
         """Load the world, optionally merging an additive overlay on top.
 
@@ -981,8 +982,8 @@ class World:
         ``get_world`` deliberately does not pass an overlay yet; this is the
         loader capability the online tier will build on.
         """
-        with open(path, encoding="utf-8") as f:
-            data = json.load(f)
+
+        data = _load_world_data(root)
         if overlay is not None and overlay.exists():
             data = _merge_overlay(data, json.loads(overlay.read_text(encoding="utf-8")))
         return cls(data)
@@ -1838,3 +1839,49 @@ def get_world() -> World:
     if _world is None:
         _world = World.load()
     return _world
+
+def _load_json(path: Path) -> dict:
+    with open(path, encoding="utf-8") as f:
+        return json.load(f)
+
+
+def _load_world_data(root: Path) -> dict:
+    """Load world data using world_data/index.json."""
+    index_path = root / "index.json"
+    index = _load_json(index_path)
+
+    if "countries" not in index:
+        raise ValueError(f"{index_path} does not contain a 'countries' list")
+
+    data = {
+        "cities": {},
+        "legs": [],
+    }
+
+    for country in index["countries"]:
+        code = country["code"]
+        country_dir = root / country["path"]
+
+        cities_path = country_dir / country.get("cities", "cities.json")
+        legs_path = country_dir / country.get("legs", "legs.json")
+
+        cities_data = _load_json(cities_path)
+        legs_data = _load_json(legs_path)
+
+        if "cities" not in cities_data:
+            raise ValueError(f"{cities_path} does not contain a 'cities' object")
+
+        if "legs" not in legs_data:
+            raise ValueError(f"{legs_path} does not contain a 'legs' list")
+
+        for name, city in cities_data["cities"].items():
+            if name in data["cities"]:
+                raise ValueError(f"Duplicate city {name!r} in {cities_path}")
+
+            city.setdefault("country", code)
+            data["cities"][name] = city
+
+        data["legs"].extend(legs_data["legs"])
+
+    return data
+
