@@ -24,6 +24,11 @@
   can also trigger a safety stop when you pass an active patrol window. Both
   stops use spoken warnings, X to signal, a full stop on the shoulder, an
   on-the-spot fine, and a reputation hit.
+- **Running from a stop now escalates before it ends badly.** If you keep
+  driving with lights behind you, the game gives a failure-to-stop warning and
+  a final warning before spike strips. A felony stop now means a major fine,
+  reputation damage, truck damage, processing time, and cancellation of the
+  active loaded run, with a clear return to the terminal afterward.
 
 ### Fixed
 

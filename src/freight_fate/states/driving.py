@@ -180,6 +180,11 @@ SPEEDING_TICKET_FINES = (150.0, 300.0, 600.0, 1200.0)
 # Travel this far still moving after the lights come on and it counts as
 # ignoring the stop -- a heavier fine and a bigger reputation hit.
 PULL_OVER_IGNORE_MI = 2.0
+FAILURE_TO_STOP_WARNING_MI = 0.8
+FAILURE_TO_STOP_FINAL_WARNING_MI = 1.5
+FAILURE_TO_STOP_FINE = 2500.0
+FAILURE_TO_STOP_DAMAGE_PCT = 12.0
+FAILURE_TO_STOP_PROCESSING_MIN = 180.0
 WEIGH_STATION_NOTICE_MI = 2.0
 WEIGH_STATION_BYPASS_MPH = 15.0
 WEIGH_STATION_BYPASS_FINE = 750.0
@@ -271,6 +276,8 @@ class DrivingState(State):
         self._pull_over_fine = 0.0
         self._pull_over_reputation_hit = 0.0
         self._pull_over_return = "Back on the highway. Watch your speed."
+        self._pull_over_warning_level = 0
+        self.failure_to_stop_count = 0
         self._weigh_station_notice_key = ""
         self._unsafe_damage_stop_key = ""
         # Deterministic, save-safe stream for "did a patrol catch you" rolls, kept
@@ -352,6 +359,7 @@ class DrivingState(State):
             "out_of_service_count": self.out_of_service_count,
             "speeding_tickets": self.speeding_tickets,
             "ticket_fines_paid": self.ticket_fines_paid,
+            "failure_to_stop_count": self.failure_to_stop_count,
             "lane_offset": self.lane.offset,
         }
 
@@ -412,6 +420,7 @@ class DrivingState(State):
             state.out_of_service_count = int(data.get("out_of_service_count", 0))
             state.speeding_tickets = int(data.get("speeding_tickets", 0))
             state.ticket_fines_paid = float(data.get("ticket_fines_paid", 0.0))
+            state.failure_to_stop_count = int(data.get("failure_to_stop_count", 0))
             state.lane.offset = float(data.get("lane_offset", 0.0))
             return state
         except (KeyError, TypeError, ValueError):
@@ -627,7 +636,9 @@ class DrivingState(State):
                 "ramp, then brake to a stop for the rest stop menu. X also "
                 "signals a pull-over if a trooper "
                 "lights you up for speeding, a scale bypass, or unsafe equipment: "
-                "signal, then brake to a stop. "
+                "signal, then brake to a stop. Ignoring the lights brings "
+                "failure-to-stop warnings, then a felony stop that can cancel "
+                "the active load. "
                 "C also speaks the date and season. "
                 "M toggles the in-cab radio, left and right brackets tune it, "
                 "and Y speaks radio station, volume, and streamer-safe status. "
@@ -1783,6 +1794,7 @@ class DrivingState(State):
         self._pull_over_fine = 0.0
         self._pull_over_reputation_hit = 0.0
         self._pull_over_return = "Back on the highway. Watch your speed."
+        self._pull_over_warning_level = 0
         patrol = self.trip.active_patrol_at(self.trip.position_mi)
         where = patrol.reason if patrol is not None else "patrol"
         self.ctx.audio.play("events/police_siren")
@@ -1807,6 +1819,7 @@ class DrivingState(State):
         self._pull_over_fine = fine
         self._pull_over_reputation_hit = reputation_hit
         self._pull_over_return = return_message
+        self._pull_over_warning_level = 0
         self.ctx.audio.play("events/police_siren")
         self.ctx.say_event(lights_message, interrupt=True)
 
@@ -1824,11 +1837,42 @@ class DrivingState(State):
     def _update_pull_over(self, dt: float) -> None:
         if self._pull_over is None:
             return
+        if self._enforcement_bypassed():
+            self._pull_over = None
+            return
         if self.truck.speed_mph <= DOCKING_MAX_MPH:
             self._open_traffic_stop()
             return
-        if self.trip.position_mi - self._pull_over_start_mi >= PULL_OVER_IGNORE_MI:
+        distance = self.trip.position_mi - self._pull_over_start_mi
+        if distance >= PULL_OVER_IGNORE_MI:
             self._evade_pull_over()
+        elif distance >= FAILURE_TO_STOP_FINAL_WARNING_MI:
+            self._warn_failure_to_stop(final=True)
+        elif distance >= FAILURE_TO_STOP_WARNING_MI:
+            self._warn_failure_to_stop(final=False)
+
+    def _warn_failure_to_stop(self, *, final: bool) -> None:
+        level = 2 if final else 1
+        if self._pull_over_warning_level >= level:
+            return
+        self._pull_over_warning_level = level
+        if final:
+            message = (
+                "Final failure-to-stop warning. Brake to a full stop now or "
+                "troopers will end the stop with spike strips and felony charges."
+            )
+        elif self._pull_over_signaled:
+            message = (
+                "You signaled for the stop, but you are still moving with lights "
+                "behind you. Brake to a full stop on the shoulder."
+            )
+        else:
+            message = (
+                "Failure-to-stop warning. Signal with X and brake to a full stop "
+                "on the shoulder."
+            )
+        self.ctx.audio.play("ui/warning")
+        self.ctx.say_event(message, interrupt=True)
 
     def _open_traffic_stop(self) -> None:
         signaled = self._pull_over_signaled
@@ -1853,21 +1897,10 @@ class DrivingState(State):
 
     def _evade_pull_over(self) -> None:
         """Drove on with the lights behind: spike strips end it, logged as a
-        felony stop with a heavy fine and reputation hit."""
+        felony stop with a heavy fine, reputation hit, and load consequences."""
         self._pull_over = None
-        p = self.ctx.profile
-        fine = SPEEDING_TICKET_FINES[-1] * 1.5
-        self.speeding_tickets += 1
-        self.ticket_fines_paid += fine
-        p.money -= fine
-        p.career.reputation = max(0.0, p.career.reputation
-                                  - hos.HOS_REPUTATION_HIT * 2.0)
         self.ctx.audio.play("events/spike_strip")
-        self.ctx.say_event(
-            f"You ran from the traffic stop, so troopers laid spike strips across "
-            f"the lane. That is a felony stop: a {fine:,.0f} dollar fine and a "
-            "serious reputation hit.",
-            interrupt=True)
+        self.ctx.push_state(FelonyStopState(self.ctx, self))
 
     def _speak_ambient_event(self, message: str, sound: str | None = None) -> None:
         if self._hazard_deadline is not None or self._ambient_event_cooldown_s > 0.0:
@@ -3086,6 +3119,80 @@ class EnforcementStopState(MenuState):
     def go_back(self) -> None:
         self.ctx.pop_state()
         self.ctx.say(self.return_message, interrupt=True)
+
+
+class FelonyStopState(MenuState):
+    """Failure-to-stop outcome after the player ignores an active siren."""
+
+    title = "Felony stop"
+    intro_help = ("Press Enter or Escape to continue from the terminal after "
+                  "the enforcement stop.")
+
+    def __init__(self, ctx, driving: DrivingState) -> None:
+        super().__init__(ctx)
+        self.driving = driving
+        self.load_lost = (
+            driving.phase == DRIVE_PHASE_DELIVERY and not driving.job.bobtail
+        )
+        self._summary = ""
+        self._resolve()
+
+    def _resolve(self) -> None:
+        d = self.driving
+        p = self.ctx.profile
+        d.failure_to_stop_count += 1
+        d.ticket_fines_paid += FAILURE_TO_STOP_FINE
+        p.money -= FAILURE_TO_STOP_FINE
+        p.career.reputation = max(
+            0.0, p.career.reputation - hos.HOS_REPUTATION_HIT * 3.0)
+        d.truck.damage_pct = min(
+            100.0, d.truck.damage_pct + FAILURE_TO_STOP_DAMAGE_PCT)
+        d.truck.velocity_mps = 0.0
+        d.truck.throttle = 0.0
+        d.truck.brake = 1.0
+        d.truck.set_parking_brake()
+        _advance_rest_clock(d, FAILURE_TO_STOP_PROCESSING_MIN,
+                            "on_duty_not_driving",
+                            "felony failure-to-stop enforcement")
+        d.hos.on_duty(FAILURE_TO_STOP_PROCESSING_MIN)
+        p.truck_fuel_gal = d.truck.fuel_gal
+        p.truck_damage_pct = d.truck.damage_pct
+        p.game_hours += d.trip.game_minutes / 60.0
+        p.market.advance_to(p.market_day())
+        p.active_trip = None
+        p.pay_advance_used_for_load = False
+        self.ctx.save_profile()
+
+        load_text = (
+            f"Dispatch cancels the {d.job.cargo.label} load; there is no pay "
+            "for this run."
+            if self.load_lost else
+            "There was no loaded trailer to lose, but the active assignment is canceled."
+        )
+        self._summary = (
+            "Troopers laid spike strips across the lane after you kept driving "
+            "with lights and siren behind you. "
+            f"Felony failure-to-stop fine: {FAILURE_TO_STOP_FINE:,.0f} dollars, "
+            "paid on the spot, with a major reputation hit. "
+            f"Spike strips added {FAILURE_TO_STOP_DAMAGE_PCT:.0f} percent truck "
+            f"damage, and processing took {FAILURE_TO_STOP_PROCESSING_MIN / 60.0:.0f} "
+            f"hours. {load_text} You are released back to "
+            f"{self.ctx.world.home_terminal(p.current_city).spoken_name}."
+        )
+
+    def announce_entry(self) -> None:
+        self.ctx.say(
+            f"{self.title}. {self._summary} {self.current_text()}",
+            interrupt=True)
+
+    def build_items(self) -> list[MenuItem]:
+        return [MenuItem("Return to terminal", self.go_back,
+                         help="End the canceled run and continue from the city terminal.")]
+
+    def go_back(self) -> None:
+        from .city import CityMenuState
+
+        self.ctx.reset_to(CityMenuState(self.ctx))
 
 
 class RestStopState(MenuState):

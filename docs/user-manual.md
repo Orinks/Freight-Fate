@@ -409,7 +409,11 @@ badly inside a patrol and a trooper may pull you over: signal with X (the same
 key as an exit), brake to a stop on the shoulder, and sit through a license and
 logbook check that reads your recent duty entries before ending in an
 on-the-spot ticket or a warning.
-Ignoring the lights is logged as evasion and costs far more. Speeding the
+Ignoring the lights starts as a failure-to-stop warning, then a final warning.
+Keep driving past that and troopers end the stop with spike strips. A felony
+stop adds truck damage, a major fine, a reputation hit, several hours of
+processing time, and cancels the active loaded run. You are released back to the
+terminal so you can repair, rest, and choose what to do next. Speeding the
 patrols do not catch still adds a quieter charge at delivery settlement.
 Open weigh stations also matter: the game warns you before the scale, and if
 you blow past at highway speed instead of slowing into the inspection lane, a

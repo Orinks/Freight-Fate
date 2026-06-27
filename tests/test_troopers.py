@@ -200,6 +200,7 @@ def test_first_marginal_stop_is_a_warning(monkeypatch):
 
 def test_ignoring_the_lights_is_logged_as_evasion(monkeypatch):
     from freight_fate.app import App
+    from freight_fate.states.driving import FAILURE_TO_STOP_FINE, FelonyStopState
 
     app = App()
     try:
@@ -209,13 +210,138 @@ def test_ignoring_the_lights_is_logged_as_evasion(monkeypatch):
         assert d._pull_over == "lights"
         p = app.ctx.profile
         money_before = p.money
+        rep_before = p.career.reputation
         # Keep driving past the ignore distance without stopping.
         d.truck.velocity_mps = (limit + 25.0) / 2.23694
         d.trip.position_mi = d._pull_over_start_mi + 3.0
         d._update_pull_over(1.0)
+        assert isinstance(app.state, FelonyStopState)
         assert d._pull_over is None
-        assert d.speeding_tickets == 1
-        assert p.money < money_before
+        assert d.failure_to_stop_count == 1
+        assert d.ticket_fines_paid == FAILURE_TO_STOP_FINE
+        assert p.money == money_before - FAILURE_TO_STOP_FINE
+        assert p.career.reputation < rep_before
+    finally:
+        app.shutdown()
+
+
+def test_failure_to_stop_gives_staged_warnings(monkeypatch):
+    from freight_fate.app import App
+
+    app = App()
+    spoken = []
+    try:
+        d = _driving(app, patrol_intensity=1.0)
+        monkeypatch.setattr(app.ctx, "say", lambda *a, **k: None)
+        monkeypatch.setattr(app.ctx, "say_event",
+                            lambda text, *a, **k: spoken.append(text))
+        monkeypatch.setattr(app.ctx.audio, "play", lambda *a, **k: None)
+        limit = _speed_for(d, over=25.0)
+        d.truck.velocity_mps = (limit + 25.0) / 2.23694
+
+        d.trip.position_mi = d._pull_over_start_mi + 0.9
+        d._update_pull_over(1.0)
+        d.trip.position_mi = d._pull_over_start_mi + 1.6
+        d._update_pull_over(1.0)
+
+        assert any("Failure-to-stop warning" in s for s in spoken)
+        assert any("Final failure-to-stop warning" in s for s in spoken)
+        assert d.failure_to_stop_count == 0
+    finally:
+        app.shutdown()
+
+
+def test_failure_to_stop_warning_acknowledges_signal(monkeypatch):
+    from freight_fate.app import App
+
+    app = App()
+    spoken = []
+    try:
+        d = _driving(app, patrol_intensity=1.0)
+        monkeypatch.setattr(app.ctx, "say", lambda text, *a, **k: spoken.append(text))
+        monkeypatch.setattr(app.ctx, "say_event",
+                            lambda text, *a, **k: spoken.append(text))
+        monkeypatch.setattr(app.ctx.audio, "play", lambda *a, **k: None)
+        limit = _speed_for(d, over=25.0)
+        d._signal_pull_over()
+        d.truck.velocity_mps = (limit + 25.0) / 2.23694
+
+        d.trip.position_mi = d._pull_over_start_mi + 0.9
+        d._update_pull_over(1.0)
+
+        assert any("You signaled for the stop" in s for s in spoken)
+        assert d.failure_to_stop_count == 0
+    finally:
+        app.shutdown()
+
+
+def test_felony_stop_cancels_loaded_run_and_returns_to_terminal(monkeypatch):
+    from freight_fate.app import App
+    from freight_fate.states.city import CityMenuState
+    from freight_fate.states.driving import FelonyStopState
+
+    app = App()
+    try:
+        d = _driving(app, patrol_intensity=1.0)
+        _quiet(app, monkeypatch)
+        _speed_for(d, over=25.0)
+        app.ctx.profile.active_trip = d.snapshot()
+        damage_before = d.truck.damage_pct
+        game_hours_before = app.ctx.profile.game_hours
+
+        d.trip.position_mi = d._pull_over_start_mi + 3.0
+        d.truck.velocity_mps = 65.0 / 2.23694
+        d._update_pull_over(1.0)
+
+        assert isinstance(app.state, FelonyStopState)
+        assert app.state.load_lost is True
+        assert app.ctx.profile.active_trip is None
+        assert app.ctx.profile.truck_damage_pct > damage_before
+        assert app.ctx.profile.game_hours > game_hours_before
+
+        app.state.go_back()
+        assert isinstance(app.state, CityMenuState)
+    finally:
+        app.shutdown()
+
+
+def test_felony_stop_does_not_claim_load_loss_for_empty_run(monkeypatch):
+    from freight_fate.app import App
+    from freight_fate.states.driving import FelonyStopState
+
+    app = App()
+    try:
+        d = _driving(app, patrol_intensity=1.0)
+        _quiet(app, monkeypatch)
+        d.job.bobtail = True
+        _speed_for(d, over=25.0)
+
+        d.trip.position_mi = d._pull_over_start_mi + 3.0
+        d.truck.velocity_mps = 65.0 / 2.23694
+        d._update_pull_over(1.0)
+
+        assert isinstance(app.state, FelonyStopState)
+        assert app.state.load_lost is False
+    finally:
+        app.shutdown()
+
+
+def test_debug_off_mode_clears_active_pull_over_without_felony(monkeypatch):
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        d = _driving(app, patrol_intensity=1.0)
+        _quiet(app, monkeypatch)
+        _speed_for(d, over=25.0)
+        app.ctx.settings.hos_mode = "debug_off"
+
+        d.trip.position_mi = d._pull_over_start_mi + 3.0
+        d.truck.velocity_mps = 65.0 / 2.23694
+        d._update_pull_over(1.0)
+
+        assert d._pull_over is None
+        assert d.failure_to_stop_count == 0
     finally:
         app.shutdown()
 
@@ -404,11 +530,13 @@ def test_ticket_counters_survive_snapshot(monkeypatch):
         _quiet(app, monkeypatch)
         d.speeding_tickets = 2
         d.ticket_fines_paid = 450.0
+        d.failure_to_stop_count = 1
         app.ctx.profile.active_trip = None
         snap = d.snapshot()
         restored = DrivingState.from_snapshot(app.ctx, snap)
         assert restored is not None
         assert restored.speeding_tickets == 2
         assert restored.ticket_fines_paid == 450.0
+        assert restored.failure_to_stop_count == 1
     finally:
         app.shutdown()

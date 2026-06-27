@@ -441,8 +441,15 @@ reset instead of only a fine.
   truck damage now draws a safety stop when the truck passes an active patrol
   window. Both use `EnforcementStopState` for spoken reason, prompt-with-X
   pull-over flow, on-the-spot fine, and reputation hit without counting as a
-  speeding ticket. Future trooper slice still open: full felony evasion
-  consequences such as losing the load.
+  speeding ticket.
+- [x] **Felony failure-to-stop escalation.** Shipped:
+  `DrivingState._update_pull_over` now gives a failure-to-stop warning and a
+  final warning before spike strips. If the player still keeps driving,
+  `FelonyStopState` forces the stop, applies a larger fine, major reputation
+  hit, spike-strip truck damage, three hours of enforcement processing time,
+  and cancels the active loaded run before returning the player to the city
+  terminal. Empty/bobtail runs do not claim a load was lost, and `debug_off`
+  remains the internal enforcement bypass.
 - [x] **Richer construction enforcement.** Shipped: construction zones now add a
   staged merge/flagger taper before the main work zone. The first cue remains
   action-first ("Brake now!") and tells the player to merge left for the flagger
@@ -477,8 +484,9 @@ function guidance: https://www.fmcsa.dot.gov/hours-service/elds/eld-functions-fa
 - **Consequences.** Immediate fines replace the silent at-delivery
   deduction (escalating like HOS fines: 150 to 1,200 dollars), reputation
   hits, and an "out of service" order for serious HOS violations: 10
-  hours parked where you stand. Ignoring the siren is a felony stop:
-  spike strips ahead, a huge fine, and possibly losing the load.
+  hours parked where you stand. Ignoring the siren now escalates through
+  spoken failure-to-stop warnings before a felony stop: spike strips, a huge
+  fine, truck damage, processing time, and active loaded-run cancellation.
 - **Settings.** HOS defaults to realistic and keeps relaxed for
   accessibility and pacing. There is no player-facing non-enforced mode:
   enforcement-off survives only as an internal developer bypass
@@ -489,8 +497,9 @@ function guidance: https://www.fmcsa.dot.gov/hours-service/elds/eld-functions-fa
   chatter, an officer voice channel (the SAPI event voice fits), spike
   strip. Added as Ogg Vorbis assets under
   `src/freight_fate/assets/sounds/`.
-- **Open questions.** Do warnings expire? Does reputation lower the ticket
-  odds, or just the fine? Should felony evasion end the active load?
+- **Open questions.** Do warnings expire after a clean stretch? Does reputation
+  lower the ticket odds, or just the fine? Should repeat felony stops affect
+  future dispatch availability?
 
 ## Shipped in 1.5.0
 
@@ -596,8 +605,8 @@ Deliver -> Earn and level up -> Repeat
 - [x] In-cab logbook / Record of Duty Status, with the trooper logbook
       check reading real entries
 - [ ] State troopers and law enforcement (speeding pull-overs, CB heads-up,
-      scale bypass stops, and damage-triggered stops shipped; full felony
-      load-loss consequences still pending)
+      scale bypass stops, damage-triggered stops, and felony failure-to-stop
+      load cancellation shipped; future repeat-offender dispatch hooks remain)
 - [ ] Special event jobs (oversize loads, urgent medical freight)
 - [ ] Trailer types with handling differences
 
