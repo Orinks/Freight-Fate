@@ -602,7 +602,8 @@ class HomeCityState(MenuState):
         loaded_over = (f"Loaded over existing driver named {name}. "
                        if name.lower() in existing else "")
         self.ctx.say(
-            f"{loaded_over}Welcome aboard, {name}. Your company tractor is parked at "
+            f"{loaded_over}Welcome aboard to Northstar Freight Lines, {name}. "
+            "Your company tractor is parked at "
             f"{terminal.spoken_name} in the {city} service area with "
             f"{profile.money:,.0f} dollars and a full tank. "
             "Your first stop is the dispatch board.", interrupt=True)
@@ -610,15 +611,16 @@ class HomeCityState(MenuState):
 
 HELP_PAGES = [
     ("The goal", [
-        "You are a company driver building toward owner-operator independence.",
+        "You are a Northstar Freight Lines company driver building toward owner-operator independence.",
         "Start from your company terminal or yard in a metro service area.",
         "Each city stands for a wider freight area with many possible shippers.",
         "Accept freight from a specific shipper facility, deadhead to that pickup,",
         "check in and load the trailer there, then get your route to the destination,",
         "and deliver cargo across the country, on time and intact.",
-        "Earn money and experience, level up, and unlock better freight.",
-        "When you qualify, Business status lets you buy your first tractor",
-        "and run leased-on as an owner-operator.",
+        "Earn money and experience, level through 20 career ranks, and unlock better freight.",
+        "Level 5 starts owner-operator preparation, not a lease-purchase shortcut.",
+        "At level 15, with enough deliveries, reputation, and working capital,",
+        "Business status lets you buy into a leased-on owner-operator path.",
     ]),
     ("Menus", [
         "All menus use Up and Down arrows, Enter to select, Escape to go back.",
@@ -792,6 +794,11 @@ HELP_PAGES = [
         "As an owner-operator, listed pay is gross revenue. Your business pays",
         "fuel, repairs, maintenance reserve, insurance, trailer program,",
         "truck payment reserve, and settlement fees.",
+        "Level 5 starts the owner-operator preparation path.",
+        "The leased-on owner-operator buy-in unlocks later, at level 15,",
+        "when your deliveries, reputation, cash, and pay advances are ready.",
+        "Level 20 completes the current owner-operator arc.",
+        "Full motor-carrier authority is future work, not a current menu.",
         "A metro can contain ports, rail and intermodal ramps, air cargo areas,",
         "parcel hubs, grocery distribution centers, dry warehouses, cold storage,",
         "food processors, farms and grain elevators, manufacturing plants,",
@@ -823,7 +830,8 @@ HELP_PAGES = [
         "Fragile cargo, like electronics and fresh food, punishes rough driving.",
         "Repair your truck in the terminal garage. Damage reduces engine power.",
         "Higher levels widen distance caps, improve low-end pay,",
-        "and unlock more facility variety plus refrigerated, heavy-haul, and high-value freight.",
+        "unlock more facility variety, refrigerated, heavy-haul, and high-value freight,",
+        "and track business ranks.",
         "Cargo markets drift day by day. The dispatch board calls out tight and loose",
         "markets; tight cargo pays well above the usual rate.",
     ]),
@@ -845,7 +853,7 @@ HELP_PAGES = [
         "fuel or repair work as your money covers toward a full tank or full repair.",
         "The Upgrades menu sells permanent improvements: an engine tune,",
         "an aerodynamic kit, a long-range tank, and reinforced brakes.",
-        "Upgrades and truck purchases unlock once you become an owner-operator.",
+        "Upgrades and truck purchases unlock once you become a leased-on owner-operator.",
         "Engine tune gives more pulling power for heavy freight, hills, and mountain grades.",
         "Aerodynamic kit burns less fuel at highway speed; same tank, fewer gallons per mile.",
         "Long-range tank carries fifty more gallons; more fuel onboard, not better efficiency.",
