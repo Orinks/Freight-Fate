@@ -107,7 +107,9 @@ def _route_event_sound(event) -> str | None:
         return "events/state_crossing"
     if kind == TripEventKind.ZONE_ENTER:
         zone = event.data.get("zone")
-        if zone is not None and zone.reason == "construction":
+        if event.data.get("suppress_sound"):
+            return None
+        if zone is not None and str(zone.reason).startswith("construction"):
             return "events/construction_zone"
         return "events/traffic_slowing"
     if kind == TripEventKind.GPS_CUE:
@@ -687,8 +689,24 @@ class DrivingState(State):
         parts: list[str] = []
         zone = self.trip.next_zone_within(within_mi)
         if zone is not None:
-            parts.append(f"{zone.reason} in {s.distance_text(zone.start_mi - pos)}, "
-                         f"speed limit {s.speed_text(zone.limit_mph)}")
+            paired = None
+            if zone.reason == "construction merge":
+                paired = next(
+                    (
+                        z for z in self.trip.zones
+                        if z.reason == "construction"
+                        and abs(z.start_mi - zone.end_mi) < 0.01
+                    ),
+                    None,
+                )
+            if paired is not None:
+                parts.append(
+                    f"construction taper in {s.distance_text(zone.start_mi - pos)}, "
+                    f"merge left, speed limit {s.speed_text(zone.limit_mph)}, "
+                    f"then work zone {s.speed_text(paired.limit_mph)}")
+            else:
+                parts.append(f"{zone.reason} in {s.distance_text(zone.start_mi - pos)}, "
+                             f"speed limit {s.speed_text(zone.limit_mph)}")
         stop = self.trip.upcoming_stop(within_mi)
         if stop is not None:
             parts.append(f"{stop.spoken_name} in {s.distance_text(stop.at_mi - pos)}")

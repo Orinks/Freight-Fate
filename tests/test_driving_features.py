@@ -1356,18 +1356,39 @@ def test_adaptive_cruise_disables_before_restricted_zone(monkeypatch):
         zone = Zone(10.0, 15.0, 45.0, "construction")
         event = TripEvent(
             TripEventKind.GPS_CUE,
-            "Brake now! In 2 miles, construction ahead. Speed limit 45.",
+            "Brake now! In 2 miles, construction ahead. Merge left for the "
+            "flagger taper; speed limit 55, then 45 through the work zone.",
             {"zone": zone},
         )
         driving._handle_trip_event(event)
 
         assert driving._cruise_mph is None
         assert events[-1] == (
-            "Brake now! In 2 miles, construction ahead. Speed limit 45. "
+            "Brake now! In 2 miles, construction ahead. Merge left for the "
+            "flagger taper; speed limit 55, then 45 through the work zone. "
             "Adaptive cruise disabled; take manual speed control."
         )
     finally:
         app.shutdown()
+
+
+def test_main_construction_zone_after_taper_suppresses_second_sound():
+    from freight_fate.sim.trip import TripEvent, TripEventKind, Zone
+    from freight_fate.states.driving import _route_event_sound
+
+    taper = TripEvent(
+        TripEventKind.ZONE_ENTER,
+        "Construction merge taper. Follow the flagger and merge left. Speed limit 55.",
+        {"zone": Zone(9.0, 10.0, 55.0, "construction merge")},
+    )
+    work_zone = TripEvent(
+        TripEventKind.ZONE_ENTER,
+        "Work zone active. Stay in the lane and watch the barrels. Speed limit 45.",
+        {"zone": Zone(10.0, 15.0, 45.0, "construction"), "suppress_sound": True},
+    )
+
+    assert _route_event_sound(taper) == "events/construction_zone"
+    assert _route_event_sound(work_zone) is None
 
 
 @pytest.mark.smoke

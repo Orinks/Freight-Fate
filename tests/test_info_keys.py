@@ -71,7 +71,8 @@ def test_repeat_key_replays_the_last_route_announcement(monkeypatch):
         # After a route announcement, A replays it verbatim.
         d._handle_trip_event(TripEvent(
             TripEventKind.GPS_CUE,
-            "Brake now! In 2 miles, construction ahead. Speed limit 45."))
+            "Brake now! In 2 miles, construction ahead. Merge left for the "
+            "flagger taper; speed limit 55, then 45 through the work zone."))
         spoken.clear()
         d.handle_event(key_event(pygame.K_a))
         assert "construction ahead" in spoken[-1]
@@ -87,11 +88,16 @@ def test_upcoming_key_reports_an_imposed_limit_ahead(monkeypatch):
     try:
         d = _driving(app)
         d.trip.position_mi = 0.0
-        d.trip.zones = [Zone(5.0, 8.0, 45.0, "construction")]
+        d.trip.zones = [
+            Zone(5.0, 6.0, 55.0, "construction merge"),
+            Zone(6.0, 8.0, 45.0, "construction"),
+        ]
         spoken = _capture(app, monkeypatch)
         d.handle_event(key_event(pygame.K_u))
-        assert "construction" in spoken[-1]
-        assert "speed limit" in spoken[-1].lower()
+        assert "construction taper" in spoken[-1]
+        assert "merge left" in spoken[-1]
+        assert "speed limit 55" in spoken[-1]
+        assert "then work zone 45" in spoken[-1]
     finally:
         app.shutdown()
 

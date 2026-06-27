@@ -7,6 +7,8 @@ import pytest
 from freight_fate.sim import Trip, TruckState, WeatherKind, WeatherSystem
 from freight_fate.sim.trip import (
     CONSTRUCTION_ENFORCEMENT_GRACE_MI,
+    CONSTRUCTION_TAPER_LIMIT_MPH,
+    CONSTRUCTION_TAPER_MI,
     NavigationCue,
     TrafficLead,
     TripEventKind,
@@ -473,8 +475,26 @@ def test_construction_zone_warns_before_entry(world):
     warnings = _gps_messages(events)
     assert warnings == [
         f"Brake now! In {trip._distance_text(lookahead)}, construction ahead. "
-        f"Speed limit {zone.limit_mph:.0f}."
+        f"Merge left for the flagger taper; speed limit "
+        f"{CONSTRUCTION_TAPER_LIMIT_MPH:.0f}, then {zone.limit_mph:.0f} "
+        "through the work zone."
     ]
+
+
+def test_construction_zone_has_staged_merge_taper(world):
+    trip, _ = make_trip(world, "Chicago", "Indianapolis", seed=12345)
+    zone = next(z for z in trip.zones if z.reason == "construction")
+    taper = next(
+        z for z in trip.zones
+        if z.reason == "construction merge" and z.end_mi == zone.start_mi
+    )
+
+    assert taper.start_mi == pytest.approx(zone.start_mi - CONSTRUCTION_TAPER_MI)
+    assert taper.limit_mph == CONSTRUCTION_TAPER_LIMIT_MPH
+    limit, reason = trip.speed_limit_at((taper.start_mi + taper.end_mi) / 2)
+    assert (limit, reason) == (CONSTRUCTION_TAPER_LIMIT_MPH, "construction merge")
+    limit, reason = trip.speed_limit_at((zone.start_mi + zone.end_mi) / 2)
+    assert (limit, reason) == (zone.limit_mph, "construction")
 
 
 def test_construction_warning_lead_allows_normal_braking(world):
@@ -517,7 +537,10 @@ def test_construction_zone_speeding_fine_waits_for_grace_distance(world):
     trip.position_mi = zone.start_mi - 2.0
     advance = trip.update(0.0)
     assert _gps_messages(advance) == [
-        f"Brake now! In 2 miles, construction ahead. Speed limit {zone.limit_mph:.0f}."
+        "Brake now! In 2 miles, construction ahead. "
+        f"Merge left for the flagger taper; speed limit "
+        f"{CONSTRUCTION_TAPER_LIMIT_MPH:.0f}, then {zone.limit_mph:.0f} "
+        "through the work zone."
     ]
 
     trip.position_mi = zone.start_mi + CONSTRUCTION_ENFORCEMENT_GRACE_MI - 0.1

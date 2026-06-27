@@ -42,6 +42,11 @@
   in one burst. Safety cues and actionable GPS distances still speak immediately.
 
 ### Changed
+- **Construction zones now stage the slowdown.** Work zones add a merge/flagger
+  taper before the barrels, with spoken guidance to slow first for the taper and
+  then for the lower work-zone limit. The taper shows up in speed-limit and
+  upcoming-road readouts, while ticket enforcement still waits until the main
+  work zone after the fair braking window.
 - **Loaded trucks pull away more like loaded trucks.** Low-speed drive force now
   ramps in from a stop instead of hitting the full rolling traction cap
   immediately, and the automatic holds the first few gears a little longer, so a

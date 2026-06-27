@@ -59,7 +59,8 @@ def test_zone_warning_interrupts_while_weather_chatter_queues(monkeypatch):
 
         d._handle_trip_event(TripEvent(
             TripEventKind.GPS_CUE,
-            "Brake now! In 2 miles, construction ahead. Speed limit 45.",
+            "Brake now! In 2 miles, construction ahead. Merge left for the "
+            "flagger taper; speed limit 55, then 45 through the work zone.",
             {"zone": zone}))
         assert calls[-1][1] is True   # the warning preempts whatever is talking
 

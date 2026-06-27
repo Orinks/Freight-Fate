@@ -97,6 +97,8 @@ RUSH_HOUR_WINDOWS = ((6.5, 9.0), (16.0, 18.5))
 TRAFFIC_LOOKAHEAD_MI = 2.5
 TRAFFIC_WARNING_GAP_S = 2.2
 ZONE_WARNING_LOOKAHEAD_MI = 2.0    # minimum distance heads-up for a zone
+CONSTRUCTION_TAPER_MI = 1.0
+CONSTRUCTION_TAPER_LIMIT_MPH = 55.0
 # Distance compression (time_scale) and speed eat into how much *real* time a
 # fixed-distance warning gives -- 2 miles at 70 mph and 20x is only ~5 seconds.
 # Scale the lead distance with speed and pacing for a roughly constant real-time
@@ -598,6 +600,9 @@ class Trip:
             at = self._rng.uniform(15, max(16, total - 20))
             length = self._rng.uniform(3, 9)
             if self._rng.random() < 0.6:
+                taper_start = max(0.0, at - CONSTRUCTION_TAPER_MI)
+                zones.append(Zone(taper_start, at, CONSTRUCTION_TAPER_LIMIT_MPH,
+                                  "construction merge"))
                 zones.append(Zone(at, at + length, 45, "construction"))
             elif not night or self._rng.random() < NIGHT_TRAFFIC_KEEP:
                 zones.append(Zone(at, at + length, 50, "heavy traffic"))
@@ -1090,18 +1095,44 @@ class Trip:
         miles = ZONE_WARNING_REAL_S * speed * self.time_scale / 3600.0
         return max(ZONE_WARNING_LOOKAHEAD_MI, min(miles, ZONE_WARNING_MAX_MI))
 
+    def _zone_warning_message(self, zone: Zone, ahead: float) -> str:
+        if zone.reason == "construction":
+            return (
+                f"Brake now! In {self._distance_text(ahead)}, construction ahead. "
+                f"Merge left for the flagger taper; speed limit "
+                f"{self._speed_value(CONSTRUCTION_TAPER_LIMIT_MPH)}, then "
+                f"{self._speed_value(zone.limit_mph)} through the work zone."
+            )
+        return (
+            f"In {self._distance_text(ahead)}, {zone.reason} ahead. "
+            f"Speed limit {self._speed_value(zone.limit_mph)}."
+        )
+
+    def _zone_entry_message(self, zone: Zone) -> str:
+        if zone.reason == "construction merge":
+            return (
+                "Construction merge taper. Follow the flagger and merge left. "
+                f"Speed limit {self._speed_value(zone.limit_mph)}."
+            )
+        if zone.reason == "construction":
+            return (
+                "Work zone active. Stay in the lane and watch the barrels. "
+                f"Speed limit {self._speed_value(zone.limit_mph)}."
+            )
+        return f"{zone.reason} ahead. Speed limit {self._speed_value(zone.limit_mph)}."
+
     def _check_zones(self) -> None:
         lookahead = self._zone_warning_lookahead_mi()
         for zone in self.zones:
             key = _zone_key(zone)
             ahead = zone.start_mi - self.position_mi
+            if zone.reason == "construction merge":
+                continue
             if 0 < ahead <= lookahead and key not in self._announced_zone_warnings:
                 self._announced_zone_warnings.add(key)
-                action = "Brake now! " if zone.reason == "construction" else ""
                 self._emit(
                     TripEventKind.GPS_CUE,
-                    f"{action}In {self._distance_text(ahead)}, {zone.reason} ahead. "
-                    f"Speed limit {self._speed_value(zone.limit_mph)}.",
+                    self._zone_warning_message(zone, ahead),
                     zone=zone,
                 )
         zone = self._active_zone_at(self.position_mi)
@@ -1109,10 +1140,18 @@ class Trip:
             if zone is not None:
                 if zone.reason == "construction":
                     self._construction_zone_grace_start[_zone_key(zone)] = zone.start_mi
+                quiet = (
+                    zone.reason == "construction"
+                    and any(
+                        z.reason == "construction merge"
+                        and abs(z.end_mi - zone.start_mi) < 0.01
+                        for z in self.zones
+                    )
+                )
                 self._emit(TripEventKind.ZONE_ENTER,
-                           f"{zone.reason} ahead. "
-                           f"Speed limit {self._speed_value(zone.limit_mph)}.",
-                           zone=zone)
+                           self._zone_entry_message(zone),
+                           zone=zone,
+                           suppress_sound=quiet)
             elif self._active_zone is not None:
                 self._construction_zone_grace_start.pop(
                     _zone_key(self._active_zone), None)

@@ -342,8 +342,9 @@ Hazards can happen while moving. When a "Brake now" warning appears, slow below
 25 miles per hour quickly to avoid a collision. Fatigue shortens the reaction
 window.
 
-Construction and traffic zones lower the speed limit. Speeding in a
-construction zone can trigger enforcement.
+Construction and traffic zones lower the speed limit. Construction zones may
+begin with a merge/flagger taper before the lower work-zone limit. Speeding in
+the main construction zone can trigger enforcement.
 
 Posted speed limits come from real map data and change along a corridor; a
 change is announced as reduced or raised, and named near a city. State troopers

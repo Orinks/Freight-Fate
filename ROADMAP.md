@@ -401,10 +401,12 @@ reset instead of only a fine.
   `tools/generate_sounds.py`.
   *Next trooper slices:* a full felony stop (losing the load), weigh-station
   "blow past while flagged", and damage-triggered stops.
-- [ ] **Richer construction enforcement.** Follow-up for the roadmap worker:
-  model staged work-zone speed drops, merge/flagger cues, and zone-end restore
-  timing more explicitly. Keep warnings action-first and keep enforcement after
-  a fair braking window.
+- [x] **Richer construction enforcement.** Shipped: construction zones now add a
+  staged merge/flagger taper before the main work zone. The first cue remains
+  action-first ("Brake now!") and tells the player to merge left for the flagger
+  taper, slow to the taper limit, then hold the lower work-zone limit. The taper
+  is a real speed zone for S/U/status surfaces, while ticket enforcement still
+  waits for the main construction zone and its fair braking grace distance.
 
 The ELD/HOS model is grounded in FMCSA's property-carrier summary:
 11 hours of driving after 10 consecutive hours off duty, a 14-hour
