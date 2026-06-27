@@ -322,6 +322,17 @@ class WeatherSystem:
 
         return season(clock)
 
+    @property
+    def date_text(self) -> str | None:
+        """Calendar date (real with live weather, else the career clock), e.g.
+        'March 21'; None when no clock is available."""
+        clock = self._season_clock()
+        if clock is None:
+            return None
+        from .season import date_text
+
+        return date_text(clock)
+
     def forecast(self, segments: int = 3) -> list[WeatherKind]:
         """Probable conditions ahead (informational, not binding)."""
         rng = random.Random()

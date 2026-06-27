@@ -29,6 +29,12 @@
   equivalent nightly.
 
 ### Changed
+- **The calendar reads as a real date, in more places.** The career clock now
+  speaks an actual date that advances as time passes -- "March 21," then "April
+  1," and so on (a new career starts March 21) -- instead of only a day number.
+  It is announced on the C clock readout, the Tab status menu, and the on-screen
+  status, not just at the terminal, with the season alongside it. With live
+  weather on, the date and season follow the real-world calendar.
 - **Weather you have to drive to, not just hear.** Three conditions that used to
   be flavor now bite. High wind and storms add real aerodynamic drag, so they
   cost top speed and fuel. Driving well over the conditions-safe speed on a

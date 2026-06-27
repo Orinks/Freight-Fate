@@ -6,8 +6,11 @@ import pytest
 
 from freight_fate.sim.season import (
     CAREER_START_DAY_OF_YEAR,
+    DAYS_PER_YEAR,
     FREEZING_C,
     adjust_for_temperature,
+    career_year,
+    date_text,
     day_of_year,
     is_freezing,
     real_clock_game_hours,
@@ -21,6 +24,28 @@ from freight_fate.sim.weather import WeatherKind, WeatherSystem
 def _hours_for_day(target_doy: float) -> float:
     """Career hours that land on a given day of the year."""
     return ((target_doy - CAREER_START_DAY_OF_YEAR) % 365.0) * 24.0
+
+
+def test_date_text_starts_at_march_21_and_advances():
+    assert date_text(0.0) == "March 21"           # day-of-year 80, career start
+    assert date_text(24.0 * 11) == "April 1"      # eleven days on
+    assert date_text(24.0 * 100) == "June 29"     # a hundred days on
+    # The fixed 365-day year wraps cleanly back to the start.
+    assert date_text(24.0 * DAYS_PER_YEAR) == "March 21"
+
+
+def test_career_year_increments_after_a_full_year():
+    assert career_year(0.0) == 1
+    assert career_year(24.0 * (DAYS_PER_YEAR - 1)) == 1
+    assert career_year(24.0 * DAYS_PER_YEAR) == 2
+
+
+def test_weather_system_exposes_date_text():
+    sim = WeatherSystem("heartland", seed=1, game_hours=0.0)
+    assert sim.date_text == "March 21"
+    assert sim.season == "spring"
+    # No clock and no provider -> no calendar.
+    assert WeatherSystem("heartland", seed=1).date_text is None
 
 
 def test_career_starts_in_spring():

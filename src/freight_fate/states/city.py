@@ -284,7 +284,7 @@ class CityMenuState(MenuState):
             kind = provider.get(city.name)
             if kind is not None:
                 desc, live = kind.value, True
-        from ..sim.season import real_clock_game_hours, season
+        from ..sim.season import date_text, real_clock_game_hours, season
 
         # With live weather on, the season follows the real calendar so it
         # matches the real conditions; otherwise it follows the career clock.
@@ -296,7 +296,8 @@ class CityMenuState(MenuState):
                                  game_hours=season_hours).describe()
         source = "Live weather" if live else "Weather"
         self.ctx.say(f"It is {clock_text(hour)}, {time_of_day(hour)}, "
-                     f"day {day} of your career, in {season(season_hours)}. "
+                     f"{date_text(season_hours)}, in {season(season_hours)}, "
+                     f"day {day} of your career. "
                      f"{source} in {p.current_city}: {desc}.")
 
     def _sleep(self) -> None:

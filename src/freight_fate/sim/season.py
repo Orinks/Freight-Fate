@@ -90,6 +90,23 @@ def season(game_hours: float) -> str:
     return "autumn"
 
 
+def date_text(game_hours: float) -> str:
+    """The career's calendar date for a point on the clock, e.g. 'March 21'.
+
+    The career runs a fixed 365-day (non-leap) year; day-of-year 80 -- the start
+    of a career -- is March 21."""
+    doy = int(day_of_year(game_hours))
+    # 2001 is a non-leap year; January 1 is day-of-year 1.
+    date = datetime.date(2001, 1, 1) + datetime.timedelta(days=(doy - 1) % 365)
+    return f"{date:%B} {date.day}"
+
+
+def career_year(game_hours: float) -> int:
+    """Which year of the career this clock falls in (1 on the first lap of the
+    calendar, 2 after a full year, ...). Always 1 for the real-calendar clock."""
+    return int(game_hours // (24.0 * DAYS_PER_YEAR)) + 1
+
+
 def temperature_c(region: str, game_hours: float) -> float:
     """Outdoor temperature in Celsius: seasonal swing plus a daily swing."""
     mean, seasonal_amp, daily_amp = REGION_CLIMATE.get(region, DEFAULT_CLIMATE)

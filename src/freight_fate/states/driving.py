@@ -646,7 +646,9 @@ class DrivingState(State):
             f"Fuel: {t.fuel_fraction * 100:.0f} percent",
             f"Air brakes: {self._air_status_text(detailed=True)}",
             f"Weather: {self.weather.describe(self.ctx.settings.imperial_units)}",
-            f"Clock: {time_of_day(self.trip.current_hour)}",
+            f"Calendar: {self._calendar_phrase() or 'unknown'}",
+            f"Clock: {clock_text(self.trip.current_hour)} "
+            f"({time_of_day(self.trip.current_hour)})",
         ]
         if self._cruise_mph is not None:
             lines.insert(
@@ -714,10 +716,24 @@ class DrivingState(State):
         self.ctx.say(f"Fuel {t.fuel_fraction * 100:.0f} percent, {t.fuel_gal:.0f} gallons. "
                      f"Estimated range {self.ctx.settings.distance_text(range_mi)}.")
 
+    def _calendar_phrase(self) -> str:
+        """Calendar date and season for the spoken readouts; '' when unknown."""
+        date = self.weather.date_text
+        if date is None:
+            return ""
+        season = self.weather.season
+        return f"{date}, {season}" if season else date
+
+    def _clock_phrase(self) -> str:
+        """'It is 5:33 AM, March 21, spring.' -- the time plus the calendar."""
+        cal = self._calendar_phrase()
+        base = f"It is {clock_text(self.trip.current_hour)}"
+        return f"{base}, {cal}." if cal else f"{base}."
+
     def _speak_clock(self) -> None:
         hours_used = self.trip.game_minutes / 60.0
+        now = self._clock_phrase()
         if self.phase == DRIVE_PHASE_PICKUP:
-            now = f"It is {clock_text(self.trip.current_hour)}."
             self.ctx.say(
                 f"{now} Pickup drive to {self._pickup_facility_text()}. "
                 f"{self.ctx.settings.distance_text(self.trip.remaining_miles)} remain. "
@@ -730,7 +746,6 @@ class DrivingState(State):
         basis = ("at your current speed"
                  if self.truck.speed_mph >= self.trip.ETA_MIN_MPH
                  else "at a typical highway pace")
-        now = f"It is {clock_text(self.trip.current_hour)}."
         hos_part = self.hos.summary(self.ctx.settings.hos_mode)
         hos_route = self._hos_route_context()
         if hos_route:
@@ -2030,6 +2045,7 @@ class DrivingState(State):
             f"Fuel: {t.fuel_fraction * 100:.0f}%   Damage: {t.damage_pct:.0f}%",
             f"Remaining: {remaining}",
             f"Weather: {self.weather.current.value}",
+            f"Date: {self._calendar_phrase() or 'unknown'}",
             f"Clock: {clock_text(self.trip.current_hour)} "
             f"({time_of_day(self.trip.current_hour)})   "
             f"Fatigue: {self.ctx.profile.fatigue:.0f}%",

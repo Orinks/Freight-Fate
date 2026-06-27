@@ -307,7 +307,19 @@ construction zone can trigger enforcement.
 Weather affects safe speed, traction, braking, visibility, traffic pressure,
 adaptive cruise following distance, and audio layers such as rain, wind,
 thunder, snow, and fog. Press V while driving for current conditions. In
-simulated weather, V also gives the upcoming forecast.
+simulated weather, V also gives the upcoming forecast. Driving well over the
+safe speed for the conditions on a slick road risks losing traction --
+hydroplaning in rain, sliding on snow -- and high winds and storms add real
+drag that costs you speed and fuel.
+
+Your career runs on a calendar. A new career begins on **March 21**, in early
+spring, and the date advances as you drive, rest, and sleep -- through summer,
+autumn, and into winter, then around again. The season sets the weather:
+snow and ice are cold-season risks, thunderstorms a warm-season one, and the
+regional temperature follows the time of year and time of day. The current
+date and season are announced with the clock (press C while driving), in the
+Tab status menu, and at the city terminal. With live weather turned on, the
+date, season, and temperature follow the real-world calendar instead.
 
 Stops are reported as you approach them. A one-mile cue tells you when to take
 an exit. Press X to signal for the exit, slow to 45 miles per hour or less, and
