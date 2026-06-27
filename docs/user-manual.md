@@ -245,6 +245,11 @@ storage, food processors, farms and grain elevators, manufacturing plants,
 construction yards, mines, lumber or paper facilities, cross-docks, and other
 freight locations.
 
+Many freight destinations now use real map-sourced endpoint matches when the
+offline data supports them. When the map data cannot prove a specific freight
+place, the game keeps using a representative local facility and treats it as a
+fallback instead of pretending it found a real gate or dock.
+
 Each job lists:
 
 - Cargo and weight.

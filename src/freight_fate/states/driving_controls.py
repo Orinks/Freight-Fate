@@ -80,12 +80,22 @@ class DrivingControlsMixin:
         elif key == pygame.K_y:
             self._speak_radio_status()
         elif key == pygame.K_F1:
-            objective_help = (
-                f"Your current objective is pickup: drive to {self._pickup_facility_text()}, "
-                "stop at the gate, then check in and load. "
-                if self.phase == DRIVE_PHASE_PICKUP else
-                "Pickup and loading are complete. At your destination, stop, "
-                "then dock and deliver. ")
+            if self.phase == DRIVE_PHASE_PICKUP:
+                objective_help = (
+                    f"Your current objective is pickup: drive to "
+                    f"{self._pickup_facility_text()}, stop at the gate, then "
+                    "check in and load. "
+                )
+            elif self.phase == DRIVE_PHASE_CITY_SERVICE:
+                objective_help = (
+                    f"Your current objective is {self._city_service_text()}: "
+                    "drive there, stop, then press Enter to go inside. "
+                )
+            else:
+                objective_help = (
+                    "Pickup and loading are complete. At your destination, stop, "
+                    "then dock and deliver. "
+                )
             self.ctx.say(
                 "Hold Up arrow to accelerate, Down arrow to brake. "
                 "When stopped in automatic, hold Down arrow to reverse slowly; "

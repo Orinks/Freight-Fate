@@ -81,8 +81,12 @@ def test_city_service_and_facility_routes_use_local_approach_layer(world):
     facility = world.cities["Chicago"].locations[0]
     facility_route = world.facility_approach_route("Chicago", facility.name)
     facility_approach = world.facility_approach("Chicago", facility.name)
+    facility_endpoint = world.facility_endpoint("Chicago", facility.name)
     assert facility_approach is not None
-    assert facility_route.miles == facility_approach.approach_miles
+    if facility_endpoint is not None and facility_endpoint.source_backed:
+        assert facility_route.miles == facility_endpoint.approach_miles
+    else:
+        assert facility_route.miles == facility_approach.approach_miles
     assert facility_route.highways == [facility_approach.road]
 
 

@@ -301,6 +301,13 @@ target and writes `local_geometry.json` for offline runtime use. The first bake
 adds turn-level geometry for 412 sourced city-service drives and fallback
 metadata for the rest of the 2,401 local targets.
 
+The freight facility endpoint layer is separate again. `tools/build_facility_endpoints.py`
+scans the same local PBF cache at `C:\Users\joshu\.cache\freight-fate-osm\regions\`
+and writes `facility_endpoints.json`: 1,462 of 1,819 facilities now have
+source-backed OSM freight/industrial endpoint matches, and 357 remain explicit
+representative fallbacks. This layer does not snap endpoints to roads and does
+not claim gates, yards, docks, driveways, or HGV-legal turn-by-turn routing.
+
 This local graph output is not ORS `driving-hgv` and should not be described as
 truck-legal routing. ORS HGV remains feasible for selected sourced service
 endpoints when `ORS_API_KEY` is available, but using it for the full local batch

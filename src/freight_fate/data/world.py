@@ -1,10 +1,5 @@
-# ruff: noqa: F403,F405
-"""World model: cities, freight locations, and the highway network.
-
-Loads ``world.json`` and exposes a graph with Dijkstra-based route finding.
-Route options are produced by re-running the search with already-used legs
-penalized, giving genuinely different alternatives (fastest vs. detour).
-"""
+# ruff: noqa: F403,F405,I001
+"""World model: cities, freight locations, and the highway network."""
 
 from __future__ import annotations
 
@@ -15,11 +10,7 @@ import zlib
 from pathlib import Path
 
 from .world_constants import *
-from .world_local_data import (
-    load_city_service_data,
-    load_local_approaches,
-    load_local_geometries,
-)
+from .world_local_data import load_city_service_data, load_facility_endpoints, load_local_approaches, load_local_geometries
 from .world_models import *
 
 WORLD_PATH = Path(__file__).parent / "world.json"
@@ -29,6 +20,7 @@ class World:
         self.cities: dict[str, City] = {}
         self._facilities_by_id: dict[str, Location] = {}
         self._city_service_data = load_city_service_data()
+        self._facility_endpoints = load_facility_endpoints()
         self._local_approaches = load_local_approaches()
         self._local_geometries = load_local_geometries()
         for name, c in data["cities"].items():
@@ -272,6 +264,10 @@ class World:
         location = self.facility_location(city, location_name)
         return self.local_approach(f"facility:{location.id}")
 
+    def facility_endpoint(self, city: str, location_name: str) -> FacilityEndpoint | None:
+        location = self.facility_location(city, location_name)
+        return self._facility_endpoints.get(location.id)
+
     def facility_geometry(self, city: str, location_name: str) -> LocalGeometry | None:
         location = self.facility_location(city, location_name)
         return self.local_geometry(f"facility:{location.id}")
@@ -308,8 +304,12 @@ class World:
     def facility_approach_route(self, city: str, location_name: str) -> Route:
         """A short, drivable local route from the company terminal to a facility."""
         location = self.facility_location(city, location_name)
+        endpoint = self._facility_endpoints.get(location.id)
         approach = self.local_approach(f"facility:{location.id}")
-        if approach is not None:
+        if endpoint is not None and endpoint.source_backed and not endpoint.fallback:
+            miles = endpoint.approach_miles
+            road = approach.road if approach is not None else endpoint.approach_road
+        elif approach is not None:
             miles = approach.approach_miles
             road = approach.road
         else:

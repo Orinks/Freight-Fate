@@ -70,6 +70,11 @@
   in one burst. Safety cues and actionable GPS distances still speak immediately.
 
 ### Changed
+- **More freight destinations use real map-backed endpoints.** The offline map
+  data now includes source-backed freight facility endpoints where local OSM
+  data supports them, while facilities without a confident match stay clearly
+  marked as representative fallbacks. The game does not claim gates, yards,
+  docks, or truck-legal turn-by-turn facility routing from this layer yet.
 - **Own-authority drivers can now buy trailers.** The garage sells dry van,
   reefer, flatbed, and bulk trailers after own authority is active. Direct
   freight rows say when an owned trailer fits, and settlement uses an

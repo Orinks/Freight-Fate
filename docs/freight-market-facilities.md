@@ -194,6 +194,20 @@ Player-facing GPS should use clean street names and turn wording from the
 geometry layer when available, then fall back to the nearest-road approach
 context. Do not expose OSM IDs, tags, source refs, ORS keys, or raw source text.
 
+## Source-Backed Endpoint Layer
+
+`src/freight_fate/data/facility_endpoints.json` is the checked-in offline
+endpoint layer for freight facilities. It was generated from the local
+Geofabrik cache at `C:\Users\joshu\.cache\freight-fate-osm\regions\` and covers
+all 1,819 supported facilities: 1,462 have source-backed OSM freight/industrial
+endpoint matches and 357 remain representative fallbacks with explicit reasons.
+
+This layer is intentionally honest about its limits. It does not claim
+truck-legal routing, road snapping, gates, yards, docks, or driveways; those
+flags stay false unless a later source proves them. Runtime can prefer a
+source-backed endpoint distance/name where available, then fall back to the
+existing local approach and turn-geometry layers for road cues.
+
 ## Job Generation
 
 Job generation now chooses:

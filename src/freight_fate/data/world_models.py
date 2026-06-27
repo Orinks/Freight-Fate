@@ -85,6 +85,32 @@ class CityService:
 
 
 @dataclass(frozen=True)
+class FacilityEndpoint:
+    facility_id: str
+    city: str
+    state: str
+    facility_name: str
+    facility_type: str
+    endpoint_name: str
+    source_type: str
+    source_note: str
+    lat: float = 0.0
+    lon: float = 0.0
+    approach_miles: float = 0.0
+    approach_road: str = ""
+    source_ref: str = ""
+    source_backed: bool = False
+    fallback: bool = True
+    fallback_reason: str = ""
+    nearest_road_context: bool = False
+    turn_level_geometry: bool = False
+    gate_hint: bool = False
+    yard_hint: bool = False
+    dock_hint: bool = False
+    mapping: str = ""
+
+
+@dataclass(frozen=True)
 class Stop:
     name: str
     at_mi: float

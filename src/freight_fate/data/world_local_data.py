@@ -10,11 +10,12 @@ from .world_constants import (
     CITY_SERVICE_SOURCE_TYPES,
     RAW_POI_TEXT_MARKERS,
 )
-from .world_models import LocalApproach, LocalGeometry, LocalGeometrySegment
+from .world_models import FacilityEndpoint, LocalApproach, LocalGeometry, LocalGeometrySegment
 
 CITY_SERVICES_PATH = Path(__file__).parent / "city_services.json"
 LOCAL_APPROACHES_PATH = Path(__file__).parent / "local_approaches.json"
 LOCAL_GEOMETRY_PATH = Path(__file__).parent / "local_geometry.json"
+FACILITY_ENDPOINTS_PATH = Path(__file__).parent / "facility_endpoints.json"
 
 
 def load_city_service_data(path: Path = CITY_SERVICES_PATH) -> dict[str, dict[str, dict]]:
@@ -192,5 +193,67 @@ def load_local_geometries(path: Path = LOCAL_GEOMETRY_PATH) -> dict[str, LocalGe
             fallback_reason=fallback_reason,
             total_miles=total_miles,
             segments=tuple(segments),
+        )
+    return out
+
+
+def load_facility_endpoints(path: Path = FACILITY_ENDPOINTS_PATH) -> dict[str, FacilityEndpoint]:
+    if not path.exists():
+        return {}
+    raw = json.loads(path.read_text(encoding="utf-8-sig"))
+    records = raw.get("endpoints", {})
+    if not isinstance(records, dict):
+        raise ValueError(f"{path} must contain an endpoints object")
+    out: dict[str, FacilityEndpoint] = {}
+    for facility_id, entry in records.items():
+        name = str(entry.get("endpoint_name", "")).strip()
+        facility_name = str(entry.get("facility_name", "")).strip()
+        road = str(entry.get("approach_road", "")).strip()
+        source_type = str(entry.get("source_type", "")).strip()
+        source_note = str(entry.get("source_note", "")).strip()
+        city = str(entry.get("city", "")).strip()
+        state = str(entry.get("state", "")).strip()
+        facility_type = str(entry.get("facility_type", "")).strip()
+        if not name or not facility_name or not source_type or not source_note:
+            raise ValueError(f"{path} facility endpoint {facility_id!r} is missing text")
+        lowered = f"{name} {facility_name} {road}".lower()
+        if any(marker in lowered for marker in RAW_POI_TEXT_MARKERS):
+            raise ValueError(
+                f"{path} facility endpoint {facility_id!r} exposes raw source text"
+            )
+        fallback = bool(entry.get("fallback", True))
+        fallback_reason = str(entry.get("fallback_reason", "")).strip()
+        if fallback and not fallback_reason:
+            raise ValueError(f"{path} facility endpoint {facility_id!r} is fallback without reason")
+        approach_miles = float(entry.get("approach_miles", 0.0))
+        if not fallback and (approach_miles <= 0.0 or approach_miles > 50.0 or not road):
+            raise ValueError(f"{path} facility endpoint {facility_id!r} has invalid approach")
+        lat = float(entry.get("lat", 0.0))
+        lon = float(entry.get("lon", 0.0))
+        if not -90.0 <= lat <= 90.0 or not -180.0 <= lon <= 180.0:
+            raise ValueError(f"{path} facility endpoint {facility_id!r} has invalid coordinates")
+        out[str(facility_id)] = FacilityEndpoint(
+            facility_id=str(facility_id),
+            city=city,
+            state=state,
+            facility_name=facility_name,
+            facility_type=facility_type,
+            endpoint_name=name,
+            source_type=source_type,
+            source_note=source_note,
+            lat=lat,
+            lon=lon,
+            approach_miles=round(approach_miles, 1),
+            approach_road=road,
+            source_ref=str(entry.get("source_ref", "")).strip(),
+            source_backed=bool(entry.get("source_backed", False)),
+            fallback=fallback,
+            fallback_reason=fallback_reason,
+            nearest_road_context=bool(entry.get("nearest_road_context", False)),
+            turn_level_geometry=bool(entry.get("turn_level_geometry", False)),
+            gate_hint=bool(entry.get("gate_hint", False)),
+            yard_hint=bool(entry.get("yard_hint", False)),
+            dock_hint=bool(entry.get("dock_hint", False)),
+            mapping=str(entry.get("mapping", "")).strip(),
         )
     return out

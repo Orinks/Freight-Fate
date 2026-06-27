@@ -119,10 +119,14 @@ def test_facility_approach_route_has_real_mileage_and_label(world):
     jobs = world.cities["Chicago"].locations
     route = world.facility_approach_route("Chicago", jobs[0].name)
     approach = world.facility_approach("Chicago", jobs[0].name)
+    endpoint = world.facility_endpoint("Chicago", jobs[0].name)
 
     assert approach is not None
     assert route.miles > 2.0
-    assert route.miles == approach.approach_miles
+    if endpoint is not None and endpoint.source_backed:
+        assert route.miles == endpoint.approach_miles
+    else:
+        assert route.miles == approach.approach_miles
     assert route.cities == ["Chicago", "Chicago"]
     assert route.highways
     assert route.highways[0] == approach.road
