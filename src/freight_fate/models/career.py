@@ -6,7 +6,8 @@ from dataclasses import dataclass
 
 from .career_ladder import MAX_CAREER_LEVEL, next_rank_for_level, rank_for_level
 
-# XP needed for each level in the 20-level career ladder.
+# XP needed for each level in the 30-level career ladder. The first 20
+# thresholds stay fixed so existing saves keep their current level.
 LEVEL_XP = [
     0,
     1000,
@@ -28,6 +29,16 @@ LEVEL_XP = [
     152_000,
     176_000,
     202_000,
+    230_000,
+    260_000,
+    292_000,
+    326_000,
+    362_000,
+    400_000,
+    440_000,
+    482_000,
+    526_000,
+    572_000,
 ]
 
 # Endorsements unlocked automatically at these levels.

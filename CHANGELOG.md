@@ -4,6 +4,10 @@
 
 ### Added
 
+- **Career progression now stretches to 30 levels.** The company-driver path
+  grows through senior company ranks before a level-18 leased-on
+  owner-operator gate, level-21 authority prep, level-25 own authority, and
+  established independent owner-operator ranks through level 30.
 - **Local turns can now add a small sound cue.** Source-backed local service and
   facility approaches can play subtle non-speech turn sounds when the checked-in
   route data clearly marks a local direction. Spoken GPS instructions with road
@@ -109,7 +113,7 @@
   grain or bulk, and high-value jobs. Some training loads also have more
   forgiving deadlines.
 - **Owner-operators now have an authority prep milestone.** Qualified
-  level-20 owner-operators can set aside a reserve from Business status before
+  level-21 owner-operators can set aside a reserve from Business status before
   taking the later own-authority step.
 - **New careers now offer grounded start choices.** Pick from several
   fictional company-driver carriers with assigned equipment and modest wage or
@@ -128,7 +132,7 @@
   ramps in from a stop instead of hitting the full rolling traction cap
   immediately, and the automatic holds the first few gears a little longer, so a
   heavy tractor-trailer launch has weight without losing highway acceleration.
-- **Career progression now has a 20-level business arc.** New drivers start
+- **Career progression now has a 30-level business arc.** New drivers start
   with fictional carrier Northstar Freight Lines, move through company-driver
   and owner-operator preparation ranks, and unlock the leased-on
   owner-operator buy-in later in the ladder instead of jumping there at level 5.

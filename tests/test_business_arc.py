@@ -6,6 +6,7 @@ import pytest
 from freight_fate.models.business import (
     AUTHORITY_ACTIVATION_COST,
     AUTHORITY_ACTIVATION_DELIVERIES,
+    AUTHORITY_ACTIVATION_LEVEL,
     AUTHORITY_ACTIVATION_REPUTATION,
     AUTHORITY_ACTIVATION_WORKING_CAPITAL,
     AUTHORITY_READY_DELIVERIES,
@@ -43,13 +44,15 @@ def key_event(key, unicode=""):
     return pygame.event.Event(pygame.KEYDOWN, key=key, unicode=unicode)
 
 
-def test_twenty_level_ladder_has_business_arc_titles():
-    assert len(CAREER_RANKS) == 20
-    assert [rank.level for rank in CAREER_RANKS] == list(range(1, 21))
+def test_thirty_level_ladder_has_business_arc_titles():
+    assert len(CAREER_RANKS) == 30
+    assert [rank.level for rank in CAREER_RANKS] == list(range(1, 31))
     assert CAREER_RANKS[0].title == "Yard Trainee"
-    assert CAREER_RANKS[4].title == "Owner-Operator Apprentice"
-    assert CAREER_RANKS[14].title == "Leased-On Owner-Operator"
-    assert CAREER_RANKS[-1].title == "Independent Operator"
+    assert CAREER_RANKS[4].title == "Regional Regular"
+    assert CAREER_RANKS[14].title == "Owner-Operator Candidate"
+    assert CAREER_RANKS[17].title == "Leased-On Owner-Operator"
+    assert CAREER_RANKS[24].title == "Independent Authority Operator"
+    assert CAREER_RANKS[-1].title == "Freight Fate Independent"
 
 
 def test_owner_operator_unlock_requires_career_and_working_capital():
@@ -61,7 +64,7 @@ def test_owner_operator_unlock_requires_career_and_working_capital():
     assert not ok
     assert any(f"Reach level {OWNER_OPERATOR_LEVEL}" in reason for reason in reasons)
     assert STARTER_CARRIER_NAME in business_status_summary(p)
-    assert "company driver" in business_status_summary(p)
+    assert "company driver" in business_status_summary(p).lower()
 
     p.career.xp = LEVEL_XP[OWNER_OPERATOR_LEVEL - 1]
     p.career.deliveries = OWNER_OPERATOR_DELIVERIES
@@ -91,19 +94,19 @@ def test_level_five_is_preparation_not_owner_operator_unlock():
 
     assert not ok
     assert any(f"Reach level {OWNER_OPERATOR_LEVEL}" in reason for reason in reasons)
-    assert "Owner-Operator Apprentice" in business_status_summary(p)
-    assert "Regional Fleet Driver" in next_business_unlock(p)
+    assert "Regional Regular" in business_status_summary(p)
+    assert "Experienced Company Driver" in next_business_unlock(p)
 
 
 def test_business_path_reports_starter_company_rank_and_next_unlock():
     from freight_fate.models.profile import Profile
 
     p = Profile(name="Path Copy")
-    p.career.xp = LEVEL_XP[10]
+    p.career.xp = LEVEL_XP[14]
 
     assert STARTER_CARRIER_NAME in business_path_label(p)
     assert "Owner-Operator Candidate" in business_path_label(p)
-    assert "Working Capital Builder" in next_business_unlock(p)
+    assert "Leased-On Applicant" in next_business_unlock(p)
 
 
 def test_business_status_menu_unlocks_owner_operator_when_qualified():
@@ -652,6 +655,11 @@ def test_authority_activation_requires_prep_and_specialty_program():
     p.authority_readiness = True
     ok, reasons = authority_activation_eligibility(p)
     assert not ok
+    assert any(f"level {AUTHORITY_ACTIVATION_LEVEL}" in reason for reason in reasons)
+
+    p.career.xp = LEVEL_XP[AUTHORITY_ACTIVATION_LEVEL - 1]
+    ok, reasons = authority_activation_eligibility(p)
+    assert not ok
     assert any("specialty trailer" in reason for reason in reasons)
 
     p.trailer_programs = ["dry_van", "reefer"]
@@ -673,7 +681,7 @@ def test_business_status_menu_activates_own_authority():
         p.owned_trucks = ["rig"]
         p.trailer_programs = ["dry_van", "reefer"]
         p.authority_readiness = True
-        p.career.xp = LEVEL_XP[AUTHORITY_READY_LEVEL - 1]
+        p.career.xp = LEVEL_XP[AUTHORITY_ACTIVATION_LEVEL - 1]
         p.career.deliveries = AUTHORITY_ACTIVATION_DELIVERIES
         p.career.reputation = AUTHORITY_ACTIVATION_REPUTATION
         p.money = AUTHORITY_ACTIVATION_COST + AUTHORITY_ACTIVATION_WORKING_CAPITAL + 750
@@ -700,11 +708,11 @@ def test_direct_freight_board_pays_more_and_uses_direct_label(world):
     from freight_fate.states.city import JobBoardState
 
     base = JobBoard(world, seed=44).offers(
-        "Chicago", {"refrigerated", "heavy_haul", "high_value"}, level=20)
+        "Chicago", {"refrigerated", "heavy_haul", "high_value"}, level=25)
     direct = JobBoard(world, seed=44).offers(
         "Chicago",
         {"refrigerated", "heavy_haul", "high_value"},
-        level=20,
+        level=25,
         direct_freight=True,
     )
 

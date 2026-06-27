@@ -267,9 +267,9 @@ Net-new realism candidates, roughly by area:
   true gate/yard/dock/driveway hints, private-entry validation, and first-drive
   city orientation routes. Player-facing text must continue to hide raw OSM
   IDs, tags, and source keys.
-- **Business realism.** The grounded 20-level company-driver to leased-on
-  owner-operator arc is shipped; true authority, trailers, operating-cost
-  tuning, and market pricing are tracked under Business.
+- **Business realism.** The grounded 30-level company-driver to independent
+  owner-operator arc is shipped; true-authority depth, trailer polish,
+  operating-cost tuning, and market pricing are tracked under Business.
 
 ## Shipped for 1.8: local city service drives
 
@@ -727,14 +727,15 @@ fit for an audio-first game.
 - [x] Company-driver to owner-operator career arc. Full first arc: choose among
       grounded fictional company-driver starter carriers with
       carrier-assigned equipment, carrier-paid fuel/repairs, and different
-      wage, dispatch, route-mix, and freight tradeoffs; progress through 20
+      wage, dispatch, route-mix, and freight tradeoffs; progress through 30
       ranks; then unlock a
-      later-level leased-on owner-operator path with a buy-in,
+      level-18 leased-on owner-operator path with a buy-in,
       working-capital gate, owned-tractor garage access, higher gross revenue,
       and operating-cost deductions. A higher-risk owner-operator start is also
-      available for experienced-driver fantasy play. Level-20
+      available for experienced-driver fantasy play. Level-21
       owner-operators can now set aside an authority prep reserve, then unlock
-      a limited own-authority direct-freight mode once the final gates are met.
+      a limited level-25 own-authority direct-freight mode once the final gates
+      are met. Levels 26-30 add established independent owner-operator ranks.
       Loans, full paperwork simulation, and fleet ownership remain future work.
 - [x] Trailer program and cargo compatibility slice. Cargo now maps to dry van,
       reefer, flatbed, or bulk trailer programs. Company drivers keep

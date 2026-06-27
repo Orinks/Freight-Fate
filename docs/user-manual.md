@@ -182,33 +182,35 @@ pay, pay share, on-time bonus, route-length mix, deadline slack, and in some
 cases regional or freight emphasis. The carrier assigns the tractor and supplies
 the trailer, authority, insurance, fuel, and routine repairs.
 
-The career ladder has 20 levels. Early levels are company-driver ranks. Level 5
-starts the owner-operator preparation path, but it is not a lease-purchase
-shortcut. The **Business status** menu tells you your carrier, rank, next
-business unlock, and what still blocks the next step.
+The career ladder has 30 levels. Levels 1 through 15 are company-driver and
+senior company-driver ranks. Levels 16 and 17 are owner-operator preparation,
+but they are not a lease-purchase shortcut. The **Business status** menu tells
+you your carrier, rank, next business unlock, and what still blocks the next
+step.
 
-The leased-on owner-operator buy-in unlocks later, at level 15, when the rest
+The leased-on owner-operator buy-in unlocks later, at level 18, when the rest
 of the business gate is also ready: 35 deliveries, reputation 80, no outstanding
 pay advance, and enough cash for a 35,000 dollar truck buy-in while keeping
 10,000 dollars working capital.
 
 Owner-operators see higher gross revenue, but the business pays fuel, repairs,
 maintenance reserve, insurance reserve, trailer program, truck payment reserve,
-and settlement fees. You can reach that through the level-15 company-driver
+and settlement fees. You can reach that through the level-18 company-driver
 buy-in, or choose the owner-operator start for a higher-risk career from day
 one. The carrier still handles dispatch and reimbursed accessorials so the game
 stays focused on driving.
 
-At level 20, established owner-operators can set aside an authority prep reserve
+At level 21, established owner-operators can set aside an authority prep reserve
 from **Business status** after enough deliveries, reputation, and working
-capital. After that, the final own-authority gate requires 75 deliveries,
+capital. At level 25, the final own-authority gate can open with 75 deliveries,
 reputation 92, at least one specialty trailer program, no pay advance, and
-enough cash to pay the startup cost while keeping working capital. Activating
-own authority unlocks direct freight on the dispatch board. Direct freight has
-higher gross revenue, but settlement also deducts insurance, compliance,
-trailer, truck, and factoring costs. Buying a matching trailer lowers the
-direct-freight trailer charge to an owned-trailer reserve. It is a playable
-business step, not a full paperwork or broker-contract simulation.
+enough cash to pay the startup cost while keeping working capital. Levels 26
+through 30 are established independent owner-operator ranks with better direct
+freight positioning, not fleet management. Direct freight has higher gross
+revenue, but settlement also deducts insurance, compliance, trailer, truck, and
+factoring costs. Buying a matching trailer lowers the direct-freight trailer
+charge to an owned-trailer reserve. It is a playable business step, not a full
+paperwork or broker-contract simulation.
 
 City service drives are a first step toward more local city driving. Pick a
 service, follow the spoken GPS, stop at the destination, and press Enter to go
@@ -284,7 +286,7 @@ settlement uses the owned trailer reserve instead of a trailer-program charge.
 Deliveries earn money, experience, reputation, and career stats. Leveling up can
 unlock longer dispatch distances, better early-career minimum pay, more cargo
 variety, refrigerated freight at level 2, heavy-haul freight at level 3,
-high-value freight at level 4, and business-path ranks through level 20.
+high-value freight at level 4, and business-path ranks through level 30.
 
 ## Pickup, Loading, And Route Planning
 

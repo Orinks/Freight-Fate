@@ -2,7 +2,7 @@
 
 Freight Fate keeps the business arc playable rather than fully accounting-like:
 the player starts as a company driver, then can buy into a leased-on
-owner-operator track once the 20-level career ladder has enough reputation,
+owner-operator track once the 30-level career ladder has enough reputation,
 cash, and miles behind it.
 """
 
@@ -25,18 +25,19 @@ INDEPENDENT_AUTHORITY = "independent_authority"
 
 OWNER_OPERATOR_PREP_LEVEL = 5
 OWNER_OPERATOR_CANDIDATE_LEVEL = 11
-OWNER_OPERATOR_LEVEL = 15
+OWNER_OPERATOR_LEVEL = 18
 OWNER_OPERATOR_REPUTATION = 80.0
 OWNER_OPERATOR_DELIVERIES = 35
 OWNER_OPERATOR_BUY_IN = 35_000.0
 OWNER_OPERATOR_WORKING_CAPITAL = 10_000.0
 OWNER_OPERATOR_REVENUE_MULT = 1.12
-AUTHORITY_READY_LEVEL = 20
+AUTHORITY_READY_LEVEL = 21
 AUTHORITY_READY_DELIVERIES = 60
 AUTHORITY_READY_REPUTATION = 90.0
 AUTHORITY_READY_RESERVE = 12_500.0
 AUTHORITY_READY_WORKING_CAPITAL = 25_000.0
 AUTHORITY_ACTIVATION_DELIVERIES = 75
+AUTHORITY_ACTIVATION_LEVEL = 25
 AUTHORITY_ACTIVATION_REPUTATION = 92.0
 AUTHORITY_ACTIVATION_COST = 15_000.0
 AUTHORITY_ACTIVATION_WORKING_CAPITAL = 35_000.0
@@ -157,6 +158,9 @@ def authority_activation_eligibility(profile) -> tuple[bool, tuple[str, ...]]:
     reasons: list[str] = []
     if not has_authority_readiness(profile):
         reasons.append("Set the authority prep reserve first.")
+    if profile.career.level < AUTHORITY_ACTIVATION_LEVEL:
+        rank = rank_for_level(AUTHORITY_ACTIVATION_LEVEL)
+        reasons.append(f"Reach level {AUTHORITY_ACTIVATION_LEVEL}: {rank.title}.")
     if profile.career.deliveries < AUTHORITY_ACTIVATION_DELIVERIES:
         reasons.append(f"Complete {AUTHORITY_ACTIVATION_DELIVERIES} deliveries.")
     if profile.career.reputation < AUTHORITY_ACTIVATION_REPUTATION:
@@ -231,7 +235,7 @@ def next_business_unlock(profile) -> str:
                 "Next: set aside an authority prep reserve from Business "
                 "status."
             )
-        if profile.career.level >= 20:
+        if profile.career.level >= AUTHORITY_READY_LEVEL:
             return (
                 "Authority prep locked: " + " ".join(reasons)
             )
@@ -260,11 +264,10 @@ def business_status_summary(profile) -> str:
     if is_owner_operator(status):
         if status == INDEPENDENT_AUTHORITY:
             return (
-                f"You run under your own authority as a level {rank.level} "
-                f"{rank.title}. Direct freight pays higher gross, but your "
-                "business carries fuel, repairs, insurance, trailer program "
-                "or owned-trailer reserve, truck reserve, compliance reserve, "
-                "and factoring costs. "
+                f"Own authority active. Level {rank.level}: {rank.title}. "
+                "Direct freight pays higher gross. You pay fuel, repairs, "
+                "insurance, trailer reserve, truck reserve, compliance "
+                "reserve, and factoring costs. "
                 + next_business_unlock(profile)
             )
         start_mode = getattr(profile, "start_mode", "")
@@ -274,10 +277,10 @@ def business_status_summary(profile) -> str:
             ""
         )
         return (
-            f"{lead}You are leased to {carrier_name(profile)} as a level "
-            f"{rank.level} {rank.title}. Load revenue is higher, but fuel, "
-            "repairs, maintenance reserve, insurance, trailer program, truck "
-            "payment reserve, and settlement fees come out of your money. "
+            f"{lead}Leased to {carrier_name(profile)}. Level {rank.level}: "
+            f"{rank.title}. Gross revenue is higher. You pay fuel, repairs, "
+            "maintenance reserve, insurance, trailer program, truck reserve, "
+            "and settlement fees. "
             + (
                 "Authority prep reserve is set. "
                 if has_authority_readiness(profile) else
@@ -296,10 +299,10 @@ def business_status_summary(profile) -> str:
             "working capital in the bank."
         )
     return (
-        f"You are a company driver for {carrier_name(profile)}, level "
-        f"{rank.level} {rank.title}. {option_for_profile(profile).menu_summary} "
+        f"Company driver for {carrier_name(profile)}. Level {rank.level}: "
+        f"{rank.title}. {option_for_profile(profile).menu_summary} "
         "The carrier supplies the tractor, fuel, repairs, trailer, authority, "
-        "and insurance; your settlements are driver wages and bonuses. "
+        "and insurance. Settlements are driver wages and bonuses. "
         + next_business_unlock(profile)
     )
 

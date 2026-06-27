@@ -6,6 +6,7 @@ import pytest
 from freight_fate.models.business import (
     COMPANY_DRIVER,
     LEASED_OWNER_OPERATOR,
+    OWNER_OPERATOR_LEVEL,
     build_business_settlement,
     company_driver_pay,
 )
@@ -216,7 +217,7 @@ def test_owner_operator_start_applies_owned_equipment_and_costs():
     assert p.active_trailer_programs() == ("dry_van",)
     assert p.money == pytest.approx(18_000.0)
     assert p.truck_damage_pct > 0
-    assert p.career.level >= 15
+    assert p.career.level >= OWNER_OPERATOR_LEVEL
     assert p.career.deliveries >= 35
     assert p.career.total_miles > 0
 

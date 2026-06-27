@@ -14,7 +14,7 @@ visual display mirrors all speech for sighted players and helpers.
 
 - **Career mode** — accept jobs inside metro freight markets, deadhead to
   specific origin facilities, deliver to specific receivers, earn money and
-  experience, level through a 20-rank trucking career, unlock cargo
+  experience, level through a 30-rank trucking career, unlock cargo
   endorsements, then buy into a leased-on owner-operator path when your career
   and working capital are ready.
 - **Realistic freight markets** — the 59-city route graph acts as metro

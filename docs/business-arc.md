@@ -53,7 +53,7 @@ costs active from day one.
   trailer program and can add reefer, flatbed, or bulk programs from the garage.
   Missing specialty programs lock matching cargo until the player adds them.
 - Own authority and direct freight: prepared owner-operators can activate a
-  limited own-authority mode from Business status after level-20 prep, 75
+  limited own-authority mode from Business status at level 25, with 75
   deliveries, reputation 92, a specialty trailer program, no pay advance, and
   enough cash to pay 15,000 dollars while keeping 35,000 dollars working
   capital. Direct freight pays higher gross revenue, then settlement deducts
@@ -64,9 +64,10 @@ costs active from day one.
   owned-trailer reserve instead of the trailer-program charge. Leased-on
   owner-operators still use carrier trailer programs, and company drivers still
   use carrier-provided trailers.
-- Progression: level 5 starts owner-operator preparation, but the leased-on
-  buy-in does not unlock until level 15 with 35 deliveries, reputation 80, no
-  pay advance, and enough cash for a 35,000 dollar buy-in while keeping 10,000
+- Progression: levels 1-15 are company-driver and senior company-driver ranks.
+  Levels 16-17 prepare the owner-operator transition, but the leased-on buy-in
+  does not unlock until level 18 with 35 deliveries, reputation 80, no pay
+  advance, and enough cash for a 35,000 dollar buy-in while keeping 10,000
   dollars of working capital.
 - The design remains a driving career, not a fleet-management sim. It adds one
   terminal menu and settlement math; it does not add driver hiring, tax filing,
@@ -83,9 +84,9 @@ costs active from day one.
 | Great Lakes Training Transport | Company driver | Better short-load stop pay, more short-haul training work, and slightly more forgiving deadlines. |
 | Prairie Link Regional | Company driver | Better per-mile wage floor, lower stop pay, more same-region work, and grain/bulk emphasis. |
 | Summit Value Logistics | Company driver | Better percentage and on-time bonus, smaller guarantee, and more long-haul/high-value lanes. |
-| Owner-operator start | Leased-on owner-operator | Starts at level 15 with owned starter equipment, 18,000 dollars working capital, partial fuel, light wear, higher gross revenue, and operating costs active. |
+| Owner-operator start | Leased-on owner-operator | Starts at level 18 with owned starter equipment, 18,000 dollars working capital, partial fuel, light wear, higher gross revenue, and operating costs active. |
 
-## 20-Level Arc
+## 30-Level Arc
 
 | Level | Rank | Business Meaning |
 | --- | --- | --- |
@@ -93,33 +94,44 @@ costs active from day one.
 | 2 | New Hire Company Driver | Refrigerated freight unlocks. |
 | 3 | Solo Company Driver | Heavy-haul freight unlocks. |
 | 4 | Regional Company Driver | High-value freight unlocks. |
-| 5 | Owner-Operator Apprentice | Business status starts tracking the preparation path. |
-| 6 | Regional Fleet Driver | Wider regional work while still company-paid. |
+| 5 | Regional Regular | Broader regional lane variety while still company-paid. |
+| 6 | Experienced Company Driver | Better company-driver lanes. |
 | 7 | Long-Haul Company Driver | Long-haul dispatch becomes routine. |
-| 8 | Trusted Freight Driver | Better specialized freight opportunities. |
-| 9 | High-Value Driver | Higher-consequence freight trust. |
+| 8 | Heavy Freight Driver | More machinery, construction, and bulk opportunities. |
+| 9 | High-Value Company Driver | Higher-consequence freight trust. |
 | 10 | Lead Company Driver | Senior company-driver status. |
-| 11 | Owner-Operator Candidate | Full owner-operator checklist appears. |
-| 12 | Working Capital Builder | Saving cash becomes the main milestone. |
-| 13 | Tractor Buy-In Candidate | Tractor buy-in target is active. |
-| 14 | Leased-On Applicant | Final reputation, delivery, and cash gate. |
-| 15 | Leased-On Owner-Operator | Buy-in can unlock leased-on owner-operator economics. |
-| 16 | Settled Owner-Operator | Owner-operator settlements become normal. |
-| 17 | Established Owner-Operator | Higher-trust leased-on business status. |
-| 18 | Equipment Planner | Trailer/equipment planning is a future hook. |
-| 19 | Authority Candidate | Independent authority readiness appears. |
-| 20 | Independent Operator | Authority prep and the final own-authority gate can unlock. |
+| 11 | Specialized Company Driver | Endorsements and careful service carry more weight. |
+| 12 | Premium Lane Driver | Better carrier lane quality. |
+| 13 | Carrier Mentor Driver | Stronger reputation weight with dispatch. |
+| 14 | Business Prep Driver | Owner-operator checklist starts to matter. |
+| 15 | Owner-Operator Candidate | Working-capital target becomes visible. |
+| 16 | Leased-On Applicant | Leased-on requirements appear in full. |
+| 17 | Tractor Buy-In Candidate | Tractor buy-in target is active. |
+| 18 | Leased-On Owner-Operator | Buy-in can unlock leased-on owner-operator economics. |
+| 19 | Settled Owner-Operator | Owner-operator settlements become normal. |
+| 20 | Established Owner-Operator | Specialty trailer programs matter more. |
+| 21 | Authority Prep Candidate | Authority prep reserve can unlock. |
+| 22 | Direct Freight Prep | Direct freight readiness gates become clearer. |
+| 23 | Trailer Strategy Owner | Trailer ownership planning matters for direct freight. |
+| 24 | Authority-Ready Operator | Final authority activation checklist. |
+| 25 | Independent Authority Operator | Own authority and direct freight can unlock. |
+| 26 | Contract Freight Builder | Premium direct freight reputation matters more. |
+| 27 | Specialized Trailer Operator | Specialized trailer opportunities stand out. |
+| 28 | Premium Lane Operator | Premium lanes favor high reputation and the right trailer. |
+| 29 | Veteran Independent Operator | Prestige freight and best dispatch quality. |
+| 30 | Freight Fate Independent | Top one-driver owner-operator rank. |
 
-Level 20 completes the owner-operator career arc. A prepared player can now
-activate Freight Fate's first own-authority mode, which adds direct freight and
-extra settlement overhead. It is still not a fleet or brokerage simulator.
+Level 30 completes the extended owner-operator career arc. The own-authority
+mode begins at level 25 when the other gates are met, then levels 26-30 make the
+endgame feel like an established independent driving business. It is still not a
+fleet or brokerage simulator.
 
 ## Authority Prep Reserve
 
 Authority readiness is the first concrete hook toward true authority without
 turning Freight Fate into a compliance sim. A leased-on owner-operator at level
-20 can set aside a 12,500 dollar reserve after 60 deliveries, reputation 90, and
-25,000 dollars of working capital. After that, the player can activate own
+21 can set aside a 12,500 dollar reserve after 60 deliveries, reputation 90, and
+25,000 dollars of working capital. At level 25, the player can activate own
 authority with 75 deliveries, reputation 92, at least one specialty trailer
 program, no pay advance, and enough cash to pay the 15,000 dollar startup cost
 while keeping 35,000 dollars of working capital.
