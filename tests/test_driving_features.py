@@ -1116,6 +1116,30 @@ def test_adaptive_cruise_caps_at_posted_limit(monkeypatch):
 
 
 @pytest.mark.smoke
+def test_adaptive_cruise_allows_a_small_offset_over_the_limit(monkeypatch):
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        # A few mph over the posted limit is a natural with-traffic pace and well
+        # under the speeding-strike threshold, so cruise should not pull it back.
+        driving.trip.speed_limit_at = lambda mile: (60.0, None)
+        driving.handle_event(key_event(pygame.K_e))
+        driving.truck.transmission.gear = 10
+        driving.truck.velocity_mps = 28.2             # ~63 mph, 3 over a 60 limit
+        driving.handle_event(key_event(pygame.K_k))
+
+        driving.update(1 / 60)
+
+        assert not driving._acc_limit_capped
+        assert driving.truck.brake == 0.0
+    finally:
+        app.shutdown()
+
+
+@pytest.mark.smoke
 def test_adaptive_cruise_increases_gap_for_bad_weather(monkeypatch):
     from freight_fate.app import App
     from freight_fate.sim.trip import TrafficLead

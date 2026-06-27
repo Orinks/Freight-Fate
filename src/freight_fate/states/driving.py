@@ -62,6 +62,9 @@ DESTINATION_EXIT_BEFORE_END_MI = 1.0
 
 CRUISE_MIN_MPH = 20.0             # cruise control needs road speed to hold
 ACC_BASE_GAP_SECONDS = 3.0        # clear-weather adaptive cruise gap
+ACC_LIMIT_OFFSET_MPH = 5.0        # predictive ACC holds this far over the posted
+                                  # limit -- a with-traffic pace, comfortably under
+                                  # the 9 mph speeding-strike threshold
 ENGINE_SHUTDOWN_SAFE_MPH = 5.0    # prevent accidental kill-switch use at speed
 DELIVERY_PARK_MPH = 3.0           # within this, the gate prompts you to stop
 DOCKING_MAX_MPH = 0.5            # dock/settle/rest actions need a complete stop
@@ -1780,13 +1783,14 @@ class DrivingState(State):
         # tickets, and trooper stops -- all of which now exist. The "Speed limit X"
         # cue still names the number; this cue says cruise is handling it.
         posted, _ = self.trip.speed_limit_at(self.trip.position_mi)
-        limit_capped = posted < self._cruise_mph
+        cap_mph = posted + ACC_LIMIT_OFFSET_MPH
+        limit_capped = cap_mph < self._cruise_mph
         if limit_capped:
-            target_mph = posted
+            target_mph = cap_mph
             if not self._acc_limit_capped:
                 self.ctx.say_event(
                     "Posted limit lower; adaptive cruise easing to "
-                    f"{self.ctx.settings.speed_text(posted)}.", interrupt=False)
+                    f"{self.ctx.settings.speed_text(cap_mph)}.", interrupt=False)
         self._acc_limit_capped = limit_capped
         context = self.trip.traffic_context()
         following = False

@@ -11,12 +11,13 @@
   equivalent nightly.
 
 ### Changed
-- **Adaptive cruise now respects the posted limit.** Cruise eases off and holds
-  the current posted speed limit instead of carrying your set speed straight
-  through an urban drop or a lower-limit stretch -- so it no longer drives you
-  into speeding strikes, tickets, and trooper stops. It still follows slower
-  traffic and widens its gap in bad weather, and a short cue says when it eases
-  off for a lower limit (the "Speed limit X" sign cue still names the number).
+- **Adaptive cruise now respects the posted limit.** Cruise eases off to hold a
+  with-traffic pace (about 5 over the posted limit) instead of carrying your set
+  speed straight through an urban drop or a lower-limit stretch -- so it keeps
+  you moving naturally without driving you into speeding strikes, tickets, and
+  trooper stops. It still follows slower traffic and widens its gap in bad
+  weather, and a short cue says when it eases off for a lower limit (the
+  "Speed limit X" sign cue still names the number).
 - **The air-brake system has real sounds now.** When pressure builds, you hear
   an air-dryer purge as the compressor cuts out instead of a generic beep, and
   low-air and spring-brake warnings sound a proper low-air buzzer. The spoken
