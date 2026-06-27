@@ -15,6 +15,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 WORLD_PATH = Path(__file__).parent / "world.json"
+CITY_SERVICES_PATH = Path(__file__).parent / "city_services.json"
 
 # Alternate routes should feel like real dispatch choices, not graph leftovers.
 # A little extra mileage is fine for traffic, weather, grades, or avoiding a
@@ -84,6 +85,13 @@ class CityService:
     state: str
     kind: str
     source_note: str
+    lat: float = 0.0
+    lon: float = 0.0
+    approach_miles: float = 0.0
+    approach_road: str = ""
+    source_type: str = "fallback"
+    source_ref: str = ""
+    fallback: bool = True
 
     @property
     def label(self) -> str:
@@ -324,6 +332,10 @@ CITY_SERVICE_SOURCE_NOTES = {
         "Representative truck dealer service POI for the metro service area."
     ),
 }
+
+CITY_SERVICE_ORDER = ("freight_market", "garage", "truck_dealer")
+
+CITY_SERVICE_SOURCE_TYPES = {"osm", "ors", "operator", "fallback"}
 
 FACILITY_CARGO_ROLES: dict[str, dict[str, tuple[str, ...]]] = {
     "air_cargo": {
@@ -945,10 +957,68 @@ class Route:
         return all(world.leg_metadata_complete(leg) for leg in self.legs)
 
 
+def _load_city_service_data(path: Path = CITY_SERVICES_PATH) -> dict[str, dict[str, dict]]:
+    if not path.exists():
+        return {}
+    raw = json.loads(path.read_text(encoding="utf-8"))
+    cities = raw.get("cities", {})
+    if not isinstance(cities, dict):
+        raise ValueError(f"{path} must contain a cities object")
+    out: dict[str, dict[str, dict]] = {}
+    for city, entries in cities.items():
+        if not isinstance(entries, list):
+            raise ValueError(f"{path} city {city!r} must contain a service list")
+        city_services: dict[str, dict] = {}
+        for entry in entries:
+            key = str(entry.get("key", "")).strip()
+            if key not in CITY_SERVICE_ORDER:
+                raise ValueError(f"{path} city {city!r} has unknown service key {key!r}")
+            if key in city_services:
+                raise ValueError(f"{path} city {city!r} repeats service key {key!r}")
+            name = str(entry.get("name", "")).strip()
+            lowered = name.lower()
+            if not name:
+                raise ValueError(f"{path} city {city!r} service {key!r} has no name")
+            if any(marker in lowered for marker in RAW_POI_TEXT_MARKERS):
+                raise ValueError(
+                    f"{path} city {city!r} service {name!r} exposes raw OSM/source text"
+                )
+            source_type = str(entry.get("source_type", "fallback")).strip()
+            if source_type not in CITY_SERVICE_SOURCE_TYPES:
+                raise ValueError(
+                    f"{path} city {city!r} service {name!r} has unknown source_type "
+                    f"{source_type!r}"
+                )
+            if not str(entry.get("source_note", "")).strip():
+                raise ValueError(
+                    f"{path} city {city!r} service {name!r} has no source note"
+                )
+            approach_miles = float(entry.get("approach_miles", 0.0))
+            if approach_miles <= 0.0 or approach_miles > 50.0:
+                raise ValueError(
+                    f"{path} city {city!r} service {name!r} has invalid approach miles"
+                )
+            lat = float(entry.get("lat", 0.0))
+            lon = float(entry.get("lon", 0.0))
+            if not -90.0 <= lat <= 90.0 or not -180.0 <= lon <= 180.0:
+                raise ValueError(
+                    f"{path} city {city!r} service {name!r} has invalid coordinates"
+                )
+            road = str(entry.get("approach_road", "")).strip()
+            if not road:
+                raise ValueError(
+                    f"{path} city {city!r} service {name!r} has no approach road"
+                )
+            city_services[key] = dict(entry)
+        out[str(city)] = city_services
+    return out
+
+
 class World:
     def __init__(self, data: dict) -> None:
         self.cities: dict[str, City] = {}
         self._facilities_by_id: dict[str, Location] = {}
+        self._city_service_data = _load_city_service_data()
         for name, c in data["cities"].items():
             lat = float(c.get("lat", 0.0))
             lon = float(c.get("lon", 0.0))
@@ -1118,40 +1188,52 @@ class World:
     def city_services(self, city: str) -> tuple[CityService, ...]:
         """Service POIs available for local city driving.
 
-        These are representative service locations derived from checked-in
-        terminal and market data. Future OSM/ORS enrichment can replace their
-        approach roads or coordinates without changing the player-facing
-        service contract.
+        Source-backed entries from ``city_services.json`` are preferred per
+        service key. Missing keys stay available as representative fallback
+        services so the existing offline menu contract remains complete.
         """
         if city not in self.cities:
             raise KeyError(f"Unknown city: {city}")
+        source_entries = self._city_service_data.get(city, {})
+        services: list[CityService] = []
+        for key in CITY_SERVICE_ORDER:
+            raw = source_entries.get(key)
+            if raw is None:
+                services.append(self._fallback_city_service(city, key))
+                continue
+            city_obj = self.cities[city]
+            services.append(CityService(
+                key=key,
+                name=str(raw["name"]).strip(),
+                city=city,
+                state=city_obj.state,
+                kind=str(raw.get("kind", key)).strip() or key,
+                source_note=str(raw.get("source_note", "")).strip(),
+                lat=float(raw.get("lat", 0.0)),
+                lon=float(raw.get("lon", 0.0)),
+                approach_miles=round(float(raw["approach_miles"]), 1),
+                approach_road=str(raw["approach_road"]).strip(),
+                source_type=str(raw.get("source_type", "osm")).strip(),
+                source_ref=str(raw.get("source_ref", "")).strip(),
+                fallback=bool(raw.get("fallback", False)),
+            ))
+        return tuple(services)
+
+    def _fallback_city_service(self, city: str, key: str) -> CityService:
         city_obj = self.cities[city]
         terminal = self.home_terminal(city)
-        return (
-            CityService(
-                "freight_market",
-                f"{city} Freight Market Office",
-                city,
-                city_obj.state,
-                "freight_market",
-                CITY_SERVICE_SOURCE_NOTES["freight_market"],
-            ),
-            CityService(
-                "garage",
-                f"{terminal.name} Garage",
-                city,
-                city_obj.state,
-                "garage",
-                CITY_SERVICE_SOURCE_NOTES["garage"],
-            ),
-            CityService(
-                "truck_dealer",
-                f"{city} Truck Dealer",
-                city,
-                city_obj.state,
-                "truck_dealer",
-                CITY_SERVICE_SOURCE_NOTES["truck_dealer"],
-            ),
+        names = {
+            "freight_market": f"{city} Freight Market Office",
+            "garage": f"{terminal.name} Garage",
+            "truck_dealer": f"{city} Truck Dealer",
+        }
+        return CityService(
+            key=key,
+            name=names[key],
+            city=city,
+            state=city_obj.state,
+            kind=key,
+            source_note=CITY_SERVICE_SOURCE_NOTES[key],
         )
 
     def city_service(self, city: str, key: str) -> CityService:
@@ -1163,11 +1245,17 @@ class World:
     def city_service_route(self, city: str, key: str) -> Route:
         """A short, drivable local route from the terminal to a city service."""
         service = self.city_service(city, key)
-        base_miles = CITY_SERVICE_APPROACH_MILES.get(service.kind, 3.0)
-        seed = zlib.crc32(f"{city}:service:{service.key}".encode())
-        offset = (seed % 5) * 0.2
-        miles = round(base_miles + offset, 1)
-        road = CITY_SERVICE_APPROACH_ROADS.get(service.kind, "city service road")
+        if service.approach_miles > 0:
+            miles = service.approach_miles
+        else:
+            base_miles = CITY_SERVICE_APPROACH_MILES.get(service.kind, 3.0)
+            seed = zlib.crc32(f"{city}:service:{service.key}".encode())
+            offset = (seed % 5) * 0.2
+            miles = round(base_miles + offset, 1)
+        road = (
+            service.approach_road
+            or CITY_SERVICE_APPROACH_ROADS.get(service.kind, "city service road")
+        )
         leg = Leg(city, city, miles, road, "flat", ())
         return Route([city, city], [leg])
 

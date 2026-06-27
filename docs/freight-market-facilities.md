@@ -106,17 +106,28 @@ locations, not claims about a specific real-world shipper.
 
 ## City Service POIs
 
-City services are separate from freight shippers and receivers. The current
-runtime exposes representative service POIs for the freight market office,
-terminal garage, and truck dealer, then generates short local approach drives
-from the home terminal. They are derived from checked-in terminal and metro
-market data, stay offline, and keep the same clean spoken-name rules as freight
-facilities.
+City services are separate from freight shippers and receivers. The runtime
+loads checked-in `city_services.json` first, then falls back per missing service
+to representative POIs derived from terminal and metro market data. Runtime
+play stays offline and deterministic.
 
-Future OSM/ORS or operator-data passes can replace the representative approach
-distance, road name, and coordinates with source-backed local POIs. Player
-speech should still say the service plainly, such as `garage: Chicago Company
-Yard Garage`, and should not expose raw OSM tags, IDs, or source keys.
+Chicago is the first source-backed proof slice. Its freight market office,
+garage, and truck dealer come from the local OpenStreetMap Illinois extract at
+`C:\Users\joshu\.cache\freight-fate-osm\regions\illinois-latest.osm.pbf`,
+filtered by `tools/build_city_services.py` within a bounded Chicago radius. The
+baked data stores source coordinates, approximate approach mileage, and a
+nearby named approach road. Other cities remain representative fallback until
+their local extracts are curated.
+
+The freight market office is a grounded mapping, not an OSM tag named "freight
+market": it maps to a logistics, freight-forwarder, distribution, terminal, or
+intermodal office/facility. Generic transport customer-service offices are not
+enough. Garage and truck dealer mappings favor heavy-vehicle repair, truck
+repair, truck sales, or named truck brands/dealers over generic car POIs.
+
+Player speech should still say the service plainly, such as `garage: Carimichael
+Truck Repair`, and should not expose raw OSM tags, IDs, or source keys. Source
+references stay internal for auditing.
 
 The next data pass should keep service POIs separate from career ownership and
 settlement systems. OSM/Overpass and ORS can improve where service drives go;

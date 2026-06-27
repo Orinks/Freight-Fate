@@ -16,9 +16,29 @@ def test_city_services_are_source_backed(world):
     assert all(service.source_note for service in services)
     assert all(service.spoken_name for service in services)
     for service in services:
+        assert not service.fallback
+        assert service.source_type == "osm"
+        assert service.lat
+        assert service.lon
+        assert "OpenStreetMap" in service.source_note
+        assert "node/" not in service.spoken_name.lower()
+        assert "way/" not in service.spoken_name.lower()
         route = world.city_service_route("Chicago", service.key)
-        assert route.miles > 0
-        assert route.highways[0]
+        assert route.miles == service.approach_miles
+        assert route.highways[0] == service.approach_road
+
+
+def test_city_services_fallback_when_no_source_data(world):
+    services = world.city_services("Nashville")
+
+    assert [service.key for service in services] == [
+        "freight_market",
+        "garage",
+        "truck_dealer",
+    ]
+    assert all(service.fallback for service in services)
+    assert all(service.source_type == "fallback" for service in services)
+    assert all(service.source_note for service in services)
 
 
 def test_city_service_drive_requires_enter_before_opening(monkeypatch):
@@ -31,9 +51,13 @@ def test_city_service_drive_requires_enter_before_opening(monkeypatch):
         DrivingStatusScreenState,
     )
 
+    monkeypatch.setenv("FREIGHT_FATE_AUDIO_BACKEND", "pygame")
     app = App()
     try:
         spoken = []
+        monkeypatch.setattr(app.ctx.audio, "play", lambda *args, **kwargs: None)
+        monkeypatch.setattr(app.ctx, "play_music_sequence", lambda *args, **kwargs: None)
+        monkeypatch.setattr(app.ctx.audio, "set_ambient", lambda *args, **kwargs: None)
         monkeypatch.setattr(app.ctx, "say",
                             lambda text, interrupt=True: spoken.append(text))
         monkeypatch.setattr(app.ctx, "say_event",
@@ -46,7 +70,8 @@ def test_city_service_drive_requires_enter_before_opening(monkeypatch):
         app.state.handle_event(key_event(pygame.K_RETURN))
         assert isinstance(app.state, CityServiceSelectState)
 
-        while "Garage" not in app.state.items[app.state.index].text:
+        garage_name = app.ctx.world.city_service("Chicago", "garage").name
+        while garage_name not in app.state.items[app.state.index].text:
             app.state.handle_event(key_event(pygame.K_DOWN))
         app.state.handle_event(key_event(pygame.K_RETURN))
         assert isinstance(app.state, DrivingState)

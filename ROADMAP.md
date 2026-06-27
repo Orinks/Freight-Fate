@@ -266,10 +266,15 @@ garage, or truck dealer, drive a short local service route, stop at the
 destination, and press Enter to go inside. This keeps the current terminal menu
 available while moving city services toward a drive-to-location model.
 
-- [x] **Representative city service POIs.** `World.city_services` derives
-  offline service POIs from checked-in terminal and metro freight-market data:
-  freight market office, garage, and truck dealer. These are representative,
-  source-noted service locations, not claims about exact real-world storefronts.
+- [x] **Source-backed city service POI foundation.** Chicago now loads
+  source-backed service POIs from checked-in `city_services.json`: Coyote
+  Logistics as the freight-market/logistics office, Carimichael Truck Repair as
+  the garage/repair stop, and Rush Truck Centers as the truck dealer. The data
+  was baked from the local OpenStreetMap Illinois extract at
+  `C:\Users\joshu\.cache\freight-fate-osm\regions\illinois-latest.osm.pbf`
+  using `tools/build_city_services.py`; it stores service coordinates,
+  approximate approach mileage, and nearby named road context. Cities without a
+  sourced service still use internally marked representative fallback entries.
 - [x] **Local service driving phase.** City service drives use the existing
   truck physics, GPS/status surfaces, save/resume path, and spoken driving help.
   Arrival does not auto-open the menu: the truck must be fully stopped, then the
@@ -287,12 +292,12 @@ Follow-up hooks for the roadmap worker:
   city tour that visits the garage, truck dealer, freight market office, and
   terminal services before the first dispatch. Keep it skippable/replayable and
   spoken as GPS guidance, not as a forced tutorial wall.
-- **OSM/ORS service-POI enrichment.** Replace representative service approach
-  distance/road names with build-time source-backed local POIs where possible:
-  OSM/Overpass for service roads and industrial/commercial access, ORS HGV for
-  truck-legal local approaches, and operator or public sources for named dealer
-  or service locations. Runtime stays offline and deterministic; no raw OSM
-  tags, IDs, or source keys in player speech.
+- **OSM/ORS service-POI enrichment.** Extend the Chicago proof pipeline to more
+  metros using bounded local Geofabrik extracts first, then only the smallest
+  necessary download if cache coverage is missing. Add ORS HGV or OSRM local
+  geometry for turn-level approaches after source-backed POI coordinates exist.
+  Runtime stays offline and deterministic; no raw OSM tags, IDs, or source keys
+  in player speech.
 - **Enter-to-enter polish.** Add pull-in/park sounds and brief exterior/office
   transition cues when entering and leaving services. Keep the keyboard contract
   simple: stop, Enter to enter, menu action, Back/Escape returns to the truck or

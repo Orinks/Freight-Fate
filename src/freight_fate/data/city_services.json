@@ -1,0 +1,58 @@
+{
+  "cities": {
+    "Chicago": [
+      {
+        "approach_miles": 6.6,
+        "approach_road": "North Maplewood Avenue",
+        "city": "Chicago",
+        "fallback": false,
+        "key": "freight_market",
+        "kind": "freight_market",
+        "lat": 41.931882,
+        "lon": -87.69191,
+        "name": "Coyote Logistics",
+        "source_note": "Source-backed city service POI from a local OpenStreetMap extract for Chicago, Illinois; category mapped as logistics or freight-forwarder office tags; accessed 2026-06-27.",
+        "source_ref": "node/8614075198",
+        "source_type": "osm",
+        "state": "Illinois"
+      },
+      {
+        "approach_miles": 3.3,
+        "approach_road": "South Loomis Street",
+        "city": "Chicago",
+        "fallback": false,
+        "key": "garage",
+        "kind": "garage",
+        "lat": 41.851707,
+        "lon": -87.661383,
+        "name": "Carimichael Truck Repair",
+        "source_note": "Source-backed city service POI from a local OpenStreetMap extract for Chicago, Illinois; category mapped as vehicle repair tags with truck relevance scoring; accessed 2026-06-27.",
+        "source_ref": "way/210222930",
+        "source_type": "osm",
+        "state": "Illinois"
+      },
+      {
+        "approach_miles": 11.2,
+        "approach_road": "South Central Avenue",
+        "city": "Chicago",
+        "fallback": false,
+        "key": "truck_dealer",
+        "kind": "truck_dealer",
+        "lat": 41.808495,
+        "lon": -87.761912,
+        "name": "Rush Truck Centers \u2013 Chicago",
+        "source_note": "Source-backed city service POI from a local OpenStreetMap extract for Chicago, Illinois; category mapped as truck dealer or heavy-vehicle sales/service tags; accessed 2026-06-27.",
+        "source_ref": "way/1065369310",
+        "source_type": "osm",
+        "state": "Illinois"
+      }
+    ]
+  },
+  "source": {
+    "accessed": "2026-06-27",
+    "family": "OpenStreetMap local extract",
+    "file": "C:\\Users\\joshu\\.cache\\freight-fate-osm\\regions\\illinois-latest.osm.pbf",
+    "radius_mi": 28.0
+  },
+  "version": 1
+}
