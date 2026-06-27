@@ -61,6 +61,8 @@ RAMP_LENGTH_MI = 0.5              # deceleration lane plus ramp to the stop
 DESTINATION_EXIT_BEFORE_END_MI = 1.0
 
 CRUISE_MIN_MPH = 20.0             # cruise control needs road speed to hold
+CRUISE_STEP_MPH = 5.0             # set-point change per Accel/Coast (+/-) tap
+CRUISE_MAX_MPH = 85.0             # highest cruise set point (top US posted limits)
 ACC_BASE_GAP_SECONDS = 3.0        # clear-weather adaptive cruise gap
 ACC_LIMIT_OFFSET_MPH = 5.0        # predictive ACC holds this far over the posted
                                   # limit -- a with-traffic pace, comfortably under
@@ -434,6 +436,10 @@ class DrivingState(State):
                 self._take_exit()
         elif key == pygame.K_k:
             self._toggle_cruise()
+        elif key in (pygame.K_EQUALS, pygame.K_KP_PLUS):
+            self._adjust_cruise(CRUISE_STEP_MPH)
+        elif key in (pygame.K_MINUS, pygame.K_KP_MINUS):
+            self._adjust_cruise(-CRUISE_STEP_MPH)
         elif key == pygame.K_SPACE:
             self._speak_speed()
         elif key == pygame.K_TAB:
@@ -470,7 +476,10 @@ class DrivingState(State):
                 "touch Up arrow to brake and return to forward. "
                 "Hold B for the emergency brake, the hardest possible stop. "
                 "K sets adaptive cruise at your current speed; bad weather "
-                "increases the following gap, and braking cancels. "
+                "increases the following gap, and braking cancels. Plus and "
+                "minus raise and lower the cruise speed by five, so you can dial "
+                "it up to the speed you want; it will not hold above the posted "
+                "limit. "
                 "X takes the next announced exit, called out by its number "
                 "when known: slow to 45 for the ramp, then brake to a stop for "
                 "the rest stop menu. "
@@ -1739,6 +1748,21 @@ class DrivingState(State):
                       f"{self.ctx.settings.speed_text(t.speed_mph)}. "
                       f"Following gap {gap:.0f} seconds. "
                       "K or braking cancels.")
+
+    def _adjust_cruise(self, delta_mph: float) -> None:
+        """Raise or lower the cruise set point -- the Accel/Coast (+/-) buttons.
+
+        Only while cruise is engaged: the truck then accelerates up to a higher
+        set point or eases down to a lower one, still capped at the posted limit
+        plus the offset. So you engage once rolling, then dial the target up to
+        the speed you want without having to reach it manually first."""
+        if self._cruise_mph is None:
+            self.ctx.say("Adaptive cruise is off. Press K to set it first.")
+            return
+        self._cruise_mph = max(CRUISE_MIN_MPH,
+                               min(CRUISE_MAX_MPH, self._cruise_mph + delta_mph))
+        self.ctx.say(
+            f"Adaptive cruise {self.ctx.settings.speed_text(self._cruise_mph)}.")
 
     def _cancel_cruise(self) -> None:
         self._cruise_mph = None

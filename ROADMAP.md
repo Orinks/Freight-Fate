@@ -185,6 +185,9 @@ From a batch of player reports:
   (`ACC_LIMIT_OFFSET_MPH = 5`, a with-traffic pace under the 9 mph strike
   threshold), brakes gently down to a lower limit, and announces once when it
   eases off. Still follows slower traffic and widens its gap in bad weather.
+  Plus and Minus adjust the set point by `CRUISE_STEP_MPH` (the real
+  Accel/Coast buttons), so you engage once rolling and dial the target up to the
+  speed you want; the truck accelerates up to it, capped by the limit offset.
 
 ### Realism north star (ongoing)
 

@@ -1000,6 +1000,55 @@ def test_cruise_control_holds_the_set_speed():
 
 
 @pytest.mark.smoke
+def test_cruise_set_point_adjusts_with_plus_and_minus():
+    from freight_fate.app import App
+    from freight_fate.states.driving import CRUISE_MAX_MPH, CRUISE_STEP_MPH
+
+    app = App()
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        open_limits(driving)                           # isolate from the limit cap
+        driving.handle_event(key_event(pygame.K_e))
+        driving.truck.transmission.gear = 10
+        driving.truck.velocity_mps = 26.8              # ~60 mph
+        driving.handle_event(key_event(pygame.K_k))
+        base = driving._cruise_mph
+        assert base == pytest.approx(60.0, abs=1.0)
+
+        driving.handle_event(key_event(pygame.K_EQUALS))   # + raises by a step
+        assert driving._cruise_mph == pytest.approx(base + CRUISE_STEP_MPH)
+        driving.handle_event(key_event(pygame.K_MINUS))    # - lowers it back
+        assert driving._cruise_mph == pytest.approx(base)
+
+        for _ in range(20):                                # clamps at the max
+            driving.handle_event(key_event(pygame.K_EQUALS))
+        assert driving._cruise_mph == pytest.approx(CRUISE_MAX_MPH)
+    finally:
+        app.shutdown()
+
+
+@pytest.mark.smoke
+def test_cruise_adjust_is_inert_when_cruise_is_off(monkeypatch):
+    from freight_fate.app import App
+
+    app = App()
+    said = []
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        monkeypatch.setattr(app.ctx, "say",
+                            lambda text, interrupt=True: said.append(text))
+        driving.handle_event(key_event(pygame.K_e))
+        assert driving._cruise_mph is None
+        driving.handle_event(key_event(pygame.K_EQUALS))
+        assert driving._cruise_mph is None              # nothing to adjust
+        assert any("off" in s.lower() for s in said)
+    finally:
+        app.shutdown()
+
+
+@pytest.mark.smoke
 def test_automatic_shift_uses_shift_cue_not_brake_air(monkeypatch):
     from freight_fate.app import App
 

@@ -23,6 +23,12 @@
   station instead of the modeled seasonal estimate, so the degrees match the
   conditions it is already pulling in. The seasonal climate model stays the
   fallback whenever live data is unavailable or a station omits its reading.
+- **Dial your cruise speed with Plus and Minus.** Once adaptive cruise is set,
+  Plus and Minus raise and lower the target by 5 -- the accelerate and coast
+  buttons on a real truck -- so you can engage as soon as you are rolling and
+  dial the speed up to where you want it instead of having to reach it manually
+  first. The truck accelerates up to a higher target on its own, and the posted
+  limit cap still applies, so a higher set speed never makes it speed.
 - **Adaptive cruise now respects the posted limit.** Cruise eases off to hold a
   with-traffic pace (about 5 over the posted limit) instead of carrying your set
   speed straight through an urban drop or a lower-limit stretch -- so it keeps

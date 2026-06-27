@@ -229,6 +229,7 @@ Driving controls are active while the road view is focused:
 | E | Start the engine. Stop the engine only below 5 miles per hour. |
 | P | Release or set the parking brake. |
 | K | Set or cancel adaptive cruise control. Braking also cancels it. |
+| Plus / Minus | Raise or lower the set cruise speed by 5 mph while cruise is engaged. |
 | X | Arm or cancel the next exit when it is close enough. |
 | T | Open the route point-of-interest menu when stopped at a supported stop. |
 | J | Toggle the engine brake. |
@@ -281,9 +282,15 @@ Repeated hard braking can use air faster than normal driving. If low air is
 reported, stop safely, set the parking brake, and let pressure build.
 
 Adaptive cruise requires the engine to be running and the truck to be moving at
-least 20 miles per hour. Press K to set cruise at your current speed. Weather
-can increase the following gap, and modeled traffic can make cruise reduce
-speed. Cruise does not steer, change lanes, or replace your attention.
+least 20 miles per hour. Press K to set cruise at your current speed. Once it is
+engaged, Plus and Minus raise and lower the set speed by 5 miles per hour, just
+like the accelerate and coast buttons on a real truck, so you can dial the
+target up to the speed you want without having to reach it manually first. The
+truck then accelerates up to a higher set speed on its own. Cruise will not hold
+more than 5 miles per hour over the posted limit, so it keeps you legal even if
+you set it higher. Weather can increase the following gap, and modeled traffic
+can make cruise reduce speed. Cruise does not steer, change lanes, or replace
+your attention.
 
 ## Road Events, Weather, And Rest Stops
 
