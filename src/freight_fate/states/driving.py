@@ -126,6 +126,8 @@ def _route_event_sound(event) -> str | None:
     if kind == TripEventKind.GPS_CUE:
         if event.data.get("cb_patrol") is not None:
             return "events/cb_radio_chatter"
+        if event.data.get("traffic_pressure") is not None:
+            return "events/traffic_slowing"
         cue = event.data.get("cue")
         cue_kind = getattr(cue, "kind", None)
         if cue_kind == "traffic":
@@ -764,6 +766,13 @@ class DrivingState(State):
         stop = self.trip.upcoming_stop(within_mi)
         if stop is not None:
             parts.append(f"{stop.spoken_name} in {s.distance_text(stop.at_mi - pos)}")
+        pressure = self.trip.next_traffic_pressure_within(within_mi)
+        if pressure is not None:
+            parts.append(
+                f"{pressure.reason} in {s.distance_text(pressure.start_mi - pos)}, "
+                f"move {pressure.direction} and target "
+                f"{s.speed_text(pressure.target_speed_mph)}"
+            )
         if self.ctx.settings.hos_mode not in hos.HOS_NON_ENFORCED_MODES:
             patrol = self.trip.next_patrol_within(within_mi)
             if patrol is not None:
@@ -828,6 +837,15 @@ class DrivingState(State):
                     f"{self.ctx.settings.distance_text(context.gap_mi)} ahead, "
                     f"{self.ctx.settings.speed_text(context.lead.speed_mph)}",
                 )
+        pressure = self.trip.traffic_pressure_at()
+        if pressure is not None:
+            insert_at = 3 if self._cruise_mph is not None else 2
+            lines.insert(
+                insert_at,
+                "Merge pressure: "
+                f"{pressure.reason}, move {pressure.direction}, "
+                f"target {self.ctx.settings.speed_text(pressure.target_speed_mph)}",
+            )
         if t.damage_pct - self.start_damage > 1:
             lines.append(
                 f"Damage: new damage {t.damage_pct - self.start_damage:.0f} percent"
@@ -1378,9 +1396,14 @@ class DrivingState(State):
 
         if 0 < ahead <= EXIT_LANE_PREP_MI and not self._exit_lane_prompt_said:
             self._exit_lane_prompt_said = True
+            pressure = self._active_exit_pressure(stop)
+            pressure_text = (
+                " Traffic is tight, so hold the lane and let the gap open."
+                if pressure is not None and pressure.intensity >= 0.35 else ""
+            )
             self.ctx.say_event(
                 f"Exit lane in {ahead:.1f} miles. Signal is on; steer right "
-                f"for the exit lane and slow to {RAMP_MAX_MPH:.0f}.",
+                f"for the exit lane and slow to {RAMP_MAX_MPH:.0f}.{pressure_text}",
                 interrupt=False,
             )
         if (
@@ -1403,6 +1426,15 @@ class DrivingState(State):
         drifted toward (negative left, positive right), so the side you hear it
         on is the side to steer away from."""
         return max(-1.0, min(1.0, self.lane.offset))
+
+    def _active_exit_pressure(self, stop) -> object | None:
+        sample_mi = min(self.trip.position_mi, stop.at_mi)
+        pressure = self.trip.traffic_pressure_at(sample_mi)
+        if pressure is None or pressure.kind != "exit":
+            return None
+        if pressure.start_mi <= stop.at_mi <= pressure.end_mi + 0.2:
+            return pressure
+        return None
 
     def _update_audio(self, dt: float = 0.0) -> None:
         t = self.truck
@@ -1728,7 +1760,11 @@ class DrivingState(State):
             return True
         if event.kind == TripEventKind.GPS_CUE:
             cue = event.data.get("cue")
-            return event.data.get("cb_patrol") is not None or getattr(cue, "kind", "") == "toll"
+            return (
+                event.data.get("cb_patrol") is not None
+                or event.data.get("traffic_pressure") is not None
+                or getattr(cue, "kind", "") == "toll"
+            )
         return False
 
     def _handle_trip_event(self, event) -> None:
@@ -1797,7 +1833,10 @@ class DrivingState(State):
                 self.ctx.award_achievement("traffic_slowing", event=True)
         if kind == TripEventKind.GPS_CUE:
             cue = event.data.get("cue")
-            if getattr(cue, "kind", "") == "traffic":
+            if (
+                getattr(cue, "kind", "") == "traffic"
+                or event.data.get("traffic_pressure") is not None
+            ):
                 self.ctx.award_achievement("traffic_slowing", event=True)
 
     def _is_critical_event(self, event) -> bool:
@@ -1809,6 +1848,8 @@ class DrivingState(State):
                           TripEventKind.CHECKPOINT):
             return True
         if event.kind == TripEventKind.GPS_CUE:
+            if event.data.get("traffic_pressure") is not None:
+                return True
             if event.data.get("zone") is not None:
                 return True
             cue = event.data.get("cue")
@@ -2099,7 +2140,17 @@ class DrivingState(State):
         if self.trip.position_mi > stop.at_mi + EXIT_COMMIT_WINDOW_MI:
             self._exit_stop = None
             self._reset_exit_lane_state()
-            self.ctx.say_event("You missed the exit window and stayed on the highway.")
+            pressure = self._active_exit_pressure(stop)
+            if pressure is not None:
+                self.ctx.say_event(
+                    "Traffic stayed tight through the gore and you missed the "
+                    "exit window. Stay on the highway and recover at the next "
+                    "safe exit."
+                )
+            else:
+                self.ctx.say_event(
+                    "You missed the exit window and stayed on the highway."
+                )
             return
         self._exit_stop = None
         if not self._exit_lane_ready():
@@ -2107,8 +2158,16 @@ class DrivingState(State):
             missed = stop.exit_label if stop.exit_label else "the exit"
             place = (self._destination_exit_phrase(stop)
                      if stop.type == "delivery_destination" else stop.spoken_name)
-            self.ctx.say_event("You were not in the exit lane at the gore and "
-                               f"missed {missed} for {place}.")
+            pressure = self._active_exit_pressure(stop)
+            if pressure is not None:
+                self.ctx.say_event(
+                    "Traffic boxed you out of the exit lane at the gore, so "
+                    f"you missed {missed} for {place}. Stay on the highway and "
+                    "recover at the next safe exit."
+                )
+            else:
+                self.ctx.say_event("You were not in the exit lane at the gore and "
+                                   f"missed {missed} for {place}.")
         elif self.truck.speed_mph <= RAMP_MAX_MPH:
             self._reset_exit_lane_state()
             self._ramp_mi = RAMP_LENGTH_MI

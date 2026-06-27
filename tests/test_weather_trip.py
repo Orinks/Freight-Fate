@@ -216,6 +216,26 @@ def test_relaxed_mode_thins_traffic_density(world):
             < normal._leg_traffic_density(leg, 0.0, False))
 
 
+def test_relaxed_mode_reduces_merge_exit_pressure(world):
+    from freight_fate.sim.hos import RELAXED_HAZARD_SCALE
+
+    normal, _ = make_trip(world, seed=4)
+    relaxed, _ = make_trip(world, seed=4, hazard_scale=RELAXED_HAZARD_SCALE)
+
+    normal_exit = next(p for p in normal.traffic_pressures if p.kind == "exit")
+    stop_mile = normal.stops[0].at_mi - 2.0
+
+    assert relaxed._traffic_pressure_intensity(stop_mile, "exit") == pytest.approx(
+        normal._traffic_pressure_intensity(stop_mile, "exit") * RELAXED_HAZARD_SCALE)
+    relaxed_exit = next(
+        (p for p in relaxed.traffic_pressures if p.kind == "exit"),
+        None,
+    )
+    if relaxed_exit is not None:
+        assert relaxed_exit.intensity < normal_exit.intensity
+        assert relaxed_exit.target_speed_mph > normal_exit.target_speed_mph
+
+
 def test_relaxed_mode_thins_random_inspection_odds(world):
     """Relaxed mode pulls a violating driver over less often; the random log
     check is thinned by the hazard scale (weigh stations are not)."""
@@ -687,6 +707,39 @@ def test_rush_hour_can_slow_modeled_traffic(world):
         assert min(lead.speed_mph for lead in rush.traffic_leads) <= (
             min(lead.speed_mph for lead in midday.traffic_leads)
         )
+
+
+def test_traffic_pressure_marks_exit_and_construction_context(world):
+    trip, _ = make_trip(world)
+
+    assert any(p.kind == "exit" and p.direction == "right"
+               for p in trip.traffic_pressures)
+    if any(zone.reason == "construction merge" for zone in trip.zones):
+        assert any(p.kind == "construction_merge" and p.direction == "left"
+                   for p in trip.traffic_pressures)
+
+
+def test_traffic_pressure_gps_cue_deduplicates(world):
+    trip, _truck = make_trip(world)
+    pressure = next(p for p in trip.traffic_pressures if p.kind == "exit")
+    trip.position_mi = pressure.start_mi - 1.0
+
+    first = trip.update(0.0)
+    second = trip.update(0.0)
+
+    cues = [
+        event for event in first
+        if event.kind == TripEventKind.GPS_CUE
+        and event.data.get("traffic_pressure") is pressure
+    ]
+    assert len(cues) == 1
+    assert "Exit traffic building" in cues[0].message
+    assert "Signal early" in cues[0].message
+    assert not [
+        event for event in second
+        if event.kind == TripEventKind.GPS_CUE
+        and event.data.get("traffic_pressure") is pressure
+    ]
 
 
 def test_time_scale_compresses_fuel_burn(world):

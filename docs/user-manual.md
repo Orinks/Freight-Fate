@@ -378,6 +378,11 @@ Construction and traffic zones lower the speed limit. Construction zones may
 begin with a merge/flagger taper before the lower work-zone limit. Speeding in
 the main construction zone can trigger enforcement.
 
+Traffic can also build around exit lanes, highway merges, construction tapers,
+and slow lead packs. The GPS gives a short traffic-gap cue when one of those
+pressure points is ahead, naming the lane direction and a target speed. Treat it
+like a heads-up to signal early, leave space, and avoid forcing the merge.
+
 Posted speed limits come from real map data and change along a corridor; a
 change is announced as reduced or raised, and named near a city. State troopers
 patrol some stretches, hotter on busy interstates, in construction, and at
@@ -415,6 +420,8 @@ prompted, slow to 45 miles per hour or less, and brake to a stop at the end of
 the ramp. If you reach the gore too fast, without signaling, or without the exit
 lane set, you stay on the highway and the game tells you what went wrong. The
 timing is generous so the sequence is about preparation, not twitch input. The
+game can also tell you when traffic boxes you out of the lane, so you know to
+recover at the next safe exit instead of fighting the maneuver. The
 game gives a short pull-in moment before the stop menu opens, so holding Down
 Arrow to brake does not skip the first menu option.
 

@@ -1053,6 +1053,7 @@ def test_exit_requires_right_lane_alignment(monkeypatch):
     try:
         driving = start_drive(app)
         quiet_trip(driving)
+        driving.trip.traffic_pressures = []
         stop = driving.trip.stops[0]
         driving.trip.position_mi = stop.at_mi - 1.0
         driving.truck.velocity_mps = 15.0
@@ -1063,6 +1064,41 @@ def test_exit_requires_right_lane_alignment(monkeypatch):
         assert driving._ramp_mi is None
         assert driving._exit_stop is None
         assert any("not in the exit lane" in line for line in spoken)
+    finally:
+        app.shutdown()
+
+
+@pytest.mark.smoke
+def test_exit_traffic_pressure_changes_missed_lane_recovery(monkeypatch):
+    from freight_fate.app import App
+    from freight_fate.sim.trip import TrafficPressure
+
+    spoken = []
+    app = App()
+    monkeypatch.setattr(app.ctx, "say_event", lambda text, interrupt=True: spoken.append(text))
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        stop = driving.trip.stops[0]
+        driving.trip.traffic_pressures = [
+            TrafficPressure(
+                stop.at_mi - 2.0,
+                stop.at_mi + 0.4,
+                "exit",
+                "right",
+                0.75,
+                42.0,
+                "exit traffic for test ramp",
+            )
+        ]
+        driving.trip.position_mi = stop.at_mi - 1.0
+        driving.truck.velocity_mps = 15.0
+        driving.handle_event(key_event(pygame.K_x))
+        driving.trip.position_mi = stop.at_mi
+        driving.update(1 / 60)
+        assert driving._ramp_mi is None
+        assert any("Traffic boxed you out of the exit lane" in line for line in spoken)
+        assert any("recover at the next safe exit" in line for line in spoken)
     finally:
         app.shutdown()
 

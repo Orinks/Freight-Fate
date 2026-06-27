@@ -818,6 +818,8 @@ HELP_PAGES = [
         "When you hear Brake now, slow below twenty five miles per hour quickly",
         "to avoid a collision. These warnings are tied to road or traffic context.",
         "Hold B for the emergency brake when normal braking is not enough.",
+        "Traffic pressure cues name exit lanes, merges, and target speeds.",
+        "Signal early, leave a gap, and avoid forcing a tight merge.",
         "Rest stops sit at highway exits, announced a few miles out.",
         "The GPS adds one-mile exit cues and concise turn guidance.",
         "Press X to signal for the exit, move right for the exit lane,",

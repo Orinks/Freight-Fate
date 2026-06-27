@@ -242,13 +242,15 @@ Net-new realism candidates, roughly by area:
   the brakes faster -- while loads at or below the rated gross are unchanged.
   Remaining: tire and brake wear over a truck's life, and finer grade-based
   fuel burn.
-- **Traffic and corridors.** Two slices shipped: rush-hour departure windows
+- **Traffic and corridors.** Three slices shipped: rush-hour departure windows
   (morning and afternoon commute) raise modeled traffic density, especially on
   checkpoint/metro corridors, and can slow lead traffic packs with
   commuter/merge callouts. Random road-hazard check spacing now also follows
   corridor busyness: dense metro/checkpoint interstates check sooner, while
-  sparse open-country corridors breathe more. Remaining: more realistic
-  merge/exit traffic.
+  sparse open-country corridors breathe more. Merge/exit pressure now marks
+  exit lanes, route merges, construction tapers, and traffic packs with spoken
+  gap cues and traffic-specific missed-exit recovery. Remaining: richer
+  surrounding-vehicle behavior and multi-lane traffic choices.
 - **Hours of service.** Split-sleeper provision and the 60/70-hour cycle
   with 34-hour restart (the HOS model intentionally skips these today).
 - **Local delivery realism.** The checked-in local approach layer now gives

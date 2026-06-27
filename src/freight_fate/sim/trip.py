@@ -96,6 +96,8 @@ NIGHT_TRAFFIC_KEEP = 0.4           # chance a traffic zone still forms at night
 RUSH_HOUR_WINDOWS = ((6.5, 9.0), (16.0, 18.5))
 TRAFFIC_LOOKAHEAD_MI = 2.5
 TRAFFIC_WARNING_GAP_S = 2.2
+TRAFFIC_PRESSURE_LOOKAHEAD_MI = 2.5
+TRAFFIC_PRESSURE_MIN_INTENSITY = 0.12
 ZONE_WARNING_LOOKAHEAD_MI = 2.0    # minimum distance heads-up for a zone
 CONSTRUCTION_TAPER_MI = 1.0
 CONSTRUCTION_TAPER_LIMIT_MPH = 55.0
@@ -334,6 +336,23 @@ class TrafficContext:
 
 
 @dataclass(frozen=True)
+class TrafficPressure:
+    """A short stretch where merging or exiting needs extra spacing."""
+
+    start_mi: float
+    end_mi: float
+    kind: str
+    direction: str
+    intensity: float
+    target_speed_mph: float
+    reason: str
+
+    @property
+    def at_mi(self) -> float:
+        return self.start_mi
+
+
+@dataclass(frozen=True)
 class TollCharge:
     event: TollEvent
     amount: float
@@ -388,10 +407,11 @@ class Trip:
         # destination), used to drop the speed limit for the urban stretch.
         self._city_mileposts = list(self._leg_starts) + [self.total_miles]
         self.stops = self._place_stops()
-        self.traffic_leads = self._place_traffic()
-        self.navigation_cues = self._build_navigation_cues()
         self.toll_charges: list[TollCharge] = []
+        self.traffic_leads = self._place_traffic()
         self.zones = self._place_zones()
+        self.traffic_pressures = self._place_traffic_pressures()
+        self.navigation_cues = self._build_navigation_cues()
         self.patrols = self._place_patrols()
         self._announced_stops: set[str] = set()
         self._announced_cities: set[int] = set()
@@ -400,6 +420,7 @@ class Trip:
         self._active_zone: Zone | None = None
         self._announced_speed_limit: float | None = None  # last spoken corridor limit
         self._announced_zone_warnings: set[str] = set()
+        self._announced_traffic_pressures: set[str] = set()
         self._construction_zone_grace_start: dict[str, float] = {}
         self._announced_patrols: set[str] = set()
         self._hazard_check_mi = 5.0
@@ -755,6 +776,75 @@ class Trip:
         leads.sort(key=lambda lead: lead.at_mi)
         return leads
 
+    def _traffic_pressure_intensity(self, mile: float, kind: str) -> float:
+        leg_i, _ = self._leg_at_mile(mile)
+        leg = self.route.legs[leg_i]
+        intensity = 0.18
+        if kind == "exit":
+            intensity += 0.16
+        elif kind == "route_merge":
+            intensity += 0.20
+        elif kind == "construction_merge":
+            intensity += 0.34
+        elif kind == "traffic_pack":
+            intensity += 0.24
+        if self._near_city(mile):
+            intensity += 0.22
+        if leg.checkpoints:
+            intensity += 0.12
+        if self._rush_hour_traffic_bias(leg):
+            intensity += 0.14
+        if is_night(self.start_hour):
+            intensity -= 0.06
+        effects = self.weather.effects
+        if effects.grip < 0.9:
+            intensity += (0.9 - effects.grip) * 0.35
+        if effects.visibility_mi < 3.0:
+            intensity += (3.0 - effects.visibility_mi) * 0.04
+        return max(0.0, min(0.95, intensity * self.hazard_scale))
+
+    def _traffic_pressure_speed(self, mile: float, intensity: float) -> float:
+        posted = self._corridor_limit_at(mile)
+        return max(30.0, min(posted, posted - intensity * 26.0))
+
+    def _place_traffic_pressures(self) -> list[TrafficPressure]:
+        pressures: list[TrafficPressure] = []
+
+        def add(start: float, end: float, kind: str, direction: str, reason: str) -> None:
+            start = max(0.0, start)
+            end = min(self.total_miles, max(start + 0.2, end))
+            intensity = self._traffic_pressure_intensity(start, kind)
+            if intensity < TRAFFIC_PRESSURE_MIN_INTENSITY:
+                return
+            pressures.append(TrafficPressure(
+                start,
+                end,
+                kind,
+                direction,
+                intensity,
+                self._traffic_pressure_speed(start, intensity),
+                reason,
+            ))
+
+        for stop in self.stops:
+            label = stop.exit_label or stop.spoken_name
+            add(stop.at_mi - 2.0, stop.at_mi + 0.4, "exit", "right",
+                f"exit traffic for {label}")
+        for i, start in enumerate(self._leg_starts[1:], start=1):
+            if self.route.legs[i - 1].highway != self.route.legs[i].highway:
+                add(start - 1.5, start + 0.6, "route_merge", "right",
+                    f"traffic merging for {self.route.legs[i].highway}")
+        for zone in self.zones:
+            if zone.reason == "construction merge":
+                add(zone.start_mi, zone.end_mi, "construction_merge", "left",
+                    "construction taper traffic")
+        for lead in self.traffic_leads:
+            add(lead.at_mi - 1.2, lead.end_mi, "traffic_pack", "center",
+                lead.reason)
+
+        pressures.sort(key=lambda pressure: pressure.start_mi)
+        return pressures
+
     # -- queries -----------------------------------------------------------------
 
     @property
@@ -891,6 +981,28 @@ class Trip:
             return None
         return context.lead.speed_mph
 
+    def traffic_pressure_at(self, mile: float | None = None) -> TrafficPressure | None:
+        sample = self.position_mi if mile is None else mile
+        active = [
+            pressure for pressure in self.traffic_pressures
+            if pressure.start_mi <= sample <= pressure.end_mi
+        ]
+        if not active:
+            return None
+        return max(active, key=lambda pressure: pressure.intensity)
+
+    def next_traffic_pressure_within(
+        self, within_mi: float = TRAFFIC_PRESSURE_LOOKAHEAD_MI
+    ) -> TrafficPressure | None:
+        candidates = [
+            pressure for pressure in self.traffic_pressures
+            if pressure.end_mi >= self.position_mi
+            and 0 <= pressure.start_mi - self.position_mi <= within_mi
+        ]
+        if not candidates:
+            return None
+        return min(candidates, key=lambda pressure: pressure.start_mi)
+
     def nearest_stop_within(self, radius_mi: float = 1.5) -> RoadStop | None:
         for stop in self.stops:
             if abs(stop.at_mi - self.position_mi) <= radius_mi:
@@ -1006,6 +1118,9 @@ class Trip:
         for patrol in self.patrols:
             if patrol.start_mi <= self.position_mi:
                 self._announced_patrols.add(_patrol_key(patrol))
+        for pressure in self.traffic_pressures:
+            if pressure.start_mi <= self.position_mi:
+                self._announced_traffic_pressures.add(_traffic_pressure_key(pressure))
         for i, (start, leg) in enumerate(zip(self._leg_starts, self.route.legs,
                                              strict=True)):
             forward = self.route.cities[i] == leg.a
@@ -1069,6 +1184,7 @@ class Trip:
         self._check_zones()
         self._check_speed_limit()
         self._check_stops()
+        self._check_traffic_pressures()
         self._check_navigation_cues()
         self._check_tolls()
         self._check_cities()
@@ -1251,6 +1367,56 @@ class Trip:
                     self._emit(TripEventKind.CHECKPOINT, cue.near_text, cue=cue)
                 else:
                     self._emit(TripEventKind.GPS_CUE, cue.near_text, cue=cue)
+
+    def _traffic_pressure_message(
+        self, pressure: TrafficPressure, ahead: float
+    ) -> str:
+        distance = self._distance_text(ahead)
+        speed = self._speed_value(pressure.target_speed_mph)
+        if pressure.kind == "exit":
+            return (
+                f"Exit traffic building in {distance}. Signal early, hold the "
+                f"{pressure.direction} exit lane, and be ready to slow near {speed}."
+            )
+        if pressure.kind == "construction_merge":
+            return (
+                f"Traffic squeezing at the construction taper in {distance}. "
+                f"Merge {pressure.direction} early, leave a gap, and be ready "
+                f"for {speed}."
+            )
+        if pressure.kind == "route_merge":
+            return (
+                f"Merging traffic in {distance}. Keep {pressure.direction}, "
+                f"leave a gap, and be ready to adjust toward {speed}."
+            )
+        return (
+            f"Traffic pack in {distance}. "
+            f"Leave extra following room and be ready for {speed}."
+        )
+
+    def _check_traffic_pressures(self) -> None:
+        for pressure in self.traffic_pressures:
+            key = _traffic_pressure_key(pressure)
+            ahead = pressure.start_mi - self.position_mi
+            if (
+                0 < ahead <= TRAFFIC_PRESSURE_LOOKAHEAD_MI
+                and key not in self._announced_traffic_pressures
+            ):
+                if pressure.kind == "construction_merge" and any(
+                    zone.reason == "construction"
+                    and abs(zone.start_mi - pressure.end_mi) < 0.01
+                    and _zone_key(zone) in self._announced_zone_warnings
+                    for zone in self.zones
+                ):
+                    self._announced_traffic_pressures.add(key)
+                    continue
+                self._announced_traffic_pressures.add(key)
+                self._emit(
+                    TripEventKind.GPS_CUE,
+                    self._traffic_pressure_message(pressure, ahead),
+                    traffic_pressure=pressure,
+                )
+                return
 
     def _check_patrol_heads_up(self) -> None:
         for patrol in self.patrols:
@@ -1549,6 +1715,13 @@ def _zone_key(zone: Zone) -> str:
 
 def _patrol_key(patrol: PatrolWindow) -> str:
     return f"{patrol.reason}:{patrol.start_mi:.3f}:{patrol.end_mi:.3f}"
+
+
+def _traffic_pressure_key(pressure: TrafficPressure) -> str:
+    return (
+        f"{pressure.kind}:{pressure.start_mi:.3f}:"
+        f"{pressure.end_mi:.3f}:{pressure.reason}"
+    )
 
 
 def _fallback_grade(terrain: str, mile: float, highway: str) -> float:
