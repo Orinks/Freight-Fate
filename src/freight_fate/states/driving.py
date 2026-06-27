@@ -759,7 +759,9 @@ class DrivingState(State):
         action = "break" if kind == "break" else "sleep"
         if next_stop is None:
             return (f"No route stop is currently visible before the next {action} "
-                    f"limit, due in {remaining_min / 60.0:.1f} hours.")
+                    f"limit, due in {remaining_min / 60.0:.1f} hours. If you "
+                    "cannot reach a stop, come to a stop and you can sleep on the "
+                    "shoulder: poor rest, and a possible parking ticket.")
         ahead = max(0.0, next_stop.at_mi - self.trip.position_mi)
         verdict = "before" if ahead <= legal_miles else "after"
         return (
@@ -814,6 +816,23 @@ class DrivingState(State):
         return (f"Your next {action} limit is due in "
                 f"{remaining_min / 60.0:.1f} hours, and no suitable route "
                 "stop is visible before it.")
+
+    def needs_emergency_sleep(self) -> bool:
+        """Whether the driver is out of (or nearly out of) sleep/duty hours, so a
+        break/fuel-only stop should still offer an emergency lot sleep."""
+        mode = self.ctx.settings.hos_mode
+        if mode in hos.HOS_NON_ENFORCED_MODES:
+            return False
+        if self.hos.in_violation(mode):
+            return True
+        next_limit = self.hos.next_limit(mode)
+        if next_limit is None:
+            return False
+        kind, remaining_min, _due = next_limit
+        # The 30-minute break is covered by a stop's own break option; this is for
+        # the sleep/duty wall, which a break-only stop cannot otherwise satisfy.
+        return (kind != "break"
+                and remaining_min <= hos.SHOULDER_SLEEP_LIMIT_BUFFER_MIN)
 
     def _speak_weather(self) -> None:
         source = "Live conditions" if self.weather.live else "Currently"
@@ -2324,6 +2343,14 @@ class RestStopState(MenuState):
                 "Sleep 10 hours", self._sleep,
                 help="A full reset: fresh hours of service and zero fatigue. "
                      "The clock and your deadline advance 10 hours."))
+        elif self.driving.needs_emergency_sleep():
+            # No proper sleeper facility here, but the driver is out of hours --
+            # let them bed down in the lot (legal reset, but cramped, poor rest).
+            items.append(MenuItem(
+                "Emergency sleep in the lot", self._emergency_lot_sleep,
+                help="No sleeper facility here, but you are out of hours. Sleep "
+                     "in the lot for a legal 10-hour reset. The rest is poor, so "
+                     "you wake still tired, and the clock advances 10 hours."))
         if "repair" in actions:
             items.append(MenuItem(
                 "Use repair service", self._repair,
@@ -2470,6 +2497,23 @@ class RestStopState(MenuState):
         self.ctx.award_achievement("slept_on_route")
         if before_fatigue < hos.FATIGUE_SEVERE:
             self.ctx.award_achievement("sleep_before_exhaustion")
+
+    def _emergency_lot_sleep(self) -> None:
+        """Bed down in a break/fuel stop's lot when out of hours: a legal HOS
+        reset, but cramped poor rest (no proper sleeper), so you wake still
+        tired. No shoulder fine -- a lot is more legitimate than the freeway."""
+        d = self.driving
+        p = self.ctx.profile
+        _advance_rest_clock(d, hos.SLEEP_MIN)
+        d.hos.sleep()
+        p.fatigue = hos.rest_shoulder(p.fatigue)
+        self._save_here(silent=True)
+        self.ctx.audio.play("ui/notify")
+        self.ctx.say(f"You bed down in the cramped lot, off to the side. "
+                     f"It is {clock_text(d.trip.current_hour)}. Hours of service "
+                     f"reset, but the rest was poor and you wake still tired. "
+                     f"{_deadline_text(d)}")
+        self.ctx.award_achievement("slept_on_route")
 
     def _repair(self) -> None:
         d = self.driving

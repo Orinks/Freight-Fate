@@ -13,6 +13,7 @@ def test_hazard_scale_only_relaxes_relaxed_mode():
 
 import pygame
 import pytest
+from types import SimpleNamespace
 
 from freight_fate.sim import hos
 from freight_fate.sim.hos import (
@@ -631,6 +632,36 @@ def test_hos_off_still_allows_fatigue_emergency_shoulder_sleep(monkeypatch):
         assert isinstance(app.state, ShoulderSleepConfirmationState)
         assert "poor rest" in spoken[-1]
         assert "If hours of service are enforced" in spoken[-1]
+    finally:
+        app.shutdown()
+
+
+@pytest.mark.smoke
+def test_emergency_lot_sleep_offered_at_break_only_stop_when_out_of_hours(monkeypatch):
+    from freight_fate.app import App
+    from freight_fate.states.driving import RestStopState
+
+    app = App()
+    try:
+        app.ctx.settings.hos_mode = "realistic"
+        driving = start_drive(app)
+        assert not driving.needs_emergency_sleep()        # fresh hours
+        driving.hos.drive(15 * 60)                         # blow past the limit
+        assert driving.hos.in_violation("realistic")
+        assert driving.needs_emergency_sleep()
+        app.ctx.settings.hos_mode = "debug_off"            # enforcement off
+        assert not driving.needs_emergency_sleep()
+        app.ctx.settings.hos_mode = "realistic"
+
+        # A break/fuel stop (no sleeper) now offers the emergency lot sleep.
+        stop = SimpleNamespace(
+            name="Roadside Rest", at_mi=driving.trip.position_mi, type="rest_area",
+            actions=("break", "fuel"), services=(), parking="day_only",
+            exit_label="", spoken_name="Roadside Rest", parking_text="day parking")
+        menu = RestStopState(app.ctx, driving, stop)
+        labels = [item.text for item in menu.build_items()]
+        assert "Emergency sleep in the lot" in labels
+        assert "Sleep 10 hours" not in labels
     finally:
         app.shutdown()
 

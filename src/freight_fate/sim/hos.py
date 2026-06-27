@@ -260,7 +260,11 @@ HOS_FINES = (200.0, 500.0, 1000.0, 2000.0)
 HOS_REPUTATION_HIT = 3.0
 FATIGUE_BREAK_RELIEF = 35.0
 FATIGUE_SHOULDER_FLOOR = 30.0
-SHOULDER_SLEEP_LIMIT_BUFFER_MIN = 30.0
+# How long before a sleep/duty limit the shoulder-sleep option opens up, paired
+# with a reachability check (no stop you can legally reach before the limit).
+# A real driver starts hunting for parking a couple of hours out, not in the
+# last half hour -- 30 min left you stranded with no action available.
+SHOULDER_SLEEP_LIMIT_BUFFER_MIN = 120.0
 SHOULDER_FINE_CHANCE = 0.15
 SHOULDER_FINE = 150.0
 SHOULDER_DAMAGE_CHANCE = 0.10
