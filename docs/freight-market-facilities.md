@@ -208,6 +208,22 @@ flags stay false unless a later source proves them. Runtime can prefer a
 source-backed endpoint distance/name where available, then fall back to the
 existing local approach and turn-geometry layers for road cues.
 
+## Facility Approach Geometry
+
+`src/freight_fate/data/facility_approaches.json` is the first source-backed
+facility road-snap layer. `tools/build_facility_approaches.py` reads
+`facility_endpoints.json`, `local_approaches.json`, and the local PBF cache at
+`C:\Users\joshu\.cache\freight-fate-osm\regions\`. The current bounded bake
+only targets high-confidence source-backed facilities in Illinois, Indiana, and
+Ohio so it can be regenerated quickly without a national road scan.
+
+The current coverage is 1,819 facility records: 1,462 source-backed endpoints,
+71 road-snapped public-road contexts, 6 playable turn-level public-road
+approaches, 1,391 source-backed nearest-road fallbacks outside or beyond this
+bounded pass, and 357 representative facility fallbacks. Gate, yard, dock,
+driveway, and private entrance hints remain zero because this layer does not
+prove them.
+
 ## Job Generation
 
 Job generation now chooses:

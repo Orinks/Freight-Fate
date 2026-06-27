@@ -308,6 +308,16 @@ source-backed OSM freight/industrial endpoint matches, and 357 remain explicit
 representative fallbacks. This layer does not snap endpoints to roads and does
 not claim gates, yards, docks, driveways, or HGV-legal turn-by-turn routing.
 
+`tools/build_facility_approaches.py` is the next bounded layer. It reuses those
+source-backed endpoints plus `local_approaches.json`, then scans only selected
+local PBFs for high-confidence public-road paths. The current checked-in bake
+uses Illinois, Indiana, and Ohio from the local cache and writes
+`facility_approaches.json`: 71 source-backed facility endpoints now have
+road-snapped public-road context, and 6 are long enough to use as playable
+turn-level public-road approach geometry. The remaining facilities stay
+explicit fallback records. This still is not ORS `driving-hgv`, and it does
+not prove private gates, yards, docks, driveways, or truck-legal access.
+
 This local graph output is not ORS `driving-hgv` and should not be described as
 truck-legal routing. ORS HGV remains feasible for selected sourced service
 endpoints when `ORS_API_KEY` is available, but using it for the full local batch

@@ -10,12 +10,19 @@ from .world_constants import (
     CITY_SERVICE_SOURCE_TYPES,
     RAW_POI_TEXT_MARKERS,
 )
-from .world_models import FacilityEndpoint, LocalApproach, LocalGeometry, LocalGeometrySegment
+from .world_models import (
+    FacilityApproach,
+    FacilityEndpoint,
+    LocalApproach,
+    LocalGeometry,
+    LocalGeometrySegment,
+)
 
 CITY_SERVICES_PATH = Path(__file__).parent / "city_services.json"
 LOCAL_APPROACHES_PATH = Path(__file__).parent / "local_approaches.json"
 LOCAL_GEOMETRY_PATH = Path(__file__).parent / "local_geometry.json"
 FACILITY_ENDPOINTS_PATH = Path(__file__).parent / "facility_endpoints.json"
+FACILITY_APPROACHES_PATH = Path(__file__).parent / "facility_approaches.json"
 
 
 def load_city_service_data(path: Path = CITY_SERVICES_PATH) -> dict[str, dict[str, dict]]:
@@ -255,5 +262,78 @@ def load_facility_endpoints(path: Path = FACILITY_ENDPOINTS_PATH) -> dict[str, F
             yard_hint=bool(entry.get("yard_hint", False)),
             dock_hint=bool(entry.get("dock_hint", False)),
             mapping=str(entry.get("mapping", "")).strip(),
+        )
+    return out
+
+
+def load_facility_approaches(path: Path = FACILITY_APPROACHES_PATH) -> dict[str, FacilityApproach]:
+    if not path.exists():
+        return {}
+    raw = json.loads(path.read_text(encoding="utf-8"))
+    records = raw.get("approaches", {})
+    if not isinstance(records, dict):
+        raise ValueError(f"{path} must contain an approaches object")
+    out: dict[str, FacilityApproach] = {}
+    for facility_id, entry in records.items():
+        facility_name = str(entry.get("facility_name", "")).strip()
+        endpoint_name = str(entry.get("endpoint_name", "")).strip()
+        road = str(entry.get("approach_road", "")).strip()
+        source_type = str(entry.get("source_type", "")).strip()
+        if not facility_name or not endpoint_name or not road or not source_type:
+            raise ValueError(f"{path} facility approach {facility_id!r} is missing text")
+        spoken = f"{facility_name} {endpoint_name} {road}".lower()
+        if any(marker in spoken for marker in RAW_POI_TEXT_MARKERS):
+            raise ValueError(
+                f"{path} facility approach {facility_id!r} exposes raw source text"
+            )
+        fallback = bool(entry.get("fallback", True))
+        fallback_reason = str(entry.get("fallback_reason", "")).strip()
+        if fallback and not fallback_reason:
+            raise ValueError(f"{path} facility approach {facility_id!r} is fallback without reason")
+        segments = []
+        for raw_segment in entry.get("segments", ()):
+            segment_road = str(raw_segment.get("road", "")).strip()
+            cue = str(raw_segment.get("cue", "")).strip()
+            miles = float(raw_segment.get("miles", 0.0))
+            if not segment_road or not cue or miles <= 0.0:
+                raise ValueError(f"{path} facility approach {facility_id!r} has invalid segment")
+            lowered = f"{segment_road} {cue}".lower()
+            if any(marker in lowered for marker in RAW_POI_TEXT_MARKERS):
+                raise ValueError(
+                    f"{path} facility approach {facility_id!r} segment exposes raw text"
+                )
+            segments.append(LocalGeometrySegment(
+                road=segment_road,
+                miles=round(miles, 2),
+                cue=cue,
+                speed_mph=float(raw_segment.get("speed_mph", 25.0)),
+            ))
+        turn_level = bool(entry.get("turn_level", False))
+        if turn_level and not segments:
+            raise ValueError(f"{path} facility approach {facility_id!r} has no turn segments")
+        out[str(facility_id)] = FacilityApproach(
+            facility_id=str(facility_id),
+            city=str(entry.get("city", "")).strip(),
+            state=str(entry.get("state", "")).strip(),
+            facility_name=facility_name,
+            facility_type=str(entry.get("facility_type", "")).strip(),
+            endpoint_name=endpoint_name,
+            endpoint_source_backed=bool(entry.get("endpoint_source_backed", False)),
+            road_snapped=bool(entry.get("road_snapped", False)),
+            turn_level=turn_level,
+            source_type=source_type,
+            estimated=bool(entry.get("estimated", True)),
+            fallback=fallback,
+            fallback_reason=fallback_reason,
+            nearest_road_context=bool(entry.get("nearest_road_context", False)),
+            representative_fallback=bool(entry.get("representative_fallback", True)),
+            total_miles=round(float(entry.get("total_miles", 0.0)), 2),
+            approach_road=road,
+            segments=tuple(segments),
+            gate_hint=bool(entry.get("gate_hint", False)),
+            yard_hint=bool(entry.get("yard_hint", False)),
+            dock_hint=bool(entry.get("dock_hint", False)),
+            final_hint=str(entry.get("final_hint", "")).strip(),
+            source_note=str(entry.get("source_note", "")).strip(),
         )
     return out

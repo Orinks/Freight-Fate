@@ -249,6 +249,9 @@ Many freight destinations now use real map-sourced endpoint matches when the
 offline data supports them. When the map data cannot prove a specific freight
 place, the game keeps using a representative local facility and treats it as a
 fallback instead of pretending it found a real gate or dock.
+Some sourced freight destinations also have local public-road turn guidance;
+where that is not available, the GPS keeps using the best checked fallback road
+context.
 
 Each job lists:
 

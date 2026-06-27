@@ -111,6 +111,33 @@ class FacilityEndpoint:
 
 
 @dataclass(frozen=True)
+class FacilityApproach:
+    facility_id: str
+    city: str
+    state: str
+    facility_name: str
+    facility_type: str
+    endpoint_name: str
+    endpoint_source_backed: bool
+    road_snapped: bool
+    turn_level: bool
+    source_type: str
+    estimated: bool
+    fallback: bool
+    fallback_reason: str
+    nearest_road_context: bool
+    representative_fallback: bool
+    total_miles: float
+    approach_road: str
+    segments: tuple[LocalGeometrySegment, ...] = ()
+    gate_hint: bool = False
+    yard_hint: bool = False
+    dock_hint: bool = False
+    final_hint: str = ""
+    source_note: str = ""
+
+
+@dataclass(frozen=True)
 class Stop:
     name: str
     at_mi: float

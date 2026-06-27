@@ -13,6 +13,7 @@ from .world_constants import (
 )
 from .world_models import (
     CityService,
+    FacilityApproach,
     FacilityEndpoint,
     Leg,
     LocalApproach,
@@ -119,6 +120,10 @@ class WorldServiceMixin:
         location = self.facility_location(city, location_name)
         return self._facility_endpoints.get(location.id)
 
+    def facility_source_approach(self, city: str, location_name: str) -> FacilityApproach | None:
+        location = self.facility_location(city, location_name)
+        return self._facility_approaches.get(location.id)
+
     def facility_geometry(self, city: str, location_name: str) -> LocalGeometry | None:
         location = self.facility_location(city, location_name)
         return self.local_geometry(f"facility:{location.id}")
@@ -155,6 +160,13 @@ class WorldServiceMixin:
     def facility_approach_route(self, city: str, location_name: str) -> Route:
         """A short, drivable local route from the company terminal to a facility."""
         location = self.facility_location(city, location_name)
+        source_approach = self._facility_approaches.get(location.id)
+        if source_approach is not None and source_approach.turn_level and source_approach.segments:
+            legs = [
+                Leg(city, city, segment.miles, segment.road, "flat", ())
+                for segment in source_approach.segments
+            ]
+            return Route([city] * (len(legs) + 1), legs)
         endpoint = self._facility_endpoints.get(location.id)
         approach = self.local_approach(f"facility:{location.id}")
         if endpoint is not None and endpoint.source_backed and not endpoint.fallback:

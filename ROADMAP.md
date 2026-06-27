@@ -257,13 +257,16 @@ Net-new realism candidates, roughly by area:
   source-backed city-service POIs for every supported city, nearest-public-road
   local approach context for 2,395 of 2,401 service/facility targets, turn-level
   local street geometry for 412 city-service drives, and source-backed freight
-  facility endpoints for 1,462 of 1,819 facilities. The endpoint layer was built
+  facility endpoints for 1,462 of 1,819 facilities. A bounded Midwest facility
+  approach pass now road-snaps 71 high-confidence source-backed facility
+  endpoints from Illinois, Indiana, and Ohio, with 6 long enough to use as
+  turn-level playable facility approaches. These layers were built
   offline from the local Geofabrik PBF cache at
   `C:\Users\joshu\.cache\freight-fate-osm\regions\`; runtime remains offline
-  and reads checked-in compact JSON only. Remaining: endpoint road snapping,
-  true gate/yard/dock/driveway hints, turn-level facility routing, and
-  first-drive city orientation routes. Player-facing text must continue to hide
-  raw OSM IDs, tags, and source keys.
+  and reads checked-in compact JSON only. Remaining: broader facility routing,
+  true gate/yard/dock/driveway hints, private-entry validation, and first-drive
+  city orientation routes. Player-facing text must continue to hide raw OSM
+  IDs, tags, and source keys.
 - **Business realism.** The grounded 20-level company-driver to leased-on
   owner-operator arc is shipped; true authority, trailers, operating-cost
   tuning, and market pricing are tracked under Business.

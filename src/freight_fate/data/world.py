@@ -16,6 +16,7 @@ from .world_constants import *
 from .world_loader import load_world_data
 from .world_local_data import (
     load_city_service_data,
+    load_facility_approaches,
     load_facility_endpoints,
     load_local_approaches,
     load_local_geometries,
@@ -58,6 +59,7 @@ class World(WorldServiceMixin):
         self.cities: dict[str, City] = {}
         self._facilities_by_id: dict[str, Location] = {}
         self._city_service_data = load_city_service_data()
+        self._facility_approaches = load_facility_approaches()
         self._facility_endpoints = load_facility_endpoints()
         self._local_approaches = load_local_approaches()
         self._local_geometries = load_local_geometries()

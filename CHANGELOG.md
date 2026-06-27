@@ -78,6 +78,10 @@
   data supports them, while facilities without a confident match stay clearly
   marked as representative fallbacks. The game does not claim gates, yards,
   docks, or truck-legal turn-by-turn facility routing from this layer yet.
+- **Some freight facility approaches now use real local road turns.** A bounded
+  Midwest map pass snaps 71 high-confidence source-backed freight facilities to
+  public-road context, with 6 long enough to use checked-in turn-level approach
+  geometry. Other facilities keep explicit fallback road context.
 - **Own-authority drivers can now buy trailers.** The garage sells dry van,
   reefer, flatbed, and bulk trailers after own authority is active. Direct
   freight rows say when an owned trailer fits, and settlement uses an
