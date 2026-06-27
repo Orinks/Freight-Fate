@@ -119,8 +119,7 @@ def route_departure_summary(route: Route) -> str:
     )
 
 
-# How far you can bobtail (drive empty) to shop another city's board. Generous
-# and level-independent so a thin start city is never a dead end.
+# Empty-drive range for shopping another city's board.
 BOBTAIL_RANGE_MI = 400.0
 
 
@@ -218,11 +217,6 @@ class CityMenuState(MenuState):
                      "and cannot afford fuel. Repaid automatically out of "
                      "your next delivery settlement."))
         return items
-
-    # -- actions -----------------------------------------------------------------
-
-    def _city_services(self) -> None:
-        self.ctx.push_state(CityServiceSelectState(self.ctx))
 
     def _job_board(self) -> None:
         open_freight_market(self.ctx)
@@ -1379,14 +1373,12 @@ class PickupFacilityState(MenuState):
             primary = MenuItem(
                 "Depart for destination",
                 self._depart_for_destination,
-                help="Dispatch loads the navigation itinerary and starts the "
-                     "loaded trip to the destination facility.")
+                help="Dispatch loads the navigation itinerary and starts the trip.")
         elif self.checked_in:
             primary = MenuItem(
                 "Load cargo at dock",
                 self._load,
-                help="Back into the assigned dock, set the brakes, and wait "
-                     "while the trailer is loaded and sealed.")
+                help="Back into the assigned dock and wait while the trailer is loaded.")
         else:
             primary = MenuItem(
                 "Check in at shipping office",
@@ -1490,7 +1482,6 @@ class PickupFacilityState(MenuState):
             air_brake=self.truck.air_brake_snapshot(),
             engine_on=self.truck.engine_on,
         ))
-
     def _plan_route(self) -> None:
         self._depart_for_destination()
 
@@ -1531,7 +1522,6 @@ class PickupFacilityState(MenuState):
                  "Checked in" if self.checked_in else "Check-in required")
         return [
             self.title,
-            "",
             f"Facility: {self.facility}",
             f"Cargo: {self.job.weight_tons:.0f} tons of {self.job.cargo.label}",
             f"Destination: {self.job.destination}",
@@ -1562,8 +1552,6 @@ class RouteSelectState(MenuState):
         self.back_label = back_label
         self.air_brake = air_brake
         self.engine_on = engine_on
-        # start fetching live weather for cities on the routes so the data is
-        # usually ready by the time the player asks for a forecast
         provider = ctx.real_weather_provider()
         if provider is not None:
             for route in routes:
