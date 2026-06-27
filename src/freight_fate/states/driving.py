@@ -92,6 +92,7 @@ MICROSLEEP_MIN_GM = 3.0           # ...shrinking to this nearer total exhaustion
 MICROSLEEP_COOLDOWN_GM = 4.0      # quiet period after one resolves
 MICROSLEEP_SHOULDER_DAMAGE_PCT = 6.0
 MICROSLEEP_FORCE_STOP_MISSES = 3  # consecutive misses that force a stop
+AMBIENT_EVENT_SPACING_S = 2.5     # keep low-priority chatter from stacking
 
 
 def _route_event_sound(event) -> str | None:
@@ -248,6 +249,8 @@ class DrivingState(State):
         self._spring_brake_said = False
         self._brake_lockout_cue_timer = 0.0
         self._lane_rumble_timer = 0.0
+        self._ambient_event_cooldown_s = 0.0
+        self._pending_ambient_event: tuple[str, str | None] | None = None
         self._status_text = "Press E to start the engine."
 
     # -- save and resume -----------------------------------------------------------
@@ -1012,6 +1015,7 @@ class DrivingState(State):
         self._update_hours_and_fatigue(dt)
         self._update_audio(dt)
         self._update_announcements(dt)
+        self._update_ambient_events(dt)
         self._update_hazard(dt)
         self._update_microsleep(keys, dt)
         self._update_speeding(dt)
@@ -1517,6 +1521,34 @@ class DrivingState(State):
             "serious reputation hit.",
             interrupt=True)
 
+    def _speak_ambient_event(self, message: str, sound: str | None = None) -> None:
+        if self._hazard_deadline is not None or self._ambient_event_cooldown_s > 0.0:
+            self._pending_ambient_event = (message, sound)
+            return
+        if sound is not None:
+            self.ctx.audio.play(sound)
+        self.ctx.say_event(message, interrupt=False)
+        self._ambient_event_cooldown_s = AMBIENT_EVENT_SPACING_S
+
+    def _update_ambient_events(self, dt: float) -> None:
+        if self._ambient_event_cooldown_s > 0.0:
+            self._ambient_event_cooldown_s = max(0.0, self._ambient_event_cooldown_s - dt)
+        if self._hazard_deadline is not None:
+            return
+        if self._ambient_event_cooldown_s > 0.0 or self._pending_ambient_event is None:
+            return
+        message, sound = self._pending_ambient_event
+        self._pending_ambient_event = None
+        self._speak_ambient_event(message, sound)
+
+    def _should_space_ambient_event(self, event) -> bool:
+        if event.kind == TripEventKind.WEATHER_CHANGE:
+            return True
+        if event.kind == TripEventKind.GPS_CUE:
+            cue = event.data.get("cue")
+            return event.data.get("cb_patrol") is not None or getattr(cue, "kind", "") == "toll"
+        return False
+
     def _handle_trip_event(self, event) -> None:
         kind = event.kind
         sound = _route_event_sound(event)
@@ -1527,6 +1559,7 @@ class DrivingState(State):
                 return   # off the highway: the hazard passes you by
             if self._cruise_mph is not None:
                 self._cancel_cruise()   # hands back on the wheel to brake
+            self._pending_ambient_event = None
             self.ctx.audio.play(sound or "ui/warning")
             # The deadline is braking physics plus reaction slack. The physics
             # part is whatever full service brakes need from the current speed
@@ -1541,29 +1574,38 @@ class DrivingState(State):
         elif kind == TripEventKind.INSPECTION:
             self._handle_inspection(event)
         elif kind == TripEventKind.WEATHER_CHANGE:
-            self.ctx.say_event(event.message, interrupt=False)
+            self._speak_ambient_event(event.message)
             self._record_weather_achievement()
         elif kind == TripEventKind.TOLL_CHARGED:
-            self.ctx.audio.play(sound or "ui/notify")
-            self.ctx.say_event(event.message, interrupt=False)
+            self._speak_ambient_event(event.message, sound or "ui/notify")
             self.ctx.award_achievement("toll_paid", event=True)
         elif kind == TripEventKind.STATE_CROSSING:
             cue = event.data.get("cue")
             state = getattr(cue, "near_text", event.message)
             add_unique_stat(self.ctx.profile, "states_crossed", str(state))
-            if sound is not None:
-                self.ctx.audio.play(sound)
-            self.ctx.say_event(event.message, interrupt=False)
+            self._speak_ambient_event(event.message, sound)
             self.ctx.award_achievement("state_crossing", event=True)
         elif kind == TripEventKind.ARRIVED:
             pass  # handled by _arrive()
         elif self._event_disables_cruise(event):
             self._cancel_cruise_for_restricted_area(event.message)
         else:
-            if sound is not None and kind != TripEventKind.ZONE_ENTER:
-                self.ctx.audio.play(sound)
-            self.ctx.say_event(event.message,
-                               interrupt=self._is_critical_event(event))
+            critical = self._is_critical_event(event)
+            if critical:
+                self._pending_ambient_event = None
+                if sound is not None and kind != TripEventKind.ZONE_ENTER:
+                    self.ctx.audio.play(sound)
+                self.ctx.say_event(event.message, interrupt=True)
+            else:
+                if self._should_space_ambient_event(event):
+                    self._speak_ambient_event(
+                        event.message,
+                        sound if kind != TripEventKind.ZONE_ENTER else None,
+                    )
+                else:
+                    if sound is not None and kind != TripEventKind.ZONE_ENTER:
+                        self.ctx.audio.play(sound)
+                    self.ctx.say_event(event.message, interrupt=False)
         if kind == TripEventKind.ZONE_ENTER:
             self.ctx.audio.play(sound or "ui/notify")
             zone = event.data.get("zone")

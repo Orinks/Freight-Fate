@@ -66,9 +66,12 @@ From a batch of player reports:
   lists S/A/U. The manual is also exported to `USER_MANUAL.html` (a small
   dependency-free Markdown->HTML converter, `tools/manual_html.py`) and shipped
   in portable builds beside `USER_MANUAL.md`.
-- [ ] **Ambient-cue spacing (anti-stacking).** Priority handling fixes the
-  critical case; still worth spacing or coalescing simultaneous low-priority
-  cues so a burst of chatter does not pile up. Lower priority than the above.
+- [x] **Ambient-cue spacing (anti-stacking).** Shipped: priority handling fixes
+  the critical case, and low-priority route chatter now has a short spacing
+  window with one pending newest cue. Hazards, construction, checkpoints, pull-
+  overs, and other safety events still speak immediately, while weather, tolls,
+  state lines, CB chatter, and similar ambient lines no longer pile up in one
+  burst; actionable GPS distances stay immediate.
 - Confirmed-good: routing announcements through the SAPI event voice avoids
   contention with the player's primary screen reader; keep it the recommended
   default and documented.

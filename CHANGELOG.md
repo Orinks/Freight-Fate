@@ -36,6 +36,10 @@
   new as -- or newer than -- the latest nightly, so once dev work ships in a
   stable build you converge back onto stable instead of being left on an
   equivalent nightly.
+- **Route chatter no longer stacks into a wall of speech.** Low-priority road
+  chatter now has a short spacing window and keeps only the newest pending cue,
+  so weather, toll, state-line, CB, and similar ambient lines do not all pile up
+  in one burst. Safety cues and actionable GPS distances still speak immediately.
 
 ### Changed
 - **Loading, unloading, and pulling in now take a beat.** Pickup loading and

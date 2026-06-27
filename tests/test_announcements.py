@@ -96,6 +96,102 @@ def test_cb_radio_chatter_queues_and_uses_cb_audio(monkeypatch):
         app.shutdown()
 
 
+def test_truly_ambient_chatter_is_spaced_without_blocking_safety(monkeypatch):
+    from freight_fate.app import App
+    from freight_fate.sim.trip import PatrolWindow
+    from freight_fate.states.driving import AMBIENT_EVENT_SPACING_S
+
+    app = App()
+    try:
+        d = _driving(app)
+        calls = []
+        monkeypatch.setattr(app.ctx, "say_event",
+                            lambda text, interrupt=True: calls.append((text, interrupt)))
+        monkeypatch.setattr(app.ctx.audio, "play", lambda *a, **k: None)
+
+        d._handle_trip_event(TripEvent(TripEventKind.WEATHER_CHANGE, "Weather: rain."))
+        d._handle_trip_event(TripEvent(
+            TripEventKind.GPS_CUE,
+            "CB radio reports a trooper ahead in 5 miles.",
+            {"cb_patrol": PatrolWindow(10.0, 14.0, 0.8, "speed trap")},
+        ))
+        d._handle_trip_event(TripEvent(TripEventKind.GPS_CUE, "Exit 12 ahead."))
+
+        assert calls == [("Weather: rain.", False), ("Exit 12 ahead.", False)]
+
+        d._handle_trip_event(TripEvent(TripEventKind.HAZARD, "Brake now! Debris."))
+        assert calls[-1] == ("Brake now! Debris.", True)
+
+        d._update_ambient_events(AMBIENT_EVENT_SPACING_S)
+        assert calls[-1] == ("Brake now! Debris.", True)
+
+        d._hazard_deadline = None
+        d._handle_trip_event(TripEvent(
+            TripEventKind.GPS_CUE,
+            "CB radio reports a trooper ahead in 4 miles.",
+            {"cb_patrol": PatrolWindow(11.0, 14.0, 0.8, "speed trap")},
+        ))
+        d._update_ambient_events(AMBIENT_EVENT_SPACING_S)
+        assert calls[-1] == ("CB radio reports a trooper ahead in 4 miles.", False)
+    finally:
+        app.shutdown()
+
+
+def test_ambient_chatter_waits_while_hazard_is_active(monkeypatch):
+    from freight_fate.app import App
+    from freight_fate.states.driving import AMBIENT_EVENT_SPACING_S
+
+    app = App()
+    try:
+        d = _driving(app)
+        calls = []
+        monkeypatch.setattr(app.ctx, "say_event",
+                            lambda text, interrupt=True: calls.append((text, interrupt)))
+
+        d._hazard_deadline = 5.0
+        d._handle_trip_event(TripEvent(TripEventKind.WEATHER_CHANGE, "Weather: rain."))
+        assert calls == []
+
+        d._update_ambient_events(AMBIENT_EVENT_SPACING_S)
+        assert calls == []
+
+        d._hazard_deadline = None
+        d._update_ambient_events(0.0)
+        assert calls == [("Weather: rain.", False)]
+    finally:
+        app.shutdown()
+
+
+def test_critical_zone_clears_pending_ambient_chatter(monkeypatch):
+    from freight_fate.app import App
+    from freight_fate.states.driving import AMBIENT_EVENT_SPACING_S
+
+    app = App()
+    try:
+        d = _driving(app)
+        calls = []
+        monkeypatch.setattr(app.ctx, "say_event",
+                            lambda text, interrupt=True: calls.append((text, interrupt)))
+        monkeypatch.setattr(app.ctx.audio, "play", lambda *a, **k: None)
+
+        d._handle_trip_event(TripEvent(TripEventKind.WEATHER_CHANGE, "Weather: rain."))
+        d._handle_trip_event(TripEvent(TripEventKind.STATE_CROSSING, "Crossing Ohio."))
+        assert calls == [("Weather: rain.", False)]
+
+        zone = Zone(5.0, 8.0, 45.0, "construction")
+        d._handle_trip_event(TripEvent(
+            TripEventKind.ZONE_ENTER,
+            "Construction ahead. Speed limit 45.",
+            {"zone": zone},
+        ))
+        assert calls[-1] == ("Construction ahead. Speed limit 45.", True)
+
+        d._update_ambient_events(AMBIENT_EVENT_SPACING_S)
+        assert calls[-1] == ("Construction ahead. Speed limit 45.", True)
+    finally:
+        app.shutdown()
+
+
 def test_zone_warning_lead_scales_with_speed_and_pacing():
     from freight_fate.app import App
     from freight_fate.sim.trip import (
