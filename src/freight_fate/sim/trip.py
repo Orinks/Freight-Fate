@@ -573,7 +573,7 @@ class Trip:
                     f"{stop.label} ahead{at_part}",
                     f"{stop.label.capitalize()}{at_part} ahead in "
                     f"{'1 mile' if self.imperial else self._distance_text(1.0)}; "
-                    f"{stop.parking_label}; press X to take the exit.",
+                    f"{stop.parking_label}; press X to signal for the exit.",
                 ))
         for i, lead in enumerate(self.traffic_leads):
             cues.append(NavigationCue(
@@ -1193,7 +1193,7 @@ class Trip:
                            f"{stop.spoken_name}{exit_part} in "
                            f"{self._distance_text(ahead)}. "
                            f"{stop.parking_text}. "
-                           "Press X to take the exit for it.",
+                           "Press X to signal for the exit.",
                            stop=stop)
 
     def _check_navigation_cues(self) -> None:

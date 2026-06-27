@@ -10,6 +10,10 @@
   stations across the game map plus multiple AFN choices. Streamer-safe mode
   stays on by default, real public streams stay hidden unless explicitly opted
   in, and external streams fall back safely until live stream playback is added.
+- **Highway exits now require a real setup.** X signals for the next announced
+  exit instead of magically taking it. The GPS now stages the maneuver, asks for
+  the right-side exit lane, checks that you are slowed to ramp speed at the
+  gore, and explains missed exits when you are too fast or in the wrong lane.
 
 ### Fixed
 

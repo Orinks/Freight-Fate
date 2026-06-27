@@ -290,7 +290,7 @@ Driving controls are active while the road view is focused:
 | P | Release or set the parking brake. |
 | K | Set or cancel adaptive cruise control. Braking also cancels it. |
 | Plus / Minus | Raise or lower the set cruise speed by 5 mph while cruise is engaged. |
-| X | Arm or cancel the next exit when it is close enough. |
+| X | Signal for or cancel the next exit when it is close enough. |
 | T | Open the route point-of-interest menu when stopped at a supported stop. |
 | J | Toggle the engine brake. |
 | H | Sound the horn. |
@@ -404,17 +404,21 @@ Tab status menu, and at the city terminal. With live weather turned on, the
 date, season, and temperature follow the real-world calendar instead.
 
 Stops are reported as you approach them. A one-mile cue tells you when to take
-an exit. Press X to signal for the exit, slow to 45 miles per hour or less, and
-brake to a stop at the end of the ramp. The game gives a short pull-in moment
-before the stop menu opens, so holding Down Arrow to brake does not skip the
-first menu option.
+an exit. Press X to signal for the exit, steer right into the exit lane when
+prompted, slow to 45 miles per hour or less, and brake to a stop at the end of
+the ramp. If you reach the gore too fast, without signaling, or without the exit
+lane set, you stay on the highway and the game tells you what went wrong. The
+timing is generous so the sequence is about preparation, not twitch input. The
+game gives a short pull-in moment before the stop menu opens, so holding Down
+Arrow to brake does not skip the first menu option.
 
 Destination exits work the same way. When your delivery exit is ahead, the game
 announces the signed exit and toward cities, marks it as the destination exit,
-and tells you to press X. If adaptive cruise is set, the destination-exit callout
-cancels cruise so you can take manual speed control. If you miss the destination
-exit, the delivery does not complete; back up until the exit is ahead again,
-then press X to take it.
+and tells you to press X, move right for the exit lane, and slow down. If
+adaptive cruise is set, the destination-exit callout cancels cruise so you can
+take manual speed control. If you miss the destination exit, the delivery does
+not complete; back up until the exit is ahead again, then signal and take the
+lane correctly.
 
 Ordinary highway exits that do not lead to a current action are not announced
 during the drive. Press Shift+R if you want the next listed exit for route

@@ -66,8 +66,12 @@ FUEL_STOP_MIN = 20.0              # fueling is on-duty-not-driving work
 INSPECTION_MIN = 15.0             # routine scale/inspection check-in time
 OUT_OF_SERVICE_MIN = hos.SLEEP_MIN
 
-# Highway exits: signal inside the window, slow enough to make the ramp.
+# Highway exits: signal, move right into the exit lane, and slow for the ramp.
 EXIT_WINDOW_MI = 5.0              # how far out X can arm the upcoming exit
+EXIT_LANE_PREP_MI = 2.0           # where GPS starts asking for the exit lane
+EXIT_COMMIT_WINDOW_MI = 0.4       # generous gore-window grace after the marker
+EXIT_LANE_READY = 0.85            # accumulated right-lane commitment
+EXIT_LANE_OFFSET_READY = 0.45     # right-side lane position also counts
 RAMP_MAX_MPH = 45.0               # any faster and you blow past the exit
 RAMP_LENGTH_MI = 0.5              # deceleration lane plus ramp to the stop
 DESTINATION_EXIT_BEFORE_END_MI = 1.0
@@ -261,6 +265,10 @@ class DrivingState(State):
         self._rescue_offered = False
         self._signal_timer = 0.0
         self._exit_stop = None            # armed exit, set with X
+        self._exit_lane_alignment = 0.0
+        self._exit_lane_prompt_said = False
+        self._exit_lane_ready_said = False
+        self._exit_commit_said = False
         self._ramp_mi: float | None = None   # ramp distance left, once taken
         self._ramp_stop = None
         self._ramp_end_said = False
@@ -599,9 +607,10 @@ class DrivingState(State):
                 "minus raise and lower the cruise speed by five, so you can dial "
                 "it up to the speed you want; it will not hold above the posted "
                 "limit. "
-                "X takes the next announced exit, called out by its number "
-                "when known: slow to 45 for the ramp, then brake to a stop for "
-                "the rest stop menu. X also signals a pull-over if a trooper "
+                "X signals for the next announced exit, called out by its number "
+                "when known: move right for the exit lane, slow to 45 for the "
+                "ramp, then brake to a stop for the rest stop menu. X also "
+                "signals a pull-over if a trooper "
                 "lights you up for speeding: signal, then brake to a stop. "
                 "C also speaks the date and season. "
                 "M toggles the in-cab radio, left and right brackets tune it, "
@@ -1086,6 +1095,7 @@ class DrivingState(State):
         t.emergency_brake = emergency
         t.transmission.clutch = 1.0 if keys[pygame.K_LSHIFT] or keys[pygame.K_RSHIFT] else 0.0
         self._update_lane(keys, dt)
+        self._update_exit_preparation(keys, dt)
         self._update_cruise(dt, braking, accelerating)
 
         if t.transmission.automatic and t.engine_on:
@@ -1321,6 +1331,70 @@ class DrivingState(State):
             self.truck.damage_pct = min(100.0, self.truck.damage_pct + 1.0)
             self.ctx.say_event(
                 f"{self.lane.describe()} Steer back toward the lane center.",
+                interrupt=False,
+            )
+
+    def _reset_exit_lane_state(self) -> None:
+        self._exit_lane_alignment = 0.0
+        self._exit_lane_prompt_said = False
+        self._exit_lane_ready_said = False
+        self._exit_commit_said = False
+
+    def _exit_lane_ready(self) -> bool:
+        return (
+            self._exit_lane_alignment >= EXIT_LANE_READY
+            or self.lane.offset >= EXIT_LANE_OFFSET_READY
+        )
+
+    def _update_exit_preparation(self, keys, dt: float) -> None:
+        stop = self._exit_stop
+        if stop is None or self._ramp_mi is not None:
+            self._reset_exit_lane_state()
+            return
+        ahead = stop.at_mi - self.trip.position_mi
+        if ahead < -EXIT_COMMIT_WINDOW_MI:
+            return
+
+        right = keys[pygame.K_RIGHT]
+        left = keys[pygame.K_LEFT]
+        if right:
+            self._exit_lane_alignment += dt / 1.2
+        elif left:
+            self._exit_lane_alignment -= dt / 0.8
+        elif (
+            self._exit_lane_ready_said
+            and self._exit_lane_alignment >= EXIT_LANE_READY
+            and self.lane.offset >= -0.25
+        ):
+            self._exit_lane_alignment = max(
+                self._exit_lane_alignment, EXIT_LANE_READY)
+        elif self.lane.offset >= EXIT_LANE_OFFSET_READY:
+            self._exit_lane_alignment += dt / 2.0
+        elif self.lane.offset < -0.25:
+            self._exit_lane_alignment -= dt / 0.8
+        else:
+            self._exit_lane_alignment -= dt / 4.0
+        self._exit_lane_alignment = max(0.0, min(1.0, self._exit_lane_alignment))
+
+        if 0 < ahead <= EXIT_LANE_PREP_MI and not self._exit_lane_prompt_said:
+            self._exit_lane_prompt_said = True
+            self.ctx.say_event(
+                f"Exit lane in {ahead:.1f} miles. Signal is on; steer right "
+                f"for the exit lane and slow to {RAMP_MAX_MPH:.0f}.",
+                interrupt=False,
+            )
+        if (
+            0 < ahead <= EXIT_LANE_PREP_MI
+            and self._exit_lane_ready()
+            and not self._exit_lane_ready_said
+        ):
+            self._exit_lane_ready_said = True
+            self.ctx.say("Exit lane set. Hold this lane and keep slowing.")
+        if 0 <= ahead <= EXIT_COMMIT_WINDOW_MI and not self._exit_commit_said:
+            self._exit_commit_said = True
+            self.ctx.say_event(
+                "At the exit gore. Hold the exit lane and stay under "
+                f"{RAMP_MAX_MPH:.0f}.",
                 interrupt=False,
             )
 
@@ -1868,6 +1942,7 @@ class DrivingState(State):
             return
         if self._exit_stop is not None:
             self._exit_stop = None
+            self._reset_exit_lane_state()
             self.ctx.say("Exit canceled. Staying on the highway.")
             return
         stop = self._upcoming_exit_stop()
@@ -1876,6 +1951,7 @@ class DrivingState(State):
                          "approach them.")
             return
         self._exit_stop = stop
+        self._reset_exit_lane_state()
         self.ctx.audio.play("ui/notify", volume=0.5)
         ahead = stop.at_mi - self.trip.position_mi
         if stop.type == "delivery_destination":
@@ -1886,7 +1962,8 @@ class DrivingState(State):
         else:
             head = f"Signaling for the {stop.spoken_name} exit,"
         self.ctx.say(f"{head} {ahead:.1f} miles ahead. "
-                     f"Slow to {RAMP_MAX_MPH:.0f} or less for the ramp.")
+                     "Move right for the exit lane, then slow to "
+                     f"{RAMP_MAX_MPH:.0f} or less for the ramp.")
 
     def _upcoming_exit_stop(self):
         stop = self.trip.upcoming_stop(EXIT_WINDOW_MI)
@@ -1940,7 +2017,7 @@ class DrivingState(State):
     def _destination_exit_announcement(self, stop, ahead: float) -> str:
         phrase = self._destination_exit_phrase(stop)
         return (f"In {ahead:.0f} miles, {phrase}, destination exit. "
-                "Press X to take it.")
+                "Press X to signal, move right for the exit lane, and slow down.")
 
     def _check_destination_exit(self) -> None:
         stop = self._destination_exit_stop()
@@ -2019,8 +2096,21 @@ class DrivingState(State):
         stop = self._exit_stop
         if stop is None or self.trip.position_mi < stop.at_mi:
             return
+        if self.trip.position_mi > stop.at_mi + EXIT_COMMIT_WINDOW_MI:
+            self._exit_stop = None
+            self._reset_exit_lane_state()
+            self.ctx.say_event("You missed the exit window and stayed on the highway.")
+            return
         self._exit_stop = None
-        if self.truck.speed_mph <= RAMP_MAX_MPH:
+        if not self._exit_lane_ready():
+            self._reset_exit_lane_state()
+            missed = stop.exit_label if stop.exit_label else "the exit"
+            place = (self._destination_exit_phrase(stop)
+                     if stop.type == "delivery_destination" else stop.spoken_name)
+            self.ctx.say_event("You were not in the exit lane at the gore and "
+                               f"missed {missed} for {place}.")
+        elif self.truck.speed_mph <= RAMP_MAX_MPH:
+            self._reset_exit_lane_state()
             self._ramp_mi = RAMP_LENGTH_MI
             self._ramp_stop = stop
             self._ramp_end_said = False
@@ -2037,6 +2127,7 @@ class DrivingState(State):
             self.ctx.say_event(f"{take} Half a mile of ramp; brake to a stop "
                                "at the end.")
         else:
+            self._reset_exit_lane_state()
             missed = stop.exit_label if stop.exit_label else "the exit"
             place = (self._destination_exit_phrase(stop)
                      if stop.type == "delivery_destination" else stop.spoken_name)

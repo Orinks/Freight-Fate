@@ -8,6 +8,14 @@ def key_event(key, unicode=""):
     return pygame.event.Event(pygame.KEYDOWN, key=key, unicode=unicode)
 
 
+class HeldKeys:
+    def __init__(self, *keys):
+        self.keys = set(keys)
+
+    def __getitem__(self, key):
+        return key in self.keys
+
+
 def finish_timed_state(app):
     from freight_fate.states.base import TimedMessageState
 
@@ -76,6 +84,7 @@ def take_destination_exit(driving):
     destination = driving._destination_exit_stop()
     assert destination is not None
     driving._exit_stop = destination
+    driving._exit_lane_alignment = 1.0
     driving.trip.position_mi = destination.at_mi
     driving.truck.velocity_mps = 0.0
     driving._update_exit(0.0)
@@ -608,7 +617,8 @@ def test_destination_exit_announces_and_disables_cruise(monkeypatch):
         assert "exit " in events[-1]
         assert "toward" in events[-1]
         assert "destination exit" in events[-1]
-        assert "Press X to take it" in events[-1]
+        assert "Press X to signal" in events[-1]
+        assert "move right for the exit lane" in events[-1]
         assert "Adaptive cruise disabled" in events[-1]
     finally:
         app.shutdown()
@@ -747,6 +757,9 @@ def test_exit_flow_reaches_the_rest_stop_menu():
         driving.truck.velocity_mps = 15.0   # ~34 mph: slow enough for the ramp
         driving.handle_event(key_event(pygame.K_x))
         assert driving._exit_stop is stop
+        for _ in range(75):
+            driving._update_exit_preparation(HeldKeys(pygame.K_RIGHT), 1 / 60)
+        assert driving._exit_lane_ready()
 
         driving.trip.position_mi = stop.at_mi   # reach the exit point
         driving.update(1 / 60)
@@ -995,6 +1008,7 @@ def test_exit_missed_when_too_fast():
         driving.truck.velocity_mps = 29.0   # ~65 mph: way too fast for the ramp
         driving.handle_event(key_event(pygame.K_x))
         assert driving._exit_stop is stop
+        driving._exit_lane_alignment = 1.0
         driving.trip.position_mi = stop.at_mi
         driving.update(1 / 60)
         assert driving._ramp_mi is None         # blew past it
@@ -1021,8 +1035,102 @@ def test_exit_key_is_a_toggle_and_needs_an_exit_nearby():
         driving.trip.position_mi = stop.at_mi - 2.0
         driving.handle_event(key_event(pygame.K_x))
         assert driving._exit_stop is stop
+        driving._exit_lane_alignment = 0.6
         driving.handle_event(key_event(pygame.K_x))
         assert driving._exit_stop is None
+        assert driving._exit_lane_alignment == 0.0
+    finally:
+        app.shutdown()
+
+
+@pytest.mark.smoke
+def test_exit_requires_right_lane_alignment(monkeypatch):
+    from freight_fate.app import App
+
+    spoken = []
+    app = App()
+    monkeypatch.setattr(app.ctx, "say_event", lambda text, interrupt=True: spoken.append(text))
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        stop = driving.trip.stops[0]
+        driving.trip.position_mi = stop.at_mi - 1.0
+        driving.truck.velocity_mps = 15.0
+        driving.handle_event(key_event(pygame.K_x))
+        assert driving._exit_stop is stop
+        driving.trip.position_mi = stop.at_mi
+        driving.update(1 / 60)
+        assert driving._ramp_mi is None
+        assert driving._exit_stop is None
+        assert any("not in the exit lane" in line for line in spoken)
+    finally:
+        app.shutdown()
+
+
+@pytest.mark.smoke
+def test_exit_lane_can_be_set_with_keyboard_steering(monkeypatch):
+    from freight_fate.app import App
+
+    spoken = []
+    app = App()
+    monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: spoken.append(text))
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        stop = driving.trip.stops[0]
+        driving.trip.position_mi = stop.at_mi - 1.5
+        driving.handle_event(key_event(pygame.K_x))
+        for _ in range(80):
+            driving._update_exit_preparation(HeldKeys(pygame.K_RIGHT), 1 / 60)
+        assert driving._exit_lane_ready()
+        assert any("Exit lane set" in line for line in spoken)
+    finally:
+        app.shutdown()
+
+
+@pytest.mark.smoke
+def test_exit_lane_stays_set_after_keyboard_release():
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        stop = driving.trip.stops[0]
+        driving.trip.position_mi = stop.at_mi - 1.5
+        driving.handle_event(key_event(pygame.K_x))
+        for _ in range(80):
+            driving._update_exit_preparation(HeldKeys(pygame.K_RIGHT), 1 / 60)
+        assert driving._exit_lane_ready()
+        for _ in range(60 * 20):
+            driving._update_exit_preparation(HeldKeys(), 1 / 60)
+        assert driving._exit_lane_ready()
+        driving._update_exit_preparation(HeldKeys(pygame.K_LEFT), 1.5)
+        assert not driving._exit_lane_ready()
+    finally:
+        app.shutdown()
+
+
+@pytest.mark.smoke
+def test_exit_missed_after_gore_window(monkeypatch):
+    from freight_fate.app import App
+
+    spoken = []
+    app = App()
+    monkeypatch.setattr(app.ctx, "say_event", lambda text, interrupt=True: spoken.append(text))
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        stop = driving.trip.stops[0]
+        driving.trip.position_mi = stop.at_mi - 1.0
+        driving.truck.velocity_mps = 10.0
+        driving.handle_event(key_event(pygame.K_x))
+        driving._exit_lane_alignment = 1.0
+        driving.trip.position_mi = stop.at_mi + 0.6
+        driving.update(1 / 60)
+        assert driving._ramp_mi is None
+        assert driving._exit_stop is None
+        assert any("missed the exit window" in line for line in spoken)
     finally:
         app.shutdown()
 

@@ -552,7 +552,9 @@ Deliver -> Earn and level up -> Repeat
 - [x] Timed loading, unloading, and pull-in settling before facility/stop menus
 - [ ] Optional cargo loading/securing minigame
 - [x] Hours-of-service fatigue and mandatory rest planning (1.5.0)
-- [x] Highway exits: signal with X, slow for the ramp, brake to the stop
+- [x] Highway exits: signal with X, move right into the exit lane, slow for the
+      ramp, brake to the stop, and get spoken missed-exit recovery when the
+      signal, lane, speed, or gore-window setup is wrong
 - [x] Cruise control (K), with hazard and braking auto-cancel
 - [x] Region-flavored road hazards (dust devils, deer, rockfall, ...)
 - [x] HOS-aware realistic deadlines (driving + breaks + sleep + slack)
