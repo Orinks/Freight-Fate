@@ -7,14 +7,30 @@ from freight_fate.models.business import (
     COMPANY_DRIVER,
     LEASED_OWNER_OPERATOR,
     OWNER_OPERATOR_BUY_IN,
+    OWNER_OPERATOR_DELIVERIES,
+    OWNER_OPERATOR_LEVEL,
+    OWNER_OPERATOR_REPUTATION,
     OWNER_OPERATOR_WORKING_CAPITAL,
+    business_path_label,
     business_status_summary,
+    next_business_unlock,
     owner_operator_eligibility,
 )
+from freight_fate.models.career import LEVEL_XP
+from freight_fate.models.career_ladder import CAREER_RANKS, STARTER_CARRIER_NAME
 
 
 def key_event(key, unicode=""):
     return pygame.event.Event(pygame.KEYDOWN, key=key, unicode=unicode)
+
+
+def test_twenty_level_ladder_has_business_arc_titles():
+    assert len(CAREER_RANKS) == 20
+    assert [rank.level for rank in CAREER_RANKS] == list(range(1, 21))
+    assert CAREER_RANKS[0].title == "Yard Trainee"
+    assert CAREER_RANKS[4].title == "Owner-Operator Apprentice"
+    assert CAREER_RANKS[14].title == "Leased-On Owner-Operator"
+    assert CAREER_RANKS[-1].title == "Independent Operator"
 
 
 def test_owner_operator_unlock_requires_career_and_working_capital():
@@ -24,12 +40,13 @@ def test_owner_operator_unlock_requires_career_and_working_capital():
 
     ok, reasons = owner_operator_eligibility(p)
     assert not ok
-    assert any("Reach level 5" in reason for reason in reasons)
+    assert any(f"Reach level {OWNER_OPERATOR_LEVEL}" in reason for reason in reasons)
+    assert STARTER_CARRIER_NAME in business_status_summary(p)
     assert "company driver" in business_status_summary(p)
 
-    p.career.xp = 7000
-    p.career.deliveries = 10
-    p.career.reputation = 65
+    p.career.xp = LEVEL_XP[OWNER_OPERATOR_LEVEL - 1]
+    p.career.deliveries = OWNER_OPERATOR_DELIVERIES
+    p.career.reputation = OWNER_OPERATOR_REPUTATION
     p.money = OWNER_OPERATOR_BUY_IN + OWNER_OPERATOR_WORKING_CAPITAL
 
     ok, reasons = owner_operator_eligibility(p)
@@ -42,6 +59,34 @@ def test_owner_operator_unlock_requires_career_and_working_capital():
     assert any("advance" in reason for reason in reasons)
 
 
+def test_level_five_is_preparation_not_owner_operator_unlock():
+    from freight_fate.models.profile import Profile
+
+    p = Profile(name="Prep Gate")
+    p.career.xp = LEVEL_XP[4]
+    p.career.deliveries = 20
+    p.career.reputation = 90
+    p.money = 200_000.0
+
+    ok, reasons = owner_operator_eligibility(p)
+
+    assert not ok
+    assert any(f"Reach level {OWNER_OPERATOR_LEVEL}" in reason for reason in reasons)
+    assert "Owner-Operator Apprentice" in business_status_summary(p)
+    assert "Regional Fleet Driver" in next_business_unlock(p)
+
+
+def test_business_path_reports_starter_company_rank_and_next_unlock():
+    from freight_fate.models.profile import Profile
+
+    p = Profile(name="Path Copy")
+    p.career.xp = LEVEL_XP[10]
+
+    assert STARTER_CARRIER_NAME in business_path_label(p)
+    assert "Owner-Operator Candidate" in business_path_label(p)
+    assert "Working Capital Builder" in next_business_unlock(p)
+
+
 def test_business_status_menu_unlocks_owner_operator_when_qualified():
     from freight_fate.app import App
     from freight_fate.models.profile import Profile
@@ -51,15 +96,17 @@ def test_business_status_menu_unlocks_owner_operator_when_qualified():
     try:
         app.ctx.profile = Profile(name="Owner Path", current_city="Chicago")
         p = app.ctx.profile
-        p.career.xp = 7000
-        p.career.deliveries = 10
-        p.career.reputation = 65
+        p.career.xp = LEVEL_XP[OWNER_OPERATOR_LEVEL - 1]
+        p.career.deliveries = OWNER_OPERATOR_DELIVERIES
+        p.career.reputation = OWNER_OPERATOR_REPUTATION
         p.money = OWNER_OPERATOR_BUY_IN + OWNER_OPERATOR_WORKING_CAPITAL + 500
 
         app.push_state(BusinessStatusState(app.ctx))
         menu = app.state
-        assert any("Become owner-operator" in item.text for item in menu.items)
-        while "Become owner-operator" not in menu.items[menu.index].text:
+        assert any("Buy into leased-on owner-operator" in item.text for item in menu.items)
+        assert any("Carrier and rank" in item.text for item in menu.items)
+        assert any("Next business unlock" in item.text for item in menu.items)
+        while "Buy into leased-on owner-operator" not in menu.items[menu.index].text:
             menu.handle_event(key_event(pygame.K_DOWN))
         menu.handle_event(key_event(pygame.K_RETURN))
 
@@ -114,3 +161,24 @@ def test_company_driver_board_labels_carrier_gross(world):
         assert "Carrier gross" in app.state.items[0].text
     finally:
         app.shutdown()
+
+
+def test_late_company_driver_still_uses_company_settlement_until_buy_in():
+    from freight_fate.models.business import build_business_settlement
+    from freight_fate.models.jobs import CARGO_CATALOG, Job
+
+    job = Job(
+        CARGO_CATALOG["general"],
+        18.0,
+        "Chicago",
+        "Chicago yard",
+        "Milwaukee",
+        92.0,
+        1800.0,
+        6.0,
+    )
+    settlement = build_business_settlement(
+        COMPANY_DRIVER, job, 1800.0, on_time=True, driver_charges=0.0)
+
+    assert settlement.status == COMPANY_DRIVER
+    assert settlement.business_charges == ()

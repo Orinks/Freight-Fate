@@ -8,8 +8,10 @@ from ..data.world import Route
 from ..models.business import (
     LEASED_OWNER_OPERATOR,
     OWNER_OPERATOR_BUY_IN,
+    business_path_label,
     business_status_summary,
     is_owner_operator,
+    next_business_unlock,
     owner_operator_eligibility,
     pay_label,
     player_pays_operating_costs,
@@ -144,9 +146,11 @@ class CityMenuState(MenuState):
         city = self.ctx.world.cities[p.current_city]
         terminal = self.ctx.world.home_terminal(p.current_city)
         business = status_label(p.business_status)
+        rank = p.career.rank
         self.ctx.say(
             f"Parked at {terminal.spoken_name} in the {p.current_city} "
-            f"service area, {city.state}. {business.capitalize()}. "
+            f"service area, {city.state}. {business.capitalize()} with "
+            f"level {rank.level}, {rank.title}. "
             f"You have {p.money:,.0f} dollars. "
             f"{self.current_text()}")
 
@@ -169,8 +173,8 @@ class CityMenuState(MenuState):
                           "Company drivers use the carrier account. "
                           "Owner-operators pay their own fuel and repairs."),
             MenuItem("Business status", self._business_status,
-                     help="Review company-driver or owner-operator status, "
-                          "and buy into owner-operator status when qualified."),
+                     help="Review your carrier, rank, next business unlock, "
+                          "and owner-operator buy-in when qualified."),
             MenuItem("Career stats", self._stats,
                      help="Hear your level, reputation, and lifetime numbers."),
             MenuItem("Truck status", self._truck_status,
@@ -698,13 +702,17 @@ class BusinessStatusState(MenuState):
         p = self.ctx.profile
         items = [
             MenuItem(self._summary_label, self._summary,
-                     help="Hear the current business status and tradeoffs.")
+                     help="Hear the current business status and tradeoffs."),
+            MenuItem(self._rank_label, self._rank_status,
+                     help="Hear your starter carrier, rank, and career stage."),
+            MenuItem(self._next_unlock_label, self._next_unlock,
+                     help="Hear the next career or business unlock."),
         ]
         if not is_owner_operator(p.business_status):
             ok, _reasons = owner_operator_eligibility(p)
             if ok:
                 items.append(MenuItem(
-                    f"Become owner-operator: {OWNER_OPERATOR_BUY_IN:,.0f} dollars",
+                    f"Buy into leased-on owner-operator: {OWNER_OPERATOR_BUY_IN:,.0f} dollars",
                     self._become_owner_operator,
                     help="Buy your first tractor position and start running as "
                          "a leased-on owner-operator. Higher revenue, but your "
@@ -723,6 +731,18 @@ class BusinessStatusState(MenuState):
     def _summary(self) -> None:
         self.ctx.say(business_status_summary(self.ctx.profile))
 
+    def _rank_label(self) -> str:
+        return "Carrier and rank"
+
+    def _rank_status(self) -> None:
+        self.ctx.say(business_path_label(self.ctx.profile))
+
+    def _next_unlock_label(self) -> str:
+        return "Next business unlock"
+
+    def _next_unlock(self) -> None:
+        self.ctx.say(next_business_unlock(self.ctx.profile))
+
     def _become_owner_operator(self) -> None:
         p = self.ctx.profile
         ok, reasons = owner_operator_eligibility(p)
@@ -737,7 +757,7 @@ class BusinessStatusState(MenuState):
         self.ctx.save_profile()
         self.ctx.audio.play("ui/cash")
         self.ctx.say(
-            f"Owner-operator status unlocked. You paid "
+            f"Leased-on owner-operator status unlocked. You paid "
             f"{OWNER_OPERATOR_BUY_IN:,.0f} dollars toward your first tractor "
             f"and kept {p.money:,.0f} dollars working capital. Future loads "
             "pay higher gross revenue, and your business pays fuel, repairs, "

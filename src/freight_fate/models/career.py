@@ -4,8 +4,31 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-# XP needed to go from level N to N+1 (then +1500 per level beyond the table)
-LEVEL_XP = [0, 1000, 2500, 4500, 7000, 10_000, 14_000, 19_000, 25_000]
+from .career_ladder import MAX_CAREER_LEVEL, next_rank_for_level, rank_for_level
+
+# XP needed for each level in the 20-level career ladder.
+LEVEL_XP = [
+    0,
+    1000,
+    2500,
+    4500,
+    7000,
+    10_000,
+    14_000,
+    19_000,
+    25_000,
+    32_000,
+    40_000,
+    50_000,
+    62_000,
+    76_000,
+    92_000,
+    110_000,
+    130_000,
+    152_000,
+    176_000,
+    202_000,
+]
 
 # Endorsements unlocked automatically at these levels.
 ENDORSEMENT_LEVELS = {
@@ -29,10 +52,7 @@ def level_for_xp(xp: float) -> int:
     for i, threshold in enumerate(LEVEL_XP[1:], start=2):
         if xp >= threshold:
             level = i
-    extra = xp - LEVEL_XP[-1]
-    if extra > 0:
-        level = len(LEVEL_XP) + int(extra // 1500)
-    return level
+    return min(level, MAX_CAREER_LEVEL)
 
 
 @dataclass
@@ -47,6 +67,10 @@ class Career:
     @property
     def level(self) -> int:
         return level_for_xp(self.xp)
+
+    @property
+    def rank(self):
+        return rank_for_level(self.level)
 
     @property
     def endorsements(self) -> set[str]:
@@ -73,15 +97,27 @@ class Career:
 
         messages: list[str] = []
         if self.level > before_level:
-            messages.append(f"Level up! You are now a level {self.level} driver.")
+            rank = self.rank
+            messages.append(
+                f"Level up! You are now level {self.level}: {rank.title}. "
+                f"Unlock: {rank.unlock}"
+            )
         for endorsement in self.endorsements - before_endorsements:
             messages.append(ENDORSEMENT_ANNOUNCEMENTS[endorsement])
         return messages
 
     def summary(self) -> str:
         pct = (100 * self.on_time_deliveries / self.deliveries) if self.deliveries else 100
-        return (f"Level {self.level} driver. {self.xp:.0f} experience. "
+        rank = self.rank
+        next_rank = next_rank_for_level(self.level)
+        next_text = (
+            f" Next: level {next_rank.level}, {next_rank.title}."
+            if next_rank is not None else
+            " You are at the top career rank."
+        )
+        return (f"Level {self.level}, {rank.title}. {self.xp:.0f} experience. "
                 f"Reputation {self.reputation:.0f} out of 100. "
                 f"{self.deliveries} deliveries, {pct:.0f} percent on time. "
                 f"{self.total_miles:,.0f} lifetime miles, "
-                f"{self.total_earnings:,.0f} dollars earned.")
+                f"{self.total_earnings:,.0f} dollars earned. "
+                f"Career stage: {rank.stage}. {rank.status}.{next_text}")

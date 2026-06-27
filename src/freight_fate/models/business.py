@@ -2,23 +2,27 @@
 
 Freight Fate keeps the business arc playable rather than fully accounting-like:
 the player starts as a company driver, then can buy into a leased-on
-owner-operator track once the career has enough reputation, cash, and miles.
+owner-operator track once the 20-level career ladder has enough reputation,
+cash, and miles behind it.
 """
 
 from __future__ import annotations
 
 from dataclasses import dataclass
 
+from .career_ladder import STARTER_CARRIER_NAME, next_rank_for_level, rank_for_level
 from .jobs import Job
 
 COMPANY_DRIVER = "company_driver"
 LEASED_OWNER_OPERATOR = "leased_owner_operator"
 
-OWNER_OPERATOR_LEVEL = 5
-OWNER_OPERATOR_REPUTATION = 65.0
-OWNER_OPERATOR_DELIVERIES = 10
-OWNER_OPERATOR_BUY_IN = 20_000.0
-OWNER_OPERATOR_WORKING_CAPITAL = 3_000.0
+OWNER_OPERATOR_PREP_LEVEL = 5
+OWNER_OPERATOR_CANDIDATE_LEVEL = 11
+OWNER_OPERATOR_LEVEL = 15
+OWNER_OPERATOR_REPUTATION = 80.0
+OWNER_OPERATOR_DELIVERIES = 35
+OWNER_OPERATOR_BUY_IN = 35_000.0
+OWNER_OPERATOR_WORKING_CAPITAL = 10_000.0
 OWNER_OPERATOR_REVENUE_MULT = 1.12
 
 COMPANY_PAY_SHARE = 0.36
@@ -89,7 +93,8 @@ def owner_operator_eligibility(profile) -> tuple[bool, tuple[str, ...]]:
 
     reasons: list[str] = []
     if profile.career.level < OWNER_OPERATOR_LEVEL:
-        reasons.append(f"Reach level {OWNER_OPERATOR_LEVEL}.")
+        rank = rank_for_level(OWNER_OPERATOR_LEVEL)
+        reasons.append(f"Reach level {OWNER_OPERATOR_LEVEL}: {rank.title}.")
     if profile.career.deliveries < OWNER_OPERATOR_DELIVERIES:
         reasons.append(f"Complete {OWNER_OPERATOR_DELIVERIES} deliveries.")
     if profile.career.reputation < OWNER_OPERATOR_REPUTATION:
@@ -106,27 +111,68 @@ def owner_operator_eligibility(profile) -> tuple[bool, tuple[str, ...]]:
     return not reasons, tuple(reasons)
 
 
-def business_status_summary(profile) -> str:
+def business_path_label(profile) -> str:
+    rank = rank_for_level(profile.career.level)
+    return (
+        f"{STARTER_CARRIER_NAME}. Level {rank.level}: {rank.title}. "
+        f"{rank.stage}."
+    )
+
+
+def next_business_unlock(profile) -> str:
     status = getattr(profile, "business_status", COMPANY_DRIVER)
     if is_owner_operator(status):
+        if profile.career.level >= 20:
+            return (
+                "Endgame owner-operator status reached. Full independent "
+                "authority is a future optional system."
+            )
+        next_rank = next_rank_for_level(profile.career.level)
+        if next_rank is None:
+            return "You are at the top career rank."
+        return f"Next: level {next_rank.level}, {next_rank.title}. {next_rank.unlock}"
+
+    ok, reasons = owner_operator_eligibility(profile)
+    if ok:
         return (
-            "You are a leased-on owner-operator. Load revenue is higher, but "
-            "fuel, repairs, maintenance reserve, insurance, trailer program, "
-            "truck payment reserve, and settlement fees come out of your money."
+            "Next: buy into a leased-on owner-operator tractor position from "
+            "Business status."
+        )
+    if profile.career.level < OWNER_OPERATOR_LEVEL - 1:
+        next_rank = next_rank_for_level(profile.career.level)
+        if next_rank is None:
+            return "You are at the top career rank."
+        return f"Next: level {next_rank.level}, {next_rank.title}. {next_rank.unlock}"
+    return "Owner-operator gate locked: " + " ".join(reasons)
+
+
+def business_status_summary(profile) -> str:
+    status = getattr(profile, "business_status", COMPANY_DRIVER)
+    rank = rank_for_level(profile.career.level)
+    if is_owner_operator(status):
+        return (
+            f"You are leased to {STARTER_CARRIER_NAME} as a level "
+            f"{rank.level} {rank.title}. Load revenue is higher, but fuel, "
+            "repairs, maintenance reserve, insurance, trailer program, truck "
+            "payment reserve, and settlement fees come out of your money. "
+            + next_business_unlock(profile)
         )
     ok, reasons = owner_operator_eligibility(profile)
     if ok:
         return (
-            "You are a company driver and qualify to buy your first tractor. "
-            f"Owner-operator buy-in costs {OWNER_OPERATOR_BUY_IN:,.0f} dollars "
+            f"You are a company driver for {STARTER_CARRIER_NAME}, level "
+            f"{rank.level} {rank.title}. You qualify to buy your first "
+            f"leased-on tractor position. Owner-operator buy-in costs "
+            f"{OWNER_OPERATOR_BUY_IN:,.0f} dollars "
             f"and keeps {OWNER_OPERATOR_WORKING_CAPITAL:,.0f} dollars of "
             "working capital in the bank."
         )
     return (
-        "You are a company driver. The carrier supplies the tractor, fuel, "
+        f"You are a company driver for {STARTER_CARRIER_NAME}, level "
+        f"{rank.level} {rank.title}. The carrier supplies the tractor, fuel, "
         "repairs, trailer, authority, and insurance; your settlements are "
-        "driver wages and bonuses. Owner-operator path locked: "
-        + " ".join(reasons)
+        "driver wages and bonuses. "
+        + next_business_unlock(profile)
     )
 
 

@@ -3,8 +3,13 @@
 import json
 
 from freight_fate.models import Career, Economy, JobBoard, Profile
-from freight_fate.models.business import COMPANY_DRIVER, LEASED_OWNER_OPERATOR
-from freight_fate.models.career import level_for_xp
+from freight_fate.models.business import (
+    COMPANY_DRIVER,
+    LEASED_OWNER_OPERATOR,
+    business_status_summary,
+)
+from freight_fate.models.career import LEVEL_XP, level_for_xp
+from freight_fate.models.career_ladder import MAX_CAREER_LEVEL, STARTER_CARRIER_NAME
 from freight_fate.models.jobs import CARGO_CATALOG, plan_hos
 from freight_fate.models.profile import SIGNATURE_FIELD, ProfileIntegrityError
 from freight_fate.settings import Settings
@@ -142,7 +147,8 @@ def test_level_thresholds():
     assert level_for_xp(999) == 1
     assert level_for_xp(1000) == 2
     assert level_for_xp(2500) == 3
-    assert level_for_xp(100_000) > 9
+    assert level_for_xp(LEVEL_XP[-1]) == MAX_CAREER_LEVEL
+    assert level_for_xp(999_999) == MAX_CAREER_LEVEL
 
 
 def test_endorsements_unlock_with_levels():
@@ -160,8 +166,19 @@ def test_record_delivery_announces_level_up():
     c = Career(xp=950)
     messages = c.record_delivery(miles=100, pay=300, on_time=True, damage_pct=0)
     assert any("Level up" in m for m in messages)
+    assert any("New Hire Company Driver" in m for m in messages)
     assert c.deliveries == 1
     assert c.on_time_deliveries == 1
+
+
+def test_career_summary_includes_rank_and_next_step():
+    c = Career()
+
+    text = c.summary()
+
+    assert "Yard Trainee" in text
+    assert "Career stage: Company driver" in text
+    assert "Next: level 2, New Hire Company Driver" in text
 
 
 def test_reputation_moves_with_performance():
@@ -208,6 +225,7 @@ def test_old_save_without_business_status_loads_as_company_driver():
     loaded = Profile.load(path)
 
     assert loaded.business_status == COMPANY_DRIVER
+    assert STARTER_CARRIER_NAME in business_status_summary(loaded)
 
 
 def test_profile_ignores_unknown_fields():
