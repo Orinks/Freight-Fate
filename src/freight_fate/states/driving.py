@@ -180,6 +180,11 @@ SPEEDING_TICKET_FINES = (150.0, 300.0, 600.0, 1200.0)
 # Travel this far still moving after the lights come on and it counts as
 # ignoring the stop -- a heavier fine and a bigger reputation hit.
 PULL_OVER_IGNORE_MI = 2.0
+WEIGH_STATION_NOTICE_MI = 2.0
+WEIGH_STATION_BYPASS_MPH = 15.0
+WEIGH_STATION_BYPASS_FINE = 750.0
+UNSAFE_DAMAGE_STOP_PCT = 65.0
+UNSAFE_DAMAGE_FINE = 900.0
 
 
 class DrivingState(State):
@@ -260,6 +265,14 @@ class DrivingState(State):
         self._pull_over_signaled = False
         self._pull_over_over = 0.0            # mph over the limit when clocked
         self._pull_over_limit = 0.0           # posted limit when clocked
+        self._pull_over_kind = "speeding"
+        self._pull_over_title = "Traffic stop"
+        self._pull_over_summary = ""
+        self._pull_over_fine = 0.0
+        self._pull_over_reputation_hit = 0.0
+        self._pull_over_return = "Back on the highway. Watch your speed."
+        self._weigh_station_notice_key = ""
+        self._unsafe_damage_stop_key = ""
         # Deterministic, save-safe stream for "did a patrol catch you" rolls, kept
         # apart from the trip's hazard/zone/inspection streams.
         self._patrol_rng = random.Random(
@@ -613,7 +626,8 @@ class DrivingState(State):
                 "when known: move right for the exit lane, slow to 45 for the "
                 "ramp, then brake to a stop for the rest stop menu. X also "
                 "signals a pull-over if a trooper "
-                "lights you up for speeding: signal, then brake to a stop. "
+                "lights you up for speeding, a scale bypass, or unsafe equipment: "
+                "signal, then brake to a stop. "
                 "C also speaks the date and season. "
                 "M toggles the in-cab radio, left and right brackets tune it, "
                 "and Y speaks radio station, volume, and streamer-safe status. "
@@ -1142,6 +1156,8 @@ class DrivingState(State):
         pos_before = self.trip.position_mi
         for event in self.trip.update(dt):
             self._handle_trip_event(event)
+        self._check_weigh_station_enforcement(pos_before)
+        self._check_unsafe_damage_enforcement()
         self._check_destination_exit()
         self._update_exit(self.trip.position_mi - pos_before)
 
@@ -1664,9 +1680,90 @@ class DrivingState(State):
         else:
             self._speeding_timer = 0.0
 
+    def _enforcement_bypassed(self) -> bool:
+        return self.ctx.settings.hos_mode in hos.HOS_NON_ENFORCED_MODES
+
+    def _weigh_station_key(self, stop) -> str:
+        return f"weigh:{stop.name}:{stop.at_mi:.1f}"
+
+    def _check_weigh_station_enforcement(self, previous_mi: float) -> None:
+        if (self._enforcement_bypassed() or self._pull_over is not None
+                or self._ramp_mi is not None):
+            return
+        for stop in self.trip.stops:
+            if stop.type != "weigh_station":
+                continue
+            ahead = stop.at_mi - self.trip.position_mi
+            key = self._weigh_station_key(stop)
+            if (0 < ahead <= WEIGH_STATION_NOTICE_MI
+                    and key != self._weigh_station_notice_key):
+                self._weigh_station_notice_key = key
+                self.ctx.audio.play("events/inspection_warning", volume=0.7)
+                self.ctx.say_event(
+                    f"Open weigh station ahead in {ahead:.1f} miles: "
+                    "slow down, pull into the scale lane, stop, then press T "
+                    "for inspection check-in.",
+                    interrupt=False)
+            if key in self.enforcement_events:
+                continue
+            crossed = previous_mi < stop.at_mi <= self.trip.position_mi
+            if crossed and self.truck.speed_mph > WEIGH_STATION_BYPASS_MPH:
+                self.enforcement_events.add(key)
+                self._begin_enforcement_pull_over(
+                    kind="weigh_station_bypass",
+                    title="Weigh station bypass stop",
+                    summary=(
+                        f"Scale officers saw you blow past {stop.spoken_name} "
+                        "instead of pulling into the inspection lane."
+                    ),
+                    fine=WEIGH_STATION_BYPASS_FINE,
+                    reputation_hit=hos.HOS_REPUTATION_HIT,
+                    return_message=(
+                        "Back on the highway. Watch for the next open scale."
+                    ),
+                    lights_message=(
+                        f"Scale officer saw you bypass {stop.spoken_name}. "
+                        "Lights and siren behind you: signal with X and brake "
+                        "to a stop on the shoulder."
+                    ))
+
+    def _check_unsafe_damage_enforcement(self) -> None:
+        if (self._enforcement_bypassed() or self._pull_over is not None
+                or self._ramp_mi is not None):
+            return
+        if (self.truck.damage_pct < UNSAFE_DAMAGE_STOP_PCT
+                or self.truck.speed_mph <= DOCKING_MAX_MPH):
+            return
+        patrol = self.trip.active_patrol_at(self.trip.position_mi)
+        if patrol is None:
+            return
+        key = f"unsafe-damage:{round(patrol.start_mi, 1)}:{round(patrol.end_mi, 1)}"
+        if key == self._unsafe_damage_stop_key or key in self.enforcement_events:
+            return
+        self._unsafe_damage_stop_key = key
+        self.enforcement_events.add(key)
+        self._begin_enforcement_pull_over(
+            kind="unsafe_damage",
+            title="Unsafe equipment stop",
+            summary=(
+                f"A trooper in this {patrol.reason} saw visible truck damage "
+                f"at {self.truck.damage_pct:.0f} percent and ordered a roadside "
+                "safety inspection."
+            ),
+            fine=UNSAFE_DAMAGE_FINE,
+            reputation_hit=hos.HOS_REPUTATION_HIT,
+            return_message=(
+                "Back on the highway. Repair the truck at the next safe stop."
+            ),
+            lights_message=(
+                f"Trooper behind you noticed visible truck damage: "
+                f"{self.truck.damage_pct:.0f} percent. Signal with X and brake "
+                "to a stop for a safety inspection."
+            ))
+
     def _trooper_catches_speeder(self, limit: float) -> bool:
         """Whether a patrol clocks this speeding strike, by patrol intensity."""
-        if self.ctx.settings.hos_mode in hos.HOS_NON_ENFORCED_MODES:
+        if self._enforcement_bypassed():
             return False   # enforcement is bypassed in the debug mode
         patrol = self.trip.active_patrol_at(self.trip.position_mi)
         if patrol is None:
@@ -1680,6 +1777,12 @@ class DrivingState(State):
         self._pull_over_signaled = False
         self._pull_over_limit = limit
         self._pull_over_over = max(0.0, self.truck.speed_mph - limit)
+        self._pull_over_kind = "speeding"
+        self._pull_over_title = "Traffic stop"
+        self._pull_over_summary = ""
+        self._pull_over_fine = 0.0
+        self._pull_over_reputation_hit = 0.0
+        self._pull_over_return = "Back on the highway. Watch your speed."
         patrol = self.trip.active_patrol_at(self.trip.position_mi)
         where = patrol.reason if patrol is not None else "patrol"
         self.ctx.audio.play("events/police_siren")
@@ -1688,6 +1791,24 @@ class DrivingState(State):
             f"at {self.truck.speed_mph:.0f} in a {limit:.0f}. Signal with X and "
             "brake to a stop on the shoulder.",
             interrupt=True)
+
+    def _begin_enforcement_pull_over(
+            self, *, kind: str, title: str, summary: str, fine: float,
+            reputation_hit: float, return_message: str,
+            lights_message: str) -> None:
+        self._pull_over = "lights"
+        self._pull_over_start_mi = self.trip.position_mi
+        self._pull_over_signaled = False
+        self._pull_over_over = 0.0
+        self._pull_over_limit = 0.0
+        self._pull_over_kind = kind
+        self._pull_over_title = title
+        self._pull_over_summary = summary
+        self._pull_over_fine = fine
+        self._pull_over_reputation_hit = reputation_hit
+        self._pull_over_return = return_message
+        self.ctx.audio.play("events/police_siren")
+        self.ctx.say_event(lights_message, interrupt=True)
 
     def _signal_pull_over(self) -> None:
         """X during a pull-over: signal and ease over (better demeanor)."""
@@ -1712,7 +1833,20 @@ class DrivingState(State):
     def _open_traffic_stop(self) -> None:
         signaled = self._pull_over_signaled
         over, limit = self._pull_over_over, self._pull_over_limit
+        kind = self._pull_over_kind
+        title = self._pull_over_title
+        summary = self._pull_over_summary
+        fine = self._pull_over_fine
+        reputation_hit = self._pull_over_reputation_hit
+        return_message = self._pull_over_return
         self._pull_over = None
+        if kind != "speeding":
+            self.ctx.push_state(
+                EnforcementStopState(
+                    self.ctx, self, title=title, summary=summary, fine=fine,
+                    reputation_hit=reputation_hit, signaled=signaled,
+                    return_message=return_message))
+            return
         self.ctx.push_state(
             TrafficStopState(self.ctx, self, signaled=signaled, over=over,
                              limit=limit))
@@ -2890,6 +3024,68 @@ class TrafficStopState(MenuState):
     def go_back(self) -> None:
         self.ctx.pop_state()
         self.ctx.say("Back on the highway. Watch your speed.", interrupt=True)
+
+
+class EnforcementStopState(MenuState):
+    """Roadside enforcement stop for non-speeding violations."""
+
+    intro_help = ("Press Enter or Escape to pull back onto the highway when "
+                  "you are ready.")
+
+    def __init__(
+            self, ctx, driving: DrivingState, *, title: str, summary: str,
+            fine: float, reputation_hit: float, signaled: bool,
+            return_message: str) -> None:
+        super().__init__(ctx)
+        self.driving = driving
+        self._title = title
+        self.summary = summary
+        self.fine = fine
+        self.reputation_hit = reputation_hit
+        self.signaled = signaled
+        self.return_message = return_message
+        self._outcome_text = ""
+        self._resolve()
+
+    @property
+    def title(self) -> str:  # type: ignore[override]
+        return self._title
+
+    def presence(self):
+        from ..discord_presence import PresenceState
+
+        base = self.driving.presence()
+        detail = base.detail if base is not None else ""
+        return PresenceState("Pulled over", detail)
+
+    def _resolve(self) -> None:
+        p = self.ctx.profile
+        d = self.driving
+        d.ticket_fines_paid += self.fine
+        p.money -= self.fine
+        hit = self.reputation_hit * (0.8 if self.signaled else 1.0)
+        p.career.reputation = max(0.0, p.career.reputation - hit)
+        self.ctx.audio.play("ui/error")
+        self._outcome_text = (
+            f"Fine: {self.fine:,.0f} dollars, paid on the spot, and a "
+            "reputation hit.")
+
+    def announce_entry(self) -> None:
+        polite = (" You signaled and pulled over promptly."
+                  if self.signaled else "")
+        self.ctx.say(
+            f"You stop on the shoulder for an enforcement inspection.{polite} "
+            f"{self.summary} {self._outcome_text} {self.current_text()}",
+            interrupt=True)
+
+    def build_items(self) -> list[MenuItem]:
+        return [MenuItem("Pull back onto the highway", self.go_back,
+                         help="Signal, check your mirror, and merge back up to "
+                              "speed.")]
+
+    def go_back(self) -> None:
+        self.ctx.pop_state()
+        self.ctx.say(self.return_message, interrupt=True)
 
 
 class RestStopState(MenuState):

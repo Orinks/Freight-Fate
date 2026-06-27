@@ -411,6 +411,11 @@ logbook check that reads your recent duty entries before ending in an
 on-the-spot ticket or a warning.
 Ignoring the lights is logged as evasion and costs far more. Speeding the
 patrols do not catch still adds a quieter charge at delivery settlement.
+Open weigh stations also matter: the game warns you before the scale, and if
+you blow past at highway speed instead of slowing into the inspection lane, a
+scale officer can light you up for a roadside enforcement stop. A visibly
+unsafe truck can also draw a safety stop when you pass active enforcement, so
+repair severe damage before pushing through patrol corridors.
 Adaptive cruise will not engage on low-speed local roads such as facility
 access roads, construction, or heavy traffic; drive those manually.
 
@@ -466,9 +471,10 @@ Stop actions depend on that stop's data. A stop may offer:
 - Save point.
 
 Not every stop offers every action. A public rest area usually does not offer
-fuel or repair. A weigh station is for inspection, not food or sleep. Parking
-labels describe confidence, not a live guarantee that a space is open right
-now. Late at night, a sleep-capable stop may be full.
+fuel or repair. A weigh station is for inspection, not food or sleep: slow
+down, pull into the scale lane, stop, then press T for inspection check-in.
+Parking labels describe confidence, not a live guarantee that a space is open
+right now. Late at night, a sleep-capable stop may be full.
 
 ## Hours Of Service And Fatigue
 

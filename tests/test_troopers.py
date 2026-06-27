@@ -220,6 +220,180 @@ def test_ignoring_the_lights_is_logged_as_evasion(monkeypatch):
         app.shutdown()
 
 
+def test_weigh_station_blow_past_starts_enforcement_stop(monkeypatch):
+    from freight_fate.app import App
+    from freight_fate.sim.trip import RoadStop
+    from freight_fate.states.driving import (
+        WEIGH_STATION_BYPASS_FINE,
+        EnforcementStopState,
+    )
+
+    app = App()
+    try:
+        d = _driving(app, patrol_intensity=None)
+        _quiet(app, monkeypatch)
+        d.trip.stops = [
+            RoadStop("Ontario Scale", 10.0, "weigh_station", ("inspect",))
+        ]
+        d.trip.position_mi = 10.1
+        d.truck.velocity_mps = 55.0 / 2.23694
+
+        d._check_weigh_station_enforcement(9.9)
+
+        assert d._pull_over == "lights"
+        assert d._pull_over_kind == "weigh_station_bypass"
+
+        money_before = app.ctx.profile.money
+        rep_before = app.ctx.profile.career.reputation
+        d.truck.velocity_mps = 0.0
+        d._update_pull_over(1.0)
+        assert isinstance(app.state, EnforcementStopState)
+        assert d.ticket_fines_paid == WEIGH_STATION_BYPASS_FINE
+        assert app.ctx.profile.money == money_before - WEIGH_STATION_BYPASS_FINE
+        assert app.ctx.profile.career.reputation < rep_before
+    finally:
+        app.shutdown()
+
+
+def test_weigh_station_warning_is_spoken_before_bypass(monkeypatch):
+    from freight_fate.app import App
+    from freight_fate.sim.trip import RoadStop
+
+    app = App()
+    spoken = []
+    try:
+        d = _driving(app, patrol_intensity=None)
+        monkeypatch.setattr(app.ctx, "say", lambda *a, **k: None)
+        monkeypatch.setattr(app.ctx, "say_event",
+                            lambda text, *a, **k: spoken.append(text))
+        monkeypatch.setattr(app.ctx.audio, "play", lambda *a, **k: None)
+        d.trip.stops = [
+            RoadStop("Ontario Scale", 10.0, "weigh_station", ("inspect",))
+        ]
+        d.trip.position_mi = 8.2
+        d.truck.velocity_mps = 45.0 / 2.23694
+
+        d._check_weigh_station_enforcement(8.0)
+        d._check_weigh_station_enforcement(8.1)
+
+        assert len([s for s in spoken if "Open weigh station ahead" in s]) == 1
+        assert "press T for inspection check-in" in spoken[0]
+    finally:
+        app.shutdown()
+
+
+def test_debug_off_mode_bypasses_scale_blow_past(monkeypatch):
+    from freight_fate.app import App
+    from freight_fate.sim.trip import RoadStop
+
+    app = App()
+    try:
+        d = _driving(app, patrol_intensity=None)
+        app.ctx.settings.hos_mode = "debug_off"
+        _quiet(app, monkeypatch)
+        d.trip.stops = [
+            RoadStop("Ontario Scale", 10.0, "weigh_station", ("inspect",))
+        ]
+        d.trip.position_mi = 10.1
+        d.truck.velocity_mps = 55.0 / 2.23694
+
+        d._check_weigh_station_enforcement(9.9)
+
+        assert d._pull_over is None
+        assert not d.enforcement_events
+    finally:
+        app.shutdown()
+
+
+def test_scale_bypass_does_not_overwrite_active_pull_over(monkeypatch):
+    from freight_fate.app import App
+    from freight_fate.sim.trip import RoadStop
+
+    app = App()
+    try:
+        d = _driving(app, patrol_intensity=1.0)
+        _quiet(app, monkeypatch)
+        limit = _speed_for(d, over=25.0)
+        assert d._pull_over == "lights"
+        d.trip.stops = [
+            RoadStop("Ontario Scale", 10.0, "weigh_station", ("inspect",))
+        ]
+        d.trip.position_mi = 10.1
+        d.truck.velocity_mps = (limit + 25.0) / 2.23694
+
+        d._check_weigh_station_enforcement(9.9)
+
+        assert d._pull_over == "lights"
+        assert d._pull_over_kind == "speeding"
+    finally:
+        app.shutdown()
+
+
+def test_unsafe_damage_in_patrol_starts_safety_stop(monkeypatch):
+    from freight_fate.app import App
+    from freight_fate.states.driving import UNSAFE_DAMAGE_FINE
+
+    app = App()
+    try:
+        d = _driving(app, patrol_intensity=1.0)
+        _quiet(app, monkeypatch)
+        d.trip.position_mi = d.trip.total_miles / 2.0
+        d.truck.damage_pct = 70.0
+        d.truck.velocity_mps = 35.0 / 2.23694
+
+        d._check_unsafe_damage_enforcement()
+
+        assert d._pull_over == "lights"
+        assert d._pull_over_kind == "unsafe_damage"
+        money_before = app.ctx.profile.money
+        d.truck.velocity_mps = 0.0
+        d._update_pull_over(1.0)
+        assert d.ticket_fines_paid == UNSAFE_DAMAGE_FINE
+        assert app.ctx.profile.money == money_before - UNSAFE_DAMAGE_FINE
+    finally:
+        app.shutdown()
+
+
+def test_unsafe_damage_needs_active_enforcement(monkeypatch):
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        d = _driving(app, patrol_intensity=None)
+        _quiet(app, monkeypatch)
+        d.truck.damage_pct = 85.0
+        d.truck.velocity_mps = 35.0 / 2.23694
+
+        d._check_unsafe_damage_enforcement()
+
+        assert d._pull_over is None
+        assert not d.enforcement_events
+    finally:
+        app.shutdown()
+
+
+def test_f1_help_names_non_speed_enforcement_pullovers(monkeypatch):
+    import pygame
+
+    from freight_fate.app import App
+
+    app = App()
+    spoken = []
+    try:
+        d = _driving(app, patrol_intensity=None)
+        monkeypatch.setattr(app.ctx, "say", lambda text, *a, **k: spoken.append(text))
+        monkeypatch.setattr(app.ctx, "say_event", lambda *a, **k: None)
+        monkeypatch.setattr(app.ctx.audio, "play", lambda *a, **k: None)
+
+        d.handle_event(pygame.event.Event(pygame.KEYDOWN, {"key": pygame.K_F1}))
+
+        assert spoken
+        assert "scale bypass, or unsafe equipment" in spoken[-1]
+        assert "signal, then brake to a stop" in spoken[-1]
+    finally:
+        app.shutdown()
+
+
 def test_ticket_counters_survive_snapshot(monkeypatch):
     from freight_fate.app import App
     from freight_fate.states.driving import DrivingState

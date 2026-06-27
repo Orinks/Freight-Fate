@@ -434,8 +434,15 @@ reset instead of only a fine.
   `events/spike_strip.ogg` (felony-stop sound on evasion), and
   `events/cb_radio_chatter.ogg` (CB patrol heads-up). Regenerate via
   `tools/generate_sounds.py`.
-  *Next trooper slices:* a full felony stop (losing the load), weigh-station
-  "blow past while flagged", and damage-triggered stops.
+- [x] **Weigh-station bypass and unsafe-equipment stops.** Shipped:
+  `DrivingState._check_weigh_station_enforcement` now gives a scale warning
+  before open weigh stations, treats highway-speed blow-pasts as a roadside
+  enforcement stop, and keeps the developer `debug_off` bypass. Severe visible
+  truck damage now draws a safety stop when the truck passes an active patrol
+  window. Both use `EnforcementStopState` for spoken reason, prompt-with-X
+  pull-over flow, on-the-spot fine, and reputation hit without counting as a
+  speeding ticket. Future trooper slice still open: full felony evasion
+  consequences such as losing the load.
 - [x] **Richer construction enforcement.** Shipped: construction zones now add a
   staged merge/flagger taper before the main work zone. The first cue remains
   action-first ("Brake now!") and tells the player to merge left for the flagger
@@ -462,7 +469,7 @@ function guidance: https://www.fmcsa.dot.gov/hours-service/elds/eld-functions-fa
   "bear at mile marker 12" gives attentive players a spoken heads-up a
   few miles out.
 - **Getting pulled over.** Speeding 10+ over inside a patrol's window (or
-  blowing past a weigh station while flagged) triggers a siren behind you.
+  blowing past an open weigh station at highway speed) triggers a siren behind you.
   The player must signal with X (reusing the exit system's muscle memory),
   brake to a stop on the shoulder, and sit through a spoken stop: license
   and logbook check, then a ticket, a warning (reputation and demeanor
@@ -482,9 +489,8 @@ function guidance: https://www.fmcsa.dot.gov/hours-service/elds/eld-functions-fa
   chatter, an officer voice channel (the SAPI event voice fits), spike
   strip. Added as Ogg Vorbis assets under
   `src/freight_fate/assets/sounds/`.
-- **Open questions.** Should troopers notice damage (a visibly wrecked
-  truck invites a stop)? Do warnings expire? Does reputation lower the
-  ticket odds, or just the fine?
+- **Open questions.** Do warnings expire? Does reputation lower the ticket
+  odds, or just the fine? Should felony evasion end the active load?
 
 ## Shipped in 1.5.0
 
@@ -589,8 +595,9 @@ Deliver -> Earn and level up -> Repeat
 - [x] HOS-aware realistic deadlines (driving + breaks + sleep + slack)
 - [x] In-cab logbook / Record of Duty Status, with the trooper logbook
       check reading real entries
-- [ ] State troopers and law enforcement (speeding pull-overs and CB heads-up
-      shipped; felony stop, weigh-station, damage-triggered slices pending)
+- [ ] State troopers and law enforcement (speeding pull-overs, CB heads-up,
+      scale bypass stops, and damage-triggered stops shipped; full felony
+      load-loss consequences still pending)
 - [ ] Special event jobs (oversize loads, urgent medical freight)
 - [ ] Trailer types with handling differences
 

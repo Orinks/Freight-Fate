@@ -18,6 +18,12 @@
   call out traffic building near exits, highway merges, construction tapers,
   and lead-traffic packs. Relaxed mode keeps those cues calmer, and missed
   exits now distinguish being boxed out by traffic from simply missing the lane.
+- **Law enforcement now watches scales and unsafe trucks.** Open weigh stations
+  warn you before the scale; blow past one at highway speed and a scale officer
+  can light you up for a roadside enforcement stop. Severe visible truck damage
+  can also trigger a safety stop when you pass an active patrol window. Both
+  stops use spoken warnings, X to signal, a full stop on the shoulder, an
+  on-the-spot fine, and a reputation hit.
 
 ### Fixed
 
