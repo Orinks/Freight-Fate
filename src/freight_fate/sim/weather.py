@@ -7,6 +7,7 @@ A deterministic seed makes trips reproducible in tests.
 
 from __future__ import annotations
 
+import os
 import random
 from dataclasses import dataclass
 from enum import Enum
@@ -93,6 +94,21 @@ REGION_WEIGHTS: dict[str, dict[WeatherKind, float]] = {
 DEFAULT_WEIGHTS = REGION_WEIGHTS["heartland"]
 
 
+def _forced_weather() -> "WeatherKind | None":
+    """A dev/testing override locking the weather to one condition, from
+    ``FREIGHT_FATE_FORCE_WEATHER`` (e.g. ``snow``, ``heavy_rain``, ``fog``,
+    ``wind``). Empty or unrecognized -> None (normal weather)."""
+    name = os.environ.get("FREIGHT_FATE_FORCE_WEATHER", "").strip().lower()
+    if not name:
+        return None
+    normalized = name.replace("_", " ")
+    for kind in WeatherKind:
+        if normalized in (kind.name.lower(), kind.value,
+                          kind.value.replace(" ", "_")):
+            return kind
+    return None
+
+
 class WeatherSystem:
     """Evolving weather for the current region of a trip.
 
@@ -118,8 +134,11 @@ class WeatherSystem:
         # than showing a simulated warm-up condition that the real data would
         # immediately replace. Simulated weather only appears if the provider
         # turns out to be offline (see update()).
-        self.current = (WeatherKind.CLEAR if provider is not None
-                        else self._seasonal(self._sample(region)))
+        self._forced = _forced_weather()   # dev/testing override, usually None
+        self.current = (
+            self._forced if self._forced is not None
+            else WeatherKind.CLEAR if provider is not None
+            else self._seasonal(self._sample(region)))
         self.minutes_until_change = self._rng.uniform(25, 70)
         self.thunder_cooldown = 0.0
 
@@ -209,6 +228,13 @@ class WeatherSystem:
         self.thunder_cooldown = max(0.0, self.thunder_cooldown - game_minutes)
         if self.game_hours is not None:
             self.game_hours += game_minutes / 60.0  # advance the career clock
+
+        if self._forced is not None:
+            # Locked condition for testing: ignore the provider and simulation.
+            if self.current != self._forced:
+                self.current = self._forced
+                return self._forced
+            return None
 
         changed = self._poll_provider()
         if self.live:

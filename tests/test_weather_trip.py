@@ -230,6 +230,21 @@ def test_speed_limit_cue_names_direction_and_city(world, monkeypatch):
     assert all("approaching" not in m for m in raised)
 
 
+def test_force_weather_override_locks_condition(monkeypatch):
+    monkeypatch.setenv("FREIGHT_FATE_FORCE_WEATHER", "snow")
+    ws = WeatherSystem("heartland", seed=1)
+    assert ws.current is WeatherKind.SNOW
+    for _ in range(200):              # never drifts off the forced condition
+        ws.update(30.0)
+        assert ws.current is WeatherKind.SNOW
+
+    monkeypatch.setenv("FREIGHT_FATE_FORCE_WEATHER", "heavy_rain")
+    assert WeatherSystem("heartland", seed=1).current is WeatherKind.HEAVY_RAIN
+    monkeypatch.delenv("FREIGHT_FATE_FORCE_WEATHER")
+    monkeypatch.setenv("FREIGHT_FATE_FORCE_WEATHER", "bogus")
+    assert WeatherSystem("heartland", seed=1)._forced is None
+
+
 def test_weather_drag_multiplier_increases_resistance():
     truck = TruckState()
     truck.velocity_mps = 25.0
