@@ -1,6 +1,7 @@
 """Transmission behavior tests."""
 
 from freight_fate.sim.transmission import (
+    AUTO_LOW_GEAR_UPSHIFT_RPM,
     AUTO_UPSHIFT_RPM,
     FINAL_DRIVE,
     GEAR_RATIOS,
@@ -80,7 +81,10 @@ def test_manual_rejected_in_automatic_mode():
 
 def test_auto_upshifts_at_high_rpm():
     tr = Transmission(automatic=True, gear=3)
-    assert tr.auto_update(1800, throttle=0.8, moving=True) == 4
+    assert tr.auto_update(AUTO_LOW_GEAR_UPSHIFT_RPM, throttle=0.8,
+                          moving=True) is None
+    assert tr.auto_update(AUTO_LOW_GEAR_UPSHIFT_RPM + 1, throttle=0.8,
+                          moving=True) == 4
 
 
 def test_auto_downshifts_at_low_rpm():
@@ -116,9 +120,9 @@ def test_auto_drops_to_first_when_stopped_in_high_gear():
 
 def test_auto_waits_for_shift_to_finish():
     tr = Transmission(automatic=True, gear=3)
-    tr.auto_update(1800, 0.8, True)
+    tr.auto_update(AUTO_LOW_GEAR_UPSHIFT_RPM + 1, 0.8, True)
     assert tr.shifting
-    assert tr.auto_update(1800, 0.8, True) is None
+    assert tr.auto_update(AUTO_LOW_GEAR_UPSHIFT_RPM + 1, 0.8, True) is None
     tr.update(1.0)
     assert not tr.shifting
 

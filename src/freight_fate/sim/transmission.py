@@ -18,6 +18,7 @@ REVERSE = -1
 NEUTRAL = 0
 
 AUTO_UPSHIFT_RPM = 1750
+AUTO_LOW_GEAR_UPSHIFT_RPM = 1800
 AUTO_DOWNSHIFT_RPM = 1050
 SHIFT_TIME = 0.45  # seconds of torque interruption
 
@@ -114,7 +115,8 @@ class Transmission:
             self.gear = 1
             self._shift_timer = SHIFT_TIME
             return self.gear
-        if rpm > AUTO_UPSHIFT_RPM and self.gear < self.num_gears and not braking:
+        upshift_rpm = AUTO_LOW_GEAR_UPSHIFT_RPM if self.gear <= 4 else AUTO_UPSHIFT_RPM
+        if rpm > upshift_rpm and self.gear < self.num_gears and not braking:
             self.gear += 1
             self._shift_timer = SHIFT_TIME
             return self.gear

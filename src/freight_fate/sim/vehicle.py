@@ -28,6 +28,9 @@ KG_PER_TON = 1000.0  # game cargo "tons" are treated as metric tonnes
 # this reference payload, so an unconfigured truck keeps the original loaded
 # behavior; lighter loads (and empty deadheads) weigh proportionally less.
 REFERENCE_CARGO_KG = 21_500.0
+LAUNCH_TRACTION_LOW_SPEED_MPH = 25.0
+LAUNCH_TRACTION_START_G = 0.12
+LAUNCH_TRACTION_ROLLING_G = 0.33
 
 
 @dataclass(frozen=True)
@@ -185,8 +188,15 @@ class TruckState:
         torque = self.torque_at(self.rpm) * self.throttle * self.health_factor
         direction = -1.0 if ratio < 0 else 1.0
         force = torque * abs(ratio) * self.specs.driveline_efficiency / self.specs.wheel_radius_m
-        # traction limit: drive wheels carry roughly a third of gross weight
-        traction_limit = self.gross_mass_kg * G * 0.33 * self.grip
+        # Drive wheels can use roughly a third of gross weight once rolling,
+        # but a loaded tractor-trailer eases into that force instead of
+        # launching at the full traction cap from a dead stop.
+        launch = min(1.0, self.speed_mph / LAUNCH_TRACTION_LOW_SPEED_MPH)
+        traction_g = (
+            LAUNCH_TRACTION_START_G
+            + (LAUNCH_TRACTION_ROLLING_G - LAUNCH_TRACTION_START_G) * launch
+        )
+        traction_limit = self.gross_mass_kg * G * traction_g * self.grip
         return direction * min(force, traction_limit)
 
     def resistance_force(self) -> float:
@@ -227,7 +237,6 @@ class TruckState:
     # -- per-frame update ---------------------------------------------------------
 
     def update(self, dt: float) -> None:
-        s = self.specs
         tr = self.transmission
         tr.update(dt)
         self._update_air_system(dt)

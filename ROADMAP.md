@@ -132,16 +132,15 @@ From a batch of player reports:
 
 ### Driving feel
 
-- **Gear / launch realism.** Partly addressed: gross mass is now
+- [x] **Gear / launch realism.** Shipped: gross mass is now
   cargo-weight-aware (tare + payload), so a heavy load accelerates slower,
   lugs on grades, and burns more fuel, and an empty deadhead is light and
-  brisk -- the truck mass is no longer a flat 36 t. **Still open:** the
-  launch itself is too brisk even fully loaded, because it is
-  traction-limited at ~0.33 g and the automatic upshifts almost instantly
-  (`AUTO_UPSHIFT_RPM` 1750). Remaining options: lower the effective launch
-  traction / drive force at low speed and/or widen the low-gear dwell
-  before the auto upshifts. Needs playtesting to avoid feeling sluggish to
-  the point of frustration.
+  brisk -- the truck mass is no longer a flat 36 t. The low-speed launch now
+  ramps into full drive-wheel traction instead of using the full rolling cap at
+  a dead stop, and the automatic uses a slightly higher low-gear upshift point
+  so a loaded tractor does not rush through the first gears before it is really
+  moving. Tests pin the 0-20 mph and highway-speed envelopes so the truck feels
+  heavier without turning sluggish.
 
 ### Speed limits and speeding
 

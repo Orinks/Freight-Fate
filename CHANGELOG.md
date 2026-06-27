@@ -42,6 +42,10 @@
   in one burst. Safety cues and actionable GPS distances still speak immediately.
 
 ### Changed
+- **Loaded trucks pull away more like loaded trucks.** Low-speed drive force now
+  ramps in from a stop instead of hitting the full rolling traction cap
+  immediately, and the automatic holds the first few gears a little longer, so a
+  heavy tractor-trailer launch has weight without losing highway acceleration.
 - **Career progression now has a 20-level business arc.** New drivers start
   with fictional carrier Northstar Freight Lines, move through company-driver
   and owner-operator preparation ranks, and unlock the leased-on

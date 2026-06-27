@@ -77,6 +77,39 @@ def test_heavier_load_accelerates_slower():
     assert heavy_t > light_t
 
 
+def test_loaded_launch_uses_lower_low_speed_traction():
+    from freight_fate.sim.vehicle import (
+        LAUNCH_TRACTION_ROLLING_G,
+        LAUNCH_TRACTION_START_G,
+        G,
+    )
+
+    t = make_auto_truck()
+    t.transmission.gear = 1
+    t.rpm = t.specs.peak_torque_rpm
+    t.throttle = 1.0
+
+    start_force = abs(t.drive_force())
+    t.velocity_mps = 25.0 / 2.23694
+    rolling_force = abs(t.drive_force())
+
+    assert start_force / t.gross_mass_kg == pytest.approx(
+        G * LAUNCH_TRACTION_START_G)
+    assert rolling_force / t.gross_mass_kg == pytest.approx(
+        G * LAUNCH_TRACTION_ROLLING_G)
+    assert start_force < rolling_force
+
+
+def test_automatic_does_not_rush_through_low_gears_on_launch():
+    t = make_auto_truck()
+    t.throttle = 1.0
+
+    drive(t, 5.0)
+
+    assert 8.0 <= t.speed_mph <= 13.0
+    assert t.transmission.gear <= 4
+
+
 def test_heavier_load_raises_grade_resistance():
     from freight_fate.sim.vehicle import KG_PER_TON
 

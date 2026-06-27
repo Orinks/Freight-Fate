@@ -314,6 +314,10 @@ The truck simulation includes:
 - Fuel burn.
 - Damage that reduces performance.
 
+A loaded tractor-trailer pulls away gradually. The automatic transmission holds
+the first few gears long enough to feel the weight, then settles into normal
+highway acceleration.
+
 Repeated hard braking can use air faster than normal driving. If low air is
 reported, stop safely, set the parking brake, and let pressure build.
 
