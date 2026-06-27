@@ -483,6 +483,9 @@ Use these keys when you need status without leaving the road:
 | R | Route progress and GPS context. |
 | Shift+R | Next listed highway exit. |
 | V | Weather and forecast. |
+| M | Toggle the in-cab radio. |
+| [ / ] | Tune the radio down or up. |
+| Y | Speak radio station, source, volume, and streamer-safe status. |
 | Tab | Grouped driving status screens. |
 
 Tab opens the Driving status menu. It has three review screens:
@@ -577,7 +580,10 @@ Audio settings include:
 | Gameplay cues volume | Horn, alerts, road, facility, and gameplay cue sounds. |
 | Weather sounds volume | Rain, wind, thunder, snow, and fog sounds. |
 | Engine sounds volume | Engine start, shutdown, and running engine sounds. |
-| Music volume | Background music volume. |
+| Music volume | Menu and facility background music volume. |
+| In-cab radio volume | Driving radio music volume. It defaults lower than speech and safety cues. |
+| Radio streamer-safe mode | Keeps radio on built-in safe stations and skips real public streams. |
+| Radio real public streams | Opt-in catalog access for real public stream stations. Streamer-safe mode must also be off before they can play. |
 | Menu and UI sounds volume | Menu movement, selection, warning, and cash sounds. |
 
 Speech and weather settings include:
@@ -619,9 +625,14 @@ Audio is layered by category:
 | Route events | Hazards, construction zones, inspections, state crossings, traffic slowing, and toll charges. |
 | Facilities and stops | Facility gates, docks, rest stops, and weigh station lanes. |
 | Music | Menu, facility, day-driving, and night-driving music pools. |
+| In-cab radio | Keyboard-controlled driving music and safe station status. |
 
-Speech, gameplay cues, and warnings are the primary access path. Music and
-ambience sit behind those cues and can be adjusted separately.
+Speech, gameplay cues, and warnings are the primary access path. Radio, music,
+and ambience sit behind those cues and can be adjusted separately. The in-cab
+radio defaults to built-in Freight Fate music and streamer-safe mode. Real public
+stream stations are skipped unless you turn on real streams and turn off
+streamer-safe mode; if a station cannot play, the radio falls back safely instead
+of blocking the drive.
 
 Useful accessibility patterns:
 

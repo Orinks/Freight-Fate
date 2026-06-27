@@ -31,6 +31,12 @@ from ..music import (
     select_drive_music_sequence,
     select_menu_music_sequence,
 )
+from ..radio import (
+    SAFE_ROUTE_PLAYLIST,
+    RadioPlaybackError,
+    RadioState,
+    RadioStation,
+)
 from ..sim import hos
 from ..sim.hos import HosClock, clock_text, is_night, time_of_day
 from ..sim.lane import LaneKeeping
@@ -134,6 +140,27 @@ def _speeding_settlement_fine(strikes: int) -> float:
     return min(400.0, 80.0 * strikes) if strikes else 0.0
 
 
+class _DrivingRadioBackend:
+    """Adapts radio station choices onto the existing safe music backend."""
+
+    def __init__(self, driving: DrivingState) -> None:
+        self.driving = driving
+
+    def play_station(self, station: RadioStation, volume: float) -> None:
+        if station.real_stream:
+            raise RadioPlaybackError("real stream playback is not available")
+        self.driving._apply_radio_volume()
+        if station.fallback:
+            self.driving.ctx.audio.stop_music(600)
+        elif station.track_key:
+            self.driving.ctx.audio.play_music(station.track_key, fade_ms=900)
+        else:
+            self.driving._play_current_music(fade_ms=900)
+
+    def stop_radio(self) -> None:
+        self.driving.ctx.audio.stop_music(600)
+
+
 # A strike is recorded only above the posted limit plus this leeway, held for the
 # sustained window below -- roughly real-world ticketing tolerance, now judged
 # against the leg's real OSM maxspeed rather than a flat number.
@@ -196,6 +223,8 @@ class DrivingState(State):
         self._night_music_index = 0
         self._music_elapsed_s = 0.0
         self._music_night = is_night(trip_start_hour)
+        self.radio = RadioState.from_settings(ctx.settings)
+        self._radio_backend = _DrivingRadioBackend(self)
         self.tutorial = Tutorial(ctx) if not profile.tutorial_done else None
 
         self.hos = profile.hos          # shift clock lives on the profile
@@ -373,7 +402,7 @@ class DrivingState(State):
         self._entered_once = True
         self.ctx.clear_music_rotation()
         self.ctx.audio.stop_music(800)
-        self._play_current_music(fade_ms=2500)
+        self._play_radio_current()
         self.ctx.audio.set_weather(self.weather.effects.sound)
         self.ctx.audio.set_wind(self.weather.effects.wind)
         mode = "automatic" if self.truck.transmission.automatic else "manual"
@@ -461,8 +490,11 @@ class DrivingState(State):
             self.ctx.award_achievement("low_visibility", event=event)
 
     def exit(self) -> None:
+        self.radio.write_settings(self.ctx.settings)
+        self.ctx.settings.save()
         self.ctx.audio.stop_world()
         self.ctx.audio.stop_music(600)
+        self.ctx.apply_volumes()
 
     # -- input ---------------------------------------------------------------------
 
@@ -531,6 +563,14 @@ class DrivingState(State):
             self._speak_last_announcement()
         elif key == pygame.K_u:
             self._speak_upcoming()
+        elif key == pygame.K_m:
+            self._toggle_radio()
+        elif key == pygame.K_LEFTBRACKET:
+            self._tune_radio(-1)
+        elif key == pygame.K_RIGHTBRACKET:
+            self._tune_radio(1)
+        elif key == pygame.K_y:
+            self._speak_radio_status()
         elif key == pygame.K_F1:
             if self.phase == DRIVE_PHASE_PICKUP:
                 objective_help = (
@@ -563,6 +603,8 @@ class DrivingState(State):
                 "the rest stop menu. X also signals a pull-over if a trooper "
                 "lights you up for speeding: signal, then brake to a stop. "
                 "C also speaks the date and season. "
+                "M toggles the in-cab radio, left and right brackets tune it, "
+                "and Y speaks radio station, volume, and streamer-safe status. "
                 "E starts the engine, and stops it only below 5 miles per hour. "
                 "Air pressure must build before the truck can move. "
                 "Press P to release or set the parking brake; if pressure is "
@@ -755,6 +797,7 @@ class DrivingState(State):
             f"Fuel: {t.fuel_fraction * 100:.0f} percent",
             f"Air brakes: {self._air_status_text(detailed=True)}",
             f"Weather: {self.weather.describe(self.ctx.settings.imperial_units)}",
+            f"Radio: {self.radio.status_text()}",
             f"Calendar: {self._calendar_phrase() or 'unknown'}",
             f"Clock: {clock_text(self.trip.current_hour)} "
             f"({time_of_day(self.trip.current_hour)})",
@@ -958,6 +1001,44 @@ class DrivingState(State):
             parts.append(f"Ahead: {ahead}.")
         self.ctx.say(" ".join(parts))
 
+    def _sync_radio_settings(self) -> None:
+        station_before = self.radio.station_id
+        self.radio.apply_settings(self.ctx.settings)
+        self.radio.current_station()
+        if self.radio.station_id != station_before:
+            self.radio.write_settings(self.ctx.settings)
+            self.ctx.settings.save()
+
+    def _apply_radio_volume(self) -> None:
+        self.ctx.audio.set_volumes(music=self.ctx.settings.radio_volume)
+
+    def _play_radio_current(self) -> None:
+        self._sync_radio_settings()
+        if self.radio.enabled:
+            self._apply_radio_volume()
+            self.radio.play(self._radio_backend)
+        else:
+            self.ctx.audio.stop_music(600)
+
+    def _finish_radio_action(self, action) -> None:
+        self.radio.write_settings(self.ctx.settings)
+        self.ctx.settings.save()
+        self.ctx.say(action.message)
+
+    def _toggle_radio(self) -> None:
+        self._sync_radio_settings()
+        action = self.radio.toggle(self._radio_backend)
+        self._finish_radio_action(action)
+
+    def _tune_radio(self, direction: int) -> None:
+        self._sync_radio_settings()
+        action = self.radio.tune(direction, self._radio_backend)
+        self._finish_radio_action(action)
+
+    def _speak_radio_status(self) -> None:
+        self._sync_radio_settings()
+        self.ctx.say(self.radio.status_text())
+
     # -- per-frame update -----------------------------------------------------------------
 
     def update(self, dt: float) -> None:
@@ -965,6 +1046,7 @@ class DrivingState(State):
         # pacing can be changed from the pause menu mid-trip; keep the trip's
         # clock compression in step with the setting
         self.trip.time_scale = self.ctx.settings.time_scale
+        self._sync_radio_settings()
         self._sync_weather_source()
         keys = pygame.key.get_pressed()
         ramp = dt * 2.2
@@ -1267,7 +1349,10 @@ class DrivingState(State):
             audio.set_ambient("ambient/night")
         else:
             audio.set_ambient(None)
-        self._update_music_rotation(night, dt)
+        if self.radio.enabled:
+            self._apply_radio_volume()
+        if self.radio.enabled and self.radio.current_station().id == SAFE_ROUTE_PLAYLIST:
+            self._update_music_rotation(night, dt)
         if self.weather.should_thunder():
             audio.play("weather/thunder")
 

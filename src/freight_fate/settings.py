@@ -24,6 +24,11 @@ class Settings:
     master_volume: float = 1.0
     sfx_volume: float = 0.8
     music_volume: float = 0.5
+    radio_volume: float = 0.25
+    radio_enabled: bool = True
+    radio_station_id: str = "route_playlist"
+    radio_streamer_safe: bool = True
+    radio_real_streams: bool = False
     weather_volume: float = 0.65
     engine_volume: float = 0.55
     ui_volume: float = 0.9
@@ -78,10 +83,13 @@ class Settings:
             s.event_backend = "SAPI"
         for attr in (
             "master_volume", "sfx_volume", "music_volume",
+            "radio_volume",
             "weather_volume", "engine_volume", "ui_volume",
             "speech_rate", "speech_pitch", "speech_volume",
         ):
             setattr(s, attr, max(0.0, min(1.0, float(getattr(s, attr)))))
+        if not isinstance(s.radio_station_id, str) or not s.radio_station_id:
+            s.radio_station_id = "route_playlist"
         return s
 
     def speed_text(self, mph: float) -> str:

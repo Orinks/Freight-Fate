@@ -241,6 +241,8 @@ def test_how_to_play_documents_new_gameplay_systems():
     assert "cb radio chatter can warn" in help_text
     assert "check upcoming patrols" in help_text
     assert "will not engage on low-speed local roads" in help_text
+    assert "in-cab radio" in help_text
+    assert "streamer-safe status" in help_text
 
 
 def test_dispatch_board_keeps_route_planning_out_of_load_offer():
@@ -1369,6 +1371,86 @@ def test_adaptive_cruise_disables_before_restricted_zone(monkeypatch):
             "flagger taper; speed limit 55, then 45 through the work zone. "
             "Adaptive cruise disabled; take manual speed control."
         )
+    finally:
+        app.shutdown()
+
+
+@pytest.mark.smoke
+def test_in_cab_radio_controls_are_spoken_and_keyboard_accessible(monkeypatch):
+    from freight_fate.app import App
+
+    app = App()
+    spoken = []
+    played = []
+    stopped = []
+    monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: spoken.append(text))
+    monkeypatch.setattr(
+        app.ctx.audio,
+        "play_music",
+        lambda track, fade_ms=1500: played.append((track, fade_ms)),
+    )
+    monkeypatch.setattr(
+        app.ctx.audio,
+        "stop_music",
+        lambda fade_ms=1000: stopped.append(fade_ms),
+    )
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        spoken.clear()
+        played.clear()
+        stopped.clear()
+
+        driving.handle_event(key_event(pygame.K_y))
+        assert "Radio on" in spoken[-1]
+        assert "streamer-safe" in spoken[-1]
+        assert any(line.startswith("Radio:") for line in driving.status_lines())
+
+        driving.handle_event(key_event(pygame.K_m))
+        assert app.ctx.settings.radio_enabled is False
+        assert spoken[-1] == "Radio off."
+        assert stopped
+
+        driving.handle_event(key_event(pygame.K_m))
+        assert app.ctx.settings.radio_enabled is True
+        assert "Radio on" in spoken[-1]
+        assert played
+
+        driving.handle_event(key_event(pygame.K_RIGHTBRACKET))
+        assert app.ctx.settings.radio_station_id == "ff-night-line"
+        assert "Tuned to FFN, Freight Fate Night Line" in spoken[-1]
+        assert played[-1][0] == "night_haul"
+    finally:
+        app.shutdown()
+
+
+@pytest.mark.smoke
+def test_in_cab_radio_volume_stays_separate_in_paused_settings(monkeypatch):
+    from freight_fate.app import App
+    from freight_fate.states.main_menu import SettingsCategoryState
+
+    app = App()
+    volume_calls = []
+    monkeypatch.setattr(app.ctx.audio, "play_music", lambda *args, **kwargs: None)
+    monkeypatch.setattr(app.ctx.audio, "set_volumes", lambda **kwargs: volume_calls.append(kwargs))
+    monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: None)
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        app.ctx.settings.music_volume = 0.8
+        app.ctx.settings.radio_volume = 0.2
+        driving.radio.enabled = True
+
+        app.push_state(SettingsCategoryState(app.ctx, "audio"))
+        cat = app.state
+        while not cat.items[cat.index].text.startswith("In-cab radio volume"):
+            cat.handle_event(key_event(pygame.K_DOWN))
+        volume_calls.clear()
+
+        cat.handle_event(key_event(pygame.K_RIGHT))
+
+        assert app.ctx.settings.radio_volume == 0.3
+        assert volume_calls[-1] == {"music": 0.3}
     finally:
         app.shutdown()
 

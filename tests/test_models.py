@@ -324,6 +324,11 @@ def test_settings_roundtrip():
     s = Settings()
     s.imperial_units = False
     s.music_volume = 0.3
+    s.radio_volume = 0.2
+    s.radio_enabled = False
+    s.radio_station_id = "ff-night-line"
+    s.radio_streamer_safe = False
+    s.radio_real_streams = True
     s.weather_volume = 0.4
     s.engine_volume = 0.7
     s.ui_volume = 0.8
@@ -332,6 +337,11 @@ def test_settings_roundtrip():
     loaded = Settings.load()
     assert loaded.imperial_units is False
     assert loaded.music_volume == 0.3
+    assert loaded.radio_volume == 0.2
+    assert loaded.radio_enabled is False
+    assert loaded.radio_station_id == "ff-night-line"
+    assert loaded.radio_streamer_safe is False
+    assert loaded.radio_real_streams is True
     assert loaded.weather_volume == 0.4
     assert loaded.engine_volume == 0.7
     assert loaded.ui_volume == 0.8
@@ -346,9 +356,18 @@ def test_music_volume_defaults_to_half():
     assert Settings().music_volume == 0.5
 
 
+def test_radio_defaults_are_streamer_safe_and_quiet():
+    s = Settings()
+    assert s.radio_enabled is True
+    assert s.radio_volume == 0.25
+    assert s.radio_streamer_safe is True
+    assert s.radio_real_streams is False
+
+
 def test_split_audio_volume_defaults_prioritize_cues_over_background():
     s = Settings()
     assert s.ui_volume > s.music_volume
+    assert s.ui_volume > s.radio_volume
     assert s.ui_volume > s.weather_volume
     assert s.ui_volume > s.engine_volume
 

@@ -753,6 +753,9 @@ HELP_PAGES = [
         "Cruise will not engage on low-speed local roads, like facility access",
         "roads, construction, or heavy traffic; take those manually.",
         "Press K again or touch the brakes to cancel it.",
+        "M toggles the in-cab radio. Left and right brackets tune stations.",
+        "Y speaks the radio station, volume, source, and streamer-safe status.",
+        "The radio defaults to built-in safe music and stays quieter than road cues.",
         "In automatic mode the truck shifts for itself.",
         "In manual mode, hold Left Shift for the clutch,",
         "then press 1 through 0 for gears one through ten, or N for neutral.",
@@ -768,6 +771,7 @@ HELP_PAGES = [
         "C speaks the clock, your deadline, and your hours of service.",
         "R speaks route progress, GPS context, and the next stop or maneuver.",
         "Shift R speaks the next listed highway exit for route context.",
+        "Y speaks in-cab radio status.",
         "L speaks lane position when lane drift is enabled.",
         "V speaks the weather and the forecast.",
         "A repeats the last route announcement, in case you missed it.",
@@ -1117,7 +1121,16 @@ class SettingsCategoryState(MenuState):
                          help="Engine start, shutdown, and running engine sounds."),
                 MenuItem(lambda: f"Music volume: {round(s.music_volume * 100)} percent",
                          lambda: self._volume("music_volume", 0.1),
-                         help="Background music volume."),
+                         help="Menu and facility background music volume."),
+                MenuItem(lambda: f"In-cab radio volume: {round(s.radio_volume * 100)} percent",
+                         lambda: self._volume("radio_volume", 0.1),
+                         help="Music volume while driving. Kept lower by default so speech, engine, and safety cues stay clear."),
+                MenuItem(lambda: f"Radio streamer-safe mode: {'on' if s.radio_streamer_safe else 'off'}",
+                         lambda: self._toggle_radio_streamer_safe(1),
+                         help="When on, the radio uses only built-in safe stations and skips real public streams."),
+                MenuItem(lambda: f"Radio real public streams: {'on' if s.radio_real_streams else 'off'}",
+                         lambda: self._toggle_radio_real_streams(1),
+                         help="Opt in to real public stream stations. Streamer-safe mode must also be off before they can play."),
                 MenuItem(lambda: f"Menu and UI sounds volume: {round(s.ui_volume * 100)} percent",
                          lambda: self._volume("ui_volume", 0.1),
                          help="Menu movement, selection, warning, and cash sounds."),
@@ -1162,6 +1175,9 @@ class SettingsCategoryState(MenuState):
                     lambda d: self._volume("weather_volume", 0.1 * d),
                     lambda d: self._volume("engine_volume", 0.1 * d),
                     lambda d: self._volume("music_volume", 0.1 * d),
+                    lambda d: self._volume("radio_volume", 0.1 * d),
+                    self._toggle_radio_streamer_safe,
+                    self._toggle_radio_real_streams,
                     lambda d: self._volume("ui_volume", 0.1 * d),
                 ],
                 "updates": [self._toggle_update_channel],
@@ -1271,8 +1287,20 @@ class SettingsCategoryState(MenuState):
         value = getattr(self.ctx.settings, attr)
         setattr(self.ctx.settings, attr, max(0.0, min(1.0, round(value + delta, 2))))
         self.ctx.settings.save()
-        self.ctx.apply_volumes()
+        self._apply_audio_volumes()
         self._announce()
+
+    def _apply_audio_volumes(self) -> None:
+        self.ctx.apply_volumes()
+        if self._driving_radio_active():
+            self.ctx.audio.set_volumes(music=self.ctx.settings.radio_volume)
+
+    def _driving_radio_active(self) -> bool:
+        for state in reversed(self.ctx._app.states):
+            radio = getattr(state, "radio", None)
+            if radio is not None:
+                return bool(getattr(radio, "enabled", False))
+        return False
 
     def _cycle_hos(self, d: int) -> None:
         modes = ["realistic", "relaxed"]
@@ -1295,6 +1323,14 @@ class SettingsCategoryState(MenuState):
     def _toggle_discord_presence(self, _d: int) -> None:
         self.ctx.settings.discord_presence = not self.ctx.settings.discord_presence
         self.ctx.apply_presence()
+        self._announce()
+
+    def _toggle_radio_streamer_safe(self, _d: int) -> None:
+        self.ctx.settings.radio_streamer_safe = not self.ctx.settings.radio_streamer_safe
+        self._announce()
+
+    def _toggle_radio_real_streams(self, _d: int) -> None:
+        self.ctx.settings.radio_real_streams = not self.ctx.settings.radio_real_streams
         self._announce()
 
     def _cycle_verbosity(self, d: int) -> None:

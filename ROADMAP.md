@@ -579,6 +579,17 @@ always-available fallback when you are out of range of anything local. A
 community suggestion; the right kind of immersion for long hauls and a natural
 fit for an audio-first game.
 
+- [x] **Safe in-cab radio foundation.** Shipped: driving now has keyboard
+  radio controls (M toggles, brackets tune, Y speaks status), persistent radio
+  enabled/station/volume settings, a dedicated lower radio volume, streamer-safe
+  mode on by default, real public streams gated behind explicit opt-in, and
+  graceful fallback when a selected station/backend cannot play. The first safe
+  stations use built-in Freight Fate music or silence, so no live stream is
+  required for normal play or tests. Remaining: full local FM station catalog,
+  FCC-derived range/signal model, favorites/station list UI, audible static and
+  signal fades, and live public-stream playback once the catalog and opt-in UX
+  are ready.
+
 - **Direction (decided):** use real stations via their public internet stream
   URLs (a friend has a curated list). The game is free and non-commercial, and
   it acts as a *tuner* -- it points the player's own client at a stream the

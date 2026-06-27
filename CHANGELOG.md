@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+### Added
+
+- **In-cab radio controls are now in the truck.** Press M to toggle the radio,
+  bracket keys to tune, and Y for station status. It defaults to built-in
+  Freight Fate music with streamer-safe mode on, keeps a separate lower driving
+  radio volume, and falls back safely if a selected station cannot play. Real
+  public-stream stations stay opt-in and are skipped while streamer-safe mode
+  is on.
+
 ### Fixed
 
 - **Construction-zone warnings give you room to react.** The warning now comes

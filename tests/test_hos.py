@@ -1093,6 +1093,11 @@ def test_settings_menu_volume_survives_new_app_session():
         cat.handle_event(key_event(pygame.K_RIGHT))
         assert app.ctx.settings.music_volume == 0.6
         assert Settings.load().music_volume == 0.6
+        while not cat.items[cat.index].text.startswith("In-cab radio volume"):
+            cat.handle_event(key_event(pygame.K_DOWN))
+        cat.handle_event(key_event(pygame.K_RIGHT))
+        assert app.ctx.settings.radio_volume == 0.35
+        assert Settings.load().radio_volume == 0.35
         while not cat.items[cat.index].text.startswith("Weather sounds volume"):
             cat.handle_event(key_event(pygame.K_UP))
         cat.handle_event(key_event(pygame.K_RIGHT))
@@ -1108,6 +1113,7 @@ def test_settings_menu_volume_survives_new_app_session():
     try:
         assert next_app.ctx.settings.music_volume == 0.6
         assert next_app.ctx.audio.music_volume == 0.6
+        assert next_app.ctx.settings.radio_volume == 0.35
         assert next_app.ctx.settings.weather_volume == 0.65
         assert next_app.ctx.audio.weather_volume == 0.65
     finally:
