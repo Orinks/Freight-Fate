@@ -154,7 +154,7 @@ Your terminal is the safe hub between jobs. Public terminal actions include:
 | Dispatch board | Browse freight offers from local facilities. |
 | Drive to city services | Drive a short local route to the freight market office, garage, or truck dealer. Service names use sourced local data where available, and GPS prefers checked-in local road context when it exists. |
 | Business status | Review company-driver or owner-operator status. |
-| Garage | Refuel and repair company equipment; owner-operators can also buy upgrades, buy tractors, or switch owned tractors. |
+| Garage | Refuel and repair company equipment; owner-operators can also buy upgrades, buy tractors, switch owned tractors, or add trailer programs. |
 | Request pay advance | Draw cash against your next load when you are broke. |
 | Career stats | Review level, reputation, deliveries, and career totals. |
 | Truck status | Review truck model, fuel, tank size, and damage condition. |
@@ -169,7 +169,9 @@ Company drivers use an assigned carrier tractor. Fuel and routine repairs are
 billed to the carrier, and truck purchases or performance upgrades stay locked.
 After you become an owner-operator, fuel and repairs come out of your cash; the
 garage can do partial fuel or repair work when you cannot afford a full tank or
-full repair.
+full repair. Owner-operators also start with a dry van trailer program and can
+add reefer, flatbed, or bulk programs. Company drivers do not lease trailers;
+the carrier supplies the right trailer for approved loads.
 
 ## Business Status
 
@@ -219,13 +221,16 @@ next delivery settlement, so a negative balance is never a dead end.
 
 After the owner-operator buy-in, the garage sells:
 
-| Upgrade Or Truck | Effect |
+| Upgrade, Truck, Or Program | Effect |
 | --- | --- |
 | Engine tune | Adds pulling power. |
 | Aerodynamic kit | Improves highway fuel economy. |
 | Long-range tank | Adds 50 gallons of capacity. |
 | Reinforced brakes | Helps the brakes resist fade longer. |
 | Heavy hauler | Adds more torque and a 200-gallon tank, with worse aerodynamics and higher fuel use. |
+| Reefer trailer program | Opens refrigerated and fresh food cargo for owner-operators. |
+| Flatbed trailer program | Opens steel, machinery, construction, lumber, and paper cargo for owner-operators. |
+| Bulk trailer program | Opens grain, farm inputs, and loose bulk cargo for owner-operators. |
 
 ## Dispatch And Jobs
 
@@ -244,11 +249,17 @@ Each job lists:
 - Pay.
 - Deadline.
 - Equipment type.
+- Trailer program note for owner-operators.
 - Market note when the cargo market is tight or loose.
 - Endorsement requirement when one applies.
 
 Early drivers mostly see shorter regional work. Higher levels widen the
 distance cap and unlock more variety.
+
+Company drivers use carrier-provided trailers, so trailer program locks do not
+block their approved loads. Owner-operators start with a dry van program.
+Specialty cargo may say it needs a reefer, flatbed, or bulk trailer program;
+add that program from the garage before accepting the load.
 
 Deliveries earn money, experience, reputation, and career stats. Leveling up can
 unlock longer dispatch distances, better early-career minimum pay, more cargo

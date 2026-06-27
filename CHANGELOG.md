@@ -59,6 +59,10 @@
   in one burst. Safety cues and actionable GPS distances still speak immediately.
 
 ### Changed
+- **Trailer fit now matters for owner-operators.** Company drivers still use
+  carrier-provided trailers, while leased-on owner-operators start with dry van
+  access and can add reefer, flatbed, or bulk trailer programs from the garage.
+  Dispatch now tells you when specialty cargo needs a trailer program.
 - **Carrier choice now shapes the dispatch board.** Starter carriers still stay
   grounded, but they now change how often you see short, regional, long-haul,
   grain or bulk, and high-value jobs. Some training loads also have more

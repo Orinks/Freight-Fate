@@ -47,6 +47,10 @@ costs active from day one.
   service fee. Fuel and repairs also come out of the player's cash.
   Truck purchases, switching, and upgrades unlock here because the player now
   has owned tractor responsibility.
+- Trailer compatibility: cargo now maps to trailer programs. Company drivers
+  use carrier-provided trailers. Leased-on owner-operators start with a dry van
+  trailer program and can add reefer, flatbed, or bulk programs from the garage.
+  Missing specialty programs lock matching cargo until the player adds them.
 - Progression: level 5 starts owner-operator preparation, but the leased-on
   buy-in does not unlock until level 15 with 35 deliveries, reputation 80, no
   pay advance, and enough cash for a 35,000 dollar buy-in while keeping 10,000
@@ -108,6 +112,24 @@ turning Freight Fate into a compliance sim. A leased-on owner-operator at level
 future authority system and keeps the current game grounded: dispatch, trailers,
 insurance support, and settlement still run through the leased-on carrier.
 
+## Trailer Programs
+
+This slice implements trailer compatibility without jumping all the way to
+player-owned trailer fleets. The current trailer programs are:
+
+| Program | Cargo Fit |
+| --- | --- |
+| Dry van | General, retail, parcel, automotive, electronics, packaged chemicals, and some container, farm, construction, lumber, and paper freight. |
+| Reefer | Fresh food and refrigerated cargo. |
+| Flatbed | Steel, machinery, construction, lumber, paper, and some container freight. |
+| Bulk | Grain, farm inputs, and loose bulk materials. |
+
+The dry van program is included for leased-on owner-operators. Reefer, flatbed,
+and bulk programs are leased from the garage. They are not lease-purchase deals
+and do not create weekly debt traps. Tanker freight is not implemented yet
+because current chemical cargo is packaged industrial freight, not liquid bulk
+tanker work.
+
 ## Follow-Up Realism Hooks
 
 - True authority should be a later, optional step. It should cover
@@ -116,9 +138,9 @@ insurance support, and settlement still run through the leased-on carrier.
 - Authority prep now has a reserve gate and save flag; the future work is
   turning that prepared state into a real authority application, insurance, and
   direct-freight gameplay loop.
-- Trailer ownership/leasing belongs with freight-market and garage/dealer work:
-  carrier-provided trailers stay in the leased-on path, while owned or leased
-  dry van, reefer, or flatbed equipment can later affect cargo fit and costs.
+- Trailer ownership should be a later authority or dealer slice. Current
+  gameplay has leased-on trailer program slots and cargo fit; future work can
+  add owned trailer condition, financing, tanker cargo, and trailer resale.
 - Operating-cost polish should keep using recognizable owner-operator cost
   categories, but player-facing settlement text should stay concise and avoid
   dense finance jargon.
@@ -148,3 +170,11 @@ insurance support, and settlement still run through the leased-on carrier.
   https://schneiderjobs.com/truck-driving-jobs/benefits/equipment-technology
 - Schneider power-only carrier equipment split:
   https://schneider.com/carriers/power-only
+- FMCSA cargo tank registration and resources:
+  https://www.fmcsa.dot.gov/carrier-safety/hazardous-materials-safety/cargo-tank-registration-and-resources
+- NMFTA trucking type overview:
+  https://nmfta.org/resource/different-types-of-trucking-in-the-shipping-industry/
+- NMFTA reefer overview:
+  https://nmfta.org/resource/what-is-reefer-trucking/
+- NMFTA flatbed overview:
+  https://nmfta.org/resource/types-of-flatbed-trailers-how-are-they-different/

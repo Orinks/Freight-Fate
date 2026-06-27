@@ -37,7 +37,7 @@ from .career_ladder import STARTER_CARRIER_NAME
 from .market import Market
 from .start_options import DEFAULT_START_KEY, START_MODE_COMPANY
 
-SAVE_VERSION = 7
+SAVE_VERSION = 8
 STARTING_MONEY = 5_000.0
 DEFAULT_CITY = "Chicago"
 SIGNATURE_FIELD = "_signature"
@@ -287,6 +287,7 @@ class Profile:
     carrier_key: str = DEFAULT_START_KEY
     start_mode: str = START_MODE_COMPANY
     authority_readiness: bool = False
+    trailer_programs: list[str] = field(default_factory=list)
     career: Career = field(default_factory=Career)
     market: Market = field(default_factory=Market)
     hos: HosClock = field(default_factory=HosClock)  # hours-of-service shift clock
@@ -340,6 +341,17 @@ class Profile:
     def visible_owned_trucks(self) -> tuple[str, ...]:
         """Player-owned tractors to show in menus."""
         return tuple(self.owned_trucks) if self.owns_equipment() else ()
+
+    def active_trailer_programs(self) -> tuple[str, ...]:
+        """Trailer programs the player controls for owner-operator dispatch."""
+        if not self.owns_equipment():
+            return ()
+        from .trailers import DEFAULT_TRAILER_PROGRAMS, normalized_trailer_programs
+
+        programs = normalized_trailer_programs(self.trailer_programs)
+        if programs:
+            return programs
+        return DEFAULT_TRAILER_PROGRAMS
 
     def truck_specs(self):
         """The active truck's specs with this profile's upgrades applied."""

@@ -19,6 +19,7 @@ from ..data.world import (
 )
 from .market import Market, market_condition
 from .start_options import DEFAULT_START_KEY, start_option
+from .trailers import equipment_text_for_cargo, required_program_text, trailer_keys_for_cargo
 
 
 @dataclass(frozen=True)
@@ -30,7 +31,11 @@ class CargoType:
     endorsement: str | None    # required license endorsement, if any
     fragile: bool = False
     min_level: int = 1
-    equipment: str = "dry van"
+    equipment: str = ""
+
+    @property
+    def equipment_text(self) -> str:
+        return self.equipment or equipment_text_for_cargo(self.key)
 
 
 CARGO_CATALOG: dict[str, CargoType] = {
@@ -38,34 +43,27 @@ CARGO_CATALOG: dict[str, CargoType] = {
     "retail": CargoType("retail", "retail goods", 2.25, (6, 16), None),
     "parcel": CargoType("parcel", "parcel freight", 2.55, (4, 12), None),
     "container": CargoType("container", "shipping containers", 2.40, (12, 24), None),
-    "bulk": CargoType("bulk", "bulk materials", 2.30, (15, 25), None,
-                      equipment="bulk trailer"),
-    "grain": CargoType("grain", "grain", 2.20, (18, 25), None,
-                       equipment="hopper trailer"),
-    "farm_inputs": CargoType("farm_inputs", "farm inputs", 2.35, (10, 22), None,
-                             equipment="dry van or bulk trailer"),
+    "bulk": CargoType("bulk", "bulk materials", 2.30, (15, 25), None),
+    "grain": CargoType("grain", "grain", 2.20, (18, 25), None),
+    "farm_inputs": CargoType("farm_inputs", "farm inputs", 2.35, (10, 22), None),
     "construction": CargoType("construction", "construction materials", 2.35, (14, 25),
-                              None, equipment="flatbed or dry van"),
+                              None),
     "lumber_paper": CargoType("lumber_paper", "lumber and paper products", 2.45,
-                              (10, 24), None, min_level=2,
-                              equipment="flatbed or dry van"),
+                              (10, 24), None, min_level=2),
     "automotive": CargoType("automotive", "automotive parts", 2.75, (8, 20), None,
-                            fragile=True, min_level=2, equipment="dry van"),
+                            fragile=True, min_level=2),
     "machinery": CargoType("machinery", "heavy machinery", 2.90, (15, 25),
-                           "heavy_haul", fragile=True,
-                           equipment="heavy-haul trailer"),
+                           "heavy_haul", fragile=True),
     "steel": CargoType("steel", "steel products", 2.85, (16, 25), "heavy_haul",
-                       min_level=3, equipment="flatbed trailer"),
+                       min_level=3),
     "food": CargoType("food", "fresh food", 2.60, (8, 18), "refrigerated",
-                      fragile=True, equipment="refrigerated trailer"),
+                      fragile=True),
     "refrigerated": CargoType("refrigerated", "refrigerated goods", 2.85, (8, 18),
-                              "refrigerated", fragile=True,
-                              equipment="refrigerated trailer"),
+                              "refrigerated", fragile=True),
     "chemicals": CargoType("chemicals", "packaged industrial chemicals", 3.05,
-                           (10, 22), "high_value", min_level=4,
-                           equipment="sealed van or tanker-compatible trailer"),
+                           (10, 22), "high_value", min_level=4),
     "electronics": CargoType("electronics", "electronics", 3.30, (4, 12), "high_value",
-                             fragile=True, equipment="secure dry van"),
+                             fragile=True),
 }
 
 ENDORSEMENT_LABELS = {
@@ -169,6 +167,7 @@ class Job:
         index: int | None = None,
         total: int | None = None,
         pay_label: str = "Pays",
+        trailer_note: str = "",
     ) -> str:
         prefix = f"Job {index} of {total}: " if index is not None else ""
         condition = market_condition(self.market_mult)
@@ -178,11 +177,12 @@ class Job:
             endorsement = f" Requires {ENDORSEMENT_LABELS[self.cargo.endorsement]}."
         origin = "from " + self.origin_facility_text()
         dest = "to " + self.destination_facility_text()
+        trailer = f" {trailer_note}" if trailer_note else ""
         return (f"{prefix}{self.weight_tons:.0f} tons of {self.cargo.label} "
                 f"{origin} {dest}. {self.distance_mi:.0f} miles. "
                 f"{pay_label} {self.pay:,.0f} dollars. "
                 f"Deadline {self.deadline_game_h:.0f} hours. "
-                f"Equipment: {self.cargo.equipment}.{market}{endorsement}")
+                f"Equipment: {self.cargo.equipment_text}.{trailer}{market}{endorsement}")
 
     def origin_facility_text(self) -> str:
         return facility_text(
@@ -196,12 +196,28 @@ class Job:
             self.destination_locality,
         )
 
-    def locked_reason(self, endorsements: set[str], level: int) -> str:
+    def locked_reason(
+        self,
+        endorsements: set[str],
+        level: int,
+        *,
+        trailer_programs: set[str] | tuple[str, ...] | None = None,
+        carrier_trailer_support: bool = True,
+    ) -> str:
         if level < self.cargo.min_level:
             return f"Level {self.cargo.min_level} drivers unlock this cargo."
         if self.cargo.endorsement and self.cargo.endorsement not in endorsements:
             return f"Requires {ENDORSEMENT_LABELS[self.cargo.endorsement]}."
+        if (
+            not carrier_trailer_support
+            and trailer_programs is not None
+            and not (set(trailer_programs) & set(self.required_trailers()))
+        ):
+            return f"Requires {required_program_text(self.cargo.key)} trailer program."
         return ""
+
+    def required_trailers(self) -> tuple[str, ...]:
+        return trailer_keys_for_cargo(self.cargo.key)
 
     def payout(self, hours_taken: float, damage_pct: float, on_time_bonus: float = 0.15) -> float:
         """Final payment given delivery time and cargo condition."""

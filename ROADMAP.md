@@ -697,16 +697,20 @@ fit for an audio-first game.
       owner-operators can now set aside an authority prep reserve as a
       future-system boundary. Full authority, loans, and fleet ownership remain
       future work.
+- [x] Trailer program and cargo compatibility slice. Cargo now maps to dry van,
+      reefer, flatbed, or bulk trailer programs. Company drivers keep
+      carrier-provided trailers. Leased-on owner-operators start with dry van
+      access and can add specialty trailer programs from the garage; missing
+      programs lock matching loads with clear dispatch-board text.
 - [ ] True authority and direct freight. Later optional slice for operating
       under the player's own motor-carrier authority. Cover Department of
       Transportation and motor-carrier authority, insurance filings,
       broker/load-board access, factoring or settlement timing, and higher
       compliance overhead. The current authority prep reserve should be
       the entry gate for this later system.
-- [ ] Trailer ownership and leasing. Keep carrier-provided trailers in the
-      leased-on path, then let later true-authority or freight-market work add
-      owned or leased dry van, reefer, flatbed, maintenance, washout, and
-      cargo-fit choices.
+- [ ] Trailer ownership and advanced leasing. Build on the current trailer
+      program model with true player-owned trailers, condition, financing,
+      resale, tanker cargo, washout, and authority-specific cargo-fit choices.
 - [ ] Operating-cost polish. Continue tuning owner-operator deductions against
       real cost categories such as fuel, maintenance reserve, insurance, truck
       payment, trailer program, and settlement/factoring fees, while keeping

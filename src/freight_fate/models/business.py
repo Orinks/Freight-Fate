@@ -17,6 +17,7 @@ from .start_options import (
     option_for_profile,
     pay_plan_for_key,
 )
+from .trailers import trailer_program_charge_per_mile
 
 COMPANY_DRIVER = "company_driver"
 LEASED_OWNER_OPERATOR = "leased_owner_operator"
@@ -264,7 +265,8 @@ def owner_operator_charges(job: Job, gross_pay: float) -> tuple[BusinessCharge, 
     return (
         BusinessCharge("maintenance reserve", round(job.distance_mi * OWNER_MAINTENANCE_PER_MILE, 2)),
         BusinessCharge("insurance reserve", round(job.distance_mi * OWNER_INSURANCE_PER_MILE, 2)),
-        BusinessCharge("trailer program", round(job.distance_mi * OWNER_TRAILER_PROGRAM_PER_MILE, 2)),
+        BusinessCharge("trailer program", round(
+            job.distance_mi * trailer_program_charge_per_mile(job.cargo.key), 2)),
         BusinessCharge("truck payment reserve", round(job.distance_mi * OWNER_TRUCK_PAYMENT_PER_MILE, 2)),
         BusinessCharge("settlement service fee", round(gross_pay * OWNER_SETTLEMENT_FEE_SHARE, 2)),
     )

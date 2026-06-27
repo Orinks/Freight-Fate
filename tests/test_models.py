@@ -211,7 +211,7 @@ def test_profile_save_is_atomic_and_versioned():
     p = Profile(name="Atomic")
     path = p.save()
     data = json.loads(path.read_text())
-    assert data["version"] == 7
+    assert data["version"] == 8
     assert SIGNATURE_FIELD in data
     assert not path.with_suffix(".json.tmp").exists()
 
@@ -241,6 +241,22 @@ def test_old_save_without_carrier_loads_with_starter_company():
     loaded = Profile.load(path)
 
     assert loaded.carrier_name == STARTER_CARRIER_NAME
+
+
+def test_old_owner_operator_save_without_trailer_programs_gets_basic_program():
+    p = Profile(name="Old Trailer Program")
+    p.business_status = LEASED_OWNER_OPERATOR
+    p.owned_trucks = ["rig"]
+    data = p.to_dict()
+    data.pop("trailer_programs")
+    data.pop(SIGNATURE_FIELD)
+    path = p.path
+    path.write_text(json.dumps(data))
+
+    loaded = Profile.load(path)
+
+    assert loaded.business_status == LEASED_OWNER_OPERATOR
+    assert loaded.active_trailer_programs() == ("dry_van",)
 
 
 def test_old_save_without_start_choice_fields_uses_northstar_company_start():

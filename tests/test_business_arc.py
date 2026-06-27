@@ -25,6 +25,12 @@ from freight_fate.models.business import (
 )
 from freight_fate.models.career import LEVEL_XP
 from freight_fate.models.career_ladder import CAREER_RANKS, STARTER_CARRIER_NAME
+from freight_fate.models.trailers import (
+    DEFAULT_TRAILER_PROGRAMS,
+    TRAILER_CATALOG,
+    compatible_with_programs,
+    trailer_keys_for_cargo,
+)
 
 
 def key_event(key, unicode=""):
@@ -240,6 +246,7 @@ def test_owner_operator_buy_in_records_first_owned_tractor():
         assert p.business_status == LEASED_OWNER_OPERATOR
         assert p.truck == "rig"
         assert p.visible_owned_trucks() == ("rig",)
+        assert p.active_trailer_programs() == DEFAULT_TRAILER_PROGRAMS
     finally:
         app.shutdown()
 
@@ -280,6 +287,164 @@ def test_owner_operator_can_buy_switch_and_upgrade_owned_equipment():
         assert p.money == pytest.approx(money_before_switch)
     finally:
         app.shutdown()
+
+
+def test_trailer_catalog_matches_current_cargo_classes():
+    assert {"dry_van", "reefer", "flatbed", "bulk"} <= set(TRAILER_CATALOG)
+    assert trailer_keys_for_cargo("general") == ("dry_van",)
+    assert trailer_keys_for_cargo("refrigerated") == ("reefer",)
+    assert trailer_keys_for_cargo("steel") == ("flatbed",)
+    assert trailer_keys_for_cargo("grain") == ("bulk",)
+    assert compatible_with_programs("farm_inputs", ("dry_van",))
+    assert compatible_with_programs("farm_inputs", ("bulk",))
+
+
+def test_company_driver_dispatch_uses_carrier_trailer_support():
+    from freight_fate.models.jobs import CARGO_CATALOG, Job
+
+    job = Job(
+        CARGO_CATALOG["refrigerated"],
+        10.0,
+        "Chicago",
+        "cold storage",
+        "Milwaukee",
+        92.0,
+        1200.0,
+        5.0,
+    )
+
+    assert job.locked_reason({"refrigerated"}, 4) == ""
+    assert "Requires Reefer trailer program" in job.locked_reason(
+        {"refrigerated"},
+        4,
+        trailer_programs=DEFAULT_TRAILER_PROGRAMS,
+        carrier_trailer_support=False,
+    )
+
+
+def test_owner_operator_can_add_specialty_trailer_program():
+    from freight_fate.app import App
+    from freight_fate.models.profile import Profile
+    from freight_fate.states.city import TrailerProgramState
+
+    app = App()
+    try:
+        app.ctx.profile = Profile(name="Trailer Lease", current_city="Chicago")
+        p = app.ctx.profile
+        p.business_status = LEASED_OWNER_OPERATOR
+        p.owned_trucks = ["rig"]
+        p.money = 20_000.0
+
+        app.push_state(TrailerProgramState(app.ctx))
+        assert "Dry van: included carrier trailer program" in app.state.items[0].text
+        while "Reefer" not in app.state.items[app.state.index].text:
+            app.state.handle_event(key_event(pygame.K_DOWN))
+        app.state.handle_event(key_event(pygame.K_RETURN))
+
+        assert "reefer" in p.active_trailer_programs()
+        assert p.money == pytest.approx(12_000.0)
+        assert p.dispatch_board_cache is None
+    finally:
+        app.shutdown()
+
+
+def test_owner_operator_job_board_labels_missing_trailer_program():
+    from freight_fate.app import App
+    from freight_fate.models.jobs import CARGO_CATALOG, Job
+    from freight_fate.models.profile import Profile
+    from freight_fate.states.city import JobBoardState
+
+    app = App()
+    try:
+        app.ctx.profile = Profile(name="Trailer Board", current_city="Chicago")
+        p = app.ctx.profile
+        p.business_status = LEASED_OWNER_OPERATOR
+        p.owned_trucks = ["rig"]
+        job = Job(
+            CARGO_CATALOG["refrigerated"],
+            12.0,
+            "Chicago",
+            "cold storage",
+            "Milwaukee",
+            92.0,
+            1800.0,
+            7.0,
+        )
+
+        app.push_state(JobBoardState(app.ctx, [job]))
+
+        assert "Needs Reefer trailer program" in app.state.items[0].text
+        assert "Gross revenue" in app.state.items[0].text
+        app.state.handle_event(key_event(pygame.K_RETURN))
+        assert p.active_trip is None
+    finally:
+        app.shutdown()
+
+
+def test_owner_operator_job_board_accepts_matching_trailer_program():
+    from freight_fate.app import App
+    from freight_fate.models.jobs import CARGO_CATALOG, Job
+    from freight_fate.models.profile import Profile
+    from freight_fate.states.city import JobBoardState
+
+    app = App()
+    try:
+        app.ctx.profile = Profile(name="Trailer Board Ready", current_city="Chicago")
+        p = app.ctx.profile
+        p.business_status = LEASED_OWNER_OPERATOR
+        p.owned_trucks = ["rig"]
+        p.trailer_programs = ["dry_van", "reefer"]
+        job = Job(
+            CARGO_CATALOG["refrigerated"],
+            12.0,
+            "Chicago",
+            "cold storage",
+            "Milwaukee",
+            92.0,
+            1800.0,
+            7.0,
+        )
+
+        app.push_state(JobBoardState(app.ctx, [job]))
+
+        assert "Trailer program: Reefer" in app.state.items[0].text
+    finally:
+        app.shutdown()
+
+
+def test_company_driver_trailer_program_menu_stays_carrier_provided():
+    from freight_fate.app import App
+    from freight_fate.models.profile import Profile
+    from freight_fate.states.city import TrailerProgramState
+
+    app = App()
+    try:
+        app.ctx.profile = Profile(name="Company Trailers", current_city="Chicago")
+        app.push_state(TrailerProgramState(app.ctx))
+
+        assert "carrier-provided trailers" in app.state.items[0].text
+        assert not any("lease program for" in item.text for item in app.state.items)
+    finally:
+        app.shutdown()
+
+
+def test_owner_operator_settlement_uses_specialty_trailer_program_charge():
+    from freight_fate.models.business import build_business_settlement
+    from freight_fate.models.jobs import CARGO_CATALOG, Job
+
+    dry_job = Job(
+        CARGO_CATALOG["general"], 12.0, "Chicago", "yard", "Milwaukee", 100.0, 1000.0, 6.0)
+    reefer_job = Job(
+        CARGO_CATALOG["refrigerated"], 12.0, "Chicago", "cold", "Milwaukee", 100.0, 1000.0, 6.0)
+
+    dry = build_business_settlement(
+        LEASED_OWNER_OPERATOR, dry_job, dry_job.pay, on_time=True, driver_charges=0.0)
+    reefer = build_business_settlement(
+        LEASED_OWNER_OPERATOR, reefer_job, reefer_job.pay, on_time=True, driver_charges=0.0)
+
+    dry_trailer = next(c.amount for c in dry.business_charges if c.label == "trailer program")
+    reefer_trailer = next(c.amount for c in reefer.business_charges if c.label == "trailer program")
+    assert reefer_trailer > dry_trailer
 
 
 def test_authority_readiness_requires_endgame_owner_operator():

@@ -213,6 +213,7 @@ def test_owner_operator_start_applies_owned_equipment_and_costs():
     assert p.business_status == LEASED_OWNER_OPERATOR
     assert p.owns_equipment()
     assert p.visible_owned_trucks() == ("rig",)
+    assert p.active_trailer_programs() == ("dry_van",)
     assert p.money == pytest.approx(18_000.0)
     assert p.truck_damage_pct > 0
     assert p.career.level >= 15

@@ -6,6 +6,7 @@ from dataclasses import dataclass, field
 
 from .career import LEVEL_XP
 from .career_ladder import STARTER_CARRIER_NAME
+from .trailers import DEFAULT_TRAILER_PROGRAMS
 
 START_MODE_COMPANY = "company_driver"
 START_MODE_OWNER_OPERATOR = "owner_operator"
@@ -247,6 +248,9 @@ def apply_start_option(profile, option: CareerStartOption) -> None:
     )
     profile.truck = option.starting_truck
     profile.owned_trucks = list(option.owned_trucks)
+    profile.trailer_programs = (
+        list(DEFAULT_TRAILER_PROGRAMS) if option.is_owner_operator else []
+    )
     profile.upgrades = {}
     profile.truck_fuel_gal = option.truck_fuel_gal
     profile.truck_damage_pct = option.truck_damage_pct

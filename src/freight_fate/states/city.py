@@ -34,6 +34,13 @@ from ..models.jobs import (
     job_payload,
     plan_hos,
 )
+from ..models.trailers import (
+    DEFAULT_TRAILER_PROGRAMS,
+    TRAILER_CATALOG,
+    TrailerType,
+    compatible_with_programs,
+    required_program_text,
+)
 from ..models.trucks import TRUCK_CATALOG, UPGRADE_CATALOG, TruckModel, Upgrade
 from ..music import select_menu_music_sequence
 from ..sim.hos import clock_text, time_of_day
@@ -382,6 +389,7 @@ def dispatch_cache_key(p) -> dict:
         "business_status": p.business_status,
         "carrier_key": getattr(p, "carrier_key", ""),
         "authority_readiness": bool(getattr(p, "authority_readiness", False)),
+        "trailer_programs": sorted(getattr(p, "trailer_programs", ())),
         "level": p.career.level,
         "endorsements": sorted(p.career.endorsements),
         "count": 5,
@@ -551,6 +559,9 @@ class GarageState(MenuState):
             MenuItem("Trucks", self._trucks,
                      help="Owner-operators can buy a new truck, or switch "
                           "between trucks they own."),
+            MenuItem("Trailer programs", self._trailers,
+                     help="Company drivers use carrier trailers. Owner-operators "
+                          "can add specialty trailer program slots for more cargo."),
             MenuItem("Back", self.go_back,
                      help="Return to the terminal menu."),
         ]
@@ -700,6 +711,9 @@ class GarageState(MenuState):
     def _trucks(self) -> None:
         self.ctx.push_state(TruckShopState(self.ctx))
 
+    def _trailers(self) -> None:
+        self.ctx.push_state(TrailerProgramState(self.ctx))
+
 
 class BusinessStatusState(MenuState):
     title = "Business status"
@@ -790,6 +804,8 @@ class BusinessStatusState(MenuState):
         p.business_status = LEASED_OWNER_OPERATOR
         if assigned not in p.owned_trucks:
             p.owned_trucks.append(assigned)
+        if not p.trailer_programs:
+            p.trailer_programs = list(DEFAULT_TRAILER_PROGRAMS)
         p.truck = assigned
         p.dispatch_board_cache = None
         self.ctx.save_profile()
@@ -989,6 +1005,93 @@ class TruckShopState(MenuState):
         self.refresh()
 
 
+class TrailerProgramState(MenuState):
+    title = "Trailer programs"
+    intro_help = (
+        "Company drivers use carrier-provided trailers. Owner-operators start "
+        "with the dry van trailer program and can add specialty programs. "
+        "Escape returns to the garage."
+    )
+
+    def announce_entry(self) -> None:
+        p = self.ctx.profile
+        self.ctx.say(
+            f"Trailer programs. You have {p.money:,.0f} dollars. "
+            f"{self.current_text()}"
+        )
+
+    def build_items(self) -> list[MenuItem]:
+        p = self.ctx.profile
+        if not is_owner_operator(p.business_status):
+            return [
+                MenuItem(
+                    "Trailer programs locked: carrier-provided trailers",
+                    self._locked,
+                    help=(
+                        "Company drivers do not lease or buy trailers. The "
+                        "carrier supplies the right trailer for approved loads."
+                    ),
+                ),
+                MenuItem("Back", self.go_back),
+            ]
+        items = [
+            MenuItem(lambda t=t: self._label(t), lambda t=t: self._lease(t),
+                     help=t.description)
+            for t in TRAILER_CATALOG.values()
+        ]
+        items.append(MenuItem("Back", self.go_back))
+        return items
+
+    def _locked(self) -> None:
+        self.ctx.audio.play("ui/error")
+        self.ctx.say(
+            "Trailer programs are locked. Company drivers use carrier-provided "
+            "trailers, so no trailer lease is needed."
+        )
+
+    def _label(self, trailer: TrailerType) -> str:
+        p = self.ctx.profile
+        programs = set(p.active_trailer_programs())
+        if trailer.key in programs:
+            if trailer.key in DEFAULT_TRAILER_PROGRAMS:
+                return f"{trailer.label}: included carrier trailer program"
+            return f"{trailer.label}: leased program active"
+        return f"{trailer.label}: lease program for {trailer.lease_deposit:,.0f} dollars"
+
+    def _lease(self, trailer: TrailerType) -> None:
+        p = self.ctx.profile
+        if not is_owner_operator(p.business_status):
+            self.ctx.audio.play("ui/error")
+            self.ctx.say(
+                "Company drivers use carrier-provided trailers. Trailer "
+                "programs unlock after the leased-on owner-operator buy-in."
+            )
+            return
+        if trailer.key in p.active_trailer_programs():
+            self.ctx.say(f"{trailer.label} trailer program is already active.")
+            return
+        if p.money < trailer.lease_deposit:
+            self.ctx.audio.play("ui/error")
+            self.ctx.say(
+                f"Not enough money. {trailer.label} trailer program costs "
+                f"{trailer.lease_deposit:,.0f} dollars and you have "
+                f"{p.money:,.0f}."
+            )
+            return
+        p.money -= trailer.lease_deposit
+        p.trailer_programs = list(p.active_trailer_programs()) + [trailer.key]
+        p.dispatch_board_cache = None
+        self.ctx.save_profile()
+        self.ctx.audio.play("ui/cash")
+        self.ctx.say(
+            f"{trailer.label} trailer program active for "
+            f"{trailer.lease_deposit:,.0f} dollars. You have "
+            f"{p.money:,.0f} dollars left. Matching cargo can now appear as "
+            "available on the dispatch board."
+        )
+        self.refresh()
+
+
 class JobBoardState(MenuState):
     title = "Dispatch board"
     intro_help = ("Each entry is one dispatch. Enter accepts the dispatch and "
@@ -1007,7 +1110,8 @@ class JobBoardState(MenuState):
             self.ctx.say("Dispatch board. No jobs available right now. Press Escape to go back.")
         else:
             business_note = (
-                "Listed amounts are owner-operator gross revenue. "
+                "Listed amounts are owner-operator gross revenue. Trailer "
+                "program needs are listed on each job. "
                 if is_owner_operator(self.ctx.profile.business_status)
                 else "Listed amounts are carrier gross; your settlement pays driver wages. "
             )
@@ -1023,6 +1127,7 @@ class JobBoardState(MenuState):
                     i + 1,
                     len(self.jobs),
                     pay_label=pay_label(self.ctx.profile.business_status),
+                    trailer_note=self._trailer_note(job),
                 ),
                 lambda j=job: self._accept(j),
                 help=(
@@ -1035,10 +1140,18 @@ class JobBoardState(MenuState):
 
     def _accept(self, job: Job) -> None:
         p = self.ctx.profile
-        locked = job.locked_reason(p.career.endorsements, p.career.level)
+        locked = job.locked_reason(
+            p.career.endorsements,
+            p.career.level,
+            trailer_programs=p.active_trailer_programs(),
+            carrier_trailer_support=not is_owner_operator(p.business_status),
+        )
         if locked:
             self.ctx.audio.play("ui/error")
-            self.ctx.say(f"{locked} Keep delivering to level up and unlock it.")
+            if "trailer program" in locked:
+                self.ctx.say(f"{locked} Open Garage, Trailer programs to add it.")
+            else:
+                self.ctx.say(f"{locked} Keep delivering to level up and unlock it.")
             return
         from .driving import DRIVE_PHASE_PICKUP, DrivingState
 
@@ -1056,6 +1169,14 @@ class JobBoardState(MenuState):
             interrupt=True)
         self.ctx.push_state(driving)
         self.ctx.award_achievement("first_dispatch")
+
+    def _trailer_note(self, job: Job) -> str:
+        p = self.ctx.profile
+        if not is_owner_operator(p.business_status):
+            return "Carrier trailer provided."
+        if compatible_with_programs(job.cargo.key, p.active_trailer_programs()):
+            return f"Trailer program: {required_program_text(job.cargo.key)}."
+        return f"Needs {required_program_text(job.cargo.key)} trailer program."
 
 
 class PickupFacilityState(MenuState):
