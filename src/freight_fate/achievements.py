@@ -405,7 +405,7 @@ ACHIEVEMENTS: tuple[Achievement, ...] = (
     Achievement(
         "max_level",
         "Veteran of the Long Haul",
-        "Career level ten. Same towns, same docks, same diner pie -- but the page turns a little easier when you've read the whole book.",
+        "Career level twenty. Same towns, same docks, same diner pie -- but the page turns a little easier when you've read the whole book.",
         "Challenges",
         "Bob Seger - Turn the Page",
     ),

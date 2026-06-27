@@ -33,6 +33,7 @@ from ..sim.hos import DutyLog, HosClock
 from ..updater import is_frozen
 from .business import COMPANY_DRIVER
 from .career import Career
+from .career_ladder import STARTER_CARRIER_NAME
 from .market import Market
 
 SAVE_VERSION = 5
@@ -281,6 +282,7 @@ class Profile:
     pay_advance: float = 0.0         # outstanding dispatcher advance owed, repaid at delivery
     pay_advance_used_for_load: bool = False
     business_status: str = COMPANY_DRIVER  # company driver, then leased-on owner-operator
+    carrier_name: str = STARTER_CARRIER_NAME
     career: Career = field(default_factory=Career)
     market: Market = field(default_factory=Market)
     hos: HosClock = field(default_factory=HosClock)  # hours-of-service shift clock

@@ -3864,7 +3864,7 @@ class ArrivalState(MenuState):
             ids.append("fifty_thousand_miles")
         if p.money >= 100_000.0:
             ids.append("hundred_grand")
-        if p.career.level >= 10:
+        if p.career.level >= 20:
             ids.append("max_level")
         if p.career.reputation >= 100.0:
             ids.append("top_reputation")

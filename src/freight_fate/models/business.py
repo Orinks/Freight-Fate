@@ -86,6 +86,10 @@ def player_pays_operating_costs(status: str) -> bool:
     return is_owner_operator(status)
 
 
+def carrier_name(profile) -> str:
+    return str(getattr(profile, "carrier_name", STARTER_CARRIER_NAME) or STARTER_CARRIER_NAME)
+
+
 def owner_operator_eligibility(profile) -> tuple[bool, tuple[str, ...]]:
     """Whether the profile can buy into owner-operator status now."""
     if is_owner_operator(getattr(profile, "business_status", COMPANY_DRIVER)):
@@ -114,7 +118,7 @@ def owner_operator_eligibility(profile) -> tuple[bool, tuple[str, ...]]:
 def business_path_label(profile) -> str:
     rank = rank_for_level(profile.career.level)
     return (
-        f"{STARTER_CARRIER_NAME}. Level {rank.level}: {rank.title}. "
+        f"{carrier_name(profile)}. Level {rank.level}: {rank.title}. "
         f"{rank.stage}."
     )
 
@@ -151,7 +155,7 @@ def business_status_summary(profile) -> str:
     rank = rank_for_level(profile.career.level)
     if is_owner_operator(status):
         return (
-            f"You are leased to {STARTER_CARRIER_NAME} as a level "
+            f"You are leased to {carrier_name(profile)} as a level "
             f"{rank.level} {rank.title}. Load revenue is higher, but fuel, "
             "repairs, maintenance reserve, insurance, trailer program, truck "
             "payment reserve, and settlement fees come out of your money. "
@@ -160,7 +164,7 @@ def business_status_summary(profile) -> str:
     ok, reasons = owner_operator_eligibility(profile)
     if ok:
         return (
-            f"You are a company driver for {STARTER_CARRIER_NAME}, level "
+            f"You are a company driver for {carrier_name(profile)}, level "
             f"{rank.level} {rank.title}. You qualify to buy your first "
             f"leased-on tractor position. Owner-operator buy-in costs "
             f"{OWNER_OPERATOR_BUY_IN:,.0f} dollars "
@@ -168,7 +172,7 @@ def business_status_summary(profile) -> str:
             "working capital in the bank."
         )
     return (
-        f"You are a company driver for {STARTER_CARRIER_NAME}, level "
+        f"You are a company driver for {carrier_name(profile)}, level "
         f"{rank.level} {rank.title}. The carrier supplies the tractor, fuel, "
         "repairs, trailer, authority, and insurance; your settlements are "
         "driver wages and bonuses. "

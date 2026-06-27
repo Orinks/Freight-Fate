@@ -197,11 +197,13 @@ def test_profile_roundtrip():
     p.money = 1234.5
     p.career.xp = 2600
     p.business_status = LEASED_OWNER_OPERATOR
+    p.carrier_name = "Test Carrier"
     path = p.save()
     loaded = Profile.load(path)
     assert loaded.money == 1234.5
     assert loaded.career.level == 3
     assert loaded.business_status == LEASED_OWNER_OPERATOR
+    assert loaded.carrier_name == "Test Carrier"
     assert loaded.name == "Roundtrip Test"
 
 
@@ -226,6 +228,19 @@ def test_old_save_without_business_status_loads_as_company_driver():
 
     assert loaded.business_status == COMPANY_DRIVER
     assert STARTER_CARRIER_NAME in business_status_summary(loaded)
+
+
+def test_old_save_without_carrier_loads_with_starter_company():
+    p = Profile(name="Old Carrier")
+    data = p.to_dict()
+    data.pop("carrier_name")
+    data.pop(SIGNATURE_FIELD)
+    path = p.path
+    path.write_text(json.dumps(data))
+
+    loaded = Profile.load(path)
+
+    assert loaded.carrier_name == STARTER_CARRIER_NAME
 
 
 def test_profile_ignores_unknown_fields():
