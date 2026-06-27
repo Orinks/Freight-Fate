@@ -216,8 +216,15 @@ def test_how_to_play_documents_new_gameplay_systems():
     assert "more fuel onboard, not better efficiency" in help_text
     assert "emergency stops" in help_text
     assert "emergency shoulder sleep" in help_text
-    assert "resets your legal clock but leaves fatigue" in help_text
     assert "parking ticket or minor damage" in help_text
+    # Always-available sleep, and the 1.8.0 systems, are documented in-game.
+    assert "emergency sleep in the lot" in help_text
+    assert "fully-rested ten-hour sleep" in help_text
+    assert "risks losing traction" in help_text
+    assert "low visibility shortens" in help_text
+    assert "career runs on a calendar that starts in spring" in help_text
+    assert "state troopers patrol" in help_text
+    assert "will not engage on low-speed local roads" in help_text
 
 
 def test_dispatch_board_keeps_route_planning_out_of_load_offer():

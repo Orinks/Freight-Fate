@@ -29,6 +29,12 @@
   equivalent nightly.
 
 ### Changed
+- **In-game help and manual now cover the new systems.** The how-to-play pages,
+  the F1 driving help, and the user manual were brought in line: the calendar
+  and seasons, weather that bites (traction loss, drag, visibility), the
+  always-available shoulder and lot sleep, cruise that declines low-speed local
+  roads, and -- newly documented anywhere -- state-trooper speeding pull-overs
+  (signal with X) and real changing posted limits.
 - **The calendar reads as a real date, in more places.** The career clock now
   speaks an actual date that advances as time passes -- "March 21," then "April
   1," and so on (a new career starts March 21) -- instead of only a day number.
