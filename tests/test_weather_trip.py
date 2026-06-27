@@ -166,6 +166,43 @@ def test_relaxed_hazard_scale_lowers_hazard_risk(world):
     assert relaxed._hazard_risk() < normal._hazard_risk()
 
 
+def test_corridor_busyness_scales_hazard_check_frequency(world):
+    dense_route = world.route_from_cities(["New York", "Boston"])
+    sparse_route = world.route_from_cities(["Las Vegas", "Reno"])
+    weather = WeatherSystem("northeast", seed=1)
+    dense = Trip(dense_route, TruckState(), weather, seed=1)
+    sparse = Trip(sparse_route, TruckState(), WeatherSystem("great_basin", seed=1),
+                  seed=1)
+    dense.position_mi = 25.0
+    sparse.position_mi = sparse.total_miles / 2
+
+    assert dense._corridor_hazard_factor_at(dense.position_mi) > (
+        sparse._corridor_hazard_factor_at(sparse.position_mi)
+    )
+
+
+def test_hazard_check_interval_shortens_on_busy_corridors(world):
+    class FixedRng:
+        def uniform(self, low, high):
+            assert (low, high) == (20, 60)
+            return 40.0
+
+    dense_route = world.route_from_cities(["New York", "Boston"])
+    sparse_route = world.route_from_cities(["Las Vegas", "Reno"])
+    dense = Trip(dense_route, TruckState(), WeatherSystem("northeast", seed=1),
+                 seed=1)
+    sparse = Trip(sparse_route, TruckState(), WeatherSystem("great_basin", seed=1),
+                  seed=1)
+    dense.position_mi = 25.0
+    sparse.position_mi = sparse.total_miles / 2
+    dense._rng = FixedRng()
+    sparse._rng = FixedRng()
+
+    assert dense._next_hazard_check_interval_mi() < (
+        sparse._next_hazard_check_interval_mi()
+    )
+
+
 def test_relaxed_mode_thins_traffic_density(world):
     """Relaxed mode also makes ambient traffic rarer, not just hazards."""
     from freight_fate.sim.hos import RELAXED_HAZARD_SCALE

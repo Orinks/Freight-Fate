@@ -42,6 +42,10 @@
   in one burst. Safety cues and actionable GPS distances still speak immediately.
 
 ### Changed
+- **Busy corridors now feel busier beyond rush hour.** Random road-hazard checks
+  now use corridor busyness: dense metro/checkpoint interstates check sooner,
+  while sparse open-country corridors leave more breathing room. Relaxed mode
+  still keeps random hazards rare overall.
 - **Construction zones now stage the slowdown.** Work zones add a merge/flagger
   taper before the barrels, with spoken guidance to slow first for the taper and
   then for the lower work-zone limit. The taper shows up in speed-limit and

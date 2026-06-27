@@ -115,6 +115,8 @@ CONDITIONS_SPEED_MARGIN_MPH = 8.0    # slack over the safe speed before any risk
 CONDITIONS_GRIP_CEILING = 0.85       # only weather this slick can spin you out
 CONDITIONS_CHECK_MI = 1.5            # mileage between incident rolls while overspeed
 CONDITIONS_INCIDENT_RISK = 0.5       # peak per-roll chance at full severity
+CORRIDOR_HAZARD_MIN_FACTOR = 0.75
+CORRIDOR_HAZARD_MAX_FACTOR = 1.45
 
 # Road hazards are grounded in what actually puts a tractor-trailer on the
 # brakes on an interstate, and in *where and when* it happens. Each hazard is
@@ -1329,6 +1331,32 @@ class Trip:
             risk += NIGHT_HAZARD_BONUS
         return risk * self.hazard_scale
 
+    def _corridor_hazard_factor_at(self, mile: float) -> float:
+        """Relative hazard-check frequency for the current corridor.
+
+        Busy urban interstates and checkpoint corridors get checked a little
+        sooner; sparse rural state/US routes and wide-open regions get more
+        breathing room. Weather and relaxed-mode odds still apply separately.
+        """
+        leg_i, _ = self._leg_at_mile(mile)
+        leg = self.route.legs[leg_i]
+        cls = _highway_class(leg.highway)
+        factor = {"interstate": 1.05, "us_highway": 0.92}.get(cls, 0.82)
+        factor += min(0.18, len(leg.checkpoints) * 0.06)
+        region = self._region_at(mile)
+        if region in _HOT_PATROL_REGIONS:
+            factor += 0.12
+        elif region in _COLD_PATROL_REGIONS:
+            factor -= 0.12
+        if self._near_city(mile):
+            factor += 0.18
+        return max(CORRIDOR_HAZARD_MIN_FACTOR,
+                   min(CORRIDOR_HAZARD_MAX_FACTOR, factor))
+
+    def _next_hazard_check_interval_mi(self) -> float:
+        base = self._rng.uniform(20, 60)
+        return base / self._corridor_hazard_factor_at(self.position_mi)
+
     def _check_hazards(self, moved_mi: float) -> None:
         """Occasional road hazards that demand braking."""
         context = self.traffic_context()
@@ -1347,7 +1375,7 @@ class Trip:
         self._hazard_check_mi -= moved_mi
         if self._hazard_check_mi > 0:
             return
-        self._hazard_check_mi = self._rng.uniform(20, 60)
+        self._hazard_check_mi = self._next_hazard_check_interval_mi()
         if self._rng.random() < self._hazard_risk():
             choices = eligible_hazards(
                 self.current_region, self.weather.current,

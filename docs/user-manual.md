@@ -339,7 +339,9 @@ your attention.
 
 The road can report traffic, construction, state lines, city pass-throughs,
 checkpoints, toll points, route stops, and weather changes. Morning and
-afternoon rush hours can make metro corridors busier and slower.
+afternoon rush hours can make metro corridors busier and slower. Dense
+metro/checkpoint corridors can also produce random road hazards a little more
+often than open-country stretches.
 
 Hazards can happen while moving. When a "Brake now" warning appears, slow below
 25 miles per hour quickly to avoid a collision. Fatigue shortens the reaction
