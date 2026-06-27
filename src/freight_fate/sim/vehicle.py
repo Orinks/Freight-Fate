@@ -95,6 +95,7 @@ class TruckState:
     # environment, set each frame by the trip/weather layer
     grade: float = 0.0           # +uphill, e.g. 0.06 = 6%
     grip: float = 1.0            # weather traction multiplier
+    drag_mult: float = 1.0       # weather aero drag multiplier (headwinds/storms)
     fuel_burn_mult: float = 1.0  # trip time compression so mpg stays honest
 
     stalled: bool = False
@@ -192,7 +193,8 @@ class TruckState:
         s = self.specs
         v = self.velocity_mps
         direction = 1.0 if v > 0.01 else -1.0 if v < -0.01 else 0.0
-        drag = 0.5 * AIR_DENSITY * s.drag_coefficient * s.frontal_area_m2 * v * abs(v)
+        drag = (0.5 * AIR_DENSITY * s.drag_coefficient * s.frontal_area_m2
+                * self.drag_mult * v * abs(v))
         rolling = self.gross_mass_kg * G * s.rolling_resistance * direction
         grade_f = self.gross_mass_kg * G * math.sin(math.atan(self.grade))
         return drag + rolling + grade_f

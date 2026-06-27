@@ -104,6 +104,13 @@ ZONE_WARNING_REAL_S = 12.0         # target real seconds of warning
 ZONE_WARNING_MAX_MI = 8.0
 STATE_CROSSING_WARNING_LOOKAHEAD_MI = 10.0
 CONSTRUCTION_ENFORCEMENT_GRACE_MI = 1.0
+# Driving faster than the weather's safe speed risks a traction-loss incident,
+# so the safe-speed readout has teeth. Risk scales with how far over you are and
+# how little grip the conditions leave; only adverse grip counts.
+CONDITIONS_SPEED_MARGIN_MPH = 8.0    # slack over the safe speed before any risk
+CONDITIONS_GRIP_CEILING = 0.85       # only weather this slick can spin you out
+CONDITIONS_CHECK_MI = 1.5            # mileage between incident rolls while overspeed
+CONDITIONS_INCIDENT_RISK = 0.5       # peak per-roll chance at full severity
 
 # Road hazards are grounded in what actually puts a tractor-trailer on the
 # brakes on an interstate, and in *where and when* it happens. Each hazard is
@@ -367,6 +374,8 @@ class Trip:
         self._rng = random.Random(seed)
         # separate stream so inspections never disturb hazard/zone layout
         self._insp_rng = random.Random(None if seed is None else seed ^ 0x5EED)
+        # likewise for the reactive too-fast-for-conditions rolls
+        self._cond_rng = random.Random(None if seed is None else seed ^ 0xC0FFEE)
         self._events: list[TripEvent] = []
         self._leg_starts = self._compute_leg_starts()
         # Mileposts of every city on the route (leg starts plus the final
@@ -388,6 +397,7 @@ class Trip:
         self._construction_zone_grace_start: dict[str, float] = {}
         self._hazard_check_mi = 5.0
         self._inspection_check_mi = 10.0
+        self._conditions_check_mi = CONDITIONS_CHECK_MI
         self._traffic_warning_mi = 1.0
         self._announced_enforcement: set[str] = set()
 
@@ -1007,6 +1017,7 @@ class Trip:
                        f"Weather changing: {self.weather.describe()}",
                        weather=changed)
         self.truck.grip = self.weather.effects.grip
+        self.truck.drag_mult = self.weather.effects.drag_mult
         self.truck.grade = self.grade_at(self.position_mi)
         self.truck.fuel_burn_mult = self.time_scale
 
@@ -1023,6 +1034,7 @@ class Trip:
         self._check_cities()
         if moved_mi > 0.0:
             self._check_hazards(moved_mi)
+            self._check_conditions_speed(moved_mi)
             self._check_inspections(moved_mi)
 
         if self.position_mi >= self.total_miles:
@@ -1258,10 +1270,52 @@ class Trip:
             hazard = self._rng.choices(texts, weights)[0]
             # Lead with the action: the player can be on the brakes before
             # the sentence finishes. deadline_s is the reaction slack on top
-            # of the braking time the driving state computes from speed.
+            # of the braking time the driving state computes from speed, cut
+            # short in low visibility -- you see the hazard later in fog/rain.
             self._emit(TripEventKind.HAZARD,
                        f"Brake now! {hazard[0].upper()}{hazard[1:]}.",
-                       deadline_s=self._rng.uniform(3.0, 4.5))
+                       deadline_s=(self._rng.uniform(3.0, 4.5)
+                                   * self._visibility_reaction_factor()))
+
+    def _visibility_reaction_factor(self) -> float:
+        """Fraction of the normal hazard reaction slack you get: low visibility
+        means you see a hazard later, so less time to react. 1.0 in clear air,
+        floored so a hazard is never physically impossible to answer."""
+        vis = self.weather.effects.visibility_mi
+        if vis >= 3.0:
+            return 1.0
+        return max(0.4, vis / 3.0)
+
+    def _conditions_incident_text(self) -> str:
+        """The traction-loss phrase for the current conditions."""
+        kind = self.weather.current
+        if kind == WeatherKind.SNOW:
+            return "The trailer is sliding on the snow, too fast for the conditions."
+        if kind in (WeatherKind.RAIN, WeatherKind.HEAVY_RAIN,
+                    WeatherKind.THUNDERSTORM):
+            return "Hydroplaning on the wet road, too fast for the conditions."
+        return "Losing traction, too fast for the conditions."
+
+    def _check_conditions_speed(self, moved_mi: float) -> None:
+        """Driving well over the weather's safe speed risks a traction-loss
+        incident, so the safe-speed readout has teeth instead of being flavor.
+        Risk scales with how far over you are and how slick the road is."""
+        eff = self.weather.effects
+        over = self.truck.speed_mph - eff.safe_speed_mph
+        if over <= CONDITIONS_SPEED_MARGIN_MPH or eff.grip >= CONDITIONS_GRIP_CEILING:
+            self._conditions_check_mi = CONDITIONS_CHECK_MI
+            return
+        self._conditions_check_mi -= moved_mi
+        if self._conditions_check_mi > 0:
+            return
+        self._conditions_check_mi = CONDITIONS_CHECK_MI
+        severity = min(1.0, (over - CONDITIONS_SPEED_MARGIN_MPH) / 25.0)
+        risk = (severity * (1.0 - eff.grip) * CONDITIONS_INCIDENT_RISK
+                * self.hazard_scale)
+        if self._cond_rng.random() < risk:
+            self._emit(TripEventKind.HAZARD,
+                       f"Brake now! {self._conditions_incident_text()}",
+                       deadline_s=max(1.5, 2.5 * self._visibility_reaction_factor()))
 
     def _random_inspection_odds(self, leg: Leg) -> float:
         """Odds a random roadside log-check fires when the driver is in HOS

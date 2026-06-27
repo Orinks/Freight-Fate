@@ -213,9 +213,14 @@ Net-new realism candidates, roughly by area:
   conditions. Real observation temperature is now extracted too (`_temp_to_c`
   -> `RealWeatherProvider.get_temperature` -> `WeatherSystem._temperature`), so
   live mode reports the station's real degrees and falls back to the climate
-  model only when a reading is missing. Remaining follow-ups: black-ice risk on
-  clear cold mornings after wet roads (currently ice rides on active snow); and
-  seasonal daylight length.
+  model only when a reading is missing. Weather also bites mechanically now,
+  not just as flavor: the per-condition aero `drag_mult` is applied to the
+  physics (storms/wind cost top speed and fuel), driving well over the
+  conditions-safe speed on a slick road risks a traction-loss incident
+  (`_check_conditions_speed`), and low visibility shortens hazard reaction time
+  (`_visibility_reaction_factor`). Remaining follow-ups: black-ice risk on clear
+  cold mornings after wet roads (currently ice rides on active snow); steady
+  crosswind nudging the trailer; and seasonal daylight length.
 - **Physics and the truck.** Cargo-weight-aware gross mass is done for
   acceleration, grade lugging, fuel burn, and now braking: the foundation
   brakes have a fixed force ceiling sized for the rated gross, so loads over

@@ -230,6 +230,60 @@ def test_speed_limit_cue_names_direction_and_city(world, monkeypatch):
     assert all("approaching" not in m for m in raised)
 
 
+def test_weather_drag_multiplier_increases_resistance():
+    truck = TruckState()
+    truck.velocity_mps = 25.0
+    base = truck.resistance_force()
+    truck.drag_mult = 1.25          # a strong headwind / storm
+    assert truck.resistance_force() > base
+
+
+def test_visibility_shortens_hazard_reaction(world):
+    trip, _ = make_trip(world)
+    trip.weather.current = WeatherKind.CLEAR
+    assert trip._visibility_reaction_factor() == 1.0
+    trip.weather.current = WeatherKind.HEAVY_RAIN   # 1.5 mi visibility
+    assert trip._visibility_reaction_factor() == pytest.approx(0.5)
+    trip.weather.current = WeatherKind.FOG          # 0.3 mi -> floored
+    assert trip._visibility_reaction_factor() == pytest.approx(0.4)
+
+
+def test_too_fast_for_conditions_risks_traction_loss(world):
+    trip, truck = make_trip(world)
+    trip._hazard_check_mi = 1e9          # silence the random environmental hazards
+    trip._inspection_check_mi = 1e9
+    trip.traffic_leads = []
+
+    def run_for_hazard(frames=12000):
+        hits = []
+        for _ in range(frames):
+            trip.weather.current = WeatherKind.SNOW   # grip 0.45, safe speed 35
+            truck.velocity_mps = 27.0                 # ~60 mph, well over safe
+            for e in trip.update(1 / 60):
+                if e.kind == TripEventKind.HAZARD:
+                    hits.append(e.message)
+            if hits:
+                break
+        return hits
+
+    hits = run_for_hazard()
+    assert any("too fast for the conditions" in m for m in hits)
+
+    # At a safe speed for the snow, no traction-loss incident fires.
+    trip2, truck2 = make_trip(world, seed=7)
+    trip2._hazard_check_mi = 1e9
+    trip2._inspection_check_mi = 1e9
+    trip2.traffic_leads = []
+    safe_hits = []
+    for _ in range(6000):
+        trip2.weather.current = WeatherKind.SNOW
+        truck2.velocity_mps = 14.0                    # ~31 mph, under safe 35
+        for e in trip2.update(1 / 60):
+            if e.kind == TripEventKind.HAZARD:
+                safe_hits.append(e.message)
+    assert not any("too fast for the conditions" in m for m in safe_hits)
+
+
 def test_trip_completes_and_emits_arrival(world):
     trip, truck = make_trip(world)
     truck.throttle = 0.85

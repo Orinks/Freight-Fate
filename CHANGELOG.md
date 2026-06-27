@@ -29,6 +29,13 @@
   equivalent nightly.
 
 ### Changed
+- **Weather you have to drive to, not just hear.** Three conditions that used to
+  be flavor now bite. High wind and storms add real aerodynamic drag, so they
+  cost top speed and fuel. Driving well over the conditions-safe speed on a
+  slick road risks a traction-loss incident -- hydroplaning in rain, sliding on
+  snow -- so the safe-speed readout finally has teeth. And low visibility (fog,
+  heavy rain) shortens how much warning you get before a hazard, so you have to
+  actually slow down to see and react in time.
 - **Speed-limit changes now say why.** A changing posted limit is announced as
   "Speed limit reduced to X" or "raised to X" instead of a bare number, and an
   urban drop names the city ("reduced to 55 approaching Boston"), so a mid-drive
