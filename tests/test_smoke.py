@@ -63,6 +63,7 @@ def test_full_game_flow_headless(monkeypatch):
     )
     from freight_fate.states.driving import ArrivalState, DrivingState, FacilityArrivalState
     from freight_fate.states.main_menu import (
+        CareerStartState,
         HomeCityState,
         HomeTerminalState,
         MainMenuState,
@@ -92,6 +93,8 @@ def test_full_game_flow_headless(monkeypatch):
         for ch in "Smoke":
             app.state.handle_event(key_event(ord(ch.lower()), ch))
         app.state.handle_event(key_event(pygame.K_RETURN))
+        assert isinstance(app.state, CareerStartState)
+        app.state.handle_event(key_event(pygame.K_RETURN))  # default start: Northstar
         assert isinstance(app.state, HomeTerminalState)
         app.state.handle_event(key_event(pygame.K_RETURN))  # default region: Great Lakes
         assert isinstance(app.state, HomeCityState)
@@ -255,7 +258,7 @@ def test_garage_upgrade_and_truck_purchase_flow():
         TruckShopState,
         UpgradeShopState,
     )
-    from freight_fate.states.main_menu import MainMenuState, NameEntryState
+    from freight_fate.states.main_menu import CareerStartState, MainMenuState, NameEntryState
 
     app = App()
     try:
@@ -265,6 +268,8 @@ def test_garage_upgrade_and_truck_purchase_flow():
         app.state.handle_event(key_event(pygame.K_RETURN))
         assert isinstance(app.state, NameEntryState)
         app.state.handle_event(key_event(pygame.K_RETURN))  # default name
+        assert isinstance(app.state, CareerStartState)
+        app.state.handle_event(key_event(pygame.K_RETURN))  # default start
         app.state.handle_event(key_event(pygame.K_RETURN))  # default region
         app.state.handle_event(key_event(pygame.K_RETURN))  # default home terminal
         assert isinstance(app.state, CityMenuState)
@@ -428,7 +433,7 @@ def test_pause_and_abandon_returns_to_city():
     from freight_fate.app import App
     from freight_fate.states.city import CityMenuState, PickupFacilityState, RouteSelectState
     from freight_fate.states.driving import DrivingState, PauseMenuState
-    from freight_fate.states.main_menu import MainMenuState, NameEntryState
+    from freight_fate.states.main_menu import CareerStartState, MainMenuState, NameEntryState
 
     app = App()
     try:
@@ -438,6 +443,8 @@ def test_pause_and_abandon_returns_to_city():
         app.state.handle_event(key_event(pygame.K_RETURN))
         assert isinstance(app.state, NameEntryState)
         app.state.handle_event(key_event(pygame.K_RETURN))  # default name
+        assert isinstance(app.state, CareerStartState)
+        app.state.handle_event(key_event(pygame.K_RETURN))  # default start
         app.state.handle_event(key_event(pygame.K_RETURN))  # default region
         app.state.handle_event(key_event(pygame.K_RETURN))  # default home terminal
         app.state.handle_event(key_event(pygame.K_RETURN))  # job board

@@ -377,6 +377,7 @@ def dispatch_cache_key(p) -> dict:
         "market_seed": p.market.seed,
         "market_state_day": p.market.day,
         "business_status": p.business_status,
+        "carrier_key": getattr(p, "carrier_key", ""),
         "level": p.career.level,
         "endorsements": sorted(p.career.endorsements),
         "count": 5,
@@ -393,8 +394,13 @@ def open_freight_market(ctx) -> list[Job]:
         jobs = [_job_from_payload(payload)
                 for payload in cache.get("jobs", [])]
     else:
-        jobs = board.offers(p.current_city, p.career.endorsements,
-                            level=p.career.level, market=p.market)
+        jobs = board.offers(
+            p.current_city,
+            p.career.endorsements,
+            level=p.career.level,
+            market=p.market,
+            carrier_key=getattr(p, "carrier_key", ""),
+        )
         p.dispatch_board_cache = {
             "key": key,
             "jobs": [_job_payload(job) for job in jobs],

@@ -211,7 +211,7 @@ def test_profile_save_is_atomic_and_versioned():
     p = Profile(name="Atomic")
     path = p.save()
     data = json.loads(path.read_text())
-    assert data["version"] == 5
+    assert data["version"] == 6
     assert SIGNATURE_FIELD in data
     assert not path.with_suffix(".json.tmp").exists()
 
@@ -241,6 +241,24 @@ def test_old_save_without_carrier_loads_with_starter_company():
     loaded = Profile.load(path)
 
     assert loaded.carrier_name == STARTER_CARRIER_NAME
+
+
+def test_old_save_without_start_choice_fields_uses_northstar_company_start():
+    from freight_fate.models.start_options import DEFAULT_START_KEY, START_MODE_COMPANY
+
+    p = Profile(name="Old Start")
+    data = p.to_dict()
+    data.pop("carrier_key")
+    data.pop("start_mode")
+    data.pop(SIGNATURE_FIELD)
+    path = p.path
+    path.write_text(json.dumps(data))
+
+    loaded = Profile.load(path)
+
+    assert loaded.carrier_key == DEFAULT_START_KEY
+    assert loaded.start_mode == START_MODE_COMPANY
+    assert loaded.business_status == COMPANY_DRIVER
 
 
 def test_profile_ignores_unknown_fields():

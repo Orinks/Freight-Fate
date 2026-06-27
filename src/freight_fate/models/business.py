@@ -12,6 +12,11 @@ from dataclasses import dataclass
 
 from .career_ladder import STARTER_CARRIER_NAME, next_rank_for_level, rank_for_level
 from .jobs import Job
+from .start_options import (
+    START_MODE_OWNER_OPERATOR,
+    option_for_profile,
+    pay_plan_for_key,
+)
 
 COMPANY_DRIVER = "company_driver"
 LEASED_OWNER_OPERATOR = "leased_owner_operator"
@@ -24,11 +29,6 @@ OWNER_OPERATOR_DELIVERIES = 35
 OWNER_OPERATOR_BUY_IN = 35_000.0
 OWNER_OPERATOR_WORKING_CAPITAL = 10_000.0
 OWNER_OPERATOR_REVENUE_MULT = 1.12
-
-COMPANY_PAY_SHARE = 0.36
-COMPANY_MIN_PER_MILE = 0.82
-COMPANY_STOP_PAY = 175.0
-COMPANY_ON_TIME_BONUS_SHARE = 0.04
 
 OWNER_MAINTENANCE_PER_MILE = 0.18
 OWNER_INSURANCE_PER_MILE = 0.09
@@ -90,6 +90,10 @@ def carrier_name(profile) -> str:
     return str(getattr(profile, "carrier_name", STARTER_CARRIER_NAME) or STARTER_CARRIER_NAME)
 
 
+def carrier_key(profile) -> str:
+    return str(getattr(profile, "carrier_key", "") or "")
+
+
 def owner_operator_eligibility(profile) -> tuple[bool, tuple[str, ...]]:
     """Whether the profile can buy into owner-operator status now."""
     if is_owner_operator(getattr(profile, "business_status", COMPANY_DRIVER)):
@@ -117,9 +121,10 @@ def owner_operator_eligibility(profile) -> tuple[bool, tuple[str, ...]]:
 
 def business_path_label(profile) -> str:
     rank = rank_for_level(profile.career.level)
+    option = option_for_profile(profile)
     return (
         f"{carrier_name(profile)}. Level {rank.level}: {rank.title}. "
-        f"{rank.stage}."
+        f"{rank.stage}. {option.menu_summary}"
     )
 
 
@@ -154,8 +159,14 @@ def business_status_summary(profile) -> str:
     status = getattr(profile, "business_status", COMPANY_DRIVER)
     rank = rank_for_level(profile.career.level)
     if is_owner_operator(status):
+        start_mode = getattr(profile, "start_mode", "")
+        lead = (
+            "You chose the owner-operator start. "
+            if start_mode == START_MODE_OWNER_OPERATOR else
+            ""
+        )
         return (
-            f"You are leased to {carrier_name(profile)} as a level "
+            f"{lead}You are leased to {carrier_name(profile)} as a level "
             f"{rank.level} {rank.title}. Load revenue is higher, but fuel, "
             "repairs, maintenance reserve, insurance, trailer program, truck "
             "payment reserve, and settlement fees come out of your money. "
@@ -173,17 +184,23 @@ def business_status_summary(profile) -> str:
         )
     return (
         f"You are a company driver for {carrier_name(profile)}, level "
-        f"{rank.level} {rank.title}. The carrier supplies the tractor, fuel, "
-        "repairs, trailer, authority, and insurance; your settlements are "
-        "driver wages and bonuses. "
+        f"{rank.level} {rank.title}. {option_for_profile(profile).menu_summary} "
+        "The carrier supplies the tractor, fuel, repairs, trailer, authority, "
+        "and insurance; your settlements are driver wages and bonuses. "
         + next_business_unlock(profile)
     )
 
 
-def company_driver_pay(job: Job, gross_pay: float, on_time: bool) -> float:
-    wage_floor = COMPANY_STOP_PAY + job.distance_mi * COMPANY_MIN_PER_MILE
-    wage_share = gross_pay * COMPANY_PAY_SHARE
-    bonus = gross_pay * COMPANY_ON_TIME_BONUS_SHARE if on_time else 0.0
+def company_driver_pay(
+    job: Job,
+    gross_pay: float,
+    on_time: bool,
+    carrier_key_value: str | None = None,
+) -> float:
+    plan = pay_plan_for_key(carrier_key_value)
+    wage_floor = plan.stop_pay + job.distance_mi * plan.min_per_mile
+    wage_share = gross_pay * plan.pay_share
+    bonus = gross_pay * plan.on_time_bonus_share if on_time else 0.0
     return round(max(wage_floor, wage_share) + bonus, 2)
 
 
@@ -208,6 +225,7 @@ def build_business_settlement(
     *,
     on_time: bool,
     driver_charges: float,
+    carrier_key: str | None = None,
 ) -> BusinessSettlement:
     if is_owner_operator(status):
         gross_pay = owner_operator_gross(gross_pay)
@@ -222,7 +240,10 @@ def build_business_settlement(
             round(net, 2),
         )
 
-    net = max(0.0, company_driver_pay(job, gross_pay, on_time) - driver_charges)
+    net = max(
+        0.0,
+        company_driver_pay(job, gross_pay, on_time, carrier_key) - driver_charges,
+    )
     return BusinessSettlement(
         COMPANY_DRIVER,
         status_label(COMPANY_DRIVER),

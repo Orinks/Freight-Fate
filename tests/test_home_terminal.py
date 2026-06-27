@@ -11,7 +11,7 @@ def key_event(key, unicode=""):
 
 def open_picker(app, name=""):
     """Drive a new career up to the home terminal picker."""
-    from freight_fate.states.main_menu import HomeTerminalState, MainMenuState
+    from freight_fate.states.main_menu import CareerStartState, HomeTerminalState, MainMenuState
 
     app.push_state(MainMenuState(app.ctx))
     while app.state.items[app.state.index].text != "New career":
@@ -20,6 +20,8 @@ def open_picker(app, name=""):
     for ch in name:
         app.state.handle_event(key_event(ord(ch.lower()), ch))
     app.state.handle_event(key_event(pygame.K_RETURN))
+    assert isinstance(app.state, CareerStartState)
+    app.state.handle_event(key_event(pygame.K_RETURN))  # default Northstar start
     assert isinstance(app.state, HomeTerminalState)
     return app.state
 
@@ -104,11 +106,13 @@ def test_picking_a_city_sets_the_profile_start_city():
 
 def test_escape_returns_to_name_entry_keeping_the_typed_name():
     from freight_fate.app import App
-    from freight_fate.states.main_menu import NameEntryState
+    from freight_fate.states.main_menu import CareerStartState, NameEntryState
 
     app = App()
     try:
         open_picker(app, name="Bob")
+        app.state.handle_event(key_event(pygame.K_ESCAPE))
+        assert isinstance(app.state, CareerStartState)
         app.state.handle_event(key_event(pygame.K_ESCAPE))
         assert isinstance(app.state, NameEntryState)
         assert app.state.name == "Bob"

@@ -11,6 +11,12 @@ from .. import __version__, updater
 from ..achievements import ACHIEVEMENTS, earned_ids
 from ..data.regions import REGION_LABELS
 from ..models.profile import DEFAULT_CITY, Profile, ProfileIntegrityError
+from ..models.start_options import (
+    all_start_options,
+    apply_start_option,
+    option_for_profile,
+    start_option,
+)
 from ..music import select_menu_music_sequence
 from ..settings import TIME_SCALES
 from .base import MenuItem, MenuState, State
@@ -104,8 +110,11 @@ def _saved_label(path: Path) -> str:
 
 
 def _career_summary(path: Path, profile: Profile, *, include_saved: bool = True) -> str:
+    from ..models.business import status_label
+
     parts = [
         f"{profile.name}: level {profile.career.level}",
+        f"{profile.carrier_name} {status_label(profile.business_status)}",
         f"{profile.money:,.0f} dollars",
         _career_location(profile),
         f"{profile.career.deliveries} deliveries",
@@ -431,9 +440,11 @@ class ConfirmCareerActionState(MenuState):
         name = self.profile.name
         if self.action == "reset":
             fresh = Profile(name=name, current_city=self.profile.current_city)
+            apply_start_option(fresh, option_for_profile(self.profile))
             fresh.save()
             message = (f"{name} reset. The career starts over at "
-                       f"{fresh.current_city} with {fresh.money:,.0f} dollars.")
+                       f"{fresh.current_city} with {fresh.carrier_name} "
+                       f"and {fresh.money:,.0f} dollars.")
         else:
             self.path.unlink(missing_ok=True)
             if self.ctx.profile is not None and self.ctx.profile.path == self.path:
@@ -481,11 +492,45 @@ class NameEntryState(State):
     def _confirm(self) -> None:
         name = self.name.strip() or "Driver"
         self.ctx.audio.play("ui/menu_select")
-        self.ctx.push_state(HomeTerminalState(self.ctx, name))
+        self.ctx.push_state(CareerStartState(self.ctx, name))
 
     def lines(self) -> list[str]:
         return ["New career", "", f"Driver name: {self.name}_",
                 "Press Enter to confirm, Escape to cancel, F2 to review."]
+
+
+class CareerStartState(MenuState):
+    title = "Career start"
+    intro_help = (
+        "Choose how this career starts. Company-driver starts use assigned "
+        "carrier equipment and carrier-paid routine costs. The owner-operator "
+        "start is higher risk: you control a starter tractor and pay operating "
+        "costs from day one. Enter selects; Escape goes back to name entry."
+    )
+
+    def __init__(self, ctx, driver_name: str) -> None:
+        super().__init__(ctx)
+        self.driver_name = driver_name
+
+    def announce_entry(self) -> None:
+        self.ctx.say(
+            "Career start. Pick a carrier or owner-operator start. "
+            f"{self.current_text()}")
+
+    def build_items(self) -> list[MenuItem]:
+        return [
+            MenuItem(
+                f"{option.label}. {option.menu_summary}",
+                lambda key=option.key: self._pick(key),
+                help=option.help_text,
+            )
+            for option in all_start_options()
+        ]
+
+    def _pick(self, key: str) -> None:
+        option = start_option(key)
+        self.ctx.audio.play("ui/menu_select")
+        self.ctx.push_state(HomeTerminalState(self.ctx, self.driver_name, option.key))
 
 
 def _region_menu_name(region: str) -> str:
@@ -514,9 +559,11 @@ class HomeTerminalState(MenuState):
                   "letter to jump to a region. Enter opens that region's cities. "
                   "Escape goes back to name entry.")
 
-    def __init__(self, ctx, driver_name: str) -> None:
+    def __init__(self, ctx, driver_name: str, start_key: str) -> None:
         super().__init__(ctx)
         self.driver_name = driver_name
+        self.start_key = start_key
+        option = start_option(start_key)
         by_region: dict[str, list[str]] = {}
         for city in ctx.world.cities.values():
             by_region.setdefault(city.region, []).append(city.name)
@@ -524,14 +571,16 @@ class HomeTerminalState(MenuState):
             names.sort()
         self._cities_by_region = by_region
         self._regions = sorted(by_region, key=_region_menu_name)
-        default = ctx.world.cities[DEFAULT_CITY].region \
-            if DEFAULT_CITY in ctx.world.cities else None
+        default_city = option.default_city if option.default_city in ctx.world.cities else DEFAULT_CITY
+        default = ctx.world.cities[default_city].region \
+            if default_city in ctx.world.cities else None
         if default in self._regions:
             self.index = self._regions.index(default)
 
     def announce_entry(self) -> None:
+        option = start_option(self.start_key)
         self.ctx.say("Home region. Pick the part of the country where your "
-                     f"career starts. {self.current_text()}")
+                     f"{option.carrier_name} career starts. {self.current_text()}")
 
     def build_items(self) -> list[MenuItem]:
         items: list[MenuItem] = []
@@ -548,7 +597,7 @@ class HomeTerminalState(MenuState):
 
     def _pick_region(self, region: str) -> None:
         self.ctx.push_state(HomeCityState(
-            self.ctx, self.driver_name, region,
+            self.ctx, self.driver_name, self.start_key, region,
             self._cities_by_region[region]))
 
 
@@ -561,13 +610,17 @@ class HomeCityState(MenuState):
                   "city. Enter confirms your home terminal. Escape goes back to "
                   "the region list.")
 
-    def __init__(self, ctx, driver_name: str, region: str,
+    def __init__(self, ctx, driver_name: str, start_key: str, region: str,
                  city_names: list[str]) -> None:
         super().__init__(ctx)
         self.driver_name = driver_name
+        self.start_key = start_key
         self.region = region
         self._cities = list(city_names)
-        if DEFAULT_CITY in self._cities:
+        option = start_option(start_key)
+        if option.default_city in self._cities:
+            self.index = self._cities.index(option.default_city)
+        elif DEFAULT_CITY in self._cities:
             self.index = self._cities.index(DEFAULT_CITY)
 
     def announce_entry(self) -> None:
@@ -591,34 +644,52 @@ class HomeCityState(MenuState):
 
         name = self.driver_name
         existing = {p.stem.lower() for p in Profile.list_saves()}
+        option = start_option(self.start_key)
         profile = Profile(name=name, current_city=city)
+        apply_start_option(profile, option)
         terminal = self.ctx.world.home_terminal(city)
         self.ctx.profile = profile
         profile.save()
         self.ctx.pop_state()   # this city picker
         self.ctx.pop_state()   # region picker
+        self.ctx.pop_state()   # career start
         self.ctx.pop_state()   # name entry
         self.ctx.push_state(CityMenuState(self.ctx))
         loaded_over = (f"Loaded over existing driver named {name}. "
                        if name.lower() in existing else "")
-        self.ctx.say(
-            f"{loaded_over}Welcome aboard to Northstar Freight Lines, {name}. "
-            "Your assigned company tractor is parked at "
-            f"{terminal.spoken_name} in the {city} service area with "
-            f"{profile.money:,.0f} dollars and a full tank. "
-            "Your first stop is the dispatch board.", interrupt=True)
+        if option.is_owner_operator:
+            message = (
+                f"{loaded_over}Owner-operator start created for {name}. "
+                f"You are leased to {option.carrier_name}, parked at "
+                f"{terminal.spoken_name} in the {city} service area, with an "
+                f"owned starter tractor and {profile.money:,.0f} dollars of "
+                "working capital. Fuel, repairs, and business reserves are "
+                "your responsibility from day one. "
+                "Your first stop is the dispatch board."
+            )
+        else:
+            message = (
+                f"{loaded_over}Welcome aboard to {option.carrier_name}, {name}. "
+                "Your assigned company tractor is parked at "
+                f"{terminal.spoken_name} in the {city} service area with "
+                f"{profile.money:,.0f} dollars and a full tank. "
+                "Your first stop is the dispatch board."
+            )
+        self.ctx.say(message, interrupt=True)
 
 
 HELP_PAGES = [
     ("The goal", [
-        "You are a Northstar Freight Lines company driver building toward owner-operator independence.",
+        "A new career starts with a choice: company driver carrier or owner-operator start.",
+        "Company drivers use assigned carrier equipment and carrier-paid routine costs.",
+        "The owner-operator start skips ahead, but fuel, repairs, and business costs are yours.",
         "Start from your company terminal or yard in a metro service area.",
         "Each city stands for a wider freight area with many possible shippers.",
         "Accept freight from a specific shipper facility, deadhead to that pickup,",
         "check in and load the trailer there, then get your route to the destination,",
         "and deliver cargo across the country, on time and intact.",
         "Earn money and experience, level through 20 career ranks, and unlock better freight.",
-        "Level 5 starts owner-operator preparation, not a lease-purchase shortcut.",
+        "On the company path, level 5 starts owner-operator preparation.",
         "At level 15, with enough deliveries, reputation, and working capital,",
         "Business status lets you buy into a leased-on owner-operator path.",
     ]),
@@ -791,7 +862,8 @@ HELP_PAGES = [
     ("Deliveries and money", [
         "The dispatch board lists freight for the current metro service area.",
         "As a company driver, listed pay is carrier gross. Your settlement pays",
-        "driver wages and bonuses, and the carrier handles tractor costs.",
+        "driver wages and bonuses. Starter carriers use different wage floors,",
+        "stop pay, pay share, on-time bonus, and freight emphasis.",
         "As an owner-operator, listed pay is gross revenue. Your business pays",
         "fuel, repairs, maintenance reserve, insurance, trailer program,",
         "truck payment reserve, and settlement fees.",

@@ -18,6 +18,7 @@ from ..data.world import (
     World,
 )
 from .market import Market, market_condition
+from .start_options import DEFAULT_START_KEY, start_option
 
 
 @dataclass(frozen=True)
@@ -423,10 +424,18 @@ class JobBoard:
             return LEVEL_DISTANCE_CAPS[level]
         return LEVEL_DISTANCE_CAPS[5] + 500.0 * (level - 5)
 
-    def offers(self, city: str, endorsements: set[str], count: int = 5,
-               level: int = 1, market: Market | None = None) -> list[Job]:
+    def offers(
+        self,
+        city: str,
+        endorsements: set[str],
+        count: int = 5,
+        level: int = 1,
+        market: Market | None = None,
+        carrier_key: str | None = None,
+    ) -> list[Job]:
         jobs: list[Job] = []
         city_obj = self.world.cities[city]
+        carrier_key = carrier_key or DEFAULT_START_KEY
         candidates = self._candidates(city)
         cap = self.distance_cap(level)
         reachable = [c for c in candidates if c[1] <= cap]
@@ -442,8 +451,9 @@ class JobBoard:
         attempts = 0
         while len(jobs) < count and attempts < count * 30:
             attempts += 1
-            location = self._choose_origin_location(city_obj, level)
-            cargo_key = self._choose_cargo_for_location(city_obj, location, level)
+            location = self._choose_origin_location(city_obj, level, carrier_key)
+            cargo_key = self._choose_cargo_for_location(
+                city_obj, location, level, carrier_key)
             cargo = CARGO_CATALOG[cargo_key]
             locked = cargo.endorsement and cargo.endorsement not in endorsements
             # a locked job may appear once in a while as a teaser, otherwise skip
@@ -515,7 +525,9 @@ class JobBoard:
         weights = [1.0 / (c[1] ** exponent) for c in pool]
         return self._rng.choices(pool, weights)[0]
 
-    def _choose_origin_location(self, city, level: int) -> Location:
+    def _choose_origin_location(
+        self, city, level: int, carrier_key: str = DEFAULT_START_KEY,
+    ) -> Location:
         plausible = [
             location
             for location in city.locations
@@ -523,15 +535,24 @@ class JobBoard:
         ]
         if not plausible:
             plausible = list(city.locations)
-        weights = [self._facility_weight(city, location) for location in plausible]
+        weights = [
+            self._facility_weight(city, location, carrier_key)
+            for location in plausible
+        ]
         return self._rng.choices(plausible, weights)[0]
 
-    def _choose_cargo_for_location(self, city, location: Location, level: int) -> str:
+    def _choose_cargo_for_location(
+        self,
+        city,
+        location: Location,
+        level: int,
+        carrier_key: str = DEFAULT_START_KEY,
+    ) -> str:
         cargo_keys = self._cargo_for_location(location, level=level)
         if not cargo_keys:
             cargo_keys = tuple(cargo.key for cargo in CARGO_CATALOG.values()
                                if cargo.min_level <= level)
-        weights = [self._cargo_weight(city, key) for key in cargo_keys]
+        weights = [self._cargo_weight(city, key, carrier_key) for key in cargo_keys]
         return self._rng.choices(cargo_keys, weights)[0]
 
     def _cargo_for_location(self, location: Location, role: str = "ships",
@@ -569,7 +590,9 @@ class JobBoard:
             [self._facility_weight(self.world.cities[city], loc) for loc in plausible],
         )[0]
 
-    def _facility_weight(self, city, location: Location) -> float:
+    def _facility_weight(
+        self, city, location: Location, carrier_key: str = DEFAULT_START_KEY,
+    ) -> float:
         weight = FACILITY_SELECTION_WEIGHTS.get(location.type, 0.85)
         for tag in city.market_tags:
             boosted = MARKET_TAG_CARGO_BONUS.get(tag, set())
@@ -577,9 +600,16 @@ class JobBoard:
                 weight += 0.25
         if location.template:
             weight *= 0.9
+        option = start_option(carrier_key)
+        if option.cargo_weight_bonus:
+            cargo_keys = set(location.ships + location.receives)
+            if cargo_keys & set(option.cargo_weight_bonus):
+                weight += 0.2
         return max(0.1, weight)
 
-    def _cargo_weight(self, city, cargo_key: str) -> float:
+    def _cargo_weight(
+        self, city, cargo_key: str, carrier_key: str = DEFAULT_START_KEY,
+    ) -> float:
         weight = 1.0
         for tag in city.market_tags:
             if cargo_key in MARKET_TAG_CARGO_BONUS.get(tag, set()):
@@ -587,6 +617,7 @@ class JobBoard:
         cargo = CARGO_CATALOG[cargo_key]
         if cargo.endorsement:
             weight *= 0.8
+        weight += start_option(carrier_key).cargo_weight_bonus.get(cargo_key, 0.0)
         return weight
 
     def _make_job(self, cargo: CargoType, origin: str, origin_location: str,

@@ -23,6 +23,7 @@ def accept_pickup_drive(app):
         app.state.handle_event(key_event(pygame.K_DOWN))
     app.state.handle_event(key_event(pygame.K_RETURN))
     app.state.handle_event(key_event(pygame.K_RETURN))  # default name
+    app.state.handle_event(key_event(pygame.K_RETURN))  # default career start
     app.state.handle_event(key_event(pygame.K_RETURN))  # default region
     app.state.handle_event(key_event(pygame.K_RETURN))  # default home terminal
     app.state.handle_event(key_event(pygame.K_RETURN))  # job board
@@ -92,6 +93,7 @@ def test_dispatch_board_stays_stable_when_reopened():
             app.state.handle_event(key_event(pygame.K_DOWN))
         app.state.handle_event(key_event(pygame.K_RETURN))
         app.state.handle_event(key_event(pygame.K_RETURN))  # default name
+        app.state.handle_event(key_event(pygame.K_RETURN))  # default career start
         app.state.handle_event(key_event(pygame.K_RETURN))  # default region
         app.state.handle_event(key_event(pygame.K_RETURN))  # default home terminal
 

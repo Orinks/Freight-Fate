@@ -35,8 +35,9 @@ from .business import COMPANY_DRIVER, is_owner_operator
 from .career import Career
 from .career_ladder import STARTER_CARRIER_NAME
 from .market import Market
+from .start_options import DEFAULT_START_KEY, START_MODE_COMPANY
 
-SAVE_VERSION = 5
+SAVE_VERSION = 6
 STARTING_MONEY = 5_000.0
 DEFAULT_CITY = "Chicago"
 SIGNATURE_FIELD = "_signature"
@@ -283,6 +284,8 @@ class Profile:
     pay_advance_used_for_load: bool = False
     business_status: str = COMPANY_DRIVER  # company driver, then leased-on owner-operator
     carrier_name: str = STARTER_CARRIER_NAME
+    carrier_key: str = DEFAULT_START_KEY
+    start_mode: str = START_MODE_COMPANY
     career: Career = field(default_factory=Career)
     market: Market = field(default_factory=Market)
     hos: HosClock = field(default_factory=HosClock)  # hours-of-service shift clock
