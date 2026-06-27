@@ -40,6 +40,22 @@ buy-in and working-capital gate instead of a confusing weekly deduction trap.
   terminal menu and settlement math; it does not add driver hiring, tax filing,
   direct broker negotiation, or full authority management.
 
+## Follow-Up Realism Hooks
+
+- True authority should be a later, optional step. It should cover
+  motor-carrier authority, insurance filings, broker/load-board access,
+  settlement or factoring timing, and more compliance overhead.
+- Trailer ownership/leasing belongs with freight-market and garage/dealer work:
+  carrier-provided trailers stay in the leased-on path, while owned or leased
+  dry van, reefer, or flatbed equipment can later affect cargo fit and costs.
+- Operating-cost polish should keep using recognizable owner-operator cost
+  categories, but player-facing settlement text should stay concise and avoid
+  dense finance jargon.
+- Freight-market pricing should keep company-driver wages, leased-on gross
+  revenue, and future true-authority spot or broker rates distinct.
+- Lease-purchase remains a realism caveat and caution, not the default success
+  path. Fleet hiring and company ownership stay separate from this driving arc.
+
 ## Sources Consulted
 
 - FMCSA operating authority overview:

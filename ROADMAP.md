@@ -248,8 +248,9 @@ Net-new realism candidates, roughly by area:
 - **Local delivery realism.** The destination-local approach legs already
   sketched under World: surface-street miles, gate speeds, and dock
   approaches after the highway portion.
-- **Business realism.** The company-driver→owner-operator arc, loans, and
-  insurance already sketched under Business.
+- **Business realism.** The first grounded company-driver to leased-on
+  owner-operator arc is shipped; true authority, trailers, operating-cost
+  tuning, and market pricing are tracked under Business.
 
 ## Shipped for 1.8: local city service drives
 
@@ -634,6 +635,25 @@ fit for an audio-first game.
       settlements, then unlock a leased-on owner-operator path with a buy-in,
       working-capital gate, higher gross revenue, and operating-cost
       deductions. Full authority, loans, and fleet ownership remain future work.
+- [ ] True authority and direct freight. Later optional slice for operating
+      under the player's own motor-carrier authority. Cover Department of
+      Transportation and motor-carrier authority, insurance filings,
+      broker/load-board access, factoring or settlement timing, and higher
+      compliance overhead.
+- [ ] Trailer ownership and leasing. Keep carrier-provided trailers in the
+      leased-on path, then let later true-authority or freight-market work add
+      owned or leased dry van, reefer, flatbed, maintenance, washout, and
+      cargo-fit choices.
+- [ ] Operating-cost polish. Continue tuning owner-operator deductions against
+      real cost categories such as fuel, maintenance reserve, insurance, truck
+      payment, trailer program, and settlement/factoring fees, while keeping
+      settlement speech short and understandable.
+- [ ] Freight-market pricing realism. Separate company-driver wages,
+      leased-on gross revenue, and future true-authority spot or broker rates;
+      let tight/loose markets affect upside without hiding the player's net pay.
+- [ ] Business realism caveats. Keep lease-purchase risk visible as caution,
+      not the golden path. Avoid payday-loan-like traps, and keep fleet hiring
+      separate from the driving-career loop.
 - [ ] Company ownership: hire AI drivers, buy trucks
 - [ ] Loans and insurance
 
