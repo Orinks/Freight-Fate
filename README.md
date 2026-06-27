@@ -27,11 +27,10 @@ visual display mirrors all speech for sighted players and helpers.
   ten gears (manual with clutch, or automatic), air-brake pressure,
   parking brakes, engine braking, grades, stalls, brake fade, and honest
   fuel economy.
-- **Business progression** — start with fictional carrier Northstar Freight
-  Lines as a company driver in an assigned carrier tractor with carrier-paid
-  fuel and repairs, then work
-  through a grounded ladder toward a leased-on owner-operator endgame with
-  higher gross revenue and real operating costs.
+- **Business progression** — choose a grounded company-driver carrier with
+  assigned equipment and modest wage tradeoffs, or start as a higher-risk
+  leased-on owner-operator with owned starter equipment and real operating
+  costs.
 - **Trucks and upgrades** — owner-operators can earn their way into a heavy
   hauler with more torque and a bigger tank (and worse aerodynamics), and
   outfit any truck with an engine tune, aerodynamic kit, long-range tank, or

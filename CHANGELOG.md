@@ -42,6 +42,10 @@
   in one burst. Safety cues and actionable GPS distances still speak immediately.
 
 ### Changed
+- **New careers now offer grounded start choices.** Pick from several
+  fictional company-driver carriers with assigned equipment and modest wage or
+  freight tradeoffs, or choose a higher-risk owner-operator start with owned
+  starter equipment and operating costs active from day one.
 - **Busy corridors now feel busier beyond rush hour.** Random road-hazard checks
   now use corridor busyness: dense metro/checkpoint interstates check sooner,
   while sparse open-country corridors leave more breathing room. Relaxed mode

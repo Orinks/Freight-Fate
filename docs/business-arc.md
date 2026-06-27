@@ -6,12 +6,11 @@ the main dream.
 
 ## Grounding
 
-The realistic first step is not instant independence. A new driver starts as a
-company driver for fictional starter carrier Northstar Freight Lines: the
-carrier controls the dispatch relationship, assigns and maintains the
-tractor/trailer combination, and carries the normal carrier costs. The driver
-earns wages and bonuses from each settlement, while fines and damaged-load
-consequences still matter.
+The realistic first step is not instant independence. A new company-path driver
+starts with one of several fictional starter carriers. The carrier controls the
+dispatch relationship, assigns and maintains the tractor/trailer combination,
+and carries the normal carrier costs. The driver earns wages and bonuses from
+each settlement, while fines and damaged-load consequences still matter.
 
 The first owner-operator step is modeled as a leased-on owner-operator, not full
 motor-carrier authority. That keeps the game focused on driving and load choice:
@@ -26,12 +25,21 @@ arrangements can create serious risk for drivers, and those risks are the wrong
 tone for the first playable business arc. The game therefore uses a clear
 buy-in and working-capital gate instead of a confusing weekly deduction trap.
 
+Freight Fate also offers an alternate owner-operator start for players who want
+that fantasy immediately. It is framed as an experienced-driver start: the
+player begins leased on with an owned starter tractor, higher gross revenue,
+limited working capital, partial fuel, light equipment wear, and operating
+costs active from day one.
+
 ## Gameplay Model
 
 - Company driver: listed board pay is carrier gross; settlement pays a driver
   wage/bonus. Fuel, routine repairs, roadside fuel, and carrier shop repair are
   billed to the carrier. The driver may have a regular assigned tractor, but
   does not own, switch, or upgrade tractors yet.
+- Starter carrier differences: company carriers adjust realistic wage knobs:
+  pay share, per-mile wage floor, stop pay, on-time bonus, and modest freight
+  emphasis. They do not grant magic perks or personal truck ownership.
 - Leased-on owner-operator: listed board pay is gross revenue; settlement adds
   a higher revenue multiplier, then deducts business costs: maintenance reserve,
   insurance reserve, trailer program, truck payment reserve, and settlement
@@ -46,11 +54,21 @@ buy-in and working-capital gate instead of a confusing weekly deduction trap.
   terminal menu and settlement math; it does not add driver hiring, tax filing,
   direct broker negotiation, or full authority management.
 
+## Career Start Choices
+
+| Start | Mode | Practical Tradeoff |
+| --- | --- | --- |
+| Northstar Freight Lines | Company driver | Balanced wage plan and broad dispatch. |
+| Great Lakes Training Transport | Company driver | Better short-load stop pay, lower long-haul upside. |
+| Prairie Link Regional | Company driver | Better per-mile wage floor, lower stop pay, grain and bulk emphasis. |
+| Summit Value Logistics | Company driver | Better percentage and on-time bonus, smaller guarantee. |
+| Owner-operator start | Leased-on owner-operator | Starts at level 15 with owned starter equipment, 18,000 dollars working capital, partial fuel, light wear, higher gross revenue, and operating costs active. |
+
 ## 20-Level Arc
 
 | Level | Rank | Business Meaning |
 | --- | --- | --- |
-| 1 | Yard Trainee | Start at Northstar Freight Lines with an assigned company tractor. |
+| 1 | Yard Trainee | Start with a company carrier and an assigned company tractor. |
 | 2 | New Hire Company Driver | Refrigerated freight unlocks. |
 | 3 | Solo Company Driver | Heavy-haul freight unlocks. |
 | 4 | Regional Company Driver | High-value freight unlocks. |

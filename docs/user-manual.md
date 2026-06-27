@@ -72,18 +72,35 @@ The main menu can include:
 | Continue latest career | Loads the newest readable save. |
 | Choose career | Opens a list of saved careers. |
 | Manage careers | Opens reset and delete actions with confirmation. |
-| New career | Starts name entry and home-terminal selection. |
+| New career | Starts name entry, career start choice, and home-terminal selection. |
 | Achievements | Reviews earned and locked achievements for a saved career. |
 | How to play | Opens the built-in help reader. |
 | Settings | Opens gameplay, audio, speech and weather, and update settings. |
 | Quit | Exits the game. |
 
-A new driver starts with 5,000 dollars, an assigned company tractor, a full
+A new career asks you to choose a start path after entering a driver name.
+Company-driver starts use assigned carrier equipment, carrier-paid fuel and
+routine repairs, and different wage tradeoffs. The owner-operator start is an
+experienced-driver shortcut with owned starter equipment, higher gross revenue,
+limited working capital, and player-paid operating costs from day one.
+
+Company-driver carrier choices are:
+
+| Start | Tradeoff |
+| --- | --- |
+| Northstar Freight Lines | Balanced company-driver wages and broad dispatch. |
+| Great Lakes Training Transport | Better short-load stop pay, lower long-haul upside. |
+| Prairie Link Regional | Better per-mile floor, lower stop pay, grain and bulk emphasis. |
+| Summit Value Logistics | Better percentage and on-time bonus, smaller guarantee. |
+
+Company starts begin with 5,000 dollars, an assigned company tractor, a full
 tank, a fresh career record, and a company terminal or yard in the chosen metro
-service area.
+service area. The owner-operator start begins as a leased-on owner-operator
+with 18,000 dollars working capital, an owned starter tractor, partial fuel,
+light wear, and owner-operator costs already active.
 The home-terminal picker starts with a region list, then opens the cities in
-that region. Chicago is the default starting area, but any listed terminal can
-be your starting city.
+that region. Each start has a suggested default city, but any listed terminal
+can be your starting city.
 
 The normal career loop is:
 
@@ -155,10 +172,12 @@ full repair.
 
 ## Business Status
 
-Freight Fate starts you as a company driver for Northstar Freight Lines, a
-fictional starter carrier. The dispatch board lists carrier gross, but your
-settlement pays driver wages and bonuses. The carrier assigns the tractor and
-supplies the trailer, authority, insurance, fuel, and routine repairs.
+Freight Fate can start you as a company driver for one of several fictional
+starter carriers. The dispatch board lists carrier gross, but your settlement
+pays driver wages and bonuses. The selected carrier changes wage floor, stop
+pay, pay share, on-time bonus, and in some cases freight emphasis. The carrier
+assigns the tractor and supplies the trailer, authority, insurance, fuel, and
+routine repairs.
 
 The career ladder has 20 levels. Early levels are company-driver ranks. Level 5
 starts the owner-operator preparation path, but it is not a lease-purchase
@@ -172,10 +191,12 @@ pay advance, and enough cash for a 35,000 dollar truck buy-in while keeping
 
 Owner-operators see higher gross revenue, but the business pays fuel, repairs,
 maintenance reserve, insurance reserve, trailer program, truck payment reserve,
-and settlement fees. The carrier still handles dispatch and reimbursed
-accessorials so the game stays focused on driving. Level 20 completes the
-current owner-operator arc as an authority-ready independent operator; full
-motor-carrier authority is still future work.
+and settlement fees. You can reach that through the level-15 company-driver
+buy-in, or choose the owner-operator start for a higher-risk career from day
+one. The carrier still handles dispatch and reimbursed accessorials so the game
+stays focused on driving. Level 20 completes the current owner-operator arc as
+an authority-ready independent operator; full motor-carrier authority is still
+future work.
 
 City service drives are a first step toward more local city driving. Pick a
 service, follow the spoken GPS, stop at the destination, and press Enter to go

@@ -645,13 +645,15 @@ fit for an audio-first game.
   per-genre licensing for any owned music library.
 
 ### Business
-- [x] Company-driver to owner-operator career arc. Full first arc: start as a
-      Northstar Freight Lines company driver in carrier-assigned equipment with
-      carrier-paid fuel/repairs and driver-wage settlements, progress through
-      20 ranks, then unlock a later-level leased-on owner-operator path with a
-      buy-in, working-capital gate, owned-tractor garage access, higher gross
-      revenue, and operating-cost deductions. Full authority, loans, and fleet
-      ownership remain future work.
+- [x] Company-driver to owner-operator career arc. Full first arc: choose among
+      grounded fictional company-driver starter carriers with
+      carrier-assigned equipment, carrier-paid fuel/repairs, and different
+      wage/freight tradeoffs; progress through 20 ranks; then unlock a
+      later-level leased-on owner-operator path with a buy-in,
+      working-capital gate, owned-tractor garage access, higher gross revenue,
+      and operating-cost deductions. A higher-risk owner-operator start is also
+      available for experienced-driver fantasy play. Full authority, loans,
+      and fleet ownership remain future work.
 - [ ] True authority and direct freight. Later optional slice for operating
       under the player's own motor-carrier authority. Cover Department of
       Transportation and motor-carrier authority, insurance filings,
