@@ -14,6 +14,11 @@ import pygame
 
 from ..achievements import add_unique_stat
 from ..data.world import Route
+from ..models.business import (
+    build_business_settlement,
+    pay_label,
+    player_pays_operating_costs,
+)
 from ..models.economy import pay_advance_grant, pay_advance_unavailable_reason
 from ..models.jobs import Job, job_from_payload, job_payload
 from ..models.settlement import (
@@ -2001,12 +2006,16 @@ class DrivingState(State):
         self._rescue_offered = True
         p = self.ctx.profile
         fee = 750.0
-        p.money -= fee  # can go negative: the rescue is not optional
+        if player_pays_operating_costs(p.business_status):
+            p.money -= fee  # can go negative: the rescue is not optional
+            billing = f" for {fee:,.0f} dollars"
+        else:
+            billing = " on the carrier account"
         self.truck.refuel(30.0)
         self._rescue_offered = False
         self.ctx.audio.play("ui/error")
         self.ctx.say_event(f"You ran out of fuel. Roadside rescue brought thirty "
-                           f"gallons for {fee:,.0f} dollars. Press E to restart "
+                           f"gallons{billing}. Press E to restart "
                            "the engine, and plan your fuel stops.")
 
     def _handle_pickup_gate(self) -> None:
@@ -2606,9 +2615,9 @@ class RestStopState(MenuState):
         if "fuel" in actions:
             items.append(MenuItem(
                 self._fuel_label, self._refuel,
-                help="Fill the tank at this region's diesel price, plus a "
-                     "35 dollar service fee. If cash is short, buy as many "
-                     "gallons as you can afford."))
+                help="Fill the tank. Company drivers bill the carrier. "
+                     "Owner-operators pay this region's diesel price, plus a "
+                     "35 dollar service fee."))
         if "food" in actions:
             items.append(MenuItem(
                 "Food and coffee break", self._food_break,
@@ -2637,8 +2646,7 @@ class RestStopState(MenuState):
         if "repair" in actions:
             items.append(MenuItem(
                 "Use repair service", self._repair,
-                help="Pay the shop to repair truck damage before returning "
-                     "to the road."))
+                help=self._repair_help()))
         if "roadside_assistance" in actions:
             items.append(MenuItem(
                 "Call roadside assistance", self._roadside_assistance,
@@ -2676,6 +2684,14 @@ class RestStopState(MenuState):
             return f"Request pay advance: {grant:,.0f} dollars"
         return "Request pay advance"
 
+    def _repair_help(self) -> str:
+        if player_pays_operating_costs(self.ctx.profile.business_status):
+            return "Pay the shop to repair truck damage before returning to the road."
+        return (
+            "Use carrier-billed repair service to fix truck damage before "
+            "returning to the road."
+        )
+
     def _pay_advance_available(self) -> bool:
         p = self.ctx.profile
         return pay_advance_grant(
@@ -2707,6 +2723,8 @@ class RestStopState(MenuState):
         need = d.truck.specs.fuel_tank_gal - d.truck.fuel_gal
         if need < 1:
             return "Fuel: tank is full"
+        if not player_pays_operating_costs(self.ctx.profile.business_status):
+            return f"Refuel company tractor: {need:.0f} gallons, carrier billed"
         cost = self.ctx.economy.fuel_cost(d.trip.current_region, need) + 35.0
         return f"Refuel {need:.0f} gallons for {cost:,.0f} dollars"
 
@@ -2717,6 +2735,18 @@ class RestStopState(MenuState):
         need = d.truck.specs.fuel_tank_gal - d.truck.fuel_gal
         if need < 1:
             self.ctx.say("The tank is already full.")
+            return
+        if not player_pays_operating_costs(p.business_status):
+            d.truck.refuel(need)
+            _advance_rest_clock(d, FUEL_STOP_MIN)
+            d.hos.on_duty(FUEL_STOP_MIN)
+            self._save_here(silent=True)
+            self.ctx.audio.play("vehicle/fuel_pump")
+            self.ctx.say(
+                f"Refueled {need:.0f} gallons on the carrier fuel account. "
+                f"Fueling took {FUEL_STOP_MIN:.0f} minutes. {_deadline_text(d)}")
+            self.ctx.award_achievement("route_refuel")
+            self.refresh()
             return
         cost = self.ctx.economy.fuel_cost(region, need) + 35.0
         if p.money < cost:
@@ -2809,6 +2839,17 @@ class RestStopState(MenuState):
         if damage < 1.0:
             self.ctx.say("The truck does not need repair.")
             return
+        if not player_pays_operating_costs(p.business_status):
+            d.truck.damage_pct = 0.0
+            _advance_rest_clock(d, 60.0)
+            d.hos.on_duty(60.0)
+            self._save_here(silent=True)
+            self.ctx.audio.play("ui/notify")
+            self.ctx.say(
+                f"Carrier repair service fixed the truck. It is "
+                f"{clock_text(d.trip.current_hour)}. {_deadline_text(d)}")
+            self.ctx.award_achievement("garage_repair")
+            return
         cost = self.ctx.economy.repair_cost(damage)
         if p.money < cost:
             self.ctx.audio.play("ui/error")
@@ -2834,7 +2875,11 @@ class RestStopState(MenuState):
             return
         repaired = max(0.0, damage - FIELD_REPAIR_DAMAGE_PCT)
         cost = MECHANIC_CALLOUT_FEE + repaired * MECHANIC_RATE_PER_PCT
-        p.money -= cost
+        if player_pays_operating_costs(p.business_status):
+            p.money -= cost
+            billing = f" for {cost:,.0f} dollars"
+        else:
+            billing = " on the carrier account"
         d.truck.damage_pct = min(damage, FIELD_REPAIR_DAMAGE_PCT)
         _advance_rest_clock(d, MECHANIC_WAIT_MIN, "on_duty_not_driving",
                             "roadside mechanic")
@@ -2842,8 +2887,7 @@ class RestStopState(MenuState):
         self._save_here(silent=True)
         self.ctx.audio.play("ui/notify")
         self.ctx.say(f"Roadside assistance patched the truck to "
-                     f"{d.truck.damage_pct:.0f} percent damage for "
-                     f"{cost:,.0f} dollars. It is "
+                     f"{d.truck.damage_pct:.0f} percent damage{billing}. It is "
                      f"{clock_text(d.trip.current_hour)}. {_deadline_text(d)}")
 
     def _inspect(self) -> None:
@@ -3173,10 +3217,7 @@ class PauseMenuState(MenuState):
                           "Left and Right arrows change pages, Up and Down read "
                           "line by line, Escape returns here."),
             MenuItem(self._mechanic_label, self._mechanic,
-                     help="A mobile mechanic patches the truck up enough to "
-                          "drive on. Costs much more than a garage repair, "
-                          "takes an hour and a half, and the bill is due even "
-                          "if it puts you in debt."),
+                     help=self._mechanic_help()),
             MenuItem("Settings", self._settings,
                      help="Change units, transmission, volumes, weather, "
                           "voices, update channel, and trip pacing."),
@@ -3205,9 +3246,23 @@ class PauseMenuState(MenuState):
         damage = self.driving.truck.damage_pct
         if damage <= FIELD_REPAIR_DAMAGE_PCT:
             return "Call a roadside mechanic: not needed yet"
+        if not player_pays_operating_costs(self.ctx.profile.business_status):
+            return "Call a roadside mechanic: carrier billed"
         repaired = damage - FIELD_REPAIR_DAMAGE_PCT
         cost = MECHANIC_CALLOUT_FEE + repaired * MECHANIC_RATE_PER_PCT
         return f"Call a roadside mechanic: {cost:,.0f} dollars"
+
+    def _mechanic_help(self) -> str:
+        if player_pays_operating_costs(self.ctx.profile.business_status):
+            return (
+                "A mobile mechanic patches the truck up enough to drive on. "
+                "Costs much more than a garage repair, takes an hour and a "
+                "half, and the bill is due even if it puts you in debt."
+            )
+        return (
+            "A carrier-billed mobile mechanic patches the truck up enough to "
+            "drive on. The repair still takes an hour and a half."
+        )
 
     def _mechanic(self) -> None:
         d = self.driving
@@ -3223,7 +3278,11 @@ class PauseMenuState(MenuState):
         p = self.ctx.profile
         repaired = damage - FIELD_REPAIR_DAMAGE_PCT
         cost = MECHANIC_CALLOUT_FEE + repaired * MECHANIC_RATE_PER_PCT
-        p.money -= cost   # the rescue is never refused; money can go negative
+        if player_pays_operating_costs(p.business_status):
+            p.money -= cost   # the rescue is never refused; money can go negative
+            billing = f"for {cost:,.0f} dollars. You have {p.money:,.0f} dollars."
+        else:
+            billing = "on the carrier account."
         d.truck.damage_pct = FIELD_REPAIR_DAMAGE_PCT
         _advance_rest_clock(d, MECHANIC_WAIT_MIN, "on_duty_not_driving",
                             "roadside mechanic")
@@ -3231,8 +3290,8 @@ class PauseMenuState(MenuState):
         self.ctx.audio.play("ui/notify")
         self.refresh()
         self.ctx.say(f"A mobile mechanic patched the truck up to "
-                     f"{FIELD_REPAIR_DAMAGE_PCT:.0f} percent damage for "
-                     f"{cost:,.0f} dollars. You have {p.money:,.0f} dollars. "
+                     f"{FIELD_REPAIR_DAMAGE_PCT:.0f} percent damage "
+                     f"{billing} "
                      f"The repair took an hour and a half: it is "
                      f"{clock_text(d.trip.current_hour)}. {_deadline_text(d)}")
 
@@ -3394,7 +3453,14 @@ class FacilityArrivalState(MenuState):
         accessorials = carrier_accessorial_charges(job)
         carrier_charges = tolls + charge_total(accessorials)
         driver_charges = _speeding_settlement_fine(d.speeding_strikes)
-        net_estimated_pay = max(0.0, estimated_pay - driver_charges)
+        business = build_business_settlement(
+            self.ctx.profile.business_status,
+            job,
+            estimated_pay,
+            on_time=hours <= job.deadline_game_h,
+            driver_charges=driver_charges,
+        )
+        net_estimated_pay = business.net_before_advance
         advance_due = round(min(self.ctx.profile.pay_advance, net_estimated_pay), 2)
         net_estimated_pay = round(net_estimated_pay - advance_due, 2)
         advance_note = (
@@ -3412,11 +3478,13 @@ class FacilityArrivalState(MenuState):
         self.ctx.say(
             f"Paperwork for {self.facility}: {job.weight_tons:.0f} tons of "
             f"{job.cargo.label}. Rate sheet lists {job.pay:,.0f} dollars; "
-            f"current gross payout is {estimated_pay:,.0f} dollars. "
+            f"current gross payout is "
+            f"{business.gross_pay:,.0f} dollars. "
             f"Carrier-paid or reimbursed charges recorded so far are "
             f"{carrier_charges:,.0f} dollars, including tolls "
             f"{tolls:,.0f} and accessorials {charge_summary(accessorials)}. "
             "Those charges do not reduce driver pay. "
+            f"Business costs are {business.business_charge_total:,.0f} dollars. "
             f"Driver-responsibility charges are estimated at "
             f"{driver_charges:,.0f} dollars, for estimated net driver pay "
             f"{net_estimated_pay:,.0f}.{advance_note} "
@@ -3499,12 +3567,27 @@ class ArrivalState(MenuState):
         if job.bobtail:
             self._settle_bobtail(hours, trip_damage)
             return
-        gross_pay = job.payout(hours, trip_damage)
+        gross_base = job.payout(hours, trip_damage)
         toll_expense = d.trip.toll_expense
         accessorials = carrier_accessorial_charges(job)
         carrier_charges = toll_expense + charge_total(accessorials)
-        early_bonus = max(0.0, gross_pay - job.payout(job.deadline_game_h, trip_damage))
         driver_charges = _speeding_settlement_fine(d.speeding_strikes)
+        business = build_business_settlement(
+            p.business_status,
+            job,
+            gross_base,
+            on_time=hours <= job.deadline_game_h,
+            driver_charges=driver_charges,
+        )
+        deadline_business = build_business_settlement(
+            p.business_status,
+            job,
+            job.payout(job.deadline_game_h, trip_damage),
+            on_time=True,
+            driver_charges=driver_charges,
+        )
+        gross_pay = business.gross_pay
+        early_bonus = max(0.0, gross_pay - deadline_business.gross_pay)
         if driver_charges:
             self.summary_parts.append(
                 f"Driver-responsibility charges: speeding fines cost you "
@@ -3515,7 +3598,11 @@ class ArrivalState(MenuState):
             self.summary_parts.append(
                 f"On-the-spot speeding tickets this trip: {d.speeding_tickets}, "
                 f"already paid, {d.ticket_fines_paid:,.0f} dollars.")
-        net_pay = max(0.0, gross_pay - driver_charges)
+        if business.business_charges:
+            self.summary_parts.append(
+                f"Owner-operator business costs: "
+                f"{business.business_charge_summary}.")
+        net_pay = business.net_before_advance
         advance_repaid = round(min(p.pay_advance, net_pay), 2)
         if advance_repaid > 0:
             net_pay = round(net_pay - advance_repaid, 2)
@@ -3544,11 +3631,13 @@ class ArrivalState(MenuState):
             f"{job.destination} in {hours:.1f} hours, "
             f"{'on time' if on_time else 'late'}. "
             f"It is {clock_text(p.game_hours)}. "
-            f"Gross pay {gross_pay:,.0f} dollars. "
+            f"{pay_label(p.business_status)} {gross_pay:,.0f} dollars. "
             f"Carrier-paid or reimbursed charges {carrier_charges:,.0f} dollars: "
             f"tolls {toll_expense:,.0f}, accessorials "
             f"{charge_summary(accessorials)}. "
             "These are billed to carrier settlement and not deducted from driver pay. "
+            f"Business status: {business.status_label}. "
+            f"Business costs {business.business_charge_total:,.0f} dollars. "
             f"Driver-responsibility charges {driver_charges:,.0f} dollars. "
             f"Net driver pay {net_pay:,.0f} "
             f"dollars, and you now have {p.money:,.0f}. "
@@ -3590,6 +3679,12 @@ class ArrivalState(MenuState):
         if p.pay_advance >= 1.0:
             advance_lines.append(
                 f"Pay advance still outstanding: {p.pay_advance:,.0f} dollars.")
+        business_cost_lines = []
+        if business.business_charges:
+            business_cost_lines = [
+                f"Business costs: {business.business_charge_total:,.0f} dollars.",
+                f"Business cost detail: {business.business_charge_summary}.",
+            ]
         self.summary_lines = [
             f"Delivered {job.weight_tons:.0f} tons of {job.cargo.label} "
             f"to {job.destination}.",
@@ -3597,11 +3692,13 @@ class ArrivalState(MenuState):
             f"It is {clock_text(p.game_hours)}.",
             f"Parked at {self.terminal.name} for the "
             f"{job.destination} service area.",
-            f"Gross pay: {gross_pay:,.0f} dollars.",
+            f"Business status: {business.status_label}.",
+            f"{pay_label(p.business_status)}: {gross_pay:,.0f} dollars.",
             f"Carrier-paid or reimbursed charges: {carrier_charges:,.0f} "
             f"dollars, including tolls {toll_expense:,.0f} and "
             f"accessorials {charge_summary(accessorials)}.",
             "Carrier charges are not deducted from driver pay.",
+            *business_cost_lines,
             f"Driver-responsibility charges: {driver_charges:,.0f} dollars.",
             *advance_lines,
             f"Net driver pay: {net_pay:,.0f} dollars.",

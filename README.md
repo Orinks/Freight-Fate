@@ -15,7 +15,8 @@ visual display mirrors all speech for sighted players and helpers.
 - **Career mode** — accept jobs inside metro freight markets, deadhead to
   specific origin facilities, deliver to specific receivers, earn money and
   experience, level up, and unlock cargo endorsements (refrigerated,
-  heavy-haul, high-value).
+  heavy-haul, high-value), then buy into an owner-operator path when your
+  career is ready.
 - **Realistic freight markets** — the 59-city route graph acts as metro
   service areas, while each market expands into representative ports, rail and
   intermodal ramps, air cargo areas, parcel hubs, distribution centers, cold
@@ -26,10 +27,13 @@ visual display mirrors all speech for sighted players and helpers.
   ten gears (manual with clutch, or automatic), air-brake pressure,
   parking brakes, engine braking, grades, stalls, brake fade, and honest
   fuel economy.
-- **Trucks and upgrades** — earn your way into a heavy hauler with more
-  torque and a bigger tank (and worse aerodynamics), and outfit any truck
-  with an engine tune, aerodynamic kit, long-range tank, or reinforced
-  brakes. Every purchase changes the physics.
+- **Business progression** — start as a company driver with carrier-paid fuel
+  and repairs, then become a leased-on owner-operator for higher gross revenue
+  and real operating costs.
+- **Trucks and upgrades** — owner-operators can earn their way into a heavy
+  hauler with more torque and a bigger tank (and worse aerodynamics), and
+  outfit any truck with an engine tune, aerodynamic kit, long-range tank, or
+  reinforced brakes. Every purchase changes the physics.
 - **A living market** — each cargo class has a pay rate that drifts day by
   day, and each metro weights freight by regional specialization. The job
   board tells you when electronics are tight or bulk freight has gone loose;

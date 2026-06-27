@@ -78,7 +78,7 @@ The main menu can include:
 | Settings | Opens gameplay, audio, speech and weather, and update settings. |
 | Quit | Exits the game. |
 
-A new driver starts with 5,000 dollars, the standard rig, a full tank, a fresh
+A new driver starts with 5,000 dollars, a company tractor, a full tank, a fresh
 career record, and a company terminal or yard in the chosen metro service area.
 The home-terminal picker starts with a region list, then opens the cities in
 that region. Chicago is the default starting area, but any listed terminal can
@@ -134,6 +134,7 @@ Your terminal is the safe hub between jobs. Public terminal actions include:
 | --- | --- |
 | Dispatch board | Browse freight offers from local facilities. |
 | Drive to city services | Drive a short local route to the freight market office, garage, or truck dealer. |
+| Business status | Review company-driver or owner-operator status. |
 | Garage | Refuel, repair, buy upgrades, buy trucks, or switch owned trucks. |
 | Request pay advance | Draw cash against your next load when you are broke. |
 | Career stats | Review level, reputation, deliveries, and career totals. |
@@ -145,8 +146,25 @@ Your terminal is the safe hub between jobs. Public terminal actions include:
 | Settings | Open settings categories. |
 | Quit to main menu | Save and return to the title menu. |
 
-The garage can do partial fuel or repair work when you cannot afford a full
-tank or full repair.
+Company-driver fuel and routine repairs are billed to the carrier. After you
+become an owner-operator, fuel and repairs come out of your cash; the garage can
+do partial fuel or repair work when you cannot afford a full tank or full repair.
+
+## Business Status
+
+Freight Fate starts you as a company driver. The dispatch board lists carrier
+gross, but your settlement pays driver wages and bonuses. The carrier supplies
+the tractor, trailer, authority, insurance, fuel, and routine repairs.
+
+When your career is ready, the **Business status** menu lets you buy into a
+leased-on owner-operator path. You need level 5, 10 deliveries, reputation 65,
+no outstanding pay advance, and enough cash for a 20,000 dollar truck buy-in
+while keeping 3,000 dollars working capital.
+
+Owner-operators see higher gross revenue, but the business pays fuel, repairs,
+maintenance reserve, insurance reserve, trailer program, truck payment reserve,
+and settlement fees. The carrier still handles dispatch and reimbursed
+accessorials so the game stays focused on driving.
 
 City service drives are a first step toward more local city driving. Pick a
 service, follow the spoken GPS, stop at the destination, and press Enter to go

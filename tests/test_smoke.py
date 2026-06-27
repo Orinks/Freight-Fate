@@ -24,6 +24,7 @@ def select(menu, label):
 @pytest.mark.smoke
 def test_garage_offers_partial_fuel_and_repairs_when_cash_is_short():
     from freight_fate.app import App
+    from freight_fate.models.business import LEASED_OWNER_OPERATOR
     from freight_fate.models.profile import Profile
     from freight_fate.states.city import GarageState
 
@@ -32,6 +33,7 @@ def test_garage_offers_partial_fuel_and_repairs_when_cash_is_short():
         app.ctx.profile = Profile(name="Partial Garage")
         p = app.ctx.profile
         p.current_city = "Chicago"
+        p.business_status = LEASED_OWNER_OPERATOR
         app.push_state(GarageState(app.ctx))
 
         p.money = 100.0
@@ -246,6 +248,7 @@ def test_menu_first_letter_navigation():
 @pytest.mark.smoke
 def test_garage_upgrade_and_truck_purchase_flow():
     from freight_fate.app import App
+    from freight_fate.models.business import LEASED_OWNER_OPERATOR
     from freight_fate.states.city import (
         CityMenuState,
         GarageState,
@@ -266,6 +269,7 @@ def test_garage_upgrade_and_truck_purchase_flow():
         app.state.handle_event(key_event(pygame.K_RETURN))  # default home terminal
         assert isinstance(app.state, CityMenuState)
         p = app.ctx.profile
+        p.business_status = LEASED_OWNER_OPERATOR
         p.money = 200_000.0
 
         # city -> garage -> upgrades
@@ -369,12 +373,14 @@ def test_discord_presence_toggle_is_accessible_and_wired(monkeypatch):
 @pytest.mark.smoke
 def test_upgrades_are_money_gated():
     from freight_fate.app import App
+    from freight_fate.models.business import LEASED_OWNER_OPERATOR
     from freight_fate.models.profile import Profile
     from freight_fate.states.city import UpgradeShopState
 
     app = App()
     try:
         app.ctx.profile = Profile(name="Broke")
+        app.ctx.profile.business_status = LEASED_OWNER_OPERATOR
         app.ctx.profile.money = 10.0
         app.push_state(UpgradeShopState(app.ctx))
         shop = app.state

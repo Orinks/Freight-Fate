@@ -5,6 +5,16 @@ from __future__ import annotations
 import zlib
 
 from ..data.world import Route
+from ..models.business import (
+    LEASED_OWNER_OPERATOR,
+    OWNER_OPERATOR_BUY_IN,
+    business_status_summary,
+    is_owner_operator,
+    owner_operator_eligibility,
+    pay_label,
+    player_pays_operating_costs,
+    status_label,
+)
 from ..models.economy import (
     REPAIR_COST_PER_PCT,
     pay_advance_grant,
@@ -133,9 +143,11 @@ class CityMenuState(MenuState):
         p = self.ctx.profile
         city = self.ctx.world.cities[p.current_city]
         terminal = self.ctx.world.home_terminal(p.current_city)
+        business = status_label(p.business_status)
         self.ctx.say(
             f"Parked at {terminal.spoken_name} in the {p.current_city} "
-            f"service area, {city.state}. You have {p.money:,.0f} dollars. "
+            f"service area, {city.state}. {business.capitalize()}. "
+            f"You have {p.money:,.0f} dollars. "
             f"{self.current_text()}")
 
     def build_items(self) -> list[MenuItem]:
@@ -154,7 +166,11 @@ class CityMenuState(MenuState):
                           "pay. Use it when local jobs are thin."),
             MenuItem(self._garage_label, self._garage,
                      help="Refuel and repair your truck at the terminal garage. "
-                          "If cash is short, the garage does partial work."),
+                          "Company drivers use the carrier account. "
+                          "Owner-operators pay their own fuel and repairs."),
+            MenuItem("Business status", self._business_status,
+                     help="Review company-driver or owner-operator status, "
+                          "and buy into owner-operator status when qualified."),
             MenuItem("Career stats", self._stats,
                      help="Hear your level, reputation, and lifetime numbers."),
             MenuItem("Truck status", self._truck_status,
@@ -216,6 +232,9 @@ class CityMenuState(MenuState):
 
     def _garage(self) -> None:
         self.ctx.push_state(GarageState(self.ctx))
+
+    def _business_status(self) -> None:
+        self.ctx.push_state(BusinessStatusState(self.ctx))
 
     def _pay_advance_label(self) -> str:
         p = self.ctx.profile
@@ -348,6 +367,7 @@ def dispatch_cache_key(p) -> dict:
         "market_day": p.market_day(),
         "market_seed": p.market.seed,
         "market_state_day": p.market.day,
+        "business_status": p.business_status,
         "level": p.career.level,
         "endorsements": sorted(p.career.endorsements),
         "count": 5,
@@ -500,16 +520,18 @@ class GarageState(MenuState):
     def build_items(self) -> list[MenuItem]:
         return [
             MenuItem(self._fuel_label, self._refuel,
-                     help="Fill the tank at this region's diesel price. If cash "
-                          "is short, buy as many gallons as you can afford."),
+                     help="Fill the tank. Company drivers bill the carrier. "
+                          "Owner-operators pay this region's diesel price."),
             MenuItem(self._repair_label, self._repair,
-                     help="Restore the truck to full condition. If cash is short, "
-                          "repair as much damage as you can afford."),
+                     help="Restore the truck to full condition. Company drivers "
+                          "bill the carrier; owner-operators pay the shop."),
             MenuItem("Upgrades", self._upgrades,
-                     help="Buy performance upgrades for your truck: more torque, "
-                          "less drag, a bigger tank, stronger brakes."),
+                     help="Owner-operators can buy performance upgrades for "
+                          "their truck: more torque, less drag, a bigger tank, "
+                          "stronger brakes."),
             MenuItem("Trucks", self._trucks,
-                     help="Buy a new truck, or switch between trucks you own."),
+                     help="Owner-operators can buy a new truck, or switch "
+                          "between trucks they own."),
             MenuItem("Back", self.go_back,
                      help="Return to the terminal menu."),
         ]
@@ -525,6 +547,8 @@ class GarageState(MenuState):
         need = self._tank_gal() - p.truck_fuel_gal
         if need < 1:
             return "Fuel: tank is full"
+        if not player_pays_operating_costs(p.business_status):
+            return f"Refuel company tractor: {need:.0f} gallons, carrier billed"
         cost = self.ctx.economy.fuel_cost(self._region(), need)
         return f"Refuel {need:.0f} gallons for {cost:,.0f} dollars"
 
@@ -532,6 +556,8 @@ class GarageState(MenuState):
         p = self.ctx.profile
         if p.truck_damage_pct < 1:
             return "Repairs: truck is in top shape"
+        if not player_pays_operating_costs(p.business_status):
+            return f"Repair company tractor: {p.truck_damage_pct:.0f} percent damage, carrier billed"
         cost = self.ctx.economy.repair_cost(p.truck_damage_pct)
         return f"Repair {p.truck_damage_pct:.0f} percent damage for {cost:,.0f} dollars"
 
@@ -541,6 +567,19 @@ class GarageState(MenuState):
         need = tank - p.truck_fuel_gal
         if need < 1:
             self.ctx.say("The tank is already full.")
+            return
+        if not player_pays_operating_costs(p.business_status):
+            p.truck_fuel_gal = tank
+            p.game_hours += TERMINAL_FUEL_MIN / 60.0
+            p.hos.on_duty(TERMINAL_FUEL_MIN)
+            self.ctx.save_profile()
+            self.ctx.audio.play("vehicle/fuel_pump")
+            self.ctx.say(
+                f"Tank filled on the carrier fuel account. Fueling took "
+                f"{TERMINAL_FUEL_MIN:.0f} minutes. You still have "
+                f"{p.money:,.0f} dollars.")
+            self.ctx.award_achievement("route_refuel")
+            self.refresh()
             return
         cost = self.ctx.economy.fuel_cost(self._region(), need)
         if p.money < cost:
@@ -584,6 +623,20 @@ class GarageState(MenuState):
         p = self.ctx.profile
         if p.truck_damage_pct < 1:
             self.ctx.say("Nothing to repair.")
+            return
+        if not player_pays_operating_costs(p.business_status):
+            fixed = p.truck_damage_pct
+            p.truck_damage_pct = 0.0
+            p.game_hours += TERMINAL_REPAIR_MIN / 60.0
+            p.hos.on_duty(TERMINAL_REPAIR_MIN)
+            self.ctx.save_profile()
+            self.ctx.audio.play("ui/notify")
+            self.ctx.say(
+                f"Carrier shop repaired {fixed:.0f} percent damage. "
+                f"The repair took {TERMINAL_REPAIR_MIN:.0f} minutes and did "
+                f"not reduce your cash balance.")
+            self.ctx.award_achievement("garage_repair")
+            self.refresh()
             return
         cost = self.ctx.economy.repair_cost(p.truck_damage_pct)
         if p.money < cost:
@@ -629,6 +682,70 @@ class GarageState(MenuState):
         self.ctx.push_state(TruckShopState(self.ctx))
 
 
+class BusinessStatusState(MenuState):
+    title = "Business status"
+    intro_help = (
+        "Use up and down arrows to review the business path. Enter repeats "
+        "status, or buys into owner-operator status when qualified. Escape "
+        "returns to the terminal."
+    )
+
+    def announce_entry(self) -> None:
+        self.ctx.say(f"Business status. {business_status_summary(self.ctx.profile)} "
+                     f"{self.current_text()}")
+
+    def build_items(self) -> list[MenuItem]:
+        p = self.ctx.profile
+        items = [
+            MenuItem(self._summary_label, self._summary,
+                     help="Hear the current business status and tradeoffs.")
+        ]
+        if not is_owner_operator(p.business_status):
+            ok, _reasons = owner_operator_eligibility(p)
+            if ok:
+                items.append(MenuItem(
+                    f"Become owner-operator: {OWNER_OPERATOR_BUY_IN:,.0f} dollars",
+                    self._become_owner_operator,
+                    help="Buy your first tractor position and start running as "
+                         "a leased-on owner-operator. Higher revenue, but your "
+                         "business pays operating costs."))
+            else:
+                items.append(MenuItem(
+                    "Owner-operator path locked", self._summary,
+                    help="Hear the remaining requirements."))
+        items.append(MenuItem("Back", self.go_back))
+        return items
+
+    def _summary_label(self) -> str:
+        p = self.ctx.profile
+        return f"Current status: {status_label(p.business_status)}"
+
+    def _summary(self) -> None:
+        self.ctx.say(business_status_summary(self.ctx.profile))
+
+    def _become_owner_operator(self) -> None:
+        p = self.ctx.profile
+        ok, reasons = owner_operator_eligibility(p)
+        if not ok:
+            self.ctx.audio.play("ui/error")
+            self.ctx.say("Owner-operator path locked. " + " ".join(reasons))
+            self.refresh()
+            return
+        p.money -= OWNER_OPERATOR_BUY_IN
+        p.business_status = LEASED_OWNER_OPERATOR
+        p.dispatch_board_cache = None
+        self.ctx.save_profile()
+        self.ctx.audio.play("ui/cash")
+        self.ctx.say(
+            f"Owner-operator status unlocked. You paid "
+            f"{OWNER_OPERATOR_BUY_IN:,.0f} dollars toward your first tractor "
+            f"and kept {p.money:,.0f} dollars working capital. Future loads "
+            "pay higher gross revenue, and your business pays fuel, repairs, "
+            "maintenance reserve, insurance, trailer program, truck payment "
+            "reserve, and settlement fees.")
+        self.refresh()
+
+
 class UpgradeShopState(MenuState):
     title = "Upgrades"
     intro_help = ("Each entry speaks the upgrade, its price, and what you already "
@@ -660,6 +777,12 @@ class UpgradeShopState(MenuState):
 
     def _buy(self, upgrade: Upgrade) -> None:
         p = self.ctx.profile
+        if not is_owner_operator(p.business_status):
+            self.ctx.audio.play("ui/error")
+            self.ctx.say(
+                "Upgrades unlock when you become an owner-operator. The "
+                "company tractor stays carrier-maintained for now.")
+            return
         owned = p.upgrades.get(upgrade.key, 0)
         if owned >= upgrade.max_tier:
             self.ctx.say(f"{upgrade.label} is already fully installed.")
@@ -713,6 +836,12 @@ class TruckShopState(MenuState):
         if model.key == p.truck:
             self.ctx.say(f"You are already driving the {model.label}.")
             return
+        if not is_owner_operator(p.business_status):
+            self.ctx.audio.play("ui/error")
+            self.ctx.say(
+                "Truck purchases unlock when you become an owner-operator. "
+                "For now, the carrier assigns your company tractor.")
+            return
         if model.key not in p.owned_trucks:
             if p.money < model.price:
                 self.ctx.audio.play("ui/error")
@@ -757,15 +886,24 @@ class JobBoardState(MenuState):
         if n == 0:
             self.ctx.say("Dispatch board. No jobs available right now. Press Escape to go back.")
         else:
+            business_note = (
+                "Listed amounts are owner-operator gross revenue. "
+                if is_owner_operator(self.ctx.profile.business_status)
+                else "Listed amounts are carrier gross; your settlement pays driver wages. "
+            )
             self.ctx.say(f"Dispatch board. {n} dispatch{'es' if n != 1 else ''} available. "
-                         f"{self.ctx.profile.market.summary()} "
+                         f"{business_note}{self.ctx.profile.market.summary()} "
                          + self.current_text())
 
     def build_items(self) -> list[MenuItem]:
         items = []
         for i, job in enumerate(self.jobs):
             items.append(MenuItem(
-                job.describe(i + 1, len(self.jobs)),
+                job.describe(
+                    i + 1,
+                    len(self.jobs),
+                    pay_label=pay_label(self.ctx.profile.business_status),
+                ),
                 lambda j=job: self._accept(j),
                 help=(
                     f"Load offer from {job.origin_facility_text()} to "

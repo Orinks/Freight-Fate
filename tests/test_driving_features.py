@@ -647,7 +647,7 @@ def test_destination_exit_opens_delivery_gate():
 @pytest.mark.smoke
 def test_facility_menu_waits_for_full_stop(monkeypatch):
     from freight_fate.app import App
-    from freight_fate.states.driving import DrivingState, FacilityArrivalState, UNLOADING_MIN
+    from freight_fate.states.driving import UNLOADING_MIN, DrivingState, FacilityArrivalState
 
     app = App()
     events = []
@@ -877,6 +877,7 @@ def test_status_map_screen_describes_source_backed_poi_services():
 @pytest.mark.smoke
 def test_toll_route_delivery_settlement_records_expense(monkeypatch):
     from freight_fate.app import App
+    from freight_fate.models.business import build_business_settlement
     from freight_fate.models.jobs import CARGO_CATALOG, Job
     from freight_fate.models.profile import Profile
     from freight_fate.states.driving import ArrivalState, DrivingState
@@ -906,24 +907,31 @@ def test_toll_route_delivery_settlement_records_expense(monkeypatch):
         assert driving.trip.toll_expense == 30.0
 
         app.ctx.profile.money = 1000.0
+        expected = build_business_settlement(
+            app.ctx.profile.business_status,
+            job,
+            job.payout(driving.trip.game_minutes / 60.0, 0.0),
+            on_time=True,
+            driver_charges=0.0,
+        )
         app.ctx.push_state(ArrivalState(app.ctx, driving))
 
-        assert app.ctx.profile.money == pytest.approx(3875.0)
-        assert app.ctx.profile.career.total_earnings == pytest.approx(2875.0)
+        assert app.ctx.profile.money == pytest.approx(1000.0 + expected.net_before_advance)
+        assert app.ctx.profile.career.total_earnings == pytest.approx(expected.net_before_advance)
         text = " ".join(app.state.summary_parts)
-        assert "Gross pay 2,875 dollars" in text
+        assert "Carrier gross 2,875 dollars" in text
         assert "Carrier-paid or reimbursed charges 215 dollars" in text
         assert "tolls 30" in text
         assert "accessorials carrier-authorized unloading service 185 dollars" in text
         assert "not deducted from driver pay" in text
         assert "Driver-responsibility charges 0 dollars" in text
-        assert "Net driver pay 2,875 dollars" in text
+        assert f"Net driver pay {expected.net_before_advance:,.0f} dollars" in text
 
         assert not hasattr(app.state, "screen_index")
         assert app.state.lines()[0] == "Delivery complete"
         summary_lines = [item.text for item in app.state.items]
         assert any(line.startswith("Delivered 18 tons of electronics") for line in summary_lines)
-        assert any(line.startswith("Gross pay: 2,875 dollars") for line in summary_lines)
+        assert any(line.startswith("Carrier gross: 2,875 dollars") for line in summary_lines)
         assert any("Carrier-paid or reimbursed charges" in line for line in summary_lines)
         assert any(line.startswith("Route: New York to Philadelphia") for line in summary_lines)
 

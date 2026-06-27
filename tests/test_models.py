@@ -3,6 +3,7 @@
 import json
 
 from freight_fate.models import Career, Economy, JobBoard, Profile
+from freight_fate.models.business import COMPANY_DRIVER, LEASED_OWNER_OPERATOR
 from freight_fate.models.career import level_for_xp
 from freight_fate.models.jobs import CARGO_CATALOG, plan_hos
 from freight_fate.models.profile import SIGNATURE_FIELD, ProfileIntegrityError
@@ -178,10 +179,12 @@ def test_profile_roundtrip():
     p = Profile(name="Roundtrip Test")
     p.money = 1234.5
     p.career.xp = 2600
+    p.business_status = LEASED_OWNER_OPERATOR
     path = p.save()
     loaded = Profile.load(path)
     assert loaded.money == 1234.5
     assert loaded.career.level == 3
+    assert loaded.business_status == LEASED_OWNER_OPERATOR
     assert loaded.name == "Roundtrip Test"
 
 
@@ -189,9 +192,22 @@ def test_profile_save_is_atomic_and_versioned():
     p = Profile(name="Atomic")
     path = p.save()
     data = json.loads(path.read_text())
-    assert data["version"] == 4
+    assert data["version"] == 5
     assert SIGNATURE_FIELD in data
     assert not path.with_suffix(".json.tmp").exists()
+
+
+def test_old_save_without_business_status_loads_as_company_driver():
+    p = Profile(name="Old Business")
+    data = p.to_dict()
+    data.pop("business_status")
+    data.pop(SIGNATURE_FIELD)
+    path = p.path
+    path.write_text(json.dumps(data))
+
+    loaded = Profile.load(path)
+
+    assert loaded.business_status == COMPANY_DRIVER
 
 
 def test_profile_ignores_unknown_fields():

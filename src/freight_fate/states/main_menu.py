@@ -602,7 +602,7 @@ class HomeCityState(MenuState):
         loaded_over = (f"Loaded over existing driver named {name}. "
                        if name.lower() in existing else "")
         self.ctx.say(
-            f"{loaded_over}Welcome aboard, {name}. Your truck is parked at "
+            f"{loaded_over}Welcome aboard, {name}. Your company tractor is parked at "
             f"{terminal.spoken_name} in the {city} service area with "
             f"{profile.money:,.0f} dollars and a full tank. "
             "Your first stop is the dispatch board.", interrupt=True)
@@ -610,13 +610,15 @@ class HomeCityState(MenuState):
 
 HELP_PAGES = [
     ("The goal", [
-        "You are an owner-operator truck driver building a freight career.",
+        "You are a company driver building toward owner-operator independence.",
         "Start from your company terminal or yard in a metro service area.",
         "Each city stands for a wider freight area with many possible shippers.",
         "Accept freight from a specific shipper facility, deadhead to that pickup,",
         "check in and load the trailer there, then get your route to the destination,",
         "and deliver cargo across the country, on time and intact.",
         "Earn money and experience, level up, and unlock better freight.",
+        "When you qualify, Business status lets you buy your first tractor",
+        "and run leased-on as an owner-operator.",
     ]),
     ("Menus", [
         "All menus use Up and Down arrows, Enter to select, Escape to go back.",
@@ -748,9 +750,11 @@ HELP_PAGES = [
         "T still opens the menu if you simply stop on the highway at one.",
         "If you miss a stop, slow down, back up carefully to it, stop, then press T.",
         "Fuel prices vary by region.",
-        "Running out of fuel means an expensive roadside rescue.",
+        "Company-driver fuel and carrier repairs are billed to the carrier.",
+        "Owner-operators pay fuel, repairs, and roadside rescue from the business.",
+        "Running out of fuel means roadside rescue and lost time.",
         "If collisions leave the truck badly damaged, open the pause menu",
-        "and call a roadside mechanic for a pricey field repair.",
+        "and call a roadside mechanic for a field repair.",
     ]),
     ("Hours and rest", [
         "The ELD tracks driving, on-duty-not-driving, off-duty, and sleeper time.",
@@ -781,6 +785,11 @@ HELP_PAGES = [
     ]),
     ("Deliveries and money", [
         "The dispatch board lists freight for the current metro service area.",
+        "As a company driver, listed pay is carrier gross. Your settlement pays",
+        "driver wages and bonuses, and the carrier handles tractor costs.",
+        "As an owner-operator, listed pay is gross revenue. Your business pays",
+        "fuel, repairs, maintenance reserve, insurance, trailer program,",
+        "truck payment reserve, and settlement fees.",
         "A metro can contain ports, rail and intermodal ramps, air cargo areas,",
         "parcel hubs, grocery distribution centers, dry warehouses, cold storage,",
         "food processors, farms and grain elevators, manufacturing plants,",
@@ -806,7 +815,8 @@ HELP_PAGES = [
         "Deliver before the deadline for a bonus. Late or damaged cargo pays less.",
         "At the destination facility, stop, then dock and deliver.",
         "Delivery settlement reports gross pay, carrier-paid or reimbursed charges,",
-        "driver-responsibility charges, and net driver pay.",
+        "business status, business costs, driver-responsibility",
+        "charges, and net driver pay.",
         "After settlement, the truck is parked at the destination service-area terminal.",
         "Fragile cargo, like electronics and fresh food, punishes rough driving.",
         "Repair your truck in the terminal garage. Damage reduces engine power.",
@@ -828,10 +838,12 @@ HELP_PAGES = [
     ]),
     ("The garage", [
         "Every terminal garage refuels and repairs your truck.",
-        "If you cannot afford a full tank or full repair, the garage",
-        "buys as much fuel or repair work as your money covers.",
+        "Company drivers bill routine fuel and repairs to the carrier.",
+        "Owner-operators pay the shop. If cash is short, the garage buys as much",
+        "fuel or repair work as your money covers toward a full tank or full repair.",
         "The Upgrades menu sells permanent improvements: an engine tune,",
         "an aerodynamic kit, a long-range tank, and reinforced brakes.",
+        "Upgrades and truck purchases unlock once you become an owner-operator.",
         "Engine tune gives more pulling power for heavy freight, hills, and mountain grades.",
         "Aerodynamic kit burns less fuel at highway speed; same tank, fewer gallons per mile.",
         "Long-range tank carries fifty more gallons; more fuel onboard, not better efficiency.",

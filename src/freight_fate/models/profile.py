@@ -31,10 +31,11 @@ from pathlib import Path
 
 from ..sim.hos import DutyLog, HosClock
 from ..updater import is_frozen
+from .business import COMPANY_DRIVER
 from .career import Career
 from .market import Market
 
-SAVE_VERSION = 4
+SAVE_VERSION = 5
 STARTING_MONEY = 5_000.0
 DEFAULT_CITY = "Chicago"
 SIGNATURE_FIELD = "_signature"
@@ -279,6 +280,7 @@ class Profile:
     fatigue: float = 0.0             # 0 fresh .. 100 exhausted
     pay_advance: float = 0.0         # outstanding dispatcher advance owed, repaid at delivery
     pay_advance_used_for_load: bool = False
+    business_status: str = COMPANY_DRIVER  # company driver, then leased-on owner-operator
     career: Career = field(default_factory=Career)
     market: Market = field(default_factory=Market)
     hos: HosClock = field(default_factory=HosClock)  # hours-of-service shift clock

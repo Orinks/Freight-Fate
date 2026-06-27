@@ -2,6 +2,12 @@
 
 import pytest
 
+from freight_fate.models.business import (
+    COMPANY_DRIVER,
+    LEASED_OWNER_OPERATOR,
+    build_business_settlement,
+)
+
 
 def _job(cargo_key="electronics", *, origin="New York", destination="Philadelphia",
          destination_type="dry_warehouse", pay=2500.0, deadline=12.0):
@@ -23,12 +29,14 @@ def _job(cargo_key="electronics", *, origin="New York", destination="Philadelphi
 
 
 def _settle(app, job, route_cities, *, money=1000.0, speeding_strikes=0,
-            pay_advance=0.0, pay_advance_used_for_load=False):
+            pay_advance=0.0, pay_advance_used_for_load=False,
+            business_status=COMPANY_DRIVER):
     from freight_fate.models.profile import Profile
     from freight_fate.states.driving import ArrivalState, DrivingState
 
     app.ctx.profile = Profile(name="Settlement Audit", current_city=job.origin)
     app.ctx.profile.money = money
+    app.ctx.profile.business_status = business_status
     app.ctx.profile.pay_advance = pay_advance
     app.ctx.profile.pay_advance_used_for_load = pay_advance_used_for_load
     route = app.ctx.world.route_from_cities(route_cities)
@@ -49,10 +57,12 @@ def test_carrier_paid_charges_do_not_increase_player_progression():
         job = _job(destination_type="retail_distribution")
         gross, summary = _settle(app, job, ["New York", "Philadelphia"], money=1000.0)
         carrier_charges = 30.0 + 185.0
+        expected = build_business_settlement(
+            COMPANY_DRIVER, job, gross, on_time=True, driver_charges=0.0)
 
         assert f"Carrier-paid or reimbursed charges {carrier_charges:,.0f} dollars" in summary
-        assert app.ctx.profile.money == pytest.approx(1000.0 + gross)
-        assert app.ctx.profile.career.total_earnings == pytest.approx(gross)
+        assert app.ctx.profile.money == pytest.approx(1000.0 + expected.net_before_advance)
+        assert app.ctx.profile.career.total_earnings == pytest.approx(expected.net_before_advance)
         assert app.ctx.profile.career.xp == pytest.approx(job.distance_mi * 1.2)
         assert app.ctx.profile.career.reputation == pytest.approx(52.0)
     finally:
@@ -72,11 +82,38 @@ def test_driver_responsibility_charges_reduce_driver_pay_but_not_carrier_charges
             money=1000.0,
             speeding_strikes=2,
         )
+        expected = build_business_settlement(
+            COMPANY_DRIVER, job, gross, on_time=True, driver_charges=160.0)
 
         assert "Carrier-paid or reimbursed charges 215 dollars" in summary
         assert "Driver-responsibility charges 160 dollars" in summary
-        assert app.ctx.profile.money == pytest.approx(1000.0 + gross - 160.0)
-        assert app.ctx.profile.career.total_earnings == pytest.approx(gross - 160.0)
+        assert app.ctx.profile.money == pytest.approx(1000.0 + expected.net_before_advance)
+        assert app.ctx.profile.career.total_earnings == pytest.approx(expected.net_before_advance)
+    finally:
+        app.shutdown()
+
+
+def test_owner_operator_settlement_deducts_business_costs():
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        job = _job(destination_type="retail_distribution")
+        gross, summary = _settle(
+            app,
+            job,
+            ["New York", "Philadelphia"],
+            money=1000.0,
+            business_status=LEASED_OWNER_OPERATOR,
+        )
+        expected = build_business_settlement(
+            LEASED_OWNER_OPERATOR, job, gross, on_time=True, driver_charges=0.0)
+
+        assert "Business status: leased-on owner-operator" in summary
+        assert "Owner-operator business costs" in summary
+        assert expected.business_charge_total > 0
+        assert app.ctx.profile.money == pytest.approx(1000.0 + expected.net_before_advance)
+        assert app.ctx.profile.career.total_earnings == pytest.approx(expected.net_before_advance)
     finally:
         app.shutdown()
 
@@ -94,13 +131,17 @@ def test_pay_advance_is_repaid_from_settlement():
             money=-200.0,
             pay_advance=500.0,
         )
+        expected = build_business_settlement(
+            COMPANY_DRIVER, job, gross, on_time=True, driver_charges=0.0)
 
         assert "Pay advance repaid from this settlement: 500 dollars" in summary
         assert app.ctx.profile.pay_advance == pytest.approx(0.0)
         assert app.ctx.profile.pay_advance_used_for_load is False
         # Net pay is reduced by the repaid advance; the bank reflects it.
-        assert app.ctx.profile.money == pytest.approx(-200.0 + gross - 500.0)
-        assert app.ctx.profile.career.total_earnings == pytest.approx(gross - 500.0)
+        assert app.ctx.profile.money == pytest.approx(
+            -200.0 + expected.net_before_advance - 500.0)
+        assert app.ctx.profile.career.total_earnings == pytest.approx(
+            expected.net_before_advance - 500.0)
     finally:
         app.shutdown()
 
@@ -122,9 +163,11 @@ def test_pay_advance_repayment_never_drives_net_pay_negative():
             pay_advance=1500.0,
         )
 
-        repaid = min(1500.0, gross)
+        expected = build_business_settlement(
+            COMPANY_DRIVER, job, gross, on_time=True, driver_charges=0.0)
+        repaid = min(1500.0, expected.net_before_advance)
         assert app.ctx.profile.pay_advance == pytest.approx(1500.0 - repaid)
-        assert app.ctx.profile.money == pytest.approx(gross - repaid)
+        assert app.ctx.profile.money == pytest.approx(expected.net_before_advance - repaid)
         assert app.ctx.profile.money >= 0.0
         assert "still outstanding" in summary
     finally:
@@ -187,9 +230,11 @@ def test_restored_toll_charges_do_not_duplicate_or_pay_out():
         assert not [event for event in events if event.kind == TripEventKind.TOLL_CHARGED]
 
         gross = job.payout(resumed.trip.game_minutes / 60.0, 0.0)
+        expected = build_business_settlement(
+            COMPANY_DRIVER, job, gross, on_time=True, driver_charges=0.0)
         app.ctx.push_state(ArrivalState(app.ctx, resumed))
-        assert app.ctx.profile.money == pytest.approx(1000.0 + gross)
-        assert app.ctx.profile.career.total_earnings == pytest.approx(gross)
+        assert app.ctx.profile.money == pytest.approx(1000.0 + expected.net_before_advance)
+        assert app.ctx.profile.career.total_earnings == pytest.approx(expected.net_before_advance)
     finally:
         app.shutdown()
 
@@ -203,11 +248,13 @@ def test_toll_route_does_not_pay_more_than_equal_non_toll_route():
         non_toll_job = _job(origin="Chicago", destination="Indianapolis")
 
         toll_gross, toll_summary = _settle(
-            app, toll_job, ["New York", "Philadelphia"], money=1000.0)
+            app, toll_job, ["New York", "Philadelphia"], money=1000.0,
+            business_status=LEASED_OWNER_OPERATOR)
         toll_money = app.ctx.profile.money
         toll_earnings = app.ctx.profile.career.total_earnings
         non_toll_gross, non_toll_summary = _settle(
-            app, non_toll_job, ["Chicago", "Indianapolis"], money=1000.0)
+            app, non_toll_job, ["Chicago", "Indianapolis"], money=1000.0,
+            business_status=LEASED_OWNER_OPERATOR)
 
         assert toll_gross == pytest.approx(non_toll_gross)
         assert "Carrier-paid or reimbursed charges 30 dollars" in toll_summary
