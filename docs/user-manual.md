@@ -485,16 +485,17 @@ Use these keys when you need status without leaving the road:
 | V | Weather and forecast. |
 | M | Toggle the in-cab radio. |
 | [ / ] | Tune the radio down or up. |
-| Y | Speak radio station, source, volume, and streamer-safe status. |
+| Y | Speak radio station, source, signal or fallback state, volume, and streamer-safe status. |
 | Tab | Grouped driving status screens. |
 
-Tab opens the Driving status menu. It has three review screens:
+Tab opens the Driving status menu. It has five review screens:
 
 | Screen | Information |
 | --- | --- |
 | Route | Current route status lines from the active drive. |
 | Driver | Driver name, money, load, objective, truck fuel and damage, transmission, fatigue, hours, and deadline. |
 | Map | Route cities, highways, progress, next guidance, upcoming stops, map points, and toll exposure. |
+| Radio | Current station, stream-safety state, approximate reception position, and currently receivable stations. |
 | Logbook | Today's duty totals and recent Record of Duty Status entries. |
 
 Inside a status screen, Up and Down move line by line, Enter repeats the current
@@ -582,8 +583,8 @@ Audio settings include:
 | Engine sounds volume | Engine start, shutdown, and running engine sounds. |
 | Music volume | Menu and facility background music volume. |
 | In-cab radio volume | Driving radio music volume. It defaults lower than speech and safety cues. |
-| Radio streamer-safe mode | Keeps radio on built-in safe stations and skips real public streams. |
-| Radio real public streams | Opt-in catalog access for real public stream stations. Streamer-safe mode must also be off before they can play. |
+| Radio streamer-safe mode | Keeps radio on built-in safe stations and hides real public streams. |
+| Radio real public streams | Opt-in catalog access for real public stations, including AFN choices. Streamer-safe mode must also be off before they appear. |
 | Menu and UI sounds volume | Menu movement, selection, warning, and cash sounds. |
 
 Speech and weather settings include:
@@ -629,10 +630,16 @@ Audio is layered by category:
 
 Speech, gameplay cues, and warnings are the primary access path. Radio, music,
 and ambience sit behind those cues and can be adjusted separately. The in-cab
-radio defaults to built-in Freight Fate music and streamer-safe mode. Real public
-stream stations are skipped unless you turn on real streams and turn off
-streamer-safe mode; if a station cannot play, the radio falls back safely instead
-of blocking the drive.
+radio defaults to built-in Freight Fate music and streamer-safe mode. Bracket
+tuning moves through stations the truck can currently receive from the checked-in
+catalog, using the route's approximate position and each station's range. The
+Radio status screen lists the currently receivable stations.
+
+Real public stream stations, including AFN choices, are hidden unless you turn on
+real streams and turn off streamer-safe mode. Their catalog entries include
+public stream metadata, but live external playback is still skipped in this build
+until the stream backend is added. If a selected station cannot play, the radio
+falls back safely instead of blocking the drive.
 
 Useful accessibility patterns:
 
@@ -641,6 +648,8 @@ Useful accessibility patterns:
   reminders.
 - Use the status menu when you want reviewable lines instead of one long status
   message.
+- Use the Radio status screen when you want the current station list before
+  tuning.
 - Lower music or ambience if speech or route cues are hard to follow.
 - Treat route stop menus as data-backed: if a stop does not list fuel, repair,
   or sleep, that stop is not currently documented as supporting that action.

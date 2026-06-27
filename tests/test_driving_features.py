@@ -243,6 +243,7 @@ def test_how_to_play_documents_new_gameplay_systems():
     assert "will not engage on low-speed local roads" in help_text
     assert "in-cab radio" in help_text
     assert "streamer-safe status" in help_text
+    assert "receivable stations" in help_text
 
 
 def test_dispatch_board_keeps_route_planning_out_of_load_offer():
@@ -383,6 +384,12 @@ def test_air_brake_help_and_status_are_spoken(monkeypatch):
         driver_lines = [item.text for item in app.state.items]
         assert any(line.startswith("Driver:") for line in driver_lines)
         assert any(line.startswith("Hours:") for line in driver_lines)
+
+        app.state.handle_event(key_event(pygame.K_ESCAPE))
+        open_status_screen(app, "Radio")
+        radio_lines = [item.text for item in app.state.items]
+        assert any(line.startswith("Radio on.") for line in radio_lines)
+        assert any(line.startswith("Receivable stations:") for line in radio_lines)
 
         app.state.handle_event(key_event(pygame.K_ESCAPE))
         open_status_screen(app, "Map")

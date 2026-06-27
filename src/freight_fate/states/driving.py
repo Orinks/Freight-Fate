@@ -36,6 +36,7 @@ from ..radio import (
     RadioPlaybackError,
     RadioState,
     RadioStation,
+    truck_position,
 )
 from ..sim import hos
 from ..sim.hos import HosClock, clock_text, is_night, time_of_day
@@ -148,7 +149,7 @@ class _DrivingRadioBackend:
 
     def play_station(self, station: RadioStation, volume: float) -> None:
         if station.real_stream:
-            raise RadioPlaybackError("real stream playback is not available")
+            raise RadioPlaybackError("external stream playback is not available")
         self.driving._apply_radio_volume()
         if station.fallback:
             self.driving.ctx.audio.stop_music(600)
@@ -605,6 +606,8 @@ class DrivingState(State):
                 "C also speaks the date and season. "
                 "M toggles the in-cab radio, left and right brackets tune it, "
                 "and Y speaks radio station, volume, and streamer-safe status. "
+                "The Tab status menu includes a radio screen with the currently "
+                "receivable stations. "
                 "E starts the engine, and stops it only below 5 miles per hour. "
                 "Air pressure must build before the truck can move. "
                 "Press P to release or set the parking brake; if pressure is "
@@ -1004,6 +1007,8 @@ class DrivingState(State):
     def _sync_radio_settings(self) -> None:
         station_before = self.radio.station_id
         self.radio.apply_settings(self.ctx.settings)
+        self.radio.update_position(
+            truck_position(self.route, self.trip.position_mi, self.ctx.world))
         self.radio.current_station()
         if self.radio.station_id != station_before:
             self.radio.write_settings(self.ctx.settings)
@@ -3198,6 +3203,7 @@ class DrivingStatusState(MenuState):
         ("Route", "route"),
         ("Driver", "driver"),
         ("Map", "map"),
+        ("Radio", "radio"),
         ("Logbook", "logbook"),
     )
 
@@ -3234,7 +3240,13 @@ class DrivingStatusScreenState(MenuState):
         "Use up and down arrows to review each line. Enter repeats the current "
         "line. Escape goes back to the status screens."
     )
-    TITLES = {"route": "Route", "driver": "Driver", "map": "Map", "logbook": "Logbook"}
+    TITLES = {
+        "route": "Route",
+        "driver": "Driver",
+        "map": "Map",
+        "radio": "Radio",
+        "logbook": "Logbook",
+    }
 
     def __init__(self, ctx, driving: DrivingState, screen: str) -> None:
         super().__init__(ctx)
@@ -3263,6 +3275,8 @@ class DrivingStatusScreenState(MenuState):
             return self._driver_lines()
         if self.screen == "map":
             return self._map_lines()
+        if self.screen == "radio":
+            return self._radio_lines()
         if self.screen == "logbook":
             from .logbook import logbook_lines
 
@@ -3342,6 +3356,26 @@ class DrivingStatusScreenState(MenuState):
             lines.append(
                 f"Estimated carrier-paid toll exposure: {route.estimated_tolls:,.0f} dollars."
             )
+        return lines
+
+    def _radio_lines(self) -> list[str]:
+        d = self.driving
+        d._sync_radio_settings()
+        settings = self.ctx.settings
+        position = d.radio.position
+        lines = [
+            d.radio.status_text(),
+            (
+                "Real public streams: on, streamer-safe mode off"
+                if settings.radio_real_streams and not settings.radio_streamer_safe
+                else "Real public streams are hidden unless real streams are on and streamer-safe mode is off."
+            ),
+            "Tune with left and right brackets. Press M to toggle radio from the cab.",
+        ]
+        if position is not None:
+            lines.append(f"Approximate truck radio position: {position[0]:.2f}, {position[1]:.2f}.")
+        lines.append("Receivable stations:")
+        lines.extend(d.radio.station_list_lines(limit=16))
         return lines
 
 

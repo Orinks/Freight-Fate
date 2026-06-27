@@ -584,16 +584,22 @@ always-available fallback when you are out of range of anything local. A
 community suggestion; the right kind of immersion for long hauls and a natural
 fit for an audio-first game.
 
-- [x] **Safe in-cab radio foundation.** Shipped: driving now has keyboard
-  radio controls (M toggles, brackets tune, Y speaks status), persistent radio
+- [x] **Practical in-cab radio.** Shipped: driving now has keyboard radio
+  controls (M toggles, brackets tune, Y speaks status), persistent radio
   enabled/station/volume settings, a dedicated lower radio volume, streamer-safe
   mode on by default, real public streams gated behind explicit opt-in, and
-  graceful fallback when a selected station/backend cannot play. The first safe
-  stations use built-in Freight Fate music or silence, so no live stream is
-  required for normal play or tests. Remaining: full local FM station catalog,
-  FCC-derived range/signal model, favorites/station list UI, audible static and
-  signal fades, and live public-stream playback once the catalog and opt-in UX
-  are ready.
+  graceful fallback when a selected station/backend cannot play. The checked-in
+  JSON catalog includes safe built-in stations, AFN Pacific, multiple AFN Go
+  choices (Freedom, Gravity, Country, The Voice, and Okinawa Eagle), and a curated
+  regional public-station subset across the current map. The truck estimates its
+  lat/lon from checked-in route geometry and city coordinates, bracket tuning
+  walks only the currently receivable stations, and the Tab status menu has a
+  Radio screen with signal/fallback/source/volume details. External live streams
+  are still metadata-only until a non-blocking stream backend is added; opt-in
+  stations fall back safely instead of hanging or crashing. Remaining: FCC-derived
+  contour/range refresh, station favorites/presets beyond the review list,
+  audible static/signal fades, and actual external stream playback once the
+  backend can do it without stealing priority from speech and safety cues.
 
 - **Direction (decided):** use real stations via their public internet stream
   URLs (a friend has a curated list). The game is free and non-commercial, and

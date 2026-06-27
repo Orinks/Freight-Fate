@@ -6,6 +6,9 @@ from freight_fate.radio import (
     SAFE_ROUTE_PLAYLIST,
     RadioPlaybackError,
     RadioState,
+    estimate_signal,
+    load_radio_catalog,
+    truck_position,
 )
 from freight_fate.settings import Settings
 
@@ -25,6 +28,34 @@ class RecordingBackend:
         self.stopped += 1
 
 
+def station_ids(stations):
+    return [station.id for station in stations]
+
+
+def test_catalog_loads_structured_regional_and_afn_stations():
+    catalog = load_radio_catalog()
+    ids = station_ids(catalog)
+    afn = [station for station in catalog if station.source_type == "afn"]
+    locals_ = [station for station in catalog if station.source_type == "local"]
+
+    assert len(catalog) >= 20
+    assert SAFE_ROUTE_PLAYLIST in ids
+    assert SAFE_FALLBACK_STATION_ID in ids
+    assert len(afn) >= 5
+    assert {
+        "afn-pacific",
+        "afn-freedom",
+        "afn-gravity",
+        "afn-country",
+        "afn-the-voice",
+    } <= set(ids)
+    assert len({station.region for station in locals_}) >= 7
+    assert all(station.stream_url for station in afn + locals_)
+    assert all(station.stream_format for station in afn + locals_)
+    assert all(station.lat is not None and station.lon is not None for station in locals_)
+    assert all(station.range_miles > 0 for station in locals_)
+
+
 def test_radio_defaults_to_streamer_safe_builtin_station():
     radio = RadioState()
 
@@ -33,17 +64,20 @@ def test_radio_defaults_to_streamer_safe_builtin_station():
     assert radio.volume == 0.25
     assert radio.streamer_safe is True
     assert radio.real_streams_enabled is False
-    assert "afn-pacific" not in [station.id for station in radio.available_stations()]
+    assert not any(station.source_type == "afn" for station in radio.available_stations())
     assert "streamer-safe" in radio.status_text()
+    assert "always available" in radio.status_text()
 
 
 def test_real_stream_station_requires_opt_in_and_streamer_safe_off():
     radio = RadioState(real_streams_enabled=True, streamer_safe=True)
-    assert "afn-pacific" not in [station.id for station in radio.available_stations()]
+    assert not any(station.source_type == "afn" for station in radio.available_stations())
 
     radio.streamer_safe = False
 
-    assert "afn-pacific" in [station.id for station in radio.available_stations()]
+    assert any(station.id == "afn-gravity" for station in radio.available_stations())
+    assert all(not station.safe_for_streaming for station in radio.available_stations()
+               if station.real_stream)
 
 
 def test_radio_persists_enabled_station_and_volume():
@@ -65,14 +99,58 @@ def test_radio_persists_enabled_station_and_volume():
     assert radio.real_streams_enabled is True
 
 
+def test_regional_station_filtering_uses_simulated_truck_position():
+    radio = RadioState(
+        real_streams_enabled=True,
+        streamer_safe=False,
+        position=(47.61, -122.33),
+    )
+    ids = station_ids(radio.available_stations())
+
+    assert "kexp-seattle" in ids
+    assert "wbur-boston" not in ids
+    kexp = next(station for station in radio.available_stations() if station.id == "kexp-seattle")
+    assert estimate_signal(kexp, radio.position).signal_label == "strong signal"
+
+
+def test_tuning_uses_receivable_stations_not_global_catalog():
+    radio = RadioState(
+        real_streams_enabled=True,
+        streamer_safe=False,
+        position=(47.61, -122.33),
+    )
+    backend = RecordingBackend()
+
+    seen = []
+    for _ in range(4):
+        action = radio.tune(1, backend)
+        seen.append(action.station.id)
+
+    assert "kexp-seattle" in seen
+    assert "wbur-boston" not in seen
+
+
+def test_no_regional_signal_still_has_safe_and_afn_fallback_choices():
+    radio = RadioState(
+        real_streams_enabled=True,
+        streamer_safe=False,
+        position=(44.0, -101.0),
+    )
+    stations = radio.available_stations()
+
+    assert any(station.id == SAFE_ROUTE_PLAYLIST for station in stations)
+    assert any(station.source_type == "afn" for station in stations)
+    assert not any(station.source_type == "local" for station in stations)
+
+
 def test_radio_falls_back_when_backend_cannot_play_selected_station():
     radio = RadioState(
         enabled=True,
-        station_id="afn-pacific",
+        station_id="afn-freedom",
         real_streams_enabled=True,
         streamer_safe=False,
     )
-    backend = RecordingBackend(fail_ids={"afn-pacific"})
+    backend = RecordingBackend(fail_ids={"afn-freedom"})
 
     action = radio.play(backend)
 
@@ -81,17 +159,35 @@ def test_radio_falls_back_when_backend_cannot_play_selected_station():
     assert radio.station_id == SAFE_FALLBACK_STATION_ID
     assert backend.played == [(SAFE_FALLBACK_STATION_ID, 0.25)]
     assert "unavailable" in action.message
+    assert "fallback" in action.message
 
 
-def test_tuning_skips_real_streams_until_they_are_safe_to_offer():
-    radio = RadioState()
-    backend = RecordingBackend()
+def test_spoken_status_includes_signal_source_safety_and_volume():
+    radio = RadioState(
+        real_streams_enabled=True,
+        streamer_safe=False,
+        station_id="kexp-seattle",
+        position=(47.61, -122.33),
+        volume=0.35,
+    )
 
-    action = radio.tune(1, backend)
+    text = radio.status_text()
 
-    assert action.station.real_stream is False
-    assert action.station.safe_for_streaming is True
-    assert "afn-pacific" not in [played[0] for played in backend.played]
+    assert "KEXP" in text
+    assert "strong signal" in text
+    assert "Volume 35 percent" in text
+    assert "streamer-safe off" in text
+    assert "Source:" in text
+
+
+def test_truck_position_uses_route_geometry(world):
+    route = world.route_from_cities(["Seattle", "Portland"])
+    position = truck_position(route, route.miles / 2, world)
+
+    assert position is not None
+    lat, lon = position
+    assert 44.0 <= lat <= 48.5
+    assert -124.0 <= lon <= -121.0
 
 
 @pytest.mark.parametrize("station", DEFAULT_RADIO_CATALOG)
