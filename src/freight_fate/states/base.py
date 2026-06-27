@@ -19,6 +19,17 @@ if TYPE_CHECKING:
     from ..app import GameContext
 
 
+def end_sentence(text: str) -> str:
+    """A spoken fragment ending in exactly one sentence mark, never two.
+
+    Menu/list labels are sometimes plain ("Sleep 10 hours") and sometimes whole
+    sentences that already end in a period (settlement summary lines). Appending
+    "." unconditionally produces ".." which a screen reader voices as "dot dot",
+    so add the period only when one is not already there."""
+    text = text.rstrip()
+    return text if text.endswith((".", "!", "?", ":")) else text + "."
+
+
 class State:
     """Base class for all game screens."""
 
@@ -87,7 +98,7 @@ class MenuState(State):
         self.announce_entry()
 
     def announce_entry(self) -> None:
-        self.ctx.say(f"{self.title}. {self.current_text()}")
+        self.ctx.say(f"{end_sentence(self.title)} {self.current_text()}")
 
     def refresh(self, keep_index: bool = True) -> None:
         old = self.index
@@ -97,7 +108,8 @@ class MenuState(State):
     def current_text(self) -> str:
         if not self.items:
             return "No options available."
-        return f"{self.items[self.index].text}. {self.index + 1} of {len(self.items)}."
+        return (f"{end_sentence(self.items[self.index].text)} "
+                f"{self.index + 1} of {len(self.items)}.")
 
     def speak_current(self) -> None:
         self.ctx.say(self.current_text())
