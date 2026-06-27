@@ -615,13 +615,23 @@ def test_hos_off_still_allows_fatigue_emergency_shoulder_sleep(monkeypatch):
 
         park_away_from_stops(driving, after_stop=stop)
         driving.truck.velocity_mps = 0.0
+        # Stopped with no POI nearby: shoulder sleep is always an option now,
+        # even rested and with HOS enforcement off -- you can choose to rest.
         app.ctx.profile.fatigue = 20.0
-        assert driving.emergency_shoulder_sleep_reason() is None
+        reason = driving.emergency_shoulder_sleep_reason()
+        assert reason is not None
+        assert "pull over and rest" in reason
 
+        # Severe fatigue escalates the wording but it was already available.
         app.ctx.profile.fatigue = hos.FATIGUE_SEVERE
         reason = driving.emergency_shoulder_sleep_reason()
         assert reason is not None
         assert "Fatigue is severe" in reason
+
+        # Moving, it is not offered -- you cannot sleep while rolling.
+        driving.truck.velocity_mps = 12.0
+        assert driving.emergency_shoulder_sleep_reason() is None
+        driving.truck.velocity_mps = 0.0   # back to a stop for the pause-menu check
 
         driving.handle_event(key_event(pygame.K_ESCAPE))
         assert isinstance(app.state, PauseMenuState)
@@ -637,31 +647,32 @@ def test_hos_off_still_allows_fatigue_emergency_shoulder_sleep(monkeypatch):
 
 
 @pytest.mark.smoke
-def test_emergency_lot_sleep_offered_at_break_only_stop_when_out_of_hours(monkeypatch):
+def test_break_only_stop_always_offers_emergency_lot_sleep(monkeypatch):
     from freight_fate.app import App
     from freight_fate.states.driving import RestStopState
 
     app = App()
     try:
-        app.ctx.settings.hos_mode = "realistic"
-        driving = start_drive(app)
-        assert not driving.needs_emergency_sleep()        # fresh hours
-        driving.hos.drive(15 * 60)                         # blow past the limit
-        assert driving.hos.in_violation("realistic")
-        assert driving.needs_emergency_sleep()
-        app.ctx.settings.hos_mode = "debug_off"            # enforcement off
-        assert not driving.needs_emergency_sleep()
-        app.ctx.settings.hos_mode = "realistic"
+        driving = start_drive(app)  # fresh hours, not tired
 
-        # A break/fuel stop (no sleeper) now offers the emergency lot sleep.
-        stop = SimpleNamespace(
+        # A break/fuel stop (no sleeper) still offers a lot sleep -- you can
+        # always choose to sleep, even with hours to spare.
+        break_only = SimpleNamespace(
             name="Roadside Rest", at_mi=driving.trip.position_mi, type="rest_area",
             actions=("break", "fuel"), services=(), parking="day_only",
             exit_label="", spoken_name="Roadside Rest", parking_text="day parking")
-        menu = RestStopState(app.ctx, driving, stop)
-        labels = [item.text for item in menu.build_items()]
+        labels = [i.text for i in RestStopState(app.ctx, driving, break_only).build_items()]
         assert "Emergency sleep in the lot" in labels
         assert "Sleep 10 hours" not in labels
+
+        # A sleeper stop offers the full sleep instead, not the lot fallback.
+        sleeper = SimpleNamespace(
+            name="Big Truck Stop", at_mi=driving.trip.position_mi, type="truck_stop",
+            actions=("break", "fuel", "sleep"), services=(), parking="overnight",
+            exit_label="", spoken_name="Big Truck Stop", parking_text="overnight parking")
+        labels = [i.text for i in RestStopState(app.ctx, driving, sleeper).build_items()]
+        assert "Sleep 10 hours" in labels
+        assert "Emergency sleep in the lot" not in labels
     finally:
         app.shutdown()
 

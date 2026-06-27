@@ -4,14 +4,16 @@
 
 ### Fixed
 
-- **Hours of service no longer strands you with no legal stop.** When the
-  duty/sleep clock is running out and no route stop is reachable in time, the
-  shoulder-sleep option now opens up to two hours before the limit (you start
-  hunting for parking early, like a real driver) instead of only in the last
-  half hour. The "no stop visible" warning also tells you the shoulder-sleep out
-  exists, and a break/fuel-only stop you reach now offers an emergency sleep in
-  the lot -- a legal 10-hour reset with poor, cramped rest -- when you are out
-  of hours, so you are never forced into a violation with nowhere to go.
+- **You can always find somewhere to sleep.** A sleep option is now reachable
+  at any time, so the hours-of-service clock can never strand you with nowhere
+  legal to stop. Stopped on the open road with no route stop nearby, you can
+  pull over and sleep on the shoulder (poor rest, possible parking ticket);
+  the wording escalates when an HOS limit is closing in with no reachable stop.
+  Any break/fuel stop you reach -- even one with no sleeper facility -- now
+  offers an emergency sleep in the lot: a legal 10-hour reset with poor, cramped
+  rest. The "no stop visible" warning also names the shoulder-sleep out, so it
+  is a plan rather than a panic. (Proper sleeper stops still give the best,
+  fully-rested 10-hour sleep.)
 - **The automatic no longer gears up while you brake.** Braking from speed could
   trigger an upshift because the box only watched engine RPM; it now holds the
   gear for engine braking and downshifts cleanly as you slow to a stop.

@@ -787,52 +787,35 @@ class DrivingState(State):
         return best
 
     def emergency_shoulder_sleep_reason(self) -> str | None:
-        """Why shoulder sleep is available now, or None when it is not."""
+        """Why shoulder sleep is offered now, or None when it is not.
+
+        Available whenever the truck is stopped with no route POI to pull into --
+        a driver can always choose to pull over and rest, urgently or not. The
+        wording escalates with urgency (severe fatigue, or an HOS limit closing
+        in with no reachable stop) but the option itself is always there."""
         if self.truck.speed_mph > 3:
             return None
         if self.trip.nearest_stop_within() is not None:
-            return None
+            return None   # a POI is right here; use its rest menu instead
+        if self.ctx.profile.fatigue >= hos.FATIGUE_SEVERE:
+            return "Fatigue is severe, and no route stop is nearby."
         mode = self.ctx.settings.hos_mode
-        fatigue = self.ctx.profile.fatigue
-        if (fatigue >= hos.FATIGUE_SEVERE
-                and self._upcoming_stop_with_action("sleep", 30.0) is None):
-            return ("Fatigue is severe, and no sleep-capable route stop is "
-                    "within 30 miles.")
-        if mode in hos.HOS_NON_ENFORCED_MODES:
-            return None
-        if self.hos.in_violation(mode):
-            return ("You are already past your hours-of-service limit, and "
-                    "there is no route POI here.")
-        next_limit = self.hos.next_limit(mode)
-        if next_limit is None:
-            return None
-        kind, remaining_min, _due = next_limit
-        if remaining_min > hos.SHOULDER_SLEEP_LIMIT_BUFFER_MIN:
-            return None
-        action = "break" if kind == "break" else "sleep"
-        legal_miles = self._legal_miles_for_hos(remaining_min)
-        if self._upcoming_stop_with_action(action, max(legal_miles + 5.0, 5.0)):
-            return None
-        return (f"Your next {action} limit is due in "
-                f"{remaining_min / 60.0:.1f} hours, and no suitable route "
-                "stop is visible before it.")
-
-    def needs_emergency_sleep(self) -> bool:
-        """Whether the driver is out of (or nearly out of) sleep/duty hours, so a
-        break/fuel-only stop should still offer an emergency lot sleep."""
-        mode = self.ctx.settings.hos_mode
-        if mode in hos.HOS_NON_ENFORCED_MODES:
-            return False
-        if self.hos.in_violation(mode):
-            return True
-        next_limit = self.hos.next_limit(mode)
-        if next_limit is None:
-            return False
-        kind, remaining_min, _due = next_limit
-        # The 30-minute break is covered by a stop's own break option; this is for
-        # the sleep/duty wall, which a break-only stop cannot otherwise satisfy.
-        return (kind != "break"
-                and remaining_min <= hos.SHOULDER_SLEEP_LIMIT_BUFFER_MIN)
+        if mode not in hos.HOS_NON_ENFORCED_MODES:
+            if self.hos.in_violation(mode):
+                return ("You are past your hours-of-service limit, and there is "
+                        "no route POI here.")
+            next_limit = self.hos.next_limit(mode)
+            if next_limit is not None:
+                kind, remaining_min, _due = next_limit
+                action = "break" if kind == "break" else "sleep"
+                legal_miles = self._legal_miles_for_hos(remaining_min)
+                if (remaining_min <= hos.SHOULDER_SLEEP_LIMIT_BUFFER_MIN
+                        and self._upcoming_stop_with_action(
+                            action, max(legal_miles + 5.0, 5.0)) is None):
+                    return (f"Your next {action} limit is due in "
+                            f"{remaining_min / 60.0:.1f} hours, and no suitable "
+                            "route stop is visible before it.")
+        return "No route stop is nearby. You can pull over and rest on the shoulder."
 
     def _speak_weather(self) -> None:
         source = "Live conditions" if self.weather.live else "Currently"
@@ -2343,14 +2326,14 @@ class RestStopState(MenuState):
                 "Sleep 10 hours", self._sleep,
                 help="A full reset: fresh hours of service and zero fatigue. "
                      "The clock and your deadline advance 10 hours."))
-        elif self.driving.needs_emergency_sleep():
-            # No proper sleeper facility here, but the driver is out of hours --
-            # let them bed down in the lot (legal reset, but cramped, poor rest).
+        else:
+            # No proper sleeper facility here, but you can always bed down in the
+            # lot -- a legal reset, just cramped and poor rest.
             items.append(MenuItem(
                 "Emergency sleep in the lot", self._emergency_lot_sleep,
-                help="No sleeper facility here, but you are out of hours. Sleep "
-                     "in the lot for a legal 10-hour reset. The rest is poor, so "
-                     "you wake still tired, and the clock advances 10 hours."))
+                help="No sleeper facility here, but you can sleep in the lot for "
+                     "a legal 10-hour reset. The rest is poor, so you wake still "
+                     "tired, and the clock advances 10 hours."))
         if "repair" in actions:
             items.append(MenuItem(
                 "Use repair service", self._repair,
