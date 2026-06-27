@@ -731,6 +731,10 @@ fit for an audio-first game.
       carrier-provided trailers. Leased-on owner-operators start with dry van
       access and can add specialty trailer programs from the garage; missing
       programs lock matching loads with clear dispatch-board text.
+- [x] Own-authority trailer ownership slice. Own-authority drivers can buy dry
+      van, reefer, flatbed, and bulk trailers from the garage. Matching direct
+      freight rows say when an owned trailer fits, and settlement uses a smaller
+      owned-trailer reserve instead of the trailer-program charge.
 - [x] True authority and direct freight first slice. Prepared owner-operators
       can activate own authority from Business status after delivery,
       reputation, cash, trailer-program, and advance-clearance gates. Dispatch
@@ -741,16 +745,16 @@ fit for an audio-first game.
       richer insurance filings, DOT/MC application timing, broker/load-board
       access tiers, factoring or delayed settlement choices, and clearer
       compliance overhead.
-- [ ] Trailer ownership and advanced leasing. Build on the current trailer
-      program model with true player-owned trailers, condition, financing,
-      resale, tanker cargo, washout, and authority-specific cargo-fit choices.
+- [ ] Advanced trailer ownership and leasing. Build on the current owned
+      trailer model with condition, financing, resale, tanker cargo, washout,
+      and richer authority-specific cargo-fit choices.
 - [ ] Operating-cost polish. Continue tuning owner-operator deductions against
       real cost categories such as fuel, maintenance reserve, insurance, truck
       payment, trailer program, and settlement/factoring fees, while keeping
       settlement speech short and understandable.
 - [ ] Freight-market pricing realism. Continue separating company-driver wages,
-      leased-on gross revenue, and own-authority spot or broker rates; let
-      tight/loose markets affect upside without hiding the player's net pay.
+      leased-on gross revenue, and own-authority spot or broker rates; expand
+      direct freight board comparisons without hiding the player's net pay.
 - [ ] Business realism caveats. Keep lease-purchase risk visible as caution,
       not the golden path. Avoid payday-loan-like traps, and keep fleet hiring
       separate from the driving-career loop.

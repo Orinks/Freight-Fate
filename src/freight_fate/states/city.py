@@ -42,6 +42,7 @@ from ..models.trailers import (
     TRAILER_CATALOG,
     TrailerType,
     compatible_with_programs,
+    owned_trailer_for_cargo,
     required_program_text,
 )
 from ..models.trucks import TRUCK_CATALOG, UPGRADE_CATALOG, TruckModel, Upgrade
@@ -565,7 +566,8 @@ class GarageState(MenuState):
                           "between trucks they own."),
             MenuItem("Trailer programs", self._trailers,
                      help="Company drivers use carrier trailers. Owner-operators "
-                          "can add specialty trailer program slots for more cargo."),
+                          "can add specialty trailer program slots. Own-authority "
+                          "drivers can also buy trailers."),
             MenuItem("Back", self.go_back,
                      help="Return to the terminal menu."),
         ]
@@ -1048,17 +1050,18 @@ class TruckShopState(MenuState):
 
 
 class TrailerProgramState(MenuState):
-    title = "Trailer programs"
+    title = "Trailers"
     intro_help = (
         "Company drivers use carrier-provided trailers. Owner-operators start "
         "with the dry van trailer program and can add specialty programs. "
+        "Own-authority drivers can buy trailers outright. "
         "Escape returns to the garage."
     )
 
     def announce_entry(self) -> None:
         p = self.ctx.profile
         self.ctx.say(
-            f"Trailer programs. You have {p.money:,.0f} dollars. "
+            f"Trailers. You have {p.money:,.0f} dollars. "
             f"{self.current_text()}"
         )
 
@@ -1077,7 +1080,7 @@ class TrailerProgramState(MenuState):
                 MenuItem("Back", self.go_back),
             ]
         items = [
-            MenuItem(lambda t=t: self._label(t), lambda t=t: self._lease(t),
+            MenuItem(lambda t=t: self._label(t), lambda t=t: self._select(t),
                      help=t.description)
             for t in TRAILER_CATALOG.values()
         ]
@@ -1093,12 +1096,23 @@ class TrailerProgramState(MenuState):
 
     def _label(self, trailer: TrailerType) -> str:
         p = self.ctx.profile
+        owned = set(p.visible_owned_trailers())
+        if p.business_status == INDEPENDENT_AUTHORITY:
+            if trailer.key in owned:
+                return f"{trailer.label}: owned trailer"
+            return f"{trailer.label}: buy trailer for {trailer.purchase_price:,.0f} dollars"
         programs = set(p.active_trailer_programs())
         if trailer.key in programs:
             if trailer.key in DEFAULT_TRAILER_PROGRAMS:
                 return f"{trailer.label}: included carrier trailer program"
             return f"{trailer.label}: leased program active"
         return f"{trailer.label}: lease program for {trailer.lease_deposit:,.0f} dollars"
+
+    def _select(self, trailer: TrailerType) -> None:
+        if self.ctx.profile.business_status == INDEPENDENT_AUTHORITY:
+            self._buy_trailer(trailer)
+            return
+        self._lease(trailer)
 
     def _lease(self, trailer: TrailerType) -> None:
         p = self.ctx.profile
@@ -1130,6 +1144,39 @@ class TrailerProgramState(MenuState):
             f"{trailer.lease_deposit:,.0f} dollars. You have "
             f"{p.money:,.0f} dollars left. Matching cargo can now appear as "
             "available on the dispatch board."
+        )
+        self.refresh()
+
+    def _buy_trailer(self, trailer: TrailerType) -> None:
+        p = self.ctx.profile
+        if p.business_status != INDEPENDENT_AUTHORITY:
+            self.ctx.audio.play("ui/error")
+            self.ctx.say(
+                "Trailer purchases unlock after own authority. Leased-on "
+                "owner-operators can use trailer programs for now."
+            )
+            return
+        if trailer.key in p.visible_owned_trailers():
+            self.ctx.say(f"You already own a {trailer.label} trailer.")
+            return
+        if p.money < trailer.purchase_price:
+            self.ctx.audio.play("ui/error")
+            self.ctx.say(
+                f"Not enough money. The {trailer.label} trailer costs "
+                f"{trailer.purchase_price:,.0f} dollars and you have "
+                f"{p.money:,.0f}."
+            )
+            return
+        p.money -= trailer.purchase_price
+        p.owned_trailers = list(p.visible_owned_trailers()) + [trailer.key]
+        p.dispatch_board_cache = None
+        self.ctx.save_profile()
+        self.ctx.audio.play("ui/cash")
+        self.ctx.say(
+            f"{trailer.label} trailer purchased for "
+            f"{trailer.purchase_price:,.0f} dollars. You have "
+            f"{p.money:,.0f} dollars left. Matching direct freight now uses "
+            "an owned-trailer reserve at settlement."
         )
         self.refresh()
 
@@ -1202,7 +1249,13 @@ class JobBoardState(MenuState):
         if locked:
             self.ctx.audio.play("ui/error")
             if "trailer program" in locked:
-                self.ctx.say(f"{locked} Open Garage, Trailer programs to add it.")
+                if p.business_status == INDEPENDENT_AUTHORITY:
+                    self.ctx.say(
+                        f"{locked} Open Garage, Trailers to lease support or "
+                        "buy a matching trailer."
+                    )
+                else:
+                    self.ctx.say(f"{locked} Open Garage, Trailers to add it.")
             else:
                 self.ctx.say(f"{locked} Keep delivering to level up and unlock it.")
             return
@@ -1227,6 +1280,19 @@ class JobBoardState(MenuState):
         p = self.ctx.profile
         if not is_owner_operator(p.business_status):
             return "Carrier trailer provided."
+        if p.business_status == INDEPENDENT_AUTHORITY:
+            owned = owned_trailer_for_cargo(job.cargo.key, p.visible_owned_trailers())
+            if owned is not None:
+                return (
+                    f"Owned trailer: {owned.label}. Direct freight gross; "
+                    "owned-trailer reserve at settlement."
+                )
+            if compatible_with_programs(job.cargo.key, p.active_trailer_programs()):
+                return (
+                    f"Trailer program: {required_program_text(job.cargo.key)}. "
+                    "Direct freight gross; program charge at settlement."
+                )
+            return f"Needs {required_program_text(job.cargo.key)} trailer program or owned trailer."
         if compatible_with_programs(job.cargo.key, p.active_trailer_programs()):
             return f"Trailer program: {required_program_text(job.cargo.key)}."
         return f"Needs {required_program_text(job.cargo.key)} trailer program."

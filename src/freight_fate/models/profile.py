@@ -31,13 +31,13 @@ from pathlib import Path
 
 from ..sim.hos import DutyLog, HosClock
 from ..updater import is_frozen
-from .business import COMPANY_DRIVER, is_owner_operator
+from .business import COMPANY_DRIVER, INDEPENDENT_AUTHORITY, is_owner_operator
 from .career import Career
 from .career_ladder import STARTER_CARRIER_NAME
 from .market import Market
 from .start_options import DEFAULT_START_KEY, START_MODE_COMPANY
 
-SAVE_VERSION = 9
+SAVE_VERSION = 10
 STARTING_MONEY = 5_000.0
 DEFAULT_CITY = "Chicago"
 SIGNATURE_FIELD = "_signature"
@@ -288,6 +288,7 @@ class Profile:
     start_mode: str = START_MODE_COMPANY
     authority_readiness: bool = False
     trailer_programs: list[str] = field(default_factory=list)
+    owned_trailers: list[str] = field(default_factory=list)
     career: Career = field(default_factory=Career)
     market: Market = field(default_factory=Market)
     hos: HosClock = field(default_factory=HosClock)  # hours-of-service shift clock
@@ -349,9 +350,25 @@ class Profile:
         from .trailers import DEFAULT_TRAILER_PROGRAMS, normalized_trailer_programs
 
         programs = normalized_trailer_programs(self.trailer_programs)
+        if self.business_status == INDEPENDENT_AUTHORITY:
+            owned = normalized_trailer_programs(self.owned_trailers)
+            combined = list(programs)
+            for key in owned:
+                if key not in combined:
+                    combined.append(key)
+            if combined:
+                return tuple(combined)
         if programs:
             return programs
         return DEFAULT_TRAILER_PROGRAMS
+
+    def visible_owned_trailers(self) -> tuple[str, ...]:
+        """Player-owned trailers to show in menus."""
+        if self.business_status != INDEPENDENT_AUTHORITY:
+            return ()
+        from .trailers import normalized_trailer_programs
+
+        return normalized_trailer_programs(self.owned_trailers)
 
     def truck_specs(self):
         """The active truck's specs with this profile's upgrades applied."""

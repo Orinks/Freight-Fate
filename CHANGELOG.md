@@ -70,6 +70,10 @@
   in one burst. Safety cues and actionable GPS distances still speak immediately.
 
 ### Changed
+- **Own-authority drivers can now buy trailers.** The garage sells dry van,
+  reefer, flatbed, and bulk trailers after own authority is active. Direct
+  freight rows say when an owned trailer fits, and settlement uses an
+  owned-trailer reserve instead of the trailer-program charge.
 - **Authority prep now leads to a first own-authority mode.** Qualified
   owner-operators can pay the startup cost from Business status, unlock direct
   freight on the dispatch board, and see insurance, compliance, trailer, truck,

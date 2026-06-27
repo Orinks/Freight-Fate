@@ -154,7 +154,7 @@ Your terminal is the safe hub between jobs. Public terminal actions include:
 | Dispatch board | Browse freight offers from local facilities. |
 | Drive to city services | Drive a short local route to the freight market office, garage, or truck dealer. Service names use sourced local data where available, and GPS prefers checked-in local turns or road context when they exist. |
 | Business status | Review company-driver or owner-operator status. |
-| Garage | Refuel and repair company equipment; owner-operators can also buy upgrades, buy tractors, switch owned tractors, or add trailer programs. |
+| Garage | Refuel and repair company equipment; owner-operators can also buy upgrades, buy tractors, switch owned tractors, add trailer programs, or buy trailers after own authority. |
 | Request pay advance | Draw cash against your next load when you are broke. |
 | Career stats | Review level, reputation, deliveries, and career totals. |
 | Truck status | Review truck model, fuel, tank size, and damage condition. |
@@ -206,8 +206,9 @@ reputation 92, at least one specialty trailer program, no pay advance, and
 enough cash to pay the startup cost while keeping working capital. Activating
 own authority unlocks direct freight on the dispatch board. Direct freight has
 higher gross revenue, but settlement also deducts insurance, compliance,
-trailer, truck, and factoring costs. It is a playable business step, not a full
-paperwork or broker-contract simulation.
+trailer, truck, and factoring costs. Buying a matching trailer lowers the
+direct-freight trailer charge to an owned-trailer reserve. It is a playable
+business step, not a full paperwork or broker-contract simulation.
 
 City service drives are a first step toward more local city driving. Pick a
 service, follow the spoken GPS, stop at the destination, and press Enter to go
@@ -224,7 +225,7 @@ next delivery settlement, so a negative balance is never a dead end.
 
 After the owner-operator buy-in, the garage sells:
 
-| Upgrade, Truck, Or Program | Effect |
+| Upgrade, Truck, Program, Or Trailer | Effect |
 | --- | --- |
 | Engine tune | Adds pulling power. |
 | Aerodynamic kit | Improves highway fuel economy. |
@@ -234,6 +235,7 @@ After the owner-operator buy-in, the garage sells:
 | Reefer trailer program | Opens refrigerated and fresh food cargo for owner-operators. |
 | Flatbed trailer program | Opens steel, machinery, construction, lumber, and paper cargo for owner-operators. |
 | Bulk trailer program | Opens grain, farm inputs, and loose bulk cargo for owner-operators. |
+| Owned trailer | Own-authority drivers can buy dry van, reefer, flatbed, or bulk trailers. Matching direct freight uses an owned-trailer reserve at settlement. |
 
 ## Dispatch And Jobs
 
@@ -265,7 +267,9 @@ Specialty cargo may say it needs a reefer, flatbed, or bulk trailer program;
 add that program from the garage before accepting the load.
 
 Own-authority drivers see direct freight on the same board. The listed pay is
-direct freight gross; the extra business costs are shown at settlement.
+direct freight gross; the extra business costs are shown at settlement. If you
+own a matching trailer, the job row says so and settlement uses the owned
+trailer reserve instead of a trailer-program charge.
 
 Deliveries earn money, experience, reputation, and career stats. Leveling up can
 unlock longer dispatch distances, better early-career minimum pay, more cargo

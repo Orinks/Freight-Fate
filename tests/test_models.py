@@ -212,7 +212,7 @@ def test_profile_save_is_atomic_and_versioned():
     p = Profile(name="Atomic")
     path = p.save()
     data = json.loads(path.read_text())
-    assert data["version"] == 9
+    assert data["version"] == 10
     assert SIGNATURE_FIELD in data
     assert not path.with_suffix(".json.tmp").exists()
 
@@ -235,12 +235,14 @@ def test_independent_authority_status_round_trips():
     p = Profile(name="Authority Save")
     p.business_status = INDEPENDENT_AUTHORITY
     p.owned_trucks = ["rig"]
+    p.owned_trailers = ["dry_van", "reefer"]
     path = p.save()
 
     loaded = Profile.load(path)
 
     assert loaded.business_status == INDEPENDENT_AUTHORITY
     assert loaded.owns_equipment()
+    assert loaded.visible_owned_trailers() == ("dry_van", "reefer")
 
 
 def test_old_save_without_carrier_loads_with_starter_company():

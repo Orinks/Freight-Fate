@@ -17,7 +17,7 @@ from .start_options import (
     option_for_profile,
     pay_plan_for_key,
 )
-from .trailers import trailer_program_charge_per_mile
+from .trailers import owned_trailer_charge_per_mile, trailer_program_charge_per_mile
 
 COMPANY_DRIVER = "company_driver"
 LEASED_OWNER_OPERATOR = "leased_owner_operator"
@@ -262,8 +262,9 @@ def business_status_summary(profile) -> str:
             return (
                 f"You run under your own authority as a level {rank.level} "
                 f"{rank.title}. Direct freight pays higher gross, but your "
-                "business carries fuel, repairs, insurance, trailer program, "
-                "truck reserve, compliance reserve, and factoring costs. "
+                "business carries fuel, repairs, insurance, trailer program "
+                "or owned-trailer reserve, truck reserve, compliance reserve, "
+                "and factoring costs. "
                 + next_business_unlock(profile)
             )
         start_mode = getattr(profile, "start_mode", "")
@@ -336,11 +337,30 @@ def owner_operator_charges(job: Job, gross_pay: float) -> tuple[BusinessCharge, 
 
 
 def independent_authority_charges(job: Job, gross_pay: float) -> tuple[BusinessCharge, ...]:
+    owned_trailers: tuple[str, ...] = ()
+    return independent_authority_charges_for_trailers(job, gross_pay, owned_trailers)
+
+
+def independent_authority_charges_for_trailers(
+    job: Job,
+    gross_pay: float,
+    owned_trailers: tuple[str, ...] | list[str] = (),
+) -> tuple[BusinessCharge, ...]:
+    owned_trailer_charge = owned_trailer_charge_per_mile(job.cargo.key, owned_trailers)
+    if owned_trailer_charge is None:
+        trailer_charge = BusinessCharge(
+            "trailer program",
+            round(job.distance_mi * trailer_program_charge_per_mile(job.cargo.key), 2),
+        )
+    else:
+        trailer_charge = BusinessCharge(
+            "owned trailer reserve",
+            round(job.distance_mi * owned_trailer_charge, 2),
+        )
     return (
         BusinessCharge("maintenance reserve", round(job.distance_mi * OWNER_MAINTENANCE_PER_MILE, 2)),
         BusinessCharge("insurance reserve", round(job.distance_mi * AUTHORITY_INSURANCE_PER_MILE, 2)),
-        BusinessCharge("trailer program", round(
-            job.distance_mi * trailer_program_charge_per_mile(job.cargo.key), 2)),
+        trailer_charge,
         BusinessCharge("truck payment reserve", round(job.distance_mi * OWNER_TRUCK_PAYMENT_PER_MILE, 2)),
         BusinessCharge("authority compliance reserve", round(
             job.distance_mi * AUTHORITY_COMPLIANCE_PER_MILE, 2)),
@@ -356,10 +376,11 @@ def build_business_settlement(
     on_time: bool,
     driver_charges: float,
     carrier_key: str | None = None,
+    owned_trailers: tuple[str, ...] | list[str] = (),
 ) -> BusinessSettlement:
     if status == INDEPENDENT_AUTHORITY:
         gross_pay = direct_freight_gross(gross_pay)
-        charges = independent_authority_charges(job, gross_pay)
+        charges = independent_authority_charges_for_trailers(job, gross_pay, owned_trailers)
         net = max(0.0, gross_pay - driver_charges - sum(charge.amount for charge in charges))
         return BusinessSettlement(
             status,

@@ -1,9 +1,8 @@
-"""Trailer program and cargo compatibility model.
+"""Trailer program, ownership, and cargo compatibility model.
 
-The current business arc models leased-on owner-operators, not full authority.
-Company drivers use carrier-provided trailers. Leased-on owner-operators start
-with the carrier's dry van program and can add specialty trailer program slots
-without buying trailers outright.
+Company drivers use carrier-provided trailers. Leased-on owner-operators use
+carrier trailer programs. Own-authority players can buy trailers outright while
+still keeping earlier support programs for save compatibility.
 """
 
 from __future__ import annotations
@@ -22,6 +21,8 @@ class TrailerType:
     description: str
     lease_deposit: float
     per_mile_reserve: float
+    purchase_price: float
+    owned_per_mile_reserve: float
 
 
 TRAILER_CATALOG: dict[str, TrailerType] = {
@@ -32,6 +33,8 @@ TRAILER_CATALOG: dict[str, TrailerType] = {
         "Carrier trailer program for general boxed and pallet freight.",
         0.0,
         0.12,
+        42_000.0,
+        0.05,
     ),
     "reefer": TrailerType(
         "reefer",
@@ -40,6 +43,8 @@ TRAILER_CATALOG: dict[str, TrailerType] = {
         "Temperature-controlled trailer program for food and refrigerated freight.",
         8_000.0,
         0.18,
+        82_000.0,
+        0.10,
     ),
     "flatbed": TrailerType(
         "flatbed",
@@ -48,6 +53,8 @@ TRAILER_CATALOG: dict[str, TrailerType] = {
         "Open-deck trailer program for steel, machinery, lumber, and construction freight.",
         7_000.0,
         0.16,
+        48_000.0,
+        0.07,
     ),
     "bulk": TrailerType(
         "bulk",
@@ -56,6 +63,8 @@ TRAILER_CATALOG: dict[str, TrailerType] = {
         "Bulk trailer program for grain, farm inputs, and loose bulk materials.",
         9_000.0,
         0.20,
+        58_000.0,
+        0.09,
     ),
 }
 
@@ -136,3 +145,21 @@ def trailer_program_charge_per_mile(cargo_key: str) -> float:
         if key in TRAILER_CATALOG
     ]
     return max(charges) if charges else TRAILER_CATALOG["dry_van"].per_mile_reserve
+
+
+def owned_trailer_for_cargo(
+    cargo_key: str,
+    owned_trailers: Iterable[str],
+) -> TrailerType | None:
+    owned = set(normalized_trailer_programs(owned_trailers))
+    for key in trailer_keys_for_cargo(cargo_key):
+        if key in owned and key in TRAILER_CATALOG:
+            return TRAILER_CATALOG[key]
+    return None
+
+
+def owned_trailer_charge_per_mile(cargo_key: str, owned_trailers: Iterable[str]) -> float | None:
+    trailer = owned_trailer_for_cargo(cargo_key, owned_trailers)
+    if trailer is None:
+        return None
+    return trailer.owned_per_mile_reserve

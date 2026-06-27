@@ -133,8 +133,8 @@ references and fallback reasons stay internal for auditing.
 
 The next data pass should keep service POIs separate from career ownership and
 settlement systems. OSM/Overpass and ORS can improve where service drives go.
-Cargo-to-trailer matching now lives in the career/business model, while future
-owned-trailer dealer work can build on that model without changing service POIs.
+Cargo-to-trailer matching and own-authority trailer purchases now live in the
+career/business model without changing service POIs.
 
 ## Local Approach Data
 

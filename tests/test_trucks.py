@@ -146,7 +146,14 @@ def test_old_save_without_truck_fields_loads_with_defaults():
     import json
 
     data = json.loads(path.read_text())
-    for legacy_missing in ("truck", "owned_trucks", "upgrades", "market", "trailer_programs"):
+    for legacy_missing in (
+        "truck",
+        "owned_trucks",
+        "upgrades",
+        "market",
+        "trailer_programs",
+        "owned_trailers",
+    ):
         data.pop(legacy_missing, None)
     data.pop("_signature", None)
     data.pop("_signature_version", None)
@@ -157,6 +164,7 @@ def test_old_save_without_truck_fields_loads_with_defaults():
     assert loaded.visible_owned_trucks() == ()
     assert loaded.upgrades == {}
     assert loaded.active_trailer_programs() == ()
+    assert loaded.visible_owned_trailers() == ()
     assert loaded.market.multipliers  # fresh market seeded on load
 
 

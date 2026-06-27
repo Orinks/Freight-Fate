@@ -57,7 +57,13 @@ costs active from day one.
   deliveries, reputation 92, a specialty trailer program, no pay advance, and
   enough cash to pay 15,000 dollars while keeping 35,000 dollars working
   capital. Direct freight pays higher gross revenue, then settlement deducts
-  insurance, compliance, trailer program, truck reserve, and factoring costs.
+  insurance, compliance, trailer program or owned-trailer reserve, truck
+  reserve, and factoring costs.
+- Trailer ownership: own-authority drivers can buy dry van, reefer, flatbed,
+  or bulk trailers from the garage. Matching direct freight then uses an
+  owned-trailer reserve instead of the trailer-program charge. Leased-on
+  owner-operators still use carrier trailer programs, and company drivers still
+  use carrier-provided trailers.
 - Progression: level 5 starts owner-operator preparation, but the leased-on
   buy-in does not unlock until level 15 with 35 deliveries, reputation 80, no
   pay advance, and enough cash for a 35,000 dollar buy-in while keeping 10,000
@@ -120,14 +126,14 @@ while keeping 35,000 dollars of working capital.
 
 The active own-authority mode changes the dispatch board to direct freight.
 Listed pay has higher gross upside, and settlement adds insurance, compliance,
-trailer program, truck reserve, and factoring costs. This represents the
-business responsibility at a playable scale; it does not model every filing,
-broker agreement, or delayed-pay negotiation.
+trailer program or owned-trailer reserve, truck reserve, and factoring costs.
+This represents the business responsibility at a playable scale; it does not
+model every filing, broker agreement, or delayed-pay negotiation.
 
-## Trailer Programs
+## Trailer Programs And Ownership
 
-This slice implements trailer compatibility without jumping all the way to
-player-owned trailer fleets. The current trailer programs are:
+Trailer compatibility uses the same cargo fit for both leased programs and
+owned trailers:
 
 | Program | Cargo Fit |
 | --- | --- |
@@ -138,9 +144,14 @@ player-owned trailer fleets. The current trailer programs are:
 
 The dry van program is included for leased-on owner-operators. Reefer, flatbed,
 and bulk programs are leased from the garage. They are not lease-purchase deals
-and do not create weekly debt traps. Tanker freight is not implemented yet
-because current chemical cargo is packaged industrial freight, not liquid bulk
-tanker work.
+and do not create weekly debt traps.
+
+Own-authority drivers can buy the same four trailer types outright. Owned
+trailers are expensive up front, but matching direct freight uses a smaller
+owned-trailer reserve at settlement instead of the trailer-program charge. The
+first ownership slice does not add trailer condition, financing, resale, or
+washout work. Tanker freight is not implemented yet because current chemical
+cargo is packaged industrial freight, not liquid bulk tanker work.
 
 ## Follow-Up Realism Hooks
 
@@ -149,14 +160,14 @@ tanker work.
   tiers, delayed settlement or factoring choices, and clearer compliance
   overhead.
 - Authority prep remains the entry gate for that advanced authority work.
-- Trailer ownership should be a later authority or dealer slice. Current
-  gameplay has leased-on trailer program slots and cargo fit; future work can
-  add owned trailer condition, financing, tanker cargo, and trailer resale.
+- Trailer ownership has a first own-authority dealer slice. Future work can add
+  owned trailer condition, financing, tanker cargo, washout, and trailer resale.
 - Operating-cost polish should keep using recognizable owner-operator cost
   categories, but player-facing settlement text should stay concise and avoid
   dense finance jargon.
 - Freight-market pricing should keep company-driver wages, leased-on gross
-  revenue, and own-authority spot or broker rates distinct.
+  revenue, and own-authority spot or broker rates distinct, with clear gross
+  and settlement-cost wording on direct freight.
 - Lease-purchase remains a realism caveat and caution, not the default success
   path. Fleet hiring and company ownership stay separate from this driving arc.
 - A future save-schema cleanup can rename internal `truck` and `owned_trucks`

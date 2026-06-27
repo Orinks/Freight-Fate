@@ -887,6 +887,8 @@ HELP_PAGES = [
         "cash, and reserves are ready.",
         "Own authority adds direct freight with higher gross revenue, plus",
         "insurance, compliance, trailer, truck, and factoring costs.",
+        "Buying a matching trailer lowers the direct-freight trailer charge",
+        "to an owned-trailer reserve.",
         "A metro can contain ports, rail and intermodal ramps, air cargo areas,",
         "parcel hubs, grocery distribution centers, dry warehouses, cold storage,",
         "food processors, farms and grain elevators, manufacturing plants,",

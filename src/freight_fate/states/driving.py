@@ -4106,6 +4106,7 @@ class FacilityArrivalState(MenuState):
             on_time=hours <= job.deadline_game_h,
             driver_charges=driver_charges,
             carrier_key=getattr(self.ctx.profile, "carrier_key", ""),
+            owned_trailers=getattr(self.ctx.profile, "owned_trailers", ()),
         )
         net_estimated_pay = business.net_before_advance
         advance_due = round(min(self.ctx.profile.pay_advance, net_estimated_pay), 2)
@@ -4226,6 +4227,7 @@ class ArrivalState(MenuState):
             on_time=hours <= job.deadline_game_h,
             driver_charges=driver_charges,
             carrier_key=getattr(p, "carrier_key", ""),
+            owned_trailers=getattr(p, "owned_trailers", ()),
         )
         deadline_business = build_business_settlement(
             p.business_status,
@@ -4234,6 +4236,7 @@ class ArrivalState(MenuState):
             on_time=True,
             driver_charges=driver_charges,
             carrier_key=getattr(p, "carrier_key", ""),
+            owned_trailers=getattr(p, "owned_trailers", ()),
         )
         gross_pay = business.gross_pay
         early_bonus = max(0.0, gross_pay - deadline_business.gross_pay)
