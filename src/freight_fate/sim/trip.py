@@ -130,6 +130,7 @@ class Trip(TripRoadEventMixin, TripTrafficMixin):
                         start + 0.05,
                         f"start on {leg.highway}",
                         f"Start on {leg.highway}; {self._distance_text(leg.miles)}.",
+                        direction="ahead",
                     ))
                 elif self.route.legs[i - 1].highway != leg.highway:
                     cues.append(NavigationCue(

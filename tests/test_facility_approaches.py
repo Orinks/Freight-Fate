@@ -68,6 +68,11 @@ def test_facility_approach_records_are_clean_and_honest(world):
 
 
 def test_facility_route_prefers_turn_level_source_approach(world):
+    from freight_fate.sim.trip import Trip, TripEvent, TripEventKind
+    from freight_fate.sim.vehicle import TruckState
+    from freight_fate.sim.weather import WeatherSystem
+    from freight_fate.states.driving import _route_event_sound
+
     data = json.loads(Path("src/freight_fate/data/facility_approaches.json").read_text(encoding="utf-8"))
     facility_id, record = next(
         item for item in data["approaches"].items() if item[1]["turn_level"]
@@ -80,6 +85,12 @@ def test_facility_route_prefers_turn_level_source_approach(world):
     assert approach.turn_level
     assert route.miles == pytest.approx(approach.total_miles)
     assert route.highways == [segment.road for segment in approach.segments]
+    trip = Trip(route, TruckState(), WeatherSystem())
+    start_cue = next(cue for cue in trip.navigation_cues if cue.key == "local:start")
+    assert start_cue.direction == "ahead"
+    assert _route_event_sound(
+        TripEvent(TripEventKind.GPS_CUE, start_cue.near_text, {"cue": start_cue})
+    ) == "events/turn_ahead"
 
 
 def test_facility_route_keeps_existing_fallback_when_no_source_geometry(world):

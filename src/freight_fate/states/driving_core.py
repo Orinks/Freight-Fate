@@ -124,11 +124,24 @@ def _route_event_sound(event) -> str | None:
             return "events/traffic_slowing"
         cue = event.data.get("cue")
         cue_kind = getattr(cue, "kind", None)
+        if cue_kind == "local_turn":
+            return _local_turn_sound(cue)
         if cue_kind == "traffic":
             return "events/traffic_slowing"
         if cue_kind == "toll":
             return "events/toll_charged"
     return None
+
+
+def _local_turn_sound(cue) -> str | None:
+    direction = str(getattr(cue, "direction", "") or "").strip().lower()
+    sounds = {
+        "left": "events/turn_left",
+        "right": "events/turn_right",
+        "ahead": "events/turn_ahead",
+        "straight": "events/turn_ahead",
+    }
+    return sounds.get(direction)
 
 
 def _poi_ambient_key(stop) -> str:

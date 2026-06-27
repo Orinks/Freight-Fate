@@ -15,7 +15,7 @@ from driving_feature_helpers import (
 
 
 def test_trip_event_sounds_use_contextual_cues():
-    from freight_fate.sim.trip import TripEvent, TripEventKind, Zone
+    from freight_fate.sim.trip import NavigationCue, TripEvent, TripEventKind, Zone
     from freight_fate.states.driving import _route_event_sound
 
     assert _route_event_sound(TripEvent(TripEventKind.HAZARD, "Brake now!")) == (
@@ -35,6 +35,60 @@ def test_trip_event_sounds_use_contextual_cues():
     assert _route_event_sound(event) == "events/construction_zone"
     cb_event = TripEvent(TripEventKind.GPS_CUE, "CB patrol ahead", {"cb_patrol": object()})
     assert _route_event_sound(cb_event) == "events/cb_radio_chatter"
+    left_turn = NavigationCue(
+        "local:left",
+        "local_turn",
+        1.0,
+        "turn left onto Depot Street",
+        "Turn left onto Depot Street.",
+        direction="left",
+    )
+    right_turn = NavigationCue(
+        "local:right",
+        "local_turn",
+        1.0,
+        "turn right onto Yard Road",
+        "Turn right onto Yard Road.",
+        direction="right",
+    )
+    ahead_turn = NavigationCue(
+        "local:ahead",
+        "local_turn",
+        1.0,
+        "start on Market Street",
+        "Start on Market Street.",
+        direction="ahead",
+    )
+    ambiguous_turn = NavigationCue(
+        "local:ambiguous",
+        "local_turn",
+        1.0,
+        "turn onto Market Street",
+        "Turn onto Market Street.",
+    )
+    highway_maneuver = NavigationCue(
+        "maneuver:right",
+        "maneuver",
+        1.0,
+        "keep right for I-80",
+        "Keep right for I-80.",
+        direction="right",
+    )
+    assert _route_event_sound(TripEvent(
+        TripEventKind.GPS_CUE, left_turn.near_text, {"cue": left_turn}
+    )) == "events/turn_left"
+    assert _route_event_sound(TripEvent(
+        TripEventKind.GPS_CUE, right_turn.near_text, {"cue": right_turn}
+    )) == "events/turn_right"
+    assert _route_event_sound(TripEvent(
+        TripEventKind.GPS_CUE, ahead_turn.near_text, {"cue": ahead_turn}
+    )) == "events/turn_ahead"
+    assert _route_event_sound(TripEvent(
+        TripEventKind.GPS_CUE, ambiguous_turn.near_text, {"cue": ambiguous_turn}
+    )) is None
+    assert _route_event_sound(TripEvent(
+        TripEventKind.GPS_CUE, highway_maneuver.near_text, {"cue": highway_maneuver}
+    )) is None
 
 
 def test_driving_f1_describes_safe_shutdown_and_destination_parking(monkeypatch):

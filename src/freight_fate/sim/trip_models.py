@@ -372,6 +372,8 @@ class NavigationCue:
     # Speed carried unformatted so display code can render it in the player's
     # chosen units. Only traffic cues set this; others leave it None.
     speed_mph: float | None = None
+    # Optional local-road maneuver direction used only for non-speech earcons.
+    direction: str = ""
 
 
 __all__ = [name for name in globals() if not name.startswith("__")]

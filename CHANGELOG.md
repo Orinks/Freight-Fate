@@ -4,6 +4,10 @@
 
 ### Added
 
+- **Local turns can now add a small sound cue.** Source-backed local service and
+  facility approaches can play subtle non-speech turn sounds when the checked-in
+  route data clearly marks a local direction. Spoken GPS instructions with road
+  names remain the main guidance.
 - **In-cab radio now follows the map.** Press M to toggle the radio, bracket
   keys to tune receivable stations, Y for spoken station status, and Tab for a
   Radio status screen. The checked-in catalog now includes regional public
