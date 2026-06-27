@@ -1,6 +1,11 @@
 # Freight Fate Roadmap
 
-## Current dev branch
+> Current stable: **1.7.0** (shipped). Next release: **1.8.0**, in flight on the
+> `awesome-greider` branch (troopers, real OSM speed limits, seasons,
+> cargo-weight physics, predictive adaptive cruise, and more). `pyproject`
+> still reads 1.6.0 on that branch and must be bumped to 1.8.0 at release.
+
+## Shipped in 1.6.0
 
 - [x] Realistic freight markets and facilities: metro route nodes now expand
       into hundreds of representative shippers and receivers, with stable
@@ -16,12 +21,20 @@
       spring-brake warnings a low-air buzzer (`vehicle/low_air_buzzer.ogg`),
       both ElevenLabs-generated; the spoken cues are kept for accessibility.
 
-## Next up: 1.6 polish and realism
+## Realism and polish pass (1.7.0 shipped, 1.8.0 in flight)
 
 A consolidation pass focused on closing realism gaps and removing rough
-edges rather than adding new systems. Several items overlap the trooper
-milestone below (speeding consequences especially); ship whichever slice
-is ready first and fold the rest in.
+edges rather than adding new systems. Much of it shipped in **1.7.0**
+(player-feedback UX, dispatcher pay advances, relaxed mode, grounded
+hazards, drowsiness, truck-legal HGV routing); the 1.7.0 CHANGELOG is the
+source of truth for that release's exact contents. The **1.8.0** batch on
+the `awesome-greider` branch -- pending merge -- adds the trooper pull-overs,
+real OSM `maxspeed` baked per leg, corridor/real speed limits, seasons and a
+temperature model, cargo-weight physics, immediate speeding-cost cues, the
+S/A/U info keys, the HTML manual, and limit-aware (predictive) adaptive
+cruise. Checkboxes below mark what is implemented; which release each lands
+in is 1.7.0 or 1.8.0 per the split above. Several items overlap the trooper
+milestone below (speeding consequences especially).
 
 ### Player feedback round (accessibility/UX)
 
@@ -161,9 +174,17 @@ From a batch of player reports:
   trooper milestone (below) remains the home for *visible, immediate*
   enforcement: getting pulled over and on-the-spot fines.
 
+- [x] **Limit-aware adaptive cruise.** Shipped: once real OSM limits, zones,
+  and trooper enforcement landed, plain "hold the set speed" cruise would carry
+  the driver straight through an urban drop into strikes and pull-overs. Cruise
+  now caps its target at the posted limit plus a small offset
+  (`ACC_LIMIT_OFFSET_MPH = 5`, a with-traffic pace under the 9 mph strike
+  threshold), brakes gently down to a lower limit, and announces once when it
+  eases off. Still follows slower traffic and widens its gap in bad weather.
+
 ### Realism north star (ongoing)
 
-The guiding goal for 1.6 and beyond: make every system as true to real
+The guiding goal for 1.8 and beyond: make every system as true to real
 trucking as the 2-D, audio-first design allows, short of a 3-D driving
 model. New realism ideas land here, then graduate into a concrete slice
 above when picked up. Existing items already serving this goal: grounded
@@ -205,14 +226,14 @@ Net-new realism candidates, roughly by area:
 - **Business realism.** The company-driver→owner-operator arc, loans, and
   insurance already sketched under Business.
 
-## Planned for 1.7: in-cab logbook (Record of Duty Status)
+## Planned for 1.8: in-cab logbook (Record of Duty Status)
 
 The game talks about an ELD and the shipped `TrafficStopState` already runs a
 spoken "license/logbook check," but there is no actual logbook behind it. Today's
 `HosClock` (`sim/hos.py`) is an aggregate ledger -- it accumulates driving, duty,
 and since-break minutes and tracks the current duty status, but keeps no
 chronological history. A real ELD logbook is a Record of Duty Status (RODS): a
-timeline of duty-status segments with timestamps and locations. 1.7 adds that,
+timeline of duty-status segments with timestamps and locations. 1.8 adds that,
 and graduates the trooper logbook check from cosmetic narration to reading real
 entries. (The 60/70-hour cycle and 34-hour restart that a RODS window would
 unlock are deferred to a later milestone.)
@@ -245,7 +266,7 @@ unlock are deferred to a later milestone.)
   running limits the clock already computes, and a chronological list of recent
   segments ("7:00 AM-11:30 AM, driving, 4.5 hrs, I-90 from Chicago"). No new
   global hotkey needed -- C and Tab already cover live HOS.
-- **Real enforcement (in scope for 1.7).** `TrafficStopState`'s logbook check
+- **Real enforcement (in scope for 1.8).** `TrafficStopState`'s logbook check
   reads the recorded RODS instead of only the `hos_violation` flag, and cites
   specifics in the spoken stop and evidence ("11.5 hours driving since your last
   10-hour reset") rather than a generic "HOS/ELD violation."
@@ -421,7 +442,7 @@ Deliver -> Earn and level up -> Repeat
 - [x] Region-flavored road hazards (dust devils, deer, rockfall, ...)
 - [x] HOS-aware realistic deadlines (driving + breaks + sleep + slack)
 - [ ] In-cab logbook / Record of Duty Status, with the trooper logbook
-      check reading real entries (planned for 1.7, designed above)
+      check reading real entries (planned for 1.8, designed above)
 - [ ] State troopers and law enforcement (speeding pull-overs shipped;
       CB heads-up, felony stop, weigh-station, damage-triggered slices pending)
 - [ ] Special event jobs (oversize loads, urgent medical freight)
@@ -440,7 +461,7 @@ Deliver -> Earn and level up -> Repeat
       gate speed, and dock-approach detail to make warehouses, terminals,
       ports, and industrial yards feel distinct.
 
-### In-cab radio (1.7 / 1.8 candidate)
+### In-cab radio (1.8 / 1.9 candidate)
 
 A truck radio you can tune as you drive: pull in the local FM stations for
 wherever you are on the map, with a satellite-style network as the
