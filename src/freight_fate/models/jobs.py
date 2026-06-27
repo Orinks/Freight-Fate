@@ -447,7 +447,8 @@ class JobBoard:
         # Pick a spread of DISTINCT destinations up front so the board never
         # collapses to one back-and-forth city (a start with a single nearby
         # neighbour used to be locked into one route). Nearer cities stay likelier.
-        dest_cycle = self._spread_destinations(reachable, level, count)
+        dest_cycle = self._spread_destinations(
+            city, reachable, level, count, carrier_key)
         attempts = 0
         while len(jobs) < count and attempts < count * 30:
             attempts += 1
@@ -465,12 +466,17 @@ class JobBoard:
                 continue
             jobs.append(self._make_job(cargo, city, location.name, destination,
                                        miles, market, level, location,
-                                       dest_location))
+                                       dest_location, carrier_key))
         jobs.sort(key=lambda j: j.distance_mi)
         return jobs
 
     def _spread_destinations(
-        self, reachable: list[tuple[str, float, int]], level: int, count: int,
+        self,
+        origin: str,
+        reachable: list[tuple[str, float, int]],
+        level: int,
+        count: int,
+        carrier_key: str = DEFAULT_START_KEY,
     ) -> list[tuple[str, float, int]]:
         """A weighted spread of distinct destinations (nearer = likelier).
 
@@ -488,11 +494,40 @@ class JobBoard:
         chosen: list[tuple[str, float, int]] = []
         available = pool[:]
         while available and len(chosen) < target:
-            weights = [1.0 / (cand[1] ** exponent) for cand in available]
+            weights = [
+                self._destination_weight(origin, cand, level, carrier_key, exponent)
+                for cand in available
+            ]
             pick = self._rng.choices(available, weights)[0]
             chosen.append(pick)
             available.remove(pick)
         return chosen or pool
+
+    def _destination_weight(
+        self,
+        origin: str,
+        candidate: tuple[str, float, int],
+        level: int,
+        carrier_key: str = DEFAULT_START_KEY,
+        exponent: float | None = None,
+    ) -> float:
+        """Weighted lane fit for a carrier's modest dispatch tendencies."""
+        destination, miles, _legs = candidate
+        exponent = exponent if exponent is not None else (2.0 if level <= 2 else 1.0)
+        weight = 1.0 / (miles ** exponent)
+        option = start_option(carrier_key)
+        cap = max(1.0, self.distance_cap(level))
+        if option.dispatch.short_haul_bias:
+            short_factor = max(0.0, 1.0 - min(miles, cap) / cap)
+            weight *= 1.0 + option.dispatch.short_haul_bias * short_factor
+        if option.dispatch.long_haul_bias:
+            long_factor = min(1.0, miles / cap)
+            weight *= 1.0 + option.dispatch.long_haul_bias * long_factor
+        if option.dispatch.regional_bias:
+            origin_region = self.world.cities[origin].region
+            if self.world.cities[destination].region == origin_region:
+                weight *= 1.0 + option.dispatch.regional_bias
+        return max(weight, 1e-12)
 
     def _candidates(self, city: str) -> list[tuple[str, float, int]]:
         """(destination, route miles, route leg count) for every other city."""
@@ -623,7 +658,8 @@ class JobBoard:
     def _make_job(self, cargo: CargoType, origin: str, origin_location: str,
                   destination: str, miles: float, market: Market | None,
                   level: int, origin_facility: Location,
-                  destination_facility: Location) -> Job:
+                  destination_facility: Location,
+                  carrier_key: str = DEFAULT_START_KEY) -> Job:
         weight = self._rng.uniform(*cargo.weight_tons)
         rate = cargo.rate_per_mile * self._rng.uniform(0.9, 1.15)
         mult = market.multiplier(cargo.key) if market is not None else 1.0
@@ -631,7 +667,9 @@ class JobBoard:
         pay = round(max(base_pay, minimum_pay_for_level(miles, level)) * mult, 2)
         # deadline: the honest HOS-compliant hours (driving, breaks, sleep),
         # shipper slack on top, plus a flat hour for fuel and the unexpected
-        deadline = required_hours(miles) * self._rng.uniform(1.2, 1.5) + 1.0
+        deadline = (
+            required_hours(miles) * self._rng.uniform(1.2, 1.5) + 1.0
+        ) * start_option(carrier_key).dispatch.deadline_slack
         return Job(cargo, weight, origin, origin_location, destination,
                    round(miles, 1), pay, round(deadline, 1), market_mult=mult,
                    origin_type=origin_facility.type,

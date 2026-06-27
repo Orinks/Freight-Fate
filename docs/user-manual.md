@@ -80,18 +80,19 @@ The main menu can include:
 
 A new career asks you to choose a start path after entering a driver name.
 Company-driver starts use assigned carrier equipment, carrier-paid fuel and
-routine repairs, and different wage tradeoffs. The owner-operator start is an
-experienced-driver shortcut with owned starter equipment, higher gross revenue,
-limited working capital, and player-paid operating costs from day one.
+routine repairs, and different wage and dispatch tradeoffs. The owner-operator
+start is an experienced-driver shortcut with owned starter equipment, higher
+gross revenue, limited working capital, and player-paid operating costs from
+day one.
 
 Company-driver carrier choices are:
 
 | Start | Tradeoff |
 | --- | --- |
 | Northstar Freight Lines | Balanced company-driver wages and broad dispatch. |
-| Great Lakes Training Transport | Better short-load stop pay, lower long-haul upside. |
-| Prairie Link Regional | Better per-mile floor, lower stop pay, grain and bulk emphasis. |
-| Summit Value Logistics | Better percentage and on-time bonus, smaller guarantee. |
+| Great Lakes Training Transport | Better short-load stop pay, more short-haul training work, and slightly more forgiving deadlines. |
+| Prairie Link Regional | Better per-mile floor, lower stop pay, more same-region work, and grain/bulk emphasis. |
+| Summit Value Logistics | Better percentage and on-time bonus, smaller guarantee, and more long-haul/high-value lanes. |
 
 Company starts begin with 5,000 dollars, an assigned company tractor, a full
 tank, a fresh career record, and a company terminal or yard in the chosen metro
@@ -175,9 +176,9 @@ full repair.
 Freight Fate can start you as a company driver for one of several fictional
 starter carriers. The dispatch board lists carrier gross, but your settlement
 pays driver wages and bonuses. The selected carrier changes wage floor, stop
-pay, pay share, on-time bonus, and in some cases freight emphasis. The carrier
-assigns the tractor and supplies the trailer, authority, insurance, fuel, and
-routine repairs.
+pay, pay share, on-time bonus, route-length mix, deadline slack, and in some
+cases regional or freight emphasis. The carrier assigns the tractor and supplies
+the trailer, authority, insurance, fuel, and routine repairs.
 
 The career ladder has 20 levels. Early levels are company-driver ranks. Level 5
 starts the owner-operator preparation path, but it is not a lease-purchase
@@ -197,6 +198,11 @@ one. The carrier still handles dispatch and reimbursed accessorials so the game
 stays focused on driving. Level 20 completes the current owner-operator arc as
 an authority-ready independent operator; full motor-carrier authority is still
 future work.
+
+At level 20, established owner-operators can set aside an authority prep reserve
+from **Business status** after enough deliveries, reputation, and working
+capital. This prepares the save for future true-authority gameplay. It does not
+yet unlock direct brokers, insurance filings, or player-owned trailers.
 
 City service drives are a first step toward more local city driving. Pick a
 service, follow the spoken GPS, stop at the destination, and press Enter to go

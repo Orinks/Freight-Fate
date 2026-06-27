@@ -33,6 +33,28 @@ class CompanyPayPlan:
 
 
 @dataclass(frozen=True)
+class DispatchProfile:
+    """Modest carrier dispatch tendencies for generated job boards."""
+
+    short_haul_bias: float = 0.0
+    regional_bias: float = 0.0
+    long_haul_bias: float = 0.0
+    deadline_slack: float = 1.0
+
+    def summary(self) -> str:
+        parts: list[str] = []
+        if self.short_haul_bias:
+            parts.append("more short training loads")
+        if self.regional_bias:
+            parts.append("more same-region lanes")
+        if self.long_haul_bias:
+            parts.append("more longer lanes")
+        if self.deadline_slack > 1.0:
+            parts.append("more appointment slack")
+        return ", ".join(parts) if parts else "balanced dispatch"
+
+
+@dataclass(frozen=True)
 class CareerStartOption:
     key: str
     label: str
@@ -54,6 +76,7 @@ class CareerStartOption:
     starting_reputation: float = 50.0
     company_pay: CompanyPayPlan | None = None
     cargo_weight_bonus: dict[str, float] = field(default_factory=dict)
+    dispatch: DispatchProfile = field(default_factory=DispatchProfile)
 
     @property
     def is_owner_operator(self) -> bool:
@@ -96,13 +119,14 @@ START_OPTIONS: dict[str, CareerStartOption] = {
         carrier_name="Great Lakes Training Transport",
         mode=START_MODE_COMPANY,
         menu_summary=(
-            "Trainer-friendly company start with stronger stop pay for short "
-            "rookie loads, but lower long-haul upside."
+            "Trainer-friendly company start with stronger stop pay, more short "
+            "rookie loads, and a little more appointment slack."
         ),
         help_text=(
             "A practical training-fleet start. Stop pay is better on short "
-            "loads, while percentage and mileage upside are lower than "
-            "Northstar. Equipment and routine costs stay carrier-paid."
+            "loads, and dispatch leans toward shorter training work with a "
+            "little more deadline room. Equipment and routine costs stay "
+            "carrier-paid."
         ),
         default_city="Milwaukee",
         company_pay=CompanyPayPlan(
@@ -111,6 +135,7 @@ START_OPTIONS: dict[str, CareerStartOption] = {
             stop_pay=225.0,
             on_time_bonus_share=0.02,
         ),
+        dispatch=DispatchProfile(short_haul_bias=0.8, deadline_slack=1.08),
     ),
     "prairie_link": CareerStartOption(
         key="prairie_link",
@@ -119,13 +144,13 @@ START_OPTIONS: dict[str, CareerStartOption] = {
         mode=START_MODE_COMPANY,
         menu_summary=(
             "Regional carrier with a better per-mile floor, lower stop pay, "
-            "and a Great Plains starting lane."
+            "and more same-region grain and bulk lanes."
         ),
         help_text=(
             "A mile-focused company start. The per-mile wage floor is higher, "
             "but stop pay is lower, so it favors steady regional mileage over "
-            "very short hops. The carrier still assigns and maintains the "
-            "tractor."
+            "very short hops. Dispatch leans toward same-region grain and "
+            "bulk work. The carrier still assigns and maintains the tractor."
         ),
         default_city="Kansas City",
         company_pay=CompanyPayPlan(
@@ -135,6 +160,7 @@ START_OPTIONS: dict[str, CareerStartOption] = {
             on_time_bonus_share=0.03,
         ),
         cargo_weight_bonus={"grain": 0.25, "farm_inputs": 0.2, "bulk": 0.15},
+        dispatch=DispatchProfile(regional_bias=0.7, long_haul_bias=0.1),
     ),
     "summit_value": CareerStartOption(
         key="summit_value",
@@ -143,12 +169,13 @@ START_OPTIONS: dict[str, CareerStartOption] = {
         mode=START_MODE_COMPANY,
         menu_summary=(
             "Higher percentage and on-time bonus for careful freight, with a "
-            "smaller wage floor when a run goes poorly."
+            "smaller wage floor and more long-haul/high-value lanes."
         ),
         help_text=(
             "A performance-sensitive company start. Good on-time runs pay "
-            "better, but the guaranteed floor is smaller. The carrier still "
-            "supplies equipment, authority, insurance, fuel, and repairs."
+            "better, but the guaranteed floor is smaller. Dispatch leans "
+            "toward longer and higher-value lanes. The carrier still supplies "
+            "equipment, authority, insurance, fuel, and repairs."
         ),
         default_city="Denver",
         company_pay=CompanyPayPlan(
@@ -158,6 +185,7 @@ START_OPTIONS: dict[str, CareerStartOption] = {
             on_time_bonus_share=0.06,
         ),
         cargo_weight_bonus={"electronics": 0.2, "automotive": 0.15, "parcel": 0.15},
+        dispatch=DispatchProfile(long_haul_bias=0.35),
     ),
     OWNER_OPERATOR_START_KEY: CareerStartOption(
         key=OWNER_OPERATOR_START_KEY,
@@ -185,6 +213,7 @@ START_OPTIONS: dict[str, CareerStartOption] = {
         starting_total_miles=42_000.0,
         starting_total_earnings=70_000.0,
         starting_reputation=80.0,
+        dispatch=DispatchProfile(long_haul_bias=0.25),
     ),
 }
 

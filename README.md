@@ -28,9 +28,9 @@ visual display mirrors all speech for sighted players and helpers.
   parking brakes, engine braking, grades, stalls, brake fade, and honest
   fuel economy.
 - **Business progression** — choose a grounded company-driver carrier with
-  assigned equipment and modest wage tradeoffs, or start as a higher-risk
-  leased-on owner-operator with owned starter equipment and real operating
-  costs.
+  assigned equipment plus modest wage and dispatch tradeoffs, or start as a
+  higher-risk leased-on owner-operator with owned starter equipment and real
+  operating costs.
 - **Trucks and upgrades** — owner-operators can earn their way into a heavy
   hauler with more torque and a bigger tank (and worse aerodynamics), and
   outfit any truck with an engine tune, aerodynamic kit, long-range tank, or

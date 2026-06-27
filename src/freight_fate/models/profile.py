@@ -37,7 +37,7 @@ from .career_ladder import STARTER_CARRIER_NAME
 from .market import Market
 from .start_options import DEFAULT_START_KEY, START_MODE_COMPANY
 
-SAVE_VERSION = 6
+SAVE_VERSION = 7
 STARTING_MONEY = 5_000.0
 DEFAULT_CITY = "Chicago"
 SIGNATURE_FIELD = "_signature"
@@ -286,6 +286,7 @@ class Profile:
     carrier_name: str = STARTER_CARRIER_NAME
     carrier_key: str = DEFAULT_START_KEY
     start_mode: str = START_MODE_COMPANY
+    authority_readiness: bool = False
     career: Career = field(default_factory=Career)
     market: Market = field(default_factory=Market)
     hos: HosClock = field(default_factory=HosClock)  # hours-of-service shift clock

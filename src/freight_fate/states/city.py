@@ -6,11 +6,14 @@ import zlib
 
 from ..data.world import Route
 from ..models.business import (
+    AUTHORITY_READY_RESERVE,
     LEASED_OWNER_OPERATOR,
     OWNER_OPERATOR_BUY_IN,
+    authority_readiness_eligibility,
     business_path_label,
     business_status_summary,
     carrier_name,
+    has_authority_readiness,
     is_owner_operator,
     next_business_unlock,
     owner_operator_eligibility,
@@ -378,6 +381,7 @@ def dispatch_cache_key(p) -> dict:
         "market_state_day": p.market.day,
         "business_status": p.business_status,
         "carrier_key": getattr(p, "carrier_key", ""),
+        "authority_readiness": bool(getattr(p, "authority_readiness", False)),
         "level": p.career.level,
         "endorsements": sorted(p.career.endorsements),
         "count": 5,
@@ -732,6 +736,25 @@ class BusinessStatusState(MenuState):
                 items.append(MenuItem(
                     "Owner-operator path locked", self._summary,
                     help="Hear the remaining requirements."))
+        else:
+            if has_authority_readiness(p):
+                items.append(MenuItem(
+                    "Authority prep reserve: set", self._summary,
+                    help="Own authority and direct broker freight are future "
+                         "systems; this career has set aside the prep reserve."))
+            else:
+                ok, _reasons = authority_readiness_eligibility(p)
+                if ok:
+                    items.append(MenuItem(
+                        f"Commit {AUTHORITY_READY_RESERVE:,.0f} dollars "
+                        "to authority prep",
+                        self._set_authority_readiness,
+                        help="Set aside money for a future own-authority system. "
+                             "This does not unlock direct broker freight yet."))
+                else:
+                    items.append(MenuItem(
+                        "Authority prep locked", self._next_unlock,
+                        help="Hear the remaining authority prep requirements."))
         items.append(MenuItem("Back", self.go_back))
         return items
 
@@ -778,6 +801,27 @@ class BusinessStatusState(MenuState):
             "pay higher gross revenue, and your business pays fuel, repairs, "
             "maintenance reserve, insurance, trailer program, truck payment "
             "reserve, and settlement fees.")
+        self.refresh()
+
+    def _set_authority_readiness(self) -> None:
+        p = self.ctx.profile
+        ok, reasons = authority_readiness_eligibility(p)
+        if not ok:
+            self.ctx.audio.play("ui/error")
+            self.ctx.say("Authority prep locked. " + " ".join(reasons))
+            self.refresh()
+            return
+        p.money -= AUTHORITY_READY_RESERVE
+        p.authority_readiness = True
+        p.dispatch_board_cache = None
+        self.ctx.save_profile()
+        self.ctx.audio.play("ui/cash")
+        self.ctx.say(
+            f"Authority prep reserve set aside: "
+            f"{AUTHORITY_READY_RESERVE:,.0f} dollars. You have "
+            f"{p.money:,.0f} dollars left. Your own motor-carrier authority, "
+            "direct broker freight, and trailer ownership are future systems; "
+            "for now you remain leased on.")
         self.refresh()
 
 

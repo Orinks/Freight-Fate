@@ -672,17 +672,21 @@ fit for an audio-first game.
 - [x] Company-driver to owner-operator career arc. Full first arc: choose among
       grounded fictional company-driver starter carriers with
       carrier-assigned equipment, carrier-paid fuel/repairs, and different
-      wage/freight tradeoffs; progress through 20 ranks; then unlock a
+      wage, dispatch, route-mix, and freight tradeoffs; progress through 20
+      ranks; then unlock a
       later-level leased-on owner-operator path with a buy-in,
       working-capital gate, owned-tractor garage access, higher gross revenue,
       and operating-cost deductions. A higher-risk owner-operator start is also
-      available for experienced-driver fantasy play. Full authority, loans,
-      and fleet ownership remain future work.
+      available for experienced-driver fantasy play. Level-20
+      owner-operators can now set aside an authority prep reserve as a
+      future-system boundary. Full authority, loans, and fleet ownership remain
+      future work.
 - [ ] True authority and direct freight. Later optional slice for operating
       under the player's own motor-carrier authority. Cover Department of
       Transportation and motor-carrier authority, insurance filings,
       broker/load-board access, factoring or settlement timing, and higher
-      compliance overhead.
+      compliance overhead. The current authority prep reserve should be
+      the entry gate for this later system.
 - [ ] Trailer ownership and leasing. Keep carrier-provided trailers in the
       leased-on path, then let later true-authority or freight-market work add
       owned or leased dry van, reefer, flatbed, maintenance, washout, and

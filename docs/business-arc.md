@@ -37,8 +37,9 @@ costs active from day one.
   wage/bonus. Fuel, routine repairs, roadside fuel, and carrier shop repair are
   billed to the carrier. The driver may have a regular assigned tractor, but
   does not own, switch, or upgrade tractors yet.
-- Starter carrier differences: company carriers adjust realistic wage knobs:
-  pay share, per-mile wage floor, stop pay, on-time bonus, and modest freight
+- Starter carrier differences: company carriers adjust realistic wage and
+  dispatch factors: pay share, per-mile wage floor, stop pay, on-time bonus,
+  route-length mix, deadline slack, regional tendency, and modest freight
   emphasis. They do not grant magic perks or personal truck ownership.
 - Leased-on owner-operator: listed board pay is gross revenue; settlement adds
   a higher revenue multiplier, then deducts business costs: maintenance reserve,
@@ -53,15 +54,19 @@ costs active from day one.
 - The design remains a driving career, not a fleet-management sim. It adds one
   terminal menu and settlement math; it does not add driver hiring, tax filing,
   direct broker negotiation, or full authority management.
+- Level-20 owner-operators can set aside an authority prep reserve when
+  their reputation, delivery count, and working capital are ready. This is a
+  playable savings milestone for a future motor-carrier authority feature, not
+  current independent authority.
 
 ## Career Start Choices
 
 | Start | Mode | Practical Tradeoff |
 | --- | --- | --- |
 | Northstar Freight Lines | Company driver | Balanced wage plan and broad dispatch. |
-| Great Lakes Training Transport | Company driver | Better short-load stop pay, lower long-haul upside. |
-| Prairie Link Regional | Company driver | Better per-mile wage floor, lower stop pay, grain and bulk emphasis. |
-| Summit Value Logistics | Company driver | Better percentage and on-time bonus, smaller guarantee. |
+| Great Lakes Training Transport | Company driver | Better short-load stop pay, more short-haul training work, and slightly more forgiving deadlines. |
+| Prairie Link Regional | Company driver | Better per-mile wage floor, lower stop pay, more same-region work, and grain/bulk emphasis. |
+| Summit Value Logistics | Company driver | Better percentage and on-time bonus, smaller guarantee, and more long-haul/high-value lanes. |
 | Owner-operator start | Leased-on owner-operator | Starts at level 15 with owned starter equipment, 18,000 dollars working capital, partial fuel, light wear, higher gross revenue, and operating costs active. |
 
 ## 20-Level Arc
@@ -94,11 +99,23 @@ Level 20 means the player has completed the owner-operator career arc and is
 ready for a later authority system, not that Freight Fate has become a fleet or
 brokerage simulator.
 
+## Authority Prep Reserve
+
+Authority readiness is the first concrete hook toward true authority without
+turning Freight Fate into a compliance sim. A leased-on owner-operator at level
+20 can set aside a 12,500 dollar reserve after 60 deliveries, reputation 90, and
+25,000 dollars of working capital. The reserve marks the profile as ready for a
+future authority system and keeps the current game grounded: dispatch, trailers,
+insurance support, and settlement still run through the leased-on carrier.
+
 ## Follow-Up Realism Hooks
 
 - True authority should be a later, optional step. It should cover
   motor-carrier authority, insurance filings, broker/load-board access,
   settlement or factoring timing, and more compliance overhead.
+- Authority prep now has a reserve gate and save flag; the future work is
+  turning that prepared state into a real authority application, insurance, and
+  direct-freight gameplay loop.
 - Trailer ownership/leasing belongs with freight-market and garage/dealer work:
   carrier-provided trailers stay in the leased-on path, while owned or leased
   dry van, reefer, or flatbed equipment can later affect cargo fit and costs.

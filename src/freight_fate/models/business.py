@@ -29,6 +29,11 @@ OWNER_OPERATOR_DELIVERIES = 35
 OWNER_OPERATOR_BUY_IN = 35_000.0
 OWNER_OPERATOR_WORKING_CAPITAL = 10_000.0
 OWNER_OPERATOR_REVENUE_MULT = 1.12
+AUTHORITY_READY_LEVEL = 20
+AUTHORITY_READY_DELIVERIES = 60
+AUTHORITY_READY_REPUTATION = 90.0
+AUTHORITY_READY_RESERVE = 12_500.0
+AUTHORITY_READY_WORKING_CAPITAL = 25_000.0
 
 OWNER_MAINTENANCE_PER_MILE = 0.18
 OWNER_INSURANCE_PER_MILE = 0.09
@@ -94,6 +99,37 @@ def carrier_key(profile) -> str:
     return str(getattr(profile, "carrier_key", "") or "")
 
 
+def has_authority_readiness(profile) -> bool:
+    return bool(getattr(profile, "authority_readiness", False))
+
+
+def authority_readiness_eligibility(profile) -> tuple[bool, tuple[str, ...]]:
+    """Whether an owner-operator can set aside an authority-readiness reserve."""
+    if has_authority_readiness(profile):
+        return False, ("Authority readiness reserve is already set.",)
+    if not is_owner_operator(getattr(profile, "business_status", COMPANY_DRIVER)):
+        return False, ("Become a leased-on owner-operator first.",)
+
+    reasons: list[str] = []
+    if profile.career.level < AUTHORITY_READY_LEVEL:
+        rank = rank_for_level(AUTHORITY_READY_LEVEL)
+        reasons.append(f"Reach level {AUTHORITY_READY_LEVEL}: {rank.title}.")
+    if profile.career.deliveries < AUTHORITY_READY_DELIVERIES:
+        reasons.append(f"Complete {AUTHORITY_READY_DELIVERIES} deliveries.")
+    if profile.career.reputation < AUTHORITY_READY_REPUTATION:
+        reasons.append(f"Build reputation to {AUTHORITY_READY_REPUTATION:.0f}.")
+    needed_cash = AUTHORITY_READY_RESERVE + AUTHORITY_READY_WORKING_CAPITAL
+    if profile.money < needed_cash:
+        reasons.append(
+            f"Have {needed_cash:,.0f} dollars first: "
+            f"{AUTHORITY_READY_RESERVE:,.0f} for the reserve plus "
+            f"{AUTHORITY_READY_WORKING_CAPITAL:,.0f} working capital."
+        )
+    if profile.pay_advance >= 1.0:
+        reasons.append("Pay off your dispatcher advance.")
+    return not reasons, tuple(reasons)
+
+
 def owner_operator_eligibility(profile) -> tuple[bool, tuple[str, ...]]:
     """Whether the profile can buy into owner-operator status now."""
     if is_owner_operator(getattr(profile, "business_status", COMPANY_DRIVER)):
@@ -131,10 +167,21 @@ def business_path_label(profile) -> str:
 def next_business_unlock(profile) -> str:
     status = getattr(profile, "business_status", COMPANY_DRIVER)
     if is_owner_operator(status):
+        if has_authority_readiness(profile):
+            return (
+                "Authority prep reserve is set. Your own motor-carrier "
+                "authority, direct broker freight, and trailer ownership remain "
+                "future work."
+            )
+        ok, reasons = authority_readiness_eligibility(profile)
+        if ok:
+            return (
+                "Next: set aside an authority prep reserve from Business "
+                "status."
+            )
         if profile.career.level >= 20:
             return (
-                "Endgame owner-operator status reached. Full independent "
-                "authority is a future optional system."
+                "Authority prep locked: " + " ".join(reasons)
             )
         next_rank = next_rank_for_level(profile.career.level)
         if next_rank is None:
@@ -165,11 +212,16 @@ def business_status_summary(profile) -> str:
             if start_mode == START_MODE_OWNER_OPERATOR else
             ""
         )
+        authority = (
+            " Authority prep reserve is set for a future own-authority system."
+            if has_authority_readiness(profile) else
+            ""
+        )
         return (
             f"{lead}You are leased to {carrier_name(profile)} as a level "
             f"{rank.level} {rank.title}. Load revenue is higher, but fuel, "
             "repairs, maintenance reserve, insurance, trailer program, truck "
-            "payment reserve, and settlement fees come out of your money. "
+            f"payment reserve, and settlement fees come out of your money.{authority} "
             + next_business_unlock(profile)
         )
     ok, reasons = owner_operator_eligibility(profile)

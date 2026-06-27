@@ -4,6 +4,11 @@ import pygame
 import pytest
 
 from freight_fate.models.business import (
+    AUTHORITY_READY_DELIVERIES,
+    AUTHORITY_READY_LEVEL,
+    AUTHORITY_READY_REPUTATION,
+    AUTHORITY_READY_RESERVE,
+    AUTHORITY_READY_WORKING_CAPITAL,
     COMPANY_DRIVER,
     LEASED_OWNER_OPERATOR,
     OWNER_OPERATOR_BUY_IN,
@@ -11,8 +16,10 @@ from freight_fate.models.business import (
     OWNER_OPERATOR_LEVEL,
     OWNER_OPERATOR_REPUTATION,
     OWNER_OPERATOR_WORKING_CAPITAL,
+    authority_readiness_eligibility,
     business_path_label,
     business_status_summary,
+    has_authority_readiness,
     next_business_unlock,
     owner_operator_eligibility,
 )
@@ -271,6 +278,60 @@ def test_owner_operator_can_buy_switch_and_upgrade_owned_equipment():
         app.state.handle_event(key_event(pygame.K_RETURN))
         assert p.truck == "rig"
         assert p.money == pytest.approx(money_before_switch)
+    finally:
+        app.shutdown()
+
+
+def test_authority_readiness_requires_endgame_owner_operator():
+    from freight_fate.models.profile import Profile
+
+    p = Profile(name="Authority Gate", current_city="Chicago")
+    ok, reasons = authority_readiness_eligibility(p)
+
+    assert not ok
+    assert any("owner-operator" in reason for reason in reasons)
+
+    p.business_status = LEASED_OWNER_OPERATOR
+    p.owned_trucks = ["rig"]
+    p.career.xp = LEVEL_XP[AUTHORITY_READY_LEVEL - 1]
+    p.career.deliveries = AUTHORITY_READY_DELIVERIES
+    p.career.reputation = AUTHORITY_READY_REPUTATION
+    p.money = AUTHORITY_READY_RESERVE + AUTHORITY_READY_WORKING_CAPITAL
+
+    ok, reasons = authority_readiness_eligibility(p)
+
+    assert ok
+    assert reasons == ()
+    assert "authority prep reserve" in next_business_unlock(p)
+
+
+def test_business_status_menu_sets_authority_readiness_reserve():
+    from freight_fate.app import App
+    from freight_fate.models.profile import Profile
+    from freight_fate.states.city import BusinessStatusState
+
+    app = App()
+    try:
+        app.ctx.profile = Profile(name="Authority Ready", current_city="Chicago")
+        p = app.ctx.profile
+        p.business_status = LEASED_OWNER_OPERATOR
+        p.owned_trucks = ["rig"]
+        p.career.xp = LEVEL_XP[AUTHORITY_READY_LEVEL - 1]
+        p.career.deliveries = AUTHORITY_READY_DELIVERIES
+        p.career.reputation = AUTHORITY_READY_REPUTATION
+        p.money = AUTHORITY_READY_RESERVE + AUTHORITY_READY_WORKING_CAPITAL + 500
+        p.dispatch_board_cache = {"old": True}
+
+        app.push_state(BusinessStatusState(app.ctx))
+        while "Commit 12,500 dollars to authority prep" not in app.state.items[app.state.index].text:
+            app.state.handle_event(key_event(pygame.K_DOWN))
+        app.state.handle_event(key_event(pygame.K_RETURN))
+
+        assert has_authority_readiness(p)
+        assert p.money == pytest.approx(AUTHORITY_READY_WORKING_CAPITAL + 500)
+        assert p.dispatch_board_cache is None
+        assert "Authority prep reserve is set" in business_status_summary(p)
+        assert any("Authority prep reserve: set" in item.text for item in app.state.items)
     finally:
         app.shutdown()
 

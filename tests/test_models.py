@@ -211,7 +211,7 @@ def test_profile_save_is_atomic_and_versioned():
     p = Profile(name="Atomic")
     path = p.save()
     data = json.loads(path.read_text())
-    assert data["version"] == 6
+    assert data["version"] == 7
     assert SIGNATURE_FIELD in data
     assert not path.with_suffix(".json.tmp").exists()
 
@@ -259,6 +259,19 @@ def test_old_save_without_start_choice_fields_uses_northstar_company_start():
     assert loaded.carrier_key == DEFAULT_START_KEY
     assert loaded.start_mode == START_MODE_COMPANY
     assert loaded.business_status == COMPANY_DRIVER
+
+
+def test_old_save_without_authority_readiness_loads_with_default():
+    p = Profile(name="Old Authority")
+    data = p.to_dict()
+    data.pop("authority_readiness")
+    data.pop(SIGNATURE_FIELD)
+    path = p.path
+    path.write_text(json.dumps(data))
+
+    loaded = Profile.load(path)
+
+    assert loaded.authority_readiness is False
 
 
 def test_profile_ignores_unknown_fields():

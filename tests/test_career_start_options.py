@@ -113,6 +113,81 @@ def test_carrier_key_can_bias_job_mix_weighting(world):
     assert prairie > baseline
 
 
+def test_company_carriers_have_distinct_dispatch_weighting(world):
+    from freight_fate.models.jobs import JobBoard
+
+    board = JobBoard(world, seed=1)
+    chicago = "Chicago"
+    short = next(c for c in board._candidates(chicago) if c[0] == "Milwaukee")  # noqa: SLF001
+    long = next(c for c in board._candidates(chicago) if c[0] == "Kansas City")  # noqa: SLF001
+
+    northstar_short_ratio = board._destination_weight(  # noqa: SLF001
+        chicago, short, 2, DEFAULT_START_KEY
+    ) / board._destination_weight(chicago, long, 2, DEFAULT_START_KEY)  # noqa: SLF001
+    training_short_ratio = board._destination_weight(  # noqa: SLF001
+        chicago, short, 2, "great_lakes_training"
+    ) / board._destination_weight(chicago, long, 2, "great_lakes_training")  # noqa: SLF001
+    assert training_short_ratio > northstar_short_ratio
+
+    kansas_city = "Kansas City"
+    origin_region = world.cities[kansas_city].region
+    same_region = next(
+        c for c in board._candidates(kansas_city)  # noqa: SLF001
+        if world.cities[c[0]].region == origin_region
+    )
+    other_region = next(
+        c for c in board._candidates(kansas_city)  # noqa: SLF001
+        if world.cities[c[0]].region != origin_region
+    )
+    prairie_region_ratio = board._destination_weight(  # noqa: SLF001
+        kansas_city, same_region, 2, "prairie_link"
+    ) / board._destination_weight(kansas_city, other_region, 2, "prairie_link")  # noqa: SLF001
+    northstar_region_ratio = board._destination_weight(  # noqa: SLF001
+        kansas_city, same_region, 2, DEFAULT_START_KEY
+    ) / board._destination_weight(kansas_city, other_region, 2, DEFAULT_START_KEY)  # noqa: SLF001
+    assert prairie_region_ratio > northstar_region_ratio
+
+    cap = board.distance_cap(5)
+    candidate = ("Los Angeles", cap, 3)
+    assert board._destination_weight(  # noqa: SLF001
+        "Denver", candidate, 5, "summit_value"
+    ) > board._destination_weight("Denver", candidate, 5, DEFAULT_START_KEY)  # noqa: SLF001
+
+
+def test_training_carrier_adds_modest_deadline_slack(world):
+    from freight_fate.models.jobs import JobBoard
+
+    cargo = CARGO_CATALOG["general"]
+    origin = world.cities["Chicago"].locations[0]
+    destination = world.cities["Milwaukee"].locations[0]
+    northstar = JobBoard(world, seed=8)._make_job(  # noqa: SLF001
+        cargo,
+        "Chicago",
+        origin.name,
+        "Milwaukee",
+        92.0,
+        None,
+        1,
+        origin,
+        destination,
+        DEFAULT_START_KEY,
+    )
+    training = JobBoard(world, seed=8)._make_job(  # noqa: SLF001
+        cargo,
+        "Chicago",
+        origin.name,
+        "Milwaukee",
+        92.0,
+        None,
+        1,
+        origin,
+        destination,
+        "great_lakes_training",
+    )
+
+    assert training.deadline_game_h > northstar.deadline_game_h
+
+
 def test_apply_company_start_keeps_assigned_equipment():
     from freight_fate.models.profile import Profile
 

@@ -55,6 +55,14 @@
   in one burst. Safety cues and actionable GPS distances still speak immediately.
 
 ### Changed
+- **Carrier choice now shapes the dispatch board.** Starter carriers still stay
+  grounded, but they now change how often you see short, regional, long-haul,
+  grain or bulk, and high-value jobs. Some training loads also have more
+  forgiving deadlines.
+- **Owner-operators now have an authority prep milestone.** Qualified
+  level-20 owner-operators can set aside a reserve from Business status, marking
+  the save ready for a future true-authority system without pretending direct
+  broker authority is live yet.
 - **New careers now offer grounded start choices.** Pick from several
   fictional company-driver carriers with assigned equipment and modest wage or
   freight tradeoffs, or choose a higher-risk owner-operator start with owned
