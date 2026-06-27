@@ -1,9 +1,10 @@
 # Changelog
 
 ## Unreleased
-
 ### Fixed
 
+- **Metric weather readouts use metric safe speed.** Pressing V with metric
+  units enabled now reports the weather safe speed in kilometers per hour.
 - **No more "dot dot" at the end of menu items.** A menu or list item that was
   already a full sentence (like a settlement summary line) got a second period
   appended before its "N of M" position, which a screen reader voiced as "dot
