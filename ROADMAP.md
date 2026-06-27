@@ -49,6 +49,11 @@ From a batch of player reports:
   event voice instead of queuing behind it; zone warnings lead by real time
   (scaled by speed and `time_scale`) instead of a flat 2 miles that compressed
   to a few seconds at highway speed.
+- [x] **Construction-zone reaction window.** Shipped: construction-zone
+  warnings now lead with "Brake now!" and arrive early enough at highway speed
+  for normal service braking to reach the work-zone limit. Troopers also wait
+  a little farther into the zone before clocking construction speeding, so the
+  emergency brake can still save a late reaction.
 - [x] **Directional lane-drift rumble.** Shipped: `AudioEngine.play` takes a
   `pan` argument (BASS `BASS_ATTRIB_PAN`, with a stereo-volume fallback for the
   pygame backend), and the lane rumble sets it from `lane.offset` so the strip
@@ -310,6 +315,10 @@ reset instead of only a fine.
   *Next trooper slices:* the CB-radio heads-up mechanic ("bear at mile marker
   12"), a full felony stop (losing the load), weigh-station "blow past while
   flagged", damage-triggered stops.
+- [ ] **Richer construction enforcement.** Follow-up for the roadmap worker:
+  model staged work-zone speed drops, merge/flagger cues, and zone-end restore
+  timing more explicitly. Keep warnings action-first and keep enforcement after
+  a fair braking window.
 
 The ELD/HOS model is grounded in FMCSA's property-carrier summary:
 11 hours of driving after 10 consecutive hours off duty, a 14-hour
