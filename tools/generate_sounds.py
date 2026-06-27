@@ -40,6 +40,18 @@ SPECS: dict[str, tuple[str, float, float]] = {
         "Heavy truck tires running over a police spike strip, sharp puncture then "
         "rushing air hiss of a deflating tire, no music",
         3.0, 0.5),
+    "events/turn_left": (
+        "Short quiet non-verbal vehicle navigation earcon leaning left in stereo, "
+        "soft two-note chime, under spoken GPS, no words, no voice, no melody",
+        0.5, 0.35),
+    "events/turn_right": (
+        "Short quiet non-verbal vehicle navigation earcon leaning right in stereo, "
+        "soft two-note chime, under spoken GPS, no words, no voice, no melody",
+        0.5, 0.35),
+    "events/turn_ahead": (
+        "Short quiet centered non-verbal vehicle navigation earcon for straight "
+        "ahead, soft chime, under spoken GPS, no words, no voice, no melody",
+        0.5, 0.35),
     "vehicle/air_dryer_purge": (
         "Truck air brake system air dryer purge, a single sharp pneumatic hiss "
         "and pop as the compressor cuts out, heard in the cab, no music",
@@ -74,7 +86,7 @@ def _generate(key: str, spec_key: str, prompt: str, duration: float,
         SOUND_API, data=body,
         headers={"xi-api-key": key, "Content-Type": "application/json",
                  "Accept": "audio/mpeg"})
-    print(f"  requesting {spec_key} ({duration:.0f}s)...", flush=True)
+    print(f"  requesting {spec_key} ({duration:.1f}s)...", flush=True)
     with urllib.request.urlopen(req, timeout=120) as resp:
         mp3 = resp.read()
     out = ASSETS / f"{spec_key}.ogg"

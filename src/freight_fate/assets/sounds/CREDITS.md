@@ -58,9 +58,9 @@ current idle, start, and shutdown cues.
 | Toll charged | `events/toll_charged.ogg` | Short toll/transponder cue |
 | State crossing | `events/state_crossing.ogg` | Short route milestone cue |
 | Inspection warning | `events/inspection_warning.ogg` | Short inspection/weigh-station cue |
-| Local turn left | `events/turn_left.ogg` | Locally synthesized placeholder non-speech turn cue |
-| Local turn right | `events/turn_right.ogg` | Locally synthesized placeholder non-speech turn cue |
-| Local turn ahead | `events/turn_ahead.ogg` | Locally synthesized placeholder non-speech local-route cue |
+| Local turn left | `events/turn_left.ogg` | ElevenLabs-generated placeholder non-speech turn cue |
+| Local turn right | `events/turn_right.ogg` | ElevenLabs-generated placeholder non-speech turn cue |
+| Local turn ahead | `events/turn_ahead.ogg` | ElevenLabs-generated placeholder non-speech local-route cue |
 | Police siren | `events/police_siren.ogg` | ElevenLabs-generated trooper pull-over siren wail |
 | CB radio chatter | `events/cb_radio_chatter.ogg` | ElevenLabs-generated CB squelch and chatter for trooper patrol heads-up cues |
 | Spike strip | `events/spike_strip.ogg` | ElevenLabs-generated spike-strip puncture/air-hiss for felony stops |
