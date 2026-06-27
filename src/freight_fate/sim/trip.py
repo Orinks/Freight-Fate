@@ -648,8 +648,6 @@ class Trip(TripRoadEventMixin, TripTrafficMixin):
             amount = float(raw.get("amount", event.amount))
             self.toll_charges.append(TollCharge(event, amount))
 
-    # -- main update ----------------------------------------------------------------
-
     def update(self, dt: float) -> list[TripEvent]:
         """Advance the trip by real seconds; returns events for the UI layer."""
         self._events = []

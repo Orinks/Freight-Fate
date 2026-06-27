@@ -6,6 +6,7 @@ import zlib
 
 from ..models.business import (
     INDEPENDENT_AUTHORITY,
+    build_business_settlement,
     carrier_name,
     is_owner_operator,
     pay_label,
@@ -531,13 +532,12 @@ class JobBoardState(MenuState):
     def build_items(self) -> list[MenuItem]:
         items = []
         for i, job in enumerate(self.jobs):
+            locked = self._locked_reason(job)
+            label = self._job_label(job, i + 1)
+            if locked:
+                label = label.replace("Job ", "Locked job ", 1)
             items.append(MenuItem(
-                job.describe(
-                    i + 1,
-                    len(self.jobs),
-                    pay_label=pay_label(self.ctx.profile.business_status),
-                    trailer_note=self._trailer_note(job),
-                ),
+                label,
                 lambda j=job: self._accept(j),
                 help=(
                     f"Load offer from {job.origin_facility_text()} to "
@@ -547,14 +547,50 @@ class JobBoardState(MenuState):
         items.append(MenuItem("Back to terminal", self.go_back))
         return items
 
-    def _accept(self, job: Job) -> None:
+    def _job_label(self, job: Job, index: int) -> str:
         p = self.ctx.profile
-        locked = job.locked_reason(
+        business = build_business_settlement(
+            p.business_status,
+            job,
+            job.pay,
+            on_time=True,
+            driver_charges=0.0,
+            carrier_key=getattr(p, "carrier_key", ""),
+            owned_trailers=p.visible_owned_trailers(),
+        )
+        return job.describe(
+            index,
+            len(self.jobs),
+            pay_label=pay_label(p.business_status),
+            trailer_note=self._trailer_note(job),
+            display_pay=business.gross_pay,
+            market_preview=self._market_preview(business),
+        )
+
+    def _locked_reason(self, job: Job) -> str:
+        p = self.ctx.profile
+        return job.locked_reason(
             p.career.endorsements,
             p.career.level,
             trailer_programs=p.active_trailer_programs(),
             carrier_trailer_support=not is_owner_operator(p.business_status),
         )
+
+    def _market_preview(self, business) -> str:
+        if business.business_charge_total > 0:
+            return (
+                f"Estimated take-home before advances: "
+                f"{business.net_before_advance:,.0f} dollars after "
+                f"{business.business_charge_total:,.0f} dollars business costs."
+            )
+        return (
+            f"Estimated driver pay before advances: "
+            f"{business.net_before_advance:,.0f} dollars."
+        )
+
+    def _accept(self, job: Job) -> None:
+        p = self.ctx.profile
+        locked = self._locked_reason(job)
         if locked:
             self.ctx.audio.play("ui/error")
             if "trailer program" in locked:

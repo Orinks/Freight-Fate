@@ -745,6 +745,11 @@ fit for an audio-first game.
       van, reefer, flatbed, and bulk trailers from the garage. Matching direct
       freight rows say when an owned trailer fits, and settlement uses a smaller
       owned-trailer reserve instead of the trailer-program charge.
+- [x] Trailer-fit dispatch preview slice. Dispatch rows now mark trailer-setup
+      locks before the player accepts a load and show an estimated driver pay
+      or take-home preview based on the current carrier, business status, and
+      owned/program trailer setup. This is a readable offer preview, not a full
+      spot-market or resale model.
 - [x] True authority and direct freight first slice. Prepared owner-operators
       can activate own authority from Business status after delivery,
       reputation, cash, trailer-program, and advance-clearance gates. Dispatch
@@ -764,7 +769,8 @@ fit for an audio-first game.
       settlement speech short and understandable.
 - [ ] Freight-market pricing realism. Continue separating company-driver wages,
       leased-on gross revenue, and own-authority spot or broker rates; expand
-      direct freight board comparisons without hiding the player's net pay.
+      direct freight board comparisons with better lane-rate inputs, fuel
+      estimates, and trailer condition once those systems exist.
 - [ ] Business realism caveats. Keep lease-purchase risk visible as caution,
       not the golden path. Avoid payday-loan-like traps, and keep fleet hiring
       separate from the driving-career loop.

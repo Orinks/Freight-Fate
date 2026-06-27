@@ -169,21 +169,26 @@ class Job:
         total: int | None = None,
         pay_label: str = "Pays",
         trailer_note: str = "",
+        display_pay: float | None = None,
+        market_preview: str = "",
     ) -> str:
         prefix = f"Job {index} of {total}: " if index is not None else ""
         condition = market_condition(self.market_mult)
         market = f" Lane note: Market is {condition}." if condition != "steady" else ""
+        preview = f" {market_preview}" if market_preview else ""
         endorsement = ""
         if self.cargo.endorsement:
             endorsement = f" Requires {ENDORSEMENT_LABELS[self.cargo.endorsement]}."
         origin = "from " + self.origin_facility_text()
         dest = "to " + self.destination_facility_text()
         trailer = f" {trailer_note}" if trailer_note else ""
+        pay = self.pay if display_pay is None else display_pay
         return (f"{prefix}{self.weight_tons:.0f} tons of {self.cargo.label} "
                 f"{origin} {dest}. {self.distance_mi:.0f} miles. "
-                f"{pay_label} {self.pay:,.0f} dollars. "
+                f"{pay_label} {pay:,.0f} dollars. "
                 f"Deadline {self.deadline_game_h:.0f} hours. "
-                f"Equipment: {self.cargo.equipment_text}.{trailer}{market}{endorsement}")
+                f"Equipment: {self.cargo.equipment_text}.{trailer}{preview}{market}"
+                f"{endorsement}")
 
     def origin_facility_text(self) -> str:
         return facility_text(

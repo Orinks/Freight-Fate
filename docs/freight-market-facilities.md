@@ -135,6 +135,10 @@ The next data pass should keep service POIs separate from career ownership and
 settlement systems. OSM/Overpass and ORS can improve where service drives go.
 Cargo-to-trailer matching and own-authority trailer purchases now live in the
 career/business model without changing service POIs.
+Dispatch rows use that model to mark trailer-setup locks and show a short
+estimated take-home preview. The preview is based on the current career
+business status and trailer setup; it is not yet a full spot-rate, resale, or
+fuel-margin simulation.
 
 ## Local Approach Data
 

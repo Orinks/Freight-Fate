@@ -263,6 +263,7 @@ Each job lists:
 - Deadline.
 - Equipment type.
 - Trailer program note for owner-operators.
+- Estimated driver pay or take-home before any pay advance.
 - Market note when the cargo market is tight or loose.
 - Endorsement requirement when one applies.
 
@@ -272,12 +273,13 @@ distance cap and unlock more variety.
 Company drivers use carrier-provided trailers, so trailer program locks do not
 block their approved loads. Owner-operators start with a dry van program.
 Specialty cargo may say it needs a reefer, flatbed, or bulk trailer program;
-add that program from the garage before accepting the load.
+add that program from the garage before accepting the load. If a load is
+blocked by your trailer setup, the dispatch row starts with `Locked job`.
 
 Own-authority drivers see direct freight on the same board. The listed pay is
-direct freight gross; the extra business costs are shown at settlement. If you
-own a matching trailer, the job row says so and settlement uses the owned
-trailer reserve instead of a trailer-program charge.
+direct freight gross, and the row includes a short take-home estimate before
+any pay advance. If you own a matching trailer, the job row says so and
+settlement uses the owned trailer reserve instead of a trailer-program charge.
 
 Deliveries earn money, experience, reputation, and career stats. Leveling up can
 unlock longer dispatch distances, better early-career minimum pay, more cargo

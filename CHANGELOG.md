@@ -8,6 +8,11 @@
   facility approaches can play subtle non-speech turn sounds when the checked-in
   route data clearly marks a local direction. Spoken GPS instructions with road
   names remain the main guidance.
+- **Dispatch rows now preview trailer fit and take-home.** Company drivers keep
+  carrier-provided trailer support, while owner-operators and own-authority
+  drivers hear when a load needs a missing trailer program or owned trailer.
+  Rows also include a short estimated driver-pay or take-home preview before
+  pay advances, using the current business status and trailer setup.
 - **In-cab radio now follows the map.** Press M to toggle the radio, bracket
   keys to tune receivable stations, Y for spoken station status, and Tab for a
   Radio status screen. The checked-in catalog now includes regional public
