@@ -13,13 +13,20 @@ from driving_feature_helpers import (
 
 
 @pytest.mark.smoke
-def test_cruise_control_holds_the_set_speed():
+def test_cruise_control_holds_the_set_speed(monkeypatch):
     from freight_fate.app import App
+
+    class NoKeys:
+        def __getitem__(self, _key):
+            return False
+
+    monkeypatch.setattr(pygame.key, "get_pressed", lambda: NoKeys())
 
     app = App()
     try:
         driving = start_drive(app)
         quiet_trip(driving)
+        driving.trip.zones = []
         open_limits(driving)                           # isolate hold from the limit cap
         t = driving.truck
         driving.handle_event(key_event(pygame.K_e))   # engine on

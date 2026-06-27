@@ -94,7 +94,7 @@ REGION_WEIGHTS: dict[str, dict[WeatherKind, float]] = {
 DEFAULT_WEIGHTS = REGION_WEIGHTS["heartland"]
 
 
-def _forced_weather() -> "WeatherKind | None":
+def _forced_weather() -> WeatherKind | None:
     """A dev/testing override locking the weather to one condition, from
     ``FREIGHT_FATE_FORCE_WEATHER`` (e.g. ``snow``, ``heavy_rain``, ``fog``,
     ``wind``). Empty or unrecognized -> None (normal weather)."""
@@ -186,7 +186,7 @@ class WeatherSystem:
 
         return temperature_c(self.region, clock)
 
-    def _seasonal(self, kind: "WeatherKind") -> "WeatherKind":
+    def _seasonal(self, kind: WeatherKind) -> WeatherKind:
         """Reconcile a simulated condition with the season's temperature."""
         temp = self._temperature()
         if temp is None:

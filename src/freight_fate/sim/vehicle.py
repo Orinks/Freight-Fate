@@ -227,7 +227,6 @@ class TruckState:
     # -- per-frame update ---------------------------------------------------------
 
     def update(self, dt: float) -> None:
-        s = self.specs
         tr = self.transmission
         tr.update(dt)
         self._update_air_system(dt)
