@@ -46,6 +46,10 @@
   with fictional carrier Northstar Freight Lines, move through company-driver
   and owner-operator preparation ranks, and unlock the leased-on
   owner-operator buy-in later in the ladder instead of jumping there at level 5.
+- **Rush hour makes traffic feel busier.** Starting a trip during morning or
+  afternoon commute windows now raises modeled traffic density, especially near
+  metro/checkpoint corridors, and can slow lead traffic with commuter or merge
+  callouts.
 - **Loading, unloading, and pulling in now take a beat.** Pickup loading and
   destination unloading now give a short spoken wait and advance the in-game
   clock as on-duty work. Pulling into pickup gates, destination gates, and route

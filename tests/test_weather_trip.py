@@ -613,6 +613,22 @@ def test_bad_weather_slows_modeled_traffic(world):
     assert "visibility" in rain.traffic_leads[0].reason
 
 
+def test_rush_hour_can_slow_modeled_traffic(world):
+    route = world.route_from_cities(["Chicago", "Indianapolis"])
+    midday = Trip(
+        route, TruckState(), WeatherSystem("great_lakes", seed=1),
+        seed=1, start_hour=12.0)
+    rush = Trip(
+        route, TruckState(), WeatherSystem("great_lakes", seed=1),
+        seed=1, start_hour=8.0)
+
+    assert rush._rush_hour_traffic_bias(route.legs[0]) > 0.0
+    if rush.traffic_leads and midday.traffic_leads:
+        assert min(lead.speed_mph for lead in rush.traffic_leads) <= (
+            min(lead.speed_mph for lead in midday.traffic_leads)
+        )
+
+
 def test_time_scale_compresses_fuel_burn(world):
     trip, truck = make_trip(world, time_scale=40.0)
     truck.throttle = 0.9

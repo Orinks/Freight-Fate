@@ -329,6 +329,15 @@ def test_night_produces_sparser_traffic(world):
     assert traffic_count(23.0) < traffic_count(12.0)
 
 
+def test_rush_hour_increases_corridor_traffic_density(world):
+    rush = make_trip(world, start_hour=8.0, start="Chicago", end="Indianapolis")
+    midday = make_trip(world, start_hour=12.0, start="Chicago", end="Indianapolis")
+    leg = rush.route.legs[0]
+
+    assert rush._leg_traffic_density(leg, 0.0, False) > midday._leg_traffic_density(
+        leg, 0.0, False)
+
+
 def test_night_raises_hazard_risk(world):
     day = make_trip(world, start_hour=12.0)
     night = make_trip(world, start_hour=23.0)

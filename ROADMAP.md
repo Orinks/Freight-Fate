@@ -243,9 +243,12 @@ Net-new realism candidates, roughly by area:
   the brakes faster -- while loads at or below the rated gross are unchanged.
   Remaining: tire and brake wear over a truck's life, and finer grade-based
   fuel burn.
-- **Traffic and corridors.** Hazard and congestion frequency scaled by how
-  busy a corridor actually is (urban interstates dense, empty plains
-  sparse); rush-hour slowdowns near metros; realistic merge/exit traffic.
+- **Traffic and corridors.** First slice shipped: rush-hour departure windows
+  (morning and afternoon commute) raise modeled traffic density, especially on
+  checkpoint/metro corridors, and can slow lead traffic packs with
+  commuter/merge callouts. Remaining: broader hazard/congestion frequency
+  scaling by corridor busyness (urban interstates dense, empty plains sparse)
+  and more realistic merge/exit traffic.
 - **Hours of service.** Split-sleeper provision and the 60/70-hour cycle
   with 34-hour restart (the HOS model intentionally skips these today).
 - **Local delivery realism.** The destination-local approach legs already

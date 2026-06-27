@@ -331,7 +331,8 @@ your attention.
 ## Road Events, Weather, And Rest Stops
 
 The road can report traffic, construction, state lines, city pass-throughs,
-checkpoints, toll points, route stops, and weather changes.
+checkpoints, toll points, route stops, and weather changes. Morning and
+afternoon rush hours can make metro corridors busier and slower.
 
 Hazards can happen while moving. When a "Brake now" warning appears, slow below
 25 miles per hour quickly to avoid a collision. Fatigue shortens the reaction

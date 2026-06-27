@@ -93,6 +93,7 @@ DESTINATION_APPROACH_ZONE_MI = 3.0
 FACILITY_GATE_ZONE_MI = 0.5
 NIGHT_HAZARD_BONUS = 0.10          # extra hazard risk after dark
 NIGHT_TRAFFIC_KEEP = 0.4           # chance a traffic zone still forms at night
+RUSH_HOUR_WINDOWS = ((6.5, 9.0), (16.0, 18.5))
 TRAFFIC_LOOKAHEAD_MI = 2.5
 TRAFFIC_WARNING_GAP_S = 2.2
 ZONE_WARNING_LOOKAHEAD_MI = 2.0    # minimum distance heads-up for a zone
@@ -689,10 +690,16 @@ class Trip:
         and patrols. A no-op (x1.0) in realistic mode."""
         metro_bias = 0.18 if leg.checkpoints else 0.0
         night_bias = -0.08 if night else 0.0
+        rush_bias = self._rush_hour_traffic_bias(leg)
         density = min(0.86, max(0.05,
                       0.22 + leg.miles / 900.0 + metro_bias
-                      + bad_weather_bias + night_bias))
+                      + bad_weather_bias + night_bias + rush_bias))
         return density * self.hazard_scale
+
+    def _rush_hour_traffic_bias(self, leg: Leg) -> float:
+        if not any(start <= self.start_hour < end for start, end in RUSH_HOUR_WINDOWS):
+            return 0.0
+        return 0.14 if leg.checkpoints else 0.06
 
     def _place_traffic(self) -> list[TrafficLead]:
         leads: list[TrafficLead] = []
@@ -715,14 +722,24 @@ class Trip:
                 min(16.0, (1.0 - effects.grip) * 22.0
                     + max(0.0, 3.0 - effects.visibility_mi) * 1.5),
             )
-            speed = max(28.0, self._rng.uniform(42.0, 58.0) - weather_slowdown)
+            rush_bias = self._rush_hour_traffic_bias(leg)
+            rush_slowdown = self._rng.uniform(4.0, 10.0) if rush_bias else 0.0
+            speed = max(
+                25.0,
+                self._rng.uniform(42.0, 58.0) - weather_slowdown - rush_slowdown,
+            )
             reason = self._rng.choice((
                 "slow lead traffic",
                 "traffic queue ahead",
                 "merging traffic",
                 "lane restriction",
             ))
-            if bad_weather_bias and self._rng.random() < 0.45:
+            if rush_bias and self._rng.random() < 0.6:
+                reason = self._rng.choice((
+                    "rush-hour traffic near the metro",
+                    "commuter traffic merging ahead",
+                ))
+            elif bad_weather_bias and self._rng.random() < 0.45:
                 reason = self._rng.choice((
                     "traffic slowing for wet roads",
                     "traffic slowing for low visibility",

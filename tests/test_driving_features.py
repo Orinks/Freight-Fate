@@ -191,6 +191,7 @@ def test_how_to_play_documents_new_gameplay_systems():
     assert "gps announces state lines" in help_text
     assert "grades and terrain come from the route" in help_text
     assert "weather, traffic, and construction still vary" in help_text
+    assert "rush hours can make metro corridors busier" in help_text
     assert "slow lead vehicles" in help_text
     assert "settings are grouped into categories" in help_text
     assert "open a category to see its settings" in help_text

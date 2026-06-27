@@ -709,6 +709,7 @@ HELP_PAGES = [
         "intermediate places, traffic, highway changes, and rest-stop exits.",
         "Grades and terrain come from the route you are driving.",
         "Weather, traffic, and construction still vary by time, place, and seed.",
+        "Morning and afternoon rush hours can make metro corridors busier.",
         "Weather is not just flavor. Driving well over the safe speed for the",
         "conditions on a slick road risks losing traction; high winds and storms",
         "add drag that costs speed and fuel; and low visibility shortens how much",
