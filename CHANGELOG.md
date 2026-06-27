@@ -121,6 +121,11 @@
   seconds.
 
 ### Added
+- **In-cab logbook.** The game now records a rolling Record of Duty Status as
+  you drive, fuel, repair, load, take breaks, sleep, or get placed out of
+  service. You can review it from the terminal or the driving status menu, and
+  traffic stops now read the recent logbook entries instead of only pretending
+  to check them.
 - **State troopers can pull you over for speeding.** Routes now have patrol
   windows -- hotter on busy interstates, in construction, and in dense regions,
   cooler out on the plains, with a night DUI bump. Speed badly inside one and a

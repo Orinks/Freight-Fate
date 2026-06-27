@@ -1031,10 +1031,16 @@ class DrivingState(State):
         moving = self.truck.speed_mph > 5.0
         mode = self.ctx.settings.hos_mode
         p = self.ctx.profile
+        start_hour = self._absolute_game_hour(max(0.0, self.trip.game_minutes - gm))
+        end_hour = self._absolute_game_hour()
 
         if moving:
+            p.duty_log.record("driving", start_hour, end_hour,
+                              self._logbook_location())
             self.hos.drive(gm)
         else:
+            p.duty_log.record("on_duty_not_driving", start_hour, end_hour,
+                              self._logbook_location(), "parked at the wheel")
             self.hos.on_duty(gm)   # the 14-hour window runs even while parked
         if mode not in hos.HOS_NON_ENFORCED_MODES:
             for message in self.hos.check_warnings(mode):
@@ -1075,6 +1081,22 @@ class DrivingState(State):
                 else:
                     self.ctx.audio.play("driver/yawn", volume=0.8)
         self._accrue_microsleep(gm, moving, fatigue)
+
+    def _absolute_game_hour(self, trip_minutes: float | None = None) -> float:
+        if trip_minutes is None:
+            trip_minutes = self.trip.game_minutes
+        return self.ctx.profile.game_hours + trip_minutes / 60.0
+
+    def _logbook_location(self) -> str:
+        if self.phase == DRIVE_PHASE_PICKUP:
+            return f"local route to {self._pickup_facility_text()}"
+        if not self.route.legs:
+            return self.job.destination
+        index = max(0, min(self.trip.current_leg_index, len(self.route.legs) - 1))
+        leg = self.route.legs[index]
+        start = self.route.cities[index]
+        end = self.route.cities[index + 1]
+        return f"{leg.highway} from {start} to {end}"
 
     def _update_lane(self, keys, dt: float) -> None:
         mode = self.ctx.settings.steering_assist
@@ -1539,7 +1561,8 @@ class DrivingState(State):
         self.ctx.award_achievement("inspection", event=True)
 
     def _place_out_of_service(self) -> None:
-        _advance_rest_clock(self, OUT_OF_SERVICE_MIN)
+        _advance_rest_clock(self, OUT_OF_SERVICE_MIN, "sleeper_berth",
+                            "out-of-service order")
         self.hos.sleep()
         self.ctx.profile.fatigue = hos.rest_sleep(self.ctx.profile.fatigue)
         self.out_of_service_count += 1
@@ -2193,10 +2216,21 @@ class Tutorial:
                              "the shift key.", interrupt=False)
 
 
-def _advance_rest_clock(driving: DrivingState, minutes: float) -> None:
+def _advance_rest_clock(driving: DrivingState, minutes: float,
+                        duty_status: str | None = None,
+                        note: str = "") -> None:
     """Resting advances game time, so deadlines keep counting."""
+    start_hour = driving._absolute_game_hour()
     driving.trip.game_minutes += minutes
     driving.weather.update(minutes)
+    if duty_status is not None:
+        driving.ctx.profile.duty_log.record(
+            duty_status,
+            start_hour,
+            driving._absolute_game_hour(),
+            driving._logbook_location(),
+            note,
+        )
 
 
 def _deadline_text(driving: DrivingState) -> str:
@@ -2209,7 +2243,8 @@ def _deadline_text(driving: DrivingState) -> str:
 def _perform_shoulder_sleep(driving: DrivingState, anchor_mi: float) -> str:
     """Apply the emergency shoulder-sleep outcome and return spoken text."""
     p = driving.ctx.profile
-    _advance_rest_clock(driving, hos.SLEEP_MIN)
+    _advance_rest_clock(driving, hos.SLEEP_MIN, "sleeper_berth",
+                        "emergency shoulder sleep")
     driving.hos.sleep()
     p.fatigue = hos.rest_shoulder(p.fatigue)
     parts = [f"You sleep poorly on the shoulder, woken again and again by "
@@ -2334,11 +2369,15 @@ class TrafficStopState(MenuState):
             "hit.")
 
     def announce_entry(self) -> None:
+        from .logbook import traffic_stop_logbook_summary
+
         polite = (" You signaled and pulled over promptly."
                   if self.signaled else "")
+        logbook = traffic_stop_logbook_summary(self.ctx, self.driving)
         self.ctx.say(
             f"You stop on the shoulder and the trooper walks up for a license "
-            f"and logbook check.{polite} {self._outcome_text} {self.current_text()}",
+            f"and logbook check.{polite} {logbook} "
+            f"{self._outcome_text} {self.current_text()}",
             interrupt=True)
 
     def build_items(self) -> list[MenuItem]:
@@ -2510,7 +2549,7 @@ class RestStopState(MenuState):
             cost = self.ctx.economy.fuel_cost(region, need) + 35.0
         p.money -= cost
         d.truck.refuel(need)
-        _advance_rest_clock(d, FUEL_STOP_MIN)
+        _advance_rest_clock(d, FUEL_STOP_MIN, "on_duty_not_driving", "fuel stop")
         d.hos.on_duty(FUEL_STOP_MIN)
         self._save_here(silent=True)
         self.ctx.audio.play("vehicle/fuel_pump")
@@ -2523,7 +2562,7 @@ class RestStopState(MenuState):
     def _take_break(self) -> None:
         d = self.driving
         p = self.ctx.profile
-        _advance_rest_clock(d, 30.0)
+        _advance_rest_clock(d, 30.0, "off_duty", "30-minute break")
         d.hos.take_break(30.0)
         p.fatigue = hos.rest_break(p.fatigue)
         self._save_here(silent=True)
@@ -2537,7 +2576,7 @@ class RestStopState(MenuState):
     def _food_break(self) -> None:
         d = self.driving
         p = self.ctx.profile
-        _advance_rest_clock(d, 15.0)
+        _advance_rest_clock(d, 15.0, "off_duty", "food and coffee")
         d.hos.take_break(15.0)
         p.fatigue = hos.rest_coffee_break(p.fatigue)
         self._save_here(silent=True)
@@ -2553,7 +2592,7 @@ class RestStopState(MenuState):
         d = self.driving
         p = self.ctx.profile
         before_fatigue = p.fatigue
-        _advance_rest_clock(d, hos.SLEEP_MIN)
+        _advance_rest_clock(d, hos.SLEEP_MIN, "sleeper_berth", "sleeper rest")
         d.hos.sleep()
         p.fatigue = hos.rest_sleep(p.fatigue)
         self._save_here(silent=True)
@@ -2571,7 +2610,8 @@ class RestStopState(MenuState):
         tired. No shoulder fine -- a lot is more legitimate than the freeway."""
         d = self.driving
         p = self.ctx.profile
-        _advance_rest_clock(d, hos.SLEEP_MIN)
+        _advance_rest_clock(d, hos.SLEEP_MIN, "sleeper_berth",
+                            "emergency lot sleep")
         d.hos.sleep()
         p.fatigue = hos.rest_shoulder(p.fatigue)
         self._save_here(silent=True)
@@ -2596,7 +2636,7 @@ class RestStopState(MenuState):
             return
         p.money -= cost
         d.truck.damage_pct = 0.0
-        _advance_rest_clock(d, 60.0)
+        _advance_rest_clock(d, 60.0, "on_duty_not_driving", "repair service")
         d.hos.on_duty(60.0)
         self._save_here(silent=True)
         self.ctx.audio.play("ui/notify")
@@ -2616,7 +2656,8 @@ class RestStopState(MenuState):
         cost = MECHANIC_CALLOUT_FEE + repaired * MECHANIC_RATE_PER_PCT
         p.money -= cost
         d.truck.damage_pct = min(damage, FIELD_REPAIR_DAMAGE_PCT)
-        _advance_rest_clock(d, MECHANIC_WAIT_MIN)
+        _advance_rest_clock(d, MECHANIC_WAIT_MIN, "on_duty_not_driving",
+                            "roadside mechanic")
         d.hos.on_duty(MECHANIC_WAIT_MIN)
         self._save_here(silent=True)
         self.ctx.audio.play("ui/notify")
@@ -2627,7 +2668,8 @@ class RestStopState(MenuState):
 
     def _inspect(self) -> None:
         d = self.driving
-        _advance_rest_clock(d, INSPECTION_MIN)
+        _advance_rest_clock(d, INSPECTION_MIN, "on_duty_not_driving",
+                            "inspection check-in")
         d.hos.on_duty(INSPECTION_MIN)
         self.ctx.audio.play("ui/notify")
         self.ctx.say(f"Inspection check-in complete at {self.stop.spoken_name}. "
@@ -2769,7 +2811,12 @@ class DrivingStatusState(MenuState):
         "Use up and down arrows to pick a status screen, Enter to open it, and "
         "Escape to return to driving. Each screen lists its status lines."
     )
-    SCREENS = (("Route", "route"), ("Driver", "driver"), ("Map", "map"))
+    SCREENS = (
+        ("Route", "route"),
+        ("Driver", "driver"),
+        ("Map", "map"),
+        ("Logbook", "logbook"),
+    )
 
     def __init__(self, ctx, driving: DrivingState) -> None:
         super().__init__(ctx)
@@ -2804,7 +2851,7 @@ class DrivingStatusScreenState(MenuState):
         "Use up and down arrows to review each line. Enter repeats the current "
         "line. Escape goes back to the status screens."
     )
-    TITLES = {"route": "Route", "driver": "Driver", "map": "Map"}
+    TITLES = {"route": "Route", "driver": "Driver", "map": "Map", "logbook": "Logbook"}
 
     def __init__(self, ctx, driving: DrivingState, screen: str) -> None:
         super().__init__(ctx)
@@ -2833,6 +2880,10 @@ class DrivingStatusScreenState(MenuState):
             return self._driver_lines()
         if self.screen == "map":
             return self._map_lines()
+        if self.screen == "logbook":
+            from .logbook import logbook_lines
+
+            return logbook_lines(self.ctx, self.driving)
         return self.driving.status_lines()
 
     def _driver_lines(self) -> list[str]:
@@ -2984,7 +3035,8 @@ class PauseMenuState(MenuState):
         cost = MECHANIC_CALLOUT_FEE + repaired * MECHANIC_RATE_PER_PCT
         p.money -= cost   # the rescue is never refused; money can go negative
         d.truck.damage_pct = FIELD_REPAIR_DAMAGE_PCT
-        _advance_rest_clock(d, MECHANIC_WAIT_MIN)
+        _advance_rest_clock(d, MECHANIC_WAIT_MIN, "on_duty_not_driving",
+                            "roadside mechanic")
         d.hos.on_duty(MECHANIC_WAIT_MIN)
         self.ctx.audio.play("ui/notify")
         self.refresh()

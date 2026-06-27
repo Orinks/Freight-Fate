@@ -9,6 +9,7 @@ import pytest
 from freight_fate.sim import hos
 from freight_fate.sim.hos import (
     LIMITS,
+    DutyLog,
     HosClock,
     clock_text,
     is_night,
@@ -247,6 +248,32 @@ def test_profile_persists_hos_and_fatigue():
     loaded = Profile.load(p.save())
     assert loaded.hos.driving_min == 345
     assert loaded.fatigue == 67.5
+
+
+def test_duty_log_records_coalesces_and_roundtrips():
+    log = DutyLog()
+    log.record("driving", 6.0, 7.0, "I-90 from Chicago to Toledo")
+    log.record("driving", 7.0, 7.5, "I-90 from Chicago to Toledo")
+    log.record("off_duty", 7.5, 8.0, "Ohio Turnpike service plaza", "30-minute break")
+
+    assert len(log.segments) == 2
+    assert log.segments[0].duration_hours == pytest.approx(1.5)
+    assert log.totals_since(6.0, 8.0)["driving"] == pytest.approx(1.5)
+
+    again = DutyLog.from_dict(log.to_dict())
+    assert len(again.segments) == 2
+    assert again.segments[1].note == "30-minute break"
+
+
+def test_profile_persists_duty_log():
+    from freight_fate.models.profile import Profile
+
+    p = Profile(name="Log Driver")
+    p.duty_log.record("on_duty_not_driving", 6.0, 6.25, "Chicago terminal",
+                      "pre-trip")
+    loaded = Profile.load(p.save())
+    assert len(loaded.duty_log.segments) == 1
+    assert loaded.duty_log.segments[0].location == "Chicago terminal"
 
 
 # -- day/night ---------------------------------------------------------------------
@@ -939,6 +966,35 @@ def test_hos_clock_runs_on_game_time():
         driving._update_hours_and_fatigue(1.0)  # one real second
         gained = driving.hos.driving_min - before
         assert gained == pytest.approx(driving.trip.time_scale / 60.0)
+    finally:
+        app.shutdown()
+
+
+@pytest.mark.smoke
+def test_driving_logbook_records_and_traffic_stop_reads_entries(monkeypatch):
+    from freight_fate.app import App
+    from freight_fate.states.driving import TrafficStopState
+
+    app = App()
+    spoken = []
+    monkeypatch.setattr(app.ctx, "say",
+                        lambda text, interrupt=True: spoken.append(text))
+    try:
+        driving = start_drive(app)
+        driving.truck.velocity_mps = 12.0
+        driving.trip.game_minutes = driving.trip.time_scale / 60.0
+        driving._update_hours_and_fatigue(1.0)
+
+        assert app.ctx.profile.duty_log.segments
+        assert app.ctx.profile.duty_log.segments[-1].status == "driving"
+
+        stop = TrafficStopState(app.ctx, driving, signaled=True, over=12.0, limit=65.0)
+        stop.items = stop.build_items()
+        stop.announce_entry()
+
+        assert "Logbook shows" in spoken[-1]
+        assert "driving" in spoken[-1]
+        assert "Latest entry" in spoken[-1]
     finally:
         app.shutdown()
 

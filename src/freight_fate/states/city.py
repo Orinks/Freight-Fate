@@ -30,6 +30,15 @@ TERMINAL_FUEL_MIN = 20.0
 TERMINAL_REPAIR_MIN = 60.0
 
 
+def _record_city_duty(ctx, status: str, start_hour: float, end_hour: float,
+                      note: str = "") -> None:
+    p = ctx.profile
+    if p is None:
+        return
+    terminal = ctx.world.home_terminal(p.current_city)
+    p.duty_log.record(status, start_hour, end_hour, terminal.name, note)
+
+
 def _job_payload(job: Job) -> dict:
     return job_payload(job)
 
@@ -148,6 +157,8 @@ class CityMenuState(MenuState):
             MenuItem("Time and weather", self._time_weather,
                      help="Hear the clock, the day of your career, and the "
                           "conditions outside."),
+            MenuItem("Logbook", self._logbook,
+                     help="Review your recent Record of Duty Status entries."),
             MenuItem("Sleep 10 hours", self._sleep,
                      help="A full night in the terminal bunk room: fresh hours of "
                           "service and zero fatigue. The clock advances "
@@ -304,7 +315,10 @@ class CityMenuState(MenuState):
     def _sleep(self) -> None:
         p = self.ctx.profile
         before_fatigue = p.fatigue
+        start = p.game_hours
         p.game_hours += 10.0
+        _record_city_duty(self.ctx, "sleeper_berth", start, p.game_hours,
+                          "terminal sleep")
         p.hos.sleep()
         p.fatigue = 0.0
         p.market.advance_to(p.market_day())
@@ -316,6 +330,11 @@ class CityMenuState(MenuState):
                      "Hours of service reset.")
         if before_fatigue < 70.0:
             self.ctx.award_achievement("sleep_before_exhaustion")
+
+    def _logbook(self) -> None:
+        from .logbook import LogbookState
+
+        self.ctx.push_state(LogbookState(self.ctx))
 
     def _save(self) -> None:
         self.ctx.save_profile()
@@ -449,7 +468,10 @@ class GarageState(MenuState):
             cost = self.ctx.economy.fuel_cost(self._region(), gallons)
             p.money -= cost
             p.truck_fuel_gal = min(tank, p.truck_fuel_gal + gallons)
+            start = p.game_hours
             p.game_hours += TERMINAL_FUEL_MIN / 60.0
+            _record_city_duty(self.ctx, "on_duty_not_driving", start,
+                              p.game_hours, "terminal fuel")
             p.hos.on_duty(TERMINAL_FUEL_MIN)
             self.ctx.save_profile()
             self.ctx.audio.play("vehicle/fuel_pump")
@@ -461,7 +483,10 @@ class GarageState(MenuState):
             return
         p.money -= cost
         p.truck_fuel_gal = tank
+        start = p.game_hours
         p.game_hours += TERMINAL_FUEL_MIN / 60.0
+        _record_city_duty(self.ctx, "on_duty_not_driving", start,
+                          p.game_hours, "terminal fuel")
         p.hos.on_duty(TERMINAL_FUEL_MIN)
         self.ctx.save_profile()
         self.ctx.audio.play("vehicle/fuel_pump")
@@ -485,7 +510,10 @@ class GarageState(MenuState):
             cost = self.ctx.economy.repair_cost(repairable)
             p.money -= cost
             p.truck_damage_pct = max(0.0, p.truck_damage_pct - repairable)
+            start = p.game_hours
             p.game_hours += TERMINAL_REPAIR_MIN / 60.0
+            _record_city_duty(self.ctx, "on_duty_not_driving", start,
+                              p.game_hours, "terminal repair")
             p.hos.on_duty(TERMINAL_REPAIR_MIN)
             self.ctx.save_profile()
             self.ctx.audio.play("ui/notify")
@@ -497,7 +525,10 @@ class GarageState(MenuState):
             return
         p.money -= cost
         p.truck_damage_pct = 0.0
+        start = p.game_hours
         p.game_hours += TERMINAL_REPAIR_MIN / 60.0
+        _record_city_duty(self.ctx, "on_duty_not_driving", start,
+                          p.game_hours, "terminal repair")
         p.hos.on_duty(TERMINAL_REPAIR_MIN)
         self.ctx.save_profile()
         self.ctx.audio.play("ui/notify")
@@ -801,7 +832,10 @@ class PickupFacilityState(MenuState):
 
     def _check_in(self) -> None:
         p = self.ctx.profile
+        start = p.game_hours
         p.game_hours += PICKUP_CHECK_IN_MIN / 60.0
+        p.duty_log.record("on_duty_not_driving", start, p.game_hours,
+                          self.facility, "shipper check-in")
         p.hos.on_duty(PICKUP_CHECK_IN_MIN)
         self.checked_in = True
         self._save_state()
@@ -839,7 +873,10 @@ class PickupFacilityState(MenuState):
 
     def _finish_load(self) -> None:
         p = self.ctx.profile
+        start = p.game_hours
         p.game_hours += PICKUP_LOADING_MIN / 60.0
+        p.duty_log.record("on_duty_not_driving", start, p.game_hours,
+                          self.facility, "loading")
         p.hos.on_duty(PICKUP_LOADING_MIN)
         self.loaded = True
         self._just_loaded = True

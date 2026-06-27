@@ -29,7 +29,7 @@ import sys
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
 
-from ..sim.hos import HosClock
+from ..sim.hos import DutyLog, HosClock
 from ..updater import is_frozen
 from .career import Career
 from .market import Market
@@ -282,6 +282,7 @@ class Profile:
     career: Career = field(default_factory=Career)
     market: Market = field(default_factory=Market)
     hos: HosClock = field(default_factory=HosClock)  # hours-of-service shift clock
+    duty_log: DutyLog = field(default_factory=DutyLog)  # rolling Record of Duty Status
     achievements: list[str] = field(default_factory=list)
     achievement_stats: dict = field(default_factory=dict)
 
@@ -303,9 +304,14 @@ class Profile:
         career = Career(**d.pop("career", {}))
         market = Market(**d.pop("market", {}))
         hos = HosClock.from_dict(d.pop("hos", None))  # absent in v2 saves: fresh clock
-        known = {f for f in cls.__dataclass_fields__ if f not in ("career", "market", "hos")}
+        duty_log = DutyLog.from_dict(d.pop("duty_log", None))
+        known = {
+            f for f in cls.__dataclass_fields__
+            if f not in ("career", "market", "hos", "duty_log")
+        }
         kwargs = {k: v for k, v in d.items() if k in known}
-        return cls(career=career, market=market, hos=hos, **kwargs)
+        return cls(career=career, market=market, hos=hos,
+                   duty_log=duty_log, **kwargs)
 
     # -- truck ------------------------------------------------------------------
 

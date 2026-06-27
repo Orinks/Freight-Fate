@@ -239,50 +239,48 @@ Net-new realism candidates, roughly by area:
 - **Business realism.** The company-driver→owner-operator arc, loans, and
   insurance already sketched under Business.
 
-## Planned for 1.8: in-cab logbook (Record of Duty Status)
+## Shipped for 1.8: in-cab logbook (Record of Duty Status)
 
 The game talks about an ELD and the shipped `TrafficStopState` already runs a
-spoken "license/logbook check," but there is no actual logbook behind it. Today's
-`HosClock` (`sim/hos.py`) is an aggregate ledger -- it accumulates driving, duty,
-and since-break minutes and tracks the current duty status, but keeps no
-chronological history. A real ELD logbook is a Record of Duty Status (RODS): a
-timeline of duty-status segments with timestamps and locations. 1.8 adds that,
-and graduates the trooper logbook check from cosmetic narration to reading real
-entries. (The 60/70-hour cycle and 34-hour restart that a RODS window would
-unlock are deferred to a later milestone.)
+spoken "license/logbook check." That now has a real logbook behind it:
+`DutyLog` records a rolling Record of Duty Status (RODS) as chronological
+driving, on-duty, off-duty, and sleeper-berth segments with timestamps,
+locations, and notes. The terminal and driving Tab status menu expose a spoken
+Logbook screen, and traffic stops read the recent logbook summary before
+resolving the warning or ticket. (The 60/70-hour cycle and 34-hour restart that
+a RODS window would unlock are deferred to a later milestone.)
 
 ### Design sketch
 
-- **Data model.** A `DutyLog` of ordered `DutySegment`s: status (the existing
+- [x] **Data model.** A `DutyLog` of ordered `DutySegment`s: status (the existing
   `DUTY_STATUSES` -- driving / on_duty_not_driving / off_duty / sleeper_berth),
   start and end hour on the career clock (`profile.game_hours`), a short location
   string ("I-90 near Toledo", "Chicago terminal"), and an optional note ("fuel
   stop", "out-of-service order").
-- **Recording with coalescing.** `drive()` runs every frame, so the log must not
-  append a row per tick. `DutyLog.record(status, now_hour, location)` extends the
-  current segment when the status is unchanged and only opens a new one on an
-  actual transition, capturing location where the segment starts (as real RODS
-  logs location at status changes). A continuous driving stint becomes one row,
-  on-ramp to rest stop.
-- **Architecture.** Keep `HosClock` pure and pygame-free (the headless tests
+- [x] **Recording with coalescing.** `drive()` runs every frame, so the log must not
+  append a row per tick. `DutyLog.record(status, start_hour, end_hour, location)`
+  extends the current segment when status, location, and note match, and only
+  opens a new one on an actual transition. A continuous driving stint becomes
+  one row, on-ramp to rest stop.
+- [x] **Architecture.** Keep `HosClock` pure and pygame-free (the headless tests
   drive it directly). The `DutyLog` lives on the `Profile` alongside `hos`, and
   is recorded from the layer that already knows the absolute clock and place --
   the driving/city/rest code that calls `_advance_rest_clock` and
   `hos.drive/on_duty/off_duty`. `DutyLog` stays unit-testable standalone. Prune
   to a rolling ~8-day window (192 game-hours) to bound save size.
-- **Persistence.** Additive `duty_log` field in `Profile.to_dict`/`from_dict`
+- [x] **Persistence.** Additive `duty_log` field in `Profile.to_dict`/`from_dict`
   with a tolerant load like `HosClock.from_dict`; absent in old saves means an
   empty log. Fully backward compatible.
-- **Player surface.** A fully spoken Logbook screen (first-letter nav, consistent
+- [x] **Player surface.** A fully spoken Logbook screen (first-letter nav, consistent
   with the rest of the UI), reachable from the city menu and the driving Tab
   status menu. Shows current status, today's hours-in-each-status grid, the
   running limits the clock already computes, and a chronological list of recent
   segments ("7:00 AM-11:30 AM, driving, 4.5 hrs, I-90 from Chicago"). No new
   global hotkey needed -- C and Tab already cover live HOS.
-- **Real enforcement (in scope for 1.8).** `TrafficStopState`'s logbook check
-  reads the recorded RODS instead of only the `hos_violation` flag, and cites
-  specifics in the spoken stop and evidence ("11.5 hours driving since your last
-  10-hour reset") rather than a generic "HOS/ELD violation."
+- [x] **Real enforcement (first slice).** `TrafficStopState`'s logbook check
+  reads the recorded RODS instead of only saying it performed a generic
+  "license/logbook check." Future enforcement can cite deeper violations such
+  as "11.5 hours driving since your last 10-hour reset."
 
 ## State troopers and law enforcement
 
@@ -454,8 +452,8 @@ Deliver -> Earn and level up -> Repeat
 - [x] Cruise control (K), with hazard and braking auto-cancel
 - [x] Region-flavored road hazards (dust devils, deer, rockfall, ...)
 - [x] HOS-aware realistic deadlines (driving + breaks + sleep + slack)
-- [ ] In-cab logbook / Record of Duty Status, with the trooper logbook
-      check reading real entries (planned for 1.8, designed above)
+- [x] In-cab logbook / Record of Duty Status, with the trooper logbook
+      check reading real entries
 - [ ] State troopers and law enforcement (speeding pull-overs shipped;
       CB heads-up, felony stop, weigh-station, damage-triggered slices pending)
 - [ ] Special event jobs (oversize loads, urgent medical freight)

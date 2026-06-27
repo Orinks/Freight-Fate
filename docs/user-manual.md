@@ -138,6 +138,7 @@ Your terminal is the safe hub between jobs. Public terminal actions include:
 | Career stats | Review level, reputation, deliveries, and career totals. |
 | Truck status | Review truck model, fuel, tank size, and damage condition. |
 | Time and weather | Review the clock, career day, and current city weather. |
+| Logbook | Review your recent Record of Duty Status entries. |
 | Sleep 10 hours | Rest at the terminal and reset hours of service. |
 | Save game | Save the current career. |
 | Settings | Open settings categories. |
@@ -309,7 +310,8 @@ change is announced as reduced or raised, and named near a city. State troopers
 patrol some stretches, hotter on busy interstates, in construction, and at
 night. Speed badly inside a patrol and a trooper may pull you over: signal with
 X (the same key as an exit), brake to a stop on the shoulder, and sit through a
-license and logbook check that ends in an on-the-spot ticket or a warning.
+license and logbook check that reads your recent duty entries before ending in
+an on-the-spot ticket or a warning.
 Ignoring the lights is logged as evasion and costs far more. Speeding the
 patrols do not catch still adds a quieter charge at delivery settlement.
 Adaptive cruise will not engage on low-speed local roads such as facility
@@ -376,6 +378,12 @@ The game gives warnings at 2 hours, 1 hour, and 30 minutes before a limit.
 Driving past a limit risks inspections, fines, reputation loss, and
 out-of-service orders.
 
+The Logbook is the spoken Record of Duty Status behind that clock. It records a
+rolling timeline of driving, on-duty work, off-duty breaks, and sleeper-berth
+rest, with the time, location, and a short note such as fuel stop, loading, or
+out-of-service order. Open **Logbook** from the terminal, or open **Tab** while
+driving and choose **Logbook**, to review today's totals and recent entries.
+
 Fatigue rises while driving, faster at night. Drowsiness adds yawn and rumble
 strip cues and makes hazards harder to react to. Once fatigue is severe you
 start to nod off: a rumble-strip jolt and a warning give you a brief window to
@@ -413,6 +421,7 @@ Tab opens the Driving status menu. It has three review screens:
 | Route | Current route status lines from the active drive. |
 | Driver | Driver name, money, load, objective, truck fuel and damage, transmission, fatigue, hours, and deadline. |
 | Map | Route cities, highways, progress, next guidance, upcoming stops, map points, and toll exposure. |
+| Logbook | Today's duty totals and recent Record of Duty Status entries. |
 
 Inside a status screen, Up and Down move line by line, Enter repeats the current
 line, and Escape returns to the status screen list.

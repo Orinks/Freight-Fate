@@ -23,6 +23,13 @@ from dataclasses import dataclass, field
 HOS_MODES = ("realistic", "relaxed", "debug_off")
 HOS_NON_ENFORCED_MODES = {"off", "debug_off"}
 DUTY_STATUSES = ("driving", "on_duty_not_driving", "off_duty", "sleeper_berth")
+DUTY_STATUS_LABELS = {
+    "driving": "driving",
+    "on_duty_not_driving": "on duty, not driving",
+    "off_duty": "off duty",
+    "sleeper_berth": "sleeper berth",
+}
+RODS_WINDOW_HOURS = 8 * 24.0
 
 BREAK_MIN = 30.0          # minimum break that resets the 8-hour rule
 SLEEP_MIN = 600.0         # a full 10-hour off-duty reset
@@ -246,6 +253,146 @@ class HosClock:
             )
         except (TypeError, ValueError):
             return cls()
+
+
+@dataclass
+class DutySegment:
+    """One Record of Duty Status row, in absolute career-clock hours."""
+
+    status: str
+    start_hour: float
+    end_hour: float
+    location: str
+    note: str = ""
+
+    @property
+    def duration_hours(self) -> float:
+        return max(0.0, self.end_hour - self.start_hour)
+
+    def to_dict(self) -> dict:
+        return {
+            "status": self.status,
+            "start_hour": self.start_hour,
+            "end_hour": self.end_hour,
+            "location": self.location,
+            "note": self.note,
+        }
+
+    @classmethod
+    def from_dict(cls, data) -> DutySegment | None:
+        if not isinstance(data, dict):
+            return None
+        try:
+            status = str(data.get("status", ""))
+            if status not in DUTY_STATUSES:
+                return None
+            start = float(data.get("start_hour", 0.0))
+            end = float(data.get("end_hour", start))
+            if not math.isfinite(start) or not math.isfinite(end):
+                return None
+            if end < start:
+                end = start
+            return cls(
+                status=status,
+                start_hour=max(0.0, start),
+                end_hour=max(0.0, end),
+                location=str(data.get("location", "") or "unknown location"),
+                note=str(data.get("note", "") or ""),
+            )
+        except (TypeError, ValueError):
+            return None
+
+
+@dataclass
+class DutyLog:
+    """Rolling in-cab Record of Duty Status.
+
+    Kept separate from ``HosClock``: the clock remains the aggregate rules
+    engine, while the logbook records the chronological status rows a driver
+    and trooper can review.
+    """
+
+    segments: list[DutySegment] = field(default_factory=list)
+
+    def record(self, status: str, start_hour: float, end_hour: float,
+               location: str, note: str = "") -> None:
+        if status not in DUTY_STATUSES:
+            return
+        try:
+            start = max(0.0, float(start_hour))
+            end = max(start, float(end_hour))
+        except (TypeError, ValueError):
+            return
+        if not math.isfinite(start) or not math.isfinite(end):
+            return
+        location = str(location or "unknown location")
+        note = str(note or "")
+        if end == start:
+            return
+        if self.segments:
+            last = self.segments[-1]
+            if last.status == status and last.location == location and last.note == note:
+                last.end_hour = max(last.end_hour, end)
+                self.prune(end)
+                return
+            if last.end_hour < start:
+                last.end_hour = start
+        self.segments.append(DutySegment(status, start, end, location, note))
+        self.prune(end)
+
+    def prune(self, now_hour: float, keep_hours: float = RODS_WINDOW_HOURS) -> None:
+        cutoff = max(0.0, now_hour - keep_hours)
+        kept: list[DutySegment] = []
+        for segment in self.segments:
+            if segment.end_hour <= cutoff:
+                continue
+            if segment.start_hour < cutoff:
+                segment.start_hour = cutoff
+            kept.append(segment)
+        self.segments = kept
+
+    def totals_since(self, start_hour: float, end_hour: float) -> dict[str, float]:
+        totals = {status: 0.0 for status in DUTY_STATUSES}
+        for segment in self.segments:
+            start = max(start_hour, segment.start_hour)
+            end = min(end_hour, segment.end_hour)
+            if end > start:
+                totals[segment.status] += end - start
+        return totals
+
+    def recent(self, count: int = 8) -> list[DutySegment]:
+        return self.segments[-count:]
+
+    def current_status(self) -> str:
+        if not self.segments:
+            return "off_duty"
+        return self.segments[-1].status
+
+    def to_dict(self) -> dict:
+        return {"segments": [segment.to_dict() for segment in self.segments]}
+
+    @classmethod
+    def from_dict(cls, data) -> DutyLog:
+        if not isinstance(data, dict):
+            return cls()
+        segments = [
+            segment
+            for raw in data.get("segments", [])
+            if (segment := DutySegment.from_dict(raw)) is not None
+        ]
+        segments.sort(key=lambda item: item.start_hour)
+        return cls(segments=segments)
+
+
+def duty_status_label(status: str) -> str:
+    return DUTY_STATUS_LABELS.get(status, str(status).replace("_", " "))
+
+
+def duration_text(hours: float) -> str:
+    minutes = max(0.0, hours * 60.0)
+    if minutes < 60.0:
+        return f"{minutes:.0f} minutes"
+    return f"{minutes / 60.0:.1f} hours"
 
 
 # ---------------------------------------------------------------------------
