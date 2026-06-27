@@ -503,9 +503,10 @@ class DrivingControlsMixin:
 
     def _speak_weather(self) -> None:
         source = "Live conditions" if self.weather.live else "Currently"
+        safe_speed = self.ctx.settings.speed_text(self.weather.effects.safe_speed_mph)
         parts = [f"It is {time_of_day(self.trip.current_hour)}.",
                  f"{source} {self.weather.describe()}.",
-                 f"Safe speed about {self.weather.effects.safe_speed_mph:.0f}."]
+                 f"Safe speed about {safe_speed}."]
         if not self.weather.live:
             ahead = ", then ".join(k.value for k in self.weather.forecast(2))
             parts.append(f"Ahead: {ahead}.")

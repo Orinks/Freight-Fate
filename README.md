@@ -98,6 +98,9 @@ For a complete player-facing guide to installing, careers, dispatch, driving,
 route stops, saves, settings, audio, speech, and troubleshooting, see the
 [Freight Fate Player Manual](docs/user-manual.md).
 
+Want to help with code, docs, or world data? Start with
+[CONTRIBUTING.md](CONTRIBUTING.md).
+
 ## Run from source
 
 You need two tools installed and on your PATH:

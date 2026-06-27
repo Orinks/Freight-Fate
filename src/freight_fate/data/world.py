@@ -1,5 +1,10 @@
-# ruff: noqa: F403,F405,I001
-"""World model: cities, freight locations, and the highway network."""
+# ruff: noqa: F403,F405
+"""World model: cities, freight locations, and the highway network.
+
+Loads indexed world data and exposes a graph with Dijkstra-based route finding.
+Route options are produced by re-running the search with already-used legs
+penalized, giving genuinely different alternatives (fastest vs. detour).
+"""
 
 from __future__ import annotations
 
@@ -10,10 +15,22 @@ import zlib
 from pathlib import Path
 
 from .world_constants import *
-from .world_local_data import load_city_service_data, load_facility_endpoints, load_local_approaches, load_local_geometries
+from .world_loader import load_world_data
+from .world_local_data import (
+    load_city_service_data,
+    load_facility_endpoints,
+    load_local_approaches,
+    load_local_geometries,
+)
 from .world_models import *
 
 WORLD_PATH = Path(__file__).parent / "world.json"
+WORLD_DATA_PATH = Path(__file__).parent / "world_data"
+WORLD_INDEX_PATH = WORLD_DATA_PATH / "index.json"
+# Alternate routes should feel like dispatch choices, not graph leftovers.
+ALTERNATE_ROUTE_EXTRA_RATIO = 0.22
+ALTERNATE_ROUTE_MIN_EXTRA_MILES = 75.0
+ALTERNATE_ROUTE_MAX_EXTRA_MILES = 550.0
 
 class World:
     def __init__(self, data: dict) -> None:
@@ -110,21 +127,20 @@ class World:
             self._facilities_by_id[location.id] = location
 
     @classmethod
-    def load(cls, path: Path = WORLD_PATH,
+    def load(cls, root: Path = WORLD_DATA_PATH,
              overlay: Path | None = None) -> World:
         """Load the world, optionally merging an additive overlay on top.
 
-        The checked-in base at ``path`` is the deterministic source of truth.
-        An optional ``overlay`` (extra cities and legs fetched online and cached
-        for later offline play, per docs/osm-routing-plan.md) is merged
-        additively: it can only add cities and legs the base does not already
+        The checked-in indexed world data is the deterministic source of truth.
+        An optional ``overlay`` is merged additively: it can only add cities and
+        legs the base does not already
         have, never override the base. With no overlay the result is exactly the
         base world, so the offline/deterministic path is unchanged. The runtime
         ``get_world`` deliberately does not pass an overlay yet; this is the
         loader capability the online tier will build on.
         """
-        with open(path, encoding="utf-8") as f:
-            data = json.load(f)
+
+        data = load_world_data(root)
         if overlay is not None and overlay.exists():
             data = _merge_overlay(data, json.loads(overlay.read_text(encoding="utf-8")))
         return cls(data)
