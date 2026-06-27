@@ -104,6 +104,7 @@ ZONE_WARNING_REAL_S = 18.0         # target real seconds of warning
 ZONE_WARNING_MAX_MI = 10.0
 STATE_CROSSING_WARNING_LOOKAHEAD_MI = 10.0
 CONSTRUCTION_ENFORCEMENT_GRACE_MI = 1.5
+CB_PATROL_LOOKAHEAD_MI = 5.0
 # Driving faster than the weather's safe speed risks a traction-loss incident,
 # so the safe-speed readout has teeth. Risk scales with how far over you are and
 # how little grip the conditions leave; only adverse grip counts.
@@ -395,6 +396,7 @@ class Trip:
         self._announced_speed_limit: float | None = None  # last spoken corridor limit
         self._announced_zone_warnings: set[str] = set()
         self._construction_zone_grace_start: dict[str, float] = {}
+        self._announced_patrols: set[str] = set()
         self._hazard_check_mi = 5.0
         self._inspection_check_mi = 10.0
         self._conditions_check_mi = CONDITIONS_CHECK_MI
@@ -668,6 +670,17 @@ class Trip:
         """The hottest patrol window covering a mile, or ``None``."""
         active = [p for p in self.patrols if p.start_mi <= mile <= p.end_mi]
         return max(active, key=lambda p: p.intensity) if active else None
+
+    def next_patrol_within(self, within_mi: float) -> PatrolWindow | None:
+        """Nearest active or upcoming patrol window inside the lookahead."""
+        candidates = [
+            p for p in self.patrols
+            if p.end_mi >= self.position_mi
+            and p.start_mi - self.position_mi <= within_mi
+        ]
+        if not candidates:
+            return None
+        return min(candidates, key=lambda p: max(0.0, p.start_mi - self.position_mi))
 
     def _leg_traffic_density(self, leg: Leg, bad_weather_bias: float,
                              night: bool) -> float:
@@ -966,6 +979,9 @@ class Trip:
             if cue.at_mi <= self.position_mi:
                 self._announced_navigation.add(f"{cue.key}:advance")
                 self._announced_navigation.add(f"{cue.key}:near")
+        for patrol in self.patrols:
+            if patrol.start_mi <= self.position_mi:
+                self._announced_patrols.add(_patrol_key(patrol))
         for i, (start, leg) in enumerate(zip(self._leg_starts, self.route.legs,
                                              strict=True)):
             forward = self.route.cities[i] == leg.a
@@ -1033,6 +1049,7 @@ class Trip:
         self._check_tolls()
         self._check_cities()
         if moved_mi > 0.0:
+            self._check_patrol_heads_up()
             self._check_hazards(moved_mi)
             self._check_conditions_speed(moved_mi)
             self._check_inspections(moved_mi)
@@ -1176,6 +1193,20 @@ class Trip:
                     self._emit(TripEventKind.CHECKPOINT, cue.near_text, cue=cue)
                 else:
                     self._emit(TripEventKind.GPS_CUE, cue.near_text, cue=cue)
+
+    def _check_patrol_heads_up(self) -> None:
+        for patrol in self.patrols:
+            key = _patrol_key(patrol)
+            ahead = patrol.start_mi - self.position_mi
+            if 0 < ahead <= CB_PATROL_LOOKAHEAD_MI and key not in self._announced_patrols:
+                self._announced_patrols.add(key)
+                self._emit(
+                    TripEventKind.GPS_CUE,
+                    f"CB radio reports a trooper ahead in {self._distance_text(ahead)} "
+                    f"on this {patrol.reason}. Check your speed.",
+                    cb_patrol=patrol,
+                )
+                return
 
     def _check_tolls(self) -> None:
         for i, (start, leg) in enumerate(zip(self._leg_starts, self.route.legs,
@@ -1430,6 +1461,10 @@ def _nearest_exit_label(leg, at_mi: float, tol_mi: float = 2.0) -> str:
 
 def _zone_key(zone: Zone) -> str:
     return f"{zone.reason}:{zone.start_mi:.3f}:{zone.end_mi:.3f}:{zone.limit_mph:.0f}"
+
+
+def _patrol_key(patrol: PatrolWindow) -> str:
+    return f"{patrol.reason}:{patrol.start_mi:.3f}:{patrol.end_mi:.3f}"
 
 
 def _fallback_grade(terrain: str, mile: float, highway: str) -> float:

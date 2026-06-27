@@ -36,6 +36,9 @@ def test_safety_cues_are_critical_and_chatter_is_not():
         assert d._is_critical_event(
             TripEvent(TripEventKind.GPS_CUE, "traffic ahead", {"cue": _Cue()}))
         # Ambient chatter is not critical.
+        assert not d._is_critical_event(
+            TripEvent(TripEventKind.GPS_CUE, "CB radio: patrol ahead",
+                      {"cb_patrol": object()}))
         assert not d._is_critical_event(TripEvent(TripEventKind.WEATHER_CHANGE, "rain"))
         assert not d._is_critical_event(TripEvent(TripEventKind.TOLL_CHARGED, "toll"))
         assert not d._is_critical_event(TripEvent(TripEventKind.GPS_CUE, "exit ahead"))
@@ -62,6 +65,33 @@ def test_zone_warning_interrupts_while_weather_chatter_queues(monkeypatch):
 
         d._handle_trip_event(TripEvent(TripEventKind.WEATHER_CHANGE, "Weather: rain."))
         assert calls[-1][1] is False  # ambient chatter yields and queues
+    finally:
+        app.shutdown()
+
+
+def test_cb_radio_chatter_queues_and_uses_cb_audio(monkeypatch):
+    from freight_fate.app import App
+    from freight_fate.sim.trip import PatrolWindow
+
+    app = App()
+    try:
+        d = _driving(app)
+        calls = []
+        sounds = []
+        monkeypatch.setattr(app.ctx, "say_event",
+                            lambda text, interrupt=True: calls.append((text, interrupt)))
+        monkeypatch.setattr(app.ctx.audio, "play",
+                            lambda key, **kwargs: sounds.append(key))
+
+        d._handle_trip_event(TripEvent(
+            TripEventKind.GPS_CUE,
+            "CB radio reports a trooper ahead in 5 miles on this speed trap. "
+            "Check your speed.",
+            {"cb_patrol": PatrolWindow(10.0, 14.0, 0.8, "speed trap")},
+        ))
+
+        assert sounds[-1] == "events/cb_radio_chatter"
+        assert calls[-1][1] is False
     finally:
         app.shutdown()
 

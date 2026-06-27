@@ -96,6 +96,28 @@ def test_upcoming_key_reports_an_imposed_limit_ahead(monkeypatch):
         app.shutdown()
 
 
+def test_upcoming_key_reports_cb_patrol_ahead(monkeypatch):
+    from freight_fate.app import App
+    from freight_fate.sim.trip import PatrolWindow
+
+    app = App()
+    try:
+        d = _driving(app)
+        d.trip.position_mi = 4.0
+        d.trip.zones = []
+        d.trip.stops = []
+        d.trip.navigation_cues = []
+        d.trip.patrols = [PatrolWindow(10.0, 14.0, 0.8, "speed trap")]
+        spoken = _capture(app, monkeypatch)
+
+        d.handle_event(key_event(pygame.K_u))
+
+        assert "Patrol in" in spoken[-1]
+        assert "speed trap" in spoken[-1]
+    finally:
+        app.shutdown()
+
+
 def test_upcoming_key_handles_a_clear_road(monkeypatch):
     from freight_fate.app import App
 
@@ -106,6 +128,7 @@ def test_upcoming_key_handles_a_clear_road(monkeypatch):
         d.trip.zones = []
         d.trip.stops = []
         d.trip.navigation_cues = []
+        d.trip.patrols = []
         spoken = _capture(app, monkeypatch)
         d.handle_event(key_event(pygame.K_u))
         assert "Nothing notable" in spoken[-1]

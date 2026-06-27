@@ -372,7 +372,7 @@ Events carry evidence such as HOS/ELD violations or construction-zone
 speeding, and serious HOS violations trigger an out-of-service 10-hour
 reset instead of only a fine.
 
-- [x] **Speeding pull-overs (interactive traffic stop).** Shipped: routes seed
+- [x] **Speeding pull-overs and CB heads-up.** Shipped: routes seed
   `PatrolWindow`s by highway class, region, and time of day (`Trip._place_patrols`
   / `active_patrol_at`), construction zones always hot, scaled down by relaxed
   mode's `hazard_scale`. A sustained speeding strike inside a window rolls
@@ -382,13 +382,15 @@ reset instead of only a fine.
   on-the-spot ticket (`SPEEDING_TICKET_FINES`, paid now) or a warning. Ignoring
   the lights past `PULL_OVER_IGNORE_MI` is logged as evasion. Disabled in the
   debug HOS bypass. Uncaught speeding still accrues the silent settlement strike.
-  Real ElevenLabs audio is in: `events/police_siren.ogg` (used now),
+  CB chatter now warns a few miles before an upcoming patrol window, plays
+  `events/cb_radio_chatter.ogg`, remains non-critical so hazards and
+  construction warnings can preempt it, and is reviewable with the U upcoming
+  key. Real ElevenLabs audio is in: `events/police_siren.ogg` (pull-over),
   `events/spike_strip.ogg` (felony-stop sound on evasion), and
-  `events/cb_radio_chatter.ogg` (staged for the CB slice). Regenerate via
+  `events/cb_radio_chatter.ogg` (CB patrol heads-up). Regenerate via
   `tools/generate_sounds.py`.
-  *Next trooper slices:* the CB-radio heads-up mechanic ("bear at mile marker
-  12"), a full felony stop (losing the load), weigh-station "blow past while
-  flagged", damage-triggered stops.
+  *Next trooper slices:* a full felony stop (losing the load), weigh-station
+  "blow past while flagged", and damage-triggered stops.
 - [ ] **Richer construction enforcement.** Follow-up for the roadmap worker:
   model staged work-zone speed drops, merge/flagger cues, and zone-end restore
   timing more explicitly. Keep warnings action-first and keep enforcement after
@@ -538,8 +540,8 @@ Deliver -> Earn and level up -> Repeat
 - [x] HOS-aware realistic deadlines (driving + breaks + sleep + slack)
 - [x] In-cab logbook / Record of Duty Status, with the trooper logbook
       check reading real entries
-- [ ] State troopers and law enforcement (speeding pull-overs shipped;
-      CB heads-up, felony stop, weigh-station, damage-triggered slices pending)
+- [ ] State troopers and law enforcement (speeding pull-overs and CB heads-up
+      shipped; felony stop, weigh-station, damage-triggered slices pending)
 - [ ] Special event jobs (oversize loads, urgent medical freight)
 - [ ] Trailer types with handling differences
 

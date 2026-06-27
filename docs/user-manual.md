@@ -272,7 +272,7 @@ Driving controls are active while the road view is focused:
 | V | Report weather and forecast. |
 | L | Report lane position when lane drift is enabled. |
 | A | Repeat the last route announcement, in case you missed it. |
-| U | Report what is coming up: imposed speed limits, stops, and exits ahead. |
+| U | Report what is coming up: imposed speed limits, patrols, stops, and exits ahead. |
 | F1 | Show the driving control list and current objective. |
 | Escape | Open the pause menu. |
 
@@ -335,10 +335,12 @@ construction zone can trigger enforcement.
 Posted speed limits come from real map data and change along a corridor; a
 change is announced as reduced or raised, and named near a city. State troopers
 patrol some stretches, hotter on busy interstates, in construction, and at
-night. Speed badly inside a patrol and a trooper may pull you over: signal with
-X (the same key as an exit), brake to a stop on the shoulder, and sit through a
-license and logbook check that reads your recent duty entries before ending in
-an on-the-spot ticket or a warning.
+night. CB radio chatter can warn you a few miles before a patrol window; press
+U to check upcoming patrols along with other route guidance. Speed
+badly inside a patrol and a trooper may pull you over: signal with X (the same
+key as an exit), brake to a stop on the shoulder, and sit through a license and
+logbook check that reads your recent duty entries before ending in an
+on-the-spot ticket or a warning.
 Ignoring the lights is logged as evasion and costs far more. Speeding the
 patrols do not catch still adds a quieter charge at delivery settlement.
 Adaptive cruise will not engage on low-speed local roads such as facility

@@ -43,6 +43,36 @@ def test_active_patrol_returns_hottest_window():
     assert t.active_patrol_at(200.0) is None
 
 
+def test_cb_radio_warns_before_upcoming_patrol():
+    from freight_fate.sim.trip import CB_PATROL_LOOKAHEAD_MI, TripEventKind
+
+    t = _trip()
+    t.patrols = [PatrolWindow(10.0, 14.0, 0.8, "speed trap")]
+    t.position_mi = 10.0 - CB_PATROL_LOOKAHEAD_MI + 0.1
+    t.truck.velocity_mps = 1.0
+
+    events = t.update(0.1)
+
+    cb_events = [e for e in events if e.data.get("cb_patrol") is t.patrols[0]]
+    assert cb_events
+    assert cb_events[0].kind == TripEventKind.GPS_CUE
+    assert "CB radio reports a trooper ahead" in cb_events[0].message
+    assert "Check your speed" in cb_events[0].message
+
+
+def test_cb_radio_patrol_warning_only_fires_once():
+    t = _trip()
+    t.patrols = [PatrolWindow(10.0, 14.0, 0.8, "speed trap")]
+    t.position_mi = 6.0
+    t.truck.velocity_mps = 1.0
+
+    first = t.update(0.1)
+    second = t.update(0.1)
+
+    assert sum(1 for e in first if e.data.get("cb_patrol") is t.patrols[0]) == 1
+    assert not any(e.data.get("cb_patrol") is t.patrols[0] for e in second)
+
+
 # --- driving-side: catching the speeder -------------------------------------
 
 def _driving(app, *, patrol_intensity=1.0):

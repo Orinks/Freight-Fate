@@ -110,6 +110,8 @@ def _route_event_sound(event) -> str | None:
             return "events/construction_zone"
         return "events/traffic_slowing"
     if kind == TripEventKind.GPS_CUE:
+        if event.data.get("cb_patrol") is not None:
+            return "events/cb_radio_chatter"
         cue = event.data.get("cue")
         cue_kind = getattr(cue, "kind", None)
         if cue_kind == "traffic":
@@ -565,7 +567,7 @@ class DrivingState(State):
                 "C clock, deadline, and hours of service. "
                 "R route. Shift R next listed highway exit. V weather. L lane position. "
                 "A repeats the last announcement. U reads what is coming up: "
-                "imposed limits, stops, and exits ahead. "
+                "imposed limits, patrols, stops, and exits ahead. "
                 "Left and Right arrows steer when lane drift is enabled. "
                 "T route POI menu when already stopped "
                 "at one: available actions may include fuel, break, sleep, "
@@ -687,6 +689,17 @@ class DrivingState(State):
         stop = self.trip.upcoming_stop(within_mi)
         if stop is not None:
             parts.append(f"{stop.spoken_name} in {s.distance_text(stop.at_mi - pos)}")
+        if self.ctx.settings.hos_mode not in hos.HOS_NON_ENFORCED_MODES:
+            patrol = self.trip.next_patrol_within(within_mi)
+            if patrol is not None:
+                ahead = patrol.start_mi - pos
+                if ahead <= 0:
+                    parts.append(f"Patrol active now on this {patrol.reason}")
+                else:
+                    parts.append(
+                        f"Patrol in {s.distance_text(ahead)} "
+                        f"on this {patrol.reason}"
+                    )
         cue = self.trip.next_exit_cue()
         if cue is not None and 0 < cue.at_mi - pos <= within_mi:
             parts.append(f"in {s.distance_text(cue.at_mi - pos)}, {cue.text}")

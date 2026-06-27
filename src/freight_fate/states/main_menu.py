@@ -698,7 +698,7 @@ HELP_PAGES = [
         "L speaks lane position when lane drift is enabled.",
         "V speaks the weather and the forecast.",
         "A repeats the last route announcement, in case you missed it.",
-        "U speaks what is coming up: imposed speed limits, stops, and exits ahead.",
+        "U speaks what is coming up: imposed speed limits, patrols, stops, and exits ahead.",
         "Escape opens the pause menu.",
     ]),
     ("On the road", [
@@ -719,6 +719,8 @@ HELP_PAGES = [
         "A change is announced as reduced or raised, and named near a city.",
         "Watch your speed: limits also drop in construction and traffic zones.",
         "State troopers patrol some stretches. Speed badly inside a patrol and a",
+        "CB radio chatter can warn you a few miles before a patrol window.",
+        "Use U if you want to check upcoming patrols along with other guidance.",
         "trooper may light you up: signal with X, brake to a stop on the shoulder,",
         "and sit through a license and logbook check ending in an on-the-spot",
         "ticket or a warning. Ignoring the lights is logged as evasion, which",

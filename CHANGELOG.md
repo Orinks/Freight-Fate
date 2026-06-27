@@ -134,6 +134,11 @@
   service. You can review it from the terminal or the driving status menu, and
   traffic stops now read the recent logbook entries instead of only pretending
   to check them.
+- **CB radio patrol heads-up.** CB chatter can now warn you a few miles before
+  an upcoming state-trooper patrol window, with a radio squelch cue and a clear
+  "check your speed" line. The cue stays secondary to hazards and construction
+  warnings, and the U upcoming key can check upcoming patrols alongside
+  stops, speed zones, and exits.
 - **State troopers can pull you over for speeding.** Routes now have patrol
   windows -- hotter on busy interstates, in construction, and in dense regions,
   cooler out on the plains, with a night DUI bump. Speed badly inside one and a

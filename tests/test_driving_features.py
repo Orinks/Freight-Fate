@@ -119,6 +119,8 @@ def test_trip_event_sounds_use_contextual_cues():
         {"zone": Zone(1.0, 2.0, 45.0, "construction")},
     )
     assert _route_event_sound(event) == "events/construction_zone"
+    cb_event = TripEvent(TripEventKind.GPS_CUE, "CB patrol ahead", {"cb_patrol": object()})
+    assert _route_event_sound(cb_event) == "events/cb_radio_chatter"
 
 
 def test_driving_f1_describes_safe_shutdown_and_destination_parking(monkeypatch):
@@ -234,6 +236,8 @@ def test_how_to_play_documents_new_gameplay_systems():
     assert "low visibility shortens" in help_text
     assert "career runs on a calendar that starts in spring" in help_text
     assert "state troopers patrol" in help_text
+    assert "cb radio chatter can warn" in help_text
+    assert "check upcoming patrols" in help_text
     assert "will not engage on low-speed local roads" in help_text
 
 
