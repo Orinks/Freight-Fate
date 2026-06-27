@@ -10,6 +10,7 @@ from ..models.business import (
     OWNER_OPERATOR_BUY_IN,
     business_path_label,
     business_status_summary,
+    carrier_name,
     is_owner_operator,
     next_business_unlock,
     owner_operator_eligibility,
@@ -169,8 +170,8 @@ class CityMenuState(MenuState):
                           "board. Costs fuel and hours of service; no load, no "
                           "pay. Use it when local jobs are thin."),
             MenuItem(self._garage_label, self._garage,
-                     help="Refuel and repair your truck at the terminal garage. "
-                          "Company drivers use the carrier account. "
+                     help="Refuel and repair the active tractor at the terminal garage. "
+                          "Company drivers use carrier-assigned equipment and the carrier account. "
                           "Owner-operators pay their own fuel and repairs."),
             MenuItem("Business status", self._business_status,
                      help="Review your carrier, rank, next business unlock, "
@@ -178,7 +179,7 @@ class CityMenuState(MenuState):
             MenuItem("Career stats", self._stats,
                      help="Hear your level, reputation, and lifetime numbers."),
             MenuItem("Truck status", self._truck_status,
-                     help="Hear fuel and damage at a glance."),
+                     help="Hear assigned or owned tractor status at a glance."),
             MenuItem("Time and weather", self._time_weather,
                      help="Hear the clock, the day of your career, and the "
                           "conditions outside."),
@@ -279,15 +280,19 @@ class CityMenuState(MenuState):
     def _truck_status(self) -> None:
         p = self.ctx.profile
         specs = p.truck_specs()
-        truck = TRUCK_CATALOG.get(p.truck, TRUCK_CATALOG["rig"])
+        truck = TRUCK_CATALOG.get(p.active_truck_key(), TRUCK_CATALOG["rig"])
         fuel_pct = p.truck_fuel_gal / specs.fuel_tank_gal * 100
         damage = p.truck_damage_pct
         condition = ("excellent" if damage < 5 else "good" if damage < 20
                      else "worn" if damage < 50 else "poor")
-        self.ctx.say(f"Driving the {truck.label}. "
-                     f"Fuel {fuel_pct:.0f} percent, {p.truck_fuel_gal:.0f} gallons "
-                     f"of {specs.fuel_tank_gal:.0f}. "
-                     f"Truck condition {condition}, {damage:.0f} percent damage.")
+        if not p.owns_equipment():
+            lead = f"Assigned {carrier_name(p)} tractor: {truck.label}."
+        else:
+            lead = f"Owned tractor: {truck.label}."
+        self.ctx.say(f"{lead} Fuel {fuel_pct:.0f} percent, "
+                     f"{p.truck_fuel_gal:.0f} gallons of "
+                     f"{specs.fuel_tank_gal:.0f}. "
+                     f"Tractor condition {condition}, {damage:.0f} percent damage.")
 
     def _time_weather(self) -> None:
         from ..sim.weather import WeatherSystem
@@ -524,14 +529,14 @@ class GarageState(MenuState):
     def build_items(self) -> list[MenuItem]:
         return [
             MenuItem(self._fuel_label, self._refuel,
-                     help="Fill the tank. Company drivers bill the carrier. "
+                     help="Fill the tank. Company drivers use carrier-assigned tractors and bill the carrier. "
                           "Owner-operators pay this region's diesel price."),
             MenuItem(self._repair_label, self._repair,
-                     help="Restore the truck to full condition. Company drivers "
+                     help="Restore the tractor to full condition. Company drivers "
                           "bill the carrier; owner-operators pay the shop."),
             MenuItem("Upgrades", self._upgrades,
                      help="Owner-operators can buy performance upgrades for "
-                          "their truck: more torque, less drag, a bigger tank, "
+                          "owned tractors: more torque, less drag, a bigger tank, "
                           "stronger brakes."),
             MenuItem("Trucks", self._trucks,
                      help="Owner-operators can buy a new truck, or switch "
@@ -552,7 +557,7 @@ class GarageState(MenuState):
         if need < 1:
             return "Fuel: tank is full"
         if not player_pays_operating_costs(p.business_status):
-            return f"Refuel company tractor: {need:.0f} gallons, carrier billed"
+            return f"Refuel assigned company tractor: {need:.0f} gallons, carrier billed"
         cost = self.ctx.economy.fuel_cost(self._region(), need)
         return f"Refuel {need:.0f} gallons for {cost:,.0f} dollars"
 
@@ -561,7 +566,7 @@ class GarageState(MenuState):
         if p.truck_damage_pct < 1:
             return "Repairs: truck is in top shape"
         if not player_pays_operating_costs(p.business_status):
-            return f"Repair company tractor: {p.truck_damage_pct:.0f} percent damage, carrier billed"
+            return f"Repair assigned company tractor: {p.truck_damage_pct:.0f} percent damage, carrier billed"
         cost = self.ctx.economy.repair_cost(p.truck_damage_pct)
         return f"Repair {p.truck_damage_pct:.0f} percent damage for {cost:,.0f} dollars"
 
@@ -579,7 +584,7 @@ class GarageState(MenuState):
             self.ctx.save_profile()
             self.ctx.audio.play("vehicle/fuel_pump")
             self.ctx.say(
-                f"Tank filled on the carrier fuel account. Fueling took "
+                f"Assigned company tractor tank filled on the carrier fuel account. Fueling took "
                 f"{TERMINAL_FUEL_MIN:.0f} minutes. You still have "
                 f"{p.money:,.0f} dollars.")
             self.ctx.award_achievement("route_refuel")
@@ -636,7 +641,7 @@ class GarageState(MenuState):
             self.ctx.save_profile()
             self.ctx.audio.play("ui/notify")
             self.ctx.say(
-                f"Carrier shop repaired {fixed:.0f} percent damage. "
+                f"Carrier shop repaired {fixed:.0f} percent damage on the assigned tractor. "
                 f"The repair took {TERMINAL_REPAIR_MIN:.0f} minutes and did "
                 f"not reduce your cash balance.")
             self.ctx.award_achievement("garage_repair")
@@ -752,7 +757,11 @@ class BusinessStatusState(MenuState):
             self.refresh()
             return
         p.money -= OWNER_OPERATOR_BUY_IN
+        assigned = p.active_truck_key()
         p.business_status = LEASED_OWNER_OPERATOR
+        if assigned not in p.owned_trucks:
+            p.owned_trucks.append(assigned)
+        p.truck = assigned
         p.dispatch_board_cache = None
         self.ctx.save_profile()
         self.ctx.audio.play("ui/cash")
@@ -777,11 +786,31 @@ class UpgradeShopState(MenuState):
         self.ctx.say(f"Upgrades. You have {p.money:,.0f} dollars. {self.current_text()}")
 
     def build_items(self) -> list[MenuItem]:
+        if not is_owner_operator(self.ctx.profile.business_status):
+            return [
+                MenuItem(
+                    "Upgrades locked: carrier-assigned tractor",
+                    self._locked,
+                    help=(
+                        "Company drivers use fleet-maintained equipment. "
+                        "Performance upgrades unlock after the leased-on "
+                        "owner-operator buy-in."
+                    ),
+                ),
+                MenuItem("Back", self.go_back),
+            ]
         items = [MenuItem(lambda u=u: self._label(u), lambda u=u: self._buy(u),
                           help=u.description)
                  for u in UPGRADE_CATALOG.values()]
         items.append(MenuItem("Back", self.go_back))
         return items
+
+    def _locked(self) -> None:
+        self.ctx.audio.play("ui/error")
+        self.ctx.say(
+            "Upgrades are locked. Company drivers use carrier-assigned, "
+            "fleet-maintained tractors. Ownership upgrades unlock after the "
+            "leased-on owner-operator buy-in.")
 
     def _label(self, upgrade: Upgrade) -> str:
         owned = self.ctx.profile.upgrades.get(upgrade.key, 0)
@@ -800,8 +829,8 @@ class UpgradeShopState(MenuState):
         if not is_owner_operator(p.business_status):
             self.ctx.audio.play("ui/error")
             self.ctx.say(
-                "Upgrades unlock when you become an owner-operator. The "
-                "company tractor stays carrier-maintained for now.")
+                "Upgrades unlock after the leased-on owner-operator buy-in. "
+                "The company tractor stays carrier-maintained for now.")
             return
         owned = p.upgrades.get(upgrade.key, 0)
         if owned >= upgrade.max_tier:
@@ -826,28 +855,47 @@ class UpgradeShopState(MenuState):
 
 class TruckShopState(MenuState):
     title = "Trucks"
-    intro_help = ("Each entry speaks the truck, its price, and whether you own it. "
-                  "Enter buys a truck you do not own, or switches to one you do. "
-                  "Press F1 on a truck to hear its character. Escape returns to "
-                  "the garage.")
+    intro_help = ("Owner-operators can buy tractors or switch among tractors "
+                  "they own. Company drivers use carrier-assigned equipment. "
+                  "Escape returns to the garage.")
 
     def announce_entry(self) -> None:
         p = self.ctx.profile
         self.ctx.say(f"Trucks. You have {p.money:,.0f} dollars. {self.current_text()}")
 
     def build_items(self) -> list[MenuItem]:
+        if not is_owner_operator(self.ctx.profile.business_status):
+            return [
+                MenuItem(
+                    "Truck ownership locked: carrier-assigned tractor",
+                    self._locked,
+                    help=(
+                        "Company drivers do not buy tractors here. The carrier "
+                        "assigns and maintains the company tractor until the "
+                        "leased-on owner-operator buy-in."
+                    ),
+                ),
+                MenuItem("Back", self.go_back),
+            ]
         items = [MenuItem(lambda m=m: self._label(m), lambda m=m: self._pick(m),
                           help=m.description)
                  for m in TRUCK_CATALOG.values()]
         items.append(MenuItem("Back", self.go_back))
         return items
 
+    def _locked(self) -> None:
+        self.ctx.audio.play("ui/error")
+        self.ctx.say(
+            "Truck ownership is locked. Company drivers run a carrier-assigned "
+            "tractor. Buying and switching owned tractors unlocks after the "
+            "leased-on owner-operator buy-in.")
+
     def _label(self, model: TruckModel) -> str:
         p = self.ctx.profile
         name = model.label.capitalize()
         if model.key == p.truck:
             return f"{name}: currently driving"
-        if model.key in p.owned_trucks:
+        if model.key in p.visible_owned_trucks():
             return f"{name}: owned, switch to it"
         return f"{name}: buy for {model.price:,.0f} dollars"
 
@@ -859,7 +907,7 @@ class TruckShopState(MenuState):
         if not is_owner_operator(p.business_status):
             self.ctx.audio.play("ui/error")
             self.ctx.say(
-                "Truck purchases unlock when you become an owner-operator. "
+                "Truck purchases unlock after the leased-on owner-operator buy-in. "
                 "For now, the carrier assigns your company tractor.")
             return
         if model.key not in p.owned_trucks:
@@ -872,8 +920,10 @@ class TruckShopState(MenuState):
             p.owned_trucks.append(model.key)
             self.ctx.audio.play("ui/cash")
             self._switch_to(model)
-            self.ctx.say(f"You bought the {model.label} for {model.price:,.0f} dollars "
-                         f"and it is now your truck. You have {p.money:,.0f} dollars left.")
+            self.ctx.say(
+                f"You bought the {model.label} for {model.price:,.0f} dollars "
+                f"and it is now your owned tractor. "
+                f"You have {p.money:,.0f} dollars left.")
             if model.key == "heavy_hauler":
                 self.ctx.award_achievement("heavy_hauler")
             return

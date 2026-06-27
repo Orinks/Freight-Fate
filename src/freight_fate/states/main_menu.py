@@ -603,7 +603,7 @@ class HomeCityState(MenuState):
                        if name.lower() in existing else "")
         self.ctx.say(
             f"{loaded_over}Welcome aboard to Northstar Freight Lines, {name}. "
-            "Your company tractor is parked at "
+            "Your assigned company tractor is parked at "
             f"{terminal.spoken_name} in the {city} service area with "
             f"{profile.money:,.0f} dollars and a full tank. "
             "Your first stop is the dispatch board.", interrupt=True)
@@ -829,7 +829,7 @@ HELP_PAGES = [
         "charges, and net driver pay.",
         "After settlement, the truck is parked at the destination service-area terminal.",
         "Fragile cargo, like electronics and fresh food, punishes rough driving.",
-        "Repair your truck in the terminal garage. Damage reduces engine power.",
+        "Repair the active tractor in the terminal garage. Damage reduces engine power.",
         "Higher levels widen distance caps, improve low-end pay,",
         "unlock more facility variety, refrigerated, heavy-haul, and high-value freight,",
         "and track business ranks.",
@@ -848,8 +848,8 @@ HELP_PAGES = [
         "They still behave like named places with clear cargo roles.",
     ]),
     ("The garage", [
-        "Every terminal garage refuels and repairs your truck.",
-        "Company drivers bill routine fuel and repairs to the carrier.",
+        "Every terminal garage refuels and repairs the active tractor.",
+        "Company drivers use an assigned tractor and bill routine fuel and repairs to the carrier.",
         "Owner-operators pay the shop. If cash is short, the garage buys as much",
         "fuel or repair work as your money covers toward a full tank or full repair.",
         "The Upgrades menu sells permanent improvements: an engine tune,",
@@ -861,7 +861,7 @@ HELP_PAGES = [
         "Reinforced brakes keep stopping power longer on descents and emergency stops.",
         "The Trucks menu sells the heavy hauler: more torque and a bigger",
         "tank, but worse aerodynamics and a thirstier engine.",
-        "Switch between trucks you own at any garage, free of charge.",
+        "After the owner-operator buy-in, switch between tractors you own at any garage.",
     ]),
 ]
 

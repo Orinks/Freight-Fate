@@ -32,6 +32,7 @@ def _denver_to_salt_lake_job():
 
 
 def test_menu_music_tracks_career_milestones():
+    from freight_fate.models.business import LEASED_OWNER_OPERATOR
     from freight_fate.models.profile import Profile
 
     rookie = Profile(name="Rookie")
@@ -45,7 +46,8 @@ def test_menu_music_tracks_career_milestones():
     assert select_menu_music(regional) == "menu_regional_carrier"
 
     fleet = Profile(name="Fleet")
-    fleet.owned_trucks.append("heavy_hauler")
+    fleet.business_status = LEASED_OWNER_OPERATOR
+    fleet.owned_trucks = ["rig", "heavy_hauler"]
     assert select_menu_music(fleet) == "menu_fleet_owner"
 
     coast = Profile(name="Coast")
@@ -116,6 +118,7 @@ def test_drive_music_sequence_is_stable_pool_for_trip_and_separates_day_night(wo
 
 def test_city_menu_uses_milestone_music(monkeypatch):
     from freight_fate.app import App
+    from freight_fate.models.business import LEASED_OWNER_OPERATOR
     from freight_fate.models.profile import Profile
     from freight_fate.states.city import CityMenuState
 
@@ -125,7 +128,8 @@ def test_city_menu_uses_milestone_music(monkeypatch):
                         lambda track, fade_ms=1500: played.append(track))
     try:
         app.ctx.profile = Profile(name="Fleet", current_city="Chicago")
-        app.ctx.profile.owned_trucks.append("heavy_hauler")
+        app.ctx.profile.business_status = LEASED_OWNER_OPERATOR
+        app.ctx.profile.owned_trucks = ["rig", "heavy_hauler"]
         app.push_state(CityMenuState(app.ctx))
         assert played[-1] == "menu_fleet_owner"
     finally:

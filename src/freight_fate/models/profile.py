@@ -31,7 +31,7 @@ from pathlib import Path
 
 from ..sim.hos import DutyLog, HosClock
 from ..updater import is_frozen
-from .business import COMPANY_DRIVER
+from .business import COMPANY_DRIVER, is_owner_operator
 from .career import Career
 from .career_ladder import STARTER_CARRIER_NAME
 from .market import Market
@@ -273,9 +273,9 @@ class Profile:
     truck_fuel_gal: float = 150.0
     game_hours: float = 6.0          # in-game clock, hours since career start
     tutorial_done: bool = False
-    truck: str = "rig"               # key into trucks.TRUCK_CATALOG
-    owned_trucks: list[str] = field(default_factory=lambda: ["rig"])
-    upgrades: dict[str, int] = field(default_factory=dict)  # upgrade key -> tier
+    truck: str = "rig"               # owner-operator active tractor, or assignment key
+    owned_trucks: list[str] = field(default_factory=list)  # owned tractors after buy-in
+    upgrades: dict[str, int] = field(default_factory=dict)  # owned-tractor upgrade key -> tier
     active_trip: dict | None = None  # mid-delivery snapshot, see DrivingState
     dispatch_board_cache: dict | None = None
     fatigue: float = 0.0             # 0 fresh .. 100 exhausted
@@ -319,11 +319,30 @@ class Profile:
 
     # -- truck ------------------------------------------------------------------
 
+    def owns_equipment(self) -> bool:
+        """True when the profile is responsible for owned tractor equipment."""
+        return is_owner_operator(self.business_status)
+
+    def active_truck_key(self) -> str:
+        """Truck model currently used for simulation.
+
+        Company drivers operate the carrier-assigned standard tractor. The
+        profile still carries ``truck`` for save compatibility and for the
+        owner-operator path, but company-driver play should not treat it as
+        player-owned equipment.
+        """
+        return self.truck if self.owns_equipment() else "rig"
+
+    def visible_owned_trucks(self) -> tuple[str, ...]:
+        """Player-owned tractors to show in menus."""
+        return tuple(self.owned_trucks) if self.owns_equipment() else ()
+
     def truck_specs(self):
         """The active truck's specs with this profile's upgrades applied."""
         from .trucks import build_truck_specs
 
-        return build_truck_specs(self.truck, self.upgrades)
+        upgrades = self.upgrades if self.owns_equipment() else {}
+        return build_truck_specs(self.active_truck_key(), upgrades)
 
     def market_day(self) -> int:
         return int(self.game_hours // 24)

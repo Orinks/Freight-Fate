@@ -28,7 +28,8 @@ visual display mirrors all speech for sighted players and helpers.
   parking brakes, engine braking, grades, stalls, brake fade, and honest
   fuel economy.
 - **Business progression** — start with fictional carrier Northstar Freight
-  Lines as a company driver with carrier-paid fuel and repairs, then work
+  Lines as a company driver in an assigned carrier tractor with carrier-paid
+  fuel and repairs, then work
   through a grounded ladder toward a leased-on owner-operator endgame with
   higher gross revenue and real operating costs.
 - **Trucks and upgrades** — owner-operators can earn their way into a heavy

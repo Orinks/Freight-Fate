@@ -55,6 +55,10 @@
   with fictional carrier Northstar Freight Lines, move through company-driver
   and owner-operator preparation ranks, and unlock the leased-on
   owner-operator buy-in later in the ladder instead of jumping there at level 5.
+- **Company-driver equipment now reads like company equipment.** New drivers
+  use an assigned carrier tractor with carrier-paid fuel and routine repairs;
+  buying, switching, and upgrading owned tractors waits until the leased-on
+  owner-operator path.
 - **Rush hour makes traffic feel busier.** Starting a trip during morning or
   afternoon commute windows now raises modeled traffic density, especially near
   metro/checkpoint corridors, and can slow lead traffic with commuter or merge

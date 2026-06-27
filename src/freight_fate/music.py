@@ -79,8 +79,12 @@ def _menu_milestone_index(profile) -> int:
     level = career.level
     deliveries = career.deliveries
     miles = career.total_miles
-    owned = set(getattr(profile, "owned_trucks", ()))
-    truck = getattr(profile, "truck", "rig")
+    if hasattr(profile, "visible_owned_trucks"):
+        owned = set(profile.visible_owned_trucks())
+        truck = profile.active_truck_key()
+    else:
+        owned = set(getattr(profile, "owned_trucks", ()))
+        truck = getattr(profile, "truck", "rig")
     if level >= 9 or deliveries >= 40 or miles >= 20_000:
         return 5
     if level >= 7 or miles >= 10_000:

@@ -132,6 +132,8 @@ def test_company_driver_garage_service_is_carrier_billed():
         p.truck_damage_pct = 12.0
         app.push_state(GarageState(app.ctx))
 
+        assert p.visible_owned_trucks() == ()
+        assert "assigned company tractor" in app.state.items[0].text
         assert "carrier billed" in app.state.items[0].text
         app.state.handle_event(key_event(pygame.K_RETURN))
         assert p.truck_fuel_gal == pytest.approx(p.truck_specs().fuel_tank_gal)
@@ -141,6 +143,134 @@ def test_company_driver_garage_service_is_carrier_billed():
         app.state.handle_event(key_event(pygame.K_RETURN))
         assert p.truck_damage_pct == pytest.approx(0.0)
         assert p.money == pytest.approx(25.0)
+    finally:
+        app.shutdown()
+
+
+def test_company_driver_truck_status_says_assigned_not_owned():
+    from freight_fate.app import App
+    from freight_fate.models.profile import Profile
+    from freight_fate.models.trucks import TruckSpecs
+    from freight_fate.states.city import CityMenuState
+
+    app = App()
+    spoken: list[str] = []
+    try:
+        app.ctx.profile = Profile(name="Assigned Tractor", current_city="Chicago")
+        app.ctx.profile.owned_trucks = ["rig", "heavy_hauler"]  # legacy save data
+        app.ctx.profile.truck = "heavy_hauler"
+        app.ctx.profile.upgrades = {"engine_tune": 2}
+        app.ctx.say = lambda text, interrupt=True: spoken.append(text)
+        menu = CityMenuState(app.ctx)
+        menu._truck_status()
+
+        assert spoken
+        assert "Assigned Northstar Freight Lines tractor" in spoken[-1]
+        assert "Owned tractor" not in spoken[-1]
+        assert "standard rig" in spoken[-1]
+        assert app.ctx.profile.truck_specs().max_torque_nm == pytest.approx(
+            TruckSpecs().max_torque_nm)
+    finally:
+        app.shutdown()
+
+
+def test_company_driver_shops_hide_owned_truck_language():
+    from freight_fate.app import App
+    from freight_fate.models.profile import Profile
+    from freight_fate.states.city import TruckShopState, UpgradeShopState
+
+    app = App()
+    spoken: list[str] = []
+    try:
+        app.ctx.profile = Profile(name="No Ownership", current_city="Chicago")
+        p = app.ctx.profile
+        p.owned_trucks = ["rig", "heavy_hauler"]  # old save values stay hidden
+        p.money = 200_000.0
+        app.ctx.say = lambda text, interrupt=True: spoken.append(text)
+
+        app.push_state(TruckShopState(app.ctx))
+        assert "carrier-assigned tractor" in app.state.items[0].text
+        assert not any("owned" in item.text.lower() for item in app.state.items)
+        app.state.handle_event(key_event(pygame.K_RETURN))
+        assert p.truck == "rig"
+        assert p.money == pytest.approx(200_000.0)
+        assert "carrier-assigned" in spoken[-1]
+
+        app.pop_state()
+        app.push_state(UpgradeShopState(app.ctx))
+        assert "carrier-assigned tractor" in app.state.items[0].text
+        assert not any("owned" in item.text.lower() for item in app.state.items)
+        app.state.handle_event(key_event(pygame.K_RETURN))
+        assert p.upgrades == {}
+        assert p.money == pytest.approx(200_000.0)
+        assert "carrier-assigned" in spoken[-1]
+    finally:
+        app.shutdown()
+
+
+def test_owner_operator_buy_in_records_first_owned_tractor():
+    from freight_fate.app import App
+    from freight_fate.models.profile import Profile
+    from freight_fate.states.city import BusinessStatusState
+
+    app = App()
+    try:
+        app.ctx.profile = Profile(name="Buy In Equipment", current_city="Chicago")
+        p = app.ctx.profile
+        p.career.xp = LEVEL_XP[OWNER_OPERATOR_LEVEL - 1]
+        p.career.deliveries = OWNER_OPERATOR_DELIVERIES
+        p.career.reputation = OWNER_OPERATOR_REPUTATION
+        p.money = OWNER_OPERATOR_BUY_IN + OWNER_OPERATOR_WORKING_CAPITAL
+
+        app.push_state(BusinessStatusState(app.ctx))
+        while (
+            "Buy into leased-on owner-operator"
+            not in app.state.items[app.state.index].text
+        ):
+            app.state.handle_event(key_event(pygame.K_DOWN))
+        app.state.handle_event(key_event(pygame.K_RETURN))
+
+        assert p.business_status == LEASED_OWNER_OPERATOR
+        assert p.truck == "rig"
+        assert p.visible_owned_trucks() == ("rig",)
+    finally:
+        app.shutdown()
+
+
+def test_owner_operator_can_buy_switch_and_upgrade_owned_equipment():
+    from freight_fate.app import App
+    from freight_fate.models.profile import Profile
+    from freight_fate.states.city import TruckShopState, UpgradeShopState
+
+    app = App()
+    try:
+        app.ctx.profile = Profile(name="Owned Equipment", current_city="Chicago")
+        p = app.ctx.profile
+        p.business_status = LEASED_OWNER_OPERATOR
+        p.owned_trucks = ["rig"]
+        p.money = 200_000.0
+
+        app.push_state(UpgradeShopState(app.ctx))
+        app.state.handle_event(key_event(pygame.K_RETURN))
+        assert p.upgrades
+        assert p.money < 200_000.0
+
+        app.pop_state()
+        money_after_upgrade = p.money
+        app.push_state(TruckShopState(app.ctx))
+        while "Heavy hauler" not in app.state.items[app.state.index].text:
+            app.state.handle_event(key_event(pygame.K_DOWN))
+        app.state.handle_event(key_event(pygame.K_RETURN))
+        assert p.truck == "heavy_hauler"
+        assert "heavy_hauler" in p.visible_owned_trucks()
+        assert p.money == pytest.approx(money_after_upgrade - 52_000.0)
+
+        while "Standard rig" not in app.state.items[app.state.index].text:
+            app.state.handle_event(key_event(pygame.K_DOWN))
+        money_before_switch = p.money
+        app.state.handle_event(key_event(pygame.K_RETURN))
+        assert p.truck == "rig"
+        assert p.money == pytest.approx(money_before_switch)
     finally:
         app.shutdown()
 

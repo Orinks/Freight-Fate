@@ -78,8 +78,9 @@ The main menu can include:
 | Settings | Opens gameplay, audio, speech and weather, and update settings. |
 | Quit | Exits the game. |
 
-A new driver starts with 5,000 dollars, a company tractor, a full tank, a fresh
-career record, and a company terminal or yard in the chosen metro service area.
+A new driver starts with 5,000 dollars, an assigned company tractor, a full
+tank, a fresh career record, and a company terminal or yard in the chosen metro
+service area.
 The home-terminal picker starts with a region list, then opens the cities in
 that region. Chicago is the default starting area, but any listed terminal can
 be your starting city.
@@ -135,7 +136,7 @@ Your terminal is the safe hub between jobs. Public terminal actions include:
 | Dispatch board | Browse freight offers from local facilities. |
 | Drive to city services | Drive a short local route to the freight market office, garage, or truck dealer. Some cities use sourced local service names; others use representative service stops. |
 | Business status | Review company-driver or owner-operator status. |
-| Garage | Refuel, repair, buy upgrades, buy trucks, or switch owned trucks. |
+| Garage | Refuel and repair company equipment; owner-operators can also buy upgrades, buy tractors, or switch owned tractors. |
 | Request pay advance | Draw cash against your next load when you are broke. |
 | Career stats | Review level, reputation, deliveries, and career totals. |
 | Truck status | Review truck model, fuel, tank size, and damage condition. |
@@ -146,16 +147,18 @@ Your terminal is the safe hub between jobs. Public terminal actions include:
 | Settings | Open settings categories. |
 | Quit to main menu | Save and return to the title menu. |
 
-Company-driver fuel and routine repairs are billed to the carrier. After you
-become an owner-operator, fuel and repairs come out of your cash; the garage can
-do partial fuel or repair work when you cannot afford a full tank or full repair.
+Company drivers use an assigned carrier tractor. Fuel and routine repairs are
+billed to the carrier, and truck purchases or performance upgrades stay locked.
+After you become an owner-operator, fuel and repairs come out of your cash; the
+garage can do partial fuel or repair work when you cannot afford a full tank or
+full repair.
 
 ## Business Status
 
 Freight Fate starts you as a company driver for Northstar Freight Lines, a
 fictional starter carrier. The dispatch board lists carrier gross, but your
-settlement pays driver wages and bonuses. The carrier supplies the tractor,
-trailer, authority, insurance, fuel, and routine repairs.
+settlement pays driver wages and bonuses. The carrier assigns the tractor and
+supplies the trailer, authority, insurance, fuel, and routine repairs.
 
 The career ladder has 20 levels. Early levels are company-driver ranks. Level 5
 starts the owner-operator preparation path, but it is not a lease-purchase
@@ -187,7 +190,7 @@ rest stops, drawn against the load you are hauling). The advance is offered
 only while cash is low, is capped, and is repaid automatically out of your
 next delivery settlement, so a negative balance is never a dead end.
 
-The garage sells:
+After the owner-operator buy-in, the garage sells:
 
 | Upgrade Or Truck | Effect |
 | --- | --- |

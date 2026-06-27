@@ -2797,7 +2797,7 @@ class RestStopState(MenuState):
         if need < 1:
             return "Fuel: tank is full"
         if not player_pays_operating_costs(self.ctx.profile.business_status):
-            return f"Refuel company tractor: {need:.0f} gallons, carrier billed"
+            return f"Refuel assigned company tractor: {need:.0f} gallons, carrier billed"
         cost = self.ctx.economy.fuel_cost(d.trip.current_region, need) + 35.0
         return f"Refuel {need:.0f} gallons for {cost:,.0f} dollars"
 
@@ -2816,7 +2816,8 @@ class RestStopState(MenuState):
             self._save_here(silent=True)
             self.ctx.audio.play("vehicle/fuel_pump")
             self.ctx.say(
-                f"Refueled {need:.0f} gallons on the carrier fuel account. "
+                f"Refueled the assigned company tractor by {need:.0f} gallons "
+                "on the carrier fuel account. "
                 f"Fueling took {FUEL_STOP_MIN:.0f} minutes. {_deadline_text(d)}")
             self.ctx.award_achievement("route_refuel")
             self.refresh()

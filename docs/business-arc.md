@@ -8,9 +8,10 @@ the main dream.
 
 The realistic first step is not instant independence. A new driver starts as a
 company driver for fictional starter carrier Northstar Freight Lines: the
-carrier controls the dispatch relationship, supplies the tractor/trailer, and
-carries the normal carrier costs. The driver earns wages and bonuses from each
-settlement, while fines and damaged-load consequences still matter.
+carrier controls the dispatch relationship, assigns and maintains the
+tractor/trailer combination, and carries the normal carrier costs. The driver
+earns wages and bonuses from each settlement, while fines and damaged-load
+consequences still matter.
 
 The first owner-operator step is modeled as a leased-on owner-operator, not full
 motor-carrier authority. That keeps the game focused on driving and load choice:
@@ -29,11 +30,14 @@ buy-in and working-capital gate instead of a confusing weekly deduction trap.
 
 - Company driver: listed board pay is carrier gross; settlement pays a driver
   wage/bonus. Fuel, routine repairs, roadside fuel, and carrier shop repair are
-  billed to the carrier.
+  billed to the carrier. The driver may have a regular assigned tractor, but
+  does not own, switch, or upgrade tractors yet.
 - Leased-on owner-operator: listed board pay is gross revenue; settlement adds
   a higher revenue multiplier, then deducts business costs: maintenance reserve,
   insurance reserve, trailer program, truck payment reserve, and settlement
   service fee. Fuel and repairs also come out of the player's cash.
+  Truck purchases, switching, and upgrades unlock here because the player now
+  has owned tractor responsibility.
 - Progression: level 5 starts owner-operator preparation, but the leased-on
   buy-in does not unlock until level 15 with 35 deliveries, reputation 80, no
   pay advance, and enough cash for a 35,000 dollar buy-in while keeping 10,000
@@ -46,7 +50,7 @@ buy-in and working-capital gate instead of a confusing weekly deduction trap.
 
 | Level | Rank | Business Meaning |
 | --- | --- | --- |
-| 1 | Yard Trainee | Start at Northstar Freight Lines with company equipment. |
+| 1 | Yard Trainee | Start at Northstar Freight Lines with an assigned company tractor. |
 | 2 | New Hire Company Driver | Refrigerated freight unlocks. |
 | 3 | Solo Company Driver | Heavy-haul freight unlocks. |
 | 4 | Regional Company Driver | High-value freight unlocks. |
@@ -87,6 +91,9 @@ brokerage simulator.
   revenue, and future true-authority spot or broker rates distinct.
 - Lease-purchase remains a realism caveat and caution, not the default success
   path. Fleet hiring and company ownership stay separate from this driving arc.
+- A future save-schema cleanup can rename internal `truck` and `owned_trucks`
+  fields so legacy saves keep loading without those fields sounding like
+  company-driver ownership in code.
 
 ## Sources Consulted
 
@@ -100,3 +107,9 @@ brokerage simulator.
   https://www.fmcsa.dot.gov/tltf
 - ATRI operational cost research:
   https://truckingresearch.org/about-atri/atri-research/operational-costs-of-trucking/
+- Bureau of Labor Statistics heavy and tractor-trailer truck driver overview:
+  https://www.bls.gov/ooh/transportation-and-material-moving/heavy-and-tractor-trailer-truck-drivers.htm
+- Schneider company-driver equipment overview:
+  https://schneiderjobs.com/truck-driving-jobs/benefits/equipment-technology
+- Schneider power-only carrier equipment split:
+  https://schneider.com/carriers/power-only

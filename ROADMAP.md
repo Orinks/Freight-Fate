@@ -645,11 +645,12 @@ fit for an audio-first game.
 
 ### Business
 - [x] Company-driver to owner-operator career arc. Full first arc: start as a
-      Northstar Freight Lines company driver with carrier-paid tractor costs
-      and driver-wage settlements, progress through 20 ranks, then unlock a
-      later-level leased-on owner-operator path with a buy-in, working-capital
-      gate, higher gross revenue, and operating-cost deductions. Full authority,
-      loans, and fleet ownership remain future work.
+      Northstar Freight Lines company driver in carrier-assigned equipment with
+      carrier-paid fuel/repairs and driver-wage settlements, progress through
+      20 ranks, then unlock a later-level leased-on owner-operator path with a
+      buy-in, working-capital gate, owned-tractor garage access, higher gross
+      revenue, and operating-cost deductions. Full authority, loans, and fleet
+      ownership remain future work.
 - [ ] True authority and direct freight. Later optional slice for operating
       under the player's own motor-carrier authority. Cover Department of
       Transportation and motor-carrier authority, insurance filings,
@@ -669,6 +670,10 @@ fit for an audio-first game.
 - [ ] Business realism caveats. Keep lease-purchase risk visible as caution,
       not the golden path. Avoid payday-loan-like traps, and keep fleet hiring
       separate from the driving-career loop.
+- [ ] Equipment model polish. Legacy profile fields still preserve `truck` and
+      `owned_trucks` for save compatibility, but company-driver UI hides them
+      behind assigned-equipment helpers. A future schema pass can rename those
+      internals once older saves have a migration path.
 - [ ] Company ownership: hire AI drivers, buy trucks
 - [ ] Loans and insurance
 

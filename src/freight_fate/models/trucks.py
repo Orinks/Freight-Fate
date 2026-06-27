@@ -1,8 +1,7 @@
-"""Truck catalog and garage upgrades.
+"""Truck catalog and owner-operator garage upgrades.
 
-Upgrades and the chosen truck live on the player profile; they come together
-in :func:`build_truck_specs`, which produces the :class:`TruckSpecs` the
-driving simulation runs on.
+Owner-operator upgrades and chosen tractors live on the player profile. Company
+drivers use carrier-assigned equipment and do not apply owned upgrades.
 """
 
 from __future__ import annotations

@@ -270,6 +270,7 @@ def test_garage_upgrade_and_truck_purchase_flow():
         assert isinstance(app.state, CityMenuState)
         p = app.ctx.profile
         p.business_status = LEASED_OWNER_OPERATOR
+        p.owned_trucks = ["rig"]
         p.money = 200_000.0
 
         # city -> garage -> upgrades
@@ -394,12 +395,15 @@ def test_upgrades_are_money_gated():
 @pytest.mark.smoke
 def test_upgrade_f1_help_explains_player_benefits():
     from freight_fate.app import App
+    from freight_fate.models.business import LEASED_OWNER_OPERATOR
     from freight_fate.models.profile import Profile
     from freight_fate.states.city import UpgradeShopState
 
     app = App()
     try:
         app.ctx.profile = Profile(name="Helper")
+        app.ctx.profile.business_status = LEASED_OWNER_OPERATOR
+        app.ctx.profile.owned_trucks = ["rig"]
         app.push_state(UpgradeShopState(app.ctx))
         help_by_label = {}
         for item in app.state.items:

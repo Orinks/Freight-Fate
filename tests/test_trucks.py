@@ -1,5 +1,6 @@
 """Truck catalog, garage upgrades, and their effects on the physics model."""
 
+from freight_fate.models.business import LEASED_OWNER_OPERATOR
 from freight_fate.models.profile import Profile
 from freight_fate.models.trucks import (
     TRUCK_CATALOG,
@@ -125,6 +126,7 @@ def test_heavy_hauler_burns_more_fuel():
 
 def test_profile_persists_truck_and_upgrades():
     p = Profile(name="Garage Test")
+    p.business_status = LEASED_OWNER_OPERATOR
     p.truck = "heavy_hauler"
     p.owned_trucks = ["rig", "heavy_hauler"]
     p.upgrades = {"engine_tune": 2, "aero_kit": 1}
@@ -151,9 +153,23 @@ def test_old_save_without_truck_fields_loads_with_defaults():
     path.write_text(json.dumps(data))
     loaded = Profile.load(path)
     assert loaded.truck == "rig"
-    assert loaded.owned_trucks == ["rig"]
+    assert loaded.owned_trucks == []
+    assert loaded.visible_owned_trucks() == ()
     assert loaded.upgrades == {}
     assert loaded.market.multipliers  # fresh market seeded on load
+
+
+def test_company_driver_profile_uses_assigned_standard_tractor():
+    p = Profile(name="Assigned Rig")
+    p.truck = "heavy_hauler"
+    p.owned_trucks = ["rig", "heavy_hauler"]
+    p.upgrades = {"engine_tune": 2, "long_range_tank": 1}
+
+    specs = p.truck_specs()
+
+    assert p.visible_owned_trucks() == ()
+    assert p.active_truck_key() == "rig"
+    assert specs == TruckSpecs()
 
 
 def test_upgrade_catalog_prices_and_tiers():
