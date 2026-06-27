@@ -11,6 +11,11 @@
   equivalent nightly.
 
 ### Changed
+- **Live weather now reports the real temperature.** With live weather on, the
+  cab speaks the actual temperature from the nearest National Weather Service
+  station instead of the modeled seasonal estimate, so the degrees match the
+  conditions it is already pulling in. The seasonal climate model stays the
+  fallback whenever live data is unavailable or a station omits its reading.
 - **Adaptive cruise now respects the posted limit.** Cruise eases off to hold a
   with-traffic pace (about 5 over the posted limit) instead of carrying your set
   speed straight through an urban drop or a lower-limit stretch -- so it keeps

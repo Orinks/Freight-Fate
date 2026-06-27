@@ -137,8 +137,29 @@ class WeatherSystem:
             return real_clock_game_hours()
         return self.game_hours
 
+    def _observed_temperature(self) -> float | None:
+        """The real station temperature in Celsius while live weather is driving
+        conditions, or None (still loading, offline, or provider has no reading).
+
+        Defensive about provider shape so test fakes and older providers without
+        ``get_temperature`` simply fall back to the seasonal model."""
+        if not self.live or self.provider is None or self.city is None:
+            return None
+        getter = getattr(self.provider, "get_temperature", None)
+        if getter is None:
+            return None
+        try:
+            return getter(self.city)
+        except Exception:  # pragma: no cover - defensive
+            return None
+
     def _temperature(self) -> float | None:
-        """Modeled outdoor temperature in Celsius, or None when seasons are off."""
+        """Outdoor temperature in Celsius. Prefers the real station observation
+        while live weather is active, falling back to the seasonal model; None
+        when seasons are off and no live reading is available."""
+        observed = self._observed_temperature()
+        if observed is not None:
+            return observed
         clock = self._season_clock()
         if clock is None:
             return None
