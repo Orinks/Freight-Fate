@@ -16,6 +16,7 @@ from pathlib import Path
 
 WORLD_PATH = Path(__file__).parent / "world.json"
 CITY_SERVICES_PATH = Path(__file__).parent / "city_services.json"
+LOCAL_APPROACHES_PATH = Path(__file__).parent / "local_approaches.json"
 
 # Alternate routes should feel like real dispatch choices, not graph leftovers.
 # A little extra mileage is fine for traffic, weather, grades, or avoiding a
@@ -337,6 +338,22 @@ CITY_SERVICE_SOURCE_NOTES = {
 CITY_SERVICE_ORDER = ("freight_market", "garage", "truck_dealer")
 
 CITY_SERVICE_SOURCE_TYPES = {"osm", "ors", "operator", "fallback"}
+
+
+@dataclass(frozen=True)
+class LocalApproach:
+    target_id: str
+    target_type: str
+    city: str
+    name: str
+    approach_miles: float
+    road: str
+    source_type: str
+    estimated: bool
+    fallback: bool = False
+    fallback_reason: str = ""
+    distance_to_road_mi: float = 0.0
+    turn_segments: tuple[str, ...] = ()
 
 FACILITY_CARGO_ROLES: dict[str, dict[str, tuple[str, ...]]] = {
     "air_cargo": {
@@ -1021,11 +1038,65 @@ def _load_city_service_data(path: Path = CITY_SERVICES_PATH) -> dict[str, dict[s
     return out
 
 
+def _load_local_approaches(path: Path = LOCAL_APPROACHES_PATH) -> dict[str, LocalApproach]:
+    if not path.exists():
+        return {}
+    raw = json.loads(path.read_text(encoding="utf-8"))
+    records = raw.get("approaches", {})
+    if not isinstance(records, dict):
+        raise ValueError(f"{path} must contain an approaches object")
+    out: dict[str, LocalApproach] = {}
+    for target_id, entry in records.items():
+        name = str(entry.get("name", "")).strip()
+        road = str(entry.get("road", "")).strip()
+        target_type = str(entry.get("target_type", "")).strip()
+        city = str(entry.get("city", "")).strip()
+        source_type = str(entry.get("source_type", "")).strip()
+        if not name or not road or not target_type or not city or not source_type:
+            raise ValueError(f"{path} local approach {target_id!r} is missing required text")
+        lowered = f"{name} {road}".lower()
+        if any(marker in lowered for marker in RAW_POI_TEXT_MARKERS):
+            raise ValueError(
+                f"{path} local approach {target_id!r} exposes raw OSM/source text"
+            )
+        approach_miles = float(entry.get("approach_miles", 0.0))
+        if approach_miles <= 0.0 or approach_miles > 75.0:
+            raise ValueError(f"{path} local approach {target_id!r} has invalid mileage")
+        fallback = bool(entry.get("fallback", False))
+        fallback_reason = str(entry.get("fallback_reason", "")).strip()
+        if fallback and not fallback_reason:
+            raise ValueError(f"{path} local approach {target_id!r} is fallback without reason")
+        raw_segments = entry.get("turn_segments", ())
+        segments = tuple(str(segment).strip() for segment in raw_segments if str(segment).strip())
+        for segment in segments:
+            lowered_segment = segment.lower()
+            if any(marker in lowered_segment for marker in RAW_POI_TEXT_MARKERS):
+                raise ValueError(
+                    f"{path} local approach {target_id!r} segment exposes raw source text"
+                )
+        out[str(target_id)] = LocalApproach(
+            target_id=str(target_id),
+            target_type=target_type,
+            city=city,
+            name=name,
+            approach_miles=round(approach_miles, 1),
+            road=road,
+            source_type=source_type,
+            estimated=bool(entry.get("estimated", True)),
+            fallback=fallback,
+            fallback_reason=fallback_reason,
+            distance_to_road_mi=round(float(entry.get("distance_to_road_mi", 0.0)), 2),
+            turn_segments=segments,
+        )
+    return out
+
+
 class World:
     def __init__(self, data: dict) -> None:
         self.cities: dict[str, City] = {}
         self._facilities_by_id: dict[str, Location] = {}
         self._city_service_data = _load_city_service_data()
+        self._local_approaches = _load_local_approaches()
         for name, c in data["cities"].items():
             lat = float(c.get("lat", 0.0))
             lon = float(c.get("lon", 0.0))
@@ -1251,31 +1322,51 @@ class World:
                 return service
         raise KeyError(f"Unknown service in {city}: {key}")
 
+    def local_approach(self, target_id: str) -> LocalApproach | None:
+        return self._local_approaches.get(target_id)
+
+    def city_service_approach(self, city: str, key: str) -> LocalApproach | None:
+        return self.local_approach(f"city_service:{_slug(city)}:{key}")
+
+    def facility_approach(self, city: str, location_name: str) -> LocalApproach | None:
+        location = self.facility_location(city, location_name)
+        return self.local_approach(f"facility:{location.id}")
+
     def city_service_route(self, city: str, key: str) -> Route:
         """A short, drivable local route from the terminal to a city service."""
         service = self.city_service(city, key)
-        if service.approach_miles > 0:
+        approach = self.city_service_approach(city, key)
+        if approach is not None:
+            miles = approach.approach_miles
+            road = approach.road
+        elif service.approach_miles > 0:
             miles = service.approach_miles
+            road = (
+                service.approach_road
+                or CITY_SERVICE_APPROACH_ROADS.get(service.kind, "city service road")
+            )
         else:
             base_miles = CITY_SERVICE_APPROACH_MILES.get(service.kind, 3.0)
             seed = zlib.crc32(f"{city}:service:{service.key}".encode())
             offset = (seed % 5) * 0.2
             miles = round(base_miles + offset, 1)
-        road = (
-            service.approach_road
-            or CITY_SERVICE_APPROACH_ROADS.get(service.kind, "city service road")
-        )
+            road = CITY_SERVICE_APPROACH_ROADS.get(service.kind, "city service road")
         leg = Leg(city, city, miles, road, "flat", ())
         return Route([city, city], [leg])
 
     def facility_approach_route(self, city: str, location_name: str) -> Route:
         """A short, drivable local route from the company terminal to a facility."""
         location = self.facility_location(city, location_name)
-        base_miles = FACILITY_APPROACH_MILES.get(location.type, 4.0)
-        seed = zlib.crc32(f"{city}:{location.name}:{location.type}".encode())
-        offset = (seed % 7) * 0.25
-        miles = round(base_miles + offset, 1)
-        road = FACILITY_APPROACH_ROADS.get(location.type, "facility access road")
+        approach = self.local_approach(f"facility:{location.id}")
+        if approach is not None:
+            miles = approach.approach_miles
+            road = approach.road
+        else:
+            base_miles = FACILITY_APPROACH_MILES.get(location.type, 4.0)
+            seed = zlib.crc32(f"{city}:{location.name}:{location.type}".encode())
+            offset = (seed % 7) * 0.25
+            miles = round(base_miles + offset, 1)
+            road = FACILITY_APPROACH_ROADS.get(location.type, "facility access road")
         leg = Leg(city, city, miles, road, "flat", ())
         return Route([city, city], [leg])
 

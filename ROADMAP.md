@@ -251,9 +251,10 @@ Net-new realism candidates, roughly by area:
   merge/exit traffic.
 - **Hours of service.** Split-sleeper provision and the 60/70-hour cycle
   with 34-hour restart (the HOS model intentionally skips these today).
-- **Local delivery realism.** The destination-local approach legs already
-  sketched under World: surface-street miles, gate speeds, and dock
-  approaches after the highway portion.
+- **Local delivery realism.** The checked-in local approach layer now gives
+  service drives and pickup/delivery facility legs source-backed nearby road
+  context where OSM supports it. Remaining: true turn-level street geometry,
+  gate speeds, yard paths, and dock approaches after the highway portion.
 - **Business realism.** The grounded 20-level company-driver to leased-on
   owner-operator arc is shipped; true authority, trailers, operating-cost
   tuning, and market pricing are tracked under Business.
@@ -277,6 +278,15 @@ available while moving city services toward a drive-to-location model.
   with machine-readable fallback reasons. Source-backed roles carry coordinates,
   approach mileage, and road/context; fallback roles are not described as real
   POIs.
+- [x] **Full-map local approach road context.** `local_approaches.json` is a
+  checked-in build-time bake from the same local PBF cache plus world/facility
+  data. It covers 2,401 approach targets: all 582 city-service roles have a
+  nearest OSM public-road context, and 1,813 of 1,819 freight facility legs have
+  nearest OSM public-road context. Six representative facility legs keep
+  explicit fallback records because no usable road segment was found within the
+  bounded search radius. Facility coordinates are still usually representative,
+  so these are local-road approach contexts, not claims about real driveways,
+  gates, docks, or companies.
 - [x] **Local service driving phase.** City service drives use the existing
   truck physics, GPS/status surfaces, save/resume path, and spoken driving help.
   Arrival does not auto-open the menu: the truck must be fully stopped, then the
@@ -298,6 +308,10 @@ Follow-up hooks for the roadmap worker:
   source-backed approaches so GPS can cue actual turns, lane changes, and final
   pull-ins instead of only source coordinates plus approach mileage/context.
   Runtime should still read checked-in compact data.
+- **Facility-leg realism.** Replace representative freight-facility coordinates
+  with sourced shipper/receiver, gate, yard, or driveway points where reliable
+  local data supports them. Keep fallback reasons machine-readable and keep raw
+  OSM tags, IDs, and source keys out of spoken/menu text.
 - **Fallback reduction and data quality.** Keep extending the build-time
   classifier and optional operator-source inputs for the 88 fallback truck
   dealer roles, but do not invent dealers where OSM/operator data is missing.

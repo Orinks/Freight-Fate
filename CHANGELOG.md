@@ -92,6 +92,10 @@
   garage, freight/logistics office, and truck dealer drives now prefer
   checked-in source-backed local service data for every supported city, with
   representative fallbacks only where no suitable sourced role is available.
+- **Local service and facility drives use checked-in road context.** GPS and
+  route summaries now prefer source-backed nearby road names for city-service
+  drives and pickup/delivery facility approaches, while simplified fallbacks
+  remain clearly marked in the data.
 - **Rush hour makes traffic feel busier.** Starting a trip during morning or
   afternoon commute windows now raises modeled traffic density, especially near
   metro/checkpoint corridors, and can slow lead traffic with commuter or merge

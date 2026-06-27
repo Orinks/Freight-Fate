@@ -152,7 +152,7 @@ Your terminal is the safe hub between jobs. Public terminal actions include:
 | Choice | What It Does |
 | --- | --- |
 | Dispatch board | Browse freight offers from local facilities. |
-| Drive to city services | Drive a short local route to the freight market office, garage, or truck dealer. Service names use sourced local data where available, with representative fallbacks where a role has no suitable source. |
+| Drive to city services | Drive a short local route to the freight market office, garage, or truck dealer. Service names use sourced local data where available, and GPS prefers checked-in local road context when it exists. |
 | Business status | Review company-driver or owner-operator status. |
 | Garage | Refuel and repair company equipment; owner-operators can also buy upgrades, buy tractors, or switch owned tractors. |
 | Request pay advance | Draw cash against your next load when you are broke. |

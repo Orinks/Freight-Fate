@@ -24,8 +24,10 @@ def test_city_services_are_source_backed(world):
         assert "node/" not in service.spoken_name.lower()
         assert "way/" not in service.spoken_name.lower()
         route = world.city_service_route("Chicago", service.key)
-        assert route.miles == service.approach_miles
-        assert route.highways[0] == service.approach_road
+        approach = world.city_service_approach("Chicago", service.key)
+        assert approach is not None
+        assert route.miles == approach.approach_miles
+        assert route.highways[0] == approach.road
 
 
 def test_city_services_fallback_when_no_source_data(world):
@@ -63,6 +65,10 @@ def test_city_service_data_covers_every_supported_city(world):
             route = world.city_service_route(city, service.key)
             assert route.miles > 0
             assert route.highways[0]
+            approach = world.city_service_approach(city, service.key)
+            assert approach is not None
+            assert route.miles == approach.approach_miles
+            assert route.highways[0] == approach.road
             if service.fallback:
                 fallback += 1
                 assert service.source_type == "fallback"

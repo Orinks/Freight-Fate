@@ -136,6 +136,33 @@ settlement systems. OSM/Overpass and ORS can improve where service drives go;
 trailer ownership and cargo-equipment matching belong to a freight-market and
 garage/dealer slice, not to the company-driver or owner-operator career arc.
 
+## Local Approach Data
+
+`local_approaches.json` is the compact offline layer used by city-service
+drives and pickup/delivery facility approach legs. Runtime reads the checked-in
+file only; it does not call OSM, ORS, OSRM, Overpass, or other network routing
+services.
+
+The current bake used the local state PBF cache at
+`C:\Users\joshu\.cache\freight-fate-osm\regions\` through
+`tools/build_local_approaches.py`. It covers 2,401 targets: all 582
+city-service roles have a nearest OSM public-road context, and 1,813 of 1,819
+freight facility approach legs have a nearest OSM public-road context. Six
+representative facility targets remain explicit fallbacks because no usable
+road segment was found within the bounded search radius.
+
+For sourced city services, the service coordinate and nearby road context come
+from local OSM extracts. For freight facilities, most facility coordinates are
+still representative gameplay points generated from metro freight-market
+templates, so their approach records are marked estimated even when the nearby
+road is source-backed. These records help GPS and route descriptions use real
+local road names where available, but they are not driveway, gate, yard, dock,
+or company claims.
+
+The next map-data milestone is turn-level local routing: a build-time HGV
+routing pass from the highway/city context to the service or facility vicinity,
+then sourced final-access hints only where local data supports them.
+
 ## Job Generation
 
 Job generation now chooses:
