@@ -971,7 +971,11 @@ class DrivingState(State):
                 self._set_status("Air ready.")
             self.ctx.say_event(text, interrupt=False)
             self.ctx.award_achievement("air_ready", event=True)
-        elif not t.air_ready:
+        elif t.air_low_warning:
+            # Re-arm the ready cue only after a genuine depletion (low-air), not
+            # the routine 100-125 psi compressor cycling: the parking-release
+            # threshold sits at the cut-in pressure, so air_ready otherwise
+            # flickers across it every cycle and re-announces back to back.
             self._air_ready_said = False
 
     def _update_reverse_controls(self, accelerating: bool, braking_key: bool) -> bool:

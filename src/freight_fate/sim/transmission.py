@@ -90,8 +90,13 @@ class Transmission:
 
     # -- automatic ---------------------------------------------------------------
 
-    def auto_update(self, rpm: float, throttle: float, moving: bool) -> int | None:
-        """Pick a gear in automatic mode. Returns the new gear when it changes."""
+    def auto_update(self, rpm: float, throttle: float, moving: bool,
+                    braking: bool = False) -> int | None:
+        """Pick a gear in automatic mode. Returns the new gear when it changes.
+
+        While braking the box never upshifts -- a real automatic holds the gear
+        for engine braking instead of grabbing a taller one as you slow, which
+        otherwise read as "geared up while stopping"."""
         if not self.automatic or self.shifting:
             return None
         if self.in_reverse:
@@ -109,7 +114,7 @@ class Transmission:
             self.gear = 1
             self._shift_timer = SHIFT_TIME
             return self.gear
-        if rpm > AUTO_UPSHIFT_RPM and self.gear < self.num_gears:
+        if rpm > AUTO_UPSHIFT_RPM and self.gear < self.num_gears and not braking:
             self.gear += 1
             self._shift_timer = SHIFT_TIME
             return self.gear

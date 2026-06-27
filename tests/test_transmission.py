@@ -88,6 +88,17 @@ def test_auto_downshifts_at_low_rpm():
     assert tr.auto_update(900, throttle=0.1, moving=True) == 4
 
 
+def test_auto_holds_gear_while_braking_instead_of_upshifting():
+    # High rpm would normally upshift, but braking from speed must not gear up.
+    tr = Transmission(automatic=True, gear=5)
+    assert tr.auto_update(1800, throttle=0.0, moving=True, braking=True) is None
+    # Still allowed to downshift as the brake scrubs speed and rpm falls.
+    assert tr.auto_update(900, throttle=0.0, moving=True, braking=True) == 4
+    # Without braking the same high rpm still upshifts (default unchanged).
+    tr = Transmission(automatic=True, gear=5)
+    assert tr.auto_update(1800, throttle=0.8, moving=True) == 6
+
+
 def test_auto_engages_first_from_neutral_on_throttle():
     tr = Transmission(automatic=True)
     assert tr.auto_update(600, throttle=0.5, moving=False) == 1

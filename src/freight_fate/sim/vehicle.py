@@ -168,7 +168,10 @@ class TruckState:
             return None
         rpm_est = self.coupled_rpm() if not tr.in_neutral else self.rpm
         rpm_est = max(rpm_est, self.specs.idle_rpm * (0.5 + 0.5 * self.throttle))
-        return tr.auto_update(rpm_est, self.throttle, self.velocity_mps > 0.5)
+        braking = (self.brake > 0.01 or self.emergency_brake
+                   or self.air_brakes_holding)
+        return tr.auto_update(rpm_est, self.throttle, self.velocity_mps > 0.5,
+                              braking)
 
     # -- forces -----------------------------------------------------------------
 

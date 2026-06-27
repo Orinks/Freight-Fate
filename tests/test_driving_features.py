@@ -1049,6 +1049,43 @@ def test_cruise_adjust_is_inert_when_cruise_is_off(monkeypatch):
 
 
 @pytest.mark.smoke
+def test_air_ready_cue_does_not_repeat_on_compressor_cycling(monkeypatch):
+    from freight_fate.app import App
+
+    app = App()
+    events = []
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        monkeypatch.setattr(app.ctx, "say_event",
+                            lambda text, interrupt=True: events.append(text))
+        t = driving.truck
+        t.air_pressure_psi = t.specs.air_governor_cut_out_psi   # charged
+        driving._air_ready_said = True                          # already announced
+
+        def ready_count():
+            return sum("Air pressure ready" in e for e in events)
+
+        # Routine compressor cycling dips below the release threshold (which sits
+        # at the cut-in pressure) but stays well above low air. Must not re-announce.
+        for _ in range(3):
+            t.air_pressure_psi = t.specs.air_governor_cut_in_psi - 5
+            driving._update_air_brake_announcements(True, False, False)
+            t.air_pressure_psi = t.specs.air_governor_cut_out_psi
+            driving._update_air_brake_announcements(False, False, False)
+        assert ready_count() == 0
+
+        # A genuine depletion to low air, then recovery, re-announces exactly once.
+        t.air_pressure_psi = t.specs.air_low_warning_psi - 5
+        driving._update_air_brake_announcements(False, False, False)
+        t.air_pressure_psi = t.specs.air_governor_cut_out_psi
+        driving._update_air_brake_announcements(False, True, False)
+        assert ready_count() == 1
+    finally:
+        app.shutdown()
+
+
+@pytest.mark.smoke
 def test_automatic_shift_uses_shift_cue_not_brake_air(monkeypatch):
     from freight_fate.app import App
 

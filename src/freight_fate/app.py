@@ -5,6 +5,7 @@ from __future__ import annotations
 import logging
 import os
 import sys
+from pathlib import Path
 
 import pygame
 
@@ -21,6 +22,9 @@ from .speech import Speech
 from .states.base import State
 
 log = logging.getLogger(__name__)
+# Every spoken line lands here too, so a logged playtest reads as a transcript of
+# what the player heard -- the most faithful record for an audio-first game.
+transcript = logging.getLogger("freight_fate.transcript")
 
 WINDOW_SIZE = (900, 640)
 FPS = 60
@@ -63,6 +67,7 @@ class GameContext:
         return self._real_weather
 
     def say(self, text: str, interrupt: bool = True) -> None:
+        transcript.info("%s", text)
         self.speech.say(text, interrupt)
 
     def say_event(self, text: str, interrupt: bool = True) -> None:
@@ -80,6 +85,7 @@ class GameContext:
         follow the current utterance, which the screen reader handles in its
         own time.
         """
+        transcript.info("[event] %s", text)
         if self.settings.sapi_events:
             self.speech.say_event(text, interrupt)
         else:
@@ -338,15 +344,23 @@ def _configure_logging() -> None:
     from . import updater
 
     packaged = updater.is_frozen()
-    default_level = "INFO" if packaged else "WARNING"
+    # An explicit log file (set for playtests/observation) forces file output and
+    # an INFO default even from a source checkout, so a session can be reviewed
+    # after the fact without streaming to a console.
+    explicit_log_file = os.environ.get("FREIGHT_FATE_LOG_FILE")
+    default_level = "INFO" if (packaged or explicit_log_file) else "WARNING"
     level = os.environ.get("FREIGHT_FATE_LOG", default_level)
     handlers = None
 
-    if packaged:
+    log_path = None
+    if explicit_log_file:
+        log_path = Path(explicit_log_file)
+    elif packaged:
         from .models.profile import game_root
 
+        log_path = game_root() / "logs" / "game.log"
+    if log_path is not None:
         try:
-            log_path = game_root() / "logs" / "game.log"
             log_path.parent.mkdir(parents=True, exist_ok=True)
             handlers = [logging.FileHandler(log_path, mode="w", encoding="utf-8")]
         except OSError:

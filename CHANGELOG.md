@@ -4,6 +4,13 @@
 
 ### Fixed
 
+- **The automatic no longer gears up while you brake.** Braking from speed could
+  trigger an upshift because the box only watched engine RPM; it now holds the
+  gear for engine braking and downshifts cleanly as you slow to a stop.
+- **"Air pressure ready" no longer repeats back to back.** The parking-brake
+  release threshold sat exactly at the compressor cut-in pressure, so the ready
+  state flickered every 100-125 psi cycle and re-announced. The cue now fires
+  once and only re-arms after a genuine low-air depletion.
 - **Snapshot players move to stable when it catches up.** On the developer
   snapshot channel, the game now offers the stable release whenever it is as
   new as -- or newer than -- the latest nightly, so once dev work ships in a
