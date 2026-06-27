@@ -118,6 +118,11 @@ distance, road name, and coordinates with source-backed local POIs. Player
 speech should still say the service plainly, such as `garage: Chicago Company
 Yard Garage`, and should not expose raw OSM tags, IDs, or source keys.
 
+The next data pass should keep service POIs separate from career ownership and
+settlement systems. OSM/Overpass and ORS can improve where service drives go;
+trailer ownership and cargo-equipment matching belong to a freight-market and
+garage/dealer slice, not to the company-driver or owner-operator career arc.
+
 ## Job Generation
 
 Job generation now chooses:

@@ -244,6 +244,52 @@ Net-new realism candidates, roughly by area:
 - **Business realism.** The company-driver→owner-operator arc, loans, and
   insurance already sketched under Business.
 
+## Shipped for 1.8: local city service drives
+
+The first ATS-style city-layout foundation is in: from the terminal, **Drive to
+city services** lets the player pick the freight market office, terminal
+garage, or truck dealer, drive a short local service route, stop at the
+destination, and press Enter to go inside. This keeps the current terminal menu
+available while moving city services toward a drive-to-location model.
+
+- [x] **Representative city service POIs.** `World.city_services` derives
+  offline service POIs from checked-in terminal and metro freight-market data:
+  freight market office, garage, and truck dealer. These are representative,
+  source-noted service locations, not claims about exact real-world storefronts.
+- [x] **Local service driving phase.** City service drives use the existing
+  truck physics, GPS/status surfaces, save/resume path, and spoken driving help.
+  Arrival does not auto-open the menu: the truck must be fully stopped, then the
+  player presses Enter to go inside.
+- [x] **Accessible PDA/status wording.** The Tab status screens describe these
+  as no-cargo local service drives, not `0 tons` freight loads, and F1/arrival
+  prompts name the Enter-to-enter contract.
+- [x] **Player/data docs.** The manual and freight-market data notes describe
+  city service drives as the current representative foundation and point future
+  data work at OSM/ORS/operator-source enrichment.
+
+Follow-up hooks for the roadmap worker:
+
+- **First-drive orientation route.** A new career can start with a short guided
+  city tour that visits the garage, truck dealer, freight market office, and
+  terminal services before the first dispatch. Keep it skippable/replayable and
+  spoken as GPS guidance, not as a forced tutorial wall.
+- **OSM/ORS service-POI enrichment.** Replace representative service approach
+  distance/road names with build-time source-backed local POIs where possible:
+  OSM/Overpass for service roads and industrial/commercial access, ORS HGV for
+  truck-legal local approaches, and operator or public sources for named dealer
+  or service locations. Runtime stays offline and deterministic; no raw OSM
+  tags, IDs, or source keys in player speech.
+- **Enter-to-enter polish.** Add pull-in/park sounds and brief exterior/office
+  transition cues when entering and leaving services. Keep the keyboard contract
+  simple: stop, Enter to enter, menu action, Back/Escape returns to the truck or
+  terminal stack with clear speech.
+- **Freight market and trailers.** Trailer ownership/equipment matching belongs
+  with a freight-market overhaul, not with the company-to-owner-operator career
+  arc. A later slice can let the garage/dealer sell trailers, filter cargo by
+  owned trailer capability, and show market sell prices at freight-market
+  offices, while the business arc remains focused on driver/company vs
+  owner-operator settlement and operating costs.
+
 ## Shipped for 1.8: in-cab logbook (Record of Duty Status)
 
 The game talks about an ELD and the shipped `TrafficStopState` already runs a

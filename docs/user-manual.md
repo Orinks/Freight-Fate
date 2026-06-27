@@ -470,7 +470,7 @@ Escape opens the pause menu during a drive. Public pause choices include:
 Freight Fate saves at terminals, at supported route save points, when quitting
 to the main menu, and during important trip state changes. Continue latest
 career can resume a saved pickup objective, pickup drive, pickup facility visit,
-or loaded delivery.
+city service drive, or loaded delivery.
 
 The main menu can continue the latest career, choose another career, reset a
 career, or delete a career. If a saved career fails its integrity check, the
