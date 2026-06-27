@@ -228,8 +228,9 @@ the shipper. At the pickup gate:
 4. Load cargo at the assigned dock.
 5. Depart for the destination after the trailer is loaded and sealed.
 
-Check-in takes 15 in-game minutes. Loading takes 60 in-game minutes. Both count
-as on-duty time.
+Check-in takes 15 in-game minutes. Loading gives a short spoken wait while the
+dock crew loads and seals the trailer, then advances the clock by 60 in-game
+minutes. Both count as on-duty time.
 
 Route planning appears after pickup and loading. Each route option lists:
 
@@ -362,7 +363,9 @@ date, season, and temperature follow the real-world calendar instead.
 
 Stops are reported as you approach them. A one-mile cue tells you when to take
 an exit. Press X to signal for the exit, slow to 45 miles per hour or less, and
-brake to a stop at the end of the ramp.
+brake to a stop at the end of the ramp. The game gives a short pull-in moment
+before the stop menu opens, so holding Down Arrow to brake does not skip the
+first menu option.
 
 Destination exits work the same way. When your delivery exit is ahead, the game
 announces the signed exit and toward cities, marks it as the destination exit,
@@ -491,14 +494,15 @@ The destination menu includes:
 
 | Choice | What It Does |
 | --- | --- |
-| Dock and deliver | Complete the delivery and open settlement. |
+| Dock and deliver | Unload the trailer, sign the paperwork, and open settlement. |
 | Check paperwork | Review facility, cargo, payout, deadline, damage, tolls, approved charges, driver charges, and net pay before settlement. |
 | Check arrival status | Review facility, cargo, speed, and next step. |
 
-Settlement reports cargo delivered, trip time, on-time status, gross pay,
-carrier-paid or reimbursed charges, driver-responsibility charges, net driver
-pay, money after settlement, fuel, truck damage, career messages, and
-achievements.
+Unloading gives a short spoken wait and advances the clock as on-duty work
+before settlement. Settlement reports cargo delivered, trip time, on-time
+status, gross pay, carrier-paid or reimbursed charges, driver-responsibility
+charges, net driver pay, money after settlement, fuel, truck damage, career
+messages, and achievements.
 
 Tolls and approved accessorial charges are carrier settlement items. They are
 reported for transparency but do not reduce driver pay. Driver-caused charges,

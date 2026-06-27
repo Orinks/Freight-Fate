@@ -38,6 +38,11 @@
   equivalent nightly.
 
 ### Changed
+- **Loading, unloading, and pulling in now take a beat.** Pickup loading and
+  destination unloading now give a short spoken wait and advance the in-game
+  clock as on-duty work. Pulling into pickup gates, destination gates, and route
+  stops also gives the first menu option a moment to speak, so holding Down
+  Arrow to brake no longer skips past it.
 - **Menus can read just the option, not its place.** A new Speech setting,
   "Menu position announcements," turns off the "N of 10" position spoken after
   each menu option, so menus read only the option itself. On by default.

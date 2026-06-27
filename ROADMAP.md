@@ -297,6 +297,26 @@ Follow-up hooks for the roadmap worker:
   offices, while the business arc remains focused on driver/company vs
   owner-operator settlement and operating costs.
 
+## Shipped for 1.8: timed facility work and stop-menu settling
+
+Pickup, loading, destination docking, unloading, and route-stop pull-ins now
+feel like short in-game actions instead of instant teleports. Loading and
+unloading speak what is happening, advance the career/HOS clocks as on-duty
+work, and keep the player in a status screen for a brief real-time wait. Pulling
+into pickup gates, destination gates, and route stops adds a short settling
+buffer before the menu accepts navigation, so holding Down Arrow to brake does
+not skip the first spoken option.
+
+Follow-ups for a later facility/keyboard polish pass:
+
+- Keep the future cargo loading/securing minigame optional and audio-first,
+  with a simple timed loading path preserved for players who do not want an
+  extra ritual at every dock.
+- Give local facility approaches more distinct dock/gate identity: yard road
+  names, gate lanes, backing distance, and receiver-specific arrival language.
+- If key repeat is ever enabled globally, add an explicit post-transition input
+  guard so held braking/navigation keys cannot leak into newly opened menus.
+
 ## Shipped for 1.8: in-cab logbook (Record of Duty Status)
 
 The game talks about an ELD and the shipped `TrafficStopState` already runs a
@@ -508,7 +528,8 @@ Deliver -> Earn and level up -> Repeat
 ## Future ideas (post-1.0)
 
 ### Gameplay depth
-- [ ] Cargo loading/securing minigame
+- [x] Timed loading, unloading, and pull-in settling before facility/stop menus
+- [ ] Optional cargo loading/securing minigame
 - [x] Hours-of-service fatigue and mandatory rest planning (1.5.0)
 - [x] Highway exits: signal with X, slow for the ramp, brake to the stop
 - [x] Cruise control (K), with hazard and braking auto-cancel
