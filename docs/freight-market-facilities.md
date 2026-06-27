@@ -104,6 +104,20 @@ Template facilities use stable IDs and polished names such as `Chicago
 Cross-Dock` or `Fresno Grain Elevator`. They are representative gameplay
 locations, not claims about a specific real-world shipper.
 
+## City Service POIs
+
+City services are separate from freight shippers and receivers. The current
+runtime exposes representative service POIs for the freight market office,
+terminal garage, and truck dealer, then generates short local approach drives
+from the home terminal. They are derived from checked-in terminal and metro
+market data, stay offline, and keep the same clean spoken-name rules as freight
+facilities.
+
+Future OSM/ORS or operator-data passes can replace the representative approach
+distance, road name, and coordinates with source-backed local POIs. Player
+speech should still say the service plainly, such as `garage: Chicago Company
+Yard Garage`, and should not expose raw OSM tags, IDs, or source keys.
+
 ## Job Generation
 
 Job generation now chooses:

@@ -76,6 +76,24 @@ class HomeTerminal:
         return f"{self.city}, {self.state}"
 
 
+@dataclass(frozen=True)
+class CityService:
+    key: str
+    name: str
+    city: str
+    state: str
+    kind: str
+    source_note: str
+
+    @property
+    def label(self) -> str:
+        return CITY_SERVICE_LABELS.get(self.kind, self.kind.replace("_", " "))
+
+    @property
+    def spoken_name(self) -> str:
+        return f"{self.label}: {self.name}"
+
+
 STOP_TYPE_LABELS = {
     "truck_stop": "truck stop",
     "travel_center": "travel center",
@@ -274,6 +292,37 @@ FACILITY_APPROACH_ROADS = {
     "steel_industrial": "industrial plant access road",
     "terminal": "terminal access road",
     "warehouse": "warehouse access road",
+}
+
+CITY_SERVICE_LABELS = {
+    "freight_market": "freight market office",
+    "garage": "garage",
+    "truck_dealer": "truck dealer",
+}
+
+CITY_SERVICE_APPROACH_MILES = {
+    "freight_market": 2.5,
+    "garage": 1.4,
+    "truck_dealer": 4.5,
+}
+
+CITY_SERVICE_APPROACH_ROADS = {
+    "freight_market": "local freight district streets",
+    "garage": "terminal service road",
+    "truck_dealer": "dealer access road",
+}
+
+CITY_SERVICE_SOURCE_NOTES = {
+    "freight_market": (
+        "Representative city service POI derived from the metro freight market "
+        "and checked-in facility taxonomy."
+    ),
+    "garage": (
+        "Representative terminal garage service POI derived from the home terminal."
+    ),
+    "truck_dealer": (
+        "Representative truck dealer service POI for the metro service area."
+    ),
 }
 
 FACILITY_CARGO_ROLES: dict[str, dict[str, tuple[str, ...]]] = {
@@ -1065,6 +1114,62 @@ class World:
             if location.type == "company_yard":
                 return HomeTerminal(location.name, city, city_obj.state, "company_yard")
         return HomeTerminal(f"{city} Company Yard", city, city_obj.state, "company_yard")
+
+    def city_services(self, city: str) -> tuple[CityService, ...]:
+        """Service POIs available for local city driving.
+
+        These are representative service locations derived from checked-in
+        terminal and market data. Future OSM/ORS enrichment can replace their
+        approach roads or coordinates without changing the player-facing
+        service contract.
+        """
+        if city not in self.cities:
+            raise KeyError(f"Unknown city: {city}")
+        city_obj = self.cities[city]
+        terminal = self.home_terminal(city)
+        return (
+            CityService(
+                "freight_market",
+                f"{city} Freight Market Office",
+                city,
+                city_obj.state,
+                "freight_market",
+                CITY_SERVICE_SOURCE_NOTES["freight_market"],
+            ),
+            CityService(
+                "garage",
+                f"{terminal.name} Garage",
+                city,
+                city_obj.state,
+                "garage",
+                CITY_SERVICE_SOURCE_NOTES["garage"],
+            ),
+            CityService(
+                "truck_dealer",
+                f"{city} Truck Dealer",
+                city,
+                city_obj.state,
+                "truck_dealer",
+                CITY_SERVICE_SOURCE_NOTES["truck_dealer"],
+            ),
+        )
+
+    def city_service(self, city: str, key: str) -> CityService:
+        for service in self.city_services(city):
+            if service.key == key:
+                return service
+        raise KeyError(f"Unknown service in {city}: {key}")
+
+    def city_service_route(self, city: str, key: str) -> Route:
+        """A short, drivable local route from the terminal to a city service."""
+        service = self.city_service(city, key)
+        base_miles = CITY_SERVICE_APPROACH_MILES.get(service.kind, 3.0)
+        seed = zlib.crc32(f"{city}:service:{service.key}".encode())
+        offset = (seed % 5) * 0.2
+        miles = round(base_miles + offset, 1)
+        road = CITY_SERVICE_APPROACH_ROADS.get(service.kind, "city service road")
+        leg = Leg(city, city, miles, road, "flat", ())
+        return Route([city, city], [leg])
 
     def facility_approach_route(self, city: str, location_name: str) -> Route:
         """A short, drivable local route from the company terminal to a facility."""

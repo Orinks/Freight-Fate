@@ -11,6 +11,7 @@ from ..models.economy import (
     pay_advance_unavailable_reason,
 )
 from ..models.jobs import (
+    CARGO_CATALOG,
     Job,
     JobBoard,
     job_from_payload,
@@ -143,6 +144,10 @@ class CityMenuState(MenuState):
                      help="Browse terminal dispatches from local freight "
                           "facilities, including ports, warehouses, food "
                           "terminals, intermodal yards, and distribution hubs."),
+            MenuItem("Drive to city services", self._city_services,
+                     help="Drive through the local service area to the garage, "
+                          "truck dealer, or freight market office. Stop at the "
+                          "destination, then press Enter to go inside."),
             MenuItem("Bobtail to a nearby city", self._bobtail,
                      help="Drive empty to a nearby city to shop its dispatch "
                           "board. Costs fuel and hours of service; no load, no "
@@ -181,36 +186,15 @@ class CityMenuState(MenuState):
 
     # -- actions -----------------------------------------------------------------
 
+    def _city_services(self) -> None:
+        self.ctx.push_state(CityServiceSelectState(self.ctx))
+
     def _job_board(self) -> None:
-        p = self.ctx.profile
-        market_changed = p.market.advance_to(p.market_day())
-        key = self._dispatch_cache_key()
-        cache = p.dispatch_board_cache if not market_changed else None
-        if cache and cache.get("key") == key:
-            jobs = [_job_from_payload(payload)
-                    for payload in cache.get("jobs", [])]
-        else:
-            jobs = self._board.offers(p.current_city, p.career.endorsements,
-                                      level=p.career.level, market=p.market)
-            p.dispatch_board_cache = {
-                "key": key,
-                "jobs": [_job_payload(job) for job in jobs],
-            }
-            self.ctx.save_profile()
-        self._jobs_cache = jobs
-        self.ctx.push_state(JobBoardState(self.ctx, jobs))
+        open_freight_market(self.ctx)
 
     def _dispatch_cache_key(self) -> dict:
         p = self.ctx.profile
-        return {
-            "city": p.current_city,
-            "market_day": p.market_day(),
-            "market_seed": p.market.seed,
-            "market_state_day": p.market.day,
-            "level": p.career.level,
-            "endorsements": sorted(p.career.endorsements),
-            "count": 5,
-        }
+        return dispatch_cache_key(p)
 
     def _bobtail(self) -> None:
         p = self.ctx.profile
@@ -356,6 +340,107 @@ class CityMenuState(MenuState):
     def go_back(self) -> None:
         self.ctx.audio.play("ui/menu_back")
         self.ctx.say("Use Quit to main menu to leave the terminal. Progress is saved automatically.")
+
+
+def dispatch_cache_key(p) -> dict:
+    return {
+        "city": p.current_city,
+        "market_day": p.market_day(),
+        "market_seed": p.market.seed,
+        "market_state_day": p.market.day,
+        "level": p.career.level,
+        "endorsements": sorted(p.career.endorsements),
+        "count": 5,
+    }
+
+
+def open_freight_market(ctx) -> list[Job]:
+    p = ctx.profile
+    board = JobBoard(ctx.world)
+    market_changed = p.market.advance_to(p.market_day())
+    key = dispatch_cache_key(p)
+    cache = p.dispatch_board_cache if not market_changed else None
+    if cache and cache.get("key") == key:
+        jobs = [_job_from_payload(payload)
+                for payload in cache.get("jobs", [])]
+    else:
+        jobs = board.offers(p.current_city, p.career.endorsements,
+                            level=p.career.level, market=p.market)
+        p.dispatch_board_cache = {
+            "key": key,
+            "jobs": [_job_payload(job) for job in jobs],
+        }
+        ctx.save_profile()
+    ctx.push_state(JobBoardState(ctx, jobs))
+    return jobs
+
+
+class CityServiceSelectState(MenuState):
+    title = "City services"
+    intro_help = (
+        "Pick a city service to drive to. The GPS gives local guidance. "
+        "Stop at the destination, then press Enter to go inside."
+    )
+
+    def announce_entry(self) -> None:
+        city = self.ctx.profile.current_city
+        self.ctx.say(f"{city} services. {self.current_text()}")
+
+    def build_items(self) -> list[MenuItem]:
+        items = []
+        for service in self.ctx.world.city_services(self.ctx.profile.current_city):
+            route = self.ctx.world.city_service_route(service.city, service.key)
+            items.append(MenuItem(
+                f"{service.name}: {route.miles:.1f} miles",
+                lambda key=service.key: self._start(key),
+                help=(
+                    f"Drive to {service.spoken_name}. "
+                    "The destination opens only after you stop and press Enter."
+                ),
+            ))
+        items.append(MenuItem("Back to terminal", self.go_back))
+        return items
+
+    def _start(self, service_key: str) -> None:
+        from .driving import DRIVE_PHASE_CITY_SERVICE, DrivingState
+
+        p = self.ctx.profile
+        service = self.ctx.world.city_service(p.current_city, service_key)
+        route = self.ctx.world.city_service_route(p.current_city, service_key)
+        terminal = self.ctx.world.home_terminal(p.current_city)
+        job = Job(
+            CARGO_CATALOG["general"],
+            0.0,
+            p.current_city,
+            terminal.name,
+            p.current_city,
+            route.miles,
+            0.0,
+            24.0,
+            origin_type=terminal.kind,
+            destination_location=service.name,
+            destination_type=service.kind,
+            bobtail=True,
+        )
+        driving = DrivingState(
+            self.ctx,
+            job,
+            route,
+            phase=DRIVE_PHASE_CITY_SERVICE,
+            city_service_key=service.key,
+        )
+        p.active_trip = driving.snapshot()
+        self.ctx.save_profile()
+        self.ctx.say(
+            f"GPS set for {service.spoken_name}, {route.miles:.1f} miles on "
+            f"{route.highways[0]}. Stop there, then press Enter to go inside.",
+            interrupt=True,
+        )
+        self.ctx.push_state(driving)
+
+    def go_back(self) -> None:
+        self.ctx.audio.play("ui/menu_back")
+        self.ctx.pop_state()
 
 
 class BobtailDestState(MenuState):

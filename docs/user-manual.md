@@ -133,6 +133,7 @@ Your terminal is the safe hub between jobs. Public terminal actions include:
 | Choice | What It Does |
 | --- | --- |
 | Dispatch board | Browse freight offers from local facilities. |
+| Drive to city services | Drive a short local route to the freight market office, garage, or truck dealer. |
 | Garage | Refuel, repair, buy upgrades, buy trucks, or switch owned trucks. |
 | Request pay advance | Draw cash against your next load when you are broke. |
 | Career stats | Review level, reputation, deliveries, and career totals. |
@@ -146,6 +147,13 @@ Your terminal is the safe hub between jobs. Public terminal actions include:
 
 The garage can do partial fuel or repair work when you cannot afford a full
 tank or full repair.
+
+City service drives are a first step toward more local city driving. Pick a
+service, follow the spoken GPS, stop at the destination, and press Enter to go
+inside. The truck does not enter the service automatically. Current service
+locations are representative city POIs derived from the checked-in freight
+market and terminal data; future map-data passes can make those approaches more
+specific without changing the controls.
 
 If your balance goes negative and you cannot afford fuel, **Request pay
 advance** fronts you cash against your next load (also available at in-trip
