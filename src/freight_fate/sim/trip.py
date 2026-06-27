@@ -659,6 +659,18 @@ class Trip:
         active = [p for p in self.patrols if p.start_mi <= mile <= p.end_mi]
         return max(active, key=lambda p: p.intensity) if active else None
 
+    def _leg_traffic_density(self, leg: Leg, bad_weather_bias: float,
+                             night: bool) -> float:
+        """Probability a slow-traffic lead forms on ``leg``, scaled by
+        ``hazard_scale`` so relaxed mode thins traffic the way it thins hazards
+        and patrols. A no-op (x1.0) in realistic mode."""
+        metro_bias = 0.18 if leg.checkpoints else 0.0
+        night_bias = -0.08 if night else 0.0
+        density = min(0.86, max(0.05,
+                      0.22 + leg.miles / 900.0 + metro_bias
+                      + bad_weather_bias + night_bias))
+        return density * self.hazard_scale
+
     def _place_traffic(self) -> list[TrafficLead]:
         leads: list[TrafficLead] = []
         effects = self.weather.effects
@@ -671,11 +683,7 @@ class Trip:
         for start, leg in zip(self._leg_starts, self.route.legs, strict=True):
             if leg.miles < 70.0:
                 continue
-            metro_bias = 0.18 if leg.checkpoints else 0.0
-            night_bias = -0.08 if night else 0.0
-            density = min(0.86, max(0.05,
-                          0.22 + leg.miles / 900.0 + metro_bias
-                          + bad_weather_bias + night_bias))
+            density = self._leg_traffic_density(leg, bad_weather_bias, night)
             if self._rng.random() > density:
                 continue
             at = start + self._rng.uniform(25.0, max(26.0, leg.miles - 20.0))
@@ -1241,6 +1249,14 @@ class Trip:
                        f"Brake now! {hazard[0].upper()}{hazard[1:]}.",
                        deadline_s=self._rng.uniform(3.0, 4.5))
 
+    def _random_inspection_odds(self, leg: Leg) -> float:
+        """Odds a random roadside log-check fires when the driver is in HOS
+        violation, thinned by ``hazard_scale`` so relaxed mode pulls you over
+        less often. Weigh-station and construction-zone checks are unaffected --
+        a real violation at a fixed checkpoint still catches you."""
+        base = 0.55 if leg.checkpoints else 0.25
+        return base * self.hazard_scale
+
     def _check_inspections(self, moved_mi: float) -> None:
         """Route-backed inspections plus rare seeded patrols.
 
@@ -1293,7 +1309,7 @@ class Trip:
             return
         leg = self.route.legs[self.current_leg_index]
         context = "checkpoint corridor" if leg.checkpoints else "patrol corridor"
-        if self._insp_rng.random() < (0.55 if leg.checkpoints else 0.25):
+        if self._insp_rng.random() < self._random_inspection_odds(leg):
             key = f"patrol:{self.current_leg_index}:{round(self.position_mi)}"
             self._emit(
                 TripEventKind.INSPECTION,

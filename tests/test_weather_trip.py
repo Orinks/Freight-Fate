@@ -134,6 +134,32 @@ def test_relaxed_hazard_scale_lowers_hazard_risk(world):
     assert relaxed._hazard_risk() < normal._hazard_risk()
 
 
+def test_relaxed_mode_thins_traffic_density(world):
+    """Relaxed mode also makes ambient traffic rarer, not just hazards."""
+    from freight_fate.sim.hos import RELAXED_HAZARD_SCALE
+
+    normal, _ = make_trip(world, seed=4)
+    relaxed, _ = make_trip(world, seed=4, hazard_scale=RELAXED_HAZARD_SCALE)
+    leg = normal.route.legs[0]
+    assert relaxed._leg_traffic_density(leg, 0.0, False) == pytest.approx(
+        normal._leg_traffic_density(leg, 0.0, False) * RELAXED_HAZARD_SCALE)
+    assert (relaxed._leg_traffic_density(leg, 0.0, False)
+            < normal._leg_traffic_density(leg, 0.0, False))
+
+
+def test_relaxed_mode_thins_random_inspection_odds(world):
+    """Relaxed mode pulls a violating driver over less often; the random log
+    check is thinned by the hazard scale (weigh stations are not)."""
+    from freight_fate.sim.hos import RELAXED_HAZARD_SCALE
+
+    normal, _ = make_trip(world, seed=4)
+    relaxed, _ = make_trip(world, seed=4, hazard_scale=RELAXED_HAZARD_SCALE)
+    leg = normal.route.legs[0]
+    assert relaxed._random_inspection_odds(leg) == pytest.approx(
+        normal._random_inspection_odds(leg) * RELAXED_HAZARD_SCALE)
+    assert relaxed._random_inspection_odds(leg) < normal._random_inspection_odds(leg)
+
+
 def test_corridor_speed_limit_by_highway_and_region():
     from freight_fate.sim.trip import BASE_SPEED_LIMIT_MPH, corridor_speed_limit
 

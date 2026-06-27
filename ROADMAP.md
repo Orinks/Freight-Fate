@@ -96,8 +96,11 @@ From a batch of player reports:
   (0.2), so random road hazards are ~5x rarer while weather and night
   still modulate the ones that occur. Driver-responsibility systems
   (hours of service, fueling, repairs, fatigue) carry the relaxed loop;
-  `realistic` mode is unchanged. Possible follow-up: also thin out traffic
-  density and reduce inspection/patrol frequency in relaxed mode.
+  `realistic` mode is unchanged. Patrol windows already scale by
+  `hazard_scale`; ambient traffic density (`_leg_traffic_density`) and the
+  random roadside log-check odds (`_random_inspection_odds`) now do too, so a
+  relaxed run is genuinely quieter on the road. Fixed weigh-station and
+  construction-zone enforcement stay put -- a real violation still catches you.
 
 - [x] **Grounded, context-aware hazards.** Shipped: the flat per-region
   string pool (which could announce farm equipment merging onto a freeway

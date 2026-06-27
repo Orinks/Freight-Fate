@@ -11,6 +11,13 @@
   equivalent nightly.
 
 ### Changed
+- **Relaxed mode now feels emptier on the road.** Relaxed hours-of-service mode
+  already made random hazards and trooper patrols rarer; it now also thins
+  ambient traffic and the odds of a random roadside log check, so a relaxed run
+  centers on driver responsibility -- hours, fuel, fatigue -- with fewer
+  interruptions. Fixed checkpoints (weigh stations) and construction-zone
+  enforcement are unchanged: a real violation still catches you. Realistic mode
+  is untouched.
 - **Live weather now reports the real temperature.** With live weather on, the
   cab speaks the actual temperature from the nearest National Weather Service
   station instead of the modeled seasonal estimate, so the degrees match the
