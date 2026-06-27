@@ -2,8 +2,9 @@
 
 > Current stable: **1.7.0** (shipped). Next release: **1.8.0**, in flight on the
 > `awesome-greider` branch (troopers, real OSM speed limits, seasons,
-> cargo-weight physics, predictive adaptive cruise, and more). `pyproject`
-> still reads 1.6.0 on that branch and must be bumped to 1.8.0 at release.
+> cargo-weight physics, predictive adaptive cruise, and more). `pyproject` is
+> set to 1.8.0 so developer snapshots report it; the stable tag follows at
+> release.
 
 ## Shipped in 1.6.0
 
