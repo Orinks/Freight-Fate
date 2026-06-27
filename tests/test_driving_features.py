@@ -1318,14 +1318,14 @@ def test_adaptive_cruise_disables_before_restricted_zone(monkeypatch):
         zone = Zone(10.0, 15.0, 45.0, "construction")
         event = TripEvent(
             TripEventKind.GPS_CUE,
-            "In 2 miles, construction ahead. Speed limit 45.",
+            "Brake now! In 2 miles, construction ahead. Speed limit 45.",
             {"zone": zone},
         )
         driving._handle_trip_event(event)
 
         assert driving._cruise_mph is None
         assert events[-1] == (
-            "In 2 miles, construction ahead. Speed limit 45. "
+            "Brake now! In 2 miles, construction ahead. Speed limit 45. "
             "Adaptive cruise disabled; take manual speed control."
         )
     finally:

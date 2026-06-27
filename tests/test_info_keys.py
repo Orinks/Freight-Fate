@@ -71,7 +71,7 @@ def test_repeat_key_replays_the_last_route_announcement(monkeypatch):
         # After a route announcement, A replays it verbatim.
         d._handle_trip_event(TripEvent(
             TripEventKind.GPS_CUE,
-            "In 2 miles, construction ahead. Speed limit 45."))
+            "Brake now! In 2 miles, construction ahead. Speed limit 45."))
         spoken.clear()
         d.handle_event(key_event(pygame.K_a))
         assert "construction ahead" in spoken[-1]

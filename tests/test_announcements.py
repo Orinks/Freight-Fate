@@ -56,7 +56,8 @@ def test_zone_warning_interrupts_while_weather_chatter_queues(monkeypatch):
 
         d._handle_trip_event(TripEvent(
             TripEventKind.GPS_CUE,
-            "In 2 miles, construction ahead. Speed limit 45.", {"zone": zone}))
+            "Brake now! In 2 miles, construction ahead. Speed limit 45.",
+            {"zone": zone}))
         assert calls[-1][1] is True   # the warning preempts whatever is talking
 
         d._handle_trip_event(TripEvent(TripEventKind.WEATHER_CHANGE, "Weather: rain."))
@@ -67,7 +68,11 @@ def test_zone_warning_interrupts_while_weather_chatter_queues(monkeypatch):
 
 def test_zone_warning_lead_scales_with_speed_and_pacing():
     from freight_fate.app import App
-    from freight_fate.sim.trip import ZONE_WARNING_LOOKAHEAD_MI, ZONE_WARNING_MAX_MI
+    from freight_fate.sim.trip import (
+        ZONE_WARNING_LOOKAHEAD_MI,
+        ZONE_WARNING_MAX_MI,
+        ZONE_WARNING_REAL_S,
+    )
 
     app = App()
     try:
@@ -80,11 +85,13 @@ def test_zone_warning_lead_scales_with_speed_and_pacing():
 
         d.truck.velocity_mps = 70 / 2.23694   # highway speed -> more warning
         fast = d.trip._zone_warning_lookahead_mi()
-        assert fast > crawl
+        expected = ZONE_WARNING_REAL_S * 70.0 * d.trip.time_scale / 3600.0
+        assert fast == pytest.approx(expected, abs=0.05)
         assert fast <= ZONE_WARNING_MAX_MI
 
         d.trip.time_scale = 40.0   # faster pacing compresses time -> even more lead
         faster = d.trip._zone_warning_lookahead_mi()
         assert faster >= fast
+        assert faster == pytest.approx(ZONE_WARNING_MAX_MI)
     finally:
         app.shutdown()

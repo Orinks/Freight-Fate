@@ -100,10 +100,10 @@ ZONE_WARNING_LOOKAHEAD_MI = 2.0    # minimum distance heads-up for a zone
 # fixed-distance warning gives -- 2 miles at 70 mph and 20x is only ~5 seconds.
 # Scale the lead distance with speed and pacing for a roughly constant real-time
 # heads-up, clamped between the base distance and a sane maximum.
-ZONE_WARNING_REAL_S = 12.0         # target real seconds of warning
-ZONE_WARNING_MAX_MI = 8.0
+ZONE_WARNING_REAL_S = 18.0         # target real seconds of warning
+ZONE_WARNING_MAX_MI = 10.0
 STATE_CROSSING_WARNING_LOOKAHEAD_MI = 10.0
-CONSTRUCTION_ENFORCEMENT_GRACE_MI = 1.0
+CONSTRUCTION_ENFORCEMENT_GRACE_MI = 1.5
 # Driving faster than the weather's safe speed risks a traction-loss incident,
 # so the safe-speed readout has teeth. Risk scales with how far over you are and
 # how little grip the conditions leave; only adverse grip counts.
@@ -1052,7 +1052,7 @@ class Trip:
     def _zone_warning_lookahead_mi(self) -> float:
         """Lead distance for a zone warning, scaled so the player gets roughly
         ``ZONE_WARNING_REAL_S`` of real time despite speed and time compression."""
-        speed = max(self.truck.speed_mph, 30.0)
+        speed = max(self.truck.speed_mph, 1.0)
         miles = ZONE_WARNING_REAL_S * speed * self.time_scale / 3600.0
         return max(ZONE_WARNING_LOOKAHEAD_MI, min(miles, ZONE_WARNING_MAX_MI))
 
@@ -1063,9 +1063,10 @@ class Trip:
             ahead = zone.start_mi - self.position_mi
             if 0 < ahead <= lookahead and key not in self._announced_zone_warnings:
                 self._announced_zone_warnings.add(key)
+                action = "Brake now! " if zone.reason == "construction" else ""
                 self._emit(
                     TripEventKind.GPS_CUE,
-                    f"In {self._distance_text(ahead)}, {zone.reason} ahead. "
+                    f"{action}In {self._distance_text(ahead)}, {zone.reason} ahead. "
                     f"Speed limit {self._speed_value(zone.limit_mph)}.",
                     zone=zone,
                 )

@@ -5,7 +5,12 @@ import itertools
 import pytest
 
 from freight_fate.sim import Trip, TruckState, WeatherKind, WeatherSystem
-from freight_fate.sim.trip import NavigationCue, TrafficLead, TripEventKind
+from freight_fate.sim.trip import (
+    CONSTRUCTION_ENFORCEMENT_GRACE_MI,
+    NavigationCue,
+    TrafficLead,
+    TripEventKind,
+)
 from freight_fate.sim.weather import EFFECTS, REGION_WEIGHTS
 
 
@@ -120,6 +125,31 @@ def make_trip(world, start="Chicago", end="Indianapolis", seed=2, **kwargs):
     truck.start_engine()
     weather = WeatherSystem("great_lakes", seed=1)
     return Trip(route, truck, weather, seed=seed, **kwargs), truck
+
+
+def _brake_until_speed(
+    trip: Trip,
+    truck: TruckState,
+    target_mph: float,
+    *,
+    emergency: bool = False,
+    limit_s: float = 20.0,
+    dt: float = 1 / 60,
+) -> list:
+    truck.throttle = 0.0
+    truck.brake = 1.0
+    truck.emergency_brake = emergency
+    inspections = []
+    for _ in range(int(limit_s / dt)):
+        truck.auto_shift()
+        truck.update(dt)
+        events = trip.update(dt)
+        inspections.extend(
+            event for event in events if event.kind == TripEventKind.INSPECTION
+        )
+        if truck.speed_mph <= target_mph:
+            return inspections
+    raise AssertionError(f"truck did not slow to {target_mph} mph")
 
 
 def test_relaxed_hazard_scale_lowers_hazard_risk(world):
@@ -429,16 +459,38 @@ def test_facility_gate_warns_before_final_low_speed_zone(world):
 
 
 def test_construction_zone_warns_before_entry(world):
-    trip, _ = make_trip(world, "Chicago", "Indianapolis", seed=12345)
+    trip, truck = make_trip(world, "Chicago", "Indianapolis", seed=12345)
     zone = next(z for z in trip.zones if z.reason == "construction")
+    truck.velocity_mps = 70 / 2.23694
+    trip.time_scale = 20.0
 
-    trip.position_mi = zone.start_mi - 2.0
+    lookahead = trip._zone_warning_lookahead_mi()
+    assert lookahead >= 6.0
+
+    trip.position_mi = zone.start_mi - lookahead
     events = trip.update(0.0)
 
     warnings = _gps_messages(events)
     assert warnings == [
-        f"In 2 miles, construction ahead. Speed limit {zone.limit_mph:.0f}."
+        f"Brake now! In {trip._distance_text(lookahead)}, construction ahead. "
+        f"Speed limit {zone.limit_mph:.0f}."
     ]
+
+
+def test_construction_warning_lead_allows_normal_braking(world):
+    trip, truck = make_trip(world, "Chicago", "Indianapolis", seed=12345)
+    zone = next(z for z in trip.zones if z.reason == "construction")
+    truck.velocity_mps = 70 / 2.23694
+    trip.time_scale = 20.0
+    trip.position_mi = zone.start_mi - trip._zone_warning_lookahead_mi()
+
+    events = trip.update(0.0)
+    assert _gps_messages(events)[0].startswith("Brake now!")
+
+    inspections = _brake_until_speed(trip, truck, zone.limit_mph)
+
+    assert trip.position_mi < zone.start_mi
+    assert inspections == []
 
 
 def test_construction_zone_does_not_fine_on_entry_tick(world):
@@ -465,22 +517,43 @@ def test_construction_zone_speeding_fine_waits_for_grace_distance(world):
     trip.position_mi = zone.start_mi - 2.0
     advance = trip.update(0.0)
     assert _gps_messages(advance) == [
-        f"In 2 miles, construction ahead. Speed limit {zone.limit_mph:.0f}."
+        f"Brake now! In 2 miles, construction ahead. Speed limit {zone.limit_mph:.0f}."
     ]
 
-    trip.position_mi = zone.start_mi + 0.3
+    trip.position_mi = zone.start_mi + CONSTRUCTION_ENFORCEMENT_GRACE_MI - 0.1
     trip._events = []
     trip._check_zones()
     trip._check_inspections(0.4)
     assert not [event for event in trip._events if event.kind == TripEventKind.INSPECTION]
 
-    trip.position_mi = zone.start_mi + 1.1
+    trip.position_mi = zone.start_mi + CONSTRUCTION_ENFORCEMENT_GRACE_MI + 0.1
     trip._events = []
     trip._check_inspections(0.8)
     inspection = [event for event in trip._events if event.kind == TripEventKind.INSPECTION]
     assert [event.message for event in inspection] == [
         "Trooper in the construction zone clocks your speed."
     ]
+
+
+def test_late_emergency_brake_can_save_construction_speeding(world):
+    trip, truck = make_trip(world, "Chicago", "Indianapolis", seed=12345)
+    zone = next(z for z in trip.zones if z.reason == "construction")
+    truck.velocity_mps = 70 / 2.23694
+    trip.time_scale = 20.0
+    trip.position_mi = zone.start_mi + CONSTRUCTION_ENFORCEMENT_GRACE_MI - 0.7
+    trip._check_zones()
+    trip._events = []
+
+    inspections = _brake_until_speed(
+        trip,
+        truck,
+        zone.limit_mph + 9.0,
+        emergency=True,
+        limit_s=5.0,
+    )
+
+    assert trip.position_mi < zone.start_mi + CONSTRUCTION_ENFORCEMENT_GRACE_MI
+    assert inspections == []
 
 
 def test_grades_are_bounded(world):

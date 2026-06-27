@@ -4,6 +4,10 @@
 
 ### Fixed
 
+- **Construction-zone warnings give you room to react.** The warning now comes
+  earlier at highway speed and starts with "Brake now!", and troopers wait a
+  little longer inside the zone before clocking you, so normal braking from the
+  warning is fair and the emergency brake can still save a late reaction.
 - **No more "dot dot" at the end of menu items.** A menu or list item that was
   already a full sentence (like a settlement summary line) got a second period
   appended before its "N of M" position, which a screen reader voiced as "dot
