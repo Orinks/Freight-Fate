@@ -2332,8 +2332,10 @@ class RestStopState(MenuState):
         if "food" in actions:
             items.append(MenuItem(
                 "Food and coffee break", self._food_break,
-                help="A short off-duty break for food or coffee. The clock and "
-                     "your deadline advance fifteen minutes."))
+                help="A short off-duty stop for food or coffee. Coffee eases "
+                     "fatigue a little, but this does not satisfy the "
+                     "30-minute break rule. The clock and your deadline advance "
+                     "fifteen minutes."))
         if "break" in actions:
             items.append(MenuItem(
                 "Take a 30-minute break", self._take_break,
@@ -2476,11 +2478,14 @@ class RestStopState(MenuState):
         p = self.ctx.profile
         _advance_rest_clock(d, 15.0)
         d.hos.take_break(15.0)
-        p.fatigue = max(0.0, p.fatigue - 3.0)
+        p.fatigue = hos.rest_coffee_break(p.fatigue)
         self._save_here(silent=True)
         self.ctx.audio.play("ui/notify")
         self.ctx.say(f"You took a short food and coffee break. "
                      f"It is {clock_text(d.trip.current_hour)}. "
+                     "The coffee helps you stay alert a little longer, but "
+                     "this short stop does not reset your 30-minute break "
+                     "requirement. "
                      f"{_deadline_text(d)}")
 
     def _sleep(self) -> None:

@@ -764,6 +764,8 @@ HELP_PAGES = [
         "Driving past a limit risks inspections, fines, and out-of-service orders.",
         "Fatigue builds as you drive, faster at night. A drowsy driver",
         "yawns, drifts onto the rumble strip, and reacts late to hazards.",
+        "Coffee stops ease fatigue a little, but only a thirty minute",
+        "non-driving break satisfies the break rule.",
         "Late at night, truck parking may be full. Drive on, or risk",
         "a ticket and poor sleep on the shoulder.",
         "You can always find somewhere to sleep. Stopped on the open road with no",

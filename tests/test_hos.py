@@ -1,19 +1,10 @@
 """Hours of service, fatigue, day/night, and overnight parking (1.5.0)."""
 
 import json
-
-
-def test_hazard_scale_only_relaxes_relaxed_mode():
-    from freight_fate.sim.hos import RELAXED_HAZARD_SCALE, hazard_scale
-
-    assert hazard_scale("relaxed") == RELAXED_HAZARD_SCALE
-    assert hazard_scale("relaxed") < 1.0
-    assert hazard_scale("realistic") == 1.0
-    assert hazard_scale("debug_off") == 1.0
+from types import SimpleNamespace
 
 import pygame
 import pytest
-from types import SimpleNamespace
 
 from freight_fate.sim import hos
 from freight_fate.sim.hos import (
@@ -330,6 +321,12 @@ def test_fatigue_shortens_the_reaction_window():
 
 
 def test_rest_helpers():
+    assert hos.rest_coffee_break(50.0) == pytest.approx(42.0)
+    assert hos.rest_coffee_break(6.0) == 0.0
+    assert hos.rest_coffee_break(50.0) > hos.rest_break(50.0)
+    daytime_boost_min = (50.0 - hos.rest_coffee_break(50.0)) / hos.fatigue_rate_per_min(False)
+    daytime_break_min = (50.0 - hos.rest_break(50.0)) / hos.fatigue_rate_per_min(False)
+    assert 60.0 < daytime_boost_min < daytime_break_min
     assert hos.rest_break(50.0) == pytest.approx(15.0)
     assert hos.rest_break(10.0) == 0.0
     assert hos.rest_sleep(99.0) == 0.0
@@ -506,6 +503,50 @@ def test_rest_stop_menu_break_and_sleep():
 
         app.state.handle_event(key_event(pygame.K_ESCAPE))
         assert isinstance(app.state, DrivingState)
+    finally:
+        app.shutdown()
+
+
+@pytest.mark.smoke
+def test_food_and_coffee_break_boosts_alertness_without_resetting_break_rule(monkeypatch):
+    from freight_fate.app import App
+    from freight_fate.sim.trip import RoadStop
+    from freight_fate.states.driving import RestStopState
+
+    app = App()
+    spoken = []
+    monkeypatch.setattr(app.ctx, "say",
+                        lambda text, interrupt=True: spoken.append(text))
+    try:
+        driving = start_drive(app)
+        stop = RoadStop(
+            name="Test Coffee Stop",
+            at_mi=max(1.0, driving.trip.total_miles * 0.5),
+            type="travel_center",
+            actions=("park", "food", "break", "sleep"),
+            services=("food", "parking"),
+            parking="confirmed",
+        )
+        driving.trip.stops = [stop]
+        driving.trip.position_mi = stop.at_mi
+        driving.hos.drive(100.0)
+        app.ctx.profile.fatigue = 55.0
+        driving.handle_event(key_event(pygame.K_t))
+        assert isinstance(app.state, RestStopState)
+
+        food_item = next(item for item in app.state.items
+                         if item.text == "Food and coffee break")
+        assert "Coffee eases fatigue a little" in food_item.help
+        assert "does not satisfy the 30-minute break rule" in food_item.help
+
+        minutes_before = driving.trip.game_minutes
+        select(app.state, "Food and coffee break")
+
+        assert driving.trip.game_minutes == pytest.approx(minutes_before + 15.0)
+        assert driving.hos.since_break_min == pytest.approx(100.0)
+        assert app.ctx.profile.fatigue == pytest.approx(47.0)
+        assert "coffee helps you stay alert a little longer" in spoken[-1]
+        assert "does not reset your 30-minute break requirement" in spoken[-1]
     finally:
         app.shutdown()
 

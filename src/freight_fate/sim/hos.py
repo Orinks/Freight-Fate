@@ -258,6 +258,7 @@ FATIGUE_SEVERE = 80.0   # rumble strip drift, urgent warning
 # Escalating fines for failed roadside inspections while over hours.
 HOS_FINES = (200.0, 500.0, 1000.0, 2000.0)
 HOS_REPUTATION_HIT = 3.0
+FATIGUE_COFFEE_RELIEF = 8.0
 FATIGUE_BREAK_RELIEF = 35.0
 FATIGUE_SHOULDER_FLOOR = 30.0
 # How long before a sleep/duty limit the shoulder-sleep option opens up, paired
@@ -291,6 +292,11 @@ def reaction_window_mult(fatigue: float) -> float:
 def rest_break(fatigue: float) -> float:
     """Fatigue after a 30-minute break."""
     return max(0.0, fatigue - FATIGUE_BREAK_RELIEF)
+
+
+def rest_coffee_break(fatigue: float) -> float:
+    """Fatigue after a short food and coffee stop."""
+    return max(0.0, fatigue - FATIGUE_COFFEE_RELIEF)
 
 
 def rest_sleep(fatigue: float) -> float:
