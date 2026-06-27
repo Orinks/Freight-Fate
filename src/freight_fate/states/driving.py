@@ -219,6 +219,7 @@ class DrivingState(State):
         self._cruise_throttle = 0.0
         self._acc_following = False
         self._acc_weather_gap_said = False
+        self._acc_limit_capped = False
         self._arrival_stop_said = False
         self._arrival_full_stop_said = False
         self._arrival_menu_open = False
@@ -1728,6 +1729,7 @@ class DrivingState(State):
         self._cruise_throttle = t.throttle
         self._acc_following = False
         self._acc_weather_gap_said = False
+        self._acc_limit_capped = False
         gap = self._acc_gap_seconds()
         self.ctx.audio.play("ui/notify", volume=0.5)
         self.ctx.say("Adaptive cruise set at "
@@ -1740,6 +1742,7 @@ class DrivingState(State):
         self._cruise_throttle = 0.0
         self._acc_following = False
         self._acc_weather_gap_said = False
+        self._acc_limit_capped = False
 
     def _acc_gap_seconds(self) -> float:
         effects = self.weather.effects
@@ -1771,6 +1774,20 @@ class DrivingState(State):
         if accelerating:
             return   # manual override; cruise resumes when the key lifts
         target_mph = self._cruise_mph
+        # Predictive ACC: never carry the driver past the posted limit. With real
+        # OSM limits baked per leg, a held set speed would otherwise sail through
+        # urban drops and corridor limit changes straight into speeding strikes,
+        # tickets, and trooper stops -- all of which now exist. The "Speed limit X"
+        # cue still names the number; this cue says cruise is handling it.
+        posted, _ = self.trip.speed_limit_at(self.trip.position_mi)
+        limit_capped = posted < self._cruise_mph
+        if limit_capped:
+            target_mph = posted
+            if not self._acc_limit_capped:
+                self.ctx.say_event(
+                    "Posted limit lower; adaptive cruise easing to "
+                    f"{self.ctx.settings.speed_text(posted)}.", interrupt=False)
+        self._acc_limit_capped = limit_capped
         context = self.trip.traffic_context()
         following = False
         if context is not None:
@@ -1792,7 +1809,7 @@ class DrivingState(State):
         self._cruise_throttle = max(0.0, min(
             1.0, self._cruise_throttle + error * 0.08 * dt))
         t.throttle = self._cruise_throttle
-        if following and error < -2.0:
+        if (following or limit_capped) and error < -2.0:
             weather_brake = 0.45 if self.weather.effects.grip < 0.7 else 0.65
             t.brake = max(t.brake, min(weather_brake, abs(error) / 30.0))
 

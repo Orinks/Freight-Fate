@@ -55,6 +55,12 @@ def quiet_trip(driving):
     driving.trip.traffic_leads = []
 
 
+def open_limits(driving):
+    """Lift posted speed limits out of the way so a test can isolate cruise
+    hold/follow behavior from the predictive-ACC limit cap."""
+    driving.trip.speed_limit_at = lambda mile: (200.0, None)
+
+
 def take_destination_exit(driving):
     """Move onto the delivery ramp and stop at the destination gate."""
     destination = driving._destination_exit_stop()
@@ -978,6 +984,7 @@ def test_cruise_control_holds_the_set_speed():
     try:
         driving = start_drive(app)
         quiet_trip(driving)
+        open_limits(driving)                           # isolate hold from the limit cap
         t = driving.truck
         driving.handle_event(key_event(pygame.K_e))   # engine on
         t.transmission.gear = 10
@@ -1057,6 +1064,7 @@ def test_adaptive_cruise_follows_modeled_traffic(monkeypatch):
         quiet_trip(driving)
         monkeypatch.setattr(app.ctx, "say_event",
                             lambda text, interrupt=True: events.append(text))
+        open_limits(driving)                           # isolate following from the limit cap
         driving.trip.traffic_leads = [
             TrafficLead(driving.trip.position_mi + 0.08, 45.0, "slow lead traffic", 4.0)
         ]
@@ -1072,6 +1080,37 @@ def test_adaptive_cruise_follows_modeled_traffic(monkeypatch):
         assert driving.truck.throttle < 0.9
         assert driving.truck.brake > 0.0
         assert "Traffic ahead, adaptive cruise reducing speed." in events
+    finally:
+        app.shutdown()
+
+
+@pytest.mark.smoke
+def test_adaptive_cruise_caps_at_posted_limit(monkeypatch):
+    from freight_fate.app import App
+
+    app = App()
+    events = []
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        monkeypatch.setattr(app.ctx, "say_event",
+                            lambda text, interrupt=True: events.append(text))
+        # A posted limit well below the held set speed: predictive ACC must ease
+        # off rather than carry the driver over the limit into a speeding strike.
+        driving.trip.speed_limit_at = lambda mile: (45.0, None)
+        driving.handle_event(key_event(pygame.K_e))
+        driving.truck.transmission.gear = 10
+        driving.truck.velocity_mps = 29.0              # ~65 mph
+        driving.truck.throttle = 0.8
+        driving.handle_event(key_event(pygame.K_k))    # set cruise at ~65
+        assert driving._cruise_mph > 60
+
+        driving.update(1 / 60)
+
+        assert driving._acc_limit_capped
+        assert driving.truck.throttle < 0.8            # backed off the throttle
+        assert driving.truck.brake > 0.0               # braking down toward the limit
+        assert any("adaptive cruise easing to" in e for e in events)
     finally:
         app.shutdown()
 
