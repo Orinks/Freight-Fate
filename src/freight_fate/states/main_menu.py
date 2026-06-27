@@ -652,6 +652,9 @@ HELP_PAGES = [
         "like the main menu, driving a route, or resting, with the route and cargo.",
         "Only general game status is shared, never your saves or personal details.",
         "It is on by default and has no effect if Discord is closed.",
+        "Speech settings include verbosity, the driving event voice, and a toggle",
+        "for menu position announcements: turn it off to hear only the option,",
+        "not its place like three of ten.",
         "Audio volumes have their own help text in the Audio category with F1.",
     ]),
     ("Driving basics", [
@@ -1081,6 +1084,10 @@ class SettingsCategoryState(MenuState):
             (lambda: f"Speech verbosity: {['terse', 'normal', 'chatty'][s.speech_verbosity]}",
              self._cycle_verbosity,
              "Controls how often driving status reminders speak."),
+            (lambda: f"Menu position announcements: {'on' if s.announce_menu_position else 'off'}",
+             self._toggle_menu_position,
+             "When on, menus say the position, like 3 of 10, after each option. "
+             "Turn off to hear only the option."),
             (lambda: f"Driving event voice: {self._event_voice_label()}",
              self._cycle_event_voice,
              "Speaks road events through the main voice or a separate SAPI or "
@@ -1195,6 +1202,11 @@ class SettingsCategoryState(MenuState):
 
     def _cycle_verbosity(self, d: int) -> None:
         self.ctx.settings.speech_verbosity = (self.ctx.settings.speech_verbosity + d) % 3
+        self._announce()
+
+    def _toggle_menu_position(self, _d: int) -> None:
+        s = self.ctx.settings
+        s.announce_menu_position = not s.announce_menu_position
         self._announce()
 
     _EVENT_BACKEND_NAMES = {"OneCore": "Windows OneCore"}

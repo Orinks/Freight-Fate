@@ -108,8 +108,10 @@ class MenuState(State):
     def current_text(self) -> str:
         if not self.items:
             return "No options available."
-        return (f"{end_sentence(self.items[self.index].text)} "
-                f"{self.index + 1} of {len(self.items)}.")
+        label = end_sentence(self.items[self.index].text)
+        if not getattr(self.ctx.settings, "announce_menu_position", True):
+            return label
+        return f"{label} {self.index + 1} of {len(self.items)}."
 
     def speak_current(self) -> None:
         self.ctx.say(self.current_text())

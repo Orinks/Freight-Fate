@@ -503,6 +503,7 @@ Speech and weather settings include:
 | Setting | Purpose |
 | --- | --- |
 | Speech verbosity | Controls how often driving status reminders run. |
+| Menu position announcements | When on, menus say the position, like 3 of 10, after each option. Turn off to hear only the option. |
 | Driving event voice | Routes road events through the main voice or a separate software voice when available. |
 | Speech rate | Appears only when the current voice source supports rate changes. |
 | Speech pitch | Appears only when the current voice source supports pitch changes. |

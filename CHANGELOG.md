@@ -34,6 +34,9 @@
   equivalent nightly.
 
 ### Changed
+- **Menus can read just the option, not its place.** A new Speech setting,
+  "Menu position announcements," turns off the "N of 10" position spoken after
+  each menu option, so menus read only the option itself. On by default.
 - **In-game help and manual now cover the new systems.** The how-to-play pages,
   the F1 driving help, and the user manual were brought in line: the calendar
   and seasons, weather that bites (traction loss, drag, visibility), the

@@ -28,6 +28,7 @@ class Settings:
     engine_volume: float = 0.55
     ui_volume: float = 0.9
     speech_verbosity: int = 1             # 0 terse, 1 normal, 2 chatty
+    announce_menu_position: bool = True   # speak "N of M" position in menus
     sapi_events: bool = True              # driving events on a separate voice
     event_backend: str = "SAPI"          # which voice that is (e.g. SAPI/OneCore)
     speech_rate: float = 0.5              # voice speed, 0..1 (backend default ~0.5)
