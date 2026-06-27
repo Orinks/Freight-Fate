@@ -1,11 +1,5 @@
 # ruff: noqa: F403,F405
-"""Trip simulation: progress along a route, grades, zones, stops, and events.
-
-The truck physics run in real time; the trip layer compresses distance with a
-configurable time scale (default 20x), so a 300-mile haul takes roughly
-fifteen minutes at highway speed instead of five hours. The in-game clock
-advances at the same rate, which keeps deadlines meaningful.
-"""
+"""Trip simulation: progress along a route, grades, zones, stops, and events."""
 
 from __future__ import annotations
 
@@ -30,26 +24,18 @@ class Trip:
         self.truck = truck
         self.weather = weather
         self.time_scale = time_scale
-        # Multiplier on random road-hazard frequency (relaxed mode lowers it).
         self.hazard_scale = max(0.0, hazard_scale)
         self.start_hour = start_hour   # clock hour of day at departure
-        # Spoken/listed navigation distances follow the player's unit choice.
-        # Backing field set before cues are built below; the property setter
-        # re-renders baked cues if the player changes units mid-trip.
         self._imperial = imperial
         self.position_mi = 0.0
         self.game_minutes = 0.0
         self.finished = False
         self.hos_violation = False     # set by the UI layer; gates inspections
         self._rng = random.Random(seed)
-        # separate stream so inspections never disturb hazard/zone layout
         self._insp_rng = random.Random(None if seed is None else seed ^ 0x5EED)
-        # likewise for the reactive too-fast-for-conditions rolls
         self._cond_rng = random.Random(None if seed is None else seed ^ 0xC0FFEE)
         self._events: list[TripEvent] = []
         self._leg_starts = self._compute_leg_starts()
-        # Mileposts of every city on the route (leg starts plus the final
-        # destination), used to drop the speed limit for the urban stretch.
         self._city_mileposts = list(self._leg_starts) + [self.total_miles]
         self.stops = self._place_stops()
         self.traffic_leads = self._place_traffic()
@@ -62,7 +48,7 @@ class Trip:
         self._announced_navigation: set[str] = set()
         self._charged_tolls: set[str] = set()
         self._active_zone: Zone | None = None
-        self._announced_speed_limit: float | None = None  # last spoken corridor limit
+        self._announced_speed_limit: float | None = None
         self._announced_zone_warnings: set[str] = set()
         self._construction_zone_grace_start: dict[str, float] = {}
         self._hazard_check_mi = 5.0
@@ -80,31 +66,22 @@ class Trip:
         if value == self._imperial:
             return
         self._imperial = value
-        # Re-render baked cue distances (onramp, continue, rest stop) so a
-        # mid-trip unit change updates guidance already laid out on the route.
-        # Cue keys are distance-independent, so announcement de-duplication
-        # carries over unchanged.
         self.navigation_cues = self._build_navigation_cues()
 
     def _distance_text(self, miles: float) -> str:
-        """Spoken distance in the player's units (miles or kilometers)."""
         if self.imperial:
             return f"{miles:.0f} miles"
         return f"{miles * 1.609344:.0f} kilometers"
 
     def _gap_text(self, miles: float) -> str:
-        """Short following-gap distance (one decimal) in the player's units."""
         if self.imperial:
             return f"{miles:.1f} miles"
         return f"{miles * 1.609344:.1f} kilometers"
 
     def _speed_value(self, mph: float) -> str:
-        """Bare speed-limit number in the player's units (no unit word)."""
         if self.imperial:
             return f"{mph:.0f}"
         return f"{mph * 1.609344:.0f}"
-
-    # -- layout -----------------------------------------------------------------
 
     def _compute_leg_starts(self) -> list[float]:
         starts, acc = [], 0.0
@@ -114,7 +91,6 @@ class Trip:
         return starts
 
     def _place_stops(self) -> list[RoadStop]:
-        """Place each leg's named stops at its curated route mileage."""
         out: list[RoadStop] = []
         for i, (start, leg) in enumerate(zip(self._leg_starts, self.route.legs,
                                              strict=True)):
@@ -146,8 +122,6 @@ class Trip:
             shield = f"{leg.highway} {heading}".strip()
             segment_miles = leg.miles
             if i == 0:
-                # The onramp doubles as the first leg's "continue", carrying the
-                # distance, so the two do not announce the same thing at launch.
                 cues.append(NavigationCue(
                     "onramp:0",
                     "onramp",
@@ -251,12 +225,6 @@ class Trip:
         return cues
 
     def _place_zones(self) -> list[Zone]:
-        """Random construction/traffic zones, roughly one per 150 miles.
-
-        At night most traffic zones never form: roads are sparse after dark,
-        so a departure in the night band yields fewer heavy-traffic stretches.
-        Deterministic for a given seed and departure hour.
-        """
         night = is_night(self.start_hour)
         zones: list[Zone] = []
         total = self.route.miles
@@ -273,7 +241,6 @@ class Trip:
         return zones
 
     def _facility_speed_zones(self) -> list[Zone]:
-        """Low-speed facility access roads and final gate approaches."""
         total = self.route.miles
         if total <= 0:
             return []
@@ -294,9 +261,6 @@ class Trip:
         return len(self.route.cities) >= 2 and self.route.cities[0] == self.route.cities[-1]
 
     def _patrol_intensity_at(self, mile: float) -> float:
-        """How heavily a stretch is patrolled (0-1), from highway, region, and
-        time of day. Busy interstates and dense regions run hotter; empty plains
-        run cold; night adds a DUI-patrol bump."""
         leg_i, _ = self._leg_at_mile(mile)
         cls = _highway_class(self.route.legs[leg_i].highway)
         base = {"interstate": 0.5, "us_highway": 0.35}.get(cls, 0.25)
@@ -310,12 +274,6 @@ class Trip:
         return base
 
     def _place_patrols(self) -> list[PatrolWindow]:
-        """Seed trooper patrol windows along the route, roughly one per 120
-        miles, plus an always-hot window over every construction zone.
-
-        Uses the inspection RNG so enforcement never perturbs hazard/zone
-        layout, and scales the count by ``hazard_scale`` so relaxed mode stays
-        relaxed. Deterministic for a given seed and departure hour."""
         patrols: list[PatrolWindow] = []
         total = self.route.miles
         n = max(0, int(total / 120.0 * min(1.0, self.hazard_scale)))
@@ -335,15 +293,11 @@ class Trip:
         return patrols
 
     def active_patrol_at(self, mile: float) -> PatrolWindow | None:
-        """The hottest patrol window covering a mile, or ``None``."""
         active = [p for p in self.patrols if p.start_mi <= mile <= p.end_mi]
         return max(active, key=lambda p: p.intensity) if active else None
 
     def _leg_traffic_density(self, leg: Leg, bad_weather_bias: float,
                              night: bool) -> float:
-        """Probability a slow-traffic lead forms on ``leg``, scaled by
-        ``hazard_scale`` so relaxed mode thins traffic the way it thins hazards
-        and patrols. A no-op (x1.0) in realistic mode."""
         metro_bias = 0.18 if leg.checkpoints else 0.0
         night_bias = -0.08 if night else 0.0
         density = min(0.86, max(0.05,
@@ -388,8 +342,6 @@ class Trip:
         leads.sort(key=lambda lead: lead.at_mi)
         return leads
 
-    # -- queries -----------------------------------------------------------------
-
     @property
     def total_miles(self) -> float:
         return self.route.miles
@@ -400,7 +352,6 @@ class Trip:
 
     @property
     def current_hour(self) -> float:
-        """Clock hour of day right now (departure hour plus trip time)."""
         return (self.start_hour + self.game_minutes / 60.0) % 24.0
 
     @property
@@ -412,7 +363,6 @@ class Trip:
 
     @property
     def current_target_city(self):
-        """City object the current leg is heading toward; drives the weather."""
         name = self.route.cities[self.current_leg_index + 1]
         return get_world().cities[name]
 
@@ -421,7 +371,6 @@ class Trip:
         return self.current_target_city.region
 
     def grade_at(self, mile: float) -> float:
-        """Route-derived grade when available, conservative fallback otherwise."""
         leg_i, leg_start = self._leg_at_mile(mile)
         leg = self.route.legs[leg_i]
         forward = self.route.cities[leg_i] == leg.a
@@ -434,7 +383,6 @@ class Trip:
         return _fallback_grade(leg.terrain, mile, leg.highway)
 
     def terrain_at(self, mile: float | None = None) -> str:
-        """Terrain classification for the current route mile."""
         sample_mile = self.position_mi if mile is None else mile
         leg_i, leg_start = self._leg_at_mile(sample_mile)
         leg = self.route.legs[leg_i]
@@ -460,7 +408,6 @@ class Trip:
         return self._corridor_limit_at(mile), None
 
     def _region_at(self, mile: float) -> str:
-        """Region of the corridor at a mile (the leg's destination city)."""
         leg_i, _ = self._leg_at_mile(mile)
         city = self.route.cities[min(leg_i + 1, len(self.route.cities) - 1)]
         return get_world().cities[city].region
@@ -469,8 +416,6 @@ class Trip:
         return any(abs(mile - mp) <= URBAN_RADIUS_MI for mp in self._city_mileposts)
 
     def _nearest_urban_city(self, mile: float) -> str | None:
-        """The route city within the urban radius of ``mile``, or None -- used to
-        explain an urban speed-limit drop ('approaching Boston')."""
         best, best_d = None, URBAN_RADIUS_MI
         for i, mp in enumerate(self._city_mileposts):
             d = abs(mile - mp)
@@ -479,12 +424,6 @@ class Trip:
         return best
 
     def _corridor_limit_at(self, mile: float) -> float:
-        """Posted limit for the corridor, dropped to the urban limit on the city
-        stretches.
-
-        Prefers a real baked OSM ``maxspeed`` for the leg when present, falling
-        back to the highway- and region-derived heuristic where OSM has no tag.
-        """
         leg_i, leg_start = self._leg_at_mile(mile)
         leg = self.route.legs[leg_i]
         baked = _leg_speed_limit_at(leg, mile - leg_start)
@@ -495,7 +434,6 @@ class Trip:
         return base
 
     def next_zone_within(self, within_mi: float) -> Zone | None:
-        """The nearest speed zone whose start lies ahead within the distance."""
         ahead = [z for z in self.zones
                  if 0 < z.start_mi - self.position_mi <= within_mi]
         return min(ahead, key=lambda z: z.start_mi) if ahead else None

@@ -12,7 +12,6 @@ import heapq
 import json
 import re
 import zlib
-from dataclasses import dataclass
 from pathlib import Path
 
 from .world_constants import *
@@ -26,55 +25,6 @@ WORLD_PATH = Path(__file__).parent / "world.json"
 ALTERNATE_ROUTE_EXTRA_RATIO = 0.22
 ALTERNATE_ROUTE_MIN_EXTRA_MILES = 75.0
 ALTERNATE_ROUTE_MAX_EXTRA_MILES = 550.0
-
-@dataclass(frozen=True)
-class Interchange:
-    """A highway exit/junction along a leg, sourced from OpenStreetMap.
-
-    ``exit_ref`` is the signed exit number ("7", "7A"), empty when OSM has no
-    ``ref`` on the junction node. ``destinations`` is the green-sign control
-    text (``destination`` tag) split into places; ``via`` is the route the exit
-    feeds (``destination:ref``), normalized for speech ("US 1 North" ->
-    "US-1 North"). All three may be sparse; the spoken phrase degrades
-    gracefully so a bare exit number still reads cleanly.
-    """
-
-    at_mi: float
-    exit_ref: str = ""
-    name: str = ""
-    destinations: tuple[str, ...] = ()
-    via: str = ""
-    highway: str = ""
-    source: str = ""
-
-    @property
-    def spoken_phrase(self) -> str:
-        """Lower-case lead phrase, e.g. 'exit 7 for US-1 North toward Trenton
-        and New York'. Built to slot into 'In 3 miles, {phrase}.'"""
-        head = f"exit {self.exit_ref}" if self.exit_ref else "exit"
-        parts = [head]
-        via = _format_route_ref(self.via)
-        if via:
-            parts.append(f"for {via}")
-        dest = _join_destinations(_destinations_without_via(self.via, self.destinations))
-        if dest:
-            parts.append(f"toward {dest}")
-        elif self.name and not self.exit_ref:
-            parts.append(f"for {self.name}")
-        return " ".join(parts)
-
-    @property
-    def near_phrase(self) -> str:
-        phrase = self.spoken_phrase
-        return f"{phrase[0].upper()}{phrase[1:]} now."
-
-    @property
-    def exit_label(self) -> str:
-        """Short signed label for a stop's ramp, e.g. 'exit 7'; empty when OSM
-        has no exit number for this junction."""
-        return f"exit {self.exit_ref}" if self.exit_ref else ""
-
-
 
 class World:
     def __init__(self, data: dict) -> None:
@@ -931,22 +881,6 @@ def _parse_interchange(raw, leg_miles: float, from_city: str, to_city: str,
         highway=highway,
         source=source,
     )
-
-
-def _format_route_ref(value: str) -> str:
-    """Speech-friendly route ref: 'US 1 North' -> 'US-1 North', 'I 95' ->
-    'I-95'. Multiple refs ('I 95 North;NJTP North') join with ' and '."""
-    out: list[str] = []
-    for chunk in str(value).split(";"):
-        ref = " ".join(chunk.split())
-        if not ref:
-            continue
-        # Hyphenate a leading shield token + number: "US 1" -> "US-1".
-        parts = ref.split(" ")
-        if len(parts) >= 2 and parts[1][:1].isdigit():
-            parts[0:2] = [f"{parts[0]}-{parts[1]}"]
-        out.append(" ".join(parts))
-    return " and ".join(out)
 
 
 def _route_token(value: str) -> str:

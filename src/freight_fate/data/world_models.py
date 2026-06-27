@@ -188,6 +188,81 @@ class TollEvent:
         return f"toll point: {self.name}"
 
 
+@dataclass(frozen=True)
+class Interchange:
+    """A highway exit/junction along a leg, sourced from OpenStreetMap."""
+
+    at_mi: float
+    exit_ref: str = ""
+    name: str = ""
+    destinations: tuple[str, ...] = ()
+    via: str = ""
+    highway: str = ""
+    source: str = ""
+
+    @property
+    def spoken_phrase(self) -> str:
+        """Lower-case lead phrase for GPS announcements."""
+        head = f"exit {self.exit_ref}" if self.exit_ref else "exit"
+        parts = [head]
+        via = _format_route_ref(self.via)
+        if via:
+            parts.append(f"for {via}")
+        dest = _join_destinations(_destinations_without_via(self.via, self.destinations))
+        if dest:
+            parts.append(f"toward {dest}")
+        elif self.name and not self.exit_ref:
+            parts.append(f"for {self.name}")
+        return " ".join(parts)
+
+    @property
+    def near_phrase(self) -> str:
+        phrase = self.spoken_phrase
+        return f"{phrase[0].upper()}{phrase[1:]} now."
+
+    @property
+    def exit_label(self) -> str:
+        return f"exit {self.exit_ref}" if self.exit_ref else ""
+
+
+def _format_route_ref(value: str) -> str:
+    out: list[str] = []
+    for chunk in str(value).split(";"):
+        ref = " ".join(chunk.split())
+        if not ref:
+            continue
+        parts = ref.split(" ")
+        if len(parts) >= 2 and parts[1][:1].isdigit():
+            parts[0:2] = [f"{parts[0]}-{parts[1]}"]
+        out.append(" ".join(parts))
+    return " and ".join(out)
+
+
+def _route_token(value: str) -> str:
+    import re
+
+    match = re.match(r"\s*((?:I|US|[A-Za-z]{2})[-\s]?\d+)", str(value).strip())
+    return re.sub(r"[-\s]", "", match.group(1)).upper() if match else ""
+
+
+def _destinations_without_via(via: str, destinations: tuple[str, ...]) -> tuple[str, ...]:
+    token = _route_token(via)
+    if not token:
+        return destinations
+    return tuple(d for d in destinations if _route_token(d) != token)
+
+
+def _join_destinations(destinations: tuple[str, ...]) -> str:
+    items = [d for d in destinations if d]
+    if not items:
+        return ""
+    if len(items) == 1:
+        return items[0]
+    if len(items) == 2:
+        return f"{items[0]} and {items[1]}"
+    return f"{', '.join(items[:-1])}, and {items[-1]}"
+
+
 
 @dataclass(frozen=True)
 class City:
