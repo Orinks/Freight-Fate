@@ -42,6 +42,10 @@
   in one burst. Safety cues and actionable GPS distances still speak immediately.
 
 ### Changed
+- **Career progression now has a 20-level business arc.** New drivers start
+  with fictional carrier Northstar Freight Lines, move through company-driver
+  and owner-operator preparation ranks, and unlock the leased-on
+  owner-operator buy-in later in the ladder instead of jumping there at level 5.
 - **Loading, unloading, and pulling in now take a beat.** Pickup loading and
   destination unloading now give a short spoken wait and advance the in-game
   clock as on-duty work. Pulling into pickup gates, destination gates, and route

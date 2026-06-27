@@ -251,7 +251,7 @@ Net-new realism candidates, roughly by area:
 - **Local delivery realism.** The destination-local approach legs already
   sketched under World: surface-street miles, gate speeds, and dock
   approaches after the highway portion.
-- **Business realism.** The first grounded company-driver to leased-on
+- **Business realism.** The grounded 20-level company-driver to leased-on
   owner-operator arc is shipped; true authority, trailers, operating-cost
   tuning, and market pricing are tracked under Business.
 
@@ -635,11 +635,12 @@ fit for an audio-first game.
   per-genre licensing for any owned music library.
 
 ### Business
-- [x] Company-driver to owner-operator career arc. First slice: start as a
-      company driver with carrier-paid tractor costs and driver-wage
-      settlements, then unlock a leased-on owner-operator path with a buy-in,
-      working-capital gate, higher gross revenue, and operating-cost
-      deductions. Full authority, loans, and fleet ownership remain future work.
+- [x] Company-driver to owner-operator career arc. Full first arc: start as a
+      Northstar Freight Lines company driver with carrier-paid tractor costs
+      and driver-wage settlements, progress through 20 ranks, then unlock a
+      later-level leased-on owner-operator path with a buy-in, working-capital
+      gate, higher gross revenue, and operating-cost deductions. Full authority,
+      loans, and fleet ownership remain future work.
 - [ ] True authority and direct freight. Later optional slice for operating
       under the player's own motor-carrier authority. Cover Department of
       Transportation and motor-carrier authority, insurance filings,

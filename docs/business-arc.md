@@ -7,10 +7,10 @@ the main dream.
 ## Grounding
 
 The realistic first step is not instant independence. A new driver starts as a
-company driver: the carrier controls the dispatch relationship, supplies the
-tractor/trailer, and carries the normal carrier costs. The driver earns wages
-and bonuses from each settlement, while fines and damaged-load consequences
-still matter.
+company driver for fictional starter carrier Northstar Freight Lines: the
+carrier controls the dispatch relationship, supplies the tractor/trailer, and
+carries the normal carrier costs. The driver earns wages and bonuses from each
+settlement, while fines and damaged-load consequences still matter.
 
 The first owner-operator step is modeled as a leased-on owner-operator, not full
 motor-carrier authority. That keeps the game focused on driving and load choice:
@@ -34,11 +34,43 @@ buy-in and working-capital gate instead of a confusing weekly deduction trap.
   a higher revenue multiplier, then deducts business costs: maintenance reserve,
   insurance reserve, trailer program, truck payment reserve, and settlement
   service fee. Fuel and repairs also come out of the player's cash.
-- Unlock gate: level 5, 10 deliveries, reputation 65, no pay advance, and enough
-  cash for a 20,000 dollar buy-in while keeping 3,000 dollars of working capital.
+- Progression: level 5 starts owner-operator preparation, but the leased-on
+  buy-in does not unlock until level 15 with 35 deliveries, reputation 80, no
+  pay advance, and enough cash for a 35,000 dollar buy-in while keeping 10,000
+  dollars of working capital.
 - The design remains a driving career, not a fleet-management sim. It adds one
   terminal menu and settlement math; it does not add driver hiring, tax filing,
   direct broker negotiation, or full authority management.
+
+## 20-Level Arc
+
+| Level | Rank | Business Meaning |
+| --- | --- | --- |
+| 1 | Yard Trainee | Start at Northstar Freight Lines with company equipment. |
+| 2 | New Hire Company Driver | Refrigerated freight unlocks. |
+| 3 | Solo Company Driver | Heavy-haul freight unlocks. |
+| 4 | Regional Company Driver | High-value freight unlocks. |
+| 5 | Owner-Operator Apprentice | Business status starts tracking the preparation path. |
+| 6 | Regional Fleet Driver | Wider regional work while still company-paid. |
+| 7 | Long-Haul Company Driver | Long-haul dispatch becomes routine. |
+| 8 | Trusted Freight Driver | Better specialized freight opportunities. |
+| 9 | High-Value Driver | Higher-consequence freight trust. |
+| 10 | Lead Company Driver | Senior company-driver status. |
+| 11 | Owner-Operator Candidate | Full owner-operator checklist appears. |
+| 12 | Working Capital Builder | Saving cash becomes the main milestone. |
+| 13 | Tractor Buy-In Candidate | Tractor buy-in target is active. |
+| 14 | Leased-On Applicant | Final reputation, delivery, and cash gate. |
+| 15 | Leased-On Owner-Operator | Buy-in can unlock leased-on owner-operator economics. |
+| 16 | Settled Owner-Operator | Owner-operator settlements become normal. |
+| 17 | Established Owner-Operator | Higher-trust leased-on business status. |
+| 18 | Equipment Planner | Trailer/equipment planning is a future hook. |
+| 19 | Authority Candidate | Independent authority readiness appears. |
+| 20 | Independent Operator | Current owner-operator arc is complete. |
+
+Full independent motor-carrier authority is not implemented in this slice.
+Level 20 means the player has completed the owner-operator career arc and is
+ready for a later authority system, not that Freight Fate has become a fleet or
+brokerage simulator.
 
 ## Follow-Up Realism Hooks
 

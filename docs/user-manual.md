@@ -152,19 +152,27 @@ do partial fuel or repair work when you cannot afford a full tank or full repair
 
 ## Business Status
 
-Freight Fate starts you as a company driver. The dispatch board lists carrier
-gross, but your settlement pays driver wages and bonuses. The carrier supplies
-the tractor, trailer, authority, insurance, fuel, and routine repairs.
+Freight Fate starts you as a company driver for Northstar Freight Lines, a
+fictional starter carrier. The dispatch board lists carrier gross, but your
+settlement pays driver wages and bonuses. The carrier supplies the tractor,
+trailer, authority, insurance, fuel, and routine repairs.
 
-When your career is ready, the **Business status** menu lets you buy into a
-leased-on owner-operator path. You need level 5, 10 deliveries, reputation 65,
-no outstanding pay advance, and enough cash for a 20,000 dollar truck buy-in
-while keeping 3,000 dollars working capital.
+The career ladder has 20 levels. Early levels are company-driver ranks. Level 5
+starts the owner-operator preparation path, but it is not a lease-purchase
+shortcut. The **Business status** menu tells you your carrier, rank, next
+business unlock, and what still blocks the next step.
+
+The leased-on owner-operator buy-in unlocks later, at level 15, when the rest
+of the business gate is also ready: 35 deliveries, reputation 80, no outstanding
+pay advance, and enough cash for a 35,000 dollar truck buy-in while keeping
+10,000 dollars working capital.
 
 Owner-operators see higher gross revenue, but the business pays fuel, repairs,
 maintenance reserve, insurance reserve, trailer program, truck payment reserve,
 and settlement fees. The carrier still handles dispatch and reimbursed
-accessorials so the game stays focused on driving.
+accessorials so the game stays focused on driving. Level 20 completes the
+current owner-operator arc as an authority-ready independent operator; full
+motor-carrier authority is still future work.
 
 City service drives are a first step toward more local city driving. Pick a
 service, follow the spoken GPS, stop at the destination, and press Enter to go
@@ -214,8 +222,8 @@ distance cap and unlock more variety.
 
 Deliveries earn money, experience, reputation, and career stats. Leveling up can
 unlock longer dispatch distances, better early-career minimum pay, more cargo
-variety, refrigerated freight at level 2, heavy-haul freight at level 3, and
-high-value freight at level 4.
+variety, refrigerated freight at level 2, heavy-haul freight at level 3,
+high-value freight at level 4, and business-path ranks through level 20.
 
 ## Pickup, Loading, And Route Planning
 
