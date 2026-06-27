@@ -138,6 +138,41 @@ def test_nightly_notes_exclude_previous_release_body_sections(tmp_path, monkeypa
     assert "- **Updater.** Packaged updates work." not in notes
 
 
+def test_nightly_notes_exclude_stable_release_body_sections(tmp_path, monkeypatch):
+    release_notes = load_release_notes_module()
+    repo = make_repo(tmp_path, changelog("### Fixed\n- **Updater.** Packaged updates work.\n"))
+    git(repo, "tag", "nightly-20260615")
+    (repo / "CHANGELOG.md").write_text(
+        changelog(
+            "### Added\n"
+            "- **Radio.** New radio chatter.\n"
+            "### Fixed\n"
+            "- **Updater.** Packaged updates work.\n"
+            "- **Help.** Upgrade help explains what to buy.\n"
+        ),
+        encoding="utf-8",
+    )
+    commit(repo, "docs: improve help")
+    stable_notes = repo / "stable-notes.md"
+    stable_notes.write_text(
+        "## Added\n"
+        "- **Radio.** New radio chatter.\n\n"
+        "## Fixed\n"
+        "- **Updater.** Packaged updates work.\n",
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(release_notes, "ROOT", repo)
+
+    notes = release_notes.nightly_notes(
+        previous_tag="nightly-20260615",
+        exclude_stable_notes=str(stable_notes),
+    )
+
+    assert "- **Help.** Upgrade help explains what to buy." in notes
+    assert "- **Radio.** New radio chatter." not in notes
+    assert "- **Updater.** Packaged updates work." not in notes
+
+
 def test_nightly_notes_use_new_version_block_entries(tmp_path, monkeypatch):
     release_notes = load_release_notes_module()
     repo = make_repo(
