@@ -163,6 +163,15 @@ class DrivingState(DrivingControlsMixin, DrivingUpdateMixin, DrivingEventMixin, 
             if route is None:
                 return None
             job = job_from_payload(j)
+            position_mi = float(data.get("position_mi", 0.0))
+            game_minutes = float(data.get("game_minutes", 0.0))
+            job.deadline_game_h = fair_active_deadline(
+                job,
+                route,
+                hours_used=game_minutes / 60.0,
+                position_mi=position_mi,
+                world=ctx.world,
+            )
             state = cls(
                 ctx,
                 job,
@@ -174,7 +183,7 @@ class DrivingState(DrivingControlsMixin, DrivingUpdateMixin, DrivingEventMixin, 
             state.resumed = True
             state.start_damage = float(data["start_damage"])
             state.speeding_strikes = int(data["speeding_strikes"])
-            state.trip.restore(float(data["position_mi"]), float(data["game_minutes"]))
+            state.trip.restore(position_mi, game_minutes)
             state.trip.restore_toll_charges(list(data.get("toll_charges", ())))
             state.truck.restore_air_brake_snapshot(
                 data.get("air_brake"), default_ready=True)

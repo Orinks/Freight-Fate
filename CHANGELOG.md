@@ -3,6 +3,12 @@
 ## Unreleased
 ### Fixed
 
+- **Delivery windows match the slower, real route model.** New dispatch
+  deadlines now use the route's posted-limit profile, city approaches, facility
+  gates, HOS breaks, sleep, and practical slack instead of a flat mileage
+  average. Older active trips that were saved under the faster estimate get a
+  one-time fair deadline floor when they resume, so a source update does not
+  make an in-progress load suddenly late.
 - **Metric weather readouts use metric safe speed.** Pressing V with metric
   units enabled now reports the weather safe speed in kilometers per hour.
 - **No more "dot dot" at the end of menu items.** A menu or list item that was

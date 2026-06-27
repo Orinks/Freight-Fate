@@ -390,6 +390,56 @@ def test_old_map_snapshot_still_resumes():
         app.shutdown()
 
 
+def test_old_active_trip_gets_fair_deadline_floor():
+    from freight_fate.app import App
+    from freight_fate.models.jobs import fair_active_deadline, job_from_payload
+    from freight_fate.models.profile import Profile
+    from freight_fate.states.driving import DrivingState
+    from freight_fate.states.main_menu import enter_world
+
+    app = App()
+    try:
+        route_cities = ["San Antonio", "Dallas"]
+        job_payload = {
+            "cargo": "general",
+            "weight_tons": 14.0,
+            "origin": "San Antonio",
+            "origin_location": "San Antonio freight market",
+            "destination": "Dallas",
+            "distance_mi": 275.0,
+            "pay": 1200.0,
+            "deadline_game_h": 3.0,
+            "market_mult": 1.0,
+        }
+        p = Profile(name="Deadline Floor")
+        p.active_trip = {
+            "job": job_payload,
+            "route_cities": route_cities,
+            "trip_seed": 1234,
+            "position_mi": 50.0,
+            "game_minutes": 180.0,
+            "start_damage": 0.0,
+            "speeding_strikes": 0,
+        }
+        app.ctx.profile = p
+        route = app.ctx.world.route_from_cities(route_cities)
+        expected = fair_active_deadline(
+            job_from_payload(job_payload),
+            route,
+            hours_used=3.0,
+            position_mi=50.0,
+            world=app.ctx.world,
+        )
+
+        enter_world(app.ctx)
+
+        assert isinstance(app.state, DrivingState)
+        assert app.state.job.deadline_game_h == expected
+        assert app.state.job.deadline_game_h > job_payload["deadline_game_h"]
+    finally:
+        app.shutdown()
+
+
 def test_bare_city_job_snapshot_gets_facility_fallback():
     from freight_fate.app import App
     from freight_fate.models.profile import Profile
