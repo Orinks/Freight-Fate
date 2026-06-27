@@ -65,6 +65,65 @@ class State:
         return None
 
 
+class TimedMessageState(State):
+    """A brief, spoken transition that ignores stray held navigation keys."""
+
+    def __init__(
+            self,
+            ctx: GameContext,
+            *,
+            title: str,
+            message: str,
+            status: str,
+            seconds: float,
+            on_complete: Callable[[], None],
+            complete_text: str = "",
+            sound_key: str = "ui/notify") -> None:
+        super().__init__(ctx)
+        self.title = title
+        self.message = message
+        self.status = status
+        self.seconds = max(0.0, seconds)
+        self.remaining = self.seconds
+        self.on_complete = on_complete
+        self.complete_text = complete_text
+        self.sound_key = sound_key
+        self._complete = False
+
+    def enter(self) -> None:
+        if self.sound_key:
+            self.ctx.audio.play(self.sound_key)
+        self.ctx.say(self.message, interrupt=True)
+
+    def handle_event(self, event: pygame.event.Event) -> None:
+        if event.type != pygame.KEYDOWN:
+            return
+        if event.key in (
+                pygame.K_F1, pygame.K_ESCAPE, pygame.K_RETURN,
+                pygame.K_SPACE, pygame.K_KP_ENTER):
+            self.ctx.say(self.status)
+
+    def update(self, dt: float) -> None:
+        super().update(dt)
+        if self._complete:
+            return
+        self.remaining = max(0.0, self.remaining - dt)
+        if self.remaining > 0.0:
+            return
+        self._complete = True
+        if self.complete_text:
+            self.ctx.say(self.complete_text, interrupt=False)
+        self.on_complete()
+
+    def lines(self) -> list[str]:
+        return [
+            self.title,
+            "",
+            self.status,
+            f"Ready in {self.remaining:.1f} seconds.",
+        ]
+
+
 @dataclass
 class MenuItem:
     label: str | Callable[[], str]

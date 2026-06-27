@@ -21,10 +21,11 @@ from ..models.trucks import TRUCK_CATALOG, UPGRADE_CATALOG, TruckModel, Upgrade
 from ..music import select_menu_music_sequence
 from ..sim.hos import clock_text, time_of_day
 from ..sim.vehicle import TruckState
-from .base import MenuItem, MenuState
+from .base import MenuItem, MenuState, TimedMessageState
 
 PICKUP_CHECK_IN_MIN = 15.0
 PICKUP_LOADING_MIN = 60.0
+PICKUP_LOADING_WAIT_S = 1.5
 TERMINAL_FUEL_MIN = 20.0
 TERMINAL_REPAIR_MIN = 60.0
 
@@ -745,6 +746,9 @@ class PickupFacilityState(MenuState):
         if self.loaded:
             lead = (f"Loaded at {self.facility}. The trailer is sealed for "
                     f"{self.job.destination}.")
+            if getattr(self, "_just_loaded", False):
+                lead += f" Loading took {PICKUP_LOADING_MIN:.0f} minutes."
+                self._just_loaded = False
         elif self.checked_in:
             lead = (f"Checked in at {self.facility}. You are assigned a dock "
                     "for loading.")
@@ -819,20 +823,29 @@ class PickupFacilityState(MenuState):
             return
         self.truck.throttle = 0.0
         self.truck.brake = 1.0
+        self.truck.set_parking_brake()
+        self.ctx.push_state(TimedMessageState(
+            self.ctx,
+            title="Loading cargo",
+            message=(
+                f"Loading {self.job.weight_tons:.0f} tons of "
+                f"{self.job.cargo.label} at {self.facility}. "
+                "Trailer doors open, dock crew working, brakes set."
+            ),
+            status="Loading cargo. Please wait.",
+            seconds=PICKUP_LOADING_WAIT_S,
+            on_complete=self._finish_load,
+            sound_key="poi/dock_and_deliver"))
+
+    def _finish_load(self) -> None:
         p = self.ctx.profile
         p.game_hours += PICKUP_LOADING_MIN / 60.0
         p.hos.on_duty(PICKUP_LOADING_MIN)
-        self.truck.set_parking_brake()
         self.loaded = True
+        self._just_loaded = True
         self._save_state()
-        self.refresh(keep_index=False)
-        self.ctx.audio.play("poi/dock_and_deliver")
         self.ctx.award_achievement("first_pickup")
-        self.ctx.say(
-            f"Loaded and sealed at {self.facility}. "
-            f"{self.job.weight_tons:.0f} tons of {self.job.cargo.label} are "
-            f"ready for {self.job.destination}. Loading took "
-            f"{PICKUP_LOADING_MIN:.0f} minutes. Depart when ready.")
+        self.ctx.pop_state()
 
     def _depart_for_destination(self) -> None:
         if not self.loaded:

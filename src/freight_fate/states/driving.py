@@ -33,7 +33,7 @@ from ..sim.transmission import REVERSE
 from ..sim.trip import RoadStop, Trip, TripEventKind
 from ..sim.vehicle import KG_PER_TON, G, TruckState
 from ..sim.weather import WeatherKind, WeatherSystem
-from .base import MenuItem, MenuState, State
+from .base import MenuItem, MenuState, State, TimedMessageState
 
 log = logging.getLogger(__name__)
 
@@ -70,6 +70,10 @@ ACC_LIMIT_OFFSET_MPH = 5.0        # predictive ACC holds this far over the poste
 ENGINE_SHUTDOWN_SAFE_MPH = 5.0    # prevent accidental kill-switch use at speed
 DELIVERY_PARK_MPH = 3.0           # within this, the gate prompts you to stop
 DOCKING_MAX_MPH = 0.5            # dock/settle/rest actions need a complete stop
+STOP_PULL_IN_MIN = 2.0           # short on-duty facility/ramp settling time
+STOP_PULL_IN_WAIT_S = 0.75       # real seconds to absorb held brake key repeats
+UNLOADING_MIN = 45.0             # receiver dock work before settlement
+UNLOADING_WAIT_S = 1.5
 DRIVE_PHASE_PICKUP = "pickup"
 DRIVE_PHASE_DELIVERY = "delivery"
 
@@ -1553,7 +1557,7 @@ class DrivingState(State):
             return
         self._open_poi_stop(stop)
 
-    def _open_poi_stop(self, stop) -> None:
+    def _open_poi_stop(self, stop, *, settle: bool = False) -> None:
         # Secure the truck before handing off to the stop menu: zero the
         # throttle, apply the service brake, and set the parking brake. A truck
         # that rolled in just under the docking threshold (or idled in gear)
@@ -1562,6 +1566,30 @@ class DrivingState(State):
         self.truck.throttle = 0.0
         self.truck.brake = 1.0
         self.truck.set_parking_brake()
+
+        if settle:
+            _advance_rest_clock(self, STOP_PULL_IN_MIN)
+            self.hos.on_duty(STOP_PULL_IN_MIN)
+            self.ctx.profile.active_trip = self.snapshot()
+            self.ctx.save_profile()
+
+            def complete() -> None:
+                self.ctx.pop_state()
+                self._open_poi_stop(stop, settle=False)
+
+            self.ctx.push_state(TimedMessageState(
+                self.ctx,
+                title="Pulling into stop",
+                message=(
+                    f"Pulling into {stop.spoken_name}. "
+                    "Brakes set; menu opening in a moment."
+                ),
+                status="Pulling into the route stop. Please wait.",
+                seconds=STOP_PULL_IN_WAIT_S,
+                on_complete=complete,
+                sound_key="ui/notify"))
+            return
+
         can_sleep = "sleep" in stop.actions
         if can_sleep and hos.parking_is_full(self.trip_seed, stop.at_mi,
                                              self.trip.current_hour):
@@ -1716,7 +1744,7 @@ class DrivingState(State):
                 if stop.type == "delivery_destination":
                     self._open_facility_arrival()
                 else:
-                    self._open_poi_stop(stop)
+                    self._open_poi_stop(stop, settle=True)
             elif not self._ramp_end_said:
                 self._ramp_end_said = True
                 place = (self._ramp_stop.name
@@ -1927,12 +1955,28 @@ class DrivingState(State):
         self.truck.set_parking_brake()
         p.truck_fuel_gal = self.truck.fuel_gal
         p.truck_damage_pct = self.truck.damage_pct
-        p.game_hours += self.trip.game_minutes / 60.0
+        p.game_hours += (self.trip.game_minutes + STOP_PULL_IN_MIN) / 60.0
+        p.hos.on_duty(STOP_PULL_IN_MIN)
         p.market.advance_to(p.market_day())
         p.active_trip = pickup_snapshot(self.job, air_brake=self.truck.air_brake_snapshot())
         self.ctx.save_profile()
-        self._set_status("Parked at pickup. Check in and load.")
-        self.ctx.replace_state(PickupFacilityState(self.ctx, self.job, driving=self))
+        self._set_status("Pulling into pickup. Check-in menu opening.")
+
+        def complete() -> None:
+            self._set_status("Parked at pickup. Check in and load.")
+            self.ctx.replace_state(PickupFacilityState(self.ctx, self.job, driving=self))
+
+        self.ctx.replace_state(TimedMessageState(
+            self.ctx,
+            title="Pulling into pickup",
+            message=(
+                f"Pulling into {self._pickup_facility_text()}. "
+                "Setting the brakes and rolling to the check-in lane."
+            ),
+            status="Pulling into the pickup facility. Please wait.",
+            seconds=STOP_PULL_IN_WAIT_S,
+            on_complete=complete,
+            sound_key="ui/notify"))
 
     def _arrive(self) -> None:
         self.ctx.replace_state(ArrivalState(self.ctx, self))
@@ -1989,8 +2033,25 @@ class DrivingState(State):
         self.truck.throttle = 0.0
         self.truck.brake = 1.0
         self.truck.set_parking_brake()
-        self._set_status("Parked at destination. Dock and deliver.")
-        self.ctx.replace_state(FacilityArrivalState(self.ctx, self))
+        _advance_rest_clock(self, STOP_PULL_IN_MIN)
+        self.hos.on_duty(STOP_PULL_IN_MIN)
+        self._set_status("Pulling into destination. Dock menu opening.")
+
+        def complete() -> None:
+            self._set_status("Parked at destination. Dock and deliver.")
+            self.ctx.replace_state(FacilityArrivalState(self.ctx, self))
+
+        self.ctx.replace_state(TimedMessageState(
+            self.ctx,
+            title="Pulling into destination",
+            message=(
+                f"Pulling into {self._destination_facility_text()}. "
+                "Brakes set; dock menu opening in a moment."
+            ),
+            status="Pulling into the destination facility. Please wait.",
+            seconds=STOP_PULL_IN_WAIT_S,
+            on_complete=complete,
+            sound_key="ui/notify"))
 
     def _destination_facility_text(self) -> str:
         return self.job.destination_facility_text()
@@ -3059,12 +3120,26 @@ class FacilityArrivalState(MenuState):
         d.truck.throttle = 0.0
         d.truck.brake = 1.0
         d.truck.set_parking_brake()
-        d._set_status("Docked. Delivery paperwork signed.")
-        self.ctx.audio.play("poi/dock_and_deliver")
-        self.ctx.say(
-            f"Docked at {self.facility}. Trailer secured and paperwork signed.",
-            interrupt=True)
-        d._arrive()
+        d._set_status("Docked. Unloading cargo.")
+
+        def complete() -> None:
+            _advance_rest_clock(d, UNLOADING_MIN)
+            d.hos.on_duty(UNLOADING_MIN)
+            d._set_status("Unloaded. Delivery paperwork signed.")
+            d._arrive()
+
+        self.ctx.replace_state(TimedMessageState(
+            self.ctx,
+            title="Unloading cargo",
+            message=(
+                f"Docked at {self.facility}. Unloading "
+                f"{d.job.weight_tons:.0f} tons of {d.job.cargo.label}; "
+                "paperwork is being signed."
+            ),
+            status="Unloading cargo. Please wait.",
+            seconds=UNLOADING_WAIT_S,
+            on_complete=complete,
+            sound_key="poi/dock_and_deliver"))
 
     def _paperwork(self) -> None:
         d = self.driving

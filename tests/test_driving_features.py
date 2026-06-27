@@ -8,6 +8,13 @@ def key_event(key, unicode=""):
     return pygame.event.Event(pygame.KEYDOWN, key=key, unicode=unicode)
 
 
+def finish_timed_state(app):
+    from freight_fate.states.base import TimedMessageState
+
+    assert isinstance(app.state, TimedMessageState)
+    app.state.update(app.state.remaining + 0.01)
+
+
 def release_air_brakes(driving):
     driving.truck.set_air_ready(parking_brake=False)
 
@@ -36,9 +43,11 @@ def start_drive(app):
     app.state.trip.finished = True
     app.state.truck.velocity_mps = 0.0
     app.state.update(1 / 60)
+    finish_timed_state(app)
     assert isinstance(app.state, PickupFacilityState)
     app.state.handle_event(key_event(pygame.K_RETURN))  # check in at origin
     app.state.handle_event(key_event(pygame.K_RETURN))  # load at dock
+    finish_timed_state(app)
     app.state.handle_event(key_event(pygame.K_RETURN))  # depart for destination
     assert isinstance(app.state, RouteSelectState)
     app.state.handle_event(key_event(pygame.K_RETURN))  # accept planned route
@@ -70,6 +79,7 @@ def take_destination_exit(driving):
     driving.truck.velocity_mps = 0.0
     driving._update_exit(0.0)
     driving._update_exit(driving._ramp_mi)
+    finish_timed_state(driving.ctx._app)
 
 
 def mark_destination_exit_taken(driving):
@@ -488,6 +498,7 @@ def test_delivery_requires_parking_at_destination(monkeypatch):
 
         driving.truck.velocity_mps = 0.0
         driving.update(1 / 60)
+        finish_timed_state(app)
 
         assert isinstance(app.state, FacilityArrivalState)
         assert app.state.items[app.state.index].text == "Dock and deliver"
@@ -495,9 +506,10 @@ def test_delivery_requires_parking_at_destination(monkeypatch):
         assert app.ctx.profile.career.deliveries == 0
 
         app.state.handle_event(key_event(pygame.K_RETURN))
+        finish_timed_state(app)
 
         assert isinstance(app.state, ArrivalState)
-        assert any("Trailer secured and paperwork signed" in text for text in spoken)
+        assert any("Unloading" in text for text in spoken)
     finally:
         app.shutdown()
 
@@ -635,7 +647,7 @@ def test_destination_exit_opens_delivery_gate():
 @pytest.mark.smoke
 def test_facility_menu_waits_for_full_stop(monkeypatch):
     from freight_fate.app import App
-    from freight_fate.states.driving import DrivingState, FacilityArrivalState
+    from freight_fate.states.driving import DrivingState, FacilityArrivalState, UNLOADING_MIN
 
     app = App()
     events = []
@@ -664,12 +676,16 @@ def test_facility_menu_waits_for_full_stop(monkeypatch):
 
         driving.truck.velocity_mps = 0.0
         driving.update(1 / 60)
+        assert "Pulling into destination" in app.state.lines()[0]
+        app.state.handle_event(key_event(pygame.K_DOWN))
+        finish_timed_state(app)
 
         assert isinstance(app.state, FacilityArrivalState)
         assert played[-1][0] == "facility/dock_gate"
         assert all(key != "ui/menu_open" for key, _volume in played)
         assert [item.text for item in app.state.items] == [
             "Dock and deliver", "Check paperwork", "Check arrival status"]
+        assert app.state.index == 0
 
         app.state.handle_event(key_event(pygame.K_DOWN))
         app.state.handle_event(key_event(pygame.K_RETURN))
@@ -686,9 +702,13 @@ def test_facility_menu_waits_for_full_stop(monkeypatch):
         assert "Dock and deliver to settle" in spoken[-1]
 
         app.state.handle_event(key_event(pygame.K_UP))
+        minutes_before_unloading = driving.trip.game_minutes
         app.state.handle_event(key_event(pygame.K_RETURN))
+        assert "Unloading cargo" in app.state.lines()[0]
+        finish_timed_state(app)
         assert not isinstance(app.state, FacilityArrivalState)
         assert app.ctx.profile.career.deliveries == 1
+        assert driving.trip.game_minutes == minutes_before_unloading + UNLOADING_MIN
         played_keys = [key for key, _volume in played]
         assert "poi/dock_and_deliver" in played_keys
         assert "ui/job_complete" in played_keys
@@ -721,7 +741,11 @@ def test_exit_flow_reaches_the_rest_stop_menu():
         driving._ramp_mi = 0.0                  # end of the ramp...
         driving.truck.velocity_mps = 0.0        # ...braked to a stop
         driving.update(1 / 60)
+        assert "Pulling into stop" in app.state.lines()[0]
+        app.state.handle_event(key_event(pygame.K_DOWN))
+        finish_timed_state(app)
         assert isinstance(app.state, (RestStopState, ParkingFullState))
+        assert app.state.index == 0
     finally:
         app.shutdown()
 
@@ -992,6 +1016,7 @@ def test_cruise_control_holds_the_set_speed():
         driving = start_drive(app)
         quiet_trip(driving)
         open_limits(driving)                           # isolate hold from the limit cap
+        driving.trip.update = lambda _dt: []            # isolate from route-event cancels
         t = driving.truck
         driving.handle_event(key_event(pygame.K_e))   # engine on
         t.transmission.gear = 10

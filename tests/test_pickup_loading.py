@@ -7,6 +7,13 @@ def key_event(key, unicode=""):
     return pygame.event.Event(pygame.KEYDOWN, key=key, unicode=unicode)
 
 
+def finish_timed_state(app):
+    from freight_fate.states.base import TimedMessageState
+
+    assert isinstance(app.state, TimedMessageState)
+    app.state.update(app.state.remaining + 0.01)
+
+
 def accept_pickup_drive(app):
     from freight_fate.states.driving import DrivingState
     from freight_fate.states.main_menu import MainMenuState
@@ -37,6 +44,7 @@ def arrive_at_pickup(app, speed_mps: float = 0.0):
     driving.truck.velocity_mps = speed_mps
     driving.update(1 / 60)
     if speed_mps <= 0.45:
+        finish_timed_state(app)
         assert isinstance(app.state, PickupFacilityState)
         return app.state
     return driving
@@ -124,8 +132,11 @@ def test_pickup_facility_waits_for_full_stop(monkeypatch):
     app = App()
     events = []
     played = []
+    spoken = []
     monkeypatch.setattr(app.ctx, "say_event",
                         lambda text, interrupt=True: events.append(text))
+    monkeypatch.setattr(app.ctx, "say",
+                        lambda text, interrupt=True: spoken.append(text))
     monkeypatch.setattr(app.ctx.audio, "play",
                         lambda key, volume=1.0: played.append((key, volume)))
     try:
@@ -143,6 +154,11 @@ def test_pickup_facility_waits_for_full_stop(monkeypatch):
 
         driving.truck.velocity_mps = 0.0
         driving.update(1 / 60)
+        assert "Pulling into pickup" in app.state.lines()[0]
+        app.state.handle_event(key_event(pygame.K_DOWN))
+        app.state.handle_event(key_event(pygame.K_ESCAPE))
+        assert "Pulling into the pickup facility" in spoken[-1]
+        finish_timed_state(app)
         assert isinstance(app.state, PickupFacilityState)
         assert played[-1][0] == "facility/dock_gate"
         assert app.state.items[app.state.index].text == "Check in at shipping office"
@@ -161,10 +177,16 @@ def test_loading_at_pickup_uses_dock_sound(monkeypatch):
         accept_pickup_drive(app)
         pickup = arrive_at_pickup(app)
         pickup.handle_event(key_event(pygame.K_RETURN))  # check in
+        hours_before = app.ctx.profile.game_hours
+        duty_before = app.ctx.profile.hos.duty_min
         pickup.handle_event(key_event(pygame.K_RETURN))  # load cargo
+        assert "Loading cargo" in app.state.lines()[0]
+        finish_timed_state(app)
 
         assert ("poi/dock_and_deliver", 1.0) in played
-        assert played[-1] == ("ui/level_up", 0.8)
+        assert any(key == "ui/level_up" for key, _volume in played)
+        assert app.ctx.profile.game_hours == hours_before + 1.0
+        assert app.ctx.profile.hos.duty_min == duty_before + 60.0
     finally:
         app.shutdown()
 
@@ -223,6 +245,7 @@ def test_pickup_arrival_state_and_loaded_planning_resume():
         assert not app.state.loaded
 
         app.state.handle_event(key_event(pygame.K_RETURN))  # load
+        finish_timed_state(app)
         assert app.state.loaded
         assert app.ctx.profile.active_trip["loaded"] is True
 
@@ -262,6 +285,7 @@ def test_departing_loaded_trip_keeps_idling_engine():
 
         pickup.handle_event(key_event(pygame.K_RETURN))  # check in
         pickup.handle_event(key_event(pygame.K_RETURN))  # load
+        finish_timed_state(app)
         assert pickup.truck.engine_on
         pickup.handle_event(key_event(pygame.K_RETURN))  # depart for destination
         assert isinstance(app.state, RouteSelectState)

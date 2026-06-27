@@ -8,6 +8,13 @@ def key_event(key, unicode=""):
     return pygame.event.Event(pygame.KEYDOWN, key=key, unicode=unicode)
 
 
+def finish_timed_state(app):
+    from freight_fate.states.base import TimedMessageState
+
+    assert isinstance(app.state, TimedMessageState)
+    app.state.update(app.state.remaining + 0.01)
+
+
 def select(menu, label):
     while not menu.items[menu.index].text.startswith(label):
         menu.handle_event(key_event(pygame.K_DOWN))
@@ -114,10 +121,12 @@ def test_full_game_flow_headless(monkeypatch):
         app.state.trip.finished = True
         app.state.truck.velocity_mps = 0.0
         app.state.update(1 / 60)
+        finish_timed_state(app)
         assert isinstance(app.state, PickupFacilityState)
         app.state.handle_event(key_event(pygame.K_RETURN))  # check in at origin
         assert "Load cargo at dock" in app.state.items[app.state.index].text
         app.state.handle_event(key_event(pygame.K_RETURN))  # load at dock
+        finish_timed_state(app)
         assert "Depart for destination" in app.state.items[app.state.index].text
         app.state.handle_event(key_event(pygame.K_RETURN))
         from freight_fate.states.city import RouteSelectState
@@ -188,6 +197,7 @@ def test_full_game_flow_headless(monkeypatch):
             if driving.trip.finished:
                 driving.truck.velocity_mps = 0.0
                 driving._handle_arrival_gate()
+                finish_timed_state(app)
                 break
         else:  # never hit trip.finished -- a real stall, not just a tight cap
             raise AssertionError(
@@ -195,6 +205,7 @@ def test_full_game_flow_headless(monkeypatch):
                 f"{driving.trip.position_mi:.1f}/{driving.trip.total_miles:.1f} mi")
         assert isinstance(app.state, FacilityArrivalState)
         app.state.handle_event(key_event(pygame.K_RETURN))
+        finish_timed_state(app)
         assert isinstance(app.state, ArrivalState)
         assert app.ctx.profile.career.deliveries == 1
         assert app.ctx.profile.career.total_earnings > 0
@@ -430,9 +441,11 @@ def test_pause_and_abandon_returns_to_city():
         app.state.trip.finished = True
         app.state.truck.velocity_mps = 0.0
         app.state.update(1 / 60)
+        finish_timed_state(app)
         assert isinstance(app.state, PickupFacilityState)
         app.state.handle_event(key_event(pygame.K_RETURN))  # check in at origin
         app.state.handle_event(key_event(pygame.K_RETURN))  # load at dock
+        finish_timed_state(app)
         app.state.handle_event(key_event(pygame.K_RETURN))  # depart for destination
         assert isinstance(app.state, RouteSelectState)
         app.state.handle_event(key_event(pygame.K_RETURN))  # accept planned route

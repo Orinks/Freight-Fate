@@ -8,6 +8,13 @@ def key_event(key, unicode=""):
     return pygame.event.Event(pygame.KEYDOWN, key=key, unicode=unicode)
 
 
+def finish_timed_state(app):
+    from freight_fate.states.base import TimedMessageState
+
+    assert isinstance(app.state, TimedMessageState)
+    app.state.update(app.state.remaining + 0.01)
+
+
 def start_drive(app):
     """New career, accept an unlocked job, pick a route; returns DrivingState."""
     from freight_fate.states.city import PickupFacilityState, RouteSelectState
@@ -32,9 +39,11 @@ def start_drive(app):
     app.state.trip.finished = True
     app.state.truck.velocity_mps = 0.0
     app.state.update(1 / 60)
+    finish_timed_state(app)
     assert isinstance(app.state, PickupFacilityState)
     app.state.handle_event(key_event(pygame.K_RETURN))  # check in at origin
     app.state.handle_event(key_event(pygame.K_RETURN))  # load at dock
+    finish_timed_state(app)
     app.state.handle_event(key_event(pygame.K_RETURN))  # depart for destination
     assert isinstance(app.state, RouteSelectState)
     app.state.handle_event(key_event(pygame.K_RETURN))  # accept planned route
@@ -169,8 +178,10 @@ def test_delivery_clears_the_saved_trip():
         resumed.trip.update(1 / 60)
         resumed.truck.velocity_mps = 0.0
         resumed._handle_arrival_gate()
+        finish_timed_state(app)
         assert isinstance(app.state, FacilityArrivalState)
         app.state.handle_event(key_event(pygame.K_RETURN))
+        finish_timed_state(app)
         assert isinstance(app.state, ArrivalState)
         assert app.ctx.profile.active_trip is None
     finally:
