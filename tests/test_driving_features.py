@@ -1029,6 +1029,31 @@ def test_cruise_set_point_adjusts_with_plus_and_minus():
 
 
 @pytest.mark.smoke
+def test_cruise_refuses_to_engage_in_a_facility_zone(monkeypatch):
+    from freight_fate.app import App
+
+    app = App()
+    said = []
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        monkeypatch.setattr(app.ctx, "say",
+                            lambda text, interrupt=True: said.append(text))
+        # On a low-speed facility access road, cruise must not engage.
+        driving.trip.speed_limit_at = lambda mile: (25.0, "facility access road")
+        driving.handle_event(key_event(pygame.K_e))
+        driving.truck.transmission.gear = 4
+        driving.truck.velocity_mps = 10.0              # ~22 mph, above the floor
+        driving.handle_event(key_event(pygame.K_k))
+
+        assert driving._cruise_mph is None
+        assert any("not available" in s and "facility access road" in s
+                   for s in said)
+    finally:
+        app.shutdown()
+
+
+@pytest.mark.smoke
 def test_cruise_adjust_is_inert_when_cruise_is_off(monkeypatch):
     from freight_fate.app import App
 
@@ -1060,6 +1085,7 @@ def test_air_ready_cue_does_not_repeat_on_compressor_cycling(monkeypatch):
         monkeypatch.setattr(app.ctx, "say_event",
                             lambda text, interrupt=True: events.append(text))
         t = driving.truck
+        t.parking_brake = True                                  # cue only fires while set
         t.air_pressure_psi = t.specs.air_governor_cut_out_psi   # charged
         driving._air_ready_said = True                          # already announced
 

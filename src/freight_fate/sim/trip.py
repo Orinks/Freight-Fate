@@ -788,6 +788,16 @@ class Trip:
     def _near_city(self, mile: float) -> bool:
         return any(abs(mile - mp) <= URBAN_RADIUS_MI for mp in self._city_mileposts)
 
+    def _nearest_urban_city(self, mile: float) -> str | None:
+        """The route city within the urban radius of ``mile``, or None -- used to
+        explain an urban speed-limit drop ('approaching Boston')."""
+        best, best_d = None, URBAN_RADIUS_MI
+        for i, mp in enumerate(self._city_mileposts):
+            d = abs(mile - mp)
+            if d <= best_d and i < len(self.route.cities):
+                best, best_d = self.route.cities[i], d
+        return best
+
     def _corridor_limit_at(self, mile: float) -> float:
         """Posted limit for the corridor, dropped to the urban limit on the city
         stretches.
@@ -1077,9 +1087,13 @@ class Trip:
             self._announced_speed_limit = limit   # seed at departure, no cue
             return
         if limit != self._announced_speed_limit:
+            lowered = limit < self._announced_speed_limit
             self._announced_speed_limit = limit
+            verb = "reduced to" if lowered else "raised to"
+            city = self._nearest_urban_city(self.position_mi) if lowered else None
+            where = f" approaching {city}" if city else ""
             self._emit(TripEventKind.GPS_CUE,
-                       f"Speed limit {self._speed_value(limit)}.")
+                       f"Speed limit {verb} {self._speed_value(limit)}{where}.")
 
     def _check_stops(self) -> None:
         for stop in self.stops:

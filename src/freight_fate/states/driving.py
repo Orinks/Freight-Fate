@@ -959,17 +959,18 @@ class DrivingState(State):
         elif not t.spring_brakes_active:
             self._spring_brake_said = False
 
-        if t.air_ready and not was_ready and not self._air_ready_said:
+        if (t.air_ready and t.parking_brake and not was_ready
+                and not self._air_ready_said):
+            # The cue's whole job is "you can release the parking brake now", so
+            # only announce while it is set. Once released (rolling, or braking to
+            # a stop on arrival), a dip back across the threshold must not
+            # re-announce it.
             self._air_ready_said = True
             self.ctx.audio.play("vehicle/air_dryer_purge", volume=0.65)
-            if t.parking_brake:
-                text = (f"Air pressure ready at {t.air_pressure_psi:.0f} psi. "
-                        "Press P to release the parking brake.")
-                self._set_status("Air ready. Press P to release the parking brake.")
-            else:
-                text = f"Air pressure ready at {t.air_pressure_psi:.0f} psi."
-                self._set_status("Air ready.")
-            self.ctx.say_event(text, interrupt=False)
+            self._set_status("Air ready. Press P to release the parking brake.")
+            self.ctx.say_event(
+                f"Air pressure ready at {t.air_pressure_psi:.0f} psi. "
+                "Press P to release the parking brake.", interrupt=False)
             self.ctx.award_achievement("air_ready", event=True)
         elif t.air_low_warning:
             # Re-arm the ready cue only after a genuine depletion (low-air), not
@@ -1740,6 +1741,12 @@ class DrivingState(State):
         if not t.engine_on or t.speed_mph < CRUISE_MIN_MPH:
             self.ctx.say("Adaptive cruise needs the engine running and at "
                          f"least {CRUISE_MIN_MPH:.0f} miles per hour.")
+            return
+        _, zone_reason = self.trip.speed_limit_at(self.trip.position_mi)
+        if zone_reason is not None:
+            # No cruise on facility access roads, gates, work zones, or heavy
+            # traffic -- low-speed local stretches a real driver takes manually.
+            self.ctx.say(f"Adaptive cruise is not available in a {zone_reason} zone.")
             return
         self._cruise_mph = t.speed_mph
         self._cruise_throttle = t.throttle

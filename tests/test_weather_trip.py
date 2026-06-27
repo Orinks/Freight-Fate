@@ -207,6 +207,29 @@ def test_speed_limit_change_is_announced_crossing_out_of_a_city(world):
     assert any("Speed limit" in m for m in messages)
 
 
+def test_speed_limit_cue_names_direction_and_city(world, monkeypatch):
+    trip, _ = make_trip(world)  # Chicago -> Indianapolis
+    trip._active_zone = None
+
+    # A drop near the origin city names the direction and the city.
+    trip.position_mi = 0.0
+    trip._announced_speed_limit = 65.0
+    monkeypatch.setattr(trip, "_corridor_limit_at", lambda mile: 45.0)
+    trip._events.clear()
+    trip._check_speed_limit()
+    lowered = [e.message for e in trip._events]
+    assert any("reduced to" in m and "approaching" in m for m in lowered), lowered
+
+    # A rise just states the higher value -- no "approaching" on the way up.
+    trip._announced_speed_limit = 45.0
+    monkeypatch.setattr(trip, "_corridor_limit_at", lambda mile: 65.0)
+    trip._events.clear()
+    trip._check_speed_limit()
+    raised = [e.message for e in trip._events]
+    assert any("raised to" in m for m in raised), raised
+    assert all("approaching" not in m for m in raised)
+
+
 def test_trip_completes_and_emits_arrival(world):
     trip, truck = make_trip(world)
     truck.throttle = 0.85

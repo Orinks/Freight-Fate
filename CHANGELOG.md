@@ -10,7 +10,8 @@
 - **"Air pressure ready" no longer repeats back to back.** The parking-brake
   release threshold sat exactly at the compressor cut-in pressure, so the ready
   state flickered every 100-125 psi cycle and re-announced. The cue now fires
-  once and only re-arms after a genuine low-air depletion.
+  once, only while the parking brake is actually set (its whole purpose is
+  "you can release it now"), and only re-arms after a genuine low-air depletion.
 - **Snapshot players move to stable when it catches up.** On the developer
   snapshot channel, the game now offers the stable release whenever it is as
   new as -- or newer than -- the latest nightly, so once dev work ships in a
@@ -18,6 +19,13 @@
   equivalent nightly.
 
 ### Changed
+- **Speed-limit changes now say why.** A changing posted limit is announced as
+  "Speed limit reduced to X" or "raised to X" instead of a bare number, and an
+  urban drop names the city ("reduced to 55 approaching Boston"), so a mid-drive
+  change is no longer a mystery.
+- **No cruise on low-speed local roads.** Adaptive cruise will not engage on a
+  facility access road, gate, construction zone, or heavy-traffic stretch -- the
+  low-speed local roads a real driver takes manually -- and says so if you try.
 - **Relaxed mode now feels emptier on the road.** Relaxed hours-of-service mode
   already made random hazards and trooper patrols rarer; it now also thins
   ambient traffic and the odds of a random roadside log check, so a relaxed run
