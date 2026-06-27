@@ -292,6 +292,24 @@ few thousand/day); the resumable batch + `.route-cache` handle polite staging,
 and Docker self-hosting (regional/national OSM extract plus RAM) is the unlimited
 path for large batches. OSRM stays as a graceful fallback.
 
+### Local service/facility approaches
+
+The city-service local-geometry layer is deliberately separate from the ORS HGV
+highway-corridor layer. `tools/build_local_geometry.py` uses local Geofabrik PBF
+extracts to build a small public-road graph around each supported city-service
+target and writes `local_geometry.json` for offline runtime use. The first bake
+adds turn-level geometry for 412 sourced city-service drives and fallback
+metadata for the rest of the 2,401 local targets.
+
+This local graph output is not ORS `driving-hgv` and should not be described as
+truck-legal routing. ORS HGV remains feasible for selected sourced service
+endpoints when `ORS_API_KEY` is available, but using it for the full local batch
+would be hundreds of live directions calls and would still not make
+representative freight-facility endpoints into real gates, yards, or docks.
+Future work can add a credential-gated ORS local batch or a self-hosted HGV
+router, then compare it against the current PBF graph output before replacing
+any checked-in local geometry.
+
 ### Other ORS/HeiGIT APIs (optional, for later workstreams)
 
 Beyond directions, the ORS suite has endpoints worth using as the map grows

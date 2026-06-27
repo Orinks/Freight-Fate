@@ -17,6 +17,7 @@ from pathlib import Path
 WORLD_PATH = Path(__file__).parent / "world.json"
 CITY_SERVICES_PATH = Path(__file__).parent / "city_services.json"
 LOCAL_APPROACHES_PATH = Path(__file__).parent / "local_approaches.json"
+LOCAL_GEOMETRY_PATH = Path(__file__).parent / "local_geometry.json"
 
 # Alternate routes should feel like real dispatch choices, not graph leftovers.
 # A little extra mileage is fine for traffic, weather, grades, or avoiding a
@@ -354,6 +355,29 @@ class LocalApproach:
     fallback_reason: str = ""
     distance_to_road_mi: float = 0.0
     turn_segments: tuple[str, ...] = ()
+
+
+@dataclass(frozen=True)
+class LocalGeometrySegment:
+    road: str
+    miles: float
+    cue: str
+    speed_mph: float = 25.0
+
+
+@dataclass(frozen=True)
+class LocalGeometry:
+    target_id: str
+    target_type: str
+    city: str
+    name: str
+    turn_level: bool
+    source_type: str
+    estimated: bool
+    fallback: bool
+    fallback_reason: str
+    total_miles: float
+    segments: tuple[LocalGeometrySegment, ...] = ()
 
 FACILITY_CARGO_ROLES: dict[str, dict[str, tuple[str, ...]]] = {
     "air_cargo": {
@@ -1091,12 +1115,76 @@ def _load_local_approaches(path: Path = LOCAL_APPROACHES_PATH) -> dict[str, Loca
     return out
 
 
+def _load_local_geometries(path: Path = LOCAL_GEOMETRY_PATH) -> dict[str, LocalGeometry]:
+    if not path.exists():
+        return {}
+    raw = json.loads(path.read_text(encoding="utf-8"))
+    records = raw.get("geometries", {})
+    if not isinstance(records, dict):
+        raise ValueError(f"{path} must contain a geometries object")
+    out: dict[str, LocalGeometry] = {}
+    for target_id, entry in records.items():
+        name = str(entry.get("name", "")).strip()
+        target_type = str(entry.get("target_type", "")).strip()
+        city = str(entry.get("city", "")).strip()
+        source_type = str(entry.get("source_type", "")).strip()
+        if not name or not target_type or not city or not source_type:
+            raise ValueError(f"{path} local geometry {target_id!r} is missing required text")
+        if any(marker in name.lower() for marker in RAW_POI_TEXT_MARKERS):
+            raise ValueError(f"{path} local geometry {target_id!r} exposes raw source text")
+        fallback = bool(entry.get("fallback", False))
+        turn_level = bool(entry.get("turn_level", False))
+        fallback_reason = str(entry.get("fallback_reason", "")).strip()
+        if fallback and not fallback_reason:
+            raise ValueError(f"{path} local geometry {target_id!r} is fallback without reason")
+        raw_segments = entry.get("segments", ())
+        segments: list[LocalGeometrySegment] = []
+        for raw_segment in raw_segments:
+            road = str(raw_segment.get("road", "")).strip()
+            cue = str(raw_segment.get("cue", "")).strip()
+            miles = float(raw_segment.get("miles", 0.0))
+            if not road or not cue or miles <= 0.0:
+                raise ValueError(f"{path} local geometry {target_id!r} has invalid segment")
+            lowered = f"{road} {cue}".lower()
+            if any(marker in lowered for marker in RAW_POI_TEXT_MARKERS):
+                raise ValueError(
+                    f"{path} local geometry {target_id!r} segment exposes raw source text"
+                )
+            segments.append(LocalGeometrySegment(
+                road=road,
+                miles=round(miles, 2),
+                cue=cue,
+                speed_mph=float(raw_segment.get("speed_mph", 25.0)),
+            ))
+        total_miles = round(float(entry.get("total_miles", 0.0)), 2)
+        if turn_level:
+            if not segments:
+                raise ValueError(f"{path} local geometry {target_id!r} has no segments")
+            if total_miles <= 0.0:
+                raise ValueError(f"{path} local geometry {target_id!r} has invalid mileage")
+        out[str(target_id)] = LocalGeometry(
+            target_id=str(target_id),
+            target_type=target_type,
+            city=city,
+            name=name,
+            turn_level=turn_level,
+            source_type=source_type,
+            estimated=bool(entry.get("estimated", True)),
+            fallback=fallback,
+            fallback_reason=fallback_reason,
+            total_miles=total_miles,
+            segments=tuple(segments),
+        )
+    return out
+
+
 class World:
     def __init__(self, data: dict) -> None:
         self.cities: dict[str, City] = {}
         self._facilities_by_id: dict[str, Location] = {}
         self._city_service_data = _load_city_service_data()
         self._local_approaches = _load_local_approaches()
+        self._local_geometries = _load_local_geometries()
         for name, c in data["cities"].items():
             lat = float(c.get("lat", 0.0))
             lon = float(c.get("lon", 0.0))
@@ -1325,16 +1413,33 @@ class World:
     def local_approach(self, target_id: str) -> LocalApproach | None:
         return self._local_approaches.get(target_id)
 
+    def local_geometry(self, target_id: str) -> LocalGeometry | None:
+        return self._local_geometries.get(target_id)
+
     def city_service_approach(self, city: str, key: str) -> LocalApproach | None:
         return self.local_approach(f"city_service:{_slug(city)}:{key}")
+
+    def city_service_geometry(self, city: str, key: str) -> LocalGeometry | None:
+        return self.local_geometry(f"city_service:{_slug(city)}:{key}")
 
     def facility_approach(self, city: str, location_name: str) -> LocalApproach | None:
         location = self.facility_location(city, location_name)
         return self.local_approach(f"facility:{location.id}")
 
+    def facility_geometry(self, city: str, location_name: str) -> LocalGeometry | None:
+        location = self.facility_location(city, location_name)
+        return self.local_geometry(f"facility:{location.id}")
+
     def city_service_route(self, city: str, key: str) -> Route:
         """A short, drivable local route from the terminal to a city service."""
         service = self.city_service(city, key)
+        geometry = self.city_service_geometry(city, key)
+        if geometry is not None and geometry.turn_level and geometry.segments:
+            legs = [
+                Leg(city, city, segment.miles, segment.road, "flat", ())
+                for segment in geometry.segments
+            ]
+            return Route([city] * (len(legs) + 1), legs)
         approach = self.city_service_approach(city, key)
         if approach is not None:
             miles = approach.approach_miles

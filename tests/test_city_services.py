@@ -1,4 +1,5 @@
 import pygame
+import pytest
 
 
 def key_event(key, unicode=""):
@@ -25,9 +26,14 @@ def test_city_services_are_source_backed(world):
         assert "way/" not in service.spoken_name.lower()
         route = world.city_service_route("Chicago", service.key)
         approach = world.city_service_approach("Chicago", service.key)
+        geometry = world.city_service_geometry("Chicago", service.key)
         assert approach is not None
-        assert route.miles == approach.approach_miles
-        assert route.highways[0] == approach.road
+        if geometry is not None and geometry.turn_level:
+            assert route.miles == pytest.approx(geometry.total_miles)
+            assert route.highways == [segment.road for segment in geometry.segments]
+        else:
+            assert route.miles == approach.approach_miles
+            assert route.highways[0] == approach.road
 
 
 def test_city_services_fallback_when_no_source_data(world):
@@ -66,9 +72,14 @@ def test_city_service_data_covers_every_supported_city(world):
             assert route.miles > 0
             assert route.highways[0]
             approach = world.city_service_approach(city, service.key)
+            geometry = world.city_service_geometry(city, service.key)
             assert approach is not None
-            assert route.miles == approach.approach_miles
-            assert route.highways[0] == approach.road
+            if geometry is not None and geometry.turn_level:
+                assert route.miles == pytest.approx(geometry.total_miles)
+                assert route.highways == [segment.road for segment in geometry.segments]
+            else:
+                assert route.miles == approach.approach_miles
+                assert route.highways[0] == approach.road
             if service.fallback:
                 fallback += 1
                 assert service.source_type == "fallback"

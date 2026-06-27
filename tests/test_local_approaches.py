@@ -71,9 +71,12 @@ def test_local_approach_records_are_clean_and_marked(world):
 def test_city_service_and_facility_routes_use_local_approach_layer(world):
     service_route = world.city_service_route("Chicago", "garage")
     service_approach = world.city_service_approach("Chicago", "garage")
+    service_geometry = world.city_service_geometry("Chicago", "garage")
     assert service_approach is not None
-    assert service_route.miles == service_approach.approach_miles
-    assert service_route.highways == [service_approach.road]
+    assert service_geometry is not None
+    assert service_geometry.turn_level
+    assert service_route.miles == service_geometry.total_miles
+    assert service_route.highways == [segment.road for segment in service_geometry.segments]
 
     facility = world.cities["Chicago"].locations[0]
     facility_route = world.facility_approach_route("Chicago", facility.name)

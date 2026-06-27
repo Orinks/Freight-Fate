@@ -289,6 +289,16 @@ available while moving city services toward a drive-to-location model.
   bounded search radius. Facility coordinates are still usually representative,
   so these are local-road approach contexts, not claims about real driveways,
   gates, docks, or companies.
+- [x] **Turn-level local geometry subset.** `local_geometry.json` adds a
+  source-backed local street sequence where confidence is high. The current
+  bake covers all 2,401 service/facility targets with honest metadata: 412 of
+  582 city-service drives have turn-level local street geometry from the local
+  OSM PBF road graph, 170 city-service drives fall back to nearest-road context,
+  and all 1,819 freight-facility records remain estimated fallback geometry
+  because their endpoints are still representative metro-market facilities.
+  This layer is not ORS `driving-hgv`; ORS HGV already powers corridor/highway
+  route metadata where checked in, while this local batch stays rebuildable from
+  local OSM extracts without hundreds of live directions calls.
 - [x] **Local service driving phase.** City service drives use the existing
   truck physics, GPS/status surfaces, save/resume path, and spoken driving help.
   Arrival does not auto-open the menu: the truck must be fully stopped, then the
@@ -307,9 +317,12 @@ Follow-up hooks for the roadmap worker:
   terminal services before the first dispatch. Keep it skippable/replayable and
   spoken as GPS guidance, not as a forced tutorial wall.
 - **Turn-level local geometry.** Add ORS HGV or OSRM local geometry for
-  source-backed approaches so GPS can cue actual turns, lane changes, and final
-  pull-ins instead of only source coordinates plus approach mileage/context.
-  Runtime should still read checked-in compact data.
+  the remaining sourced approaches so GPS can cue actual turns, lane changes,
+  and final pull-ins instead of only source coordinates plus approach
+  mileage/context. Runtime should still read checked-in compact data. The next
+  routing-quality decision is whether to run a credential-gated ORS HGV local
+  batch for selected service endpoints, self-host an HGV router, or keep
+  extending the local PBF graph extractor with truck-access tags.
 - **Facility-leg realism.** Replace representative freight-facility coordinates
   with sourced shipper/receiver, gate, yard, or driveway points where reliable
   local data supports them. Keep fallback reasons machine-readable and keep raw

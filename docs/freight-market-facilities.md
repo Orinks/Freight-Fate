@@ -163,6 +163,37 @@ The next map-data milestone is turn-level local routing: a build-time HGV
 routing pass from the highway/city context to the service or facility vicinity,
 then sourced final-access hints only where local data supports them.
 
+## Local Turn Geometry
+
+`local_geometry.json` is the next compact layer after nearest-road approach
+context. It stores turn-level local street sequences when the source data is
+strong enough, and fallback records everywhere else so the game cannot overclaim
+real city layouts.
+
+The current bake used the same local state PBF cache at
+`C:\Users\joshu\.cache\freight-fate-osm\regions\` and
+`tools/build_local_geometry.py`. It covers all 2,401 approach targets. Of the
+582 city-service drives, 412 have source-backed local street geometry from a
+bounded OSM road graph between the city context and the sourced service POI.
+The remaining 170 city-service records fall back to nearest-road context. All
+1,819 freight-facility records are fallback/estimated because the facility
+endpoints are still representative gameplay facilities, not sourced real gates,
+yards, docks, or shipper entrances.
+
+This is distinct from the existing OpenRouteService work. Freight Fate already
+has an ORS `driving-hgv` corridor pipeline for highway legs in
+`tools/enrich_routes.py`; checked-in highway route points, elevation/grade data,
+and some corridor metadata can come from that truck profile. The local turn
+geometry added here does not use ORS and is not truck-legal HGV certification.
+It is source-backed local OSM street geometry with conservative fallback
+marking. ORS HGV remains a good credential-gated follow-up for selected local
+service endpoints, but a full local batch would require hundreds of live
+directions calls and still would not solve representative facility endpoints.
+
+Player-facing GPS should use clean street names and turn wording from the
+geometry layer when available, then fall back to the nearest-road approach
+context. Do not expose OSM IDs, tags, source refs, ORS keys, or raw source text.
+
 ## Job Generation
 
 Job generation now chooses:

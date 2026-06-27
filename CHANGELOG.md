@@ -108,6 +108,10 @@
   route summaries now prefer source-backed nearby road names for city-service
   drives and pickup/delivery facility approaches, while simplified fallbacks
   remain clearly marked in the data.
+- **Some city service drives now have real local turns.** Where local OSM data
+  supports it, service drives can use checked-in street-by-street approach
+  geometry with spoken local turn cues. Other services and representative
+  facility approaches still fall back to simpler road context.
 - **Rush hour makes traffic feel busier.** Starting a trip during morning or
   afternoon commute windows now raises modeled traffic density, especially near
   metro/checkpoint corridors, and can slow lead traffic with commuter or merge

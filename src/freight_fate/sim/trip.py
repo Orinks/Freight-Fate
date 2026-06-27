@@ -500,6 +500,24 @@ class Trip:
                                              strict=True)):
             forward = self.route.cities[i] == leg.a
             toward = self.route.cities[i + 1]
+            if self._is_facility_approach_route():
+                if i == 0:
+                    cues.append(NavigationCue(
+                        "local:start",
+                        "local_turn",
+                        start + 0.05,
+                        f"start on {leg.highway}",
+                        f"Start on {leg.highway}; {self._distance_text(leg.miles)}.",
+                    ))
+                elif self.route.legs[i - 1].highway != leg.highway:
+                    cues.append(NavigationCue(
+                        f"local:turn:{i}",
+                        "local_turn",
+                        start,
+                        f"turn onto {leg.highway}",
+                        f"Turn onto {leg.highway}; {self._distance_text(leg.miles)}.",
+                    ))
+                continue
             heading = _leg_heading(leg.highway, self.route.cities[i], toward)
             shield = f"{leg.highway} {heading}".strip()
             segment_miles = leg.miles
