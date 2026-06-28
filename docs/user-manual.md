@@ -110,6 +110,13 @@ setup, the current terminal, who pays normal equipment costs, and the first
 objective: choose an unlocked dispatch, reach the shipper, and start a clean
 record with dispatch.
 
+After that first dispatch, the terminal adds **Career plan**. This speaks the
+current career objective and how it should shape dispatch choices. Early
+company drivers work through probation loads, dispatcher trust, safe service,
+and better carrier lanes. Owner-operators hear reminders about working capital,
+fuel, repairs, trailer costs, and cash reserves before moving toward stronger
+contracts or own authority.
+
 The normal career loop is:
 
 1. Start or continue a career.
@@ -160,6 +167,7 @@ Your terminal is the safe hub between jobs. Public terminal actions include:
 | --- | --- |
 | Dispatch board | Browse freight offers from local facilities. |
 | Drive to city services | Drive a short local route to the freight market office, garage, or truck dealer. Service names use sourced local data where available, and GPS prefers checked-in local turns or road context when they exist. |
+| Career plan | Review your next realistic career objective after the first dispatch. |
 | Business status | Review company-driver or owner-operator status. |
 | Garage | Refuel and repair company equipment; owner-operators can also buy upgrades, buy tractors, switch owned tractors, add trailer programs, or buy trailers after own authority. |
 | Request pay advance | Draw cash against your next load when you are broke. |

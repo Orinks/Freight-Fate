@@ -1,0 +1,123 @@
+import pygame
+
+from freight_fate.models.business import (
+    LEASED_OWNER_OPERATOR,
+    OWNER_OPERATOR_LEVEL,
+)
+from freight_fate.models.career import LEVEL_XP
+from freight_fate.models.career_objectives import career_objective
+from freight_fate.models.jobs import CARGO_CATALOG, Job
+from freight_fate.models.profile import Profile
+
+
+def key_event(key, unicode=""):
+    return pygame.event.Event(pygame.KEYDOWN, key=key, unicode=unicode)
+
+
+def _job(*, miles: float, pay: float = 900.0, cargo: str = "general") -> Job:
+    return Job(
+        CARGO_CATALOG[cargo],
+        12.0,
+        "Chicago",
+        "Chicago yard",
+        "Milwaukee",
+        miles,
+        pay,
+        8.0,
+    )
+
+
+def test_company_driver_objective_moves_from_probation_to_dispatcher_trust():
+    profile = Profile(name="Career Plan", current_city="Chicago")
+    profile.achievements.append("first_dispatch")
+
+    first_load = career_objective(profile)
+    assert first_load.title == "Finish the probation load"
+    assert "first delivery cleanly" in first_load.terminal_text
+    assert "standard unlocked load" in first_load.dispatch_text
+
+    profile.career.deliveries = 4
+    profile.career.reputation = 62
+    trust = career_objective(profile)
+    assert trust.title == "Build dispatcher trust"
+    assert "on-time service" in trust.terminal_text
+    assert "reliable lanes" in trust.dispatch_text
+
+
+def test_owner_operator_objective_emphasizes_working_capital():
+    profile = Profile(name="Owner Plan", current_city="Chicago")
+    profile.business_status = LEASED_OWNER_OPERATOR
+    profile.owned_trucks = ["rig"]
+    profile.money = 12_000.0
+    profile.achievements.append("first_dispatch")
+
+    objective = career_objective(profile)
+
+    assert objective.title == "Protect working capital"
+    assert "Fuel, maintenance, insurance" in objective.terminal_text
+    assert "take-home" in objective.dispatch_text
+
+
+def test_terminal_career_plan_is_keyboard_reachable_and_spoken(monkeypatch):
+    from freight_fate.app import App
+    from freight_fate.states.city import CityMenuState
+
+    spoken: list[str] = []
+    app = App()
+    try:
+        monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: spoken.append(text))
+        app.ctx.profile = Profile(name="Keyboard Plan", current_city="Chicago")
+        app.ctx.profile.achievements.append("first_dispatch")
+
+        app.push_state(CityMenuState(app.ctx))
+
+        assert any("Career objective:" in text for text in spoken)
+        assert app.state.items[1].text == "Career plan"
+
+        app.state.handle_event(key_event(pygame.K_DOWN))
+        app.state.handle_event(key_event(pygame.K_RETURN))
+
+        assert spoken[-1].startswith("Finish the probation load.")
+        assert "deadline you can protect" in spoken[-1]
+    finally:
+        app.shutdown()
+
+
+def test_dispatch_board_speaks_objective_and_marks_recommended_job(monkeypatch):
+    from freight_fate.app import App
+    from freight_fate.states.city import JobBoardState
+
+    spoken: list[str] = []
+    app = App()
+    try:
+        monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: spoken.append(text))
+        app.ctx.profile = Profile(name="Board Plan", current_city="Chicago")
+        app.ctx.profile.achievements.append("first_dispatch")
+        app.ctx.profile.career.deliveries = 2
+
+        app.push_state(JobBoardState(app.ctx, [
+            _job(miles=180.0, pay=1200.0),
+            _job(miles=70.0, pay=700.0),
+        ]))
+
+        assert "Career objective: Probation board" in spoken[-1]
+        assert "Short regional freight" in spoken[-1]
+        assert app.state.items[1].text.startswith(
+            "Recommended dispatch for short regional freight: Job 2 of 2:")
+        assert not app.state.items[0].text.startswith("Recommended dispatch")
+    finally:
+        app.shutdown()
+
+
+def test_late_company_driver_plan_points_to_owner_operator_prep():
+    profile = Profile(name="Prep Plan", current_city="Chicago")
+    profile.achievements.append("first_dispatch")
+    profile.career.xp = LEVEL_XP[OWNER_OPERATOR_LEVEL - 4]
+    profile.career.deliveries = 25
+    profile.career.reputation = 75
+
+    objective = career_objective(profile)
+
+    assert objective.title == "Owner-operator preparation"
+    assert "cash cushion" in objective.terminal_text
+    assert "protects reputation" in objective.dispatch_text

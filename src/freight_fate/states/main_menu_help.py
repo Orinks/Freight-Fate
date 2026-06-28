@@ -15,6 +15,7 @@ HELP_PAGES = [
         "check in and load the trailer there, then get your route to the destination,",
         "and deliver cargo across the country, on time and intact.",
         "Earn money and experience, level through 30 career ranks, and unlock better freight.",
+        "After your first dispatch, Career plan at the terminal explains the next practical step.",
         "The company path prepares for owner-operator work before the later buy-in.",
         "Own authority is an endgame business step with direct freight and higher overhead.",
     ]),

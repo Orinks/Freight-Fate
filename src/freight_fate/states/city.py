@@ -12,6 +12,7 @@ from ..models.business import (
     pay_label,
     status_label,
 )
+from ..models.career_objectives import career_objective
 from ..models.economy import (
     pay_advance_grant,
     pay_advance_unavailable_reason,
@@ -134,6 +135,8 @@ class CityMenuState(MenuState):
         first_day = ""
         if not first_dispatch_done(p):
             first_day = " First-day objective: open the dispatch board and take your first load."
+        else:
+            first_day = f" Career objective: {career_objective(p).terminal_text}"
         self.ctx.say(
             f"Parked at {terminal.spoken_name} in the {p.current_city} "
             f"service area, {city.state}. {business.capitalize()} with "
@@ -189,6 +192,12 @@ class CityMenuState(MenuState):
                 self._first_day_briefing,
                 help="Repeat your starter carrier, terminal, business costs, "
                      "and first dispatch objective."))
+        else:
+            items.insert(1, MenuItem(
+                "Career plan",
+                self._career_plan,
+                help="Review the next practical career objective and how it "
+                     "should shape dispatch choices."))
         if self._pay_advance_available():
             items.insert(3, MenuItem(
                 self._pay_advance_label, self._request_pay_advance,
@@ -199,6 +208,9 @@ class CityMenuState(MenuState):
 
     def _first_day_briefing(self) -> None:
         self.ctx.say(first_day_orientation_message(self.ctx), interrupt=True)
+
+    def _career_plan(self) -> None:
+        self.ctx.say(career_objective(self.ctx.profile).spoken_summary, interrupt=True)
 
     def _city_services(self) -> None:
         self.ctx.push_state(CityServiceSelectState(self.ctx))
@@ -575,6 +587,12 @@ class JobBoardState(MenuState):
                     "a deadline you can protect; accepting it starts your "
                     "record with dispatch. "
                 )
+            else:
+                objective = career_objective(self.ctx.profile)
+                first_day = (
+                    f"Career objective: {objective.title}. "
+                    f"{objective.dispatch_text} "
+                )
             self.ctx.say(f"Dispatch board. {n} dispatch{'es' if n != 1 else ''} available. "
                          f"{business_note}{first_day}{self.ctx.profile.market.summary()} "
                          + self.current_text())
@@ -608,7 +626,7 @@ class JobBoardState(MenuState):
             carrier_key=getattr(p, "carrier_key", ""),
             owned_trailers=p.visible_owned_trailers(),
         )
-        return job.describe(
+        label = job.describe(
             index,
             len(self.jobs),
             pay_label=pay_label(p.business_status),
@@ -616,6 +634,34 @@ class JobBoardState(MenuState):
             display_pay=business.gross_pay,
             market_preview=self._market_preview(business),
         )
+        if self._recommended_job_index() == index - 1:
+            label = f"Recommended dispatch for {career_objective(p).recommendation}: {label}"
+        return label
+
+    def _recommended_job_index(self) -> int | None:
+        p = self.ctx.profile
+        if not first_dispatch_done(p):
+            return None
+        candidates: list[tuple[float, int]] = []
+        for index, job in enumerate(self.jobs):
+            if self._locked_reason(job):
+                continue
+            if is_owner_operator(p.business_status):
+                business = build_business_settlement(
+                    p.business_status,
+                    job,
+                    job.pay,
+                    on_time=True,
+                    driver_charges=0.0,
+                    carrier_key=getattr(p, "carrier_key", ""),
+                    owned_trailers=p.visible_owned_trailers(),
+                )
+                candidates.append((-business.net_before_advance, index))
+            else:
+                candidates.append((job.distance_mi, index))
+        if not candidates:
+            return None
+        return min(candidates)[1]
 
     def _locked_reason(self, job: Job) -> str:
         p = self.ctx.profile

@@ -8,6 +8,10 @@
   home terminal, the terminal repeats a first-day briefing until the first
   dispatch is accepted. It names the carrier or owner-operator setup, the
   terminal, who pays equipment costs, and why the first dispatch matters.
+- **Career terminals now name the next practical step.** After the first
+  dispatch, the terminal adds a Career plan item and the dispatch board frames
+  realistic next moves such as probation loads, dispatcher trust, cash
+  reserves, owner-operator preparation, and direct-freight margins.
 - **CB chatter sounds more like drivers talking.** Road radio warnings now use
   vague bear and work-zone enforcement chatter instead of pinpoint enforcement
   language.
