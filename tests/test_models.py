@@ -107,6 +107,33 @@ def test_route_aware_deadline_estimate_uses_low_speed_segments():
     assert required_hours(100.0, route) > required_hours(100.0)
 
 
+def test_route_deadline_uses_baked_limit_near_city():
+    from freight_fate.data.world_models import Leg, Route, SpeedLimitSample
+    from freight_fate.models.jobs import (
+        DEADLINE_PLANNING_SPEED_FACTOR,
+        _route_planning_limit,
+    )
+
+    route = Route(
+        ["A", "B"],
+        [
+            Leg(
+                "A",
+                "B",
+                100.0,
+                "I-1",
+                "flat",
+                (),
+                speed_limits=(SpeedLimitSample(0.0, 75.0, "test"),),
+            )
+        ],
+    )
+
+    assert _route_planning_limit(
+        route, 0, route.legs[0], 1.0, 1.0, [0.0, 100.0], False, None
+    ) == 75.0 * DEADLINE_PLANNING_SPEED_FACTOR
+
+
 def test_deadlines_cover_required_hos_time_across_the_network(world):
     """Every generated job's deadline must cover the honest HOS time (driving at
     the planning pace plus mandatory breaks and 10-hour sleeps). This is the

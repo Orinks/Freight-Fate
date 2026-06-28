@@ -3,6 +3,13 @@
 ## Unreleased
 ### Fixed
 
+- **Real posted speed limits win near cities.** City approaches still use a
+  slower fallback when the route has no posted speed-limit sample, but real
+  baked `maxspeed` data is no longer capped just because the route is near a
+  city.
+- **Stops no longer announce speculative truck parking.** If a stop's parking
+  is confirmed, that still gets spoken; otherwise speculative parking wording
+  is dropped from route cues so the game just announces the stop.
 - **Adaptive cruise starts slowing before big speed-limit drops.** When the
   posted limit ahead falls sharply, adaptive cruise now looks far enough ahead
   to begin braking before the lower-limit point instead of waiting until the
@@ -113,12 +120,11 @@
   carries an OpenStreetMap `maxspeed` tag, the game uses that real posted limit
   instead of the highway/region approximation -- and falls back to the
   approximation only on stretches OSM has not tagged. Limits are baked at build
-  time (truck-specific `maxspeed:hgv` preferred where present); the urban
-  reduction near cities and the spoken limit-change cue are unchanged.
+  time (truck-specific `maxspeed:hgv` preferred where present); the spoken
+  limit-change cue still calls out posted-limit changes as you drive.
 - **The lane-drift rumble is now directional.** When you wander toward a lane
   edge, the rumble strip plays from that side -- drift right and you hear it on
-  the right -- so the ear it lands in tells you which way to steer back. Uses
-  the BASS backend's stereo panning.
+  the right -- so the ear it lands in tells you which way to steer back.
 - **Safety announcements no longer get buried, and you get more warning.** Zone
   entries, construction and traffic warnings, and checkpoints now preempt
   ambient chatter (weather, tolls, state lines) on the event voice instead of
@@ -743,12 +749,9 @@ compresses it as usual), never wall time.
 ## 1.2.0 — 2026-06-09
 
 ### Added
-- **BASS audio backend** via [sound_lib](https://pypi.org/project/sound_lib/)
-  (pinned `==0.8.8`; PyPI's version ordering for this package is broken and an
-  unpinned install resolves to a stale 2022 build). The truck engine is now a
-  single loop whose playback frequency tracks RPM in real time, smoothed with
-  BASS attribute slides -- no more four-band crossfade seams. pygame.mixer
-  remains as an automatic fallback when sound_lib/BASS cannot initialize.
+- **Smoother truck engine audio.** Engine sound now follows RPM more naturally,
+  with smoother transitions as you accelerate, shift, and settle into highway
+  speed.
 - **Garage upgrades** (Garage → Upgrades), money-gated and saved on the
   profile: engine tune (+10% torque per tier, two tiers), aerodynamic kit
   (−12% drag), long-range tank (+50 gallons), and reinforced brakes (fade

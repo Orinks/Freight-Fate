@@ -307,12 +307,13 @@ window.
 Construction and traffic zones lower the speed limit. Speeding in a
 construction zone can trigger enforcement.
 
-Posted speed limits come from real map data and change along a corridor; a
-change is announced as reduced or raised, and named near a city. State troopers
-patrol some stretches, hotter on busy interstates, in construction, and at
-night. Speed badly inside a patrol and a trooper may pull you over: signal with
-X (the same key as an exit), brake to a stop on the shoulder, and sit through a
-license and logbook check that ends in an on-the-spot ticket or a warning.
+Posted speed limits come from real map data where available and change along a
+corridor; a change is announced as reduced or raised, and named near a city when
+the game is using a city-approach fallback. State troopers patrol some
+stretches, hotter on busy interstates, in construction, and at night. Speed
+badly inside a patrol and a trooper may pull you over: signal with X (the same
+key as an exit), brake to a stop on the shoulder, and sit through a license and
+logbook check that ends in an on-the-spot ticket or a warning.
 Ignoring the lights is logged as evasion and costs far more. Speeding the
 patrols do not catch still adds a quieter charge at delivery settlement.
 Adaptive cruise will not engage on low-speed local roads such as facility

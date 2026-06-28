@@ -4,8 +4,10 @@ import itertools
 
 import pytest
 
+from freight_fate.data.world_models import Stop
 from freight_fate.sim import Trip, TruckState, WeatherKind, WeatherSystem
 from freight_fate.sim.trip import NavigationCue, TrafficLead, TripEventKind
+from freight_fate.sim.trip_models import RoadStop
 from freight_fate.sim.weather import EFFECTS, REGION_WEIGHTS
 
 
@@ -690,6 +692,24 @@ def test_gps_state_crossing_and_rest_stop_cues_deduplicate(world):
         )
         for event in rest
     )
+
+
+def test_likely_parking_is_not_announced_as_truck_parking():
+    assert Stop("Fuel", 1.0, parking="likely").parking_label == ""
+    assert RoadStop("Fuel", 1.0, parking="likely").parking_text == ""
+
+
+def test_likely_parking_route_cue_just_announces_stop(world):
+    trip, _truck = make_trip(world)
+    leg = trip.route.legs[0]
+    likely_stop = next(stop for stop in leg.stops if stop.parking == "likely")
+    cue = next(cue for cue in trip.navigation_cues
+               if cue.key.endswith(f":{likely_stop.name}"))
+
+    assert "likely truck parking" not in cue.near_text
+    assert cue.near_text.startswith(likely_stop.label.capitalize())
+    assert cue.near_text.endswith("ahead in 1 mile; press X to take the exit.")
+    assert ";;" not in cue.near_text
 
 
 def test_gps_traffic_cue_deduplicates(world):

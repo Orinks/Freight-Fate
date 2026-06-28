@@ -522,8 +522,11 @@ def _route_planning_limit(
         baked = _leg_speed_limit_at(leg, offset_mi)
         toward_city = route.cities[min(leg_index + 1, len(route.cities) - 1)]
         region = _route_city_region(toward_city, world)
-        limit = baked if baked is not None else corridor_speed_limit(leg.highway, region)
-        if any(abs(route_mi - mp) <= URBAN_RADIUS_MI for mp in city_mileposts):
+        limit = (baked if baked is not None
+                 else corridor_speed_limit(leg.highway, region))
+        if (baked is None
+                and any(abs(route_mi - mp) <= URBAN_RADIUS_MI
+                        for mp in city_mileposts)):
             limit = min(limit, URBAN_LIMIT_MPH)
         if route_mi >= max(0.0, route.miles - DESTINATION_APPROACH_ZONE_MI):
             limit = min(limit, DESTINATION_APPROACH_LIMIT_MPH)

@@ -11,7 +11,7 @@ STOP_TYPE_LABELS = {
 
 PARKING_CERTAINTY_LABELS = {
     "confirmed": "confirmed truck parking",
-    "likely": "likely truck parking",
+    "likely": "",
     "limited": "limited truck parking",
     "unknown": "parking not verified",
     "none": "no truck parking",

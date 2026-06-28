@@ -13,6 +13,14 @@ from .vehicle import TruckState
 from .weather import WeatherKind, WeatherSystem
 
 
+def _rest_stop_cue_text(prefix: str, parking_label: str) -> str:
+    parts = [prefix]
+    if parking_label:
+        parts.append(parking_label)
+    parts.append("press X to take the exit.")
+    return "; ".join(parts)
+
+
 class Trip:
     """One delivery run along a chosen route."""
 
@@ -208,9 +216,11 @@ class Trip:
                     "rest_stop",
                     start + offset,
                     f"{stop.label} ahead{at_part}",
-                    f"{stop.label.capitalize()}{at_part} ahead in "
-                    f"{'1 mile' if self.imperial else self._distance_text(1.0)}; "
-                    f"{stop.parking_label}; press X to take the exit.",
+                    _rest_stop_cue_text(
+                        f"{stop.label.capitalize()}{at_part} ahead in "
+                        f"{'1 mile' if self.imperial else self._distance_text(1.0)}",
+                        stop.parking_label,
+                    ),
                 ))
         for i, lead in enumerate(self.traffic_leads):
             cues.append(NavigationCue(
@@ -427,8 +437,9 @@ class Trip:
         leg_i, leg_start = self._leg_at_mile(mile)
         leg = self.route.legs[leg_i]
         baked = _leg_speed_limit_at(leg, mile - leg_start)
-        base = (baked if baked is not None
-                else corridor_speed_limit(leg.highway, self._region_at(mile)))
+        if baked is not None:
+            return baked
+        base = corridor_speed_limit(leg.highway, self._region_at(mile))
         if self._near_city(mile):
             return min(base, URBAN_LIMIT_MPH)
         return base
@@ -723,12 +734,14 @@ class Trip:
             if 0 < ahead <= 5.0 and stop.name not in self._announced_stops:
                 self._announced_stops.add(stop.name)
                 exit_part = f" at {stop.exit_label}" if stop.exit_label else ""
-                self._emit(TripEventKind.STOP_AHEAD,
-                           f"{stop.spoken_name}{exit_part} in "
-                           f"{self._distance_text(ahead)}. "
-                           f"{stop.parking_text}. "
-                           "Press X to take the exit for it.",
-                           stop=stop)
+                parts = [
+                    f"{stop.spoken_name}{exit_part} in "
+                    f"{self._distance_text(ahead)}."
+                ]
+                if stop.parking_text:
+                    parts.append(f"{stop.parking_text}.")
+                parts.append("Press X to take the exit for it.")
+                self._emit(TripEventKind.STOP_AHEAD, " ".join(parts), stop=stop)
 
     def _check_navigation_cues(self) -> None:
         for cue in self.navigation_cues:

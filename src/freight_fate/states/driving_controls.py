@@ -392,11 +392,13 @@ class DrivingControlsMixin:
                     "shoulder: poor rest, and a possible parking ticket.")
         ahead = max(0.0, next_stop.at_mi - self.trip.position_mi)
         verdict = "before" if ahead <= legal_miles else "after"
-        return (
+        stop_text = (
             f"Next legal stop: {next_stop.spoken_name} in "
-            f"{self.ctx.settings.distance_text(ahead)}, {next_stop.parking_text}, "
-            f"{verdict} the next {action} limit."
+            f"{self.ctx.settings.distance_text(ahead)}"
         )
+        if next_stop.parking_text:
+            stop_text += f", {next_stop.parking_text}"
+        return f"{stop_text}, {verdict} the next {action} limit."
 
     def _legal_miles_for_hos(self, remaining_min: float) -> float:
         pace = max(35.0, min(62.0, self.truck.speed_mph or 55.0))

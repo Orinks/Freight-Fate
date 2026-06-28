@@ -146,10 +146,14 @@ class RestStopState(MenuState):
 
     def announce_entry(self) -> None:
         self.ctx.audio.set_ambient(_poi_ambient_key(self.stop))
-        self.ctx.say(f"{self.stop.spoken_name}. "
-                     f"{self.stop.parking_text}. "
-                     f"It is {clock_text(self.driving.trip.current_hour)}. "
-                     f"{self.current_text()}")
+        parts = [f"{self.stop.spoken_name}."]
+        if self.stop.parking_text:
+            parts.append(f"{self.stop.parking_text}.")
+        parts.extend([
+            f"It is {clock_text(self.driving.trip.current_hour)}.",
+            self.current_text(),
+        ])
+        self.ctx.say(" ".join(parts))
 
     def build_items(self) -> list[MenuItem]:
         actions = set(self.stop.actions)
