@@ -142,8 +142,12 @@ def test_exit_lane_can_be_set_with_keyboard_steering(monkeypatch):
     from freight_fate.app import App
 
     spoken = []
+    sounds = []
     app = App()
+    app.ctx.settings.steering_assist = "light"
     monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: spoken.append(text))
+    monkeypatch.setattr(app.ctx.audio, "play",
+                        lambda key, volume=1.0, **_kw: sounds.append((key, volume)))
     try:
         driving = start_drive(app)
         quiet_trip(driving)
@@ -154,6 +158,33 @@ def test_exit_lane_can_be_set_with_keyboard_steering(monkeypatch):
             driving._update_exit_preparation(HeldKeys(pygame.K_RIGHT), 1 / 60)
         assert driving._exit_lane_ready()
         assert any("Exit lane set" in line for line in spoken)
+        assert ("ui/notify", 0.6) in sounds
+    finally:
+        app.shutdown()
+
+
+def test_lane_drift_off_sets_exit_lane_when_signaling(monkeypatch):
+    from freight_fate.app import App
+
+    spoken = []
+    sounds = []
+    app = App()
+    app.ctx.settings.steering_assist = "off"
+    monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: spoken.append(text))
+    monkeypatch.setattr(app.ctx.audio, "play",
+                        lambda key, volume=1.0, **_kw: sounds.append((key, volume)))
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        stop = driving.trip.stops[0]
+        driving.trip.position_mi = stop.at_mi - 1.5
+
+        driving.handle_event(key_event(pygame.K_x))
+
+        assert driving._exit_lane_ready()
+        assert any("Exit lane set" in line for line in spoken)
+        assert all("Move right" not in line for line in spoken)
+        assert ("ui/notify", 0.6) in sounds
     finally:
         app.shutdown()
 
@@ -163,6 +194,7 @@ def test_exit_lane_stays_set_after_keyboard_release():
     from freight_fate.app import App
 
     app = App()
+    app.ctx.settings.steering_assist = "light"
     try:
         driving = start_drive(app)
         quiet_trip(driving)

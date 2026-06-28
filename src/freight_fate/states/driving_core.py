@@ -162,7 +162,14 @@ class _DrivingRadioBackend:
 
     def play_station(self, station: RadioStation, volume: float) -> None:
         if station.real_stream:
-            raise RadioPlaybackError("external stream playback is not available")
+            if not station.stream_url:
+                raise RadioPlaybackError("station has no stream URL")
+            self.driving._apply_radio_volume()
+            try:
+                self.driving.ctx.audio.play_radio_stream(station.stream_url, fade_ms=900)
+            except RuntimeError as exc:
+                raise RadioPlaybackError("external stream playback failed") from exc
+            return
         self.driving._apply_radio_volume()
         if station.fallback:
             self.driving.ctx.audio.stop_music(600)

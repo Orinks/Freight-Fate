@@ -187,6 +187,47 @@ def test_bass_music_never_loops_catalog_tracks(monkeypatch):
     assert loop_flags == [False] * len(ALL_MUSIC_TRACKS)
 
 
+def test_bass_radio_stream_uses_url_stream(monkeypatch):
+    class FakeStream:
+        handle = 1
+
+        def __init__(self):
+            self.volume = None
+            self.played = False
+
+        def set_volume(self, volume):
+            self.volume = volume
+
+        def play(self):
+            self.played = True
+
+    opened = []
+    slides = []
+    backend = audio._BassBackend.__new__(audio._BassBackend)
+    backend.master_volume = 1.0
+    backend.music_volume = 0.5
+    backend._music_track = None
+    backend._music_stream = None
+    backend._BassError = Exception
+    backend._ATTRIB_VOL = 0
+    backend._slide = object()
+    backend._bass_call = lambda *args: slides.append(args)
+
+    def fake_url_stream(url):
+        opened.append(url)
+        return FakeStream()
+
+    monkeypatch.setattr(backend, "_url_stream", fake_url_stream)
+
+    backend.play_radio_stream("https://example.test/live.mp3", fade_ms=321)
+
+    assert opened == ["https://example.test/live.mp3"]
+    assert backend._music_track == "https://example.test/live.mp3"
+    assert backend._music_stream.played
+    assert backend._music_stream.volume == 0.0
+    assert slides[-1][-1] == 321
+
+
 def test_bass_engine_uses_single_pitched_loop(monkeypatch):
     monkeypatch.delenv("FREIGHT_FATE_AUDIO_BACKEND", raising=False)
     a = AudioEngine()

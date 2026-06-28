@@ -423,6 +423,8 @@ class RadioState:
             reception=reception)
 
     def _station_allowed(self, station: RadioStation) -> bool:
+        if not station.supported:
+            return False
         if not station.real_stream:
             return True
         return self.real_streams_enabled and not self.streamer_safe

@@ -457,23 +457,25 @@ Tab status menu, and at the city terminal. With live weather turned on, the
 date, season, and temperature follow the real-world calendar instead.
 
 Stops are reported as you approach them. A one-mile cue tells you when to take
-an exit. Press X to signal for the exit, steer right into the exit lane when
-prompted, slow to 45 miles per hour or less, and brake to a stop at the end of
-the ramp. If you reach the gore too fast, without signaling, or without the exit
-lane set, you stay on the highway and the game tells you what went wrong. The
-timing is generous so the sequence is about preparation, not twitch input. The
-game can also tell you when traffic boxes you out of the lane, so you know to
-recover at the next safe exit instead of fighting the maneuver. The
+an exit. Press X to signal for the exit. With lane drift off, that also sets the
+exit lane; with lane drift on, steer right when prompted. Slow to 45 miles per
+hour or less, and brake to a stop at the end of the ramp. If you reach the gore
+too fast, without signaling, or without the exit lane set, you stay on the
+highway and the game tells you what went wrong. The timing is generous so the
+sequence is about preparation, not twitch input. The game can also tell you when
+traffic boxes you out of the lane, so you know to recover at the next safe exit
+instead of fighting the maneuver. The
 game gives a short pull-in moment before the stop menu opens, so holding Down
 Arrow to brake does not skip the first menu option.
 
 Destination exits work the same way. When your delivery exit is ahead, the game
 announces the signed exit and toward cities, marks it as the destination exit,
-and tells you to press X, move right for the exit lane, and slow down. If
+and tells you to press X and slow down. If lane drift is on, it also tells you
+when to move right for the exit lane. If
 adaptive cruise is set, the destination-exit callout cancels cruise so you can
 take manual speed control. If you miss the destination exit, the delivery does
 not complete; back up until the exit is ahead again, then signal and take the
-lane correctly.
+exit correctly.
 
 Ordinary highway exits that do not lead to a current action are not announced
 during the drive. Press Shift+R if you want the next listed exit for route
@@ -696,10 +698,9 @@ catalog, using the route's approximate position and each station's range. The
 Radio status screen lists the currently receivable stations.
 
 Real public stream stations, including AFN choices, are hidden unless you turn on
-real streams and turn off streamer-safe mode. Their catalog entries include
-public stream metadata, but live external playback is still skipped in this build
-until the stream backend is added. If a selected station cannot play, the radio
-falls back safely instead of blocking the drive.
+real streams and turn off streamer-safe mode. When the BASS audio backend is
+available, those stations play from their public stream URLs. If a selected
+station cannot play, the radio falls back safely instead of blocking the drive.
 
 Useful accessibility patterns:
 

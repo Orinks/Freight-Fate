@@ -576,8 +576,29 @@ def test_destination_exit_announces_and_disables_cruise(monkeypatch):
         assert "toward" in events[-1]
         assert "destination exit" in events[-1]
         assert "Press X to signal" in events[-1]
-        assert "move right for the exit lane" in events[-1]
+        assert "set the exit lane" in events[-1]
         assert "Adaptive cruise disabled" in events[-1]
+    finally:
+        app.shutdown()
+
+
+def test_destination_exit_announcement_names_lane_move_when_drift_is_on(monkeypatch):
+    from freight_fate.app import App
+
+    app = App()
+    app.ctx.settings.steering_assist = "light"
+    events = []
+    monkeypatch.setattr(app.ctx, "say_event",
+                        lambda text, interrupt=True: events.append(text))
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        destination = driving._destination_exit_stop()
+        driving.trip.position_mi = destination.at_mi - 4.0
+
+        driving._check_destination_exit()
+
+        assert "move right for the exit lane" in events[-1]
     finally:
         app.shutdown()
 
@@ -606,6 +627,41 @@ def test_delivery_does_not_complete_without_taking_destination_exit(monkeypatch)
         exit_mi, _label, _phrase = driving._destination_exit_details(include_past=True)
         driving.trip.position_mi = exit_mi - 1.0
         assert driving._destination_exit_stop() is not None
+        assert "missed the destination exit" in events[-1].lower()
+    finally:
+        app.shutdown()
+
+
+def test_missed_destination_exit_suppresses_facility_zone_cues(monkeypatch):
+    from freight_fate.app import App
+    from freight_fate.sim.trip import TripEvent, TripEventKind, Zone
+
+    app = App()
+    events = []
+    monkeypatch.setattr(app.ctx, "say_event",
+                        lambda text, interrupt=True: events.append(text))
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        driving._destination_exit_taken = False
+
+        driving._handle_trip_event(TripEvent(
+            TripEventKind.GPS_CUE,
+            "In 1 miles, destination approach ahead. Speed limit 35.",
+            {"zone": Zone(99.0, 100.0, 35.0, "destination approach")},
+        ))
+        driving._handle_trip_event(TripEvent(
+            TripEventKind.ZONE_ENTER,
+            "facility gate ahead. Speed limit 15.",
+            {"zone": Zone(99.8, 100.0, 15.0, "facility gate")},
+        ))
+
+        assert events == []
+
+        driving.trip.position_mi = driving.trip.total_miles
+        driving.trip.finished = True
+        driving.update(1 / 60)
+
         assert "missed the destination exit" in events[-1].lower()
     finally:
         app.shutdown()

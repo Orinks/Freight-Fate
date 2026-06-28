@@ -41,6 +41,8 @@ class DrivingEventMixin:
         return False
 
     def _handle_trip_event(self, event) -> None:
+        if self._should_ignore_untaken_destination_facility_event(event):
+            return
         kind = event.kind
         sound = _route_event_sound(event)
         if event.message:
@@ -126,6 +128,18 @@ class DrivingEventMixin:
             if getattr(cue, "kind", "") == "traffic":
                 return True
         return False
+
+    def _should_ignore_untaken_destination_facility_event(self, event) -> bool:
+        if self.phase != DRIVE_PHASE_DELIVERY or self._destination_exit_taken:
+            return False
+        zone = event.data.get("zone")
+        if zone is None:
+            return False
+        return zone.reason in {
+            "destination approach",
+            "facility access road",
+            "facility gate",
+        }
 
     def _event_disables_cruise(self, event) -> bool:
         if self._cruise_mph is None:
@@ -271,6 +285,15 @@ class DrivingEventMixin:
             head = f"Signaling for {stop.exit_label}, {stop.spoken_name},"
         else:
             head = f"Signaling for the {stop.spoken_name} exit,"
+        if self.ctx.settings.steering_assist == "off":
+            self._exit_lane_alignment = EXIT_LANE_READY
+            self._exit_lane_ready_said = True
+            self.ctx.audio.play("ui/notify", volume=0.6)
+            self.ctx.say(
+                f"{head} {ahead:.1f} miles ahead. Exit lane set. "
+                f"Slow to {RAMP_MAX_MPH:.0f} or less for the ramp."
+            )
+            return
         self.ctx.say(f"{head} {ahead:.1f} miles ahead. "
                      "Move right for the exit lane, then slow to "
                      f"{RAMP_MAX_MPH:.0f} or less for the ramp.")
@@ -291,6 +314,8 @@ class DrivingEventMixin:
         stop = self._exit_stop
         if stop is None or self._ramp_mi is not None:
             self._reset_exit_lane_state()
+            return
+        if self.ctx.settings.steering_assist == "off":
             return
         ahead = stop.at_mi - self.trip.position_mi
         if ahead < -EXIT_COMMIT_WINDOW_MI:
@@ -335,6 +360,7 @@ class DrivingEventMixin:
             and not self._exit_lane_ready_said
         ):
             self._exit_lane_ready_said = True
+            self.ctx.audio.play("ui/notify", volume=0.6)
             self.ctx.say("Exit lane set. Hold this lane and keep slowing.")
         if 0 <= ahead <= EXIT_COMMIT_WINDOW_MI and not self._exit_commit_said:
             self._exit_commit_said = True
@@ -404,8 +430,13 @@ class DrivingEventMixin:
 
     def _destination_exit_announcement(self, stop, ahead: float) -> str:
         phrase = self._destination_exit_phrase(stop)
+        lane_text = (
+            "Press X to signal and set the exit lane, then slow down."
+            if self.ctx.settings.steering_assist == "off"
+            else "Press X to signal, move right for the exit lane, and slow down."
+        )
         return (f"In {ahead:.0f} miles, {phrase}, destination exit. "
-                "Press X to signal, move right for the exit lane, and slow down.")
+                f"{lane_text}")
 
     def _check_destination_exit(self) -> None:
         stop = self._destination_exit_stop()

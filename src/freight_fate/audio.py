@@ -246,6 +246,9 @@ class _PygameBackend:
         except pygame.error:
             log.warning("Could not play music %s", track, exc_info=True)
 
+    def play_radio_stream(self, url: str, fade_ms: int = 1500) -> None:
+        raise RuntimeError("radio stream unavailable")
+
     def stop_music(self, fade_ms: int = 1000) -> None:
         if not self.enabled or self._music_track is None:
             return
@@ -310,9 +313,10 @@ class _BassBackend:
         )
         from sound_lib.main import BassError, bass_call
         from sound_lib.output import Output
-        from sound_lib.stream import FileStream
+        from sound_lib.stream import FileStream, URLStream
 
         self._FileStream = FileStream
+        self._URLStream = URLStream
         self._BassError = BassError
         self._bass_call = bass_call
         self._slide = BASS_ChannelSlideAttribute
@@ -371,6 +375,15 @@ class _BassBackend:
             log.warning("Missing sound: %s", ASSETS / (key + ".ogg"))
             return None
         return self._stream(path, looping)
+
+    def _url_stream(self, url: str):
+        if not url:
+            return None
+        try:
+            return self._URLStream(url=url, autofree=True)
+        except self._BassError:
+            log.warning("Could not open radio stream: %s", url, exc_info=True)
+            return None
 
     def _retain(self, stream) -> None:
         """Keep a reference until BASS finishes with the stream.
@@ -542,6 +555,28 @@ class _BassBackend:
         self._music_stream = stream
         self._music_track = track
 
+    def play_radio_stream(self, url: str, fade_ms: int = 1500) -> None:
+        if self._music_track == url:
+            return
+        if self._music_stream is not None:
+            self._fade_out(self._music_stream, 800)
+            self._music_stream = None
+            self._music_track = None
+        stream = self._url_stream(url)
+        if stream is None:
+            raise RuntimeError("radio stream unavailable")
+        try:
+            stream.set_volume(0.0)
+            stream.play()
+            self._bass_call(self._slide, stream.handle, self._ATTRIB_VOL,
+                            max(0.0, min(1.0, self.music_volume * self.master_volume)),
+                            max(0, int(fade_ms)))
+        except self._BassError as exc:
+            log.warning("Could not play radio stream: %s", url, exc_info=True)
+            raise RuntimeError("radio stream unavailable") from exc
+        self._music_stream = stream
+        self._music_track = url
+
     def stop_music(self, fade_ms: int = 1000) -> None:
         if self._music_stream is None:
             return
@@ -624,6 +659,8 @@ class _NullBackend:
     def engine_stop(self, shutdown_sound: bool = True) -> None: ...
     def set_engine_rpm(self, rpm: float, throttle: float = 0.0) -> None: ...
     def play_music(self, track: str, fade_ms: int = 1500) -> None: ...
+    def play_radio_stream(self, url: str, fade_ms: int = 1500) -> None:
+        raise RuntimeError("radio stream unavailable")
     def stop_music(self, fade_ms: int = 1000) -> None: ...
     def set_volumes(self, master: float | None = None, sfx: float | None = None,
                     music: float | None = None, weather: float | None = None,
@@ -768,6 +805,10 @@ class AudioEngine:
     def play_music(self, track: str, fade_ms: int = 1500) -> None:
         """Stream a music track, e.g. ``play_music("menu_theme")``."""
         self._impl.play_music(track, fade_ms)
+
+    def play_radio_stream(self, url: str, fade_ms: int = 1500) -> None:
+        """Stream a live radio URL when the active backend supports it."""
+        self._impl.play_radio_stream(url, fade_ms)
 
     def stop_music(self, fade_ms: int = 1000) -> None:
         self._impl.stop_music(fade_ms)

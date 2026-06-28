@@ -43,15 +43,30 @@ def test_catalog_loads_structured_regional_and_afn_stations():
     assert SAFE_FALLBACK_STATION_ID in ids
     assert len(afn) >= 5
     assert {
-        "afn-pacific",
-        "afn-freedom",
-        "afn-gravity",
-        "afn-country",
-        "afn-the-voice",
+        "afn-aviano",
+        "afn-bavaria",
+        "afn-benelux",
+        "afn-tokyo",
+        "afn-guantanamo-bay",
+        "afn-incirlik",
+        "afn-kaiserslautern",
+        "afn-humphreys",
+        "afn-daegu",
+        "afn-bahrain",
+        "afn-naples",
+        "afn-rota",
+        "afn-sigonella",
+        "afn-souda-bay",
+        "afn-spangdahlem",
+        "afn-stuttgart",
+        "afn-vicenza",
+        "afn-wiesbaden",
     } <= set(ids)
     assert len({station.region for station in locals_}) >= 7
     assert all(station.stream_url for station in afn + locals_)
     assert all(station.stream_format for station in afn + locals_)
+    assert all(station.supported for station in locals_)
+    assert sum(1 for station in afn if station.supported) >= 15
     assert all(station.lat is not None and station.lon is not None for station in locals_)
     assert all(station.range_miles > 0 for station in locals_)
 
@@ -75,7 +90,7 @@ def test_real_stream_station_requires_opt_in_and_streamer_safe_off():
 
     radio.streamer_safe = False
 
-    assert any(station.id == "afn-gravity" for station in radio.available_stations())
+    assert any(station.id == "afn-tokyo" for station in radio.available_stations())
     assert all(not station.safe_for_streaming for station in radio.available_stations()
                if station.real_stream)
 
@@ -146,11 +161,11 @@ def test_no_regional_signal_still_has_safe_and_afn_fallback_choices():
 def test_radio_falls_back_when_backend_cannot_play_selected_station():
     radio = RadioState(
         enabled=True,
-        station_id="afn-freedom",
+        station_id="afn-tokyo",
         real_streams_enabled=True,
         streamer_safe=False,
     )
-    backend = RecordingBackend(fail_ids={"afn-freedom"})
+    backend = RecordingBackend(fail_ids={"afn-tokyo"})
 
     action = radio.play(backend)
 
@@ -160,6 +175,47 @@ def test_radio_falls_back_when_backend_cannot_play_selected_station():
     assert backend.played == [(SAFE_FALLBACK_STATION_ID, 0.25)]
     assert "unavailable" in action.message
     assert "fallback" in action.message
+
+
+def test_driving_radio_backend_plays_real_stream_url():
+    from freight_fate.radio import RadioStation
+    from freight_fate.states.driving_core import _DrivingRadioBackend
+
+    class Audio:
+        def __init__(self):
+            self.streams = []
+
+        def play_radio_stream(self, url, fade_ms=1500):
+            self.streams.append((url, fade_ms))
+
+    class Ctx:
+        def __init__(self):
+            self.audio = Audio()
+
+    class Driving:
+        def __init__(self):
+            self.ctx = Ctx()
+            self.volume_applied = False
+
+        def _apply_radio_volume(self):
+            self.volume_applied = True
+
+    driving = Driving()
+    backend = _DrivingRadioBackend(driving)
+    station = RadioStation(
+        "test-stream",
+        "Test Stream",
+        "TEST",
+        "music",
+        "fixture",
+        stream_url="https://example.test/live.mp3",
+        real_stream=True,
+    )
+
+    backend.play_station(station, 0.25)
+
+    assert driving.volume_applied
+    assert driving.ctx.audio.streams == [("https://example.test/live.mp3", 900)]
 
 
 def test_spoken_status_includes_signal_source_safety_and_volume():
