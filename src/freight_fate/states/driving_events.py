@@ -431,9 +431,9 @@ class DrivingEventMixin:
     def _destination_exit_announcement(self, stop, ahead: float) -> str:
         phrase = self._destination_exit_phrase(stop)
         lane_text = (
-            "Press X to signal and set the exit lane, then slow down."
+            "Slow down for the ramp."
             if self.ctx.settings.steering_assist == "off"
-            else "Press X to signal, move right for the exit lane, and slow down."
+            else "Move right for the exit lane and slow down."
         )
         return (f"In {ahead:.0f} miles, {phrase}, destination exit. "
                 f"{lane_text}")

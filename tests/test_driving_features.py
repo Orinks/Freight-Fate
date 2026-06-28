@@ -575,8 +575,9 @@ def test_destination_exit_announces_and_disables_cruise(monkeypatch):
         assert "exit " in events[-1]
         assert "toward" in events[-1]
         assert "destination exit" in events[-1]
-        assert "Press X to signal" in events[-1]
-        assert "set the exit lane" in events[-1]
+        assert "slow down" in events[-1].lower()
+        assert "Press X" not in events[-1]
+        assert "X takes" not in events[-1]
         assert "Adaptive cruise disabled" in events[-1]
     finally:
         app.shutdown()
@@ -598,7 +599,9 @@ def test_destination_exit_announcement_names_lane_move_when_drift_is_on(monkeypa
 
         driving._check_destination_exit()
 
-        assert "move right for the exit lane" in events[-1]
+        assert "move right for the exit lane" in events[-1].lower()
+        assert "Press X" not in events[-1]
+        assert "X takes" not in events[-1]
     finally:
         app.shutdown()
 
