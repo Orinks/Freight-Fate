@@ -43,6 +43,7 @@ dev = [
     "ruff>=0.8",
     "soundfile>=0.14.0",
     "pre-commit>=4.6.0",
+    "hypothesis>=6.155.7",
 ]
 build = [
     "nuitka>=4.0.8",
@@ -71,6 +72,7 @@ testpaths = ["tests"]
 # fast with a stack trace instead of stalling the whole run.
 addopts = "-q --timeout=120 --timeout-method=thread"
 markers = [
+    "property: property-based randomized tests",
     "smoke: headless end-to-end smoke tests",
 ]
 
