@@ -261,30 +261,35 @@ class DrivingEventMixin:
         self.ctx.award_achievement("first_rest_stop")
 
     def _take_exit(self) -> None:
+        self._toggle_exit_signal()
+
+    def _toggle_exit_signal(self) -> None:
         if self._ramp_mi is not None:
             self.ctx.say("You are already on the exit ramp. Brake to a stop.")
             return
-        if self._exit_stop is not None:
-            self._exit_stop = None
-            self._reset_exit_lane_state()
-            self.ctx.say("Exit canceled. Staying on the highway.")
-            return
-        stop = self._upcoming_exit_stop()
+        stop = self._exit_stop or self._upcoming_exit_stop()
         if stop is None:
-            self.ctx.say("No exit coming up. Exits are announced as you "
-                         "approach them.")
+            self.ctx.say(
+                "No route exit to signal for yet. Exits are announced as you "
+                "approach them."
+            )
             return
         self._exit_stop = stop
-        self._reset_exit_lane_state()
-        self.ctx.audio.play("ui/notify", volume=0.5)
+        self._exit_signal_on = not self._exit_signal_on
         ahead = stop.at_mi - self.trip.position_mi
+        if not self._exit_signal_on:
+            self.ctx.say("Signal canceled. Keep following the highway.")
+            return
+        self.ctx.audio.play("ui/notify", volume=0.5)
         if stop.type == "delivery_destination":
-            head = (f"Signaling for {self._destination_exit_phrase(stop)}, "
-                    f"destination exit for {stop.name},")
+            head = (
+                f"Signal on for {self._destination_exit_phrase(stop)}, "
+                f"destination exit for {stop.name},"
+            )
         elif stop.exit_label:
-            head = f"Signaling for {stop.exit_label}, {stop.spoken_name},"
+            head = f"Signal on for {stop.exit_label}, {stop.spoken_name},"
         else:
-            head = f"Signaling for the {stop.spoken_name} exit,"
+            head = f"Signal on for the {stop.spoken_name} exit,"
         if self.ctx.settings.steering_assist == "off":
             self._exit_lane_alignment = EXIT_LANE_READY
             self._exit_lane_ready_said = True
@@ -521,6 +526,7 @@ class DrivingEventMixin:
         if stop is None or self.trip.position_mi < stop.at_mi:
             return
         self._exit_stop = None
+        self._exit_signal_on = False
         if self.trip.position_mi > stop.at_mi + EXIT_COMMIT_WINDOW_MI:
             self._reset_exit_lane_state()
             pressure = self._active_exit_pressure(stop)
@@ -554,6 +560,7 @@ class DrivingEventMixin:
             return
         if self.truck.speed_mph <= RAMP_MAX_MPH:
             self._reset_exit_lane_state()
+            self._exit_signal_on = False
             self._ramp_mi = RAMP_LENGTH_MI
             self._ramp_stop = stop
             self._ramp_end_said = False
@@ -575,6 +582,7 @@ class DrivingEventMixin:
                      if stop.type == "delivery_destination" else stop.spoken_name)
             self.ctx.say_event("You were going too fast for the ramp and "
                                f"missed {missed} for {place}.")
+            self._exit_signal_on = False
             self._reset_exit_lane_state()
 
     def _toggle_cruise(self) -> None:
@@ -782,6 +790,7 @@ class DrivingEventMixin:
     def _handle_missed_destination_exit(self) -> None:
         self.trip.finished = False
         self._exit_stop = None
+        self._exit_signal_on = False
         self._cancel_cruise()
         if self._missed_destination_exit_said:
             return

@@ -52,27 +52,54 @@ def test_exit_missed_when_too_fast():
 
 
 @pytest.mark.smoke
-def test_exit_key_is_a_toggle_and_needs_an_exit_nearby():
+def test_x_signals_for_upcoming_route_exit_without_taking_it(monkeypatch):
     from freight_fate.app import App
 
+    spoken = []
     app = App()
+    app.ctx.settings.steering_assist = "light"
+    monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: spoken.append(text))
     try:
         driving = start_drive(app)
         quiet_trip(driving)
-        # far from any stop: X does not arm
+        stop = driving._destination_exit_stop()
+        assert stop is not None
+        driving.trip.position_mi = stop.at_mi - 1.5
+
+        driving.handle_event(key_event(pygame.K_x))
+
+        assert driving._exit_stop is not None
+        assert driving._exit_stop.type == "delivery_destination"
+        assert driving._exit_signal_on
+        assert any("Signal on" in line for line in spoken)
+
+        driving.handle_event(key_event(pygame.K_x))
+
+        assert driving._exit_stop is not None
+        assert not driving._exit_signal_on
+        assert any("Signal canceled" in line for line in spoken)
+    finally:
+        app.shutdown()
+
+
+@pytest.mark.smoke
+def test_x_without_route_exit_reports_no_signal_target(monkeypatch):
+    from freight_fate.app import App
+
+    spoken = []
+    app = App()
+    monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: spoken.append(text))
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
         driving.trip.position_mi = 0.0
-        if driving.trip.stops[0].at_mi > 6.0:
-            driving.handle_event(key_event(pygame.K_x))
-            assert driving._exit_stop is None
-        # in range it arms; pressing X again cancels
-        stop = driving.trip.stops[0]
-        driving.trip.position_mi = stop.at_mi - 2.0
+        if driving._destination_exit_stop() is not None:
+            pytest.skip("route starts close to a destination exit")
+
         driving.handle_event(key_event(pygame.K_x))
-        assert driving._exit_stop is stop
-        driving._exit_lane_alignment = 0.6
-        driving.handle_event(key_event(pygame.K_x))
-        assert driving._exit_stop is None
-        assert driving._exit_lane_alignment == 0.0
+
+        assert not driving._exit_signal_on
+        assert any("No route exit to signal for yet" in line for line in spoken)
     finally:
         app.shutdown()
 

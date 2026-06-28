@@ -103,7 +103,8 @@ class DrivingState(DrivingControlsMixin, DrivingUpdateMixin, DrivingEventMixin, 
             None if trip_seed is None else trip_seed ^ 0xB0A1)
         self._rescue_offered = False
         self._signal_timer = 0.0
-        self._exit_stop = None            # armed exit, set with X
+        self._exit_stop = None            # active route exit
+        self._exit_signal_on = False
         self._exit_lane_alignment = 0.0
         self._exit_lane_prompt_said = False
         self._exit_lane_ready_said = False
