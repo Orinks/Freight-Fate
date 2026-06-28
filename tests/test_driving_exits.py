@@ -157,6 +157,7 @@ def test_canceled_destination_exit_signal_stays_on_highway(monkeypatch):
         driving.handle_event(key_event(pygame.K_x))
         assert driving._exit_stop is not None
         assert not driving._exit_signal_on
+        assert not driving._exit_intent_ready(stop)
 
         driving.trip.position_mi = stop.at_mi
         driving.update(1 / 60)
@@ -225,12 +226,15 @@ def test_destination_exit_no_longer_requires_x_to_take_ramp(monkeypatch):
 
 
 @pytest.mark.smoke
-def test_realistic_lane_drift_requires_signal_for_destination_exit(monkeypatch):
+@pytest.mark.parametrize("steering_assist", ("light", "realistic"))
+def test_realistic_lane_drift_requires_signal_for_destination_exit(
+    monkeypatch, steering_assist
+):
     from freight_fate.app import App
 
     spoken = []
     app = App()
-    app.ctx.settings.steering_assist = "light"
+    app.ctx.settings.steering_assist = steering_assist
     monkeypatch.setattr(app.ctx, "say_event", lambda text, interrupt=True: spoken.append(text))
     try:
         driving = start_drive(app)

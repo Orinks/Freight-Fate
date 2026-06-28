@@ -507,6 +507,8 @@ class DrivingEventMixin:
         return candidates[0][3], candidates[0][4], candidates[0][5]
 
     def _exit_intent_ready(self, stop) -> bool:
+        if self._exit_signal_canceled:
+            return False
         if self._exit_signal_on:
             return True
         return (
