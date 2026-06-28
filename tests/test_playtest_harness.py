@@ -8,6 +8,31 @@ from hypothesis import strategies as st
 from playtest_harness import PlaytestHarness
 
 
+def test_playtest_harness_forces_headless_environment_before_pygame():
+    import os
+    import subprocess
+
+    env = os.environ.copy()
+    env.pop("SDL_VIDEODRIVER", None)
+    env.pop("SDL_AUDIODRIVER", None)
+    env.pop("FREIGHT_FATE_NO_SPEECH", None)
+    env["PYTHONPATH"] = os.pathsep.join(filter(None, ["tests", env.get("PYTHONPATH", "")]))
+    script = (
+        "import os, playtest_harness; "
+        "print(os.environ.get('SDL_VIDEODRIVER')); "
+        "print(os.environ.get('SDL_AUDIODRIVER')); "
+        "print(os.environ.get('FREIGHT_FATE_NO_SPEECH'))"
+    )
+    result = subprocess.run(
+        [os.sys.executable, "-c", script],
+        check=True,
+        capture_output=True,
+        env=env,
+        text=True,
+    )
+    assert result.stdout.splitlines() == ["dummy", "dummy", "1"]
+
+
 @pytest.mark.smoke
 def test_playtest_harness_records_headless_delivery_transcript(monkeypatch):
     with PlaytestHarness(monkeypatch) as harness:
