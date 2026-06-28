@@ -506,6 +506,14 @@ class DrivingEventMixin:
         candidates.sort()
         return candidates[0][3], candidates[0][4], candidates[0][5]
 
+    def _exit_intent_ready(self, stop) -> bool:
+        if self._exit_signal_on:
+            return True
+        return (
+            stop.type == "delivery_destination"
+            and self.ctx.settings.steering_assist == "off"
+        )
+
     def _update_exit(self, moved_mi: float) -> None:
         """Advance an armed exit or an active ramp; opens the stop menu."""
         if self._ramp_mi is not None:
@@ -538,10 +546,10 @@ class DrivingEventMixin:
                 "Exit signal was canceled, so you stayed on the highway."
             )
             return
-        self._exit_signal_on = False
         self._exit_signal_canceled = False
         if self.trip.position_mi > stop.at_mi + EXIT_COMMIT_WINDOW_MI:
             self._reset_exit_lane_state()
+            self._exit_signal_on = False
             pressure = self._active_exit_pressure(stop)
             if pressure is not None and pressure.intensity >= 0.35:
                 self.ctx.say_event(
@@ -553,8 +561,19 @@ class DrivingEventMixin:
                     "You missed the exit window and stayed on the highway."
                 )
             return
+        if not self._exit_intent_ready(stop):
+            self._reset_exit_lane_state()
+            self._exit_signal_on = False
+            place = (self._destination_exit_phrase(stop)
+                     if stop.type == "delivery_destination" else stop.spoken_name)
+            self.ctx.say_event(
+                f"You missed {place}: the turn signal was not set. "
+                "Stay on the highway and recover at the next safe exit."
+            )
+            return
         if not self._exit_lane_ready():
             self._reset_exit_lane_state()
+            self._exit_signal_on = False
             place = (self._destination_exit_phrase(stop)
                      if stop.type == "delivery_destination" else stop.spoken_name)
             pressure = self._active_exit_pressure(stop)

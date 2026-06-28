@@ -225,6 +225,59 @@ def test_destination_exit_no_longer_requires_x_to_take_ramp(monkeypatch):
 
 
 @pytest.mark.smoke
+def test_realistic_lane_drift_requires_signal_for_destination_exit(monkeypatch):
+    from freight_fate.app import App
+
+    spoken = []
+    app = App()
+    app.ctx.settings.steering_assist = "light"
+    monkeypatch.setattr(app.ctx, "say_event", lambda text, interrupt=True: spoken.append(text))
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        stop = driving._destination_exit_stop()
+        assert stop is not None
+        driving.trip.position_mi = stop.at_mi - 1.0
+        driving.truck.velocity_mps = 12.0
+        driving._exit_lane_alignment = 1.0
+        driving.update(1 / 60)
+
+        driving.trip.position_mi = stop.at_mi
+        driving.update(1 / 60)
+
+        assert driving._ramp_mi is None
+        assert any("signal was not set" in line for line in spoken)
+    finally:
+        app.shutdown()
+
+
+@pytest.mark.smoke
+def test_relaxed_lane_drift_infers_destination_exit_intent(monkeypatch):
+    from freight_fate.app import App
+
+    spoken = []
+    app = App()
+    app.ctx.settings.steering_assist = "off"
+    monkeypatch.setattr(app.ctx, "say_event", lambda text, interrupt=True: spoken.append(text))
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        stop = driving._destination_exit_stop()
+        assert stop is not None
+        driving.trip.position_mi = stop.at_mi - 1.0
+        driving.truck.velocity_mps = 12.0
+        driving.update(1 / 60)
+
+        driving.trip.position_mi = stop.at_mi
+        driving.update(1 / 60)
+
+        assert driving._ramp_mi == pytest.approx(0.5)
+        assert any("You take" in line for line in spoken)
+    finally:
+        app.shutdown()
+
+
+@pytest.mark.smoke
 def test_exit_requires_right_lane_alignment(monkeypatch):
     from freight_fate.app import App
 
