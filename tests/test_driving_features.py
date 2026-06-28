@@ -5,6 +5,8 @@ import pytest
 from driving_feature_helpers import (
     key_event,
     mark_destination_exit_taken,
+    open_driver_app,
+    open_driver_apps,
     open_status_screen,
     quiet_trip,
     start_drive,
@@ -320,17 +322,38 @@ def test_air_brake_help_and_status_are_spoken(monkeypatch):
         assert any("offers" in line for line in map_lines)
 
         app.state.handle_event(key_event(pygame.K_ESCAPE))
-        open_status_screen(app, "Driver apps")
-        app_lines = [item.text for item in app.state.items]
-        assert any(line.startswith("Driver tablet:") for line in app_lines)
-        assert any(line.startswith("Navigation app:") for line in app_lines)
-        assert any(line.startswith("Weather app:") for line in app_lines)
-        assert any(line.startswith("Traffic app:") for line in app_lines)
-        assert any(line.startswith("Truck stop app:") for line in app_lines)
-        assert any(line.startswith("Road chatter:") for line in app_lines)
-        assert any(line.startswith("ELD app:") for line in app_lines)
+        open_driver_apps(app)
+        tablet_apps = [item.text for item in app.state.items]
+        assert "Navigation" in tablet_apps
+        assert "Weather" in tablet_apps
+        assert "Traffic" in tablet_apps
+        assert "Truck stops" in tablet_apps
+        assert "Road chatter" in tablet_apps
+        assert "ELD" in tablet_apps
 
-        app.state.handle_event(key_event(pygame.K_ESCAPE))  # screen -> picker
+        open_driver_app(app, "Navigation")
+        navigation_lines = [item.text for item in app.state.items]
+        assert any(line.startswith("Navigation:") for line in navigation_lines)
+        assert any(line.startswith("Route progress:") for line in navigation_lines)
+        app.state.handle_event(key_event(pygame.K_ESCAPE))  # app -> tablet
+
+        open_driver_app(app, "Weather")
+        weather_lines = [item.text for item in app.state.items]
+        assert any(line.startswith("Weather:") for line in weather_lines)
+        assert any(line.startswith("Safe speed guidance:") for line in weather_lines)
+        app.state.handle_event(key_event(pygame.K_ESCAPE))  # app -> tablet
+
+        open_driver_app(app, "Truck stops")
+        truck_stop_lines = [item.text for item in app.state.items]
+        assert any(line.startswith("Truck stops:") for line in truck_stop_lines)
+        app.state.handle_event(key_event(pygame.K_ESCAPE))  # app -> tablet
+
+        open_driver_app(app, "ELD")
+        eld_lines = [item.text for item in app.state.items]
+        assert any(line.startswith("ELD:") for line in eld_lines)
+
+        app.state.handle_event(key_event(pygame.K_ESCAPE))  # app -> tablet
+        app.state.handle_event(key_event(pygame.K_ESCAPE))  # tablet -> picker
         app.state.handle_event(key_event(pygame.K_ESCAPE))  # picker -> driving
         assert isinstance(app.state, DrivingState)
         assert spoken[-1] == "Back to driving."
@@ -366,7 +389,11 @@ def test_driver_apps_screen_uses_keyboard_and_vague_road_chatter(monkeypatch):
         assert isinstance(app.state, DrivingStatusState)
         picker_labels = [item.text for item in app.state.items]
         assert "Driver apps" in picker_labels
-        open_status_screen(app, "Driver apps")
+        open_driver_apps(app)
+        tablet_apps = [item.text for item in app.state.items]
+        assert "Road chatter" in tablet_apps
+        assert "Navigation" in tablet_apps
+        open_driver_app(app, "Road chatter")
 
         lines = [item.text for item in app.state.items]
         road_chatter = next(line for line in lines if line.startswith("Road chatter:"))

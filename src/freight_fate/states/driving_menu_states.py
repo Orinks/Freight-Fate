@@ -42,6 +42,9 @@ class DrivingStatusState(MenuState):
         return items
 
     def _open(self, screen: str) -> None:
+        if screen == "apps":
+            self.ctx.push_state(DriverAppsState(self.ctx, self.driving))
+            return
         self.ctx.push_state(
             DrivingStatusScreenState(self.ctx, self.driving, screen))
 
@@ -62,7 +65,6 @@ class DrivingStatusScreenState(MenuState):
         "route": "Route",
         "driver": "Driver",
         "map": "Map",
-        "apps": "Driver apps",
     }
 
     def __init__(self, ctx, driving: DrivingState, screen: str) -> None:
@@ -92,8 +94,6 @@ class DrivingStatusScreenState(MenuState):
             return self._driver_lines()
         if self.screen == "map":
             return self._map_lines()
-        if self.screen == "apps":
-            return self._driver_app_lines()
         return self.driving.status_lines()
 
     def _driver_lines(self) -> list[str]:
@@ -161,44 +161,170 @@ class DrivingStatusScreenState(MenuState):
             )
         return lines
 
-    def _driver_app_lines(self) -> list[str]:
+class DriverAppsState(MenuState):
+    """Accessible driver tablet launcher."""
+
+    title = "Driver apps"
+    intro_help = (
+        "Choose an app on the driver tablet. Enter opens the app, and Escape "
+        "returns to the status screens."
+    )
+    APPS = (
+        ("Navigation", "navigation",
+         "Open GPS guidance, route progress, and exit context."),
+        ("Weather", "weather",
+         "Open conditions, forecast, and safe-speed guidance."),
+        ("Traffic", "traffic",
+         "Open traffic pace and reported slowdowns ahead."),
+        ("Truck stops", "truck_stops",
+         "Open upcoming route stops and available services."),
+        ("Road chatter", "road_chatter",
+         "Open local driver reports and general road chatter."),
+        ("ELD", "eld",
+         "Open hours-of-service and legal-stop guidance."),
+    )
+
+    def __init__(self, ctx, driving: DrivingState) -> None:
+        super().__init__(ctx)
+        self.driving = driving
+
+    def build_items(self) -> list[MenuItem]:
+        items = [
+            MenuItem(
+                label,
+                lambda key=key: self._open_app(key),
+                help=help_text,
+            )
+            for label, key, help_text in self.APPS
+        ]
+        items.append(MenuItem("Back to status screens", self.go_back,
+                              help="Return to the status screen list."))
+        return items
+
+    def _open_app(self, app_key: str) -> None:
+        self.ctx.push_state(DriverAppScreenState(self.ctx, self.driving, app_key))
+
+
+class DriverAppScreenState(MenuState):
+    """One driver tablet app as a reviewable spoken list."""
+
+    intro_help = (
+        "Use up and down arrows to review app lines. Enter repeats the current "
+        "line. Escape returns to Driver apps."
+    )
+    TITLES = {
+        "navigation": "Navigation",
+        "weather": "Weather",
+        "traffic": "Traffic",
+        "truck_stops": "Truck stops",
+        "road_chatter": "Road chatter",
+        "eld": "ELD",
+    }
+
+    def __init__(self, ctx, driving: DrivingState, app_key: str) -> None:
+        super().__init__(ctx)
+        self.driving = driving
+        self.app_key = app_key
+
+    @property
+    def title(self) -> str:  # type: ignore[override]
+        return self.TITLES.get(self.app_key, "Driver app")
+
+    def build_items(self) -> list[MenuItem]:
+        items = [
+            MenuItem(line, lambda line=line: self.ctx.say(line),
+                     help="Repeat this app line.")
+            for line in self._lines()
+        ]
+        items.append(MenuItem("Back to Driver apps", self.go_back,
+                              help="Return to the driver tablet app list."))
+        return items
+
+    def _lines(self) -> list[str]:
+        if self.app_key == "weather":
+            return self._weather_lines()
+        if self.app_key == "traffic":
+            return self._traffic_lines()
+        if self.app_key == "truck_stops":
+            return self._truck_stop_lines()
+        if self.app_key == "road_chatter":
+            return self._road_chatter_lines()
+        if self.app_key == "eld":
+            return self._eld_lines()
+        return self._navigation_lines()
+
+    def _navigation_lines(self) -> list[str]:
         d = self.driving
         settings = self.ctx.settings
-        pos = d.trip.position_mi
+        return [
+            f"Navigation: {d.trip.next_navigation_context(settings.imperial_units)}",
+            f"Route progress: {d.trip.progress_summary(settings.imperial_units)}",
+            f"Next listed exit: {d.trip.next_exit_context()}",
+        ]
+
+    def _weather_lines(self) -> list[str]:
+        d = self.driving
+        settings = self.ctx.settings
+        source = (
+            "live conditions from the weather service"
+            if d.weather.live
+            else "simulated route forecast"
+        )
         lines = [
-            "Driver tablet: road apps are open.",
-            f"Navigation app: {d.trip.next_navigation_context(settings.imperial_units)}",
-            (
-                "Weather app: live conditions from the weather service."
-                if d.weather.live
-                else "Weather app: simulated forecast for this route."
-            ),
-            f"Weather now: {d.weather.describe(settings.imperial_units)}",
+            f"Weather: {source}.",
+            f"Current conditions: {d.weather.describe(settings.imperial_units)}",
+            f"Safe speed guidance: about {settings.speed_text(d.weather.effects.safe_speed_mph)}.",
         ]
         if not d.weather.live:
             forecast = ", then ".join(kind.value for kind in d.weather.forecast(2))
-            lines.append(f"Weather ahead: {forecast}.")
+            lines.append(f"Forecast ahead: {forecast}.")
+        return lines
 
-        traffic = self._next_traffic_line()
-        lines.append(traffic or "Traffic app: no reported traffic pinch in the next 20 miles.")
-
-        stop = self._next_stop_within(50.0)
-        if stop is not None:
-            ahead = max(0.0, stop.at_mi - pos)
+    def _traffic_lines(self) -> list[str]:
+        d = self.driving
+        settings = self.ctx.settings
+        context = d.trip.traffic_context()
+        lines = []
+        if context is not None:
             lines.append(
-                f"Truck stop app: {stop.spoken_name} in {settings.distance_text(ahead)}; "
-                f"{_poi_offers_text(stop)}."
+                f"Traffic: {context.reason}; pace about "
+                f"{settings.speed_text(context.speed_mph)}."
             )
-        else:
-            lines.append("Truck stop app: no listed route stop in the next 50 miles.")
+        line = self._next_traffic_line()
+        lines.append(line or "Traffic: no reported pinch in the next 20 miles.")
+        return lines
 
-        lines.append(self._road_chatter_line())
-        lines.append(
-            f"ELD app: {d.hos.summary(self.ctx.settings.hos_mode).rstrip('.')}"
-        )
+    def _truck_stop_lines(self) -> list[str]:
+        d = self.driving
+        settings = self.ctx.settings
+        stops = self._upcoming_stops(100.0, limit=3)
+        if not stops:
+            return ["Truck stops: no listed route stop in the next 100 miles."]
+        lines = []
+        for stop in stops:
+            ahead = max(0.0, stop.at_mi - d.trip.position_mi)
+            lines.append(
+                f"Truck stops: {stop.spoken_name} in "
+                f"{settings.distance_text(ahead)}; {_poi_offers_text(stop)}."
+            )
+        return lines
+
+    def _road_chatter_lines(self) -> list[str]:
+        return [
+            self._road_chatter_line(),
+            "Road chatter: reports are informal and may be stale.",
+        ]
+
+    def _eld_lines(self) -> list[str]:
+        d = self.driving
+        lines = [
+            f"ELD: {d.hos.summary(self.ctx.settings.hos_mode).rstrip('.')}"
+        ]
         context = d._hos_route_context()
         if context:
             lines.append(f"ELD route note: {context}")
+        else:
+            lines.append("ELD route note: no legal stop warning right now.")
         return lines
 
     def _next_traffic_line(self) -> str | None:
@@ -209,19 +335,20 @@ class DrivingStatusScreenState(MenuState):
             ahead = lead.at_mi - pos
             if 0 <= ahead <= 20.0:
                 return (
-                    f"Traffic app: {lead.reason} in {settings.distance_text(ahead)}; "
-                    f"reported pace {settings.speed_text(lead.speed_mph)}."
+                    f"Traffic ahead: {lead.reason} in "
+                    f"{settings.distance_text(ahead)}; reported pace "
+                    f"{settings.speed_text(lead.speed_mph)}."
                 )
         return None
 
-    def _next_stop_within(self, within_mi: float):
+    def _upcoming_stops(self, within_mi: float, *, limit: int) -> list:
         d = self.driving
-        best = None
+        stops = []
         for stop in d.trip.stops:
             ahead = stop.at_mi - d.trip.position_mi
-            if 0 <= ahead <= within_mi and (best is None or stop.at_mi < best.at_mi):
-                best = stop
-        return best
+            if 0 <= ahead <= within_mi:
+                stops.append(stop)
+        return sorted(stops, key=lambda stop: stop.at_mi)[:limit]
 
     def _road_chatter_line(self) -> str:
         d = self.driving

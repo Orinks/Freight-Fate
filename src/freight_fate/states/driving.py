@@ -290,6 +290,8 @@ class DrivingState(DrivingControlsMixin, DrivingUpdateMixin, DrivingEventMixin, 
 
 from .driving_menu_states import (  # noqa: E402,F401
     ArrivalState,
+    DriverAppsState,
+    DriverAppScreenState,
     DrivingStatusScreenState,
     DrivingStatusState,
     FacilityArrivalState,

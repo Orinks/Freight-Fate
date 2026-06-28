@@ -85,7 +85,9 @@ HELP_PAGES = [
     ("Driving information keys", [
         "Space speaks your speed, gear, RPM, cruise set speed when cruise is on, air pressure, and brake state.",
         "S speaks the posted speed limit here, the zone if any, and how far over you are.",
-        "Tab opens a driving status menu for route, driver, map, and Driver apps screens.",
+        "Tab opens a driving status menu for route, driver, map, and a Driver apps tablet menu.",
+        "Inside Driver apps, choose Navigation, Weather, Traffic, Truck stops,",
+        "Road chatter, or ELD, then review that app line by line.",
         "F speaks fuel level and range.",
         "C speaks the clock, your deadline, and your hours of service.",
         "R speaks route progress, GPS context, and the next stop or maneuver.",
