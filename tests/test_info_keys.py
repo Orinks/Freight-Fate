@@ -41,6 +41,20 @@ def test_speed_limit_key_reads_the_posted_limit(monkeypatch):
         app.shutdown()
 
 
+def test_speed_key_includes_cruise_set_speed_when_active(monkeypatch):
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        d = _driving(app)
+        d._cruise_mph = 55.0
+        spoken = _capture(app, monkeypatch)
+        d.handle_event(key_event(pygame.K_SPACE))
+        assert "cruise set at 55 miles per hour" in spoken[-1]
+    finally:
+        app.shutdown()
+
+
 def test_weather_key_reads_safe_speed_in_metric_units(monkeypatch):
     from freight_fate.app import App
 

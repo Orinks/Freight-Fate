@@ -41,9 +41,9 @@ class DrivingControlsMixin:
                 self._take_exit()
         elif key == pygame.K_k:
             self._toggle_cruise()
-        elif key in (pygame.K_EQUALS, pygame.K_KP_PLUS):
+        elif key in (pygame.K_EQUALS, pygame.K_PLUS, pygame.K_KP_PLUS) or event.unicode == "+":
             self._adjust_cruise(CRUISE_STEP_MPH)
-        elif key in (pygame.K_MINUS, pygame.K_KP_MINUS):
+        elif key in (pygame.K_MINUS, pygame.K_KP_MINUS) or event.unicode == "-":
             self._adjust_cruise(-CRUISE_STEP_MPH)
         elif key == pygame.K_SPACE:
             self._speak_speed()
@@ -81,10 +81,11 @@ class DrivingControlsMixin:
                 "touch Up arrow to brake and return to forward. "
                 "Hold B for the emergency brake, the hardest possible stop. "
                 "K sets adaptive cruise at your current speed; bad weather "
-                "increases the following gap, and braking cancels. Plus and "
-                "minus raise and lower the cruise speed by five, so you can dial "
-                "it up to the speed you want; it will not hold above the posted "
-                "limit. "
+                "increases the following gap, sharp posted-limit drops make it "
+                "slow early, and braking cancels. Plus and minus, including "
+                "the keypad keys, raise and lower the cruise speed by five, so "
+                "you can dial it up to the speed you want; it will not hold "
+                "above the posted limit. "
                 "X takes the next announced exit, called out by its number "
                 "when known: slow to 45 for the ramp, then brake to a stop for "
                 "the rest stop menu. X also signals a pull-over if a trooper "
@@ -95,7 +96,8 @@ class DrivingControlsMixin:
                 "Press P to release or set the parking brake; if pressure is "
                 "below 100 psi, wait with the engine running. "
                 f"{objective_help}"
-                "Space speed. S posted speed limit. Tab status menu. F fuel. "
+                "Space speed, and cruise set speed when cruise is on. "
+                "S posted speed limit. Tab status menu. F fuel. "
                 "C clock, deadline, and hours of service. "
                 "R route. Shift R next listed highway exit. V weather. L lane position. "
                 "A repeats the last announcement. U reads what is coming up: "
@@ -190,8 +192,12 @@ class DrivingControlsMixin:
     def _speak_speed(self) -> None:
         t = self.truck
         gear = self._gear_text()
+        cruise = (
+            f", cruise set at {self.ctx.settings.speed_text(self._cruise_mph)}"
+            if self._cruise_mph is not None else ""
+        )
         self.ctx.say(f"{self.ctx.settings.speed_text(t.speed_mph)}, {gear}, "
-                     f"{t.rpm:.0f} RPM, {self._air_status_text()}.")
+                     f"{t.rpm:.0f} RPM{cruise}, {self._air_status_text()}.")
 
     def _speak_speed_limit(self) -> None:
         """S: the posted limit here, the zone if any, and how far over you are."""

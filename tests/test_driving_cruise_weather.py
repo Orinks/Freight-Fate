@@ -32,6 +32,7 @@ def test_cruise_control_holds_the_set_speed(monkeypatch):
         driving.handle_event(key_event(pygame.K_e))   # engine on
         t.transmission.gear = 10
         t.velocity_mps = 26.8                          # ~60 mph
+        t.throttle = 0.35
         driving.handle_event(key_event(pygame.K_k))
         assert driving._cruise_mph == pytest.approx(60.0, abs=1.0)
         for _ in range(60 * 15):                       # 15 seconds, no keys held
@@ -62,6 +63,10 @@ def test_cruise_set_point_adjusts_with_plus_and_minus():
         driving.handle_event(key_event(pygame.K_EQUALS))   # + raises by a step
         assert driving._cruise_mph == pytest.approx(base + CRUISE_STEP_MPH)
         driving.handle_event(key_event(pygame.K_MINUS))    # - lowers it back
+        assert driving._cruise_mph == pytest.approx(base)
+        driving.handle_event(key_event(pygame.K_PLUS, "+"))
+        assert driving._cruise_mph == pytest.approx(base + CRUISE_STEP_MPH)
+        driving.handle_event(key_event(pygame.K_KP_MINUS, "-"))
         assert driving._cruise_mph == pytest.approx(base)
 
         for _ in range(20):                                # clamps at the max
@@ -266,6 +271,63 @@ def test_adaptive_cruise_caps_at_posted_limit(monkeypatch):
         assert driving.truck.throttle < 0.8            # backed off the throttle
         assert driving.truck.brake > 0.0               # braking down toward the limit
         assert any("adaptive cruise easing to" in e for e in events)
+    finally:
+        app.shutdown()
+
+
+@pytest.mark.smoke
+def test_adaptive_cruise_slows_before_large_limit_drop(monkeypatch):
+    from freight_fate.app import App
+
+    app = App()
+    events = []
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        monkeypatch.setattr(app.ctx, "say_event",
+                            lambda text, interrupt=True: events.append(text))
+        drop_at = driving.trip.position_mi + 0.4
+        driving.trip.speed_limit_at = (
+            lambda mile: (40.0, None) if mile >= drop_at else (65.0, None)
+        )
+        driving.handle_event(key_event(pygame.K_e))
+        driving.truck.transmission.gear = 10
+        driving.truck.velocity_mps = 30.4              # ~68 mph
+        driving.truck.throttle = 0.8
+        driving.handle_event(key_event(pygame.K_k))
+        assert driving.trip.position_mi < drop_at
+
+        driving.update(1 / 60)
+
+        assert driving._acc_limit_capped
+        assert driving.truck.throttle < 0.8
+        assert driving.truck.brake > 0.0
+        assert any("adaptive cruise easing to" in e for e in events)
+    finally:
+        app.shutdown()
+
+
+@pytest.mark.smoke
+def test_adaptive_cruise_ignores_far_small_limit_drop(monkeypatch):
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        drop_at = driving.trip.position_mi + 1.4
+        driving.trip.speed_limit_at = (
+            lambda mile: (60.0, None) if mile >= drop_at else (65.0, None)
+        )
+        driving.handle_event(key_event(pygame.K_e))
+        driving.truck.transmission.gear = 10
+        driving.truck.velocity_mps = 30.4              # ~68 mph
+        driving.handle_event(key_event(pygame.K_k))
+
+        driving.update(1 / 60)
+
+        assert not driving._acc_limit_capped
+        assert driving.truck.brake == 0.0
     finally:
         app.shutdown()
 

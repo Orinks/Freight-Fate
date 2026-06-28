@@ -61,7 +61,7 @@ def test_nightly_notes_use_curated_unreleased_entries(tmp_path, monkeypatch):
 
     notes = release_notes.nightly_notes()
 
-    assert "Automated developer snapshot" in notes
+    assert "Preview snapshot for players" in notes
     assert "## Added" in notes
     assert "- **Dispatch.** New spoken board details." in notes
     assert "chore: seed changelog" not in notes
@@ -121,7 +121,7 @@ def test_nightly_notes_exclude_previous_release_body_sections(tmp_path, monkeypa
     commit(repo, "docs: improve help")
     previous_notes = repo / "previous-notes.md"
     previous_notes.write_text(
-        "Automated developer snapshot.\n\n"
+        "Preview snapshot.\n\n"
         "## Changes since the previous snapshot\n\n"
         "## Fixed\n"
         "- **Updater.** Packaged updates work.\n",

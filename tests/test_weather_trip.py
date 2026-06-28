@@ -712,6 +712,23 @@ def test_gps_traffic_cue_deduplicates(world):
     assert not _gps_events(second)
 
 
+def test_route_context_describes_near_traffic_without_zero_distance(world):
+    trip, _truck = make_trip(world)
+    trip.navigation_cues = [NavigationCue(
+        "traffic:test",
+        "traffic",
+        10.1,
+        "traffic queue ahead",
+        speed_mph=45.0,
+    )]
+    trip.position_mi = 10.0
+
+    context = trip.next_navigation_context()
+
+    assert context == "Traffic just ahead: traffic queue ahead at 45 miles per hour."
+    assert "0" not in context
+
+
 def test_toll_cues_and_charges_deduplicate(world):
     trip, _truck = make_trip(world, "New York", "Philadelphia")
 

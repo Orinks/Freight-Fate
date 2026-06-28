@@ -3,6 +3,11 @@
 ## Unreleased
 ### Fixed
 
+- **Adaptive cruise starts slowing before big speed-limit drops.** When the
+  posted limit ahead falls sharply, adaptive cruise now looks far enough ahead
+  to begin braking before the lower-limit point instead of waiting until the
+  truck is already in the slower stretch. Pressing Space while cruise is on now
+  also includes the cruise set speed in the speed readout.
 - **Delivery windows match the slower, real route model.** New dispatch
   deadlines now use the route's posted-limit profile, city approaches, facility
   gates, HOS breaks, sleep, and practical slack instead of a flat mileage
@@ -34,10 +39,10 @@
   state flickered every 100-125 psi cycle and re-announced. The cue now fires
   once, only while the parking brake is actually set (its whole purpose is
   "you can release it now"), and only re-arms after a genuine low-air depletion.
-- **Snapshot players move to stable when it catches up.** On the developer
+- **Snapshot players move to stable when it catches up.** On the preview
   snapshot channel, the game now offers the stable release whenever it is as
-  new as -- or newer than -- the latest nightly, so once dev work ships in a
-  stable build you converge back onto stable instead of being left on an
+  new as -- or newer than -- the latest nightly, so once those changes ship in
+  a stable build you converge back onto stable instead of being left on an
   equivalent nightly.
 
 ### Changed
@@ -133,7 +138,7 @@
   stop or your reputation is strong. Run from the stop and it's logged as
   evasion -- a heavier fine and a serious reputation hit. Speeding the patrols
   don't catch still accrues the quieter safety-record cost at settlement.
-  Relaxed mode keeps patrols light; the debug HOS bypass disables them entirely.
+  Relaxed mode keeps patrols light.
 - **Consult the controls without leaving a drive.** The pause menu now has a
   "Controls and help" entry that opens the how-to-play reference straight to the
   driving keys -- page through it, read it line by line, then escape back to the
@@ -257,8 +262,8 @@
   [Darren Duff](https://darrenduff.com/).
 - **New achievement system.** Careers now track achievements across a range
   of categories, with a spoken main-menu viewer and a chime when you unlock
-  one. Existing careers carry over. Note: a career saved on a developer
-  snapshot may not load on an older stable release.
+  one. Existing careers carry over. Note: a career saved on a preview snapshot
+  may not load on an older stable release.
 
 ### Changed
 
@@ -278,8 +283,8 @@
   grade profiles are finer too -- the old car-engine legs had a single grade per
   corridor, where the truck engine breaks each into the real run of climbs and
   descents -- though no leg's overall terrain rating changed. Distances were
-  already accurate, so pay and deadlines are unchanged. Routing stays fully
-  offline at runtime -- this is a development-time data refresh.
+  already accurate, so pay and deadlines are unchanged. The refreshed route
+  data is included in the game, so driving still works fully offline.
 - **Real weather now uses the National Weather Service.** Optional live weather
   switched from Open-Meteo to the U.S. National Weather Service API
   (api.weather.gov). It is still free and needs no API key, reads each city's
@@ -362,8 +367,8 @@
   updates spoken navigation guidance right away, including the distances already
   laid out along the current route.
 - **Packaged update checks.** The updater now recognizes standalone packaged
-  folders more reliably, so switching to developer snapshots does not leave
-  the update screen thinking the game is running from source.
+  folders more reliably, so switching to preview snapshots does not leave the
+  update screen confused about how the game was installed.
 - **Quieter exit guidance.** Ordinary highway exits now stay available in the
   route screen without being announced during the drive unless they lead to a
   stop you can actually take.
@@ -381,12 +386,8 @@
 - **Clearer help.** F1 help now focuses on what the selected item does for the
   player instead of repeating menu controls, and garage upgrade help explains
   how each upgrade changes the truck.
-- **Updater works in packaged builds again.** Nuitka builds do not set the
-  PyInstaller-era ``sys.frozen`` flag, so the game mistook every packaged copy
-  for a source checkout: "Check for updates" reported running from source, the
-  startup update check never ran, and ``logs/game.log`` was never written.
-  Packaged builds are now detected correctly, restoring update checks, install,
-  and crash logging.
+- **Updater works in packaged builds again.** Packaged copies are now detected
+  correctly, restoring update checks, install, and crash logging.
 - **Facility approach speed cues.** Pickup deadheads now use lower-speed
   facility access roads, deliveries slow through a final receiver approach,
   and the last gate prompts are shorter so stopping instructions land faster.
@@ -720,8 +721,7 @@ compresses it as usual), never wall time.
 
 ### Compatibility
 - All 21 original cities and all 27 original direct legs are preserved
-  verbatim, so old profiles and mid-trip snapshots (`route_cities`) load
-  and resume unchanged. A regression test pins every original adjacency.
+  verbatim, so old profiles and mid-trip snapshots load and resume unchanged.
 
 ## 1.2.1 — 2026-06-09
 
@@ -747,10 +747,8 @@ compresses it as usual), never wall time.
   (pinned `==0.8.8`; PyPI's version ordering for this package is broken and an
   unpinned install resolves to a stale 2022 build). The truck engine is now a
   single loop whose playback frequency tracks RPM in real time, smoothed with
-  BASS attribute slides — no more four-band crossfade seams. pygame.mixer
-  remains as an automatic fallback when sound_lib/BASS cannot initialize
-  (`FREIGHT_FATE_AUDIO_BACKEND=pygame` forces it), and headless environments
-  use BASS's "no sound" device so CI runs the full audio pipeline silently.
+  BASS attribute slides -- no more four-band crossfade seams. pygame.mixer
+  remains as an automatic fallback when sound_lib/BASS cannot initialize.
 - **Garage upgrades** (Garage → Upgrades), money-gated and saved on the
   profile: engine tune (+10% torque per tier, two tiers), aerodynamic kit
   (−12% drag), long-range tank (+50 gallons), and reinforced brakes (fade
@@ -817,8 +815,8 @@ First release. Complete rewrite of the prototype.
   imperial/metric units, and a visible text mirror of all speech.
 - First-drive tutorial, six-page in-game manual.
 - Atomic JSON saves with multiple driver profiles.
-- uv-based packaging, cross-platform CI (Windows + Linux), 67-test suite.
+- Packaged builds for Windows and Linux.
 
 ### Removed
 - SRAL DLL dependency (replaced by the Prism Python package).
-- Legacy prototype source tree, duplicate data files, and debug artifacts.
+- Legacy prototype files and duplicate data files.

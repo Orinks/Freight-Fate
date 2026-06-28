@@ -111,6 +111,9 @@ def test_how_to_play_documents_new_gameplay_systems():
     assert "adaptive cruise" in help_text
     assert "three second clear-weather gap" in help_text
     assert "increase the following gap" in help_text
+    assert "keypad keys" in help_text
+    assert "cruise set speed" in help_text
+    assert "sharp posted-limit drops" in help_text
     assert "highway stops use clear place names" in help_text
     assert "list the actions available there" in help_text
     assert "call for help" in help_text

@@ -229,12 +229,12 @@ Driving controls are active while the road view is focused:
 | E | Start the engine. Stop the engine only below 5 miles per hour. |
 | P | Release or set the parking brake. |
 | K | Set or cancel adaptive cruise control. Braking also cancels it. |
-| Plus / Minus | Raise or lower the set cruise speed by 5 mph while cruise is engaged. |
+| Plus / Minus | Raise or lower the set cruise speed by 5 mph while cruise is engaged. The keypad Plus and Minus keys work too. |
 | X | Arm or cancel the next exit when it is close enough. |
 | T | Open the route point-of-interest menu when stopped at a supported stop. |
 | J | Toggle the engine brake. |
 | H | Sound the horn. |
-| Space | Report speed, gear, RPM, air pressure, and brake state. |
+| Space | Report speed, gear, RPM, cruise set speed when cruise is on, air pressure, and brake state. |
 | S | Report the posted speed limit here, the zone if any, and how far over you are. |
 | Tab | Open the driving status menu. |
 | F | Report fuel level and estimated range. |
@@ -286,11 +286,14 @@ least 20 miles per hour. Press K to set cruise at your current speed. Once it is
 engaged, Plus and Minus raise and lower the set speed by 5 miles per hour, just
 like the accelerate and coast buttons on a real truck, so you can dial the
 target up to the speed you want without having to reach it manually first. The
-truck then accelerates up to a higher set speed on its own. Cruise will not hold
-more than 5 miles per hour over the posted limit, so it keeps you legal even if
-you set it higher. Weather can increase the following gap, and modeled traffic
-can make cruise reduce speed. Cruise does not steer, change lanes, or replace
-your attention.
+keypad Plus and Minus keys work too. Press Space while cruise is on to hear the
+current cruise set speed along with speed, gear, RPM, and air-brake state. The
+truck then accelerates up to a higher set speed on its own. Cruise looks ahead
+for sharp posted-limit drops so it can begin slowing before the lower-limit
+stretch. It will not hold more than 5 miles per hour over the posted limit, so
+it keeps you legal even if you set it higher. Weather can increase the following
+gap, and modeled traffic can make cruise reduce speed. Cruise does not steer,
+change lanes, or replace your attention.
 
 ## Road Events, Weather, And Rest Stops
 

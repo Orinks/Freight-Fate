@@ -534,6 +534,8 @@ class Trip:
                     f"{cue.speed_mph:.0f} miles per hour" if imperial
                     else f"{cue.speed_mph * 1.609344:.0f} kilometers per hour"
                 )
+            if ahead < 0.5:
+                return f"Traffic just ahead: {cue.text}{speed}."
             return f"Traffic in {ahead_text}: {cue.text}{speed}."
         if cue.kind == "toll":
             return f"Toll point in {ahead_text}: {cue.text}."
