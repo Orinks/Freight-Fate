@@ -278,8 +278,10 @@ class DrivingEventMixin:
         self._exit_signal_on = not self._exit_signal_on
         ahead = stop.at_mi - self.trip.position_mi
         if not self._exit_signal_on:
+            self._exit_signal_canceled = True
             self.ctx.say("Signal canceled. Keep following the highway.")
             return
+        self._exit_signal_canceled = False
         self.ctx.audio.play("ui/notify", volume=0.5)
         if stop.type == "delivery_destination":
             head = (
@@ -463,6 +465,7 @@ class DrivingEventMixin:
             self.ctx.say_event(message, interrupt=False)
         if self._exit_stop is None:
             self._exit_stop = stop
+            self._exit_signal_canceled = False
             self._reset_exit_lane_state()
             if self.ctx.settings.steering_assist == "off":
                 self._exit_lane_alignment = EXIT_LANE_READY
@@ -528,7 +531,15 @@ class DrivingEventMixin:
         if stop is None or self.trip.position_mi < stop.at_mi:
             return
         self._exit_stop = None
+        if self._exit_signal_canceled:
+            self._reset_exit_lane_state()
+            self._exit_signal_canceled = False
+            self.ctx.say_event(
+                "Exit signal was canceled, so you stayed on the highway."
+            )
+            return
         self._exit_signal_on = False
+        self._exit_signal_canceled = False
         if self.trip.position_mi > stop.at_mi + EXIT_COMMIT_WINDOW_MI:
             self._reset_exit_lane_state()
             pressure = self._active_exit_pressure(stop)
@@ -793,6 +804,7 @@ class DrivingEventMixin:
         self.trip.finished = False
         self._exit_stop = None
         self._exit_signal_on = False
+        self._exit_signal_canceled = False
         self._cancel_cruise()
         if self._missed_destination_exit_said:
             return

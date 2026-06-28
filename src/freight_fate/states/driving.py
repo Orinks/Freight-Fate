@@ -105,6 +105,7 @@ class DrivingState(DrivingControlsMixin, DrivingUpdateMixin, DrivingEventMixin, 
         self._signal_timer = 0.0
         self._exit_stop = None            # active route exit
         self._exit_signal_on = False
+        self._exit_signal_canceled = False
         self._exit_lane_alignment = 0.0
         self._exit_lane_prompt_said = False
         self._exit_lane_ready_said = False

@@ -137,6 +137,38 @@ def test_canceled_exit_signal_does_not_prompt_lane_prep(monkeypatch):
 
 
 @pytest.mark.smoke
+def test_canceled_destination_exit_signal_stays_on_highway(monkeypatch):
+    from freight_fate.app import App
+
+    spoken = []
+    app = App()
+    app.ctx.settings.steering_assist = "off"
+    monkeypatch.setattr(app.ctx, "say_event", lambda text, interrupt=True: spoken.append(text))
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        stop = driving._destination_exit_stop()
+        assert stop is not None
+        driving.trip.position_mi = stop.at_mi - 1.0
+        driving.truck.velocity_mps = 12.0
+
+        driving.handle_event(key_event(pygame.K_x))
+        assert driving._exit_lane_ready()
+        driving.handle_event(key_event(pygame.K_x))
+        assert driving._exit_stop is not None
+        assert not driving._exit_signal_on
+
+        driving.trip.position_mi = stop.at_mi
+        driving.update(1 / 60)
+
+        assert driving._ramp_mi is None
+        assert any("signal" in line.casefold() for line in spoken)
+        assert any("stayed on the highway" in line for line in spoken)
+    finally:
+        app.shutdown()
+
+
+@pytest.mark.smoke
 def test_destination_exit_auto_arms_and_takes_ramp_with_valid_setup(monkeypatch):
     from freight_fate.app import App
 
