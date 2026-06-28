@@ -93,13 +93,45 @@ def test_x_without_route_exit_reports_no_signal_target(monkeypatch):
         driving = start_drive(app)
         quiet_trip(driving)
         driving.trip.position_mi = 0.0
-        if driving._destination_exit_stop() is not None:
-            pytest.skip("route starts close to a destination exit")
+        assert driving._upcoming_exit_stop() is None
 
         driving.handle_event(key_event(pygame.K_x))
 
         assert not driving._exit_signal_on
         assert any("No route exit to signal for yet" in line for line in spoken)
+    finally:
+        app.shutdown()
+
+
+@pytest.mark.smoke
+def test_canceled_exit_signal_does_not_prompt_lane_prep(monkeypatch):
+    from freight_fate.app import App
+
+    spoken = []
+    app = App()
+    app.ctx.settings.steering_assist = "light"
+    monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: spoken.append(text))
+    monkeypatch.setattr(
+        app.ctx,
+        "say_event",
+        lambda text, interrupt=True: spoken.append(text),
+    )
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        stop = driving.trip.stops[0]
+        driving.trip.position_mi = stop.at_mi - 1.5
+
+        driving.handle_event(key_event(pygame.K_x))
+        driving.handle_event(key_event(pygame.K_x))
+        assert driving._exit_stop is stop
+        assert not driving._exit_signal_on
+
+        spoken.clear()
+        driving._update_exit_preparation(HeldKeys(pygame.K_RIGHT), 1.5)
+
+        assert all("Signal is on" not in line for line in spoken)
+        assert all("Exit lane set" not in line for line in spoken)
     finally:
         app.shutdown()
 
@@ -166,6 +198,7 @@ def test_exit_requires_right_lane_alignment(monkeypatch):
 
     spoken = []
     app = App()
+    app.ctx.settings.steering_assist = "light"
     monkeypatch.setattr(app.ctx, "say_event", lambda text, interrupt=True: spoken.append(text))
     try:
         driving = start_drive(app)
@@ -192,6 +225,7 @@ def test_exit_traffic_pressure_changes_missed_lane_recovery(monkeypatch):
 
     spoken = []
     app = App()
+    app.ctx.settings.steering_assist = "light"
     monkeypatch.setattr(app.ctx, "say_event", lambda text, interrupt=True: spoken.append(text))
     try:
         driving = start_drive(app)

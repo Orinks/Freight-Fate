@@ -322,6 +322,8 @@ class DrivingEventMixin:
             return
         if self.ctx.settings.steering_assist == "off":
             return
+        if not self._exit_signal_on:
+            return
         ahead = stop.at_mi - self.trip.position_mi
         if ahead < -EXIT_COMMIT_WINDOW_MI:
             return
