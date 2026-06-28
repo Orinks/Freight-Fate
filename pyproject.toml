@@ -42,6 +42,7 @@ dev = [
     "pytest-timeout>=2.3",
     "ruff>=0.8",
     "soundfile>=0.14.0",
+    "pre-commit>=4.6.0",
 ]
 build = [
     "nuitka>=4.0.8",

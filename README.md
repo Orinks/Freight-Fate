@@ -233,10 +233,16 @@ rather than minutes of waiting.
 ## Development
 
 ```bash
-uv sync --dev
+uv sync --group dev
+uv run pre-commit install --hook-type pre-push
 uv run pytest          # full test suite, headless
 uv run ruff check src tests tools
 ```
+
+The pre-push hook runs the release-note gate before publishing commits. It
+uses `tools.release_notes check --base auto --head HEAD`, so user-facing
+changes need a player-facing `CHANGELOG.md` entry unless the whole change set
+uses `changelog: none` or `[skip changelog]`.
 
 ### Changelog and snapshots
 
