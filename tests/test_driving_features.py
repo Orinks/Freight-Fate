@@ -606,6 +606,40 @@ def test_destination_exit_announcement_names_lane_move_when_drift_is_on(monkeypa
         app.shutdown()
 
 
+def test_destination_exit_suppresses_matching_interchange_gps_cue(monkeypatch):
+    from freight_fate.app import App
+    from freight_fate.sim.trip import TripEvent, TripEventKind
+    from freight_fate.sim.trip_models import NavigationCue
+
+    app = App()
+    events = []
+    monkeypatch.setattr(app.ctx, "say_event",
+                        lambda text, interrupt=True: events.append(text))
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        destination = driving._destination_exit_stop()
+        driving.trip.position_mi = destination.at_mi - 1.0
+
+        driving._check_destination_exit()
+        driving._handle_trip_event(TripEvent(
+            TripEventKind.GPS_CUE,
+            "Exit ahead from generic navigation cue.",
+            {"cue": NavigationCue(
+                "interchange:test",
+                "interchange",
+                destination.at_mi,
+                "generic exit cue",
+            )},
+        ))
+
+        assert len(events) == 1
+        assert "destination exit" in events[0]
+        assert "generic navigation cue" not in events[0]
+    finally:
+        app.shutdown()
+
+
 def test_delivery_does_not_complete_without_taking_destination_exit(monkeypatch):
     from freight_fate.app import App
     from freight_fate.states.driving import DrivingState
@@ -684,6 +718,25 @@ def test_destination_exit_opens_delivery_gate():
 
         assert isinstance(app.state, FacilityArrivalState)
         assert app.state.items[app.state.index].text == "Dock and deliver"
+    finally:
+        app.shutdown()
+
+
+def test_destination_exit_completion_clears_remaining_route_miles():
+    from freight_fate.app import App
+    from freight_fate.states.driving import FacilityArrivalState
+
+    app = App()
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        take_destination_exit(driving)
+
+        assert isinstance(app.state, FacilityArrivalState)
+        assert driving.trip.finished
+        assert driving.trip.position_mi == pytest.approx(driving.trip.total_miles)
+        assert driving.trip.remaining_miles == pytest.approx(0.0)
+        assert any("0 miles remaining" in line for line in driving.status_lines())
     finally:
         app.shutdown()
 

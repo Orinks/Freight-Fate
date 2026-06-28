@@ -60,6 +60,9 @@
 
 ### Fixed
 
+- **Destination exits keep the route status honest.** Taking a delivery exit now
+  clears the remaining route miles before the dock menu opens, and the GPS no
+  longer repeats the destination exit with a second generic interchange cue.
 - **Construction-zone warnings give you room to react.** The warning now comes
   earlier at highway speed and starts with "Brake now!", and troopers wait a
   little longer inside the zone before clocking you, so normal braking from the
