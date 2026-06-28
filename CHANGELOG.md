@@ -3,6 +3,9 @@
 ## Unreleased
 ### Fixed
 
+- **Destination exits keep the route status honest.** Taking a delivery exit now
+  clears the remaining route miles before the dock menu opens, and the GPS no
+  longer repeats the destination exit with a second generic interchange cue.
 - **Real posted speed limits win near cities.** City approaches still use a
   slower fallback when the route has no posted speed-limit sample, but real
   baked `maxspeed` data is no longer capped just because the route is near a

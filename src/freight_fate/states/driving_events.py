@@ -8,6 +8,8 @@ from .driving_rest_states import ParkingFullState, RestStopState
 
 class DrivingEventMixin:
     def _handle_trip_event(self, event) -> None:
+        if self._should_ignore_destination_exit_gps_cue(event):
+            return
         kind = event.kind
         sound = _route_event_sound(event)
         if event.message:
@@ -65,6 +67,17 @@ class DrivingEventMixin:
             cue = event.data.get("cue")
             if getattr(cue, "kind", "") == "traffic":
                 self.ctx.award_achievement("traffic_slowing", event=True)
+
+    def _should_ignore_destination_exit_gps_cue(self, event) -> bool:
+        if self.phase != DRIVE_PHASE_DELIVERY or event.kind != TripEventKind.GPS_CUE:
+            return False
+        cue = event.data.get("cue")
+        if getattr(cue, "kind", "") != "interchange":
+            return False
+        stop = self._destination_exit_stop()
+        if stop is None:
+            return False
+        return abs(float(getattr(cue, "at_mi", -9999.0)) - stop.at_mi) <= 0.15
 
     def _is_critical_event(self, event) -> bool:
         """Safety announcements that must preempt ambient chatter on the event
@@ -321,6 +334,8 @@ class DrivingEventMixin:
                 self._ramp_mi = None
                 self._ramp_stop = None
                 if stop.type == "delivery_destination":
+                    self.trip.position_mi = self.trip.total_miles
+                    self.trip.finished = True
                     self._open_facility_arrival()
                 else:
                     self._open_poi_stop(stop)
