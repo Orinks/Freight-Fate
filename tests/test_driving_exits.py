@@ -78,6 +78,62 @@ def test_exit_key_is_a_toggle_and_needs_an_exit_nearby():
 
 
 @pytest.mark.smoke
+def test_destination_exit_auto_arms_and_takes_ramp_with_valid_setup(monkeypatch):
+    from freight_fate.app import App
+
+    spoken = []
+    app = App()
+    app.ctx.settings.steering_assist = "off"
+    monkeypatch.setattr(app.ctx, "say_event", lambda text, interrupt=True: spoken.append(text))
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        stop = driving._destination_exit_stop()
+        assert stop is not None
+        driving.trip.position_mi = stop.at_mi - 1.0
+        driving.truck.velocity_mps = 15.0
+
+        driving.update(1 / 60)
+        assert driving._exit_stop is not None
+        assert driving._exit_stop.type == "delivery_destination"
+
+        driving.trip.position_mi = stop.at_mi
+        driving.update(1 / 60)
+
+        assert driving._ramp_mi == pytest.approx(0.5)
+        assert driving._destination_exit_taken
+        assert any("You take" in line and "destination exit" in line for line in spoken)
+    finally:
+        app.shutdown()
+
+
+@pytest.mark.smoke
+def test_destination_exit_no_longer_requires_x_to_take_ramp(monkeypatch):
+    from freight_fate.app import App
+
+    spoken = []
+    app = App()
+    app.ctx.settings.steering_assist = "off"
+    monkeypatch.setattr(app.ctx, "say_event", lambda text, interrupt=True: spoken.append(text))
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        stop = driving._destination_exit_stop()
+        assert stop is not None
+        driving.trip.position_mi = stop.at_mi - 0.5
+        driving.truck.velocity_mps = 12.0
+
+        driving.update(1 / 60)
+        driving.trip.position_mi = stop.at_mi
+        driving.update(1 / 60)
+
+        assert driving._ramp_mi == pytest.approx(0.5)
+        assert all("Press X to take" not in line for line in spoken)
+    finally:
+        app.shutdown()
+
+
+@pytest.mark.smoke
 def test_exit_requires_right_lane_alignment(monkeypatch):
     from freight_fate.app import App
 

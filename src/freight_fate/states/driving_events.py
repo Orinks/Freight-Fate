@@ -446,15 +446,20 @@ class DrivingEventMixin:
         if not (0 < ahead <= EXIT_WINDOW_MI):
             return
         key = self._destination_exit_key(stop)
-        if key == self._destination_exit_announced_key:
-            return
-        self._destination_exit_announced_key = key
-        message = self._destination_exit_announcement(stop, ahead)
-        if self._cruise_mph is not None:
-            self._cancel_cruise()
-            message += " Adaptive cruise disabled; take manual speed control."
-        self.ctx.audio.play("ui/notify", volume=0.7)
-        self.ctx.say_event(message, interrupt=False)
+        if key != self._destination_exit_announced_key:
+            self._destination_exit_announced_key = key
+            message = self._destination_exit_announcement(stop, ahead)
+            if self._cruise_mph is not None:
+                self._cancel_cruise()
+                message += " Adaptive cruise disabled; take manual speed control."
+            self.ctx.audio.play("ui/notify", volume=0.7)
+            self.ctx.say_event(message, interrupt=False)
+        if self._exit_stop is None:
+            self._exit_stop = stop
+            self._reset_exit_lane_state()
+            if self.ctx.settings.steering_assist == "off":
+                self._exit_lane_alignment = EXIT_LANE_READY
+                self._exit_lane_ready_said = True
 
     def _destination_exit_details(
             self, *, include_past: bool = False) -> tuple[float, str, str] | None:
