@@ -109,6 +109,7 @@ def test_how_to_play_documents_new_gameplay_systems():
     assert "press p to release or set the parking brake" in help_text
     assert "low air" in help_text
     assert "tab opens a driving status menu" in help_text
+    assert "driver apps" in help_text
     assert "slow below 5 miles per hour" in help_text
     assert "destination facility" in help_text
     assert "local deadhead moves to the origin facility" in help_text
@@ -318,6 +319,17 @@ def test_air_brake_help_and_status_are_spoken(monkeypatch):
         assert any(line.startswith("Route:") for line in map_lines)
         assert any("offers" in line for line in map_lines)
 
+        app.state.handle_event(key_event(pygame.K_ESCAPE))
+        open_status_screen(app, "Driver apps")
+        app_lines = [item.text for item in app.state.items]
+        assert any(line.startswith("Driver tablet:") for line in app_lines)
+        assert any(line.startswith("Navigation app:") for line in app_lines)
+        assert any(line.startswith("Weather app:") for line in app_lines)
+        assert any(line.startswith("Traffic app:") for line in app_lines)
+        assert any(line.startswith("Truck stop app:") for line in app_lines)
+        assert any(line.startswith("Road chatter:") for line in app_lines)
+        assert any(line.startswith("ELD app:") for line in app_lines)
+
         app.state.handle_event(key_event(pygame.K_ESCAPE))  # screen -> picker
         app.state.handle_event(key_event(pygame.K_ESCAPE))  # picker -> driving
         assert isinstance(app.state, DrivingState)
@@ -326,6 +338,48 @@ def test_air_brake_help_and_status_are_spoken(monkeypatch):
         driving.handle_event(key_event(pygame.K_SPACE))
         assert "air 55 psi" in spoken[-1]
         assert any(line.startswith("Air: 55 psi") for line in driving.lines())
+    finally:
+        app.shutdown()
+
+
+def test_driver_apps_screen_uses_keyboard_and_vague_road_chatter(monkeypatch):
+    from freight_fate.app import App
+    from freight_fate.sim.trip import PatrolWindow
+    from freight_fate.states.driving import DrivingStatusState
+
+    app = App()
+    spoken = []
+    monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: spoken.append(text))
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        driving.trip.patrols = [
+            PatrolWindow(
+                driving.trip.position_mi + 3.0,
+                driving.trip.position_mi + 6.0,
+                0.8,
+                "speed trap",
+            )
+        ]
+
+        driving.handle_event(key_event(pygame.K_TAB))
+        assert isinstance(app.state, DrivingStatusState)
+        picker_labels = [item.text for item in app.state.items]
+        assert "Driver apps" in picker_labels
+        open_status_screen(app, "Driver apps")
+
+        lines = [item.text for item in app.state.items]
+        road_chatter = next(line for line in lines if line.startswith("Road chatter:"))
+        assert "enforcement somewhere ahead" in road_chatter
+        lower = road_chatter.lower()
+        assert "radar" not in lower
+        assert "scanner" not in lower
+        assert "patrol" not in lower
+        assert "speed trap" not in lower
+        assert "3 miles" not in lower
+
+        app.state.handle_event(key_event(pygame.K_RETURN))
+        assert spoken[-1] == lines[0]
     finally:
         app.shutdown()
 

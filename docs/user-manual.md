@@ -409,13 +409,14 @@ Use these keys when you need status without leaving the road:
 | V | Weather and forecast. |
 | Tab | Grouped driving status screens. |
 
-Tab opens the Driving status menu. It has three review screens:
+Tab opens the Driving status menu. It has four review screens:
 
 | Screen | Information |
 | --- | --- |
 | Route | Current route status lines from the active drive. |
 | Driver | Driver name, money, load, objective, truck fuel and damage, transmission, fatigue, hours, and deadline. |
 | Map | Route cities, highways, progress, next guidance, upcoming stops, map points, and toll exposure. |
+| Driver apps | Navigation, weather, traffic, truck-stop, road-chatter, and ELD lines in one reviewable tablet-style list. |
 
 Inside a status screen, Up and Down move line by line, Enter repeats the current
 line, and Escape returns to the status screen list.

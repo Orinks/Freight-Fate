@@ -102,6 +102,8 @@ class DrivingControlsMixin:
                 "R route. Shift R next listed highway exit. V weather. L lane position. "
                 "A repeats the last announcement. U reads what is coming up: "
                 "imposed limits, stops, and exits ahead. "
+                "The Tab status menu includes Driver apps for navigation, "
+                "weather, traffic, truck stops, road chatter, and ELD status. "
                 "Left and Right arrows steer when lane drift is enabled. "
                 "T route POI menu when already stopped "
                 "at one: available actions may include fuel, break, sleep, "
