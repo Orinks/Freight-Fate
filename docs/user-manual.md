@@ -486,11 +486,12 @@ Arrow to brake does not skip the first menu option.
 
 Destination exits work the same way. When your delivery exit is ahead, the game
 announces the signed exit and toward cities, marks it as the destination exit,
-and tells you to signal and slow down. If lane drift is on, it also tells you
-when to move right for the exit lane. If
+and tells you to slow down and set up for the ramp. If lane drift is on, use X
+to signal and move right for the exit lane. With lane drift off, the GPS infers
+your destination-exit intent from the route. If
 adaptive cruise is set, the destination-exit callout cancels cruise so you can
 take manual speed control. If you miss the destination exit, the delivery does
-not complete; back up until the exit is ahead again, then signal and take the
+not complete; back up until the exit is ahead again, then set up and take the
 exit correctly.
 
 Ordinary highway exits that do not lead to a current action are not announced

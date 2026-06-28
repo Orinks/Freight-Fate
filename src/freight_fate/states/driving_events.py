@@ -831,10 +831,12 @@ class DrivingEventMixin:
             return
         self._missed_destination_exit_said = True
         self.ctx.audio.play("ui/warning")
-        self._set_status("Destination exit missed. Back up until it is ahead, then press X.")
+        self._set_status(
+            "Destination exit missed. Back up until it is ahead, then set up the exit."
+        )
         self.ctx.say_event(
             f"You missed the destination exit for {self._destination_facility_text()}. "
-            "Back up until the exit is ahead, then press X to signal for it.",
+            "Back up until the exit is ahead, then slow down and set up for the ramp.",
             interrupt=True,
         )
 

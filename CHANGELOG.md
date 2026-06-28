@@ -38,6 +38,10 @@
   exit instead of magically taking it. The GPS now stages the maneuver, asks for
   the right-side exit lane, checks that you are slowed to ramp speed at the
   gore, and explains missed exits when you are too fast or in the wrong lane.
+- **Destination exits now follow the route setup.** The delivery ramp is taken
+  when speed, lane setup, and route intent are valid. Lane-drift modes require
+  a signal; with lane drift off, the GPS infers destination intent from the
+  route unless you explicitly cancel the signal.
 - **Merge and exit traffic now puts pressure on the maneuver.** The route can
   call out traffic building near exits, highway merges, construction tapers,
   and lead-traffic packs. Relaxed mode keeps those cues calmer, and missed

@@ -631,6 +631,8 @@ def test_delivery_does_not_complete_without_taking_destination_exit(monkeypatch)
         driving.trip.position_mi = exit_mi - 1.0
         assert driving._destination_exit_stop() is not None
         assert "missed the destination exit" in events[-1].lower()
+        assert "press x" not in events[-1].lower()
+        assert "set up for the ramp" in events[-1].lower()
     finally:
         app.shutdown()
 
