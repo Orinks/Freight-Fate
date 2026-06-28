@@ -205,8 +205,8 @@ def test_how_to_play_documents_new_gameplay_systems():
     assert "low visibility shortens" in help_text
     assert "career runs on a calendar that starts in spring" in help_text
     assert "state troopers patrol" in help_text
-    assert "cb radio chatter can warn" in help_text
-    assert "check upcoming patrols" in help_text
+    assert "cb chatter may mention" in help_text
+    assert "review that chatter" in help_text
     assert "will not engage on low-speed local roads" in help_text
     assert "in-cab radio" in help_text
     assert "streamer-safe status" in help_text

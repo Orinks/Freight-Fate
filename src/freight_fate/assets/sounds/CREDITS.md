@@ -62,7 +62,7 @@ current idle, start, and shutdown cues.
 | Local turn right | `events/turn_right.ogg` | ElevenLabs-generated placeholder non-speech turn cue |
 | Local turn ahead | `events/turn_ahead.ogg` | ElevenLabs-generated placeholder non-speech local-route cue |
 | Police siren | `events/police_siren.ogg` | ElevenLabs-generated trooper pull-over siren wail |
-| CB radio chatter | `events/cb_radio_chatter.ogg` | ElevenLabs-generated CB squelch and chatter for trooper patrol heads-up cues |
+| CB radio chatter | `events/cb_radio_chatter.ogg` | ElevenLabs-generated CB squelch and chatter for bear and enforcement heads-up cues |
 | Spike strip | `events/spike_strip.ogg` | ElevenLabs-generated spike-strip puncture/air-hiss for felony stops |
 | Rest stop at night | `poi/rest_stop_night.ogg` | Parked rest-stop ambience loop |
 | Weigh station lane | `poi/weigh_station_lane.ogg` | Parked weigh-station lane ambience loop |

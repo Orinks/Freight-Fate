@@ -276,12 +276,7 @@ class DrivingControlsMixin:
             patrol = self.trip.next_patrol_within(within_mi)
             if patrol is not None:
                 ahead = patrol.start_mi - pos
-                if ahead <= 0:
-                    parts.append(f"Patrol active now on this {patrol.reason}")
-                else:
-                    parts.append(
-                        f"Patrol in {s.distance_text(ahead)} on this {patrol.reason}"
-                    )
+                parts.append(self.trip.cb_patrol_status(patrol, ahead))
         cue = self.trip.next_exit_cue()
         if cue is not None and 0 < cue.at_mi - pos <= within_mi:
             parts.append(f"in {s.distance_text(cue.at_mi - pos)}, {cue.text}")

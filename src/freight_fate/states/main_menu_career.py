@@ -150,14 +150,13 @@ class HomeCityState(MenuState):
         return items
 
     def _pick(self, city: str) -> None:
-        from .city import CityMenuState
+        from .city import CityMenuState, first_day_orientation_message
 
         name = self.driver_name
         existing = {p.stem.lower() for p in Profile.list_saves()}
         option = start_option(self.start_key)
         profile = Profile(name=name, current_city=city)
         apply_start_option(profile, option)
-        terminal = self.ctx.world.home_terminal(city)
         self.ctx.profile = profile
         profile.save()
         self.ctx.pop_state()   # this city picker
@@ -167,23 +166,6 @@ class HomeCityState(MenuState):
         self.ctx.push_state(CityMenuState(self.ctx))
         loaded_over = (f"Loaded over existing driver named {name}. "
                        if name.lower() in existing else "")
-        if option.is_owner_operator:
-            message = (
-                f"{loaded_over}Owner-operator start created for {name}. "
-                f"You are leased to {option.carrier_name}, parked at "
-                f"{terminal.spoken_name} in the {city} service area, with an "
-                f"owned starter tractor and {profile.money:,.0f} dollars of "
-                "working capital. Fuel, repairs, and business reserves are "
-                "your responsibility from day one. "
-                "Your first stop is the dispatch board."
-            )
-        else:
-            message = (
-                f"{loaded_over}Welcome aboard to {option.carrier_name}, {name}. "
-                "Your assigned company tractor is parked at "
-                f"{terminal.spoken_name} in the {city} service area with "
-                f"{profile.money:,.0f} dollars and a full tank. "
-                "Your first stop is the dispatch board."
-            )
+        message = first_day_orientation_message(self.ctx, loaded_over)
         self.ctx.say(message, interrupt=True)
 

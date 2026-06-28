@@ -309,12 +309,12 @@ class Trip(TripRoadEventMixin, TripTrafficMixin):
             intensity = self._patrol_intensity_at(at) * self.hazard_scale
             patrols.append(PatrolWindow(at, at + length,
                                         max(0.1, min(0.95, intensity)),
-                                        "speed trap"))
+                                        "highway enforcement"))
         for zone in self.zones:
             if zone.reason == "construction":
                 patrols.append(PatrolWindow(zone.start_mi, zone.end_mi,
                                             min(0.95, 0.9 * self.hazard_scale),
-                                            "construction patrol"))
+                                            "work zone enforcement"))
         patrols.sort(key=lambda p: p.start_mi)
         return patrols
 
@@ -920,8 +920,7 @@ class Trip(TripRoadEventMixin, TripTrafficMixin):
                 self._announced_patrols.add(key)
                 self._emit(
                     TripEventKind.GPS_CUE,
-                    f"CB radio reports a trooper ahead in {self._distance_text(ahead)} "
-                    f"on this {patrol.reason}. Check your speed.",
+                    self.cb_patrol_message(patrol, ahead),
                     cb_patrol=patrol,
                 )
                 return

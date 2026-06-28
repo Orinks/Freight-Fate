@@ -4,6 +4,13 @@
 
 ### Added
 
+- **New-career first day has a stronger handoff.** After choosing a start and
+  home terminal, the terminal repeats a first-day briefing until the first
+  dispatch is accepted. It names the carrier or owner-operator setup, the
+  terminal, who pays equipment costs, and why the first dispatch matters.
+- **CB chatter sounds more like drivers talking.** Road radio warnings now use
+  vague bear and work-zone enforcement chatter instead of pinpoint enforcement
+  language.
 - **Career progression now stretches to 30 levels.** The company-driver path
   grows through senior company ranks before a level-18 leased-on
   owner-operator gate, level-21 authority prep, level-25 own authority, and
@@ -34,7 +41,7 @@
 - **Law enforcement now watches scales and unsafe trucks.** Open weigh stations
   warn you before the scale; blow past one at highway speed and a scale officer
   can light you up for a roadside enforcement stop. Severe visible truck damage
-  can also trigger a safety stop when you pass an active patrol window. Both
+  can also trigger a safety stop when you pass active enforcement. Both
   stops use spoken warnings, X to signal, a full stop on the shoulder, an
   on-the-spot fine, and a reputation hit.
 - **Running from a stop now escalates before it ends badly.** If you keep
@@ -252,11 +259,11 @@
   service. You can review it from the terminal or the driving status menu, and
   traffic stops now read the recent logbook entries instead of only pretending
   to check them.
-- **CB radio patrol heads-up.** CB chatter can now warn you a few miles before
-  an upcoming state-trooper patrol window, with a radio squelch cue and a clear
-  "check your speed" line. The cue stays secondary to hazards and construction
-  warnings, and the U upcoming key can check upcoming patrols alongside
-  stops, speed zones, and exits.
+- **CB radio enforcement chatter.** CB chatter can now warn you a few miles
+  before drivers are talking about a bear ahead or enforcement near a work
+  zone, with a radio squelch cue and a clear "check your speed" line. The cue
+  stays secondary to hazards and construction warnings, and the U upcoming key
+  can review that chatter alongside stops, speed zones, and exits.
 - **State troopers can pull you over for speeding.** Routes now have patrol
   windows -- hotter on busy interstates, in construction, and in dense regions,
   cooler out on the plains, with a night DUI bump. Speed badly inside one and a

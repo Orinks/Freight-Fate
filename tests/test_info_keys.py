@@ -130,13 +130,12 @@ def test_upcoming_key_reports_cb_patrol_ahead(monkeypatch):
         d.trip.zones = []
         d.trip.stops = []
         d.trip.navigation_cues = []
-        d.trip.patrols = [PatrolWindow(10.0, 14.0, 0.8, "speed trap")]
+        d.trip.patrols = [PatrolWindow(10.0, 14.0, 0.8, "highway enforcement")]
         spoken = _capture(app, monkeypatch)
 
         d.handle_event(key_event(pygame.K_u))
 
-        assert "Patrol in" in spoken[-1]
-        assert "speed trap" in spoken[-1]
+        assert "CB chatter reports a bear ahead" in spoken[-1]
     finally:
         app.shutdown()
 

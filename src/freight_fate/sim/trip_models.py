@@ -265,7 +265,8 @@ class PatrolWindow:
     ``intensity`` (0-1) is the chance a sustained speeding strike inside the
     window actually gets you pulled over -- higher on busy interstates, in
     construction, and at rush hour or night, lower out on empty plains. The
-    ``reason`` is a short spoken label ("speed trap", "construction patrol")."""
+    ``reason`` is a short internal context label, such as highway enforcement
+    or work zone enforcement."""
 
     start_mi: float
     end_mi: float

@@ -246,7 +246,9 @@ def test_new_company_career_choice_creates_company_profile():
     from freight_fate.states.main_menu import CareerStartState, HomeCityState
 
     app = App()
+    spoken = []
     try:
+        app.ctx.say = lambda text, *a, **k: spoken.append(text)
         app.push_state(CareerStartState(app.ctx, "Prairie Driver"))
         while "Prairie Link Regional" not in app.state.items[app.state.index].text:
             app.state.handle_event(key_event(pygame.K_DOWN))
@@ -261,6 +263,10 @@ def test_new_company_career_choice_creates_company_profile():
         assert profile.carrier_name == "Prairie Link Regional"
         assert profile.business_status == COMPANY_DRIVER
         assert profile.visible_owned_trucks() == ()
+        assert "First-day briefing" in spoken[-1]
+        assert "Prairie Link Regional" in spoken[-1]
+        assert "same-region lanes" in spoken[-1]
+        assert any(item.text == "First-day briefing" for item in app.state.items)
     finally:
         app.shutdown()
 
@@ -290,5 +296,38 @@ def test_owner_operator_start_unlocks_equipment_systems():
         app.pop_state()
         app.push_state(UpgradeShopState(app.ctx))
         assert "locked" not in app.state.items[0].text.lower()
+    finally:
+        app.shutdown()
+
+
+def test_first_day_briefing_names_owner_operator_costs():
+    from freight_fate.app import App
+    from freight_fate.models.profile import Profile
+    from freight_fate.states.city import (
+        CityMenuState,
+        first_day_orientation_message,
+        first_dispatch_done,
+    )
+
+    app = App()
+    try:
+        app.ctx.profile = Profile(name="Owner Briefing", current_city="Chicago")
+        apply_start_option(app.ctx.profile, start_option(OWNER_OPERATOR_START_KEY))
+        state = CityMenuState(app.ctx)
+        state.refresh()
+
+        message = first_day_orientation_message(app.ctx)
+
+        assert "leased to Northstar Freight Lines" in message
+        assert "own the starter tractor" in message
+        assert "working capital" in message
+        assert "fuel, repairs, truck wear" in message
+        assert any(item.text == "First-day briefing" for item in state.items)
+        assert not first_dispatch_done(app.ctx.profile)
+
+        app.ctx.profile.achievements.append("first_dispatch")
+        state.refresh()
+        assert all(item.text != "First-day briefing" for item in state.items)
+        assert first_dispatch_done(app.ctx.profile)
     finally:
         app.shutdown()

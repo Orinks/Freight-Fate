@@ -17,7 +17,8 @@ driving.
 4. Run `FreightFate.exe` on Windows, or `FreightFate` on macOS or Linux.
 5. Choose **New career**, enter a driver name, pick a home region, and pick a
    home terminal.
-6. Open the dispatch board, accept a job, and follow the current objective.
+6. Listen to the first-day briefing, open the dispatch board, accept a job,
+   and follow the current objective.
 
 On Windows and Linux the game is portable: saves, settings, save identity
 files, and packaged-game logs live in the `saves` folder inside the game
@@ -102,6 +103,12 @@ light wear, and owner-operator costs already active.
 The home-terminal picker starts with a region list, then opens the cities in
 that region. Each start has a suggested default city, but any listed terminal
 can be your starting city.
+
+After the home terminal is chosen, the terminal repeats a first-day briefing
+until the first dispatch is accepted. It names the carrier or owner-operator
+setup, the current terminal, who pays normal equipment costs, and the first
+objective: choose an unlocked dispatch, reach the shipper, and start a clean
+record with dispatch.
 
 The normal career loop is:
 
@@ -419,8 +426,8 @@ like a heads-up to signal early, leave space, and avoid forcing the merge.
 Posted speed limits come from real map data and change along a corridor; a
 change is announced as reduced or raised, and named near a city. State troopers
 patrol some stretches, hotter on busy interstates, in construction, and at
-night. CB radio chatter can warn you a few miles before a patrol window; press
-U to check upcoming patrols along with other route guidance. Speed
+night. CB chatter may mention a bear ahead or drivers talking about enforcement
+near a work zone; press U to review that chatter with other route guidance. Speed
 badly inside a patrol and a trooper may pull you over: signal with X (the same
 key as an exit), brake to a stop on the shoulder, and sit through a license and
 logbook check that reads your recent duty entries before ending in an

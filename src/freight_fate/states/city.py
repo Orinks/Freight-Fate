@@ -23,6 +23,7 @@ from ..models.jobs import (
     job_from_payload,
     job_payload,
 )
+from ..models.start_options import option_for_profile
 from ..models.trailers import (
     compatible_with_programs,
     owned_trailer_for_cargo,
@@ -60,6 +61,36 @@ def _job_from_payload(data: dict) -> Job:
 
 # Empty-drive range for shopping another city's board.
 BOBTAIL_RANGE_MI = 400.0
+
+
+def first_dispatch_done(profile) -> bool:
+    return "first_dispatch" in getattr(profile, "achievements", ())
+
+
+def first_day_orientation_message(ctx, prefix: str = "") -> str:
+    p = ctx.profile
+    terminal = ctx.world.home_terminal(p.current_city)
+    option = option_for_profile(p)
+    location = f"{terminal.spoken_name} in the {p.current_city} service area"
+    if option.is_owner_operator:
+        return (
+            f"{prefix}First-day briefing: you are leased to {option.carrier_name} "
+            f"and parked at {location}. You own the starter tractor, have "
+            f"{p.money:,.0f} dollars of working capital, and fuel, repairs, "
+            "truck wear, trailer programs, and business reserves come out of "
+            "your cash. Your first objective is to open the dispatch board, "
+            "choose an unlocked load with a deadline you can protect, and get "
+            "to the shipper without burning your cushion."
+        )
+    return (
+        f"{prefix}First-day briefing: welcome aboard {option.carrier_name}. "
+        f"Your assigned company tractor is parked at {location}; the carrier "
+        "covers normal fuel, repairs, insurance, and trailer support. Your "
+        f"starter dispatch style is {option.dispatch.summary()}. Your first "
+        "objective is to open the dispatch board, choose an unlocked load, "
+        "deadhead to the shipper, and deliver cleanly to start building your "
+        "record with dispatch."
+    )
 
 
 class CityMenuState(MenuState):
@@ -100,12 +131,15 @@ class CityMenuState(MenuState):
         terminal = self.ctx.world.home_terminal(p.current_city)
         business = status_label(p.business_status)
         rank = p.career.rank
+        first_day = ""
+        if not first_dispatch_done(p):
+            first_day = " First-day objective: open the dispatch board and take your first load."
         self.ctx.say(
             f"Parked at {terminal.spoken_name} in the {p.current_city} "
             f"service area, {city.state}. {business.capitalize()} with "
             f"level {rank.level}, {rank.title}. "
             f"You have {p.money:,.0f} dollars. "
-            f"{self.current_text()}")
+            f"{first_day} {self.current_text()}")
 
     def build_items(self) -> list[MenuItem]:
         items = [
@@ -149,6 +183,12 @@ class CityMenuState(MenuState):
             MenuItem("Quit to main menu", self._to_main_menu,
                      help="Save your career and return to the title menu."),
         ]
+        if not first_dispatch_done(self.ctx.profile):
+            items.insert(1, MenuItem(
+                "First-day briefing",
+                self._first_day_briefing,
+                help="Repeat your starter carrier, terminal, business costs, "
+                     "and first dispatch objective."))
         if self._pay_advance_available():
             items.insert(3, MenuItem(
                 self._pay_advance_label, self._request_pay_advance,
@@ -156,6 +196,9 @@ class CityMenuState(MenuState):
                      "and cannot afford fuel. Repaid automatically out of "
                      "your next delivery settlement."))
         return items
+
+    def _first_day_briefing(self) -> None:
+        self.ctx.say(first_day_orientation_message(self.ctx), interrupt=True)
 
     def _city_services(self) -> None:
         self.ctx.push_state(CityServiceSelectState(self.ctx))
@@ -525,8 +568,15 @@ class JobBoardState(MenuState):
                     "Listed amounts are carrier gross; your settlement pays "
                     "driver wages. "
                 )
+            first_day = ""
+            if not first_dispatch_done(self.ctx.profile):
+                first_day = (
+                    "First-day objective: pick an unlocked starter load with "
+                    "a deadline you can protect; accepting it starts your "
+                    "record with dispatch. "
+                )
             self.ctx.say(f"Dispatch board. {n} dispatch{'es' if n != 1 else ''} available. "
-                         f"{business_note}{self.ctx.profile.market.summary()} "
+                         f"{business_note}{first_day}{self.ctx.profile.market.summary()} "
                          + self.current_text())
 
     def build_items(self) -> list[MenuItem]:

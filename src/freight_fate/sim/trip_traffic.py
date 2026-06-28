@@ -13,6 +13,29 @@ from .trip_models import (
 
 class TripTrafficMixin:
 
+    def cb_patrol_message(self, patrol: PatrolWindow, ahead_mi: float) -> str:
+        """Player-facing CB chatter for enforcement presence."""
+        distance = self._distance_text(max(0.0, ahead_mi))
+        if "construction" in patrol.reason or "work zone" in patrol.reason:
+            return (
+                f"CB chatter in {distance}: drivers are talking about enforcement "
+                "near the work zone. Ease back and check your speed."
+            )
+        return (
+            f"CB chatter in {distance}: drivers report a bear ahead. "
+            "Ease back and check your speed."
+        )
+
+    def cb_patrol_status(self, patrol: PatrolWindow, ahead_mi: float) -> str:
+        distance = self._distance_text(max(0.0, ahead_mi))
+        if ahead_mi <= 0:
+            if "construction" in patrol.reason or "work zone" in patrol.reason:
+                return "CB chatter says enforcement is active around this work zone"
+            return "CB chatter says a bear may be watching this stretch"
+        if "construction" in patrol.reason or "work zone" in patrol.reason:
+            return f"CB chatter about work-zone enforcement in {distance}"
+        return f"CB chatter reports a bear ahead in {distance}"
+
     def next_patrol_within(self, within_mi: float) -> PatrolWindow | None:
         """Nearest active or upcoming patrol window inside the lookahead."""
         candidates = [

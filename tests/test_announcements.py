@@ -86,9 +86,9 @@ def test_cb_radio_chatter_queues_and_uses_cb_audio(monkeypatch):
 
         d._handle_trip_event(TripEvent(
             TripEventKind.GPS_CUE,
-            "CB radio reports a trooper ahead in 5 miles on this speed trap. "
-            "Check your speed.",
-            {"cb_patrol": PatrolWindow(10.0, 14.0, 0.8, "speed trap")},
+            "CB chatter in 5 miles: drivers report a bear ahead. "
+            "Ease back and check your speed.",
+            {"cb_patrol": PatrolWindow(10.0, 14.0, 0.8, "highway enforcement")},
         ))
 
         assert sounds[-1] == "events/cb_radio_chatter"
@@ -113,8 +113,8 @@ def test_truly_ambient_chatter_is_spaced_without_blocking_safety(monkeypatch):
         d._handle_trip_event(TripEvent(TripEventKind.WEATHER_CHANGE, "Weather: rain."))
         d._handle_trip_event(TripEvent(
             TripEventKind.GPS_CUE,
-            "CB radio reports a trooper ahead in 5 miles.",
-            {"cb_patrol": PatrolWindow(10.0, 14.0, 0.8, "speed trap")},
+            "CB chatter in 5 miles: drivers report a bear ahead.",
+            {"cb_patrol": PatrolWindow(10.0, 14.0, 0.8, "highway enforcement")},
         ))
         d._handle_trip_event(TripEvent(TripEventKind.GPS_CUE, "Exit 12 ahead."))
 
@@ -129,11 +129,11 @@ def test_truly_ambient_chatter_is_spaced_without_blocking_safety(monkeypatch):
         d._hazard_deadline = None
         d._handle_trip_event(TripEvent(
             TripEventKind.GPS_CUE,
-            "CB radio reports a trooper ahead in 4 miles.",
-            {"cb_patrol": PatrolWindow(11.0, 14.0, 0.8, "speed trap")},
+            "CB chatter in 4 miles: drivers report a bear ahead.",
+            {"cb_patrol": PatrolWindow(11.0, 14.0, 0.8, "highway enforcement")},
         ))
         d._update_ambient_events(AMBIENT_EVENT_SPACING_S)
-        assert calls[-1] == ("CB radio reports a trooper ahead in 4 miles.", False)
+        assert calls[-1] == ("CB chatter in 4 miles: drivers report a bear ahead.", False)
     finally:
         app.shutdown()
 

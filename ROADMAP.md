@@ -422,12 +422,12 @@ Speeding, HOS/ELD compliance, and route enforcement are now one visible
 system instead of unrelated end-of-trip deductions and generic random
 inspections. The first shipped slice uses route-backed contexts where the
 current corridor data supports them: weigh-station POIs, construction
-zones, checkpoints/high-patrol corridors, and seeded patrol windows.
+zones, checkpoints/high-enforcement corridors, and seeded enforcement windows.
 Events carry evidence such as HOS/ELD violations or construction-zone
 speeding, and serious HOS violations trigger an out-of-service 10-hour
 reset instead of only a fine.
 
-- [x] **Speeding pull-overs and CB heads-up.** Shipped: routes seed
+- [x] **Speeding pull-overs and CB chatter.** Shipped: routes seed
   `PatrolWindow`s by highway class, region, and time of day (`Trip._place_patrols`
   / `active_patrol_at`), construction zones always hot, scaled down by relaxed
   mode's `hazard_scale`. A sustained speeding strike inside a window rolls
@@ -437,12 +437,13 @@ reset instead of only a fine.
   on-the-spot ticket (`SPEEDING_TICKET_FINES`, paid now) or a warning. Ignoring
   the lights past `PULL_OVER_IGNORE_MI` is logged as evasion. Disabled in the
   debug HOS bypass. Uncaught speeding still accrues the silent settlement strike.
-  CB chatter now warns a few miles before an upcoming patrol window, plays
-  `events/cb_radio_chatter.ogg`, remains non-critical so hazards and
-  construction warnings can preempt it, and is reviewable with the U upcoming
-  key. Real ElevenLabs audio is in: `events/police_siren.ogg` (pull-over),
+  CB chatter now warns a few miles before drivers are talking about a bear or
+  work-zone enforcement, plays `events/cb_radio_chatter.ogg`, remains
+  non-critical so hazards and construction warnings can preempt it, and is
+  reviewable with the U upcoming key. Real ElevenLabs audio is in:
+  `events/police_siren.ogg` (pull-over),
   `events/spike_strip.ogg` (felony-stop sound on evasion), and
-  `events/cb_radio_chatter.ogg` (CB patrol heads-up). Regenerate via
+  `events/cb_radio_chatter.ogg` (CB chatter). Regenerate via
   `tools/generate_sounds.py`.
 - [x] **Weigh-station bypass and unsafe-equipment stops.** Shipped:
   `DrivingState._check_weigh_station_enforcement` now gives a scale warning
@@ -479,12 +480,11 @@ function guidance: https://www.fmcsa.dot.gov/hours-service/elds/eld-functions-fa
 
 ### Design sketch
 
-- **Patrol presence.** Each route leg gets a patrol intensity from its
+- **Enforcement presence.** Each route leg gets an enforcement intensity from its
   region and highway (urban corridors hot, empty plains cold, construction
-  zones always hot), modulated by time of day (speed traps at rush hour,
-  DUI patrols at night). The CB radio is the counterplay: chatter like
-  "bear at mile marker 12" gives attentive players a spoken heads-up a
-  few miles out.
+  zones always hot), modulated by time of day. The CB radio is the flavor:
+  chatter about a bear ahead or enforcement near a work zone gives attentive
+  players a vague spoken heads-up a few miles out.
 - **Getting pulled over.** Speeding 10+ over inside a patrol's window (or
   blowing past an open weigh station at highway speed) triggers a siren behind you.
   The player must signal with X (reusing the exit system's muscle memory),
