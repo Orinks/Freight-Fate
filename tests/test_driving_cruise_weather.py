@@ -242,6 +242,39 @@ def test_adaptive_cruise_follows_modeled_traffic(monkeypatch):
 
 
 @pytest.mark.smoke
+def test_adaptive_cruise_follows_npc_traffic(monkeypatch):
+    from freight_fate.app import App
+    from freight_fate.sim.trip import NPCVehicle
+
+    app = App()
+    events = []
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        monkeypatch.setattr(app.ctx, "say_event",
+                            lambda text, interrupt=True: events.append(text))
+        open_limits(driving)
+        driving.trip.npc_vehicles = [
+            NPCVehicle("npc:acc", driving.trip.position_mi + 0.08,
+                       44.0, 44.0, 0, "braking_traffic")
+        ]
+        driving.handle_event(key_event(pygame.K_e))
+        driving.truck.transmission.gear = 10
+        driving.truck.velocity_mps = 29.0
+        driving.truck.throttle = 0.9
+        driving.handle_event(key_event(pygame.K_k))
+        driving.update(1 / 60)
+
+        assert driving._cruise_mph is not None
+        assert driving._acc_following
+        assert driving.truck.throttle < 0.9
+        assert driving.truck.brake > 0.0
+        assert "Traffic ahead, adaptive cruise reducing speed." in events
+    finally:
+        app.shutdown()
+
+
+@pytest.mark.smoke
 def test_adaptive_cruise_caps_at_posted_limit(monkeypatch):
     from freight_fate.app import App
 

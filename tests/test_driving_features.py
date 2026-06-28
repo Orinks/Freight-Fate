@@ -345,6 +345,7 @@ def test_air_brake_help_and_status_are_spoken(monkeypatch):
         assert "compressor idle" in air_status
         assert "brakes cool" in air_status
         assert any(line.startswith("Weather:") for line in status_lines)
+        assert any(line.startswith("Traffic:") for line in status_lines)
 
         app.state.handle_event(key_event(pygame.K_ESCAPE))  # back to the screen picker
         open_status_screen(app, "Driver")

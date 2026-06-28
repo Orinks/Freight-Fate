@@ -9,6 +9,7 @@ from freight_fate.sim.trip import (
     CONSTRUCTION_ENFORCEMENT_GRACE_MI,
     CONSTRUCTION_TAPER_LIMIT_MPH,
     CONSTRUCTION_TAPER_MI,
+    NPCVehicle,
     TripEventKind,
 )
 from freight_fate.sim.weather import EFFECTS, REGION_WEIGHTS
@@ -674,6 +675,42 @@ def test_traffic_model_applies_to_enriched_and_legacy_routes(world):
         assert trip.traffic_leads, cities
 
 
+def test_npc_traffic_seeding_is_deterministic(world):
+    route = world.route_from_cities(["Chicago", "Indianapolis"])
+    weather = WeatherSystem("great_lakes", seed=1)
+    weather.current = WeatherKind.CLEAR
+
+    trip_a = Trip(route, TruckState(), weather, seed=7, start_hour=8.0)
+    trip_b = Trip(route, TruckState(), weather, seed=7, start_hour=8.0)
+
+    def signature(trip):
+        return [
+            (
+                round(vehicle.position_mi, 2),
+                round(vehicle.speed_mph, 1),
+                vehicle.relative_lane,
+                vehicle.behavior,
+            )
+            for vehicle in trip.npc_vehicles
+        ]
+
+    assert signature(trip_a)
+    assert signature(trip_a) == signature(trip_b)
+
+
+def test_npc_traffic_moves_each_trip_tick(world):
+    trip, _truck = make_trip(world)
+    trip.npc_vehicles = [
+        NPCVehicle("npc:test", 5.0, 60.0, 60.0, 0, "steady_truck")
+    ]
+    trip._hazard_check_mi = 1e9
+    trip._inspection_check_mi = 1e9
+
+    trip.update(1.0)
+
+    assert trip.npc_vehicles[0].position_mi > 5.2
+
+
 def test_bad_weather_slows_modeled_traffic(world):
     route = world.route_from_cities(["Chicago", "Indianapolis"])
     clear_weather = WeatherSystem("great_lakes", seed=1)
@@ -738,6 +775,27 @@ def test_traffic_pressure_gps_cue_deduplicates(world):
         if event.kind == TripEventKind.GPS_CUE
         and event.data.get("traffic_pressure") is pressure
     ]
+
+
+def test_npc_traffic_cue_and_status_are_reviewable(world):
+    trip, truck = make_trip(world)
+    truck.velocity_mps = 29.0
+    trip.position_mi = 10.0
+    trip.npc_vehicles = [
+        NPCVehicle("npc:merge", 10.8, 42.0, 42.0, 0, "merging_vehicle")
+    ]
+
+    events = trip.update(0.0)
+
+    npc_cues = [
+        event for event in events
+        if event.kind == TripEventKind.GPS_CUE
+        and event.data.get("npc_vehicle") is trip.npc_vehicles[0]
+    ]
+    assert len(npc_cues) == 1
+    assert "Merging vehicle" in npc_cues[0].message
+    assert "leave a gap" in npc_cues[0].message
+    assert "Traffic: merging traffic" in trip.npc_traffic_status()
 
 
 def test_time_scale_compresses_fuel_burn(world):

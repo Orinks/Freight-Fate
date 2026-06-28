@@ -310,6 +310,7 @@ class DrivingControlsMixin:
             f"Speed: {self.ctx.settings.speed_text(t.speed_mph)}",
             f"Limit: {self.ctx.settings.speed_text(limit)}"
             + (f" in a {reason} zone" if reason else ""),
+            self.trip.npc_traffic_status(),
             f"Route: {progress}",
             f"Fuel: {t.fuel_fraction * 100:.0f} percent",
             f"Air brakes: {self._air_status_text(detailed=True)}",

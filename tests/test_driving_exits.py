@@ -87,6 +87,7 @@ def test_exit_requires_right_lane_alignment(monkeypatch):
     try:
         driving = start_drive(app)
         quiet_trip(driving)
+        app.ctx.settings.steering_assist = "light"
         driving.trip.traffic_pressures = []
         stop = driving.trip.stops[0]
         driving.trip.position_mi = stop.at_mi - 1.0
@@ -113,6 +114,7 @@ def test_exit_traffic_pressure_changes_missed_lane_recovery(monkeypatch):
     try:
         driving = start_drive(app)
         quiet_trip(driving)
+        app.ctx.settings.steering_assist = "light"
         stop = driving.trip.stops[0]
         driving.trip.traffic_pressures = [
             TrafficPressure(

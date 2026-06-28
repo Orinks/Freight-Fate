@@ -391,9 +391,9 @@ like the accelerate and coast buttons on a real truck, so you can dial the
 target up to the speed you want without having to reach it manually first. The
 truck then accelerates up to a higher set speed on its own. Cruise will not hold
 more than 5 miles per hour over the posted limit, so it keeps you legal even if
-you set it higher. Weather can increase the following gap, and modeled traffic
-can make cruise reduce speed. Cruise does not steer, change lanes, or replace
-your attention.
+you set it higher. Weather can increase the following gap. Simulated nearby
+vehicles can make cruise reduce speed when a slower vehicle is in your lane.
+Cruise does not steer, change lanes, or replace your attention.
 
 ## Road Events, Weather, And Rest Stops
 
@@ -412,9 +412,9 @@ begin with a merge/flagger taper before the lower work-zone limit. Speeding in
 the main construction zone can trigger enforcement.
 
 Traffic can also build around exit lanes, highway merges, construction tapers,
-and slow lead packs. The GPS gives a short traffic-gap cue when one of those
-pressure points is ahead, naming the lane direction and a target speed. Treat it
-like a heads-up to signal early, leave space, and avoid forcing the merge.
+and slow lead packs. You may also hear nearby vehicles called out, such as a
+merging vehicle, brake lights, or a slow car ahead. Treat those cues like a
+heads-up to signal early, leave space, and avoid forcing the merge.
 
 Posted speed limits come from real map data and change along a corridor; a
 change is announced as reduced or raised, and named near a city. State troopers
