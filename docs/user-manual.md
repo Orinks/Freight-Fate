@@ -344,7 +344,7 @@ Driving controls are active while the road view is focused:
 | P | Release or set the parking brake. |
 | K | Set or cancel adaptive cruise control. Braking also cancels it. |
 | Plus / Minus | Raise or lower the set cruise speed by 5 mph while cruise is engaged. |
-| X | Signal for or cancel the next exit when it is close enough. |
+| X | Signal for or cancel the next announced route exit. The truck takes the ramp when speed, lane setup, and route intent are valid. |
 | T | Open the route point-of-interest menu when stopped at a supported stop. |
 | J | Toggle the engine brake. |
 | H | Sound the horn. |
@@ -472,10 +472,11 @@ Tab status menu, and at the city terminal. With live weather turned on, the
 date, season, and temperature follow the real-world calendar instead.
 
 Stops are reported as you approach them. A one-mile cue tells you when to take
-an exit. Press X to signal for the exit. With lane drift off, that also sets the
-exit lane; with lane drift on, steer right when prompted. Slow to 45 miles per
-hour or less, and brake to a stop at the end of the ramp. If you reach the gore
-too fast, without signaling, or without the exit lane set, you stay on the
+an exit. As an announced exit approaches, use X to signal or cancel your intent,
+slow to 45 miles per hour or less, and set up the exit lane when lane drift is
+enabled. If your speed, lane setup, and route intent are valid at the marker,
+the truck takes the ramp automatically. If you reach the gore too fast, without
+signaling, or without the exit lane set, you stay on the
 highway and the game tells you what went wrong. The timing is generous so the
 sequence is about preparation, not twitch input. The game can also tell you when
 traffic boxes you out of the lane, so you know to recover at the next safe exit
@@ -485,7 +486,7 @@ Arrow to brake does not skip the first menu option.
 
 Destination exits work the same way. When your delivery exit is ahead, the game
 announces the signed exit and toward cities, marks it as the destination exit,
-and tells you to press X and slow down. If lane drift is on, it also tells you
+and tells you to signal and slow down. If lane drift is on, it also tells you
 when to move right for the exit lane. If
 adaptive cruise is set, the destination-exit callout cancels cruise so you can
 take manual speed control. If you miss the destination exit, the delivery does

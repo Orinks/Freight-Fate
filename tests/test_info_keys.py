@@ -156,3 +156,23 @@ def test_upcoming_key_handles_a_clear_road(monkeypatch):
         assert "Nothing notable" in spoken[-1]
     finally:
         app.shutdown()
+
+
+def test_driving_help_describes_x_as_signal_not_take_exit(monkeypatch):
+    from driving_feature_helpers import key_event, quiet_trip, start_drive
+
+    from freight_fate.app import App
+
+    spoken = []
+    app = App()
+    monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: spoken.append(text))
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        driving.handle_event(key_event(pygame.K_F1))
+
+        help_text = spoken[-1]
+        assert "X signals for the next announced route exit" in help_text
+        assert "X takes the next announced exit" not in help_text
+    finally:
+        app.shutdown()
