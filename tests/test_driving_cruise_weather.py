@@ -30,6 +30,8 @@ def test_cruise_control_holds_the_set_speed(monkeypatch):
         open_limits(driving)                           # isolate hold from the limit cap
         t = driving.truck
         driving.handle_event(key_event(pygame.K_e))   # engine on
+        t.cargo_kg = 0.0
+        t.grade = 0.0
         t.transmission.gear = 10
         t.velocity_mps = 26.8                          # ~60 mph
         t.throttle = 0.35

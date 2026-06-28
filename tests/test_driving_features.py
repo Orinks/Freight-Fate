@@ -33,6 +33,27 @@ def test_trip_event_sounds_use_contextual_cues():
     assert _route_event_sound(event) == "events/construction_zone"
 
 
+def test_shift_key_does_not_press_clutch_in_automatic(monkeypatch):
+    from freight_fate.app import App
+
+    class Keys:
+        def __getitem__(self, key):
+            return key == pygame.K_LSHIFT
+
+    app = App()
+    monkeypatch.setattr(pygame.key, "get_pressed", lambda: Keys())
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        assert driving.truck.transmission.automatic
+
+        driving.update(1 / 60)
+
+        assert driving.truck.transmission.clutch == 0.0
+    finally:
+        app.shutdown()
+
+
 def test_driving_f1_describes_safe_shutdown_and_destination_parking(monkeypatch):
     from freight_fate.app import App
 
