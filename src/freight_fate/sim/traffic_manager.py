@@ -76,7 +76,7 @@ class TrafficManager:
         self.route = route
         self.truck = truck
         self.weather = weather
-        self.leg_starts = leg_starts
+        self.leg_starts = list(leg_starts)
         self.seed = seed
         self.start_hour = start_hour
         self.hazard_scale = hazard_scale

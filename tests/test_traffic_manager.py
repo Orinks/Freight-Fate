@@ -53,3 +53,23 @@ def test_lead_vehicle_selects_nearest_vehicle_in_player_lane():
     assert context is not None
     assert context.lead.key == "near"
     assert context.closing_mph == 18.0
+
+
+def test_manager_copies_leg_starts():
+    world = get_world()
+    route = world.route_from_cities(["Chicago", "Indianapolis"])
+    leg_starts = [0.0]
+    manager = TrafficManager(
+        route=route,
+        truck=TruckState(),
+        weather=WeatherSystem("great_lakes", seed=1),
+        leg_starts=leg_starts,
+        seed=1,
+        start_hour=8.0,
+        hazard_scale=1.0,
+        imperial=True,
+    )
+
+    leg_starts.append(12.0)
+
+    assert manager.leg_starts == [0.0]
