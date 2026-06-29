@@ -17,7 +17,7 @@ from ..achievements import add_unique_stat
 from ..data.world import Route
 from ..models.business import build_business_settlement, pay_label
 from ..models.economy import pay_advance_grant, pay_advance_unavailable_reason
-from ..models.jobs import Job, job_from_payload, job_payload
+from ..models.jobs import Job, fair_active_deadline, job_from_payload, job_payload
 from ..models.settlement import (
     carrier_accessorial_charges,
     charge_summary,
@@ -84,6 +84,10 @@ ACC_BASE_GAP_SECONDS = 3.0        # clear-weather adaptive cruise gap
 ACC_LIMIT_OFFSET_MPH = 5.0        # predictive ACC holds this far over the posted
                                   # limit -- a with-traffic pace, comfortably under
                                   # the 9 mph speeding-strike threshold
+ACC_LIMIT_LOOKAHEAD_MIN_MI = 0.25
+ACC_LIMIT_LOOKAHEAD_MAX_MI = 1.5
+ACC_LIMIT_LOOKAHEAD_STEP_MI = 0.1
+ACC_LIMIT_COMFORT_DECEL_MPS2 = 1.0
 ENGINE_SHUTDOWN_SAFE_MPH = 5.0    # prevent accidental kill-switch use at speed
 DELIVERY_PARK_MPH = 3.0           # within this, the gate prompts you to stop
 DOCKING_MAX_MPH = 0.5            # dock/settle/rest actions need a complete stop

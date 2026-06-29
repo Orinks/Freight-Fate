@@ -41,9 +41,9 @@ class DrivingControlsMixin:
                 self._take_exit()
         elif key == pygame.K_k:
             self._toggle_cruise()
-        elif key in (pygame.K_EQUALS, pygame.K_KP_PLUS):
+        elif key in (pygame.K_EQUALS, pygame.K_PLUS, pygame.K_KP_PLUS) or event.unicode == "+":
             self._adjust_cruise(CRUISE_STEP_MPH)
-        elif key in (pygame.K_MINUS, pygame.K_KP_MINUS):
+        elif key in (pygame.K_MINUS, pygame.K_KP_MINUS) or event.unicode == "-":
             self._adjust_cruise(-CRUISE_STEP_MPH)
         elif key == pygame.K_SPACE:
             self._speak_speed()
@@ -102,19 +102,19 @@ class DrivingControlsMixin:
                 "touch Up arrow to brake and return to forward. "
                 "Hold B for the emergency brake, the hardest possible stop. "
                 "K sets adaptive cruise at your current speed; bad weather "
-                "increases the following gap, and braking cancels. Plus and "
-                "minus raise and lower the cruise speed by five, so you can dial "
-                "it up to the speed you want; it will not hold above the posted "
-                "limit. "
+                "increases the following gap, sharp posted-limit drops make it "
+                "slow early, and braking cancels. Plus and minus, including "
+                "the keypad keys, raise and lower the cruise speed by five, so "
+                "you can dial it up to the speed you want; it will not hold "
+                "above the posted limit. "
                 "X signals for the next announced route exit or cancels that "
                 "signal. Prepare early: slow to 45 for the ramp, hold the exit "
                 "lane when lane drift is enabled, and the truck takes the ramp "
-                "when your setup is valid. "
-                "X also signals a pull-over if a trooper "
-                "lights you up for speeding, scale bypass, or unsafe equipment: "
-                "signal, then brake to a stop. Ignoring the lights gives staged "
-                "failure-to-stop warnings, then a felony stop that can cancel "
-                "the active load. "
+                "when your setup is valid. X also signals a pull-over if a "
+                "trooper lights you up for speeding, scale bypass, or unsafe "
+                "equipment: signal, then brake to a stop. Ignoring the lights "
+                "gives staged failure-to-stop warnings, then a felony stop "
+                "that can cancel the active load. "
                 "C also speaks the date and season. "
                 "M toggles the in-cab radio, left and right brackets tune it, "
                 "and Y speaks radio station, volume, and streamer-safe status. "
@@ -125,11 +125,14 @@ class DrivingControlsMixin:
                 "Press P to release or set the parking brake; if pressure is "
                 "below 100 psi, wait with the engine running. "
                 f"{objective_help}"
-                "Space speed. S posted speed limit. Tab status menu. F fuel. "
+                "Space speed, and cruise set speed when cruise is on. "
+                "S posted speed limit. Tab status menu. F fuel. "
                 "C clock, deadline, and hours of service. "
                 "R route. Shift R next listed highway exit. V weather. L lane position. "
                 "A repeats the last announcement. U reads what is coming up: "
                 "imposed limits, stops, and exits ahead. "
+                "The Tab status menu includes a Driver apps tablet menu for "
+                "navigation, weather, traffic, truck stops, road chatter, and ELD. "
                 "Left and Right arrows steer when lane drift is enabled. "
                 "T route POI menu when already stopped "
                 "at one: available actions may include fuel, break, sleep, "
@@ -220,8 +223,12 @@ class DrivingControlsMixin:
     def _speak_speed(self) -> None:
         t = self.truck
         gear = self._gear_text()
+        cruise = (
+            f", cruise set at {self.ctx.settings.speed_text(self._cruise_mph)}"
+            if self._cruise_mph is not None else ""
+        )
         self.ctx.say(f"{self.ctx.settings.speed_text(t.speed_mph)}, {gear}, "
-                     f"{t.rpm:.0f} RPM, {self._air_status_text()}.")
+                     f"{t.rpm:.0f} RPM{cruise}, {self._air_status_text()}.")
 
     def _speak_speed_limit(self) -> None:
         """S: the posted limit here, the zone if any, and how far over you are."""
@@ -446,11 +453,13 @@ class DrivingControlsMixin:
                     "shoulder: poor rest, and a possible parking ticket.")
         ahead = max(0.0, next_stop.at_mi - self.trip.position_mi)
         verdict = "before" if ahead <= legal_miles else "after"
-        return (
+        stop_text = (
             f"Next legal stop: {next_stop.spoken_name} in "
-            f"{self.ctx.settings.distance_text(ahead)}, {next_stop.parking_text}, "
-            f"{verdict} the next {action} limit."
+            f"{self.ctx.settings.distance_text(ahead)}"
         )
+        if next_stop.parking_text:
+            stop_text += f", {next_stop.parking_text}"
+        return f"{stop_text}, {verdict} the next {action} limit."
 
     def _legal_miles_for_hos(self, remaining_min: float) -> float:
         pace = max(35.0, min(62.0, self.truck.speed_mph or 55.0))

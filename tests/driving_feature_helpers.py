@@ -109,3 +109,27 @@ def open_status_screen(app, label):
     assert isinstance(app.state, DrivingStatusScreenState)
     return app.state
 
+
+def open_driver_apps(app):
+    """From the open driving status picker, open the driver tablet menu."""
+    from freight_fate.states.driving import DriverAppsState
+
+    picker = app.state
+    while picker.items[picker.index].text != "Driver apps":
+        picker.handle_event(key_event(pygame.K_DOWN))
+    picker.handle_event(key_event(pygame.K_RETURN))
+    assert isinstance(app.state, DriverAppsState)
+    return app.state
+
+
+def open_driver_app(app, label):
+    """From the driver tablet menu, open one app."""
+    from freight_fate.states.driving import DriverAppScreenState
+
+    apps = app.state
+    while apps.items[apps.index].text != label:
+        apps.handle_event(key_event(pygame.K_DOWN))
+    apps.handle_event(key_event(pygame.K_RETURN))
+    assert isinstance(app.state, DriverAppScreenState)
+    return app.state
+

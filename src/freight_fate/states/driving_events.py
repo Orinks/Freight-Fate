@@ -701,6 +701,35 @@ class DrivingEventMixin:
             return "Low visibility, adaptive cruise increasing following gap."
         return None
 
+    def _acc_limit_lookahead_mi(self, speed_mph: float, target_mph: float) -> float:
+        """Distance ACC needs to ease down to a specific lower limit."""
+        speed_mps = max(0.0, speed_mph * 0.44704)
+        target_mps = max(0.0, target_mph * 0.44704)
+        if target_mps >= speed_mps:
+            return ACC_LIMIT_LOOKAHEAD_MIN_MI
+        braking_m = (
+            (speed_mps * speed_mps - target_mps * target_mps)
+            / (2.0 * ACC_LIMIT_COMFORT_DECEL_MPS2)
+        )
+        braking_mi = max(0.0, braking_m / 1609.344)
+        return max(ACC_LIMIT_LOOKAHEAD_MIN_MI,
+                   min(ACC_LIMIT_LOOKAHEAD_MAX_MI, braking_mi + 0.25))
+
+    def _acc_posted_limit_ahead(self) -> tuple[float, str | None]:
+        """Lowest posted limit close enough that ACC should start slowing now."""
+        start = self.trip.position_mi
+        end = min(self.trip.total_miles, start + ACC_LIMIT_LOOKAHEAD_MAX_MI)
+        lowest_limit, lowest_reason = self.trip.speed_limit_at(start)
+        probe = start + ACC_LIMIT_LOOKAHEAD_STEP_MI
+        while probe <= end + 1e-6:
+            limit, reason = self.trip.speed_limit_at(probe)
+            cap_mph = limit + ACC_LIMIT_OFFSET_MPH
+            braking_mi = self._acc_limit_lookahead_mi(self.truck.speed_mph, cap_mph)
+            if limit < lowest_limit and probe - start <= braking_mi:
+                lowest_limit, lowest_reason = limit, reason
+            probe += ACC_LIMIT_LOOKAHEAD_STEP_MI
+        return lowest_limit, lowest_reason
+
     def _update_cruise(self, dt: float, braking: bool,
                        accelerating: bool) -> None:
         """Hold speed when clear, and follow slower modeled traffic when present."""
@@ -719,7 +748,7 @@ class DrivingEventMixin:
         # urban drops and corridor limit changes straight into speeding strikes,
         # tickets, and trooper stops -- all of which now exist. The "Speed limit X"
         # cue still names the number; this cue says cruise is handling it.
-        posted, _ = self.trip.speed_limit_at(self.trip.position_mi)
+        posted, _ = self._acc_posted_limit_ahead()
         cap_mph = posted + ACC_LIMIT_OFFSET_MPH
         limit_capped = cap_mph < self._cruise_mph
         if limit_capped:

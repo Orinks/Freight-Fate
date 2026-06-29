@@ -343,12 +343,12 @@ Driving controls are active while the road view is focused:
 | E | Start the engine. Stop the engine only below 5 miles per hour. |
 | P | Release or set the parking brake. |
 | K | Set or cancel adaptive cruise control. Braking also cancels it. |
-| Plus / Minus | Raise or lower the set cruise speed by 5 mph while cruise is engaged. |
+| Plus / Minus | Raise or lower the set cruise speed by 5 mph while cruise is engaged. The keypad Plus and Minus keys work too. |
 | X | Signal for or cancel the next announced route exit. The truck takes the ramp when speed, lane setup, and route intent are valid. |
 | T | Open the route point-of-interest menu when stopped at a supported stop. |
 | J | Toggle the engine brake. |
 | H | Sound the horn. |
-| Space | Report speed, gear, RPM, air pressure, and brake state. |
+| Space | Report speed, gear, RPM, cruise set speed when cruise is on, air pressure, and brake state. |
 | S | Report the posted speed limit here, the zone if any, and how far over you are. |
 | Tab | Open the driving status menu. |
 | F | Report fuel level and estimated range. |
@@ -404,11 +404,14 @@ least 20 miles per hour. Press K to set cruise at your current speed. Once it is
 engaged, Plus and Minus raise and lower the set speed by 5 miles per hour, just
 like the accelerate and coast buttons on a real truck, so you can dial the
 target up to the speed you want without having to reach it manually first. The
-truck then accelerates up to a higher set speed on its own. Cruise will not hold
-more than 5 miles per hour over the posted limit, so it keeps you legal even if
-you set it higher. Weather can increase the following gap. Simulated nearby
-vehicles can make cruise reduce speed when a slower vehicle is in your lane.
-Cruise does not steer, change lanes, or replace your attention.
+keypad Plus and Minus keys work too. Press Space while cruise is on to hear the
+current cruise set speed along with speed, gear, RPM, and air-brake state. The
+truck then accelerates up to a higher set speed on its own. Cruise looks ahead
+for sharp posted-limit drops so it can begin slowing before the lower-limit
+stretch. It will not hold more than 5 miles per hour over the posted limit, so
+it keeps you legal even if you set it higher. Weather can increase the following
+gap, and modeled traffic can make cruise reduce speed. Cruise does not steer,
+change lanes, or replace your attention.
 
 ## Road Events, Weather, And Rest Stops
 
@@ -567,7 +570,7 @@ Use these keys when you need status without leaving the road:
 | Y | Speak radio station, source, signal or fallback state, volume, and streamer-safe status. |
 | Tab | Grouped driving status screens. |
 
-Tab opens the Driving status menu. It has five review screens:
+Tab opens the Driving status menu. It has four review screens and a Driver apps menu:
 
 | Screen | Information |
 | --- | --- |
@@ -575,10 +578,14 @@ Tab opens the Driving status menu. It has five review screens:
 | Driver | Driver name, money, load, objective, truck fuel and damage, transmission, fatigue, hours, and deadline. |
 | Map | Route cities, highways, progress, next guidance, upcoming stops, map points, and toll exposure. |
 | Radio | Current station, stream-safety state, approximate reception position, and currently receivable stations. |
-| Logbook | Today's duty totals and recent Record of Duty Status entries. |
+| Driver apps | A tablet-style app menu for Navigation, Weather, Traffic, Truck stops, Road chatter, and ELD. |
 
 Inside a status screen, Up and Down move line by line, Enter repeats the current
 line, and Escape returns to the status screen list.
+
+Inside Driver apps, choose an app first. Each app opens as its own reviewable
+list: Up and Down move line by line, Enter repeats the current line, and Escape
+returns to the Driver apps menu.
 
 ## Pause, Save, And Resume
 

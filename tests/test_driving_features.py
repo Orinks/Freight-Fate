@@ -7,6 +7,8 @@ from driving_feature_helpers import (
     finish_timed_state,
     key_event,
     mark_destination_exit_taken,
+    open_driver_app,
+    open_driver_apps,
     open_status_screen,
     quiet_trip,
     start_drive,
@@ -91,6 +93,27 @@ def test_trip_event_sounds_use_contextual_cues():
     )) is None
 
 
+def test_shift_key_does_not_press_clutch_in_automatic(monkeypatch):
+    from freight_fate.app import App
+
+    class Keys:
+        def __getitem__(self, key):
+            return key == pygame.K_LSHIFT
+
+    app = App()
+    monkeypatch.setattr(pygame.key, "get_pressed", lambda: Keys())
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        assert driving.truck.transmission.automatic
+
+        driving.update(1 / 60)
+
+        assert driving.truck.transmission.clutch == 0.0
+    finally:
+        app.shutdown()
+
+
 def test_driving_f1_describes_safe_shutdown_and_destination_parking(monkeypatch):
     from freight_fate.app import App
 
@@ -146,6 +169,7 @@ def test_how_to_play_documents_new_gameplay_systems():
     assert "press p to release or set the parking brake" in help_text
     assert "low air" in help_text
     assert "tab opens a driving status menu" in help_text
+    assert "driver apps" in help_text
     assert "slow below 5 miles per hour" in help_text
     assert "destination facility" in help_text
     assert "local deadhead moves to the origin facility" in help_text
@@ -170,6 +194,9 @@ def test_how_to_play_documents_new_gameplay_systems():
     assert "adaptive cruise" in help_text
     assert "three second clear-weather gap" in help_text
     assert "increase the following gap" in help_text
+    assert "keypad keys" in help_text
+    assert "cruise set speed" in help_text
+    assert "sharp posted-limit drops" in help_text
     assert "highway stops use clear place names" in help_text
     assert "list the actions available there" in help_text
     assert "call for help" in help_text
@@ -365,7 +392,39 @@ def test_air_brake_help_and_status_are_spoken(monkeypatch):
         assert any(line.startswith("Route:") for line in map_lines)
         assert any("offers" in line for line in map_lines)
 
-        app.state.handle_event(key_event(pygame.K_ESCAPE))  # screen -> picker
+        app.state.handle_event(key_event(pygame.K_ESCAPE))
+        open_driver_apps(app)
+        tablet_apps = [item.text for item in app.state.items]
+        assert "Navigation" in tablet_apps
+        assert "Weather" in tablet_apps
+        assert "Traffic" in tablet_apps
+        assert "Truck stops" in tablet_apps
+        assert "Road chatter" in tablet_apps
+        assert "ELD" in tablet_apps
+
+        open_driver_app(app, "Navigation")
+        navigation_lines = [item.text for item in app.state.items]
+        assert any(line.startswith("Navigation:") for line in navigation_lines)
+        assert any(line.startswith("Route progress:") for line in navigation_lines)
+        app.state.handle_event(key_event(pygame.K_ESCAPE))  # app -> tablet
+
+        open_driver_app(app, "Weather")
+        weather_lines = [item.text for item in app.state.items]
+        assert any(line.startswith("Weather:") for line in weather_lines)
+        assert any(line.startswith("Safe speed guidance:") for line in weather_lines)
+        app.state.handle_event(key_event(pygame.K_ESCAPE))  # app -> tablet
+
+        open_driver_app(app, "Truck stops")
+        truck_stop_lines = [item.text for item in app.state.items]
+        assert any(line.startswith("Truck stops:") for line in truck_stop_lines)
+        app.state.handle_event(key_event(pygame.K_ESCAPE))  # app -> tablet
+
+        open_driver_app(app, "ELD")
+        eld_lines = [item.text for item in app.state.items]
+        assert any(line.startswith("ELD:") for line in eld_lines)
+
+        app.state.handle_event(key_event(pygame.K_ESCAPE))  # app -> tablet
+        app.state.handle_event(key_event(pygame.K_ESCAPE))  # tablet -> picker
         app.state.handle_event(key_event(pygame.K_ESCAPE))  # picker -> driving
         assert isinstance(app.state, DrivingState)
         assert spoken[-1] == "Back to driving."
@@ -373,6 +432,52 @@ def test_air_brake_help_and_status_are_spoken(monkeypatch):
         driving.handle_event(key_event(pygame.K_SPACE))
         assert "air 55 psi" in spoken[-1]
         assert any(line.startswith("Air: 55 psi") for line in driving.lines())
+    finally:
+        app.shutdown()
+
+
+def test_driver_apps_screen_uses_keyboard_and_vague_road_chatter(monkeypatch):
+    from freight_fate.app import App
+    from freight_fate.sim.trip import PatrolWindow
+    from freight_fate.states.driving import DrivingStatusState
+
+    app = App()
+    spoken = []
+    monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: spoken.append(text))
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        driving.trip.patrols = [
+            PatrolWindow(
+                driving.trip.position_mi + 3.0,
+                driving.trip.position_mi + 6.0,
+                0.8,
+                "speed trap",
+            )
+        ]
+
+        driving.handle_event(key_event(pygame.K_TAB))
+        assert isinstance(app.state, DrivingStatusState)
+        picker_labels = [item.text for item in app.state.items]
+        assert "Driver apps" in picker_labels
+        open_driver_apps(app)
+        tablet_apps = [item.text for item in app.state.items]
+        assert "Road chatter" in tablet_apps
+        assert "Navigation" in tablet_apps
+        open_driver_app(app, "Road chatter")
+
+        lines = [item.text for item in app.state.items]
+        road_chatter = next(line for line in lines if line.startswith("Road chatter:"))
+        assert "enforcement somewhere ahead" in road_chatter
+        lower = road_chatter.lower()
+        assert "radar" not in lower
+        assert "scanner" not in lower
+        assert "patrol" not in lower
+        assert "speed trap" not in lower
+        assert "3 miles" not in lower
+
+        app.state.handle_event(key_event(pygame.K_RETURN))
+        assert spoken[-1] == lines[0]
     finally:
         app.shutdown()
 

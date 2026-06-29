@@ -18,9 +18,9 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 CHANGELOG_PATH = Path("CHANGELOG.md")
 NIGHTLY_HEADER = (
-    "Automated developer snapshot of the dev branch, for players who want "
-    "the newest features before the next stable release. Expect rough edges; "
-    "your save files stay compatible whenever possible, but back them up first."
+    "Preview snapshot for players who want the newest features before the next "
+    "stable release. Expect rough edges; your save files stay compatible "
+    "whenever possible, but back them up first."
 )
 SECTION_ORDER = ("Added", "Changed", "Improved", "Fixed", "Removed", "Deprecated", "Security")
 PLAYER_FACING_SECTIONS = SECTION_ORDER + ("Compatibility",)

@@ -60,6 +60,24 @@
 
 ### Fixed
 
+- **Real posted speed limits win near cities.** City approaches still use a
+  slower fallback when the route has no posted speed-limit sample, but real
+  baked `maxspeed` data is no longer capped just because the route is near a
+  city.
+- **Stops no longer announce speculative truck parking.** If a stop's parking
+  is confirmed, that still gets spoken; otherwise speculative parking wording
+  is dropped from route cues so the game just announces the stop.
+- **Adaptive cruise starts slowing before big speed-limit drops.** When the
+  posted limit ahead falls sharply, adaptive cruise now looks far enough ahead
+  to begin braking before the lower-limit point instead of waiting until the
+  truck is already in the slower stretch. Pressing Space while cruise is on now
+  also includes the cruise set speed in the speed readout.
+- **Delivery windows match the slower, real route model.** New dispatch
+  deadlines now use the route's posted-limit profile, city approaches, facility
+  gates, HOS breaks, sleep, and practical slack instead of a flat mileage
+  average. Older active trips that were saved under the faster estimate get a
+  one-time fair deadline floor when they resume, so a source update does not
+  make an in-progress load suddenly late.
 - **Destination exits keep the route status honest.** Taking a delivery exit now
   clears the remaining route miles before the dock menu opens, and the GPS no
   longer repeats the destination exit with a second generic interchange cue.
@@ -67,7 +85,6 @@
   earlier at highway speed and starts with "Brake now!", and troopers wait a
   little longer inside the zone before clocking you, so normal braking from the
   warning is fair and the emergency brake can still save a late reaction.
-
 - **Metric weather readouts use metric safe speed.** Pressing V with metric
   units enabled now reports the weather safe speed in kilometers per hour.
 - **No more "dot dot" at the end of menu items.** A menu or list item that was
@@ -93,10 +110,10 @@
   state flickered every 100-125 psi cycle and re-announced. The cue now fires
   once, only while the parking brake is actually set (its whole purpose is
   "you can release it now"), and only re-arms after a genuine low-air depletion.
-- **Snapshot players move to stable when it catches up.** On the developer
+- **Snapshot players move to stable when it catches up.** On the preview
   snapshot channel, the game now offers the stable release whenever it is as
-  new as -- or newer than -- the latest nightly, so once dev work ships in a
-  stable build you converge back onto stable instead of being left on an
+  new as -- or newer than -- the latest nightly, so once those changes ship in
+  a stable build you converge back onto stable instead of being left on an
   equivalent nightly.
 - **Route chatter no longer stacks into a wall of speech.** Low-priority road
   chatter now has a short spacing window and keeps only the newest pending cue,
@@ -249,12 +266,11 @@
   carries an OpenStreetMap `maxspeed` tag, the game uses that real posted limit
   instead of the highway/region approximation -- and falls back to the
   approximation only on stretches OSM has not tagged. Limits are baked at build
-  time (truck-specific `maxspeed:hgv` preferred where present); the urban
-  reduction near cities and the spoken limit-change cue are unchanged.
+  time (truck-specific `maxspeed:hgv` preferred where present); the spoken
+  limit-change cue still calls out posted-limit changes as you drive.
 - **The lane-drift rumble is now directional.** When you wander toward a lane
   edge, the rumble strip plays from that side -- drift right and you hear it on
-  the right -- so the ear it lands in tells you which way to steer back. Uses
-  the BASS backend's stereo panning.
+  the right -- so the ear it lands in tells you which way to steer back.
 - **Safety announcements no longer get buried, and you get more warning.** Zone
   entries, construction and traffic warnings, and checkpoints now preempt
   ambient chatter (weather, tolls, state lines) on the event voice instead of
@@ -284,7 +300,7 @@
   stop or your reputation is strong. Run from the stop and it's logged as
   evasion -- a heavier fine and a serious reputation hit. Speeding the patrols
   don't catch still accrues the quieter safety-record cost at settlement.
-  Relaxed mode keeps patrols light; the debug HOS bypass disables them entirely.
+  Relaxed mode keeps patrols light.
 - **Consult the controls without leaving a drive.** The pause menu now has a
   "Controls and help" entry that opens the how-to-play reference straight to the
   driving keys -- page through it, read it line by line, then escape back to the
@@ -408,8 +424,8 @@
   [Darren Duff](https://darrenduff.com/).
 - **New achievement system.** Careers now track achievements across a range
   of categories, with a spoken main-menu viewer and a chime when you unlock
-  one. Existing careers carry over. Note: a career saved on a developer
-  snapshot may not load on an older stable release.
+  one. Existing careers carry over. Note: a career saved on a preview snapshot
+  may not load on an older stable release.
 
 ### Changed
 
@@ -429,8 +445,8 @@
   grade profiles are finer too -- the old car-engine legs had a single grade per
   corridor, where the truck engine breaks each into the real run of climbs and
   descents -- though no leg's overall terrain rating changed. Distances were
-  already accurate, so pay and deadlines are unchanged. Routing stays fully
-  offline at runtime -- this is a development-time data refresh.
+  already accurate, so pay and deadlines are unchanged. The refreshed route
+  data is included in the game, so driving still works fully offline.
 - **Real weather now uses the National Weather Service.** Optional live weather
   switched from Open-Meteo to the U.S. National Weather Service API
   (api.weather.gov). It is still free and needs no API key, reads each city's
@@ -513,8 +529,8 @@
   updates spoken navigation guidance right away, including the distances already
   laid out along the current route.
 - **Packaged update checks.** The updater now recognizes standalone packaged
-  folders more reliably, so switching to developer snapshots does not leave
-  the update screen thinking the game is running from source.
+  folders more reliably, so switching to preview snapshots does not leave the
+  update screen confused about how the game was installed.
 - **Quieter exit guidance.** Ordinary highway exits now stay available in the
   route screen without being announced during the drive unless they lead to a
   stop you can actually take.
@@ -532,12 +548,8 @@
 - **Clearer help.** F1 help now focuses on what the selected item does for the
   player instead of repeating menu controls, and garage upgrade help explains
   how each upgrade changes the truck.
-- **Updater works in packaged builds again.** Nuitka builds do not set the
-  PyInstaller-era ``sys.frozen`` flag, so the game mistook every packaged copy
-  for a source checkout: "Check for updates" reported running from source, the
-  startup update check never ran, and ``logs/game.log`` was never written.
-  Packaged builds are now detected correctly, restoring update checks, install,
-  and crash logging.
+- **Updater works in packaged builds again.** Packaged copies are now detected
+  correctly, restoring update checks, install, and crash logging.
 - **Facility approach speed cues.** Pickup deadheads now use lower-speed
   facility access roads, deliveries slow through a final receiver approach,
   and the last gate prompts are shorter so stopping instructions land faster.
@@ -871,8 +883,7 @@ compresses it as usual), never wall time.
 
 ### Compatibility
 - All 21 original cities and all 27 original direct legs are preserved
-  verbatim, so old profiles and mid-trip snapshots (`route_cities`) load
-  and resume unchanged. A regression test pins every original adjacency.
+  verbatim, so old profiles and mid-trip snapshots load and resume unchanged.
 
 ## 1.2.1 — 2026-06-09
 
@@ -894,14 +905,9 @@ compresses it as usual), never wall time.
 ## 1.2.0 — 2026-06-09
 
 ### Added
-- **BASS audio backend** via [sound_lib](https://pypi.org/project/sound_lib/)
-  (pinned `==0.8.8`; PyPI's version ordering for this package is broken and an
-  unpinned install resolves to a stale 2022 build). The truck engine is now a
-  single loop whose playback frequency tracks RPM in real time, smoothed with
-  BASS attribute slides — no more four-band crossfade seams. pygame.mixer
-  remains as an automatic fallback when sound_lib/BASS cannot initialize
-  (`FREIGHT_FATE_AUDIO_BACKEND=pygame` forces it), and headless environments
-  use BASS's "no sound" device so CI runs the full audio pipeline silently.
+- **Smoother truck engine audio.** Engine sound now follows RPM more naturally,
+  with smoother transitions as you accelerate, shift, and settle into highway
+  speed.
 - **Garage upgrades** (Garage → Upgrades), money-gated and saved on the
   profile: engine tune (+10% torque per tier, two tiers), aerodynamic kit
   (−12% drag), long-range tank (+50 gallons), and reinforced brakes (fade
@@ -968,8 +974,8 @@ First release. Complete rewrite of the prototype.
   imperial/metric units, and a visible text mirror of all speech.
 - First-drive tutorial, six-page in-game manual.
 - Atomic JSON saves with multiple driver profiles.
-- uv-based packaging, cross-platform CI (Windows + Linux), 67-test suite.
+- Packaged builds for Windows and Linux.
 
 ### Removed
 - SRAL DLL dependency (replaced by the Prism Python package).
-- Legacy prototype source tree, duplicate data files, and debug artifacts.
+- Legacy prototype files and duplicate data files.

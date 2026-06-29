@@ -11,11 +11,7 @@ import pytest
 
 from freight_fate.data.world import Leg, SpeedLimitSample
 from freight_fate.sim import Trip, TruckState, WeatherSystem
-from freight_fate.sim.trip import (
-    URBAN_LIMIT_MPH,
-    _leg_speed_limit_at,
-    corridor_speed_limit,
-)
+from freight_fate.sim.trip import _leg_speed_limit_at, corridor_speed_limit
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -125,11 +121,11 @@ def test_runtime_falls_back_to_heuristic_without_a_profile(world):
     assert trip._corridor_limit_at(mile) == expected
 
 
-def test_urban_reduction_still_caps_a_baked_limit(world):
+def test_baked_limit_wins_near_city(world):
     route = world.route_options("Chicago", "Indianapolis")[0]
     route.legs[0] = dataclasses.replace(
         route.legs[0], speed_limits=(SpeedLimitSample(0.0, 75.0),))
     trip = Trip(route, TruckState(), WeatherSystem("great_lakes", seed=1), seed=2)
-    # At the very start (in the origin city) the urban cap applies even though
-    # the baked open-road limit is higher.
-    assert trip._corridor_limit_at(0.0) == min(75.0, URBAN_LIMIT_MPH)
+    # Real posted data is authoritative; the city cap is only a fallback when
+    # the route lacks baked speed samples.
+    assert trip._corridor_limit_at(0.0) == 75.0

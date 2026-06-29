@@ -44,7 +44,10 @@ class DrivingUpdateMixin:
             t.throttle = 0.0
             t.brake = 1.0
         t.emergency_brake = emergency
-        t.transmission.clutch = 1.0 if keys[pygame.K_LSHIFT] or keys[pygame.K_RSHIFT] else 0.0
+        clutch_pressed = keys[pygame.K_LSHIFT] or keys[pygame.K_RSHIFT]
+        t.transmission.clutch = (
+            1.0 if clutch_pressed and not t.transmission.automatic else 0.0
+        )
         self._update_lane(keys, dt)
         self._update_exit_preparation(keys, dt)
         self._update_cruise(dt, braking, accelerating)

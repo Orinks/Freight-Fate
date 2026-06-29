@@ -296,7 +296,7 @@ class RoadStop:
     def parking_text(self) -> str:
         return {
             "confirmed": "confirmed truck parking",
-            "likely": "likely truck parking",
+            "likely": "",
             "limited": "limited truck parking",
             "unknown": "parking not verified",
             "none": "no truck parking",
