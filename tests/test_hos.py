@@ -140,6 +140,32 @@ def test_long_first_sleeper_split_preserves_between_rest_driving():
     assert c.split_pending_summary() is None
 
 
+def test_long_first_split_survives_fragmented_driving_history():
+    c = HosClock()
+    c.drive(60)
+    c.sleeper(480)
+    for _ in range(120):
+        c.drive(2)
+    c.sleeper(120)
+
+    assert c.driving_min == pytest.approx(240)
+    assert c.duty_min == pytest.approx(240)
+    assert c.split_pending_summary() is None
+
+
+def test_short_first_split_survives_fragmented_driving_history():
+    c = HosClock()
+    c.drive(60)
+    c.sleeper(120)
+    for _ in range(120):
+        c.drive(2)
+    c.sleeper(480)
+
+    assert c.driving_min == pytest.approx(240)
+    assert c.duty_min == pytest.approx(240)
+    assert c.split_pending_summary() is None
+
+
 def test_seven_three_sleeper_split_restores_time_without_full_reset():
     c = HosClock()
     c.drive(90)

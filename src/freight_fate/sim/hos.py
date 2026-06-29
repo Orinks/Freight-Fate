@@ -29,6 +29,7 @@ SPLIT_SHORT_ALT_MIN = 180.0
 SPLIT_LONG_MIN = 420.0
 SPLIT_LONG_ALT_MIN = 480.0
 HOS_HISTORY_MAX = 96
+HOS_SPLIT_REST_HISTORY_MAX = 16
 
 BREAK_MIN = 30.0          # minimum break that resets the 8-hour rule
 SLEEP_MIN = 600.0         # a full 10-hour off-duty reset
@@ -121,6 +122,7 @@ class HosClock:
     off_duty_min: float = 0.0     # consecutive off-duty/sleeper time
     warned: list[str] = field(default_factory=list)  # thresholds already spoken
     history: list[HosEvent] = field(default_factory=list)
+    split_rest_history: list[HosEvent] = field(default_factory=list)
     split_credit_key: str | None = None
 
     # -- time accounting ------------------------------------------------------
@@ -193,15 +195,25 @@ class HosClock:
             self.warned = [w for w in self.warned if not w.startswith("break:")]
 
     def _record_event(self, status: str, minutes: float, source: str = "normal") -> None:
-        self.history.append(HosEvent(
+        event = HosEvent(
             status=status,
             minutes=minutes,
             drive_before=self.driving_min,
             duty_before=self.duty_min,
             since_break_before=self.since_break_min,
             source=source,
-        ))
+        )
+        self.history.append(event)
         self.history = self.history[-HOS_HISTORY_MAX:]
+        if source == "full_reset":
+            self.split_rest_history.clear()
+        elif (
+            source == "normal"
+            and status in {"off_duty", "sleeper_berth"}
+            and minutes >= SPLIT_SHORT_MIN
+        ):
+            self.split_rest_history.append(event)
+            self.split_rest_history = self.split_rest_history[-HOS_SPLIT_REST_HISTORY_MAX:]
 
     def _split_event_key(self, first: HosEvent, second: HosEvent) -> str:
         first_key = (
@@ -245,27 +257,14 @@ class HosClock:
         key = self._split_event_key(first, second)
         if self.split_credit_key == key:
             return
-        between = self.history[self.history.index(first) + 1:self.history.index(second)]
-        self.driving_min = sum(e.minutes for e in between if e.status == "driving")
-        self.duty_min = sum(
-            e.minutes for e in between
-            if e.status in {"driving", "on_duty_not_driving"}
-        )
+        self.driving_min = second.drive_before - first.drive_before
+        self.duty_min = second.duty_before - first.duty_before - first.minutes
         self.since_break_min = 0.0
         self.split_credit_key = key
         self.warned = [w for w in self.warned if not w.startswith(("drive:", "duty:", "break:"))]
 
     def _split_rest_events(self) -> list[HosEvent]:
-        last_reset = max(
-            (i for i, e in enumerate(self.history) if e.source == "full_reset"),
-            default=-1,
-        )
-        return [
-            e for e in self.history[last_reset + 1:]
-            if e.source == "normal"
-            and e.status in {"off_duty", "sleeper_berth"}
-            and e.minutes >= SPLIT_SHORT_MIN
-        ]
+        return list(self.split_rest_history)
 
     def _split_rest_pairs(self, rest_events: list[HosEvent]) -> zip[tuple[HosEvent, HosEvent]]:
         return zip(rest_events, rest_events[1:], strict=False)
@@ -406,6 +405,9 @@ class HosClock:
                 "off_duty_min": self.off_duty_min,
                 "warned": list(self.warned),
                 "history": [event.to_dict() for event in self.history],
+                "split_rest_history": [
+                    event.to_dict() for event in self.split_rest_history
+                ],
                 "split_credit_key": self.split_credit_key}
 
     @classmethod
@@ -422,6 +424,20 @@ class HosClock:
                 event = HosEvent.from_dict(raw_event)
                 if event is not None:
                     history.append(event)
+            split_rest_history = []
+            raw_split_rest_history = data.get("split_rest_history")
+            if isinstance(raw_split_rest_history, list):
+                for raw_event in raw_split_rest_history:
+                    event = HosEvent.from_dict(raw_event)
+                    if event is not None:
+                        split_rest_history.append(event)
+            else:
+                split_rest_history = [
+                    event for event in history
+                    if event.source == "normal"
+                    and event.status in {"off_duty", "sleeper_berth"}
+                    and event.minutes >= SPLIT_SHORT_MIN
+                ]
             return cls(
                 driving_min=float(data.get("driving_min", 0.0)),
                 duty_min=float(data.get("duty_min", 0.0)),
@@ -431,6 +447,7 @@ class HosClock:
                 off_duty_min=float(data.get("off_duty_min", 0.0)),
                 warned=[str(w) for w in data.get("warned", [])],
                 history=history[-HOS_HISTORY_MAX:],
+                split_rest_history=split_rest_history[-HOS_SPLIT_REST_HISTORY_MAX:],
                 split_credit_key=(
                     str(data["split_credit_key"])
                     if data.get("split_credit_key") is not None else None
