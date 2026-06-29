@@ -27,14 +27,20 @@ def _job(*, miles: float, pay: float = 900.0, cargo: str = "general") -> Job:
     )
 
 
-def test_company_driver_objective_moves_from_probation_to_dispatcher_trust():
+def test_company_driver_objective_tapers_from_first_week_to_trust():
     profile = Profile(name="Career Plan", current_city="Chicago")
     profile.achievements.append("first_dispatch")
 
     first_load = career_objective(profile)
-    assert first_load.title == "Finish the probation load"
-    assert "first delivery cleanly" in first_load.terminal_text
-    assert "standard unlocked load" in first_load.dispatch_text
+    assert first_load.title == "First dispatch"
+    assert "real freight" in first_load.terminal_text
+    assert "short standard load" in first_load.dispatch_text
+    assert "probation" not in first_load.spoken_summary.lower()
+
+    profile.career.deliveries = 2
+    reminder = career_objective(profile)
+    assert reminder.title == "First-week service record"
+    assert "steady service, not perfection" in reminder.terminal_text
 
     profile.career.deliveries = 4
     profile.career.reputation = 62
@@ -42,6 +48,19 @@ def test_company_driver_objective_moves_from_probation_to_dispatcher_trust():
     assert trust.title == "Build dispatcher trust"
     assert "on-time service" in trust.terminal_text
     assert "reliable lanes" in trust.dispatch_text
+
+
+def test_low_reputation_company_driver_keeps_trust_objective_after_training():
+    profile = Profile(name="Trust Plan", current_city="Chicago")
+    profile.achievements.append("first_dispatch")
+    profile.career.deliveries = 12
+    profile.career.reputation = 62
+
+    objective = career_objective(profile)
+
+    assert objective.title == "Build dispatcher trust"
+    assert "on-time service" in objective.terminal_text
+    assert "reliable lanes" in objective.dispatch_text
 
 
 def test_owner_operator_objective_emphasizes_working_capital():
@@ -77,8 +96,8 @@ def test_terminal_career_plan_is_keyboard_reachable_and_spoken(monkeypatch):
         app.state.handle_event(key_event(pygame.K_DOWN))
         app.state.handle_event(key_event(pygame.K_RETURN))
 
-        assert spoken[-1].startswith("Finish the probation load.")
-        assert "deadline you can protect" in spoken[-1]
+        assert spoken[-1].startswith("First dispatch.")
+        assert "short standard load" in spoken[-1]
     finally:
         app.shutdown()
 
@@ -100,10 +119,10 @@ def test_dispatch_board_speaks_objective_and_marks_recommended_job(monkeypatch):
             _job(miles=70.0, pay=700.0),
         ]))
 
-        assert "Career objective: Probation board" in spoken[-1]
-        assert "Short regional freight" in spoken[-1]
+        assert "Career objective: First-week service record" in spoken[-1]
+        assert "short regional freight" in spoken[-1]
         assert app.state.items[1].text.startswith(
-            "Recommended dispatch for short regional freight: Job 2 of 2:")
+            "Recommended dispatch for good first-week run: Job 2 of 2:")
         assert not app.state.items[0].text.startswith("Recommended dispatch")
     finally:
         app.shutdown()

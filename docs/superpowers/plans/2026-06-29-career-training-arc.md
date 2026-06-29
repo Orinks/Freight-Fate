@@ -28,7 +28,7 @@
 - Create: `src/freight_fate/models/career_training.py`
 - Test: `tests/test_career_training.py`
 
-- [ ] **Step 1: Write failing tests for stage boundaries and carrier flavor**
+- [x] **Step 1: Write failing tests for stage boundaries and carrier flavor**
 
 Create `tests/test_career_training.py`:
 
@@ -81,7 +81,7 @@ def test_ten_delivery_guidance_tapers_to_normal_company_driver_voice():
     assert "trainer" not in guidance.spoken_summary.lower()
 ```
 
-- [ ] **Step 2: Run tests to confirm they fail**
+- [x] **Step 2: Run tests to confirm they fail**
 
 Run:
 
@@ -91,7 +91,7 @@ uv run pytest tests/test_career_training.py -q
 
 Expected: failure because `freight_fate.models.career_training` does not exist.
 
-- [ ] **Step 3: Implement the training model**
+- [x] **Step 3: Implement the training model**
 
 Create `src/freight_fate/models/career_training.py`:
 
@@ -201,7 +201,7 @@ def _carrier_flavor(key: str, carrier: str) -> str:
     return f"{carrier} keeps the first week balanced."
 ```
 
-- [ ] **Step 4: Run model tests**
+- [x] **Step 4: Run model tests**
 
 Run:
 
@@ -211,7 +211,7 @@ uv run pytest tests/test_career_training.py -q
 
 Expected: all tests in `tests/test_career_training.py` pass.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 Run:
 
@@ -226,7 +226,7 @@ git commit -m "feat(career): model company-driver training stages"
 - Modify: `src/freight_fate/models/career_objectives.py`
 - Modify: `tests/test_career_objectives.py`
 
-- [ ] **Step 1: Update failing objective tests**
+- [x] **Step 1: Update failing objective tests**
 
 In `tests/test_career_objectives.py`, replace `test_company_driver_objective_moves_from_probation_to_dispatcher_trust` with:
 
@@ -254,7 +254,7 @@ def test_company_driver_objective_tapers_from_first_week_to_trust():
     assert "reliable lanes" in trust.dispatch_text
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run:
 
@@ -264,7 +264,7 @@ uv run pytest tests/test_career_objectives.py::test_company_driver_objective_tap
 
 Expected: failure because current code still says "Finish the probation load" and "Probation board".
 
-- [ ] **Step 3: Route early company-driver objectives through `training_guidance`**
+- [x] **Step 3: Route early company-driver objectives through `training_guidance`**
 
 Modify `src/freight_fate/models/career_objectives.py`:
 
@@ -287,7 +287,7 @@ Then replace the first three early-company branches in `_company_driver_objectiv
 
 Keep the existing owner-operator prep, buy-in, and normal company-driver logic below this new block.
 
-- [ ] **Step 4: Run objective tests**
+- [x] **Step 4: Run objective tests**
 
 Run:
 
@@ -297,7 +297,7 @@ uv run pytest tests/test_career_objectives.py tests/test_career_training.py -q
 
 Expected: all selected tests pass.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 Run:
 

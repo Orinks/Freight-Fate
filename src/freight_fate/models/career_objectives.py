@@ -20,6 +20,7 @@ from .business import (
     is_owner_operator,
     owner_operator_eligibility,
 )
+from .career_training import TrainingStage, training_guidance
 
 
 @dataclass(frozen=True)
@@ -45,22 +46,15 @@ def career_objective(profile) -> CareerObjective:
 
 
 def _company_driver_objective(profile) -> CareerObjective:
-    deliveries = profile.career.deliveries
-    if deliveries <= 0:
+    guidance = training_guidance(profile)
+    if guidance.stage is not TrainingStage.NORMAL_GUIDANCE:
         return CareerObjective(
-            "Finish the probation load",
-            "Complete your first delivery cleanly so dispatch has a real service record.",
-            "Favor a standard unlocked load with a deadline you can protect.",
-            "short standard load",
+            guidance.title,
+            guidance.terminal_text,
+            guidance.dispatch_text,
+            guidance.recommendation_label,
         )
-    if deliveries < 3:
-        return CareerObjective(
-            "Probation board",
-            "Finish your first three loads without late service or heavy damage.",
-            "Short regional freight is the best way to prove reliability.",
-            "short regional freight",
-        )
-    if profile.career.reputation < 70 or deliveries < 10:
+    if profile.career.reputation < 70:
         return CareerObjective(
             "Build dispatcher trust",
             f"{carrier_name(profile)} is watching on-time service, damage, and steady miles.",
