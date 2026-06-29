@@ -13,6 +13,7 @@ from ..models.business import (
     status_label,
 )
 from ..models.career_objectives import career_objective
+from ..models.career_training import is_company_training_profile, training_guidance
 from ..models.economy import (
     pay_advance_grant,
     pay_advance_unavailable_reason,
@@ -134,7 +135,17 @@ class CityMenuState(MenuState):
         rank = p.career.rank
         first_day = ""
         if not first_dispatch_done(p):
-            first_day = " First-day objective: open the dispatch board and take your first load."
+            if is_company_training_profile(p):
+                guidance = training_guidance(p)
+                first_day = (
+                    " First-day objective: open the dispatch board and take a "
+                    f"{guidance.recommendation_label} load."
+                )
+            else:
+                first_day = (
+                    " First-day objective: open the dispatch board and choose "
+                    "an unlocked load without burning your cash cushion."
+                )
         else:
             first_day = f" Career objective: {career_objective(p).terminal_text}"
         self.ctx.say(
@@ -582,16 +593,24 @@ class JobBoardState(MenuState):
                 )
             first_day = ""
             if not first_dispatch_done(self.ctx.profile):
-                first_day = (
-                    "First-day objective: pick an unlocked starter load with "
-                    "a deadline you can protect; accepting it starts your "
-                    "record with dispatch. "
-                )
+                if is_company_training_profile(self.ctx.profile):
+                    guidance = training_guidance(self.ctx.profile)
+                    first_day = (
+                        f"First-day objective: pick a {guidance.recommendation_label} "
+                        f"load. {guidance.dispatch_text} "
+                    )
+                else:
+                    first_day = (
+                        "First-day objective: pick an unlocked load with a "
+                        "deadline you can protect. Keep fuel, repairs, and "
+                        "your cash cushion in mind. "
+                    )
             else:
                 objective = career_objective(self.ctx.profile)
                 first_day = (
                     f"Career objective: {objective.title}. "
                     f"{objective.dispatch_text} "
+                    f"Recommended dispatch: {objective.recommendation}. "
                 )
             self.ctx.say(f"Dispatch board. {n} dispatch{'es' if n != 1 else ''} available. "
                          f"{business_note}{first_day}{self.ctx.profile.market.summary()} "
@@ -635,13 +654,17 @@ class JobBoardState(MenuState):
             market_preview=self._market_preview(business),
         )
         if self._recommended_job_index() == index - 1:
-            label = f"Recommended dispatch for {career_objective(p).recommendation}: {label}"
+            if first_dispatch_done(p):
+                recommendation = career_objective(p).recommendation
+            elif not is_company_training_profile(p):
+                return label
+            else:
+                recommendation = training_guidance(p).recommendation_label
+            label = f"Recommended dispatch, {recommendation}: {label}"
         return label
 
     def _recommended_job_index(self) -> int | None:
         p = self.ctx.profile
-        if not first_dispatch_done(p):
-            return None
         candidates: list[tuple[float, int]] = []
         for index, job in enumerate(self.jobs):
             if self._locked_reason(job):

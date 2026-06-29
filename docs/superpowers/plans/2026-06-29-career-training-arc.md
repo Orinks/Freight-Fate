@@ -312,7 +312,7 @@ git commit -m "fix(career): remove probation wording from early guidance"
 - Modify: `src/freight_fate/states/city.py`
 - Modify: `tests/test_career_objectives.py`
 
-- [ ] **Step 1: Add failing spoken-feedback tests**
+- [x] **Step 1: Add failing spoken-feedback tests**
 
 Append to `tests/test_career_objectives.py`:
 
@@ -363,7 +363,7 @@ def test_dispatch_board_recommendation_label_is_spoken_and_visible(monkeypatch):
         app.shutdown()
 ```
 
-- [ ] **Step 2: Run the new tests to verify failure**
+- [x] **Step 2: Run the new tests to verify failure**
 
 Run:
 
@@ -373,7 +373,7 @@ uv run pytest tests/test_career_objectives.py::test_first_day_terminal_entry_spe
 
 Expected: failure because first-day entry lacks the recommendation label and the visible label still uses `Recommended dispatch for ...`.
 
-- [ ] **Step 3: Update terminal and dispatch-board speech**
+- [x] **Step 3: Update terminal and dispatch-board speech**
 
 In `src/freight_fate/states/city.py`, import:
 
@@ -423,7 +423,7 @@ Change recommended label in `_job_label`:
             label = f"Recommended dispatch, {recommendation}: {label}"
 ```
 
-- [ ] **Step 4: Run spoken-feedback tests**
+- [x] **Step 4: Run spoken-feedback tests**
 
 Run:
 
@@ -433,7 +433,7 @@ uv run pytest tests/test_career_objectives.py -q
 
 Expected: all career objective tests pass, and no spoken or visible text includes "probation".
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 Run:
 
