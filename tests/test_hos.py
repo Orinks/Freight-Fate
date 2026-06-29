@@ -332,6 +332,27 @@ def test_skipping_thresholds_speaks_only_the_most_urgent():
     assert not any("2 hours" in m for m in drive_collecting(c, 5))
 
 
+def test_warning_batch_speaks_only_most_urgent_limit():
+    c = HosClock()
+    c.drive(900)
+
+    msgs = c.check_warnings("realistic")
+
+    assert len(msgs) == 1
+    assert "violation" in msgs[0]
+    assert "driving time" in msgs[0]
+
+
+def test_break_only_violation_summary_requests_break_not_sleep():
+    c = HosClock()
+    c.drive(481)
+
+    summary = c.summary("realistic")
+
+    assert "30-minute break" in summary or "30 minute break" in summary
+    assert "Sleep 10 hours" not in summary
+
+
 # -- modes -------------------------------------------------------------------
 
 def test_relaxed_limits_are_25_percent_longer():
@@ -698,13 +719,16 @@ def test_sleep_capable_stop_offers_sleeper_split_choices():
             name="Big Truck Stop", at_mi=driving.trip.position_mi, type="truck_stop",
             actions=("break", "fuel", "sleep"), services=(), parking="confirmed",
             exit_label="", spoken_name="Big Truck Stop", parking_text="confirmed truck parking")
-        labels = [i.text for i in RestStopState(app.ctx, driving, sleeper).build_items()]
+        items = RestStopState(app.ctx, driving, sleeper).build_items()
+        labels = [i.text for i in items]
 
         assert "Sleep 2 hours in sleeper berth" in labels
         assert "Sleep 3 hours in sleeper berth" in labels
         assert "Sleep 7 hours in sleeper berth" in labels
         assert "Sleep 8 hours in sleeper berth" in labels
         assert "Sleep 10 hours" in labels
+        back = next(i for i in items if i.text == "Back to the road")
+        assert back.help
     finally:
         app.shutdown()
 
@@ -717,6 +741,14 @@ def test_split_sleeper_rest_action_advances_clock_and_speaks_status(monkeypatch)
     app = App()
     spoken = []
     monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: spoken.append(text))
+    awards = []
+    original_award = app.ctx.award_achievement
+
+    def record_award(achievement_id: str, **kwargs):
+        awards.append((achievement_id, len(spoken)))
+        return original_award(achievement_id, **kwargs)
+
+    monkeypatch.setattr(app.ctx, "award_achievement", record_award)
     try:
         driving = start_drive(app)
         sleeper = SimpleNamespace(
@@ -730,7 +762,9 @@ def test_split_sleeper_rest_action_advances_clock_and_speaks_status(monkeypatch)
 
         assert driving.trip.game_minutes == pytest.approx(before + 480.0)
         assert driving.hos.status == "sleeper_berth"
-        assert "Sleeper split pending" in spoken[-1]
+        status_index = next(
+            i for i, text in enumerate(spoken) if "Sleeper split pending" in text)
+        assert ("slept_on_route", status_index + 1) in awards
     finally:
         app.shutdown()
 
@@ -820,6 +854,10 @@ def test_emergency_shoulder_sleep_pause_menu_constraints(monkeypatch):
         assert isinstance(app.state, ShoulderSleepConfirmationState)
         assert "If hours of service are enforced" in spoken[-1]
         assert "minor truck damage" in spoken[-1]
+        assert app.state.items[app.state.index].text == (
+            "Cancel and keep looking for a safe stop")
+        assert "previous menu" in app.state.intro_help
+        assert "returns to the road" not in app.state.intro_help
     finally:
         app.shutdown()
 
@@ -867,6 +905,11 @@ def test_hos_off_still_allows_fatigue_emergency_shoulder_sleep(monkeypatch):
         assert isinstance(app.state, ShoulderSleepConfirmationState)
         assert "poor rest" in spoken[-1]
         assert "If hours of service are enforced" in spoken[-1]
+
+        minutes_before = driving.trip.game_minutes
+        app.state.handle_event(key_event(pygame.K_RETURN))
+        assert isinstance(app.state, PauseMenuState)
+        assert driving.trip.game_minutes == minutes_before
     finally:
         app.shutdown()
 

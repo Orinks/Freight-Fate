@@ -338,7 +338,8 @@ class HosClock:
         once (a long menu action, say) speaks only the most urgent one, but
         marks them all so nothing fires late.
         """
-        messages: list[str] = []
+        candidates: list[tuple[int, float, str]] = []
+        violation_priority = {"drive": 0, "duty": 1, "break": 2}
         for kind, rem, due in self._statuses(mode):
             if rem <= 0:
                 key = f"{kind}:violation"
@@ -348,9 +349,10 @@ class HosClock:
                         k = f"{kind}:{t:.0f}"
                         if k not in self.warned:
                             self.warned.append(k)
-                    messages.append(
+                    candidates.append((
+                        violation_priority.get(kind, 9), rem,
                         "Hours of service violation: " + due + ". "
-                        "Driving on risks fines at inspections.")
+                        "Driving on risks fines at inspections."))
                 continue
             crossed = [t for t in WARNING_THRESHOLDS_MIN
                        if rem <= t and f"{kind}:{t:.0f}" not in self.warned]
@@ -358,8 +360,10 @@ class HosClock:
                 for t in crossed:
                     self.warned.append(f"{kind}:{t:.0f}")
                 phrase = _THRESHOLD_PHRASES[min(crossed)]
-                messages.append(f"Hours of service: {phrase} until {due}.")
-        return messages
+                candidates.append((10, rem, f"Hours of service: {phrase} until {due}."))
+        if not candidates:
+            return []
+        return [min(candidates, key=lambda item: (item[0], item[1]))[2]]
 
     def summary(self, mode: str) -> str:
         """Spoken status for the C key and Tab report."""
@@ -371,6 +375,10 @@ class HosClock:
         duty_left = max(0.0, duty_limit - self.duty_min) / 60.0
         break_left = max(0.0, break_after - self.since_break_min) / 60.0
         if self.in_violation(mode):
+            violations = {kind for kind, rem, _ in self._statuses(mode) if rem <= 0}
+            if violations == {"break"}:
+                return ("Hours of service: you are past your break limit. "
+                        "Take a 30-minute break at a rest stop.")
             return ("Hours of service: you are past your limit. "
                     "Sleep 10 hours at a rest stop to reset.")
         status = self.status.replace("_", " ")

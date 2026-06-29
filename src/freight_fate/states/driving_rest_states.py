@@ -9,7 +9,7 @@ class ShoulderSleepConfirmationState(MenuState):
 
     title = "Emergency shoulder sleep"
     intro_help = ("Use up and down arrows to navigate, Enter to select. "
-                  "Escape cancels and returns to the road.")
+                  "Escape cancels and returns to the previous menu.")
 
     def __init__(self, ctx, driving: DrivingState, reason: str,
                  anchor_mi: float | None = None) -> None:
@@ -29,11 +29,11 @@ class ShoulderSleepConfirmationState(MenuState):
 
     def build_items(self) -> list[MenuItem]:
         return [
+            MenuItem("Cancel and keep looking for a safe stop", self.go_back,
+                     help="Return to the previous menu without resting here."),
             MenuItem("Sleep on the shoulder anyway", self._sleep,
                      help="Accept poor emergency rest, possible ticket, "
                           "possible minor truck damage, and deadline time loss."),
-            MenuItem("Cancel and keep looking for a safe stop", self.go_back,
-                     help="Return to the road without resting here."),
         ]
 
     def _sleep(self) -> None:
@@ -223,7 +223,9 @@ class RestStopState(MenuState):
                 help="Draw cash against this load when you are broke and cannot "
                      "afford fuel. Repaid automatically out of your delivery "
                      "settlement."))
-        items.append(MenuItem("Back to the road", self.go_back))
+        items.append(MenuItem(
+            "Back to the road", self.go_back,
+            help="Leave this stop and return to driving."))
         return items
 
     def _pay_advance_label(self) -> str:
@@ -347,10 +349,10 @@ class RestStopState(MenuState):
             "Sleeper split credited. "
             if completed else (d.hos.split_pending_summary() or "Sleeper berth rest recorded.")
         )
-        self.ctx.award_achievement("slept_on_route")
         self.ctx.say(
             f"You slept {hours} hours in the sleeper berth. "
             f"It is {clock_text(d.trip.current_hour)}. {status} {_deadline_text(d)}")
+        self.ctx.award_achievement("slept_on_route")
         self.refresh()
 
     def _sleep(self) -> None:
