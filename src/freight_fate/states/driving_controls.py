@@ -25,6 +25,9 @@ class DrivingControlsMixin:
         elif key in GEAR_KEYS and not tr.automatic:
             self._manual_shift(GEAR_KEYS[key])
         elif key == pygame.K_j:
+            if self.truck.throttle > 0.05 and not self.truck.engine_brake:
+                self.ctx.say("Release the accelerator before turning the engine brake on.")
+                return
             self.truck.engine_brake = not self.truck.engine_brake
             self.ctx.say("Engine brake on." if self.truck.engine_brake
                          else "Engine brake off.")

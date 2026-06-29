@@ -219,8 +219,12 @@ class TruckState:
         friction = self.gross_mass_kg * effort * self.grip
         capacity = s.mass_kg * effort
         service = min(friction, capacity)
-        jake = s.engine_brake_force_n if (self.engine_brake and self.engine_on
-                                          and not self.transmission.in_neutral) else 0.0
+        jake = s.engine_brake_force_n if (
+            self.engine_brake
+            and self.engine_on
+            and self.throttle <= 0.05
+            and not self.transmission.in_neutral
+        ) else 0.0
         direction = 1.0 if self.velocity_mps > 0 else -1.0
         return direction * (service + jake)
 

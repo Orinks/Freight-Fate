@@ -759,6 +759,56 @@ def test_rest_stop_menu_can_save_active_drive():
 
 
 @pytest.mark.smoke
+def test_engine_brake_cannot_be_enabled_while_accelerating(monkeypatch):
+    from freight_fate.app import App
+
+    app = App()
+    spoken = []
+    monkeypatch.setattr(app.ctx, "say",
+                        lambda text, interrupt=True: spoken.append(text))
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        driving.truck.engine_brake = False
+        driving.truck.throttle = 0.4
+
+        driving.handle_event(key_event(pygame.K_j))
+
+        assert not driving.truck.engine_brake
+        assert any("Release the accelerator" in text for text in spoken)
+    finally:
+        app.shutdown()
+
+
+@pytest.mark.smoke
+def test_accelerating_turns_engine_brake_off(monkeypatch):
+    from freight_fate.app import App
+
+    class FakeKeys:
+        def __getitem__(self, key):
+            return key == pygame.K_UP
+
+    app = App()
+    events = []
+    monkeypatch.setattr(pygame.key, "get_pressed", lambda: FakeKeys())
+    monkeypatch.setattr(app.ctx, "say_event",
+                        lambda text, interrupt=True: events.append(text))
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        driving.truck.engine_brake = True
+        driving.truck.set_air_ready(parking_brake=False)
+
+        driving.update(1 / 60)
+
+        assert not driving.truck.engine_brake
+        assert driving.truck.throttle > 0.0
+        assert "Engine brake off." in events
+    finally:
+        app.shutdown()
+
+
+@pytest.mark.smoke
 def test_opening_a_route_stop_secures_the_truck():
     """A truck that rolled in just under the docking threshold must be parked
     when the stop menu opens, so it cannot creep while the driver rests."""

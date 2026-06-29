@@ -3,6 +3,9 @@
 ## Unreleased
 ### Fixed
 
+- **Engine brake and throttle no longer fight each other.** The engine brake now
+  refuses to switch on while you are accelerating, and pressing the accelerator
+  turns it back off so the truck can make power normally.
 - **Destination exits keep the route status honest.** Taking a delivery exit now
   clears the remaining route miles before the dock menu opens, and the GPS no
   longer repeats the destination exit with a second generic interchange cue.

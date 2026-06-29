@@ -22,6 +22,9 @@ class DrivingUpdateMixin:
         if accelerating and not backing and t.air_brakes_holding:
             self._maybe_say_air_brake_lockout()
         if accelerating and not backing:
+            if t.engine_brake:
+                t.engine_brake = False
+                self.ctx.say_event("Engine brake off.", interrupt=False)
             t.throttle = min(1.0, t.throttle + ramp)
         elif backing:
             t.throttle = min(0.45, t.throttle + ramp)
