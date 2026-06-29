@@ -32,6 +32,7 @@ class Trip(TripRoadEventMixin, TripTrafficMixin):
         self.game_minutes = 0.0
         self.finished = False
         self.hos_violation = False     # set by the UI layer; gates inspections
+        self._seed = seed
         self._rng = random.Random(seed)
         self._insp_rng = random.Random(None if seed is None else seed ^ 0x5EED)
         self._cond_rng = random.Random(None if seed is None else seed ^ 0xC0FFEE)
@@ -41,6 +42,7 @@ class Trip(TripRoadEventMixin, TripTrafficMixin):
         self.stops = self._place_stops()
         self.toll_charges: list[TollCharge] = []
         self.traffic_leads = self._place_traffic()
+        self.npc_vehicles = self._place_npc_traffic()
         self.zones = self._place_zones()
         self.traffic_pressures = self._place_traffic_pressures()
         self.navigation_cues = self._build_navigation_cues()
@@ -53,6 +55,7 @@ class Trip(TripRoadEventMixin, TripTrafficMixin):
         self._announced_speed_limit: float | None = None
         self._announced_zone_warnings: set[str] = set()
         self._announced_traffic_pressures: set[str] = set()
+        self._announced_npc_traffic: set[str] = set()
         self._construction_zone_grace_start: dict[str, float] = {}
         self._announced_patrols: set[str] = set()
         self._hazard_check_mi = 5.0
@@ -481,24 +484,6 @@ class Trip(TripRoadEventMixin, TripTrafficMixin):
             return None
         return min(active, key=lambda z: z.limit_mph)
 
-    def traffic_context(self) -> TrafficContext | None:
-        best: TrafficContext | None = None
-        for lead in self.traffic_leads:
-            gap = lead.at_mi - self.position_mi
-            if gap < -lead.length_mi or gap > TRAFFIC_LOOKAHEAD_MI:
-                continue
-            closing = max(0.0, self.truck.speed_mph - lead.speed_mph)
-            context = TrafficContext(lead, max(0.0, gap), closing)
-            if best is None or context.gap_mi < best.gap_mi:
-                best = context
-        return best
-
-    def traffic_target_speed(self) -> float | None:
-        context = self.traffic_context()
-        if context is None:
-            return None
-        return context.lead.speed_mph
-
     def nearest_stop_within(self, radius_mi: float = 1.5) -> RoadStop | None:
         for stop in self.stops:
             if abs(stop.at_mi - self.position_mi) <= radius_mi:
@@ -675,9 +660,11 @@ class Trip(TripRoadEventMixin, TripTrafficMixin):
         if self.position_mi < 0.0:
             self.position_mi = 0.0
 
+        self._update_npc_traffic(dt)
         self._check_zones()
         self._check_speed_limit()
         self._check_stops()
+        self._check_npc_traffic_cues()
         self._check_traffic_pressures()
         self._check_navigation_cues()
         self._check_tolls()

@@ -317,9 +317,48 @@ class TrafficLead:
         return self.at_mi + self.length_mi
 
 
+@dataclass
+class NPCVehicle:
+    """A simulated nearby road user that can affect traffic flow."""
+
+    key: str
+    position_mi: float
+    speed_mph: float
+    target_speed_mph: float
+    relative_lane: int
+    behavior: str
+    length_mi: float = 0.25
+
+    @property
+    def at_mi(self) -> float:
+        return self.position_mi
+
+    @property
+    def end_mi(self) -> float:
+        return self.position_mi + self.length_mi
+
+    @property
+    def lane_text(self) -> str:
+        if self.relative_lane < 0:
+            return "left lane"
+        if self.relative_lane > 0:
+            return "right lane"
+        return "your lane"
+
+    @property
+    def reason(self) -> str:
+        return {
+            "steady_truck": "steady truck traffic",
+            "slow_car": "slow car ahead",
+            "merging_vehicle": "merging traffic",
+            "braking_traffic": "brake lights ahead",
+            "passing_vehicle": "passing traffic",
+        }.get(self.behavior, "traffic ahead")
+
+
 @dataclass(frozen=True)
 class TrafficContext:
-    lead: TrafficLead
+    lead: TrafficLead | NPCVehicle
     gap_mi: float
     closing_mph: float
 

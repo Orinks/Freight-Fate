@@ -70,6 +70,7 @@ def quiet_trip(driving):
     driving.trip._hazard_check_mi = 1e9
     driving.trip._inspection_check_mi = 1e9
     driving.trip.traffic_leads = []
+    driving.trip.npc_vehicles = []
 
 
 def open_limits(driving):

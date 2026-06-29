@@ -132,6 +132,8 @@ HELP_PAGES = [
         "Use the status menu to review that chatter with other route guidance.",
         "Some hazards come from traffic ahead, such as slow lead vehicles,",
         "merging traffic, lane restrictions, and queues.",
+        "Nearby simulated vehicles may merge, brake, pass, or slow in your lane.",
+        "Adaptive cruise can follow them, but you still steer and manage space.",
         "Highway stops use clear place names and list the actions available there.",
         "Depending on the stop, you may be able to fuel, eat, rest, save, inspect,",
         "or call for help.",
