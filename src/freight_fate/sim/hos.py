@@ -252,6 +252,11 @@ class HosClock:
                 e.minutes for e in between
                 if e.status in {"driving", "on_duty_not_driving"}
             )
+        elif first.minutes < second.minutes:
+            first_drive_after = first.drive_before
+            first_duty_after = first.duty_before + first.minutes
+            self.driving_min = max(0.0, self.driving_min - first_drive_after)
+            self.duty_min = max(0.0, self.duty_min - first_duty_after - second.minutes)
         else:
             self.driving_min = max(0.0, first.drive_before)
             on_duty_between = sum(e.minutes for e in between if e.status == "on_duty_not_driving")

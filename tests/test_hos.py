@@ -116,6 +116,18 @@ def test_normal_sleeper_periods_can_complete_split_credit():
     assert c.split_pending_summary() is None
 
 
+def test_short_first_sleeper_split_preserves_between_rest_driving():
+    c = HosClock()
+    c.drive(60)
+    c.sleeper(120)
+    c.drive(600)
+    c.sleeper(480)
+
+    assert c.driving_min == pytest.approx(600)
+    assert c.duty_min == pytest.approx(600)
+    assert c.split_pending_summary() is None
+
+
 def test_seven_three_sleeper_split_restores_time_without_full_reset():
     c = HosClock()
     c.drive(240)
