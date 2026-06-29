@@ -376,6 +376,12 @@ Freight Fate tracks an ELD-style hours clock. In realistic mode:
 - You need a 30-minute break after 8 cumulative hours of driving.
 - Sleeping 10 hours resets the shift clock.
 
+At sleep-capable truck parking, the sleeper berth means the bunk in your cab.
+You can choose 2, 3, 7, or 8 hours in the sleeper berth to plan an 8+2 or 7+3
+split. Sleep 10 hours remains the simplest full reset. Shoulder sleep and
+Sleep 10 hours in the lot are fallback rests, not clean split-rest planning
+tools.
+
 The game gives warnings at 2 hours, 1 hour, and 30 minutes before a limit.
 Driving past a limit risks inspections, fines, reputation loss, and
 out-of-service orders.
@@ -389,11 +395,11 @@ forces you off the road. A 30-minute break reduces fatigue; a proper 10-hour
 sleep clears it. Plan your rest before you get there.
 
 Emergency shoulder sleep is a fallback, not normal rest. It can appear in the
-pause menu only when you are stopped away from a route point of interest and
-the game sees a real hours or fatigue problem without a suitable stop visible.
-The confirmation explains that 10 hours pass, the hours clock resets, fatigue
-only improves to a poor-rest floor, a parking ticket is possible, minor truck
-damage is possible, and the delivery deadline keeps running.
+pause menu when you are stopped away from a route point of interest. The game
+uses stronger warnings when hours are tight or fatigue is severe. The
+confirmation explains that 10 hours pass, the hours clock resets, fatigue only
+improves to a poor-rest floor, a parking ticket is possible, minor truck damage
+is possible, and the delivery deadline keeps running.
 
 ## Status Screens
 
@@ -430,7 +436,7 @@ Escape opens the pause menu during a drive. Public pause choices include:
 | Trip status | Review cargo, objective, route progress, time used, and air status. |
 | Controls and help | Open the how-to-play reference at the driving keys, page by page, without leaving the drive. |
 | Call a roadside mechanic | Patch severe truck damage enough to continue, at a high cost. |
-| Emergency shoulder sleep | Appears only when the game detects a true hours or fatigue emergency. |
+| Emergency shoulder sleep | Rest on the shoulder when stopped away from route points; warnings get stronger when hours or fatigue are urgent. |
 | Settings | Open settings during the drive. |
 | Abandon job | Pay a penalty and return to the origin city. |
 | Save and quit to main menu | Save the active drive and resume it later. |

@@ -247,6 +247,17 @@ def test_split_pending_summary_names_needed_pair():
     )
 
 
+def test_hos_summary_mentions_pending_sleeper_split():
+    c = HosClock()
+    c.drive(300)
+    c.sleeper_split_rest(480)
+
+    summary = c.summary("realistic")
+
+    assert "Sleeper split pending" in summary
+    assert "2 more hours" in summary
+
+
 def test_completed_split_summary_stays_clear_after_dict_roundtrip():
     c = HosClock()
     c.drive(300)
