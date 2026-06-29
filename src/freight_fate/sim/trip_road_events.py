@@ -21,8 +21,6 @@ class TripRoadEventMixin:
             intensity += 0.20
         elif kind == "construction_merge":
             intensity += 0.34
-        elif kind == "traffic_pack":
-            intensity += 0.24
         if self._near_city(mile):
             intensity += 0.22
         if leg.checkpoints:
@@ -73,10 +71,6 @@ class TripRoadEventMixin:
             if zone.reason == "construction merge":
                 add(zone.start_mi, zone.end_mi, "construction_merge", "left",
                     "construction taper traffic")
-        for lead in self.traffic_leads:
-            add(lead.at_mi - 1.2, lead.end_mi, "traffic_pack", "center",
-                lead.reason)
-
         pressures.sort(key=lambda pressure: pressure.start_mi)
         return pressures
 

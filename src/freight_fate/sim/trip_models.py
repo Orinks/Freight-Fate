@@ -304,20 +304,6 @@ class RoadStop:
 
 
 @dataclass
-class TrafficLead:
-    """A simple lead vehicle or traffic pack on the current itinerary."""
-
-    at_mi: float
-    speed_mph: float
-    reason: str
-    length_mi: float = 5.0
-
-    @property
-    def end_mi(self) -> float:
-        return self.at_mi + self.length_mi
-
-
-@dataclass
 class NPCVehicle:
     """A simulated nearby road user that can affect traffic flow."""
 
@@ -358,7 +344,7 @@ class NPCVehicle:
 
 @dataclass(frozen=True)
 class TrafficContext:
-    lead: TrafficLead | NPCVehicle
+    lead: NPCVehicle
     gap_mi: float
     closing_mph: float
 

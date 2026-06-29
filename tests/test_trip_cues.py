@@ -3,7 +3,7 @@
 from test_weather_trip import _gps_events, _gps_messages, make_trip
 
 from freight_fate.sim import Trip, TruckState, WeatherSystem
-from freight_fate.sim.trip import NavigationCue, TrafficLead, TripEventKind
+from freight_fate.sim.trip import NavigationCue, NPCVehicle, TripEventKind
 from freight_fate.sim.weather import REGION_WEIGHTS
 
 
@@ -229,7 +229,9 @@ def test_traffic_context_and_warning_are_grounded_in_lead_vehicle(world):
     trip, truck = make_trip(world)
     truck.velocity_mps = 29.0
     trip.position_mi = 9.98
-    trip.traffic_leads = [TrafficLead(10.0, 45.0, "traffic queue ahead", 4.0)]
+    trip.npc_vehicles = [
+        NPCVehicle("npc:queue", 10.0, 45.0, 45.0, 0, "braking_traffic")
+    ]
 
     context = trip.traffic_context()
     assert context is not None
@@ -241,7 +243,7 @@ def test_traffic_context_and_warning_are_grounded_in_lead_vehicle(world):
 
     hazards = [event for event in events if event.kind == TripEventKind.HAZARD]
     assert hazards
-    assert "Traffic queue ahead" in hazards[0].message
+    assert "Brake lights" in hazards[0].message
     assert "traffic" in hazards[0].data
 
 

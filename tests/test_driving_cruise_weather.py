@@ -217,38 +217,6 @@ def test_cruise_control_requires_road_speed_and_cancels_on_hazard():
 
 
 @pytest.mark.smoke
-def test_adaptive_cruise_follows_modeled_traffic(monkeypatch):
-    from freight_fate.app import App
-    from freight_fate.sim.trip import TrafficLead
-
-    app = App()
-    events = []
-    try:
-        driving = start_drive(app)
-        quiet_trip(driving)
-        monkeypatch.setattr(app.ctx, "say_event",
-                            lambda text, interrupt=True: events.append(text))
-        open_limits(driving)                           # isolate following from the limit cap
-        driving.trip.traffic_leads = [
-            TrafficLead(driving.trip.position_mi + 0.08, 45.0, "slow lead traffic", 4.0)
-        ]
-        driving.handle_event(key_event(pygame.K_e))
-        driving.truck.transmission.gear = 10
-        driving.truck.velocity_mps = 29.0
-        driving.truck.throttle = 0.9
-        driving.handle_event(key_event(pygame.K_k))
-        driving.update(1 / 60)
-
-        assert driving._cruise_mph is not None
-        assert driving._acc_following
-        assert driving.truck.throttle < 0.9
-        assert driving.truck.brake > 0.0
-        assert "Traffic ahead, adaptive cruise reducing speed." in events
-    finally:
-        app.shutdown()
-
-
-@pytest.mark.smoke
 def test_adaptive_cruise_follows_npc_traffic(monkeypatch):
     from freight_fate.app import App
     from freight_fate.sim.trip import NPCVehicle
@@ -396,7 +364,7 @@ def test_adaptive_cruise_allows_a_small_offset_over_the_limit(monkeypatch):
 @pytest.mark.smoke
 def test_adaptive_cruise_increases_gap_for_bad_weather(monkeypatch):
     from freight_fate.app import App
-    from freight_fate.sim.trip import TrafficLead
+    from freight_fate.sim.trip import NPCVehicle
     from freight_fate.sim.weather import WeatherKind
 
     app = App()
@@ -412,9 +380,9 @@ def test_adaptive_cruise_increases_gap_for_bad_weather(monkeypatch):
         driving.truck.throttle = 0.5
         driving.handle_event(key_event(pygame.K_k))
 
-        driving.trip.traffic_leads = [
-            TrafficLead(driving.trip.position_mi + 0.08, 65.0,
-                        "slow lead traffic", 4.0)
+        driving.trip.npc_vehicles = [
+            NPCVehicle("npc:weather-gap", driving.trip.position_mi + 0.08,
+                       65.0, 65.0, 0, "steady_truck")
         ]
         driving.weather.current = WeatherKind.CLEAR
         clear_gap = driving._acc_gap_seconds()

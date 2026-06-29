@@ -157,7 +157,7 @@ def test_full_game_flow_headless(monkeypatch):
         driving.truck.set_air_ready(parking_brake=False)
         driving.trip._hazard_check_mi = 1e9
         driving.trip._inspection_check_mi = 1e9
-        driving.trip.traffic_leads = []
+        driving.trip.npc_vehicles = []
 
         # The dispatch board's shortest unlocked job varies run to run, so a
         # flat frame budget flaked when the only short job was still long

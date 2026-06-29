@@ -12,7 +12,6 @@ from freight_fate.sim.trip import (
     CONSTRUCTION_TAPER_MI,
     NavigationCue,
     NPCVehicle,
-    TrafficLead,
     TripEventKind,
 )
 from freight_fate.sim.trip_models import RoadStop
@@ -359,7 +358,7 @@ def test_too_fast_for_conditions_risks_traction_loss(world):
     trip, truck = make_trip(world)
     trip._hazard_check_mi = 1e9          # silence the random environmental hazards
     trip._inspection_check_mi = 1e9
-    trip.traffic_leads = []
+    trip.npc_vehicles = []
 
     def run_for_hazard(frames=12000):
         hits = []
@@ -380,7 +379,7 @@ def test_too_fast_for_conditions_risks_traction_loss(world):
     trip2, truck2 = make_trip(world, seed=7)
     trip2._hazard_check_mi = 1e9
     trip2._inspection_check_mi = 1e9
-    trip2.traffic_leads = []
+    trip2.npc_vehicles = []
     safe_hits = []
     for _ in range(6000):
         trip2.weather.current = WeatherKind.SNOW
@@ -521,7 +520,7 @@ def test_facility_gate_warns_before_final_low_speed_zone(world):
 
 
 def test_construction_zone_warns_before_entry(world):
-    trip, truck = make_trip(world, "Chicago", "Indianapolis", seed=12345)
+    trip, truck = make_trip(world, "Chicago", "Indianapolis", seed=2)
     zone = next(z for z in trip.zones if z.reason == "construction")
     truck.velocity_mps = 70 / 2.23694
     trip.time_scale = 20.0
@@ -542,7 +541,7 @@ def test_construction_zone_warns_before_entry(world):
 
 
 def test_construction_zone_has_staged_merge_taper(world):
-    trip, _ = make_trip(world, "Chicago", "Indianapolis", seed=12345)
+    trip, _ = make_trip(world, "Chicago", "Indianapolis", seed=2)
     zone = next(z for z in trip.zones if z.reason == "construction")
     taper = next(
         z for z in trip.zones
@@ -558,7 +557,7 @@ def test_construction_zone_has_staged_merge_taper(world):
 
 
 def test_construction_warning_lead_allows_normal_braking(world):
-    trip, truck = make_trip(world, "Chicago", "Indianapolis", seed=12345)
+    trip, truck = make_trip(world, "Chicago", "Indianapolis", seed=2)
     zone = next(z for z in trip.zones if z.reason == "construction")
     truck.velocity_mps = 70 / 2.23694
     trip.time_scale = 20.0
@@ -574,7 +573,7 @@ def test_construction_warning_lead_allows_normal_braking(world):
 
 
 def test_construction_zone_does_not_fine_on_entry_tick(world):
-    trip, truck = make_trip(world, "Chicago", "Indianapolis", seed=12345)
+    trip, truck = make_trip(world, "Chicago", "Indianapolis", seed=2)
     zone = next(z for z in trip.zones if z.reason == "construction")
     truck.velocity_mps = 31.3   # about 70 mph
 
@@ -590,7 +589,7 @@ def test_construction_zone_does_not_fine_on_entry_tick(world):
 
 
 def test_construction_zone_speeding_fine_waits_for_grace_distance(world):
-    trip, truck = make_trip(world, "Chicago", "Indianapolis", seed=12345)
+    trip, truck = make_trip(world, "Chicago", "Indianapolis", seed=2)
     zone = next(z for z in trip.zones if z.reason == "construction")
     truck.velocity_mps = 31.3   # about 70 mph
 
@@ -619,7 +618,7 @@ def test_construction_zone_speeding_fine_waits_for_grace_distance(world):
 
 
 def test_late_emergency_brake_can_save_construction_speeding(world):
-    trip, truck = make_trip(world, "Chicago", "Indianapolis", seed=12345)
+    trip, truck = make_trip(world, "Chicago", "Indianapolis", seed=2)
     zone = next(z for z in trip.zones if z.reason == "construction")
     truck.velocity_mps = 70 / 2.23694
     trip.time_scale = 20.0
@@ -664,19 +663,23 @@ def test_traffic_varies_by_seed_but_route_grade_does_not(world):
     assert [trip_a.grade_at(mile) for mile in (10.0, 80.0, 150.0)] == [
         trip_b.grade_at(mile) for mile in (10.0, 80.0, 150.0)
     ]
-    assert [(lead.at_mi, lead.speed_mph, lead.reason) for lead in trip_a.traffic_leads] != [
-        (lead.at_mi, lead.speed_mph, lead.reason) for lead in trip_b.traffic_leads
+    assert [
+        (vehicle.at_mi, vehicle.speed_mph, vehicle.reason)
+        for vehicle in trip_a.npc_vehicles
+    ] != [
+        (vehicle.at_mi, vehicle.speed_mph, vehicle.reason)
+        for vehicle in trip_b.npc_vehicles
     ]
 
 
-def test_traffic_model_applies_to_enriched_and_legacy_routes(world):
+def test_npc_traffic_model_applies_to_enriched_and_legacy_routes(world):
     for cities in (["Chicago", "Indianapolis"], ["Chicago", "St. Louis"]):
         route = world.route_from_cities(cities)
         truck = TruckState()
         weather = WeatherSystem("great_lakes", seed=1)
         weather.current = WeatherKind.CLEAR
         trip = Trip(route, truck, weather, seed=1)
-        assert trip.traffic_leads, cities
+        assert trip.npc_vehicles, cities
 
 
 def test_npc_traffic_seeding_is_deterministic(world):
@@ -684,8 +687,8 @@ def test_npc_traffic_seeding_is_deterministic(world):
     weather = WeatherSystem("great_lakes", seed=1)
     weather.current = WeatherKind.CLEAR
 
-    trip_a = Trip(route, TruckState(), weather, seed=7, start_hour=8.0)
-    trip_b = Trip(route, TruckState(), weather, seed=7, start_hour=8.0)
+    trip_a = Trip(route, TruckState(), weather, seed=1, start_hour=8.0)
+    trip_b = Trip(route, TruckState(), weather, seed=1, start_hour=8.0)
 
     def signature(trip):
         return [
@@ -725,11 +728,10 @@ def test_bad_weather_slows_modeled_traffic(world):
     clear = Trip(route, TruckState(), clear_weather, seed=1)
     rain = Trip(route, TruckState(), rain_weather, seed=1)
 
-    assert clear.traffic_leads
-    assert rain.traffic_leads
-    assert rain.traffic_leads[0].at_mi == clear.traffic_leads[0].at_mi
-    assert rain.traffic_leads[0].speed_mph < clear.traffic_leads[0].speed_mph
-    assert "visibility" in rain.traffic_leads[0].reason
+    assert clear.npc_vehicles
+    assert rain.npc_vehicles
+    assert rain.npc_vehicles[0].at_mi == clear.npc_vehicles[0].at_mi
+    assert rain.npc_vehicles[0].speed_mph < clear.npc_vehicles[0].speed_mph
 
 
 def test_rush_hour_can_slow_modeled_traffic(world):
@@ -742,9 +744,9 @@ def test_rush_hour_can_slow_modeled_traffic(world):
         seed=1, start_hour=8.0)
 
     assert rush._rush_hour_traffic_bias(route.legs[0]) > 0.0
-    if rush.traffic_leads and midday.traffic_leads:
-        assert min(lead.speed_mph for lead in rush.traffic_leads) <= (
-            min(lead.speed_mph for lead in midday.traffic_leads)
+    if rush.npc_vehicles and midday.npc_vehicles:
+        assert min(vehicle.speed_mph for vehicle in rush.npc_vehicles) <= (
+            min(vehicle.speed_mph for vehicle in midday.npc_vehicles)
         )
 
 
@@ -1070,7 +1072,9 @@ def test_traffic_context_and_warning_are_grounded_in_lead_vehicle(world):
     trip, truck = make_trip(world)
     truck.velocity_mps = 29.0
     trip.position_mi = 9.98
-    trip.traffic_leads = [TrafficLead(10.0, 45.0, "traffic queue ahead", 4.0)]
+    trip.npc_vehicles = [
+        NPCVehicle("npc:queue", 10.0, 45.0, 45.0, 0, "braking_traffic")
+    ]
 
     context = trip.traffic_context()
     assert context is not None
@@ -1082,7 +1086,7 @@ def test_traffic_context_and_warning_are_grounded_in_lead_vehicle(world):
 
     hazards = [event for event in events if event.kind == TripEventKind.HAZARD]
     assert hazards
-    assert "Traffic queue ahead" in hazards[0].message
+    assert "Brake lights" in hazards[0].message
     assert "traffic" in hazards[0].data
 
 

@@ -29,8 +29,7 @@ class TripTrafficMixin:
             for city, leg in zip(self.route.cities, self.route.legs, strict=False)
         )
         return (
-            f"npc:{getattr(self, '_seed', None)}:{route_key}:"
-            f"{self.start_hour:.1f}:{self.weather.current.value}"
+            f"npc:{getattr(self, '_seed', None)}:{route_key}"
         )
 
     def _npc_rng(self) -> random.Random:
@@ -79,7 +78,8 @@ class TripTrafficMixin:
                     "braking_traffic": rng.uniform(35.0, 48.0),
                     "passing_vehicle": rng.uniform(62.0, 75.0),
                 }[behavior]
-                speed = max(25.0, base_speed - weather_slowdown)
+                rush_slowdown = rng.uniform(4.0, 10.0) if self._rush_hour_traffic_bias(leg) else 0.0
+                speed = max(25.0, base_speed - weather_slowdown - rush_slowdown)
                 lane = -1 if behavior == "passing_vehicle" else 0
                 if behavior == "merging_vehicle":
                     lane = 1
@@ -123,20 +123,8 @@ class TripTrafficMixin:
                 best = context
         return best
 
-    def _legacy_traffic_context(self) -> TrafficContext | None:
-        best: TrafficContext | None = None
-        for lead in self.traffic_leads:
-            gap = lead.at_mi - self.position_mi
-            if gap < -lead.length_mi or gap > TRAFFIC_LOOKAHEAD_MI:
-                continue
-            closing = max(0.0, self.truck.speed_mph - lead.speed_mph)
-            context = TrafficContext(lead, max(0.0, gap), closing)
-            if best is None or context.gap_mi < best.gap_mi:
-                best = context
-        return best
-
     def traffic_context(self) -> TrafficContext | None:
-        return self._npc_context() or self._legacy_traffic_context()
+        return self._npc_context()
 
     def traffic_target_speed(self) -> float | None:
         context = self.traffic_context()

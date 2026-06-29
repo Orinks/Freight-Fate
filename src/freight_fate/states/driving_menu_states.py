@@ -325,8 +325,8 @@ class DriverAppScreenState(MenuState):
         lines = []
         if context is not None:
             lines.append(
-                f"Traffic: {context.reason}; pace about "
-                f"{settings.speed_text(context.speed_mph)}."
+                f"Traffic: {context.lead.reason}; pace about "
+                f"{settings.speed_text(context.lead.speed_mph)}."
             )
         line = self._next_traffic_line()
         lines.append(line or "Traffic: no reported pinch in the next 20 miles.")
@@ -369,8 +369,8 @@ class DriverAppScreenState(MenuState):
         d = self.driving
         settings = self.ctx.settings
         pos = d.trip.position_mi
-        for lead in getattr(d.trip, "traffic_leads", []):
-            ahead = lead.at_mi - pos
+        for lead in getattr(d.trip, "npc_vehicles", []):
+            ahead = lead.position_mi - pos
             if 0 <= ahead <= 20.0:
                 return (
                     f"Traffic ahead: {lead.reason} in "

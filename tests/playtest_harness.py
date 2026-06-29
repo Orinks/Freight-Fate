@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import os
+import re
 from dataclasses import dataclass, field
 
 os.environ.setdefault("SDL_VIDEODRIVER", "dummy")
@@ -11,6 +12,8 @@ os.environ.setdefault("FREIGHT_FATE_NO_SPEECH", "1")
 os.environ.setdefault("PYGAME_HIDE_SUPPORT_PROMPT", "1")
 
 import pygame
+
+from freight_fate.sim.trip_models import NPCVehicle, TrafficPressure
 
 
 def key_event(key: int, unicode: str = ""):
@@ -41,7 +44,10 @@ class PlaytestResult:
             if "destination exit" in line or "exit for the destination" in line
         ]
         assert len(destination_exit_lines) <= 1, self.transcript_text
-        assert not any("21 miles remaining" in line for line in lower_lines), self.transcript_text
+        assert not any(
+            re.search(r"\b21 miles remaining\b", line)
+            for line in lower_lines
+        ), self.transcript_text
         assert self.remaining_miles == 0.0
 
 
@@ -140,9 +146,7 @@ class PlaytestHarness:
         assert self.app is not None
         assert self.driving is not None
         driving = self.driving
-        driving.handle_event(key_event(pygame.K_e))
-        driving.truck.transmission.automatic = True
-        driving.truck.set_air_ready(parking_brake=False)
+        self.prepare_for_driving()
 
         crawl_mph = 15.0
         max_frames = int(driving.trip.total_miles / crawl_mph * 3600 * 60) + 60 * 60
@@ -171,6 +175,64 @@ class PlaytestHarness:
         self.result.current_city = profile.current_city
         self.result.remaining_miles = driving.trip.remaining_miles
         return self.result
+
+    def prepare_for_driving(self, *, speed_mph: float = 30.0) -> None:
+        """Put the active delivery truck in a road-ready deterministic state."""
+        assert self.driving is not None
+        driving = self.driving
+        if not driving.truck.engine_on:
+            driving.handle_event(key_event(pygame.K_e))
+        driving.truck.transmission.automatic = True
+        driving.truck.set_air_ready(parking_brake=False)
+        driving.truck.velocity_mps = speed_mph / 2.2369362920544
+
+    def press_key(self, key: int, unicode: str = "") -> None:
+        assert self.driving is not None
+        self.driving.handle_event(key_event(key, unicode))
+
+    def drive_frames(self, frames: int) -> None:
+        for _ in range(frames):
+            self._drive_one_frame()
+
+    def add_npc_traffic_ahead(
+            self,
+            *,
+            behavior: str = "merging_vehicle",
+            gap_mi: float = 0.8,
+            speed_mph: float = 42.0,
+            relative_lane: int = 1) -> NPCVehicle:
+        assert self.driving is not None
+        vehicle = NPCVehicle(
+            "harness:npc",
+            self.driving.trip.position_mi + gap_mi,
+            speed_mph,
+            speed_mph,
+            relative_lane,
+            behavior,
+        )
+        self.driving.trip.npc_vehicles = [vehicle]
+        return vehicle
+
+    def add_traffic_pressure_ahead(
+            self,
+            *,
+            gap_mi: float = 2.0,
+            kind: str = "exit",
+            direction: str = "right",
+            reason: str = "exit traffic for harness ramp") -> TrafficPressure:
+        assert self.driving is not None
+        start = self.driving.trip.position_mi + gap_mi
+        pressure = TrafficPressure(
+            start,
+            start + 1.0,
+            kind,
+            direction,
+            0.8,
+            42.0,
+            reason,
+        )
+        self.driving.trip.traffic_pressures = [pressure]
+        return pressure
 
     def _select_current_menu_text(self, text: str) -> None:
         assert self.app is not None
@@ -203,10 +265,14 @@ class PlaytestHarness:
         route_state.handle_event(key_event(pygame.K_RETURN))
 
     def _neutralize_random_trip_friction(self) -> None:
+        from freight_fate.sim.weather import WeatherKind
+
         assert self.driving is not None
         self.driving.trip._hazard_check_mi = 1e9
         self.driving.trip._inspection_check_mi = 1e9
-        self.driving.trip.traffic_leads = []
+        self.driving.trip.npc_vehicles = []
+        self.driving.trip.traffic_pressures = []
+        self.driving.weather.current = WeatherKind.CLEAR
 
     def _drive_one_frame(self) -> None:
         driving = self.driving

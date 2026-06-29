@@ -49,7 +49,6 @@ class Trip(TripRoadEventMixin, TripTrafficMixin):
         self._city_mileposts = list(self._leg_starts) + [self.total_miles]
         self.stops = self._place_stops()
         self.toll_charges: list[TollCharge] = []
-        self.traffic_leads = self._place_traffic()
         self.npc_vehicles = self._place_npc_traffic()
         self.zones = self._place_zones()
         self.traffic_pressures = self._place_traffic_pressures()
@@ -248,15 +247,6 @@ class Trip(TripRoadEventMixin, TripTrafficMixin):
                         stop.parking_label,
                     ),
                 ))
-        for i, lead in enumerate(self.traffic_leads):
-            cues.append(NavigationCue(
-                f"traffic:{i}:{lead.at_mi:.1f}",
-                "traffic",
-                lead.at_mi,
-                lead.reason,
-                f"Traffic slowing ahead; target speed {lead.speed_mph:.0f}.",
-                speed_mph=lead.speed_mph,
-            ))
         cues.sort(key=lambda cue: cue.at_mi)
         return cues
 
@@ -344,53 +334,6 @@ class Trip(TripRoadEventMixin, TripTrafficMixin):
                       0.22 + leg.miles / 900.0 + metro_bias
                       + bad_weather_bias + night_bias + rush_bias))
         return density * self.hazard_scale
-
-    def _place_traffic(self) -> list[TrafficLead]:
-        leads: list[TrafficLead] = []
-        effects = self.weather.effects
-        bad_weather_bias = 0.0
-        if effects.grip < 0.9:
-            bad_weather_bias += (0.9 - effects.grip) * 0.45
-        if effects.visibility_mi < 3.0:
-            bad_weather_bias += (3.0 - effects.visibility_mi) * 0.05
-        night = is_night(self.start_hour)
-        for start, leg in zip(self._leg_starts, self.route.legs, strict=True):
-            if leg.miles < 70.0:
-                continue
-            density = self._leg_traffic_density(leg, bad_weather_bias, night)
-            if self._rng.random() > density:
-                continue
-            at = start + self._rng.uniform(25.0, max(26.0, leg.miles - 20.0))
-            weather_slowdown = max(
-                0.0,
-                min(16.0, (1.0 - effects.grip) * 22.0
-                    + max(0.0, 3.0 - effects.visibility_mi) * 1.5),
-            )
-            rush_bias = self._rush_hour_traffic_bias(leg)
-            rush_slowdown = self._rng.uniform(4.0, 10.0) if rush_bias else 0.0
-            speed = max(
-                25.0,
-                self._rng.uniform(42.0, 58.0) - weather_slowdown - rush_slowdown,
-            )
-            reason = self._rng.choice((
-                "slow lead traffic",
-                "traffic queue ahead",
-                "merging traffic",
-                "lane restriction",
-            ))
-            if rush_bias and self._rng.random() < 0.6:
-                reason = self._rng.choice((
-                    "rush-hour traffic near the metro",
-                    "commuter traffic merging ahead",
-                ))
-            elif bad_weather_bias and self._rng.random() < 0.45:
-                reason = self._rng.choice((
-                    "traffic slowing for wet roads",
-                    "traffic slowing for low visibility",
-                ))
-            leads.append(TrafficLead(at, speed, reason, self._rng.uniform(3.0, 8.0)))
-        leads.sort(key=lambda lead: lead.at_mi)
-        return leads
 
     @property
     def total_miles(self) -> float:
