@@ -9,6 +9,8 @@ from driving_feature_helpers import (
     start_drive,
 )
 
+from freight_fate.states.driving import SPEEDING_HOLD_S
+
 # -- cruise control -------------------------------------------------------------
 
 
@@ -328,10 +330,20 @@ def test_adaptive_cruise_slows_before_large_limit_drop(monkeypatch):
         app.shutdown()
 
 
+@pytest.mark.parametrize(
+    ("speed_mph", "timer_before", "dt"),
+    [
+        (45.0, SPEEDING_HOLD_S - 0.05, 0.1),
+        (46.0, SPEEDING_HOLD_S - 0.05, 0.1),
+        (55.0, SPEEDING_HOLD_S - 0.25, 0.5),
+        (65.0, SPEEDING_HOLD_S - 0.5, 1.0),
+        (70.0, SPEEDING_HOLD_S - 1.0, 1.5),
+    ],
+)
 @pytest.mark.smoke
-def test_adaptive_cruise_limit_drop_does_not_trigger_speeding_strike(monkeypatch):
+def test_adaptive_cruise_limit_drop_does_not_trigger_speeding_strike(
+        monkeypatch, speed_mph, timer_before, dt):
     from freight_fate.app import App
-    from freight_fate.states.driving import SPEEDING_HOLD_S
 
     app = App()
     events = []
@@ -343,12 +355,12 @@ def test_adaptive_cruise_limit_drop_does_not_trigger_speeding_strike(monkeypatch
         driving.trip.speed_limit_at = lambda mile: (35.0, None)
         driving.handle_event(key_event(pygame.K_e))
         driving.truck.transmission.gear = 10
-        driving.truck.velocity_mps = 20.6              # ~46 mph
+        driving.truck.velocity_mps = speed_mph / 2.23694
         driving.truck.throttle = 0.0
         driving._cruise_mph = 65.0
-        driving._speeding_timer = SPEEDING_HOLD_S - 0.05
+        driving._speeding_timer = timer_before
 
-        driving.update(0.1)
+        driving.update(dt)
 
         assert driving._acc_limit_capped
         assert driving.truck.brake > 0.0
