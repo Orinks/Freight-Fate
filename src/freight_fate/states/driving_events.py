@@ -381,7 +381,7 @@ class DrivingEventMixin:
             return
         if not t.engine_on or t.speed_mph < CRUISE_MIN_MPH:
             self.ctx.say("Adaptive cruise needs the engine running and at "
-                         f"least {CRUISE_MIN_MPH:.0f} miles per hour.")
+                         f"least {self.ctx.settings.speed_text(CRUISE_MIN_MPH)}.")
             return
         _, zone_reason = self.trip.speed_limit_at(self.trip.position_mi)
         if zone_reason is not None:

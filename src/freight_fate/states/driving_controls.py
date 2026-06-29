@@ -207,7 +207,10 @@ class DrivingControlsMixin:
         limit, reason = self.trip.speed_limit_at(self.trip.position_mi)
         zone = f", in a {reason} zone" if reason else ""
         over = self.truck.speed_mph - limit
-        comparison = f" You are about {over:.0f} over." if over >= 1 else ""
+        comparison = (
+            f" You are about {self.ctx.settings.speed_text(over)} over."
+            if over >= 1 else ""
+        )
         self.ctx.say(
             f"Speed limit {self.ctx.settings.speed_text(limit)}{zone}.{comparison}")
 

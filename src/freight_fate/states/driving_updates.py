@@ -463,6 +463,8 @@ class DrivingUpdateMixin:
     def _update_speeding(self, dt: float) -> None:
         if self._ramp_mi is not None:
             return   # the ramp is off the highway and unpatrolled
+        if self._missed_destination_exit_said and not self._destination_exit_taken:
+            return   # recovery state: guide the player back to the missed exit
         if self._pull_over is not None:
             return   # already being pulled over; don't pile on strikes
         limit, _ = self.trip.speed_limit_at(self.trip.position_mi)
@@ -484,12 +486,14 @@ class DrivingUpdateMixin:
                 # silent deduction at delivery, so the price of speeding is felt now.
                 if after > before:
                     self.ctx.say_event(
-                        f"Speeding strike. The limit is {limit:.0f}. Speeding "
+                        "Speeding strike. The limit is "
+                        f"{self.ctx.settings.speed_text(limit)}. Speeding "
                         f"fines now total {after:,.0f} dollars, due at delivery.",
                         interrupt=False)
                 else:
                     self.ctx.say_event(
-                        f"Speeding strike. The limit is {limit:.0f}. Your speeding "
+                        "Speeding strike. The limit is "
+                        f"{self.ctx.settings.speed_text(limit)}. Your speeding "
                         f"fines are already at the {after:,.0f}-dollar maximum.",
                         interrupt=False)
         else:
@@ -516,7 +520,8 @@ class DrivingUpdateMixin:
         self.ctx.audio.play("events/police_siren")
         self.ctx.say_event(
             f"Lights and siren behind you. A trooper on this {where} clocked you "
-            f"at {self.truck.speed_mph:.0f} in a {limit:.0f}. Signal with X and "
+            f"at {self.ctx.settings.speed_text(self.truck.speed_mph)} in a "
+            f"{self.ctx.settings.speed_text(limit)} zone. Signal with X and "
             "brake to a stop on the shoulder.",
             interrupt=True)
 

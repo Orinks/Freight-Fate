@@ -2,7 +2,7 @@
 
 Manual shifting follows the real sequence: press the clutch, pick the target
 gear, release the clutch. Shifting without the clutch grinds and is refused.
-Automatic mode shifts on RPM thresholds with a short torque-interrupt delay.
+Automatic mode shifts on RPM thresholds with a truck-like torque-interrupt delay.
 """
 
 from __future__ import annotations
@@ -19,7 +19,7 @@ NEUTRAL = 0
 
 AUTO_UPSHIFT_RPM = 1750
 AUTO_DOWNSHIFT_RPM = 1050
-SHIFT_TIME = 0.45  # seconds of torque interruption
+SHIFT_TIME = 1.0  # seconds of torque interruption
 
 
 @dataclass

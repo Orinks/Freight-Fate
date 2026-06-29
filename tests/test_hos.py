@@ -1080,6 +1080,41 @@ def test_city_sleep_resets_hours_and_advances_the_clock():
         app.shutdown()
 
 
+def test_dispatch_warns_before_accepting_job_that_exceeds_current_hos(monkeypatch):
+    from freight_fate.app import App
+    from freight_fate.models.jobs import JobBoard
+    from freight_fate.sim.hos import LIMITS
+    from freight_fate.states.city import JobBoardState
+
+    app = App()
+    spoken = []
+    monkeypatch.setattr(app.ctx, "say",
+                        lambda text, interrupt=True: spoken.append(text))
+    monkeypatch.setattr(app.ctx.audio, "play", lambda *a, **k: None)
+    try:
+        from freight_fate.models.profile import Profile
+
+        app.ctx.profile = Profile(name="HOS Dispatch", current_city="Austin")
+        app.ctx.settings.hos_mode = "realistic"
+        app.ctx.profile.current_city = "Austin"
+        app.ctx.profile.hos.drive(LIMITS["realistic"][0] - 30.0)
+        jobs = JobBoard(app.ctx.world, seed=2).offers("Austin", set(), level=2)
+        job = next(j for j in jobs
+                   if app.ctx.world.supported_route(j.origin, j.destination))
+        board = JobBoardState(app.ctx, [job])
+
+        board._accept(job)
+
+        assert "Hours warning" in spoken[-1]
+        assert app.ctx.profile.active_trip is None
+
+        board._accept(job)
+
+        assert app.ctx.profile.active_trip is not None
+    finally:
+        app.shutdown()
+
+
 @pytest.mark.smoke
 def test_snapshot_roundtrip_preserves_hos_fatigue_and_fines():
     from freight_fate.app import App

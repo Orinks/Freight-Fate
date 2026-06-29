@@ -85,10 +85,12 @@ class TrafficStopState(MenuState):
         # pulled over promptly and wasn't egregiously over; otherwise a ticket.
         warning = ((first and self.over < 15.0)
                    or (rep >= 70.0 and self.signaled and self.over < 20.0))
+        over_text = self.ctx.settings.speed_text(self.over)
+        limit_text = self.ctx.settings.speed_text(self.limit)
         if warning:
             self._outcome_text = (
-                f"You were {self.over:.0f} over the {self.limit:.0f}. The trooper "
-                "lets you off with a warning this time. Keep it down.")
+                f"You were {over_text} over the {limit_text} limit. The "
+                "trooper lets you off with a warning this time. Keep it down.")
             return
         fine = SPEEDING_TICKET_FINES[
             min(d.speeding_tickets, len(SPEEDING_TICKET_FINES) - 1)]
@@ -99,7 +101,7 @@ class TrafficStopState(MenuState):
         p.career.reputation = max(0.0, rep - hit)
         self.ctx.audio.play("ui/error")
         self._outcome_text = (
-            f"You were {self.over:.0f} over the {self.limit:.0f}. Speeding "
+            f"You were {over_text} over the {limit_text} limit. Speeding "
             f"ticket: {fine:,.0f} dollars, paid on the spot, and a reputation "
             "hit.")
 

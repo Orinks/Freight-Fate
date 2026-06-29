@@ -88,6 +88,24 @@ def test_speed_limit_key_reports_how_far_over_you_are(monkeypatch):
         app.shutdown()
 
 
+def test_metric_speed_limit_key_reports_overage_in_metric_units(monkeypatch):
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        app.ctx.settings.imperial_units = False
+        d = _driving(app)
+        d.trip.position_mi = d.trip.total_miles / 2
+        limit, _ = d.trip.speed_limit_at(d.trip.position_mi)
+        d.truck.velocity_mps = (limit + 15) / 2.23694
+        spoken = _capture(app, monkeypatch)
+        d.handle_event(key_event(pygame.K_s))
+        assert "kilometers per hour over" in spoken[-1]
+        assert "miles per hour" not in spoken[-1]
+    finally:
+        app.shutdown()
+
+
 def test_repeat_key_replays_the_last_route_announcement(monkeypatch):
     from freight_fate.app import App
     from freight_fate.sim.trip import TripEvent, TripEventKind

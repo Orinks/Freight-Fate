@@ -4,6 +4,14 @@ from __future__ import annotations
 from .driving_core import *
 from .driving_rest_states import ShoulderSleepConfirmationState
 
+DELIVERY_SETTLEMENT_MAX_AVERAGE_MPH = 55.0
+
+
+def _settlement_hours(driving: DrivingState) -> float:
+    driven_hours = driving.trip.game_minutes / 60.0
+    minimum_hours = driving.job.distance_mi / DELIVERY_SETTLEMENT_MAX_AVERAGE_MPH
+    return max(driven_hours, minimum_hours)
+
 
 class DrivingStatusState(MenuState):
     """Live driving status, grouped into screens you open one at a time.
@@ -487,7 +495,7 @@ class ArrivalState(MenuState):
         d = self.driving
         p = self.ctx.profile
         job = d.job
-        hours = d.trip.game_minutes / 60.0
+        hours = _settlement_hours(d)
         trip_damage = max(0.0, d.truck.damage_pct - d.start_damage)
         if job.bobtail:
             self._settle_bobtail(hours, trip_damage)

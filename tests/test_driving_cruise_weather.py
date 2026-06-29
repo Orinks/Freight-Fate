@@ -214,6 +214,25 @@ def test_cruise_control_requires_road_speed_and_cancels_on_hazard():
         app.shutdown()
 
 
+def test_metric_cruise_minimum_refusal_uses_metric_units(monkeypatch):
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        app.ctx.settings.imperial_units = False
+        driving = start_drive(app)
+        quiet_trip(driving)
+        spoken = []
+        monkeypatch.setattr(app.ctx, "say",
+                            lambda text, interrupt=True: spoken.append(text))
+        driving.handle_event(key_event(pygame.K_k))
+        assert driving._cruise_mph is None
+        assert "kilometers per hour" in spoken[-1]
+        assert "miles per hour" not in spoken[-1]
+    finally:
+        app.shutdown()
+
+
 @pytest.mark.smoke
 def test_adaptive_cruise_follows_modeled_traffic(monkeypatch):
     from freight_fate.app import App

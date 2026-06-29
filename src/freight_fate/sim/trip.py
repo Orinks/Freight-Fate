@@ -646,6 +646,8 @@ class Trip:
         self.position_mi += moved_mi
         if self.position_mi < 0.0:
             self.position_mi = 0.0
+        elif self.position_mi > self.total_miles:
+            self.position_mi = self.total_miles
 
         self._check_zones()
         self._check_speed_limit()
@@ -659,7 +661,6 @@ class Trip:
             self._check_inspections(moved_mi)
 
         if self.position_mi >= self.total_miles:
-            self.position_mi = self.total_miles
             self.finished = True
             self._emit(TripEventKind.ARRIVED,
                        f"You have arrived in {self.route.cities[-1]}.")

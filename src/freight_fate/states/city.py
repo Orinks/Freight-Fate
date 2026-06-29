@@ -16,6 +16,7 @@ from ..models.jobs import (
     job_from_payload,
     job_payload,
     plan_hos,
+    route_required_hours,
 )
 from ..models.trucks import TRUCK_CATALOG, UPGRADE_CATALOG, TruckModel, Upgrade
 from ..music import select_menu_music_sequence
@@ -631,6 +632,7 @@ class JobBoardState(MenuState):
     def __init__(self, ctx, jobs: list[Job]) -> None:
         super().__init__(ctx)
         self.jobs = jobs
+        self._confirm_risky_job: Job | None = None
 
     def announce_entry(self) -> None:
         n = len(self.jobs)
@@ -662,6 +664,16 @@ class JobBoardState(MenuState):
             self.ctx.audio.play("ui/error")
             self.ctx.say(f"{locked} Keep delivering to level up and unlock it.")
             return
+        if self._needs_hos_confirmation(job):
+            self._confirm_risky_job = job
+            self.ctx.audio.play("ui/warning")
+            self.ctx.say(
+                f"Hours warning. This dispatch may not fit your current duty "
+                f"clock before you need a legal rest. {p.hos.summary(self.ctx.settings.hos_mode)} "
+                "Press Enter again to accept it anyway, or choose another load.",
+                interrupt=True)
+            return
+        self._confirm_risky_job = None
         from .driving import DRIVE_PHASE_PICKUP, DrivingState
 
         route = self.ctx.world.facility_approach_route(job.origin, job.origin_location)
@@ -678,6 +690,21 @@ class JobBoardState(MenuState):
             interrupt=True)
         self.ctx.push_state(driving)
         self.ctx.award_achievement("first_dispatch")
+
+    def _needs_hos_confirmation(self, job: Job) -> bool:
+        p = self.ctx.profile
+        mode = self.ctx.settings.hos_mode
+        remaining = p.hos.remaining_min(mode)
+        if remaining is None:
+            return False
+        if self._confirm_risky_job is job:
+            return False
+        route = self.ctx.world.supported_route(job.origin, job.destination)
+        if route is None:
+            return False
+        pickup_work_h = (PICKUP_CHECK_IN_MIN + PICKUP_LOADING_MIN) / 60.0
+        needed_h = pickup_work_h + route_required_hours(route, world=self.ctx.world)
+        return remaining / 60.0 < needed_h
 
 
 class PickupFacilityState(MenuState):

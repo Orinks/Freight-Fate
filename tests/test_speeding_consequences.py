@@ -50,6 +50,22 @@ def test_first_strike_announces_the_running_fine(monkeypatch):
         app.shutdown()
 
 
+def test_metric_strike_announces_limit_in_metric_units(monkeypatch):
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        app.ctx.settings.imperial_units = False
+        d = _driving(app)
+        spoken = _capture_events(app, monkeypatch)
+        _force_strike(d)
+        assert "Speeding strike" in spoken[-1]
+        assert "kilometers per hour" in spoken[-1]
+        assert "miles per hour" not in spoken[-1]
+    finally:
+        app.shutdown()
+
+
 def test_strike_cost_climbs_with_each_strike(monkeypatch):
     from freight_fate.app import App
     from freight_fate.states.driving import _speeding_settlement_fine

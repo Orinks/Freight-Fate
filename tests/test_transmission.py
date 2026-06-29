@@ -119,7 +119,9 @@ def test_auto_waits_for_shift_to_finish():
     tr.auto_update(1800, 0.8, True)
     assert tr.shifting
     assert tr.auto_update(1800, 0.8, True) is None
-    tr.update(1.0)
+    tr.update(0.8)
+    assert tr.shifting
+    tr.update(0.3)
     assert not tr.shifting
 
 

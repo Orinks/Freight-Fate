@@ -93,6 +93,24 @@ def test_speeding_in_a_patrol_window_starts_a_pull_over(monkeypatch):
         app.shutdown()
 
 
+def test_metric_pull_over_announcement_uses_metric_units(monkeypatch):
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        app.ctx.settings.imperial_units = False
+        d = _driving(app, patrol_intensity=1.0)
+        spoken = []
+        monkeypatch.setattr(app.ctx, "say_event",
+                            lambda text, interrupt=True: spoken.append(text))
+        monkeypatch.setattr(app.ctx.audio, "play", lambda *a, **k: None)
+        _speed_for(d)
+        assert "kilometers per hour" in spoken[-1]
+        assert "miles per hour" not in spoken[-1]
+    finally:
+        app.shutdown()
+
+
 def test_speeding_with_no_patrol_records_a_silent_strike(monkeypatch):
     from freight_fate.app import App
 
@@ -146,6 +164,26 @@ def test_stopping_issues_an_immediate_ticket(monkeypatch):
         assert d.ticket_fines_paid == SPEEDING_TICKET_FINES[0]
         assert p.money == money_before - SPEEDING_TICKET_FINES[0]
         assert p.career.reputation < rep_before
+    finally:
+        app.shutdown()
+
+
+def test_metric_traffic_stop_outcome_uses_metric_units(monkeypatch):
+    from freight_fate.app import App
+    from freight_fate.states.driving import TrafficStopState
+
+    app = App()
+    try:
+        app.ctx.settings.imperial_units = False
+        d = _driving(app, patrol_intensity=1.0)
+        _quiet(app, monkeypatch)
+        _speed_for(d, over=25.0)
+        d.truck.velocity_mps = 0.0
+        d._update_pull_over(1.0)
+        assert isinstance(app.state, TrafficStopState)
+        text = app.state._outcome_text
+        assert "kilometers per hour" in text
+        assert "miles per hour" not in text
     finally:
         app.shutdown()
 
