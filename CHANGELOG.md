@@ -59,6 +59,12 @@
   equivalent nightly.
 
 ### Changed
+- **Hours-of-service rules are more realistic.** Realistic mode now tracks the
+  11-hour driving limit, 14-hour duty window, 30-minute break requirement,
+  60/70-hour weekly limits, roadside inspections, and legal sleeper-berth split
+  rest. Rest menus now make the choice explicit: short breaks, poor emergency
+  sleep, full sleeper sleep, or sleeper split planning where the stop supports
+  it.
 - **Menus can read just the option, not its place.** A new Speech setting,
   "Menu position announcements," turns off the "N of 10" position spoken after
   each menu option, so menus read only the option itself. On by default.
