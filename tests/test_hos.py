@@ -377,6 +377,22 @@ def test_legacy_clock_data_migrates_to_eld_fields():
     assert clock.non_driving_min == 0
 
 
+def test_legacy_history_full_reset_does_not_become_pending_split():
+    c = HosClock()
+    c.drive(300)
+    c.sleeper(600)
+    data = c.to_dict()
+    data.pop("split_rest_history", None)
+
+    again = HosClock.from_dict(data)
+
+    assert again.split_pending_summary() is None
+    again.drive(60)
+    again.off_duty(120)
+    assert again.driving_min == pytest.approx(60)
+    assert again.duty_min == pytest.approx(180)
+
+
 def test_clock_from_garbage_is_fresh():
     assert HosClock.from_dict(None) == HosClock()
     assert HosClock.from_dict("nonsense") == HosClock()

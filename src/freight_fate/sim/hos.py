@@ -236,6 +236,13 @@ class HosClock:
         for first, second in reversed(list(candidates)):
             if self.split_credit_key == self._split_event_key(first, second):
                 continue
+            if (
+                first.source == "full_reset"
+                or second.source == "full_reset"
+                or first.minutes >= SLEEP_MIN
+                or second.minutes >= SLEEP_MIN
+            ):
+                continue
             total = first.minutes + second.minutes
             if total < SLEEP_MIN:
                 continue
@@ -437,6 +444,7 @@ class HosClock:
                     if event.source == "normal"
                     and event.status in {"off_duty", "sleeper_berth"}
                     and event.minutes >= SPLIT_SHORT_MIN
+                    and event.minutes < SLEEP_MIN
                 ]
             return cls(
                 driving_min=float(data.get("driving_min", 0.0)),
