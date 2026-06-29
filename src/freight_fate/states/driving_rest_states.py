@@ -188,7 +188,7 @@ class RestStopState(MenuState):
             # No proper sleeper facility here, but you can always bed down in the
             # lot -- a legal reset, just cramped and poor rest.
             items.append(MenuItem(
-                "Emergency sleep in the lot", self._emergency_lot_sleep,
+                "Sleep 10 hours in the lot", self._emergency_lot_sleep,
                 help="No sleeper facility here, but you can sleep in the lot for "
                      "a legal 10-hour reset. The rest is poor, so you wake still "
                      "tired, and the clock advances 10 hours."))

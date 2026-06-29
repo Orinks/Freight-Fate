@@ -665,6 +665,44 @@ def park_away_from_stops(driving, *, after_stop) -> None:
 
 
 @pytest.mark.smoke
+def test_hos_violation_speech_interrupts_but_threshold_warning_does_not(monkeypatch):
+    from freight_fate.app import App
+
+    app = App()
+    spoken = []
+    monkeypatch.setattr(
+        app.ctx,
+        "say_event",
+        lambda text, interrupt=False: spoken.append((text, interrupt)),
+    )
+    try:
+        driving = start_drive(app)
+        app.ctx.settings.hos_mode = "realistic"
+        app.ctx.settings.time_scale = 60.0
+        driving.trip.time_scale = 60.0
+        driving.truck.velocity_mps = 20.0
+
+        driving.hos.driving_min = LIMITS["realistic"][0] - 121.0
+        driving.hos.duty_min = driving.hos.driving_min
+        driving.hos.since_break_min = 0.0
+        driving._update_hours_and_fatigue(1.0)
+        warning = spoken[-1]
+        assert warning[0].startswith("Hours of service: 2 hours")
+        assert warning[1] is False
+
+        driving.hos.driving_min = LIMITS["realistic"][0] - 0.5
+        driving.hos.duty_min = driving.hos.driving_min
+        driving.hos.since_break_min = 0.0
+        driving.hos.warned.clear()
+        driving._update_hours_and_fatigue(1.0)
+        violation = spoken[-1]
+        assert violation[0].startswith("Hours of service violation:")
+        assert violation[1] is True
+    finally:
+        app.shutdown()
+
+
+@pytest.mark.smoke
 def test_fatigued_driver_gets_a_shorter_hazard_window():
     from freight_fate.app import App
     from freight_fate.sim.trip import TripEvent, TripEventKind
@@ -941,7 +979,8 @@ def test_break_only_stop_always_offers_emergency_lot_sleep(monkeypatch):
             actions=("break", "fuel"), services=(), parking="day_only",
             exit_label="", spoken_name="Roadside Rest", parking_text="day parking")
         labels = [i.text for i in RestStopState(app.ctx, driving, break_only).build_items()]
-        assert "Emergency sleep in the lot" in labels
+        assert "Sleep 10 hours in the lot" in labels
+        assert "Emergency sleep in the lot" not in labels
         assert "Sleep 10 hours" not in labels
         assert not any("sleeper berth" in label for label in labels)
 

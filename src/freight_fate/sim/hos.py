@@ -59,6 +59,10 @@ WARNING_THRESHOLDS_MIN = (120.0, 60.0, 30.0)
 _THRESHOLD_PHRASES = {120.0: "2 hours", 60.0: "1 hour", 30.0: "30 minutes"}
 
 
+def warning_is_urgent(message: str) -> bool:
+    return message.startswith("Hours of service violation:")
+
+
 def _positive_minutes(minutes: float) -> float:
     value = float(minutes)
     if not math.isfinite(value) or value < 0.0:

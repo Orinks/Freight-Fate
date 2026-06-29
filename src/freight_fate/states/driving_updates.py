@@ -201,7 +201,7 @@ class DrivingUpdateMixin:
         if mode not in hos.HOS_NON_ENFORCED_MODES:
             for message in self.hos.check_warnings(mode):
                 self.ctx.audio.play("ui/warning")
-                self.ctx.say_event(message, interrupt=False)
+                self.ctx.say_event(message, interrupt=hos.warning_is_urgent(message))
         self.trip.hos_violation = (
             mode not in hos.HOS_NON_ENFORCED_MODES and self.hos.in_violation(mode)
         )
