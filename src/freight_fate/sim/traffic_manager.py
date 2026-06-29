@@ -87,15 +87,18 @@ class TrafficManager:
     def lead_vehicle(
         self, position_mi: float, truck_speed_mph: float
     ) -> TrafficContext | None:
+        # TrafficVehicle intentionally matches the NPCVehicle runtime surface
+        # used by TrafficContext while the traffic bubble is split out.
         nearest: tuple[float, TrafficVehicle] | None = None
         for vehicle in self.vehicles:
             if vehicle.relative_lane != 0:
                 continue
             gap_mi = vehicle.position_mi - position_mi
-            if gap_mi < 0 or gap_mi > TRAFFIC_LOOKAHEAD_MI:
+            if gap_mi < -vehicle.length_mi or gap_mi > TRAFFIC_LOOKAHEAD_MI:
                 continue
-            if nearest is None or gap_mi < nearest[0]:
-                nearest = (gap_mi, vehicle)
+            context_gap_mi = max(0.0, gap_mi)
+            if nearest is None or context_gap_mi < nearest[0]:
+                nearest = (context_gap_mi, vehicle)
 
         if nearest is None:
             return None

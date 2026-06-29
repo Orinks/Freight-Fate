@@ -55,6 +55,19 @@ def test_lead_vehicle_selects_nearest_vehicle_in_player_lane():
     assert context.closing_mph == 18.0
 
 
+def test_lead_vehicle_keeps_overlapping_vehicle_in_player_lane():
+    manager = _manager()
+    manager.vehicles = [
+        TrafficVehicle("overlap", 4.9, 20.0, 20.0, 0, "braking", "semi"),
+    ]
+
+    context = manager.lead_vehicle(position_mi=5.0, truck_speed_mph=10.0)
+
+    assert context is not None
+    assert context.lead.key == "overlap"
+    assert context.gap_mi == 0.0
+
+
 def test_manager_copies_leg_starts():
     world = get_world()
     route = world.route_from_cities(["Chicago", "Indianapolis"])
