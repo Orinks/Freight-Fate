@@ -413,6 +413,12 @@ class TruckState:
             return
         ratio = tr.ratio_for(tr.gear) if not tr.in_neutral else 0.0
         coupled = ratio != 0.0 and tr.clutch <= 0.5 and not tr.shifting
+        if tr.automatic and tr.shifting and ratio != 0.0:
+            wheel_rps = abs(self.velocity_mps) / (2 * math.pi * s.wheel_radius_m)
+            road_rpm = wheel_rps * 60.0 * abs(ratio)
+            target = max(s.idle_rpm, min(self.rpm, road_rpm))
+            self.rpm += (target - self.rpm) * min(1.0, 5.0 * dt)
+            return
         if coupled:
             wheel_rps = abs(self.velocity_mps) / (2 * math.pi * s.wheel_radius_m)
             road_rpm = wheel_rps * 60.0 * abs(ratio)

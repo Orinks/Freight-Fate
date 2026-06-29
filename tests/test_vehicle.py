@@ -185,6 +185,21 @@ def test_highway_cruise_rpm_keeps_engine_audio_believable():
     assert 1400.0 <= t.rpm <= 1900.0
 
 
+def test_automatic_shift_does_not_flare_engine_rpm():
+    t = make_auto_truck()
+    t.throttle = 1.0
+    t.transmission.gear = 3
+    t.velocity_mps = 20.0
+    t.rpm = 1700.0
+
+    assert t.auto_shift() == 4
+    rpm_before = t.rpm
+    t.update(0.5)
+
+    assert t.transmission.shifting
+    assert t.rpm <= rpm_before
+
+
 def test_truck_does_not_move_in_neutral():
     t = TruckState()
     t.start_engine()
