@@ -369,7 +369,7 @@ class DriverAppScreenState(MenuState):
         d = self.driving
         settings = self.ctx.settings
         pos = d.trip.position_mi
-        for lead in getattr(d.trip, "npc_vehicles", []):
+        for lead in d.trip.traffic_manager.vehicles:
             ahead = lead.position_mi - pos
             if 0 <= ahead <= 20.0:
                 return (

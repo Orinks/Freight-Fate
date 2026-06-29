@@ -210,7 +210,7 @@ class PlaytestHarness:
             relative_lane,
             behavior,
         )
-        self.driving.trip.npc_vehicles = [vehicle]
+        self.driving.trip.traffic_manager.vehicles = [vehicle]
         return vehicle
 
     def add_traffic_pressure_ahead(
@@ -270,7 +270,7 @@ class PlaytestHarness:
         assert self.driving is not None
         self.driving.trip._hazard_check_mi = 1e9
         self.driving.trip._inspection_check_mi = 1e9
-        self.driving.trip.npc_vehicles = []
+        self.driving.trip.traffic_manager.vehicles = []
         self.driving.trip.traffic_pressures = []
         self.driving.weather.current = WeatherKind.CLEAR
 

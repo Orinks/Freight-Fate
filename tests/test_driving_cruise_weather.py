@@ -229,7 +229,7 @@ def test_adaptive_cruise_follows_npc_traffic(monkeypatch):
         monkeypatch.setattr(app.ctx, "say_event",
                             lambda text, interrupt=True: events.append(text))
         open_limits(driving)
-        driving.trip.npc_vehicles = [
+        driving.trip.traffic_manager.vehicles = [
             NPCVehicle("npc:acc", driving.trip.position_mi + 0.08,
                        44.0, 44.0, 0, "braking_traffic")
         ]
@@ -380,7 +380,7 @@ def test_adaptive_cruise_increases_gap_for_bad_weather(monkeypatch):
         driving.truck.throttle = 0.5
         driving.handle_event(key_event(pygame.K_k))
 
-        driving.trip.npc_vehicles = [
+        driving.trip.traffic_manager.vehicles = [
             NPCVehicle("npc:weather-gap", driving.trip.position_mi + 0.08,
                        65.0, 65.0, 0, "steady_truck")
         ]
