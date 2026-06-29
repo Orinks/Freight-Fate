@@ -103,6 +103,75 @@ def test_lead_vehicle_keeps_overlapping_vehicle_in_player_lane():
     assert context.gap_mi == 0.0
 
 
+def test_update_moves_and_prunes_vehicles_outside_bubble():
+    manager = _manager()
+    manager.vehicles = [
+        TrafficVehicle("behind", -3.0, 55.0, 55.0, 0, "cruising", "semi"),
+        TrafficVehicle("ahead", 2.0, 55.0, 55.0, 0, "cruising", "semi"),
+    ]
+
+    manager.update(dt=1.0, position_mi=0.0, time_scale=20.0)
+
+    assert [vehicle.key for vehicle in manager.vehicles] == ["ahead"]
+    assert manager.vehicles[0].position_mi > 2.2
+
+
+def test_merging_vehicle_moves_into_player_lane_and_creates_situation():
+    manager = _manager()
+    manager.vehicles = [
+        TrafficVehicle("merge", 0.8, 42.0, 42.0, 1, "merging", "car")
+    ]
+
+    manager.update(dt=0.0, position_mi=0.0, time_scale=20.0)
+    situation = manager.next_situation(position_mi=0.0, truck_speed_mph=55.0)
+
+    assert manager.vehicles[0].relative_lane == 0
+    assert situation is not None
+    assert situation.kind == "merging"
+    assert "Merging" in situation.message
+
+
+def test_braking_vehicle_slows_and_creates_lead_situation():
+    manager = _manager()
+    manager.vehicles = [
+        TrafficVehicle("brake", 0.7, 45.0, 45.0, 0, "braking", "car")
+    ]
+
+    manager.update(dt=1.0, position_mi=0.0, time_scale=20.0)
+    situation = manager.next_situation(position_mi=0.0, truck_speed_mph=60.0)
+
+    assert manager.vehicles[0].target_speed_mph < 45.0
+    assert situation is not None
+    assert situation.kind == "braking"
+    assert "Brake lights" in situation.message
+
+
+def test_next_situation_only_announces_vehicle_once():
+    manager = _manager()
+    manager.vehicles = [
+        TrafficVehicle("lead", 0.7, 42.0, 42.0, 0, "following", "semi")
+    ]
+
+    first = manager.next_situation(position_mi=0.0, truck_speed_mph=55.0)
+    second = manager.next_situation(position_mi=0.0, truck_speed_mph=55.0)
+
+    assert first is not None
+    assert first.kind == "lead"
+    assert second is None
+
+
+def test_next_situation_speaks_speed_units():
+    manager = _manager()
+    manager.vehicles = [
+        TrafficVehicle("lead", 0.7, 42.0, 42.0, 0, "following", "semi")
+    ]
+
+    situation = manager.next_situation(position_mi=0.0, truck_speed_mph=55.0)
+
+    assert situation is not None
+    assert "42 miles per hour" in situation.message
+
+
 def test_manager_copies_leg_starts():
     world = get_world()
     route = world.route_from_cities(["Chicago", "Indianapolis"])

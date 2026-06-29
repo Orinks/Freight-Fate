@@ -213,6 +213,63 @@ class TrafficManager:
         closing_mph = max(0.0, truck_speed_mph - vehicle.speed_mph)
         return TrafficContext(lead=vehicle, gap_mi=gap_mi, closing_mph=closing_mph)
 
+    def _gap_text(self, miles: float) -> str:
+        if self.imperial:
+            return f"{miles:.1f} miles"
+        return f"{miles * 1.609344:.1f} kilometers"
+
+    def _speed_value(self, mph: float) -> str:
+        if self.imperial:
+            return f"{mph:.0f} miles per hour"
+        return f"{mph * 1.609344:.0f} kilometers per hour"
+
+    def update(self, *, dt: float, position_mi: float, time_scale: float) -> None:
+        game_hours = dt * time_scale / 3600.0
+        kept: list[TrafficVehicle] = []
+        for vehicle in self.vehicles:
+            gap = vehicle.position_mi - position_mi
+            if vehicle.intent == "merging" and 0.0 <= gap <= 1.4:
+                vehicle.relative_lane = 0
+            if vehicle.intent == "braking" and 0.0 <= gap <= 1.8:
+                vehicle.target_speed_mph = max(30.0, vehicle.target_speed_mph - 8.0 * dt)
+            delta = vehicle.target_speed_mph - vehicle.speed_mph
+            vehicle.speed_mph += max(-6.0 * dt, min(4.0 * dt, delta))
+            vehicle.position_mi += max(0.0, vehicle.speed_mph) * game_hours
+            if -2.0 <= vehicle.position_mi - position_mi <= 10.0:
+                kept.append(vehicle)
+        self.vehicles = sorted(kept, key=lambda vehicle: vehicle.position_mi)
+
+    def next_situation(
+        self, *, position_mi: float, truck_speed_mph: float
+    ) -> TrafficSituation | None:
+        context = self.lead_vehicle(
+            position_mi=position_mi,
+            truck_speed_mph=truck_speed_mph,
+        )
+        if context is None or context.gap_mi > 2.2:
+            return None
+        vehicle = context.lead
+        if vehicle.key in self.announced_vehicle_keys:
+            return None
+        gap = self._gap_text(context.gap_mi)
+        speed = self._speed_value(vehicle.speed_mph)
+        if vehicle.intent == "merging":
+            message = (
+                f"Merging {vehicle.vehicle_class} {gap} ahead. Hold your lane, "
+                f"leave a gap, and be ready for {speed}."
+            )
+            kind = "merging"
+        elif vehicle.intent == "braking":
+            message = f"Brake lights {gap} ahead. Ease down and leave room for {speed}."
+            kind = "braking"
+        elif vehicle.intent == "following":
+            message = f"Slow {vehicle.vehicle_class} {gap} ahead. Be ready near {speed}."
+            kind = "lead"
+        else:
+            return None
+        self.announced_vehicle_keys.add(vehicle.key)
+        return TrafficSituation(kind, vehicle, message, interrupt=True)
+
 
 __all__ = [
     "Leg",
