@@ -143,6 +143,14 @@ def facility_text(location_type: str, location_name: str, city: str,
     return f"{facility_label(location_type)} {location_name}{place} in {city}"
 
 
+def facility_offer_text(location_type: str, location_name: str, city: str,
+                        locality: str = "") -> str:
+    if location_type == "metro_market" or _is_legacy_facility_name(city, location_name):
+        return f"the {city} metro freight market"
+    place = f" near {locality}" if locality and locality not in location_name else ""
+    return f"{location_name}{place} in {city}"
+
+
 def _is_legacy_facility_name(city: str, location_name: str) -> bool:
     normalized = str(location_name or "").strip().lower()
     city_lower = city.lower()
@@ -181,8 +189,8 @@ class Job:
         endorsement = ""
         if self.cargo.endorsement:
             endorsement = f" Requires {ENDORSEMENT_LABELS[self.cargo.endorsement]}."
-        origin = "from " + self.origin_facility_text()
-        dest = "to " + self.destination_facility_text()
+        origin = "from " + self.origin_offer_text()
+        dest = "to " + self.destination_offer_text()
         return (f"{prefix}{self.weight_tons:.0f} tons of {self.cargo.label} "
                 f"{origin} {dest}. {self.distance_mi:.0f} miles. "
                 f"Pays {self.pay:,.0f} dollars. "
@@ -193,8 +201,20 @@ class Job:
         return facility_text(
             self.origin_type, self.origin_location, self.origin, self.origin_locality)
 
+    def origin_offer_text(self) -> str:
+        return facility_offer_text(
+            self.origin_type, self.origin_location, self.origin, self.origin_locality)
+
     def destination_facility_text(self) -> str:
         return facility_text(
+            self.destination_type,
+            self.destination_location,
+            self.destination,
+            self.destination_locality,
+        )
+
+    def destination_offer_text(self) -> str:
+        return facility_offer_text(
             self.destination_type,
             self.destination_location,
             self.destination,

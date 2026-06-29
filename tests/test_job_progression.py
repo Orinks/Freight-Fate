@@ -241,6 +241,31 @@ def test_jobs_carry_destination_facility_metadata(world):
         assert job.destination_location in text
 
 
+def test_job_offer_avoids_repeating_facility_type_in_generated_names():
+    from freight_fate.models.jobs import CARGO_CATALOG, Job
+
+    job = Job(
+        CARGO_CATALOG["general"],
+        12.0,
+        "South Bend",
+        "South Bend Grocery Distribution Center",
+        "Fort Wayne",
+        85.0,
+        833.0,
+        4.0,
+        origin_type="grocery_retail_dc",
+        destination_location="Fort Wayne Dry Warehouse",
+        destination_type="dry_warehouse",
+    )
+
+    text = job.describe(1, 5)
+
+    assert "from South Bend Grocery Distribution Center in South Bend" in text
+    assert "to Fort Wayne Dry Warehouse in Fort Wayne" in text
+    assert "grocery and retail distribution center South Bend" not in text
+    assert "dry warehouse Fort Wayne Dry Warehouse" not in text
+
+
 def test_representative_stops_are_real_world_grounded(world):
     expected = {
         ("Atlanta", "Birmingham"): "Pilot Travel Center Lincoln",
