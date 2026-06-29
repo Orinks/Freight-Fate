@@ -118,6 +118,32 @@ def test_seven_three_sleeper_split_restores_time_without_full_reset():
     assert c.split_pending_summary() is None
 
 
+def test_short_off_duty_can_complete_sleeper_split():
+    c = HosClock()
+    c.drive(300)
+    c.sleeper_split_rest(480)
+    c.drive(60)
+    c.off_duty(120)
+
+    assert c.driving_min == pytest.approx(60)
+    assert c.duty_min == pytest.approx(60)
+    assert c.split_pending_summary() is None
+
+
+def test_full_off_duty_and_sleeper_resets_clear_split_pending_summary():
+    off = HosClock()
+    off.drive(300)
+    off.off_duty(600)
+    assert off.driving_min == 0
+    assert off.split_pending_summary() is None
+
+    sleeper = HosClock()
+    sleeper.drive(300)
+    sleeper.sleeper(600)
+    assert sleeper.driving_min == 0
+    assert sleeper.split_pending_summary() is None
+
+
 def test_split_long_period_must_be_sleeper_berth():
     c = HosClock()
     c.drive(300)

@@ -153,6 +153,8 @@ class HosClock:
         self.off_duty_min += minutes
         if self.off_duty_min >= SLEEP_MIN:
             self.sleep(status="off_duty")
+            return
+        self._apply_split_credit()
 
     def sleeper(self, minutes: float) -> None:
         """Sleeper-berth time. Split sleeper is not modeled yet."""
@@ -208,12 +210,7 @@ class HosClock:
         return repr((first_key, second_key))
 
     def _qualifying_split_pair(self) -> tuple[HosEvent, HosEvent] | None:
-        rest_events = [
-            e for e in self.history
-            if e.source == "normal"
-            and e.status in {"off_duty", "sleeper_berth"}
-            and e.minutes >= SPLIT_SHORT_MIN
-        ]
+        rest_events = self._split_rest_events()
         for first, second in zip(rest_events, rest_events[1:], strict=False):
             total = first.minutes + second.minutes
             if total < SLEEP_MIN:
@@ -236,13 +233,32 @@ class HosClock:
         key = self._split_event_key(first, second)
         if self.split_credit_key == key:
             return
-        self.driving_min = max(0.0, first.drive_before)
         between = self.history[self.history.index(first) + 1:self.history.index(second)]
-        on_duty_between = sum(e.minutes for e in between if e.status == "on_duty_not_driving")
-        self.duty_min = max(0.0, first.duty_before + on_duty_between)
+        if second.status == "off_duty":
+            self.driving_min = sum(e.minutes for e in between if e.status == "driving")
+            self.duty_min = sum(
+                e.minutes for e in between
+                if e.status in {"driving", "on_duty_not_driving"}
+            )
+        else:
+            self.driving_min = max(0.0, first.drive_before)
+            on_duty_between = sum(e.minutes for e in between if e.status == "on_duty_not_driving")
+            self.duty_min = max(0.0, first.duty_before + on_duty_between)
         self.since_break_min = 0.0
         self.split_credit_key = key
         self.warned = [w for w in self.warned if not w.startswith(("drive:", "duty:", "break:"))]
+
+    def _split_rest_events(self) -> list[HosEvent]:
+        last_reset = max(
+            (i for i, e in enumerate(self.history) if e.source == "full_reset"),
+            default=-1,
+        )
+        return [
+            e for e in self.history[last_reset + 1:]
+            if e.source == "normal"
+            and e.status in {"off_duty", "sleeper_berth"}
+            and e.minutes >= SPLIT_SHORT_MIN
+        ]
 
     def sleeper_split_rest(self, minutes: float, source: str = "normal") -> bool:
         minutes = _positive_minutes(minutes)
@@ -345,12 +361,7 @@ class HosClock:
         pair = self._qualifying_split_pair()
         if pair is not None and self.split_credit_key == self._split_event_key(*pair):
             return None
-        rest_events = [
-            e for e in self.history
-            if e.source == "normal"
-            and e.status in {"off_duty", "sleeper_berth"}
-            and e.minutes >= SPLIT_SHORT_MIN
-        ]
+        rest_events = self._split_rest_events()
         if not rest_events:
             return None
         last = rest_events[-1]
