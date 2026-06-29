@@ -353,13 +353,15 @@ def test_break_only_violation_summary_requests_break_not_sleep():
     assert "Sleep 10 hours" not in summary
 
 
-def test_hos_summary_includes_break_time_units():
+def test_hos_summary_includes_time_units():
     c = HosClock()
     c.drive(120)
 
     summary = c.summary("realistic")
 
+    assert "9.0 hours of driving left" in summary
     assert "break due in 6.0 hours" in summary
+    assert "duty window closes in 12.0 hours" in summary
 
 
 # -- modes -------------------------------------------------------------------
