@@ -27,7 +27,7 @@
 - Create: `src/freight_fate/models/career_level_guidance.py`
 - Test: `tests/test_career_level_guidance.py`
 
-- [ ] **Step 1: Write failing representative guidance tests**
+- [x] **Step 1: Write failing representative guidance tests**
 
 Create `tests/test_career_level_guidance.py`:
 
@@ -84,7 +84,7 @@ def test_owner_operator_guidance_tracks_margin_authority_and_independence():
     assert independent.recommendation == "direct freight with margin"
 ```
 
-- [ ] **Step 2: Run tests to confirm failure**
+- [x] **Step 2: Run tests to confirm failure**
 
 Run:
 
@@ -94,7 +94,7 @@ uv run pytest tests/test_career_level_guidance.py -q
 
 Expected: failure because `freight_fate.models.career_level_guidance` does not exist.
 
-- [ ] **Step 3: Implement the derived guidance model**
+- [x] **Step 3: Implement the derived guidance model**
 
 Create `src/freight_fate/models/career_level_guidance.py`:
 
@@ -182,7 +182,7 @@ def career_level_guidance(profile) -> CareerLevelGuidance:
     )
 ```
 
-- [ ] **Step 4: Run model tests**
+- [x] **Step 4: Run model tests**
 
 Run:
 
@@ -192,7 +192,7 @@ uv run pytest tests/test_career_level_guidance.py -q
 
 Expected: all tests pass.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 Run:
 
@@ -207,7 +207,7 @@ git commit -m "feat(career): add level-band guidance"
 - Modify: `src/freight_fate/models/career_objectives.py`
 - Modify: `tests/test_career_objectives.py`
 
-- [ ] **Step 1: Add failing objective integration tests**
+- [x] **Step 1: Add failing objective integration tests**
 
 Append to `tests/test_career_objectives.py`:
 
@@ -240,7 +240,7 @@ def test_ready_unlock_states_override_level_band_guidance():
     assert objective.recommendation == "clean company load"
 ```
 
-- [ ] **Step 2: Run tests to confirm failure**
+- [x] **Step 2: Run tests to confirm failure**
 
 Run:
 
@@ -250,7 +250,7 @@ uv run pytest tests/test_career_objectives.py::test_company_driver_objective_use
 
 Expected: first test fails because generic company-driver text still returns `Trusted company driver`; ready-unlock test should continue to pass or fail only if the test setup needs existing gate cash adjusted.
 
-- [ ] **Step 3: Delegate generic objective text to level guidance**
+- [x] **Step 3: Delegate generic objective text to level guidance**
 
 In `src/freight_fate/models/career_objectives.py`, import:
 
@@ -296,7 +296,7 @@ Replace the final generic independent authority return in `_independent_authorit
 
 Keep low-reputation, buy-in-ready, working-capital, authority-ready, and authority-activation branches above the delegated generic returns.
 
-- [ ] **Step 4: Run objective and level-guidance tests**
+- [x] **Step 4: Run objective and level-guidance tests**
 
 Run:
 
@@ -306,7 +306,7 @@ uv run pytest tests/test_career_objectives.py tests/test_career_level_guidance.p
 
 Expected: all tests pass.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 Run:
 
@@ -320,7 +320,7 @@ git commit -m "feat(career): use level-band objectives"
 **Files:**
 - Modify: `tests/test_career_objectives.py`
 
-- [ ] **Step 1: Add failing terminal and dispatch-board speech tests**
+- [x] **Step 1: Add failing terminal and dispatch-board speech tests**
 
 Append to `tests/test_career_objectives.py`:
 
@@ -380,7 +380,7 @@ def test_dispatch_board_speaks_authority_level_recommendation(monkeypatch):
         app.shutdown()
 ```
 
-- [ ] **Step 2: Run tests to confirm failure or current gaps**
+- [x] **Step 2: Run tests to confirm failure or current gaps**
 
 Run:
 
@@ -390,11 +390,11 @@ uv run pytest tests/test_career_objectives.py::test_terminal_career_plan_speaks_
 
 Expected: pass after Task 2; if it fails, the failure should identify missing speech propagation through existing terminal or dispatch-board paths.
 
-- [ ] **Step 3: Fix only if propagation is missing**
+- [x] **Step 3: Fix only if propagation is missing**
 
 If either test fails because `CityMenuState` or `JobBoardState` does not speak the delegated objective, update `src/freight_fate/states/city.py` to use `career_objective(profile).spoken_summary`, `.dispatch_text`, and `.recommendation` exactly as existing first-week paths do. Do not add new menu items or save fields.
 
-- [ ] **Step 4: Run speech integration tests**
+- [x] **Step 4: Run speech integration tests**
 
 Run:
 
@@ -404,7 +404,7 @@ uv run pytest tests/test_career_objectives.py tests/test_career_level_guidance.p
 
 Expected: all tests pass.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 If tests required code or test changes:
 
@@ -425,7 +425,7 @@ git commit -m "test(career): cover spoken level guidance"
 **Files:**
 - Modify: `tests/test_playtest_harness.py`
 
-- [ ] **Step 1: Add failing transcript test for mid-career guidance**
+- [x] **Step 1: Add failing transcript test for mid-career guidance**
 
 Add to `tests/test_playtest_harness.py`:
 
@@ -449,7 +449,7 @@ def test_mid_career_transcript_speaks_level_band_guidance(monkeypatch):
     assert "probation" not in text.lower()
 ```
 
-- [ ] **Step 2: Run transcript test**
+- [x] **Step 2: Run transcript test**
 
 Run:
 
@@ -459,7 +459,7 @@ uv run pytest tests/test_playtest_harness.py::test_mid_career_transcript_speaks_
 
 Expected: pass if the harness captures terminal/dispatch-board guidance. If it fails because `start_delivery()` resets profile state after the assignments, inspect `tests/playtest_harness.py` and set the profile fields after harness initialization but before opening the dispatch board using the harness’s existing helper flow.
 
-- [ ] **Step 3: Run harness baseline**
+- [x] **Step 3: Run harness baseline**
 
 Run:
 
@@ -469,7 +469,7 @@ uv run pytest tests/test_playtest_harness.py -q
 
 Expected: all harness tests pass.
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 Run:
 
@@ -483,7 +483,7 @@ git commit -m "test(career): cover mid-career guidance transcript"
 **Files:**
 - No code changes unless verification exposes defects.
 
-- [ ] **Step 1: Run focused career checks**
+- [x] **Step 1: Run focused career checks**
 
 Run:
 
@@ -493,7 +493,7 @@ uv run pytest tests/test_career_level_guidance.py tests/test_career_objectives.p
 
 Expected: all selected tests pass.
 
-- [ ] **Step 2: Run playtest proof**
+- [x] **Step 2: Run playtest proof**
 
 Run:
 
@@ -503,7 +503,7 @@ uv run pytest tests/test_playtest_harness.py -q
 
 Expected: all harness tests pass.
 
-- [ ] **Step 3: Run accessibility review**
+- [x] **Step 3: Run accessibility review**
 
 Use the available accessibility-agent or desktop accessibility review path for:
 
@@ -516,7 +516,7 @@ or own-authority profiles.
 
 Expected: no blocking findings. Fix any concrete spoken/focus findings before finalizing.
 
-- [ ] **Step 4: Run full suite**
+- [x] **Step 4: Run full suite**
 
 Run:
 
@@ -527,7 +527,7 @@ uv run pytest -q
 
 Expected: full pytest passes.
 
-- [ ] **Step 5: Commit final fixes if needed**
+- [x] **Step 5: Commit final fixes if needed**
 
 If verification required changes:
 
