@@ -2,6 +2,7 @@
 
 from freight_fate.data.world import get_world
 from freight_fate.sim.traffic_manager import TrafficManager, TrafficVehicle
+from freight_fate.sim.trip_models import PatrolWindow
 from freight_fate.sim.vehicle import TruckState
 from freight_fate.sim.weather import WeatherKind, WeatherSystem
 
@@ -49,6 +50,20 @@ def test_traffic_vehicle_keeps_npc_compatibility_properties():
     assert vehicle.lane_text == "right lane"
     assert vehicle.behavior == "merging_vehicle"
     assert vehicle.reason == "merging traffic"
+
+
+def test_state_trooper_vehicle_has_clear_status_reason():
+    vehicle = TrafficVehicle(
+        key="trooper:test",
+        position_mi=12.5,
+        speed_mph=62.0,
+        target_speed_mph=62.0,
+        relative_lane=0,
+        intent="cruising",
+        vehicle_class="state trooper",
+    )
+
+    assert vehicle.reason == "state trooper ahead"
 
 
 def test_traffic_vehicle_maps_new_intents_to_legacy_behavior_and_reason():
@@ -129,6 +144,30 @@ def test_update_keeps_future_route_traffic_until_reached():
     assert initial_count > 1
     assert len(manager.vehicles) == initial_count
     assert any(vehicle.position_mi > 10.0 for vehicle in manager.vehicles)
+
+
+def test_patrol_windows_add_state_trooper_traffic():
+    manager = _manager()
+    manager.vehicles = [
+        TrafficVehicle("traffic:existing", 2.0, 55.0, 55.0, 0, "cruising", "semi")
+    ]
+    patrols = [
+        PatrolWindow(10.0, 14.0, 0.8, "highway enforcement"),
+        PatrolWindow(22.0, 26.0, 0.9, "work zone enforcement"),
+    ]
+
+    manager.add_patrol_traffic(patrols)
+    manager.add_patrol_traffic(patrols)
+
+    troopers = [
+        vehicle for vehicle in manager.vehicles
+        if vehicle.vehicle_class == "state trooper"
+    ]
+    assert len(troopers) == 2
+    assert [vehicle.position_mi for vehicle in manager.vehicles] == sorted(
+        vehicle.position_mi for vehicle in manager.vehicles
+    )
+    assert all(vehicle.relative_lane == 0 for vehicle in troopers)
 
 
 def test_merging_vehicle_moves_into_player_lane_and_creates_situation():

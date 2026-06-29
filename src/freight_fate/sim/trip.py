@@ -65,6 +65,7 @@ class Trip(TripRoadEventMixin, TripTrafficMixin):
         self.traffic_pressures = self._place_traffic_pressures()
         self.navigation_cues = self._build_navigation_cues()
         self.patrols = self._place_patrols()
+        self.traffic_manager.add_patrol_traffic(self.patrols)
         self._announced_stops: set[str] = set()
         self._announced_cities: set[int] = set()
         self._announced_navigation: set[str] = set()

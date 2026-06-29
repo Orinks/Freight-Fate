@@ -22,6 +22,19 @@ def test_patrol_seeding_is_deterministic():
     assert _patrol_key(_trip()) == _patrol_key(_trip())
 
 
+def test_patrol_windows_create_state_trooper_npcs():
+    t = _trip()
+
+    troopers = [
+        vehicle for vehicle in t.traffic_manager.vehicles
+        if getattr(vehicle, "vehicle_class", "") == "state trooper"
+    ]
+
+    assert t.patrols
+    assert len(troopers) == len(t.patrols)
+    assert all(vehicle.reason == "state trooper ahead" for vehicle in troopers)
+
+
 def test_relaxed_mode_has_fewer_patrols():
     assert len(_trip(hazard_scale=0.3).patrols) <= len(_trip().patrols)
 

@@ -8,7 +8,12 @@ from dataclasses import dataclass
 
 from ..data.world import Leg, Route
 from .hos import is_night
-from .trip_models import RUSH_HOUR_WINDOWS, TRAFFIC_LOOKAHEAD_MI, TrafficContext
+from .trip_models import (
+    RUSH_HOUR_WINDOWS,
+    TRAFFIC_LOOKAHEAD_MI,
+    PatrolWindow,
+    TrafficContext,
+)
 
 
 @dataclass
@@ -50,6 +55,8 @@ class TrafficVehicle:
 
     @property
     def reason(self) -> str:
+        if self.vehicle_class == "state trooper":
+            return "state trooper ahead"
         return {
             "cruising": "steady truck traffic",
             "following": "slow car ahead",
@@ -190,6 +197,29 @@ class TrafficManager:
                 )
         self.vehicles = sorted(vehicles, key=lambda vehicle: vehicle.position_mi)
 
+    def add_patrol_traffic(self, patrols: list[PatrolWindow]) -> None:
+        existing_keys = {vehicle.key for vehicle in self.vehicles}
+        for patrol in patrols:
+            key = f"trooper:{patrol.start_mi:.3f}:{patrol.end_mi:.3f}:{patrol.reason}"
+            if key in existing_keys:
+                continue
+            span = max(0.1, patrol.end_mi - patrol.start_mi)
+            position = patrol.start_mi + min(0.8, span / 3.0)
+            speed = 50.0 if "work zone" in patrol.reason else 62.0
+            self.vehicles.append(
+                TrafficVehicle(
+                    key=key,
+                    position_mi=position,
+                    speed_mph=speed,
+                    target_speed_mph=speed,
+                    relative_lane=0,
+                    intent="cruising",
+                    vehicle_class="state trooper",
+                )
+            )
+            existing_keys.add(key)
+        self.vehicles.sort(key=lambda vehicle: vehicle.position_mi)
+
     def lead_vehicle(
         self, position_mi: float, truck_speed_mph: float
     ) -> TrafficContext | None:
@@ -291,6 +321,7 @@ class TrafficManager:
 
 __all__ = [
     "Leg",
+    "PatrolWindow",
     "RUSH_HOUR_WINDOWS",
     "TrafficManager",
     "TrafficSituation",

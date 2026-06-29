@@ -41,9 +41,15 @@ class DrivingControlsMixin:
                 self._take_exit()
         elif key == pygame.K_k:
             self._toggle_cruise()
-        elif key in (pygame.K_EQUALS, pygame.K_PLUS, pygame.K_KP_PLUS) or event.unicode == "+":
+        elif (
+            key in (pygame.K_EQUALS, pygame.K_PLUS, pygame.K_KP_PLUS)
+            or getattr(event, "unicode", "") == "+"
+        ):
             self._adjust_cruise(CRUISE_STEP_MPH)
-        elif key in (pygame.K_MINUS, pygame.K_KP_MINUS) or event.unicode == "-":
+        elif (
+            key in (pygame.K_MINUS, pygame.K_KP_MINUS)
+            or getattr(event, "unicode", "") == "-"
+        ):
             self._adjust_cruise(-CRUISE_STEP_MPH)
         elif key == pygame.K_SPACE:
             self._speak_speed()
