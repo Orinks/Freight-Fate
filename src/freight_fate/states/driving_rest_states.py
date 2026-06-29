@@ -346,7 +346,7 @@ class RestStopState(MenuState):
         self._save_here(silent=True)
         self.ctx.audio.play("ui/notify")
         status = (
-            "Sleeper split credited. "
+            f"Sleeper split credited. {d.hos.summary(self.ctx.settings.hos_mode)} "
             if completed else (d.hos.split_pending_summary() or "Sleeper berth rest recorded.")
         )
         self.ctx.say(

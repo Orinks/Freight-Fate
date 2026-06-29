@@ -234,31 +234,34 @@ class HosClock:
         if self.split_credit_key is not None:
             for index, pair in enumerate(self._split_rest_pairs(rest_events)):
                 if self.split_credit_key == self._split_event_key(*pair):
-                    start = index + 2
+                    start = index + 1
                     break
         candidates = self._split_rest_pairs(rest_events[start:])
         for first, second in reversed(list(candidates)):
             if self.split_credit_key == self._split_event_key(first, second):
                 continue
-            if (
-                first.source == "full_reset"
-                or second.source == "full_reset"
-                or first.minutes >= SLEEP_MIN
-                or second.minutes >= SLEEP_MIN
-            ):
-                continue
-            total = first.minutes + second.minutes
-            if total < SLEEP_MIN:
-                continue
-            long_event = first if first.minutes >= second.minutes else second
-            short_event = second if long_event is first else first
-            if long_event.status != "sleeper_berth":
-                continue
-            if long_event.minutes >= SPLIT_LONG_ALT_MIN and short_event.minutes >= SPLIT_SHORT_MIN:
-                return first, second
-            if long_event.minutes >= SPLIT_LONG_MIN and short_event.minutes >= SPLIT_SHORT_ALT_MIN:
+            if self._split_pair_qualifies(first, second):
                 return first, second
         return None
+
+    def _split_pair_qualifies(self, first: HosEvent, second: HosEvent) -> bool:
+        if (
+            first.source == "full_reset"
+            or second.source == "full_reset"
+            or first.minutes >= SLEEP_MIN
+            or second.minutes >= SLEEP_MIN
+        ):
+            return False
+        total = first.minutes + second.minutes
+        if total < SLEEP_MIN:
+            return False
+        long_event = first if first.minutes >= second.minutes else second
+        short_event = second if long_event is first else first
+        if long_event.status != "sleeper_berth":
+            return False
+        if long_event.minutes >= SPLIT_LONG_ALT_MIN and short_event.minutes >= SPLIT_SHORT_MIN:
+            return True
+        return long_event.minutes >= SPLIT_LONG_MIN and short_event.minutes >= SPLIT_SHORT_ALT_MIN
 
     def _apply_split_credit(self) -> None:
         pair = self._qualifying_split_pair()
@@ -268,11 +271,32 @@ class HosClock:
         key = self._split_event_key(first, second)
         if self.split_credit_key == key:
             return
-        self.driving_min = second.drive_before - first.drive_before
-        self.duty_min = second.duty_before - first.duty_before - first.minutes
+        self.driving_min = second.drive_before - self._split_drive_after_rest(first)
+        self.duty_min = second.duty_before - self._split_duty_after_rest(first)
         self.since_break_min = 0.0
         self.split_credit_key = key
         self.warned = [w for w in self.warned if not w.startswith(("drive:", "duty:", "break:"))]
+
+    def _split_drive_after_rest(self, event: HosEvent) -> float:
+        pair = self._previous_qualifying_split_pair(event)
+        if pair is not None:
+            first, second = pair
+            return second.drive_before - self._split_drive_after_rest(first)
+        return event.drive_before
+
+    def _split_duty_after_rest(self, event: HosEvent) -> float:
+        pair = self._previous_qualifying_split_pair(event)
+        if pair is not None:
+            first, second = pair
+            return second.duty_before - self._split_duty_after_rest(first)
+        return event.duty_before + event.minutes
+
+    def _previous_qualifying_split_pair(
+            self, event: HosEvent) -> tuple[HosEvent, HosEvent] | None:
+        for first, second in self._split_rest_pairs(self._split_rest_events()):
+            if second is event and self._split_pair_qualifies(first, second):
+                return first, second
+        return None
 
     def _split_rest_events(self) -> list[HosEvent]:
         return list(self.split_rest_history)

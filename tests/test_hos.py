@@ -116,6 +116,20 @@ def test_normal_sleeper_periods_can_complete_split_credit():
     assert c.split_pending_summary() is None
 
 
+def test_rolling_sleeper_split_reuses_previous_short_rest():
+    c = HosClock()
+    c.sleeper(480)
+    c.drive(240)
+    c.off_duty(120)
+    assert c.split_pending_summary() is None
+    c.drive(300)
+    c.sleeper(480)
+
+    assert c.driving_min == pytest.approx(300)
+    assert c.duty_min == pytest.approx(300)
+    assert c.split_pending_summary() is None
+
+
 def test_short_first_sleeper_split_preserves_between_rest_driving():
     c = HosClock()
     c.drive(60)
@@ -202,7 +216,9 @@ def test_repeated_sleeper_splits_can_each_apply_credit():
     assert c.duty_min == pytest.approx(60)
 
     c.drive(300)
-    assert c.sleeper_split_rest(480) is False
+    assert c.sleeper_split_rest(480) is True
+    assert c.driving_min == pytest.approx(300)
+    assert c.duty_min == pytest.approx(300)
     c.drive(60)
     c.off_duty(120)
 
@@ -826,6 +842,15 @@ def test_split_sleeper_rest_action_advances_clock_and_speaks_status(monkeypatch)
         status_index = next(
             i for i, text in enumerate(spoken) if "Sleeper split pending" in text)
         assert ("slept_on_route", status_index + 1) in awards
+
+        spoken.clear()
+        driving.hos.drive(300)
+        select(app.state, "Sleep 2 hours in sleeper berth")
+
+        completed_line = spoken[-1]
+        assert "Sleeper split credited" in completed_line
+        assert "hours of driving left" in completed_line
+        assert "duty window closes" in completed_line
     finally:
         app.shutdown()
 
