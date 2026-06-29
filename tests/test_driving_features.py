@@ -164,7 +164,7 @@ def test_how_to_play_documents_new_gameplay_systems():
     assert "emergency shoulder sleep" in help_text
     assert "parking ticket or minor damage" in help_text
     # Always-available sleep, and the 1.8.0 systems, are documented in-game.
-    assert "emergency sleep in the lot" in help_text
+    assert "sleep 10 hours in the lot" in help_text
     assert "fully-rested ten-hour sleep" in help_text
     assert "risks losing traction" in help_text
     assert "low visibility shortens" in help_text
