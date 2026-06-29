@@ -329,6 +329,36 @@ def test_adaptive_cruise_slows_before_large_limit_drop(monkeypatch):
 
 
 @pytest.mark.smoke
+def test_adaptive_cruise_limit_drop_does_not_trigger_speeding_strike(monkeypatch):
+    from freight_fate.app import App
+    from freight_fate.states.driving import SPEEDING_HOLD_S
+
+    app = App()
+    events = []
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        monkeypatch.setattr(app.ctx, "say_event",
+                            lambda text, interrupt=True: events.append(text))
+        driving.trip.speed_limit_at = lambda mile: (35.0, None)
+        driving.handle_event(key_event(pygame.K_e))
+        driving.truck.transmission.gear = 10
+        driving.truck.velocity_mps = 20.6              # ~46 mph
+        driving.truck.throttle = 0.0
+        driving._cruise_mph = 65.0
+        driving._speeding_timer = SPEEDING_HOLD_S - 0.05
+
+        driving.update(0.1)
+
+        assert driving._acc_limit_capped
+        assert driving.truck.brake > 0.0
+        assert driving.speeding_strikes == 0
+        assert not any("Speeding strike" in e for e in events)
+    finally:
+        app.shutdown()
+
+
+@pytest.mark.smoke
 def test_adaptive_cruise_ignores_far_small_limit_drop(monkeypatch):
     from freight_fate.app import App
 

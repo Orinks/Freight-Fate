@@ -31,6 +31,10 @@
   to begin braking before the lower-limit point instead of waiting until the
   truck is already in the slower stretch. Pressing Space while cruise is on now
   also includes the cruise set speed in the speed readout.
+- **Adaptive cruise no longer gets you fined while braking for a lower limit.**
+  When the posted limit drops sharply, cruise now gets a clean chance to slow
+  the truck instead of letting the speeding timer fire while it is already
+  braking down.
 - **Delivery windows match the slower, real route model.** New dispatch
   deadlines now use the route's posted-limit profile, city approaches, facility
   gates, HOS breaks, sleep, and practical slack instead of a flat mileage

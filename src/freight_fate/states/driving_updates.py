@@ -474,6 +474,14 @@ class DrivingUpdateMixin:
             return   # already being pulled over; don't pile on strikes
         limit, _ = self.trip.speed_limit_at(self.trip.position_mi)
         if self.truck.speed_mph > limit + SPEEDING_LEEWAY_MPH:
+            if (
+                self._cruise_mph is not None
+                and self._acc_limit_capped
+                and self.truck.brake > 0.0
+                and self.truck.throttle <= 0.05
+            ):
+                self._speeding_timer = 0.0
+                return
             self._speeding_timer += dt
             if self._speeding_timer > SPEEDING_HOLD_S:
                 self._speeding_timer = 0.0
