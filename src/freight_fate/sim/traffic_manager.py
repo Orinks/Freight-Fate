@@ -251,7 +251,7 @@ class TrafficManager:
             delta = vehicle.target_speed_mph - vehicle.speed_mph
             vehicle.speed_mph += max(-6.0 * dt, min(4.0 * dt, delta))
             vehicle.position_mi += max(0.0, vehicle.speed_mph) * game_hours
-            if -2.0 <= vehicle.position_mi - position_mi <= 10.0:
+            if vehicle.position_mi - position_mi >= -2.0:
                 kept.append(vehicle)
         self.vehicles = sorted(kept, key=lambda vehicle: vehicle.position_mi)
 

@@ -116,6 +116,21 @@ def test_update_moves_and_prunes_vehicles_outside_bubble():
     assert manager.vehicles[0].position_mi > 2.2
 
 
+def test_update_keeps_future_route_traffic_until_reached():
+    world = get_world()
+    route = world.supported_route("Seattle", "New York")
+    assert route is not None
+    manager = _manager_for_route(route, seed=7)
+    manager.spawn_initial_traffic()
+    initial_count = len(manager.vehicles)
+
+    manager.update(dt=0.0, position_mi=0.0, time_scale=20.0)
+
+    assert initial_count > 1
+    assert len(manager.vehicles) == initial_count
+    assert any(vehicle.position_mi > 10.0 for vehicle in manager.vehicles)
+
+
 def test_merging_vehicle_moves_into_player_lane_and_creates_situation():
     manager = _manager()
     manager.vehicles = [
