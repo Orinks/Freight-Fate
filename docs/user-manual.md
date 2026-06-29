@@ -379,7 +379,7 @@ Freight Fate tracks an ELD-style hours clock. In realistic mode:
 At sleep-capable truck parking, the sleeper berth means the bunk in your cab.
 You can choose 2, 3, 7, or 8 hours in the sleeper berth to plan an 8+2 or 7+3
 split. Sleep 10 hours remains the simplest full reset. Shoulder sleep and
-Sleep 10 hours in the lot are fallback rests, not clean split-rest planning
+sleeping 10 hours in the lot are fallback rests, not clean split-rest planning
 tools.
 
 The game gives warnings at 2 hours, 1 hour, and 30 minutes before a limit.

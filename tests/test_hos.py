@@ -397,7 +397,8 @@ def test_off_mode_never_warns_or_violates():
     assert c.check_warnings("off") == []
     assert not c.in_violation("off")
     assert c.remaining_min("off") is None
-    assert "developer mode" in c.summary("off")
+    assert "developer mode" not in c.summary("off")
+    assert "enforcement is off" in c.summary("off")
 
 
 # -- serialization and compatibility ----------------------------------------------

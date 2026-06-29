@@ -372,7 +372,7 @@ class HosClock:
     def summary(self, mode: str) -> str:
         """Spoken status for the C key and Tab report."""
         if mode in HOS_NON_ENFORCED_MODES:
-            return ("Hours of service enforcement is off in developer mode; "
+            return ("Hours of service enforcement is off; "
                     "the ELD clock still records time.")
         drive_limit, duty_limit, break_after = LIMITS[mode]
         drive_left = max(0.0, drive_limit - self.driving_min) / 60.0
