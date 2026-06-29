@@ -6,9 +6,10 @@ trip's ``game_minutes``, never wall time): 11 hours of driving after a
 30-minute break after 8 cumulative hours of driving. The break may be any
 30 consecutive non-driving minutes, including on-duty-not-driving work.
 
-The model intentionally skips split sleeper and 60/70-hour cycle limits
-for now; the save schema records explicit duty statuses so those rules can
-be added without changing how drive, facility, and POI time is classified.
+The model includes 7/3 and 8/2 sleeper split credits but intentionally skips
+60/70-hour cycle limits for now; the save schema records explicit duty
+statuses so those rules can be added without changing how drive, facility,
+and POI time is classified.
 
 Everything here is deterministic and pygame-free so the headless tests
 can exercise the rules directly.
@@ -157,7 +158,7 @@ class HosClock:
         self._apply_split_credit()
 
     def sleeper(self, minutes: float) -> None:
-        """Sleeper-berth time. Split sleeper is not modeled yet."""
+        """Sleeper-berth time. A full 10 hours resets; shorter rests may split."""
         minutes = _positive_minutes(minutes)
         self._record_event("sleeper_berth", minutes)
         self.duty_min += minutes
@@ -211,7 +212,16 @@ class HosClock:
 
     def _qualifying_split_pair(self) -> tuple[HosEvent, HosEvent] | None:
         rest_events = self._split_rest_events()
-        for first, second in zip(rest_events, rest_events[1:], strict=False):
+        start = 0
+        if self.split_credit_key is not None:
+            for index, pair in enumerate(self._split_rest_pairs(rest_events)):
+                if self.split_credit_key == self._split_event_key(*pair):
+                    start = index + 2
+                    break
+        candidates = self._split_rest_pairs(rest_events[start:])
+        for first, second in reversed(list(candidates)):
+            if self.split_credit_key == self._split_event_key(first, second):
+                continue
             total = first.minutes + second.minutes
             if total < SLEEP_MIN:
                 continue
@@ -259,6 +269,17 @@ class HosClock:
             and e.status in {"off_duty", "sleeper_berth"}
             and e.minutes >= SPLIT_SHORT_MIN
         ]
+
+    def _split_rest_pairs(self, rest_events: list[HosEvent]) -> zip[tuple[HosEvent, HosEvent]]:
+        return zip(rest_events, rest_events[1:], strict=False)
+
+    def _credited_split_pair(self) -> tuple[HosEvent, HosEvent] | None:
+        if self.split_credit_key is None:
+            return None
+        for pair in self._split_rest_pairs(self._split_rest_events()):
+            if self.split_credit_key == self._split_event_key(*pair):
+                return pair
+        return None
 
     def sleeper_split_rest(self, minutes: float, source: str = "normal") -> bool:
         minutes = _positive_minutes(minutes)
@@ -358,6 +379,9 @@ class HosClock:
                 f"duty window closes in {duty_left:.1f}.{suffix}")
 
     def split_pending_summary(self) -> str | None:
+        credited = self._credited_split_pair()
+        if credited is not None and credited[1] is self._split_rest_events()[-1]:
+            return None
         pair = self._qualifying_split_pair()
         if pair is not None and self.split_credit_key == self._split_event_key(*pair):
             return None

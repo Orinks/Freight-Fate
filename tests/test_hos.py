@@ -130,6 +130,25 @@ def test_short_off_duty_can_complete_sleeper_split():
     assert c.split_pending_summary() is None
 
 
+def test_repeated_sleeper_splits_can_each_apply_credit():
+    c = HosClock()
+    c.drive(300)
+    assert c.sleeper_split_rest(480) is False
+    c.drive(60)
+    c.off_duty(120)
+    assert c.driving_min == pytest.approx(60)
+    assert c.duty_min == pytest.approx(60)
+
+    c.drive(300)
+    assert c.sleeper_split_rest(480) is False
+    c.drive(60)
+    c.off_duty(120)
+
+    assert c.driving_min == pytest.approx(60)
+    assert c.duty_min == pytest.approx(60)
+    assert c.split_pending_summary() is None
+
+
 def test_full_off_duty_and_sleeper_resets_clear_split_pending_summary():
     off = HosClock()
     off.drive(300)
