@@ -1,5 +1,7 @@
 """Highway exits and cruise control, end to end through the driving state."""
 
+from types import SimpleNamespace
+
 import pygame
 import pytest
 from driving_feature_helpers import (
@@ -480,6 +482,30 @@ def test_driver_apps_screen_uses_keyboard_and_vague_road_chatter(monkeypatch):
         assert spoken[-1] == lines[0]
     finally:
         app.shutdown()
+
+
+def test_status_traffic_line_falls_back_to_legacy_npc_vehicles():
+    from freight_fate.states.driving_menu_states import DriverAppScreenState
+
+    lead = SimpleNamespace(
+        position_mi=12.5,
+        reason="slow merge",
+        speed_mph=42.0,
+    )
+    trip = SimpleNamespace(position_mi=10.0, npc_vehicles=[lead])
+    driving = SimpleNamespace(trip=trip)
+    ctx = SimpleNamespace(
+        settings=SimpleNamespace(
+            distance_text=lambda miles: f"{miles:g} miles",
+            speed_text=lambda mph: f"{mph:g} miles per hour",
+        )
+    )
+    state = DriverAppScreenState(ctx, driving, "traffic")
+
+    assert state._next_traffic_line() == (
+        "Traffic ahead: slow merge in 2.5 miles; reported pace "
+        "42 miles per hour."
+    )
 
 
 # -- highway exits -------------------------------------------------------------
