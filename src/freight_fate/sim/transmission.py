@@ -20,8 +20,6 @@ NEUTRAL = 0
 AUTO_UPSHIFT_RPM = 1750
 AUTO_DOWNSHIFT_RPM = 1050
 SHIFT_TIME = 1.0  # seconds of torque interruption
-LOW_GEAR_UPSHIFT_HOLD_S = 1.25
-LOW_GEAR_HOLD_THROUGH = 7
 
 
 @dataclass
@@ -37,7 +35,6 @@ class Transmission:
     gear: int = NEUTRAL  # -1 = reverse, 0 = neutral, 1..10
     clutch: float = 0.0  # 0 engaged .. 1 fully pressed
     _shift_timer: float = field(default=0.0, repr=False)
-    _upshift_hold_timer: float = field(default=0.0, repr=False)
 
     @property
     def num_gears(self) -> int:
@@ -81,10 +78,8 @@ class Transmission:
             return ShiftResult(False, f"Already in {self._gear_name(target)}")
         if self.clutch < 0.8 and target != NEUTRAL:
             return ShiftResult(False, "Clutch not pressed", grind=True)
-        previous = self.gear
         self.gear = target
         self._shift_timer = SHIFT_TIME
-        self._arm_upshift_hold(previous, target)
         return ShiftResult(True, self._gear_name(target))
 
     def shift_up(self) -> ShiftResult:
@@ -118,19 +113,14 @@ class Transmission:
             # engine dies on every restart.
             self.gear = 1
             self._shift_timer = SHIFT_TIME
-            self._upshift_hold_timer = 0.0
             return self.gear
-        if (rpm > AUTO_UPSHIFT_RPM and self.gear < self.num_gears
-                and not braking and self._upshift_hold_timer <= 0.0):
-            previous = self.gear
+        if rpm > AUTO_UPSHIFT_RPM and self.gear < self.num_gears and not braking:
             self.gear += 1
             self._shift_timer = SHIFT_TIME
-            self._arm_upshift_hold(previous, self.gear)
             return self.gear
         if rpm < AUTO_DOWNSHIFT_RPM and self.gear > 1 and moving:
             self.gear -= 1
             self._shift_timer = SHIFT_TIME
-            self._upshift_hold_timer = 0.0
             return self.gear
         return None
 
@@ -143,20 +133,11 @@ class Transmission:
             return None
         self.gear -= 1
         self._shift_timer = SHIFT_TIME
-        self._upshift_hold_timer = 0.0
         return self.gear
 
     def update(self, dt: float) -> None:
         if self._shift_timer > 0.0:
             self._shift_timer = max(0.0, self._shift_timer - dt)
-        if self._upshift_hold_timer > 0.0:
-            self._upshift_hold_timer = max(0.0, self._upshift_hold_timer - dt)
-
-    def _arm_upshift_hold(self, previous: int, target: int) -> None:
-        if self.automatic and target > previous and previous < LOW_GEAR_HOLD_THROUGH:
-            self._upshift_hold_timer = SHIFT_TIME + LOW_GEAR_UPSHIFT_HOLD_S
-        else:
-            self._upshift_hold_timer = 0.0
 
     @staticmethod
     def _gear_name(gear: int) -> str:

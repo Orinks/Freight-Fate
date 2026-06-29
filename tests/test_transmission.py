@@ -125,16 +125,6 @@ def test_auto_waits_for_shift_to_finish():
     assert not tr.shifting
 
 
-def test_low_gear_upshifts_wait_after_shift_finishes():
-    tr = Transmission(automatic=True, gear=3)
-    assert tr.auto_update(1800, 0.8, True) == 4
-    tr.update(1.1)
-    assert not tr.shifting
-    assert tr.auto_update(1800, 0.8, True) is None
-    tr.update(1.2)
-    assert tr.auto_update(1800, 0.8, True) == 5
-
-
 def test_auto_does_not_shift_out_of_reverse():
     tr = Transmission(automatic=True, gear=REVERSE)
     assert tr.auto_update(1900, throttle=0.5, moving=True) is None
