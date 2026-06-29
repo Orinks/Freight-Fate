@@ -639,8 +639,9 @@ class JobBoardState(MenuState):
         if n == 0:
             self.ctx.say("Dispatch board. No jobs available right now. Press Escape to go back.")
         else:
+            hos_note = self._hos_board_note()
             self.ctx.say(f"Dispatch board. {n} dispatch{'es' if n != 1 else ''} available. "
-                         f"{self.ctx.profile.market.summary()} "
+                         f"{self.ctx.profile.market.summary()} {hos_note}"
                          + self.current_text())
 
     def build_items(self) -> list[MenuItem]:
@@ -692,12 +693,13 @@ class JobBoardState(MenuState):
         self.ctx.award_achievement("first_dispatch")
 
     def _needs_hos_confirmation(self, job: Job) -> bool:
+        return self._job_exceeds_current_hos(job) and self._confirm_risky_job is not job
+
+    def _job_exceeds_current_hos(self, job: Job) -> bool:
         p = self.ctx.profile
         mode = self.ctx.settings.hos_mode
         remaining = p.hos.remaining_min(mode)
         if remaining is None:
-            return False
-        if self._confirm_risky_job is job:
             return False
         route = self.ctx.world.supported_route(job.origin, job.destination)
         if route is None:
@@ -705,6 +707,18 @@ class JobBoardState(MenuState):
         pickup_work_h = (PICKUP_CHECK_IN_MIN + PICKUP_LOADING_MIN) / 60.0
         needed_h = pickup_work_h + route_required_hours(route, world=self.ctx.world)
         return remaining / 60.0 < needed_h
+
+    def _hos_board_note(self) -> str:
+        if not self.jobs:
+            return ""
+        risky = sum(1 for job in self.jobs if self._job_exceeds_current_hos(job))
+        if risky == len(self.jobs):
+            return ("Every listed dispatch may require a legal rest before delivery; "
+                    "press Enter on a load to review the warning. ")
+        if risky:
+            return (f"{risky} dispatch{'es' if risky != 1 else ''} may require "
+                    "a legal rest before delivery. ")
+        return ""
 
 
 class PickupFacilityState(MenuState):
