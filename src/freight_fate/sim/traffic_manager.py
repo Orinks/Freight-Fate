@@ -84,6 +84,106 @@ class TrafficManager:
         self.vehicles: list[TrafficVehicle] = []
         self.announced_vehicle_keys: set[str] = set()
 
+    def _seed_key(self) -> str:
+        route_key = "|".join(
+            f"{city}:{leg.highway}:{leg.miles:.1f}"
+            for city, leg in zip(self.route.cities, self.route.legs, strict=False)
+        )
+        return f"traffic-manager:{self.seed}:{route_key}"
+
+    def _rng(self) -> random.Random:
+        digest = hashlib.sha256(self._seed_key().encode("utf-8")).hexdigest()
+        return random.Random(int(digest[:16], 16))
+
+    def _rush_hour_traffic_bias(self, leg: Leg) -> float:
+        if not any(start <= self.start_hour < end for start, end in RUSH_HOUR_WINDOWS):
+            return 0.0
+        return 0.14 if leg.checkpoints else 0.06
+
+    def _leg_density(self, leg: Leg, weather_slowdown: float, night: bool) -> float:
+        metro_bias = 0.18 if leg.checkpoints else 0.0
+        night_bias = -0.08 if night else 0.0
+        rush_bias = self._rush_hour_traffic_bias(leg)
+        density = min(
+            0.86,
+            max(
+                0.05,
+                0.22
+                + leg.miles / 900.0
+                + metro_bias
+                + weather_slowdown / 100.0
+                + night_bias
+                + rush_bias,
+            ),
+        )
+        return density * self.hazard_scale
+
+    def _weather_slowdown(self) -> float:
+        effects = self.weather.effects
+        return max(
+            0.0,
+            min(
+                14.0,
+                (1.0 - effects.grip) * 20.0
+                + max(0.0, 3.0 - effects.visibility_mi) * 1.4,
+            ),
+        )
+
+    def spawn_initial_traffic(self) -> None:
+        rng = self._rng()
+        vehicles: list[TrafficVehicle] = []
+        weather_slowdown = self._weather_slowdown()
+        night = is_night(self.start_hour)
+        for leg_index, (start, leg) in enumerate(
+            zip(self.leg_starts, self.route.legs, strict=True)
+        ):
+            if leg.miles < 35.0:
+                continue
+            density = self._leg_density(leg, weather_slowdown, night)
+            slots = max(1, int(leg.miles / 85.0))
+            for slot in range(slots):
+                if rng.random() > min(0.92, density + 0.18):
+                    continue
+                span = leg.miles / slots
+                low = max(4.0, slot * span + 8.0)
+                high = min(leg.miles - 6.0, (slot + 1) * span + 4.0)
+                if high <= low:
+                    continue
+                intent = rng.choices(
+                    ("cruising", "following", "merging", "braking", "passing"),
+                    weights=(3.0, 1.5, 1.2, 1.0, 1.1),
+                )[0]
+                vehicle_class = rng.choices(
+                    ("car", "box truck", "semi", "service vehicle"),
+                    weights=(5.0, 1.4, 2.0, 0.3),
+                )[0]
+                base_speed = {
+                    "cruising": rng.uniform(52.0, 64.0),
+                    "following": rng.uniform(42.0, 55.0),
+                    "merging": rng.uniform(38.0, 52.0),
+                    "braking": rng.uniform(35.0, 48.0),
+                    "passing": rng.uniform(62.0, 75.0),
+                }[intent]
+                rush_slowdown = (
+                    rng.uniform(4.0, 10.0) if self._rush_hour_traffic_bias(leg) else 0.0
+                )
+                speed = max(25.0, base_speed - weather_slowdown - rush_slowdown)
+                lane = -1 if intent == "passing" else 0
+                if intent == "merging":
+                    lane = 1
+                vehicles.append(
+                    TrafficVehicle(
+                        key=f"traffic:{leg_index}:{slot}:{intent}",
+                        position_mi=start + rng.uniform(low, high),
+                        speed_mph=speed,
+                        target_speed_mph=speed,
+                        relative_lane=lane,
+                        intent=intent,
+                        vehicle_class=vehicle_class,
+                    )
+                )
+        self.vehicles = sorted(vehicles, key=lambda vehicle: vehicle.position_mi)
+
     def lead_vehicle(
         self, position_mi: float, truck_speed_mph: float
     ) -> TrafficContext | None:

@@ -3,7 +3,7 @@
 from freight_fate.data.world import get_world
 from freight_fate.sim.traffic_manager import TrafficManager, TrafficVehicle
 from freight_fate.sim.vehicle import TruckState
-from freight_fate.sim.weather import WeatherSystem
+from freight_fate.sim.weather import WeatherKind, WeatherSystem
 
 
 def _manager(seed: int = 1) -> TrafficManager:
@@ -86,3 +86,44 @@ def test_manager_copies_leg_starts():
     leg_starts.append(12.0)
 
     assert manager.leg_starts == [0.0]
+
+
+def _signature(manager: TrafficManager) -> list[tuple[float, float, int, str, str]]:
+    return [
+        (
+            round(vehicle.position_mi, 2),
+            round(vehicle.speed_mph, 1),
+            vehicle.relative_lane,
+            vehicle.intent,
+            vehicle.vehicle_class,
+        )
+        for vehicle in manager.vehicles
+    ]
+
+
+def test_spawn_is_deterministic_for_same_route_and_seed():
+    first = _manager(seed=1)
+    second = _manager(seed=1)
+
+    first.spawn_initial_traffic()
+    second.spawn_initial_traffic()
+
+    assert _signature(first)
+    assert _signature(first) == _signature(second)
+
+
+def test_bad_weather_slows_spawned_traffic_without_moving_it():
+    clear = _manager(seed=1)
+    rain = _manager(seed=1)
+    rain.weather.current = WeatherKind.HEAVY_RAIN
+
+    clear.spawn_initial_traffic()
+    rain.spawn_initial_traffic()
+
+    assert _signature(clear)
+    assert [v.position_mi for v in rain.vehicles] == [
+        v.position_mi for v in clear.vehicles
+    ]
+    assert min(v.speed_mph for v in rain.vehicles) < min(
+        v.speed_mph for v in clear.vehicles
+    )
