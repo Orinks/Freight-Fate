@@ -8,6 +8,11 @@ from freight_fate.models.career import LEVEL_XP
 from freight_fate.models.career_objectives import career_objective
 from freight_fate.models.jobs import CARGO_CATALOG, Job
 from freight_fate.models.profile import Profile
+from freight_fate.models.start_options import (
+    OWNER_OPERATOR_START_KEY,
+    apply_start_option,
+    start_option,
+)
 
 
 def key_event(key, unicode=""):
@@ -298,10 +303,7 @@ def test_out_of_sync_owner_operator_uses_career_guidance(monkeypatch):
             app.ctx, "say", lambda text, interrupt=True: spoken.append(text)
         )
         app.ctx.profile = Profile(name="Owner Week", current_city="Chicago")
-        app.ctx.profile.business_status = LEASED_OWNER_OPERATOR
-        app.ctx.profile.owned_trucks = ["rig"]
-        app.ctx.profile.money = 12_000.0
-        app.ctx.profile.career.deliveries = 1
+        apply_start_option(app.ctx.profile, start_option(OWNER_OPERATOR_START_KEY))
 
         app.push_state(CityMenuState(app.ctx))
 

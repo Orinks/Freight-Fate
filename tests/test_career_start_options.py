@@ -322,7 +322,8 @@ def test_first_day_briefing_names_owner_operator_costs():
         assert "own the starter tractor" in message
         assert "working capital" in message
         assert "fuel, repairs, truck wear" in message
-        assert any(item.text == "First-day briefing" for item in state.items)
+        assert all(item.text != "First-day briefing" for item in state.items)
+        assert any(item.text == "Career plan" for item in state.items)
         assert not first_dispatch_done(app.ctx.profile)
 
         app.ctx.profile.achievements.append("first_dispatch")

@@ -76,11 +76,7 @@ def first_dispatch_done(profile) -> bool:
 
 def first_day_guidance_active(profile) -> bool:
     deliveries = int(getattr(profile.career, "deliveries", 0))
-    option = option_for_profile(profile)
-    return (
-        not first_dispatch_done(profile)
-        and (deliveries <= 0 or option.is_owner_operator)
-    )
+    return not first_dispatch_done(profile) and deliveries <= 0
 
 
 def first_day_orientation_message(ctx, prefix: str = "") -> str:
