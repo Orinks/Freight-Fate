@@ -589,17 +589,31 @@ class DrivingEventMixin:
         self.ctx.replace_state(ArrivalState(self.ctx, self))
 
     def _handle_missed_destination_exit(self) -> None:
+        exit_details = self._destination_exit_details(include_past=True)
         self.trip.finished = False
         self._exit_stop = None
         self._cancel_cruise()
         if self._missed_destination_exit_said:
             return
         self._missed_destination_exit_said = True
+        reroute_text = (
+            "Continue to the next safe turnaround. Dispatch reroutes you back "
+            "onto the approach; take the destination exit when it comes up."
+        )
+        if exit_details is not None:
+            self.trip.game_minutes += 20.0
+            self.trip.position_mi = max(0.0, exit_details[0] - 1.0)
+            self._destination_exit_announced_key = None
+            reroute_text = (
+                "You continue to the next safe turnaround and loop back onto "
+                "the approach. The destination exit is ahead again; press X "
+                "when you are close enough to take it."
+            )
         self.ctx.audio.play("ui/warning")
-        self._set_status("Destination exit missed. Back up until it is ahead, then press X.")
+        self._set_status("Destination exit missed. Use the next safe turnaround.")
         self.ctx.say_event(
             f"You missed the destination exit for {self._destination_facility_text()}. "
-            "Back up until the exit is ahead, then press X to signal for it.",
+            f"{reroute_text}",
             interrupt=True,
         )
 

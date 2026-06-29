@@ -586,12 +586,11 @@ def test_delivery_does_not_complete_without_taking_destination_exit(monkeypatch)
 
         assert isinstance(app.state, DrivingState)
         assert not driving.trip.finished
-        assert driving.trip.position_mi == driving.trip.total_miles
-        assert driving._destination_exit_stop() is None
-        exit_mi, _label, _phrase = driving._destination_exit_details(include_past=True)
-        driving.trip.position_mi = exit_mi - 1.0
+        assert driving.trip.position_mi < driving.trip.total_miles
         assert driving._destination_exit_stop() is not None
         assert "missed the destination exit" in events[-1].lower()
+        assert "safe turnaround" in events[-1].lower()
+        assert "back up" not in events[-1].lower()
     finally:
         app.shutdown()
 
@@ -615,6 +614,7 @@ def test_missed_destination_recovery_does_not_keep_issuing_gate_speed_strikes(mo
         driving.update(1 / 60)
         assert isinstance(app.state, DrivingState)
         assert "missed the destination exit" in events[-1].lower()
+        assert "back up" not in events[-1].lower()
 
         driving.update(SPEEDING_HOLD_S + 1.0)
 
