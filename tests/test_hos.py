@@ -391,6 +391,19 @@ def test_hos_summary_includes_time_units():
     assert "duty window closes in 12.0 hours" in summary
 
 
+def test_hos_summary_omits_break_when_duty_window_closes_first():
+    c = HosClock()
+    c.driving_min = 414
+    c.since_break_min = 270
+    c.duty_min = 732
+    c.status = "driving"
+
+    summary = c.summary("realistic")
+
+    assert "1.8 hours of duty window left" in summary
+    assert "break due" not in summary
+
+
 # -- modes -------------------------------------------------------------------
 
 def test_relaxed_limits_are_25_percent_longer():

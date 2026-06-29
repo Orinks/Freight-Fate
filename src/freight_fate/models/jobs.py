@@ -304,9 +304,11 @@ def job_from_payload(data: dict) -> Job:
 def make_reposition_job(world: World, origin: str, destination: str) -> Job | None:
     """A zero-pay empty 'bobtail' run to relocate to a nearby city.
 
-    Reuses the normal delivery drive (so HOS, fuel, weather, and save/resume all
-    apply) but carries no cargo and pays nothing; on arrival the player simply
-    parks at the destination city's hub and can shop its dispatch board.
+    Reuses the normal delivery drive for fuel, weather, and save/resume, but
+    carries no cargo and pays nothing. It is player-chosen personal conveyance,
+    so the ELD records it as off duty instead of freight-duty driving; on
+    arrival the player simply parks at the destination city's hub and can shop
+    its dispatch board.
     """
     route = world.supported_route(origin, destination)
     if route is None:

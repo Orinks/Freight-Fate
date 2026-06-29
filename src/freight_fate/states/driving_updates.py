@@ -194,7 +194,9 @@ class DrivingUpdateMixin:
         mode = self.ctx.settings.hos_mode
         p = self.ctx.profile
 
-        if moving:
+        if self.job.bobtail:
+            self.hos.off_duty(gm)
+        elif moving:
             self.hos.drive(gm)
         else:
             self.hos.on_duty(gm)   # the 14-hour window runs even while parked

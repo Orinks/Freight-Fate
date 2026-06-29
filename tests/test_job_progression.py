@@ -88,6 +88,30 @@ def test_bobtail_relocates_to_a_nearby_city_without_pay():
         app.shutdown()
 
 
+def test_bobtail_personal_conveyance_records_off_duty_hos_time():
+    from freight_fate.app import App
+    from freight_fate.models.jobs import make_reposition_job
+    from freight_fate.models.profile import Profile
+    from freight_fate.states.driving import DrivingState
+
+    app = App()
+    try:
+        app.ctx.profile = Profile(name="Bobtail HOS", current_city="Denver")
+        job = make_reposition_job(app.ctx.world, "Denver", "Cheyenne")
+        assert job is not None and job.bobtail
+        route = app.ctx.world.supported_route("Denver", "Cheyenne")
+        driving = DrivingState(app.ctx, job, route)
+        driving.truck.velocity_mps = 20.0
+
+        driving._update_hours_and_fatigue(60.0)
+
+        assert driving.hos.status == "off_duty"
+        assert driving.hos.driving_min == 0.0
+        assert driving.hos.off_duty_min > 0.0
+    finally:
+        app.shutdown()
+
+
 def test_distance_cap_rises_with_level(world):
     caps = [JobBoard.distance_cap(level) for level in range(1, 9)]
     assert caps == sorted(caps)

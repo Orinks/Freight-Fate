@@ -412,6 +412,10 @@ class HosClock:
         status = self.status.replace("_", " ")
         pending = self.split_pending_summary()
         suffix = f" {pending}" if pending else ""
+        if duty_left <= break_left:
+            return (f"ELD status {status}. Hours of service: "
+                    f"{drive_left:.1f} hours of driving left, "
+                    f"{duty_left:.1f} hours of duty window left{suffix}")
         return (f"ELD status {status}. Hours of service: "
                 f"{drive_left:.1f} hours of driving left, "
                 f"break due in {break_left:.1f} hours, "
