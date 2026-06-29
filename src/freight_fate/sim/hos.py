@@ -246,21 +246,11 @@ class HosClock:
         if self.split_credit_key == key:
             return
         between = self.history[self.history.index(first) + 1:self.history.index(second)]
-        if second.status == "off_duty":
-            self.driving_min = sum(e.minutes for e in between if e.status == "driving")
-            self.duty_min = sum(
-                e.minutes for e in between
-                if e.status in {"driving", "on_duty_not_driving"}
-            )
-        elif first.minutes < second.minutes:
-            first_drive_after = first.drive_before
-            first_duty_after = first.duty_before + first.minutes
-            self.driving_min = max(0.0, self.driving_min - first_drive_after)
-            self.duty_min = max(0.0, self.duty_min - first_duty_after - second.minutes)
-        else:
-            self.driving_min = max(0.0, first.drive_before)
-            on_duty_between = sum(e.minutes for e in between if e.status == "on_duty_not_driving")
-            self.duty_min = max(0.0, first.duty_before + on_duty_between)
+        self.driving_min = sum(e.minutes for e in between if e.status == "driving")
+        self.duty_min = sum(
+            e.minutes for e in between
+            if e.status in {"driving", "on_duty_not_driving"}
+        )
         self.since_break_min = 0.0
         self.split_credit_key = key
         self.warned = [w for w in self.warned if not w.startswith(("drive:", "duty:", "break:"))]

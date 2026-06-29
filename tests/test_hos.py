@@ -128,16 +128,28 @@ def test_short_first_sleeper_split_preserves_between_rest_driving():
     assert c.split_pending_summary() is None
 
 
+def test_long_first_sleeper_split_preserves_between_rest_driving():
+    c = HosClock()
+    c.drive(60)
+    c.sleeper(480)
+    c.drive(300)
+    c.sleeper(120)
+
+    assert c.driving_min == pytest.approx(300)
+    assert c.duty_min == pytest.approx(300)
+    assert c.split_pending_summary() is None
+
+
 def test_seven_three_sleeper_split_restores_time_without_full_reset():
     c = HosClock()
-    c.drive(240)
+    c.drive(90)
     c.sleeper_split_rest(420)
     c.on_duty(60)
     c.drive(180)
     c.sleeper_split_rest(180)
 
-    assert c.driving_min == pytest.approx(240)
-    assert c.duty_min == pytest.approx(300)
+    assert c.driving_min == pytest.approx(180)
+    assert c.duty_min == pytest.approx(240)
     assert c.since_break_min == 0
     assert c.split_pending_summary() is None
 
