@@ -24,6 +24,10 @@ def release_air_brakes(driving):
     driving.truck.set_air_ready(parking_brake=False)
 
 
+def set_trip_traffic(driving, vehicles):
+    driving.trip.traffic_manager.vehicles = list(vehicles)
+
+
 def start_drive(app):
     """New career, accept an unlocked job, pick a route; returns DrivingState."""
     from freight_fate.states.city import CityMenuState, PickupFacilityState, RouteSelectState
@@ -71,7 +75,7 @@ def quiet_trip(driving):
 
     driving.trip._hazard_check_mi = 1e9
     driving.trip._inspection_check_mi = 1e9
-    driving.trip.npc_vehicles = []
+    driving.trip.traffic_manager.vehicles = []
     driving.weather.current = WeatherKind.CLEAR
 
 

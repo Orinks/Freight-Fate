@@ -358,7 +358,7 @@ def test_too_fast_for_conditions_risks_traction_loss(world):
     trip, truck = make_trip(world)
     trip._hazard_check_mi = 1e9          # silence the random environmental hazards
     trip._inspection_check_mi = 1e9
-    trip.npc_vehicles = []
+    trip.traffic_manager.vehicles = []
 
     def run_for_hazard(frames=12000):
         hits = []
@@ -379,7 +379,7 @@ def test_too_fast_for_conditions_risks_traction_loss(world):
     trip2, truck2 = make_trip(world, seed=7)
     trip2._hazard_check_mi = 1e9
     trip2._inspection_check_mi = 1e9
-    trip2.npc_vehicles = []
+    trip2.traffic_manager.vehicles = []
     safe_hits = []
     for _ in range(6000):
         trip2.weather.current = WeatherKind.SNOW
@@ -710,7 +710,7 @@ def test_npc_traffic_seeding_is_deterministic(world):
 
 def test_npc_traffic_moves_each_trip_tick(world):
     trip, _truck = make_trip(world)
-    trip.npc_vehicles = [
+    trip.traffic_manager.vehicles = [
         NPCVehicle("npc:test", 5.0, 60.0, 60.0, 0, "steady_truck")
     ]
     trip._hazard_check_mi = 1e9
@@ -719,6 +719,16 @@ def test_npc_traffic_moves_each_trip_tick(world):
     trip.update(1.0)
 
     assert trip.npc_vehicles[0].position_mi > 5.2
+
+
+def test_npc_vehicles_property_tracks_traffic_manager(world):
+    trip, _truck = make_trip(world)
+    vehicle = NPCVehicle("npc:compat", 5.0, 55.0, 55.0, 0, "steady_truck")
+
+    trip.npc_vehicles = [vehicle]
+
+    assert trip.traffic_manager.vehicles == [vehicle]
+    assert trip.npc_vehicles == [vehicle]
 
 
 def test_bad_weather_slows_modeled_traffic(world):
@@ -790,7 +800,7 @@ def test_npc_traffic_cue_and_status_are_reviewable(world):
     trip, truck = make_trip(world)
     truck.velocity_mps = 29.0
     trip.position_mi = 10.0
-    trip.npc_vehicles = [
+    trip.traffic_manager.vehicles = [
         NPCVehicle("npc:merge", 10.8, 42.0, 42.0, 0, "merging_vehicle")
     ]
 
@@ -814,7 +824,7 @@ def test_metric_toggle_updates_npc_traffic_cue_units(world):
     truck.velocity_mps = 29.0
     trip.position_mi = 10.0
     trip.imperial = False
-    trip.npc_vehicles = [
+    trip.traffic_manager.vehicles = [
         NPCVehicle("npc:metric-merge", 10.8, 42.0, 42.0, 0, "merging_vehicle")
     ]
 
@@ -833,7 +843,7 @@ def test_metric_toggle_updates_npc_traffic_cue_units(world):
 def test_npc_traffic_status_includes_speed_units(world):
     trip, _truck = make_trip(world)
     trip.position_mi = 10.0
-    trip.npc_vehicles = [
+    trip.traffic_manager.vehicles = [
         NPCVehicle("npc:status", 10.8, 68.0, 68.0, 0, "steady_truck")
     ]
 
@@ -958,6 +968,7 @@ def test_progress_summary_mentions_highway(world):
 
 def test_gps_state_crossing_and_rest_stop_cues_deduplicate(world):
     trip, _truck = make_trip(world)
+    trip.traffic_manager.vehicles = []
 
     trip.position_mi = 23.0
     advance = trip.update(0.0)
@@ -1108,7 +1119,7 @@ def test_traffic_context_and_warning_are_grounded_in_lead_vehicle(world):
     trip, truck = make_trip(world)
     truck.velocity_mps = 29.0
     trip.position_mi = 9.98
-    trip.npc_vehicles = [
+    trip.traffic_manager.vehicles = [
         NPCVehicle("npc:queue", 10.0, 45.0, 45.0, 0, "braking_traffic")
     ]
 

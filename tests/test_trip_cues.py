@@ -114,6 +114,7 @@ def test_progress_summary_mentions_highway(world):
 
 def test_gps_state_crossing_and_rest_stop_cues_deduplicate(world):
     trip, _truck = make_trip(world)
+    trip.traffic_manager.vehicles = []
 
     trip.position_mi = 23.0
     advance = trip.update(0.0)
