@@ -131,10 +131,24 @@ def _route_event_sound(event) -> str | None:
         if cue_kind == "local_turn":
             return _local_turn_sound(cue)
         if cue_kind == "traffic":
-            return "events/traffic_slowing"
+            return _traffic_vehicle_sound(event)
         if cue_kind == "toll":
             return "events/toll_charged"
     return None
+
+
+def _traffic_vehicle_sound(event) -> str:
+    vehicle = event.data.get("npc_vehicle")
+    vehicle_class = str(getattr(vehicle, "vehicle_class", "") or "").strip().lower()
+    if vehicle_class == "state trooper":
+        return "traffic/trooper_pass"
+    if vehicle_class == "semi":
+        return "traffic/semi_pass"
+    if vehicle_class == "box truck":
+        return "traffic/box_truck_pass"
+    if vehicle_class == "car":
+        return "traffic/car_pass"
+    return "events/traffic_slowing"
 
 
 def _local_turn_sound(cue) -> str | None:

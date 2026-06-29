@@ -1,9 +1,9 @@
 """Generate sound-effect assets via the ElevenLabs Sound Effects API.
 
 Build-time only. Reads the ElevenLabs key from an out-of-repo file (or the
-ELEVENLABS_API_KEY env var), requests each effect, and converts the returned
-MP3 to the project's Ogg Vorbis convention with ffmpeg. Never run at runtime and
-the key is never bundled.
+ELEVENLABS_API_KEY env var or local ignored .env), requests each effect, and
+converts the returned MP3 to the project's Ogg Vorbis convention with ffmpeg.
+Never run at runtime and the key is never bundled.
 
 Usage:
     uv run python tools/generate_sounds.py            # generate the default set
@@ -60,10 +60,40 @@ SPECS: dict[str, tuple[str, float, float]] = {
         "Truck low air pressure warning buzzer, a steady harsh electronic alarm "
         "buzz on the dash, no music",
         2.5, 0.6),
+    "traffic/car_pass": (
+        "A passenger car passing a truck cab on a highway, brief tire and wind "
+        "whoosh from outside, no horn, no voice, no music",
+        1.8, 0.45),
+    "traffic/box_truck_pass": (
+        "A medium box truck passing a semi truck cab on a highway, deeper tire "
+        "noise and short diesel whoosh, no horn, no voice, no music",
+        2.2, 0.45),
+    "traffic/semi_pass": (
+        "A large semi truck passing close by another truck cab on an interstate, "
+        "heavy diesel rumble, tire roar, air wash, no horn, no voice, no music",
+        2.8, 0.5),
+    "traffic/trooper_pass": (
+        "A state trooper patrol car cruising past a truck cab on the highway, "
+        "clean car tire whoosh with a subtle police radio chirp, no siren, no "
+        "voice, no music",
+        2.0, 0.45),
 }
 
 
+def _load_dotenv() -> None:
+    env_path = ROOT / ".env"
+    if not env_path.exists():
+        return
+    for raw in env_path.read_text(encoding="utf-8", errors="ignore").splitlines():
+        line = raw.strip()
+        if not line or line.startswith("#") or "=" not in line:
+            continue
+        name, value = line.split("=", 1)
+        os.environ.setdefault(name.strip(), value.strip().strip('"').strip("'"))
+
+
 def _api_key() -> str:
+    _load_dotenv()
     env = os.environ.get("ELEVENLABS_API_KEY")
     if env:
         return env.strip()

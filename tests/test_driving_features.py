@@ -93,6 +93,22 @@ def test_trip_event_sounds_use_contextual_cues():
     assert _route_event_sound(TripEvent(
         TripEventKind.GPS_CUE, highway_maneuver.near_text, {"cue": highway_maneuver}
     )) is None
+    traffic_cue = NavigationCue("traffic:test", "traffic", 1.0, "traffic ahead")
+    for vehicle_class, sound in (
+        ("car", "traffic/car_pass"),
+        ("box truck", "traffic/box_truck_pass"),
+        ("semi", "traffic/semi_pass"),
+        ("state trooper", "traffic/trooper_pass"),
+    ):
+        vehicle = SimpleNamespace(vehicle_class=vehicle_class)
+        assert _route_event_sound(TripEvent(
+            TripEventKind.GPS_CUE,
+            traffic_cue.near_text,
+            {"cue": traffic_cue, "npc_vehicle": vehicle},
+        )) == sound
+    assert _route_event_sound(TripEvent(
+        TripEventKind.GPS_CUE, traffic_cue.near_text, {"cue": traffic_cue}
+    )) == "events/traffic_slowing"
 
 
 def test_shift_key_does_not_press_clutch_in_automatic(monkeypatch):
