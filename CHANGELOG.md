@@ -3,7 +3,7 @@
 ## Unreleased
 ### Fixed
 
-- **Driving realism polish from player reports.** Metric speed warnings,
+- **Driving realism polish.** Metric speed warnings,
   speeding strikes, trooper stops, cruise messages, and the speed-limit key now
   use the selected units consistently. Missed destination exits reroute you via
   a safe turnaround instead of telling you to reverse down the highway, and
