@@ -83,7 +83,8 @@ class PlaytestHarness:
             *,
             profile_name: str = "Playtest",
             job_rank: int = 0,
-            route_rank: int = 0) -> PlaytestResult:
+            route_rank: int = 0,
+            configure_profile=None) -> PlaytestResult:
         from freight_fate.states.city import (
             CityMenuState,
             JobBoardState,
@@ -114,6 +115,9 @@ class PlaytestHarness:
         assert isinstance(self.app.state, HomeCityState)
         self.app.state.handle_event(key_event(pygame.K_RETURN))
         assert isinstance(self.app.state, CityMenuState)
+        if configure_profile is not None:
+            assert self.app.ctx.profile is not None
+            configure_profile(self.app.ctx.profile)
 
         self.app.state.handle_event(key_event(pygame.K_RETURN))
         assert isinstance(self.app.state, JobBoardState)

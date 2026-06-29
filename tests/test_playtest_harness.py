@@ -87,6 +87,29 @@ def test_company_driver_first_delivery_transcript_builds_dispatch_trust(monkeypa
     assert "probation" not in text
 
 
+def test_mid_career_transcript_speaks_level_band_guidance(monkeypatch):
+    from freight_fate.models.career import LEVEL_XP
+
+    def configure_profile(profile) -> None:
+        profile.achievements.append("first_dispatch")
+        profile.career.xp = LEVEL_XP[9]
+        profile.career.deliveries = 20
+        profile.career.reputation = 86
+
+    with PlaytestHarness(monkeypatch) as harness:
+        result = harness.start_delivery(
+            profile_name="Harness Senior Career",
+            job_rank=0,
+            route_rank=0,
+            configure_profile=configure_profile,
+        )
+
+    text = result.transcript_text
+    assert "Run like a senior company driver" in text
+    assert "senior company lane" in text
+    assert "probation" not in text.lower()
+
+
 def test_playtest_harness_neutralizes_random_traffic_by_default(monkeypatch):
     with PlaytestHarness(monkeypatch) as harness:
         harness.start_delivery(profile_name="Harness Quiet Road")
