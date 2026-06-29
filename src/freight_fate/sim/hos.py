@@ -167,6 +167,8 @@ class HosClock:
         self.off_duty_min += minutes
         if self.off_duty_min >= SLEEP_MIN:
             self.sleep(status="sleeper_berth")
+            return
+        self._apply_split_credit()
 
     def take_break(self, minutes: float) -> None:
         """A short off-duty rest. Kept for old callers and explicit break actions."""
