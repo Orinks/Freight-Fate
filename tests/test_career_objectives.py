@@ -68,6 +68,34 @@ def test_low_reputation_company_driver_keeps_trust_objective_after_training():
     assert "reliable lanes" in objective.dispatch_text
 
 
+def test_company_driver_objective_uses_level_band_guidance_after_training():
+    profile = Profile(name="Regional Plan", current_city="Chicago")
+    profile.achievements.append("first_dispatch")
+    profile.career.xp = LEVEL_XP[3]
+    profile.career.deliveries = 12
+    profile.career.reputation = 82
+
+    objective = career_objective(profile)
+
+    assert objective.title == "Build a regional service record"
+    assert "broader company lanes" in objective.terminal_text
+    assert objective.recommendation == "reputation-building lane"
+
+
+def test_ready_unlock_states_override_level_band_guidance():
+    profile = Profile(name="Buy In", current_city="Chicago")
+    profile.achievements.append("first_dispatch")
+    profile.career.xp = LEVEL_XP[OWNER_OPERATOR_LEVEL - 1]
+    profile.career.deliveries = 35
+    profile.career.reputation = 82
+    profile.money = 60_000.0
+
+    objective = career_objective(profile)
+
+    assert objective.title == "Owner-operator buy-in ready"
+    assert objective.recommendation == "clean company load"
+
+
 def test_owner_operator_objective_emphasizes_working_capital():
     profile = Profile(name="Owner Plan", current_city="Chicago")
     profile.business_status = LEASED_OWNER_OPERATOR

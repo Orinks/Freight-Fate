@@ -20,6 +20,7 @@ from .business import (
     is_owner_operator,
     owner_operator_eligibility,
 )
+from .career_level_guidance import career_level_guidance
 from .career_training import TrainingStage, training_guidance
 
 
@@ -80,12 +81,7 @@ def _company_driver_objective(profile) -> CareerObjective:
             "Choose freight that protects reputation and builds savings.",
             "steady earning lane",
         )
-    return CareerObjective(
-        "Trusted company driver",
-        "Keep building seniority, clean service, endorsements, and better carrier lanes.",
-        "Unlocked freight with good time margins is the strongest career move.",
-        "trusted carrier lane",
-    )
+    return _level_guidance_objective(profile)
 
 
 def _owner_operator_objective(profile) -> CareerObjective:
@@ -114,12 +110,7 @@ def _owner_operator_objective(profile) -> CareerObjective:
             "The strongest loads are the ones that leave room for fuel, repairs, and trailer costs.",
             "owner-operator margin load",
         )
-    return CareerObjective(
-        "Prove the truck",
-        "Run clean leased-on freight while your reputation and cash reserve grow.",
-        "Compare take-home estimates and trailer needs before accepting.",
-        "clean leased-on load",
-    )
+    return _level_guidance_objective(profile)
 
 
 def _independent_authority_objective(profile) -> CareerObjective:
@@ -138,9 +129,14 @@ def _independent_authority_objective(profile) -> CareerObjective:
             "Compare gross pay against authority costs before taking a lane.",
             "direct freight with margin",
         )
+    return _level_guidance_objective(profile)
+
+
+def _level_guidance_objective(profile) -> CareerObjective:
+    guidance = career_level_guidance(profile)
     return CareerObjective(
-        "Independent contract growth",
-        "Use reputation, trailer fit, and cash reserves to choose better direct freight.",
-        "The best contract is the one you can deliver cleanly and settle profitably.",
-        "profitable direct freight",
+        guidance.title,
+        guidance.terminal_text,
+        guidance.dispatch_text,
+        guidance.recommendation,
     )
