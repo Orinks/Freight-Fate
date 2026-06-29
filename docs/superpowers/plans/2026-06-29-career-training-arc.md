@@ -591,7 +591,7 @@ git commit -m "feat(career): prefer safer first-week freight"
 **Files:**
 - Modify: `tests/test_playtest_harness.py`
 
-- [ ] **Step 1: Add failing transcript test**
+- [x] **Step 1: Add failing transcript test**
 
 Add to `tests/test_playtest_harness.py`:
 
@@ -606,7 +606,7 @@ def test_company_driver_first_delivery_transcript_builds_dispatch_trust(monkeypa
     assert "probation" not in text
 ```
 
-- [ ] **Step 2: Run the playtest harness test**
+- [x] **Step 2: Run the playtest harness test**
 
 Run:
 
@@ -616,7 +616,7 @@ uv run pytest tests/test_playtest_harness.py::test_company_driver_first_delivery
 
 Expected: the test should pass after Tasks 1-4. If it fails because the harness starts after the first-dispatch achievement is awarded, adjust the assertion to inspect the dispatch-board transcript before acceptance rather than weakening the "no probation wording" requirement.
 
-- [ ] **Step 3: Run focused harness baseline**
+- [x] **Step 3: Run focused harness baseline**
 
 Run:
 
@@ -626,7 +626,7 @@ uv run pytest tests/test_playtest_harness.py -q
 
 Expected: all playtest harness tests pass.
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 Run:
 

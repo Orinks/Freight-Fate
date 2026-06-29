@@ -73,6 +73,20 @@ def test_playtest_harness_records_headless_delivery_transcript(monkeypatch):
     result.assert_no_known_destination_exit_regressions()
 
 
+def test_company_driver_first_delivery_transcript_builds_dispatch_trust(monkeypatch):
+    with PlaytestHarness(monkeypatch) as harness:
+        result = harness.start_delivery(
+            profile_name="Harness Training Arc",
+            job_rank=0,
+            route_rank=0,
+        )
+
+    text = result.transcript_text.lower()
+    assert "dispatch" in text
+    assert "trainer" in text or "first-week" in text
+    assert "probation" not in text
+
+
 def test_playtest_harness_neutralizes_random_traffic_by_default(monkeypatch):
     with PlaytestHarness(monkeypatch) as harness:
         harness.start_delivery(profile_name="Harness Quiet Road")
