@@ -3,6 +3,16 @@
 ## Unreleased
 ### Fixed
 
+- **Driving realism polish from player reports.** Metric speed warnings,
+  speeding strikes, trooper stops, cruise messages, and the speed-limit key now
+  use the selected units consistently. Missed destination exits reroute you via
+  a safe turnaround instead of telling you to reverse down the highway, and
+  recovery no longer loops gate-speed tickets. Dispatch warns when your current
+  hours are too short for a load, including when every listed job is risky.
+  Bobtail repositioning now counts as off-duty personal conveyance, dispatch
+  board facility names are less repetitive, impossible short delivery summaries
+  are floored to a practical road time, and automatic shift audio no longer
+  flares at full throttle during gear changes.
 - **Engine brake and throttle no longer fight each other.** The engine brake now
   refuses to switch on while you are accelerating, and pressing the accelerator
   turns it back off so the truck can make power normally.
