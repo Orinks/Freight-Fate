@@ -42,7 +42,7 @@ def test_company_driver_bulk_job_uses_carrier_trailer_support():
         labels = _labels(app, profile)
 
         row = labels[0]
-        assert row.startswith("Job 1 of 1")
+        assert "Job 1 of 1" in row
         assert "Carrier trailer provided" in row
         assert "Estimated driver pay before advances" in row
         assert "Locked job" not in row

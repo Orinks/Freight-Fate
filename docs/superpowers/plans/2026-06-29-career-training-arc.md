@@ -640,7 +640,7 @@ git commit -m "test(career): cover first-week dispatch transcript"
 **Files:**
 - No required code changes unless verification exposes a defect.
 
-- [ ] **Step 1: Run focused career checks**
+- [x] **Step 1: Run focused career checks**
 
 Run:
 
@@ -650,7 +650,7 @@ uv run pytest tests/test_career_training.py tests/test_career_objectives.py test
 
 Expected: all selected tests pass.
 
-- [ ] **Step 2: Run playtest smoke proof**
+- [x] **Step 2: Run playtest smoke proof**
 
 Run:
 
@@ -660,7 +660,7 @@ uv run pytest tests/test_playtest_harness.py -q
 
 Expected: all harness tests pass with transcript coverage for spoken guidance.
 
-- [ ] **Step 3: Run accessibility-agent review for the spoken UI surface**
+- [x] **Step 3: Run accessibility-agent review for the spoken UI surface**
 
 Use the available accessibility-agent tool for game/audio UI review. Ask it to review the diff for:
 
@@ -670,7 +670,7 @@ Freight Fate company-driver career training arc. Verify that dispatch recommenda
 
 Expected: no blocking findings. If it reports findings, fix them before continuing.
 
-- [ ] **Step 4: Run full focused regression if time allows**
+- [x] **Step 4: Run full focused regression if time allows**
 
 Run:
 
@@ -680,7 +680,7 @@ uv run pytest -q
 
 Expected: full suite passes. If this is too slow for the worker budget, report that focused career, business, job progression, and playtest harness checks passed and name the skipped full-suite command.
 
-- [ ] **Step 5: Commit final fixes if needed**
+- [x] **Step 5: Commit final fixes if needed**
 
 If verification required changes:
 
