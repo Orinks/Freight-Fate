@@ -690,6 +690,9 @@ def test_npc_traffic_seeding_is_deterministic(world):
     trip_a = Trip(route, TruckState(), weather, seed=1, start_hour=8.0)
     trip_b = Trip(route, TruckState(), weather, seed=1, start_hour=8.0)
 
+    assert hasattr(trip_a, "traffic_manager")
+    assert trip_a.npc_vehicles is trip_a.traffic_manager.vehicles
+
     def signature(trip):
         return [
             (

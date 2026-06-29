@@ -223,14 +223,30 @@ class TrafficManager:
             return f"{mph:.0f} miles per hour"
         return f"{mph * 1.609344:.0f} kilometers per hour"
 
+    def _vehicle_intent(self, vehicle) -> str:
+        intent = getattr(vehicle, "intent", None)
+        if intent is not None:
+            return intent
+        return {
+            "steady_truck": "cruising",
+            "slow_car": "following",
+            "merging_vehicle": "merging",
+            "braking_traffic": "braking",
+            "passing_vehicle": "passing",
+        }.get(getattr(vehicle, "behavior", ""), "cruising")
+
+    def _vehicle_class(self, vehicle) -> str:
+        return getattr(vehicle, "vehicle_class", "vehicle")
+
     def update(self, *, dt: float, position_mi: float, time_scale: float) -> None:
         game_hours = dt * time_scale / 3600.0
         kept: list[TrafficVehicle] = []
         for vehicle in self.vehicles:
             gap = vehicle.position_mi - position_mi
-            if vehicle.intent == "merging" and 0.0 <= gap <= 1.4:
+            intent = self._vehicle_intent(vehicle)
+            if intent == "merging" and 0.0 <= gap <= 1.4:
                 vehicle.relative_lane = 0
-            if vehicle.intent == "braking" and 0.0 <= gap <= 1.8:
+            if intent == "braking" and 0.0 <= gap <= 1.8:
                 vehicle.target_speed_mph = max(30.0, vehicle.target_speed_mph - 8.0 * dt)
             delta = vehicle.target_speed_mph - vehicle.speed_mph
             vehicle.speed_mph += max(-6.0 * dt, min(4.0 * dt, delta))
@@ -253,17 +269,19 @@ class TrafficManager:
             return None
         gap = self._gap_text(context.gap_mi)
         speed = self._speed_value(vehicle.speed_mph)
-        if vehicle.intent == "merging":
+        intent = self._vehicle_intent(vehicle)
+        vehicle_class = self._vehicle_class(vehicle)
+        if intent == "merging":
             message = (
-                f"Merging {vehicle.vehicle_class} {gap} ahead. Hold your lane, "
+                f"Merging {vehicle_class} {gap} ahead. Hold your lane, "
                 f"leave a gap, and be ready for {speed}."
             )
             kind = "merging"
-        elif vehicle.intent == "braking":
+        elif intent == "braking":
             message = f"Brake lights {gap} ahead. Ease down and leave room for {speed}."
             kind = "braking"
-        elif vehicle.intent == "following":
-            message = f"Slow {vehicle.vehicle_class} {gap} ahead. Be ready near {speed}."
+        elif intent == "following":
+            message = f"Slow {vehicle_class} {gap} ahead. Be ready near {speed}."
             kind = "following"
         else:
             return None

@@ -124,7 +124,10 @@ class TripTrafficMixin:
         return best
 
     def traffic_context(self) -> TrafficContext | None:
-        return self._npc_context()
+        return self.traffic_manager.lead_vehicle(
+            position_mi=self.position_mi,
+            truck_speed_mph=self.truck.speed_mph,
+        )
 
     def traffic_target_speed(self) -> float | None:
         context = self.traffic_context()
@@ -161,20 +164,17 @@ class TripTrafficMixin:
         return ""
 
     def _check_npc_traffic_cues(self) -> None:
-        context = self._npc_context()
-        if context is None or context.gap_mi > NPC_TRAFFIC_LOOKAHEAD_MI:
+        situation = self.traffic_manager.next_situation(
+            position_mi=self.position_mi,
+            truck_speed_mph=self.truck.speed_mph,
+        )
+        if situation is None:
             return
-        lead = context.lead
-        if not isinstance(lead, NPCVehicle) or lead.key in self._announced_npc_traffic:
-            return
-        message = self._npc_warning_message(context)
-        if not message:
-            return
-        self._announced_npc_traffic.add(lead.key)
+        lead = situation.vehicle
         cue = NavigationCue(
             f"npc:{lead.key}", "traffic", lead.position_mi,
             lead.reason, speed_mph=lead.speed_mph)
-        self._emit(TripEventKind.GPS_CUE, message, cue=cue, npc_vehicle=lead)
+        self._emit(TripEventKind.GPS_CUE, situation.message, cue=cue, npc_vehicle=lead)
 
     def cb_patrol_message(self, patrol: PatrolWindow, ahead_mi: float) -> str:
         """Player-facing CB chatter for enforcement presence."""

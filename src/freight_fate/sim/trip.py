@@ -6,6 +6,7 @@ from __future__ import annotations
 import random
 
 from ..data.world import Leg, Route
+from .traffic_manager import TrafficManager
 from .trip_models import *
 from .trip_road_events import TripRoadEventMixin
 from .trip_route_helpers import *
@@ -49,7 +50,17 @@ class Trip(TripRoadEventMixin, TripTrafficMixin):
         self._city_mileposts = list(self._leg_starts) + [self.total_miles]
         self.stops = self._place_stops()
         self.toll_charges: list[TollCharge] = []
-        self.npc_vehicles = self._place_npc_traffic()
+        self.traffic_manager = TrafficManager(
+            route=self.route,
+            truck=self.truck,
+            weather=self.weather,
+            leg_starts=self._leg_starts,
+            seed=self._seed,
+            start_hour=self.start_hour,
+            hazard_scale=self.hazard_scale,
+            imperial=self.imperial,
+        )
+        self.traffic_manager.spawn_initial_traffic()
         self.zones = self._place_zones()
         self.traffic_pressures = self._place_traffic_pressures()
         self.navigation_cues = self._build_navigation_cues()
@@ -81,6 +92,14 @@ class Trip(TripRoadEventMixin, TripTrafficMixin):
             return
         self._imperial = value
         self.navigation_cues = self._build_navigation_cues()
+
+    @property
+    def npc_vehicles(self):
+        return self.traffic_manager.vehicles
+
+    @npc_vehicles.setter
+    def npc_vehicles(self, vehicles) -> None:
+        self.traffic_manager.vehicles = vehicles
 
     def _distance_text(self, miles: float) -> str:
         if self.imperial:
@@ -616,7 +635,11 @@ class Trip(TripRoadEventMixin, TripTrafficMixin):
         if self.position_mi < 0.0:
             self.position_mi = 0.0
 
-        self._update_npc_traffic(dt)
+        self.traffic_manager.update(
+            dt=dt,
+            position_mi=self.position_mi,
+            time_scale=self.time_scale,
+        )
         self._check_zones()
         self._check_speed_limit()
         self._check_stops()
