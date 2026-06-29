@@ -175,6 +175,11 @@ class RestStopState(MenuState):
                 help="Satisfies the 30-minute break rule and eases fatigue. "
                      "The clock and your deadline advance half an hour."))
         if "sleep" in actions:
+            for hours in (2, 3, 7, 8):
+                items.append(MenuItem(
+                    f"Sleep {hours} hours in sleeper berth",
+                    lambda h=hours: self._sleeper_split_rest(h),
+                    help=self._sleeper_split_help(hours)))
             items.append(MenuItem(
                 "Sleep 10 hours", self._sleep,
                 help="A full reset: fresh hours of service and zero fatigue. "
@@ -317,6 +322,36 @@ class RestStopState(MenuState):
         self.ctx.say(f"You took a short food and coffee break. "
                      f"It is {clock_text(d.trip.current_hour)}. "
                      f"{_deadline_text(d)}")
+
+    def _sleeper_split_help(self, hours: int) -> str:
+        if hours == 2:
+            pair = "Can pair with 8 hours in the sleeper berth."
+        elif hours == 3:
+            pair = "Can pair with 7 hours in the sleeper berth."
+        elif hours == 7:
+            pair = "Can pair with 3 hours off duty or sleeper berth."
+        else:
+            pair = "Can pair with 2 hours off duty or sleeper berth."
+        return f"{pair} The clock and your deadline advance {hours} hours."
+
+    def _sleeper_split_rest(self, hours: int) -> None:
+        d = self.driving
+        p = self.ctx.profile
+        minutes = float(hours * 60)
+        _advance_rest_clock(d, minutes)
+        completed = d.hos.sleeper_split_rest(minutes)
+        p.fatigue = hos.rest_sleeper_split(p.fatigue, minutes, completed=completed)
+        self._save_here(silent=True)
+        self.ctx.audio.play("ui/notify")
+        status = (
+            "Sleeper split credited. "
+            if completed else (d.hos.split_pending_summary() or "Sleeper berth rest recorded.")
+        )
+        self.ctx.award_achievement("slept_on_route")
+        self.ctx.say(
+            f"You slept {hours} hours in the sleeper berth. "
+            f"It is {clock_text(d.trip.current_hour)}. {status} {_deadline_text(d)}")
+        self.refresh()
 
     def _sleep(self) -> None:
         d = self.driving

@@ -520,6 +520,12 @@ def rest_shoulder(fatigue: float) -> float:
     return min(fatigue, FATIGUE_SHOULDER_FLOOR)
 
 
+def rest_sleeper_split(fatigue: float, minutes: float, *, completed: bool = False) -> float:
+    relief = 18.0 if minutes <= 180.0 else 55.0
+    floor = 10.0 if completed else 20.0
+    return max(floor, max(0.0, fatigue - relief))
+
+
 # ---------------------------------------------------------------------------
 # Day/night clock
 # ---------------------------------------------------------------------------

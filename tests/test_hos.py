@@ -687,6 +687,55 @@ def test_rest_stop_menu_break_and_sleep():
 
 
 @pytest.mark.smoke
+def test_sleep_capable_stop_offers_sleeper_split_choices():
+    from freight_fate.app import App
+    from freight_fate.states.driving import RestStopState
+
+    app = App()
+    try:
+        driving = start_drive(app)
+        sleeper = SimpleNamespace(
+            name="Big Truck Stop", at_mi=driving.trip.position_mi, type="truck_stop",
+            actions=("break", "fuel", "sleep"), services=(), parking="confirmed",
+            exit_label="", spoken_name="Big Truck Stop", parking_text="confirmed truck parking")
+        labels = [i.text for i in RestStopState(app.ctx, driving, sleeper).build_items()]
+
+        assert "Sleep 2 hours in sleeper berth" in labels
+        assert "Sleep 3 hours in sleeper berth" in labels
+        assert "Sleep 7 hours in sleeper berth" in labels
+        assert "Sleep 8 hours in sleeper berth" in labels
+        assert "Sleep 10 hours" in labels
+    finally:
+        app.shutdown()
+
+
+@pytest.mark.smoke
+def test_split_sleeper_rest_action_advances_clock_and_speaks_status(monkeypatch):
+    from freight_fate.app import App
+    from freight_fate.states.driving import RestStopState
+
+    app = App()
+    spoken = []
+    monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: spoken.append(text))
+    try:
+        driving = start_drive(app)
+        sleeper = SimpleNamespace(
+            name="Big Truck Stop", at_mi=driving.trip.position_mi, type="truck_stop",
+            actions=("break", "fuel", "sleep"), services=(), parking="confirmed",
+            exit_label="", spoken_name="Big Truck Stop", parking_text="confirmed truck parking")
+        app.push_state(RestStopState(app.ctx, driving, sleeper))
+        before = driving.trip.game_minutes
+
+        select(app.state, "Sleep 8 hours in sleeper berth")
+
+        assert driving.trip.game_minutes == pytest.approx(before + 480.0)
+        assert driving.hos.status == "sleeper_berth"
+        assert "Sleeper split pending" in spoken[-1]
+    finally:
+        app.shutdown()
+
+
+@pytest.mark.smoke
 def test_full_parking_offers_drive_on_and_shoulder(monkeypatch):
     from freight_fate.app import App
     from freight_fate.states.driving import (
@@ -840,6 +889,7 @@ def test_break_only_stop_always_offers_emergency_lot_sleep(monkeypatch):
         labels = [i.text for i in RestStopState(app.ctx, driving, break_only).build_items()]
         assert "Emergency sleep in the lot" in labels
         assert "Sleep 10 hours" not in labels
+        assert not any("sleeper berth" in label for label in labels)
 
         # A sleeper stop offers the full sleep instead, not the lot fallback.
         sleeper = SimpleNamespace(
