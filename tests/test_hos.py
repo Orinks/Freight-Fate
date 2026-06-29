@@ -259,7 +259,7 @@ def test_split_pending_summary_names_needed_pair():
     c.sleeper_split_rest(480)
 
     assert c.split_pending_summary() == (
-        "Sleeper split pending: pair this with 2 more hours off duty or sleeper berth."
+        "Sleeper split pending: pair this with 2 more hours at sleep-capable parking."
     )
 
 

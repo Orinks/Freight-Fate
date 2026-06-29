@@ -331,9 +331,9 @@ class RestStopState(MenuState):
         elif hours == 3:
             pair = "Can pair with 7 hours in the sleeper berth."
         elif hours == 7:
-            pair = "Can pair with 3 hours off duty or sleeper berth."
+            pair = "Can pair with 3 more hours at sleep-capable parking."
         else:
-            pair = "Can pair with 2 hours off duty or sleeper berth."
+            pair = "Can pair with 2 more hours at sleep-capable parking."
         return f"{pair} The clock and your deadline advance {hours} hours."
 
     def _sleeper_split_rest(self, hours: int) -> None:

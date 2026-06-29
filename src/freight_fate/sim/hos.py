@@ -429,9 +429,15 @@ class HosClock:
             return None
         last = rest_events[-1]
         if last.status == "sleeper_berth" and last.minutes >= SPLIT_LONG_ALT_MIN:
-            return "Sleeper split pending: pair this with 2 more hours off duty or sleeper berth."
+            return (
+                "Sleeper split pending: pair this with 2 more hours at "
+                "sleep-capable parking."
+            )
         if last.status == "sleeper_berth" and last.minutes >= SPLIT_LONG_MIN:
-            return "Sleeper split pending: pair this with 3 more hours off duty or sleeper berth."
+            return (
+                "Sleeper split pending: pair this with 3 more hours at "
+                "sleep-capable parking."
+            )
         if last.minutes >= SPLIT_SHORT_ALT_MIN:
             return "Sleeper split pending: pair this with 7 more hours in the sleeper berth."
         if last.minutes >= SPLIT_SHORT_MIN:
