@@ -275,7 +275,10 @@ class DrivingUpdateMixin:
         audio = self.ctx.audio
         if t.engine_on and not audio.engine_running:
             audio.engine_start()
-        audio.set_engine_rpm(t.rpm, t.throttle)
+        engine_load = t.throttle
+        if t.transmission.automatic and t.transmission.shifting:
+            engine_load = min(engine_load, 0.08)
+        audio.set_engine_rpm(t.rpm, engine_load)
         audio.set_road_noise(t.velocity_mps)
         eff = self.weather.effects
         audio.set_weather(eff.sound)

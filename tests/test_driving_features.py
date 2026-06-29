@@ -991,6 +991,34 @@ def test_toll_route_delivery_settlement_records_expense(monkeypatch):
         app.shutdown()
 
 
+def test_engine_audio_load_drops_during_automatic_shift(monkeypatch):
+    from freight_fate.app import App
+
+    app = App()
+    samples = []
+    monkeypatch.setattr(app.ctx.audio, "set_engine_rpm",
+                        lambda rpm, throttle=0.0: samples.append((rpm, throttle)))
+    monkeypatch.setattr(app.ctx.audio, "set_road_noise", lambda *a, **k: None)
+    monkeypatch.setattr(app.ctx.audio, "set_weather", lambda *a, **k: None)
+    monkeypatch.setattr(app.ctx.audio, "set_wind", lambda *a, **k: None)
+    monkeypatch.setattr(app.ctx.audio, "set_ambient", lambda *a, **k: None)
+    monkeypatch.setattr(app.ctx.audio, "play", lambda *a, **k: None)
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        driving.truck.throttle = 1.0
+        driving.truck.rpm = 1700.0
+        driving.truck.transmission.automatic = True
+        driving.truck.transmission.gear = 4
+        driving.truck.transmission._shift_timer = 0.5
+
+        driving._update_audio(0.0)
+
+        assert samples[-1][1] <= 0.08
+    finally:
+        app.shutdown()
+
+
 @pytest.mark.smoke
 def test_can_back_up_to_a_missed_rest_stop_with_t_menu():
     from freight_fate.app import App
