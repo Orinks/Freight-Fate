@@ -135,6 +135,32 @@ def test_terminal_career_plan_is_keyboard_reachable_and_spoken(monkeypatch):
         app.shutdown()
 
 
+def test_terminal_career_plan_speaks_senior_company_level_guidance(monkeypatch):
+    from freight_fate.app import App
+    from freight_fate.states.city import CityMenuState
+
+    spoken: list[str] = []
+    app = App()
+    try:
+        monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: spoken.append(text))
+        app.ctx.profile = Profile(name="Senior Driver", current_city="Chicago")
+        app.ctx.profile.achievements.append("first_dispatch")
+        app.ctx.profile.career.xp = LEVEL_XP[9]
+        app.ctx.profile.career.deliveries = 20
+        app.ctx.profile.career.reputation = 86
+
+        app.push_state(CityMenuState(app.ctx))
+        career_item = next(i for i, item in enumerate(app.state.items) if item.text == "Career plan")
+        app.state.index = career_item
+        app.state.items[career_item].action()
+
+        assert spoken[-1].startswith("Run like a senior company driver.")
+        assert "premium lanes" in spoken[-1]
+        assert "premium freight" in spoken[-1]
+    finally:
+        app.shutdown()
+
+
 def test_dispatch_board_speaks_objective_and_marks_recommended_job(monkeypatch):
     from freight_fate.app import App
     from freight_fate.states.city import JobBoardState
@@ -161,6 +187,35 @@ def test_dispatch_board_speaks_objective_and_marks_recommended_job(monkeypatch):
         assert recommended.startswith(
             "Recommended dispatch, good first-week run: Job 2 of 2:")
         assert not app.state.items[0].text.startswith("Recommended dispatch")
+    finally:
+        app.shutdown()
+
+
+def test_dispatch_board_speaks_authority_level_recommendation(monkeypatch):
+    from freight_fate.app import App
+    from freight_fate.models.business import INDEPENDENT_AUTHORITY
+    from freight_fate.states.city import JobBoardState
+
+    spoken: list[str] = []
+    app = App()
+    try:
+        monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: spoken.append(text))
+        app.ctx.profile = Profile(name="Independent", current_city="Chicago")
+        app.ctx.profile.achievements.append("first_dispatch")
+        app.ctx.profile.business_status = INDEPENDENT_AUTHORITY
+        app.ctx.profile.owned_trucks = ["rig"]
+        app.ctx.profile.money = 90_000.0
+        app.ctx.profile.career.xp = LEVEL_XP[24]
+        app.ctx.profile.career.deliveries = 80
+        app.ctx.profile.career.reputation = 94
+
+        app.push_state(JobBoardState(app.ctx, [
+            _job(miles=120.0, pay=1800.0),
+        ]))
+
+        assert "Career objective: Grow a freight business" in spoken[-1]
+        assert "direct freight" in spoken[-1]
+        assert "direct freight with margin" in spoken[-1]
     finally:
         app.shutdown()
 
