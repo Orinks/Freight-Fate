@@ -40,12 +40,19 @@ class TrafficVehicle:
 
     @property
     def behavior(self) -> str:
-        return self.intent
+        return {
+            "cruising": "steady_truck",
+            "following": "slow_car",
+            "merging": "merging_vehicle",
+            "braking": "braking_traffic",
+            "passing": "passing_vehicle",
+        }.get(self.intent, self.intent)
 
     @property
     def reason(self) -> str:
         return {
-            "following": "steady traffic",
+            "cruising": "steady truck traffic",
+            "following": "slow car ahead",
             "merging": "merging traffic",
             "braking": "brake lights ahead",
             "passing": "passing traffic",

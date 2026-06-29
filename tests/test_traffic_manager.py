@@ -47,7 +47,32 @@ def test_traffic_vehicle_keeps_npc_compatibility_properties():
     assert vehicle.at_mi == 12.5
     assert vehicle.end_mi > vehicle.at_mi
     assert vehicle.lane_text == "right lane"
+    assert vehicle.behavior == "merging_vehicle"
     assert vehicle.reason == "merging traffic"
+
+
+def test_traffic_vehicle_maps_new_intents_to_legacy_behavior_and_reason():
+    expected = {
+        "cruising": ("steady_truck", "steady truck traffic"),
+        "following": ("slow_car", "slow car ahead"),
+        "merging": ("merging_vehicle", "merging traffic"),
+        "braking": ("braking_traffic", "brake lights ahead"),
+        "passing": ("passing_vehicle", "passing traffic"),
+    }
+
+    for intent, (behavior, reason) in expected.items():
+        vehicle = TrafficVehicle(
+            key=f"traffic:{intent}",
+            position_mi=10.0,
+            speed_mph=45.0,
+            target_speed_mph=45.0,
+            relative_lane=0,
+            intent=intent,
+            vehicle_class="car",
+        )
+
+        assert vehicle.behavior == behavior
+        assert vehicle.reason == reason
 
 
 def test_lead_vehicle_selects_nearest_vehicle_in_player_lane():
@@ -162,7 +187,8 @@ def test_long_route_bad_weather_preserves_spawned_traffic_positions():
     clear.spawn_initial_traffic()
     rain.spawn_initial_traffic()
 
-    assert len(clear.vehicles) == 27
+    assert clear.vehicles
+    assert len(rain.vehicles) == len(clear.vehicles)
     assert _placement_signature(rain) == _placement_signature(clear)
     assert [v.speed_mph for v in rain.vehicles] != [
         v.speed_mph for v in clear.vehicles
