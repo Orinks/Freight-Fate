@@ -100,7 +100,7 @@ class TrafficManager:
             return 0.0
         return 0.14 if leg.checkpoints else 0.06
 
-    def _leg_density(self, leg: Leg, weather_slowdown: float, night: bool) -> float:
+    def _leg_density(self, leg: Leg, night: bool) -> float:
         metro_bias = 0.18 if leg.checkpoints else 0.0
         night_bias = -0.08 if night else 0.0
         rush_bias = self._rush_hour_traffic_bias(leg)
@@ -111,7 +111,6 @@ class TrafficManager:
                 0.22
                 + leg.miles / 900.0
                 + metro_bias
-                + weather_slowdown / 100.0
                 + night_bias
                 + rush_bias,
             ),
@@ -139,7 +138,7 @@ class TrafficManager:
         ):
             if leg.miles < 35.0:
                 continue
-            density = self._leg_density(leg, weather_slowdown, night)
+            density = self._leg_density(leg, night)
             slots = max(1, int(leg.miles / 85.0))
             for slot in range(slots):
                 if rng.random() > min(0.92, density + 0.18):

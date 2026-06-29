@@ -9,13 +9,23 @@ from freight_fate.sim.weather import WeatherKind, WeatherSystem
 def _manager(seed: int = 1) -> TrafficManager:
     world = get_world()
     route = world.route_from_cities(["Chicago", "Indianapolis"])
+    assert route is not None
+    return _manager_for_route(route, seed=seed)
+
+
+def _manager_for_route(route, seed: int = 1) -> TrafficManager:
     truck = TruckState()
     weather = WeatherSystem("great_lakes", seed=1)
+    leg_starts = []
+    at_mi = 0.0
+    for leg in route.legs:
+        leg_starts.append(at_mi)
+        at_mi += leg.miles
     return TrafficManager(
         route=route,
         truck=truck,
         weather=weather,
-        leg_starts=[0.0],
+        leg_starts=leg_starts,
         seed=seed,
         start_hour=8.0,
         hazard_scale=1.0,
@@ -101,6 +111,18 @@ def _signature(manager: TrafficManager) -> list[tuple[float, float, int, str, st
     ]
 
 
+def _placement_signature(manager: TrafficManager) -> list[tuple[float, int, str, str]]:
+    return [
+        (
+            round(vehicle.position_mi, 2),
+            vehicle.relative_lane,
+            vehicle.intent,
+            vehicle.vehicle_class,
+        )
+        for vehicle in manager.vehicles
+    ]
+
+
 def test_spawn_is_deterministic_for_same_route_and_seed():
     first = _manager(seed=1)
     second = _manager(seed=1)
@@ -127,3 +149,21 @@ def test_bad_weather_slows_spawned_traffic_without_moving_it():
     assert min(v.speed_mph for v in rain.vehicles) < min(
         v.speed_mph for v in clear.vehicles
     )
+
+
+def test_long_route_bad_weather_preserves_spawned_traffic_positions():
+    world = get_world()
+    route = world.supported_route("Seattle", "New York")
+    assert route is not None
+    clear = _manager_for_route(route, seed=7)
+    rain = _manager_for_route(route, seed=7)
+    rain.weather.current = WeatherKind.HEAVY_RAIN
+
+    clear.spawn_initial_traffic()
+    rain.spawn_initial_traffic()
+
+    assert len(clear.vehicles) == 27
+    assert _placement_signature(rain) == _placement_signature(clear)
+    assert [v.speed_mph for v in rain.vehicles] != [
+        v.speed_mph for v in clear.vehicles
+    ]
