@@ -49,9 +49,12 @@ def start_drive(app):
 
 def quiet_trip(driving):
     """Push random hazards and inspections beyond this test's horizon."""
+    from freight_fate.sim.weather import WeatherKind
+
     driving.trip._hazard_check_mi = 1e9
     driving.trip._inspection_check_mi = 1e9
     driving.trip.traffic_leads = []
+    driving.weather.current = WeatherKind.CLEAR
 
 
 def open_limits(driving):

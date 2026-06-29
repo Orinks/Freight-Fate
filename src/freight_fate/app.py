@@ -221,6 +221,9 @@ class GameContext:
 class App:
     def __init__(self) -> None:
         os.environ.setdefault("PYGAME_HIDE_SUPPORT_PROMPT", "1")
+        if os.environ.get("FREIGHT_FATE_NO_SPEECH"):
+            os.environ["SDL_VIDEODRIVER"] = "dummy"
+            os.environ["SDL_AUDIODRIVER"] = "dummy"
         pygame.init()
         pygame.display.set_caption(f"Freight Fate {__version__}")
         self.screen = pygame.display.set_mode(WINDOW_SIZE)

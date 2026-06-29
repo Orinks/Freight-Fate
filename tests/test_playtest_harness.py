@@ -33,6 +33,31 @@ def test_playtest_harness_forces_headless_environment_before_pygame():
     assert result.stdout.splitlines() == ["dummy", "dummy", "1"]
 
 
+def test_app_forces_dummy_video_when_speech_is_disabled():
+    import os
+    import subprocess
+
+    env = os.environ.copy()
+    env["FREIGHT_FATE_NO_SPEECH"] = "1"
+    env["SDL_VIDEODRIVER"] = "windib"
+    env["PYTHONPATH"] = os.pathsep.join(filter(None, ["src", env.get("PYTHONPATH", "")]))
+    script = (
+        "import pygame; "
+        "from freight_fate.app import App; "
+        "app = App(); "
+        "print(pygame.display.get_driver()); "
+        "app.shutdown()"
+    )
+    result = subprocess.run(
+        [os.sys.executable, "-c", script],
+        check=True,
+        capture_output=True,
+        env=env,
+        text=True,
+    )
+    assert result.stdout.splitlines()[-1] == "dummy"
+
+
 @pytest.mark.smoke
 def test_playtest_harness_records_headless_delivery_transcript(monkeypatch):
     with PlaytestHarness(monkeypatch) as harness:

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import os
+import re
 from dataclasses import dataclass, field
 
 os.environ.setdefault("SDL_VIDEODRIVER", "dummy")
@@ -41,7 +42,10 @@ class PlaytestResult:
             if "destination exit" in line or "exit for the destination" in line
         ]
         assert len(destination_exit_lines) <= 1, self.transcript_text
-        assert not any("21 miles remaining" in line for line in lower_lines), self.transcript_text
+        assert not any(
+            re.search(r"\b21 miles remaining\b", line)
+            for line in lower_lines
+        ), self.transcript_text
         assert self.remaining_miles == 0.0
 
 
@@ -208,10 +212,13 @@ class PlaytestHarness:
         route_state.handle_event(key_event(pygame.K_RETURN))
 
     def _neutralize_random_trip_friction(self) -> None:
+        from freight_fate.sim.weather import WeatherKind
+
         assert self.driving is not None
         self.driving.trip._hazard_check_mi = 1e9
         self.driving.trip._inspection_check_mi = 1e9
         self.driving.trip.traffic_leads = []
+        self.driving.weather.current = WeatherKind.CLEAR
 
     def _drive_one_frame(self) -> None:
         driving = self.driving
