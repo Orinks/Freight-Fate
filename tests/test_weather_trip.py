@@ -804,7 +804,40 @@ def test_npc_traffic_cue_and_status_are_reviewable(world):
     assert len(npc_cues) == 1
     assert "Merging vehicle" in npc_cues[0].message
     assert "leave a gap" in npc_cues[0].message
-    assert "Traffic: merging traffic" in trip.npc_traffic_status()
+    status = trip.npc_traffic_status()
+    assert "Traffic: merging traffic" in status
+    assert "moving 42 miles per hour" in status
+
+
+def test_metric_toggle_updates_npc_traffic_cue_units(world):
+    trip, truck = make_trip(world)
+    truck.velocity_mps = 29.0
+    trip.position_mi = 10.0
+    trip.imperial = False
+    trip.npc_vehicles = [
+        NPCVehicle("npc:metric-merge", 10.8, 42.0, 42.0, 0, "merging_vehicle")
+    ]
+
+    events = trip.update(0.0)
+
+    npc_cue = next(
+        event for event in events
+        if event.kind == TripEventKind.GPS_CUE
+        and event.data.get("npc_vehicle") is trip.npc_vehicles[0]
+    )
+    assert "1.3 kilometers ahead" in npc_cue.message
+    assert "68 kilometers per hour" in npc_cue.message
+    assert "miles" not in npc_cue.message
+
+
+def test_npc_traffic_status_includes_speed_units(world):
+    trip, _truck = make_trip(world)
+    trip.position_mi = 10.0
+    trip.npc_vehicles = [
+        NPCVehicle("npc:status", 10.8, 68.0, 68.0, 0, "steady_truck")
+    ]
+
+    assert "moving 68 miles per hour" in trip.npc_traffic_status()
 
 
 def test_time_scale_compresses_fuel_burn(world):

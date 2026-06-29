@@ -91,6 +91,7 @@ class Trip(TripRoadEventMixin, TripTrafficMixin):
         if value == self._imperial:
             return
         self._imperial = value
+        self.traffic_manager.imperial = value
         self.navigation_cues = self._build_navigation_cues()
 
     @property
@@ -115,6 +116,10 @@ class Trip(TripRoadEventMixin, TripTrafficMixin):
         if self.imperial:
             return f"{mph:.0f}"
         return f"{mph * 1.609344:.0f}"
+
+    def _speed_text(self, mph: float) -> str:
+        units = "miles per hour" if self.imperial else "kilometers per hour"
+        return f"{self._speed_value(mph)} {units}"
 
     def _compute_leg_starts(self) -> list[float]:
         starts, acc = [], 0.0

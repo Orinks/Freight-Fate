@@ -143,7 +143,7 @@ class TripTrafficMixin:
         lane = getattr(lead, "lane_text", "your lane")
         return (
             f"Traffic: {lead.reason} {self._gap_text(context.gap_mi)} ahead "
-            f"in {lane}, moving {self._speed_value(lead.speed_mph)}."
+            f"in {lane}, moving {self._speed_text(lead.speed_mph)}."
         )
 
     def _npc_warning_message(self, context: TrafficContext) -> str:
