@@ -264,7 +264,7 @@ class TrafficManager:
             kind = "braking"
         elif vehicle.intent == "following":
             message = f"Slow {vehicle.vehicle_class} {gap} ahead. Be ready near {speed}."
-            kind = "lead"
+            kind = "following"
         else:
             return None
         self.announced_vehicle_keys.add(vehicle.key)

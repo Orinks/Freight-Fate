@@ -156,7 +156,7 @@ def test_next_situation_only_announces_vehicle_once():
     second = manager.next_situation(position_mi=0.0, truck_speed_mph=55.0)
 
     assert first is not None
-    assert first.kind == "lead"
+    assert first.kind == "following"
     assert second is None
 
 
