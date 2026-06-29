@@ -450,7 +450,7 @@ git commit -m "feat(career): speak first-week dispatch guidance"
 - Modify: `tests/test_career_training.py`
 - Modify: `tests/test_career_objectives.py`
 
-- [ ] **Step 1: Add failing recommendation-scoring tests**
+- [x] **Step 1: Add failing recommendation-scoring tests**
 
 Append to `tests/test_career_training.py`:
 
@@ -494,7 +494,7 @@ def test_trust_building_recommendation_allows_broader_but_still_values_time_marg
     )
 ```
 
-- [ ] **Step 2: Run scoring tests to verify failure**
+- [x] **Step 2: Run scoring tests to verify failure**
 
 Run:
 
@@ -504,7 +504,7 @@ uv run pytest tests/test_career_training.py::test_first_dispatch_recommendation_
 
 Expected: failure because `training_recommendation_score` is missing.
 
-- [ ] **Step 3: Implement recommendation scoring**
+- [x] **Step 3: Implement recommendation scoring**
 
 Add to `src/freight_fate/models/career_training.py`:
 
@@ -526,7 +526,7 @@ def training_recommendation_score(profile, job) -> float:
     return miles
 ```
 
-- [ ] **Step 4: Use scoring in the dispatch board for company-driver training stages**
+- [x] **Step 4: Use scoring in the dispatch board for company-driver training stages**
 
 In `src/freight_fate/states/city.py`, import:
 
@@ -548,7 +548,7 @@ In `_recommended_job_index`, replace the company-driver `candidates.append((job.
                     candidates.append((job.distance_mi, index))
 ```
 
-- [ ] **Step 5: Add a dispatch-board integration assertion**
+- [x] **Step 5: Add a dispatch-board integration assertion**
 
 In `tests/test_career_objectives.py`, add a shorter tight-deadline job and a roomier regional job to `test_dispatch_board_recommendation_label_is_spoken_and_visible`:
 
@@ -567,7 +567,7 @@ Then assert the recommended item is the roomier job:
         )
 ```
 
-- [ ] **Step 6: Run recommendation tests**
+- [x] **Step 6: Run recommendation tests**
 
 Run:
 
@@ -577,7 +577,7 @@ uv run pytest tests/test_career_training.py tests/test_career_objectives.py -q
 
 Expected: all tests pass.
 
-- [ ] **Step 7: Commit**
+- [x] **Step 7: Commit**
 
 Run:
 

@@ -13,7 +13,12 @@ from ..models.business import (
     status_label,
 )
 from ..models.career_objectives import career_objective
-from ..models.career_training import is_company_training_profile, training_guidance
+from ..models.career_training import (
+    TrainingStage,
+    is_company_training_profile,
+    training_guidance,
+    training_recommendation_score,
+)
 from ..models.economy import (
     pay_advance_grant,
     pay_advance_unavailable_reason,
@@ -67,6 +72,15 @@ BOBTAIL_RANGE_MI = 400.0
 
 def first_dispatch_done(profile) -> bool:
     return "first_dispatch" in getattr(profile, "achievements", ())
+
+
+def first_day_guidance_active(profile) -> bool:
+    deliveries = int(getattr(profile.career, "deliveries", 0))
+    option = option_for_profile(profile)
+    return (
+        not first_dispatch_done(profile)
+        and (deliveries <= 0 or option.is_owner_operator)
+    )
 
 
 def first_day_orientation_message(ctx, prefix: str = "") -> str:
@@ -134,18 +148,33 @@ class CityMenuState(MenuState):
         business = status_label(p.business_status)
         rank = p.career.rank
         first_day = ""
-        if not first_dispatch_done(p):
-            if is_company_training_profile(p):
-                guidance = training_guidance(p)
+        if first_day_guidance_active(p):
+            guidance = training_guidance(p) if is_company_training_profile(p) else None
+            if (
+                guidance is not None
+                and guidance.stage is TrainingStage.FIRST_DISPATCH
+            ):
                 first_day = (
                     " First-day objective: open the dispatch board and take a "
                     f"{guidance.recommendation_label} load."
                 )
-            else:
+            elif not is_company_training_profile(p):
                 first_day = (
                     " First-day objective: open the dispatch board and choose "
                     "an unlocked load without burning your cash cushion."
                 )
+            else:
+                objective = career_objective(p)
+                first_day = (
+                    f" Career objective: {objective.terminal_text} "
+                    f"Recommended dispatch: {objective.recommendation}."
+                )
+        elif not first_dispatch_done(p) and is_company_training_profile(p):
+            objective = career_objective(p)
+            first_day = (
+                f" Career objective: {objective.terminal_text} "
+                f"Recommended dispatch: {objective.recommendation}."
+            )
         else:
             first_day = f" Career objective: {career_objective(p).terminal_text}"
         self.ctx.say(
@@ -197,7 +226,7 @@ class CityMenuState(MenuState):
             MenuItem("Quit to main menu", self._to_main_menu,
                      help="Save your career and return to the title menu."),
         ]
-        if not first_dispatch_done(self.ctx.profile):
+        if self._show_first_day_briefing():
             items.insert(1, MenuItem(
                 "First-day briefing",
                 self._first_day_briefing,
@@ -216,6 +245,14 @@ class CityMenuState(MenuState):
                      "and cannot afford fuel. Repaid automatically out of "
                      "your next delivery settlement."))
         return items
+
+    def _show_first_day_briefing(self) -> bool:
+        p = self.ctx.profile
+        if not first_day_guidance_active(p):
+            return False
+        if not is_company_training_profile(p):
+            return True
+        return training_guidance(p).stage is TrainingStage.FIRST_DISPATCH
 
     def _first_day_briefing(self) -> None:
         self.ctx.say(first_day_orientation_message(self.ctx), interrupt=True)
@@ -568,6 +605,9 @@ class JobBoardState(MenuState):
     def __init__(self, ctx, jobs: list[Job]) -> None:
         super().__init__(ctx)
         self.jobs = jobs
+        recommended = self._recommended_job_index()
+        if recommended is not None and self._recommendation_label() is not None:
+            self.index = recommended
 
     def announce_entry(self) -> None:
         n = len(self.jobs)
@@ -591,29 +631,38 @@ class JobBoardState(MenuState):
                     "Listed amounts are carrier gross; your settlement pays "
                     "driver wages. "
                 )
-            first_day = ""
-            if not first_dispatch_done(self.ctx.profile):
-                if is_company_training_profile(self.ctx.profile):
-                    guidance = training_guidance(self.ctx.profile)
-                    first_day = (
-                        f"First-day objective: pick a {guidance.recommendation_label} "
-                        f"load. {guidance.dispatch_text} "
-                    )
-                else:
-                    first_day = (
-                        "First-day objective: pick an unlocked load with a "
-                        "deadline you can protect. Keep fuel, repairs, and "
-                        "your cash cushion in mind. "
-                    )
+            objective_text = ""
+            training_label = self._training_recommendation_label()
+            if training_label is not None:
+                guidance = training_guidance(self.ctx.profile)
+                objective_text = (
+                    f"First-day objective: pick a {training_label} "
+                    f"load. {guidance.dispatch_text} "
+                )
+            elif (
+                first_day_guidance_active(self.ctx.profile)
+                and not is_company_training_profile(self.ctx.profile)
+            ):
+                objective_text = (
+                    "First-day objective: pick an unlocked load with a "
+                    "deadline you can protect. Keep fuel, repairs, and "
+                    "your cash cushion in mind. "
+                )
             else:
                 objective = career_objective(self.ctx.profile)
-                first_day = (
+                recommendation = (
+                    ""
+                    if self._focused_recommendation_is_spoken()
+                    else f"Recommended dispatch: {objective.recommendation}. "
+                )
+                objective_text = (
                     f"Career objective: {objective.title}. "
                     f"{objective.dispatch_text} "
-                    f"Recommended dispatch: {objective.recommendation}. "
+                    f"{recommendation}"
                 )
             self.ctx.say(f"Dispatch board. {n} dispatch{'es' if n != 1 else ''} available. "
-                         f"{business_note}{first_day}{self.ctx.profile.market.summary()} "
+                         f"{business_note}{objective_text}"
+                         f"{self.ctx.profile.market.summary()} "
                          + self.current_text())
 
     def build_items(self) -> list[MenuItem]:
@@ -654,14 +703,36 @@ class JobBoardState(MenuState):
             market_preview=self._market_preview(business),
         )
         if self._recommended_job_index() == index - 1:
-            if first_dispatch_done(p):
-                recommendation = career_objective(p).recommendation
-            elif not is_company_training_profile(p):
+            recommendation = self._recommendation_label()
+            if recommendation is None:
                 return label
-            else:
-                recommendation = training_guidance(p).recommendation_label
             label = f"Recommended dispatch, {recommendation}: {label}"
         return label
+
+    def _recommendation_label(self) -> str | None:
+        training_label = self._training_recommendation_label()
+        if training_label is not None:
+            return training_label
+        if first_dispatch_done(self.ctx.profile):
+            return career_objective(self.ctx.profile).recommendation
+        if is_company_training_profile(self.ctx.profile):
+            return career_objective(self.ctx.profile).recommendation
+        return None
+
+    def _training_recommendation_label(self) -> str | None:
+        p = self.ctx.profile
+        if not is_company_training_profile(p):
+            return None
+        guidance = training_guidance(p)
+        if guidance.stage is TrainingStage.FIRST_DISPATCH and not first_dispatch_done(p):
+            return guidance.recommendation_label
+        return None
+
+    def _focused_recommendation_is_spoken(self) -> bool:
+        return (
+            self._recommendation_label() is not None
+            and self._recommended_job_index() == self.index
+        )
 
     def _recommended_job_index(self) -> int | None:
         p = self.ctx.profile
@@ -681,7 +752,10 @@ class JobBoardState(MenuState):
                 )
                 candidates.append((-business.net_before_advance, index))
             else:
-                candidates.append((job.distance_mi, index))
+                if training_guidance(p).stage is not TrainingStage.NORMAL_GUIDANCE:
+                    candidates.append((training_recommendation_score(p, job), index))
+                else:
+                    candidates.append((job.distance_mi, index))
         if not candidates:
             return None
         return min(candidates)[1]

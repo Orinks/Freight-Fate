@@ -166,6 +166,34 @@ def test_first_day_terminal_entry_speaks_training_arc_without_tutorial_language(
         app.shutdown()
 
 
+def test_out_of_sync_company_terminal_entry_uses_first_week_guidance(monkeypatch):
+    from freight_fate.app import App
+    from freight_fate.states.city import CityMenuState
+
+    spoken: list[str] = []
+    app = App()
+    try:
+        monkeypatch.setattr(
+            app.ctx, "say", lambda text, interrupt=True: spoken.append(text)
+        )
+        app.ctx.profile = Profile(name="First Week", current_city="Chicago")
+        app.ctx.profile.career.deliveries = 1
+
+        app.push_state(CityMenuState(app.ctx))
+
+        entry = spoken[-1]
+        assert "First-day objective" not in entry
+        assert "Career objective:" in entry
+        assert "steady service, not perfection" in entry
+        assert "good first-week run" in entry
+        assert "trainer notes still close by" in entry
+        labels = [item.text for item in app.state.items]
+        assert "First-day briefing" not in labels
+        assert "Career plan" in labels
+    finally:
+        app.shutdown()
+
+
 def test_dispatch_board_recommendation_label_is_spoken_and_visible(monkeypatch):
     from freight_fate.app import App
     from freight_fate.states.city import JobBoardState
@@ -173,23 +201,64 @@ def test_dispatch_board_recommendation_label_is_spoken_and_visible(monkeypatch):
     spoken: list[str] = []
     app = App()
     try:
-        monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: spoken.append(text))
+        monkeypatch.setattr(
+            app.ctx, "say", lambda text, interrupt=True: spoken.append(text)
+        )
         app.ctx.profile = Profile(name="Board Plan", current_city="Chicago")
+        app.ctx.profile.career.deliveries = 1
 
-        app.push_state(JobBoardState(app.ctx, [
-            _job(miles=180.0, pay=1200.0),
-            _job(miles=70.0, pay=700.0),
-        ]))
+        app.push_state(
+            JobBoardState(
+                app.ctx,
+                [
+                    Job(
+                        CARGO_CATALOG["general"],
+                        12.0,
+                        "Chicago",
+                        "Chicago yard",
+                        "Milwaukee",
+                        45.0,
+                        900.0,
+                        1.0,
+                    ),
+                    Job(
+                        CARGO_CATALOG["general"],
+                        12.0,
+                        "Chicago",
+                        "Chicago yard",
+                        "Milwaukee",
+                        120.0,
+                        900.0,
+                        12.0,
+                    ),
+                ],
+            )
+        )
 
-        assert "First-day objective" in spoken[-1]
-        assert "trainer-recommended" in spoken[-1]
+        assert "Career objective: First-week service record" in spoken[-1]
+        assert "First-day objective" not in spoken[-1]
+        assert "good first-week run" in spoken[-1]
+        assert "Recommended dispatch: good first-week run" not in spoken[-1]
+        assert (
+            "Recommended dispatch, good first-week run: Job 2 of 2:"
+            in spoken[-1]
+        )
+        assert (
+            "Recommended dispatch is Recommended dispatch"
+            not in spoken[-1]
+        )
+        assert app.state.index == 1
+        assert app.state.current_text().startswith(
+            "Recommended dispatch, good first-week run: Job 2 of 2:"
+        )
         recommended = [
             item.text for item in app.state.items
             if item.text.startswith("Recommended dispatch, trainer-recommended:")
+            or item.text.startswith("Recommended dispatch, good first-week run:")
         ]
         assert recommended == [app.state.items[1].text]
         assert app.state.items[1].text.startswith(
-            "Recommended dispatch, trainer-recommended: Job 2 of 2:"
+            "Recommended dispatch, good first-week run: Job 2 of 2:"
         )
     finally:
         app.shutdown()
@@ -218,6 +287,45 @@ def test_owner_operator_first_day_terminal_keeps_cash_cushion_guidance(monkeypat
         app.shutdown()
 
 
+def test_out_of_sync_owner_operator_uses_career_guidance(monkeypatch):
+    from freight_fate.app import App
+    from freight_fate.states.city import CityMenuState, JobBoardState
+
+    spoken: list[str] = []
+    app = App()
+    try:
+        monkeypatch.setattr(
+            app.ctx, "say", lambda text, interrupt=True: spoken.append(text)
+        )
+        app.ctx.profile = Profile(name="Owner Week", current_city="Chicago")
+        app.ctx.profile.business_status = LEASED_OWNER_OPERATOR
+        app.ctx.profile.owned_trucks = ["rig"]
+        app.ctx.profile.money = 12_000.0
+        app.ctx.profile.career.deliveries = 1
+
+        app.push_state(CityMenuState(app.ctx))
+
+        terminal_entry = spoken[-1]
+        labels = [item.text for item in app.state.items]
+        assert "First-day objective" not in terminal_entry
+        assert "Career objective:" in terminal_entry
+        assert "Fuel, maintenance, insurance" in terminal_entry
+        assert "First-day briefing" not in labels
+        assert "Career plan" in labels
+
+        app.push_state(JobBoardState(app.ctx, [
+            _job(miles=180.0, pay=1200.0),
+            _job(miles=70.0, pay=1800.0),
+        ]))
+
+        board_entry = spoken[-1]
+        assert "First-day objective" not in board_entry
+        assert "Career objective:" in board_entry
+        assert "cash-positive load" in board_entry
+    finally:
+        app.shutdown()
+
+
 def test_owner_operator_first_day_dispatch_board_keeps_business_cost_guidance(monkeypatch):
     from freight_fate.app import App
     from freight_fate.states.city import JobBoardState
@@ -233,13 +341,15 @@ def test_owner_operator_first_day_dispatch_board_keeps_business_cost_guidance(mo
 
         app.push_state(JobBoardState(app.ctx, [
             _job(miles=180.0, pay=1200.0),
-            _job(miles=70.0, pay=700.0),
+            _job(miles=70.0, pay=1800.0),
         ]))
 
         entry = spoken[-1]
         assert "owner-operator gross revenue" in entry
         assert "cash cushion" in entry
         assert "trainer-recommended" not in entry
+        assert app.state.index == 0
+        assert app.state.current_text().startswith("Job 1 of 2:")
         assert not any(
             item.text.startswith("Recommended dispatch, trainer-recommended:")
             for item in app.state.items
