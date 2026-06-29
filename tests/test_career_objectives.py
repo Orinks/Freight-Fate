@@ -151,12 +151,14 @@ def test_terminal_career_plan_speaks_senior_company_level_guidance(monkeypatch):
 
         app.push_state(CityMenuState(app.ctx))
         career_item = next(i for i, item in enumerate(app.state.items) if item.text == "Career plan")
-        app.state.index = career_item
-        app.state.items[career_item].action()
+        while app.state.index != career_item:
+            app.state.handle_event(key_event(pygame.K_DOWN))
+        app.state.handle_event(key_event(pygame.K_RETURN))
 
         assert spoken[-1].startswith("Run like a senior company driver.")
         assert "premium lanes" in spoken[-1]
         assert "premium freight" in spoken[-1]
+        assert "Senior company status is about consistency" in spoken[-1]
     finally:
         app.shutdown()
 

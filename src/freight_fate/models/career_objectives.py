@@ -30,10 +30,12 @@ class CareerObjective:
     terminal_text: str
     dispatch_text: str
     recommendation: str
+    milestone_text: str = ""
 
     @property
     def spoken_summary(self) -> str:
-        return f"{self.title}. {self.terminal_text} {self.dispatch_text}"
+        milestone = f" {self.milestone_text}" if self.milestone_text else ""
+        return f"{self.title}. {self.terminal_text} {self.dispatch_text}{milestone}"
 
 
 def career_objective(profile) -> CareerObjective:
@@ -139,4 +141,5 @@ def _level_guidance_objective(profile) -> CareerObjective:
         guidance.terminal_text,
         guidance.dispatch_text,
         guidance.recommendation,
+        guidance.milestone_text,
     )
