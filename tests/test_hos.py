@@ -90,6 +90,68 @@ def test_sleep_resets_the_shift():
     assert c.warned == []
 
 
+def test_eight_two_sleeper_split_restores_time_without_full_reset():
+    c = HosClock()
+    c.drive(300)
+    c.sleeper_split_rest(480)
+    c.drive(300)
+    c.sleeper_split_rest(120)
+
+    assert c.driving_min == pytest.approx(300)
+    assert c.duty_min == pytest.approx(300)
+    assert c.since_break_min == 0
+    assert c.status == "sleeper_berth"
+    assert c.split_pending_summary() is None
+
+
+def test_seven_three_sleeper_split_restores_time_without_full_reset():
+    c = HosClock()
+    c.drive(240)
+    c.sleeper_split_rest(420)
+    c.on_duty(60)
+    c.drive(180)
+    c.sleeper_split_rest(180)
+
+    assert c.driving_min == pytest.approx(240)
+    assert c.duty_min == pytest.approx(300)
+    assert c.since_break_min == 0
+    assert c.split_pending_summary() is None
+
+
+def test_split_long_period_must_be_sleeper_berth():
+    c = HosClock()
+    c.drive(300)
+    c.off_duty(480)
+    c.drive(60)
+    completed = c.sleeper_split_rest(120)
+
+    assert completed is False
+    assert c.driving_min == pytest.approx(360)
+    assert c.duty_min == pytest.approx(960)
+
+
+def test_split_pending_summary_names_needed_pair():
+    c = HosClock()
+    c.drive(300)
+    c.sleeper_split_rest(480)
+
+    assert c.split_pending_summary() == (
+        "Sleeper split pending: pair this with 2 more hours off duty or sleeper berth."
+    )
+
+
+def test_completed_split_summary_stays_clear_after_dict_roundtrip():
+    c = HosClock()
+    c.drive(300)
+    c.sleeper_split_rest(480)
+    c.drive(300)
+    c.sleeper_split_rest(120)
+
+    again = HosClock.from_dict(c.to_dict())
+
+    assert again.split_pending_summary() is None
+
+
 def test_remaining_is_the_nearest_limit():
     c = HosClock()
     c.drive(400)
