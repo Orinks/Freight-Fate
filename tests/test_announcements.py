@@ -1,5 +1,6 @@
 """Announcement priority (safety preempts chatter) and speed-scaled lead time."""
 
+import pygame
 import pytest
 
 from freight_fate.sim.trip import TripEvent, TripEventKind, Zone
@@ -80,6 +81,33 @@ def test_cold_start_low_air_does_not_stack_on_entry(monkeypatch):
         d._update_air_brake_announcements(was_ready=False, was_low=True, was_spring=True)
 
         assert events == []
+    finally:
+        app.shutdown()
+
+
+def test_horn_loops_while_key_is_held():
+    from freight_fate.app import App
+
+    class Recorder:
+        def __init__(self) -> None:
+            self.calls = []
+
+        def horn_start(self) -> None:
+            self.calls.append("start")
+
+        def horn_stop(self) -> None:
+            self.calls.append("stop")
+
+    app = App()
+    try:
+        d = _driving(app)
+        audio = Recorder()
+        app.ctx.audio = audio
+
+        d.handle_event(pygame.event.Event(pygame.KEYDOWN, key=pygame.K_h, unicode="h"))
+        d.handle_event(pygame.event.Event(pygame.KEYUP, key=pygame.K_h, unicode="h"))
+
+        assert audio.calls == ["start", "stop"]
     finally:
         app.shutdown()
 

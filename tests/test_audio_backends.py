@@ -235,6 +235,18 @@ def test_new_context_loops_enter_mixer_at_full_gain(monkeypatch):
     a.shutdown()
 
 
+def test_horn_uses_reserved_loop_slot(monkeypatch):
+    monkeypatch.delenv("FREIGHT_FATE_AUDIO_BACKEND", raising=False)
+    a = AudioEngine()
+    if a.backend_name != "bass":
+        pytest.skip("BASS backend unavailable")
+    a.horn_start()
+    assert a._impl._loops[audio.CH_HORN][0] == "vehicle/horn"
+    a.horn_stop()
+    assert audio.CH_HORN not in a._impl._loops
+    a.shutdown()
+
+
 def test_bass_one_shots_survive_garbage_collection(monkeypatch):
     # Channel.__del__ in sound_lib frees the BASS handle on garbage
     # collection; the backend must hold a reference until playback ends,

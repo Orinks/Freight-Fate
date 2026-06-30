@@ -7,6 +7,9 @@ from .driving_menu_states import DrivingStatusState, PauseMenuState
 
 class DrivingControlsMixin:
     def handle_event(self, event: pygame.event.Event) -> None:
+        if event.type == pygame.KEYUP and event.key == pygame.K_h:
+            self.ctx.audio.horn_stop()
+            return
         if event.type != pygame.KEYDOWN:
             return
         key = event.key
@@ -36,7 +39,7 @@ class DrivingControlsMixin:
         elif key == pygame.K_p:
             self._toggle_parking_brake()
         elif key == pygame.K_h:
-            self.ctx.audio.play("vehicle/horn")
+            self.ctx.audio.horn_start()
         elif key == pygame.K_t:
             self._try_rest_stop()
         elif key == pygame.K_x:
