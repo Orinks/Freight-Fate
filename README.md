@@ -91,6 +91,9 @@ For a complete player-facing guide to installing, careers, dispatch, driving,
 route stops, saves, settings, audio, speech, and troubleshooting, see the
 [Freight Fate Player Manual](docs/user-manual.md).
 
+Want to help with code, docs, or world data? Start with
+[CONTRIBUTING.md](CONTRIBUTING.md).
+
 ## Run from source
 
 You need two tools installed and on your PATH:
@@ -223,10 +226,18 @@ rather than minutes of waiting.
 ## Development
 
 ```bash
-uv sync --dev
+uv sync --group dev
+uv run pre-commit install
+uv run pre-commit install --hook-type pre-push
 uv run pytest          # full test suite, headless
 uv run ruff check src tests tools
 ```
+
+The pre-commit hooks run Ruff lint fixes and formatting before commits. The
+pre-push hook runs the release-note gate before publishing commits. It uses
+`tools.release_notes check --base auto --head HEAD`, so user-facing changes need
+a player-facing `CHANGELOG.md` entry unless the whole change set uses
+`changelog: none` or `[skip changelog]`.
 
 ### Changelog and snapshots
 

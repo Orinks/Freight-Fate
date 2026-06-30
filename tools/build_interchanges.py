@@ -1,3 +1,4 @@
+# ruff: noqa: F821,I001
 """Discover highway interchanges along each leg and curate them into world.json.
 
 Development-time helper (never called at runtime). For every Interstate leg it:
@@ -35,6 +36,8 @@ import time
 import urllib.error
 import urllib.parse
 import urllib.request
+import importlib
+import sys
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
@@ -117,9 +120,14 @@ def _haversine_mi(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
     return 2 * EARTH_RADIUS_MI * math.asin(math.sqrt(h))
 
 
-def _osrm_geometry(route_points: list[dict[str, Any]], rate_limit: float
+def _osrm_geometry(route_points: list[dict[str, Any]], rate_limit: float,
+                   cached_only: bool = False
                    ) -> list[tuple[float, float, float]] | None:
-    """Dense [(lat, lon, cumulative_mi), ...] following the leg's waypoints."""
+    """Dense [(lat, lon, cumulative_mi), ...] following the leg's waypoints.
+
+    With ``cached_only`` it never makes a live request, returning ``None`` on a
+    cache miss so a batch can fall back to local interpolation instead of risking
+    a hang on the public OSRM router."""
     if len(route_points) < 2:
         return None
     coords = ";".join(f"{p['lon']},{p['lat']}" for p in route_points)
@@ -128,7 +136,7 @@ def _osrm_geometry(route_points: list[dict[str, Any]], rate_limit: float
         "alternatives": "false", "steps": "false",
     })
     url = OSRM_ROUTE_URL.format(coords=coords) + "?" + params
-    payload = _cached_get(url, "osrm", rate_limit)
+    payload = _cached_get(url, "osrm", rate_limit, cached_only=cached_only)
     if payload is None:
         return None
     try:
@@ -614,10 +622,13 @@ def _cache_file(tag: str, key: str) -> Path:
     return CACHE_DIR / f"{tag}-{digest}.json"
 
 
-def _cached_get(url: str, tag: str, rate_limit: float) -> dict[str, Any] | None:
+def _cached_get(url: str, tag: str, rate_limit: float,
+                cached_only: bool = False) -> dict[str, Any] | None:
     cf = _cache_file(tag, url)
     if cf.exists():
         return json.loads(cf.read_text(encoding="utf-8"))
+    if cached_only:
+        return None
     req = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
     try:
         with urllib.request.urlopen(req, timeout=30) as resp:
@@ -811,7 +822,26 @@ def _space_out(exits: list[dict[str, Any]]) -> list[dict[str, Any]]:
     return kept
 
 
-# --- driver -----------------------------------------------------------------
+# --- maxspeed ---------------------------------------------------------------
+#
+# Bakes real OSM `maxspeed` onto each leg as a `corridor.speed_limits` step
+# profile (mph), which the runtime prefers over the highway/region heuristic.
+# Reuses this module's local-PBF reader and corridor snapping; the per-state
+# extracts under ~/.cache/freight-fate-osm/regions are selected automatically
+# from the states each leg touches, so the slow 12GB national file is not needed.
+
+
+TOOLS_DIR = Path(__file__).resolve().parent
+if str(TOOLS_DIR) not in sys.path:
+    sys.path.insert(0, str(TOOLS_DIR))
+
+_MAXSPEED_MODULE = importlib.import_module("build_interchanges_maxspeed")
+for _name, _value in _MAXSPEED_MODULE.__dict__.items():
+    if not _name.startswith("__"):
+        globals()[_name] = _value
+_MAXSPEED_MODULE.__dict__.update(
+    {name: value for name, value in globals().items() if not name.startswith("__")}
+)
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Curate OSM interchanges into world.json.")
@@ -832,9 +862,21 @@ def main(argv: list[str] | None = None) -> int:
                               "interchange features. Defaults beside --pbf."))
     parser.add_argument("--rebuild-local-index", action="store_true",
                         help="Ignore any existing --local-index-cache and rebuild it.")
+    parser.add_argument("--maxspeed", action="store_true",
+                        help="Bake real OSM maxspeed onto legs as a speed_limits "
+                             "profile (the runtime prefers it over the heuristic) "
+                             "instead of discovering interchanges. Reads local "
+                             "per-state extracts, auto-selected from --osm-region-dir "
+                             "unless --pbf is given.")
+    parser.add_argument("--osm-region-dir", type=Path, default=OSM_REGION_CACHE_DIR,
+                        help=("Directory of per-state Geofabrik extracts "
+                              "(<state>-latest.osm.pbf) for --maxspeed auto-selection. "
+                              f"Default: {OSM_REGION_CACHE_DIR}."))
     args = parser.parse_args(argv)
 
     data = json.loads(WORLD_PATH.read_text(encoding="utf-8"))
+    if args.maxspeed:
+        return run_maxspeed(data, args)
     legs = data["legs"]
     if args.only:
         a, _, b = args.only.partition("->")

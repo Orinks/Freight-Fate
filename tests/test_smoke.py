@@ -164,14 +164,19 @@ def test_full_game_flow_headless(monkeypatch):
             # trip.update reapplies physics every frame that can randomly slow a
             # long headless drive below the budget: simulated weather can turn to
             # ice and cap traction to a crawl, terrain grade drags on long climbs,
-            # and fuel burns at time_scale (20x) so the tank can empty mid-route
-            # and cut the engine. This is a flow smoke test -- that physics is
-            # covered by test_weather_trip and test_vehicle -- so pin full
-            # traction, flat ground, and a full tank for a deterministic drive,
-            # matching the hazard/inspection/traffic neutralisation above.
+            # fuel burns at time_scale (20x) so the tank can empty mid-route and
+            # cut the engine, and this controller's bang-bang braking against a
+            # target near the truck's governed speed bleeds the air reservoirs
+            # until the spring brakes latch. This is a flow smoke test -- that
+            # physics is covered by test_weather_trip, test_vehicle, and the
+            # air-brake tests -- so pin full traction, flat ground, a full tank,
+            # and charged air for a deterministic drive, matching the
+            # hazard/inspection/traffic neutralisation above.
             driving.truck.grip = 1.0
             driving.truck.grade = 0.0
             driving.truck.fuel_gal = driving.truck.specs.fuel_tank_gal
+            driving.truck.air_pressure_psi = driving.truck.specs.air_governor_cut_out_psi
+            driving.truck.parking_brake = False
             driving.truck.auto_shift()
             driving.truck.update(1 / 60)
             for event in driving.trip.update(1 / 60):

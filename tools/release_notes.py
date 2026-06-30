@@ -18,9 +18,9 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 CHANGELOG_PATH = Path("CHANGELOG.md")
 NIGHTLY_HEADER = (
-    "Automated developer snapshot of the dev branch, for players who want "
-    "the newest features before the next stable release. Expect rough edges; "
-    "your save files stay compatible whenever possible, but back them up first."
+    "Preview snapshot for players who want the newest features before the next "
+    "stable release. Expect rough edges; your save files stay compatible "
+    "whenever possible, but back them up first."
 )
 SECTION_ORDER = ("Added", "Changed", "Improved", "Fixed", "Removed", "Deprecated", "Security")
 PLAYER_FACING_SECTIONS = SECTION_ORDER + ("Compatibility",)
@@ -284,9 +284,14 @@ def stable_notes(version: str) -> str:
     return format_sections(parse_sections(block))
 
 
-def nightly_notes(previous_tag: str = "", exclude_notes: str = "") -> str:
+def nightly_notes(
+    previous_tag: str = "",
+    exclude_notes: str = "",
+    exclude_stable_notes: str = "",
+) -> str:
     changelog_text = changelog_file().read_text(encoding="utf-8")
     excluded_entries = excluded_entries_from_notes(exclude_notes)
+    excluded_entries.update(excluded_entries_from_notes(exclude_stable_notes))
     released = released_versions()
     if previous_tag:
         sections = sections_added_since(
@@ -434,7 +439,11 @@ def write_notes_command(args: argparse.Namespace) -> int:
             raise SystemExit("stable notes need --version")
         notes = stable_notes(args.version)
     else:
-        notes = nightly_notes(args.previous_tag, args.exclude_notes)
+        notes = nightly_notes(
+            args.previous_tag,
+            args.exclude_notes,
+            getattr(args, "exclude_stable_notes", ""),
+        )
     Path(args.output).write_text(notes + "\n", encoding="utf-8")
     print(f"Wrote release notes to {args.output}.")
     return 0
@@ -450,6 +459,7 @@ def build_parser() -> argparse.ArgumentParser:
         notes.add_argument("--version", default="")
         notes.add_argument("--previous-tag", default="")
         notes.add_argument("--exclude-notes", default="")
+        notes.add_argument("--exclude-stable-notes", default="")
         notes.add_argument("--output", required=True)
 
     should_build = subparsers.add_parser(

@@ -12,6 +12,7 @@ venv/
 # Tooling caches
 .pytest_cache/
 .ruff_cache/
+.hypothesis/
 .route-cache/
 .coverage
 coverage.xml

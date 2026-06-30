@@ -61,7 +61,7 @@ def test_nightly_notes_use_curated_unreleased_entries(tmp_path, monkeypatch):
 
     notes = release_notes.nightly_notes()
 
-    assert "Automated developer snapshot" in notes
+    assert "Preview snapshot for players" in notes
     assert "## Added" in notes
     assert "- **Dispatch.** New spoken board details." in notes
     assert "chore: seed changelog" not in notes
@@ -121,7 +121,7 @@ def test_nightly_notes_exclude_previous_release_body_sections(tmp_path, monkeypa
     commit(repo, "docs: improve help")
     previous_notes = repo / "previous-notes.md"
     previous_notes.write_text(
-        "Automated developer snapshot.\n\n"
+        "Preview snapshot.\n\n"
         "## Changes since the previous snapshot\n\n"
         "## Fixed\n"
         "- **Updater.** Packaged updates work.\n",
@@ -135,6 +135,41 @@ def test_nightly_notes_exclude_previous_release_body_sections(tmp_path, monkeypa
     )
 
     assert "- **Help.** Upgrade help explains what to buy." in notes
+    assert "- **Updater.** Packaged updates work." not in notes
+
+
+def test_nightly_notes_exclude_stable_release_body_sections(tmp_path, monkeypatch):
+    release_notes = load_release_notes_module()
+    repo = make_repo(tmp_path, changelog("### Fixed\n- **Updater.** Packaged updates work.\n"))
+    git(repo, "tag", "nightly-20260615")
+    (repo / "CHANGELOG.md").write_text(
+        changelog(
+            "### Added\n"
+            "- **Radio.** New radio chatter.\n"
+            "### Fixed\n"
+            "- **Updater.** Packaged updates work.\n"
+            "- **Help.** Upgrade help explains what to buy.\n"
+        ),
+        encoding="utf-8",
+    )
+    commit(repo, "docs: improve help")
+    stable_notes = repo / "stable-notes.md"
+    stable_notes.write_text(
+        "## Added\n"
+        "- **Radio.** New radio chatter.\n\n"
+        "## Fixed\n"
+        "- **Updater.** Packaged updates work.\n",
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(release_notes, "ROOT", repo)
+
+    notes = release_notes.nightly_notes(
+        previous_tag="nightly-20260615",
+        exclude_stable_notes=str(stable_notes),
+    )
+
+    assert "- **Help.** Upgrade help explains what to buy." in notes
+    assert "- **Radio.** New radio chatter." not in notes
     assert "- **Updater.** Packaged updates work." not in notes
 
 

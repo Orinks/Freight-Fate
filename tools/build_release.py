@@ -275,6 +275,15 @@ def verify_prism_native_linkage(native_dir: Path, dependency_dir: Path | None = 
             )
 
 
+def _load_manual_html():
+    """Load the by-path manual HTML converter (tools is not a package)."""
+    spec = importlib.util.spec_from_file_location(
+        "manual_html", Path(__file__).resolve().parent / "manual_html.py")
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
 def stage_release_docs(build_dir: Path) -> None:
     """Copy player-facing release documents into the packaged runtime."""
     changelog = ROOT / "CHANGELOG.md"
@@ -287,6 +296,10 @@ def stage_release_docs(build_dir: Path) -> None:
     if not manual.exists():
         raise RuntimeError(f"User manual was not found: {manual}")
     shutil.copy2(manual, root / "USER_MANUAL.md")
+    # Also ship a browser-friendly, accessible HTML rendering of the manual.
+    manual_html = _load_manual_html().markdown_to_html(
+        manual.read_text(encoding="utf-8"), title="Freight Fate Player Manual")
+    (root / "USER_MANUAL.html").write_text(manual_html, encoding="utf-8")
 
 
 def build_nuitka_command(entry: Path) -> list[str]:
@@ -369,6 +382,7 @@ def verify_packaged_payload(build_dir: Path) -> None:
         root / "build_info.json",
         root / "CHANGELOG.md",
         root / "USER_MANUAL.md",
+        root / "USER_MANUAL.html",
         root / "freight_fate" / "assets" / "sounds",
         root / "freight_fate" / "data" / "world.json",
         root / "sound_lib" / "lib",

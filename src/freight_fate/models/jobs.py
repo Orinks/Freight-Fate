@@ -17,6 +17,17 @@ from ..data.world import (
     Route,
     World,
 )
+from ..sim.trip_models import (
+    DESTINATION_APPROACH_LIMIT_MPH,
+    DESTINATION_APPROACH_ZONE_MI,
+    FACILITY_ACCESS_LIMIT_MPH,
+    FACILITY_GATE_LIMIT_MPH,
+    FACILITY_GATE_ZONE_MI,
+    URBAN_LIMIT_MPH,
+    URBAN_RADIUS_MI,
+    _leg_speed_limit_at,
+    corridor_speed_limit,
+)
 from .market import Market, market_condition
 
 
@@ -132,6 +143,14 @@ def facility_text(location_type: str, location_name: str, city: str,
     return f"{facility_label(location_type)} {location_name}{place} in {city}"
 
 
+def facility_offer_text(location_type: str, location_name: str, city: str,
+                        locality: str = "") -> str:
+    if location_type == "metro_market" or _is_legacy_facility_name(city, location_name):
+        return f"the {city} metro freight market"
+    place = f" near {locality}" if locality and locality not in location_name else ""
+    return f"{location_name}{place} in {city}"
+
+
 def _is_legacy_facility_name(city: str, location_name: str) -> bool:
     normalized = str(location_name or "").strip().lower()
     city_lower = city.lower()
@@ -170,8 +189,8 @@ class Job:
         endorsement = ""
         if self.cargo.endorsement:
             endorsement = f" Requires {ENDORSEMENT_LABELS[self.cargo.endorsement]}."
-        origin = "from " + self.origin_facility_text()
-        dest = "to " + self.destination_facility_text()
+        origin = "from " + self.origin_offer_text()
+        dest = "to " + self.destination_offer_text()
         return (f"{prefix}{self.weight_tons:.0f} tons of {self.cargo.label} "
                 f"{origin} {dest}. {self.distance_mi:.0f} miles. "
                 f"Pays {self.pay:,.0f} dollars. "
@@ -182,8 +201,20 @@ class Job:
         return facility_text(
             self.origin_type, self.origin_location, self.origin, self.origin_locality)
 
+    def origin_offer_text(self) -> str:
+        return facility_offer_text(
+            self.origin_type, self.origin_location, self.origin, self.origin_locality)
+
     def destination_facility_text(self) -> str:
         return facility_text(
+            self.destination_type,
+            self.destination_location,
+            self.destination,
+            self.destination_locality,
+        )
+
+    def destination_offer_text(self) -> str:
+        return facility_offer_text(
             self.destination_type,
             self.destination_location,
             self.destination,
@@ -273,9 +304,11 @@ def job_from_payload(data: dict) -> Job:
 def make_reposition_job(world: World, origin: str, destination: str) -> Job | None:
     """A zero-pay empty 'bobtail' run to relocate to a nearby city.
 
-    Reuses the normal delivery drive (so HOS, fuel, weather, and save/resume all
-    apply) but carries no cargo and pays nothing; on arrival the player simply
-    parks at the destination city's hub and can shop its dispatch board.
+    Reuses the normal delivery drive for fuel, weather, and save/resume, but
+    carries no cargo and pays nothing. It is player-chosen personal conveyance,
+    so the ELD records it as off duty instead of freight-duty driving; on
+    arrival the player simply parks at the destination city's hub and can shop
+    its dispatch board.
     """
     route = world.supported_route(origin, destination)
     if route is None:
@@ -285,7 +318,7 @@ def make_reposition_job(world: World, origin: str, destination: str) -> Job | No
     dest_loc = dest.locations[0] if dest.locations else None
     return Job(
         CARGO_CATALOG["general"], 0.0, origin, "company yard", destination,
-        miles, 0.0, required_hours(miles) * 3.0 + 24.0,
+        miles, 0.0, required_hours(miles, route, world) * 3.0 + 24.0,
         origin_type="company_yard",
         destination_location=dest_loc.name if dest_loc else f"{destination} yard",
         destination_type=dest_loc.type if dest_loc else "company_yard",
@@ -306,6 +339,12 @@ MINIMUM_PAY_BY_LEVEL = {
 
 # Deadline model: what a law-abiding trucker actually needs.
 DEADLINE_AVG_MPH = 55.0   # achievable interstate average through zones and weather
+DEADLINE_PLANNING_SPEED_FACTOR = 0.88
+DEADLINE_SAMPLE_MI = 2.0
+DEADLINE_MIN_SEGMENT_MPH = 10.0
+DEADLINE_DISPATCH_MIN_SLACK_H = 1.0
+DEADLINE_DISPATCH_SLACK_RANGE = (1.2, 1.5)
+ACTIVE_TRIP_FAIRNESS_SLACK = 1.2
 
 
 @dataclass(frozen=True)
@@ -341,7 +380,11 @@ class HosPlan:
                 f"{break_text}, {sleep_text}.{coverage}")
 
 
-def plan_hos(miles: float, route: Route | None = None) -> HosPlan:
+def plan_hos(
+    miles: float,
+    route: Route | None = None,
+    world: World | None = None,
+) -> HosPlan:
     """Estimate the FMCSA-compliant plan for a property-carrying trip.
 
     Based on FMCSA's public HOS summary: 11 driving hours after 10 off-duty
@@ -349,7 +392,17 @@ def plan_hos(miles: float, route: Route | None = None) -> HosPlan:
     hours. Split sleeper and 60/70-hour cycle limits are intentionally not
     modeled in this route estimate.
     """
-    drive_h = miles / DEADLINE_AVG_MPH
+    drive_h = (
+        route_drive_hours(route, world=world)
+        if route is not None
+        else miles / DEADLINE_AVG_MPH
+    )
+    return _plan_hos_for_drive_hours(drive_h, route)
+
+
+def _plan_hos_for_drive_hours(drive_h: float, route: Route | None = None) -> HosPlan:
+    """Apply the HOS break/sleep model to already-estimated driving hours."""
+
     breaks = 0
     sleeps = 0
     remaining = drive_h
@@ -376,11 +429,139 @@ def plan_hos(miles: float, route: Route | None = None) -> HosPlan:
     return HosPlan(drive_h, breaks, sleeps, break_stops, sleep_stops)
 
 
-def required_hours(miles: float) -> float:
+def required_hours(
+    miles: float,
+    route: Route | None = None,
+    world: World | None = None,
+) -> float:
     """Honest hours for the run: driving at an achievable average, plus the
     30-minute break every 8 driving hours and a 10-hour sleep for every
     11-hour shift the distance demands. Dispatch cannot ask for less."""
-    return plan_hos(miles).total_h
+    return plan_hos(miles, route, world).total_h
+
+
+def route_required_hours(
+    route: Route,
+    start_mi: float = 0.0,
+    world: World | None = None,
+) -> float:
+    """Minimum legal time for the actual route from ``start_mi`` onward."""
+
+    return _plan_hos_for_drive_hours(
+        route_drive_hours(route, start_mi=start_mi, world=world), route).total_h
+
+
+def dispatch_deadline_hours(
+    miles: float,
+    slack: float,
+    route: Route | None = None,
+    world: World | None = None,
+) -> float:
+    """Deadline from the current route-aware timing model plus dispatch slack."""
+
+    return required_hours(miles, route, world) * slack + DEADLINE_DISPATCH_MIN_SLACK_H
+
+
+def fair_active_deadline(
+    job: Job,
+    route: Route,
+    hours_used: float,
+    position_mi: float,
+    world: World | None = None,
+) -> float:
+    """One-time compatibility floor for jobs saved before route-aware timing.
+
+    Older source snapshots may have a deadline from the old mileage-only model.
+    On resume, keep generous existing deadlines, but lift too-tight ones enough
+    to cover both the whole route's fair model and the route still ahead.
+    """
+
+    full_floor = dispatch_deadline_hours(
+        route.miles, ACTIVE_TRIP_FAIRNESS_SLACK, route, world)
+    remaining_floor = (
+        hours_used
+        + route_required_hours(route, start_mi=position_mi, world=world)
+        * ACTIVE_TRIP_FAIRNESS_SLACK
+        + DEADLINE_DISPATCH_MIN_SLACK_H
+    )
+    return round(max(job.deadline_game_h, full_floor, remaining_floor), 1)
+
+
+def route_drive_hours(
+    route: Route | None,
+    start_mi: float = 0.0,
+    world: World | None = None,
+) -> float:
+    """Route-aware drive-time estimate using posted limits where available."""
+
+    if route is None:
+        return 0.0
+    start_mi = max(0.0, min(route.miles, start_mi))
+    if route.miles <= start_mi:
+        return 0.0
+    hours = 0.0
+    leg_starts: list[float] = []
+    acc = 0.0
+    for leg in route.legs:
+        leg_starts.append(acc)
+        acc += leg.miles
+    city_mileposts = leg_starts + [route.miles]
+    is_facility_approach = len(route.cities) >= 2 and route.cities[0] == route.cities[-1]
+    for index, (leg_start, leg) in enumerate(zip(leg_starts, route.legs, strict=True)):
+        leg_end = leg_start + leg.miles
+        segment_start = max(start_mi, leg_start)
+        if segment_start >= leg_end:
+            continue
+        offset = segment_start - leg_start
+        while offset < leg.miles - 1e-6:
+            step = min(DEADLINE_SAMPLE_MI, leg.miles - offset)
+            global_start = leg_start + offset
+            if global_start + step <= start_mi:
+                offset += step
+                continue
+            mid = global_start + step / 2.0
+            mph = _route_planning_limit(
+                route, index, leg, offset + step / 2.0, mid,
+                city_mileposts, is_facility_approach, world)
+            hours += step / max(DEADLINE_MIN_SEGMENT_MPH, mph)
+            offset += step
+    return hours
+
+
+def _route_planning_limit(
+    route: Route,
+    leg_index: int,
+    leg,
+    offset_mi: float,
+    route_mi: float,
+    city_mileposts: list[float],
+    is_facility_approach: bool,
+    world: World | None,
+) -> float:
+    if is_facility_approach:
+        limit = FACILITY_ACCESS_LIMIT_MPH
+    else:
+        baked = _leg_speed_limit_at(leg, offset_mi)
+        toward_city = route.cities[min(leg_index + 1, len(route.cities) - 1)]
+        region = _route_city_region(toward_city, world)
+        limit = (baked if baked is not None
+                 else corridor_speed_limit(leg.highway, region))
+        if (baked is None
+                and any(abs(route_mi - mp) <= URBAN_RADIUS_MI
+                        for mp in city_mileposts)):
+            limit = min(limit, URBAN_LIMIT_MPH)
+        if route_mi >= max(0.0, route.miles - DESTINATION_APPROACH_ZONE_MI):
+            limit = min(limit, DESTINATION_APPROACH_LIMIT_MPH)
+    if route_mi >= max(0.0, route.miles - FACILITY_GATE_ZONE_MI):
+        limit = min(limit, FACILITY_GATE_LIMIT_MPH)
+    return limit * DEADLINE_PLANNING_SPEED_FACTOR
+
+
+def _route_city_region(city: str, world: World | None) -> str:
+    if world is None:
+        return ""
+    city_obj = world.cities.get(city)
+    return "" if city_obj is None else city_obj.region
 
 
 def minimum_pay_for_level(miles: float, level: int) -> float:
@@ -595,7 +776,9 @@ class JobBoard:
         pay = round(max(base_pay, minimum_pay_for_level(miles, level)) * mult, 2)
         # deadline: the honest HOS-compliant hours (driving, breaks, sleep),
         # shipper slack on top, plus a flat hour for fuel and the unexpected
-        deadline = required_hours(miles) * self._rng.uniform(1.2, 1.5) + 1.0
+        route = self.world.supported_route(origin, destination)
+        slack = self._rng.uniform(*DEADLINE_DISPATCH_SLACK_RANGE)
+        deadline = dispatch_deadline_hours(miles, slack, route, self.world)
         return Job(cargo, weight, origin, origin_location, destination,
                    round(miles, 1), pay, round(deadline, 1), market_mult=mult,
                    origin_type=origin_facility.type,

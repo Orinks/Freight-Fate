@@ -229,11 +229,13 @@ Driving controls are active while the road view is focused:
 | E | Start the engine. Stop the engine only below 5 miles per hour. |
 | P | Release or set the parking brake. |
 | K | Set or cancel adaptive cruise control. Braking also cancels it. |
+| Plus / Minus | Raise or lower the set cruise speed by 5 mph while cruise is engaged. The keypad Plus and Minus keys work too. |
 | X | Arm or cancel the next exit when it is close enough. |
 | T | Open the route point-of-interest menu when stopped at a supported stop. |
 | J | Toggle the engine brake. |
 | H | Sound the horn. |
-| Space | Report speed, gear, RPM, air pressure, and brake state. |
+| Space | Report speed, gear, RPM, cruise set speed when cruise is on, air pressure, and brake state. |
+| S | Report the posted speed limit here, the zone if any, and how far over you are. |
 | Tab | Open the driving status menu. |
 | F | Report fuel level and estimated range. |
 | C | Report clock, deadline, estimated arrival, and hours of service. |
@@ -241,6 +243,8 @@ Driving controls are active while the road view is focused:
 | Shift+R | Report the next listed highway exit. |
 | V | Report weather and forecast. |
 | L | Report lane position when lane drift is enabled. |
+| A | Repeat the last route announcement, in case you missed it. |
+| U | Report what is coming up: imposed speed limits, stops, and exits ahead. |
 | F1 | Show the driving control list and current objective. |
 | Escape | Open the pause menu. |
 
@@ -278,9 +282,18 @@ Repeated hard braking can use air faster than normal driving. If low air is
 reported, stop safely, set the parking brake, and let pressure build.
 
 Adaptive cruise requires the engine to be running and the truck to be moving at
-least 20 miles per hour. Press K to set cruise at your current speed. Weather
-can increase the following gap, and modeled traffic can make cruise reduce
-speed. Cruise does not steer, change lanes, or replace your attention.
+least 20 miles per hour. Press K to set cruise at your current speed. Once it is
+engaged, Plus and Minus raise and lower the set speed by 5 miles per hour, just
+like the accelerate and coast buttons on a real truck, so you can dial the
+target up to the speed you want without having to reach it manually first. The
+keypad Plus and Minus keys work too. Press Space while cruise is on to hear the
+current cruise set speed along with speed, gear, RPM, and air-brake state. The
+truck then accelerates up to a higher set speed on its own. Cruise looks ahead
+for sharp posted-limit drops so it can begin slowing before the lower-limit
+stretch. It will not hold more than 5 miles per hour over the posted limit, so
+it keeps you legal even if you set it higher. Weather can increase the following
+gap, and modeled traffic can make cruise reduce speed. Cruise does not steer,
+change lanes, or replace your attention.
 
 ## Road Events, Weather, And Rest Stops
 
@@ -294,10 +307,34 @@ window.
 Construction and traffic zones lower the speed limit. Speeding in a
 construction zone can trigger enforcement.
 
+Posted speed limits come from real map data where available and change along a
+corridor; a change is announced as reduced or raised, and named near a city when
+the game is using a city-approach fallback. State troopers patrol some
+stretches, hotter on busy interstates, in construction, and at night. Speed
+badly inside a patrol and a trooper may pull you over: signal with X (the same
+key as an exit), brake to a stop on the shoulder, and sit through a license and
+logbook check that ends in an on-the-spot ticket or a warning.
+Ignoring the lights is logged as evasion and costs far more. Speeding the
+patrols do not catch still adds a quieter charge at delivery settlement.
+Adaptive cruise will not engage on low-speed local roads such as facility
+access roads, construction, or heavy traffic; drive those manually.
+
 Weather affects safe speed, traction, braking, visibility, traffic pressure,
 adaptive cruise following distance, and audio layers such as rain, wind,
 thunder, snow, and fog. Press V while driving for current conditions. In
-simulated weather, V also gives the upcoming forecast.
+simulated weather, V also gives the upcoming forecast. Driving well over the
+safe speed for the conditions on a slick road risks losing traction --
+hydroplaning in rain, sliding on snow -- and high winds and storms add real
+drag that costs you speed and fuel.
+
+Your career runs on a calendar. A new career begins on **March 21**, in early
+spring, and the date advances as you drive, rest, and sleep -- through summer,
+autumn, and into winter, then around again. The season sets the weather:
+snow and ice are cold-season risks, thunderstorms a warm-season one, and the
+regional temperature follows the time of year and time of day. The current
+date and season are announced with the clock (press C while driving), in the
+Tab status menu, and at the city terminal. With live weather turned on, the
+date, season, and temperature follow the real-world calendar instead.
 
 Stops are reported as you approach them. A one-mile cue tells you when to take
 an exit. Press X to signal for the exit, slow to 45 miles per hour or less, and
@@ -339,20 +376,30 @@ Freight Fate tracks an ELD-style hours clock. In realistic mode:
 - You need a 30-minute break after 8 cumulative hours of driving.
 - Sleeping 10 hours resets the shift clock.
 
+At sleep-capable truck parking, the sleeper berth means the bunk in your cab.
+You can choose 2, 3, 7, or 8 hours in the sleeper berth to plan an 8+2 or 7+3
+split. Sleep 10 hours remains the simplest full reset. Shoulder sleep and
+sleeping 10 hours in the lot are fallback rests, not clean split-rest planning
+tools.
+
 The game gives warnings at 2 hours, 1 hour, and 30 minutes before a limit.
 Driving past a limit risks inspections, fines, reputation loss, and
 out-of-service orders.
 
 Fatigue rises while driving, faster at night. Drowsiness adds yawn and rumble
-strip cues and makes hazards harder to react to. A 30-minute break reduces
-fatigue. A proper 10-hour sleep clears it.
+strip cues and makes hazards harder to react to. Once fatigue is severe you
+start to nod off: a rumble-strip jolt and a warning give you a brief window to
+steer or brake and stay awake. Catch it and you carry on; miss it and you drift
+onto the shoulder, taking damage and losing speed, and a third miss in a row
+forces you off the road. A 30-minute break reduces fatigue; a proper 10-hour
+sleep clears it. Plan your rest before you get there.
 
 Emergency shoulder sleep is a fallback, not normal rest. It can appear in the
-pause menu only when you are stopped away from a route point of interest and
-the game sees a real hours or fatigue problem without a suitable stop visible.
-The confirmation explains that 10 hours pass, the hours clock resets, fatigue
-only improves to a poor-rest floor, a parking ticket is possible, minor truck
-damage is possible, and the delivery deadline keeps running.
+pause menu when you are stopped away from a route point of interest. The game
+uses stronger warnings when hours are tight or fatigue is severe. The
+confirmation explains that 10 hours pass, the hours clock resets, fatigue only
+improves to a poor-rest floor, a parking ticket is possible, minor truck damage
+is possible, and the delivery deadline keeps running.
 
 ## Status Screens
 
@@ -387,8 +434,9 @@ Escape opens the pause menu during a drive. Public pause choices include:
 | --- | --- |
 | Resume driving | Return to the active drive. |
 | Trip status | Review cargo, objective, route progress, time used, and air status. |
+| Controls and help | Open the how-to-play reference at the driving keys, page by page, without leaving the drive. |
 | Call a roadside mechanic | Patch severe truck damage enough to continue, at a high cost. |
-| Emergency shoulder sleep | Appears only when the game detects a true hours or fatigue emergency. |
+| Emergency shoulder sleep | Rest on the shoulder when stopped away from route points; warnings get stronger when hours or fatigue are urgent. |
 | Settings | Open settings during the drive. |
 | Abandon job | Pay a penalty and return to the origin city. |
 | Save and quit to main menu | Save the active drive and resume it later. |
@@ -446,7 +494,7 @@ Gameplay settings include:
 | Transmission | Switch between automatic and manual transmission. |
 | Trip pacing | Choose relaxed, standard, or fast pacing. |
 | Hours of service | Choose realistic or relaxed hours rules. |
-| Lane drift | Choose whether lane drift is off, light, or realistic. |
+| Lane drift | Choose whether lane drift is off, light, or realistic. When on, the rumble strip is panned to the side you have drifted toward, so the side you hear it on is the side to steer away from. |
 | Discord presence | Show broad activity in Discord (menu, terminal, driving, resting, delivering) with high-level route and cargo. Only general game status is shared, never your saves or personal details. On by default; no effect if Discord is closed. |
 
 Audio settings include:
@@ -465,6 +513,7 @@ Speech and weather settings include:
 | Setting | Purpose |
 | --- | --- |
 | Speech verbosity | Controls how often driving status reminders run. |
+| Menu position announcements | When on, menus say the position, like 3 of 10, after each option. Turn off to hear only the option. |
 | Driving event voice | Routes road events through the main voice or a separate software voice when available. |
 | Speech rate | Appears only when the current voice source supports rate changes. |
 | Speech pitch | Appears only when the current voice source supports pitch changes. |

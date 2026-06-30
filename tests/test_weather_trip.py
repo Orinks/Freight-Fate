@@ -4,8 +4,10 @@ import itertools
 
 import pytest
 
+from freight_fate.data.world_models import Stop
 from freight_fate.sim import Trip, TruckState, WeatherKind, WeatherSystem
 from freight_fate.sim.trip import NavigationCue, TrafficLead, TripEventKind
+from freight_fate.sim.trip_models import RoadStop
 from freight_fate.sim.weather import EFFECTS, REGION_WEIGHTS
 
 
@@ -32,6 +34,50 @@ def test_all_regions_in_world_have_weights(world):
     regions = {c.region for c in world.cities.values()}
     for region in regions:
         assert region in REGION_WEIGHTS, f"no weather weights for {region}"
+
+
+def _season_conditions(region, game_hours, steps=400, seed=5):
+    """Conditions seen across a run with the career clock set to a season."""
+    ws = WeatherSystem(region, seed=seed, game_hours=game_hours)
+    seen = {ws.current}
+    for _ in range(steps):
+        ws.update(60.0)  # advance about an hour per step
+        seen.add(ws.current)
+    return seen
+
+
+def test_summer_runs_have_no_snow():
+    from freight_fate.sim.season import CAREER_START_DAY_OF_YEAR
+
+    summer_hours = (200 - CAREER_START_DAY_OF_YEAR) * 24.0  # mid July
+    seen = _season_conditions("great_lakes", summer_hours)
+    assert WeatherKind.SNOW not in seen
+
+
+def test_winter_runs_have_snow_but_no_thunderstorms():
+    from freight_fate.sim.season import CAREER_START_DAY_OF_YEAR
+
+    winter_hours = ((15 - CAREER_START_DAY_OF_YEAR) % 365.0) * 24.0  # mid January
+    seen = _season_conditions("great_lakes", winter_hours)
+    assert WeatherKind.SNOW in seen
+    assert WeatherKind.THUNDERSTORM not in seen
+
+
+def test_seasonal_weather_is_deterministic_with_seed():
+    winter_hours = ((15 - 80.0) % 365.0) * 24.0
+    a = WeatherSystem("rockies", seed=11, game_hours=winter_hours)
+    b = WeatherSystem("rockies", seed=11, game_hours=winter_hours)
+    for _ in range(80):
+        assert a.update(45.0) == b.update(45.0)
+    assert a.current == b.current
+    assert a.season == b.season == "winter"
+
+
+def test_seasons_off_by_default_leaves_temperature_unknown():
+    ws = WeatherSystem("heartland", seed=1)
+    assert ws.game_hours is None
+    assert ws.temperature_c is None
+    assert ws.season is None
 
 
 def test_weather_is_deterministic_with_seed():
@@ -88,6 +134,171 @@ def test_relaxed_hazard_scale_lowers_hazard_risk(world):
     assert relaxed._hazard_risk() == pytest.approx(
         normal._hazard_risk() * RELAXED_HAZARD_SCALE)
     assert relaxed._hazard_risk() < normal._hazard_risk()
+
+
+def test_relaxed_mode_thins_traffic_density(world):
+    """Relaxed mode also makes ambient traffic rarer, not just hazards."""
+    from freight_fate.sim.hos import RELAXED_HAZARD_SCALE
+
+    normal, _ = make_trip(world, seed=4)
+    relaxed, _ = make_trip(world, seed=4, hazard_scale=RELAXED_HAZARD_SCALE)
+    leg = normal.route.legs[0]
+    assert relaxed._leg_traffic_density(leg, 0.0, False) == pytest.approx(
+        normal._leg_traffic_density(leg, 0.0, False) * RELAXED_HAZARD_SCALE)
+    assert (relaxed._leg_traffic_density(leg, 0.0, False)
+            < normal._leg_traffic_density(leg, 0.0, False))
+
+
+def test_relaxed_mode_thins_random_inspection_odds(world):
+    """Relaxed mode pulls a violating driver over less often; the random log
+    check is thinned by the hazard scale (weigh stations are not)."""
+    from freight_fate.sim.hos import RELAXED_HAZARD_SCALE
+
+    normal, _ = make_trip(world, seed=4)
+    relaxed, _ = make_trip(world, seed=4, hazard_scale=RELAXED_HAZARD_SCALE)
+    leg = normal.route.legs[0]
+    assert relaxed._random_inspection_odds(leg) == pytest.approx(
+        normal._random_inspection_odds(leg) * RELAXED_HAZARD_SCALE)
+    assert relaxed._random_inspection_odds(leg) < normal._random_inspection_odds(leg)
+
+
+def test_corridor_speed_limit_by_highway_and_region():
+    from freight_fate.sim.trip import BASE_SPEED_LIMIT_MPH, corridor_speed_limit
+
+    # Rural Interstates run faster out West, slower in the Northeast.
+    assert corridor_speed_limit("I-80", "great_basin") == 80
+    assert corridor_speed_limit("I-90", "northeast") == 65
+    assert corridor_speed_limit("I-70", "heartland") == 70
+    # US highways and state routes are slower than Interstates.
+    assert corridor_speed_limit("US-30", "heartland") == 65
+    assert corridor_speed_limit("SR-99", "california") == 60
+    # An unknown region on an Interstate falls back to the base limit.
+    assert corridor_speed_limit("I-5", "atlantis") == BASE_SPEED_LIMIT_MPH
+
+
+def test_speed_limit_varies_by_corridor_and_drops_in_cities(world):
+    from freight_fate.sim.trip import URBAN_LIMIT_MPH
+
+    trip, _ = make_trip(world)  # Chicago -> Indianapolis, an Interstate corridor
+    # Near the origin city the limit drops to the urban value.
+    near_city, reason = trip.speed_limit_at(1.0)
+    assert reason is None
+    assert near_city == URBAN_LIMIT_MPH
+    # Out on the open road it is the faster corridor limit.
+    open_road, reason = trip.speed_limit_at(trip.total_miles / 2)
+    assert reason is None
+    assert open_road >= 65
+    assert open_road > near_city
+
+
+def test_speed_limit_change_is_announced_crossing_out_of_a_city(world):
+    from freight_fate.sim.trip import URBAN_RADIUS_MI, TripEventKind
+
+    trip, truck = make_trip(world)
+    truck.throttle = 0.95
+    messages = []
+    for _ in range(8000):
+        truck.auto_shift()
+        truck.update(1 / 60)
+        for event in trip.update(1 / 60):
+            if event.kind == TripEventKind.GPS_CUE:
+                messages.append(event.message)
+        if trip.position_mi > URBAN_RADIUS_MI + 4:
+            break
+    # Leaving the urban stretch raises the posted limit, and that is spoken.
+    assert any("Speed limit" in m for m in messages)
+
+
+def test_speed_limit_cue_names_direction_and_city(world, monkeypatch):
+    trip, _ = make_trip(world)  # Chicago -> Indianapolis
+    trip._active_zone = None
+
+    # A drop near the origin city names the direction and the city.
+    trip.position_mi = 0.0
+    trip._announced_speed_limit = 65.0
+    monkeypatch.setattr(trip, "_corridor_limit_at", lambda mile: 45.0)
+    trip._events.clear()
+    trip._check_speed_limit()
+    lowered = [e.message for e in trip._events]
+    assert any("reduced to" in m and "approaching" in m for m in lowered), lowered
+
+    # A rise just states the higher value -- no "approaching" on the way up.
+    trip._announced_speed_limit = 45.0
+    monkeypatch.setattr(trip, "_corridor_limit_at", lambda mile: 65.0)
+    trip._events.clear()
+    trip._check_speed_limit()
+    raised = [e.message for e in trip._events]
+    assert any("raised to" in m for m in raised), raised
+    assert all("approaching" not in m for m in raised)
+
+
+def test_force_weather_override_locks_condition(monkeypatch):
+    monkeypatch.setenv("FREIGHT_FATE_FORCE_WEATHER", "snow")
+    ws = WeatherSystem("heartland", seed=1)
+    assert ws.current is WeatherKind.SNOW
+    for _ in range(200):              # never drifts off the forced condition
+        ws.update(30.0)
+        assert ws.current is WeatherKind.SNOW
+
+    monkeypatch.setenv("FREIGHT_FATE_FORCE_WEATHER", "heavy_rain")
+    assert WeatherSystem("heartland", seed=1).current is WeatherKind.HEAVY_RAIN
+    monkeypatch.delenv("FREIGHT_FATE_FORCE_WEATHER")
+    monkeypatch.setenv("FREIGHT_FATE_FORCE_WEATHER", "bogus")
+    assert WeatherSystem("heartland", seed=1)._forced is None
+
+
+def test_weather_drag_multiplier_increases_resistance():
+    truck = TruckState()
+    truck.velocity_mps = 25.0
+    base = truck.resistance_force()
+    truck.drag_mult = 1.25          # a strong headwind / storm
+    assert truck.resistance_force() > base
+
+
+def test_visibility_shortens_hazard_reaction(world):
+    trip, _ = make_trip(world)
+    trip.weather.current = WeatherKind.CLEAR
+    assert trip._visibility_reaction_factor() == 1.0
+    trip.weather.current = WeatherKind.HEAVY_RAIN   # 1.5 mi visibility
+    assert trip._visibility_reaction_factor() == pytest.approx(0.5)
+    trip.weather.current = WeatherKind.FOG          # 0.3 mi -> floored
+    assert trip._visibility_reaction_factor() == pytest.approx(0.4)
+
+
+def test_too_fast_for_conditions_risks_traction_loss(world):
+    trip, truck = make_trip(world)
+    trip._hazard_check_mi = 1e9          # silence the random environmental hazards
+    trip._inspection_check_mi = 1e9
+    trip.traffic_leads = []
+
+    def run_for_hazard(frames=12000):
+        hits = []
+        for _ in range(frames):
+            trip.weather.current = WeatherKind.SNOW   # grip 0.45, safe speed 35
+            truck.velocity_mps = 27.0                 # ~60 mph, well over safe
+            for e in trip.update(1 / 60):
+                if e.kind == TripEventKind.HAZARD:
+                    hits.append(e.message)
+            if hits:
+                break
+        return hits
+
+    hits = run_for_hazard()
+    assert any("too fast for the conditions" in m for m in hits)
+
+    # At a safe speed for the snow, no traction-loss incident fires.
+    trip2, truck2 = make_trip(world, seed=7)
+    trip2._hazard_check_mi = 1e9
+    trip2._inspection_check_mi = 1e9
+    trip2.traffic_leads = []
+    safe_hits = []
+    for _ in range(6000):
+        trip2.weather.current = WeatherKind.SNOW
+        truck2.velocity_mps = 14.0                    # ~31 mph, under safe 35
+        for e in trip2.update(1 / 60):
+            if e.kind == TripEventKind.HAZARD:
+                safe_hits.append(e.message)
+    assert not any("too fast for the conditions" in m for m in safe_hits)
 
 
 def test_trip_completes_and_emits_arrival(world):
@@ -342,16 +553,63 @@ def test_time_scale_compresses_fuel_burn(world):
     assert truck.fuel_gal < truck.specs.fuel_tank_gal - 0.5
 
 
-def test_every_weather_region_has_local_hazards():
-    from freight_fate.sim.trip import GENERIC_HAZARDS, REGION_HAZARDS, hazard_choices
+def test_every_region_has_clear_day_hazards():
+    """Every region always has plausible clear, calm, daytime hazards: the
+    nationwide staples are never filtered out."""
+    from freight_fate.sim.trip import WeatherKind, eligible_hazards
 
-    for region in REGION_WEIGHTS:
-        assert region in REGION_HAZARDS, f"no local hazards for {region}"
-        pool = hazard_choices(region)
-        assert set(GENERIC_HAZARDS) <= set(pool)
-        assert set(REGION_HAZARDS[region]) <= set(pool)
-    # unknown regions still get the nationwide staples
-    assert hazard_choices("atlantis") == GENERIC_HAZARDS
+    noon = 12.0
+    for region in list(REGION_WEIGHTS) + ["atlantis"]:
+        pool = dict(eligible_hazards(region, WeatherKind.CLEAR, "flat", noon))
+        assert "debris on the road" in pool
+        # No weather- or terrain-specific hazard leaks into a clear flat day:
+        # nothing about snow, fog, wind, water, or mountain rockfall. (Wildlife
+        # is not weather-gated -- it stays eligible but heavily down-weighted
+        # by day -- so animal hazards are deliberately not excluded here.)
+        text = " ".join(pool)
+        for word in ("snow", "ice", "fog", "crosswind", "dust", "water",
+                     "hail", "rockfall", "tumbleweed"):
+            assert word not in text, f"{word!r} should not occur on a clear day"
+
+
+def test_weather_and_terrain_gate_hazards():
+    from freight_fate.sim.trip import WeatherKind, eligible_hazards
+
+    # Snow hazards only appear when it is snowing.
+    clear = dict(eligible_hazards("great_lakes", WeatherKind.CLEAR, "flat", 12.0))
+    snowy = dict(eligible_hazards("great_lakes", WeatherKind.SNOW, "flat", 12.0))
+    assert not any("snow" in t or "ice" in t for t in clear)
+    assert any("snow" in t for t in snowy)
+
+    # Rockfall is a mountain-terrain hazard, not a flatland one.
+    flat = dict(eligible_hazards("rockies", WeatherKind.CLEAR, "flat", 12.0))
+    mountain = dict(eligible_hazards("rockies", WeatherKind.CLEAR, "mountain", 12.0))
+    assert "rockfall debris on the road" not in flat
+    assert "rockfall debris on the road" in mountain
+
+    # The dropped, implausible hazards are gone for good.
+    everything = {
+        t
+        for region in REGION_WEIGHTS
+        for weather in WeatherKind
+        for terrain in ("flat", "hills", "mountain")
+        for t, _ in eligible_hazards(region, weather, terrain, 3.0)
+    }
+    assert not any("farm equipment" in t for t in everything)
+    assert not any("dust devil" in t for t in everything)
+
+
+def test_wildlife_is_biased_to_dawn_dusk_and_night():
+    """Deer and elk are far likelier at night than at midday, and the same
+    catalog drives both -- only the time of day changes the weight."""
+    from freight_fate.sim.trip import WeatherKind, eligible_hazards
+
+    day = dict(eligible_hazards("great_lakes", WeatherKind.CLEAR, "flat", 12.0))
+    night = dict(eligible_hazards("great_lakes", WeatherKind.CLEAR, "flat", 23.0))
+    deer = "a deer crossing the road"
+    assert night[deer] > day[deer]
+    # Non-animal staples keep the same weight regardless of the hour.
+    assert night["debris on the road"] == day["debris on the road"]
 
 
 def test_upcoming_stop_only_looks_ahead(world):
@@ -387,7 +645,7 @@ def test_progress_summary_mentions_highway(world):
     text = trip.progress_summary()
     assert "I-65" in text
     assert "Indianapolis, Indiana" in text
-    assert "Grade level" in text
+    assert "Current grade 0.0 percent, level" in text
     # The summary reports the nearest upcoming cue; an early stop leads here.
     assert "Next stop" in text
     metric = trip.progress_summary(imperial=False)
@@ -436,6 +694,24 @@ def test_gps_state_crossing_and_rest_stop_cues_deduplicate(world):
     )
 
 
+def test_likely_parking_is_not_announced_as_truck_parking():
+    assert Stop("Fuel", 1.0, parking="likely").parking_label == ""
+    assert RoadStop("Fuel", 1.0, parking="likely").parking_text == ""
+
+
+def test_likely_parking_route_cue_just_announces_stop(world):
+    trip, _truck = make_trip(world)
+    leg = trip.route.legs[0]
+    likely_stop = next(stop for stop in leg.stops if stop.parking == "likely")
+    cue = next(cue for cue in trip.navigation_cues
+               if cue.key.endswith(f":{likely_stop.name}"))
+
+    assert "likely truck parking" not in cue.near_text
+    assert cue.near_text.startswith(likely_stop.label.capitalize())
+    assert cue.near_text.endswith("ahead in 1 mile; press X to take the exit.")
+    assert ";;" not in cue.near_text
+
+
 def test_gps_traffic_cue_deduplicates(world):
     trip, _truck = make_trip(world)
     trip.navigation_cues.append(NavigationCue(
@@ -454,6 +730,23 @@ def test_gps_traffic_cue_deduplicates(world):
         "Traffic slowing ahead in 2 miles; traffic queue ahead at 45 miles per hour."
     ]
     assert not _gps_events(second)
+
+
+def test_route_context_describes_near_traffic_without_zero_distance(world):
+    trip, _truck = make_trip(world)
+    trip.navigation_cues = [NavigationCue(
+        "traffic:test",
+        "traffic",
+        10.1,
+        "traffic queue ahead",
+        speed_mph=45.0,
+    )]
+    trip.position_mi = 10.0
+
+    context = trip.next_navigation_context()
+
+    assert context == "Traffic just ahead: traffic queue ahead at 45 miles per hour."
+    assert "0" not in context
 
 
 def test_toll_cues_and_charges_deduplicate(world):

@@ -16,6 +16,7 @@ from ..models.jobs import (
     job_from_payload,
     job_payload,
     plan_hos,
+    route_required_hours,
 )
 from ..models.trucks import TRUCK_CATALOG, UPGRADE_CATALOG, TruckModel, Upgrade
 from ..music import select_menu_music_sequence
@@ -81,8 +82,7 @@ def route_departure_summary(route: Route) -> str:
     )
 
 
-# How far you can bobtail (drive empty) to shop another city's board. Generous
-# and level-independent so a thin start city is never a dead end.
+# Empty-drive range for shopping another city's board.
 BOBTAIL_RANGE_MI = 400.0
 
 
@@ -166,8 +166,6 @@ class CityMenuState(MenuState):
                      "and cannot afford fuel. Repaid automatically out of "
                      "your next delivery settlement."))
         return items
-
-    # -- actions -----------------------------------------------------------------
 
     def _job_board(self) -> None:
         p = self.ctx.profile
@@ -284,12 +282,19 @@ class CityMenuState(MenuState):
             kind = provider.get(city.name)
             if kind is not None:
                 desc, live = kind.value, True
+        from ..sim.season import date_text, real_clock_game_hours, season
+
+        # With live weather on, the season follows the real calendar so it
+        # matches the real conditions; otherwise it follows the career clock.
+        season_hours = real_clock_game_hours() if provider is not None else p.game_hours
         if desc is None:
             # deterministic per city and hour, so asking twice agrees
             seed = zlib.crc32(f"{city.name}:{int(p.game_hours)}".encode())
-            desc = WeatherSystem(city.region, seed=seed).describe()
+            desc = WeatherSystem(city.region, seed=seed,
+                                 game_hours=season_hours).describe()
         source = "Live weather" if live else "Weather"
         self.ctx.say(f"It is {clock_text(hour)}, {time_of_day(hour)}, "
+                     f"{date_text(season_hours)}, in {season(season_hours)}, "
                      f"day {day} of your career. "
                      f"{source} in {p.current_city}: {desc}.")
 
@@ -627,14 +632,16 @@ class JobBoardState(MenuState):
     def __init__(self, ctx, jobs: list[Job]) -> None:
         super().__init__(ctx)
         self.jobs = jobs
+        self._confirm_risky_job: Job | None = None
 
     def announce_entry(self) -> None:
         n = len(self.jobs)
         if n == 0:
             self.ctx.say("Dispatch board. No jobs available right now. Press Escape to go back.")
         else:
+            hos_note = self._hos_board_note()
             self.ctx.say(f"Dispatch board. {n} dispatch{'es' if n != 1 else ''} available. "
-                         f"{self.ctx.profile.market.summary()} "
+                         f"{self.ctx.profile.market.summary()} {hos_note}"
                          + self.current_text())
 
     def build_items(self) -> list[MenuItem]:
@@ -658,6 +665,16 @@ class JobBoardState(MenuState):
             self.ctx.audio.play("ui/error")
             self.ctx.say(f"{locked} Keep delivering to level up and unlock it.")
             return
+        if self._needs_hos_confirmation(job):
+            self._confirm_risky_job = job
+            self.ctx.audio.play("ui/warning")
+            self.ctx.say(
+                f"Hours warning. This dispatch may not fit your current duty "
+                f"clock before you need a legal rest. {p.hos.summary(self.ctx.settings.hos_mode)} "
+                "Press Enter again to accept it anyway, or choose another load.",
+                interrupt=True)
+            return
+        self._confirm_risky_job = None
         from .driving import DRIVE_PHASE_PICKUP, DrivingState
 
         route = self.ctx.world.facility_approach_route(job.origin, job.origin_location)
@@ -674,6 +691,34 @@ class JobBoardState(MenuState):
             interrupt=True)
         self.ctx.push_state(driving)
         self.ctx.award_achievement("first_dispatch")
+
+    def _needs_hos_confirmation(self, job: Job) -> bool:
+        return self._job_exceeds_current_hos(job) and self._confirm_risky_job is not job
+
+    def _job_exceeds_current_hos(self, job: Job) -> bool:
+        p = self.ctx.profile
+        mode = self.ctx.settings.hos_mode
+        remaining = p.hos.remaining_min(mode)
+        if remaining is None:
+            return False
+        route = self.ctx.world.supported_route(job.origin, job.destination)
+        if route is None:
+            return False
+        pickup_work_h = (PICKUP_CHECK_IN_MIN + PICKUP_LOADING_MIN) / 60.0
+        needed_h = pickup_work_h + route_required_hours(route, world=self.ctx.world)
+        return remaining / 60.0 < needed_h
+
+    def _hos_board_note(self) -> str:
+        if not self.jobs:
+            return ""
+        risky = sum(1 for job in self.jobs if self._job_exceeds_current_hos(job))
+        if risky == len(self.jobs):
+            return ("Every listed dispatch may require a legal rest before delivery; "
+                    "press Enter on a load to review the warning. ")
+        if risky:
+            return (f"{risky} dispatch{'es' if risky != 1 else ''} may require "
+                    "a legal rest before delivery. ")
+        return ""
 
 
 class PickupFacilityState(MenuState):
@@ -754,14 +799,12 @@ class PickupFacilityState(MenuState):
             primary = MenuItem(
                 "Depart for destination",
                 self._depart_for_destination,
-                help="Dispatch loads the navigation itinerary and starts the "
-                     "loaded trip to the destination facility.")
+                help="Dispatch loads the navigation itinerary and starts the trip.")
         elif self.checked_in:
             primary = MenuItem(
                 "Load cargo at dock",
                 self._load,
-                help="Back into the assigned dock, set the brakes, and wait "
-                     "while the trailer is loaded and sealed.")
+                help="Back into the assigned dock and wait while the trailer is loaded.")
         else:
             primary = MenuItem(
                 "Check in at shipping office",
@@ -850,7 +893,6 @@ class PickupFacilityState(MenuState):
             air_brake=self.truck.air_brake_snapshot(),
             engine_on=self.truck.engine_on,
         ))
-
     def _plan_route(self) -> None:
         self._depart_for_destination()
 
@@ -891,7 +933,6 @@ class PickupFacilityState(MenuState):
                  "Checked in" if self.checked_in else "Check-in required")
         return [
             self.title,
-            "",
             f"Facility: {self.facility}",
             f"Cargo: {self.job.weight_tons:.0f} tons of {self.job.cargo.label}",
             f"Destination: {self.job.destination}",
@@ -922,8 +963,6 @@ class RouteSelectState(MenuState):
         self.back_label = back_label
         self.air_brake = air_brake
         self.engine_on = engine_on
-        # start fetching live weather for cities on the routes so the data is
-        # usually ready by the time the player asks for a forecast
         provider = ctx.real_weather_provider()
         if provider is not None:
             for route in routes:

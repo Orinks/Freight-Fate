@@ -127,14 +127,33 @@ def _wind_to_kmh(wind: dict | None) -> float:
     return value                              # already km/h (wmoUnit:km_h-1)
 
 
-def _default_fetch(lat: float, lon: float) -> tuple[str, float]:
-    """Fetch (condition_text, wind_speed_kmh) from NWS. Raises on failure."""
+def _temp_to_c(temp: dict | None) -> float | None:
+    """Convert an NWS temperature measurement to Celsius, or None when absent.
+
+    NWS observations report Celsius (``wmoUnit:degC``); Fahrenheit is handled
+    defensively in case a station ever reports it. A null value (the station
+    has no current reading) yields None so callers fall back to the model."""
+    if not temp or temp.get("value") is None:
+        return None
+    value = float(temp["value"])
+    unit = str(temp.get("unitCode", ""))
+    if "degF" in unit:
+        return (value - 32.0) * 5.0 / 9.0
+    return value                              # degC (the NWS default)
+
+
+def _default_fetch(lat: float, lon: float) -> tuple[str, float, float | None]:
+    """Fetch (condition_text, wind_speed_kmh, temperature_c) from NWS.
+
+    The temperature is None when the station reports no current value. Raises
+    on network failure."""
     obs_url = _resolve_station_obs_url(lat, lon)
     data = _get_json(obs_url)
     props = data["properties"]
     text = props.get("textDescription") or ""
     wind_kmh = _wind_to_kmh(props.get("windSpeed"))
-    return text, wind_kmh
+    temp_c = _temp_to_c(props.get("temperature"))
+    return text, wind_kmh, temp_c
 
 
 class RealWeatherProvider:
@@ -145,12 +164,14 @@ class RealWeatherProvider:
     A custom ``fetch`` callable can be injected for tests.
     """
 
-    def __init__(self, fetch: Callable[[float, float], tuple[str, float]] | None = None,
+    def __init__(self,
+                 fetch: Callable[[float, float], tuple[str, float, float | None]] | None = None,
                  clock: Callable[[], float] = time.monotonic) -> None:
         self._fetch = fetch or _default_fetch
         self._clock = clock
         self._lock = threading.Lock()
-        self._cache: dict[str, tuple[WeatherKind, float]] = {}
+        # city -> (condition, temperature_c or None, fetched_at)
+        self._cache: dict[str, tuple[WeatherKind, float | None, float]] = {}
         self._failed_at: dict[str, float] = {}
         self._inflight: set[str] = set()
 
@@ -159,10 +180,23 @@ class RealWeatherProvider:
             entry = self._cache.get(city)
             if entry is None:
                 return None
-            kind, fetched_at = entry
+            kind, _temp_c, fetched_at = entry
             if self._clock() - fetched_at > CACHE_TTL_S * 2:
                 return None  # too stale to trust
             return kind
+
+    def get_temperature(self, city: str) -> float | None:
+        """The last real observed temperature in Celsius, or None when there is
+        no fresh reading -- still loading, offline, too stale, or the station
+        omitted it. Callers fall back to the seasonal model on None."""
+        with self._lock:
+            entry = self._cache.get(city)
+            if entry is None:
+                return None
+            _kind, temp_c, fetched_at = entry
+            if self._clock() - fetched_at > CACHE_TTL_S * 2:
+                return None
+            return temp_c
 
     def unavailable(self, city: str) -> bool:
         """True when live data is not usable *and* a fetch has failed.
@@ -183,7 +217,7 @@ class RealWeatherProvider:
             if city in self._inflight:
                 return
             entry = self._cache.get(city)
-            if entry is not None and now - entry[1] < CACHE_TTL_S:
+            if entry is not None and now - entry[2] < CACHE_TTL_S:
                 return
             failed = self._failed_at.get(city)
             if failed is not None and now - failed < RETRY_AFTER_S:
@@ -195,13 +229,14 @@ class RealWeatherProvider:
 
     def _worker(self, city: str, lat: float, lon: float) -> None:
         try:
-            text, wind = self._fetch(lat, lon)
+            text, wind, temp_c = self._fetch(lat, lon)
             kind = map_condition(text, wind)
             with self._lock:
-                self._cache[city] = (kind, self._clock())
+                self._cache[city] = (kind, temp_c, self._clock())
                 self._failed_at.pop(city, None)
-            log.info("Real weather for %s: %s (NWS %r, wind %.0f km/h)",
-                     city, kind.value, text, wind)
+            log.info("Real weather for %s: %s (NWS %r, wind %.0f km/h, temp %s)",
+                     city, kind.value, text, wind,
+                     f"{temp_c:.0f}C" if temp_c is not None else "n/a")
         except Exception:
             with self._lock:
                 self._failed_at[city] = self._clock()

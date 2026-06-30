@@ -234,6 +234,8 @@ def test_packaged_payload_requires_platform_prism_native(tmp_path):
     (build_dir / "build_info.json").write_text("{}", encoding="utf-8")
     (build_dir / "CHANGELOG.md").write_text("# Changelog\n", encoding="utf-8")
     (build_dir / "USER_MANUAL.md").write_text("# Manual\n", encoding="utf-8")
+    (build_dir / "USER_MANUAL.html").write_text(
+        "<h1>Manual</h1>\n", encoding="utf-8")
     (build_dir / "freight_fate" / "assets" / "sounds").mkdir(parents=True)
     (build_dir / "freight_fate" / "data").mkdir(parents=True)
     (build_dir / "freight_fate" / "data" / "world.json").write_text(
@@ -269,6 +271,8 @@ def test_packaged_payload_requires_runnable_posix_executable(tmp_path, monkeypat
     (build_dir / "build_info.json").write_text("{}", encoding="utf-8")
     (build_dir / "CHANGELOG.md").write_text("# Changelog\n", encoding="utf-8")
     (build_dir / "USER_MANUAL.md").write_text("# Manual\n", encoding="utf-8")
+    (build_dir / "USER_MANUAL.html").write_text(
+        "<h1>Manual</h1>\n", encoding="utf-8")
     (build_dir / "freight_fate" / "assets" / "sounds").mkdir(parents=True)
     (build_dir / "freight_fate" / "data").mkdir(parents=True)
     (build_dir / "freight_fate" / "data" / "world.json").write_text(
@@ -341,6 +345,8 @@ def test_linux_packaged_payload_requires_prism_dependency_bundle(tmp_path, monke
     (build_dir / "build_info.json").write_text("{}", encoding="utf-8")
     (build_dir / "CHANGELOG.md").write_text("# Changelog\n", encoding="utf-8")
     (build_dir / "USER_MANUAL.md").write_text("# Manual\n", encoding="utf-8")
+    (build_dir / "USER_MANUAL.html").write_text(
+        "<h1>Manual</h1>\n", encoding="utf-8")
     (build_dir / "freight_fate" / "assets" / "sounds").mkdir(parents=True)
     (build_dir / "freight_fate" / "data").mkdir(parents=True)
     (build_dir / "freight_fate" / "data" / "world.json").write_text(

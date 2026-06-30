@@ -5,6 +5,7 @@ from __future__ import annotations
 import logging
 import os
 import sys
+from pathlib import Path
 
 import pygame
 
@@ -21,12 +22,27 @@ from .speech import Speech
 from .states.base import State
 
 log = logging.getLogger(__name__)
+# Every spoken line lands here too, so a logged playtest reads as a transcript of
+# what the player heard -- the most faithful record for an audio-first game.
+transcript = logging.getLogger("freight_fate.transcript")
 
 WINDOW_SIZE = (900, 640)
 FPS = 60
 BG_COLOR = (12, 12, 16)
 TEXT_COLOR = (235, 235, 225)
 HILIGHT_COLOR = (255, 210, 90)
+
+
+def _stop_main_speech(speech) -> None:
+    stop = getattr(speech, "stop_main", None) or getattr(speech, "stop", None)
+    if stop is not None:
+        stop()
+
+
+def _stop_event_speech(speech) -> None:
+    stop = getattr(speech, "stop_event", None)
+    if stop is not None:
+        stop()
 
 
 class GameContext:
@@ -63,6 +79,7 @@ class GameContext:
         return self._real_weather
 
     def say(self, text: str, interrupt: bool = True) -> None:
+        transcript.info("%s", text)
         self.speech.say(text, interrupt)
 
     def say_event(self, text: str, interrupt: bool = True) -> None:
@@ -74,16 +91,19 @@ class GameContext:
         screen reader.
 
         With it disabled the player has chosen to hear events through their
-        screen reader. There we never interrupt, even for critical events: an
-        interrupt would chop the screen reader off mid-word as it reads menus,
-        keystrokes, or a prior announcement. Queuing instead lets the event
-        follow the current utterance, which the screen reader handles in its
-        own time.
+        screen reader. Urgent events first flush stale game speech, then speak
+        as a fresh queued utterance so old messages do not bury the warning.
         """
+        transcript.info("[event] %s", text)
         if self.settings.sapi_events:
             self.speech.say_event(text, interrupt)
         else:
+            if interrupt:
+                _stop_main_speech(self.speech)
             self.speech.say(text, interrupt=False)
+
+    def stop_event_speech(self) -> None:
+        _stop_event_speech(self.speech)
 
     # -- state stack ------------------------------------------------------------
 
@@ -107,12 +127,14 @@ class GameContext:
             self.profile.save()
 
     def apply_volumes(self) -> None:
-        self.audio.set_volumes(master=self.settings.master_volume,
-                               sfx=self.settings.sfx_volume,
-                               music=self.settings.music_volume,
-                               weather=self.settings.weather_volume,
-                               engine=self.settings.engine_volume,
-                               ui=self.settings.ui_volume)
+        self.audio.set_volumes(
+            master=self.settings.master_volume,
+            sfx=self.settings.sfx_volume,
+            music=self.settings.music_volume,
+            weather=self.settings.weather_volume,
+            engine=self.settings.engine_volume,
+            ui=self.settings.ui_volume,
+        )
 
     def apply_presence(self) -> None:
         """Reflect the Discord presence setting (e.g. after a settings change)."""
@@ -120,7 +142,8 @@ class GameContext:
 
     def apply_speech(self) -> None:
         self.speech.select_event_backend(
-            self.settings.event_backend if self.settings.sapi_events else None)
+            self.settings.event_backend if self.settings.sapi_events else None
+        )
         # If the saved voice was not on this machine (e.g. a Windows save's
         # SAPI opened on macOS), record the one actually used so the menu and
         # later sessions reflect reality.
@@ -128,10 +151,12 @@ class GameContext:
             actual = self.speech.event_backend_name
             if actual not in ("none", "unknown") and actual != self.settings.event_backend:
                 self.settings.event_backend = actual
-        self.speech.configure(rate=self.settings.speech_rate,
-                              pitch=self.settings.speech_pitch,
-                              volume=self.settings.speech_volume,
-                              voice=self.settings.speech_voice or None)
+        self.speech.configure(
+            rate=self.settings.speech_rate,
+            pitch=self.settings.speech_pitch,
+            volume=self.settings.speech_volume,
+            voice=self.settings.speech_voice or None,
+        )
 
     def next_music_track(self, pool_name: str, sequence: tuple[str, ...]) -> str:
         """Advance a session-local music pool without immediate repeats."""
@@ -151,17 +176,20 @@ class GameContext:
         return track
 
     def play_music_sequence(
-            self,
-            pool_name: str,
-            sequence: tuple[str, ...],
-            *,
-            fade_ms: int = 1500,
-            advance: bool = False) -> str:
+        self,
+        pool_name: str,
+        sequence: tuple[str, ...],
+        *,
+        fade_ms: int = 1500,
+        advance: bool = False,
+    ) -> str:
         """Play or refresh a pool without jarring compatible menu restarts."""
-        if (not advance
-                and self._music_rotation_pool is not None
-                and self._music_rotation_track is not None
-                and self._music_rotation_pool[0] == pool_name):
+        if (
+            not advance
+            and self._music_rotation_pool is not None
+            and self._music_rotation_track is not None
+            and self._music_rotation_pool[0] == pool_name
+        ):
             self._music_rotation_pool = (pool_name, sequence)
             return self._music_rotation_track
         track = self.next_music_track(pool_name, sequence)
@@ -179,8 +207,7 @@ class GameContext:
         if self._music_rotation_pool is None or self._music_rotation_track is None:
             return
         self._music_rotation_elapsed_s += max(0.0, dt)
-        if self._music_rotation_elapsed_s < music_track_duration_s(
-                self._music_rotation_track):
+        if self._music_rotation_elapsed_s < music_track_duration_s(self._music_rotation_track):
             return
         pool_name, sequence = self._music_rotation_pool
         self.play_music_sequence(pool_name, sequence, advance=True)
@@ -191,12 +218,13 @@ class GameContext:
         self._music_rotation_elapsed_s = 0.0
 
     def award_achievement(
-            self,
-            achievement_id: str,
-            *,
-            event: bool = False,
-            interrupt: bool = False,
-            announce: bool = True) -> AchievementAward | None:
+        self,
+        achievement_id: str,
+        *,
+        event: bool = False,
+        interrupt: bool = False,
+        announce: bool = True,
+    ) -> AchievementAward | None:
         if self.profile is None:
             return None
         result = award(self.profile, achievement_id)
@@ -215,6 +243,9 @@ class GameContext:
 class App:
     def __init__(self) -> None:
         os.environ.setdefault("PYGAME_HIDE_SUPPORT_PROMPT", "1")
+        if os.environ.get("FREIGHT_FATE_NO_SPEECH"):
+            os.environ["SDL_VIDEODRIVER"] = "dummy"
+            os.environ["SDL_AUDIODRIVER"] = "dummy"
         pygame.init()
         pygame.display.set_caption(f"Freight Fate {__version__}")
         self.screen = pygame.display.set_mode(WINDOW_SIZE)
@@ -272,7 +303,7 @@ class App:
 
         self.running = True
         self.push_state(MainMenuState(self.ctx))
-        self.presence.start()   # after init; never blocks if Discord is absent
+        self.presence.start()  # after init; never blocks if Discord is absent
         frames = 0
         try:
             while self.running:
@@ -338,27 +369,38 @@ def _configure_logging() -> None:
     from . import updater
 
     packaged = updater.is_frozen()
-    default_level = "INFO" if packaged else "WARNING"
+    # An explicit log file (set for playtests/observation) forces file output and
+    # an INFO default even from a source checkout, so a session can be reviewed
+    # after the fact without streaming to a console.
+    explicit_log_file = os.environ.get("FREIGHT_FATE_LOG_FILE")
+    default_level = "INFO" if (packaged or explicit_log_file) else "WARNING"
     level = os.environ.get("FREIGHT_FATE_LOG", default_level)
     handlers = None
 
-    if packaged:
+    log_path = None
+    if explicit_log_file:
+        log_path = Path(explicit_log_file)
+    elif packaged:
         from .models.profile import game_root
 
+        log_path = game_root() / "logs" / "game.log"
+    if log_path is not None:
         try:
-            log_path = game_root() / "logs" / "game.log"
             log_path.parent.mkdir(parents=True, exist_ok=True)
             handlers = [logging.FileHandler(log_path, mode="w", encoding="utf-8")]
         except OSError:
             pass  # unwritable disk: console-only is the best we can do
     logging.basicConfig(
-        level=level, handlers=handlers, force=True,
-        format="%(asctime)s %(levelname)s %(name)s: %(message)s")
+        level=level,
+        handlers=handlers,
+        force=True,
+        format="%(asctime)s %(levelname)s %(name)s: %(message)s",
+    )
 
 
 def main() -> int:
     _configure_logging()
-    smoke = "--smoke" in sys.argv[1:]   # CI: boot, render a few frames, exit 0
+    smoke = "--smoke" in sys.argv[1:]  # CI: boot, render a few frames, exit 0
     from .single_instance import SingleInstanceGuard
 
     guard = SingleInstanceGuard()
