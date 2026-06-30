@@ -1,7 +1,6 @@
 # ruff: noqa: F403,F405
 from __future__ import annotations
 
-from ..audio import CH_REVERSE
 from .driving_core import *
 from .driving_rest_states import TrafficStopState
 
@@ -205,6 +204,7 @@ class DrivingUpdateMixin:
                 tr._shift_timer = 0.0
                 self.ctx.audio.play("vehicle/gear_shift", volume=0.55)
                 self._set_status("Forward gear selected.")
+                self.ctx.say_event("Forward gear selected.", interrupt=False)
                 return False
             return braking_key and not accelerating
         if braking_key and not accelerating and t.speed_mph < 0.5:
@@ -213,6 +213,7 @@ class DrivingUpdateMixin:
             self._cancel_cruise()
             self.ctx.audio.play("vehicle/gear_shift", volume=0.55)
             self._set_status("Reverse selected. Backing slowly.")
+            self.ctx.say_event("Reverse selected. Backing slowly.", interrupt=False)
             return True
         return False
 
@@ -314,9 +315,11 @@ class DrivingUpdateMixin:
         audio.set_engine_rpm(t.rpm, engine_load)
         audio.set_road_noise(t.velocity_mps)
         if t.engine_on and t.transmission.in_reverse:
-            audio.start_loop(CH_REVERSE, "vehicle/reverse", volume=0.4, fade_ms=150)
+            if not self._reverse_cue_active:
+                audio.play("vehicle/reverse", volume=0.4)
+                self._reverse_cue_active = True
         else:
-            audio.stop_loop(CH_REVERSE, fade_ms=150)
+            self._reverse_cue_active = False
         eff = self.weather.effects
         audio.set_weather(eff.sound)
         audio.set_wind(eff.wind)

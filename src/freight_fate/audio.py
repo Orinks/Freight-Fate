@@ -40,8 +40,7 @@ CH_ROAD = 4
 CH_WEATHER = 5
 CH_WEATHER_B = 6
 CH_AMBIENT = 7
-CH_REVERSE = 8
-RESERVED = 9
+RESERVED = 8
 NUM_CHANNELS = 32
 
 # RPM centers for the pygame engine loop crossfade.
@@ -804,7 +803,7 @@ class AudioEngine:
     def stop_world(self) -> None:
         """Stop engine, road, weather, and ambience (leaving UI sfx alone)."""
         self.engine_stop(shutdown_sound=False)
-        for ch in (CH_ROAD, CH_WEATHER, CH_WEATHER_B, CH_AMBIENT, CH_REVERSE):
+        for ch in (CH_ROAD, CH_WEATHER, CH_WEATHER_B, CH_AMBIENT):
             self.stop_loop(ch, fade_ms=400)
 
     # -- music ----------------------------------------------------------------

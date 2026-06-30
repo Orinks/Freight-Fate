@@ -4,8 +4,8 @@
 ### Fixed
 
 - **Reverse now has its own backing cue.** Shifting into reverse with the engine
-  running now starts a dedicated reverse loop, and it stops cleanly when you
-  leave reverse, shut down, or leave the driving scene.
+  running now plays a short reverse sound through the normal effects path, and
+  automatic reverse selection also gets a spoken confirmation.
 - **Hazard clears are easier to hear, and speech backs off faster.** Passing a
   road hazard now plays a short achievement-like confirmation sound, and urgent
   events plus driving warnings clear stale spoken messages so old alerts do not

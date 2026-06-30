@@ -113,6 +113,28 @@ def test_shift_key_does_not_press_clutch_in_automatic(monkeypatch):
         app.shutdown()
 
 
+def test_automatic_reverse_selection_is_spoken(monkeypatch):
+    from freight_fate.app import App
+
+    app = App()
+    events = []
+    monkeypatch.setattr(app.ctx.audio, "play", lambda *a, **k: None)
+    monkeypatch.setattr(
+        app.ctx,
+        "say_event",
+        lambda text, interrupt=True: events.append((text, interrupt)),
+    )
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+
+        assert driving._update_reverse_controls(accelerating=False, braking_key=True)
+
+        assert events[-1] == ("Reverse selected. Backing slowly.", False)
+    finally:
+        app.shutdown()
+
+
 def test_driving_f1_describes_safe_shutdown_and_destination_parking(monkeypatch):
     from freight_fate.app import App
 
@@ -1334,31 +1356,21 @@ def test_engine_audio_load_drops_during_automatic_shift(monkeypatch):
         app.shutdown()
 
 
-def test_reverse_audio_loop_tracks_reverse_gear(monkeypatch):
-    from freight_fate import audio
+def test_reverse_audio_cue_plays_once_when_reverse_engages(monkeypatch):
     from freight_fate.app import App
     from freight_fate.sim.transmission import REVERSE
 
     app = App()
-    started = []
-    stopped = []
+    played = []
     monkeypatch.setattr(app.ctx.audio, "set_engine_rpm", lambda *a, **k: None)
     monkeypatch.setattr(app.ctx.audio, "set_road_noise", lambda *a, **k: None)
     monkeypatch.setattr(app.ctx.audio, "set_weather", lambda *a, **k: None)
     monkeypatch.setattr(app.ctx.audio, "set_wind", lambda *a, **k: None)
     monkeypatch.setattr(app.ctx.audio, "set_ambient", lambda *a, **k: None)
-    monkeypatch.setattr(app.ctx.audio, "play", lambda *a, **k: None)
     monkeypatch.setattr(
         app.ctx.audio,
-        "start_loop",
-        lambda channel, key, volume=1.0, fade_ms=300: started.append(
-            (channel, key, volume, fade_ms)
-        ),
-    )
-    monkeypatch.setattr(
-        app.ctx.audio,
-        "stop_loop",
-        lambda channel, fade_ms=300: stopped.append((channel, fade_ms)),
+        "play",
+        lambda key, volume=1.0, **kwargs: played.append((key, volume, kwargs)),
     )
     try:
         driving = start_drive(app)
@@ -1367,11 +1379,14 @@ def test_reverse_audio_loop_tracks_reverse_gear(monkeypatch):
         driving.truck.transmission.gear = REVERSE
 
         driving._update_audio(0.0)
-        assert started[-1] == (audio.CH_REVERSE, "vehicle/reverse", 0.4, 150)
+        driving._update_audio(0.0)
+        assert played.count(("vehicle/reverse", 0.4, {})) == 1
 
         driving.truck.transmission.gear = 1
         driving._update_audio(0.0)
-        assert stopped[-1] == (audio.CH_REVERSE, 150)
+        driving.truck.transmission.gear = REVERSE
+        driving._update_audio(0.0)
+        assert played.count(("vehicle/reverse", 0.4, {})) == 2
     finally:
         app.shutdown()
 
