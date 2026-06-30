@@ -11,7 +11,10 @@ class DrivingControlsMixin:
             return
         key = event.key
         tr = self.truck.transmission
-        if key == pygame.K_ESCAPE:
+        if key in (pygame.K_LCTRL, pygame.K_RCTRL):
+            self.ctx.stop_event_speech()
+            self._set_status("Event voice stopped.")
+        elif key == pygame.K_ESCAPE:
             self.ctx.push_state(PauseMenuState(self.ctx, self))
         elif key == pygame.K_e:
             self._toggle_engine()
@@ -29,8 +32,7 @@ class DrivingControlsMixin:
                 self.ctx.say("Release the accelerator before turning the engine brake on.")
                 return
             self.truck.engine_brake = not self.truck.engine_brake
-            self.ctx.say("Engine brake on." if self.truck.engine_brake
-                         else "Engine brake off.")
+            self.ctx.say("Engine brake on." if self.truck.engine_brake else "Engine brake off.")
         elif key == pygame.K_p:
             self._toggle_parking_brake()
         elif key == pygame.K_h:
@@ -75,9 +77,10 @@ class DrivingControlsMixin:
             objective_help = (
                 f"Your current objective is pickup: drive to {self._pickup_facility_text()}, "
                 "stop at the gate, then check in and load. "
-                if self.phase == DRIVE_PHASE_PICKUP else
-                "Pickup and loading are complete. At your destination, stop, "
-                "then dock and deliver. ")
+                if self.phase == DRIVE_PHASE_PICKUP
+                else "Pickup and loading are complete. At your destination, stop, "
+                "then dock and deliver. "
+            )
             self.ctx.say(
                 "Hold Up arrow to accelerate, Down arrow to brake. "
                 "When stopped in automatic, hold Down arrow to reverse slowly; "
@@ -105,23 +108,30 @@ class DrivingControlsMixin:
                 "R route. Shift R next listed highway exit. V weather. L lane position. "
                 "A repeats the last announcement. U reads what is coming up: "
                 "imposed limits, stops, and exits ahead. "
+                "Left or Right Control stops the driving event voice. "
                 "Left and Right arrows steer when lane drift is enabled. "
                 "T route POI menu when already stopped "
                 "at one: available actions may include fuel, break, sleep, "
                 "inspect, roadside assistance, or save when source-backed. H horn. "
                 "J engine brake. Escape pause menu. "
-                + ("" if self.truck.transmission.automatic else
-                   "Hold Left Shift for clutch, then 1 through 0 for gears, "
-                   "Backspace for reverse, N for neutral."))
+                + (
+                    ""
+                    if self.truck.transmission.automatic
+                    else "Hold Left Shift for clutch, then 1 through 0 for gears, "
+                    "Backspace for reverse, N for neutral."
+                )
+            )
 
     def _toggle_engine(self) -> None:
         t = self.truck
         if t.engine_on:
             if t.speed_mph > ENGINE_SHUTDOWN_SAFE_MPH:
                 self.ctx.audio.play("ui/error")
-                text = (f"Unsafe to shut the engine off at "
-                        f"{self.ctx.settings.speed_text(t.speed_mph)}. "
-                        "Brake below 5 miles per hour first.")
+                text = (
+                    f"Unsafe to shut the engine off at "
+                    f"{self.ctx.settings.speed_text(t.speed_mph)}. "
+                    "Brake below 5 miles per hour first."
+                )
                 self._set_status("Engine shutdown blocked: slow down first.")
                 self.ctx.say(text)
                 return
@@ -146,11 +156,15 @@ class DrivingControlsMixin:
 
     def _air_start_instruction(self) -> str:
         t = self.truck
+        if self._terse_speech():
+            return f"Air pressure {t.air_pressure_psi:.0f} psi."
         if t.parking_brake:
             if t.air_ready:
                 return "Air pressure ready. Press P to release the parking brake."
-            return (f"Air pressure {t.air_pressure_psi:.0f} psi. "
-                    "Wait for 100 psi, then press P to release the parking brake.")
+            return (
+                f"Air pressure {t.air_pressure_psi:.0f} psi. "
+                "Wait for 100 psi, then press P to release the parking brake."
+            )
         return "Air pressure ready. Hold the Up arrow to drive."
 
     def _toggle_parking_brake(self) -> None:
@@ -159,16 +173,19 @@ class DrivingControlsMixin:
             if t.release_parking_brake():
                 self.ctx.audio.play("vehicle/brake_release", volume=0.65)
                 self._set_status("Parking brake released.")
-                self.ctx.say("Parking brake released. Air pressure "
-                             f"{t.air_pressure_psi:.0f} psi.")
+                self.ctx.say(f"Parking brake released. Air pressure {t.air_pressure_psi:.0f} psi.")
                 if self.tutorial:
                     self.tutorial.on_parking_brake_released()
             else:
                 self.ctx.audio.play("ui/error")
                 self._set_status("Parking brake locked: build air pressure first.")
-                self.ctx.say(
-                    f"Parking brake stays set. Air pressure {t.air_pressure_psi:.0f} psi; "
-                    "wait for 100 psi with the engine running.")
+                if self._terse_speech():
+                    self.ctx.say(f"Parking brake set. Air pressure {t.air_pressure_psi:.0f} psi.")
+                else:
+                    self.ctx.say(
+                        f"Parking brake stays set. Air pressure {t.air_pressure_psi:.0f} psi; "
+                        "wait for 100 psi with the engine running."
+                    )
             return
         t.set_parking_brake()
         t.throttle = 0.0
@@ -197,10 +214,13 @@ class DrivingControlsMixin:
         gear = self._gear_text()
         cruise = (
             f", cruise set at {self.ctx.settings.speed_text(self._cruise_mph)}"
-            if self._cruise_mph is not None else ""
+            if self._cruise_mph is not None
+            else ""
         )
-        self.ctx.say(f"{self.ctx.settings.speed_text(t.speed_mph)}, {gear}, "
-                     f"{t.rpm:.0f} RPM{cruise}, {self._air_status_text()}.")
+        self.ctx.say(
+            f"{self.ctx.settings.speed_text(t.speed_mph)}, {gear}, "
+            f"{t.rpm:.0f} RPM{cruise}, {self._air_status_text()}."
+        )
 
     def _speak_speed_limit(self) -> None:
         """S: the posted limit here, the zone if any, and how far over you are."""
@@ -208,11 +228,9 @@ class DrivingControlsMixin:
         zone = f", in a {reason} zone" if reason else ""
         over = self.truck.speed_mph - limit
         comparison = (
-            f" You are about {self.ctx.settings.speed_text(over)} over."
-            if over >= 1 else ""
+            f" You are about {self.ctx.settings.speed_text(over)} over." if over >= 1 else ""
         )
-        self.ctx.say(
-            f"Speed limit {self.ctx.settings.speed_text(limit)}{zone}.{comparison}")
+        self.ctx.say(f"Speed limit {self.ctx.settings.speed_text(limit)}{zone}.{comparison}")
 
     def _speak_last_announcement(self) -> None:
         """A: replay the last route announcement, for one you missed."""
@@ -228,8 +246,10 @@ class DrivingControlsMixin:
         parts: list[str] = []
         zone = self.trip.next_zone_within(within_mi)
         if zone is not None:
-            parts.append(f"{zone.reason} in {s.distance_text(zone.start_mi - pos)}, "
-                         f"speed limit {s.speed_text(zone.limit_mph)}")
+            parts.append(
+                f"{zone.reason} in {s.distance_text(zone.start_mi - pos)}, "
+                f"speed limit {s.speed_text(zone.limit_mph)}"
+            )
         stop = self.trip.upcoming_stop(within_mi)
         if stop is not None:
             parts.append(f"{stop.spoken_name} in {s.distance_text(stop.at_mi - pos)}")
@@ -266,14 +286,12 @@ class DrivingControlsMixin:
             f"Air brakes: {self._air_status_text(detailed=True)}",
             f"Weather: {self.weather.describe(self.ctx.settings.imperial_units)}",
             f"Calendar: {self._calendar_phrase() or 'unknown'}",
-            f"Clock: {clock_text(self.trip.current_hour)} "
-            f"({time_of_day(self.trip.current_hour)})",
+            f"Clock: {clock_text(self.trip.current_hour)} ({time_of_day(self.trip.current_hour)})",
         ]
         if self._cruise_mph is not None:
             lines.insert(
                 1,
-                "Cruise: adaptive cruise set at "
-                f"{self.ctx.settings.speed_text(self._cruise_mph)}",
+                f"Cruise: adaptive cruise set at {self.ctx.settings.speed_text(self._cruise_mph)}",
             )
             context = self.trip.traffic_context()
             if context is not None:
@@ -284,16 +302,12 @@ class DrivingControlsMixin:
                     f"{self.ctx.settings.speed_text(context.lead.speed_mph)}",
                 )
         if t.damage_pct - self.start_damage > 1:
-            lines.append(
-                f"Damage: new damage {t.damage_pct - self.start_damage:.0f} percent"
-            )
+            lines.append(f"Damage: new damage {t.damage_pct - self.start_damage:.0f} percent")
         if self.ctx.settings.speech_verbosity >= 1:
             fatigue = self.ctx.profile.fatigue
             if fatigue >= hos.FATIGUE_DROWSY:
                 lines.append(f"Fatigue: {fatigue:.0f} percent")
-            lines.append(
-                f"HOS: {self.hos.summary(self.ctx.settings.hos_mode).rstrip('.')}"
-            )
+            lines.append(f"HOS: {self.hos.summary(self.ctx.settings.hos_mode).rstrip('.')}")
             context = self._hos_route_context()
             if context:
                 lines.append(f"Next legal stop: {context}")
@@ -315,8 +329,10 @@ class DrivingControlsMixin:
             pressure = "air building"
         compressor = "compressor building" if t.air_compressor_active else "compressor idle"
         heat = (
-            "brakes hot" if t.brake_temp_c >= t.specs.brake_fade_temp_c
-            else "brakes warm" if t.brake_temp_c >= 180.0
+            "brakes hot"
+            if t.brake_temp_c >= t.specs.brake_fade_temp_c
+            else "brakes warm"
+            if t.brake_temp_c >= 180.0
             else "brakes cool"
         )
         if detailed:
@@ -332,8 +348,10 @@ class DrivingControlsMixin:
         t = self.truck
         mpg = 6.0
         range_mi = t.fuel_gal * mpg
-        self.ctx.say(f"Fuel {t.fuel_fraction * 100:.0f} percent, {t.fuel_gal:.0f} gallons. "
-                     f"Estimated range {self.ctx.settings.distance_text(range_mi)}.")
+        self.ctx.say(
+            f"Fuel {t.fuel_fraction * 100:.0f} percent, {t.fuel_gal:.0f} gallons. "
+            f"Estimated range {self.ctx.settings.distance_text(range_mi)}."
+        )
 
     def _calendar_phrase(self) -> str:
         """Calendar date and season for the spoken readouts; '' when unknown."""
@@ -358,27 +376,37 @@ class DrivingControlsMixin:
                 f"{self.ctx.settings.distance_text(self.trip.remaining_miles)} remain. "
                 f"{hours_used:.1f} hours used before loading. "
                 f"{self.hos.summary(self.ctx.settings.hos_mode)} "
-                f"{self._hos_route_context()}")
+                f"{self._hos_route_context()}"
+            )
             return
         remaining = self.job.deadline_game_h - hours_used
         eta = self.trip.eta_game_hours()
-        basis = ("at your current speed"
-                 if self.truck.speed_mph >= self.trip.ETA_MIN_MPH
-                 else "at a typical highway pace")
+        basis = (
+            "at your current speed"
+            if self.truck.speed_mph >= self.trip.ETA_MIN_MPH
+            else "at a typical highway pace"
+        )
         hos_part = self.hos.summary(self.ctx.settings.hos_mode)
         hos_route = self._hos_route_context()
         if hos_route:
             hos_part = f"{hos_part} {hos_route}"
         if remaining > 0:
-            verdict = ("You are on schedule." if eta < remaining
-                       else "You are running behind. Keep your speed up.")
-            self.ctx.say(f"{now} {hours_used:.1f} hours on the road. "
-                         f"{remaining:.1f} hours until the deadline. "
-                         f"Estimated time to arrival {eta:.1f} hours {basis}. "
-                         f"{verdict} {hos_part}")
+            verdict = (
+                "You are on schedule."
+                if eta < remaining
+                else "You are running behind. Keep your speed up."
+            )
+            self.ctx.say(
+                f"{now} {hours_used:.1f} hours on the road. "
+                f"{remaining:.1f} hours until the deadline. "
+                f"Estimated time to arrival {eta:.1f} hours {basis}. "
+                f"{verdict} {hos_part}"
+            )
         else:
-            self.ctx.say(f"{now} You are {-remaining:.1f} hours past the deadline. "
-                         f"The pay is shrinking, but finish the delivery. {hos_part}")
+            self.ctx.say(
+                f"{now} You are {-remaining:.1f} hours past the deadline. "
+                f"The pay is shrinking, but finish the delivery. {hos_part}"
+            )
 
     def _hos_route_context(self) -> str:
         mode = self.ctx.settings.hos_mode
@@ -392,15 +420,16 @@ class DrivingControlsMixin:
         next_stop = self.trip.upcoming_stop(max(legal_miles + 5.0, 5.0))
         action = "break" if kind == "break" else "sleep"
         if next_stop is None:
-            return (f"No route stop is currently visible before the next {action} "
-                    f"limit, due in {remaining_min / 60.0:.1f} hours. If you "
-                    "cannot reach a stop, come to a stop and you can sleep on the "
-                    "shoulder: poor rest, and a possible parking ticket.")
+            return (
+                f"No route stop is currently visible before the next {action} "
+                f"limit, due in {remaining_min / 60.0:.1f} hours. If you "
+                "cannot reach a stop, come to a stop and you can sleep on the "
+                "shoulder: poor rest, and a possible parking ticket."
+            )
         ahead = max(0.0, next_stop.at_mi - self.trip.position_mi)
         verdict = "before" if ahead <= legal_miles else "after"
         stop_text = (
-            f"Next legal stop: {next_stop.spoken_name} in "
-            f"{self.ctx.settings.distance_text(ahead)}"
+            f"Next legal stop: {next_stop.spoken_name} in {self.ctx.settings.distance_text(ahead)}"
         )
         if next_stop.parking_text:
             stop_text += f", {next_stop.parking_text}"
@@ -432,37 +461,40 @@ class DrivingControlsMixin:
         if self.truck.speed_mph > 3:
             return None
         if self.trip.nearest_stop_within() is not None:
-            return None   # a POI is right here; use its rest menu instead
+            return None  # a POI is right here; use its rest menu instead
         if self.ctx.profile.fatigue >= hos.FATIGUE_SEVERE:
             return "Fatigue is severe, and no route stop is nearby."
         mode = self.ctx.settings.hos_mode
         if mode not in hos.HOS_NON_ENFORCED_MODES:
             if self.hos.in_violation(mode):
-                return ("You are past your hours-of-service limit, and there is "
-                        "no route POI here.")
+                return "You are past your hours-of-service limit, and there is no route POI here."
             next_limit = self.hos.next_limit(mode)
             if next_limit is not None:
                 kind, remaining_min, _due = next_limit
                 action = "break" if kind == "break" else "sleep"
                 legal_miles = self._legal_miles_for_hos(remaining_min)
-                if (remaining_min <= hos.SHOULDER_SLEEP_LIMIT_BUFFER_MIN
-                        and self._upcoming_stop_with_action(
-                            action, max(legal_miles + 5.0, 5.0)) is None):
-                    return (f"Your next {action} limit is due in "
-                            f"{remaining_min / 60.0:.1f} hours, and no suitable "
-                            "route stop is visible before it.")
+                if (
+                    remaining_min <= hos.SHOULDER_SLEEP_LIMIT_BUFFER_MIN
+                    and self._upcoming_stop_with_action(action, max(legal_miles + 5.0, 5.0)) is None
+                ):
+                    return (
+                        f"Your next {action} limit is due in "
+                        f"{remaining_min / 60.0:.1f} hours, and no suitable "
+                        "route stop is visible before it."
+                    )
         return "No route stop is nearby. You can pull over and rest on the shoulder."
 
     def _speak_weather(self) -> None:
         source = "Live conditions" if self.weather.live else "Currently"
         safe_speed = self.ctx.settings.speed_text(self.weather.effects.safe_speed_mph)
-        parts = [f"It is {time_of_day(self.trip.current_hour)}.",
-                 f"{source} {self.weather.describe()}.",
-                 f"Safe speed about {safe_speed}."]
+        parts = [
+            f"It is {time_of_day(self.trip.current_hour)}.",
+            f"{source} {self.weather.describe()}.",
+            f"Safe speed about {safe_speed}.",
+        ]
         if not self.weather.live:
             ahead = ", then ".join(k.value for k in self.weather.forecast(2))
             parts.append(f"Ahead: {ahead}.")
         self.ctx.say(" ".join(parts))
 
     # -- per-frame update -----------------------------------------------------------------
-

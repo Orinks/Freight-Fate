@@ -10,9 +10,15 @@ from .driving_updates import DrivingUpdateMixin
 
 
 class DrivingState(DrivingControlsMixin, DrivingUpdateMixin, DrivingEventMixin, State):
-    def __init__(self, ctx, job: Job, route: Route, trip_seed: int | None = None,
-                 phase: str = DRIVE_PHASE_DELIVERY,
-                 start_hour: float | None = None) -> None:
+    def __init__(
+        self,
+        ctx,
+        job: Job,
+        route: Route,
+        trip_seed: int | None = None,
+        phase: str = DRIVE_PHASE_DELIVERY,
+        start_hour: float | None = None,
+    ) -> None:
         super().__init__(ctx)
         self.job = job
         self.route = route
@@ -24,9 +30,7 @@ class DrivingState(DrivingControlsMixin, DrivingUpdateMixin, DrivingEventMixin, 
         # Loaded delivery runs carry the job's payload; pickup deadheads and
         # empty bobtail repositions run light. Gross weight drives the physics,
         # so a heavy load pulls away gently and lugs on grades.
-        self.truck.cargo_kg = (
-            job.weight_tons * KG_PER_TON
-            if phase == DRIVE_PHASE_DELIVERY else 0.0)
+        self.truck.cargo_kg = job.weight_tons * KG_PER_TON if phase == DRIVE_PHASE_DELIVERY else 0.0
         self.truck.transmission.automatic = ctx.settings.automatic_transmission
         self.truck.fuel_gal = min(profile.truck_fuel_gal, self.truck.specs.fuel_tank_gal)
         self.truck.damage_pct = profile.truck_damage_pct
@@ -41,35 +45,42 @@ class DrivingState(DrivingControlsMixin, DrivingUpdateMixin, DrivingEventMixin, 
         )
         self._weather_source_real = ctx.settings.real_weather
         trip_start_hour = profile.game_hours % 24.0 if start_hour is None else start_hour
-        self.trip = Trip(route, self.truck, self.weather,
-                         time_scale=ctx.settings.time_scale, seed=self.trip_seed,
-                         start_hour=trip_start_hour,
-                         imperial=ctx.settings.imperial_units,
-                         hazard_scale=hos.hazard_scale(ctx.settings.hos_mode))
+        self.trip = Trip(
+            route,
+            self.truck,
+            self.weather,
+            time_scale=ctx.settings.time_scale,
+            seed=self.trip_seed,
+            start_hour=trip_start_hour,
+            imperial=ctx.settings.imperial_units,
+            hazard_scale=hos.hazard_scale(ctx.settings.hos_mode),
+        )
         self.lane = LaneKeeping(seed=self.trip_seed)
         self._day_music_sequence = select_drive_music_sequence(
-            self.route, self.trip_seed, 12.0, self.weather.current)
+            self.route, self.trip_seed, 12.0, self.weather.current
+        )
         self._night_music_sequence = select_drive_music_sequence(
-            self.route, self.trip_seed, 0.0, self.weather.current)
+            self.route, self.trip_seed, 0.0, self.weather.current
+        )
         self._day_music_index = 0
         self._night_music_index = 0
         self._music_elapsed_s = 0.0
         self._music_night = is_night(trip_start_hour)
         self.tutorial = Tutorial(ctx) if not profile.tutorial_done else None
 
-        self.hos = profile.hos          # shift clock lives on the profile
-        self.hos_fine_count = 0         # escalates with each failed inspection
+        self.hos = profile.hos  # shift clock lives on the profile
+        self.hos_fine_count = 0  # escalates with each failed inspection
         self.enforcement_events: set[str] = set()
         self.out_of_service_count = 0
         self._drowsy_said = False
         self._severe_said = False
-        self._fatigue_cue_gm = 0.0      # game minutes since the last drowsy cue
+        self._fatigue_cue_gm = 0.0  # game minutes since the last drowsy cue
         self._microsleep_deadline: float | None = None  # reaction window, real seconds
-        self._microsleep_gm = 0.0       # game minutes since the last nod
+        self._microsleep_gm = 0.0  # game minutes since the last nod
         self._microsleep_cooldown_gm = 0.0
-        self._microsleep_misses = 0     # consecutive nods drifted off the road
+        self._microsleep_misses = 0  # consecutive nods drifted off the road
         self._hazard_deadline: float | None = None
-        self._last_event_message = ""   # last spoken route announcement, for replay
+        self._last_event_message = ""  # last spoken route announcement, for replay
         self._speed_announce_timer = 0.0
         self._last_announced_mph = 0.0
         self._speeding_timer = 0.0
@@ -78,19 +89,18 @@ class DrivingState(DrivingControlsMixin, DrivingUpdateMixin, DrivingEventMixin, 
         # for an immediate ticket, separate from the silent at-delivery strikes.
         self.speeding_tickets = 0
         self.ticket_fines_paid = 0.0
-        self._pull_over: str | None = None   # None | "lights" | "stopping"
+        self._pull_over: str | None = None  # None | "lights" | "stopping"
         self._pull_over_start_mi = 0.0
         self._pull_over_signaled = False
-        self._pull_over_over = 0.0            # mph over the limit when clocked
-        self._pull_over_limit = 0.0           # posted limit when clocked
+        self._pull_over_over = 0.0  # mph over the limit when clocked
+        self._pull_over_limit = 0.0  # posted limit when clocked
         # Deterministic, save-safe stream for "did a patrol catch you" rolls, kept
         # apart from the trip's hazard/zone/inspection streams.
-        self._patrol_rng = random.Random(
-            None if trip_seed is None else trip_seed ^ 0xB0A1)
+        self._patrol_rng = random.Random(None if trip_seed is None else trip_seed ^ 0xB0A1)
         self._rescue_offered = False
         self._signal_timer = 0.0
-        self._exit_stop = None            # armed exit, set with X
-        self._ramp_mi: float | None = None   # ramp distance left, once taken
+        self._exit_stop = None  # armed exit, set with X
+        self._ramp_mi: float | None = None  # ramp distance left, once taken
         self._ramp_stop = None
         self._ramp_end_said = False
         self._destination_exit_taken = False
@@ -111,6 +121,9 @@ class DrivingState(DrivingControlsMixin, DrivingUpdateMixin, DrivingEventMixin, 
         self._lane_rumble_timer = 0.0
         self._status_text = "Press E to start the engine."
 
+    def _terse_speech(self) -> bool:
+        return self.ctx.settings.speech_verbosity == 0
+
     # -- save and resume -----------------------------------------------------------
 
     def snapshot(self) -> dict:
@@ -121,8 +134,9 @@ class DrivingState(DrivingControlsMixin, DrivingUpdateMixin, DrivingEventMixin, 
             "kind": kind,
             "job": job_payload(job),
             "route_cities": list(self.route.cities),
-            "route_kind": ("facility_approach" if self.phase == DRIVE_PHASE_PICKUP
-                           else "corridor_itinerary"),
+            "route_kind": (
+                "facility_approach" if self.phase == DRIVE_PHASE_PICKUP else "corridor_itinerary"
+            ),
             "navigation_schema": 1,
             "trip_seed": self.trip_seed,
             "start_hour": self.trip.start_hour,
@@ -185,8 +199,7 @@ class DrivingState(DrivingControlsMixin, DrivingUpdateMixin, DrivingEventMixin, 
             state.speeding_strikes = int(data["speeding_strikes"])
             state.trip.restore(position_mi, game_minutes)
             state.trip.restore_toll_charges(list(data.get("toll_charges", ())))
-            state.truck.restore_air_brake_snapshot(
-                data.get("air_brake"), default_ready=True)
+            state.truck.restore_air_brake_snapshot(data.get("air_brake"), default_ready=True)
             if bool(data.get("engine_on", False)):
                 state.truck.start_engine()
             state._air_ready_said = state.truck.air_ready
@@ -197,12 +210,11 @@ class DrivingState(DrivingControlsMixin, DrivingUpdateMixin, DrivingEventMixin, 
             if "hos" in data:
                 ctx.profile.hos = HosClock.from_dict(data["hos"])
                 state.hos = ctx.profile.hos
-            ctx.profile.fatigue = max(0.0, min(100.0, float(
-                data.get("fatigue", ctx.profile.fatigue))))
+            ctx.profile.fatigue = max(
+                0.0, min(100.0, float(data.get("fatigue", ctx.profile.fatigue)))
+            )
             state.hos_fine_count = int(data.get("hos_fine_count", 0))
-            state.enforcement_events = {
-                str(key) for key in data.get("enforcement_events", [])
-            }
+            state.enforcement_events = {str(key) for key in data.get("enforcement_events", [])}
             state.out_of_service_count = int(data.get("out_of_service_count", 0))
             state.speeding_tickets = int(data.get("speeding_tickets", 0))
             state.ticket_fines_paid = float(data.get("ticket_fines_paid", 0.0))
@@ -228,11 +240,16 @@ class DrivingState(DrivingControlsMixin, DrivingUpdateMixin, DrivingEventMixin, 
         if self.resumed:
             hours_used = self.trip.game_minutes / 60.0
             drive_name = "pickup drive" if self.phase == DRIVE_PHASE_PICKUP else "loaded delivery"
-            destination = (self._pickup_facility_text()
-                           if self.phase == DRIVE_PHASE_PICKUP else self.job.destination)
-            progress = (self._pickup_progress_summary()
-                        if self.phase == DRIVE_PHASE_PICKUP else
-                        self.trip.progress_summary(self.ctx.settings.imperial_units))
+            destination = (
+                self._pickup_facility_text()
+                if self.phase == DRIVE_PHASE_PICKUP
+                else self.job.destination
+            )
+            progress = (
+                self._pickup_progress_summary()
+                if self.phase == DRIVE_PHASE_PICKUP
+                else self.trip.progress_summary(self.ctx.settings.imperial_units)
+            )
             self.ctx.say(
                 f"Resuming your {drive_name}: {self.job.weight_tons:.0f} tons of "
                 f"{self.job.cargo.label} to {destination}. "
@@ -242,19 +259,23 @@ class DrivingState(DrivingControlsMixin, DrivingUpdateMixin, DrivingEventMixin, 
                 f"Weather: {self.weather.describe()}. "
                 f"You are parked. {self._engine_entry_instruction()} "
                 "When air pressure is ready, press P to release the parking brake.",
-                interrupt=False)
+                interrupt=False,
+            )
         else:
-            objective = (f"Pickup dispatch: deadhead from the terminal to "
-                         f"{self._pickup_facility_text()}. "
-                         if self.phase == DRIVE_PHASE_PICKUP else
-                         f"Loaded for {self._destination_facility_text()}. "
-                         f"{self.trip.progress_summary(self.ctx.settings.imperial_units)} ")
-            self.ctx.say(f"You are at the wheel. {objective}It is {now}. "
-                         f"Transmission is {mode}. "
-                         f"Weather: {self.weather.describe()}. "
-                         f"{self._engine_entry_instruction()} "
-                         "F1 lists the controls.",
-                         interrupt=False)
+            objective = (
+                f"Pickup dispatch: deadhead from the terminal to {self._pickup_facility_text()}. "
+                if self.phase == DRIVE_PHASE_PICKUP
+                else f"Loaded for {self._destination_facility_text()}. "
+                f"{self.trip.progress_summary(self.ctx.settings.imperial_units)} "
+            )
+            self.ctx.say(
+                f"You are at the wheel. {objective}It is {now}. "
+                f"Transmission is {mode}. "
+                f"Weather: {self.weather.describe()}. "
+                f"{self._engine_entry_instruction()} "
+                "F1 lists the controls.",
+                interrupt=False,
+            )
         if self.tutorial:
             self.tutorial.begin()
         if self.phase == DRIVE_PHASE_DELIVERY:
@@ -285,7 +306,6 @@ class DrivingState(DrivingControlsMixin, DrivingUpdateMixin, DrivingEventMixin, 
         self.ctx.audio.stop_music(600)
 
     # -- input ---------------------------------------------------------------------
-
 
 
 from .driving_menu_states import (  # noqa: E402,F401

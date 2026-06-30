@@ -34,6 +34,7 @@ def key_event(key, unicode="", mod=0):
 
 # -- clock math -------------------------------------------------------------------
 
+
 def test_drive_accumulates_all_three_meters():
     c = HosClock()
     c.drive(90)
@@ -304,8 +305,10 @@ def test_violation_detection():
 
 # -- warnings -------------------------------------------------------------------
 
-def drive_collecting(c: HosClock, minutes: float, mode: str = "realistic",
-                     step: float = 5.0) -> list[str]:
+
+def drive_collecting(
+    c: HosClock, minutes: float, mode: str = "realistic", step: float = 5.0
+) -> list[str]:
     msgs = []
     elapsed = 0.0
     while elapsed < minutes:
@@ -338,7 +341,7 @@ def test_warnings_mention_what_is_due():
 
 def test_break_rearms_break_warnings_only():
     c = HosClock()
-    drive_collecting(c, 485)        # all break warnings + violation spoken
+    drive_collecting(c, 485)  # all break warnings + violation spoken
     c.take_break(30)
     # next binding limit is the 11-hour drive clock (660): at 540 driving
     # the 2-hour warning for it fires once
@@ -406,6 +409,7 @@ def test_hos_summary_omits_break_when_duty_window_closes_first():
 
 # -- modes -------------------------------------------------------------------
 
+
 def test_relaxed_limits_are_25_percent_longer():
     drive, duty, brk = LIMITS["realistic"]
     assert LIMITS["relaxed"] == (drive * 1.25, duty * 1.25, brk * 1.25)
@@ -413,10 +417,10 @@ def test_relaxed_limits_are_25_percent_longer():
 
 def test_relaxed_mode_delays_warnings():
     c = HosClock()
-    c.drive(470)   # realistic would warn (10 minutes left before the break)
-    assert c.check_warnings("relaxed") == []   # break rule now at 600
+    c.drive(470)  # realistic would warn (10 minutes left before the break)
+    assert c.check_warnings("relaxed") == []  # break rule now at 600
     assert not c.in_violation("relaxed")
-    c.drive(140)   # 610 driving minutes: past the relaxed break rule
+    c.drive(140)  # 610 driving minutes: past the relaxed break rule
     assert c.in_violation("relaxed")
 
 
@@ -431,6 +435,7 @@ def test_off_mode_never_warns_or_violates():
 
 
 # -- serialization and compatibility ----------------------------------------------
+
 
 def test_clock_roundtrips_through_dict():
     c = HosClock()
@@ -502,6 +507,7 @@ def test_profile_persists_hos_and_fatigue():
 
 # -- day/night ---------------------------------------------------------------------
 
+
 def test_time_of_day_bands():
     assert time_of_day(6.0) == "dawn"
     assert time_of_day(12.0) == "day"
@@ -546,9 +552,12 @@ def test_night_zone_layout_is_deterministic(world):
 
 def test_night_produces_sparser_traffic(world):
     def traffic_count(hour):
-        return sum(1 for s in range(40)
-                   for z in make_trip(world, start_hour=hour, seed=s).zones
-                   if z.reason == "heavy traffic")
+        return sum(
+            1
+            for s in range(40)
+            for z in make_trip(world, start_hour=hour, seed=s).zones
+            if z.reason == "heavy traffic"
+        )
 
     assert traffic_count(23.0) < traffic_count(12.0)
 
@@ -567,6 +576,7 @@ def test_trip_current_hour_advances_with_game_time(world):
 
 # -- fatigue ---------------------------------------------------------------------
 
+
 def test_fatigue_grows_faster_at_night():
     assert hos.fatigue_rate_per_min(night=True) > hos.fatigue_rate_per_min(night=False)
 
@@ -582,19 +592,19 @@ def test_rest_helpers():
     assert hos.rest_break(50.0) == pytest.approx(15.0)
     assert hos.rest_break(10.0) == 0.0
     assert hos.rest_sleep(99.0) == 0.0
-    assert hos.rest_shoulder(90.0) == 30.0   # poor rest floor
-    assert hos.rest_shoulder(10.0) == 10.0   # never adds fatigue
+    assert hos.rest_shoulder(90.0) == 30.0  # poor rest floor
+    assert hos.rest_shoulder(10.0) == 10.0  # never adds fatigue
 
 
 def test_shoulder_damage_is_deterministic():
     for seed in range(20):
-        assert (hos.shoulder_damage_due(seed, 88.0)
-                == hos.shoulder_damage_due(seed, 88.0))
+        assert hos.shoulder_damage_due(seed, 88.0) == hos.shoulder_damage_due(seed, 88.0)
     results = {hos.shoulder_damage_due(seed, 88.0) for seed in range(100)}
     assert results == {True, False}
 
 
 # -- overnight parking ----------------------------------------------------------------
+
 
 def test_parking_is_only_scarce_at_night():
     assert parking_full_probability(12.0) == 0.0
@@ -607,8 +617,7 @@ def test_parking_is_only_scarce_at_night():
 
 def test_parking_full_is_deterministic_per_seed_and_stop():
     for seed in range(20):
-        assert (parking_is_full(seed, 88.0, 23.0)
-                == parking_is_full(seed, 88.0, 23.0))
+        assert parking_is_full(seed, 88.0, 23.0) == parking_is_full(seed, 88.0, 23.0)
     # both outcomes occur across seeds
     results = {parking_is_full(s, 88.0, 23.0) for s in range(100)}
     assert results == {True, False}
@@ -620,6 +629,7 @@ def test_parking_fills_more_often_later_in_the_evening():
 
 
 # -- driving state integration ----------------------------------------------------------
+
 
 def start_drive(app):
     """New career, accept an unlocked job, pick a route; returns DrivingState."""
@@ -683,11 +693,15 @@ def park_at_first_stop(driving):
         # a deterministic one so the sleep / parking-full tests never depend on
         # which route the career happened to draw.
         from freight_fate.sim.trip import RoadStop
+
         stop = RoadStop(
-            name="Test Travel Center", at_mi=max(1.0, driving.trip.total_miles * 0.5),
+            name="Test Travel Center",
+            at_mi=max(1.0, driving.trip.total_miles * 0.5),
             type="travel_center",
             actions=("park", "save", "fuel", "food", "break", "sleep"),
-            services=("diesel", "food", "parking"), parking="confirmed")
+            services=("diesel", "food", "parking"),
+            parking="confirmed",
+        )
         driving.trip.stops = [stop]
     driving.trip.position_mi = stop.at_mi
     return stop
@@ -743,6 +757,30 @@ def test_hos_violation_speech_interrupts_but_threshold_warning_does_not(monkeypa
         app.shutdown()
 
 
+def test_severe_fatigue_drift_warning_is_urgent(monkeypatch):
+    from freight_fate.app import App
+
+    app = App()
+    spoken = []
+    monkeypatch.setattr(
+        app.ctx,
+        "say_event",
+        lambda text, interrupt=False: spoken.append((text, interrupt)),
+    )
+    try:
+        driving = start_drive(app)
+        app.ctx.profile.fatigue = hos.FATIGUE_SEVERE
+        driving.truck.velocity_mps = 20.0
+
+        driving._update_hours_and_fatigue(1.0)
+
+        warning = spoken[-1]
+        assert warning[0].startswith("You are dangerously drowsy")
+        assert warning[1] is True
+    finally:
+        app.shutdown()
+
+
 @pytest.mark.smoke
 def test_fatigued_driver_gets_a_shorter_hazard_window():
     from freight_fate.app import App
@@ -771,7 +809,7 @@ def test_rest_stop_menu_break_and_sleep():
     try:
         driving = start_drive(app)
         park_at_first_stop(driving)
-        driving.hos.drive(490)            # past the break rule
+        driving.hos.drive(490)  # past the break rule
         app.ctx.profile.fatigue = 50.0
         driving.handle_event(key_event(pygame.K_t))
         assert isinstance(app.state, RestStopState)
@@ -806,9 +844,16 @@ def test_sleep_capable_stop_offers_sleeper_split_choices():
     try:
         driving = start_drive(app)
         sleeper = SimpleNamespace(
-            name="Big Truck Stop", at_mi=driving.trip.position_mi, type="truck_stop",
-            actions=("break", "fuel", "sleep"), services=(), parking="confirmed",
-            exit_label="", spoken_name="Big Truck Stop", parking_text="confirmed truck parking")
+            name="Big Truck Stop",
+            at_mi=driving.trip.position_mi,
+            type="truck_stop",
+            actions=("break", "fuel", "sleep"),
+            services=(),
+            parking="confirmed",
+            exit_label="",
+            spoken_name="Big Truck Stop",
+            parking_text="confirmed truck parking",
+        )
         items = RestStopState(app.ctx, driving, sleeper).build_items()
         labels = [i.text for i in items]
 
@@ -842,9 +887,16 @@ def test_split_sleeper_rest_action_advances_clock_and_speaks_status(monkeypatch)
     try:
         driving = start_drive(app)
         sleeper = SimpleNamespace(
-            name="Big Truck Stop", at_mi=driving.trip.position_mi, type="truck_stop",
-            actions=("break", "fuel", "sleep"), services=(), parking="confirmed",
-            exit_label="", spoken_name="Big Truck Stop", parking_text="confirmed truck parking")
+            name="Big Truck Stop",
+            at_mi=driving.trip.position_mi,
+            type="truck_stop",
+            actions=("break", "fuel", "sleep"),
+            services=(),
+            parking="confirmed",
+            exit_label="",
+            spoken_name="Big Truck Stop",
+            parking_text="confirmed truck parking",
+        )
         app.push_state(RestStopState(app.ctx, driving, sleeper))
         before = driving.trip.game_minutes
 
@@ -852,8 +904,7 @@ def test_split_sleeper_rest_action_advances_clock_and_speaks_status(monkeypatch)
 
         assert driving.trip.game_minutes == pytest.approx(before + 480.0)
         assert driving.hos.status == "sleeper_berth"
-        status_index = next(
-            i for i, text in enumerate(spoken) if "Sleeper split pending" in text)
+        status_index = next(i for i, text in enumerate(spoken) if "Sleeper split pending" in text)
         assert ("slept_on_route", status_index + 1) in awards
 
         spoken.clear()
@@ -879,17 +930,13 @@ def test_full_parking_offers_drive_on_and_shoulder(monkeypatch):
 
     app = App()
     spoken = []
-    monkeypatch.setattr(app.ctx, "say",
-                        lambda text, interrupt=True: spoken.append(text))
+    monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: spoken.append(text))
     try:
         driving = start_drive(app)
         park_at_first_stop(driving)
-        monkeypatch.setattr("freight_fate.sim.hos.parking_is_full",
-                            lambda *a, **k: True)
-        monkeypatch.setattr("freight_fate.sim.hos.shoulder_fine_due",
-                            lambda *a, **k: True)
-        monkeypatch.setattr("freight_fate.sim.hos.shoulder_damage_due",
-                            lambda *a, **k: True)
+        monkeypatch.setattr("freight_fate.sim.hos.parking_is_full", lambda *a, **k: True)
+        monkeypatch.setattr("freight_fate.sim.hos.shoulder_fine_due", lambda *a, **k: True)
+        monkeypatch.setattr("freight_fate.sim.hos.shoulder_damage_due", lambda *a, **k: True)
         driving.handle_event(key_event(pygame.K_t))
         assert isinstance(app.state, ParkingFullState)
         labels = [i.text for i in app.state.items]
@@ -913,8 +960,7 @@ def test_full_parking_offers_drive_on_and_shoulder(monkeypatch):
         assert driving.hos.driving_min == 0.0
         assert app.ctx.profile.fatigue == 30.0
         assert app.ctx.profile.money == money_before - hos.SHOULDER_FINE
-        assert driving.truck.damage_pct == pytest.approx(
-            damage_before + hos.SHOULDER_DAMAGE_PCT)
+        assert driving.truck.damage_pct == pytest.approx(damage_before + hos.SHOULDER_DAMAGE_PCT)
         assert app.ctx.profile.active_trip is not None
     finally:
         app.shutdown()
@@ -927,8 +973,7 @@ def test_emergency_shoulder_sleep_pause_menu_constraints(monkeypatch):
 
     app = App()
     spoken = []
-    monkeypatch.setattr(app.ctx, "say",
-                        lambda text, interrupt=True: spoken.append(text))
+    monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: spoken.append(text))
     try:
         driving = start_drive(app)
         stop = park_at_first_stop(driving)
@@ -953,8 +998,7 @@ def test_emergency_shoulder_sleep_pause_menu_constraints(monkeypatch):
         assert isinstance(app.state, ShoulderSleepConfirmationState)
         assert "If hours of service are enforced" in spoken[-1]
         assert "minor truck damage" in spoken[-1]
-        assert app.state.items[app.state.index].text == (
-            "Cancel and keep looking for a safe stop")
+        assert app.state.items[app.state.index].text == ("Cancel and keep looking for a safe stop")
         assert "previous menu" in app.state.intro_help
         assert "returns to the road" not in app.state.intro_help
     finally:
@@ -968,8 +1012,7 @@ def test_hos_off_still_allows_fatigue_emergency_shoulder_sleep(monkeypatch):
 
     app = App()
     spoken = []
-    monkeypatch.setattr(app.ctx, "say",
-                        lambda text, interrupt=True: spoken.append(text))
+    monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: spoken.append(text))
     try:
         app.ctx.settings.hos_mode = "debug_off"
         driving = start_drive(app)
@@ -993,7 +1036,7 @@ def test_hos_off_still_allows_fatigue_emergency_shoulder_sleep(monkeypatch):
         # Moving, it is not offered -- you cannot sleep while rolling.
         driving.truck.velocity_mps = 12.0
         assert driving.emergency_shoulder_sleep_reason() is None
-        driving.truck.velocity_mps = 0.0   # back to a stop for the pause-menu check
+        driving.truck.velocity_mps = 0.0  # back to a stop for the pause-menu check
 
         driving.handle_event(key_event(pygame.K_ESCAPE))
         assert isinstance(app.state, PauseMenuState)
@@ -1025,9 +1068,16 @@ def test_break_only_stop_always_offers_emergency_lot_sleep(monkeypatch):
         # A break/fuel stop (no sleeper) still offers a lot sleep -- you can
         # always choose to sleep, even with hours to spare.
         break_only = SimpleNamespace(
-            name="Roadside Rest", at_mi=driving.trip.position_mi, type="rest_area",
-            actions=("break", "fuel"), services=(), parking="day_only",
-            exit_label="", spoken_name="Roadside Rest", parking_text="day parking")
+            name="Roadside Rest",
+            at_mi=driving.trip.position_mi,
+            type="rest_area",
+            actions=("break", "fuel"),
+            services=(),
+            parking="day_only",
+            exit_label="",
+            spoken_name="Roadside Rest",
+            parking_text="day parking",
+        )
         labels = [i.text for i in RestStopState(app.ctx, driving, break_only).build_items()]
         assert "Sleep 10 hours in the lot" in labels
         assert "Emergency sleep in the lot" not in labels
@@ -1036,9 +1086,16 @@ def test_break_only_stop_always_offers_emergency_lot_sleep(monkeypatch):
 
         # A sleeper stop offers the full sleep instead, not the lot fallback.
         sleeper = SimpleNamespace(
-            name="Big Truck Stop", at_mi=driving.trip.position_mi, type="truck_stop",
-            actions=("break", "fuel", "sleep"), services=(), parking="overnight",
-            exit_label="", spoken_name="Big Truck Stop", parking_text="overnight parking")
+            name="Big Truck Stop",
+            at_mi=driving.trip.position_mi,
+            type="truck_stop",
+            actions=("break", "fuel", "sleep"),
+            services=(),
+            parking="overnight",
+            exit_label="",
+            spoken_name="Big Truck Stop",
+            parking_text="overnight parking",
+        )
         labels = [i.text for i in RestStopState(app.ctx, driving, sleeper).build_items()]
         assert "Sleep 10 hours" in labels
         assert "Emergency sleep in the lot" not in labels
@@ -1056,7 +1113,7 @@ def test_parking_never_full_during_the_day():
         driving = start_drive(app)
         park_at_first_stop(driving)
         assert not (driving.trip.current_hour >= 20 or driving.trip.current_hour < 4)
-        driving.handle_event(key_event(pygame.K_t))   # 6 AM start: lot has room
+        driving.handle_event(key_event(pygame.K_t))  # 6 AM start: lot has room
         assert isinstance(app.state, RestStopState)
     finally:
         app.shutdown()
@@ -1081,7 +1138,7 @@ def test_city_sleep_resets_hours_and_advances_the_clock():
         app.state.handle_event(key_event(pygame.K_RETURN))  # home terminal
         assert isinstance(app.state, CityMenuState)
         p = app.ctx.profile
-        p.hos.drive(660)          # a fully spent shift
+        p.hos.drive(660)  # a fully spent shift
         p.fatigue = 75.0
         before = p.game_hours
         select(app.state, "Sleep 10 hours")
@@ -1101,8 +1158,7 @@ def test_dispatch_warns_before_accepting_job_that_exceeds_current_hos(monkeypatc
 
     app = App()
     spoken = []
-    monkeypatch.setattr(app.ctx, "say",
-                        lambda text, interrupt=True: spoken.append(text))
+    monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: spoken.append(text))
     monkeypatch.setattr(app.ctx.audio, "play", lambda *a, **k: None)
     try:
         from freight_fate.models.profile import Profile
@@ -1112,8 +1168,7 @@ def test_dispatch_warns_before_accepting_job_that_exceeds_current_hos(monkeypatc
         app.ctx.profile.current_city = "Austin"
         app.ctx.profile.hos.drive(LIMITS["realistic"][0] - 30.0)
         jobs = JobBoard(app.ctx.world, seed=2).offers("Austin", set(), level=2)
-        job = next(j for j in jobs
-                   if app.ctx.world.supported_route(j.origin, j.destination))
+        job = next(j for j in jobs if app.ctx.world.supported_route(j.origin, j.destination))
         board = JobBoardState(app.ctx, [job])
 
         board._accept(job)
@@ -1137,8 +1192,7 @@ def test_dispatch_board_warns_when_all_generated_jobs_exceed_current_hos(monkeyp
 
     app = App()
     spoken = []
-    monkeypatch.setattr(app.ctx, "say",
-                        lambda text, interrupt=True: spoken.append(text))
+    monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: spoken.append(text))
     monkeypatch.setattr(app.ctx.audio, "play", lambda *a, **k: None)
     try:
         app.ctx.profile = Profile(name="All Risky", current_city="Austin")
@@ -1199,13 +1253,23 @@ def test_pre_1_5_snapshot_resumes_with_fresh_clock():
     try:
         p = Profile(name="Old Save")
         p.active_trip = {
-            "job": {"cargo": "general", "weight_tons": 14.0,
-                    "origin": "Chicago", "origin_location": "Cicero Rail Hub",
-                    "destination": "Denver", "distance_mi": 1150.0,
-                    "pay": 2800.0, "deadline_game_h": 31.0, "market_mult": 1.0},
+            "job": {
+                "cargo": "general",
+                "weight_tons": 14.0,
+                "origin": "Chicago",
+                "origin_location": "Cicero Rail Hub",
+                "destination": "Denver",
+                "distance_mi": 1150.0,
+                "pay": 2800.0,
+                "deadline_game_h": 31.0,
+                "market_mult": 1.0,
+            },
             "route_cities": ["Chicago", "St. Louis", "Kansas City", "Denver"],
-            "trip_seed": 1234, "position_mi": 412.0, "game_minutes": 540.0,
-            "start_damage": 3.0, "speeding_strikes": 1,
+            "trip_seed": 1234,
+            "position_mi": 412.0,
+            "game_minutes": 540.0,
+            "start_damage": 3.0,
+            "speeding_strikes": 1,
         }
         app.ctx.profile = p
         enter_world(app.ctx)
@@ -1223,8 +1287,7 @@ def test_inspections_fire_only_in_violation(world):
     from freight_fate.sim.trip import TripEventKind
 
     def run_trip(violating):
-        trip = make_trip(world, start_hour=12.0, seed=5,
-                         start="Chicago", end="Indianapolis")
+        trip = make_trip(world, start_hour=12.0, seed=5, start="Chicago", end="Indianapolis")
         truck = trip.truck
         truck.start_engine()
         truck.throttle = 0.85
@@ -1266,11 +1329,8 @@ def test_inspection_fines_escalate_and_hit_reputation():
 def test_route_backed_weigh_station_emits_evidence(world):
     from freight_fate.sim.trip import RoadStop, TripEventKind
 
-    trip = make_trip(world, start_hour=12.0, seed=5,
-                     start="Chicago", end="Indianapolis")
-    trip.stops = [
-        RoadStop("Example Scale", 10.0, "weigh_station", ("inspect",), ())
-    ]
+    trip = make_trip(world, start_hour=12.0, seed=5, start="Chicago", end="Indianapolis")
+    trip.stops = [RoadStop("Example Scale", 10.0, "weigh_station", ("inspect",), ())]
     trip.position_mi = 10.1
     trip.hos_violation = True
     trip._events = []
@@ -1323,12 +1383,10 @@ def test_hos_clock_runs_on_game_time():
     try:
         driving = start_drive(app)
         app.ctx.settings.hos_mode = "realistic"
-        driving.truck.velocity_mps = 10.0   # rolling: counts as driving
+        driving.truck.velocity_mps = 10.0  # rolling: counts as driving
         before = driving.hos.driving_min
         driving._update_hours_and_fatigue(1.0)  # one real second
         gained = driving.hos.driving_min - before
         assert gained == pytest.approx(driving.trip.time_scale / 60.0)
     finally:
         app.shutdown()
-
-

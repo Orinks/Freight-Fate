@@ -61,6 +61,7 @@ current idle, start, and shutdown cues.
 | Police siren | `events/police_siren.ogg` | ElevenLabs-generated trooper pull-over siren wail |
 | CB radio chatter | `events/cb_radio_chatter.ogg` | ElevenLabs-generated CB squelch and chatter (staged for the CB heads-up slice) |
 | Spike strip | `events/spike_strip.ogg` | ElevenLabs-generated spike-strip puncture/air-hiss for felony stops |
+| Hazard clear | `events/hazard_clear.ogg` | ElevenLabs-generated confirmation cue when a hazard has been safely passed |
 | Rest stop at night | `poi/rest_stop_night.ogg` | Parked rest-stop ambience loop |
 | Weigh station lane | `poi/weigh_station_lane.ogg` | Parked weigh-station lane ambience loop |
 | Facility gate | `poi/facility_gate.ogg` | ElevenLabs-generated loading-dock gate ambience loop |

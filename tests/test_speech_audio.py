@@ -93,8 +93,9 @@ def test_no_usable_backend_returns_none():
 def test_backend_without_speak_or_output_is_skipped():
     ctx = FakeContext(
         [
-            FakeBackend("BRAILLE_ONLY", 103,
-                        FakeFeatures(supports_output=False, supports_speak=False)),
+            FakeBackend(
+                "BRAILLE_ONLY", 103, FakeFeatures(supports_output=False, supports_speak=False)
+            ),
             FakeBackend("SAPI", 97),
         ],
         best="BRAILLE_ONLY",
@@ -140,6 +141,7 @@ class FakeParamFeatures:
     is_supported_at_runtime: bool = True
     supports_output: bool = True
     supports_speak: bool = True
+    supports_stop: bool = False
     supports_set_rate: bool = False
     supports_set_pitch: bool = False
     supports_set_volume: bool = False
@@ -160,6 +162,8 @@ class RecordingBackend:
         self.volume = None
         self.voice = None
         self.spoken = []
+        self.stop_calls = 0
+        self.fail_output = False
 
     @property
     def voices_count(self):
@@ -169,10 +173,15 @@ class RecordingBackend:
         return self._voices[idx]
 
     def output(self, text, interrupt=True):
+        if self.fail_output:
+            raise RuntimeError("speech backend failed")
         self.spoken.append((text, interrupt))
 
     def speak(self, text, interrupt=True):
         self.output(text, interrupt)
+
+    def stop(self):
+        self.stop_calls += 1
 
 
 def _configurable_speech():
@@ -181,10 +190,17 @@ def _configurable_speech():
     s = Speech()  # FREIGHT_FATE_NO_SPEECH (conftest) leaves it empty
     main = RecordingBackend("NVDA", [], FakeParamFeatures())
     event = RecordingBackend(
-        "SAPI", ["David", "Zira"],
-        FakeParamFeatures(supports_set_rate=True, supports_set_pitch=True,
-                          supports_set_volume=True, supports_set_voice=True,
-                          supports_count_voices=True, supports_get_voice_name=True))
+        "SAPI",
+        ["David", "Zira"],
+        FakeParamFeatures(
+            supports_set_rate=True,
+            supports_set_pitch=True,
+            supports_set_volume=True,
+            supports_set_voice=True,
+            supports_count_voices=True,
+            supports_get_voice_name=True,
+        ),
+    )
     s._backend = main
     s._event_backend = event
     return s, main, event
@@ -216,7 +232,8 @@ def test_adjustment_preview_falls_back_when_setting_is_not_configurable():
 def test_configure_preserves_onecore_default_pitch_at_midpoint():
     s = Speech()
     event = RecordingBackend(
-        "OneCore", [],
+        "OneCore",
+        [],
         FakeParamFeatures(supports_set_rate=True, supports_set_pitch=True),
     )
     s._event_backend = event
@@ -247,15 +264,97 @@ def test_no_configurable_backend_reports_no_support():
     assert not s.supports_pitch
     assert not s.supports_volume
     assert s.voice_names() == []
+
+
+def test_interrupting_main_speech_uses_backend_interrupt_without_extra_stop():
+    s = Speech()
+    backend = RecordingBackend("SAPI", [], FakeParamFeatures(supports_stop=True))
+    s._backend = backend
+
+    s.say("Fresh menu item.", interrupt=True)
+
+    assert backend.stop_calls == 0
+    assert backend.spoken == [("Fresh menu item.", True)]
+
+
+def test_main_speech_flush_does_not_stop_event_voice():
+    s = Speech()
+    main = RecordingBackend("NVDA", [], FakeParamFeatures(supports_stop=True))
+    event = RecordingBackend("SAPI", [], FakeParamFeatures(supports_stop=True))
+    s._backend = main
+    s._event_backend = event
+
+    s.say("Fresh menu item.", interrupt=True)
+
+    assert main.stop_calls == 0
+    assert event.stop_calls == 0
+    assert main.spoken == [("Fresh menu item.", True)]
+
+
+def test_urgent_event_speech_flushes_event_voice_only():
+    s = Speech()
+    main = RecordingBackend("NVDA", [], FakeParamFeatures(supports_stop=True))
+    event = RecordingBackend("SAPI", [], FakeParamFeatures(supports_stop=True))
+    s._backend = main
+    s._event_backend = event
+
+    s.say_event("Brake now.", interrupt=True)
+
+    assert main.stop_calls == 0
+    assert event.stop_calls == 1
+    assert event.spoken == [("Brake now.", True)]
+
+
+def test_urgent_event_without_event_voice_flushes_main_before_fallback():
+    s = Speech()
+    main = RecordingBackend("NVDA", [], FakeParamFeatures(supports_stop=True))
+    s._backend = main
+    s._event_backend = None
+
+    s.say_event("Brake now.", interrupt=True)
+
+    assert main.stop_calls == 1
+    assert main.spoken == [("Brake now.", False)]
+
+
+def test_failed_urgent_event_voice_falls_back_without_main_interrupt():
+    s = Speech()
+    main = RecordingBackend("NVDA", [], FakeParamFeatures(supports_stop=True))
+    event = RecordingBackend("SAPI", [], FakeParamFeatures(supports_stop=True))
+    event.fail_output = True
+    s._backend = main
+    s._event_backend = event
+
+    s.say_event("Brake now.", interrupt=True)
+
+    assert event.stop_calls == 1
+    assert main.stop_calls == 1
+    assert main.spoken == [("Brake now.", False)]
+
+
+def test_nonurgent_event_speech_can_queue_on_event_voice():
+    s = Speech()
+    event = RecordingBackend("SAPI", [], FakeParamFeatures(supports_stop=True))
+    s._event_backend = event
+
+    s.say_event("Weather changing.", interrupt=False)
+
+    assert event.stop_calls == 0
+    assert event.spoken == [("Weather changing.", False)]
     s.configure(rate=0.9, voice="David")  # must not raise
 
 
 def _multi_voice_ctx():
     """A registry shaped like a real Windows box with NVDA running: the screen
     reader plus two controllable software voices."""
-    params = dict(supports_set_rate=True, supports_set_pitch=True,
-                  supports_set_volume=True, supports_set_voice=True,
-                  supports_count_voices=True, supports_get_voice_name=True)
+    params = dict(
+        supports_set_rate=True,
+        supports_set_pitch=True,
+        supports_set_volume=True,
+        supports_set_voice=True,
+        supports_count_voices=True,
+        supports_get_voice_name=True,
+    )
     return FakeContext(
         [
             FakeBackend("NVDA", 103, FakeParamFeatures()),
@@ -279,7 +378,7 @@ def test_select_event_backend_switches_and_clears():
     s._backend = s._ctx.acquire("NVDA")
     s.select_event_backend("OneCore")
     assert s.event_backend_name == "OneCore"
-    s.select_event_backend(None)               # back to the main voice
+    s.select_event_backend(None)  # back to the main voice
     assert s.event_backend_name == "none"
     # Asking for the main voice by name is not a real separate option, so the
     # preference falls back to the best available one (None is how you pick the
@@ -291,9 +390,14 @@ def test_select_event_backend_switches_and_clears():
 def test_event_backend_falls_back_to_platform_voice():
     # A macOS-shaped registry: VoiceOver running, AVSpeech as the software voice,
     # no SAPI. A Windows save's "SAPI" preference must still land on a real voice.
-    params = dict(supports_set_rate=True, supports_set_pitch=True,
-                  supports_set_volume=True, supports_set_voice=True,
-                  supports_count_voices=True, supports_get_voice_name=True)
+    params = dict(
+        supports_set_rate=True,
+        supports_set_pitch=True,
+        supports_set_volume=True,
+        supports_set_voice=True,
+        supports_count_voices=True,
+        supports_get_voice_name=True,
+    )
     ctx = FakeContext(
         [
             FakeBackend("VoiceOver", 103, FakeParamFeatures()),
@@ -304,14 +408,13 @@ def test_event_backend_falls_back_to_platform_voice():
     s = Speech()
     s._ctx = ctx
     s._backend = ctx.acquire("VoiceOver")
-    s.select_event_backend("SAPI")             # not on this machine
+    s.select_event_backend("SAPI")  # not on this machine
     assert s.event_backend_name == "AVSpeech"  # best available wins
 
 
 def test_event_backend_none_when_no_separate_voice_exists():
     # Only a screen reader is usable: there is nothing to separate onto.
-    ctx = FakeContext([FakeBackend("VoiceOver", 103, FakeParamFeatures())],
-                      best="VoiceOver")
+    ctx = FakeContext([FakeBackend("VoiceOver", 103, FakeParamFeatures())], best="VoiceOver")
     s = Speech()
     s._ctx = ctx
     s._backend = ctx.acquire("VoiceOver")
@@ -325,12 +428,22 @@ class _RecordingSpeech:
     def __init__(self) -> None:
         self.say_calls: list[tuple[str, bool]] = []
         self.event_calls: list[tuple[str, bool]] = []
+        self.stop_calls = 0
 
     def say(self, text: str, interrupt: bool = True) -> None:
         self.say_calls.append((text, interrupt))
 
     def say_event(self, text: str, interrupt: bool = True) -> None:
         self.event_calls.append((text, interrupt))
+
+    def stop(self) -> None:
+        self.stop_calls += 1
+
+    def stop_main(self) -> None:
+        self.stop()
+
+    def stop_event(self) -> None:
+        self.stop()
 
 
 def test_events_via_screen_reader_never_interrupt_even_when_critical():
@@ -342,8 +455,9 @@ def test_events_via_screen_reader_never_interrupt_even_when_critical():
         app.ctx.speech = rec
         app.ctx.settings.sapi_events = False  # event voice = screen reader
         app.ctx.say_event("Brake now!", interrupt=True)  # a critical event
-        # not on a separate voice, and queued (interrupt forced False) so it
-        # does not chop the screen reader off mid-word
+        # Not on a separate voice, so the stale queue is flushed first and the
+        # event is then spoken as a fresh screen-reader utterance.
+        assert rec.stop_calls == 1
         assert rec.event_calls == []
         assert rec.say_calls == [("Brake now!", False)]
     finally:
@@ -366,17 +480,36 @@ def test_events_on_separate_sapi_voice_keep_requested_interrupt():
         app.shutdown()
 
 
+def test_state_transitions_do_not_flush_menu_speech_before_enter():
+    from freight_fate.app import App
+    from freight_fate.states.base import State
+
+    class SayingState(State):
+        def enter(self):
+            self.ctx.say("New screen.")
+
+    app = App()
+    try:
+        rec = _RecordingSpeech()
+        app.ctx.speech = rec
+        app.push_state(SayingState(app.ctx))
+        assert rec.stop_calls == 0
+        assert rec.say_calls == [("New screen.", True)]
+    finally:
+        app.shutdown()
+
+
 def test_speech_disabled_by_env_is_silent_and_safe():
     s = Speech()
     assert not s.available
     assert s.backend_name == "none"
     assert s.event_backend_name == "none"
-    s.say("hello")        # must not raise
-    s.say("")             # empty text is fine
+    s.say("hello")  # must not raise
+    s.say("")  # empty text is fine
     s.say_event("hazard")  # falls back to the (absent) main voice safely
     s.stop()
     s.shutdown()
-    s.shutdown()          # idempotent
+    s.shutdown()  # idempotent
 
 
 def test_audio_engine_headless_noops():
@@ -405,14 +538,14 @@ def test_all_referenced_assets_exist():
 
     src = Path(__file__).parents[1] / "src" / "freight_fate"
     pattern = re.compile(
-        r"""["']((?:ui|engine|vehicle|weather|ambient|driver|events|facility|poi)/[a-z_]+)["']""")
+        r"""["']((?:ui|engine|vehicle|weather|ambient|driver|events|facility|poi)/[a-z_]+)["']"""
+    )
     keys: set[str] = set()
     for py in src.rglob("*.py"):
         keys |= set(pattern.findall(py.read_text(encoding="utf-8")))
     assert keys, "expected to find sound keys in source"
     missing = [
-        k for k in keys
-        if not ((ASSETS / f"{k}.wav").exists() or (ASSETS / f"{k}.ogg").exists())
+        k for k in keys if not ((ASSETS / f"{k}.wav").exists() or (ASSETS / f"{k}.ogg").exists())
     ]
     assert not missing, f"missing sound files: {missing}"
 

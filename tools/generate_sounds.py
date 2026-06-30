@@ -31,23 +31,39 @@ SPECS: dict[str, tuple[str, float, float]] = {
     "events/police_siren": (
         "A police car siren wailing close behind, urgent up-and-down electronic "
         "yelp and wail, heard from inside a truck cab, no music, clean",
-        4.0, 0.5),
+        4.0,
+        0.5,
+    ),
     "events/cb_radio_chatter": (
         "CB radio squelch burst then a short muffled trucker voice transmission "
         "with static, click off, no music",
-        3.0, 0.4),
+        3.0,
+        0.4,
+    ),
     "events/spike_strip": (
         "Heavy truck tires running over a police spike strip, sharp puncture then "
         "rushing air hiss of a deflating tire, no music",
-        3.0, 0.5),
+        3.0,
+        0.5,
+    ),
+    "events/hazard_clear": (
+        "Short satisfying in-cab road hazard passed sound, a quick safe whoosh "
+        "and soft confirmation chime, non-musical, clean",
+        2.0,
+        0.55,
+    ),
     "vehicle/air_dryer_purge": (
         "Truck air brake system air dryer purge, a single sharp pneumatic hiss "
         "and pop as the compressor cuts out, heard in the cab, no music",
-        2.0, 0.6),
+        2.0,
+        0.6,
+    ),
     "vehicle/low_air_buzzer": (
         "Truck low air pressure warning buzzer, a steady harsh electronic alarm "
         "buzz on the dash, no music",
-        2.5, 0.6),
+        2.5,
+        0.6,
+    ),
 }
 
 
@@ -62,18 +78,20 @@ def _api_key() -> str:
     return m.group(1)
 
 
-def _generate(key: str, spec_key: str, prompt: str, duration: float,
-              influence: float) -> None:
-    body = json.dumps({
-        "text": prompt,
-        "duration_seconds": duration,
-        "prompt_influence": influence,
-        "output_format": "mp3_44100_128",
-    }).encode("utf-8")
+def _generate(key: str, spec_key: str, prompt: str, duration: float, influence: float) -> None:
+    body = json.dumps(
+        {
+            "text": prompt,
+            "duration_seconds": duration,
+            "prompt_influence": influence,
+            "output_format": "mp3_44100_128",
+        }
+    ).encode("utf-8")
     req = urllib.request.Request(
-        SOUND_API, data=body,
-        headers={"xi-api-key": key, "Content-Type": "application/json",
-                 "Accept": "audio/mpeg"})
+        SOUND_API,
+        data=body,
+        headers={"xi-api-key": key, "Content-Type": "application/json", "Accept": "audio/mpeg"},
+    )
     print(f"  requesting {spec_key} ({duration:.0f}s)...", flush=True)
     with urllib.request.urlopen(req, timeout=120) as resp:
         mp3 = resp.read()
@@ -84,9 +102,21 @@ def _generate(key: str, spec_key: str, prompt: str, duration: float,
         tmp_path = tmp.name
     try:
         subprocess.run(
-            ["ffmpeg", "-y", "-loglevel", "error", "-i", tmp_path,
-             "-c:a", "libvorbis", "-q:a", "5", str(out)],
-            check=True)
+            [
+                "ffmpeg",
+                "-y",
+                "-loglevel",
+                "error",
+                "-i",
+                tmp_path,
+                "-c:a",
+                "libvorbis",
+                "-q:a",
+                "5",
+                str(out),
+            ],
+            check=True,
+        )
     finally:
         os.unlink(tmp_path)
     print(f"    wrote {out} ({out.stat().st_size:,} bytes)", flush=True)
@@ -98,8 +128,7 @@ def main(argv: list[str] | None = None) -> int:
     key = _api_key()
     for spec_key in wanted:
         if spec_key not in SPECS:
-            raise SystemExit(f"Unknown sound key {spec_key!r}; "
-                             f"known: {', '.join(SPECS)}")
+            raise SystemExit(f"Unknown sound key {spec_key!r}; known: {', '.join(SPECS)}")
         prompt, duration, influence = SPECS[spec_key]
         _generate(key, spec_key, prompt, duration, influence)
     return 0

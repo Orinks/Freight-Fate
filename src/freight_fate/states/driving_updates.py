@@ -47,9 +47,7 @@ class DrivingUpdateMixin:
             t.brake = 1.0
         t.emergency_brake = emergency
         clutch_pressed = keys[pygame.K_LSHIFT] or keys[pygame.K_RSHIFT]
-        t.transmission.clutch = (
-            1.0 if clutch_pressed and not t.transmission.automatic else 0.0
-        )
+        t.transmission.clutch = 1.0 if clutch_pressed and not t.transmission.automatic else 0.0
         self._update_lane(keys, dt)
         self._update_cruise(dt, braking, accelerating)
 
@@ -63,13 +61,14 @@ class DrivingUpdateMixin:
         was_low_air = t.air_low_warning
         was_spring_brake = t.spring_brakes_active
         t.update(dt)
-        self._update_air_brake_announcements(
-            was_air_ready, was_low_air, was_spring_brake)
+        self._update_air_brake_announcements(was_air_ready, was_low_air, was_spring_brake)
         if was_on and not t.engine_on:
             self.ctx.audio.engine_stop()
             if t.stalled:
-                self.ctx.say_event("The engine stalled. Press E to restart, and "
-                                   "use a lower gear at low speed.")
+                self.ctx.say_event(
+                    "The engine stalled. Press E to restart, and use a lower gear at low speed.",
+                    interrupt=True,
+                )
             elif t.fuel_gal <= 0:
                 self._handle_out_of_fuel()
 
@@ -108,44 +107,67 @@ class DrivingUpdateMixin:
         t = self.truck
         if not t.engine_on:
             self._set_status("Start the engine before releasing the brakes.")
-            self.ctx.say_event("Start the engine first; air pressure cannot build "
-                               "with the engine off.", interrupt=False)
+            message = (
+                "Engine off."
+                if self._terse_speech()
+                else "Start the engine first; air pressure cannot build with the engine off."
+            )
+            self.ctx.say_event(message, interrupt=False)
         elif not t.air_ready:
             self._set_status("Waiting for air pressure before the truck can move.")
-            self.ctx.say_event(
-                f"Air pressure {t.air_pressure_psi:.0f} psi. Wait for 100 psi, "
-                "then press P to release the parking brake.",
-                interrupt=False)
+            message = (
+                f"Air pressure {t.air_pressure_psi:.0f} psi."
+                if self._terse_speech()
+                else (
+                    f"Air pressure {t.air_pressure_psi:.0f} psi. Wait for 100 psi, "
+                    "then press P to release the parking brake."
+                )
+            )
+            self.ctx.say_event(message, interrupt=False)
         elif t.parking_brake:
             self._set_status("Parking brake set. Press P to release it.")
-            self.ctx.say_event("Parking brake set. Press P to release it.",
-                               interrupt=False)
+            message = (
+                "Parking brake set."
+                if self._terse_speech()
+                else "Parking brake set. Press P to release it."
+            )
+            self.ctx.say_event(message, interrupt=False)
 
     def _update_air_brake_announcements(
-            self, was_ready: bool, was_low: bool, was_spring: bool) -> None:
+        self, was_ready: bool, was_low: bool, was_spring: bool
+    ) -> None:
         t = self.truck
         if t.air_low_warning and t.engine_on and (not was_low or not self._low_air_said):
             self._low_air_said = True
             self.ctx.audio.play("vehicle/low_air_buzzer", volume=0.7)
-            self.ctx.say_event(
-                f"Low air warning: {t.air_pressure_psi:.0f} psi. "
-                "Keep the parking brake set until pressure builds.",
-                interrupt=False)
+            message = (
+                f"Low air: {t.air_pressure_psi:.0f} psi."
+                if self._terse_speech()
+                else (
+                    f"Low air warning: {t.air_pressure_psi:.0f} psi. "
+                    "Keep the parking brake set until pressure builds."
+                )
+            )
+            self.ctx.say_event(message, interrupt=True)
         elif not t.air_low_warning:
             self._low_air_said = False
 
         if t.spring_brakes_active and not was_spring and not self._spring_brake_said:
             self._spring_brake_said = True
             self.ctx.audio.play("vehicle/low_air_buzzer", volume=0.9)
-            self.ctx.say_event(
-                "Spring brakes applied from low air pressure. Stop and let the "
-                "compressor rebuild air before moving.",
-                interrupt=True)
+            message = (
+                "Spring brakes applied."
+                if self._terse_speech()
+                else (
+                    "Spring brakes applied from low air pressure. Stop and let the "
+                    "compressor rebuild air before moving."
+                )
+            )
+            self.ctx.say_event(message, interrupt=True)
         elif not t.spring_brakes_active:
             self._spring_brake_said = False
 
-        if (t.air_ready and t.parking_brake and not was_ready
-                and not self._air_ready_said):
+        if t.air_ready and t.parking_brake and not was_ready and not self._air_ready_said:
             # The cue's whole job is "you can release the parking brake now", so
             # only announce while it is set. Once released (rolling, or braking to
             # a stop on arrival), a dip back across the threshold must not
@@ -153,9 +175,15 @@ class DrivingUpdateMixin:
             self._air_ready_said = True
             self.ctx.audio.play("vehicle/air_dryer_purge", volume=0.65)
             self._set_status("Air ready. Press P to release the parking brake.")
-            self.ctx.say_event(
-                f"Air pressure ready at {t.air_pressure_psi:.0f} psi. "
-                "Press P to release the parking brake.", interrupt=False)
+            message = (
+                f"Air ready: {t.air_pressure_psi:.0f} psi."
+                if self._terse_speech()
+                else (
+                    f"Air pressure ready at {t.air_pressure_psi:.0f} psi. "
+                    "Press P to release the parking brake."
+                )
+            )
+            self.ctx.say_event(message, interrupt=False)
             self.ctx.award_achievement("air_ready", event=True)
         elif t.air_low_warning:
             # Re-arm the ready cue only after a genuine depletion (low-air), not
@@ -189,7 +217,7 @@ class DrivingUpdateMixin:
 
     def _update_hours_and_fatigue(self, dt: float) -> None:
         """Advance the HOS shift clock and fatigue on game time, not wall time."""
-        gm = dt * self.trip.time_scale / 60.0   # game minutes this frame
+        gm = dt * self.trip.time_scale / 60.0  # game minutes this frame
         moving = self.truck.speed_mph > 5.0
         mode = self.ctx.settings.hos_mode
         p = self.ctx.profile
@@ -199,13 +227,13 @@ class DrivingUpdateMixin:
         elif moving:
             self.hos.drive(gm)
         else:
-            self.hos.on_duty(gm)   # the 14-hour window runs even while parked
+            self.hos.on_duty(gm)  # the 14-hour window runs even while parked
         if mode not in hos.HOS_NON_ENFORCED_MODES:
             for message in self.hos.check_warnings(mode):
                 self.ctx.audio.play("ui/warning")
                 self.ctx.say_event(message, interrupt=hos.warning_is_urgent(message))
-        self.trip.hos_violation = (
-            mode not in hos.HOS_NON_ENFORCED_MODES and self.hos.in_violation(mode)
+        self.trip.hos_violation = mode not in hos.HOS_NON_ENFORCED_MODES and self.hos.in_violation(
+            mode
         )
 
         night = is_night(self.trip.current_hour)
@@ -216,15 +244,18 @@ class DrivingUpdateMixin:
             self._severe_said = True
             self._fatigue_cue_gm = 0.0
             self.ctx.audio.play("vehicle/rumble_strip", volume=0.8)
-            self.ctx.say_event("You are dangerously drowsy and drifting out of "
-                               "your lane. Sleep at the next rest stop.",
-                               interrupt=False)
+            self.ctx.say_event(
+                "You are dangerously drowsy and drifting out of "
+                "your lane. Sleep at the next rest stop.",
+                interrupt=True,
+            )
         elif fatigue >= hos.FATIGUE_DROWSY and not self._drowsy_said:
             self._drowsy_said = True
             self._fatigue_cue_gm = 0.0
             self.ctx.audio.play("driver/yawn", volume=0.9)
-            self.ctx.say_event("You are getting drowsy. Take a break or sleep "
-                               "at a rest stop.", interrupt=False)
+            self.ctx.say_event(
+                "You are getting drowsy. Take a break or sleep at a rest stop.", interrupt=False
+            )
         if fatigue < hos.FATIGUE_DROWSY:
             self._drowsy_said = False
         if fatigue < hos.FATIGUE_SEVERE:
@@ -258,13 +289,12 @@ class DrivingUpdateMixin:
             curve += 0.35
         wind = self.weather.effects.wind
         if self.lane.update(dt, self.truck.velocity_mps, curve=curve, wind=wind, assist=mode):
-            self.ctx.audio.play("vehicle/rumble_strip", volume=1.0,
-                                pan=self._lane_pan())
+            self.ctx.audio.play("vehicle/rumble_strip", volume=1.0, pan=self._lane_pan())
             self.truck.damage_pct = min(100.0, self.truck.damage_pct + 1.0)
-            self.ctx.say_event(
-                f"{self.lane.describe()} Steer back toward the lane center.",
-                interrupt=False,
-            )
+            message = self.lane.describe()
+            if not self._terse_speech():
+                message += " Steer back toward the lane center."
+            self.ctx.say_event(message, interrupt=True)
 
     def _lane_pan(self) -> float:
         """Stereo pan for the rumble strip: it comes from the side you have
@@ -292,8 +322,7 @@ class DrivingUpdateMixin:
             and self._lane_rumble_timer <= 0.0
         ):
             self._lane_rumble_timer = 0.8
-            audio.play("vehicle/rumble_strip", volume=0.25 + rumble * 0.45,
-                       pan=self._lane_pan())
+            audio.play("vehicle/rumble_strip", volume=0.25 + rumble * 0.45, pan=self._lane_pan())
         night = is_night(self.trip.current_hour)
         if night:
             audio.set_ambient("ambient/night")
@@ -323,13 +352,11 @@ class DrivingUpdateMixin:
             return
         self._music_elapsed_s = 0.0
         if night:
-            self._night_music_index = (
-                self._night_music_index + 1
-            ) % len(self._night_music_sequence)
+            self._night_music_index = (self._night_music_index + 1) % len(
+                self._night_music_sequence
+            )
         else:
-            self._day_music_index = (
-                self._day_music_index + 1
-            ) % len(self._day_music_sequence)
+            self._day_music_index = (self._day_music_index + 1) % len(self._day_music_sequence)
         self._play_current_music(fade_ms=4000)
 
     def _sync_weather_source(self) -> None:
@@ -353,8 +380,7 @@ class DrivingUpdateMixin:
             mph = self.truck.speed_mph
             if abs(mph - self._last_announced_mph) >= 5 and mph > 1:
                 self._last_announced_mph = mph
-                self.ctx.say_event(self.ctx.settings.speed_text(mph),
-                                   interrupt=False)
+                self.ctx.say_event(self.ctx.settings.speed_text(mph), interrupt=False)
 
     def _brake_budget_s(self) -> float:
         """Seconds of full service braking to reach the hazard-safe speed.
@@ -373,6 +399,7 @@ class DrivingUpdateMixin:
             return
         if self.truck.speed_mph <= HAZARD_SAFE_MPH:
             self._hazard_deadline = None
+            self.ctx.audio.play("events/hazard_clear", volume=0.75)
             self.ctx.say_event("Hazard avoided. Well done.", interrupt=False)
             self.ctx.award_achievement("hazard_avoided", event=True)
             return
@@ -382,8 +409,11 @@ class DrivingUpdateMixin:
             self.ctx.audio.play("vehicle/collision")
             severity = min(1.0, self.truck.speed_mph / 70.0)
             self.truck.apply_collision(severity)
-            self.ctx.say_event(f"Collision! The truck took damage. "
-                               f"Total damage {self.truck.damage_pct:.0f} percent.")
+            self.ctx.say_event(
+                f"Collision! The truck took damage. "
+                f"Total damage {self.truck.damage_pct:.0f} percent.",
+                interrupt=True,
+            )
 
     # -- microsleeps (severe fatigue) ----------------------------------------------
 
@@ -402,9 +432,11 @@ class DrivingUpdateMixin:
             self._microsleep_gm = 0.0
             return
         # One demand on the driver at a time, and not right after the last nod.
-        if (self._microsleep_deadline is not None
-                or self._hazard_deadline is not None
-                or self._microsleep_cooldown_gm > 0.0):
+        if (
+            self._microsleep_deadline is not None
+            or self._hazard_deadline is not None
+            or self._microsleep_cooldown_gm > 0.0
+        ):
             return
         self._microsleep_gm += gm
         if self._microsleep_gm >= self._microsleep_interval_gm(fatigue):
@@ -412,12 +444,10 @@ class DrivingUpdateMixin:
             self._begin_microsleep()
 
     def _begin_microsleep(self) -> None:
-        self._cancel_cruise()   # the nod takes your hands off the wheel
+        self._cancel_cruise()  # the nod takes your hands off the wheel
         self._microsleep_deadline = MICROSLEEP_REACTION_S
         self.ctx.audio.play("vehicle/rumble_strip", volume=1.0)
-        self.ctx.say_event(
-            "You are nodding off. Steer or brake now to stay awake!",
-            interrupt=True)
+        self.ctx.say_event("You are nodding off. Steer or brake now to stay awake!", interrupt=True)
 
     def _update_microsleep(self, keys, dt: float) -> None:
         if self._microsleep_deadline is None:
@@ -426,8 +456,9 @@ class DrivingUpdateMixin:
         if self.truck.speed_mph <= HAZARD_SAFE_MPH:
             self._resolve_microsleep(silent=True)
             return
-        reacted = (keys[pygame.K_LEFT] or keys[pygame.K_RIGHT]
-                   or keys[pygame.K_DOWN] or keys[pygame.K_b])
+        reacted = (
+            keys[pygame.K_LEFT] or keys[pygame.K_RIGHT] or keys[pygame.K_DOWN] or keys[pygame.K_b]
+        )
         if reacted:
             self._resolve_microsleep()
             return
@@ -441,8 +472,9 @@ class DrivingUpdateMixin:
         self._microsleep_cooldown_gm = MICROSLEEP_COOLDOWN_GM
         self._microsleep_misses = 0
         if not silent:
-            self.ctx.say_event("You caught it. Pull over and sleep before the "
-                               "next one.", interrupt=False)
+            self.ctx.say_event(
+                "You caught it. Pull over and sleep before the next one.", interrupt=False
+            )
 
     def _microsleep_drift_off_road(self) -> None:
         self._microsleep_misses += 1
@@ -450,7 +482,7 @@ class DrivingUpdateMixin:
         t = self.truck
         self.ctx.audio.play("vehicle/rumble_strip", volume=1.0)
         t.damage_pct = min(100.0, t.damage_pct + MICROSLEEP_SHOULDER_DAMAGE_PCT)
-        t.velocity_mps *= 0.8   # wandering onto the shoulder scrubs speed
+        t.velocity_mps *= 0.8  # wandering onto the shoulder scrubs speed
         if self._microsleep_misses >= MICROSLEEP_FORCE_STOP_MISSES:
             self._microsleep_misses = 0
             t.throttle = 0.0
@@ -458,20 +490,23 @@ class DrivingUpdateMixin:
             self.ctx.say_event(
                 "You cannot stay awake. You drift onto the shoulder and jolt "
                 "awake on the brakes. Stop and sleep before you wreck.",
-                interrupt=True)
+                interrupt=True,
+            )
         else:
             self.ctx.say_event(
                 f"You nodded off and drifted onto the rumble strip. The truck "
                 f"took damage, now {t.damage_pct:.0f} percent. Pull over and "
-                "sleep.", interrupt=True)
+                "sleep.",
+                interrupt=True,
+            )
 
     def _update_speeding(self, dt: float) -> None:
         if self._ramp_mi is not None:
-            return   # the ramp is off the highway and unpatrolled
+            return  # the ramp is off the highway and unpatrolled
         if self._missed_destination_exit_said and not self._destination_exit_taken:
-            return   # recovery state: guide the player back to the missed exit
+            return  # recovery state: guide the player back to the missed exit
         if self._pull_over is not None:
-            return   # already being pulled over; don't pile on strikes
+            return  # already being pulled over; don't pile on strikes
         limit, _ = self.trip.speed_limit_at(self.trip.position_mi)
         if self.truck.speed_mph > limit + SPEEDING_LEEWAY_MPH:
             if (
@@ -502,20 +537,22 @@ class DrivingUpdateMixin:
                         "Speeding strike. The limit is "
                         f"{self.ctx.settings.speed_text(limit)}. Speeding "
                         f"fines now total {after:,.0f} dollars, due at delivery.",
-                        interrupt=False)
+                        interrupt=True,
+                    )
                 else:
                     self.ctx.say_event(
                         "Speeding strike. The limit is "
                         f"{self.ctx.settings.speed_text(limit)}. Your speeding "
                         f"fines are already at the {after:,.0f}-dollar maximum.",
-                        interrupt=False)
+                        interrupt=True,
+                    )
         else:
             self._speeding_timer = 0.0
 
     def _trooper_catches_speeder(self, limit: float) -> bool:
         """Whether a patrol clocks this speeding strike, by patrol intensity."""
         if self.ctx.settings.hos_mode in hos.HOS_NON_ENFORCED_MODES:
-            return False   # enforcement is bypassed in the debug mode
+            return False  # enforcement is bypassed in the debug mode
         patrol = self.trip.active_patrol_at(self.trip.position_mi)
         if patrol is None:
             return False
@@ -536,7 +573,8 @@ class DrivingUpdateMixin:
             f"at {self.ctx.settings.speed_text(self.truck.speed_mph)} in a "
             f"{self.ctx.settings.speed_text(limit)} zone. Signal with X and "
             "brake to a stop on the shoulder.",
-            interrupt=True)
+            interrupt=True,
+        )
 
     def _signal_pull_over(self) -> None:
         """X during a pull-over: signal and ease over (better demeanor)."""
@@ -544,8 +582,7 @@ class DrivingUpdateMixin:
             self._pull_over = "stopping"
             self._pull_over_signaled = True
             self.ctx.audio.play("ui/notify", volume=0.5)
-            self.ctx.say("Signaling and easing onto the shoulder. Brake to a "
-                         "full stop.")
+            self.ctx.say("Signaling and easing onto the shoulder. Brake to a full stop.")
         else:
             self.ctx.say("Pulling over. Brake to a full stop on the shoulder.")
 
@@ -563,8 +600,8 @@ class DrivingUpdateMixin:
         over, limit = self._pull_over_over, self._pull_over_limit
         self._pull_over = None
         self.ctx.push_state(
-            TrafficStopState(self.ctx, self, signaled=signaled, over=over,
-                             limit=limit))
+            TrafficStopState(self.ctx, self, signaled=signaled, over=over, limit=limit)
+        )
 
     def _evade_pull_over(self) -> None:
         """Drove on with the lights behind: spike strips end it, logged as a
@@ -575,13 +612,11 @@ class DrivingUpdateMixin:
         self.speeding_tickets += 1
         self.ticket_fines_paid += fine
         p.money -= fine
-        p.career.reputation = max(0.0, p.career.reputation
-                                  - hos.HOS_REPUTATION_HIT * 2.0)
+        p.career.reputation = max(0.0, p.career.reputation - hos.HOS_REPUTATION_HIT * 2.0)
         self.ctx.audio.play("events/spike_strip")
         self.ctx.say_event(
             f"You ran from the traffic stop, so troopers laid spike strips across "
             f"the lane. That is a felony stop: a {fine:,.0f} dollar fine and a "
             "serious reputation hit.",
-            interrupt=True)
-
-
+            interrupt=True,
+        )
