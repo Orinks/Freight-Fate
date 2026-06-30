@@ -40,12 +40,17 @@ CH_ROAD = 4
 CH_WEATHER = 5
 CH_WEATHER_B = 6
 CH_AMBIENT = 7
-RESERVED = 8
+CH_REVERSE = 8
+RESERVED = 9
 NUM_CHANNELS = 32
 
 # RPM centers for the pygame engine loop crossfade.
-ENGINE_BANDS = (("engine/idle", 620), ("engine/low", 1000),
-                ("engine/mid", 1500), ("engine/high", 2100))
+ENGINE_BANDS = (
+    ("engine/idle", 620),
+    ("engine/low", 1000),
+    ("engine/mid", 1500),
+    ("engine/high", 2100),
+)
 
 # BASS engine model: one idle loop, pitched up with RPM.
 ENGINE_LOOP_KEY = "engine/idle"
@@ -73,8 +78,7 @@ def engine_freq_mult(rpm: float) -> float:
     clamped at both ends.
     """
     t = (rpm - ENGINE_RPM_IDLE) / (ENGINE_RPM_MAX - ENGINE_RPM_IDLE)
-    return max(1.0, min(ENGINE_FREQ_MAX_MULT,
-                        1.0 + t * (ENGINE_FREQ_MAX_MULT - 1.0)))
+    return max(1.0, min(ENGINE_FREQ_MAX_MULT, 1.0 + t * (ENGINE_FREQ_MAX_MULT - 1.0)))
 
 
 def _one_shot_category(key: str) -> str:
@@ -147,8 +151,10 @@ class _PygameBackend:
         snd = self._sound(key)
         if snd is None:
             return
-        vol = max(0.0, min(1.0, volume * self._category_volume(
-            _one_shot_category(key)) * self.master_volume))
+        vol = max(
+            0.0,
+            min(1.0, volume * self._category_volume(_one_shot_category(key)) * self.master_volume),
+        )
         snd.set_volume(vol)
         channel = snd.play()
         if channel is not None and pan:
@@ -189,9 +195,10 @@ class _PygameBackend:
         if not self.enabled or channel not in self._loops:
             return
         _, gain = self._loops[channel]
-        vol = max(0.0, min(
-            1.0, gain * self._category_volume(_loop_category(channel))
-            * self.master_volume))
+        vol = max(
+            0.0,
+            min(1.0, gain * self._category_volume(_loop_category(channel)) * self.master_volume),
+        )
         pygame.mixer.Channel(channel).set_volume(vol)
 
     # -- truck engine crossfade ----------------------------------------------
@@ -261,9 +268,15 @@ class _PygameBackend:
             "ui": self.ui_volume,
         }.get(category, self.sfx_volume)
 
-    def set_volumes(self, master: float | None = None, sfx: float | None = None,
-                    music: float | None = None, weather: float | None = None,
-                    engine: float | None = None, ui: float | None = None) -> None:
+    def set_volumes(
+        self,
+        master: float | None = None,
+        sfx: float | None = None,
+        music: float | None = None,
+        weather: float | None = None,
+        engine: float | None = None,
+        ui: float | None = None,
+    ) -> None:
         if master is not None:
             self.master_volume = max(0.0, min(1.0, master))
         if sfx is not None:
@@ -393,8 +406,9 @@ class _BassBackend:
     def _fade_out(self, stream, fade_ms: int) -> None:
         """Slide volume to -1: BASS stops (and autofrees) the channel at 0."""
         try:
-            self._bass_call(self._slide, stream.handle, self._ATTRIB_VOL,
-                            -1.0, max(0, int(fade_ms)))
+            self._bass_call(
+                self._slide, stream.handle, self._ATTRIB_VOL, -1.0, max(0, int(fade_ms))
+            )
         except self._BassError:
             log.debug("Fade-out failed; stream already gone", exc_info=True)
             return
@@ -407,11 +421,21 @@ class _BassBackend:
         if stream is None:
             return
         try:
-            stream.set_volume(max(0.0, min(1.0, volume * self._category_volume(
-                _one_shot_category(key)) * self.master_volume)))
+            stream.set_volume(
+                max(
+                    0.0,
+                    min(
+                        1.0,
+                        volume
+                        * self._category_volume(_one_shot_category(key))
+                        * self.master_volume,
+                    ),
+                )
+            )
             if pan:
-                self._bass_call(self._set_attr, stream.handle, self._ATTRIB_PAN,
-                                max(-1.0, min(1.0, pan)))
+                self._bass_call(
+                    self._set_attr, stream.handle, self._ATTRIB_PAN, max(-1.0, min(1.0, pan))
+                )
             stream.play()
         except self._BassError:
             log.warning("Could not play %s", key, exc_info=True)
@@ -454,13 +478,13 @@ class _BassBackend:
         if channel not in self._loops:
             return
         _, gain, stream = self._loops[channel]
-        vol = max(0.0, min(
-            1.0, gain * self._category_volume(_loop_category(channel))
-            * self.master_volume))
+        vol = max(
+            0.0,
+            min(1.0, gain * self._category_volume(_loop_category(channel)) * self.master_volume),
+        )
         try:
             if fade_ms > 0:
-                self._bass_call(self._slide, stream.handle, self._ATTRIB_VOL,
-                                vol, int(fade_ms))
+                self._bass_call(self._slide, stream.handle, self._ATTRIB_VOL, vol, int(fade_ms))
             else:
                 stream.set_volume(vol)
         except self._BassError:
@@ -499,11 +523,11 @@ class _BassBackend:
         if not (self._engine_running and self._engine_stream is not None):
             return
         target = self._engine_base_freq * engine_freq_mult(rpm)
-        vol = max(0.0, min(
-            1.0, ENGINE_LOOP_GAIN * self.engine_volume * self.master_volume))
+        vol = max(0.0, min(1.0, ENGINE_LOOP_GAIN * self.engine_volume * self.master_volume))
         try:
-            self._bass_call(self._slide, self._engine_stream.handle,
-                            self._ATTRIB_FREQ, target, ENGINE_SLIDE_MS)
+            self._bass_call(
+                self._slide, self._engine_stream.handle, self._ATTRIB_FREQ, target, ENGINE_SLIDE_MS
+            )
             self._engine_stream.set_volume(vol)
         except self._BassError:
             self._engine_stream = None
@@ -533,9 +557,13 @@ class _BassBackend:
         try:
             stream.set_volume(0.0)
             stream.play()
-            self._bass_call(self._slide, stream.handle, self._ATTRIB_VOL,
-                            max(0.0, min(1.0, self.music_volume * self.master_volume)),
-                            max(0, int(fade_ms)))
+            self._bass_call(
+                self._slide,
+                stream.handle,
+                self._ATTRIB_VOL,
+                max(0.0, min(1.0, self.music_volume * self.master_volume)),
+                max(0, int(fade_ms)),
+            )
         except self._BassError:
             log.warning("Could not play music %s", track, exc_info=True)
             return
@@ -558,9 +586,15 @@ class _BassBackend:
             "ui": self.ui_volume,
         }.get(category, self.sfx_volume)
 
-    def set_volumes(self, master: float | None = None, sfx: float | None = None,
-                    music: float | None = None, weather: float | None = None,
-                    engine: float | None = None, ui: float | None = None) -> None:
+    def set_volumes(
+        self,
+        master: float | None = None,
+        sfx: float | None = None,
+        music: float | None = None,
+        weather: float | None = None,
+        engine: float | None = None,
+        ui: float | None = None,
+    ) -> None:
         if master is not None:
             self.master_volume = max(0.0, min(1.0, master))
         if sfx is not None:
@@ -578,14 +612,15 @@ class _BassBackend:
         if self._engine_stream is not None:
             try:
                 self._engine_stream.set_volume(
-                    max(0.0, min(
-                        1.0, ENGINE_LOOP_GAIN * self.engine_volume * self.master_volume)))
+                    max(0.0, min(1.0, ENGINE_LOOP_GAIN * self.engine_volume * self.master_volume))
+                )
             except self._BassError:
                 self._engine_stream = None
         if self._music_stream is not None:
             try:
                 self._music_stream.set_volume(
-                    max(0.0, min(1.0, self.music_volume * self.master_volume)))
+                    max(0.0, min(1.0, self.music_volume * self.master_volume))
+                )
             except self._BassError:
                 self._music_stream = None
 
@@ -616,8 +651,9 @@ class _NullBackend:
         self.ui_volume = 0.9
 
     def play(self, key: str, volume: float = 1.0, pan: float = 0.0) -> None: ...
-    def start_loop(self, channel: int, key: str, volume: float = 1.0,
-                   fade_ms: int = 300) -> None: ...
+    def start_loop(
+        self, channel: int, key: str, volume: float = 1.0, fade_ms: int = 300
+    ) -> None: ...
     def set_loop_volume(self, channel: int, volume: float) -> None: ...
     def stop_loop(self, channel: int, fade_ms: int = 300) -> None: ...
     def engine_start(self) -> None: ...
@@ -625,9 +661,15 @@ class _NullBackend:
     def set_engine_rpm(self, rpm: float, throttle: float = 0.0) -> None: ...
     def play_music(self, track: str, fade_ms: int = 1500) -> None: ...
     def stop_music(self, fade_ms: int = 1000) -> None: ...
-    def set_volumes(self, master: float | None = None, sfx: float | None = None,
-                    music: float | None = None, weather: float | None = None,
-                    engine: float | None = None, ui: float | None = None) -> None:
+    def set_volumes(
+        self,
+        master: float | None = None,
+        sfx: float | None = None,
+        music: float | None = None,
+        weather: float | None = None,
+        engine: float | None = None,
+        ui: float | None = None,
+    ) -> None:
         if master is not None:
             self.master_volume = max(0.0, min(1.0, master))
         if sfx is not None:
@@ -640,6 +682,7 @@ class _NullBackend:
             self.engine_volume = max(0.0, min(1.0, engine))
         if ui is not None:
             self.ui_volume = max(0.0, min(1.0, ui))
+
     def shutdown(self) -> None: ...
 
 
@@ -657,8 +700,9 @@ class AudioEngine:
             try:
                 return _BassBackend()
             except Exception:
-                log.warning("sound_lib/BASS unavailable; falling back to pygame.mixer",
-                            exc_info=True)
+                log.warning(
+                    "sound_lib/BASS unavailable; falling back to pygame.mixer", exc_info=True
+                )
         backend = _PygameBackend()
         if backend.enabled:
             return backend
@@ -760,7 +804,7 @@ class AudioEngine:
     def stop_world(self) -> None:
         """Stop engine, road, weather, and ambience (leaving UI sfx alone)."""
         self.engine_stop(shutdown_sound=False)
-        for ch in (CH_ROAD, CH_WEATHER, CH_WEATHER_B, CH_AMBIENT):
+        for ch in (CH_ROAD, CH_WEATHER, CH_WEATHER_B, CH_AMBIENT, CH_REVERSE):
             self.stop_loop(ch, fade_ms=400)
 
     # -- music ----------------------------------------------------------------
@@ -774,9 +818,15 @@ class AudioEngine:
 
     # -- volume control ---------------------------------------------------------
 
-    def set_volumes(self, master: float | None = None, sfx: float | None = None,
-                    music: float | None = None, weather: float | None = None,
-                    engine: float | None = None, ui: float | None = None) -> None:
+    def set_volumes(
+        self,
+        master: float | None = None,
+        sfx: float | None = None,
+        music: float | None = None,
+        weather: float | None = None,
+        engine: float | None = None,
+        ui: float | None = None,
+    ) -> None:
         self._impl.set_volumes(master, sfx, music, weather, engine, ui)
 
     def shutdown(self) -> None:

@@ -1,6 +1,7 @@
 # ruff: noqa: F403,F405
 from __future__ import annotations
 
+from ..audio import CH_REVERSE
 from .driving_core import *
 from .driving_rest_states import TrafficStopState
 
@@ -312,6 +313,10 @@ class DrivingUpdateMixin:
             engine_load = min(engine_load, 0.08)
         audio.set_engine_rpm(t.rpm, engine_load)
         audio.set_road_noise(t.velocity_mps)
+        if t.engine_on and t.transmission.in_reverse:
+            audio.start_loop(CH_REVERSE, "vehicle/reverse", volume=0.4, fade_ms=150)
+        else:
+            audio.stop_loop(CH_REVERSE, fade_ms=150)
         eff = self.weather.effects
         audio.set_weather(eff.sound)
         audio.set_wind(eff.wind)

@@ -1334,6 +1334,48 @@ def test_engine_audio_load_drops_during_automatic_shift(monkeypatch):
         app.shutdown()
 
 
+def test_reverse_audio_loop_tracks_reverse_gear(monkeypatch):
+    from freight_fate import audio
+    from freight_fate.app import App
+    from freight_fate.sim.transmission import REVERSE
+
+    app = App()
+    started = []
+    stopped = []
+    monkeypatch.setattr(app.ctx.audio, "set_engine_rpm", lambda *a, **k: None)
+    monkeypatch.setattr(app.ctx.audio, "set_road_noise", lambda *a, **k: None)
+    monkeypatch.setattr(app.ctx.audio, "set_weather", lambda *a, **k: None)
+    monkeypatch.setattr(app.ctx.audio, "set_wind", lambda *a, **k: None)
+    monkeypatch.setattr(app.ctx.audio, "set_ambient", lambda *a, **k: None)
+    monkeypatch.setattr(app.ctx.audio, "play", lambda *a, **k: None)
+    monkeypatch.setattr(
+        app.ctx.audio,
+        "start_loop",
+        lambda channel, key, volume=1.0, fade_ms=300: started.append(
+            (channel, key, volume, fade_ms)
+        ),
+    )
+    monkeypatch.setattr(
+        app.ctx.audio,
+        "stop_loop",
+        lambda channel, fade_ms=300: stopped.append((channel, fade_ms)),
+    )
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        driving.truck.start_engine()
+        driving.truck.transmission.gear = REVERSE
+
+        driving._update_audio(0.0)
+        assert started[-1] == (audio.CH_REVERSE, "vehicle/reverse", 0.4, 150)
+
+        driving.truck.transmission.gear = 1
+        driving._update_audio(0.0)
+        assert stopped[-1] == (audio.CH_REVERSE, 150)
+    finally:
+        app.shutdown()
+
+
 @pytest.mark.smoke
 def test_can_back_up_to_a_missed_rest_stop_with_t_menu():
     from freight_fate.app import App
