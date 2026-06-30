@@ -6,11 +6,13 @@ repos:
         entry: uv run ruff check --fix
         language: system
         types_or: [python, pyi]
+        stages: [pre-commit]
       - id: ruff-format
         name: Ruff format
         entry: uv run ruff format
         language: system
         types_or: [python, pyi]
+        stages: [pre-commit]
       - id: freight-fate-release-notes
         name: Freight Fate release-note gate
         entry: uv run python -m tools.release_notes check --base auto --head HEAD
