@@ -339,6 +339,10 @@ MINIMUM_PAY_BY_LEVEL = {
     2: (900.0, 1.65),
     3: (1050.0, 1.75),
 }
+LONG_HAUL_MINIMUM_RATE_BY_LEVEL = {
+    4: 4.75,
+    5: 5.25,
+}
 
 # Deadline model: what a law-abiding trucker actually needs.
 DEADLINE_AVG_MPH = 55.0   # achievable interstate average through zones and weather
@@ -571,7 +575,12 @@ def minimum_pay_for_level(miles: float, level: int) -> float:
     """Dispatch minimums keep short early jobs worth the player's time."""
     floor, per_mile = MINIMUM_PAY_BY_LEVEL.get(
         min(level, max(MINIMUM_PAY_BY_LEVEL)), MINIMUM_PAY_BY_LEVEL[3])
-    return floor + miles * per_mile
+    pay = floor + miles * per_mile
+    long_haul_rate = LONG_HAUL_MINIMUM_RATE_BY_LEVEL.get(
+        min(level, max(LONG_HAUL_MINIMUM_RATE_BY_LEVEL)))
+    if long_haul_rate is not None and miles >= LONG_HAUL_MILES:
+        pay = max(pay, miles * long_haul_rate)
+    return pay
 
 
 # Reachable-destination candidates depend only on the (static) world, not the

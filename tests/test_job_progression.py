@@ -170,6 +170,21 @@ def test_rookie_boards_have_rewarding_minimum_pay(world):
                 assert job.pay >= round(minimum_pay_for_level(job.distance_mi, 1), 2)
 
 
+def test_long_haul_boards_have_rewarding_minimum_pay(world):
+    endorsements = {"refrigerated", "heavy_haul", "high_value"}
+    long_jobs = [
+        job
+        for city in ["Chicago", "Atlanta", "Dallas", "Los Angeles"]
+        for seed in range(30)
+        for job in JobBoard(world, seed=seed).offers(city, endorsements, level=5)
+        if job.distance_mi >= 600
+    ]
+
+    assert long_jobs
+    for job in long_jobs:
+        assert job.pay / job.distance_mi >= 5.25
+
+
 def test_representative_boards_use_truck_plausible_locations(world):
     for city in ["Chicago", "Atlanta", "Philadelphia", "San Antonio", "Los Angeles"]:
         jobs = JobBoard(world, seed=3).offers(city, set(), level=2)
