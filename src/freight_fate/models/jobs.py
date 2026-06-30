@@ -221,6 +221,9 @@ class Job:
             self.destination_locality,
         )
 
+    def equipment_text(self) -> str:
+        return self.cargo.equipment or "standard dry van"
+
     def locked_reason(self, endorsements: set[str], level: int) -> str:
         if level < self.cargo.min_level:
             return f"Level {self.cargo.min_level} drivers unlock this cargo."

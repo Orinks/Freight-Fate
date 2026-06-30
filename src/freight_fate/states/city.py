@@ -658,6 +658,14 @@ class JobBoardState(MenuState):
         items.append(MenuItem("Back to terminal", self.go_back))
         return items
 
+    def handle_event(self, event) -> None:
+        import pygame
+
+        if event.type == pygame.KEYDOWN and event.key == pygame.K_F1 and self.jobs:
+            self.ctx.push_state(JobDetailState(self.ctx, self, self.jobs[self.index]))
+            return
+        super().handle_event(event)
+
     def _accept(self, job: Job) -> None:
         p = self.ctx.profile
         locked = job.locked_reason(p.career.endorsements, p.career.level)
@@ -719,6 +727,66 @@ class JobBoardState(MenuState):
             return (f"{risky} dispatch{'es' if risky != 1 else ''} may require "
                     "a legal rest before delivery. ")
         return ""
+
+
+class JobDetailState(MenuState):
+    title = "Job details"
+
+    def __init__(self, ctx, board: JobBoardState, job: Job) -> None:
+        super().__init__(ctx)
+        self.board = board
+        self.job = job
+
+    def enter(self) -> None:
+        self.items = self.build_items()
+        self.index = min(self.index, max(0, len(self.items) - 1))
+        self.ctx.audio.play(self.open_sound_key)
+        self.ctx.say("Job details. " + " ".join(self._detail_lines()))
+
+    def build_items(self) -> list[MenuItem]:
+        return [
+            MenuItem(
+                "Accept this job",
+                self._accept,
+                help="Accept this dispatch and begin the pickup drive.",
+            ),
+            MenuItem(
+                "Back to dispatch board",
+                self.go_back,
+                help="Return to the dispatch board without accepting this job.",
+            ),
+        ]
+
+    def _accept(self) -> None:
+        self.ctx.pop_state()
+        self.board._accept(self.job)
+
+    def _detail_lines(self) -> list[str]:
+        job = self.job
+        p = self.ctx.profile
+        dollars_per_mile = job.pay / max(job.distance_mi, 1.0)
+        lines = [
+            f"Cargo: {job.cargo.label}.",
+            f"Origin: {job.origin_facility_text()}.",
+            f"Destination: {job.destination_facility_text()} in {job.destination}.",
+            f"Distance: {job.distance_mi:.0f} miles.",
+            f"Pay: {job.pay:,.0f} dollars.",
+            f"Dollars per mile: {dollars_per_mile:.2f}.",
+            f"Deadline: {job.deadline_game_h:.0f} hours.",
+            f"Equipment: {job.equipment_text()}.",
+        ]
+        locked = job.locked_reason(p.career.endorsements, p.career.level)
+        if locked:
+            lines.append(f"Locked: {locked}")
+        elif job.cargo.endorsement:
+            lines.append(f"Endorsement: {job.cargo.endorsement.replace('_', ' ')}.")
+        lines.append(
+            "Route details happen after pickup: rest, fuel, tolls, weather, and stops."
+        )
+        return lines
+
+    def lines(self) -> list[str]:
+        return [self.title, ""] + self._detail_lines() + ["", self.current_text()]
 
 
 class PickupFacilityState(MenuState):
