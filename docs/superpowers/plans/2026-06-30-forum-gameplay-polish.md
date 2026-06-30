@@ -2,7 +2,7 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Build the approved forum-feedback polish pass: dispatch job detail help, hybrid assist, looping horn, tire/cleaning maintenance, and fairer long-haul pay.
+**Goal:** Build the approved forum-feedback polish pass: dispatch job detail help, looping horn, tire/cleaning maintenance, and fairer long-haul pay.
 
 **Architecture:** Keep changes inside existing Freight Fate patterns: Pygame menu states, profile-backed upgrades, driving-state updates, and job-board generation. Each slice adds focused tests first, implements the smallest compatible data/model change, and commits independently.
 
@@ -15,18 +15,15 @@
 - `src/freight_fate/states/city.py`: dispatch board F1 detail state, garage maintenance actions/status, upgrade shop labels.
 - `src/freight_fate/models/jobs.py`: pay-per-mile helper and long-haul pay floor.
 - `src/freight_fate/models/profile.py`: save-compatible tire wear and dirt fields.
-- `src/freight_fate/models/trucks.py`: hybrid assist upgrade definition and fuel-effect constants.
-- `src/freight_fate/sim/vehicle.py`: low-speed hybrid fuel-burn effect, tire/dirt wear helpers if best kept on truck state.
 - `src/freight_fate/states/driving.py`: initialize/restore maintenance counters as needed.
 - `src/freight_fate/states/driving_controls.py`: H keydown/keyup horn loop.
 - `src/freight_fate/states/driving_updates.py`: accrue tire wear and dirt during driving.
 - `src/freight_fate/audio.py`: reserve one loop channel for the horn and expose `start_horn` / `stop_horn`.
 - `tests/test_dispatch_job_detail.py`: new focused dispatch F1 tests.
-- `tests/test_trucks.py`: hybrid assist behavior tests.
 - `tests/test_driving_features.py`: horn keydown/keyup and driving maintenance accrual tests.
 - `tests/test_garage_maintenance.py`: garage tire/wash service tests.
 - `tests/test_jobs.py`: long-haul pay floor tests.
-- `CHANGELOG.md`: user-facing note for job details, horn loop, maintenance, hybrid upgrade, and long-haul pay.
+- `CHANGELOG.md`: user-facing note for job details, horn loop, maintenance, and long-haul pay.
 
 ## Task 1: Dispatch Job Detail View
 
@@ -283,115 +280,7 @@ git add src/freight_fate/models/jobs.py tests/test_jobs.py
 git commit -m "fix(dispatch): improve long-haul pay floor"
 ```
 
-## Task 3: Hybrid Assist Upgrade
-
-**Files:**
-- Modify: `src/freight_fate/models/trucks.py`
-- Modify: `src/freight_fate/sim/vehicle.py`
-- Test: `tests/test_trucks.py`
-
-- [ ] **Step 1: Add failing hybrid tests**
-
-Append to `tests/test_trucks.py`:
-
-```python
-def test_hybrid_assist_upgrade_is_available():
-    from freight_fate.models.trucks import UPGRADE_CATALOG
-
-    upgrade = UPGRADE_CATALOG["hybrid_assist"]
-    assert upgrade.label == "Hybrid assist"
-    assert "low-speed" in upgrade.description.lower()
-
-
-def test_hybrid_assist_reduces_low_speed_fuel_burn_more_than_highway():
-    from freight_fate.models.trucks import build_truck_specs
-    from freight_fate.sim.vehicle import TruckState
-
-    base = TruckState(specs=build_truck_specs("rig", {}))
-    hybrid = TruckState(specs=build_truck_specs("rig", {"hybrid_assist": 1}))
-
-    low_base = base.fuel_burn_gph(speed_mph=20.0, throttle=0.5)
-    low_hybrid = hybrid.fuel_burn_gph(speed_mph=20.0, throttle=0.5)
-    highway_base = base.fuel_burn_gph(speed_mph=65.0, throttle=0.5)
-    highway_hybrid = hybrid.fuel_burn_gph(speed_mph=65.0, throttle=0.5)
-
-    assert low_hybrid < low_base * 0.9
-    assert highway_hybrid == pytest.approx(highway_base, rel=0.03)
-```
-
-If `pytest` is not imported in `tests/test_trucks.py`, add `import pytest`.
-
-- [ ] **Step 2: Run failing tests**
-
-```powershell
-uv run pytest tests/test_trucks.py -q
-```
-
-Expected: fail because upgrade and `fuel_burn_gph` helper do not exist.
-
-- [ ] **Step 3: Add upgrade and spec field**
-
-In `src/freight_fate/models/trucks.py`, add a constant:
-
-```python
-HYBRID_LOW_SPEED_FUEL_MULT = 0.82
-```
-
-Add to `UPGRADE_CATALOG`:
-
-```python
-"hybrid_assist": Upgrade(
-    "hybrid_assist", "Hybrid assist",
-    (9000,),
-    "Adds low-speed electric assist for yards, city streets, and facility approaches. "
-    "It lowers fuel costs off the highway; the aerodynamic kit is still the highway "
-    "fuel-saver.",
-),
-```
-
-Add a field to `TruckSpecs` if needed:
-
-```python
-hybrid_low_speed_fuel_mult: float = 1.0
-```
-
-In `build_truck_specs`, apply:
-
-```python
-if upgrades.get("hybrid_assist"):
-    specs.hybrid_low_speed_fuel_mult = HYBRID_LOW_SPEED_FUEL_MULT
-```
-
-- [ ] **Step 4: Add fuel-burn helper and use it**
-
-In `src/freight_fate/sim/vehicle.py`, add to `TruckState`:
-
-```python
-def fuel_burn_gph(self, *, speed_mph: float, throttle: float) -> float:
-    base = self.specs.fuel_burn_gph * (0.35 + 0.65 * max(0.0, min(1.0, throttle)))
-    if speed_mph < 35.0:
-        return base * self.specs.hybrid_low_speed_fuel_mult
-    return base
-```
-
-Then replace the existing per-frame fuel drain formula with this helper. Preserve current fuel behavior aside from the hybrid multiplier.
-
-- [ ] **Step 5: Verify tests**
-
-```powershell
-uv run pytest tests/test_trucks.py tests/test_vehicle.py -q
-```
-
-Expected: pass.
-
-- [ ] **Step 6: Commit**
-
-```powershell
-git add src/freight_fate/models/trucks.py src/freight_fate/sim/vehicle.py tests/test_trucks.py
-git commit -m "feat(garage): add hybrid assist upgrade"
-```
-
-## Task 4: Looping Horn
+## Task 3: Looping Horn
 
 **Files:**
 - Modify: `src/freight_fate/audio.py`
@@ -525,7 +414,7 @@ git add src/freight_fate/audio.py src/freight_fate/states/driving_controls.py sr
 git commit -m "feat(driving): loop horn while held"
 ```
 
-## Task 5: Tire Wear And Cleaning Maintenance
+## Task 4: Tire Wear And Cleaning Maintenance
 
 **Files:**
 - Modify: `src/freight_fate/models/profile.py`
@@ -715,7 +604,7 @@ git add src/freight_fate/models/profile.py src/freight_fate/states/city.py src/f
 git commit -m "feat(garage): add tire and wash maintenance"
 ```
 
-## Task 6: Changelog, Docs, And Full Verification
+## Task 5: Changelog, Docs, And Full Verification
 
 **Files:**
 - Modify: `CHANGELOG.md`
@@ -729,7 +618,6 @@ In `src/freight_fate/states/main_menu_help.py`, add concise notes:
 ```python
 "Hold H to sound the horn; release H to stop it.",
 "The garage can service tires and wash the truck as maintenance builds up.",
-"Hybrid assist lowers fuel use in low-speed city and facility driving.",
 "Dispatch job details include dollars per mile so long-haul value is easier to compare.",
 ```
 
@@ -740,13 +628,13 @@ Put the horn line in Driving basics/information keys, garage lines in The garage
 Under `## Unreleased`, add one bullet:
 
 ```markdown
-- **Dispatch, garage, and horn polish.** F1 on a dispatch job now opens a structured job-detail view, long-haul pay has a stronger floor, the horn loops while held, hybrid assist lowers low-speed fuel burn, and the garage can service tire wear and wash road grime.
+- **Dispatch, garage, and horn polish.** F1 on a dispatch job now opens a structured job-detail view, long-haul pay has a stronger floor, the horn loops while held, and the garage can service tire wear and wash road grime.
 ```
 
 - [ ] **Step 3: Run focused suites**
 
 ```powershell
-uv run pytest tests/test_dispatch_job_detail.py tests/test_jobs.py tests/test_trucks.py tests/test_garage_maintenance.py tests/test_driving_features.py -q
+uv run pytest tests/test_dispatch_job_detail.py tests/test_jobs.py tests/test_garage_maintenance.py tests/test_driving_features.py -q
 ```
 
 Expected: pass.
@@ -773,7 +661,7 @@ Manual checks:
 - Open dispatch board, press F1 on a job, verify job details are digestible.
 - Press Escape to return to board.
 - Hold H while driving and release it; horn should start and stop.
-- Open garage and verify tire/wash/hybrid wording is reachable.
+- Open garage and verify tire/wash wording is reachable.
 
 - [ ] **Step 6: Commit final docs/help**
 
@@ -789,14 +677,13 @@ If `README.md` or `docs/user-manual.md` are unchanged, omit them from `git add`.
 Spec coverage:
 
 - Dispatch F1 detail view: Task 1.
-- Hybrid assist: Task 3.
-- Looping horn: Task 4.
-- Tire wear and cleaning: Task 5.
+- Looping horn: Task 3.
+- Tire wear and cleaning: Task 4.
 - Long-haul pay: Task 2.
-- Help/changelog/full verification: Task 6.
+- Help/changelog/full verification: Task 5.
 
 No horn-required hazards are included. That is intentional and matches the approved correction.
 
 Completeness scan: no unfinished markers or unspecified implementation notes remain. Any conditional notes name the exact fallback behavior.
 
-Type consistency: public names used across tasks are `JobDetailState`, `equipment_text`, `long_haul_pay_floor`, `hybrid_assist`, `start_horn`, `stop_horn`, `truck_tire_wear_pct`, and `truck_dirt_pct`.
+Type consistency: public names used across tasks are `JobDetailState`, `equipment_text`, `long_haul_pay_floor`, `start_horn`, `stop_horn`, `truck_tire_wear_pct`, and `truck_dirt_pct`.

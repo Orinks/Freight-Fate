@@ -5,7 +5,6 @@
 Address forum feedback items 2 through 6 in one focused branch:
 
 - Make dispatch job F1 useful by opening a structured, digestible job detail view.
-- Add a hybrid engine upgrade with a distinct low-speed fuel-savings niche.
 - Make the horn loop while held.
 - Add lightweight tire wear and truck cleaning maintenance so the garage matters more.
 - Rebalance long-haul dispatch pay so longer trips are not obviously worse than short trips.
@@ -26,12 +25,6 @@ Pressing F1 on a dispatch-board job should push a reviewable job detail state in
 - A note that route rest, fuel, toll, and weather details are inspected after pickup.
 
 Enter accepts the job from the detail view. Escape returns to the dispatch board. The original job row stays concise for fast menu browsing.
-
-## Hybrid Engine Upgrade
-
-Add a garage upgrade named Hybrid assist. It should reduce fuel burn in low-speed city, yard, and facility driving, not highway cruising. This keeps it distinct from the aerodynamic kit, which remains the long-highway fuel upgrade.
-
-The implementation should be simple and save-compatible: store the upgrade in the existing `profile.upgrades` dictionary, and apply its effect inside the truck fuel-use model or the driving fuel calculation path. The upgrade description should make the tradeoff clear.
 
 ## Looping Horn
 
@@ -65,7 +58,6 @@ Focused tests should cover:
 
 - F1 on a dispatch job opens the detail view, and Enter/Escape behave correctly.
 - Job detail lines include pay per mile and route-detail messaging.
-- Hybrid assist changes low-speed fuel burn without replacing highway aero behavior.
 - H keydown starts horn looping and keyup stops it.
 - Tire wear and dirt accrue over driving and are serviceable in the garage.
 - Long-haul generated jobs meet the new pay floor.
