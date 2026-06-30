@@ -1,6 +1,16 @@
 repos:
   - repo: local
     hooks:
+      - id: ruff-check-fix
+        name: Ruff lint and import fixes
+        entry: uv run ruff check --fix
+        language: system
+        types_or: [python, pyi]
+      - id: ruff-format
+        name: Ruff format
+        entry: uv run ruff format
+        language: system
+        types_or: [python, pyi]
       - id: freight-fate-release-notes
         name: Freight Fate release-note gate
         entry: uv run python -m tools.release_notes check --base auto --head HEAD
