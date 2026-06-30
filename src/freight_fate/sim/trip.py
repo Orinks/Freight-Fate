@@ -514,10 +514,18 @@ class Trip:
         toward = self.route.cities[self.current_leg_index + 1]
         state = get_world().cities[toward].state
         next_context = self.next_navigation_context(imperial)
-        terrain = self.terrain_at()
-        terrain_text = "Grade level" if terrain == "flat" else f"Terrain {terrain}"
+        terrain_text = self._current_grade_text()
         return (f"{dist}. On {leg.highway} toward {toward}, {state}. "
                 f"{terrain_text}. {next_context}")
+
+    def _current_grade_text(self) -> str:
+        grade_pct = self.grade_at(self.position_mi) * 100.0
+        if abs(grade_pct) < 0.05:
+            return "Current grade 0.0 percent, level"
+        direction = "uphill" if grade_pct > 0 else "downhill"
+        terrain = self.terrain_at()
+        terrain_text = "" if terrain == "flat" else f", terrain {terrain}"
+        return f"Current grade {abs(grade_pct):.1f} percent {direction}{terrain_text}"
 
     def next_navigation_context(self, imperial: bool = True) -> str:
         cue = self.next_navigation_cue()

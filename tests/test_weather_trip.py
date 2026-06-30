@@ -645,7 +645,7 @@ def test_progress_summary_mentions_highway(world):
     text = trip.progress_summary()
     assert "I-65" in text
     assert "Indianapolis, Indiana" in text
-    assert "Grade level" in text
+    assert "Current grade 0.0 percent, level" in text
     # The summary reports the nearest upcoming cue; an early stop leads here.
     assert "Next stop" in text
     metric = trip.progress_summary(imperial=False)

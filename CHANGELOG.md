@@ -35,6 +35,9 @@
   When the posted limit drops sharply, cruise now gets a clean chance to slow
   the truck instead of letting the speeding timer fire while it is already
   braking down.
+- **Route status explains road grade clearly.** Pressing R now reports the
+  current grade as a percent and uphill, downhill, or level instead of saying
+  the vague phrase "Grade level."
 - **Delivery windows match the slower, real route model.** New dispatch
   deadlines now use the route's posted-limit profile, city approaches, facility
   gates, HOS breaks, sleep, and practical slack instead of a flat mileage
