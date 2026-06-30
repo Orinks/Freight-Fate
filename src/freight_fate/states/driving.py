@@ -801,6 +801,12 @@ class DrivingState(State):
             else:
                 self._handle_arrival_gate()
 
+#play reverse loop on channel 8 that is reserved.
+        if self.truck.transmission.in_reverse and self.truck.parking_brake and self.truck.engine_on:
+            self.ctx.audio.start_loop(8,"vehicle/reverse",0.4)
+        elif not self.truck.transmission.in_reverse:
+            self.ctx.audio.stop_loop(8)
+
     def _maybe_say_air_brake_lockout(self) -> None:
         if self._brake_lockout_cue_timer > 0:
             return
