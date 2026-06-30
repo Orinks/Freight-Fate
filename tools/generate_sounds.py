@@ -28,6 +28,13 @@ SOUND_API = "https://api.elevenlabs.io/v1/sound-generation"
 
 # key -> (prompt, duration_seconds, prompt_influence)
 SPECS: dict[str, tuple[str, float, float]] = {
+    "events/hazard_warning": (
+        "Short urgent brake warning sound for an audio driving game, loud clear "
+        "double beep alert, sharp but not harsh, no speech, no music, no whoosh, "
+        "clean, cuts through truck engine noise",
+        0.8,
+        0.75,
+    ),
     "events/police_siren": (
         "A police car siren wailing close behind, urgent up-and-down electronic "
         "yelp and wail, heard from inside a truck cab, no music, clean",

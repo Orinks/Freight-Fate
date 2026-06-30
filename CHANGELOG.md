@@ -6,7 +6,8 @@
 - **Hazard clears are easier to hear, and speech backs off faster.** Passing a
   road hazard now plays a short achievement-like confirmation sound, and urgent
   events plus driving warnings clear stale spoken messages so old alerts do not
-  keep piling up.
+  keep piling up. The brake-now hazard warning cue was also remade as a short,
+  louder alert.
 - **First-rig menu music refreshed.** The first-owned-truck menu bed now uses
   a cleaner, longer copy and plays for its full length before the menu rotation
   advances.
