@@ -28,6 +28,10 @@ PICKUP_CHECK_IN_MIN = 15.0
 PICKUP_LOADING_MIN = 60.0
 TERMINAL_FUEL_MIN = 20.0
 TERMINAL_REPAIR_MIN = 60.0
+TERMINAL_TIRE_MIN = 45.0
+TERMINAL_WASH_MIN = 20.0
+TIRE_SERVICE_COST_PER_PCT = 45.0
+TRUCK_WASH_COST = 35.0
 
 
 def _job_payload(job: Job) -> dict:
@@ -266,7 +270,9 @@ class CityMenuState(MenuState):
         self.ctx.say(f"Driving the {truck.label}. "
                      f"Fuel {fuel_pct:.0f} percent, {p.truck_fuel_gal:.0f} gallons "
                      f"of {specs.fuel_tank_gal:.0f}. "
-                     f"Truck condition {condition}, {damage:.0f} percent damage.")
+                     f"Truck condition {condition}, {damage:.0f} percent damage. "
+                     f"Tire wear {p.tire_wear_pct:.0f} percent. "
+                     f"Road grime {p.road_grime_pct:.0f} percent.")
 
     def _time_weather(self) -> None:
         from ..sim.weather import WeatherSystem
@@ -398,6 +404,11 @@ class GarageState(MenuState):
             MenuItem(self._repair_label, self._repair,
                      help="Restore the truck to full condition. If cash is short, "
                           "repair as much damage as you can afford."),
+            MenuItem(self._tire_label, self._service_tires,
+                     help="Replace worn tires. Normal miles add slow tire wear, "
+                          "even when you drive cleanly."),
+            MenuItem(self._wash_label, self._wash_truck,
+                     help="Wash road grime off the truck after long or dirty runs."),
             MenuItem("Upgrades", self._upgrades,
                      help="Buy performance upgrades for your truck: more torque, "
                           "less drag, a bigger tank, stronger brakes."),
@@ -427,6 +438,19 @@ class GarageState(MenuState):
             return "Repairs: truck is in top shape"
         cost = self.ctx.economy.repair_cost(p.truck_damage_pct)
         return f"Repair {p.truck_damage_pct:.0f} percent damage for {cost:,.0f} dollars"
+
+    def _tire_label(self) -> str:
+        wear = self.ctx.profile.tire_wear_pct
+        if wear < 1:
+            return "Tires: tread is in top shape"
+        cost = round(wear * TIRE_SERVICE_COST_PER_PCT, 2)
+        return f"Replace tires: {wear:.0f} percent wear for {cost:,.0f} dollars"
+
+    def _wash_label(self) -> str:
+        grime = self.ctx.profile.road_grime_pct
+        if grime < 1:
+            return "Wash: truck is clean"
+        return f"Wash truck: {grime:.0f} percent road grime for {TRUCK_WASH_COST:,.0f} dollars"
 
     def _refuel(self) -> None:
         p = self.ctx.profile
@@ -501,6 +525,60 @@ class GarageState(MenuState):
         self.ctx.say(f"Truck repaired. {cost:,.0f} dollars. "
                      f"You have {p.money:,.0f} dollars left.")
         self.ctx.award_achievement("garage_repair")
+        self.refresh()
+
+    def _service_tires(self) -> None:
+        p = self.ctx.profile
+        wear = p.tire_wear_pct
+        if wear < 1:
+            self.ctx.say("The tires are already in top shape.")
+            return
+        cost = round(wear * TIRE_SERVICE_COST_PER_PCT, 2)
+        if p.money < cost:
+            serviceable = p.money / TIRE_SERVICE_COST_PER_PCT
+            if serviceable < 1:
+                self.ctx.audio.play("ui/error")
+                self.ctx.say("Not enough money for one percent of tire service.")
+                return
+            cost = round(serviceable * TIRE_SERVICE_COST_PER_PCT, 2)
+            p.money -= cost
+            p.tire_wear_pct = max(0.0, p.tire_wear_pct - serviceable)
+            p.game_hours += TERMINAL_TIRE_MIN / 60.0
+            p.hos.on_duty(TERMINAL_TIRE_MIN)
+            self.ctx.save_profile()
+            self.ctx.audio.play("ui/notify")
+            self.ctx.say(f"Partial tire service fixed {serviceable:.0f} percent wear "
+                         f"for {cost:,.0f} dollars. "
+                         f"You have {p.money:,.0f} dollars left.")
+            self.refresh()
+            return
+        p.money -= cost
+        p.tire_wear_pct = 0.0
+        p.game_hours += TERMINAL_TIRE_MIN / 60.0
+        p.hos.on_duty(TERMINAL_TIRE_MIN)
+        self.ctx.save_profile()
+        self.ctx.audio.play("ui/notify")
+        self.ctx.say(f"Tires replaced. {cost:,.0f} dollars. "
+                     f"You have {p.money:,.0f} dollars left.")
+        self.refresh()
+
+    def _wash_truck(self) -> None:
+        p = self.ctx.profile
+        if p.road_grime_pct < 1:
+            self.ctx.say("The truck is already clean.")
+            return
+        if p.money < TRUCK_WASH_COST:
+            self.ctx.audio.play("ui/error")
+            self.ctx.say(f"A truck wash costs {TRUCK_WASH_COST:,.0f} dollars.")
+            return
+        p.money -= TRUCK_WASH_COST
+        p.road_grime_pct = 0.0
+        p.game_hours += TERMINAL_WASH_MIN / 60.0
+        p.hos.on_duty(TERMINAL_WASH_MIN)
+        self.ctx.save_profile()
+        self.ctx.audio.play("ui/notify")
+        self.ctx.say(f"Truck washed for {TRUCK_WASH_COST:,.0f} dollars. "
+                     f"You have {p.money:,.0f} dollars left.")
         self.refresh()
 
     def _upgrades(self) -> None:

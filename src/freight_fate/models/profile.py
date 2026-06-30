@@ -268,6 +268,8 @@ class Profile:
     money: float = STARTING_MONEY
     current_city: str = DEFAULT_CITY
     truck_damage_pct: float = 0.0
+    tire_wear_pct: float = 0.0
+    road_grime_pct: float = 0.0
     truck_fuel_gal: float = 150.0
     game_hours: float = 6.0          # in-game clock, hours since career start
     tutorial_done: bool = False

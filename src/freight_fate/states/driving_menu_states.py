@@ -5,6 +5,8 @@ from .driving_core import *
 from .driving_rest_states import ShoulderSleepConfirmationState
 
 DELIVERY_SETTLEMENT_MAX_AVERAGE_MPH = 55.0
+TIRE_WEAR_PER_MILE = 0.003
+ROAD_GRIME_PER_MILE = 0.004
 
 
 def _settlement_hours(driving: DrivingState) -> float:
@@ -585,6 +587,10 @@ class ArrivalState(MenuState):
         p.current_city = job.destination
         p.truck_fuel_gal = d.truck.fuel_gal
         p.truck_damage_pct = d.truck.damage_pct
+        tire_wear_added = min(100.0, job.distance_mi * TIRE_WEAR_PER_MILE)
+        road_grime_added = min(100.0, job.distance_mi * ROAD_GRIME_PER_MILE)
+        p.tire_wear_pct = min(100.0, p.tire_wear_pct + tire_wear_added)
+        p.road_grime_pct = min(100.0, p.road_grime_pct + road_grime_added)
         announcements = p.career.record_delivery(job.distance_mi, net_pay, on_time, trip_damage)
         p.game_hours += hours
         p.market.advance_to(p.market_day())
@@ -617,6 +623,11 @@ class ArrivalState(MenuState):
             self.summary_parts.append(
                 f"The cargo run added {trip_damage:.0f} percent truck damage. "
                 "Visit the garage when you can."
+            )
+        if tire_wear_added > 0.0 or road_grime_added > 0.0:
+            self.summary_parts.append(
+                f"The run added {tire_wear_added:.1f} percent tire wear and "
+                f"{road_grime_added:.1f} percent road grime."
             )
         self.summary_parts.extend(announcements)
         self._award_arrival_achievements(
