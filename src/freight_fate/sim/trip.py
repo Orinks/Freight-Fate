@@ -436,7 +436,10 @@ class Trip:
     def _corridor_limit_at(self, mile: float) -> float:
         leg_i, leg_start = self._leg_at_mile(mile)
         leg = self.route.legs[leg_i]
-        baked = _leg_speed_limit_at(leg, mile - leg_start)
+        forward = self.route.cities[leg_i] == leg.a
+        route_offset = mile - leg_start
+        leg_offset = route_offset if forward else leg.miles - route_offset
+        baked = _truck_capped_speed_limit(leg, leg_offset)
         if baked is not None:
             return baked
         base = corridor_speed_limit(leg.highway, self._region_at(mile))

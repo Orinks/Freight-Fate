@@ -38,6 +38,9 @@
   slower fallback when the route has no posted speed-limit sample, but real
   baked `maxspeed` data is no longer capped just because the route is near a
   city.
+- **Truck speed limits now respect state caps.** Baked route speed-limit data
+  now applies lower truck maximums in states that cap commercial trucks below
+  the general posted limit, and reversed routes read the correct limit profile.
 - **Stops no longer announce speculative truck parking.** If a stop's parking
   is confirmed, that still gets spoken; otherwise speculative parking wording
   is dropped from route cues so the game just announces the stop.

@@ -10,6 +10,7 @@ from pathlib import Path
 import pytest
 
 from freight_fate.data.world import Leg, SpeedLimitSample
+from freight_fate.data.world_models import Route, StateMileage
 from freight_fate.sim import Trip, TruckState, WeatherSystem
 from freight_fate.sim.trip import _leg_speed_limit_at, corridor_speed_limit
 
@@ -101,9 +102,9 @@ def _open_road_mile(trip):
 
 
 def test_runtime_prefers_baked_maxspeed_over_heuristic(world):
-    route = world.route_options("Chicago", "Indianapolis")[0]
+    route = world.route_options("Chicago", "St. Louis")[0]
     leg = route.legs[0]
-    heuristic = corridor_speed_limit(leg.highway, "great_lakes")
+    heuristic = corridor_speed_limit(leg.highway, "heartland")
     baked = heuristic + 5.0  # a value the heuristic would never produce here
     route.legs[0] = dataclasses.replace(
         leg, speed_limits=(SpeedLimitSample(0.0, baked),))
@@ -111,8 +112,61 @@ def test_runtime_prefers_baked_maxspeed_over_heuristic(world):
     assert trip._corridor_limit_at(_open_road_mile(trip)) == baked
 
 
+def test_runtime_caps_general_baked_limit_to_state_truck_limit():
+    leg = Leg(
+        "A",
+        "B",
+        100.0,
+        "I-5",
+        "flat",
+        (),
+        state_miles=(StateMileage("California", 100.0),),
+        speed_limits=(SpeedLimitSample(0.0, 65.0),),
+    )
+    trip = Trip(Route(["A", "B"], [leg]), TruckState(),
+                WeatherSystem("california", seed=1), seed=2)
+    assert trip._corridor_limit_at(50.0) == 55.0
+
+
+def test_runtime_keeps_truck_specific_baked_limit():
+    leg = Leg(
+        "A",
+        "B",
+        100.0,
+        "I-5",
+        "flat",
+        (),
+        state_miles=(StateMileage("California", 100.0),),
+        speed_limits=(SpeedLimitSample(0.0, 50.0, hgv=True),),
+    )
+    trip = Trip(Route(["A", "B"], [leg]), TruckState(),
+                WeatherSystem("california", seed=1), seed=2)
+    assert trip._corridor_limit_at(50.0) == 50.0
+
+
+def test_runtime_reads_baked_profile_in_reverse_direction():
+    leg = Leg(
+        "A",
+        "B",
+        100.0,
+        "I-65",
+        "flat",
+        (),
+        state_miles=(StateMileage("Indiana", 100.0),),
+        speed_limits=(
+            SpeedLimitSample(0.0, 55.0),
+            SpeedLimitSample(80.0, 70.0),
+        ),
+    )
+    trip = Trip(Route(["B", "A"], [leg]), TruckState(),
+                WeatherSystem("great_lakes", seed=1), seed=2)
+    assert trip._corridor_limit_at(10.0) == 65.0
+    assert trip._corridor_limit_at(90.0) == 55.0
+
+
 def test_runtime_falls_back_to_heuristic_without_a_profile(world):
     route = world.route_options("Chicago", "Indianapolis")[0]
+    route.legs[0] = dataclasses.replace(route.legs[0], speed_limits=())
     trip = Trip(route, TruckState(), WeatherSystem("great_lakes", seed=1), seed=2)
     mile = _open_road_mile(trip)
     leg_i, _ = trip._leg_at_mile(mile)

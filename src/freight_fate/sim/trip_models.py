@@ -43,6 +43,20 @@ INTERSTATE_RURAL_LIMIT_MPH: dict[str, float] = {
     "california": 65.0,
 }
 
+# States where heavy trucks have a lower maximum open-road limit than the
+# general posted limit commonly tagged in OSM. Source checked against Trucker
+# Country's state speed-limit table, accessed 2026-06-30.
+STATE_TRUCK_MAX_MPH: dict[str, float] = {
+    "Arkansas": 70.0,
+    "California": 55.0,
+    "Indiana": 65.0,
+    "Michigan": 65.0,
+    "Montana": 70.0,
+    "Nevada": 75.0,
+    "North Dakota": 75.0,
+    "Washington": 60.0,
+}
+
 
 def _highway_class(highway: str) -> str:
     h = (highway or "").strip().upper()
@@ -79,6 +93,33 @@ def _leg_speed_limit_at(leg: Leg, offset_mi: float) -> float | None:
         else:
             break
     return chosen.mph
+
+
+def _leg_state_at(leg: Leg, offset_mi: float) -> str:
+    """State in effect at a leg-relative offset in the leg's A-to-B direction."""
+    if not leg.state_crossings:
+        return leg.state_miles[0].state if len(leg.state_miles) == 1 else ""
+    state = leg.state_crossings[0].from_state
+    for crossing in leg.state_crossings:
+        if crossing.at_mi <= offset_mi:
+            state = crossing.state
+        else:
+            break
+    return state
+
+
+def _truck_capped_speed_limit(leg: Leg, offset_mi: float) -> float | None:
+    samples = leg.speed_limits
+    if not samples:
+        return None
+    chosen = samples[0]
+    for sample in samples:
+        if sample.at_mi <= offset_mi:
+            chosen = sample
+        else:
+            break
+    cap = STATE_TRUCK_MAX_MPH.get(_leg_state_at(leg, offset_mi))
+    return min(chosen.mph, cap) if cap is not None else chosen.mph
 FACILITY_ACCESS_LIMIT_MPH = 25.0
 DESTINATION_APPROACH_LIMIT_MPH = 35.0
 FACILITY_GATE_LIMIT_MPH = 15.0
