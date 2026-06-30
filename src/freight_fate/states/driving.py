@@ -802,7 +802,7 @@ class DrivingState(State):
                 self._handle_arrival_gate()
 
 #play reverse loop on channel 8 that is reserved.
-        if self.truck.transmission.in_reverse and self.truck.parking_brake and self.truck.engine_on:
+        if self.truck.transmission.in_reverse and self.truck.engine_on:
             self.ctx.audio.start_loop(8,"vehicle/reverse",0.4)
         elif not self.truck.transmission.in_reverse:
             self.ctx.audio.stop_loop(8)
