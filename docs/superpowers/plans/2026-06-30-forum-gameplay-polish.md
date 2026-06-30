@@ -2,7 +2,7 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Build the approved forum-feedback polish pass: dispatch job detail help, looping horn, tire/cleaning maintenance, and fairer long-haul pay.
+**Goal:** Build the approved forum-feedback polish pass: dispatch job detail help, clearer truck identity, quieter run-start speech, looping horn, tire/cleaning maintenance, and fairer long-haul pay.
 
 **Architecture:** Keep changes inside existing Freight Fate patterns: Pygame menu states, profile-backed upgrades, driving-state updates, and job-board generation. Each slice adds focused tests first, implements the smallest compatible data/model change, and commits independently.
 
@@ -15,15 +15,19 @@
 - `src/freight_fate/states/city.py`: dispatch board F1 detail state, garage maintenance actions/status, upgrade shop labels.
 - `src/freight_fate/models/jobs.py`: pay-per-mile helper and long-haul pay floor.
 - `src/freight_fate/models/profile.py`: save-compatible tire wear and dirt fields.
+- `src/freight_fate/models/trucks.py`: clearer truck descriptions and fleet-wide upgrade wording.
 - `src/freight_fate/states/driving.py`: initialize/restore maintenance counters as needed.
-- `src/freight_fate/states/driving_controls.py`: H keydown/keyup horn loop.
+- `src/freight_fate/states/driving_core.py`: first-run tutorial speech cleanup.
+- `src/freight_fate/states/driving_controls.py`: H keydown/keyup horn loop and startup air prompt cleanup.
 - `src/freight_fate/states/driving_updates.py`: accrue tire wear and dirt during driving.
 - `src/freight_fate/audio.py`: reserve one loop channel for the horn and expose `start_horn` / `stop_horn`.
 - `tests/test_dispatch_job_detail.py`: new focused dispatch F1 tests.
+- `tests/test_trucks.py`: truck comparison and upgrade wording tests.
+- `tests/test_speech_audio.py` or `tests/test_driving_features.py`: run-start speech cleanup tests.
 - `tests/test_driving_features.py`: horn keydown/keyup and driving maintenance accrual tests.
 - `tests/test_garage_maintenance.py`: garage tire/wash service tests.
 - `tests/test_jobs.py`: long-haul pay floor tests.
-- `CHANGELOG.md`: user-facing note for job details, horn loop, maintenance, and long-haul pay.
+- `CHANGELOG.md`: user-facing note for job details, truck clarity, quieter startup speech, horn loop, maintenance, and long-haul pay.
 
 ## Task 1: Dispatch Job Detail View
 
@@ -280,7 +284,192 @@ git add src/freight_fate/models/jobs.py tests/test_jobs.py
 git commit -m "fix(dispatch): improve long-haul pay floor"
 ```
 
-## Task 3: Looping Horn
+## Task 3: Truck Identity And Upgrade Wording
+
+**Files:**
+- Modify: `src/freight_fate/models/trucks.py`
+- Modify: `src/freight_fate/states/city.py`
+- Test: `tests/test_trucks.py`
+
+- [ ] **Step 1: Add failing tests for truck differences and upgrade carryover wording**
+
+Append to `tests/test_trucks.py`:
+
+```python
+def test_truck_descriptions_explain_practical_difference():
+    from freight_fate.models.trucks import TRUCK_CATALOG
+
+    rig = TRUCK_CATALOG["rig"].description.lower()
+    heavy = TRUCK_CATALOG["heavy_hauler"].description.lower()
+
+    assert "balanced" in rig or "starter" in rig
+    assert "heavy" in heavy
+    assert "torque" in heavy
+    assert "fuel" in heavy
+
+
+def test_upgrade_shop_explains_upgrades_apply_to_fleet():
+    from freight_fate.app import App
+    from freight_fate.models.profile import Profile
+    from freight_fate.states.city import UpgradeShopState
+
+    app = App()
+    try:
+        app.ctx.profile = Profile(name="Fleet Upgrades", current_city="Buffalo")
+        state = UpgradeShopState(app.ctx)
+
+        assert "fleet" in state.intro_help.lower()
+        assert "both trucks" in state.intro_help.lower()
+    finally:
+        app.shutdown()
+```
+
+- [ ] **Step 2: Run failing tests**
+
+```powershell
+uv run pytest tests/test_trucks.py::test_truck_descriptions_explain_practical_difference tests/test_trucks.py::test_upgrade_shop_explains_upgrades_apply_to_fleet -q
+```
+
+Expected: fail because current text does not clearly explain truck identity or fleet-wide upgrades.
+
+- [ ] **Step 3: Update truck and upgrade wording**
+
+In `src/freight_fate/models/trucks.py`, revise descriptions so:
+
+```python
+"rig"` description says it is the balanced starter truck: lower operating cost, easier fuel use, enough power for normal freight.
+"heavy_hauler"` description says it has more torque and tank capacity for heavy cargo and grades, but burns more fuel.
+```
+
+In `src/freight_fate/states/city.py`, update `UpgradeShopState.intro_help`:
+
+```python
+intro_help = (
+    "Each entry speaks the upgrade, its price, and what you already own. "
+    "Enter buys the next tier. Upgrades are shop packages shared across your "
+    "fleet, so they apply to both trucks. Press F1 on an upgrade to hear details."
+)
+```
+
+- [ ] **Step 4: Verify tests**
+
+```powershell
+uv run pytest tests/test_trucks.py -q
+```
+
+Expected: pass.
+
+- [ ] **Step 5: Commit**
+
+```powershell
+git add src/freight_fate/models/trucks.py src/freight_fate/states/city.py tests/test_trucks.py
+git commit -m "docs(garage): clarify truck and upgrade differences"
+```
+
+## Task 4: Startup Speech Cleanup
+
+**Files:**
+- Modify: `src/freight_fate/states/driving.py`
+- Modify: `src/freight_fate/states/driving_core.py`
+- Test: `tests/test_driving_features.py`
+
+- [ ] **Step 1: Add failing startup speech tests**
+
+Append to `tests/test_driving_features.py`:
+
+```python
+def test_terse_drive_start_speaks_one_concise_status(monkeypatch):
+    from freight_fate.app import App
+
+    app = App()
+    spoken = []
+    monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: spoken.append(text))
+    try:
+        app.ctx.settings.speech_verbosity = 0
+        driving = start_drive(app)
+        quiet_trip(driving)
+        spoken.clear()
+
+        driving.enter()
+
+        assert len(spoken) == 1
+        text = spoken[0]
+        assert "F1 lists the controls" not in text
+        assert "press P" not in text.lower()
+        assert "Weather:" in text
+    finally:
+        app.shutdown()
+
+
+def test_first_run_tutorial_does_not_stack_on_terse_start(monkeypatch):
+    from freight_fate.app import App
+
+    app = App()
+    spoken = []
+    monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: spoken.append(text))
+    try:
+        app.ctx.settings.speech_verbosity = 0
+        driving = start_drive(app)
+        quiet_trip(driving)
+        driving.tutorial.stage = 0
+        spoken.clear()
+
+        driving.tutorial.begin()
+
+        assert spoken == []
+    finally:
+        app.shutdown()
+```
+
+- [ ] **Step 2: Run failing tests**
+
+```powershell
+uv run pytest tests/test_driving_features.py::test_terse_drive_start_speaks_one_concise_status tests/test_driving_features.py::test_first_run_tutorial_does_not_stack_on_terse_start -q
+```
+
+Expected: fail if drive-start and tutorial still stack or include control coaching in terse mode.
+
+- [ ] **Step 3: Shorten drive enter copy**
+
+In `src/freight_fate/states/driving.py`, branch `enter()` copy on `_terse_speech()`:
+
+```python
+if self._terse_speech():
+    objective = (
+        f"Pickup drive to {self._pickup_facility_text()}."
+        if self.phase == DRIVE_PHASE_PICKUP
+        else f"Loaded for {self._destination_facility_text()}."
+    )
+    self.ctx.say(
+        f"{objective} {self.trip.progress_summary(self.ctx.settings.imperial_units)} "
+        f"It is {now}. {mode} transmission. Weather: {self.weather.describe()}.",
+        interrupt=False,
+    )
+    return
+```
+
+Keep normal/chatty modes with richer guidance, but avoid duplicating air-brake and F1 coaching in the same burst.
+
+- [ ] **Step 4: Ensure tutorial stays quiet in terse mode**
+
+In `src/freight_fate/states/driving_core.py`, keep `Tutorial.begin()` no-op when `speech_verbosity == 0`, and ensure `on_engine_started()` also returns without speaking in terse mode. If this already exists, keep the test as regression coverage.
+
+- [ ] **Step 5: Verify tests**
+
+```powershell
+uv run pytest tests/test_driving_features.py::test_terse_drive_start_speaks_one_concise_status tests/test_driving_features.py::test_first_run_tutorial_does_not_stack_on_terse_start -q
+```
+
+Expected: pass.
+
+- [ ] **Step 6: Commit**
+
+```powershell
+git add src/freight_fate/states/driving.py src/freight_fate/states/driving_core.py tests/test_driving_features.py
+git commit -m "fix(speech): reduce drive start message burst"
+```
+
+## Task 5: Looping Horn
 
 **Files:**
 - Modify: `src/freight_fate/audio.py`
@@ -414,7 +603,7 @@ git add src/freight_fate/audio.py src/freight_fate/states/driving_controls.py sr
 git commit -m "feat(driving): loop horn while held"
 ```
 
-## Task 4: Tire Wear And Cleaning Maintenance
+## Task 6: Tire Wear And Cleaning Maintenance
 
 **Files:**
 - Modify: `src/freight_fate/models/profile.py`
@@ -604,7 +793,7 @@ git add src/freight_fate/models/profile.py src/freight_fate/states/city.py src/f
 git commit -m "feat(garage): add tire and wash maintenance"
 ```
 
-## Task 5: Changelog, Docs, And Full Verification
+## Task 7: Changelog, Docs, And Full Verification
 
 **Files:**
 - Modify: `CHANGELOG.md`
@@ -617,24 +806,27 @@ In `src/freight_fate/states/main_menu_help.py`, add concise notes:
 
 ```python
 "Hold H to sound the horn; release H to stop it.",
+"The two trucks trade off operating cost, fuel appetite, torque, and heavy-load confidence.",
+"Garage upgrades are fleet shop packages, so they apply to both trucks.",
 "The garage can service tires and wash the truck as maintenance builds up.",
 "Dispatch job details include dollars per mile so long-haul value is easier to compare.",
+"Starting a run speaks a shorter status, especially in terse mode.",
 ```
 
-Put the horn line in Driving basics/information keys, garage lines in The garage, and dispatch value line in Deliveries and money.
+Put the horn line in Driving basics/information keys, truck and garage lines in The garage, dispatch value line in Deliveries and money, and startup speech note in Settings or Speech help if that page already covers verbosity.
 
 - [ ] **Step 2: Update changelog**
 
 Under `## Unreleased`, add one bullet:
 
 ```markdown
-- **Dispatch, garage, and horn polish.** F1 on a dispatch job now opens a structured job-detail view, long-haul pay has a stronger floor, the horn loops while held, and the garage can service tire wear and wash road grime.
+- **Dispatch, garage, and horn polish.** F1 on a dispatch job now opens a structured job-detail view, truck and upgrade wording is clearer, drive-start speech is shorter, long-haul pay has a stronger floor, the horn loops while held, and the garage can service tire wear and wash road grime.
 ```
 
 - [ ] **Step 3: Run focused suites**
 
 ```powershell
-uv run pytest tests/test_dispatch_job_detail.py tests/test_jobs.py tests/test_garage_maintenance.py tests/test_driving_features.py -q
+uv run pytest tests/test_dispatch_job_detail.py tests/test_jobs.py tests/test_trucks.py tests/test_garage_maintenance.py tests/test_driving_features.py -q
 ```
 
 Expected: pass.
@@ -660,6 +852,8 @@ Manual checks:
 
 - Open dispatch board, press F1 on a job, verify job details are digestible.
 - Press Escape to return to board.
+- Compare trucks and upgrade help in the garage, verifying upgrade carryover wording.
+- Start a route in terse mode and verify it does not stack tutorial/control/air-brake speech.
 - Hold H while driving and release it; horn should start and stop.
 - Open garage and verify tire/wash wording is reachable.
 
@@ -677,10 +871,12 @@ If `README.md` or `docs/user-manual.md` are unchanged, omit them from `git add`.
 Spec coverage:
 
 - Dispatch F1 detail view: Task 1.
-- Looping horn: Task 3.
-- Tire wear and cleaning: Task 4.
+- Truck identity and upgrade wording: Task 3.
+- Startup speech cleanup: Task 4.
+- Looping horn: Task 5.
+- Tire wear and cleaning: Task 6.
 - Long-haul pay: Task 2.
-- Help/changelog/full verification: Task 5.
+- Help/changelog/full verification: Task 7.
 
 No horn-required hazards are included. That is intentional and matches the approved correction.
 
