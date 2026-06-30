@@ -91,7 +91,7 @@ HELP_PAGES = [
             "then press 1 through 0 for gears one through ten, or N for neutral.",
             "Manual transmission uses Backspace for reverse after pressing the clutch.",
             "J toggles the engine brake for long downhill grades.",
-            "H sounds the horn.",
+            "Hold H to sound the horn; release H to stop it.",
         ],
     ),
     (
@@ -232,6 +232,7 @@ HELP_PAGES = [
             "After settlement, the truck is parked at the destination service-area terminal.",
             "Fragile cargo, like electronics and fresh food, punishes rough driving.",
             "Repair your truck in the terminal garage. Damage reduces engine power.",
+            "Normal miles also add tire wear and road grime for the garage to service.",
             "Higher levels widen distance caps, improve low-end pay,",
             "and unlock more facility variety plus refrigerated, heavy-haul, and high-value freight.",
             "Cargo markets drift day by day. The dispatch board calls out tight and loose",
@@ -255,11 +256,12 @@ HELP_PAGES = [
     (
         "The garage",
         [
-            "Every terminal garage refuels and repairs your truck.",
-            "If you cannot afford a full tank or full repair, the garage",
-            "buys as much fuel or repair work as your money covers.",
+            "Every terminal garage refuels, repairs, services tires, and washes your truck.",
+            "If you cannot afford a full tank or full repair, or full tire service,",
+            "the garage buys as much work as your money covers.",
             "The Upgrades menu sells permanent improvements: an engine tune,",
             "an aerodynamic kit, a long-range tank, and reinforced brakes.",
+            "Upgrades are fleet packages and apply to every truck you own.",
             "Engine tune gives more pulling power for heavy freight, hills, and mountain grades.",
             "Aerodynamic kit burns less fuel at highway speed; same tank, fewer gallons per mile.",
             "Long-range tank carries fifty more gallons; more fuel onboard, not better efficiency.",

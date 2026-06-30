@@ -61,6 +61,22 @@ def test_carrier_paid_charges_do_not_increase_player_progression():
         app.shutdown()
 
 
+def test_delivery_adds_tire_wear_and_road_grime():
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        job = _job(destination_type="retail_distribution")
+        _gross, summary = _settle(app, job, ["New York", "Philadelphia"], money=1000.0)
+
+        assert app.ctx.profile.tire_wear_pct > 0.0
+        assert app.ctx.profile.road_grime_pct > 0.0
+        assert "tire wear" in summary
+        assert "road grime" in summary
+    finally:
+        app.shutdown()
+
+
 def test_driver_responsibility_charges_reduce_driver_pay_but_not_carrier_charges():
     from freight_fate.app import App
 

@@ -133,18 +133,19 @@ Your terminal is the safe hub between jobs. Public terminal actions include:
 | Choice | What It Does |
 | --- | --- |
 | Dispatch board | Browse freight offers from local facilities. |
-| Garage | Refuel, repair, buy upgrades, buy trucks, or switch owned trucks. |
+| Garage | Refuel, repair, service tires, wash the truck, buy upgrades, buy trucks, or switch owned trucks. |
 | Request pay advance | Draw cash against your next load when you are broke. |
 | Career stats | Review level, reputation, deliveries, and career totals. |
-| Truck status | Review truck model, fuel, tank size, and damage condition. |
+| Truck status | Review truck model, fuel, tank size, damage, tire wear, and road grime. |
 | Time and weather | Review the clock, career day, and current city weather. |
 | Sleep 10 hours | Rest at the terminal and reset hours of service. |
 | Save game | Save the current career. |
 | Settings | Open settings categories. |
 | Quit to main menu | Save and return to the title menu. |
 
-The garage can do partial fuel or repair work when you cannot afford a full
-tank or full repair.
+The garage can do partial fuel, repair, or tire work when you cannot afford
+the full service. Normal miles add slow tire wear and road grime, even when
+you drive cleanly.
 
 If your balance goes negative and you cannot afford fuel, **Request pay
 advance** fronts you cash against your next load (also available at in-trip
@@ -161,6 +162,8 @@ The garage sells:
 | Long-range tank | Adds 50 gallons of capacity. |
 | Reinforced brakes | Helps the brakes resist fade longer. |
 | Heavy hauler | Adds more torque and a 200-gallon tank, with worse aerodynamics and higher fuel use. |
+
+Upgrades are fleet packages and apply to every truck you own.
 
 ## Dispatch And Jobs
 
@@ -233,7 +236,7 @@ Driving controls are active while the road view is focused:
 | X | Arm or cancel the next exit when it is close enough. |
 | T | Open the route point-of-interest menu when stopped at a supported stop. |
 | J | Toggle the engine brake. |
-| H | Sound the horn. |
+| H | Hold to sound the horn; release to stop it. |
 | Space | Report speed, gear, RPM, cruise set speed when cruise is on, air pressure, and brake state. |
 | S | Report the posted speed limit here, the zone if any, and how far over you are. |
 | Tab | Open the driving status menu. |

@@ -28,6 +28,10 @@ PICKUP_CHECK_IN_MIN = 15.0
 PICKUP_LOADING_MIN = 60.0
 TERMINAL_FUEL_MIN = 20.0
 TERMINAL_REPAIR_MIN = 60.0
+TERMINAL_TIRE_MIN = 45.0
+TERMINAL_WASH_MIN = 20.0
+TIRE_SERVICE_COST_PER_PCT = 45.0
+TRUCK_WASH_COST = 35.0
 
 
 def _job_payload(job: Job) -> dict:
@@ -266,7 +270,9 @@ class CityMenuState(MenuState):
         self.ctx.say(f"Driving the {truck.label}. "
                      f"Fuel {fuel_pct:.0f} percent, {p.truck_fuel_gal:.0f} gallons "
                      f"of {specs.fuel_tank_gal:.0f}. "
-                     f"Truck condition {condition}, {damage:.0f} percent damage.")
+                     f"Truck condition {condition}, {damage:.0f} percent damage. "
+                     f"Tire wear {p.tire_wear_pct:.0f} percent. "
+                     f"Road grime {p.road_grime_pct:.0f} percent.")
 
     def _time_weather(self) -> None:
         from ..sim.weather import WeatherSystem
@@ -398,6 +404,11 @@ class GarageState(MenuState):
             MenuItem(self._repair_label, self._repair,
                      help="Restore the truck to full condition. If cash is short, "
                           "repair as much damage as you can afford."),
+            MenuItem(self._tire_label, self._service_tires,
+                     help="Replace worn tires. Normal miles add slow tire wear, "
+                          "even when you drive cleanly."),
+            MenuItem(self._wash_label, self._wash_truck,
+                     help="Wash road grime off the truck after long or dirty runs."),
             MenuItem("Upgrades", self._upgrades,
                      help="Buy performance upgrades for your truck: more torque, "
                           "less drag, a bigger tank, stronger brakes."),
@@ -427,6 +438,19 @@ class GarageState(MenuState):
             return "Repairs: truck is in top shape"
         cost = self.ctx.economy.repair_cost(p.truck_damage_pct)
         return f"Repair {p.truck_damage_pct:.0f} percent damage for {cost:,.0f} dollars"
+
+    def _tire_label(self) -> str:
+        wear = self.ctx.profile.tire_wear_pct
+        if wear < 1:
+            return "Tires: tread is in top shape"
+        cost = round(wear * TIRE_SERVICE_COST_PER_PCT, 2)
+        return f"Replace tires: {wear:.0f} percent wear for {cost:,.0f} dollars"
+
+    def _wash_label(self) -> str:
+        grime = self.ctx.profile.road_grime_pct
+        if grime < 1:
+            return "Wash: truck is clean"
+        return f"Wash truck: {grime:.0f} percent road grime for {TRUCK_WASH_COST:,.0f} dollars"
 
     def _refuel(self) -> None:
         p = self.ctx.profile
@@ -503,6 +527,60 @@ class GarageState(MenuState):
         self.ctx.award_achievement("garage_repair")
         self.refresh()
 
+    def _service_tires(self) -> None:
+        p = self.ctx.profile
+        wear = p.tire_wear_pct
+        if wear < 1:
+            self.ctx.say("The tires are already in top shape.")
+            return
+        cost = round(wear * TIRE_SERVICE_COST_PER_PCT, 2)
+        if p.money < cost:
+            serviceable = p.money / TIRE_SERVICE_COST_PER_PCT
+            if serviceable < 1:
+                self.ctx.audio.play("ui/error")
+                self.ctx.say("Not enough money for one percent of tire service.")
+                return
+            cost = round(serviceable * TIRE_SERVICE_COST_PER_PCT, 2)
+            p.money -= cost
+            p.tire_wear_pct = max(0.0, p.tire_wear_pct - serviceable)
+            p.game_hours += TERMINAL_TIRE_MIN / 60.0
+            p.hos.on_duty(TERMINAL_TIRE_MIN)
+            self.ctx.save_profile()
+            self.ctx.audio.play("ui/notify")
+            self.ctx.say(f"Partial tire service fixed {serviceable:.0f} percent wear "
+                         f"for {cost:,.0f} dollars. "
+                         f"You have {p.money:,.0f} dollars left.")
+            self.refresh()
+            return
+        p.money -= cost
+        p.tire_wear_pct = 0.0
+        p.game_hours += TERMINAL_TIRE_MIN / 60.0
+        p.hos.on_duty(TERMINAL_TIRE_MIN)
+        self.ctx.save_profile()
+        self.ctx.audio.play("ui/notify")
+        self.ctx.say(f"Tires replaced. {cost:,.0f} dollars. "
+                     f"You have {p.money:,.0f} dollars left.")
+        self.refresh()
+
+    def _wash_truck(self) -> None:
+        p = self.ctx.profile
+        if p.road_grime_pct < 1:
+            self.ctx.say("The truck is already clean.")
+            return
+        if p.money < TRUCK_WASH_COST:
+            self.ctx.audio.play("ui/error")
+            self.ctx.say(f"A truck wash costs {TRUCK_WASH_COST:,.0f} dollars.")
+            return
+        p.money -= TRUCK_WASH_COST
+        p.road_grime_pct = 0.0
+        p.game_hours += TERMINAL_WASH_MIN / 60.0
+        p.hos.on_duty(TERMINAL_WASH_MIN)
+        self.ctx.save_profile()
+        self.ctx.audio.play("ui/notify")
+        self.ctx.say(f"Truck washed for {TRUCK_WASH_COST:,.0f} dollars. "
+                     f"You have {p.money:,.0f} dollars left.")
+        self.refresh()
+
     def _upgrades(self) -> None:
         self.ctx.push_state(UpgradeShopState(self.ctx))
 
@@ -512,13 +590,17 @@ class GarageState(MenuState):
 
 class UpgradeShopState(MenuState):
     title = "Upgrades"
-    intro_help = ("Each entry speaks the upgrade, its price, and what you already "
-                  "own. Enter buys the next tier. Press F1 on an upgrade to hear "
+    intro_help = ("Each entry speaks the fleet upgrade, its price, and what you "
+                  "already own. Upgrades apply to every truck in your fleet. "
+                  "Enter buys the next tier. Press F1 on an upgrade to hear "
                   "what it does. Escape returns to the garage.")
 
     def announce_entry(self) -> None:
         p = self.ctx.profile
-        self.ctx.say(f"Upgrades. You have {p.money:,.0f} dollars. {self.current_text()}")
+        self.ctx.say(
+            f"Fleet upgrades. They apply to every truck you own. "
+            f"You have {p.money:,.0f} dollars. {self.current_text()}"
+        )
 
     def build_items(self) -> list[MenuItem]:
         items = [MenuItem(lambda u=u: self._label(u), lambda u=u: self._buy(u),
@@ -556,8 +638,8 @@ class UpgradeShopState(MenuState):
         self.ctx.save_profile()
         self.ctx.audio.play("ui/cash")
         tier_part = (f" tier {owned + 1}" if upgrade.max_tier > 1 else "")
-        self.ctx.say(f"{upgrade.label}{tier_part} installed for {price:,.0f} dollars. "
-                     f"You have {p.money:,.0f} dollars left.")
+        self.ctx.say(f"{upgrade.label}{tier_part} installed across your fleet for "
+                     f"{price:,.0f} dollars. You have {p.money:,.0f} dollars left.")
         self.ctx.award_achievement("first_upgrade")
         self.refresh()
 
@@ -566,8 +648,9 @@ class TruckShopState(MenuState):
     title = "Trucks"
     intro_help = ("Each entry speaks the truck, its price, and whether you own it. "
                   "Enter buys a truck you do not own, or switches to one you do. "
-                  "Press F1 on a truck to hear its character. Escape returns to "
-                  "the garage.")
+                  "Your fleet upgrades apply to whichever truck you drive. "
+                  "Press F1 on a truck to hear its character. Escape returns "
+                  "to the garage.")
 
     def announce_entry(self) -> None:
         p = self.ctx.profile
@@ -583,11 +666,16 @@ class TruckShopState(MenuState):
     def _label(self, model: TruckModel) -> str:
         p = self.ctx.profile
         name = model.label.capitalize()
+        specs = model.specs
+        traits = (
+            f"{specs.max_torque_nm / 1000:.1f} thousand newton meters torque, "
+            f"{specs.fuel_tank_gal:.0f} gallon tank"
+        )
         if model.key == p.truck:
-            return f"{name}: currently driving"
+            return f"{name}: currently driving, {traits}"
         if model.key in p.owned_trucks:
-            return f"{name}: owned, switch to it"
-        return f"{name}: buy for {model.price:,.0f} dollars"
+            return f"{name}: owned, {traits}, switch to it"
+        return f"{name}: {traits}, buy for {model.price:,.0f} dollars"
 
     def _pick(self, model: TruckModel) -> None:
         p = self.ctx.profile
@@ -658,6 +746,14 @@ class JobBoardState(MenuState):
         items.append(MenuItem("Back to terminal", self.go_back))
         return items
 
+    def handle_event(self, event) -> None:
+        import pygame
+
+        if event.type == pygame.KEYDOWN and event.key == pygame.K_F1 and self.jobs:
+            self.ctx.push_state(JobDetailState(self.ctx, self, self.jobs[self.index]))
+            return
+        super().handle_event(event)
+
     def _accept(self, job: Job) -> None:
         p = self.ctx.profile
         locked = job.locked_reason(p.career.endorsements, p.career.level)
@@ -719,6 +815,66 @@ class JobBoardState(MenuState):
             return (f"{risky} dispatch{'es' if risky != 1 else ''} may require "
                     "a legal rest before delivery. ")
         return ""
+
+
+class JobDetailState(MenuState):
+    title = "Job details"
+
+    def __init__(self, ctx, board: JobBoardState, job: Job) -> None:
+        super().__init__(ctx)
+        self.board = board
+        self.job = job
+
+    def enter(self) -> None:
+        self.items = self.build_items()
+        self.index = min(self.index, max(0, len(self.items) - 1))
+        self.ctx.audio.play(self.open_sound_key)
+        self.ctx.say("Job details. " + " ".join(self._detail_lines()))
+
+    def build_items(self) -> list[MenuItem]:
+        return [
+            MenuItem(
+                "Accept this job",
+                self._accept,
+                help="Accept this dispatch and begin the pickup drive.",
+            ),
+            MenuItem(
+                "Back to dispatch board",
+                self.go_back,
+                help="Return to the dispatch board without accepting this job.",
+            ),
+        ]
+
+    def _accept(self) -> None:
+        self.ctx.pop_state()
+        self.board._accept(self.job)
+
+    def _detail_lines(self) -> list[str]:
+        job = self.job
+        p = self.ctx.profile
+        dollars_per_mile = job.pay / max(job.distance_mi, 1.0)
+        lines = [
+            f"Cargo: {job.cargo.label}.",
+            f"Origin: {job.origin_facility_text()}.",
+            f"Destination: {job.destination_facility_text()} in {job.destination}.",
+            f"Distance: {job.distance_mi:.0f} miles.",
+            f"Pay: {job.pay:,.0f} dollars.",
+            f"Dollars per mile: {dollars_per_mile:.2f}.",
+            f"Deadline: {job.deadline_game_h:.0f} hours.",
+            f"Equipment: {job.equipment_text()}.",
+        ]
+        locked = job.locked_reason(p.career.endorsements, p.career.level)
+        if locked:
+            lines.append(f"Locked: {locked}")
+        elif job.cargo.endorsement:
+            lines.append(f"Endorsement: {job.cargo.endorsement.replace('_', ' ')}.")
+        lines.append(
+            "Route details happen after pickup: rest, fuel, tolls, weather, and stops."
+        )
+        return lines
+
+    def lines(self) -> list[str]:
+        return [self.title, ""] + self._detail_lines() + ["", self.current_text()]
 
 
 class PickupFacilityState(MenuState):

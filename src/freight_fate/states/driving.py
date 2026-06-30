@@ -115,8 +115,8 @@ class DrivingState(DrivingControlsMixin, DrivingUpdateMixin, DrivingEventMixin, 
         self._arrival_full_stop_said = False
         self._arrival_menu_open = False
         self._air_ready_said = self.truck.air_ready
-        self._low_air_said = False
-        self._spring_brake_said = False
+        self._low_air_said = self.truck.air_low_warning
+        self._spring_brake_said = self.truck.spring_brakes_active
         self._brake_lockout_cue_timer = 0.0
         self._lane_rumble_timer = 0.0
         self._reverse_cue_active = False
@@ -251,17 +251,26 @@ class DrivingState(DrivingControlsMixin, DrivingUpdateMixin, DrivingEventMixin, 
                 if self.phase == DRIVE_PHASE_PICKUP
                 else self.trip.progress_summary(self.ctx.settings.imperial_units)
             )
-            self.ctx.say(
-                f"Resuming your {drive_name}: {self.job.weight_tons:.0f} tons of "
-                f"{self.job.cargo.label} to {destination}. "
-                f"{progress} "
-                f"{hours_used:.1f} hours used of {self.job.deadline_game_h:.0f}. "
-                f"It is {now}. Transmission is {mode}. "
-                f"Weather: {self.weather.describe()}. "
-                f"You are parked. {self._engine_entry_instruction()} "
-                "When air pressure is ready, press P to release the parking brake.",
-                interrupt=False,
-            )
+            if self._terse_speech():
+                self.ctx.say(
+                    f"Resuming {drive_name}: {destination}. {progress} "
+                    f"{hours_used:.1f} of {self.job.deadline_game_h:.0f} hours used. "
+                    f"{now}. {mode}. {self.weather.describe()}. "
+                    f"{self._parked_entry_status()}",
+                    interrupt=False,
+                )
+            else:
+                self.ctx.say(
+                    f"Resuming your {drive_name}: {self.job.weight_tons:.0f} tons of "
+                    f"{self.job.cargo.label} to {destination}. "
+                    f"{progress} "
+                    f"{hours_used:.1f} hours used of {self.job.deadline_game_h:.0f}. "
+                    f"It is {now}. Transmission is {mode}. "
+                    f"Weather: {self.weather.describe()}. "
+                    f"You are parked. {self._engine_entry_instruction()} "
+                    "When air pressure is ready, press P to release the parking brake.",
+                    interrupt=False,
+                )
         else:
             objective = (
                 f"Pickup dispatch: deadhead from the terminal to {self._pickup_facility_text()}. "
@@ -269,14 +278,21 @@ class DrivingState(DrivingControlsMixin, DrivingUpdateMixin, DrivingEventMixin, 
                 else f"Loaded for {self._destination_facility_text()}. "
                 f"{self.trip.progress_summary(self.ctx.settings.imperial_units)} "
             )
-            self.ctx.say(
-                f"You are at the wheel. {objective}It is {now}. "
-                f"Transmission is {mode}. "
-                f"Weather: {self.weather.describe()}. "
-                f"{self._engine_entry_instruction()} "
-                "F1 lists the controls.",
-                interrupt=False,
-            )
+            if self._terse_speech():
+                self.ctx.say(
+                    f"{objective}{now}. {mode}. {self.weather.describe()}. "
+                    f"{self._parked_entry_status()}",
+                    interrupt=False,
+                )
+            else:
+                self.ctx.say(
+                    f"You are at the wheel. {objective}It is {now}. "
+                    f"Transmission is {mode}. "
+                    f"Weather: {self.weather.describe()}. "
+                    f"{self._engine_entry_instruction()} "
+                    "F1 lists the controls.",
+                    interrupt=False,
+                )
         if self.tutorial:
             self.tutorial.begin()
         if self.phase == DRIVE_PHASE_DELIVERY:
@@ -288,6 +304,16 @@ class DrivingState(DrivingControlsMixin, DrivingUpdateMixin, DrivingEventMixin, 
         if self.truck.engine_on:
             return "Engine idling; build air pressure if needed."
         return "Press E to start the engine and build air pressure."
+
+    def _parked_entry_status(self) -> str:
+        engine = "Engine idling" if self.truck.engine_on else "Engine off"
+        air = (
+            f"air {self.truck.air_pressure_psi:.0f} psi"
+            if not self.truck.air_ready
+            else "air ready"
+        )
+        brake = "parking brake set" if self.truck.parking_brake else "parking brake released"
+        return f"{engine}, {air}, {brake}."
 
     def _record_weather_achievement(self, *, event: bool = True) -> None:
         p = self.ctx.profile
@@ -303,6 +329,7 @@ class DrivingState(DrivingControlsMixin, DrivingUpdateMixin, DrivingEventMixin, 
             self.ctx.award_achievement("low_visibility", event=event)
 
     def exit(self) -> None:
+        self.ctx.audio.horn_stop()
         self.ctx.audio.stop_world()
         self.ctx.audio.stop_music(600)
 

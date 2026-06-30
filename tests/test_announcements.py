@@ -1,5 +1,6 @@
 """Announcement priority (safety preempts chatter) and speed-scaled lead time."""
 
+import pygame
 import pytest
 
 from freight_fate.sim.trip import TripEvent, TripEventKind, Zone
@@ -39,6 +40,84 @@ def test_safety_cues_are_critical_and_chatter_is_not():
         assert not d._is_critical_event(TripEvent(TripEventKind.WEATHER_CHANGE, "rain"))
         assert not d._is_critical_event(TripEvent(TripEventKind.TOLL_CHARGED, "toll"))
         assert not d._is_critical_event(TripEvent(TripEventKind.GPS_CUE, "exit ahead"))
+    finally:
+        app.shutdown()
+
+
+def test_terse_drive_entry_skips_startup_handholding(monkeypatch):
+    from freight_fate.app import App
+
+    app = App()
+    spoken = []
+    try:
+        app.ctx.settings.speech_verbosity = 0
+        d = _driving(app)
+        monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: spoken.append(text))
+
+        d.enter()
+
+        assert spoken
+        entry = spoken[0]
+        assert "Press" not in entry
+        assert "F1" not in entry
+        assert "air" in entry
+        assert "parking brake" in entry
+    finally:
+        app.shutdown()
+
+
+def test_cold_start_low_air_does_not_stack_on_entry(monkeypatch):
+    from freight_fate.app import App
+
+    app = App()
+    events = []
+    try:
+        d = _driving(app)
+        monkeypatch.setattr(app.ctx, "say_event", lambda text, interrupt=True: events.append(text))
+
+        assert d.truck.air_low_warning
+        assert d._low_air_said
+        d.truck.start_engine()
+        d._update_air_brake_announcements(was_ready=False, was_low=True, was_spring=True)
+
+        assert events == []
+    finally:
+        app.shutdown()
+
+
+def test_horn_loops_while_key_is_held():
+    from freight_fate.app import App
+
+    class Recorder:
+        def __init__(self) -> None:
+            self.calls = []
+
+        def horn_start(self) -> None:
+            self.calls.append("start")
+
+        def horn_stop(self) -> None:
+            self.calls.append("stop")
+
+        def play(self, *_args, **_kwargs) -> None:
+            pass
+
+        def stop_world(self) -> None:
+            pass
+
+    app = App()
+    try:
+        d = _driving(app)
+        audio = Recorder()
+        app.ctx.audio = audio
+
+        d.handle_event(pygame.event.Event(pygame.KEYDOWN, key=pygame.K_h, unicode="h"))
+        d.handle_event(pygame.event.Event(pygame.KEYUP, key=pygame.K_h, unicode="h"))
+
+        assert audio.calls == ["start", "stop"]
+
+        d.handle_event(pygame.event.Event(pygame.KEYDOWN, key=pygame.K_h, unicode="h"))
+        d.handle_event(pygame.event.Event(pygame.KEYDOWN, key=pygame.K_ESCAPE, unicode=""))
+        assert audio.calls[-2:] == ["start", "stop"]
     finally:
         app.shutdown()
 

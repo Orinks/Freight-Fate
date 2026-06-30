@@ -375,6 +375,36 @@ def test_upgrades_are_money_gated():
 
 
 @pytest.mark.smoke
+def test_garage_services_tires_and_wash():
+    from freight_fate.app import App
+    from freight_fate.models.profile import Profile
+    from freight_fate.states.city import GarageState
+
+    app = App()
+    try:
+        app.ctx.profile = Profile(name="Maintenance", current_city="Chicago")
+        p = app.ctx.profile
+        p.money = 1_000.0
+        p.tire_wear_pct = 10.0
+        p.road_grime_pct = 25.0
+        garage = GarageState(app.ctx)
+        app.push_state(garage)
+
+        assert any("Replace tires" in item.text for item in garage.items)
+        assert any("Wash truck" in item.text for item in garage.items)
+
+        garage._service_tires()
+        assert p.tire_wear_pct == 0.0
+        assert p.money == 550.0
+
+        garage._wash_truck()
+        assert p.road_grime_pct == 0.0
+        assert p.money == 515.0
+    finally:
+        app.shutdown()
+
+
+@pytest.mark.smoke
 def test_upgrade_f1_help_explains_player_benefits():
     from freight_fate.app import App
     from freight_fate.models.profile import Profile
