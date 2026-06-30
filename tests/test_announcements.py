@@ -43,6 +43,47 @@ def test_safety_cues_are_critical_and_chatter_is_not():
         app.shutdown()
 
 
+def test_terse_drive_entry_skips_startup_handholding(monkeypatch):
+    from freight_fate.app import App
+
+    app = App()
+    spoken = []
+    try:
+        app.ctx.settings.speech_verbosity = 0
+        d = _driving(app)
+        monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: spoken.append(text))
+
+        d.enter()
+
+        assert spoken
+        entry = spoken[0]
+        assert "Press" not in entry
+        assert "F1" not in entry
+        assert "air" in entry
+        assert "parking brake" in entry
+    finally:
+        app.shutdown()
+
+
+def test_cold_start_low_air_does_not_stack_on_entry(monkeypatch):
+    from freight_fate.app import App
+
+    app = App()
+    events = []
+    try:
+        d = _driving(app)
+        monkeypatch.setattr(app.ctx, "say_event", lambda text, interrupt=True: events.append(text))
+
+        assert d.truck.air_low_warning
+        assert d._low_air_said
+        d.truck.start_engine()
+        d._update_air_brake_announcements(was_ready=False, was_low=True, was_spring=True)
+
+        assert events == []
+    finally:
+        app.shutdown()
+
+
 def test_zone_warning_interrupts_while_weather_chatter_queues(monkeypatch):
     from freight_fate.app import App
 
