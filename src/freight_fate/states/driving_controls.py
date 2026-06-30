@@ -18,6 +18,7 @@ class DrivingControlsMixin:
             self.ctx.stop_event_speech()
             self._set_status("Event voice stopped.")
         elif key == pygame.K_ESCAPE:
+            self.ctx.audio.horn_stop()
             self.ctx.push_state(PauseMenuState(self.ctx, self))
         elif key == pygame.K_e:
             self._toggle_engine()

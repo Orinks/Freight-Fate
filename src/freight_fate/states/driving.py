@@ -328,6 +328,7 @@ class DrivingState(DrivingControlsMixin, DrivingUpdateMixin, DrivingEventMixin, 
             self.ctx.award_achievement("low_visibility", event=event)
 
     def exit(self) -> None:
+        self.ctx.audio.horn_stop()
         self.ctx.audio.stop_world()
         self.ctx.audio.stop_music(600)
 

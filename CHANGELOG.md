@@ -3,6 +3,10 @@
 ## Unreleased
 ### Fixed
 
+- **Dispatch, garage, and horn polish.** F1 on a dispatch job now opens a
+  structured job-detail view, long-haul pay has a stronger floor, drive-start
+  speech is shorter in terse mode, the horn loops while held, truck and upgrade
+  wording is clearer, and the garage can service tire wear and wash road grime.
 - **Hazard clears are easier to hear, and speech backs off faster.** Passing a
   road hazard now plays a short achievement-like confirmation sound, and urgent
   events plus driving warnings clear stale spoken messages so old alerts do not

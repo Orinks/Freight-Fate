@@ -98,6 +98,12 @@ def test_horn_loops_while_key_is_held():
         def horn_stop(self) -> None:
             self.calls.append("stop")
 
+        def play(self, *_args, **_kwargs) -> None:
+            pass
+
+        def stop_world(self) -> None:
+            pass
+
     app = App()
     try:
         d = _driving(app)
@@ -108,6 +114,10 @@ def test_horn_loops_while_key_is_held():
         d.handle_event(pygame.event.Event(pygame.KEYUP, key=pygame.K_h, unicode="h"))
 
         assert audio.calls == ["start", "stop"]
+
+        d.handle_event(pygame.event.Event(pygame.KEYDOWN, key=pygame.K_h, unicode="h"))
+        d.handle_event(pygame.event.Event(pygame.KEYDOWN, key=pygame.K_ESCAPE, unicode=""))
+        assert audio.calls[-2:] == ["start", "stop"]
     finally:
         app.shutdown()
 
