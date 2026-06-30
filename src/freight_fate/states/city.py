@@ -512,13 +512,17 @@ class GarageState(MenuState):
 
 class UpgradeShopState(MenuState):
     title = "Upgrades"
-    intro_help = ("Each entry speaks the upgrade, its price, and what you already "
-                  "own. Enter buys the next tier. Press F1 on an upgrade to hear "
+    intro_help = ("Each entry speaks the fleet upgrade, its price, and what you "
+                  "already own. Upgrades apply to every truck in your fleet. "
+                  "Enter buys the next tier. Press F1 on an upgrade to hear "
                   "what it does. Escape returns to the garage.")
 
     def announce_entry(self) -> None:
         p = self.ctx.profile
-        self.ctx.say(f"Upgrades. You have {p.money:,.0f} dollars. {self.current_text()}")
+        self.ctx.say(
+            f"Fleet upgrades. They apply to every truck you own. "
+            f"You have {p.money:,.0f} dollars. {self.current_text()}"
+        )
 
     def build_items(self) -> list[MenuItem]:
         items = [MenuItem(lambda u=u: self._label(u), lambda u=u: self._buy(u),
@@ -556,8 +560,8 @@ class UpgradeShopState(MenuState):
         self.ctx.save_profile()
         self.ctx.audio.play("ui/cash")
         tier_part = (f" tier {owned + 1}" if upgrade.max_tier > 1 else "")
-        self.ctx.say(f"{upgrade.label}{tier_part} installed for {price:,.0f} dollars. "
-                     f"You have {p.money:,.0f} dollars left.")
+        self.ctx.say(f"{upgrade.label}{tier_part} installed across your fleet for "
+                     f"{price:,.0f} dollars. You have {p.money:,.0f} dollars left.")
         self.ctx.award_achievement("first_upgrade")
         self.refresh()
 
@@ -566,8 +570,9 @@ class TruckShopState(MenuState):
     title = "Trucks"
     intro_help = ("Each entry speaks the truck, its price, and whether you own it. "
                   "Enter buys a truck you do not own, or switches to one you do. "
-                  "Press F1 on a truck to hear its character. Escape returns to "
-                  "the garage.")
+                  "Your fleet upgrades apply to whichever truck you drive. "
+                  "Press F1 on a truck to hear its character. Escape returns "
+                  "to the garage.")
 
     def announce_entry(self) -> None:
         p = self.ctx.profile
@@ -583,11 +588,16 @@ class TruckShopState(MenuState):
     def _label(self, model: TruckModel) -> str:
         p = self.ctx.profile
         name = model.label.capitalize()
+        specs = model.specs
+        traits = (
+            f"{specs.max_torque_nm / 1000:.1f} thousand newton meters torque, "
+            f"{specs.fuel_tank_gal:.0f} gallon tank"
+        )
         if model.key == p.truck:
-            return f"{name}: currently driving"
+            return f"{name}: currently driving, {traits}"
         if model.key in p.owned_trucks:
-            return f"{name}: owned, switch to it"
-        return f"{name}: buy for {model.price:,.0f} dollars"
+            return f"{name}: owned, {traits}, switch to it"
+        return f"{name}: {traits}, buy for {model.price:,.0f} dollars"
 
     def _pick(self, model: TruckModel) -> None:
         p = self.ctx.profile

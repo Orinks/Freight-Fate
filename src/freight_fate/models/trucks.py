@@ -30,12 +30,14 @@ class TruckModel:
 TRUCK_CATALOG: dict[str, TruckModel] = {
     "rig": TruckModel(
         "rig", "standard rig", 0.0,
-        "The dependable tractor you started with. Balanced all around.",
+        "The dependable tractor you started with: better fuel economy and "
+        "a calmer highway feel than the heavy hauler.",
         TruckSpecs()),
     "heavy_hauler": TruckModel(
         "heavy_hauler", "heavy hauler", 52_000.0,
-        "A brute: a quarter more torque and a two hundred gallon tank, but "
-        "blunt aerodynamics and a thirstier engine.",
+        "A brute for heavy loads and long stretches: a quarter more torque "
+        "and a two hundred gallon tank, but blunt aerodynamics and a "
+        "thirstier engine.",
         TruckSpecs(max_torque_nm=3_000.0, fuel_tank_gal=200.0,
                    drag_coefficient=0.75, fuel_burn_factor=1.2,
                    mass_kg=37_500.0)),

@@ -75,9 +75,37 @@ def test_heavy_hauler_tradeoffs():
     assert hauler.fuel_burn_factor > rig.fuel_burn_factor
 
 
+def test_truck_descriptions_explain_tradeoffs():
+    rig = TRUCK_CATALOG["rig"].description
+    hauler = TRUCK_CATALOG["heavy_hauler"].description
+    assert "fuel economy" in rig
+    assert "heavy loads" in hauler
+    assert "thirstier engine" in hauler
+
+
 def test_heavy_hauler_upgrades_apply_on_top():
     s = build_truck_specs("heavy_hauler", {"long_range_tank": 1})
     assert s.fuel_tank_gal == TRUCK_CATALOG["heavy_hauler"].specs.fuel_tank_gal + 50.0
+
+
+def test_garage_says_upgrades_are_fleet_wide():
+    from freight_fate.app import App
+    from freight_fate.models.profile import Profile
+    from freight_fate.states.city import TruckShopState, UpgradeShopState
+
+    app = App()
+    try:
+        app.ctx.profile = Profile(name="Fleet Copy")
+        upgrades = UpgradeShopState(app.ctx)
+        trucks = TruckShopState(app.ctx)
+
+        assert "apply to every truck" in upgrades.intro_help
+        assert "fleet upgrades apply" in trucks.intro_help.lower()
+        trucks.enter()
+        assert "thousand newton meters torque" in trucks.current_text()
+        assert "gallon tank" in trucks.current_text()
+    finally:
+        app.shutdown()
 
 
 # -- physics effects ---------------------------------------------------------------
