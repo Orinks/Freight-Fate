@@ -47,10 +47,11 @@ SPECS: dict[str, tuple[str, float, float]] = {
         0.5,
     ),
     "events/hazard_clear": (
-        "Short satisfying in-cab road hazard passed sound, a quick safe whoosh "
-        "and soft confirmation chime, non-musical, clean",
-        2.0,
-        0.55,
+        "Very short achievement-style success sound in C major, bright two-note "
+        "confirmation ping using C then G, satisfying but subtle, heard in a truck "
+        "cab, no whoosh, no melody, clean",
+        1.0,
+        0.65,
     ),
     "vehicle/air_dryer_purge": (
         "Truck air brake system air dryer purge, a single sharp pneumatic hiss "
