@@ -3,6 +3,9 @@
 ## Unreleased
 ### Fixed
 
+- **First-rig menu music refreshed.** The first-owned-truck menu bed now uses
+  a cleaner, longer copy and plays for its full length before the menu rotation
+  advances.
 - **Driving realism polish.** Metric speed warnings,
   speeding strikes, trooper stops, cruise messages, and the speed-limit key now
   use the selected units consistently. Missed destination exits reroute you via

@@ -18,7 +18,7 @@ class MusicTrack:
 
 MENU_TRACKS: tuple[MusicTrack, ...] = (
     MusicTrack("menu_theme", "Headlights West", "Warm Americana for new careers", 128.4),
-    MusicTrack("menu_first_rig", "Keys To The Rig", "Easy country-rock milestone bed", 75.0),
+    MusicTrack("menu_first_rig", "Keys To The Rig", "Easy country-rock milestone bed", 143.2),
     MusicTrack("menu_regional_carrier", "Regional Lines", "Confident heartland rock bed", 75.0),
     MusicTrack("menu_fleet_owner", "Yard Lights", "Steady fleet-owner menu bed", 75.0),
     MusicTrack("menu_coast_to_coast", "Coast To Coast Ledger", "Broad road-trip menu bed", 75.0),
@@ -47,7 +47,8 @@ NIGHT_DRIVE_TRACKS: tuple[MusicTrack, ...] = (
 # Played at the menu (and the title screen of a loaded career) when the career
 # clock reads night, in place of the daytime milestone bed.
 MENU_NIGHT_TRACK = MusicTrack(
-    "menu_theme_night", "Midnight Keys", "Quiet piano ballad for night menus", 169.9)
+    "menu_theme_night", "Midnight Keys", "Quiet piano ballad for night menus", 169.9
+)
 
 
 ALL_MUSIC_TRACKS: tuple[MusicTrack, ...] = (
@@ -111,13 +112,15 @@ def select_menu_music_sequence(profile) -> tuple[str, ...]:
         primary = milestone_primary
         pool = tuple(track for track in options if track.key != milestone_primary)
     career = getattr(profile, "career", None)
-    seed_key = "|".join((
-        str(getattr(profile, "name", "")),
-        str(getattr(profile, "current_city", "")),
-        str(getattr(career, "deliveries", 0)),
-        str(int(getattr(career, "total_miles", 0))),
-        primary,
-    ))
+    seed_key = "|".join(
+        (
+            str(getattr(profile, "name", "")),
+            str(getattr(profile, "current_city", "")),
+            str(getattr(career, "deliveries", 0)),
+            str(int(getattr(career, "total_miles", 0))),
+            primary,
+        )
+    )
     rest = sorted(
         pool,
         key=lambda track: zlib.crc32(f"{seed_key}|{track.key}".encode()),
