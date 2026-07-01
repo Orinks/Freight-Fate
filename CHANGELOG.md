@@ -3,6 +3,11 @@
 ## Unreleased
 ### Fixed
 
+- **Control now stops speech in menus too, not just while driving.** Left or
+  Right Control already silenced the driving event voice; it now also stops the
+  current speech in every menu and in the how-to-play reader, so a long readout
+  -- job details, cargo loading, a full help page -- can be cut short with the
+  same key everywhere.
 - **Dispatch, garage, and driving tools feel clearer.** F1 on a dispatch job now opens a
   reviewable job-detail view with line-by-line facts, long-haul pay has a stronger
   floor, drive-start speech is shorter in terse mode, the horn loops while held,
