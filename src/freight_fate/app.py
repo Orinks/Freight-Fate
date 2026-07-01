@@ -105,6 +105,16 @@ class GameContext:
     def stop_event_speech(self) -> None:
         _stop_event_speech(self.speech)
 
+    def stop_speech(self) -> None:
+        """Silence all in-progress speech on both channels (main and event).
+
+        Menus and readers speak through the main channel, so the driving-only
+        ``stop_event_speech`` does not quiet them. This silences everything so a
+        single key works as a "stop talking" everywhere in the game.
+        """
+        _stop_main_speech(self.speech)
+        _stop_event_speech(self.speech)
+
     # -- state stack ------------------------------------------------------------
 
     def push_state(self, state: State) -> None:

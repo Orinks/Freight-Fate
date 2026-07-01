@@ -80,7 +80,10 @@ class MenuState(State):
     """A vertically navigated, fully spoken menu."""
 
     title = "Menu"
-    intro_help = "Use up and down arrows to navigate, Enter to select, Escape to go back."
+    intro_help = (
+        "Use up and down arrows to navigate, Enter to select, Escape to go back. "
+        "Left or Right Control stops the current speech."
+    )
     open_sound_key = "ui/menu_open"
 
     def __init__(self, ctx: GameContext) -> None:
@@ -164,6 +167,8 @@ class MenuState(State):
             self.go_back()
         elif key == pygame.K_F1:
             self.ctx.say(self.current_help())
+        elif key in (pygame.K_LCTRL, pygame.K_RCTRL):
+            self.ctx.stop_speech()
         elif event.unicode and event.unicode.isalnum():
             self._first_letter_jump(event.unicode.lower())
 

@@ -297,7 +297,8 @@ class HelpState(State):
     def enter(self) -> None:
         self.ctx.say(
             "How to play. Left and Right arrows change pages. Up and Down arrows "
-            "read line by line. Enter reads the whole page. Escape goes back. " + self._page_title()
+            "read line by line. Enter reads the whole page. Left or Right Control "
+            "stops the current speech. Escape goes back. " + self._page_title()
         )
 
     def _page_title(self) -> str:
@@ -311,6 +312,8 @@ class HelpState(State):
         if event.key == pygame.K_ESCAPE:
             self.ctx.audio.play("ui/menu_back")
             self.ctx.pop_state()
+        elif event.key in (pygame.K_LCTRL, pygame.K_RCTRL):
+            self.ctx.stop_speech()
         elif event.key in (pygame.K_RIGHT, pygame.K_PAGEDOWN):
             self.page = (self.page + 1) % len(HELP_PAGES)
             self.line = -1
