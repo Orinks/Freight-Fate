@@ -253,6 +253,21 @@ uv run python tools/index_world.py --check  # verify in sync (CI + pre-commit do
 A pre-commit hook and a test both fail if `world_data/` drifts from `world.json`,
 so commit the regenerated `world_data/` files alongside your `world.json` edits.
 
+### Playtesting
+
+Freight Fate is audio-first, so the way to review a playthrough is the transcript
+of what the game says. `tools/playtest.py` drives the real game states headless
+(no window, no speech) and prints that transcript:
+
+```bash
+uv run python tools/playtest.py                       # new-career delivery
+uv run python tools/playtest.py --route "Newark->New York"   # one corridor
+uv run python tools/playtest.py --route "New York->Boston" --events-only
+```
+
+Use `--route` to exercise a specific corridor after editing its route data. The
+same harness backs the `@pytest.mark.smoke` delivery tests.
+
 ### Changelog and snapshots
 
 Player-facing changes should add a short bullet under `## Unreleased` in
