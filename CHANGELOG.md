@@ -9,7 +9,8 @@
   wording is clearer, and the garage can service tire wear and wash road grime.
 - **Reverse now has its own backing cue.** Shifting into reverse with the engine
   running now starts a backing loop through the main audio backend, and automatic
-  reverse selection still gets a spoken confirmation.
+  reverse selection still gets a spoken confirmation. Thanks to ashleygrobler04
+  for the original reverse-loop PR.
 - **Hazard clears are easier to hear, and speech backs off faster.** Passing a
   road hazard now plays a short achievement-like confirmation sound, and urgent
   events plus driving warnings clear stale spoken messages so old alerts do not
