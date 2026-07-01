@@ -120,9 +120,11 @@ contracts or own authority.
 The normal career loop is:
 
 1. Start or continue a career.
-2. Pick a dispatch from your terminal's dispatch board.
+2. Open your terminal's dispatch board. New company hires accept the load
+   dispatch assigns; senior drivers and owner-operators pick their own.
 3. Drive from the terminal to the pickup facility.
-4. Check in, load the cargo, and choose a destination route.
+4. Check in and load the cargo. Owner-operators then choose a destination
+   route; company drivers run the route dispatch assigns.
 5. Drive the loaded trip.
 6. Use route stops for fuel, breaks, sleep, saves, inspections, or repairs when
    the stop supports those actions.
@@ -262,6 +264,14 @@ storage, food processors, farms and grain elevators, manufacturing plants,
 construction yards, mines, lumber or paper facilities, cross-docks, and other
 freight locations.
 
+How much say you have is earned with seniority. New company hires do not
+browse the board: dispatch assigns one load, and you accept it or decline it.
+You can decline a few assignments before your next promotion to have dispatch
+draw another, but each refusal costs reputation, and when the declines run
+out you take what you are given until you level up. Load choice from the full
+board opens at level 8; choosing your own routes is an owner-operator
+freedom.
+
 Many freight destinations now use real map-sourced endpoint matches when the
 offline data supports them. When the map data cannot prove a specific freight
 place, the game keeps using a representative local facility and treats it as a
@@ -318,7 +328,11 @@ Check-in takes 15 in-game minutes. Loading gives a short spoken wait while the
 dock crew loads and seals the trailer, then advances the clock by 60 in-game
 minutes. Both count as on-duty time.
 
-Route planning appears after pickup and loading. Each route option lists:
+Departure depends on your business status. Company drivers run the lane
+dispatch gives them: departing announces the assigned routing and starts the
+loaded trip directly. Owner-operators and own-authority drivers plan their
+own routing, and route planning appears after pickup and loading. Each route
+option lists:
 
 - Distance and highways.
 - Legal hours plan.

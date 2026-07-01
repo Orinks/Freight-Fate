@@ -4,6 +4,14 @@
 
 ### Added
 
+- **Freight and route freedom is now earned, not given.** New company hires
+  run the load and lane dispatch assigns: the dispatch board offers a single
+  assignment with accept or decline, declining draws another load but costs
+  reputation and comes from a small budget that refills at your next
+  promotion, and departure runs dispatch's routing with no route menu. Load
+  choice from the full board opens at level 8, and choosing your own routes
+  is the owner-operator and own-authority reward, matching how forced
+  dispatch works at real starter carriers.
 - **New-career first day has a stronger handoff.** After choosing a start and
   home terminal, the terminal repeats a first-day briefing until the first
   dispatch is accepted. It names the carrier or owner-operator setup, the

@@ -61,41 +61,69 @@ Add one small, pure policy model — `dispatch_policy(profile) -> DispatchPolicy
 
 **Files:** create `src/freight_fate/models/dispatch_policy.py`; test `tests/test_dispatch_policy.py`.
 
-- [ ] **Step 1: Failing band tests.** Assert: level-1 `company_driver` → `assigns_load and assigns_route`; level-8 `company_driver` → `assigns_route and not assigns_load`; `leased_owner_operator` → neither assigned; `independent_authority` → neither assigned. Assert `decline_budget > 0` only for `company_driver`.
-- [ ] **Step 2: Implement `DispatchPolicy` + `dispatch_policy(profile)`.** Pure function of `business_status` and `career.level`. Constants: `SENIOR_LOAD_CHOICE_LEVEL = 8`, `NEW_HIRE_DECLINE_BUDGET = 3`.
-- [ ] **Step 3: `ruff format` / `ruff check`; tests green.**
+- [x] **Step 1: Failing band tests.** Assert: level-1 `company_driver` → `assigns_load and assigns_route`; level-8 `company_driver` → `assigns_route and not assigns_load`; `leased_owner_operator` → neither assigned; `independent_authority` → neither assigned. Assert `decline_budget > 0` only for `company_driver`.
+- [x] **Step 2: Implement `DispatchPolicy` + `dispatch_policy(profile)`.** Pure function of `business_status` and `career.level`. Constants: `SENIOR_LOAD_CHOICE_LEVEL = 8`, `NEW_HIRE_DECLINE_BUDGET = 3`.
+- [x] **Step 3: `ruff format` / `ruff check`; tests green.**
 
 ### Task 2: Save-compatible decline tracking
 
 **Files:** modify `src/freight_fate/models/profile.py`, `src/freight_fate/models/career.py`.
 
-- [ ] **Step 1: Failing tests** for a fresh `Profile` defaulting `dispatch_declines_used = 0` and old-save round-trip still loading.
-- [ ] **Step 2:** add `dispatch_declines_used: int = 0` (+ any cycle marker) with defaults; refill (reset to 0) on level-up inside `Career.record_delivery` so a promotion clears refusals. Remaining budget = `NEW_HIRE_DECLINE_BUDGET - dispatch_declines_used`.
-- [ ] **Step 3:** ruff + tests green, including existing profile-integrity/signature tests.
+- [x] **Step 1: Failing tests** for a fresh `Profile` defaulting `dispatch_declines_used = 0` and old-save round-trip still loading.
+- [x] **Step 2:** add `dispatch_declines_used: int = 0` (+ any cycle marker) with defaults; refill (reset to 0) on level-up inside `Career.record_delivery` so a promotion clears refusals. Remaining budget = `NEW_HIRE_DECLINE_BUDGET - dispatch_declines_used`.
+- [x] **Step 3:** ruff + tests green, including existing profile-integrity/signature tests.
 
 ### Task 3: Assigned-load flow on the dispatch board
 
 **Files:** modify `src/freight_fate/states/city.py` (`JobBoardState`).
 
-- [ ] **Step 1: Failing state test.** With a `company_driver` level-1 profile, opening the board yields a single *assigned* load (the `_recommended_job_index()` load) with accept + decline actions, not a 5-item browsable list. Declining draws the next candidate and increments `dispatch_declines_used`; a decline applies the reputation penalty; budget exhaustion locks to accept-only.
-- [ ] **Step 2: Implement.** Branch on `dispatch_policy(profile).assigns_load`: reuse `_recommended_job_index()`/`_candidates` to pick the assigned load; speak it as an assignment ("Dispatch assigned you…"); wire decline → next candidate + `career.reputation` hit + budget decrement. Leave the browsable board untouched when `not assigns_load`.
-- [ ] **Step 3:** ruff + tests green.
+- [x] **Step 1: Failing state test.** With a `company_driver` level-1 profile, opening the board yields a single *assigned* load (the `_recommended_job_index()` load) with accept + decline actions, not a 5-item browsable list. Declining draws the next candidate and increments `dispatch_declines_used`; a decline applies the reputation penalty; budget exhaustion locks to accept-only.
+- [x] **Step 2: Implement.** Branch on `dispatch_policy(profile).assigns_load`: reuse `_recommended_job_index()`/`_candidates` to pick the assigned load; speak it as an assignment ("Dispatch assigned you…"); wire decline → next candidate + `career.reputation` hit + budget decrement. Leave the browsable board untouched when `not assigns_load`.
+- [x] **Step 3:** ruff + tests green.
 
 ### Task 4: Assigned-route flow at departure
 
 **Files:** modify `src/freight_fate/states/city_pickup.py` (`_depart_for_destination`).
 
-- [ ] **Step 1: Failing test.** `company_driver` departure auto-selects `routes[0]` and transitions straight to `DrivingState` (no `RouteSelectState`), narrating the assigned routing ("Dispatch routed you via …"). Owner-operator/authority still pushes `RouteSelectState`.
-- [ ] **Step 2: Implement.** When `not dispatch_policy(profile).assigns_route`, keep pushing `RouteSelectState`. Otherwise build the trip from `routes[0]` with the state RouteSelectState already constructs (reuse its trip-setup so air-brake/engine snapshots carry over), speak the assigned route summary, and push `DrivingState` directly.
-- [ ] **Step 3:** ruff + tests green.
+- [x] **Step 1: Failing test.** `company_driver` departure auto-selects `routes[0]` and transitions straight to `DrivingState` (no `RouteSelectState`), narrating the assigned routing ("Dispatch routed you via …"). Owner-operator/authority still pushes `RouteSelectState`.
+- [x] **Step 2: Implement.** When `not dispatch_policy(profile).assigns_route`, keep pushing `RouteSelectState`. Otherwise build the trip from `routes[0]` with the state RouteSelectState already constructs (reuse its trip-setup so air-brake/engine snapshots carry over), speak the assigned route summary, and push `DrivingState` directly.
+- [x] **Step 3:** ruff + tests green.
 
 ### Task 5: Guidance + transcript proof
 
 **Files:** modify `src/freight_fate/states/city.py` terminal/first-day guidance, `tests/test_playtest_harness.py`, `docs/business-arc.md`.
 
-- [ ] **Step 1:** Update first-day / terminal objective text so new hires are told the load and route are assigned ("run dispatch's load and lane, build your record"), and senior/owner bands are told what they now choose.
-- [ ] **Step 2: Harness proof.** Extend `PlaytestHarness` so a new-hire run asserts the transcript contains an assigned-load and assigned-route line and **no** route-selection prompt; add an owner-operator variant (set `business_status` + XP) that asserts the route menu still appears.
-- [ ] **Step 3:** Add a "Dispatch autonomy" section to `docs/business-arc.md`; ruff + full `uv run pytest` green.
+- [x] **Step 1:** Update first-day / terminal objective text so new hires are told the load and route are assigned ("run dispatch's load and lane, build your record"), and senior/owner bands are told what they now choose.
+- [x] **Step 2: Harness proof.** Extend `PlaytestHarness` so a new-hire run asserts the transcript contains an assigned-load and assigned-route line and **no** route-selection prompt; add an owner-operator variant (set `business_status` + XP) that asserts the route menu still appears.
+- [x] **Step 3:** Add a "Dispatch autonomy" section to `docs/business-arc.md`; ruff + full `uv run pytest` green.
+
+## Implementation notes (deviations that improved the plan)
+
+- **Decline tracking lives on `Career`, not `Profile`.** The plan put
+  `dispatch_declines_used` on `Profile` with the refill in
+  `Career.record_delivery`, but `Career` cannot see `Profile` fields. Putting
+  the counter on `Career` keeps the refill beside the level-up logic it
+  belongs to, stays save-compatible (`Career(**payload)` defaults it), and
+  removes the need for any cycle marker.
+- **Decline is only offered when it means something.** The decline item is
+  hidden when the budget is spent *and* when the board has no second unlocked
+  candidate, so the player never pays reputation to be re-offered the same
+  load.
+- **Shared departure helper.** `start_loaded_drive()` in `city_pickup.py` is
+  used by both `RouteSelectState._start` and the assigned-route path, so
+  air-brake/engine snapshots carry over identically instead of being
+  duplicated.
+- **Harness handles both flows.** `PlaytestHarness.start_delivery` detects
+  `JobBoardState.assigned_mode`: `job_rank` spends declines to reach an
+  alternative on assigned boards, and `route_rank` applies only when the
+  route menu exists (owner-operator runs). Existing new-career test flows
+  (`test_smoke`, `test_pickup_loading`, `test_hos`, `test_trip_resume`,
+  driving feature helpers) were updated to the assigned flow; the
+  recommended-label board tests in `test_career_objectives` moved to senior
+  company profiles since new hires no longer browse.
+- **Senior band hears its unlock.** The browsable company board announcement
+  now says loads are the driver's choice while routing stays assigned, so the
+  level-8 unlock is felt, not silent.
 
 ## Out of scope (follow-ups noted from the same playtest)
 

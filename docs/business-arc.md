@@ -76,6 +76,26 @@ costs active from day one.
   their reputation, delivery count, and working capital are ready. It is the
   prerequisite for the later own-authority activation gate.
 
+## Dispatch Autonomy
+
+Freedom to choose freight and routing is itself a progression reward
+(`dispatch_policy` in `models/dispatch_policy.py`):
+
+| Band | Gate | Load | Route |
+| --- | --- | --- | --- |
+| New company hire | Company driver below level 8 | Assigned: one offered load with accept/decline | Assigned: dispatch picks the lane |
+| Senior company driver | Company driver at level 8+ | Chosen from the dispatch board | Assigned |
+| Owner-operator / own authority | Leased-on or independent | Chosen from the dispatch board | Chosen from the route options |
+
+A new hire can decline a limited number of assigned loads before the next
+promotion (dispatch draws the next candidate), but each refusal costs
+reputation -- refusing freight is remembered by dispatch, matching forced
+dispatch at real starter carriers. When the budget runs out, the board locks
+to accept-only until the next level-up refills it. Owner-operators never see
+the assignment flow: choosing freight and lanes is the independence the
+buy-in purchases, which also removes the often-single-option route menu from
+the company-driver game where it was a no-op.
+
 ## Career Start Choices
 
 | Start | Mode | Practical Tradeoff |
