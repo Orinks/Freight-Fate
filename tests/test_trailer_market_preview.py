@@ -41,8 +41,9 @@ def test_company_driver_bulk_job_uses_carrier_trailer_support():
         profile.business_status = COMPANY_DRIVER
         labels = _labels(app, profile)
 
+        # New company hires get the load as a dispatch assignment.
         row = labels[0]
-        assert "Job 1 of 1" in row
+        assert row.startswith("Accept assigned dispatch:")
         assert "Carrier trailer provided" in row
         assert "Estimated driver pay before advances" in row
         assert "Locked job" not in row

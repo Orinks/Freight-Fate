@@ -121,7 +121,12 @@ class PlaytestHarness:
 
         self.app.state.handle_event(key_event(pygame.K_RETURN))
         assert isinstance(self.app.state, JobBoardState)
-        self._choose_unlocked_job(job_rank)
+        if self.app.state.assigned_mode:
+            # New company hires are assigned a load: job_rank spends declines
+            # to reach an alternative instead of browsing the board.
+            self._accept_assigned_job(job_rank)
+        else:
+            self._choose_unlocked_job(job_rank)
         assert isinstance(self.app.state, DrivingState)
         assert self.app.state.phase == "pickup"
 
@@ -135,8 +140,10 @@ class PlaytestHarness:
         self.app.state.handle_event(key_event(pygame.K_RETURN))
         _finish_timed_state(self.app)
         self.app.state.handle_event(key_event(pygame.K_RETURN))
-        assert isinstance(self.app.state, RouteSelectState)
-        self._choose_route(route_rank)
+        if isinstance(self.app.state, RouteSelectState):
+            # Owner-operators and authority choose their routing.
+            self._choose_route(route_rank)
+        # Company drivers run dispatch's assigned route: route_rank is unused.
         assert isinstance(self.app.state, DrivingState)
         assert self.app.state.phase == "delivery"
 
@@ -247,11 +254,10 @@ class PlaytestHarness:
     def _choose_unlocked_job(self, rank: int) -> None:
         assert self.app is not None
         board = self.app.state
-        profile = self.app.ctx.profile
         unlocked = [
             (i, job)
             for i, job in enumerate(board.jobs)
-            if not job.locked_reason(profile.career.endorsements, profile.career.level)
+            if not board._locked_reason(job)
         ]
         assert unlocked
         unlocked.sort(key=lambda item: item[1].distance_mi)
@@ -259,6 +265,21 @@ class PlaytestHarness:
         while board.index != target_index:
             board.handle_event(key_event(pygame.K_DOWN))
         self.app.state.handle_event(key_event(pygame.K_RETURN))
+
+    def _accept_assigned_job(self, rank: int) -> None:
+        assert self.app is not None
+        board = self.app.state
+        for _ in range(rank):
+            decline_index = next(
+                (i for i, item in enumerate(board.items)
+                 if item.text.startswith("Decline")), None)
+            if decline_index is None:
+                break  # out of declines or no alternative freight
+            while board.index != decline_index:
+                board.handle_event(key_event(pygame.K_DOWN))
+            board.handle_event(key_event(pygame.K_RETURN))
+        board.handle_event(key_event(pygame.K_HOME))
+        board.handle_event(key_event(pygame.K_RETURN))
 
     def _choose_route(self, rank: int) -> None:
         assert self.app is not None

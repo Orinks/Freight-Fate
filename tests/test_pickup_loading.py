@@ -27,10 +27,8 @@ def accept_pickup_drive(app):
     app.state.handle_event(key_event(pygame.K_RETURN))  # default region
     app.state.handle_event(key_event(pygame.K_RETURN))  # default home terminal
     app.state.handle_event(key_event(pygame.K_RETURN))  # job board
-    board = app.state
-    while board.jobs[board.index].cargo.endorsement:
-        board.handle_event(key_event(pygame.K_DOWN))
-    board.handle_event(key_event(pygame.K_RETURN))
+    assert app.state.assigned_mode
+    app.state.handle_event(key_event(pygame.K_RETURN))  # accept assigned job
     assert isinstance(app.state, DrivingState)
     assert app.state.phase == "pickup"
     return app.state
@@ -270,11 +268,10 @@ def test_pickup_arrival_state_and_loaded_planning_resume():
         assert app.state.items[app.state.index].text == "Depart for destination"
 
         app.state.handle_event(key_event(pygame.K_RETURN))
-        from freight_fate.states.city import RouteSelectState
         from freight_fate.states.driving import DrivingState
 
-        assert isinstance(app.state, RouteSelectState)
-        app.state.handle_event(key_event(pygame.K_RETURN))
+        # New company hires run the assigned route: departure goes straight
+        # to the loaded drive without a route menu.
         assert isinstance(app.state, DrivingState)
     finally:
         app.shutdown()
@@ -282,7 +279,6 @@ def test_pickup_arrival_state_and_loaded_planning_resume():
 
 def test_departing_loaded_trip_keeps_idling_engine():
     from freight_fate.app import App
-    from freight_fate.states.city import RouteSelectState
     from freight_fate.states.driving import DrivingState
 
     app = App()
@@ -296,9 +292,7 @@ def test_departing_loaded_trip_keeps_idling_engine():
         pickup.handle_event(key_event(pygame.K_RETURN))  # load
         finish_timed_state(app)
         assert pickup.truck.engine_on
-        pickup.handle_event(key_event(pygame.K_RETURN))  # depart for destination
-        assert isinstance(app.state, RouteSelectState)
-        app.state.handle_event(key_event(pygame.K_RETURN))
+        pickup.handle_event(key_event(pygame.K_RETURN))  # depart on assigned route
 
         assert isinstance(app.state, DrivingState)
         assert app.state.phase == "delivery"

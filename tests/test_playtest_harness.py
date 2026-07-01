@@ -67,7 +67,7 @@ def test_playtest_harness_records_headless_delivery_transcript(monkeypatch):
 
     transcript = result.transcript_text
     assert "Freight Fate" in transcript
-    assert "Navigation set for" in transcript
+    assert "Dispatch routed you to" in transcript
     assert "arrived" in transcript.lower()
     assert result.deliveries == 1
     result.assert_no_known_destination_exit_regressions()
@@ -85,6 +85,44 @@ def test_company_driver_first_delivery_transcript_builds_dispatch_trust(monkeypa
     assert "dispatch" in text
     assert "trainer" in text or "first-week" in text
     assert "probation" not in text
+
+
+def test_new_hire_transcript_runs_assigned_load_and_route(monkeypatch):
+    with PlaytestHarness(monkeypatch) as harness:
+        result = harness.start_delivery(profile_name="Harness New Hire")
+
+    transcript = result.transcript_text
+    assert "Dispatch assigns your load and route" in transcript
+    assert "Accept assigned dispatch:" in transcript
+    assert "Dispatch routed you to" in transcript
+    # the route menu never appears for a new company hire
+    assert "Route planning to" not in transcript
+    assert "route option" not in transcript
+
+
+def test_owner_operator_transcript_keeps_load_and_route_choice(monkeypatch):
+    from freight_fate.models.start_options import (
+        OWNER_OPERATOR_START_KEY,
+        apply_start_option,
+        start_option,
+    )
+
+    def configure_profile(profile) -> None:
+        apply_start_option(profile, start_option(OWNER_OPERATOR_START_KEY))
+        profile.achievements.append("first_dispatch")
+
+    with PlaytestHarness(monkeypatch) as harness:
+        result = harness.start_delivery(
+            profile_name="Harness Owner Choice",
+            configure_profile=configure_profile,
+        )
+
+    transcript = result.transcript_text
+    assert "dispatches available" in transcript  # browsable board, not assigned
+    assert "Accept assigned dispatch:" not in transcript
+    assert "Route planning to" in transcript  # route choice preserved
+    assert "route option" in transcript
+    assert "Dispatch routed you to" not in transcript
 
 
 def test_mid_career_transcript_speaks_level_band_guidance(monkeypatch):

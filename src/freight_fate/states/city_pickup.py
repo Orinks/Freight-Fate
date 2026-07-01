@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 from ..data.world import Route
+from ..models.dispatch_policy import dispatch_policy
 from ..models.jobs import Job, job_from_payload, job_payload, plan_hos
 from ..music import select_menu_music_sequence
 from ..sim.vehicle import TruckState
@@ -56,6 +57,29 @@ def route_departure_summary(route: Route) -> str:
         f"Loaded trip is {route.miles:.0f} miles via "
         f"{', then '.join(route.highways)}.{toll_text}"
     )
+
+
+def start_loaded_drive(ctx, job: Job, route: Route, *, air_brake=None,
+                       engine_on: bool = False, lead: str = "") -> None:
+    """Build the loaded delivery trip and depart, narrating ``lead`` first.
+
+    Shared by the player-chosen route path (``RouteSelectState``) and the
+    dispatch-assigned route path so air-brake and engine snapshots carry over
+    identically on both.
+    """
+    from .driving import DrivingState
+
+    driving = DrivingState(ctx, job, route)
+    driving.truck.restore_air_brake_snapshot(air_brake, default_ready=True)
+    if engine_on:
+        driving.truck.start_engine()
+    ctx.profile.active_trip = driving.snapshot()
+    ctx.save_profile()
+    next_context = driving.trip.next_navigation_context()
+    ctx.say(
+        f"{lead}{route_departure_summary(route)} {next_context} Departing now.",
+        interrupt=True)
+    ctx.push_state(driving)
 
 
 class PickupFacilityState(MenuState):
@@ -235,6 +259,20 @@ class PickupFacilityState(MenuState):
             self.ctx.audio.play("ui/error")
             self.ctx.say("Dispatch cannot find a navigation itinerary for this load.")
             return
+        if dispatch_policy(self.ctx.profile).assigns_route:
+            # Company drivers run the lane dispatch gives them; routes are
+            # already sorted best-first. Route choice is an owner-operator
+            # freedom.
+            start_loaded_drive(
+                self.ctx,
+                self.job,
+                routes[0],
+                air_brake=self.truck.air_brake_snapshot(),
+                engine_on=self.truck.engine_on,
+                lead=(f"Dispatch routed you to "
+                      f"{self.job.destination_facility_text()}. "),
+            )
+            return
         self.ctx.say(
             f"Route planning to {self.job.destination_facility_text()}. "
             f"{len(routes)} realistic supported route "
@@ -383,17 +421,11 @@ class RouteSelectState(MenuState):
         self.ctx.say("Forecast along the route. " + ". ".join(parts) + ".")
 
     def _start(self, route: Route) -> None:
-        from .driving import DrivingState
-
-        driving = DrivingState(self.ctx, self.job, route)
-        driving.truck.restore_air_brake_snapshot(self.air_brake, default_ready=True)
-        if self.engine_on:
-            driving.truck.start_engine()
-        self.ctx.profile.active_trip = driving.snapshot()
-        self.ctx.save_profile()
-        next_context = driving.trip.next_navigation_context()
-        self.ctx.say(
-            f"Navigation set for {self.job.destination_facility_text()}. "
-            f"{route_departure_summary(route)} {next_context} Departing now.",
-            interrupt=True)
-        self.ctx.push_state(driving)
+        start_loaded_drive(
+            self.ctx,
+            self.job,
+            route,
+            air_brake=self.air_brake,
+            engine_on=self.engine_on,
+            lead=f"Navigation set for {self.job.destination_facility_text()}. ",
+        )

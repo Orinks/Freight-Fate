@@ -29,8 +29,12 @@ def set_trip_traffic(driving, vehicles):
 
 
 def start_drive(app):
-    """New career, accept an unlocked job, pick a route; returns DrivingState."""
-    from freight_fate.states.city import CityMenuState, PickupFacilityState, RouteSelectState
+    """New career, accept the assigned dispatch, depart; returns DrivingState.
+
+    New company hires run the load and route dispatch assigns, so the board
+    offers a single assignment and departure skips the route menu.
+    """
+    from freight_fate.states.city import CityMenuState, PickupFacilityState
     from freight_fate.states.driving import DrivingState
     from freight_fate.states.main_menu import MainMenuState
 
@@ -45,10 +49,8 @@ def start_drive(app):
     app.state.handle_event(key_event(pygame.K_RETURN))  # job board
     if isinstance(app.state, CityMenuState):
         app.state.handle_event(key_event(pygame.K_RETURN))  # dispatch board
-    board = app.state
-    while board.jobs[board.index].cargo.endorsement:  # skip locked teasers
-        board.handle_event(key_event(pygame.K_DOWN))
-    app.state.handle_event(key_event(pygame.K_RETURN))  # accept job
+    assert app.state.assigned_mode
+    app.state.handle_event(key_event(pygame.K_RETURN))  # accept assigned job
     assert isinstance(app.state, DrivingState)
     assert app.state.phase == "pickup"
     app.state.trip.position_mi = app.state.trip.total_miles
@@ -60,9 +62,7 @@ def start_drive(app):
     app.state.handle_event(key_event(pygame.K_RETURN))  # check in at origin
     app.state.handle_event(key_event(pygame.K_RETURN))  # load at dock
     finish_timed_state(app)
-    app.state.handle_event(key_event(pygame.K_RETURN))  # depart for destination
-    assert isinstance(app.state, RouteSelectState)
-    app.state.handle_event(key_event(pygame.K_RETURN))  # accept planned route
+    app.state.handle_event(key_event(pygame.K_RETURN))  # depart on assigned route
     assert isinstance(app.state, DrivingState)
     assert app.state.phase == "delivery"
     release_air_brakes(app.state)

@@ -164,6 +164,8 @@ def test_terminal_career_plan_speaks_senior_company_level_guidance(monkeypatch):
 
 
 def test_dispatch_board_speaks_objective_and_marks_recommended_job(monkeypatch):
+    # Senior company drivers browse the board; new hires get an assignment,
+    # covered by test_dispatch_autonomy.
     from freight_fate.app import App
     from freight_fate.states.city import JobBoardState
 
@@ -173,21 +175,24 @@ def test_dispatch_board_speaks_objective_and_marks_recommended_job(monkeypatch):
         monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: spoken.append(text))
         app.ctx.profile = Profile(name="Board Plan", current_city="Chicago")
         app.ctx.profile.achievements.append("first_dispatch")
-        app.ctx.profile.career.deliveries = 2
+        app.ctx.profile.career.xp = LEVEL_XP[9]
+        app.ctx.profile.career.deliveries = 12
+        app.ctx.profile.career.reputation = 86
 
         app.push_state(JobBoardState(app.ctx, [
             _job(miles=180.0, pay=1200.0),
             _job(miles=70.0, pay=700.0),
         ]))
 
-        assert "Career objective: First-week service record" in spoken[-1]
-        assert "short regional freight" in spoken[-1]
+        assert "Career objective: Run like a senior company driver" in spoken[-1]
+        assert "pick your own loads" in spoken[-1]
+        assert "routing is still assigned" in spoken[-1]
         recommended = next(
             item.text for item in app.state.items
             if item.text.startswith("Recommended dispatch")
         )
         assert recommended.startswith(
-            "Recommended dispatch, good first-week run: Job 2 of 2:")
+            "Recommended dispatch, senior company lane: Job 2 of 2:")
         assert not app.state.items[0].text.startswith("Recommended dispatch")
     finally:
         app.shutdown()
@@ -295,7 +300,10 @@ def test_dispatch_board_recommendation_label_is_spoken_and_visible(monkeypatch):
             app.ctx, "say", lambda text, interrupt=True: spoken.append(text)
         )
         app.ctx.profile = Profile(name="Board Plan", current_city="Chicago")
-        app.ctx.profile.career.deliveries = 1
+        app.ctx.profile.achievements.append("first_dispatch")
+        app.ctx.profile.career.xp = LEVEL_XP[9]
+        app.ctx.profile.career.deliveries = 12
+        app.ctx.profile.career.reputation = 86
 
         app.push_state(
             JobBoardState(
@@ -325,30 +333,29 @@ def test_dispatch_board_recommendation_label_is_spoken_and_visible(monkeypatch):
             )
         )
 
-        assert "Career objective: First-week service record" in spoken[-1]
+        assert "Career objective: Run like a senior company driver" in spoken[-1]
         assert "First-day objective" not in spoken[-1]
-        assert "good first-week run" in spoken[-1]
-        assert "Recommended dispatch: good first-week run" not in spoken[-1]
+        assert "senior company lane" in spoken[-1]
+        assert "Recommended dispatch: senior company lane" not in spoken[-1]
         assert (
-            "Recommended dispatch, good first-week run: Job 2 of 2:"
+            "Recommended dispatch, senior company lane: Job 1 of 2:"
             in spoken[-1]
         )
         assert (
             "Recommended dispatch is Recommended dispatch"
             not in spoken[-1]
         )
-        assert app.state.index == 1
+        assert app.state.index == 0
         assert app.state.current_text().startswith(
-            "Recommended dispatch, good first-week run: Job 2 of 2:"
+            "Recommended dispatch, senior company lane: Job 1 of 2:"
         )
         recommended = [
             item.text for item in app.state.items
-            if item.text.startswith("Recommended dispatch, trainer-recommended:")
-            or item.text.startswith("Recommended dispatch, good first-week run:")
+            if item.text.startswith("Recommended dispatch, senior company lane:")
         ]
-        assert recommended == [app.state.items[1].text]
-        assert app.state.items[1].text.startswith(
-            "Recommended dispatch, good first-week run: Job 2 of 2:"
+        assert recommended == [app.state.items[0].text]
+        assert app.state.items[0].text.startswith(
+            "Recommended dispatch, senior company lane: Job 1 of 2:"
         )
     finally:
         app.shutdown()

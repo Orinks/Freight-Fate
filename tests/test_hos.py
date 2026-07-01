@@ -413,8 +413,8 @@ def test_parking_fills_more_often_later_in_the_evening():
 # -- driving state integration ----------------------------------------------------------
 
 def start_drive(app):
-    """New career, accept an unlocked job, pick a route; returns DrivingState."""
-    from freight_fate.states.city import PickupFacilityState, RouteSelectState
+    """New career, accept the assigned dispatch, depart; returns DrivingState."""
+    from freight_fate.states.city import PickupFacilityState
     from freight_fate.states.driving import DrivingState
     from freight_fate.states.main_menu import MainMenuState
 
@@ -427,10 +427,8 @@ def start_drive(app):
     app.state.handle_event(key_event(pygame.K_RETURN))  # default region
     app.state.handle_event(key_event(pygame.K_RETURN))  # default home terminal
     app.state.handle_event(key_event(pygame.K_RETURN))  # job board
-    board = app.state
-    while board.jobs[board.index].cargo.endorsement:  # skip locked teasers
-        board.handle_event(key_event(pygame.K_DOWN))
-    app.state.handle_event(key_event(pygame.K_RETURN))  # accept job
+    assert app.state.assigned_mode
+    app.state.handle_event(key_event(pygame.K_RETURN))  # accept assigned job
     assert isinstance(app.state, DrivingState)
     assert app.state.phase == "pickup"
     app.state.trip.position_mi = app.state.trip.total_miles
@@ -442,9 +440,7 @@ def start_drive(app):
     app.state.handle_event(key_event(pygame.K_RETURN))  # check in at origin
     app.state.handle_event(key_event(pygame.K_RETURN))  # load at dock
     finish_timed_state(app)
-    app.state.handle_event(key_event(pygame.K_RETURN))  # depart for destination
-    assert isinstance(app.state, RouteSelectState)
-    app.state.handle_event(key_event(pygame.K_RETURN))  # accept planned route
+    app.state.handle_event(key_event(pygame.K_RETURN))  # depart on assigned route
     assert isinstance(app.state, DrivingState)
     assert app.state.phase == "delivery"
     app.state.truck.set_air_ready(parking_brake=False)

@@ -19,6 +19,12 @@ from ..models.career_training import (
     training_guidance,
     training_recommendation_score,
 )
+from ..models.dispatch_policy import (
+    DECLINE_REPUTATION_PENALTY,
+    SENIOR_LOAD_CHOICE_LEVEL,
+    declines_remaining,
+    dispatch_policy,
+)
 from ..models.economy import (
     pay_advance_grant,
     pay_advance_unavailable_reason,
@@ -98,10 +104,12 @@ def first_day_orientation_message(ctx, prefix: str = "") -> str:
         f"{prefix}First-day briefing: welcome aboard {option.carrier_name}. "
         f"Your assigned company tractor is parked at {location}; the carrier "
         "covers normal fuel, repairs, insurance, and trailer support. Your "
-        f"starter dispatch style is {option.dispatch.summary()}. Your first "
-        "objective is to open the dispatch board, choose an unlocked load, "
-        "deadhead to the shipper, and deliver cleanly to start building your "
-        "record with dispatch."
+        f"starter dispatch style is {option.dispatch.summary()}. As a new "
+        "hire, dispatch assigns your load and your route; you earn load "
+        "choice with seniority, and refusing an assignment goes on your "
+        "service record. Your first objective is to open the dispatch "
+        "board, accept the assigned load, deadhead to the shipper, and "
+        "deliver cleanly to start building your record with dispatch."
     )
 
 
@@ -151,8 +159,10 @@ class CityMenuState(MenuState):
                 and guidance.stage is TrainingStage.FIRST_DISPATCH
             ):
                 first_day = (
-                    " First-day objective: open the dispatch board and take a "
-                    f"{guidance.recommendation_label} load."
+                    " First-day objective: open the dispatch board and accept "
+                    f"your assigned {guidance.recommendation_label} load. "
+                    "Dispatch assigns both load and route while you are a "
+                    "new hire."
                 )
             elif not is_company_training_profile(p):
                 first_day = (
@@ -601,14 +611,29 @@ class JobBoardState(MenuState):
     def __init__(self, ctx, jobs: list[Job]) -> None:
         super().__init__(ctx)
         self.jobs = jobs
-        recommended = self._recommended_job_index()
-        if recommended is not None and self._recommendation_label() is not None:
-            self.index = recommended
+        self._assigned_queue: list[int] = (
+            self._assignment_queue()
+            if dispatch_policy(ctx.profile).assigns_load else []
+        )
+        self._assigned_pos = 0
+        if not self.assigned_mode:
+            recommended = self._recommended_job_index()
+            if recommended is not None and self._recommendation_label() is not None:
+                self.index = recommended
+
+    @property
+    def assigned_mode(self) -> bool:
+        """Dispatch picks the load: new company hires get an assignment,
+        not a browsable board. Falls back to browsing when nothing on the
+        board is unlocked, so the player can still hear what is there."""
+        return bool(self._assigned_queue)
 
     def announce_entry(self) -> None:
         n = len(self.jobs)
         if n == 0:
             self.ctx.say("Dispatch board. No jobs available right now. Press Escape to go back.")
+        elif self.assigned_mode:
+            self._announce_assignment()
         else:
             status = self.ctx.profile.business_status
             if status == INDEPENDENT_AUTHORITY:
@@ -625,7 +650,9 @@ class JobBoardState(MenuState):
             else:
                 business_note = (
                     "Listed amounts are carrier gross; your settlement pays "
-                    "driver wages. "
+                    "driver wages. Dispatch trusts you to pick your own "
+                    "loads now; routing is still assigned until you run "
+                    "your own truck. "
                 )
             objective_text = ""
             training_label = self._training_recommendation_label()
@@ -661,7 +688,40 @@ class JobBoardState(MenuState):
                          f"{self.ctx.profile.market.summary()} "
                          + self.current_text())
 
+    def _announce_assignment(self) -> None:
+        p = self.ctx.profile
+        remaining = declines_remaining(p)
+        if len(self._assigned_queue) < 2:
+            decline_note = "No alternative freight is available to request."
+        elif remaining > 0:
+            decline_note = (
+                f"You can decline {remaining} more assigned "
+                f"load{'s' if remaining != 1 else ''} before your next "
+                "promotion, but refusals cost standing with dispatch."
+            )
+        else:
+            decline_note = (
+                "You are out of declines until your next promotion, so "
+                "dispatch expects you to run this load."
+            )
+        training_label = self._training_recommendation_label()
+        if training_label is not None:
+            objective_text = (
+                f"First-day objective: run this {training_label} load "
+                "cleanly to start building your record with dispatch. "
+            )
+        else:
+            objective_text = f"Career objective: {career_objective(p).title}. "
+        self.ctx.say(
+            "Dispatch board. Dispatch assigns your load and route while you "
+            "are a new company hire; load choice opens at level "
+            f"{SENIOR_LOAD_CHOICE_LEVEL}. Listed amounts are carrier gross; "
+            f"your settlement pays driver wages. {objective_text}"
+            f"{decline_note} {p.market.summary()} " + self.current_text())
+
     def build_items(self) -> list[MenuItem]:
+        if self.assigned_mode:
+            return self._build_assignment_items()
         items = []
         for i, job in enumerate(self.jobs):
             locked = self._locked_reason(job)
@@ -679,7 +739,64 @@ class JobBoardState(MenuState):
         items.append(MenuItem("Back to terminal", self.go_back))
         return items
 
-    def _job_label(self, job: Job, index: int) -> str:
+    def _build_assignment_items(self) -> list[MenuItem]:
+        job = self._assigned_job()
+        items = [MenuItem(
+            f"Accept assigned dispatch: {self._describe_job(job)}",
+            lambda j=job: self._accept(j),
+            help=(
+                "Dispatch assigned this load; new hires run the load and "
+                "lane dispatch picks. Accepting creates a local deadhead "
+                "pickup drive from your terminal to the named origin "
+                "facility. Route inspection after pickup covers rest, fuel, "
+                "toll, weather, and restrictions."
+            ))]
+        remaining = declines_remaining(self.ctx.profile)
+        if len(self._assigned_queue) > 1 and remaining > 0:
+            items.append(MenuItem(
+                f"Decline and request another load: "
+                f"{remaining} decline{'s' if remaining != 1 else ''} left",
+                self._decline_assignment,
+                help=(
+                    "Turn the assigned load down and let dispatch draw "
+                    "another. Refusals cost reputation, and the decline "
+                    "budget only refills when you reach the next level."
+                )))
+        items.append(MenuItem("Back to terminal", self.go_back))
+        return items
+
+    def _assigned_job(self) -> Job:
+        queue = self._assigned_queue
+        return self.jobs[queue[self._assigned_pos % len(queue)]]
+
+    def _decline_assignment(self) -> None:
+        p = self.ctx.profile
+        if declines_remaining(p) <= 0:
+            self.ctx.audio.play("ui/error")
+            self.ctx.say(
+                "Dispatch has no patience left for refusals. Run this load; "
+                "declines refill at your next promotion.")
+            return
+        p.career.dispatch_declines_used += 1
+        p.career.reputation = max(
+            0.0, p.career.reputation - DECLINE_REPUTATION_PENALTY)
+        self._assigned_pos += 1
+        self.ctx.save_profile()
+        self.ctx.audio.play("ui/notify")
+        self.refresh(keep_index=False)
+        remaining = declines_remaining(p)
+        note = (
+            f"You have {remaining} decline{'s' if remaining != 1 else ''} left."
+            if remaining > 0 else
+            "That was your last decline until your next promotion."
+        )
+        self.ctx.say(
+            "Load declined. The refusal goes on your service record with "
+            f"dispatch. {note} New assignment: "
+            f"{self._describe_job(self._assigned_job())}",
+            interrupt=True)
+
+    def _describe_job(self, job: Job, index: int | None = None) -> str:
         p = self.ctx.profile
         business = build_business_settlement(
             p.business_status,
@@ -690,14 +807,17 @@ class JobBoardState(MenuState):
             carrier_key=getattr(p, "carrier_key", ""),
             owned_trailers=p.visible_owned_trailers(),
         )
-        label = job.describe(
+        return job.describe(
             index,
-            len(self.jobs),
+            len(self.jobs) if index is not None else None,
             pay_label=pay_label(p.business_status),
             trailer_note=self._trailer_note(job),
             display_pay=business.gross_pay,
             market_preview=self._market_preview(business),
         )
+
+    def _job_label(self, job: Job, index: int) -> str:
+        label = self._describe_job(job, index)
         if self._recommended_job_index() == index - 1:
             recommendation = self._recommendation_label()
             if recommendation is None:
@@ -730,7 +850,8 @@ class JobBoardState(MenuState):
             and self._recommended_job_index() == self.index
         )
 
-    def _recommended_job_index(self) -> int | None:
+    def _scored_candidates(self) -> list[tuple[float, int]]:
+        """(score, index) for each unlocked job; lower scores fit better."""
         p = self.ctx.profile
         candidates: list[tuple[float, int]] = []
         for index, job in enumerate(self.jobs):
@@ -752,9 +873,17 @@ class JobBoardState(MenuState):
                     candidates.append((training_recommendation_score(p, job), index))
                 else:
                     candidates.append((job.distance_mi, index))
+        return candidates
+
+    def _recommended_job_index(self) -> int | None:
+        candidates = self._scored_candidates()
         if not candidates:
             return None
         return min(candidates)[1]
+
+    def _assignment_queue(self) -> list[int]:
+        """Unlocked jobs in the order dispatch would assign them, best first."""
+        return [index for _score, index in sorted(self._scored_candidates())]
 
     def _locked_reason(self, job: Job) -> str:
         p = self.ctx.profile

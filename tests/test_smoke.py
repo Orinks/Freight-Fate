@@ -104,21 +104,14 @@ def test_full_game_flow_headless(monkeypatch):
         assert app.ctx.profile.name == "Smoke"
         assert app.ctx.profile.current_city == "Chicago"
 
-        # Open dispatch board and accept a short unlocked job so the bounded
-        # smoke run can finish while still driving below enforcement speeds.
+        # Open dispatch board and accept the assigned job: a new hire runs
+        # dispatch's load, and the trainer recommendation keeps it short
+        # enough for the bounded smoke run.
         app.state.handle_event(key_event(pygame.K_RETURN))
         assert isinstance(app.state, JobBoardState)
         assert app.state.jobs
-        board = app.state
-        unlocked = [
-            (i, job)
-            for i, job in enumerate(board.jobs)
-            if not job.locked_reason(app.ctx.profile.career.endorsements, app.ctx.profile.career.level)
-        ]
-        assert unlocked
-        target_index, _job = min(unlocked, key=lambda item: item[1].distance_mi)
-        while board.index != target_index:
-            board.handle_event(key_event(pygame.K_DOWN))
+        assert app.state.assigned_mode
+        assert app.state.items[0].text.startswith("Accept assigned dispatch:")
         app.state.handle_event(key_event(pygame.K_RETURN))
         assert isinstance(app.state, DrivingState)
         assert app.state.phase == "pickup"
@@ -134,15 +127,12 @@ def test_full_game_flow_headless(monkeypatch):
         finish_timed_state(app)
         assert "Depart for destination" in app.state.items[app.state.index].text
         app.state.handle_event(key_event(pygame.K_RETURN))
-        from freight_fate.states.city import RouteSelectState
 
-        assert isinstance(app.state, RouteSelectState)
-        app.state.handle_event(key_event(pygame.K_RETURN))
+        # A new company hire runs dispatch's routing: no route menu appears.
         assert isinstance(app.state, DrivingState)
         assert app.state.phase == "delivery"
         departure = next(text for text in reversed(spoken)
-                         if "Navigation set for" in text)
-        assert "Navigation set for" in departure
+                         if "Dispatch routed you to" in text)
         assert "Loaded trip is" in departure
         assert "Departing now" in departure
         assert "Legal HOS plan" not in departure
@@ -431,7 +421,7 @@ def test_upgrade_f1_help_explains_player_benefits():
 @pytest.mark.smoke
 def test_pause_and_abandon_returns_to_city():
     from freight_fate.app import App
-    from freight_fate.states.city import CityMenuState, PickupFacilityState, RouteSelectState
+    from freight_fate.states.city import CityMenuState, PickupFacilityState
     from freight_fate.states.driving import DrivingState, PauseMenuState
     from freight_fate.states.main_menu import CareerStartState, MainMenuState, NameEntryState
 
@@ -448,10 +438,8 @@ def test_pause_and_abandon_returns_to_city():
         app.state.handle_event(key_event(pygame.K_RETURN))  # default region
         app.state.handle_event(key_event(pygame.K_RETURN))  # default home terminal
         app.state.handle_event(key_event(pygame.K_RETURN))  # job board
-        board = app.state
-        while board.jobs[board.index].cargo.endorsement:  # skip locked teasers
-            board.handle_event(key_event(pygame.K_DOWN))
-        app.state.handle_event(key_event(pygame.K_RETURN))  # accept job
+        assert app.state.assigned_mode
+        app.state.handle_event(key_event(pygame.K_RETURN))  # accept assigned job
         assert isinstance(app.state, DrivingState)
         assert app.state.phase == "pickup"
         app.state.trip.position_mi = app.state.trip.total_miles
@@ -463,9 +451,7 @@ def test_pause_and_abandon_returns_to_city():
         app.state.handle_event(key_event(pygame.K_RETURN))  # check in at origin
         app.state.handle_event(key_event(pygame.K_RETURN))  # load at dock
         finish_timed_state(app)
-        app.state.handle_event(key_event(pygame.K_RETURN))  # depart for destination
-        assert isinstance(app.state, RouteSelectState)
-        app.state.handle_event(key_event(pygame.K_RETURN))  # accept planned route
+        app.state.handle_event(key_event(pygame.K_RETURN))  # depart on assigned route
         assert isinstance(app.state, DrivingState)
         assert app.state.phase == "delivery"
         origin = app.state.job.origin
