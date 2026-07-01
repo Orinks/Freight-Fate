@@ -4,6 +4,10 @@ from __future__ import annotations
 from .driving_core import *
 from .driving_rest_states import TrafficStopState
 
+LANE_GUIDANCE_DRIFT_START = 0.3
+LANE_GUIDANCE_CENTER_MAX = 0.18
+LANE_GUIDANCE_PAN = 0.85
+
 
 class DrivingUpdateMixin:
     def update(self, dt: float) -> None:
@@ -304,6 +308,34 @@ class DrivingUpdateMixin:
         on is the side to steer away from."""
         return max(-1.0, min(1.0, self.lane.offset))
 
+    def _lane_guidance_zone(self) -> str:
+        offset = self.lane.offset
+        if offset <= -LANE_GUIDANCE_DRIFT_START:
+            return "left"
+        if offset >= LANE_GUIDANCE_DRIFT_START:
+            return "right"
+        if abs(offset) <= LANE_GUIDANCE_CENTER_MAX:
+            return "center"
+        if self._lane_guidance_state in {"left", "right"}:
+            return self._lane_guidance_state
+        return "center"
+
+    def _update_lane_guidance_audio(self) -> None:
+        if self.ctx.settings.steering_assist == "off":
+            self._lane_guidance_state = "center"
+            return
+        zone = self._lane_guidance_zone()
+        previous = self._lane_guidance_state
+        if zone == previous:
+            return
+        self._lane_guidance_state = zone
+        if zone == "left":
+            self.ctx.audio.play("vehicle/lane_drift", volume=0.45, pan=-LANE_GUIDANCE_PAN)
+        elif zone == "right":
+            self.ctx.audio.play("vehicle/lane_drift", volume=0.45, pan=LANE_GUIDANCE_PAN)
+        elif previous in {"left", "right"}:
+            self.ctx.audio.play("vehicle/lane_centered", volume=0.45, pan=0.0)
+
     def _update_audio(self, dt: float = 0.0) -> None:
         t = self.truck
         audio = self.ctx.audio
@@ -324,6 +356,7 @@ class DrivingUpdateMixin:
         eff = self.weather.effects
         audio.set_weather(eff.sound)
         audio.set_wind(eff.wind)
+        self._update_lane_guidance_audio()
         rumble = self.lane.rumble_level()
         if (
             rumble > 0.0

@@ -36,6 +36,8 @@ current idle, start, and shutdown cues.
 | Air dryer purge | `vehicle/air_dryer_purge.ogg` | ElevenLabs-generated compressor cut-out purge, played when air pressure is ready |
 | Low air buzzer | `vehicle/low_air_buzzer.ogg` | ElevenLabs-generated low-air-pressure / spring-brake warning buzzer |
 | Highway road bed | `vehicle/road.ogg` | ElevenLabs-generated in-cab road ambience |
+| Lane drift | `vehicle/lane_drift.ogg` | ElevenLabs-generated directional lane drift beep |
+| Lane centered | `vehicle/lane_centered.ogg` | ElevenLabs-generated centered-lane confirmation chime |
 
 ## Weather
 

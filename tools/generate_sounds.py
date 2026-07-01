@@ -72,6 +72,20 @@ SPECS: dict[str, tuple[str, float, float]] = {
         2.5,
         0.6,
     ),
+    "vehicle/lane_centered": (
+        "Very short calm centered-lane confirmation sound for an audio driving "
+        "game, soft two-note dashboard chime, clear and positive but subtle, "
+        "heard inside a truck cab, no speech, no music, no whoosh",
+        0.9,
+        0.75,
+    ),
+    "vehicle/lane_drift": (
+        "Very short lane drift warning beep for an audio driving game, single "
+        "clean dashboard beep, clear direction cue when panned left or right, "
+        "subtle but easy to hear over truck engine noise, no speech, no music",
+        0.5,
+        0.75,
+    ),
 }
 
 

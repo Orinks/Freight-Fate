@@ -11,6 +11,9 @@
   running now starts a backing loop through the main audio backend, and automatic
   reverse selection still gets a spoken confirmation. Thanks to ashleygrobler04
   for the original reverse-loop PR.
+- **Lane drift now cues direction before the rumble strip.** When lane drift is
+  enabled, a short beep now plays from the side you drift toward, and a dedicated
+  centered-lane chime confirms when you are back in the lane.
 - **Hazard clears are easier to hear, and speech backs off faster.** Passing a
   road hazard now plays a short achievement-like confirmation sound, and urgent
   events plus driving warnings clear stale spoken messages so old alerts do not

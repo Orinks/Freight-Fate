@@ -119,6 +119,7 @@ class DrivingState(DrivingControlsMixin, DrivingUpdateMixin, DrivingEventMixin, 
         self._spring_brake_said = self.truck.spring_brakes_active
         self._brake_lockout_cue_timer = 0.0
         self._lane_rumble_timer = 0.0
+        self._lane_guidance_state = "center"
         self._reverse_cue_active = False
         self._status_text = "Press E to start the engine."
 
