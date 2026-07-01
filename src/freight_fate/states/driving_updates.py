@@ -20,12 +20,20 @@ class DrivingUpdateMixin:
         ramp = dt * 2.2
         self._brake_lockout_cue_timer = max(0.0, self._brake_lockout_cue_timer - dt)
         self._lane_rumble_timer = max(0.0, self._lane_rumble_timer - dt)
-        accelerating = keys[pygame.K_UP]
-        braking_key = keys[pygame.K_DOWN]
+        # Controller triggers/clutch are analog held positions blended in below;
+        # the keyboard keys keep their ramped behavior so both devices work.
+        pad = self.ctx.controller
+        pad_on = pad.active
+        pad_throttle = pad.throttle if pad_on else 0.0
+        pad_brake = pad.brake if pad_on else 0.0
+        key_up = keys[pygame.K_UP]
+        key_down = keys[pygame.K_DOWN]
+        accelerating = key_up or pad_throttle > 0.05
+        braking_key = key_down or pad_brake > 0.05
         backing = self._update_reverse_controls(accelerating, braking_key)
         if accelerating and not backing and t.air_brakes_holding:
             self._maybe_say_air_brake_lockout()
-        if accelerating and not backing:
+        if key_up and not backing:
             if t.engine_brake:
                 t.engine_brake = False
                 self.ctx.say_event("Engine brake off.", interrupt=False)
@@ -34,14 +42,21 @@ class DrivingUpdateMixin:
             t.throttle = min(0.45, t.throttle + ramp)
         else:
             t.throttle = max(0.0, t.throttle - ramp * 2)
-        braking = (braking_key and not backing) or (accelerating and t.velocity_mps < -0.1)
-        if braking:
-            new_brake = min(1.0, t.brake + ramp * 1.5)
-            if t.brake < 0.05 and new_brake >= 0.05 and abs(t.velocity_mps) > 1:
-                self.ctx.audio.play("vehicle/brake_air", volume=0.6)
-            t.brake = new_brake
+        if pad_throttle > 0.05 and not backing:
+            if t.engine_brake:
+                t.engine_brake = False
+                self.ctx.say_event("Engine brake off.", interrupt=False)
+            t.throttle = max(t.throttle, pad_throttle)
+        # Keyboard ramps the brake up and down; the analog trigger sets a direct
+        # held floor on top of that.
+        braking_ramp = (key_down and not backing) or (accelerating and t.velocity_mps < -0.1)
+        if braking_ramp:
+            t.brake = min(1.0, t.brake + ramp * 1.5)
         else:
             t.brake = max(0.0, t.brake - ramp * 3)
+        if pad_brake > 0.05 and not backing:
+            t.brake = max(t.brake, pad_brake)
+        braking = braking_ramp or (pad_brake > 0.05 and not backing)
         emergency = keys[pygame.K_b]
         if emergency:
             # no ramp: slams to full application instantly, plus spring brakes
@@ -50,8 +65,21 @@ class DrivingUpdateMixin:
             t.throttle = 0.0
             t.brake = 1.0
         t.emergency_brake = emergency
+        # Air hiss only on the rising edge of applying the brake. A hysteresis
+        # flag (arm at 0.05, release below 0.02) keeps a steady analog trigger --
+        # or a held key -- from retriggering the sound frame after frame. The
+        # emergency brake plays its own louder cue, so it only arms the flag.
+        if t.brake >= 0.05:
+            if not self._brake_air_hissed and not emergency and abs(t.velocity_mps) > 1:
+                self.ctx.audio.play("vehicle/brake_air", volume=0.6)
+            self._brake_air_hissed = True
+        elif t.brake < 0.02:
+            self._brake_air_hissed = False
         clutch_pressed = keys[pygame.K_LSHIFT] or keys[pygame.K_RSHIFT]
-        t.transmission.clutch = 1.0 if clutch_pressed and not t.transmission.automatic else 0.0
+        clutch_val = 1.0 if clutch_pressed else 0.0
+        if pad_on:
+            clutch_val = max(clutch_val, pad.clutch)
+        t.transmission.clutch = clutch_val if not t.transmission.automatic else 0.0
         self._update_lane(keys, dt)
         self._update_cruise(dt, braking, accelerating)
 
@@ -70,7 +98,8 @@ class DrivingUpdateMixin:
             self.ctx.audio.engine_stop()
             if t.stalled:
                 self.ctx.say_event(
-                    "The engine stalled. Press E to restart, and use a lower gear at low speed.",
+                    f"The engine stalled. Press {self.ctx.control_hint('engine')} to restart, "
+                    "and use a lower gear at low speed.",
                     interrupt=True,
                 )
             elif t.fuel_gal <= 0:
@@ -124,16 +153,18 @@ class DrivingUpdateMixin:
                 if self._terse_speech()
                 else (
                     f"Air pressure {t.air_pressure_psi:.0f} psi. Wait for 100 psi, "
-                    "then press P to release the parking brake."
+                    f"then press {self.ctx.control_hint('parking_brake')} "
+                    "to release the parking brake."
                 )
             )
             self.ctx.say_event(message, interrupt=False)
         elif t.parking_brake:
-            self._set_status("Parking brake set. Press P to release it.")
+            brake_hint = self.ctx.control_hint("parking_brake")
+            self._set_status(f"Parking brake set. Press {brake_hint} to release it.")
             message = (
                 "Parking brake set."
                 if self._terse_speech()
-                else "Parking brake set. Press P to release it."
+                else f"Parking brake set. Press {brake_hint} to release it."
             )
             self.ctx.say_event(message, interrupt=False)
 
@@ -178,13 +209,14 @@ class DrivingUpdateMixin:
             # re-announce it.
             self._air_ready_said = True
             self.ctx.audio.play("vehicle/air_dryer_purge", volume=0.65)
-            self._set_status("Air ready. Press P to release the parking brake.")
+            brake_hint = self.ctx.control_hint("parking_brake")
+            self._set_status(f"Air ready. Press {brake_hint} to release the parking brake.")
             message = (
                 f"Air ready: {t.air_pressure_psi:.0f} psi."
                 if self._terse_speech()
                 else (
                     f"Air pressure ready at {t.air_pressure_psi:.0f} psi. "
-                    "Press P to release the parking brake."
+                    f"Press {brake_hint} to release the parking brake."
                 )
             )
             self.ctx.say_event(message, interrupt=False)
@@ -284,6 +316,11 @@ class DrivingUpdateMixin:
             steer -= 1.0
         if keys[pygame.K_RIGHT]:
             steer += 1.0
+        # The left stick provides analog steering when the keys are idle.
+        if steer == 0.0:
+            pad = self.ctx.controller
+            if pad.active and pad.steering:
+                steer = pad.steering
         self.lane.steering = steer
         leg = self.route.legs[self.trip.current_leg_index]
         curve = 0.0

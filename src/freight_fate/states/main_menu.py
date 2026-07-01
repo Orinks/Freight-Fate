@@ -807,6 +807,13 @@ class SettingsCategoryState(MenuState):
                     "is shared, never your save files or personal details. "
                     "Has no effect if Discord is not running.",
                 ),
+                MenuItem(
+                    lambda: f"Controller: {'enabled' if s.controller_enabled else 'disabled'}",
+                    lambda: self._toggle_controller(1),
+                    help="Accept game-controller input alongside the keyboard. "
+                    "The keyboard always stays active. The first connected "
+                    "controller is used automatically.",
+                ),
                 MenuItem("Back", self.go_back),
             ]
         if self.category == "audio":
@@ -875,6 +882,10 @@ class SettingsCategoryState(MenuState):
         else:
             super().handle_event(event)
 
+    def adjust(self, direction: int) -> None:
+        # D-pad left/right on a controller maps to the same per-item adjust.
+        self._adjust(direction)
+
     def _adjust(self, direction: int) -> None:
         if self.category == "speech":
             actions = [action for _, action, _ in self._speech_control_specs()]
@@ -887,6 +898,7 @@ class SettingsCategoryState(MenuState):
                     self._cycle_hos,
                     self._cycle_steering,
                     self._toggle_discord_presence,
+                    self._toggle_controller,
                 ],
                 "audio": [
                     lambda d: self._volume("master_volume", 0.1 * d),
@@ -1048,6 +1060,11 @@ class SettingsCategoryState(MenuState):
     def _toggle_discord_presence(self, _d: int) -> None:
         self.ctx.settings.discord_presence = not self.ctx.settings.discord_presence
         self.ctx.apply_presence()
+        self._announce()
+
+    def _toggle_controller(self, _d: int) -> None:
+        self.ctx.settings.controller_enabled = not self.ctx.settings.controller_enabled
+        self.ctx.apply_controller()
         self._announce()
 
     def _cycle_verbosity(self, d: int) -> None:

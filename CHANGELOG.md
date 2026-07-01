@@ -1,6 +1,19 @@
 # Changelog
 
 ## Unreleased
+### Added
+
+- **Game controllers are now supported, alongside the keyboard.** Plug in an
+  Xbox, PlayStation, or other compatible controller and drive by feel: the right
+  and left triggers are the gas and brake, the left stick steers, the left bumper
+  is the clutch, and the A and X buttons shift up and down. Menus map to the
+  D-pad, the A button confirms, the B button goes back, and the Back button reads
+  controller help. The first controller is picked up automatically, hot-plugging
+  and unplugging are detected mid-game (unplugging pauses the drive), and spoken
+  prompts name controller buttons when you are on a pad and keys when you are on
+  the keyboard. Turn it off under Settings, Gameplay, Controller. The keyboard
+  always stays active.
+
 ### Fixed
 
 - **Trucks into New York now take the George Washington Bridge, not the Holland

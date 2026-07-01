@@ -32,11 +32,7 @@ class DrivingControlsMixin:
         elif key in GEAR_KEYS and not tr.automatic:
             self._manual_shift(GEAR_KEYS[key])
         elif key == pygame.K_j:
-            if self.truck.throttle > 0.05 and not self.truck.engine_brake:
-                self.ctx.say("Release the accelerator before turning the engine brake on.")
-                return
-            self.truck.engine_brake = not self.truck.engine_brake
-            self.ctx.say("Engine brake on." if self.truck.engine_brake else "Engine brake off.")
+            self._toggle_engine_brake()
         elif key == pygame.K_p:
             self._toggle_parking_brake()
         elif key == pygame.K_h:
@@ -78,53 +74,174 @@ class DrivingControlsMixin:
         elif key == pygame.K_u:
             self._speak_upcoming()
         elif key == pygame.K_F1:
-            objective_help = (
-                f"Your current objective is pickup: drive to {self._pickup_facility_text()}, "
-                "stop at the gate, then check in and load. "
-                if self.phase == DRIVE_PHASE_PICKUP
-                else "Pickup and loading are complete. At your destination, stop, "
-                "then dock and deliver. "
+            self._speak_driving_help()
+
+    def _objective_help(self) -> str:
+        return (
+            f"Your current objective is pickup: drive to {self._pickup_facility_text()}, "
+            "stop at the gate, then check in and load. "
+            if self.phase == DRIVE_PHASE_PICKUP
+            else "Pickup and loading are complete. At your destination, stop, "
+            "then dock and deliver. "
+        )
+
+    def _speak_driving_help(self) -> None:
+        """F1 help: keyboard or controller layout, following the device in use."""
+        if self.ctx.controller.device == "controller":
+            self._speak_controller_help()
+        else:
+            self._speak_keyboard_help()
+
+    def _speak_keyboard_help(self) -> None:
+        objective_help = self._objective_help()
+        self.ctx.say(
+            "Hold Up arrow to accelerate, Down arrow to brake. "
+            "When stopped in automatic, hold Down arrow to reverse slowly; "
+            "touch Up arrow to brake and return to forward. "
+            "Hold B for the emergency brake, the hardest possible stop. "
+            "K sets adaptive cruise at your current speed; bad weather "
+            "increases the following gap, sharp posted-limit drops make it "
+            "slow early, and braking cancels. Plus and minus, including "
+            "the keypad keys, raise and lower the cruise speed by five, so "
+            "you can dial it up to the speed you want; it will not hold "
+            "above the posted limit. "
+            "X takes the next announced exit, called out by its number "
+            "when known: slow to 45 for the ramp, then brake to a stop for "
+            "the rest stop menu. X also signals a pull-over if a trooper "
+            "lights you up for speeding: signal, then brake to a stop. "
+            "C also speaks the date and season. "
+            "E starts the engine, and stops it only below 5 miles per hour. "
+            "Air pressure must build before the truck can move. "
+            "Press P to release or set the parking brake; if pressure is "
+            "below 100 psi, wait with the engine running. "
+            f"{objective_help}"
+            "Space speed, and cruise set speed when cruise is on. "
+            "S posted speed limit. Tab status menu. F fuel. "
+            "C clock, deadline, and hours of service. "
+            "R route. Shift R next listed highway exit. V weather. L lane position. "
+            "A repeats the last announcement. U reads what is coming up: "
+            "imposed limits, stops, and exits ahead. "
+            "Left or Right Control stops the driving event voice. "
+            "Left and Right arrows steer when lane drift is enabled. "
+            "T route POI menu when already stopped "
+            "at one: available actions may include fuel, break, sleep, "
+            "inspect, roadside assistance, or save when source-backed. H horn. "
+            "J engine brake. Escape pause menu. "
+            + (
+                ""
+                if self.truck.transmission.automatic
+                else "Hold Left Shift for clutch, then 1 through 0 for gears, "
+                "Backspace for reverse, N for neutral."
             )
-            self.ctx.say(
-                "Hold Up arrow to accelerate, Down arrow to brake. "
-                "When stopped in automatic, hold Down arrow to reverse slowly; "
-                "touch Up arrow to brake and return to forward. "
-                "Hold B for the emergency brake, the hardest possible stop. "
-                "K sets adaptive cruise at your current speed; bad weather "
-                "increases the following gap, sharp posted-limit drops make it "
-                "slow early, and braking cancels. Plus and minus, including "
-                "the keypad keys, raise and lower the cruise speed by five, so "
-                "you can dial it up to the speed you want; it will not hold "
-                "above the posted limit. "
-                "X takes the next announced exit, called out by its number "
-                "when known: slow to 45 for the ramp, then brake to a stop for "
-                "the rest stop menu. X also signals a pull-over if a trooper "
-                "lights you up for speeding: signal, then brake to a stop. "
-                "C also speaks the date and season. "
-                "E starts the engine, and stops it only below 5 miles per hour. "
-                "Air pressure must build before the truck can move. "
-                "Press P to release or set the parking brake; if pressure is "
-                "below 100 psi, wait with the engine running. "
-                f"{objective_help}"
-                "Space speed, and cruise set speed when cruise is on. "
-                "S posted speed limit. Tab status menu. F fuel. "
-                "C clock, deadline, and hours of service. "
-                "R route. Shift R next listed highway exit. V weather. L lane position. "
-                "A repeats the last announcement. U reads what is coming up: "
-                "imposed limits, stops, and exits ahead. "
-                "Left or Right Control stops the driving event voice. "
-                "Left and Right arrows steer when lane drift is enabled. "
-                "T route POI menu when already stopped "
-                "at one: available actions may include fuel, break, sleep, "
-                "inspect, roadside assistance, or save when source-backed. H horn. "
-                "J engine brake. Escape pause menu. "
-                + (
-                    ""
-                    if self.truck.transmission.automatic
-                    else "Hold Left Shift for clutch, then 1 through 0 for gears, "
-                    "Backspace for reverse, N for neutral."
-                )
-            )
+        )
+
+    def _speak_controller_help(self) -> None:
+        """Controller layout help, spoken from the Back button or F1 on a pad."""
+        manual = not self.truck.transmission.automatic
+        gears = (
+            "The A button shifts up a gear and the X button shifts down, while "
+            "you hold the left bumper for the clutch. "
+            if manual
+            else ""
+        )
+        self.ctx.say(
+            "Right trigger is the gas, left trigger the brake; press the left "
+            "trigger fully for the hardest stop. The left stick steers when lane "
+            "drift is on. "
+            f"{gears}"
+            "The Y button sets adaptive cruise; hold the right bumper and press "
+            "D-pad left or right to lower or raise the cruise speed by five. "
+            "D-pad down takes the next announced exit, or signals a pull-over. "
+            "D-pad up reads your route, D-pad left the weather, D-pad right the "
+            "clock. The B button speaks your speed. Click the left stick to honk, "
+            "the right stick to toggle the engine brake. "
+            "Hold the right bumper for the second layer: plus A starts or stops "
+            "the engine, plus B reads fuel, plus Y sets or releases the parking "
+            "brake, plus D-pad up reads the next listed exit, plus D-pad down "
+            "opens rest-stop actions, and plus Start opens the status menu. "
+            "Start pauses and unpauses. The Back button repeats this help. "
+            f"{self._objective_help()}"
+        )
+
+    def _toggle_engine_brake(self) -> None:
+        if self.truck.throttle > 0.05 and not self.truck.engine_brake:
+            self.ctx.say("Release the accelerator before turning the engine brake on.")
+            return
+        self.truck.engine_brake = not self.truck.engine_brake
+        self.ctx.say("Engine brake on." if self.truck.engine_brake else "Engine brake off.")
+
+    def _shift_relative(self, delta: int) -> None:
+        """Controller next/previous gear: step one gear from the current one."""
+        tr = self.truck.transmission
+        if tr.automatic:
+            return
+        target = max(REVERSE, min(tr.num_gears, tr.gear + delta))
+        if target != tr.gear:
+            self._manual_shift(target)
+
+    def handle_controller(self, event: pygame.event.Event, manager) -> None:
+        button = event.button
+        if event.type == pygame.CONTROLLERBUTTONUP:
+            if button == pygame.CONTROLLER_BUTTON_LEFTSTICK:
+                self.ctx.audio.horn_stop()  # release L3 to stop the horn
+            return
+        if event.type != pygame.CONTROLLERBUTTONDOWN:
+            return
+        if manager.modifier:
+            self._handle_controller_modified(button)
+            return
+        if button == pygame.CONTROLLER_BUTTON_A:
+            self._shift_relative(1)
+        elif button == pygame.CONTROLLER_BUTTON_X:
+            self._shift_relative(-1)
+        elif button == pygame.CONTROLLER_BUTTON_B:
+            self._speak_speed()
+        elif button == pygame.CONTROLLER_BUTTON_Y:
+            self._toggle_cruise()
+        elif button == pygame.CONTROLLER_BUTTON_START:
+            self.ctx.audio.horn_stop()
+            self.ctx.push_state(PauseMenuState(self.ctx, self))
+        elif button == pygame.CONTROLLER_BUTTON_LEFTSTICK:
+            self.ctx.audio.horn_start()
+        elif button == pygame.CONTROLLER_BUTTON_RIGHTSTICK:
+            self._toggle_engine_brake()
+        elif button == pygame.CONTROLLER_BUTTON_DPAD_UP:
+            self.ctx.say(self.trip.progress_summary(self.ctx.settings.imperial_units))
+        elif button == pygame.CONTROLLER_BUTTON_DPAD_DOWN:
+            if self._pull_over is not None:
+                self._signal_pull_over()
+            else:
+                self._take_exit()
+        elif button == pygame.CONTROLLER_BUTTON_DPAD_LEFT:
+            self._speak_weather()
+        elif button == pygame.CONTROLLER_BUTTON_DPAD_RIGHT:
+            self._speak_clock()
+        elif button == pygame.CONTROLLER_BUTTON_BACK:
+            self._speak_controller_help()
+
+    def _handle_controller_modified(self, button: int) -> None:
+        """Secondary bindings while the right bumper (modifier) is held."""
+        if button == pygame.CONTROLLER_BUTTON_DPAD_UP:
+            self.ctx.say(self.trip.next_exit_context())
+        elif button == pygame.CONTROLLER_BUTTON_DPAD_DOWN:
+            self._try_rest_stop()
+        elif button == pygame.CONTROLLER_BUTTON_DPAD_LEFT:
+            self._adjust_cruise(-CRUISE_STEP_MPH)
+        elif button == pygame.CONTROLLER_BUTTON_DPAD_RIGHT:
+            self._adjust_cruise(CRUISE_STEP_MPH)
+        elif button == pygame.CONTROLLER_BUTTON_A:
+            self._toggle_engine()
+        elif button == pygame.CONTROLLER_BUTTON_B:
+            self._speak_fuel()
+        elif button == pygame.CONTROLLER_BUTTON_Y:
+            self._toggle_parking_brake()
+        elif button == pygame.CONTROLLER_BUTTON_START:
+            self.ctx.push_state(DrivingStatusState(self.ctx, self))
+
+    def on_controller_disconnect(self) -> None:
+        # Pause so an unplugged pad mid-drive does not leave the truck rolling.
+        self.ctx.audio.horn_stop()
+        self.ctx.push_state(PauseMenuState(self.ctx, self))
 
     def _toggle_engine(self) -> None:
         t = self.truck
@@ -162,14 +279,15 @@ class DrivingControlsMixin:
         t = self.truck
         if self._terse_speech():
             return f"Air pressure {t.air_pressure_psi:.0f} psi."
+        brake_hint = self.ctx.control_hint("parking_brake")
         if t.parking_brake:
             if t.air_ready:
-                return "Air pressure ready. Press P to release the parking brake."
+                return f"Air pressure ready. Press {brake_hint} to release the parking brake."
             return (
                 f"Air pressure {t.air_pressure_psi:.0f} psi. "
-                "Wait for 100 psi, then press P to release the parking brake."
+                f"Wait for 100 psi, then press {brake_hint} to release the parking brake."
             )
-        return "Air pressure ready. Hold the Up arrow to drive."
+        return f"Air pressure ready. Hold {self.ctx.control_hint('accelerate')} to drive."
 
     def _toggle_parking_brake(self) -> None:
         t = self.truck
@@ -207,7 +325,9 @@ class DrivingControlsMixin:
                 self.tutorial.on_gear_engaged()
         elif result.grind:
             self.ctx.audio.play("vehicle/gear_grind")
-            self.ctx.say("Grinding gears! Hold Left Shift to press the clutch first.")
+            self.ctx.say(
+                f"Grinding gears! Hold {self.ctx.control_hint('clutch')} to press the clutch first."
+            )
         else:
             self.ctx.say(result.message)
 

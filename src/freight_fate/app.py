@@ -12,6 +12,7 @@ import pygame
 from . import __version__
 from .achievements import AchievementAward, award
 from .audio import AudioEngine
+from .controller import ControllerManager
 from .data.world import World, get_world
 from .discord_presence import DiscordPresence
 from .models.economy import Economy
@@ -28,6 +29,16 @@ transcript = logging.getLogger("freight_fate.transcript")
 
 WINDOW_SIZE = (900, 640)
 FPS = 60
+
+_CONTROLLER_EVENTS = frozenset(
+    {
+        pygame.CONTROLLERBUTTONDOWN,
+        pygame.CONTROLLERBUTTONUP,
+        pygame.CONTROLLERAXISMOTION,
+        pygame.CONTROLLERDEVICEADDED,
+        pygame.CONTROLLERDEVICEREMOVED,
+    }
+)
 BG_COLOR = (12, 12, 16)
 TEXT_COLOR = (235, 235, 225)
 HILIGHT_COLOR = (255, 210, 90)
@@ -52,6 +63,7 @@ class GameContext:
         self._app = app
         self.speech: Speech = app.speech
         self.audio: AudioEngine = app.audio
+        self.controller: ControllerManager = app.controller
         self.settings: Settings = app.settings
         self.world: World = app.world
         self.economy: Economy = app.economy
@@ -149,6 +161,14 @@ class GameContext:
     def apply_presence(self) -> None:
         """Reflect the Discord presence setting (e.g. after a settings change)."""
         self._app.presence.set_enabled(self.settings.discord_presence)
+
+    def apply_controller(self) -> None:
+        """Reflect the controller setting (e.g. after a settings change)."""
+        self.controller.set_enabled(self.settings.controller_enabled)
+
+    def control_hint(self, action: str) -> str:
+        """Name a control for a spoken prompt, following the active device."""
+        return self.controller.hint(action)
 
     def apply_speech(self) -> None:
         self.speech.select_event_backend(
@@ -253,6 +273,10 @@ class GameContext:
 class App:
     def __init__(self) -> None:
         os.environ.setdefault("PYGAME_HIDE_SUPPORT_PROMPT", "1")
+        # Rumble is deferred; these opt PS4/PS5 pads into HIDAPI rumble and are
+        # kept here, commented out, until we know they are needed.
+        # os.environ['SDL_JOYSTICK_HIDAPI_PS4_RUMBLE'] = '1'
+        # os.environ['SDL_JOYSTICK_HIDAPI_PS5_RUMBLE'] = '1'
         if os.environ.get("FREIGHT_FATE_NO_SPEECH"):
             os.environ["SDL_VIDEODRIVER"] = "dummy"
             os.environ["SDL_AUDIODRIVER"] = "dummy"
@@ -269,6 +293,7 @@ class App:
         self.world = get_world()
         self.economy = Economy()
         self.presence = DiscordPresence(enabled=self.settings.discord_presence)
+        self.controller = ControllerManager(enabled=self.settings.controller_enabled)
         self.ctx = GameContext(self)
         self.ctx.apply_volumes()
         self.ctx.apply_speech()
@@ -304,6 +329,18 @@ class App:
             self.states.pop().exit()
         self.push_state(state)
 
+    def _dispatch_controller(self, event: pygame.event.Event) -> None:
+        """Feed a controller event to the manager, then to the active state.
+
+        The manager updates its cached axis/modifier/hot-plug state first;
+        only button presses are then handed to the state, which routes them
+        to the same methods keyboard events already call.
+        """
+        self.controller.process_event(event)
+        button_event = event.type in (pygame.CONTROLLERBUTTONDOWN, pygame.CONTROLLERBUTTONUP)
+        if button_event and self.controller.active and self.state is not None:
+            self.state.handle_controller(event, self.controller)
+
     # -- main loop ------------------------------------------------------------
 
     def run(self, max_frames: int | None = None) -> None:
@@ -321,8 +358,28 @@ class App:
                 for event in pygame.event.get():
                     if event.type == pygame.QUIT:
                         self.running = False
+                    elif event.type in _CONTROLLER_EVENTS:
+                        self._dispatch_controller(event)
                     elif self.state is not None:
+                        if event.type == pygame.KEYDOWN:
+                            self.controller.note_keyboard()
                         self.state.handle_event(event)
+                # Auto-repeat (held D-pad left/right) and analog smoothing.
+                # Synthetic repeats go straight to the state (bypassing the
+                # manager, whose press state must not be reset) and only where
+                # the menu wants adjust-repeat -- driving keeps D-pad discrete.
+                repeats = self.controller.tick(dt)
+                state = self.state
+                if state is not None and getattr(state, "wants_controller_repeat", False):
+                    for event in repeats:
+                        state.handle_controller(event, self.controller)
+                if self.controller.take_disconnect():
+                    self.ctx.say(
+                        "Controller disconnected. You can keep playing with the "
+                        "keyboard, or reconnect your controller.",
+                    )
+                    if self.state is not None:
+                        self.state.on_controller_disconnect()
                 if self.state is not None:
                     self.state.update(dt)
                     self.presence.update(self.state.presence())
@@ -363,6 +420,7 @@ class App:
             self.ctx.profile.save()
         self.settings.save()
         self.presence.shutdown()
+        self.controller.shutdown()
         self.audio.shutdown()
         self.speech.shutdown()
         pygame.quit()

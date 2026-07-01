@@ -270,7 +270,10 @@ class DrivingEventMixin:
         phrase = self._destination_exit_phrase(stop)
         if self._terse_speech():
             return f"In {ahead:.0f} miles, {phrase}, destination exit."
-        return f"In {ahead:.0f} miles, {phrase}, destination exit. Press X to take it."
+        return (
+            f"In {ahead:.0f} miles, {phrase}, destination exit. "
+            f"Press {self.ctx.control_hint('take_exit')} to take it."
+        )
 
     def _check_destination_exit(self) -> None:
         stop = self._destination_exit_stop()
@@ -562,7 +565,8 @@ class DrivingEventMixin:
         self.ctx.audio.play("ui/error")
         self.ctx.say_event(
             f"You ran out of fuel. Roadside rescue brought thirty "
-            f"gallons for {fee:,.0f} dollars. Press E to restart "
+            f"gallons for {fee:,.0f} dollars. Press "
+            f"{self.ctx.control_hint('engine')} to restart "
             "the engine, and plan your fuel stops.",
             interrupt=True,
         )
@@ -643,7 +647,8 @@ class DrivingEventMixin:
             else:
                 reroute_text = (
                     "You continue to the next safe turnaround and loop back onto "
-                    "the approach. The destination exit is ahead again; press X "
+                    "the approach. The destination exit is ahead again; press "
+                    f"{self.ctx.control_hint('take_exit')} "
                     "when you are close enough to take it."
                 )
         self.ctx.audio.play("ui/warning")
