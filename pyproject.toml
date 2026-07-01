@@ -30,6 +30,10 @@ dependencies = [
 
 [project.scripts]
 freight-fate = "freight_fate.app:main"
+# Controller input diagnostic: logs the game's GameController events alongside
+# the raw joystick layer to a file, for tracking down pads (e.g. DualSense)
+# whose triggers/shoulders do not map through. Run: uv run controller-diagnostics
+controller-diagnostics = "freight_fate.controller_diagnostics:main"
 
 [project.urls]
 Repository = "https://github.com/Orinks/Freight-fate"
@@ -54,6 +58,12 @@ build = [
 tooling = [
     "osmium>=4.0.2",
     "openrouteservice>=2.2.0",
+]
+# Controller input diagnostic (`uv run controller-diagnostics`). It reuses the
+# game's own input stack, so it needs only the core pygame dependency; listed
+# here so the group resolves standalone via `uv run --group controller-diagnostics`.
+controller-diagnostics = [
+    "pygame>=2.6",
 ]
 
 [build-system]
