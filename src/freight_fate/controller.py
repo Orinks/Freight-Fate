@@ -28,6 +28,7 @@ from enum import Enum, auto
 import pygame
 
 from .input_hints import CONTROLLER, KEYBOARD, control_hint
+from .rumble import RumbleEngine
 
 log = logging.getLogger(__name__)
 
@@ -97,13 +98,17 @@ def _deadzone(value: float, dead: float) -> float:
 class ControllerManager:
     """Owns the active controller and translates its events for the game."""
 
-    def __init__(self, enabled: bool = True) -> None:
+    def __init__(self, enabled: bool = True, haptics: bool = True) -> None:
         self.enabled = enabled
+        self._haptics_enabled = haptics
         self.active_device = KEYBOARD  # which device the player last used
         self._controller = None
         self._instance_id: int | None = None
         self._name = ""
         self._disconnected = False  # latched until the app consumes it
+        # Haptics live in their own pygame-free engine; we only supply the
+        # guarded device send/stop and drive it once per frame in tick().
+        self.rumble = RumbleEngine(send=self._device_rumble, stop=self._device_stop_rumble)
 
         # Raw (event) and smoothed (tick) analog targets. The clutch is a digital
         # bumper, so it stays instant like the keyboard Shift and is not smoothed.
@@ -151,6 +156,25 @@ class ControllerManager:
             self._reset_analog()
             self.active_device = KEYBOARD
 
+    def set_haptics_enabled(self, enabled: bool) -> None:
+        self._haptics_enabled = enabled
+        if not enabled:
+            self.rumble.reset()
+
+    # -- haptics device layer -------------------------------------------------
+
+    def _device_rumble(self, low: float, high: float, duration_ms: int) -> None:
+        if not (self.active and self._haptics_enabled) or self._controller is None:
+            return
+        with contextlib.suppress(Exception):  # pragma: no cover - driver dependent
+            self._controller.rumble(low, high, duration_ms)
+
+    def _device_stop_rumble(self) -> None:
+        if self._controller is None:
+            return
+        with contextlib.suppress(Exception):  # pragma: no cover - driver dependent
+            self._controller.stop_rumble()
+
     def _open_first(self) -> None:
         if self._sdl is None:
             return
@@ -181,6 +205,7 @@ class ControllerManager:
         self._throttle = self._brake = 0.0
         self.modifier = False
         self._repeat_button = None
+        self.rumble.reset()
 
     # -- input notification ---------------------------------------------------
 
@@ -272,6 +297,9 @@ class ControllerManager:
 
     def tick(self, dt: float) -> list[pygame.event.Event]:
         """Smooth analog axes and return synthetic D-pad repeat events."""
+        # Always drive the rumble engine so queued effects decay and expire even
+        # when no controller is bound; the device send is guarded either way.
+        self.rumble.tick(dt)
         if not self.active:
             return []
         self._throttle = self._smooth(self._throttle, self._throttle_target, dt)
@@ -320,6 +348,7 @@ class ControllerManager:
         return self._clutch if self.active else 0.0
 
     def shutdown(self) -> None:
+        self.rumble.reset()  # silence the pad before we drop it
         self._controller = None
         if self._sdl is not None:
             with contextlib.suppress(Exception):  # pragma: no cover

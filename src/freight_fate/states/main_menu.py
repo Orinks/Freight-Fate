@@ -814,6 +814,13 @@ class SettingsCategoryState(MenuState):
                     "The keyboard always stays active. The first connected "
                     "controller is used automatically.",
                 ),
+                MenuItem(
+                    lambda: f"Haptics: {'enabled' if s.haptics_enabled else 'disabled'}",
+                    lambda: self._toggle_haptics(1),
+                    help="Rumble feedback on the controller for hazards, hard "
+                    "braking, and the rumble strip. Has no effect without a "
+                    "controller connected.",
+                ),
                 MenuItem("Back", self.go_back),
             ]
         if self.category == "audio":
@@ -1065,6 +1072,11 @@ class SettingsCategoryState(MenuState):
     def _toggle_controller(self, _d: int) -> None:
         self.ctx.settings.controller_enabled = not self.ctx.settings.controller_enabled
         self.ctx.apply_controller()
+        self._announce()
+
+    def _toggle_haptics(self, _d: int) -> None:
+        self.ctx.settings.haptics_enabled = not self.ctx.settings.haptics_enabled
+        self.ctx.apply_haptics()
         self._announce()
 
     def _cycle_verbosity(self, d: int) -> None:

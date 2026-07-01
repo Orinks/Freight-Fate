@@ -65,6 +65,13 @@ class DrivingUpdateMixin:
             t.throttle = 0.0
             t.brake = 1.0
         t.emergency_brake = emergency
+        # Hard braking (emergency or heavy service) shudders the pad while it
+        # lasts; the engine's TTL lets it lapse a few frames after we stop. Only
+        # while moving *forward*: rolling backward, the sim ramps the service
+        # brake to full on its own to arrest the reverse before shifting to
+        # drive, and that must not read as a hard stop and buzz the whole time.
+        if t.velocity_mps > 1 and (emergency or t.brake >= 0.85):
+            self.ctx.controller.rumble.hard_brake(1.0 if emergency else t.brake)
         # Air hiss only on the rising edge of applying the brake. A hysteresis
         # flag (arm at 0.05, release below 0.02) keeps a steady analog trigger --
         # or a held key -- from retriggering the sound frame after frame. The
@@ -175,6 +182,7 @@ class DrivingUpdateMixin:
         if t.air_low_warning and t.engine_on and (not was_low or not self._low_air_said):
             self._low_air_said = True
             self.ctx.audio.play("vehicle/low_air_buzzer", volume=0.7)
+            self.ctx.controller.rumble.alert()
             message = (
                 f"Low air: {t.air_pressure_psi:.0f} psi."
                 if self._terse_speech()
@@ -190,6 +198,7 @@ class DrivingUpdateMixin:
         if t.spring_brakes_active and not was_spring and not self._spring_brake_said:
             self._spring_brake_said = True
             self.ctx.audio.play("vehicle/low_air_buzzer", volume=0.9)
+            self.ctx.controller.rumble.alert()
             message = (
                 "Spring brakes applied."
                 if self._terse_speech()
@@ -269,6 +278,7 @@ class DrivingUpdateMixin:
         if mode not in hos.HOS_NON_ENFORCED_MODES:
             for message in self.hos.check_warnings(mode):
                 self.ctx.audio.play("ui/warning")
+                self.ctx.controller.rumble.alert()
                 self.ctx.say_event(message, interrupt=hos.warning_is_urgent(message))
         self.trip.hos_violation = mode not in hos.HOS_NON_ENFORCED_MODES and self.hos.in_violation(
             mode
@@ -402,6 +412,10 @@ class DrivingUpdateMixin:
         ):
             self._lane_rumble_timer = 0.8
             audio.play("vehicle/rumble_strip", volume=0.25 + rumble * 0.45, pan=self._lane_pan())
+        if rumble > 0.0 and self.ctx.settings.steering_assist != "off":
+            # Harsh, continuous pad buzz while over the rumble strip; refreshed
+            # each frame, it stops on its own once steered back off.
+            self.ctx.controller.rumble.rumble_strip(rumble)
         night = is_night(self.trip.current_hour)
         if night:
             audio.set_ambient("ambient/night")
@@ -479,6 +493,7 @@ class DrivingUpdateMixin:
         if self.truck.speed_mph <= HAZARD_SAFE_MPH:
             self._hazard_deadline = None
             self.ctx.audio.play("events/hazard_clear", volume=0.75)
+            self.ctx.controller.rumble.alert(intensity=0.4)
             self.ctx.say_event("Hazard avoided. Well done.", interrupt=False)
             self.ctx.award_achievement("hazard_avoided", event=True)
             return
@@ -487,6 +502,7 @@ class DrivingUpdateMixin:
             self._hazard_deadline = None
             self.ctx.audio.play("vehicle/collision")
             severity = min(1.0, self.truck.speed_mph / 70.0)
+            self.ctx.controller.rumble.impact(severity)
             self.truck.apply_collision(severity)
             self.ctx.say_event(
                 f"Collision! The truck took damage. "
@@ -526,6 +542,7 @@ class DrivingUpdateMixin:
         self._cancel_cruise()  # the nod takes your hands off the wheel
         self._microsleep_deadline = MICROSLEEP_REACTION_S
         self.ctx.audio.play("vehicle/rumble_strip", volume=1.0)
+        self.ctx.controller.rumble.alert()
         self.ctx.say_event("You are nodding off. Steer or brake now to stay awake!", interrupt=True)
 
     def _update_microsleep(self, keys, dt: float) -> None:
@@ -609,6 +626,7 @@ class DrivingUpdateMixin:
                 self.speeding_strikes += 1
                 after = _speeding_settlement_fine(self.speeding_strikes)
                 self.ctx.audio.play("ui/warning")
+                self.ctx.controller.rumble.alert()
                 # Surface the cost the moment the strike lands instead of only as a
                 # silent deduction at delivery, so the price of speeding is felt now.
                 if after > before:
@@ -647,6 +665,7 @@ class DrivingUpdateMixin:
         patrol = self.trip.active_patrol_at(self.trip.position_mi)
         where = patrol.reason if patrol is not None else "patrol"
         self.ctx.audio.play("events/police_siren")
+        self.ctx.controller.rumble.alert()
         self.ctx.say_event(
             f"Lights and siren behind you. A trooper on this {where} clocked you "
             f"at {self.ctx.settings.speed_text(self.truck.speed_mph)} in a "

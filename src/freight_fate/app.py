@@ -166,6 +166,10 @@ class GameContext:
         """Reflect the controller setting (e.g. after a settings change)."""
         self.controller.set_enabled(self.settings.controller_enabled)
 
+    def apply_haptics(self) -> None:
+        """Reflect the haptics setting (e.g. after a settings change)."""
+        self.controller.set_haptics_enabled(self.settings.haptics_enabled)
+
     def control_hint(self, action: str) -> str:
         """Name a control for a spoken prompt, following the active device."""
         return self.controller.hint(action)
@@ -273,10 +277,10 @@ class GameContext:
 class App:
     def __init__(self) -> None:
         os.environ.setdefault("PYGAME_HIDE_SUPPORT_PROMPT", "1")
-        # Rumble is deferred; these opt PS4/PS5 pads into HIDAPI rumble and are
-        # kept here, commented out, until we know they are needed.
-        # os.environ['SDL_JOYSTICK_HIDAPI_PS4_RUMBLE'] = '1'
-        # os.environ['SDL_JOYSTICK_HIDAPI_PS5_RUMBLE'] = '1'
+        # Opt PS4/PS5 pads into HIDAPI rumble so their motors work like Xbox
+        # pads. Must be set before pygame.init(); Xbox/XInput needs no flag.
+        os.environ.setdefault("SDL_JOYSTICK_HIDAPI_PS4_RUMBLE", "1")
+        os.environ.setdefault("SDL_JOYSTICK_HIDAPI_PS5_RUMBLE", "1")
         if os.environ.get("FREIGHT_FATE_NO_SPEECH"):
             os.environ["SDL_VIDEODRIVER"] = "dummy"
             os.environ["SDL_AUDIODRIVER"] = "dummy"
@@ -293,7 +297,10 @@ class App:
         self.world = get_world()
         self.economy = Economy()
         self.presence = DiscordPresence(enabled=self.settings.discord_presence)
-        self.controller = ControllerManager(enabled=self.settings.controller_enabled)
+        self.controller = ControllerManager(
+            enabled=self.settings.controller_enabled,
+            haptics=self.settings.haptics_enabled,
+        )
         self.ctx = GameContext(self)
         self.ctx.apply_volumes()
         self.ctx.apply_speech()

@@ -20,6 +20,7 @@ class DrivingEventMixin:
             if self._cruise_mph is not None:
                 self._cancel_cruise()  # hands back on the wheel to brake
             self.ctx.audio.play(sound or "ui/warning")
+            self.ctx.controller.rumble.hazard()  # 750 ms right->left sweep
             # The deadline is braking physics plus reaction slack. The physics
             # part is whatever full service brakes need from the current speed
             # on this surface; the rolled window covers hearing the warning and
@@ -136,6 +137,7 @@ class DrivingEventMixin:
             evidence = ["HOS/ELD violation"]
         evidence_text = ", ".join(evidence)
         self.ctx.audio.play("ui/error")
+        self.ctx.controller.rumble.alert()
         serious_hos = (
             self.ctx.settings.hos_mode not in hos.HOS_NON_ENFORCED_MODES
             and self.hos.in_violation(self.ctx.settings.hos_mode)
