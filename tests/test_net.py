@@ -25,17 +25,19 @@ def test_describe_error_speaks_http_codes():
 
 def test_describe_error_unwraps_urlerror_reasons():
     cert = ssl.SSLCertVerificationError("unable to get local issuer certificate")
-    assert (net.describe_error(urllib.error.URLError(cert))
-            == "The secure connection could not be verified.")
+    assert (
+        net.describe_error(urllib.error.URLError(cert))
+        == "The secure connection could not be verified."
+    )
     dns = socket.gaierror(11001, "getaddrinfo failed")
-    assert (net.describe_error(urllib.error.URLError(dns))
-            == "The server address could not be found.")
+    assert (
+        net.describe_error(urllib.error.URLError(dns)) == "The server address could not be found."
+    )
 
 
 def test_describe_error_common_failures():
     assert net.describe_error(TimeoutError()) == "The connection timed out."
-    assert (net.describe_error(ConnectionResetError())
-            == "The connection was refused or dropped.")
+    assert net.describe_error(ConnectionResetError()) == "The connection was refused or dropped."
     assert net.describe_error(ssl.SSLError()) == "The secure connection failed."
 
 

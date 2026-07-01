@@ -263,7 +263,6 @@ def _join_destinations(destinations: tuple[str, ...]) -> str:
     return f"{', '.join(items[:-1])}, and {items[-1]}"
 
 
-
 @dataclass(frozen=True)
 class City:
     name: str
@@ -381,9 +380,11 @@ class Route:
 
     def describe(self) -> str:
         via = " then ".join(self.highways)
-        return (f"{self.miles:.0f} miles via {via}, "
-                f"{len(self.legs)} leg{'s' if len(self.legs) != 1 else ''}, "
-                f"terrain {self.terrain_summary}")
+        return (
+            f"{self.miles:.0f} miles via {via}, "
+            f"{len(self.legs)} leg{'s' if len(self.legs) != 1 else ''}, "
+            f"terrain {self.terrain_summary}"
+        )
 
     def metadata_complete(self, world: World) -> bool:
         return all(world.leg_metadata_complete(leg) for leg in self.legs)

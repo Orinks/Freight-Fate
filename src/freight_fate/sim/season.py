@@ -28,8 +28,8 @@ CAREER_START_DAY_OF_YEAR = 80.0
 SEASONS = ("winter", "spring", "summer", "autumn")
 
 # Temperatures at which precipitation type and ice risk flip, in Celsius.
-FREEZING_C = 1.0       # at or below this, rain falls as snow and ice forms
-WARM_STORM_C = 12.0    # thunderstorms need convective warmth above this
+FREEZING_C = 1.0  # at or below this, rain falls as snow and ice forms
+WARM_STORM_C = 12.0  # thunderstorms need convective warmth above this
 
 # Per region: (annual mean C, seasonal half-swing C, daily half-swing C).
 # Rough climatological values -- cold northern tier, hot desert and Gulf,

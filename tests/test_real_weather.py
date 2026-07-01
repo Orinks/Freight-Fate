@@ -8,6 +8,7 @@ from freight_fate.sim.weather import WeatherKind, WeatherSystem
 
 # -- NWS condition mapping -----------------------------------------------------
 
+
 def test_condition_mapping_basics():
     assert map_condition("Clear") is WeatherKind.CLEAR
     assert map_condition("Sunny") is WeatherKind.CLEAR
@@ -46,6 +47,7 @@ def test_strong_wind_promotes_clear_to_windy():
 
 
 # -- provider ----------------------------------------------------------------
+
 
 class SyncProvider(RealWeatherProvider):
     """Run worker threads inline so tests are deterministic."""
@@ -106,6 +108,7 @@ def test_provider_refetches_after_ttl():
 
 # -- temperature ---------------------------------------------------------------
 
+
 def test_temp_to_c_handles_units_and_nulls():
     from freight_fate.sim.real_weather import _temp_to_c
 
@@ -144,6 +147,7 @@ def test_weather_system_reports_real_observed_temperature():
 
 # -- weather system integration ------------------------------------------------
 
+
 def test_weather_system_applies_live_conditions():
     p = SyncProvider(fetch=lambda lat, lon: ("Heavy Rain", 5.0, 18.0))
     ws = WeatherSystem("desert_southwest", seed=1, provider=p)
@@ -161,6 +165,7 @@ def test_weather_system_applies_live_conditions():
 def test_weather_system_holds_clear_while_live_data_pending():
     """With a provider attached, weather starts clear and holds -- no simulated
     warm-up -- until live data (or a confirmed offline state) arrives."""
+
     class Pending:
         def request(self, city, lat, lon):
             pass

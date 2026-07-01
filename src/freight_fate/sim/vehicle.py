@@ -32,20 +32,20 @@ REFERENCE_CARGO_KG = 21_500.0
 
 @dataclass(frozen=True)
 class TruckSpecs:
-    mass_kg: float = 36_000.0          # gross weight at the reference payload
+    mass_kg: float = 36_000.0  # gross weight at the reference payload
     drag_coefficient: float = 0.65
     frontal_area_m2: float = 10.0
     rolling_resistance: float = 0.0065
     wheel_radius_m: float = 0.5
-    max_torque_nm: float = 2_400.0     # ~1770 lb-ft
+    max_torque_nm: float = 2_400.0  # ~1770 lb-ft
     idle_rpm: float = 600.0
     max_rpm: float = 2_200.0
     peak_torque_rpm: float = 1_300.0
     driveline_efficiency: float = 0.85
     max_brake_decel_g: float = 0.35
-    brake_fade_temp_c: float = 400.0   # brakes fade above this temperature
+    brake_fade_temp_c: float = 400.0  # brakes fade above this temperature
     fuel_tank_gal: float = 150.0
-    fuel_burn_factor: float = 1.0      # model-specific thirst multiplier
+    fuel_burn_factor: float = 1.0  # model-specific thirst multiplier
     engine_brake_force_n: float = 25_000.0
     # Air-brake thresholds follow official CDL references: FMCSA gives
     # typical compressor cut-out/cut-in ranges, California places low-air
@@ -88,14 +88,14 @@ class TruckState:
     fuel_gal: float = 150.0
     engine_temp_c: float = 60.0
     brake_temp_c: float = 20.0
-    damage_pct: float = 0.0      # 0 = pristine, 100 = wrecked
+    damage_pct: float = 0.0  # 0 = pristine, 100 = wrecked
     odometer_mi: float = 0.0
     cargo_kg: float = REFERENCE_CARGO_KG  # payload aboard; default = full reference load
 
     # environment, set each frame by the trip/weather layer
-    grade: float = 0.0           # +uphill, e.g. 0.06 = 6%
-    grip: float = 1.0            # weather traction multiplier
-    drag_mult: float = 1.0       # weather aero drag multiplier (headwinds/storms)
+    grade: float = 0.0  # +uphill, e.g. 0.06 = 6%
+    grip: float = 1.0  # weather traction multiplier
+    drag_mult: float = 1.0  # weather aero drag multiplier (headwinds/storms)
     fuel_burn_mult: float = 1.0  # trip time compression so mpg stays honest
 
     stalled: bool = False
@@ -169,10 +169,8 @@ class TruckState:
             return None
         rpm_est = self.coupled_rpm() if not tr.in_neutral else self.rpm
         rpm_est = max(rpm_est, self.specs.idle_rpm * (0.5 + 0.5 * self.throttle))
-        braking = (self.brake > 0.01 or self.emergency_brake
-                   or self.air_brakes_holding)
-        return tr.auto_update(rpm_est, self.throttle, self.velocity_mps > 0.5,
-                              braking)
+        braking = self.brake > 0.01 or self.emergency_brake or self.air_brakes_holding
+        return tr.auto_update(rpm_est, self.throttle, self.velocity_mps > 0.5, braking)
 
     # -- forces -----------------------------------------------------------------
 
@@ -193,8 +191,9 @@ class TruckState:
         s = self.specs
         v = self.velocity_mps
         direction = 1.0 if v > 0.01 else -1.0 if v < -0.01 else 0.0
-        drag = (0.5 * AIR_DENSITY * s.drag_coefficient * s.frontal_area_m2
-                * self.drag_mult * v * abs(v))
+        drag = (
+            0.5 * AIR_DENSITY * s.drag_coefficient * s.frontal_area_m2 * self.drag_mult * v * abs(v)
+        )
         rolling = self.gross_mass_kg * G * s.rolling_resistance * direction
         grade_f = self.gross_mass_kg * G * math.sin(math.atan(self.grade))
         return drag + rolling + grade_f
@@ -204,8 +203,11 @@ class TruckState:
             return 0.0
         s = self.specs
         fade_temp = s.brake_fade_temp_c
-        fade = (1.0 if self.brake_temp_c < fade_temp
-                else max(0.35, 1.0 - (self.brake_temp_c - fade_temp) / 400))
+        fade = (
+            1.0
+            if self.brake_temp_c < fade_temp
+            else max(0.35, 1.0 - (self.brake_temp_c - fade_temp) / 400)
+        )
         holding = self.air_brakes_holding
         application = 1.0 if self.emergency_brake or holding else self.brake
         boost = EMERGENCY_BRAKE_MULT if self.emergency_brake or holding else 1.0
@@ -219,12 +221,16 @@ class TruckState:
         friction = self.gross_mass_kg * effort * self.grip
         capacity = s.mass_kg * effort
         service = min(friction, capacity)
-        jake = s.engine_brake_force_n if (
-            self.engine_brake
-            and self.engine_on
-            and self.throttle <= 0.05
-            and not self.transmission.in_neutral
-        ) else 0.0
+        jake = (
+            s.engine_brake_force_n
+            if (
+                self.engine_brake
+                and self.engine_on
+                and self.throttle <= 0.05
+                and not self.transmission.in_neutral
+            )
+            else 0.0
+        )
         direction = 1.0 if self.velocity_mps > 0 else -1.0
         return direction * (service + jake)
 
@@ -242,8 +248,9 @@ class TruckState:
         drive_force = self.drive_force()
         if self.air_brakes_holding and abs(old_v) < 0.05 and abs(new_v) < 0.05:
             new_v = 0.0
-        if ((old_v > 0.0 > new_v and drive_force <= 0.0)
-                or (old_v < 0.0 < new_v and drive_force >= 0.0)):
+        if (old_v > 0.0 > new_v and drive_force <= 0.0) or (
+            old_v < 0.0 < new_v and drive_force >= 0.0
+        ):
             new_v = 0.0
         if self.transmission.in_reverse:
             new_v = max(-MAX_REVERSE_MPS, new_v)
@@ -374,14 +381,12 @@ class TruckState:
             rpm_factor = max(0.0, min(1.0, (self.rpm - self.specs.idle_rpm) / rpm_span))
             rate = (
                 self.specs.air_build_idle_psi_per_s
-                + (self.specs.air_build_fast_psi_per_s
-                   - self.specs.air_build_idle_psi_per_s) * rpm_factor
+                + (self.specs.air_build_fast_psi_per_s - self.specs.air_build_idle_psi_per_s)
+                * rpm_factor
             )
             self.primary_air_psi = self._clamp_air_psi(self.primary_air_psi + rate * dt)
-            self.secondary_air_psi = self._clamp_air_psi(
-                self.secondary_air_psi + rate * 0.96 * dt)
-            self.trailer_air_psi = self._clamp_air_psi(
-                self.trailer_air_psi + rate * 0.85 * dt)
+            self.secondary_air_psi = self._clamp_air_psi(self.secondary_air_psi + rate * 0.96 * dt)
+            self.trailer_air_psi = self._clamp_air_psi(self.trailer_air_psi + rate * 0.85 * dt)
         self._sync_air_compressor()
 
     def _consume_brake_air(self, dt: float) -> None:
@@ -434,8 +439,9 @@ class TruckState:
                     # can be outrun by a hard deceleration during the shift
                     # delay, so force the drop here.
                     tr.kickdown()
-                self.rpm = max(s.idle_rpm, s.idle_rpm + (s.max_rpm - s.idle_rpm)
-                               * self.throttle * 0.3)
+                self.rpm = max(
+                    s.idle_rpm, s.idle_rpm + (s.max_rpm - s.idle_rpm) * self.throttle * 0.3
+                )
             else:
                 self.rpm = min(s.max_rpm, road_rpm)
         else:

@@ -5,19 +5,55 @@ from enrich_routes_base import *
 
 
 _TRUCK_POI_KEYWORDS = (
-    "love's", "loves travel", "pilot", "flying j", "ta travel", "travelcenters",
-    "petro stopping", "ta petro", "road ranger", "ambest", "sapp bros",
-    "kwik trip", "kwik star", "one9", "roady", "mr. fuel", "busy bee",
-    "travel center", "travel plaza", "travel stop", "truck stop", "truckstop",
-    "service plaza", "truck plaza",
+    "love's",
+    "loves travel",
+    "pilot",
+    "flying j",
+    "ta travel",
+    "travelcenters",
+    "petro stopping",
+    "ta petro",
+    "road ranger",
+    "ambest",
+    "sapp bros",
+    "kwik trip",
+    "kwik star",
+    "one9",
+    "roady",
+    "mr. fuel",
+    "busy bee",
+    "travel center",
+    "travel plaza",
+    "travel stop",
+    "truck stop",
+    "truckstop",
+    "service plaza",
+    "truck plaza",
 )
 # Warehouse-club / grocery fuel: real OSM amenity=fuel points, but not truck
 # stops (members-only pumps, no big-rig access -- Buc-ee's famously bans trucks).
 _RETAIL_FUEL_KEYWORDS = (
-    "sam's club", "sams club", "costco", "bj's", "walmart", "kroger", "meijer",
-    "safeway", "albertsons", "h-e-b", "heb ", "buc-ee", "bucee", "wegmans",
-    "publix", "giant eagle", "fred meyer", "king soopers", "stop & shop",
-    "stop and shop", "woodman",
+    "sam's club",
+    "sams club",
+    "costco",
+    "bj's",
+    "walmart",
+    "kroger",
+    "meijer",
+    "safeway",
+    "albertsons",
+    "h-e-b",
+    "heb ",
+    "buc-ee",
+    "bucee",
+    "wegmans",
+    "publix",
+    "giant eagle",
+    "fred meyer",
+    "king soopers",
+    "stop & shop",
+    "stop and shop",
+    "woodman",
 )
 # Names that are not a place a driver stops for fuel/rest -- OSM mistags or
 # mandatory-only facilities that shouldn't surface as a chooseable stop.
@@ -50,7 +86,10 @@ def _truck_relevance(tags: dict[str, str], name: str) -> int | None:
     is_brand = any(word in low for word in _TRUCK_POI_KEYWORDS)
     truck_signal = (
         highway in {"services", "rest_area"}
-        or hgv or hgv_diesel or is_brand or amenity == "parking"
+        or hgv
+        or hgv_diesel
+        or is_brand
+        or amenity == "parking"
     )
     if not truck_signal:
         return None  # generic car fuel -- not a truck stop
@@ -99,7 +138,8 @@ def add_overpass_pois(
         existing = {str(s.get("name", "")).lower() for s in stops}
         taken_mi = [float(s["at_mi"]) for s in stops]
         cands = _overpass_named_candidates(
-            leg, points, cache_dir, rate_limit_s, per_leg + len(existing) + 6)
+            leg, points, cache_dir, rate_limit_s, per_leg + len(existing) + 6
+        )
         fresh = []
         for cand in cands:
             if cand["name"].lower() in existing:
@@ -215,8 +255,7 @@ def _maxspeed_at_point(
             urllib.parse.urlencode({"data": query}).encode("utf-8"),
             rate_limit_s=rate_limit_s,
         )
-    except (TimeoutError, OSError, urllib.error.URLError,
-            urllib.error.HTTPError, RuntimeError):
+    except (TimeoutError, OSError, urllib.error.URLError, urllib.error.HTTPError, RuntimeError):
         return None
     shield = _highway_digits(str(leg.get("highway", "")))
     best: tuple[float, bool] | None = None
@@ -278,12 +317,10 @@ def bake_maxspeed(
             # Collapse a repeated limit into the step function it represents.
             if samples and samples[-1]["mph"] == mph and samples[-1]["hgv"] == is_hgv:
                 continue
-            samples.append({"at_mi": at_mi, "mph": mph,
-                            "source": MAXSPEED_SOURCE, "hgv": is_hgv})
+            samples.append({"at_mi": at_mi, "mph": mph, "source": MAXSPEED_SOURCE, "hgv": is_hgv})
         if samples:
             leg.setdefault("corridor", {})["speed_limits"] = samples
-            baked.append({"from": leg["from"], "to": leg["to"],
-                          "samples": len(samples)})
+            baked.append({"from": leg["from"], "to": leg["to"], "samples": len(samples)})
         else:
             skipped.append(f"{leg['from']}-{leg['to']}")
     return {
@@ -293,8 +330,13 @@ def bake_maxspeed(
     }
 
 
-_TRUCK_STOP_TYPES = {"travel_center", "truck_stop", "service_plaza",
-                     "public_rest_area", "truck_parking"}
+_TRUCK_STOP_TYPES = {
+    "travel_center",
+    "truck_stop",
+    "service_plaza",
+    "public_rest_area",
+    "truck_parking",
+}
 
 
 def _stop_is_truck_relevant(stop: dict[str, Any]) -> bool:
@@ -398,9 +440,14 @@ MIN_STOP_SPACING_MI = 10.0
 
 
 def _nearest_free_mile(
-    target: float, taken: list[float], min_gap: float, lo: float, hi: float,
+    target: float,
+    taken: list[float],
+    min_gap: float,
+    lo: float,
+    hi: float,
 ) -> float:
     """Closest mile to ``target`` that is >= ``min_gap`` from every taken mile."""
+
     def is_free(mile: float) -> bool:
         return all(abs(mile - t) >= min_gap - 1e-9 for t in taken)
 
@@ -416,7 +463,10 @@ def _nearest_free_mile(
 
 
 def _spread_stop_positions(
-    stops: list[dict[str, Any]], leg_miles: float, *, min_gap: float = 1.0,
+    stops: list[dict[str, Any]],
+    leg_miles: float,
+    *,
+    min_gap: float = 1.0,
 ) -> list[dict[str, Any]]:
     """Give every stop its own truck-mile marker.
 
@@ -425,11 +475,11 @@ def _spread_stop_positions(
     their authoritative positions; each discovered stop is nudged to the nearest
     free mile at least ``min_gap`` apart, staying within the leg."""
     lo, hi = 1.0, max(1.0, round(float(leg_miles) - 1.0, 1))
-    taken = [round(float(s["at_mi"]), 1)
-             for s in stops if s.get("source") != OVERPASS_POI_SOURCE]
+    taken = [round(float(s["at_mi"]), 1) for s in stops if s.get("source") != OVERPASS_POI_SOURCE]
     movable = sorted(
         (s for s in stops if s.get("source") == OVERPASS_POI_SOURCE),
-        key=lambda s: float(s["at_mi"]))
+        key=lambda s: float(s["at_mi"]),
+    )
     for stop in movable:
         at = _nearest_free_mile(float(stop["at_mi"]), taken, min_gap, lo, hi)
         stop["at_mi"] = at
@@ -504,13 +554,15 @@ def _grade_segments(
         terrain = "mountain"
     elif max_abs > 0.8 and terrain == "flat":
         terrain = "hills"
-    return [{
-        "start_mi": 0.0,
-        "end_mi": float(leg["miles"]),
-        "avg_grade_pct": round(avg, 2),
-        "terrain": terrain,
-        "source": "Open-Meteo elevation samples summarized for corridor terrain.",
-    }]
+    return [
+        {
+            "start_mi": 0.0,
+            "end_mi": float(leg["miles"]),
+            "avg_grade_pct": round(avg, 2),
+            "terrain": terrain,
+            "source": "Open-Meteo elevation samples summarized for corridor terrain.",
+        }
+    ]
 
 
 def _checkpoints(
@@ -520,15 +572,16 @@ def _checkpoints(
 ) -> list[dict[str, Any]]:
     cities = data["cities"]
     mid = samples[len(samples) // 2]
-    return [{
-        "name": f"{leg['highway']} corridor between {leg['from']} and {leg['to']}",
-        "at_mi": round(max(1.0, min(float(leg["miles"]) - 1.0, mid["at_mi"])), 1),
-        "type": "place",
-        "state": cities[leg["to"]]["state"],
-        "highway": leg["highway"],
-        "source": "Curated OSRM/OpenStreetMap corridor checkpoint.",
-    }]
-
+    return [
+        {
+            "name": f"{leg['highway']} corridor between {leg['from']} and {leg['to']}",
+            "at_mi": round(max(1.0, min(float(leg["miles"]) - 1.0, mid["at_mi"])), 1),
+            "type": "place",
+            "state": cities[leg["to"]]["state"],
+            "highway": leg["highway"],
+            "source": "Curated OSRM/OpenStreetMap corridor checkpoint.",
+        }
+    ]
 
 
 __all__ = [name for name in globals() if not name.startswith("__")]

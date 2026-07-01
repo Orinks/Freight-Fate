@@ -19,9 +19,17 @@ def _driving(app):
 
     app.ctx.profile = Profile(name="Drowsy", current_city="Buffalo")
     route = app.ctx.world.supported_route("Buffalo", "Rochester")
-    job = Job(CARGO_CATALOG["general"], 12.0, "Buffalo", "company yard",
-              "Rochester", route.miles, 1000.0, 12.0,
-              destination_location="Rochester freight market")
+    job = Job(
+        CARGO_CATALOG["general"],
+        12.0,
+        "Buffalo",
+        "company yard",
+        "Rochester",
+        route.miles,
+        1000.0,
+        12.0,
+        destination_location="Rochester freight market",
+    )
     return DrivingState(app.ctx, job, route, phase="delivery")
 
 
@@ -84,7 +92,7 @@ def test_reacting_to_a_microsleep_avoids_damage():
         before = d.truck.damage_pct
         d._begin_microsleep()
         assert d._microsleep_deadline is not None
-        d._update_microsleep(_keys(pygame.K_DOWN), 0.1)   # brake = staying awake
+        d._update_microsleep(_keys(pygame.K_DOWN), 0.1)  # brake = staying awake
         assert d._microsleep_deadline is None
         assert d.truck.damage_pct == pytest.approx(before)
         assert d._microsleep_cooldown_gm > 0.0
@@ -107,7 +115,7 @@ def test_ignoring_a_microsleep_drifts_off_the_road():
             if d._microsleep_deadline is None:
                 break
         assert d.truck.damage_pct > before
-        assert d.truck.speed_mph < speed_before   # scrubbed wandering onto the shoulder
+        assert d.truck.speed_mph < speed_before  # scrubbed wandering onto the shoulder
         assert d._microsleep_misses == 1
     finally:
         app.shutdown()

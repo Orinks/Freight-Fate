@@ -28,8 +28,11 @@ def main(argv: list[str] | None = None) -> int:
     )
     parser.add_argument("--from-city")
     parser.add_argument("--to-city")
-    parser.add_argument("--all", action="store_true",
-                        help="Query every leg in world.json, optionally capped by --max-legs.")
+    parser.add_argument(
+        "--all",
+        action="store_true",
+        help="Query every leg in world.json, optionally capped by --max-legs.",
+    )
     parser.add_argument("--max-legs", type=int, default=0)
     parser.add_argument("--radius-m", type=int, default=12_000)
     parser.add_argument("--limit-points", type=int, default=0)
@@ -42,7 +45,7 @@ def main(argv: list[str] | None = None) -> int:
         raise SystemExit("--from-city and --to-city are required unless --all is used")
     legs = data["legs"] if args.all else [_require_leg(data, args.from_city, args.to_city)]
     if args.max_legs:
-        legs = legs[:args.max_legs]
+        legs = legs[: args.max_legs]
     reports = [
         discover_leg(
             leg,
@@ -73,21 +76,25 @@ def discover_leg(
     errors = []
     for point in points:
         query = _query(point["lat"], point["lon"], radius_m)
-        queries.append({
-            "at_mi": point["at_mi"],
-            "lat": point["lat"],
-            "lon": point["lon"],
-            "radius_m": radius_m,
-        })
-        try:
-            payload = _post_overpass(query)
-        except (TimeoutError, OSError, urllib.error.URLError, urllib.error.HTTPError) as exc:
-            errors.append({
+        queries.append(
+            {
                 "at_mi": point["at_mi"],
                 "lat": point["lat"],
                 "lon": point["lon"],
-                "error": f"{type(exc).__name__}: {exc}",
-            })
+                "radius_m": radius_m,
+            }
+        )
+        try:
+            payload = _post_overpass(query)
+        except (TimeoutError, OSError, urllib.error.URLError, urllib.error.HTTPError) as exc:
+            errors.append(
+                {
+                    "at_mi": point["at_mi"],
+                    "lat": point["lat"],
+                    "lon": point["lon"],
+                    "error": f"{type(exc).__name__}: {exc}",
+                }
+            )
             continue
         for element in payload.get("elements", []):
             candidate = _candidate_from_element(element, point["at_mi"])
@@ -163,10 +170,7 @@ def _sample_points(leg: dict[str, Any], limit: int) -> list[dict[str, float]]:
     if limit and len(points) > limit:
         if limit == 1:
             return [points[len(points) // 2]]
-        indexes = sorted({
-            round(i * (len(points) - 1) / (limit - 1))
-            for i in range(limit)
-        })
+        indexes = sorted({round(i * (len(points) - 1) / (limit - 1)) for i in range(limit)})
         return [points[index] for index in indexes]
     return points
 

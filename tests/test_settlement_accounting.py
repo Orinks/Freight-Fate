@@ -3,9 +3,16 @@
 import pytest
 
 
-def _job(cargo_key="electronics", *, origin="New York", destination="Philadelphia",
-         destination_type="dry_warehouse", pay=2500.0, deadline=12.0,
-         distance=78.0):
+def _job(
+    cargo_key="electronics",
+    *,
+    origin="New York",
+    destination="Philadelphia",
+    destination_type="dry_warehouse",
+    pay=2500.0,
+    deadline=12.0,
+    distance=78.0,
+):
     from freight_fate.models.jobs import CARGO_CATALOG, Job
 
     return Job(
@@ -23,8 +30,16 @@ def _job(cargo_key="electronics", *, origin="New York", destination="Philadelphi
     )
 
 
-def _settle(app, job, route_cities, *, money=1000.0, speeding_strikes=0,
-            pay_advance=0.0, pay_advance_used_for_load=False):
+def _settle(
+    app,
+    job,
+    route_cities,
+    *,
+    money=1000.0,
+    speeding_strikes=0,
+    pay_advance=0.0,
+    pay_advance_used_for_load=False,
+):
     from freight_fate.models.profile import Profile
     from freight_fate.states.driving import ArrivalState, DrivingState
     from freight_fate.states.driving_menu_states import _settlement_hours
@@ -232,6 +247,7 @@ def test_restored_toll_charges_do_not_duplicate_or_pay_out():
         assert not [event for event in events if event.kind == TripEventKind.TOLL_CHARGED]
 
         from freight_fate.states.driving_menu_states import _settlement_hours
+
         gross = job.payout(_settlement_hours(resumed), 0.0)
         app.ctx.push_state(ArrivalState(app.ctx, resumed))
         assert app.ctx.profile.money == pytest.approx(1000.0 + gross)
@@ -249,11 +265,13 @@ def test_toll_route_does_not_pay_more_than_equal_non_toll_route():
         non_toll_job = _job(origin="Chicago", destination="Indianapolis")
 
         toll_gross, toll_summary = _settle(
-            app, toll_job, ["New York", "Philadelphia"], money=1000.0)
+            app, toll_job, ["New York", "Philadelphia"], money=1000.0
+        )
         toll_money = app.ctx.profile.money
         toll_earnings = app.ctx.profile.career.total_earnings
         non_toll_gross, non_toll_summary = _settle(
-            app, non_toll_job, ["Chicago", "Indianapolis"], money=1000.0)
+            app, non_toll_job, ["Chicago", "Indianapolis"], money=1000.0
+        )
 
         assert toll_gross == pytest.approx(non_toll_gross)
         assert "Carrier-paid or reimbursed charges 30 dollars" in toll_summary

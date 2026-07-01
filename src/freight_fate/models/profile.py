@@ -239,10 +239,10 @@ def _signed_payload(data: dict) -> dict:
 
 
 def _signature_for(data: dict) -> str:
-    payload = json.dumps(_signed_payload(data), sort_keys=True,
-                         separators=(",", ":"), ensure_ascii=True)
-    return hmac.new(_profile_secret(), payload.encode("utf-8"),
-                    hashlib.sha256).hexdigest()
+    payload = json.dumps(
+        _signed_payload(data), sort_keys=True, separators=(",", ":"), ensure_ascii=True
+    )
+    return hmac.new(_profile_secret(), payload.encode("utf-8"), hashlib.sha256).hexdigest()
 
 
 def _is_signature_valid(data: dict) -> bool:
@@ -271,15 +271,15 @@ class Profile:
     tire_wear_pct: float = 0.0
     road_grime_pct: float = 0.0
     truck_fuel_gal: float = 150.0
-    game_hours: float = 6.0          # in-game clock, hours since career start
+    game_hours: float = 6.0  # in-game clock, hours since career start
     tutorial_done: bool = False
-    truck: str = "rig"               # key into trucks.TRUCK_CATALOG
+    truck: str = "rig"  # key into trucks.TRUCK_CATALOG
     owned_trucks: list[str] = field(default_factory=lambda: ["rig"])
     upgrades: dict[str, int] = field(default_factory=dict)  # upgrade key -> tier
     active_trip: dict | None = None  # mid-delivery snapshot, see DrivingState
     dispatch_board_cache: dict | None = None
-    fatigue: float = 0.0             # 0 fresh .. 100 exhausted
-    pay_advance: float = 0.0         # outstanding dispatcher advance owed, repaid at delivery
+    fatigue: float = 0.0  # 0 fresh .. 100 exhausted
+    pay_advance: float = 0.0  # outstanding dispatcher advance owed, repaid at delivery
     pay_advance_used_for_load: bool = False
     career: Career = field(default_factory=Career)
     market: Market = field(default_factory=Market)
@@ -344,8 +344,7 @@ class Profile:
         signed = SIGNATURE_FIELD in data
         if signed and not _is_signature_valid(data):
             _quarantine(path)
-            raise ProfileIntegrityError(
-                "Save file failed its integrity check and was quarantined.")
+            raise ProfileIntegrityError("Save file failed its integrity check and was quarantined.")
         profile = cls.from_dict(data)
         if not signed:
             profile.save()
@@ -353,8 +352,7 @@ class Profile:
 
     @staticmethod
     def list_saves() -> list[Path]:
-        return sorted(profiles_dir().glob("*.json"),
-                      key=lambda p: p.stat().st_mtime, reverse=True)
+        return sorted(profiles_dir().glob("*.json"), key=lambda p: p.stat().st_mtime, reverse=True)
 
     def delete(self) -> None:
         self.path.unlink(missing_ok=True)

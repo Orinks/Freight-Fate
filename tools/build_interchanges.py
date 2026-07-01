@@ -55,13 +55,13 @@ USER_AGENT = "FreightFate interchange curation (https://github.com/Orinks/Freigh
 ACCESSED_DATE = "2026-06-23"
 EARTH_RADIUS_MI = 3958.7613
 
-SAMPLE_SPACING_MI = 10.0   # how often to drop an Overpass probe along the leg
-PROBE_RADIUS_M = 9_000     # search radius per probe
-RAMP_NEAR_M = 350.0        # a ramp this close to a junction belongs to it
-LOCAL_CORRIDOR_M = 200.0   # local PBF features must snap this close to a leg
+SAMPLE_SPACING_MI = 10.0  # how often to drop an Overpass probe along the leg
+PROBE_RADIUS_M = 9_000  # search radius per probe
+RAMP_NEAR_M = 350.0  # a ramp this close to a junction belongs to it
+LOCAL_CORRIDOR_M = 200.0  # local PBF features must snap this close to a leg
 LOCAL_PBF_PREFILTER_PAD_M = PROBE_RADIUS_M
 MIN_EXIT_SPACING_MI = 2.0  # collapse exits closer than this (keep the richer)
-MAX_DESTINATIONS = 3       # cap control cities per exit for speech brevity
+MAX_DESTINATIONS = 3  # cap control cities per exit for speech brevity
 LOCAL_INDEX_CACHE_VERSION = 1
 LOCAL_INDEX_PROGRESS_INTERVAL_SEC = 60.0
 
@@ -105,24 +105,23 @@ class _LocalIndexProgress:
             return
         self.last = now
         elapsed = now - self.started
-        print(f"    {self.label}: {message} after {elapsed / 60.0:.1f} min",
-              flush=True)
+        print(f"    {self.label}: {message} after {elapsed / 60.0:.1f} min", flush=True)
 
 
 # --- geometry ---------------------------------------------------------------
+
 
 def _haversine_mi(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
     p1, p2 = math.radians(lat1), math.radians(lat2)
     dphi = math.radians(lat2 - lat1)
     dlmb = math.radians(lon2 - lon1)
-    h = (math.sin(dphi / 2) ** 2
-         + math.cos(p1) * math.cos(p2) * math.sin(dlmb / 2) ** 2)
+    h = math.sin(dphi / 2) ** 2 + math.cos(p1) * math.cos(p2) * math.sin(dlmb / 2) ** 2
     return 2 * EARTH_RADIUS_MI * math.asin(math.sqrt(h))
 
 
-def _osrm_geometry(route_points: list[dict[str, Any]], rate_limit: float,
-                   cached_only: bool = False
-                   ) -> list[tuple[float, float, float]] | None:
+def _osrm_geometry(
+    route_points: list[dict[str, Any]], rate_limit: float, cached_only: bool = False
+) -> list[tuple[float, float, float]] | None:
     """Dense [(lat, lon, cumulative_mi), ...] following the leg's waypoints.
 
     With ``cached_only`` it never makes a live request, returning ``None`` on a
@@ -131,10 +130,14 @@ def _osrm_geometry(route_points: list[dict[str, Any]], rate_limit: float,
     if len(route_points) < 2:
         return None
     coords = ";".join(f"{p['lon']},{p['lat']}" for p in route_points)
-    params = urllib.parse.urlencode({
-        "overview": "full", "geometries": "geojson",
-        "alternatives": "false", "steps": "false",
-    })
+    params = urllib.parse.urlencode(
+        {
+            "overview": "full",
+            "geometries": "geojson",
+            "alternatives": "false",
+            "steps": "false",
+        }
+    )
     url = OSRM_ROUTE_URL.format(coords=coords) + "?" + params
     payload = _cached_get(url, "osrm", rate_limit, cached_only=cached_only)
     if payload is None:
@@ -154,9 +157,9 @@ def _osrm_geometry(route_points: list[dict[str, Any]], rate_limit: float,
     return out
 
 
-def _snap_at_mi(lat: float, lon: float,
-                geom: list[tuple[float, float, float]],
-                leg_miles: float) -> tuple[float, float]:
+def _snap_at_mi(
+    lat: float, lon: float, geom: list[tuple[float, float, float]], leg_miles: float
+) -> tuple[float, float]:
     """Nearest geometry vertex -> (at_mi scaled into the leg's frame, dist_mi)."""
     best_d = float("inf")
     best_cum = 0.0
@@ -170,8 +173,9 @@ def _snap_at_mi(lat: float, lon: float,
     return at_mi, best_d
 
 
-def _geometry_bounds(geom: list[tuple[float, float, float]],
-                     pad_m: float) -> tuple[float, float, float, float]:
+def _geometry_bounds(
+    geom: list[tuple[float, float, float]], pad_m: float
+) -> tuple[float, float, float, float]:
     min_lat = min(p[0] for p in geom)
     max_lat = max(p[0] for p in geom)
     min_lon = min(p[1] for p in geom)
@@ -183,8 +187,7 @@ def _geometry_bounds(geom: list[tuple[float, float, float]],
     return min_lat - lat_pad, max_lat + lat_pad, min_lon - lon_pad, max_lon + lon_pad
 
 
-def _inside_bounds(lat: float, lon: float,
-                   bounds: LocalBounds) -> bool:
+def _inside_bounds(lat: float, lon: float, bounds: LocalBounds) -> bool:
     min_lat, max_lat, min_lon, max_lon = bounds
     return min_lat <= lat <= max_lat and min_lon <= lon <= max_lon
 
@@ -193,9 +196,7 @@ def _inside_any_bounds(lat: float, lon: float, bounds: list[LocalBounds]) -> boo
     return any(_inside_bounds(lat, lon, item) for item in bounds)
 
 
-def _segment_bounds(
-    a: dict[str, Any], b: dict[str, Any], pad_m: float
-) -> LocalBounds:
+def _segment_bounds(a: dict[str, Any], b: dict[str, Any], pad_m: float) -> LocalBounds:
     min_lat = min(float(a["lat"]), float(b["lat"]))
     max_lat = max(float(a["lat"]), float(b["lat"]))
     min_lon = min(float(a["lon"]), float(b["lon"]))
@@ -252,7 +253,7 @@ def _default_local_index_cache(pbf_path: Path) -> Path:
     name = pbf_path.name
     for suffix in (".osm.pbf", ".pbf"):
         if name.endswith(suffix):
-            name = name[:-len(suffix)]
+            name = name[: -len(suffix)]
             break
     return pbf_path.with_name(f"{name}.interchanges.json")
 
@@ -296,8 +297,7 @@ def _read_local_index_cache(
     try:
         payload = json.loads(cache_path.read_text(encoding="utf-8"))
     except (OSError, json.JSONDecodeError) as exc:
-        print(f"    ignoring unreadable local index cache {cache_path}: {exc}",
-              flush=True)
+        print(f"    ignoring unreadable local index cache {cache_path}: {exc}", flush=True)
         return None
     if payload.get("version") != LOCAL_INDEX_CACHE_VERSION:
         return None
@@ -335,9 +335,7 @@ def load_or_build_local_index(
 def load_local_index_cache_only(cache_path: Path, bounds: list[LocalBounds]) -> LocalOsmIndex:
     cached = _read_local_index_cache(cache_path, None, bounds)
     if cached is None:
-        raise SystemExit(
-            f"Local index cache is missing, stale, or incompatible: {cache_path}"
-        )
+        raise SystemExit(f"Local index cache is missing, stale, or incompatible: {cache_path}")
     print(
         f"Loaded local OSM interchange index cache: {cache_path} "
         f"({len(cached.junctions)} junctions, {len(cached.ramps)} ramps)",
@@ -347,6 +345,7 @@ def load_local_index_cache_only(cache_path: Path, bounds: list[LocalBounds]) -> 
 
 
 # --- Overpass ---------------------------------------------------------------
+
 
 def _shield_pattern(highway: str) -> str | None:
     """'I-95' -> regex 'I 95([^0-9]|$)'. Interstate shields only (clean OSM
@@ -358,8 +357,7 @@ def _shield_pattern(highway: str) -> str | None:
     return f"I {m.group(1)}([^0-9]|$)"
 
 
-def _sample_points(geom: list[tuple[float, float, float]]
-                   ) -> list[tuple[float, float]]:
+def _sample_points(geom: list[tuple[float, float, float]]) -> list[tuple[float, float]]:
     points: list[tuple[float, float]] = []
     next_at = 0.0
     total = geom[-1][2]
@@ -392,6 +390,7 @@ def _post_overpass(query: str, rate_limit: float) -> dict[str, Any] | None:
 
 
 # --- local OSM extracts -----------------------------------------------------
+
 
 def _dedupe_features(features: list[LocalOsmFeature]) -> list[LocalOsmFeature]:
     seen: set[tuple[float, float, tuple[tuple[str, str], ...]]] = set()
@@ -479,11 +478,13 @@ def _build_local_index_from_pbf(
             lon = float(node.location.lon)
             if not _inside_any_bounds(lat, lon, bounds):
                 return
-            self.junctions.append(LocalOsmFeature(
-                lat=lat,
-                lon=lon,
-                tags=tags,
-            ))
+            self.junctions.append(
+                LocalOsmFeature(
+                    lat=lat,
+                    lon=lon,
+                    tags=tags,
+                )
+            )
 
         def way(self, way: Any) -> None:
             self.ways_seen += 1
@@ -502,14 +503,16 @@ def _build_local_index_from_pbf(
                     node_ids.append(int(node_id))
             if not node_ids:
                 return
-            self.ramp_ways.append(_LocalRampWay(
-                node_ids=tuple(node_ids),
-                tags={
-                    "highway": "motorway_link",
-                    "destination": str(tags.get("destination", "")),
-                    "destination:ref": str(tags.get("destination:ref", "")),
-                },
-            ))
+            self.ramp_ways.append(
+                _LocalRampWay(
+                    node_ids=tuple(node_ids),
+                    tags={
+                        "highway": "motorway_link",
+                        "destination": str(tags.get("destination", "")),
+                        "destination:ref": str(tags.get("destination:ref", "")),
+                    },
+                )
+            )
             self.ramp_node_ids.update(node_ids)
 
     pass2 = _LocalIndexProgress(f"PBF {label} pass 2", progress_interval_sec)
@@ -581,10 +584,9 @@ def _build_local_index_from_pbf(
     return LocalOsmIndex(junctions=handler.junctions, ramps=ramps)
 
 
-def _local_candidates(index: LocalOsmIndex,
-                      geom: list[tuple[float, float, float]],
-                      leg_miles: float) -> tuple[dict[int, dict[str, Any]],
-                                                  list[dict[str, Any]]]:
+def _local_candidates(
+    index: LocalOsmIndex, geom: list[tuple[float, float, float]], leg_miles: float
+) -> tuple[dict[int, dict[str, Any]], list[dict[str, Any]]]:
     bounds = _geometry_bounds(geom, max(PROBE_RADIUS_M, 2_000.0))
     junctions: dict[int, dict[str, Any]] = {}
     ramps: list[dict[str, Any]] = []
@@ -606,24 +608,28 @@ def _local_candidates(index: LocalOsmIndex,
         _, dist = _snap_at_mi(feature.lat, feature.lon, geom, leg_miles)
         if dist * 1609.34 > max(RAMP_NEAR_M, LOCAL_CORRIDOR_M):
             continue
-        ramps.append({
-            "lat": feature.lat,
-            "lon": feature.lon,
-            "destinations": _split_destinations(feature.tags.get("destination", "")),
-            "via": str(feature.tags.get("destination:ref", "")).strip(),
-        })
+        ramps.append(
+            {
+                "lat": feature.lat,
+                "lon": feature.lon,
+                "destinations": _split_destinations(feature.tags.get("destination", "")),
+                "via": str(feature.tags.get("destination:ref", "")).strip(),
+            }
+        )
     return junctions, ramps
 
 
 # --- caching ----------------------------------------------------------------
+
 
 def _cache_file(tag: str, key: str) -> Path:
     digest = hashlib.md5(key.encode("utf-8")).hexdigest()[:16]
     return CACHE_DIR / f"{tag}-{digest}.json"
 
 
-def _cached_get(url: str, tag: str, rate_limit: float,
-                cached_only: bool = False) -> dict[str, Any] | None:
+def _cached_get(
+    url: str, tag: str, rate_limit: float, cached_only: bool = False
+) -> dict[str, Any] | None:
     cf = _cache_file(tag, url)
     if cf.exists():
         return json.loads(cf.read_text(encoding="utf-8"))
@@ -654,16 +660,22 @@ def _cached_post(query: str, rate_limit: float) -> dict[str, Any] | None:
     for attempt in range(4):
         for url in OVERPASS_MIRRORS:
             req = urllib.request.Request(
-                url, data=body,
-                headers={"User-Agent": USER_AGENT,
-                         "Content-Type": "application/x-www-form-urlencoded"})
+                url,
+                data=body,
+                headers={
+                    "User-Agent": USER_AGENT,
+                    "Content-Type": "application/x-www-form-urlencoded",
+                },
+            )
             try:
                 with urllib.request.urlopen(req, timeout=120) as resp:
                     payload = json.loads(resp.read().decode("utf-8"))
             except (TimeoutError, OSError, urllib.error.URLError) as exc:
                 code = getattr(exc, "code", "")
-                print(f"    Overpass {url.split('/')[2]} -> {type(exc).__name__} "
-                      f"{code}; trying next mirror")
+                print(
+                    f"    Overpass {url.split('/')[2]} -> {type(exc).__name__} "
+                    f"{code}; trying next mirror"
+                )
                 continue
             CACHE_DIR.mkdir(parents=True, exist_ok=True)
             cf.write_text(json.dumps(payload), encoding="utf-8")
@@ -671,8 +683,7 @@ def _cached_post(query: str, rate_limit: float) -> dict[str, Any] | None:
                 time.sleep(rate_limit)
             return payload
         backoff = 15.0 * (attempt + 1)
-        print(f"    all mirrors busy; backing off {backoff:.0f}s "
-              f"(attempt {attempt + 1}/4)")
+        print(f"    all mirrors busy; backing off {backoff:.0f}s (attempt {attempt + 1}/4)")
         time.sleep(backoff)
     return None
 
@@ -684,9 +695,25 @@ RAW_MARKERS = ("node/", "way/", "relation/", "amenity=", "highway=")
 # destination made up *only* of these (e.g. "Cars Only", "Trucks - Buses",
 # "Buses And Cars Only") is lane signage, not a place to head "toward".
 VEHICLE_CONTROL_WORDS = {
-    "cars", "car", "trucks", "truck", "buses", "bus", "vehicles", "only",
-    "no", "hov", "express", "local", "left", "right", "lane", "lanes",
-    "exit", "toll", "ezpass",
+    "cars",
+    "car",
+    "trucks",
+    "truck",
+    "buses",
+    "bus",
+    "vehicles",
+    "only",
+    "no",
+    "hov",
+    "express",
+    "local",
+    "left",
+    "right",
+    "lane",
+    "lanes",
+    "exit",
+    "toll",
+    "ezpass",
 }
 _CONNECTOR_WORDS = {"and"}
 
@@ -711,8 +738,9 @@ def _split_destinations(raw: str) -> list[str]:
     return out
 
 
-def discover_leg(leg: dict[str, Any], rate_limit: float,
-                 local_index: LocalOsmIndex | None = None) -> list[dict[str, Any]]:
+def discover_leg(
+    leg: dict[str, Any], rate_limit: float, local_index: LocalOsmIndex | None = None
+) -> list[dict[str, Any]]:
     highway = str(leg.get("highway", ""))
     shield_rx = _shield_pattern(highway)
     if shield_rx is None:
@@ -727,8 +755,8 @@ def discover_leg(leg: dict[str, Any], rate_limit: float,
         junctions, ramps = _local_candidates(local_index, geom, leg_miles)
         return _assemble(junctions, ramps, geom, leg_miles, highway)
 
-    junctions: dict[int, dict[str, Any]] = {}     # node id -> {lat, lon, ref, name}
-    ramps: list[dict[str, Any]] = []              # {lat, lon, destination, via}
+    junctions: dict[int, dict[str, Any]] = {}  # node id -> {lat, lon, ref, name}
+    ramps: list[dict[str, Any]] = []  # {lat, lon, destination, via}
     for lat, lon in _sample_points(geom):
         payload = _post_overpass(_overpass_query(shield_rx, lat, lon), rate_limit)
         if payload is None:
@@ -737,7 +765,8 @@ def discover_leg(leg: dict[str, Any], rate_limit: float,
             tags = el.get("tags", {})
             if el.get("type") == "node" and tags.get("highway") == "motorway_junction":
                 junctions[el["id"]] = {
-                    "lat": el["lat"], "lon": el["lon"],
+                    "lat": el["lat"],
+                    "lon": el["lon"],
                     "ref": str(tags.get("ref", "")).strip(),
                     "name": _clean_place(tags.get("name", "")),
                 }
@@ -745,18 +774,25 @@ def discover_leg(leg: dict[str, Any], rate_limit: float,
                 center = el.get("center") or {}
                 if "lat" not in center:
                     continue
-                ramps.append({
-                    "lat": center["lat"], "lon": center["lon"],
-                    "destinations": _split_destinations(tags.get("destination", "")),
-                    "via": str(tags.get("destination:ref", "")).strip(),
-                })
+                ramps.append(
+                    {
+                        "lat": center["lat"],
+                        "lon": center["lon"],
+                        "destinations": _split_destinations(tags.get("destination", "")),
+                        "via": str(tags.get("destination:ref", "")).strip(),
+                    }
+                )
 
     return _assemble(junctions, ramps, geom, leg_miles, highway)
 
 
-def _assemble(junctions: dict[int, dict[str, Any]], ramps: list[dict[str, Any]],
-              geom: list[tuple[float, float, float]], leg_miles: float,
-              highway: str) -> list[dict[str, Any]]:
+def _assemble(
+    junctions: dict[int, dict[str, Any]],
+    ramps: list[dict[str, Any]],
+    geom: list[tuple[float, float, float]],
+    leg_miles: float,
+    highway: str,
+) -> list[dict[str, Any]]:
     # Collapse the two per-carriageway junction nodes that share an exit ref
     # into one logical exit; ref-less nodes are grouped by their snapped mile.
     by_key: dict[str, list[dict[str, Any]]] = {}
@@ -779,8 +815,10 @@ def _assemble(junctions: dict[int, dict[str, Any]], ramps: list[dict[str, Any]],
         via = ""
         for node in group:
             for ramp in ramps:
-                if _haversine_mi(node["lat"], node["lon"],
-                                 ramp["lat"], ramp["lon"]) * 1609.34 > RAMP_NEAR_M:
+                if (
+                    _haversine_mi(node["lat"], node["lon"], ramp["lat"], ramp["lon"]) * 1609.34
+                    > RAMP_NEAR_M
+                ):
                     continue
                 for d in ramp["destinations"]:
                     if d not in dests:
@@ -789,20 +827,22 @@ def _assemble(junctions: dict[int, dict[str, Any]], ramps: list[dict[str, Any]],
                     via = ramp["via"]
         if not (ref or dests or name):
             continue
-        exits.append({
-            "at_mi": round(at_mi, 1),
-            "exit_ref": ref,
-            "name": name,
-            "destinations": dests[:MAX_DESTINATIONS],
-            "via": via,
-            "highway": highway,
-            "source": (
-                "OpenStreetMap highway=motorway_junction exit ref and "
-                "destination sign tags on the leg's Interstate shield, snapped "
-                f"to checked-in OSRM route geometry, accessed {ACCESSED_DATE}: "
-                "https://www.openstreetmap.org/"
-            ),
-        })
+        exits.append(
+            {
+                "at_mi": round(at_mi, 1),
+                "exit_ref": ref,
+                "name": name,
+                "destinations": dests[:MAX_DESTINATIONS],
+                "via": via,
+                "highway": highway,
+                "source": (
+                    "OpenStreetMap highway=motorway_junction exit ref and "
+                    "destination sign tags on the leg's Interstate shield, snapped "
+                    f"to checked-in OSRM route geometry, accessed {ACCESSED_DATE}: "
+                    "https://www.openstreetmap.org/"
+                ),
+            }
+        )
 
     return _space_out(exits)
 
@@ -843,35 +883,63 @@ _MAXSPEED_MODULE.__dict__.update(
     {name: value for name, value in globals().items() if not name.startswith("__")}
 )
 
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Curate OSM interchanges into world.json.")
-    parser.add_argument("--write", action="store_true",
-                        help="Write discovered interchanges back into world.json.")
-    parser.add_argument("--only", default="",
-                        help="Limit to one leg, e.g. 'New York->Philadelphia'.")
+    parser.add_argument(
+        "--write", action="store_true", help="Write discovered interchanges back into world.json."
+    )
+    parser.add_argument(
+        "--only", default="", help="Limit to one leg, e.g. 'New York->Philadelphia'."
+    )
     parser.add_argument("--max-legs", type=int, default=0)
     parser.add_argument("--rate-limit", type=float, default=1.0)
-    parser.add_argument("--force", action="store_true",
-                        help="Re-discover legs that already have interchanges.")
-    parser.add_argument("--pbf", type=Path, action="append", default=[],
-                        help=("Read OSM interchange candidates from a local Geofabrik/"
-                              "OpenStreetMap .osm.pbf extract instead of Overpass. "
-                              "May be passed more than once."))
-    parser.add_argument("--local-index-cache", type=Path,
-                        help=("Reusable JSON cache for route-filtered local OSM "
-                              "interchange features. Defaults beside --pbf."))
-    parser.add_argument("--rebuild-local-index", action="store_true",
-                        help="Ignore any existing --local-index-cache and rebuild it.")
-    parser.add_argument("--maxspeed", action="store_true",
-                        help="Bake real OSM maxspeed onto legs as a speed_limits "
-                             "profile (the runtime prefers it over the heuristic) "
-                             "instead of discovering interchanges. Reads local "
-                             "per-state extracts, auto-selected from --osm-region-dir "
-                             "unless --pbf is given.")
-    parser.add_argument("--osm-region-dir", type=Path, default=OSM_REGION_CACHE_DIR,
-                        help=("Directory of per-state Geofabrik extracts "
-                              "(<state>-latest.osm.pbf) for --maxspeed auto-selection. "
-                              f"Default: {OSM_REGION_CACHE_DIR}."))
+    parser.add_argument(
+        "--force", action="store_true", help="Re-discover legs that already have interchanges."
+    )
+    parser.add_argument(
+        "--pbf",
+        type=Path,
+        action="append",
+        default=[],
+        help=(
+            "Read OSM interchange candidates from a local Geofabrik/"
+            "OpenStreetMap .osm.pbf extract instead of Overpass. "
+            "May be passed more than once."
+        ),
+    )
+    parser.add_argument(
+        "--local-index-cache",
+        type=Path,
+        help=(
+            "Reusable JSON cache for route-filtered local OSM "
+            "interchange features. Defaults beside --pbf."
+        ),
+    )
+    parser.add_argument(
+        "--rebuild-local-index",
+        action="store_true",
+        help="Ignore any existing --local-index-cache and rebuild it.",
+    )
+    parser.add_argument(
+        "--maxspeed",
+        action="store_true",
+        help="Bake real OSM maxspeed onto legs as a speed_limits "
+        "profile (the runtime prefers it over the heuristic) "
+        "instead of discovering interchanges. Reads local "
+        "per-state extracts, auto-selected from --osm-region-dir "
+        "unless --pbf is given.",
+    )
+    parser.add_argument(
+        "--osm-region-dir",
+        type=Path,
+        default=OSM_REGION_CACHE_DIR,
+        help=(
+            "Directory of per-state Geofabrik extracts "
+            "(<state>-latest.osm.pbf) for --maxspeed auto-selection. "
+            f"Default: {OSM_REGION_CACHE_DIR}."
+        ),
+    )
     args = parser.parse_args(argv)
 
     data = json.loads(WORLD_PATH.read_text(encoding="utf-8"))
@@ -903,17 +971,12 @@ def main(argv: list[str] | None = None) -> int:
     if pbf_paths:
         missing = [path for path in pbf_paths if not path.exists()]
         if missing:
-            raise SystemExit(
-                "OSM PBF not found: " + ", ".join(str(path) for path in missing)
-            )
+            raise SystemExit("OSM PBF not found: " + ", ".join(str(path) for path in missing))
         bounds = _local_prefilter_bounds(index_legs)
-        cache_path = (
-            args.local_index_cache
-            or (
-                _default_local_index_cache(pbf_paths[0])
-                if len(pbf_paths) == 1
-                else pbf_paths[0].with_name("freight-fate-interchanges.json")
-            )
+        cache_path = args.local_index_cache or (
+            _default_local_index_cache(pbf_paths[0])
+            if len(pbf_paths) == 1
+            else pbf_paths[0].with_name("freight-fate-interchanges.json")
         )
         print(
             f"Reading {len(pbf_paths)} local OSM extract(s) "
@@ -955,12 +1018,13 @@ def main(argv: list[str] | None = None) -> int:
         # re-run without --force skips legs already written here.
         if args.write and updated_legs and processed % 10 == 0:
             WORLD_PATH.write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")
-            print(f"    ...checkpointed world.json ({updated_legs} legs so far)",
-                  flush=True)
+            print(f"    ...checkpointed world.json ({updated_legs} legs so far)", flush=True)
 
-    print(f"\n{eligible} Interstate legs eligible; "
-          f"{processed} processed, {updated_legs} populated, "
-          f"{total_added} interchanges total.")
+    print(
+        f"\n{eligible} Interstate legs eligible; "
+        f"{processed} processed, {updated_legs} populated, "
+        f"{total_added} interchanges total."
+    )
     if args.write and updated_legs:
         WORLD_PATH.write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")
         print(f"Wrote {WORLD_PATH}")

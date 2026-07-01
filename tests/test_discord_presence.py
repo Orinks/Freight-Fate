@@ -23,8 +23,9 @@ from freight_fate.discord_presence import (
 class FakeRpc:
     """A stand-in for ``pypresence.Presence`` recording every call."""
 
-    def __init__(self, *, connect_error: Exception | None = None,
-                 update_error: Exception | None = None) -> None:
+    def __init__(
+        self, *, connect_error: Exception | None = None, update_error: Exception | None = None
+    ) -> None:
         self.connect_error = connect_error
         self.update_error = update_error
         self.connects = 0
@@ -77,6 +78,7 @@ def make_presence(rpc, clock, *, enabled=True, min_interval_s=15.0):
 
 # -- application id -----------------------------------------------------------
 
+
 def test_default_client_id_is_the_registered_freight_fate_app():
     assert DEFAULT_CLIENT_ID == "1519334426453082162"
     assert DEFAULT_CLIENT_ID.isdecimal()
@@ -103,9 +105,9 @@ def test_default_client_id_is_used_when_no_override_is_supplied():
 
 # -- formatting ---------------------------------------------------------------
 
+
 def test_format_activity_maps_fields_and_includes_start():
-    payload = format_activity(PresenceState("Driving a route", "Chicago to Dallas"),
-                              start=1234.0)
+    payload = format_activity(PresenceState("Driving a route", "Chicago to Dallas"), start=1234.0)
     assert payload["details"] == "Driving a route"
     assert payload["state"] == "Chicago to Dallas"
     assert payload["start"] == 1234
@@ -128,11 +130,17 @@ def test_format_activity_truncates_to_discord_limit():
 
 def test_driving_presence_is_privacy_safe_and_concise():
     state = driving_presence(
-        phase="delivery", origin="Chicago", destination="Dallas",
-        cargo="steel coils", fraction=0.42, moving=True, truck_label="Standard rig")
+        phase="delivery",
+        origin="Chicago",
+        destination="Dallas",
+        cargo="steel coils",
+        fraction=0.42,
+        moving=True,
+        truck_label="Standard rig",
+    )
     assert state.activity == "Driving: Chicago to Dallas"
     assert "steel coils" in state.detail
-    assert "40% there" in state.detail        # rounded to nearest 5%
+    assert "40% there" in state.detail  # rounded to nearest 5%
     assert "Standard rig" in state.detail
     # Nothing private leaks into the strings.
     blob = (state.activity + state.detail).lower()
@@ -141,27 +149,44 @@ def test_driving_presence_is_privacy_safe_and_concise():
 
 def test_driving_presence_stopped_and_pickup_phrasing():
     stopped = driving_presence(
-        phase="delivery", origin="Reno", destination="Boise",
-        cargo="lumber", fraction=0.9, moving=False)
+        phase="delivery",
+        origin="Reno",
+        destination="Boise",
+        cargo="lumber",
+        fraction=0.9,
+        moving=False,
+    )
     assert stopped.activity.startswith("Stopped")
 
     pickup = driving_presence(
-        phase="pickup", origin="Tampa", destination="Miami",
-        cargo="produce", fraction=0.1, moving=True)
+        phase="pickup",
+        origin="Tampa",
+        destination="Miami",
+        cargo="produce",
+        fraction=0.1,
+        moving=True,
+    )
     assert "pickup" in pickup.activity.lower()
     assert "produce" in pickup.detail
 
 
 def test_driving_presence_clamps_fraction():
-    assert "0% there" in driving_presence(
-        phase="delivery", origin="A", destination="B", cargo="x",
-        fraction=-1.0, moving=True).detail
-    assert "100% there" in driving_presence(
-        phase="delivery", origin="A", destination="B", cargo="x",
-        fraction=2.0, moving=True).detail
+    assert (
+        "0% there"
+        in driving_presence(
+            phase="delivery", origin="A", destination="B", cargo="x", fraction=-1.0, moving=True
+        ).detail
+    )
+    assert (
+        "100% there"
+        in driving_presence(
+            phase="delivery", origin="A", destination="B", cargo="x", fraction=2.0, moving=True
+        ).detail
+    )
 
 
 # -- disabled mode ------------------------------------------------------------
+
 
 def test_disabled_never_touches_rpc():
     rpc = FakeRpc()
@@ -176,6 +201,7 @@ def test_disabled_never_touches_rpc():
 
 
 # -- missing dependency / unavailable Discord ---------------------------------
+
 
 def test_missing_dependency_leaves_service_dormant():
     # rpc_factory=None models pypresence being absent entirely.
@@ -192,8 +218,8 @@ def test_discord_closed_is_handled_and_retried_after_backoff():
     presence = make_presence(rpc, clock)
     presence.start()
     presence.update(PresenceState("In the main menu"))
-    assert rpc.connects == 1          # tried once
-    assert rpc.updates == []          # nothing sent; no crash
+    assert rpc.connects == 1  # tried once
+    assert rpc.updates == []  # nothing sent; no crash
     assert not presence.connected
 
     # Within the backoff window it does not hammer the socket.
@@ -214,11 +240,12 @@ def test_update_failure_drops_connection_for_reconnect():
     presence.start()
     presence.update(PresenceState("Driving a route"))
     assert rpc.connects == 1
-    assert not presence.connected     # disconnected after the failed update
-    presence.shutdown()               # never raises
+    assert not presence.connected  # disconnected after the failed update
+    presence.shutdown()  # never raises
 
 
 # -- throttling / de-duplication ---------------------------------------------
+
 
 def test_identical_state_is_not_resent():
     rpc = FakeRpc()
@@ -266,6 +293,7 @@ def test_first_update_sends_immediately():
 
 # -- shutdown cleanup ---------------------------------------------------------
 
+
 def test_shutdown_clears_and_closes_the_rpc():
     rpc = FakeRpc()
     clock = Clock()
@@ -294,9 +322,9 @@ def test_set_enabled_toggles_runtime_state():
 
     presence.set_enabled(False)
     assert not presence.enabled
-    assert rpc.cleared == 1            # disabling tears the presence down
+    assert rpc.cleared == 1  # disabling tears the presence down
     presence.update(PresenceState("At the terminal"))
-    assert len(rpc.updates) == 1       # ignored while disabled
+    assert len(rpc.updates) == 1  # ignored while disabled
 
     # Re-enabling reconnects and re-shows the last reported state at once.
     presence.set_enabled(True)
@@ -312,6 +340,7 @@ def test_set_enabled_toggles_runtime_state():
 
 
 # -- threaded path smoke ------------------------------------------------------
+
 
 def test_threaded_service_sends_and_shuts_down():
     rpc = FakeRpc()

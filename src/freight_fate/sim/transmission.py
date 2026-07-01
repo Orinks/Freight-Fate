@@ -90,8 +90,9 @@ class Transmission:
 
     # -- automatic ---------------------------------------------------------------
 
-    def auto_update(self, rpm: float, throttle: float, moving: bool,
-                    braking: bool = False) -> int | None:
+    def auto_update(
+        self, rpm: float, throttle: float, moving: bool, braking: bool = False
+    ) -> int | None:
         """Pick a gear in automatic mode. Returns the new gear when it changes.
 
         While braking the box never upshifts -- a real automatic holds the gear

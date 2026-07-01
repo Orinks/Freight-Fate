@@ -24,6 +24,7 @@ def make_auto_truck(specs: TruckSpecs) -> TruckState:
 
 # -- spec building ---------------------------------------------------------------
 
+
 def test_no_upgrades_returns_base_specs():
     assert build_truck_specs("rig", {}) == TruckSpecs()
 
@@ -57,8 +58,9 @@ def test_reinforced_brakes_raise_fade_threshold():
 
 
 def test_upgrades_stack():
-    s = build_truck_specs("rig", {"engine_tune": 2, "aero_kit": 1,
-                                  "long_range_tank": 1, "reinforced_brakes": 1})
+    s = build_truck_specs(
+        "rig", {"engine_tune": 2, "aero_kit": 1, "long_range_tank": 1, "reinforced_brakes": 1}
+    )
     base = TruckSpecs()
     assert s.max_torque_nm > base.max_torque_nm
     assert s.drag_coefficient < base.drag_coefficient
@@ -110,6 +112,7 @@ def test_garage_says_upgrades_are_fleet_wide():
 
 # -- physics effects ---------------------------------------------------------------
 
+
 def test_engine_tune_accelerates_faster():
     stock = make_auto_truck(build_truck_specs("rig", {}))
     tuned = make_auto_truck(build_truck_specs("rig", {"engine_tune": 2}))
@@ -150,6 +153,7 @@ def test_heavy_hauler_burns_more_fuel():
 
 
 # -- profile persistence ------------------------------------------------------------
+
 
 def test_profile_persists_truck_and_upgrades():
     p = Profile(name="Garage Test")

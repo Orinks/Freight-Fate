@@ -80,10 +80,8 @@ def test_event_achievement_speaks_through_screen_reader(monkeypatch):
         app.ctx.profile = Profile(name="Screen Reader Badges")
         screen_reader = []
         events = []
-        monkeypatch.setattr(app.ctx, "say",
-                            lambda text, interrupt=True: screen_reader.append(text))
-        monkeypatch.setattr(app.ctx, "say_event",
-                            lambda text, interrupt=True: events.append(text))
+        monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: screen_reader.append(text))
+        monkeypatch.setattr(app.ctx, "say_event", lambda text, interrupt=True: events.append(text))
 
         result = app.ctx.award_achievement("first_delivery", event=True)
 
@@ -138,7 +136,8 @@ def test_delivery_settlement_awards_core_achievements(monkeypatch):
         p = app.ctx.profile
         p.current_city = "Chicago"
         job = next(
-            job for job in JobBoard(app.ctx.world).offers(
+            job
+            for job in JobBoard(app.ctx.world).offers(
                 p.current_city,
                 p.career.endorsements,
                 level=p.career.level,
@@ -155,8 +154,9 @@ def test_delivery_settlement_awards_core_achievements(monkeypatch):
         arrival = ArrivalState(app.ctx, driving)
 
         earned = set(p.achievements)
-        assert {"first_delivery", "first_on_time", "clean_delivery",
-                "speed_limit_saint"}.issubset(earned)
+        assert {"first_delivery", "first_on_time", "clean_delivery", "speed_limit_saint"}.issubset(
+            earned
+        )
         assert any(part.startswith("New achievement!") for part in arrival.summary_parts)
         reloaded = Profile.load(p.path)
         assert set(reloaded.achievements) == earned
@@ -182,8 +182,10 @@ def test_eastbound_badge_fires_only_on_an_eastbound_delivery(monkeypatch):
         world = app.ctx.world
         origin_lon = world.cities["Chicago"].lon
         job = next(
-            job for job in JobBoard(world, seed=11).offers(
-                "Chicago", p.career.endorsements, level=5, market=p.market)
+            job
+            for job in JobBoard(world, seed=11).offers(
+                "Chicago", p.career.endorsements, level=5, market=p.market
+            )
             if not job.locked_reason(p.career.endorsements, p.career.level)
             and world.cities[job.destination].lon > origin_lon + 1.0  # net eastbound
         )
@@ -236,7 +238,8 @@ def test_state_crossing_keeps_gameplay_prompt_before_achievement(monkeypatch):
         p = app.ctx.profile
         p.current_city = "Chicago"
         job = next(
-            job for job in JobBoard(app.ctx.world).offers(
+            job
+            for job in JobBoard(app.ctx.world).offers(
                 p.current_city,
                 p.career.endorsements,
                 level=p.career.level,
@@ -248,10 +251,8 @@ def test_state_crossing_keeps_gameplay_prompt_before_achievement(monkeypatch):
         driving = DrivingState(app.ctx, job, route)
         events = []
         screen_reader = []
-        monkeypatch.setattr(app.ctx, "say_event",
-                            lambda text, interrupt=True: events.append(text))
-        monkeypatch.setattr(app.ctx, "say",
-                            lambda text, interrupt=True: screen_reader.append(text))
+        monkeypatch.setattr(app.ctx, "say_event", lambda text, interrupt=True: events.append(text))
+        monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: screen_reader.append(text))
 
         cue = NavigationCue(
             "state:test",
@@ -260,11 +261,13 @@ def test_state_crossing_keeps_gameplay_prompt_before_achievement(monkeypatch):
             "crossing from Illinois into Missouri",
             "Crossing into Missouri near St. Louis.",
         )
-        driving._handle_trip_event(TripEvent(
-            TripEventKind.STATE_CROSSING,
-            "Crossing into Missouri near St. Louis.",
-            {"cue": cue},
-        ))
+        driving._handle_trip_event(
+            TripEvent(
+                TripEventKind.STATE_CROSSING,
+                "Crossing into Missouri near St. Louis.",
+                {"cue": cue},
+            )
+        )
 
         assert events == ["Crossing into Missouri near St. Louis."]
         assert screen_reader[0].startswith("New achievement! Kept It Between the Lines.")

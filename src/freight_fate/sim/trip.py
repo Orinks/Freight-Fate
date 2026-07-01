@@ -24,21 +24,28 @@ def _rest_stop_cue_text(prefix: str, parking_label: str) -> str:
 class Trip:
     """One delivery run along a chosen route."""
 
-    def __init__(self, route: Route, truck: TruckState, weather: WeatherSystem,
-                 time_scale: float = 20.0, seed: int | None = None,
-                 start_hour: float = 12.0, imperial: bool = True,
-                 hazard_scale: float = 1.0) -> None:
+    def __init__(
+        self,
+        route: Route,
+        truck: TruckState,
+        weather: WeatherSystem,
+        time_scale: float = 20.0,
+        seed: int | None = None,
+        start_hour: float = 12.0,
+        imperial: bool = True,
+        hazard_scale: float = 1.0,
+    ) -> None:
         self.route = route
         self.truck = truck
         self.weather = weather
         self.time_scale = time_scale
         self.hazard_scale = max(0.0, hazard_scale)
-        self.start_hour = start_hour   # clock hour of day at departure
+        self.start_hour = start_hour  # clock hour of day at departure
         self._imperial = imperial
         self.position_mi = 0.0
         self.game_minutes = 0.0
         self.finished = False
-        self.hos_violation = False     # set by the UI layer; gates inspections
+        self.hos_violation = False  # set by the UI layer; gates inspections
         self._rng = random.Random(seed)
         self._insp_rng = random.Random(None if seed is None else seed ^ 0x5EED)
         self._cond_rng = random.Random(None if seed is None else seed ^ 0xC0FFEE)
@@ -100,84 +107,100 @@ class Trip:
 
     def _place_stops(self) -> list[RoadStop]:
         out: list[RoadStop] = []
-        for i, (start, leg) in enumerate(zip(self._leg_starts, self.route.legs,
-                                             strict=True)):
+        for i, (start, leg) in enumerate(zip(self._leg_starts, self.route.legs, strict=True)):
             from_city = self.route.cities[i]
             leg_stops = sorted(
                 leg.stops,
-                key=lambda stop: _stop_offset_for_direction(stop.at_mi, leg.miles,
-                                                            from_city == leg.a),
+                key=lambda stop: _stop_offset_for_direction(
+                    stop.at_mi, leg.miles, from_city == leg.a
+                ),
             )
             for stop in leg_stops:
                 if not stop.curated or not stop.applies_to_direction(from_city == leg.a):
                     continue
-                offset = _stop_offset_for_direction(stop.at_mi, leg.miles,
-                                                    from_city == leg.a)
+                offset = _stop_offset_for_direction(stop.at_mi, leg.miles, from_city == leg.a)
                 at = start + offset
                 exit_label = _nearest_exit_label(leg, stop.at_mi)
-                out.append(RoadStop(stop.name, at, stop.type,
-                                    stop.actions, stop.services, stop.parking,
-                                    exit_label))
+                out.append(
+                    RoadStop(
+                        stop.name,
+                        at,
+                        stop.type,
+                        stop.actions,
+                        stop.services,
+                        stop.parking,
+                        exit_label,
+                    )
+                )
         return out
 
     def _build_navigation_cues(self) -> list[NavigationCue]:
         cues: list[NavigationCue] = []
-        for i, (start, leg) in enumerate(zip(self._leg_starts, self.route.legs,
-                                             strict=True)):
+        for i, (start, leg) in enumerate(zip(self._leg_starts, self.route.legs, strict=True)):
             forward = self.route.cities[i] == leg.a
             toward = self.route.cities[i + 1]
             heading = _leg_heading(leg.highway, self.route.cities[i], toward)
             shield = f"{leg.highway} {heading}".strip()
             segment_miles = leg.miles
             if i == 0:
-                cues.append(NavigationCue(
-                    "onramp:0",
-                    "onramp",
-                    start + 0.05,
-                    f"merge onto {shield} toward {toward}",
-                    f"Merge onto {shield} toward {toward}; "
-                    f"{self._distance_text(segment_miles)}.",
-                ))
+                cues.append(
+                    NavigationCue(
+                        "onramp:0",
+                        "onramp",
+                        start + 0.05,
+                        f"merge onto {shield} toward {toward}",
+                        f"Merge onto {shield} toward {toward}; "
+                        f"{self._distance_text(segment_miles)}.",
+                    )
+                )
             elif segment_miles >= 40.0:
-                cues.append(NavigationCue(
-                    f"continue:{i}",
-                    "continue",
-                    start + 0.1,
-                    f"Continue on {leg.highway} for "
-                    f"{self._distance_text(segment_miles)} toward {toward}.",
-                ))
+                cues.append(
+                    NavigationCue(
+                        f"continue:{i}",
+                        "continue",
+                        start + 0.1,
+                        f"Continue on {leg.highway} for "
+                        f"{self._distance_text(segment_miles)} toward {toward}.",
+                    )
+                )
             if i > 0 and self.route.legs[i - 1].highway != leg.highway:
-                cues.append(NavigationCue(
-                    f"maneuver:{i}",
-                    "maneuver",
-                    start,
-                    f"keep right for {shield} toward {toward}",
-                    f"Keep right now for {shield} toward {toward}.",
-                ))
+                cues.append(
+                    NavigationCue(
+                        f"maneuver:{i}",
+                        "maneuver",
+                        start,
+                        f"keep right for {shield} toward {toward}",
+                        f"Keep right now for {shield} toward {toward}.",
+                    )
+                )
             for crossing in leg.state_crossings:
                 offset = _stop_offset_for_direction(crossing.at_mi, leg.miles, forward)
                 into_state = crossing.state if forward else crossing.from_state
                 from_state = crossing.from_state if forward else crossing.state
                 place = crossing.place
-                cues.append(NavigationCue(
-                    f"state:{i}:{crossing.at_mi}:{into_state}",
-                    "state_crossing",
-                    start + offset,
-                    f"crossing from {from_state} into {into_state} near {place}",
-                    f"Crossing into {into_state} near {place}.",
-                ))
+                cues.append(
+                    NavigationCue(
+                        f"state:{i}:{crossing.at_mi}:{into_state}",
+                        "state_crossing",
+                        start + offset,
+                        f"crossing from {from_state} into {into_state} near {place}",
+                        f"Crossing into {into_state} near {place}.",
+                    )
+                )
             for checkpoint in leg.checkpoints:
                 offset = _stop_offset_for_direction(checkpoint.at_mi, leg.miles, forward)
                 place = checkpoint.name
                 state = f", {checkpoint.state}" if checkpoint.state else ""
                 highway = checkpoint.highway or leg.highway
-                cues.append(NavigationCue(
-                    f"checkpoint:{i}:{checkpoint.at_mi}:{place}",
-                    "checkpoint",
-                    start + offset,
-                    f"{place}{state} on {highway}",
-                    f"Passing {place}{state} on {highway}.",
-                ))
+                cues.append(
+                    NavigationCue(
+                        f"checkpoint:{i}:{checkpoint.at_mi}:{place}",
+                        "checkpoint",
+                        start + offset,
+                        f"{place}{state} on {highway}",
+                        f"Passing {place}{state} on {highway}.",
+                    )
+                )
             for toll in leg.toll_events:
                 offset = _stop_offset_for_direction(toll.at_mi, leg.miles, forward)
                 if toll.amount > 0:
@@ -188,49 +211,56 @@ class Trip:
                     )
                 else:
                     toll_text = "entry will be recorded for carrier settlement."
-                cues.append(NavigationCue(
-                    f"toll:{i}:{toll.at_mi}:{toll.name}",
-                    "toll",
-                    start + offset,
-                    f"toll road ahead: {toll.road}",
-                    f"{toll.method_label} toll point ahead: {toll.name}. "
-                    f"{toll_text}",
-                ))
+                cues.append(
+                    NavigationCue(
+                        f"toll:{i}:{toll.at_mi}:{toll.name}",
+                        "toll",
+                        start + offset,
+                        f"toll road ahead: {toll.road}",
+                        f"{toll.method_label} toll point ahead: {toll.name}. {toll_text}",
+                    )
+                )
             for ix in leg.interchanges:
                 offset = _stop_offset_for_direction(ix.at_mi, leg.miles, forward)
-                cues.append(NavigationCue(
-                    f"interchange:{i}:{ix.at_mi}:{ix.exit_ref}",
-                    "interchange",
-                    start + offset,
-                    ix.spoken_phrase,
-                    ix.near_phrase,
-                ))
+                cues.append(
+                    NavigationCue(
+                        f"interchange:{i}:{ix.at_mi}:{ix.exit_ref}",
+                        "interchange",
+                        start + offset,
+                        ix.spoken_phrase,
+                        ix.near_phrase,
+                    )
+                )
             for stop in leg.stops:
                 if not stop.curated or not stop.applies_to_direction(forward):
                     continue
                 offset = _stop_offset_for_direction(stop.at_mi, leg.miles, forward)
                 exit_label = _nearest_exit_label(leg, stop.at_mi)
                 at_part = f" at {exit_label}" if exit_label else ""
-                cues.append(NavigationCue(
-                    f"rest_stop:{i}:{stop.at_mi}:{stop.name}",
-                    "rest_stop",
-                    start + offset,
-                    f"{stop.label} ahead{at_part}",
-                    _rest_stop_cue_text(
-                        f"{stop.label.capitalize()}{at_part} ahead in "
-                        f"{'1 mile' if self.imperial else self._distance_text(1.0)}",
-                        stop.parking_label,
-                    ),
-                ))
+                cues.append(
+                    NavigationCue(
+                        f"rest_stop:{i}:{stop.at_mi}:{stop.name}",
+                        "rest_stop",
+                        start + offset,
+                        f"{stop.label} ahead{at_part}",
+                        _rest_stop_cue_text(
+                            f"{stop.label.capitalize()}{at_part} ahead in "
+                            f"{'1 mile' if self.imperial else self._distance_text(1.0)}",
+                            stop.parking_label,
+                        ),
+                    )
+                )
         for i, lead in enumerate(self.traffic_leads):
-            cues.append(NavigationCue(
-                f"traffic:{i}:{lead.at_mi:.1f}",
-                "traffic",
-                lead.at_mi,
-                lead.reason,
-                f"Traffic slowing ahead; target speed {lead.speed_mph:.0f}.",
-                speed_mph=lead.speed_mph,
-            ))
+            cues.append(
+                NavigationCue(
+                    f"traffic:{i}:{lead.at_mi:.1f}",
+                    "traffic",
+                    lead.at_mi,
+                    lead.reason,
+                    f"Traffic slowing ahead; target speed {lead.speed_mph:.0f}.",
+                    speed_mph=lead.speed_mph,
+                )
+            )
         cues.sort(key=lambda cue: cue.at_mi)
         return cues
 
@@ -262,8 +292,7 @@ class Trip:
             ]
         approach_start = max(0.0, total - DESTINATION_APPROACH_ZONE_MI)
         return [
-            Zone(approach_start, total, DESTINATION_APPROACH_LIMIT_MPH,
-                 "destination approach"),
+            Zone(approach_start, total, DESTINATION_APPROACH_LIMIT_MPH, "destination approach"),
             Zone(gate_start, total, FACILITY_GATE_LIMIT_MPH, "facility gate"),
         ]
 
@@ -291,14 +320,19 @@ class Trip:
             at = self._insp_rng.uniform(10, max(11, total - 15))
             length = self._insp_rng.uniform(3, 8)
             intensity = self._patrol_intensity_at(at) * self.hazard_scale
-            patrols.append(PatrolWindow(at, at + length,
-                                        max(0.1, min(0.95, intensity)),
-                                        "speed trap"))
+            patrols.append(
+                PatrolWindow(at, at + length, max(0.1, min(0.95, intensity)), "speed trap")
+            )
         for zone in self.zones:
             if zone.reason == "construction":
-                patrols.append(PatrolWindow(zone.start_mi, zone.end_mi,
-                                            min(0.95, 0.9 * self.hazard_scale),
-                                            "construction patrol"))
+                patrols.append(
+                    PatrolWindow(
+                        zone.start_mi,
+                        zone.end_mi,
+                        min(0.95, 0.9 * self.hazard_scale),
+                        "construction patrol",
+                    )
+                )
         patrols.sort(key=lambda p: p.start_mi)
         return patrols
 
@@ -306,13 +340,12 @@ class Trip:
         active = [p for p in self.patrols if p.start_mi <= mile <= p.end_mi]
         return max(active, key=lambda p: p.intensity) if active else None
 
-    def _leg_traffic_density(self, leg: Leg, bad_weather_bias: float,
-                             night: bool) -> float:
+    def _leg_traffic_density(self, leg: Leg, bad_weather_bias: float, night: bool) -> float:
         metro_bias = 0.18 if leg.checkpoints else 0.0
         night_bias = -0.08 if night else 0.0
-        density = min(0.86, max(0.05,
-                      0.22 + leg.miles / 900.0 + metro_bias
-                      + bad_weather_bias + night_bias))
+        density = min(
+            0.86, max(0.05, 0.22 + leg.miles / 900.0 + metro_bias + bad_weather_bias + night_bias)
+        )
         return density * self.hazard_scale
 
     def _place_traffic(self) -> list[TrafficLead]:
@@ -333,21 +366,26 @@ class Trip:
             at = start + self._rng.uniform(25.0, max(26.0, leg.miles - 20.0))
             weather_slowdown = max(
                 0.0,
-                min(16.0, (1.0 - effects.grip) * 22.0
-                    + max(0.0, 3.0 - effects.visibility_mi) * 1.5),
+                min(
+                    16.0, (1.0 - effects.grip) * 22.0 + max(0.0, 3.0 - effects.visibility_mi) * 1.5
+                ),
             )
             speed = max(28.0, self._rng.uniform(42.0, 58.0) - weather_slowdown)
-            reason = self._rng.choice((
-                "slow lead traffic",
-                "traffic queue ahead",
-                "merging traffic",
-                "lane restriction",
-            ))
+            reason = self._rng.choice(
+                (
+                    "slow lead traffic",
+                    "traffic queue ahead",
+                    "merging traffic",
+                    "lane restriction",
+                )
+            )
             if bad_weather_bias and self._rng.random() < 0.45:
-                reason = self._rng.choice((
-                    "traffic slowing for wet roads",
-                    "traffic slowing for low visibility",
-                ))
+                reason = self._rng.choice(
+                    (
+                        "traffic slowing for wet roads",
+                        "traffic slowing for low visibility",
+                    )
+                )
             leads.append(TrafficLead(at, speed, reason, self._rng.uniform(3.0, 8.0)))
         leads.sort(key=lambda lead: lead.at_mi)
         return leads
@@ -448,8 +486,7 @@ class Trip:
         return base
 
     def next_zone_within(self, within_mi: float) -> Zone | None:
-        ahead = [z for z in self.zones
-                 if 0 < z.start_mi - self.position_mi <= within_mi]
+        ahead = [z for z in self.zones if 0 < z.start_mi - self.position_mi <= within_mi]
         return min(ahead, key=lambda z: z.start_mi) if ahead else None
 
     def _active_zone_at(self, mile: float) -> Zone | None:
@@ -487,8 +524,7 @@ class Trip:
         best: RoadStop | None = None
         for stop in self.stops:
             ahead = stop.at_mi - self.position_mi
-            if 0 <= ahead <= within_mi and (
-                    best is None or stop.at_mi < best.at_mi):
+            if 0 <= ahead <= within_mi and (best is None or stop.at_mi < best.at_mi):
                 best = stop
         return best
 
@@ -511,15 +547,16 @@ class Trip:
         if imperial:
             dist = f"{self.remaining_miles:.0f} miles remaining of {self.total_miles:.0f}"
         else:
-            dist = (f"{self.remaining_miles * 1.609:.0f} kilometers remaining "
-                    f"of {self.total_miles * 1.609:.0f}")
+            dist = (
+                f"{self.remaining_miles * 1.609:.0f} kilometers remaining "
+                f"of {self.total_miles * 1.609:.0f}"
+            )
         leg = self.route.legs[self.current_leg_index]
         toward = self.route.cities[self.current_leg_index + 1]
         state = get_world().cities[toward].state
         next_context = self.next_navigation_context(imperial)
         terrain_text = self._current_grade_text()
-        return (f"{dist}. On {leg.highway} toward {toward}, {state}. "
-                f"{terrain_text}. {next_context}")
+        return f"{dist}. On {leg.highway} toward {toward}, {state}. {terrain_text}. {next_context}"
 
     def _current_grade_text(self) -> str:
         grade_pct = self.grade_at(self.position_mi) * 100.0
@@ -535,10 +572,7 @@ class Trip:
         if cue is None:
             return f"Destination {self.route.cities[-1]} ahead."
         ahead = max(0.0, cue.at_mi - self.position_mi)
-        ahead_text = (
-            f"{ahead:.0f} miles" if imperial
-            else f"{ahead * 1.609344:.0f} kilometers"
-        )
+        ahead_text = f"{ahead:.0f} miles" if imperial else f"{ahead * 1.609344:.0f} kilometers"
         if cue.kind == "rest_stop":
             return f"Next stop in {ahead_text}: {cue.text}."
         if cue.kind == "state_crossing":
@@ -553,7 +587,8 @@ class Trip:
             speed = ""
             if cue.speed_mph is not None:
                 speed = " at " + (
-                    f"{cue.speed_mph:.0f} miles per hour" if imperial
+                    f"{cue.speed_mph:.0f} miles per hour"
+                    if imperial
                     else f"{cue.speed_mph * 1.609344:.0f} kilometers per hour"
                 )
             if ahead < 0.5:
@@ -565,10 +600,7 @@ class Trip:
 
     def next_navigation_cue(self) -> NavigationCue | None:
         for cue in self.navigation_cues:
-            if (
-                cue.at_mi > self.position_mi + 0.05
-                and cue.kind not in ("continue", "interchange")
-            ):
+            if cue.at_mi > self.position_mi + 0.05 and cue.kind not in ("continue", "interchange"):
                 return cue
         return None
 
@@ -598,8 +630,7 @@ class Trip:
             if cue.at_mi <= self.position_mi:
                 self._announced_navigation.add(f"{cue.key}:advance")
                 self._announced_navigation.add(f"{cue.key}:near")
-        for i, (start, leg) in enumerate(zip(self._leg_starts, self.route.legs,
-                                             strict=True)):
+        for i, (start, leg) in enumerate(zip(self._leg_starts, self.route.legs, strict=True)):
             forward = self.route.cities[i] == leg.a
             for toll in leg.toll_events:
                 offset = _stop_offset_for_direction(toll.at_mi, leg.miles, forward)
@@ -615,11 +646,7 @@ class Trip:
 
     def restore_toll_charges(self, charges: list[dict]) -> None:
         """Restore settlement toll expenses from an active-drive snapshot."""
-        by_name = {
-            toll.name: toll
-            for leg in self.route.legs
-            for toll in leg.toll_events
-        }
+        by_name = {toll.name: toll for leg in self.route.legs for toll in leg.toll_events}
         self.toll_charges = []
         for raw in charges:
             name = str(raw.get("name", "")).strip()
@@ -645,9 +672,11 @@ class Trip:
         self.weather.set_city(target.name, target.lat, target.lon)
         changed = self.weather.update(game_min)
         if changed is not None:
-            self._emit(TripEventKind.WEATHER_CHANGE,
-                       f"Weather changing: {self.weather.describe()}",
-                       weather=changed)
+            self._emit(
+                TripEventKind.WEATHER_CHANGE,
+                f"Weather changing: {self.weather.describe()}",
+                weather=changed,
+            )
         self.truck.grip = self.weather.effects.grip
         self.truck.drag_mult = self.weather.effects.drag_mult
         self.truck.grade = self.grade_at(self.position_mi)
@@ -673,8 +702,7 @@ class Trip:
 
         if self.position_mi >= self.total_miles:
             self.finished = True
-            self._emit(TripEventKind.ARRIVED,
-                       f"You have arrived in {self.route.cities[-1]}.")
+            self._emit(TripEventKind.ARRIVED, f"You have arrived in {self.route.cities[-1]}.")
         return self._events
 
     # -- event checks ----------------------------------------------------------------
@@ -707,18 +735,20 @@ class Trip:
             if zone is not None:
                 if zone.reason == "construction":
                     self._construction_zone_grace_start[_zone_key(zone)] = zone.start_mi
-                self._emit(TripEventKind.ZONE_ENTER,
-                           f"{zone.reason} ahead. "
-                           f"Speed limit {self._speed_value(zone.limit_mph)}.",
-                           zone=zone)
+                self._emit(
+                    TripEventKind.ZONE_ENTER,
+                    f"{zone.reason} ahead. Speed limit {self._speed_value(zone.limit_mph)}.",
+                    zone=zone,
+                )
             elif self._active_zone is not None:
-                self._construction_zone_grace_start.pop(
-                    _zone_key(self._active_zone), None)
+                self._construction_zone_grace_start.pop(_zone_key(self._active_zone), None)
                 resumed = self._corridor_limit_at(self.position_mi)
                 self._announced_speed_limit = resumed
-                self._emit(TripEventKind.ZONE_EXIT,
-                           f"End of {self._active_zone.reason} zone. "
-                           f"Speed limit {self._speed_value(resumed)}.")
+                self._emit(
+                    TripEventKind.ZONE_EXIT,
+                    f"End of {self._active_zone.reason} zone. "
+                    f"Speed limit {self._speed_value(resumed)}.",
+                )
             self._active_zone = zone
 
     def _check_speed_limit(self) -> None:
@@ -729,7 +759,7 @@ class Trip:
             return
         limit = self._corridor_limit_at(self.position_mi)
         if self._announced_speed_limit is None:
-            self._announced_speed_limit = limit   # seed at departure, no cue
+            self._announced_speed_limit = limit  # seed at departure, no cue
             return
         if limit != self._announced_speed_limit:
             lowered = limit < self._announced_speed_limit
@@ -737,8 +767,9 @@ class Trip:
             verb = "reduced to" if lowered else "raised to"
             city = self._nearest_urban_city(self.position_mi) if lowered else None
             where = f" approaching {city}" if city else ""
-            self._emit(TripEventKind.GPS_CUE,
-                       f"Speed limit {verb} {self._speed_value(limit)}{where}.")
+            self._emit(
+                TripEventKind.GPS_CUE, f"Speed limit {verb} {self._speed_value(limit)}{where}."
+            )
 
     def _check_stops(self) -> None:
         for stop in self.stops:
@@ -746,10 +777,7 @@ class Trip:
             if 0 < ahead <= 5.0 and stop.name not in self._announced_stops:
                 self._announced_stops.add(stop.name)
                 exit_part = f" at {stop.exit_label}" if stop.exit_label else ""
-                parts = [
-                    f"{stop.spoken_name}{exit_part} in "
-                    f"{self._distance_text(ahead)}."
-                ]
+                parts = [f"{stop.spoken_name}{exit_part} in {self._distance_text(ahead)}."]
                 if stop.parking_text:
                     parts.append(f"{stop.parking_text}.")
                 parts.append("Press X to take the exit for it.")
@@ -764,8 +792,7 @@ class Trip:
                 key = f"{cue.key}:near"
                 if -0.5 <= ahead <= 0.5 and key not in self._announced_navigation:
                     self._announced_navigation.add(key)
-                    self._emit(TripEventKind.GPS_CUE, cue.near_text or cue.text,
-                               cue=cue)
+                    self._emit(TripEventKind.GPS_CUE, cue.near_text or cue.text, cue=cue)
                 continue
             if cue.kind == "rest_stop":
                 key = f"{cue.key}:near"
@@ -777,8 +804,11 @@ class Trip:
                 key = f"{cue.key}:advance"
                 if 0 < ahead <= 2.0 and key not in self._announced_navigation:
                     self._announced_navigation.add(key)
-                    speed = (f" at {cue.speed_mph:.0f} miles per hour"
-                             if cue.speed_mph is not None else "")
+                    speed = (
+                        f" at {cue.speed_mph:.0f} miles per hour"
+                        if cue.speed_mph is not None
+                        else ""
+                    )
                     self._emit(
                         TripEventKind.GPS_CUE,
                         f"Traffic slowing ahead in {self._distance_text(ahead)}; "
@@ -794,10 +824,7 @@ class Trip:
                 continue
             advance_key = f"{cue.key}:advance"
             near_key = f"{cue.key}:near"
-            lookahead = (
-                STATE_CROSSING_WARNING_LOOKAHEAD_MI
-                if cue.kind == "state_crossing" else 2.0
-            )
+            lookahead = STATE_CROSSING_WARNING_LOOKAHEAD_MI if cue.kind == "state_crossing" else 2.0
             if 0 < ahead <= lookahead and advance_key not in self._announced_navigation:
                 self._announced_navigation.add(advance_key)
                 message = f"In {self._distance_text(ahead)}, {cue.text}."
@@ -812,8 +839,7 @@ class Trip:
                     self._emit(TripEventKind.GPS_CUE, cue.near_text, cue=cue)
 
     def _check_tolls(self) -> None:
-        for i, (start, leg) in enumerate(zip(self._leg_starts, self.route.legs,
-                                             strict=True)):
+        for i, (start, leg) in enumerate(zip(self._leg_starts, self.route.legs, strict=True)):
             forward = self.route.cities[i] == leg.a
             for toll in leg.toll_events:
                 offset = _stop_offset_for_direction(toll.at_mi, leg.miles, forward)
@@ -858,11 +884,12 @@ class Trip:
                 world = get_world()
                 city_state = world.cities[city].state
                 prev_state = world.cities[prev].state
-                crossing = (f"Crossing into {city_state}. "
-                            if city_state != prev_state else "")
-                self._emit(TripEventKind.CITY_REACHED,
-                           f"{crossing}Passing {city}, {city_state}. "
-                           f"Continuing on {leg.highway} toward {nxt}.")
+                crossing = f"Crossing into {city_state}. " if city_state != prev_state else ""
+                self._emit(
+                    TripEventKind.CITY_REACHED,
+                    f"{crossing}Passing {city}, {city_state}. "
+                    f"Continuing on {leg.highway} toward {nxt}.",
+                )
 
     def _hazard_risk(self) -> float:
         """Chance of a hazard at each check; worse in fog and after dark.
@@ -879,9 +906,12 @@ class Trip:
     def _check_hazards(self, moved_mi: float) -> None:
         """Occasional road hazards that demand braking."""
         context = self.traffic_context()
-        if (context is not None and context.closing_mph > 8.0
-                and context.gap_seconds <= TRAFFIC_WARNING_GAP_S
-                and self.position_mi >= self._traffic_warning_mi):
+        if (
+            context is not None
+            and context.closing_mph > 8.0
+            and context.gap_seconds <= TRAFFIC_WARNING_GAP_S
+            and self.position_mi >= self._traffic_warning_mi
+        ):
             self._traffic_warning_mi = self.position_mi + 8.0
             self._emit(
                 TripEventKind.HAZARD,
@@ -897,8 +927,11 @@ class Trip:
         self._hazard_check_mi = self._rng.uniform(20, 60)
         if self._rng.random() < self._hazard_risk():
             choices = eligible_hazards(
-                self.current_region, self.weather.current,
-                self.terrain_at(self.position_mi), self.current_hour)
+                self.current_region,
+                self.weather.current,
+                self.terrain_at(self.position_mi),
+                self.current_hour,
+            )
             if not choices:
                 return
             texts, weights = zip(*choices, strict=True)
@@ -907,10 +940,11 @@ class Trip:
             # the sentence finishes. deadline_s is the reaction slack on top
             # of the braking time the driving state computes from speed, cut
             # short in low visibility -- you see the hazard later in fog/rain.
-            self._emit(TripEventKind.HAZARD,
-                       f"Brake now! {hazard[0].upper()}{hazard[1:]}.",
-                       deadline_s=(self._rng.uniform(3.0, 4.5)
-                                   * self._visibility_reaction_factor()))
+            self._emit(
+                TripEventKind.HAZARD,
+                f"Brake now! {hazard[0].upper()}{hazard[1:]}.",
+                deadline_s=(self._rng.uniform(3.0, 4.5) * self._visibility_reaction_factor()),
+            )
 
     def _visibility_reaction_factor(self) -> float:
         """Fraction of the normal hazard reaction slack you get: low visibility
@@ -926,8 +960,7 @@ class Trip:
         kind = self.weather.current
         if kind == WeatherKind.SNOW:
             return "The trailer is sliding on the snow, too fast for the conditions."
-        if kind in (WeatherKind.RAIN, WeatherKind.HEAVY_RAIN,
-                    WeatherKind.THUNDERSTORM):
+        if kind in (WeatherKind.RAIN, WeatherKind.HEAVY_RAIN, WeatherKind.THUNDERSTORM):
             return "Hydroplaning on the wet road, too fast for the conditions."
         return "Losing traction, too fast for the conditions."
 
@@ -945,12 +978,13 @@ class Trip:
             return
         self._conditions_check_mi = CONDITIONS_CHECK_MI
         severity = min(1.0, (over - CONDITIONS_SPEED_MARGIN_MPH) / 25.0)
-        risk = (severity * (1.0 - eff.grip) * CONDITIONS_INCIDENT_RISK
-                * self.hazard_scale)
+        risk = severity * (1.0 - eff.grip) * CONDITIONS_INCIDENT_RISK * self.hazard_scale
         if self._cond_rng.random() < risk:
-            self._emit(TripEventKind.HAZARD,
-                       f"Brake now! {self._conditions_incident_text()}",
-                       deadline_s=max(1.5, 2.5 * self._visibility_reaction_factor()))
+            self._emit(
+                TripEventKind.HAZARD,
+                f"Brake now! {self._conditions_incident_text()}",
+                deadline_s=max(1.5, 2.5 * self._visibility_reaction_factor()),
+            )
 
     def _random_inspection_odds(self, leg: Leg) -> float:
         """Odds a random roadside log-check fires when the driver is in HOS
@@ -989,7 +1023,9 @@ class Trip:
             active_zone = self._active_zone
             if active_zone is not None and active_zone.reason == "construction":
                 zone_key = _zone_key(active_zone)
-                grace_start = self._construction_zone_grace_start.get(zone_key, active_zone.start_mi)
+                grace_start = self._construction_zone_grace_start.get(
+                    zone_key, active_zone.start_mi
+                )
                 if self.position_mi - grace_start < CONSTRUCTION_ENFORCEMENT_GRACE_MI:
                     return
             key = f"construction:{round(self.position_mi)}"
@@ -1021,5 +1057,3 @@ class Trip:
                 context=context,
                 evidence=("HOS/ELD violation",),
             )
-
-

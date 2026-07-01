@@ -33,8 +33,8 @@ API_ROOT = "https://api.weather.gov"
 # NWS asks every client to identify itself; a contact URL is recommended.
 USER_AGENT = "FreightFate/1.1 (accessible trucking game; https://orinks.net)"
 FETCH_TIMEOUT_S = 8.0
-CACHE_TTL_S = 15 * 60.0          # current weather is fresh enough for 15 min
-RETRY_AFTER_S = 60.0             # wait before retrying a failed city
+CACHE_TTL_S = 15 * 60.0  # current weather is fresh enough for 15 min
+RETRY_AFTER_S = 60.0  # wait before retrying a failed city
 STRONG_WIND_KMH = 38.0
 
 # Keyword groups for mapping NWS condition text onto game weather. Checked in
@@ -43,8 +43,10 @@ STRONG_WIND_KMH = 38.0
 # (e.g. "Chance Light Rain", "Patchy Fog"); matching is case-insensitive.
 _CONDITION_RULES: tuple[tuple[WeatherKind, tuple[str, ...]], ...] = (
     (WeatherKind.THUNDERSTORM, ("thunder", "t-storm", "tstorm", "squall")),
-    (WeatherKind.SNOW, ("snow", "sleet", "flurr", "blizzard", "wintry",
-                        "ice", "icy", "freezing", "frost")),
+    (
+        WeatherKind.SNOW,
+        ("snow", "sleet", "flurr", "blizzard", "wintry", "ice", "icy", "freezing", "frost"),
+    ),
     (WeatherKind.HEAVY_RAIN, ("heavy rain", "heavy shower")),
     (WeatherKind.RAIN, ("rain", "shower", "drizzle", "spray")),
     (WeatherKind.FOG, ("fog", "mist", "haze", "smoke", "ash", "dust", "sand")),
@@ -74,12 +76,14 @@ def map_condition(text: str, wind_kmh: float = 0.0) -> WeatherKind:
 
 def _get_json(url: str) -> dict:
     """Fetch and decode a JSON document from the NWS API. Raises on failure."""
-    req = urllib.request.Request(url, headers={
-        "User-Agent": USER_AGENT,
-        "Accept": "application/geo+json",
-    })
-    with urllib.request.urlopen(req, timeout=FETCH_TIMEOUT_S,
-                                context=ssl_context()) as resp:
+    req = urllib.request.Request(
+        url,
+        headers={
+            "User-Agent": USER_AGENT,
+            "Accept": "application/geo+json",
+        },
+    )
+    with urllib.request.urlopen(req, timeout=FETCH_TIMEOUT_S, context=ssl_context()) as resp:
         return json.loads(resp.read().decode("utf-8"))
 
 
@@ -120,11 +124,11 @@ def _wind_to_kmh(wind: dict | None) -> float:
         return 0.0
     value = float(wind["value"])
     unit = str(wind.get("unitCode", ""))
-    if "m_s" in unit or "m/s" in unit:        # metres per second
+    if "m_s" in unit or "m/s" in unit:  # metres per second
         return value * 3.6
-    if "mi_h" in unit or "mph" in unit:       # miles per hour
+    if "mi_h" in unit or "mph" in unit:  # miles per hour
         return value * 1.609344
-    return value                              # already km/h (wmoUnit:km_h-1)
+    return value  # already km/h (wmoUnit:km_h-1)
 
 
 def _temp_to_c(temp: dict | None) -> float | None:
@@ -139,7 +143,7 @@ def _temp_to_c(temp: dict | None) -> float | None:
     unit = str(temp.get("unitCode", ""))
     if "degF" in unit:
         return (value - 32.0) * 5.0 / 9.0
-    return value                              # degC (the NWS default)
+    return value  # degC (the NWS default)
 
 
 def _default_fetch(lat: float, lon: float) -> tuple[str, float, float | None]:
@@ -164,9 +168,11 @@ class RealWeatherProvider:
     A custom ``fetch`` callable can be injected for tests.
     """
 
-    def __init__(self,
-                 fetch: Callable[[float, float], tuple[str, float, float | None]] | None = None,
-                 clock: Callable[[], float] = time.monotonic) -> None:
+    def __init__(
+        self,
+        fetch: Callable[[float, float], tuple[str, float, float | None]] | None = None,
+        clock: Callable[[], float] = time.monotonic,
+    ) -> None:
         self._fetch = fetch or _default_fetch
         self._clock = clock
         self._lock = threading.Lock()
@@ -223,8 +229,9 @@ class RealWeatherProvider:
             if failed is not None and now - failed < RETRY_AFTER_S:
                 return
             self._inflight.add(city)
-        thread = threading.Thread(target=self._worker, args=(city, lat, lon),
-                                  name=f"weather-{city}", daemon=True)
+        thread = threading.Thread(
+            target=self._worker, args=(city, lat, lon), name=f"weather-{city}", daemon=True
+        )
         thread.start()
 
     def _worker(self, city: str, lat: float, lon: float) -> None:
@@ -234,9 +241,14 @@ class RealWeatherProvider:
             with self._lock:
                 self._cache[city] = (kind, temp_c, self._clock())
                 self._failed_at.pop(city, None)
-            log.info("Real weather for %s: %s (NWS %r, wind %.0f km/h, temp %s)",
-                     city, kind.value, text, wind,
-                     f"{temp_c:.0f}C" if temp_c is not None else "n/a")
+            log.info(
+                "Real weather for %s: %s (NWS %r, wind %.0f km/h, temp %s)",
+                city,
+                kind.value,
+                text,
+                wind,
+                f"{temp_c:.0f}C" if temp_c is not None else "n/a",
+            )
         except Exception:
             with self._lock:
                 self._failed_at[city] = self._clock()

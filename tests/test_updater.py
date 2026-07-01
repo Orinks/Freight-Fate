@@ -23,19 +23,24 @@ from freight_fate.updater import (
 )
 
 
-def release(tag, prerelease=False, body="", published="",
-            assets=("-windows-portable.zip",
-                    "-macos.zip",
-                    "-linux-x64.tar.gz")):
+def release(
+    tag,
+    prerelease=False,
+    body="",
+    published="",
+    assets=("-windows-portable.zip", "-macos.zip", "-linux-x64.tar.gz"),
+):
     return {
         "tag_name": tag,
         "prerelease": prerelease,
         "body": body,
         "published_at": published,
         "assets": [
-            {"name": f"FreightFate-{tag}{suffix}",
-             "browser_download_url": f"https://example.test/{tag}/{suffix}",
-             "size": 50_000_000}
+            {
+                "name": f"FreightFate-{tag}{suffix}",
+                "browser_download_url": f"https://example.test/{tag}/{suffix}",
+                "size": 50_000_000,
+            }
             for suffix in assets
         ],
     }
@@ -103,7 +108,7 @@ def test_stable_no_update_without_platform_asset():
 
 def test_dev_update_skips_non_nightlies_and_finds_newer():
     releases = [
-        release("v1.5.0"),                                  # stable, ignored
+        release("v1.5.0"),  # stable, ignored
         release("nightly-20260611", prerelease=True),
         release("nightly-20260610", prerelease=True),
     ]
@@ -146,7 +151,8 @@ def test_dev_update_uses_partial_nightly_build_info():
 
 def test_build_info_malformed_falls_back_to_stable_version():
     assert build_info_from_dict([], "1.6.0") == BuildInfo(
-        tag="v1.6.0", channel="stable", built_at="")
+        tag="v1.6.0", channel="stable", built_at=""
+    )
 
 
 def test_build_info_stamp_marks_stable_and_nightly_channels(tmp_path):
@@ -155,8 +161,9 @@ def test_build_info_stamp_marks_stable_and_nightly_channels(tmp_path):
     stable_dir = tmp_path / "stable"
     stable_dir.mkdir()
     stamp_build_info(stable_dir, "1.6.0")
-    stable = build_info_from_dict(json.loads(
-        (stable_dir / "build_info.json").read_text(encoding="utf-8")), "1.6.0")
+    stable = build_info_from_dict(
+        json.loads((stable_dir / "build_info.json").read_text(encoding="utf-8")), "1.6.0"
+    )
     assert stable.tag == "v1.6.0"
     assert stable.channel == "stable"
     assert stable.built_at
@@ -164,8 +171,9 @@ def test_build_info_stamp_marks_stable_and_nightly_channels(tmp_path):
     nightly_dir = tmp_path / "nightly"
     nightly_dir.mkdir()
     stamp_build_info(nightly_dir, "nightly-20260615")
-    nightly = build_info_from_dict(json.loads(
-        (nightly_dir / "build_info.json").read_text(encoding="utf-8")), "1.6.0")
+    nightly = build_info_from_dict(
+        json.loads((nightly_dir / "build_info.json").read_text(encoding="utf-8")), "1.6.0"
+    )
     assert nightly.tag == "nightly-20260615"
     assert nightly.channel == "dev"
     assert nightly.built_at
@@ -176,20 +184,22 @@ def test_release_docs_are_staged_with_build_payload(tmp_path, monkeypatch):
     source_root = tmp_path / "repo"
     source_root.mkdir()
     (source_root / "docs").mkdir()
-    (source_root / "CHANGELOG.md").write_text(
-        "# Changelog\n\n## Unreleased\n", encoding="utf-8")
+    (source_root / "CHANGELOG.md").write_text("# Changelog\n\n## Unreleased\n", encoding="utf-8")
     (source_root / "docs" / "user-manual.md").write_text(
-        "# Freight Fate User Manual\n", encoding="utf-8")
+        "# Freight Fate User Manual\n", encoding="utf-8"
+    )
     monkeypatch.setattr(build_release, "ROOT", source_root)
 
     build_dir = tmp_path / "FreightFate"
     build_dir.mkdir()
     build_release.stage_release_docs(build_dir)
 
-    assert (build_dir / "CHANGELOG.md").read_text(
-        encoding="utf-8").startswith("# Changelog")
-    assert (build_dir / "USER_MANUAL.md").read_text(
-        encoding="utf-8").startswith("# Freight Fate User Manual")
+    assert (build_dir / "CHANGELOG.md").read_text(encoding="utf-8").startswith("# Changelog")
+    assert (
+        (build_dir / "USER_MANUAL.md")
+        .read_text(encoding="utf-8")
+        .startswith("# Freight Fate User Manual")
+    )
 
 
 def test_packaged_payload_requires_release_docs(tmp_path):
@@ -203,16 +213,13 @@ def test_packaged_payload_requires_release_docs(tmp_path):
     (build_dir / "build_info.json").write_text("{}", encoding="utf-8")
     (build_dir / "freight_fate" / "assets" / "sounds").mkdir(parents=True)
     (build_dir / "freight_fate" / "data").mkdir(parents=True)
-    (build_dir / "freight_fate" / "data" / "world.json").write_text(
-        "{}", encoding="utf-8")
+    (build_dir / "freight_fate" / "data" / "world.json").write_text("{}", encoding="utf-8")
     (build_dir / "sound_lib" / "lib").mkdir(parents=True)
     sound_suffix = next(iter(build_release.platform_native_exts()))
-    (build_dir / "sound_lib" / "lib" / f"bass{sound_suffix}").write_text(
-        "", encoding="utf-8")
+    (build_dir / "sound_lib" / "lib" / f"bass{sound_suffix}").write_text("", encoding="utf-8")
     (build_dir / "prism" / "_native").mkdir(parents=True)
     native_suffix = next(iter(build_release.platform_native_exts()))
-    (build_dir / "prism" / "_native" / f"bridge{native_suffix}").write_text(
-        "", encoding="utf-8")
+    (build_dir / "prism" / "_native" / f"bridge{native_suffix}").write_text("", encoding="utf-8")
 
     try:
         build_release.verify_packaged_payload(build_dir)
@@ -234,20 +241,16 @@ def test_packaged_payload_requires_platform_prism_native(tmp_path):
     (build_dir / "build_info.json").write_text("{}", encoding="utf-8")
     (build_dir / "CHANGELOG.md").write_text("# Changelog\n", encoding="utf-8")
     (build_dir / "USER_MANUAL.md").write_text("# Manual\n", encoding="utf-8")
-    (build_dir / "USER_MANUAL.html").write_text(
-        "<h1>Manual</h1>\n", encoding="utf-8")
+    (build_dir / "USER_MANUAL.html").write_text("<h1>Manual</h1>\n", encoding="utf-8")
     (build_dir / "freight_fate" / "assets" / "sounds").mkdir(parents=True)
     (build_dir / "freight_fate" / "data").mkdir(parents=True)
-    (build_dir / "freight_fate" / "data" / "world.json").write_text(
-        "{}", encoding="utf-8")
+    (build_dir / "freight_fate" / "data" / "world.json").write_text("{}", encoding="utf-8")
     (build_dir / "sound_lib" / "lib").mkdir(parents=True)
     sound_suffix = next(iter(build_release.platform_native_exts()))
-    (build_dir / "sound_lib" / "lib" / f"bass{sound_suffix}").write_text(
-        "", encoding="utf-8")
+    (build_dir / "sound_lib" / "lib" / f"bass{sound_suffix}").write_text("", encoding="utf-8")
     (build_dir / "prism" / "_native").mkdir(parents=True)
     wrong_suffix = ".dll" if ".dll" not in build_release.platform_native_exts() else ".so"
-    (build_dir / "prism" / "_native" / f"bridge{wrong_suffix}").write_text(
-        "", encoding="utf-8")
+    (build_dir / "prism" / "_native" / f"bridge{wrong_suffix}").write_text("", encoding="utf-8")
     if build_release.sys.platform.startswith("linux"):
         add_linux_prism_dependency_dir(build_release, build_dir)
 
@@ -271,12 +274,10 @@ def test_packaged_payload_requires_runnable_posix_executable(tmp_path, monkeypat
     (build_dir / "build_info.json").write_text("{}", encoding="utf-8")
     (build_dir / "CHANGELOG.md").write_text("# Changelog\n", encoding="utf-8")
     (build_dir / "USER_MANUAL.md").write_text("# Manual\n", encoding="utf-8")
-    (build_dir / "USER_MANUAL.html").write_text(
-        "<h1>Manual</h1>\n", encoding="utf-8")
+    (build_dir / "USER_MANUAL.html").write_text("<h1>Manual</h1>\n", encoding="utf-8")
     (build_dir / "freight_fate" / "assets" / "sounds").mkdir(parents=True)
     (build_dir / "freight_fate" / "data").mkdir(parents=True)
-    (build_dir / "freight_fate" / "data" / "world.json").write_text(
-        "{}", encoding="utf-8")
+    (build_dir / "freight_fate" / "data" / "world.json").write_text("{}", encoding="utf-8")
     (build_dir / "sound_lib" / "lib").mkdir(parents=True)
     (build_dir / "sound_lib" / "lib" / "libbass.so").write_text("", encoding="utf-8")
     (build_dir / "prism" / "_native").mkdir(parents=True)
@@ -327,11 +328,7 @@ def test_stage_prism_runtime_files_copies_linux_dependency_bundle(tmp_path, monk
     build_release.stage_prism_runtime_files(build_dir)
 
     assert (build_dir / "prism" / "_native" / "libprism.so").exists()
-    assert (
-        build_dir
-        / build_release.PRISM_DEPENDENCY_DIR
-        / "libglibmm-test.so.1.3.0"
-    ).exists()
+    assert (build_dir / build_release.PRISM_DEPENDENCY_DIR / "libglibmm-test.so.1.3.0").exists()
 
 
 def test_linux_packaged_payload_requires_prism_dependency_bundle(tmp_path, monkeypatch):
@@ -345,12 +342,10 @@ def test_linux_packaged_payload_requires_prism_dependency_bundle(tmp_path, monke
     (build_dir / "build_info.json").write_text("{}", encoding="utf-8")
     (build_dir / "CHANGELOG.md").write_text("# Changelog\n", encoding="utf-8")
     (build_dir / "USER_MANUAL.md").write_text("# Manual\n", encoding="utf-8")
-    (build_dir / "USER_MANUAL.html").write_text(
-        "<h1>Manual</h1>\n", encoding="utf-8")
+    (build_dir / "USER_MANUAL.html").write_text("<h1>Manual</h1>\n", encoding="utf-8")
     (build_dir / "freight_fate" / "assets" / "sounds").mkdir(parents=True)
     (build_dir / "freight_fate" / "data").mkdir(parents=True)
-    (build_dir / "freight_fate" / "data" / "world.json").write_text(
-        "{}", encoding="utf-8")
+    (build_dir / "freight_fate" / "data" / "world.json").write_text("{}", encoding="utf-8")
     (build_dir / "sound_lib" / "lib").mkdir(parents=True)
     (build_dir / "sound_lib" / "lib" / "libbass.so").write_text("", encoding="utf-8")
     (build_dir / "prism" / "_native").mkdir(parents=True)
@@ -444,9 +439,11 @@ def test_pick_asset_matches_platform_suffix():
 
 
 def test_flatten_markdown_strips_formatting():
-    body = ("## Changes\n\n- **Cruise control.** K sets cruise.\n"
-            "* See [the manual](https://example.test) for `details`.\n"
-            "---\n")
+    body = (
+        "## Changes\n\n- **Cruise control.** K sets cruise.\n"
+        "* See [the manual](https://example.test) for `details`.\n"
+        "---\n"
+    )
     assert flatten_markdown(body) == [
         "Changes",
         "Cruise control. K sets cruise.",
@@ -479,9 +476,9 @@ def test_write_apply_script_waits_for_pid_and_relaunches(tmp_path):
     if sys.platform == "win32":
         assert "/XD _internal saves" in text
     else:
-        assert f"rm -rf \"{new_root}/saves\"" in text
+        assert f'rm -rf "{new_root}/saves"' in text
     assert "/PURGE" not in text
-    assert f"rm -rf \"{install}\"" not in text
+    assert f'rm -rf "{install}"' not in text
 
 
 # -- settings -----------------------------------------------------------------
@@ -492,14 +489,12 @@ def test_settings_default_and_validation(tmp_path, monkeypatch):
     assert s.update_channel == ""
     assert s.skipped_update == ""
 
-    monkeypatch.setattr("freight_fate.models.profile.data_dir",
-                        lambda: tmp_path)
-    monkeypatch.setattr(Settings, "path",
-                        property(lambda self: tmp_path / "settings.json"))
+    monkeypatch.setattr("freight_fate.models.profile.data_dir", lambda: tmp_path)
+    monkeypatch.setattr(Settings, "path", property(lambda self: tmp_path / "settings.json"))
     s.update_channel = "weird"
     s.save()
     loaded = Settings.load()
-    assert loaded.update_channel == ""   # invalid value reset
+    assert loaded.update_channel == ""  # invalid value reset
 
 
 def test_build_info_none_when_not_frozen():

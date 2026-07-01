@@ -27,9 +27,9 @@ def _hours_for_day(target_doy: float) -> float:
 
 
 def test_date_text_starts_at_march_21_and_advances():
-    assert date_text(0.0) == "March 21"           # day-of-year 80, career start
-    assert date_text(24.0 * 11) == "April 1"      # eleven days on
-    assert date_text(24.0 * 100) == "June 29"     # a hundred days on
+    assert date_text(0.0) == "March 21"  # day-of-year 80, career start
+    assert date_text(24.0 * 11) == "April 1"  # eleven days on
+    assert date_text(24.0 * 100) == "June 29"  # a hundred days on
     # The fixed 365-day year wraps cleanly back to the start.
     assert date_text(24.0 * DAYS_PER_YEAR) == "March 21"
 
@@ -54,10 +54,10 @@ def test_career_starts_in_spring():
 
 
 def test_seasons_track_the_day_of_year():
-    assert season(_hours_for_day(15)) == "winter"    # mid January
-    assert season(_hours_for_day(100)) == "spring"   # mid April
-    assert season(_hours_for_day(200)) == "summer"   # mid July
-    assert season(_hours_for_day(280)) == "autumn"   # early October
+    assert season(_hours_for_day(15)) == "winter"  # mid January
+    assert season(_hours_for_day(100)) == "spring"  # mid April
+    assert season(_hours_for_day(200)) == "summer"  # mid July
+    assert season(_hours_for_day(280)) == "autumn"  # early October
 
 
 def test_summer_is_warmer_than_winter():
@@ -68,15 +68,16 @@ def test_summer_is_warmer_than_winter():
 
 
 def test_nights_are_colder_than_afternoons():
-    day = temperature_c("heartland", _hours_for_day(200) + 15)   # 3 PM
+    day = temperature_c("heartland", _hours_for_day(200) + 15)  # 3 PM
     night = temperature_c("heartland", _hours_for_day(200) + 4)  # 4 AM
     assert night < day
 
 
 def test_climate_differs_by_region():
     summer_afternoon = _hours_for_day(200) + 15
-    assert (temperature_c("desert_southwest", summer_afternoon)
-            > temperature_c("great_lakes", summer_afternoon))
+    assert temperature_c("desert_southwest", summer_afternoon) > temperature_c(
+        "great_lakes", summer_afternoon
+    )
     # The Gulf Coast does not freeze the way the northern tier does in winter.
     winter_night = _hours_for_day(15) + 4
     assert not is_freezing("gulf_coast", winter_night)
@@ -111,7 +112,7 @@ def test_dry_conditions_and_unknown_temperature_pass_through():
 
 
 def test_real_clock_game_hours_maps_to_the_real_date():
-    jan = datetime.datetime(2026, 1, 15, 3, 0)   # mid January, 3 AM
+    jan = datetime.datetime(2026, 1, 15, 3, 0)  # mid January, 3 AM
     jul = datetime.datetime(2026, 7, 15, 15, 0)  # mid July, 3 PM
     assert season(real_clock_game_hours(jan)) == "winter"
     assert season(real_clock_game_hours(jul)) == "summer"
@@ -137,11 +138,11 @@ def test_live_weather_makes_season_follow_the_real_clock():
         def get(self, *a):
             return None
 
-    live = WeatherSystem("great_lakes", seed=1, game_hours=summer_career,
-                         provider=_Provider())
+    live = WeatherSystem("great_lakes", seed=1, game_hours=summer_career, provider=_Provider())
     assert live.season == season(real_clock_game_hours())
     assert live.temperature_c == pytest.approx(
-        temperature_c("great_lakes", real_clock_game_hours()), abs=0.5)
+        temperature_c("great_lakes", real_clock_game_hours()), abs=0.5
+    )
 
 
 def test_temperature_text_uses_player_units():

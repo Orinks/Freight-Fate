@@ -311,9 +311,12 @@ def main() -> None:
     parser.add_argument("--radius-miles", type=float, default=20.0)
     parser.add_argument("--write-world", action="store_true")
     parser.add_argument("--json", action="store_true")
-    parser.add_argument("--include-jasons-law", action="store_true",
-                        help="Also pull the FHWA Jason's Law public truck-parking "
-                             "inventory to fill corridors the chains miss.")
+    parser.add_argument(
+        "--include-jasons-law",
+        action="store_true",
+        help="Also pull the FHWA Jason's Law public truck-parking "
+        "inventory to fill corridors the chains miss.",
+    )
     args = parser.parse_args()
 
     data = json.loads(args.world.read_text(encoding="utf-8"))
@@ -426,8 +429,7 @@ def fetch_pilot_candidates() -> list[Candidate]:
     return out
 
 
-_DIRECTION_TOKENS = {"EB", "WB", "NB", "SB", "N", "S", "E", "W",
-                     "NORTH", "SOUTH", "EAST", "WEST"}
+_DIRECTION_TOKENS = {"EB", "WB", "NB", "SB", "N", "S", "E", "W", "NORTH", "SOUTH", "EAST", "WEST"}
 
 
 def _strip_direction(route: str) -> str:
@@ -446,7 +448,8 @@ def fetch_jasons_law_candidates() -> list[Candidate]:
     areas (legal overnight parking, no guaranteed fuel/food).
     """
     params = urllib.parse.urlencode(
-        {"where": "1=1", "outFields": "*", "outSR": "4326", "f": "geojson"})
+        {"where": "1=1", "outFields": "*", "outSR": "4326", "f": "geojson"}
+    )
     payload = _read_json(f"{JASONS_LAW_ENDPOINT}?{params}", accept_json=True)
     out: list[Candidate] = []
     for feature in payload.get("features", []):
@@ -466,14 +469,18 @@ def fetch_jasons_law_candidates() -> list[Candidate]:
             continue
         # Dataset placeholders ("NA", "NHS Rest Stop or Truck Facility 19") ->
         # use a descriptive highway/municipality fallback instead.
-        if (name.upper() in {"NA", "N/A", "NONE"}
-                or name.lower().startswith("nhs rest stop or truck facility")):
+        if name.upper() in {"NA", "N/A", "NONE"} or name.lower().startswith(
+            "nhs rest stop or truck facility"
+        ):
             name = ""
         if not name:
             near = f" near {municipality}" if municipality else ""
             name = f"{highway or 'Corridor'} truck parking{near}"
-        spots_text = (f" with {int(spots)} truck parking spaces"
-                      if isinstance(spots, (int, float)) and spots else "")
+        spots_text = (
+            f" with {int(spots)} truck parking spaces"
+            if isinstance(spots, (int, float)) and spots
+            else ""
+        )
         out.append(
             Candidate(
                 provider="jasons_law",
@@ -483,8 +490,7 @@ def fetch_jasons_law_candidates() -> list[Candidate]:
                 lat=float(lat),
                 lon=float(lon),
                 highway=highway,
-                exit_text=(f"mile post {props.get('mile_post')}"
-                           if props.get("mile_post") else ""),
+                exit_text=(f"mile post {props.get('mile_post')}" if props.get("mile_post") else ""),
                 source_url=JASONS_LAW_ENDPOINT,
                 source_note=(
                     f"FHWA Jason's Law truck parking inventory (NTAD via BTS) "
@@ -534,15 +540,19 @@ def curate_world(
             )
             added_pois += len(selected)
             updated_legs += 1
-        curated_count = len([stop for stop in leg.get("stops", []) if not _stop_is_placeholder(stop)])
+        curated_count = len(
+            [stop for stop in leg.get("stops", []) if not _stop_is_placeholder(stop)]
+        )
         if curated_count < minimum:
-            remaining_gaps.append({
-                "from": leg["from"],
-                "to": leg["to"],
-                "highway": leg["highway"],
-                "curated_pois": curated_count,
-                "minimum_curated_pois": minimum,
-            })
+            remaining_gaps.append(
+                {
+                    "from": leg["from"],
+                    "to": leg["to"],
+                    "highway": leg["highway"],
+                    "curated_pois": curated_count,
+                    "minimum_curated_pois": minimum,
+                }
+            )
     return {
         "source_endpoints": [LOVES_ENDPOINT, f"{PILOT_ENDPOINT}?per=50&offset=N&locations=all"],
         "source_candidate_count": len(candidates),
@@ -627,22 +637,23 @@ def _select_spread(
     used: set[tuple[str, str]] = set()
     existing_miles = [float(stop["at_mi"]) for stop in existing]
     target_count = len(existing_miles) + need
-    targets = [
-        float(leg["miles"]) * (idx + 1) / (target_count + 1)
-        for idx in range(target_count)
-    ]
-    open_targets = sorted(targets, key=lambda target: min(
-        [abs(target - mile) for mile in existing_miles] or [float("inf")]
-    ), reverse=True)[:need]
+    targets = [float(leg["miles"]) * (idx + 1) / (target_count + 1) for idx in range(target_count)]
+    open_targets = sorted(
+        targets,
+        key=lambda target: min([abs(target - mile) for mile in existing_miles] or [float("inf")]),
+        reverse=True,
+    )[:need]
     for target in open_targets:
         available = [
-            candidate for candidate in candidates
+            candidate
+            for candidate in candidates
             if (candidate.provider, candidate.key) not in used
             and _far_enough(candidate, existing_miles, selected)
         ]
         if not available:
             available = [
-                candidate for candidate in candidates
+                candidate
+                for candidate in candidates
                 if (candidate.provider, candidate.key) not in used
             ]
         if not available:
@@ -656,7 +667,9 @@ def _select_spread(
         )
         selected.append(chosen)
         used.add((chosen.provider, chosen.key))
-    return [candidate.to_stop() for candidate in sorted(selected, key=lambda item: item.at_mi or 0.0)]
+    return [
+        candidate.to_stop() for candidate in sorted(selected, key=lambda item: item.at_mi or 0.0)
+    ]
 
 
 def _far_enough(
@@ -674,11 +687,7 @@ def _dedupe_manual(
     existing: list[dict[str, Any]],
 ) -> list[dict[str, Any]]:
     existing_names = {str(stop["name"]).casefold() for stop in existing}
-    return [
-        dict(stop)
-        for stop in manual
-        if str(stop["name"]).casefold() not in existing_names
-    ]
+    return [dict(stop) for stop in manual if str(stop["name"]).casefold() not in existing_names]
 
 
 def _not_duplicate(

@@ -38,14 +38,14 @@ class PlaytestResult:
     def assert_no_known_destination_exit_regressions(self) -> None:
         lower_lines = [line.lower() for line in self.transcript]
         destination_exit_lines = [
-            line for line in lower_lines
+            line
+            for line in lower_lines
             if "destination exit" in line or "exit for the destination" in line
         ]
         assert len(destination_exit_lines) <= 1, self.transcript_text
-        assert not any(
-            re.search(r"\b21 miles remaining\b", line)
-            for line in lower_lines
-        ), self.transcript_text
+        assert not any(re.search(r"\b21 miles remaining\b", line) for line in lower_lines), (
+            self.transcript_text
+        )
         assert self.remaining_miles == 0.0
 
 
@@ -77,11 +77,8 @@ class PlaytestHarness:
         self.result.transcript.append(f"[event] {text}")
 
     def start_delivery(
-            self,
-            *,
-            profile_name: str = "Playtest",
-            job_rank: int = 0,
-            route_rank: int = 0) -> PlaytestResult:
+        self, *, profile_name: str = "Playtest", job_rank: int = 0, route_rank: int = 0
+    ) -> PlaytestResult:
         from freight_fate.states.city import (
             CityMenuState,
             JobBoardState,

@@ -33,7 +33,7 @@ def test_no_torque_path_while_clutch_pressed_or_shifting():
     tr.clutch = 1.0
     tr.request_gear(1)
     assert tr.drive_ratio == 0.0  # still shifting + clutch in
-    tr.update(1.0)                # shift completes
+    tr.update(1.0)  # shift completes
     assert tr.drive_ratio == 0.0  # clutch still pressed
     tr.clutch = 0.0
     assert tr.drive_ratio > 0.0

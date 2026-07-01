@@ -9,26 +9,34 @@ def _driving(app):
 
     app.ctx.profile = Profile(name="Speeder", current_city="Buffalo")
     route = app.ctx.world.supported_route("Buffalo", "Rochester")
-    job = Job(CARGO_CATALOG["general"], 12.0, "Buffalo", "company yard",
-              "Rochester", route.miles, 1000.0, 12.0,
-              destination_location="Rochester freight market")
+    job = Job(
+        CARGO_CATALOG["general"],
+        12.0,
+        "Buffalo",
+        "company yard",
+        "Rochester",
+        route.miles,
+        1000.0,
+        12.0,
+        destination_location="Rochester freight market",
+    )
     return DrivingState(app.ctx, job, route, phase="delivery")
 
 
 def _capture_events(app, monkeypatch):
     spoken = []
-    monkeypatch.setattr(app.ctx, "say_event",
-                        lambda text, interrupt=True: spoken.append(text))
+    monkeypatch.setattr(app.ctx, "say_event", lambda text, interrupt=True: spoken.append(text))
     monkeypatch.setattr(app.ctx.audio, "play", lambda *a, **k: None)
     return spoken
 
 
 def _force_strike(d):
     from freight_fate.states.driving import SPEEDING_HOLD_S, SPEEDING_LEEWAY_MPH
-    d.trip.position_mi = d.trip.total_miles / 2.0       # out on the open road
+
+    d.trip.position_mi = d.trip.total_miles / 2.0  # out on the open road
     limit, _ = d.trip.speed_limit_at(d.trip.position_mi)
     d.truck.velocity_mps = (limit + SPEEDING_LEEWAY_MPH + 5) / 2.23694
-    d._update_speeding(SPEEDING_HOLD_S + 1.0)           # hold past the window
+    d._update_speeding(SPEEDING_HOLD_S + 1.0)  # hold past the window
     return limit
 
 
@@ -89,7 +97,7 @@ def test_capped_fine_says_it_is_maxed(monkeypatch):
     try:
         d = _driving(app)
         spoken = _capture_events(app, monkeypatch)
-        d.speeding_strikes = 5          # already at the 400-dollar cap
+        d.speeding_strikes = 5  # already at the 400-dollar cap
         _force_strike(d)
         assert "maximum" in spoken[-1]
         assert "400-dollar" in spoken[-1]

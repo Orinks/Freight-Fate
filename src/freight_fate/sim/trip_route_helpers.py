@@ -28,9 +28,9 @@ def _leg_heading(highway: str, from_city: str, to_city: str) -> str:
     a, b = cities.get(from_city), cities.get(to_city)
     if a is None or b is None or (a.lat == 0.0 and a.lon == 0.0):
         return ""
-    if int(match.group()) % 2 == 1:   # odd -> north/south route
+    if int(match.group()) % 2 == 1:  # odd -> north/south route
         return "North" if b.lat >= a.lat else "South"
-    return "East" if b.lon >= a.lon else "West"   # even -> east/west route
+    return "East" if b.lon >= a.lon else "West"  # even -> east/west route
 
 
 def _nearest_exit_label(leg, at_mi: float, tol_mi: float = 2.0) -> str:
@@ -64,5 +64,6 @@ def _fallback_grade(terrain: str, mile: float, highway: str) -> float:
     wavelength = {"hills": 14.0, "mountain": 8.0}.get(terrain, 16.0)
     phase = (sum(ord(ch) for ch in highway) % 628) / 100.0
     return amplitude * math.sin(2 * math.pi * mile / wavelength + phase)
+
 
 __all__ = [name for name in globals() if not name.startswith("__")]

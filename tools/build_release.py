@@ -170,19 +170,11 @@ def prism_dependency_dir() -> Path | None:
 
 def native_files(root: Path, exts: set[str] | None = None) -> list[Path]:
     suffixes = exts or platform_native_exts()
-    return [
-        path
-        for path in root.rglob("*")
-        if path.is_file() and path.suffix.lower() in suffixes
-    ]
+    return [path for path in root.rglob("*") if path.is_file() and path.suffix.lower() in suffixes]
 
 
 def linux_shared_library_files(root: Path) -> list[Path]:
-    return [
-        path
-        for path in root.rglob("*")
-        if path.is_file() and ".so" in path.name
-    ]
+    return [path for path in root.rglob("*") if path.is_file() and ".so" in path.name]
 
 
 def verify_release_dependencies() -> None:
@@ -196,8 +188,7 @@ def verify_release_dependencies() -> None:
     sound_lib_dir = sound_lib_lib_dir()
     if not native_files(sound_lib_dir):
         raise RuntimeError(
-            "sound_lib native audio libraries are missing for this platform: "
-            f"{sound_lib_dir}"
+            f"sound_lib native audio libraries are missing for this platform: {sound_lib_dir}"
         )
 
     native_dir = prism_native_dir()
@@ -270,15 +261,15 @@ def verify_prism_native_linkage(native_dir: Path, dependency_dir: Path | None = 
         output = f"{result.stdout}\n{result.stderr}".strip()
         if result.returncode != 0 or "not found" in output:
             raise RuntimeError(
-                f"Prism native library has unresolved Linux dependencies: {prism_lib}\n"
-                f"{output}"
+                f"Prism native library has unresolved Linux dependencies: {prism_lib}\n{output}"
             )
 
 
 def _load_manual_html():
     """Load the by-path manual HTML converter (tools is not a package)."""
     spec = importlib.util.spec_from_file_location(
-        "manual_html", Path(__file__).resolve().parent / "manual_html.py")
+        "manual_html", Path(__file__).resolve().parent / "manual_html.py"
+    )
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
     return module
@@ -298,7 +289,8 @@ def stage_release_docs(build_dir: Path) -> None:
     shutil.copy2(manual, root / "USER_MANUAL.md")
     # Also ship a browser-friendly, accessible HTML rendering of the manual.
     manual_html = _load_manual_html().markdown_to_html(
-        manual.read_text(encoding="utf-8"), title="Freight Fate Player Manual")
+        manual.read_text(encoding="utf-8"), title="Freight Fate Player Manual"
+    )
     (root / "USER_MANUAL.html").write_text(manual_html, encoding="utf-8")
 
 
@@ -498,8 +490,7 @@ def archive(build_dir: Path, label: str) -> Path:
                 z.write(path, Path(APP_NAME) / path.relative_to(build_dir))
     elif sys.platform == "darwin":
         out = DIST / f"{APP_NAME}-{label}-macos.zip"
-        subprocess.run(["ditto", "-c", "-k", "--keepParent",
-                        str(build_dir), str(out)], check=True)
+        subprocess.run(["ditto", "-c", "-k", "--keepParent", str(build_dir), str(out)], check=True)
     else:
         out = DIST / f"{APP_NAME}-{label}-linux-x64.tar.gz"
         with tarfile.open(out, "w:gz") as tar:
@@ -509,12 +500,13 @@ def archive(build_dir: Path, label: str) -> Path:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--tag", default="",
-                        help="release label override, e.g. nightly-20260610")
-    parser.add_argument("--skip-smoke", action="store_true",
-                        help="skip booting the frozen build")
-    parser.add_argument("--check-dependencies", action="store_true",
-                        help="only verify release-critical runtime dependencies")
+    parser.add_argument("--tag", default="", help="release label override, e.g. nightly-20260610")
+    parser.add_argument("--skip-smoke", action="store_true", help="skip booting the frozen build")
+    parser.add_argument(
+        "--check-dependencies",
+        action="store_true",
+        help="only verify release-critical runtime dependencies",
+    )
     args = parser.parse_args()
 
     if args.check_dependencies:

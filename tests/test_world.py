@@ -4,19 +4,32 @@
 # mid-trip snapshots store these as consecutive route_cities pairs, so each
 # one must remain a direct leg forever (or ship with a save migration).
 ORIGINAL_ADJACENT_PAIRS = [
-    ("New York", "Boston"), ("New York", "Philadelphia"),
-    ("Philadelphia", "Pittsburgh"), ("Pittsburgh", "Cleveland"),
-    ("Cleveland", "Chicago"), ("Chicago", "Indianapolis"),
-    ("Indianapolis", "Nashville"), ("Nashville", "Atlanta"),
-    ("Indianapolis", "St. Louis"), ("Chicago", "St. Louis"),
-    ("St. Louis", "Nashville"), ("St. Louis", "Kansas City"),
-    ("Kansas City", "Denver"), ("Denver", "Salt Lake City"),
-    ("Denver", "Albuquerque"), ("Albuquerque", "Phoenix"),
-    ("Phoenix", "Los Angeles"), ("Salt Lake City", "Las Vegas"),
-    ("Las Vegas", "Los Angeles"), ("Dallas", "Albuquerque"),
-    ("Dallas", "St. Louis"), ("Atlanta", "Dallas"),
-    ("Los Angeles", "San Francisco"), ("San Francisco", "Salt Lake City"),
-    ("San Francisco", "Portland"), ("Portland", "Seattle"),
+    ("New York", "Boston"),
+    ("New York", "Philadelphia"),
+    ("Philadelphia", "Pittsburgh"),
+    ("Pittsburgh", "Cleveland"),
+    ("Cleveland", "Chicago"),
+    ("Chicago", "Indianapolis"),
+    ("Indianapolis", "Nashville"),
+    ("Nashville", "Atlanta"),
+    ("Indianapolis", "St. Louis"),
+    ("Chicago", "St. Louis"),
+    ("St. Louis", "Nashville"),
+    ("St. Louis", "Kansas City"),
+    ("Kansas City", "Denver"),
+    ("Denver", "Salt Lake City"),
+    ("Denver", "Albuquerque"),
+    ("Albuquerque", "Phoenix"),
+    ("Phoenix", "Los Angeles"),
+    ("Salt Lake City", "Las Vegas"),
+    ("Las Vegas", "Los Angeles"),
+    ("Dallas", "Albuquerque"),
+    ("Dallas", "St. Louis"),
+    ("Atlanta", "Dallas"),
+    ("Los Angeles", "San Francisco"),
+    ("San Francisco", "Salt Lake City"),
+    ("San Francisco", "Portland"),
+    ("Portland", "Seattle"),
     ("Portland", "Salt Lake City"),
 ]
 
@@ -56,19 +69,18 @@ def test_route_options_reject_out_of_direction_detours(world):
     from freight_fate.data.world import _max_alternate_miles
 
     for start, end in [
-        ("Philadelphia", "New York"),      # Northeast Corridor freight
-        ("Philadelphia", "Boston"),        # I-95 with plausible I-84 option
-        ("Atlanta", "Dallas"),             # I-20, not a St. Louis loop
-        ("Dallas", "Los Angeles"),         # Southwest corridors
-        ("Denver", "Seattle"),             # I-80/I-84 or US-95/I-90
-        ("New York", "Los Angeles"),       # long-haul alternatives still allowed
+        ("Philadelphia", "New York"),  # Northeast Corridor freight
+        ("Philadelphia", "Boston"),  # I-95 with plausible I-84 option
+        ("Atlanta", "Dallas"),  # I-20, not a St. Louis loop
+        ("Dallas", "Los Angeles"),  # Southwest corridors
+        ("Denver", "Seattle"),  # I-80/I-84 or US-95/I-90
+        ("New York", "Los Angeles"),  # long-haul alternatives still allowed
     ]:
         best = world.shortest_route(start, end)
         options = world.route_options(start, end, count=5)
         assert options
         assert options[0].cities == best.cities
-        assert all(route.miles <= _max_alternate_miles(best.miles)
-                   for route in options)
+        assert all(route.miles <= _max_alternate_miles(best.miles) for route in options)
 
 
 def test_northeast_corridors_prefer_i95_not_inland_loops(world):
@@ -190,8 +202,9 @@ def test_route_stops_have_trucker_relevant_types(world):
     assert all(stop.parking in PARKING_CERTAINTY_LABELS for stop in route.stop_details)
     assert all(set(stop.directions) <= STOP_DIRECTIONS for stop in route.stop_details)
     assert all(set(stop.actions) <= POI_ACTIONS for stop in route.stop_details)
-    assert all(set(stop.actions) <= set(DEFAULT_POI_ACTIONS[stop.type])
-               for stop in route.stop_details)
+    assert all(
+        set(stop.actions) <= set(DEFAULT_POI_ACTIONS[stop.type]) for stop in route.stop_details
+    )
 
     parking_route = world.shortest_route("Los Angeles", "San Diego")
     assert any(stop.type == "public_rest_area" for stop in parking_route.stop_details)
@@ -199,10 +212,7 @@ def test_route_stops_have_trucker_relevant_types(world):
 
 def test_public_rest_areas_do_not_imply_repair(world):
     rest_area_actions = [
-        stop.actions
-        for leg in world.legs
-        for stop in leg.stops
-        if stop.type == "public_rest_area"
+        stop.actions for leg in world.legs for stop in leg.stops if stop.type == "public_rest_area"
     ]
     assert rest_area_actions
     assert all("repair" not in actions for actions in rest_area_actions)
@@ -219,10 +229,7 @@ def test_route_stops_have_explicit_valid_positions(world):
 
 def test_no_placeholder_pois_remain_in_current_route_network(world):
     placeholders = [
-        (leg.a, leg.b, stop.name)
-        for leg in world.legs
-        for stop in leg.stops
-        if not stop.curated
+        (leg.a, leg.b, stop.name) for leg in world.legs for stop in leg.stops if not stop.curated
     ]
     assert placeholders == []
 
@@ -255,24 +262,38 @@ def test_world_rejects_raw_source_text_in_player_poi_name():
 
     data = {
         "cities": {
-            "A": {"state": "One", "region": "midwest", "lat": 40, "lon": -90,
-                  "locations": [{"name": "A Yard", "type": "terminal", "cargo": ["general"]}]},
-            "B": {"state": "One", "region": "midwest", "lat": 41, "lon": -91,
-                  "locations": [{"name": "B Yard", "type": "terminal", "cargo": ["general"]}]},
+            "A": {
+                "state": "One",
+                "region": "midwest",
+                "lat": 40,
+                "lon": -90,
+                "locations": [{"name": "A Yard", "type": "terminal", "cargo": ["general"]}],
+            },
+            "B": {
+                "state": "One",
+                "region": "midwest",
+                "lat": 41,
+                "lon": -91,
+                "locations": [{"name": "B Yard", "type": "terminal", "cargo": ["general"]}],
+            },
         },
-        "legs": [{
-            "from": "A",
-            "to": "B",
-            "miles": 80,
-            "highway": "I-1",
-            "terrain": "flat",
-            "stops": [{
-                "name": "amenity=fuel node/123",
-                "type": "travel_center",
-                "at_mi": 30,
-                "source": "fixture",
-            }],
-        }],
+        "legs": [
+            {
+                "from": "A",
+                "to": "B",
+                "miles": 80,
+                "highway": "I-1",
+                "terrain": "flat",
+                "stops": [
+                    {
+                        "name": "amenity=fuel node/123",
+                        "type": "travel_center",
+                        "at_mi": 30,
+                        "source": "fixture",
+                    }
+                ],
+            }
+        ],
     }
 
     with pytest.raises(ValueError, match="raw OSM"):
@@ -286,12 +307,22 @@ def test_world_rejects_raw_source_text_in_player_facility_name():
 
     data = {
         "cities": {
-            "A": {"state": "One", "region": "midwest", "lat": 40, "lon": -90,
-                  "locations": [{"name": "warehouse way/123", "type": "terminal",
-                                 "cargo": ["general"]}]},
-            "B": {"state": "One", "region": "midwest", "lat": 41, "lon": -91,
-                  "locations": [{"name": "B Yard", "type": "terminal",
-                                 "cargo": ["general"]}]},
+            "A": {
+                "state": "One",
+                "region": "midwest",
+                "lat": 40,
+                "lon": -90,
+                "locations": [
+                    {"name": "warehouse way/123", "type": "terminal", "cargo": ["general"]}
+                ],
+            },
+            "B": {
+                "state": "One",
+                "region": "midwest",
+                "lat": 41,
+                "lon": -91,
+                "locations": [{"name": "B Yard", "type": "terminal", "cargo": ["general"]}],
+            },
         },
         "legs": [],
     }
@@ -307,26 +338,40 @@ def test_repair_action_requires_matching_service_metadata():
 
     data = {
         "cities": {
-            "A": {"state": "One", "region": "midwest", "lat": 40, "lon": -90,
-                  "locations": [{"name": "A Yard", "type": "terminal", "cargo": ["general"]}]},
-            "B": {"state": "One", "region": "midwest", "lat": 41, "lon": -91,
-                  "locations": [{"name": "B Yard", "type": "terminal", "cargo": ["general"]}]},
+            "A": {
+                "state": "One",
+                "region": "midwest",
+                "lat": 40,
+                "lon": -90,
+                "locations": [{"name": "A Yard", "type": "terminal", "cargo": ["general"]}],
+            },
+            "B": {
+                "state": "One",
+                "region": "midwest",
+                "lat": 41,
+                "lon": -91,
+                "locations": [{"name": "B Yard", "type": "terminal", "cargo": ["general"]}],
+            },
         },
-        "legs": [{
-            "from": "A",
-            "to": "B",
-            "miles": 80,
-            "highway": "I-1",
-            "terrain": "flat",
-            "stops": [{
-                "name": "Example Service Plaza",
-                "type": "service_plaza",
-                "at_mi": 30,
-                "source": "fixture source names emergency service provider",
-                "actions": ["park", "save", "repair"],
-                "services": ["parking"],
-            }],
-        }],
+        "legs": [
+            {
+                "from": "A",
+                "to": "B",
+                "miles": 80,
+                "highway": "I-1",
+                "terrain": "flat",
+                "stops": [
+                    {
+                        "name": "Example Service Plaza",
+                        "type": "service_plaza",
+                        "at_mi": 30,
+                        "source": "fixture source names emergency service provider",
+                        "actions": ["park", "save", "repair"],
+                        "services": ["parking"],
+                    }
+                ],
+            }
+        ],
     }
 
     with pytest.raises(ValueError, match="matching source-backed service"):
@@ -338,26 +383,40 @@ def test_explicit_roadside_assistance_service_can_extend_plaza_actions():
 
     data = {
         "cities": {
-            "A": {"state": "One", "region": "midwest", "lat": 40, "lon": -90,
-                  "locations": [{"name": "A Yard", "type": "terminal", "cargo": ["general"]}]},
-            "B": {"state": "One", "region": "midwest", "lat": 41, "lon": -91,
-                  "locations": [{"name": "B Yard", "type": "terminal", "cargo": ["general"]}]},
+            "A": {
+                "state": "One",
+                "region": "midwest",
+                "lat": 40,
+                "lon": -90,
+                "locations": [{"name": "A Yard", "type": "terminal", "cargo": ["general"]}],
+            },
+            "B": {
+                "state": "One",
+                "region": "midwest",
+                "lat": 41,
+                "lon": -91,
+                "locations": [{"name": "B Yard", "type": "terminal", "cargo": ["general"]}],
+            },
         },
-        "legs": [{
-            "from": "A",
-            "to": "B",
-            "miles": 80,
-            "highway": "I-1",
-            "terrain": "flat",
-            "stops": [{
-                "name": "Example Turnpike Service Plaza",
-                "type": "service_plaza",
-                "at_mi": 30,
-                "source": "fixture source names authorized emergency road service",
-                "actions": ["park", "save", "fuel", "break", "roadside_assistance"],
-                "services": ["diesel", "parking", "roadside_assistance"],
-            }],
-        }],
+        "legs": [
+            {
+                "from": "A",
+                "to": "B",
+                "miles": 80,
+                "highway": "I-1",
+                "terrain": "flat",
+                "stops": [
+                    {
+                        "name": "Example Turnpike Service Plaza",
+                        "type": "service_plaza",
+                        "at_mi": 30,
+                        "source": "fixture source names authorized emergency road service",
+                        "actions": ["park", "save", "fuel", "break", "roadside_assistance"],
+                        "services": ["diesel", "parking", "roadside_assistance"],
+                    }
+                ],
+            }
+        ],
     }
 
     stop = World(data).legs[0].stops[0]
@@ -379,8 +438,9 @@ def test_corridor_metadata_supports_offline_itineraries(world):
     assert max(abs(segment.avg_grade_pct) for segment in leg.grade_segments) < 0.2
     assert [crossing.state for crossing in leg.state_crossings] == ["Indiana"]
     assert leg.state_crossings[0].at_mi == 32.8
-    assert any(checkpoint.name == "Gary and Hammond industrial corridor"
-               for checkpoint in leg.checkpoints)
+    assert any(
+        checkpoint.name == "Gary and Hammond industrial corridor" for checkpoint in leg.checkpoints
+    )
     assert sum(state_miles.miles for state_miles in leg.state_miles) == leg.miles
 
 
@@ -472,8 +532,7 @@ def test_southern_sleep_stop_gaps_are_no_longer_extreme(world):
         route = world.supported_route(start, end)
         assert route is not None
         points = [0.0]
-        points.extend(stop.at_mi for stop in route.stop_details
-                      if "sleep" in stop.actions)
+        points.extend(stop.at_mi for stop in route.stop_details if "sleep" in stop.actions)
         points.append(route.miles)
         points.sort()
         return max(b - a for a, b in zip(points, points[1:], strict=False))
@@ -501,8 +560,7 @@ def test_toll_metadata_is_explicit_and_separate_from_service_plazas(world):
     assert event.estimated
     assert "toll" in event.source.lower()
 
-    plazas = [stop for leg in route.legs for stop in leg.stops
-              if stop.type == "service_plaza"]
+    plazas = [stop for leg in route.legs for stop in leg.stops if stop.type == "service_plaza"]
     assert plazas
     assert all("fuel" in plaza.actions for plaza in plazas)
 
@@ -568,6 +626,7 @@ def test_route_describe_mentions_miles_and_highway(world):
 
 # -- graph integrity -----------------------------------------------------------
 
+
 def test_every_city_has_coordinates_and_a_known_region(world):
     from freight_fate.sim.weather import REGION_WEIGHTS
 
@@ -606,32 +665,32 @@ def test_famous_corridors_have_real_terrain(world):
     """
     expected = {
         # the legendary grades
-        ("Nashville", "Atlanta"): "mountain",       # I-24 Monteagle Mountain
-        ("Knoxville", "Nashville"): "mountain",     # I-40 Cumberland Plateau
-        ("Charlotte", "Knoxville"): "mountain",     # I-40 Pigeon River Gorge
+        ("Nashville", "Atlanta"): "mountain",  # I-24 Monteagle Mountain
+        ("Knoxville", "Nashville"): "mountain",  # I-40 Cumberland Plateau
+        ("Charlotte", "Knoxville"): "mountain",  # I-40 Pigeon River Gorge
         ("Philadelphia", "Pittsburgh"): "mountain",  # PA Turnpike Alleghenies
-        ("Baltimore", "Pittsburgh"): "mountain",    # Sideling Hill country
-        ("Sacramento", "Reno"): "mountain",         # I-80 Donner Pass
-        ("Denver", "Albuquerque"): "mountain",      # I-25 Raton Pass
-        ("Boise", "Portland"): "mountain",          # I-84 Cabbage Hill
-        ("Spokane", "Seattle"): "mountain",         # I-90 Snoqualmie Pass
-        ("Spokane", "Boise"): "mountain",           # US-95 White Bird grade
+        ("Baltimore", "Pittsburgh"): "mountain",  # Sideling Hill country
+        ("Sacramento", "Reno"): "mountain",  # I-80 Donner Pass
+        ("Denver", "Albuquerque"): "mountain",  # I-25 Raton Pass
+        ("Boise", "Portland"): "mountain",  # I-84 Cabbage Hill
+        ("Spokane", "Seattle"): "mountain",  # I-90 Snoqualmie Pass
+        ("Spokane", "Boise"): "mountain",  # US-95 White Bird grade
         # honest rolling country
-        ("St. Louis", "Kansas City"): "hills",      # I-70 Missouri River hills
-        ("Wichita", "Kansas City"): "hills",        # I-35 Flint Hills
-        ("Oklahoma City", "Dallas"): "hills",       # I-35 Arbuckle Mountains
-        ("Memphis", "Nashville"): "hills",          # I-40 Highland Rim
-        ("Milwaukee", "Minneapolis"): "hills",      # I-94 driftless coulees
-        ("New York", "Boston"): "hills",            # I-95 rolling Connecticut
-        ("Richmond", "Raleigh"): "hills",           # I-85 piedmont
-        ("Phoenix", "Los Angeles"): "hills",        # I-10 San Gorgonio Pass
-        ("Amarillo", "Albuquerque"): "hills",       # I-40 Clines Corners climb
+        ("St. Louis", "Kansas City"): "hills",  # I-70 Missouri River hills
+        ("Wichita", "Kansas City"): "hills",  # I-35 Flint Hills
+        ("Oklahoma City", "Dallas"): "hills",  # I-35 Arbuckle Mountains
+        ("Memphis", "Nashville"): "hills",  # I-40 Highland Rim
+        ("Milwaukee", "Minneapolis"): "hills",  # I-94 driftless coulees
+        ("New York", "Boston"): "hills",  # I-95 rolling Connecticut
+        ("Richmond", "Raleigh"): "hills",  # I-85 piedmont
+        ("Phoenix", "Los Angeles"): "hills",  # I-10 San Gorgonio Pass
+        ("Amarillo", "Albuquerque"): "hills",  # I-40 Clines Corners climb
         # genuinely flat country stays flat
-        ("Kansas City", "Denver"): "flat",          # I-70 across the high plains
-        ("Chicago", "St. Louis"): "flat",           # I-55 Illinois prairie
-        ("New Orleans", "Houston"): "flat",         # I-10 Gulf coastal plain
-        ("Omaha", "Cheyenne"): "flat",              # I-80 Platte River valley
-        ("Jacksonville", "Miami"): "flat",          # I-95 Florida coast
+        ("Kansas City", "Denver"): "flat",  # I-70 across the high plains
+        ("Chicago", "St. Louis"): "flat",  # I-55 Illinois prairie
+        ("New Orleans", "Houston"): "flat",  # I-10 Gulf coastal plain
+        ("Omaha", "Cheyenne"): "flat",  # I-80 Platte River valley
+        ("Jacksonville", "Miami"): "flat",  # I-95 Florida coast
     }
     for (a, b), terrain in expected.items():
         assert leg_terrain(world, a, b) == terrain, f"{a}-{b}"
@@ -655,5 +714,6 @@ def test_dijkstra_connects_every_city_pair(world):
 
 def test_original_map_is_preserved_for_old_saves(world):
     for a, b in ORIGINAL_ADJACENT_PAIRS:
-        assert world.route_from_cities([a, b]) is not None, \
+        assert world.route_from_cities([a, b]) is not None, (
             f"old direct leg {a}-{b} no longer resolves"
+        )

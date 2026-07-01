@@ -90,4 +90,3 @@ def open_status_screen(app, label):
     picker.handle_event(key_event(pygame.K_RETURN))
     assert isinstance(app.state, DrivingStatusScreenState)
     return app.state
-

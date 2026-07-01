@@ -55,8 +55,8 @@ def fetch_ors_hgv_route(
         ) from exc
     base_url = os.environ.get("ORS_BASE_URL", ORS_DEFAULT_BASE_URL)
     client = openrouteservice.Client(
-        key=api_key, base_url=base_url, timeout=timeout_s,
-        retry_over_query_limit=True)
+        key=api_key, base_url=base_url, timeout=timeout_s, retry_over_query_limit=True
+    )
     return client.directions(**_ors_directions_kwargs(start, end))
 
 
@@ -78,10 +78,7 @@ def parse_ors_route(payload: dict[str, Any]) -> dict[str, Any]:
     if len(coords3d) < 2:
         raise RuntimeError("ORS route geometry has fewer than two points")
     coordinates = [[float(point[0]), float(point[1])] for point in coords3d]
-    elevations_ft = [
-        float(point[2]) * 3.28084 if len(point) > 2 else 0.0
-        for point in coords3d
-    ]
+    elevations_ft = [float(point[2]) * 3.28084 if len(point) > 2 else 0.0 for point in coords3d]
     props = feature.get("properties", {})
     distance_m = float(props.get("summary", {}).get("distance", 0.0))
     extras = props.get("extras", {})
@@ -101,7 +98,10 @@ _OSRM_REF_RE = re.compile(r"([A-Za-z]{1,3})\s*-?\s*(\d+)")
 
 
 def _osrm_primary_highway(
-    data: dict[str, Any], leg: dict[str, Any], cache_dir: Path, rate_limit_s: float,
+    data: dict[str, Any],
+    leg: dict[str, Any],
+    cache_dir: Path,
+    rate_limit_s: float,
 ) -> str:
     """Dominant route shield for a leg, from OSRM's step ``ref`` field.
 
@@ -115,13 +115,20 @@ def _osrm_primary_highway(
     cities = data["cities"]
     start, end = cities[leg["from"]], cities[leg["to"]]
     coords = f"{start['lon']},{start['lat']};{end['lon']},{end['lat']}"
-    params = {"overview": "false", "steps": "true",
-              "alternatives": "false", "geometries": "geojson"}
+    params = {
+        "overview": "false",
+        "steps": "true",
+        "alternatives": "false",
+        "geometries": "geojson",
+    }
     try:
         payload = _cached_json(
-            cache_dir, "osrm-steps", f"{leg['from']}--{leg['to']}",
+            cache_dir,
+            "osrm-steps",
+            f"{leg['from']}--{leg['to']}",
             OSRM_ROUTE_URL.format(coords=coords) + "?" + urllib.parse.urlencode(params),
-            rate_limit_s=rate_limit_s)
+            rate_limit_s=rate_limit_s,
+        )
     except (TimeoutError, OSError, urllib.error.URLError, urllib.error.HTTPError):
         return ""
     if payload.get("code") != "Ok" or not payload.get("routes"):
@@ -196,7 +203,8 @@ def ors_corridor_samples(
         lon, lat = coords[index]
         samples.append({"at_mi": at_mi, "lat": float(lat), "lon": float(lon)})
         sample_elevations.append(
-            elevations[index] if index < len(elevations)
+            elevations[index]
+            if index < len(elevations)
             else (elevations[-1] if elevations else 0.0)
         )
     samples[0]["at_mi"] = 0.0
@@ -241,11 +249,14 @@ def grade_segments_from_samples(
     ):
         run_mi = max(0.1, end["at_mi"] - start["at_mi"])
         grade = (elev_b - elev_a) / (run_mi * 5280.0) * 100.0
-        intervals.append((start["at_mi"], end["at_mi"], grade,
-                          _terrain_for_grade(abs(grade))))
+        intervals.append((start["at_mi"], end["at_mi"], grade, _terrain_for_grade(abs(grade))))
     segments: list[dict[str, Any]] = []
     seg_start, seg_end, grades, terrain = (
-        intervals[0][0], intervals[0][1], [intervals[0][2]], intervals[0][3])
+        intervals[0][0],
+        intervals[0][1],
+        [intervals[0][2]],
+        intervals[0][3],
+    )
     for start, end, grade, kind in intervals[1:]:
         if kind == terrain:
             seg_end = end
@@ -257,8 +268,9 @@ def grade_segments_from_samples(
     return segments
 
 
-def _grade_segment(start_mi: float, end_mi: float, grades: list[float],
-                   terrain: str) -> dict[str, Any]:
+def _grade_segment(
+    start_mi: float, end_mi: float, grades: list[float], terrain: str
+) -> dict[str, Any]:
     return {
         "start_mi": round(start_mi, 1),
         "end_mi": round(end_mi, 1),
@@ -331,10 +343,12 @@ def _open_meteo_elevation_smoke(corridor: dict[str, Any]) -> dict[str, Any]:
         selected.append(points[len(points) // 2])
     if len(points) > 1:
         selected.append(points[-1])
-    params = urllib.parse.urlencode({
-        "latitude": ",".join(str(point["lat"]) for point in selected),
-        "longitude": ",".join(str(point["lon"]) for point in selected),
-    })
+    params = urllib.parse.urlencode(
+        {
+            "latitude": ",".join(str(point["lat"]) for point in selected),
+            "longitude": ",".join(str(point["lon"]) for point in selected),
+        }
+    )
     req = urllib.request.Request(
         OPEN_METEO_ELEVATION_URL + "?" + params,
         headers={"User-Agent": USER_AGENT},
@@ -380,7 +394,8 @@ def _overpass_poi_smoke(corridor: dict[str, Any]) -> dict[str, Any]:
         data = json.loads(resp.read().decode("utf-8"))
     elements = data.get("elements", [])
     actionable = [
-        element for element in elements
+        element
+        for element in elements
         if any(key in element.get("tags", {}) for key in ("amenity", "highway"))
     ]
     return {"elements": len(elements), "actionable_candidates": len(actionable)}

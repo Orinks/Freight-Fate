@@ -25,13 +25,13 @@ USER_AGENT = "FreightFate interchange curation (https://github.com/Orinks/Freigh
 ACCESSED_DATE = "2026-06-23"
 EARTH_RADIUS_MI = 3958.7613
 
-SAMPLE_SPACING_MI = 10.0   # how often to drop an Overpass probe along the leg
-PROBE_RADIUS_M = 9_000     # search radius per probe
-RAMP_NEAR_M = 350.0        # a ramp this close to a junction belongs to it
-LOCAL_CORRIDOR_M = 200.0   # local PBF features must snap this close to a leg
+SAMPLE_SPACING_MI = 10.0  # how often to drop an Overpass probe along the leg
+PROBE_RADIUS_M = 9_000  # search radius per probe
+RAMP_NEAR_M = 350.0  # a ramp this close to a junction belongs to it
+LOCAL_CORRIDOR_M = 200.0  # local PBF features must snap this close to a leg
 LOCAL_PBF_PREFILTER_PAD_M = PROBE_RADIUS_M
 MIN_EXIT_SPACING_MI = 2.0  # collapse exits closer than this (keep the richer)
-MAX_DESTINATIONS = 3       # cap control cities per exit for speech brevity
+MAX_DESTINATIONS = 3  # cap control cities per exit for speech brevity
 LOCAL_INDEX_CACHE_VERSION = 1
 LOCAL_INDEX_PROGRESS_INTERVAL_SEC = 60.0
 

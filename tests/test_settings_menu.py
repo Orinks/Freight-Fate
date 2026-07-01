@@ -201,8 +201,7 @@ def test_speech_setting_adjustment_previews_adjusted_voice(monkeypatch):
     preview = PreviewSpeech()
     monkeypatch.setattr(app.ctx, "speech", preview)
     monkeypatch.setattr(app, "speech", preview)
-    monkeypatch.setattr(app.ctx, "say",
-                        lambda text, interrupt=True: fallback_spoken.append(text))
+    monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: fallback_spoken.append(text))
     try:
         menu = SettingsCategoryState(app.ctx, "speech")
         app.push_state(menu)

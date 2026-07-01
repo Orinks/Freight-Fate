@@ -14,16 +14,23 @@ def _driving(app):
 
     app.ctx.profile = Profile(name="Info Keys", current_city="Buffalo")
     route = app.ctx.world.supported_route("Buffalo", "Rochester")
-    job = Job(CARGO_CATALOG["general"], 12.0, "Buffalo", "company yard",
-              "Rochester", route.miles, 1000.0, 12.0,
-              destination_location="Rochester freight market")
+    job = Job(
+        CARGO_CATALOG["general"],
+        12.0,
+        "Buffalo",
+        "company yard",
+        "Rochester",
+        route.miles,
+        1000.0,
+        12.0,
+        destination_location="Rochester freight market",
+    )
     return DrivingState(app.ctx, job, route, phase="delivery")
 
 
 def _capture(app, monkeypatch):
     spoken = []
-    monkeypatch.setattr(app.ctx, "say",
-                        lambda text, interrupt=True: spoken.append(text))
+    monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: spoken.append(text))
     return spoken
 
 
@@ -78,9 +85,9 @@ def test_speed_limit_key_reports_how_far_over_you_are(monkeypatch):
     app = App()
     try:
         d = _driving(app)
-        d.trip.position_mi = d.trip.total_miles / 2   # out on the open road
+        d.trip.position_mi = d.trip.total_miles / 2  # out on the open road
         limit, _ = d.trip.speed_limit_at(d.trip.position_mi)
-        d.truck.velocity_mps = (limit + 15) / 2.23694   # 15 mph over
+        d.truck.velocity_mps = (limit + 15) / 2.23694  # 15 mph over
         spoken = _capture(app, monkeypatch)
         d.handle_event(key_event(pygame.K_s))
         assert "over" in spoken[-1]
@@ -118,9 +125,9 @@ def test_repeat_key_replays_the_last_route_announcement(monkeypatch):
         d.handle_event(key_event(pygame.K_a))
         assert "No recent announcement" in spoken[-1]
         # After a route announcement, A replays it verbatim.
-        d._handle_trip_event(TripEvent(
-            TripEventKind.GPS_CUE,
-            "In 2 miles, construction ahead. Speed limit 45."))
+        d._handle_trip_event(
+            TripEvent(TripEventKind.GPS_CUE, "In 2 miles, construction ahead. Speed limit 45.")
+        )
         spoken.clear()
         d.handle_event(key_event(pygame.K_a))
         assert "construction ahead" in spoken[-1]

@@ -40,8 +40,8 @@ def enrich_all_routes(
                 parsed = _cached_ors_route(data, leg, cache_dir, rate_limit_s, api_key)
                 geometry = parsed["coordinates"]
                 samples, elevations = ors_corridor_samples(
-                    parsed, float(leg["miles"]),
-                    sample_count=_ors_sample_count(float(leg["miles"])))
+                    parsed, float(leg["miles"]), sample_count=_ors_sample_count(float(leg["miles"]))
+                )
                 elevation_source = ORS_ELEVATION_SOURCE
                 corridor_source = ORS_CORRIDOR_SOURCE
                 corridor["tollway_detected"] = parsed["has_tollway"]
@@ -54,9 +54,11 @@ def enrich_all_routes(
                 corridor_source = CORRIDOR_SOURCE
             if "route_points" in needs:
                 corridor["route_points"] = [
-                    {"at_mi": round(point["at_mi"], 1),
-                     "lat": round(point["lat"], 5),
-                     "lon": round(point["lon"], 5)}
+                    {
+                        "at_mi": round(point["at_mi"], 1),
+                        "lat": round(point["lat"], 5),
+                        "lon": round(point["lon"], 5),
+                    }
                     for point in samples
                 ]
             if "elevation_samples" in needs:
@@ -72,7 +74,8 @@ def enrich_all_routes(
                 corridor["grade_segments"] = (
                     grade_segments_from_samples(samples, elevations, leg)
                     if engine == "ors"
-                    else _grade_segments(samples, elevations, leg))
+                    else _grade_segments(samples, elevations, leg)
+                )
                 # Label the leg's coarse terrain from the real grades. Only new
                 # legs reach here (fully-enriched legs are skipped above), so a
                 # placeholder "flat" on a freshly-added mountain leg is corrected
@@ -97,24 +100,28 @@ def enrich_all_routes(
                 if stop is not None:
                     leg["stops"] = [stop]
             if "pois" in _leg_missing_fields(data, leg):
-                blockers.append({
-                    "from": leg["from"],
-                    "to": leg["to"],
-                    "reason": "No actionable Overpass POI candidate found in sampled corridor searches.",
-                    "next_action": (
-                        "Run with --enrich-all --write after checking DOT/operator "
-                        "sources or increasing Overpass search radius for this leg."
-                    ),
-                })
+                blockers.append(
+                    {
+                        "from": leg["from"],
+                        "to": leg["to"],
+                        "reason": "No actionable Overpass POI candidate found in sampled corridor searches.",
+                        "next_action": (
+                            "Run with --enrich-all --write after checking DOT/operator "
+                            "sources or increasing Overpass search radius for this leg."
+                        ),
+                    }
+                )
             else:
                 enriched += 1
         except Exception as exc:  # noqa: BLE001 - batch report should keep moving.
-            blockers.append({
-                "from": leg["from"],
-                "to": leg["to"],
-                "reason": str(exc),
-                "next_action": "Retry this leg after checking cache/API availability.",
-            })
+            blockers.append(
+                {
+                    "from": leg["from"],
+                    "to": leg["to"],
+                    "reason": str(exc),
+                    "next_action": "Retry this leg after checking cache/API availability.",
+                }
+            )
     report = coverage_report(data)
     return {
         "write": write,
@@ -171,7 +178,8 @@ def refresh_corridors(
         if engine == "ors":
             parsed = _cached_ors_route(data, leg, cache_dir, rate_limit_s, api_key)
             samples, elevations = ors_corridor_samples(
-                parsed, miles, sample_count=_ors_sample_count(miles))
+                parsed, miles, sample_count=_ors_sample_count(miles)
+            )
             elevation_source = ORS_ELEVATION_SOURCE
             corridor_source = ORS_CORRIDOR_SOURCE
             corridor["tollway_detected"] = parsed["has_tollway"]
@@ -184,27 +192,22 @@ def refresh_corridors(
             corridor_source = CORRIDOR_SOURCE
             grade_segments = _grade_segments(samples, elevations, leg)
         corridor["route_points"] = [
-            {"at_mi": round(p["at_mi"], 1),
-             "lat": round(p["lat"], 5),
-             "lon": round(p["lon"], 5)}
+            {"at_mi": round(p["at_mi"], 1), "lat": round(p["lat"], 5), "lon": round(p["lon"], 5)}
             for p in samples
         ]
         corridor["elevation_samples"] = [
-            {"at_mi": round(p["at_mi"], 1),
-             "elevation_ft": round(e, 1),
-             "source": elevation_source}
+            {"at_mi": round(p["at_mi"], 1), "elevation_ft": round(e, 1), "source": elevation_source}
             for p, e in zip(samples, elevations, strict=True)
         ]
         corridor["grade_segments"] = grade_segments
         corridor["source"] = corridor_source
-        refreshed.append({"from": leg["from"], "to": leg["to"],
-                          "engine": engine, "points": len(samples)})
-    return {"refreshed": refreshed,
-            "coverage_totals": coverage_report(data)["totals"]}
+        refreshed.append(
+            {"from": leg["from"], "to": leg["to"], "engine": engine, "points": len(samples)}
+        )
+    return {"refreshed": refreshed, "coverage_totals": coverage_report(data)["totals"]}
 
 
-def _rescale_corridor_positions(leg: dict[str, Any], factor: float,
-                                new_miles: float) -> None:
+def _rescale_corridor_positions(leg: dict[str, Any], factor: float, new_miles: float) -> None:
     """Scale every at_mi position in a leg to a new total mileage.
 
     Keeps the corridor consistent (endpoints land exactly on 0 and new_miles)
@@ -278,8 +281,9 @@ def adopt_ors_miles(
             continue
         leg["miles"] = new_miles
         _rescale_corridor_positions(leg, new_miles / old_miles, float(new_miles))
-        changed.append({"from": leg["from"], "to": leg["to"],
-                        "old_miles": old_miles, "new_miles": new_miles})
+        changed.append(
+            {"from": leg["from"], "to": leg["to"], "old_miles": old_miles, "new_miles": new_miles}
+        )
     return {"changed": changed, "coverage_totals": coverage_report(data)["totals"]}
 
 
@@ -344,10 +348,12 @@ def _cached_elevations(
     cache_dir: Path,
     rate_limit_s: float,
 ) -> list[float]:
-    params = urllib.parse.urlencode({
-        "latitude": ",".join(str(point["lat"]) for point in samples),
-        "longitude": ",".join(str(point["lon"]) for point in samples),
-    })
+    params = urllib.parse.urlencode(
+        {
+            "latitude": ",".join(str(point["lat"]) for point in samples),
+            "longitude": ",".join(str(point["lon"]) for point in samples),
+        }
+    )
     payload = _cached_json(
         cache_dir,
         "elevation",
@@ -512,8 +518,7 @@ def _overpass_named_candidates(
                 urllib.parse.urlencode({"data": query}).encode("utf-8"),
                 rate_limit_s=rate_limit_s,
             )
-        except (TimeoutError, OSError, urllib.error.URLError,
-                urllib.error.HTTPError, RuntimeError):
+        except (TimeoutError, OSError, urllib.error.URLError, urllib.error.HTTPError, RuntimeError):
             continue  # skip this point/leg; all endpoints failed or timed out
         at_mi = round(max(1.0, min(float(leg["miles"]) - 1.0, point["at_mi"])), 1)
         for element in payload.get("elements", []):
