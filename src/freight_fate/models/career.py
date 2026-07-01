@@ -74,6 +74,7 @@ class Career:
     on_time_deliveries: int = 0
     total_miles: float = 0.0
     total_earnings: float = 0.0
+    dispatch_declines_used: int = 0  # assigned-load refusals since last level-up
 
     @property
     def level(self) -> int:
@@ -108,6 +109,8 @@ class Career:
 
         messages: list[str] = []
         if self.level > before_level:
+            # A promotion clears the assigned-load refusals dispatch remembers.
+            self.dispatch_declines_used = 0
             rank = self.rank
             messages.append(
                 f"Level up! You are now level {self.level}: {rank.title}. "
