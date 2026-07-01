@@ -239,6 +239,20 @@ pre-push hook runs the release-note gate before publishing commits. It uses
 a player-facing `CHANGELOG.md` entry unless the whole change set uses
 `changelog: none` or `[skip changelog]`.
 
+### World data
+
+The route tools edit the single `src/freight_fate/data/world.json`, but the game
+loads the indexed `src/freight_fate/data/world_data/` tree. After changing world
+data, regenerate the index so the two stay in sync:
+
+```bash
+uv run python tools/index_world.py          # rewrite world_data/ from world.json
+uv run python tools/index_world.py --check  # verify in sync (CI + pre-commit do this)
+```
+
+A pre-commit hook and a test both fail if `world_data/` drifts from `world.json`,
+so commit the regenerated `world_data/` files alongside your `world.json` edits.
+
 ### Changelog and snapshots
 
 Player-facing changes should add a short bullet under `## Unreleased` in
