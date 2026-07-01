@@ -819,6 +819,12 @@ class JobBoardState(MenuState):
 
 class JobDetailState(MenuState):
     title = "Job details"
+    intro_help = (
+        "Use up and down arrows to review each job detail line; Home and End "
+        "jump to the first and last row. Enter repeats detail lines, accepts "
+        "when Accept this dispatch is selected, or returns when Back to "
+        "dispatch board is selected. Escape also returns to the dispatch board."
+    )
 
     def __init__(self, ctx, board: JobBoardState, job: Job) -> None:
         super().__init__(ctx)
@@ -829,21 +835,50 @@ class JobDetailState(MenuState):
         self.items = self.build_items()
         self.index = min(self.index, max(0, len(self.items) - 1))
         self.ctx.audio.play(self.open_sound_key)
-        self.ctx.say("Job details. " + " ".join(self._detail_lines()))
+        self.announce_entry()
+
+    def announce_entry(self) -> None:
+        self.ctx.say(f"Job details. {self.intro_help} {self.current_text()}")
+
+    def current_help(self) -> str:
+        return f"{self.intro_help} {super().current_help()}"
 
     def build_items(self) -> list[MenuItem]:
-        return [
+        items = [
             MenuItem(
-                "Accept this job",
-                self._accept,
-                help="Accept this dispatch and begin the pickup drive.",
-            ),
+                line,
+                lambda line=line: self.ctx.say(line),
+                help="This is a job detail line. Press Enter to repeat it.",
+            )
+            for line in self._detail_lines()
+        ]
+        locked = self.job.locked_reason(
+            self.ctx.profile.career.endorsements, self.ctx.profile.career.level
+        )
+        if locked:
+            items.append(
+                MenuItem(
+                    f"Cannot accept this dispatch: {locked}",
+                    lambda locked=locked: self.ctx.say(locked),
+                    help=f"This dispatch is locked. {locked}",
+                )
+            )
+        else:
+            items.append(
+                MenuItem(
+                    "Accept this dispatch",
+                    self._accept,
+                    help="Accept this dispatch and begin the pickup drive.",
+                )
+            )
+        items.append(
             MenuItem(
                 "Back to dispatch board",
                 self.go_back,
                 help="Return to the dispatch board without accepting this job.",
-            ),
-        ]
+            )
+        )
+        return items
 
     def _accept(self) -> None:
         self.ctx.pop_state()
@@ -874,7 +909,7 @@ class JobDetailState(MenuState):
         return lines
 
     def lines(self) -> list[str]:
-        return [self.title, ""] + self._detail_lines() + ["", self.current_text()]
+        return super().lines()
 
 
 class PickupFacilityState(MenuState):

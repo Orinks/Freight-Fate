@@ -4,9 +4,10 @@
 ### Fixed
 
 - **Dispatch, garage, and driving tools feel clearer.** F1 on a dispatch job now opens a
-  structured job-detail view, long-haul pay has a stronger floor, drive-start
-  speech is shorter in terse mode, the horn loops while held, truck and upgrade
-  wording is clearer, and the garage can service tire wear and wash road grime.
+  reviewable job-detail view with line-by-line facts, long-haul pay has a stronger
+  floor, drive-start speech is shorter in terse mode, the horn loops while held,
+  truck and upgrade wording is clearer, and the garage can service tire wear and
+  wash road grime.
 - **Reverse now has its own backing cue.** Shifting into reverse with the engine
   running now starts a backing loop through the main audio backend, and automatic
   reverse selection still gets a spoken confirmation. Thanks to ashleygrobler04
