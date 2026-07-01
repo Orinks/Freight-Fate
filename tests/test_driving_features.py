@@ -1292,7 +1292,9 @@ def test_toll_route_delivery_settlement_records_expense(monkeypatch):
         )
         route = app.ctx.world.route_from_cities(["New York", "Philadelphia"])
         driving = DrivingState(app.ctx, job, route, phase="delivery")
-        driving.trip.position_mi = 79.0
+        # Both I-95 tolls now sit at mi 8.9 (NJ Turnpike) and 86.1 (Delaware
+        # River) after the node moved to Hunts Point; drive past both.
+        driving.trip.position_mi = 90.0
         driving.trip.update(0.0)
         assert driving.trip.toll_expense == 30.0
 

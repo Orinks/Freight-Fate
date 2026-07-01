@@ -49,11 +49,13 @@ INTERSTATE_RURAL_LIMIT_MPH: dict[str, float] = {
 STATE_TRUCK_MAX_MPH: dict[str, float] = {
     "Arkansas": 70.0,
     "California": 55.0,
+    "Idaho": 70.0,
     "Indiana": 65.0,
     "Michigan": 65.0,
     "Montana": 70.0,
     "Nevada": 75.0,
     "North Dakota": 75.0,
+    "Oregon": 65.0,
     "Washington": 60.0,
 }
 

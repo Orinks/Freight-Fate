@@ -3,6 +3,16 @@
 ## Unreleased
 ### Fixed
 
+- **Trucks into New York now take the George Washington Bridge, not the Holland
+  Tunnel.** New York freight now routes to the Hunts Point market in the Bronx
+  over the GWB on I-95 -- the Hudson crossing a full-height rig can legally use
+  -- instead of the height-restricted Holland Tunnel that I-78 feeds into. Trips
+  from New Jersey and Pennsylvania have realistic mileage and exit cues as a
+  result.
+- **Truck speed limits are now capped in Oregon and Idaho too.** Posted limits
+  on those states' fastest roads are held to the legal truck maximum (65 in
+  Oregon, 70 in Idaho), matching the existing handling for California and other
+  truck-restricted states.
 - **Control now stops speech in menus too, not just while driving.** Left or
   Right Control already silenced the driving event voice; it now also stops the
   current speech in every menu and in the how-to-play reader, so a long readout

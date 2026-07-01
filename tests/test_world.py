@@ -91,7 +91,9 @@ def test_northeast_corridors_prefer_i95_not_inland_loops(world):
 def test_shortest_route_is_actually_shortest(world):
     direct = world.shortest_route("New York", "Boston")
     assert direct is not None
-    assert direct.miles == 219
+    # New York's node is the Hunts Point (Bronx) freight hub, so I-95 legs land
+    # there rather than at lower Manhattan; the direct hop is 205 mi.
+    assert direct.miles == 205
     assert len(direct.legs) == 1
 
 

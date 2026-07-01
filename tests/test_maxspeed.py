@@ -144,6 +144,25 @@ def test_runtime_keeps_truck_specific_baked_limit():
     assert trip._corridor_limit_at(50.0) == 50.0
 
 
+def test_runtime_caps_oregon_and_idaho_truck_limits():
+    # Oregon (65) and Idaho (70) also hold trucks below the car limit; a baked
+    # car speed above the cap is pulled down at runtime.
+    for state, baked, expected in (("Oregon", 70.0, 65.0), ("Idaho", 75.0, 70.0)):
+        leg = Leg(
+            "A",
+            "B",
+            100.0,
+            "I-84",
+            "flat",
+            (),
+            state_miles=(StateMileage(state, 100.0),),
+            speed_limits=(SpeedLimitSample(0.0, baked),),
+        )
+        trip = Trip(Route(["A", "B"], [leg]), TruckState(),
+                    WeatherSystem("pacific_northwest", seed=1), seed=2)
+        assert trip._corridor_limit_at(50.0) == expected
+
+
 def test_runtime_reads_baked_profile_in_reverse_direction():
     leg = Leg(
         "A",

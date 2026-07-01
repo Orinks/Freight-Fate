@@ -752,7 +752,10 @@ def test_route_context_describes_near_traffic_without_zero_distance(world):
 def test_toll_cues_and_charges_deduplicate(world):
     trip, _truck = make_trip(world, "New York", "Philadelphia")
 
-    trip.position_mi = 6.1
+    # I-95 south from the Hunts Point node crosses to NJ at the GWB (mi 7.0);
+    # the NJ Turnpike ticket toll follows at mi 8.9, so probe just past the
+    # crossing to isolate the toll cue.
+    trip.position_mi = 7.3
     advance = trip.update(0.0)
     repeat = trip.update(0.0)
 
@@ -762,7 +765,7 @@ def test_toll_cues_and_charges_deduplicate(world):
     ]
     assert not _gps_events(repeat)
 
-    trip.position_mi = 8.0
+    trip.position_mi = 9.5
     charged = trip.update(0.0)
     charged_again = trip.update(0.0)
 
