@@ -40,6 +40,8 @@ class Settings:
     update_channel: str = ""  # "stable"/"dev"; "" follows this build's channel
     skipped_update: str = ""  # release tag the player chose to skip
     discord_presence: bool = True  # show broad activity in Discord (privacy-safe)
+    controller_enabled: bool = True  # accept game-controller input alongside the keyboard
+    haptics_enabled: bool = True  # rumble/vibration feedback on the controller
 
     @property
     def path(self):
@@ -78,6 +80,10 @@ class Settings:
             s.update_channel = ""
         if not isinstance(s.event_backend, str) or not s.event_backend:
             s.event_backend = "SAPI"
+        if not isinstance(s.controller_enabled, bool):
+            s.controller_enabled = True
+        if not isinstance(s.haptics_enabled, bool):
+            s.haptics_enabled = True
         for attr in (
             "master_volume",
             "sfx_volume",
