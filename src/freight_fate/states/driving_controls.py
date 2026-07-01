@@ -4,7 +4,6 @@ from __future__ import annotations
 from .driving_core import *
 from .driving_menu_states import DrivingStatusState, PauseMenuState
 
-
 class DrivingControlsMixin:
     def handle_event(self, event: pygame.event.Event) -> None:
         if event.type == pygame.KEYUP and event.key == pygame.K_h:
@@ -14,6 +13,7 @@ class DrivingControlsMixin:
             return
         key = event.key
         tr = self.truck.transmission
+        global gear_idx
         if key in (pygame.K_LCTRL, pygame.K_RCTRL):
             self.ctx.stop_event_speech()
             self._set_status("Event voice stopped.")
@@ -29,8 +29,20 @@ class DrivingControlsMixin:
                 self.ctx.say("Neutral.")
         elif key == pygame.K_BACKSPACE and not tr.automatic:
             self._manual_shift(REVERSE)
-        elif key in GEAR_KEYS and not tr.automatic:
-            self._manual_shift(GEAR_KEYS[key])
+        elif key==pygame.K_q and not tr.automatic and gear_idx>1:
+            gear_idx-=1
+            self._manual_shift(gear_idx)
+        elif key==pygame.K_w and not tr.automatic :
+            if tr.in_reverse:
+                gear_idx=1
+                self._manual_shift(gear_idx)
+            elif tr.in_neutral:
+                gear_idx=1
+                self._manual_shift(gear_idx)
+            elif gear_idx<10:
+                gear_idx+=1
+                self._manual_shift(gear_idx)
+
         elif key == pygame.K_j:
             if self.truck.throttle > 0.05 and not self.truck.engine_brake:
                 self.ctx.say("Release the accelerator before turning the engine brake on.")
@@ -121,7 +133,7 @@ class DrivingControlsMixin:
                 + (
                     ""
                     if self.truck.transmission.automatic
-                    else "Hold Left Shift for clutch, then 1 through 0 for gears, "
+                    else "Hold Left Shift for clutch, then W to shift up or Q to shift down, "
                     "Backspace for reverse, N for neutral."
                 )
             )
