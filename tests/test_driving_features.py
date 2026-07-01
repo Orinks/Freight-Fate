@@ -1356,37 +1356,80 @@ def test_engine_audio_load_drops_during_automatic_shift(monkeypatch):
         app.shutdown()
 
 
-def test_reverse_audio_cue_plays_once_when_reverse_engages(monkeypatch):
+def test_reverse_audio_cue_loops_while_reverse_is_engaged(monkeypatch):
     from freight_fate.app import App
     from freight_fate.sim.transmission import REVERSE
 
     app = App()
-    played = []
+    starts = []
+    stops = []
     monkeypatch.setattr(app.ctx.audio, "set_engine_rpm", lambda *a, **k: None)
     monkeypatch.setattr(app.ctx.audio, "set_road_noise", lambda *a, **k: None)
     monkeypatch.setattr(app.ctx.audio, "set_weather", lambda *a, **k: None)
     monkeypatch.setattr(app.ctx.audio, "set_wind", lambda *a, **k: None)
     monkeypatch.setattr(app.ctx.audio, "set_ambient", lambda *a, **k: None)
-    monkeypatch.setattr(
-        app.ctx.audio,
-        "play",
-        lambda key, volume=1.0, **kwargs: played.append((key, volume, kwargs)),
-    )
+    monkeypatch.setattr(app.ctx.audio, "play", lambda *a, **k: None)
+    monkeypatch.setattr(app.ctx.audio, "reverse_start", lambda: starts.append("start"))
+    monkeypatch.setattr(app.ctx.audio, "reverse_stop", lambda: stops.append("stop"))
     try:
         driving = start_drive(app)
         quiet_trip(driving)
+        starts.clear()
+        stops.clear()
         driving.truck.start_engine()
         driving.truck.transmission.gear = REVERSE
 
         driving._update_audio(0.0)
         driving._update_audio(0.0)
-        assert played.count(("vehicle/reverse", 0.4, {})) == 1
+        assert starts == ["start"]
+        assert stops == []
 
         driving.truck.transmission.gear = 1
         driving._update_audio(0.0)
+        assert stops == ["stop"]
+
         driving.truck.transmission.gear = REVERSE
         driving._update_audio(0.0)
-        assert played.count(("vehicle/reverse", 0.4, {})) == 2
+        assert starts == ["start", "start"]
+    finally:
+        app.shutdown()
+
+
+def test_reverse_audio_loop_restarts_after_pause_resume(monkeypatch):
+    from freight_fate.app import App
+    from freight_fate.sim.transmission import REVERSE
+    from freight_fate.states.driving import PauseMenuState
+
+    app = App()
+    starts = []
+    stops = []
+    monkeypatch.setattr(app.ctx.audio, "set_engine_rpm", lambda *a, **k: None)
+    monkeypatch.setattr(app.ctx.audio, "set_road_noise", lambda *a, **k: None)
+    monkeypatch.setattr(app.ctx.audio, "set_weather", lambda *a, **k: None)
+    monkeypatch.setattr(app.ctx.audio, "set_wind", lambda *a, **k: None)
+    monkeypatch.setattr(app.ctx.audio, "set_ambient", lambda *a, **k: None)
+    monkeypatch.setattr(app.ctx.audio, "play", lambda *a, **k: None)
+    monkeypatch.setattr(app.ctx.audio, "play_music", lambda *a, **k: None)
+    monkeypatch.setattr(app.ctx.audio, "reverse_start", lambda: starts.append("start"))
+    monkeypatch.setattr(app.ctx.audio, "reverse_stop", lambda: stops.append("stop"))
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        starts.clear()
+        stops.clear()
+        driving.truck.start_engine()
+        driving.truck.transmission.gear = REVERSE
+        driving._update_audio(0.0)
+        assert starts == ["start"]
+
+        app.ctx.push_state(PauseMenuState(app.ctx, driving))
+        assert stops == ["stop"]
+        app.state._resume()
+
+        starts.clear()
+        driving._update_audio(0.0)
+
+        assert starts == ["start"]
     finally:
         app.shutdown()
 

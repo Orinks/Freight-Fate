@@ -316,9 +316,10 @@ class DrivingUpdateMixin:
         audio.set_road_noise(t.velocity_mps)
         if t.engine_on and t.transmission.in_reverse:
             if not self._reverse_cue_active:
-                audio.play("vehicle/reverse", volume=0.4)
+                audio.reverse_start()
                 self._reverse_cue_active = True
-        else:
+        elif self._reverse_cue_active:
+            audio.reverse_stop()
             self._reverse_cue_active = False
         eff = self.weather.effects
         audio.set_weather(eff.sound)

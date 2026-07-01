@@ -41,6 +41,7 @@ CH_WEATHER = 5
 CH_WEATHER_B = 6
 CH_AMBIENT = 7
 CH_HORN = 8
+CH_REVERSE = 9
 RESERVED = 9
 NUM_CHANNELS = 32
 
@@ -190,6 +191,13 @@ class _PygameBackend:
         if channel in self._loops:
             pygame.mixer.Channel(channel).fadeout(fade_ms)
             del self._loops[channel]
+
+    def reverse_start(self) -> None:
+        # The reverse loop is intentionally not played through pygame.mixer.
+        return
+
+    def reverse_stop(self) -> None:
+        return
 
     def _apply_channel_volume(self, channel: int) -> None:
         if not self.enabled or channel not in self._loops:
@@ -474,6 +482,12 @@ class _BassBackend:
         if entry is not None:
             self._fade_out(entry[2], fade_ms)
 
+    def reverse_start(self) -> None:
+        self.start_loop(CH_REVERSE, "vehicle/reverse", volume=0.4, fade_ms=80)
+
+    def reverse_stop(self) -> None:
+        self.stop_loop(CH_REVERSE, fade_ms=80)
+
     def _apply_loop_volume(self, channel: int, fade_ms: int = 0) -> None:
         if channel not in self._loops:
             return
@@ -509,6 +523,7 @@ class _BassBackend:
         self.set_engine_rpm(ENGINE_RPM_IDLE, throttle=0.0)
 
     def engine_stop(self, shutdown_sound: bool = True) -> None:
+        self.reverse_stop()
         if not self._engine_running:
             return
         self._engine_running = False
@@ -659,6 +674,8 @@ class _NullBackend:
     def engine_start(self) -> None: ...
     def engine_stop(self, shutdown_sound: bool = True) -> None: ...
     def set_engine_rpm(self, rpm: float, throttle: float = 0.0) -> None: ...
+    def reverse_start(self) -> None: ...
+    def reverse_stop(self) -> None: ...
     def play_music(self, track: str, fade_ms: int = 1500) -> None: ...
     def stop_music(self, fade_ms: int = 1000) -> None: ...
     def set_volumes(
@@ -761,6 +778,7 @@ class AudioEngine:
         self._impl.engine_start()
 
     def engine_stop(self, shutdown_sound: bool = True) -> None:
+        self.reverse_stop()
         self._impl.engine_stop(shutdown_sound)
 
     def set_engine_rpm(self, rpm: float, throttle: float = 0.0) -> None:
@@ -806,6 +824,12 @@ class AudioEngine:
 
     def horn_stop(self) -> None:
         self.stop_loop(CH_HORN, fade_ms=80)
+
+    def reverse_start(self) -> None:
+        self._impl.reverse_start()
+
+    def reverse_stop(self) -> None:
+        self._impl.reverse_stop()
 
     def stop_world(self) -> None:
         """Stop engine, road, weather, and ambience (leaving UI sfx alone)."""
