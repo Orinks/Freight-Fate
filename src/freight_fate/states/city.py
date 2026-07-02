@@ -803,7 +803,8 @@ class JobBoardState(MenuState):
         "creates a local deadhead pickup drive from your terminal to "
         "the named origin facility. Jobs name their origin and "
         "destination facilities, and cargo depends on the facility "
-        "type. Escape returns to the terminal."
+        "type. Tab repeats the freight market watch. Escape returns to "
+        "the terminal."
     )
 
     def __init__(self, ctx, jobs: list[Job]) -> None:
@@ -844,6 +845,9 @@ class JobBoardState(MenuState):
 
         if event.type == pygame.KEYDOWN and event.key == pygame.K_F1 and self.jobs:
             self.ctx.push_state(JobDetailState(self.ctx, self, self.jobs[self.index]))
+            return
+        if event.type == pygame.KEYDOWN and event.key == pygame.K_TAB:
+            self.ctx.say(self.ctx.profile.market.summary())
             return
         super().handle_event(event)
 

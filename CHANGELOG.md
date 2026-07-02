@@ -206,6 +206,9 @@
   seconds.
 
 ### Added
+- **Repeat the market watch on the dispatch board.** The board speaks which
+  freight is tight or loose when you open it; pressing Tab now repeats just that
+  market watch, so you can re-check it without leaving and reopening the board.
 - **State troopers can pull you over for speeding.** Routes now have patrol
   windows -- hotter on busy interstates, in construction, and in dense regions,
   cooler out on the plains, with a night DUI bump. Speed badly inside one and a
