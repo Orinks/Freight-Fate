@@ -75,7 +75,7 @@ STATE_REGION: dict[str, str] = {
     "Connecticut": "northeast",
     "New Jersey": "northeast",
     "Delaware": "northeast",
-    "Maryland": "northeast",
+    # Maryland is split by longitude in classify_region (western MD -> appalachia).
     "District of Columbia": "northeast",
     # Appalachia
     "West Virginia": "appalachia",
@@ -100,9 +100,9 @@ STATE_REGION: dict[str, str] = {
     "Alabama": "mid_south",
     "Mississippi": "mid_south",
     "Arkansas": "mid_south",
-    # Atlantic Southeast (Piedmont + southern Atlantic coastal plain)
-    "Virginia": "atlantic_southeast",
-    "North Carolina": "atlantic_southeast",
+    # Atlantic Southeast (Piedmont + southern Atlantic coastal plain).
+    # Virginia and North Carolina are split by longitude in classify_region
+    # (their western Blue Ridge / Great Valley -> appalachia).
     "South Carolina": "atlantic_southeast",
     "Georgia": "atlantic_southeast",
     # Gulf Coast
@@ -160,6 +160,18 @@ def classify_region(state: str, lat: float, lon: float) -> str:
     if state == "New York":
         # Western New York (Buffalo) is lake-effect Great Lakes country.
         return "great_lakes" if lon <= -78.0 else "northeast"
+    if state == "North Carolina":
+        # The western Blue Ridge (Asheville) is Appalachian; the Piedmont and
+        # coastal plain are the Atlantic Southeast.
+        return "appalachia" if lon <= -82.0 else "atlantic_southeast"
+    if state == "Virginia":
+        # West of the Blue Ridge -- the I-81 Great Valley (Roanoke, Harrisonburg,
+        # Winchester) -- is Appalachian; the Piedmont and Tidewater are not.
+        return "appalachia" if lon <= -78.0 else "atlantic_southeast"
+    if state == "Maryland":
+        # Western Maryland (Hagerstown, the Cumberland valley) is Appalachian;
+        # the rest is the Northeast corridor.
+        return "appalachia" if lon <= -77.5 else "northeast"
     try:
         return STATE_REGION[state]
     except KeyError:
