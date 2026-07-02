@@ -38,7 +38,6 @@ from .base import MenuItem, MenuState, State
 
 log = logging.getLogger(__name__)
 
-gear_idx = 1
 HAZARD_SAFE_MPH = 25.0
 MPH_PER_MPS = 2.23694
 
