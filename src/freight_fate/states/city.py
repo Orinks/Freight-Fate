@@ -475,6 +475,7 @@ class GarageState(MenuState):
             self.ctx.say("Nothing to repair.")
             return
         cost = self.ctx.economy.repair_cost(p.truck_damage_pct)
+        deep_damage = p.truck_damage_pct >= 75.0
         if p.money < cost:
             repairable = p.money / REPAIR_COST_PER_PCT
             if repairable < 1:
@@ -503,6 +504,8 @@ class GarageState(MenuState):
         self.ctx.say(f"Truck repaired. {cost:,.0f} dollars. "
                      f"You have {p.money:,.0f} dollars left.")
         self.ctx.award_achievement("garage_repair")
+        if deep_damage:
+            self.ctx.award_achievement("deep_repair")
         self.refresh()
 
     def _upgrades(self) -> None:
@@ -561,6 +564,9 @@ class UpgradeShopState(MenuState):
         self.ctx.say(f"{upgrade.label}{tier_part} installed for {price:,.0f} dollars. "
                      f"You have {p.money:,.0f} dollars left.")
         self.ctx.award_achievement("first_upgrade")
+        if all(p.upgrades.get(key, 0) >= item.max_tier
+               for key, item in UPGRADE_CATALOG.items()):
+            self.ctx.award_achievement("all_upgrades")
         self.refresh()
 
 
