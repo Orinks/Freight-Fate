@@ -4,6 +4,20 @@
 
 ### Added
 
+- **The in-cab radio now has hosts, regional stations, and real signal
+  ranges.** The Freight Fate Roadhouse and the Night Line each have a live
+  host who breaks in between songs, and twelve fictional regional stations --
+  country, classic rock, and blues and soul, each with newly composed songs --
+  cover markets from Seattle to New Orleans. Stations behave like real FM
+  signals: full and clear near their market, thinner with static crackle at
+  the fringe, and gone past their range, with a spoken fallback to the
+  Roadhouse when the signal drops. Three more Radio Browser-checked AFN 360
+  channels (Global Fans, Global Holiday, and Mach 5) join the catalog for the
+  real-streams opt-in.
+- **Every career level band now has its own voice.** Levels 8 and 9 celebrate
+  the load-choice unlock, and level 30 gets distinct top-of-the-ladder
+  guidance for company drivers, leased-on owner-operators, and independent
+  authority instead of repeating the level-25 text.
 - **Haul length now progresses through the whole company arc.** Dispatch
   distance caps used to grow 500 miles per level and blow past every real
   U.S. route by level 12; they now grow gradually and top out at a real

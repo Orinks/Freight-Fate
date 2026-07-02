@@ -100,3 +100,20 @@ current idle, start, and shutdown cues.
 | Lonely Plains | `music/night_lonely_plains.ogg` | Open nighttime plains drive bed |
 | Mountain Night Pass | `music/night_mountain_pass.ogg` | Quiet mountain night drive bed |
 | Small Hours | `music/night_small_hours.ogg` | Late-night piano ballad drive bed |
+| Backroads Sunrise | `music/radio_country_backroads.ogg` | ElevenLabs-composed country song for regional radio |
+| Two-Lane Towns | `music/radio_country_two_lane.ogg` | ElevenLabs-composed classic country song for regional radio |
+| Diesel Heart | `music/radio_country_diesel_heart.ogg` | ElevenLabs-composed country rock song for regional radio |
+| Open Throttle | `music/radio_rock_open_throttle.ogg` | ElevenLabs-composed highway rock anthem for regional radio |
+| Night Shift | `music/radio_rock_night_shift.ogg` | ElevenLabs-composed organ-driven rock song for regional radio |
+| Chrome Horizon | `music/radio_rock_chrome_horizon.ogg` | ElevenLabs-composed heartland rock song for regional radio |
+| Delta Mile | `music/radio_blues_delta_mile.ogg` | ElevenLabs-composed delta blues song for regional radio |
+| Crossroad Coffee | `music/radio_blues_crossroad_coffee.ogg` | ElevenLabs-composed soul blues song for regional radio |
+| Low Beams | `music/radio_night_low_beams.ogg` | ElevenLabs-composed late-night jazz instrumental for the Night Line |
+
+## Radio Hosts And Static
+
+| Sound | File | Source |
+| --- | --- | --- |
+| Roadhouse host breaks | `music/host_roadhouse_01.ogg` … `music/host_roadhouse_06.ogg` | ElevenLabs TTS host segments for the Freight Fate Roadhouse |
+| Night Line host breaks | `music/host_nightline_01.ogg` … `music/host_nightline_06.ogg` | ElevenLabs TTS host segments for the Freight Fate Night Line |
+| Radio static burst | `radio/static_burst.ogg` | Procedurally generated band-limited noise (tools/generate_radio.py) |

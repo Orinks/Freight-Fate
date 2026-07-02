@@ -378,38 +378,110 @@ class DrivingUpdateMixin:
         else:
             audio.set_ambient(None)
         if self.radio.enabled:
-            self._apply_radio_volume()
-        if self.radio.enabled and self.radio.current_station().id == SAFE_ROUTE_PLAYLIST:
-            self._update_music_rotation(night, dt)
+            self._update_radio_reception(dt)
+            self._update_radio_playback(night, dt)
         if self.weather.should_thunder():
             audio.play("weather/thunder")
 
-    def _current_music_track(self) -> str:
-        if self._music_night:
-            return self._night_music_sequence[self._night_music_index]
-        return self._day_music_sequence[self._day_music_index]
+    # -- radio reception and station rotation --------------------------------------
 
-    def _play_current_music(self, fade_ms: int = 4000) -> None:
-        self.ctx.audio.play_music(self._current_music_track(), fade_ms=fade_ms)
-
-    def _update_music_rotation(self, night: bool, dt: float) -> None:
-        if night != self._music_night:
-            self._music_night = night
-            self._music_elapsed_s = 0.0
-            self._play_current_music(fade_ms=4000)
+    def _update_radio_reception(self, dt: float) -> None:
+        """Fade ranged stations with distance and retune when they drop out."""
+        self._radio_signal_timer -= max(0.0, dt)
+        if self._radio_signal_timer > 0.0:
             return
-        self._music_elapsed_s += max(0.0, dt)
-        current = self._current_music_track()
-        if self._music_elapsed_s < music_track_duration_s(current):
-            return
-        self._music_elapsed_s = 0.0
-        if night:
-            self._night_music_index = (self._night_music_index + 1) % len(
-                self._night_music_sequence
+        self._radio_signal_timer = 1.5
+        before = self.radio.current_station()
+        self.radio.update_position(
+            truck_position(self.route, self.trip.position_mi, self.ctx.world)
+        )
+        reception = self.radio.current_reception()
+        if reception.station.id != before.id:
+            # the tuned station fell past its range contour mid-drive
+            self.ctx.audio.play("radio/static_burst", volume=0.5)
+            action = self.radio.select_station(SAFE_ROUTE_PLAYLIST, self._radio_backend)
+            self.radio.write_settings(self.ctx.settings)
+            self.ctx.settings.save()
+            self.ctx.say_event(
+                f"{before.display_name} faded out of range. "
+                f"Falling back to {action.station.display_name}.",
+                interrupt=False,
             )
+            return
+        self._radio_signal_factor = signal_volume_factor(reception)
+        self._apply_radio_volume()
+        signal = reception.signal
+        if 0.0 < signal < STATIC_SIGNAL_THRESHOLD and not reception.station.always_available:
+            self._radio_static_timer -= 1.5
+            if self._radio_static_timer <= 0.0:
+                self._radio_static_timer = 6.0
+                self.ctx.audio.play(
+                    "radio/static_burst",
+                    volume=0.08 + (STATIC_SIGNAL_THRESHOLD - signal) * 0.6,
+                )
+
+    def _station_rotation_pool(self, station: RadioStation, night: bool) -> tuple[str, ...]:
+        if station.playlist == "route":
+            return self._night_music_sequence if night else self._day_music_sequence
+        if station.playlist:
+            return select_station_playlist(station.playlist, f"{self.trip_seed}|{station.id}")
+        if station.track_key:
+            return (station.track_key,)
+        return ()
+
+    def _start_station_rotation(self, station: RadioStation, fade_ms: int = 900) -> None:
+        night = is_night(self.trip.current_hour)
+        self._music_night = night
+        self._radio_station_id = station.id
+        self._radio_playlist = self._station_rotation_pool(station, night)
+        self._radio_hosts = select_host_segments(station.host, f"{self.trip_seed}|{station.id}")
+        self._radio_track_index = 0
+        self._radio_host_index = 0
+        self._radio_elapsed_s = 0.0
+        self._radio_tracks_since_host = 0
+        self._radio_playing_host = False
+        if self._radio_playlist:
+            self.ctx.audio.play_music(self._radio_playlist[0], fade_ms=fade_ms)
+
+    def _update_radio_playback(self, night: bool, dt: float) -> None:
+        station = self.radio.current_station()
+        if station.real_stream or station.fallback:
+            return
+        if not station.playlist and not station.track_key:
+            return
+        if station.id != self._radio_station_id or (
+            station.playlist == "route" and night != self._music_night
+        ):
+            self._start_station_rotation(station, fade_ms=2500)
+            return
+        if not self._radio_playlist:
+            return
+        self._radio_elapsed_s += max(0.0, dt)
+        if self._radio_playing_host and self._radio_hosts:
+            current = self._radio_hosts[self._radio_host_index % len(self._radio_hosts)]
         else:
-            self._day_music_index = (self._day_music_index + 1) % len(self._day_music_sequence)
-        self._play_current_music(fade_ms=4000)
+            current = self._radio_playlist[self._radio_track_index % len(self._radio_playlist)]
+        if self._radio_elapsed_s < music_track_duration_s(current):
+            return
+        self._radio_elapsed_s = 0.0
+        if self._radio_playing_host:
+            self._radio_playing_host = False
+            self._radio_host_index += 1
+            self._play_station_track(fade_ms=1200)
+            return
+        self._radio_track_index += 1
+        self._radio_tracks_since_host += 1
+        if self._radio_hosts and self._radio_tracks_since_host >= RADIO_TRACKS_PER_HOST_BREAK:
+            self._radio_playing_host = True
+            self._radio_tracks_since_host = 0
+            key = self._radio_hosts[self._radio_host_index % len(self._radio_hosts)]
+            self.ctx.audio.play_music(key, fade_ms=600)
+            return
+        self._play_station_track(fade_ms=2500)
+
+    def _play_station_track(self, fade_ms: int) -> None:
+        key = self._radio_playlist[self._radio_track_index % len(self._radio_playlist)]
+        self.ctx.audio.play_music(key, fade_ms=fade_ms)
 
     def _sync_radio_settings(self) -> None:
         station_before = self.radio.station_id
@@ -423,7 +495,8 @@ class DrivingUpdateMixin:
             self.ctx.settings.save()
 
     def _apply_radio_volume(self) -> None:
-        self.ctx.audio.set_volumes(music=self.ctx.settings.radio_volume)
+        factor = getattr(self, "_radio_signal_factor", 1.0)
+        self.ctx.audio.set_volumes(music=self.ctx.settings.radio_volume * factor)
 
     def _play_radio_current(self) -> None:
         self._sync_radio_settings()

@@ -395,8 +395,12 @@ def test_night_driving_advances_through_music_pool(monkeypatch):
 
         assert first in {track.key for track in NIGHT_DRIVE_TRACKS}
         assert second in {track.key for track in NIGHT_DRIVE_TRACKS}
-        assert third in {track.key for track in NIGHT_DRIVE_TRACKS}
-        assert len({first, second, third}) >= 3
+        # after two songs the Roadhouse host takes a break slot
+        assert third.startswith("host_roadhouse_")
+        driving._update_audio(music_track_duration_s(third) + 0.1)
+        fourth = played[-1]
+        assert fourth in {track.key for track in NIGHT_DRIVE_TRACKS}
+        assert len({first, second, fourth}) >= 3
     finally:
         app.shutdown()
 

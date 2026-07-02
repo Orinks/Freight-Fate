@@ -64,12 +64,24 @@ class DrivingState(DrivingControlsMixin, DrivingUpdateMixin, DrivingEventMixin, 
         self._night_music_sequence = select_drive_music_sequence(
             self.route, self.trip_seed, 0.0, self.weather.current
         )
-        self._day_music_index = 0
-        self._night_music_index = 0
-        self._music_elapsed_s = 0.0
         self._music_night = is_night(trip_start_hour)
         self.radio = RadioState.from_settings(ctx.settings)
         self._radio_backend = _DrivingRadioBackend(self)
+        # Station rotation: per-station shuffled song order, with host breaks
+        # every few songs on the stations that have a live host.
+        self._radio_station_id = ""
+        self._radio_playlist: tuple[str, ...] = ()
+        self._radio_hosts: tuple[str, ...] = ()
+        self._radio_track_index = 0
+        self._radio_host_index = 0
+        self._radio_elapsed_s = 0.0
+        self._radio_tracks_since_host = 0
+        self._radio_playing_host = False
+        # Reception: signal re-checked on a slow cadence while driving so
+        # ranged stations fade with distance and drop past their contour.
+        self._radio_signal_timer = 0.0
+        self._radio_static_timer = 0.0
+        self._radio_signal_factor = 1.0
         self.tutorial = Tutorial(ctx) if not profile.tutorial_done else None
 
         self.hos = profile.hos  # shift clock lives on the profile

@@ -38,6 +38,8 @@ class RadioStation:
     fallback: bool = False
     supported: bool = True
     track_key: str = ""
+    playlist: str = ""  # music.STATION_PLAYLISTS pool for built-in rotation
+    host: str = ""  # music.STATION_HOST_SEGMENTS voice between songs
     notes: str = ""
 
     @property
@@ -128,6 +130,8 @@ def _station_from_dict(row: dict) -> RadioStation:
         fallback=bool(row.get("fallback", False)),
         supported=bool(row.get("supported", True)),
         track_key=str(row.get("track_key", "")),
+        playlist=str(row.get("playlist", "")),
+        host=str(row.get("host", "")),
         notes=str(row.get("notes", "")),
     )
 
@@ -172,6 +176,31 @@ def estimate_signal(
     # replace range_miles without changing the state/menu layer.
     signal = max(0.05, 1.0 - (distance / station.range_miles) ** 1.4)
     return RadioReception(station, distance, signal, "in range")
+
+
+# Below this signal the audio starts to thin out; the floor keeps a fringe
+# station audible enough to be worth chasing toward its city.
+SIGNAL_FULL_VOLUME = 0.6
+SIGNAL_FRINGE_FLOOR = 0.3
+STATIC_SIGNAL_THRESHOLD = 0.35
+
+
+def signal_volume_factor(reception: RadioReception) -> float:
+    """How much of the radio volume the current signal supports.
+
+    Satellite/built-in sources always play at full volume. Ranged stations
+    hold full volume through most of their contour, then fade toward a fringe
+    floor as the truck drives away, and go silent past the range edge.
+    """
+    station = reception.station
+    if reception.fallback or station.always_available or station.range_miles <= 0:
+        return 1.0
+    signal = reception.signal
+    if signal <= 0.0:
+        return 0.0
+    if signal >= SIGNAL_FULL_VOLUME:
+        return 1.0
+    return SIGNAL_FRINGE_FLOOR + (1.0 - SIGNAL_FRINGE_FLOOR) * (signal / SIGNAL_FULL_VOLUME)
 
 
 def truck_position(route, position_mi: float, world) -> tuple[float, float] | None:
@@ -480,7 +509,7 @@ class RadioState:
             group = 1
         elif station.fallback:
             group = 4
-        elif station.source_type == "local":
+        elif station.source_type in {"local", "regional"}:
             group = 2
         elif station.satellite:
             group = 3

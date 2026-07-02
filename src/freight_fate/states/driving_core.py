@@ -24,15 +24,20 @@ from ..models.settlement import (
     charge_total,
 )
 from ..music import (
+    RADIO_TRACKS_PER_HOST_BREAK,
     music_track_duration_s,
     select_drive_music_sequence,
+    select_host_segments,
     select_menu_music_sequence,
+    select_station_playlist,
 )
 from ..radio import (
     SAFE_ROUTE_PLAYLIST,
+    STATIC_SIGNAL_THRESHOLD,
     RadioPlaybackError,
     RadioState,
     RadioStation,
+    signal_volume_factor,
     truck_position,
 )
 from ..sim import hos
@@ -198,6 +203,9 @@ class _DrivingRadioBackend:
         self.driving = driving
 
     def play_station(self, station: RadioStation, volume: float) -> None:
+        radio = getattr(self.driving, "radio", None)
+        if radio is not None:
+            self.driving._radio_signal_factor = signal_volume_factor(radio.current_reception())
         if station.real_stream:
             if not station.stream_url:
                 raise RadioPlaybackError("station has no stream URL")
@@ -210,10 +218,8 @@ class _DrivingRadioBackend:
         self.driving._apply_radio_volume()
         if station.fallback:
             self.driving.ctx.audio.stop_music(600)
-        elif station.track_key:
-            self.driving.ctx.audio.play_music(station.track_key, fade_ms=900)
         else:
-            self.driving._play_current_music(fade_ms=900)
+            self.driving._start_station_rotation(station, fade_ms=900)
 
     def stop_radio(self) -> None:
         self.driving.ctx.audio.stop_music(600)

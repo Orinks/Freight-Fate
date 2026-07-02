@@ -748,6 +748,15 @@ tuning moves through stations the truck can currently receive from the checked-i
 catalog, using the route's approximate position and each station's range. The
 Radio status screen lists the currently receivable stations.
 
+The Freight Fate Roadhouse and the Night Line have their own hosts, who break
+in between songs. Fictional regional stations cover markets across the map --
+country, classic rock, and blues and soul formats with their own song pools --
+and behave like real FM signals: full volume near the market, thinner audio and
+static crackle at the fringe of the range, and a fade to static as you drive
+past the edge. When a station drops out of range the radio announces it and
+falls back to the Roadhouse, which is receivable everywhere along with the
+Night Line and the satellite fallback.
+
 Real public stream stations, including AFN choices, are hidden unless you turn on
 real streams and turn off streamer-safe mode. When the BASS audio backend is
 available, those stations play from their public stream URLs. If a selected
