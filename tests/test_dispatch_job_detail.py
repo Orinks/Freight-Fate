@@ -45,6 +45,24 @@ def test_f1_on_dispatch_job_opens_structured_detail_view():
         app.shutdown()
 
 
+def test_tab_repeats_only_the_market_watch(monkeypatch):
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        board = _job_board(app)
+        spoken = []
+        monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: spoken.append(text))
+
+        board.handle_event(key_event(pygame.K_TAB))
+
+        # Exactly the market summary is spoken -- no job line, no HOS note.
+        assert spoken == [app.ctx.profile.market.summary()]
+        assert board.index == 0  # Tab does not move the selection
+    finally:
+        app.shutdown()
+
+
 def test_job_detail_lines_are_reviewable_before_accepting():
     from freight_fate.app import App
     from freight_fate.states.city import JobBoardState
