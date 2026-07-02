@@ -18,6 +18,11 @@ from ..models.business import (
     owner_operator_eligibility,
     status_label,
 )
+from ..models.career import (
+    ENDORSEMENT_COURSE_COSTS,
+    ENDORSEMENT_LABELS_SPOKEN,
+    ENDORSEMENT_LEVELS,
+)
 from ..models.trailers import (
     DEFAULT_TRAILER_PROGRAMS,
     TRAILER_CATALOG,
@@ -551,5 +556,80 @@ class TrailerProgramState(MenuState):
             f"{trailer.purchase_price:,.0f} dollars. You have "
             f"{p.money:,.0f} dollars left. Matching direct freight now uses "
             "an owned-trailer reserve at settlement."
+        )
+        self.refresh()
+
+
+class EndorsementCourseState(MenuState):
+    title = "Endorsement courses"
+    intro_help = (
+        "Each endorsement course unlocks its freight early, before the "
+        "carrier would sponsor the training at the listed level. Enter books "
+        "a course you can afford. Escape returns to the terminal."
+    )
+
+    def announce_entry(self) -> None:
+        p = self.ctx.profile
+        self.ctx.say(
+            f"Endorsement courses. Pay for training yourself to unlock "
+            f"specialty freight early; the carrier sponsors each course for "
+            f"free at its listed level. You have {p.money:,.0f} dollars. "
+            f"{self.current_text()}"
+        )
+
+    def build_items(self) -> list[MenuItem]:
+        career = self.ctx.profile.career
+        items: list[MenuItem] = []
+        for key, level in ENDORSEMENT_LEVELS.items():
+            label = ENDORSEMENT_LABELS_SPOKEN[key]
+            if key in career.endorsements:
+                how = (
+                    "self-paid course"
+                    if key in career.purchased_endorsements
+                    else "carrier-sponsored"
+                )
+                items.append(
+                    MenuItem(
+                        f"{label.capitalize()} endorsement: earned, {how}",
+                        lambda lab=label: self.ctx.say(f"You already hold the {lab} endorsement."),
+                        help="This endorsement is already on your license.",
+                    )
+                )
+                continue
+            cost = ENDORSEMENT_COURSE_COSTS[key]
+            items.append(
+                MenuItem(
+                    f"{label.capitalize()} course: {cost:,.0f} dollars "
+                    f"(carrier-sponsored free at level {level})",
+                    lambda k=key: self._buy(k),
+                    help=f"Pay for the {label} training and testing now to "
+                    f"unlock that freight before level {level}.",
+                )
+            )
+        items.append(MenuItem("Back", self.go_back, help="Return to the terminal menu."))
+        return items
+
+    def _buy(self, key: str) -> None:
+        p = self.ctx.profile
+        label = ENDORSEMENT_LABELS_SPOKEN[key]
+        cost = ENDORSEMENT_COURSE_COSTS[key]
+        if key in p.career.endorsements:
+            self.ctx.say(f"You already hold the {label} endorsement.")
+            return
+        if p.money < cost:
+            self.ctx.audio.play("ui/error")
+            self.ctx.say(
+                f"The {label} course costs {cost:,.0f} dollars and you have {p.money:,.0f}."
+            )
+            return
+        p.money -= cost
+        p.career.purchased_endorsements.append(key)
+        p.dispatch_board_cache = None
+        self.ctx.save_profile()
+        self.ctx.audio.play("ui/cash")
+        self.ctx.say(
+            f"Course complete: you paid {cost:,.0f} dollars and earned the "
+            f"{label} endorsement. Matching freight is unlocked on the "
+            f"dispatch board. You have {p.money:,.0f} dollars left."
         )
         self.refresh()

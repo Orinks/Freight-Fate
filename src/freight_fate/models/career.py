@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 from .career_ladder import MAX_CAREER_LEVEL, next_rank_for_level, rank_for_level
 
@@ -41,12 +41,50 @@ LEVEL_XP = [
     572_000,
 ]
 
-# Endorsements unlocked automatically at these levels.
+# Endorsements unlock automatically at these levels: the carrier sponsors
+# the training once dispatch trusts you with the freight.
 ENDORSEMENT_LEVELS = {
     "refrigerated": 2,
     "heavy_haul": 3,
     "high_value": 4,
 }
+
+# Paying for the course yourself unlocks an endorsement before the carrier
+# would sponsor it -- real drivers buy their own training to get ahead.
+ENDORSEMENT_COURSE_COSTS = {
+    "refrigerated": 900.0,
+    "heavy_haul": 1_600.0,
+    "high_value": 1_300.0,
+}
+
+ENDORSEMENT_LABELS_SPOKEN = {
+    "refrigerated": "refrigerated",
+    "heavy_haul": "heavy-haul",
+    "high_value": "high-value",
+}
+
+# Experience scales with what the freight demands, not just its miles:
+# specialty (endorsement) cargo and premium mid-level cargo teach more per
+# mile, and a run of consecutive on-time deliveries compounds the lesson.
+XP_SPECIALTY_MULT = 1.4
+XP_PREMIUM_MULT = 1.15
+XP_STREAK_STEP = 0.05  # extra share per consecutive on-time delivery
+XP_STREAK_MAX_BONUS = 0.25
+
+
+def xp_class_multiplier(cargo) -> float:
+    """How much more a delivery teaches, by cargo demands."""
+    if getattr(cargo, "endorsement", None):
+        return XP_SPECIALTY_MULT
+    if getattr(cargo, "min_level", 1) >= 2:
+        return XP_PREMIUM_MULT
+    return 1.0
+
+
+def xp_streak_bonus(streak: int) -> float:
+    """Bonus XP share for consecutive on-time deliveries (0 for the first)."""
+    return min(XP_STREAK_MAX_BONUS, XP_STREAK_STEP * max(0, streak - 1))
+
 
 ENDORSEMENT_ANNOUNCEMENTS = {
     "refrigerated": (
@@ -77,6 +115,8 @@ class Career:
     total_miles: float = 0.0
     total_earnings: float = 0.0
     dispatch_declines_used: int = 0  # assigned-load refusals since last level-up
+    on_time_streak: int = 0  # consecutive on-time deliveries
+    purchased_endorsements: list[str] = field(default_factory=list)  # self-paid courses
 
     @property
     def level(self) -> int:
@@ -88,10 +128,17 @@ class Career:
 
     @property
     def endorsements(self) -> set[str]:
-        return {e for e, lvl in ENDORSEMENT_LEVELS.items() if self.level >= lvl}
+        earned = {e for e, lvl in ENDORSEMENT_LEVELS.items() if self.level >= lvl}
+        purchased = {e for e in self.purchased_endorsements if e in ENDORSEMENT_LEVELS}
+        return earned | purchased
 
     def record_delivery(
-        self, miles: float, pay: float, on_time: bool, damage_pct: float
+        self,
+        miles: float,
+        pay: float,
+        on_time: bool,
+        damage_pct: float,
+        cargo_class_mult: float = 1.0,
     ) -> list[str]:
         """Apply a finished delivery; returns announcements (level ups etc.)."""
         before_level = self.level
@@ -100,7 +147,13 @@ class Career:
         self.deliveries += 1
         self.total_miles += miles
         self.total_earnings += pay
-        gained = miles * (1.2 if on_time else 0.8)
+        if on_time:
+            self.on_time_streak += 1
+        else:
+            self.on_time_streak = 0
+        gained = miles * (1.2 if on_time else 0.8) * max(1.0, cargo_class_mult)
+        if on_time:
+            gained *= 1.0 + xp_streak_bonus(self.on_time_streak)
         self.xp += gained
         if on_time:
             self.on_time_deliveries += 1

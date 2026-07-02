@@ -234,6 +234,13 @@ class CityMenuState(MenuState):
                 help="Hear your level, reputation, and lifetime numbers.",
             ),
             MenuItem(
+                "Endorsement courses",
+                self._endorsement_courses,
+                help="Pay for endorsement training yourself to unlock "
+                "refrigerated, heavy-haul, or high-value freight before "
+                "the carrier sponsors it at the listed level.",
+            ),
+            MenuItem(
                 "Truck status",
                 self._truck_status,
                 help="Hear assigned or owned tractor status at a glance.",
@@ -346,6 +353,9 @@ class CityMenuState(MenuState):
 
     def _business_status(self) -> None:
         self.ctx.push_state(BusinessStatusState(self.ctx))
+
+    def _endorsement_courses(self) -> None:
+        self.ctx.push_state(EndorsementCourseState(self.ctx))
 
     def _pay_advance_label(self) -> str:
         p = self.ctx.profile
@@ -662,6 +672,7 @@ class BobtailDestState(MenuState):
 
 from .city_business import (  # noqa: E402,F401
     BusinessStatusState,
+    EndorsementCourseState,
     TrailerProgramState,
     TruckShopState,
     UpgradeShopState,
@@ -923,6 +934,7 @@ class JobBoardState(MenuState):
             driver_charges=0.0,
             carrier_key=getattr(p, "carrier_key", ""),
             owned_trailers=p.visible_owned_trailers(),
+            reputation=p.career.reputation,
         )
         return job.describe(
             index,
@@ -1091,7 +1103,10 @@ class JobBoardState(MenuState):
                 else:
                     self.ctx.say(f"{locked} Open Garage, Trailers to add it.")
             else:
-                self.ctx.say(f"{locked} Keep delivering to level up and unlock it.")
+                self.ctx.say(
+                    f"{locked} Keep delivering to level up, or book the "
+                    "endorsement course at the terminal."
+                )
             return
         if self._needs_hos_confirmation(job):
             self._confirm_risky_job = job
@@ -1214,6 +1229,7 @@ class JobDetailState(MenuState):
             driver_charges=0.0,
             carrier_key=getattr(p, "carrier_key", ""),
             owned_trailers=p.visible_owned_trailers(),
+            reputation=p.career.reputation,
         )
         dollars_per_mile = business.gross_pay / max(job.distance_mi, 1.0)
         lines = [

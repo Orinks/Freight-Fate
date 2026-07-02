@@ -290,16 +290,32 @@ def business_status_summary(profile) -> str:
     )
 
 
+# Dispatch trust pays continuously, not only at business gates: a driver at
+# reputation 100 earns this share of gross on top of the wage plan, scaling
+# down to nothing at the 50-point starting reputation.
+REPUTATION_BONUS_MAX_SHARE = 0.06
+
+
+def reputation_pay_bonus(gross_pay: float, reputation: float | None) -> float:
+    """Extra company pay for dispatch trust above the starting reputation."""
+    if reputation is None:
+        return 0.0
+    trust = max(0.0, min(1.0, (float(reputation) - 50.0) / 50.0))
+    return round(gross_pay * REPUTATION_BONUS_MAX_SHARE * trust, 2)
+
+
 def company_driver_pay(
     job: Job,
     gross_pay: float,
     on_time: bool,
     carrier_key_value: str | None = None,
+    reputation: float | None = None,
 ) -> float:
     plan = pay_plan_for_key(carrier_key_value)
     wage_floor = plan.stop_pay + job.distance_mi * plan.min_per_mile
     wage_share = gross_pay * plan.pay_share
     bonus = gross_pay * plan.on_time_bonus_share if on_time else 0.0
+    bonus += reputation_pay_bonus(gross_pay, reputation)
     return round(max(wage_floor, wage_share) + bonus, 2)
 
 
@@ -377,6 +393,7 @@ def build_business_settlement(
     driver_charges: float,
     carrier_key: str | None = None,
     owned_trailers: tuple[str, ...] | list[str] = (),
+    reputation: float | None = None,
 ) -> BusinessSettlement:
     if status == INDEPENDENT_AUTHORITY:
         gross_pay = direct_freight_gross(gross_pay)
@@ -405,7 +422,7 @@ def build_business_settlement(
 
     net = max(
         0.0,
-        company_driver_pay(job, gross_pay, on_time, carrier_key) - driver_charges,
+        company_driver_pay(job, gross_pay, on_time, carrier_key, reputation) - driver_charges,
     )
     return BusinessSettlement(
         COMPANY_DRIVER,

@@ -4,6 +4,17 @@
 
 ### Added
 
+- **The career economy now pays like a real one.** Company drivers fuel and
+  repair on the carrier account on the road, not just at terminals -- an
+  out-of-fuel rescue dings the service record instead of the wallet, while
+  owner-operators keep paying their own way. Demanding freight teaches more:
+  specialty and premium cargo earn bonus experience and on-time streaks
+  compound it, so the mid-career grind rewards exactly the freight dispatch
+  recommends. Reputation now pays continuously through a dispatch trust
+  bonus on company settlements. And personal money has real uses: pay for
+  endorsement courses to unlock specialty freight before the carrier
+  sponsors the training, or take a motel room for full-quality rest where
+  truck parking is poor or full.
 - **How to play now teaches the current game.** The in-game help reader
   gained a dedicated radio page (stations, hosts, signal ranges, and the
   streamer-safe rules), The goal and Deliveries pages explain earned dispatch

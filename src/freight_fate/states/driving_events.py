@@ -826,13 +826,20 @@ class DrivingEventMixin:
         self._rescue_offered = True
         p = self.ctx.profile
         fee = 750.0
-        p.money -= fee  # can go negative: the rescue is not optional
+        if player_pays_operating_costs(p.business_status):
+            p.money -= fee  # can go negative: the rescue is not optional
+            billing = f"for {fee:,.0f} dollars"
+        else:
+            # the carrier pays for company fuel, but a preventable service
+            # call goes straight onto the driver's record
+            p.career.reputation = max(0.0, p.career.reputation - 2.0)
+            billing = "on the carrier account, and dispatch noted the service call"
         self.truck.refuel(30.0)
         self._rescue_offered = False
         self.ctx.audio.play("ui/error")
         self.ctx.say_event(
             f"You ran out of fuel. Roadside rescue brought thirty "
-            f"gallons for {fee:,.0f} dollars. Press E to restart "
+            f"gallons {billing}. Press E to restart "
             "the engine, and plan your fuel stops.",
             interrupt=True,
         )

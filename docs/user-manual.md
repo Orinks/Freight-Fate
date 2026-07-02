@@ -174,6 +174,7 @@ Your terminal is the safe hub between jobs. Public terminal actions include:
 | Garage | Refuel, repair, service tires, and wash company equipment; owner-operators can also buy upgrades, buy tractors, switch owned tractors, add trailer programs, or buy trailers after own authority. |
 | Request pay advance | Draw cash against your next load when you are broke. |
 | Career stats | Review level, reputation, deliveries, and career totals. |
+| Endorsement courses | Pay for refrigerated, heavy-haul, or high-value training early; the carrier sponsors each course for free at its unlock level. |
 | Truck status | Review truck model, fuel, tank size, damage, tire wear, and road grime. |
 | Time and weather | Review the clock, career day, and current city weather. |
 | Logbook | Review your recent Record of Duty Status entries. |

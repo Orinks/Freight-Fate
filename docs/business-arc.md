@@ -36,7 +36,11 @@ costs active from day one.
 
 - Company driver: listed board pay is carrier gross; settlement pays a driver
   wage/bonus. Fuel, routine repairs, roadside fuel, and carrier shop repair are
-  billed to the carrier. The driver may have a regular assigned tractor, but
+  billed to the carrier, on the road as well as at terminals; an out-of-fuel
+  rescue costs the company driver reputation instead of cash. Settlements add
+  a dispatch trust bonus that scales with reputation above 50 (up to 6 percent
+  of gross at 100), so the service record pays continuously rather than only
+  at business gates. The driver may have a regular assigned tractor, but
   does not own, switch, or upgrade tractors yet.
 - Starter carrier differences: company carriers adjust realistic wage and
   dispatch factors: pay share, per-mile wage floor, stop pay, on-time bonus,
@@ -95,6 +99,18 @@ to accept-only until the next level-up refills it. Owner-operators never see
 the assignment flow: choosing freight and lanes is the independence the
 buy-in purchases, which also removes the often-single-option route menu from
 the company-driver game where it was a no-op.
+
+## Experience And Personal Money
+
+Experience scales with what the freight demands: specialty (endorsement)
+cargo earns 1.4x XP per mile, premium mid-level cargo 1.15x, and consecutive
+on-time deliveries add up to 25 percent more, so the mid-career levels reward
+running the harder freight the guidance recommends. Personal money has
+company-driver uses beyond fines and the buy-in ladder: endorsement courses
+can be self-paid to unlock specialty freight before the carrier sponsors the
+training at its level, and motel rooms buy full-quality rest where parking is
+poor or full. Lodging and training stay personal costs; the truck's fuel and
+repairs stay on the carrier account.
 
 ## Career Start Choices
 

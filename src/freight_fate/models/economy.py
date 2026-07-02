@@ -24,6 +24,7 @@ REGION_FUEL_PRICE = {
 
 REPAIR_COST_PER_PCT = 85.0  # $ per percent of damage repaired
 REST_COST = 35.0  # flat cost of a rest stop visit (food, parking)
+MOTEL_COST = 95.0  # a real bed near the lot: full-quality rest for money
 
 # Dispatcher pay advances: a recovery line for a driver who has run the
 # balance negative and can no longer afford fuel. Cash now, drawn against

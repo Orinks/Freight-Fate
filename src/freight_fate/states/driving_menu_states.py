@@ -516,16 +516,22 @@ class PauseMenuState(MenuState):
         p = self.ctx.profile
         repaired = damage - FIELD_REPAIR_DAMAGE_PCT
         cost = MECHANIC_CALLOUT_FEE + repaired * MECHANIC_RATE_PER_PCT
-        p.money -= cost  # the rescue is never refused; money can go negative
+        carrier_paid = not player_pays_operating_costs(p.business_status)
+        if not carrier_paid:
+            p.money -= cost  # the rescue is never refused; money can go negative
         d.truck.damage_pct = FIELD_REPAIR_DAMAGE_PCT
         _advance_rest_clock(d, MECHANIC_WAIT_MIN)
         d.hos.on_duty(MECHANIC_WAIT_MIN)
         self.ctx.audio.play("ui/notify")
         self.refresh()
+        billing = (
+            "on the carrier breakdown account"
+            if carrier_paid
+            else f"for {cost:,.0f} dollars. You have {p.money:,.0f} dollars"
+        )
         self.ctx.say(
             f"A mobile mechanic patched the truck up to "
-            f"{FIELD_REPAIR_DAMAGE_PCT:.0f} percent damage for "
-            f"{cost:,.0f} dollars. You have {p.money:,.0f} dollars. "
+            f"{FIELD_REPAIR_DAMAGE_PCT:.0f} percent damage {billing}. "
             f"The repair took an hour and a half: it is "
             f"{clock_text(d.trip.current_hour)}. {_deadline_text(d)}"
         )
@@ -837,6 +843,13 @@ class ArrivalState(MenuState):
             driver_charges=driver_charges,
             carrier_key=getattr(p, "carrier_key", ""),
             owned_trailers=getattr(p, "owned_trailers", ()),
+            reputation=p.career.reputation,
+        )
+        reputation_before = p.career.reputation
+        trust_bonus = (
+            0.0
+            if is_owner_operator(p.business_status)
+            else reputation_pay_bonus(business.gross_pay, reputation_before)
         )
         deadline_business = build_business_settlement(
             p.business_status,
@@ -888,7 +901,28 @@ class ArrivalState(MenuState):
         road_grime_added = min(100.0, job.distance_mi * ROAD_GRIME_PER_MILE)
         p.tire_wear_pct = min(100.0, p.tire_wear_pct + tire_wear_added)
         p.road_grime_pct = min(100.0, p.road_grime_pct + road_grime_added)
-        announcements = p.career.record_delivery(job.distance_mi, net_pay, on_time, trip_damage)
+        announcements = p.career.record_delivery(
+            job.distance_mi,
+            net_pay,
+            on_time,
+            trip_damage,
+            cargo_class_mult=xp_class_multiplier(job.cargo),
+        )
+        xp_bonus_notes = []
+        if xp_class_multiplier(job.cargo) > 1.0:
+            xp_bonus_notes.append("demanding freight")
+        streak_bonus = xp_streak_bonus(p.career.on_time_streak) if on_time else 0.0
+        if streak_bonus > 0.0:
+            xp_bonus_notes.append(f"a {p.career.on_time_streak}-delivery on-time streak")
+        if xp_bonus_notes:
+            self.summary_parts.append(
+                f"Career experience bonus for {' and '.join(xp_bonus_notes)}."
+            )
+        if trust_bonus >= 1.0:
+            self.summary_parts.append(
+                f"Dispatch trust bonus: {trust_bonus:,.0f} dollars for your "
+                f"{reputation_before:.0f} reputation."
+            )
         p.game_hours += hours
         p.market.advance_to(p.market_day())
         p.active_trip = None

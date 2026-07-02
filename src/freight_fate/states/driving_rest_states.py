@@ -388,6 +388,15 @@ class RestStopState(MenuState):
                     "tired, and the clock advances 10 hours.",
                 )
             )
+            items.append(
+                MenuItem(
+                    f"Motel room: sleep 10 hours for {MOTEL_COST:.0f} dollars",
+                    self._motel_sleep,
+                    help="A real bed near the lot. Costs money out of your own "
+                    "pocket, but gives the same legal reset with full-quality "
+                    "rest: you wake fresh. The clock advances 10 hours.",
+                )
+            )
         if "repair" in actions:
             items.append(
                 MenuItem(
@@ -485,6 +494,8 @@ class RestStopState(MenuState):
         need = d.truck.specs.fuel_tank_gal - d.truck.fuel_gal
         if need < 1:
             return "Fuel: tank is full"
+        if not player_pays_operating_costs(self.ctx.profile.business_status):
+            return f"Refuel {need:.0f} gallons on the carrier fuel card"
         cost = self.ctx.economy.fuel_cost(d.trip.current_region, need) + 35.0
         return f"Refuel {need:.0f} gallons for {cost:,.0f} dollars"
 
@@ -495,6 +506,20 @@ class RestStopState(MenuState):
         need = d.truck.specs.fuel_tank_gal - d.truck.fuel_gal
         if need < 1:
             self.ctx.say("The tank is already full.")
+            return
+        if not player_pays_operating_costs(p.business_status):
+            # the carrier fuel card covers road fuel for company drivers
+            d.truck.refuel(need)
+            _advance_rest_clock(d, FUEL_STOP_MIN)
+            d.hos.on_duty(FUEL_STOP_MIN)
+            self._save_here(silent=True)
+            self.ctx.audio.play("vehicle/fuel_pump")
+            self.ctx.say(
+                f"Refueled {need:.0f} gallons on the carrier fuel card. "
+                f"Fueling took {FUEL_STOP_MIN:.0f} minutes."
+            )
+            self.ctx.award_achievement("route_refuel")
+            self.refresh()
             return
         cost = self.ctx.economy.fuel_cost(region, need) + 35.0
         if p.money < cost:
@@ -602,6 +627,33 @@ class RestStopState(MenuState):
         if before_fatigue < hos.FATIGUE_SEVERE:
             self.ctx.award_achievement("sleep_before_exhaustion")
 
+    def _motel_sleep(self) -> None:
+        """A paid bed where the parking is rough: a legal reset with real rest.
+
+        Lodging is personal money even for company drivers -- the carrier
+        pays for the truck, not the room."""
+        d = self.driving
+        p = self.ctx.profile
+        if p.money < MOTEL_COST:
+            self.ctx.audio.play("ui/error")
+            self.ctx.say(
+                f"A motel room costs {MOTEL_COST:,.0f} dollars and you have {p.money:,.0f}."
+            )
+            return
+        p.money -= MOTEL_COST
+        _advance_rest_clock(d, hos.SLEEP_MIN)
+        d.hos.sleep()
+        p.fatigue = 0.0
+        self._save_here(silent=True)
+        self.ctx.audio.play("ui/notify")
+        self.ctx.say(
+            f"You took a motel room for {MOTEL_COST:,.0f} dollars and slept "
+            f"a full ten hours. It is {clock_text(d.trip.current_hour)}. "
+            f"Hours of service reset and you wake fresh. You have "
+            f"{p.money:,.0f} dollars. {_deadline_text(d)}"
+        )
+        self.ctx.award_achievement("slept_on_route")
+
     def _emergency_lot_sleep(self) -> None:
         """Bed down in a break/fuel stop's lot when out of hours: a legal HOS
         reset, but cramped poor rest (no proper sleeper), so you wake still
@@ -627,6 +679,19 @@ class RestStopState(MenuState):
         damage = d.truck.damage_pct
         if damage < 1.0:
             self.ctx.say("The truck does not need repair.")
+            return
+        if not player_pays_operating_costs(p.business_status):
+            d.truck.damage_pct = 0.0
+            _advance_rest_clock(d, 60.0)
+            d.hos.on_duty(60.0)
+            self._save_here(silent=True)
+            self.ctx.audio.play("ui/notify")
+            self.ctx.say(
+                f"Shop repaired {damage:.0f} percent damage on the carrier "
+                f"account. It is {clock_text(d.trip.current_hour)}. "
+                f"{_deadline_text(d)}"
+            )
+            self.ctx.award_achievement("garage_repair")
             return
         cost = self.ctx.economy.repair_cost(damage)
         if p.money < cost:
@@ -655,16 +720,18 @@ class RestStopState(MenuState):
             return
         repaired = max(0.0, damage - FIELD_REPAIR_DAMAGE_PCT)
         cost = MECHANIC_CALLOUT_FEE + repaired * MECHANIC_RATE_PER_PCT
-        p.money -= cost
+        carrier_paid = not player_pays_operating_costs(p.business_status)
+        if not carrier_paid:
+            p.money -= cost
         d.truck.damage_pct = min(damage, FIELD_REPAIR_DAMAGE_PCT)
         _advance_rest_clock(d, MECHANIC_WAIT_MIN)
         d.hos.on_duty(MECHANIC_WAIT_MIN)
         self._save_here(silent=True)
         self.ctx.audio.play("ui/notify")
+        billing = "on the carrier breakdown account" if carrier_paid else f"for {cost:,.0f} dollars"
         self.ctx.say(
             f"Roadside assistance patched the truck to "
-            f"{d.truck.damage_pct:.0f} percent damage for "
-            f"{cost:,.0f} dollars. It is "
+            f"{d.truck.damage_pct:.0f} percent damage {billing}. It is "
             f"{clock_text(d.trip.current_hour)}. {_deadline_text(d)}"
         )
 
@@ -735,6 +802,13 @@ class ParkingFullState(MenuState):
                 help="Return to the road and try the next rest stop.",
             ),
             MenuItem(
+                f"Motel room: sleep 10 hours for {MOTEL_COST:.0f} dollars",
+                self._motel,
+                help="The lot is full, but a motel near the exit has a bed. "
+                "Costs your own money; full-quality rest and a legal "
+                "10-hour reset.",
+            ),
+            MenuItem(
                 "Park on the shoulder and sleep",
                 self._shoulder,
                 help="Ten hours of poor sleep. Resets your hours of "
@@ -754,6 +828,34 @@ class ParkingFullState(MenuState):
             "approach it. Press E to start the engine.",
             interrupt=True,
         )
+
+    def _motel(self) -> None:
+        d = self.driving
+        p = self.ctx.profile
+        if p.money < MOTEL_COST:
+            self.ctx.audio.play("ui/error")
+            self.ctx.say(
+                f"A motel room costs {MOTEL_COST:,.0f} dollars and you have {p.money:,.0f}."
+            )
+            return
+        p.money -= MOTEL_COST
+        _advance_rest_clock(d, hos.SLEEP_MIN)
+        d.hos.sleep()
+        p.fatigue = 0.0
+        p.truck_fuel_gal = d.truck.fuel_gal
+        p.truck_damage_pct = d.truck.damage_pct
+        p.active_trip = d.snapshot()
+        self.ctx.save_profile()
+        self.ctx.audio.play("ui/notify")
+        self.ctx.pop_state()
+        self.ctx.say(
+            f"You took a motel room for {MOTEL_COST:,.0f} dollars and slept "
+            f"a full ten hours. It is {clock_text(d.trip.current_hour)}. "
+            f"Hours of service reset and you wake fresh. You have "
+            f"{p.money:,.0f} dollars. Press E to start the engine.",
+            interrupt=True,
+        )
+        self.ctx.award_achievement("slept_on_route")
 
     def _shoulder(self) -> None:
         self.ctx.push_state(
