@@ -14,7 +14,6 @@ class DrivingControlsMixin:
             return
         key = event.key
         tr = self.truck.transmission
-        global gear_idx
         if key in (pygame.K_LCTRL, pygame.K_RCTRL):
             self.ctx.stop_event_speech()
             self._set_status("Event voice stopped.")
@@ -30,17 +29,13 @@ class DrivingControlsMixin:
                 self.ctx.say("Neutral.")
         elif key == pygame.K_BACKSPACE and not tr.automatic:
             self._manual_shift(REVERSE)
-        elif key == pygame.K_q and not tr.automatic and gear_idx > 1:
-            gear_idx -= 1
-            self._manual_shift(gear_idx)
         elif key == pygame.K_w and not tr.automatic:
             if tr.in_reverse or tr.in_neutral:
-                gear_idx = 1
-                self._manual_shift(gear_idx)
-            elif gear_idx < 10:
-                gear_idx += 1
-                self._manual_shift(gear_idx)
-
+                self._manual_shift(1)
+            elif tr.gear < 10:
+                self._manual_shift(tr.gear+1)
+        elif key == pygame.K_q and not tr.automatic and not tr.in_neutral and tr.gear > 1:
+            self._manual_shift(tr.gear - 1)
         elif key == pygame.K_j:
             self._toggle_engine_brake()
         elif key == pygame.K_p:
