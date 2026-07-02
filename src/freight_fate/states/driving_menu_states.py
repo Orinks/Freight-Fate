@@ -289,6 +289,16 @@ class PauseMenuState(MenuState):
             )
         )
 
+    def handle_controller(self, event, manager) -> None:
+        # Start pauses and unpauses, so it resumes from the pause menu too.
+        if (
+            event.type == pygame.CONTROLLERBUTTONDOWN
+            and event.button == pygame.CONTROLLER_BUTTON_START
+        ):
+            self._resume()
+            return
+        super().handle_controller(event, manager)
+
     def _resume(self) -> None:
         self.ctx.audio.play("ui/unpause")
         self.ctx.pop_state()
