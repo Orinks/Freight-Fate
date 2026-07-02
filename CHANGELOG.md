@@ -3,6 +3,10 @@
 ## Unreleased
 ### Fixed
 
+- **The dispatch board no longer offers trivially short hauls.** Because each
+  city stands for a whole freight area, a job to a neighbor under 25 miles was a
+  pointless across-town hop; the board now skips those destinations and fills
+  from real routes instead.
 - **Trucks into New York now take the George Washington Bridge, not the Holland
   Tunnel.** New York freight now routes to the Hunts Point market in the Bronx
   over the GWB on I-95 -- the Hudson crossing a full-height rig can legally use
