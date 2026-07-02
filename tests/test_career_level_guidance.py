@@ -74,3 +74,16 @@ def test_high_level_company_bands_do_not_overstate_business_status():
     early_independent = career_level_guidance(_profile(22, status=INDEPENDENT_AUTHORITY))
     assert early_independent.title == "Prove independent authority"
     assert early_independent.recommendation == "authority-building freight"
+
+
+def test_level_30_guidance_is_distinct_per_business_path():
+    company = career_level_guidance(_profile(30))
+    leased = career_level_guidance(_profile(30, status=LEASED_OWNER_OPERATOR))
+    authority = career_level_guidance(_profile(30, status=INDEPENDENT_AUTHORITY))
+
+    titles = {company.title, leased.title, authority.title}
+    assert len(titles) == 3
+    assert company.title != career_level_guidance(_profile(25)).title
+    assert (
+        authority.title != career_level_guidance(_profile(25, status=INDEPENDENT_AUTHORITY)).title
+    )

@@ -26,6 +26,14 @@ def career_level_guidance(profile) -> CareerLevelGuidance:
     status = getattr(profile, "business_status", COMPANY_DRIVER)
 
     if status == INDEPENDENT_AUTHORITY:
+        if level >= 30:
+            return CareerLevelGuidance(
+                "Run the business you built",
+                "The top of the ladder: your name, your authority, and the freight you choose to keep.",
+                "Take the loads you want to be known for; prestige freight follows a spotless record.",
+                "signature freight",
+                "Level 30 is legacy: every clean run keeps the reputation you already earned.",
+            )
         if level >= 25:
             return CareerLevelGuidance(
                 "Grow a freight business",
@@ -40,6 +48,14 @@ def career_level_guidance(profile) -> CareerLevelGuidance:
             "Favor contracts that protect service quality, cash flow, and your authority record.",
             "authority-building freight",
             "Early authority work is about proving reliability as a carrier.",
+        )
+    if is_owner_operator(status) and level >= 30:
+        return CareerLevelGuidance(
+            "Top of the leased-on ladder",
+            "You reached level 30 as a leased-on owner-operator; own authority remains the one step left.",
+            "Run the freight that keeps margins healthy, and take the authority step only if you want it.",
+            "proven owner-operator lane",
+            "The ladder is finished: what remains is the business you choose to run.",
         )
     if is_owner_operator(status) and level >= 21:
         return CareerLevelGuidance(
@@ -56,6 +72,14 @@ def career_level_guidance(profile) -> CareerLevelGuidance:
             "Favor freight with clear take-home and enough reserve after settlement.",
             "reserve-safe owner-operator freight",
             "Owner-operator progress depends on margin discipline.",
+        )
+    if level >= 30:
+        return CareerLevelGuidance(
+            "Career company driver, by choice",
+            "Level 30 on carrier equipment is its own achievement; the buy-in stays open if you ever want it.",
+            "Run the premium freight your record earned; nothing on the board is above your standing.",
+            "top-seniority company lane",
+            "A thirty-level company career is the safest version of the top rank.",
         )
     if level >= 25:
         return CareerLevelGuidance(
