@@ -22,8 +22,8 @@ REGION_FUEL_PRICE = {
     "pacific_northwest": 4.45,
 }
 
-REPAIR_COST_PER_PCT = 85.0     # $ per percent of damage repaired
-REST_COST = 35.0               # flat cost of a rest stop visit (food, parking)
+REPAIR_COST_PER_PCT = 85.0  # $ per percent of damage repaired
+REST_COST = 35.0  # flat cost of a rest stop visit (food, parking)
 
 # Dispatcher pay advances: a recovery line for a driver who has run the
 # balance negative and can no longer afford fuel. Cash now, drawn against
@@ -31,13 +31,12 @@ REST_COST = 35.0               # flat cost of a rest stop visit (food, parking)
 # when cash is already low so it stays a safety net against a soft lock,
 # not free liquidity. Mirrors how carriers and factoring services front a
 # driver fuel money against a load in transit.
-PAY_ADVANCE_LIMIT = 1500.0          # most you can owe at once
-PAY_ADVANCE_GRANT = 500.0           # cash per request
-PAY_ADVANCE_ELIGIBLE_BELOW = 10.0   # only offered at single-digit cash or worse
+PAY_ADVANCE_LIMIT = 1500.0  # most you can owe at once
+PAY_ADVANCE_GRANT = 500.0  # cash per request
+PAY_ADVANCE_ELIGIBLE_BELOW = 10.0  # only offered at single-digit cash or worse
 
 
-def pay_advance_grant(money: float, outstanding: float,
-                      used_for_load: bool = False) -> float:
+def pay_advance_grant(money: float, outstanding: float, used_for_load: bool = False) -> float:
     """Dollars a dispatcher will advance now, or 0 when none is available.
 
     Available only while cash is low (a recovery tool) and only up to the
@@ -51,17 +50,23 @@ def pay_advance_grant(money: float, outstanding: float,
     return round(min(PAY_ADVANCE_GRANT, headroom), 2)
 
 
-def pay_advance_unavailable_reason(money: float, outstanding: float,
-                                   used_for_load: bool = False) -> str:
+def pay_advance_unavailable_reason(
+    money: float, outstanding: float, used_for_load: bool = False
+) -> str:
     """Spoken explanation for why no advance is available right now."""
     if used_for_load:
-        return ("You have already taken a pay advance for this load. Deliver "
-                "it before drawing another.")
+        return (
+            "You have already taken a pay advance for this load. Deliver it before drawing another."
+        )
     if money >= PAY_ADVANCE_ELIGIBLE_BELOW:
-        return ("A pay advance is only for getting unstuck when cash is low. "
-                f"You have {money:,.0f} dollars.")
-    return ("You have reached your pay-advance limit. Deliver a load to pay "
-            "it down before drawing more.")
+        return (
+            "A pay advance is only for getting unstuck when cash is low. "
+            f"You have {money:,.0f} dollars."
+        )
+    return (
+        "You have reached your pay-advance limit. Deliver a load to pay "
+        "it down before drawing more."
+    )
 
 
 class Economy:

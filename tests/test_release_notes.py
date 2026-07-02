@@ -177,10 +177,7 @@ def test_nightly_notes_use_new_version_block_entries(tmp_path, monkeypatch):
     release_notes = load_release_notes_module()
     repo = make_repo(
         tmp_path,
-        version_only_changelog(
-            "## 1.6.0 - 2026-06-15\n\n"
-            "### Added\n- Old player-facing note.\n"
-        ),
+        version_only_changelog("## 1.6.0 - 2026-06-15\n\n### Added\n- Old player-facing note.\n"),
     )
     git(repo, "tag", "nightly-20260615")
     (repo / "CHANGELOG.md").write_text(
@@ -234,25 +231,24 @@ def test_nightly_notes_skip_already_released_version_block(tmp_path, monkeypatch
 def test_format_sections_merges_duplicate_titles(tmp_path, monkeypatch):
     release_notes = load_release_notes_module()
     section = release_notes.ChangelogSection
-    out = release_notes.format_sections([
-        section("Added", ("- Unreleased badge.",)),
-        section("Added", ("- Staged feature.",)),
-    ])
+    out = release_notes.format_sections(
+        [
+            section("Added", ("- Unreleased badge.",)),
+            section("Added", ("- Staged feature.",)),
+        ]
+    )
 
     assert out.count("## Added") == 1
     assert "- Unreleased badge." in out
     assert "- Staged feature." in out
 
 
-def test_should_build_nightly_ignores_internal_version_block_entries(
-    tmp_path, monkeypatch, capsys
-):
+def test_should_build_nightly_ignores_internal_version_block_entries(tmp_path, monkeypatch, capsys):
     release_notes = load_release_notes_module()
     repo = make_repo(
         tmp_path,
         version_only_changelog(
-            "## 1.6.0 - 2026-06-15\n\n"
-            "### Internal\n- Old build script cleanup.\n"
+            "## 1.6.0 - 2026-06-15\n\n### Internal\n- Old build script cleanup.\n"
         ),
     )
     git(repo, "tag", "nightly-20260615")
@@ -267,13 +263,17 @@ def test_should_build_nightly_ignores_internal_version_block_entries(
     )
     commit(repo, "test: add helper")
     monkeypatch.setattr(release_notes, "ROOT", repo)
-    args = type("Args", (), {
-        "previous_tag": "nightly-20260615",
-        "exclude_notes": "",
-        "latest_stable_tag": "",
-        "exclude_stable_notes": "",
-        "head": "HEAD",
-    })()
+    args = type(
+        "Args",
+        (),
+        {
+            "previous_tag": "nightly-20260615",
+            "exclude_notes": "",
+            "latest_stable_tag": "",
+            "exclude_stable_notes": "",
+            "head": "HEAD",
+        },
+    )()
 
     assert release_notes.should_build_nightly_command(args) == 0
 
@@ -303,35 +303,41 @@ def test_should_build_nightly_uses_curated_entries(tmp_path, monkeypatch, capsys
     )
     commit(repo, "feat: add new work")
     monkeypatch.setattr(release_notes, "ROOT", repo)
-    args = type("Args", (), {
-        "previous_tag": "nightly-20260615",
-        "exclude_notes": "",
-        "latest_stable_tag": "",
-        "exclude_stable_notes": "",
-        "head": "HEAD",
-    })()
+    args = type(
+        "Args",
+        (),
+        {
+            "previous_tag": "nightly-20260615",
+            "exclude_notes": "",
+            "latest_stable_tag": "",
+            "exclude_stable_notes": "",
+            "head": "HEAD",
+        },
+    )()
 
     assert release_notes.should_build_nightly_command(args) == 0
 
     assert "should_build=true" in capsys.readouterr().out
 
 
-def test_should_build_nightly_skips_without_entries_or_marker(
-    tmp_path, monkeypatch, capsys
-):
+def test_should_build_nightly_skips_without_entries_or_marker(tmp_path, monkeypatch, capsys):
     release_notes = load_release_notes_module()
     repo = make_repo(tmp_path, changelog("### Added\n- Old curated note.\n"))
     git(repo, "tag", "nightly-20260615")
     (repo / "README.md").write_text("Docs only\n", encoding="utf-8")
     commit(repo, "docs: update readme")
     monkeypatch.setattr(release_notes, "ROOT", repo)
-    args = type("Args", (), {
-        "previous_tag": "nightly-20260615",
-        "exclude_notes": "",
-        "latest_stable_tag": "",
-        "exclude_stable_notes": "",
-        "head": "HEAD",
-    })()
+    args = type(
+        "Args",
+        (),
+        {
+            "previous_tag": "nightly-20260615",
+            "exclude_notes": "",
+            "latest_stable_tag": "",
+            "exclude_stable_notes": "",
+            "head": "HEAD",
+        },
+    )()
 
     assert release_notes.should_build_nightly_command(args) == 0
 
@@ -345,13 +351,17 @@ def test_should_build_nightly_allows_explicit_marker(tmp_path, monkeypatch, caps
     (repo / "README.md").write_text("Nightly refresh\n", encoding="utf-8")
     commit(repo, "chore: refresh snapshot\n\nnightly: build")
     monkeypatch.setattr(release_notes, "ROOT", repo)
-    args = type("Args", (), {
-        "previous_tag": "nightly-20260615",
-        "exclude_notes": "",
-        "latest_stable_tag": "",
-        "exclude_stable_notes": "",
-        "head": "HEAD",
-    })()
+    args = type(
+        "Args",
+        (),
+        {
+            "previous_tag": "nightly-20260615",
+            "exclude_notes": "",
+            "latest_stable_tag": "",
+            "exclude_stable_notes": "",
+            "head": "HEAD",
+        },
+    )()
 
     assert release_notes.should_build_nightly_command(args) == 0
 
@@ -386,4 +396,4 @@ def test_build_workflow_uses_curated_nightly_decision_and_notes():
     assert "--exclude-notes previous-notes.md" in workflow
     assert "--exclude-stable-notes latest-stable-notes.md" in workflow
     assert "tools/release_notes.py nightly" in workflow
-    assert "git diff --name-only \"$LAST_TAG\"..HEAD" not in workflow
+    assert 'git diff --name-only "$LAST_TAG"..HEAD' not in workflow

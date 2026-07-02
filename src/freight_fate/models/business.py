@@ -76,8 +76,7 @@ class BusinessSettlement:
         if not self.business_charges:
             return "none"
         return ", ".join(
-            f"{charge.label} {charge.amount:,.0f} dollars"
-            for charge in self.business_charges
+            f"{charge.label} {charge.amount:,.0f} dollars" for charge in self.business_charges
         )
 
 
@@ -226,19 +225,12 @@ def next_business_unlock(profile) -> str:
             ok, reasons = authority_activation_eligibility(profile)
             if ok:
                 return "Next: activate own authority from Business status."
-            return (
-                "Own authority locked: " + " ".join(reasons)
-            )
+            return "Own authority locked: " + " ".join(reasons)
         ok, reasons = authority_readiness_eligibility(profile)
         if ok:
-            return (
-                "Next: set aside an authority prep reserve from Business "
-                "status."
-            )
+            return "Next: set aside an authority prep reserve from Business status."
         if profile.career.level >= AUTHORITY_READY_LEVEL:
-            return (
-                "Authority prep locked: " + " ".join(reasons)
-            )
+            return "Authority prep locked: " + " ".join(reasons)
         next_rank = next_rank_for_level(profile.career.level)
         if next_rank is None:
             return "You are at the top career rank."
@@ -246,10 +238,7 @@ def next_business_unlock(profile) -> str:
 
     ok, reasons = owner_operator_eligibility(profile)
     if ok:
-        return (
-            "Next: buy into a leased-on owner-operator tractor position from "
-            "Business status."
-        )
+        return "Next: buy into a leased-on owner-operator tractor position from Business status."
     if profile.career.level < OWNER_OPERATOR_LEVEL - 1:
         next_rank = next_rank_for_level(profile.career.level)
         if next_rank is None:
@@ -267,25 +256,20 @@ def business_status_summary(profile) -> str:
                 f"Own authority active. Level {rank.level}: {rank.title}. "
                 "Direct freight pays higher gross. You pay fuel, repairs, "
                 "insurance, trailer reserve, truck reserve, compliance "
-                "reserve, and factoring costs. "
-                + next_business_unlock(profile)
+                "reserve, and factoring costs. " + next_business_unlock(profile)
             )
         start_mode = getattr(profile, "start_mode", "")
         lead = (
             "You chose the owner-operator start. "
-            if start_mode == START_MODE_OWNER_OPERATOR else
-            ""
+            if start_mode == START_MODE_OWNER_OPERATOR
+            else ""
         )
         return (
             f"{lead}Leased to {carrier_name(profile)}. Level {rank.level}: "
             f"{rank.title}. Gross revenue is higher. You pay fuel, repairs, "
             "maintenance reserve, insurance, trailer program, truck reserve, "
             "and settlement fees. "
-            + (
-                "Authority prep reserve is set. "
-                if has_authority_readiness(profile) else
-                ""
-            )
+            + ("Authority prep reserve is set. " if has_authority_readiness(profile) else "")
             + next_business_unlock(profile)
         )
     ok, reasons = owner_operator_eligibility(profile)
@@ -302,8 +286,7 @@ def business_status_summary(profile) -> str:
         f"Company driver for {carrier_name(profile)}. Level {rank.level}: "
         f"{rank.title}. {option_for_profile(profile).menu_summary} "
         "The carrier supplies the tractor, fuel, repairs, trailer, authority, "
-        "and insurance. Settlements are driver wages and bonuses. "
-        + next_business_unlock(profile)
+        "and insurance. Settlements are driver wages and bonuses. " + next_business_unlock(profile)
     )
 
 
@@ -330,11 +313,17 @@ def direct_freight_gross(gross_pay: float) -> float:
 
 def owner_operator_charges(job: Job, gross_pay: float) -> tuple[BusinessCharge, ...]:
     return (
-        BusinessCharge("maintenance reserve", round(job.distance_mi * OWNER_MAINTENANCE_PER_MILE, 2)),
+        BusinessCharge(
+            "maintenance reserve", round(job.distance_mi * OWNER_MAINTENANCE_PER_MILE, 2)
+        ),
         BusinessCharge("insurance reserve", round(job.distance_mi * OWNER_INSURANCE_PER_MILE, 2)),
-        BusinessCharge("trailer program", round(
-            job.distance_mi * trailer_program_charge_per_mile(job.cargo.key), 2)),
-        BusinessCharge("truck payment reserve", round(job.distance_mi * OWNER_TRUCK_PAYMENT_PER_MILE, 2)),
+        BusinessCharge(
+            "trailer program",
+            round(job.distance_mi * trailer_program_charge_per_mile(job.cargo.key), 2),
+        ),
+        BusinessCharge(
+            "truck payment reserve", round(job.distance_mi * OWNER_TRUCK_PAYMENT_PER_MILE, 2)
+        ),
         BusinessCharge("settlement service fee", round(gross_pay * OWNER_SETTLEMENT_FEE_SHARE, 2)),
     )
 
@@ -361,12 +350,20 @@ def independent_authority_charges_for_trailers(
             round(job.distance_mi * owned_trailer_charge, 2),
         )
     return (
-        BusinessCharge("maintenance reserve", round(job.distance_mi * OWNER_MAINTENANCE_PER_MILE, 2)),
-        BusinessCharge("insurance reserve", round(job.distance_mi * AUTHORITY_INSURANCE_PER_MILE, 2)),
+        BusinessCharge(
+            "maintenance reserve", round(job.distance_mi * OWNER_MAINTENANCE_PER_MILE, 2)
+        ),
+        BusinessCharge(
+            "insurance reserve", round(job.distance_mi * AUTHORITY_INSURANCE_PER_MILE, 2)
+        ),
         trailer_charge,
-        BusinessCharge("truck payment reserve", round(job.distance_mi * OWNER_TRUCK_PAYMENT_PER_MILE, 2)),
-        BusinessCharge("authority compliance reserve", round(
-            job.distance_mi * AUTHORITY_COMPLIANCE_PER_MILE, 2)),
+        BusinessCharge(
+            "truck payment reserve", round(job.distance_mi * OWNER_TRUCK_PAYMENT_PER_MILE, 2)
+        ),
+        BusinessCharge(
+            "authority compliance reserve",
+            round(job.distance_mi * AUTHORITY_COMPLIANCE_PER_MILE, 2),
+        ),
         BusinessCharge("factoring fee", round(gross_pay * AUTHORITY_FACTORING_FEE_SHARE, 2)),
     )
 

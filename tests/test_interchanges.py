@@ -15,9 +15,16 @@ from freight_fate.sim.trip import _leg_heading, _nearest_exit_label
 
 # --- phrasing ---------------------------------------------------------------
 
+
 def test_full_phrase_reads_naturally():
-    ix = Interchange(at_mi=72.7, exit_ref="7", destinations=("Trenton", "New York"),
-                     via="US 1 North", highway="I-95", source="OSM")
+    ix = Interchange(
+        at_mi=72.7,
+        exit_ref="7",
+        destinations=("Trenton", "New York"),
+        via="US 1 North",
+        highway="I-95",
+        source="OSM",
+    )
     assert ix.spoken_phrase == "exit 7 for US-1 North toward Trenton and New York"
     assert ix.near_phrase == "Exit 7 for US-1 North toward Trenton and New York now."
 
@@ -28,8 +35,9 @@ def test_bare_exit_number_still_speaks():
 
 
 def test_destinations_without_exit_number():
-    ix = Interchange(at_mi=5.0, destinations=("Camden", "Shore Points"),
-                     via="NJ 129 South", source="OSM")
+    ix = Interchange(
+        at_mi=5.0, destinations=("Camden", "Shore Points"), via="NJ 129 South", source="OSM"
+    )
     assert ix.spoken_phrase == "exit for NJ-129 South toward Camden and Shore Points"
 
 
@@ -55,9 +63,15 @@ def test_join_destinations_oxford_comma():
 
 # --- parsing / validation ---------------------------------------------------
 
+
 def _raw(**over):
-    base = {"at_mi": 10.0, "exit_ref": "7", "destinations": ["Trenton"],
-            "via": "US 1 North", "source": "OSM"}
+    base = {
+        "at_mi": 10.0,
+        "exit_ref": "7",
+        "destinations": ["Trenton"],
+        "via": "US 1 North",
+        "source": "OSM",
+    }
     base.update(over)
     return base
 
@@ -78,8 +92,7 @@ def test_parse_accepts_string_destination():
 
 def test_parse_requires_something_sayable():
     with pytest.raises(ValueError, match="no exit ref"):
-        _parse_interchange(_raw(exit_ref="", destinations=[], name=""),
-                           50.0, "A", "B", "I-95")
+        _parse_interchange(_raw(exit_ref="", destinations=[], name=""), 50.0, "A", "B", "I-95")
 
 
 def test_parse_requires_source():
@@ -99,12 +112,19 @@ def test_parse_rejects_raw_osm_text():
 
 # --- cue wiring -------------------------------------------------------------
 
+
 def _route_with_interchange(world, start="Chicago", end="Indianapolis"):
     route = world.route_options(start, end)[0]
     leg = route.legs[0]
     at = leg.miles / 2.0
-    ix = Interchange(at_mi=at, exit_ref="21", destinations=("Lafayette",),
-                     via="US 52 West", highway=leg.highway, source="OSM")
+    ix = Interchange(
+        at_mi=at,
+        exit_ref="21",
+        destinations=("Lafayette",),
+        via="US 52 West",
+        highway=leg.highway,
+        source="OSM",
+    )
     route.legs[0] = dataclasses.replace(leg, interchanges=(ix,))
     return route, at
 
@@ -142,8 +162,14 @@ def test_reverse_direction_mirrors_interchange_position(world):
     forward = world.route_options("Chicago", "Indianapolis")[0]
     leg = forward.legs[0]
     at = leg.miles / 2.0 - 10.0
-    ix = Interchange(at_mi=at, exit_ref="21", destinations=("Lafayette",),
-                     via="US 52 West", highway=leg.highway, source="OSM")
+    ix = Interchange(
+        at_mi=at,
+        exit_ref="21",
+        destinations=("Lafayette",),
+        via="US 52 West",
+        highway=leg.highway,
+        source="OSM",
+    )
 
     forward.legs[0] = dataclasses.replace(leg, interchanges=(ix,))
     fwd_trip = Trip(forward, TruckState(), WeatherSystem("great_lakes", seed=1), seed=2)
@@ -152,7 +178,8 @@ def test_reverse_direction_mirrors_interchange_position(world):
     reverse = world.route_options("Indianapolis", "Chicago")[0]
     rev_leg = reverse.legs[0]
     reverse.legs[0] = dataclasses.replace(
-        rev_leg, interchanges=(dataclasses.replace(ix, highway=rev_leg.highway),))
+        rev_leg, interchanges=(dataclasses.replace(ix, highway=rev_leg.highway),)
+    )
     rev_trip = Trip(reverse, TruckState(), WeatherSystem("great_lakes", seed=1), seed=2)
     rev_cue = next(c for c in rev_trip.navigation_cues if c.kind == "interchange")
 
@@ -166,8 +193,13 @@ def test_next_exit_context_mentions_flavor_exit(world):
     route, _ = _route_with_interchange(world)
     trip = Trip(route, TruckState(), WeatherSystem("great_lakes", seed=1), seed=2)
     trip.navigation_cues = [
-        NavigationCue("interchange:0:50:21", "interchange", 50.0,
-                      "exit 21 for US-52 West toward Lafayette", "")
+        NavigationCue(
+            "interchange:0:50:21",
+            "interchange",
+            50.0,
+            "exit 21 for US-52 West toward Lafayette",
+            "",
+        )
     ]
     trip.position_mi = 40.0
     assert trip.next_navigation_context() == "Destination Indianapolis ahead."
@@ -182,10 +214,16 @@ def test_next_navigation_context_prioritizes_actionable_stop_over_exit(world):
     route, _ = _route_with_interchange(world)
     trip = Trip(route, TruckState(), WeatherSystem("great_lakes", seed=1), seed=2)
     trip.navigation_cues = [
-        NavigationCue("interchange:0:40:21", "interchange", 40.0,
-                      "exit 21 for US-52 West toward Lafayette", ""),
-        NavigationCue("rest_stop:0:50:pilot", "rest_stop", 50.0,
-                      "travel center ahead at exit 26", ""),
+        NavigationCue(
+            "interchange:0:40:21",
+            "interchange",
+            40.0,
+            "exit 21 for US-52 West toward Lafayette",
+            "",
+        ),
+        NavigationCue(
+            "rest_stop:0:50:pilot", "rest_stop", 50.0, "travel center ahead at exit 26", ""
+        ),
     ]
     trip.position_mi = 30.0
     assert trip.next_navigation_context() == (
@@ -197,6 +235,7 @@ def test_next_navigation_context_prioritizes_actionable_stop_over_exit(world):
 
 
 # --- Scope A: grounded exits, ramps, onramps --------------------------------
+
 
 def test_interchange_exit_label_property():
     assert Interchange(at_mi=5.0, exit_ref="7", source="x").exit_label == "exit 7"
@@ -218,27 +257,35 @@ def test_leg_heading_follows_route_numbering(world):
 def _leg0_curated_stop(route):
     leg = route.legs[0]
     forward = route.cities[0] == leg.a
-    stop = next(s for s in leg.stops
-                if s.curated and s.applies_to_direction(forward))
+    stop = next(s for s in leg.stops if s.curated and s.applies_to_direction(forward))
     return leg, stop
 
 
 def test_nearest_exit_label_respects_tolerance(world):
     base = world.route_options("Chicago", "Indianapolis")[0].legs[0]
-    leg = dataclasses.replace(base, interchanges=(
-        Interchange(at_mi=50.0, exit_ref="7", source="x"),
-        Interchange(at_mi=80.0, exit_ref="", destinations=("Town",), source="x"),
-    ))
-    assert _nearest_exit_label(leg, 51.0) == "exit 7"     # within 2.0 mi
-    assert _nearest_exit_label(leg, 55.0) == ""           # too far
-    assert _nearest_exit_label(leg, 80.0) == ""           # nearest has no ref
+    leg = dataclasses.replace(
+        base,
+        interchanges=(
+            Interchange(at_mi=50.0, exit_ref="7", source="x"),
+            Interchange(at_mi=80.0, exit_ref="", destinations=("Town",), source="x"),
+        ),
+    )
+    assert _nearest_exit_label(leg, 51.0) == "exit 7"  # within 2.0 mi
+    assert _nearest_exit_label(leg, 55.0) == ""  # too far
+    assert _nearest_exit_label(leg, 80.0) == ""  # nearest has no ref
 
 
 def test_place_stops_attaches_exit_label(world):
     route = world.route_options("Chicago", "Indianapolis")[0]
     leg, target = _leg0_curated_stop(route)
-    ix = Interchange(at_mi=target.at_mi, exit_ref="21", destinations=("Lafayette",),
-                     via="US 52 West", highway=leg.highway, source="OSM")
+    ix = Interchange(
+        at_mi=target.at_mi,
+        exit_ref="21",
+        destinations=("Lafayette",),
+        via="US 52 West",
+        highway=leg.highway,
+        source="OSM",
+    )
     route.legs[0] = dataclasses.replace(leg, interchanges=(ix,))
     trip = Trip(route, TruckState(), WeatherSystem("great_lakes", seed=1), seed=2)
     placed = next(s for s in trip.stops if s.name == target.name)
@@ -248,12 +295,17 @@ def test_place_stops_attaches_exit_label(world):
 def test_rest_stop_cue_names_exit_when_linked(world):
     route = world.route_options("Chicago", "Indianapolis")[0]
     leg, target = _leg0_curated_stop(route)
-    ix = Interchange(at_mi=target.at_mi, exit_ref="21", destinations=("Lafayette",),
-                     via="US 52 West", highway=leg.highway, source="OSM")
+    ix = Interchange(
+        at_mi=target.at_mi,
+        exit_ref="21",
+        destinations=("Lafayette",),
+        via="US 52 West",
+        highway=leg.highway,
+        source="OSM",
+    )
     route.legs[0] = dataclasses.replace(leg, interchanges=(ix,))
     trip = Trip(route, TruckState(), WeatherSystem("great_lakes", seed=1), seed=2)
-    cue = next(c for c in trip.navigation_cues
-               if c.kind == "rest_stop" and target.name in c.key)
+    cue = next(c for c in trip.navigation_cues if c.kind == "rest_stop" and target.name in c.key)
     assert "at exit 21" in cue.near_text
 
 
@@ -262,8 +314,7 @@ def test_rest_stop_cue_generic_without_linked_exit(world):
     leg, target = _leg0_curated_stop(route)
     route.legs[0] = dataclasses.replace(leg, interchanges=())
     trip = Trip(route, TruckState(), WeatherSystem("great_lakes", seed=1), seed=2)
-    cue = next(c for c in trip.navigation_cues
-               if c.kind == "rest_stop" and target.name in c.key)
+    cue = next(c for c in trip.navigation_cues if c.kind == "rest_stop" and target.name in c.key)
     assert "exit" in cue.near_text  # "press X to take the exit"
     assert "at exit" not in cue.near_text  # no fabricated exit number
 
@@ -299,6 +350,7 @@ def test_onramp_cue_fires_at_drive_start(world):
 
 # --- text cleanup: exit-ref whitespace + via-redundant destinations ---------
 
+
 def test_parse_normalizes_exit_ref_whitespace():
     ix = _parse_interchange(_raw(exit_ref="103 B"), 50.0, "A", "B", "I-70")
     assert ix.exit_ref == "103B"
@@ -306,36 +358,42 @@ def test_parse_normalizes_exit_ref_whitespace():
 
 
 def test_spoken_phrase_drops_via_redundant_destination():
-    ix = Interchange(at_mi=5.0, exit_ref="101A", via="I 70",
-                     destinations=("I 70 East", "Parsons Avenue"), source="x")
+    ix = Interchange(
+        at_mi=5.0,
+        exit_ref="101A",
+        via="I 70",
+        destinations=("I 70 East", "Parsons Avenue"),
+        source="x",
+    )
     assert ix.spoken_phrase == "exit 101A for I-70 toward Parsons Avenue"
 
 
 def test_spoken_phrase_via_only_when_all_destinations_redundant():
-    ix = Interchange(at_mi=5.0, exit_ref="101A", via="I 70",
-                     destinations=("I 70 East",), source="x")
+    ix = Interchange(
+        at_mi=5.0, exit_ref="101A", via="I 70", destinations=("I 70 East",), source="x"
+    )
     assert ix.spoken_phrase == "exit 101A for I-70"
 
 
 def test_spoken_phrase_keeps_unrelated_destinations():
-    ix = Interchange(at_mi=5.0, exit_ref="7", via="US 1 North",
-                     destinations=("Trenton", "New York"), source="x")
+    ix = Interchange(
+        at_mi=5.0, exit_ref="7", via="US 1 North", destinations=("Trenton", "New York"), source="x"
+    )
     assert ix.spoken_phrase == "exit 7 for US-1 North toward Trenton and New York"
 
 
 # --- metric navigation distances --------------------------------------------
 
+
 def test_metric_navigation_cues_use_kilometers(world):
     route = world.route_options("Chicago", "Indianapolis")[0]
-    metric = Trip(route, TruckState(), WeatherSystem("great_lakes", seed=1),
-                  seed=2, imperial=False)
+    metric = Trip(route, TruckState(), WeatherSystem("great_lakes", seed=1), seed=2, imperial=False)
     blob = " ".join(f"{c.text} {c.near_text}" for c in metric.navigation_cues)
     assert "kilometers" in blob
     assert "mile" not in blob
 
     # The default (imperial) trip keeps miles, so existing drives are unchanged.
-    imperial = Trip(route, TruckState(), WeatherSystem("great_lakes", seed=1),
-                    seed=2)
+    imperial = Trip(route, TruckState(), WeatherSystem("great_lakes", seed=1), seed=2)
     blob_i = " ".join(f"{c.text} {c.near_text}" for c in imperial.navigation_cues)
     assert "miles" in blob_i
 
@@ -347,8 +405,7 @@ def test_metric_drive_speaks_distances_in_kilometers(world):
     truck = TruckState()
     truck.transmission.automatic = True
     truck.start_engine()
-    trip = Trip(route, truck, WeatherSystem("great_lakes", seed=1),
-                seed=2, imperial=False)
+    trip = Trip(route, truck, WeatherSystem("great_lakes", seed=1), seed=2, imperial=False)
     truck.throttle = 0.85
     nav: list[str] = []
     for _ in range(60 * 60 * 12):
@@ -384,14 +441,12 @@ def test_metric_zone_warning_uses_metric_speed_limit(world):
     from freight_fate.sim.trip import TripEventKind, Zone
 
     route = world.route_options("Chicago", "Indianapolis")[0]
-    trip = Trip(route, TruckState(), WeatherSystem("great_lakes", seed=1),
-                seed=2, imperial=False)
+    trip = Trip(route, TruckState(), WeatherSystem("great_lakes", seed=1), seed=2, imperial=False)
     trip.zones = [Zone(5.0, 10.0, 45.0, "construction")]
     trip._announced_zone_warnings.clear()
     trip.position_mi = 4.0  # within the 2-mile warning lookahead of the zone
 
-    msgs = [ev.message for ev in trip.update(0.0)
-            if ev.kind == TripEventKind.GPS_CUE]
+    msgs = [ev.message for ev in trip.update(0.0) if ev.kind == TripEventKind.GPS_CUE]
     blob = " ".join(msgs)
     assert "speed limit 89, then 72" in blob  # 55/45 mph rendered as km/h
     assert "speed limit 55, then 45" not in blob

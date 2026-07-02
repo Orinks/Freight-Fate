@@ -40,14 +40,14 @@ class PlaytestResult:
     def assert_no_known_destination_exit_regressions(self) -> None:
         lower_lines = [line.lower() for line in self.transcript]
         destination_exit_lines = [
-            line for line in lower_lines
+            line
+            for line in lower_lines
             if "destination exit" in line or "exit for the destination" in line
         ]
         assert len(destination_exit_lines) <= 1, self.transcript_text
-        assert not any(
-            re.search(r"\b21 miles remaining\b", line)
-            for line in lower_lines
-        ), self.transcript_text
+        assert not any(re.search(r"\b21 miles remaining\b", line) for line in lower_lines), (
+            self.transcript_text
+        )
         assert self.remaining_miles == 0.0
 
 
@@ -79,12 +79,13 @@ class PlaytestHarness:
         self.result.transcript.append(f"[event] {text}")
 
     def start_delivery(
-            self,
-            *,
-            profile_name: str = "Playtest",
-            job_rank: int = 0,
-            route_rank: int = 0,
-            configure_profile=None) -> PlaytestResult:
+        self,
+        *,
+        profile_name: str = "Playtest",
+        job_rank: int = 0,
+        route_rank: int = 0,
+        configure_profile=None,
+    ) -> PlaytestResult:
         from freight_fate.states.city import (
             CityMenuState,
             JobBoardState,
@@ -151,6 +152,48 @@ class PlaytestHarness:
         self._neutralize_random_trip_friction()
         return self.result
 
+    def start_route(
+        self,
+        origin: str,
+        destination: str,
+        *,
+        profile_name: str = "Route Playtest",
+        cargo: str = "general",
+        tons: int = 18,
+    ) -> PlaytestResult:
+        """Set up a delivery on a specific supported route, skipping the menus.
+
+        Useful for exercising one corridor's routing/data (e.g. a leg whose
+        geometry changed) rather than whatever job the dispatch board offers.
+        Pair with :meth:`drive_delivery_to_completion`.
+        """
+        from freight_fate.models.jobs import CARGO_CATALOG, Job
+        from freight_fate.models.profile import Profile
+        from freight_fate.states.driving import DrivingState
+
+        assert self.app is not None
+        self.app.ctx.profile = Profile(name=profile_name, current_city=origin)
+        route = self.app.ctx.world.route_from_cities([origin, destination])
+        if route is None:
+            raise SystemExit(f"No supported route {origin} -> {destination}")
+        miles = round(route.miles)
+        job = Job(
+            CARGO_CATALOG[cargo],
+            tons,
+            origin,
+            f"{origin} Terminal",
+            destination,
+            miles,
+            max(500, miles * 10),
+            max(2.0, miles / 25.0),
+            destination_location=f"{destination} Terminal",
+        )
+        driving = DrivingState(self.app.ctx, job, route, phase="delivery")
+        self.app.push_state(driving)
+        self.driving = driving
+        self._neutralize_random_trip_friction()
+        return self.result
+
     def drive_delivery_to_completion(self) -> PlaytestResult:
         from freight_fate.states.driving import ArrivalState, FacilityArrivalState
 
@@ -206,12 +249,13 @@ class PlaytestHarness:
             self._drive_one_frame()
 
     def add_npc_traffic_ahead(
-            self,
-            *,
-            behavior: str = "merging_vehicle",
-            gap_mi: float = 0.8,
-            speed_mph: float = 42.0,
-            relative_lane: int = 1) -> NPCVehicle:
+        self,
+        *,
+        behavior: str = "merging_vehicle",
+        gap_mi: float = 0.8,
+        speed_mph: float = 42.0,
+        relative_lane: int = 1,
+    ) -> NPCVehicle:
         assert self.driving is not None
         vehicle = NPCVehicle(
             "harness:npc",
@@ -225,12 +269,13 @@ class PlaytestHarness:
         return vehicle
 
     def add_traffic_pressure_ahead(
-            self,
-            *,
-            gap_mi: float = 2.0,
-            kind: str = "exit",
-            direction: str = "right",
-            reason: str = "exit traffic for harness ramp") -> TrafficPressure:
+        self,
+        *,
+        gap_mi: float = 2.0,
+        kind: str = "exit",
+        direction: str = "right",
+        reason: str = "exit traffic for harness ramp",
+    ) -> TrafficPressure:
         assert self.driving is not None
         start = self.driving.trip.position_mi + gap_mi
         pressure = TrafficPressure(
@@ -254,11 +299,7 @@ class PlaytestHarness:
     def _choose_unlocked_job(self, rank: int) -> None:
         assert self.app is not None
         board = self.app.state
-        unlocked = [
-            (i, job)
-            for i, job in enumerate(board.jobs)
-            if not board._locked_reason(job)
-        ]
+        unlocked = [(i, job) for i, job in enumerate(board.jobs) if not board._locked_reason(job)]
         assert unlocked
         unlocked.sort(key=lambda item: item[1].distance_mi)
         target_index, _job = unlocked[rank % len(unlocked)]
@@ -271,8 +312,8 @@ class PlaytestHarness:
         board = self.app.state
         for _ in range(rank):
             decline_index = next(
-                (i for i, item in enumerate(board.items)
-                 if item.text.startswith("Decline")), None)
+                (i for i, item in enumerate(board.items) if item.text.startswith("Decline")), None
+            )
             if decline_index is None:
                 break  # out of declines or no alternative freight
             while board.index != decline_index:

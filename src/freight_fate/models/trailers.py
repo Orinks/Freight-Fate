@@ -94,11 +94,7 @@ def trailer_keys_for_cargo(cargo_key: str) -> tuple[str, ...]:
 
 
 def trailer_labels(keys: Iterable[str]) -> str:
-    labels = [
-        TRAILER_CATALOG[key].label
-        for key in keys
-        if key in TRAILER_CATALOG
-    ]
+    labels = [TRAILER_CATALOG[key].label for key in keys if key in TRAILER_CATALOG]
     if not labels:
         return "carrier trailer"
     if len(labels) == 1:
@@ -108,11 +104,7 @@ def trailer_labels(keys: Iterable[str]) -> str:
 
 def equipment_text_for_cargo(cargo_key: str) -> str:
     keys = trailer_keys_for_cargo(cargo_key)
-    texts = [
-        TRAILER_CATALOG[key].equipment_text
-        for key in keys
-        if key in TRAILER_CATALOG
-    ]
+    texts = [TRAILER_CATALOG[key].equipment_text for key in keys if key in TRAILER_CATALOG]
     if not texts:
         return "carrier trailer"
     if len(texts) == 1:
@@ -139,11 +131,7 @@ def required_program_text(cargo_key: str) -> str:
 
 def trailer_program_charge_per_mile(cargo_key: str) -> float:
     keys = trailer_keys_for_cargo(cargo_key)
-    charges = [
-        TRAILER_CATALOG[key].per_mile_reserve
-        for key in keys
-        if key in TRAILER_CATALOG
-    ]
+    charges = [TRAILER_CATALOG[key].per_mile_reserve for key in keys if key in TRAILER_CATALOG]
     return max(charges) if charges else TRAILER_CATALOG["dry_van"].per_mile_reserve
 
 

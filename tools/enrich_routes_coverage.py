@@ -42,14 +42,8 @@ def coverage_report(data: dict[str, Any]) -> dict[str, Any]:
         from_state = cities[leg["from"]]["state"]
         to_state = cities[leg["to"]]["state"]
         expected_crossing = from_state != to_state
-        curated_stops = [
-            stop for stop in stops
-            if not _stop_is_placeholder(stop)
-        ]
-        placeholder_stops = [
-            stop for stop in stops
-            if _stop_is_placeholder(stop)
-        ]
+        curated_stops = [stop for stop in stops if not _stop_is_placeholder(stop)]
+        placeholder_stops = [stop for stop in stops if _stop_is_placeholder(stop)]
         min_pois = _minimum_curated_pois(float(leg["miles"]))
         min_fuel_pois = _minimum_fuel_capable_pois(float(leg["miles"]))
         curated_pois_complete = bool(curated_stops) and all(
@@ -60,9 +54,9 @@ def coverage_report(data: dict[str, Any]) -> dict[str, Any]:
             for stop in curated_stops
         )
         sufficient_density = len(curated_stops) >= min_pois
-        sufficient_fuel_support = sum(
-            1 for stop in curated_stops if "fuel" in _stop_actions(stop)
-        ) >= min_fuel_pois
+        sufficient_fuel_support = (
+            sum(1 for stop in curated_stops if "fuel" in _stop_actions(stop)) >= min_fuel_pois
+        )
         present = {
             "route_points": len(corridor.get("route_points", [])) >= 2,
             "state_crossings": bool(corridor.get("state_crossings", [])),
@@ -76,10 +70,7 @@ def coverage_report(data: dict[str, Any]) -> dict[str, Any]:
             "poi_density": sufficient_density,
             "fuel_poi_support": sufficient_fuel_support,
         }
-        missing = [
-            field for field in REQUIRED_METADATA_FIELDS
-            if not present[field]
-        ]
+        missing = [field for field in REQUIRED_METADATA_FIELDS if not present[field]]
         if expected_crossing and not present["state_crossings"]:
             missing.append("state_crossings")
         playable = not missing
@@ -91,30 +82,33 @@ def coverage_report(data: dict[str, Any]) -> dict[str, Any]:
         totals["toll_legs"] += int(bool(toll_events))
         if corridor.get("tollway_detected") and not toll_events:
             totals["toll_review_pending"] += 1
-            toll_review.append({
-                "from": leg["from"],
-                "to": leg["to"],
-                "highway": leg["highway"],
-                "note": "ORS flags a tollway but no toll_events are curated.",
-            })
-        fuel_capable = sum(
-            1 for stop in curated_stops if "fuel" in _stop_actions(stop))
+            toll_review.append(
+                {
+                    "from": leg["from"],
+                    "to": leg["to"],
+                    "highway": leg["highway"],
+                    "note": "ORS flags a tollway but no toll_events are curated.",
+                }
+            )
+        fuel_capable = sum(1 for stop in curated_stops if "fuel" in _stop_actions(stop))
         if float(leg["miles"]) >= LONG_LEG_POI_ADVISORY_MI and fuel_capable == 0:
             totals["poi_review_pending"] += 1
-            poi_review.append({
-                "from": leg["from"],
-                "to": leg["to"],
-                "highway": leg["highway"],
-                "miles": leg["miles"],
-                "note": ("Long leg with no fuel-capable curated stop; leans on "
-                         "the roadside-fuel fallback. Curation optional."),
-            })
+            poi_review.append(
+                {
+                    "from": leg["from"],
+                    "to": leg["to"],
+                    "highway": leg["highway"],
+                    "miles": leg["miles"],
+                    "note": (
+                        "Long leg with no fuel-capable curated stop; leans on "
+                        "the roadside-fuel fallback. Curation optional."
+                    ),
+                }
+            )
         totals["curated_pois"] += len(curated_stops)
         totals["placeholder_pois"] += len(placeholder_stops)
         totals["legs_with_curated_pois"] += int(bool(curated_stops))
-        totals["legs_with_placeholder_only"] += int(
-            bool(placeholder_stops) and not curated_stops
-        )
+        totals["legs_with_placeholder_only"] += int(bool(placeholder_stops) and not curated_stops)
         totals["legs_with_sufficient_poi_density"] += int(sufficient_density)
         totals["legs_with_fuel_support"] += int(sufficient_fuel_support)
         totals["state_crossings_expected"] += int(expected_crossing)
@@ -122,39 +116,42 @@ def coverage_report(data: dict[str, Any]) -> dict[str, Any]:
             expected_crossing and present["state_crossings"]
         )
         totals["playable"] += int(playable)
-        leg_reports.append({
-            "from": leg["from"],
-            "to": leg["to"],
-            "highway": leg["highway"],
-            "miles": leg["miles"],
-            "endpoint_state_change": expected_crossing,
-            "playable": playable,
-            "present": present,
-            "missing": missing,
-            "unsupported_reasons": _unsupported_reasons(
-                missing,
-                curated_count=len(curated_stops),
-                placeholder_count=len(placeholder_stops),
-                minimum_curated_pois=min_pois,
-                fuel_capable_count=sum(
-                    1 for stop in curated_stops if "fuel" in _stop_actions(stop)
+        leg_reports.append(
+            {
+                "from": leg["from"],
+                "to": leg["to"],
+                "highway": leg["highway"],
+                "miles": leg["miles"],
+                "endpoint_state_change": expected_crossing,
+                "playable": playable,
+                "present": present,
+                "missing": missing,
+                "unsupported_reasons": _unsupported_reasons(
+                    missing,
+                    curated_count=len(curated_stops),
+                    placeholder_count=len(placeholder_stops),
+                    minimum_curated_pois=min_pois,
+                    fuel_capable_count=sum(
+                        1 for stop in curated_stops if "fuel" in _stop_actions(stop)
+                    ),
+                    minimum_fuel_capable_pois=min_fuel_pois,
                 ),
-                minimum_fuel_capable_pois=min_fuel_pois,
-            ),
-            "poi_count": len(stops),
-            "curated_poi_count": len(curated_stops),
-            "placeholder_poi_count": len(placeholder_stops),
-            "minimum_curated_pois": min_pois,
-            "minimum_fuel_capable_pois": min_fuel_pois,
-            "poi_actions": sorted({
-                action for stop in curated_stops for action in _stop_actions(stop)
-            }),
-            "toll_event_count": len(toll_events),
-        })
+                "poi_count": len(stops),
+                "curated_poi_count": len(curated_stops),
+                "placeholder_poi_count": len(placeholder_stops),
+                "minimum_curated_pois": min_pois,
+                "minimum_fuel_capable_pois": min_fuel_pois,
+                "poi_actions": sorted(
+                    {action for stop in curated_stops for action in _stop_actions(stop)}
+                ),
+                "toll_event_count": len(toll_events),
+            }
+        )
     percentages = {
         key: round(value / totals["legs"] * 100.0, 1)
         for key, value in totals.items()
-        if key not in {
+        if key
+        not in {
             "legs",
             "state_crossings_expected",
             "toll_events",
@@ -164,8 +161,7 @@ def coverage_report(data: dict[str, Any]) -> dict[str, Any]:
     }
     if totals["state_crossings_expected"]:
         percentages["state_crossings_expected_present"] = round(
-            totals["state_crossings_expected_present"]
-            / totals["state_crossings_expected"] * 100.0,
+            totals["state_crossings_expected_present"] / totals["state_crossings_expected"] * 100.0,
             1,
         )
     return {
@@ -201,9 +197,7 @@ def coverage_report(data: dict[str, Any]) -> dict[str, Any]:
         "totals": totals,
         "percentages": percentages,
         "legs": leg_reports,
-        "missing_playable": [
-            leg for leg in leg_reports if not leg["playable"]
-        ],
+        "missing_playable": [leg for leg in leg_reports if not leg["playable"]],
     }
 
 
@@ -213,12 +207,9 @@ def format_coverage_report(report: dict[str, Any]) -> str:
     lines = [
         "Freight Fate route metadata coverage",
         f"Total legs: {totals['legs']}",
-        f"Playable metadata-backed legs: {totals['playable']} "
-        f"({pct.get('playable', 0.0):.1f}%)",
-        f"Route geometry: {totals['route_points']} "
-        f"({pct.get('route_points', 0.0):.1f}%)",
-        f"Elevation/grade: {totals['grade_segments']} "
-        f"({pct.get('grade_segments', 0.0):.1f}%)",
+        f"Playable metadata-backed legs: {totals['playable']} ({pct.get('playable', 0.0):.1f}%)",
+        f"Route geometry: {totals['route_points']} ({pct.get('route_points', 0.0):.1f}%)",
+        f"Elevation/grade: {totals['grade_segments']} ({pct.get('grade_segments', 0.0):.1f}%)",
         f"POIs with actions: {totals['pois_with_actions']} "
         f"({pct.get('pois_with_actions', 0.0):.1f}%)",
         f"Curated POIs: {totals['curated_pois']} on "
@@ -340,16 +331,19 @@ def _priority_status(leg_reports: list[dict[str, Any]]) -> list[dict[str, Any]]:
     for priority in HIGH_PRIORITY_REMAINING_CORRIDORS:
         leg = next(
             (
-                item for item in leg_reports
+                item
+                for item in leg_reports
                 if item["from"] == priority["from"] and item["to"] == priority["to"]
             ),
             None,
         )
-        out.append({
-            **priority,
-            "playable": bool(leg and leg["playable"]),
-            "missing": [] if leg is None else leg["missing"],
-        })
+        out.append(
+            {
+                **priority,
+                "playable": bool(leg and leg["playable"]),
+                "missing": [] if leg is None else leg["missing"],
+            }
+        )
     return out
 
 
@@ -358,12 +352,14 @@ def _osrm_smoke(data: dict[str, Any], from_city: str, to_city: str) -> dict[str,
     start = cities[from_city]
     end = cities[to_city]
     coords = f"{start['lon']},{start['lat']};{end['lon']},{end['lat']}"
-    params = urllib.parse.urlencode({
-        "overview": "simplified",
-        "geometries": "geojson",
-        "alternatives": "false",
-        "steps": "false",
-    })
+    params = urllib.parse.urlencode(
+        {
+            "overview": "simplified",
+            "geometries": "geojson",
+            "alternatives": "false",
+            "steps": "false",
+        }
+    )
     url = OSRM_ROUTE_URL.format(coords=coords) + "?" + params
     req = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
     with urllib.request.urlopen(req, timeout=OSRM_TIMEOUT_S) as resp:
@@ -374,7 +370,6 @@ def _osrm_smoke(data: dict[str, Any], from_city: str, to_city: str) -> dict[str,
         "miles": float(route["distance"]) / 1609.344,
         "points": len(route.get("geometry", {}).get("coordinates", [])),
     }
-
 
 
 __all__ = [name for name in globals() if not name.startswith("__")]

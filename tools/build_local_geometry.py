@@ -69,16 +69,16 @@ class Target:
     @property
     def source_backed_city_service(self) -> bool:
         return (
-            self.target_type == "city_service"
-            and not self.estimated
-            and not self.fallback_reason
+            self.target_type == "city_service" and not self.estimated and not self.fallback_reason
         )
 
 
 @dataclass(slots=True)
 class RouteGraph:
     nodes: dict[int, tuple[float, float]] = field(default_factory=dict)
-    edges: dict[int, list[tuple[int, float, str]]] = field(default_factory=lambda: defaultdict(list))
+    edges: dict[int, list[tuple[int, float, str]]] = field(
+        default_factory=lambda: defaultdict(list)
+    )
 
     def add_edge(self, a: int, b: int, road: str, miles: float) -> None:
         self.edges[a].append((b, miles, road))
@@ -104,7 +104,8 @@ def build_local_geometry(cache_dir: Path) -> dict[str, Any]:
         extract = state_extract_path(cache_dir, state)
         sources.append(source_record(state, extract))
         routable = [
-            target for target in state_targets
+            target
+            for target in state_targets
             if target.source_backed_city_service
             and city_target_distance(target) <= MAX_CITY_SERVICE_ROUTE_MI
         ]
@@ -150,46 +151,50 @@ def collect_targets() -> list[Target]:
             target_id = f"city_service:{slug(city_name)}:{entry['key']}"
             approach = approaches[target_id]
             fallback = bool(entry.get("fallback")) or bool(approach.get("fallback"))
-            targets.append(Target(
-                target_id=target_id,
-                target_type="city_service",
-                city=city_name,
-                state=city.state,
-                name=str(entry["name"]),
-                lat=float(entry["lat"]),
-                lon=float(entry["lon"]),
-                start_lat=city.lat,
-                start_lon=city.lon,
-                role=str(entry["key"]),
-                estimated=fallback,
-                fallback_reason=str(entry.get("fallback_reason", "")),
-                approach_road=str(approach.get("road", "")),
-                approach_miles=float(approach.get("approach_miles", entry["approach_miles"])),
-                source_note=str(entry.get("source_note", "")),
-            ))
+            targets.append(
+                Target(
+                    target_id=target_id,
+                    target_type="city_service",
+                    city=city_name,
+                    state=city.state,
+                    name=str(entry["name"]),
+                    lat=float(entry["lat"]),
+                    lon=float(entry["lon"]),
+                    start_lat=city.lat,
+                    start_lon=city.lon,
+                    role=str(entry["key"]),
+                    estimated=fallback,
+                    fallback_reason=str(entry.get("fallback_reason", "")),
+                    approach_road=str(approach.get("road", "")),
+                    approach_miles=float(approach.get("approach_miles", entry["approach_miles"])),
+                    source_note=str(entry.get("source_note", "")),
+                )
+            )
         for location in city.locations:
             target_id = f"facility:{location.id}"
             approach = approaches[target_id]
-            targets.append(Target(
-                target_id=target_id,
-                target_type="facility",
-                city=city_name,
-                state=city.state,
-                name=location.name,
-                lat=float(approach.get("lat", location.lat or city.lat)),
-                lon=float(approach.get("lon", location.lon or city.lon)),
-                start_lat=city.lat,
-                start_lon=city.lon,
-                role=location.type,
-                estimated=True,
-                fallback_reason=(
-                    "Facility target uses representative freight-market coordinates, "
-                    "so turn-level gate, yard, or dock routing is not claimed yet."
-                ),
-                approach_road=str(approach.get("road", "")),
-                approach_miles=float(approach.get("approach_miles", 0.0)),
-                source_note=location.source_note,
-            ))
+            targets.append(
+                Target(
+                    target_id=target_id,
+                    target_type="facility",
+                    city=city_name,
+                    state=city.state,
+                    name=location.name,
+                    lat=float(approach.get("lat", location.lat or city.lat)),
+                    lon=float(approach.get("lon", location.lon or city.lon)),
+                    start_lat=city.lat,
+                    start_lon=city.lon,
+                    role=location.type,
+                    estimated=True,
+                    fallback_reason=(
+                        "Facility target uses representative freight-market coordinates, "
+                        "so turn-level gate, yard, or dock routing is not claimed yet."
+                    ),
+                    approach_road=str(approach.get("road", "")),
+                    approach_miles=float(approach.get("approach_miles", 0.0)),
+                    source_note=location.source_note,
+                )
+            )
     return targets
 
 
@@ -296,12 +301,14 @@ def collapse_segments(edges: list[tuple[str, float]]) -> list[dict[str, Any]]:
         miles = round(max(segment["miles"], 0.05), 2)
         road = segment["road"]
         cue = f"Start on {road}." if i == 0 else f"Turn onto {road}."
-        out.append({
-            "road": road,
-            "miles": miles,
-            "cue": cue,
-            "speed_mph": 25.0 if road != "unnamed public road" else 15.0,
-        })
+        out.append(
+            {
+                "road": road,
+                "miles": miles,
+                "cue": cue,
+                "speed_mph": 25.0 if road != "unnamed public road" else 15.0,
+            }
+        )
     return out[:8]
 
 
@@ -318,12 +325,18 @@ def geometry_record(target: Target, geometry: GeometryPath | None, extract: Path
             reason = "Target is beyond the bounded local route graph distance for this pass."
         else:
             reason = "No connected public-road path was found between the city context and target."
-    segments = list(geometry.segments) if geometry else [{
-        "road": target.approach_road or "local approach road",
-        "miles": round(max(target.approach_miles, 0.4), 2),
-        "cue": f"Use {target.approach_road or 'the local approach road'} for the local approach.",
-        "speed_mph": 25.0,
-    }]
+    segments = (
+        list(geometry.segments)
+        if geometry
+        else [
+            {
+                "road": target.approach_road or "local approach road",
+                "miles": round(max(target.approach_miles, 0.4), 2),
+                "cue": f"Use {target.approach_road or 'the local approach road'} for the local approach.",
+                "speed_mph": 25.0,
+            }
+        ]
+    )
     return {
         "target_type": target.target_type,
         "city": target.city,
@@ -338,7 +351,8 @@ def geometry_record(target: Target, geometry: GeometryPath | None, extract: Path
         "segments": clean_segments(segments),
         "final_hint": (
             "Final driveway, yard, gate, or dock path is not source-backed yet."
-            if not turn_level else "Route reaches the sourced service vicinity; final driveway is not source-backed."
+            if not turn_level
+            else "Route reaches the sourced service vicinity; final driveway is not source-backed."
         ),
         "source_note": target.source_note,
     }
@@ -349,24 +363,29 @@ def clean_segments(segments: list[dict[str, Any]]) -> list[dict[str, Any]]:
     for segment in segments:
         road = clean_text(str(segment["road"])) or "unnamed public road"
         cue = clean_text(str(segment["cue"]))
-        out.append({
-            "road": road,
-            "miles": round(float(segment["miles"]), 2),
-            "cue": cue,
-            "speed_mph": float(segment.get("speed_mph", 25.0)),
-        })
+        out.append(
+            {
+                "road": road,
+                "miles": round(float(segment["miles"]), 2),
+                "cue": cue,
+                "speed_mph": float(segment.get("speed_mph", 25.0)),
+            }
+        )
     return out
 
 
 def coverage_summary(geometries: dict[str, dict[str, Any]]) -> dict[str, Any]:
     by_type: dict[str, dict[str, int]] = {}
     for record in geometries.values():
-        item = by_type.setdefault(record["target_type"], {
-            "total": 0,
-            "turn_level": 0,
-            "fallback": 0,
-            "estimated": 0,
-        })
+        item = by_type.setdefault(
+            record["target_type"],
+            {
+                "total": 0,
+                "turn_level": 0,
+                "fallback": 0,
+                "estimated": 0,
+            },
+        )
         item["total"] += 1
         if record["turn_level"]:
             item["turn_level"] += 1
@@ -513,8 +532,7 @@ def haversine_mi(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
     p1, p2 = math.radians(lat1), math.radians(lat2)
     dphi = math.radians(lat2 - lat1)
     dlmb = math.radians(lon2 - lon1)
-    h = (math.sin(dphi / 2) ** 2
-         + math.cos(p1) * math.cos(p2) * math.sin(dlmb / 2) ** 2)
+    h = math.sin(dphi / 2) ** 2 + math.cos(p1) * math.cos(p2) * math.sin(dlmb / 2) ** 2
     return 2 * EARTH_RADIUS_MI * math.asin(math.sqrt(h))
 
 
@@ -528,8 +546,9 @@ def main() -> int:
     payload = build_local_geometry(args.cache_dir)
     print(json.dumps(payload["coverage"], indent=2, sort_keys=True))
     if args.write:
-        args.output.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n",
-                               encoding="utf-8")
+        args.output.write_text(
+            json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+        )
         print(f"Wrote {args.output}")
     return 0
 

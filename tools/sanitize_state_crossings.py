@@ -81,16 +81,16 @@ def sanitize(data: dict[str, Any]) -> list[dict[str, Any]]:
             corridor["state_crossings"] = new_crossings
         else:
             corridor.pop("state_crossings", None)
-        corridor["state_miles"] = state_miles_from_sequence(
-            cleaned, leg_miles, endpoint_states
+        corridor["state_miles"] = state_miles_from_sequence(cleaned, leg_miles, endpoint_states)
+        changes.append(
+            {
+                "leg": f"{leg['from']} -> {leg['to']}",
+                "highway": leg["highway"],
+                "dropped": dropped,
+                "before": [c["place"] for c in baked],
+                "after": [c["place"] for c in new_crossings],
+            }
         )
-        changes.append({
-            "leg": f"{leg['from']} -> {leg['to']}",
-            "highway": leg["highway"],
-            "dropped": dropped,
-            "before": [c["place"] for c in baked],
-            "after": [c["place"] for c in new_crossings],
-        })
     return changes
 
 

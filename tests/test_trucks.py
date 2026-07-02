@@ -25,6 +25,7 @@ def make_auto_truck(specs: TruckSpecs) -> TruckState:
 
 # -- spec building ---------------------------------------------------------------
 
+
 def test_no_upgrades_returns_base_specs():
     assert build_truck_specs("rig", {}) == TruckSpecs()
 
@@ -58,8 +59,9 @@ def test_reinforced_brakes_raise_fade_threshold():
 
 
 def test_upgrades_stack():
-    s = build_truck_specs("rig", {"engine_tune": 2, "aero_kit": 1,
-                                  "long_range_tank": 1, "reinforced_brakes": 1})
+    s = build_truck_specs(
+        "rig", {"engine_tune": 2, "aero_kit": 1, "long_range_tank": 1, "reinforced_brakes": 1}
+    )
     base = TruckSpecs()
     assert s.max_torque_nm > base.max_torque_nm
     assert s.drag_coefficient < base.drag_coefficient
@@ -76,12 +78,45 @@ def test_heavy_hauler_tradeoffs():
     assert hauler.fuel_burn_factor > rig.fuel_burn_factor
 
 
+def test_truck_descriptions_explain_tradeoffs():
+    rig = TRUCK_CATALOG["rig"].description
+    hauler = TRUCK_CATALOG["heavy_hauler"].description
+    assert "fuel economy" in rig
+    assert "heavy loads" in hauler
+    assert "thirstier engine" in hauler
+
+
 def test_heavy_hauler_upgrades_apply_on_top():
     s = build_truck_specs("heavy_hauler", {"long_range_tank": 1})
     assert s.fuel_tank_gal == TRUCK_CATALOG["heavy_hauler"].specs.fuel_tank_gal + 50.0
 
 
+def test_garage_says_upgrades_are_fleet_wide():
+    from freight_fate.app import App
+    from freight_fate.models.profile import Profile
+    from freight_fate.states.city import TruckShopState, UpgradeShopState
+
+    app = App()
+    try:
+        from freight_fate.models.business import LEASED_OWNER_OPERATOR
+
+        app.ctx.profile = Profile(name="Fleet Copy")
+        app.ctx.profile.business_status = LEASED_OWNER_OPERATOR
+        app.ctx.profile.owned_trucks = ["rig"]
+        upgrades = UpgradeShopState(app.ctx)
+        trucks = TruckShopState(app.ctx)
+
+        assert "apply to every tractor" in upgrades.intro_help
+        assert "fleet upgrades apply" in trucks.intro_help.lower()
+        trucks.enter()
+        assert "thousand newton meters torque" in trucks.current_text()
+        assert "gallon tank" in trucks.current_text()
+    finally:
+        app.shutdown()
+
+
 # -- physics effects ---------------------------------------------------------------
+
 
 def test_engine_tune_accelerates_faster():
     stock = make_auto_truck(build_truck_specs("rig", {}))
@@ -124,6 +159,7 @@ def test_heavy_hauler_burns_more_fuel():
 
 # -- profile persistence ------------------------------------------------------------
 
+
 def test_profile_persists_truck_and_upgrades():
     p = Profile(name="Garage Test")
     p.business_status = LEASED_OWNER_OPERATOR
@@ -153,6 +189,8 @@ def test_old_save_without_truck_fields_loads_with_defaults():
         "market",
         "trailer_programs",
         "owned_trailers",
+        "tire_wear_pct",
+        "road_grime_pct",
     ):
         data.pop(legacy_missing, None)
     data.pop("_signature", None)
@@ -165,6 +203,8 @@ def test_old_save_without_truck_fields_loads_with_defaults():
     assert loaded.upgrades == {}
     assert loaded.active_trailer_programs() == ()
     assert loaded.visible_owned_trailers() == ()
+    assert loaded.tire_wear_pct == 0.0
+    assert loaded.road_grime_pct == 0.0
     assert loaded.market.multipliers  # fresh market seeded on load
 
 

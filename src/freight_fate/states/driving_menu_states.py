@@ -5,6 +5,16 @@ from .base import TimedMessageState
 from .driving_core import *
 from .driving_rest_states import ShoulderSleepConfirmationState
 
+DELIVERY_SETTLEMENT_MAX_AVERAGE_MPH = 55.0
+TIRE_WEAR_PER_MILE = 0.003
+ROAD_GRIME_PER_MILE = 0.004
+
+
+def _settlement_hours(driving: DrivingState) -> float:
+    driven_hours = driving.trip.game_minutes / 60.0
+    minimum_hours = driving.job.distance_mi / DELIVERY_SETTLEMENT_MAX_AVERAGE_MPH
+    return max(driven_hours, minimum_hours)
+
 
 class DrivingStatusState(MenuState):
     """Live driving status, grouped into screens you open one at a time.
@@ -33,13 +43,15 @@ class DrivingStatusState(MenuState):
 
     def build_items(self) -> list[MenuItem]:
         items = [
-            MenuItem(label, lambda key=key: self._open(key),
-                     help=f"Open the {label.lower()} status screen.")
+            MenuItem(
+                label,
+                lambda key=key: self._open(key),
+                help=f"Open the {label.lower()} status screen.",
+            )
             for label, key in self.SCREENS
         ]
         items.append(
-            MenuItem("Back to driving", self.go_back,
-                     help="Close status and resume driving.")
+            MenuItem("Back to driving", self.go_back, help="Close status and resume driving.")
         )
         return items
 
@@ -47,13 +59,12 @@ class DrivingStatusState(MenuState):
         if screen == "apps":
             self.ctx.push_state(DriverAppsState(self.ctx, self.driving))
             return
-        self.ctx.push_state(
-            DrivingStatusScreenState(self.ctx, self.driving, screen))
+        self.ctx.push_state(DrivingStatusScreenState(self.ctx, self.driving, screen))
 
     def go_back(self) -> None:
         self.ctx.audio.play("ui/menu_back")
         self.ctx.pop_state()
-        self.ctx.say("Back to driving.", interrupt=True)
+        self.ctx.say("Back to driving.", interrupt=False)
 
 
 class DrivingStatusScreenState(MenuState):
@@ -88,8 +99,7 @@ class DrivingStatusScreenState(MenuState):
             )
             for line in self._lines()
         ]
-        items.append(MenuItem("Back", self.go_back,
-                              help="Back to the status screens."))
+        items.append(MenuItem("Back", self.go_back, help="Back to the status screens."))
         return items
 
     def _lines(self) -> list[str]:
@@ -114,14 +124,14 @@ class DrivingStatusScreenState(MenuState):
         )
         load_line = (
             "Load: no cargo, local city service drive"
-            if d.phase == DRIVE_PHASE_CITY_SERVICE else
-            f"Load: {d.job.weight_tons:.0f} tons of {d.job.cargo.label}, "
+            if d.phase == DRIVE_PHASE_CITY_SERVICE
+            else f"Load: {d.job.weight_tons:.0f} tons of {d.job.cargo.label}, "
             f"gross {d.truck.gross_mass_kg / KG_PER_TON:.0f} tons"
         )
         time_line = (
             f"Time: {clock_text(d.trip.current_hour)}, {hours_used:.1f} hours used"
-            if d.phase == DRIVE_PHASE_CITY_SERVICE else
-            f"Time: {clock_text(d.trip.current_hour)}, {deadline_text}"
+            if d.phase == DRIVE_PHASE_CITY_SERVICE
+            else f"Time: {clock_text(d.trip.current_hour)}, {deadline_text}"
         )
         return [
             f"Driver: {profile.name}",
@@ -146,11 +156,7 @@ class DrivingStatusScreenState(MenuState):
             f"{settings.distance_text(d.trip.remaining_miles)} remaining",
             f"Guidance: {d.trip.next_navigation_context(settings.imperial_units)}",
         ]
-        upcoming = [
-            stop
-            for stop in d.trip.stops
-            if stop.at_mi >= d.trip.position_mi - 0.05
-        ][:5]
+        upcoming = [stop for stop in d.trip.stops if stop.at_mi >= d.trip.position_mi - 0.05][:5]
         if upcoming:
             for stop in upcoming:
                 ahead = max(0.0, stop.at_mi - d.trip.position_mi)
@@ -161,15 +167,14 @@ class DrivingStatusScreenState(MenuState):
         else:
             lines.append("Stops: no more listed route stops before destination.")
         next_cues = [
-            cue for cue in d.trip.navigation_cues
+            cue
+            for cue in d.trip.navigation_cues
             if cue.at_mi > d.trip.position_mi + 0.05 and cue.kind != "rest_stop"
         ][:4]
         for cue in next_cues:
             ahead = max(0.0, cue.at_mi - d.trip.position_mi)
-            speed = (f" at {settings.speed_text(cue.speed_mph)}"
-                     if cue.speed_mph is not None else "")
-            lines.append(
-                f"Map point in {settings.distance_text(ahead)}: {cue.text}{speed}.")
+            speed = f" at {settings.speed_text(cue.speed_mph)}" if cue.speed_mph is not None else ""
+            lines.append(f"Map point in {settings.distance_text(ahead)}: {cue.text}{speed}.")
         if route.estimated_tolls > 0:
             lines.append(
                 f"Estimated carrier-paid toll exposure: {route.estimated_tolls:,.0f} dollars."
@@ -191,9 +196,7 @@ class DrivingStatusScreenState(MenuState):
             "Tune with left and right brackets. Press M to toggle radio from the cab.",
         ]
         if position is not None:
-            lines.append(
-                f"Approximate truck radio position: {position[0]:.2f}, {position[1]:.2f}."
-            )
+            lines.append(f"Approximate truck radio position: {position[0]:.2f}, {position[1]:.2f}.")
         lines.append("Receivable stations:")
         lines.extend(d.radio.station_list_lines(limit=16))
         return lines
@@ -208,18 +211,12 @@ class DriverAppsState(MenuState):
         "returns to the status screens."
     )
     APPS = (
-        ("Navigation", "navigation",
-         "Open GPS guidance, route progress, and exit context."),
-        ("Weather", "weather",
-         "Open conditions, forecast, and safe-speed guidance."),
-        ("Traffic", "traffic",
-         "Open traffic pace and reported slowdowns ahead."),
-        ("Truck stops", "truck_stops",
-         "Open upcoming route stops and available services."),
-        ("Road chatter", "road_chatter",
-         "Open local driver reports and general road chatter."),
-        ("ELD", "eld",
-         "Open hours-of-service and legal-stop guidance."),
+        ("Navigation", "navigation", "Open GPS guidance, route progress, and exit context."),
+        ("Weather", "weather", "Open conditions, forecast, and safe-speed guidance."),
+        ("Traffic", "traffic", "Open traffic pace and reported slowdowns ahead."),
+        ("Truck stops", "truck_stops", "Open upcoming route stops and available services."),
+        ("Road chatter", "road_chatter", "Open local driver reports and general road chatter."),
+        ("ELD", "eld", "Open hours-of-service and legal-stop guidance."),
     )
 
     def __init__(self, ctx, driving: DrivingState) -> None:
@@ -235,8 +232,11 @@ class DriverAppsState(MenuState):
             )
             for label, key, help_text in self.APPS
         ]
-        items.append(MenuItem("Back to status screens", self.go_back,
-                              help="Return to the status screen list."))
+        items.append(
+            MenuItem(
+                "Back to status screens", self.go_back, help="Return to the status screen list."
+            )
+        )
         return items
 
     def _open_app(self, app_key: str) -> None:
@@ -270,12 +270,14 @@ class DriverAppScreenState(MenuState):
 
     def build_items(self) -> list[MenuItem]:
         items = [
-            MenuItem(line, lambda line=line: self.ctx.say(line),
-                     help="Repeat this app line.")
+            MenuItem(line, lambda line=line: self.ctx.say(line), help="Repeat this app line.")
             for line in self._lines()
         ]
-        items.append(MenuItem("Back to Driver apps", self.go_back,
-                              help="Return to the driver tablet app list."))
+        items.append(
+            MenuItem(
+                "Back to Driver apps", self.go_back, help="Return to the driver tablet app list."
+            )
+        )
         return items
 
     def _lines(self) -> list[str]:
@@ -355,9 +357,7 @@ class DriverAppScreenState(MenuState):
 
     def _eld_lines(self) -> list[str]:
         d = self.driving
-        lines = [
-            f"ELD: {d.hos.summary(self.ctx.settings.hos_mode).rstrip('.')}"
-        ]
+        lines = [f"ELD: {d.hos.summary(self.ctx.settings.hos_mode).rstrip('.')}"]
         context = d._hos_route_context()
         if context:
             lines.append(f"ELD route note: {context}")
@@ -421,6 +421,7 @@ class PauseMenuState(MenuState):
     def enter(self) -> None:
         self.ctx.audio.play("ui/pause")
         self.ctx.audio.stop_world()
+        self.driving._reverse_cue_active = False
         super().enter()
 
     def presence(self):
@@ -433,38 +434,59 @@ class PauseMenuState(MenuState):
     def build_items(self) -> list[MenuItem]:
         drive_label = "pickup drive" if self.driving.phase == DRIVE_PHASE_PICKUP else "delivery"
         items = [
-            MenuItem("Resume driving", self._resume,
-                     help=f"Return to the active {drive_label}."),
-            MenuItem("Trip status", self._status,
-                     help="Hear cargo, objective, route progress, and time used."),
-            MenuItem("Controls and help", self._controls,
-                     help="Open the how-to-play reference at the driving keys. "
-                          "Left and Right arrows change pages, Up and Down read "
-                          "line by line, Escape returns here."),
-            MenuItem(self._mechanic_label, self._mechanic,
-                     help="A mobile mechanic patches the truck up enough to "
-                          "drive on. Costs much more than a garage repair, "
-                          "takes an hour and a half, and the bill is due even "
-                          "if it puts you in debt."),
-            MenuItem("Settings", self._settings,
-                     help="Change units, transmission, volumes, weather, "
-                          "voices, update channel, and trip pacing."),
-            MenuItem("Abandon job", self._abandon,
-                     help="Give up this job. Costs five hundred dollars and "
-                          "reputation, and returns you to the origin city."),
-            MenuItem("Quit to main menu", self._quit_to_menu,
-                     help="You can only save at a stop, so this drive is not "
-                          "saved in progress. It resumes from your last stop "
-                          "when you continue. Use Abandon job to drop the load."),
+            MenuItem("Resume driving", self._resume, help=f"Return to the active {drive_label}."),
+            MenuItem(
+                "Trip status",
+                self._status,
+                help="Hear cargo, objective, route progress, and time used.",
+            ),
+            MenuItem(
+                "Controls and help",
+                self._controls,
+                help="Open the how-to-play reference at the driving keys. "
+                "Left and Right arrows change pages, Up and Down read "
+                "line by line, Escape returns here.",
+            ),
+            MenuItem(
+                self._mechanic_label,
+                self._mechanic,
+                help="A mobile mechanic patches the truck up enough to "
+                "drive on. Costs much more than a garage repair, "
+                "takes an hour and a half, and the bill is due even "
+                "if it puts you in debt.",
+            ),
+            MenuItem(
+                "Settings",
+                self._settings,
+                help="Change units, transmission, volumes, weather, "
+                "voices, update channel, and trip pacing.",
+            ),
+            MenuItem(
+                "Abandon job",
+                self._abandon,
+                help="Give up this job. Costs five hundred dollars and "
+                "reputation, and returns you to the origin city.",
+            ),
+            MenuItem(
+                "Quit to main menu",
+                self._quit_to_menu,
+                help="You can only save at a stop, so this drive is not "
+                "saved in progress. It resumes from your last stop "
+                "when you continue. Use Abandon job to drop the load.",
+            ),
         ]
         if self.driving.emergency_shoulder_sleep_reason() is not None:
-            items.insert(4, MenuItem(
-                "Emergency shoulder sleep",
-                self._emergency_shoulder_sleep,
-                help="Emergency-only poor sleep on the shoulder. Resets hours "
-                     "of service, but fatigue remains, you may be ticketed, "
-                     "minor truck damage can happen, and the deadline keeps "
-                     "running."))
+            items.insert(
+                4,
+                MenuItem(
+                    "Emergency shoulder sleep",
+                    self._emergency_shoulder_sleep,
+                    help="Emergency-only poor sleep on the shoulder. Resets hours "
+                    "of service, but fatigue remains, you may be ticketed, "
+                    "minor truck damage can happen, and the deadline keeps "
+                    "running.",
+                ),
+            )
         return items
 
     def go_back(self) -> None:
@@ -482,9 +504,11 @@ class PauseMenuState(MenuState):
         d = self.driving
         damage = d.truck.damage_pct
         if damage <= FIELD_REPAIR_DAMAGE_PCT:
-            self.ctx.say("The truck is running well enough. A roadside mechanic "
-                         f"can help once damage is past "
-                         f"{FIELD_REPAIR_DAMAGE_PCT:.0f} percent.")
+            self.ctx.say(
+                "The truck is running well enough. A roadside mechanic "
+                f"can help once damage is past "
+                f"{FIELD_REPAIR_DAMAGE_PCT:.0f} percent."
+            )
             return
         if d.truck.speed_mph > 3:
             self.ctx.say("Come to a complete stop first.")
@@ -492,32 +516,39 @@ class PauseMenuState(MenuState):
         p = self.ctx.profile
         repaired = damage - FIELD_REPAIR_DAMAGE_PCT
         cost = MECHANIC_CALLOUT_FEE + repaired * MECHANIC_RATE_PER_PCT
-        p.money -= cost   # the rescue is never refused; money can go negative
+        p.money -= cost  # the rescue is never refused; money can go negative
         d.truck.damage_pct = FIELD_REPAIR_DAMAGE_PCT
         _advance_rest_clock(d, MECHANIC_WAIT_MIN)
         d.hos.on_duty(MECHANIC_WAIT_MIN)
         self.ctx.audio.play("ui/notify")
         self.refresh()
-        self.ctx.say(f"A mobile mechanic patched the truck up to "
-                     f"{FIELD_REPAIR_DAMAGE_PCT:.0f} percent damage for "
-                     f"{cost:,.0f} dollars. You have {p.money:,.0f} dollars. "
-                     f"The repair took an hour and a half: it is "
-                     f"{clock_text(d.trip.current_hour)}. {_deadline_text(d)}")
+        self.ctx.say(
+            f"A mobile mechanic patched the truck up to "
+            f"{FIELD_REPAIR_DAMAGE_PCT:.0f} percent damage for "
+            f"{cost:,.0f} dollars. You have {p.money:,.0f} dollars. "
+            f"The repair took an hour and a half: it is "
+            f"{clock_text(d.trip.current_hour)}. {_deadline_text(d)}"
+        )
 
     def _emergency_shoulder_sleep(self) -> None:
         reason = self.driving.emergency_shoulder_sleep_reason()
         if reason is None:
-            self.ctx.say("Emergency shoulder sleep is not available right now. "
-                         "Use a route stop for normal breaks and sleep.")
+            self.ctx.say(
+                "Emergency shoulder sleep is not available right now. "
+                "Use a route stop for normal breaks and sleep."
+            )
             self.refresh()
             return
-        self.ctx.push_state(ShoulderSleepConfirmationState(
-            self.ctx, self.driving, reason, self.driving.trip.position_mi))
+        self.ctx.push_state(
+            ShoulderSleepConfirmationState(
+                self.ctx, self.driving, reason, self.driving.trip.position_mi
+            )
+        )
 
     def _resume(self) -> None:
         self.ctx.audio.play("ui/unpause")
         self.ctx.pop_state()
-        self.ctx.say("Resumed.", interrupt=True)
+        self.ctx.say("Resumed.", interrupt=False)
 
     def _status(self) -> None:
         d = self.driving
@@ -528,14 +559,16 @@ class PauseMenuState(MenuState):
                 f"{d.job.weight_tons:.0f} tons of {d.job.cargo.label} are "
                 f"assigned for {d.job.destination}. "
                 f"{d._pickup_progress_summary()} {hours_used:.1f} hours used. "
-                f"{d._air_status_text()}.")
+                f"{d._air_status_text()}."
+            )
             return
         self.ctx.say(
             f"Hauling {d.job.weight_tons:.0f} tons of {d.job.cargo.label} "
             f"to {d.job.destination}. "
             f"{d.trip.progress_summary(self.ctx.settings.imperial_units)} "
             f"{hours_used:.1f} hours used of {d.job.deadline_game_h:.0f}. "
-            f"{d._air_status_text()}.")
+            f"{d._air_status_text()}."
+        )
 
     def _controls(self) -> None:
         from .main_menu import HelpState, controls_help_page
@@ -562,9 +595,12 @@ class PauseMenuState(MenuState):
         p.active_trip = None
         p.pay_advance_used_for_load = False
         self.ctx.save_profile()
-        self.ctx.say(f"Job abandoned. You paid a five hundred dollar penalty and "
-                     f"returned to {p.current_city}.", interrupt=True)
-        self.ctx.pop_state()   # close pause menu
+        self.ctx.say(
+            f"Job abandoned. You paid a five hundred dollar penalty and "
+            f"returned to {p.current_city}.",
+            interrupt=True,
+        )
+        self.ctx.pop_state()  # close pause menu
         self.ctx.replace_state(CityMenuState(self.ctx))
 
     def _quit_to_menu(self) -> None:
@@ -577,15 +613,15 @@ class PauseMenuState(MenuState):
         self.ctx.say(
             f"Returning to the title. You can only save at a stop, so this "
             f"{drive_label} will resume from your last stop, not from here.",
-            interrupt=True)
+            interrupt=True,
+        )
         self.ctx.reset_to(MainMenuState(self.ctx))
 
 
 class FacilityArrivalState(MenuState):
     title = "Destination facility"
     open_sound_key = "facility/dock_gate"
-    intro_help = ("Use arrows to navigate, Enter to select. "
-                  "Dock and deliver completes the job.")
+    intro_help = "Use arrows to navigate, Enter to select. Dock and deliver completes the job."
 
     def __init__(self, ctx, driving: DrivingState) -> None:
         super().__init__(ctx)
@@ -598,8 +634,9 @@ class FacilityArrivalState(MenuState):
     def presence(self):
         from ..discord_presence import PresenceState
 
-        return PresenceState("Delivering", f"{self.driving.job.cargo.label} to "
-                             f"{self.driving.job.destination}")
+        return PresenceState(
+            "Delivering", f"{self.driving.job.cargo.label} to {self.driving.job.destination}"
+        )
 
     def enter(self) -> None:
         sequence = select_menu_music_sequence(self.ctx.profile)
@@ -608,17 +645,25 @@ class FacilityArrivalState(MenuState):
 
     def announce_entry(self) -> None:
         self.ctx.audio.set_ambient("poi/facility_gate")
-        self.ctx.say(
-            f"At {self.facility}. {self.current_text()}")
+        self.ctx.say(f"At {self.facility}. {self.current_text()}")
 
     def build_items(self) -> list[MenuItem]:
         return [
-            MenuItem("Dock and deliver", self._dock,
-                     help="Back into the dock and complete this delivery."),
-            MenuItem("Check paperwork", self._paperwork,
-                     help="Review pay, deadline, cargo condition, and charges."),
-            MenuItem("Check arrival status", self._status,
-                     help="Hear the facility, cargo, speed, and next step."),
+            MenuItem(
+                "Dock and deliver",
+                self._dock,
+                help="Back into the dock and complete this delivery.",
+            ),
+            MenuItem(
+                "Check paperwork",
+                self._paperwork,
+                help="Review pay, deadline, cargo condition, and charges.",
+            ),
+            MenuItem(
+                "Check arrival status",
+                self._status,
+                help="Hear the facility, cargo, speed, and next step.",
+            ),
         ]
 
     def _dock(self) -> None:
@@ -638,18 +683,21 @@ class FacilityArrivalState(MenuState):
             d._set_status("Unloaded. Delivery paperwork signed.")
             d._arrive()
 
-        self.ctx.replace_state(TimedMessageState(
-            self.ctx,
-            title="Unloading cargo",
-            message=(
-                f"Docked at {self.facility}. Unloading "
-                f"{d.job.weight_tons:.0f} tons of {d.job.cargo.label}; "
-                "paperwork is being signed."
-            ),
-            status="Unloading cargo. Please wait.",
-            seconds=UNLOADING_WAIT_S,
-            on_complete=complete,
-            sound_key="poi/dock_and_deliver"))
+        self.ctx.replace_state(
+            TimedMessageState(
+                self.ctx,
+                title="Unloading cargo",
+                message=(
+                    f"Docked at {self.facility}. Unloading "
+                    f"{d.job.weight_tons:.0f} tons of {d.job.cargo.label}; "
+                    "paperwork is being signed."
+                ),
+                status="Unloading cargo. Please wait.",
+                seconds=UNLOADING_WAIT_S,
+                on_complete=complete,
+                sound_key="poi/dock_and_deliver",
+            )
+        )
 
     def _paperwork(self) -> None:
         d = self.driving
@@ -666,15 +714,20 @@ class FacilityArrivalState(MenuState):
         advance_due = round(min(self.ctx.profile.pay_advance, net_estimated_pay), 2)
         net_estimated_pay = round(net_estimated_pay - advance_due, 2)
         advance_note = (
-            f" A pay advance of {advance_due:,.0f} dollars will be repaid from "
-            "this settlement." if advance_due > 0 else "")
-        timing = (f"{remaining:.1f} hours remain before the deadline"
-                  if remaining >= 0
-                  else f"{-remaining:.1f} hours past the deadline")
+            f" A pay advance of {advance_due:,.0f} dollars will be repaid from this settlement."
+            if advance_due > 0
+            else ""
+        )
+        timing = (
+            f"{remaining:.1f} hours remain before the deadline"
+            if remaining >= 0
+            else f"{-remaining:.1f} hours past the deadline"
+        )
         if trip_damage > 1:
             cargo_condition = (
                 f"Damage consideration: this run added {trip_damage:.0f} "
-                "percent truck damage, which may reduce final pay.")
+                "percent truck damage, which may reduce final pay."
+            )
         else:
             cargo_condition = "Cargo condition: no new damage recorded."
         self.ctx.say(
@@ -688,7 +741,8 @@ class FacilityArrivalState(MenuState):
             f"Driver-responsibility charges are estimated at "
             f"{driver_charges:,.0f} dollars, for estimated net driver pay "
             f"{net_estimated_pay:,.0f}.{advance_note} "
-            f"{timing}. {cargo_condition} Dock and deliver to settle.")
+            f"{timing}. {cargo_condition} Dock and deliver to settle."
+        )
 
     def _status(self) -> None:
         d = self.driving
@@ -696,7 +750,8 @@ class FacilityArrivalState(MenuState):
             f"At {self.facility}. Hauling {d.job.weight_tons:.0f} tons of "
             f"{d.job.cargo.label}. Current speed "
             f"{self.ctx.settings.speed_text(d.truck.speed_mph)}. "
-            "Stop, then Dock and deliver.")
+            "Stop, then Dock and deliver."
+        )
 
     def go_back(self) -> None:
         self.ctx.say("At destination. Dock and deliver to finish.")
@@ -709,10 +764,7 @@ class FacilityArrivalState(MenuState):
             f"Speed: {self.driving.truck.speed_mph:.0f} mph",
             "Docking required before delivery settlement.",
             "",
-        ] + [
-            ("> " if i == self.index else "  ") + item.text
-            for i, item in enumerate(self.items)
-        ]
+        ] + [("> " if i == self.index else "  ") + item.text for i, item in enumerate(self.items)]
 
 
 class ArrivalState(MenuState):
@@ -746,15 +798,20 @@ class ArrivalState(MenuState):
         p.active_trip = None
         p.pay_advance_used_for_load = False
         self.ctx.save_profile()
-        self.summary_parts.insert(0, (
-            f"Bobtailed empty to {job.destination} in {hours:.1f} hours. "
-            f"It is {clock_text(p.game_hours)}. No load and no pay, but you are "
-            f"parked at {self.terminal.name} and can shop the {job.destination} "
-            f"dispatch board. Fuel {d.truck.fuel_fraction * 100:.0f} percent."))
+        self.summary_parts.insert(
+            0,
+            (
+                f"Bobtailed empty to {job.destination} in {hours:.1f} hours. "
+                f"It is {clock_text(p.game_hours)}. No load and no pay, but you are "
+                f"parked at {self.terminal.name} and can shop the {job.destination} "
+                f"dispatch board. Fuel {d.truck.fuel_fraction * 100:.0f} percent."
+            ),
+        )
         if trip_damage > 1:
             self.summary_parts.append(
                 f"The empty run added {trip_damage:.0f} percent truck damage. "
-                "Visit the garage when you can.")
+                "Visit the garage when you can."
+            )
         # The arrival screen and announcement read summary_lines, not parts.
         self.summary_lines = list(self.summary_parts)
 
@@ -762,7 +819,7 @@ class ArrivalState(MenuState):
         d = self.driving
         p = self.ctx.profile
         job = d.job
-        hours = d.trip.game_minutes / 60.0
+        hours = _settlement_hours(d)
         trip_damage = max(0.0, d.truck.damage_pct - d.start_damage)
         if job.bobtail:
             self._settle_bobtail(hours, trip_damage)
@@ -795,17 +852,19 @@ class ArrivalState(MenuState):
         if driver_charges:
             self.summary_parts.append(
                 f"Driver-responsibility charges: speeding fines cost you "
-                f"{driver_charges:,.0f} dollars.")
+                f"{driver_charges:,.0f} dollars."
+            )
         # Tickets from being pulled over were already paid on the spot; report
         # them for transparency but don't deduct again at settlement.
         if d.speeding_tickets:
             self.summary_parts.append(
                 f"On-the-spot speeding tickets this trip: {d.speeding_tickets}, "
-                f"already paid, {d.ticket_fines_paid:,.0f} dollars.")
+                f"already paid, {d.ticket_fines_paid:,.0f} dollars."
+            )
         if business.business_charges:
             self.summary_parts.append(
-                f"Owner-operator business costs: "
-                f"{business.business_charge_summary}.")
+                f"Owner-operator business costs: {business.business_charge_summary}."
+            )
         net_pay = business.net_before_advance
         advance_repaid = round(min(p.pay_advance, net_pay), 2)
         if advance_repaid > 0:
@@ -813,47 +872,62 @@ class ArrivalState(MenuState):
             p.pay_advance = round(p.pay_advance - advance_repaid, 2)
             outstanding = (
                 f" {p.pay_advance:,.0f} dollars of advance still outstanding."
-                if p.pay_advance >= 1.0 else "")
+                if p.pay_advance >= 1.0
+                else ""
+            )
             self.summary_parts.append(
                 f"Pay advance repaid from this settlement: "
-                f"{advance_repaid:,.0f} dollars.{outstanding}")
+                f"{advance_repaid:,.0f} dollars.{outstanding}"
+            )
         on_time = hours <= job.deadline_game_h
         p.money += net_pay
         p.current_city = job.destination
         p.truck_fuel_gal = d.truck.fuel_gal
         p.truck_damage_pct = d.truck.damage_pct
-        announcements = p.career.record_delivery(
-            job.distance_mi, net_pay, on_time, trip_damage)
+        tire_wear_added = min(100.0, job.distance_mi * TIRE_WEAR_PER_MILE)
+        road_grime_added = min(100.0, job.distance_mi * ROAD_GRIME_PER_MILE)
+        p.tire_wear_pct = min(100.0, p.tire_wear_pct + tire_wear_added)
+        p.road_grime_pct = min(100.0, p.road_grime_pct + road_grime_added)
+        announcements = p.career.record_delivery(job.distance_mi, net_pay, on_time, trip_damage)
         p.game_hours += hours
         p.market.advance_to(p.market_day())
         p.active_trip = None
         p.pay_advance_used_for_load = False
         self.ctx.save_profile()
 
-        self.summary_parts.insert(0, (
-            f"Delivered {job.weight_tons:.0f} tons of {job.cargo.label} to "
-            f"{job.destination} in {hours:.1f} hours, "
-            f"{'on time' if on_time else 'late'}. "
-            f"It is {clock_text(p.game_hours)}. "
-            f"{pay_label(p.business_status)} {gross_pay:,.0f} dollars. "
-            f"Carrier-paid or reimbursed charges {carrier_charges:,.0f} dollars: "
-            f"tolls {toll_expense:,.0f}, accessorials "
-            f"{charge_summary(accessorials)}. "
-            "These are billed to carrier settlement and not deducted from driver pay. "
-            f"Business status: {business.status_label}. "
-            f"Business costs {business.business_charge_total:,.0f} dollars. "
-            f"Driver-responsibility charges {driver_charges:,.0f} dollars. "
-            f"Net driver pay {net_pay:,.0f} "
-            f"dollars, and you now have {p.money:,.0f}. "
-            f"After unloading, dispatch has you parked at "
-            f"{self.terminal.name} for the {job.destination} service area."))
+        self.summary_parts.insert(
+            0,
+            (
+                f"Delivered {job.weight_tons:.0f} tons of {job.cargo.label} to "
+                f"{job.destination} in {hours:.1f} hours, "
+                f"{'on time' if on_time else 'late'}. "
+                f"It is {clock_text(p.game_hours)}. "
+                f"{pay_label(p.business_status)} {gross_pay:,.0f} dollars. "
+                f"Carrier-paid or reimbursed charges {carrier_charges:,.0f} dollars: "
+                f"tolls {toll_expense:,.0f}, accessorials "
+                f"{charge_summary(accessorials)}. "
+                "These are billed to carrier settlement and not deducted from driver pay. "
+                f"Business status: {business.status_label}. "
+                f"Business costs {business.business_charge_total:,.0f} dollars. "
+                f"Driver-responsibility charges {driver_charges:,.0f} dollars. "
+                f"Net driver pay {net_pay:,.0f} "
+                f"dollars, and you now have {p.money:,.0f}. "
+                f"After unloading, dispatch has you parked at "
+                f"{self.terminal.name} for the {job.destination} service area."
+            ),
+        )
         if early_bonus >= 1.0:
-            self.summary_parts.append(
-                f"Early delivery bonus: {early_bonus:,.0f} dollars.")
+            self.summary_parts.append(f"Early delivery bonus: {early_bonus:,.0f} dollars.")
         if trip_damage > 1:
             self.summary_parts.append(
                 f"The cargo run added {trip_damage:.0f} percent truck damage. "
-                "Visit the garage when you can.")
+                "Visit the garage when you can."
+            )
+        if tire_wear_added > 0.0 or road_grime_added > 0.0:
+            self.summary_parts.append(
+                f"The run added {tire_wear_added:.1f} percent tire wear and "
+                f"{road_grime_added:.1f} percent road grime."
+            )
         self.summary_parts.extend(announcements)
         self._award_arrival_achievements(
             on_time=on_time,
@@ -867,22 +941,22 @@ class ArrivalState(MenuState):
         timing = "On time" if on_time else "Late"
         bonus_text = (
             f"Early delivery bonus: {early_bonus:,.0f} dollars"
-            if early_bonus >= 1.0 else "No early delivery bonus on this run"
+            if early_bonus >= 1.0
+            else "No early delivery bonus on this run"
         )
         cargo_condition = (
             f"Truck damage added on this run: {trip_damage:.0f} percent"
-            if trip_damage > 1 else "No new damage recorded"
+            if trip_damage > 1
+            else "No new damage recorded"
         )
         career_lines = announcements + self._achievement_messages
         if not career_lines:
             career_lines = ["No new career messages."]
         advance_lines = []
         if advance_repaid > 0:
-            advance_lines.append(
-                f"Pay advance repaid: {advance_repaid:,.0f} dollars.")
+            advance_lines.append(f"Pay advance repaid: {advance_repaid:,.0f} dollars.")
         if p.pay_advance >= 1.0:
-            advance_lines.append(
-                f"Pay advance still outstanding: {p.pay_advance:,.0f} dollars.")
+            advance_lines.append(f"Pay advance still outstanding: {p.pay_advance:,.0f} dollars.")
         business_cost_lines = []
         if business.business_charges:
             business_cost_lines = [
@@ -890,12 +964,10 @@ class ArrivalState(MenuState):
                 f"Business cost detail: {business.business_charge_summary}.",
             ]
         self.summary_lines = [
-            f"Delivered {job.weight_tons:.0f} tons of {job.cargo.label} "
-            f"to {job.destination}.",
+            f"Delivered {job.weight_tons:.0f} tons of {job.cargo.label} to {job.destination}.",
             f"Trip time: {hours:.1f} hours, {timing.lower()}.",
             f"It is {clock_text(p.game_hours)}.",
-            f"Parked at {self.terminal.name} for the "
-            f"{job.destination} service area.",
+            f"Parked at {self.terminal.name} for the {job.destination} service area.",
             f"{pay_label(p.business_status)}: {gross_pay:,.0f} dollars.",
             f"Carrier-paid or reimbursed charges: {carrier_charges:,.0f} "
             f"dollars, including tolls {toll_expense:,.0f} and "
@@ -918,14 +990,15 @@ class ArrivalState(MenuState):
         self._announcements = announcements
 
     def _award_arrival_achievements(
-            self,
-            *,
-            on_time: bool,
-            trip_damage: float,
-            toll_expense: float,
-            route_miles: float,
-            speeding_strikes: int,
-            gross_pay: float = 0.0) -> None:
+        self,
+        *,
+        on_time: bool,
+        trip_damage: float,
+        toll_expense: float,
+        route_miles: float,
+        speeding_strikes: int,
+        gross_pay: float = 0.0,
+    ) -> None:
         p = self.ctx.profile
         route = self.driving.route
         world = self.ctx.world
@@ -975,29 +1048,39 @@ class ArrivalState(MenuState):
             ids.append("westbound_delivery")
         if abs(dest_lon - origin_lon) >= 35.0:
             ids.append("coast_to_coast")
-        route66 = {"Chicago", "St. Louis", "Tulsa", "Oklahoma City",
-                   "Amarillo", "Albuquerque", "Flagstaff", "Los Angeles"}
+        route66 = {
+            "Chicago",
+            "St. Louis",
+            "Tulsa",
+            "Oklahoma City",
+            "Amarillo",
+            "Albuquerque",
+            "Flagstaff",
+            "Los Angeles",
+        }
         if origin in route66 and dest in route66:
             ids.append("route66_run")
         arrival_hour = self.driving.trip.current_hour
         # Plain "deliver into this city" badges (titles claim nothing extra).
         simple_arrival = {
-            "Phoenix": "phoenix_arrival", "Wichita": "wichita_arrival",
-            "Bakersfield": "bakersfield_arrival", "Las Vegas": "vegas_arrival",
+            "Phoenix": "phoenix_arrival",
+            "Wichita": "wichita_arrival",
+            "Bakersfield": "bakersfield_arrival",
+            "Las Vegas": "vegas_arrival",
         }
         if dest in simple_arrival:
             ids.append(simple_arrival[dest])
         # Badges whose title names a condition, so the condition is enforced:
-        if dest == "Amarillo" and 5.0 <= arrival_hour < 12.0:   # "by Daybreak"
+        if dest == "Amarillo" and 5.0 <= arrival_hour < 12.0:  # "by Daybreak"
             ids.append("amarillo_arrival")
-        if dest == "Tulsa" and on_time:                         # "Right on Schedule"
+        if dest == "Tulsa" and on_time:  # "Right on Schedule"
             ids.append("tulsa_arrival")
         if world.cities[dest].state == "Georgia" and is_night(arrival_hour):
-            ids.append("georgia_arrival")                       # "Midnight Freight"
+            ids.append("georgia_arrival")  # "Midnight Freight"
         # Departures: the title puts the city in the rearview / "out of" it.
-        if origin == "Lubbock":                                 # "in the Rearview"
+        if origin == "Lubbock":  # "in the Rearview"
             ids.append("lubbock_arrival")
-        if origin == "Detroit":                                 # "Last Load Out of"
+        if origin == "Detroit":  # "Last Load Out of"
             ids.append("detroit_run")
 
         # -- Challenges: grind milestones, long hauls, spotless runs ----------
@@ -1058,8 +1141,9 @@ class ArrivalState(MenuState):
 
     def build_items(self) -> list[MenuItem]:
         items = [
-            MenuItem(line, lambda line=line: self.ctx.say(line),
-                     help="Repeat this settlement line.")
+            MenuItem(
+                line, lambda line=line: self.ctx.say(line), help="Repeat this settlement line."
+            )
             for line in self.summary_lines
         ]
         items.append(MenuItem("Continue to " + self.terminal.name, self._continue))
@@ -1074,7 +1158,9 @@ class ArrivalState(MenuState):
         self.ctx.replace_state(CityMenuState(self.ctx))
 
     def lines(self) -> list[str]:
-        return [self.title, ""] + self.summary_lines + [""] + [
-            ("> " if i == self.index else "  ") + item.text
-            for i, item in enumerate(self.items)
-        ]
+        return (
+            [self.title, ""]
+            + self.summary_lines
+            + [""]
+            + [("> " if i == self.index else "  ") + item.text for i, item in enumerate(self.items)]
+        )

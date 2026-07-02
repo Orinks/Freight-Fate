@@ -49,34 +49,44 @@ class TripRoadEventMixin:
             intensity = self._traffic_pressure_intensity(start, kind)
             if intensity < TRAFFIC_PRESSURE_MIN_INTENSITY:
                 return
-            pressures.append(TrafficPressure(
-                start,
-                end,
-                kind,
-                direction,
-                intensity,
-                self._traffic_pressure_speed(start, intensity),
-                reason,
-            ))
+            pressures.append(
+                TrafficPressure(
+                    start,
+                    end,
+                    kind,
+                    direction,
+                    intensity,
+                    self._traffic_pressure_speed(start, intensity),
+                    reason,
+                )
+            )
 
         for stop in self.stops:
             label = stop.exit_label or stop.spoken_name
-            add(stop.at_mi - 2.0, stop.at_mi + 0.4, "exit", "right",
-                f"exit traffic for {label}")
+            add(stop.at_mi - 2.0, stop.at_mi + 0.4, "exit", "right", f"exit traffic for {label}")
         for i, start in enumerate(self._leg_starts[1:], start=1):
             if self.route.legs[i - 1].highway != self.route.legs[i].highway:
-                add(start - 1.5, start + 0.6, "route_merge", "right",
-                    f"traffic merging for {self.route.legs[i].highway}")
+                add(
+                    start - 1.5,
+                    start + 0.6,
+                    "route_merge",
+                    "right",
+                    f"traffic merging for {self.route.legs[i].highway}",
+                )
         for zone in self.zones:
             if zone.reason == "construction merge":
-                add(zone.start_mi, zone.end_mi, "construction_merge", "left",
-                    "construction taper traffic")
+                add(
+                    zone.start_mi,
+                    zone.end_mi,
+                    "construction_merge",
+                    "left",
+                    "construction taper traffic",
+                )
         pressures.sort(key=lambda pressure: pressure.start_mi)
         return pressures
 
     def _check_tolls(self) -> None:
-        for i, (start, leg) in enumerate(zip(self._leg_starts, self.route.legs,
-                                             strict=True)):
+        for i, (start, leg) in enumerate(zip(self._leg_starts, self.route.legs, strict=True)):
             forward = self.route.cities[i] == leg.a
             for toll in leg.toll_events:
                 offset = _stop_offset_for_direction(toll.at_mi, leg.miles, forward)
@@ -121,11 +131,12 @@ class TripRoadEventMixin:
                 world = get_world()
                 city_state = world.cities[city].state
                 prev_state = world.cities[prev].state
-                crossing = (f"Crossing into {city_state}. "
-                            if city_state != prev_state else "")
-                self._emit(TripEventKind.CITY_REACHED,
-                           f"{crossing}Passing {city}, {city_state}. "
-                           f"Continuing on {leg.highway} toward {nxt}.")
+                crossing = f"Crossing into {city_state}. " if city_state != prev_state else ""
+                self._emit(
+                    TripEventKind.CITY_REACHED,
+                    f"{crossing}Passing {city}, {city_state}. "
+                    f"Continuing on {leg.highway} toward {nxt}.",
+                )
 
     def _hazard_risk(self) -> float:
         """Chance of a hazard at each check; worse in fog and after dark."""
@@ -149,8 +160,7 @@ class TripRoadEventMixin:
             factor -= 0.12
         if self._near_city(mile):
             factor += 0.18
-        return max(CORRIDOR_HAZARD_MIN_FACTOR,
-                   min(CORRIDOR_HAZARD_MAX_FACTOR, factor))
+        return max(CORRIDOR_HAZARD_MIN_FACTOR, min(CORRIDOR_HAZARD_MAX_FACTOR, factor))
 
     def _next_hazard_check_interval_mi(self) -> float:
         base = self._rng.uniform(20, 60)
@@ -159,9 +169,12 @@ class TripRoadEventMixin:
     def _check_hazards(self, moved_mi: float) -> None:
         """Occasional road hazards that demand braking."""
         context = self.traffic_context()
-        if (context is not None and context.closing_mph > 8.0
-                and context.gap_seconds <= TRAFFIC_WARNING_GAP_S
-                and self.position_mi >= self._traffic_warning_mi):
+        if (
+            context is not None
+            and context.closing_mph > 8.0
+            and context.gap_seconds <= TRAFFIC_WARNING_GAP_S
+            and self.position_mi >= self._traffic_warning_mi
+        ):
             self._traffic_warning_mi = self.position_mi + 8.0
             self._emit(
                 TripEventKind.HAZARD,
@@ -177,16 +190,20 @@ class TripRoadEventMixin:
         self._hazard_check_mi = self._next_hazard_check_interval_mi()
         if self._rng.random() < self._hazard_risk():
             choices = eligible_hazards(
-                self.current_region, self.weather.current,
-                self.terrain_at(self.position_mi), self.current_hour)
+                self.current_region,
+                self.weather.current,
+                self.terrain_at(self.position_mi),
+                self.current_hour,
+            )
             if not choices:
                 return
             texts, weights = zip(*choices, strict=True)
             hazard = self._rng.choices(texts, weights)[0]
-            self._emit(TripEventKind.HAZARD,
-                       f"Brake now! {hazard[0].upper()}{hazard[1:]}.",
-                       deadline_s=(self._rng.uniform(3.0, 4.5)
-                                   * self._visibility_reaction_factor()))
+            self._emit(
+                TripEventKind.HAZARD,
+                f"Brake now! {hazard[0].upper()}{hazard[1:]}.",
+                deadline_s=(self._rng.uniform(3.0, 4.5) * self._visibility_reaction_factor()),
+            )
 
     def _visibility_reaction_factor(self) -> float:
         """Low visibility shortens the normal hazard reaction slack."""
@@ -200,8 +217,7 @@ class TripRoadEventMixin:
         kind = self.weather.current
         if kind == WeatherKind.SNOW:
             return "The trailer is sliding on the snow, too fast for the conditions."
-        if kind in (WeatherKind.RAIN, WeatherKind.HEAVY_RAIN,
-                    WeatherKind.THUNDERSTORM):
+        if kind in (WeatherKind.RAIN, WeatherKind.HEAVY_RAIN, WeatherKind.THUNDERSTORM):
             return "Hydroplaning on the wet road, too fast for the conditions."
         return "Losing traction, too fast for the conditions."
 
@@ -217,9 +233,10 @@ class TripRoadEventMixin:
             return
         self._conditions_check_mi = CONDITIONS_CHECK_MI
         severity = min(1.0, (over - CONDITIONS_SPEED_MARGIN_MPH) / 25.0)
-        risk = (severity * (1.0 - eff.grip) * CONDITIONS_INCIDENT_RISK
-                * self.hazard_scale)
+        risk = severity * (1.0 - eff.grip) * CONDITIONS_INCIDENT_RISK * self.hazard_scale
         if self._cond_rng.random() < risk:
-            self._emit(TripEventKind.HAZARD,
-                       f"Brake now! {self._conditions_incident_text()}",
-                       deadline_s=max(1.5, 2.5 * self._visibility_reaction_factor()))
+            self._emit(
+                TripEventKind.HAZARD,
+                f"Brake now! {self._conditions_incident_text()}",
+                deadline_s=max(1.5, 2.5 * self._visibility_reaction_factor()),
+            )

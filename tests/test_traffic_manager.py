@@ -148,9 +148,7 @@ def test_update_keeps_future_route_traffic_until_reached():
 
 def test_patrol_windows_add_state_trooper_traffic():
     manager = _manager()
-    manager.vehicles = [
-        TrafficVehicle("traffic:existing", 2.0, 55.0, 55.0, 0, "cruising", "semi")
-    ]
+    manager.vehicles = [TrafficVehicle("traffic:existing", 2.0, 55.0, 55.0, 0, "cruising", "semi")]
     patrols = [
         PatrolWindow(10.0, 14.0, 0.8, "highway enforcement"),
         PatrolWindow(22.0, 26.0, 0.9, "work zone enforcement"),
@@ -159,10 +157,7 @@ def test_patrol_windows_add_state_trooper_traffic():
     manager.add_patrol_traffic(patrols)
     manager.add_patrol_traffic(patrols)
 
-    troopers = [
-        vehicle for vehicle in manager.vehicles
-        if vehicle.vehicle_class == "state trooper"
-    ]
+    troopers = [vehicle for vehicle in manager.vehicles if vehicle.vehicle_class == "state trooper"]
     assert len(troopers) == 2
     assert [vehicle.position_mi for vehicle in manager.vehicles] == sorted(
         vehicle.position_mi for vehicle in manager.vehicles
@@ -172,9 +167,7 @@ def test_patrol_windows_add_state_trooper_traffic():
 
 def test_merging_vehicle_moves_into_player_lane_and_creates_situation():
     manager = _manager()
-    manager.vehicles = [
-        TrafficVehicle("merge", 0.8, 42.0, 42.0, 1, "merging", "car")
-    ]
+    manager.vehicles = [TrafficVehicle("merge", 0.8, 42.0, 42.0, 1, "merging", "car")]
 
     manager.update(dt=0.0, position_mi=0.0, time_scale=20.0)
     situation = manager.next_situation(position_mi=0.0, truck_speed_mph=55.0)
@@ -187,9 +180,7 @@ def test_merging_vehicle_moves_into_player_lane_and_creates_situation():
 
 def test_braking_vehicle_slows_and_creates_lead_situation():
     manager = _manager()
-    manager.vehicles = [
-        TrafficVehicle("brake", 0.7, 45.0, 45.0, 0, "braking", "car")
-    ]
+    manager.vehicles = [TrafficVehicle("brake", 0.7, 45.0, 45.0, 0, "braking", "car")]
 
     manager.update(dt=1.0, position_mi=0.0, time_scale=20.0)
     situation = manager.next_situation(position_mi=0.0, truck_speed_mph=60.0)
@@ -202,9 +193,7 @@ def test_braking_vehicle_slows_and_creates_lead_situation():
 
 def test_next_situation_only_announces_vehicle_once():
     manager = _manager()
-    manager.vehicles = [
-        TrafficVehicle("lead", 0.7, 42.0, 42.0, 0, "following", "semi")
-    ]
+    manager.vehicles = [TrafficVehicle("lead", 0.7, 42.0, 42.0, 0, "following", "semi")]
 
     first = manager.next_situation(position_mi=0.0, truck_speed_mph=55.0)
     second = manager.next_situation(position_mi=0.0, truck_speed_mph=55.0)
@@ -216,9 +205,7 @@ def test_next_situation_only_announces_vehicle_once():
 
 def test_next_situation_speaks_speed_units():
     manager = _manager()
-    manager.vehicles = [
-        TrafficVehicle("lead", 0.7, 42.0, 42.0, 0, "following", "semi")
-    ]
+    manager.vehicles = [TrafficVehicle("lead", 0.7, 42.0, 42.0, 0, "following", "semi")]
 
     situation = manager.next_situation(position_mi=0.0, truck_speed_mph=55.0)
 
@@ -291,12 +278,8 @@ def test_bad_weather_slows_spawned_traffic_without_moving_it():
     rain.spawn_initial_traffic()
 
     assert _signature(clear)
-    assert [v.position_mi for v in rain.vehicles] == [
-        v.position_mi for v in clear.vehicles
-    ]
-    assert min(v.speed_mph for v in rain.vehicles) < min(
-        v.speed_mph for v in clear.vehicles
-    )
+    assert [v.position_mi for v in rain.vehicles] == [v.position_mi for v in clear.vehicles]
+    assert min(v.speed_mph for v in rain.vehicles) < min(v.speed_mph for v in clear.vehicles)
 
 
 def test_long_route_bad_weather_preserves_spawned_traffic_positions():
@@ -313,6 +296,4 @@ def test_long_route_bad_weather_preserves_spawned_traffic_positions():
     assert clear.vehicles
     assert len(rain.vehicles) == len(clear.vehicles)
     assert _placement_signature(rain) == _placement_signature(clear)
-    assert [v.speed_mph for v in rain.vehicles] != [
-        v.speed_mph for v in clear.vehicles
-    ]
+    assert [v.speed_mph for v in rain.vehicles] != [v.speed_mph for v in clear.vehicles]

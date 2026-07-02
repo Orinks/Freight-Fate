@@ -104,38 +104,43 @@ def collect_targets() -> list[Target]:
         city = world.cities[city_name]
         for entry in city_services["cities"][city_name]:
             fallback = bool(entry.get("fallback"))
-            targets.append(Target(
-                target_id=f"city_service:{slug(city_name)}:{entry['key']}",
-                target_type="city_service",
-                city=city_name,
-                state=city.state,
-                name=str(entry["name"]),
-                lat=float(entry["lat"]),
-                lon=float(entry["lon"]),
-                role=str(entry["key"]),
-                estimated=fallback,
-                source_note=str(entry.get("source_note", "")),
-                fallback_reason=str(entry.get("fallback_reason", "")),
-            ))
+            targets.append(
+                Target(
+                    target_id=f"city_service:{slug(city_name)}:{entry['key']}",
+                    target_type="city_service",
+                    city=city_name,
+                    state=city.state,
+                    name=str(entry["name"]),
+                    lat=float(entry["lat"]),
+                    lon=float(entry["lon"]),
+                    role=str(entry["key"]),
+                    estimated=fallback,
+                    source_note=str(entry.get("source_note", "")),
+                    fallback_reason=str(entry.get("fallback_reason", "")),
+                )
+            )
         for location in city.locations:
             estimated = bool(location.template or "representative" in location.source_note.lower())
-            targets.append(Target(
-                target_id=f"facility:{location.id}",
-                target_type="facility",
-                city=city_name,
-                state=city.state,
-                name=location.name,
-                lat=location.lat or city.lat,
-                lon=location.lon or city.lon,
-                role=location.type,
-                estimated=estimated,
-                source_note=location.source_note,
-                fallback_reason=(
-                    "Facility coordinate is representative, so approach is an estimated "
-                    "local road context rather than a real driveway or gate."
-                    if estimated else ""
-                ),
-            ))
+            targets.append(
+                Target(
+                    target_id=f"facility:{location.id}",
+                    target_type="facility",
+                    city=city_name,
+                    state=city.state,
+                    name=location.name,
+                    lat=location.lat or city.lat,
+                    lon=location.lon or city.lon,
+                    role=location.type,
+                    estimated=estimated,
+                    source_note=location.source_note,
+                    fallback_reason=(
+                        "Facility coordinate is representative, so approach is an estimated "
+                        "local road context rather than a real driveway or gate."
+                        if estimated
+                        else ""
+                    ),
+                )
+            )
     return targets
 
 
@@ -172,8 +177,9 @@ def approach_record(target: Target) -> dict[str, Any]:
             f"No named public OSM road found within {SEARCH_RADIUS_MI:.2f} miles "
             "of the target coordinate."
         )
-    straight_line = haversine_mi(city_lat_lon(target)[0], city_lat_lon(target)[1],
-                                 target.lat, target.lon)
+    straight_line = haversine_mi(
+        city_lat_lon(target)[0], city_lat_lon(target)[1], target.lat, target.lon
+    )
     access_pad = target.best_distance_mi if has_road else 0.5
     minimum_miles = 2.1 if target.target_type == "facility" else 0.4
     approach_miles = round(max(minimum_miles, min(35.0, straight_line * 1.25 + access_pad)), 1)
@@ -218,12 +224,15 @@ def coverage_summary(approaches: dict[str, dict[str, Any]]) -> dict[str, Any]:
     total = len(approaches)
     by_type: dict[str, dict[str, int]] = {}
     for record in approaches.values():
-        item = by_type.setdefault(record["target_type"], {
-            "total": 0,
-            "osm_road": 0,
-            "fallback": 0,
-            "estimated": 0,
-        })
+        item = by_type.setdefault(
+            record["target_type"],
+            {
+                "total": 0,
+                "osm_road": 0,
+                "fallback": 0,
+                "estimated": 0,
+            },
+        )
         item["total"] += 1
         if record["fallback"]:
             item["fallback"] += 1
@@ -248,7 +257,9 @@ def build_grid(targets: list[Target]) -> dict[tuple[int, int], list[Target]]:
     return grid
 
 
-def nearby_targets(grid: dict[tuple[int, int], list[Target]], lat: float, lon: float) -> list[Target]:
+def nearby_targets(
+    grid: dict[tuple[int, int], list[Target]], lat: float, lon: float
+) -> list[Target]:
     row, col = cell(lat, lon)
     out: list[Target] = []
     for dr in (-1, 0, 1):
@@ -321,8 +332,7 @@ def haversine_mi(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
     p1, p2 = math.radians(lat1), math.radians(lat2)
     dphi = math.radians(lat2 - lat1)
     dlmb = math.radians(lon2 - lon1)
-    h = (math.sin(dphi / 2) ** 2
-         + math.cos(p1) * math.cos(p2) * math.sin(dlmb / 2) ** 2)
+    h = math.sin(dphi / 2) ** 2 + math.cos(p1) * math.cos(p2) * math.sin(dlmb / 2) ** 2
     return 2 * EARTH_RADIUS_MI * math.asin(math.sqrt(h))
 
 
@@ -336,8 +346,9 @@ def main() -> int:
     payload = build_local_approaches(args.cache_dir)
     print(json.dumps(payload["coverage"], indent=2, sort_keys=True))
     if args.write:
-        args.output.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n",
-                               encoding="utf-8")
+        args.output.write_text(
+            json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+        )
         print(f"Wrote {args.output}")
     return 0
 

@@ -40,7 +40,6 @@ CITY_SERVICE_APPROACH_ROADS = {
 
 
 class WorldServiceMixin:
-
     def city_services(self, city: str) -> tuple[CityService, ...]:
         """Service POIs available for local city driving.
 
@@ -58,22 +57,24 @@ class WorldServiceMixin:
                 services.append(self._fallback_city_service(city, key))
                 continue
             city_obj = self.cities[city]
-            services.append(CityService(
-                key=key,
-                name=str(raw["name"]).strip(),
-                city=city,
-                state=city_obj.state,
-                kind=str(raw.get("kind", key)).strip() or key,
-                source_note=str(raw.get("source_note", "")).strip(),
-                lat=float(raw.get("lat", 0.0)),
-                lon=float(raw.get("lon", 0.0)),
-                approach_miles=round(float(raw["approach_miles"]), 1),
-                approach_road=str(raw["approach_road"]).strip(),
-                source_type=str(raw.get("source_type", "osm")).strip(),
-                source_ref=str(raw.get("source_ref", "")).strip(),
-                fallback=bool(raw.get("fallback", False)),
-                fallback_reason=str(raw.get("fallback_reason", "")).strip(),
-            ))
+            services.append(
+                CityService(
+                    key=key,
+                    name=str(raw["name"]).strip(),
+                    city=city,
+                    state=city_obj.state,
+                    kind=str(raw.get("kind", key)).strip() or key,
+                    source_note=str(raw.get("source_note", "")).strip(),
+                    lat=float(raw.get("lat", 0.0)),
+                    lon=float(raw.get("lon", 0.0)),
+                    approach_miles=round(float(raw["approach_miles"]), 1),
+                    approach_road=str(raw["approach_road"]).strip(),
+                    source_type=str(raw.get("source_type", "osm")).strip(),
+                    source_ref=str(raw.get("source_ref", "")).strip(),
+                    fallback=bool(raw.get("fallback", False)),
+                    fallback_reason=str(raw.get("fallback_reason", "")).strip(),
+                )
+            )
         return tuple(services)
 
     def _fallback_city_service(self, city: str, key: str) -> CityService:
@@ -144,9 +145,8 @@ class WorldServiceMixin:
             road = approach.road
         elif service.approach_miles > 0:
             miles = service.approach_miles
-            road = (
-                service.approach_road
-                or CITY_SERVICE_APPROACH_ROADS.get(service.kind, "city service road")
+            road = service.approach_road or CITY_SERVICE_APPROACH_ROADS.get(
+                service.kind, "city service road"
             )
         else:
             base_miles = CITY_SERVICE_APPROACH_MILES.get(service.kind, 3.0)
@@ -183,4 +183,3 @@ class WorldServiceMixin:
             road = FACILITY_APPROACH_ROADS.get(location.type, "facility access road")
         leg = Leg(city, city, miles, road, "flat", ())
         return Route([city, city], [leg])
-

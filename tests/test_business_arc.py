@@ -191,7 +191,8 @@ def test_company_driver_truck_status_says_assigned_not_owned():
         assert "Owned tractor" not in spoken[-1]
         assert "standard rig" in spoken[-1]
         assert app.ctx.profile.truck_specs().max_torque_nm == pytest.approx(
-            TruckSpecs().max_torque_nm)
+            TruckSpecs().max_torque_nm
+        )
     finally:
         app.shutdown()
 
@@ -245,10 +246,7 @@ def test_owner_operator_buy_in_records_first_owned_tractor():
         p.money = OWNER_OPERATOR_BUY_IN + OWNER_OPERATOR_WORKING_CAPITAL
 
         app.push_state(BusinessStatusState(app.ctx))
-        while (
-            "Buy into leased-on owner-operator"
-            not in app.state.items[app.state.index].text
-        ):
+        while "Buy into leased-on owner-operator" not in app.state.items[app.state.index].text:
             app.state.handle_event(key_event(pygame.K_DOWN))
         app.state.handle_event(key_event(pygame.K_RETURN))
 
@@ -307,7 +305,10 @@ def test_trailer_catalog_matches_current_cargo_classes():
     assert compatible_with_programs("farm_inputs", ("dry_van",))
     assert compatible_with_programs("farm_inputs", ("bulk",))
     assert TRAILER_CATALOG["reefer"].purchase_price > TRAILER_CATALOG["reefer"].lease_deposit
-    assert TRAILER_CATALOG["reefer"].owned_per_mile_reserve < TRAILER_CATALOG["reefer"].per_mile_reserve
+    assert (
+        TRAILER_CATALOG["reefer"].owned_per_mile_reserve
+        < TRAILER_CATALOG["reefer"].per_mile_reserve
+    )
 
 
 def test_company_driver_dispatch_uses_carrier_trailer_support():
@@ -545,14 +546,18 @@ def test_owner_operator_settlement_uses_specialty_trailer_program_charge():
     from freight_fate.models.jobs import CARGO_CATALOG, Job
 
     dry_job = Job(
-        CARGO_CATALOG["general"], 12.0, "Chicago", "yard", "Milwaukee", 100.0, 1000.0, 6.0)
+        CARGO_CATALOG["general"], 12.0, "Chicago", "yard", "Milwaukee", 100.0, 1000.0, 6.0
+    )
     reefer_job = Job(
-        CARGO_CATALOG["refrigerated"], 12.0, "Chicago", "cold", "Milwaukee", 100.0, 1000.0, 6.0)
+        CARGO_CATALOG["refrigerated"], 12.0, "Chicago", "cold", "Milwaukee", 100.0, 1000.0, 6.0
+    )
 
     dry = build_business_settlement(
-        LEASED_OWNER_OPERATOR, dry_job, dry_job.pay, on_time=True, driver_charges=0.0)
+        LEASED_OWNER_OPERATOR, dry_job, dry_job.pay, on_time=True, driver_charges=0.0
+    )
     reefer = build_business_settlement(
-        LEASED_OWNER_OPERATOR, reefer_job, reefer_job.pay, on_time=True, driver_charges=0.0)
+        LEASED_OWNER_OPERATOR, reefer_job, reefer_job.pay, on_time=True, driver_charges=0.0
+    )
 
     dry_trailer = next(c.amount for c in dry.business_charges if c.label == "trailer program")
     reefer_trailer = next(c.amount for c in reefer.business_charges if c.label == "trailer program")
@@ -564,10 +569,12 @@ def test_own_authority_owned_trailer_reduces_trailer_charge():
     from freight_fate.models.jobs import CARGO_CATALOG, Job
 
     job = Job(
-        CARGO_CATALOG["refrigerated"], 12.0, "Chicago", "cold", "Milwaukee", 100.0, 1000.0, 6.0)
+        CARGO_CATALOG["refrigerated"], 12.0, "Chicago", "cold", "Milwaukee", 100.0, 1000.0, 6.0
+    )
 
     program = build_business_settlement(
-        INDEPENDENT_AUTHORITY, job, job.pay, on_time=True, driver_charges=0.0)
+        INDEPENDENT_AUTHORITY, job, job.pay, on_time=True, driver_charges=0.0
+    )
     owned = build_business_settlement(
         INDEPENDENT_AUTHORITY,
         job,
@@ -577,8 +584,12 @@ def test_own_authority_owned_trailer_reduces_trailer_charge():
         owned_trailers=("reefer",),
     )
 
-    program_trailer = next(c.amount for c in program.business_charges if c.label == "trailer program")
-    owned_trailer = next(c.amount for c in owned.business_charges if c.label == "owned trailer reserve")
+    program_trailer = next(
+        c.amount for c in program.business_charges if c.label == "trailer program"
+    )
+    owned_trailer = next(
+        c.amount for c in owned.business_charges if c.label == "owned trailer reserve"
+    )
     assert owned_trailer < program_trailer
     assert owned.net_before_advance > program.net_before_advance
 
@@ -624,7 +635,9 @@ def test_business_status_menu_sets_authority_readiness_reserve():
         p.dispatch_board_cache = {"old": True}
 
         app.push_state(BusinessStatusState(app.ctx))
-        while "Commit 12,500 dollars to authority prep" not in app.state.items[app.state.index].text:
+        while (
+            "Commit 12,500 dollars to authority prep" not in app.state.items[app.state.index].text
+        ):
             app.state.handle_event(key_event(pygame.K_DOWN))
         app.state.handle_event(key_event(pygame.K_RETURN))
 
@@ -708,7 +721,8 @@ def test_direct_freight_board_pays_more_and_uses_direct_label(world):
     from freight_fate.states.city import JobBoardState
 
     base = JobBoard(world, seed=44).offers(
-        "Chicago", {"refrigerated", "heavy_haul", "high_value"}, level=25)
+        "Chicago", {"refrigerated", "heavy_haul", "high_value"}, level=25
+    )
     direct = JobBoard(world, seed=44).offers(
         "Chicago",
         {"refrigerated", "heavy_haul", "high_value"},
@@ -739,13 +753,14 @@ def test_independent_authority_settlement_adds_business_overhead():
     from freight_fate.models.business import build_business_settlement
     from freight_fate.models.jobs import CARGO_CATALOG, Job
 
-    job = Job(
-        CARGO_CATALOG["general"], 12.0, "Chicago", "yard", "Milwaukee", 100.0, 1500.0, 6.0)
+    job = Job(CARGO_CATALOG["general"], 12.0, "Chicago", "yard", "Milwaukee", 100.0, 1500.0, 6.0)
 
     leased = build_business_settlement(
-        LEASED_OWNER_OPERATOR, job, job.pay, on_time=True, driver_charges=0.0)
+        LEASED_OWNER_OPERATOR, job, job.pay, on_time=True, driver_charges=0.0
+    )
     direct = build_business_settlement(
-        INDEPENDENT_AUTHORITY, job, job.pay, on_time=True, driver_charges=0.0)
+        INDEPENDENT_AUTHORITY, job, job.pay, on_time=True, driver_charges=0.0
+    )
 
     labels = {charge.label for charge in direct.business_charges}
     assert "authority compliance reserve" in labels
@@ -787,7 +802,8 @@ def test_late_company_driver_still_uses_company_settlement_until_buy_in():
         6.0,
     )
     settlement = build_business_settlement(
-        COMPANY_DRIVER, job, 1800.0, on_time=True, driver_charges=0.0)
+        COMPANY_DRIVER, job, 1800.0, on_time=True, driver_charges=0.0
+    )
 
     assert settlement.status == COMPANY_DRIVER
     assert settlement.business_charges == ()

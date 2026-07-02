@@ -36,10 +36,7 @@ OVERPASS_URLS = (
     OVERPASS_URL,
     "https://overpass.kumi.systems/api/interpreter",
 )
-CENSUS_STATES_URL = (
-    "https://www2.census.gov/geo/tiger/GENZ2023/shp/"
-    "cb_2023_us_state_500k.zip"
-)
+CENSUS_STATES_URL = "https://www2.census.gov/geo/tiger/GENZ2023/shp/cb_2023_us_state_500k.zip"
 CENSUS_STATES_GEOJSON_URL = (
     "https://raw.githubusercontent.com/plotly/datasets/master/geojson-counties-fips.json"
 )
@@ -60,9 +57,7 @@ REQUIRED_METADATA_FIELDS = (
 # A long leg with no fuel-capable curated stop leans on the roadside-fuel
 # fallback; flag it for optional curation without blocking dispatch.
 LONG_LEG_POI_ADVISORY_MI = 250.0
-ELEVATION_SOURCE = (
-    "Open-Meteo Elevation API development-time sample from Copernicus DEM GLO-90."
-)
+ELEVATION_SOURCE = "Open-Meteo Elevation API development-time sample from Copernicus DEM GLO-90."
 CORRIDOR_SOURCE = (
     "Development-time OSRM route geometry over OpenStreetMap, with Open-Meteo "
     "elevation samples, Census/OpenStreetMap state context, and curated "
@@ -78,8 +73,7 @@ ORS_CORRIDOR_SOURCE = (
     "curated corridor POIs checked in for offline runtime use."
 )
 ORS_GRADE_SOURCE = (
-    "OpenRouteService route elevation profile segmented by terrain "
-    "(development-time)."
+    "OpenRouteService route elevation profile segmented by terrain (development-time)."
 )
 HIGH_PRIORITY_REMAINING_CORRIDORS = (
     {

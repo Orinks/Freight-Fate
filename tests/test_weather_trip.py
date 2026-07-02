@@ -23,9 +23,12 @@ def _gps_events(events):
     target one specific cue (toll, state line, construction, traffic); curated
     interchanges share the GPS-cue stream, so filter them out to keep those
     assertions about the cue they mean."""
-    return [e for e in events
-            if e.kind == TripEventKind.GPS_CUE
-            and getattr(e.data.get("cue"), "kind", "") != "interchange"]
+    return [
+        e
+        for e in events
+        if e.kind == TripEventKind.GPS_CUE
+        and getattr(e.data.get("cue"), "kind", "") != "interchange"
+    ]
 
 
 def _gps_messages(events):
@@ -148,9 +151,7 @@ def _brake_until_speed(
         truck.auto_shift()
         truck.update(dt)
         events = trip.update(dt)
-        inspections.extend(
-            event for event in events if event.kind == TripEventKind.INSPECTION
-        )
+        inspections.extend(event for event in events if event.kind == TripEventKind.INSPECTION)
         if truck.speed_mph <= target_mph:
             return inspections
     raise AssertionError(f"truck did not slow to {target_mph} mph")
@@ -163,8 +164,7 @@ def test_relaxed_hazard_scale_lowers_hazard_risk(world):
     normal, _ = make_trip(world, seed=4)
     relaxed, _ = make_trip(world, seed=4, hazard_scale=RELAXED_HAZARD_SCALE)
     # Same route, weather, and clock: the only difference is the scale.
-    assert relaxed._hazard_risk() == pytest.approx(
-        normal._hazard_risk() * RELAXED_HAZARD_SCALE)
+    assert relaxed._hazard_risk() == pytest.approx(normal._hazard_risk() * RELAXED_HAZARD_SCALE)
     assert relaxed._hazard_risk() < normal._hazard_risk()
 
 
@@ -173,8 +173,7 @@ def test_corridor_busyness_scales_hazard_check_frequency(world):
     sparse_route = world.route_from_cities(["Las Vegas", "Reno"])
     weather = WeatherSystem("northeast", seed=1)
     dense = Trip(dense_route, TruckState(), weather, seed=1)
-    sparse = Trip(sparse_route, TruckState(), WeatherSystem("great_basin", seed=1),
-                  seed=1)
+    sparse = Trip(sparse_route, TruckState(), WeatherSystem("great_basin", seed=1), seed=1)
     dense.position_mi = 25.0
     sparse.position_mi = sparse.total_miles / 2
 
@@ -191,18 +190,14 @@ def test_hazard_check_interval_shortens_on_busy_corridors(world):
 
     dense_route = world.route_from_cities(["New York", "Boston"])
     sparse_route = world.route_from_cities(["Las Vegas", "Reno"])
-    dense = Trip(dense_route, TruckState(), WeatherSystem("northeast", seed=1),
-                 seed=1)
-    sparse = Trip(sparse_route, TruckState(), WeatherSystem("great_basin", seed=1),
-                  seed=1)
+    dense = Trip(dense_route, TruckState(), WeatherSystem("northeast", seed=1), seed=1)
+    sparse = Trip(sparse_route, TruckState(), WeatherSystem("great_basin", seed=1), seed=1)
     dense.position_mi = 25.0
     sparse.position_mi = sparse.total_miles / 2
     dense._rng = FixedRng()
     sparse._rng = FixedRng()
 
-    assert dense._next_hazard_check_interval_mi() < (
-        sparse._next_hazard_check_interval_mi()
-    )
+    assert dense._next_hazard_check_interval_mi() < (sparse._next_hazard_check_interval_mi())
 
 
 def test_relaxed_mode_thins_traffic_density(world):
@@ -213,9 +208,11 @@ def test_relaxed_mode_thins_traffic_density(world):
     relaxed, _ = make_trip(world, seed=4, hazard_scale=RELAXED_HAZARD_SCALE)
     leg = normal.route.legs[0]
     assert relaxed._leg_traffic_density(leg, 0.0, False) == pytest.approx(
-        normal._leg_traffic_density(leg, 0.0, False) * RELAXED_HAZARD_SCALE)
-    assert (relaxed._leg_traffic_density(leg, 0.0, False)
-            < normal._leg_traffic_density(leg, 0.0, False))
+        normal._leg_traffic_density(leg, 0.0, False) * RELAXED_HAZARD_SCALE
+    )
+    assert relaxed._leg_traffic_density(leg, 0.0, False) < normal._leg_traffic_density(
+        leg, 0.0, False
+    )
 
 
 def test_relaxed_mode_reduces_merge_exit_pressure(world):
@@ -228,7 +225,8 @@ def test_relaxed_mode_reduces_merge_exit_pressure(world):
     stop_mile = normal.stops[0].at_mi - 2.0
 
     assert relaxed._traffic_pressure_intensity(stop_mile, "exit") == pytest.approx(
-        normal._traffic_pressure_intensity(stop_mile, "exit") * RELAXED_HAZARD_SCALE)
+        normal._traffic_pressure_intensity(stop_mile, "exit") * RELAXED_HAZARD_SCALE
+    )
     relaxed_exit = next(
         (p for p in relaxed.traffic_pressures if p.kind == "exit"),
         None,
@@ -247,7 +245,8 @@ def test_relaxed_mode_thins_random_inspection_odds(world):
     relaxed, _ = make_trip(world, seed=4, hazard_scale=RELAXED_HAZARD_SCALE)
     leg = normal.route.legs[0]
     assert relaxed._random_inspection_odds(leg) == pytest.approx(
-        normal._random_inspection_odds(leg) * RELAXED_HAZARD_SCALE)
+        normal._random_inspection_odds(leg) * RELAXED_HAZARD_SCALE
+    )
     assert relaxed._random_inspection_odds(leg) < normal._random_inspection_odds(leg)
 
 
@@ -325,7 +324,7 @@ def test_force_weather_override_locks_condition(monkeypatch):
     monkeypatch.setenv("FREIGHT_FATE_FORCE_WEATHER", "snow")
     ws = WeatherSystem("heartland", seed=1)
     assert ws.current is WeatherKind.SNOW
-    for _ in range(200):              # never drifts off the forced condition
+    for _ in range(200):  # never drifts off the forced condition
         ws.update(30.0)
         assert ws.current is WeatherKind.SNOW
 
@@ -340,7 +339,7 @@ def test_weather_drag_multiplier_increases_resistance():
     truck = TruckState()
     truck.velocity_mps = 25.0
     base = truck.resistance_force()
-    truck.drag_mult = 1.25          # a strong headwind / storm
+    truck.drag_mult = 1.25  # a strong headwind / storm
     assert truck.resistance_force() > base
 
 
@@ -348,23 +347,23 @@ def test_visibility_shortens_hazard_reaction(world):
     trip, _ = make_trip(world)
     trip.weather.current = WeatherKind.CLEAR
     assert trip._visibility_reaction_factor() == 1.0
-    trip.weather.current = WeatherKind.HEAVY_RAIN   # 1.5 mi visibility
+    trip.weather.current = WeatherKind.HEAVY_RAIN  # 1.5 mi visibility
     assert trip._visibility_reaction_factor() == pytest.approx(0.5)
-    trip.weather.current = WeatherKind.FOG          # 0.3 mi -> floored
+    trip.weather.current = WeatherKind.FOG  # 0.3 mi -> floored
     assert trip._visibility_reaction_factor() == pytest.approx(0.4)
 
 
 def test_too_fast_for_conditions_risks_traction_loss(world):
     trip, truck = make_trip(world)
-    trip._hazard_check_mi = 1e9          # silence the random environmental hazards
+    trip._hazard_check_mi = 1e9  # silence the random environmental hazards
     trip._inspection_check_mi = 1e9
     trip.traffic_manager.vehicles = []
 
     def run_for_hazard(frames=12000):
         hits = []
         for _ in range(frames):
-            trip.weather.current = WeatherKind.SNOW   # grip 0.45, safe speed 35
-            truck.velocity_mps = 27.0                 # ~60 mph, well over safe
+            trip.weather.current = WeatherKind.SNOW  # grip 0.45, safe speed 35
+            truck.velocity_mps = 27.0  # ~60 mph, well over safe
             for e in trip.update(1 / 60):
                 if e.kind == TripEventKind.HAZARD:
                     hits.append(e.message)
@@ -383,7 +382,7 @@ def test_too_fast_for_conditions_risks_traction_loss(world):
     safe_hits = []
     for _ in range(6000):
         trip2.weather.current = WeatherKind.SNOW
-        truck2.velocity_mps = 14.0                    # ~31 mph, under safe 35
+        truck2.velocity_mps = 14.0  # ~31 mph, under safe 35
         for e in trip2.update(1 / 60):
             if e.kind == TripEventKind.HAZARD:
                 safe_hits.append(e.message)
@@ -490,8 +489,7 @@ def test_delivery_final_miles_use_facility_approach_limits(world):
 
 
 def test_pickup_deadhead_route_uses_local_facility_limits(world):
-    route = world.facility_approach_route(
-        "Chicago", world.cities["Chicago"].locations[0].name)
+    route = world.facility_approach_route("Chicago", world.cities["Chicago"].locations[0].name)
     truck = TruckState()
     weather = WeatherSystem("great_lakes", seed=1)
     trip = Trip(route, truck, weather, seed=2)
@@ -506,8 +504,7 @@ def test_pickup_deadhead_route_uses_local_facility_limits(world):
 
 
 def test_facility_gate_warns_before_final_low_speed_zone(world):
-    route = world.facility_approach_route(
-        "Chicago", world.cities["Chicago"].locations[0].name)
+    route = world.facility_approach_route("Chicago", world.cities["Chicago"].locations[0].name)
     truck = TruckState()
     weather = WeatherSystem("great_lakes", seed=1)
     trip = Trip(route, truck, weather, seed=2)
@@ -544,8 +541,7 @@ def test_construction_zone_has_staged_merge_taper(world):
     trip, _ = make_trip(world, "Chicago", "Indianapolis", seed=2)
     zone = next(z for z in trip.zones if z.reason == "construction")
     taper = next(
-        z for z in trip.zones
-        if z.reason == "construction merge" and z.end_mi == zone.start_mi
+        z for z in trip.zones if z.reason == "construction merge" and z.end_mi == zone.start_mi
     )
 
     assert taper.start_mi == pytest.approx(zone.start_mi - CONSTRUCTION_TAPER_MI)
@@ -575,7 +571,7 @@ def test_construction_warning_lead_allows_normal_braking(world):
 def test_construction_zone_does_not_fine_on_entry_tick(world):
     trip, truck = make_trip(world, "Chicago", "Indianapolis", seed=2)
     zone = next(z for z in trip.zones if z.reason == "construction")
-    truck.velocity_mps = 31.3   # about 70 mph
+    truck.velocity_mps = 31.3  # about 70 mph
 
     trip.position_mi = zone.start_mi - 0.2
     moved_mi = 0.35
@@ -591,7 +587,7 @@ def test_construction_zone_does_not_fine_on_entry_tick(world):
 def test_construction_zone_speeding_fine_waits_for_grace_distance(world):
     trip, truck = make_trip(world, "Chicago", "Indianapolis", seed=2)
     zone = next(z for z in trip.zones if z.reason == "construction")
-    truck.velocity_mps = 31.3   # about 70 mph
+    truck.velocity_mps = 31.3  # about 70 mph
 
     trip.position_mi = zone.start_mi - 2.0
     advance = trip.update(0.0)
@@ -649,9 +645,7 @@ def test_route_derived_flat_grade_is_stable_across_trip_seeds(world):
     trip_b, _ = make_trip(world, seed=99)
     miles = [0.0, 20.0, 33.0, 72.0, 122.0, 183.0]
 
-    assert [trip_a.grade_at(mile) for mile in miles] == [
-        trip_b.grade_at(mile) for mile in miles
-    ]
+    assert [trip_a.grade_at(mile) for mile in miles] == [trip_b.grade_at(mile) for mile in miles]
     assert max(abs(trip_a.grade_at(mile)) for mile in miles) < 0.002
     assert {trip_a.terrain_at(mile) for mile in miles} == {"flat"}
 
@@ -664,12 +658,8 @@ def test_traffic_varies_by_seed_but_route_grade_does_not(world):
         trip_b.grade_at(mile) for mile in (10.0, 80.0, 150.0)
     ]
     assert [
-        (vehicle.at_mi, vehicle.speed_mph, vehicle.reason)
-        for vehicle in trip_a.npc_vehicles
-    ] != [
-        (vehicle.at_mi, vehicle.speed_mph, vehicle.reason)
-        for vehicle in trip_b.npc_vehicles
-    ]
+        (vehicle.at_mi, vehicle.speed_mph, vehicle.reason) for vehicle in trip_a.npc_vehicles
+    ] != [(vehicle.at_mi, vehicle.speed_mph, vehicle.reason) for vehicle in trip_b.npc_vehicles]
 
 
 def test_npc_traffic_model_applies_to_enriched_and_legacy_routes(world):
@@ -710,9 +700,7 @@ def test_npc_traffic_seeding_is_deterministic(world):
 
 def test_npc_traffic_moves_each_trip_tick(world):
     trip, _truck = make_trip(world)
-    trip.traffic_manager.vehicles = [
-        NPCVehicle("npc:test", 5.0, 60.0, 60.0, 0, "steady_truck")
-    ]
+    trip.traffic_manager.vehicles = [NPCVehicle("npc:test", 5.0, 60.0, 60.0, 0, "steady_truck")]
     trip._hazard_check_mi = 1e9
     trip._inspection_check_mi = 1e9
 
@@ -750,11 +738,9 @@ def test_bad_weather_slows_modeled_traffic(world):
 def test_rush_hour_can_slow_modeled_traffic(world):
     route = world.route_from_cities(["Chicago", "Indianapolis"])
     midday = Trip(
-        route, TruckState(), WeatherSystem("great_lakes", seed=1),
-        seed=1, start_hour=12.0)
-    rush = Trip(
-        route, TruckState(), WeatherSystem("great_lakes", seed=1),
-        seed=1, start_hour=8.0)
+        route, TruckState(), WeatherSystem("great_lakes", seed=1), seed=1, start_hour=12.0
+    )
+    rush = Trip(route, TruckState(), WeatherSystem("great_lakes", seed=1), seed=1, start_hour=8.0)
 
     assert rush._rush_hour_traffic_bias(route.legs[0]) > 0.0
     if rush.npc_vehicles and midday.npc_vehicles:
@@ -766,11 +752,11 @@ def test_rush_hour_can_slow_modeled_traffic(world):
 def test_traffic_pressure_marks_exit_and_construction_context(world):
     trip, _ = make_trip(world)
 
-    assert any(p.kind == "exit" and p.direction == "right"
-               for p in trip.traffic_pressures)
+    assert any(p.kind == "exit" and p.direction == "right" for p in trip.traffic_pressures)
     if any(zone.reason == "construction merge" for zone in trip.zones):
-        assert any(p.kind == "construction_merge" and p.direction == "left"
-                   for p in trip.traffic_pressures)
+        assert any(
+            p.kind == "construction_merge" and p.direction == "left" for p in trip.traffic_pressures
+        )
 
 
 def test_traffic_pressure_gps_cue_deduplicates(world):
@@ -782,17 +768,17 @@ def test_traffic_pressure_gps_cue_deduplicates(world):
     second = trip.update(0.0)
 
     cues = [
-        event for event in first
-        if event.kind == TripEventKind.GPS_CUE
-        and event.data.get("traffic_pressure") is pressure
+        event
+        for event in first
+        if event.kind == TripEventKind.GPS_CUE and event.data.get("traffic_pressure") is pressure
     ]
     assert len(cues) == 1
     assert "Exit traffic building" in cues[0].message
     assert "Signal early" in cues[0].message
     assert not [
-        event for event in second
-        if event.kind == TripEventKind.GPS_CUE
-        and event.data.get("traffic_pressure") is pressure
+        event
+        for event in second
+        if event.kind == TripEventKind.GPS_CUE and event.data.get("traffic_pressure") is pressure
     ]
 
 
@@ -807,7 +793,8 @@ def test_npc_traffic_cue_and_status_are_reviewable(world):
     events = trip.update(0.0)
 
     npc_cues = [
-        event for event in events
+        event
+        for event in events
         if event.kind == TripEventKind.GPS_CUE
         and event.data.get("npc_vehicle") is trip.npc_vehicles[0]
     ]
@@ -831,7 +818,8 @@ def test_metric_toggle_updates_npc_traffic_cue_units(world):
     events = trip.update(0.0)
 
     npc_cue = next(
-        event for event in events
+        event
+        for event in events
         if event.kind == TripEventKind.GPS_CUE
         and event.data.get("npc_vehicle") is trip.npc_vehicles[0]
     )
@@ -843,9 +831,7 @@ def test_metric_toggle_updates_npc_traffic_cue_units(world):
 def test_npc_traffic_status_includes_speed_units(world):
     trip, _truck = make_trip(world)
     trip.position_mi = 10.0
-    trip.traffic_manager.vehicles = [
-        NPCVehicle("npc:status", 10.8, 68.0, 68.0, 0, "steady_truck")
-    ]
+    trip.traffic_manager.vehicles = [NPCVehicle("npc:status", 10.8, 68.0, 68.0, 0, "steady_truck")]
 
     assert "moving 68 miles per hour" in trip.npc_traffic_status()
 
@@ -875,8 +861,17 @@ def test_every_region_has_clear_day_hazards():
         # is not weather-gated -- it stays eligible but heavily down-weighted
         # by day -- so animal hazards are deliberately not excluded here.)
         text = " ".join(pool)
-        for word in ("snow", "ice", "fog", "crosswind", "dust", "water",
-                     "hail", "rockfall", "tumbleweed"):
+        for word in (
+            "snow",
+            "ice",
+            "fog",
+            "crosswind",
+            "dust",
+            "water",
+            "hail",
+            "rockfall",
+            "tumbleweed",
+        ):
             assert word not in text, f"{word!r} should not occur on a clear day"
 
 
@@ -927,7 +922,7 @@ def test_upcoming_stop_only_looks_ahead(world):
     assert trip.upcoming_stop(5.0) is stop
     trip.position_mi = stop.at_mi - 10.0
     assert trip.upcoming_stop(5.0) is None
-    trip.position_mi = stop.at_mi + 0.1   # just past: the exit is gone
+    trip.position_mi = stop.at_mi + 0.1  # just past: the exit is gone
     next_stop = trip.upcoming_stop(5.0)
     assert next_stop is not stop
 
@@ -938,9 +933,9 @@ def test_eta_tracks_current_speed(world):
     trip, truck = make_trip(world)
     parked = trip.eta_game_hours()
     assert parked > 0
-    truck.velocity_mps = 31.3   # ~70 mph
+    truck.velocity_mps = 31.3  # ~70 mph
     fast = trip.eta_game_hours()
-    truck.velocity_mps = 13.4   # ~30 mph
+    truck.velocity_mps = 13.4  # ~30 mph
     slow = trip.eta_game_hours()
     assert fast < parked < slow  # parked assumes 55 mph, between the two
     # parked or crawling falls back to highway pace, never infinity
@@ -953,7 +948,7 @@ def test_progress_summary_mentions_highway(world):
     text = trip.progress_summary()
     assert "I-65" in text
     assert "Indianapolis, Indiana" in text
-    assert "Grade level" in text
+    assert "Current grade 0.0 percent, level" in text
     # The summary reports the nearest upcoming cue; an early stop leads here.
     assert "Next stop" in text
     metric = trip.progress_summary(imperial=False)
@@ -986,8 +981,7 @@ def test_gps_state_crossing_and_rest_stop_cues_deduplicate(world):
 
     trip.position_mi = 32.8
     crossing = trip.update(0.0)
-    assert [event.message for event in crossing
-            if event.kind == TripEventKind.STATE_CROSSING] == [
+    assert [event.message for event in crossing if event.kind == TripEventKind.STATE_CROSSING] == [
         "Crossing into Indiana near the I-65 state line south of Hammond."
     ]
 
@@ -995,7 +989,8 @@ def test_gps_state_crossing_and_rest_stop_cues_deduplicate(world):
     rest = trip.update(0.0)
     assert any(
         event.kind == TripEventKind.GPS_CUE
-        and event.message == (
+        and event.message
+        == (
             "Travel center at exit 175 ahead in 1 mile; confirmed truck parking; "
             "press X to signal for the exit."
         )
@@ -1012,8 +1007,7 @@ def test_likely_parking_route_cue_just_announces_stop(world):
     trip, _truck = make_trip(world)
     leg = trip.route.legs[0]
     likely_stop = next(stop for stop in leg.stops if stop.parking == "likely")
-    cue = next(cue for cue in trip.navigation_cues
-               if cue.key.endswith(f":{likely_stop.name}"))
+    cue = next(cue for cue in trip.navigation_cues if cue.key.endswith(f":{likely_stop.name}"))
 
     assert "likely truck parking" not in cue.near_text
     assert cue.near_text.startswith(likely_stop.label.capitalize())
@@ -1023,13 +1017,15 @@ def test_likely_parking_route_cue_just_announces_stop(world):
 
 def test_gps_traffic_cue_deduplicates(world):
     trip, _truck = make_trip(world)
-    trip.navigation_cues.append(NavigationCue(
-        "traffic:test",
-        "traffic",
-        10.0,
-        "traffic queue ahead at 45 miles per hour",
-        "Traffic slowing ahead; target speed 45.",
-    ))
+    trip.navigation_cues.append(
+        NavigationCue(
+            "traffic:test",
+            "traffic",
+            10.0,
+            "traffic queue ahead at 45 miles per hour",
+            "Traffic slowing ahead; target speed 45.",
+        )
+    )
 
     trip.position_mi = 8.5
     first = trip.update(0.0)
@@ -1043,13 +1039,15 @@ def test_gps_traffic_cue_deduplicates(world):
 
 def test_route_context_describes_near_traffic_without_zero_distance(world):
     trip, _truck = make_trip(world)
-    trip.navigation_cues = [NavigationCue(
-        "traffic:test",
-        "traffic",
-        10.1,
-        "traffic queue ahead",
-        speed_mph=45.0,
-    )]
+    trip.navigation_cues = [
+        NavigationCue(
+            "traffic:test",
+            "traffic",
+            10.1,
+            "traffic queue ahead",
+            speed_mph=45.0,
+        )
+    ]
     trip.position_mi = 10.0
 
     context = trip.next_navigation_context()
@@ -1061,7 +1059,10 @@ def test_route_context_describes_near_traffic_without_zero_distance(world):
 def test_toll_cues_and_charges_deduplicate(world):
     trip, _truck = make_trip(world, "New York", "Philadelphia")
 
-    trip.position_mi = 6.1
+    # I-95 south from the Hunts Point node crosses to NJ at the GWB (mi 7.0);
+    # the NJ Turnpike ticket toll follows at mi 8.9, so probe just past the
+    # crossing to isolate the toll cue.
+    trip.position_mi = 7.3
     advance = trip.update(0.0)
     repeat = trip.update(0.0)
 
@@ -1071,18 +1072,16 @@ def test_toll_cues_and_charges_deduplicate(world):
     ]
     assert not _gps_events(repeat)
 
-    trip.position_mi = 8.0
+    trip.position_mi = 9.5
     charged = trip.update(0.0)
     charged_again = trip.update(0.0)
 
-    assert [event.message for event in charged
-            if event.kind == TripEventKind.TOLL_CHARGED] == [
+    assert [event.message for event in charged if event.kind == TripEventKind.TOLL_CHARGED] == [
         "ticket system toll charged at New Jersey Turnpike ticket entry: "
         "Estimated 18 dollars, billed to carrier settlement."
     ]
     assert trip.toll_expense == 18.0
-    assert not [event for event in charged_again
-                if event.kind == TripEventKind.TOLL_CHARGED]
+    assert not [event for event in charged_again if event.kind == TripEventKind.TOLL_CHARGED]
 
 
 def test_non_toll_route_does_not_charge_tolls(world):
@@ -1148,8 +1147,7 @@ def test_city_events_announce_state_crossings(world):
 
     city_events = [e.message for e in events if e.kind == TripEventKind.CITY_REACHED]
     assert city_events == [
-        "Crossing into Ohio. Passing Cleveland, Ohio. "
-        "Continuing on I-76 toward Pittsburgh."
+        "Crossing into Ohio. Passing Cleveland, Ohio. Continuing on I-76 toward Pittsburgh."
     ]
 
 
@@ -1163,6 +1161,4 @@ def test_city_events_include_state_without_repeating_crossing(world):
     events = trip.update(0.0)
 
     city_events = [e.message for e in events if e.kind == TripEventKind.CITY_REACHED]
-    assert city_events == [
-        "Passing Buffalo, New York. Continuing on I-90 toward Cleveland."
-    ]
+    assert city_events == ["Passing Buffalo, New York. Continuing on I-90 toward Cleveland."]

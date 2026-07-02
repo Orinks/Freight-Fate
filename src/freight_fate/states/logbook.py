@@ -65,8 +65,7 @@ class LogbookState(MenuState):
 
     def build_items(self) -> list[MenuItem]:
         items = [
-            MenuItem(line, lambda line=line: self.ctx.say(line),
-                     help="Repeat this logbook line.")
+            MenuItem(line, lambda line=line: self.ctx.say(line), help="Repeat this logbook line.")
             for line in logbook_lines(self.ctx, self.driving)
         ]
         items.append(MenuItem("Back", self.go_back, help="Return to the previous menu."))

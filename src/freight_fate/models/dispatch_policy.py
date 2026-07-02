@@ -40,8 +40,7 @@ def dispatch_policy(profile) -> DispatchPolicy:
     """The dispatch autonomy band for this profile, derived from saves as-is."""
     status = getattr(profile, "business_status", COMPANY_DRIVER)
     if is_owner_operator(status):
-        return DispatchPolicy(assigns_load=False, assigns_route=False,
-                              decline_budget=0)
+        return DispatchPolicy(assigns_load=False, assigns_route=False, decline_budget=0)
     level = int(getattr(profile.career, "level", 1))
     return DispatchPolicy(
         assigns_load=level < SENIOR_LOAD_CHOICE_LEVEL,

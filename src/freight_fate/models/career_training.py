@@ -96,14 +96,10 @@ def training_guidance(profile) -> TrainingGuidance:
 def training_recommendation_score(profile, job) -> float:
     stage = company_training_stage(profile)
     miles = float(getattr(job, "distance_mi", 0.0))
-    deadline = float(
-        getattr(job, "deadline_game_h", getattr(job, "deadline_h", 0.0))
-    )
+    deadline = float(getattr(job, "deadline_game_h", getattr(job, "deadline_h", 0.0)))
     margin = max(0.0, deadline - miles / 55.0)
     cargo = getattr(getattr(job, "cargo", None), "key", "")
-    specialty_penalty = (
-        60.0 if cargo in {"electronics", "machinery", "hazmat"} else 0.0
-    )
+    specialty_penalty = 60.0 if cargo in {"electronics", "machinery", "hazmat"} else 0.0
 
     if stage is TrainingStage.FIRST_DISPATCH:
         return miles + specialty_penalty - margin * 18.0

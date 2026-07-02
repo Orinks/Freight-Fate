@@ -234,15 +234,46 @@ rather than minutes of waiting.
 
 ```bash
 uv sync --group dev
+uv run pre-commit install
 uv run pre-commit install --hook-type pre-push
 uv run pytest          # full test suite, headless
 uv run ruff check src tests tools
 ```
 
-The pre-push hook runs the release-note gate before publishing commits. It
-uses `tools.release_notes check --base auto --head HEAD`, so user-facing
-changes need a player-facing `CHANGELOG.md` entry unless the whole change set
-uses `changelog: none` or `[skip changelog]`.
+The pre-commit hooks run Ruff lint fixes and formatting before commits. The
+pre-push hook runs the release-note gate before publishing commits. It uses
+`tools.release_notes check --base auto --head HEAD`, so user-facing changes need
+a player-facing `CHANGELOG.md` entry unless the whole change set uses
+`changelog: none` or `[skip changelog]`.
+
+### World data
+
+The route tools edit the single `src/freight_fate/data/world.json`, but the game
+loads the indexed `src/freight_fate/data/world_data/` tree. After changing world
+data, regenerate the index so the two stay in sync:
+
+```bash
+uv run python tools/index_world.py          # rewrite world_data/ from world.json
+uv run python tools/index_world.py --check  # verify in sync (CI + pre-commit do this)
+```
+
+A pre-commit hook and a test both fail if `world_data/` drifts from `world.json`,
+so commit the regenerated `world_data/` files alongside your `world.json` edits.
+
+### Playtesting
+
+Freight Fate is audio-first, so the way to review a playthrough is the transcript
+of what the game says. `tools/playtest.py` drives the real game states headless
+(no window, no speech) and prints that transcript:
+
+```bash
+uv run python tools/playtest.py                       # new-career delivery
+uv run python tools/playtest.py --route "Newark->New York"   # one corridor
+uv run python tools/playtest.py --route "New York->Boston" --events-only
+```
+
+Use `--route` to exercise a specific corridor after editing its route data. The
+same harness backs the `@pytest.mark.smoke` delivery tests.
 
 ### Changelog and snapshots
 

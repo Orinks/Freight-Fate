@@ -5,8 +5,8 @@ from build_interchanges_base import *
 
 
 MAXSPEED_HIGHWAY_CLASSES = ("motorway", "trunk", "primary", "secondary")
-MAXSPEED_CORRIDOR_M = 250.0       # a maxspeed way must snap this close to a leg
-MAXSPEED_SAMPLE_STRIDE_MI = 5.0   # profile resolution along the leg
+MAXSPEED_CORRIDOR_M = 250.0  # a maxspeed way must snap this close to a leg
+MAXSPEED_SAMPLE_STRIDE_MI = 5.0  # profile resolution along the leg
 # The maxspeed index spans every route in the country, so snapping all of it to
 # each leg is quadratic. A coarse lat/lon grid buckets way points (~5.5km cells)
 # so a leg only snaps ways in the cells its geometry passes through. Way points
@@ -52,8 +52,10 @@ def _parse_osm_maxspeed(raw: Any) -> float | None:
     global _PARSE_OSM_MAXSPEED
     if _PARSE_OSM_MAXSPEED is None:
         import importlib.util
+
         spec = importlib.util.spec_from_file_location(
-            "enrich_routes", Path(__file__).with_name("enrich_routes.py"))
+            "enrich_routes", Path(__file__).with_name("enrich_routes.py")
+        )
         module = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(module)
         _PARSE_OSM_MAXSPEED = module.parse_osm_maxspeed
@@ -99,9 +101,11 @@ def _pbf_for_states(states: set[str], region_dir: Path) -> list[Path]:
         else:
             missing.append(state)
     if missing:
-        print(f"    no local extract for: {', '.join(missing)} "
-              f"(looked in {region_dir}); those stretches keep the heuristic",
-              flush=True)
+        print(
+            f"    no local extract for: {', '.join(missing)} "
+            f"(looked in {region_dir}); those stretches keep the heuristic",
+            flush=True,
+        )
     return found
 
 
@@ -129,8 +133,7 @@ def _build_maxspeed_index_from_pbf(
             *(("highway", value) for value in MAXSPEED_HIGHWAY_CLASSES)
         )
     ]
-    pass1 = _LocalIndexProgress(f"PBF {label} maxspeed pass 1",
-                                LOCAL_INDEX_PROGRESS_INTERVAL_SEC)
+    pass1 = _LocalIndexProgress(f"PBF {label} maxspeed pass 1", LOCAL_INDEX_PROGRESS_INTERVAL_SEC)
 
     class MaxspeedWayHandler(osmium.SimpleHandler):  # type: ignore[name-defined]
         def __init__(self) -> None:
@@ -141,34 +144,30 @@ def _build_maxspeed_index_from_pbf(
 
         def way(self, way: Any) -> None:
             self.ways_seen += 1
-            pass1.maybe(
-                f"{self.ways_seen:,} ways; retained {len(self.ways):,} "
-                f"maxspeed ways"
-            )
+            pass1.maybe(f"{self.ways_seen:,} ways; retained {len(self.ways):,} maxspeed ways")
             tags = {str(k): str(v) for k, v in way.tags}
             if tags.get("highway") not in MAXSPEED_HIGHWAY_CLASSES:
                 return
             hgv_mph = _parse_osm_maxspeed(tags.get("maxspeed:hgv"))
-            mph = hgv_mph if hgv_mph is not None else _parse_osm_maxspeed(
-                tags.get("maxspeed"))
+            mph = hgv_mph if hgv_mph is not None else _parse_osm_maxspeed(tags.get("maxspeed"))
             if mph is None:
                 return
-            node_ids = [int(ref.ref) for ref in way.nodes
-                        if getattr(ref, "ref", None) is not None]
+            node_ids = [int(ref.ref) for ref in way.nodes if getattr(ref, "ref", None) is not None]
             if len(node_ids) < 1:
                 return
-            self.ways.append(_MaxspeedWayRaw(
-                node_ids=tuple(node_ids),
-                mph=mph,
-                hgv=hgv_mph is not None,
-                ref=str(tags.get("ref", "")).strip(),
-            ))
+            self.ways.append(
+                _MaxspeedWayRaw(
+                    node_ids=tuple(node_ids),
+                    mph=mph,
+                    hgv=hgv_mph is not None,
+                    ref=str(tags.get("ref", "")).strip(),
+                )
+            )
             self.wanted.update(node_ids)
 
     handler = MaxspeedWayHandler()
     try:
-        print(f"    building maxspeed index from PBF {label} pass 1: {pbf_path}",
-              flush=True)
+        print(f"    building maxspeed index from PBF {label} pass 1: {pbf_path}", flush=True)
         handler.apply_file(str(pbf_path), filters=tag_filters)
     except RuntimeError as exc:
         raise SystemExit(f"Could not read OSM PBF {pbf_path}: {exc}") from exc
@@ -176,8 +175,7 @@ def _build_maxspeed_index_from_pbf(
     if not handler.wanted:
         return []
 
-    pass2 = _LocalIndexProgress(f"PBF {label} maxspeed pass 2",
-                                LOCAL_INDEX_PROGRESS_INTERVAL_SEC)
+    pass2 = _LocalIndexProgress(f"PBF {label} maxspeed pass 2", LOCAL_INDEX_PROGRESS_INTERVAL_SEC)
 
     class MaxspeedNodeHandler(osmium.SimpleHandler):  # type: ignore[name-defined]
         def __init__(self, wanted: set[int]) -> None:
@@ -203,21 +201,25 @@ def _build_maxspeed_index_from_pbf(
     node_handler = MaxspeedNodeHandler(handler.wanted)
     id_filters = [osmium.filter.IdFilter(handler.wanted)]  # type: ignore[attr-defined]
     try:
-        print(f"    resolving {len(handler.wanted):,} maxspeed-way node locations "
-              f"from PBF {label} pass 2", flush=True)
+        print(
+            f"    resolving {len(handler.wanted):,} maxspeed-way node locations "
+            f"from PBF {label} pass 2",
+            flush=True,
+        )
         node_handler.apply_file(str(pbf_path), filters=id_filters)
     except RuntimeError as exc:
         raise SystemExit(f"Could not read OSM PBF {pbf_path}: {exc}") from exc
 
     ways: list[LocalMaxspeedWay] = []
     for raw in handler.ways:
-        coords = tuple(node_handler.coords[node_id] for node_id in raw.node_ids
-                       if node_id in node_handler.coords)
+        coords = tuple(
+            node_handler.coords[node_id]
+            for node_id in raw.node_ids
+            if node_id in node_handler.coords
+        )
         if coords:
-            ways.append(LocalMaxspeedWay(
-                coords=coords, mph=raw.mph, hgv=raw.hgv, ref=raw.ref))
-    print(f"    retained {len(ways):,} route-corridor maxspeed ways from {label}",
-          flush=True)
+            ways.append(LocalMaxspeedWay(coords=coords, mph=raw.mph, hgv=raw.hgv, ref=raw.ref))
+    print(f"    retained {len(ways):,} route-corridor maxspeed ways from {label}", flush=True)
     return ways
 
 
@@ -226,22 +228,23 @@ def _maxspeed_index_cache_path(pbf_paths: list[Path]) -> Path:
         name = pbf_paths[0].name
         for suffix in (".osm.pbf", ".pbf"):
             if name.endswith(suffix):
-                name = name[:-len(suffix)]
+                name = name[: -len(suffix)]
                 break
         return pbf_paths[0].with_name(f"{name}.maxspeed.json")
     return pbf_paths[0].with_name("freight-fate-maxspeed.json")
 
 
 def _maxspeed_way_to_json(way: LocalMaxspeedWay) -> dict[str, Any]:
-    return {"coords": [list(c) for c in way.coords],
-            "mph": way.mph, "hgv": way.hgv, "ref": way.ref}
+    return {"coords": [list(c) for c in way.coords], "mph": way.mph, "hgv": way.hgv, "ref": way.ref}
 
 
 def _maxspeed_way_from_json(raw: dict[str, Any]) -> LocalMaxspeedWay:
     return LocalMaxspeedWay(
         coords=tuple((float(c[0]), float(c[1])) for c in raw.get("coords", ())),
-        mph=float(raw["mph"]), hgv=bool(raw.get("hgv", False)),
-        ref=str(raw.get("ref", "")))
+        mph=float(raw["mph"]),
+        hgv=bool(raw.get("hgv", False)),
+        ref=str(raw.get("ref", "")),
+    )
 
 
 def load_or_build_maxspeed_index(
@@ -255,31 +258,40 @@ def load_or_build_maxspeed_index(
             payload = json.loads(cache_path.read_text(encoding="utf-8"))
         except (OSError, json.JSONDecodeError):
             payload = None
-        if (payload is not None
-                and payload.get("version") == MAXSPEED_INDEX_CACHE_VERSION
-                and payload.get("pbfs") == _pbf_set_metadata(pbf_paths)
-                and payload.get("bounds_digest") == _bounds_digest(bounds)):
+        if (
+            payload is not None
+            and payload.get("version") == MAXSPEED_INDEX_CACHE_VERSION
+            and payload.get("pbfs") == _pbf_set_metadata(pbf_paths)
+            and payload.get("bounds_digest") == _bounds_digest(bounds)
+        ):
             ways = [_maxspeed_way_from_json(w) for w in payload.get("ways", ())]
-            print(f"Loaded local OSM maxspeed index cache: {cache_path} "
-                  f"({len(ways)} ways)", flush=True)
+            print(
+                f"Loaded local OSM maxspeed index cache: {cache_path} ({len(ways)} ways)",
+                flush=True,
+            )
             return ways
     ways: list[LocalMaxspeedWay] = []
     for i, pbf_path in enumerate(pbf_paths, start=1):
-        ways.extend(_build_maxspeed_index_from_pbf(
-            pbf_path, bounds, label=f"{i}/{len(pbf_paths)}"))
+        ways.extend(_build_maxspeed_index_from_pbf(pbf_path, bounds, label=f"{i}/{len(pbf_paths)}"))
     cache_path.parent.mkdir(parents=True, exist_ok=True)
-    cache_path.write_text(json.dumps({
-        "version": MAXSPEED_INDEX_CACHE_VERSION,
-        "pbfs": _pbf_set_metadata(pbf_paths),
-        "bounds_digest": _bounds_digest(bounds),
-        "ways": [_maxspeed_way_to_json(w) for w in ways],
-    }, indent=2) + "\n", encoding="utf-8")
+    cache_path.write_text(
+        json.dumps(
+            {
+                "version": MAXSPEED_INDEX_CACHE_VERSION,
+                "pbfs": _pbf_set_metadata(pbf_paths),
+                "bounds_digest": _bounds_digest(bounds),
+                "ways": [_maxspeed_way_to_json(w) for w in ways],
+            },
+            indent=2,
+        )
+        + "\n",
+        encoding="utf-8",
+    )
     return ways
 
 
 def _maxspeed_cell(lat: float, lon: float) -> tuple[int, int]:
-    return (int(math.floor(lat / _MAXSPEED_GRID_DEG)),
-            int(math.floor(lon / _MAXSPEED_GRID_DEG)))
+    return (int(math.floor(lat / _MAXSPEED_GRID_DEG)), int(math.floor(lon / _MAXSPEED_GRID_DEG)))
 
 
 def build_maxspeed_grid(ways: list[LocalMaxspeedWay]) -> MaxspeedGrid:
@@ -298,7 +310,8 @@ def build_maxspeed_grid(ways: list[LocalMaxspeedWay]) -> MaxspeedGrid:
                 continue
             last = thin
             grid.setdefault(_maxspeed_cell(lat, lon), []).append(
-                (lat, lon, way.mph, way.hgv, ref_digits))
+                (lat, lon, way.mph, way.hgv, ref_digits)
+            )
     return grid
 
 
@@ -321,12 +334,10 @@ def assemble_maxspeed(
     # the full geometry per candidate is what made dense metro legs crawl.
     geom_grid: dict[tuple[int, int], list[tuple[float, float, float]]] = {}
     for glat, glon, cum in geom:
-        geom_grid.setdefault(_maxspeed_cell(glat, glon), []).append(
-            (glat, glon, cum))
+        geom_grid.setdefault(_maxspeed_cell(glat, glon), []).append((glat, glon, cum))
 
     def neighbors(cell: tuple[int, int]) -> list[tuple[int, int]]:
-        return [(cell[0] + dr, cell[1] + dc)
-                for dr in (-1, 0, 1) for dc in (-1, 0, 1)]
+        return [(cell[0] + dr, cell[1] + dc) for dr in (-1, 0, 1) for dc in (-1, 0, 1)]
 
     # A corridor-adjacent way point shares a cell (or a neighbor) with the geom
     # vertex it snaps to, so only visit way cells next to a geom cell.
@@ -352,8 +363,7 @@ def assemble_maxspeed(
     if not points:
         return []
 
-    def choose(cands: list[tuple[float, float, bool, bool]]
-               ) -> tuple[float, bool] | None:
+    def choose(cands: list[tuple[float, float, bool, bool]]) -> tuple[float, bool] | None:
         if not cands:
             return None
         on_shield = [c for c in cands if c[3]]
@@ -365,14 +375,13 @@ def assemble_maxspeed(
         return max(c[1] for c in chosen), bool(hgv_pool)
 
     half = MAXSPEED_SAMPLE_STRIDE_MI
-    picked: list[tuple[float, float, bool]] = []   # (at_mi, mph, hgv)
+    picked: list[tuple[float, float, bool]] = []  # (at_mi, mph, hgv)
     mile = 0.0
     while mile <= leg_miles + 1e-9:
         window = [p for p in points if abs(p[0] - mile) <= half]
         choice = choose(window)
         if choice is not None:
-            picked.append((round(min(leg_miles, max(0.0, mile)), 1),
-                           choice[0], choice[1]))
+            picked.append((round(min(leg_miles, max(0.0, mile)), 1), choice[0], choice[1]))
         mile += MAXSPEED_SAMPLE_STRIDE_MI
 
     # OSM tags a limit (especially maxspeed:hgv) on some ways but not their
@@ -386,15 +395,14 @@ def assemble_maxspeed(
 
     profile: list[dict[str, Any]] = []
     for (at_mi, _, _), (mph, hgv) in zip(picked, smoothed, strict=True):
-        if not (profile and profile[-1]["mph"] == mph
-                and profile[-1]["hgv"] == hgv):
-            profile.append({"at_mi": at_mi, "mph": mph,
-                            "source": MAXSPEED_SOURCE, "hgv": hgv})
+        if not (profile and profile[-1]["mph"] == mph and profile[-1]["hgv"] == hgv):
+            profile.append({"at_mi": at_mi, "mph": mph, "source": MAXSPEED_SOURCE, "hgv": hgv})
     return profile
 
 
-def _interpolated_geometry(route_points: list[dict[str, Any]]
-                           ) -> list[tuple[float, float, float]] | None:
+def _interpolated_geometry(
+    route_points: list[dict[str, Any]],
+) -> list[tuple[float, float, float]] | None:
     """A dense [(lat, lon, at_mi), ...] polyline built locally from the
     checked-in route points (straight segments, ~0.5mi spacing).
 
@@ -412,9 +420,9 @@ def _interpolated_geometry(route_points: list[dict[str, Any]]
         steps = max(1, int(max(0.0, b_mi - a_mi) / 0.5))
         for s in range(steps):
             t = s / steps
-            out.append((a_lat + (b_lat - a_lat) * t,
-                        a_lon + (b_lon - a_lon) * t,
-                        a_mi + (b_mi - a_mi) * t))
+            out.append(
+                (a_lat + (b_lat - a_lat) * t, a_lon + (b_lon - a_lon) * t, a_mi + (b_mi - a_mi) * t)
+            )
     last = pts[-1]
     out.append((float(last["lat"]), float(last["lon"]), float(last["at_mi"])))
     return out
@@ -428,20 +436,19 @@ def bake_maxspeed_for_leg(
     route_points = list(leg.get("corridor", {}).get("route_points", ()))
     # Prefer cached dense OSRM geometry; never fetch live (a hung socket would
     # stall the whole batch). Fall back to local interpolation of route points.
-    geom = (_osrm_geometry(route_points, rate_limit, cached_only=True)
-            or _interpolated_geometry(route_points))
+    geom = _osrm_geometry(route_points, rate_limit, cached_only=True) or _interpolated_geometry(
+        route_points
+    )
     if not geom:
         return []
-    return assemble_maxspeed(grid, geom, float(leg["miles"]),
-                             str(leg.get("highway", "")))
+    return assemble_maxspeed(grid, geom, float(leg["miles"]), str(leg.get("highway", "")))
 
 
 def run_maxspeed(data: dict[str, Any], args: argparse.Namespace) -> int:
     legs = data["legs"]
     if args.only:
         a, _, b = args.only.partition("->")
-        legs = [leg for leg in legs
-                if leg["from"] == a.strip() and leg["to"] == b.strip()]
+        legs = [leg for leg in legs if leg["from"] == a.strip() and leg["to"] == b.strip()]
         if not legs:
             raise SystemExit(f"No leg {args.only!r}")
 
@@ -466,32 +473,38 @@ def run_maxspeed(data: dict[str, Any], args: argparse.Namespace) -> int:
         if not pbf_paths:
             raise SystemExit(
                 f"No per-state OSM extracts found in {args.osm_region_dir}. "
-                "Pass --pbf explicitly or download the region files.")
-        print(f"Auto-selected {len(pbf_paths)} per-state extract(s) for "
-              f"{len(states)} state(s).", flush=True)
+                "Pass --pbf explicitly or download the region files."
+            )
+        print(
+            f"Auto-selected {len(pbf_paths)} per-state extract(s) for {len(states)} state(s).",
+            flush=True,
+        )
     missing = [p for p in pbf_paths if not p.exists()]
     if missing:
-        raise SystemExit("OSM PBF not found: "
-                         + ", ".join(str(p) for p in missing))
+        raise SystemExit("OSM PBF not found: " + ", ".join(str(p) for p in missing))
 
     bounds = _local_prefilter_bounds(target_legs)
     cache_path = args.local_index_cache or _maxspeed_index_cache_path(pbf_paths)
-    print(f"Reading {len(pbf_paths)} local OSM extract(s) for maxspeed "
-          f"({len(bounds)} route segment bbox filters, cache {cache_path})",
-          flush=True)
+    print(
+        f"Reading {len(pbf_paths)} local OSM extract(s) for maxspeed "
+        f"({len(bounds)} route segment bbox filters, cache {cache_path})",
+        flush=True,
+    )
     ways = load_or_build_maxspeed_index(
-        pbf_paths, bounds, cache_path, rebuild=args.rebuild_local_index)
+        pbf_paths, bounds, cache_path, rebuild=args.rebuild_local_index
+    )
     grid = build_maxspeed_grid(ways)
-    print(f"    using {len(ways)} corridor maxspeed ways "
-          f"({len(grid)} grid cells)", flush=True)
+    print(f"    using {len(ways)} corridor maxspeed ways ({len(grid)} grid cells)", flush=True)
     del ways
 
     baked = 0
     processed = 0
     for leg in target_legs:
         processed += 1
-        print(f"[{processed}/{len(target_legs)}] {leg['from']}->{leg['to']} "
-              f"({leg['highway']})", flush=True)
+        print(
+            f"[{processed}/{len(target_legs)}] {leg['from']}->{leg['to']} ({leg['highway']})",
+            flush=True,
+        )
         try:
             profile = bake_maxspeed_for_leg(leg, grid, args.rate_limit)
         except Exception as exc:  # noqa: BLE001 - one bad leg must not abort the batch
@@ -502,13 +515,10 @@ def run_maxspeed(data: dict[str, Any], args: argparse.Namespace) -> int:
             baked += 1
             print(f"    {len(profile)} speed-limit samples", flush=True)
         else:
-            print("    no on-corridor maxspeed; keeping the heuristic",
-                  flush=True)
+            print("    no on-corridor maxspeed; keeping the heuristic", flush=True)
         if args.write and baked and processed % 10 == 0:
-            WORLD_PATH.write_text(json.dumps(data, indent=2) + "\n",
-                                  encoding="utf-8")
-            print(f"    ...checkpointed world.json ({baked} legs so far)",
-                  flush=True)
+            WORLD_PATH.write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")
+            print(f"    ...checkpointed world.json ({baked} legs so far)", flush=True)
 
     print(f"\n{processed} legs processed, {baked} given a maxspeed profile.")
     if args.write and baked:

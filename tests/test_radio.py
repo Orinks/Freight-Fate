@@ -91,8 +91,11 @@ def test_real_stream_station_requires_opt_in_and_streamer_safe_off():
     radio.streamer_safe = False
 
     assert any(station.id == "afn-tokyo" for station in radio.available_stations())
-    assert all(not station.safe_for_streaming for station in radio.available_stations()
-               if station.real_stream)
+    assert all(
+        not station.safe_for_streaming
+        for station in radio.available_stations()
+        if station.real_stream
+    )
 
 
 def test_radio_persists_enabled_station_and_volume():

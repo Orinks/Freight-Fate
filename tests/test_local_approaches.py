@@ -51,11 +51,13 @@ def test_local_approach_records_are_clean_and_marked(world):
         assert record["road"]
         assert record["approach_miles"] > 0
         assert record["target_type"] in {"city_service", "facility"}
-        spoken = " ".join((
-            record["name"],
-            record["road"],
-            " ".join(record["turn_segments"]),
-        )).lower()
+        spoken = " ".join(
+            (
+                record["name"],
+                record["road"],
+                " ".join(record["turn_segments"]),
+            )
+        ).lower()
         assert not any(marker in spoken for marker in RAW_MARKERS)
         if record["fallback"]:
             assert record["fallback_reason"]

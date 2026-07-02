@@ -8,13 +8,15 @@ from .base import MenuItem, MenuState
 
 TERMINAL_FUEL_MIN = 20.0
 TERMINAL_REPAIR_MIN = 60.0
+TERMINAL_TIRE_MIN = 45.0
+TERMINAL_WASH_MIN = 20.0
+TIRE_SERVICE_COST_PER_PCT = 45.0
+TRUCK_WASH_COST = 35.0
 
 
-def _record_terminal_duty(ctx, start_hour: float, end_hour: float,
-                          note: str) -> None:
+def _record_terminal_duty(ctx, start_hour: float, end_hour: float, note: str) -> None:
     terminal = ctx.world.home_terminal(ctx.profile.current_city)
-    ctx.profile.duty_log.record(
-        "on_duty_not_driving", start_hour, end_hour, terminal.name, note)
+    ctx.profile.duty_log.record("on_duty_not_driving", start_hour, end_hour, terminal.name, note)
 
 
 class GarageState(MenuState):
@@ -22,25 +24,52 @@ class GarageState(MenuState):
 
     def build_items(self) -> list[MenuItem]:
         return [
-            MenuItem(self._fuel_label, self._refuel,
-                     help="Fill the tank. Company drivers use carrier-assigned tractors and bill the carrier. "
-                          "Owner-operators pay this region's diesel price."),
-            MenuItem(self._repair_label, self._repair,
-                     help="Restore the tractor to full condition. Company drivers "
-                          "bill the carrier; owner-operators pay the shop."),
-            MenuItem("Upgrades", self._upgrades,
-                     help="Owner-operators can buy performance upgrades for "
-                          "owned tractors: more torque, less drag, a bigger tank, "
-                          "stronger brakes."),
-            MenuItem("Trucks", self._trucks,
-                     help="Owner-operators can buy a new truck, or switch "
-                          "between trucks they own."),
-            MenuItem("Trailer programs", self._trailers,
-                     help="Company drivers use carrier trailers. Owner-operators "
-                          "can add specialty trailer program slots. Own-authority "
-                          "drivers can also buy trailers."),
-            MenuItem("Back", self.go_back,
-                     help="Return to the terminal menu."),
+            MenuItem(
+                self._fuel_label,
+                self._refuel,
+                help="Fill the tank. Company drivers use carrier-assigned tractors and bill the carrier. "
+                "Owner-operators pay this region's diesel price.",
+            ),
+            MenuItem(
+                self._repair_label,
+                self._repair,
+                help="Restore the tractor to full condition. Company drivers "
+                "bill the carrier; owner-operators pay the shop.",
+            ),
+            MenuItem(
+                self._tire_label,
+                self._service_tires,
+                help="Replace worn tires. Normal miles add slow tire wear, "
+                "even when you drive cleanly. Company drivers bill "
+                "the carrier; owner-operators pay the shop.",
+            ),
+            MenuItem(
+                self._wash_label,
+                self._wash_truck,
+                help="Wash road grime off the truck after long or dirty "
+                "runs. Company drivers bill the carrier; "
+                "owner-operators pay.",
+            ),
+            MenuItem(
+                "Upgrades",
+                self._upgrades,
+                help="Owner-operators can buy performance upgrades for "
+                "owned tractors: more torque, less drag, a bigger tank, "
+                "stronger brakes.",
+            ),
+            MenuItem(
+                "Trucks",
+                self._trucks,
+                help="Owner-operators can buy a new truck, or switch between trucks they own.",
+            ),
+            MenuItem(
+                "Trailer programs",
+                self._trailers,
+                help="Company drivers use carrier trailers. Owner-operators "
+                "can add specialty trailer program slots. Own-authority "
+                "drivers can also buy trailers.",
+            ),
+            MenuItem("Back", self.go_back, help="Return to the terminal menu."),
         ]
 
     def _region(self) -> str:
@@ -84,7 +113,8 @@ class GarageState(MenuState):
             self.ctx.say(
                 f"Assigned company tractor tank filled on the carrier fuel account. Fueling took "
                 f"{TERMINAL_FUEL_MIN:.0f} minutes. You still have "
-                f"{p.money:,.0f} dollars.")
+                f"{p.money:,.0f} dollars."
+            )
             self.ctx.award_achievement("route_refuel")
             self.refresh()
             return
@@ -100,8 +130,7 @@ class GarageState(MenuState):
         p.hos.on_duty(TERMINAL_FUEL_MIN)
         self.ctx.save_profile()
         self.ctx.audio.play("vehicle/fuel_pump")
-        self.ctx.say(f"Tank filled. {cost:,.0f} dollars. "
-                     f"You have {p.money:,.0f} dollars left.")
+        self.ctx.say(f"Tank filled. {cost:,.0f} dollars. You have {p.money:,.0f} dollars left.")
         self.ctx.award_achievement("route_refuel")
         self.refresh()
 
@@ -122,9 +151,11 @@ class GarageState(MenuState):
         p.hos.on_duty(TERMINAL_FUEL_MIN)
         self.ctx.save_profile()
         self.ctx.audio.play("vehicle/fuel_pump")
-        self.ctx.say(f"Partial fuel: added {gallons:.0f} gallons for "
-                     f"{cost:,.0f} dollars. "
-                     f"You have {p.money:,.0f} dollars left.")
+        self.ctx.say(
+            f"Partial fuel: added {gallons:.0f} gallons for "
+            f"{cost:,.0f} dollars. "
+            f"You have {p.money:,.0f} dollars left."
+        )
         self.ctx.award_achievement("route_refuel")
         self.refresh()
 
@@ -143,7 +174,8 @@ class GarageState(MenuState):
             self.ctx.say(
                 f"Carrier shop repaired {fixed:.0f} percent damage on the assigned tractor. "
                 f"The repair took {TERMINAL_REPAIR_MIN:.0f} minutes and did "
-                f"not reduce your cash balance.")
+                f"not reduce your cash balance."
+            )
             self.ctx.award_achievement("garage_repair")
             self.refresh()
             return
@@ -159,8 +191,7 @@ class GarageState(MenuState):
         p.hos.on_duty(TERMINAL_REPAIR_MIN)
         self.ctx.save_profile()
         self.ctx.audio.play("ui/notify")
-        self.ctx.say(f"Truck repaired. {cost:,.0f} dollars. "
-                     f"You have {p.money:,.0f} dollars left.")
+        self.ctx.say(f"Truck repaired. {cost:,.0f} dollars. You have {p.money:,.0f} dollars left.")
         self.ctx.award_achievement("garage_repair")
         self.refresh()
 
@@ -180,10 +211,122 @@ class GarageState(MenuState):
         p.hos.on_duty(TERMINAL_REPAIR_MIN)
         self.ctx.save_profile()
         self.ctx.audio.play("ui/notify")
-        self.ctx.say(f"Partial repairs fixed {repairable:.0f} percent damage "
-                     f"for {cost:,.0f} dollars. "
-                     f"You have {p.money:,.0f} dollars left.")
+        self.ctx.say(
+            f"Partial repairs fixed {repairable:.0f} percent damage "
+            f"for {cost:,.0f} dollars. "
+            f"You have {p.money:,.0f} dollars left."
+        )
         self.ctx.award_achievement("garage_repair")
+        self.refresh()
+
+    def _tire_label(self) -> str:
+        p = self.ctx.profile
+        wear = p.tire_wear_pct
+        if wear < 1:
+            return "Tires: tread is in top shape"
+        if not player_pays_operating_costs(p.business_status):
+            return f"Replace tires on assigned company tractor: {wear:.0f} percent wear, carrier billed"
+        cost = round(wear * TIRE_SERVICE_COST_PER_PCT, 2)
+        return f"Replace tires: {wear:.0f} percent wear for {cost:,.0f} dollars"
+
+    def _wash_label(self) -> str:
+        p = self.ctx.profile
+        grime = p.road_grime_pct
+        if grime < 1:
+            return "Wash: truck is clean"
+        if not player_pays_operating_costs(p.business_status):
+            return f"Wash assigned company tractor: {grime:.0f} percent road grime, carrier billed"
+        return f"Wash truck: {grime:.0f} percent road grime for {TRUCK_WASH_COST:,.0f} dollars"
+
+    def _service_tires(self) -> None:
+        p = self.ctx.profile
+        wear = p.tire_wear_pct
+        if wear < 1:
+            self.ctx.say("The tires are already in top shape.")
+            return
+        start = p.game_hours
+        if not player_pays_operating_costs(p.business_status):
+            p.tire_wear_pct = 0.0
+            p.game_hours += TERMINAL_TIRE_MIN / 60.0
+            _record_terminal_duty(self.ctx, start, p.game_hours, "tire service")
+            p.hos.on_duty(TERMINAL_TIRE_MIN)
+            self.ctx.save_profile()
+            self.ctx.audio.play("ui/notify")
+            self.ctx.say(
+                f"Carrier shop replaced tires with {wear:.0f} percent wear on "
+                f"the assigned tractor. The service took "
+                f"{TERMINAL_TIRE_MIN:.0f} minutes and did not reduce your "
+                "cash balance."
+            )
+            self.refresh()
+            return
+        cost = round(wear * TIRE_SERVICE_COST_PER_PCT, 2)
+        if p.money < cost:
+            serviceable = p.money / TIRE_SERVICE_COST_PER_PCT
+            if serviceable < 1:
+                self.ctx.audio.play("ui/error")
+                self.ctx.say("Not enough money for one percent of tire service.")
+                return
+            cost = round(serviceable * TIRE_SERVICE_COST_PER_PCT, 2)
+            p.money -= cost
+            p.tire_wear_pct = max(0.0, p.tire_wear_pct - serviceable)
+            p.game_hours += TERMINAL_TIRE_MIN / 60.0
+            _record_terminal_duty(self.ctx, start, p.game_hours, "tire service")
+            p.hos.on_duty(TERMINAL_TIRE_MIN)
+            self.ctx.save_profile()
+            self.ctx.audio.play("ui/notify")
+            self.ctx.say(
+                f"Partial tire service fixed {serviceable:.0f} percent wear "
+                f"for {cost:,.0f} dollars. "
+                f"You have {p.money:,.0f} dollars left."
+            )
+            self.refresh()
+            return
+        p.money -= cost
+        p.tire_wear_pct = 0.0
+        p.game_hours += TERMINAL_TIRE_MIN / 60.0
+        _record_terminal_duty(self.ctx, start, p.game_hours, "tire service")
+        p.hos.on_duty(TERMINAL_TIRE_MIN)
+        self.ctx.save_profile()
+        self.ctx.audio.play("ui/notify")
+        self.ctx.say(f"Tires replaced. {cost:,.0f} dollars. You have {p.money:,.0f} dollars left.")
+        self.refresh()
+
+    def _wash_truck(self) -> None:
+        p = self.ctx.profile
+        if p.road_grime_pct < 1:
+            self.ctx.say("The truck is already clean.")
+            return
+        start = p.game_hours
+        if not player_pays_operating_costs(p.business_status):
+            grime = p.road_grime_pct
+            p.road_grime_pct = 0.0
+            p.game_hours += TERMINAL_WASH_MIN / 60.0
+            _record_terminal_duty(self.ctx, start, p.game_hours, "truck wash")
+            p.hos.on_duty(TERMINAL_WASH_MIN)
+            self.ctx.save_profile()
+            self.ctx.audio.play("ui/notify")
+            self.ctx.say(
+                f"Carrier account covered the truck wash: {grime:.0f} percent "
+                "road grime cleaned off the assigned tractor."
+            )
+            self.refresh()
+            return
+        if p.money < TRUCK_WASH_COST:
+            self.ctx.audio.play("ui/error")
+            self.ctx.say(f"A truck wash costs {TRUCK_WASH_COST:,.0f} dollars.")
+            return
+        p.money -= TRUCK_WASH_COST
+        p.road_grime_pct = 0.0
+        p.game_hours += TERMINAL_WASH_MIN / 60.0
+        _record_terminal_duty(self.ctx, start, p.game_hours, "truck wash")
+        p.hos.on_duty(TERMINAL_WASH_MIN)
+        self.ctx.save_profile()
+        self.ctx.audio.play("ui/notify")
+        self.ctx.say(
+            f"Truck washed for {TRUCK_WASH_COST:,.0f} dollars. "
+            f"You have {p.money:,.0f} dollars left."
+        )
         self.refresh()
 
     def _upgrades(self) -> None:

@@ -20,7 +20,9 @@ def _load_tool():
 
 
 def test_facility_approach_data_covers_full_facility_set(world):
-    data = json.loads(Path("src/freight_fate/data/facility_approaches.json").read_text(encoding="utf-8"))
+    data = json.loads(
+        Path("src/freight_fate/data/facility_approaches.json").read_text(encoding="utf-8")
+    )
     coverage = data["coverage"]
 
     assert coverage["facilities"] == 1819
@@ -32,15 +34,15 @@ def test_facility_approach_data_covers_full_facility_set(world):
     assert coverage["gate_yard_dock_hints"] == 0
 
     facilities = {
-        location.id
-        for city in world.city_names()
-        for location in world.cities[city].locations
+        location.id for city in world.city_names() for location in world.cities[city].locations
     }
     assert set(data["approaches"]) == facilities
 
 
 def test_facility_approach_records_are_clean_and_honest(world):
-    data = json.loads(Path("src/freight_fate/data/facility_approaches.json").read_text(encoding="utf-8"))
+    data = json.loads(
+        Path("src/freight_fate/data/facility_approaches.json").read_text(encoding="utf-8")
+    )
 
     for facility_id, record in data["approaches"].items():
         approach = world.facility_source_approach(record["city"], facility_id)
@@ -73,10 +75,10 @@ def test_facility_route_prefers_turn_level_source_approach(world):
     from freight_fate.sim.weather import WeatherSystem
     from freight_fate.states.driving import _route_event_sound
 
-    data = json.loads(Path("src/freight_fate/data/facility_approaches.json").read_text(encoding="utf-8"))
-    facility_id, record = next(
-        item for item in data["approaches"].items() if item[1]["turn_level"]
+    data = json.loads(
+        Path("src/freight_fate/data/facility_approaches.json").read_text(encoding="utf-8")
     )
+    facility_id, record = next(item for item in data["approaches"].items() if item[1]["turn_level"])
     facility = world.facility_by_id(facility_id)
     route = world.facility_approach_route(record["city"], facility.name)
     approach = world.facility_source_approach(record["city"], facility.name)
@@ -88,9 +90,12 @@ def test_facility_route_prefers_turn_level_source_approach(world):
     trip = Trip(route, TruckState(), WeatherSystem())
     start_cue = next(cue for cue in trip.navigation_cues if cue.key == "local:start")
     assert start_cue.direction == "ahead"
-    assert _route_event_sound(
-        TripEvent(TripEventKind.GPS_CUE, start_cue.near_text, {"cue": start_cue})
-    ) == "events/turn_ahead"
+    assert (
+        _route_event_sound(
+            TripEvent(TripEventKind.GPS_CUE, start_cue.near_text, {"cue": start_cue})
+        )
+        == "events/turn_ahead"
+    )
 
 
 def test_facility_route_keeps_existing_fallback_when_no_source_geometry(world):

@@ -171,10 +171,10 @@ Your terminal is the safe hub between jobs. Public terminal actions include:
 | Drive to city services | Drive a short local route to the freight market office, garage, or truck dealer. Service names use sourced local data where available, and GPS prefers checked-in local turns or road context when they exist. |
 | Career plan | Review your next realistic career objective after the first dispatch. |
 | Business status | Review company-driver or owner-operator status. |
-| Garage | Refuel and repair company equipment; owner-operators can also buy upgrades, buy tractors, switch owned tractors, add trailer programs, or buy trailers after own authority. |
+| Garage | Refuel, repair, service tires, and wash company equipment; owner-operators can also buy upgrades, buy tractors, switch owned tractors, add trailer programs, or buy trailers after own authority. |
 | Request pay advance | Draw cash against your next load when you are broke. |
 | Career stats | Review level, reputation, deliveries, and career totals. |
-| Truck status | Review truck model, fuel, tank size, and damage condition. |
+| Truck status | Review truck model, fuel, tank size, damage, tire wear, and road grime. |
 | Time and weather | Review the clock, career day, and current city weather. |
 | Logbook | Review your recent Record of Duty Status entries. |
 | Sleep 10 hours | Rest at the terminal and reset hours of service. |
@@ -236,6 +236,11 @@ locations are representative city POIs derived from the checked-in freight
 market and terminal data; future map-data passes can make those approaches more
 specific without changing the controls.
 
+The garage can do partial fuel, repair, or tire work when an owner-operator
+cannot afford the full service. Normal miles add slow tire wear and road
+grime, even when you drive cleanly; company drivers bill tire service and
+washes to the carrier.
+
 If your balance goes negative and you cannot afford fuel, **Request pay
 advance** fronts you cash against your next load (also available at in-trip
 rest stops, drawn against the load you are hauling). The advance is offered
@@ -255,6 +260,8 @@ After the owner-operator buy-in, the garage sells:
 | Flatbed trailer program | Opens steel, machinery, construction, lumber, and paper cargo for owner-operators. |
 | Bulk trailer program | Opens grain, farm inputs, and loose bulk cargo for owner-operators. |
 | Owned trailer | Own-authority drivers can buy dry van, reefer, flatbed, or bulk trailers. Matching direct freight uses an owned-trailer reserve at settlement. |
+
+Upgrades are fleet packages and apply to every truck you own.
 
 ## Dispatch And Jobs
 
@@ -361,7 +368,7 @@ Driving controls are active while the road view is focused:
 | X | Signal for or cancel the next announced route exit. The truck takes the ramp when speed, lane setup, and route intent are valid. |
 | T | Open the route point-of-interest menu when stopped at a supported stop. |
 | J | Toggle the engine brake. |
-| H | Sound the horn. |
+| H | Hold to sound the horn; release to stop it. |
 | Space | Report speed, gear, RPM, cruise set speed when cruise is on, air pressure, and brake state. |
 | S | Report the posted speed limit here, the zone if any, and how far over you are. |
 | Tab | Open the driving status menu. |
@@ -541,6 +548,12 @@ Freight Fate tracks an ELD-style hours clock. In realistic mode:
 - You need a 30-minute break after 8 cumulative hours of driving.
 - Sleeping 10 hours resets the shift clock.
 
+At sleep-capable truck parking, the sleeper berth means the bunk in your cab.
+You can choose 2, 3, 7, or 8 hours in the sleeper berth to plan an 8+2 or 7+3
+split. Sleep 10 hours remains the simplest full reset. Shoulder sleep and
+sleeping 10 hours in the lot are fallback rests, not clean split-rest planning
+tools.
+
 The game gives warnings at 2 hours, 1 hour, and 30 minutes before a limit.
 Driving past a limit risks inspections, fines, reputation loss, and
 out-of-service orders.
@@ -561,11 +574,11 @@ but do not satisfy the 30-minute break rule. A 30-minute break reduces fatigue
 more; a proper 10-hour sleep clears it. Plan your rest before you get there.
 
 Emergency shoulder sleep is a fallback, not normal rest. It can appear in the
-pause menu only when you are stopped away from a route point of interest and
-the game sees a real hours or fatigue problem without a suitable stop visible.
-The confirmation explains that 10 hours pass, the hours clock resets, fatigue
-only improves to a poor-rest floor, a parking ticket is possible, minor truck
-damage is possible, and the delivery deadline keeps running.
+pause menu when you are stopped away from a route point of interest. The game
+uses stronger warnings when hours are tight or fatigue is severe. The
+confirmation explains that 10 hours pass, the hours clock resets, fatigue only
+improves to a poor-rest floor, a parking ticket is possible, minor truck damage
+is possible, and the delivery deadline keeps running.
 
 ## Status Screens
 
@@ -611,7 +624,7 @@ Escape opens the pause menu during a drive. Public pause choices include:
 | Trip status | Review cargo, objective, route progress, time used, and air status. |
 | Controls and help | Open the how-to-play reference at the driving keys, page by page, without leaving the drive. |
 | Call a roadside mechanic | Patch severe truck damage enough to continue, at a high cost. |
-| Emergency shoulder sleep | Appears only when the game detects a true hours or fatigue emergency. |
+| Emergency shoulder sleep | Rest on the shoulder when stopped away from route points; warnings get stronger when hours or fatigue are urgent. |
 | Settings | Open settings during the drive. |
 | Abandon job | Pay a penalty and return to the origin city. |
 | Save and quit to main menu | Save the active drive and resume it later. |
@@ -670,7 +683,7 @@ Gameplay settings include:
 | Transmission | Switch between automatic and manual transmission. |
 | Trip pacing | Choose relaxed, standard, or fast pacing. |
 | Hours of service | Choose realistic or relaxed hours rules. |
-| Lane drift | Choose whether lane drift is off, light, or realistic. When on, the rumble strip is panned to the side you have drifted toward, so the side you hear it on is the side to steer away from. |
+| Lane drift | Choose whether lane drift is off, light, or realistic. When on, a short beep comes from the side you drift toward, so steer away from the beep. A dedicated centered-lane chime confirms you are centered again, and the rumble strip is panned to the side you have drifted toward near the lane edge. |
 | Discord presence | Show broad activity in Discord (menu, terminal, driving, resting, delivering) with high-level route and cargo. Only general game status is shared, never your saves or personal details. On by default; no effect if Discord is closed. |
 
 Audio settings include:

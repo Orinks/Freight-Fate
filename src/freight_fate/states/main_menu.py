@@ -150,8 +150,7 @@ class MainMenuState(MenuState):
         super().update(dt)
         cls = MainMenuState
         checker = cls._update_checker
-        if (cls._update_prompted or checker is None
-                or not checker.done.is_set()):
+        if cls._update_prompted or checker is None or not checker.done.is_set():
             return
         cls._update_prompted = True
         info = checker.result
@@ -162,10 +161,11 @@ class MainMenuState(MenuState):
         warning = ""
         if _last_invalid_saves:
             count = len(_last_invalid_saves)
-            warning = (f"{count} saved career failed its integrity check and "
-                       f"was moved aside. " if count == 1 else
-                       f"{count} saved careers failed integrity checks and "
-                       f"were moved aside. ")
+            warning = (
+                f"{count} saved career failed its integrity check and was moved aside. "
+                if count == 1
+                else f"{count} saved careers failed integrity checks and were moved aside. "
+            )
         self.ctx.say(
             f"Welcome to Freight Fate, version {__version__}. "
             f"An audio trucking adventure across America. {warning}"
@@ -177,25 +177,45 @@ class MainMenuState(MenuState):
         saves = _loadable_saves()
         if saves:
             latest_path, latest_profile = saves[0]
-            items.append(MenuItem(
-                f"Continue latest career: "
-                f"{_career_summary(latest_path, latest_profile, include_saved=False)}",
-                self._continue,
-                help=f"Load the newest save for {latest_profile.name}."))
-            items.append(MenuItem("Choose career", self._load_menu,
-                                  help="Choose any saved career instead of only the newest one."))
-            items.append(MenuItem("Manage careers", self._manage_careers,
-                                  help="Reset or delete saved careers."))
-        items.append(MenuItem("New career", self._new_game,
-                              help="Start a fresh trucking career."))
-        items.append(MenuItem("Achievements", self._achievements,
-                              help="Review earned and locked achievements for "
-                                   "a saved career."))
-        items.append(MenuItem("How to play", self._help,
-                              help="Learn the controls and the goal of the game."))
-        items.append(MenuItem("Settings", self._settings,
-                              help="Units, transmission mode, volumes, weather, "
-                                   "voices, update channel, and trip pacing."))
+            items.append(
+                MenuItem(
+                    f"Continue latest career: "
+                    f"{_career_summary(latest_path, latest_profile, include_saved=False)}",
+                    self._continue,
+                    help=f"Load the newest save for {latest_profile.name}.",
+                )
+            )
+            items.append(
+                MenuItem(
+                    "Choose career",
+                    self._load_menu,
+                    help="Choose any saved career instead of only the newest one.",
+                )
+            )
+            items.append(
+                MenuItem(
+                    "Manage careers", self._manage_careers, help="Reset or delete saved careers."
+                )
+            )
+        items.append(MenuItem("New career", self._new_game, help="Start a fresh trucking career."))
+        items.append(
+            MenuItem(
+                "Achievements",
+                self._achievements,
+                help="Review earned and locked achievements for a saved career.",
+            )
+        )
+        items.append(
+            MenuItem("How to play", self._help, help="Learn the controls and the goal of the game.")
+        )
+        items.append(
+            MenuItem(
+                "Settings",
+                self._settings,
+                help="Units, transmission mode, volumes, weather, "
+                "voices, update channel, and trip pacing.",
+            )
+        )
         items.append(MenuItem("Quit", self.ctx.quit, help="Exit the game."))
         return items
 
@@ -220,9 +240,12 @@ class MainMenuState(MenuState):
             self.ctx.say(f"Welcome back, {p.name}.", interrupt=True)
         else:
             terminal = self.ctx.world.home_terminal(p.current_city)
-            self.ctx.say(f"Welcome back, {p.name}. You are parked at "
-                         f"{terminal.name} in {p.current_city} "
-                         f"with {p.money:,.0f} dollars.", interrupt=True)
+            self.ctx.say(
+                f"Welcome back, {p.name}. You are parked at "
+                f"{terminal.name} in {p.current_city} "
+                f"with {p.money:,.0f} dollars.",
+                interrupt=True,
+            )
         enter_world(self.ctx)
 
     def _load_menu(self) -> None:
@@ -246,13 +269,17 @@ class MainMenuState(MenuState):
 
 class AchievementCareerState(MenuState):
     title = "Achievements"
-    intro_help = ("Choose a saved career to review achievements. Enter opens "
-                  "that driver's earned and locked achievements. Escape goes back.")
+    intro_help = (
+        "Choose a saved career to review achievements. Enter opens "
+        "that driver's earned and locked achievements. Escape goes back."
+    )
 
     def announce_entry(self) -> None:
         if not self.items or self.items[0].text == "Back":
-            self.ctx.say("Achievements. No saved careers yet. Start a career, "
-                         "then come back after the road has opinions.")
+            self.ctx.say(
+                "Achievements. No saved careers yet. Start a career, "
+                "then come back after the road has opinions."
+            )
             return
         self.ctx.say(f"Achievements. {self.current_text()}")
 
@@ -261,10 +288,13 @@ class AchievementCareerState(MenuState):
         for _path, profile in _loadable_saves():
             earned = len(earned_ids(profile))
             total = len(ACHIEVEMENTS)
-            items.append(MenuItem(
-                f"{profile.name}: {earned} of {total} earned",
-                lambda p=profile: self._pick(p),
-                help=f"Review achievements for {profile.name}."))
+            items.append(
+                MenuItem(
+                    f"{profile.name}: {earned} of {total} earned",
+                    lambda p=profile: self._pick(p),
+                    help=f"Review achievements for {profile.name}.",
+                )
+            )
         items.append(MenuItem("Back", self.go_back))
         return items
 
@@ -273,9 +303,11 @@ class AchievementCareerState(MenuState):
 
 
 class AchievementsState(MenuState):
-    intro_help = ("Use up and down arrows to review achievements. Earned and "
-                  "locked entries are both shown. Enter repeats the selected "
-                  "entry. Escape goes back.")
+    intro_help = (
+        "Use up and down arrows to review achievements. Earned and "
+        "locked entries are both shown. Enter repeats the selected "
+        "entry. Escape goes back."
+    )
 
     def __init__(self, ctx, profile: Profile) -> None:
         super().__init__(ctx)
@@ -291,13 +323,15 @@ class AchievementsState(MenuState):
         self.ctx.say(
             f"Achievements for {self.profile.name}. {earned} of {total} earned. "
             "Locked achievements are shown as goals, with no story spoilers. "
-            f"{self.current_text()}")
+            f"{self.current_text()}"
+        )
 
     def build_items(self) -> list[MenuItem]:
         earned = earned_ids(self.profile)
         items = [
-            MenuItem(self._summary_label, self._summary,
-                     help="Hear the total earned achievement count.")
+            MenuItem(
+                self._summary_label, self._summary, help="Hear the total earned achievement count."
+            )
         ]
         for achievement in ACHIEVEMENTS:
             unlocked = achievement.id in earned
@@ -309,10 +343,7 @@ class AchievementsState(MenuState):
                 # hidden until the achievement is earned.
                 label = f"Locked: {achievement.name}"
                 help_text = f"{achievement.category}. Keep playing to unlock it."
-            items.append(MenuItem(
-                label,
-                lambda text=label: self.ctx.say(text),
-                help=help_text))
+            items.append(MenuItem(label, lambda text=label: self.ctx.say(text), help=help_text))
         items.append(MenuItem("Back", self.go_back))
         return items
 
@@ -329,17 +360,22 @@ class AchievementsState(MenuState):
 
 class LoadDriverState(MenuState):
     title = "Choose career"
-    intro_help = ("Use up and down arrows to choose a saved career. Enter loads "
-                  "the selected career. Escape goes back.")
+    intro_help = (
+        "Use up and down arrows to choose a saved career. Enter loads "
+        "the selected career. Escape goes back."
+    )
 
     def build_items(self) -> list[MenuItem]:
         items = []
         for path, profile in _loadable_saves():
             label = _career_summary(path, profile)
-            items.append(MenuItem(
-                label,
-                lambda p=profile: self._pick(p),
-                help=f"Load {profile.name}, {_career_location(profile)}."))
+            items.append(
+                MenuItem(
+                    label,
+                    lambda p=profile: self._pick(p),
+                    help=f"Load {profile.name}, {_career_location(profile)}.",
+                )
+            )
         items.append(MenuItem("Back", self.go_back))
         return items
 
@@ -351,18 +387,23 @@ class LoadDriverState(MenuState):
 
 class ManageCareersState(MenuState):
     title = "Manage careers"
-    intro_help = ("Use up and down arrows to choose a saved career. Enter opens "
-                  "reset and delete actions. Escape goes back.")
+    intro_help = (
+        "Use up and down arrows to choose a saved career. Enter opens "
+        "reset and delete actions. Escape goes back."
+    )
 
     def build_items(self) -> list[MenuItem]:
         items = []
         for path, profile in _loadable_saves():
             label = _career_summary(path, profile)
-            items.append(MenuItem(
-                label,
-                lambda p=path, prof=profile: self._manage(p, prof),
-                help=f"Manage {profile.name}. Reset starts the career over; "
-                     "delete removes the save."))
+            items.append(
+                MenuItem(
+                    label,
+                    lambda p=path, prof=profile: self._manage(p, prof),
+                    help=f"Manage {profile.name}. Reset starts the career over; "
+                    "delete removes the save.",
+                )
+            )
         items.append(MenuItem("Back", self.go_back))
         return items
 
@@ -372,8 +413,10 @@ class ManageCareersState(MenuState):
 
 class CareerActionsState(MenuState):
     title = "Career actions"
-    intro_help = ("Choose an action for this saved career. Reset and delete both "
-                  "ask for confirmation. Escape goes back.")
+    intro_help = (
+        "Choose an action for this saved career. Reset and delete both "
+        "ask for confirmation. Escape goes back."
+    )
 
     def __init__(self, ctx, path: Path, profile: Profile) -> None:
         super().__init__(ctx)
@@ -381,33 +424,41 @@ class CareerActionsState(MenuState):
         self.profile = profile
 
     def announce_entry(self) -> None:
-        self.ctx.say(f"Actions for {_career_summary(self.path, self.profile)}. "
-                     f"{self.current_text()}")
+        self.ctx.say(
+            f"Actions for {_career_summary(self.path, self.profile)}. {self.current_text()}"
+        )
 
     def build_items(self) -> list[MenuItem]:
         return [
-            MenuItem("Reset this career", self._reset,
-                     help="Start this driver over with a fresh truck, money, "
-                          "career stats, market, and hours of service clock."),
-            MenuItem("Delete this career", self._delete,
-                     help="Permanently remove this saved career file."),
+            MenuItem(
+                "Reset this career",
+                self._reset,
+                help="Start this driver over with a fresh truck, money, "
+                "career stats, market, and hours of service clock.",
+            ),
+            MenuItem(
+                "Delete this career",
+                self._delete,
+                help="Permanently remove this saved career file.",
+            ),
             MenuItem("Back", self.go_back),
         ]
 
     def _reset(self) -> None:
-        self.ctx.push_state(ConfirmCareerActionState(
-            self.ctx, self.path, self.profile, action="reset"))
+        self.ctx.push_state(
+            ConfirmCareerActionState(self.ctx, self.path, self.profile, action="reset")
+        )
 
     def _delete(self) -> None:
-        self.ctx.push_state(ConfirmCareerActionState(
-            self.ctx, self.path, self.profile, action="delete"))
+        self.ctx.push_state(
+            ConfirmCareerActionState(self.ctx, self.path, self.profile, action="delete")
+        )
 
 
 class ConfirmCareerActionState(MenuState):
     title = "Confirm career action"
     open_sound_key = "ui/error"
-    intro_help = ("Use up and down arrows. Enter confirms the selected option. "
-                  "Escape cancels.")
+    intro_help = "Use up and down arrows. Enter confirms the selected option. Escape cancels."
 
     def __init__(self, ctx, path: Path, profile: Profile, *, action: str) -> None:
         super().__init__(ctx)
@@ -421,22 +472,27 @@ class ConfirmCareerActionState(MenuState):
 
     def announce_entry(self) -> None:
         if self.action == "reset":
-            detail = ("Resetting starts this driver over at "
-                      f"{self.profile.current_city} with a fresh truck, "
-                      "starting money, no active trip, and no delivery history.")
+            detail = (
+                "Resetting starts this driver over at "
+                f"{self.profile.current_city} with a fresh truck, "
+                "starting money, no active trip, and no delivery history."
+            )
         else:
             detail = "Deleting permanently removes this saved career."
         self.ctx.say(
-            f"Confirm {self._action_label} for {self.profile.name}. {detail} "
-            f"{self.current_text()}")
+            f"Confirm {self._action_label} for {self.profile.name}. {detail} {self.current_text()}"
+        )
 
     def build_items(self) -> list[MenuItem]:
         return [
-            MenuItem(f"Yes, {self._action_label} {self.profile.name}",
-                     self._confirm,
-                     help=f"Confirm and {self._action_label} this saved career."),
-            MenuItem("No, keep this career", self.go_back,
-                     help="Cancel and return to career actions."),
+            MenuItem(
+                f"Yes, {self._action_label} {self.profile.name}",
+                self._confirm,
+                help=f"Confirm and {self._action_label} this saved career.",
+            ),
+            MenuItem(
+                "No, keep this career", self.go_back, help="Cancel and return to career actions."
+            ),
         ]
 
     def _confirm(self) -> None:
@@ -445,9 +501,11 @@ class ConfirmCareerActionState(MenuState):
             fresh = Profile(name=name, current_city=self.profile.current_city)
             apply_start_option(fresh, option_for_profile(self.profile))
             fresh.save()
-            message = (f"{name} reset. The career starts over at "
-                       f"{fresh.current_city} with {fresh.carrier_name} "
-                       f"and {fresh.money:,.0f} dollars.")
+            message = (
+                f"{name} reset. The career starts over at "
+                f"{fresh.current_city} with {fresh.carrier_name} "
+                f"and {fresh.money:,.0f} dollars."
+            )
         else:
             self.path.unlink(missing_ok=True)
             if self.ctx.profile is not None and self.ctx.profile.path == self.path:
@@ -467,8 +525,7 @@ class NameEntryState(State):
         self.name = ""
 
     def enter(self) -> None:
-        self.ctx.say("New career. Type your driver name, then press Enter. "
-                     "Press Escape to cancel.")
+        self.ctx.say("New career. Type your driver name, then press Enter. Press Escape to cancel.")
 
     def handle_event(self, event: pygame.event.Event) -> None:
         if event.type != pygame.KEYDOWN:
@@ -498,8 +555,12 @@ class NameEntryState(State):
         self.ctx.push_state(CareerStartState(self.ctx, name))
 
     def lines(self) -> list[str]:
-        return ["New career", "", f"Driver name: {self.name}_",
-                "Press Enter to confirm, Escape to cancel, F2 to review."]
+        return [
+            "New career",
+            "",
+            f"Driver name: {self.name}_",
+            "Press Enter to confirm, Escape to cancel, F2 to review.",
+        ]
 
 
 from .main_menu_career import (  # noqa: E402,F401
@@ -534,8 +595,7 @@ class SettingsState(MenuState):
 
     def build_items(self) -> list[MenuItem]:
         items = [
-            MenuItem(label, lambda key=key: self._open(key),
-                     help=f"Open {label.lower()} settings.")
+            MenuItem(label, lambda key=key: self._open(key), help=f"Open {label.lower()} settings.")
             for label, key in self.CATEGORIES
         ]
         items.append(MenuItem("Back", self.go_back))
@@ -586,76 +646,117 @@ class SettingsCategoryState(MenuState):
         if self.category == "gameplay":
             return [
                 MenuItem(
-                    lambda: f"Units: {'imperial, miles' if s.imperial_units else 'metric, kilometers'}",
+                    lambda: (
+                        f"Units: {'imperial, miles' if s.imperial_units else 'metric, kilometers'}"
+                    ),
                     lambda: self._toggle_units(1),
-                    help="Switch distance and speed readouts between miles and kilometers."),
+                    help="Switch distance and speed readouts between miles and kilometers.",
+                ),
                 MenuItem(
-                    lambda: f"Transmission: {'automatic' if s.automatic_transmission else 'manual'}",
+                    lambda: (
+                        f"Transmission: {'automatic' if s.automatic_transmission else 'manual'}"
+                    ),
                     lambda: self._toggle_transmission(1),
-                    help="Automatic shifts for you. Manual uses clutch and number keys."),
-                MenuItem(lambda: f"Trip pacing: {self._pace_label()}",
-                         lambda: self._cycle_pace(1),
-                         help="Controls how quickly game time and distance pass."),
-                MenuItem(lambda: f"Hours of service: {self._hos_label()}",
-                         lambda: self._cycle_hos(1),
-                         help="Realistic enforces full hours rules and normal "
-                              "road hazards. Relaxed eases the hours limits and "
-                              "makes road hazards rare, so you can focus on "
-                              "driver responsibility: hours, fueling, and repairs."),
-                MenuItem(lambda: f"Lane drift: {self._steering_label()}",
-                         lambda: self._cycle_steering(1),
-                         help="Choose whether lane drift is off, light, or realistic."),
-                MenuItem(lambda: f"Discord presence: {'on' if s.discord_presence else 'off'}",
-                         lambda: self._toggle_discord_presence(1),
-                         help="Show broad activity in Discord, like the main menu, "
-                              "driving a route, or resting. Only general game status "
-                              "is shared, never your save files or personal details. "
-                              "Has no effect if Discord is not running."),
+                    help="Automatic shifts for you. Manual uses clutch and number keys.",
+                ),
+                MenuItem(
+                    lambda: f"Trip pacing: {self._pace_label()}",
+                    lambda: self._cycle_pace(1),
+                    help="Controls how quickly game time and distance pass.",
+                ),
+                MenuItem(
+                    lambda: f"Hours of service: {self._hos_label()}",
+                    lambda: self._cycle_hos(1),
+                    help="Realistic enforces full hours rules and normal "
+                    "road hazards. Relaxed eases the hours limits and "
+                    "makes road hazards rare, so you can focus on "
+                    "driver responsibility: hours, fueling, and repairs.",
+                ),
+                MenuItem(
+                    lambda: f"Lane drift: {self._steering_label()}",
+                    lambda: self._cycle_steering(1),
+                    help="Choose whether lane drift is off, light, or realistic.",
+                ),
+                MenuItem(
+                    lambda: f"Discord presence: {'on' if s.discord_presence else 'off'}",
+                    lambda: self._toggle_discord_presence(1),
+                    help="Show broad activity in Discord, like the main menu, "
+                    "driving a route, or resting. Only general game status "
+                    "is shared, never your save files or personal details. "
+                    "Has no effect if Discord is not running.",
+                ),
                 MenuItem("Back", self.go_back),
             ]
         if self.category == "audio":
             return [
-                MenuItem(lambda: f"Master volume: {round(s.master_volume * 100)} percent",
-                         lambda: self._volume("master_volume", 0.1),
-                         help="Overall game volume."),
-                MenuItem(lambda: f"Gameplay cues volume: {round(s.sfx_volume * 100)} percent",
-                         lambda: self._volume("sfx_volume", 0.1),
-                         help="Horn, alerts, road, facility, and gameplay cue sounds."),
-                MenuItem(lambda: f"Weather sounds volume: {round(s.weather_volume * 100)} percent",
-                         lambda: self._volume("weather_volume", 0.1),
-                         help="Rain, wind, thunder, snow, and fog sounds."),
-                MenuItem(lambda: f"Engine sounds volume: {round(s.engine_volume * 100)} percent",
-                         lambda: self._volume("engine_volume", 0.1),
-                         help="Engine start, shutdown, and running engine sounds."),
-                MenuItem(lambda: f"Music volume: {round(s.music_volume * 100)} percent",
-                         lambda: self._volume("music_volume", 0.1),
-                         help="Menu and facility background music volume."),
-                MenuItem(lambda: f"In-cab radio volume: {round(s.radio_volume * 100)} percent",
-                         lambda: self._volume("radio_volume", 0.1),
-                         help="Music volume while driving. Kept lower by default so speech, engine, and safety cues stay clear."),
-                MenuItem(lambda: f"Radio streamer-safe mode: {'on' if s.radio_streamer_safe else 'off'}",
-                         lambda: self._toggle_radio_streamer_safe(1),
-                         help="When on, the radio uses only built-in safe stations and skips real public streams."),
-                MenuItem(lambda: f"Radio real public streams: {'on' if s.radio_real_streams else 'off'}",
-                         lambda: self._toggle_radio_real_streams(1),
-                         help="Opt in to real public stream stations. Streamer-safe mode must also be off before they can play."),
-                MenuItem(lambda: f"Menu and UI sounds volume: {round(s.ui_volume * 100)} percent",
-                         lambda: self._volume("ui_volume", 0.1),
-                         help="Menu movement, selection, warning, and cash sounds."),
+                MenuItem(
+                    lambda: f"Master volume: {round(s.master_volume * 100)} percent",
+                    lambda: self._volume("master_volume", 0.1),
+                    help="Overall game volume.",
+                ),
+                MenuItem(
+                    lambda: f"Gameplay cues volume: {round(s.sfx_volume * 100)} percent",
+                    lambda: self._volume("sfx_volume", 0.1),
+                    help="Horn, alerts, road, facility, and gameplay cue sounds.",
+                ),
+                MenuItem(
+                    lambda: f"Weather sounds volume: {round(s.weather_volume * 100)} percent",
+                    lambda: self._volume("weather_volume", 0.1),
+                    help="Rain, wind, thunder, snow, and fog sounds.",
+                ),
+                MenuItem(
+                    lambda: f"Engine sounds volume: {round(s.engine_volume * 100)} percent",
+                    lambda: self._volume("engine_volume", 0.1),
+                    help="Engine start, shutdown, and running engine sounds.",
+                ),
+                MenuItem(
+                    lambda: f"Music volume: {round(s.music_volume * 100)} percent",
+                    lambda: self._volume("music_volume", 0.1),
+                    help="Menu and facility background music volume.",
+                ),
+                MenuItem(
+                    lambda: f"In-cab radio volume: {round(s.radio_volume * 100)} percent",
+                    lambda: self._volume("radio_volume", 0.1),
+                    help="Music volume while driving. Kept lower by default so speech, engine, and safety cues stay clear.",
+                ),
+                MenuItem(
+                    lambda: f"Radio streamer-safe mode: {'on' if s.radio_streamer_safe else 'off'}",
+                    lambda: self._toggle_radio_streamer_safe(1),
+                    help="When on, the radio uses only built-in safe stations and skips real public streams.",
+                ),
+                MenuItem(
+                    lambda: f"Radio real public streams: {'on' if s.radio_real_streams else 'off'}",
+                    lambda: self._toggle_radio_real_streams(1),
+                    help="Opt in to real public stream stations. Streamer-safe mode must also be off before they can play.",
+                ),
+                MenuItem(
+                    lambda: f"Menu and UI sounds volume: {round(s.ui_volume * 100)} percent",
+                    lambda: self._volume("ui_volume", 0.1),
+                    help="Menu movement, selection, warning, and cash sounds.",
+                ),
                 MenuItem("Back", self.go_back),
             ]
         if self.category == "speech":
-            items = [MenuItem(label, (lambda a=action: a(1)), help=help_text)
-                     for label, action, help_text in self._speech_control_specs()]
+            items = [
+                MenuItem(label, (lambda a=action: a(1)), help=help_text)
+                for label, action, help_text in self._speech_control_specs()
+            ]
             items.append(MenuItem("Back", self.go_back))
             return items
         return [
-            MenuItem(lambda: ("Update channel: "
-                              f"{'developer snapshots' if self._channel() == 'dev' else 'stable releases'}"),
-                     lambda: self._toggle_update_channel(1),
-                     help="Choose stable releases or developer snapshots."),
-            MenuItem("Check for updates", self._check_updates,
-                     help="Look for a new version of the game right now."),
+            MenuItem(
+                lambda: (
+                    "Update channel: "
+                    f"{'developer snapshots' if self._channel() == 'dev' else 'stable releases'}"
+                ),
+                lambda: self._toggle_update_channel(1),
+                help="Choose stable releases or developer snapshots.",
+            ),
+            MenuItem(
+                "Check for updates",
+                self._check_updates,
+                help="Look for a new version of the game right now.",
+            ),
             MenuItem("Back", self.go_back),
         ]
 
@@ -673,8 +774,11 @@ class SettingsCategoryState(MenuState):
         else:
             actions = {
                 "gameplay": [
-                    self._toggle_units, self._toggle_transmission,
-                    self._cycle_pace, self._cycle_hos, self._cycle_steering,
+                    self._toggle_units,
+                    self._toggle_transmission,
+                    self._cycle_pace,
+                    self._cycle_hos,
+                    self._cycle_steering,
                     self._toggle_discord_presence,
                 ],
                 "audio": [
@@ -702,48 +806,70 @@ class SettingsCategoryState(MenuState):
         s = self.ctx.settings
         speech = self.ctx.speech
         specs = [
-            (lambda: f"Speech verbosity: {['terse', 'normal', 'chatty'][s.speech_verbosity]}",
-             self._cycle_verbosity,
-             "Controls how often driving status reminders speak."),
-            (lambda: f"Menu position announcements: {'on' if s.announce_menu_position else 'off'}",
-             self._toggle_menu_position,
-             "When on, menus say the position, like 3 of 10, after each option. "
-             "Turn off to hear only the option."),
-            (lambda: f"Driving event voice: {self._event_voice_label()}",
-             self._cycle_event_voice,
-             "Speaks road events through the main voice or a separate SAPI or "
-             "OneCore voice, so a screen reader cannot cut them off."),
+            (
+                lambda: f"Speech verbosity: {['terse', 'normal', 'chatty'][s.speech_verbosity]}",
+                self._cycle_verbosity,
+                "Controls how often driving status reminders speak.",
+            ),
+            (
+                lambda: (
+                    f"Menu position announcements: {'on' if s.announce_menu_position else 'off'}"
+                ),
+                self._toggle_menu_position,
+                "When on, menus say the position, like 3 of 10, after each option. "
+                "Turn off to hear only the option.",
+            ),
+            (
+                lambda: f"Driving event voice: {self._event_voice_label()}",
+                self._cycle_event_voice,
+                "Speaks road events through the main voice or a separate SAPI or "
+                "OneCore voice, so a screen reader cannot cut them off.",
+            ),
         ]
         if speech.supports_rate:
-            specs.append((
-                lambda: f"Speech rate: {round(s.speech_rate * 100)} percent",
-                lambda d: self._adjust_speech("speech_rate", 0.1 * d),
-                "How fast the game's voice speaks, where the voice allows it."))
+            specs.append(
+                (
+                    lambda: f"Speech rate: {round(s.speech_rate * 100)} percent",
+                    lambda d: self._adjust_speech("speech_rate", 0.1 * d),
+                    "How fast the game's voice speaks, where the voice allows it.",
+                )
+            )
         if speech.supports_pitch:
-            specs.append((
-                lambda: f"Speech pitch: {round(s.speech_pitch * 100)} percent",
-                lambda d: self._adjust_speech("speech_pitch", 0.1 * d),
-                "How high or low the game's voice sounds."))
+            specs.append(
+                (
+                    lambda: f"Speech pitch: {round(s.speech_pitch * 100)} percent",
+                    lambda d: self._adjust_speech("speech_pitch", 0.1 * d),
+                    "How high or low the game's voice sounds.",
+                )
+            )
         if speech.supports_volume:
-            specs.append((
-                lambda: f"Speech volume: {round(s.speech_volume * 100)} percent",
-                lambda d: self._adjust_speech("speech_volume", 0.1 * d),
-                "Loudness of the game's voice, separate from sound volume."))
+            specs.append(
+                (
+                    lambda: f"Speech volume: {round(s.speech_volume * 100)} percent",
+                    lambda d: self._adjust_speech("speech_volume", 0.1 * d),
+                    "Loudness of the game's voice, separate from sound volume.",
+                )
+            )
         if speech.voice_names():
-            specs.append((
-                lambda: f"Speech voice: {s.speech_voice or 'default'}",
-                self._cycle_voice,
-                "Which installed voice the game speaks with."))
-        specs.append((
-            lambda: f"Weather source: {'real world' if s.real_weather else 'simulated'}",
-            self._toggle_real_weather,
-            "Real world uses live city conditions when available."))
+            specs.append(
+                (
+                    lambda: f"Speech voice: {s.speech_voice or 'default'}",
+                    self._cycle_voice,
+                    "Which installed voice the game speaks with.",
+                )
+            )
+        specs.append(
+            (
+                lambda: f"Weather source: {'real world' if s.real_weather else 'simulated'}",
+                self._toggle_real_weather,
+                "Real world uses live city conditions when available.",
+            )
+        )
         return specs
 
     def _pace_label(self) -> str:
         scale = self.ctx.settings.time_scale
-        return {10.0: "relaxed", 20.0: "standard", 40.0: "fast"}.get(
-            scale, f"{scale:g} times")
+        return {10.0: "relaxed", 20.0: "standard", 40.0: "fast"}.get(scale, f"{scale:g} times")
 
     def _hos_label(self) -> str:
         return {
@@ -778,8 +904,7 @@ class SettingsCategoryState(MenuState):
         self._announce()
 
     def _toggle_transmission(self, _d: int) -> None:
-        self.ctx.settings.automatic_transmission = (
-            not self.ctx.settings.automatic_transmission)
+        self.ctx.settings.automatic_transmission = not self.ctx.settings.automatic_transmission
         self._announce()
 
     def _cycle_pace(self, d: int) -> None:
@@ -901,12 +1026,11 @@ class SettingsCategoryState(MenuState):
 
     def _channel(self) -> str:
         return updater.resolve_channel(
-            self.ctx.settings.update_channel,
-            updater.load_build_info(__version__))
+            self.ctx.settings.update_channel, updater.load_build_info(__version__)
+        )
 
     def _toggle_update_channel(self, _d: int) -> None:
-        self.ctx.settings.update_channel = (
-            "stable" if self._channel() == "dev" else "dev")
+        self.ctx.settings.update_channel = "stable" if self._channel() == "dev" else "dev"
         self._announce()
 
     def _check_updates(self) -> None:

@@ -34,9 +34,7 @@ class CareerStartState(MenuState):
         self.driver_name = driver_name
 
     def announce_entry(self) -> None:
-        self.ctx.say(
-            "Career start. Pick a carrier or owner-operator start. "
-            f"{self.current_text()}")
+        self.ctx.say(f"Career start. Pick a carrier or owner-operator start. {self.current_text()}")
 
     def build_items(self) -> list[MenuItem]:
         return [
@@ -64,10 +62,12 @@ class HomeTerminalState(MenuState):
     """
 
     title = "Home region"
-    intro_help = ("Pick the part of the country where your trucking career "
-                  "begins. Use up and down arrows, Home and End, or type a "
-                  "letter to jump to a region. Enter opens that region's cities. "
-                  "Escape goes back to name entry.")
+    intro_help = (
+        "Pick the part of the country where your trucking career "
+        "begins. Use up and down arrows, Home and End, or type a "
+        "letter to jump to a region. Enter opens that region's cities. "
+        "Escape goes back to name entry."
+    )
 
     def __init__(self, ctx, driver_name: str, start_key: str) -> None:
         super().__init__(ctx)
@@ -81,16 +81,21 @@ class HomeTerminalState(MenuState):
             names.sort()
         self._cities_by_region = by_region
         self._regions = sorted(by_region, key=_region_menu_name)
-        default_city = option.default_city if option.default_city in ctx.world.cities else DEFAULT_CITY
-        default = ctx.world.cities[default_city].region \
-            if default_city in ctx.world.cities else None
+        default_city = (
+            option.default_city if option.default_city in ctx.world.cities else DEFAULT_CITY
+        )
+        default = (
+            ctx.world.cities[default_city].region if default_city in ctx.world.cities else None
+        )
         if default in self._regions:
             self.index = self._regions.index(default)
 
     def announce_entry(self) -> None:
         option = start_option(self.start_key)
-        self.ctx.say("Home region. Pick the part of the country where your "
-                     f"{option.carrier_name} career starts. {self.current_text()}")
+        self.ctx.say(
+            "Home region. Pick the part of the country where your "
+            f"{option.carrier_name} career starts. {self.current_text()}"
+        )
 
     def build_items(self) -> list[MenuItem]:
         items: list[MenuItem] = []
@@ -98,30 +103,37 @@ class HomeTerminalState(MenuState):
             name = _region_menu_name(region)
             count = len(self._cities_by_region[region])
             noun = "city" if count == 1 else "cities"
-            items.append(MenuItem(
-                f"{name} ({count} {noun})",
-                lambda r=region: self._pick_region(r),
-                help=f"Open {name} to choose a starting city. "
-                     f"{count} {noun} available."))
+            items.append(
+                MenuItem(
+                    f"{name} ({count} {noun})",
+                    lambda r=region: self._pick_region(r),
+                    help=f"Open {name} to choose a starting city. {count} {noun} available.",
+                )
+            )
         return items
 
     def _pick_region(self, region: str) -> None:
-        self.ctx.push_state(HomeCityState(
-            self.ctx, self.driver_name, self.start_key, region,
-            self._cities_by_region[region]))
+        self.ctx.push_state(
+            HomeCityState(
+                self.ctx, self.driver_name, self.start_key, region, self._cities_by_region[region]
+            )
+        )
 
 
 class HomeCityState(MenuState):
     """Pick the home terminal city within a chosen region."""
 
     title = "Home terminal"
-    intro_help = ("Pick the city where your trucking career begins. Use up and "
-                  "down arrows, Home and End, or type a letter to jump to a "
-                  "city. Enter confirms your home terminal. Escape goes back to "
-                  "the region list.")
+    intro_help = (
+        "Pick the city where your trucking career begins. Use up and "
+        "down arrows, Home and End, or type a letter to jump to a "
+        "city. Enter confirms your home terminal. Escape goes back to "
+        "the region list."
+    )
 
-    def __init__(self, ctx, driver_name: str, start_key: str, region: str,
-                 city_names: list[str]) -> None:
+    def __init__(
+        self, ctx, driver_name: str, start_key: str, region: str, city_names: list[str]
+    ) -> None:
         super().__init__(ctx)
         self.driver_name = driver_name
         self.start_key = start_key
@@ -135,18 +147,22 @@ class HomeCityState(MenuState):
 
     def announce_entry(self) -> None:
         region = _region_menu_name(self.region)
-        self.ctx.say(f"{region} terminals. Pick the city where your career "
-                     f"starts. {self.current_text()}")
+        self.ctx.say(
+            f"{region} terminals. Pick the city where your career starts. {self.current_text()}"
+        )
 
     def build_items(self) -> list[MenuItem]:
         items: list[MenuItem] = []
         for name in self._cities:
             city = self.ctx.world.cities[name]
             terminal = self.ctx.world.home_terminal(name)
-            items.append(MenuItem(f"{name}, {city.state}",
-                                  lambda n=name: self._pick(n),
-                                  help=f"Start at {terminal.spoken_name} in "
-                                       f"{name}, {city.state}."))
+            items.append(
+                MenuItem(
+                    f"{name}, {city.state}",
+                    lambda n=name: self._pick(n),
+                    help=f"Start at {terminal.spoken_name} in {name}, {city.state}.",
+                )
+            )
         return items
 
     def _pick(self, city: str) -> None:
@@ -159,13 +175,13 @@ class HomeCityState(MenuState):
         apply_start_option(profile, option)
         self.ctx.profile = profile
         profile.save()
-        self.ctx.pop_state()   # this city picker
-        self.ctx.pop_state()   # region picker
-        self.ctx.pop_state()   # career start
-        self.ctx.pop_state()   # name entry
+        self.ctx.pop_state()  # this city picker
+        self.ctx.pop_state()  # region picker
+        self.ctx.pop_state()  # career start
+        self.ctx.pop_state()  # name entry
         self.ctx.push_state(CityMenuState(self.ctx))
-        loaded_over = (f"Loaded over existing driver named {name}. "
-                       if name.lower() in existing else "")
+        loaded_over = (
+            f"Loaded over existing driver named {name}. " if name.lower() in existing else ""
+        )
         message = first_day_orientation_message(self.ctx, loaded_over)
         self.ctx.say(message, interrupt=True)
-

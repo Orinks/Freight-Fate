@@ -60,8 +60,7 @@ class Market:
     def __post_init__(self) -> None:
         if not self.multipliers:
             rng = random.Random(self.seed)
-            self.multipliers = {key: round(rng.uniform(0.9, 1.15), 3)
-                                for key in MARKET_CARGO_KEYS}
+            self.multipliers = {key: round(rng.uniform(0.9, 1.15), 3) for key in MARKET_CARGO_KEYS}
 
     def multiplier(self, cargo_key: str) -> float:
         return self.multipliers.get(cargo_key, 1.0)
@@ -89,11 +88,12 @@ class Market:
     def summary(self) -> str:
         """Spoken job-board headline naming the standout cargo classes."""
         items = sorted(self.multipliers.items())
-        tight = sorted((kv for kv in items if kv[1] >= 1.07),
-                       key=lambda kv: kv[1], reverse=True)
+        tight = sorted((kv for kv in items if kv[1] >= 1.07), key=lambda kv: kv[1], reverse=True)
         loose = sorted((kv for kv in items if kv[1] <= 0.97), key=lambda kv: kv[1])
         if not tight and not loose:
             return "Freight market is steady across the board."
-        parts = [f"{key.replace('_', ' ')} {market_condition(mult)}"
-                 for key, mult in tight[:2] + loose[:2]]
+        parts = [
+            f"{key.replace('_', ' ')} {market_condition(mult)}"
+            for key, mult in tight[:2] + loose[:2]
+        ]
         return "Market watch: " + ", ".join(parts) + "."

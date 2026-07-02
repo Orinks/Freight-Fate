@@ -24,11 +24,11 @@ def test_level_one_offers_are_short_regional_hops(world, city):
         assert jobs
         for job in jobs:
             total += 1
-            assert job.distance_mi <= cap                # within the regional cap
-            near += job.distance_mi <= cap * 0.6         # proximity favors near cities
+            assert job.distance_mi <= cap  # within the regional cap
+            near += job.distance_mi <= cap * 0.6  # proximity favors near cities
             destinations.add(job.destination)
-    assert near / total >= 0.5                            # predominantly short hauls
-    assert len(destinations) >= 3                         # variety, not one repeated route
+    assert near / total >= 0.5  # predominantly short hauls
+    assert len(destinations) >= 3  # variety, not one repeated route
 
 
 def test_level_one_and_two_stay_within_the_regional_cap(world):
@@ -45,10 +45,11 @@ def test_level_one_and_two_stay_within_the_regional_cap(world):
 def test_higher_level_reaches_farther_destinations(world):
     # Level 2's larger cap lets it take jobs to cities level 1 cannot reach.
     def max_distance(level: int) -> float:
-        return max(job.distance_mi
-                   for seed in range(40)
-                   for job in JobBoard(world, seed=seed).offers(
-                       "Milwaukee", set(), level=level))
+        return max(
+            job.distance_mi
+            for seed in range(40)
+            for job in JobBoard(world, seed=seed).offers("Milwaukee", set(), level=level)
+        )
 
     assert max_distance(2) > max_distance(1)
 
@@ -78,12 +79,36 @@ def test_bobtail_relocates_to_a_nearby_city_without_pay():
         app.ctx.push_state(ArrivalState(app.ctx, driving))
         arrival = app.state
 
-        assert p.current_city == "Cheyenne"   # relocated to the new hub
-        assert p.money == money_before        # no pay for an empty run
-        assert p.career.deliveries == 0       # not counted as a delivery
+        assert p.current_city == "Cheyenne"  # relocated to the new hub
+        assert p.money == money_before  # no pay for an empty run
+        assert p.career.deliveries == 0  # not counted as a delivery
         # The repositioned arrival screen carries its summary.
         assert arrival.summary_lines
         assert any("Cheyenne" in line for line in arrival.summary_lines)
+    finally:
+        app.shutdown()
+
+
+def test_bobtail_personal_conveyance_records_off_duty_hos_time():
+    from freight_fate.app import App
+    from freight_fate.models.jobs import make_reposition_job
+    from freight_fate.models.profile import Profile
+    from freight_fate.states.driving import DrivingState
+
+    app = App()
+    try:
+        app.ctx.profile = Profile(name="Bobtail HOS", current_city="Denver")
+        job = make_reposition_job(app.ctx.world, "Denver", "Cheyenne")
+        assert job is not None and job.bobtail
+        route = app.ctx.world.supported_route("Denver", "Cheyenne")
+        driving = DrivingState(app.ctx, job, route)
+        driving.truck.velocity_mps = 20.0
+
+        driving._update_hours_and_fatigue(60.0)
+
+        assert driving.hos.status == "off_duty"
+        assert driving.hos.driving_min == 0.0
+        assert driving.hos.off_duty_min > 0.0
     finally:
         app.shutdown()
 
@@ -102,10 +127,11 @@ def test_distance_cap_rises_with_level(world):
 
 def test_long_hauls_unlock_around_level_five(world):
     def longest(level: int) -> float:
-        return max(job.distance_mi
-                   for seed in range(30)
-                   for job in JobBoard(world, seed=seed).offers(
-                       "Phoenix", set(), level=level))
+        return max(
+            job.distance_mi
+            for seed in range(30)
+            for job in JobBoard(world, seed=seed).offers("Phoenix", set(), level=level)
+        )
 
     assert longest(1) < LONG_HAUL_MILES
     assert longest(5) >= LONG_HAUL_MILES
@@ -146,19 +172,37 @@ def test_rookie_boards_have_rewarding_minimum_pay(world):
                 assert job.pay >= round(minimum_pay_for_level(job.distance_mi, 1), 2)
 
 
+def test_long_haul_boards_have_rewarding_minimum_pay(world):
+    endorsements = {"refrigerated", "heavy_haul", "high_value"}
+    long_jobs = [
+        job
+        for city in ["Chicago", "Atlanta", "Dallas", "Los Angeles"]
+        for seed in range(30)
+        for job in JobBoard(world, seed=seed).offers(city, endorsements, level=5)
+        if job.distance_mi >= 600
+    ]
+
+    assert long_jobs
+    for job in long_jobs:
+        assert job.pay / job.distance_mi >= 5.25
+
+
 def test_representative_boards_use_truck_plausible_locations(world):
     for city in ["Chicago", "Atlanta", "Philadelphia", "San Antonio", "Los Angeles"]:
         jobs = JobBoard(world, seed=3).offers(city, set(), level=2)
         assert jobs
-        assert all(any(job.origin_location == loc.name for loc in world.cities[city].locations)
-                   for job in jobs)
+        assert all(
+            any(job.origin_location == loc.name for loc in world.cities[city].locations)
+            for job in jobs
+        )
         assert all(job.origin_facility_id for job in jobs)
 
 
 def test_facility_type_filters_available_cargo(world):
     for seed in range(40):
         jobs = JobBoard(world, seed=seed).offers(
-            "Chicago", {"refrigerated", "heavy_haul", "high_value"}, level=4)
+            "Chicago", {"refrigerated", "heavy_haul", "high_value"}, level=4
+        )
         for job in jobs:
             allowed = FACILITY_CARGO[job.origin_type]
             assert job.cargo.key in allowed
@@ -168,12 +212,12 @@ def test_jobs_match_shipper_and_receiver_roles(world):
     for city in ["Chicago", "Fresno", "Houston", "Memphis", "Detroit"]:
         for seed in range(12):
             jobs = JobBoard(world, seed=seed).offers(
-                city, {"refrigerated", "heavy_haul", "high_value"}, level=5)
+                city, {"refrigerated", "heavy_haul", "high_value"}, level=5
+            )
             assert jobs
             for job in jobs:
                 origin = world.facility_location(job.origin, job.origin_facility_id)
-                destination = world.facility_location(
-                    job.destination, job.destination_facility_id)
+                destination = world.facility_location(job.destination, job.destination_facility_id)
                 assert job.cargo.key in origin.ships
                 assert job.cargo.key in destination.receives
                 assert origin.name in job.describe()
@@ -185,19 +229,22 @@ def test_regional_specialization_shapes_generated_freight(world):
         job.cargo.key
         for seed in range(25)
         for job in JobBoard(world, seed=seed).offers(
-            "Chicago", {"refrigerated", "heavy_haul", "high_value"}, level=5)
+            "Chicago", {"refrigerated", "heavy_haul", "high_value"}, level=5
+        )
     }
     fresno_cargo = {
         job.cargo.key
         for seed in range(25)
         for job in JobBoard(world, seed=seed).offers(
-            "Fresno", {"refrigerated", "heavy_haul", "high_value"}, level=5)
+            "Fresno", {"refrigerated", "heavy_haul", "high_value"}, level=5
+        )
     }
     houston_types = {
         job.origin_type
         for seed in range(25)
         for job in JobBoard(world, seed=seed).offers(
-            "Houston", {"refrigerated", "heavy_haul", "high_value"}, level=5)
+            "Houston", {"refrigerated", "heavy_haul", "high_value"}, level=5
+        )
     }
 
     assert {"container", "parcel"} & chicago_cargo
@@ -215,20 +262,20 @@ def test_higher_levels_unlock_more_facility_and_cargo_variety(world):
         job
         for seed in range(20)
         for job in JobBoard(world, seed=seed).offers(
-            "Chicago", {"refrigerated", "heavy_haul", "high_value"}, level=5)
+            "Chicago", {"refrigerated", "heavy_haul", "high_value"}, level=5
+        )
     ]
 
     assert low_jobs and high_jobs
-    assert len({job.cargo.key for job in high_jobs}) > len(
-        {job.cargo.key for job in low_jobs})
-    assert len({job.origin_type for job in high_jobs}) > len(
-        {job.origin_type for job in low_jobs})
+    assert len({job.cargo.key for job in high_jobs}) > len({job.cargo.key for job in low_jobs})
+    assert len({job.origin_type for job in high_jobs}) > len({job.origin_type for job in low_jobs})
     assert any(job.cargo.min_level > 1 or job.cargo.endorsement for job in high_jobs)
 
 
 def test_jobs_carry_destination_facility_metadata(world):
     jobs = JobBoard(world, seed=8).offers(
-        "Los Angeles", {"refrigerated", "heavy_haul", "high_value"}, level=5)
+        "Los Angeles", {"refrigerated", "heavy_haul", "high_value"}, level=5
+    )
     assert jobs
     for job in jobs:
         assert job.destination_location
@@ -239,6 +286,31 @@ def test_jobs_carry_destination_facility_metadata(world):
         text = job.describe()
         assert job.origin_location in text
         assert job.destination_location in text
+
+
+def test_job_offer_avoids_repeating_facility_type_in_generated_names():
+    from freight_fate.models.jobs import CARGO_CATALOG, Job
+
+    job = Job(
+        CARGO_CATALOG["general"],
+        12.0,
+        "South Bend",
+        "South Bend Grocery Distribution Center",
+        "Fort Wayne",
+        85.0,
+        833.0,
+        4.0,
+        origin_type="grocery_retail_dc",
+        destination_location="Fort Wayne Dry Warehouse",
+        destination_type="dry_warehouse",
+    )
+
+    text = job.describe(1, 5)
+
+    assert "from South Bend Grocery Distribution Center in South Bend" in text
+    assert "to Fort Wayne Dry Warehouse in Fort Wayne" in text
+    assert "grocery and retail distribution center South Bend" not in text
+    assert "dry warehouse Fort Wayne Dry Warehouse" not in text
 
 
 def test_representative_stops_are_real_world_grounded(world):
@@ -290,8 +362,7 @@ def test_former_legacy_routes_are_now_metadata_supported_for_dispatch(world):
     assert route.metadata_complete(world)
     jobs = JobBoard(world, seed=9).offers("Chicago", set(), level=6)
     assert jobs
-    assert all(world.supported_route(job.origin, job.destination) is not None
-               for job in jobs)
+    assert all(world.supported_route(job.origin, job.destination) is not None for job in jobs)
 
 
 def test_former_placeholder_only_routes_are_metadata_supported(world):
@@ -306,5 +377,4 @@ def test_former_placeholder_only_routes_are_metadata_supported(world):
 
     jobs = JobBoard(world, seed=4).offers("Memphis", set(), level=1)
     assert jobs
-    assert all(world.supported_route(job.origin, job.destination) is not None
-               for job in jobs)
+    assert all(world.supported_route(job.origin, job.destination) is not None for job in jobs)

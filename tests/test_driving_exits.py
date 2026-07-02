@@ -39,13 +39,13 @@ def test_exit_missed_when_too_fast():
         quiet_trip(driving)
         stop = driving.trip.stops[0]
         driving.trip.position_mi = stop.at_mi - 1.0
-        driving.truck.velocity_mps = 29.0   # ~65 mph: way too fast for the ramp
+        driving.truck.velocity_mps = 29.0  # ~65 mph: way too fast for the ramp
         driving.handle_event(key_event(pygame.K_x))
         assert driving._exit_stop is stop
         driving._exit_lane_alignment = 1.0
         driving.trip.position_mi = stop.at_mi
         driving.update(1 / 60)
-        assert driving._ramp_mi is None         # blew past it
+        assert driving._ramp_mi is None  # blew past it
         assert driving._exit_stop is None
     finally:
         app.shutdown()
@@ -227,9 +227,7 @@ def test_destination_exit_no_longer_requires_x_to_take_ramp(monkeypatch):
 
 @pytest.mark.smoke
 @pytest.mark.parametrize("steering_assist", ("light", "realistic"))
-def test_realistic_lane_drift_requires_signal_for_destination_exit(
-    monkeypatch, steering_assist
-):
+def test_realistic_lane_drift_requires_signal_for_destination_exit(monkeypatch, steering_assist):
     from freight_fate.app import App
 
     spoken = []
@@ -354,8 +352,9 @@ def test_exit_lane_can_be_set_with_keyboard_steering(monkeypatch):
     app = App()
     app.ctx.settings.steering_assist = "light"
     monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: spoken.append(text))
-    monkeypatch.setattr(app.ctx.audio, "play",
-                        lambda key, volume=1.0, **_kw: sounds.append((key, volume)))
+    monkeypatch.setattr(
+        app.ctx.audio, "play", lambda key, volume=1.0, **_kw: sounds.append((key, volume))
+    )
     try:
         driving = start_drive(app)
         quiet_trip(driving)
@@ -379,8 +378,9 @@ def test_lane_drift_off_sets_exit_lane_when_signaling(monkeypatch):
     app = App()
     app.ctx.settings.steering_assist = "off"
     monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: spoken.append(text))
-    monkeypatch.setattr(app.ctx.audio, "play",
-                        lambda key, volume=1.0, **_kw: sounds.append((key, volume)))
+    monkeypatch.setattr(
+        app.ctx.audio, "play", lambda key, volume=1.0, **_kw: sounds.append((key, volume))
+    )
     try:
         driving = start_drive(app)
         quiet_trip(driving)
@@ -443,6 +443,3 @@ def test_exit_missed_after_gore_window(monkeypatch):
         assert any("missed the exit window" in line for line in spoken)
     finally:
         app.shutdown()
-
-
-

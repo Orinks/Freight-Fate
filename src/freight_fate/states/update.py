@@ -28,8 +28,7 @@ class UpdateChecker:
         self.error: str | None = None
         build = updater.load_build_info(__version__)
         channel = updater.resolve_channel(settings.update_channel, build)
-        self._thread = threading.Thread(
-            target=self._run, args=(channel, build), daemon=True)
+        self._thread = threading.Thread(target=self._run, args=(channel, build), daemon=True)
         self._thread.start()
 
     def _run(self, channel: str, build) -> None:
@@ -37,8 +36,7 @@ class UpdateChecker:
             self.result = updater.check_for_update(channel, __version__, build)
         except Exception as e:  # offline, rate-limited, GitHub down...
             log.warning("Update check failed: %r", e)
-            self.error = ("Could not reach the update server. "
-                          + net.describe_error(e))
+            self.error = "Could not reach the update server. " + net.describe_error(e)
         finally:
             self.done.set()
 
@@ -53,8 +51,10 @@ class UpdateCheckState(State):
 
     def enter(self) -> None:
         if not updater.is_frozen():
-            self.message = ("Updates are only available in the packaged game. "
-                            "This copy runs from source; update it with git.")
+            self.message = (
+                "Updates are only available in the packaged game. "
+                "This copy runs from source; update it with git."
+            )
             self.ctx.say(self.message + " Press Escape to go back.")
             return
         if self.checker is None:
@@ -76,23 +76,27 @@ class UpdateCheckState(State):
 
     def handle_event(self, event: pygame.event.Event) -> None:
         if event.type == pygame.KEYDOWN and event.key in (
-                pygame.K_ESCAPE, pygame.K_RETURN, pygame.K_KP_ENTER):
+            pygame.K_ESCAPE,
+            pygame.K_RETURN,
+            pygame.K_KP_ENTER,
+        ):
             self.ctx.audio.play("ui/menu_back")
             self.ctx.pop_state()
 
     def lines(self) -> list[str]:
-        return ["Check for updates", "",
-                self.message or "Checking for updates..."]
+        return ["Check for updates", "", self.message or "Checking for updates..."]
 
 
 class UpdatePromptState(MenuState):
     """Asks whether to download a newly found update."""
 
     title = "Update available"
-    intro_help = ("A new version of the game is available. Download and "
-                  "restart installs it now. What's new reads the list of "
-                  "changes. Skip this version stops asking about this "
-                  "particular update.")
+    intro_help = (
+        "A new version of the game is available. Download and "
+        "restart installs it now. What's new reads the list of "
+        "changes. Skip this version stops asking about this "
+        "particular update."
+    )
 
     def __init__(self, ctx, info: updater.UpdateInfo) -> None:
         super().__init__(ctx)
@@ -101,28 +105,37 @@ class UpdatePromptState(MenuState):
     def announce_entry(self) -> None:
         mb = self.info.asset_size / 1e6
         size = f" The download is {mb:.0f} megabytes." if mb else ""
-        self.ctx.say(f"Update available. {self.info.title} is ready to "
-                     f"install. You are running version {__version__}.{size} "
-                     f"{self.current_text()}")
+        self.ctx.say(
+            f"Update available. {self.info.title} is ready to "
+            f"install. You are running version {__version__}.{size} "
+            f"{self.current_text()}"
+        )
 
     def build_items(self) -> list[MenuItem]:
         return [
-            MenuItem("Download and restart", self._download,
-                     help="Download the update, then restart the game with "
-                          "the new version in place."),
-            MenuItem("What's new", self._whats_new,
-                     help="Read the changes in this update, line by line."),
-            MenuItem("Remind me later", self.go_back,
-                     help="Ask again the next time the game starts."),
-            MenuItem("Skip this version", self._skip,
-                     help="Do not ask about this update again. Later updates "
-                          "will still be offered."),
+            MenuItem(
+                "Download and restart",
+                self._download,
+                help="Download the update, then restart the game with the new version in place.",
+            ),
+            MenuItem(
+                "What's new", self._whats_new, help="Read the changes in this update, line by line."
+            ),
+            MenuItem(
+                "Remind me later", self.go_back, help="Ask again the next time the game starts."
+            ),
+            MenuItem(
+                "Skip this version",
+                self._skip,
+                help="Do not ask about this update again. Later updates will still be offered.",
+            ),
         ]
 
     def _download(self) -> None:
         if not updater.is_frozen():
-            self.ctx.say("Updates can only be installed in the packaged "
-                         "game. This copy runs from source.")
+            self.ctx.say(
+                "Updates can only be installed in the packaged game. This copy runs from source."
+            )
             return
         self.ctx.replace_state(UpdateDownloadState(self.ctx, self.info))
 
@@ -132,8 +145,9 @@ class UpdatePromptState(MenuState):
     def _skip(self) -> None:
         self.ctx.settings.skipped_update = self.info.tag
         self.ctx.settings.save()
-        self.ctx.say(f"Skipping {self.info.title}. You will be asked again "
-                     "when the next update comes out.")
+        self.ctx.say(
+            f"Skipping {self.info.title}. You will be asked again when the next update comes out."
+        )
         self.ctx.pop_state()
 
 
@@ -147,9 +161,11 @@ class WhatsNewState(State):
         self.line = -1
 
     def enter(self) -> None:
-        self.ctx.say(f"What's new in {self.info.title}. "
-                     f"{len(self.notes)} lines. Up and Down arrows read line "
-                     "by line, Enter reads everything, Escape goes back.")
+        self.ctx.say(
+            f"What's new in {self.info.title}. "
+            f"{len(self.notes)} lines. Up and Down arrows read line "
+            "by line, Enter reads everything, Escape goes back."
+        )
 
     def handle_event(self, event: pygame.event.Event) -> None:
         if event.type != pygame.KEYDOWN:
@@ -184,7 +200,7 @@ class UpdateDownloadState(State):
         self.new_root = None
         self.staging = None
         self.error: str | None = None
-        self.progress = 0.0       # 0..1, written by the worker thread
+        self.progress = 0.0  # 0..1, written by the worker thread
         self._spoken_quarter = 0
         self._finished = False
         self._thread: threading.Thread | None = None
@@ -194,8 +210,10 @@ class UpdateDownloadState(State):
             return
         mb = self.info.asset_size / 1e6
         size = f", {mb:.0f} megabytes" if mb else ""
-        self.ctx.say(f"Downloading {self.info.title}{size}. The game will "
-                     "restart when the download finishes. Press Escape to cancel.")
+        self.ctx.say(
+            f"Downloading {self.info.title}{size}. The game will "
+            "restart when the download finishes. Press Escape to cancel."
+        )
         self._thread = threading.Thread(target=self._work, daemon=True)
         self._thread.start()
 
@@ -203,16 +221,15 @@ class UpdateDownloadState(State):
         try:
             self.staging = updater.make_staging_dir()
             archive = updater.download(
-                self.info, self.staging,
-                progress=self._on_progress, cancelled=self.cancelled)
+                self.info, self.staging, progress=self._on_progress, cancelled=self.cancelled
+            )
             self.new_root = updater.extract(archive, self.staging / "unpacked")
             archive.unlink(missing_ok=True)
         except updater.UpdateCancelled:
             pass
         except Exception as e:
             log.warning("Update download failed: %r", e)
-            self.error = (f"The download failed. {net.describe_error(e)} "
-                          "Try again later.")
+            self.error = f"The download failed. {net.describe_error(e)} Try again later."
         finally:
             self.done.set()
 
@@ -237,8 +254,10 @@ class UpdateDownloadState(State):
             self.ctx.audio.play("ui/error")
             self.ctx.pop_state()
         else:
-            self.ctx.say("Download complete. Restarting the game to finish "
-                         "the update. See you in a moment.", interrupt=True)
+            self.ctx.say(
+                "Download complete. Restarting the game to finish the update. See you in a moment.",
+                interrupt=True,
+            )
             updater.apply_and_restart(self.new_root, self.staging)
             self.ctx.quit()
 
@@ -257,6 +276,9 @@ class UpdateDownloadState(State):
             self.ctx.say(f"{self.progress * 100:.0f} percent downloaded.")
 
     def lines(self) -> list[str]:
-        return [f"Downloading {self.info.title}", "",
-                f"{self.progress * 100:.0f} percent",
-                "Press Escape to cancel, Tab for progress."]
+        return [
+            f"Downloading {self.info.title}",
+            "",
+            f"{self.progress * 100:.0f} percent",
+            "Press Escape to cancel, Tab for progress.",
+        ]

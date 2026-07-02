@@ -36,67 +36,104 @@ class BusinessStatusState(MenuState):
     )
 
     def announce_entry(self) -> None:
-        self.ctx.say(f"Business status. {business_status_summary(self.ctx.profile)} "
-                     f"{self.current_text()}")
+        self.ctx.say(
+            f"Business status. {business_status_summary(self.ctx.profile)} {self.current_text()}"
+        )
 
     def build_items(self) -> list[MenuItem]:
         p = self.ctx.profile
         items = [
-            MenuItem(self._summary_label, self._summary,
-                     help="Hear the current business status and tradeoffs."),
-            MenuItem(self._rank_label, self._rank_status,
-                     help="Hear your starter carrier, rank, and career stage."),
-            MenuItem(self._next_unlock_label, self._next_unlock,
-                     help="Hear the next career or business unlock."),
+            MenuItem(
+                self._summary_label,
+                self._summary,
+                help="Hear the current business status and tradeoffs.",
+            ),
+            MenuItem(
+                self._rank_label,
+                self._rank_status,
+                help="Hear your starter carrier, rank, and career stage.",
+            ),
+            MenuItem(
+                self._next_unlock_label,
+                self._next_unlock,
+                help="Hear the next career or business unlock.",
+            ),
         ]
         if not is_owner_operator(p.business_status):
             ok, _reasons = owner_operator_eligibility(p)
             if ok:
-                items.append(MenuItem(
-                    f"Buy into leased-on owner-operator: {OWNER_OPERATOR_BUY_IN:,.0f} dollars",
-                    self._become_owner_operator,
-                    help="Buy your first tractor position and start running as "
-                         "a leased-on owner-operator. Higher revenue, but your "
-                         "business pays operating costs."))
+                items.append(
+                    MenuItem(
+                        f"Buy into leased-on owner-operator: {OWNER_OPERATOR_BUY_IN:,.0f} dollars",
+                        self._become_owner_operator,
+                        help="Buy your first tractor position and start running as "
+                        "a leased-on owner-operator. Higher revenue, but your "
+                        "business pays operating costs.",
+                    )
+                )
             else:
-                items.append(MenuItem(
-                    "Owner-operator path locked", self._summary,
-                    help="Hear the remaining requirements."))
+                items.append(
+                    MenuItem(
+                        "Owner-operator path locked",
+                        self._summary,
+                        help="Hear the remaining requirements.",
+                    )
+                )
         else:
             if p.business_status == INDEPENDENT_AUTHORITY:
-                items.append(MenuItem(
-                    "Own authority active", self._summary,
-                    help="Direct freight is available. Settlement includes "
-                         "insurance, compliance, and factoring costs."))
+                items.append(
+                    MenuItem(
+                        "Own authority active",
+                        self._summary,
+                        help="Direct freight is available. Settlement includes "
+                        "insurance, compliance, and factoring costs.",
+                    )
+                )
             elif has_authority_readiness(p):
-                items.append(MenuItem(
-                    "Authority prep reserve: set", self._summary,
-                    help="This career has set aside the prep reserve for "
-                         "own-authority startup."))
+                items.append(
+                    MenuItem(
+                        "Authority prep reserve: set",
+                        self._summary,
+                        help="This career has set aside the prep reserve for "
+                        "own-authority startup.",
+                    )
+                )
                 ok, _reasons = authority_activation_eligibility(p)
                 if ok:
-                    items.append(MenuItem(
-                        f"Activate own authority: {AUTHORITY_ACTIVATION_COST:,.0f} dollars",
-                        self._activate_authority,
-                        help="Start direct freight with higher gross revenue "
-                             "and more business overhead."))
+                    items.append(
+                        MenuItem(
+                            f"Activate own authority: {AUTHORITY_ACTIVATION_COST:,.0f} dollars",
+                            self._activate_authority,
+                            help="Start direct freight with higher gross revenue "
+                            "and more business overhead.",
+                        )
+                    )
                 else:
-                    items.append(MenuItem(
-                        "Own authority locked", self._next_unlock,
-                        help="Hear the remaining own-authority requirements."))
+                    items.append(
+                        MenuItem(
+                            "Own authority locked",
+                            self._next_unlock,
+                            help="Hear the remaining own-authority requirements.",
+                        )
+                    )
             else:
                 ok, _reasons = authority_readiness_eligibility(p)
                 if ok:
-                    items.append(MenuItem(
-                        f"Commit {AUTHORITY_READY_RESERVE:,.0f} dollars "
-                        "to authority prep",
-                        self._set_authority_readiness,
-                        help="Set aside money for the later own-authority "
-                             "activation gate."))
+                    items.append(
+                        MenuItem(
+                            f"Commit {AUTHORITY_READY_RESERVE:,.0f} dollars to authority prep",
+                            self._set_authority_readiness,
+                            help="Set aside money for the later own-authority activation gate.",
+                        )
+                    )
                 else:
-                    items.append(MenuItem(
-                        "Authority prep locked", self._next_unlock,
-                        help="Hear the remaining authority prep requirements."))
+                    items.append(
+                        MenuItem(
+                            "Authority prep locked",
+                            self._next_unlock,
+                            help="Hear the remaining authority prep requirements.",
+                        )
+                    )
         items.append(MenuItem("Back", self.go_back))
         return items
 
@@ -144,7 +181,8 @@ class BusinessStatusState(MenuState):
             f"and kept {p.money:,.0f} dollars working capital. Future loads "
             "pay higher gross revenue, and your business pays fuel, repairs, "
             "maintenance reserve, insurance, trailer program, truck payment "
-            "reserve, and settlement fees.")
+            "reserve, and settlement fees."
+        )
         self.refresh()
 
     def _set_authority_readiness(self) -> None:
@@ -165,7 +203,8 @@ class BusinessStatusState(MenuState):
             f"{AUTHORITY_READY_RESERVE:,.0f} dollars. You have "
             f"{p.money:,.0f} dollars left. Own authority can unlock after "
             "the final delivery, reputation, trailer program, and cash gates. "
-            "For now you remain leased on.")
+            "For now you remain leased on."
+        )
         self.refresh()
 
     def _activate_authority(self) -> None:
@@ -193,13 +232,22 @@ class BusinessStatusState(MenuState):
 
 class UpgradeShopState(MenuState):
     title = "Upgrades"
-    intro_help = ("Each entry speaks the upgrade, its price, and what you already "
-                  "own. Enter buys the next tier. Press F1 on an upgrade to hear "
-                  "what it does. Escape returns to the garage.")
+    intro_help = (
+        "Each entry speaks the fleet upgrade, its price, and what you "
+        "already own. Upgrades apply to every tractor in your fleet. "
+        "Enter buys the next tier. Press F1 on an upgrade to hear "
+        "what it does. Escape returns to the garage."
+    )
 
     def announce_entry(self) -> None:
         p = self.ctx.profile
-        self.ctx.say(f"Upgrades. You have {p.money:,.0f} dollars. {self.current_text()}")
+        if is_owner_operator(p.business_status):
+            self.ctx.say(
+                f"Fleet upgrades. They apply to every tractor you own. "
+                f"You have {p.money:,.0f} dollars. {self.current_text()}"
+            )
+        else:
+            self.ctx.say(f"Upgrades. You have {p.money:,.0f} dollars. {self.current_text()}")
 
     def build_items(self) -> list[MenuItem]:
         if not is_owner_operator(self.ctx.profile.business_status):
@@ -215,9 +263,10 @@ class UpgradeShopState(MenuState):
                 ),
                 MenuItem("Back", self.go_back),
             ]
-        items = [MenuItem(lambda u=u: self._label(u), lambda u=u: self._buy(u),
-                          help=u.description)
-                 for u in UPGRADE_CATALOG.values()]
+        items = [
+            MenuItem(lambda u=u: self._label(u), lambda u=u: self._buy(u), help=u.description)
+            for u in UPGRADE_CATALOG.values()
+        ]
         items.append(MenuItem("Back", self.go_back))
         return items
 
@@ -226,7 +275,8 @@ class UpgradeShopState(MenuState):
         self.ctx.say(
             "Upgrades are locked. Company drivers use carrier-assigned, "
             "fleet-maintained tractors. Ownership upgrades unlock after the "
-            "leased-on owner-operator buy-in.")
+            "leased-on owner-operator buy-in."
+        )
 
     def _label(self, upgrade: Upgrade) -> str:
         owned = self.ctx.profile.upgrades.get(upgrade.key, 0)
@@ -236,8 +286,10 @@ class UpgradeShopState(MenuState):
         price = upgrade.prices[owned]
         if upgrade.max_tier > 1:
             owned_part = f", tier {owned} owned" if owned else ""
-            return (f"{upgrade.label}, tier {owned + 1} of {upgrade.max_tier}: "
-                    f"{price:,.0f} dollars{owned_part}")
+            return (
+                f"{upgrade.label}, tier {owned + 1} of {upgrade.max_tier}: "
+                f"{price:,.0f} dollars{owned_part}"
+            )
         return f"{upgrade.label}: {price:,.0f} dollars"
 
     def _buy(self, upgrade: Upgrade) -> None:
@@ -246,7 +298,8 @@ class UpgradeShopState(MenuState):
             self.ctx.audio.play("ui/error")
             self.ctx.say(
                 "Upgrades unlock after the leased-on owner-operator buy-in. "
-                "The company tractor stays carrier-maintained for now.")
+                "The company tractor stays carrier-maintained for now."
+            )
             return
         owned = p.upgrades.get(upgrade.key, 0)
         if owned >= upgrade.max_tier:
@@ -255,25 +308,33 @@ class UpgradeShopState(MenuState):
         price = upgrade.prices[owned]
         if p.money < price:
             self.ctx.audio.play("ui/error")
-            self.ctx.say(f"Not enough money. {upgrade.label} costs {price:,.0f} dollars "
-                         f"and you have {p.money:,.0f}.")
+            self.ctx.say(
+                f"Not enough money. {upgrade.label} costs {price:,.0f} dollars "
+                f"and you have {p.money:,.0f}."
+            )
             return
         p.money -= price
         p.upgrades[upgrade.key] = owned + 1
         self.ctx.save_profile()
         self.ctx.audio.play("ui/cash")
-        tier_part = (f" tier {owned + 1}" if upgrade.max_tier > 1 else "")
-        self.ctx.say(f"{upgrade.label}{tier_part} installed for {price:,.0f} dollars. "
-                     f"You have {p.money:,.0f} dollars left.")
+        tier_part = f" tier {owned + 1}" if upgrade.max_tier > 1 else ""
+        self.ctx.say(
+            f"{upgrade.label}{tier_part} installed across your fleet for "
+            f"{price:,.0f} dollars. "
+            f"You have {p.money:,.0f} dollars left."
+        )
         self.ctx.award_achievement("first_upgrade")
         self.refresh()
 
 
 class TruckShopState(MenuState):
     title = "Trucks"
-    intro_help = ("Owner-operators can buy tractors or switch among tractors "
-                  "they own. Company drivers use carrier-assigned equipment. "
-                  "Escape returns to the garage.")
+    intro_help = (
+        "Owner-operators can buy tractors or switch among tractors "
+        "they own. Your fleet upgrades apply to whichever tractor you "
+        "drive. Company drivers use carrier-assigned equipment. "
+        "Escape returns to the garage."
+    )
 
     def announce_entry(self) -> None:
         p = self.ctx.profile
@@ -293,9 +354,10 @@ class TruckShopState(MenuState):
                 ),
                 MenuItem("Back", self.go_back),
             ]
-        items = [MenuItem(lambda m=m: self._label(m), lambda m=m: self._pick(m),
-                          help=m.description)
-                 for m in TRUCK_CATALOG.values()]
+        items = [
+            MenuItem(lambda m=m: self._label(m), lambda m=m: self._pick(m), help=m.description)
+            for m in TRUCK_CATALOG.values()
+        ]
         items.append(MenuItem("Back", self.go_back))
         return items
 
@@ -304,16 +366,22 @@ class TruckShopState(MenuState):
         self.ctx.say(
             "Truck ownership is locked. Company drivers run a carrier-assigned "
             "tractor. Buying and switching owned tractors unlocks after the "
-            "leased-on owner-operator buy-in.")
+            "leased-on owner-operator buy-in."
+        )
 
     def _label(self, model: TruckModel) -> str:
         p = self.ctx.profile
         name = model.label.capitalize()
+        specs = model.specs
+        traits = (
+            f"{specs.max_torque_nm / 1000:.1f} thousand newton meters torque, "
+            f"{specs.fuel_tank_gal:.0f} gallon tank"
+        )
         if model.key == p.truck:
-            return f"{name}: currently driving"
+            return f"{name}: currently driving, {traits}"
         if model.key in p.visible_owned_trucks():
-            return f"{name}: owned, switch to it"
-        return f"{name}: buy for {model.price:,.0f} dollars"
+            return f"{name}: owned, {traits}, switch to it"
+        return f"{name}: {traits}, buy for {model.price:,.0f} dollars"
 
     def _pick(self, model: TruckModel) -> None:
         p = self.ctx.profile
@@ -324,13 +392,16 @@ class TruckShopState(MenuState):
             self.ctx.audio.play("ui/error")
             self.ctx.say(
                 "Truck purchases unlock after the leased-on owner-operator buy-in. "
-                "For now, the carrier assigns your company tractor.")
+                "For now, the carrier assigns your company tractor."
+            )
             return
         if model.key not in p.owned_trucks:
             if p.money < model.price:
                 self.ctx.audio.play("ui/error")
-                self.ctx.say(f"Not enough money. The {model.label} costs "
-                             f"{model.price:,.0f} dollars and you have {p.money:,.0f}.")
+                self.ctx.say(
+                    f"Not enough money. The {model.label} costs "
+                    f"{model.price:,.0f} dollars and you have {p.money:,.0f}."
+                )
                 return
             p.money -= model.price
             p.owned_trucks.append(model.key)
@@ -339,7 +410,8 @@ class TruckShopState(MenuState):
             self.ctx.say(
                 f"You bought the {model.label} for {model.price:,.0f} dollars "
                 f"and it is now your owned tractor. "
-                f"You have {p.money:,.0f} dollars left.")
+                f"You have {p.money:,.0f} dollars left."
+            )
             if model.key == "heavy_hauler":
                 self.ctx.award_achievement("heavy_hauler")
             return
@@ -366,10 +438,7 @@ class TrailerProgramState(MenuState):
 
     def announce_entry(self) -> None:
         p = self.ctx.profile
-        self.ctx.say(
-            f"Trailers. You have {p.money:,.0f} dollars. "
-            f"{self.current_text()}"
-        )
+        self.ctx.say(f"Trailers. You have {p.money:,.0f} dollars. {self.current_text()}")
 
     def build_items(self) -> list[MenuItem]:
         p = self.ctx.profile
@@ -386,8 +455,7 @@ class TrailerProgramState(MenuState):
                 MenuItem("Back", self.go_back),
             ]
         items = [
-            MenuItem(lambda t=t: self._label(t), lambda t=t: self._select(t),
-                     help=t.description)
+            MenuItem(lambda t=t: self._label(t), lambda t=t: self._select(t), help=t.description)
             for t in TRAILER_CATALOG.values()
         ]
         items.append(MenuItem("Back", self.go_back))
@@ -485,5 +553,3 @@ class TrailerProgramState(MenuState):
             "an owned-trailer reserve at settlement."
         )
         self.refresh()
-
-

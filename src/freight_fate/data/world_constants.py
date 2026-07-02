@@ -69,12 +69,8 @@ CITY_SERVICE_SOURCE_NOTES = {
         "Representative city service POI derived from the metro freight market "
         "and checked-in facility taxonomy."
     ),
-    "garage": (
-        "Representative terminal garage service POI derived from the home terminal."
-    ),
-    "truck_dealer": (
-        "Representative truck dealer service POI for the metro service area."
-    ),
+    "garage": ("Representative terminal garage service POI derived from the home terminal."),
+    "truck_dealer": ("Representative truck dealer service POI for the metro service area."),
 }
 
 CITY_SERVICE_LABELS = {

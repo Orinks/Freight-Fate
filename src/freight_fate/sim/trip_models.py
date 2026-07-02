@@ -21,7 +21,7 @@ BASE_SPEED_LIMIT_MPH = 70.0
 # faster out West -- and dropped to an urban limit near cities. The heuristic is
 # a grounded approximation, the backstop for legs OSM has no maxspeed tag on.
 URBAN_LIMIT_MPH = 55.0
-URBAN_RADIUS_MI = 6.0     # urban speed reduction within this distance of a city
+URBAN_RADIUS_MI = 6.0  # urban speed reduction within this distance of a city
 US_HIGHWAY_LIMIT_MPH = 65.0
 STATE_ROUTE_LIMIT_MPH = 60.0
 
@@ -41,6 +41,22 @@ INTERSTATE_RURAL_LIMIT_MPH: dict[str, float] = {
     "pacific_northwest": 70.0,
     "northeast": 65.0,
     "california": 65.0,
+}
+
+# States where heavy trucks have a lower maximum open-road limit than the
+# general posted limit commonly tagged in OSM. Source checked against Trucker
+# Country's state speed-limit table, accessed 2026-06-30.
+STATE_TRUCK_MAX_MPH: dict[str, float] = {
+    "Arkansas": 70.0,
+    "California": 55.0,
+    "Idaho": 70.0,
+    "Indiana": 65.0,
+    "Michigan": 65.0,
+    "Montana": 70.0,
+    "Nevada": 75.0,
+    "North Dakota": 75.0,
+    "Oregon": 65.0,
+    "Washington": 60.0,
 }
 
 
@@ -79,13 +95,42 @@ def _leg_speed_limit_at(leg: Leg, offset_mi: float) -> float | None:
         else:
             break
     return chosen.mph
+
+
+def _leg_state_at(leg: Leg, offset_mi: float) -> str:
+    """State in effect at a leg-relative offset in the leg's A-to-B direction."""
+    if not leg.state_crossings:
+        return leg.state_miles[0].state if len(leg.state_miles) == 1 else ""
+    state = leg.state_crossings[0].from_state
+    for crossing in leg.state_crossings:
+        if crossing.at_mi <= offset_mi:
+            state = crossing.state
+        else:
+            break
+    return state
+
+
+def _truck_capped_speed_limit(leg: Leg, offset_mi: float) -> float | None:
+    samples = leg.speed_limits
+    if not samples:
+        return None
+    chosen = samples[0]
+    for sample in samples:
+        if sample.at_mi <= offset_mi:
+            chosen = sample
+        else:
+            break
+    cap = STATE_TRUCK_MAX_MPH.get(_leg_state_at(leg, offset_mi))
+    return min(chosen.mph, cap) if cap is not None else chosen.mph
+
+
 FACILITY_ACCESS_LIMIT_MPH = 25.0
 DESTINATION_APPROACH_LIMIT_MPH = 35.0
 FACILITY_GATE_LIMIT_MPH = 15.0
 DESTINATION_APPROACH_ZONE_MI = 3.0
 FACILITY_GATE_ZONE_MI = 0.5
-NIGHT_HAZARD_BONUS = 0.10          # extra hazard risk after dark
-NIGHT_TRAFFIC_KEEP = 0.4           # chance a traffic zone still forms at night
+NIGHT_HAZARD_BONUS = 0.10  # extra hazard risk after dark
+NIGHT_TRAFFIC_KEEP = 0.4  # chance a traffic zone still forms at night
 RUSH_HOUR_WINDOWS = ((6.5, 9.0), (16.0, 18.5))
 TRAFFIC_LOOKAHEAD_MI = 2.5
 TRAFFIC_WARNING_GAP_S = 2.2
@@ -96,22 +141,22 @@ CONSTRUCTION_TAPER_LIMIT_MPH = 55.0
 CORRIDOR_HAZARD_MIN_FACTOR = 0.75
 CORRIDOR_HAZARD_MAX_FACTOR = 1.45
 CB_PATROL_LOOKAHEAD_MI = 5.0
-ZONE_WARNING_LOOKAHEAD_MI = 2.0    # minimum distance heads-up for a zone
+ZONE_WARNING_LOOKAHEAD_MI = 2.0  # minimum distance heads-up for a zone
 # Distance compression (time_scale) and speed eat into how much *real* time a
 # fixed-distance warning gives -- 2 miles at 70 mph and 20x is only ~5 seconds.
 # Scale the lead distance with speed and pacing for a roughly constant real-time
 # heads-up, clamped between the base distance and a sane maximum.
-ZONE_WARNING_REAL_S = 18.0         # target real seconds of warning
+ZONE_WARNING_REAL_S = 18.0  # target real seconds of warning
 ZONE_WARNING_MAX_MI = 10.0
 STATE_CROSSING_WARNING_LOOKAHEAD_MI = 10.0
 CONSTRUCTION_ENFORCEMENT_GRACE_MI = 1.5
 # Driving faster than the weather's safe speed risks a traction-loss incident,
 # so the safe-speed readout has teeth. Risk scales with how far over you are and
 # how little grip the conditions leave; only adverse grip counts.
-CONDITIONS_SPEED_MARGIN_MPH = 8.0    # slack over the safe speed before any risk
-CONDITIONS_GRIP_CEILING = 0.85       # only weather this slick can spin you out
-CONDITIONS_CHECK_MI = 1.5            # mileage between incident rolls while overspeed
-CONDITIONS_INCIDENT_RISK = 0.5       # peak per-roll chance at full severity
+CONDITIONS_SPEED_MARGIN_MPH = 8.0  # slack over the safe speed before any risk
+CONDITIONS_GRIP_CEILING = 0.85  # only weather this slick can spin you out
+CONDITIONS_CHECK_MI = 1.5  # mileage between incident rolls while overspeed
+CONDITIONS_INCIDENT_RISK = 0.5  # peak per-roll chance at full severity
 
 # Road hazards are grounded in what actually puts a tractor-trailer on the
 # brakes on an interstate, and in *where and when* it happens. Each hazard is
@@ -122,14 +167,24 @@ CONDITIONS_INCIDENT_RISK = 0.5       # peak per-roll chance at full severity
 
 # Patrol density by region: dense, urbanized states run hot; wide-open country
 # runs cold. Regions not listed sit at the neutral baseline.
-_HOT_PATROL_REGIONS = ("northeast", "california", "great_lakes", "florida",
-                       "atlantic_southeast", "mid_south")
-_COLD_PATROL_REGIONS = ("great_basin", "southern_plains", "rockies",
-                        "desert_southwest", "heartland")
+_HOT_PATROL_REGIONS = (
+    "northeast",
+    "california",
+    "great_lakes",
+    "florida",
+    "atlantic_southeast",
+    "mid_south",
+)
+_COLD_PATROL_REGIONS = (
+    "great_basin",
+    "southern_plains",
+    "rockies",
+    "desert_southwest",
+    "heartland",
+)
 
 # Open, exposed country where high wind genuinely shoves a loaded trailer.
-_CROSSWIND_REGIONS = ("southern_plains", "heartland", "great_basin",
-                      "desert_southwest", "rockies")
+_CROSSWIND_REGIONS = ("southern_plains", "heartland", "great_basin", "desert_southwest", "rockies")
 # Wet-road weather where standing water and hydroplaning are real risks.
 _WET = (WeatherKind.RAIN, WeatherKind.HEAVY_RAIN, WeatherKind.THUNDERSTORM)
 _HEAVY_WET = (WeatherKind.HEAVY_RAIN, WeatherKind.THUNDERSTORM)
@@ -165,44 +220,83 @@ HAZARDS: tuple[HazardDef, ...] = (
     HazardDef("a sudden lane closure ahead", 0.8),
     HazardDef("stopped traffic around a fender bender", 0.9),
     # Wildlife: dawn/dusk/night, regional species.
-    HazardDef("a deer crossing the road", 1.3, animal=True,
-              regions=("northeast", "appalachia", "great_lakes", "heartland",
-                       "mid_south", "atlantic_southeast", "southern_plains",
-                       "gulf_coast", "florida", "california")),
-    HazardDef("an elk crossing the road", 1.1, animal=True,
-              regions=("rockies", "great_basin", "pacific_northwest")),
+    HazardDef(
+        "a deer crossing the road",
+        1.3,
+        animal=True,
+        regions=(
+            "northeast",
+            "appalachia",
+            "great_lakes",
+            "heartland",
+            "mid_south",
+            "atlantic_southeast",
+            "southern_plains",
+            "gulf_coast",
+            "florida",
+            "california",
+        ),
+    ),
+    HazardDef(
+        "an elk crossing the road",
+        1.1,
+        animal=True,
+        regions=("rockies", "great_basin", "pacific_northwest"),
+    ),
     HazardDef("an animal on the road", 0.7, animal=True),  # generic fallback
     # Wet weather only.
     HazardDef("standing water flooding the lane", 1.1, weather=_WET),
     HazardDef("the trailer hydroplaning on standing water", 1.0, weather=_HEAVY_WET),
-    HazardDef("hail hammering the windshield", 0.7,
-              weather=(WeatherKind.THUNDERSTORM,),
-              regions=("southern_plains", "heartland", "mid_south", "rockies",
-                       "great_lakes")),
+    HazardDef(
+        "hail hammering the windshield",
+        0.7,
+        weather=(WeatherKind.THUNDERSTORM,),
+        regions=("southern_plains", "heartland", "mid_south", "rockies", "great_lakes"),
+    ),
     # Snow and ice only.
     HazardDef("a snow squall whiting out the lane", 1.0, weather=(WeatherKind.SNOW,)),
     HazardDef("ice on the bridge deck", 1.0, weather=(WeatherKind.SNOW,)),
-    HazardDef("black ice on the shaded grade", 1.1, weather=(WeatherKind.SNOW,),
-              terrain=("mountain", "hills")),
+    HazardDef(
+        "black ice on the shaded grade",
+        1.1,
+        weather=(WeatherKind.SNOW,),
+        terrain=("mountain", "hills"),
+    ),
     # Dense fog only.
     HazardDef("brake lights looming in dense fog", 1.2, weather=(WeatherKind.FOG,)),
     # High wind: crosswind shove and blowing debris in open country.
-    HazardDef("a crosswind gust shoving the trailer", 1.2,
-              weather=(WeatherKind.WIND,), regions=_CROSSWIND_REGIONS),
-    HazardDef("a dust storm dropping visibility", 0.9, weather=(WeatherKind.WIND,),
-              regions=("desert_southwest", "southern_plains", "great_basin")),
-    HazardDef("tumbleweeds piling in your lane", 0.5, weather=(WeatherKind.WIND,),
-              regions=("desert_southwest", "great_basin", "southern_plains")),
+    HazardDef(
+        "a crosswind gust shoving the trailer",
+        1.2,
+        weather=(WeatherKind.WIND,),
+        regions=_CROSSWIND_REGIONS,
+    ),
+    HazardDef(
+        "a dust storm dropping visibility",
+        0.9,
+        weather=(WeatherKind.WIND,),
+        regions=("desert_southwest", "southern_plains", "great_basin"),
+    ),
+    HazardDef(
+        "tumbleweeds piling in your lane",
+        0.5,
+        weather=(WeatherKind.WIND,),
+        regions=("desert_southwest", "great_basin", "southern_plains"),
+    ),
     # Mountain terrain only.
-    HazardDef("rockfall debris on the road", 1.0, terrain=("mountain",),
-              regions=("rockies", "appalachia", "great_basin",
-                       "pacific_northwest", "california")),
+    HazardDef(
+        "rockfall debris on the road",
+        1.0,
+        terrain=("mountain",),
+        regions=("rockies", "appalachia", "great_basin", "pacific_northwest", "california"),
+    ),
     HazardDef("a runaway truck on the grade ahead", 0.8, terrain=("mountain",)),
 )
 
 
-def eligible_hazards(region: str, weather: WeatherKind, terrain: str,
-                     game_hours: float) -> list[tuple[str, float]]:
+def eligible_hazards(
+    region: str, weather: WeatherKind, terrain: str, game_hours: float
+) -> list[tuple[str, float]]:
     """Hazards plausible for the current context, as ``(text, weight)`` pairs.
 
     Filters the catalog by region, weather, and terrain, then biases wildlife
@@ -282,7 +376,7 @@ class RoadStop:
     actions: tuple[str, ...] = ()
     services: tuple[str, ...] = ()
     parking: str = "unknown"
-    exit_label: str = ""   # "exit 7" when a real OSM interchange sits here
+    exit_label: str = ""  # "exit 7" when a real OSM interchange sits here
 
     @property
     def label(self) -> str:
@@ -372,10 +466,7 @@ def _patrol_key(patrol: PatrolWindow) -> str:
 
 
 def _traffic_pressure_key(pressure: TrafficPressure) -> str:
-    return (
-        f"{pressure.kind}:{pressure.start_mi:.3f}:"
-        f"{pressure.end_mi:.3f}:{pressure.reason}"
-    )
+    return f"{pressure.kind}:{pressure.start_mi:.3f}:{pressure.end_mi:.3f}:{pressure.reason}"
 
 
 @dataclass(frozen=True)

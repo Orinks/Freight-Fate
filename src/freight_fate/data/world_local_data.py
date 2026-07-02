@@ -54,13 +54,10 @@ def load_city_service_data(path: Path = CITY_SERVICES_PATH) -> dict[str, dict[st
             source_type = str(entry.get("source_type", "fallback")).strip()
             if source_type not in CITY_SERVICE_SOURCE_TYPES:
                 raise ValueError(
-                    f"{path} city {city!r} service {name!r} has unknown source_type "
-                    f"{source_type!r}"
+                    f"{path} city {city!r} service {name!r} has unknown source_type {source_type!r}"
                 )
             if not str(entry.get("source_note", "")).strip():
-                raise ValueError(
-                    f"{path} city {city!r} service {name!r} has no source note"
-                )
+                raise ValueError(f"{path} city {city!r} service {name!r} has no source note")
             fallback = bool(entry.get("fallback", False))
             fallback_reason = str(entry.get("fallback_reason", "")).strip()
             if fallback and not fallback_reason:
@@ -75,14 +72,10 @@ def load_city_service_data(path: Path = CITY_SERVICES_PATH) -> dict[str, dict[st
             lat = float(entry.get("lat", 0.0))
             lon = float(entry.get("lon", 0.0))
             if not -90.0 <= lat <= 90.0 or not -180.0 <= lon <= 180.0:
-                raise ValueError(
-                    f"{path} city {city!r} service {name!r} has invalid coordinates"
-                )
+                raise ValueError(f"{path} city {city!r} service {name!r} has invalid coordinates")
             road = str(entry.get("approach_road", "")).strip()
             if not road:
-                raise ValueError(
-                    f"{path} city {city!r} service {name!r} has no approach road"
-                )
+                raise ValueError(f"{path} city {city!r} service {name!r} has no approach road")
             city_services[key] = dict(entry)
         out[str(city)] = city_services
     return out
@@ -106,9 +99,7 @@ def load_local_approaches(path: Path = LOCAL_APPROACHES_PATH) -> dict[str, Local
             raise ValueError(f"{path} local approach {target_id!r} is missing required text")
         lowered = f"{name} {road}".lower()
         if any(marker in lowered for marker in RAW_POI_TEXT_MARKERS):
-            raise ValueError(
-                f"{path} local approach {target_id!r} exposes raw OSM/source text"
-            )
+            raise ValueError(f"{path} local approach {target_id!r} exposes raw OSM/source text")
         approach_miles = float(entry.get("approach_miles", 0.0))
         if approach_miles <= 0.0 or approach_miles > 75.0:
             raise ValueError(f"{path} local approach {target_id!r} has invalid mileage")
@@ -176,12 +167,14 @@ def load_local_geometries(path: Path = LOCAL_GEOMETRY_PATH) -> dict[str, LocalGe
                 raise ValueError(
                     f"{path} local geometry {target_id!r} segment exposes raw source text"
                 )
-            segments.append(LocalGeometrySegment(
-                road=road,
-                miles=round(miles, 2),
-                cue=cue,
-                speed_mph=float(raw_segment.get("speed_mph", 25.0)),
-            ))
+            segments.append(
+                LocalGeometrySegment(
+                    road=road,
+                    miles=round(miles, 2),
+                    cue=cue,
+                    speed_mph=float(raw_segment.get("speed_mph", 25.0)),
+                )
+            )
         total_miles = round(float(entry.get("total_miles", 0.0)), 2)
         if turn_level:
             if not segments:
@@ -225,9 +218,7 @@ def load_facility_endpoints(path: Path = FACILITY_ENDPOINTS_PATH) -> dict[str, F
             raise ValueError(f"{path} facility endpoint {facility_id!r} is missing text")
         lowered = f"{name} {facility_name} {road}".lower()
         if any(marker in lowered for marker in RAW_POI_TEXT_MARKERS):
-            raise ValueError(
-                f"{path} facility endpoint {facility_id!r} exposes raw source text"
-            )
+            raise ValueError(f"{path} facility endpoint {facility_id!r} exposes raw source text")
         fallback = bool(entry.get("fallback", True))
         fallback_reason = str(entry.get("fallback_reason", "")).strip()
         if fallback and not fallback_reason:
@@ -283,9 +274,7 @@ def load_facility_approaches(path: Path = FACILITY_APPROACHES_PATH) -> dict[str,
             raise ValueError(f"{path} facility approach {facility_id!r} is missing text")
         spoken = f"{facility_name} {endpoint_name} {road}".lower()
         if any(marker in spoken for marker in RAW_POI_TEXT_MARKERS):
-            raise ValueError(
-                f"{path} facility approach {facility_id!r} exposes raw source text"
-            )
+            raise ValueError(f"{path} facility approach {facility_id!r} exposes raw source text")
         fallback = bool(entry.get("fallback", True))
         fallback_reason = str(entry.get("fallback_reason", "")).strip()
         if fallback and not fallback_reason:
@@ -302,12 +291,14 @@ def load_facility_approaches(path: Path = FACILITY_APPROACHES_PATH) -> dict[str,
                 raise ValueError(
                     f"{path} facility approach {facility_id!r} segment exposes raw text"
                 )
-            segments.append(LocalGeometrySegment(
-                road=segment_road,
-                miles=round(miles, 2),
-                cue=cue,
-                speed_mph=float(raw_segment.get("speed_mph", 25.0)),
-            ))
+            segments.append(
+                LocalGeometrySegment(
+                    road=segment_road,
+                    miles=round(miles, 2),
+                    cue=cue,
+                    speed_mph=float(raw_segment.get("speed_mph", 25.0)),
+                )
+            )
         turn_level = bool(entry.get("turn_level", False))
         if turn_level and not segments:
             raise ValueError(f"{path} facility approach {facility_id!r} has no turn segments")

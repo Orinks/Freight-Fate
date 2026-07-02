@@ -56,9 +56,9 @@ CHANNELS = ("stable", "dev")
 class BuildInfo:
     """What this running copy of the game is."""
 
-    tag: str        # "v1.5.0" or "nightly-20260611"
-    channel: str    # "stable" or "dev"
-    built_at: str   # "2026-06-11" (UTC date); "" when unknown
+    tag: str  # "v1.5.0" or "nightly-20260611"
+    channel: str  # "stable" or "dev"
+    built_at: str  # "2026-06-11" (UTC date); "" when unknown
 
 
 def is_frozen() -> bool:
@@ -112,8 +112,7 @@ def build_info_from_dict(data: object, version: str) -> BuildInfo:
     channel = str(data.get("channel") or "")
     if channel not in CHANNELS:
         channel = "dev" if _nightly_date(tag) else "stable"
-    return BuildInfo(tag=tag, channel=channel,
-                     built_at=str(data.get("built_at") or ""))
+    return BuildInfo(tag=tag, channel=channel, built_at=str(data.get("built_at") or ""))
 
 
 def resolve_channel(setting: str, build: BuildInfo | None) -> str:
@@ -131,12 +130,12 @@ def resolve_channel(setting: str, build: BuildInfo | None) -> str:
 
 @dataclass
 class UpdateInfo:
-    tag: str            # release tag to install
-    title: str          # spoken name, e.g. "Freight Fate version 1.6.0"
-    notes: list[str]    # release notes flattened to speakable lines
+    tag: str  # release tag to install
+    title: str  # spoken name, e.g. "Freight Fate version 1.6.0"
+    notes: list[str]  # release notes flattened to speakable lines
     asset_name: str
     asset_url: str
-    asset_size: int     # bytes
+    asset_size: int  # bytes
 
 
 def _api_get(path: str):
@@ -179,10 +178,10 @@ def flatten_markdown(body: str) -> list[str]:
         line = raw.strip()
         if not line or set(line) <= {"-", "=", "*", "_"}:
             continue
-        line = re.sub(r"^#{1,6}\s+", "", line)          # headings
-        line = re.sub(r"^[-*+]\s+", "", line)            # bullets
+        line = re.sub(r"^#{1,6}\s+", "", line)  # headings
+        line = re.sub(r"^[-*+]\s+", "", line)  # bullets
         line = re.sub(r"\[([^\]]+)\]\([^)]*\)", r"\1", line)  # links
-        line = re.sub(r"(\*\*|__|\*|_|`)", "", line)     # emphasis/code
+        line = re.sub(r"(\*\*|__|\*|_|`)", "", line)  # emphasis/code
         if line:
             lines.append(line)
     return lines
@@ -199,34 +198,38 @@ def _update_from_release(release: dict, title: str) -> UpdateInfo | None:
     if asset is None:
         return None
     name, url, size = asset
-    return UpdateInfo(tag=release["tag_name"], title=title,
-                      notes=flatten_markdown(release.get("body", "")),
-                      asset_name=name, asset_url=url, asset_size=size)
+    return UpdateInfo(
+        tag=release["tag_name"],
+        title=title,
+        notes=flatten_markdown(release.get("body", "")),
+        asset_name=name,
+        asset_url=url,
+        asset_size=size,
+    )
 
 
 def stable_update_from(release: dict, current_version: str) -> UpdateInfo | None:
     tag = release.get("tag_name", "")
     if parse_version(tag) <= parse_version(current_version):
         return None
-    return _update_from_release(
-        release, f"Freight Fate version {tag.lstrip('v')}")
+    return _update_from_release(release, f"Freight Fate version {tag.lstrip('v')}")
 
 
 def _nightly_releases_newest_first(releases: list[dict]) -> list[dict]:
     nightlies = [
-        release for release in releases
+        release
+        for release in releases
         if release.get("prerelease") and _nightly_date(release.get("tag_name", ""))
     ]
-    return sorted(nightlies, key=lambda r: _nightly_date(r.get("tag_name", "")),
-                  reverse=True)
+    return sorted(nightlies, key=lambda r: _nightly_date(r.get("tag_name", "")), reverse=True)
 
 
 def _latest_stable_release(releases: list[dict]) -> dict | None:
     """The highest-versioned non-prerelease in the list, or None."""
     stables = [
-        release for release in releases
-        if not release.get("prerelease")
-        and parse_version(release.get("tag_name", "")) > (0,)
+        release
+        for release in releases
+        if not release.get("prerelease") and parse_version(release.get("tag_name", "")) > (0,)
     ]
     if not stables:
         return None
@@ -253,8 +256,7 @@ def _build_date(build: BuildInfo | None) -> str:
     return _nightly_date(build.tag) or build.built_at.replace("-", "")
 
 
-def _stable_newer_than_build(release: dict, build: BuildInfo | None,
-                             build_date: str) -> bool:
+def _stable_newer_than_build(release: dict, build: BuildInfo | None, build_date: str) -> bool:
     """Whether ``release`` (a stable build) is an upgrade for the running copy.
 
     A stable build compares by version (two builds can share a date but differ
@@ -269,8 +271,7 @@ def _stable_newer_than_build(release: dict, build: BuildInfo | None,
     return not (build_date and stable_date and stable_date <= build_date)
 
 
-def _nightly_newer_than_build(release: dict, build: BuildInfo | None,
-                              build_date: str) -> bool:
+def _nightly_newer_than_build(release: dict, build: BuildInfo | None, build_date: str) -> bool:
     tag = release.get("tag_name", "")
     if build is not None:
         if tag == build.tag:
@@ -280,8 +281,9 @@ def _nightly_newer_than_build(release: dict, build: BuildInfo | None,
     return True
 
 
-def dev_update_from(releases: list[dict], build: BuildInfo | None,
-                    stable: dict | None = None) -> UpdateInfo | None:
+def dev_update_from(
+    releases: list[dict], build: BuildInfo | None, stable: dict | None = None
+) -> UpdateInfo | None:
     """The update to offer a dev-channel player.
 
     Normally this is the newest nightly snapshot. But once dev work is
@@ -304,21 +306,19 @@ def dev_update_from(releases: list[dict], build: BuildInfo | None,
     if stable is not None and stable_date and stable_date >= nightly_date:
         if _stable_newer_than_build(stable, build, build_date):
             tag = stable.get("tag_name", "")
-            return _update_from_release(
-                stable, f"Freight Fate version {tag.lstrip('v')}")
+            return _update_from_release(stable, f"Freight Fate version {tag.lstrip('v')}")
         return None  # already on the newest stable; nothing newer on dev
 
-    if latest_nightly is not None and _nightly_newer_than_build(
-            latest_nightly, build, build_date):
+    if latest_nightly is not None and _nightly_newer_than_build(latest_nightly, build, build_date):
         date = _nightly_date(latest_nightly.get("tag_name", ""))
         spoken = f"{date[:4]}-{date[4:6]}-{date[6:]}"
-        return _update_from_release(
-            latest_nightly, f"Freight Fate developer snapshot {spoken}")
+        return _update_from_release(latest_nightly, f"Freight Fate developer snapshot {spoken}")
     return None
 
 
-def check_for_update(channel: str, current_version: str,
-                     build: BuildInfo | None) -> UpdateInfo | None:
+def check_for_update(
+    channel: str, current_version: str, build: BuildInfo | None
+) -> UpdateInfo | None:
     """Query GitHub for a newer release on ``channel``. Raises OSError on
     network trouble; returns None when already up to date."""
     if channel == "dev":
@@ -348,8 +348,7 @@ class UpdateCancelled(Exception):
     pass
 
 
-def download(info: UpdateInfo, dest_dir: Path, progress=None,
-             cancelled=None) -> Path:
+def download(info: UpdateInfo, dest_dir: Path, progress=None, cancelled=None) -> Path:
     """Fetch the release archive into ``dest_dir``.
 
     ``progress(done_bytes, total_bytes)`` is called as data arrives;
@@ -358,8 +357,10 @@ def download(info: UpdateInfo, dest_dir: Path, progress=None,
     dest = dest_dir / info.asset_name
     req = urllib.request.Request(info.asset_url, headers={"User-Agent": USER_AGENT})
     done = 0
-    with urllib.request.urlopen(req, timeout=TIMEOUT,
-                                context=ssl_context()) as resp, open(dest, "wb") as f:
+    with (
+        urllib.request.urlopen(req, timeout=TIMEOUT, context=ssl_context()) as resp,
+        open(dest, "wb") as f,
+    ):
         total = int(resp.headers.get("Content-Length") or info.asset_size or 0)
         while True:
             if cancelled is not None and cancelled.is_set():
@@ -384,8 +385,7 @@ def extract(archive: Path, staging: Path) -> Path:
             tar.extractall(staging, filter="data")
     elif sys.platform == "darwin":
         # ditto preserves the executable bits that zipfile would drop
-        subprocess.run(["ditto", "-x", "-k", str(archive), str(staging)],
-                       check=True)
+        subprocess.run(["ditto", "-x", "-k", str(archive), str(staging)], check=True)
     else:
         import zipfile
 
@@ -428,13 +428,11 @@ rm -f "$0"
 """
 
 
-def write_apply_script(new_root: Path, install: Path, staging: Path,
-                       pid: int) -> Path:
+def write_apply_script(new_root: Path, install: Path, staging: Path, pid: int) -> Path:
     """The helper script that swaps in the update once the game exits."""
     exe = APP_NAME + (".exe" if sys.platform == "win32" else "")
     template = _WINDOWS_SCRIPT if sys.platform == "win32" else _POSIX_SCRIPT
-    text = template.format(pid=pid, src=new_root, dst=install,
-                           staging=staging, exe=exe)
+    text = template.format(pid=pid, src=new_root, dst=install, staging=staging, exe=exe)
     suffix = ".bat" if sys.platform == "win32" else ".sh"
     script = staging.parent / f"{APP_NAME.lower()}-apply-{pid}{suffix}"
     script.write_text(text, encoding="utf-8")
@@ -448,13 +446,22 @@ def apply_and_restart(new_root: Path, staging: Path) -> None:
     the script waits for this process to exit before touching files."""
     script = write_apply_script(new_root, install_root(), staging, os.getpid())
     if sys.platform == "win32":
-        flags = (subprocess.CREATE_NO_WINDOW
-                 | subprocess.CREATE_NEW_PROCESS_GROUP)
-        subprocess.Popen(["cmd", "/c", str(script)], creationflags=flags,
-                         stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL,
-                         stderr=subprocess.DEVNULL, close_fds=True)
+        flags = subprocess.CREATE_NO_WINDOW | subprocess.CREATE_NEW_PROCESS_GROUP
+        subprocess.Popen(
+            ["cmd", "/c", str(script)],
+            creationflags=flags,
+            stdin=subprocess.DEVNULL,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+            close_fds=True,
+        )
     else:
-        subprocess.Popen(["/bin/sh", str(script)], start_new_session=True,
-                         stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL,
-                         stderr=subprocess.DEVNULL, close_fds=True)
+        subprocess.Popen(
+            ["/bin/sh", str(script)],
+            start_new_session=True,
+            stdin=subprocess.DEVNULL,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+            close_fds=True,
+        )
     log.info("Update staged; apply script %s spawned", script)

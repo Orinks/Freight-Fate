@@ -20,7 +20,9 @@ def _load_tool():
 
 
 def test_facility_endpoint_data_covers_supported_facilities(world):
-    data = json.loads(Path("src/freight_fate/data/facility_endpoints.json").read_text(encoding="utf-8-sig"))
+    data = json.loads(
+        Path("src/freight_fate/data/facility_endpoints.json").read_text(encoding="utf-8-sig")
+    )
     coverage = data["coverage"]
 
     assert coverage["facilities"] == 1819
@@ -33,23 +35,25 @@ def test_facility_endpoint_data_covers_supported_facilities(world):
     facilities = sum(len(world.cities[city].locations) for city in world.city_names())
     assert facilities == coverage["facilities"]
     assert set(data["endpoints"]) == {
-        location.id
-        for city in world.city_names()
-        for location in world.cities[city].locations
+        location.id for city in world.city_names() for location in world.cities[city].locations
     }
 
 
 def test_facility_endpoint_records_are_clean_and_honest(world):
-    data = json.loads(Path("src/freight_fate/data/facility_endpoints.json").read_text(encoding="utf-8-sig"))
+    data = json.loads(
+        Path("src/freight_fate/data/facility_endpoints.json").read_text(encoding="utf-8-sig")
+    )
 
     for facility_id, record in data["endpoints"].items():
         endpoint = world.facility_endpoint(record["city"], facility_id)
         assert endpoint is not None
-        spoken = " ".join((
-            record["facility_name"],
-            record["endpoint_name"],
-            record["approach_road"],
-        )).lower()
+        spoken = " ".join(
+            (
+                record["facility_name"],
+                record["endpoint_name"],
+                record["approach_road"],
+            )
+        ).lower()
         assert not any(marker in spoken for marker in RAW_MARKERS)
         assert record["source_note"]
         assert not record["gate_hint"]
@@ -156,4 +160,6 @@ def test_build_tool_marks_missing_extracts_as_fallback(tmp_path, monkeypatch):
 
     assert payload["coverage"]["fallback"] == 1
     assert record["fallback"]
-    assert "No high-confidence source-backed OSM facility endpoint found" in record["fallback_reason"]
+    assert (
+        "No high-confidence source-backed OSM facility endpoint found" in record["fallback_reason"]
+    )

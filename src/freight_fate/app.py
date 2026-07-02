@@ -33,6 +33,18 @@ TEXT_COLOR = (235, 235, 225)
 HILIGHT_COLOR = (255, 210, 90)
 
 
+def _stop_main_speech(speech) -> None:
+    stop = getattr(speech, "stop_main", None) or getattr(speech, "stop", None)
+    if stop is not None:
+        stop()
+
+
+def _stop_event_speech(speech) -> None:
+    stop = getattr(speech, "stop_event", None)
+    if stop is not None:
+        stop()
+
+
 class GameContext:
     """Shared services handed to every state."""
 
@@ -79,17 +91,29 @@ class GameContext:
         screen reader.
 
         With it disabled the player has chosen to hear events through their
-        screen reader. There we never interrupt, even for critical events: an
-        interrupt would chop the screen reader off mid-word as it reads menus,
-        keystrokes, or a prior announcement. Queuing instead lets the event
-        follow the current utterance, which the screen reader handles in its
-        own time.
+        screen reader. Urgent events first flush stale game speech, then speak
+        as a fresh queued utterance so old messages do not bury the warning.
         """
         transcript.info("[event] %s", text)
         if self.settings.sapi_events:
             self.speech.say_event(text, interrupt)
         else:
+            if interrupt:
+                _stop_main_speech(self.speech)
             self.speech.say(text, interrupt=False)
+
+    def stop_event_speech(self) -> None:
+        _stop_event_speech(self.speech)
+
+    def stop_speech(self) -> None:
+        """Silence all in-progress speech on both channels (main and event).
+
+        Menus and readers speak through the main channel, so the driving-only
+        ``stop_event_speech`` does not quiet them. This silences everything so a
+        single key works as a "stop talking" everywhere in the game.
+        """
+        _stop_main_speech(self.speech)
+        _stop_event_speech(self.speech)
 
     # -- state stack ------------------------------------------------------------
 
@@ -113,12 +137,14 @@ class GameContext:
             self.profile.save()
 
     def apply_volumes(self) -> None:
-        self.audio.set_volumes(master=self.settings.master_volume,
-                               sfx=self.settings.sfx_volume,
-                               music=self.settings.music_volume,
-                               weather=self.settings.weather_volume,
-                               engine=self.settings.engine_volume,
-                               ui=self.settings.ui_volume)
+        self.audio.set_volumes(
+            master=self.settings.master_volume,
+            sfx=self.settings.sfx_volume,
+            music=self.settings.music_volume,
+            weather=self.settings.weather_volume,
+            engine=self.settings.engine_volume,
+            ui=self.settings.ui_volume,
+        )
 
     def apply_presence(self) -> None:
         """Reflect the Discord presence setting (e.g. after a settings change)."""
@@ -126,7 +152,8 @@ class GameContext:
 
     def apply_speech(self) -> None:
         self.speech.select_event_backend(
-            self.settings.event_backend if self.settings.sapi_events else None)
+            self.settings.event_backend if self.settings.sapi_events else None
+        )
         # If the saved voice was not on this machine (e.g. a Windows save's
         # SAPI opened on macOS), record the one actually used so the menu and
         # later sessions reflect reality.
@@ -134,10 +161,12 @@ class GameContext:
             actual = self.speech.event_backend_name
             if actual not in ("none", "unknown") and actual != self.settings.event_backend:
                 self.settings.event_backend = actual
-        self.speech.configure(rate=self.settings.speech_rate,
-                              pitch=self.settings.speech_pitch,
-                              volume=self.settings.speech_volume,
-                              voice=self.settings.speech_voice or None)
+        self.speech.configure(
+            rate=self.settings.speech_rate,
+            pitch=self.settings.speech_pitch,
+            volume=self.settings.speech_volume,
+            voice=self.settings.speech_voice or None,
+        )
 
     def next_music_track(self, pool_name: str, sequence: tuple[str, ...]) -> str:
         """Advance a session-local music pool without immediate repeats."""
@@ -157,17 +186,20 @@ class GameContext:
         return track
 
     def play_music_sequence(
-            self,
-            pool_name: str,
-            sequence: tuple[str, ...],
-            *,
-            fade_ms: int = 1500,
-            advance: bool = False) -> str:
+        self,
+        pool_name: str,
+        sequence: tuple[str, ...],
+        *,
+        fade_ms: int = 1500,
+        advance: bool = False,
+    ) -> str:
         """Play or refresh a pool without jarring compatible menu restarts."""
-        if (not advance
-                and self._music_rotation_pool is not None
-                and self._music_rotation_track is not None
-                and self._music_rotation_pool[0] == pool_name):
+        if (
+            not advance
+            and self._music_rotation_pool is not None
+            and self._music_rotation_track is not None
+            and self._music_rotation_pool[0] == pool_name
+        ):
             self._music_rotation_pool = (pool_name, sequence)
             return self._music_rotation_track
         track = self.next_music_track(pool_name, sequence)
@@ -185,8 +217,7 @@ class GameContext:
         if self._music_rotation_pool is None or self._music_rotation_track is None:
             return
         self._music_rotation_elapsed_s += max(0.0, dt)
-        if self._music_rotation_elapsed_s < music_track_duration_s(
-                self._music_rotation_track):
+        if self._music_rotation_elapsed_s < music_track_duration_s(self._music_rotation_track):
             return
         pool_name, sequence = self._music_rotation_pool
         self.play_music_sequence(pool_name, sequence, advance=True)
@@ -197,12 +228,13 @@ class GameContext:
         self._music_rotation_elapsed_s = 0.0
 
     def award_achievement(
-            self,
-            achievement_id: str,
-            *,
-            event: bool = False,
-            interrupt: bool = False,
-            announce: bool = True) -> AchievementAward | None:
+        self,
+        achievement_id: str,
+        *,
+        event: bool = False,
+        interrupt: bool = False,
+        announce: bool = True,
+    ) -> AchievementAward | None:
         if self.profile is None:
             return None
         result = award(self.profile, achievement_id)
@@ -281,7 +313,7 @@ class App:
 
         self.running = True
         self.push_state(MainMenuState(self.ctx))
-        self.presence.start()   # after init; never blocks if Discord is absent
+        self.presence.start()  # after init; never blocks if Discord is absent
         frames = 0
         try:
             while self.running:
@@ -369,13 +401,16 @@ def _configure_logging() -> None:
         except OSError:
             pass  # unwritable disk: console-only is the best we can do
     logging.basicConfig(
-        level=level, handlers=handlers, force=True,
-        format="%(asctime)s %(levelname)s %(name)s: %(message)s")
+        level=level,
+        handlers=handlers,
+        force=True,
+        format="%(asctime)s %(levelname)s %(name)s: %(message)s",
+    )
 
 
 def main() -> int:
     _configure_logging()
-    smoke = "--smoke" in sys.argv[1:]   # CI: boot, render a few frames, exit 0
+    smoke = "--smoke" in sys.argv[1:]  # CI: boot, render a few frames, exit 0
     from .single_instance import SingleInstanceGuard
 
     guard = SingleInstanceGuard()

@@ -68,22 +68,18 @@ def test_company_carrier_pay_plans_have_distinct_benefits():
     long_floor_job = _job(miles=500.0, pay=500.0)
     high_gross_job = _job(miles=300.0, pay=3000.0)
 
-    northstar = company_driver_pay(
-        short_job, short_job.pay, True, DEFAULT_START_KEY)
-    training = company_driver_pay(
-        short_job, short_job.pay, True, "great_lakes_training")
+    northstar = company_driver_pay(short_job, short_job.pay, True, DEFAULT_START_KEY)
+    training = company_driver_pay(short_job, short_job.pay, True, "great_lakes_training")
     assert training > northstar
 
-    northstar_long = company_driver_pay(
-        long_floor_job, long_floor_job.pay, True, DEFAULT_START_KEY)
-    prairie = company_driver_pay(
-        long_floor_job, long_floor_job.pay, True, "prairie_link")
+    northstar_long = company_driver_pay(long_floor_job, long_floor_job.pay, True, DEFAULT_START_KEY)
+    prairie = company_driver_pay(long_floor_job, long_floor_job.pay, True, "prairie_link")
     assert prairie > northstar_long
 
     northstar_bonus = company_driver_pay(
-        high_gross_job, high_gross_job.pay, True, DEFAULT_START_KEY)
-    summit = company_driver_pay(
-        high_gross_job, high_gross_job.pay, True, "summit_value")
+        high_gross_job, high_gross_job.pay, True, DEFAULT_START_KEY
+    )
+    summit = company_driver_pay(high_gross_job, high_gross_job.pay, True, "summit_value")
     assert summit > northstar_bonus
 
 
@@ -91,11 +87,21 @@ def test_carrier_key_changes_settlement_math():
     job = _job(miles=80.0, pay=600.0)
 
     northstar = build_business_settlement(
-        COMPANY_DRIVER, job, job.pay, on_time=True, driver_charges=0.0,
-        carrier_key=DEFAULT_START_KEY)
+        COMPANY_DRIVER,
+        job,
+        job.pay,
+        on_time=True,
+        driver_charges=0.0,
+        carrier_key=DEFAULT_START_KEY,
+    )
     training = build_business_settlement(
-        COMPANY_DRIVER, job, job.pay, on_time=True, driver_charges=0.0,
-        carrier_key="great_lakes_training")
+        COMPANY_DRIVER,
+        job,
+        job.pay,
+        on_time=True,
+        driver_charges=0.0,
+        carrier_key="great_lakes_training",
+    )
 
     assert training.net_before_advance > northstar.net_before_advance
     assert training.business_charges == ()
@@ -107,9 +113,11 @@ def test_carrier_key_can_bias_job_mix_weighting(world):
     board = JobBoard(world, seed=1)
 
     baseline = board._cargo_weight(  # noqa: SLF001 - focused model regression
-        world.cities["Kansas City"], "grain", DEFAULT_START_KEY)
+        world.cities["Kansas City"], "grain", DEFAULT_START_KEY
+    )
     prairie = board._cargo_weight(  # noqa: SLF001 - focused model regression
-        world.cities["Kansas City"], "grain", "prairie_link")
+        world.cities["Kansas City"], "grain", "prairie_link"
+    )
 
     assert prairie > baseline
 
@@ -133,11 +141,13 @@ def test_company_carriers_have_distinct_dispatch_weighting(world):
     kansas_city = "Kansas City"
     origin_region = world.cities[kansas_city].region
     same_region = next(
-        c for c in board._candidates(kansas_city)  # noqa: SLF001
+        c
+        for c in board._candidates(kansas_city)  # noqa: SLF001
         if world.cities[c[0]].region == origin_region
     )
     other_region = next(
-        c for c in board._candidates(kansas_city)  # noqa: SLF001
+        c
+        for c in board._candidates(kansas_city)  # noqa: SLF001
         if world.cities[c[0]].region != origin_region
     )
     prairie_region_ratio = board._destination_weight(  # noqa: SLF001

@@ -35,8 +35,15 @@ def test_overlay_adds_new_city_and_leg(tmp_path):
     assert "Helena" not in base.cities
     overlay = {
         "cities": {"Helena": _helena_city()},
-        "legs": [{"from": "Helena", "to": "Salt Lake City",
-                  "miles": 480, "highway": "I-15", "terrain": "mountain"}],
+        "legs": [
+            {
+                "from": "Helena",
+                "to": "Salt Lake City",
+                "miles": 480,
+                "highway": "I-15",
+                "terrain": "mountain",
+            }
+        ],
     }
     path = tmp_path / "overlay.json"
     path.write_text(json.dumps(overlay), encoding="utf-8")
@@ -53,10 +60,15 @@ def test_overlay_adds_new_city_and_leg(tmp_path):
 def test_overlay_cannot_override_base_city(tmp_path):
     base = World.load()
     overlay = {
-        "cities": {"Chicago": {
-            "state": "Nowhere", "region": "rockies", "lat": 0.0, "lon": 0.0,
-            "locations": [{"name": "Bogus Yard", "type": "terminal"}],
-        }},
+        "cities": {
+            "Chicago": {
+                "state": "Nowhere",
+                "region": "rockies",
+                "lat": 0.0,
+                "lon": 0.0,
+                "locations": [{"name": "Bogus Yard", "type": "terminal"}],
+            }
+        },
         "legs": [],
     }
     path = tmp_path / "overlay.json"
@@ -71,10 +83,18 @@ def test_overlay_does_not_duplicate_an_existing_leg(tmp_path):
     base = World.load()
     leg = base.legs[0]
     # re-add the same leg with endpoints reversed; it must not be duplicated
-    overlay = {"cities": {}, "legs": [{
-        "from": leg.b, "to": leg.a, "miles": leg.miles,
-        "highway": leg.highway, "terrain": leg.terrain,
-    }]}
+    overlay = {
+        "cities": {},
+        "legs": [
+            {
+                "from": leg.b,
+                "to": leg.a,
+                "miles": leg.miles,
+                "highway": leg.highway,
+                "terrain": leg.terrain,
+            }
+        ],
+    }
     path = tmp_path / "overlay.json"
     path.write_text(json.dumps(overlay), encoding="utf-8")
 

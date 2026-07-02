@@ -18,7 +18,8 @@ ROOT = Path(__file__).resolve().parents[1]
 def _load_enrich_routes():
     """Import tools/enrich_routes.py by path (tools is not a package)."""
     spec = importlib.util.spec_from_file_location(
-        "enrich_routes", ROOT / "tools" / "enrich_routes.py")
+        "enrich_routes", ROOT / "tools" / "enrich_routes.py"
+    )
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
     return module
@@ -30,23 +31,25 @@ enrich_routes = _load_enrich_routes()
 def _mock_ors_payload():
     """A minimal driving-hgv GeoJSON response: 3D coords + steepness + tollways."""
     return {
-        "features": [{
-            "geometry": {
-                "type": "LineString",
-                "coordinates": [
-                    [-87.63, 41.88, 180.0],
-                    [-86.90, 41.00, 200.0],
-                    [-86.16, 39.77, 220.0],
-                ],
-            },
-            "properties": {
-                "summary": {"distance": 296000.0, "duration": 10000.0},
-                "extras": {
-                    "steepness": {"values": [[0, 1, 0], [1, 2, 2]]},
-                    "tollways": {"values": [[0, 2, 1]]},
+        "features": [
+            {
+                "geometry": {
+                    "type": "LineString",
+                    "coordinates": [
+                        [-87.63, 41.88, 180.0],
+                        [-86.90, 41.00, 200.0],
+                        [-86.16, 39.77, 220.0],
+                    ],
                 },
-            },
-        }]
+                "properties": {
+                    "summary": {"distance": 296000.0, "duration": 10000.0},
+                    "extras": {
+                        "steepness": {"values": [[0, 1, 0], [1, 2, 2]]},
+                        "tollways": {"values": [[0, 2, 1]]},
+                    },
+                },
+            }
+        ]
     }
 
 
@@ -79,7 +82,8 @@ def test_parse_ors_route_elevation_feeds_existing_grade_helper():
 def test_ors_corridor_samples_carry_elevation():
     parsed = enrich_routes.parse_ors_route(_mock_ors_payload())
     samples, elevations = enrich_routes.ors_corridor_samples(
-        parsed, parsed["miles"], sample_count=3)
+        parsed, parsed["miles"], sample_count=3
+    )
     assert len(samples) == 3 == len(elevations)
     assert samples[0]["at_mi"] == 0.0
     assert samples[-1]["at_mi"] == pytest.approx(parsed["miles"])
@@ -118,9 +122,9 @@ def test_grade_segments_from_samples_single_when_uniform():
 
 
 def test_ors_sample_count_scales_with_distance():
-    assert enrich_routes._ors_sample_count(40) == 5      # short legs get a floor
-    assert enrich_routes._ors_sample_count(490) == 18     # ~1 per 30 mi
-    assert enrich_routes._ors_sample_count(2000) == 25    # capped
+    assert enrich_routes._ors_sample_count(40) == 5  # short legs get a floor
+    assert enrich_routes._ors_sample_count(490) == 18  # ~1 per 30 mi
+    assert enrich_routes._ors_sample_count(2000) == 25  # capped
 
 
 def test_parse_ors_route_rejects_empty_response():
@@ -137,7 +141,8 @@ def test_ors_api_key_reads_environment(monkeypatch):
 
 def test_ors_directions_kwargs_request_hgv_with_elevation_and_extras():
     kwargs = enrich_routes._ors_directions_kwargs(
-        {"lon": -87.63, "lat": 41.88}, {"lon": -86.16, "lat": 39.77})
+        {"lon": -87.63, "lat": 41.88}, {"lon": -86.16, "lat": 39.77}
+    )
     assert kwargs["coordinates"] == [[-87.63, 41.88], [-86.16, 39.77]]
     assert kwargs["profile"] == "driving-hgv"
     assert kwargs["format"] == "geojson"

@@ -122,11 +122,7 @@ class TrafficManager:
             0.86,
             max(
                 0.05,
-                0.22
-                + leg.miles / 900.0
-                + metro_bias
-                + night_bias
-                + rush_bias,
+                0.22 + leg.miles / 900.0 + metro_bias + night_bias + rush_bias,
             ),
         )
         return density * self.hazard_scale
@@ -137,8 +133,7 @@ class TrafficManager:
             0.0,
             min(
                 14.0,
-                (1.0 - effects.grip) * 20.0
-                + max(0.0, 3.0 - effects.visibility_mi) * 1.4,
+                (1.0 - effects.grip) * 20.0 + max(0.0, 3.0 - effects.visibility_mi) * 1.4,
             ),
         )
 
@@ -177,9 +172,7 @@ class TrafficManager:
                     "braking": rng.uniform(35.0, 48.0),
                     "passing": rng.uniform(62.0, 75.0),
                 }[intent]
-                rush_slowdown = (
-                    rng.uniform(4.0, 10.0) if self._rush_hour_traffic_bias(leg) else 0.0
-                )
+                rush_slowdown = rng.uniform(4.0, 10.0) if self._rush_hour_traffic_bias(leg) else 0.0
                 speed = max(25.0, base_speed - weather_slowdown - rush_slowdown)
                 lane = -1 if intent == "passing" else 0
                 if intent == "merging":
@@ -220,9 +213,7 @@ class TrafficManager:
             existing_keys.add(key)
         self.vehicles.sort(key=lambda vehicle: vehicle.position_mi)
 
-    def lead_vehicle(
-        self, position_mi: float, truck_speed_mph: float
-    ) -> TrafficContext | None:
+    def lead_vehicle(self, position_mi: float, truck_speed_mph: float) -> TrafficContext | None:
         # TrafficVehicle intentionally matches the NPCVehicle runtime surface
         # used by TrafficContext while the traffic bubble is split out.
         nearest: tuple[float, TrafficVehicle] | None = None

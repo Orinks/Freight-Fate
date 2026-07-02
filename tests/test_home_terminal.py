@@ -35,8 +35,7 @@ def test_region_picker_lists_regions_and_defaults_to_chicagos_region(world):
         picker = open_picker(app)
         # defaults to the region that contains the default city (Chicago)
         default_region = world.cities["Chicago"].region
-        assert picker.items[picker.index].text.startswith(
-            _region_menu_name(default_region))
+        assert picker.items[picker.index].text.startswith(_region_menu_name(default_region))
         # one item per region that actually has cities
         regions_with_cities = {c.region for c in world.cities.values()}
         assert len(picker.items) == len(regions_with_cities)
@@ -60,8 +59,7 @@ def test_region_opens_a_city_submenu_listing_only_that_regions_cities(world):
         picker.handle_event(key_event(pygame.K_RETURN))
         assert isinstance(app.state, HomeCityState)
         listed = {item.text.split(",")[0] for item in app.state.items}
-        expected = {c.name for c in world.cities.values()
-                    if c.region == "great_lakes"}
+        expected = {c.name for c in world.cities.values() if c.region == "great_lakes"}
         assert listed == expected
         assert "Chicago" in listed
     finally:

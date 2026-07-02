@@ -31,10 +31,17 @@ GEONAMES_CITIES_URL = "https://download.geonames.org/export/dump/cities15000.zip
 GEONAMES_ADMIN1_URL = "https://download.geonames.org/export/dump/admin1CodesASCII.txt"
 EARTH_RADIUS_MI = 3958.8
 # Non-contiguous states/territories cannot join the continental truck network.
-NON_CONTIGUOUS_STATES = frozenset({
-    "Alaska", "Hawaii", "Puerto Rico", "Guam", "American Samoa",
-    "United States Virgin Islands", "Northern Mariana Islands",
-})
+NON_CONTIGUOUS_STATES = frozenset(
+    {
+        "Alaska",
+        "Hawaii",
+        "Puerto Rico",
+        "Guam",
+        "American Samoa",
+        "United States Virgin Islands",
+        "Northern Mariana Islands",
+    }
+)
 
 
 def _haversine_miles(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
@@ -70,13 +77,15 @@ def parse_geonames(cities_text: str, admin1: dict[str, str]) -> list[dict[str, A
         if state is None or state in NON_CONTIGUOUS_STATES:
             continue
         try:
-            rows.append({
-                "name": cols[1],
-                "state": state,
-                "lat": float(cols[4]),
-                "lon": float(cols[5]),
-                "population": int(cols[14] or 0),
-            })
+            rows.append(
+                {
+                    "name": cols[1],
+                    "state": state,
+                    "lat": float(cols[4]),
+                    "lon": float(cols[5]),
+                    "population": int(cols[14] or 0),
+                }
+            )
         except ValueError:
             continue
     return rows
@@ -98,8 +107,10 @@ def rank_candidates(
     for row in sorted(rows, key=lambda r: r["population"], reverse=True):
         if row["population"] < min_population or row["name"] in existing_names:
             continue
-        if any(_haversine_miles(row["lat"], row["lon"], lat, lon) <= dedupe_mi
-               for lat, lon in chosen_coords):
+        if any(
+            _haversine_miles(row["lat"], row["lon"], lat, lon) <= dedupe_mi
+            for lat, lon in chosen_coords
+        ):
             continue
         candidates.append(row)
         chosen_coords.append((row["lat"], row["lon"]))
@@ -122,8 +133,8 @@ def _cached_bytes(cache_dir: Path, name: str, url: str) -> bytes:
 
 def load_geonames(cache_dir: Path) -> list[dict[str, Any]]:
     admin1 = parse_admin1(
-        _cached_bytes(cache_dir, "admin1CodesASCII.txt", GEONAMES_ADMIN1_URL)
-        .decode("utf-8"))
+        _cached_bytes(cache_dir, "admin1CodesASCII.txt", GEONAMES_ADMIN1_URL).decode("utf-8")
+    )
     zip_bytes = _cached_bytes(cache_dir, "cities15000.zip", GEONAMES_CITIES_URL)
     with zipfile.ZipFile(io.BytesIO(zip_bytes)) as zf:
         cities_text = zf.read("cities15000.txt").decode("utf-8")
@@ -132,7 +143,8 @@ def load_geonames(cache_dir: Path) -> list[dict[str, Any]]:
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
-        description="Propose candidate new city nodes from GeoNames (read-only).")
+        description="Propose candidate new city nodes from GeoNames (read-only)."
+    )
     parser.add_argument("--top", type=int, default=25)
     parser.add_argument("--min-pop", type=int, default=100_000)
     parser.add_argument("--dedupe-mi", type=float, default=30.0)
@@ -142,27 +154,34 @@ def main(argv: list[str] | None = None) -> int:
 
     data = json.loads(WORLD_PATH.read_text(encoding="utf-8"))
     existing_names = set(data["cities"])
-    existing_coords = [(float(c["lat"]), float(c["lon"]))
-                       for c in data["cities"].values()]
+    existing_coords = [(float(c["lat"]), float(c["lon"])) for c in data["cities"].values()]
 
     rows = load_geonames(Path(args.cache_dir))
     candidates = rank_candidates(
-        rows, existing_names, existing_coords,
-        top_n=args.top, min_population=args.min_pop, dedupe_mi=args.dedupe_mi)
+        rows,
+        existing_names,
+        existing_coords,
+        top_n=args.top,
+        min_population=args.min_pop,
+        dedupe_mi=args.dedupe_mi,
+    )
 
     from freight_fate.data.regions import classify_region
+
     for candidate in candidates:
         candidate["region"] = classify_region(
-            candidate["state"], candidate["lat"], candidate["lon"])
+            candidate["state"], candidate["lat"], candidate["lon"]
+        )
 
     if args.json:
         print(json.dumps(candidates, indent=2))
     else:
-        print(f"Top {len(candidates)} candidate nodes (not in the current "
-              f"{len(existing_names)}-city map), by population:")
+        print(
+            f"Top {len(candidates)} candidate nodes (not in the current "
+            f"{len(existing_names)}-city map), by population:"
+        )
         for i, c in enumerate(candidates, 1):
-            print(f"{i:2}. {c['name']}, {c['state']} "
-                  f"({c['population']:,}) -> {c['region']}")
+            print(f"{i:2}. {c['name']}, {c['state']} ({c['population']:,}) -> {c['region']}")
     return 0
 
 

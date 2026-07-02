@@ -96,7 +96,9 @@ class CityBucket:
     candidates: list[Candidate] = field(default_factory=list)
 
 
-def build_facility_endpoints(cache_dir: Path, *, radius_mi: float = DEFAULT_RADIUS_MI) -> dict[str, Any]:
+def build_facility_endpoints(
+    cache_dir: Path, *, radius_mi: float = DEFAULT_RADIUS_MI
+) -> dict[str, Any]:
     targets = collect_targets()
     by_state: dict[str, dict[str, CityBucket]] = defaultdict(dict)
     for target in targets:
@@ -140,16 +142,18 @@ def collect_targets() -> list[FacilityTarget]:
     for city_name in world.city_names():
         city = world.cities[city_name]
         for location in city.locations:
-            targets.append(FacilityTarget(
-                facility_id=location.id,
-                city=city_name,
-                state=city.state,
-                name=location.name,
-                facility_type=location.type,
-                lat=location.lat or city.lat,
-                lon=location.lon or city.lon,
-                source_note=location.source_note,
-            ))
+            targets.append(
+                FacilityTarget(
+                    facility_id=location.id,
+                    city=city_name,
+                    state=city.state,
+                    name=location.name,
+                    facility_type=location.type,
+                    lat=location.lat or city.lat,
+                    lon=location.lon or city.lon,
+                    source_note=location.source_note,
+                )
+            )
     return targets
 
 
@@ -223,41 +227,47 @@ def endpoint_records_for_city(
     for target in sorted(bucket.targets, key=lambda item: item.facility_id):
         candidate = choose_candidate(target, bucket.candidates, used_refs)
         if candidate is None:
-            records.append(fallback_record(
-                target,
-                reason=f"No high-confidence source-backed OSM facility endpoint found within {radius_mi:.0f} miles in {extract.name}.",
-            ))
+            records.append(
+                fallback_record(
+                    target,
+                    reason=f"No high-confidence source-backed OSM facility endpoint found within {radius_mi:.0f} miles in {extract.name}.",
+                )
+            )
             continue
         used_refs.add(candidate.source_ref)
-        records.append({
-            "facility_id": target.facility_id,
-            "city": target.city,
-            "state": target.state,
-            "facility_name": target.name,
-            "facility_type": target.facility_type,
-            "endpoint_name": candidate.name,
-            "lat": round(candidate.lat, 6),
-            "lon": round(candidate.lon, 6),
-            "approach_miles": approach_miles(target.lat, target.lon, candidate.lat, candidate.lon),
-            "approach_road": "local facility access road",
-            "source_type": "osm_facility_endpoint",
-            "source_ref": candidate.source_ref,
-            "source_backed": True,
-            "fallback": False,
-            "fallback_reason": "",
-            "nearest_road_context": False,
-            "turn_level_geometry": False,
-            "gate_hint": False,
-            "yard_hint": False,
-            "dock_hint": False,
-            "mapping": candidate.mapping,
-            "source_note": (
-                "Source-backed freight facility endpoint from a local OpenStreetMap "
-                f"extract for {target.city}, {target.state}; matched to "
-                f"{target.facility_type} by {candidate.mapping}; road snapping, gates, "
-                f"yards, and docks are not claimed by this layer; accessed {ACCESSED_DATE}."
-            ),
-        })
+        records.append(
+            {
+                "facility_id": target.facility_id,
+                "city": target.city,
+                "state": target.state,
+                "facility_name": target.name,
+                "facility_type": target.facility_type,
+                "endpoint_name": candidate.name,
+                "lat": round(candidate.lat, 6),
+                "lon": round(candidate.lon, 6),
+                "approach_miles": approach_miles(
+                    target.lat, target.lon, candidate.lat, candidate.lon
+                ),
+                "approach_road": "local facility access road",
+                "source_type": "osm_facility_endpoint",
+                "source_ref": candidate.source_ref,
+                "source_backed": True,
+                "fallback": False,
+                "fallback_reason": "",
+                "nearest_road_context": False,
+                "turn_level_geometry": False,
+                "gate_hint": False,
+                "yard_hint": False,
+                "dock_hint": False,
+                "mapping": candidate.mapping,
+                "source_note": (
+                    "Source-backed freight facility endpoint from a local OpenStreetMap "
+                    f"extract for {target.city}, {target.state}; matched to "
+                    f"{target.facility_type} by {candidate.mapping}; road snapping, gates, "
+                    f"yards, and docks are not claimed by this layer; accessed {ACCESSED_DATE}."
+                ),
+            }
+        )
     return records
 
 
@@ -269,16 +279,19 @@ def choose_candidate(
     if target.facility_type not in TARGET_FACILITY_TYPES:
         return None
     choices = [
-        candidate for candidate in candidates
+        candidate
+        for candidate in candidates
         if target.facility_type in candidate.roles and candidate.source_ref not in used_refs
     ]
     if not choices:
         return None
-    choices.sort(key=lambda candidate: (
-        -candidate.score,
-        _haversine_mi(target.lat, target.lon, candidate.lat, candidate.lon),
-        candidate.name,
-    ))
+    choices.sort(
+        key=lambda candidate: (
+            -candidate.score,
+            _haversine_mi(target.lat, target.lon, candidate.lat, candidate.lon),
+            candidate.name,
+        )
+    )
     return choices[0]
 
 
@@ -335,31 +348,51 @@ def classify(tags: dict[str, str], name: str) -> tuple[set[str], int, str]:
     score = 0
     reasons: list[str] = []
 
-    logistics_terms = ("logistics", "freight", "warehouse", "distribution", "terminal", "cross dock", "cross-dock")
+    logistics_terms = (
+        "logistics",
+        "freight",
+        "warehouse",
+        "distribution",
+        "terminal",
+        "cross dock",
+        "cross-dock",
+    )
     industrial_terms = ("industrial", "manufacturing", "plant", "factory", "works")
     if tags.get("industrial") == "logistics" or any(term in text for term in logistics_terms):
-        roles.update({"dry_warehouse", "warehouse", "distribution", "terminal", "cross_dock", "company_yard"})
+        roles.update(
+            {"dry_warehouse", "warehouse", "distribution", "terminal", "cross_dock", "company_yard"}
+        )
         score += 78
         reasons.append("logistics/warehouse/freight tags or name")
     if tags.get("office") in {"logistics", "freight_forwarder"}:
         roles.update({"terminal", "distribution", "company_yard"})
         score += 84
         reasons.append("logistics office tags")
-    if tags.get("landuse") in {"industrial", "commercial"} and any(term in text for term in logistics_terms):
+    if tags.get("landuse") in {"industrial", "commercial"} and any(
+        term in text for term in logistics_terms
+    ):
         roles.update({"dry_warehouse", "warehouse", "distribution", "industrial_park"})
         score += 68
         reasons.append("industrial landuse with freight naming")
 
-    if tags.get("railway") in {"yard", "terminal", "rail"} or "intermodal" in text or "rail yard" in text:
+    if (
+        tags.get("railway") in {"yard", "terminal", "rail"}
+        or "intermodal" in text
+        or "rail yard" in text
+    ):
         roles.update({"intermodal_ramp", "intermodal", "rail"})
         score += 88
         reasons.append("rail/intermodal tags or name")
-    if tags.get("landuse") == "railway" and any(term in text for term in ("yard", "intermodal", "terminal")):
+    if tags.get("landuse") == "railway" and any(
+        term in text for term in ("yard", "intermodal", "terminal")
+    ):
         roles.update({"intermodal_ramp", "intermodal", "rail"})
         score += 70
         reasons.append("railway landuse with terminal naming")
 
-    if tags.get("aeroway") in {"terminal", "hangar", "apron"} and any(term in text for term in ("cargo", "freight", "air cargo")):
+    if tags.get("aeroway") in {"terminal", "hangar", "apron"} and any(
+        term in text for term in ("cargo", "freight", "air cargo")
+    ):
         roles.add("air_cargo")
         score += 86
         reasons.append("air cargo tags or name")
@@ -368,7 +401,11 @@ def classify(tags: dict[str, str], name: str) -> tuple[set[str], int, str]:
         score += 78
         reasons.append("air cargo name")
 
-    if tags.get("harbour") or tags.get("seamark:type") or any(term in text for term in ("port", "container terminal", "marine terminal")):
+    if (
+        tags.get("harbour")
+        or tags.get("seamark:type")
+        or any(term in text for term in ("port", "container terminal", "marine terminal"))
+    ):
         roles.update({"port", "port_terminal"})
         score += 84
         reasons.append("port/container terminal tags or name")
@@ -377,12 +414,18 @@ def classify(tags: dict[str, str], name: str) -> tuple[set[str], int, str]:
         roles.add("cold_storage")
         score += 82
         reasons.append("cold storage naming")
-    if any(term in text for term in ("food", "produce", "grocery")) and any(term in text for term in logistics_terms):
+    if any(term in text for term in ("food", "produce", "grocery")) and any(
+        term in text for term in logistics_terms
+    ):
         roles.update({"food_terminal", "food_processor", "grocery_retail_dc"})
         score += 70
         reasons.append("food/grocery logistics naming")
 
-    if tags.get("man_made") == "works" or tags.get("building") in {"industrial", "factory"} or any(term in text for term in industrial_terms):
+    if (
+        tags.get("man_made") == "works"
+        or tags.get("building") in {"industrial", "factory"}
+        or any(term in text for term in industrial_terms)
+    ):
         roles.update({"manufacturing", "manufacturing_plant", "industrial_park"})
         score += 68
         reasons.append("manufacturing/industrial tags")
@@ -394,7 +437,9 @@ def classify(tags: dict[str, str], name: str) -> tuple[set[str], int, str]:
         roles.add("automotive_plant")
         score += 78
         reasons.append("automotive plant naming")
-    if any(term in text for term in ("chemical", "petroleum", "oil terminal", "tank farm", "refinery")):
+    if any(
+        term in text for term in ("chemical", "petroleum", "oil terminal", "tank farm", "refinery")
+    ):
         roles.add("chemical_petroleum_terminal")
         score += 78
         reasons.append("chemical/petroleum naming")
@@ -418,7 +463,9 @@ def coverage_summary(endpoints: dict[str, dict[str, Any]]) -> dict[str, Any]:
     fallback = 0
     gate_hints = 0
     for record in endpoints.values():
-        item = by_type.setdefault(record["facility_type"], {"total": 0, "source_backed": 0, "fallback": 0})
+        item = by_type.setdefault(
+            record["facility_type"], {"total": 0, "source_backed": 0, "fallback": 0}
+        )
         item["total"] += 1
         if record["source_backed"]:
             source_backed += 1
@@ -432,8 +479,12 @@ def coverage_summary(endpoints: dict[str, dict[str, Any]]) -> dict[str, Any]:
         "facilities": len(endpoints),
         "source_backed": source_backed,
         "fallback": fallback,
-        "nearest_road_context": sum(1 for record in endpoints.values() if record["nearest_road_context"]),
-        "turn_level_geometry": sum(1 for record in endpoints.values() if record["turn_level_geometry"]),
+        "nearest_road_context": sum(
+            1 for record in endpoints.values() if record["nearest_road_context"]
+        ),
+        "turn_level_geometry": sum(
+            1 for record in endpoints.values() if record["turn_level_geometry"]
+        ),
         "gate_yard_dock_hints": gate_hints,
         "by_type": by_type,
     }
@@ -446,7 +497,8 @@ def nearby_cities(
     radius_mi: float,
 ) -> list[str]:
     return [
-        city for city, (city_lat, city_lon) in cities.items()
+        city
+        for city, (city_lat, city_lon) in cities.items()
         if _haversine_mi(city_lat, city_lon, lat, lon) <= radius_mi
     ]
 
@@ -507,8 +559,7 @@ def _haversine_mi(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
     p1, p2 = math.radians(lat1), math.radians(lat2)
     dphi = math.radians(lat2 - lat1)
     dlmb = math.radians(lon2 - lon1)
-    h = (math.sin(dphi / 2) ** 2
-         + math.cos(p1) * math.cos(p2) * math.sin(dlmb / 2) ** 2)
+    h = math.sin(dphi / 2) ** 2 + math.cos(p1) * math.cos(p2) * math.sin(dlmb / 2) ** 2
     return 2 * EARTH_RADIUS_MI * math.asin(math.sqrt(h))
 
 
@@ -522,8 +573,9 @@ def main() -> int:
     payload = build_facility_endpoints(args.cache_dir)
     print(json.dumps(payload["coverage"], indent=2, sort_keys=True))
     if args.write:
-        args.output.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n",
-                               encoding="utf-8")
+        args.output.write_text(
+            json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+        )
         print(f"Wrote {args.output}")
     return 0
 

@@ -92,8 +92,9 @@ class RadioAction:
 
 def load_radio_catalog() -> tuple[RadioStation, ...]:
     data = json.loads(
-        resources.files("freight_fate.data").joinpath(
-            RADIO_CATALOG_RESOURCE).read_text(encoding="utf-8")
+        resources.files("freight_fate.data")
+        .joinpath(RADIO_CATALOG_RESOURCE)
+        .read_text(encoding="utf-8")
     )
     stations = tuple(_station_from_dict(row) for row in data["stations"])
     if not stations:
@@ -150,10 +151,7 @@ def station_distance_miles(
     lat2, lon2 = (math.radians(station.lat), math.radians(station.lon))
     dlat = lat2 - lat1
     dlon = lon2 - lon1
-    a = (
-        math.sin(dlat / 2) ** 2
-        + math.cos(lat1) * math.cos(lat2) * math.sin(dlon / 2) ** 2
-    )
+    a = math.sin(dlat / 2) ** 2 + math.cos(lat1) * math.cos(lat2) * math.sin(dlon / 2) ** 2
     return EARTH_RADIUS_MI * 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
 
 
@@ -255,7 +253,8 @@ class RadioState:
     def apply_settings(self, settings) -> None:
         self.volume = self._clamp_volume(float(getattr(settings, "radio_volume", self.volume)))
         self.real_streams_enabled = bool(
-            getattr(settings, "radio_real_streams", self.real_streams_enabled))
+            getattr(settings, "radio_real_streams", self.real_streams_enabled)
+        )
         self.streamer_safe = bool(getattr(settings, "radio_streamer_safe", self.streamer_safe))
 
     def write_settings(self, settings) -> None:
@@ -272,7 +271,8 @@ class RadioState:
             if self._station_allowed(station)
         ]
         receivable = [
-            reception for reception in receptions
+            reception
+            for reception in receptions
             if reception.signal > 0.0 or reception.station.always_available
         ]
         receivable.sort(key=self._reception_sort_key)
@@ -288,7 +288,8 @@ class RadioState:
             selected = "current, " if station.id == self.current_station().id else ""
             distance = (
                 f", {reception.distance_miles:.0f} miles away"
-                if reception.distance_miles is not None else ""
+                if reception.distance_miles is not None
+                else ""
             )
             lines.append(
                 f"{selected}{station.display_name}: {station.format}, "
@@ -341,8 +342,11 @@ class RadioState:
         if not self.enabled:
             self._stop(backend)
             return RadioAction(
-                "Radio off.", self.current_station(), enabled=False,
-                reception=self.current_reception())
+                "Radio off.",
+                self.current_station(),
+                enabled=False,
+                reception=self.current_reception(),
+            )
         return self.play(backend, prefix="Radio on.")
 
     def tune(self, direction: int, backend: RadioPlaybackBackend | None = None) -> RadioAction:
@@ -395,8 +399,8 @@ class RadioState:
             return RadioAction("Radio off.", station, enabled=False, reception=reception)
         if backend is None:
             return RadioAction(
-                self._play_message(prefix, reception), station, enabled=True,
-                reception=reception)
+                self._play_message(prefix, reception), station, enabled=True, reception=reception
+            )
         try:
             backend.play_station(station, self.volume)
         except Exception:
@@ -419,8 +423,8 @@ class RadioState:
                 fallback_used=True,
             )
         return RadioAction(
-            self._play_message(prefix, reception), station, enabled=True,
-            reception=reception)
+            self._play_message(prefix, reception), station, enabled=True, reception=reception
+        )
 
     def _station_allowed(self, station: RadioStation) -> bool:
         if not station.supported:
@@ -455,7 +459,8 @@ class RadioState:
     ) -> str:
         station = reception.station
         parts = [
-            part for part in (
+            part
+            for part in (
                 prefix,
                 station.display_name,
                 station.format,

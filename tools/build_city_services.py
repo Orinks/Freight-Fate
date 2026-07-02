@@ -204,8 +204,9 @@ def collect_state_services(
     return buckets
 
 
-def _collect_node(obj, tags: dict[str, str], cities: list[CityInfo],
-                  buckets: dict[str, CityBucket]) -> None:
+def _collect_node(
+    obj, tags: dict[str, str], cities: list[CityInfo], buckets: dict[str, CityBucket]
+) -> None:
     if not obj.location.valid():
         return
     lat = float(obj.location.lat)
@@ -218,8 +219,14 @@ def _collect_node(obj, tags: dict[str, str], cities: list[CityInfo],
             buckets[city.name].candidates.append(candidate_cache)
 
 
-def _collect_way(obj, tags: dict[str, str], cities: list[CityInfo],
-                 buckets: dict[str, CityBucket], *, include_roads: bool) -> None:
+def _collect_way(
+    obj,
+    tags: dict[str, str],
+    cities: list[CityInfo],
+    buckets: dict[str, CityBucket],
+    *,
+    include_roads: bool,
+) -> None:
     coords = _way_coords(obj)
     if not coords:
         return
@@ -256,34 +263,38 @@ def build_entries_for_city(bucket: CityBucket, source_path: Path) -> list[dict[s
     for key in SERVICE_ORDER:
         candidate = chosen.get(key)
         if candidate is None:
-            entries.append(fallback_entry(
-                city,
-                key,
-                "No realistic source-backed OSM candidate found within "
-                f"{city.radius_mi:.0f} miles in {source_path.name}.",
-            ))
+            entries.append(
+                fallback_entry(
+                    city,
+                    key,
+                    "No realistic source-backed OSM candidate found within "
+                    f"{city.radius_mi:.0f} miles in {source_path.name}.",
+                )
+            )
             continue
         road = _nearest_road(candidate, bucket.roads)
         approach_miles = _approach_miles(city.lat, city.lon, candidate.lat, candidate.lon)
-        entries.append({
-            "key": key,
-            "kind": key,
-            "name": candidate.name,
-            "city": city.name,
-            "state": city.state,
-            "lat": round(candidate.lat, 6),
-            "lon": round(candidate.lon, 6),
-            "approach_miles": approach_miles,
-            "approach_road": road,
-            "source_type": "osm",
-            "source_ref": candidate.source_ref,
-            "fallback": False,
-            "source_note": (
-                "Source-backed city service POI from a local OpenStreetMap "
-                f"extract for {city.name}, {city.state}; category mapped as "
-                f"{candidate.mapping}; accessed {ACCESSED_DATE}."
-            ),
-        })
+        entries.append(
+            {
+                "key": key,
+                "kind": key,
+                "name": candidate.name,
+                "city": city.name,
+                "state": city.state,
+                "lat": round(candidate.lat, 6),
+                "lon": round(candidate.lon, 6),
+                "approach_miles": approach_miles,
+                "approach_road": road,
+                "source_type": "osm",
+                "source_ref": candidate.source_ref,
+                "fallback": False,
+                "source_note": (
+                    "Source-backed city service POI from a local OpenStreetMap "
+                    f"extract for {city.name}, {city.state}; category mapped as "
+                    f"{candidate.mapping}; accessed {ACCESSED_DATE}."
+                ),
+            }
+        )
     return entries
 
 
@@ -365,8 +376,7 @@ def source_record(state: str, extract: Path, *, available: bool) -> dict[str, An
 
 def nearby_cities(cities: list[CityInfo], lat: float, lon: float) -> list[CityInfo]:
     return [
-        city for city in cities
-        if _haversine_mi(city.lat, city.lon, lat, lon) <= city.radius_mi
+        city for city in cities if _haversine_mi(city.lat, city.lon, lat, lon) <= city.radius_mi
     ]
 
 
@@ -448,14 +458,17 @@ def _classify(tags: dict[str, str], name: str) -> tuple[str | None, int, str]:
         "cross dock",
     )
 
-    if tags.get("shop") == "truck" or any(term in text for term in (
-        "freightliner",
-        "kenworth",
-        "peterbilt",
-        "mack truck",
-        "international trucks",
-        "volvo trucks",
-    )):
+    if tags.get("shop") == "truck" or any(
+        term in text
+        for term in (
+            "freightliner",
+            "kenworth",
+            "peterbilt",
+            "mack truck",
+            "international trucks",
+            "volvo trucks",
+        )
+    ):
         return "truck_dealer", 90, "truck dealer or heavy-vehicle sales/service tags"
     if "dealer" in lower_name and any(term in text for term in truck_terms):
         return "truck_dealer", 82, "dealer name with truck/heavy-vehicle context"
@@ -502,8 +515,9 @@ def _road_label(tags: dict[str, str]) -> str:
 def _nearest_road(candidate: Candidate, roads: list[RoadPoint]) -> str:
     if not roads:
         return "local industrial access road"
-    nearest = min(roads, key=lambda road: _haversine_mi(
-        candidate.lat, candidate.lon, road.lat, road.lon))
+    nearest = min(
+        roads, key=lambda road: _haversine_mi(candidate.lat, candidate.lon, road.lat, road.lon)
+    )
     return nearest.label
 
 
@@ -523,8 +537,7 @@ def _haversine_mi(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
     p1, p2 = math.radians(lat1), math.radians(lat2)
     dphi = math.radians(lat2 - lat1)
     dlmb = math.radians(lon2 - lon1)
-    h = (math.sin(dphi / 2) ** 2
-         + math.cos(p1) * math.cos(p2) * math.sin(dlmb / 2) ** 2)
+    h = math.sin(dphi / 2) ** 2 + math.cos(p1) * math.cos(p2) * math.sin(dlmb / 2) ** 2
     return 2 * EARTH_RADIUS_MI * math.asin(math.sqrt(h))
 
 
@@ -538,8 +551,9 @@ def _write_payload(path: Path, payload: dict[str, Any]) -> None:
     path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
 
 
-def _write_single_city(path: Path, city: str, entries: list[dict[str, Any]],
-                       source_path: Path, radius_mi: float) -> None:
+def _write_single_city(
+    path: Path, city: str, entries: list[dict[str, Any]], source_path: Path, radius_mi: float
+) -> None:
     payload = {
         "version": 2,
         "generated": {
@@ -548,8 +562,11 @@ def _write_single_city(path: Path, city: str, entries: list[dict[str, Any]],
             "radius_mi": radius_mi,
             "source_policy": "Build-time only; runtime reads this compact checked-in file.",
         },
-        "sources": [source_record(entries[0]["state"] if entries else "", source_path,
-                                  available=source_path.exists())],
+        "sources": [
+            source_record(
+                entries[0]["state"] if entries else "", source_path, available=source_path.exists()
+            )
+        ],
         "cities": {},
     }
     if path.exists():
@@ -564,13 +581,21 @@ def _write_single_city(path: Path, city: str, entries: list[dict[str, Any]],
 def main() -> int:
     parser = argparse.ArgumentParser()
     mode = parser.add_mutually_exclusive_group(required=True)
-    mode.add_argument("--all-supported", action="store_true",
-                      help="Build all supported world.json cities from local state extracts")
+    mode.add_argument(
+        "--all-supported",
+        action="store_true",
+        help="Build all supported world.json cities from local state extracts",
+    )
     mode.add_argument("--city", help="Supported Freight Fate city for a single-city build")
-    parser.add_argument("--osm", type=Path,
-                        help="Local .osm, .osm.pbf, or .osm.gz extract for --city")
-    parser.add_argument("--cache-dir", type=Path, default=DEFAULT_CACHE_DIR,
-                        help="Directory containing <state>-latest.osm.pbf files")
+    parser.add_argument(
+        "--osm", type=Path, help="Local .osm, .osm.pbf, or .osm.gz extract for --city"
+    )
+    parser.add_argument(
+        "--cache-dir",
+        type=Path,
+        default=DEFAULT_CACHE_DIR,
+        help="Directory containing <state>-latest.osm.pbf files",
+    )
     parser.add_argument("--radius-mi", type=float, default=DEFAULT_RADIUS_MI)
     parser.add_argument("--output", type=Path, default=CITY_SERVICES_PATH)
     parser.add_argument("--write", action="store_true")

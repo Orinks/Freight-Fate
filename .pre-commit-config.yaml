@@ -1,6 +1,25 @@
 repos:
   - repo: local
     hooks:
+      - id: ruff-check-fix
+        name: Ruff lint and import fixes
+        entry: uv run ruff check --fix
+        language: system
+        types_or: [python, pyi]
+        stages: [pre-commit]
+      - id: ruff-format
+        name: Ruff format
+        entry: uv run ruff format
+        language: system
+        types_or: [python, pyi]
+        stages: [pre-commit]
+      - id: world-data-index
+        name: world_data is in sync with world.json
+        entry: uv run python tools/index_world.py --check
+        language: system
+        files: ^src/freight_fate/data/world\.json$
+        pass_filenames: false
+        stages: [pre-commit]
       - id: freight-fate-release-notes
         name: Freight Fate release-note gate
         entry: uv run python -m tools.release_notes check --base auto --head HEAD

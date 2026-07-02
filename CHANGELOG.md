@@ -68,10 +68,64 @@
 
 ### Fixed
 
+- **Trucks into New York now take the George Washington Bridge, not the Holland
+  Tunnel.** New York freight now routes to the Hunts Point market in the Bronx
+  over the GWB on I-95 -- the Hudson crossing a full-height rig can legally use
+  -- instead of the height-restricted Holland Tunnel that I-78 feeds into. Trips
+  from New Jersey and Pennsylvania have realistic mileage and exit cues as a
+  result.
+- **Truck speed limits are now capped in Oregon and Idaho too.** Posted limits
+  on those states' fastest roads are held to the legal truck maximum (65 in
+  Oregon, 70 in Idaho), matching the existing handling for California and other
+  truck-restricted states.
+- **Control now stops speech in menus too, not just while driving.** Left or
+  Right Control already silenced the driving event voice; it now also stops the
+  current speech in every menu and in the how-to-play reader, so a long readout
+  -- job details, cargo loading, a full help page -- can be cut short with the
+  same key everywhere.
+- **Dispatch, garage, and driving tools feel clearer.** F1 on a dispatch job now opens a
+  reviewable job-detail view with line-by-line facts, long-haul pay has a stronger
+  floor, drive-start speech is shorter in terse mode, the horn loops while held,
+  truck and upgrade wording is clearer, and the garage can service tire wear and
+  wash road grime.
+- **Reverse now has its own backing cue.** Shifting into reverse with the engine
+  running now starts a backing loop through the main audio backend, and automatic
+  reverse selection still gets a spoken confirmation. Thanks to ashleygrobler04
+  for the original reverse-loop PR.
+- **Lane drift now cues direction before the rumble strip.** When lane drift is
+  enabled, a short beep now plays from the side you drift toward, and a dedicated
+  centered-lane chime confirms when you are back in the lane.
+- **Hazard clears are easier to hear, and speech backs off faster.** Passing a
+  road hazard now plays a short achievement-like confirmation sound, and urgent
+  events plus driving warnings clear stale spoken messages so old alerts do not
+  keep piling up. The brake-now hazard warning cue was also remade as a short,
+  louder alert.
+- **First-rig menu music refreshed.** The first-owned-truck menu bed now uses
+  a cleaner, longer copy and plays for its full length before the menu rotation
+  advances.
+- **Driving realism polish.** Metric speed warnings,
+  speeding strikes, trooper stops, cruise messages, and the speed-limit key now
+  use the selected units consistently. Missed destination exits reroute you via
+  a safe turnaround instead of telling you to reverse down the highway, and
+  recovery no longer loops gate-speed tickets. Dispatch warns when your current
+  hours are too short for a load, including when every listed job is risky.
+  Bobtail repositioning now counts as off-duty personal conveyance, dispatch
+  board facility names are less repetitive, impossible short delivery summaries
+  are floored to a practical road time, and automatic shift audio no longer
+  flares at full throttle during gear changes.
+- **Engine brake and throttle no longer fight each other.** The engine brake now
+  refuses to switch on while you are accelerating, and pressing the accelerator
+  turns it back off so the truck can make power normally.
+- **Destination exits keep the route status honest.** Taking a delivery exit now
+  clears the remaining route miles before the dock menu opens, and the GPS no
+  longer repeats the destination exit with a second generic interchange cue.
 - **Real posted speed limits win near cities.** City approaches still use a
   slower fallback when the route has no posted speed-limit sample, but real
   baked `maxspeed` data is no longer capped just because the route is near a
   city.
+- **Truck speed limits now respect state caps.** Baked route speed-limit data
+  now applies lower truck maximums in states that cap commercial trucks below
+  the general posted limit, and reversed routes read the correct limit profile.
 - **Stops no longer announce speculative truck parking.** If a stop's parking
   is confirmed, that still gets spoken; otherwise speculative parking wording
   is dropped from route cues so the game just announces the stop.
@@ -80,6 +134,13 @@
   to begin braking before the lower-limit point instead of waiting until the
   truck is already in the slower stretch. Pressing Space while cruise is on now
   also includes the cruise set speed in the speed readout.
+- **Adaptive cruise no longer gets you fined while braking for a lower limit.**
+  When the posted limit drops sharply, cruise now gets a clean chance to slow
+  the truck instead of letting the speeding timer fire while it is already
+  braking down.
+- **Route status explains road grade clearly.** Pressing R now reports the
+  current grade as a percent and uphill, downhill, or level instead of saying
+  the vague phrase "Grade level."
 - **Delivery windows match the slower, real route model.** New dispatch
   deadlines now use the route's posted-limit profile, city approaches, facility
   gates, HOS breaks, sleep, and practical slack instead of a flat mileage
@@ -204,6 +265,12 @@
   clock as on-duty work. Pulling into pickup gates, destination gates, and route
   stops also gives the first menu option a moment to speak, so holding Down
   Arrow to brake no longer skips past it.
+- **Hours-of-service rules are more realistic.** Realistic mode now tracks the
+  11-hour driving limit, 14-hour duty window, 30-minute break requirement,
+  60/70-hour weekly limits, roadside inspections, and legal sleeper-berth split
+  rest. Rest menus now make the choice explicit: short breaks, poor emergency
+  sleep, full sleeper sleep, or sleeper split planning where the stop supports
+  it.
 - **Menus can read just the option, not its place.** A new Speech setting,
   "Menu position announcements," turns off the "N of 10" position spoken after
   each menu option, so menus read only the option itself. On by default.

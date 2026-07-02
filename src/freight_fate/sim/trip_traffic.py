@@ -47,8 +47,8 @@ class TripTrafficMixin:
             return
         lead = situation.vehicle
         cue = NavigationCue(
-            f"npc:{lead.key}", "traffic", lead.position_mi,
-            lead.reason, speed_mph=lead.speed_mph)
+            f"npc:{lead.key}", "traffic", lead.position_mi, lead.reason, speed_mph=lead.speed_mph
+        )
         self._emit(TripEventKind.GPS_CUE, situation.message, cue=cue, npc_vehicle=lead)
 
     def cb_patrol_message(self, patrol: PatrolWindow, ahead_mi: float) -> str:
@@ -77,9 +77,9 @@ class TripTrafficMixin:
     def next_patrol_within(self, within_mi: float) -> PatrolWindow | None:
         """Nearest active or upcoming patrol window inside the lookahead."""
         candidates = [
-            p for p in self.patrols
-            if p.end_mi >= self.position_mi
-            and p.start_mi - self.position_mi <= within_mi
+            p
+            for p in self.patrols
+            if p.end_mi >= self.position_mi and p.start_mi - self.position_mi <= within_mi
         ]
         if not candidates:
             return None
@@ -93,7 +93,8 @@ class TripTrafficMixin:
     def traffic_pressure_at(self, mile: float | None = None) -> TrafficPressure | None:
         sample = self.position_mi if mile is None else mile
         active = [
-            pressure for pressure in self.traffic_pressures
+            pressure
+            for pressure in self.traffic_pressures
             if pressure.start_mi <= sample <= pressure.end_mi
         ]
         if not active:
@@ -104,11 +105,11 @@ class TripTrafficMixin:
         self, within_mi: float = TRAFFIC_PRESSURE_LOOKAHEAD_MI
     ) -> TrafficPressure | None:
         candidates = [
-            pressure for pressure in self.traffic_pressures
+            pressure
+            for pressure in self.traffic_pressures
             if pressure.end_mi >= self.position_mi
             and 0 <= pressure.start_mi - self.position_mi <= within_mi
         ]
         if not candidates:
             return None
         return min(candidates, key=lambda pressure: pressure.start_mi)
-

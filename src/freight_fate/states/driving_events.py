@@ -48,12 +48,12 @@ class DrivingEventMixin:
         kind = event.kind
         sound = _route_event_sound(event)
         if event.message:
-            self._last_event_message = event.message   # replayable with A
+            self._last_event_message = event.message  # replayable with A
         if kind == TripEventKind.HAZARD:
             if self._ramp_mi is not None:
-                return   # off the highway: the hazard passes you by
+                return  # off the highway: the hazard passes you by
             if self._cruise_mph is not None:
-                self._cancel_cruise()   # hands back on the wheel to brake
+                self._cancel_cruise()  # hands back on the wheel to brake
             self._pending_ambient_event = None
             self.ctx.audio.play(sound or "ui/warning")
             # The deadline is braking physics plus reaction slack. The physics
@@ -62,10 +62,11 @@ class DrivingEventMixin:
             # getting on the pedal, and fatigue eats into that part only --
             # a drowsy driver reacts late, but the truck stops no slower.
             slack = event.data.get("deadline_s", 4.0)
-            self._hazard_deadline = (
-                self._brake_budget_s()
-                + slack * hos.reaction_window_mult(self.ctx.profile.fatigue))
-            self.ctx.say_event(event.message, interrupt=True)
+            self._hazard_deadline = self._brake_budget_s() + slack * hos.reaction_window_mult(
+                self.ctx.profile.fatigue
+            )
+            message = terse_hazard_message(event.message) if self._terse_speech() else event.message
+            self.ctx.say_event(message, interrupt=True)
         elif kind == TripEventKind.INSPECTION:
             self._handle_inspection(event)
         elif kind == TripEventKind.WEATHER_CHANGE:
@@ -115,13 +116,23 @@ class DrivingEventMixin:
             ):
                 self.ctx.award_achievement("traffic_slowing", event=True)
 
+    def _should_ignore_destination_exit_gps_cue(self, event) -> bool:
+        if self.phase != DRIVE_PHASE_DELIVERY or event.kind != TripEventKind.GPS_CUE:
+            return False
+        cue = event.data.get("cue")
+        if getattr(cue, "kind", "") != "interchange":
+            return False
+        stop = self._destination_exit_stop()
+        if stop is None:
+            return False
+        return abs(float(getattr(cue, "at_mi", -9999.0)) - stop.at_mi) <= 0.15
+
     def _is_critical_event(self, event) -> bool:
         """Safety announcements that must preempt ambient chatter on the event
         voice -- zone entries, checkpoints, and zone-ahead/traffic warnings --
         versus informational cues (weather, tolls, state lines, stops) that
         should queue and yield rather than bury a warning you need to act on."""
-        if event.kind in (TripEventKind.HAZARD, TripEventKind.ZONE_ENTER,
-                          TripEventKind.CHECKPOINT):
+        if event.kind in (TripEventKind.HAZARD, TripEventKind.ZONE_ENTER, TripEventKind.CHECKPOINT):
             return True
         if event.kind == TripEventKind.GPS_CUE:
             if event.data.get("zone") is not None:
@@ -171,24 +182,25 @@ class DrivingEventMixin:
         self.ctx.audio.play("ui/notify")
         # A restricted area (construction, heavy traffic) is a safety cue: it
         # preempts ambient chatter rather than queuing behind it.
-        self.ctx.say_event(
-            f"{message} Adaptive cruise disabled; take manual speed control.",
-            interrupt=True,
-        )
+        if not self._terse_speech():
+            message = f"{message} Adaptive cruise disabled; take manual speed control."
+        self.ctx.say_event(message, interrupt=True)
 
     def _handle_inspection(self, event) -> None:
         """Route-backed enforcement with stable evidence and no duplicate fines."""
-        event_key = str(event.data.get(
-            "key",
-            f"{event.message}:{round(self.trip.position_mi, 1)}:{self.hos_fine_count}",
-        ))
+        event_key = str(
+            event.data.get(
+                "key",
+                f"{event.message}:{round(self.trip.position_mi, 1)}:{self.hos_fine_count}",
+            )
+        )
         if event_key in self.enforcement_events:
             return
         self.enforcement_events.add(event_key)
         p = self.ctx.profile
         fine = hos.HOS_FINES[min(self.hos_fine_count, len(hos.HOS_FINES) - 1)]
         self.hos_fine_count += 1
-        p.money -= fine   # can go negative; never a game over
+        p.money -= fine  # can go negative; never a game over
         p.career.reputation = max(0.0, p.career.reputation - hos.HOS_REPUTATION_HIT)
         evidence = list(event.data.get("evidence", ()))
         if not evidence:
@@ -199,12 +211,13 @@ class DrivingEventMixin:
             self.ctx.settings.hos_mode not in hos.HOS_NON_ENFORCED_MODES
             and self.hos.in_violation(self.ctx.settings.hos_mode)
         )
-        message = (f"{event.message} Evidence: {evidence_text}. "
-                   f"Fined {fine:,.0f} dollars, and your reputation took a hit.")
+        message = (
+            f"{event.message} Evidence: {evidence_text}. "
+            f"Fined {fine:,.0f} dollars, and your reputation took a hit."
+        )
         if serious_hos:
             self.ctx.say_event(
-                message + " Out of service order: parked for 10 hours to reset "
-                "your ELD clock.",
+                message + " Out of service order: parked for 10 hours to reset your ELD clock.",
                 interrupt=True,
             )
             self.ctx.award_achievement("inspection", event=True)
@@ -224,8 +237,7 @@ class DrivingEventMixin:
     def _try_rest_stop(self) -> None:
         stop = self.trip.nearest_stop_within()
         if stop is None:
-            self.ctx.say("There is no route POI here. Stops are announced as you "
-                         "approach them.")
+            self.ctx.say("There is no route POI here. Stops are announced as you approach them.")
             return
         if self.truck.speed_mph > DOCKING_MAX_MPH:
             self.ctx.say("Come to a complete stop first.")
@@ -252,22 +264,23 @@ class DrivingEventMixin:
                 self.ctx.pop_state()
                 self._open_poi_stop(stop, settle=False)
 
-            self.ctx.push_state(TimedMessageState(
-                self.ctx,
-                title="Pulling into stop",
-                message=(
-                    f"Pulling into {stop.spoken_name}. "
-                    "Brakes set; menu opening in a moment."
-                ),
-                status="Pulling into the route stop. Please wait.",
-                seconds=STOP_PULL_IN_WAIT_S,
-                on_complete=complete,
-                sound_key="ui/notify"))
+            self.ctx.push_state(
+                TimedMessageState(
+                    self.ctx,
+                    title="Pulling into stop",
+                    message=(
+                        f"Pulling into {stop.spoken_name}. Brakes set; menu opening in a moment."
+                    ),
+                    status="Pulling into the route stop. Please wait.",
+                    seconds=STOP_PULL_IN_WAIT_S,
+                    on_complete=complete,
+                    sound_key="ui/notify",
+                )
+            )
             return
 
         can_sleep = "sleep" in stop.actions
-        if can_sleep and hos.parking_is_full(self.trip_seed, stop.at_mi,
-                                             self.trip.current_hour):
+        if can_sleep and hos.parking_is_full(self.trip_seed, stop.at_mi, self.trip.current_hour):
             self.ctx.push_state(ParkingFullState(self.ctx, self, stop))
             return
         self.ctx.push_state(RestStopState(self.ctx, self, stop))
@@ -283,8 +296,7 @@ class DrivingEventMixin:
         stop = self._exit_stop or self._upcoming_exit_stop()
         if stop is None:
             self.ctx.say(
-                "No route exit to signal for yet. Exits are announced as you "
-                "approach them."
+                "No route exit to signal for yet. Exits are announced as you approach them."
             )
             return
         self._exit_stop = stop
@@ -314,9 +326,11 @@ class DrivingEventMixin:
                 f"Slow to {RAMP_MAX_MPH:.0f} or less for the ramp."
             )
             return
-        self.ctx.say(f"{head} {ahead:.1f} miles ahead. "
-                     "Move right for the exit lane, then slow to "
-                     f"{RAMP_MAX_MPH:.0f} or less for the ramp.")
+        self.ctx.say(
+            f"{head} {ahead:.1f} miles ahead. "
+            "Move right for the exit lane, then slow to "
+            f"{RAMP_MAX_MPH:.0f} or less for the ramp."
+        )
 
     def _reset_exit_lane_state(self) -> None:
         self._exit_lane_alignment = 0.0
@@ -354,8 +368,7 @@ class DrivingEventMixin:
             and self._exit_lane_alignment >= EXIT_LANE_READY
             and self.lane.offset >= -0.25
         ):
-            self._exit_lane_alignment = max(
-                self._exit_lane_alignment, EXIT_LANE_READY)
+            self._exit_lane_alignment = max(self._exit_lane_alignment, EXIT_LANE_READY)
         elif self.lane.offset >= EXIT_LANE_OFFSET_READY:
             self._exit_lane_alignment += dt / 2.0
         elif self.lane.offset < -0.25:
@@ -369,7 +382,8 @@ class DrivingEventMixin:
             pressure = self._active_exit_pressure(stop)
             pressure_text = (
                 " Traffic is tight, so hold the lane and let the gap open."
-                if pressure is not None and pressure.intensity >= 0.35 else ""
+                if pressure is not None and pressure.intensity >= 0.35
+                else ""
             )
             self.ctx.say_event(
                 f"Exit lane in {ahead:.1f} miles. Signal is on; steer right "
@@ -387,8 +401,7 @@ class DrivingEventMixin:
         if 0 <= ahead <= EXIT_COMMIT_WINDOW_MI and not self._exit_commit_said:
             self._exit_commit_said = True
             self.ctx.say_event(
-                "At the exit gore. Hold the exit lane and stay under "
-                f"{RAMP_MAX_MPH:.0f}.",
+                f"At the exit gore. Hold the exit lane and stay under {RAMP_MAX_MPH:.0f}.",
                 interrupt=False,
             )
 
@@ -452,13 +465,14 @@ class DrivingEventMixin:
 
     def _destination_exit_announcement(self, stop, ahead: float) -> str:
         phrase = self._destination_exit_phrase(stop)
+        if self._terse_speech():
+            return f"In {ahead:.0f} miles, {phrase}, destination exit."
         lane_text = (
             "Slow down for the ramp."
             if self.ctx.settings.steering_assist == "off"
             else "Move right for the exit lane and slow down."
         )
-        return (f"In {ahead:.0f} miles, {phrase}, destination exit. "
-                f"{lane_text}")
+        return f"In {ahead:.0f} miles, {phrase}, destination exit. {lane_text}"
 
     def _check_destination_exit(self) -> None:
         stop = self._destination_exit_stop()
@@ -485,7 +499,8 @@ class DrivingEventMixin:
                 self._exit_lane_ready_said = True
 
     def _destination_exit_details(
-            self, *, include_past: bool = False) -> tuple[float, str, str] | None:
+        self, *, include_past: bool = False
+    ) -> tuple[float, str, str] | None:
         if not self.route.legs:
             return None
         destination = self.route.cities[-1].casefold()
@@ -503,15 +518,18 @@ class DrivingEventMixin:
                     continue
                 dist_from_destination = abs(ix.at_mi - target)
                 matches_destination = any(
-                    destination in part.casefold() for part in ix.destinations)
-                candidates.append((
-                    not matches_destination,
-                    len(self.route.legs) - 1 - i,
-                    dist_from_destination,
-                    route_mile,
-                    ix.exit_label,
-                    ix.spoken_phrase,
-                ))
+                    destination in part.casefold() for part in ix.destinations
+                )
+                candidates.append(
+                    (
+                        not matches_destination,
+                        len(self.route.legs) - 1 - i,
+                        dist_from_destination,
+                        route_mile,
+                        ix.exit_label,
+                        ix.spoken_phrase,
+                    )
+                )
             if candidates and not candidates[0][0]:
                 break
         if not candidates:
@@ -524,10 +542,7 @@ class DrivingEventMixin:
             return False
         if self._exit_signal_on:
             return True
-        return (
-            stop.type == "delivery_destination"
-            and self.ctx.settings.steering_assist == "off"
-        )
+        return stop.type == "delivery_destination" and self.ctx.settings.steering_assist == "off"
 
     def _update_exit(self, moved_mi: float) -> None:
         """Advance an armed exit or an active ramp; opens the stop menu."""
@@ -547,10 +562,17 @@ class DrivingEventMixin:
                     self._open_poi_stop(stop, settle=True)
             elif not self._ramp_end_said:
                 self._ramp_end_said = True
-                place = (self._ramp_stop.name
-                         if self._ramp_stop.type == "delivery_destination"
-                         else self._ramp_stop.spoken_name)
-                self.ctx.say_event(f"You are at {place}. Come to a complete stop.")
+                place = (
+                    self._ramp_stop.name
+                    if self._ramp_stop.type == "delivery_destination"
+                    else self._ramp_stop.spoken_name
+                )
+                message = (
+                    f"At {place}."
+                    if self._terse_speech()
+                    else f"You are at {place}. Come to a complete stop."
+                )
+                self.ctx.say_event(message, interrupt=True)
             return
         stop = self._exit_stop
         if stop is None or self.trip.position_mi < stop.at_mi:
@@ -559,9 +581,7 @@ class DrivingEventMixin:
         if self._exit_signal_canceled:
             self._reset_exit_lane_state()
             self._exit_signal_canceled = False
-            self.ctx.say_event(
-                "Exit signal was canceled, so you stayed on the highway."
-            )
+            self.ctx.say_event("Exit signal was canceled, so you stayed on the highway.")
             return
         self._exit_signal_canceled = False
         if self.trip.position_mi > stop.at_mi + EXIT_COMMIT_WINDOW_MI:
@@ -570,19 +590,19 @@ class DrivingEventMixin:
             pressure = self._active_exit_pressure(stop)
             if pressure is not None and pressure.intensity >= 0.35:
                 self.ctx.say_event(
-                    "You missed the exit window in heavy traffic and stayed on "
-                    "the highway."
+                    "You missed the exit window in heavy traffic and stayed on the highway."
                 )
             else:
-                self.ctx.say_event(
-                    "You missed the exit window and stayed on the highway."
-                )
+                self.ctx.say_event("You missed the exit window and stayed on the highway.")
             return
         if not self._exit_intent_ready(stop):
             self._reset_exit_lane_state()
             self._exit_signal_on = False
-            place = (self._destination_exit_phrase(stop)
-                     if stop.type == "delivery_destination" else stop.spoken_name)
+            place = (
+                self._destination_exit_phrase(stop)
+                if stop.type == "delivery_destination"
+                else stop.spoken_name
+            )
             self.ctx.say_event(
                 f"You missed {place}: the turn signal was not set. "
                 "Stay on the highway and recover at the next safe exit."
@@ -591,8 +611,11 @@ class DrivingEventMixin:
         if not self._exit_lane_ready():
             self._reset_exit_lane_state()
             self._exit_signal_on = False
-            place = (self._destination_exit_phrase(stop)
-                     if stop.type == "delivery_destination" else stop.spoken_name)
+            place = (
+                self._destination_exit_phrase(stop)
+                if stop.type == "delivery_destination"
+                else stop.spoken_name
+            )
             pressure = self._active_exit_pressure(stop)
             missed = stop.exit_label if stop.exit_label else "the exit"
             if pressure is not None:
@@ -617,20 +640,32 @@ class DrivingEventMixin:
             self._cancel_cruise()
             self.ctx.audio.play("ui/notify", volume=0.7)
             if stop.type == "delivery_destination":
-                take = (f"You take {self._destination_exit_phrase(stop)}, "
-                        f"destination exit for {stop.name}.")
+                take = (
+                    f"You take {self._destination_exit_phrase(stop)}, "
+                    f"destination exit for {stop.name}."
+                )
             else:
-                take = (f"You take {stop.exit_label} for {stop.spoken_name}."
-                        if stop.exit_label
-                        else f"You take the exit for {stop.spoken_name}.")
-            self.ctx.say_event(f"{take} Half a mile of ramp; brake to a stop "
-                               "at the end.")
+                take = (
+                    f"You take {stop.exit_label} for {stop.spoken_name}."
+                    if stop.exit_label
+                    else f"You take the exit for {stop.spoken_name}."
+                )
+            message = (
+                f"{take} Half a mile of ramp."
+                if self._terse_speech()
+                else f"{take} Half a mile of ramp; brake to a stop at the end."
+            )
+            self.ctx.say_event(message, interrupt=True)
         else:
             missed = stop.exit_label if stop.exit_label else "the exit"
-            place = (self._destination_exit_phrase(stop)
-                     if stop.type == "delivery_destination" else stop.spoken_name)
-            self.ctx.say_event("You were going too fast for the ramp and "
-                               f"missed {missed} for {place}.")
+            place = (
+                self._destination_exit_phrase(stop)
+                if stop.type == "delivery_destination"
+                else stop.spoken_name
+            )
+            self.ctx.say_event(
+                f"You were going too fast for the ramp and missed {missed} for {place}."
+            )
             self._exit_signal_on = False
             self._reset_exit_lane_state()
 
@@ -641,8 +676,10 @@ class DrivingEventMixin:
             self.ctx.say("Adaptive cruise off.")
             return
         if not t.engine_on or t.speed_mph < CRUISE_MIN_MPH:
-            self.ctx.say("Adaptive cruise needs the engine running and at "
-                         f"least {CRUISE_MIN_MPH:.0f} miles per hour.")
+            self.ctx.say(
+                "Adaptive cruise needs the engine running and at "
+                f"least {self.ctx.settings.speed_text(CRUISE_MIN_MPH)}."
+            )
             return
         _, zone_reason = self.trip.speed_limit_at(self.trip.position_mi)
         if zone_reason is not None:
@@ -657,10 +694,12 @@ class DrivingEventMixin:
         self._acc_limit_capped = False
         gap = self._acc_gap_seconds()
         self.ctx.audio.play("ui/notify", volume=0.5)
-        self.ctx.say("Adaptive cruise set at "
-                      f"{self.ctx.settings.speed_text(t.speed_mph)}. "
-                      f"Following gap {gap:.0f} seconds. "
-                      "K or braking cancels.")
+        self.ctx.say(
+            "Adaptive cruise set at "
+            f"{self.ctx.settings.speed_text(t.speed_mph)}. "
+            f"Following gap {gap:.0f} seconds. "
+            "K or braking cancels."
+        )
 
     def _adjust_cruise(self, delta_mph: float) -> None:
         """Raise or lower the cruise set point -- the Accel/Coast (+/-) buttons.
@@ -672,10 +711,8 @@ class DrivingEventMixin:
         if self._cruise_mph is None:
             self.ctx.say("Adaptive cruise is off. Press K to set it first.")
             return
-        self._cruise_mph = max(CRUISE_MIN_MPH,
-                               min(CRUISE_MAX_MPH, self._cruise_mph + delta_mph))
-        self.ctx.say(
-            f"Adaptive cruise {self.ctx.settings.speed_text(self._cruise_mph)}.")
+        self._cruise_mph = max(CRUISE_MIN_MPH, min(CRUISE_MAX_MPH, self._cruise_mph + delta_mph))
+        self.ctx.say(f"Adaptive cruise {self.ctx.settings.speed_text(self._cruise_mph)}.")
 
     def _cancel_cruise(self) -> None:
         self._cruise_mph = None
@@ -707,13 +744,11 @@ class DrivingEventMixin:
         target_mps = max(0.0, target_mph * 0.44704)
         if target_mps >= speed_mps:
             return ACC_LIMIT_LOOKAHEAD_MIN_MI
-        braking_m = (
-            (speed_mps * speed_mps - target_mps * target_mps)
-            / (2.0 * ACC_LIMIT_COMFORT_DECEL_MPS2)
+        braking_m = (speed_mps * speed_mps - target_mps * target_mps) / (
+            2.0 * ACC_LIMIT_COMFORT_DECEL_MPS2
         )
         braking_mi = max(0.0, braking_m / 1609.344)
-        return max(ACC_LIMIT_LOOKAHEAD_MIN_MI,
-                   min(ACC_LIMIT_LOOKAHEAD_MAX_MI, braking_mi + 0.25))
+        return max(ACC_LIMIT_LOOKAHEAD_MIN_MI, min(ACC_LIMIT_LOOKAHEAD_MAX_MI, braking_mi + 0.25))
 
     def _acc_posted_limit_ahead(self) -> tuple[float, str | None]:
         """Lowest posted limit close enough that ACC should start slowing now."""
@@ -730,8 +765,7 @@ class DrivingEventMixin:
             probe += ACC_LIMIT_LOOKAHEAD_STEP_MI
         return lowest_limit, lowest_reason
 
-    def _update_cruise(self, dt: float, braking: bool,
-                       accelerating: bool) -> None:
+    def _update_cruise(self, dt: float, braking: bool, accelerating: bool) -> None:
         """Hold speed when clear, and follow slower modeled traffic when present."""
         if self._cruise_mph is None:
             return
@@ -741,7 +775,7 @@ class DrivingEventMixin:
             self.ctx.say_event("Adaptive cruise canceled.", interrupt=False)
             return
         if accelerating:
-            return   # manual override; cruise resumes when the key lifts
+            return  # manual override; cruise resumes when the key lifts
         target_mph = self._cruise_mph
         # Predictive ACC: never carry the driver past the posted limit. With real
         # OSM limits baked per leg, a held set speed would otherwise sail through
@@ -756,15 +790,20 @@ class DrivingEventMixin:
             if not self._acc_limit_capped:
                 self.ctx.say_event(
                     "Posted limit lower; adaptive cruise easing to "
-                    f"{self.ctx.settings.speed_text(cap_mph)}.", interrupt=False)
+                    f"{self.ctx.settings.speed_text(cap_mph)}.",
+                    interrupt=False,
+                )
         self._acc_limit_capped = limit_capped
         context = self.trip.traffic_context()
         following = False
         if context is not None:
             desired_gap = self._acc_gap_seconds()
             reason = self._acc_weather_gap_text()
-            if (reason and not self._acc_weather_gap_said
-                    and context.gap_seconds <= desired_gap + 1.5):
+            if (
+                reason
+                and not self._acc_weather_gap_said
+                and context.gap_seconds <= desired_gap + 1.5
+            ):
                 self._acc_weather_gap_said = True
                 self.ctx.say_event(reason, interrupt=False)
             if context.gap_seconds <= desired_gap + 1.0 or context.lead.speed_mph < target_mph:
@@ -772,12 +811,10 @@ class DrivingEventMixin:
                 following = True
         if following and not self._acc_following:
             self.ctx.audio.play("ui/notify", volume=0.55)
-            self.ctx.say_event("Traffic ahead, adaptive cruise reducing speed.",
-                               interrupt=False)
+            self.ctx.say_event("Traffic ahead, adaptive cruise reducing speed.", interrupt=False)
         self._acc_following = following
         error = target_mph - t.speed_mph
-        self._cruise_throttle = max(0.0, min(
-            1.0, self._cruise_throttle + error * 0.08 * dt))
+        self._cruise_throttle = max(0.0, min(1.0, self._cruise_throttle + error * 0.08 * dt))
         t.throttle = self._cruise_throttle
         if (following or limit_capped) and error < -2.0:
             weather_brake = 0.45 if self.weather.effects.grip < 0.7 else 0.65
@@ -793,9 +830,12 @@ class DrivingEventMixin:
         self.truck.refuel(30.0)
         self._rescue_offered = False
         self.ctx.audio.play("ui/error")
-        self.ctx.say_event(f"You ran out of fuel. Roadside rescue brought thirty "
-                           f"gallons for {fee:,.0f} dollars. Press E to restart "
-                           "the engine, and plan your fuel stops.")
+        self.ctx.say_event(
+            f"You ran out of fuel. Roadside rescue brought thirty "
+            f"gallons for {fee:,.0f} dollars. Press E to restart "
+            "the engine, and plan your fuel stops.",
+            interrupt=True,
+        )
 
     def _handle_pickup_gate(self) -> None:
         if self.truck.speed_mph <= DOCKING_MAX_MPH:
@@ -810,10 +850,15 @@ class DrivingEventMixin:
         self._cancel_cruise()
         self.ctx.audio.play("ui/warning")
         self._set_status("Pickup ahead: slow down and come to a complete stop.")
-        self.ctx.say_event(
-            f"Pickup ahead: {self._pickup_facility_text()}. "
-            "Slow down and come to a complete stop at the gate.",
-            interrupt=True)
+        message = (
+            f"Pickup ahead: {self._pickup_facility_text()}."
+            if self._terse_speech()
+            else (
+                f"Pickup ahead: {self._pickup_facility_text()}. "
+                "Slow down and come to a complete stop at the gate."
+            )
+        )
+        self.ctx.say_event(message, interrupt=True)
 
     def _handle_pickup_creep(self) -> None:
         if self._arrival_full_stop_said:
@@ -822,9 +867,7 @@ class DrivingEventMixin:
         self._cancel_cruise()
         self.ctx.audio.play("ui/notify", volume=0.7)
         self._set_status("Pickup gate: stop to check in.")
-        self.ctx.say_event(
-            f"At {self._pickup_facility_text()}. Stop to check in.",
-            interrupt=False)
+        self.ctx.say_event(f"At {self._pickup_facility_text()}. Stop to check in.", interrupt=False)
 
     def _open_pickup_arrival(self) -> None:
         if self._arrival_menu_open:
@@ -850,22 +893,26 @@ class DrivingEventMixin:
             self._set_status("Parked at pickup. Check in and load.")
             self.ctx.replace_state(PickupFacilityState(self.ctx, self.job, driving=self))
 
-        self.ctx.replace_state(TimedMessageState(
-            self.ctx,
-            title="Pulling into pickup",
-            message=(
-                f"Pulling into {self._pickup_facility_text()}. "
-                "Setting the brakes and rolling to the check-in lane."
-            ),
-            status="Pulling into the pickup facility. Please wait.",
-            seconds=STOP_PULL_IN_WAIT_S,
-            on_complete=complete,
-            sound_key="ui/notify"))
+        self.ctx.replace_state(
+            TimedMessageState(
+                self.ctx,
+                title="Pulling into pickup",
+                message=(
+                    f"Pulling into {self._pickup_facility_text()}. "
+                    "Setting the brakes and rolling to the check-in lane."
+                ),
+                status="Pulling into the pickup facility. Please wait.",
+                seconds=STOP_PULL_IN_WAIT_S,
+                on_complete=complete,
+                sound_key="ui/notify",
+            )
+        )
 
     def _arrive(self) -> None:
         self.ctx.replace_state(ArrivalState(self.ctx, self))
 
     def _handle_missed_destination_exit(self) -> None:
+        exit_details = self._destination_exit_details(include_past=True)
         self.trip.finished = False
         self._exit_stop = None
         self._exit_signal_on = False
@@ -874,13 +921,27 @@ class DrivingEventMixin:
         if self._missed_destination_exit_said:
             return
         self._missed_destination_exit_said = True
-        self.ctx.audio.play("ui/warning")
-        self._set_status(
-            "Destination exit missed. Back up until it is ahead, then set up the exit."
+        reroute_text = (
+            "Continue to the next safe turnaround. Dispatch reroutes you back "
+            "onto the approach; take the destination exit when it comes up."
         )
+        if exit_details is not None:
+            self.trip.game_minutes += 20.0
+            self.trip.position_mi = max(0.0, exit_details[0] - 1.0)
+            self._destination_exit_announced_key = None
+            if self._terse_speech():
+                reroute_text = "Safe turnaround. Destination exit ahead again."
+            else:
+                reroute_text = (
+                    "You continue to the next safe turnaround and loop back onto "
+                    "the approach. The destination exit is ahead again; press X "
+                    "when you are close enough to take it."
+                )
+        self.ctx.audio.play("ui/warning")
+        self._set_status("Destination exit missed. Use the next safe turnaround.")
         self.ctx.say_event(
             f"You missed the destination exit for {self._destination_facility_text()}. "
-            "Back up until the exit is ahead, then slow down and set up for the ramp.",
+            f"{reroute_text}",
             interrupt=True,
         )
 
@@ -897,10 +958,15 @@ class DrivingEventMixin:
         self._cancel_cruise()
         self.ctx.audio.play("ui/warning")
         self._set_status("Destination ahead: slow down and come to a complete stop.")
-        self.ctx.say_event(
-            f"Destination ahead: {self._destination_facility_text()}. "
-            "Slow down and come to a complete stop at the gate.",
-            interrupt=True)
+        message = (
+            f"Destination ahead: {self._destination_facility_text()}."
+            if self._terse_speech()
+            else (
+                f"Destination ahead: {self._destination_facility_text()}. "
+                "Slow down and come to a complete stop at the gate."
+            )
+        )
+        self.ctx.say_event(message, interrupt=True)
 
     def _handle_arrival_creep(self) -> None:
         if self._arrival_full_stop_said:
@@ -910,8 +976,8 @@ class DrivingEventMixin:
         self.ctx.audio.play("ui/notify", volume=0.7)
         self._set_status("Destination gate: stop to dock.")
         self.ctx.say_event(
-            f"At {self._destination_facility_text()}. Stop to dock.",
-            interrupt=False)
+            f"At {self._destination_facility_text()}. Stop to dock.", interrupt=False
+        )
 
     def _open_facility_arrival(self) -> None:
         if self._arrival_menu_open:
@@ -929,17 +995,20 @@ class DrivingEventMixin:
             self._set_status("Parked at destination. Dock and deliver.")
             self.ctx.replace_state(FacilityArrivalState(self.ctx, self))
 
-        self.ctx.replace_state(TimedMessageState(
-            self.ctx,
-            title="Pulling into destination",
-            message=(
-                f"Pulling into {self._destination_facility_text()}. "
-                "Brakes set; dock menu opening in a moment."
-            ),
-            status="Pulling into the destination facility. Please wait.",
-            seconds=STOP_PULL_IN_WAIT_S,
-            on_complete=complete,
-            sound_key="ui/notify"))
+        self.ctx.replace_state(
+            TimedMessageState(
+                self.ctx,
+                title="Pulling into destination",
+                message=(
+                    f"Pulling into {self._destination_facility_text()}. "
+                    "Brakes set; dock menu opening in a moment."
+                ),
+                status="Pulling into the destination facility. Please wait.",
+                seconds=STOP_PULL_IN_WAIT_S,
+                on_complete=complete,
+                sound_key="ui/notify",
+            )
+        )
 
     def _destination_facility_text(self) -> str:
         return self.job.destination_facility_text()
@@ -949,8 +1018,7 @@ class DrivingEventMixin:
 
     def _city_service_text(self) -> str:
         try:
-            return self.ctx.world.city_service(
-                self.job.origin, self.city_service_key).spoken_name
+            return self.ctx.world.city_service(self.job.origin, self.city_service_key).spoken_name
         except KeyError:
             return self.job.destination_location or "city service"
 
@@ -962,13 +1030,17 @@ class DrivingEventMixin:
         return "deliver to " + self._destination_facility_text()
 
     def _pickup_progress_summary(self) -> str:
-        return (f"{self.trip.remaining_miles:.1f} miles remaining of "
-                f"{self.trip.total_miles:.1f} to pickup at "
-                f"{self._pickup_facility_text()}.")
+        return (
+            f"{self.trip.remaining_miles:.1f} miles remaining of "
+            f"{self.trip.total_miles:.1f} to pickup at "
+            f"{self._pickup_facility_text()}."
+        )
 
     def _city_service_progress_summary(self) -> str:
-        return (f"{self.trip.remaining_miles:.1f} miles remaining of "
-                f"{self.trip.total_miles:.1f} to {self._city_service_text()}.")
+        return (
+            f"{self.trip.remaining_miles:.1f} miles remaining of "
+            f"{self.trip.total_miles:.1f} to {self._city_service_text()}."
+        )
 
     def _handle_city_service_gate(self) -> None:
         if self.truck.speed_mph <= DOCKING_MAX_MPH:
@@ -1083,13 +1155,16 @@ class DrivingEventMixin:
         t = self.truck
         limit, reason = self.trip.speed_limit_at(self.trip.position_mi)
         gear = "N" if t.transmission.in_neutral else str(t.transmission.gear)
-        title = (f"Deadheading to pickup at {self._pickup_facility_text()}"
-                 if self.phase == DRIVE_PHASE_PICKUP else
-                 f"Driving loaded to {self.job.destination}")
-        remaining = (f"{self.trip.remaining_miles:.1f} of "
-                     f"{self.trip.total_miles:.1f} miles"
-                     if self.phase == DRIVE_PHASE_PICKUP else
-                     f"{self.trip.remaining_miles:.0f} of {self.trip.total_miles:.0f} miles")
+        title = (
+            f"Deadheading to pickup at {self._pickup_facility_text()}"
+            if self.phase == DRIVE_PHASE_PICKUP
+            else f"Driving loaded to {self.job.destination}"
+        )
+        remaining = (
+            f"{self.trip.remaining_miles:.1f} of {self.trip.total_miles:.1f} miles"
+            if self.phase == DRIVE_PHASE_PICKUP
+            else f"{self.trip.remaining_miles:.0f} of {self.trip.total_miles:.0f} miles"
+        )
         return [
             title,
             "",
@@ -1109,4 +1184,3 @@ class DrivingEventMixin:
             "",
             self._status_text,
         ]
-

@@ -136,10 +136,10 @@ def classify_region(state: str, lat: float, lon: float) -> str:
     """
     if state == "Texas":
         if lon <= -104.0:
-            return "desert_southwest"        # El Paso and far-west Texas
+            return "desert_southwest"  # El Paso and far-west Texas
         if lat <= 31.0:
-            return "gulf_coast"              # Houston, San Antonio, south Texas
-        return "southern_plains"             # Dallas, Amarillo, north Texas
+            return "gulf_coast"  # Houston, San Antonio, south Texas
+        return "southern_plains"  # Dallas, Amarillo, north Texas
     if state == "Nevada":
         # Reno and northern Nevada are Great Basin; Las Vegas is Mojave desert.
         return "great_basin" if lat >= 38.0 else "desert_southwest"

@@ -12,7 +12,8 @@ ROOT = Path(__file__).resolve().parents[1]
 def _load_build_interchanges():
     """Import tools/build_interchanges.py by path (tools is not a package)."""
     spec = importlib.util.spec_from_file_location(
-        "build_interchanges", ROOT / "tools" / "build_interchanges.py")
+        "build_interchanges", ROOT / "tools" / "build_interchanges.py"
+    )
     module = importlib.util.module_from_spec(spec)
     sys.modules[spec.name] = module
     spec.loader.exec_module(module)
@@ -34,11 +35,11 @@ def _way_along(mph, ref="I-65", hgv=False, lo=0, hi=10):
 
 def _profile(ways, highway="I-65", leg_miles=10.0):
     """Assemble a profile through the grid the runner uses."""
-    return bx.assemble_maxspeed(
-        bx.build_maxspeed_grid(ways), _geom(), leg_miles, highway)
+    return bx.assemble_maxspeed(bx.build_maxspeed_grid(ways), _geom(), leg_miles, highway)
 
 
 # --- small helpers ----------------------------------------------------------
+
 
 def test_state_slug():
     assert bx._state_slug("Indiana") == "indiana"
@@ -55,9 +56,13 @@ def test_route_digits():
 
 def test_leg_states_unions_mileage_and_endpoints():
     data = {"cities": {"A": {"state": "Illinois"}, "B": {"state": "Indiana"}}}
-    leg = {"from": "A", "to": "B",
-           "corridor": {"state_miles": [{"state": "Illinois", "miles": 5},
-                                        {"state": "Indiana", "miles": 5}]}}
+    leg = {
+        "from": "A",
+        "to": "B",
+        "corridor": {
+            "state_miles": [{"state": "Illinois", "miles": 5}, {"state": "Indiana", "miles": 5}]
+        },
+    }
     assert bx._leg_states(data, leg) == {"Illinois", "Indiana"}
 
 
@@ -68,6 +73,7 @@ def test_pbf_for_states_picks_existing_only(tmp_path: Path):
 
 
 # --- profile assembly -------------------------------------------------------
+
 
 def test_no_on_corridor_ways_yields_empty_profile():
     far = bx.LocalMaxspeedWay(coords=((10.0, 10.0),), mph=65.0, hgv=False, ref="")
@@ -85,13 +91,12 @@ def test_changing_limit_produces_a_step():
     profile = _profile([_way_along(70.0, lo=0, hi=4), _way_along(55.0, lo=6, hi=10)])
     mphs = [s["mph"] for s in profile]
     assert mphs[0] == 70.0 and mphs[-1] == 55.0
-    assert any(a["mph"] != b["mph"]
-               for a, b in zip(profile, profile[1:], strict=False))
+    assert any(a["mph"] != b["mph"] for a, b in zip(profile, profile[1:], strict=False))
 
 
 def test_shield_match_beats_a_parallel_frontage_road():
     mainline = _way_along(70.0, ref="I-65")
-    frontage = _way_along(45.0, ref="")        # no shield -> not on-shield
+    frontage = _way_along(45.0, ref="")  # no shield -> not on-shield
     profile = _profile([frontage, mainline])
     assert all(s["mph"] == 70.0 for s in profile)
 

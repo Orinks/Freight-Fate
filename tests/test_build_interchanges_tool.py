@@ -16,7 +16,8 @@ ROOT = Path(__file__).resolve().parents[1]
 def _load_build_interchanges():
     """Import tools/build_interchanges.py by path (tools is not a package)."""
     spec = importlib.util.spec_from_file_location(
-        "build_interchanges", ROOT / "tools" / "build_interchanges.py")
+        "build_interchanges", ROOT / "tools" / "build_interchanges.py"
+    )
     module = importlib.util.module_from_spec(spec)
     sys.modules[spec.name] = module
     spec.loader.exec_module(module)
@@ -44,23 +45,27 @@ def test_local_pbf_discovery_reuses_existing_assembly(monkeypatch: pytest.Monkey
     index = build_interchanges.LocalOsmIndex(
         junctions=[
             build_interchanges.LocalOsmFeature(
-                40.0500, -75.0000,
+                40.0500,
+                -75.0000,
                 {"highway": "motorway_junction", "ref": "27", "name": "Market Street"},
             ),
             # Same exit on the opposite carriageway; should group by ref.
             build_interchanges.LocalOsmFeature(
-                40.0502, -75.0001,
+                40.0502,
+                -75.0001,
                 {"highway": "motorway_junction", "ref": "27"},
             ),
             # Close enough for the bounding box but too far from the route line.
             build_interchanges.LocalOsmFeature(
-                40.0500, -74.9900,
+                40.0500,
+                -74.9900,
                 {"highway": "motorway_junction", "ref": "99"},
             ),
         ],
         ramps=[
             build_interchanges.LocalOsmFeature(
-                40.0501, -75.0001,
+                40.0501,
+                -75.0001,
                 {
                     "highway": "motorway_link",
                     "destination": "Trenton;node/123;Cars Only;New York",
@@ -79,41 +84,47 @@ def test_local_pbf_discovery_reuses_existing_assembly(monkeypatch: pytest.Monkey
 
     found = build_interchanges.discover_leg(leg, rate_limit=0, local_index=index)
 
-    assert found == [{
-        "at_mi": 5.0,
-        "exit_ref": "27",
-        "name": "Market Street",
-        "destinations": ["Trenton", "New York"],
-        "via": "US 1",
-        "highway": "I-95",
-        "source": (
-            "OpenStreetMap highway=motorway_junction exit ref and "
-            "destination sign tags on the leg's Interstate shield, snapped "
-            "to checked-in OSRM route geometry, accessed 2026-06-23: "
-            "https://www.openstreetmap.org/"
-        ),
-    }]
+    assert found == [
+        {
+            "at_mi": 5.0,
+            "exit_ref": "27",
+            "name": "Market Street",
+            "destinations": ["Trenton", "New York"],
+            "via": "US 1",
+            "highway": "I-95",
+            "source": (
+                "OpenStreetMap highway=motorway_junction exit ref and "
+                "destination sign tags on the leg's Interstate shield, snapped "
+                "to checked-in OSRM route geometry, accessed 2026-06-23: "
+                "https://www.openstreetmap.org/"
+            ),
+        }
+    ]
 
 
 def test_local_candidates_keep_only_route_adjacent_features():
     index = build_interchanges.LocalOsmIndex(
         junctions=[
             build_interchanges.LocalOsmFeature(
-                40.0500, -75.0000,
+                40.0500,
+                -75.0000,
                 {"highway": "motorway_junction", "ref": "27"},
             ),
             build_interchanges.LocalOsmFeature(
-                40.0500, -74.9900,
+                40.0500,
+                -74.9900,
                 {"highway": "motorway_junction", "ref": "99"},
             ),
         ],
         ramps=[
             build_interchanges.LocalOsmFeature(
-                40.0501, -75.0001,
+                40.0501,
+                -75.0001,
                 {"highway": "motorway_link", "destination": "Trenton"},
             ),
             build_interchanges.LocalOsmFeature(
-                40.0500, -74.9900,
+                40.0500,
+                -74.9900,
                 {"highway": "motorway_link", "destination": "Wrong Road"},
             ),
         ],
@@ -168,37 +179,47 @@ def test_build_local_index_prefilters_streamed_features(
             filename: str,
             filters: list[Any] | None = None,
         ) -> None:
-            calls.append({
-                "filename": filename,
-                "handler": type(self).__name__,
-                "filters": len(filters or []),
-            })
+            calls.append(
+                {
+                    "filename": filename,
+                    "handler": type(self).__name__,
+                    "filters": len(filters or []),
+                }
+            )
             if hasattr(self, "node"):
-                self.node(FakeNode(
-                    1,
-                    40.0500,
-                    -75.0000,
-                    {"highway": "motorway_junction", "ref": "27"},
-                ))
-                self.node(FakeNode(
-                    2,
-                    41.0000,
-                    -75.0000,
-                    {"highway": "motorway_junction", "ref": "99"},
-                ))
+                self.node(
+                    FakeNode(
+                        1,
+                        40.0500,
+                        -75.0000,
+                        {"highway": "motorway_junction", "ref": "27"},
+                    )
+                )
+                self.node(
+                    FakeNode(
+                        2,
+                        41.0000,
+                        -75.0000,
+                        {"highway": "motorway_junction", "ref": "99"},
+                    )
+                )
                 self.node(FakeNode(10, 40.0500, -75.0000, {}))
                 self.node(FakeNode(11, 40.0502, -75.0001, {}))
                 self.node(FakeNode(20, 41.0000, -75.0000, {}))
                 self.node(FakeNode(21, 41.0002, -75.0001, {}))
             if hasattr(self, "way"):
-                self.way(FakeWay(
-                    [10, 11],
-                    {"highway": "motorway_link", "destination": "Trenton"},
-                ))
-                self.way(FakeWay(
-                    [20, 21],
-                    {"highway": "motorway_link", "destination": "Wrong Road"},
-                ))
+                self.way(
+                    FakeWay(
+                        [10, 11],
+                        {"highway": "motorway_link", "destination": "Trenton"},
+                    )
+                )
+                self.way(
+                    FakeWay(
+                        [20, 21],
+                        {"highway": "motorway_link", "destination": "Wrong Road"},
+                    )
+                )
 
     fake_filter = SimpleNamespace(
         TagFilter=lambda *_args: "tag-filter",
@@ -206,10 +227,12 @@ def test_build_local_index_prefilters_streamed_features(
     )
     fake_osmium = SimpleNamespace(SimpleHandler=FakeSimpleHandler, filter=fake_filter)
     monkeypatch.setitem(sys.modules, "osmium", fake_osmium)
-    bounds = build_interchanges._route_corridor_bounds([
-        {"lat": 40.0000, "lon": -75.0000},
-        {"lat": 40.1000, "lon": -75.0000},
-    ])
+    bounds = build_interchanges._route_corridor_bounds(
+        [
+            {"lat": 40.0000, "lon": -75.0000},
+            {"lat": 40.1000, "lon": -75.0000},
+        ]
+    )
 
     index = build_interchanges.build_local_index(
         Path("fake.osm.pbf"),
@@ -251,9 +274,10 @@ def test_local_index_cache_round_trips(tmp_path: Path):
     loaded = build_interchanges._read_local_index_cache(cache, [pbf], bounds)
 
     assert loaded == index
-    assert build_interchanges._read_local_index_cache(
-        cache, [pbf], [(41.0, 41.1, -75.1, -74.9)]
-    ) is None
+    assert (
+        build_interchanges._read_local_index_cache(cache, [pbf], [(41.0, 41.1, -75.1, -74.9)])
+        is None
+    )
 
 
 def test_load_or_build_local_index_uses_valid_cache(

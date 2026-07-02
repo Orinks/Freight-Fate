@@ -21,8 +21,17 @@ def test_every_region_has_clear_day_hazards():
         # is not weather-gated -- it stays eligible but heavily down-weighted
         # by day -- so animal hazards are deliberately not excluded here.)
         text = " ".join(pool)
-        for word in ("snow", "ice", "fog", "crosswind", "dust", "water",
-                     "hail", "rockfall", "tumbleweed"):
+        for word in (
+            "snow",
+            "ice",
+            "fog",
+            "crosswind",
+            "dust",
+            "water",
+            "hail",
+            "rockfall",
+            "tumbleweed",
+        ):
             assert word not in text, f"{word!r} should not occur on a clear day"
 
 
@@ -73,7 +82,7 @@ def test_upcoming_stop_only_looks_ahead(world):
     assert trip.upcoming_stop(5.0) is stop
     trip.position_mi = stop.at_mi - 10.0
     assert trip.upcoming_stop(5.0) is None
-    trip.position_mi = stop.at_mi + 0.1   # just past: the exit is gone
+    trip.position_mi = stop.at_mi + 0.1  # just past: the exit is gone
     next_stop = trip.upcoming_stop(5.0)
     assert next_stop is not stop
 
@@ -84,9 +93,9 @@ def test_eta_tracks_current_speed(world):
     trip, truck = make_trip(world)
     parked = trip.eta_game_hours()
     assert parked > 0
-    truck.velocity_mps = 31.3   # ~70 mph
+    truck.velocity_mps = 31.3  # ~70 mph
     fast = trip.eta_game_hours()
-    truck.velocity_mps = 13.4   # ~30 mph
+    truck.velocity_mps = 13.4  # ~30 mph
     slow = trip.eta_game_hours()
     assert fast < parked < slow  # parked assumes 55 mph, between the two
     # parked or crawling falls back to highway pace, never infinity
@@ -99,7 +108,7 @@ def test_progress_summary_mentions_highway(world):
     text = trip.progress_summary()
     assert "I-65" in text
     assert "Indianapolis, Indiana" in text
-    assert "Grade level" in text
+    assert "Current grade 0.0 percent, level" in text
     # The summary reports the nearest upcoming cue; an early stop leads here.
     assert "Next stop" in text
     metric = trip.progress_summary(imperial=False)
@@ -132,8 +141,7 @@ def test_gps_state_crossing_and_rest_stop_cues_deduplicate(world):
 
     trip.position_mi = 32.8
     crossing = trip.update(0.0)
-    assert [event.message for event in crossing
-            if event.kind == TripEventKind.STATE_CROSSING] == [
+    assert [event.message for event in crossing if event.kind == TripEventKind.STATE_CROSSING] == [
         "Crossing into Indiana near the I-65 state line south of Hammond."
     ]
 
@@ -141,7 +149,8 @@ def test_gps_state_crossing_and_rest_stop_cues_deduplicate(world):
     rest = trip.update(0.0)
     assert any(
         event.kind == TripEventKind.GPS_CUE
-        and event.message == (
+        and event.message
+        == (
             "Travel center at exit 175 ahead in 1 mile; confirmed truck parking; "
             "press X to signal for the exit."
         )
@@ -151,13 +160,15 @@ def test_gps_state_crossing_and_rest_stop_cues_deduplicate(world):
 
 def test_gps_traffic_cue_deduplicates(world):
     trip, _truck = make_trip(world)
-    trip.navigation_cues.append(NavigationCue(
-        "traffic:test",
-        "traffic",
-        10.0,
-        "traffic queue ahead at 45 miles per hour",
-        "Traffic slowing ahead; target speed 45.",
-    ))
+    trip.navigation_cues.append(
+        NavigationCue(
+            "traffic:test",
+            "traffic",
+            10.0,
+            "traffic queue ahead at 45 miles per hour",
+            "Traffic slowing ahead; target speed 45.",
+        )
+    )
 
     trip.position_mi = 8.5
     first = trip.update(0.0)
@@ -173,6 +184,13 @@ def test_toll_cues_and_charges_deduplicate(world):
     trip, _truck = make_trip(world, "New York", "Philadelphia")
 
     trip.position_mi = 6.1
+    crossing = trip.update(0.0)
+
+    assert _gps_messages(crossing) == [
+        "In 1 miles, crossing from New York into New Jersey near New York-New Jersey line on I-95.",
+    ]
+
+    trip.position_mi = 7.2
     advance = trip.update(0.0)
     repeat = trip.update(0.0)
 
@@ -182,18 +200,16 @@ def test_toll_cues_and_charges_deduplicate(world):
     ]
     assert not _gps_events(repeat)
 
-    trip.position_mi = 8.0
+    trip.position_mi = 9.0
     charged = trip.update(0.0)
     charged_again = trip.update(0.0)
 
-    assert [event.message for event in charged
-            if event.kind == TripEventKind.TOLL_CHARGED] == [
+    assert [event.message for event in charged if event.kind == TripEventKind.TOLL_CHARGED] == [
         "ticket system toll charged at New Jersey Turnpike ticket entry: "
         "Estimated 18 dollars, billed to carrier settlement."
     ]
     assert trip.toll_expense == 18.0
-    assert not [event for event in charged_again
-                if event.kind == TripEventKind.TOLL_CHARGED]
+    assert not [event for event in charged_again if event.kind == TripEventKind.TOLL_CHARGED]
 
 
 def test_non_toll_route_does_not_charge_tolls(world):
@@ -259,8 +275,7 @@ def test_city_events_announce_state_crossings(world):
 
     city_events = [e.message for e in events if e.kind == TripEventKind.CITY_REACHED]
     assert city_events == [
-        "Crossing into Ohio. Passing Cleveland, Ohio. "
-        "Continuing on I-76 toward Pittsburgh."
+        "Crossing into Ohio. Passing Cleveland, Ohio. Continuing on I-76 toward Pittsburgh."
     ]
 
 
@@ -274,7 +289,4 @@ def test_city_events_include_state_without_repeating_crossing(world):
     events = trip.update(0.0)
 
     city_events = [e.message for e in events if e.kind == TripEventKind.CITY_REACHED]
-    assert city_events == [
-        "Passing Buffalo, New York. Continuing on I-90 toward Cleveland."
-    ]
-
+    assert city_events == ["Passing Buffalo, New York. Continuing on I-90 toward Cleveland."]

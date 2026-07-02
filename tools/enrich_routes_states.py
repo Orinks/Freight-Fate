@@ -4,9 +4,7 @@ from __future__ import annotations
 from enrich_routes_base import *
 
 
-STATE_CONTEXT_SOURCE = (
-    "Computed from OSRM route geometry and public U.S. state boundary GeoJSON."
-)
+STATE_CONTEXT_SOURCE = "Computed from OSRM route geometry and public U.S. state boundary GeoJSON."
 
 # Highways that run alongside a river border -- I-84 hugging the Oregon bank of
 # the Columbia is the worst offender -- make per-vertex point-in-polygon sampling
@@ -74,13 +72,15 @@ def crossings_from_sequence(
     for prev, cur in zip(sequence, sequence[1:], strict=False):
         if prev["state"] == cur["state"]:
             continue
-        crossings.append({
-            "at_mi": round(max(0.1, min(leg_miles - 0.1, cur["at_mi"])), 1),
-            "from_state": prev["state"],
-            "state": cur["state"],
-            "place": f"{prev['state']}-{cur['state']} line on {highway}",
-            "source": STATE_CONTEXT_SOURCE,
-        })
+        crossings.append(
+            {
+                "at_mi": round(max(0.1, min(leg_miles - 0.1, cur["at_mi"])), 1),
+                "from_state": prev["state"],
+                "state": cur["state"],
+                "place": f"{prev['state']}-{cur['state']} line on {highway}",
+                "source": STATE_CONTEXT_SOURCE,
+            }
+        )
     return crossings
 
 
@@ -98,15 +98,11 @@ def state_miles_from_sequence(
     if not mileage:
         mileage[endpoint_states[0]] = leg_miles
     state_miles = [
-        {"state": state, "miles": round(miles, 1)}
-        for state, miles in mileage.items()
-        if miles > 0
+        {"state": state, "miles": round(miles, 1)} for state, miles in mileage.items() if miles > 0
     ]
     total = sum(item["miles"] for item in state_miles)
     if state_miles and abs(total - leg_miles) >= 0.1:
-        state_miles[-1]["miles"] = round(
-            state_miles[-1]["miles"] + leg_miles - total, 1
-        )
+        state_miles[-1]["miles"] = round(state_miles[-1]["miles"] + leg_miles - total, 1)
     return state_miles
 
 
@@ -117,8 +113,7 @@ def _state_context(
     state_shapes: list[dict[str, Any]],
 ) -> dict[str, list[dict[str, Any]]]:
     leg_miles = float(leg["miles"])
-    endpoint_states = (data["cities"][leg["from"]]["state"],
-                       data["cities"][leg["to"]]["state"])
+    endpoint_states = (data["cities"][leg["from"]]["state"], data["cities"][leg["to"]]["state"])
     points = _state_points(geometry, leg_miles, state_shapes)
     if not points:
         points = [
@@ -189,8 +184,7 @@ def _point_in_geometry(lat: float, lon: float, geometry: dict[str, Any]) -> bool
         return any(_point_in_ring(lat, lon, ring) for ring in coordinates[:1])
     if geom_type == "MultiPolygon":
         return any(
-            any(_point_in_ring(lat, lon, ring) for ring in polygon[:1])
-            for polygon in coordinates
+            any(_point_in_ring(lat, lon, ring) for ring in polygon[:1]) for polygon in coordinates
         )
     return False
 
@@ -270,8 +264,7 @@ def _overpass_is_error(payload: dict[str, Any]) -> bool:
     """
     remark = str(payload.get("remark", "")).lower()
     return any(
-        token in remark
-        for token in ("runtime error", "timed out", "rate_limited", "too many")
+        token in remark for token in ("runtime error", "timed out", "rate_limited", "too many")
     )
 
 
@@ -308,12 +301,12 @@ def _cached_overpass_json(
             # Server aborted (timeout / rate limit). Don't cache the failure;
             # try the next endpoint instead.
             last_error = RuntimeError(
-                f"Overpass error from {url}: {payload.get('remark', '').strip()}")
+                f"Overpass error from {url}: {payload.get('remark', '').strip()}"
+            )
             per_url.unlink(missing_ok=True)
             continue
         path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_text(json.dumps(payload, indent=2, sort_keys=True),
-                        encoding="utf-8")
+        path.write_text(json.dumps(payload, indent=2, sort_keys=True), encoding="utf-8")
         return payload
     if last_error is not None:
         raise last_error
@@ -335,11 +328,8 @@ def _haversine_miles(lat1: float, lon1: float, lat2: float, lon2: float) -> floa
     phi2 = math.radians(lat2)
     d_phi = math.radians(lat2 - lat1)
     d_lambda = math.radians(lon2 - lon1)
-    a = (
-        math.sin(d_phi / 2) ** 2
-        + math.cos(phi1) * math.cos(phi2) * math.sin(d_lambda / 2) ** 2
-    )
-    return 2 * radius_mi * math.atan2(a ** 0.5, (1 - a) ** 0.5)
+    a = math.sin(d_phi / 2) ** 2 + math.cos(phi1) * math.cos(phi2) * math.sin(d_lambda / 2) ** 2
+    return 2 * radius_mi * math.atan2(a**0.5, (1 - a) ** 0.5)
 
 
 def _find_leg(data: dict[str, Any], from_city: str, to_city: str) -> dict[str, Any] | None:
@@ -355,13 +345,16 @@ def _offline_summary(leg: dict[str, Any], corridor: dict[str, Any]) -> str:
     checkpoints = corridor.get("checkpoints", [])
     elevations = corridor.get("elevation_samples", [])
     grade_segments = corridor.get("grade_segments", [])
-    state_text = ", ".join(
-        f"{item['from_state']} to {item['state']} at {item['at_mi']} mi"
-        for item in crossings
-    ) or "no explicit state crossings"
+    state_text = (
+        ", ".join(
+            f"{item['from_state']} to {item['state']} at {item['at_mi']} mi" for item in crossings
+        )
+        or "no explicit state crossings"
+    )
     terrain_text = (
         f"{len(elevations)} elevation samples, {len(grade_segments)} grade segments"
-        if elevations or grade_segments else "no route-derived terrain"
+        if elevations or grade_segments
+        else "no route-derived terrain"
     )
     return (
         f"Offline corridor {leg['from']} to {leg['to']}: "

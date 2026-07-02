@@ -82,8 +82,10 @@ class LaneKeeping:
         self._gust += (self._gust_target - self._gust) * min(1.0, dt / 1.5)
 
         drift = (
-            self._wander + curve * CURVE_RATE + wind * self._gust * WIND_RATE
-        ) * drift_mult * speed_factor
+            (self._wander + curve * CURVE_RATE + wind * self._gust * WIND_RATE)
+            * drift_mult
+            * speed_factor
+        )
         authority = STEER_RATE * steer_mult * min(1.0, mph / 25.0)
         self.offset += (drift + self.steering * authority) * dt
         self.offset = max(-MAX_OFFSET, min(MAX_OFFSET, self.offset))
@@ -91,10 +93,7 @@ class LaneKeeping:
         self._event_cooldown = max(0.0, self._event_cooldown - dt)
         if abs(self.offset) >= OFF_ROAD:
             self._off_road_timer += dt
-            if (
-                self._off_road_timer >= OFF_ROAD_GRACE_S
-                and self._event_cooldown <= 0.0
-            ):
+            if self._off_road_timer >= OFF_ROAD_GRACE_S and self._event_cooldown <= 0.0:
                 self._event_cooldown = OFF_ROAD_REPEAT_S
                 return True
         else:

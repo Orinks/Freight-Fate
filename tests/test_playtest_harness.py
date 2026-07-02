@@ -190,6 +190,24 @@ def test_playtest_harness_can_exercise_traffic_pressure_guidance(monkeypatch):
     assert "move right" in result.transcript_text
 
 
+@pytest.mark.smoke
+def test_playtest_harness_drives_a_specific_route(monkeypatch):
+    # The Newark -> New York corridor crosses to NY at the GWB on I-95 (the
+    # Holland Tunnel fix); driving it directly should complete and never mention
+    # the tunnel.
+    with PlaytestHarness(monkeypatch) as harness:
+        result = harness.start_route("Newark", "New York")
+        assert harness.driving.trip.route.highways == ["I-95"]
+        harness.drive_delivery_to_completion()
+
+    transcript = result.transcript_text
+    assert result.deliveries == 1
+    assert result.destination == "New York"
+    assert result.remaining_miles == 0.0
+    assert "Holland Tunnel" not in transcript
+    assert "New Jersey into New York" in transcript
+
+
 @pytest.mark.property
 @settings(max_examples=6, deadline=None)
 @given(

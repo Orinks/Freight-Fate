@@ -113,10 +113,8 @@ def test_city_service_drive_requires_enter_before_opening(monkeypatch):
         monkeypatch.setattr(app.ctx.audio, "play", lambda *args, **kwargs: None)
         monkeypatch.setattr(app.ctx, "play_music_sequence", lambda *args, **kwargs: None)
         monkeypatch.setattr(app.ctx.audio, "set_ambient", lambda *args, **kwargs: None)
-        monkeypatch.setattr(app.ctx, "say",
-                            lambda text, interrupt=True: spoken.append(text))
-        monkeypatch.setattr(app.ctx, "say_event",
-                            lambda text, interrupt=True: spoken.append(text))
+        monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: spoken.append(text))
+        monkeypatch.setattr(app.ctx, "say_event", lambda text, interrupt=True: spoken.append(text))
         app.ctx.profile = Profile(name="Services", current_city="Chicago")
         app.push_state(CityMenuState(app.ctx))
 

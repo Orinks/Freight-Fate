@@ -69,16 +69,17 @@ class TimedMessageState(State):
     """A brief, spoken transition that ignores stray held navigation keys."""
 
     def __init__(
-            self,
-            ctx: GameContext,
-            *,
-            title: str,
-            message: str,
-            status: str,
-            seconds: float,
-            on_complete: Callable[[], None],
-            complete_text: str = "",
-            sound_key: str = "ui/notify") -> None:
+        self,
+        ctx: GameContext,
+        *,
+        title: str,
+        message: str,
+        status: str,
+        seconds: float,
+        on_complete: Callable[[], None],
+        complete_text: str = "",
+        sound_key: str = "ui/notify",
+    ) -> None:
         super().__init__(ctx)
         self.title = title
         self.message = message
@@ -99,8 +100,12 @@ class TimedMessageState(State):
         if event.type != pygame.KEYDOWN:
             return
         if event.key in (
-                pygame.K_F1, pygame.K_ESCAPE, pygame.K_RETURN,
-                pygame.K_SPACE, pygame.K_KP_ENTER):
+            pygame.K_F1,
+            pygame.K_ESCAPE,
+            pygame.K_RETURN,
+            pygame.K_SPACE,
+            pygame.K_KP_ENTER,
+        ):
             self.ctx.say(self.status)
 
     def update(self, dt: float) -> None:
@@ -139,7 +144,10 @@ class MenuState(State):
     """A vertically navigated, fully spoken menu."""
 
     title = "Menu"
-    intro_help = "Use up and down arrows to navigate, Enter to select, Escape to go back."
+    intro_help = (
+        "Use up and down arrows to navigate, Enter to select, Escape to go back. "
+        "Left or Right Control stops the current speech."
+    )
     open_sound_key = "ui/menu_open"
 
     def __init__(self, ctx: GameContext) -> None:
@@ -223,6 +231,8 @@ class MenuState(State):
             self.go_back()
         elif key == pygame.K_F1:
             self.ctx.say(self.current_help())
+        elif key in (pygame.K_LCTRL, pygame.K_RCTRL):
+            self.ctx.stop_speech()
         elif event.unicode and event.unicode.isalnum():
             self._first_letter_jump(event.unicode.lower())
 

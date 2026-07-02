@@ -54,6 +54,7 @@ ALTERNATE_ROUTE_EXTRA_RATIO = 0.22
 ALTERNATE_ROUTE_MIN_EXTRA_MILES = 75.0
 ALTERNATE_ROUTE_MAX_EXTRA_MILES = 550.0
 
+
 class World(WorldServiceMixin):
     def __init__(self, data: dict) -> None:
         self.cities: dict[str, City] = {}
@@ -66,21 +67,18 @@ class World(WorldServiceMixin):
         for name, c in data["cities"].items():
             lat = float(c.get("lat", 0.0))
             lon = float(c.get("lon", 0.0))
-            explicit_locs = tuple(
-                _parse_location(loc, name, lat, lon)
-                for loc in c["locations"]
-            )
+            explicit_locs = tuple(_parse_location(loc, name, lat, lon) for loc in c["locations"])
             tags = _market_tags_for_city(name, c, explicit_locs)
             locs = _expand_market_locations(name, lat, lon, explicit_locs, tags)
             self._validate_city_locations(name, locs)
-            self.cities[name] = City(name, c["state"], c["region"], locs,
-                                     lat, lon, tags)
+            self.cities[name] = City(name, c["state"], c["region"], locs, lat, lon, tags)
 
         self.legs: list[Leg] = []
         for leg in data["legs"]:
             miles = float(leg["miles"])
-            stops = tuple(_parse_stop(s, miles, leg["from"], leg["to"])
-                          for s in leg.get("stops", ()))
+            stops = tuple(
+                _parse_stop(s, miles, leg["from"], leg["to"]) for s in leg.get("stops", ())
+            )
             corridor = leg.get("corridor", {})
             route_points = tuple(
                 _parse_route_point(p, miles, leg["from"], leg["to"])
@@ -95,8 +93,9 @@ class World(WorldServiceMixin):
                 for s in corridor.get("grade_segments", ())
             )
             state_crossings = tuple(
-                _parse_state_crossing(c, miles, leg["from"], leg["to"],
-                                      self.cities[leg["from"]].state)
+                _parse_state_crossing(
+                    c, miles, leg["from"], leg["to"], self.cities[leg["from"]].state
+                )
                 for c in corridor.get("state_crossings", ())
             )
             checkpoints = tuple(
@@ -116,12 +115,26 @@ class World(WorldServiceMixin):
                 for x in corridor.get("interchanges", ())
             )
             speed_limits = _parse_speed_limits(
-                corridor.get("speed_limits", ()), miles, leg["from"], leg["to"])
+                corridor.get("speed_limits", ()), miles, leg["from"], leg["to"]
+            )
             self.legs.append(
-                Leg(leg["from"], leg["to"], miles, leg["highway"],
-                    leg["terrain"], stops, route_points, elevation_samples,
-                    grade_segments, state_crossings, checkpoints, state_miles,
-                    toll_events, interchanges, speed_limits)
+                Leg(
+                    leg["from"],
+                    leg["to"],
+                    miles,
+                    leg["highway"],
+                    leg["terrain"],
+                    stops,
+                    route_points,
+                    elevation_samples,
+                    grade_segments,
+                    state_crossings,
+                    checkpoints,
+                    state_miles,
+                    toll_events,
+                    interchanges,
+                    speed_limits,
+                )
             )
         self._adjacency: dict[str, list[Leg]] = {name: [] for name in self.cities}
         for leg in self.legs:
@@ -150,8 +163,7 @@ class World(WorldServiceMixin):
             self._facilities_by_id[location.id] = location
 
     @classmethod
-    def load(cls, root: Path = WORLD_DATA_PATH,
-             overlay: Path | None = None) -> World:
+    def load(cls, root: Path = WORLD_DATA_PATH, overlay: Path | None = None) -> World:
         """Load the world, optionally merging an additive overlay on top.
 
         The checked-in indexed world data is the deterministic source of truth.
@@ -228,9 +240,13 @@ class World(WorldServiceMixin):
                 return HomeTerminal(location.name, city, city_obj.state, "company_yard")
         return HomeTerminal(f"{city} Company Yard", city, city_obj.state, "company_yard")
 
-    def shortest_route(self, start: str, end: str,
-                       penalties: dict[Leg, float] | None = None,
-                       require_metadata: bool = False) -> Route | None:
+    def shortest_route(
+        self,
+        start: str,
+        end: str,
+        penalties: dict[Leg, float] | None = None,
+        require_metadata: bool = False,
+    ) -> Route | None:
         """Dijkstra over leg miles, with optional per-leg penalty multipliers.
 
         ``require_metadata`` is for new dispatchable freight. The default keeps
@@ -297,8 +313,9 @@ class World(WorldServiceMixin):
     def leg_metadata_complete(self, leg: Leg) -> bool:
         return leg.metadata_complete(self.cities[leg.a].state, self.cities[leg.b].state)
 
-    def supported_route(self, start: str, end: str,
-                        penalties: dict[Leg, float] | None = None) -> Route | None:
+    def supported_route(
+        self, start: str, end: str, penalties: dict[Leg, float] | None = None
+    ) -> Route | None:
         if penalties:
             return self.shortest_route(start, end, penalties, require_metadata=True)
         key = (start, end)
@@ -311,12 +328,12 @@ class World(WorldServiceMixin):
             return None
         return Route(list(route.cities), list(route.legs))
 
-    def supported_route_options(self, start: str, end: str,
-                                count: int = 3) -> list[Route]:
+    def supported_route_options(self, start: str, end: str, count: int = 3) -> list[Route]:
         return self.route_options(start, end, count, require_metadata=True)
 
-    def route_options(self, start: str, end: str, count: int = 3,
-                      require_metadata: bool = False) -> list[Route]:
+    def route_options(
+        self, start: str, end: str, count: int = 3, require_metadata: bool = False
+    ) -> list[Route]:
         """Up to ``count`` distinct routes, fastest first."""
         routes: list[Route] = []
         penalties: dict[Leg, float] = {}
@@ -326,8 +343,7 @@ class World(WorldServiceMixin):
             return routes
         max_miles = _max_alternate_miles(best.miles)
         for _ in range(count * 8):
-            route = self.shortest_route(start, end, penalties,
-                                        require_metadata=require_metadata)
+            route = self.shortest_route(start, end, penalties, require_metadata=require_metadata)
             if route is None:
                 break
             key = tuple(route.cities)
@@ -347,8 +363,7 @@ _world: World | None = None
 
 def _max_alternate_miles(best_miles: float) -> float:
     extra = best_miles * ALTERNATE_ROUTE_EXTRA_RATIO
-    extra = max(ALTERNATE_ROUTE_MIN_EXTRA_MILES,
-                min(ALTERNATE_ROUTE_MAX_EXTRA_MILES, extra))
+    extra = max(ALTERNATE_ROUTE_MIN_EXTRA_MILES, min(ALTERNATE_ROUTE_MAX_EXTRA_MILES, extra))
     return best_miles + extra
 
 

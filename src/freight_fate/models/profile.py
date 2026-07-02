@@ -242,10 +242,10 @@ def _signed_payload(data: dict) -> dict:
 
 
 def _signature_for(data: dict) -> str:
-    payload = json.dumps(_signed_payload(data), sort_keys=True,
-                         separators=(",", ":"), ensure_ascii=True)
-    return hmac.new(_profile_secret(), payload.encode("utf-8"),
-                    hashlib.sha256).hexdigest()
+    payload = json.dumps(
+        _signed_payload(data), sort_keys=True, separators=(",", ":"), ensure_ascii=True
+    )
+    return hmac.new(_profile_secret(), payload.encode("utf-8"), hashlib.sha256).hexdigest()
 
 
 def _is_signature_valid(data: dict) -> bool:
@@ -271,16 +271,18 @@ class Profile:
     money: float = STARTING_MONEY
     current_city: str = DEFAULT_CITY
     truck_damage_pct: float = 0.0
+    tire_wear_pct: float = 0.0
+    road_grime_pct: float = 0.0
     truck_fuel_gal: float = 150.0
-    game_hours: float = 6.0          # in-game clock, hours since career start
+    game_hours: float = 6.0  # in-game clock, hours since career start
     tutorial_done: bool = False
-    truck: str = "rig"               # owner-operator active tractor, or assignment key
+    truck: str = "rig"  # owner-operator active tractor, or assignment key
     owned_trucks: list[str] = field(default_factory=list)  # owned tractors after buy-in
     upgrades: dict[str, int] = field(default_factory=dict)  # owned-tractor upgrade key -> tier
     active_trip: dict | None = None  # mid-delivery snapshot, see DrivingState
     dispatch_board_cache: dict | None = None
-    fatigue: float = 0.0             # 0 fresh .. 100 exhausted
-    pay_advance: float = 0.0         # outstanding dispatcher advance owed, repaid at delivery
+    fatigue: float = 0.0  # 0 fresh .. 100 exhausted
+    pay_advance: float = 0.0  # outstanding dispatcher advance owed, repaid at delivery
     pay_advance_used_for_load: bool = False
     business_status: str = COMPANY_DRIVER  # company driver, then leased-on owner-operator
     carrier_name: str = STARTER_CARRIER_NAME
@@ -316,12 +318,10 @@ class Profile:
         hos = HosClock.from_dict(d.pop("hos", None))  # absent in v2 saves: fresh clock
         duty_log = DutyLog.from_dict(d.pop("duty_log", None))
         known = {
-            f for f in cls.__dataclass_fields__
-            if f not in ("career", "market", "hos", "duty_log")
+            f for f in cls.__dataclass_fields__ if f not in ("career", "market", "hos", "duty_log")
         }
         kwargs = {k: v for k, v in d.items() if k in known}
-        return cls(career=career, market=market, hos=hos,
-                   duty_log=duty_log, **kwargs)
+        return cls(career=career, market=market, hos=hos, duty_log=duty_log, **kwargs)
 
     # -- truck ------------------------------------------------------------------
 
@@ -404,8 +404,7 @@ class Profile:
         signed = SIGNATURE_FIELD in data
         if signed and not _is_signature_valid(data):
             _quarantine(path)
-            raise ProfileIntegrityError(
-                "Save file failed its integrity check and was quarantined.")
+            raise ProfileIntegrityError("Save file failed its integrity check and was quarantined.")
         profile = cls.from_dict(data)
         if not signed:
             profile.save()
@@ -413,8 +412,7 @@ class Profile:
 
     @staticmethod
     def list_saves() -> list[Path]:
-        return sorted(profiles_dir().glob("*.json"),
-                      key=lambda p: p.stat().st_mtime, reverse=True)
+        return sorted(profiles_dir().glob("*.json"), key=lambda p: p.stat().st_mtime, reverse=True)
 
     def delete(self) -> None:
         self.path.unlink(missing_ok=True)

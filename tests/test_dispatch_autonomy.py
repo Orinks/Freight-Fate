@@ -46,10 +46,15 @@ def test_new_hire_board_offers_single_assignment_with_decline(monkeypatch):
         app.ctx.profile = _new_hire()
         app.ctx.profile.career.deliveries = 12  # past training stages
 
-        app.push_state(JobBoardState(app.ctx, [
-            _job(miles=180.0),
-            _job(miles=70.0),
-        ]))
+        app.push_state(
+            JobBoardState(
+                app.ctx,
+                [
+                    _job(miles=180.0),
+                    _job(miles=70.0),
+                ],
+            )
+        )
 
         board = app.state
         assert board.assigned_mode
@@ -77,10 +82,15 @@ def test_declining_assignment_costs_reputation_and_draws_next_load(monkeypatch):
         app.ctx.profile.career.deliveries = 12
         reputation_before = app.ctx.profile.career.reputation
 
-        app.push_state(JobBoardState(app.ctx, [
-            _job(miles=180.0),
-            _job(miles=70.0),
-        ]))
+        app.push_state(
+            JobBoardState(
+                app.ctx,
+                [
+                    _job(miles=180.0),
+                    _job(miles=70.0),
+                ],
+            )
+        )
         board = app.state
         while not board.items[board.index].text.startswith("Decline"):
             board.handle_event(key_event(pygame.K_DOWN))
@@ -108,10 +118,15 @@ def test_exhausted_decline_budget_locks_board_to_accept_only(monkeypatch):
         app.ctx.profile.career.deliveries = 12
         app.ctx.profile.career.dispatch_declines_used = NEW_HIRE_DECLINE_BUDGET
 
-        app.push_state(JobBoardState(app.ctx, [
-            _job(miles=180.0),
-            _job(miles=70.0),
-        ]))
+        app.push_state(
+            JobBoardState(
+                app.ctx,
+                [
+                    _job(miles=180.0),
+                    _job(miles=70.0),
+                ],
+            )
+        )
 
         labels = [item.text for item in app.state.items]
         assert labels[0].startswith("Accept assigned dispatch:")
@@ -172,10 +187,15 @@ def test_senior_company_driver_gets_browsable_board(monkeypatch):
         app.ctx.profile.career.deliveries = 20
         app.ctx.profile.career.reputation = 80
 
-        app.push_state(JobBoardState(app.ctx, [
-            _job(miles=180.0),
-            _job(miles=70.0),
-        ]))
+        app.push_state(
+            JobBoardState(
+                app.ctx,
+                [
+                    _job(miles=180.0),
+                    _job(miles=70.0),
+                ],
+            )
+        )
 
         assert not app.state.assigned_mode
         assert any("Job 1 of 2" in item.text for item in app.state.items)
@@ -194,10 +214,15 @@ def test_owner_operator_board_stays_browsable(monkeypatch):
         app.ctx.profile.business_status = LEASED_OWNER_OPERATOR
         app.ctx.profile.owned_trucks = ["rig"]
 
-        app.push_state(JobBoardState(app.ctx, [
-            _job(miles=180.0),
-            _job(miles=70.0),
-        ]))
+        app.push_state(
+            JobBoardState(
+                app.ctx,
+                [
+                    _job(miles=180.0),
+                    _job(miles=70.0),
+                ],
+            )
+        )
 
         assert not app.state.assigned_mode
     finally:
@@ -216,8 +241,7 @@ def test_company_departure_runs_dispatch_assigned_route(monkeypatch):
         app.ctx.profile = _new_hire("Routed Driver")
         expected = app.ctx.world.supported_route_options("Chicago", "Milwaukee")[0]
 
-        app.push_state(PickupFacilityState(
-            app.ctx, _job(miles=92.0), checked_in=True, loaded=True))
+        app.push_state(PickupFacilityState(app.ctx, _job(miles=92.0), checked_in=True, loaded=True))
         app.state.handle_event(key_event(pygame.K_RETURN))  # depart
 
         assert isinstance(app.state, DrivingState)
@@ -241,8 +265,7 @@ def test_senior_company_departure_is_still_dispatch_routed(monkeypatch):
         app.ctx.profile = _new_hire("Senior Routed")
         app.ctx.profile.career.xp = LEVEL_XP[SENIOR_LOAD_CHOICE_LEVEL - 1]
 
-        app.push_state(PickupFacilityState(
-            app.ctx, _job(miles=92.0), checked_in=True, loaded=True))
+        app.push_state(PickupFacilityState(app.ctx, _job(miles=92.0), checked_in=True, loaded=True))
         app.state.handle_event(key_event(pygame.K_RETURN))  # depart
 
         assert isinstance(app.state, DrivingState)
@@ -263,8 +286,7 @@ def test_owner_operator_departure_keeps_route_choice(monkeypatch):
         app.ctx.profile.business_status = LEASED_OWNER_OPERATOR
         app.ctx.profile.owned_trucks = ["rig"]
 
-        app.push_state(PickupFacilityState(
-            app.ctx, _job(miles=92.0), checked_in=True, loaded=True))
+        app.push_state(PickupFacilityState(app.ctx, _job(miles=92.0), checked_in=True, loaded=True))
         app.state.handle_event(key_event(pygame.K_RETURN))  # depart
 
         assert isinstance(app.state, RouteSelectState)

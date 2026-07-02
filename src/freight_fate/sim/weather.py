@@ -26,11 +26,11 @@ class WeatherKind(Enum):
 
 @dataclass(frozen=True)
 class WeatherEffects:
-    grip: float          # traction multiplier
-    drag_mult: float     # aerodynamic drag multiplier (headwinds)
+    grip: float  # traction multiplier
+    drag_mult: float  # aerodynamic drag multiplier (headwinds)
     visibility_mi: float
-    sound: str | None    # ambience loop key, e.g. "weather/rain_light"
-    wind: float          # 0..1 wind loop intensity
+    sound: str | None  # ambience loop key, e.g. "weather/rain_light"
+    wind: float  # 0..1 wind loop intensity
     safe_speed_mph: float
 
 
@@ -47,48 +47,146 @@ EFFECTS: dict[WeatherKind, WeatherEffects] = {
 
 # Per-region likelihood weights for each condition.
 REGION_WEIGHTS: dict[str, dict[WeatherKind, float]] = {
-    "northeast": {WeatherKind.CLEAR: 4, WeatherKind.CLOUDY: 3, WeatherKind.RAIN: 2,
-                  WeatherKind.HEAVY_RAIN: 1, WeatherKind.THUNDERSTORM: 0.5,
-                  WeatherKind.SNOW: 1.5, WeatherKind.FOG: 1, WeatherKind.WIND: 0.5},
-    "appalachia": {WeatherKind.CLEAR: 3.5, WeatherKind.CLOUDY: 3, WeatherKind.RAIN: 2,
-                   WeatherKind.HEAVY_RAIN: 1, WeatherKind.THUNDERSTORM: 1,
-                   WeatherKind.SNOW: 1.5, WeatherKind.FOG: 2.5, WeatherKind.WIND: 1},
-    "great_lakes": {WeatherKind.CLEAR: 3.5, WeatherKind.CLOUDY: 3.5, WeatherKind.RAIN: 2,
-                    WeatherKind.HEAVY_RAIN: 1, WeatherKind.THUNDERSTORM: 1.5,
-                    WeatherKind.SNOW: 2.5, WeatherKind.FOG: 1, WeatherKind.WIND: 1.5},
-    "heartland": {WeatherKind.CLEAR: 4, WeatherKind.CLOUDY: 2.5, WeatherKind.RAIN: 2,
-                  WeatherKind.HEAVY_RAIN: 1, WeatherKind.THUNDERSTORM: 2,
-                  WeatherKind.SNOW: 1, WeatherKind.FOG: 1, WeatherKind.WIND: 2},
-    "southern_plains": {WeatherKind.CLEAR: 5, WeatherKind.CLOUDY: 2, WeatherKind.RAIN: 1.5,
-                        WeatherKind.HEAVY_RAIN: 1, WeatherKind.THUNDERSTORM: 2.5,
-                        WeatherKind.SNOW: 0.3, WeatherKind.FOG: 0.5, WeatherKind.WIND: 3},
-    "mid_south": {WeatherKind.CLEAR: 4, WeatherKind.CLOUDY: 2.5, WeatherKind.RAIN: 2,
-                  WeatherKind.HEAVY_RAIN: 1.5, WeatherKind.THUNDERSTORM: 2,
-                  WeatherKind.SNOW: 0.4, WeatherKind.FOG: 1.5, WeatherKind.WIND: 0.7},
-    "atlantic_southeast": {WeatherKind.CLEAR: 4.5, WeatherKind.CLOUDY: 2.5, WeatherKind.RAIN: 2,
-                           WeatherKind.HEAVY_RAIN: 1.5, WeatherKind.THUNDERSTORM: 2.5,
-                           WeatherKind.SNOW: 0.2, WeatherKind.FOG: 1, WeatherKind.WIND: 0.6},
-    "gulf_coast": {WeatherKind.CLEAR: 4, WeatherKind.CLOUDY: 2.5, WeatherKind.RAIN: 2,
-                   WeatherKind.HEAVY_RAIN: 2, WeatherKind.THUNDERSTORM: 3,
-                   WeatherKind.SNOW: 0.05, WeatherKind.FOG: 1.5, WeatherKind.WIND: 0.8},
-    "florida": {WeatherKind.CLEAR: 4.5, WeatherKind.CLOUDY: 2.5, WeatherKind.RAIN: 2,
-                WeatherKind.HEAVY_RAIN: 2, WeatherKind.THUNDERSTORM: 3.5,
-                WeatherKind.SNOW: 0.0, WeatherKind.FOG: 0.8, WeatherKind.WIND: 0.8},
-    "rockies": {WeatherKind.CLEAR: 4, WeatherKind.CLOUDY: 2.5, WeatherKind.RAIN: 1,
-                WeatherKind.HEAVY_RAIN: 0.5, WeatherKind.THUNDERSTORM: 1,
-                WeatherKind.SNOW: 3, WeatherKind.FOG: 1, WeatherKind.WIND: 2},
-    "great_basin": {WeatherKind.CLEAR: 5.5, WeatherKind.CLOUDY: 1.5, WeatherKind.RAIN: 0.7,
-                    WeatherKind.HEAVY_RAIN: 0.3, WeatherKind.THUNDERSTORM: 0.8,
-                    WeatherKind.SNOW: 1.5, WeatherKind.FOG: 0.5, WeatherKind.WIND: 2.5},
-    "desert_southwest": {WeatherKind.CLEAR: 7, WeatherKind.CLOUDY: 1.5, WeatherKind.RAIN: 0.5,
-                         WeatherKind.HEAVY_RAIN: 0.4, WeatherKind.THUNDERSTORM: 1,
-                         WeatherKind.SNOW: 0.15, WeatherKind.FOG: 0.2, WeatherKind.WIND: 2},
-    "california": {WeatherKind.CLEAR: 5, WeatherKind.CLOUDY: 3, WeatherKind.RAIN: 1.3,
-                   WeatherKind.HEAVY_RAIN: 0.5, WeatherKind.THUNDERSTORM: 0.3,
-                   WeatherKind.SNOW: 0.1, WeatherKind.FOG: 2.5, WeatherKind.WIND: 1},
-    "pacific_northwest": {WeatherKind.CLEAR: 2.5, WeatherKind.CLOUDY: 4, WeatherKind.RAIN: 3.5,
-                          WeatherKind.HEAVY_RAIN: 1.5, WeatherKind.THUNDERSTORM: 0.5,
-                          WeatherKind.SNOW: 1, WeatherKind.FOG: 2, WeatherKind.WIND: 1},
+    "northeast": {
+        WeatherKind.CLEAR: 4,
+        WeatherKind.CLOUDY: 3,
+        WeatherKind.RAIN: 2,
+        WeatherKind.HEAVY_RAIN: 1,
+        WeatherKind.THUNDERSTORM: 0.5,
+        WeatherKind.SNOW: 1.5,
+        WeatherKind.FOG: 1,
+        WeatherKind.WIND: 0.5,
+    },
+    "appalachia": {
+        WeatherKind.CLEAR: 3.5,
+        WeatherKind.CLOUDY: 3,
+        WeatherKind.RAIN: 2,
+        WeatherKind.HEAVY_RAIN: 1,
+        WeatherKind.THUNDERSTORM: 1,
+        WeatherKind.SNOW: 1.5,
+        WeatherKind.FOG: 2.5,
+        WeatherKind.WIND: 1,
+    },
+    "great_lakes": {
+        WeatherKind.CLEAR: 3.5,
+        WeatherKind.CLOUDY: 3.5,
+        WeatherKind.RAIN: 2,
+        WeatherKind.HEAVY_RAIN: 1,
+        WeatherKind.THUNDERSTORM: 1.5,
+        WeatherKind.SNOW: 2.5,
+        WeatherKind.FOG: 1,
+        WeatherKind.WIND: 1.5,
+    },
+    "heartland": {
+        WeatherKind.CLEAR: 4,
+        WeatherKind.CLOUDY: 2.5,
+        WeatherKind.RAIN: 2,
+        WeatherKind.HEAVY_RAIN: 1,
+        WeatherKind.THUNDERSTORM: 2,
+        WeatherKind.SNOW: 1,
+        WeatherKind.FOG: 1,
+        WeatherKind.WIND: 2,
+    },
+    "southern_plains": {
+        WeatherKind.CLEAR: 5,
+        WeatherKind.CLOUDY: 2,
+        WeatherKind.RAIN: 1.5,
+        WeatherKind.HEAVY_RAIN: 1,
+        WeatherKind.THUNDERSTORM: 2.5,
+        WeatherKind.SNOW: 0.3,
+        WeatherKind.FOG: 0.5,
+        WeatherKind.WIND: 3,
+    },
+    "mid_south": {
+        WeatherKind.CLEAR: 4,
+        WeatherKind.CLOUDY: 2.5,
+        WeatherKind.RAIN: 2,
+        WeatherKind.HEAVY_RAIN: 1.5,
+        WeatherKind.THUNDERSTORM: 2,
+        WeatherKind.SNOW: 0.4,
+        WeatherKind.FOG: 1.5,
+        WeatherKind.WIND: 0.7,
+    },
+    "atlantic_southeast": {
+        WeatherKind.CLEAR: 4.5,
+        WeatherKind.CLOUDY: 2.5,
+        WeatherKind.RAIN: 2,
+        WeatherKind.HEAVY_RAIN: 1.5,
+        WeatherKind.THUNDERSTORM: 2.5,
+        WeatherKind.SNOW: 0.2,
+        WeatherKind.FOG: 1,
+        WeatherKind.WIND: 0.6,
+    },
+    "gulf_coast": {
+        WeatherKind.CLEAR: 4,
+        WeatherKind.CLOUDY: 2.5,
+        WeatherKind.RAIN: 2,
+        WeatherKind.HEAVY_RAIN: 2,
+        WeatherKind.THUNDERSTORM: 3,
+        WeatherKind.SNOW: 0.05,
+        WeatherKind.FOG: 1.5,
+        WeatherKind.WIND: 0.8,
+    },
+    "florida": {
+        WeatherKind.CLEAR: 4.5,
+        WeatherKind.CLOUDY: 2.5,
+        WeatherKind.RAIN: 2,
+        WeatherKind.HEAVY_RAIN: 2,
+        WeatherKind.THUNDERSTORM: 3.5,
+        WeatherKind.SNOW: 0.0,
+        WeatherKind.FOG: 0.8,
+        WeatherKind.WIND: 0.8,
+    },
+    "rockies": {
+        WeatherKind.CLEAR: 4,
+        WeatherKind.CLOUDY: 2.5,
+        WeatherKind.RAIN: 1,
+        WeatherKind.HEAVY_RAIN: 0.5,
+        WeatherKind.THUNDERSTORM: 1,
+        WeatherKind.SNOW: 3,
+        WeatherKind.FOG: 1,
+        WeatherKind.WIND: 2,
+    },
+    "great_basin": {
+        WeatherKind.CLEAR: 5.5,
+        WeatherKind.CLOUDY: 1.5,
+        WeatherKind.RAIN: 0.7,
+        WeatherKind.HEAVY_RAIN: 0.3,
+        WeatherKind.THUNDERSTORM: 0.8,
+        WeatherKind.SNOW: 1.5,
+        WeatherKind.FOG: 0.5,
+        WeatherKind.WIND: 2.5,
+    },
+    "desert_southwest": {
+        WeatherKind.CLEAR: 7,
+        WeatherKind.CLOUDY: 1.5,
+        WeatherKind.RAIN: 0.5,
+        WeatherKind.HEAVY_RAIN: 0.4,
+        WeatherKind.THUNDERSTORM: 1,
+        WeatherKind.SNOW: 0.15,
+        WeatherKind.FOG: 0.2,
+        WeatherKind.WIND: 2,
+    },
+    "california": {
+        WeatherKind.CLEAR: 5,
+        WeatherKind.CLOUDY: 3,
+        WeatherKind.RAIN: 1.3,
+        WeatherKind.HEAVY_RAIN: 0.5,
+        WeatherKind.THUNDERSTORM: 0.3,
+        WeatherKind.SNOW: 0.1,
+        WeatherKind.FOG: 2.5,
+        WeatherKind.WIND: 1,
+    },
+    "pacific_northwest": {
+        WeatherKind.CLEAR: 2.5,
+        WeatherKind.CLOUDY: 4,
+        WeatherKind.RAIN: 3.5,
+        WeatherKind.HEAVY_RAIN: 1.5,
+        WeatherKind.THUNDERSTORM: 0.5,
+        WeatherKind.SNOW: 1,
+        WeatherKind.FOG: 2,
+        WeatherKind.WIND: 1,
+    },
 }
 
 DEFAULT_WEIGHTS = REGION_WEIGHTS["heartland"]
@@ -103,8 +201,7 @@ def _forced_weather() -> WeatherKind | None:
         return None
     normalized = name.replace("_", " ")
     for kind in WeatherKind:
-        if normalized in (kind.name.lower(), kind.value,
-                          kind.value.replace(" ", "_")):
+        if normalized in (kind.name.lower(), kind.value, kind.value.replace(" ", "_")):
             return kind
     return None
 
@@ -117,8 +214,13 @@ class WeatherSystem:
     Markov weather keeps running underneath as an offline fallback.
     """
 
-    def __init__(self, region: str = "heartland", seed: int | None = None,
-                 provider=None, game_hours: float | None = None) -> None:
+    def __init__(
+        self,
+        region: str = "heartland",
+        seed: int | None = None,
+        provider=None,
+        game_hours: float | None = None,
+    ) -> None:
         self._rng = random.Random(seed)
         self.region = region
         self.provider = provider
@@ -134,11 +236,14 @@ class WeatherSystem:
         # than showing a simulated warm-up condition that the real data would
         # immediately replace. Simulated weather only appears if the provider
         # turns out to be offline (see update()).
-        self._forced = _forced_weather()   # dev/testing override, usually None
+        self._forced = _forced_weather()  # dev/testing override, usually None
         self.current = (
-            self._forced if self._forced is not None
-            else WeatherKind.CLEAR if provider is not None
-            else self._seasonal(self._sample(region)))
+            self._forced
+            if self._forced is not None
+            else WeatherKind.CLEAR
+            if provider is not None
+            else self._seasonal(self._sample(region))
+        )
         self.minutes_until_change = self._rng.uniform(25, 70)
         self.thunder_cooldown = 0.0
 

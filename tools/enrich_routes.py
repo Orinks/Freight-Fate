@@ -46,10 +46,7 @@ OVERPASS_URLS = (
     OVERPASS_URL,
     "https://overpass.kumi.systems/api/interpreter",
 )
-CENSUS_STATES_URL = (
-    "https://www2.census.gov/geo/tiger/GENZ2023/shp/"
-    "cb_2023_us_state_500k.zip"
-)
+CENSUS_STATES_URL = "https://www2.census.gov/geo/tiger/GENZ2023/shp/cb_2023_us_state_500k.zip"
 CENSUS_STATES_GEOJSON_URL = (
     "https://raw.githubusercontent.com/plotly/datasets/master/geojson-counties-fips.json"
 )
@@ -70,9 +67,7 @@ REQUIRED_METADATA_FIELDS = (
 # A long leg with no fuel-capable curated stop leans on the roadside-fuel
 # fallback; flag it for optional curation without blocking dispatch.
 LONG_LEG_POI_ADVISORY_MI = 250.0
-ELEVATION_SOURCE = (
-    "Open-Meteo Elevation API development-time sample from Copernicus DEM GLO-90."
-)
+ELEVATION_SOURCE = "Open-Meteo Elevation API development-time sample from Copernicus DEM GLO-90."
 CORRIDOR_SOURCE = (
     "Development-time OSRM route geometry over OpenStreetMap, with Open-Meteo "
     "elevation samples, Census/OpenStreetMap state context, and curated "
@@ -88,8 +83,7 @@ ORS_CORRIDOR_SOURCE = (
     "curated corridor POIs checked in for offline runtime use."
 )
 ORS_GRADE_SOURCE = (
-    "OpenRouteService route elevation profile segmented by terrain "
-    "(development-time)."
+    "OpenRouteService route elevation profile segmented by terrain (development-time)."
 )
 HIGH_PRIORITY_REMAINING_CORRIDORS = (
     {
@@ -148,76 +142,129 @@ for _module in _HELPER_MODULES:
         {name: value for name, value in globals().items() if not name.startswith("__")}
     )
 
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
         description="Inspect or smoke-check offline corridor metadata."
     )
     parser.add_argument("--from-city", default="Chicago")
     parser.add_argument("--to-city", default="Indianapolis")
-    parser.add_argument("--live-smoke", action="store_true",
-                        help="Make tiny no-key OSRM and elevation requests.")
-    parser.add_argument("--ors-smoke", action="store_true",
-                        help="Make a tiny OpenRouteService driving-hgv (truck) "
-                             f"request for the corridor. Requires the "
-                             f"{ORS_API_KEY_ENV} environment variable (a free "
-                             "OpenRouteService key, build-time only).")
-    parser.add_argument("--ors-compare", action="store_true",
-                        help="Read-only: compare the ORS driving-hgv corridor "
-                             "for --from-city/--to-city against the checked-in "
-                             f"data. Requires {ORS_API_KEY_ENV}.")
-    parser.add_argument("--engine", choices=("osrm", "ors"), default="osrm",
-                        help="Routing engine for --enrich-all. 'ors' uses the "
-                             "driving-hgv truck profile (needs ORS_API_KEY and "
-                             "the tooling group); 'osrm' (default) is car.")
-    parser.add_argument("--refresh-geometry", action="store_true",
-                        help="Re-derive route_points, elevation_samples, and "
-                             "grade_segments for selected legs from --engine, "
-                             "preserving curated miles, POIs, tolls, and named "
-                             "crossings/checkpoints. Use with --only and --write.")
-    parser.add_argument("--only", default="",
-                        help="Semicolon-separated 'From:To' legs for "
-                             "--refresh-geometry / --adopt-ors-miles, e.g. "
-                             "'Denver:Salt Lake City;Philadelphia:Pittsburgh'. "
-                             "Semicolons (not commas) so comma-bearing city "
-                             "names like 'Charleston, West Virginia' parse.")
-    parser.add_argument("--adopt-ors-miles", action="store_true",
-                        help="Rewrite leg mileage to the real ORS driving-hgv "
-                             "distance (rescaling corridor positions). Drives "
-                             "pay/deadlines. Needs ORS_API_KEY + tooling group; "
-                             "use with --write (and optionally --only).")
-    parser.add_argument("--add-overpass-pois", action="store_true",
-                        help="Additively enrich legs with named OpenStreetMap "
-                             "truck POIs of any brand (Overpass). Use with "
-                             "--write, --per-leg, and optionally --only.")
-    parser.add_argument("--per-leg", type=int, default=2,
-                        help="Max new POIs per leg for --add-overpass-pois.")
-    parser.add_argument("--add-maxspeed", action="store_true",
-                        help="Bake real OpenStreetMap maxspeed onto legs as a "
-                             "speed_limits profile (Overpass). The runtime "
-                             "prefers it over the highway/region heuristic. Use "
-                             "with --write and optionally --only.")
-    parser.add_argument("--prune-non-truck-pois", action="store_true",
-                        help="Remove auto-discovered non-truck POIs (generic car "
-                             "fuel) network-wide, keeping curated stops and "
-                             "truck-relevant ones. Use with --write.")
-    parser.add_argument("--coverage-report", action="store_true",
-                        help="Report metadata coverage for every world leg.")
-    parser.add_argument("--json", action="store_true",
-                        help="Emit machine-readable JSON with --coverage-report.")
-    parser.add_argument("--overpass-poi-smoke", action="store_true",
-                        help="Make one tiny Overpass POI query near the corridor.")
-    parser.add_argument("--enrich-all", action="store_true",
-                        help="Enrich missing world legs from cached/no-key sources.")
-    parser.add_argument("--write", action="store_true",
-                        help="Write enriched metadata back to world.json.")
-    parser.add_argument("--cache-dir", default=str(CACHE_PATH),
-                        help="Directory for resumable live API response cache.")
-    parser.add_argument("--limit", type=int, default=0,
-                        help="Maximum number of legs to enrich in this run.")
-    parser.add_argument("--rate-limit", type=float, default=1.0,
-                        help="Seconds to wait after uncached live API requests.")
-    parser.add_argument("--no-overpass", action="store_true",
-                        help="Skip live Overpass POI discovery during enrichment.")
+    parser.add_argument(
+        "--live-smoke", action="store_true", help="Make tiny no-key OSRM and elevation requests."
+    )
+    parser.add_argument(
+        "--ors-smoke",
+        action="store_true",
+        help="Make a tiny OpenRouteService driving-hgv (truck) "
+        f"request for the corridor. Requires the "
+        f"{ORS_API_KEY_ENV} environment variable (a free "
+        "OpenRouteService key, build-time only).",
+    )
+    parser.add_argument(
+        "--ors-compare",
+        action="store_true",
+        help="Read-only: compare the ORS driving-hgv corridor "
+        "for --from-city/--to-city against the checked-in "
+        f"data. Requires {ORS_API_KEY_ENV}.",
+    )
+    parser.add_argument(
+        "--engine",
+        choices=("osrm", "ors"),
+        default="osrm",
+        help="Routing engine for --enrich-all. 'ors' uses the "
+        "driving-hgv truck profile (needs ORS_API_KEY and "
+        "the tooling group); 'osrm' (default) is car.",
+    )
+    parser.add_argument(
+        "--refresh-geometry",
+        action="store_true",
+        help="Re-derive route_points, elevation_samples, and "
+        "grade_segments for selected legs from --engine, "
+        "preserving curated miles, POIs, tolls, and named "
+        "crossings/checkpoints. Use with --only and --write.",
+    )
+    parser.add_argument(
+        "--only",
+        default="",
+        help="Semicolon-separated 'From:To' legs for "
+        "--refresh-geometry / --adopt-ors-miles, e.g. "
+        "'Denver:Salt Lake City;Philadelphia:Pittsburgh'. "
+        "Semicolons (not commas) so comma-bearing city "
+        "names like 'Charleston, West Virginia' parse.",
+    )
+    parser.add_argument(
+        "--adopt-ors-miles",
+        action="store_true",
+        help="Rewrite leg mileage to the real ORS driving-hgv "
+        "distance (rescaling corridor positions). Drives "
+        "pay/deadlines. Needs ORS_API_KEY + tooling group; "
+        "use with --write (and optionally --only).",
+    )
+    parser.add_argument(
+        "--add-overpass-pois",
+        action="store_true",
+        help="Additively enrich legs with named OpenStreetMap "
+        "truck POIs of any brand (Overpass). Use with "
+        "--write, --per-leg, and optionally --only.",
+    )
+    parser.add_argument(
+        "--per-leg", type=int, default=2, help="Max new POIs per leg for --add-overpass-pois."
+    )
+    parser.add_argument(
+        "--add-maxspeed",
+        action="store_true",
+        help="Bake real OpenStreetMap maxspeed onto legs as a "
+        "speed_limits profile (Overpass). The runtime "
+        "prefers it over the highway/region heuristic. Use "
+        "with --write and optionally --only.",
+    )
+    parser.add_argument(
+        "--prune-non-truck-pois",
+        action="store_true",
+        help="Remove auto-discovered non-truck POIs (generic car "
+        "fuel) network-wide, keeping curated stops and "
+        "truck-relevant ones. Use with --write.",
+    )
+    parser.add_argument(
+        "--coverage-report",
+        action="store_true",
+        help="Report metadata coverage for every world leg.",
+    )
+    parser.add_argument(
+        "--json", action="store_true", help="Emit machine-readable JSON with --coverage-report."
+    )
+    parser.add_argument(
+        "--overpass-poi-smoke",
+        action="store_true",
+        help="Make one tiny Overpass POI query near the corridor.",
+    )
+    parser.add_argument(
+        "--enrich-all",
+        action="store_true",
+        help="Enrich missing world legs from cached/no-key sources.",
+    )
+    parser.add_argument(
+        "--write", action="store_true", help="Write enriched metadata back to world.json."
+    )
+    parser.add_argument(
+        "--cache-dir",
+        default=str(CACHE_PATH),
+        help="Directory for resumable live API response cache.",
+    )
+    parser.add_argument(
+        "--limit", type=int, default=0, help="Maximum number of legs to enrich in this run."
+    )
+    parser.add_argument(
+        "--rate-limit",
+        type=float,
+        default=1.0,
+        help="Seconds to wait after uncached live API requests.",
+    )
+    parser.add_argument(
+        "--no-overpass",
+        action="store_true",
+        help="Skip live Overpass POI discovery during enrichment.",
+    )
     args = parser.parse_args(argv)
 
     data = json.loads(WORLD_PATH.read_text(encoding="utf-8"))
@@ -243,8 +290,11 @@ def main(argv: list[str] | None = None) -> int:
         )
         if args.write:
             WORLD_PATH.write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")
-        print(json.dumps(result, indent=2, sort_keys=True) if args.json
-              else format_enrichment_result(result))
+        print(
+            json.dumps(result, indent=2, sort_keys=True)
+            if args.json
+            else format_enrichment_result(result)
+        )
         return 0
     if args.adopt_ors_miles:
         api_key = ors_api_key()
@@ -266,9 +316,11 @@ def main(argv: list[str] | None = None) -> int:
             print(json.dumps(result, indent=2, sort_keys=True))
         else:
             totals = result["coverage_totals"]
-            print(f"Adopted ORS miles for {len(result['changed'])} leg(s); "
-                  f"playable {totals['playable']}/{totals['legs']}"
-                  f"{' (written)' if args.write else ' (dry run)'}")
+            print(
+                f"Adopted ORS miles for {len(result['changed'])} leg(s); "
+                f"playable {totals['playable']}/{totals['legs']}"
+                f"{' (written)' if args.write else ' (dry run)'}"
+            )
         return 0
     if args.add_overpass_pois:
         result = add_overpass_pois(
@@ -284,11 +336,13 @@ def main(argv: list[str] | None = None) -> int:
             print(json.dumps(result, indent=2, sort_keys=True))
         else:
             totals = result["coverage_totals"]
-            print(f"Added {result['added_pois']} OSM POIs to "
-                  f"{result['updated_legs']} legs; playable "
-                  f"{totals['playable']}/{totals['legs']}; "
-                  f"{len(result['legs_without_any_poi'])} legs still without a POI"
-                  f"{' (written)' if args.write else ' (dry run)'}")
+            print(
+                f"Added {result['added_pois']} OSM POIs to "
+                f"{result['updated_legs']} legs; playable "
+                f"{totals['playable']}/{totals['legs']}; "
+                f"{len(result['legs_without_any_poi'])} legs still without a POI"
+                f"{' (written)' if args.write else ' (dry run)'}"
+            )
         return 0
     if args.add_maxspeed:
         result = bake_maxspeed(
@@ -302,10 +356,12 @@ def main(argv: list[str] | None = None) -> int:
         if args.json:
             print(json.dumps(result, indent=2, sort_keys=True))
         else:
-            print(f"Baked OSM maxspeed onto {len(result['baked_legs'])} leg(s); "
-                  f"{len(result['legs_without_maxspeed'])} without a corridor "
-                  f"maxspeed tag"
-                  f"{' (written)' if args.write else ' (dry run)'}")
+            print(
+                f"Baked OSM maxspeed onto {len(result['baked_legs'])} leg(s); "
+                f"{len(result['legs_without_maxspeed'])} without a corridor "
+                f"maxspeed tag"
+                f"{' (written)' if args.write else ' (dry run)'}"
+            )
         return 0
     if args.prune_non_truck_pois:
         result = prune_non_truck_pois(data)
@@ -315,10 +371,12 @@ def main(argv: list[str] | None = None) -> int:
             print(json.dumps(result, indent=2, sort_keys=True))
         else:
             totals = result["coverage_totals"]
-            print(f"Pruned {result['removed_pois']} non-truck POIs; "
-                  f"{result['legs_emptied']} legs now stop-less; playable "
-                  f"{totals['playable']}/{totals['legs']}"
-                  f"{' (written)' if args.write else ' (dry run)'}")
+            print(
+                f"Pruned {result['removed_pois']} non-truck POIs; "
+                f"{result['legs_emptied']} legs now stop-less; playable "
+                f"{totals['playable']}/{totals['legs']}"
+                f"{' (written)' if args.write else ' (dry run)'}"
+            )
         return 0
     if args.refresh_geometry:
         api_key = None
@@ -344,9 +402,11 @@ def main(argv: list[str] | None = None) -> int:
             print(json.dumps(result, indent=2, sort_keys=True))
         else:
             totals = result["coverage_totals"]
-            print(f"Refreshed {len(result['refreshed'])} corridor(s) via "
-                  f"{args.engine}; playable {totals['playable']}/{totals['legs']}"
-                  f"{' (written)' if args.write else ' (dry run)'}")
+            print(
+                f"Refreshed {len(result['refreshed'])} corridor(s) via "
+                f"{args.engine}; playable {totals['playable']}/{totals['legs']}"
+                f"{' (written)' if args.write else ' (dry run)'}"
+            )
         return 0
     if args.coverage_report:
         report = coverage_report(data)
@@ -400,10 +460,14 @@ def main(argv: list[str] | None = None) -> int:
                 f"--ors-compare needs the {ORS_API_KEY_ENV} environment "
                 "variable and the tooling group (uv run --group tooling ...)."
             )
-        cmp = _ors_compare(data, args.from_city, args.to_city, api_key,
-                           Path(args.cache_dir), args.rate_limit)
-        current_grade = (f"{cmp['current_avg_grade_pct']}%"
-                         if cmp["current_avg_grade_pct"] is not None else "n/a")
+        cmp = _ors_compare(
+            data, args.from_city, args.to_city, api_key, Path(args.cache_dir), args.rate_limit
+        )
+        current_grade = (
+            f"{cmp['current_avg_grade_pct']}%"
+            if cmp["current_avg_grade_pct"] is not None
+            else "n/a"
+        )
         print(
             "ORS vs checked-in: "
             f"miles {cmp['ors_miles']:.1f} vs {cmp['leg_miles']:.0f}; "

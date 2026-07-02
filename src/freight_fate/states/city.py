@@ -35,6 +35,7 @@ from ..models.jobs import (
     JobBoard,
     job_from_payload,
     job_payload,
+    route_required_hours,
 )
 from ..models.start_options import option_for_profile
 from ..models.trailers import (
@@ -48,6 +49,8 @@ from ..sim.hos import clock_text, time_of_day
 from .base import MenuItem, MenuState
 from .city_garage import GarageState
 from .city_pickup import (  # noqa: F401
+    PICKUP_CHECK_IN_MIN,
+    PICKUP_LOADING_MIN,
     PickupFacilityState,
     RouteSelectState,
     pickup_snapshot,
@@ -55,8 +58,7 @@ from .city_pickup import (  # noqa: F401
 )
 
 
-def _record_city_duty(ctx, status: str, start_hour: float, end_hour: float,
-                      note: str = "") -> None:
+def _record_city_duty(ctx, status: str, start_hour: float, end_hour: float, note: str = "") -> None:
     p = ctx.profile
     if p is None:
         return
@@ -154,10 +156,7 @@ class CityMenuState(MenuState):
         first_day = ""
         if first_day_guidance_active(p):
             guidance = training_guidance(p) if is_company_training_profile(p) else None
-            if (
-                guidance is not None
-                and guidance.stage is TrainingStage.FIRST_DISPATCH
-            ):
+            if guidance is not None and guidance.stage is TrainingStage.FIRST_DISPATCH:
                 first_day = (
                     " First-day objective: open the dispatch board and accept "
                     f"your assigned {guidance.recommendation_label} load. "
@@ -188,68 +187,114 @@ class CityMenuState(MenuState):
             f"service area, {city.state}. {business.capitalize()} with "
             f"level {rank.level}, {rank.title}. "
             f"You have {p.money:,.0f} dollars. "
-            f"{first_day} {self.current_text()}")
+            f"{first_day} {self.current_text()}"
+        )
 
     def build_items(self) -> list[MenuItem]:
         items = [
-            MenuItem("Dispatch board", self._job_board,
-                     help="Browse terminal dispatches from local freight "
-                          "facilities, including ports, warehouses, food "
-                          "terminals, intermodal yards, and distribution hubs."),
-            MenuItem("Drive to city services", self._city_services,
-                     help="Drive through the local service area to the garage, "
-                          "truck dealer, or freight market office. Stop at the "
-                          "destination, then press Enter to go inside."),
-            MenuItem("Bobtail to a nearby city", self._bobtail,
-                     help="Drive empty to a nearby city to shop its dispatch "
-                          "board. Costs fuel and hours of service; no load, no "
-                          "pay. Use it when local jobs are thin."),
-            MenuItem(self._garage_label, self._garage,
-                     help="Refuel and repair the active tractor at the terminal garage. "
-                          "Company drivers use carrier-assigned equipment and the carrier account. "
-                          "Owner-operators pay their own fuel and repairs."),
-            MenuItem("Business status", self._business_status,
-                     help="Review your carrier, rank, next business unlock, "
-                          "and owner-operator buy-in when qualified."),
-            MenuItem("Career stats", self._stats,
-                     help="Hear your level, reputation, and lifetime numbers."),
-            MenuItem("Truck status", self._truck_status,
-                     help="Hear assigned or owned tractor status at a glance."),
-            MenuItem("Time and weather", self._time_weather,
-                     help="Hear the clock, the day of your career, and the "
-                          "conditions outside."),
-            MenuItem("Logbook", self._logbook,
-                     help="Review your recent Record of Duty Status entries."),
-            MenuItem("Sleep 10 hours", self._sleep,
-                     help="A full night in the terminal bunk room: fresh hours of "
-                          "service and zero fatigue. The clock advances "
-                          "10 hours."),
-            MenuItem("Save game", self._save,
-                     help="Write your career save to disk."),
-            MenuItem("Settings", self._settings,
-                     help="Change units, transmission, volumes, weather, "
-                          "voices, update channel, and trip pacing."),
-            MenuItem("Quit to main menu", self._to_main_menu,
-                     help="Save your career and return to the title menu."),
+            MenuItem(
+                "Dispatch board",
+                self._job_board,
+                help="Browse terminal dispatches from local freight "
+                "facilities, including ports, warehouses, food "
+                "terminals, intermodal yards, and distribution hubs.",
+            ),
+            MenuItem(
+                "Drive to city services",
+                self._city_services,
+                help="Drive through the local service area to the garage, "
+                "truck dealer, or freight market office. Stop at the "
+                "destination, then press Enter to go inside.",
+            ),
+            MenuItem(
+                "Bobtail to a nearby city",
+                self._bobtail,
+                help="Drive empty to a nearby city to shop its dispatch "
+                "board. Costs fuel and hours of service; no load, no "
+                "pay. Use it when local jobs are thin.",
+            ),
+            MenuItem(
+                self._garage_label,
+                self._garage,
+                help="Refuel and repair the active tractor at the terminal garage. "
+                "Company drivers use carrier-assigned equipment and the carrier account. "
+                "Owner-operators pay their own fuel and repairs.",
+            ),
+            MenuItem(
+                "Business status",
+                self._business_status,
+                help="Review your carrier, rank, next business unlock, "
+                "and owner-operator buy-in when qualified.",
+            ),
+            MenuItem(
+                "Career stats",
+                self._stats,
+                help="Hear your level, reputation, and lifetime numbers.",
+            ),
+            MenuItem(
+                "Truck status",
+                self._truck_status,
+                help="Hear assigned or owned tractor status at a glance.",
+            ),
+            MenuItem(
+                "Time and weather",
+                self._time_weather,
+                help="Hear the clock, the day of your career, and the conditions outside.",
+            ),
+            MenuItem(
+                "Logbook", self._logbook, help="Review your recent Record of Duty Status entries."
+            ),
+            MenuItem(
+                "Sleep 10 hours",
+                self._sleep,
+                help="A full night in the terminal bunk room: fresh hours of "
+                "service and zero fatigue. The clock advances "
+                "10 hours.",
+            ),
+            MenuItem("Save game", self._save, help="Write your career save to disk."),
+            MenuItem(
+                "Settings",
+                self._settings,
+                help="Change units, transmission, volumes, weather, "
+                "voices, update channel, and trip pacing.",
+            ),
+            MenuItem(
+                "Quit to main menu",
+                self._to_main_menu,
+                help="Save your career and return to the title menu.",
+            ),
         ]
         if self._show_first_day_briefing():
-            items.insert(1, MenuItem(
-                "First-day briefing",
-                self._first_day_briefing,
-                help="Repeat your starter carrier, terminal, business costs, "
-                     "and first dispatch objective."))
+            items.insert(
+                1,
+                MenuItem(
+                    "First-day briefing",
+                    self._first_day_briefing,
+                    help="Repeat your starter carrier, terminal, business costs, "
+                    "and first dispatch objective.",
+                ),
+            )
         else:
-            items.insert(1, MenuItem(
-                "Career plan",
-                self._career_plan,
-                help="Review the next practical career objective and how it "
-                     "should shape dispatch choices."))
+            items.insert(
+                1,
+                MenuItem(
+                    "Career plan",
+                    self._career_plan,
+                    help="Review the next practical career objective and how it "
+                    "should shape dispatch choices.",
+                ),
+            )
         if self._pay_advance_available():
-            items.insert(3, MenuItem(
-                self._pay_advance_label, self._request_pay_advance,
-                help="Draw cash against your next load when you are broke "
-                     "and cannot afford fuel. Repaid automatically out of "
-                     "your next delivery settlement."))
+            items.insert(
+                3,
+                MenuItem(
+                    self._pay_advance_label,
+                    self._request_pay_advance,
+                    help="Draw cash against your next load when you are broke "
+                    "and cannot afford fuel. Repaid automatically out of "
+                    "your next delivery settlement.",
+                ),
+            )
         return items
 
     def _show_first_day_briefing(self) -> bool:
@@ -302,25 +347,23 @@ class CityMenuState(MenuState):
 
     def _pay_advance_label(self) -> str:
         p = self.ctx.profile
-        grant = pay_advance_grant(
-            p.money, p.pay_advance, p.pay_advance_used_for_load)
+        grant = pay_advance_grant(p.money, p.pay_advance, p.pay_advance_used_for_load)
         if grant > 0:
             return f"Request pay advance: {grant:,.0f} dollars"
         return "Request pay advance"
 
     def _pay_advance_available(self) -> bool:
         p = self.ctx.profile
-        return pay_advance_grant(
-            p.money, p.pay_advance, p.pay_advance_used_for_load) > 0
+        return pay_advance_grant(p.money, p.pay_advance, p.pay_advance_used_for_load) > 0
 
     def _request_pay_advance(self) -> None:
         p = self.ctx.profile
-        grant = pay_advance_grant(
-            p.money, p.pay_advance, p.pay_advance_used_for_load)
+        grant = pay_advance_grant(p.money, p.pay_advance, p.pay_advance_used_for_load)
         if grant <= 0:
             self.ctx.audio.play("ui/error")
-            self.ctx.say(pay_advance_unavailable_reason(
-                p.money, p.pay_advance, p.pay_advance_used_for_load))
+            self.ctx.say(
+                pay_advance_unavailable_reason(p.money, p.pay_advance, p.pay_advance_used_for_load)
+            )
             return
         p.money += grant
         p.pay_advance = round(p.pay_advance + grant, 2)
@@ -330,7 +373,8 @@ class CityMenuState(MenuState):
         self.ctx.say(
             f"Pay advance approved: {grant:,.0f} dollars against your next load. "
             f"It will be deducted at delivery. You have {p.money:,.0f} dollars, "
-            f"with {p.pay_advance:,.0f} dollars of advance still to repay.")
+            f"with {p.pay_advance:,.0f} dollars of advance still to repay."
+        )
         self.refresh()
 
     def _stats(self) -> None:
@@ -342,16 +386,27 @@ class CityMenuState(MenuState):
         truck = TRUCK_CATALOG.get(p.active_truck_key(), TRUCK_CATALOG["rig"])
         fuel_pct = p.truck_fuel_gal / specs.fuel_tank_gal * 100
         damage = p.truck_damage_pct
-        condition = ("excellent" if damage < 5 else "good" if damage < 20
-                     else "worn" if damage < 50 else "poor")
+        condition = (
+            "excellent"
+            if damage < 5
+            else "good"
+            if damage < 20
+            else "worn"
+            if damage < 50
+            else "poor"
+        )
         if not p.owns_equipment():
             lead = f"Assigned {carrier_name(p)} tractor: {truck.label}."
         else:
             lead = f"Owned tractor: {truck.label}."
-        self.ctx.say(f"{lead} Fuel {fuel_pct:.0f} percent, "
-                     f"{p.truck_fuel_gal:.0f} gallons of "
-                     f"{specs.fuel_tank_gal:.0f}. "
-                     f"Tractor condition {condition}, {damage:.0f} percent damage.")
+        self.ctx.say(
+            f"{lead} Fuel {fuel_pct:.0f} percent, "
+            f"{p.truck_fuel_gal:.0f} gallons of "
+            f"{specs.fuel_tank_gal:.0f}. "
+            f"Tractor condition {condition}, {damage:.0f} percent damage. "
+            f"Tire wear {p.tire_wear_pct:.0f} percent. "
+            f"Road grime {p.road_grime_pct:.0f} percent."
+        )
 
     def _time_weather(self) -> None:
         from ..sim.weather import WeatherSystem
@@ -375,30 +430,32 @@ class CityMenuState(MenuState):
         if desc is None:
             # deterministic per city and hour, so asking twice agrees
             seed = zlib.crc32(f"{city.name}:{int(p.game_hours)}".encode())
-            desc = WeatherSystem(city.region, seed=seed,
-                                 game_hours=season_hours).describe()
+            desc = WeatherSystem(city.region, seed=seed, game_hours=season_hours).describe()
         source = "Live weather" if live else "Weather"
-        self.ctx.say(f"It is {clock_text(hour)}, {time_of_day(hour)}, "
-                     f"{date_text(season_hours)}, in {season(season_hours)}, "
-                     f"day {day} of your career. "
-                     f"{source} in {p.current_city}: {desc}.")
+        self.ctx.say(
+            f"It is {clock_text(hour)}, {time_of_day(hour)}, "
+            f"{date_text(season_hours)}, in {season(season_hours)}, "
+            f"day {day} of your career. "
+            f"{source} in {p.current_city}: {desc}."
+        )
 
     def _sleep(self) -> None:
         p = self.ctx.profile
         before_fatigue = p.fatigue
         start = p.game_hours
         p.game_hours += 10.0
-        _record_city_duty(self.ctx, "sleeper_berth", start, p.game_hours,
-                          "terminal sleep")
+        _record_city_duty(self.ctx, "sleeper_berth", start, p.game_hours, "terminal sleep")
         p.hos.sleep()
         p.fatigue = 0.0
         p.market.advance_to(p.market_day())
         self.ctx.save_profile()
         self.ctx.audio.play("ui/notify")
         hour = p.game_hours % 24.0
-        self.ctx.say(f"You slept 10 hours and woke rested. It is "
-                     f"{clock_text(hour)}, {time_of_day(hour)}. "
-                     "Hours of service reset.")
+        self.ctx.say(
+            f"You slept 10 hours and woke rested. It is "
+            f"{clock_text(hour)}, {time_of_day(hour)}. "
+            "Hours of service reset."
+        )
         if before_fatigue < 70.0:
             self.ctx.award_achievement("sleep_before_exhaustion")
 
@@ -426,7 +483,9 @@ class CityMenuState(MenuState):
 
     def go_back(self) -> None:
         self.ctx.audio.play("ui/menu_back")
-        self.ctx.say("Use Quit to main menu to leave the terminal. Progress is saved automatically.")
+        self.ctx.say(
+            "Use Quit to main menu to leave the terminal. Progress is saved automatically."
+        )
 
 
 def dispatch_cache_key(p) -> dict:
@@ -452,8 +511,7 @@ def open_freight_market(ctx) -> list[Job]:
     key = dispatch_cache_key(p)
     cache = p.dispatch_board_cache if not market_changed else None
     if cache and cache.get("key") == key:
-        jobs = [_job_from_payload(payload)
-                for payload in cache.get("jobs", [])]
+        jobs = [_job_from_payload(payload) for payload in cache.get("jobs", [])]
     else:
         jobs = board.offers(
             p.current_city,
@@ -487,14 +545,16 @@ class CityServiceSelectState(MenuState):
         items = []
         for service in self.ctx.world.city_services(self.ctx.profile.current_city):
             route = self.ctx.world.city_service_route(service.city, service.key)
-            items.append(MenuItem(
-                f"{service.name}: {route.miles:.1f} miles",
-                lambda key=service.key: self._start(key),
-                help=(
-                    f"Drive to {service.spoken_name}. "
-                    "The destination opens only after you stop and press Enter."
-                ),
-            ))
+            items.append(
+                MenuItem(
+                    f"{service.name}: {route.miles:.1f} miles",
+                    lambda key=service.key: self._start(key),
+                    help=(
+                        f"Drive to {service.spoken_name}. "
+                        "The destination opens only after you stop and press Enter."
+                    ),
+                )
+            )
         items.append(MenuItem("Back to terminal", self.go_back))
         return items
 
@@ -544,9 +604,11 @@ class BobtailDestState(MenuState):
     """Pick a nearby city to bobtail (drive empty) to, to shop its board."""
 
     title = "Bobtail to a nearby city"
-    intro_help = ("Pick a nearby city to drive to empty. You will see its "
-                  "dispatch board on arrival. No load and no pay; this costs "
-                  "fuel and hours of service. Escape returns to the terminal.")
+    intro_help = (
+        "Pick a nearby city to drive to empty. You will see its "
+        "dispatch board on arrival. No load and no pay; this costs "
+        "fuel and hours of service. Escape returns to the terminal."
+    )
 
     def __init__(self, ctx, cities: list[str]) -> None:
         self._cities = cities
@@ -560,10 +622,14 @@ class BobtailDestState(MenuState):
             route = world.supported_route(here, name)
             miles = route.miles if route is not None else 0.0
             city = world.cities[name]
-            label = (f"{name}, {city.state} -- "
-                     f"{self.ctx.settings.distance_text(miles)} empty")
-            items.append(MenuItem(label, lambda n=name: self._start(n),
-                                  help=f"Drive empty to {name} to shop its board."))
+            label = f"{name}, {city.state} -- {self.ctx.settings.distance_text(miles)} empty"
+            items.append(
+                MenuItem(
+                    label,
+                    lambda n=name: self._start(n),
+                    help=f"Drive empty to {name} to shop its board.",
+                )
+            )
         items.append(MenuItem("Back to terminal", self.go_back))
         return items
 
@@ -587,9 +653,9 @@ class BobtailDestState(MenuState):
             f"{route.highways[0]}. No load and no pay -- you will see the {dest} "
             "dispatch board on arrival. Check in at the city terminal when you "
             "get there.",
-            interrupt=True)
+            interrupt=True,
+        )
         self.ctx.push_state(driving)
-
 
 
 from .city_business import (  # noqa: E402,F401
@@ -602,18 +668,20 @@ from .city_business import (  # noqa: E402,F401
 
 class JobBoardState(MenuState):
     title = "Dispatch board"
-    intro_help = ("Each entry is one dispatch. Enter accepts the dispatch and "
-                  "creates a local deadhead pickup drive from your terminal to "
-                  "the named origin facility. Jobs name their origin and "
-                  "destination facilities, and cargo depends on the facility "
-                  "type. Escape returns to the terminal.")
+    intro_help = (
+        "Each entry is one dispatch. Enter accepts the dispatch and "
+        "creates a local deadhead pickup drive from your terminal to "
+        "the named origin facility. Jobs name their origin and "
+        "destination facilities, and cargo depends on the facility "
+        "type. Escape returns to the terminal."
+    )
 
     def __init__(self, ctx, jobs: list[Job]) -> None:
         super().__init__(ctx)
         self.jobs = jobs
+        self._confirm_risky_job: Job | None = None
         self._assigned_queue: list[int] = (
-            self._assignment_queue()
-            if dispatch_policy(ctx.profile).assigns_load else []
+            self._assignment_queue() if dispatch_policy(ctx.profile).assigns_load else []
         )
         self._assigned_pos = 0
         if not self.assigned_mode:
@@ -659,12 +727,10 @@ class JobBoardState(MenuState):
             if training_label is not None:
                 guidance = training_guidance(self.ctx.profile)
                 objective_text = (
-                    f"First-day objective: pick a {training_label} "
-                    f"load. {guidance.dispatch_text} "
+                    f"First-day objective: pick a {training_label} load. {guidance.dispatch_text} "
                 )
-            elif (
-                first_day_guidance_active(self.ctx.profile)
-                and not is_company_training_profile(self.ctx.profile)
+            elif first_day_guidance_active(self.ctx.profile) and not is_company_training_profile(
+                self.ctx.profile
             ):
                 objective_text = (
                     "First-day objective: pick an unlocked load with a "
@@ -683,10 +749,12 @@ class JobBoardState(MenuState):
                     f"{objective.dispatch_text} "
                     f"{recommendation}"
                 )
-            self.ctx.say(f"Dispatch board. {n} dispatch{'es' if n != 1 else ''} available. "
-                         f"{business_note}{objective_text}"
-                         f"{self.ctx.profile.market.summary()} "
-                         + self.current_text())
+            self.ctx.say(
+                f"Dispatch board. {n} dispatch{'es' if n != 1 else ''} available. "
+                f"{business_note}{objective_text}"
+                f"{self._hos_board_note()}"
+                f"{self.ctx.profile.market.summary()} " + self.current_text()
+            )
 
     def _announce_assignment(self) -> None:
         p = self.ctx.profile
@@ -712,12 +780,19 @@ class JobBoardState(MenuState):
             )
         else:
             objective_text = f"Career objective: {career_objective(p).title}. "
+        hos_note = (
+            "This assignment may need a legal rest before delivery; you will "
+            "get an hours warning at accept. "
+            if self._job_exceeds_current_hos(self._assigned_job())
+            else ""
+        )
         self.ctx.say(
             "Dispatch board. Dispatch assigns your load and route while you "
             "are a new company hire; load choice opens at level "
             f"{SENIOR_LOAD_CHOICE_LEVEL}. Listed amounts are carrier gross; "
             f"your settlement pays driver wages. {objective_text}"
-            f"{decline_note} {p.market.summary()} " + self.current_text())
+            f"{decline_note} {hos_note}{p.market.summary()} " + self.current_text()
+        )
 
     def build_items(self) -> list[MenuItem]:
         if self.assigned_mode:
@@ -728,40 +803,49 @@ class JobBoardState(MenuState):
             label = self._job_label(job, i + 1)
             if locked:
                 label = label.replace("Job ", "Locked job ", 1)
-            items.append(MenuItem(
-                label,
-                lambda j=job: self._accept(j),
-                help=(
-                    f"Load offer from {job.origin_facility_text()} to "
-                    f"{job.destination_facility_text()}. Route inspection after "
-                    "pickup covers rest, fuel, toll, weather, and restrictions."
-                )))
+            items.append(
+                MenuItem(
+                    label,
+                    lambda j=job: self._accept(j),
+                    help=(
+                        f"Load offer from {job.origin_facility_text()} to "
+                        f"{job.destination_facility_text()}. Route inspection after "
+                        "pickup covers rest, fuel, toll, weather, and restrictions."
+                    ),
+                )
+            )
         items.append(MenuItem("Back to terminal", self.go_back))
         return items
 
     def _build_assignment_items(self) -> list[MenuItem]:
         job = self._assigned_job()
-        items = [MenuItem(
-            f"Accept assigned dispatch: {self._describe_job(job)}",
-            lambda j=job: self._accept(j),
-            help=(
-                "Dispatch assigned this load; new hires run the load and "
-                "lane dispatch picks. Accepting creates a local deadhead "
-                "pickup drive from your terminal to the named origin "
-                "facility. Route inspection after pickup covers rest, fuel, "
-                "toll, weather, and restrictions."
-            ))]
+        items = [
+            MenuItem(
+                f"Accept assigned dispatch: {self._describe_job(job)}",
+                lambda j=job: self._accept(j),
+                help=(
+                    "Dispatch assigned this load; new hires run the load and "
+                    "lane dispatch picks. Accepting creates a local deadhead "
+                    "pickup drive from your terminal to the named origin "
+                    "facility. Route inspection after pickup covers rest, fuel, "
+                    "toll, weather, and restrictions."
+                ),
+            )
+        ]
         remaining = declines_remaining(self.ctx.profile)
         if len(self._assigned_queue) > 1 and remaining > 0:
-            items.append(MenuItem(
-                f"Decline and request another load: "
-                f"{remaining} decline{'s' if remaining != 1 else ''} left",
-                self._decline_assignment,
-                help=(
-                    "Turn the assigned load down and let dispatch draw "
-                    "another. Refusals cost reputation, and the decline "
-                    "budget only refills when you reach the next level."
-                )))
+            items.append(
+                MenuItem(
+                    f"Decline and request another load: "
+                    f"{remaining} decline{'s' if remaining != 1 else ''} left",
+                    self._decline_assignment,
+                    help=(
+                        "Turn the assigned load down and let dispatch draw "
+                        "another. Refusals cost reputation, and the decline "
+                        "budget only refills when you reach the next level."
+                    ),
+                )
+            )
         items.append(MenuItem("Back to terminal", self.go_back))
         return items
 
@@ -775,11 +859,11 @@ class JobBoardState(MenuState):
             self.ctx.audio.play("ui/error")
             self.ctx.say(
                 "Dispatch has no patience left for refusals. Run this load; "
-                "declines refill at your next promotion.")
+                "declines refill at your next promotion."
+            )
             return
         p.career.dispatch_declines_used += 1
-        p.career.reputation = max(
-            0.0, p.career.reputation - DECLINE_REPUTATION_PENALTY)
+        p.career.reputation = max(0.0, p.career.reputation - DECLINE_REPUTATION_PENALTY)
         self._assigned_pos += 1
         self.ctx.save_profile()
         self.ctx.audio.play("ui/notify")
@@ -787,14 +871,15 @@ class JobBoardState(MenuState):
         remaining = declines_remaining(p)
         note = (
             f"You have {remaining} decline{'s' if remaining != 1 else ''} left."
-            if remaining > 0 else
-            "That was your last decline until your next promotion."
+            if remaining > 0
+            else "That was your last decline until your next promotion."
         )
         self.ctx.say(
             "Load declined. The refusal goes on your service record with "
             f"dispatch. {note} New assignment: "
             f"{self._describe_job(self._assigned_job())}",
-            interrupt=True)
+            interrupt=True,
+        )
 
     def _describe_job(self, job: Job, index: int | None = None) -> str:
         p = self.ctx.profile
@@ -846,8 +931,7 @@ class JobBoardState(MenuState):
 
     def _focused_recommendation_is_spoken(self) -> bool:
         return (
-            self._recommendation_label() is not None
-            and self._recommended_job_index() == self.index
+            self._recommendation_label() is not None and self._recommended_job_index() == self.index
         )
 
     def _scored_candidates(self) -> list[tuple[float, int]]:
@@ -901,10 +985,57 @@ class JobBoardState(MenuState):
                 f"{business.net_before_advance:,.0f} dollars after "
                 f"{business.business_charge_total:,.0f} dollars business costs."
             )
-        return (
-            f"Estimated driver pay before advances: "
-            f"{business.net_before_advance:,.0f} dollars."
-        )
+        return f"Estimated driver pay before advances: {business.net_before_advance:,.0f} dollars."
+
+    def handle_event(self, event) -> None:
+        import pygame
+
+        if event.type == pygame.KEYDOWN and event.key == pygame.K_F1 and self.jobs:
+            job = self._focused_job()
+            if job is not None:
+                self.ctx.push_state(JobDetailState(self.ctx, self, job))
+                return
+        super().handle_event(event)
+
+    def _focused_job(self) -> Job | None:
+        """The job the current menu row refers to, in either board mode."""
+        if self.assigned_mode:
+            return self._assigned_job() if self.index == 0 else None
+        if self.index < len(self.jobs):
+            return self.jobs[self.index]
+        return None
+
+    def _needs_hos_confirmation(self, job: Job) -> bool:
+        return self._job_exceeds_current_hos(job) and self._confirm_risky_job is not job
+
+    def _job_exceeds_current_hos(self, job: Job) -> bool:
+        p = self.ctx.profile
+        mode = self.ctx.settings.hos_mode
+        remaining = p.hos.remaining_min(mode)
+        if remaining is None:
+            return False
+        route = self.ctx.world.supported_route(job.origin, job.destination)
+        if route is None:
+            return False
+        pickup_work_h = (PICKUP_CHECK_IN_MIN + PICKUP_LOADING_MIN) / 60.0
+        needed_h = pickup_work_h + route_required_hours(route, world=self.ctx.world)
+        return remaining / 60.0 < needed_h
+
+    def _hos_board_note(self) -> str:
+        if not self.jobs:
+            return ""
+        risky = sum(1 for job in self.jobs if self._job_exceeds_current_hos(job))
+        if risky == len(self.jobs):
+            return (
+                "Every listed dispatch may require a legal rest before delivery; "
+                "press Enter on a load to review the warning. "
+            )
+        if risky:
+            return (
+                f"{risky} dispatch{'es' if risky != 1 else ''} may require "
+                "a legal rest before delivery. "
+            )
+        return ""
 
     def _accept(self, job: Job) -> None:
         p = self.ctx.profile
@@ -922,6 +1053,17 @@ class JobBoardState(MenuState):
             else:
                 self.ctx.say(f"{locked} Keep delivering to level up and unlock it.")
             return
+        if self._needs_hos_confirmation(job):
+            self._confirm_risky_job = job
+            self.ctx.audio.play("ui/warning")
+            self.ctx.say(
+                f"Hours warning. This dispatch may not fit your current duty "
+                f"clock before you need a legal rest. {p.hos.summary(self.ctx.settings.hos_mode)} "
+                "Press Enter again to accept it anyway, or choose another load.",
+                interrupt=True,
+            )
+            return
+        self._confirm_risky_job = None
         from .driving import DRIVE_PHASE_PICKUP, DrivingState
 
         route = self.ctx.world.facility_approach_route(job.origin, job.origin_location)
@@ -935,7 +1077,8 @@ class JobBoardState(MenuState):
             f"{route.miles:.1f} miles on {route.highways[0]} to pickup at "
             f"{job.origin_facility_text()}. "
             "Check in with the shipper when you arrive.",
-            interrupt=True)
+            interrupt=True,
+        )
         self.ctx.push_state(driving)
         self.ctx.award_achievement("first_dispatch")
 
@@ -961,3 +1104,93 @@ class JobBoardState(MenuState):
         return f"Needs {required_program_text(job.cargo.key)} trailer program."
 
 
+class JobDetailState(MenuState):
+    title = "Job details"
+    intro_help = (
+        "Use up and down arrows to review each job detail line; Home and End "
+        "jump to the first and last row. Enter repeats detail lines, accepts "
+        "when Accept this dispatch is selected, or returns when Back to "
+        "dispatch board is selected. Escape also returns to the dispatch board."
+    )
+
+    def __init__(self, ctx, board: JobBoardState, job: Job) -> None:
+        super().__init__(ctx)
+        self.board = board
+        self.job = job
+
+    def announce_entry(self) -> None:
+        self.ctx.say(f"Job details. {self.intro_help} {self.current_text()}")
+
+    def current_help(self) -> str:
+        return f"{self.intro_help} {super().current_help()}"
+
+    def build_items(self) -> list[MenuItem]:
+        items = [
+            MenuItem(
+                line,
+                lambda line=line: self.ctx.say(line),
+                help="This is a job detail line. Press Enter to repeat it.",
+            )
+            for line in self._detail_lines()
+        ]
+        locked = self.board._locked_reason(self.job)
+        if locked:
+            items.append(
+                MenuItem(
+                    f"Cannot accept this dispatch: {locked}",
+                    lambda locked=locked: self.ctx.say(locked),
+                    help=f"This dispatch is locked. {locked}",
+                )
+            )
+        else:
+            items.append(
+                MenuItem(
+                    "Accept this dispatch",
+                    self._accept,
+                    help="Accept this dispatch and begin the pickup drive.",
+                )
+            )
+        items.append(
+            MenuItem(
+                "Back to dispatch board",
+                self.go_back,
+                help="Return to the dispatch board without accepting this job.",
+            )
+        )
+        return items
+
+    def _accept(self) -> None:
+        self.ctx.pop_state()
+        self.board._accept(self.job)
+
+    def _detail_lines(self) -> list[str]:
+        job = self.job
+        p = self.ctx.profile
+        business = build_business_settlement(
+            p.business_status,
+            job,
+            job.pay,
+            on_time=True,
+            driver_charges=0.0,
+            carrier_key=getattr(p, "carrier_key", ""),
+            owned_trailers=p.visible_owned_trailers(),
+        )
+        dollars_per_mile = business.gross_pay / max(job.distance_mi, 1.0)
+        lines = [
+            f"Cargo: {job.cargo.label}.",
+            f"Origin: {job.origin_facility_text()}.",
+            f"Destination: {job.destination_facility_text()} in {job.destination}.",
+            f"Distance: {job.distance_mi:.0f} miles.",
+            f"{pay_label(p.business_status)}: {business.gross_pay:,.0f} dollars.",
+            f"Dollars per mile: {dollars_per_mile:.2f}.",
+            f"Deadline: {job.deadline_game_h:.0f} hours.",
+            f"Equipment: {job.equipment_text()}.",
+            f"Trailer: {self.board._trailer_note(self.job)}",
+        ]
+        locked = self.board._locked_reason(job)
+        if locked:
+            lines.append(f"Locked: {locked}")
+        elif job.cargo.endorsement:
+            lines.append(f"Endorsement: {job.cargo.endorsement.replace('_', ' ')}.")
+        lines.append("Route details happen after pickup: rest, fuel, tolls, weather, and stops.")
+        return lines

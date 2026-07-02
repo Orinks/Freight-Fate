@@ -35,21 +35,25 @@ def carrier_accessorial_charges(job: Job) -> tuple[SettlementCharge, ...]:
     """Approved load-related charges that do not reduce driver pay."""
     charges: list[SettlementCharge] = []
     if job.destination_type in LUMPER_DESTINATION_TYPES:
-        charges.append(SettlementCharge(
-            "delivery_lumper",
-            "carrier-authorized unloading service",
-            185.0,
-            CARRIER_PAID,
-            "receipt required; billed to the carrier/customer settlement",
-        ))
+        charges.append(
+            SettlementCharge(
+                "delivery_lumper",
+                "carrier-authorized unloading service",
+                185.0,
+                CARRIER_PAID,
+                "receipt required; billed to the carrier/customer settlement",
+            )
+        )
     if job.cargo.key in WASHOUT_CARGO:
-        charges.append(SettlementCharge(
-            "trailer_washout",
-            "required trailer washout",
-            45.0,
-            CARRIER_PAID,
-            "approved sanitation charge after food or refrigerated freight",
-        ))
+        charges.append(
+            SettlementCharge(
+                "trailer_washout",
+                "required trailer washout",
+                45.0,
+                CARRIER_PAID,
+                "approved sanitation charge after food or refrigerated freight",
+            )
+        )
     return tuple(charges)
 
 

@@ -21,7 +21,8 @@ ROOT = Path(__file__).resolve().parents[1]
 def _load_enrich_routes():
     """Import tools/enrich_routes.py by path (tools is not a package)."""
     spec = importlib.util.spec_from_file_location(
-        "enrich_routes", ROOT / "tools" / "enrich_routes.py")
+        "enrich_routes", ROOT / "tools" / "enrich_routes.py"
+    )
     module = importlib.util.module_from_spec(spec)
     sys.modules[spec.name] = module
     spec.loader.exec_module(module)
@@ -35,25 +36,25 @@ def _seq(states_at):
 def test_short_round_trip_excursion_is_collapsed():
     coalesce = _load_enrich_routes().coalesce_short_states
     # OR -> WA(5mi) -> OR: a river-border flicker that should vanish.
-    out = coalesce(_seq([("Oregon", 0.0), ("Washington", 70.0),
-                         ("Oregon", 75.0)]), leg_miles=400.0)
+    out = coalesce(_seq([("Oregon", 0.0), ("Washington", 70.0), ("Oregon", 75.0)]), leg_miles=400.0)
     assert [item["state"] for item in out] == ["Oregon"]
 
 
 def test_genuine_pass_through_is_preserved():
     coalesce = _load_enrich_routes().coalesce_short_states
     # OH -> WV(short) -> PA is a real panhandle pass-through, not a round trip.
-    out = coalesce(_seq([("Ohio", 0.0), ("West Virginia", 60.0),
-                         ("Pennsylvania", 64.0)]), leg_miles=120.0)
-    assert [item["state"] for item in out] == [
-        "Ohio", "West Virginia", "Pennsylvania"]
+    out = coalesce(
+        _seq([("Ohio", 0.0), ("West Virginia", 60.0), ("Pennsylvania", 64.0)]), leg_miles=120.0
+    )
+    assert [item["state"] for item in out] == ["Ohio", "West Virginia", "Pennsylvania"]
 
 
 def test_long_round_trip_excursion_survives_for_review():
     coalesce = _load_enrich_routes().coalesce_short_states
     # A round trip larger than the fraction gate is left for a human to look at.
-    out = coalesce(_seq([("Oregon", 0.0), ("Washington", 40.0),
-                         ("Oregon", 100.0)]), leg_miles=200.0)
+    out = coalesce(
+        _seq([("Oregon", 0.0), ("Washington", 40.0), ("Oregon", 100.0)]), leg_miles=200.0
+    )
     assert [item["state"] for item in out] == ["Oregon", "Washington", "Oregon"]
 
 
@@ -69,10 +70,8 @@ def test_world_has_no_phantom_state_round_trips():
     world = get_world()
     offenders = []
     for leg in world.legs:
-        states = ([world.cities[leg.a].state]
-                  + [c.state for c in leg.state_crossings])
-        for first, _mid, third in zip(
-                states, states[1:], states[2:], strict=False):
+        states = [world.cities[leg.a].state] + [c.state for c in leg.state_crossings]
+        for first, _mid, third in zip(states, states[1:], states[2:], strict=False):
             if first == third:
                 offenders.append((leg.a, leg.b, leg.highway, states))
     assert offenders == [], f"phantom round-trip crossings remain: {offenders}"
@@ -91,5 +90,6 @@ def test_i84_to_portland_never_enters_washington():
         arrived = {c.state for c in leg.state_crossings}
         assert "Washington" not in arrived, (
             f"{leg.a} -> {leg.b} on I-84 wrongly crosses into Washington: "
-            f"{[c.place for c in leg.state_crossings]}")
+            f"{[c.place for c in leg.state_crossings]}"
+        )
     assert checked, "expected at least one I-84 leg touching Portland"

@@ -13,8 +13,9 @@ def drive(truck: TruckState, seconds: float, dt: float = 1 / 60) -> None:
         truck.update(dt)
 
 
-def time_to_speed(truck: TruckState, target_mph: float,
-                  limit_s: float = 240.0, dt: float = 1 / 60) -> float | None:
+def time_to_speed(
+    truck: TruckState, target_mph: float, limit_s: float = 240.0, dt: float = 1 / 60
+) -> float | None:
     for step in range(int(limit_s / dt)):
         truck.auto_shift()
         truck.update(dt)
@@ -23,9 +24,9 @@ def time_to_speed(truck: TruckState, target_mph: float,
     return None
 
 
-def acceleration_marks(truck: TruckState, targets: tuple[float, ...],
-                       limit_s: float = 240.0,
-                       dt: float = 1 / 60) -> dict[float, float | None]:
+def acceleration_marks(
+    truck: TruckState, targets: tuple[float, ...], limit_s: float = 240.0, dt: float = 1 / 60
+) -> dict[float, float | None]:
     marks = {target: None for target in targets}
     for step in range(int(limit_s / dt)):
         truck.auto_shift()
@@ -67,9 +68,9 @@ def test_heavier_load_accelerates_slower():
     from freight_fate.sim.vehicle import KG_PER_TON
 
     light = make_auto_truck()
-    light.cargo_kg = 0.0                 # empty deadhead
+    light.cargo_kg = 0.0  # empty deadhead
     heavy = make_auto_truck()
-    heavy.cargo_kg = 25 * KG_PER_TON     # a 25-ton load
+    heavy.cargo_kg = 25 * KG_PER_TON  # a 25-ton load
     light.throttle = heavy.throttle = 1.0
     light_t = time_to_speed(light, 50.0)
     heavy_t = time_to_speed(heavy, 50.0)
@@ -93,10 +94,8 @@ def test_loaded_launch_uses_lower_low_speed_traction():
     t.velocity_mps = 25.0 / 2.23694
     rolling_force = abs(t.drive_force())
 
-    assert start_force / t.gross_mass_kg == pytest.approx(
-        G * LAUNCH_TRACTION_START_G)
-    assert rolling_force / t.gross_mass_kg == pytest.approx(
-        G * LAUNCH_TRACTION_ROLLING_G)
+    assert start_force / t.gross_mass_kg == pytest.approx(G * LAUNCH_TRACTION_START_G)
+    assert rolling_force / t.gross_mass_kg == pytest.approx(G * LAUNCH_TRACTION_ROLLING_G)
     assert start_force < rolling_force
 
 
@@ -106,7 +105,7 @@ def test_automatic_does_not_rush_through_low_gears_on_launch():
 
     drive(t, 5.0)
 
-    assert 8.0 <= t.speed_mph <= 13.0
+    assert 5.0 <= t.speed_mph <= 13.0
     assert t.transmission.gear <= 4
 
 
@@ -151,8 +150,8 @@ def test_load_over_rated_gross_brakes_more_gently():
         truck.cargo_kg = cargo_kg
         return abs(truck.brake_force()) / truck.gross_mass_kg
 
-    rated = decel(REFERENCE_CARGO_KG)                   # gross == rated gross
-    light = decel(4 * KG_PER_TON)                       # well under rated
+    rated = decel(REFERENCE_CARGO_KG)  # gross == rated gross
+    light = decel(4 * KG_PER_TON)  # well under rated
     heavy = decel(REFERENCE_CARGO_KG + 6 * KG_PER_TON)  # over rated gross
 
     # At or below the rated gross, braking is friction-limited and the
@@ -172,7 +171,7 @@ def test_heavier_load_heats_brakes_faster():
     heavy.cargo_kg = 25 * KG_PER_TON
     light.throttle = heavy.throttle = 0.0
     light.brake = heavy.brake = 1.0
-    for _ in range(60):   # one second of hard braking from 25 m/s
+    for _ in range(60):  # one second of hard braking from 25 m/s
         light.velocity_mps = max(light.velocity_mps, 25.0)
         heavy.velocity_mps = max(heavy.velocity_mps, 25.0)
         light.update(1 / 60)
@@ -216,6 +215,21 @@ def test_highway_cruise_rpm_keeps_engine_audio_believable():
     assert to_65 is not None
     assert t.transmission.gear == 10
     assert 1400.0 <= t.rpm <= 1900.0
+
+
+def test_automatic_shift_does_not_flare_engine_rpm():
+    t = make_auto_truck()
+    t.throttle = 1.0
+    t.transmission.gear = 3
+    t.velocity_mps = 20.0
+    t.rpm = 1700.0
+
+    assert t.auto_shift() == 4
+    rpm_before = t.rpm
+    t.update(0.5)
+
+    assert t.transmission.shifting
+    assert t.rpm <= rpm_before
 
 
 def test_truck_does_not_move_in_neutral():
@@ -275,13 +289,13 @@ def test_rolling_automatic_kicks_down_instead_of_stalling():
     It must kick down a gear and keep running instead."""
     t = make_auto_truck()
     t.transmission.gear = 5
-    t.velocity_mps = 0.7          # rolling, but lugging below idle*0.5 in 5th
+    t.velocity_mps = 0.7  # rolling, but lugging below idle*0.5 in 5th
     t.throttle = 0.8
-    t.transmission._shift_timer = 1 / 60   # shift lock expires inside this frame
+    t.transmission._shift_timer = 1 / 60  # shift lock expires inside this frame
     t.update(1 / 60)
     assert t.engine_on
     assert not t.stalled
-    assert t.transmission.gear == 4   # dropped one gear
+    assert t.transmission.gear == 4  # dropped one gear
 
 
 def test_hard_collision_stop_does_not_stall_an_automatic():

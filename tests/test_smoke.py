@@ -73,16 +73,12 @@ def test_full_game_flow_headless(monkeypatch):
     app = App()
     try:
         spoken = []
-        monkeypatch.setattr(app.ctx, "say",
-                            lambda text, interrupt=True: spoken.append(text))
+        monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: spoken.append(text))
         app.push_state(MainMenuState(app.ctx))
         menu = app.state
         assert isinstance(menu, MainMenuState)
         assert menu.lines()[0] == "Freight Fate"
-        assert any(
-            f"Welcome to Freight Fate, version {__version__}." in line
-            for line in spoken
-        )
+        assert any(f"Welcome to Freight Fate, version {__version__}." in line for line in spoken)
 
         # navigate to "New career" and select it
         while menu.items[menu.index].text != "New career":
@@ -131,8 +127,7 @@ def test_full_game_flow_headless(monkeypatch):
         # A new company hire runs dispatch's routing: no route menu appears.
         assert isinstance(app.state, DrivingState)
         assert app.state.phase == "delivery"
-        departure = next(text for text in reversed(spoken)
-                         if "Dispatch routed you to" in text)
+        departure = next(text for text in reversed(spoken) if "Dispatch routed you to" in text)
         assert "Loaded trip is" in departure
         assert "Departing now" in departure
         assert "Legal HOS plan" not in departure
@@ -197,7 +192,8 @@ def test_full_game_flow_headless(monkeypatch):
         else:  # never hit trip.finished -- a real stall, not just a tight cap
             raise AssertionError(
                 f"delivery never finished in {max_frames} frames: "
-                f"{driving.trip.position_mi:.1f}/{driving.trip.total_miles:.1f} mi")
+                f"{driving.trip.position_mi:.1f}/{driving.trip.total_miles:.1f} mi"
+            )
         assert isinstance(app.state, FacilityArrivalState)
         app.state.handle_event(key_event(pygame.K_RETURN))
         finish_timed_state(app)
@@ -344,15 +340,15 @@ def test_discord_presence_toggle_is_accessible_and_wired(monkeypatch):
     app = App()
     try:
         spoken: list[str] = []
-        monkeypatch.setattr(app.ctx, "say",
-                            lambda text, interrupt=True: spoken.append(text))
+        monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: spoken.append(text))
         toggles: list[bool] = []
         monkeypatch.setattr(app.presence, "set_enabled", toggles.append)
 
         app.push_state(SettingsCategoryState(app.ctx, "gameplay"))
         menu = app.state
-        idx = next(i for i, item in enumerate(menu.items)
-                   if item.text.startswith("Discord presence"))
+        idx = next(
+            i for i, item in enumerate(menu.items) if item.text.startswith("Discord presence")
+        )
         menu.index = idx
         assert menu.items[idx].help  # spoken help text exists for F1
         before = app.ctx.settings.discord_presence
@@ -383,6 +379,40 @@ def test_upgrades_are_money_gated():
         shop.handle_event(key_event(pygame.K_RETURN))
         assert app.ctx.profile.upgrades == {}
         assert app.ctx.profile.money == 10.0
+    finally:
+        app.shutdown()
+
+
+@pytest.mark.smoke
+def test_garage_services_tires_and_wash():
+    from freight_fate.app import App
+    from freight_fate.models.profile import Profile
+    from freight_fate.states.city import GarageState
+
+    app = App()
+    try:
+        from freight_fate.models.business import LEASED_OWNER_OPERATOR
+
+        app.ctx.profile = Profile(name="Maintenance", current_city="Chicago")
+        p = app.ctx.profile
+        p.business_status = LEASED_OWNER_OPERATOR
+        p.owned_trucks = ["rig"]
+        p.money = 1_000.0
+        p.tire_wear_pct = 10.0
+        p.road_grime_pct = 25.0
+        garage = GarageState(app.ctx)
+        app.push_state(garage)
+
+        assert any("Replace tires" in item.text for item in garage.items)
+        assert any("Wash truck" in item.text for item in garage.items)
+
+        garage._service_tires()
+        assert p.tire_wear_pct == 0.0
+        assert p.money == 550.0
+
+        garage._wash_truck()
+        assert p.road_grime_pct == 0.0
+        assert p.money == 515.0
     finally:
         app.shutdown()
 

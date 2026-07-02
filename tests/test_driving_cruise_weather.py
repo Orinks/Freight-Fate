@@ -9,6 +9,8 @@ from driving_feature_helpers import (
     start_drive,
 )
 
+from freight_fate.states.driving import SPEEDING_HOLD_S
+
 # -- cruise control -------------------------------------------------------------
 
 
@@ -28,18 +30,18 @@ def test_cruise_control_holds_the_set_speed(monkeypatch):
         quiet_trip(driving)
         driving.trip.zones = []
         driving.trip.traffic_pressures = []
-        driving._destination_exit_taken = True          # isolate cruise from exit setup
-        open_limits(driving)                           # isolate hold from the limit cap
+        driving._destination_exit_taken = True  # isolate cruise from exit setup
+        open_limits(driving)  # isolate hold from the limit cap
         t = driving.truck
-        driving.handle_event(key_event(pygame.K_e))   # engine on
+        driving.handle_event(key_event(pygame.K_e))  # engine on
         t.cargo_kg = 0.0
         t.grade = 0.0
         t.transmission.gear = 10
-        t.velocity_mps = 26.8                          # ~60 mph
+        t.velocity_mps = 26.8  # ~60 mph
         t.throttle = 0.35
         driving.handle_event(key_event(pygame.K_k))
         assert driving._cruise_mph == pytest.approx(60.0, abs=1.0)
-        for _ in range(60 * 15):                       # 15 seconds, no keys held
+        for _ in range(60 * 15):  # 15 seconds, no keys held
             driving.update(1 / 60)
         assert driving._cruise_mph is not None
         assert abs(t.speed_mph - 60.0) < 5.0
@@ -56,24 +58,24 @@ def test_cruise_set_point_adjusts_with_plus_and_minus():
     try:
         driving = start_drive(app)
         quiet_trip(driving)
-        open_limits(driving)                           # isolate from the limit cap
+        open_limits(driving)  # isolate from the limit cap
         driving.handle_event(key_event(pygame.K_e))
         driving.truck.transmission.gear = 10
-        driving.truck.velocity_mps = 26.8              # ~60 mph
+        driving.truck.velocity_mps = 26.8  # ~60 mph
         driving.handle_event(key_event(pygame.K_k))
         base = driving._cruise_mph
         assert base == pytest.approx(60.0, abs=1.0)
 
-        driving.handle_event(key_event(pygame.K_EQUALS))   # + raises by a step
+        driving.handle_event(key_event(pygame.K_EQUALS))  # + raises by a step
         assert driving._cruise_mph == pytest.approx(base + CRUISE_STEP_MPH)
-        driving.handle_event(key_event(pygame.K_MINUS))    # - lowers it back
+        driving.handle_event(key_event(pygame.K_MINUS))  # - lowers it back
         assert driving._cruise_mph == pytest.approx(base)
         driving.handle_event(key_event(pygame.K_PLUS, "+"))
         assert driving._cruise_mph == pytest.approx(base + CRUISE_STEP_MPH)
         driving.handle_event(key_event(pygame.K_KP_MINUS, "-"))
         assert driving._cruise_mph == pytest.approx(base)
 
-        for _ in range(20):                                # clamps at the max
+        for _ in range(20):  # clamps at the max
             driving.handle_event(key_event(pygame.K_EQUALS))
         assert driving._cruise_mph == pytest.approx(CRUISE_MAX_MPH)
     finally:
@@ -89,18 +91,16 @@ def test_cruise_refuses_to_engage_in_a_facility_zone(monkeypatch):
     try:
         driving = start_drive(app)
         quiet_trip(driving)
-        monkeypatch.setattr(app.ctx, "say",
-                            lambda text, interrupt=True: said.append(text))
+        monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: said.append(text))
         # On a low-speed facility access road, cruise must not engage.
         driving.trip.speed_limit_at = lambda mile: (25.0, "facility access road")
         driving.handle_event(key_event(pygame.K_e))
         driving.truck.transmission.gear = 4
-        driving.truck.velocity_mps = 10.0              # ~22 mph, above the floor
+        driving.truck.velocity_mps = 10.0  # ~22 mph, above the floor
         driving.handle_event(key_event(pygame.K_k))
 
         assert driving._cruise_mph is None
-        assert any("not available" in s and "facility access road" in s
-                   for s in said)
+        assert any("not available" in s and "facility access road" in s for s in said)
     finally:
         app.shutdown()
 
@@ -114,12 +114,11 @@ def test_cruise_adjust_is_inert_when_cruise_is_off(monkeypatch):
     try:
         driving = start_drive(app)
         quiet_trip(driving)
-        monkeypatch.setattr(app.ctx, "say",
-                            lambda text, interrupt=True: said.append(text))
+        monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: said.append(text))
         driving.handle_event(key_event(pygame.K_e))
         assert driving._cruise_mph is None
         driving.handle_event(key_event(pygame.K_EQUALS))
-        assert driving._cruise_mph is None              # nothing to adjust
+        assert driving._cruise_mph is None  # nothing to adjust
         assert any("off" in s.lower() for s in said)
     finally:
         app.shutdown()
@@ -134,12 +133,11 @@ def test_air_ready_cue_does_not_repeat_on_compressor_cycling(monkeypatch):
     try:
         driving = start_drive(app)
         quiet_trip(driving)
-        monkeypatch.setattr(app.ctx, "say_event",
-                            lambda text, interrupt=True: events.append(text))
+        monkeypatch.setattr(app.ctx, "say_event", lambda text, interrupt=True: events.append(text))
         t = driving.truck
-        t.parking_brake = True                                  # cue only fires while set
-        t.air_pressure_psi = t.specs.air_governor_cut_out_psi   # charged
-        driving._air_ready_said = True                          # already announced
+        t.parking_brake = True  # cue only fires while set
+        t.air_pressure_psi = t.specs.air_governor_cut_out_psi  # charged
+        driving._air_ready_said = True  # already announced
 
         def ready_count():
             return sum("Air pressure ready" in e for e in events)
@@ -177,8 +175,9 @@ def test_automatic_shift_uses_shift_cue_not_brake_air(monkeypatch):
         driving = start_drive(app)
         quiet_trip(driving)
         monkeypatch.setattr(pygame.key, "get_pressed", lambda: NoKeys())
-        monkeypatch.setattr(app.ctx.audio, "play",
-                            lambda key, volume=1.0: played.append((key, volume)))
+        monkeypatch.setattr(
+            app.ctx.audio, "play", lambda key, volume=1.0: played.append((key, volume))
+        )
         driving.truck.start_engine()
         driving.truck.transmission.gear = 3
         driving.truck.velocity_mps = 5.0
@@ -216,6 +215,24 @@ def test_cruise_control_requires_road_speed_and_cancels_on_hazard():
         app.shutdown()
 
 
+def test_metric_cruise_minimum_refusal_uses_metric_units(monkeypatch):
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        app.ctx.settings.imperial_units = False
+        driving = start_drive(app)
+        quiet_trip(driving)
+        spoken = []
+        monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: spoken.append(text))
+        driving.handle_event(key_event(pygame.K_k))
+        assert driving._cruise_mph is None
+        assert "kilometers per hour" in spoken[-1]
+        assert "miles per hour" not in spoken[-1]
+    finally:
+        app.shutdown()
+
+
 @pytest.mark.smoke
 def test_adaptive_cruise_follows_npc_traffic(monkeypatch):
     from freight_fate.app import App
@@ -226,12 +243,10 @@ def test_adaptive_cruise_follows_npc_traffic(monkeypatch):
     try:
         driving = start_drive(app)
         quiet_trip(driving)
-        monkeypatch.setattr(app.ctx, "say_event",
-                            lambda text, interrupt=True: events.append(text))
+        monkeypatch.setattr(app.ctx, "say_event", lambda text, interrupt=True: events.append(text))
         open_limits(driving)
         driving.trip.traffic_manager.vehicles = [
-            NPCVehicle("npc:acc", driving.trip.position_mi + 0.08,
-                       44.0, 44.0, 0, "braking_traffic")
+            NPCVehicle("npc:acc", driving.trip.position_mi + 0.08, 44.0, 44.0, 0, "braking_traffic")
         ]
         driving.handle_event(key_event(pygame.K_e))
         driving.truck.transmission.gear = 10
@@ -258,23 +273,22 @@ def test_adaptive_cruise_caps_at_posted_limit(monkeypatch):
     try:
         driving = start_drive(app)
         quiet_trip(driving)
-        monkeypatch.setattr(app.ctx, "say_event",
-                            lambda text, interrupt=True: events.append(text))
+        monkeypatch.setattr(app.ctx, "say_event", lambda text, interrupt=True: events.append(text))
         # A posted limit well below the held set speed: predictive ACC must ease
         # off rather than carry the driver over the limit into a speeding strike.
         driving.trip.speed_limit_at = lambda mile: (45.0, None)
         driving.handle_event(key_event(pygame.K_e))
         driving.truck.transmission.gear = 10
-        driving.truck.velocity_mps = 29.0              # ~65 mph
+        driving.truck.velocity_mps = 29.0  # ~65 mph
         driving.truck.throttle = 0.8
-        driving.handle_event(key_event(pygame.K_k))    # set cruise at ~65
+        driving.handle_event(key_event(pygame.K_k))  # set cruise at ~65
         assert driving._cruise_mph > 60
 
         driving.update(1 / 60)
 
         assert driving._acc_limit_capped
-        assert driving.truck.throttle < 0.8            # backed off the throttle
-        assert driving.truck.brake > 0.0               # braking down toward the limit
+        assert driving.truck.throttle < 0.8  # backed off the throttle
+        assert driving.truck.brake > 0.0  # braking down toward the limit
         assert any("adaptive cruise easing to" in e for e in events)
     finally:
         app.shutdown()
@@ -289,15 +303,12 @@ def test_adaptive_cruise_slows_before_large_limit_drop(monkeypatch):
     try:
         driving = start_drive(app)
         quiet_trip(driving)
-        monkeypatch.setattr(app.ctx, "say_event",
-                            lambda text, interrupt=True: events.append(text))
+        monkeypatch.setattr(app.ctx, "say_event", lambda text, interrupt=True: events.append(text))
         drop_at = driving.trip.position_mi + 0.4
-        driving.trip.speed_limit_at = (
-            lambda mile: (40.0, None) if mile >= drop_at else (65.0, None)
-        )
+        driving.trip.speed_limit_at = lambda mile: (40.0, None) if mile >= drop_at else (65.0, None)
         driving.handle_event(key_event(pygame.K_e))
         driving.truck.transmission.gear = 10
-        driving.truck.velocity_mps = 30.4              # ~68 mph
+        driving.truck.velocity_mps = 30.4  # ~68 mph
         driving.truck.throttle = 0.8
         driving.handle_event(key_event(pygame.K_k))
         assert driving.trip.position_mi < drop_at
@@ -312,6 +323,46 @@ def test_adaptive_cruise_slows_before_large_limit_drop(monkeypatch):
         app.shutdown()
 
 
+@pytest.mark.parametrize(
+    ("speed_mph", "timer_before", "dt"),
+    [
+        (45.0, SPEEDING_HOLD_S - 0.05, 0.1),
+        (46.0, SPEEDING_HOLD_S - 0.05, 0.1),
+        (55.0, SPEEDING_HOLD_S - 0.25, 0.5),
+        (65.0, SPEEDING_HOLD_S - 0.5, 1.0),
+        (70.0, SPEEDING_HOLD_S - 1.0, 1.5),
+    ],
+)
+@pytest.mark.smoke
+def test_adaptive_cruise_limit_drop_does_not_trigger_speeding_strike(
+    monkeypatch, speed_mph, timer_before, dt
+):
+    from freight_fate.app import App
+
+    app = App()
+    events = []
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        monkeypatch.setattr(app.ctx, "say_event", lambda text, interrupt=True: events.append(text))
+        driving.trip.speed_limit_at = lambda mile: (35.0, None)
+        driving.handle_event(key_event(pygame.K_e))
+        driving.truck.transmission.gear = 10
+        driving.truck.velocity_mps = speed_mph / 2.23694
+        driving.truck.throttle = 0.0
+        driving._cruise_mph = 65.0
+        driving._speeding_timer = timer_before
+
+        driving.update(dt)
+
+        assert driving._acc_limit_capped
+        assert driving.truck.brake > 0.0
+        assert driving.speeding_strikes == 0
+        assert not any("Speeding strike" in e for e in events)
+    finally:
+        app.shutdown()
+
+
 @pytest.mark.smoke
 def test_adaptive_cruise_ignores_far_small_limit_drop(monkeypatch):
     from freight_fate.app import App
@@ -321,12 +372,10 @@ def test_adaptive_cruise_ignores_far_small_limit_drop(monkeypatch):
         driving = start_drive(app)
         quiet_trip(driving)
         drop_at = driving.trip.position_mi + 1.4
-        driving.trip.speed_limit_at = (
-            lambda mile: (60.0, None) if mile >= drop_at else (65.0, None)
-        )
+        driving.trip.speed_limit_at = lambda mile: (60.0, None) if mile >= drop_at else (65.0, None)
         driving.handle_event(key_event(pygame.K_e))
         driving.truck.transmission.gear = 10
-        driving.truck.velocity_mps = 30.4              # ~68 mph
+        driving.truck.velocity_mps = 30.4  # ~68 mph
         driving.handle_event(key_event(pygame.K_k))
 
         driving.update(1 / 60)
@@ -350,7 +399,7 @@ def test_adaptive_cruise_allows_a_small_offset_over_the_limit(monkeypatch):
         driving.trip.speed_limit_at = lambda mile: (60.0, None)
         driving.handle_event(key_event(pygame.K_e))
         driving.truck.transmission.gear = 10
-        driving.truck.velocity_mps = 28.2             # ~63 mph, 3 over a 60 limit
+        driving.truck.velocity_mps = 28.2  # ~63 mph, 3 over a 60 limit
         driving.handle_event(key_event(pygame.K_k))
 
         driving.update(1 / 60)
@@ -372,8 +421,7 @@ def test_adaptive_cruise_increases_gap_for_bad_weather(monkeypatch):
     try:
         driving = start_drive(app)
         quiet_trip(driving)
-        monkeypatch.setattr(app.ctx, "say_event",
-                            lambda text, interrupt=True: events.append(text))
+        monkeypatch.setattr(app.ctx, "say_event", lambda text, interrupt=True: events.append(text))
         driving.handle_event(key_event(pygame.K_e))
         driving.truck.transmission.gear = 10
         driving.truck.velocity_mps = 29.0
@@ -381,8 +429,9 @@ def test_adaptive_cruise_increases_gap_for_bad_weather(monkeypatch):
         driving.handle_event(key_event(pygame.K_k))
 
         driving.trip.traffic_manager.vehicles = [
-            NPCVehicle("npc:weather-gap", driving.trip.position_mi + 0.08,
-                       65.0, 65.0, 0, "steady_truck")
+            NPCVehicle(
+                "npc:weather-gap", driving.trip.position_mi + 0.08, 65.0, 65.0, 0, "steady_truck"
+            )
         ]
         driving.weather.current = WeatherKind.CLEAR
         clear_gap = driving._acc_gap_seconds()
@@ -410,8 +459,7 @@ def test_adaptive_cruise_disables_before_restricted_zone(monkeypatch):
     try:
         driving = start_drive(app)
         quiet_trip(driving)
-        monkeypatch.setattr(app.ctx, "say_event",
-                            lambda text, interrupt=True: events.append(text))
+        monkeypatch.setattr(app.ctx, "say_event", lambda text, interrupt=True: events.append(text))
         driving.handle_event(key_event(pygame.K_e))
         driving.truck.transmission.gear = 10
         driving.truck.velocity_mps = 26.8
@@ -445,10 +493,8 @@ def test_adaptive_cruise_disables_for_heavy_traffic_zone_entry(monkeypatch):
     try:
         driving = start_drive(app)
         quiet_trip(driving)
-        monkeypatch.setattr(app.ctx, "say_event",
-                            lambda text, interrupt=True: events.append(text))
-        monkeypatch.setattr(app.ctx, "say",
-                            lambda text, interrupt=True: events.append(text))
+        monkeypatch.setattr(app.ctx, "say_event", lambda text, interrupt=True: events.append(text))
+        monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: events.append(text))
         driving.handle_event(key_event(pygame.K_e))
         driving.truck.transmission.gear = 10
         driving.truck.velocity_mps = 26.8
@@ -501,12 +547,11 @@ def test_hazard_deadline_covers_braking_time_from_current_speed():
         driving = start_drive(app)
         quiet_trip(driving)
         t = driving.truck
-        t.velocity_mps = 29.0          # ~65 mph
+        t.velocity_mps = 29.0  # ~65 mph
         t.grip, t.grade = 1.0, 0.0
         hazard = TripEvent(TripEventKind.HAZARD, "Brake now!", {"deadline_s": 3.0})
         driving._handle_trip_event(hazard)
-        brake_s = ((t.speed_mph - HAZARD_SAFE_MPH) / MPH_PER_MPS
-                   / (G * t.specs.max_brake_decel_g))
+        brake_s = (t.speed_mph - HAZARD_SAFE_MPH) / MPH_PER_MPS / (G * t.specs.max_brake_decel_g)
         assert driving._hazard_deadline == pytest.approx(brake_s + 3.0, abs=0.01)
         assert driving._hazard_deadline > 7.5
     finally:
@@ -527,7 +572,7 @@ def test_service_brakes_beat_a_highway_hazard_after_human_reaction(monkeypatch):
         clear_weather(driving)
         t = driving.truck
         t.transmission.gear = 10
-        t.velocity_mps = 29.0          # ~65 mph
+        t.velocity_mps = 29.0  # ~65 mph
         damage_before = t.damage_pct
 
         held = set()
@@ -540,15 +585,15 @@ def test_service_brakes_beat_a_highway_hazard_after_human_reaction(monkeypatch):
 
         hazard = TripEvent(TripEventKind.HAZARD, "Brake now!", {"deadline_s": 3.0})
         driving._handle_trip_event(hazard)
-        for _ in range(int(60 * 1.5)):      # hearing the warning: no input yet
+        for _ in range(int(60 * 1.5)):  # hearing the warning: no input yet
             driving.update(1 / 60)
-        held.add(pygame.K_DOWN)             # then service brakes only
+        held.add(pygame.K_DOWN)  # then service brakes only
         for _ in range(60 * 20):
             driving.update(1 / 60)
             if driving._hazard_deadline is None:
                 break
         assert driving._hazard_deadline is None
-        assert t.damage_pct == damage_before    # avoided, not collided
+        assert t.damage_pct == damage_before  # avoided, not collided
     finally:
         app.shutdown()
 

@@ -47,50 +47,69 @@ from .base import MenuItem, MenuState, State
 log = logging.getLogger(__name__)
 
 GEAR_KEYS = {
-    pygame.K_1: 1, pygame.K_2: 2, pygame.K_3: 3, pygame.K_4: 4, pygame.K_5: 5,
-    pygame.K_6: 6, pygame.K_7: 7, pygame.K_8: 8, pygame.K_9: 9, pygame.K_0: 10,
+    pygame.K_1: 1,
+    pygame.K_2: 2,
+    pygame.K_3: 3,
+    pygame.K_4: 4,
+    pygame.K_5: 5,
+    pygame.K_6: 6,
+    pygame.K_7: 7,
+    pygame.K_8: 8,
+    pygame.K_9: 9,
+    pygame.K_0: 10,
 }
 
 HAZARD_SAFE_MPH = 25.0
 MPH_PER_MPS = 2.23694
 
 # Roadside mechanic: a field patch, not a garage restoration.
-FIELD_REPAIR_DAMAGE_PCT = 25.0    # damage level the patch repairs down to
+FIELD_REPAIR_DAMAGE_PCT = 25.0  # damage level the patch repairs down to
 MECHANIC_CALLOUT_FEE = 500.0
-MECHANIC_RATE_PER_PCT = 110.0     # premium over the garage's 85 per percent
-MECHANIC_WAIT_MIN = 90.0          # game minutes waiting for the truck to be fixed
-FUEL_STOP_MIN = 20.0              # fueling is on-duty-not-driving work
-INSPECTION_MIN = 15.0             # routine scale/inspection check-in time
+MECHANIC_RATE_PER_PCT = 110.0  # premium over the garage's 85 per percent
+MECHANIC_WAIT_MIN = 90.0  # game minutes waiting for the truck to be fixed
+FUEL_STOP_MIN = 20.0  # fueling is on-duty-not-driving work
+INSPECTION_MIN = 15.0  # routine scale/inspection check-in time
 OUT_OF_SERVICE_MIN = hos.SLEEP_MIN
 STOP_PULL_IN_MIN = 5.0
 STOP_PULL_IN_WAIT_S = 1.0
 
 # Highway exits: signal inside the window, slow enough to make the ramp.
-EXIT_WINDOW_MI = 5.0              # how far out X can arm the upcoming exit
-EXIT_LANE_PREP_MI = 2.0           # where GPS starts asking for the exit lane
-EXIT_COMMIT_WINDOW_MI = 0.4       # generous gore-window grace after the marker
-EXIT_LANE_READY = 0.85            # accumulated right-lane commitment
-EXIT_LANE_OFFSET_READY = 0.45     # right-side lane position also counts
-RAMP_MAX_MPH = 45.0               # any faster and you blow past the exit
-RAMP_LENGTH_MI = 0.5              # deceleration lane plus ramp to the stop
+EXIT_WINDOW_MI = 5.0  # how far out X can arm the upcoming exit
+EXIT_LANE_PREP_MI = 2.0  # where GPS starts asking for the exit lane
+EXIT_COMMIT_WINDOW_MI = 0.4  # generous gore-window grace after the marker
+EXIT_LANE_READY = 0.85  # accumulated right-lane commitment
+EXIT_LANE_OFFSET_READY = 0.45  # right-side lane position also counts
+RAMP_MAX_MPH = 45.0  # any faster and you blow past the exit
+RAMP_LENGTH_MI = 0.5  # deceleration lane plus ramp to the stop
 DESTINATION_EXIT_BEFORE_END_MI = 1.0
-UNLOADING_MIN = 45.0              # receiver dock work before settlement
+UNLOADING_MIN = 45.0  # receiver dock work before settlement
 UNLOADING_WAIT_S = 1.5
 
-CRUISE_MIN_MPH = 20.0             # cruise control needs road speed to hold
-CRUISE_STEP_MPH = 5.0             # set-point change per Accel/Coast (+/-) tap
-CRUISE_MAX_MPH = 85.0             # highest cruise set point (top US posted limits)
-ACC_BASE_GAP_SECONDS = 3.0        # clear-weather adaptive cruise gap
-ACC_LIMIT_OFFSET_MPH = 5.0        # predictive ACC holds this far over the posted
-                                  # limit -- a with-traffic pace, comfortably under
-                                  # the 9 mph speeding-strike threshold
+CRUISE_MIN_MPH = 20.0  # cruise control needs road speed to hold
+CRUISE_STEP_MPH = 5.0  # set-point change per Accel/Coast (+/-) tap
+CRUISE_MAX_MPH = 85.0  # highest cruise set point (top US posted limits)
+ACC_BASE_GAP_SECONDS = 3.0  # clear-weather adaptive cruise gap
+ACC_LIMIT_OFFSET_MPH = 5.0  # predictive ACC holds this far over the posted
+# limit -- a with-traffic pace, comfortably under
+# the 9 mph speeding-strike threshold
 ACC_LIMIT_LOOKAHEAD_MIN_MI = 0.25
 ACC_LIMIT_LOOKAHEAD_MAX_MI = 1.5
 ACC_LIMIT_LOOKAHEAD_STEP_MI = 0.1
 ACC_LIMIT_COMFORT_DECEL_MPS2 = 1.0
-ENGINE_SHUTDOWN_SAFE_MPH = 5.0    # prevent accidental kill-switch use at speed
-DELIVERY_PARK_MPH = 3.0           # within this, the gate prompts you to stop
-DOCKING_MAX_MPH = 0.5            # dock/settle/rest actions need a complete stop
+ENGINE_SHUTDOWN_SAFE_MPH = 5.0  # prevent accidental kill-switch use at speed
+DELIVERY_PARK_MPH = 3.0  # within this, the gate prompts you to stop
+DOCKING_MAX_MPH = 0.5  # dock/settle/rest actions need a complete stop
+
+
+def terse_hazard_message(message: str) -> str:
+    text = message.strip()
+    for prefix in ("Brake now! ", "Brake now!"):
+        if text.startswith(prefix):
+            text = text[len(prefix) :].strip()
+            break
+    return text or message
+
+
 DRIVE_PHASE_PICKUP = "pickup"
 DRIVE_PHASE_DELIVERY = "delivery"
 DRIVE_PHASE_CITY_SERVICE = "city_service"
@@ -98,10 +117,10 @@ DRIVE_PHASE_CITY_SERVICE = "city_service"
 # Microsleeps: once fatigue is severe, the driver involuntarily nods off and
 # must respond (steer or brake) within a short window or drift off the road.
 # They come faster the more exhausted you are, and escalate to a forced stop.
-MICROSLEEP_REACTION_S = 2.2       # real seconds to respond before drifting off
-MICROSLEEP_BASE_GM = 9.0          # game-minutes between nods at the severe threshold
-MICROSLEEP_MIN_GM = 3.0           # ...shrinking to this nearer total exhaustion
-MICROSLEEP_COOLDOWN_GM = 4.0      # quiet period after one resolves
+MICROSLEEP_REACTION_S = 2.2  # real seconds to respond before drifting off
+MICROSLEEP_BASE_GM = 9.0  # game-minutes between nods at the severe threshold
+MICROSLEEP_MIN_GM = 3.0  # ...shrinking to this nearer total exhaustion
+MICROSLEEP_COOLDOWN_GM = 4.0  # quiet period after one resolves
 MICROSLEEP_SHOULDER_DAMAGE_PCT = 6.0
 MICROSLEEP_FORCE_STOP_MISSES = 3  # consecutive misses that force a stop
 
@@ -222,8 +241,7 @@ WEIGH_STATION_BYPASS_MPH = 15.0
 WEIGH_STATION_BYPASS_FINE = 750.0
 UNSAFE_DAMAGE_STOP_PCT = 65.0
 UNSAFE_DAMAGE_FINE = 900.0
-AMBIENT_EVENT_SPACING_S = 2.5     # keep low-priority chatter from stacking
-
+AMBIENT_EVENT_SPACING_S = 2.5  # keep low-priority chatter from stacking
 
 
 class Tutorial:
@@ -236,75 +254,106 @@ class Tutorial:
         self._hinted = False
 
     def begin(self) -> None:
+        if self.ctx.settings.speech_verbosity == 0:
+            return
         self.ctx.say(
-            "This is your first run, so let's walk through it. "
-            "First: press E to start the engine.", interrupt=False)
+            "This is your first run, so let's walk through it. First: press E to start the engine.",
+            interrupt=False,
+        )
 
     def on_engine_started(self) -> None:
         if self.stage == 0:
             self.stage = 1
             self._timer = 0.0
             self._hinted = False
+            if self.ctx.settings.speech_verbosity == 0:
+                return
             if self.ctx.settings.automatic_transmission:
-                self.ctx.say("Now let air pressure build. When you hear air ready, "
-                             "press P to release the parking brake, then hold the "
-                             "Up arrow to accelerate. The transmission shifts for you.",
-                             interrupt=False)
+                self.ctx.say(
+                    "Now let air pressure build. When you hear air ready, "
+                    "press P to release the parking brake, then hold the "
+                    "Up arrow to accelerate. The transmission shifts for you.",
+                    interrupt=False,
+                )
             else:
-                self.ctx.say("Now let air pressure build. When you hear air ready, "
-                             "press P to release the parking brake, then hold Left "
-                             "Shift, press 1 for first gear, and release the clutch.",
-                             interrupt=False)
+                self.ctx.say(
+                    "Now let air pressure build. When you hear air ready, "
+                    "press P to release the parking brake, then hold Left "
+                    "Shift, press 1 for first gear, and release the clutch.",
+                    interrupt=False,
+                )
 
     def on_parking_brake_released(self) -> None:
         if self.stage == 1 and self.ctx.settings.automatic_transmission:
             self.stage = 2
             self._timer = 0.0
             self._hinted = False
-            self.ctx.say("Parking brake released. Now hold the Up arrow to accelerate.",
-                         interrupt=False)
+            message = (
+                "Parking brake released."
+                if self.ctx.settings.speech_verbosity == 0
+                else "Parking brake released. Now hold the Up arrow to accelerate."
+            )
+            self.ctx.say(message, interrupt=False)
         elif self.stage == 1:
             self._timer = 0.0
             self._hinted = False
-            self.ctx.say("Parking brake released. Now shift into first gear.",
-                         interrupt=False)
+            message = (
+                "Parking brake released."
+                if self.ctx.settings.speech_verbosity == 0
+                else "Parking brake released. Now shift into first gear."
+            )
+            self.ctx.say(message, interrupt=False)
 
     def on_gear_engaged(self) -> None:
         if self.stage == 1:
             self.stage = 2
             self._timer = 0.0
             self._hinted = False
-            self.ctx.say("In gear. Now hold the Up arrow to accelerate.",
-                         interrupt=False)
+            message = (
+                "In gear."
+                if self.ctx.settings.speech_verbosity == 0
+                else "In gear. Now hold the Up arrow to accelerate."
+            )
+            self.ctx.say(message, interrupt=False)
 
     def update(self, dt: float, truck) -> None:
         self._timer += dt
         if self.stage == 2 and truck.speed_mph > 20:
             self.stage = 3
-            self.ctx.say(
-                "You are rolling. Press Space anytime for your speed, Tab for a "
-                "full report, and F1 to hear all the controls. Watch for hazard "
-                "warnings, and brake hard when you hear them. Hold B for the "
-                "emergency brake when you need to stop fast. Safe travels.",
-                interrupt=False)
+            if self.ctx.settings.speech_verbosity == 0:
+                self.ctx.say("Rolling.", interrupt=False)
+            else:
+                self.ctx.say(
+                    "You are rolling. Press Space anytime for your speed, Tab for a "
+                    "full report, and F1 to hear all the controls. Watch for hazard "
+                    "warnings, and brake hard when you hear them. Hold B for the "
+                    "emergency brake when you need to stop fast. Safe travels.",
+                    interrupt=False,
+                )
             self.ctx.profile.tutorial_done = True
             self.ctx.save_profile()
         elif self.stage in (0, 1) and self._timer > 25 and not self._hinted:
             self._hinted = True
+            if self.ctx.settings.speech_verbosity == 0:
+                return
             if self.stage == 0:
                 self.ctx.say("Reminder: press E to start the engine.", interrupt=False)
             elif truck.parking_brake:
-                self.ctx.say("Reminder: wait for air pressure to reach 100 psi, "
-                             "then press P to release the parking brake.",
-                             interrupt=False)
+                self.ctx.say(
+                    "Reminder: wait for air pressure to reach 100 psi, "
+                    "then press P to release the parking brake.",
+                    interrupt=False,
+                )
             else:
-                self.ctx.say("Reminder: hold Left Shift, press 1, then release "
-                             "the shift key.", interrupt=False)
+                self.ctx.say(
+                    "Reminder: hold Left Shift, press 1, then release the shift key.",
+                    interrupt=False,
+                )
 
 
 def _advance_rest_clock(
-        driving: DrivingState, minutes: float, duty_status: str | None = None,
-        note: str = "") -> None:
+    driving: DrivingState, minutes: float, duty_status: str | None = None, note: str = ""
+) -> None:
     """Resting advances game time, so deadlines keep counting."""
     start_hour = driving._absolute_game_hour()
     driving.trip.game_minutes += minutes
@@ -332,27 +381,31 @@ def _perform_shoulder_sleep(driving: DrivingState, anchor_mi: float) -> str:
     _advance_rest_clock(driving, hos.SLEEP_MIN)
     driving.hos.sleep()
     p.fatigue = hos.rest_shoulder(p.fatigue)
-    parts = [f"You sleep poorly on the shoulder, woken again and again by "
-             f"passing trucks. It is {clock_text(driving.trip.current_hour)}. "
-             f"Hours of service reset, but you are still tired."]
+    parts = [
+        f"You sleep poorly on the shoulder, woken again and again by "
+        f"passing trucks. It is {clock_text(driving.trip.current_hour)}. "
+        f"Hours of service reset, but you are still tired."
+    ]
     if hos.shoulder_fine_due(driving.trip_seed, anchor_mi):
         p.money -= hos.SHOULDER_FINE
         driving.ctx.audio.play("ui/error")
-        parts.append(f"A trooper ticketed you for illegal parking: "
-                     f"{hos.SHOULDER_FINE:,.0f} dollars. "
-                     f"You have {p.money:,.0f} dollars.")
+        parts.append(
+            f"A trooper ticketed you for illegal parking: "
+            f"{hos.SHOULDER_FINE:,.0f} dollars. "
+            f"You have {p.money:,.0f} dollars."
+        )
     if hos.shoulder_damage_due(driving.trip_seed, anchor_mi):
-        driving.truck.damage_pct = min(
-            100.0, driving.truck.damage_pct + hos.SHOULDER_DAMAGE_PCT)
-        parts.append(f"Roadside debris and wake turbulence added "
-                     f"{hos.SHOULDER_DAMAGE_PCT:.0f} percent truck damage.")
+        driving.truck.damage_pct = min(100.0, driving.truck.damage_pct + hos.SHOULDER_DAMAGE_PCT)
+        parts.append(
+            f"Roadside debris and wake turbulence added "
+            f"{hos.SHOULDER_DAMAGE_PCT:.0f} percent truck damage."
+        )
     p.truck_fuel_gal = driving.truck.fuel_gal
     p.truck_damage_pct = driving.truck.damage_pct
     p.active_trip = driving.snapshot()
     driving.ctx.save_profile()
     parts.append(_deadline_text(driving))
     return " ".join(parts)
-
 
 
 POI_ACTION_LABELS = {
@@ -390,14 +443,9 @@ def _join_phrase(parts: list[str]) -> str:
 
 
 def _poi_offers_text(stop) -> str:
-    offers = [
-        POI_ACTION_LABELS[action]
-        for action in stop.actions
-        if action in POI_ACTION_LABELS
-    ]
+    offers = [POI_ACTION_LABELS[action] for action in stop.actions if action in POI_ACTION_LABELS]
     services = [
-        POI_SERVICE_LABELS.get(service, service.replace("_", " "))
-        for service in stop.services
+        POI_SERVICE_LABELS.get(service, service.replace("_", " ")) for service in stop.services
     ]
     parts = []
     if offers:
@@ -410,5 +458,3 @@ def _poi_offers_text(stop) -> str:
 
 
 __all__ = [name for name in globals() if not name.startswith("__")]
-
-

@@ -15,9 +15,14 @@ PICKUP_LOADING_MIN = 60.0
 PICKUP_LOADING_WAIT_S = 1.5
 
 
-def pickup_snapshot(job: Job, *, checked_in: bool = False,
-                    loaded: bool = False, air_brake: dict | None = None,
-                    engine_on: bool = False) -> dict:
+def pickup_snapshot(
+    job: Job,
+    *,
+    checked_in: bool = False,
+    loaded: bool = False,
+    air_brake: dict | None = None,
+    engine_on: bool = False,
+) -> dict:
     data = {
         "kind": "pickup",
         "job": job_payload(job),
@@ -36,8 +41,8 @@ def route_planning_summary(route: Route) -> str:
     sleep_stops = sum("sleep" in stop.actions for stop in route.stop_details)
     toll_text = (
         f"Estimated carrier-paid toll exposure {route.estimated_tolls:,.0f} dollars."
-        if route.estimated_tolls > 0 else
-        "No sourced toll exposure on this itinerary."
+        if route.estimated_tolls > 0
+        else "No sourced toll exposure on this itinerary."
     )
     return (
         f"{hos_summary} Fuel-capable stops: {fuel_stops}. "
@@ -50,17 +55,17 @@ def route_planning_summary(route: Route) -> str:
 def route_departure_summary(route: Route) -> str:
     toll_text = (
         f" Carrier toll estimate {route.estimated_tolls:,.0f} dollars."
-        if route.estimated_tolls > 0 else
-        ""
+        if route.estimated_tolls > 0
+        else ""
     )
     return (
-        f"Loaded trip is {route.miles:.0f} miles via "
-        f"{', then '.join(route.highways)}.{toll_text}"
+        f"Loaded trip is {route.miles:.0f} miles via {', then '.join(route.highways)}.{toll_text}"
     )
 
 
-def start_loaded_drive(ctx, job: Job, route: Route, *, air_brake=None,
-                       engine_on: bool = False, lead: str = "") -> None:
+def start_loaded_drive(
+    ctx, job: Job, route: Route, *, air_brake=None, engine_on: bool = False, lead: str = ""
+) -> None:
     """Build the loaded delivery trip and depart, narrating ``lead`` first.
 
     Shared by the player-chosen route path (``RouteSelectState``) and the
@@ -76,22 +81,30 @@ def start_loaded_drive(ctx, job: Job, route: Route, *, air_brake=None,
     ctx.profile.active_trip = driving.snapshot()
     ctx.save_profile()
     next_context = driving.trip.next_navigation_context()
-    ctx.say(
-        f"{lead}{route_departure_summary(route)} {next_context} Departing now.",
-        interrupt=True)
+    ctx.say(f"{lead}{route_departure_summary(route)} {next_context} Departing now.", interrupt=True)
     ctx.push_state(driving)
 
 
 class PickupFacilityState(MenuState):
     title = "Pickup facility"
     open_sound_key = "facility/dock_gate"
-    intro_help = ("Use up and down arrows to navigate, Enter to select. "
-                  "Check in at the origin facility, then load cargo only after "
-                  "the truck is fully stopped. Escape repeats the pickup status.")
+    intro_help = (
+        "Use up and down arrows to navigate, Enter to select. "
+        "Check in at the origin facility, then load cargo only after "
+        "the truck is fully stopped. Escape repeats the pickup status."
+    )
 
-    def __init__(self, ctx, job: Job, *, checked_in: bool = False,
-                 loaded: bool = False, driving=None, air_brake=None,
-                 engine_on: bool = False) -> None:
+    def __init__(
+        self,
+        ctx,
+        job: Job,
+        *,
+        checked_in: bool = False,
+        loaded: bool = False,
+        driving=None,
+        air_brake=None,
+        engine_on: bool = False,
+    ) -> None:
         super().__init__(ctx)
         self.job = job
         self.checked_in = checked_in
@@ -101,8 +114,7 @@ class PickupFacilityState(MenuState):
             self.truck = driving.truck
         else:
             self.truck = TruckState(specs=ctx.profile.truck_specs())
-            self.truck.fuel_gal = min(ctx.profile.truck_fuel_gal,
-                                      self.truck.specs.fuel_tank_gal)
+            self.truck.fuel_gal = min(ctx.profile.truck_fuel_gal, self.truck.specs.fuel_tank_gal)
             self.truck.damage_pct = ctx.profile.truck_damage_pct
             self.truck.restore_air_brake_snapshot(air_brake, default_ready=True)
             if engine_on:
@@ -111,11 +123,14 @@ class PickupFacilityState(MenuState):
     @classmethod
     def from_snapshot(cls, ctx, data: dict) -> PickupFacilityState | None:
         try:
-            return cls(ctx, job_from_payload(data["job"]),
-                       checked_in=bool(data.get("checked_in", False)),
-                       loaded=bool(data.get("loaded", False)),
-                       air_brake=data.get("air_brake"),
-                       engine_on=bool(data.get("engine_on", False)))
+            return cls(
+                ctx,
+                job_from_payload(data["job"]),
+                checked_in=bool(data.get("checked_in", False)),
+                loaded=bool(data.get("loaded", False)),
+                air_brake=data.get("air_brake"),
+                engine_on=bool(data.get("engine_on", False)),
+            )
         except (KeyError, TypeError, ValueError):
             return None
 
@@ -142,17 +157,17 @@ class PickupFacilityState(MenuState):
     def announce_entry(self) -> None:
         self.ctx.audio.set_ambient("poi/facility_gate")
         if self.loaded:
-            lead = (f"Loaded at {self.facility}. The trailer is sealed for "
-                    f"{self.job.destination}.")
+            lead = f"Loaded at {self.facility}. The trailer is sealed for {self.job.destination}."
             if getattr(self, "_just_loaded", False):
                 lead += f" Loading took {PICKUP_LOADING_MIN:.0f} minutes."
                 self._just_loaded = False
         elif self.checked_in:
-            lead = (f"Checked in at {self.facility}. You are assigned a dock "
-                    "for loading.")
+            lead = f"Checked in at {self.facility}. You are assigned a dock for loading."
         else:
-            lead = (f"Arrived at pickup: {self.facility}. Check in with the "
-                    "shipping office before loading.")
+            lead = (
+                f"Arrived at pickup: {self.facility}. Check in with the "
+                "shipping office before loading."
+            )
         self.ctx.say(f"{lead} {self.current_text()}")
 
     def exit(self) -> None:
@@ -163,52 +178,65 @@ class PickupFacilityState(MenuState):
             primary = MenuItem(
                 "Depart for destination",
                 self._depart_for_destination,
-                help="Dispatch loads the navigation itinerary and starts the trip.")
+                help="Dispatch loads the navigation itinerary and starts the trip.",
+            )
         elif self.checked_in:
             primary = MenuItem(
                 "Load cargo at dock",
                 self._load,
-                help="Back into the assigned dock and wait while the trailer is loaded.")
+                help="Back into the assigned dock and wait while the trailer is loaded.",
+            )
         else:
             primary = MenuItem(
                 "Check in at shipping office",
                 self._check_in,
-                help="Confirm the pickup number and receive the dock assignment.")
+                help="Confirm the pickup number and receive the dock assignment.",
+            )
         return [
             primary,
-            MenuItem("Pickup status", self._status,
-                     help="Hear the origin facility, cargo, destination, and "
-                          "loading instruction."),
-            MenuItem("Save and quit to main menu", self._save_and_quit,
-                     help="Save this pickup objective so it resumes here later."),
-            MenuItem("Cancel pickup and return to terminal", self._cancel,
-                     help="Give up this job before departure and return to the "
-                          "terminal dispatch board area."),
+            MenuItem(
+                "Pickup status",
+                self._status,
+                help="Hear the origin facility, cargo, destination, and loading instruction.",
+            ),
+            MenuItem(
+                "Save and quit to main menu",
+                self._save_and_quit,
+                help="Save this pickup objective so it resumes here later.",
+            ),
+            MenuItem(
+                "Cancel pickup and return to terminal",
+                self._cancel,
+                help="Give up this job before departure and return to the "
+                "terminal dispatch board area.",
+            ),
         ]
 
     def _save_state(self) -> None:
         self.ctx.profile.truck_fuel_gal = self.truck.fuel_gal
         self.ctx.profile.truck_damage_pct = self.truck.damage_pct
         self.ctx.profile.active_trip = pickup_snapshot(
-            self.job, checked_in=self.checked_in, loaded=self.loaded,
+            self.job,
+            checked_in=self.checked_in,
+            loaded=self.loaded,
             air_brake=self.truck.air_brake_snapshot(),
-            engine_on=self.truck.engine_on)
+            engine_on=self.truck.engine_on,
+        )
         self.ctx.save_profile()
 
     def _check_in(self) -> None:
         p = self.ctx.profile
         start = p.game_hours
         p.game_hours += PICKUP_CHECK_IN_MIN / 60.0
-        p.duty_log.record("on_duty_not_driving", start, p.game_hours,
-                          self.facility, "shipper check-in")
+        p.duty_log.record(
+            "on_duty_not_driving", start, p.game_hours, self.facility, "shipper check-in"
+        )
         p.hos.on_duty(PICKUP_CHECK_IN_MIN)
         self.checked_in = True
         self._save_state()
         self.refresh(keep_index=False)
         self.ctx.audio.play("ui/notify")
-        self.ctx.say(
-            f"Checked in at {self.facility}. Dock assigned. "
-            "Stop, then load cargo.")
+        self.ctx.say(f"Checked in at {self.facility}. Dock assigned. Stop, then load cargo.")
 
     def _load(self) -> None:
         from .driving import DOCKING_MAX_MPH
@@ -223,25 +251,27 @@ class PickupFacilityState(MenuState):
         self.truck.throttle = 0.0
         self.truck.brake = 1.0
         self.truck.set_parking_brake()
-        self.ctx.push_state(TimedMessageState(
-            self.ctx,
-            title="Loading cargo",
-            message=(
-                f"Loading {self.job.weight_tons:.0f} tons of "
-                f"{self.job.cargo.label} at {self.facility}. "
-                "Trailer doors open, dock crew working, brakes set."
-            ),
-            status="Loading cargo. Please wait.",
-            seconds=PICKUP_LOADING_WAIT_S,
-            on_complete=self._finish_load,
-            sound_key="poi/dock_and_deliver"))
+        self.ctx.push_state(
+            TimedMessageState(
+                self.ctx,
+                title="Loading cargo",
+                message=(
+                    f"Loading {self.job.weight_tons:.0f} tons of "
+                    f"{self.job.cargo.label} at {self.facility}. "
+                    "Trailer doors open, dock crew working, brakes set."
+                ),
+                status="Loading cargo. Please wait.",
+                seconds=PICKUP_LOADING_WAIT_S,
+                on_complete=self._finish_load,
+                sound_key="poi/dock_and_deliver",
+            )
+        )
 
     def _finish_load(self) -> None:
         p = self.ctx.profile
         start = p.game_hours
         p.game_hours += PICKUP_LOADING_MIN / 60.0
-        p.duty_log.record("on_duty_not_driving", start, p.game_hours,
-                          self.facility, "loading")
+        p.duty_log.record("on_duty_not_driving", start, p.game_hours, self.facility, "loading")
         p.hos.on_duty(PICKUP_LOADING_MIN)
         self.loaded = True
         self._just_loaded = True
@@ -253,8 +283,7 @@ class PickupFacilityState(MenuState):
         if not self.loaded:
             self.ctx.say("Load the cargo before departing for the destination.")
             return
-        routes = self.ctx.world.supported_route_options(
-            self.job.origin, self.job.destination)
+        routes = self.ctx.world.supported_route_options(self.job.origin, self.job.destination)
         if not routes:
             self.ctx.audio.play("ui/error")
             self.ctx.say("Dispatch cannot find a navigation itinerary for this load.")
@@ -269,45 +298,51 @@ class PickupFacilityState(MenuState):
                 routes[0],
                 air_brake=self.truck.air_brake_snapshot(),
                 engine_on=self.truck.engine_on,
-                lead=(f"Dispatch routed you to "
-                      f"{self.job.destination_facility_text()}. "),
+                lead=(f"Dispatch routed you to {self.job.destination_facility_text()}. "),
             )
             return
         self.ctx.say(
             f"Route planning to {self.job.destination_facility_text()}. "
             f"{len(routes)} realistic supported route "
             f"option{'s' if len(routes) != 1 else ''} available.",
-            interrupt=True)
-        self.ctx.push_state(RouteSelectState(
-            self.ctx,
-            self.job,
-            routes,
-            back_label="Back to pickup facility",
-            air_brake=self.truck.air_brake_snapshot(),
-            engine_on=self.truck.engine_on,
-        ))
+            interrupt=True,
+        )
+        self.ctx.push_state(
+            RouteSelectState(
+                self.ctx,
+                self.job,
+                routes,
+                back_label="Back to pickup facility",
+                air_brake=self.truck.air_brake_snapshot(),
+                engine_on=self.truck.engine_on,
+            )
+        )
 
     def _plan_route(self) -> None:
         self._depart_for_destination()
 
     def _status(self) -> None:
-        state = ("loaded and sealed" if self.loaded else
-                 "checked in, waiting to load" if self.checked_in else
-                 "not checked in")
+        state = (
+            "loaded and sealed"
+            if self.loaded
+            else "checked in, waiting to load"
+            if self.checked_in
+            else "not checked in"
+        )
         brake = "parking brake set" if self.truck.parking_brake else "parking brake released"
         self.ctx.say(
             f"Pickup at {self.facility}: {state}. "
             f"Cargo is {self.job.weight_tons:.0f} tons of {self.job.cargo.label}. "
             f"Destination is {self.job.destination_facility_text()}. "
             f"Current speed {self.ctx.settings.speed_text(self.truck.speed_mph)}. "
-            f"Air pressure {self.truck.air_pressure_psi:.0f} psi, {brake}.")
+            f"Air pressure {self.truck.air_pressure_psi:.0f} psi, {brake}."
+        )
 
     def _save_and_quit(self) -> None:
         from .main_menu import MainMenuState
 
         self._save_state()
-        self.ctx.say("Saved. Your pickup objective will resume here.",
-                     interrupt=True)
+        self.ctx.say("Saved. Your pickup objective will resume here.", interrupt=True)
         self.ctx.reset_to(MainMenuState(self.ctx))
 
     def _cancel(self) -> None:
@@ -317,16 +352,20 @@ class PickupFacilityState(MenuState):
         self.ctx.profile.dispatch_board_cache = None
         self.ctx.save_profile()
         terminal = self.ctx.world.home_terminal(self.ctx.profile.current_city)
-        self.ctx.say(f"Pickup canceled. Returned to {terminal.name}.",
-                     interrupt=True)
+        self.ctx.say(f"Pickup canceled. Returned to {terminal.name}.", interrupt=True)
         self.ctx.reset_to(CityMenuState(self.ctx))
 
     def go_back(self) -> None:
         self._status()
 
     def lines(self) -> list[str]:
-        state = ("Loaded and sealed" if self.loaded else
-                 "Checked in" if self.checked_in else "Check-in required")
+        state = (
+            "Loaded and sealed"
+            if self.loaded
+            else "Checked in"
+            if self.checked_in
+            else "Check-in required"
+        )
         return [
             self.title,
             f"Facility: {self.facility}",
@@ -337,22 +376,26 @@ class PickupFacilityState(MenuState):
             f"Air: {self.truck.air_pressure_psi:.0f} psi   "
             f"{'parking set' if self.truck.parking_brake else 'parking released'}",
             "",
-        ] + [
-            ("> " if i == self.index else "  ") + item.text
-            for i, item in enumerate(self.items)
-        ]
+        ] + [("> " if i == self.index else "  ") + item.text for i, item in enumerate(self.items)]
 
 
 class RouteSelectState(MenuState):
     title = "Route planning"
-    intro_help = ("Pick a route. Shorter routes are faster but may cross mountains. "
-                  "Press W on a route to hear the weather forecast along it. "
-                  "Enter starts the drive.")
+    intro_help = (
+        "Pick a route. Shorter routes are faster but may cross mountains. "
+        "Press W on a route to hear the weather forecast along it. "
+        "Enter starts the drive."
+    )
 
-    def __init__(self, ctx, job: Job, routes: list[Route],
-                 back_label: str = "Back to dispatch board",
-                 air_brake=None,
-                 engine_on: bool = False) -> None:
+    def __init__(
+        self,
+        ctx,
+        job: Job,
+        routes: list[Route],
+        back_label: str = "Back to dispatch board",
+        air_brake=None,
+        engine_on: bool = False,
+    ) -> None:
         super().__init__(ctx)
         self.job = job
         self.routes = routes
@@ -367,28 +410,38 @@ class RouteSelectState(MenuState):
                     provider.request(city.name, city.lat, city.lon)
 
     def announce_entry(self) -> None:
-        self.ctx.say(f"Route planning to {self.job.destination}. "
-                     f"{len(self.routes)} route option{'s' if len(self.routes) != 1 else ''}. "
-                     + self.current_text())
+        self.ctx.say(
+            f"Route planning to {self.job.destination}. "
+            f"{len(self.routes)} route option{'s' if len(self.routes) != 1 else ''}. "
+            + self.current_text()
+        )
 
     def build_items(self) -> list[MenuItem]:
         items = []
         for i, route in enumerate(self.routes):
             label = f"Route {i + 1}: {route.describe()}. {route_planning_summary(route)}"
-            items.append(MenuItem(label, lambda r=route: self._start(r),
-                                  help=(
-                                      "Via "
-                                      + ", ".join(route.cities[1:-1] or ["no major cities"])
-                                      + ". Press W for weather."
-                                  )))
+            items.append(
+                MenuItem(
+                    label,
+                    lambda r=route: self._start(r),
+                    help=(
+                        "Via "
+                        + ", ".join(route.cities[1:-1] or ["no major cities"])
+                        + ". Press W for weather."
+                    ),
+                )
+            )
         items.append(MenuItem(self.back_label, self.go_back))
         return items
 
     def handle_event(self, event) -> None:
         import pygame
 
-        if (event.type == pygame.KEYDOWN and event.key == pygame.K_w
-                and self.index < len(self.routes)):
+        if (
+            event.type == pygame.KEYDOWN
+            and event.key == pygame.K_w
+            and self.index < len(self.routes)
+        ):
             self._speak_forecast(self.routes[self.index])
             return
         super().handle_event(event)
@@ -406,8 +459,9 @@ class RouteSelectState(MenuState):
             if parts:
                 self.ctx.say("Live weather along the route. " + ". ".join(parts) + ".")
                 return
-            self.ctx.say("Live weather is still loading. Try again in a moment, "
-                         "or check V while driving.")
+            self.ctx.say(
+                "Live weather is still loading. Try again in a moment, or check V while driving."
+            )
             return
         regions: list[str] = []
         for city_name in route.cities:

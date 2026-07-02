@@ -30,8 +30,9 @@ def _inline(text: str) -> str:
     text = html.escape(text, quote=False)
     text = _CODE.sub(r"<code>\1</code>", text)
     text = _BOLD.sub(r"<strong>\1</strong>", text)
-    text = _LINK.sub(lambda m: f'<a href="{html.escape(m.group(2), quote=True)}">'
-                               f"{m.group(1)}</a>", text)
+    text = _LINK.sub(
+        lambda m: f'<a href="{html.escape(m.group(2), quote=True)}">{m.group(1)}</a>', text
+    )
     return text
 
 
@@ -74,9 +75,11 @@ def _render_list(lines: list[str], i: int, ordered: bool) -> tuple[int, str]:
 
 
 def _is_table_start(lines: list[str], i: int) -> bool:
-    return (lines[i].strip().startswith("|")
-            and i + 1 < len(lines)
-            and bool(_TABLE_SEP.fullmatch(lines[i + 1].strip())))
+    return (
+        lines[i].strip().startswith("|")
+        and i + 1 < len(lines)
+        and bool(_TABLE_SEP.fullmatch(lines[i + 1].strip()))
+    )
 
 
 def render_body(md_text: str) -> str:

@@ -138,4 +138,3 @@ def open_driver_app(app, label):
     apps.handle_event(key_event(pygame.K_RETURN))
     assert isinstance(app.state, DriverAppScreenState)
     return app.state
-

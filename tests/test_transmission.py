@@ -34,7 +34,7 @@ def test_no_torque_path_while_clutch_pressed_or_shifting():
     tr.clutch = 1.0
     tr.request_gear(1)
     assert tr.drive_ratio == 0.0  # still shifting + clutch in
-    tr.update(1.0)                # shift completes
+    tr.update(1.0)  # shift completes
     assert tr.drive_ratio == 0.0  # clutch still pressed
     tr.clutch = 0.0
     assert tr.drive_ratio > 0.0
@@ -81,10 +81,8 @@ def test_manual_rejected_in_automatic_mode():
 
 def test_auto_upshifts_at_high_rpm():
     tr = Transmission(automatic=True, gear=3)
-    assert tr.auto_update(AUTO_LOW_GEAR_UPSHIFT_RPM, throttle=0.8,
-                          moving=True) is None
-    assert tr.auto_update(AUTO_LOW_GEAR_UPSHIFT_RPM + 1, throttle=0.8,
-                          moving=True) == 4
+    assert tr.auto_update(AUTO_LOW_GEAR_UPSHIFT_RPM, throttle=0.8, moving=True) is None
+    assert tr.auto_update(AUTO_LOW_GEAR_UPSHIFT_RPM + 1, throttle=0.8, moving=True) == 4
 
 
 def test_auto_downshifts_at_low_rpm():
@@ -122,8 +120,10 @@ def test_auto_waits_for_shift_to_finish():
     tr = Transmission(automatic=True, gear=3)
     tr.auto_update(AUTO_LOW_GEAR_UPSHIFT_RPM + 1, 0.8, True)
     assert tr.shifting
-    assert tr.auto_update(AUTO_LOW_GEAR_UPSHIFT_RPM + 1, 0.8, True) is None
-    tr.update(1.0)
+    assert tr.auto_update(1800, 0.8, True) is None
+    tr.update(0.8)
+    assert tr.shifting
+    tr.update(0.3)
     assert not tr.shifting
 
 

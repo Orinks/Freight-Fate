@@ -13,10 +13,9 @@ def _menu(announce_position: bool = True) -> MenuState:
                 MenuItem("Sleep 10 hours", lambda: None),
             ]
 
-    ctx = SimpleNamespace(
-        settings=SimpleNamespace(announce_menu_position=announce_position))
+    ctx = SimpleNamespace(settings=SimpleNamespace(announce_menu_position=announce_position))
     m = _Menu(ctx)
-    m.refresh()                       # populate items without a real ctx
+    m.refresh()  # populate items without a real ctx
     return m
 
 
@@ -39,6 +38,6 @@ def test_menu_readout_never_doubles_the_period():
 
 def test_menu_position_can_be_suppressed():
     m = _menu(announce_position=False)
-    assert m.current_text() == "Delivered 16 tons to Boston."   # no "1 of 2"
+    assert m.current_text() == "Delivered 16 tons to Boston."  # no "1 of 2"
     m.index = 1
     assert m.current_text() == "Sleep 10 hours."

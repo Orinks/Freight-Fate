@@ -150,7 +150,9 @@ def test_terminal_career_plan_speaks_senior_company_level_guidance(monkeypatch):
         app.ctx.profile.career.reputation = 86
 
         app.push_state(CityMenuState(app.ctx))
-        career_item = next(i for i, item in enumerate(app.state.items) if item.text == "Career plan")
+        career_item = next(
+            i for i, item in enumerate(app.state.items) if item.text == "Career plan"
+        )
         while app.state.index != career_item:
             app.state.handle_event(key_event(pygame.K_DOWN))
         app.state.handle_event(key_event(pygame.K_RETURN))
@@ -179,20 +181,23 @@ def test_dispatch_board_speaks_objective_and_marks_recommended_job(monkeypatch):
         app.ctx.profile.career.deliveries = 12
         app.ctx.profile.career.reputation = 86
 
-        app.push_state(JobBoardState(app.ctx, [
-            _job(miles=180.0, pay=1200.0),
-            _job(miles=70.0, pay=700.0),
-        ]))
+        app.push_state(
+            JobBoardState(
+                app.ctx,
+                [
+                    _job(miles=180.0, pay=1200.0),
+                    _job(miles=70.0, pay=700.0),
+                ],
+            )
+        )
 
         assert "Career objective: Run like a senior company driver" in spoken[-1]
         assert "pick your own loads" in spoken[-1]
         assert "routing is still assigned" in spoken[-1]
         recommended = next(
-            item.text for item in app.state.items
-            if item.text.startswith("Recommended dispatch")
+            item.text for item in app.state.items if item.text.startswith("Recommended dispatch")
         )
-        assert recommended.startswith(
-            "Recommended dispatch, senior company lane: Job 2 of 2:")
+        assert recommended.startswith("Recommended dispatch, senior company lane: Job 2 of 2:")
         assert not app.state.items[0].text.startswith("Recommended dispatch")
     finally:
         app.shutdown()
@@ -216,9 +221,14 @@ def test_dispatch_board_speaks_authority_level_recommendation(monkeypatch):
         app.ctx.profile.career.deliveries = 80
         app.ctx.profile.career.reputation = 94
 
-        app.push_state(JobBoardState(app.ctx, [
-            _job(miles=120.0, pay=1800.0),
-        ]))
+        app.push_state(
+            JobBoardState(
+                app.ctx,
+                [
+                    _job(miles=120.0, pay=1800.0),
+                ],
+            )
+        )
 
         assert "Career objective: Grow a freight business" in spoken[-1]
         assert "direct freight" in spoken[-1]
@@ -268,9 +278,7 @@ def test_out_of_sync_company_terminal_entry_uses_first_week_guidance(monkeypatch
     spoken: list[str] = []
     app = App()
     try:
-        monkeypatch.setattr(
-            app.ctx, "say", lambda text, interrupt=True: spoken.append(text)
-        )
+        monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: spoken.append(text))
         app.ctx.profile = Profile(name="First Week", current_city="Chicago")
         app.ctx.profile.career.deliveries = 1
 
@@ -296,9 +304,7 @@ def test_dispatch_board_recommendation_label_is_spoken_and_visible(monkeypatch):
     spoken: list[str] = []
     app = App()
     try:
-        monkeypatch.setattr(
-            app.ctx, "say", lambda text, interrupt=True: spoken.append(text)
-        )
+        monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: spoken.append(text))
         app.ctx.profile = Profile(name="Board Plan", current_city="Chicago")
         app.ctx.profile.achievements.append("first_dispatch")
         app.ctx.profile.career.xp = LEVEL_XP[9]
@@ -337,20 +343,15 @@ def test_dispatch_board_recommendation_label_is_spoken_and_visible(monkeypatch):
         assert "First-day objective" not in spoken[-1]
         assert "senior company lane" in spoken[-1]
         assert "Recommended dispatch: senior company lane" not in spoken[-1]
-        assert (
-            "Recommended dispatch, senior company lane: Job 1 of 2:"
-            in spoken[-1]
-        )
-        assert (
-            "Recommended dispatch is Recommended dispatch"
-            not in spoken[-1]
-        )
+        assert "Recommended dispatch, senior company lane: Job 1 of 2:" in spoken[-1]
+        assert "Recommended dispatch is Recommended dispatch" not in spoken[-1]
         assert app.state.index == 0
         assert app.state.current_text().startswith(
             "Recommended dispatch, senior company lane: Job 1 of 2:"
         )
         recommended = [
-            item.text for item in app.state.items
+            item.text
+            for item in app.state.items
             if item.text.startswith("Recommended dispatch, senior company lane:")
         ]
         assert recommended == [app.state.items[0].text]
@@ -391,9 +392,7 @@ def test_out_of_sync_owner_operator_uses_career_guidance(monkeypatch):
     spoken: list[str] = []
     app = App()
     try:
-        monkeypatch.setattr(
-            app.ctx, "say", lambda text, interrupt=True: spoken.append(text)
-        )
+        monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: spoken.append(text))
         app.ctx.profile = Profile(name="Owner Week", current_city="Chicago")
         apply_start_option(app.ctx.profile, start_option(OWNER_OPERATOR_START_KEY))
 
@@ -407,10 +406,15 @@ def test_out_of_sync_owner_operator_uses_career_guidance(monkeypatch):
         assert "First-day briefing" not in labels
         assert "Career plan" in labels
 
-        app.push_state(JobBoardState(app.ctx, [
-            _job(miles=180.0, pay=1200.0),
-            _job(miles=70.0, pay=1800.0),
-        ]))
+        app.push_state(
+            JobBoardState(
+                app.ctx,
+                [
+                    _job(miles=180.0, pay=1200.0),
+                    _job(miles=70.0, pay=1800.0),
+                ],
+            )
+        )
 
         board_entry = spoken[-1]
         assert "First-day objective" not in board_entry
@@ -433,10 +437,15 @@ def test_owner_operator_first_day_dispatch_board_keeps_business_cost_guidance(mo
         app.ctx.profile.owned_trucks = ["rig"]
         app.ctx.profile.money = 12_000.0
 
-        app.push_state(JobBoardState(app.ctx, [
-            _job(miles=180.0, pay=1200.0),
-            _job(miles=70.0, pay=1800.0),
-        ]))
+        app.push_state(
+            JobBoardState(
+                app.ctx,
+                [
+                    _job(miles=180.0, pay=1200.0),
+                    _job(miles=70.0, pay=1800.0),
+                ],
+            )
+        )
 
         entry = spoken[-1]
         assert "owner-operator gross revenue" in entry

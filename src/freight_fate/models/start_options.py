@@ -249,9 +249,7 @@ def apply_start_option(profile, option: CareerStartOption) -> None:
     profile.truck = option.starting_truck
     profile.owned_trucks = list(option.owned_trucks)
     profile.owned_trailers = []
-    profile.trailer_programs = (
-        list(DEFAULT_TRAILER_PROGRAMS) if option.is_owner_operator else []
-    )
+    profile.trailer_programs = list(DEFAULT_TRAILER_PROGRAMS) if option.is_owner_operator else []
     profile.upgrades = {}
     profile.truck_fuel_gal = option.truck_fuel_gal
     profile.truck_damage_pct = option.truck_damage_pct

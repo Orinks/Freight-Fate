@@ -8,9 +8,17 @@ def _driving(app):
 
     app.ctx.profile = Profile(name="Help", current_city="Buffalo")
     route = app.ctx.world.supported_route("Buffalo", "Rochester")
-    job = Job(CARGO_CATALOG["general"], 12.0, "Buffalo", "company yard",
-              "Rochester", route.miles, 1000.0, 12.0,
-              destination_location="Rochester freight market")
+    job = Job(
+        CARGO_CATALOG["general"],
+        12.0,
+        "Buffalo",
+        "company yard",
+        "Rochester",
+        route.miles,
+        1000.0,
+        12.0,
+        destination_location="Rochester freight market",
+    )
     return DrivingState(app.ctx, job, route, phase="delivery")
 
 
@@ -29,6 +37,7 @@ def test_controls_help_page_points_at_the_driving_keys():
     assert "U speaks what is coming up" in joined
     assert any("X" in line and "signal" in line.lower() for line in lines)
     assert all("X takes the next announced exit" not in line for line in lines)
+    assert "Left or Right Control stops the driving event voice" in joined
 
 
 def test_help_state_opens_to_a_chosen_page():

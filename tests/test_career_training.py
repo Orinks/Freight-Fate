@@ -9,9 +9,7 @@ from freight_fate.models.profile import Profile
 from freight_fate.models.start_options import apply_start_option, start_option
 
 
-def _profile(
-    deliveries: int, reputation: float = 75.0, carrier_key: str = "northstar"
-) -> Profile:
+def _profile(deliveries: int, reputation: float = 75.0, carrier_key: str = "northstar") -> Profile:
     profile = Profile(name="Training", current_city="Chicago")
     apply_start_option(profile, start_option(carrier_key))
     profile.career.deliveries = deliveries
@@ -33,30 +31,12 @@ def _job(miles: float, deadline_h: float = 8.0, cargo: str = "general") -> Job:
 
 
 def test_company_training_stage_boundaries_do_not_depend_on_perfect_service():
-    assert (
-        company_training_stage(_profile(0, reputation=35.0))
-        is TrainingStage.FIRST_DISPATCH
-    )
-    assert (
-        company_training_stage(_profile(1, reputation=35.0))
-        is TrainingStage.TRAINER_REMINDERS
-    )
-    assert (
-        company_training_stage(_profile(2, reputation=35.0))
-        is TrainingStage.TRAINER_REMINDERS
-    )
-    assert (
-        company_training_stage(_profile(3, reputation=35.0))
-        is TrainingStage.TRUST_OPENING
-    )
-    assert (
-        company_training_stage(_profile(9, reputation=35.0))
-        is TrainingStage.TRUST_BUILDING
-    )
-    assert (
-        company_training_stage(_profile(10, reputation=75.0))
-        is TrainingStage.NORMAL_GUIDANCE
-    )
+    assert company_training_stage(_profile(0, reputation=35.0)) is TrainingStage.FIRST_DISPATCH
+    assert company_training_stage(_profile(1, reputation=35.0)) is TrainingStage.TRAINER_REMINDERS
+    assert company_training_stage(_profile(2, reputation=35.0)) is TrainingStage.TRAINER_REMINDERS
+    assert company_training_stage(_profile(3, reputation=35.0)) is TrainingStage.TRUST_OPENING
+    assert company_training_stage(_profile(9, reputation=35.0)) is TrainingStage.TRUST_BUILDING
+    assert company_training_stage(_profile(10, reputation=75.0)) is TrainingStage.NORMAL_GUIDANCE
 
 
 def test_training_guidance_uses_carrier_flavor_without_probation_wording():
@@ -89,9 +69,9 @@ def test_first_dispatch_recommendation_prefers_short_forgiving_standard_load():
     short_standard = _job(70.0, deadline_h=8.0, cargo="general")
     longer_tight = _job(220.0, deadline_h=4.0, cargo="electronics")
 
-    assert training_recommendation_score(
-        profile, short_standard
-    ) < training_recommendation_score(profile, longer_tight)
+    assert training_recommendation_score(profile, short_standard) < training_recommendation_score(
+        profile, longer_tight
+    )
 
 
 def test_trust_building_recommendation_allows_broader_but_still_values_time_margin():
@@ -100,6 +80,6 @@ def test_trust_building_recommendation_allows_broader_but_still_values_time_marg
     roomy_regional = _job(180.0, deadline_h=10.0, cargo="general")
     tight_short = _job(90.0, deadline_h=2.0, cargo="general")
 
-    assert training_recommendation_score(
-        profile, roomy_regional
-    ) < training_recommendation_score(profile, tight_short)
+    assert training_recommendation_score(profile, roomy_regional) < training_recommendation_score(
+        profile, tight_short
+    )

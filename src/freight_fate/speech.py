@@ -30,8 +30,9 @@ def _usable(backend) -> bool:
         features = backend.features
     except Exception:
         return False
-    return bool(features.is_supported_at_runtime
-                and (features.supports_output or features.supports_speak))
+    return bool(
+        features.is_supported_at_runtime and (features.supports_output or features.supports_speak)
+    )
 
 
 def pick_backend(ctx, override: str | None = None):
@@ -48,18 +49,24 @@ def pick_backend(ctx, override: str | None = None):
             backend = ctx.acquire(ctx.id_of(override))
             if _usable(backend):
                 return backend
-            log.warning("Requested speech backend %s is not usable; "
-                        "falling back to automatic choice", override)
+            log.warning(
+                "Requested speech backend %s is not usable; falling back to automatic choice",
+                override,
+            )
         except Exception:
-            log.warning("Requested speech backend %s not found; "
-                        "falling back to automatic choice", override,
-                        exc_info=True)
+            log.warning(
+                "Requested speech backend %s not found; falling back to automatic choice",
+                override,
+                exc_info=True,
+            )
     try:
         best = ctx.acquire_best()
         if _usable(best):
             return best
-        log.info("Prism's preferred backend %s is not running; "
-                 "trying the others", getattr(best, "name", "?"))
+        log.info(
+            "Prism's preferred backend %s is not running; trying the others",
+            getattr(best, "name", "?"),
+        )
     except Exception:
         log.debug("acquire_best failed", exc_info=True)
     try:
@@ -131,12 +138,10 @@ class Speech:
             import prism
 
             self._ctx = prism.Context()
-            self._backend = pick_backend(
-                self._ctx, os.environ.get("FREIGHT_FATE_SPEECH_BACKEND"))
+            self._backend = pick_backend(self._ctx, os.environ.get("FREIGHT_FATE_SPEECH_BACKEND"))
             self._prism_error = prism.PrismError
             if self._backend is None:
-                log.warning("No usable speech backend on this machine; "
-                            "continuing silently")
+                log.warning("No usable speech backend on this machine; continuing silently")
                 self._ctx = None
             else:
                 log.info("Speech backend: %s", self._backend.name)
@@ -191,8 +196,7 @@ class Speech:
             return False
 
     def _any_supports(self, feature: str) -> bool:
-        return any(self._backend_supports(backend, feature)
-                   for backend in self._backends())
+        return any(self._backend_supports(backend, feature) for backend in self._backends())
 
     @property
     def supports_rate(self) -> bool:
@@ -262,17 +266,24 @@ class Speech:
         for backend in self._backends():
             try:
                 features = backend.features
-                if (features.supports_set_voice
-                        and features.supports_count_voices
-                        and features.supports_get_voice_name):
-                    return [backend.get_voice_name(i)
-                            for i in range(backend.voices_count)]
+                if (
+                    features.supports_set_voice
+                    and features.supports_count_voices
+                    and features.supports_get_voice_name
+                ):
+                    return [backend.get_voice_name(i) for i in range(backend.voices_count)]
             except Exception:
                 continue
         return []
 
-    def configure(self, *, rate: float | None = None, pitch: float | None = None,
-                  volume: float | None = None, voice: str | None = None) -> None:
+    def configure(
+        self,
+        *,
+        rate: float | None = None,
+        pitch: float | None = None,
+        volume: float | None = None,
+        voice: str | None = None,
+    ) -> None:
         """Push speech parameters to every backend that supports them.
 
         Unsupported parameters (and backends) are skipped silently, and any
@@ -297,19 +308,26 @@ class Speech:
             try:
                 setattr(backend, attr, float(value))
             except Exception:
-                log.warning("Could not set speech %s on %s", attr,
-                            getattr(backend, "name", "?"), exc_info=True)
-        if voice and (features.supports_set_voice
-                      and features.supports_count_voices
-                      and features.supports_get_voice_name):
+                log.warning(
+                    "Could not set speech %s on %s",
+                    attr,
+                    getattr(backend, "name", "?"),
+                    exc_info=True,
+                )
+        if voice and (
+            features.supports_set_voice
+            and features.supports_count_voices
+            and features.supports_get_voice_name
+        ):
             try:
                 for i in range(backend.voices_count):
                     if backend.get_voice_name(i) == voice:
                         backend.voice = i
                         break
             except Exception:
-                log.warning("Could not set speech voice on %s",
-                            getattr(backend, "name", "?"), exc_info=True)
+                log.warning(
+                    "Could not set speech voice on %s", getattr(backend, "name", "?"), exc_info=True
+                )
 
     def _speak_with_backend(self, backend, text: str, interrupt: bool) -> bool:
         try:
@@ -340,11 +358,17 @@ class Speech:
             return
         backend = self._event_backend
         if backend is None:
-            self.say(text, interrupt)
+            if interrupt:
+                self.stop_main()
+            self.say(text, interrupt=False)
             return
+        if interrupt:
+            self.stop_event()
         if not self._speak_with_backend(backend, text, interrupt):
             self._event_backend = None
-            self.say(text, interrupt)
+            if interrupt:
+                self.stop_main()
+            self.say(text, interrupt=False)
 
     _PREVIEW_FEATURES = {
         "speech_rate": "supports_set_rate",
@@ -353,8 +377,7 @@ class Speech:
         "speech_voice": "supports_set_voice",
     }
 
-    def say_adjustment_preview(
-            self, setting: str, text: str, interrupt: bool = True) -> bool:
+    def say_adjustment_preview(self, setting: str, text: str, interrupt: bool = True) -> bool:
         """Speak a settings preview through the voice affected by the setting.
 
         If the main screen reader cannot be configured but a separate SAPI or
@@ -368,16 +391,28 @@ class Speech:
                 return self._speak_with_backend(backend, text, interrupt)
         return False
 
+    @staticmethod
+    def _stop_backend(backend) -> None:
+        if backend is None:
+            return
+        try:
+            if backend.features.supports_stop:
+                backend.stop()
+        except Exception:
+            pass
+
+    def stop_main(self) -> None:
+        """Silence in-progress main speech without cutting off event speech."""
+        self._stop_backend(self._backend)
+
+    def stop_event(self) -> None:
+        """Silence in-progress event speech without cutting off main speech."""
+        self._stop_backend(self._event_backend)
+
     def stop(self) -> None:
         """Silence any in-progress speech on both channels."""
         for backend in (self._backend, self._event_backend):
-            if backend is None:
-                continue
-            try:
-                if backend.features.supports_stop:
-                    backend.stop()
-            except Exception:
-                pass
+            self._stop_backend(backend)
 
     def shutdown(self) -> None:
         """Release the backends and context. Safe to call more than once."""
