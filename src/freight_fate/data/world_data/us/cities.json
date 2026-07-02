@@ -2064,7 +2064,7 @@
     "Evansville": {
       "lat": 37.97476,
       "lon": -87.55585,
-      "region": "great_lakes",
+      "region": "mid_south",
       "state": "Indiana",
       "locations": []
     },
@@ -2402,7 +2402,7 @@
     },
     "Erie": {
       "state": "Pennsylvania",
-      "region": "appalachia",
+      "region": "great_lakes",
       "locations": [
         {
           "name": "Port of Erie",
