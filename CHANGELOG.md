@@ -118,6 +118,7 @@
   equivalent nightly.
 
 ### Changed
+- **During a manual drive, use shift+W to shift up gears, and shift+q to shift down gears .
 - **Hours-of-service rules are more realistic.** Realistic mode now tracks the
   11-hour driving limit, 14-hour duty window, 30-minute break requirement,
   60/70-hour weekly limits, roadside inspections, and legal sleeper-berth split
