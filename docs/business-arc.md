@@ -117,7 +117,7 @@ the company-driver game where it was a no-op.
 | 5 | Regional Regular | Broader regional lane variety while still company-paid. |
 | 6 | Experienced Company Driver | Better company-driver lanes. |
 | 7 | Long-Haul Company Driver | Long-haul dispatch becomes routine. |
-| 8 | Heavy Freight Driver | More machinery, construction, and bulk opportunities. |
+| 8 | Heavy Freight Driver | Load choice from the dispatch board unlocks, with more machinery, construction, and bulk opportunities. |
 | 9 | High-Value Company Driver | Higher-consequence freight trust. |
 | 10 | Lead Company Driver | Senior company-driver status. |
 | 11 | Specialized Company Driver | Endorsements and careful service carry more weight. |

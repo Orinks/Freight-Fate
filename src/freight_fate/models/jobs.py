@@ -371,6 +371,12 @@ def make_reposition_job(world: World, origin: str, destination: str) -> Job | No
 # Career-arc distance caps: short regional hops while learning the ropes,
 # cross-country hauls unlocking as a progression reward around level 4-5.
 LEVEL_DISTANCE_CAPS = {1: 300.0, 2: 450.0, 3: 650.0, 4: 850.0, 5: 1200.0}
+# Above level 5 the cap keeps growing gradually toward the longest supported
+# coast-to-coast corridor (~2,800 miles). The old 500-mile-per-level growth
+# blew past every real U.S. route by level 12, so haul length stopped feeling
+# like progression; this keeps longer freight unlocking into the late teens.
+LEVEL_DISTANCE_CAP_STEP_MI = 120.0
+MAX_DISPATCH_DISTANCE_MI = 3000.0
 LONG_HAUL_MILES = 600.0  # what counts as a cross-country haul
 HOOKUP_FEE = 120.0  # flat load/unload fee keeping short hops worthwhile
 MINIMUM_PAY_BY_LEVEL = {
@@ -656,7 +662,10 @@ class JobBoard:
     def distance_cap(level: int) -> float:
         if level in LEVEL_DISTANCE_CAPS:
             return LEVEL_DISTANCE_CAPS[level]
-        return LEVEL_DISTANCE_CAPS[5] + 500.0 * (level - 5)
+        return min(
+            MAX_DISPATCH_DISTANCE_MI,
+            LEVEL_DISTANCE_CAPS[5] + LEVEL_DISTANCE_CAP_STEP_MI * (level - 5),
+        )
 
     def offers(
         self,

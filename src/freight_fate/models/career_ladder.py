@@ -71,7 +71,8 @@ CAREER_RANKS: tuple[CareerRank, ...] = (
         8,
         "Heavy Freight Driver",
         "Company driver",
-        "More machinery, construction, and bulk opportunities.",
+        "Dispatch now lets you choose your own loads from the board, "
+        "with more machinery, construction, and bulk opportunities.",
         "Trusted with heavier freight while the carrier covers operating costs.",
     ),
     CareerRank(

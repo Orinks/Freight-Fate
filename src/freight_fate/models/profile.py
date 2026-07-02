@@ -210,6 +210,13 @@ def profiles_dir() -> Path:
     return d
 
 
+def _known_fields(cls, payload) -> dict:
+    """The subset of a nested save payload this build's dataclass accepts."""
+    if not isinstance(payload, dict):
+        return {}
+    return {k: v for k, v in payload.items() if k in cls.__dataclass_fields__}
+
+
 class ProfileIntegrityError(ValueError):
     """A save file failed its integrity signature check."""
 
@@ -313,8 +320,11 @@ class Profile:
         d.pop("version", None)
         d.pop(SIGNATURE_FIELD, None)
         d.pop(SIGNATURE_VERSION_FIELD, None)
-        career = Career(**d.pop("career", {}))
-        market = Market(**d.pop("market", {}))
+        # Nested payloads keep only the fields this build knows: saves written
+        # by a newer snapshot (or an older one with since-removed fields) load
+        # instead of crashing on an unexpected keyword.
+        career = Career(**_known_fields(Career, d.pop("career", {})))
+        market = Market(**_known_fields(Market, d.pop("market", {})))
         hos = HosClock.from_dict(d.pop("hos", None))  # absent in v2 saves: fresh clock
         duty_log = DutyLog.from_dict(d.pop("duty_log", None))
         known = {

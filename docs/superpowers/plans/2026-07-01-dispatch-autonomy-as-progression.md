@@ -127,8 +127,12 @@ Add one small, pure policy model — `dispatch_policy(profile) -> DispatchPolicy
 
 ## Out of scope (follow-ups noted from the same playtest)
 
-- **Distance-cap recompression:** `JobBoard.distance_cap(level)` grows to 4,700 mi by L12 and 13,700 by L30 — larger than any U.S. route, so haul length stops progressing after ~L8. Recompress separately (e.g., L1≈250 → L30≈2,800).
-- **Guidance de-duplication:** L1/L6 and L25/L30 currently share guidance text; give each rank a distinct concrete objective.
+- ~~**Distance-cap recompression**~~ Done in the nightly-prep pass: growth past
+  level 5 is now 120 mi/level capped at 3,000 mi (`MAX_DISPATCH_DISTANCE_MI`),
+  so haul length progresses into the late teens.
+- **Guidance de-duplication:** partially addressed — levels 8-9 now have their
+  own "Choose your own freight" band and the 4-7 band names the level-8
+  unlock; L25/L30 still share text.
 - Detention/appointment windows, persistent 70-hour HOS clock, and owner-operator fuel/deadhead cash pressure — each its own plan.
 
 ## Testing strategy

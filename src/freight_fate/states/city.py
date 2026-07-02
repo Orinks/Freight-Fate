@@ -680,10 +680,10 @@ class JobBoardState(MenuState):
         super().__init__(ctx)
         self.jobs = jobs
         self._confirm_risky_job: Job | None = None
+        self._session_declined: set[int] = set()
         self._assigned_queue: list[int] = (
             self._assignment_queue() if dispatch_policy(ctx.profile).assigns_load else []
         )
-        self._assigned_pos = 0
         if not self.assigned_mode:
             recommended = self._recommended_job_index()
             if recommended is not None and self._recommendation_label() is not None:
@@ -850,8 +850,27 @@ class JobBoardState(MenuState):
         return items
 
     def _assigned_job(self) -> Job:
-        queue = self._assigned_queue
-        return self.jobs[queue[self._assigned_pos % len(queue)]]
+        return self.jobs[self._assigned_queue[0]]
+
+    def _declined_indices(self) -> set[int]:
+        """Board indices dispatch already re-drew past, remembered with the
+        cached board so leaving and reopening does not re-offer them."""
+        declined = set(self._session_declined)
+        cache = getattr(self.ctx.profile, "dispatch_board_cache", None)
+        if isinstance(cache, dict):
+            for index in cache.get("declined", ()):
+                if isinstance(index, int | float):
+                    declined.add(int(index))
+        return declined
+
+    def _remember_decline(self, index: int) -> None:
+        self._session_declined.add(index)
+        cache = getattr(self.ctx.profile, "dispatch_board_cache", None)
+        if isinstance(cache, dict):
+            declined = [int(i) for i in cache.get("declined", ()) if isinstance(i, int | float)]
+            if index not in declined:
+                declined.append(index)
+            cache["declined"] = declined
 
     def _decline_assignment(self) -> None:
         p = self.ctx.profile
@@ -864,7 +883,8 @@ class JobBoardState(MenuState):
             return
         p.career.dispatch_declines_used += 1
         p.career.reputation = max(0.0, p.career.reputation - DECLINE_REPUTATION_PENALTY)
-        self._assigned_pos += 1
+        self._remember_decline(self._assigned_queue[0])
+        self._assigned_queue = self._assignment_queue()
         self.ctx.save_profile()
         self.ctx.audio.play("ui/notify")
         self.refresh(keep_index=False)
@@ -966,8 +986,16 @@ class JobBoardState(MenuState):
         return min(candidates)[1]
 
     def _assignment_queue(self) -> list[int]:
-        """Unlocked jobs in the order dispatch would assign them, best first."""
-        return [index for _score, index in sorted(self._scored_candidates())]
+        """Unlocked jobs in the order dispatch would assign them, best first.
+
+        Declined loads move to the back: dispatch re-offers them only after
+        the fresh candidates run out, and reopening the board does not put a
+        refused load straight back on the driver."""
+        ordered = [index for _score, index in sorted(self._scored_candidates())]
+        declined = self._declined_indices()
+        fresh = [index for index in ordered if index not in declined]
+        reoffered = [index for index in ordered if index in declined]
+        return fresh + reoffered
 
     def _locked_reason(self, job: Job) -> str:
         p = self.ctx.profile

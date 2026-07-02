@@ -113,6 +113,16 @@ def test_bobtail_personal_conveyance_records_off_duty_hos_time():
         app.shutdown()
 
 
+def test_distance_cap_tops_out_at_a_real_coast_to_coast_run():
+    from freight_fate.models.jobs import MAX_DISPATCH_DISTANCE_MI
+
+    # haul length keeps progressing deep into the company arc...
+    assert JobBoard.distance_cap(10) < JobBoard.distance_cap(15)
+    # ...but never outgrows the longest supported U.S. corridor
+    assert JobBoard.distance_cap(20) == MAX_DISPATCH_DISTANCE_MI
+    assert JobBoard.distance_cap(30) == MAX_DISPATCH_DISTANCE_MI
+
+
 def test_distance_cap_rises_with_level(world):
     caps = [JobBoard.distance_cap(level) for level in range(1, 9)]
     assert caps == sorted(caps)

@@ -5,6 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 from .business import COMPANY_DRIVER, INDEPENDENT_AUTHORITY, is_owner_operator
+from .dispatch_policy import SENIOR_LOAD_CHOICE_LEVEL
 
 
 @dataclass(frozen=True)
@@ -96,11 +97,22 @@ def career_level_guidance(profile) -> CareerLevelGuidance:
             "senior company lane",
             "Senior company status is about consistency under better freight.",
         )
+    if level >= SENIOR_LOAD_CHOICE_LEVEL:
+        return CareerLevelGuidance(
+            "Choose your own freight",
+            "Dispatch now trusts you to pick loads from the board; routing "
+            "stays assigned until you run your own truck.",
+            "Pick freight that protects on-time service while you build toward senior lanes.",
+            "self-picked reliable lane",
+            "Load choice is new trust: keep the service record clean.",
+        )
     if level >= 4:
         return CareerLevelGuidance(
             "Build a regional service record",
-            "broader company lanes are opening, and reputation decides how good the board feels.",
-            "Pick reliable freight that turns endorsements and clean service into better dispatch trust.",
+            "broader company lanes are opening, and reputation decides how good the board feels. "
+            "Dispatch still assigns your loads until level "
+            f"{SENIOR_LOAD_CHOICE_LEVEL}.",
+            "Run assigned freight cleanly so endorsements and service turn into better dispatch trust.",
             "reputation-building lane",
             "Regional progress comes from clean, repeatable service.",
         )

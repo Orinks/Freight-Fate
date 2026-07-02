@@ -4,7 +4,20 @@
 
 ### Added
 
-- **Freight and route freedom is now earned, not given.** New company hires
+- **Haul length now progresses through the whole company arc.** Dispatch
+  distance caps used to grow 500 miles per level and blow past every real
+  U.S. route by level 12; they now grow gradually and top out at a real
+  coast-to-coast run, so longer freight keeps unlocking into the late teens.
+- **Old saves load cleanly on snapshot builds.** Careers saved by earlier
+  stable and nightly builds (back through the version 4 schema) load with
+  sensible defaults for everything added since -- business status, hours
+  clock, duty log, tire wear -- and a save touched by a newer snapshot no
+  longer crashes an older-schema load with unknown fields.
+- **Freight and route freedom is now earned, not given.** Reaching level 8 is
+  announced as the load-choice unlock, career guidance for levels 8 and 9
+  celebrates picking your own freight, and a declined load stays declined:
+  leaving the dispatch board and coming back re-offers it only after the
+  fresh candidates run out. New company hires
   run the load and lane dispatch assigns: the dispatch board offers a single
   assignment with accept or decline, declining draws another load but costs
   reputation and comes from a small budget that refills at your next

@@ -293,3 +293,42 @@ def test_owner_operator_departure_keeps_route_choice(monkeypatch):
         assert any("Route planning to" in text for text in spoken)
     finally:
         app.shutdown()
+
+
+def test_declined_load_stays_declined_when_the_board_is_reopened(monkeypatch):
+    from freight_fate.app import App
+    from freight_fate.states.city import CityMenuState, JobBoardState
+
+    app = App()
+    try:
+        monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: None)
+        app.ctx.profile = _new_hire("Board Returner")
+
+        app.push_state(CityMenuState(app.ctx))
+        app.state.handle_event(key_event(pygame.K_RETURN))  # dispatch board
+        assert isinstance(app.state, JobBoardState)
+        board = app.state
+        assert board.assigned_mode
+        first_assignment = board._assigned_job().describe()
+
+        decline = next(
+            (i for i, item in enumerate(board.items) if item.text.startswith("Decline")),
+            None,
+        )
+        if decline is None:
+            return  # single-candidate board this seed: nothing to decline into
+        while board.index != decline:
+            board.handle_event(key_event(pygame.K_DOWN))
+        board.handle_event(key_event(pygame.K_RETURN))
+        second_assignment = board._assigned_job().describe()
+        assert second_assignment != first_assignment
+
+        board.handle_event(key_event(pygame.K_ESCAPE))  # back to terminal
+        assert isinstance(app.state, CityMenuState)
+        app.state.handle_event(key_event(pygame.K_RETURN))  # reopen board
+
+        assert isinstance(app.state, JobBoardState)
+        # dispatch does not put the refused load straight back on the driver
+        assert app.state._assigned_job().describe() == second_assignment
+    finally:
+        app.shutdown()
