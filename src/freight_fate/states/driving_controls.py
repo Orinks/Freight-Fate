@@ -268,6 +268,12 @@ class DrivingControlsMixin:
         else:
             if t.start_engine():
                 self.ctx.audio.engine_start()
+                if t.air_low_warning:
+                    # Starting from a parked low-air state should always give an
+                    # immediate audible warning, independent of frame timing.
+                    self.ctx.audio.play("vehicle/low_air_buzzer", volume=0.7)
+                    self.ctx.controller.rumble.alert()
+                    self._low_air_said = True
                 self._set_status("Engine running.")
                 self.ctx.say("Engine running. " + self._air_start_instruction())
                 if self.tutorial:
