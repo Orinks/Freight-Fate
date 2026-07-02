@@ -57,7 +57,7 @@ def training_guidance(profile) -> TrainingGuidance:
             stage,
             "First dispatch",
             f"{carrier} has you on real freight with trainer support close by.",
-            f"{flavor} Start with a short standard load that leaves room on the appointment.",
+            f"{flavor} Dispatch starts you on a short standard load with room on the appointment.",
             "trainer-recommended",
         )
     if stage is TrainingStage.TRAINER_REMINDERS:
@@ -65,7 +65,7 @@ def training_guidance(profile) -> TrainingGuidance:
             stage,
             "First-week service record",
             f"{carrier} is looking for steady service, not perfection, with trainer notes still close by.",
-            f"{flavor} Favor short regional freight with clean timing.",
+            f"{flavor} Expect short regional freight, and deliver it with clean timing.",
             "good first-week run",
         )
     if stage is TrainingStage.TRUST_OPENING:
@@ -81,7 +81,7 @@ def training_guidance(profile) -> TrainingGuidance:
             stage,
             "Build dispatcher trust",
             f"{carrier} is watching on-time service, damage, and steady miles.",
-            "Pick reliable lanes before chasing specialty freight.",
+            "Run reliable lanes before chasing specialty freight.",
             "good service-record load",
         )
     return TrainingGuidance(

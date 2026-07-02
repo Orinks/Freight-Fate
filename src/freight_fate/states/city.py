@@ -195,9 +195,11 @@ class CityMenuState(MenuState):
             MenuItem(
                 "Dispatch board",
                 self._job_board,
-                help="Browse terminal dispatches from local freight "
+                help="Open terminal dispatches from local freight "
                 "facilities, including ports, warehouses, food "
-                "terminals, intermodal yards, and distribution hubs.",
+                "terminals, intermodal yards, and distribution hubs. "
+                "New company hires get dispatch's assigned load; load "
+                "choice from the board opens with seniority.",
             ),
             MenuItem(
                 "Drive to city services",
@@ -209,9 +211,9 @@ class CityMenuState(MenuState):
             MenuItem(
                 "Bobtail to a nearby city",
                 self._bobtail,
-                help="Drive empty to a nearby city to shop its dispatch "
+                help="Drive empty to a nearby city to see its dispatch "
                 "board. Costs fuel and hours of service; no load, no "
-                "pay. Use it when local jobs are thin.",
+                "pay. Use it when local freight is thin.",
             ),
             MenuItem(
                 self._garage_label,
@@ -627,7 +629,7 @@ class BobtailDestState(MenuState):
                 MenuItem(
                     label,
                     lambda n=name: self._start(n),
-                    help=f"Drive empty to {name} to shop its board.",
+                    help=f"Drive empty to {name} to see its dispatch board.",
                 )
             )
         items.append(MenuItem("Back to terminal", self.go_back))
@@ -684,7 +686,17 @@ class JobBoardState(MenuState):
         self._assigned_queue: list[int] = (
             self._assignment_queue() if dispatch_policy(ctx.profile).assigns_load else []
         )
-        if not self.assigned_mode:
+        if self.assigned_mode:
+            self.intro_help = (
+                "Dispatch assigned this load. Enter on the assignment accepts "
+                "it and creates a local deadhead pickup drive from your "
+                "terminal to the named origin facility. Declining draws "
+                "another load, but refusals cost reputation from a small "
+                "budget that refills at your next promotion. Press F1 on the "
+                "assignment to review the job details line by line. Escape "
+                "returns to the terminal."
+            )
+        else:
             recommended = self._recommended_job_index()
             if recommended is not None and self._recommendation_label() is not None:
                 self.index = recommended

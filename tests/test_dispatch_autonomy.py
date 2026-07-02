@@ -332,3 +332,36 @@ def test_declined_load_stays_declined_when_the_board_is_reopened(monkeypatch):
         assert app.state._assigned_job().describe() == second_assignment
     finally:
         app.shutdown()
+
+
+def test_how_to_play_documents_earned_dispatch_freedom():
+    from freight_fate.states.main_menu import HELP_PAGES
+
+    help_text = " ".join(line for _title, lines in HELP_PAGES for line in lines).lower()
+    assert "dispatch assigns" in help_text
+    assert "refusals cost standing with dispatch" in help_text
+    assert "at level 8, dispatch trusts you to pick your own loads" in help_text
+    assert "choosing your own routes is the owner-operator" in help_text
+    assert "press f1 on a dispatch to review its details" in help_text
+    assert "may not fit your remaining legal hours" in help_text
+    # the stale from-day-one wording is gone
+    assert "route choice happens after pickup" not in help_text
+
+
+def test_assigned_board_help_describes_accept_and_decline(monkeypatch):
+    from freight_fate.app import App
+    from freight_fate.states.city import JobBoardState
+
+    app = App()
+    try:
+        monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: None)
+        app.ctx.profile = _new_hire("Help Reader")
+
+        app.push_state(JobBoardState(app.ctx, [_job(miles=70.0)]))
+
+        assert "Dispatch assigned this load" in app.state.intro_help
+        assert "refusals cost reputation" in app.state.intro_help
+        # the browsable class-level help is untouched for senior boards
+        assert "Each entry is one dispatch" in JobBoardState.intro_help
+    finally:
+        app.shutdown()

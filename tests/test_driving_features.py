@@ -304,8 +304,8 @@ def test_how_to_play_documents_new_gameplay_systems():
     assert "pickup gate" in help_text
     assert "loading requires the truck to be stopped" in help_text
     assert "loaded and sealed" in help_text
-    assert "dispatch gives you the destination route" in help_text
-    assert "route choice happens after pickup" in help_text
+    assert "company drivers depart on dispatch's assigned route" in help_text
+    assert "pick from the route options" in help_text
     assert "real highway corridors" in help_text
     assert "gps announces state lines" in help_text
     assert "grades and terrain come from the route" in help_text

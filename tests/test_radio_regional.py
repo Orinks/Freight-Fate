@@ -239,3 +239,17 @@ def test_fringe_signal_thins_radio_volume(denver_driving):
     assert 0.0 < volume < driving.ctx.settings.radio_volume
     # fringe reception crackles
     assert any(key == "radio/static_burst" for key, _v in played_effects)
+
+
+def test_how_to_play_documents_the_radio_page():
+    from freight_fate.states.main_menu import HELP_PAGES
+
+    titles = [title for title, _lines in HELP_PAGES]
+    assert "The in-cab radio" in titles
+    help_text = " ".join(line for _title, lines in HELP_PAGES for line in lines).lower()
+    assert "receivable stations" in help_text
+    assert "streamer-safe status" in help_text
+    assert "host breaks in between songs" in help_text
+    assert "regional stations cover markets across the map" in help_text
+    assert "static crackle at the fringe" in help_text
+    assert "falls" in help_text and "back to the roadhouse" in help_text

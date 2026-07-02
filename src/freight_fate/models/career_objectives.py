@@ -61,7 +61,7 @@ def _company_driver_objective(profile) -> CareerObjective:
         return CareerObjective(
             "Build dispatcher trust",
             f"{carrier_name(profile)} is watching on-time service, damage, and steady miles.",
-            "Pick reliable lanes before chasing specialty freight.",
+            "Run reliable lanes before chasing specialty freight.",
             "reliable unlocked lane",
         )
     eligible, _ = owner_operator_eligibility(profile)

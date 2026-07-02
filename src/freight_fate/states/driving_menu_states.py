@@ -803,7 +803,7 @@ class ArrivalState(MenuState):
             (
                 f"Bobtailed empty to {job.destination} in {hours:.1f} hours. "
                 f"It is {clock_text(p.game_hours)}. No load and no pay, but you are "
-                f"parked at {self.terminal.name} and can shop the {job.destination} "
+                f"parked at {self.terminal.name} and can open the {job.destination} "
                 f"dispatch board. Fuel {d.truck.fuel_fraction * 100:.0f} percent."
             ),
         )

@@ -110,6 +110,9 @@ def test_owner_operator_transcript_keeps_load_and_route_choice(monkeypatch):
     def configure_profile(profile) -> None:
         apply_start_option(profile, start_option(OWNER_OPERATOR_START_KEY))
         profile.achievements.append("first_dispatch")
+        # all trailer programs, so a specialty-heavy random board can never
+        # leave the harness with zero unlocked jobs
+        profile.trailer_programs = ["dry_van", "reefer", "flatbed", "bulk"]
 
     with PlaytestHarness(monkeypatch) as harness:
         result = harness.start_delivery(

@@ -4,6 +4,13 @@
 
 ### Added
 
+- **How to play now teaches the current game.** The in-game help reader
+  gained a dedicated radio page (stations, hosts, signal ranges, and the
+  streamer-safe rules), The goal and Deliveries pages explain earned dispatch
+  freedom -- assigned loads and routes for new hires, declines, the level-8
+  board unlock, F1 job details, and hours warnings -- and terminal, board,
+  and early-career guidance text no longer tells assigned new hires to
+  browse and pick freight.
 - **The in-cab radio now has hosts, regional stations, and real signal
   ranges.** The Freight Fate Roadhouse and the Night Line each have a live
   host who breaks in between songs, and twelve fictional regional stations --
