@@ -692,6 +692,8 @@ class RestStopState(MenuState):
                 f"{_deadline_text(d)}"
             )
             self.ctx.award_achievement("garage_repair")
+            if damage >= 75.0:
+                self.ctx.award_achievement("deep_repair")
             return
         cost = self.ctx.economy.repair_cost(damage)
         if p.money < cost:
@@ -710,6 +712,8 @@ class RestStopState(MenuState):
             f"You have {p.money:,.0f} dollars. {_deadline_text(d)}"
         )
         self.ctx.award_achievement("garage_repair")
+        if damage >= 75.0:
+            self.ctx.award_achievement("deep_repair")
 
     def _roadside_assistance(self) -> None:
         d = self.driving
@@ -734,6 +738,7 @@ class RestStopState(MenuState):
             f"{d.truck.damage_pct:.0f} percent damage {billing}. It is "
             f"{clock_text(d.trip.current_hour)}. {_deadline_text(d)}"
         )
+        self.ctx.award_achievement("roadside_fix")
 
     def _inspect(self) -> None:
         d = self.driving
@@ -745,7 +750,7 @@ class RestStopState(MenuState):
             f"It is {clock_text(d.trip.current_hour)}. "
             f"{_deadline_text(d)}"
         )
-        self.ctx.award_achievement("inspection")
+        _record_inspection(self.ctx)
 
     def _save_here(self, *, silent: bool = False) -> None:
         d = self.driving

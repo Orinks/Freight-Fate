@@ -451,6 +451,392 @@ ACHIEVEMENTS: tuple[Achievement, ...] = (
         "Career",
         "C.W. McCall - Convoy",
     ),
+    # -- Landmarks, second verse: states, regions, and more city badges -------
+    Achievement(
+        "virginia_line",
+        "Runnin' the County Line",
+        "You put freight on a dock in Virginia, out where the ridgelines run the show. Some county lines out here are worth singing about; you crossed yours with the trailer full.",
+        "Landmarks",
+        "49 Winchester - Russell County Line",
+    ),
+    Achievement(
+        "birmingham_morning",
+        "Birmingham Before the Coffee Kicks In",
+        "Freight delivered in Birmingham while the morning was still finding its feet. Eight-thirty in Alabama hits different when you have been rolling since before the birds.",
+        "Landmarks",
+        "Andrea and Mud - Birmingham, AL 8:30AM",
+    ),
+    Achievement(
+        "kentucky_delivery",
+        "Bluegrass on the Bill of Lading",
+        "A load signed for in Kentucky, where the pastures look painted and the fences run forever. The grass gets called blue; the money you made on it was plain green.",
+        "Landmarks",
+        "Brit Taylor - Kentucky Blue",
+    ),
+    Achievement(
+        "jersey_delivery",
+        "Giant of the Turnpike",
+        "You delivered in New Jersey and lived to merge again. Between the toll plazas and the jughandles, walking tall through Jersey takes a certain kind of nerve.",
+        "Landmarks",
+        "Elle King - Jersey Giant",
+    ),
+    Achievement(
+        "waco_survivor",
+        "Made It to Waco Just Fine",
+        "Freight delivered in Waco without a scratch worth mentioning. Whatever the songs say about this town, you rolled in, got the signature, and kept your health intact.",
+        "Landmarks",
+        "Croy and the Boys - Don't Let Me Die in Waco",
+    ),
+    Achievement(
+        "gulf_coast_by_two",
+        "Coast Freight by Two O'Clock",
+        "Delivered on the Mississippi Gulf coast with the clock still shy of two. Shrimp boats, salt air, and a bill of lading signed before the afternoon heat got serious.",
+        "Landmarks",
+        "Ellis Bullard - Biloxi By Two",
+    ),
+    Achievement(
+        "nashville_delivery",
+        "An Overnight Success, Eventually",
+        "You put a load on a dock in Nashville, where every songwriter is ten years into being discovered any day now. Your freight got its big break on the first try.",
+        "Landmarks",
+        "Curtis Grimes - Ten Year Town",
+    ),
+    Achievement(
+        "appalachia_delivery",
+        "Freight Up the Holler",
+        "You delivered into Appalachian coal-and-ridge country, where the roads bend like fiddle tunes. The hills watched you come in, and the dock was glad you did.",
+        "Landmarks",
+        "Dirty Grass Soul - Back to the Holler",
+    ),
+    Achievement(
+        "wyoming_delivery",
+        "Where the Herds Still Graze",
+        "A delivery completed in Wyoming, high plains rolling out in every direction. Not much traffic to fight out here -- mostly wind, antelope, and the occasional legend.",
+        "Landmarks",
+        "Chancey Williams - Land of the Buffalo",
+    ),
+    Achievement(
+        "norcal_giants",
+        "Shadow of the Giants",
+        "You delivered up in far Northern California, where the biggest living things on Earth watch the trucks go by. The trailer felt small the whole way in.",
+        "Landmarks",
+        "Andrew Gabbard - Redwood",
+    ),
+    Achievement(
+        "pnw_delivery",
+        "Pines to the Pacific",
+        "Freight delivered in the Pacific Northwest, where the evergreens crowd the shoulders and the rain keeps its own schedule. The air alone was worth the trip.",
+        "Landmarks",
+        "Colby Acuff - Western White Pines",
+    ),
+    Achievement(
+        "el_paso_arrival",
+        "A Ballad Out West",
+        "You brought freight into El Paso, the far west end of Texas. The old ballads about this town end in heartbreak; yours ended with a signed delivery receipt.",
+        "Landmarks",
+        "Marty Robbins - El Paso City",
+    ),
+    Achievement(
+        "laredo_arrival",
+        "Down the Old Cowboy Road",
+        "Freight delivered in Laredo, right up against the border. The old song about this town is a slow goodbye; your visit was strictly business, and everybody stayed cheerful.",
+        "Landmarks",
+        "Marty Robbins - Streets of Laredo",
+    ),
+    Achievement(
+        "baton_rouge_arrival",
+        "Better Off Than Busted Flat",
+        "You rolled into Baton Rouge with a load and a paycheck coming, which beats thumbing it with a harmonica. Freedom is nice; a settlement sheet is nicer.",
+        "Landmarks",
+        "Kris Kristofferson - Me and Bobby McGee",
+    ),
+    Achievement(
+        "sacramento_arrival",
+        "A Whistle Outside Folsom",
+        "Freight delivered in Sacramento, just down the road from a famously well-sung prison. You heard a train whistle on the way in and kept rolling, free as you please.",
+        "Landmarks",
+        "Johnny Cash - Folsom Prison Blues",
+    ),
+    Achievement(
+        "texas_triangle",
+        "All Your Loads Live in Texas",
+        "Origin and destination both inside the Texas triangle, one more load bouncing between the big towns. Some drivers spread out; this week the whole map was one state.",
+        "Landmarks",
+        "George Strait - All My Ex's Live in Texas",
+    ),
+    # -- Routes, second verse: compass runs and marathon dispatches -----------
+    Achievement(
+        "true_north_run",
+        "The Compass Said Keep Going",
+        "A delivery that ran hard north, latitude stacking up the whole way. When the wandering gets aimless, some folks find a bearing and follow it; yours had a dock at the end.",
+        "Routes",
+        "Caroline Spence - True North",
+    ),
+    Achievement(
+        "southbound_run",
+        "Down the Map with a Load",
+        "A delivery that ran hard south, shedding latitude with every fuel stop. Warmer air, looser shoulders, and somebody at the bottom of the map waiting on freight.",
+        "Routes",
+        "The Allman Brothers Band - Southbound",
+    ),
+    Achievement(
+        "return_trip",
+        "Right Back Where You Started",
+        "You delivered a load, then hauled the very next one straight back where you came from. Some drivers chase new horizons; this week the horizon ran a shuttle.",
+        "Routes",
+        "Aaron McDonnell - You Drive Back",
+    ),
+    Achievement(
+        "all_terrain_route",
+        "Flats, Foothills, and the Big Climb",
+        "One route that served flat land, rolling hills, and a real mountain grade before the dock. Your stomach rode the whole ride; the freight never noticed a thing.",
+        "Routes",
+        "Ellis Bullard - Roller Coaster",
+    ),
+    Achievement(
+        "long_day_run",
+        "The Long Way to the Dock",
+        "One dispatch that stretched past a full day on the trip clock, sleep and all. The kind of run where the last hundred miles feel personally aimed at you.",
+        "Routes",
+        "Billy Strings - Long Journey Home",
+    ),
+    # -- Cargo: what's in the box matters -------------------------------------
+    Achievement(
+        "reefer_load",
+        "Cold Freight, Warm Heart",
+        "Your first refrigerated load delivered with the temperature holding steady. The trailer ran cold the whole way there; no reason your mood had to.",
+        "Cargo",
+        "Hank Williams - Cold, Cold Heart",
+    ),
+    Achievement(
+        "heavy_haul_load",
+        "Big John on the Drive Axles",
+        "Your first heavy-haul load, the kind of tonnage that makes a trailer groan and a grade think twice. Every gear change felt like moving a legend.",
+        "Cargo",
+        "Jimmy Dean - Big Bad John",
+    ),
+    Achievement(
+        "high_value_load",
+        "Sparkle in the Dry Van",
+        "Your first high-value load delivered with the seals intact. Cargo worth more than the truck rides quiet, stays locked up tight, and never stops for souvenirs.",
+        "Cargo",
+        "Amanda Fields - Diamonds",
+    ),
+    Achievement(
+        "farm_load",
+        "Feed, Seed, and Freight",
+        "You hauled farm freight where it was needed -- feed, seed, or the season's grain. Somewhere down a gravel drive, a rancher checked the sky and said much obliged.",
+        "Cargo",
+        "Emily Nenni - On The Ranch",
+    ),
+    Achievement(
+        "max_gross_load",
+        "Grossed Out at the Scale House",
+        "You delivered a load pushing the legal weight limit, every axle earning its keep. The big mama of manifests, and the scale house waved it through anyway.",
+        "Cargo",
+        "Joe Stampley - Roll On Big Mama",
+    ),
+    # -- Career, second verse: the numbers keep climbing ----------------------
+    Achievement(
+        "twenty_five_deliveries",
+        "Twenty-Five and Rolling Steady",
+        "Twenty-five career deliveries logged. Not a rookie number anymore, not a veteran number yet -- just a little more road behind you than most folks ever get.",
+        "Career",
+        "Ellie Turner - A Little Farther Down The Line",
+    ),
+    Achievement(
+        "two_hundred_deliveries",
+        "Two Hundred and Playing for Keeps",
+        "Two hundred career deliveries in the book. This stopped being a phase somewhere around load fifty; now it is a body of work with its own gravity.",
+        "Career",
+        "Emily Nenni - Long Game",
+    ),
+    Achievement(
+        "quarter_million_bank",
+        "A Vault with Mud Flaps",
+        "You banked 250,000 dollars, hauled in one settlement at a time. The teller stopped counting out loud somewhere around the third deposit. The bank is fine, by the way.",
+        "Career",
+        "Alex Miller - Breaking the Bank",
+    ),
+    Achievement(
+        "half_million_earned",
+        "Half a Million in Lifetime Freight",
+        "Five hundred thousand dollars in career earnings, gross of everything the road took back along the way. Nobody would call it easy money, but it spends just the same.",
+        "Career",
+        "Brit Taylor - Rich Little Girls",
+    ),
+    Achievement(
+        "hundred_k_miles",
+        "Leave Me on the Interstate",
+        "One hundred thousand lifetime miles. At this point the road owns a controlling share of you, and someday it can have the rest -- but not today, driver.",
+        "Career",
+        "Bob Wayne - Spread My Ashes on the Highway",
+    ),
+    Achievement(
+        "rep_ninety",
+        "Strut Past the Fuel Island",
+        "Reputation at ninety or better. Walk through any truck stop like you own the coffee machine, because at this point dispatch practically curtsies.",
+        "Career",
+        "Elvin Bishop - Struttin' My Stuff",
+    ),
+    Achievement(
+        "month_on_road",
+        "Thirty Days of Diesel",
+        "A full month on the career clock. Thirty days of docks, diners, and dawn departures -- and tomorrow you will get up and ask the road for another one.",
+        "Career",
+        "Ellie Turner - One More Day",
+    ),
+    Achievement(
+        "home_return",
+        "The Porch Light Was Still On",
+        "Ten deliveries or more into your career, you brought a load into your old home terminal city. The streets got smaller while you were gone; the welcome did not.",
+        "Career",
+        "Arlo McKinley - Back Home",
+    ),
+    Achievement(
+        "bobtail_done",
+        "Room Enough to Turn Around",
+        "You ran a bobtail reposition -- no trailer, no load, no pay, just a tractor finding its next job. Turning a rig around takes a lot less acreage without the box.",
+        "Career",
+        "The Willis Brothers - Give Me 40 Acres",
+    ),
+    # -- Seasons: the calendar rides shotgun -----------------------------------
+    Achievement(
+        "april_first",
+        "Nobody's Fool on the First",
+        "A delivery settled on the first day of April. Dispatch swore the load was real, and for once the joke was on nobody -- paperwork clean, payment posted.",
+        "Seasons",
+        "Bo Hazard - April's Fool",
+    ),
+    Achievement(
+        "winter_delivery",
+        "December Never Stood a Chance",
+        "A load delivered in the dead of winter, heater roaring and shoulders tight. The cold months lean hard on a trucking family; you leaned back and kept rolling.",
+        "Seasons",
+        "Merle Haggard - If We Make It Through December",
+    ),
+    Achievement(
+        "four_seasons",
+        "All Four Pages of the Calendar",
+        "You have settled deliveries in spring, summer, fall, and winter. The road changes clothes four times a year, and you have now seen the whole wardrobe.",
+        "Seasons",
+        "George Jones - Seasons of My Heart",
+    ),
+    Achievement(
+        "desert_summer",
+        "Through the Furnace Door",
+        "A summer delivery into the desert Southwest, where the asphalt shimmers and the door handle can bite. Whatever is on the other side of hot, you drove through it.",
+        "Seasons",
+        "Emily Nenni - Gates Of Hell",
+    ),
+    Achievement(
+        "weather_collector",
+        "Every Sky in the Logbook",
+        "You have driven under every kind of sky the forecast can throw: sun, cloud, rain, downpour, thunder, snow, fog, and wind. None of it lasted; you did.",
+        "Weather",
+        "Waylon Jennings & Jessi Colter - Storms Never Last",
+    ),
+    Achievement(
+        "storm_driving",
+        "Dark Line on the Radar",
+        "You drove through a genuine thunderstorm and kept the trailer behind you where it belongs. You could feel the weather coming on long before the first drop hit.",
+        "Weather",
+        "Channing Wilson - Blues Comin' On",
+    ),
+    # -- Deliveries, second verse: clocks, gauges, and close calls ------------
+    Achievement(
+        "deadline_squeaker",
+        "Hot Brakes, Warm Handshake",
+        "On time with almost nothing to spare -- the kind of arrival where the dock crew was already drafting the late note. They tore it up, and you never saw it.",
+        "Deliveries",
+        "Brennen Leigh & Asleep At The Wheel - Comin' In Hot",
+    ),
+    Achievement(
+        "first_late",
+        "Keep the Bonus, Boss",
+        "Your first late delivery is on the books. The bonus walked, the receiver sighed, and you learned exactly how much of a deadline is actually cushion.",
+        "Deliveries",
+        "Johnny Paycheck - Take This Job and Shove It",
+    ),
+    Achievement(
+        "midnight_delivery",
+        "The Small Hours Ride Along",
+        "Freight delivered in the smallest hours, between midnight and the first hint of gray. Whatever kept you company out there signed nothing and vanished at the dock.",
+        "Deliveries",
+        "Dolly Parton & Ben Haggard - Demons",
+    ),
+    Achievement(
+        "dawn_run",
+        "Rolling Before the Roosters",
+        "You pulled out before the world got loud, first light still rehearsing on the horizon. The early start echoes all day -- mostly in yawns, occasionally in bonuses.",
+        "Deliveries",
+        "American Aquarium - Waking Up the Echoes",
+    ),
+    Achievement(
+        "fuel_fumes",
+        "Hope Is Not a Fuel Plan",
+        "You made the dock with the fuel gauge past pleading and into prayer. Somewhere back down the road you passed the last cheap diesel and said, probably fine.",
+        "Deliveries",
+        "Brennen Leigh - Running Out Of Hope, Arkansas",
+    ),
+    Achievement(
+        "spotless_long",
+        "Vanished Like a Professional",
+        "Three hundred-plus miles delivered on time with no damage, no strikes, and no tickets. In and out so smooth the paperwork is the only proof you were there.",
+        "Deliveries",
+        "Caroline Spence - Clean Getaway",
+    ),
+    # -- Road events, second verse: citations and congestion ------------------
+    Achievement(
+        "first_ticket",
+        "Yeah, Officer, That Was Me",
+        "Your first on-the-spot speeding ticket, signed and paid at the roadside. When dispatch heard, they did not even sound surprised -- which stings worse than the fine.",
+        "Road events",
+        "Drake Milligan - Sounds Like Something I'd Do",
+    ),
+    Achievement(
+        "second_ticket",
+        "Twice in One Trip, Really",
+        "Two speeding tickets inside a single run. The first one was a lesson; the second one was a decision. The trooper recognized the truck, which is never a good sign.",
+        "Road events",
+        "Erin Viancourt - Should've Known Better",
+    ),
+    Achievement(
+        "jam_and_cones",
+        "Stuck in Every Flavor of Slow",
+        "Construction cones and a genuine traffic jam, both inside one trip. For a while there the truck was less a vehicle and more a waiting room with mud flaps.",
+        "Road events",
+        "Christian Parker - You Ain't Going Nowhere",
+    ),
+    Achievement(
+        "scale_regular",
+        "On a First-Name Basis at the Scale",
+        "Five inspections weathered across your career. The scale house is a wall every driver has to get over sooner or later; by now you could climb it in your sleep.",
+        "Road events",
+        "Caroline Spence - Scale These Walls",
+    ),
+    # -- Truck care, second verse: the shop knows you by name -----------------
+    Achievement(
+        "all_upgrades",
+        "Every Box on the Order Sheet",
+        "Every upgrade in the catalog installed on your rig. They quit building cars like they used to, but a fully optioned tractor still turns heads at the fuel island.",
+        "Truck care",
+        "Dale Watson - Whatever Happened To The Cadillac",
+    ),
+    Achievement(
+        "deep_repair",
+        "Back from the Bottom of the Ledger",
+        "You brought the truck in at seventy-five percent damage or worse and paid to make it whole. There is only one direction to go from down there, and you took it.",
+        "Truck care",
+        "Alex Williams - Rock Bottom",
+    ),
+    Achievement(
+        "roadside_fix",
+        "The Show Rolls On",
+        "Broke down bad enough to call for roadside help, waited out the mechanic, and finished the run anyway. Every touring act has a night like this; yours had freight.",
+        "Truck care",
+        "Dale Watson & Ray Benson - Bus' Breakdown",
+    ),
 )
 
 ACHIEVEMENT_BY_ID = {achievement.id: achievement for achievement in ACHIEVEMENTS}
@@ -484,6 +870,19 @@ def add_unique_stat(profile: Profile, key: str, value: str) -> int:
     if value not in values:
         values.append(value)
     return len(values)
+
+
+def int_stat(profile: Profile, key: str) -> int:
+    try:
+        return int(_stats(profile).get(key, 0))
+    except (TypeError, ValueError):
+        return 0
+
+
+def increment_stat(profile: Profile, key: str) -> int:
+    value = int_stat(profile, key) + 1
+    _stats(profile)[key] = value
+    return value
 
 
 def bool_stat(profile: Profile, key: str) -> bool:

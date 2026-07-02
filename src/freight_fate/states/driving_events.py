@@ -105,8 +105,10 @@ class DrivingEventMixin:
             self.ctx.audio.play(sound or "ui/notify")
             zone = event.data.get("zone")
             if getattr(zone, "reason", "") == "construction":
+                self.construction_seen = True
                 self.ctx.award_achievement("construction_zone", event=True)
             elif getattr(zone, "reason", "") == "heavy traffic":
+                self.traffic_seen = True
                 self.ctx.award_achievement("traffic_slowing", event=True)
         if kind == TripEventKind.GPS_CUE:
             cue = event.data.get("cue")
@@ -114,7 +116,10 @@ class DrivingEventMixin:
                 getattr(cue, "kind", "") == "traffic"
                 or event.data.get("traffic_pressure") is not None
             ):
+                self.traffic_seen = True
                 self.ctx.award_achievement("traffic_slowing", event=True)
+        if self.construction_seen and self.traffic_seen:
+            self.ctx.award_achievement("jam_and_cones", event=True)
 
     def _should_ignore_destination_exit_gps_cue(self, event) -> bool:
         if self.phase != DRIVE_PHASE_DELIVERY or event.kind != TripEventKind.GPS_CUE:
@@ -220,11 +225,11 @@ class DrivingEventMixin:
                 message + " Out of service order: parked for 10 hours to reset your ELD clock.",
                 interrupt=True,
             )
-            self.ctx.award_achievement("inspection", event=True)
+            _record_inspection(self.ctx, event=True)
             self._place_out_of_service()
             return
         self.ctx.say_event(message, interrupt=True)
-        self.ctx.award_achievement("inspection", event=True)
+        _record_inspection(self.ctx, event=True)
 
     def _place_out_of_service(self) -> None:
         _advance_rest_clock(self, OUT_OF_SERVICE_MIN)

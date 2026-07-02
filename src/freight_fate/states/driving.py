@@ -101,6 +101,9 @@ class DrivingState(DrivingControlsMixin, DrivingUpdateMixin, DrivingEventMixin, 
         self._last_announced_mph = 0.0
         self._speeding_timer = 0.0
         self.speeding_strikes = 0
+        # Congestion badges: both kinds of slow inside one trip earns a nod.
+        self.construction_seen = False
+        self.traffic_seen = False
         # Trooper pull-overs: a strike inside a patrol window may get you stopped
         # for an immediate ticket, separate from the silent at-delivery strikes.
         self.speeding_tickets = 0
@@ -419,13 +422,17 @@ class DrivingState(DrivingControlsMixin, DrivingUpdateMixin, DrivingEventMixin, 
         if p is None:
             return
         kind = self.weather.current
-        add_unique_stat(p, "weather_seen", kind.name)
+        seen = add_unique_stat(p, "weather_seen", kind.name)
         if kind in {WeatherKind.RAIN, WeatherKind.HEAVY_RAIN}:
             self.ctx.award_achievement("rain_driver", event=event)
         elif kind in {WeatherKind.SNOW, WeatherKind.WIND}:
             self.ctx.award_achievement("winter_or_wind", event=event)
         elif kind in {WeatherKind.FOG, WeatherKind.THUNDERSTORM}:
             self.ctx.award_achievement("low_visibility", event=event)
+        if kind == WeatherKind.THUNDERSTORM:
+            self.ctx.award_achievement("storm_driving", event=event)
+        if seen >= len(WeatherKind):
+            self.ctx.award_achievement("weather_collector", event=event)
 
     def exit(self) -> None:
         self.ctx.audio.horn_stop()

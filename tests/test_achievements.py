@@ -33,6 +33,64 @@ def test_achievement_copy_is_allusive_and_speech_sized():
     assert message.startswith("New achievement!")
 
 
+def test_catalog_tops_one_hundred_with_unique_ids():
+    from freight_fate.achievements import ACHIEVEMENTS
+
+    ids = [achievement.id for achievement in ACHIEVEMENTS]
+    assert len(ids) == len(set(ids))
+    assert len(ids) > 100
+
+
+def test_increment_stat_counts_and_survives_bad_values():
+    from freight_fate.achievements import increment_stat, int_stat
+    from freight_fate.models.profile import Profile
+
+    profile = Profile(name="Counter")
+    assert increment_stat(profile, "inspections_passed") == 1
+    assert increment_stat(profile, "inspections_passed") == 2
+    profile.achievement_stats["inspections_passed"] = "corrupt"
+    assert int_stat(profile, "inspections_passed") == 0
+    assert increment_stat(profile, "inspections_passed") == 1
+
+
+def test_return_trip_badge_needs_the_reverse_of_the_last_route(monkeypatch):
+    from freight_fate.app import App
+    from freight_fate.models.jobs import JobBoard
+    from freight_fate.models.profile import Profile
+    from freight_fate.states.driving import ArrivalState, DrivingState
+
+    app = App()
+    try:
+        app.ctx.profile = Profile(name="Shuttle Run")
+        p = app.ctx.profile
+        p.current_city = "Chicago"
+        job = next(
+            job for job in JobBoard(app.ctx.world).offers(
+                p.current_city,
+                p.career.endorsements,
+                level=p.career.level,
+                market=p.market,
+            )
+            if not job.locked_reason(p.career.endorsements, p.career.level)
+        )
+        route = app.ctx.world.supported_route_options(job.origin, job.destination)[0]
+        # The previous delivery ran this exact lane the other way around.
+        p.achievement_stats["last_route"] = [job.destination, job.origin]
+        driving = DrivingState(app.ctx, job, route)
+        driving.trip.game_minutes = job.deadline_game_h * 30.0
+        monkeypatch.setattr(app.ctx, "say", lambda *_a, **_k: None)
+
+        ArrivalState(app.ctx, driving)
+
+        assert "return_trip" in p.achievements
+        # The lane just driven becomes the new benchmark for the next run.
+        assert p.achievement_stats["last_route"] == [job.origin, job.destination]
+        # A career's home city is pinned by the first delivery's origin.
+        assert p.achievement_stats["home_city"] == job.origin
+    finally:
+        app.shutdown()
+
+
 def test_old_save_without_achievements_loads_with_defaults(tmp_path):
     from freight_fate.models.profile import Profile
 

@@ -13,7 +13,7 @@ import random
 
 import pygame
 
-from ..achievements import add_unique_stat
+from ..achievements import add_unique_stat, increment_stat
 from ..data.world import Route
 from ..models.business import (
     build_business_settlement,
@@ -201,6 +201,14 @@ def _poi_ambient_key(stop) -> str:
 
 def _speeding_settlement_fine(strikes: int) -> float:
     return min(400.0, 80.0 * strikes) if strikes else 0.0
+
+
+def _record_inspection(ctx, *, event: bool = False) -> None:
+    """Every inspection feeds both the one-off badge and the career tally."""
+    ctx.award_achievement("inspection", event=event)
+    if ctx.profile is not None and increment_stat(
+            ctx.profile, "inspections_passed") >= 5:
+        ctx.award_achievement("scale_regular", event=event)
 
 
 class _DrivingRadioBackend:

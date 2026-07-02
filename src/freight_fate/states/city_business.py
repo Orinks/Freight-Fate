@@ -329,6 +329,11 @@ class UpgradeShopState(MenuState):
             f"You have {p.money:,.0f} dollars left."
         )
         self.ctx.award_achievement("first_upgrade")
+        if all(
+            p.upgrades.get(key, 0) >= item.max_tier
+            for key, item in UPGRADE_CATALOG.items()
+        ):
+            self.ctx.award_achievement("all_upgrades")
         self.refresh()
 
 

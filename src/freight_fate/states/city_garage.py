@@ -164,6 +164,7 @@ class GarageState(MenuState):
         if p.truck_damage_pct < 1:
             self.ctx.say("Nothing to repair.")
             return
+        deep_damage = p.truck_damage_pct >= 75.0
         if not player_pays_operating_costs(p.business_status):
             fixed = p.truck_damage_pct
             p.truck_damage_pct = 0.0
@@ -177,6 +178,8 @@ class GarageState(MenuState):
                 f"not reduce your cash balance."
             )
             self.ctx.award_achievement("garage_repair")
+            if deep_damage:
+                self.ctx.award_achievement("deep_repair")
             self.refresh()
             return
         cost = self.ctx.economy.repair_cost(p.truck_damage_pct)
@@ -193,6 +196,8 @@ class GarageState(MenuState):
         self.ctx.audio.play("ui/notify")
         self.ctx.say(f"Truck repaired. {cost:,.0f} dollars. You have {p.money:,.0f} dollars left.")
         self.ctx.award_achievement("garage_repair")
+        if deep_damage:
+            self.ctx.award_achievement("deep_repair")
         self.refresh()
 
     def _partial_repair(self) -> None:

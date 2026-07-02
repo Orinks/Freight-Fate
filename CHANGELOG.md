@@ -4,6 +4,18 @@
 
 ### Added
 
+- **54 new achievements -- the badge wall passes one hundred.** The catalog
+  grows from 60 to 114 badges: new state, region, and city arrivals (Virginia
+  ridges, bluegrass country, the Jersey Turnpike, Waco, the Mississippi coast,
+  Nashville, El Paso, Laredo, Baton Rouge, and more), compass runs north and
+  south, cargo firsts (refrigerated, heavy-haul, high-value, farm freight, and
+  max-gross loads), career milestones out to 200 deliveries and 100,000 miles,
+  season and calendar badges (including one for a certain day in early April),
+  close-call deliveries (deadline squeakers, empty fuel tanks, midnight and
+  pre-dawn docks), citation mishaps, congestion, inspections, deep repairs,
+  roadside rescues, bobtail repositions, and a fully optioned rig. As always,
+  every badge quietly tips its hat to a country or trucking song -- this round
+  adds nods to a heap of underground country artists alongside the classics.
 - **The career economy now pays like a real one.** Company drivers fuel and
   repair on the carrier account on the road, not just at terminals -- an
   out-of-fuel rescue dings the service record instead of the wallet, while

@@ -818,6 +818,9 @@ class ArrivalState(MenuState):
                 f"The empty run added {trip_damage:.0f} percent truck damage. "
                 "Visit the garage when you can."
             )
+        result = self.ctx.award_achievement("bobtail_done", announce=False)
+        if result is not None:
+            self.summary_parts.append(result.message)
         # The arrival screen and announcement read summary_lines, not parts.
         self.summary_lines = list(self.summary_parts)
 
@@ -1101,6 +1104,11 @@ class ArrivalState(MenuState):
             "Wichita": "wichita_arrival",
             "Bakersfield": "bakersfield_arrival",
             "Las Vegas": "vegas_arrival",
+            "Nashville": "nashville_delivery",
+            "El Paso": "el_paso_arrival",
+            "Laredo": "laredo_arrival",
+            "Baton Rouge": "baton_rouge_arrival",
+            "Sacramento": "sacramento_arrival",
         }
         if dest in simple_arrival:
             ids.append(simple_arrival[dest])
@@ -1150,6 +1158,125 @@ class ArrivalState(MenuState):
         stats["perfect_streak"] = streak
         if streak >= 5:
             ids.append("perfect_streak")
+
+        # -- Landmarks, second verse: state, region, and timed city badges ----
+        d = self.driving
+        job = d.job
+        hours = d.trip.game_minutes / 60.0
+        dest_state = world.cities[dest].state
+        dest_region = world.cities[dest].region
+        state_badges = {
+            "Virginia": "virginia_line",
+            "Kentucky": "kentucky_delivery",
+            "New Jersey": "jersey_delivery",
+            "Wyoming": "wyoming_delivery",
+        }
+        if dest_state in state_badges:
+            ids.append(state_badges[dest_state])
+        region_badges = {
+            "appalachia": "appalachia_delivery",
+            "pacific_northwest": "pnw_delivery",
+        }
+        if dest_region in region_badges:
+            ids.append(region_badges[dest_region])
+        if dest == "Birmingham" and 6.0 <= arrival_hour < 11.0:  # morning run
+            ids.append("birmingham_morning")
+        if dest == "Waco" and trip_damage <= 1.0:  # "Just Fine"
+            ids.append("waco_survivor")
+        if dest == "Gulfport" and arrival_hour < 14.0:  # "by Two"
+            ids.append("gulf_coast_by_two")
+        if dest in {"Santa Rosa", "Chico"}:  # big-tree country
+            ids.append("norcal_giants")
+        triangle = {"Dallas", "Fort Worth", "Houston", "San Antonio", "Austin"}
+        if origin in triangle and dest in triangle:
+            ids.append("texas_triangle")
+
+        # -- Routes, second verse: compass runs and marathon dispatches -------
+        origin_lat = world.cities[origin].lat
+        dest_lat = world.cities[dest].lat
+        if dest_lat - origin_lat >= 4.0:
+            ids.append("true_north_run")
+        if origin_lat - dest_lat >= 4.0:
+            ids.append("southbound_run")
+        if {"flat", "hills", "mountain"} <= {leg.terrain for leg in route.legs}:
+            ids.append("all_terrain_route")
+        if hours >= 24.0:
+            ids.append("long_day_run")
+        if stats.get("last_route") == [dest, origin]:
+            ids.append("return_trip")
+        stats["last_route"] = [origin, dest]
+
+        # -- Cargo: what's in the box matters ---------------------------------
+        endorsement_badges = {
+            "refrigerated": "reefer_load",
+            "heavy_haul": "heavy_haul_load",
+            "high_value": "high_value_load",
+        }
+        if job.cargo.endorsement in endorsement_badges:
+            ids.append(endorsement_badges[job.cargo.endorsement])
+        if job.cargo.key in {"grain", "farm_inputs"}:
+            ids.append("farm_load")
+        if job.weight_tons >= 24.0:
+            ids.append("max_gross_load")
+
+        # -- Career, second verse: the numbers keep climbing ------------------
+        if p.career.deliveries >= 25:
+            ids.append("twenty_five_deliveries")
+        if p.career.deliveries >= 200:
+            ids.append("two_hundred_deliveries")
+        if p.money >= 250_000.0:
+            ids.append("quarter_million_bank")
+        if p.career.total_earnings >= 500_000.0:
+            ids.append("half_million_earned")
+        if p.career.total_miles >= 100_000.0:
+            ids.append("hundred_k_miles")
+        if p.career.reputation >= 90.0:
+            ids.append("rep_ninety")
+        if p.game_hours >= 30.0 * 24.0:
+            ids.append("month_on_road")
+        # A career's home city is where its very first delivery loaded up.
+        if p.career.deliveries == 1:
+            stats.setdefault("home_city", origin)
+        if p.career.deliveries >= 10 and dest == stats.get("home_city"):
+            ids.append("home_return")
+
+        # -- Seasons: the calendar rides shotgun ------------------------------
+        from ..sim.season import date_text, season as season_of
+
+        career_season = season_of(p.game_hours)
+        if career_season == "winter":
+            ids.append("winter_delivery")
+        if add_unique_stat(p, "seasons_delivered", career_season) >= 4:
+            ids.append("four_seasons")
+        if dest_region == "desert_southwest" and career_season == "summer":
+            ids.append("desert_summer")
+        if date_text(p.game_hours) == "April 1":
+            ids.append("april_first")
+
+        # -- Deliveries, second verse: clocks, gauges, and close calls --------
+        if on_time and hours >= 0.9 * job.deadline_game_h:
+            ids.append("deadline_squeaker")
+        if not on_time:
+            ids.append("first_late")
+        if arrival_hour < 4.0:
+            ids.append("midnight_delivery")
+        # Careers start at 6:00, so "before the roosters" means before that.
+        if 3.0 <= d.trip.start_hour < 6.0:
+            ids.append("dawn_run")
+        if d.truck.fuel_fraction < 0.08:
+            ids.append("fuel_fumes")
+        if (
+            route_miles >= 300.0
+            and on_time
+            and trip_damage <= 1.0
+            and speeding_strikes == 0
+            and d.speeding_tickets == 0
+        ):
+            ids.append("spotless_long")
+        if d.speeding_tickets >= 1:
+            ids.append("first_ticket")
+        if d.speeding_tickets >= 2:
+            ids.append("second_ticket")
 
         for achievement_id in ids:
             result = self.ctx.award_achievement(achievement_id, announce=False)
