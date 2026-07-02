@@ -81,7 +81,7 @@ STATE_REGION: dict[str, str] = {
     "West Virginia": "appalachia",
     # Great Lakes / industrial Midwest
     "Ohio": "great_lakes",
-    "Indiana": "great_lakes",
+    # Indiana is split by latitude in classify_region (Evansville -> mid_south).
     "Illinois": "great_lakes",
     "Michigan": "great_lakes",
     "Wisconsin": "great_lakes",
@@ -147,8 +147,16 @@ def classify_region(state: str, lat: float, lon: float) -> str:
         # East Tennessee is Appalachian; middle and west are Mid-South.
         return "appalachia" if lon >= -85.0 else "mid_south"
     if state == "Pennsylvania":
+        # Erie sits on the Lake Erie shore -- lake-effect Great Lakes country,
+        # like Buffalo and Cleveland on either side -- not Appalachian.
+        if lat >= 42.0:
+            return "great_lakes"
         # Western Pennsylvania is Appalachian; the southeast is the Northeast.
         return "appalachia" if lon <= -78.0 else "northeast"
+    if state == "Indiana":
+        # Far-southern Indiana on the Ohio River (Evansville) is Mid-South;
+        # the rest of the state is the industrial Great Lakes Midwest.
+        return "mid_south" if lat <= 38.5 else "great_lakes"
     if state == "New York":
         # Western New York (Buffalo) is lake-effect Great Lakes country.
         return "great_lakes" if lon <= -78.0 else "northeast"
