@@ -56,10 +56,16 @@ def test_region_opens_a_city_submenu_listing_only_that_regions_cities(world):
             picker.handle_event(key_event(pygame.K_DOWN))
         picker.handle_event(key_event(pygame.K_RETURN))
         assert isinstance(app.state, HomeCityState)
-        listed = {item.text.split(",")[0] for item in app.state.items}
-        expected = {c.name for c in world.cities.values() if c.region == "great_lakes"}
+
+        def _place(c):
+            # Mirror HomeCityState.build_items: state-disambiguated names
+            # ("Springfield, Illinois") are not given a second state suffix.
+            return c.name if c.name.endswith(f", {c.state}") else f"{c.name}, {c.state}"
+
+        listed = {item.text for item in app.state.items}
+        expected = {_place(c) for c in world.cities.values() if c.region == "great_lakes"}
         assert listed == expected
-        assert "Chicago" in listed
+        assert "Chicago, Illinois" in listed
     finally:
         app.shutdown()
 

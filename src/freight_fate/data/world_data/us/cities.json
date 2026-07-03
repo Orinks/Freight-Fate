@@ -3485,6 +3485,173 @@
       ],
       "lat": 37.9717,
       "lon": -100.8727
+    },
+    "Decatur": {
+      "state": "Illinois",
+      "region": "great_lakes",
+      "locations": [
+        {
+          "name": "ADM Decatur Complex",
+          "type": "food_processor",
+          "source_note": "Archer Daniels Midland headquarters complex (~1,125 acres); corn and soy processing at ~600k/200k bushels a day."
+        },
+        {
+          "name": "Caterpillar Decatur Plant",
+          "type": "manufacturing_plant",
+          "source_note": "Caterpillar plant building off-highway and large mining trucks and wheel-tractor scrapers, Decatur."
+        },
+        {
+          "name": "Tate & Lyle Corn Wet Mill",
+          "type": "food_processor",
+          "source_note": "Tate & Lyle (former A.E. Staley) corn wet-milling / high-fructose corn syrup plant, Decatur."
+        }
+      ],
+      "lat": 39.8403,
+      "lon": -88.9548
+    },
+    "Springfield, Illinois": {
+      "state": "Illinois",
+      "region": "great_lakes",
+      "locations": [
+        {
+          "name": "Springfield Distribution Center",
+          "type": "distribution",
+          "source_note": "Central Illinois distribution on the I-55 Chicago-St. Louis corridor at the state capital."
+        },
+        {
+          "name": "Bunn Manufacturing",
+          "type": "manufacturing_plant",
+          "source_note": "Bunn commercial beverage-equipment manufacturing, Springfield."
+        }
+      ],
+      "lat": 39.7817,
+      "lon": -89.6501
+    },
+    "Bloomington": {
+      "state": "Illinois",
+      "region": "great_lakes",
+      "locations": [
+        {
+          "name": "Rivian Normal Assembly Plant",
+          "type": "automotive_plant",
+          "source_note": "Rivian electric-vehicle plant in Normal (~4M sq ft former Mitsubishi plant)."
+        },
+        {
+          "name": "Rivian Supplier Park",
+          "type": "distribution",
+          "source_note": "Rivian supplier/logistics park serving the Normal EV plant."
+        }
+      ],
+      "lat": 40.4842,
+      "lon": -88.9937
+    },
+    "Champaign": {
+      "state": "Illinois",
+      "region": "great_lakes",
+      "locations": [
+        {
+          "name": "Flex-N-Gate",
+          "type": "manufacturing_plant",
+          "source_note": "Flex-N-Gate automotive stampings and assemblies, Champaign-Urbana."
+        },
+        {
+          "name": "Kraft Heinz Champaign Plant",
+          "type": "food_processor",
+          "source_note": "Kraft Heinz food-manufacturing plant, Champaign."
+        }
+      ],
+      "lat": 40.1164,
+      "lon": -88.2434
+    },
+    "Flint": {
+      "state": "Michigan",
+      "region": "great_lakes",
+      "locations": [
+        {
+          "name": "GM Flint Assembly",
+          "type": "automotive_plant",
+          "source_note": "General Motors Flint Assembly, heavy-duty pickup truck production."
+        },
+        {
+          "name": "Flint Genesee Distribution",
+          "type": "distribution",
+          "source_note": "Auto-supply and regional distribution serving the I-75/I-69 corridor, Flint."
+        }
+      ],
+      "lat": 43.0125,
+      "lon": -83.6875
+    },
+    "Kalamazoo": {
+      "state": "Michigan",
+      "region": "great_lakes",
+      "locations": [
+        {
+          "name": "Pfizer Kalamazoo",
+          "type": "manufacturing_plant",
+          "source_note": "Pfizer's largest manufacturing site (~1,300 acres): active ingredients, drug products, medical devices."
+        },
+        {
+          "name": "Stryker Kalamazoo",
+          "type": "manufacturing_plant",
+          "source_note": "Stryker global headquarters and medical-device manufacturing/logistics campus, Kalamazoo."
+        }
+      ],
+      "lat": 42.2917,
+      "lon": -85.5872
+    },
+    "Saginaw": {
+      "state": "Michigan",
+      "region": "great_lakes",
+      "locations": [
+        {
+          "name": "Nexteer Automotive",
+          "type": "automotive_plant",
+          "source_note": "Nexteer Automotive steering-systems manufacturing, rooted in Saginaw since 1906."
+        },
+        {
+          "name": "Saginaw Metal Casting Operations",
+          "type": "steel_industrial",
+          "source_note": "GM Saginaw metal-casting foundry supplying powertrain components."
+        }
+      ],
+      "lat": 43.4195,
+      "lon": -83.9508
+    },
+    "Port Huron": {
+      "state": "Michigan",
+      "region": "great_lakes",
+      "locations": [
+        {
+          "name": "Blue Water Bridge Freight Terminal",
+          "type": "cross_dock",
+          "source_note": "Blue Water Bridge port of entry -- the second-busiest US-Canada commercial truck crossing (~826k trucks/yr)."
+        },
+        {
+          "name": "Port Huron Distribution",
+          "type": "distribution",
+          "source_note": "Border transload and distribution serving the I-94/I-69 crossing to Sarnia, Ontario."
+        }
+      ],
+      "lat": 42.9709,
+      "lon": -82.4249
+    },
+    "Muskegon": {
+      "state": "Michigan",
+      "region": "great_lakes",
+      "locations": [
+        {
+          "name": "Port of Muskegon",
+          "type": "port",
+          "source_note": "Port of Muskegon deepwater Lake Michigan port (aggregate, coal, salt; ~1M+ tons/yr)."
+        },
+        {
+          "name": "Howmet Aerospace",
+          "type": "manufacturing_plant",
+          "source_note": "Howmet Aerospace precision-casting/aerospace-engine-component manufacturing, Muskegon County."
+        }
+      ],
+      "lat": 43.2342,
+      "lon": -86.2484
     }
   }
 }
