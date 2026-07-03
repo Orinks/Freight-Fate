@@ -330,6 +330,53 @@
         "state": "Michigan"
       }
     ],
+    "Asheville": [
+      {
+        "approach_miles": 16.8,
+        "approach_road": "local industrial access road",
+        "city": "Asheville",
+        "fallback": false,
+        "key": "freight_market",
+        "kind": "freight_market",
+        "lat": 35.41514,
+        "lon": -82.548531,
+        "name": "DRT4 Amazon Logistics",
+        "source_note": "Source-backed city service POI from a local OpenStreetMap extract for Asheville, North Carolina; category mapped as industrial logistics tag; accessed 2026-06-27.",
+        "source_ref": "way/1110085115",
+        "source_type": "osm",
+        "state": "North Carolina"
+      },
+      {
+        "approach_miles": 16.2,
+        "approach_road": "local industrial access road",
+        "city": "Asheville",
+        "fallback": false,
+        "key": "garage",
+        "kind": "garage",
+        "lat": 35.543059,
+        "lon": -82.754673,
+        "name": "TA Truck Service",
+        "source_note": "Source-backed city service POI from a local OpenStreetMap extract for Asheville, North Carolina; category mapped as vehicle repair tags with truck relevance scoring; accessed 2026-06-27.",
+        "source_ref": "way/226934963",
+        "source_type": "osm",
+        "state": "North Carolina"
+      },
+      {
+        "approach_miles": 6.6,
+        "approach_road": "local industrial access road",
+        "city": "Asheville",
+        "fallback": false,
+        "key": "truck_dealer",
+        "kind": "truck_dealer",
+        "lat": 35.565237,
+        "lon": -82.631043,
+        "name": "MHC Truck Dealer",
+        "source_note": "Source-backed city service POI from a local OpenStreetMap extract for Asheville, North Carolina; category mapped as dealer name with truck/heavy-vehicle context; accessed 2026-06-27.",
+        "source_ref": "node/3488087997",
+        "source_type": "osm",
+        "state": "North Carolina"
+      }
+    ],
     "Athens": [
       {
         "approach_miles": 4.0,
@@ -847,6 +894,101 @@
         "source_ref": "way/1528230089",
         "source_type": "osm",
         "state": "Texas"
+      }
+    ],
+    "Beckley": [
+      {
+        "approach_miles": 25.0,
+        "approach_road": "local industrial access road",
+        "city": "Beckley",
+        "fallback": false,
+        "key": "freight_market",
+        "kind": "freight_market",
+        "lat": 37.90485,
+        "lon": -81.675439,
+        "name": "Eastern Associated Coal",
+        "source_note": "Source-backed city service POI from a local OpenStreetMap extract for Beckley, West Virginia; category mapped as industrial landuse with logistics/freight name; accessed 2026-06-27.",
+        "source_ref": "way/1015609465",
+        "source_type": "osm",
+        "state": "West Virginia"
+      },
+      {
+        "approach_miles": 0.6,
+        "approach_road": "local industrial access road",
+        "city": "Beckley",
+        "fallback": false,
+        "key": "garage",
+        "kind": "garage",
+        "lat": 37.774379,
+        "lon": -81.193857,
+        "name": "Second Street Service Center",
+        "source_note": "Source-backed city service POI from a local OpenStreetMap extract for Beckley, West Virginia; category mapped as vehicle repair tags with truck relevance scoring; accessed 2026-06-27.",
+        "source_ref": "node/6267565610",
+        "source_type": "osm",
+        "state": "West Virginia"
+      },
+      {
+        "approach_miles": 4.5,
+        "approach_road": "dealer access road",
+        "city": "Beckley",
+        "fallback": true,
+        "fallback_reason": "No realistic source-backed OSM candidate found within 28 miles in west-virginia-latest.osm.pbf.",
+        "key": "truck_dealer",
+        "kind": "truck_dealer",
+        "lat": 37.7782,
+        "lon": -81.1882,
+        "name": "Beckley Truck Dealer",
+        "source_note": "Representative fallback truck dealer for Beckley, West Virginia; not a claim about a real-world service POI.",
+        "source_ref": "",
+        "source_type": "fallback",
+        "state": "West Virginia"
+      }
+    ],
+    "Bellingham": [
+      {
+        "approach_miles": 1.7,
+        "approach_road": "local industrial access road",
+        "city": "Bellingham",
+        "fallback": false,
+        "key": "freight_market",
+        "kind": "freight_market",
+        "lat": 48.756078,
+        "lon": -122.45176,
+        "name": "Transmarine Navigation",
+        "source_note": "Source-backed city service POI from a local OpenStreetMap extract for Bellingham, Washington; category mapped as logistics or freight-forwarder office tags; accessed 2026-06-27.",
+        "source_ref": "node/10262315741",
+        "source_type": "osm",
+        "state": "Washington"
+      },
+      {
+        "approach_miles": 25.0,
+        "approach_road": "local industrial access road",
+        "city": "Bellingham",
+        "fallback": false,
+        "key": "garage",
+        "kind": "garage",
+        "lat": 48.976391,
+        "lon": -122.727595,
+        "name": "IK Truck Repair",
+        "source_note": "Source-backed city service POI from a local OpenStreetMap extract for Bellingham, Washington; category mapped as vehicle repair tags with truck relevance scoring; accessed 2026-06-27.",
+        "source_ref": "node/11265687242",
+        "source_type": "osm",
+        "state": "Washington"
+      },
+      {
+        "approach_miles": 25.0,
+        "approach_road": "local industrial access road",
+        "city": "Bellingham",
+        "fallback": false,
+        "key": "truck_dealer",
+        "kind": "truck_dealer",
+        "lat": 49.00658,
+        "lon": -122.270647,
+        "name": "F1rst Truck Centre",
+        "source_note": "Source-backed city service POI from a local OpenStreetMap extract for Bellingham, Washington; category mapped as truck dealer or heavy-vehicle sales/service tags; accessed 2026-06-27.",
+        "source_ref": "way/565181842",
+        "source_type": "osm",
+        "state": "Washington"
       }
     ],
     "Billings": [
@@ -2032,6 +2174,54 @@
         "state": "South Carolina"
       }
     ],
+    "Columbia, Missouri": [
+      {
+        "approach_miles": 1.7,
+        "approach_road": "local industrial access road",
+        "city": "Columbia, Missouri",
+        "fallback": false,
+        "key": "freight_market",
+        "kind": "freight_market",
+        "lat": 38.967402,
+        "lon": -92.346257,
+        "name": "Harbor Freight Tools",
+        "source_note": "Source-backed city service POI from a local OpenStreetMap extract for Columbia, Missouri, Missouri; category mapped as named logistics/freight facility; accessed 2026-06-27.",
+        "source_ref": "node/12392665501",
+        "source_type": "osm",
+        "state": "Missouri"
+      },
+      {
+        "approach_miles": 1.9,
+        "approach_road": "local industrial access road",
+        "city": "Columbia, Missouri",
+        "fallback": false,
+        "key": "garage",
+        "kind": "garage",
+        "lat": 38.960611,
+        "lon": -92.310058,
+        "name": "Columbia Car Care & Fleet Specialties",
+        "source_note": "Source-backed city service POI from a local OpenStreetMap extract for Columbia, Missouri, Missouri; category mapped as vehicle repair tags with truck relevance scoring; accessed 2026-06-27.",
+        "source_ref": "way/593196787",
+        "source_type": "osm",
+        "state": "Missouri"
+      },
+      {
+        "approach_miles": 4.5,
+        "approach_road": "dealer access road",
+        "city": "Columbia, Missouri",
+        "fallback": true,
+        "fallback_reason": "No realistic source-backed OSM candidate found within 28 miles in missouri-latest.osm.pbf.",
+        "key": "truck_dealer",
+        "kind": "truck_dealer",
+        "lat": 38.9517,
+        "lon": -92.3341,
+        "name": "Columbia, Missouri Truck Dealer",
+        "source_note": "Representative fallback truck dealer for Columbia, Missouri, Missouri; not a claim about a real-world service POI.",
+        "source_ref": "",
+        "source_type": "fallback",
+        "state": "Missouri"
+      }
+    ],
     "Columbus": [
       {
         "approach_miles": 0.6,
@@ -2457,6 +2647,55 @@
         "state": "Michigan"
       }
     ],
+    "Dodge City": [
+      {
+        "approach_miles": 2.5,
+        "approach_road": "local freight district streets",
+        "city": "Dodge City",
+        "fallback": true,
+        "fallback_reason": "No realistic source-backed OSM candidate found within 28 miles in kansas-latest.osm.pbf.",
+        "key": "freight_market",
+        "kind": "freight_market",
+        "lat": 37.7528,
+        "lon": -100.0171,
+        "name": "Dodge City Freight Market Office",
+        "source_note": "Representative fallback freight market office for Dodge City, Kansas; not a claim about a real-world service POI.",
+        "source_ref": "",
+        "source_type": "fallback",
+        "state": "Kansas"
+      },
+      {
+        "approach_miles": 21.7,
+        "approach_road": "local industrial access road",
+        "city": "Dodge City",
+        "fallback": false,
+        "key": "garage",
+        "kind": "garage",
+        "lat": 37.854383,
+        "lon": -99.752322,
+        "name": "Pistons Auto Diesel Repair",
+        "source_note": "Source-backed city service POI from a local OpenStreetMap extract for Dodge City, Kansas; category mapped as vehicle repair tags with truck relevance scoring; accessed 2026-06-27.",
+        "source_ref": "way/694784564",
+        "source_type": "osm",
+        "state": "Kansas"
+      },
+      {
+        "approach_miles": 4.5,
+        "approach_road": "dealer access road",
+        "city": "Dodge City",
+        "fallback": true,
+        "fallback_reason": "No realistic source-backed OSM candidate found within 28 miles in kansas-latest.osm.pbf.",
+        "key": "truck_dealer",
+        "kind": "truck_dealer",
+        "lat": 37.7528,
+        "lon": -100.0171,
+        "name": "Dodge City Truck Dealer",
+        "source_note": "Representative fallback truck dealer for Dodge City, Kansas; not a claim about a real-world service POI.",
+        "source_ref": "",
+        "source_type": "fallback",
+        "state": "Kansas"
+      }
+    ],
     "Dover": [
       {
         "approach_miles": 1.3,
@@ -2648,6 +2887,54 @@
         "state": "Nevada"
       }
     ],
+    "Enid": [
+      {
+        "approach_miles": 3.7,
+        "approach_road": "local industrial access road",
+        "city": "Enid",
+        "fallback": false,
+        "key": "freight_market",
+        "kind": "freight_market",
+        "lat": 36.3924,
+        "lon": -97.927006,
+        "name": "Harbor Freight Tools",
+        "source_note": "Source-backed city service POI from a local OpenStreetMap extract for Enid, Oklahoma; category mapped as named logistics/freight facility; accessed 2026-06-27.",
+        "source_ref": "node/12286349614",
+        "source_type": "osm",
+        "state": "Oklahoma"
+      },
+      {
+        "approach_miles": 2.4,
+        "approach_road": "local industrial access road",
+        "city": "Enid",
+        "fallback": false,
+        "key": "garage",
+        "kind": "garage",
+        "lat": 36.418458,
+        "lon": -97.862441,
+        "name": "Infinite Distinctions",
+        "source_note": "Source-backed city service POI from a local OpenStreetMap extract for Enid, Oklahoma; category mapped as vehicle repair tags with truck relevance scoring; accessed 2026-06-27.",
+        "source_ref": "way/1081988803",
+        "source_type": "osm",
+        "state": "Oklahoma"
+      },
+      {
+        "approach_miles": 4.5,
+        "approach_road": "dealer access road",
+        "city": "Enid",
+        "fallback": true,
+        "fallback_reason": "No realistic source-backed OSM candidate found within 28 miles in oklahoma-latest.osm.pbf.",
+        "key": "truck_dealer",
+        "kind": "truck_dealer",
+        "lat": 36.3956,
+        "lon": -97.8784,
+        "name": "Enid Truck Dealer",
+        "source_note": "Representative fallback truck dealer for Enid, Oklahoma; not a claim about a real-world service POI.",
+        "source_ref": "",
+        "source_type": "fallback",
+        "state": "Oklahoma"
+      }
+    ],
     "Erie": [
       {
         "approach_miles": 2.2,
@@ -2789,6 +3076,53 @@
         "source_ref": "",
         "source_type": "fallback",
         "state": "Indiana"
+      }
+    ],
+    "Everett": [
+      {
+        "approach_miles": 25.0,
+        "approach_road": "local industrial access road",
+        "city": "Everett",
+        "fallback": false,
+        "key": "freight_market",
+        "kind": "freight_market",
+        "lat": 47.622947,
+        "lon": -122.358384,
+        "name": "General International Freight Forwarders, Inc.",
+        "source_note": "Source-backed city service POI from a local OpenStreetMap extract for Everett, Washington; category mapped as transport office with freight/logistics context; accessed 2026-06-27.",
+        "source_ref": "node/12312622267",
+        "source_type": "osm",
+        "state": "Washington"
+      },
+      {
+        "approach_miles": 5.2,
+        "approach_road": "local industrial access road",
+        "city": "Everett",
+        "fallback": false,
+        "key": "garage",
+        "kind": "garage",
+        "lat": 47.923638,
+        "lon": -122.205756,
+        "name": "Fleet Service Auto & Truck",
+        "source_note": "Source-backed city service POI from a local OpenStreetMap extract for Everett, Washington; category mapped as vehicle repair tags with truck relevance scoring; accessed 2026-06-27.",
+        "source_ref": "way/1132595198",
+        "source_type": "osm",
+        "state": "Washington"
+      },
+      {
+        "approach_miles": 14.7,
+        "approach_road": "local industrial access road",
+        "city": "Everett",
+        "fallback": false,
+        "key": "truck_dealer",
+        "kind": "truck_dealer",
+        "lat": 48.135824,
+        "lon": -122.18487,
+        "name": "Peterbilt",
+        "source_note": "Source-backed city service POI from a local OpenStreetMap extract for Everett, Washington; category mapped as truck dealer or heavy-vehicle sales/service tags; accessed 2026-06-27.",
+        "source_ref": "way/218404990",
+        "source_type": "osm",
+        "state": "Washington"
       }
     ],
     "Fairfield": [
@@ -3219,6 +3553,102 @@
         "state": "Florida"
       }
     ],
+    "Garden City": [
+      {
+        "approach_miles": 2.5,
+        "approach_road": "local freight district streets",
+        "city": "Garden City",
+        "fallback": true,
+        "fallback_reason": "No realistic source-backed OSM candidate found within 28 miles in kansas-latest.osm.pbf.",
+        "key": "freight_market",
+        "kind": "freight_market",
+        "lat": 37.9717,
+        "lon": -100.8727,
+        "name": "Garden City Freight Market Office",
+        "source_note": "Representative fallback freight market office for Garden City, Kansas; not a claim about a real-world service POI.",
+        "source_ref": "",
+        "source_type": "fallback",
+        "state": "Kansas"
+      },
+      {
+        "approach_miles": 0.6,
+        "approach_road": "local industrial access road",
+        "city": "Garden City",
+        "fallback": false,
+        "key": "garage",
+        "kind": "garage",
+        "lat": 37.97525,
+        "lon": -100.871906,
+        "name": "The Mufler Stop",
+        "source_note": "Source-backed city service POI from a local OpenStreetMap extract for Garden City, Kansas; category mapped as vehicle repair tags with truck relevance scoring; accessed 2026-06-27.",
+        "source_ref": "way/318979215",
+        "source_type": "osm",
+        "state": "Kansas"
+      },
+      {
+        "approach_miles": 4.5,
+        "approach_road": "dealer access road",
+        "city": "Garden City",
+        "fallback": true,
+        "fallback_reason": "No realistic source-backed OSM candidate found within 28 miles in kansas-latest.osm.pbf.",
+        "key": "truck_dealer",
+        "kind": "truck_dealer",
+        "lat": 37.9717,
+        "lon": -100.8727,
+        "name": "Garden City Truck Dealer",
+        "source_note": "Representative fallback truck dealer for Garden City, Kansas; not a claim about a real-world service POI.",
+        "source_ref": "",
+        "source_type": "fallback",
+        "state": "Kansas"
+      }
+    ],
+    "Grand Island": [
+      {
+        "approach_miles": 17.8,
+        "approach_road": "local industrial access road",
+        "city": "Grand Island",
+        "fallback": false,
+        "key": "freight_market",
+        "kind": "freight_market",
+        "lat": 40.875454,
+        "lon": -98.098929,
+        "name": "CF Industries - Aurora Terminal",
+        "source_note": "Source-backed city service POI from a local OpenStreetMap extract for Grand Island, Nebraska; category mapped as industrial landuse with logistics/freight name; accessed 2026-06-27.",
+        "source_ref": "way/1199174253",
+        "source_type": "osm",
+        "state": "Nebraska"
+      },
+      {
+        "approach_miles": 9.5,
+        "approach_road": "local industrial access road",
+        "city": "Grand Island",
+        "fallback": false,
+        "key": "garage",
+        "kind": "garage",
+        "lat": 40.828728,
+        "lon": -98.381847,
+        "name": "Bosselman Boss Shop",
+        "source_note": "Source-backed city service POI from a local OpenStreetMap extract for Grand Island, Nebraska; category mapped as vehicle repair tags with truck relevance scoring; accessed 2026-06-27.",
+        "source_ref": "way/221384339",
+        "source_type": "osm",
+        "state": "Nebraska"
+      },
+      {
+        "approach_miles": 11.0,
+        "approach_road": "local industrial access road",
+        "city": "Grand Island",
+        "fallback": false,
+        "key": "truck_dealer",
+        "kind": "truck_dealer",
+        "lat": 40.811428,
+        "lon": -98.376864,
+        "name": "Rush Truck Centers \u2013 Grand Island",
+        "source_note": "Source-backed city service POI from a local OpenStreetMap extract for Grand Island, Nebraska; category mapped as truck dealer or heavy-vehicle sales/service tags; accessed 2026-06-27.",
+        "source_ref": "way/1528889748",
+        "source_type": "osm",
+        "state": "Nebraska"
+      }
+    ],
     "Grand Rapids": [
       {
         "approach_miles": 14.4,
@@ -3455,6 +3885,54 @@
         "state": "Mississippi"
       }
     ],
+    "Hagerstown": [
+      {
+        "approach_miles": 1.4,
+        "approach_road": "local industrial access road",
+        "city": "Hagerstown",
+        "fallback": false,
+        "key": "freight_market",
+        "kind": "freight_market",
+        "lat": 39.656793,
+        "lon": -77.718642,
+        "name": "Spa Warehouse",
+        "source_note": "Source-backed city service POI from a local OpenStreetMap extract for Hagerstown, Maryland; category mapped as named logistics/freight facility; accessed 2026-06-27.",
+        "source_ref": "node/5307369502",
+        "source_type": "osm",
+        "state": "Maryland"
+      },
+      {
+        "approach_miles": 5.5,
+        "approach_road": "local industrial access road",
+        "city": "Hagerstown",
+        "fallback": false,
+        "key": "garage",
+        "kind": "garage",
+        "lat": 39.699342,
+        "lon": -77.73415,
+        "name": "Love's",
+        "source_note": "Source-backed city service POI from a local OpenStreetMap extract for Hagerstown, Maryland; category mapped as vehicle repair tags with truck relevance scoring; accessed 2026-06-27.",
+        "source_ref": "way/659634609",
+        "source_type": "osm",
+        "state": "Maryland"
+      },
+      {
+        "approach_miles": 4.5,
+        "approach_road": "dealer access road",
+        "city": "Hagerstown",
+        "fallback": true,
+        "fallback_reason": "No realistic source-backed OSM candidate found within 28 miles in maryland-latest.osm.pbf.",
+        "key": "truck_dealer",
+        "kind": "truck_dealer",
+        "lat": 39.6418,
+        "lon": -77.72,
+        "name": "Hagerstown Truck Dealer",
+        "source_note": "Representative fallback truck dealer for Hagerstown, Maryland; not a claim about a real-world service POI.",
+        "source_ref": "",
+        "source_type": "fallback",
+        "state": "Maryland"
+      }
+    ],
     "Harrisburg": [
       {
         "approach_miles": 25.0,
@@ -3500,6 +3978,54 @@
         "source_ref": "node/7838121093",
         "source_type": "osm",
         "state": "Pennsylvania"
+      }
+    ],
+    "Harrisonburg": [
+      {
+        "approach_miles": 5.3,
+        "approach_road": "local industrial access road",
+        "city": "Harrisonburg",
+        "fallback": false,
+        "key": "freight_market",
+        "kind": "freight_market",
+        "lat": 38.397286,
+        "lon": -78.897231,
+        "name": "United States Cold Storage",
+        "source_note": "Source-backed city service POI from a local OpenStreetMap extract for Harrisonburg, Virginia; category mapped as industrial landuse with logistics/freight name; accessed 2026-06-27.",
+        "source_ref": "way/765448709",
+        "source_type": "osm",
+        "state": "Virginia"
+      },
+      {
+        "approach_miles": 9.1,
+        "approach_road": "local industrial access road",
+        "city": "Harrisonburg",
+        "fallback": false,
+        "key": "garage",
+        "kind": "garage",
+        "lat": 38.393053,
+        "lon": -78.969816,
+        "name": "Fox's Repair, LLC",
+        "source_note": "Source-backed city service POI from a local OpenStreetMap extract for Harrisonburg, Virginia; category mapped as vehicle repair tags with truck relevance scoring; accessed 2026-06-27.",
+        "source_ref": "way/1056187972",
+        "source_type": "osm",
+        "state": "Virginia"
+      },
+      {
+        "approach_miles": 4.5,
+        "approach_road": "dealer access road",
+        "city": "Harrisonburg",
+        "fallback": true,
+        "fallback_reason": "No realistic source-backed OSM candidate found within 28 miles in virginia-latest.osm.pbf.",
+        "key": "truck_dealer",
+        "kind": "truck_dealer",
+        "lat": 38.4496,
+        "lon": -78.8689,
+        "name": "Harrisonburg Truck Dealer",
+        "source_note": "Representative fallback truck dealer for Harrisonburg, Virginia; not a claim about a real-world service POI.",
+        "source_ref": "",
+        "source_type": "fallback",
+        "state": "Virginia"
       }
     ],
     "Hartford": [
@@ -3831,6 +4357,102 @@
         "source_ref": "",
         "source_type": "fallback",
         "state": "Florida"
+      }
+    ],
+    "Johnson City": [
+      {
+        "approach_miles": 12.4,
+        "approach_road": "local industrial access road",
+        "city": "Johnson City",
+        "fallback": false,
+        "key": "freight_market",
+        "kind": "freight_market",
+        "lat": 36.434676,
+        "lon": -82.284431,
+        "name": "HSN Fulfillment Center",
+        "source_note": "Source-backed city service POI from a local OpenStreetMap extract for Johnson City, Tennessee; category mapped as industrial landuse with logistics/freight name; accessed 2026-06-27.",
+        "source_ref": "way/1221230216",
+        "source_type": "osm",
+        "state": "Tennessee"
+      },
+      {
+        "approach_miles": 3.2,
+        "approach_road": "local industrial access road",
+        "city": "Johnson City",
+        "fallback": false,
+        "key": "garage",
+        "kind": "garage",
+        "lat": 36.325398,
+        "lon": -82.394033,
+        "name": "Valvoline",
+        "source_note": "Source-backed city service POI from a local OpenStreetMap extract for Johnson City, Tennessee; category mapped as vehicle repair tags with truck relevance scoring; accessed 2026-06-27.",
+        "source_ref": "way/777346062",
+        "source_type": "osm",
+        "state": "Tennessee"
+      },
+      {
+        "approach_miles": 4.5,
+        "approach_road": "dealer access road",
+        "city": "Johnson City",
+        "fallback": true,
+        "fallback_reason": "No realistic source-backed OSM candidate found within 28 miles in tennessee-latest.osm.pbf.",
+        "key": "truck_dealer",
+        "kind": "truck_dealer",
+        "lat": 36.3134,
+        "lon": -82.3535,
+        "name": "Johnson City Truck Dealer",
+        "source_note": "Representative fallback truck dealer for Johnson City, Tennessee; not a claim about a real-world service POI.",
+        "source_ref": "",
+        "source_type": "fallback",
+        "state": "Tennessee"
+      }
+    ],
+    "Joplin": [
+      {
+        "approach_miles": 2.5,
+        "approach_road": "local freight district streets",
+        "city": "Joplin",
+        "fallback": true,
+        "fallback_reason": "No realistic source-backed OSM candidate found within 28 miles in missouri-latest.osm.pbf.",
+        "key": "freight_market",
+        "kind": "freight_market",
+        "lat": 37.0842,
+        "lon": -94.5133,
+        "name": "Joplin Freight Market Office",
+        "source_note": "Representative fallback freight market office for Joplin, Missouri; not a claim about a real-world service POI.",
+        "source_ref": "",
+        "source_type": "fallback",
+        "state": "Missouri"
+      },
+      {
+        "approach_miles": 3.9,
+        "approach_road": "local industrial access road",
+        "city": "Joplin",
+        "fallback": false,
+        "key": "garage",
+        "kind": "garage",
+        "lat": 37.058903,
+        "lon": -94.471353,
+        "name": "Rush Truck Centers \u2013 Joplin",
+        "source_note": "Source-backed city service POI from a local OpenStreetMap extract for Joplin, Missouri; category mapped as vehicle repair tags with truck relevance scoring; accessed 2026-06-27.",
+        "source_ref": "way/364606074",
+        "source_type": "osm",
+        "state": "Missouri"
+      },
+      {
+        "approach_miles": 19.8,
+        "approach_road": "local industrial access road",
+        "city": "Joplin",
+        "fallback": false,
+        "key": "truck_dealer",
+        "kind": "truck_dealer",
+        "lat": 36.88241,
+        "lon": -94.432708,
+        "name": "Neosho Freightliner",
+        "source_note": "Source-backed city service POI from a local OpenStreetMap extract for Joplin, Missouri; category mapped as truck dealer or heavy-vehicle sales/service tags; accessed 2026-06-27.",
+        "source_ref": "node/4761909007",
+        "source_type": "osm",
+        "state": "Missouri"
       }
     ],
     "Kansas City": [
@@ -4306,6 +4928,54 @@
         "source_ref": "",
         "source_type": "fallback",
         "state": "Nevada"
+      }
+    ],
+    "Lawton": [
+      {
+        "approach_miles": 0.6,
+        "approach_road": "local industrial access road",
+        "city": "Lawton",
+        "fallback": false,
+        "key": "freight_market",
+        "kind": "freight_market",
+        "lat": 34.609455,
+        "lon": -98.387866,
+        "name": "Lawton Gore",
+        "source_note": "Source-backed city service POI from a local OpenStreetMap extract for Lawton, Oklahoma; category mapped as industrial landuse with logistics/freight name; accessed 2026-06-27.",
+        "source_ref": "way/1123155864",
+        "source_type": "osm",
+        "state": "Oklahoma"
+      },
+      {
+        "approach_miles": 1.9,
+        "approach_road": "local industrial access road",
+        "city": "Lawton",
+        "fallback": false,
+        "key": "garage",
+        "kind": "garage",
+        "lat": 34.625415,
+        "lon": -98.405123,
+        "name": "Midas",
+        "source_note": "Source-backed city service POI from a local OpenStreetMap extract for Lawton, Oklahoma; category mapped as vehicle repair tags with truck relevance scoring; accessed 2026-06-27.",
+        "source_ref": "node/12454377988",
+        "source_type": "osm",
+        "state": "Oklahoma"
+      },
+      {
+        "approach_miles": 4.5,
+        "approach_road": "dealer access road",
+        "city": "Lawton",
+        "fallback": true,
+        "fallback_reason": "No realistic source-backed OSM candidate found within 28 miles in oklahoma-latest.osm.pbf.",
+        "key": "truck_dealer",
+        "kind": "truck_dealer",
+        "lat": 34.6086,
+        "lon": -98.3903,
+        "name": "Lawton Truck Dealer",
+        "source_note": "Representative fallback truck dealer for Lawton, Oklahoma; not a claim about a real-world service POI.",
+        "source_ref": "",
+        "source_type": "fallback",
+        "state": "Oklahoma"
       }
     ],
     "Lexington": [
@@ -4829,6 +5499,53 @@
         "source_ref": "way/659957356",
         "source_type": "osm",
         "state": "Texas"
+      }
+    ],
+    "Medford": [
+      {
+        "approach_miles": 2.0,
+        "approach_road": "local industrial access road",
+        "city": "Medford",
+        "fallback": false,
+        "key": "freight_market",
+        "kind": "freight_market",
+        "lat": 42.312632,
+        "lon": -122.853099,
+        "name": "Harbor Freight Tools",
+        "source_note": "Source-backed city service POI from a local OpenStreetMap extract for Medford, Oregon; category mapped as named logistics/freight facility; accessed 2026-06-27.",
+        "source_ref": "node/6355767036",
+        "source_type": "osm",
+        "state": "Oregon"
+      },
+      {
+        "approach_miles": 5.4,
+        "approach_road": "local industrial access road",
+        "city": "Medford",
+        "fallback": false,
+        "key": "garage",
+        "kind": "garage",
+        "lat": 42.382491,
+        "lon": -122.858641,
+        "name": "Lonnies Truck & Auto Paint",
+        "source_note": "Source-backed city service POI from a local OpenStreetMap extract for Medford, Oregon; category mapped as vehicle repair tags with truck relevance scoring; accessed 2026-06-27.",
+        "source_ref": "way/1502699158",
+        "source_type": "osm",
+        "state": "Oregon"
+      },
+      {
+        "approach_miles": 5.9,
+        "approach_road": "local industrial access road",
+        "city": "Medford",
+        "fallback": false,
+        "key": "truck_dealer",
+        "kind": "truck_dealer",
+        "lat": 42.388519,
+        "lon": -122.861848,
+        "name": "TEC Equipment",
+        "source_note": "Source-backed city service POI from a local OpenStreetMap extract for Medford, Oregon; category mapped as truck dealer or heavy-vehicle sales/service tags; accessed 2026-06-27.",
+        "source_ref": "way/1502797248",
+        "source_type": "osm",
+        "state": "Oregon"
       }
     ],
     "Memphis": [
@@ -5496,37 +6213,37 @@
     ],
     "New York": [
       {
-        "approach_miles": 1.3,
+        "approach_miles": 7.1,
         "approach_road": "local industrial access road",
         "city": "New York",
         "fallback": false,
         "key": "freight_market",
         "kind": "freight_market",
-        "lat": 40.721018,
-        "lon": -73.991165,
-        "name": "Racer",
+        "lat": 40.739709,
+        "lon": -73.921814,
+        "name": "Fast Mode",
         "source_note": "Source-backed city service POI from a local OpenStreetMap extract for New York, New York; category mapped as logistics or freight-forwarder office tags; accessed 2026-06-27.",
-        "source_ref": "node/9630440538",
+        "source_ref": "node/2844905289",
         "source_type": "osm",
         "state": "New York"
       },
       {
-        "approach_miles": 3.0,
+        "approach_miles": 5.0,
         "approach_road": "local industrial access road",
         "city": "New York",
         "fallback": false,
         "key": "garage",
         "kind": "garage",
-        "lat": 40.697453,
-        "lon": -73.969486,
-        "name": "Unique Truck & Auto",
+        "lat": 40.790407,
+        "lon": -73.812129,
+        "name": "Re Action Auto & Truck Center",
         "source_note": "Source-backed city service POI from a local OpenStreetMap extract for New York, New York; category mapped as vehicle repair tags with truck relevance scoring; accessed 2026-06-27.",
-        "source_ref": "node/2568285199",
+        "source_ref": "node/5147376172",
         "source_type": "osm",
         "state": "New York"
       },
       {
-        "approach_miles": 2.6,
+        "approach_miles": 14.6,
         "approach_road": "local industrial access road",
         "city": "New York",
         "fallback": false,
@@ -5684,6 +6401,54 @@
         "state": "Virginia"
       }
     ],
+    "North Platte": [
+      {
+        "approach_miles": 3.7,
+        "approach_road": "local industrial access road",
+        "city": "North Platte",
+        "fallback": false,
+        "key": "freight_market",
+        "kind": "freight_market",
+        "lat": 41.094488,
+        "lon": -100.730559,
+        "name": "Walmart Distribution Center",
+        "source_note": "Source-backed city service POI from a local OpenStreetMap extract for North Platte, Nebraska; category mapped as industrial landuse with logistics/freight name; accessed 2026-06-27.",
+        "source_ref": "way/967588588",
+        "source_type": "osm",
+        "state": "Nebraska"
+      },
+      {
+        "approach_miles": 3.2,
+        "approach_road": "local industrial access road",
+        "city": "North Platte",
+        "fallback": false,
+        "key": "garage",
+        "kind": "garage",
+        "lat": 41.102345,
+        "lon": -100.729885,
+        "name": "Bosselman North Platte",
+        "source_note": "Source-backed city service POI from a local OpenStreetMap extract for North Platte, Nebraska; category mapped as vehicle repair tags with truck relevance scoring; accessed 2026-06-27.",
+        "source_ref": "way/319963391",
+        "source_type": "osm",
+        "state": "Nebraska"
+      },
+      {
+        "approach_miles": 4.5,
+        "approach_road": "dealer access road",
+        "city": "North Platte",
+        "fallback": true,
+        "fallback_reason": "No realistic source-backed OSM candidate found within 28 miles in nebraska-latest.osm.pbf.",
+        "key": "truck_dealer",
+        "kind": "truck_dealer",
+        "lat": 41.1239,
+        "lon": -100.7654,
+        "name": "North Platte Truck Dealer",
+        "source_note": "Representative fallback truck dealer for North Platte, Nebraska; not a claim about a real-world service POI.",
+        "source_ref": "",
+        "source_type": "fallback",
+        "state": "Nebraska"
+      }
+    ],
     "Oceanside": [
       {
         "approach_miles": 25.0,
@@ -5777,6 +6542,53 @@
         "source_ref": "way/435186012",
         "source_type": "osm",
         "state": "Oklahoma"
+      }
+    ],
+    "Olympia": [
+      {
+        "approach_miles": 25.0,
+        "approach_road": "local industrial access road",
+        "city": "Olympia",
+        "fallback": false,
+        "key": "freight_market",
+        "kind": "freight_market",
+        "lat": 46.998773,
+        "lon": -123.43624,
+        "name": "Amazon",
+        "source_note": "Source-backed city service POI from a local OpenStreetMap extract for Olympia, Washington; category mapped as industrial logistics tag; accessed 2026-06-27.",
+        "source_ref": "way/1489341734",
+        "source_type": "osm",
+        "state": "Washington"
+      },
+      {
+        "approach_miles": 2.4,
+        "approach_road": "local industrial access road",
+        "city": "Olympia",
+        "fallback": false,
+        "key": "garage",
+        "kind": "garage",
+        "lat": 47.028993,
+        "lon": -122.935717,
+        "name": "Ernie's RV and Trailer Repair",
+        "source_note": "Source-backed city service POI from a local OpenStreetMap extract for Olympia, Washington; category mapped as vehicle repair tags with truck relevance scoring; accessed 2026-06-27.",
+        "source_ref": "way/1230183281",
+        "source_type": "osm",
+        "state": "Washington"
+      },
+      {
+        "approach_miles": 25.0,
+        "approach_road": "local industrial access road",
+        "city": "Olympia",
+        "fallback": false,
+        "key": "truck_dealer",
+        "kind": "truck_dealer",
+        "lat": 47.143967,
+        "lon": -122.512221,
+        "name": "Pape Kenworth Rentals",
+        "source_note": "Source-backed city service POI from a local OpenStreetMap extract for Olympia, Washington; category mapped as truck dealer or heavy-vehicle sales/service tags; accessed 2026-06-27.",
+        "source_ref": "node/7316702285",
+        "source_type": "osm",
+        "state": "Washington"
       }
     ],
     "Omaha": [
@@ -5969,6 +6781,54 @@
         "source_ref": "",
         "source_type": "fallback",
         "state": "Florida"
+      }
+    ],
+    "Pendleton": [
+      {
+        "approach_miles": 2.5,
+        "approach_road": "local freight district streets",
+        "city": "Pendleton",
+        "fallback": true,
+        "fallback_reason": "No realistic source-backed OSM candidate found within 28 miles in oregon-latest.osm.pbf.",
+        "key": "freight_market",
+        "kind": "freight_market",
+        "lat": 45.6721,
+        "lon": -118.7886,
+        "name": "Pendleton Freight Market Office",
+        "source_note": "Representative fallback freight market office for Pendleton, Oregon; not a claim about a real-world service POI.",
+        "source_ref": "",
+        "source_type": "fallback",
+        "state": "Oregon"
+      },
+      {
+        "approach_miles": 0.6,
+        "approach_road": "local industrial access road",
+        "city": "Pendleton",
+        "fallback": false,
+        "key": "garage",
+        "kind": "garage",
+        "lat": 45.671757,
+        "lon": -118.789686,
+        "name": "The Shop",
+        "source_note": "Source-backed city service POI from a local OpenStreetMap extract for Pendleton, Oregon; category mapped as vehicle repair tags with truck relevance scoring; accessed 2026-06-27.",
+        "source_ref": "way/265536608",
+        "source_type": "osm",
+        "state": "Oregon"
+      },
+      {
+        "approach_miles": 7.5,
+        "approach_road": "local industrial access road",
+        "city": "Pendleton",
+        "fallback": false,
+        "key": "truck_dealer",
+        "kind": "truck_dealer",
+        "lat": 45.643881,
+        "lon": -118.681505,
+        "name": "Kenworth Truck Repair",
+        "source_note": "Source-backed city service POI from a local OpenStreetMap extract for Pendleton, Oregon; category mapped as truck dealer or heavy-vehicle sales/service tags; accessed 2026-06-27.",
+        "source_ref": "way/1510316925",
+        "source_type": "osm",
+        "state": "Oregon"
       }
     ],
     "Peoria": [
@@ -6968,6 +7828,102 @@
         "state": "Illinois"
       }
     ],
+    "Rolla": [
+      {
+        "approach_miles": 2.0,
+        "approach_road": "local industrial access road",
+        "city": "Rolla",
+        "fallback": false,
+        "key": "freight_market",
+        "kind": "freight_market",
+        "lat": 37.930194,
+        "lon": -91.776812,
+        "name": "Harbor Freight Tools",
+        "source_note": "Source-backed city service POI from a local OpenStreetMap extract for Rolla, Missouri; category mapped as named logistics/freight facility; accessed 2026-06-27.",
+        "source_ref": "node/1391566915",
+        "source_type": "osm",
+        "state": "Missouri"
+      },
+      {
+        "approach_miles": 25.0,
+        "approach_road": "local industrial access road",
+        "city": "Rolla",
+        "fallback": false,
+        "key": "garage",
+        "kind": "garage",
+        "lat": 37.836604,
+        "lon": -92.100111,
+        "name": "Boss Truck Shop",
+        "source_note": "Source-backed city service POI from a local OpenStreetMap extract for Rolla, Missouri; category mapped as vehicle repair tags with truck relevance scoring; accessed 2026-06-27.",
+        "source_ref": "node/12529163896",
+        "source_type": "osm",
+        "state": "Missouri"
+      },
+      {
+        "approach_miles": 4.5,
+        "approach_road": "dealer access road",
+        "city": "Rolla",
+        "fallback": true,
+        "fallback_reason": "No realistic source-backed OSM candidate found within 28 miles in missouri-latest.osm.pbf.",
+        "key": "truck_dealer",
+        "kind": "truck_dealer",
+        "lat": 37.9514,
+        "lon": -91.7713,
+        "name": "Rolla Truck Dealer",
+        "source_note": "Representative fallback truck dealer for Rolla, Missouri; not a claim about a real-world service POI.",
+        "source_ref": "",
+        "source_type": "fallback",
+        "state": "Missouri"
+      }
+    ],
+    "Roseburg": [
+      {
+        "approach_miles": 1.0,
+        "approach_road": "local industrial access road",
+        "city": "Roseburg",
+        "fallback": false,
+        "key": "freight_market",
+        "kind": "freight_market",
+        "lat": 43.224989,
+        "lon": -123.349451,
+        "name": "Harbor Freight Tools",
+        "source_note": "Source-backed city service POI from a local OpenStreetMap extract for Roseburg, Oregon; category mapped as named logistics/freight facility; accessed 2026-06-27.",
+        "source_ref": "node/5332134357",
+        "source_type": "osm",
+        "state": "Oregon"
+      },
+      {
+        "approach_miles": 0.7,
+        "approach_road": "local industrial access road",
+        "city": "Roseburg",
+        "fallback": false,
+        "key": "garage",
+        "kind": "garage",
+        "lat": 43.209896,
+        "lon": -123.344774,
+        "name": "Mobile Tune",
+        "source_note": "Source-backed city service POI from a local OpenStreetMap extract for Roseburg, Oregon; category mapped as vehicle repair tags with truck relevance scoring; accessed 2026-06-27.",
+        "source_ref": "node/2587553960",
+        "source_type": "osm",
+        "state": "Oregon"
+      },
+      {
+        "approach_miles": 4.5,
+        "approach_road": "dealer access road",
+        "city": "Roseburg",
+        "fallback": true,
+        "fallback_reason": "No realistic source-backed OSM candidate found within 28 miles in oregon-latest.osm.pbf.",
+        "key": "truck_dealer",
+        "kind": "truck_dealer",
+        "lat": 43.2165,
+        "lon": -123.3417,
+        "name": "Roseburg Truck Dealer",
+        "source_note": "Representative fallback truck dealer for Roseburg, Oregon; not a claim about a real-world service POI.",
+        "source_ref": "",
+        "source_type": "fallback",
+        "state": "Oregon"
+      }
+    ],
     "Sacramento": [
       {
         "approach_miles": 16.8,
@@ -7061,6 +8017,53 @@
         "source_ref": "",
         "source_type": "fallback",
         "state": "Oregon"
+      }
+    ],
+    "Salina": [
+      {
+        "approach_miles": 2.6,
+        "approach_road": "local industrial access road",
+        "city": "Salina",
+        "fallback": false,
+        "key": "freight_market",
+        "kind": "freight_market",
+        "lat": 38.812139,
+        "lon": -97.614213,
+        "name": "Harbor Freight Tools",
+        "source_note": "Source-backed city service POI from a local OpenStreetMap extract for Salina, Kansas; category mapped as named logistics/freight facility; accessed 2026-06-27.",
+        "source_ref": "node/13804672613",
+        "source_type": "osm",
+        "state": "Kansas"
+      },
+      {
+        "approach_miles": 3.3,
+        "approach_road": "local industrial access road",
+        "city": "Salina",
+        "fallback": false,
+        "key": "garage",
+        "kind": "garage",
+        "lat": 38.875801,
+        "lon": -97.609176,
+        "name": "Bosselman Boss Shop",
+        "source_note": "Source-backed city service POI from a local OpenStreetMap extract for Salina, Kansas; category mapped as vehicle repair tags with truck relevance scoring; accessed 2026-06-27.",
+        "source_ref": "way/219793325",
+        "source_type": "osm",
+        "state": "Kansas"
+      },
+      {
+        "approach_miles": 3.2,
+        "approach_road": "local industrial access road",
+        "city": "Salina",
+        "fallback": false,
+        "key": "truck_dealer",
+        "kind": "truck_dealer",
+        "lat": 38.874725,
+        "lon": -97.608275,
+        "name": "Rush Truck Centers \u2013 Salina",
+        "source_note": "Source-backed city service POI from a local OpenStreetMap extract for Salina, Kansas; category mapped as truck dealer or heavy-vehicle sales/service tags; accessed 2026-06-27.",
+        "source_ref": "way/385780214",
+        "source_type": "osm",
+        "state": "Kansas"
       }
     ],
     "Salinas": [
@@ -7204,6 +8207,54 @@
         "source_ref": "node/11902141800",
         "source_type": "osm",
         "state": "Utah"
+      }
+    ],
+    "San Angelo": [
+      {
+        "approach_miles": 8.3,
+        "approach_road": "local industrial access road",
+        "city": "San Angelo",
+        "fallback": false,
+        "key": "freight_market",
+        "kind": "freight_market",
+        "lat": 31.420558,
+        "lon": -100.527699,
+        "name": "San Angelo Hot Tub Warehouse",
+        "source_note": "Source-backed city service POI from a local OpenStreetMap extract for San Angelo, Texas; category mapped as named logistics/freight facility; accessed 2026-06-27.",
+        "source_ref": "node/13410703073",
+        "source_type": "osm",
+        "state": "Texas"
+      },
+      {
+        "approach_miles": 14.8,
+        "approach_road": "local industrial access road",
+        "city": "San Angelo",
+        "fallback": false,
+        "key": "garage",
+        "kind": "garage",
+        "lat": 31.373011,
+        "lon": -100.283906,
+        "name": "JDM Diesel",
+        "source_note": "Source-backed city service POI from a local OpenStreetMap extract for San Angelo, Texas; category mapped as vehicle repair tags with truck relevance scoring; accessed 2026-06-27.",
+        "source_ref": "way/817386338",
+        "source_type": "osm",
+        "state": "Texas"
+      },
+      {
+        "approach_miles": 4.5,
+        "approach_road": "dealer access road",
+        "city": "San Angelo",
+        "fallback": true,
+        "fallback_reason": "No realistic source-backed OSM candidate found within 28 miles in texas-latest.osm.pbf.",
+        "key": "truck_dealer",
+        "kind": "truck_dealer",
+        "lat": 31.4638,
+        "lon": -100.437,
+        "name": "San Angelo Truck Dealer",
+        "source_note": "Representative fallback truck dealer for San Angelo, Texas; not a claim about a real-world service POI.",
+        "source_ref": "",
+        "source_type": "fallback",
+        "state": "Texas"
       }
     ],
     "San Antonio": [
@@ -7732,6 +8783,53 @@
         "state": "Louisiana"
       }
     ],
+    "Sioux City": [
+      {
+        "approach_miles": 6.1,
+        "approach_road": "local industrial access road",
+        "city": "Sioux City",
+        "fallback": false,
+        "key": "freight_market",
+        "kind": "freight_market",
+        "lat": 42.436173,
+        "lon": -96.380676,
+        "name": "Big Soo Terminal",
+        "source_note": "Source-backed city service POI from a local OpenStreetMap extract for Sioux City, Iowa; category mapped as industrial landuse with logistics/freight name; accessed 2026-06-27.",
+        "source_ref": "way/907907997",
+        "source_type": "osm",
+        "state": "Iowa"
+      },
+      {
+        "approach_miles": 0.6,
+        "approach_road": "local industrial access road",
+        "city": "Sioux City",
+        "fallback": false,
+        "key": "garage",
+        "kind": "garage",
+        "lat": 42.50508,
+        "lon": -96.400554,
+        "name": "Wilde Auto Repair",
+        "source_note": "Source-backed city service POI from a local OpenStreetMap extract for Sioux City, Iowa; category mapped as vehicle repair tags with truck relevance scoring; accessed 2026-06-27.",
+        "source_ref": "node/13543959878",
+        "source_type": "osm",
+        "state": "Iowa"
+      },
+      {
+        "approach_miles": 6.2,
+        "approach_road": "local industrial access road",
+        "city": "Sioux City",
+        "fallback": false,
+        "key": "truck_dealer",
+        "kind": "truck_dealer",
+        "lat": 42.43539,
+        "lon": -96.377546,
+        "name": "Peterbilt of Sioux City",
+        "source_note": "Source-backed city service POI from a local OpenStreetMap extract for Sioux City, Iowa; category mapped as truck dealer or heavy-vehicle sales/service tags; accessed 2026-06-27.",
+        "source_ref": "way/907907998",
+        "source_type": "osm",
+        "state": "Iowa"
+      }
+    ],
     "Sioux Falls": [
       {
         "approach_miles": 3.9,
@@ -8108,6 +9206,53 @@
         "source_ref": "",
         "source_type": "fallback",
         "state": "New York"
+      }
+    ],
+    "Tacoma": [
+      {
+        "approach_miles": 12.2,
+        "approach_road": "local industrial access road",
+        "city": "Tacoma",
+        "fallback": false,
+        "key": "freight_market",
+        "kind": "freight_market",
+        "lat": 47.230732,
+        "lon": -122.253824,
+        "name": "Ryder E-commerce Fulfillment",
+        "source_note": "Source-backed city service POI from a local OpenStreetMap extract for Tacoma, Washington; category mapped as logistics or freight-forwarder office tags; accessed 2026-06-27.",
+        "source_ref": "node/9665854921",
+        "source_type": "osm",
+        "state": "Washington"
+      },
+      {
+        "approach_miles": 3.3,
+        "approach_road": "local industrial access road",
+        "city": "Tacoma",
+        "fallback": false,
+        "key": "garage",
+        "kind": "garage",
+        "lat": 47.226003,
+        "lon": -122.478311,
+        "name": "Anthony Truck Repair",
+        "source_note": "Source-backed city service POI from a local OpenStreetMap extract for Tacoma, Washington; category mapped as vehicle repair tags with truck relevance scoring; accessed 2026-06-27.",
+        "source_ref": "way/1034974096",
+        "source_type": "osm",
+        "state": "Washington"
+      },
+      {
+        "approach_miles": 4.1,
+        "approach_road": "local industrial access road",
+        "city": "Tacoma",
+        "fallback": false,
+        "key": "truck_dealer",
+        "kind": "truck_dealer",
+        "lat": 47.23969,
+        "lon": -122.382738,
+        "name": "Western Peterbilt Tacoma",
+        "source_note": "Source-backed city service POI from a local OpenStreetMap extract for Tacoma, Washington; category mapped as truck dealer or heavy-vehicle sales/service tags; accessed 2026-06-27.",
+        "source_ref": "way/664916315",
+        "source_type": "osm",
+        "state": "Washington"
       }
     ],
     "Tallahassee": [
@@ -9159,6 +10304,54 @@
         "state": "Delaware"
       }
     ],
+    "Winchester": [
+      {
+        "approach_miles": 0.8,
+        "approach_road": "local industrial access road",
+        "city": "Winchester",
+        "fallback": false,
+        "key": "freight_market",
+        "kind": "freight_market",
+        "lat": 39.194274,
+        "lon": -78.163248,
+        "name": "Winchester Cold Storage",
+        "source_note": "Source-backed city service POI from a local OpenStreetMap extract for Winchester, Virginia; category mapped as industrial landuse with logistics/freight name; accessed 2026-06-27.",
+        "source_ref": "way/471309519",
+        "source_type": "osm",
+        "state": "Virginia"
+      },
+      {
+        "approach_miles": 3.6,
+        "approach_road": "local industrial access road",
+        "city": "Winchester",
+        "fallback": false,
+        "key": "garage",
+        "kind": "garage",
+        "lat": 39.222629,
+        "lon": -78.150529,
+        "name": "Brian Omps Towing and Repair",
+        "source_note": "Source-backed city service POI from a local OpenStreetMap extract for Winchester, Virginia; category mapped as vehicle repair tags with truck relevance scoring; accessed 2026-06-27.",
+        "source_ref": "node/12288296678",
+        "source_type": "osm",
+        "state": "Virginia"
+      },
+      {
+        "approach_miles": 4.5,
+        "approach_road": "dealer access road",
+        "city": "Winchester",
+        "fallback": true,
+        "fallback_reason": "No realistic source-backed OSM candidate found within 28 miles in virginia-latest.osm.pbf.",
+        "key": "truck_dealer",
+        "kind": "truck_dealer",
+        "lat": 39.1857,
+        "lon": -78.1633,
+        "name": "Winchester Truck Dealer",
+        "source_note": "Representative fallback truck dealer for Winchester, Virginia; not a claim about a real-world service POI.",
+        "source_ref": "",
+        "source_type": "fallback",
+        "state": "Virginia"
+      }
+    ],
     "Worcester": [
       {
         "approach_miles": 3.0,
@@ -9205,26 +10398,73 @@
         "source_type": "osm",
         "state": "Massachusetts"
       }
+    ],
+    "Yakima": [
+      {
+        "approach_miles": 2.0,
+        "approach_road": "local industrial access road",
+        "city": "Yakima",
+        "fallback": false,
+        "key": "freight_market",
+        "kind": "freight_market",
+        "lat": 46.582003,
+        "lon": -120.496238,
+        "name": "Boise Cascade Building Materials Distribution",
+        "source_note": "Source-backed city service POI from a local OpenStreetMap extract for Yakima, Washington; category mapped as industrial landuse with logistics/freight name; accessed 2026-06-27.",
+        "source_ref": "way/713490465",
+        "source_type": "osm",
+        "state": "Washington"
+      },
+      {
+        "approach_miles": 2.8,
+        "approach_road": "local industrial access road",
+        "city": "Yakima",
+        "fallback": false,
+        "key": "garage",
+        "kind": "garage",
+        "lat": 46.581786,
+        "lon": -120.473808,
+        "name": "Bruckner's Truck & Equipment",
+        "source_note": "Source-backed city service POI from a local OpenStreetMap extract for Yakima, Washington; category mapped as vehicle repair tags with truck relevance scoring; accessed 2026-06-27.",
+        "source_ref": "node/9156246128",
+        "source_type": "osm",
+        "state": "Washington"
+      },
+      {
+        "approach_miles": 2.1,
+        "approach_road": "local industrial access road",
+        "city": "Yakima",
+        "fallback": false,
+        "key": "truck_dealer",
+        "kind": "truck_dealer",
+        "lat": 46.591966,
+        "lon": -120.477338,
+        "name": "Pape Kenworth Northwest",
+        "source_note": "Source-backed city service POI from a local OpenStreetMap extract for Yakima, Washington; category mapped as truck dealer or heavy-vehicle sales/service tags; accessed 2026-06-27.",
+        "source_ref": "way/713542780",
+        "source_type": "osm",
+        "state": "Washington"
+      }
     ]
   },
   "coverage": {
     "by_role": {
       "freight_market": {
-        "fallback": 0,
-        "source_backed": 194
+        "fallback": 4,
+        "source_backed": 216
       },
       "garage": {
         "fallback": 0,
-        "source_backed": 194
+        "source_backed": 220
       },
       "truck_dealer": {
-        "fallback": 88,
-        "source_backed": 106
+        "fallback": 102,
+        "source_backed": 118
       }
     },
-    "cities": 194,
-    "cities_with_any_fallback": 88,
-    "fallback": 88,
+    "cities": 220,
+    "cities_with_any_fallback": 104,
+    "fallback": 106,
     "fallback_roles": {
       "Albany": [
         "truck_dealer"
@@ -9233,6 +10473,9 @@
         "truck_dealer"
       ],
       "Atlantic City": [
+        "truck_dealer"
+      ],
+      "Beckley": [
         "truck_dealer"
       ],
       "Binghamton": [
@@ -9259,10 +10502,17 @@
       "Clarksville": [
         "truck_dealer"
       ],
+      "Columbia, Missouri": [
+        "truck_dealer"
+      ],
       "Coral Springs": [
         "truck_dealer"
       ],
       "Davenport": [
+        "truck_dealer"
+      ],
+      "Dodge City": [
+        "freight_market",
         "truck_dealer"
       ],
       "Dover": [
@@ -9272,6 +10522,9 @@
         "truck_dealer"
       ],
       "Elko": [
+        "truck_dealer"
+      ],
+      "Enid": [
         "truck_dealer"
       ],
       "Erie": [
@@ -9295,7 +10548,17 @@
       "Gainesville": [
         "truck_dealer"
       ],
+      "Garden City": [
+        "freight_market",
+        "truck_dealer"
+      ],
       "Gulfport": [
+        "truck_dealer"
+      ],
+      "Hagerstown": [
+        "truck_dealer"
+      ],
+      "Harrisonburg": [
         "truck_dealer"
       ],
       "Huntsville": [
@@ -9303,6 +10566,12 @@
       ],
       "Jacksonville": [
         "truck_dealer"
+      ],
+      "Johnson City": [
+        "truck_dealer"
+      ],
+      "Joplin": [
+        "freight_market"
       ],
       "Knoxville": [
         "truck_dealer"
@@ -9317,6 +10586,9 @@
         "truck_dealer"
       ],
       "Las Vegas": [
+        "truck_dealer"
+      ],
+      "Lawton": [
         "truck_dealer"
       ],
       "Lexington": [
@@ -9358,6 +10630,9 @@
       "Norfolk": [
         "truck_dealer"
       ],
+      "North Platte": [
+        "truck_dealer"
+      ],
       "Oceanside": [
         "truck_dealer"
       ],
@@ -9372,6 +10647,9 @@
       ],
       "Palm Bay": [
         "truck_dealer"
+      ],
+      "Pendleton": [
+        "freight_market"
       ],
       "Peoria": [
         "truck_dealer"
@@ -9403,6 +10681,12 @@
       "Rock Springs": [
         "truck_dealer"
       ],
+      "Rolla": [
+        "truck_dealer"
+      ],
+      "Roseburg": [
+        "truck_dealer"
+      ],
       "Salem": [
         "truck_dealer"
       ],
@@ -9410,6 +10694,9 @@
         "truck_dealer"
       ],
       "Salisbury": [
+        "truck_dealer"
+      ],
+      "San Angelo": [
         "truck_dealer"
       ],
       "San Antonio": [
@@ -9489,10 +10776,13 @@
       ],
       "Wilmington, Delaware": [
         "truck_dealer"
+      ],
+      "Winchester": [
+        "truck_dealer"
       ]
     },
-    "service_roles": 582,
-    "source_backed": 494
+    "service_roles": 660,
+    "source_backed": 554
   },
   "generated": {
     "accessed": "2026-06-27",

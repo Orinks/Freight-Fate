@@ -6,6 +6,7 @@ from freight_fate.models.jobs import (
     FACILITY_CARGO,
     LEVEL_DISTANCE_CAPS,
     LONG_HAUL_MILES,
+    MIN_JOB_DISTANCE_MI,
     JobBoard,
     minimum_pay_for_level,
 )
@@ -156,6 +157,34 @@ def test_destination_weighting_prefers_near_cities(world):
             near += job.destination == "Milwaukee"
             far += job.destination == "New York"
     assert near > far
+
+
+def test_board_never_offers_a_haul_below_the_minimum(world):
+    # Cities stand for whole freight areas, so trivial across-town hops are not
+    # offered as dispatches, no matter how close two cities sit on the map.
+    for city in ["New York", "Philadelphia", "Los Angeles", "Dallas", "Norfolk"]:
+        for seed in range(20):
+            for level in (1, 6):
+                for job in JobBoard(world, seed=seed).offers(city, set(), level=level):
+                    assert job.distance_mi >= MIN_JOB_DISTANCE_MI, (
+                        f"{job.origin} -> {job.destination} is only {job.distance_mi:.0f} mi"
+                    )
+
+
+@pytest.mark.parametrize(
+    ("city", "too_close"),
+    [
+        ("Norfolk", "Virginia Beach"),  # 18 mi
+        ("Bridgeport", "New Haven"),  # 21 mi
+    ],
+)
+def test_close_neighbors_are_not_dispatched(world, city, too_close):
+    # The nearest neighbor sits under the minimum, so it must never be offered,
+    # yet the board still fills from farther destinations.
+    for seed in range(30):
+        jobs = JobBoard(world, seed=seed).offers(city, set(), level=1)
+        assert jobs
+        assert all(job.destination != too_close for job in jobs)
 
 
 def test_remote_terminal_still_gets_a_full_board(world):

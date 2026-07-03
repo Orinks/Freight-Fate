@@ -18,21 +18,21 @@ def test_local_approach_data_covers_supported_map(world):
     data = json.loads(path.read_text(encoding="utf-8"))
     coverage = data["coverage"]
 
-    assert coverage["approaches"] == 2401
-    assert coverage["osm_road"] == 2395
+    assert coverage["approaches"] == 2748
+    assert coverage["osm_road"] == 2742
     assert coverage["fallback"] == 6
-    assert coverage["estimated"] == 1907
+    assert coverage["estimated"] == 2129
     assert coverage["by_type"]["city_service"] == {
-        "estimated": 88,
+        "estimated": 106,
         "fallback": 0,
-        "osm_road": 582,
-        "total": 582,
+        "osm_road": 660,
+        "total": 660,
     }
     assert coverage["by_type"]["facility"] == {
-        "estimated": 1819,
+        "estimated": 2023,
         "fallback": 6,
-        "osm_road": 1813,
-        "total": 1819,
+        "osm_road": 2082,
+        "total": 2088,
     }
 
     services = sum(len(world.city_services(city)) for city in world.city_names())

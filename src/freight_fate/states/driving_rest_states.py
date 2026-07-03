@@ -770,8 +770,9 @@ class RestStopState(MenuState):
         self.ctx.audio.play("ui/menu_back")
         self.ctx.pop_state()
         self.ctx.say(
-            "Back on the road. The parking brake is set. Press E to "
-            "start the engine if needed, then P to release the brake "
+            "Back on the road. The parking brake is set. Press "
+            f"{self.ctx.control_hint('engine')} to start the engine if needed, then "
+            f"{self.ctx.control_hint('parking_brake')} to release the brake "
             "and drive on.",
             interrupt=True,
         )
@@ -832,7 +833,7 @@ class ParkingFullState(MenuState):
         self.ctx.pop_state()
         self.ctx.say(
             "Back on the road. The next stop is announced as you "
-            "approach it. Press E to start the engine.",
+            f"approach it. Press {self.ctx.control_hint('engine')} to start the engine.",
             interrupt=True,
         )
 

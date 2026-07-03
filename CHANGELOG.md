@@ -134,9 +134,71 @@
   a final warning before spike strips. A felony stop now means a major fine,
   reputation damage, truck damage, processing time, and cancellation of the
   active loaded run, with a clear return to the terminal afterward.
+- **Game controllers are now supported, alongside the keyboard.** Plug in an
+  Xbox, PlayStation, or other compatible controller and drive by feel: the right
+  and left triggers are the gas and brake, the left stick steers, the left bumper
+  is the clutch, and the A and X buttons shift up and down. Menus map to the
+  D-pad, the A button confirms, the B button goes back, and the Back button reads
+  controller help. The first controller is picked up automatically, hot-plugging
+  and unplugging are detected mid-game (unplugging pauses the drive), and spoken
+  prompts name controller buttons when you are on a pad and keys when you are on
+  the keyboard. Turn it off under Settings, Gameplay, Controller. The keyboard
+  always stays active. Thanks to ironcross32.
+
+- **Set the parking brake to let time pass while you wait.** Pressing your
+  parking brake while stopped now means deliberate waiting: the clock runs at
+  double your trip pacing -- weather blows through, daylight comes, and dock
+  time passes without the game ever dropping to real time. Pressing it again
+  to leave returns to normal pacing instantly. Only your own brake press arms
+  the fast-forward; the brake the game sets for you at trip start or after a
+  rest stop never does, so pre-trip setup stays cheap. Each pacing setting
+  keeps its relative feel while waiting: relaxed 20 times, standard 40,
+  fast 80.
+
+- **The Pacific Northwest fills in with eight new cities.** Tacoma, Everett,
+  Olympia, Bellingham, and Yakima in Washington and Medford, Roseburg, and
+  Pendleton in Oregon join the map with truck-routed corridors, real named
+  ports, mills, and freight facilities, and real truck stops along the way.
+  The region finally has short local runs -- Seattle to Tacoma is a
+  34-mile hop instead of nothing closer than Portland -- and the empty I-84
+  corridor gets its first stop at Pendleton. Thanks to liamerven.
+
+- **Appalachia, the Heartland, and the Southern Plains grow by eighteen
+  cities.** Appalachia becomes a real Valley-and-Ridge region: Asheville,
+  Johnson City, Beckley, Harrisonburg, Winchester, and Hagerstown line the
+  I-81, I-77, and I-40 mountain corridors, Roanoke gains its rail yard and
+  distribution work, and the western reaches of Virginia, North Carolina, and
+  Maryland now count as Appalachian country. The Heartland adds Sioux City,
+  Grand Island, North Platte, Columbia, Joplin, and Rolla along I-70, I-29,
+  I-80, and I-44; the Southern Plains add Salina, Dodge City, Garden City,
+  Enid, Lawton, and San Angelo with their grain, beef, and oilfield freight.
+  Every new city carries real named facilities and every corridor has named
+  truck stops. Thanks to liamerven.
 
 ### Fixed
 
+- **Getting up to highway speed no longer costs an hour of game time.** Truck
+  physics runs in real time so shifting and braking stay playable, but the
+  clock billed every real second at full trip pacing -- so the couple of real
+  minutes a loaded rig needs to work through the gears cost most of a game
+  hour, burning daylight, deadline, and duty clock. Clock compression now
+  ramps with road speed: near real time while stopped or maneuvering, your
+  full pacing setting once at cruise. Distance, fuel, fatigue, and the hours
+  of service ledger all follow the same effective rate, so the simulation
+  stays consistent -- acceleration now costs about five game minutes instead
+  of forty-five.
+- **The dispatch board no longer offers trivially short hauls.** Because each
+  city stands for a whole freight area, a job to a neighbor under 25 miles was a
+  pointless across-town hop; the board now skips those destinations and fills
+  from real routes instead.
+- **The dispatch hours warning now respects a fresh clock.** Sleeping off your
+  hours before visiting the dispatch board no longer leaves every long haul
+  flagged with "may not fit your duty clock." The warning compared your time
+  until the next HOS limit against the route's full legal plan -- including the
+  overnight sleeps every multi-day run needs anyway -- so it fired even right
+  after a reset. It now only warns when hours already spent this shift would
+  force an extra rest that fresh hours would avoid, and the board note says
+  sleeping first will clear it.
 - **Trucks into New York now take the George Washington Bridge, not the Holland
   Tunnel.** New York freight now routes to the Hunts Point market in the Bronx
   over the GWB on I-95 -- the Hudson crossing a full-height rig can legally use
@@ -257,8 +319,20 @@
   chatter now has a short spacing window and keeps only the newest pending cue,
   so weather, toll, state-line, CB, and similar ambient lines do not all pile up
   in one burst. Safety cues and actionable GPS distances still speak immediately.
+- **The low-air alarm now sounds on a cold start.** Starting the engine for
+  the first time with the air tanks low used to stay silent; the warning now
+  plays as soon as the engine is running with pressure below the threshold,
+  so you know to wait for the compressor before releasing the brakes. Thanks
+  to hannes16.
+- **Erie and Evansville moved to their right regions.** Erie sits on the Lake
+  Erie shore between Buffalo and Cleveland, so it is now Great Lakes country
+  rather than Appalachia; Evansville, down on Indiana's Ohio River border, is
+  now the Mid-South rather than the Great Lakes. Spoken region names, weather
+  flavor, and regional hazards on runs through both cities now match the
+  geography. Thanks to liamerven.
 
 ### Changed
+- **During a manual drive.** hold down the clutch (shift) then press W to shift up gears, and q to shift down gears .
 - **More freight destinations use real map-backed endpoints.** The offline map
   data now includes source-backed freight facility endpoints where local OSM
   data supports them, while facilities without a confident match stay clearly
@@ -435,6 +509,9 @@
   zone, with a radio squelch cue and a clear "check your speed" line. The cue
   stays secondary to hazards and construction warnings, and the U upcoming key
   can review that chatter alongside stops, speed zones, and exits.
+- **Repeat the market watch on the dispatch board.** The board speaks which
+  freight is tight or loose when you open it; pressing Tab now repeats just that
+  market watch, so you can re-check it without leaving and reopening the board.
 - **State troopers can pull you over for speeding.** Routes now have patrol
   windows -- hotter on busy interstates, in construction, and in dense regions,
   cooler out on the plains, with a night DUI bump. Speed badly inside one and a

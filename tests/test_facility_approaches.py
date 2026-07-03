@@ -25,12 +25,12 @@ def test_facility_approach_data_covers_full_facility_set(world):
     )
     coverage = data["coverage"]
 
-    assert coverage["facilities"] == 1819
-    assert coverage["source_backed_endpoints"] == 1462
+    assert coverage["facilities"] == 2088
+    assert coverage["source_backed_endpoints"] == 1642
     assert coverage["road_snapped"] == 71
     assert coverage["turn_level"] == 6
-    assert coverage["nearest_road_fallback"] == 1391
-    assert coverage["representative_fallback"] == 357
+    assert coverage["nearest_road_fallback"] == 1571
+    assert coverage["representative_fallback"] == 446
     assert coverage["gate_yard_dock_hints"] == 0
 
     facilities = {

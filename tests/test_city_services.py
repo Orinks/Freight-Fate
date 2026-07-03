@@ -92,8 +92,8 @@ def test_city_service_data_covers_every_supported_city(world):
                 assert service.approach_miles > 0
                 assert service.approach_road
 
-    assert source_backed == 494
-    assert fallback == 88
+    assert source_backed == 554
+    assert fallback == 106
 
 
 def test_city_service_drive_requires_enter_before_opening(monkeypatch):

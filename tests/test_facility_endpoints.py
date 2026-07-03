@@ -25,9 +25,9 @@ def test_facility_endpoint_data_covers_supported_facilities(world):
     )
     coverage = data["coverage"]
 
-    assert coverage["facilities"] == 1819
-    assert coverage["source_backed"] == 1462
-    assert coverage["fallback"] == 357
+    assert coverage["facilities"] == 2088
+    assert coverage["source_backed"] == 1642
+    assert coverage["fallback"] == 446
     assert coverage["nearest_road_context"] == 0
     assert coverage["turn_level_geometry"] == 0
     assert coverage["gate_yard_dock_hints"] == 0

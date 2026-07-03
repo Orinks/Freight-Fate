@@ -47,6 +47,9 @@ class Trip(TripRoadEventMixin, TripTrafficMixin):
         self.position_mi = 0.0
         self.game_minutes = 0.0
         self.finished = False
+        # Deliberate waiting: armed when the player sets the parking brake
+        # themselves, never by the auto-set at trip start or menu returns.
+        self.waiting = False
         self.hos_violation = False  # set by the UI layer; gates inspections
         self._seed = seed
         self._rng = random.Random(seed)
@@ -89,6 +92,20 @@ class Trip(TripRoadEventMixin, TripTrafficMixin):
         self._conditions_check_mi = CONDITIONS_CHECK_MI
         self._traffic_warning_mi = 1.0
         self._announced_enforcement: set[str] = set()
+
+    @property
+    def effective_time_scale(self) -> float:
+        """Clock compression for this frame: gentle while maneuvering, the
+        full configured pacing at highway speed, and double pacing while
+        parked with the brake set (deliberate waiting). Everything that
+        converts real seconds to game time must read this, never
+        ``time_scale``."""
+        full = self.time_scale
+        if self.waiting and self.truck.parking_brake and self.truck.speed_mph < 1.0:
+            return full * PARKED_TIME_SCALE_MULT
+        floor = min(LOW_SPEED_TIME_SCALE, full)
+        ramp = min(1.0, self.truck.speed_mph / FULL_COMPRESSION_MPH)
+        return floor + (full - floor) * ramp
 
     @property
     def imperial(self) -> bool:
@@ -660,8 +677,14 @@ class Trip(TripRoadEventMixin, TripTrafficMixin):
         if self.finished:
             return self._events
 
+        # Any release path disarms waiting; the effective-scale speed guard
+        # already keeps a still-rolling truck at maneuvering pace.
+        if self.waiting and not self.truck.parking_brake:
+            self.waiting = False
+
         # weather drives truck grip and evolves over game time
-        game_min = dt * self.time_scale / 60.0
+        scale = self.effective_time_scale
+        game_min = dt * scale / 60.0
         self.game_minutes += game_min
         target = self.current_target_city
         self.weather.set_region(target.region)
@@ -676,9 +699,9 @@ class Trip(TripRoadEventMixin, TripTrafficMixin):
         self.truck.grip = self.weather.effects.grip
         self.truck.drag_mult = self.weather.effects.drag_mult
         self.truck.grade = self.grade_at(self.position_mi)
-        self.truck.fuel_burn_mult = self.time_scale
+        self.truck.fuel_burn_mult = scale
 
-        moved_mi = self.truck.velocity_mps * dt * self.time_scale / 1609.344
+        moved_mi = self.truck.velocity_mps * dt * scale / 1609.344
         self.position_mi += moved_mi
         if self.position_mi < 0.0:
             self.position_mi = 0.0
@@ -718,7 +741,7 @@ class Trip(TripRoadEventMixin, TripTrafficMixin):
         """Lead distance for a zone warning, scaled so the player gets roughly
         ``ZONE_WARNING_REAL_S`` of real time despite speed and time compression."""
         speed = max(self.truck.speed_mph, 1.0)
-        miles = ZONE_WARNING_REAL_S * speed * self.time_scale / 3600.0
+        miles = ZONE_WARNING_REAL_S * speed * self.effective_time_scale / 3600.0
         return max(ZONE_WARNING_LOOKAHEAD_MI, min(miles, ZONE_WARNING_MAX_MI))
 
     def _zone_warning_message(self, zone: Zone, ahead: float) -> str:

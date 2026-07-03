@@ -662,7 +662,10 @@ class SettingsCategoryState(MenuState):
                 MenuItem(
                     lambda: f"Trip pacing: {self._pace_label()}",
                     lambda: self._cycle_pace(1),
-                    help="Controls how quickly game time and distance pass.",
+                    help="Controls how quickly game time and distance pass "
+                    "at highway speed. The clock always slows to near real "
+                    "time while you accelerate, brake, or maneuver, and runs "
+                    "at double pace while parked with the parking brake set.",
                 ),
                 MenuItem(
                     lambda: f"Hours of service: {self._hos_label()}",
@@ -684,6 +687,20 @@ class SettingsCategoryState(MenuState):
                     "driving a route, or resting. Only general game status "
                     "is shared, never your save files or personal details. "
                     "Has no effect if Discord is not running.",
+                ),
+                MenuItem(
+                    lambda: f"Controller: {'enabled' if s.controller_enabled else 'disabled'}",
+                    lambda: self._toggle_controller(1),
+                    help="Accept game-controller input alongside the keyboard. "
+                    "The keyboard always stays active. The first connected "
+                    "controller is used automatically.",
+                ),
+                MenuItem(
+                    lambda: f"Haptics: {'enabled' if s.haptics_enabled else 'disabled'}",
+                    lambda: self._toggle_haptics(1),
+                    help="Rumble feedback on the controller for hazards, hard "
+                    "braking, and the rumble strip. Has no effect without a "
+                    "controller connected.",
                 ),
                 MenuItem("Back", self.go_back),
             ]
@@ -768,6 +785,10 @@ class SettingsCategoryState(MenuState):
         else:
             super().handle_event(event)
 
+    def adjust(self, direction: int) -> None:
+        # D-pad left/right on a controller maps to the same per-item adjust.
+        self._adjust(direction)
+
     def _adjust(self, direction: int) -> None:
         if self.category == "speech":
             actions = [action for _, action, _ in self._speech_control_specs()]
@@ -780,6 +801,8 @@ class SettingsCategoryState(MenuState):
                     self._cycle_hos,
                     self._cycle_steering,
                     self._toggle_discord_presence,
+                    self._toggle_controller,
+                    self._toggle_haptics,
                 ],
                 "audio": [
                     lambda d: self._volume("master_volume", 0.1 * d),
@@ -964,6 +987,16 @@ class SettingsCategoryState(MenuState):
 
     def _toggle_radio_real_streams(self, _d: int) -> None:
         self.ctx.settings.radio_real_streams = not self.ctx.settings.radio_real_streams
+        self._announce()
+
+    def _toggle_controller(self, _d: int) -> None:
+        self.ctx.settings.controller_enabled = not self.ctx.settings.controller_enabled
+        self.ctx.apply_controller()
+        self._announce()
+
+    def _toggle_haptics(self, _d: int) -> None:
+        self.ctx.settings.haptics_enabled = not self.ctx.settings.haptics_enabled
+        self.ctx.apply_haptics()
         self._announce()
 
     def _cycle_verbosity(self, d: int) -> None:

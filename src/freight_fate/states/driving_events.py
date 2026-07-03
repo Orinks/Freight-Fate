@@ -56,6 +56,7 @@ class DrivingEventMixin:
                 self._cancel_cruise()  # hands back on the wheel to brake
             self._pending_ambient_event = None
             self.ctx.audio.play(sound or "ui/warning")
+            self.ctx.controller.rumble.hazard()  # 750 ms right->left sweep
             # The deadline is braking physics plus reaction slack. The physics
             # part is whatever full service brakes need from the current speed
             # on this surface; the rolled window covers hearing the warning and
@@ -212,6 +213,7 @@ class DrivingEventMixin:
             evidence = ["HOS/ELD violation"]
         evidence_text = ", ".join(evidence)
         self.ctx.audio.play("ui/error")
+        self.ctx.controller.rumble.alert()
         serious_hos = (
             self.ctx.settings.hos_mode not in hos.HOS_NON_ENFORCED_MODES
             and self.hos.in_violation(self.ctx.settings.hos_mode)
@@ -844,7 +846,8 @@ class DrivingEventMixin:
         self.ctx.audio.play("ui/error")
         self.ctx.say_event(
             f"You ran out of fuel. Roadside rescue brought thirty "
-            f"gallons {billing}. Press E to restart "
+            f"gallons {billing}. Press "
+            f"{self.ctx.control_hint('engine')} to restart "
             "the engine, and plan your fuel stops.",
             interrupt=True,
         )
@@ -946,7 +949,8 @@ class DrivingEventMixin:
             else:
                 reroute_text = (
                     "You continue to the next safe turnaround and loop back onto "
-                    "the approach. The destination exit is ahead again; press X "
+                    "the approach. The destination exit is ahead again; press "
+                    f"{self.ctx.control_hint('take_exit')} "
                     "when you are close enough to take it."
                 )
         self.ctx.audio.play("ui/warning")

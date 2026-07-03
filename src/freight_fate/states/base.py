@@ -45,6 +45,38 @@ class State:
     def handle_event(self, event: pygame.event.Event) -> None:
         pass
 
+    # Controller buttons a plain keyboard-driven state understands, translated
+    # into the key events it already handles. This keeps simple screens (update
+    # prompts, name entry, the help reader) usable from a controller without
+    # bespoke code. MenuState and the driving state override this entirely.
+    _CONTROLLER_KEYS = None  # built lazily to avoid importing pygame constants early
+
+    def handle_controller(self, event: pygame.event.Event, manager) -> None:
+        if event.type != pygame.CONTROLLERBUTTONDOWN:
+            return
+        keys = State._controller_key_map()
+        key = keys.get(event.button)
+        if key is not None:
+            self.handle_event(pygame.event.Event(pygame.KEYDOWN, key=key, unicode=""))
+
+    @staticmethod
+    def _controller_key_map() -> dict[int, int]:
+        if State._CONTROLLER_KEYS is None:
+            State._CONTROLLER_KEYS = {
+                pygame.CONTROLLER_BUTTON_A: pygame.K_RETURN,
+                pygame.CONTROLLER_BUTTON_B: pygame.K_ESCAPE,
+                pygame.CONTROLLER_BUTTON_BACK: pygame.K_F1,
+                pygame.CONTROLLER_BUTTON_DPAD_UP: pygame.K_UP,
+                pygame.CONTROLLER_BUTTON_DPAD_DOWN: pygame.K_DOWN,
+                pygame.CONTROLLER_BUTTON_DPAD_LEFT: pygame.K_LEFT,
+                pygame.CONTROLLER_BUTTON_DPAD_RIGHT: pygame.K_RIGHT,
+            }
+        return State._CONTROLLER_KEYS
+
+    def on_controller_disconnect(self) -> None:
+        """Called when the active controller is unplugged. The driving state
+        pauses; menus keep going on the keyboard."""
+
     def update(self, dt: float) -> None:
         update_music_rotation = getattr(self.ctx, "update_music_rotation", None)
         if update_music_rotation is not None:
@@ -235,6 +267,34 @@ class MenuState(State):
             self.ctx.stop_speech()
         elif event.unicode and event.unicode.isalnum():
             self._first_letter_jump(event.unicode.lower())
+
+    # -- controller -----------------------------------------------------------
+
+    # Menus opt into held D-pad left/right auto-repeat for adjusting options.
+    wants_controller_repeat = True
+
+    def adjust(self, direction: int) -> None:
+        """Change the current option (D-pad left/right). No-op unless the menu
+        has adjustable options; ``SettingsCategoryState`` overrides this."""
+
+    def handle_controller(self, event: pygame.event.Event, manager) -> None:
+        from ..controller import ControllerAction
+
+        action = manager.menu_action(event)
+        if action == ControllerAction.MENU_DOWN:
+            self.move(1)
+        elif action == ControllerAction.MENU_UP:
+            self.move(-1)
+        elif action == ControllerAction.ADJUST_RIGHT:
+            self.adjust(1)
+        elif action == ControllerAction.ADJUST_LEFT:
+            self.adjust(-1)
+        elif action == ControllerAction.CONFIRM:
+            self.activate()
+        elif action == ControllerAction.BACK:
+            self.go_back()
+        elif action == ControllerAction.HELP:
+            self.ctx.say(self.current_help())
 
     def _first_letter_jump(self, char: str) -> None:
         if not self.items:

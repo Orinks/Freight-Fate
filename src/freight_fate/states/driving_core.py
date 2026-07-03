@@ -58,19 +58,6 @@ from .base import MenuItem, MenuState, State
 
 log = logging.getLogger(__name__)
 
-GEAR_KEYS = {
-    pygame.K_1: 1,
-    pygame.K_2: 2,
-    pygame.K_3: 3,
-    pygame.K_4: 4,
-    pygame.K_5: 5,
-    pygame.K_6: 6,
-    pygame.K_7: 7,
-    pygame.K_8: 8,
-    pygame.K_9: 9,
-    pygame.K_0: 10,
-}
-
 HAZARD_SAFE_MPH = 25.0
 MPH_PER_MPS = 2.23694
 
@@ -280,7 +267,8 @@ class Tutorial:
         if self.ctx.settings.speech_verbosity == 0:
             return
         self.ctx.say(
-            "This is your first run, so let's walk through it. First: press E to start the engine.",
+            "This is your first run, so let's walk through it. First: press "
+            f"{self.ctx.control_hint('engine')} to start the engine.",
             interrupt=False,
         )
 
@@ -294,15 +282,18 @@ class Tutorial:
             if self.ctx.settings.automatic_transmission:
                 self.ctx.say(
                     "Now let air pressure build. When you hear air ready, "
-                    "press P to release the parking brake, then hold the "
-                    "Up arrow to accelerate. The transmission shifts for you.",
+                    f"press {self.ctx.control_hint('parking_brake')} to release "
+                    f"the parking brake, then hold {self.ctx.control_hint('accelerate')} "
+                    "to accelerate. The transmission shifts for you.",
                     interrupt=False,
                 )
             else:
                 self.ctx.say(
                     "Now let air pressure build. When you hear air ready, "
-                    "press P to release the parking brake, then hold Left "
-                    "Shift, press 1 for first gear, and release the clutch.",
+                    f"press {self.ctx.control_hint('parking_brake')} to release "
+                    f"the parking brake, then hold {self.ctx.control_hint('clutch')}, "
+                    f"select {self.ctx.control_hint('gear_first')} for first gear, "
+                    "and release the clutch.",
                     interrupt=False,
                 )
 
@@ -314,7 +305,8 @@ class Tutorial:
             message = (
                 "Parking brake released."
                 if self.ctx.settings.speech_verbosity == 0
-                else "Parking brake released. Now hold the Up arrow to accelerate."
+                else "Parking brake released. Now hold "
+                f"{self.ctx.control_hint('accelerate')} to accelerate."
             )
             self.ctx.say(message, interrupt=False)
         elif self.stage == 1:
@@ -335,7 +327,7 @@ class Tutorial:
             message = (
                 "In gear."
                 if self.ctx.settings.speech_verbosity == 0
-                else "In gear. Now hold the Up arrow to accelerate."
+                else f"In gear. Now hold {self.ctx.control_hint('accelerate')} to accelerate."
             )
             self.ctx.say(message, interrupt=False)
 
@@ -347,10 +339,13 @@ class Tutorial:
                 self.ctx.say("Rolling.", interrupt=False)
             else:
                 self.ctx.say(
-                    "You are rolling. Press Space anytime for your speed, Tab for a "
-                    "full report, and F1 to hear all the controls. Watch for hazard "
-                    "warnings, and brake hard when you hear them. Hold B for the "
-                    "emergency brake when you need to stop fast. Safe travels.",
+                    "You are rolling. Press "
+                    f"{self.ctx.control_hint('speed')} anytime for your speed, "
+                    f"{self.ctx.control_hint('status_menu')} for a full report, and "
+                    f"{self.ctx.control_hint('help')} to hear all the controls. "
+                    "Watch for hazard warnings, and brake hard when you hear them. "
+                    f"Press {self.ctx.control_hint('emergency_brake')} when you need "
+                    "to stop fast. Safe travels.",
                     interrupt=False,
                 )
             self.ctx.profile.tutorial_done = True
@@ -360,16 +355,21 @@ class Tutorial:
             if self.ctx.settings.speech_verbosity == 0:
                 return
             if self.stage == 0:
-                self.ctx.say("Reminder: press E to start the engine.", interrupt=False)
+                self.ctx.say(
+                    f"Reminder: press {self.ctx.control_hint('engine')} to start the engine.",
+                    interrupt=False,
+                )
             elif truck.parking_brake:
                 self.ctx.say(
-                    "Reminder: wait for air pressure to reach 100 psi, "
-                    "then press P to release the parking brake.",
+                    "Reminder: wait for air pressure to reach 100 psi, then press "
+                    f"{self.ctx.control_hint('parking_brake')} to release the parking brake.",
                     interrupt=False,
                 )
             else:
                 self.ctx.say(
-                    "Reminder: hold Left Shift, press 1, then release the shift key.",
+                    f"Reminder: hold {self.ctx.control_hint('clutch')}, "
+                    f"select {self.ctx.control_hint('gear_first')}, "
+                    "then release the clutch.",
                     interrupt=False,
                 )
 

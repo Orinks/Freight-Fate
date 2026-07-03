@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import math
 import zlib
 
 from ..models.business import (
@@ -35,7 +36,7 @@ from ..models.jobs import (
     JobBoard,
     job_from_payload,
     job_payload,
-    route_required_hours,
+    route_drive_hours,
 )
 from ..models.start_options import option_for_profile
 from ..models.trailers import (
@@ -45,7 +46,7 @@ from ..models.trailers import (
 )
 from ..models.trucks import TRUCK_CATALOG
 from ..music import select_menu_music_sequence
-from ..sim.hos import clock_text, time_of_day
+from ..sim.hos import LIMITS, clock_text, time_of_day
 from .base import MenuItem, MenuState
 from .city_garage import GarageState
 from .city_pickup import (  # noqa: F401
@@ -64,6 +65,14 @@ def _record_city_duty(ctx, status: str, start_hour: float, end_hour: float, note
         return
     terminal = ctx.world.home_terminal(p.current_city)
     p.duty_log.record(status, start_hour, end_hour, terminal.name, note)
+
+
+def _sleeps_needed(drive_h: float, first_shift_h: float, shift_h: float) -> int:
+    """10-hour sleeps required to cover ``drive_h``, given the driving hours
+    left in the current shift and full-shift capacity after each sleep."""
+    if drive_h <= first_shift_h + 1e-9:
+        return 0
+    return max(1, math.ceil((drive_h - first_shift_h) / shift_h - 1e-9))
 
 
 def _job_payload(job: Job) -> dict:
@@ -686,7 +695,8 @@ class JobBoardState(MenuState):
         "creates a local deadhead pickup drive from your terminal to "
         "the named origin facility. Jobs name their origin and "
         "destination facilities, and cargo depends on the facility "
-        "type. Escape returns to the terminal."
+        "type. Tab repeats the freight market watch. Escape returns to "
+        "the terminal."
     )
 
     def __init__(self, ctx, jobs: list[Job]) -> None:
@@ -1047,6 +1057,9 @@ class JobBoardState(MenuState):
             if job is not None:
                 self.ctx.push_state(JobDetailState(self.ctx, self, job))
                 return
+        if event.type == pygame.KEYDOWN and event.key == pygame.K_TAB:
+            self.ctx.say(self.ctx.profile.market.summary())
+            return
         super().handle_event(event)
 
     def _focused_job(self) -> Job | None:
@@ -1061,17 +1074,38 @@ class JobBoardState(MenuState):
         return self._job_exceeds_current_hos(job) and self._confirm_risky_job is not job
 
     def _job_exceeds_current_hos(self, job: Job) -> bool:
+        """True when hours already spent this shift force an extra 10-hour
+        rest the job would not need on a fresh clock. Multi-shift routes
+        budget their own sleeps into the deadline, so a rested driver is
+        never warned just because the run is long."""
         p = self.ctx.profile
         mode = self.ctx.settings.hos_mode
-        remaining = p.hos.remaining_min(mode)
-        if remaining is None:
+        if mode not in LIMITS:
             return False
         route = self.ctx.world.supported_route(job.origin, job.destination)
         if route is None:
             return False
-        pickup_work_h = (PICKUP_CHECK_IN_MIN + PICKUP_LOADING_MIN) / 60.0
-        needed_h = pickup_work_h + route_required_hours(route, world=self.ctx.world)
-        return remaining / 60.0 < needed_h
+        drive_limit, duty_limit, _break_after = LIMITS[mode]
+        # Pickup check-in and loading are on-duty work before the first route
+        # mile; being over 30 non-driving minutes, they also reset the break
+        # clock, so only the drive and duty limits matter here.
+        pickup_work_min = PICKUP_CHECK_IN_MIN + PICKUP_LOADING_MIN
+        drive_h = route_drive_hours(route, world=self.ctx.world)
+        shift_h = drive_limit / 60.0
+        fresh_first_h = min(drive_limit, duty_limit - pickup_work_min) / 60.0
+        current_first_h = (
+            max(
+                0.0,
+                min(
+                    drive_limit - p.hos.driving_min,
+                    duty_limit - p.hos.duty_min - pickup_work_min,
+                ),
+            )
+            / 60.0
+        )
+        return _sleeps_needed(drive_h, current_first_h, shift_h) > _sleeps_needed(
+            drive_h, fresh_first_h, shift_h
+        )
 
     def _hos_board_note(self) -> str:
         if not self.jobs:
@@ -1079,13 +1113,13 @@ class JobBoardState(MenuState):
         risky = sum(1 for job in self.jobs if self._job_exceeds_current_hos(job))
         if risky == len(self.jobs):
             return (
-                "Every listed dispatch may require a legal rest before delivery; "
-                "press Enter on a load to review the warning. "
+                "On your current hours, every listed dispatch would need an "
+                "extra legal rest; sleeping first would clear that. "
             )
         if risky:
             return (
-                f"{risky} dispatch{'es' if risky != 1 else ''} may require "
-                "a legal rest before delivery. "
+                f"On your current hours, {risky} dispatch{'es' if risky != 1 else ''} "
+                f"would need an extra legal rest. "
             )
         return ""
 
@@ -1112,9 +1146,11 @@ class JobBoardState(MenuState):
             self._confirm_risky_job = job
             self.ctx.audio.play("ui/warning")
             self.ctx.say(
-                f"Hours warning. This dispatch may not fit your current duty "
-                f"clock before you need a legal rest. {p.hos.summary(self.ctx.settings.hos_mode)} "
-                "Press Enter again to accept it anyway, or choose another load.",
+                f"Hours warning. The hours you have already used this shift mean "
+                f"this dispatch needs an extra legal rest that fresh hours would "
+                f"avoid. {p.hos.summary(self.ctx.settings.hos_mode)} "
+                "Press Enter again to accept it anyway, or sleep first to clear "
+                "the warning.",
                 interrupt=True,
             )
             return

@@ -22,6 +22,8 @@ at the center of every change.
   `uv run python -m compileall src tests tools`.
 - For user-facing changes, include how you checked the spoken text, keyboard
   flow, or other accessibility impact.
+- For player-facing changes, add a `CHANGELOG.md` entry (see Changelog
+  Entries below); CI enforces this.
 
 ## Accessibility Expectations
 
@@ -47,6 +49,24 @@ World data changes are welcome. Please keep them deterministic and offline:
   ```powershell
   uv run pytest tests/test_world.py tests/test_world_overlay.py
   ```
+
+## Changelog Entries
+
+Nightly and stable release notes are built only from the curated entries in
+`CHANGELOG.md` -- never from commit subjects -- so a player-facing change
+without an entry ships silently. CI fails a pull request that changes
+user-facing paths (`src/`, `docs/`, `CHANGELOG.md`, `README.md`, and the
+release tooling) without adding one.
+
+- Add a bullet under `## Unreleased` in the fitting section (`Added`,
+  `Changed`, `Fixed`, and so on).
+- Write for players, not maintainers: a bold lead sentence, then plain
+  language about what they will hear or notice in the game. Match the voice
+  of the existing entries; they are read aloud by screen readers, so avoid
+  jargon, tables, and decorative symbols.
+- A change with nothing player-facing in it (internal refactors, CI, tests,
+  tooling) can skip the entry by putting `[skip changelog]` or
+  `changelog: none` in every commit message of the pull request.
 
 ## Pull Request Notes
 

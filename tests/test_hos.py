@@ -781,7 +781,7 @@ def test_hos_violation_speech_interrupts_but_threshold_warning_does_not(monkeypa
         app.ctx.settings.hos_mode = "realistic"
         app.ctx.settings.time_scale = 60.0
         driving.trip.time_scale = 60.0
-        driving.truck.velocity_mps = 20.0
+        driving.truck.velocity_mps = 25.0  # past 50 mph: full compression
 
         driving.hos.driving_min = LIMITS["realistic"][0] - 121.0
         driving.hos.duty_min = driving.hos.driving_min
@@ -1296,7 +1296,7 @@ def test_dispatch_board_warns_when_all_generated_jobs_exceed_current_hos(monkeyp
 
         board.announce_entry()
 
-        assert "Every listed dispatch may require a legal rest" in spoken[-1]
+        assert "every listed dispatch would need an extra legal rest" in spoken[-1]
         for job in jobs:
             board._accept(job)
             assert "Hours warning" in spoken[-1]
@@ -1304,6 +1304,40 @@ def test_dispatch_board_warns_when_all_generated_jobs_exceed_current_hos(monkeyp
 
         board._accept(jobs[-1])
 
+        assert app.ctx.profile.active_trip is not None
+    finally:
+        app.shutdown()
+
+
+def test_dispatch_does_not_warn_after_hours_reset(monkeypatch):
+    """A full 10-hour reset must clear the dispatch hours warning, even for
+    multi-day runs: the route's own sleeps are budgeted into the deadline,
+    so only hours already spent this shift are worth warning about."""
+    from freight_fate.app import App
+    from freight_fate.models.jobs import JobBoard
+    from freight_fate.models.profile import Profile
+    from freight_fate.states.city import JobBoardState
+
+    app = App()
+    spoken = []
+    monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: spoken.append(text))
+    monkeypatch.setattr(app.ctx.audio, "play", lambda *a, **k: None)
+    try:
+        app.ctx.profile = Profile(name="Rested", current_city="Austin")
+        app.ctx.settings.hos_mode = "realistic"
+        app.ctx.profile.hos.drive(600.0)  # a nearly spent shift...
+        app.ctx.profile.hos.sleep()  # ...wiped by the 10-hour reset
+        jobs = JobBoard(app.ctx.world, seed=2).offers("Austin", set(), level=2)[:5]
+        board = JobBoardState(app.ctx, jobs)
+
+        board.announce_entry()
+
+        assert "extra legal rest" not in spoken[-1]
+
+        job = next(j for j in jobs if app.ctx.world.supported_route(j.origin, j.destination))
+        board._accept(job)
+
+        assert "Hours warning" not in spoken[-1]
         assert app.ctx.profile.active_trip is not None
     finally:
         app.shutdown()
@@ -1479,6 +1513,43 @@ def test_hos_clock_runs_on_game_time():
         before = driving.hos.driving_min
         driving._update_hours_and_fatigue(1.0)  # one real second
         gained = driving.hos.driving_min - before
+        # below cruise speed the clock compresses less than the configured
+        # pacing, and the HOS ledger follows the same effective scale
+        assert gained == pytest.approx(driving.trip.effective_time_scale / 60.0)
+        assert gained < driving.trip.time_scale / 60.0
+
+        driving.truck.velocity_mps = 27.0  # ~60 mph: full pacing
+        before = driving.hos.driving_min
+        driving._update_hours_and_fatigue(1.0)
+        gained = driving.hos.driving_min - before
         assert gained == pytest.approx(driving.trip.time_scale / 60.0)
+    finally:
+        app.shutdown()
+
+
+@pytest.mark.smoke
+def test_players_own_parking_brake_press_arms_waiting():
+    """Only the player's P press fast-forwards the wait; the auto-set brake
+    at trip start must not, or pre-trip setup would burn game time."""
+    from freight_fate.app import App
+    from freight_fate.sim.trip import PARKED_TIME_SCALE_MULT
+
+    app = App()
+    try:
+        driving = start_drive(app)
+        trip = driving.trip
+        truck = driving.truck
+        truck.velocity_mps = 0.0
+        truck.parking_brake = False
+
+        driving._toggle_parking_brake()  # the player parks deliberately
+
+        assert truck.parking_brake
+        assert trip.waiting
+        assert trip.effective_time_scale == pytest.approx(trip.time_scale * PARKED_TIME_SCALE_MULT)
+
+        driving._toggle_parking_brake()  # trying to leave always disarms
+
+        assert not trip.waiting
     finally:
         app.shutdown()

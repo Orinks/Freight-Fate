@@ -155,12 +155,13 @@ class DrivingState(DrivingControlsMixin, DrivingUpdateMixin, DrivingEventMixin, 
         self._low_air_said = self.truck.air_low_warning
         self._spring_brake_said = self.truck.spring_brakes_active
         self._brake_lockout_cue_timer = 0.0
+        self._brake_air_hissed = False  # rising-edge guard for the brake-apply hiss
         self._lane_rumble_timer = 0.0
         self._ambient_event_cooldown_s = 0.0
         self._pending_ambient_event: tuple[str, str | None] | None = None
         self._lane_guidance_state = "center"
         self._reverse_cue_active = False
-        self._status_text = "Press E to start the engine."
+        self._status_text = f"Press {self.ctx.control_hint('engine')} to start the engine."
 
     def _terse_speech(self) -> bool:
         return self.ctx.settings.speech_verbosity == 0
@@ -361,7 +362,8 @@ class DrivingState(DrivingControlsMixin, DrivingUpdateMixin, DrivingEventMixin, 
                     f"It is {now}. Transmission is {mode}. "
                     f"Weather: {self.weather.describe()}. "
                     f"You are parked. {self._engine_entry_instruction()} "
-                    "When air pressure is ready, press P to release the parking brake.",
+                    "When air pressure is ready, press "
+                    f"{self.ctx.control_hint('parking_brake')} to release the parking brake.",
                     interrupt=False,
                 )
         else:
@@ -393,7 +395,7 @@ class DrivingState(DrivingControlsMixin, DrivingUpdateMixin, DrivingEventMixin, 
                     f"Transmission is {mode}. "
                     f"Weather: {self.weather.describe()}. "
                     f"{self._engine_entry_instruction()} "
-                    "F1 lists the controls.",
+                    f"{self.ctx.control_hint('help')} lists the controls.",
                     interrupt=False,
                 )
         if self.tutorial:
@@ -406,7 +408,9 @@ class DrivingState(DrivingControlsMixin, DrivingUpdateMixin, DrivingEventMixin, 
     def _engine_entry_instruction(self) -> str:
         if self.truck.engine_on:
             return "Engine idling; build air pressure if needed."
-        return "Press E to start the engine and build air pressure."
+        return (
+            f"Press {self.ctx.control_hint('engine')} to start the engine and build air pressure."
+        )
 
     def _parked_entry_status(self) -> str:
         engine = "Engine idling" if self.truck.engine_on else "Engine off"

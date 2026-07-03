@@ -148,6 +148,20 @@ ZONE_WARNING_LOOKAHEAD_MI = 2.0  # minimum distance heads-up for a zone
 # heads-up, clamped between the base distance and a sane maximum.
 ZONE_WARNING_REAL_S = 18.0  # target real seconds of warning
 ZONE_WARNING_MAX_MI = 10.0
+# Truck dynamics run in real time so shifting and braking stay playable, but
+# the clock bills every real second at the pacing multiplier -- which made the
+# couple of real minutes a loaded rig needs to reach highway speed cost most of
+# a game hour. Compression now ramps with road speed: near real-time pacing
+# while maneuvering, the full configured scale once at cruise. Distance, fuel,
+# and the HOS clock all share the effective value, so the sim stays coherent.
+LOW_SPEED_TIME_SCALE = 4.0  # clock multiplier when stopped or crawling
+FULL_COMPRESSION_MPH = 50.0  # road speed where full pacing resumes
+# Setting the parking brake says "I'm staying put": nothing needs real-time
+# reactions, so waiting runs at double the configured pacing -- weather,
+# daylight, and dock time pass without dropping into real time, and each
+# pacing setting keeps its relative feel (relaxed 20x, standard 40x, fast
+# 80x). Releasing the brake returns to the speed ramp instantly.
+PARKED_TIME_SCALE_MULT = 2.0
 STATE_CROSSING_WARNING_LOOKAHEAD_MI = 10.0
 CONSTRUCTION_ENFORCEMENT_GRACE_MI = 1.5
 # Driving faster than the weather's safe speed risks a traction-loss incident,

@@ -368,6 +368,11 @@ def make_reposition_job(world: World, origin: str, destination: str) -> Job | No
     )
 
 
+# Shortest job the dispatch board will offer. Cities stand for whole freight
+# areas, so a haul below this is a trivial across-town hop (e.g. New York to
+# Newark at 11 miles) rather than a real dispatch.
+MIN_JOB_DISTANCE_MI = 25.0
+
 # Career-arc distance caps: short regional hops while learning the ropes,
 # cross-country hauls unlocking as a progression reward around level 4-5.
 LEVEL_DISTANCE_CAPS = {1: 300.0, 2: 450.0, 3: 650.0, 4: 850.0, 5: 1200.0}
@@ -680,7 +685,7 @@ class JobBoard:
         jobs: list[Job] = []
         city_obj = self.world.cities[city]
         carrier_key = carrier_key or DEFAULT_START_KEY
-        candidates = self._candidates(city)
+        candidates = [c for c in self._candidates(city) if c[1] >= MIN_JOB_DISTANCE_MI]
         cap = self.distance_cap(level)
         reachable = [c for c in candidates if c[1] <= cap]
         if not reachable and candidates:
