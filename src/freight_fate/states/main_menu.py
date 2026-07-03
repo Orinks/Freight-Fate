@@ -657,7 +657,8 @@ class SettingsCategoryState(MenuState):
                         f"Transmission: {'automatic' if s.automatic_transmission else 'manual'}"
                     ),
                     lambda: self._toggle_transmission(1),
-                    help="Automatic shifts for you. Manual uses clutch and number keys.",
+                    help="Automatic shifts for you. Manual uses the clutch "
+                    "with W and Q to shift up and down.",
                 ),
                 MenuItem(
                     lambda: f"Trip pacing: {self._pace_label()}",

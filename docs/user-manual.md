@@ -389,7 +389,8 @@ Manual transmission adds:
 | Key | Action |
 | --- | --- |
 | Left Shift or Right Shift, hold | Clutch. |
-| 1 through 9, then 0 | Gears 1 through 10. |
+| W | Shift up a gear. From neutral or reverse, selects first gear. |
+| Q | Shift down a gear. |
 | N | Neutral. |
 | Backspace | Reverse. |
 
