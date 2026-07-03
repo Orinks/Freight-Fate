@@ -77,6 +77,29 @@ REGION_WEIGHTS: dict[str, dict[WeatherKind, float]] = {
         WeatherKind.FOG: 1,
         WeatherKind.WIND: 1.5,
     },
+    "upper_midwest": {
+        # Coldest tier: long snowy winters, lake-effect and northwoods snow.
+        WeatherKind.CLEAR: 3,
+        WeatherKind.CLOUDY: 3.5,
+        WeatherKind.RAIN: 1.5,
+        WeatherKind.HEAVY_RAIN: 0.5,
+        WeatherKind.THUNDERSTORM: 1.5,
+        WeatherKind.SNOW: 3.5,
+        WeatherKind.FOG: 1,
+        WeatherKind.WIND: 2,
+    },
+    "corn_belt": {
+        # Continental interior: warm-season thunderstorms, less snow than the
+        # lakeshore (no lake-effect), river-valley fog.
+        WeatherKind.CLEAR: 3.5,
+        WeatherKind.CLOUDY: 3,
+        WeatherKind.RAIN: 2,
+        WeatherKind.HEAVY_RAIN: 1,
+        WeatherKind.THUNDERSTORM: 2,
+        WeatherKind.SNOW: 1.5,
+        WeatherKind.FOG: 1.5,
+        WeatherKind.WIND: 1.5,
+    },
     "heartland": {
         WeatherKind.CLEAR: 4,
         WeatherKind.CLOUDY: 2.5,

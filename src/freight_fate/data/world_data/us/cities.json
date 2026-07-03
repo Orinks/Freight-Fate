@@ -162,7 +162,7 @@
     },
     "Indianapolis": {
       "state": "Indiana",
-      "region": "great_lakes",
+      "region": "corn_belt",
       "locations": [
         {
           "name": "Crossroads Logistics Park",
@@ -1042,7 +1042,7 @@
     },
     "Cincinnati": {
       "state": "Ohio",
-      "region": "great_lakes",
+      "region": "corn_belt",
       "locations": [
         {
           "name": "Queensgate Rail Yard",
@@ -1066,7 +1066,7 @@
     },
     "Columbus": {
       "state": "Ohio",
-      "region": "great_lakes",
+      "region": "corn_belt",
       "locations": [
         {
           "name": "Rickenbacker Inland Port",
@@ -1122,7 +1122,7 @@
     },
     "Milwaukee": {
       "state": "Wisconsin",
-      "region": "great_lakes",
+      "region": "upper_midwest",
       "locations": [
         {
           "name": "Jones Island Bulk Port",
@@ -1146,7 +1146,7 @@
     },
     "Minneapolis": {
       "state": "Minnesota",
-      "region": "great_lakes",
+      "region": "upper_midwest",
       "locations": [
         {
           "name": "Upper Harbor Grain Terminal",
@@ -1692,7 +1692,7 @@
     },
     "Madison": {
       "state": "Wisconsin",
-      "region": "great_lakes",
+      "region": "upper_midwest",
       "locations": [],
       "lat": 43.0731,
       "lon": -89.4012
@@ -2054,7 +2054,7 @@
     "Dayton": {
       "lat": 39.75895,
       "lon": -84.19161,
-      "region": "great_lakes",
+      "region": "corn_belt",
       "state": "Ohio",
       "locations": []
     },
@@ -2096,7 +2096,7 @@
     "Peoria": {
       "lat": 40.69365,
       "lon": -89.58899,
-      "region": "great_lakes",
+      "region": "corn_belt",
       "state": "Illinois",
       "locations": []
     },
@@ -2117,7 +2117,7 @@
     "Green Bay": {
       "lat": 44.51916,
       "lon": -88.01983,
-      "region": "great_lakes",
+      "region": "upper_midwest",
       "state": "Wisconsin",
       "locations": []
     },
@@ -2725,7 +2725,7 @@
     },
     "Duluth": {
       "state": "Minnesota",
-      "region": "great_lakes",
+      "region": "upper_midwest",
       "locations": [
         {
           "name": "Port of Duluth-Superior",
@@ -3488,7 +3488,7 @@
     },
     "Decatur": {
       "state": "Illinois",
-      "region": "great_lakes",
+      "region": "corn_belt",
       "locations": [
         {
           "name": "ADM Decatur Complex",
@@ -3511,7 +3511,7 @@
     },
     "Springfield, Illinois": {
       "state": "Illinois",
-      "region": "great_lakes",
+      "region": "corn_belt",
       "locations": [
         {
           "name": "Springfield Distribution Center",
@@ -3529,7 +3529,7 @@
     },
     "Bloomington": {
       "state": "Illinois",
-      "region": "great_lakes",
+      "region": "corn_belt",
       "locations": [
         {
           "name": "Rivian Normal Assembly Plant",
@@ -3547,7 +3547,7 @@
     },
     "Champaign": {
       "state": "Illinois",
-      "region": "great_lakes",
+      "region": "corn_belt",
       "locations": [
         {
           "name": "Flex-N-Gate",
