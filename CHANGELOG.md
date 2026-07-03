@@ -12,7 +12,7 @@
   and unplugging are detected mid-game (unplugging pauses the drive), and spoken
   prompts name controller buttons when you are on a pad and keys when you are on
   the keyboard. Turn it off under Settings, Gameplay, Controller. The keyboard
-  always stays active.
+  always stays active. Thanks to ironcross32.
 
 - **Set the parking brake to let time pass while you wait.** Pressing your
   parking brake while stopped now means deliberate waiting: the clock runs at
