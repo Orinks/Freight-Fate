@@ -483,6 +483,12 @@ def main() -> int:
         log.warning("Freight Fate is already running.")
         return 0
     try:
+        if smoke:
+            # The build check must prove world data loads (frozen builds
+            # carry it baked into the executable, not as files).
+            from .data.world import get_world
+
+            get_world()
         App().run(max_frames=5 if smoke else None)
     except Exception:
         log.exception("Fatal error")

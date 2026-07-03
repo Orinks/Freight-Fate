@@ -197,6 +197,11 @@
   geography. Thanks to liamerven.
 
 ### Changed
+- **Downloaded builds no longer expose the game's world data files.** The
+  world now ships built into the game program itself, so there is no data
+  folder to browse or accidentally edit next to the game. Nothing changes
+  about how the game plays, and source checkouts keep their editable data
+  files.
 - **During a manual drive.** hold down the clutch (shift) then press W to shift up gears, and q to shift down gears .
 - **Hours-of-service rules are more realistic.** Realistic mode now tracks the
   11-hour driving limit, 14-hour duty window, 30-minute break requirement,

@@ -265,10 +265,10 @@ def verify_prism_native_linkage(native_dir: Path, dependency_dir: Path | None = 
             )
 
 
-def _load_manual_html():
-    """Load the by-path manual HTML converter (tools is not a package)."""
+def _load_tool(name: str):
+    """Load a by-path tools module (tools is not a package)."""
     spec = importlib.util.spec_from_file_location(
-        "manual_html", Path(__file__).resolve().parent / "manual_html.py"
+        name, Path(__file__).resolve().parent / f"{name}.py"
     )
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
@@ -288,7 +288,7 @@ def stage_release_docs(build_dir: Path) -> None:
         raise RuntimeError(f"User manual was not found: {manual}")
     shutil.copy2(manual, root / "USER_MANUAL.md")
     # Also ship a browser-friendly, accessible HTML rendering of the manual.
-    manual_html = _load_manual_html().markdown_to_html(
+    manual_html = _load_tool("manual_html").markdown_to_html(
         manual.read_text(encoding="utf-8"), title="Freight Fate Player Manual"
     )
     (root / "USER_MANUAL.html").write_text(manual_html, encoding="utf-8")
@@ -310,7 +310,9 @@ def build_nuitka_command(entry: Path) -> list[str]:
         "--include-package-data=prism:_native/*",
         "--include-package-data=sound_lib",
         f"--include-data-dir={repo_path(PACKAGE_DIR / 'assets')}=freight_fate/assets",
-        f"--include-data-dir={repo_path(PACKAGE_DIR / 'data')}=freight_fate/data",
+        # World data ships baked into the executable (tools/bake_world.py),
+        # never as editable files next to it.
+        "--include-module=freight_fate.data._baked_world",
         f"--output-dir={output_dir.as_posix()}",
         f"--output-filename={APP_NAME}",
         f"--product-name={APP_NAME}",
@@ -352,7 +354,13 @@ def run_nuitka() -> Path:
     """Build and stage a standalone Nuitka distribution."""
     entry = write_entrypoint()
     output_dir = BUILD / "nuitka"
-    subprocess.run(build_nuitka_command(entry), cwd=ROOT, check=True)
+    baked = _load_tool("bake_world").bake()
+    try:
+        subprocess.run(build_nuitka_command(entry), cwd=ROOT, check=True)
+    finally:
+        # A leftover baked module would shadow later edits to world_data/
+        # in this source checkout, so it must not outlive the compile.
+        baked.unlink(missing_ok=True)
 
     source_dir, output_kind = find_nuitka_output(output_dir)
     build_dir = DIST / (f"{APP_NAME}.app" if output_kind == "app" else APP_NAME)
@@ -376,7 +384,6 @@ def verify_packaged_payload(build_dir: Path) -> None:
         root / "USER_MANUAL.md",
         root / "USER_MANUAL.html",
         root / "freight_fate" / "assets" / "sounds",
-        root / "freight_fate" / "data" / "world.json",
         root / "sound_lib" / "lib",
         root / "prism" / "_native",
     ]
@@ -387,6 +394,13 @@ def verify_packaged_payload(build_dir: Path) -> None:
         raise RuntimeError(
             "Packaged payload is incomplete: "
             + ", ".join(str(path.relative_to(root)) for path in missing)
+        )
+
+    exposed_data = root / "freight_fate" / "data"
+    if exposed_data.exists():
+        raise RuntimeError(
+            "Packaged payload exposes editable world data files; they must "
+            f"stay baked into the executable: {exposed_data.relative_to(root)}"
         )
 
     if sys.platform != "win32" and not exe.stat().st_mode & 0o111:
