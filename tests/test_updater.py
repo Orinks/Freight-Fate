@@ -61,6 +61,17 @@ def add_linux_prism_dependency_dir(build_release, build_dir: Path) -> None:
     (dependency_dir / "libglibmm-test.so.1.3.0").write_text("", encoding="utf-8")
 
 
+def add_sound_pack(build_dir: Path, tmp_path: Path) -> None:
+    """Stage a tiny valid sound pack and credits, as a packaged build has."""
+    from freight_fate import assets_pack
+
+    sounds = tmp_path / "pack_sounds_src"
+    (sounds / "ui").mkdir(parents=True, exist_ok=True)
+    (sounds / "ui" / "menu_select.ogg").write_bytes(b"fake ogg payload")
+    assets_pack.write_pack(sounds, build_dir / "freight_fate" / "sounds.pak")
+    (build_dir / "SOUND_CREDITS.md").write_text("# Credits\n", encoding="utf-8")
+
+
 # -- version parsing and channels --------------------------------------------
 
 
@@ -211,7 +222,7 @@ def test_packaged_payload_requires_release_docs(tmp_path):
     if sys.platform != "win32":
         exe.chmod(0o755)
     (build_dir / "build_info.json").write_text("{}", encoding="utf-8")
-    (build_dir / "freight_fate" / "assets" / "sounds").mkdir(parents=True)
+    add_sound_pack(build_dir, tmp_path)
     (build_dir / "sound_lib" / "lib").mkdir(parents=True)
     sound_suffix = next(iter(build_release.platform_native_exts()))
     (build_dir / "sound_lib" / "lib" / f"bass{sound_suffix}").write_text("", encoding="utf-8")
@@ -240,7 +251,7 @@ def test_packaged_payload_requires_platform_prism_native(tmp_path):
     (build_dir / "CHANGELOG.md").write_text("# Changelog\n", encoding="utf-8")
     (build_dir / "USER_MANUAL.md").write_text("# Manual\n", encoding="utf-8")
     (build_dir / "USER_MANUAL.html").write_text("<h1>Manual</h1>\n", encoding="utf-8")
-    (build_dir / "freight_fate" / "assets" / "sounds").mkdir(parents=True)
+    add_sound_pack(build_dir, tmp_path)
     (build_dir / "sound_lib" / "lib").mkdir(parents=True)
     sound_suffix = next(iter(build_release.platform_native_exts()))
     (build_dir / "sound_lib" / "lib" / f"bass{sound_suffix}").write_text("", encoding="utf-8")
@@ -270,7 +281,7 @@ def test_packaged_payload_rejects_exposed_world_data(tmp_path):
     (build_dir / "CHANGELOG.md").write_text("# Changelog\n", encoding="utf-8")
     (build_dir / "USER_MANUAL.md").write_text("# Manual\n", encoding="utf-8")
     (build_dir / "USER_MANUAL.html").write_text("<h1>Manual</h1>\n", encoding="utf-8")
-    (build_dir / "freight_fate" / "assets" / "sounds").mkdir(parents=True)
+    add_sound_pack(build_dir, tmp_path)
     (build_dir / "freight_fate" / "data").mkdir(parents=True)
     (build_dir / "freight_fate" / "data" / "world.json").write_text("{}", encoding="utf-8")
     (build_dir / "sound_lib" / "lib").mkdir(parents=True)
@@ -290,6 +301,37 @@ def test_packaged_payload_rejects_exposed_world_data(tmp_path):
         raise AssertionError("verify_packaged_payload accepted exposed world data files")
 
 
+def test_packaged_payload_rejects_exposed_sound_files(tmp_path):
+    build_release = load_build_release_module()
+    build_dir = tmp_path / "FreightFate"
+    exe = build_dir / ("FreightFate.exe" if sys.platform == "win32" else "FreightFate")
+    exe.parent.mkdir(parents=True)
+    exe.write_text("", encoding="utf-8")
+    if sys.platform != "win32":
+        exe.chmod(0o755)
+    (build_dir / "build_info.json").write_text("{}", encoding="utf-8")
+    (build_dir / "CHANGELOG.md").write_text("# Changelog\n", encoding="utf-8")
+    (build_dir / "USER_MANUAL.md").write_text("# Manual\n", encoding="utf-8")
+    (build_dir / "USER_MANUAL.html").write_text("<h1>Manual</h1>\n", encoding="utf-8")
+    add_sound_pack(build_dir, tmp_path)
+    (build_dir / "freight_fate" / "assets" / "sounds").mkdir(parents=True)
+    (build_dir / "sound_lib" / "lib").mkdir(parents=True)
+    sound_suffix = next(iter(build_release.platform_native_exts()))
+    (build_dir / "sound_lib" / "lib" / f"bass{sound_suffix}").write_text("", encoding="utf-8")
+    (build_dir / "prism" / "_native").mkdir(parents=True)
+    native_suffix = next(iter(build_release.platform_native_exts()))
+    (build_dir / "prism" / "_native" / f"bridge{native_suffix}").write_text("", encoding="utf-8")
+    if build_release.sys.platform.startswith("linux"):
+        add_linux_prism_dependency_dir(build_release, build_dir)
+
+    try:
+        build_release.verify_packaged_payload(build_dir)
+    except RuntimeError as exc:
+        assert "exposes editable sound files" in str(exc)
+    else:
+        raise AssertionError("verify_packaged_payload accepted exposed sound files")
+
+
 def test_packaged_payload_requires_runnable_posix_executable(tmp_path, monkeypatch):
     build_release = load_build_release_module()
     monkeypatch.setattr(build_release.sys, "platform", "linux")
@@ -303,7 +345,7 @@ def test_packaged_payload_requires_runnable_posix_executable(tmp_path, monkeypat
     (build_dir / "CHANGELOG.md").write_text("# Changelog\n", encoding="utf-8")
     (build_dir / "USER_MANUAL.md").write_text("# Manual\n", encoding="utf-8")
     (build_dir / "USER_MANUAL.html").write_text("<h1>Manual</h1>\n", encoding="utf-8")
-    (build_dir / "freight_fate" / "assets" / "sounds").mkdir(parents=True)
+    add_sound_pack(build_dir, tmp_path)
     (build_dir / "sound_lib" / "lib").mkdir(parents=True)
     (build_dir / "sound_lib" / "lib" / "libbass.so").write_text("", encoding="utf-8")
     (build_dir / "prism" / "_native").mkdir(parents=True)
@@ -369,7 +411,7 @@ def test_linux_packaged_payload_requires_prism_dependency_bundle(tmp_path, monke
     (build_dir / "CHANGELOG.md").write_text("# Changelog\n", encoding="utf-8")
     (build_dir / "USER_MANUAL.md").write_text("# Manual\n", encoding="utf-8")
     (build_dir / "USER_MANUAL.html").write_text("<h1>Manual</h1>\n", encoding="utf-8")
-    (build_dir / "freight_fate" / "assets" / "sounds").mkdir(parents=True)
+    add_sound_pack(build_dir, tmp_path)
     (build_dir / "sound_lib" / "lib").mkdir(parents=True)
     (build_dir / "sound_lib" / "lib" / "libbass.so").write_text("", encoding="utf-8")
     (build_dir / "prism" / "_native").mkdir(parents=True)

@@ -137,7 +137,7 @@ def test_pygame_music_never_loops_catalog_tracks(monkeypatch):
     backend.music_volume = 0.5
     backend._music_track = None
 
-    monkeypatch.setattr(audio.pygame.mixer.music, "load", lambda path: None)
+    monkeypatch.setattr(audio.pygame.mixer.music, "load", lambda path, namehint="": None)
     monkeypatch.setattr(audio.pygame.mixer.music, "set_volume", lambda volume: None)
     monkeypatch.setattr(
         audio.pygame.mixer.music,
@@ -173,7 +173,7 @@ def test_bass_music_never_loops_catalog_tracks(monkeypatch):
     backend._slide = object()
     backend._bass_call = lambda *args: None
 
-    def fake_stream(path, looping):
+    def fake_stream(data, label, looping):
         loop_flags.append(looping)
         return FakeStream()
 

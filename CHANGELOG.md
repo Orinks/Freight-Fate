@@ -202,6 +202,11 @@
   folder to browse or accidentally edit next to the game. Nothing changes
   about how the game plays, and source checkouts keep their editable data
   files.
+- **Downloaded builds now ship their sounds as a single packed file.** The
+  browsable sounds folder is gone from the download; all sound effects and
+  music travel in one pack file the game reads directly. Every sound plays
+  exactly as before, the sound and music credits ship as a readable file
+  next to the game, and source checkouts keep their editable sound files.
 - **During a manual drive.** hold down the clutch (shift) then press W to shift up gears, and q to shift down gears .
 - **Hours-of-service rules are more realistic.** Realistic mode now tracks the
   11-hour driving limit, 14-hour duty window, 30-minute break requirement,

@@ -22,12 +22,14 @@ extension: ``play("ui/menu_select")`` plays
 from __future__ import annotations
 
 import contextlib
+import io
 import logging
 import os
-import sys
 from pathlib import Path
 
 import pygame
+
+from . import assets_pack
 
 log = logging.getLogger(__name__)
 
@@ -65,11 +67,44 @@ BASS_NO_SOUND_DEVICE = 0
 
 
 def _asset_path(key: str, extensions: tuple[str, ...]) -> Path | None:
+    """Loose-file lookup; source checkouts and asset tooling only."""
     for ext in extensions:
         path = ASSETS / f"{key}.{ext}"
         if path.exists():
             return path
     return None
+
+
+def _asset_bytes(key: str, extensions: tuple[str, ...]) -> tuple[bytes, str] | None:
+    """Bytes and extension for a sound key, from the shipped pack or loose files.
+
+    Frozen builds carry the sounds packed into ``sounds.pak``
+    (see ``assets_pack``); source checkouts read the editable
+    ``assets/sounds`` tree.
+    """
+    pack = assets_pack.open_default()
+    if pack is not None:
+        for ext in extensions:
+            data = pack.read(f"{key}.{ext}")
+            if data is not None:
+                return data, ext
+    path = _asset_path(key, extensions)
+    if path is not None:
+        try:
+            return path.read_bytes(), path.suffix.lstrip(".")
+        except OSError:
+            log.warning("Unreadable sound file: %s", path, exc_info=True)
+    return None
+
+
+def verify_sound_assets() -> None:
+    """Raise if the canonical UI sound is unreadable (packed or loose).
+
+    Used by the --smoke build check to prove frozen builds can read the
+    shipped sound pack.
+    """
+    if _asset_bytes("ui/menu_select", ("ogg", "wav")) is None:
+        raise RuntimeError("Sound assets are missing or unreadable: ui/menu_select")
 
 
 def engine_freq_mult(rpm: float) -> float:
@@ -116,6 +151,7 @@ class _PygameBackend:
         self._cache: dict[str, pygame.mixer.Sound] = {}
         self._loops: dict[int, tuple[str, float]] = {}  # channel -> (key, base gain)
         self._music_track: str | None = None
+        self._music_buffer: io.BytesIO | None = None  # streamed; must outlive playback
         self._engine_running = False
         try:
             if not pygame.mixer.get_init():
@@ -134,14 +170,14 @@ class _PygameBackend:
             return None
         snd = self._cache.get(key)
         if snd is None:
-            path = _asset_path(key, ("ogg", "wav"))
-            if path is None:
-                log.warning("Missing or unreadable sound: %s", ASSETS / f"{key}.ogg")
+            found = _asset_bytes(key, ("ogg", "wav"))
+            if found is None:
+                log.warning("Missing or unreadable sound: %s", key)
                 return None
             try:
-                snd = pygame.mixer.Sound(str(path))
-            except (pygame.error, FileNotFoundError):
-                log.warning("Missing or unreadable sound: %s", path)
+                snd = pygame.mixer.Sound(file=io.BytesIO(found[0]))
+            except pygame.error:
+                log.warning("Missing or unreadable sound: %s", key)
                 return None
             self._cache[key] = snd
         return snd
@@ -247,17 +283,18 @@ class _PygameBackend:
     def play_music(self, track: str, fade_ms: int = 1500) -> None:
         if not self.enabled or self._music_track == track:
             return
-        path = ASSETS / "music" / (track + ".ogg")
-        if not path.exists():
-            path = ASSETS / "music" / (track + ".wav")
-        if not path.exists():
+        found = _asset_bytes(f"music/{track}", ("ogg", "wav"))
+        if found is None:
             log.warning("Missing music track: %s", track)
             return
+        data, ext = found
         try:
-            pygame.mixer.music.load(str(path))
+            buffer = io.BytesIO(data)
+            pygame.mixer.music.load(buffer, namehint=ext)
             pygame.mixer.music.set_volume(self.music_volume * self.master_volume)
             pygame.mixer.music.play(loops=0, fade_ms=fade_ms)
             self._music_track = track
+            self._music_buffer = buffer
         except pygame.error:
             log.warning("Could not play music %s", track, exc_info=True)
 
@@ -368,30 +405,32 @@ class _BassBackend:
 
     # -- assets -------------------------------------------------------------
 
-    def _stream(self, path: Path, looping: bool):
-        """A fresh stream for one playback; autofreed once it stops."""
-        kwargs: dict = {"file": str(path), "autofree": True}
-        if sys.platform.startswith("linux"):
-            # BASS_UNICODE (UTF-16 paths) is Windows-only; sound_lib handles
-            # macOS itself but passes the flag on Linux, where BASS then
-            # rejects the file. Hand over a filesystem-encoded path instead.
-            kwargs["file"] = str(path).encode(sys.getfilesystemencoding())
-            kwargs["unicode"] = False
+    def _stream(self, data: bytes, label: str, looping: bool):
+        """A fresh memory stream for one playback; autofreed once it stops.
+
+        Memory streams sidestep BASS filename-encoding quirks entirely and
+        work identically for packed and loose assets.
+        """
         try:
-            stream = self._FileStream(**kwargs)
+            stream = self._FileStream(
+                mem=True, file=data, length=len(data), autofree=True, unicode=False
+            )
         except self._BassError:
-            log.warning("Could not open stream: %s", path, exc_info=True)
+            log.warning("Could not open stream: %s", label, exc_info=True)
             return None
+        # BASS reads the buffer during playback; pin it to the wrapper so it
+        # lives exactly as long as the stream object is retained.
+        stream._ff_data = data
         if looping:
             stream.set_looping(True)
         return stream
 
     def _sfx_stream(self, key: str, looping: bool = False):
-        path = _asset_path(key, ("ogg", "wav"))
-        if path is None:
-            log.warning("Missing sound: %s", ASSETS / (key + ".ogg"))
+        found = _asset_bytes(key, ("ogg", "wav"))
+        if found is None:
+            log.warning("Missing sound: %s", key)
             return None
-        return self._stream(path, looping)
+        return self._stream(found[0], key, looping)
 
     def _retain(self, stream) -> None:
         """Keep a reference until BASS finishes with the stream.
@@ -556,17 +595,15 @@ class _BassBackend:
     def play_music(self, track: str, fade_ms: int = 1500) -> None:
         if self._music_track == track:
             return
-        path = ASSETS / "music" / (track + ".ogg")
-        if not path.exists():
-            path = ASSETS / "music" / (track + ".wav")
-        if not path.exists():
+        found = _asset_bytes(f"music/{track}", ("ogg", "wav"))
+        if found is None:
             log.warning("Missing music track: %s", track)
             return
         if self._music_stream is not None:
             self._fade_out(self._music_stream, 800)
             self._music_stream = None
             self._music_track = None
-        stream = self._stream(path, looping=False)
+        stream = self._stream(found[0], track, looping=False)
         if stream is None:
             return
         try:

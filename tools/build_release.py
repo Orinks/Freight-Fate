@@ -275,6 +275,16 @@ def _load_tool(name: str):
     return module
 
 
+def stage_sound_pack(build_dir: Path) -> None:
+    """Pack the sound assets into the runtime and keep the credits readable."""
+    root = runtime_root(build_dir)
+    _load_tool("pack_sounds").pack(output=root / "freight_fate" / "sounds.pak")
+    credits = PACKAGE_DIR / "assets" / "sounds" / "CREDITS.md"
+    if not credits.exists():
+        raise RuntimeError(f"Sound credits were not found: {credits}")
+    shutil.copy2(credits, root / "SOUND_CREDITS.md")
+
+
 def stage_release_docs(build_dir: Path) -> None:
     """Copy player-facing release documents into the packaged runtime."""
     changelog = ROOT / "CHANGELOG.md"
@@ -309,9 +319,9 @@ def build_nuitka_command(entry: Path) -> list[str]:
         "--noinclude-pytest-mode=nofollow",
         "--include-package-data=prism:_native/*",
         "--include-package-data=sound_lib",
-        f"--include-data-dir={repo_path(PACKAGE_DIR / 'assets')}=freight_fate/assets",
-        # World data ships baked into the executable (tools/bake_world.py),
-        # never as editable files next to it.
+        # World data ships baked into the executable (tools/bake_world.py)
+        # and sounds ship as a masked pack (tools/pack_sounds.py), never as
+        # editable files next to it.
         "--include-module=freight_fate.data._baked_world",
         f"--output-dir={output_dir.as_posix()}",
         f"--output-filename={APP_NAME}",
@@ -370,6 +380,7 @@ def run_nuitka() -> Path:
     shutil.copytree(source_dir, build_dir)
     stage_sound_lib_runtime_files(build_dir)
     stage_prism_runtime_files(build_dir)
+    stage_sound_pack(build_dir)
     return build_dir
 
 
@@ -383,7 +394,8 @@ def verify_packaged_payload(build_dir: Path) -> None:
         root / "CHANGELOG.md",
         root / "USER_MANUAL.md",
         root / "USER_MANUAL.html",
-        root / "freight_fate" / "assets" / "sounds",
+        root / "freight_fate" / "sounds.pak",
+        root / "SOUND_CREDITS.md",
         root / "sound_lib" / "lib",
         root / "prism" / "_native",
     ]
@@ -402,6 +414,18 @@ def verify_packaged_payload(build_dir: Path) -> None:
             "Packaged payload exposes editable world data files; they must "
             f"stay baked into the executable: {exposed_data.relative_to(root)}"
         )
+
+    exposed_assets = root / "freight_fate" / "assets"
+    if exposed_assets.exists():
+        raise RuntimeError(
+            "Packaged payload exposes editable sound files; they must stay "
+            f"packed in sounds.pak: {exposed_assets.relative_to(root)}"
+        )
+
+    assets_pack = _load_tool("pack_sounds")._load_assets_pack()
+    pack_names = assets_pack.SoundPack(root / "freight_fate" / "sounds.pak").names()
+    if not any(name.endswith((".ogg", ".wav")) for name in pack_names):
+        raise RuntimeError("Packaged sound pack contains no audio files")
 
     if sys.platform != "win32" and not exe.stat().st_mode & 0o111:
         raise RuntimeError(

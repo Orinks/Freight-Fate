@@ -485,10 +485,13 @@ def main() -> int:
     try:
         if smoke:
             # The build check must prove world data loads (frozen builds
-            # carry it baked into the executable, not as files).
+            # carry it baked into the executable, not as files) and that
+            # sound assets are readable (frozen builds ship a pack file).
+            from .audio import verify_sound_assets
             from .data.world import get_world
 
             get_world()
+            verify_sound_assets()
         App().run(max_frames=5 if smoke else None)
     except Exception:
         log.exception("Fatal error")
