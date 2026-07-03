@@ -4,6 +4,18 @@
 
 ### Added
 
+- **The world got five new sounds, and every shipped sound now earns its
+  keep.** Rest stops sound different by daylight: a new daytime truck-stop
+  lot ambience (idling diesels, air brakes, a highway pass-by) plays at
+  stops before dusk, with the familiar night loop after dark. Warehouse,
+  cold-storage, and distribution docks now wrap you in a big reverberant
+  warehouse interior instead of the generic gate loop. Signaling for an
+  exit or a pull-over clicks like a real indicator stalk, overworked
+  brakes squeal once they pass their fade temperature, and a microsleep
+  forced stop ends in a proper tire screech. All five are ElevenLabs
+  generations added to the `tools/generate_sounds.py` catalog (which now
+  supports seamless-loop requests), and the last orphaned synthesizer-era
+  asset is gone.
 - **54 new achievements -- the badge wall passes one hundred.** The catalog
   grows from 60 to 114 badges: new state, region, and city arrivals (Virginia
   ridges, bluegrass country, the Jersey Turnpike, Waco, the Mississippi coast,

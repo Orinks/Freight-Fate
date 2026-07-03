@@ -312,7 +312,7 @@ class DrivingEventMixin:
             self.ctx.say("Signal canceled. Keep following the highway.")
             return
         self._exit_signal_canceled = False
-        self.ctx.audio.play("ui/notify", volume=0.5)
+        self.ctx.audio.play("vehicle/turn_signal", volume=0.7)
         if stop.type == "delivery_destination":
             head = (
                 f"Signal on for {self._destination_exit_phrase(stop)}, "

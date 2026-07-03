@@ -315,7 +315,8 @@ class RestStopState(MenuState):
         return PresenceState("Resting at a stop", detail)
 
     def announce_entry(self) -> None:
-        self.ctx.audio.set_ambient(_poi_ambient_key(self.stop))
+        self.ctx.audio.set_ambient(
+            _poi_ambient_key(self.stop, self.driving.trip.current_hour))
         parts = [f"{self.stop.spoken_name}."]
         if self.stop.parking_text:
             parts.append(f"{self.stop.parking_text}.")
@@ -792,7 +793,8 @@ class ParkingFullState(MenuState):
         self.stop = stop
 
     def announce_entry(self) -> None:
-        self.ctx.audio.set_ambient("poi/rest_stop_night")
+        self.ctx.audio.set_ambient(
+            _poi_ambient_key(self.stop, self.driving.trip.current_hour))
         self.ctx.say(
             f"The truck parking at {self.stop.spoken_name} is full tonight. "
             f"It is {clock_text(self.driving.trip.current_hour)}. "

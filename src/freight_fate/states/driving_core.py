@@ -193,10 +193,12 @@ def _local_turn_sound(cue) -> str | None:
     return sounds.get(direction)
 
 
-def _poi_ambient_key(stop) -> str:
+def _poi_ambient_key(stop, hour: float) -> str:
     if stop.type == "weigh_station":
         return "poi/weigh_station_lane"
-    return "poi/rest_stop_night"
+    if is_night(hour):
+        return "poi/rest_stop_night"
+    return "ambient/truck_stop"
 
 
 def _speeding_settlement_fine(strikes: int) -> float:

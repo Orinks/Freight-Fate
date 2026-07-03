@@ -155,7 +155,9 @@ class PickupFacilityState(MenuState):
         super().enter()
 
     def announce_entry(self) -> None:
-        self.ctx.audio.set_ambient("poi/facility_gate")
+        from ..audio import facility_ambient_key
+
+        self.ctx.audio.set_ambient(facility_ambient_key(self.job.origin_type))
         if self.loaded:
             lead = f"Loaded at {self.facility}. The trailer is sealed for {self.job.destination}."
             if getattr(self, "_just_loaded", False):

@@ -104,6 +104,7 @@ class DrivingState(DrivingControlsMixin, DrivingUpdateMixin, DrivingEventMixin, 
         # Congestion badges: both kinds of slow inside one trip earns a nod.
         self.construction_seen = False
         self.traffic_seen = False
+        self._brake_squeal_cooldown_s = 0.0  # hot-brake squeal cue spacing
         # Trooper pull-overs: a strike inside a patrol window may get you stopped
         # for an immediate ticket, separate from the silent at-delivery strikes.
         self.speeding_tickets = 0

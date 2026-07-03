@@ -82,6 +82,16 @@ def engine_freq_mult(rpm: float) -> float:
     return max(1.0, min(ENGINE_FREQ_MAX_MULT, 1.0 + t * (ENGINE_FREQ_MAX_MULT - 1.0)))
 
 
+# Facility docks: big-room interiors get the warehouse loop, yards the gate.
+_WAREHOUSE_FACILITY_TYPES = {"warehouse", "dry_warehouse", "cold_storage", "distribution"}
+
+
+def facility_ambient_key(facility_type: str) -> str:
+    if facility_type in _WAREHOUSE_FACILITY_TYPES:
+        return "ambient/warehouse"
+    return "poi/facility_gate"
+
+
 def _one_shot_category(key: str) -> str:
     if key.startswith("ui/"):
         return "ui"

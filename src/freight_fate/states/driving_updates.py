@@ -97,6 +97,7 @@ class DrivingUpdateMixin:
         self._update_microsleep(keys, dt)
         self._update_speeding(dt)
         self._update_pull_over(dt)
+        self._update_brake_heat_cue(dt)
         if self.tutorial:
             self.tutorial.update(dt, t)
         if self.trip.finished:
@@ -653,6 +654,7 @@ class DrivingUpdateMixin:
             self._microsleep_misses = 0
             t.throttle = 0.0
             t.brake = 1.0
+            self.ctx.audio.play("vehicle/tire_screech", volume=0.9)
             self.ctx.say_event(
                 "You cannot stay awake. You drift onto the shoulder and jolt "
                 "awake on the brakes. Stop and sleep before you wreck.",
@@ -857,10 +859,24 @@ class DrivingUpdateMixin:
         if self._pull_over == "lights":
             self._pull_over = "stopping"
             self._pull_over_signaled = True
-            self.ctx.audio.play("ui/notify", volume=0.5)
+            self.ctx.audio.play("vehicle/turn_signal", volume=0.7)
             self.ctx.say("Signaling and easing onto the shoulder. Brake to a full stop.")
         else:
             self.ctx.say("Pulling over. Brake to a full stop on the shoulder.")
+
+    def _update_brake_heat_cue(self, dt: float) -> None:
+        """Squeal when hot brakes are worked past their fade temperature."""
+        if self._brake_squeal_cooldown_s > 0.0:
+            self._brake_squeal_cooldown_s = max(0.0, self._brake_squeal_cooldown_s - dt)
+            return
+        t = self.truck
+        if (
+            t.brake >= 0.4
+            and t.speed_mph > 10.0
+            and t.brake_temp_c >= t.specs.brake_fade_temp_c
+        ):
+            self.ctx.audio.play("vehicle/brake_squeal", volume=0.8)
+            self._brake_squeal_cooldown_s = 4.0
 
     def _update_pull_over(self, dt: float) -> None:
         if self._pull_over is None:

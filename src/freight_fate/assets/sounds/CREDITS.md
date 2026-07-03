@@ -42,6 +42,9 @@ current idle, start, and shutdown cues.
 | State trooper pass-by | `traffic/trooper_pass.ogg` | ElevenLabs-generated patrol-car pass-by cue without siren |
 | Lane drift | `vehicle/lane_drift.ogg` | ElevenLabs-generated directional lane drift beep |
 | Lane centered | `vehicle/lane_centered.ogg` | ElevenLabs-generated centered-lane confirmation chime |
+| Turn signal | `vehicle/turn_signal.ogg` | ElevenLabs-generated in-cab indicator clicks for exit and pull-over signaling |
+| Tire screech | `vehicle/tire_screech.ogg` | ElevenLabs-generated emergency-braking skid for microsleep forced stops |
+| Brake squeal | `vehicle/brake_squeal.ogg` | ElevenLabs-generated overheated-brake squeal past the fade temperature |
 
 ## Weather
 
@@ -75,6 +78,9 @@ current idle, start, and shutdown cues.
 | Weigh station lane | `poi/weigh_station_lane.ogg` | Parked weigh-station lane ambience loop |
 | Facility gate | `poi/facility_gate.ogg` | ElevenLabs-generated loading-dock gate ambience loop |
 | Dock and deliver | `poi/dock_and_deliver.ogg` | Destination docking action cue |
+| Truck stop by day | `ambient/truck_stop.ogg` | ElevenLabs-generated daytime truck-stop lot ambience loop |
+| Warehouse interior | `ambient/warehouse.ogg` | ElevenLabs-generated warehouse dock interior ambience loop |
+| Night driving | `ambient/night.ogg` | Original night-driving ambience loop |
 
 ## Music
 

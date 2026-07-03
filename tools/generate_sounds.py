@@ -18,6 +18,7 @@ import re
 import subprocess
 import sys
 import tempfile
+import urllib.error
 import urllib.request
 from pathlib import Path
 
@@ -129,7 +130,47 @@ SPECS: dict[str, tuple[str, float, float]] = {
         0.5,
         0.75,
     ),
+    "vehicle/turn_signal": (
+        "Truck turn signal indicator clicking inside a cab, steady dry relay "
+        "click-clack pattern, four clicks, close and mechanical, no music, "
+        "no voice",
+        1.6,
+        0.7,
+    ),
+    "vehicle/tire_screech": (
+        "Heavy truck tires screeching hard on asphalt during emergency "
+        "braking, short aggressive skid, rubber on pavement, no crash impact, "
+        "no music, no voice",
+        1.6,
+        0.6,
+    ),
+    "vehicle/brake_squeal": (
+        "Overheated semi truck brakes squealing under heavy braking on a long "
+        "downgrade, metallic high-pitched squeal with an air brake undertone, "
+        "heard from the cab, no music, no voice",
+        2.2,
+        0.6,
+    ),
+    "ambient/truck_stop": (
+        "Daytime truck stop parking lot ambience, several diesel engines "
+        "idling at different distances, an occasional air brake hiss, one "
+        "truck passing on the nearby interstate, light wind, a distant door "
+        "slam, no voices, no music, steady bed suitable for seamless looping",
+        12.0,
+        0.4,
+    ),
+    "ambient/warehouse": (
+        "Inside a large busy freight warehouse, big reverberant space, a "
+        "forklift beeping and driving past, pallets set down, a distant dock "
+        "door rattle, low ventilation hum, no voices, no music, steady bed "
+        "suitable for seamless looping",
+        12.0,
+        0.4,
+    ),
 }
+
+# Ambience beds loop at runtime; ask the API for a seamless loop when it can.
+LOOP_KEYS = {"ambient/truck_stop", "ambient/warehouse"}
 
 
 def _load_dotenv() -> None:
@@ -156,23 +197,36 @@ def _api_key() -> str:
     return m.group(1)
 
 
-def _generate(key: str, spec_key: str, prompt: str, duration: float, influence: float) -> None:
-    body = json.dumps(
-        {
-            "text": prompt,
-            "duration_seconds": duration,
-            "prompt_influence": influence,
-            "output_format": "mp3_44100_128",
-        }
-    ).encode("utf-8")
+def _request_mp3(key: str, payload: dict) -> bytes:
     req = urllib.request.Request(
         SOUND_API,
-        data=body,
+        data=json.dumps(payload).encode("utf-8"),
         headers={"xi-api-key": key, "Content-Type": "application/json", "Accept": "audio/mpeg"},
     )
-    print(f"  requesting {spec_key} ({duration:.0f}s)...", flush=True)
     with urllib.request.urlopen(req, timeout=120) as resp:
-        mp3 = resp.read()
+        return resp.read()
+
+
+def _generate(key: str, spec_key: str, prompt: str, duration: float, influence: float) -> None:
+    payload = {
+        "text": prompt,
+        "duration_seconds": duration,
+        "prompt_influence": influence,
+        "output_format": "mp3_44100_128",
+    }
+    if spec_key in LOOP_KEYS:
+        payload["loop"] = True
+    print(f"  requesting {spec_key} ({duration:.0f}s)...", flush=True)
+    try:
+        mp3 = _request_mp3(key, payload)
+    except urllib.error.HTTPError:
+        if "loop" not in payload:
+            raise
+        # Older API plans reject the loop flag; the prompt still asks for a
+        # steady bed, so fall back to a plain generation.
+        payload.pop("loop")
+        print("    loop flag rejected; retrying without it...", flush=True)
+        mp3 = _request_mp3(key, payload)
     out = ASSETS / f"{spec_key}.ogg"
     out.parent.mkdir(parents=True, exist_ok=True)
     with tempfile.NamedTemporaryFile(suffix=".mp3", delete=False) as tmp:
