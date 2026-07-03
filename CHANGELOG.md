@@ -20,6 +20,14 @@
   city stands for a whole freight area, a job to a neighbor under 25 miles was a
   pointless across-town hop; the board now skips those destinations and fills
   from real routes instead.
+- **The dispatch hours warning now respects a fresh clock.** Sleeping off your
+  hours before visiting the dispatch board no longer leaves every long haul
+  flagged with "may not fit your duty clock." The warning compared your time
+  until the next HOS limit against the route's full legal plan -- including the
+  overnight sleeps every multi-day run needs anyway -- so it fired even right
+  after a reset. It now only warns when hours already spent this shift would
+  force an extra rest that fresh hours would avoid, and the board note says
+  sleeping first will clear it.
 - **Trucks into New York now take the George Washington Bridge, not the Holland
   Tunnel.** New York freight now routes to the Hunts Point market in the Bronx
   over the GWB on I-95 -- the Hudson crossing a full-height rig can legally use

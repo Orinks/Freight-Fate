@@ -1204,7 +1204,7 @@ def test_dispatch_board_warns_when_all_generated_jobs_exceed_current_hos(monkeyp
 
         board.announce_entry()
 
-        assert "Every listed dispatch may require a legal rest" in spoken[-1]
+        assert "every listed dispatch would need an extra legal rest" in spoken[-1]
         for job in jobs:
             board._accept(job)
             assert "Hours warning" in spoken[-1]
@@ -1212,6 +1212,40 @@ def test_dispatch_board_warns_when_all_generated_jobs_exceed_current_hos(monkeyp
 
         board._accept(jobs[-1])
 
+        assert app.ctx.profile.active_trip is not None
+    finally:
+        app.shutdown()
+
+
+def test_dispatch_does_not_warn_after_hours_reset(monkeypatch):
+    """A full 10-hour reset must clear the dispatch hours warning, even for
+    multi-day runs: the route's own sleeps are budgeted into the deadline,
+    so only hours already spent this shift are worth warning about."""
+    from freight_fate.app import App
+    from freight_fate.models.jobs import JobBoard
+    from freight_fate.models.profile import Profile
+    from freight_fate.states.city import JobBoardState
+
+    app = App()
+    spoken = []
+    monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: spoken.append(text))
+    monkeypatch.setattr(app.ctx.audio, "play", lambda *a, **k: None)
+    try:
+        app.ctx.profile = Profile(name="Rested", current_city="Austin")
+        app.ctx.settings.hos_mode = "realistic"
+        app.ctx.profile.hos.drive(600.0)  # a nearly spent shift...
+        app.ctx.profile.hos.sleep()  # ...wiped by the 10-hour reset
+        jobs = JobBoard(app.ctx.world, seed=2).offers("Austin", set(), level=2)[:5]
+        board = JobBoardState(app.ctx, jobs)
+
+        board.announce_entry()
+
+        assert "extra legal rest" not in spoken[-1]
+
+        job = next(j for j in jobs if app.ctx.world.supported_route(j.origin, j.destination))
+        board._accept(job)
+
+        assert "Hours warning" not in spoken[-1]
         assert app.ctx.profile.active_trip is not None
     finally:
         app.shutdown()
