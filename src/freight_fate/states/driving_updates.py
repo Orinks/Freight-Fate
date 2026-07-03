@@ -100,7 +100,7 @@ class DrivingUpdateMixin:
         was_low_air = t.air_low_warning
         was_spring_brake = t.spring_brakes_active
         t.update(dt)
-        self._update_air_brake_announcements(was_air_ready, was_low_air, was_spring_brake)
+        self._update_air_brake_announcements(was_on, was_air_ready, was_low_air, was_spring_brake)
         if was_on and not t.engine_on:
             self.ctx.audio.engine_stop()
             if t.stalled:
@@ -176,10 +176,39 @@ class DrivingUpdateMixin:
             self.ctx.say_event(message, interrupt=False)
 
     def _update_air_brake_announcements(
-        self, was_ready: bool, was_low: bool, was_spring: bool
+        self,
+        was_engine_on: bool | None = None,
+        was_ready: bool | None = None,
+        was_low: bool | None = None,
+        was_spring: bool | None = None,
     ) -> None:
         t = self.truck
-        if t.air_low_warning and t.engine_on and (not was_low or not self._low_air_said):
+        # Backward compatibility for older call sites/tests that pass
+        # (was_ready, was_low, was_spring) positionally.
+        if (
+            was_spring is None
+            and was_engine_on is not None
+            and was_ready is not None
+            and was_low is not None
+        ):
+            was_engine_on, was_ready, was_low, was_spring = (
+                t.engine_on,
+                bool(was_engine_on),
+                bool(was_ready),
+                bool(was_low),
+            )
+        if was_engine_on is None:
+            was_engine_on = t.engine_on
+        if was_ready is None:
+            was_ready = t.air_ready
+        if was_low is None:
+            was_low = t.air_low_warning
+        if was_spring is None:
+            was_spring = t.spring_brakes_active
+
+        if t.air_low_warning and t.engine_on and (
+            not was_low or not self._low_air_said or not was_engine_on
+        ):
             self._low_air_said = True
             self.ctx.audio.play("vehicle/low_air_buzzer", volume=0.7)
             self.ctx.controller.rumble.alert()
