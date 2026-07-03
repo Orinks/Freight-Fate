@@ -786,7 +786,8 @@ class SettingsCategoryState(MenuState):
                     lambda: self._cycle_pace(1),
                     help="Controls how quickly game time and distance pass "
                     "at highway speed. The clock always slows to near real "
-                    "time while you accelerate, brake, or maneuver.",
+                    "time while you accelerate, brake, or maneuver, and runs "
+                    "at double pace while parked with the parking brake set.",
                 ),
                 MenuItem(
                     lambda: f"Hours of service: {self._hos_label()}",

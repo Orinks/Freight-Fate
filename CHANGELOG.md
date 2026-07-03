@@ -14,6 +14,16 @@
   the keyboard. Turn it off under Settings, Gameplay, Controller. The keyboard
   always stays active.
 
+- **Set the parking brake to let time pass while you wait.** Pressing your
+  parking brake while stopped now means deliberate waiting: the clock runs at
+  double your trip pacing -- weather blows through, daylight comes, and dock
+  time passes without the game ever dropping to real time. Pressing it again
+  to leave returns to normal pacing instantly. Only your own brake press arms
+  the fast-forward; the brake the game sets for you at trip start or after a
+  rest stop never does, so pre-trip setup stays cheap. Each pacing setting
+  keeps its relative feel while waiting: relaxed 20 times, standard 40,
+  fast 80.
+
 ### Fixed
 
 - **Getting up to highway speed no longer costs an hour of game time.** Truck

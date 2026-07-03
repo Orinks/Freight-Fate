@@ -45,6 +45,9 @@ class Trip:
         self.position_mi = 0.0
         self.game_minutes = 0.0
         self.finished = False
+        # Deliberate waiting: armed when the player sets the parking brake
+        # themselves, never by the auto-set at trip start or menu returns.
+        self.waiting = False
         self.hos_violation = False  # set by the UI layer; gates inspections
         self._rng = random.Random(seed)
         self._insp_rng = random.Random(None if seed is None else seed ^ 0x5EED)
@@ -75,9 +78,13 @@ class Trip:
     @property
     def effective_time_scale(self) -> float:
         """Clock compression for this frame: gentle while maneuvering, the
-        full configured pacing at highway speed. Everything that converts
-        real seconds to game time must read this, never ``time_scale``."""
+        full configured pacing at highway speed, and double pacing while
+        parked with the brake set (deliberate waiting). Everything that
+        converts real seconds to game time must read this, never
+        ``time_scale``."""
         full = self.time_scale
+        if self.waiting and self.truck.parking_brake and self.truck.speed_mph < 1.0:
+            return full * PARKED_TIME_SCALE_MULT
         floor = min(LOW_SPEED_TIME_SCALE, full)
         ramp = min(1.0, self.truck.speed_mph / FULL_COMPRESSION_MPH)
         return floor + (full - floor) * ramp
@@ -673,6 +680,11 @@ class Trip:
         self._events = []
         if self.finished:
             return self._events
+
+        # Any release path disarms waiting; the effective-scale speed guard
+        # already keeps a still-rolling truck at maneuvering pace.
+        if self.waiting and not self.truck.parking_brake:
+            self.waiting = False
 
         # weather drives truck grip and evolves over game time
         scale = self.effective_time_scale

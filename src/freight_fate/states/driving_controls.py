@@ -303,6 +303,9 @@ class DrivingControlsMixin:
     def _toggle_parking_brake(self) -> None:
         t = self.truck
         if t.parking_brake:
+            # Trying to leave, even if low air keeps the brake locked: stop
+            # fast-forwarding so build-up time is not billed at waiting pace.
+            self.trip.waiting = False
             if t.release_parking_brake():
                 self.ctx.audio.play("vehicle/brake_release", volume=0.65)
                 self._set_status("Parking brake released.")
@@ -323,9 +326,18 @@ class DrivingControlsMixin:
         t.set_parking_brake()
         t.throttle = 0.0
         self._cancel_cruise()
+        # The player's own brake press means deliberate waiting; auto-sets at
+        # trip start, rest stops, and arrivals never arm the fast-forward.
+        self.trip.waiting = True
         self.ctx.audio.play("vehicle/brake_set", volume=0.65)
         self._set_status("Parking brake set.")
-        self.ctx.say(f"Parking brake set. Air pressure {t.air_pressure_psi:.0f} psi.")
+        if self._terse_speech():
+            self.ctx.say(f"Parking brake set. Air pressure {t.air_pressure_psi:.0f} psi.")
+        else:
+            self.ctx.say(
+                "Parking brake set. Time passes at double pace while you wait. "
+                f"Air pressure {t.air_pressure_psi:.0f} psi."
+            )
 
     def _manual_shift(self, gear: int) -> None:
         result = self.truck.transmission.request_gear(gear)

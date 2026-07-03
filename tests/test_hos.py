@@ -1433,3 +1433,31 @@ def test_hos_clock_runs_on_game_time():
         assert gained == pytest.approx(driving.trip.time_scale / 60.0)
     finally:
         app.shutdown()
+
+
+@pytest.mark.smoke
+def test_players_own_parking_brake_press_arms_waiting():
+    """Only the player's P press fast-forwards the wait; the auto-set brake
+    at trip start must not, or pre-trip setup would burn game time."""
+    from freight_fate.app import App
+    from freight_fate.sim.trip import PARKED_TIME_SCALE_MULT
+
+    app = App()
+    try:
+        driving = start_drive(app)
+        trip = driving.trip
+        truck = driving.truck
+        truck.velocity_mps = 0.0
+        truck.parking_brake = False
+
+        driving._toggle_parking_brake()  # the player parks deliberately
+
+        assert truck.parking_brake
+        assert trip.waiting
+        assert trip.effective_time_scale == pytest.approx(trip.time_scale * PARKED_TIME_SCALE_MULT)
+
+        driving._toggle_parking_brake()  # trying to leave always disarms
+
+        assert not trip.waiting
+    finally:
+        app.shutdown()

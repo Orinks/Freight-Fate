@@ -578,6 +578,35 @@ def test_clock_compression_ramps_with_road_speed(world):
     assert trip.game_minutes - before == pytest.approx(20.0 / 60.0)
 
 
+def test_parking_brake_waiting_runs_at_double_pacing(world):
+    """Player-armed waiting (brake set by their own press) runs the clock at
+    double the configured pacing; the auto-set brake at trip start does not,
+    and rolling never fast-forwards even with waiting armed."""
+    from freight_fate.sim.trip import LOW_SPEED_TIME_SCALE, PARKED_TIME_SCALE_MULT
+
+    trip, truck = make_trip(world, time_scale=20.0)
+
+    truck.velocity_mps = 0.0
+    truck.parking_brake = True  # auto-set (trip start): not waiting
+    assert trip.effective_time_scale == pytest.approx(LOW_SPEED_TIME_SCALE)
+
+    trip.waiting = True  # the player's own brake press arms it
+    assert trip.effective_time_scale == pytest.approx(20.0 * PARKED_TIME_SCALE_MULT)
+    before = trip.game_minutes
+    trip.update(1.0)
+    assert trip.game_minutes - before == pytest.approx(20.0 * PARKED_TIME_SCALE_MULT / 60.0)
+    assert trip.waiting  # still parked: stays armed
+
+    truck.velocity_mps = 5.0 / 2.23694  # rolling with the brake dragging
+    assert trip.effective_time_scale < 20.0 * PARKED_TIME_SCALE_MULT / 2.0
+
+    truck.velocity_mps = 0.0
+    truck.parking_brake = False  # any release path disarms on the next frame
+    trip.update(1.0)
+    assert not trip.waiting
+    assert trip.effective_time_scale == pytest.approx(LOW_SPEED_TIME_SCALE)
+
+
 def test_every_region_has_clear_day_hazards():
     """Every region always has plausible clear, calm, daytime hazards: the
     nationwide staples are never filtered out."""
