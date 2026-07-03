@@ -46,6 +46,13 @@
 
 ### Fixed
 
+- **Spoken help now teaches the W and Q gear keys everywhere.** The engine
+  start walkthrough, the transmission setting, and the manual-transmission
+  page of How to play still told manual drivers to shift with the number
+  row; they now describe holding the clutch and pressing W to shift up and
+  Q to shift down, matching how the truck actually shifts. The left and
+  right arrows also now toggle the Haptics setting like every other
+  gameplay setting row, instead of doing nothing there.
 - **Getting up to highway speed no longer costs an hour of game time.** Truck
   physics runs in real time so shifting and braking stay playable, but the
   clock billed every real second at full trip pacing -- so the couple of real
