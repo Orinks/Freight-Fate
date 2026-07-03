@@ -3254,6 +3254,129 @@
       ],
       "lat": 37.7782,
       "lon": -81.1882
+    },
+    "Columbia, Missouri": {
+      "state": "Missouri",
+      "region": "heartland",
+      "locations": [
+        {
+          "name": "3M Columbia Plant",
+          "type": "manufacturing_plant",
+          "source_note": "3M plant making medical filtration/diagnostic products and stethoscopes, Columbia."
+        },
+        {
+          "name": "Kraft Heinz Oscar Mayer Plant",
+          "type": "food_processor",
+          "source_note": "Kraft Heinz Oscar Mayer plant, 24/7 hot dog production, Columbia."
+        },
+        {
+          "name": "Buske Logistics Distribution Center",
+          "type": "distribution",
+          "source_note": "Third-party logistics/distribution center on the I-70 corridor between St. Louis and Kansas City."
+        }
+      ],
+      "lat": 38.9517,
+      "lon": -92.3341
+    },
+    "Sioux City": {
+      "state": "Iowa",
+      "region": "heartland",
+      "locations": [
+        {
+          "name": "Seaboard Triumph Foods",
+          "type": "food_processor",
+          "source_note": "Seaboard Triumph Foods fresh pork plant (~20,000 hogs/day), Bridgeport West Industrial Park, Sioux City."
+        },
+        {
+          "name": "CF Industries Port Neal",
+          "type": "chemical_petroleum_terminal",
+          "source_note": "CF Industries Port Neal nitrogen-fertilizer complex on the Missouri River south of Sioux City."
+        },
+        {
+          "name": "Sioux City Grain Terminal",
+          "type": "farm_elevator",
+          "source_note": "Grain and ethanol shipping terminal serving the upper-Midwest ag belt."
+        }
+      ],
+      "lat": 42.4999,
+      "lon": -96.4003
+    },
+    "Grand Island": {
+      "state": "Nebraska",
+      "region": "heartland",
+      "locations": [
+        {
+          "name": "JBS Grand Island Beef Plant",
+          "type": "food_processor",
+          "source_note": "JBS USA beef processing plant, central Nebraska cattle country, exporting to 30+ countries."
+        },
+        {
+          "name": "Case IH Grand Island Plant",
+          "type": "manufacturing_plant",
+          "source_note": "CNH/Case IH plant building Axial-Flow combines and hay & forage equipment, Grand Island."
+        },
+        {
+          "name": "Hornady Manufacturing",
+          "type": "manufacturing_plant",
+          "source_note": "Hornady Manufacturing, family-owned ammunition maker headquartered in Grand Island."
+        }
+      ],
+      "lat": 40.9264,
+      "lon": -98.342
+    },
+    "North Platte": {
+      "state": "Nebraska",
+      "region": "heartland",
+      "locations": [
+        {
+          "name": "Union Pacific Bailey Yard",
+          "type": "rail",
+          "source_note": "Union Pacific Bailey Yard, the world's largest railroad classification yard (~2,850 acres, 10,000 cars/day)."
+        },
+        {
+          "name": "North Platte Grain Terminal",
+          "type": "farm_elevator",
+          "source_note": "Grain and feedlot-supply shipping serving western Nebraska."
+        }
+      ],
+      "lat": 41.1239,
+      "lon": -100.7654
+    },
+    "Joplin": {
+      "state": "Missouri",
+      "region": "heartland",
+      "locations": [
+        {
+          "name": "CFI Freight Terminal",
+          "type": "cross_dock",
+          "source_note": "Contract Freighters, Inc. (CFI) truckload carrier terminal, headquartered in Joplin since 1951."
+        },
+        {
+          "name": "Eagle Picher Technologies",
+          "type": "manufacturing_plant",
+          "source_note": "Eagle Picher Technologies battery and defense-electronics manufacturing, Joplin."
+        }
+      ],
+      "lat": 37.0842,
+      "lon": -94.5133
+    },
+    "Rolla": {
+      "state": "Missouri",
+      "region": "heartland",
+      "locations": [
+        {
+          "name": "Royal Canin Pet Food Plant",
+          "type": "food_processor",
+          "source_note": "Royal Canin (Mars) pet food manufacturing plant, Rolla."
+        },
+        {
+          "name": "Brewer Science",
+          "type": "manufacturing_plant",
+          "source_note": "Brewer Science microelectronic-materials manufacturing and shipping campus, Rolla."
+        }
+      ],
+      "lat": 37.9514,
+      "lon": -91.7713
     }
   }
 }
