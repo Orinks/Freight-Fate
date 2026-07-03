@@ -87,7 +87,7 @@ STATE_REGION: dict[str, str] = {
     # in classify_region (their Lake shore stays great_lakes, interior ->
     # corn_belt). Indiana is split by latitude too (Evansville -> mid_south,
     # Indianapolis -> corn_belt, the north -> great_lakes).
-    "Michigan": "great_lakes",
+    # Michigan is split in classify_region: the Upper Peninsula -> upper_midwest.
     # Minnesota and Wisconsin are the colder Upper Midwest.
     "Wisconsin": "upper_midwest",
     "Minnesota": "upper_midwest",
@@ -174,6 +174,15 @@ def classify_region(state: str, lat: float, lon: float) -> str:
         # The Lake Erie shore (Cleveland, Toledo, Akron) is Great Lakes; central
         # and southern Ohio (Columbus, Dayton, Cincinnati) are the Corn Belt.
         return "great_lakes" if lat >= 40.5 else "corn_belt"
+    if state == "Michigan":
+        # The Upper Peninsula -- Lake Superior northwoods, iron/timber country
+        # bordering Wisconsin -- is Upper Midwest; the Lower Peninsula (Detroit,
+        # Grand Rapids, the auto belt) is Great Lakes. The Straits of Mackinac
+        # split them: north of ~45.8 lat, or the western UP that dips south of
+        # that along Lake Michigan (lon <= -87).
+        if lat >= 45.8 or lon <= -87.0:
+            return "upper_midwest"
+        return "great_lakes"
     if state == "New York":
         # Western New York (Buffalo) is lake-effect Great Lakes country.
         return "great_lakes" if lon <= -78.0 else "northeast"
