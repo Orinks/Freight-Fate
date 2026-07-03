@@ -24,6 +24,26 @@
   keeps its relative feel while waiting: relaxed 20 times, standard 40,
   fast 80.
 
+- **The Pacific Northwest fills in with eight new cities.** Tacoma, Everett,
+  Olympia, Bellingham, and Yakima in Washington and Medford, Roseburg, and
+  Pendleton in Oregon join the map with truck-routed corridors, real named
+  ports, mills, and freight facilities, and real truck stops along the way.
+  The region finally has short local runs -- Seattle to Tacoma is a
+  34-mile hop instead of nothing closer than Portland -- and the empty I-84
+  corridor gets its first stop at Pendleton. Thanks to liamerven.
+
+- **Appalachia, the Heartland, and the Southern Plains grow by eighteen
+  cities.** Appalachia becomes a real Valley-and-Ridge region: Asheville,
+  Johnson City, Beckley, Harrisonburg, Winchester, and Hagerstown line the
+  I-81, I-77, and I-40 mountain corridors, Roanoke gains its rail yard and
+  distribution work, and the western reaches of Virginia, North Carolina, and
+  Maryland now count as Appalachian country. The Heartland adds Sioux City,
+  Grand Island, North Platte, Columbia, Joplin, and Rolla along I-70, I-29,
+  I-80, and I-44; the Southern Plains add Salina, Dodge City, Garden City,
+  Enid, Lawton, and San Angelo with their grain, beef, and oilfield freight.
+  Every new city carries real named facilities and every corridor has named
+  truck stops. Thanks to liamerven.
+
 ### Fixed
 
 - **Getting up to highway speed no longer costs an hour of game time.** Truck
@@ -157,6 +177,17 @@
   new as -- or newer than -- the latest nightly, so once those changes ship in
   a stable build you converge back onto stable instead of being left on an
   equivalent nightly.
+- **The low-air alarm now sounds on a cold start.** Starting the engine for
+  the first time with the air tanks low used to stay silent; the warning now
+  plays as soon as the engine is running with pressure below the threshold,
+  so you know to wait for the compressor before releasing the brakes. Thanks
+  to hannes16.
+- **Erie and Evansville moved to their right regions.** Erie sits on the Lake
+  Erie shore between Buffalo and Cleveland, so it is now Great Lakes country
+  rather than Appalachia; Evansville, down on Indiana's Ohio River border, is
+  now the Mid-South rather than the Great Lakes. Spoken region names, weather
+  flavor, and regional hazards on runs through both cities now match the
+  geography. Thanks to liamerven.
 
 ### Changed
 - **During a manual drive.** hold down the clutch (shift) then press W to shift up gears, and q to shift down gears .
