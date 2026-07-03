@@ -331,13 +331,7 @@ class DrivingControlsMixin:
         self.trip.waiting = True
         self.ctx.audio.play("vehicle/brake_set", volume=0.65)
         self._set_status("Parking brake set.")
-        if self._terse_speech():
-            self.ctx.say(f"Parking brake set. Air pressure {t.air_pressure_psi:.0f} psi.")
-        else:
-            self.ctx.say(
-                "Parking brake set. Time passes at double pace while you wait. "
-                f"Air pressure {t.air_pressure_psi:.0f} psi."
-            )
+        self.ctx.say(f"Parking brake set. Air pressure {t.air_pressure_psi:.0f} psi.")
 
     def _manual_shift(self, gear: int) -> None:
         result = self.truck.transmission.request_gear(gear)
