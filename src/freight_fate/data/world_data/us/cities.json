@@ -2951,6 +2951,180 @@
       ],
       "lat": 41.4901,
       "lon": -71.3128
+    },
+    "Tacoma": {
+      "state": "Washington",
+      "region": "pacific_northwest",
+      "locations": [
+        {
+          "name": "Husky Terminal",
+          "type": "port_terminal",
+          "source_note": "Husky Terminal, Northwest Seaport Alliance container terminal, Port of Tacoma."
+        },
+        {
+          "name": "Washington United Terminals",
+          "type": "intermodal",
+          "source_note": "Washington United Terminals on the Blair Waterway, with on-dock Hyundai intermodal yard, Port of Tacoma."
+        },
+        {
+          "name": "Frederickson Distribution Center",
+          "type": "distribution",
+          "source_note": "Frederickson industrial/distribution area south of Tacoma (Amazon, IKEA and other DCs)."
+        }
+      ],
+      "lat": 47.2529,
+      "lon": -122.4443
+    },
+    "Everett": {
+      "state": "Washington",
+      "region": "pacific_northwest",
+      "locations": [
+        {
+          "name": "Port of Everett",
+          "type": "port",
+          "source_note": "Port of Everett seaport, the region's premier breakbulk facility and third-largest container port in Washington."
+        },
+        {
+          "name": "Boeing Everett Factory",
+          "type": "manufacturing_plant",
+          "source_note": "Boeing Everett widebody assembly plant, served by rail and I-5/US-2."
+        },
+        {
+          "name": "Mount Baker Terminal",
+          "type": "rail",
+          "source_note": "Port of Everett barge-to-rail facility handling oversized aerospace containers."
+        }
+      ],
+      "lat": 47.979,
+      "lon": -122.2021
+    },
+    "Olympia": {
+      "state": "Washington",
+      "region": "pacific_northwest",
+      "locations": [
+        {
+          "name": "Port of Olympia Marine Terminal",
+          "type": "port",
+          "source_note": "Port of Olympia deepwater marine terminal on Budd Inlet; timber and wind-energy breakbulk, on-dock rail."
+        },
+        {
+          "name": "Lacey Commerce Business Center",
+          "type": "distribution",
+          "source_note": "Light-industrial and warehouse/distribution space in Lacey, east of Olympia."
+        }
+      ],
+      "lat": 47.0379,
+      "lon": -122.9007
+    },
+    "Yakima": {
+      "state": "Washington",
+      "region": "pacific_northwest",
+      "locations": [
+        {
+          "name": "Washington Fruit & Produce",
+          "type": "food_processor",
+          "source_note": "Washington Fruit & Produce apple-packing plant with controlled-atmosphere storage on River Road, Yakima."
+        },
+        {
+          "name": "Price Cold Storage & Packing",
+          "type": "cold_storage",
+          "source_note": "Price Cold Storage & Packing apple/pear/cherry packing and cold storage, Yakima."
+        },
+        {
+          "name": "Yakima Fruit & Cold Storage",
+          "type": "cold_storage",
+          "source_note": "Yakima Fruit & Cold Storage Co., Central Washington tree-fruit storage and shipping."
+        }
+      ],
+      "lat": 46.6021,
+      "lon": -120.5059
+    },
+    "Medford": {
+      "state": "Oregon",
+      "region": "pacific_northwest",
+      "locations": [
+        {
+          "name": "Harry & David Distribution Center",
+          "type": "distribution",
+          "source_note": "Harry & David headquarters fulfillment/distribution operation, Medford."
+        },
+        {
+          "name": "Naumes Fruit Packing",
+          "type": "food_processor",
+          "source_note": "Naumes Inc., Medford-based pear and tree-fruit grower-packer-shipper."
+        },
+        {
+          "name": "FedEx Ground Terminal",
+          "type": "parcel_hub",
+          "source_note": "FedEx Ground trucking and ground-distribution terminal in the Medford/Central Point area."
+        }
+      ],
+      "lat": 42.3265,
+      "lon": -122.8756
+    },
+    "Roseburg": {
+      "state": "Oregon",
+      "region": "pacific_northwest",
+      "locations": [
+        {
+          "name": "Roseburg Forest Products Dillard Sawmill",
+          "type": "lumber_paper",
+          "source_note": "Roseburg Forest Products Dillard stud sawmill, one of the largest in North America."
+        },
+        {
+          "name": "Roseburg Forest Products Dillard MDF",
+          "type": "construction_materials_yard",
+          "source_note": "Roseburg Forest Products Dillard particleboard/MDF engineered-wood plant."
+        }
+      ],
+      "lat": 43.2165,
+      "lon": -123.3417
+    },
+    "Bellingham": {
+      "state": "Washington",
+      "region": "pacific_northwest",
+      "locations": [
+        {
+          "name": "Bellingham Shipping Terminal",
+          "type": "port_terminal",
+          "source_note": "Port of Bellingham shipping terminal handling breakbulk and clean-bulk cargo."
+        },
+        {
+          "name": "Bellingham Cold Storage",
+          "type": "cold_storage",
+          "source_note": "Bellingham Cold Storage, a major private deepwater cold-storage terminal (seafood and perishables)."
+        },
+        {
+          "name": "BP Cherry Point Refinery",
+          "type": "chemical_petroleum_terminal",
+          "source_note": "BP Cherry Point refinery north of Bellingham, the largest refinery in Washington."
+        }
+      ],
+      "lat": 48.7519,
+      "lon": -122.4787
+    },
+    "Pendleton": {
+      "state": "Oregon",
+      "region": "pacific_northwest",
+      "locations": [
+        {
+          "name": "United Grain Pendleton Elevator",
+          "type": "farm_elevator",
+          "source_note": "United Grain Corp. Pendleton grain elevator (former Grain Craft/PGG assets), Columbia Plateau wheat."
+        },
+        {
+          "name": "Pendleton Woolen Mills",
+          "type": "manufacturing_plant",
+          "source_note": "Pendleton Woolen Mills, historic wool textile mill in Pendleton."
+        },
+        {
+          "name": "Cubework Pendleton Warehouse",
+          "type": "warehouse",
+          "source_note": "Cubework flexible warehouse/distribution space, Pendleton."
+        }
+      ],
+      "lat": 45.6721,
+      "lon": -118.7886
     }
   }
 }
