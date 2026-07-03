@@ -206,8 +206,10 @@ class DrivingUpdateMixin:
         if was_spring is None:
             was_spring = t.spring_brakes_active
 
-        if t.air_low_warning and t.engine_on and (
-            not was_low or not self._low_air_said or not was_engine_on
+        if (
+            t.air_low_warning
+            and t.engine_on
+            and (not was_low or not self._low_air_said or not was_engine_on)
         ):
             self._low_air_said = True
             self.ctx.audio.play("vehicle/low_air_buzzer", volume=0.7)

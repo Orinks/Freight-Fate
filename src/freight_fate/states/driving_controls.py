@@ -33,7 +33,7 @@ class DrivingControlsMixin:
             if tr.in_reverse or tr.in_neutral:
                 self._manual_shift(1)
             elif tr.gear < 10:
-                self._manual_shift(tr.gear+1)
+                self._manual_shift(tr.gear + 1)
         elif key == pygame.K_q and not tr.automatic and not tr.in_neutral and tr.gear > 1:
             self._manual_shift(tr.gear - 1)
         elif key == pygame.K_j:
