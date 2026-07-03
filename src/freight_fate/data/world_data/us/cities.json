@@ -3377,6 +3377,114 @@
       ],
       "lat": 37.9514,
       "lon": -91.7713
+    },
+    "San Angelo": {
+      "state": "Texas",
+      "region": "southern_plains",
+      "locations": [
+        {
+          "name": "Ethicon Medical Devices",
+          "type": "manufacturing_plant",
+          "source_note": "Ethicon (Johnson & Johnson) suture and surgical-device plant, San Angelo."
+        },
+        {
+          "name": "San Angelo Oilfield Terminal",
+          "type": "chemical_petroleum_terminal",
+          "source_note": "Permian Basin oil-and-gas services and terminal serving the Concho Valley."
+        }
+      ],
+      "lat": 31.4638,
+      "lon": -100.437
+    },
+    "Lawton": {
+      "state": "Oklahoma",
+      "region": "southern_plains",
+      "locations": [
+        {
+          "name": "Goodyear Tire Plant",
+          "type": "manufacturing_plant",
+          "source_note": "Goodyear's largest global tire manufacturing plant, Lawton."
+        },
+        {
+          "name": "Republic Paperboard",
+          "type": "lumber_paper",
+          "source_note": "Republic Paperboard gypsum-board paper mill, Lawton."
+        }
+      ],
+      "lat": 34.6086,
+      "lon": -98.3903
+    },
+    "Salina": {
+      "state": "Kansas",
+      "region": "southern_plains",
+      "locations": [
+        {
+          "name": "Great Plains Manufacturing",
+          "type": "manufacturing_plant",
+          "source_note": "Great Plains Manufacturing / Kubota agricultural and compact-loader equipment plant, Salina."
+        },
+        {
+          "name": "Schwan's Food Plant",
+          "type": "food_processor",
+          "source_note": "Schwan's frozen-food manufacturing, Salina."
+        }
+      ],
+      "lat": 38.8403,
+      "lon": -97.6114
+    },
+    "Enid": {
+      "state": "Oklahoma",
+      "region": "southern_plains",
+      "locations": [
+        {
+          "name": "Enid Terminal Grain Elevators",
+          "type": "farm_elevator",
+          "source_note": "Enid terminal grain elevators (ADM, Cargill, Continental), among the largest grain-storage capacity in the US."
+        },
+        {
+          "name": "Enid Energy Terminal",
+          "type": "chemical_petroleum_terminal",
+          "source_note": "Oil-and-gas gathering and terminal serving the STACK play, Enid."
+        }
+      ],
+      "lat": 36.3956,
+      "lon": -97.8784
+    },
+    "Dodge City": {
+      "state": "Kansas",
+      "region": "southern_plains",
+      "locations": [
+        {
+          "name": "Cargill Meat Solutions",
+          "type": "food_processor",
+          "source_note": "Cargill Meat Solutions beef plant (~6,000 head/day, 1,400 acres), Dodge City."
+        },
+        {
+          "name": "National Beef Dodge City",
+          "type": "food_processor",
+          "source_note": "National Beef Packing plant, Dodge City."
+        }
+      ],
+      "lat": 37.7528,
+      "lon": -100.0171
+    },
+    "Garden City": {
+      "state": "Kansas",
+      "region": "southern_plains",
+      "locations": [
+        {
+          "name": "Tyson Fresh Meats",
+          "type": "food_processor",
+          "source_note": "Tyson Fresh Meats beef plant at Holcomb near Garden City (~6,000 head/day)."
+        },
+        {
+          "name": "Garden City Grain & Feed Terminal",
+          "type": "farm_elevator",
+          "source_note": "Grain and feedlot-supply shipping for the southwest Kansas cattle belt."
+        }
+      ],
+      "lat": 37.9717,
+      "lon": -100.8727
     }
   }
 }
