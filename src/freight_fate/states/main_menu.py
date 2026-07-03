@@ -784,7 +784,9 @@ class SettingsCategoryState(MenuState):
                 MenuItem(
                     lambda: f"Trip pacing: {self._pace_label()}",
                     lambda: self._cycle_pace(1),
-                    help="Controls how quickly game time and distance pass.",
+                    help="Controls how quickly game time and distance pass "
+                    "at highway speed. The clock always slows to near real "
+                    "time while you accelerate, brake, or maneuver.",
                 ),
                 MenuItem(
                     lambda: f"Hours of service: {self._hos_label()}",

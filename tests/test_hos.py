@@ -735,7 +735,7 @@ def test_hos_violation_speech_interrupts_but_threshold_warning_does_not(monkeypa
         app.ctx.settings.hos_mode = "realistic"
         app.ctx.settings.time_scale = 60.0
         driving.trip.time_scale = 60.0
-        driving.truck.velocity_mps = 20.0
+        driving.truck.velocity_mps = 25.0  # past 50 mph: full compression
 
         driving.hos.driving_min = LIMITS["realistic"][0] - 121.0
         driving.hos.duty_min = driving.hos.driving_min
@@ -1420,6 +1420,15 @@ def test_hos_clock_runs_on_game_time():
         driving.truck.velocity_mps = 10.0  # rolling: counts as driving
         before = driving.hos.driving_min
         driving._update_hours_and_fatigue(1.0)  # one real second
+        gained = driving.hos.driving_min - before
+        # below cruise speed the clock compresses less than the configured
+        # pacing, and the HOS ledger follows the same effective scale
+        assert gained == pytest.approx(driving.trip.effective_time_scale / 60.0)
+        assert gained < driving.trip.time_scale / 60.0
+
+        driving.truck.velocity_mps = 27.0  # ~60 mph: full pacing
+        before = driving.hos.driving_min
+        driving._update_hours_and_fatigue(1.0)
         gained = driving.hos.driving_min - before
         assert gained == pytest.approx(driving.trip.time_scale / 60.0)
     finally:

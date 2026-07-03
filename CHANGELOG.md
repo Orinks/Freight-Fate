@@ -16,6 +16,16 @@
 
 ### Fixed
 
+- **Getting up to highway speed no longer costs an hour of game time.** Truck
+  physics runs in real time so shifting and braking stay playable, but the
+  clock billed every real second at full trip pacing -- so the couple of real
+  minutes a loaded rig needs to work through the gears cost most of a game
+  hour, burning daylight, deadline, and duty clock. Clock compression now
+  ramps with road speed: near real time while stopped or maneuvering, your
+  full pacing setting once at cruise. Distance, fuel, fatigue, and the hours
+  of service ledger all follow the same effective rate, so the simulation
+  stays consistent -- acceleration now costs about five game minutes instead
+  of forty-five.
 - **The dispatch board no longer offers trivially short hauls.** Because each
   city stands for a whole freight area, a job to a neighbor under 25 miles was a
   pointless across-town hop; the board now skips those destinations and fills

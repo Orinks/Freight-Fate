@@ -73,6 +73,16 @@ class Trip:
         self._announced_enforcement: set[str] = set()
 
     @property
+    def effective_time_scale(self) -> float:
+        """Clock compression for this frame: gentle while maneuvering, the
+        full configured pacing at highway speed. Everything that converts
+        real seconds to game time must read this, never ``time_scale``."""
+        full = self.time_scale
+        floor = min(LOW_SPEED_TIME_SCALE, full)
+        ramp = min(1.0, self.truck.speed_mph / FULL_COMPRESSION_MPH)
+        return floor + (full - floor) * ramp
+
+    @property
     def imperial(self) -> bool:
         return self._imperial
 
@@ -665,7 +675,8 @@ class Trip:
             return self._events
 
         # weather drives truck grip and evolves over game time
-        game_min = dt * self.time_scale / 60.0
+        scale = self.effective_time_scale
+        game_min = dt * scale / 60.0
         self.game_minutes += game_min
         target = self.current_target_city
         self.weather.set_region(target.region)
@@ -680,9 +691,9 @@ class Trip:
         self.truck.grip = self.weather.effects.grip
         self.truck.drag_mult = self.weather.effects.drag_mult
         self.truck.grade = self.grade_at(self.position_mi)
-        self.truck.fuel_burn_mult = self.time_scale
+        self.truck.fuel_burn_mult = scale
 
-        moved_mi = self.truck.velocity_mps * dt * self.time_scale / 1609.344
+        moved_mi = self.truck.velocity_mps * dt * scale / 1609.344
         self.position_mi += moved_mi
         if self.position_mi < 0.0:
             self.position_mi = 0.0
@@ -714,7 +725,7 @@ class Trip:
         """Lead distance for a zone warning, scaled so the player gets roughly
         ``ZONE_WARNING_REAL_S`` of real time despite speed and time compression."""
         speed = max(self.truck.speed_mph, 30.0)
-        miles = ZONE_WARNING_REAL_S * speed * self.time_scale / 3600.0
+        miles = ZONE_WARNING_REAL_S * speed * self.effective_time_scale / 3600.0
         return max(ZONE_WARNING_LOOKAHEAD_MI, min(miles, ZONE_WARNING_MAX_MI))
 
     def _check_zones(self) -> None:

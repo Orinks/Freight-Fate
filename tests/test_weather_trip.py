@@ -543,6 +543,7 @@ def test_bad_weather_slows_modeled_traffic(world):
 
 def test_time_scale_compresses_fuel_burn(world):
     trip, truck = make_trip(world, time_scale=40.0)
+    truck.velocity_mps = 26.0  # already at cruise: full pacing applies
     truck.throttle = 0.9
     for _ in range(60 * 30):
         truck.auto_shift()
@@ -550,6 +551,31 @@ def test_time_scale_compresses_fuel_burn(world):
         trip.update(1 / 60)
     assert truck.fuel_burn_mult == 40.0
     assert truck.fuel_gal < truck.specs.fuel_tank_gal - 0.5
+
+
+def test_clock_compression_ramps_with_road_speed(world):
+    """Physics runs in real time, so the clock eases off while maneuvering:
+    working up through the gears must not bill an hour of game time. Full
+    pacing only applies once the truck is at highway speed."""
+    from freight_fate.sim.trip import FULL_COMPRESSION_MPH, LOW_SPEED_TIME_SCALE
+
+    trip, truck = make_trip(world, time_scale=20.0)
+
+    truck.velocity_mps = 0.0  # parked: near real-time pacing
+    assert trip.effective_time_scale == pytest.approx(LOW_SPEED_TIME_SCALE)
+    before = trip.game_minutes
+    trip.update(1.0)
+    assert trip.game_minutes - before == pytest.approx(LOW_SPEED_TIME_SCALE / 60.0)
+
+    truck.velocity_mps = 25.0 / 2.23694  # 25 mph: mid-ramp
+    mid = trip.effective_time_scale
+    assert LOW_SPEED_TIME_SCALE < mid < 20.0
+
+    truck.velocity_mps = (FULL_COMPRESSION_MPH + 10.0) / 2.23694  # cruise
+    assert trip.effective_time_scale == pytest.approx(20.0)
+    before = trip.game_minutes
+    trip.update(1.0)
+    assert trip.game_minutes - before == pytest.approx(20.0 / 60.0)
 
 
 def test_every_region_has_clear_day_hazards():

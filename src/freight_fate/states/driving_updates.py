@@ -293,7 +293,7 @@ class DrivingUpdateMixin:
 
     def _update_hours_and_fatigue(self, dt: float) -> None:
         """Advance the HOS shift clock and fatigue on game time, not wall time."""
-        gm = dt * self.trip.time_scale / 60.0  # game minutes this frame
+        gm = dt * self.trip.effective_time_scale / 60.0  # game minutes this frame
         moving = self.truck.speed_mph > 5.0
         mode = self.ctx.settings.hos_mode
         p = self.ctx.profile
