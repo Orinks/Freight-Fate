@@ -293,6 +293,12 @@ def stage_release_docs(build_dir: Path) -> None:
     root = runtime_root(build_dir)
     shutil.copy2(changelog, root / "CHANGELOG.md")
 
+    license_file = ROOT / "LICENSE"
+    if not license_file.exists():
+        raise RuntimeError(f"License was not found: {license_file}")
+    # PolyForm's Notices term expects the terms to travel with every copy.
+    shutil.copy2(license_file, root / "LICENSE.txt")
+
     manual = ROOT / "docs" / "user-manual.md"
     if not manual.exists():
         raise RuntimeError(f"User manual was not found: {manual}")
@@ -391,6 +397,7 @@ def verify_packaged_payload(build_dir: Path) -> None:
     required = [
         exe,
         root / "build_info.json",
+        root / "LICENSE.txt",
         root / "CHANGELOG.md",
         root / "USER_MANUAL.md",
         root / "USER_MANUAL.html",

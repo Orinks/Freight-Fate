@@ -196,6 +196,7 @@ def test_release_docs_are_staged_with_build_payload(tmp_path, monkeypatch):
     source_root.mkdir()
     (source_root / "docs").mkdir()
     (source_root / "CHANGELOG.md").write_text("# Changelog\n\n## Unreleased\n", encoding="utf-8")
+    (source_root / "LICENSE").write_text("PolyForm Noncommercial 1.0.0\n", encoding="utf-8")
     (source_root / "docs" / "user-manual.md").write_text(
         "# Freight Fate User Manual\n", encoding="utf-8"
     )
@@ -206,6 +207,7 @@ def test_release_docs_are_staged_with_build_payload(tmp_path, monkeypatch):
     build_release.stage_release_docs(build_dir)
 
     assert (build_dir / "CHANGELOG.md").read_text(encoding="utf-8").startswith("# Changelog")
+    assert (build_dir / "LICENSE.txt").read_text(encoding="utf-8").startswith("PolyForm")
     assert (
         (build_dir / "USER_MANUAL.md")
         .read_text(encoding="utf-8")
@@ -222,6 +224,7 @@ def test_packaged_payload_requires_release_docs(tmp_path):
     if sys.platform != "win32":
         exe.chmod(0o755)
     (build_dir / "build_info.json").write_text("{}", encoding="utf-8")
+    (build_dir / "LICENSE.txt").write_text("PolyForm Noncommercial\n", encoding="utf-8")
     add_sound_pack(build_dir, tmp_path)
     (build_dir / "sound_lib" / "lib").mkdir(parents=True)
     sound_suffix = next(iter(build_release.platform_native_exts()))
@@ -248,6 +251,7 @@ def test_packaged_payload_requires_platform_prism_native(tmp_path):
     if sys.platform != "win32":
         exe.chmod(0o755)
     (build_dir / "build_info.json").write_text("{}", encoding="utf-8")
+    (build_dir / "LICENSE.txt").write_text("PolyForm Noncommercial\n", encoding="utf-8")
     (build_dir / "CHANGELOG.md").write_text("# Changelog\n", encoding="utf-8")
     (build_dir / "USER_MANUAL.md").write_text("# Manual\n", encoding="utf-8")
     (build_dir / "USER_MANUAL.html").write_text("<h1>Manual</h1>\n", encoding="utf-8")
@@ -278,6 +282,7 @@ def test_packaged_payload_rejects_exposed_world_data(tmp_path):
     if sys.platform != "win32":
         exe.chmod(0o755)
     (build_dir / "build_info.json").write_text("{}", encoding="utf-8")
+    (build_dir / "LICENSE.txt").write_text("PolyForm Noncommercial\n", encoding="utf-8")
     (build_dir / "CHANGELOG.md").write_text("# Changelog\n", encoding="utf-8")
     (build_dir / "USER_MANUAL.md").write_text("# Manual\n", encoding="utf-8")
     (build_dir / "USER_MANUAL.html").write_text("<h1>Manual</h1>\n", encoding="utf-8")
@@ -310,6 +315,7 @@ def test_packaged_payload_rejects_exposed_sound_files(tmp_path):
     if sys.platform != "win32":
         exe.chmod(0o755)
     (build_dir / "build_info.json").write_text("{}", encoding="utf-8")
+    (build_dir / "LICENSE.txt").write_text("PolyForm Noncommercial\n", encoding="utf-8")
     (build_dir / "CHANGELOG.md").write_text("# Changelog\n", encoding="utf-8")
     (build_dir / "USER_MANUAL.md").write_text("# Manual\n", encoding="utf-8")
     (build_dir / "USER_MANUAL.html").write_text("<h1>Manual</h1>\n", encoding="utf-8")
@@ -342,6 +348,7 @@ def test_packaged_payload_requires_runnable_posix_executable(tmp_path, monkeypat
     exe.write_text("", encoding="utf-8")
     exe.chmod(0o644)
     (build_dir / "build_info.json").write_text("{}", encoding="utf-8")
+    (build_dir / "LICENSE.txt").write_text("PolyForm Noncommercial\n", encoding="utf-8")
     (build_dir / "CHANGELOG.md").write_text("# Changelog\n", encoding="utf-8")
     (build_dir / "USER_MANUAL.md").write_text("# Manual\n", encoding="utf-8")
     (build_dir / "USER_MANUAL.html").write_text("<h1>Manual</h1>\n", encoding="utf-8")
@@ -408,6 +415,7 @@ def test_linux_packaged_payload_requires_prism_dependency_bundle(tmp_path, monke
     exe.write_text("", encoding="utf-8")
     exe.chmod(0o755)
     (build_dir / "build_info.json").write_text("{}", encoding="utf-8")
+    (build_dir / "LICENSE.txt").write_text("PolyForm Noncommercial\n", encoding="utf-8")
     (build_dir / "CHANGELOG.md").write_text("# Changelog\n", encoding="utf-8")
     (build_dir / "USER_MANUAL.md").write_text("# Manual\n", encoding="utf-8")
     (build_dir / "USER_MANUAL.html").write_text("<h1>Manual</h1>\n", encoding="utf-8")
