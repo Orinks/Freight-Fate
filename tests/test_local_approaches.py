@@ -20,17 +20,23 @@ def test_local_approach_data_covers_supported_map(world):
 
     assert coverage["approaches"] == 2748
     assert coverage["osm_road"] == 2742
+    # Every road-snapped target carries a real road name: the snap prefers the
+    # nearest *named* road, so "unnamed public road" only survives where OSM
+    # truly has no named street inside the search radius (currently nowhere).
+    assert coverage["named_road"] == 2742
     assert coverage["fallback"] == 6
     assert coverage["estimated"] == 2129
     assert coverage["by_type"]["city_service"] == {
         "estimated": 106,
         "fallback": 0,
+        "named_road": 660,
         "osm_road": 660,
         "total": 660,
     }
     assert coverage["by_type"]["facility"] == {
         "estimated": 2023,
         "fallback": 6,
+        "named_road": 2082,
         "osm_road": 2082,
         "total": 2088,
     }

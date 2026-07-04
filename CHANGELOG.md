@@ -186,6 +186,22 @@
 
 ### Fixed
 
+- **Local approaches now name real streets almost everywhere.** The road
+  snap used to let a nameless service way beat a named street a few meters
+  farther, so 39 percent of deadheads and facility approaches said "unnamed
+  public road." The snap now prefers the nearest named road inside the same
+  search radius, and the regenerated data names a real street for every
+  road-snapped target -- "Deadhead 2.1 miles on North Meridian Street"
+  instead of an unnamed mystery road.
+- **Release archives no longer ship the build machine's log.** The packaging
+  smoke check writes a log inside the build folder; it is now stripped
+  alongside saves before archiving, so a fresh download starts with an empty
+  logs folder instead of a confusing leftover run.
+- **Save migration now explains itself.** When the game folds an old save
+  folder into the active one on first run, it writes what moved from where
+  to the game log and leaves a small saves-moved.txt breadcrumb at the old
+  location, so an unexpectedly familiar career is traceable instead of
+  haunted.
 - **Tuning the radio no longer says the station name twice.** "Tuned to"
   announcements already name the station, so the station line that follows
   now skips the repeat, and the doubled period between them is gone.

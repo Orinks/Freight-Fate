@@ -22,6 +22,7 @@ import contextlib
 import hashlib
 import hmac
 import json
+import logging
 import os
 import secrets
 import shutil
@@ -36,6 +37,8 @@ from .career import Career
 from .career_ladder import STARTER_CARRIER_NAME
 from .market import Market
 from .start_options import DEFAULT_START_KEY, START_MODE_COMPANY
+
+log = logging.getLogger(__name__)
 
 SAVE_VERSION = 10
 STARTING_MONEY = 5_000.0
@@ -113,6 +116,9 @@ def _migrate_legacy(target: Path) -> None:
         return
     legacy = _legacy_data_dir()
     if legacy != target and legacy.is_dir():
+        # A first run silently inheriting an old career looks like a haunted
+        # save; the log line makes "where did this come from" answerable.
+        log.info("Save migration: copying legacy saves from %s into %s", legacy, target)
         _copy_save_tree(legacy, target)
 
 
@@ -127,11 +133,30 @@ def _migrate_nearby_portable_saves(target: Path) -> bool:
         if not source.is_dir():
             continue
         if not target.exists():
+            log.info("Save migration: moving portable saves from %s to %s", source, target)
             _move_save_tree(source, target)
             return target.exists()
+        log.info("Save migration: merging portable saves from %s into %s", source, target)
         _merge_save_tree(source, target)
         return True
     return False
+
+
+def _leave_migration_marker(source: Path, target: Path) -> None:
+    """A breadcrumb where a moved save tree used to be.
+
+    A plain text file (never a directory, so it can't re-trigger candidate
+    scans) telling a player -- or a debugging session -- where the saves went
+    instead of leaving them to vanish without a trace.
+    """
+    marker = source.with_name(source.name + "-moved.txt")
+    with contextlib.suppress(OSError):
+        marker.write_text(
+            "Freight Fate moved the saves that were in this folder to:\n"
+            f"{target}\n"
+            "This breadcrumb is safe to delete.\n",
+            encoding="utf-8",
+        )
 
 
 def _copy_save_tree(source: Path, target: Path) -> None:
@@ -146,6 +171,7 @@ def _move_save_tree(source: Path, target: Path) -> None:
     with contextlib.suppress(OSError):
         target.parent.mkdir(parents=True, exist_ok=True)
         shutil.move(str(source), str(target))
+        _leave_migration_marker(source, target)
 
 
 def _merge_save_tree(source: Path, target: Path) -> None:
@@ -159,9 +185,10 @@ def _merge_save_tree(source: Path, target: Path) -> None:
                 dest.parent.mkdir(parents=True, exist_ok=True)
                 shutil.move(str(path), str(dest))
         # Remove the duplicate tree only when every file was moved or already
-        # existed in the active tree.
+        # existed in the active tree, and leave a breadcrumb in its place.
         if not any(path.is_file() for path in source.rglob("*")):
             shutil.rmtree(source, ignore_errors=True)
+            _leave_migration_marker(source, target)
 
 
 def _portable_migration_candidates() -> list[Path]:
