@@ -349,7 +349,12 @@ licensing.
 
 ## License
 
-Code is [MIT](LICENSE). Bundled audio credits and licensing notes are tracked in
+Freight Fate is licensed under the
+[PolyForm Noncommercial License 1.0.0](LICENSE): the source is public and free
+to use, modify, and share for any noncommercial purpose, but only the copyright
+holder may sell it or put it to commercial use. This is a source-available
+license, not an OSI-approved open-source license. Bundled audio credits and
+provenance are tracked in
 [CREDITS.md](src/freight_fate/assets/sounds/CREDITS.md).
 
 **BASS license caveat:** audio playback uses the

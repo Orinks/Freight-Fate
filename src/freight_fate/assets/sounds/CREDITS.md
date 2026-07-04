@@ -11,10 +11,12 @@ The default sound_lib weather loops were generated for Freight Fate with
 ElevenLabs sound effects tooling, then reviewed and selected for the in-cab
 weather mix.
 
-These original project sound effects are dedicated to the public domain under
-[CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/). ElevenLabs
-generated assets are original project assets subject to the applicable
-ElevenLabs terms for the generating account.
+The original project sound effects, and the ElevenLabs-generated assets
+(original project assets subject to the applicable ElevenLabs terms for the
+generating account), are part of Freight Fate and covered by the project's
+PolyForm Noncommercial License (see `LICENSE` at the repository root): free to
+use and share for noncommercial purposes, all other rights reserved by the
+project owner. They are not dedicated to the public domain.
 
 The in-cab truck sounds used for selected vehicle cues are authorized sounds
 that [Darren Duff](https://darrenduff.com/) found, liked, and sent along for the
