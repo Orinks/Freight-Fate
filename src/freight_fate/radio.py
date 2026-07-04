@@ -487,11 +487,14 @@ class RadioState:
         extra: str = "",
     ) -> str:
         station = reception.station
+        # A prefix like "Tuned to <station>." already names the station;
+        # repeating the name right after would speak it twice in a row.
+        name = "" if station.display_name in prefix else station.display_name
         parts = [
-            part
+            part.rstrip(".")
             for part in (
                 prefix,
-                station.display_name,
+                name,
                 station.format,
                 reception.signal_label,
                 extra,

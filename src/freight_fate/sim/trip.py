@@ -900,8 +900,12 @@ class Trip(TripRoadEventMixin, TripTrafficMixin):
             lookahead = STATE_CROSSING_WARNING_LOOKAHEAD_MI if cue.kind == "state_crossing" else 2.0
             if 0 < ahead <= lookahead and advance_key not in self._announced_navigation:
                 self._announced_navigation.add(advance_key)
-                message = f"In {self._distance_text(ahead)}, {cue.text}."
-                self._emit(TripEventKind.GPS_CUE, message, cue=cue)
+                distance = self._distance_text(ahead)
+                # Within rounding range of the cue the near announcement is
+                # imminent; "In 0 miles, ..." reads as a bug, so skip the lead.
+                if not distance.startswith("0 "):
+                    message = f"In {distance}, {cue.text}."
+                    self._emit(TripEventKind.GPS_CUE, message, cue=cue)
             if -0.1 <= ahead <= 0.1 and near_key not in self._announced_navigation:
                 self._announced_navigation.add(near_key)
                 if cue.kind == "state_crossing":

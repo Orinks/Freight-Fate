@@ -186,6 +186,14 @@
 
 ### Fixed
 
+- **Tuning the radio no longer says the station name twice.** "Tuned to"
+  announcements already name the station, so the station line that follows
+  now skips the repeat, and the doubled period between them is gone.
+- **Route cues no longer say "In 0 miles."** When you are already on top of
+  a cue, the redundant advance warning is skipped; the arrival announcement
+  that follows carries the news. State-line and hours-of-service readouts
+  also gained a missing sentence break, so the duty window no longer runs
+  into the rest-stop advice.
 - **Spoken help now teaches the W and Q gear keys everywhere.** The engine
   start walkthrough, the transmission setting, and the manual-transmission
   page of How to play still told manual drivers to shift with the number

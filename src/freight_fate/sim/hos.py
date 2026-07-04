@@ -450,13 +450,13 @@ class HosClock:
             return (
                 f"ELD status {status}. Hours of service: "
                 f"{drive_left:.1f} hours of driving left, "
-                f"{duty_left:.1f} hours of duty window left{suffix}"
+                f"{duty_left:.1f} hours of duty window left.{suffix}"
             )
         return (
             f"ELD status {status}. Hours of service: "
             f"{drive_left:.1f} hours of driving left, "
             f"break due in {break_left:.1f} hours, "
-            f"duty window closes in {duty_left:.1f} hours{suffix}"
+            f"duty window closes in {duty_left:.1f} hours.{suffix}"
         )
 
     def split_pending_summary(self) -> str | None:
