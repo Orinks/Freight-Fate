@@ -128,6 +128,54 @@ def test_build_tool_snaps_tiny_osm_fixture_to_named_road(tmp_path):
     assert target.best_distance_mi < build_local_approaches.SEARCH_RADIUS_MI
 
 
+def test_build_tool_prefers_named_road_over_closer_unnamed(tmp_path, world):
+    osm = tmp_path / "tiny.osm"
+    osm.write_text(
+        """<?xml version="1.0" encoding="UTF-8"?>
+<osm version="0.6">
+  <node id="1" lat="41.0004" lon="-87.0000" />
+  <node id="2" lat="41.0006" lon="-87.0000" />
+  <node id="3" lat="41.0030" lon="-87.0000" />
+  <node id="4" lat="41.0040" lon="-87.0000" />
+  <way id="10">
+    <nd ref="1" />
+    <nd ref="2" />
+    <tag k="highway" v="service" />
+  </way>
+  <way id="11">
+    <nd ref="3" />
+    <nd ref="4" />
+    <tag k="highway" v="residential" />
+    <tag k="name" v="Main Street" />
+  </way>
+</osm>
+""",
+        encoding="utf-8",
+    )
+    target = build_local_approaches.Target(
+        target_id="facility:test",
+        target_type="facility",
+        city="Chicago",
+        state="Illinois",
+        name="Fixture Dock",
+        lat=41.0005,
+        lon=-87.0000,
+        role="terminal",
+        estimated=False,
+        source_note="Fixture source.",
+    )
+
+    build_local_approaches.snap_roads(osm, [target])
+
+    # The unnamed service way is nearer, but the player hears the road name,
+    # so the record must pick the named street inside the search radius.
+    assert target.best_road == "unnamed public road"
+    assert target.best_named_road == "Main Street"
+    record = build_local_approaches.approach_record(target)
+    assert record["road"] == "Main Street"
+    assert record["fallback"] is False
+
+
 def test_build_tool_marks_missing_road_context_as_fallback(monkeypatch):
     target = build_local_approaches.Target(
         target_id="facility:test",

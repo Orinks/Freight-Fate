@@ -61,6 +61,8 @@ class Target:
     fallback_reason: str = ""
     best_road: str = ""
     best_distance_mi: float = 999.0
+    best_named_road: str = ""
+    best_named_distance_mi: float = 999.0
 
 
 def build_local_approaches(cache_dir: Path) -> dict[str, Any]:
@@ -159,17 +161,37 @@ def snap_roads(osm_path: Path, targets: list[Target]) -> None:
         road = road_label(tags)
         if not road:
             continue
+        named = road != "unnamed public road"
         for lat, lon in way_coords(way):
             for target in nearby_targets(grid, lat, lon):
                 distance = haversine_mi(lat, lon, target.lat, target.lon)
                 if distance < target.best_distance_mi:
                     target.best_distance_mi = distance
                     target.best_road = road
+                if named and distance < target.best_named_distance_mi:
+                    target.best_named_distance_mi = distance
+                    target.best_named_road = road
 
 
 def approach_record(target: Target) -> dict[str, Any]:
-    has_road = bool(target.best_road) and target.best_distance_mi <= SEARCH_RADIUS_MI
-    road = target.best_road if has_road else fallback_road(target)
+    # Prefer the nearest *named* road inside the radius over a closer unnamed
+    # way: the road name is what the player hears, and "unnamed public road"
+    # right next to a named street is a worse answer than the street itself.
+    has_named = (
+        bool(target.best_named_road) and target.best_named_distance_mi <= SEARCH_RADIUS_MI
+    )
+    has_road = has_named or (
+        bool(target.best_road) and target.best_distance_mi <= SEARCH_RADIUS_MI
+    )
+    if has_named:
+        road = target.best_named_road
+        road_distance_mi = target.best_named_distance_mi
+    elif has_road:
+        road = target.best_road
+        road_distance_mi = target.best_distance_mi
+    else:
+        road = fallback_road(target)
+        road_distance_mi = 0.0
     fallback = not has_road
     fallback_reason = target.fallback_reason
     if fallback and not fallback_reason:
@@ -180,7 +202,7 @@ def approach_record(target: Target) -> dict[str, Any]:
     straight_line = haversine_mi(
         city_lat_lon(target)[0], city_lat_lon(target)[1], target.lat, target.lon
     )
-    access_pad = target.best_distance_mi if has_road else 0.5
+    access_pad = road_distance_mi if has_road else 0.5
     minimum_miles = 2.1 if target.target_type == "facility" else 0.4
     approach_miles = round(max(minimum_miles, min(35.0, straight_line * 1.25 + access_pad)), 1)
     source_type = "osm_nearest_road" if has_road else "fallback_context"
@@ -195,7 +217,7 @@ def approach_record(target: Target) -> dict[str, Any]:
         "lon": round(target.lon, 6),
         "road": road,
         "approach_miles": approach_miles,
-        "distance_to_road_mi": round(target.best_distance_mi if has_road else 0.0, 2),
+        "distance_to_road_mi": round(road_distance_mi, 2),
         "source_type": source_type,
         "estimated": bool(target.estimated or fallback),
         "fallback": fallback,
@@ -229,6 +251,7 @@ def coverage_summary(approaches: dict[str, dict[str, Any]]) -> dict[str, Any]:
             {
                 "total": 0,
                 "osm_road": 0,
+                "named_road": 0,
                 "fallback": 0,
                 "estimated": 0,
             },
@@ -238,11 +261,18 @@ def coverage_summary(approaches: dict[str, dict[str, Any]]) -> dict[str, Any]:
             item["fallback"] += 1
         else:
             item["osm_road"] += 1
+            if record["road"] != "unnamed public road":
+                item["named_road"] += 1
         if record["estimated"]:
             item["estimated"] += 1
     return {
         "approaches": total,
         "osm_road": sum(1 for record in approaches.values() if not record["fallback"]),
+        "named_road": sum(
+            1
+            for record in approaches.values()
+            if not record["fallback"] and record["road"] != "unnamed public road"
+        ),
         "fallback": sum(1 for record in approaches.values() if record["fallback"]),
         "estimated": sum(1 for record in approaches.values() if record["estimated"]),
         "by_type": by_type,
