@@ -197,6 +197,12 @@
   geography. Thanks to liamerven.
 
 ### Changed
+- **Real-world weather now refreshes three times as often.** With the real
+  weather source turned on, the game checks the live conditions for your
+  destination every five minutes instead of every fifteen, so fog rolling in,
+  a storm firing up, or skies clearing reach your drive much sooner. If your
+  connection drops, the game holds the last known weather for the same half
+  hour as before switching to simulated conditions.
 - **Downloaded builds no longer expose the game's world data files.** The
   world now ships built into the game program itself, so there is no data
   folder to browse or accidentally edit next to the game. Nothing changes

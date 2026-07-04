@@ -33,7 +33,10 @@ API_ROOT = "https://api.weather.gov"
 # NWS asks every client to identify itself; a contact URL is recommended.
 USER_AGENT = "FreightFate/1.1 (accessible trucking game; https://orinks.net)"
 FETCH_TIMEOUT_S = 8.0
-CACHE_TTL_S = 15 * 60.0  # current weather is fresh enough for 15 min
+# Refresh every 5 min -- about as fast as api.weather.gov's own response cache
+# turns over, and quick enough to catch off-schedule SPECI observations.
+CACHE_TTL_S = 5 * 60.0
+STALE_AFTER_S = 30 * 60.0  # keep serving cached data this long if refreshes fail
 RETRY_AFTER_S = 60.0  # wait before retrying a failed city
 STRONG_WIND_KMH = 38.0
 
@@ -187,7 +190,7 @@ class RealWeatherProvider:
             if entry is None:
                 return None
             kind, _temp_c, fetched_at = entry
-            if self._clock() - fetched_at > CACHE_TTL_S * 2:
+            if self._clock() - fetched_at > STALE_AFTER_S:
                 return None  # too stale to trust
             return kind
 
@@ -200,7 +203,7 @@ class RealWeatherProvider:
             if entry is None:
                 return None
             _kind, temp_c, fetched_at = entry
-            if self._clock() - fetched_at > CACHE_TTL_S * 2:
+            if self._clock() - fetched_at > STALE_AFTER_S:
                 return None
             return temp_c
 
