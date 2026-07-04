@@ -205,6 +205,19 @@
   flavor, and regional hazards on runs through both cities now match the
   geography. Thanks to liamerven.
 
+### Fixed
+- **Exit warnings now arrive early enough to act on.** At highway speed on
+  standard or fast pacing, the destination exit callout used to fire so close
+  that by the time it finished speaking the ramp was gone. The warning
+  distance now grows with your speed and pacing, so you always get roughly
+  the same amount of real listening and braking time, and the exit can be
+  armed as soon as you hear the callout.
+- **Exit announcements no longer say the same name twice.** Messages like
+  "missed exit 5B for exit 5B" and "Signaling for the exit for the warehouse,
+  destination exit for the warehouse" now speak each exit and facility name
+  exactly once. Distances also read naturally: "in 1 mile" instead of
+  "in 1 miles".
+
 ### Changed
 - **New installs now start at relaxed trip pacing.** Fresh installs default to
   the relaxed pace, which gives you the most real time to hear and react to
