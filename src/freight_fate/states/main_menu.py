@@ -213,6 +213,13 @@ class MainMenuState(MenuState):
                 "voices, update channel, and trip pacing.",
             )
         )
+        items.append(
+            MenuItem(
+                "Report a problem",
+                self._report_issue,
+                help="Open the Freight Fate bug report page on GitHub in your web browser.",
+            )
+        )
         items.append(MenuItem("Quit", self.ctx.quit, help="Exit the game."))
         return items
 
@@ -262,6 +269,30 @@ class MainMenuState(MenuState):
 
     def _settings(self) -> None:
         self.ctx.push_state(SettingsState(self.ctx))
+
+    def _report_issue(self) -> None:
+        import webbrowser
+
+        url = f"https://github.com/{updater.REPO}/issues/new?template=bug_report.yml"
+        try:
+            opened = webbrowser.open(url)
+        except Exception:
+            opened = False
+        if not opened:
+            self.ctx.say(
+                "Could not open a web browser. You can report problems at "
+                f"github.com/{updater.REPO}/issues.",
+                interrupt=True,
+            )
+            return
+        self.ctx.say(
+            "Opening the bug report page in your web browser. "
+            "Please attach your game log to the report: it is the file game.log "
+            "inside the logs folder, next to the game itself. If you restarted "
+            "the game after the problem happened, attach game.prev.log instead. "
+            "That is the log from the previous run.",
+            interrupt=True,
+        )
 
 
 class AchievementCareerState(MenuState):

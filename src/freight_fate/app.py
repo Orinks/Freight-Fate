@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import contextlib
+import faulthandler
 import logging
 import os
 import sys
@@ -462,7 +464,19 @@ def _configure_logging() -> None:
     if log_path is not None:
         try:
             log_path.parent.mkdir(parents=True, exist_ok=True)
+            # Keep the previous run's log as game.prev.log: after a crash the
+            # player relaunches the game to report it, and that relaunch must
+            # not wipe the evidence.
+            if log_path.exists():
+                # Rotation is best-effort; a locked file still gets a fresh log.
+                prev = log_path.with_name(f"{log_path.stem}.prev{log_path.suffix}")
+                with contextlib.suppress(OSError):
+                    log_path.replace(prev)
             handlers = [logging.FileHandler(log_path, mode="w", encoding="utf-8")]
+            # Crashes inside native libraries (audio, video) kill the process
+            # without ever reaching Python logging; faulthandler writes the
+            # tracebacks straight to the log file as the process dies.
+            faulthandler.enable(file=handlers[0].stream)
         except OSError:
             pass  # unwritable disk: console-only is the best we can do
     logging.basicConfig(

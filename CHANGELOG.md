@@ -3,6 +3,15 @@
 ## Unreleased
 ### Added
 
+- **Report a problem straight from the main menu.** A new Report a problem
+  option, just above Quit, opens the Freight Fate bug report page on GitHub
+  in your web browser and tells you where to find your game log: the file
+  game.log in the logs folder next to the game. The game now also keeps the
+  previous run's log as game.prev.log, so if the game crashes, the evidence
+  survives restarting it to file the report. Crashes inside the game's audio
+  and video engines, which used to vanish without a trace, are now written
+  into the log as well.
+
 - **Game controllers are now supported, alongside the keyboard.** Plug in an
   Xbox, PlayStation, or other compatible controller and drive by feel: the right
   and left triggers are the gas and brake, the left stick steers, the left bumper
