@@ -51,9 +51,7 @@ def test_game_root_when_nuitka_compiled(monkeypatch, tmp_path):
 
 
 def test_game_root_for_macos_app_is_bundle_parent(monkeypatch, tmp_path):
-    exe = (
-        tmp_path / "Games" / "FreightFate.app" / "Contents" / "MacOS" / "FreightFate"
-    )
+    exe = tmp_path / "Games" / "FreightFate.app" / "Contents" / "MacOS" / "FreightFate"
     monkeypatch.setattr(sys, "frozen", True, raising=False)
     monkeypatch.setattr(sys, "executable", str(exe))
     monkeypatch.setattr(sys, "platform", "darwin")
@@ -154,9 +152,7 @@ def test_macos_uses_application_support(monkeypatch, tmp_path):
 def test_macos_app_moves_bundle_internal_saves(monkeypatch, tmp_path):
     """Saves an earlier build dropped beside/inside the bundle migrate into
     Application Support rather than staying in /Applications."""
-    exe = (
-        tmp_path / "Games" / "FreightFate.app" / "Contents" / "MacOS" / "FreightFate"
-    )
+    exe = tmp_path / "Games" / "FreightFate.app" / "Contents" / "MacOS" / "FreightFate"
     old_profile = exe.parent / "saves" / "profiles" / "Driver.json"
     old_profile.parent.mkdir(parents=True)
     old_profile.write_text("{}", encoding="utf-8")

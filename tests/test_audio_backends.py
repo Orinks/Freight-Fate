@@ -67,7 +67,7 @@ def test_fallback_to_pygame_when_bass_init_fails(monkeypatch):
 def test_engine_freq_mult_mapping():
     assert engine_freq_mult(ENGINE_RPM_IDLE) == 1.0
     assert abs(engine_freq_mult(ENGINE_RPM_MAX) - ENGINE_FREQ_MAX_MULT) < 1e-9
-    assert engine_freq_mult(0) == 1.0                  # clamped below idle
+    assert engine_freq_mult(0) == 1.0  # clamped below idle
     assert engine_freq_mult(99_999) == ENGINE_FREQ_MAX_MULT  # clamped above redline
     mid = engine_freq_mult((ENGINE_RPM_IDLE + ENGINE_RPM_MAX) / 2)
     assert abs(mid - (1.0 + ENGINE_FREQ_MAX_MULT) / 2) < 1e-9
@@ -137,7 +137,7 @@ def test_pygame_music_never_loops_catalog_tracks(monkeypatch):
     backend.music_volume = 0.5
     backend._music_track = None
 
-    monkeypatch.setattr(audio.pygame.mixer.music, "load", lambda path: None)
+    monkeypatch.setattr(audio.pygame.mixer.music, "load", lambda path, namehint="": None)
     monkeypatch.setattr(audio.pygame.mixer.music, "set_volume", lambda volume: None)
     monkeypatch.setattr(
         audio.pygame.mixer.music,
@@ -173,7 +173,7 @@ def test_bass_music_never_loops_catalog_tracks(monkeypatch):
     backend._slide = object()
     backend._bass_call = lambda *args: None
 
-    def fake_stream(path, looping):
+    def fake_stream(data, label, looping):
         loop_flags.append(looping)
         return FakeStream()
 
@@ -233,6 +233,30 @@ def test_new_context_loops_enter_mixer_at_full_gain(monkeypatch):
     assert a._impl._loops[audio.CH_AMBIENT][1] == 1.0
     assert ENGINE_LOOP_GAIN == 1.0
     a.shutdown()
+
+
+def test_horn_uses_reserved_loop_slot(monkeypatch):
+    monkeypatch.delenv("FREIGHT_FATE_AUDIO_BACKEND", raising=False)
+    a = AudioEngine()
+    if a.backend_name != "bass":
+        pytest.skip("BASS backend unavailable")
+    a.horn_start()
+    assert a._impl._loops[audio.CH_HORN][0] == "vehicle/horn"
+    a.horn_stop()
+    assert audio.CH_HORN not in a._impl._loops
+    a.shutdown()
+
+
+def test_pygame_backend_does_not_play_reverse_loop_through_mixer(monkeypatch):
+    backend = audio._PygameBackend.__new__(audio._PygameBackend)
+
+    def fail_start_loop(*_args, **_kwargs):
+        raise AssertionError("reverse cue must not use pygame.mixer")
+
+    monkeypatch.setattr(backend, "start_loop", fail_start_loop)
+
+    backend.reverse_start()
+    backend.reverse_stop()
 
 
 def test_bass_one_shots_survive_garbage_collection(monkeypatch):

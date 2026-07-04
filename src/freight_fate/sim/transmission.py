@@ -2,7 +2,7 @@
 
 Manual shifting follows the real sequence: press the clutch, pick the target
 gear, release the clutch. Shifting without the clutch grinds and is refused.
-Automatic mode shifts on RPM thresholds with a short torque-interrupt delay.
+Automatic mode shifts on RPM thresholds with a truck-like torque-interrupt delay.
 """
 
 from __future__ import annotations
@@ -19,7 +19,7 @@ NEUTRAL = 0
 
 AUTO_UPSHIFT_RPM = 1750
 AUTO_DOWNSHIFT_RPM = 1050
-SHIFT_TIME = 0.45  # seconds of torque interruption
+SHIFT_TIME = 1.0  # seconds of torque interruption
 
 
 @dataclass
@@ -90,8 +90,14 @@ class Transmission:
 
     # -- automatic ---------------------------------------------------------------
 
-    def auto_update(self, rpm: float, throttle: float, moving: bool) -> int | None:
-        """Pick a gear in automatic mode. Returns the new gear when it changes."""
+    def auto_update(
+        self, rpm: float, throttle: float, moving: bool, braking: bool = False
+    ) -> int | None:
+        """Pick a gear in automatic mode. Returns the new gear when it changes.
+
+        While braking the box never upshifts -- a real automatic holds the gear
+        for engine braking instead of grabbing a taller one as you slow, which
+        otherwise read as "geared up while stopping"."""
         if not self.automatic or self.shifting:
             return None
         if self.in_reverse:
@@ -109,7 +115,7 @@ class Transmission:
             self.gear = 1
             self._shift_timer = SHIFT_TIME
             return self.gear
-        if rpm > AUTO_UPSHIFT_RPM and self.gear < self.num_gears:
+        if rpm > AUTO_UPSHIFT_RPM and self.gear < self.num_gears and not braking:
             self.gear += 1
             self._shift_timer = SHIFT_TIME
             return self.gear

@@ -102,12 +102,12 @@ def test_quit_mid_drive_resumes_from_the_last_stop():
         driving = start_drive(app)
         job, route = driving.job, driving.route
         drive_some(driving)
-        assert driving.trip.position_mi > 0.0   # we actually moved up the leg
+        assert driving.trip.position_mi > 0.0  # we actually moved up the leg
         quit_to_menu(app)
 
         p = app.ctx.profile
         assert p.active_trip is not None
-        assert p.active_trip["position_mi"] == 0.0   # leg start, not mid-drive
+        assert p.active_trip["position_mi"] == 0.0  # leg start, not mid-drive
 
         # Continue from the main menu lands back in the drive at the leg start
         while not app.state.items[app.state.index].text.startswith("Continue latest career"):
@@ -142,9 +142,12 @@ def test_resumed_trip_does_not_replay_passed_announcements():
         resumed = app.state
         # the first idle frame must not re-announce stops/cities behind us
         events = resumed.trip.update(1 / 60)
-        replayed = [e for e in events if e.kind in
-                    (TripEventKind.STOP_AHEAD, TripEventKind.CITY_REACHED,
-                     TripEventKind.ZONE_ENTER)]
+        replayed = [
+            e
+            for e in events
+            if e.kind
+            in (TripEventKind.STOP_AHEAD, TripEventKind.CITY_REACHED, TripEventKind.ZONE_ENTER)
+        ]
         assert not replayed
     finally:
         app.shutdown()
@@ -287,8 +290,7 @@ def test_arrival_summary_calls_out_early_delivery_bonus():
         driving = start_drive(app)
         driving.trip.game_minutes = driving.job.deadline_game_h * 30.0
         arrival = ArrivalState(app.ctx, driving)
-        assert any("Early delivery bonus" in part
-                   for part in arrival.summary_parts)
+        assert any("Early delivery bonus" in part for part in arrival.summary_parts)
     finally:
         app.shutdown()
 
@@ -369,13 +371,23 @@ def test_old_map_snapshot_still_resumes():
     try:
         p = Profile(name="Old Save")
         p.active_trip = {
-            "job": {"cargo": "general", "weight_tons": 14.0,
-                    "origin": "Chicago", "origin_location": "Cicero Rail Hub",
-                    "destination": "Denver", "distance_mi": 1150.0,
-                    "pay": 2800.0, "deadline_game_h": 31.0, "market_mult": 1.0},
+            "job": {
+                "cargo": "general",
+                "weight_tons": 14.0,
+                "origin": "Chicago",
+                "origin_location": "Cicero Rail Hub",
+                "destination": "Denver",
+                "distance_mi": 1150.0,
+                "pay": 2800.0,
+                "deadline_game_h": 31.0,
+                "market_mult": 1.0,
+            },
             "route_cities": old_route,
-            "trip_seed": 1234, "position_mi": 412.0, "game_minutes": 540.0,
-            "start_damage": 3.0, "speeding_strikes": 1,
+            "trip_seed": 1234,
+            "position_mi": 412.0,
+            "game_minutes": 540.0,
+            "start_damage": 3.0,
+            "speeding_strikes": 1,
         }
         app.ctx.profile = p
         enter_world(app.ctx)
@@ -390,6 +402,56 @@ def test_old_map_snapshot_still_resumes():
         app.shutdown()
 
 
+def test_old_active_trip_gets_fair_deadline_floor():
+    from freight_fate.app import App
+    from freight_fate.models.jobs import fair_active_deadline, job_from_payload
+    from freight_fate.models.profile import Profile
+    from freight_fate.states.driving import DrivingState
+    from freight_fate.states.main_menu import enter_world
+
+    app = App()
+    try:
+        route_cities = ["San Antonio", "Dallas"]
+        job_payload = {
+            "cargo": "general",
+            "weight_tons": 14.0,
+            "origin": "San Antonio",
+            "origin_location": "San Antonio freight market",
+            "destination": "Dallas",
+            "distance_mi": 275.0,
+            "pay": 1200.0,
+            "deadline_game_h": 3.0,
+            "market_mult": 1.0,
+        }
+        p = Profile(name="Deadline Floor")
+        p.active_trip = {
+            "job": job_payload,
+            "route_cities": route_cities,
+            "trip_seed": 1234,
+            "position_mi": 50.0,
+            "game_minutes": 180.0,
+            "start_damage": 0.0,
+            "speeding_strikes": 0,
+        }
+        app.ctx.profile = p
+        route = app.ctx.world.route_from_cities(route_cities)
+        expected = fair_active_deadline(
+            job_from_payload(job_payload),
+            route,
+            hours_used=3.0,
+            position_mi=50.0,
+            world=app.ctx.world,
+        )
+
+        enter_world(app.ctx)
+
+        assert isinstance(app.state, DrivingState)
+        assert app.state.job.deadline_game_h == expected
+        assert app.state.job.deadline_game_h > job_payload["deadline_game_h"]
+    finally:
+        app.shutdown()
+
+
 def test_bare_city_job_snapshot_gets_facility_fallback():
     from freight_fate.app import App
     from freight_fate.models.profile import Profile
@@ -400,21 +462,29 @@ def test_bare_city_job_snapshot_gets_facility_fallback():
     try:
         p = Profile(name="Bare City Save")
         p.active_trip = {
-            "job": {"cargo": "general", "weight_tons": 14.0,
-                    "origin": "Chicago", "destination": "St. Louis",
-                    "distance_mi": 298.0, "pay": 1200.0,
-                    "deadline_game_h": 9.0, "market_mult": 1.0},
+            "job": {
+                "cargo": "general",
+                "weight_tons": 14.0,
+                "origin": "Chicago",
+                "destination": "St. Louis",
+                "distance_mi": 298.0,
+                "pay": 1200.0,
+                "deadline_game_h": 9.0,
+                "market_mult": 1.0,
+            },
             "route_cities": ["Chicago", "St. Louis"],
-            "trip_seed": 1234, "position_mi": 20.0, "game_minutes": 30.0,
-            "start_damage": 0.0, "speeding_strikes": 0,
+            "trip_seed": 1234,
+            "position_mi": 20.0,
+            "game_minutes": 30.0,
+            "start_damage": 0.0,
+            "speeding_strikes": 0,
         }
         app.ctx.profile = p
         enter_world(app.ctx)
 
         assert isinstance(app.state, DrivingState)
         assert app.state.job.origin_facility_text() == "the Chicago metro freight market"
-        assert app.state.job.destination_facility_text() == (
-            "the St. Louis metro freight market")
+        assert app.state.job.destination_facility_text() == ("the St. Louis metro freight market")
     finally:
         app.shutdown()
 

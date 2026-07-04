@@ -11,10 +11,12 @@ The default sound_lib weather loops were generated for Freight Fate with
 ElevenLabs sound effects tooling, then reviewed and selected for the in-cab
 weather mix.
 
-These original project sound effects are dedicated to the public domain under
-[CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/). ElevenLabs
-generated assets are original project assets subject to the applicable
-ElevenLabs terms for the generating account.
+The original project sound effects, and the ElevenLabs-generated assets
+(original project assets subject to the applicable ElevenLabs terms for the
+generating account), are part of Freight Fate and covered by the project's
+PolyForm Noncommercial License (see `LICENSE` at the repository root): free to
+use and share for noncommercial purposes, all other rights reserved by the
+project owner. They are not dedicated to the public domain.
 
 The in-cab truck sounds used for selected vehicle cues are authorized sounds
 that [Darren Duff](https://darrenduff.com/) found, liked, and sent along for the
@@ -33,7 +35,11 @@ current idle, start, and shutdown cues.
 | Parking brake release, interior | `vehicle/brake_release.ogg` | In-cab air-brake cue, shared by Darren Duff |
 | Parking brake set, interior | `vehicle/brake_set.ogg` | In-cab brake-set cue, shared by Darren Duff |
 | Driver yawn | `driver/yawn.ogg` | Drowsiness yawn cue, shared by Darren Duff |
+| Air dryer purge | `vehicle/air_dryer_purge.ogg` | ElevenLabs-generated compressor cut-out purge, played when air pressure is ready |
+| Low air buzzer | `vehicle/low_air_buzzer.ogg` | ElevenLabs-generated low-air-pressure / spring-brake warning buzzer |
 | Highway road bed | `vehicle/road.ogg` | ElevenLabs-generated in-cab road ambience |
+| Lane drift | `vehicle/lane_drift.ogg` | ElevenLabs-generated directional lane drift beep |
+| Lane centered | `vehicle/lane_centered.ogg` | ElevenLabs-generated centered-lane confirmation chime |
 
 ## Weather
 
@@ -56,6 +62,10 @@ current idle, start, and shutdown cues.
 | Toll charged | `events/toll_charged.ogg` | Short toll/transponder cue |
 | State crossing | `events/state_crossing.ogg` | Short route milestone cue |
 | Inspection warning | `events/inspection_warning.ogg` | Short inspection/weigh-station cue |
+| Police siren | `events/police_siren.ogg` | ElevenLabs-generated trooper pull-over siren wail |
+| CB radio chatter | `events/cb_radio_chatter.ogg` | ElevenLabs-generated CB squelch and chatter (staged for the CB heads-up slice) |
+| Spike strip | `events/spike_strip.ogg` | ElevenLabs-generated spike-strip puncture/air-hiss for felony stops |
+| Hazard clear | `events/hazard_clear.ogg` | ElevenLabs-generated confirmation cue when a hazard has been safely passed |
 | Rest stop at night | `poi/rest_stop_night.ogg` | Parked rest-stop ambience loop |
 | Weigh station lane | `poi/weigh_station_lane.ogg` | Parked weigh-station lane ambience loop |
 | Facility gate | `poi/facility_gate.ogg` | ElevenLabs-generated loading-dock gate ambience loop |

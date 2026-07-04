@@ -10,6 +10,7 @@ from freight_fate.settings import Settings
 
 # -- jobs ---------------------------------------------------------------------
 
+
 def test_job_offers_have_real_route_distances(world):
     board = JobBoard(world, seed=3)
     jobs = board.offers("Chicago", endorsements=set(), level=2)
@@ -31,26 +32,28 @@ def test_deadlines_allow_legal_driving(world):
     for seed, level in ((1, 1), (2, 3), (3, 6)):
         board = JobBoard(world, seed=seed)
         for job in board.offers("San Antonio", endorsements=set(), level=level):
-            needed = required_hours(job.distance_mi)
+            route = world.supported_route(job.origin, job.destination)
+            needed = required_hours(job.distance_mi, route, world)
             assert job.deadline_game_h >= needed * 1.2, (
                 f"{job.origin} to {job.destination}: {job.distance_mi:.0f} mi "
-                f"needs {needed:.1f} h, deadline {job.deadline_game_h:.1f} h")
+                f"needs {needed:.1f} h, deadline {job.deadline_game_h:.1f} h"
+            )
 
 
 def test_required_hours_includes_breaks_and_sleep():
     from freight_fate.models.jobs import required_hours
 
-    assert required_hours(275) < 6.0            # SA-Dallas: just driving
-    medium = required_hours(495)                # 9 driving hours: one break
+    assert required_hours(275) < 6.0  # SA-Dallas: just driving
+    medium = required_hours(495)  # 9 driving hours: one break
     assert medium > 495 / 55.0
-    long_haul = required_hours(1150)            # ~21 h driving: sleep required
+    long_haul = required_hours(1150)  # ~21 h driving: sleep required
     assert long_haul > 1150 / 55.0 + 10.0
 
 
 def test_hos_plan_reports_breaks_sleeps_and_route_stop_coverage(world):
     route = world.supported_route("Chicago", "Indianapolis")
-    plan = plan_hos(route.miles, route)
-    assert plan.drive_h == route.miles / 55.0
+    plan = plan_hos(route.miles, route, world)
+    assert plan.drive_h > route.miles / 70.0
     assert plan.break_stop_count >= 1
     assert "Legal HOS plan" in plan.summary()
 
@@ -63,16 +66,74 @@ def test_northeast_short_corridor_deadline_uses_direct_route(world):
     ny_jobs = [
         job
         for seed in range(40)
-        for job in JobBoard(world, seed=seed).offers(
-            "Philadelphia", endorsements=set(), level=1)
+        for job in JobBoard(world, seed=seed).offers("Philadelphia", endorsements=set(), level=1)
         if job.destination == "New York"
     ]
 
     assert ny_jobs
-    assert all(job.distance_mi == 94 for job in ny_jobs)
-    assert all(3.0 <= job.deadline_game_h <= 4.0 for job in ny_jobs)
-    assert all(job.deadline_game_h >= required_hours(job.distance_mi) * 1.2
-               for job in ny_jobs)
+    assert all(job.distance_mi == 107 for job in ny_jobs)
+    assert all(3.0 <= job.deadline_game_h <= 5.0 for job in ny_jobs)
+    assert all(
+        job.deadline_game_h
+        >= required_hours(
+            job.distance_mi,
+            world.supported_route(job.origin, job.destination),
+            world,
+        )
+        * 1.2
+        for job in ny_jobs
+    )
+
+
+def test_route_aware_deadline_estimate_uses_low_speed_segments():
+    from freight_fate.data.world_models import Leg, Route, SpeedLimitSample
+    from freight_fate.models.jobs import required_hours, route_drive_hours
+
+    route = Route(
+        ["A", "B"],
+        [
+            Leg(
+                "A",
+                "B",
+                100.0,
+                "US 1",
+                "flat",
+                (),
+                speed_limits=(SpeedLimitSample(0.0, 35.0, "test"),),
+            )
+        ],
+    )
+
+    assert route_drive_hours(route) > 100.0 / 55.0
+    assert required_hours(100.0, route) > required_hours(100.0)
+
+
+def test_route_deadline_uses_baked_limit_near_city():
+    from freight_fate.data.world_models import Leg, Route, SpeedLimitSample
+    from freight_fate.models.jobs import (
+        DEADLINE_PLANNING_SPEED_FACTOR,
+        _route_planning_limit,
+    )
+
+    route = Route(
+        ["A", "B"],
+        [
+            Leg(
+                "A",
+                "B",
+                100.0,
+                "I-1",
+                "flat",
+                (),
+                speed_limits=(SpeedLimitSample(0.0, 75.0, "test"),),
+            )
+        ],
+    )
+
+    assert (
+        _route_planning_limit(route, 0, route.legs[0], 1.0, 1.0, [0.0, 100.0], False, None)
+        == 75.0 * DEADLINE_PLANNING_SPEED_FACTOR
+    )
 
 
 def test_deadlines_cover_required_hos_time_across_the_network(world):
@@ -86,11 +147,12 @@ def test_deadlines_cover_required_hos_time_across_the_network(world):
     endorsements = {"refrigerated", "heavy_haul", "high_value"}
     for city in world.city_names():
         for seed in range(3):
-            jobs = JobBoard(world, seed=seed).offers(
-                city, endorsements, count=5, level=5)
+            jobs = JobBoard(world, seed=seed).offers(city, endorsements, count=5, level=5)
             for job in jobs:
-                assert job.deadline_game_h >= required_hours(job.distance_mi), (
-                    f"{city} -> {job.destination} ({job.distance_mi} mi)")
+                route = world.supported_route(job.origin, job.destination)
+                assert job.deadline_game_h >= required_hours(job.distance_mi, route, world), (
+                    f"{city} -> {job.destination} ({job.distance_mi} mi)"
+                )
 
 
 def test_endorsement_gating(world):
@@ -122,6 +184,7 @@ def test_payout_punishes_fragile_damage():
 
 # -- economy ---------------------------------------------------------------------
 
+
 def test_fuel_prices_vary_by_region():
     eco = Economy(seed=1)
     assert eco.fuel_price("california") > eco.fuel_price("gulf_coast")
@@ -135,6 +198,7 @@ def test_repair_cost_scales_with_damage():
 
 
 # -- career ---------------------------------------------------------------------
+
 
 def test_level_thresholds():
     assert level_for_xp(0) == 1
@@ -173,6 +237,7 @@ def test_reputation_moves_with_performance():
 
 
 # -- profile ---------------------------------------------------------------------
+
 
 def test_profile_roundtrip():
     p = Profile(name="Roundtrip Test")
@@ -252,6 +317,7 @@ def test_profile_name_sanitized_for_filesystem():
 
 
 # -- settings ---------------------------------------------------------------------
+
 
 def test_settings_roundtrip():
     s = Settings()

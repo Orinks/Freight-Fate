@@ -13,8 +13,9 @@ def drive(truck: TruckState, seconds: float, dt: float = 1 / 60) -> None:
         truck.update(dt)
 
 
-def time_to_speed(truck: TruckState, target_mph: float,
-                  limit_s: float = 240.0, dt: float = 1 / 60) -> float | None:
+def time_to_speed(
+    truck: TruckState, target_mph: float, limit_s: float = 240.0, dt: float = 1 / 60
+) -> float | None:
     for step in range(int(limit_s / dt)):
         truck.auto_shift()
         truck.update(dt)
@@ -23,9 +24,9 @@ def time_to_speed(truck: TruckState, target_mph: float,
     return None
 
 
-def acceleration_marks(truck: TruckState, targets: tuple[float, ...],
-                       limit_s: float = 240.0,
-                       dt: float = 1 / 60) -> dict[float, float | None]:
+def acceleration_marks(
+    truck: TruckState, targets: tuple[float, ...], limit_s: float = 240.0, dt: float = 1 / 60
+) -> dict[float, float | None]:
     marks = {target: None for target in targets}
     for step in range(int(limit_s / dt)):
         truck.auto_shift()
@@ -44,6 +45,107 @@ def make_auto_truck() -> TruckState:
     t.transmission.automatic = True
     t.start_engine()
     return t
+
+
+def test_gross_mass_includes_cargo_payload():
+    from freight_fate.sim.vehicle import KG_PER_TON, REFERENCE_CARGO_KG
+
+    t = TruckState()
+    # Default cargo equals the reference payload, so gross stays the tuned 36 t.
+    assert t.cargo_kg == REFERENCE_CARGO_KG
+    assert t.gross_mass_kg == pytest.approx(t.specs.mass_kg)
+    tare = t.tare_kg
+    assert tare == pytest.approx(t.specs.mass_kg - REFERENCE_CARGO_KG)
+    # An empty deadhead is just the tractor and empty trailer.
+    t.cargo_kg = 0.0
+    assert t.gross_mass_kg == pytest.approx(tare)
+    # A heavier load weighs proportionally more.
+    t.cargo_kg = 25 * KG_PER_TON
+    assert t.gross_mass_kg == pytest.approx(tare + 25 * KG_PER_TON)
+
+
+def test_heavier_load_accelerates_slower():
+    from freight_fate.sim.vehicle import KG_PER_TON
+
+    light = make_auto_truck()
+    light.cargo_kg = 0.0  # empty deadhead
+    heavy = make_auto_truck()
+    heavy.cargo_kg = 25 * KG_PER_TON  # a 25-ton load
+    light.throttle = heavy.throttle = 1.0
+    light_t = time_to_speed(light, 50.0)
+    heavy_t = time_to_speed(heavy, 50.0)
+    assert light_t is not None and heavy_t is not None
+    assert heavy_t > light_t
+
+
+def test_heavier_load_raises_grade_resistance():
+    from freight_fate.sim.vehicle import KG_PER_TON
+
+    light = make_auto_truck()
+    heavy = make_auto_truck()
+    light.cargo_kg = 0.0
+    heavy.cargo_kg = 25 * KG_PER_TON
+    # Same speed on the same climb: the loaded rig fights more rolling and
+    # grade resistance, which is what makes it lug uphill.
+    for t in (light, heavy):
+        t.velocity_mps = 25.0
+        t.grade = 0.04
+    assert heavy.resistance_force() > light.resistance_force()
+
+
+def test_heavier_load_burns_more_fuel_reaching_speed():
+    from freight_fate.sim.vehicle import KG_PER_TON
+
+    light = make_auto_truck()
+    heavy = make_auto_truck()
+    light.cargo_kg = 0.0
+    heavy.cargo_kg = 25 * KG_PER_TON
+    light.throttle = heavy.throttle = 1.0
+    light_start, heavy_start = light.fuel_gal, heavy.fuel_gal
+    time_to_speed(light, 50.0)
+    time_to_speed(heavy, 50.0)
+    assert (heavy_start - heavy.fuel_gal) > (light_start - light.fuel_gal)
+
+
+def test_load_over_rated_gross_brakes_more_gently():
+    from freight_fate.sim.vehicle import KG_PER_TON, REFERENCE_CARGO_KG
+
+    truck = make_auto_truck()
+    truck.velocity_mps = 25.0
+    truck.brake = 1.0
+    truck.grip = 1.0
+
+    def decel(cargo_kg: float) -> float:
+        truck.cargo_kg = cargo_kg
+        return abs(truck.brake_force()) / truck.gross_mass_kg
+
+    rated = decel(REFERENCE_CARGO_KG)  # gross == rated gross
+    light = decel(4 * KG_PER_TON)  # well under rated
+    heavy = decel(REFERENCE_CARGO_KG + 6 * KG_PER_TON)  # over rated gross
+
+    # At or below the rated gross, braking is friction-limited and the
+    # deceleration does not depend on mass.
+    assert light == pytest.approx(rated)
+    # Over the rated gross the foundation brakes cannot keep up, so the rig
+    # decelerates more gently -- a longer stop.
+    assert heavy < rated
+
+
+def test_heavier_load_heats_brakes_faster():
+    from freight_fate.sim.vehicle import KG_PER_TON
+
+    light = make_auto_truck()
+    heavy = make_auto_truck()
+    light.cargo_kg = 0.0
+    heavy.cargo_kg = 25 * KG_PER_TON
+    light.throttle = heavy.throttle = 0.0
+    light.brake = heavy.brake = 1.0
+    for _ in range(60):  # one second of hard braking from 25 m/s
+        light.velocity_mps = max(light.velocity_mps, 25.0)
+        heavy.velocity_mps = max(heavy.velocity_mps, 25.0)
+        light.update(1 / 60)
+        heavy.update(1 / 60)
+    assert heavy.brake_temp_c > light.brake_temp_c
 
 
 def test_engine_start_requires_fuel():
@@ -82,6 +184,21 @@ def test_highway_cruise_rpm_keeps_engine_audio_believable():
     assert to_65 is not None
     assert t.transmission.gear == 10
     assert 1400.0 <= t.rpm <= 1900.0
+
+
+def test_automatic_shift_does_not_flare_engine_rpm():
+    t = make_auto_truck()
+    t.throttle = 1.0
+    t.transmission.gear = 3
+    t.velocity_mps = 20.0
+    t.rpm = 1700.0
+
+    assert t.auto_shift() == 4
+    rpm_before = t.rpm
+    t.update(0.5)
+
+    assert t.transmission.shifting
+    assert t.rpm <= rpm_before
 
 
 def test_truck_does_not_move_in_neutral():
@@ -141,13 +258,13 @@ def test_rolling_automatic_kicks_down_instead_of_stalling():
     It must kick down a gear and keep running instead."""
     t = make_auto_truck()
     t.transmission.gear = 5
-    t.velocity_mps = 0.7          # rolling, but lugging below idle*0.5 in 5th
+    t.velocity_mps = 0.7  # rolling, but lugging below idle*0.5 in 5th
     t.throttle = 0.8
-    t.transmission._shift_timer = 1 / 60   # shift lock expires inside this frame
+    t.transmission._shift_timer = 1 / 60  # shift lock expires inside this frame
     t.update(1 / 60)
     assert t.engine_on
     assert not t.stalled
-    assert t.transmission.gear == 4   # dropped one gear
+    assert t.transmission.gear == 4  # dropped one gear
 
 
 def test_hard_collision_stop_does_not_stall_an_automatic():

@@ -63,16 +63,12 @@ def test_full_game_flow_headless(monkeypatch):
     app = App()
     try:
         spoken = []
-        monkeypatch.setattr(app.ctx, "say",
-                            lambda text, interrupt=True: spoken.append(text))
+        monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: spoken.append(text))
         app.push_state(MainMenuState(app.ctx))
         menu = app.state
         assert isinstance(menu, MainMenuState)
         assert menu.lines()[0] == "Freight Fate"
-        assert any(
-            f"Welcome to Freight Fate, version {__version__}." in line
-            for line in spoken
-        )
+        assert any(f"Welcome to Freight Fate, version {__version__}." in line for line in spoken)
 
         # navigate to "New career" and select it
         while menu.items[menu.index].text != "New career":
@@ -101,7 +97,9 @@ def test_full_game_flow_headless(monkeypatch):
         unlocked = [
             (i, job)
             for i, job in enumerate(board.jobs)
-            if not job.locked_reason(app.ctx.profile.career.endorsements, app.ctx.profile.career.level)
+            if not job.locked_reason(
+                app.ctx.profile.career.endorsements, app.ctx.profile.career.level
+            )
         ]
         assert unlocked
         target_index, _job = min(unlocked, key=lambda item: item[1].distance_mi)
@@ -126,8 +124,7 @@ def test_full_game_flow_headless(monkeypatch):
         app.state.handle_event(key_event(pygame.K_RETURN))
         assert isinstance(app.state, DrivingState)
         assert app.state.phase == "delivery"
-        departure = next(text for text in reversed(spoken)
-                         if "Navigation set for" in text)
+        departure = next(text for text in reversed(spoken) if "Navigation set for" in text)
         assert "Navigation set for" in departure
         assert "Loaded trip is" in departure
         assert "Departing now" in departure
@@ -164,14 +161,19 @@ def test_full_game_flow_headless(monkeypatch):
             # trip.update reapplies physics every frame that can randomly slow a
             # long headless drive below the budget: simulated weather can turn to
             # ice and cap traction to a crawl, terrain grade drags on long climbs,
-            # and fuel burns at time_scale (20x) so the tank can empty mid-route
-            # and cut the engine. This is a flow smoke test -- that physics is
-            # covered by test_weather_trip and test_vehicle -- so pin full
-            # traction, flat ground, and a full tank for a deterministic drive,
-            # matching the hazard/inspection/traffic neutralisation above.
+            # fuel burns at time_scale (20x) so the tank can empty mid-route and
+            # cut the engine, and this controller's bang-bang braking against a
+            # target near the truck's governed speed bleeds the air reservoirs
+            # until the spring brakes latch. This is a flow smoke test -- that
+            # physics is covered by test_weather_trip, test_vehicle, and the
+            # air-brake tests -- so pin full traction, flat ground, a full tank,
+            # and charged air for a deterministic drive, matching the
+            # hazard/inspection/traffic neutralisation above.
             driving.truck.grip = 1.0
             driving.truck.grade = 0.0
             driving.truck.fuel_gal = driving.truck.specs.fuel_tank_gal
+            driving.truck.air_pressure_psi = driving.truck.specs.air_governor_cut_out_psi
+            driving.truck.parking_brake = False
             driving.truck.auto_shift()
             driving.truck.update(1 / 60)
             for event in driving.trip.update(1 / 60):
@@ -187,7 +189,8 @@ def test_full_game_flow_headless(monkeypatch):
         else:  # never hit trip.finished -- a real stall, not just a tight cap
             raise AssertionError(
                 f"delivery never finished in {max_frames} frames: "
-                f"{driving.trip.position_mi:.1f}/{driving.trip.total_miles:.1f} mi")
+                f"{driving.trip.position_mi:.1f}/{driving.trip.total_miles:.1f} mi"
+            )
         assert isinstance(app.state, FacilityArrivalState)
         app.state.handle_event(key_event(pygame.K_RETURN))
         assert isinstance(app.state, ArrivalState)
@@ -328,15 +331,15 @@ def test_discord_presence_toggle_is_accessible_and_wired(monkeypatch):
     app = App()
     try:
         spoken: list[str] = []
-        monkeypatch.setattr(app.ctx, "say",
-                            lambda text, interrupt=True: spoken.append(text))
+        monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: spoken.append(text))
         toggles: list[bool] = []
         monkeypatch.setattr(app.presence, "set_enabled", toggles.append)
 
         app.push_state(SettingsCategoryState(app.ctx, "gameplay"))
         menu = app.state
-        idx = next(i for i, item in enumerate(menu.items)
-                   if item.text.startswith("Discord presence"))
+        idx = next(
+            i for i, item in enumerate(menu.items) if item.text.startswith("Discord presence")
+        )
         menu.index = idx
         assert menu.items[idx].help  # spoken help text exists for F1
         before = app.ctx.settings.discord_presence
@@ -365,6 +368,36 @@ def test_upgrades_are_money_gated():
         shop.handle_event(key_event(pygame.K_RETURN))
         assert app.ctx.profile.upgrades == {}
         assert app.ctx.profile.money == 10.0
+    finally:
+        app.shutdown()
+
+
+@pytest.mark.smoke
+def test_garage_services_tires_and_wash():
+    from freight_fate.app import App
+    from freight_fate.models.profile import Profile
+    from freight_fate.states.city import GarageState
+
+    app = App()
+    try:
+        app.ctx.profile = Profile(name="Maintenance", current_city="Chicago")
+        p = app.ctx.profile
+        p.money = 1_000.0
+        p.tire_wear_pct = 10.0
+        p.road_grime_pct = 25.0
+        garage = GarageState(app.ctx)
+        app.push_state(garage)
+
+        assert any("Replace tires" in item.text for item in garage.items)
+        assert any("Wash truck" in item.text for item in garage.items)
+
+        garage._service_tires()
+        assert p.tire_wear_pct == 0.0
+        assert p.money == 550.0
+
+        garage._wash_truck()
+        assert p.road_grime_pct == 0.0
+        assert p.money == 515.0
     finally:
         app.shutdown()
 

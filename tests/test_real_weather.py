@@ -8,6 +8,7 @@ from freight_fate.sim.weather import WeatherKind, WeatherSystem
 
 # -- NWS condition mapping -----------------------------------------------------
 
+
 def test_condition_mapping_basics():
     assert map_condition("Clear") is WeatherKind.CLEAR
     assert map_condition("Sunny") is WeatherKind.CLEAR
@@ -47,6 +48,7 @@ def test_strong_wind_promotes_clear_to_windy():
 
 # -- provider ----------------------------------------------------------------
 
+
 class SyncProvider(RealWeatherProvider):
     """Run worker threads inline so tests are deterministic."""
 
@@ -65,7 +67,7 @@ def test_provider_fetches_and_caches():
 
     def fake_fetch(lat, lon):
         calls.append((lat, lon))
-        return "Light Rain", 12.0
+        return "Light Rain", 12.0, 8.0
 
     p = SyncProvider(fetch=fake_fetch)
     assert p.get("Chicago") is None
@@ -94,7 +96,7 @@ def test_provider_refetches_after_ttl():
     conditions = iter(["Clear", "Thunderstorm"])
 
     def fake_fetch(lat, lon):
-        return next(conditions), 0.0
+        return next(conditions), 0.0, None
 
     p = SyncProvider(fetch=fake_fetch, clock=lambda: now[0])
     p.request("Dallas", 32.8, -96.8)
@@ -104,10 +106,50 @@ def test_provider_refetches_after_ttl():
     assert p.get("Dallas") is WeatherKind.THUNDERSTORM
 
 
+# -- temperature ---------------------------------------------------------------
+
+
+def test_temp_to_c_handles_units_and_nulls():
+    from freight_fate.sim.real_weather import _temp_to_c
+
+    assert _temp_to_c({"value": 20.0, "unitCode": "wmoUnit:degC"}) == 20.0
+    assert _temp_to_c({"value": 68.0, "unitCode": "wmoUnit:degF"}) == 20.0
+    assert _temp_to_c({"value": None, "unitCode": "wmoUnit:degC"}) is None
+    assert _temp_to_c(None) is None
+
+
+def test_provider_caches_observed_temperature():
+    p = SyncProvider(fetch=lambda lat, lon: ("Clear", 0.0, -3.5))
+    assert p.get_temperature("Fargo") is None  # nothing fetched yet
+    p.request("Fargo", 46.88, -96.79)
+    assert p.get("Fargo") is WeatherKind.CLEAR
+    assert p.get_temperature("Fargo") == -3.5
+
+
+def test_provider_temperature_none_when_station_omits_it():
+    p = SyncProvider(fetch=lambda lat, lon: ("Clear", 0.0, None))
+    p.request("Reno", 39.5, -119.8)
+    assert p.get("Reno") is WeatherKind.CLEAR
+    assert p.get_temperature("Reno") is None
+
+
+def test_weather_system_reports_real_observed_temperature():
+    # A live provider with a real reading: the system reports the station's
+    # temperature, not the seasonal climate model.
+    p = SyncProvider(fetch=lambda lat, lon: ("Clear", 0.0, 2.0))  # 2 C real
+    ws = WeatherSystem("great_lakes", seed=1, provider=p)
+    ws.set_city("Chicago", 41.88, -87.63)
+    ws.update(1.0)
+    assert ws.live
+    assert ws.temperature_c == 2.0
+    assert "36 degrees" in ws.describe(imperial=True)  # 2 C -> 35.6 F -> "36"
+
+
 # -- weather system integration ------------------------------------------------
 
+
 def test_weather_system_applies_live_conditions():
-    p = SyncProvider(fetch=lambda lat, lon: ("Heavy Rain", 5.0))
+    p = SyncProvider(fetch=lambda lat, lon: ("Heavy Rain", 5.0, 18.0))
     ws = WeatherSystem("desert_southwest", seed=1, provider=p)
     ws.set_city("Phoenix", 33.45, -112.07)
     changed = ws.update(1.0)
@@ -123,6 +165,7 @@ def test_weather_system_applies_live_conditions():
 def test_weather_system_holds_clear_while_live_data_pending():
     """With a provider attached, weather starts clear and holds -- no simulated
     warm-up -- until live data (or a confirmed offline state) arrives."""
+
     class Pending:
         def request(self, city, lat, lon):
             pass

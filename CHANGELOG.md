@@ -1,14 +1,386 @@
 # Changelog
 
 ## Unreleased
+### Added
+
+- **Report a problem straight from the main menu.** A new Report a problem
+  option, just above Quit, opens the Freight Fate bug report page on GitHub
+  in your web browser and tells you where to find your game log: the file
+  game.log in the logs folder next to the game. The game now also keeps the
+  previous run's log as game.prev.log, so if the game crashes, the evidence
+  survives restarting it to file the report. Crashes inside the game's audio
+  and video engines, which used to vanish without a trace, are now written
+  into the log as well.
+
+- **Game controllers are now supported, alongside the keyboard.** Plug in an
+  Xbox, PlayStation, or other compatible controller and drive by feel: the right
+  and left triggers are the gas and brake, the left stick steers, the left bumper
+  is the clutch, and the A and X buttons shift up and down. Menus map to the
+  D-pad, the A button confirms, the B button goes back, and the Back button reads
+  controller help. The first controller is picked up automatically, hot-plugging
+  and unplugging are detected mid-game (unplugging pauses the drive), and spoken
+  prompts name controller buttons when you are on a pad and keys when you are on
+  the keyboard. Turn it off under Settings, Gameplay, Controller. The keyboard
+  always stays active. Thanks to ironcross32.
+
+- **Set the parking brake to let time pass while you wait.** Pressing your
+  parking brake while stopped now means deliberate waiting: the clock runs at
+  double your trip pacing -- weather blows through, daylight comes, and dock
+  time passes without the game ever dropping to real time. Pressing it again
+  to leave returns to normal pacing instantly. Only your own brake press arms
+  the fast-forward; the brake the game sets for you at trip start or after a
+  rest stop never does, so pre-trip setup stays cheap. Each pacing setting
+  keeps its relative feel while waiting: relaxed 20 times, standard 40,
+  fast 80.
+
+- **The Pacific Northwest fills in with eight new cities.** Tacoma, Everett,
+  Olympia, Bellingham, and Yakima in Washington and Medford, Roseburg, and
+  Pendleton in Oregon join the map with truck-routed corridors, real named
+  ports, mills, and freight facilities, and real truck stops along the way.
+  The region finally has short local runs -- Seattle to Tacoma is a
+  34-mile hop instead of nothing closer than Portland -- and the empty I-84
+  corridor gets its first stop at Pendleton. Thanks to liamerven.
+
+- **Appalachia, the Heartland, and the Southern Plains grow by eighteen
+  cities.** Appalachia becomes a real Valley-and-Ridge region: Asheville,
+  Johnson City, Beckley, Harrisonburg, Winchester, and Hagerstown line the
+  I-81, I-77, and I-40 mountain corridors, Roanoke gains its rail yard and
+  distribution work, and the western reaches of Virginia, North Carolina, and
+  Maryland now count as Appalachian country. The Heartland adds Sioux City,
+  Grand Island, North Platte, Columbia, Joplin, and Rolla along I-70, I-29,
+  I-80, and I-44; the Southern Plains add Salina, Dodge City, Garden City,
+  Enid, Lawton, and San Angelo with their grain, beef, and oilfield freight.
+  Every new city carries real named facilities and every corridor has named
+  truck stops. Thanks to liamerven.
 
 ### Fixed
 
-- **Snapshot players move to stable when it catches up.** On the developer
+- **Spoken help now teaches the W and Q gear keys everywhere.** The engine
+  start walkthrough, the transmission setting, and the manual-transmission
+  page of How to play still told manual drivers to shift with the number
+  row; they now describe holding the clutch and pressing W to shift up and
+  Q to shift down, matching how the truck actually shifts. The left and
+  right arrows also now toggle the Haptics setting like every other
+  gameplay setting row, instead of doing nothing there.
+- **Getting up to highway speed no longer costs an hour of game time.** Truck
+  physics runs in real time so shifting and braking stay playable, but the
+  clock billed every real second at full trip pacing -- so the couple of real
+  minutes a loaded rig needs to work through the gears cost most of a game
+  hour, burning daylight, deadline, and duty clock. Clock compression now
+  ramps with road speed: near real time while stopped or maneuvering, your
+  full pacing setting once at cruise. Distance, fuel, fatigue, and the hours
+  of service ledger all follow the same effective rate, so the simulation
+  stays consistent -- acceleration now costs about five game minutes instead
+  of forty-five.
+- **The dispatch board no longer offers trivially short hauls.** Because each
+  city stands for a whole freight area, a job to a neighbor under 25 miles was a
+  pointless across-town hop; the board now skips those destinations and fills
+  from real routes instead.
+- **The dispatch hours warning now respects a fresh clock.** Sleeping off your
+  hours before visiting the dispatch board no longer leaves every long haul
+  flagged with "may not fit your duty clock." The warning compared your time
+  until the next HOS limit against the route's full legal plan -- including the
+  overnight sleeps every multi-day run needs anyway -- so it fired even right
+  after a reset. It now only warns when hours already spent this shift would
+  force an extra rest that fresh hours would avoid, and the board note says
+  sleeping first will clear it.
+- **Trucks into New York now take the George Washington Bridge, not the Holland
+  Tunnel.** New York freight now routes to the Hunts Point market in the Bronx
+  over the GWB on I-95 -- the Hudson crossing a full-height rig can legally use
+  -- instead of the height-restricted Holland Tunnel that I-78 feeds into. Trips
+  from New Jersey and Pennsylvania have realistic mileage and exit cues as a
+  result.
+- **Truck speed limits are now capped in Oregon and Idaho too.** Posted limits
+  on those states' fastest roads are held to the legal truck maximum (65 in
+  Oregon, 70 in Idaho), matching the existing handling for California and other
+  truck-restricted states.
+- **Control now stops speech in menus too, not just while driving.** Left or
+  Right Control already silenced the driving event voice; it now also stops the
+  current speech in every menu and in the how-to-play reader, so a long readout
+  -- job details, cargo loading, a full help page -- can be cut short with the
+  same key everywhere.
+- **Dispatch, garage, and driving tools feel clearer.** F1 on a dispatch job now opens a
+  reviewable job-detail view with line-by-line facts, long-haul pay has a stronger
+  floor, drive-start speech is shorter in terse mode, the horn loops while held,
+  truck and upgrade wording is clearer, and the garage can service tire wear and
+  wash road grime.
+- **Reverse now has its own backing cue.** Shifting into reverse with the engine
+  running now starts a backing loop through the main audio backend, and automatic
+  reverse selection still gets a spoken confirmation. Thanks to ashleygrobler04
+  for the original reverse-loop PR.
+- **Lane drift now cues direction before the rumble strip.** When lane drift is
+  enabled, a short beep now plays from the side you drift toward, and a dedicated
+  centered-lane chime confirms when you are back in the lane.
+- **Hazard clears are easier to hear, and speech backs off faster.** Passing a
+  road hazard now plays a short achievement-like confirmation sound, and urgent
+  events plus driving warnings clear stale spoken messages so old alerts do not
+  keep piling up. The brake-now hazard warning cue was also remade as a short,
+  louder alert.
+- **First-rig menu music refreshed.** The first-owned-truck menu bed now uses
+  a cleaner, longer copy and plays for its full length before the menu rotation
+  advances.
+- **Driving realism polish.** Metric speed warnings,
+  speeding strikes, trooper stops, cruise messages, and the speed-limit key now
+  use the selected units consistently. Missed destination exits reroute you via
+  a safe turnaround instead of telling you to reverse down the highway, and
+  recovery no longer loops gate-speed tickets. Dispatch warns when your current
+  hours are too short for a load, including when every listed job is risky.
+  Bobtail repositioning now counts as off-duty personal conveyance, dispatch
+  board facility names are less repetitive, impossible short delivery summaries
+  are floored to a practical road time, and automatic shift audio no longer
+  flares at full throttle during gear changes.
+- **Engine brake and throttle no longer fight each other.** The engine brake now
+  refuses to switch on while you are accelerating, and pressing the accelerator
+  turns it back off so the truck can make power normally.
+- **Destination exits keep the route status honest.** Taking a delivery exit now
+  clears the remaining route miles before the dock menu opens, and the GPS no
+  longer repeats the destination exit with a second generic interchange cue.
+- **Real posted speed limits win near cities.** City approaches still use a
+  slower fallback when the route has no posted speed-limit sample, but real
+  baked `maxspeed` data is no longer capped just because the route is near a
+  city.
+- **Truck speed limits now respect state caps.** Baked route speed-limit data
+  now applies lower truck maximums in states that cap commercial trucks below
+  the general posted limit, and reversed routes read the correct limit profile.
+- **Stops no longer announce speculative truck parking.** If a stop's parking
+  is confirmed, that still gets spoken; otherwise speculative parking wording
+  is dropped from route cues so the game just announces the stop.
+- **Adaptive cruise starts slowing before big speed-limit drops.** When the
+  posted limit ahead falls sharply, adaptive cruise now looks far enough ahead
+  to begin braking before the lower-limit point instead of waiting until the
+  truck is already in the slower stretch. Pressing Space while cruise is on now
+  also includes the cruise set speed in the speed readout.
+- **Adaptive cruise no longer gets you fined while braking for a lower limit.**
+  When the posted limit drops sharply, cruise now gets a clean chance to slow
+  the truck instead of letting the speeding timer fire while it is already
+  braking down.
+- **Route status explains road grade clearly.** Pressing R now reports the
+  current grade as a percent and uphill, downhill, or level instead of saying
+  the vague phrase "Grade level."
+- **Delivery windows match the slower, real route model.** New dispatch
+  deadlines now use the route's posted-limit profile, city approaches, facility
+  gates, HOS breaks, sleep, and practical slack instead of a flat mileage
+  average. Older active trips that were saved under the faster estimate get a
+  one-time fair deadline floor when they resume, so a source update does not
+  make an in-progress load suddenly late.
+- **Metric weather readouts use metric safe speed.** Pressing V with metric
+  units enabled now reports the weather safe speed in kilometers per hour.
+- **No more "dot dot" at the end of menu items.** A menu or list item that was
+  already a full sentence (like a settlement summary line) got a second period
+  appended before its "N of M" position, which a screen reader voiced as "dot
+  dot". The readout now adds a period only when the text does not already end
+  in one.
+- **You can always find somewhere to sleep.** A sleep option is now reachable
+  at any time, so the hours-of-service clock can never strand you with nowhere
+  legal to stop. Stopped on the open road with no route stop nearby, you can
+  pull over and sleep on the shoulder (poor rest, possible parking ticket);
+  the wording escalates when an HOS limit is closing in with no reachable stop.
+  Any break/fuel stop you reach -- even one with no sleeper facility -- now
+  offers an emergency sleep in the lot: a legal 10-hour reset with poor, cramped
+  rest. The "no stop visible" warning also names the shoulder-sleep out, so it
+  is a plan rather than a panic. (Proper sleeper stops still give the best,
+  fully-rested 10-hour sleep.)
+- **The automatic no longer gears up while you brake.** Braking from speed could
+  trigger an upshift because the box only watched engine RPM; it now holds the
+  gear for engine braking and downshifts cleanly as you slow to a stop.
+- **"Air pressure ready" no longer repeats back to back.** The parking-brake
+  release threshold sat exactly at the compressor cut-in pressure, so the ready
+  state flickered every 100-125 psi cycle and re-announced. The cue now fires
+  once, only while the parking brake is actually set (its whole purpose is
+  "you can release it now"), and only re-arms after a genuine low-air depletion.
+- **Snapshot players move to stable when it catches up.** On the preview
   snapshot channel, the game now offers the stable release whenever it is as
-  new as -- or newer than -- the latest nightly, so once dev work ships in a
-  stable build you converge back onto stable instead of being left on an
+  new as -- or newer than -- the latest nightly, so once those changes ship in
+  a stable build you converge back onto stable instead of being left on an
   equivalent nightly.
+- **The low-air alarm now sounds on a cold start.** Starting the engine for
+  the first time with the air tanks low used to stay silent; the warning now
+  plays as soon as the engine is running with pressure below the threshold,
+  so you know to wait for the compressor before releasing the brakes. Thanks
+  to hannes16.
+- **Erie and Evansville moved to their right regions.** Erie sits on the Lake
+  Erie shore between Buffalo and Cleveland, so it is now Great Lakes country
+  rather than Appalachia; Evansville, down on Indiana's Ohio River border, is
+  now the Mid-South rather than the Great Lakes. Spoken region names, weather
+  flavor, and regional hazards on runs through both cities now match the
+  geography. Thanks to liamerven.
+
+### Changed
+- **Real-world weather now refreshes three times as often.** With the real
+  weather source turned on, the game checks the live conditions for your
+  destination every five minutes instead of every fifteen, so fog rolling in,
+  a storm firing up, or skies clearing reach your drive much sooner. If your
+  connection drops, the game holds the last known weather for the same half
+  hour as before switching to simulated conditions.
+- **Downloaded builds no longer expose the game's world data files.** The
+  world now ships built into the game program itself, so there is no data
+  folder to browse or accidentally edit next to the game. Nothing changes
+  about how the game plays, and source checkouts keep their editable data
+  files.
+- **Downloaded builds now ship their sounds as a single packed file.** The
+  browsable sounds folder is gone from the download; all sound effects and
+  music travel in one pack file the game reads directly. Every sound plays
+  exactly as before, the sound and music credits ship as a readable file
+  next to the game, and source checkouts keep their editable sound files.
+- **During a manual drive.** hold down the clutch (shift) then press W to shift up gears, and q to shift down gears .
+- **Hours-of-service rules are more realistic.** Realistic mode now tracks the
+  11-hour driving limit, 14-hour duty window, 30-minute break requirement,
+  60/70-hour weekly limits, roadside inspections, and legal sleeper-berth split
+  rest. Rest menus now make the choice explicit: short breaks, poor emergency
+  sleep, full sleeper sleep, or sleeper split planning where the stop supports
+  it.
+- **Menus can read just the option, not its place.** A new Speech setting,
+  "Menu position announcements," turns off the "N of 10" position spoken after
+  each menu option, so menus read only the option itself. On by default.
+- **In-game help and manual now cover the new systems.** The how-to-play pages,
+  the F1 driving help, and the user manual were brought in line: the calendar
+  and seasons, weather that bites (traction loss, drag, visibility), the
+  always-available shoulder and lot sleep, cruise that declines low-speed local
+  roads, and -- newly documented anywhere -- state-trooper speeding pull-overs
+  (signal with X) and real changing posted limits.
+- **The calendar reads as a real date, in more places.** The career clock now
+  speaks an actual date that advances as time passes -- "March 21," then "April
+  1," and so on (a new career starts March 21) -- instead of only a day number.
+  It is announced on the C clock readout, the Tab status menu, and the on-screen
+  status, not just at the terminal, with the season alongside it. With live
+  weather on, the date and season follow the real-world calendar.
+- **Weather you have to drive to, not just hear.** Three conditions that used to
+  be flavor now bite. High wind and storms add real aerodynamic drag, so they
+  cost top speed and fuel. Driving well over the conditions-safe speed on a
+  slick road risks a traction-loss incident -- hydroplaning in rain, sliding on
+  snow -- so the safe-speed readout finally has teeth. And low visibility (fog,
+  heavy rain) shortens how much warning you get before a hazard, so you have to
+  actually slow down to see and react in time.
+- **Speed-limit changes now say why.** A changing posted limit is announced as
+  "Speed limit reduced to X" or "raised to X" instead of a bare number, and an
+  urban drop names the city ("reduced to 55 approaching Boston"), so a mid-drive
+  change is no longer a mystery.
+- **No cruise on low-speed local roads.** Adaptive cruise will not engage on a
+  facility access road, gate, construction zone, or heavy-traffic stretch -- the
+  low-speed local roads a real driver takes manually -- and says so if you try.
+- **Relaxed mode now feels emptier on the road.** Relaxed hours-of-service mode
+  already made random hazards and trooper patrols rarer; it now also thins
+  ambient traffic and the odds of a random roadside log check, so a relaxed run
+  centers on driver responsibility -- hours, fuel, fatigue -- with fewer
+  interruptions. Fixed checkpoints (weigh stations) and construction-zone
+  enforcement are unchanged: a real violation still catches you. Realistic mode
+  is untouched.
+- **Live weather now reports the real temperature.** With live weather on, the
+  cab speaks the actual temperature from the nearest National Weather Service
+  station instead of the modeled seasonal estimate, so the degrees match the
+  conditions it is already pulling in. The seasonal climate model stays the
+  fallback whenever live data is unavailable or a station omits its reading.
+- **Dial your cruise speed with Plus and Minus.** Once adaptive cruise is set,
+  Plus and Minus raise and lower the target by 5 -- the accelerate and coast
+  buttons on a real truck -- so you can engage as soon as you are rolling and
+  dial the speed up to where you want it instead of having to reach it manually
+  first. The truck accelerates up to a higher target on its own, and the posted
+  limit cap still applies, so a higher set speed never makes it speed.
+- **Adaptive cruise now respects the posted limit.** Cruise eases off to hold a
+  with-traffic pace (about 5 over the posted limit) instead of carrying your set
+  speed straight through an urban drop or a lower-limit stretch -- so it keeps
+  you moving naturally without driving you into speeding strikes, tickets, and
+  trooper stops. It still follows slower traffic and widens its gap in bad
+  weather, and a short cue says when it eases off for a lower limit (the
+  "Speed limit X" sign cue still names the number).
+- **The air-brake system has real sounds now.** When pressure builds, you hear
+  an air-dryer purge as the compressor cuts out instead of a generic beep, and
+  low-air and spring-brake warnings sound a proper low-air buzzer. The spoken
+  cues are unchanged, so nothing is lost if you rely on them.
+- **Speeding now costs you out loud, the moment it happens.** When a speeding
+  strike is recorded, the cab calls out the running fine ("Speeding strike. The
+  limit is 65. Speeding fines now total 160 dollars, due at delivery.") instead
+  of the cost landing silently on your settlement. Judged against the corridor's
+  real posted limit, with the usual ~10 mph leeway before a strike lands.
+- **Posted speed limits can now come from real map data.** Where a corridor
+  carries an OpenStreetMap `maxspeed` tag, the game uses that real posted limit
+  instead of the highway/region approximation -- and falls back to the
+  approximation only on stretches OSM has not tagged. Limits are baked at build
+  time (truck-specific `maxspeed:hgv` preferred where present); the spoken
+  limit-change cue still calls out posted-limit changes as you drive.
+- **The lane-drift rumble is now directional.** When you wander toward a lane
+  edge, the rumble strip plays from that side -- drift right and you hear it on
+  the right -- so the ear it lands in tells you which way to steer back.
+- **Safety announcements no longer get buried, and you get more warning.** Zone
+  entries, construction and traffic warnings, and checkpoints now preempt
+  ambient chatter (weather, tolls, state lines) on the event voice instead of
+  queuing behind it -- so a "construction ahead" never arrives after you have
+  already entered the zone. Zone warnings also lead by real time now, not a
+  flat distance: the heads-up scales with your speed and pacing, so 70 mph at
+  high time compression gets a usefully earlier callout instead of a couple of
+  seconds.
+
+### Added
+- **Repeat the market watch on the dispatch board.** The board speaks which
+  freight is tight or loose when you open it; pressing Tab now repeats just that
+  market watch, so you can re-check it without leaving and reopening the board.
+- **State troopers can pull you over for speeding.** Routes now have patrol
+  windows -- hotter on busy interstates, in construction, and in dense regions,
+  cooler out on the plains, with a night DUI bump. Speed badly inside one and a
+  trooper lights you up: signal with X, brake to a stop on the shoulder, and sit
+  through a license and logbook check that ends in an on-the-spot ticket (paid
+  immediately, escalating with each stop) or a warning if it's a first, marginal
+  stop or your reputation is strong. Run from the stop and it's logged as
+  evasion -- a heavier fine and a serious reputation hit. Speeding the patrols
+  don't catch still accrues the quieter safety-record cost at settlement.
+  Relaxed mode keeps patrols light.
+- **Consult the controls without leaving a drive.** The pause menu now has a
+  "Controls and help" entry that opens the how-to-play reference straight to the
+  driving keys -- page through it, read it line by line, then escape back to the
+  road. The keys list also now includes S, A, and U.
+- **HTML player manual.** Portable builds now ship `USER_MANUAL.html` alongside
+  the Markdown one: the same manual rendered as a clean, accessible web page
+  (semantic headings and real tables) you can open in any browser.
+- **Three new on-demand driving keys.** **S** reads the posted speed limit where
+  you are -- the zone if any, and how far over you are -- so you no longer have
+  to dig into the status menu. **A** repeats the last route announcement, for
+  the one you missed before you could react. **U** reads what is coming up:
+  imposed speed limits, stops, and exits ahead, so a zone or gate never blindsides
+  you. All three are listed in F1 help and the manual.
+- **Drowsiness has real consequences now.** Push past severe fatigue and you
+  start to nod off: a rumble-strip jolt and a warning give you a moment to steer
+  or brake and stay awake. Catch it and you carry on; miss it and you drift onto
+  the shoulder for damage and lost speed. Keep driving exhausted and the nods
+  come faster and harder until a third miss forces you off the road. Sleep is no
+  longer optional once you are running on empty -- and in relaxed mode, where
+  hazards are rare, managing fatigue becomes the heart of the drive.
+- **Posted speed limits that change by corridor.** The flat 70 everywhere is
+  gone. The limit now comes from the highway and region -- rural Interstates run
+  70 in the Midwest and East, 75-80 across the West, US highways and state
+  routes slower -- and drops to an urban limit on the city stretches. Crossing
+  into a new limit is spoken like a sign ("Speed limit 75"), the limit restores
+  correctly when you leave a construction zone, and speeding is judged against
+  the corridor you are actually on.
+- **Seasons and temperature.** Your career now moves through the year, and the
+  weather follows. A regional temperature model (a seasonal swing plus a
+  day-night swing, warmer in the desert and Gulf, colder across the northern
+  tier) decides whether precipitation falls as rain or snow and whether storms
+  can brew, so snow is a cold-season risk, thunderstorms a warm-season one, and
+  a Great Lakes January night freezes while a Gulf Coast one does not. Because
+  hazards are weather-gated, snow squalls and ice now show up in winter and
+  hail in summer, on their own. The terminal time-and-weather readout names the
+  season, and weather reports include the temperature in your units. With live
+  weather turned on, the season follows the real-world calendar so it matches
+  the live conditions you are pulling in; otherwise it follows your career clock.
+- **Cargo weight now changes how the truck drives.** Gross weight is the
+  tractor-and-trailer tare plus the actual payload, so a heavy load pulls away
+  gently, lugs harder on grades, and burns more fuel, while a light load or an
+  empty pickup deadhead is noticeably brisker. Heavier freight is now a real
+  trade-off, not just a number on the dispatch board. The driving status screen
+  shows gross tonnage alongside the cargo weight.
+- **Load-sensitive braking.** The foundation brakes have a fixed force ceiling
+  sized for the rated gross, so a load heavier than the rated weight is
+  brake-capacity limited: it decelerates more gently, takes longer to stop, and
+  heats and fades the brakes sooner. Loads at or below the rated gross brake
+  exactly as before. Overloading a run now bites on a downgrade or a panic stop.
+- **Grounded, context-aware road hazards.** Hazards now only happen where and
+  when they plausibly would. Standing water and hydroplaning need wet weather;
+  snow squalls, bridge-deck ice, and black ice on shaded grades need snow;
+  dense-fog brake-lights need fog; crosswind shoves and dust storms need high
+  wind in open country; rockfall and runaway-truck hazards need mountain
+  terrain. Deer and elk are biased to dawn, dusk, and night, with regional
+  species. The implausible ones are gone -- no more farm equipment merging
+  onto the interstate or a dust devil on a clear, calm day.
 
 ## 1.7.0 - 2026-06-26
 
@@ -75,8 +447,8 @@
   [Darren Duff](https://darrenduff.com/).
 - **New achievement system.** Careers now track achievements across a range
   of categories, with a spoken main-menu viewer and a chime when you unlock
-  one. Existing careers carry over. Note: a career saved on a developer
-  snapshot may not load on an older stable release.
+  one. Existing careers carry over. Note: a career saved on a preview snapshot
+  may not load on an older stable release.
 
 ### Changed
 
@@ -96,8 +468,8 @@
   grade profiles are finer too -- the old car-engine legs had a single grade per
   corridor, where the truck engine breaks each into the real run of climbs and
   descents -- though no leg's overall terrain rating changed. Distances were
-  already accurate, so pay and deadlines are unchanged. Routing stays fully
-  offline at runtime -- this is a development-time data refresh.
+  already accurate, so pay and deadlines are unchanged. The refreshed route
+  data is included in the game, so driving still works fully offline.
 - **Real weather now uses the National Weather Service.** Optional live weather
   switched from Open-Meteo to the U.S. National Weather Service API
   (api.weather.gov). It is still free and needs no API key, reads each city's
@@ -180,8 +552,8 @@
   updates spoken navigation guidance right away, including the distances already
   laid out along the current route.
 - **Packaged update checks.** The updater now recognizes standalone packaged
-  folders more reliably, so switching to developer snapshots does not leave
-  the update screen thinking the game is running from source.
+  folders more reliably, so switching to preview snapshots does not leave the
+  update screen confused about how the game was installed.
 - **Quieter exit guidance.** Ordinary highway exits now stay available in the
   route screen without being announced during the drive unless they lead to a
   stop you can actually take.
@@ -199,12 +571,8 @@
 - **Clearer help.** F1 help now focuses on what the selected item does for the
   player instead of repeating menu controls, and garage upgrade help explains
   how each upgrade changes the truck.
-- **Updater works in packaged builds again.** Nuitka builds do not set the
-  PyInstaller-era ``sys.frozen`` flag, so the game mistook every packaged copy
-  for a source checkout: "Check for updates" reported running from source, the
-  startup update check never ran, and ``logs/game.log`` was never written.
-  Packaged builds are now detected correctly, restoring update checks, install,
-  and crash logging.
+- **Updater works in packaged builds again.** Packaged copies are now detected
+  correctly, restoring update checks, install, and crash logging.
 - **Facility approach speed cues.** Pickup deadheads now use lower-speed
   facility access roads, deliveries slow through a final receiver approach,
   and the last gate prompts are shorter so stopping instructions land faster.
@@ -538,8 +906,7 @@ compresses it as usual), never wall time.
 
 ### Compatibility
 - All 21 original cities and all 27 original direct legs are preserved
-  verbatim, so old profiles and mid-trip snapshots (`route_cities`) load
-  and resume unchanged. A regression test pins every original adjacency.
+  verbatim, so old profiles and mid-trip snapshots load and resume unchanged.
 
 ## 1.2.1 — 2026-06-09
 
@@ -561,14 +928,9 @@ compresses it as usual), never wall time.
 ## 1.2.0 — 2026-06-09
 
 ### Added
-- **BASS audio backend** via [sound_lib](https://pypi.org/project/sound_lib/)
-  (pinned `==0.8.8`; PyPI's version ordering for this package is broken and an
-  unpinned install resolves to a stale 2022 build). The truck engine is now a
-  single loop whose playback frequency tracks RPM in real time, smoothed with
-  BASS attribute slides — no more four-band crossfade seams. pygame.mixer
-  remains as an automatic fallback when sound_lib/BASS cannot initialize
-  (`FREIGHT_FATE_AUDIO_BACKEND=pygame` forces it), and headless environments
-  use BASS's "no sound" device so CI runs the full audio pipeline silently.
+- **Smoother truck engine audio.** Engine sound now follows RPM more naturally,
+  with smoother transitions as you accelerate, shift, and settle into highway
+  speed.
 - **Garage upgrades** (Garage → Upgrades), money-gated and saved on the
   profile: engine tune (+10% torque per tier, two tiers), aerodynamic kit
   (−12% drag), long-range tank (+50 gallons), and reinforced brakes (fade
@@ -635,8 +997,8 @@ First release. Complete rewrite of the prototype.
   imperial/metric units, and a visible text mirror of all speech.
 - First-drive tutorial, six-page in-game manual.
 - Atomic JSON saves with multiple driver profiles.
-- uv-based packaging, cross-platform CI (Windows + Linux), 67-test suite.
+- Packaged builds for Windows and Linux.
 
 ### Removed
 - SRAL DLL dependency (replaced by the Prism Python package).
-- Legacy prototype source tree, duplicate data files, and debug artifacts.
+- Legacy prototype files and duplicate data files.

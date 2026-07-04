@@ -1,0 +1,10 @@
+{
+  "countries": [
+    {
+      "code": "US",
+      "path": "us",
+      "cities": "cities.json",
+      "legs": "legs.json"
+    }
+  ]
+}

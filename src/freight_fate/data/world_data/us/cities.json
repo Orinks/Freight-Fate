@@ -1,0 +1,3490 @@
+{
+  "cities": {
+    "New York": {
+      "state": "New York",
+      "region": "northeast",
+      "locations": [
+        {
+          "name": "Port Authority Terminal",
+          "type": "terminal",
+          "cargo": [
+            "general",
+            "container"
+          ]
+        },
+        {
+          "name": "Hunts Point Market",
+          "type": "distribution",
+          "cargo": [
+            "food",
+            "retail"
+          ]
+        },
+        {
+          "name": "Newark Dock Complex",
+          "type": "port",
+          "cargo": [
+            "container",
+            "bulk"
+          ]
+        }
+      ],
+      "lat": 40.8085,
+      "lon": -73.8785
+    },
+    "Boston": {
+      "state": "Massachusetts",
+      "region": "northeast",
+      "locations": [
+        {
+          "name": "Conley Container Terminal",
+          "type": "port",
+          "cargo": [
+            "container",
+            "bulk"
+          ]
+        },
+        {
+          "name": "Everett Distribution Center",
+          "type": "distribution",
+          "cargo": [
+            "retail",
+            "food"
+          ]
+        }
+      ],
+      "lat": 42.3601,
+      "lon": -71.0589
+    },
+    "Philadelphia": {
+      "state": "Pennsylvania",
+      "region": "northeast",
+      "locations": [
+        {
+          "name": "Packer Avenue Terminal",
+          "type": "port",
+          "cargo": [
+            "container",
+            "general"
+          ]
+        },
+        {
+          "name": "Northeast Freight Yard",
+          "type": "intermodal",
+          "cargo": [
+            "bulk",
+            "machinery"
+          ]
+        }
+      ],
+      "lat": 39.9526,
+      "lon": -75.1652
+    },
+    "Pittsburgh": {
+      "state": "Pennsylvania",
+      "region": "appalachia",
+      "locations": [
+        {
+          "name": "Steel City Works",
+          "type": "warehouse",
+          "cargo": [
+            "machinery",
+            "bulk"
+          ]
+        },
+        {
+          "name": "Three Rivers Distribution",
+          "type": "distribution",
+          "cargo": [
+            "retail",
+            "general"
+          ]
+        }
+      ],
+      "lat": 40.4406,
+      "lon": -79.9959
+    },
+    "Cleveland": {
+      "state": "Ohio",
+      "region": "great_lakes",
+      "locations": [
+        {
+          "name": "Lakefront Bulk Terminal",
+          "type": "port",
+          "cargo": [
+            "bulk",
+            "machinery"
+          ]
+        },
+        {
+          "name": "Erie Shore Warehouse",
+          "type": "warehouse",
+          "cargo": [
+            "general",
+            "retail"
+          ]
+        }
+      ],
+      "lat": 41.4993,
+      "lon": -81.6944
+    },
+    "Chicago": {
+      "state": "Illinois",
+      "region": "great_lakes",
+      "locations": [
+        {
+          "name": "Cicero Rail Hub",
+          "type": "intermodal",
+          "cargo": [
+            "container",
+            "bulk"
+          ]
+        },
+        {
+          "name": "Chicago International Produce Market",
+          "type": "food_terminal",
+          "cargo": [
+            "food",
+            "refrigerated"
+          ]
+        },
+        {
+          "name": "O'Hare South Cargo Area",
+          "type": "air_cargo",
+          "cargo": [
+            "electronics",
+            "general"
+          ]
+        }
+      ],
+      "lat": 41.8781,
+      "lon": -87.6298
+    },
+    "Indianapolis": {
+      "state": "Indiana",
+      "region": "great_lakes",
+      "locations": [
+        {
+          "name": "Crossroads Logistics Park",
+          "type": "distribution",
+          "cargo": [
+            "retail",
+            "general"
+          ]
+        },
+        {
+          "name": "Speedway Parts Depot",
+          "type": "warehouse",
+          "cargo": [
+            "machinery",
+            "electronics"
+          ]
+        }
+      ],
+      "lat": 39.7684,
+      "lon": -86.1581
+    },
+    "St. Louis": {
+      "state": "Missouri",
+      "region": "heartland",
+      "locations": [
+        {
+          "name": "Gateway Riverport",
+          "type": "port",
+          "cargo": [
+            "bulk",
+            "general"
+          ]
+        },
+        {
+          "name": "Mississippi Grain Terminal",
+          "type": "warehouse",
+          "cargo": [
+            "food",
+            "bulk"
+          ]
+        }
+      ],
+      "lat": 38.627,
+      "lon": -90.1994
+    },
+    "Nashville": {
+      "state": "Tennessee",
+      "region": "mid_south",
+      "locations": [
+        {
+          "name": "Music City Freight",
+          "type": "terminal",
+          "cargo": [
+            "general",
+            "retail"
+          ]
+        },
+        {
+          "name": "Cumberland Distribution",
+          "type": "distribution",
+          "cargo": [
+            "food",
+            "retail"
+          ]
+        }
+      ],
+      "lat": 36.1627,
+      "lon": -86.7816
+    },
+    "Atlanta": {
+      "state": "Georgia",
+      "region": "atlantic_southeast",
+      "locations": [
+        {
+          "name": "Hartsfield Cargo City",
+          "type": "air_cargo",
+          "cargo": [
+            "electronics",
+            "general"
+          ]
+        },
+        {
+          "name": "Fulton Industrial District",
+          "type": "industrial_park",
+          "cargo": [
+            "machinery",
+            "retail"
+          ]
+        },
+        {
+          "name": "Atlanta State Farmers Market Cold Storage",
+          "type": "food_terminal",
+          "cargo": [
+            "food",
+            "refrigerated"
+          ]
+        }
+      ],
+      "lat": 33.749,
+      "lon": -84.388
+    },
+    "Dallas": {
+      "state": "Texas",
+      "region": "southern_plains",
+      "locations": [
+        {
+          "name": "Trinity Intermodal Yard",
+          "type": "intermodal",
+          "cargo": [
+            "container",
+            "machinery"
+          ]
+        },
+        {
+          "name": "Lone Star Distribution",
+          "type": "retail_distribution",
+          "cargo": [
+            "retail",
+            "general"
+          ]
+        }
+      ],
+      "lat": 32.7767,
+      "lon": -96.797
+    },
+    "Kansas City": {
+      "state": "Missouri",
+      "region": "heartland",
+      "locations": [
+        {
+          "name": "Stockyards Freight House",
+          "type": "warehouse",
+          "cargo": [
+            "food",
+            "bulk"
+          ]
+        },
+        {
+          "name": "Heartland Rail Center",
+          "type": "rail",
+          "cargo": [
+            "container",
+            "bulk"
+          ]
+        }
+      ],
+      "lat": 39.0997,
+      "lon": -94.5786
+    },
+    "Denver": {
+      "state": "Colorado",
+      "region": "rockies",
+      "locations": [
+        {
+          "name": "Mile High Logistics",
+          "type": "distribution",
+          "cargo": [
+            "retail",
+            "general"
+          ]
+        },
+        {
+          "name": "Front Range Equipment",
+          "type": "warehouse",
+          "cargo": [
+            "machinery",
+            "bulk"
+          ]
+        }
+      ],
+      "lat": 39.7392,
+      "lon": -104.9903
+    },
+    "Albuquerque": {
+      "state": "New Mexico",
+      "region": "desert_southwest",
+      "locations": [
+        {
+          "name": "Rio Grande Crossdock",
+          "type": "distribution",
+          "cargo": [
+            "general",
+            "retail"
+          ]
+        },
+        {
+          "name": "Desert Gate Warehouse",
+          "type": "warehouse",
+          "cargo": [
+            "bulk",
+            "machinery"
+          ]
+        }
+      ],
+      "lat": 35.0844,
+      "lon": -106.6504
+    },
+    "Phoenix": {
+      "state": "Arizona",
+      "region": "desert_southwest",
+      "locations": [
+        {
+          "name": "Sky Harbor Freight",
+          "type": "air_cargo",
+          "cargo": [
+            "electronics",
+            "general"
+          ]
+        },
+        {
+          "name": "Saguaro Produce Exchange",
+          "type": "distribution",
+          "cargo": [
+            "food",
+            "refrigerated"
+          ]
+        }
+      ],
+      "lat": 33.4484,
+      "lon": -112.074
+    },
+    "Salt Lake City": {
+      "state": "Utah",
+      "region": "rockies",
+      "locations": [
+        {
+          "name": "Wasatch Intermodal",
+          "type": "rail",
+          "cargo": [
+            "container",
+            "bulk"
+          ]
+        },
+        {
+          "name": "Great Basin Supply",
+          "type": "warehouse",
+          "cargo": [
+            "general",
+            "machinery"
+          ]
+        }
+      ],
+      "lat": 40.7608,
+      "lon": -111.891
+    },
+    "Las Vegas": {
+      "state": "Nevada",
+      "region": "desert_southwest",
+      "locations": [
+        {
+          "name": "Mojave Freight Plaza",
+          "type": "terminal",
+          "cargo": [
+            "general",
+            "retail"
+          ]
+        },
+        {
+          "name": "Silver State Cold Storage",
+          "type": "distribution",
+          "cargo": [
+            "food",
+            "refrigerated"
+          ]
+        }
+      ],
+      "lat": 36.1699,
+      "lon": -115.1398
+    },
+    "Los Angeles": {
+      "state": "California",
+      "region": "california",
+      "locations": [
+        {
+          "name": "San Pedro Container Port",
+          "type": "port",
+          "cargo": [
+            "container",
+            "electronics"
+          ]
+        },
+        {
+          "name": "Vernon Produce Terminal",
+          "type": "food_terminal",
+          "cargo": [
+            "food",
+            "refrigerated"
+          ]
+        },
+        {
+          "name": "Inland Empire Distribution Center",
+          "type": "retail_distribution",
+          "cargo": [
+            "retail",
+            "general"
+          ]
+        }
+      ],
+      "lat": 34.0522,
+      "lon": -118.2437
+    },
+    "San Francisco": {
+      "state": "California",
+      "region": "california",
+      "locations": [
+        {
+          "name": "Oakland Outer Harbor",
+          "type": "port",
+          "cargo": [
+            "container",
+            "bulk"
+          ]
+        },
+        {
+          "name": "Bay Area Tech Depot",
+          "type": "warehouse",
+          "cargo": [
+            "electronics",
+            "general"
+          ]
+        }
+      ],
+      "lat": 37.7749,
+      "lon": -122.4194
+    },
+    "Portland": {
+      "state": "Oregon",
+      "region": "pacific_northwest",
+      "locations": [
+        {
+          "name": "Willamette River Docks",
+          "type": "port",
+          "cargo": [
+            "bulk",
+            "container"
+          ]
+        },
+        {
+          "name": "Cascade Timber Yard",
+          "type": "warehouse",
+          "cargo": [
+            "bulk",
+            "machinery"
+          ]
+        }
+      ],
+      "lat": 45.5152,
+      "lon": -122.6784
+    },
+    "Seattle": {
+      "state": "Washington",
+      "region": "pacific_northwest",
+      "locations": [
+        {
+          "name": "Harbor Island Terminal",
+          "type": "port",
+          "cargo": [
+            "container",
+            "electronics"
+          ]
+        },
+        {
+          "name": "Duwamish Distribution",
+          "type": "distribution",
+          "cargo": [
+            "retail",
+            "food"
+          ]
+        }
+      ],
+      "lat": 47.6062,
+      "lon": -122.3321
+    },
+    "Hartford": {
+      "state": "Connecticut",
+      "region": "northeast",
+      "locations": [
+        {
+          "name": "Brainard Field Cargo",
+          "type": "terminal",
+          "cargo": [
+            "general",
+            "retail"
+          ]
+        },
+        {
+          "name": "Connecticut River Warehouse",
+          "type": "warehouse",
+          "cargo": [
+            "machinery",
+            "general"
+          ]
+        }
+      ],
+      "lat": 41.7658,
+      "lon": -72.6734
+    },
+    "Buffalo": {
+      "state": "New York",
+      "region": "great_lakes",
+      "locations": [
+        {
+          "name": "Niagara Frontier Food Terminal",
+          "type": "distribution",
+          "cargo": [
+            "food",
+            "retail"
+          ]
+        },
+        {
+          "name": "Lake Erie Steel Yard",
+          "type": "warehouse",
+          "cargo": [
+            "machinery",
+            "bulk"
+          ]
+        }
+      ],
+      "lat": 42.8864,
+      "lon": -78.8784
+    },
+    "Baltimore": {
+      "state": "Maryland",
+      "region": "northeast",
+      "locations": [
+        {
+          "name": "Dundalk Marine Terminal",
+          "type": "port",
+          "cargo": [
+            "container",
+            "machinery"
+          ]
+        },
+        {
+          "name": "Seagirt Container Yard",
+          "type": "port",
+          "cargo": [
+            "container",
+            "electronics"
+          ]
+        },
+        {
+          "name": "Chesapeake Cold Storage",
+          "type": "distribution",
+          "cargo": [
+            "food",
+            "refrigerated"
+          ]
+        }
+      ],
+      "lat": 39.2904,
+      "lon": -76.6122
+    },
+    "Richmond": {
+      "state": "Virginia",
+      "region": "atlantic_southeast",
+      "locations": [
+        {
+          "name": "James River Distribution",
+          "type": "distribution",
+          "cargo": [
+            "retail",
+            "general"
+          ]
+        },
+        {
+          "name": "Port of Richmond Docks",
+          "type": "port",
+          "cargo": [
+            "container",
+            "bulk"
+          ]
+        }
+      ],
+      "lat": 37.5407,
+      "lon": -77.436
+    },
+    "Raleigh": {
+      "state": "North Carolina",
+      "region": "atlantic_southeast",
+      "locations": [
+        {
+          "name": "Research Triangle Depot",
+          "type": "warehouse",
+          "cargo": [
+            "electronics",
+            "general"
+          ]
+        },
+        {
+          "name": "Carolina Foods Crossdock",
+          "type": "distribution",
+          "cargo": [
+            "food",
+            "retail"
+          ]
+        }
+      ],
+      "lat": 35.7796,
+      "lon": -78.6382
+    },
+    "Charlotte": {
+      "state": "North Carolina",
+      "region": "atlantic_southeast",
+      "locations": [
+        {
+          "name": "Queen City Intermodal",
+          "type": "intermodal",
+          "cargo": [
+            "container",
+            "general"
+          ]
+        },
+        {
+          "name": "Piedmont Distribution Park",
+          "type": "distribution",
+          "cargo": [
+            "retail",
+            "machinery"
+          ]
+        }
+      ],
+      "lat": 35.2271,
+      "lon": -80.8431
+    },
+    "Savannah": {
+      "state": "Georgia",
+      "region": "atlantic_southeast",
+      "locations": [
+        {
+          "name": "Garden City Container Terminal",
+          "type": "port",
+          "cargo": [
+            "container",
+            "electronics"
+          ]
+        },
+        {
+          "name": "Coastal Georgia Warehouse",
+          "type": "warehouse",
+          "cargo": [
+            "general",
+            "bulk"
+          ]
+        }
+      ],
+      "lat": 32.0809,
+      "lon": -81.0912
+    },
+    "Jacksonville": {
+      "state": "Florida",
+      "region": "florida",
+      "locations": [
+        {
+          "name": "Blount Island Terminal",
+          "type": "port",
+          "cargo": [
+            "container",
+            "machinery"
+          ]
+        },
+        {
+          "name": "North Florida Cold Chain",
+          "type": "distribution",
+          "cargo": [
+            "food",
+            "refrigerated"
+          ]
+        }
+      ],
+      "lat": 30.3322,
+      "lon": -81.6557
+    },
+    "Tampa": {
+      "state": "Florida",
+      "region": "florida",
+      "locations": [
+        {
+          "name": "Port Tampa Bay Bulk Docks",
+          "type": "port",
+          "cargo": [
+            "bulk",
+            "container"
+          ]
+        },
+        {
+          "name": "Gulf Coast Produce Market",
+          "type": "distribution",
+          "cargo": [
+            "food",
+            "refrigerated"
+          ]
+        }
+      ],
+      "lat": 27.9506,
+      "lon": -82.4572
+    },
+    "Miami": {
+      "state": "Florida",
+      "region": "florida",
+      "locations": [
+        {
+          "name": "PortMiami Container Yard",
+          "type": "port",
+          "cargo": [
+            "container",
+            "electronics"
+          ]
+        },
+        {
+          "name": "Doral Import Center",
+          "type": "distribution",
+          "cargo": [
+            "retail",
+            "food"
+          ]
+        }
+      ],
+      "lat": 25.7617,
+      "lon": -80.1918
+    },
+    "Birmingham": {
+      "state": "Alabama",
+      "region": "mid_south",
+      "locations": [
+        {
+          "name": "Sloss Industrial Works",
+          "type": "manufacturing",
+          "cargo": [
+            "machinery",
+            "bulk"
+          ]
+        },
+        {
+          "name": "Magic City Freight Depot",
+          "type": "terminal",
+          "cargo": [
+            "general",
+            "retail"
+          ]
+        }
+      ],
+      "lat": 33.5186,
+      "lon": -86.8104
+    },
+    "Memphis": {
+      "state": "Tennessee",
+      "region": "mid_south",
+      "locations": [
+        {
+          "name": "Memphis Air Cargo Hub",
+          "type": "air_cargo",
+          "cargo": [
+            "electronics",
+            "general"
+          ]
+        },
+        {
+          "name": "President's Island River Port",
+          "type": "port",
+          "cargo": [
+            "bulk",
+            "machinery"
+          ]
+        },
+        {
+          "name": "Memphis Food Distribution Center",
+          "type": "food_terminal",
+          "cargo": [
+            "food",
+            "refrigerated"
+          ]
+        }
+      ],
+      "lat": 35.1495,
+      "lon": -90.049
+    },
+    "Little Rock": {
+      "state": "Arkansas",
+      "region": "mid_south",
+      "locations": [
+        {
+          "name": "Arkansas River Port",
+          "type": "port",
+          "cargo": [
+            "bulk",
+            "general"
+          ]
+        },
+        {
+          "name": "Rock Region Distribution",
+          "type": "distribution",
+          "cargo": [
+            "retail",
+            "food"
+          ]
+        }
+      ],
+      "lat": 34.7465,
+      "lon": -92.2896
+    },
+    "New Orleans": {
+      "state": "Louisiana",
+      "region": "gulf_coast",
+      "locations": [
+        {
+          "name": "Napoleon Avenue Wharf",
+          "type": "port",
+          "cargo": [
+            "container",
+            "bulk"
+          ]
+        },
+        {
+          "name": "Crescent City Cold Storage",
+          "type": "distribution",
+          "cargo": [
+            "food",
+            "refrigerated"
+          ]
+        }
+      ],
+      "lat": 29.9511,
+      "lon": -90.0715
+    },
+    "Houston": {
+      "state": "Texas",
+      "region": "gulf_coast",
+      "locations": [
+        {
+          "name": "Bayport Container Terminal",
+          "type": "port",
+          "cargo": [
+            "container",
+            "electronics"
+          ]
+        },
+        {
+          "name": "Ship Channel Machinery Yard",
+          "type": "warehouse",
+          "cargo": [
+            "machinery",
+            "bulk"
+          ]
+        },
+        {
+          "name": "Gulfgate Distribution",
+          "type": "distribution",
+          "cargo": [
+            "retail",
+            "general"
+          ]
+        }
+      ],
+      "lat": 29.7604,
+      "lon": -95.3698
+    },
+    "San Antonio": {
+      "state": "Texas",
+      "region": "gulf_coast",
+      "locations": [
+        {
+          "name": "Alamo Intermodal Yard",
+          "type": "intermodal",
+          "cargo": [
+            "container",
+            "general"
+          ]
+        },
+        {
+          "name": "Mission Trail Warehouse",
+          "type": "retail_distribution",
+          "cargo": [
+            "retail",
+            "machinery"
+          ]
+        }
+      ],
+      "lat": 29.4241,
+      "lon": -98.4936
+    },
+    "El Paso": {
+      "state": "Texas",
+      "region": "desert_southwest",
+      "locations": [
+        {
+          "name": "Border Crossdock Plaza",
+          "type": "distribution",
+          "cargo": [
+            "general",
+            "electronics"
+          ]
+        },
+        {
+          "name": "Franklin Mountain Freight",
+          "type": "terminal",
+          "cargo": [
+            "retail",
+            "machinery"
+          ]
+        }
+      ],
+      "lat": 31.7619,
+      "lon": -106.485
+    },
+    "Tucson": {
+      "state": "Arizona",
+      "region": "desert_southwest",
+      "locations": [
+        {
+          "name": "Old Pueblo Logistics",
+          "type": "distribution",
+          "cargo": [
+            "retail",
+            "general"
+          ]
+        },
+        {
+          "name": "Santa Cruz Produce Shed",
+          "type": "distribution",
+          "cargo": [
+            "food",
+            "refrigerated"
+          ]
+        }
+      ],
+      "lat": 32.2226,
+      "lon": -110.9747
+    },
+    "Knoxville": {
+      "state": "Tennessee",
+      "region": "appalachia",
+      "locations": [
+        {
+          "name": "Forks of the River Industrial",
+          "type": "warehouse",
+          "cargo": [
+            "machinery",
+            "bulk"
+          ]
+        },
+        {
+          "name": "Smoky Mountain Crossdock",
+          "type": "distribution",
+          "cargo": [
+            "retail",
+            "general"
+          ]
+        }
+      ],
+      "lat": 35.9606,
+      "lon": -83.9207
+    },
+    "Louisville": {
+      "state": "Kentucky",
+      "region": "mid_south",
+      "locations": [
+        {
+          "name": "Riverport Bourbon Warehouses",
+          "type": "warehouse",
+          "cargo": [
+            "food",
+            "general"
+          ]
+        },
+        {
+          "name": "Derby City Air Hub",
+          "type": "terminal",
+          "cargo": [
+            "electronics",
+            "retail"
+          ]
+        }
+      ],
+      "lat": 38.2527,
+      "lon": -85.7585
+    },
+    "Cincinnati": {
+      "state": "Ohio",
+      "region": "great_lakes",
+      "locations": [
+        {
+          "name": "Queensgate Rail Yard",
+          "type": "rail",
+          "cargo": [
+            "container",
+            "machinery"
+          ]
+        },
+        {
+          "name": "Ohio River Produce Terminal",
+          "type": "distribution",
+          "cargo": [
+            "food",
+            "retail"
+          ]
+        }
+      ],
+      "lat": 39.1031,
+      "lon": -84.512
+    },
+    "Columbus": {
+      "state": "Ohio",
+      "region": "great_lakes",
+      "locations": [
+        {
+          "name": "Rickenbacker Inland Port",
+          "type": "terminal",
+          "cargo": [
+            "container",
+            "electronics"
+          ]
+        },
+        {
+          "name": "Buckeye Distribution Campus",
+          "type": "distribution",
+          "cargo": [
+            "retail",
+            "general"
+          ]
+        }
+      ],
+      "lat": 39.9612,
+      "lon": -82.9988
+    },
+    "Detroit": {
+      "state": "Michigan",
+      "region": "great_lakes",
+      "locations": [
+        {
+          "name": "River Rouge Assembly Docks",
+          "type": "manufacturing",
+          "cargo": [
+            "machinery",
+            "bulk"
+          ]
+        },
+        {
+          "name": "Motor City Parts Exchange",
+          "type": "distribution",
+          "cargo": [
+            "machinery",
+            "electronics"
+          ]
+        },
+        {
+          "name": "Eastern Market Cold Storage",
+          "type": "distribution",
+          "cargo": [
+            "food",
+            "retail"
+          ]
+        }
+      ],
+      "lat": 42.3314,
+      "lon": -83.0458
+    },
+    "Milwaukee": {
+      "state": "Wisconsin",
+      "region": "great_lakes",
+      "locations": [
+        {
+          "name": "Jones Island Bulk Port",
+          "type": "port",
+          "cargo": [
+            "bulk",
+            "machinery"
+          ]
+        },
+        {
+          "name": "Brew City Cold Chain",
+          "type": "distribution",
+          "cargo": [
+            "food",
+            "refrigerated"
+          ]
+        }
+      ],
+      "lat": 43.0389,
+      "lon": -87.9065
+    },
+    "Minneapolis": {
+      "state": "Minnesota",
+      "region": "great_lakes",
+      "locations": [
+        {
+          "name": "Upper Harbor Grain Terminal",
+          "type": "warehouse",
+          "cargo": [
+            "bulk",
+            "food"
+          ]
+        },
+        {
+          "name": "Twin Cities Intermodal",
+          "type": "rail",
+          "cargo": [
+            "container",
+            "retail"
+          ]
+        }
+      ],
+      "lat": 44.9778,
+      "lon": -93.265
+    },
+    "Des Moines": {
+      "state": "Iowa",
+      "region": "heartland",
+      "locations": [
+        {
+          "name": "Corn Belt Grain Elevators",
+          "type": "warehouse",
+          "cargo": [
+            "bulk",
+            "food"
+          ]
+        },
+        {
+          "name": "Capital Crossroads Crossdock",
+          "type": "distribution",
+          "cargo": [
+            "retail",
+            "general"
+          ]
+        }
+      ],
+      "lat": 41.5868,
+      "lon": -93.625
+    },
+    "Omaha": {
+      "state": "Nebraska",
+      "region": "heartland",
+      "locations": [
+        {
+          "name": "Union Stockyards Freight",
+          "type": "warehouse",
+          "cargo": [
+            "food",
+            "bulk"
+          ]
+        },
+        {
+          "name": "Platte Valley Rail Center",
+          "type": "rail",
+          "cargo": [
+            "container",
+            "bulk"
+          ]
+        }
+      ],
+      "lat": 41.2565,
+      "lon": -95.9345
+    },
+    "Wichita": {
+      "state": "Kansas",
+      "region": "southern_plains",
+      "locations": [
+        {
+          "name": "Air Capital Plant Docks",
+          "type": "manufacturing",
+          "cargo": [
+            "machinery",
+            "electronics"
+          ]
+        },
+        {
+          "name": "Arkansas Valley Grain Co-op",
+          "type": "warehouse",
+          "cargo": [
+            "bulk",
+            "food"
+          ]
+        }
+      ],
+      "lat": 37.6872,
+      "lon": -97.3301
+    },
+    "Tulsa": {
+      "state": "Oklahoma",
+      "region": "southern_plains",
+      "locations": [
+        {
+          "name": "Port of Catoosa",
+          "type": "port",
+          "cargo": [
+            "bulk",
+            "machinery"
+          ]
+        },
+        {
+          "name": "Green Country Distribution",
+          "type": "distribution",
+          "cargo": [
+            "retail",
+            "general"
+          ]
+        }
+      ],
+      "lat": 36.154,
+      "lon": -95.9928
+    },
+    "Oklahoma City": {
+      "state": "Oklahoma",
+      "region": "southern_plains",
+      "locations": [
+        {
+          "name": "Stockyards City Freight",
+          "type": "warehouse",
+          "cargo": [
+            "food",
+            "bulk"
+          ]
+        },
+        {
+          "name": "Sooner Intermodal Yard",
+          "type": "rail",
+          "cargo": [
+            "container",
+            "general"
+          ]
+        }
+      ],
+      "lat": 35.4676,
+      "lon": -97.5164
+    },
+    "Amarillo": {
+      "state": "Texas",
+      "region": "southern_plains",
+      "locations": [
+        {
+          "name": "Panhandle Cattle Exchange",
+          "type": "warehouse",
+          "cargo": [
+            "food",
+            "bulk"
+          ]
+        },
+        {
+          "name": "Route 66 Truck Terminal",
+          "type": "terminal",
+          "cargo": [
+            "general",
+            "retail"
+          ]
+        }
+      ],
+      "lat": 35.222,
+      "lon": -101.8313
+    },
+    "Cheyenne": {
+      "state": "Wyoming",
+      "region": "rockies",
+      "locations": [
+        {
+          "name": "High Plains Rail Yard",
+          "type": "rail",
+          "cargo": [
+            "container",
+            "bulk"
+          ]
+        },
+        {
+          "name": "Frontier Logistics Park",
+          "type": "distribution",
+          "cargo": [
+            "general",
+            "machinery"
+          ]
+        }
+      ],
+      "lat": 41.14,
+      "lon": -104.8202
+    },
+    "Sacramento": {
+      "state": "California",
+      "region": "california",
+      "locations": [
+        {
+          "name": "Central Valley Produce Exchange",
+          "type": "distribution",
+          "cargo": [
+            "food",
+            "refrigerated"
+          ]
+        },
+        {
+          "name": "Port of West Sacramento",
+          "type": "port",
+          "cargo": [
+            "bulk",
+            "general"
+          ]
+        }
+      ],
+      "lat": 38.5816,
+      "lon": -121.4944
+    },
+    "Fresno": {
+      "state": "California",
+      "region": "california",
+      "locations": [
+        {
+          "name": "San Joaquin Packing Sheds",
+          "type": "distribution",
+          "cargo": [
+            "food",
+            "refrigerated"
+          ]
+        },
+        {
+          "name": "Valley Ag Machinery Depot",
+          "type": "warehouse",
+          "cargo": [
+            "machinery",
+            "bulk"
+          ]
+        }
+      ],
+      "lat": 36.7378,
+      "lon": -119.7871
+    },
+    "San Diego": {
+      "state": "California",
+      "region": "california",
+      "locations": [
+        {
+          "name": "Tenth Avenue Marine Terminal",
+          "type": "port",
+          "cargo": [
+            "container",
+            "machinery"
+          ]
+        },
+        {
+          "name": "Otay Mesa Crossdock",
+          "type": "distribution",
+          "cargo": [
+            "electronics",
+            "retail"
+          ]
+        }
+      ],
+      "lat": 32.7157,
+      "lon": -117.1611
+    },
+    "Reno": {
+      "state": "Nevada",
+      "region": "great_basin",
+      "locations": [
+        {
+          "name": "Sierra Logistics Center",
+          "type": "distribution",
+          "cargo": [
+            "retail",
+            "general"
+          ]
+        },
+        {
+          "name": "Truckee Meadows Warehouse",
+          "type": "warehouse",
+          "cargo": [
+            "electronics",
+            "machinery"
+          ]
+        }
+      ],
+      "lat": 39.5296,
+      "lon": -119.8138
+    },
+    "Boise": {
+      "state": "Idaho",
+      "region": "great_basin",
+      "locations": [
+        {
+          "name": "Treasure Valley Produce",
+          "type": "distribution",
+          "cargo": [
+            "food",
+            "refrigerated"
+          ]
+        },
+        {
+          "name": "Gem State Freight Yard",
+          "type": "terminal",
+          "cargo": [
+            "general",
+            "bulk"
+          ]
+        }
+      ],
+      "lat": 43.615,
+      "lon": -116.2023
+    },
+    "Spokane": {
+      "state": "Washington",
+      "region": "pacific_northwest",
+      "locations": [
+        {
+          "name": "Inland Empire Rail Yard",
+          "type": "rail",
+          "cargo": [
+            "container",
+            "bulk"
+          ]
+        },
+        {
+          "name": "Palouse Grain Terminal",
+          "type": "warehouse",
+          "cargo": [
+            "bulk",
+            "food"
+          ]
+        }
+      ],
+      "lat": 47.6588,
+      "lon": -117.426
+    },
+    "Toledo": {
+      "state": "Ohio",
+      "region": "great_lakes",
+      "locations": [],
+      "lat": 41.6528,
+      "lon": -83.5379
+    },
+    "Fort Wayne": {
+      "state": "Indiana",
+      "region": "great_lakes",
+      "locations": [],
+      "lat": 41.0793,
+      "lon": -85.1394
+    },
+    "Washington": {
+      "state": "District of Columbia",
+      "region": "northeast",
+      "locations": [],
+      "lat": 38.9072,
+      "lon": -77.0369
+    },
+    "Providence": {
+      "state": "Rhode Island",
+      "region": "northeast",
+      "locations": [],
+      "lat": 41.824,
+      "lon": -71.4128
+    },
+    "Worcester": {
+      "state": "Massachusetts",
+      "region": "northeast",
+      "locations": [],
+      "lat": 42.2626,
+      "lon": -71.8023
+    },
+    "Bridgeport": {
+      "state": "Connecticut",
+      "region": "northeast",
+      "locations": [],
+      "lat": 41.1865,
+      "lon": -73.1952
+    },
+    "Rochester": {
+      "state": "New York",
+      "region": "northeast",
+      "locations": [],
+      "lat": 43.1566,
+      "lon": -77.6088
+    },
+    "Greensboro": {
+      "state": "North Carolina",
+      "region": "atlantic_southeast",
+      "locations": [],
+      "lat": 36.0726,
+      "lon": -79.792
+    },
+    "Fayetteville": {
+      "state": "North Carolina",
+      "region": "atlantic_southeast",
+      "locations": [],
+      "lat": 35.0527,
+      "lon": -78.8784
+    },
+    "Virginia Beach": {
+      "state": "Virginia",
+      "region": "atlantic_southeast",
+      "locations": [],
+      "lat": 36.8529,
+      "lon": -75.978
+    },
+    "Orlando": {
+      "state": "Florida",
+      "region": "florida",
+      "locations": [],
+      "lat": 28.5383,
+      "lon": -81.3792
+    },
+    "Tallahassee": {
+      "state": "Florida",
+      "region": "florida",
+      "locations": [],
+      "lat": 30.4383,
+      "lon": -84.2807
+    },
+    "Mobile": {
+      "state": "Alabama",
+      "region": "mid_south",
+      "locations": [],
+      "lat": 30.6954,
+      "lon": -88.0399
+    },
+    "Baton Rouge": {
+      "state": "Louisiana",
+      "region": "gulf_coast",
+      "locations": [],
+      "lat": 30.4515,
+      "lon": -91.1871
+    },
+    "Shreveport": {
+      "state": "Louisiana",
+      "region": "gulf_coast",
+      "locations": [],
+      "lat": 32.5252,
+      "lon": -93.7502
+    },
+    "Montgomery": {
+      "state": "Alabama",
+      "region": "mid_south",
+      "locations": [],
+      "lat": 32.3668,
+      "lon": -86.3
+    },
+    "Huntsville": {
+      "state": "Alabama",
+      "region": "mid_south",
+      "locations": [],
+      "lat": 34.7304,
+      "lon": -86.5861
+    },
+    "Chattanooga": {
+      "state": "Tennessee",
+      "region": "mid_south",
+      "locations": [],
+      "lat": 35.0456,
+      "lon": -85.3097
+    },
+    "Fort Worth": {
+      "state": "Texas",
+      "region": "southern_plains",
+      "locations": [],
+      "lat": 32.7555,
+      "lon": -97.3308
+    },
+    "Austin": {
+      "state": "Texas",
+      "region": "gulf_coast",
+      "locations": [],
+      "lat": 30.2672,
+      "lon": -97.7431
+    },
+    "Lubbock": {
+      "state": "Texas",
+      "region": "southern_plains",
+      "locations": [],
+      "lat": 33.5779,
+      "lon": -101.8552
+    },
+    "Lincoln": {
+      "state": "Nebraska",
+      "region": "heartland",
+      "locations": [],
+      "lat": 40.8136,
+      "lon": -96.7026
+    },
+    "Sioux Falls": {
+      "state": "South Dakota",
+      "region": "heartland",
+      "locations": [],
+      "lat": 43.5446,
+      "lon": -96.7311
+    },
+    "Springfield": {
+      "state": "Missouri",
+      "region": "heartland",
+      "locations": [],
+      "lat": 37.209,
+      "lon": -93.2923
+    },
+    "Colorado Springs": {
+      "state": "Colorado",
+      "region": "rockies",
+      "locations": [],
+      "lat": 38.8339,
+      "lon": -104.8214
+    },
+    "Fort Collins": {
+      "state": "Colorado",
+      "region": "rockies",
+      "locations": [],
+      "lat": 40.5853,
+      "lon": -105.0844
+    },
+    "San Jose": {
+      "state": "California",
+      "region": "california",
+      "locations": [],
+      "lat": 37.3382,
+      "lon": -121.8863
+    },
+    "Bakersfield": {
+      "state": "California",
+      "region": "california",
+      "locations": [],
+      "lat": 35.3733,
+      "lon": -119.0187
+    },
+    "Stockton": {
+      "state": "California",
+      "region": "california",
+      "locations": [],
+      "lat": 37.9577,
+      "lon": -121.2908
+    },
+    "Lexington": {
+      "state": "Kentucky",
+      "region": "mid_south",
+      "locations": [],
+      "lat": 38.0406,
+      "lon": -84.5037
+    },
+    "Madison": {
+      "state": "Wisconsin",
+      "region": "great_lakes",
+      "locations": [],
+      "lat": 43.0731,
+      "lon": -89.4012
+    },
+    "Grand Rapids": {
+      "state": "Michigan",
+      "region": "great_lakes",
+      "locations": [],
+      "lat": 42.9634,
+      "lon": -85.6681
+    },
+    "Akron": {
+      "state": "Ohio",
+      "region": "great_lakes",
+      "locations": [],
+      "lat": 41.0814,
+      "lon": -81.519
+    },
+    "Rockford": {
+      "state": "Illinois",
+      "region": "great_lakes",
+      "locations": [],
+      "lat": 42.2711,
+      "lon": -89.094
+    },
+    "Riverside": {
+      "lat": 33.95335,
+      "lon": -117.39616,
+      "region": "california",
+      "state": "California",
+      "locations": []
+    },
+    "Santa Ana": {
+      "lat": 33.74557,
+      "lon": -117.86783,
+      "region": "california",
+      "state": "California",
+      "locations": []
+    },
+    "Oxnard": {
+      "lat": 34.1975,
+      "lon": -119.17705,
+      "region": "california",
+      "state": "California",
+      "locations": []
+    },
+    "Santa Rosa": {
+      "lat": 38.44047,
+      "lon": -122.71443,
+      "region": "california",
+      "state": "California",
+      "locations": []
+    },
+    "Oceanside": {
+      "lat": 33.19587,
+      "lon": -117.37948,
+      "region": "california",
+      "state": "California",
+      "locations": []
+    },
+    "Lancaster": {
+      "lat": 34.69804,
+      "lon": -118.13674,
+      "region": "california",
+      "state": "California",
+      "locations": []
+    },
+    "Salinas": {
+      "lat": 36.67774,
+      "lon": -121.6555,
+      "region": "california",
+      "state": "California",
+      "locations": []
+    },
+    "Valencia": {
+      "lat": 34.44361,
+      "lon": -118.60953,
+      "region": "california",
+      "state": "California",
+      "locations": []
+    },
+    "Visalia": {
+      "lat": 36.33023,
+      "lon": -119.29206,
+      "region": "california",
+      "state": "California",
+      "locations": []
+    },
+    "Victorville": {
+      "lat": 34.53611,
+      "lon": -117.29116,
+      "region": "california",
+      "state": "California",
+      "locations": []
+    },
+    "Chico": {
+      "lat": 39.72849,
+      "lon": -121.83748,
+      "region": "california",
+      "state": "California",
+      "locations": []
+    },
+    "Fairfield": {
+      "lat": 38.24936,
+      "lon": -122.03997,
+      "region": "california",
+      "state": "California",
+      "locations": []
+    },
+    "Santa Maria": {
+      "lat": 34.95303,
+      "lon": -120.43572,
+      "region": "california",
+      "state": "California",
+      "locations": []
+    },
+    "Corpus Christi": {
+      "lat": 27.80058,
+      "lon": -97.39638,
+      "region": "gulf_coast",
+      "state": "Texas",
+      "locations": []
+    },
+    "Laredo": {
+      "lat": 27.50641,
+      "lon": -99.50754,
+      "region": "gulf_coast",
+      "state": "Texas",
+      "locations": []
+    },
+    "Brownsville": {
+      "lat": 25.90175,
+      "lon": -97.49748,
+      "region": "gulf_coast",
+      "state": "Texas",
+      "locations": []
+    },
+    "McKinney": {
+      "lat": 33.19762,
+      "lon": -96.61527,
+      "region": "southern_plains",
+      "state": "Texas",
+      "locations": []
+    },
+    "Killeen": {
+      "lat": 31.11712,
+      "lon": -97.7278,
+      "region": "southern_plains",
+      "state": "Texas",
+      "locations": []
+    },
+    "McAllen": {
+      "lat": 26.20341,
+      "lon": -98.23001,
+      "region": "gulf_coast",
+      "state": "Texas",
+      "locations": []
+    },
+    "Midland": {
+      "lat": 31.99735,
+      "lon": -102.07791,
+      "region": "southern_plains",
+      "state": "Texas",
+      "locations": []
+    },
+    "Waco": {
+      "lat": 31.54933,
+      "lon": -97.14667,
+      "region": "southern_plains",
+      "state": "Texas",
+      "locations": []
+    },
+    "Topeka": {
+      "lat": 39.04833,
+      "lon": -95.67804,
+      "region": "southern_plains",
+      "state": "Kansas",
+      "locations": []
+    },
+    "Abilene": {
+      "lat": 32.44874,
+      "lon": -99.73314,
+      "region": "southern_plains",
+      "state": "Texas",
+      "locations": []
+    },
+    "Lafayette": {
+      "lat": 30.22409,
+      "lon": -92.01984,
+      "region": "gulf_coast",
+      "state": "Louisiana",
+      "locations": []
+    },
+    "Beaumont": {
+      "lat": 30.08605,
+      "lon": -94.10185,
+      "region": "gulf_coast",
+      "state": "Texas",
+      "locations": []
+    },
+    "College Station": {
+      "lat": 30.62798,
+      "lon": -96.33441,
+      "region": "gulf_coast",
+      "state": "Texas",
+      "locations": []
+    },
+    "Wichita Falls": {
+      "lat": 33.91371,
+      "lon": -98.49339,
+      "region": "southern_plains",
+      "state": "Texas",
+      "locations": []
+    },
+    "Tyler": {
+      "lat": 32.35126,
+      "lon": -95.30106,
+      "region": "southern_plains",
+      "state": "Texas",
+      "locations": []
+    },
+    "Cape Coral": {
+      "lat": 26.56285,
+      "lon": -81.94953,
+      "region": "florida",
+      "state": "Florida",
+      "locations": []
+    },
+    "Clarksville": {
+      "lat": 36.52977,
+      "lon": -87.35945,
+      "region": "mid_south",
+      "state": "Tennessee",
+      "locations": []
+    },
+    "Murfreesboro": {
+      "lat": 35.84562,
+      "lon": -86.39027,
+      "region": "mid_south",
+      "state": "Tennessee",
+      "locations": []
+    },
+    "Port Saint Lucie": {
+      "lat": 27.29393,
+      "lon": -80.35033,
+      "region": "florida",
+      "state": "Florida",
+      "locations": []
+    },
+    "Jackson": {
+      "lat": 32.29876,
+      "lon": -90.18481,
+      "region": "mid_south",
+      "state": "Mississippi",
+      "locations": []
+    },
+    "Gainesville": {
+      "lat": 29.65163,
+      "lon": -82.32483,
+      "region": "florida",
+      "state": "Florida",
+      "locations": []
+    },
+    "Columbia": {
+      "lat": 34.00071,
+      "lon": -81.03481,
+      "region": "atlantic_southeast",
+      "state": "South Carolina",
+      "locations": []
+    },
+    "Charleston": {
+      "lat": 32.77632,
+      "lon": -79.93275,
+      "region": "atlantic_southeast",
+      "state": "South Carolina",
+      "locations": []
+    },
+    "Coral Springs": {
+      "lat": 26.27119,
+      "lon": -80.2706,
+      "region": "florida",
+      "state": "Florida",
+      "locations": []
+    },
+    "Athens": {
+      "lat": 33.96095,
+      "lon": -83.37794,
+      "region": "atlantic_southeast",
+      "state": "Georgia",
+      "locations": []
+    },
+    "West Palm Beach": {
+      "lat": 26.71534,
+      "lon": -80.05337,
+      "region": "florida",
+      "state": "Florida",
+      "locations": []
+    },
+    "Palm Bay": {
+      "lat": 28.03446,
+      "lon": -80.58866,
+      "region": "florida",
+      "state": "Florida",
+      "locations": []
+    },
+    "Wilmington": {
+      "lat": 34.23556,
+      "lon": -77.94604,
+      "region": "atlantic_southeast",
+      "state": "North Carolina",
+      "locations": []
+    },
+    "Tuscaloosa": {
+      "lat": 33.20984,
+      "lon": -87.56917,
+      "region": "mid_south",
+      "state": "Alabama",
+      "locations": []
+    },
+    "Lakeland": {
+      "lat": 28.03947,
+      "lon": -81.9498,
+      "region": "florida",
+      "state": "Florida",
+      "locations": []
+    },
+    "Roanoke": {
+      "lat": 37.27097,
+      "lon": -79.94143,
+      "region": "appalachia",
+      "state": "Virginia",
+      "locations": [
+        {
+          "name": "Norfolk Southern Roanoke Rail Yard",
+          "type": "rail",
+          "source_note": "Norfolk Southern rail yard, a historic classification hub (former Norfolk & Western)."
+        },
+        {
+          "name": "Advance Auto Parts Distribution Center",
+          "type": "retail_distribution",
+          "source_note": "Advance Auto Parts distribution operation rooted in the Roanoke Valley."
+        }
+      ]
+    },
+    "Aurora": {
+      "lat": 41.76058,
+      "lon": -88.32007,
+      "region": "great_lakes",
+      "state": "Illinois",
+      "locations": []
+    },
+    "Syracuse": {
+      "lat": 43.04812,
+      "lon": -76.14742,
+      "region": "northeast",
+      "state": "New York",
+      "locations": []
+    },
+    "Dayton": {
+      "lat": 39.75895,
+      "lon": -84.19161,
+      "region": "great_lakes",
+      "state": "Ohio",
+      "locations": []
+    },
+    "Cedar Rapids": {
+      "lat": 42.00833,
+      "lon": -91.64407,
+      "region": "heartland",
+      "state": "Iowa",
+      "locations": []
+    },
+    "Allentown": {
+      "lat": 40.60843,
+      "lon": -75.49018,
+      "region": "northeast",
+      "state": "Pennsylvania",
+      "locations": []
+    },
+    "Evansville": {
+      "lat": 37.97476,
+      "lon": -87.55585,
+      "region": "mid_south",
+      "state": "Indiana",
+      "locations": []
+    },
+    "Fargo": {
+      "lat": 46.87719,
+      "lon": -96.7898,
+      "region": "heartland",
+      "state": "North Dakota",
+      "locations": []
+    },
+    "Ann Arbor": {
+      "lat": 42.27756,
+      "lon": -83.74088,
+      "region": "great_lakes",
+      "state": "Michigan",
+      "locations": []
+    },
+    "Peoria": {
+      "lat": 40.69365,
+      "lon": -89.58899,
+      "region": "great_lakes",
+      "state": "Illinois",
+      "locations": []
+    },
+    "Lansing": {
+      "lat": 42.73253,
+      "lon": -84.55553,
+      "region": "great_lakes",
+      "state": "Michigan",
+      "locations": []
+    },
+    "Manchester": {
+      "lat": 42.99564,
+      "lon": -71.45479,
+      "region": "northeast",
+      "state": "New Hampshire",
+      "locations": []
+    },
+    "Green Bay": {
+      "lat": 44.51916,
+      "lon": -88.01983,
+      "region": "great_lakes",
+      "state": "Wisconsin",
+      "locations": []
+    },
+    "Davenport": {
+      "lat": 41.52364,
+      "lon": -90.57764,
+      "region": "heartland",
+      "state": "Iowa",
+      "locations": []
+    },
+    "South Bend": {
+      "lat": 41.68338,
+      "lon": -86.25001,
+      "region": "great_lakes",
+      "state": "Indiana",
+      "locations": []
+    },
+    "Albany": {
+      "lat": 42.65258,
+      "lon": -73.75623,
+      "region": "northeast",
+      "state": "New York",
+      "locations": []
+    },
+    "Tri-Cities": {
+      "lat": 46.2454,
+      "lon": -119.19617,
+      "region": "pacific_northwest",
+      "state": "Washington",
+      "locations": []
+    },
+    "Eugene": {
+      "lat": 44.05207,
+      "lon": -123.08675,
+      "region": "pacific_northwest",
+      "state": "Oregon",
+      "locations": []
+    },
+    "Salem": {
+      "lat": 44.9429,
+      "lon": -123.0351,
+      "region": "pacific_northwest",
+      "state": "Oregon",
+      "locations": []
+    },
+    "Billings": {
+      "lat": 45.78329,
+      "lon": -108.50069,
+      "region": "rockies",
+      "state": "Montana",
+      "locations": []
+    },
+    "Provo": {
+      "lat": 40.23384,
+      "lon": -111.65853,
+      "region": "rockies",
+      "state": "Utah",
+      "locations": []
+    },
+    "Pueblo": {
+      "lat": 38.25445,
+      "lon": -104.60914,
+      "region": "rockies",
+      "state": "Colorado",
+      "locations": []
+    },
+    "Las Cruces": {
+      "lat": 32.31232,
+      "lon": -106.77834,
+      "region": "desert_southwest",
+      "state": "New Mexico",
+      "locations": []
+    },
+    "Pocatello": {
+      "lat": 42.8713,
+      "lon": -112.44553,
+      "region": "great_basin",
+      "state": "Idaho",
+      "locations": []
+    },
+    "Idaho Falls": {
+      "lat": 43.46658,
+      "lon": -112.03414,
+      "region": "great_basin",
+      "state": "Idaho",
+      "locations": []
+    },
+    "Twin Falls": {
+      "lat": 42.56297,
+      "lon": -114.46087,
+      "region": "great_basin",
+      "state": "Idaho",
+      "locations": []
+    },
+    "Elko": {
+      "lat": 40.83242,
+      "lon": -115.76312,
+      "region": "great_basin",
+      "state": "Nevada",
+      "locations": []
+    },
+    "Newark": {
+      "state": "New Jersey",
+      "region": "northeast",
+      "locations": [
+        {
+          "name": "Port Newark Container Terminal",
+          "type": "port",
+          "cargo": [
+            "container",
+            "general"
+          ]
+        },
+        {
+          "name": "Meadowlands Distribution Center",
+          "type": "distribution",
+          "cargo": [
+            "retail",
+            "food"
+          ]
+        }
+      ],
+      "lat": 40.7357,
+      "lon": -74.1724
+    },
+    "Trenton": {
+      "state": "New Jersey",
+      "region": "northeast",
+      "locations": [
+        {
+          "name": "Trenton Freight Terminal",
+          "type": "terminal",
+          "cargo": [
+            "general",
+            "machinery"
+          ]
+        },
+        {
+          "name": "Hamilton Distribution Park",
+          "type": "distribution",
+          "cargo": [
+            "retail",
+            "electronics"
+          ]
+        }
+      ],
+      "lat": 40.2171,
+      "lon": -74.7429
+    },
+    "Atlantic City": {
+      "state": "New Jersey",
+      "region": "northeast",
+      "locations": [
+        {
+          "name": "Egg Harbor Distribution",
+          "type": "distribution",
+          "cargo": [
+            "food",
+            "refrigerated"
+          ]
+        },
+        {
+          "name": "Atlantic Coast Warehouse",
+          "type": "warehouse",
+          "cargo": [
+            "retail",
+            "general"
+          ]
+        }
+      ],
+      "lat": 39.3642,
+      "lon": -74.4231
+    },
+    "Salisbury": {
+      "state": "Maryland",
+      "region": "northeast",
+      "locations": [
+        {
+          "name": "Delmarva Poultry Cold Storage",
+          "type": "distribution",
+          "cargo": [
+            "food",
+            "refrigerated"
+          ]
+        },
+        {
+          "name": "Salisbury Distribution Center",
+          "type": "warehouse",
+          "cargo": [
+            "retail",
+            "general"
+          ]
+        }
+      ],
+      "lat": 38.3607,
+      "lon": -75.5994
+    },
+    "Burlington": {
+      "state": "Vermont",
+      "region": "northeast",
+      "locations": [
+        {
+          "name": "Burlington Freight Depot",
+          "type": "terminal",
+          "cargo": [
+            "general",
+            "food"
+          ]
+        },
+        {
+          "name": "Champlain Valley Warehouse",
+          "type": "warehouse",
+          "cargo": [
+            "retail",
+            "machinery"
+          ]
+        }
+      ],
+      "lat": 44.4759,
+      "lon": -73.2121
+    },
+    "Norfolk": {
+      "state": "Virginia",
+      "region": "atlantic_southeast",
+      "locations": [
+        {
+          "name": "Norfolk International Terminals",
+          "type": "port",
+          "cargo": [
+            "container",
+            "machinery"
+          ]
+        },
+        {
+          "name": "Hampton Roads Distribution",
+          "type": "distribution",
+          "cargo": [
+            "retail",
+            "refrigerated"
+          ]
+        }
+      ],
+      "lat": 36.8468,
+      "lon": -76.2852
+    },
+    "Harrisburg": {
+      "state": "Pennsylvania",
+      "region": "northeast",
+      "locations": [
+        {
+          "name": "Capital Region Intermodal",
+          "type": "intermodal",
+          "cargo": [
+            "container",
+            "machinery"
+          ]
+        },
+        {
+          "name": "Harrisburg Distribution Hub",
+          "type": "distribution",
+          "cargo": [
+            "retail",
+            "general"
+          ]
+        }
+      ],
+      "lat": 40.2737,
+      "lon": -76.8844
+    },
+    "Scranton": {
+      "state": "Pennsylvania",
+      "region": "northeast",
+      "locations": [
+        {
+          "name": "Scranton Intermodal Terminal",
+          "type": "intermodal",
+          "cargo": [
+            "container",
+            "general"
+          ]
+        },
+        {
+          "name": "Lackawanna Distribution Center",
+          "type": "distribution",
+          "cargo": [
+            "retail",
+            "food"
+          ]
+        }
+      ],
+      "lat": 41.4092,
+      "lon": -75.6649
+    },
+    "Erie": {
+      "state": "Pennsylvania",
+      "region": "great_lakes",
+      "locations": [
+        {
+          "name": "Port of Erie",
+          "type": "port",
+          "cargo": [
+            "bulk",
+            "container"
+          ]
+        },
+        {
+          "name": "Erie Manufacturing Works",
+          "type": "manufacturing",
+          "cargo": [
+            "machinery",
+            "general"
+          ]
+        }
+      ],
+      "lat": 42.1292,
+      "lon": -80.0851
+    },
+    "Binghamton": {
+      "state": "New York",
+      "region": "northeast",
+      "locations": [
+        {
+          "name": "Binghamton Rail Yard",
+          "type": "rail",
+          "cargo": [
+            "machinery",
+            "bulk"
+          ]
+        },
+        {
+          "name": "Southern Tier Warehouse",
+          "type": "warehouse",
+          "cargo": [
+            "general",
+            "electronics"
+          ]
+        }
+      ],
+      "lat": 42.0987,
+      "lon": -75.918
+    },
+    "New Haven": {
+      "state": "Connecticut",
+      "region": "northeast",
+      "locations": [
+        {
+          "name": "New Haven Port Terminal",
+          "type": "port",
+          "cargo": [
+            "bulk",
+            "general"
+          ]
+        },
+        {
+          "name": "Long Wharf Distribution",
+          "type": "distribution",
+          "cargo": [
+            "food",
+            "retail"
+          ]
+        }
+      ],
+      "lat": 41.3081,
+      "lon": -72.9282
+    },
+    "Augusta": {
+      "state": "Georgia",
+      "region": "atlantic_southeast",
+      "locations": [
+        {
+          "name": "Savannah River Terminal",
+          "type": "terminal",
+          "cargo": [
+            "bulk",
+            "machinery"
+          ]
+        },
+        {
+          "name": "Augusta Distribution Center",
+          "type": "distribution",
+          "cargo": [
+            "retail",
+            "general"
+          ]
+        }
+      ],
+      "lat": 33.471,
+      "lon": -81.9748
+    },
+    "Macon": {
+      "state": "Georgia",
+      "region": "atlantic_southeast",
+      "locations": [
+        {
+          "name": "Macon Intermodal Park",
+          "type": "intermodal",
+          "cargo": [
+            "container",
+            "retail"
+          ]
+        },
+        {
+          "name": "Middle Georgia Distribution",
+          "type": "distribution",
+          "cargo": [
+            "food",
+            "general"
+          ]
+        }
+      ],
+      "lat": 32.8407,
+      "lon": -83.6324
+    },
+    "Greenville": {
+      "state": "South Carolina",
+      "region": "atlantic_southeast",
+      "locations": [
+        {
+          "name": "Upstate Inland Port",
+          "type": "intermodal",
+          "cargo": [
+            "container",
+            "machinery"
+          ]
+        },
+        {
+          "name": "Greenville Distribution Center",
+          "type": "distribution",
+          "cargo": [
+            "retail",
+            "electronics"
+          ]
+        }
+      ],
+      "lat": 34.8526,
+      "lon": -82.394
+    },
+    "Charleston, West Virginia": {
+      "state": "West Virginia",
+      "region": "appalachia",
+      "locations": [
+        {
+          "name": "Kanawha Valley Chemical Terminal",
+          "type": "terminal",
+          "cargo": [
+            "bulk",
+            "general"
+          ]
+        },
+        {
+          "name": "Charleston Distribution Center",
+          "type": "distribution",
+          "cargo": [
+            "retail",
+            "food"
+          ]
+        }
+      ],
+      "lat": 38.3498,
+      "lon": -81.6326
+    },
+    "Portland, Maine": {
+      "state": "Maine",
+      "region": "northeast",
+      "locations": [
+        {
+          "name": "Portland Marine Terminal",
+          "type": "port",
+          "cargo": [
+            "container",
+            "refrigerated"
+          ]
+        },
+        {
+          "name": "Casco Bay Cold Storage",
+          "type": "distribution",
+          "cargo": [
+            "food",
+            "refrigerated"
+          ]
+        }
+      ],
+      "lat": 43.6615,
+      "lon": -70.2553
+    },
+    "Springfield, Massachusetts": {
+      "state": "Massachusetts",
+      "region": "northeast",
+      "locations": [
+        {
+          "name": "Springfield Rail Yard",
+          "type": "rail",
+          "cargo": [
+            "machinery",
+            "bulk"
+          ]
+        },
+        {
+          "name": "Pioneer Valley Distribution",
+          "type": "distribution",
+          "cargo": [
+            "retail",
+            "food"
+          ]
+        }
+      ],
+      "lat": 42.1015,
+      "lon": -72.5898
+    },
+    "Wilmington, Delaware": {
+      "state": "Delaware",
+      "region": "northeast",
+      "locations": [
+        {
+          "name": "Port of Wilmington",
+          "type": "port",
+          "cargo": [
+            "container",
+            "refrigerated"
+          ]
+        },
+        {
+          "name": "Wilmington Chemical Terminal",
+          "type": "terminal",
+          "cargo": [
+            "bulk",
+            "general"
+          ]
+        }
+      ],
+      "lat": 39.746,
+      "lon": -75.5466
+    },
+    "Fort Smith": {
+      "state": "Arkansas",
+      "region": "mid_south",
+      "locations": [
+        {
+          "name": "River Valley Distribution",
+          "type": "distribution",
+          "cargo": [
+            "retail",
+            "general"
+          ]
+        },
+        {
+          "name": "Fort Smith Freight Terminal",
+          "type": "terminal",
+          "cargo": [
+            "machinery",
+            "bulk"
+          ]
+        }
+      ],
+      "lat": 35.3859,
+      "lon": -94.3986
+    },
+    "Dover": {
+      "state": "Delaware",
+      "region": "northeast",
+      "locations": [
+        {
+          "name": "Dover Distribution Center",
+          "type": "distribution",
+          "cargo": [
+            "retail",
+            "food"
+          ]
+        },
+        {
+          "name": "Kent County Warehouse",
+          "type": "warehouse",
+          "cargo": [
+            "general",
+            "electronics"
+          ]
+        }
+      ],
+      "lat": 39.1582,
+      "lon": -75.5244
+    },
+    "Bangor": {
+      "state": "Maine",
+      "region": "northeast",
+      "locations": [
+        {
+          "name": "Bangor Freight Terminal",
+          "type": "terminal",
+          "cargo": [
+            "general",
+            "food"
+          ]
+        },
+        {
+          "name": "Penobscot Distribution",
+          "type": "distribution",
+          "cargo": [
+            "retail",
+            "refrigerated"
+          ]
+        }
+      ],
+      "lat": 44.8012,
+      "lon": -68.7778
+    },
+    "Duluth": {
+      "state": "Minnesota",
+      "region": "great_lakes",
+      "locations": [
+        {
+          "name": "Port of Duluth-Superior",
+          "type": "port",
+          "cargo": [
+            "bulk",
+            "container"
+          ]
+        },
+        {
+          "name": "Twin Ports Distribution",
+          "type": "distribution",
+          "cargo": [
+            "retail",
+            "general"
+          ]
+        }
+      ],
+      "lat": 46.7833,
+      "lon": -92.1066
+    },
+    "Gulfport": {
+      "state": "Mississippi",
+      "region": "mid_south",
+      "locations": [
+        {
+          "name": "Port of Gulfport",
+          "type": "port",
+          "cargo": [
+            "container",
+            "refrigerated"
+          ]
+        },
+        {
+          "name": "Gulf Coast Distribution",
+          "type": "distribution",
+          "cargo": [
+            "retail",
+            "food"
+          ]
+        }
+      ],
+      "lat": 30.3674,
+      "lon": -89.0928
+    },
+    "Missoula": {
+      "state": "Montana",
+      "region": "rockies",
+      "locations": [
+        {
+          "name": "Missoula Freight Yard",
+          "type": "rail",
+          "cargo": [
+            "machinery",
+            "bulk"
+          ]
+        },
+        {
+          "name": "Bitterroot Distribution",
+          "type": "distribution",
+          "cargo": [
+            "retail",
+            "general"
+          ]
+        }
+      ],
+      "lat": 46.8721,
+      "lon": -113.994
+    },
+    "Portsmouth": {
+      "state": "New Hampshire",
+      "region": "northeast",
+      "locations": [
+        {
+          "name": "Port of New Hampshire",
+          "type": "port",
+          "cargo": [
+            "bulk",
+            "general"
+          ]
+        },
+        {
+          "name": "Seacoast Distribution",
+          "type": "distribution",
+          "cargo": [
+            "retail",
+            "food"
+          ]
+        }
+      ],
+      "lat": 43.0718,
+      "lon": -70.7626
+    },
+    "Bismarck": {
+      "state": "North Dakota",
+      "region": "heartland",
+      "locations": [
+        {
+          "name": "Bismarck Distribution Center",
+          "type": "distribution",
+          "cargo": [
+            "retail",
+            "general"
+          ]
+        },
+        {
+          "name": "Missouri Valley Warehouse",
+          "type": "warehouse",
+          "cargo": [
+            "machinery",
+            "bulk"
+          ]
+        }
+      ],
+      "lat": 46.8083,
+      "lon": -100.7837
+    },
+    "Rapid City": {
+      "state": "South Dakota",
+      "region": "heartland",
+      "locations": [
+        {
+          "name": "Black Hills Distribution",
+          "type": "distribution",
+          "cargo": [
+            "retail",
+            "general"
+          ]
+        },
+        {
+          "name": "Rapid City Freight Terminal",
+          "type": "terminal",
+          "cargo": [
+            "machinery",
+            "bulk"
+          ]
+        }
+      ],
+      "lat": 44.0805,
+      "lon": -103.231
+    },
+    "Montpelier": {
+      "state": "Vermont",
+      "region": "northeast",
+      "locations": [
+        {
+          "name": "Montpelier Freight Depot",
+          "type": "terminal",
+          "cargo": [
+            "general",
+            "food"
+          ]
+        },
+        {
+          "name": "Central Vermont Warehouse",
+          "type": "warehouse",
+          "cargo": [
+            "retail",
+            "machinery"
+          ]
+        }
+      ],
+      "lat": 44.2601,
+      "lon": -72.5754
+    },
+    "Morgantown": {
+      "state": "West Virginia",
+      "region": "appalachia",
+      "locations": [
+        {
+          "name": "Morgantown Distribution",
+          "type": "distribution",
+          "cargo": [
+            "retail",
+            "general"
+          ]
+        },
+        {
+          "name": "Monongahela Industrial Park",
+          "type": "industrial_park",
+          "cargo": [
+            "machinery",
+            "bulk"
+          ]
+        }
+      ],
+      "lat": 39.6295,
+      "lon": -79.9559
+    },
+    "Rock Springs": {
+      "state": "Wyoming",
+      "region": "rockies",
+      "locations": [
+        {
+          "name": "Rock Springs Freight Terminal",
+          "type": "terminal",
+          "cargo": [
+            "bulk",
+            "machinery"
+          ]
+        },
+        {
+          "name": "Sweetwater Distribution",
+          "type": "distribution",
+          "cargo": [
+            "retail",
+            "general"
+          ]
+        }
+      ],
+      "lat": 41.5875,
+      "lon": -109.2029
+    },
+    "Newport": {
+      "state": "Rhode Island",
+      "region": "northeast",
+      "locations": [
+        {
+          "name": "Newport Distribution",
+          "type": "distribution",
+          "cargo": [
+            "retail",
+            "general"
+          ]
+        },
+        {
+          "name": "Aquidneck Warehouse",
+          "type": "warehouse",
+          "cargo": [
+            "food",
+            "general"
+          ]
+        }
+      ],
+      "lat": 41.4901,
+      "lon": -71.3128
+    },
+    "Tacoma": {
+      "state": "Washington",
+      "region": "pacific_northwest",
+      "locations": [
+        {
+          "name": "Husky Terminal",
+          "type": "port_terminal",
+          "source_note": "Husky Terminal, Northwest Seaport Alliance container terminal, Port of Tacoma."
+        },
+        {
+          "name": "Washington United Terminals",
+          "type": "intermodal",
+          "source_note": "Washington United Terminals on the Blair Waterway, with on-dock Hyundai intermodal yard, Port of Tacoma."
+        },
+        {
+          "name": "Frederickson Distribution Center",
+          "type": "distribution",
+          "source_note": "Frederickson industrial/distribution area south of Tacoma (Amazon, IKEA and other DCs)."
+        }
+      ],
+      "lat": 47.2529,
+      "lon": -122.4443
+    },
+    "Everett": {
+      "state": "Washington",
+      "region": "pacific_northwest",
+      "locations": [
+        {
+          "name": "Port of Everett",
+          "type": "port",
+          "source_note": "Port of Everett seaport, the region's premier breakbulk facility and third-largest container port in Washington."
+        },
+        {
+          "name": "Boeing Everett Factory",
+          "type": "manufacturing_plant",
+          "source_note": "Boeing Everett widebody assembly plant, served by rail and I-5/US-2."
+        },
+        {
+          "name": "Mount Baker Terminal",
+          "type": "rail",
+          "source_note": "Port of Everett barge-to-rail facility handling oversized aerospace containers."
+        }
+      ],
+      "lat": 47.979,
+      "lon": -122.2021
+    },
+    "Olympia": {
+      "state": "Washington",
+      "region": "pacific_northwest",
+      "locations": [
+        {
+          "name": "Port of Olympia Marine Terminal",
+          "type": "port",
+          "source_note": "Port of Olympia deepwater marine terminal on Budd Inlet; timber and wind-energy breakbulk, on-dock rail."
+        },
+        {
+          "name": "Lacey Commerce Business Center",
+          "type": "distribution",
+          "source_note": "Light-industrial and warehouse/distribution space in Lacey, east of Olympia."
+        }
+      ],
+      "lat": 47.0379,
+      "lon": -122.9007
+    },
+    "Yakima": {
+      "state": "Washington",
+      "region": "pacific_northwest",
+      "locations": [
+        {
+          "name": "Washington Fruit & Produce",
+          "type": "food_processor",
+          "source_note": "Washington Fruit & Produce apple-packing plant with controlled-atmosphere storage on River Road, Yakima."
+        },
+        {
+          "name": "Price Cold Storage & Packing",
+          "type": "cold_storage",
+          "source_note": "Price Cold Storage & Packing apple/pear/cherry packing and cold storage, Yakima."
+        },
+        {
+          "name": "Yakima Fruit & Cold Storage",
+          "type": "cold_storage",
+          "source_note": "Yakima Fruit & Cold Storage Co., Central Washington tree-fruit storage and shipping."
+        }
+      ],
+      "lat": 46.6021,
+      "lon": -120.5059
+    },
+    "Medford": {
+      "state": "Oregon",
+      "region": "pacific_northwest",
+      "locations": [
+        {
+          "name": "Harry & David Distribution Center",
+          "type": "distribution",
+          "source_note": "Harry & David headquarters fulfillment/distribution operation, Medford."
+        },
+        {
+          "name": "Naumes Fruit Packing",
+          "type": "food_processor",
+          "source_note": "Naumes Inc., Medford-based pear and tree-fruit grower-packer-shipper."
+        },
+        {
+          "name": "FedEx Ground Terminal",
+          "type": "parcel_hub",
+          "source_note": "FedEx Ground trucking and ground-distribution terminal in the Medford/Central Point area."
+        }
+      ],
+      "lat": 42.3265,
+      "lon": -122.8756
+    },
+    "Roseburg": {
+      "state": "Oregon",
+      "region": "pacific_northwest",
+      "locations": [
+        {
+          "name": "Roseburg Forest Products Dillard Sawmill",
+          "type": "lumber_paper",
+          "source_note": "Roseburg Forest Products Dillard stud sawmill, one of the largest in North America."
+        },
+        {
+          "name": "Roseburg Forest Products Dillard MDF",
+          "type": "construction_materials_yard",
+          "source_note": "Roseburg Forest Products Dillard particleboard/MDF engineered-wood plant."
+        }
+      ],
+      "lat": 43.2165,
+      "lon": -123.3417
+    },
+    "Bellingham": {
+      "state": "Washington",
+      "region": "pacific_northwest",
+      "locations": [
+        {
+          "name": "Bellingham Shipping Terminal",
+          "type": "port_terminal",
+          "source_note": "Port of Bellingham shipping terminal handling breakbulk and clean-bulk cargo."
+        },
+        {
+          "name": "Bellingham Cold Storage",
+          "type": "cold_storage",
+          "source_note": "Bellingham Cold Storage, a major private deepwater cold-storage terminal (seafood and perishables)."
+        },
+        {
+          "name": "BP Cherry Point Refinery",
+          "type": "chemical_petroleum_terminal",
+          "source_note": "BP Cherry Point refinery north of Bellingham, the largest refinery in Washington."
+        }
+      ],
+      "lat": 48.7519,
+      "lon": -122.4787
+    },
+    "Pendleton": {
+      "state": "Oregon",
+      "region": "pacific_northwest",
+      "locations": [
+        {
+          "name": "United Grain Pendleton Elevator",
+          "type": "farm_elevator",
+          "source_note": "United Grain Corp. Pendleton grain elevator (former Grain Craft/PGG assets), Columbia Plateau wheat."
+        },
+        {
+          "name": "Pendleton Woolen Mills",
+          "type": "manufacturing_plant",
+          "source_note": "Pendleton Woolen Mills, historic wool textile mill in Pendleton."
+        },
+        {
+          "name": "Cubework Pendleton Warehouse",
+          "type": "warehouse",
+          "source_note": "Cubework flexible warehouse/distribution space, Pendleton."
+        }
+      ],
+      "lat": 45.6721,
+      "lon": -118.7886
+    },
+    "Asheville": {
+      "state": "North Carolina",
+      "region": "appalachia",
+      "locations": [
+        {
+          "name": "Pratt & Whitney Aerospace",
+          "type": "manufacturing_plant",
+          "source_note": "Pratt & Whitney turbine-airfoil plant in south Asheville (~1M sq ft)."
+        },
+        {
+          "name": "New Belgium Brewing Company",
+          "type": "food_processor",
+          "source_note": "New Belgium Brewing's East Coast brewery, Asheville River Arts District."
+        }
+      ],
+      "lat": 35.5951,
+      "lon": -82.5515
+    },
+    "Johnson City": {
+      "state": "Tennessee",
+      "region": "appalachia",
+      "locations": [
+        {
+          "name": "American Water Heater Company",
+          "type": "manufacturing_plant",
+          "source_note": "American Water Heater Company (A.O. Smith), residential/commercial water heaters, Johnson City."
+        },
+        {
+          "name": "Mullican Flooring",
+          "type": "lumber_paper",
+          "source_note": "Mullican Flooring, hardwood flooring manufacturer headquartered in Johnson City."
+        }
+      ],
+      "lat": 36.3134,
+      "lon": -82.3535
+    },
+    "Harrisonburg": {
+      "state": "Virginia",
+      "region": "appalachia",
+      "locations": [
+        {
+          "name": "Cargill Turkey Processing",
+          "type": "food_processor",
+          "source_note": "Cargill turkey processing and cooked-meats operation, Shenandoah Valley (~1,800 employees)."
+        },
+        {
+          "name": "Pilgrim's Pride Poultry Plant",
+          "type": "food_processor",
+          "source_note": "Pilgrim's Pride poultry processing, Harrisonburg."
+        },
+        {
+          "name": "Harrisonburg Feed Mill",
+          "type": "farm_elevator",
+          "source_note": "Poultry-industry feed mill serving the Shenandoah Valley grower network."
+        }
+      ],
+      "lat": 38.4496,
+      "lon": -78.8689
+    },
+    "Winchester": {
+      "state": "Virginia",
+      "region": "appalachia",
+      "locations": [
+        {
+          "name": "Rubbermaid Commercial Products",
+          "type": "distribution",
+          "source_note": "Rubbermaid Commercial Products distribution center, Stonewall Industrial Park off I-81 Exit 317."
+        },
+        {
+          "name": "HP Hood Dairy",
+          "type": "cold_storage",
+          "source_note": "HP Hood dairy plant and cold storage, Winchester."
+        },
+        {
+          "name": "Kraft Heinz Plant",
+          "type": "food_processor",
+          "source_note": "Kraft Heinz food-manufacturing plant, Winchester/Frederick County."
+        }
+      ],
+      "lat": 39.1857,
+      "lon": -78.1633
+    },
+    "Hagerstown": {
+      "state": "Maryland",
+      "region": "appalachia",
+      "locations": [
+        {
+          "name": "Volvo Group Powertrain Plant",
+          "type": "automotive_plant",
+          "source_note": "Volvo/Mack Trucks powertrain plant (engines, transmissions, axles), 1.5M sq ft, Hagerstown."
+        },
+        {
+          "name": "FedEx Ground Terminal",
+          "type": "parcel_hub",
+          "source_note": "FedEx Ground/FedEx Freight distribution at the I-70/I-81 logistics crossroads."
+        }
+      ],
+      "lat": 39.6418,
+      "lon": -77.72
+    },
+    "Beckley": {
+      "state": "West Virginia",
+      "region": "appalachia",
+      "locations": [
+        {
+          "name": "Beckley Coal Terminal",
+          "type": "mine_quarry",
+          "source_note": "Coal loadout/terminal on the Norfolk Southern line, southern West Virginia coalfields hub."
+        },
+        {
+          "name": "Raleigh County Distribution Center",
+          "type": "distribution",
+          "source_note": "Regional retail/distribution serving southern West Virginia at the I-64/I-77/US-19 junction."
+        }
+      ],
+      "lat": 37.7782,
+      "lon": -81.1882
+    },
+    "Columbia, Missouri": {
+      "state": "Missouri",
+      "region": "heartland",
+      "locations": [
+        {
+          "name": "3M Columbia Plant",
+          "type": "manufacturing_plant",
+          "source_note": "3M plant making medical filtration/diagnostic products and stethoscopes, Columbia."
+        },
+        {
+          "name": "Kraft Heinz Oscar Mayer Plant",
+          "type": "food_processor",
+          "source_note": "Kraft Heinz Oscar Mayer plant, 24/7 hot dog production, Columbia."
+        },
+        {
+          "name": "Buske Logistics Distribution Center",
+          "type": "distribution",
+          "source_note": "Third-party logistics/distribution center on the I-70 corridor between St. Louis and Kansas City."
+        }
+      ],
+      "lat": 38.9517,
+      "lon": -92.3341
+    },
+    "Sioux City": {
+      "state": "Iowa",
+      "region": "heartland",
+      "locations": [
+        {
+          "name": "Seaboard Triumph Foods",
+          "type": "food_processor",
+          "source_note": "Seaboard Triumph Foods fresh pork plant (~20,000 hogs/day), Bridgeport West Industrial Park, Sioux City."
+        },
+        {
+          "name": "CF Industries Port Neal",
+          "type": "chemical_petroleum_terminal",
+          "source_note": "CF Industries Port Neal nitrogen-fertilizer complex on the Missouri River south of Sioux City."
+        },
+        {
+          "name": "Sioux City Grain Terminal",
+          "type": "farm_elevator",
+          "source_note": "Grain and ethanol shipping terminal serving the upper-Midwest ag belt."
+        }
+      ],
+      "lat": 42.4999,
+      "lon": -96.4003
+    },
+    "Grand Island": {
+      "state": "Nebraska",
+      "region": "heartland",
+      "locations": [
+        {
+          "name": "JBS Grand Island Beef Plant",
+          "type": "food_processor",
+          "source_note": "JBS USA beef processing plant, central Nebraska cattle country, exporting to 30+ countries."
+        },
+        {
+          "name": "Case IH Grand Island Plant",
+          "type": "manufacturing_plant",
+          "source_note": "CNH/Case IH plant building Axial-Flow combines and hay & forage equipment, Grand Island."
+        },
+        {
+          "name": "Hornady Manufacturing",
+          "type": "manufacturing_plant",
+          "source_note": "Hornady Manufacturing, family-owned ammunition maker headquartered in Grand Island."
+        }
+      ],
+      "lat": 40.9264,
+      "lon": -98.342
+    },
+    "North Platte": {
+      "state": "Nebraska",
+      "region": "heartland",
+      "locations": [
+        {
+          "name": "Union Pacific Bailey Yard",
+          "type": "rail",
+          "source_note": "Union Pacific Bailey Yard, the world's largest railroad classification yard (~2,850 acres, 10,000 cars/day)."
+        },
+        {
+          "name": "North Platte Grain Terminal",
+          "type": "farm_elevator",
+          "source_note": "Grain and feedlot-supply shipping serving western Nebraska."
+        }
+      ],
+      "lat": 41.1239,
+      "lon": -100.7654
+    },
+    "Joplin": {
+      "state": "Missouri",
+      "region": "heartland",
+      "locations": [
+        {
+          "name": "CFI Freight Terminal",
+          "type": "cross_dock",
+          "source_note": "Contract Freighters, Inc. (CFI) truckload carrier terminal, headquartered in Joplin since 1951."
+        },
+        {
+          "name": "Eagle Picher Technologies",
+          "type": "manufacturing_plant",
+          "source_note": "Eagle Picher Technologies battery and defense-electronics manufacturing, Joplin."
+        }
+      ],
+      "lat": 37.0842,
+      "lon": -94.5133
+    },
+    "Rolla": {
+      "state": "Missouri",
+      "region": "heartland",
+      "locations": [
+        {
+          "name": "Royal Canin Pet Food Plant",
+          "type": "food_processor",
+          "source_note": "Royal Canin (Mars) pet food manufacturing plant, Rolla."
+        },
+        {
+          "name": "Brewer Science",
+          "type": "manufacturing_plant",
+          "source_note": "Brewer Science microelectronic-materials manufacturing and shipping campus, Rolla."
+        }
+      ],
+      "lat": 37.9514,
+      "lon": -91.7713
+    },
+    "San Angelo": {
+      "state": "Texas",
+      "region": "southern_plains",
+      "locations": [
+        {
+          "name": "Ethicon Medical Devices",
+          "type": "manufacturing_plant",
+          "source_note": "Ethicon (Johnson & Johnson) suture and surgical-device plant, San Angelo."
+        },
+        {
+          "name": "San Angelo Oilfield Terminal",
+          "type": "chemical_petroleum_terminal",
+          "source_note": "Permian Basin oil-and-gas services and terminal serving the Concho Valley."
+        }
+      ],
+      "lat": 31.4638,
+      "lon": -100.437
+    },
+    "Lawton": {
+      "state": "Oklahoma",
+      "region": "southern_plains",
+      "locations": [
+        {
+          "name": "Goodyear Tire Plant",
+          "type": "manufacturing_plant",
+          "source_note": "Goodyear's largest global tire manufacturing plant, Lawton."
+        },
+        {
+          "name": "Republic Paperboard",
+          "type": "lumber_paper",
+          "source_note": "Republic Paperboard gypsum-board paper mill, Lawton."
+        }
+      ],
+      "lat": 34.6086,
+      "lon": -98.3903
+    },
+    "Salina": {
+      "state": "Kansas",
+      "region": "southern_plains",
+      "locations": [
+        {
+          "name": "Great Plains Manufacturing",
+          "type": "manufacturing_plant",
+          "source_note": "Great Plains Manufacturing / Kubota agricultural and compact-loader equipment plant, Salina."
+        },
+        {
+          "name": "Schwan's Food Plant",
+          "type": "food_processor",
+          "source_note": "Schwan's frozen-food manufacturing, Salina."
+        }
+      ],
+      "lat": 38.8403,
+      "lon": -97.6114
+    },
+    "Enid": {
+      "state": "Oklahoma",
+      "region": "southern_plains",
+      "locations": [
+        {
+          "name": "Enid Terminal Grain Elevators",
+          "type": "farm_elevator",
+          "source_note": "Enid terminal grain elevators (ADM, Cargill, Continental), among the largest grain-storage capacity in the US."
+        },
+        {
+          "name": "Enid Energy Terminal",
+          "type": "chemical_petroleum_terminal",
+          "source_note": "Oil-and-gas gathering and terminal serving the STACK play, Enid."
+        }
+      ],
+      "lat": 36.3956,
+      "lon": -97.8784
+    },
+    "Dodge City": {
+      "state": "Kansas",
+      "region": "southern_plains",
+      "locations": [
+        {
+          "name": "Cargill Meat Solutions",
+          "type": "food_processor",
+          "source_note": "Cargill Meat Solutions beef plant (~6,000 head/day, 1,400 acres), Dodge City."
+        },
+        {
+          "name": "National Beef Dodge City",
+          "type": "food_processor",
+          "source_note": "National Beef Packing plant, Dodge City."
+        }
+      ],
+      "lat": 37.7528,
+      "lon": -100.0171
+    },
+    "Garden City": {
+      "state": "Kansas",
+      "region": "southern_plains",
+      "locations": [
+        {
+          "name": "Tyson Fresh Meats",
+          "type": "food_processor",
+          "source_note": "Tyson Fresh Meats beef plant at Holcomb near Garden City (~6,000 head/day)."
+        },
+        {
+          "name": "Garden City Grain & Feed Terminal",
+          "type": "farm_elevator",
+          "source_note": "Grain and feedlot-supply shipping for the southwest Kansas cattle belt."
+        }
+      ],
+      "lat": 37.9717,
+      "lon": -100.8727
+    }
+  }
+}

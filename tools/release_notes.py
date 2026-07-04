@@ -18,9 +18,9 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 CHANGELOG_PATH = Path("CHANGELOG.md")
 NIGHTLY_HEADER = (
-    "Automated developer snapshot of the dev branch, for players who want "
-    "the newest features before the next stable release. Expect rough edges; "
-    "your save files stay compatible whenever possible, but back them up first."
+    "Preview snapshot for players who want the newest features before the next "
+    "stable release. Expect rough edges; your save files stay compatible "
+    "whenever possible, but back them up first."
 )
 SECTION_ORDER = ("Added", "Changed", "Improved", "Fixed", "Removed", "Deprecated", "Security")
 PLAYER_FACING_SECTIONS = SECTION_ORDER + ("Compatibility",)
@@ -61,9 +61,7 @@ class ReleaseBlock:
 
 
 def run_git(args: list[str]) -> str:
-    return subprocess.check_output(
-        ["git", *args], cwd=ROOT, text=True, encoding="utf-8"
-    ).strip()
+    return subprocess.check_output(["git", *args], cwd=ROOT, text=True, encoding="utf-8").strip()
 
 
 def git_output_lines(args: list[str]) -> list[str]:
@@ -155,8 +153,7 @@ def eligible_sections(markdown: str) -> list[ChangelogSection]:
     return [
         section
         for section in parse_sections(markdown)
-        if section.title in PLAYER_FACING_SECTIONS
-        and section.title not in INTERNAL_SECTIONS
+        if section.title in PLAYER_FACING_SECTIONS and section.title not in INTERNAL_SECTIONS
     ]
 
 
@@ -284,14 +281,17 @@ def stable_notes(version: str) -> str:
     return format_sections(parse_sections(block))
 
 
-def nightly_notes(previous_tag: str = "", exclude_notes: str = "") -> str:
+def nightly_notes(
+    previous_tag: str = "",
+    exclude_notes: str = "",
+    exclude_stable_notes: str = "",
+) -> str:
     changelog_text = changelog_file().read_text(encoding="utf-8")
     excluded_entries = excluded_entries_from_notes(exclude_notes)
+    excluded_entries.update(excluded_entries_from_notes(exclude_stable_notes))
     released = released_versions()
     if previous_tag:
-        sections = sections_added_since(
-            previous_tag, changelog_text, excluded_entries, released
-        )
+        sections = sections_added_since(previous_tag, changelog_text, excluded_entries, released)
     else:
         sections = nightly_candidate_sections(changelog_text, released)
     body = format_sections(sections)
@@ -309,13 +309,16 @@ def resolve_base(base: str) -> str:
 
 
 def ref_is_ancestor(ancestor: str, descendant: str) -> bool:
-    return subprocess.run(
-        ["git", "merge-base", "--is-ancestor", ancestor, descendant],
-        cwd=ROOT,
-        stdout=subprocess.DEVNULL,
-        stderr=subprocess.DEVNULL,
-        check=False,
-    ).returncode == 0
+    return (
+        subprocess.run(
+            ["git", "merge-base", "--is-ancestor", ancestor, descendant],
+            cwd=ROOT,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+            check=False,
+        ).returncode
+        == 0
+    )
 
 
 def commit_messages(base: str, head: str) -> list[str]:
@@ -350,10 +353,10 @@ def changed_files(base: str, head: str) -> list[str]:
 
 def unreleased_added_entries(base: str, head: str) -> list[str]:
     released = released_versions()
-    base_entries = entries_from_sections(
-        nightly_candidate_sections(changelog_at(base), released)
+    base_entries = entries_from_sections(nightly_candidate_sections(changelog_at(base), released))
+    head_text = (
+        changelog_at(head) if head != "HEAD" else changelog_file().read_text(encoding="utf-8")
     )
-    head_text = changelog_at(head) if head != "HEAD" else changelog_file().read_text(encoding="utf-8")
     return [
         entry
         for section in nightly_candidate_sections(head_text, released)
@@ -434,7 +437,11 @@ def write_notes_command(args: argparse.Namespace) -> int:
             raise SystemExit("stable notes need --version")
         notes = stable_notes(args.version)
     else:
-        notes = nightly_notes(args.previous_tag, args.exclude_notes)
+        notes = nightly_notes(
+            args.previous_tag,
+            args.exclude_notes,
+            getattr(args, "exclude_stable_notes", ""),
+        )
     Path(args.output).write_text(notes + "\n", encoding="utf-8")
     print(f"Wrote release notes to {args.output}.")
     return 0
@@ -450,6 +457,7 @@ def build_parser() -> argparse.ArgumentParser:
         notes.add_argument("--version", default="")
         notes.add_argument("--previous-tag", default="")
         notes.add_argument("--exclude-notes", default="")
+        notes.add_argument("--exclude-stable-notes", default="")
         notes.add_argument("--output", required=True)
 
     should_build = subparsers.add_parser(

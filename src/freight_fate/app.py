@@ -2,15 +2,19 @@
 
 from __future__ import annotations
 
+import contextlib
+import faulthandler
 import logging
 import os
 import sys
+from pathlib import Path
 
 import pygame
 
 from . import __version__
 from .achievements import AchievementAward, award
 from .audio import AudioEngine
+from .controller import ControllerManager
 from .data.world import World, get_world
 from .discord_presence import DiscordPresence
 from .models.economy import Economy
@@ -21,12 +25,37 @@ from .speech import Speech
 from .states.base import State
 
 log = logging.getLogger(__name__)
+# Every spoken line lands here too, so a logged playtest reads as a transcript of
+# what the player heard -- the most faithful record for an audio-first game.
+transcript = logging.getLogger("freight_fate.transcript")
 
 WINDOW_SIZE = (900, 640)
 FPS = 60
+
+_CONTROLLER_EVENTS = frozenset(
+    {
+        pygame.CONTROLLERBUTTONDOWN,
+        pygame.CONTROLLERBUTTONUP,
+        pygame.CONTROLLERAXISMOTION,
+        pygame.CONTROLLERDEVICEADDED,
+        pygame.CONTROLLERDEVICEREMOVED,
+    }
+)
 BG_COLOR = (12, 12, 16)
 TEXT_COLOR = (235, 235, 225)
 HILIGHT_COLOR = (255, 210, 90)
+
+
+def _stop_main_speech(speech) -> None:
+    stop = getattr(speech, "stop_main", None) or getattr(speech, "stop", None)
+    if stop is not None:
+        stop()
+
+
+def _stop_event_speech(speech) -> None:
+    stop = getattr(speech, "stop_event", None)
+    if stop is not None:
+        stop()
 
 
 class GameContext:
@@ -36,6 +65,7 @@ class GameContext:
         self._app = app
         self.speech: Speech = app.speech
         self.audio: AudioEngine = app.audio
+        self.controller: ControllerManager = app.controller
         self.settings: Settings = app.settings
         self.world: World = app.world
         self.economy: Economy = app.economy
@@ -63,6 +93,7 @@ class GameContext:
         return self._real_weather
 
     def say(self, text: str, interrupt: bool = True) -> None:
+        transcript.info("%s", text)
         self.speech.say(text, interrupt)
 
     def say_event(self, text: str, interrupt: bool = True) -> None:
@@ -74,16 +105,29 @@ class GameContext:
         screen reader.
 
         With it disabled the player has chosen to hear events through their
-        screen reader. There we never interrupt, even for critical events: an
-        interrupt would chop the screen reader off mid-word as it reads menus,
-        keystrokes, or a prior announcement. Queuing instead lets the event
-        follow the current utterance, which the screen reader handles in its
-        own time.
+        screen reader. Urgent events first flush stale game speech, then speak
+        as a fresh queued utterance so old messages do not bury the warning.
         """
+        transcript.info("[event] %s", text)
         if self.settings.sapi_events:
             self.speech.say_event(text, interrupt)
         else:
+            if interrupt:
+                _stop_main_speech(self.speech)
             self.speech.say(text, interrupt=False)
+
+    def stop_event_speech(self) -> None:
+        _stop_event_speech(self.speech)
+
+    def stop_speech(self) -> None:
+        """Silence all in-progress speech on both channels (main and event).
+
+        Menus and readers speak through the main channel, so the driving-only
+        ``stop_event_speech`` does not quiet them. This silences everything so a
+        single key works as a "stop talking" everywhere in the game.
+        """
+        _stop_main_speech(self.speech)
+        _stop_event_speech(self.speech)
 
     # -- state stack ------------------------------------------------------------
 
@@ -107,20 +151,35 @@ class GameContext:
             self.profile.save()
 
     def apply_volumes(self) -> None:
-        self.audio.set_volumes(master=self.settings.master_volume,
-                               sfx=self.settings.sfx_volume,
-                               music=self.settings.music_volume,
-                               weather=self.settings.weather_volume,
-                               engine=self.settings.engine_volume,
-                               ui=self.settings.ui_volume)
+        self.audio.set_volumes(
+            master=self.settings.master_volume,
+            sfx=self.settings.sfx_volume,
+            music=self.settings.music_volume,
+            weather=self.settings.weather_volume,
+            engine=self.settings.engine_volume,
+            ui=self.settings.ui_volume,
+        )
 
     def apply_presence(self) -> None:
         """Reflect the Discord presence setting (e.g. after a settings change)."""
         self._app.presence.set_enabled(self.settings.discord_presence)
 
+    def apply_controller(self) -> None:
+        """Reflect the controller setting (e.g. after a settings change)."""
+        self.controller.set_enabled(self.settings.controller_enabled)
+
+    def apply_haptics(self) -> None:
+        """Reflect the haptics setting (e.g. after a settings change)."""
+        self.controller.set_haptics_enabled(self.settings.haptics_enabled)
+
+    def control_hint(self, action: str) -> str:
+        """Name a control for a spoken prompt, following the active device."""
+        return self.controller.hint(action)
+
     def apply_speech(self) -> None:
         self.speech.select_event_backend(
-            self.settings.event_backend if self.settings.sapi_events else None)
+            self.settings.event_backend if self.settings.sapi_events else None
+        )
         # If the saved voice was not on this machine (e.g. a Windows save's
         # SAPI opened on macOS), record the one actually used so the menu and
         # later sessions reflect reality.
@@ -128,10 +187,12 @@ class GameContext:
             actual = self.speech.event_backend_name
             if actual not in ("none", "unknown") and actual != self.settings.event_backend:
                 self.settings.event_backend = actual
-        self.speech.configure(rate=self.settings.speech_rate,
-                              pitch=self.settings.speech_pitch,
-                              volume=self.settings.speech_volume,
-                              voice=self.settings.speech_voice or None)
+        self.speech.configure(
+            rate=self.settings.speech_rate,
+            pitch=self.settings.speech_pitch,
+            volume=self.settings.speech_volume,
+            voice=self.settings.speech_voice or None,
+        )
 
     def next_music_track(self, pool_name: str, sequence: tuple[str, ...]) -> str:
         """Advance a session-local music pool without immediate repeats."""
@@ -151,17 +212,20 @@ class GameContext:
         return track
 
     def play_music_sequence(
-            self,
-            pool_name: str,
-            sequence: tuple[str, ...],
-            *,
-            fade_ms: int = 1500,
-            advance: bool = False) -> str:
+        self,
+        pool_name: str,
+        sequence: tuple[str, ...],
+        *,
+        fade_ms: int = 1500,
+        advance: bool = False,
+    ) -> str:
         """Play or refresh a pool without jarring compatible menu restarts."""
-        if (not advance
-                and self._music_rotation_pool is not None
-                and self._music_rotation_track is not None
-                and self._music_rotation_pool[0] == pool_name):
+        if (
+            not advance
+            and self._music_rotation_pool is not None
+            and self._music_rotation_track is not None
+            and self._music_rotation_pool[0] == pool_name
+        ):
             self._music_rotation_pool = (pool_name, sequence)
             return self._music_rotation_track
         track = self.next_music_track(pool_name, sequence)
@@ -179,8 +243,7 @@ class GameContext:
         if self._music_rotation_pool is None or self._music_rotation_track is None:
             return
         self._music_rotation_elapsed_s += max(0.0, dt)
-        if self._music_rotation_elapsed_s < music_track_duration_s(
-                self._music_rotation_track):
+        if self._music_rotation_elapsed_s < music_track_duration_s(self._music_rotation_track):
             return
         pool_name, sequence = self._music_rotation_pool
         self.play_music_sequence(pool_name, sequence, advance=True)
@@ -191,12 +254,13 @@ class GameContext:
         self._music_rotation_elapsed_s = 0.0
 
     def award_achievement(
-            self,
-            achievement_id: str,
-            *,
-            event: bool = False,
-            interrupt: bool = False,
-            announce: bool = True) -> AchievementAward | None:
+        self,
+        achievement_id: str,
+        *,
+        event: bool = False,
+        interrupt: bool = False,
+        announce: bool = True,
+    ) -> AchievementAward | None:
         if self.profile is None:
             return None
         result = award(self.profile, achievement_id)
@@ -215,6 +279,13 @@ class GameContext:
 class App:
     def __init__(self) -> None:
         os.environ.setdefault("PYGAME_HIDE_SUPPORT_PROMPT", "1")
+        # Opt PS4/PS5 pads into HIDAPI rumble so their motors work like Xbox
+        # pads. Must be set before pygame.init(); Xbox/XInput needs no flag.
+        os.environ.setdefault("SDL_JOYSTICK_HIDAPI_PS4_RUMBLE", "1")
+        os.environ.setdefault("SDL_JOYSTICK_HIDAPI_PS5_RUMBLE", "1")
+        if os.environ.get("FREIGHT_FATE_NO_SPEECH"):
+            os.environ["SDL_VIDEODRIVER"] = "dummy"
+            os.environ["SDL_AUDIODRIVER"] = "dummy"
         pygame.init()
         pygame.display.set_caption(f"Freight Fate {__version__}")
         self.screen = pygame.display.set_mode(WINDOW_SIZE)
@@ -228,6 +299,10 @@ class App:
         self.world = get_world()
         self.economy = Economy()
         self.presence = DiscordPresence(enabled=self.settings.discord_presence)
+        self.controller = ControllerManager(
+            enabled=self.settings.controller_enabled,
+            haptics=self.settings.haptics_enabled,
+        )
         self.ctx = GameContext(self)
         self.ctx.apply_volumes()
         self.ctx.apply_speech()
@@ -263,6 +338,18 @@ class App:
             self.states.pop().exit()
         self.push_state(state)
 
+    def _dispatch_controller(self, event: pygame.event.Event) -> None:
+        """Feed a controller event to the manager, then to the active state.
+
+        The manager updates its cached axis/modifier/hot-plug state first;
+        only button presses are then handed to the state, which routes them
+        to the same methods keyboard events already call.
+        """
+        self.controller.process_event(event)
+        button_event = event.type in (pygame.CONTROLLERBUTTONDOWN, pygame.CONTROLLERBUTTONUP)
+        if button_event and self.controller.active and self.state is not None:
+            self.state.handle_controller(event, self.controller)
+
     # -- main loop ------------------------------------------------------------
 
     def run(self, max_frames: int | None = None) -> None:
@@ -272,7 +359,7 @@ class App:
 
         self.running = True
         self.push_state(MainMenuState(self.ctx))
-        self.presence.start()   # after init; never blocks if Discord is absent
+        self.presence.start()  # after init; never blocks if Discord is absent
         frames = 0
         try:
             while self.running:
@@ -280,8 +367,28 @@ class App:
                 for event in pygame.event.get():
                     if event.type == pygame.QUIT:
                         self.running = False
+                    elif event.type in _CONTROLLER_EVENTS:
+                        self._dispatch_controller(event)
                     elif self.state is not None:
+                        if event.type == pygame.KEYDOWN:
+                            self.controller.note_keyboard()
                         self.state.handle_event(event)
+                # Auto-repeat (held D-pad left/right) and analog smoothing.
+                # Synthetic repeats go straight to the state (bypassing the
+                # manager, whose press state must not be reset) and only where
+                # the menu wants adjust-repeat -- driving keeps D-pad discrete.
+                repeats = self.controller.tick(dt)
+                state = self.state
+                if state is not None and getattr(state, "wants_controller_repeat", False):
+                    for event in repeats:
+                        state.handle_controller(event, self.controller)
+                if self.controller.take_disconnect():
+                    self.ctx.say(
+                        "Controller disconnected. You can keep playing with the "
+                        "keyboard, or reconnect your controller.",
+                    )
+                    if self.state is not None:
+                        self.state.on_controller_disconnect()
                 if self.state is not None:
                     self.state.update(dt)
                     self.presence.update(self.state.presence())
@@ -322,6 +429,7 @@ class App:
             self.ctx.profile.save()
         self.settings.save()
         self.presence.shutdown()
+        self.controller.shutdown()
         self.audio.shutdown()
         self.speech.shutdown()
         pygame.quit()
@@ -338,27 +446,50 @@ def _configure_logging() -> None:
     from . import updater
 
     packaged = updater.is_frozen()
-    default_level = "INFO" if packaged else "WARNING"
+    # An explicit log file (set for playtests/observation) forces file output and
+    # an INFO default even from a source checkout, so a session can be reviewed
+    # after the fact without streaming to a console.
+    explicit_log_file = os.environ.get("FREIGHT_FATE_LOG_FILE")
+    default_level = "INFO" if (packaged or explicit_log_file) else "WARNING"
     level = os.environ.get("FREIGHT_FATE_LOG", default_level)
     handlers = None
 
-    if packaged:
+    log_path = None
+    if explicit_log_file:
+        log_path = Path(explicit_log_file)
+    elif packaged:
         from .models.profile import game_root
 
+        log_path = game_root() / "logs" / "game.log"
+    if log_path is not None:
         try:
-            log_path = game_root() / "logs" / "game.log"
             log_path.parent.mkdir(parents=True, exist_ok=True)
+            # Keep the previous run's log as game.prev.log: after a crash the
+            # player relaunches the game to report it, and that relaunch must
+            # not wipe the evidence.
+            if log_path.exists():
+                # Rotation is best-effort; a locked file still gets a fresh log.
+                prev = log_path.with_name(f"{log_path.stem}.prev{log_path.suffix}")
+                with contextlib.suppress(OSError):
+                    log_path.replace(prev)
             handlers = [logging.FileHandler(log_path, mode="w", encoding="utf-8")]
+            # Crashes inside native libraries (audio, video) kill the process
+            # without ever reaching Python logging; faulthandler writes the
+            # tracebacks straight to the log file as the process dies.
+            faulthandler.enable(file=handlers[0].stream)
         except OSError:
             pass  # unwritable disk: console-only is the best we can do
     logging.basicConfig(
-        level=level, handlers=handlers, force=True,
-        format="%(asctime)s %(levelname)s %(name)s: %(message)s")
+        level=level,
+        handlers=handlers,
+        force=True,
+        format="%(asctime)s %(levelname)s %(name)s: %(message)s",
+    )
 
 
 def main() -> int:
     _configure_logging()
-    smoke = "--smoke" in sys.argv[1:]   # CI: boot, render a few frames, exit 0
+    smoke = "--smoke" in sys.argv[1:]  # CI: boot, render a few frames, exit 0
     from .single_instance import SingleInstanceGuard
 
     guard = SingleInstanceGuard()
@@ -366,6 +497,15 @@ def main() -> int:
         log.warning("Freight Fate is already running.")
         return 0
     try:
+        if smoke:
+            # The build check must prove world data loads (frozen builds
+            # carry it baked into the executable, not as files) and that
+            # sound assets are readable (frozen builds ship a pack file).
+            from .audio import verify_sound_assets
+            from .data.world import get_world
+
+            get_world()
+            verify_sound_assets()
         App().run(max_frames=5 if smoke else None)
     except Exception:
         log.exception("Fatal error")

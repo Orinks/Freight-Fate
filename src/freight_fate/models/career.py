@@ -15,12 +15,14 @@ ENDORSEMENT_LEVELS = {
 }
 
 ENDORSEMENT_ANNOUNCEMENTS = {
-    "refrigerated": ("You earned the refrigerated endorsement. "
-                     "Food and refrigerated cargo jobs are now available."),
-    "heavy_haul": ("You earned the heavy-haul endorsement. "
-                   "Heavy machinery jobs are now available."),
-    "high_value": ("You earned the high-value endorsement. "
-                   "Electronics jobs are now available."),
+    "refrigerated": (
+        "You earned the refrigerated endorsement. "
+        "Food and refrigerated cargo jobs are now available."
+    ),
+    "heavy_haul": (
+        "You earned the heavy-haul endorsement. Heavy machinery jobs are now available."
+    ),
+    "high_value": ("You earned the high-value endorsement. Electronics jobs are now available."),
 }
 
 
@@ -38,7 +40,7 @@ def level_for_xp(xp: float) -> int:
 @dataclass
 class Career:
     xp: float = 0.0
-    reputation: float = 50.0       # 0..100
+    reputation: float = 50.0  # 0..100
     deliveries: int = 0
     on_time_deliveries: int = 0
     total_miles: float = 0.0
@@ -52,8 +54,9 @@ class Career:
     def endorsements(self) -> set[str]:
         return {e for e, lvl in ENDORSEMENT_LEVELS.items() if self.level >= lvl}
 
-    def record_delivery(self, miles: float, pay: float, on_time: bool,
-                        damage_pct: float) -> list[str]:
+    def record_delivery(
+        self, miles: float, pay: float, on_time: bool, damage_pct: float
+    ) -> list[str]:
         """Apply a finished delivery; returns announcements (level ups etc.)."""
         before_level = self.level
         before_endorsements = self.endorsements
@@ -80,8 +83,10 @@ class Career:
 
     def summary(self) -> str:
         pct = (100 * self.on_time_deliveries / self.deliveries) if self.deliveries else 100
-        return (f"Level {self.level} driver. {self.xp:.0f} experience. "
-                f"Reputation {self.reputation:.0f} out of 100. "
-                f"{self.deliveries} deliveries, {pct:.0f} percent on time. "
-                f"{self.total_miles:,.0f} lifetime miles, "
-                f"{self.total_earnings:,.0f} dollars earned.")
+        return (
+            f"Level {self.level} driver. {self.xp:.0f} experience. "
+            f"Reputation {self.reputation:.0f} out of 100. "
+            f"{self.deliveries} deliveries, {pct:.0f} percent on time. "
+            f"{self.total_miles:,.0f} lifetime miles, "
+            f"{self.total_earnings:,.0f} dollars earned."
+        )

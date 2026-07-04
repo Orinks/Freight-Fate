@@ -121,8 +121,9 @@ def test_city_menu_uses_milestone_music(monkeypatch):
 
     app = App()
     played = []
-    monkeypatch.setattr(app.ctx.audio, "play_music",
-                        lambda track, fade_ms=1500: played.append(track))
+    monkeypatch.setattr(
+        app.ctx.audio, "play_music", lambda track, fade_ms=1500: played.append(track)
+    )
     try:
         app.ctx.profile = Profile(name="Fleet", current_city="Chicago")
         app.ctx.profile.owned_trucks.append("heavy_hauler")
@@ -143,8 +144,9 @@ def test_main_menu_uses_latest_save_milestone_music(monkeypatch):
 
     app = App()
     played = []
-    monkeypatch.setattr(app.ctx.audio, "play_music",
-                        lambda track, fade_ms=1500: played.append(track))
+    monkeypatch.setattr(
+        app.ctx.audio, "play_music", lambda track, fade_ms=1500: played.append(track)
+    )
     try:
         app.push_state(MainMenuState(app.ctx))
         assert played[-1] == "menu_coast_to_coast"
@@ -159,8 +161,9 @@ def test_menu_music_pool_advances_without_immediate_repeat(monkeypatch):
 
     app = App()
     played = []
-    monkeypatch.setattr(app.ctx.audio, "play_music",
-                        lambda track, fade_ms=1500: played.append(track))
+    monkeypatch.setattr(
+        app.ctx.audio, "play_music", lambda track, fade_ms=1500: played.append(track)
+    )
     try:
         app.ctx.profile = Profile(name="Menu Pool", current_city="Chicago")
         app.ctx.profile.career.total_miles = 10_000
@@ -180,8 +183,9 @@ def test_menu_music_advances_when_bed_duration_ends(monkeypatch):
 
     app = App()
     played = []
-    monkeypatch.setattr(app.ctx.audio, "play_music",
-                        lambda track, fade_ms=1500: played.append(track))
+    monkeypatch.setattr(
+        app.ctx.audio, "play_music", lambda track, fade_ms=1500: played.append(track)
+    )
     try:
         app.ctx.profile = Profile(name="Menu Timer", current_city="Chicago")
         app.ctx.profile.career.total_miles = 10_000
@@ -204,8 +208,9 @@ def test_menu_reload_refreshes_pool_without_restarting_current_bed(monkeypatch):
 
     app = App()
     played = []
-    monkeypatch.setattr(app.ctx.audio, "play_music",
-                        lambda track, fade_ms=1500: played.append(track))
+    monkeypatch.setattr(
+        app.ctx.audio, "play_music", lambda track, fade_ms=1500: played.append(track)
+    )
     try:
         app.ctx.profile = Profile(name="Menu Reload", current_city="Chicago")
         app.ctx.profile.career.total_miles = 10_000
@@ -231,8 +236,9 @@ def test_menu_theme_rotates_after_its_duration(monkeypatch):
 
     app = App()
     played = []
-    monkeypatch.setattr(app.ctx.audio, "play_music",
-                        lambda track, fade_ms=1500: played.append(track))
+    monkeypatch.setattr(
+        app.ctx.audio, "play_music", lambda track, fade_ms=1500: played.append(track)
+    )
     try:
         app.ctx.profile = Profile(name="Legacy Menu", current_city="Chicago")
         app.push_state(CityMenuState(app.ctx))
@@ -252,10 +258,12 @@ def test_pickup_facility_uses_music_pool_and_keeps_facility_ambience(monkeypatch
     app = App()
     played = []
     ambient = []
-    monkeypatch.setattr(app.ctx.audio, "play_music",
-                        lambda track, fade_ms=1500: played.append(track))
-    monkeypatch.setattr(app.ctx.audio, "set_ambient",
-                        lambda key, volume=1.0: ambient.append((key, volume)))
+    monkeypatch.setattr(
+        app.ctx.audio, "play_music", lambda track, fade_ms=1500: played.append(track)
+    )
+    monkeypatch.setattr(
+        app.ctx.audio, "set_ambient", lambda key, volume=1.0: ambient.append((key, volume))
+    )
     try:
         app.ctx.profile = Profile(name="Pickup Pool", current_city="Denver")
         app.ctx.profile.career.total_miles = 10_000
@@ -279,10 +287,12 @@ def test_destination_facility_uses_music_pool_and_keeps_facility_ambience(monkey
     app = App()
     played = []
     ambient = []
-    monkeypatch.setattr(app.ctx.audio, "play_music",
-                        lambda track, fade_ms=1500: played.append(track))
-    monkeypatch.setattr(app.ctx.audio, "set_ambient",
-                        lambda key, volume=1.0: ambient.append((key, volume)))
+    monkeypatch.setattr(
+        app.ctx.audio, "play_music", lambda track, fade_ms=1500: played.append(track)
+    )
+    monkeypatch.setattr(
+        app.ctx.audio, "set_ambient", lambda key, volume=1.0: ambient.append((key, volume))
+    )
     try:
         app.ctx.profile = Profile(name="Destination Pool", current_city="Denver")
         app.ctx.profile.career.total_miles = 10_000
@@ -307,10 +317,10 @@ def test_delivery_complete_keeps_current_music(monkeypatch):
     app = App()
     played = []
     cues = []
-    monkeypatch.setattr(app.ctx.audio, "play_music",
-                        lambda track, fade_ms=1500: played.append(track))
-    monkeypatch.setattr(app.ctx.audio, "play",
-                        lambda key, **_kwargs: cues.append(key))
+    monkeypatch.setattr(
+        app.ctx.audio, "play_music", lambda track, fade_ms=1500: played.append(track)
+    )
+    monkeypatch.setattr(app.ctx.audio, "play", lambda key, **_kwargs: cues.append(key))
     try:
         app.ctx.profile = Profile(name="Arrival Pool", current_city="Denver")
         app.ctx.profile.career.total_miles = 10_000
@@ -333,8 +343,9 @@ def test_driving_state_uses_selected_drive_music(monkeypatch):
 
     app = App()
     played = []
-    monkeypatch.setattr(app.ctx.audio, "play_music",
-                        lambda track, fade_ms=1500: played.append(track))
+    monkeypatch.setattr(
+        app.ctx.audio, "play_music", lambda track, fade_ms=1500: played.append(track)
+    )
     try:
         app.ctx.profile = Profile(name="Music Test", current_city="Denver")
         job = _denver_to_salt_lake_job()
@@ -361,8 +372,9 @@ def test_night_driving_advances_through_music_pool(monkeypatch):
 
     app = App()
     played = []
-    monkeypatch.setattr(app.ctx.audio, "play_music",
-                        lambda track, fade_ms=1500: played.append(track))
+    monkeypatch.setattr(
+        app.ctx.audio, "play_music", lambda track, fade_ms=1500: played.append(track)
+    )
     try:
         app.ctx.profile = Profile(name="Night Music", current_city="Denver")
         job = _denver_to_salt_lake_job()
@@ -392,8 +404,9 @@ def test_open_road_rotates_in_day_driving_pool(monkeypatch):
 
     app = App()
     played = []
-    monkeypatch.setattr(app.ctx.audio, "play_music",
-                        lambda track, fade_ms=1500: played.append(track))
+    monkeypatch.setattr(
+        app.ctx.audio, "play_music", lambda track, fade_ms=1500: played.append(track)
+    )
     try:
         app.ctx.profile = Profile(name="Day Anchor", current_city="Denver")
         job = _denver_to_salt_lake_job()
@@ -419,8 +432,9 @@ def test_night_haul_rotates_in_night_driving_pool(monkeypatch):
 
     app = App()
     played = []
-    monkeypatch.setattr(app.ctx.audio, "play_music",
-                        lambda track, fade_ms=1500: played.append(track))
+    monkeypatch.setattr(
+        app.ctx.audio, "play_music", lambda track, fade_ms=1500: played.append(track)
+    )
     try:
         app.ctx.profile = Profile(name="Night Anchor", current_city="Denver")
         job = _denver_to_salt_lake_job()
@@ -441,7 +455,8 @@ def test_night_haul_rotates_in_night_driving_pool(monkeypatch):
 
 def test_all_cataloged_music_tracks_exist():
     missing = [
-        track.key for track in ALL_MUSIC_TRACKS
+        track.key
+        for track in ALL_MUSIC_TRACKS
         if not (ASSETS / "music" / f"{track.key}.ogg").exists()
     ]
     assert not missing

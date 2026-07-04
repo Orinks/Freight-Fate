@@ -12,6 +12,7 @@ venv/
 # Tooling caches
 .pytest_cache/
 .ruff_cache/
+.hypothesis/
 .route-cache/
 .coverage
 coverage.xml
@@ -33,6 +34,8 @@ live_*.txt
 
 # Release packaging
 tools/_entry.py
+src/freight_fate/data/_baked_world.py
+src/freight_fate/sounds.pak
 
 # Portable save data (lives in the game directory)
 saves/
@@ -43,3 +46,7 @@ saves/
 # Build-time secrets (ORS_API_KEY for OpenRouteService driving-hgv enrichment).
 # Never bundled or read at runtime; sourced only by the route tooling.
 .env
+
+# Local API key notes used by asset-generation tooling.
+AI API Keys.txt
+*API Keys*.txt

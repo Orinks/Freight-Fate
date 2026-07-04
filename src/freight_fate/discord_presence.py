@@ -268,8 +268,7 @@ class DiscordPresence:
         self._started = True
         self._stop.clear()
         if self._threaded:
-            self._thread = threading.Thread(
-                target=self._run, name="discord-presence", daemon=True)
+            self._thread = threading.Thread(target=self._run, name="discord-presence", daemon=True)
             self._thread.start()
         else:
             self._pump()
@@ -360,15 +359,14 @@ class DiscordPresence:
         if desired is None or desired == last_sent:
             return  # nothing new to show (de-dupe)
         now = self._clock()
-        if (self._last_send_t is not None
-                and now - self._last_send_t < self._min_interval):
+        if self._last_send_t is not None and now - self._last_send_t < self._min_interval:
             return  # throttled; the worker re-checks after the window closes
         try:
             self._rpc.update(  # type: ignore[union-attr]
-                **format_activity(desired, start=self._session_start))
+                **format_activity(desired, start=self._session_start)
+            )
         except Exception:
-            log.debug("Discord presence update failed; will reconnect",
-                      exc_info=True)
+            log.debug("Discord presence update failed; will reconnect", exc_info=True)
             self._close()
             return
         with self._lock:
@@ -381,8 +379,10 @@ class DiscordPresence:
         if self._rpc_factory is None:
             return False
         now = self._clock()
-        if (self._last_connect_attempt is not None
-                and now - self._last_connect_attempt < _RECONNECT_INTERVAL_S):
+        if (
+            self._last_connect_attempt is not None
+            and now - self._last_connect_attempt < _RECONNECT_INTERVAL_S
+        ):
             return False  # back off; Discord is probably not running
         self._last_connect_attempt = now
         rpc = None
@@ -390,8 +390,7 @@ class DiscordPresence:
             rpc = self._rpc_factory(self._client_id)
             rpc.connect()
         except Exception:
-            log.debug("Discord not available; presence stays hidden",
-                      exc_info=True)
+            log.debug("Discord not available; presence stays hidden", exc_info=True)
             # A failed handshake can still leave pypresence's event loop and
             # sockets open; tear them down so nothing leaks (e.g. a wrong app id
             # rejected with InvalidID).

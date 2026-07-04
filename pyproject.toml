@@ -1,6 +1,6 @@
 [project]
 name = "freight-fate"
-version = "1.7.0"
+version = "1.8.0"
 description = "An accessible, audio-first cross-country trucking simulation game"
 readme = "README.md"
 license = { file = "LICENSE" }
@@ -10,7 +10,7 @@ keywords = ["game", "accessibility", "audio-game", "screen-reader", "trucking", 
 classifiers = [
     "Development Status :: 5 - Production/Stable",
     "Intended Audience :: End Users/Desktop",
-    "License :: OSI Approved :: MIT License",
+    "License :: Other/Proprietary License",
     "Operating System :: Microsoft :: Windows",
     "Operating System :: POSIX :: Linux",
     "Operating System :: MacOS",
@@ -30,6 +30,10 @@ dependencies = [
 
 [project.scripts]
 freight-fate = "freight_fate.app:main"
+# Controller input diagnostic: logs the game's GameController events alongside
+# the raw joystick layer to a file, for tracking down pads (e.g. DualSense)
+# whose triggers/shoulders do not map through. Run: uv run controller-diagnostics
+controller-diagnostics = "freight_fate.controller_diagnostics:main"
 
 [project.urls]
 Repository = "https://github.com/Orinks/Freight-fate"
@@ -42,6 +46,8 @@ dev = [
     "pytest-timeout>=2.3",
     "ruff>=0.8",
     "soundfile>=0.14.0",
+    "pre-commit>=4.6.0",
+    "hypothesis>=6.155.7",
 ]
 build = [
     "nuitka>=4.0.8",
@@ -52,6 +58,12 @@ build = [
 tooling = [
     "osmium>=4.0.2",
     "openrouteservice>=2.2.0",
+]
+# Controller input diagnostic (`uv run controller-diagnostics`). It reuses the
+# game's own input stack, so it needs only the core pygame dependency; listed
+# here so the group resolves standalone via `uv run --group controller-diagnostics`.
+controller-diagnostics = [
+    "pygame>=2.6",
 ]
 
 [build-system]
@@ -70,6 +82,7 @@ testpaths = ["tests"]
 # fast with a stack trace instead of stalling the whole run.
 addopts = "-q --timeout=120 --timeout-method=thread"
 markers = [
+    "property: property-based randomized tests",
     "smoke: headless end-to-end smoke tests",
 ]
 

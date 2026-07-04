@@ -1,6 +1,7 @@
+# ruff: noqa: F403,F405
 """World model: cities, freight locations, and the highway network.
 
-Loads ``world.json`` and exposes a graph with Dijkstra-based route finding.
+Loads indexed world data and exposes a graph with Dijkstra-based route finding.
 Route options are produced by re-running the search with already-used legs
 penalized, giving genuinely different alternatives (fastest vs. detour).
 """
@@ -11,872 +12,36 @@ import heapq
 import json
 import re
 import zlib
-from dataclasses import dataclass
 from pathlib import Path
 
-WORLD_PATH = Path(__file__).parent / "world.json"
+from .world_constants import *
+from .world_loader import load_world_data
+from .world_models import *
 
-# Alternate routes should feel like real dispatch choices, not graph leftovers.
-# A little extra mileage is fine for traffic, weather, grades, or avoiding a
-# metro corridor; hundreds of out-of-direction miles on a short lane are not.
+WORLD_PATH = Path(__file__).parent / "world.json"
+WORLD_DATA_PATH = Path(__file__).parent / "world_data"
+WORLD_INDEX_PATH = WORLD_DATA_PATH / "index.json"
+# Alternate routes should feel like dispatch choices, not graph leftovers.
 ALTERNATE_ROUTE_EXTRA_RATIO = 0.22
 ALTERNATE_ROUTE_MIN_EXTRA_MILES = 75.0
 ALTERNATE_ROUTE_MAX_EXTRA_MILES = 550.0
 
 
-@dataclass(frozen=True)
-class Location:
-    name: str
-    type: str
-    cargo: tuple[str, ...]
-    id: str = ""
-    city: str = ""
-    locality: str = ""
-    roles: tuple[str, ...] = ("shipper", "receiver")
-    ships: tuple[str, ...] = ()
-    receives: tuple[str, ...] = ()
-    lat: float = 0.0
-    lon: float = 0.0
-    traits: tuple[str, ...] = ()
-    source_note: str = ""
-    spoken: str = ""
-    template: bool = False
-    min_level: int = 1
+def _load_base_world_data(root: Path) -> dict:
+    """Read the base world, preferring the baked-in module in frozen builds.
 
-    @property
-    def label(self) -> str:
-        return LOCATION_TYPE_LABELS.get(self.type, self.type.replace("_", " "))
-
-    @property
-    def spoken_name(self) -> str:
-        return self.spoken or f"{self.label}: {self.name}"
-
-    @property
-    def display_name(self) -> str:
-        return self.name
-
-
-@dataclass(frozen=True)
-class HomeTerminal:
-    name: str
-    city: str
-    state: str
-    kind: str
-
-    @property
-    def label(self) -> str:
-        return "company terminal" if self.kind == "terminal" else "company yard"
-
-    @property
-    def spoken_name(self) -> str:
-        return f"{self.label}: {self.name}"
-
-    @property
-    def service_area(self) -> str:
-        return f"{self.city}, {self.state}"
-
-
-STOP_TYPE_LABELS = {
-    "truck_stop": "truck stop",
-    "travel_center": "travel center",
-    "fuel_station": "truck fuel station",
-    "service_plaza": "service plaza",
-    "public_rest_area": "public rest area",
-    "truck_parking": "truck parking",
-    "weigh_station": "weigh station",
-    "repair_shop": "repair shop",
-}
-
-PARKING_CERTAINTY_LABELS = {
-    "confirmed": "confirmed truck parking",
-    "likely": "likely truck parking",
-    "limited": "limited truck parking",
-    "unknown": "parking not verified",
-    "none": "no truck parking",
-}
-
-STOP_CURATION_LEVELS = {"curated", "placeholder"}
-
-STOP_DIRECTIONS = {"both", "forward", "reverse"}
-
-POI_DENSITY_SHORT_LEG_MILES = 160.0
-POI_DENSITY_MEDIUM_LEG_MILES = 320.0
-
-POI_ACTIONS = {
-    "park",
-    "save",
-    "break",
-    "sleep",
-    "fuel",
-    "food",
-    "repair",
-    "roadside_assistance",
-    "towing",
-    "inspect",
-}
-
-RAW_POI_TEXT_MARKERS = (
-    "osm_id",
-    "openstreetmap id",
-    "amenity=",
-    "highway=",
-    "operator=",
-    "node/",
-    "way/",
-    "relation/",
-)
-
-TOLL_METHOD_LABELS = {
-    "cash_card": "cash or card",
-    "ticket_system": "ticket system",
-    "transponder": "transponder",
-    "open_road": "open-road tolling",
-    "toll_by_plate": "toll by plate",
-    "ezpass": "E-ZPass",
-}
-
-DEFAULT_POI_ACTIONS = {
-    "truck_stop": ("park", "save", "fuel", "food", "break", "sleep"),
-    "travel_center": ("park", "save", "fuel", "food", "break", "sleep"),
-    "fuel_station": ("park", "save", "fuel", "break"),
-    "service_plaza": ("park", "save", "fuel", "food", "break"),
-    "public_rest_area": ("park", "save", "break", "sleep"),
-    "truck_parking": ("park", "save", "break", "sleep"),
-    "weigh_station": ("inspect",),
-    "repair_shop": ("park", "save", "repair"),
-}
-
-SOURCE_BACKED_POI_ACTIONS = {"repair", "roadside_assistance", "towing"}
-
-FREIGHT_LOCATION_TYPES = {
-    "air_cargo",
-    "automotive_plant",
-    "chemical_petroleum_terminal",
-    "cold_storage",
-    "company_yard",
-    "construction_materials_yard",
-    "cross_dock",
-    "distribution",
-    "dry_warehouse",
-    "farm_elevator",
-    "food_terminal",
-    "food_processor",
-    "grocery_retail_dc",
-    "industrial_park",
-    "intermodal",
-    "intermodal_ramp",
-    "lumber_paper",
-    "manufacturing",
-    "manufacturing_plant",
-    "mine_quarry",
-    "parcel_hub",
-    "port",
-    "port_terminal",
-    "rail",
-    "retail_distribution",
-    "steel_industrial",
-    "terminal",
-    "warehouse",
-    "metro_market",
-}
-
-LOCATION_TYPE_LABELS = {
-    "air_cargo": "air cargo area",
-    "automotive_plant": "automotive plant",
-    "chemical_petroleum_terminal": "chemical and petroleum terminal",
-    "cold_storage": "cold storage",
-    "company_yard": "company yard",
-    "construction_materials_yard": "construction materials yard",
-    "cross_dock": "cross-dock",
-    "distribution": "distribution center",
-    "dry_warehouse": "dry warehouse",
-    "farm_elevator": "farm elevator",
-    "food_terminal": "food terminal",
-    "food_processor": "food processor",
-    "grocery_retail_dc": "grocery and retail distribution center",
-    "industrial_park": "industrial park",
-    "intermodal": "intermodal yard",
-    "intermodal_ramp": "intermodal ramp",
-    "lumber_paper": "lumber and paper facility",
-    "manufacturing": "manufacturing plant",
-    "manufacturing_plant": "manufacturing plant",
-    "metro_market": "metro freight market",
-    "mine_quarry": "mine or quarry",
-    "parcel_hub": "parcel hub",
-    "port": "port",
-    "port_terminal": "port terminal",
-    "rail": "rail yard",
-    "retail_distribution": "retail distribution hub",
-    "steel_industrial": "steel and industrial plant",
-    "terminal": "freight terminal",
-    "warehouse": "warehouse",
-}
-
-FACILITY_APPROACH_MILES = {
-    "air_cargo": 7.0,
-    "automotive_plant": 4.5,
-    "chemical_petroleum_terminal": 6.0,
-    "cold_storage": 4.0,
-    "company_yard": 2.5,
-    "construction_materials_yard": 3.5,
-    "cross_dock": 3.5,
-    "distribution": 4.0,
-    "dry_warehouse": 3.5,
-    "farm_elevator": 5.0,
-    "food_terminal": 3.5,
-    "food_processor": 4.5,
-    "grocery_retail_dc": 4.0,
-    "industrial_park": 5.0,
-    "intermodal": 6.0,
-    "intermodal_ramp": 6.0,
-    "lumber_paper": 5.5,
-    "manufacturing": 4.5,
-    "manufacturing_plant": 4.5,
-    "metro_market": 3.0,
-    "mine_quarry": 7.0,
-    "parcel_hub": 4.0,
-    "port": 8.0,
-    "port_terminal": 8.0,
-    "rail": 5.5,
-    "retail_distribution": 4.0,
-    "steel_industrial": 5.5,
-    "terminal": 3.0,
-    "warehouse": 3.5,
-}
-
-FACILITY_APPROACH_ROADS = {
-    "air_cargo": "airport cargo access road",
-    "automotive_plant": "assembly plant access road",
-    "chemical_petroleum_terminal": "terminal access road",
-    "cold_storage": "cold storage access road",
-    "company_yard": "company yard access road",
-    "construction_materials_yard": "materials yard access road",
-    "cross_dock": "cross-dock access road",
-    "distribution": "distribution center access road",
-    "dry_warehouse": "warehouse access road",
-    "farm_elevator": "elevator access road",
-    "food_terminal": "food terminal access road",
-    "food_processor": "food plant access road",
-    "grocery_retail_dc": "distribution center access road",
-    "industrial_park": "industrial park access road",
-    "intermodal": "intermodal yard access road",
-    "intermodal_ramp": "intermodal ramp access road",
-    "lumber_paper": "mill access road",
-    "manufacturing": "plant access road",
-    "manufacturing_plant": "plant access road",
-    "metro_market": "local freight access road",
-    "mine_quarry": "quarry access road",
-    "parcel_hub": "parcel hub access road",
-    "port": "port access road",
-    "port_terminal": "port terminal access road",
-    "rail": "rail yard access road",
-    "retail_distribution": "retail distribution access road",
-    "steel_industrial": "industrial plant access road",
-    "terminal": "terminal access road",
-    "warehouse": "warehouse access road",
-}
-
-FACILITY_CARGO_ROLES: dict[str, dict[str, tuple[str, ...]]] = {
-    "air_cargo": {
-        "ships": ("electronics", "parcel", "general"),
-        "receives": ("electronics", "parcel", "general"),
-    },
-    "automotive_plant": {
-        "ships": ("automotive", "machinery"),
-        "receives": ("steel", "machinery", "electronics", "general"),
-    },
-    "chemical_petroleum_terminal": {
-        "ships": ("chemicals", "bulk"),
-        "receives": ("chemicals", "bulk", "general"),
-    },
-    "cold_storage": {
-        "ships": ("food", "refrigerated"),
-        "receives": ("food", "refrigerated"),
-    },
-    "company_yard": {
-        "ships": ("general", "retail", "parcel"),
-        "receives": ("general", "retail", "parcel"),
-    },
-    "construction_materials_yard": {
-        "ships": ("construction", "bulk", "lumber_paper"),
-        "receives": ("construction", "bulk", "steel", "lumber_paper"),
-    },
-    "cross_dock": {
-        "ships": ("general", "retail", "parcel", "container"),
-        "receives": ("general", "retail", "parcel", "container"),
-    },
-    "distribution": {
-        "ships": ("food", "general", "retail", "refrigerated", "parcel"),
-        "receives": ("food", "general", "retail", "refrigerated", "parcel"),
-    },
-    "dry_warehouse": {
-        "ships": ("general", "retail", "bulk", "machinery", "construction"),
-        "receives": ("general", "retail", "bulk", "machinery", "construction"),
-    },
-    "farm_elevator": {
-        "ships": ("grain", "bulk"),
-        "receives": ("farm_inputs", "general"),
-    },
-    "food_terminal": {
-        "ships": ("food", "refrigerated", "grain"),
-        "receives": ("food", "refrigerated", "grain"),
-    },
-    "food_processor": {
-        "ships": ("food", "refrigerated"),
-        "receives": ("grain", "food", "refrigerated", "farm_inputs"),
-    },
-    "grocery_retail_dc": {
-        "ships": ("retail", "food", "refrigerated", "general"),
-        "receives": ("retail", "food", "refrigerated", "general"),
-    },
-    "industrial_park": {
-        "ships": ("bulk", "machinery", "retail", "construction"),
-        "receives": ("bulk", "machinery", "retail", "construction"),
-    },
-    "intermodal": {
-        "ships": ("bulk", "container", "general", "automotive", "retail"),
-        "receives": ("bulk", "container", "general", "automotive", "retail"),
-    },
-    "intermodal_ramp": {
-        "ships": ("container", "general", "retail", "automotive", "parcel"),
-        "receives": ("container", "general", "retail", "automotive", "parcel"),
-    },
-    "lumber_paper": {
-        "ships": ("lumber_paper", "construction"),
-        "receives": ("bulk", "machinery", "chemicals"),
-    },
-    "manufacturing": {
-        "ships": ("bulk", "electronics", "machinery", "automotive"),
-        "receives": ("bulk", "electronics", "machinery", "steel", "general"),
-    },
-    "manufacturing_plant": {
-        "ships": ("machinery", "electronics", "general"),
-        "receives": ("bulk", "steel", "electronics", "general"),
-    },
-    "metro_market": {
-        "ships": ("general", "retail"),
-        "receives": ("general", "retail"),
-    },
-    "mine_quarry": {
-        "ships": ("bulk", "construction"),
-        "receives": ("machinery", "chemicals", "farm_inputs"),
-    },
-    "parcel_hub": {
-        "ships": ("parcel", "electronics", "general"),
-        "receives": ("parcel", "electronics", "general"),
-    },
-    "port": {
-        "ships": ("bulk", "container", "electronics", "machinery", "automotive"),
-        "receives": ("bulk", "container", "electronics", "machinery", "automotive"),
-    },
-    "port_terminal": {
-        "ships": ("container", "bulk", "automotive", "chemicals", "lumber_paper"),
-        "receives": ("container", "bulk", "automotive", "chemicals", "lumber_paper"),
-    },
-    "rail": {
-        "ships": ("bulk", "container", "machinery", "grain"),
-        "receives": ("bulk", "container", "machinery", "grain"),
-    },
-    "retail_distribution": {
-        "ships": ("general", "retail", "parcel"),
-        "receives": ("general", "retail", "parcel"),
-    },
-    "steel_industrial": {
-        "ships": ("steel", "machinery", "bulk"),
-        "receives": ("bulk", "chemicals", "construction"),
-    },
-    "terminal": {
-        "ships": ("electronics", "general", "retail", "parcel"),
-        "receives": ("electronics", "general", "retail", "parcel"),
-    },
-    "warehouse": {
-        "ships": ("bulk", "general", "machinery", "retail", "construction"),
-        "receives": ("bulk", "general", "machinery", "retail", "construction"),
-    },
-}
-
-FACILITY_SOURCE_NOTES = {
-    "air_cargo": "Representative air-cargo facility; guided by FAF modal and commodity framing.",
-    "automotive_plant": "Representative automotive facility; guided by FAF commodity and metro-market framing.",
-    "chemical_petroleum_terminal": "Representative chemical or petroleum terminal; guided by FAF commodity framing.",
-    "cold_storage": "Representative cold-storage facility; guided by FAF food flows and USDA refrigerated transport context.",
-    "company_yard": "Representative company terminal or yard for the metro service area.",
-    "construction_materials_yard": "Representative construction materials yard; guided by FAF construction-sector freight framing.",
-    "cross_dock": "Representative cross-dock facility; guided by FAF metro logistics and border/gateway flows.",
-    "distribution": "Curated representative distribution facility in the metro freight market.",
-    "dry_warehouse": "Representative dry warehouse; guided by FAF metro-market freight flows.",
-    "farm_elevator": "Representative farm elevator or ag terminal; guided by USDA grain truck indicators and FAF agriculture flows.",
-    "food_terminal": "Curated representative food terminal in the metro freight market.",
-    "food_processor": "Representative food processor; guided by FAF food flows and USDA agricultural transport context.",
-    "grocery_retail_dc": "Representative grocery and retail DC; guided by FAF commodity and metro-market framing.",
-    "industrial_park": "Curated representative industrial facility in the metro freight market.",
-    "intermodal": "Curated representative intermodal facility in the metro freight market.",
-    "intermodal_ramp": "Representative rail/intermodal ramp; guided by FAF all-mode freight flow framing.",
-    "lumber_paper": "Representative lumber or paper facility; guided by FAF commodity framing.",
-    "manufacturing": "Curated representative manufacturing facility in the metro freight market.",
-    "manufacturing_plant": "Representative manufacturing plant; guided by FAF manufacturing-sector freight framing.",
-    "metro_market": "Legacy bare-city load fallback for save compatibility.",
-    "mine_quarry": "Representative mine or quarry; guided by FAF extraction-sector freight framing.",
-    "parcel_hub": "Representative parcel hub; guided by metro logistics and air/intermodal freight patterns.",
-    "port": "Curated representative port facility in the metro freight market.",
-    "port_terminal": "Representative port terminal; guided by MARAD and BTS port performance datasets.",
-    "rail": "Curated representative rail facility in the metro freight market.",
-    "retail_distribution": "Curated representative retail distribution facility in the metro freight market.",
-    "steel_industrial": "Representative steel or industrial facility; guided by FAF commodity framing.",
-    "terminal": "Curated representative freight terminal in the metro freight market.",
-    "warehouse": "Curated representative warehouse in the metro freight market.",
-}
-
-FACILITY_LEVEL_UNLOCKS = {
-    "automotive_plant": 2,
-    "chemical_petroleum_terminal": 4,
-    "cold_storage": 2,
-    "food_processor": 2,
-    "lumber_paper": 2,
-    "manufacturing_plant": 2,
-    "mine_quarry": 3,
-    "steel_industrial": 3,
-}
-
-BASE_MARKET_FACILITY_TYPES = (
-    "company_yard",
-    "dry_warehouse",
-    "cross_dock",
-    "grocery_retail_dc",
-)
-
-REGION_MARKET_TAGS = {
-    "northeast": ("port", "intermodal", "industrial", "retail"),
-    "appalachia": ("industrial", "mining", "manufacturing"),
-    "great_lakes": ("intermodal", "manufacturing", "automotive", "agriculture"),
-    "heartland": ("agriculture", "intermodal", "food"),
-    "southern_plains": ("energy", "agriculture", "intermodal", "retail"),
-    "mid_south": ("parcel", "manufacturing", "food"),
-    "atlantic_southeast": ("port", "manufacturing", "retail", "food"),
-    "gulf_coast": ("port", "energy", "chemical", "food"),
-    "florida": ("port", "food", "retail", "cold_chain"),
-    "rockies": ("mining", "intermodal", "construction"),
-    "great_basin": ("intermodal", "mining", "retail"),
-    "desert_southwest": ("border", "construction", "food", "mining"),
-    "california": ("port", "food", "retail", "intermodal"),
-    "pacific_northwest": ("port", "lumber", "agriculture", "intermodal"),
-}
-
-STATE_MARKET_TAGS = {
-    "Arkansas": ("agriculture", "food"),
-    "California": ("port", "food", "cold_chain"),
-    "Colorado": ("mining", "construction"),
-    "Florida": ("port", "food", "cold_chain"),
-    "Georgia": ("port", "food", "parcel"),
-    "Idaho": ("agriculture", "food"),
-    "Illinois": ("intermodal", "agriculture"),
-    "Indiana": ("manufacturing", "automotive"),
-    "Iowa": ("agriculture", "food"),
-    "Kansas": ("agriculture", "manufacturing"),
-    "Kentucky": ("parcel", "automotive"),
-    "Louisiana": ("port", "energy"),
-    "Michigan": ("automotive", "manufacturing"),
-    "Minnesota": ("agriculture", "lumber"),
-    "Missouri": ("agriculture", "intermodal"),
-    "Nebraska": ("agriculture", "food"),
-    "New Mexico": ("mining", "border"),
-    "New York": ("port", "retail"),
-    "North Carolina": ("manufacturing", "food"),
-    "Ohio": ("manufacturing", "automotive"),
-    "Oklahoma": ("energy", "agriculture"),
-    "Oregon": ("port", "lumber", "food"),
-    "Pennsylvania": ("industrial", "manufacturing"),
-    "Tennessee": ("parcel", "manufacturing"),
-    "Texas": ("energy", "border", "port", "retail"),
-    "Utah": ("mining", "intermodal"),
-    "Virginia": ("port", "manufacturing"),
-    "Washington": ("port", "lumber", "food"),
-    "Wisconsin": ("food", "manufacturing", "lumber"),
-    "Wyoming": ("mining", "energy"),
-}
-
-CITY_MARKET_TAGS = {
-    "Atlanta": ("air", "parcel", "food"),
-    "Baltimore": ("port", "intermodal"),
-    "Birmingham": ("steel", "manufacturing"),
-    "Buffalo": ("border", "industrial"),
-    "Charlotte": ("intermodal", "retail"),
-    "Chicago": ("intermodal", "air", "food", "parcel"),
-    "Cincinnati": ("intermodal", "manufacturing"),
-    "Cleveland": ("steel", "port"),
-    "Dallas": ("intermodal", "parcel", "retail"),
-    "Denver": ("intermodal", "construction", "mining"),
-    "Detroit": ("automotive", "border"),
-    "El Paso": ("border", "cross_dock"),
-    "Fresno": ("agriculture", "food", "cold_chain"),
-    "Houston": ("port", "energy", "chemical"),
-    "Indianapolis": ("parcel", "intermodal"),
-    "Jacksonville": ("port", "cold_chain"),
-    "Kansas City": ("intermodal", "agriculture"),
-    "Las Vegas": ("retail", "construction"),
-    "Los Angeles": ("port", "intermodal", "food", "air"),
-    "Louisville": ("parcel", "air"),
-    "Memphis": ("parcel", "air", "intermodal", "river_port"),
-    "Miami": ("port", "air", "cold_chain"),
-    "Milwaukee": ("port", "food"),
-    "Minneapolis": ("agriculture", "lumber"),
-    "New Orleans": ("port", "energy", "agriculture"),
-    "New York": ("port", "air", "retail"),
-    "Omaha": ("agriculture", "food"),
-    "Philadelphia": ("port", "industrial"),
-    "Phoenix": ("air", "retail", "construction"),
-    "Pittsburgh": ("steel", "industrial"),
-    "Portland": ("port", "lumber"),
-    "Reno": ("intermodal", "retail"),
-    "Richmond": ("port", "manufacturing"),
-    "Sacramento": ("food", "agriculture"),
-    "Salt Lake City": ("intermodal", "mining"),
-    "San Antonio": ("border", "retail"),
-    "San Diego": ("port", "border"),
-    "Savannah": ("port", "intermodal"),
-    "Seattle": ("port", "air", "lumber"),
-    "Spokane": ("agriculture", "lumber"),
-    "St. Louis": ("river_port", "agriculture", "intermodal"),
-    "Tampa": ("port", "cold_chain"),
-    "Tulsa": ("energy", "manufacturing"),
-    "Wichita": ("manufacturing", "air"),
-}
-
-MARKET_TAG_FACILITY_TYPES = {
-    "agriculture": ("farm_elevator", "food_processor"),
-    "air": ("air_cargo",),
-    "automotive": ("automotive_plant",),
-    "border": ("cross_dock", "dry_warehouse"),
-    "chemical": ("chemical_petroleum_terminal",),
-    "cold_chain": ("cold_storage",),
-    "construction": ("construction_materials_yard",),
-    "cross_dock": ("cross_dock",),
-    "energy": ("chemical_petroleum_terminal",),
-    "food": ("food_processor", "cold_storage"),
-    "industrial": ("steel_industrial", "manufacturing_plant"),
-    "intermodal": ("intermodal_ramp",),
-    "lumber": ("lumber_paper",),
-    "manufacturing": ("manufacturing_plant",),
-    "mining": ("mine_quarry",),
-    "parcel": ("parcel_hub",),
-    "port": ("port_terminal",),
-    "retail": ("grocery_retail_dc",),
-    "river_port": ("port_terminal", "farm_elevator"),
-    "steel": ("steel_industrial",),
-}
-
-FACILITY_NAME_TEMPLATES = {
-    "air_cargo": "{city} Air Cargo Center",
-    "automotive_plant": "{city} Auto Assembly Supplier Park",
-    "chemical_petroleum_terminal": "{city} Energy Terminal",
-    "cold_storage": "{city} Cold Storage",
-    "company_yard": "{city} Company Yard",
-    "construction_materials_yard": "{city} Materials Yard",
-    "cross_dock": "{city} Cross-Dock",
-    "dry_warehouse": "{city} Dry Warehouse",
-    "farm_elevator": "{city} Grain Elevator",
-    "food_processor": "{city} Food Processing Plant",
-    "grocery_retail_dc": "{city} Grocery Distribution Center",
-    "intermodal_ramp": "{city} Intermodal Ramp",
-    "lumber_paper": "{city} Lumber and Paper Yard",
-    "manufacturing_plant": "{city} Manufacturing Plant",
-    "mine_quarry": "{city} Quarry",
-    "parcel_hub": "{city} Parcel Hub",
-    "port_terminal": "{city} Port Terminal",
-    "steel_industrial": "{city} Steel and Industrial Works",
-}
-
-RAW_FACILITY_TEXT_MARKERS = RAW_POI_TEXT_MARKERS + (
-    "place_id",
-    "wikidata=",
-    "naics=",
-)
-
-
-@dataclass(frozen=True)
-class Stop:
-    name: str
-    at_mi: float
-    type: str = "travel_center"
-    source: str = ""
-    actions: tuple[str, ...] = ()
-    services: tuple[str, ...] = ()
-    parking: str = "unknown"
-    directions: tuple[str, ...] = ("both",)
-    curation: str = "curated"
-
-    @property
-    def label(self) -> str:
-        return STOP_TYPE_LABELS.get(self.type, "stop")
-
-    @property
-    def spoken_name(self) -> str:
-        return f"{self.label}: {self.name}"
-
-    @property
-    def parking_label(self) -> str:
-        return PARKING_CERTAINTY_LABELS[self.parking]
-
-    @property
-    def curated(self) -> bool:
-        return self.curation == "curated"
-
-    def applies_to_direction(self, forward: bool) -> bool:
-        if "both" in self.directions:
-            return True
-        return ("forward" if forward else "reverse") in self.directions
-
-
-@dataclass(frozen=True)
-class RoutePoint:
-    at_mi: float
-    lat: float
-    lon: float
-
-
-@dataclass(frozen=True)
-class ElevationSample:
-    at_mi: float
-    elevation_ft: float
-    source: str = ""
-
-
-@dataclass(frozen=True)
-class GradeSegment:
-    start_mi: float
-    end_mi: float
-    avg_grade_pct: float
-    terrain: str
-    source: str = ""
-
-
-@dataclass(frozen=True)
-class StateCrossing:
-    at_mi: float
-    from_state: str
-    state: str
-    place: str
-    source: str = ""
-
-
-@dataclass(frozen=True)
-class RouteCheckpoint:
-    name: str
-    at_mi: float
-    type: str = "place"
-    state: str = ""
-    highway: str = ""
-    source: str = ""
-
-    @property
-    def label(self) -> str:
-        if self.type == "highway_change":
-            return "highway change"
-        if self.type == "state_line":
-            return "state line"
-        return "corridor place"
-
-    @property
-    def spoken_name(self) -> str:
-        return f"{self.label}: {self.name}"
-
-
-@dataclass(frozen=True)
-class StateMileage:
-    state: str
-    miles: float
-
-
-@dataclass(frozen=True)
-class TollEvent:
-    name: str
-    at_mi: float
-    road: str
-    authority: str
-    method: str
-    amount: float
-    estimated: bool = True
-    source: str = ""
-
-    @property
-    def method_label(self) -> str:
-        return TOLL_METHOD_LABELS.get(self.method, self.method.replace("_", " "))
-
-    @property
-    def spoken_name(self) -> str:
-        return f"toll point: {self.name}"
-
-
-@dataclass(frozen=True)
-class Interchange:
-    """A highway exit/junction along a leg, sourced from OpenStreetMap.
-
-    ``exit_ref`` is the signed exit number ("7", "7A"), empty when OSM has no
-    ``ref`` on the junction node. ``destinations`` is the green-sign control
-    text (``destination`` tag) split into places; ``via`` is the route the exit
-    feeds (``destination:ref``), normalized for speech ("US 1 North" ->
-    "US-1 North"). All three may be sparse; the spoken phrase degrades
-    gracefully so a bare exit number still reads cleanly.
+    Release builds compile the world into the executable via
+    ``tools/bake_world.py`` and ship no ``world_data/`` files. Source
+    checkouts have no baked module and read the editable tree. Explicit
+    non-default roots (tests, tooling) always read files.
     """
-
-    at_mi: float
-    exit_ref: str = ""
-    name: str = ""
-    destinations: tuple[str, ...] = ()
-    via: str = ""
-    highway: str = ""
-    source: str = ""
-
-    @property
-    def spoken_phrase(self) -> str:
-        """Lower-case lead phrase, e.g. 'exit 7 for US-1 North toward Trenton
-        and New York'. Built to slot into 'In 3 miles, {phrase}.'"""
-        head = f"exit {self.exit_ref}" if self.exit_ref else "exit"
-        parts = [head]
-        via = _format_route_ref(self.via)
-        if via:
-            parts.append(f"for {via}")
-        dest = _join_destinations(_destinations_without_via(self.via, self.destinations))
-        if dest:
-            parts.append(f"toward {dest}")
-        elif self.name and not self.exit_ref:
-            parts.append(f"for {self.name}")
-        return " ".join(parts)
-
-    @property
-    def near_phrase(self) -> str:
-        phrase = self.spoken_phrase
-        return f"{phrase[0].upper()}{phrase[1:]} now."
-
-    @property
-    def exit_label(self) -> str:
-        """Short signed label for a stop's ramp, e.g. 'exit 7'; empty when OSM
-        has no exit number for this junction."""
-        return f"exit {self.exit_ref}" if self.exit_ref else ""
-
-
-@dataclass(frozen=True)
-class City:
-    name: str
-    state: str
-    region: str
-    locations: tuple[Location, ...]
-    lat: float = 0.0
-    lon: float = 0.0
-    market_tags: tuple[str, ...] = ()
-
-
-@dataclass(frozen=True)
-class Leg:
-    a: str
-    b: str
-    miles: float
-    highway: str
-    terrain: str  # flat | hills | mountain
-    stops: tuple[Stop, ...]
-    route_points: tuple[RoutePoint, ...] = ()
-    elevation_samples: tuple[ElevationSample, ...] = ()
-    grade_segments: tuple[GradeSegment, ...] = ()
-    state_crossings: tuple[StateCrossing, ...] = ()
-    checkpoints: tuple[RouteCheckpoint, ...] = ()
-    state_miles: tuple[StateMileage, ...] = ()
-    toll_events: tuple[TollEvent, ...] = ()
-    interchanges: tuple[Interchange, ...] = ()
-
-    def other(self, city: str) -> str:
-        return self.b if city == self.a else self.a
-
-    def metadata_complete(self, from_state: str, to_state: str) -> bool:
-        """True when a leg has enough real corridor data to be dispatchable.
-
-        Dispatch gates on *routing* completeness: route geometry, elevation and
-        grade, state mileage, and a state crossing when the endpoints differ --
-        all of which the ORS driving-hgv pipeline produces automatically, so the
-        map can scale without hand work. Curated truck-stop POIs are an additive
-        quality layer (auto-sourced; see the coverage report's POI/fuel
-        advisory), not a dispatch requirement: a stop-less leg stays playable via
-        the HOS fallbacks (roadside fuel rescue, emergency shoulder sleep). POI
-        data that *is* present is still validated at load by ``_parse_stop``.
-        """
-        if len(self.route_points) < 2:
-            return False
-        if not self.checkpoints:
-            return False
-        if not self.state_miles:
-            return False
-        if len(self.elevation_samples) < 2 or not self.grade_segments:
-            return False
-        return from_state == to_state or bool(self.state_crossings)
-
-
-@dataclass
-class Route:
-    """An ordered chain of legs from start to end."""
-
-    cities: list[str]
-    legs: list[Leg]
-
-    @property
-    def miles(self) -> float:
-        return sum(leg.miles for leg in self.legs)
-
-    @property
-    def highways(self) -> list[str]:
-        out: list[str] = []
-        for leg in self.legs:
-            if not out or out[-1] != leg.highway:
-                out.append(leg.highway)
-        return out
-
-    @property
-    def stops(self) -> list[str]:
-        return [s.name for leg in self.legs for s in leg.stops if s.curated]
-
-    @property
-    def stop_details(self) -> list[Stop]:
-        return [s for leg in self.legs for s in leg.stops if s.curated]
-
-    @property
-    def raw_stop_details(self) -> list[Stop]:
-        return [s for leg in self.legs for s in leg.stops]
-
-    @property
-    def state_crossings(self) -> list[StateCrossing]:
-        return [c for leg in self.legs for c in leg.state_crossings]
-
-    @property
-    def toll_events(self) -> list[TollEvent]:
-        return [event for leg in self.legs for event in leg.toll_events]
-
-    @property
-    def estimated_tolls(self) -> float:
-        return sum(event.amount for event in self.toll_events)
-
-    @property
-    def checkpoints(self) -> list[RouteCheckpoint]:
-        return [c for leg in self.legs for c in leg.checkpoints]
-
-    @property
-    def interchanges(self) -> list[Interchange]:
-        return [x for leg in self.legs for x in leg.interchanges]
-
-    @property
-    def terrain_summary(self) -> str:
-        kinds = {leg.terrain for leg in self.legs}
-        if kinds == {"flat"}:
-            return "flat"
-        if "mountain" in kinds:
-            return "mountainous in places"
-        return "rolling hills"
-
-    def describe(self) -> str:
-        via = " then ".join(self.highways)
-        return (f"{self.miles:.0f} miles via {via}, "
-                f"{len(self.legs)} leg{'s' if len(self.legs) != 1 else ''}, "
-                f"terrain {self.terrain_summary}")
-
-    def metadata_complete(self, world: World) -> bool:
-        return all(world.leg_metadata_complete(leg) for leg in self.legs)
+    if root == WORLD_DATA_PATH:
+        try:
+            from . import _baked_world
+        except ImportError:
+            return load_world_data(root)
+        return _baked_world.load()
+    return load_world_data(root)
 
 
 class World:
@@ -886,21 +51,18 @@ class World:
         for name, c in data["cities"].items():
             lat = float(c.get("lat", 0.0))
             lon = float(c.get("lon", 0.0))
-            explicit_locs = tuple(
-                _parse_location(loc, name, lat, lon)
-                for loc in c["locations"]
-            )
+            explicit_locs = tuple(_parse_location(loc, name, lat, lon) for loc in c["locations"])
             tags = _market_tags_for_city(name, c, explicit_locs)
             locs = _expand_market_locations(name, lat, lon, explicit_locs, tags)
             self._validate_city_locations(name, locs)
-            self.cities[name] = City(name, c["state"], c["region"], locs,
-                                     lat, lon, tags)
+            self.cities[name] = City(name, c["state"], c["region"], locs, lat, lon, tags)
 
         self.legs: list[Leg] = []
         for leg in data["legs"]:
             miles = float(leg["miles"])
-            stops = tuple(_parse_stop(s, miles, leg["from"], leg["to"])
-                          for s in leg.get("stops", ()))
+            stops = tuple(
+                _parse_stop(s, miles, leg["from"], leg["to"]) for s in leg.get("stops", ())
+            )
             corridor = leg.get("corridor", {})
             route_points = tuple(
                 _parse_route_point(p, miles, leg["from"], leg["to"])
@@ -915,8 +77,9 @@ class World:
                 for s in corridor.get("grade_segments", ())
             )
             state_crossings = tuple(
-                _parse_state_crossing(c, miles, leg["from"], leg["to"],
-                                      self.cities[leg["from"]].state)
+                _parse_state_crossing(
+                    c, miles, leg["from"], leg["to"], self.cities[leg["from"]].state
+                )
                 for c in corridor.get("state_crossings", ())
             )
             checkpoints = tuple(
@@ -935,11 +98,27 @@ class World:
                 _parse_interchange(x, miles, leg["from"], leg["to"], leg["highway"])
                 for x in corridor.get("interchanges", ())
             )
+            speed_limits = _parse_speed_limits(
+                corridor.get("speed_limits", ()), miles, leg["from"], leg["to"]
+            )
             self.legs.append(
-                Leg(leg["from"], leg["to"], miles, leg["highway"],
-                    leg["terrain"], stops, route_points, elevation_samples,
-                    grade_segments, state_crossings, checkpoints, state_miles,
-                    toll_events, interchanges)
+                Leg(
+                    leg["from"],
+                    leg["to"],
+                    miles,
+                    leg["highway"],
+                    leg["terrain"],
+                    stops,
+                    route_points,
+                    elevation_samples,
+                    grade_segments,
+                    state_crossings,
+                    checkpoints,
+                    state_miles,
+                    toll_events,
+                    interchanges,
+                    speed_limits,
+                )
             )
         self._adjacency: dict[str, list[Leg]] = {name: [] for name in self.cities}
         for leg in self.legs:
@@ -968,21 +147,19 @@ class World:
             self._facilities_by_id[location.id] = location
 
     @classmethod
-    def load(cls, path: Path = WORLD_PATH,
-             overlay: Path | None = None) -> World:
+    def load(cls, root: Path = WORLD_DATA_PATH, overlay: Path | None = None) -> World:
         """Load the world, optionally merging an additive overlay on top.
 
-        The checked-in base at ``path`` is the deterministic source of truth.
-        An optional ``overlay`` (extra cities and legs fetched online and cached
-        for later offline play, per docs/osm-routing-plan.md) is merged
-        additively: it can only add cities and legs the base does not already
+        The checked-in indexed world data is the deterministic source of truth.
+        An optional ``overlay`` is merged additively: it can only add cities and
+        legs the base does not already
         have, never override the base. With no overlay the result is exactly the
         base world, so the offline/deterministic path is unchanged. The runtime
         ``get_world`` deliberately does not pass an overlay yet; this is the
         loader capability the online tier will build on.
         """
-        with open(path, encoding="utf-8") as f:
-            data = json.load(f)
+
+        data = _load_base_world_data(root)
         if overlay is not None and overlay.exists():
             data = _merge_overlay(data, json.loads(overlay.read_text(encoding="utf-8")))
         return cls(data)
@@ -1058,9 +235,13 @@ class World:
         leg = Leg(city, city, miles, road, "flat", ())
         return Route([city, city], [leg])
 
-    def shortest_route(self, start: str, end: str,
-                       penalties: dict[Leg, float] | None = None,
-                       require_metadata: bool = False) -> Route | None:
+    def shortest_route(
+        self,
+        start: str,
+        end: str,
+        penalties: dict[Leg, float] | None = None,
+        require_metadata: bool = False,
+    ) -> Route | None:
         """Dijkstra over leg miles, with optional per-leg penalty multipliers.
 
         ``require_metadata`` is for new dispatchable freight. The default keeps
@@ -1127,8 +308,9 @@ class World:
     def leg_metadata_complete(self, leg: Leg) -> bool:
         return leg.metadata_complete(self.cities[leg.a].state, self.cities[leg.b].state)
 
-    def supported_route(self, start: str, end: str,
-                        penalties: dict[Leg, float] | None = None) -> Route | None:
+    def supported_route(
+        self, start: str, end: str, penalties: dict[Leg, float] | None = None
+    ) -> Route | None:
         if penalties:
             return self.shortest_route(start, end, penalties, require_metadata=True)
         key = (start, end)
@@ -1141,12 +323,12 @@ class World:
             return None
         return Route(list(route.cities), list(route.legs))
 
-    def supported_route_options(self, start: str, end: str,
-                                count: int = 3) -> list[Route]:
+    def supported_route_options(self, start: str, end: str, count: int = 3) -> list[Route]:
         return self.route_options(start, end, count, require_metadata=True)
 
-    def route_options(self, start: str, end: str, count: int = 3,
-                      require_metadata: bool = False) -> list[Route]:
+    def route_options(
+        self, start: str, end: str, count: int = 3, require_metadata: bool = False
+    ) -> list[Route]:
         """Up to ``count`` distinct routes, fastest first."""
         routes: list[Route] = []
         penalties: dict[Leg, float] = {}
@@ -1156,8 +338,7 @@ class World:
             return routes
         max_miles = _max_alternate_miles(best.miles)
         for _ in range(count * 8):
-            route = self.shortest_route(start, end, penalties,
-                                        require_metadata=require_metadata)
+            route = self.shortest_route(start, end, penalties, require_metadata=require_metadata)
             if route is None:
                 break
             key = tuple(route.cities)
@@ -1214,22 +395,12 @@ def _parse_location(raw: dict, city: str, city_lat: float, city_lon: float) -> L
     if facility_type not in FREIGHT_LOCATION_TYPES:
         raise ValueError(f"{city} facility {name!r} has unknown type {facility_type!r}")
     default_roles = FACILITY_CARGO_ROLES.get(facility_type, {})
-    raw_cargo = tuple(
-        str(cargo).strip()
-        for cargo in raw.get("cargo", ())
-        if str(cargo).strip()
-    )
-    default_cargo = _dedupe(
-        default_roles.get("ships", ()) + default_roles.get("receives", ())
-    )
+    raw_cargo = tuple(str(cargo).strip() for cargo in raw.get("cargo", ()) if str(cargo).strip())
+    default_cargo = _dedupe(default_roles.get("ships", ()) + default_roles.get("receives", ()))
     cargo = raw_cargo or default_cargo
     ships = _role_cargo(raw, "ships", cargo, default_roles.get("ships", ()))
     receives = _role_cargo(raw, "receives", cargo, default_roles.get("receives", ()))
-    roles = tuple(
-        role
-        for role, values in (("shipper", ships), ("receiver", receives))
-        if values
-    )
+    roles = tuple(role for role, values in (("shipper", ships), ("receiver", receives)) if values)
     source_note = str(
         raw.get("source_note")
         or raw.get("source")
@@ -1237,11 +408,7 @@ def _parse_location(raw: dict, city: str, city_lat: float, city_lon: float) -> L
     ).strip()
     spoken = str(raw.get("spoken_name") or raw.get("spoken") or "").strip()
     locality = str(raw.get("locality", "")).strip()
-    traits = tuple(
-        str(trait).strip()
-        for trait in raw.get("traits", ())
-        if str(trait).strip()
-    )
+    traits = tuple(str(trait).strip() for trait in raw.get("traits", ()) if str(trait).strip())
     return Location(
         name=name,
         type=facility_type,
@@ -1262,9 +429,13 @@ def _parse_location(raw: dict, city: str, city_lat: float, city_lon: float) -> L
     )
 
 
-def _expand_market_locations(city: str, lat: float, lon: float,
-                             explicit_locations: tuple[Location, ...],
-                             market_tags: tuple[str, ...]) -> tuple[Location, ...]:
+def _expand_market_locations(
+    city: str,
+    lat: float,
+    lon: float,
+    explicit_locations: tuple[Location, ...],
+    market_tags: tuple[str, ...],
+) -> tuple[Location, ...]:
     locations = list(explicit_locations)
     existing_types = {location.type for location in locations}
     existing_names = {location.name.lower() for location in locations}
@@ -1277,7 +448,11 @@ def _expand_market_locations(city: str, lat: float, lon: float,
         location = _template_location(city, lat, lon, facility_type, market_tags)
         if location.name.lower() in existing_names:
             location = _template_location(
-                city, lat, lon, facility_type, market_tags,
+                city,
+                lat,
+                lon,
+                facility_type,
+                market_tags,
                 name_suffix=" Facility",
             )
         locations.append(location)
@@ -1286,9 +461,14 @@ def _expand_market_locations(city: str, lat: float, lon: float,
     return tuple(locations)
 
 
-def _template_location(city: str, lat: float, lon: float, facility_type: str,
-                       market_tags: tuple[str, ...],
-                       name_suffix: str = "") -> Location:
+def _template_location(
+    city: str,
+    lat: float,
+    lon: float,
+    facility_type: str,
+    market_tags: tuple[str, ...],
+    name_suffix: str = "",
+) -> Location:
     template = FACILITY_NAME_TEMPLATES[facility_type]
     name = template.format(city=city) + name_suffix
     roles = FACILITY_CARGO_ROLES[facility_type]
@@ -1317,8 +497,9 @@ def _template_location(city: str, lat: float, lon: float, facility_type: str,
     )
 
 
-def _market_tags_for_city(city: str, raw_city: dict,
-                          locations: tuple[Location, ...]) -> tuple[str, ...]:
+def _market_tags_for_city(
+    city: str, raw_city: dict, locations: tuple[Location, ...]
+) -> tuple[str, ...]:
     tags: set[str] = set(REGION_MARKET_TAGS.get(str(raw_city.get("region", "")), ()))
     tags.update(STATE_MARKET_TAGS.get(str(raw_city.get("state", "")), ()))
     tags.update(CITY_MARKET_TAGS.get(city, ()))
@@ -1343,13 +524,10 @@ def _tags_for_facility_type(facility_type: str) -> tuple[str, ...]:
     }.get(facility_type, ())
 
 
-def _role_cargo(raw: dict, key: str, cargo: tuple[str, ...],
-                defaults: tuple[str, ...]) -> tuple[str, ...]:
-    values = tuple(
-        str(value).strip()
-        for value in raw.get(key, ())
-        if str(value).strip()
-    )
+def _role_cargo(
+    raw: dict, key: str, cargo: tuple[str, ...], defaults: tuple[str, ...]
+) -> tuple[str, ...]:
+    values = tuple(str(value).strip() for value in raw.get(key, ()) if str(value).strip())
     if values:
         return values
     plausible = tuple(value for value in cargo if value in defaults)
@@ -1393,8 +571,9 @@ def _dedupe(values: tuple[str, ...] | list[str]) -> tuple[str, ...]:
     return tuple(out)
 
 
-def _jittered_coordinates(city: str, facility_type: str, lat: float,
-                          lon: float) -> tuple[float, float]:
+def _jittered_coordinates(
+    city: str, facility_type: str, lat: float, lon: float
+) -> tuple[float, float]:
     if lat == 0.0 and lon == 0.0:
         return lat, lon
     seed = zlib.crc32(f"{city}:{facility_type}".encode())
@@ -1416,21 +595,15 @@ def _is_legacy_market_name(city: str, name: str) -> bool:
 
 def _parse_stop(raw, leg_miles: float, from_city: str, to_city: str) -> Stop:
     if not isinstance(raw, dict):
-        raise ValueError(
-            f"{from_city} to {to_city} stop {raw!r} is missing explicit at_mi"
-        )
+        raise ValueError(f"{from_city} to {to_city} stop {raw!r} is missing explicit at_mi")
     name = str(raw.get("name", "")).strip()
     if not name:
         raise ValueError(f"{from_city} to {to_city} has a stop without a name")
     lowered_name = name.lower()
     if any(marker in lowered_name for marker in RAW_POI_TEXT_MARKERS):
-        raise ValueError(
-            f"{from_city} to {to_city} stop {name!r} exposes raw OSM/source text"
-        )
+        raise ValueError(f"{from_city} to {to_city} stop {name!r} exposes raw OSM/source text")
     if "at_mi" not in raw:
-        raise ValueError(
-            f"{from_city} to {to_city} stop {name!r} is missing explicit at_mi"
-        )
+        raise ValueError(f"{from_city} to {to_city} stop {name!r} is missing explicit at_mi")
     at_mi = float(raw["at_mi"])
     if not 0.0 < at_mi < leg_miles:
         raise ValueError(
@@ -1439,19 +612,16 @@ def _parse_stop(raw, leg_miles: float, from_city: str, to_city: str) -> Stop:
         )
     stop_type = str(raw.get("type", "")).strip() or _classify_stop(name)
     if stop_type not in STOP_TYPE_LABELS:
-        raise ValueError(
-            f"{from_city} to {to_city} stop {name!r} has unknown type {stop_type!r}"
-        )
+        raise ValueError(f"{from_city} to {to_city} stop {name!r} has unknown type {stop_type!r}")
     source = str(raw.get("source", "")).strip()
-    actions = tuple(str(action).strip() for action in raw.get(
-        "actions", DEFAULT_POI_ACTIONS[stop_type]))
+    actions = tuple(
+        str(action).strip() for action in raw.get("actions", DEFAULT_POI_ACTIONS[stop_type])
+    )
     if not actions:
         raise ValueError(f"{from_city} to {to_city} stop {name!r} has no actions")
     unknown = sorted(set(actions) - POI_ACTIONS)
     if unknown:
-        raise ValueError(
-            f"{from_city} to {to_city} stop {name!r} has unknown actions {unknown}"
-        )
+        raise ValueError(f"{from_city} to {to_city} stop {name!r} has unknown actions {unknown}")
     default_actions = set(DEFAULT_POI_ACTIONS[stop_type])
     disallowed = sorted(set(actions) - default_actions)
     if disallowed:
@@ -1462,17 +632,14 @@ def _parse_stop(raw, leg_miles: float, from_city: str, to_city: str) -> Stop:
                 f"do not match type {stop_type!r}"
             )
     services = tuple(
-        str(service).strip()
-        for service in raw.get("services", ())
-        if str(service).strip()
+        str(service).strip() for service in raw.get("services", ()) if str(service).strip()
     )
     parking = str(raw.get("parking", "")).strip() or _default_parking_certainty(
         stop_type, services, actions
     )
     if parking not in PARKING_CERTAINTY_LABELS:
         raise ValueError(
-            f"{from_city} to {to_city} stop {name!r} has unknown parking "
-            f"certainty {parking!r}"
+            f"{from_city} to {to_city} stop {name!r} has unknown parking certainty {parking!r}"
         )
     directions = tuple(
         str(direction).strip()
@@ -1484,8 +651,7 @@ def _parse_stop(raw, leg_miles: float, from_city: str, to_city: str) -> Stop:
     unknown_directions = sorted(set(directions) - STOP_DIRECTIONS)
     if unknown_directions:
         raise ValueError(
-            f"{from_city} to {to_city} stop {name!r} has unknown directions "
-            f"{unknown_directions}"
+            f"{from_city} to {to_city} stop {name!r} has unknown directions {unknown_directions}"
         )
     if "both" in directions and len(directions) > 1:
         raise ValueError(
@@ -1495,13 +661,11 @@ def _parse_stop(raw, leg_miles: float, from_city: str, to_city: str) -> Stop:
     curation = str(raw.get("curation", "")).strip() or _infer_stop_curation(name, source)
     if curation not in STOP_CURATION_LEVELS:
         raise ValueError(
-            f"{from_city} to {to_city} stop {name!r} has unknown curation "
-            f"{curation!r}"
+            f"{from_city} to {to_city} stop {name!r} has unknown curation {curation!r}"
         )
     if curation == "curated" and _infer_stop_curation(name, source) == "placeholder":
         raise ValueError(
-            f"{from_city} to {to_city} stop {name!r} looks synthetic but is "
-            "marked curated"
+            f"{from_city} to {to_city} stop {name!r} looks synthetic but is marked curated"
         )
     for action in SOURCE_BACKED_POI_ACTIONS & set(actions):
         if action not in services:
@@ -1511,18 +675,15 @@ def _parse_stop(raw, leg_miles: float, from_city: str, to_city: str) -> Stop:
             )
         if not source:
             raise ValueError(
-                f"{from_city} to {to_city} stop {name!r} action {action!r} "
-                "requires a source note"
+                f"{from_city} to {to_city} stop {name!r} action {action!r} requires a source note"
             )
-    return Stop(name, at_mi, stop_type, source, actions, services,
-                parking, directions, curation)
+    return Stop(name, at_mi, stop_type, source, actions, services, parking, directions, curation)
 
 
 def _parse_route_point(raw, leg_miles: float, from_city: str, to_city: str) -> RoutePoint:
     if not isinstance(raw, dict):
         raise ValueError(f"{from_city} to {to_city} route point must be an object")
-    at_mi = _parse_at_mi(raw, leg_miles, from_city, to_city, "route point",
-                         allow_endpoints=True)
+    at_mi = _parse_at_mi(raw, leg_miles, from_city, to_city, "route point", allow_endpoints=True)
     lat = float(raw["lat"])
     lon = float(raw["lon"])
     if not -90.0 <= lat <= 90.0 or not -180.0 <= lon <= 180.0:
@@ -1530,29 +691,24 @@ def _parse_route_point(raw, leg_miles: float, from_city: str, to_city: str) -> R
     return RoutePoint(at_mi, lat, lon)
 
 
-def _parse_elevation_sample(raw, leg_miles: float, from_city: str,
-                            to_city: str) -> ElevationSample:
+def _parse_elevation_sample(raw, leg_miles: float, from_city: str, to_city: str) -> ElevationSample:
     if not isinstance(raw, dict):
         raise ValueError(f"{from_city} to {to_city} elevation sample must be an object")
-    at_mi = _parse_at_mi(raw, leg_miles, from_city, to_city, "elevation sample",
-                         allow_endpoints=True)
+    at_mi = _parse_at_mi(
+        raw, leg_miles, from_city, to_city, "elevation sample", allow_endpoints=True
+    )
     elevation_ft = float(raw["elevation_ft"])
     if not -300.0 <= elevation_ft <= 20_500.0:
-        raise ValueError(
-            f"{from_city} to {to_city} elevation sample has invalid elevation"
-        )
+        raise ValueError(f"{from_city} to {to_city} elevation sample has invalid elevation")
     source = str(raw.get("source", "")).strip()
     return ElevationSample(at_mi, elevation_ft, source)
 
 
-def _parse_grade_segment(raw, leg_miles: float, from_city: str,
-                         to_city: str) -> GradeSegment:
+def _parse_grade_segment(raw, leg_miles: float, from_city: str, to_city: str) -> GradeSegment:
     if not isinstance(raw, dict):
         raise ValueError(f"{from_city} to {to_city} grade segment must be an object")
     if "start_mi" not in raw:
-        raise ValueError(
-            f"{from_city} to {to_city} grade segment is missing explicit start_mi"
-        )
+        raise ValueError(f"{from_city} to {to_city} grade segment is missing explicit start_mi")
     start_mi = float(raw["start_mi"])
     if not 0.0 <= start_mi <= leg_miles:
         raise ValueError(
@@ -1562,26 +718,45 @@ def _parse_grade_segment(raw, leg_miles: float, from_city: str,
     end_mi = float(raw["end_mi"])
     if not 0.0 <= end_mi <= leg_miles or end_mi <= start_mi:
         raise ValueError(
-            f"{from_city} to {to_city} grade segment has invalid range "
-            f"{start_mi}-{end_mi}"
+            f"{from_city} to {to_city} grade segment has invalid range {start_mi}-{end_mi}"
         )
     avg_grade_pct = float(raw["avg_grade_pct"])
     if not -15.0 <= avg_grade_pct <= 15.0:
         raise ValueError(
-            f"{from_city} to {to_city} grade segment has unrealistic grade "
-            f"{avg_grade_pct}"
+            f"{from_city} to {to_city} grade segment has unrealistic grade {avg_grade_pct}"
         )
     terrain = str(raw.get("terrain", "")).strip() or "flat"
     if terrain not in {"flat", "hills", "mountain"}:
-        raise ValueError(
-            f"{from_city} to {to_city} grade segment has unknown terrain {terrain!r}"
-        )
+        raise ValueError(f"{from_city} to {to_city} grade segment has unknown terrain {terrain!r}")
     source = str(raw.get("source", "")).strip()
     return GradeSegment(start_mi, end_mi, avg_grade_pct, terrain, source)
 
 
-def _parse_state_crossing(raw, leg_miles: float, from_city: str, to_city: str,
-                          default_from_state: str) -> StateCrossing:
+def _parse_speed_limit(raw, leg_miles: float, from_city: str, to_city: str) -> SpeedLimitSample:
+    if not isinstance(raw, dict):
+        raise ValueError(f"{from_city} to {to_city} speed limit must be an object")
+    at_mi = _parse_at_mi(raw, leg_miles, from_city, to_city, "speed limit", allow_endpoints=True)
+    mph = float(raw["mph"])
+    if not 5.0 <= mph <= 85.0:
+        raise ValueError(f"{from_city} to {to_city} speed limit has unrealistic mph {mph}")
+    source = str(raw.get("source", "")).strip()
+    return SpeedLimitSample(at_mi, mph, source, bool(raw.get("hgv", False)))
+
+
+def _parse_speed_limits(
+    raw_samples, leg_miles: float, from_city: str, to_city: str
+) -> tuple[SpeedLimitSample, ...]:
+    """Parse the baked maxspeed profile, ordered along the leg.
+
+    Sorting by ``at_mi`` lets the runtime treat it as a step function without
+    trusting the order the samples happen to be stored in."""
+    samples = tuple(_parse_speed_limit(s, leg_miles, from_city, to_city) for s in raw_samples)
+    return tuple(sorted(samples, key=lambda s: s.at_mi))
+
+
+def _parse_state_crossing(
+    raw, leg_miles: float, from_city: str, to_city: str, default_from_state: str
+) -> StateCrossing:
     if not isinstance(raw, dict):
         raise ValueError(f"{from_city} to {to_city} state crossing must be an object")
     at_mi = _parse_at_mi(raw, leg_miles, from_city, to_city, "state crossing")
@@ -1594,8 +769,7 @@ def _parse_state_crossing(raw, leg_miles: float, from_city: str, to_city: str,
     return StateCrossing(at_mi, from_state, state, place, source)
 
 
-def _parse_checkpoint(raw, leg_miles: float, from_city: str,
-                      to_city: str) -> RouteCheckpoint:
+def _parse_checkpoint(raw, leg_miles: float, from_city: str, to_city: str) -> RouteCheckpoint:
     if not isinstance(raw, dict):
         raise ValueError(f"{from_city} to {to_city} checkpoint must be an object")
     name = str(raw.get("name", "")).strip()
@@ -1621,8 +795,9 @@ def _parse_state_mileage(raw, from_city: str, to_city: str) -> StateMileage:
     return StateMileage(state, miles)
 
 
-def _parse_toll_event(raw, leg_miles: float, from_city: str, to_city: str,
-                      default_road: str) -> TollEvent:
+def _parse_toll_event(
+    raw, leg_miles: float, from_city: str, to_city: str, default_road: str
+) -> TollEvent:
     if not isinstance(raw, dict):
         raise ValueError(f"{from_city} to {to_city} toll event must be an object")
     name = str(raw.get("name", "")).strip()
@@ -1633,8 +808,7 @@ def _parse_toll_event(raw, leg_miles: float, from_city: str, to_city: str,
         raise ValueError(
             f"{from_city} to {to_city} toll event {name!r} exposes raw OSM/source text"
         )
-    at_mi = _parse_at_mi(raw, leg_miles, from_city, to_city,
-                         f"toll event {name!r}")
+    at_mi = _parse_at_mi(raw, leg_miles, from_city, to_city, f"toll event {name!r}")
     road = str(raw.get("road", "")).strip() or default_road
     authority = str(raw.get("authority", "")).strip()
     method = str(raw.get("method", "")).strip()
@@ -1647,9 +821,7 @@ def _parse_toll_event(raw, leg_miles: float, from_city: str, to_city: str,
         )
     amount = float(raw["amount"])
     if amount < 0.0 or amount > 500.0:
-        raise ValueError(
-            f"{from_city} to {to_city} toll event {name!r} has invalid amount"
-        )
+        raise ValueError(f"{from_city} to {to_city} toll event {name!r} has invalid amount")
     if not source:
         raise ValueError(f"{from_city} to {to_city} toll event {name!r} has no source")
     return TollEvent(
@@ -1664,8 +836,9 @@ def _parse_toll_event(raw, leg_miles: float, from_city: str, to_city: str,
     )
 
 
-def _parse_interchange(raw, leg_miles: float, from_city: str, to_city: str,
-                       default_highway: str) -> Interchange:
+def _parse_interchange(
+    raw, leg_miles: float, from_city: str, to_city: str, default_highway: str
+) -> Interchange:
     if not isinstance(raw, dict):
         raise ValueError(f"{from_city} to {to_city} interchange must be an object")
     # OSM exit refs occasionally carry stray internal spaces ("103 B"); a real
@@ -1676,9 +849,7 @@ def _parse_interchange(raw, leg_miles: float, from_city: str, to_city: str,
     raw_dests = raw.get("destinations", ())
     if isinstance(raw_dests, str):
         raw_dests = [raw_dests]
-    destinations = tuple(
-        d for d in (str(item).strip() for item in raw_dests) if d
-    )
+    destinations = tuple(d for d in (str(item).strip() for item in raw_dests) if d)
     label = f"interchange {exit_ref or name or '(unnamed)'!r}"
     at_mi = _parse_at_mi(raw, leg_miles, from_city, to_city, label)
     # An interchange must carry *something* sayable beyond a milepost.
@@ -1689,9 +860,7 @@ def _parse_interchange(raw, leg_miles: float, from_city: str, to_city: str,
         )
     blob = " ".join((name, via, *destinations)).lower()
     if any(marker in blob for marker in RAW_POI_TEXT_MARKERS):
-        raise ValueError(
-            f"{from_city} to {to_city} {label} exposes raw OSM/source text"
-        )
+        raise ValueError(f"{from_city} to {to_city} {label} exposes raw OSM/source text")
     highway = str(raw.get("highway", "")).strip() or default_highway
     source = str(raw.get("source", "")).strip()
     if not source:
@@ -1705,22 +874,6 @@ def _parse_interchange(raw, leg_miles: float, from_city: str, to_city: str,
         highway=highway,
         source=source,
     )
-
-
-def _format_route_ref(value: str) -> str:
-    """Speech-friendly route ref: 'US 1 North' -> 'US-1 North', 'I 95' ->
-    'I-95'. Multiple refs ('I 95 North;NJTP North') join with ' and '."""
-    out: list[str] = []
-    for chunk in str(value).split(";"):
-        ref = " ".join(chunk.split())
-        if not ref:
-            continue
-        # Hyphenate a leading shield token + number: "US 1" -> "US-1".
-        parts = ref.split(" ")
-        if len(parts) >= 2 and parts[1][:1].isdigit():
-            parts[0:2] = [f"{parts[0]}-{parts[1]}"]
-        out.append(" ".join(parts))
-    return " and ".join(out)
 
 
 def _route_token(value: str) -> str:
@@ -1753,16 +906,22 @@ def _join_destinations(destinations: tuple[str, ...]) -> str:
     return f"{', '.join(items[:-1])}, and {items[-1]}"
 
 
-def _parse_at_mi(raw: dict, leg_miles: float, from_city: str, to_city: str,
-                 label: str, *, allow_endpoints: bool = False) -> float:
+def _parse_at_mi(
+    raw: dict,
+    leg_miles: float,
+    from_city: str,
+    to_city: str,
+    label: str,
+    *,
+    allow_endpoints: bool = False,
+) -> float:
     if "at_mi" not in raw:
         raise ValueError(f"{from_city} to {to_city} {label} is missing explicit at_mi")
     at_mi = float(raw["at_mi"])
     in_range = 0.0 <= at_mi <= leg_miles if allow_endpoints else 0.0 < at_mi < leg_miles
     if not in_range:
         raise ValueError(
-            f"{from_city} to {to_city} {label} has at_mi {at_mi}, "
-            f"outside leg mileage 0-{leg_miles}"
+            f"{from_city} to {to_city} {label} has at_mi {at_mi}, outside leg mileage 0-{leg_miles}"
         )
     return at_mi
 
@@ -1827,8 +986,7 @@ def minimum_fuel_capable_pois(miles: float) -> int:
 
 def _max_alternate_miles(best_miles: float) -> float:
     extra = best_miles * ALTERNATE_ROUTE_EXTRA_RATIO
-    extra = max(ALTERNATE_ROUTE_MIN_EXTRA_MILES,
-                min(ALTERNATE_ROUTE_MAX_EXTRA_MILES, extra))
+    extra = max(ALTERNATE_ROUTE_MIN_EXTRA_MILES, min(ALTERNATE_ROUTE_MAX_EXTRA_MILES, extra))
     return best_miles + extra
 
 

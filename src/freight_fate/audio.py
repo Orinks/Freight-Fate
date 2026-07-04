@@ -22,12 +22,14 @@ extension: ``play("ui/menu_select")`` plays
 from __future__ import annotations
 
 import contextlib
+import io
 import logging
 import os
-import sys
 from pathlib import Path
 
 import pygame
+
+from . import assets_pack
 
 log = logging.getLogger(__name__)
 
@@ -40,12 +42,18 @@ CH_ROAD = 4
 CH_WEATHER = 5
 CH_WEATHER_B = 6
 CH_AMBIENT = 7
-RESERVED = 8
+CH_HORN = 8
+CH_REVERSE = 9
+RESERVED = 9
 NUM_CHANNELS = 32
 
 # RPM centers for the pygame engine loop crossfade.
-ENGINE_BANDS = (("engine/idle", 620), ("engine/low", 1000),
-                ("engine/mid", 1500), ("engine/high", 2100))
+ENGINE_BANDS = (
+    ("engine/idle", 620),
+    ("engine/low", 1000),
+    ("engine/mid", 1500),
+    ("engine/high", 2100),
+)
 
 # BASS engine model: one idle loop, pitched up with RPM.
 ENGINE_LOOP_KEY = "engine/idle"
@@ -59,11 +67,44 @@ BASS_NO_SOUND_DEVICE = 0
 
 
 def _asset_path(key: str, extensions: tuple[str, ...]) -> Path | None:
+    """Loose-file lookup; source checkouts and asset tooling only."""
     for ext in extensions:
         path = ASSETS / f"{key}.{ext}"
         if path.exists():
             return path
     return None
+
+
+def _asset_bytes(key: str, extensions: tuple[str, ...]) -> tuple[bytes, str] | None:
+    """Bytes and extension for a sound key, from the shipped pack or loose files.
+
+    Frozen builds carry the sounds packed into ``sounds.pak``
+    (see ``assets_pack``); source checkouts read the editable
+    ``assets/sounds`` tree.
+    """
+    pack = assets_pack.open_default()
+    if pack is not None:
+        for ext in extensions:
+            data = pack.read(f"{key}.{ext}")
+            if data is not None:
+                return data, ext
+    path = _asset_path(key, extensions)
+    if path is not None:
+        try:
+            return path.read_bytes(), path.suffix.lstrip(".")
+        except OSError:
+            log.warning("Unreadable sound file: %s", path, exc_info=True)
+    return None
+
+
+def verify_sound_assets() -> None:
+    """Raise if the canonical UI sound is unreadable (packed or loose).
+
+    Used by the --smoke build check to prove frozen builds can read the
+    shipped sound pack.
+    """
+    if _asset_bytes("ui/menu_select", ("ogg", "wav")) is None:
+        raise RuntimeError("Sound assets are missing or unreadable: ui/menu_select")
 
 
 def engine_freq_mult(rpm: float) -> float:
@@ -73,8 +114,7 @@ def engine_freq_mult(rpm: float) -> float:
     clamped at both ends.
     """
     t = (rpm - ENGINE_RPM_IDLE) / (ENGINE_RPM_MAX - ENGINE_RPM_IDLE)
-    return max(1.0, min(ENGINE_FREQ_MAX_MULT,
-                        1.0 + t * (ENGINE_FREQ_MAX_MULT - 1.0)))
+    return max(1.0, min(ENGINE_FREQ_MAX_MULT, 1.0 + t * (ENGINE_FREQ_MAX_MULT - 1.0)))
 
 
 def _one_shot_category(key: str) -> str:
@@ -111,6 +151,7 @@ class _PygameBackend:
         self._cache: dict[str, pygame.mixer.Sound] = {}
         self._loops: dict[int, tuple[str, float]] = {}  # channel -> (key, base gain)
         self._music_track: str | None = None
+        self._music_buffer: io.BytesIO | None = None  # streamed; must outlive playback
         self._engine_running = False
         try:
             if not pygame.mixer.get_init():
@@ -129,27 +170,35 @@ class _PygameBackend:
             return None
         snd = self._cache.get(key)
         if snd is None:
-            path = _asset_path(key, ("ogg", "wav"))
-            if path is None:
-                log.warning("Missing or unreadable sound: %s", ASSETS / f"{key}.ogg")
+            found = _asset_bytes(key, ("ogg", "wav"))
+            if found is None:
+                log.warning("Missing or unreadable sound: %s", key)
                 return None
             try:
-                snd = pygame.mixer.Sound(str(path))
-            except (pygame.error, FileNotFoundError):
-                log.warning("Missing or unreadable sound: %s", path)
+                snd = pygame.mixer.Sound(file=io.BytesIO(found[0]))
+            except pygame.error:
+                log.warning("Missing or unreadable sound: %s", key)
                 return None
             self._cache[key] = snd
         return snd
 
     # -- one-shots ----------------------------------------------------------
 
-    def play(self, key: str, volume: float = 1.0) -> None:
+    def play(self, key: str, volume: float = 1.0, pan: float = 0.0) -> None:
         snd = self._sound(key)
         if snd is None:
             return
-        snd.set_volume(max(0.0, min(1.0, volume * self._category_volume(
-            _one_shot_category(key)) * self.master_volume)))
-        snd.play()
+        vol = max(
+            0.0,
+            min(1.0, volume * self._category_volume(_one_shot_category(key)) * self.master_volume),
+        )
+        snd.set_volume(vol)
+        channel = snd.play()
+        if channel is not None and pan:
+            pan = max(-1.0, min(1.0, pan))
+            left = vol * (1.0 - max(0.0, pan))
+            right = vol * (1.0 + min(0.0, pan))
+            channel.set_volume(left, right)
 
     # -- loops on reserved channels ------------------------------------------
 
@@ -179,13 +228,21 @@ class _PygameBackend:
             pygame.mixer.Channel(channel).fadeout(fade_ms)
             del self._loops[channel]
 
+    def reverse_start(self) -> None:
+        # The reverse loop is intentionally not played through pygame.mixer.
+        return
+
+    def reverse_stop(self) -> None:
+        return
+
     def _apply_channel_volume(self, channel: int) -> None:
         if not self.enabled or channel not in self._loops:
             return
         _, gain = self._loops[channel]
-        vol = max(0.0, min(
-            1.0, gain * self._category_volume(_loop_category(channel))
-            * self.master_volume))
+        vol = max(
+            0.0,
+            min(1.0, gain * self._category_volume(_loop_category(channel)) * self.master_volume),
+        )
         pygame.mixer.Channel(channel).set_volume(vol)
 
     # -- truck engine crossfade ----------------------------------------------
@@ -226,17 +283,18 @@ class _PygameBackend:
     def play_music(self, track: str, fade_ms: int = 1500) -> None:
         if not self.enabled or self._music_track == track:
             return
-        path = ASSETS / "music" / (track + ".ogg")
-        if not path.exists():
-            path = ASSETS / "music" / (track + ".wav")
-        if not path.exists():
+        found = _asset_bytes(f"music/{track}", ("ogg", "wav"))
+        if found is None:
             log.warning("Missing music track: %s", track)
             return
+        data, ext = found
         try:
-            pygame.mixer.music.load(str(path))
+            buffer = io.BytesIO(data)
+            pygame.mixer.music.load(buffer, namehint=ext)
             pygame.mixer.music.set_volume(self.music_volume * self.master_volume)
             pygame.mixer.music.play(loops=0, fade_ms=fade_ms)
             self._music_track = track
+            self._music_buffer = buffer
         except pygame.error:
             log.warning("Could not play music %s", track, exc_info=True)
 
@@ -255,9 +313,15 @@ class _PygameBackend:
             "ui": self.ui_volume,
         }.get(category, self.sfx_volume)
 
-    def set_volumes(self, master: float | None = None, sfx: float | None = None,
-                    music: float | None = None, weather: float | None = None,
-                    engine: float | None = None, ui: float | None = None) -> None:
+    def set_volumes(
+        self,
+        master: float | None = None,
+        sfx: float | None = None,
+        music: float | None = None,
+        weather: float | None = None,
+        engine: float | None = None,
+        ui: float | None = None,
+    ) -> None:
         if master is not None:
             self.master_volume = max(0.0, min(1.0, master))
         if sfx is not None:
@@ -297,7 +361,9 @@ class _BassBackend:
     def __init__(self) -> None:
         from sound_lib.external.pybass import (
             BASS_ATTRIB_FREQ,
+            BASS_ATTRIB_PAN,
             BASS_ATTRIB_VOL,
+            BASS_ChannelSetAttribute,
             BASS_ChannelSlideAttribute,
         )
         from sound_lib.main import BassError, bass_call
@@ -308,8 +374,10 @@ class _BassBackend:
         self._BassError = BassError
         self._bass_call = bass_call
         self._slide = BASS_ChannelSlideAttribute
+        self._set_attr = BASS_ChannelSetAttribute
         self._ATTRIB_FREQ = BASS_ATTRIB_FREQ
         self._ATTRIB_VOL = BASS_ATTRIB_VOL
+        self._ATTRIB_PAN = BASS_ATTRIB_PAN
 
         self.master_volume = 1.0
         self.sfx_volume = 0.8
@@ -337,30 +405,32 @@ class _BassBackend:
 
     # -- assets -------------------------------------------------------------
 
-    def _stream(self, path: Path, looping: bool):
-        """A fresh stream for one playback; autofreed once it stops."""
-        kwargs: dict = {"file": str(path), "autofree": True}
-        if sys.platform.startswith("linux"):
-            # BASS_UNICODE (UTF-16 paths) is Windows-only; sound_lib handles
-            # macOS itself but passes the flag on Linux, where BASS then
-            # rejects the file. Hand over a filesystem-encoded path instead.
-            kwargs["file"] = str(path).encode(sys.getfilesystemencoding())
-            kwargs["unicode"] = False
+    def _stream(self, data: bytes, label: str, looping: bool):
+        """A fresh memory stream for one playback; autofreed once it stops.
+
+        Memory streams sidestep BASS filename-encoding quirks entirely and
+        work identically for packed and loose assets.
+        """
         try:
-            stream = self._FileStream(**kwargs)
+            stream = self._FileStream(
+                mem=True, file=data, length=len(data), autofree=True, unicode=False
+            )
         except self._BassError:
-            log.warning("Could not open stream: %s", path, exc_info=True)
+            log.warning("Could not open stream: %s", label, exc_info=True)
             return None
+        # BASS reads the buffer during playback; pin it to the wrapper so it
+        # lives exactly as long as the stream object is retained.
+        stream._ff_data = data
         if looping:
             stream.set_looping(True)
         return stream
 
     def _sfx_stream(self, key: str, looping: bool = False):
-        path = _asset_path(key, ("ogg", "wav"))
-        if path is None:
-            log.warning("Missing sound: %s", ASSETS / (key + ".ogg"))
+        found = _asset_bytes(key, ("ogg", "wav"))
+        if found is None:
+            log.warning("Missing sound: %s", key)
             return None
-        return self._stream(path, looping)
+        return self._stream(found[0], key, looping)
 
     def _retain(self, stream) -> None:
         """Keep a reference until BASS finishes with the stream.
@@ -383,8 +453,9 @@ class _BassBackend:
     def _fade_out(self, stream, fade_ms: int) -> None:
         """Slide volume to -1: BASS stops (and autofrees) the channel at 0."""
         try:
-            self._bass_call(self._slide, stream.handle, self._ATTRIB_VOL,
-                            -1.0, max(0, int(fade_ms)))
+            self._bass_call(
+                self._slide, stream.handle, self._ATTRIB_VOL, -1.0, max(0, int(fade_ms))
+            )
         except self._BassError:
             log.debug("Fade-out failed; stream already gone", exc_info=True)
             return
@@ -392,13 +463,26 @@ class _BassBackend:
 
     # -- one-shots ----------------------------------------------------------
 
-    def play(self, key: str, volume: float = 1.0) -> None:
+    def play(self, key: str, volume: float = 1.0, pan: float = 0.0) -> None:
         stream = self._sfx_stream(key)
         if stream is None:
             return
         try:
-            stream.set_volume(max(0.0, min(1.0, volume * self._category_volume(
-                _one_shot_category(key)) * self.master_volume)))
+            stream.set_volume(
+                max(
+                    0.0,
+                    min(
+                        1.0,
+                        volume
+                        * self._category_volume(_one_shot_category(key))
+                        * self.master_volume,
+                    ),
+                )
+            )
+            if pan:
+                self._bass_call(
+                    self._set_attr, stream.handle, self._ATTRIB_PAN, max(-1.0, min(1.0, pan))
+                )
             stream.play()
         except self._BassError:
             log.warning("Could not play %s", key, exc_info=True)
@@ -437,17 +521,23 @@ class _BassBackend:
         if entry is not None:
             self._fade_out(entry[2], fade_ms)
 
+    def reverse_start(self) -> None:
+        self.start_loop(CH_REVERSE, "vehicle/reverse", volume=0.4, fade_ms=80)
+
+    def reverse_stop(self) -> None:
+        self.stop_loop(CH_REVERSE, fade_ms=80)
+
     def _apply_loop_volume(self, channel: int, fade_ms: int = 0) -> None:
         if channel not in self._loops:
             return
         _, gain, stream = self._loops[channel]
-        vol = max(0.0, min(
-            1.0, gain * self._category_volume(_loop_category(channel))
-            * self.master_volume))
+        vol = max(
+            0.0,
+            min(1.0, gain * self._category_volume(_loop_category(channel)) * self.master_volume),
+        )
         try:
             if fade_ms > 0:
-                self._bass_call(self._slide, stream.handle, self._ATTRIB_VOL,
-                                vol, int(fade_ms))
+                self._bass_call(self._slide, stream.handle, self._ATTRIB_VOL, vol, int(fade_ms))
             else:
                 stream.set_volume(vol)
         except self._BassError:
@@ -472,6 +562,7 @@ class _BassBackend:
         self.set_engine_rpm(ENGINE_RPM_IDLE, throttle=0.0)
 
     def engine_stop(self, shutdown_sound: bool = True) -> None:
+        self.reverse_stop()
         if not self._engine_running:
             return
         self._engine_running = False
@@ -486,11 +577,11 @@ class _BassBackend:
         if not (self._engine_running and self._engine_stream is not None):
             return
         target = self._engine_base_freq * engine_freq_mult(rpm)
-        vol = max(0.0, min(
-            1.0, ENGINE_LOOP_GAIN * self.engine_volume * self.master_volume))
+        vol = max(0.0, min(1.0, ENGINE_LOOP_GAIN * self.engine_volume * self.master_volume))
         try:
-            self._bass_call(self._slide, self._engine_stream.handle,
-                            self._ATTRIB_FREQ, target, ENGINE_SLIDE_MS)
+            self._bass_call(
+                self._slide, self._engine_stream.handle, self._ATTRIB_FREQ, target, ENGINE_SLIDE_MS
+            )
             self._engine_stream.set_volume(vol)
         except self._BassError:
             self._engine_stream = None
@@ -504,25 +595,27 @@ class _BassBackend:
     def play_music(self, track: str, fade_ms: int = 1500) -> None:
         if self._music_track == track:
             return
-        path = ASSETS / "music" / (track + ".ogg")
-        if not path.exists():
-            path = ASSETS / "music" / (track + ".wav")
-        if not path.exists():
+        found = _asset_bytes(f"music/{track}", ("ogg", "wav"))
+        if found is None:
             log.warning("Missing music track: %s", track)
             return
         if self._music_stream is not None:
             self._fade_out(self._music_stream, 800)
             self._music_stream = None
             self._music_track = None
-        stream = self._stream(path, looping=False)
+        stream = self._stream(found[0], track, looping=False)
         if stream is None:
             return
         try:
             stream.set_volume(0.0)
             stream.play()
-            self._bass_call(self._slide, stream.handle, self._ATTRIB_VOL,
-                            max(0.0, min(1.0, self.music_volume * self.master_volume)),
-                            max(0, int(fade_ms)))
+            self._bass_call(
+                self._slide,
+                stream.handle,
+                self._ATTRIB_VOL,
+                max(0.0, min(1.0, self.music_volume * self.master_volume)),
+                max(0, int(fade_ms)),
+            )
         except self._BassError:
             log.warning("Could not play music %s", track, exc_info=True)
             return
@@ -545,9 +638,15 @@ class _BassBackend:
             "ui": self.ui_volume,
         }.get(category, self.sfx_volume)
 
-    def set_volumes(self, master: float | None = None, sfx: float | None = None,
-                    music: float | None = None, weather: float | None = None,
-                    engine: float | None = None, ui: float | None = None) -> None:
+    def set_volumes(
+        self,
+        master: float | None = None,
+        sfx: float | None = None,
+        music: float | None = None,
+        weather: float | None = None,
+        engine: float | None = None,
+        ui: float | None = None,
+    ) -> None:
         if master is not None:
             self.master_volume = max(0.0, min(1.0, master))
         if sfx is not None:
@@ -565,14 +664,15 @@ class _BassBackend:
         if self._engine_stream is not None:
             try:
                 self._engine_stream.set_volume(
-                    max(0.0, min(
-                        1.0, ENGINE_LOOP_GAIN * self.engine_volume * self.master_volume)))
+                    max(0.0, min(1.0, ENGINE_LOOP_GAIN * self.engine_volume * self.master_volume))
+                )
             except self._BassError:
                 self._engine_stream = None
         if self._music_stream is not None:
             try:
                 self._music_stream.set_volume(
-                    max(0.0, min(1.0, self.music_volume * self.master_volume)))
+                    max(0.0, min(1.0, self.music_volume * self.master_volume))
+                )
             except self._BassError:
                 self._music_stream = None
 
@@ -602,19 +702,28 @@ class _NullBackend:
         self.engine_volume = 0.55
         self.ui_volume = 0.9
 
-    def play(self, key: str, volume: float = 1.0) -> None: ...
-    def start_loop(self, channel: int, key: str, volume: float = 1.0,
-                   fade_ms: int = 300) -> None: ...
+    def play(self, key: str, volume: float = 1.0, pan: float = 0.0) -> None: ...
+    def start_loop(
+        self, channel: int, key: str, volume: float = 1.0, fade_ms: int = 300
+    ) -> None: ...
     def set_loop_volume(self, channel: int, volume: float) -> None: ...
     def stop_loop(self, channel: int, fade_ms: int = 300) -> None: ...
     def engine_start(self) -> None: ...
     def engine_stop(self, shutdown_sound: bool = True) -> None: ...
     def set_engine_rpm(self, rpm: float, throttle: float = 0.0) -> None: ...
+    def reverse_start(self) -> None: ...
+    def reverse_stop(self) -> None: ...
     def play_music(self, track: str, fade_ms: int = 1500) -> None: ...
     def stop_music(self, fade_ms: int = 1000) -> None: ...
-    def set_volumes(self, master: float | None = None, sfx: float | None = None,
-                    music: float | None = None, weather: float | None = None,
-                    engine: float | None = None, ui: float | None = None) -> None:
+    def set_volumes(
+        self,
+        master: float | None = None,
+        sfx: float | None = None,
+        music: float | None = None,
+        weather: float | None = None,
+        engine: float | None = None,
+        ui: float | None = None,
+    ) -> None:
         if master is not None:
             self.master_volume = max(0.0, min(1.0, master))
         if sfx is not None:
@@ -627,6 +736,7 @@ class _NullBackend:
             self.engine_volume = max(0.0, min(1.0, engine))
         if ui is not None:
             self.ui_volume = max(0.0, min(1.0, ui))
+
     def shutdown(self) -> None: ...
 
 
@@ -644,8 +754,9 @@ class AudioEngine:
             try:
                 return _BassBackend()
             except Exception:
-                log.warning("sound_lib/BASS unavailable; falling back to pygame.mixer",
-                            exc_info=True)
+                log.warning(
+                    "sound_lib/BASS unavailable; falling back to pygame.mixer", exc_info=True
+                )
         backend = _PygameBackend()
         if backend.enabled:
             return backend
@@ -685,8 +796,9 @@ class AudioEngine:
 
     # -- one-shots and loops ------------------------------------------------------
 
-    def play(self, key: str, volume: float = 1.0) -> None:
-        self._impl.play(key, volume)
+    def play(self, key: str, volume: float = 1.0, pan: float = 0.0) -> None:
+        """Play a one-shot. ``pan`` -1.0 = full left, 0 = center, 1.0 = right."""
+        self._impl.play(key, volume, pan)
 
     def start_loop(self, channel: int, key: str, volume: float = 1.0, fade_ms: int = 300) -> None:
         self._impl.start_loop(channel, key, volume, fade_ms)
@@ -703,6 +815,7 @@ class AudioEngine:
         self._impl.engine_start()
 
     def engine_stop(self, shutdown_sound: bool = True) -> None:
+        self.reverse_stop()
         self._impl.engine_stop(shutdown_sound)
 
     def set_engine_rpm(self, rpm: float, throttle: float = 0.0) -> None:
@@ -743,10 +856,22 @@ class AudioEngine:
         else:
             self.start_loop(CH_AMBIENT, key, volume=volume, fade_ms=800)
 
+    def horn_start(self) -> None:
+        self.start_loop(CH_HORN, "vehicle/horn", volume=1.0, fade_ms=0)
+
+    def horn_stop(self) -> None:
+        self.stop_loop(CH_HORN, fade_ms=80)
+
+    def reverse_start(self) -> None:
+        self._impl.reverse_start()
+
+    def reverse_stop(self) -> None:
+        self._impl.reverse_stop()
+
     def stop_world(self) -> None:
         """Stop engine, road, weather, and ambience (leaving UI sfx alone)."""
         self.engine_stop(shutdown_sound=False)
-        for ch in (CH_ROAD, CH_WEATHER, CH_WEATHER_B, CH_AMBIENT):
+        for ch in (CH_ROAD, CH_WEATHER, CH_WEATHER_B, CH_AMBIENT, CH_HORN):
             self.stop_loop(ch, fade_ms=400)
 
     # -- music ----------------------------------------------------------------
@@ -760,9 +885,15 @@ class AudioEngine:
 
     # -- volume control ---------------------------------------------------------
 
-    def set_volumes(self, master: float | None = None, sfx: float | None = None,
-                    music: float | None = None, weather: float | None = None,
-                    engine: float | None = None, ui: float | None = None) -> None:
+    def set_volumes(
+        self,
+        master: float | None = None,
+        sfx: float | None = None,
+        music: float | None = None,
+        weather: float | None = None,
+        engine: float | None = None,
+        ui: float | None = None,
+    ) -> None:
         self._impl.set_volumes(master, sfx, music, weather, engine, ui)
 
     def shutdown(self) -> None:

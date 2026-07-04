@@ -63,8 +63,7 @@ def test_accepting_job_starts_drivable_pickup_leg():
         assert pickup.trip.remaining_miles == pickup.route.miles
         assert "Deadheading to pickup" in pickup.lines()[0]
         dispatch_messages = [
-            text for text in spoken
-            if "Dispatch accepted from Chicago Company Yard" in text
+            text for text in spoken if "Dispatch accepted from Chicago Company Yard" in text
         ]
         assert dispatch_messages
         assert "Deadhead" in dispatch_messages[-1]
@@ -124,10 +123,8 @@ def test_pickup_facility_waits_for_full_stop(monkeypatch):
     app = App()
     events = []
     played = []
-    monkeypatch.setattr(app.ctx, "say_event",
-                        lambda text, interrupt=True: events.append(text))
-    monkeypatch.setattr(app.ctx.audio, "play",
-                        lambda key, volume=1.0: played.append((key, volume)))
+    monkeypatch.setattr(app.ctx, "say_event", lambda text, interrupt=True: events.append(text))
+    monkeypatch.setattr(app.ctx.audio, "play", lambda key, volume=1.0: played.append((key, volume)))
     try:
         driving = accept_pickup_drive(app)
 
@@ -155,8 +152,7 @@ def test_loading_at_pickup_uses_dock_sound(monkeypatch):
 
     app = App()
     played = []
-    monkeypatch.setattr(app.ctx.audio, "play",
-                        lambda key, volume=1.0: played.append((key, volume)))
+    monkeypatch.setattr(app.ctx.audio, "play", lambda key, volume=1.0: played.append((key, volume)))
     try:
         accept_pickup_drive(app)
         pickup = arrive_at_pickup(app)
@@ -178,7 +174,7 @@ def test_quit_during_pickup_drive_resumes_from_the_last_stop():
     app = App()
     try:
         driving = accept_pickup_drive(app)
-        driving.trip.restore(1.5, 12.0)   # drove a little into the pickup leg
+        driving.trip.restore(1.5, 12.0)  # drove a little into the pickup leg
 
         driving.handle_event(key_event(pygame.K_ESCAPE))
         assert isinstance(app.state, PauseMenuState)

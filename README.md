@@ -160,7 +160,13 @@ the file from quarantine.
 
 ## Controls
 
-### Menus
+Freight Fate plays with the keyboard or a game controller, and both stay active
+at all times. Spoken prompts name whichever you last used, so "press X to take
+it" on the keyboard becomes "press D-pad down to take it" on a controller.
+
+### Keyboard
+
+#### Menus
 
 | Key | Action |
 | --- | --- |
@@ -171,7 +177,7 @@ the file from quarantine.
 | Any letter | Jump to the next item starting with it |
 | F1 | Contextual help |
 
-### Driving
+#### Driving
 
 | Key | Action |
 | --- | --- |
@@ -196,6 +202,63 @@ the file from quarantine.
 | V | Weather and forecast |
 | F1 | List all controls |
 | Escape | Pause menu |
+
+### Controller
+
+Plug in an Xbox, PlayStation, or other compatible controller and the game picks
+up the first one automatically. It detects a controller connected or unplugged
+mid-game — unplugging pauses the drive — and you can switch back to the keyboard
+at any time. Button names below use the Xbox layout; the equivalents map
+automatically on other pads. Turn controller support off under Settings →
+Gameplay → Controller if you prefer keyboard only.
+
+#### Menus
+
+| Button | Action |
+| --- | --- |
+| D-pad Up / Down | Navigate |
+| D-pad Left / Right | Adjust the selected option (hold to repeat) |
+| A | Select (like Enter) |
+| B | Back (like Escape) |
+| Back / Select | Contextual help (like F1) |
+
+#### Driving
+
+| Button | Action |
+| --- | --- |
+| Left stick | Steering |
+| Right trigger | Throttle |
+| Left trigger | Brake (press fully for the hardest stop) |
+| Left bumper (LB) | Clutch (manual mode) |
+| A | Shift up a gear (manual mode) |
+| X | Shift down a gear (manual mode) |
+| Y | Adaptive cruise on / off |
+| B | Speak speed, gear, RPM |
+| D-pad Up | Route progress |
+| D-pad Down | Take exit / signal a pull-over |
+| D-pad Left | Weather and forecast |
+| D-pad Right | Clock, deadline, hours of service |
+| Left stick click (L3) | Horn |
+| Right stick click (R3) | Engine brake toggle |
+| Start | Pause / resume |
+| Back / Select | Controller help |
+
+Hold the right bumper (RB) as a modifier for a second layer of driving bindings:
+
+| Button | Action |
+| --- | --- |
+| RB + A | Start / stop engine |
+| RB + B | Fuel and range |
+| RB + Y | Release / set parking brake |
+| RB + D-pad Up | Next listed highway exit |
+| RB + D-pad Down | Refuel and rest (stopped at a rest stop) |
+| RB + D-pad Left / Right | Lower / raise cruise speed |
+| RB + Start | Driving status menu |
+
+The left and right triggers are analog: hold them wherever you like for partial
+throttle or braking, rather than the ramped hold the arrow keys use. There is no
+controller emergency brake — press the left trigger all the way for the hardest
+stop.
 
 ### Air-brake model
 
@@ -226,10 +289,47 @@ rather than minutes of waiting.
 ## Development
 
 ```bash
-uv sync --dev
+uv sync --group dev
+uv run pre-commit install
+uv run pre-commit install --hook-type pre-push
 uv run pytest          # full test suite, headless
 uv run ruff check src tests tools
 ```
+
+The pre-commit hooks run Ruff lint fixes and formatting before commits. The
+pre-push hook runs the release-note gate before publishing commits. It uses
+`tools.release_notes check --base auto --head HEAD`, so user-facing changes need
+a player-facing `CHANGELOG.md` entry unless the whole change set uses
+`changelog: none` or `[skip changelog]`.
+
+### World data
+
+The route tools edit the single `src/freight_fate/data/world.json`, but the game
+loads the indexed `src/freight_fate/data/world_data/` tree. After changing world
+data, regenerate the index so the two stay in sync:
+
+```bash
+uv run python tools/index_world.py          # rewrite world_data/ from world.json
+uv run python tools/index_world.py --check  # verify in sync (CI + pre-commit do this)
+```
+
+A pre-commit hook and a test both fail if `world_data/` drifts from `world.json`,
+so commit the regenerated `world_data/` files alongside your `world.json` edits.
+
+### Playtesting
+
+Freight Fate is audio-first, so the way to review a playthrough is the transcript
+of what the game says. `tools/playtest.py` drives the real game states headless
+(no window, no speech) and prints that transcript:
+
+```bash
+uv run python tools/playtest.py                       # new-career delivery
+uv run python tools/playtest.py --route "Newark->New York"   # one corridor
+uv run python tools/playtest.py --route "New York->Boston" --events-only
+```
+
+Use `--route` to exercise a specific corridor after editing its route data. The
+same harness backs the `@pytest.mark.smoke` delivery tests.
 
 ### Changelog and snapshots
 
@@ -249,7 +349,12 @@ licensing.
 
 ## License
 
-Code is [MIT](LICENSE). Bundled audio credits and licensing notes are tracked in
+Freight Fate is licensed under the
+[PolyForm Noncommercial License 1.0.0](LICENSE): the source is public and free
+to use, modify, and share for any noncommercial purpose, but only the copyright
+holder may sell it or put it to commercial use. This is a source-available
+license, not an OSI-approved open-source license. Bundled audio credits and
+provenance are tracked in
 [CREDITS.md](src/freight_fate/assets/sounds/CREDITS.md).
 
 **BASS license caveat:** audio playback uses the

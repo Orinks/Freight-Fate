@@ -12,7 +12,7 @@ from freight_fate.data.regions import (
 )
 from freight_fate.data.world import MARKET_TAG_FACILITY_TYPES, REGION_MARKET_TAGS
 from freight_fate.models.economy import REGION_FUEL_PRICE
-from freight_fate.sim.trip import REGION_HAZARDS
+from freight_fate.sim.trip import HAZARDS
 from freight_fate.sim.weather import REGION_WEIGHTS
 
 
@@ -27,9 +27,7 @@ def test_stored_region_matches_derived(world):
         derived = classify_region(city.state, city.lat, city.lon)
         if city.region != derived:
             mismatches.append(f"{name}: stored {city.region!r} != derived {derived!r}")
-    assert not mismatches, "Stored regions out of sync with classifier:\n" + "\n".join(
-        mismatches
-    )
+    assert not mismatches, "Stored regions out of sync with classifier:\n" + "\n".join(mismatches)
 
 
 def test_every_stored_region_is_canonical(world):
@@ -43,16 +41,32 @@ def test_reno_is_great_basin_not_rockies(world):
     assert world.cities["Boise"].region == "great_basin"
 
 
-@pytest.mark.parametrize("table_name,table", [
-    ("REGION_WEIGHTS", REGION_WEIGHTS),
-    ("REGION_HAZARDS", REGION_HAZARDS),
-    ("REGION_FUEL_PRICE", REGION_FUEL_PRICE),
-    ("REGION_MARKET_TAGS", REGION_MARKET_TAGS),
-    ("REGION_LABELS", REGION_LABELS),
-])
+@pytest.mark.parametrize(
+    "table_name,table",
+    [
+        ("REGION_WEIGHTS", REGION_WEIGHTS),
+        ("REGION_FUEL_PRICE", REGION_FUEL_PRICE),
+        ("REGION_MARKET_TAGS", REGION_MARKET_TAGS),
+        ("REGION_LABELS", REGION_LABELS),
+    ],
+)
 def test_every_region_covered_in_flavor_tables(table_name, table):
     missing = [region for region in REGIONS if region not in table]
     assert not missing, f"{table_name} is missing regions: {missing}"
+
+
+def test_every_region_has_local_hazard_flavor():
+    """Every canonical region is named by at least one region-specific hazard,
+    so no region falls back to only the nationwide staples."""
+    tagged = {region for hazard in HAZARDS if hazard.regions for region in hazard.regions}
+    missing = [region for region in REGIONS if region not in tagged]
+    assert not missing, f"regions with no local hazard flavor: {missing}"
+
+
+def test_hazard_region_tags_are_canonical():
+    for hazard in HAZARDS:
+        for region in hazard.regions or ():
+            assert region in REGIONS, f"{hazard.text!r} tags unknown region {region!r}"
 
 
 def test_market_tags_are_valid(world):
@@ -65,19 +79,19 @@ def test_market_tags_are_valid(world):
 
 def test_classifier_splits_multi_region_states():
     # Texas spans three regions by coordinate.
-    assert classify_region("Texas", 29.76, -95.37) == "gulf_coast"      # Houston
+    assert classify_region("Texas", 29.76, -95.37) == "gulf_coast"  # Houston
     assert classify_region("Texas", 32.78, -96.80) == "southern_plains"  # Dallas
     assert classify_region("Texas", 31.76, -106.48) == "desert_southwest"  # El Paso
     # Nevada: northern Great Basin vs southern Mojave desert.
-    assert classify_region("Nevada", 39.53, -119.81) == "great_basin"   # Reno
+    assert classify_region("Nevada", 39.53, -119.81) == "great_basin"  # Reno
     assert classify_region("Nevada", 36.17, -115.14) == "desert_southwest"  # Las Vegas
     # Pennsylvania, New York, Tennessee splits.
-    assert classify_region("Pennsylvania", 40.44, -80.00) == "appalachia"   # Pittsburgh
-    assert classify_region("Pennsylvania", 39.95, -75.17) == "northeast"    # Philadelphia
-    assert classify_region("New York", 42.89, -78.88) == "great_lakes"      # Buffalo
-    assert classify_region("New York", 40.71, -74.01) == "northeast"        # New York
-    assert classify_region("Tennessee", 35.96, -83.92) == "appalachia"      # Knoxville
-    assert classify_region("Tennessee", 36.16, -86.78) == "mid_south"       # Nashville
+    assert classify_region("Pennsylvania", 40.44, -80.00) == "appalachia"  # Pittsburgh
+    assert classify_region("Pennsylvania", 39.95, -75.17) == "northeast"  # Philadelphia
+    assert classify_region("New York", 42.89, -78.88) == "great_lakes"  # Buffalo
+    assert classify_region("New York", 40.71, -74.01) == "northeast"  # New York
+    assert classify_region("Tennessee", 35.96, -83.92) == "appalachia"  # Knoxville
+    assert classify_region("Tennessee", 36.16, -86.78) == "mid_south"  # Nashville
 
 
 def test_classifier_rejects_unmapped_state():
