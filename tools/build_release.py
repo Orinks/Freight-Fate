@@ -265,14 +265,24 @@ def verify_prism_native_linkage(native_dir: Path, dependency_dir: Path | None = 
             )
 
 
-def _load_manual_html():
-    """Load the by-path manual HTML converter (tools is not a package)."""
+def _load_tool(name: str):
+    """Load a by-path tools module (tools is not a package)."""
     spec = importlib.util.spec_from_file_location(
-        "manual_html", Path(__file__).resolve().parent / "manual_html.py"
+        name, Path(__file__).resolve().parent / f"{name}.py"
     )
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
     return module
+
+
+def stage_sound_pack(build_dir: Path) -> None:
+    """Pack the sound assets into the runtime and keep the credits readable."""
+    root = runtime_root(build_dir)
+    _load_tool("pack_sounds").pack(output=root / "freight_fate" / "sounds.pak")
+    credits = PACKAGE_DIR / "assets" / "sounds" / "CREDITS.md"
+    if not credits.exists():
+        raise RuntimeError(f"Sound credits were not found: {credits}")
+    shutil.copy2(credits, root / "SOUND_CREDITS.md")
 
 
 def stage_release_docs(build_dir: Path) -> None:
@@ -283,12 +293,18 @@ def stage_release_docs(build_dir: Path) -> None:
     root = runtime_root(build_dir)
     shutil.copy2(changelog, root / "CHANGELOG.md")
 
+    license_file = ROOT / "LICENSE"
+    if not license_file.exists():
+        raise RuntimeError(f"License was not found: {license_file}")
+    # PolyForm's Notices term expects the terms to travel with every copy.
+    shutil.copy2(license_file, root / "LICENSE.txt")
+
     manual = ROOT / "docs" / "user-manual.md"
     if not manual.exists():
         raise RuntimeError(f"User manual was not found: {manual}")
     shutil.copy2(manual, root / "USER_MANUAL.md")
     # Also ship a browser-friendly, accessible HTML rendering of the manual.
-    manual_html = _load_manual_html().markdown_to_html(
+    manual_html = _load_tool("manual_html").markdown_to_html(
         manual.read_text(encoding="utf-8"), title="Freight Fate Player Manual"
     )
     (root / "USER_MANUAL.html").write_text(manual_html, encoding="utf-8")
@@ -309,8 +325,10 @@ def build_nuitka_command(entry: Path) -> list[str]:
         "--noinclude-pytest-mode=nofollow",
         "--include-package-data=prism:_native/*",
         "--include-package-data=sound_lib",
-        f"--include-data-dir={repo_path(PACKAGE_DIR / 'assets')}=freight_fate/assets",
-        f"--include-data-dir={repo_path(PACKAGE_DIR / 'data')}=freight_fate/data",
+        # World data ships baked into the executable (tools/bake_world.py)
+        # and sounds ship as a masked pack (tools/pack_sounds.py), never as
+        # editable files next to it.
+        "--include-module=freight_fate.data._baked_world",
         f"--output-dir={output_dir.as_posix()}",
         f"--output-filename={APP_NAME}",
         f"--product-name={APP_NAME}",
@@ -352,7 +370,13 @@ def run_nuitka() -> Path:
     """Build and stage a standalone Nuitka distribution."""
     entry = write_entrypoint()
     output_dir = BUILD / "nuitka"
-    subprocess.run(build_nuitka_command(entry), cwd=ROOT, check=True)
+    baked = _load_tool("bake_world").bake()
+    try:
+        subprocess.run(build_nuitka_command(entry), cwd=ROOT, check=True)
+    finally:
+        # A leftover baked module would shadow later edits to world_data/
+        # in this source checkout, so it must not outlive the compile.
+        baked.unlink(missing_ok=True)
 
     source_dir, output_kind = find_nuitka_output(output_dir)
     build_dir = DIST / (f"{APP_NAME}.app" if output_kind == "app" else APP_NAME)
@@ -362,6 +386,7 @@ def run_nuitka() -> Path:
     shutil.copytree(source_dir, build_dir)
     stage_sound_lib_runtime_files(build_dir)
     stage_prism_runtime_files(build_dir)
+    stage_sound_pack(build_dir)
     return build_dir
 
 
@@ -372,11 +397,12 @@ def verify_packaged_payload(build_dir: Path) -> None:
     required = [
         exe,
         root / "build_info.json",
+        root / "LICENSE.txt",
         root / "CHANGELOG.md",
         root / "USER_MANUAL.md",
         root / "USER_MANUAL.html",
-        root / "freight_fate" / "assets" / "sounds",
-        root / "freight_fate" / "data" / "world.json",
+        root / "freight_fate" / "sounds.pak",
+        root / "SOUND_CREDITS.md",
         root / "sound_lib" / "lib",
         root / "prism" / "_native",
     ]
@@ -388,6 +414,25 @@ def verify_packaged_payload(build_dir: Path) -> None:
             "Packaged payload is incomplete: "
             + ", ".join(str(path.relative_to(root)) for path in missing)
         )
+
+    exposed_data = root / "freight_fate" / "data"
+    if exposed_data.exists():
+        raise RuntimeError(
+            "Packaged payload exposes editable world data files; they must "
+            f"stay baked into the executable: {exposed_data.relative_to(root)}"
+        )
+
+    exposed_assets = root / "freight_fate" / "assets"
+    if exposed_assets.exists():
+        raise RuntimeError(
+            "Packaged payload exposes editable sound files; they must stay "
+            f"packed in sounds.pak: {exposed_assets.relative_to(root)}"
+        )
+
+    assets_pack = _load_tool("pack_sounds")._load_assets_pack()
+    pack_names = assets_pack.SoundPack(root / "freight_fate" / "sounds.pak").names()
+    if not any(name.endswith((".ogg", ".wav")) for name in pack_names):
+        raise RuntimeError("Packaged sound pack contains no audio files")
 
     if sys.platform != "win32" and not exe.stat().st_mode & 0o111:
         raise RuntimeError(

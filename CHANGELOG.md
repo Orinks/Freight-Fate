@@ -134,6 +134,15 @@
   a final warning before spike strips. A felony stop now means a major fine,
   reputation damage, truck damage, processing time, and cancellation of the
   active loaded run, with a clear return to the terminal afterward.
+- **Report a problem straight from the main menu.** A new Report a problem
+  option, just above Quit, opens the Freight Fate bug report page on GitHub
+  in your web browser and tells you where to find your game log: the file
+  game.log in the logs folder next to the game. The game now also keeps the
+  previous run's log as game.prev.log, so if the game crashes, the evidence
+  survives restarting it to file the report. Crashes inside the game's audio
+  and video engines, which used to vanish without a trace, are now written
+  into the log as well.
+
 - **Game controllers are now supported, alongside the keyboard.** Plug in an
   Xbox, PlayStation, or other compatible controller and drive by feel: the right
   and left triggers are the gas and brake, the left stick steers, the left bumper
@@ -338,7 +347,46 @@
   flavor, and regional hazards on runs through both cities now match the
   geography. Thanks to liamerven.
 
+### Fixed
+- **Exit warnings now arrive early enough to act on.** At highway speed on
+  standard or fast pacing, the destination exit callout used to fire so close
+  that by the time it finished speaking the ramp was gone. The warning
+  distance now grows with your speed and pacing, so you always get roughly
+  the same amount of real listening and braking time, and the exit can be
+  armed as soon as you hear the callout.
+- **Exit announcements no longer say the same name twice.** Messages like
+  "missed exit 5B for exit 5B" and "Signaling for the exit for the warehouse,
+  destination exit for the warehouse" now speak each exit and facility name
+  exactly once. Distances also read naturally: "in 1 mile" instead of
+  "in 1 miles".
+
 ### Changed
+- **New installs now start at relaxed trip pacing.** Fresh installs default to
+  the relaxed pace, which gives you the most real time to hear and react to
+  spoken warnings like exits and hazards. Existing players keep whatever
+  pacing they already chose, and standard and fast are still one setting away
+  under Settings, Gameplay, Trip pacing.
+- **All music now plays at the same volume.** Six tracks, including the main
+  menu themes, Open Road, Night Haul, and Small Hours, were much louder than
+  the rest of the soundtrack. They have been brought down to match, so the
+  music volume slider now behaves the same no matter which track is playing,
+  and the menu no longer greets you louder than the drive that follows.
+- **Real-world weather now refreshes three times as often.** With the real
+  weather source turned on, the game checks the live conditions for your
+  destination every five minutes instead of every fifteen, so fog rolling in,
+  a storm firing up, or skies clearing reach your drive much sooner. If your
+  connection drops, the game holds the last known weather for the same half
+  hour as before switching to simulated conditions.
+- **Downloaded builds no longer expose the game's world data files.** The
+  world now ships built into the game program itself, so there is no data
+  folder to browse or accidentally edit next to the game. Nothing changes
+  about how the game plays, and source checkouts keep their editable data
+  files.
+- **Downloaded builds now ship their sounds as a single packed file.** The
+  browsable sounds folder is gone from the download; all sound effects and
+  music travel in one pack file the game reads directly. Every sound plays
+  exactly as before, the sound and music credits ship as a readable file
+  next to the game, and source checkouts keep their editable sound files.
 - **During a manual drive.** hold down the clutch (shift) then press W to shift up gears, and q to shift down gears .
 - **More freight destinations use real map-backed endpoints.** The offline map
   data now includes source-backed freight facility endpoints where local OSM

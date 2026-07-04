@@ -55,6 +55,23 @@ ALTERNATE_ROUTE_MIN_EXTRA_MILES = 75.0
 ALTERNATE_ROUTE_MAX_EXTRA_MILES = 550.0
 
 
+def _load_base_world_data(root: Path) -> dict:
+    """Read the base world, preferring the baked-in module in frozen builds.
+
+    Release builds compile the world into the executable via
+    ``tools/bake_world.py`` and ship no ``world_data/`` files. Source
+    checkouts have no baked module and read the editable tree. Explicit
+    non-default roots (tests, tooling) always read files.
+    """
+    if root == WORLD_DATA_PATH:
+        try:
+            from . import _baked_world
+        except ImportError:
+            return load_world_data(root)
+        return _baked_world.load()
+    return load_world_data(root)
+
+
 class World(WorldServiceMixin):
     def __init__(self, data: dict) -> None:
         self.cities: dict[str, City] = {}
@@ -175,7 +192,7 @@ class World(WorldServiceMixin):
         loader capability the online tier will build on.
         """
 
-        data = load_world_data(root)
+        data = _load_base_world_data(root)
         if overlay is not None and overlay.exists():
             data = _merge_overlay(data, json.loads(overlay.read_text(encoding="utf-8")))
         return cls(data)

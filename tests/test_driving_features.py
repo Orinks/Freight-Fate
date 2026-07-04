@@ -315,7 +315,7 @@ def test_how_to_play_documents_new_gameplay_systems():
     assert "settings are grouped into categories" in help_text
     assert "open a category to see its settings" in help_text
     assert "trip pacing changes how quickly distance and game time pass" in help_text
-    assert "standard pacing is the normal freight fate pace" in help_text
+    assert "relaxed pacing gives you more real time to react, and is the default" in help_text
     assert "relaxed keeps the clock but gives a more forgiving schedule" in help_text
     assert "longer limits and fewer penalties" in help_text
     assert "adaptive cruise" in help_text
@@ -1786,6 +1786,138 @@ def test_exit_missed_when_too_fast():
         assert driving._exit_stop is None
     finally:
         app.shutdown()
+
+
+def test_exit_window_scales_with_speed_and_pacing():
+    from freight_fate.app import App
+    from freight_fate.states.driving_core import EXIT_WINDOW_MAX_MI, EXIT_WINDOW_MI
+
+    app = App()
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        driving.trip.time_scale = 20.0
+
+        driving.truck.velocity_mps = 0.0  # crawling -> the minimum window
+        assert driving._exit_window_mi() == pytest.approx(EXIT_WINDOW_MI)
+
+        driving.truck.velocity_mps = 70 / 2.23694  # highway speed -> more lead
+        fast = driving._exit_window_mi()
+        assert fast > EXIT_WINDOW_MI
+        assert fast <= EXIT_WINDOW_MAX_MI
+
+        driving.trip.time_scale = 40.0  # fast pacing compresses time -> even more
+        faster = driving._exit_window_mi()
+        assert faster >= fast
+        assert faster <= EXIT_WINDOW_MAX_MI
+    finally:
+        app.shutdown()
+
+
+def test_destination_exit_announced_within_scaled_window(monkeypatch):
+    """At highway speed on fast pacing the callout fires beyond the base
+    5-mile window, buying real seconds to hear it, arm, and brake."""
+    from freight_fate.app import App
+    from freight_fate.states.driving_core import EXIT_WINDOW_MI
+
+    app = App()
+    events = []
+    monkeypatch.setattr(
+        app.ctx, "say_event", lambda text, interrupt=True: events.append(text)
+    )
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        driving.trip.time_scale = 40.0
+        driving.truck.velocity_mps = 74 / 2.23694
+        destination = driving._destination_exit_stop()
+        driving.trip.position_mi = destination.at_mi - (EXIT_WINDOW_MI + 3.0)
+
+        driving._check_destination_exit()
+
+        assert events, "no callout inside the scaled window"
+        assert "destination exit" in events[-1]
+    finally:
+        app.shutdown()
+
+
+def test_exit_announcements_speak_each_name_once(monkeypatch):
+    """Fallback phrasing must not repeat the facility or exit label -- the
+    sentence is heard, not read."""
+    from freight_fate.app import App
+    from freight_fate.states.driving_core import RoadStop
+
+    app = App()
+    said = []
+    monkeypatch.setattr(app.ctx, "say", lambda text, **k: said.append(text))
+    monkeypatch.setattr(
+        app.ctx, "say_event", lambda text, interrupt=True: said.append(text)
+    )
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        facility = "grocery warehouse Trenton Distribution in Trenton"
+        stop = RoadStop(facility, 10.0, "delivery_destination", ("deliver",), exit_label="")
+        stop.exit_phrase = ""
+
+        monkeypatch.setattr(driving, "_upcoming_exit_stop", lambda: stop)
+        driving.trip.position_mi = 9.0
+        driving._take_exit()
+        assert said[-1].count(facility) == 1
+        assert "destination exit for" in said[-1]
+
+        announcement = driving._destination_exit_announcement(stop, 1.2)
+        assert announcement.count(facility) == 1
+        assert "In 1 mile," in announcement  # singular, not "1 miles"
+
+        driving.trip.position_mi = stop.at_mi
+        driving.truck.velocity_mps = 29.0  # too fast: blow past it
+        driving._update_exit(0.0)
+        assert "missed" in said[-1]
+        assert said[-1].count(facility) == 1
+    finally:
+        app.shutdown()
+
+
+def test_labeled_missed_exit_names_the_exit_once(monkeypatch):
+    from freight_fate.app import App
+    from freight_fate.states.driving_core import RoadStop
+
+    app = App()
+    said = []
+    monkeypatch.setattr(
+        app.ctx, "say_event", lambda text, interrupt=True: said.append(text)
+    )
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        stop = RoadStop(
+            "grocery warehouse in Trenton",
+            10.0,
+            "delivery_destination",
+            ("deliver",),
+            exit_label="exit 5B",
+        )
+        stop.exit_phrase = "exit 5B for US-1 South toward Trenton"
+        driving._exit_stop = stop
+        driving.trip.position_mi = stop.at_mi
+        driving.truck.velocity_mps = 29.0
+
+        driving._update_exit(0.0)
+
+        assert "missed exit 5B for US-1 South toward Trenton" in said[-1]
+        assert said[-1].count("exit 5B") == 1
+    finally:
+        app.shutdown()
+
+
+def test_spoken_distances_pluralize():
+    from freight_fate.sim.trip import _spoken_distance
+
+    assert _spoken_distance(1.4, "mile") == "1 mile"
+    assert _spoken_distance(0.6, "mile") == "1 mile"
+    assert _spoken_distance(2.6, "kilometer") == "3 kilometers"
+    assert _spoken_distance(0.2, "mile") == "0 miles"
 
 
 @pytest.mark.smoke

@@ -73,7 +73,12 @@ STOP_PULL_IN_MIN = 5.0
 STOP_PULL_IN_WAIT_S = 1.0
 
 # Highway exits: signal inside the window, slow enough to make the ramp.
-EXIT_WINDOW_MI = 5.0  # how far out X can arm the upcoming exit
+# The window is the *minimum*; at speed it grows so the spoken callout stays
+# far enough out to hear, arm, and brake despite time compression -- see
+# _exit_window_mi(), which mirrors the zone-warning lead scaling.
+EXIT_WINDOW_MI = 5.0  # how far out X can arm the upcoming exit, at minimum
+EXIT_WARNING_REAL_S = 25.0  # target real seconds from callout to the ramp
+EXIT_WINDOW_MAX_MI = 20.0
 EXIT_LANE_PREP_MI = 2.0  # where GPS starts asking for the exit lane
 EXIT_COMMIT_WINDOW_MI = 0.4  # generous gore-window grace after the marker
 EXIT_LANE_READY = 0.85  # accumulated right-lane commitment

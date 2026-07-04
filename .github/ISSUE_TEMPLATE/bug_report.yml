@@ -1,0 +1,53 @@
+name: Bug report
+description: Report a crash, wrong behavior, or anything else broken in Freight Fate.
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for helping improve Freight Fate. Plain language is fine:
+        describe what you heard and did. The game log is the single most
+        useful thing you can attach, especially for crashes.
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: >
+        What went wrong? If the game closed on its own with no message
+        (a crash to desktop), say so.
+      placeholder: The game closed suddenly during a drive from Dallas to Memphis.
+    validations:
+      required: true
+  - type: textarea
+    id: before
+    attributes:
+      label: What were you doing right before?
+      description: >
+        The last few things you did or heard. The menu you were in, keys you
+        pressed, the weather, the radio, a warning that played, anything you
+        remember. "It happened twice, both times mid-drive" is useful too.
+    validations:
+      required: false
+  - type: input
+    id: version
+    attributes:
+      label: Game version
+      description: >
+        Spoken when the main menu opens, for example "version 1.1". If you are
+        on a nightly build, say that here.
+    validations:
+      required: false
+  - type: textarea
+    id: log
+    attributes:
+      label: Game log
+      description: >
+        Please attach the log file. In the folder where the game lives there is
+        a "logs" folder containing "game.log". Attach it here with the
+        "attach files" button below this text box, or paste the file into the
+        box. Important, if you restarted the game after the problem, attach
+        "game.prev.log" instead. That is the log from the previous run, kept
+        exactly so a crash log survives one restart.
+    validations:
+      required: false

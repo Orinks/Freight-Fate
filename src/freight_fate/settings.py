@@ -17,7 +17,10 @@ TIME_SCALES = (10.0, 20.0, 40.0)
 class Settings:
     imperial_units: bool = True
     automatic_transmission: bool = True  # friendlier default for new players
-    time_scale: float = 20.0  # distance compression while driving
+    # Distance compression while driving. Relaxed (10x) by default: new players
+    # get the most real time to hear and react to spoken events; veterans can
+    # step up to standard or fast in Settings, Gameplay.
+    time_scale: float = 10.0
     real_weather: bool = False  # live conditions from the NWS API
     hos_mode: str = (
         "realistic"  # hours of service: realistic/relaxed (debug_off is an internal dev bypass)

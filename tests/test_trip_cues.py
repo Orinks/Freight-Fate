@@ -187,7 +187,7 @@ def test_toll_cues_and_charges_deduplicate(world):
     crossing = trip.update(0.0)
 
     assert _gps_messages(crossing) == [
-        "In 1 miles, crossing from New York into New Jersey near New York-New Jersey line on I-95.",
+        "In 1 mile, crossing from New York into New Jersey near New York-New Jersey line on I-95.",
     ]
 
     trip.position_mi = 7.2
