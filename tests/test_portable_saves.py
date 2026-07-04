@@ -134,6 +134,57 @@ def test_existing_active_saves_merge_parent_duplicate(monkeypatch, tmp_path):
     assert not (tmp_path / "freightfate" / "saves").exists()
 
 
+def test_moved_save_tree_leaves_breadcrumb_and_log(monkeypatch, tmp_path, caplog):
+    import logging
+
+    game = tmp_path / "freightfate" / "FreightFate"
+    game.mkdir(parents=True)
+    old_profile = tmp_path / "freightfate" / "saves" / "profiles" / "Driver.json"
+    old_profile.parent.mkdir(parents=True)
+    old_profile.write_text("{}", encoding="utf-8")
+    _reset(monkeypatch, tmp_path, game_dir=game)
+
+    with caplog.at_level(logging.INFO, logger="freight_fate.models.profile"):
+        target = profile_mod.data_dir()
+
+    # Where saves vanish from, a breadcrumb file says where they went --
+    # and the log records the migration so a haunted save is one grep away.
+    marker = tmp_path / "freightfate" / "saves-moved.txt"
+    assert marker.is_file()
+    assert str(target) in marker.read_text(encoding="utf-8")
+    assert any("Save migration" in record.message for record in caplog.records)
+
+
+def test_merged_save_tree_leaves_breadcrumb(monkeypatch, tmp_path):
+    game = tmp_path / "freightfate" / "FreightFate"
+    game.mkdir(parents=True)
+    active = game / "saves" / "profiles"
+    active.mkdir(parents=True)
+    (active / "Current.json").write_text("{}", encoding="utf-8")
+    duplicate = tmp_path / "freightfate" / "saves" / "profiles" / "Old.json"
+    duplicate.parent.mkdir(parents=True)
+    duplicate.write_text("{}", encoding="utf-8")
+    _reset(monkeypatch, tmp_path, game_dir=game)
+
+    profile_mod.data_dir()
+
+    marker = tmp_path / "freightfate" / "saves-moved.txt"
+    assert marker.is_file()
+
+
+def test_legacy_copy_migration_is_logged(monkeypatch, tmp_path, caplog):
+    import logging
+
+    _, legacy = _reset(monkeypatch, tmp_path)
+    (legacy / "profiles").mkdir(parents=True)
+    (legacy / "profiles" / "Driver.json").write_text("{}", encoding="utf-8")
+
+    with caplog.at_level(logging.INFO, logger="freight_fate.models.profile"):
+        profile_mod.data_dir()
+
+    assert any("legacy saves" in record.message for record in caplog.records)
+
+
 def test_macos_uses_application_support(monkeypatch, tmp_path):
     """macOS saves land in Application Support, never beside the app bundle."""
     monkeypatch.delenv("FREIGHT_FATE_DATA_DIR", raising=False)

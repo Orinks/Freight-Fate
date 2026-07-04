@@ -55,6 +55,15 @@
 
 ### Fixed
 
+- **Release archives no longer ship the build machine's log.** The packaging
+  smoke check writes a log inside the build folder; it is now stripped
+  alongside saves before archiving, so a fresh download starts with an empty
+  logs folder instead of a confusing leftover run.
+- **Save migration now explains itself.** When the game folds an old save
+  folder into the active one on first run, it writes what moved from where
+  to the game log and leaves a small saves-moved.txt breadcrumb at the old
+  location, so an unexpectedly familiar career is traceable instead of
+  haunted.
 - **Spoken help now teaches the W and Q gear keys everywhere.** The engine
   start walkthrough, the transmission setting, and the manual-transmission
   page of How to play still told manual drivers to shift with the number
