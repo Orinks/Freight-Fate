@@ -206,6 +206,11 @@
   geography. Thanks to liamerven.
 
 ### Changed
+- **All music now plays at the same volume.** Six tracks, including the main
+  menu themes, Open Road, Night Haul, and Small Hours, were much louder than
+  the rest of the soundtrack. They have been brought down to match, so the
+  music volume slider now behaves the same no matter which track is playing,
+  and the menu no longer greets you louder than the drive that follows.
 - **Real-world weather now refreshes three times as often.** With the real
   weather source turned on, the game checks the live conditions for your
   destination every five minutes instead of every fifteen, so fog rolling in,
