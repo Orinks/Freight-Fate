@@ -206,6 +206,11 @@
   geography. Thanks to liamerven.
 
 ### Changed
+- **New installs now start at relaxed trip pacing.** Fresh installs default to
+  the relaxed pace, which gives you the most real time to hear and react to
+  spoken warnings like exits and hazards. Existing players keep whatever
+  pacing they already chose, and standard and fast are still one setting away
+  under Settings, Gameplay, Trip pacing.
 - **All music now plays at the same volume.** Six tracks, including the main
   menu themes, Open Road, Night Haul, and Small Hours, were much louder than
   the rest of the soundtrack. They have been brought down to match, so the
