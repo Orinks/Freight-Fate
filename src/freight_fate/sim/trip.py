@@ -23,6 +23,23 @@ def _spoken_distance(value: float, unit: str) -> str:
     return f"{rounded:.0f} {unit if rounded == 1 else unit + 's'}"
 
 
+def _cue_direction(text: str) -> str:
+    """Turn direction for the earcon, read out of a baked maneuver cue.
+
+    Today's local-geometry builder writes directionless cues ("Turn onto
+    Palm Street"), so this usually returns "" and the spoken text carries
+    the maneuver; when a future bake adds "Turn right onto...", the panned
+    earcon comes along for free."""
+    lowered = text.lower()
+    if "left" in lowered:
+        return "left"
+    if "right" in lowered:
+        return "right"
+    if lowered.startswith(("continue", "start")):
+        return "ahead"
+    return ""
+
+
 def _rest_stop_cue_text(prefix: str, parking_label: str) -> str:
     parts = [prefix]
     if parking_label:
@@ -195,31 +212,56 @@ class Trip(TripRoadEventMixin, TripTrafficMixin):
                 )
         return out
 
+    def _surface_distance_tail(self, miles: float) -> str:
+        """Distance phrase for a surface segment: city blocks never say
+        "0 miles"; longer streets read like the highway cues."""
+        if miles < 0.2:
+            return ""
+        if self.imperial:
+            if miles < 0.4:
+                return "; a quarter mile"
+            if miles < 0.75:
+                return "; half a mile"
+            return f"; {_spoken_distance(miles, 'mile')}"
+        km = miles * 1.609344
+        if km < 0.65:
+            return "; 500 meters"
+        if km < 1.2:
+            return "; 1 kilometer"
+        return f"; {_spoken_distance(km, 'kilometer')}"
+
     def _build_navigation_cues(self) -> list[NavigationCue]:
         cues: list[NavigationCue] = []
         for i, (start, leg) in enumerate(zip(self._leg_starts, self.route.legs, strict=True)):
             forward = self.route.cities[i] == leg.a
             toward = self.route.cities[i + 1]
             if self._is_facility_approach_route():
+                # Tier-1 surface segments carry their baked maneuver; speak
+                # it verbatim with the segment distance. Legs without one
+                # keep the generic phrasing. Lookahead text lowercases only
+                # the verb, never the street name.
                 if i == 0:
+                    text = (leg.local_cue or f"Start on {leg.highway}.").rstrip(".")
                     cues.append(
                         NavigationCue(
                             "local:start",
                             "local_turn",
                             start + 0.05,
-                            f"start on {leg.highway}",
-                            f"Start on {leg.highway}; {self._distance_text(leg.miles)}.",
-                            direction="ahead",
+                            text[:1].lower() + text[1:],
+                            f"{text}{self._surface_distance_tail(leg.miles)}.",
+                            direction=_cue_direction(text) or "ahead",
                         )
                     )
                 elif self.route.legs[i - 1].highway != leg.highway:
+                    text = (leg.local_cue or f"Turn onto {leg.highway}.").rstrip(".")
                     cues.append(
                         NavigationCue(
                             f"local:turn:{i}",
                             "local_turn",
                             start,
-                            f"turn onto {leg.highway}",
-                            f"Turn onto {leg.highway}; {self._distance_text(leg.miles)}.",
+                            text[:1].lower() + text[1:],
+                            f"{text}{self._surface_distance_tail(leg.miles)}.",
+                            direction=_cue_direction(text),
                         )
                     )
                 continue
@@ -474,6 +516,27 @@ class Trip(TripRoadEventMixin, TripTrafficMixin):
             return []
         gate_start = max(0.0, total - FACILITY_GATE_ZONE_MI)
         if self._is_facility_approach_route():
+            # Tier-1 surface routes zone each street at its own baked speed
+            # (25 named, 15 unnamed service ways); the blanket access-road
+            # limit remains the fallback for single-leg approaches.
+            if any(leg.local_speed_mph > 0 for leg in self.route.legs):
+                zones: list[Zone] = []
+                for leg_start, leg in zip(self._leg_starts, self.route.legs, strict=True):
+                    speed = leg.local_speed_mph or FACILITY_ACCESS_LIMIT_MPH
+                    if zones and zones[-1].limit_mph == speed:
+                        # Same street speed continues: one zone, one callout.
+                        zones[-1] = Zone(
+                            zones[-1].start_mi,
+                            leg_start + leg.miles,
+                            speed,
+                            "facility access road",
+                        )
+                    else:
+                        zones.append(
+                            Zone(leg_start, leg_start + leg.miles, speed, "facility access road")
+                        )
+                zones.append(Zone(gate_start, total, FACILITY_GATE_LIMIT_MPH, "facility gate"))
+                return zones
             return [
                 Zone(0.0, total, FACILITY_ACCESS_LIMIT_MPH, "facility access road"),
                 Zone(gate_start, total, FACILITY_GATE_LIMIT_MPH, "facility gate"),

@@ -41,6 +41,10 @@ class TripRoadEventMixin:
         return max(30.0, min(posted, posted - intensity * 26.0))
 
     def _place_traffic_pressures(self) -> list[TrafficPressure]:
+        if self._is_facility_approach_route():
+            # Merge/exit spacing pressure is highway language; city streets
+            # get their pacing from per-street speed zones instead.
+            return []
         pressures: list[TrafficPressure] = []
 
         def add(start: float, end: float, kind: str, direction: str, reason: str) -> None:
@@ -122,6 +126,11 @@ class TripRoadEventMixin:
         for i, start in enumerate(self._leg_starts):
             if i == 0 or i in self._announced_cities:
                 continue
+            if self.route.cities[i] == self.route.cities[i - 1]:
+                # A same-city boundary is a surface-street segment change,
+                # not a city passage; the turn cue already covers it.
+                self._announced_cities.add(i)
+                continue
             if self.position_mi >= start:
                 self._announced_cities.add(i)
                 prev = self.route.cities[i - 1]
@@ -182,9 +191,7 @@ class TripRoadEventMixin:
             # is spoken as "right ahead", not "0.0 miles ahead".
             reason = context.lead.reason.removesuffix(" ahead")
             where = (
-                "right ahead"
-                if context.gap_mi < 0.1
-                else f"{self._gap_text(context.gap_mi)} ahead"
+                "right ahead" if context.gap_mi < 0.1 else f"{self._gap_text(context.gap_mi)} ahead"
             )
             self._emit(
                 TripEventKind.HAZARD,

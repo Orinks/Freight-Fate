@@ -135,7 +135,16 @@ class WorldServiceMixin:
         geometry = self.city_service_geometry(city, key)
         if geometry is not None and geometry.turn_level and geometry.segments:
             legs = [
-                Leg(city, city, segment.miles, segment.road, "flat", ())
+                Leg(
+                    city,
+                    city,
+                    segment.miles,
+                    segment.road,
+                    "flat",
+                    (),
+                    local_cue=segment.cue,
+                    local_speed_mph=segment.speed_mph,
+                )
                 for segment in geometry.segments
             ]
             return Route([city] * (len(legs) + 1), legs)
@@ -163,7 +172,16 @@ class WorldServiceMixin:
         source_approach = self._facility_approaches.get(location.id)
         if source_approach is not None and source_approach.turn_level and source_approach.segments:
             legs = [
-                Leg(city, city, segment.miles, segment.road, "flat", ())
+                Leg(
+                    city,
+                    city,
+                    segment.miles,
+                    segment.road,
+                    "flat",
+                    (),
+                    local_cue=segment.cue,
+                    local_speed_mph=segment.speed_mph,
+                )
                 for segment in source_approach.segments
             ]
             return Route([city] * (len(legs) + 1), legs)

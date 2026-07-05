@@ -435,6 +435,11 @@ class Leg:
     # Driving lanes per direction, baked from HPMS through-lane counts
     # (leg-level median); 0 means unbaked and the runtime default applies.
     lanes: int = 0
+    # Surface-street segments (tier-1 local routes) carry their baked turn
+    # cue and street speed so the runtime can speak the real maneuver and
+    # zone the street instead of a whole-route blanket. Empty on highways.
+    local_cue: str = ""
+    local_speed_mph: float = 0.0
 
     def other(self, city: str) -> str:
         return self.b if city == self.a else self.a

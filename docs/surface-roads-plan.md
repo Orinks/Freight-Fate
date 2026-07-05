@@ -67,7 +67,16 @@ change; the deadhead and approach announcements pick up real street names
 through the existing ladder. Update the pinned coverage tests to the new
 counts and keep the `named_road` coverage counter as the visibility metric.
 
-### Phase 2 -- Drive the segments
+### Phase 2 -- Drive the segments (DELIVERED)
+
+Shipped on the lanes/realism branch: `Leg` carries the baked segment cue and
+street speed (`local_cue`, `local_speed_mph`), the route builders populate
+them for tier-1 segments, boundary cues speak the baked maneuver verbatim
+with block-aware distances, per-street speed zones replace the blanket
+access-road limit (merged over same-speed runs), same-city boundaries no
+longer announce a city passage, and highway merge/exit pressure language is
+suppressed on surface routes. `tests/test_surface_streets.py` pins the
+behavior. The original gap list, for the record:
 
 `Trip` already models a route as a list of `Leg`s, and tier-1 approaches
 already return multi-leg routes. What is missing:
