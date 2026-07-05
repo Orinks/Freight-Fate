@@ -539,6 +539,24 @@ class Trip(TripRoadEventMixin, TripTrafficMixin):
         """The reduced-limit zone the truck is currently inside, if any."""
         return self._active_zone_at(self.position_mi)
 
+    def ramp_control_at(self, route_mile: float, tol_mi: float = 2.0) -> str:
+        """Baked OSM ramp-terminal control at the interchange nearest a route
+        mile: ``signal``/``stop``/``none``, or ``""`` when no interchange
+        within ``tol_mi`` carries one (the caller then uses its heuristic)."""
+        best = ""
+        best_dist = tol_mi
+        for i, (start, leg) in enumerate(zip(self._leg_starts, self.route.legs, strict=True)):
+            forward = self.route.cities[i] == leg.a
+            for ix in leg.interchanges:
+                if not ix.ramp_control:
+                    continue
+                offset = _stop_offset_for_direction(ix.at_mi, leg.miles, forward)
+                dist = abs(start + offset - route_mile)
+                if dist <= best_dist:
+                    best_dist = dist
+                    best = ix.ramp_control
+        return best
+
     def _active_zone_at(self, mile: float) -> Zone | None:
         active = [z for z in self.zones if z.start_mi <= mile <= z.end_mi]
         if not active:

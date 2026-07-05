@@ -132,6 +132,7 @@ class DrivingUpdateMixin:
         self._update_audio(dt)
         self._update_announcements(dt)
         self._update_ambient_events(dt)
+        self._update_ramp_light(dt)
         self._update_hazard(dt)
         self._update_microsleep(keys, dt)
         self._update_speeding(dt)

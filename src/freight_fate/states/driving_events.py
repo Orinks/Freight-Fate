@@ -595,16 +595,173 @@ class DrivingEventMixin:
             return True
         return stop.type == "delivery_destination" and self.ctx.settings.steering_assist == "off"
 
+    def _begin_ramp_terminal(self, stop) -> None:
+        """Decide what controls the end of the ramp just taken.
+
+        Baked OSM data (a traffic_signals or stop node on the exit's ramp
+        links) wins; otherwise a seeded urban/rural heuristic stands in --
+        most urban diamond terminals are signalized, rural ones lean to stop
+        signs, and a share flow free like a cloverleaf loop."""
+        rng = random.Random((self.trip_seed << 16) ^ int(stop.at_mi * 100.0))
+        control = self.trip.ramp_control_at(stop.at_mi)
+        if not control:
+            signal_w, stop_w = (
+                RAMP_CONTROL_URBAN_WEIGHTS
+                if self.trip._near_city(stop.at_mi)
+                else RAMP_CONTROL_RURAL_WEIGHTS
+            )
+            roll = rng.random()
+            control = "signal" if roll < signal_w else "stop" if roll < stop_w else "none"
+        self._ramp_control = control
+        self._ramp_light_timer = 0.0
+        self._ramp_light_offset_s = rng.random() * (RAMP_LIGHT_RED_S + RAMP_LIGHT_GREEN_S)
+        self._ramp_light_announced = False
+        self._ramp_light_was_red = False
+        self._ramp_terminal_done = control == "none"
+        self._ramp_waiting_at_light = False
+
+    def _ramp_light_is_red(self) -> bool:
+        cycle = RAMP_LIGHT_RED_S + RAMP_LIGHT_GREEN_S
+        return (self._ramp_light_offset_s + self._ramp_light_timer) % cycle < RAMP_LIGHT_RED_S
+
+    def _update_ramp_light(self, dt: float) -> None:
+        """Advance the terminal light in real time and speak state changes."""
+        if self._ramp_mi is None or self._ramp_control != "signal" or self._ramp_terminal_done:
+            return
+        self._ramp_light_timer += dt
+        red = self._ramp_light_is_red()
+        if not self._ramp_light_announced or red == self._ramp_light_was_red:
+            return
+        self._ramp_light_was_red = red
+        if self._ramp_waiting_at_light and not red:
+            # The wait at the stop bar ends; the driveway is just ahead.
+            self._ramp_waiting_at_light = False
+            self._ramp_terminal_done = True
+            self.ctx.audio.play("ui/notify", volume=0.7)
+            self.ctx.say_event("Green light. Pull ahead to the entrance.", interrupt=False)
+            return
+        self.ctx.say_event(
+            "The light ahead turns red. Be ready to stop."
+            if red
+            else "The light ahead turns green.",
+            interrupt=False,
+        )
+
+    def _announce_ramp_terminal(self) -> None:
+        """Mid-ramp callout naming the control at the terminal."""
+        self._ramp_light_announced = True
+        if self._ramp_control == "signal":
+            red = self._ramp_light_is_red()
+            self._ramp_light_was_red = red
+            self.ctx.audio.play("ui/warning" if red else "ui/notify", volume=0.7)
+            self.ctx.say_event(
+                "Traffic light at the end of the ramp, currently red. Brake to a stop."
+                if red
+                else "Traffic light at the end of the ramp, currently green.",
+                interrupt=False,
+            )
+        elif self._ramp_control == "stop":
+            self.ctx.audio.play("ui/notify", volume=0.7)
+            self.ctx.say_event(
+                "Stop sign at the end of the ramp. Brake to a full stop there.",
+                interrupt=False,
+            )
+
+    def _update_ramp_terminal(self) -> None:
+        """Crossing the terminal: honor the light or the sign, or pay for it.
+
+        A driver still braking gets the length of the grace distance past the
+        bar to finish the stop; carrying speed beyond it commits the run."""
+        speed = self.truck.speed_mph
+        past_bar = self._ramp_mi is not None and (
+            self._ramp_mi <= RAMP_ACCESS_MI - RAMP_TERMINAL_GRACE_MI
+        )
+        if self._ramp_control == "signal":
+            if self._ramp_light_is_red():
+                if speed <= RED_STOP_MPH:
+                    if not self._ramp_waiting_at_light:
+                        self._ramp_waiting_at_light = True
+                        self.ctx.say_event(
+                            "Stopped at the red light. Hold the brakes for green.",
+                            interrupt=False,
+                        )
+                    return
+                if not past_bar:
+                    return  # still braking down to the stop bar
+                self._ramp_terminal_done = True
+                self._ramp_waiting_at_light = False
+                if speed > STOP_ROLL_CLIP_MPH:
+                    self.ctx.audio.play("traffic/car_pass", volume=1.0, pan=-0.4)
+                    self.ctx.audio.play("vehicle/collision")
+                    self.ctx.controller.rumble.impact(RED_RUN_DAMAGE)
+                    self.truck.apply_collision(RED_RUN_DAMAGE)
+                    self.ctx.say_event(
+                        "You ran the red light at the ramp end and cross traffic "
+                        "clipped the trailer! Total damage "
+                        f"{self.truck.damage_pct:.0f} percent.",
+                        interrupt=True,
+                    )
+                else:
+                    self.ctx.audio.play("traffic/car_pass", volume=1.0, pan=-0.4)
+                    self.ctx.say_event(
+                        "You crept through the red light. Cross traffic leans "
+                        "on the horn.",
+                        interrupt=True,
+                    )
+                return
+            self._ramp_terminal_done = True
+            self._ramp_waiting_at_light = False
+            self.ctx.say_event(
+                "Green light. Through the intersection; brake for the entrance."
+                if speed <= GREEN_ROLL_MPH
+                else "Through the green light, but far too fast. Brake hard for the entrance.",
+                interrupt=False,
+            )
+            return
+        if self._ramp_control == "stop":
+            if speed > RED_STOP_MPH and not past_bar:
+                return  # still braking down to the stop bar
+            self._ramp_terminal_done = True
+            if speed <= RED_STOP_MPH:
+                self.ctx.say_event(
+                    "Stopped at the sign. Clear; pull ahead to the entrance.",
+                    interrupt=False,
+                )
+            elif speed > STOP_ROLL_CLIP_MPH:
+                self.ctx.audio.play("traffic/car_pass", volume=1.0, pan=0.4)
+                self.ctx.audio.play("vehicle/collision")
+                self.ctx.controller.rumble.impact(STOP_ROLL_DAMAGE)
+                self.truck.apply_collision(STOP_ROLL_DAMAGE)
+                self.ctx.say_event(
+                    "You blew the stop sign at the ramp end and clipped cross "
+                    f"traffic! Total damage {self.truck.damage_pct:.0f} percent.",
+                    interrupt=True,
+                )
+            else:
+                self.ctx.audio.play("traffic/car_pass", volume=1.0, pan=0.4)
+                self.ctx.say_event(
+                    "You rolled the stop sign at the ramp end. Cross traffic "
+                    "leans on the horn.",
+                    interrupt=True,
+                )
+            return
+        self._ramp_terminal_done = True
+
     def _update_exit(self, moved_mi: float) -> None:
         """Advance an armed exit or an active ramp; opens the stop menu."""
         if self._ramp_mi is not None:
             self._ramp_mi -= moved_mi
+            if not self._ramp_light_announced and self._ramp_mi <= RAMP_CONTROL_ANNOUNCE_MI:
+                self._announce_ramp_terminal()
+            if not self._ramp_terminal_done and self._ramp_mi <= RAMP_ACCESS_MI:
+                self._update_ramp_terminal()
             if self._ramp_mi > 0:
                 return
             if self.truck.speed_mph <= DOCKING_MAX_MPH:
                 stop = self._ramp_stop
                 self._ramp_mi = None
                 self._ramp_stop = None
+                self._ramp_control = ""
                 if stop.type == "delivery_destination":
                     self.trip.position_mi = self.trip.total_miles
                     self.trip.finished = True
@@ -684,6 +841,7 @@ class DrivingEventMixin:
             self.lane.offset = 0.0
             self._lane_change_target = None
             self._merge_deadline = None
+            self._begin_ramp_terminal(stop)
             self._cancel_cruise()
             self.ctx.audio.play("ui/notify", volume=0.7)
             if stop.type == "delivery_destination":
@@ -699,11 +857,18 @@ class DrivingEventMixin:
                     if stop.exit_label
                     else f"You take the exit for {stop.spoken_name}."
                 )
-            message = (
-                f"{take} Half a mile of ramp."
-                if self._terse_speech()
-                else f"{take} Half a mile of ramp; brake to a stop at the end."
-            )
+            if self._terse_speech():
+                terminal = {
+                    "signal": " Traffic light at the end.",
+                    "stop": " Stop sign at the end.",
+                }.get(self._ramp_control, "")
+                message = f"{take} Half a mile of ramp.{terminal}"
+            else:
+                ending = {
+                    "signal": "traffic light at the end, then brake to a stop at the entrance",
+                    "stop": "stop sign at the end, then brake to a stop at the entrance",
+                }.get(self._ramp_control, "brake to a stop at the end")
+                message = f"{take} Half a mile of ramp; {ending}."
             self.ctx.say_event(message, interrupt=True)
         else:
             missed = self._missed_exit_phrase(stop)

@@ -519,6 +519,9 @@ def _parse_interchange(
     source = str(raw.get("source", "")).strip()
     if not source:
         raise ValueError(f"{from_city} to {to_city} {label} has no source")
+    ramp_control = str(raw.get("ramp_control", "")).strip().lower()
+    if ramp_control not in ("", "signal", "stop", "none"):
+        raise ValueError(f"{from_city} to {to_city} {label} has unknown ramp_control")
     return Interchange(
         at_mi=at_mi,
         exit_ref=exit_ref,
@@ -527,6 +530,7 @@ def _parse_interchange(
         via=via,
         highway=highway,
         source=source,
+        ramp_control=ramp_control,
     )
 
 

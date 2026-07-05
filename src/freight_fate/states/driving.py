@@ -139,6 +139,15 @@ class DrivingState(DrivingControlsMixin, DrivingUpdateMixin, DrivingEventMixin, 
         self._ramp_mi: float | None = None  # ramp distance left, once taken
         self._ramp_stop = None
         self._ramp_end_said = False
+        # Ramp terminal control for the active ramp: what meets you where the
+        # ramp joins the surface road, and the light's cycle state if a signal.
+        self._ramp_control = ""  # "signal" | "stop" | "none" | "" (no ramp)
+        self._ramp_light_offset_s = 0.0  # seeded phase into the light cycle
+        self._ramp_light_timer = 0.0  # real seconds since the ramp was taken
+        self._ramp_light_announced = False
+        self._ramp_light_was_red = False
+        self._ramp_terminal_done = False
+        self._ramp_waiting_at_light = False
         self._destination_exit_taken = False
         self._missed_destination_exit_said = False
         self._destination_exit_announced_key = ""

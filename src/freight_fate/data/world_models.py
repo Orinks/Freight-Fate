@@ -308,7 +308,12 @@ class LocalGeometry:
 
 @dataclass(frozen=True)
 class Interchange:
-    """A highway exit/junction along a leg, sourced from OpenStreetMap."""
+    """A highway exit/junction along a leg, sourced from OpenStreetMap.
+
+    ``ramp_control`` is what governs the ramp terminal where the off-ramp
+    meets the surface road: ``signal`` (a traffic light on a ramp-link node),
+    ``stop`` (a stop sign), ``none`` (free-flow), or ``""`` when OSM had no
+    control tagged -- the runtime then falls back to a seeded heuristic."""
 
     at_mi: float
     exit_ref: str = ""
@@ -317,6 +322,7 @@ class Interchange:
     via: str = ""
     highway: str = ""
     source: str = ""
+    ramp_control: str = ""
 
     @property
     def spoken_phrase(self) -> str:

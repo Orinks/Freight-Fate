@@ -883,6 +883,19 @@ _MAXSPEED_MODULE.__dict__.update(
     {name: value for name, value in globals().items() if not name.startswith("__")}
 )
 
+_RAMPCONTROL_MODULE = importlib.import_module("build_interchanges_rampcontrols")
+for _name, _value in _RAMPCONTROL_MODULE.__dict__.items():
+    if not _name.startswith("__") and _name not in globals():
+        globals()[_name] = _value
+_RAMPCONTROL_MODULE.__dict__.update(
+    {
+        name: value
+        for name, value in globals().items()
+        if not name.startswith("__") and name not in _RAMPCONTROL_MODULE.__dict__
+    }
+)
+run_ramp_controls = _RAMPCONTROL_MODULE.run_ramp_controls
+
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Curate OSM interchanges into world.json.")
@@ -931,6 +944,14 @@ def main(argv: list[str] | None = None) -> int:
         "unless --pbf is given.",
     )
     parser.add_argument(
+        "--ramp-controls",
+        action="store_true",
+        help="Bake ramp-terminal controls (traffic light / stop sign) onto "
+        "baked interchanges from highway=traffic_signals and highway=stop "
+        "nodes sitting on motorway_link ways, read from local per-state "
+        "extracts like --maxspeed.",
+    )
+    parser.add_argument(
         "--osm-region-dir",
         type=Path,
         default=OSM_REGION_CACHE_DIR,
@@ -943,6 +964,8 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
 
     data = json.loads(WORLD_PATH.read_text(encoding="utf-8"))
+    if args.ramp_controls:
+        return run_ramp_controls(data, args)
     if args.maxspeed:
         return run_maxspeed(data, args)
     legs = data["legs"]

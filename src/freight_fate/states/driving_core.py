@@ -86,6 +86,24 @@ EXIT_LANE_READY = 0.85  # accumulated right-lane commitment
 EXIT_LANE_OFFSET_READY = 0.45  # right-side lane position also counts
 RAMP_MAX_MPH = 45.0  # any faster and you blow past the exit
 RAMP_LENGTH_MI = 0.5  # deceleration lane plus ramp to the stop
+# Ramp terminals: where the off-ramp meets the surface road there is usually
+# a light or a stop sign (diamond interchanges), occasionally free flow
+# (cloverleafs). The control comes from baked OSM traffic_signals/stop nodes
+# on the ramp links when available, else a seeded urban/rural heuristic.
+RAMP_ACCESS_MI = 0.12  # terminal-to-driveway stretch at the ramp's end
+RAMP_CONTROL_ANNOUNCE_MI = 0.38  # where the terminal callout fires on the ramp
+RAMP_LIGHT_RED_S = 12.0  # red phase of the terminal light, real seconds
+RAMP_LIGHT_GREEN_S = 9.0  # green phase, real seconds
+RED_STOP_MPH = 3.0  # at or under this you have honored a red or a stop sign
+RAMP_TERMINAL_GRACE_MI = 0.02  # rolling this far past the bar commits the violation
+GREEN_ROLL_MPH = 25.0  # green lets you roll the terminal up to this
+STOP_ROLL_CLIP_MPH = 15.0  # blowing a stop sign this fast clips cross traffic
+RED_RUN_DAMAGE = 0.3  # collision severity for running the red
+STOP_ROLL_DAMAGE = 0.2  # lighter clip for blowing the stop sign
+# Heuristic control mix when OSM has none baked: (signal, stop) cumulative
+# weights; the remainder is free flow. Urban terminals are mostly signalized.
+RAMP_CONTROL_URBAN_WEIGHTS = (0.70, 0.95)
+RAMP_CONTROL_RURAL_WEIGHTS = (0.30, 0.80)
 DESTINATION_EXIT_BEFORE_END_MI = 1.0
 UNLOADING_MIN = 45.0  # receiver dock work before settlement
 UNLOADING_WAIT_S = 1.5
