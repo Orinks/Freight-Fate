@@ -51,7 +51,10 @@ HPMS_SOURCE = (
 
 ENVELOPE_SPAN_MI = 60.0  # one HPMS query per this much corridor
 ENVELOPE_PAD_M = 2500.0
-QUERY_WORKERS = 4  # parallel envelope queries per leg
+QUERY_WORKERS = 8  # parallel envelope queries per leg
+# Server-side line generalization: we snap at 250 m, so ~55 m of geometry
+# simplification costs nothing and cuts the transfer size several-fold.
+MAX_ALLOWABLE_OFFSET_DEG = 0.0005
 SNAP_CORRIDOR_M = 250.0  # an HPMS section must snap this close to the leg
 AADT_SAMPLE_STRIDE_MI = 5.0  # profile resolution along the leg
 AADT_ROUND = 500.0
@@ -130,6 +133,8 @@ def _query_hpms(
                 "spatialRel": "esriSpatialRelIntersects",
                 "outFields": "AADT,THROUGH_LANES",
                 "returnGeometry": "true",
+                "maxAllowableOffset": MAX_ALLOWABLE_OFFSET_DEG,
+                "geometryPrecision": 5,
                 "resultOffset": offset,
                 "resultRecordCount": PAGE_SIZE,
                 "f": "json",
@@ -193,7 +198,7 @@ def _snap_points(
         lanes_per_dir = max(1, round(float(through) / 2.0)) if through else 2
         lanes_per_dir = max(lanes_per_dir, _lane_floor(aadt, interstate))
         for path in feature.get("geometry", {}).get("paths", ()):
-            for lon, lat in path[::2]:  # every other vertex is plenty at 250m
+            for lon, lat in path:  # generalized lines are already sparse
                 best_d = float("inf")
                 best_cum = 0.0
                 for ncell in _neighbors(_cell(lat, lon)):
@@ -242,6 +247,8 @@ def assemble_profile(
     profile: list[dict[str, Any]] = []
     for at_mi, aadt, lanes in picked:
         rounded = round(aadt / AADT_ROUND) * AADT_ROUND
+        if rounded < AADT_ROUND:
+            continue  # a median that rounds to zero is noise, not a freeway
         if profile and profile[-1]["aadt"] == rounded and profile[-1]["lanes"] == lanes:
             continue
         profile.append({"at_mi": at_mi, "aadt": rounded, "lanes": lanes, "source": HPMS_SOURCE})

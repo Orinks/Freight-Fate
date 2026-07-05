@@ -467,7 +467,8 @@ def test_trip_places_reverse_route_stops_from_travel_direction(world):
 def test_zone_speed_limits_apply(world):
     trip, _ = make_trip(world, "Atlanta", "Dallas")
     assert trip.zones, "long route should have at least one zone"
-    zone = trip.zones[0]
+    # Congestion zones follow the clock; test against an always-on zone.
+    zone = next(z for z in trip.zones if z.aadt is None)
     inside = (zone.start_mi + zone.end_mi) / 2
     limit, reason = trip.speed_limit_at(inside)
     assert limit == zone.limit_mph

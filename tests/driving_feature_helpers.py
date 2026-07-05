@@ -76,6 +76,9 @@ def quiet_trip(driving):
     driving.trip._hazard_check_mi = 1e9
     driving.trip._inspection_check_mi = 1e9
     driving.trip.traffic_manager.vehicles = []
+    # Congestion zones re-inject slow NPC traffic when entered, which would
+    # steal the ACC's attention from whatever the test is isolating.
+    driving.trip.zones = [z for z in driving.trip.zones if z.aadt is None]
     driving.weather.current = WeatherKind.CLEAR
 
 
