@@ -1,6 +1,9 @@
 # Changelog
 
 ## Unreleased
+
+## 1.8.0 - 2026-07-05
+
 ### Added
 
 - **Report a problem straight from the main menu.** A new Report a problem
