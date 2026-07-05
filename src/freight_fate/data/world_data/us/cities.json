@@ -1490,7 +1490,18 @@
     "Fort Wayne": {
       "state": "Indiana",
       "region": "great_lakes",
-      "locations": [],
+      "locations": [
+        {
+          "name": "GM Fort Wayne Assembly",
+          "type": "automotive_plant",
+          "source_note": "General Motors Fort Wayne Assembly (Roanoke, southwest of Fort Wayne) -- 4.6 million sq ft plant building Chevrolet Silverado and GMC Sierra pickups."
+        },
+        {
+          "name": "Steel Dynamics Structural Mill",
+          "type": "steel_industrial",
+          "source_note": "Steel Dynamics Structural and Rail Division mill at Columbia City, west of Fort Wayne; Steel Dynamics is headquartered in Fort Wayne."
+        }
+      ],
       "lat": 41.0793,
       "lon": -85.1394
     },
@@ -2077,7 +2088,18 @@
       "lon": -87.55585,
       "region": "mid_south",
       "state": "Indiana",
-      "locations": []
+      "locations": [
+        {
+          "name": "Mead Johnson Nutrition Plant",
+          "type": "food_processor",
+          "source_note": "Mead Johnson Nutrition (Reckitt), Evansville -- US headquarters and its largest US manufacturing and R&D center, producing Enfamil infant formula."
+        },
+        {
+          "name": "Amcor Packaging Plant",
+          "type": "manufacturing_plant",
+          "source_note": "Amcor (formerly Berry Global, merged 2025) plastics packaging manufacturing and former global headquarters, Evansville."
+        }
+      ]
     },
     "Fargo": {
       "lat": 46.87719,
@@ -2133,7 +2155,18 @@
       "lon": -86.25001,
       "region": "great_lakes",
       "state": "Indiana",
-      "locations": []
+      "locations": [
+        {
+          "name": "AM General Mishawaka Plant",
+          "type": "automotive_plant",
+          "source_note": "AM General Mishawaka Manufacturing Campus east of South Bend -- Humvee/HMMWV assembly since 1984; AM General is headquartered in South Bend."
+        },
+        {
+          "name": "Steel Warehouse Processing Center",
+          "type": "steel_industrial",
+          "source_note": "Steel Warehouse, South Bend -- family-owned steel service center headquarters: coil slitting, pickling, cut-to-length processing."
+        }
+      ]
     },
     "Albany": {
       "lat": 42.65258,
@@ -3976,6 +4009,42 @@
       ],
       "lat": 47.4272,
       "lon": -92.9377
+    },
+    "Gary": {
+      "state": "Indiana",
+      "region": "great_lakes",
+      "locations": [
+        {
+          "name": "Gary Works Steel Mill",
+          "type": "steel_industrial",
+          "source_note": "U.S. Steel Gary Works on Lake Michigan, operating since 1906 -- integrated steel mill anchoring the Calumet industrial region."
+        },
+        {
+          "name": "Port of Indiana-Burns Harbor",
+          "type": "port",
+          "source_note": "Port of Indiana-Burns Harbor on Lake Michigan east of Gary, adjacent to the Cleveland-Cliffs Burns Harbor integrated mill (their second-largest US facility)."
+        }
+      ],
+      "lat": 41.5934,
+      "lon": -87.3464
+    },
+    "Lafayette, Indiana": {
+      "state": "Indiana",
+      "region": "corn_belt",
+      "locations": [
+        {
+          "name": "Subaru of Indiana Plant",
+          "type": "automotive_plant",
+          "source_note": "Subaru of Indiana Automotive, Lafayette -- Subaru's only assembly plant outside Asia, building the Ascent, Crosstrek and Forester."
+        },
+        {
+          "name": "Wabash National Trailer Plant",
+          "type": "manufacturing_plant",
+          "source_note": "Wabash National, Lafayette -- North America's leading semi-trailer manufacturer, headquartered and building trailers in Lafayette."
+        }
+      ],
+      "lat": 40.4167,
+      "lon": -86.8753
     }
   }
 }
