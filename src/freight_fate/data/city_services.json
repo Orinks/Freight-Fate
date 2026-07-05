@@ -142,6 +142,54 @@
         "state": "New York"
       }
     ],
+    "Albert Lea": [
+      {
+        "approach_miles": 3.4,
+        "approach_road": "local industrial access road",
+        "city": "Albert Lea",
+        "fallback": false,
+        "key": "freight_market",
+        "kind": "freight_market",
+        "lat": 43.683334,
+        "lon": -93.356635,
+        "name": "Harbor Freight Tools",
+        "source_note": "Source-backed city service POI from a local OpenStreetMap extract for Albert Lea, Minnesota; category mapped as named logistics/freight facility; accessed 2026-06-27.",
+        "source_ref": "node/13441746840",
+        "source_type": "osm",
+        "state": "Minnesota"
+      },
+      {
+        "approach_miles": 3.7,
+        "approach_road": "local industrial access road",
+        "city": "Albert Lea",
+        "fallback": false,
+        "key": "garage",
+        "kind": "garage",
+        "lat": 43.65765,
+        "lon": -93.315522,
+        "name": "TA Truck Service",
+        "source_note": "Source-backed city service POI from a local OpenStreetMap extract for Albert Lea, Minnesota; category mapped as vehicle repair tags with truck relevance scoring; accessed 2026-06-27.",
+        "source_ref": "node/13015050264",
+        "source_type": "osm",
+        "state": "Minnesota"
+      },
+      {
+        "approach_miles": 4.5,
+        "approach_road": "dealer access road",
+        "city": "Albert Lea",
+        "fallback": true,
+        "fallback_reason": "No realistic source-backed OSM candidate found within 28 miles in minnesota-latest.osm.pbf.",
+        "key": "truck_dealer",
+        "kind": "truck_dealer",
+        "lat": 43.648,
+        "lon": -93.3683,
+        "name": "Albert Lea Truck Dealer",
+        "source_note": "Representative fallback truck dealer for Albert Lea, Minnesota; not a claim about a real-world service POI.",
+        "source_ref": "",
+        "source_type": "fallback",
+        "state": "Minnesota"
+      }
+    ],
     "Albuquerque": [
       {
         "approach_miles": 3.5,
@@ -1181,6 +1229,53 @@
         "state": "North Dakota"
       }
     ],
+    "Bloomington": [
+      {
+        "approach_miles": 3.7,
+        "approach_road": "local industrial access road",
+        "city": "Bloomington",
+        "fallback": false,
+        "key": "freight_market",
+        "kind": "freight_market",
+        "lat": 40.503736,
+        "lon": -88.948883,
+        "name": "G.E. Road Warehouse",
+        "source_note": "Source-backed city service POI from a local OpenStreetMap extract for Bloomington, Illinois; category mapped as industrial landuse with logistics/freight name; accessed 2026-06-27.",
+        "source_ref": "way/665447766",
+        "source_type": "osm",
+        "state": "Illinois"
+      },
+      {
+        "approach_miles": 5.4,
+        "approach_road": "local industrial access road",
+        "city": "Bloomington",
+        "fallback": false,
+        "key": "garage",
+        "kind": "garage",
+        "lat": 40.541524,
+        "lon": -88.99936,
+        "name": "Speedo Truck Lube and Tires Truck Repair Shop",
+        "source_note": "Source-backed city service POI from a local OpenStreetMap extract for Bloomington, Illinois; category mapped as vehicle repair tags with truck relevance scoring; accessed 2026-06-27.",
+        "source_ref": "node/11889678422",
+        "source_type": "osm",
+        "state": "Illinois"
+      },
+      {
+        "approach_miles": 6.0,
+        "approach_road": "local industrial access road",
+        "city": "Bloomington",
+        "fallback": false,
+        "key": "truck_dealer",
+        "kind": "truck_dealer",
+        "lat": 40.548855,
+        "lon": -88.995728,
+        "name": "Rush Truck Centers \u2013 Bloomington",
+        "source_note": "Source-backed city service POI from a local OpenStreetMap extract for Bloomington, Illinois; category mapped as truck dealer or heavy-vehicle sales/service tags; accessed 2026-06-27.",
+        "source_ref": "way/1528236890",
+        "source_type": "osm",
+        "state": "Illinois"
+      }
+    ],
     "Boise": [
       {
         "approach_miles": 5.4,
@@ -1557,6 +1652,53 @@
         "source_ref": "node/5084460565",
         "source_type": "osm",
         "state": "Iowa"
+      }
+    ],
+    "Champaign": [
+      {
+        "approach_miles": 1.8,
+        "approach_road": "local industrial access road",
+        "city": "Champaign",
+        "fallback": false,
+        "key": "freight_market",
+        "kind": "freight_market",
+        "lat": 40.129984,
+        "lon": -88.260419,
+        "name": "McKinley Warehouse",
+        "source_note": "Source-backed city service POI from a local OpenStreetMap extract for Champaign, Illinois; category mapped as industrial landuse with logistics/freight name; accessed 2026-06-27.",
+        "source_ref": "way/236128062",
+        "source_type": "osm",
+        "state": "Illinois"
+      },
+      {
+        "approach_miles": 1.5,
+        "approach_road": "local industrial access road",
+        "city": "Champaign",
+        "fallback": false,
+        "key": "garage",
+        "kind": "garage",
+        "lat": 40.129045,
+        "lon": -88.25745,
+        "name": "Midwest Automotive & Diesel",
+        "source_note": "Source-backed city service POI from a local OpenStreetMap extract for Champaign, Illinois; category mapped as vehicle repair tags with truck relevance scoring; accessed 2026-06-27.",
+        "source_ref": "way/244908517",
+        "source_type": "osm",
+        "state": "Illinois"
+      },
+      {
+        "approach_miles": 6.4,
+        "approach_road": "local industrial access road",
+        "city": "Champaign",
+        "fallback": false,
+        "key": "truck_dealer",
+        "kind": "truck_dealer",
+        "lat": 40.184905,
+        "lon": -88.251382,
+        "name": "Rush Truck Centers \u2013 Champaign",
+        "source_note": "Source-backed city service POI from a local OpenStreetMap extract for Champaign, Illinois; category mapped as truck dealer or heavy-vehicle sales/service tags; accessed 2026-06-27.",
+        "source_ref": "way/256998074",
+        "source_type": "osm",
+        "state": "Illinois"
       }
     ],
     "Charleston": [
@@ -2506,6 +2648,55 @@
         "state": "Ohio"
       }
     ],
+    "Decatur": [
+      {
+        "approach_miles": 2.5,
+        "approach_road": "local freight district streets",
+        "city": "Decatur",
+        "fallback": true,
+        "fallback_reason": "No realistic source-backed OSM candidate found within 28 miles in illinois-latest.osm.pbf.",
+        "key": "freight_market",
+        "kind": "freight_market",
+        "lat": 39.8403,
+        "lon": -88.9548,
+        "name": "Decatur Freight Market Office",
+        "source_note": "Representative fallback freight market office for Decatur, Illinois; not a claim about a real-world service POI.",
+        "source_ref": "",
+        "source_type": "fallback",
+        "state": "Illinois"
+      },
+      {
+        "approach_miles": 1.6,
+        "approach_road": "local industrial access road",
+        "city": "Decatur",
+        "fallback": false,
+        "key": "garage",
+        "kind": "garage",
+        "lat": 39.824474,
+        "lon": -88.962383,
+        "name": "Lugari Auto & Truck Service Center",
+        "source_note": "Source-backed city service POI from a local OpenStreetMap extract for Decatur, Illinois; category mapped as vehicle repair tags with truck relevance scoring; accessed 2026-06-27.",
+        "source_ref": "way/663968374",
+        "source_type": "osm",
+        "state": "Illinois"
+      },
+      {
+        "approach_miles": 4.5,
+        "approach_road": "dealer access road",
+        "city": "Decatur",
+        "fallback": true,
+        "fallback_reason": "No realistic source-backed OSM candidate found within 28 miles in illinois-latest.osm.pbf.",
+        "key": "truck_dealer",
+        "kind": "truck_dealer",
+        "lat": 39.8403,
+        "lon": -88.9548,
+        "name": "Decatur Truck Dealer",
+        "source_note": "Representative fallback truck dealer for Decatur, Illinois; not a claim about a real-world service POI.",
+        "source_ref": "",
+        "source_type": "fallback",
+        "state": "Illinois"
+      }
+    ],
     "Denver": [
       {
         "approach_miles": 2.6,
@@ -2792,6 +2983,54 @@
         "state": "Minnesota"
       }
     ],
+    "Eau Claire": [
+      {
+        "approach_miles": 2.9,
+        "approach_road": "local industrial access road",
+        "city": "Eau Claire",
+        "fallback": false,
+        "key": "freight_market",
+        "kind": "freight_market",
+        "lat": 44.792753,
+        "lon": -91.462747,
+        "name": "Harbor Freight Tools",
+        "source_note": "Source-backed city service POI from a local OpenStreetMap extract for Eau Claire, Wisconsin; category mapped as named logistics/freight facility; accessed 2026-06-27.",
+        "source_ref": "way/559762712",
+        "source_type": "osm",
+        "state": "Wisconsin"
+      },
+      {
+        "approach_miles": 25.0,
+        "approach_road": "local industrial access road",
+        "city": "Eau Claire",
+        "fallback": false,
+        "key": "garage",
+        "kind": "garage",
+        "lat": 44.906562,
+        "lon": -91.857282,
+        "name": "Love's Truck Care",
+        "source_note": "Source-backed city service POI from a local OpenStreetMap extract for Eau Claire, Wisconsin; category mapped as vehicle repair tags with truck relevance scoring; accessed 2026-06-27.",
+        "source_ref": "node/13887717616",
+        "source_type": "osm",
+        "state": "Wisconsin"
+      },
+      {
+        "approach_miles": 4.5,
+        "approach_road": "dealer access road",
+        "city": "Eau Claire",
+        "fallback": true,
+        "fallback_reason": "No realistic source-backed OSM candidate found within 28 miles in wisconsin-latest.osm.pbf.",
+        "key": "truck_dealer",
+        "kind": "truck_dealer",
+        "lat": 44.8113,
+        "lon": -91.4985,
+        "name": "Eau Claire Truck Dealer",
+        "source_note": "Representative fallback truck dealer for Eau Claire, Wisconsin; not a claim about a real-world service POI.",
+        "source_ref": "",
+        "source_type": "fallback",
+        "state": "Wisconsin"
+      }
+    ],
     "El Paso": [
       {
         "approach_miles": 12.1,
@@ -2981,6 +3220,54 @@
         "source_ref": "",
         "source_type": "fallback",
         "state": "Pennsylvania"
+      }
+    ],
+    "Escanaba": [
+      {
+        "approach_miles": 1.1,
+        "approach_road": "local industrial access road",
+        "city": "Escanaba",
+        "fallback": false,
+        "key": "freight_market",
+        "kind": "freight_market",
+        "lat": 45.748486,
+        "lon": -87.081247,
+        "name": "Harbor Freight Tools",
+        "source_note": "Source-backed city service POI from a local OpenStreetMap extract for Escanaba, Michigan; category mapped as named logistics/freight facility; accessed 2026-06-27.",
+        "source_ref": "node/10679559197",
+        "source_type": "osm",
+        "state": "Michigan"
+      },
+      {
+        "approach_miles": 10.3,
+        "approach_road": "local industrial access road",
+        "city": "Escanaba",
+        "fallback": false,
+        "key": "garage",
+        "kind": "garage",
+        "lat": 45.855944,
+        "lon": -87.054101,
+        "name": "Lambert Brothers",
+        "source_note": "Source-backed city service POI from a local OpenStreetMap extract for Escanaba, Michigan; category mapped as vehicle repair tags with truck relevance scoring; accessed 2026-06-27.",
+        "source_ref": "node/3252713288",
+        "source_type": "osm",
+        "state": "Michigan"
+      },
+      {
+        "approach_miles": 4.5,
+        "approach_road": "dealer access road",
+        "city": "Escanaba",
+        "fallback": true,
+        "fallback_reason": "No realistic source-backed OSM candidate found within 28 miles in michigan-latest.osm.pbf.",
+        "key": "truck_dealer",
+        "kind": "truck_dealer",
+        "lat": 45.7453,
+        "lon": -87.0646,
+        "name": "Escanaba Truck Dealer",
+        "source_note": "Representative fallback truck dealer for Escanaba, Michigan; not a claim about a real-world service POI.",
+        "source_ref": "",
+        "source_type": "fallback",
+        "state": "Michigan"
       }
     ],
     "Eugene": [
@@ -3266,6 +3553,54 @@
         "source_ref": "way/236144789",
         "source_type": "osm",
         "state": "North Carolina"
+      }
+    ],
+    "Flint": [
+      {
+        "approach_miles": 6.0,
+        "approach_road": "local industrial access road",
+        "city": "Flint",
+        "fallback": false,
+        "key": "freight_market",
+        "kind": "freight_market",
+        "lat": 42.978413,
+        "lon": -83.762842,
+        "name": "Harbor Freight Tools",
+        "source_note": "Source-backed city service POI from a local OpenStreetMap extract for Flint, Michigan; category mapped as named logistics/freight facility; accessed 2026-06-27.",
+        "source_ref": "node/7057471726",
+        "source_type": "osm",
+        "state": "Michigan"
+      },
+      {
+        "approach_miles": 15.5,
+        "approach_road": "local industrial access road",
+        "city": "Flint",
+        "fallback": false,
+        "key": "garage",
+        "kind": "garage",
+        "lat": 43.177123,
+        "lon": -83.714806,
+        "name": "Absolute Auto & Truck Repair, LLC",
+        "source_note": "Source-backed city service POI from a local OpenStreetMap extract for Flint, Michigan; category mapped as vehicle repair tags with truck relevance scoring; accessed 2026-06-27.",
+        "source_ref": "way/769059468",
+        "source_type": "osm",
+        "state": "Michigan"
+      },
+      {
+        "approach_miles": 4.5,
+        "approach_road": "dealer access road",
+        "city": "Flint",
+        "fallback": true,
+        "fallback_reason": "No realistic source-backed OSM candidate found within 28 miles in michigan-latest.osm.pbf.",
+        "key": "truck_dealer",
+        "kind": "truck_dealer",
+        "lat": 43.0125,
+        "lon": -83.6875,
+        "name": "Flint Truck Dealer",
+        "source_note": "Representative fallback truck dealer for Flint, Michigan; not a claim about a real-world service POI.",
+        "source_ref": "",
+        "source_type": "fallback",
+        "state": "Michigan"
       }
     ],
     "Fort Collins": [
@@ -3600,6 +3935,53 @@
         "source_ref": "",
         "source_type": "fallback",
         "state": "Kansas"
+      }
+    ],
+    "Gary": [
+      {
+        "approach_miles": 7.4,
+        "approach_road": "local industrial access road",
+        "city": "Gary",
+        "fallback": false,
+        "key": "freight_market",
+        "kind": "freight_market",
+        "lat": 41.587712,
+        "lon": -87.452629,
+        "name": "UPS Hammond Hub",
+        "source_note": "Source-backed city service POI from a local OpenStreetMap extract for Gary, Indiana; category mapped as industrial logistics tag; accessed 2026-06-27.",
+        "source_ref": "way/958237077",
+        "source_type": "osm",
+        "state": "Indiana"
+      },
+      {
+        "approach_miles": 2.9,
+        "approach_road": "local industrial access road",
+        "city": "Gary",
+        "fallback": false,
+        "key": "garage",
+        "kind": "garage",
+        "lat": 41.563462,
+        "lon": -87.357116,
+        "name": "Boss Truck Shop",
+        "source_note": "Source-backed city service POI from a local OpenStreetMap extract for Gary, Indiana; category mapped as vehicle repair tags with truck relevance scoring; accessed 2026-06-27.",
+        "source_ref": "way/219703185",
+        "source_type": "osm",
+        "state": "Indiana"
+      },
+      {
+        "approach_miles": 2.5,
+        "approach_road": "local industrial access road",
+        "city": "Gary",
+        "fallback": false,
+        "key": "truck_dealer",
+        "kind": "truck_dealer",
+        "lat": 41.589224,
+        "lon": -87.310895,
+        "name": "Rush Truck Centers \u2013 Gary",
+        "source_note": "Source-backed city service POI from a local OpenStreetMap extract for Gary, Indiana; category mapped as truck dealer or heavy-vehicle sales/service tags; accessed 2026-06-27.",
+        "source_ref": "way/985029611",
+        "source_type": "osm",
+        "state": "Indiana"
       }
     ],
     "Grand Island": [
@@ -4075,6 +4457,102 @@
         "state": "Connecticut"
       }
     ],
+    "Hibbing": [
+      {
+        "approach_miles": 22.2,
+        "approach_road": "local industrial access road",
+        "city": "Hibbing",
+        "fallback": false,
+        "key": "freight_market",
+        "kind": "freight_market",
+        "lat": 47.532332,
+        "lon": -92.622453,
+        "name": "Food Distribution Center - Arrowhead Community Economic Assistance Office",
+        "source_note": "Source-backed city service POI from a local OpenStreetMap extract for Hibbing, Minnesota; category mapped as named logistics/freight facility; accessed 2026-06-27.",
+        "source_ref": "node/8679988918",
+        "source_type": "osm",
+        "state": "Minnesota"
+      },
+      {
+        "approach_miles": 25.0,
+        "approach_road": "local industrial access road",
+        "city": "Hibbing",
+        "fallback": false,
+        "key": "garage",
+        "kind": "garage",
+        "lat": 47.288542,
+        "lon": -93.423651,
+        "name": "Mackley's Auto Repair",
+        "source_note": "Source-backed city service POI from a local OpenStreetMap extract for Hibbing, Minnesota; category mapped as vehicle repair tags with truck relevance scoring; accessed 2026-06-27.",
+        "source_ref": "way/1204786750",
+        "source_type": "osm",
+        "state": "Minnesota"
+      },
+      {
+        "approach_miles": 4.5,
+        "approach_road": "dealer access road",
+        "city": "Hibbing",
+        "fallback": true,
+        "fallback_reason": "No realistic source-backed OSM candidate found within 28 miles in minnesota-latest.osm.pbf.",
+        "key": "truck_dealer",
+        "kind": "truck_dealer",
+        "lat": 47.4272,
+        "lon": -92.9377,
+        "name": "Hibbing Truck Dealer",
+        "source_note": "Representative fallback truck dealer for Hibbing, Minnesota; not a claim about a real-world service POI.",
+        "source_ref": "",
+        "source_type": "fallback",
+        "state": "Minnesota"
+      }
+    ],
+    "Houghton": [
+      {
+        "approach_miles": 1.0,
+        "approach_road": "local industrial access road",
+        "city": "Houghton",
+        "fallback": false,
+        "key": "freight_market",
+        "kind": "freight_market",
+        "lat": 47.112568,
+        "lon": -88.55939,
+        "name": "Northern Natural Gas",
+        "source_note": "Source-backed city service POI from a local OpenStreetMap extract for Houghton, Michigan; category mapped as industrial landuse with logistics/freight name; accessed 2026-06-27.",
+        "source_ref": "way/984552002",
+        "source_type": "osm",
+        "state": "Michigan"
+      },
+      {
+        "approach_miles": 0.7,
+        "approach_road": "local industrial access road",
+        "city": "Houghton",
+        "fallback": false,
+        "key": "garage",
+        "kind": "garage",
+        "lat": 47.126325,
+        "lon": -88.577309,
+        "name": "Dave's Super Service",
+        "source_note": "Source-backed city service POI from a local OpenStreetMap extract for Houghton, Michigan; category mapped as vehicle repair tags with truck relevance scoring; accessed 2026-06-27.",
+        "source_ref": "node/7752619869",
+        "source_type": "osm",
+        "state": "Michigan"
+      },
+      {
+        "approach_miles": 4.5,
+        "approach_road": "dealer access road",
+        "city": "Houghton",
+        "fallback": true,
+        "fallback_reason": "No realistic source-backed OSM candidate found within 28 miles in michigan-latest.osm.pbf.",
+        "key": "truck_dealer",
+        "kind": "truck_dealer",
+        "lat": 47.1211,
+        "lon": -88.5694,
+        "name": "Houghton Truck Dealer",
+        "source_note": "Representative fallback truck dealer for Houghton, Michigan; not a claim about a real-world service POI.",
+        "source_ref": "",
+        "source_type": "fallback",
+        "state": "Michigan"
+      }
+    ],
     "Houston": [
       {
         "approach_miles": 6.4,
@@ -4264,6 +4742,55 @@
         "state": "Indiana"
       }
     ],
+    "Iron Mountain": [
+      {
+        "approach_miles": 2.5,
+        "approach_road": "local freight district streets",
+        "city": "Iron Mountain",
+        "fallback": true,
+        "fallback_reason": "No realistic source-backed OSM candidate found within 28 miles in michigan-latest.osm.pbf.",
+        "key": "freight_market",
+        "kind": "freight_market",
+        "lat": 45.8202,
+        "lon": -88.0654,
+        "name": "Iron Mountain Freight Market Office",
+        "source_note": "Representative fallback freight market office for Iron Mountain, Michigan; not a claim about a real-world service POI.",
+        "source_ref": "",
+        "source_type": "fallback",
+        "state": "Michigan"
+      },
+      {
+        "approach_miles": 2.4,
+        "approach_road": "local industrial access road",
+        "city": "Iron Mountain",
+        "fallback": false,
+        "key": "garage",
+        "kind": "garage",
+        "lat": 45.803727,
+        "lon": -88.094692,
+        "name": "Diesel Detail Co.",
+        "source_note": "Source-backed city service POI from a local OpenStreetMap extract for Iron Mountain, Michigan; category mapped as vehicle repair tags with truck relevance scoring; accessed 2026-06-27.",
+        "source_ref": "node/13680791305",
+        "source_type": "osm",
+        "state": "Michigan"
+      },
+      {
+        "approach_miles": 4.5,
+        "approach_road": "dealer access road",
+        "city": "Iron Mountain",
+        "fallback": true,
+        "fallback_reason": "No realistic source-backed OSM candidate found within 28 miles in michigan-latest.osm.pbf.",
+        "key": "truck_dealer",
+        "kind": "truck_dealer",
+        "lat": 45.8202,
+        "lon": -88.0654,
+        "name": "Iron Mountain Truck Dealer",
+        "source_note": "Representative fallback truck dealer for Iron Mountain, Michigan; not a claim about a real-world service POI.",
+        "source_ref": "",
+        "source_type": "fallback",
+        "state": "Michigan"
+      }
+    ],
     "Jackson": [
       {
         "approach_miles": 3.2,
@@ -4309,6 +4836,54 @@
         "source_ref": "node/8971192333",
         "source_type": "osm",
         "state": "Mississippi"
+      }
+    ],
+    "Jackson, Michigan": [
+      {
+        "approach_miles": 0.7,
+        "approach_road": "local industrial access road",
+        "city": "Jackson, Michigan",
+        "fallback": false,
+        "key": "freight_market",
+        "kind": "freight_market",
+        "lat": 42.249616,
+        "lon": -84.409787,
+        "name": "Ingham Substation",
+        "source_note": "Source-backed city service POI from a local OpenStreetMap extract for Jackson, Michigan, Michigan; category mapped as industrial landuse with logistics/freight name; accessed 2026-06-27.",
+        "source_ref": "way/186932176",
+        "source_type": "osm",
+        "state": "Michigan"
+      },
+      {
+        "approach_miles": 25.0,
+        "approach_road": "local industrial access road",
+        "city": "Jackson, Michigan",
+        "fallback": false,
+        "key": "garage",
+        "kind": "garage",
+        "lat": 42.292312,
+        "lon": -83.858781,
+        "name": "Grant's Auto And Truck Repair",
+        "source_note": "Source-backed city service POI from a local OpenStreetMap extract for Jackson, Michigan, Michigan; category mapped as vehicle repair tags with truck relevance scoring; accessed 2026-06-27.",
+        "source_ref": "node/12315003931",
+        "source_type": "osm",
+        "state": "Michigan"
+      },
+      {
+        "approach_miles": 4.5,
+        "approach_road": "dealer access road",
+        "city": "Jackson, Michigan",
+        "fallback": true,
+        "fallback_reason": "No realistic source-backed OSM candidate found within 28 miles in michigan-latest.osm.pbf.",
+        "key": "truck_dealer",
+        "kind": "truck_dealer",
+        "lat": 42.2459,
+        "lon": -84.4013,
+        "name": "Jackson, Michigan Truck Dealer",
+        "source_note": "Representative fallback truck dealer for Jackson, Michigan, Michigan; not a claim about a real-world service POI.",
+        "source_ref": "",
+        "source_type": "fallback",
+        "state": "Michigan"
       }
     ],
     "Jacksonville": [
@@ -4455,6 +5030,54 @@
         "state": "Missouri"
       }
     ],
+    "Kalamazoo": [
+      {
+        "approach_miles": 2.8,
+        "approach_road": "local industrial access road",
+        "city": "Kalamazoo",
+        "fallback": false,
+        "key": "freight_market",
+        "kind": "freight_market",
+        "lat": 42.271126,
+        "lon": -85.558324,
+        "name": "All -N- One Delivery",
+        "source_note": "Source-backed city service POI from a local OpenStreetMap extract for Kalamazoo, Michigan; category mapped as logistics or freight-forwarder office tags; accessed 2026-06-27.",
+        "source_ref": "node/11012262604",
+        "source_type": "osm",
+        "state": "Michigan"
+      },
+      {
+        "approach_miles": 25.0,
+        "approach_road": "local industrial access road",
+        "city": "Kalamazoo",
+        "fallback": false,
+        "key": "garage",
+        "kind": "garage",
+        "lat": 41.953737,
+        "lon": -85.622485,
+        "name": "Legendary Diesel Performance",
+        "source_note": "Source-backed city service POI from a local OpenStreetMap extract for Kalamazoo, Michigan; category mapped as vehicle repair tags with truck relevance scoring; accessed 2026-06-27.",
+        "source_ref": "way/381298934",
+        "source_type": "osm",
+        "state": "Michigan"
+      },
+      {
+        "approach_miles": 4.5,
+        "approach_road": "dealer access road",
+        "city": "Kalamazoo",
+        "fallback": true,
+        "fallback_reason": "No realistic source-backed OSM candidate found within 28 miles in michigan-latest.osm.pbf.",
+        "key": "truck_dealer",
+        "kind": "truck_dealer",
+        "lat": 42.2917,
+        "lon": -85.5872,
+        "name": "Kalamazoo Truck Dealer",
+        "source_note": "Representative fallback truck dealer for Kalamazoo, Michigan; not a claim about a real-world service POI.",
+        "source_ref": "",
+        "source_type": "fallback",
+        "state": "Michigan"
+      }
+    ],
     "Kansas City": [
       {
         "approach_miles": 0.6,
@@ -4500,6 +5123,53 @@
         "source_ref": "way/793662801",
         "source_type": "osm",
         "state": "Missouri"
+      }
+    ],
+    "Kenosha": [
+      {
+        "approach_miles": 25.0,
+        "approach_road": "local industrial access road",
+        "city": "Kenosha",
+        "fallback": false,
+        "key": "freight_market",
+        "kind": "freight_market",
+        "lat": 42.934254,
+        "lon": -87.922563,
+        "name": "Lindner Logistics",
+        "source_note": "Source-backed city service POI from a local OpenStreetMap extract for Kenosha, Wisconsin; category mapped as logistics or freight-forwarder office tags; accessed 2026-06-27.",
+        "source_ref": "node/12161666077",
+        "source_type": "osm",
+        "state": "Wisconsin"
+      },
+      {
+        "approach_miles": 15.9,
+        "approach_road": "local industrial access road",
+        "city": "Kenosha",
+        "fallback": false,
+        "key": "garage",
+        "kind": "garage",
+        "lat": 42.72281,
+        "lon": -87.955976,
+        "name": "TA Truck Service",
+        "source_note": "Source-backed city service POI from a local OpenStreetMap extract for Kenosha, Wisconsin; category mapped as vehicle repair tags with truck relevance scoring; accessed 2026-06-27.",
+        "source_ref": "way/220282565",
+        "source_type": "osm",
+        "state": "Wisconsin"
+      },
+      {
+        "approach_miles": 15.8,
+        "approach_road": "local industrial access road",
+        "city": "Kenosha",
+        "fallback": false,
+        "key": "truck_dealer",
+        "kind": "truck_dealer",
+        "lat": 42.72214,
+        "lon": -87.955609,
+        "name": "Lakeside International Trucks",
+        "source_note": "Source-backed city service POI from a local OpenStreetMap extract for Kenosha, Wisconsin; category mapped as truck dealer or heavy-vehicle sales/service tags; accessed 2026-06-27.",
+        "source_ref": "way/514087205",
+        "source_type": "osm",
+        "state": "Wisconsin"
       }
     ],
     "Killeen": [
@@ -4597,6 +5267,53 @@
         "state": "Tennessee"
       }
     ],
+    "La Crosse": [
+      {
+        "approach_miles": 5.7,
+        "approach_road": "local industrial access road",
+        "city": "La Crosse",
+        "fallback": false,
+        "key": "freight_market",
+        "kind": "freight_market",
+        "lat": 43.760488,
+        "lon": -91.177328,
+        "name": "Potato King",
+        "source_note": "Source-backed city service POI from a local OpenStreetMap extract for La Crosse, Wisconsin; category mapped as industrial landuse with logistics/freight name; accessed 2026-06-27.",
+        "source_ref": "way/817418868",
+        "source_type": "osm",
+        "state": "Wisconsin"
+      },
+      {
+        "approach_miles": 1.1,
+        "approach_road": "local industrial access road",
+        "city": "La Crosse",
+        "fallback": false,
+        "key": "garage",
+        "kind": "garage",
+        "lat": 43.807108,
+        "lon": -91.254676,
+        "name": "Pischke",
+        "source_note": "Source-backed city service POI from a local OpenStreetMap extract for La Crosse, Wisconsin; category mapped as vehicle repair tags with truck relevance scoring; accessed 2026-06-27.",
+        "source_ref": "way/962657212",
+        "source_type": "osm",
+        "state": "Wisconsin"
+      },
+      {
+        "approach_miles": 8.7,
+        "approach_road": "local industrial access road",
+        "city": "La Crosse",
+        "fallback": false,
+        "key": "truck_dealer",
+        "kind": "truck_dealer",
+        "lat": 43.874391,
+        "lon": -91.158597,
+        "name": "Wisconsin Kenworth - La Crosse",
+        "source_note": "Source-backed city service POI from a local OpenStreetMap extract for La Crosse, Wisconsin; category mapped as truck dealer or heavy-vehicle sales/service tags; accessed 2026-06-27.",
+        "source_ref": "way/1112059735",
+        "source_type": "osm",
+        "state": "Wisconsin"
+      }
+    ],
     "Lafayette": [
       {
         "approach_miles": 8.0,
@@ -4642,6 +5359,53 @@
         "source_ref": "node/10976375535",
         "source_type": "osm",
         "state": "Louisiana"
+      }
+    ],
+    "Lafayette, Indiana": [
+      {
+        "approach_miles": 22.2,
+        "approach_road": "local industrial access road",
+        "city": "Lafayette, Indiana",
+        "fallback": false,
+        "key": "freight_market",
+        "kind": "freight_market",
+        "lat": 40.271685,
+        "lon": -86.627337,
+        "name": "CF Industries - Frankfort Terminal",
+        "source_note": "Source-backed city service POI from a local OpenStreetMap extract for Lafayette, Indiana, Indiana; category mapped as industrial landuse with logistics/freight name; accessed 2026-06-27.",
+        "source_ref": "way/1198875592",
+        "source_type": "osm",
+        "state": "Indiana"
+      },
+      {
+        "approach_miles": 3.4,
+        "approach_road": "local industrial access road",
+        "city": "Lafayette, Indiana",
+        "fallback": false,
+        "key": "garage",
+        "kind": "garage",
+        "lat": 40.44976,
+        "lon": -86.854409,
+        "name": "JX Truck Center",
+        "source_note": "Source-backed city service POI from a local OpenStreetMap extract for Lafayette, Indiana, Indiana; category mapped as vehicle repair tags with truck relevance scoring; accessed 2026-06-27.",
+        "source_ref": "way/536680952",
+        "source_type": "osm",
+        "state": "Indiana"
+      },
+      {
+        "approach_miles": 7.7,
+        "approach_road": "local industrial access road",
+        "city": "Lafayette, Indiana",
+        "fallback": false,
+        "key": "truck_dealer",
+        "kind": "truck_dealer",
+        "lat": 40.377447,
+        "lon": -86.779637,
+        "name": "Stoops Freightliner-Western Star",
+        "source_note": "Source-backed city service POI from a local OpenStreetMap extract for Lafayette, Indiana, Indiana; category mapped as truck dealer or heavy-vehicle sales/service tags; accessed 2026-06-27.",
+        "source_ref": "way/1223804804",
+        "source_type": "osm",
+        "state": "Indiana"
       }
     ],
     "Lakeland": [
@@ -5406,6 +6170,102 @@
         "state": "New Hampshire"
       }
     ],
+    "Mankato": [
+      {
+        "approach_miles": 1.4,
+        "approach_road": "local industrial access road",
+        "city": "Mankato",
+        "fallback": false,
+        "key": "freight_market",
+        "kind": "freight_market",
+        "lat": 44.145974,
+        "lon": -93.999704,
+        "name": "Visitor Paylot Terminal",
+        "source_note": "Source-backed city service POI from a local OpenStreetMap extract for Mankato, Minnesota; category mapped as named logistics/freight facility; accessed 2026-06-27.",
+        "source_ref": "node/12629785245",
+        "source_type": "osm",
+        "state": "Minnesota"
+      },
+      {
+        "approach_miles": 25.0,
+        "approach_road": "local industrial access road",
+        "city": "Mankato",
+        "fallback": false,
+        "key": "garage",
+        "kind": "garage",
+        "lat": 43.765684,
+        "lon": -93.900182,
+        "name": "Hislop Diesel Repair",
+        "source_note": "Source-backed city service POI from a local OpenStreetMap extract for Mankato, Minnesota; category mapped as repair name with truck/heavy-vehicle context; accessed 2026-06-27.",
+        "source_ref": "way/1106651050",
+        "source_type": "osm",
+        "state": "Minnesota"
+      },
+      {
+        "approach_miles": 4.5,
+        "approach_road": "dealer access road",
+        "city": "Mankato",
+        "fallback": true,
+        "fallback_reason": "No realistic source-backed OSM candidate found within 28 miles in minnesota-latest.osm.pbf.",
+        "key": "truck_dealer",
+        "kind": "truck_dealer",
+        "lat": 44.1591,
+        "lon": -94.0092,
+        "name": "Mankato Truck Dealer",
+        "source_note": "Representative fallback truck dealer for Mankato, Minnesota; not a claim about a real-world service POI.",
+        "source_ref": "",
+        "source_type": "fallback",
+        "state": "Minnesota"
+      }
+    ],
+    "Marquette": [
+      {
+        "approach_miles": 9.7,
+        "approach_road": "local industrial access road",
+        "city": "Marquette",
+        "fallback": false,
+        "key": "freight_market",
+        "kind": "freight_market",
+        "lat": 46.491725,
+        "lon": -87.526824,
+        "name": "Northern Natural Gas",
+        "source_note": "Source-backed city service POI from a local OpenStreetMap extract for Marquette, Michigan; category mapped as industrial landuse with logistics/freight name; accessed 2026-06-27.",
+        "source_ref": "way/986509678",
+        "source_type": "osm",
+        "state": "Michigan"
+      },
+      {
+        "approach_miles": 6.6,
+        "approach_road": "local industrial access road",
+        "city": "Marquette",
+        "fallback": false,
+        "key": "garage",
+        "kind": "garage",
+        "lat": 46.538634,
+        "lon": -87.498076,
+        "name": "International Autohaus",
+        "source_note": "Source-backed city service POI from a local OpenStreetMap extract for Marquette, Michigan; category mapped as vehicle repair tags with truck relevance scoring; accessed 2026-06-27.",
+        "source_ref": "way/343282637",
+        "source_type": "osm",
+        "state": "Michigan"
+      },
+      {
+        "approach_miles": 4.5,
+        "approach_road": "dealer access road",
+        "city": "Marquette",
+        "fallback": true,
+        "fallback_reason": "No realistic source-backed OSM candidate found within 28 miles in michigan-latest.osm.pbf.",
+        "key": "truck_dealer",
+        "kind": "truck_dealer",
+        "lat": 46.5436,
+        "lon": -87.3954,
+        "name": "Marquette Truck Dealer",
+        "source_note": "Representative fallback truck dealer for Marquette, Michigan; not a claim about a real-world service POI.",
+        "source_ref": "",
+        "source_type": "fallback",
+        "state": "Michigan"
+      }
+    ],
     "McAllen": [
       {
         "approach_miles": 8.8,
@@ -6067,6 +6927,54 @@
         "source_ref": "way/684786125",
         "source_type": "osm",
         "state": "Tennessee"
+      }
+    ],
+    "Muskegon": [
+      {
+        "approach_miles": 0.6,
+        "approach_road": "local industrial access road",
+        "city": "Muskegon",
+        "fallback": false,
+        "key": "freight_market",
+        "kind": "freight_market",
+        "lat": 43.237009,
+        "lon": -86.252043,
+        "name": "Herman Ivory Terminal",
+        "source_note": "Source-backed city service POI from a local OpenStreetMap extract for Muskegon, Michigan; category mapped as named logistics/freight facility; accessed 2026-06-27.",
+        "source_ref": "way/762937242",
+        "source_type": "osm",
+        "state": "Michigan"
+      },
+      {
+        "approach_miles": 20.0,
+        "approach_road": "local industrial access road",
+        "city": "Muskegon",
+        "fallback": false,
+        "key": "garage",
+        "kind": "garage",
+        "lat": 43.436416,
+        "lon": -86.345646,
+        "name": "Advanced Diesel Systems",
+        "source_note": "Source-backed city service POI from a local OpenStreetMap extract for Muskegon, Michigan; category mapped as vehicle repair tags with truck relevance scoring; accessed 2026-06-27.",
+        "source_ref": "way/1046697447",
+        "source_type": "osm",
+        "state": "Michigan"
+      },
+      {
+        "approach_miles": 4.5,
+        "approach_road": "dealer access road",
+        "city": "Muskegon",
+        "fallback": true,
+        "fallback_reason": "No realistic source-backed OSM candidate found within 28 miles in michigan-latest.osm.pbf.",
+        "key": "truck_dealer",
+        "kind": "truck_dealer",
+        "lat": 43.2342,
+        "lon": -86.2484,
+        "name": "Muskegon Truck Dealer",
+        "source_note": "Representative fallback truck dealer for Muskegon, Michigan; not a claim about a real-world service POI.",
+        "source_ref": "",
+        "source_type": "fallback",
+        "state": "Michigan"
       }
     ],
     "Nashville": [
@@ -7067,6 +7975,54 @@
         "state": "Idaho"
       }
     ],
+    "Port Huron": [
+      {
+        "approach_miles": 2.6,
+        "approach_road": "local industrial access road",
+        "city": "Port Huron",
+        "fallback": false,
+        "key": "freight_market",
+        "kind": "freight_market",
+        "lat": 42.998282,
+        "lon": -82.427159,
+        "name": "Freighters Eatery & Taproom",
+        "source_note": "Source-backed city service POI from a local OpenStreetMap extract for Port Huron, Michigan; category mapped as named logistics/freight facility; accessed 2026-06-27.",
+        "source_ref": "way/450148149",
+        "source_type": "osm",
+        "state": "Michigan"
+      },
+      {
+        "approach_miles": 8.6,
+        "approach_road": "local industrial access road",
+        "city": "Port Huron",
+        "fallback": false,
+        "key": "garage",
+        "kind": "garage",
+        "lat": 42.938922,
+        "lon": -82.54251,
+        "name": "Emergency Truck & Tire Repair LLC",
+        "source_note": "Source-backed city service POI from a local OpenStreetMap extract for Port Huron, Michigan; category mapped as vehicle repair tags with truck relevance scoring; accessed 2026-06-27.",
+        "source_ref": "way/879059685",
+        "source_type": "osm",
+        "state": "Michigan"
+      },
+      {
+        "approach_miles": 4.5,
+        "approach_road": "dealer access road",
+        "city": "Port Huron",
+        "fallback": true,
+        "fallback_reason": "No realistic source-backed OSM candidate found within 28 miles in michigan-latest.osm.pbf.",
+        "key": "truck_dealer",
+        "kind": "truck_dealer",
+        "lat": 42.9709,
+        "lon": -82.4249,
+        "name": "Port Huron Truck Dealer",
+        "source_note": "Representative fallback truck dealer for Port Huron, Michigan; not a claim about a real-world service POI.",
+        "source_ref": "",
+        "source_type": "fallback",
+        "state": "Michigan"
+      }
+    ],
     "Port Saint Lucie": [
       {
         "approach_miles": 14.4,
@@ -7733,6 +8689,53 @@
         "state": "New York"
       }
     ],
+    "Rochester, Minnesota": [
+      {
+        "approach_miles": 4.7,
+        "approach_road": "local industrial access road",
+        "city": "Rochester, Minnesota",
+        "fallback": false,
+        "key": "freight_market",
+        "kind": "freight_market",
+        "lat": 44.044298,
+        "lon": -92.534988,
+        "name": "Coolstore Warehouse Services",
+        "source_note": "Source-backed city service POI from a local OpenStreetMap extract for Rochester, Minnesota, Minnesota; category mapped as industrial landuse with logistics/freight name; accessed 2026-06-27.",
+        "source_ref": "way/181188310",
+        "source_type": "osm",
+        "state": "Minnesota"
+      },
+      {
+        "approach_miles": 5.7,
+        "approach_road": "local industrial access road",
+        "city": "Rochester, Minnesota",
+        "fallback": false,
+        "key": "garage",
+        "kind": "garage",
+        "lat": 44.071417,
+        "lon": -92.502402,
+        "name": "Truckin' America",
+        "source_note": "Source-backed city service POI from a local OpenStreetMap extract for Rochester, Minnesota, Minnesota; category mapped as vehicle repair tags with truck relevance scoring; accessed 2026-06-27.",
+        "source_ref": "way/155547967",
+        "source_type": "osm",
+        "state": "Minnesota"
+      },
+      {
+        "approach_miles": 4.2,
+        "approach_road": "local industrial access road",
+        "city": "Rochester, Minnesota",
+        "fallback": false,
+        "key": "truck_dealer",
+        "kind": "truck_dealer",
+        "lat": 43.994041,
+        "lon": -92.422103,
+        "name": "Interstate Motor Trucks",
+        "source_note": "Source-backed city service POI from a local OpenStreetMap extract for Rochester, Minnesota, Minnesota; category mapped as truck dealer or heavy-vehicle sales/service tags; accessed 2026-06-27.",
+        "source_ref": "way/204052572",
+        "source_type": "osm",
+        "state": "Minnesota"
+      }
+    ],
     "Rock Springs": [
       {
         "approach_miles": 4.6,
@@ -7969,6 +8972,54 @@
         "source_ref": "node/12169108651",
         "source_type": "osm",
         "state": "California"
+      }
+    ],
+    "Saginaw": [
+      {
+        "approach_miles": 5.0,
+        "approach_road": "local industrial access road",
+        "city": "Saginaw",
+        "fallback": false,
+        "key": "freight_market",
+        "kind": "freight_market",
+        "lat": 43.471004,
+        "lon": -83.972804,
+        "name": "Harbor Freight Tools",
+        "source_note": "Source-backed city service POI from a local OpenStreetMap extract for Saginaw, Michigan; category mapped as named logistics/freight facility; accessed 2026-06-27.",
+        "source_ref": "node/7189233063",
+        "source_type": "osm",
+        "state": "Michigan"
+      },
+      {
+        "approach_miles": 25.0,
+        "approach_road": "local industrial access road",
+        "city": "Saginaw",
+        "fallback": false,
+        "key": "garage",
+        "kind": "garage",
+        "lat": 43.177123,
+        "lon": -83.714806,
+        "name": "Absolute Auto & Truck Repair, LLC",
+        "source_note": "Source-backed city service POI from a local OpenStreetMap extract for Saginaw, Michigan; category mapped as vehicle repair tags with truck relevance scoring; accessed 2026-06-27.",
+        "source_ref": "way/769059468",
+        "source_type": "osm",
+        "state": "Michigan"
+      },
+      {
+        "approach_miles": 4.5,
+        "approach_road": "dealer access road",
+        "city": "Saginaw",
+        "fallback": true,
+        "fallback_reason": "No realistic source-backed OSM candidate found within 28 miles in michigan-latest.osm.pbf.",
+        "key": "truck_dealer",
+        "kind": "truck_dealer",
+        "lat": 43.4195,
+        "lon": -83.9508,
+        "name": "Saginaw Truck Dealer",
+        "source_note": "Representative fallback truck dealer for Saginaw, Michigan; not a claim about a real-world service POI.",
+        "source_ref": "",
+        "source_type": "fallback",
+        "state": "Michigan"
       }
     ],
     "Salem": [
@@ -8592,6 +9643,54 @@
         "state": "California"
       }
     ],
+    "Sault Ste. Marie": [
+      {
+        "approach_miles": 0.6,
+        "approach_road": "local industrial access road",
+        "city": "Sault Ste. Marie",
+        "fallback": false,
+        "key": "freight_market",
+        "kind": "freight_market",
+        "lat": 46.501445,
+        "lon": -84.348136,
+        "name": "Freighters Restaurant",
+        "source_note": "Source-backed city service POI from a local OpenStreetMap extract for Sault Ste. Marie, Michigan; category mapped as named logistics/freight facility; accessed 2026-06-27.",
+        "source_ref": "node/1105912492",
+        "source_type": "osm",
+        "state": "Michigan"
+      },
+      {
+        "approach_miles": 0.9,
+        "approach_road": "local industrial access road",
+        "city": "Sault Ste. Marie",
+        "fallback": false,
+        "key": "garage",
+        "kind": "garage",
+        "lat": 46.498991,
+        "lon": -84.357778,
+        "name": "Storey Automotive",
+        "source_note": "Source-backed city service POI from a local OpenStreetMap extract for Sault Ste. Marie, Michigan; category mapped as vehicle repair tags with truck relevance scoring; accessed 2026-06-27.",
+        "source_ref": "node/6689615068",
+        "source_type": "osm",
+        "state": "Michigan"
+      },
+      {
+        "approach_miles": 4.5,
+        "approach_road": "dealer access road",
+        "city": "Sault Ste. Marie",
+        "fallback": true,
+        "fallback_reason": "No realistic source-backed OSM candidate found within 28 miles in michigan-latest.osm.pbf.",
+        "key": "truck_dealer",
+        "kind": "truck_dealer",
+        "lat": 46.4953,
+        "lon": -84.3453,
+        "name": "Sault Ste. Marie Truck Dealer",
+        "source_note": "Representative fallback truck dealer for Sault Ste. Marie, Michigan; not a claim about a real-world service POI.",
+        "source_ref": "",
+        "source_type": "fallback",
+        "state": "Michigan"
+      }
+    ],
     "Savannah": [
       {
         "approach_miles": 0.6,
@@ -9019,6 +10118,54 @@
         "state": "Missouri"
       }
     ],
+    "Springfield, Illinois": [
+      {
+        "approach_miles": 2.1,
+        "approach_road": "local industrial access road",
+        "city": "Springfield, Illinois",
+        "fallback": false,
+        "key": "freight_market",
+        "kind": "freight_market",
+        "lat": 39.75983,
+        "lon": -89.647125,
+        "name": "Pool Supply Warehouse",
+        "source_note": "Source-backed city service POI from a local OpenStreetMap extract for Springfield, Illinois, Illinois; category mapped as named logistics/freight facility; accessed 2026-06-27.",
+        "source_ref": "node/6214006943",
+        "source_type": "osm",
+        "state": "Illinois"
+      },
+      {
+        "approach_miles": 0.6,
+        "approach_road": "local industrial access road",
+        "city": "Springfield, Illinois",
+        "fallback": false,
+        "key": "garage",
+        "kind": "garage",
+        "lat": 39.783117,
+        "lon": -89.648959,
+        "name": "Brahler Tire & Auto Center",
+        "source_note": "Source-backed city service POI from a local OpenStreetMap extract for Springfield, Illinois, Illinois; category mapped as vehicle repair tags with truck relevance scoring; accessed 2026-06-27.",
+        "source_ref": "node/7179866733",
+        "source_type": "osm",
+        "state": "Illinois"
+      },
+      {
+        "approach_miles": 4.5,
+        "approach_road": "dealer access road",
+        "city": "Springfield, Illinois",
+        "fallback": true,
+        "fallback_reason": "No realistic source-backed OSM candidate found within 28 miles in illinois-latest.osm.pbf.",
+        "key": "truck_dealer",
+        "kind": "truck_dealer",
+        "lat": 39.7817,
+        "lon": -89.6501,
+        "name": "Springfield, Illinois Truck Dealer",
+        "source_note": "Representative fallback truck dealer for Springfield, Illinois, Illinois; not a claim about a real-world service POI.",
+        "source_ref": "",
+        "source_type": "fallback",
+        "state": "Illinois"
+      }
+    ],
     "Springfield, Massachusetts": [
       {
         "approach_miles": 4.7,
@@ -9064,6 +10211,54 @@
         "source_ref": "node/13709943013",
         "source_type": "osm",
         "state": "Massachusetts"
+      }
+    ],
+    "St. Cloud": [
+      {
+        "approach_miles": 2.6,
+        "approach_road": "local industrial access road",
+        "city": "St. Cloud",
+        "fallback": false,
+        "key": "freight_market",
+        "kind": "freight_market",
+        "lat": 45.552279,
+        "lon": -94.200497,
+        "name": "Harbor Freight Tools",
+        "source_note": "Source-backed city service POI from a local OpenStreetMap extract for St. Cloud, Minnesota; category mapped as named logistics/freight facility; accessed 2026-06-27.",
+        "source_ref": "node/4341630982",
+        "source_type": "osm",
+        "state": "Minnesota"
+      },
+      {
+        "approach_miles": 6.1,
+        "approach_road": "local industrial access road",
+        "city": "St. Cloud",
+        "fallback": false,
+        "key": "garage",
+        "kind": "garage",
+        "lat": 45.552712,
+        "lon": -94.254505,
+        "name": "Fleet Farm Auto Center",
+        "source_note": "Source-backed city service POI from a local OpenStreetMap extract for St. Cloud, Minnesota; category mapped as vehicle repair tags with truck relevance scoring; accessed 2026-06-27.",
+        "source_ref": "way/1046307172",
+        "source_type": "osm",
+        "state": "Minnesota"
+      },
+      {
+        "approach_miles": 4.5,
+        "approach_road": "dealer access road",
+        "city": "St. Cloud",
+        "fallback": true,
+        "fallback_reason": "No realistic source-backed OSM candidate found within 28 miles in minnesota-latest.osm.pbf.",
+        "key": "truck_dealer",
+        "kind": "truck_dealer",
+        "lat": 45.5608,
+        "lon": -94.1625,
+        "name": "St. Cloud Truck Dealer",
+        "source_note": "Representative fallback truck dealer for St. Cloud, Minnesota; not a claim about a real-world service POI.",
+        "source_ref": "",
+        "source_type": "fallback",
+        "state": "Minnesota"
       }
     ],
     "St. Louis": [
@@ -9442,6 +10637,54 @@
         "source_ref": "",
         "source_type": "fallback",
         "state": "Kansas"
+      }
+    ],
+    "Traverse City": [
+      {
+        "approach_miles": 0.6,
+        "approach_road": "local industrial access road",
+        "city": "Traverse City",
+        "fallback": false,
+        "key": "freight_market",
+        "kind": "freight_market",
+        "lat": 44.765633,
+        "lon": -85.627715,
+        "name": "Warehouse District",
+        "source_note": "Source-backed city service POI from a local OpenStreetMap extract for Traverse City, Michigan; category mapped as named logistics/freight facility; accessed 2026-06-27.",
+        "source_ref": "way/122725375",
+        "source_type": "osm",
+        "state": "Michigan"
+      },
+      {
+        "approach_miles": 9.7,
+        "approach_road": "local industrial access road",
+        "city": "Traverse City",
+        "fallback": false,
+        "key": "garage",
+        "kind": "garage",
+        "lat": 44.662595,
+        "lon": -85.655664,
+        "name": "Bud's Complete Auto & Truck Repair",
+        "source_note": "Source-backed city service POI from a local OpenStreetMap extract for Traverse City, Michigan; category mapped as vehicle repair tags with truck relevance scoring; accessed 2026-06-27.",
+        "source_ref": "node/12588435734",
+        "source_type": "osm",
+        "state": "Michigan"
+      },
+      {
+        "approach_miles": 4.5,
+        "approach_road": "dealer access road",
+        "city": "Traverse City",
+        "fallback": true,
+        "fallback_reason": "No realistic source-backed OSM candidate found within 28 miles in michigan-latest.osm.pbf.",
+        "key": "truck_dealer",
+        "kind": "truck_dealer",
+        "lat": 44.7631,
+        "lon": -85.6206,
+        "name": "Traverse City Truck Dealer",
+        "source_note": "Representative fallback truck dealer for Traverse City, Michigan; not a claim about a real-world service POI.",
+        "source_ref": "",
+        "source_type": "fallback",
+        "state": "Michigan"
       }
     ],
     "Trenton": [
@@ -10064,6 +11307,54 @@
         "state": "District of Columbia"
       }
     ],
+    "Wausau": [
+      {
+        "approach_miles": 20.2,
+        "approach_road": "local industrial access road",
+        "city": "Wausau",
+        "fallback": false,
+        "key": "freight_market",
+        "kind": "freight_market",
+        "lat": 45.175251,
+        "lon": -89.654078,
+        "name": "TC Energy Corporation",
+        "source_note": "Source-backed city service POI from a local OpenStreetMap extract for Wausau, Wisconsin; category mapped as industrial landuse with logistics/freight name; accessed 2026-06-27.",
+        "source_ref": "way/1006199883",
+        "source_type": "osm",
+        "state": "Wisconsin"
+      },
+      {
+        "approach_miles": 3.1,
+        "approach_road": "local industrial access road",
+        "city": "Wausau",
+        "fallback": false,
+        "key": "garage",
+        "kind": "garage",
+        "lat": 44.98869,
+        "lon": -89.653073,
+        "name": "Mill's Fleet Farm",
+        "source_note": "Source-backed city service POI from a local OpenStreetMap extract for Wausau, Wisconsin; category mapped as vehicle repair tags with truck relevance scoring; accessed 2026-06-27.",
+        "source_ref": "way/1464228632",
+        "source_type": "osm",
+        "state": "Wisconsin"
+      },
+      {
+        "approach_miles": 4.5,
+        "approach_road": "dealer access road",
+        "city": "Wausau",
+        "fallback": true,
+        "fallback_reason": "No realistic source-backed OSM candidate found within 28 miles in wisconsin-latest.osm.pbf.",
+        "key": "truck_dealer",
+        "kind": "truck_dealer",
+        "lat": 44.9591,
+        "lon": -89.6301,
+        "name": "Wausau Truck Dealer",
+        "source_note": "Representative fallback truck dealer for Wausau, Wisconsin; not a claim about a real-world service POI.",
+        "source_ref": "",
+        "source_type": "fallback",
+        "state": "Wisconsin"
+      }
+    ],
     "West Palm Beach": [
       {
         "approach_miles": 5.3,
@@ -10206,6 +11497,53 @@
         "source_ref": "",
         "source_type": "fallback",
         "state": "Texas"
+      }
+    ],
+    "Willmar": [
+      {
+        "approach_miles": 1.6,
+        "approach_road": "local industrial access road",
+        "city": "Willmar",
+        "fallback": false,
+        "key": "freight_market",
+        "kind": "freight_market",
+        "lat": 45.104747,
+        "lon": -95.04053,
+        "name": "Harbor Freight Tools",
+        "source_note": "Source-backed city service POI from a local OpenStreetMap extract for Willmar, Minnesota; category mapped as named logistics/freight facility; accessed 2026-06-27.",
+        "source_ref": "node/10887284105",
+        "source_type": "osm",
+        "state": "Minnesota"
+      },
+      {
+        "approach_miles": 1.0,
+        "approach_road": "local industrial access road",
+        "city": "Willmar",
+        "fallback": false,
+        "key": "garage",
+        "kind": "garage",
+        "lat": 45.110829,
+        "lon": -95.043253,
+        "name": "Walt's",
+        "source_note": "Source-backed city service POI from a local OpenStreetMap extract for Willmar, Minnesota; category mapped as vehicle repair tags with truck relevance scoring; accessed 2026-06-27.",
+        "source_ref": "node/13119691140",
+        "source_type": "osm",
+        "state": "Minnesota"
+      },
+      {
+        "approach_miles": 2.4,
+        "approach_road": "local industrial access road",
+        "city": "Willmar",
+        "fallback": false,
+        "key": "truck_dealer",
+        "kind": "truck_dealer",
+        "lat": 45.124207,
+        "lon": -95.006864,
+        "name": "Nelson International",
+        "source_note": "Source-backed city service POI from a local OpenStreetMap extract for Willmar, Minnesota; category mapped as truck dealer or heavy-vehicle sales/service tags; accessed 2026-06-27.",
+        "source_ref": "node/12145581861",
+        "source_type": "osm",
+        "state": "Minnesota"
       }
     ],
     "Wilmington": [
@@ -10352,6 +11690,54 @@
         "state": "Virginia"
       }
     ],
+    "Winona": [
+      {
+        "approach_miles": 12.0,
+        "approach_road": "local industrial access road",
+        "city": "Winona",
+        "fallback": false,
+        "key": "freight_market",
+        "kind": "freight_market",
+        "lat": 43.943482,
+        "lon": -91.73917,
+        "name": "FedEx Freight",
+        "source_note": "Source-backed city service POI from a local OpenStreetMap extract for Winona, Minnesota; category mapped as industrial landuse with logistics/freight name; accessed 2026-06-27.",
+        "source_ref": "way/1161780215",
+        "source_type": "osm",
+        "state": "Minnesota"
+      },
+      {
+        "approach_miles": 0.7,
+        "approach_road": "local industrial access road",
+        "city": "Winona",
+        "fallback": false,
+        "key": "garage",
+        "kind": "garage",
+        "lat": 44.04506,
+        "lon": -91.647511,
+        "name": "Gordie's",
+        "source_note": "Source-backed city service POI from a local OpenStreetMap extract for Winona, Minnesota; category mapped as vehicle repair tags with truck relevance scoring; accessed 2026-06-27.",
+        "source_ref": "way/135099977",
+        "source_type": "osm",
+        "state": "Minnesota"
+      },
+      {
+        "approach_miles": 4.5,
+        "approach_road": "dealer access road",
+        "city": "Winona",
+        "fallback": true,
+        "fallback_reason": "No realistic source-backed OSM candidate found within 28 miles in minnesota-latest.osm.pbf.",
+        "key": "truck_dealer",
+        "kind": "truck_dealer",
+        "lat": 44.05,
+        "lon": -91.6393,
+        "name": "Winona Truck Dealer",
+        "source_note": "Representative fallback truck dealer for Winona, Minnesota; not a claim about a real-world service POI.",
+        "source_ref": "",
+        "source_type": "fallback",
+        "state": "Minnesota"
+      }
+    ],
     "Worcester": [
       {
         "approach_miles": 3.0,
@@ -10450,23 +11836,26 @@
   "coverage": {
     "by_role": {
       "freight_market": {
-        "fallback": 4,
-        "source_backed": 216
+        "fallback": 6,
+        "source_backed": 243
       },
       "garage": {
         "fallback": 0,
-        "source_backed": 220
+        "source_backed": 249
       },
       "truck_dealer": {
-        "fallback": 102,
-        "source_backed": 118
+        "fallback": 123,
+        "source_backed": 126
       }
     },
-    "cities": 220,
-    "cities_with_any_fallback": 104,
-    "fallback": 106,
+    "cities": 249,
+    "cities_with_any_fallback": 125,
+    "fallback": 129,
     "fallback_roles": {
       "Albany": [
+        "truck_dealer"
+      ],
+      "Albert Lea": [
         "truck_dealer"
       ],
       "Athens": [
@@ -10511,6 +11900,10 @@
       "Davenport": [
         "truck_dealer"
       ],
+      "Decatur": [
+        "freight_market",
+        "truck_dealer"
+      ],
       "Dodge City": [
         "freight_market",
         "truck_dealer"
@@ -10519,6 +11912,9 @@
         "truck_dealer"
       ],
       "Duluth": [
+        "truck_dealer"
+      ],
+      "Eau Claire": [
         "truck_dealer"
       ],
       "Elko": [
@@ -10530,6 +11926,9 @@
       "Erie": [
         "truck_dealer"
       ],
+      "Escanaba": [
+        "truck_dealer"
+      ],
       "Evansville": [
         "truck_dealer"
       ],
@@ -10537,6 +11936,9 @@
         "truck_dealer"
       ],
       "Fargo": [
+        "truck_dealer"
+      ],
+      "Flint": [
         "truck_dealer"
       ],
       "Fort Wayne": [
@@ -10561,7 +11963,20 @@
       "Harrisonburg": [
         "truck_dealer"
       ],
+      "Hibbing": [
+        "truck_dealer"
+      ],
+      "Houghton": [
+        "truck_dealer"
+      ],
       "Huntsville": [
+        "truck_dealer"
+      ],
+      "Iron Mountain": [
+        "freight_market",
+        "truck_dealer"
+      ],
+      "Jackson, Michigan": [
         "truck_dealer"
       ],
       "Jacksonville": [
@@ -10572,6 +11987,9 @@
       ],
       "Joplin": [
         "freight_market"
+      ],
+      "Kalamazoo": [
+        "truck_dealer"
       ],
       "Knoxville": [
         "truck_dealer"
@@ -10606,6 +12024,12 @@
       "Madison": [
         "truck_dealer"
       ],
+      "Mankato": [
+        "truck_dealer"
+      ],
+      "Marquette": [
+        "truck_dealer"
+      ],
       "McAllen": [
         "truck_dealer"
       ],
@@ -10619,6 +12043,9 @@
         "truck_dealer"
       ],
       "Morgantown": [
+        "truck_dealer"
+      ],
+      "Muskegon": [
         "truck_dealer"
       ],
       "New Orleans": [
@@ -10654,6 +12081,9 @@
       "Peoria": [
         "truck_dealer"
       ],
+      "Port Huron": [
+        "truck_dealer"
+      ],
       "Port Saint Lucie": [
         "truck_dealer"
       ],
@@ -10687,6 +12117,9 @@
       "Roseburg": [
         "truck_dealer"
       ],
+      "Saginaw": [
+        "truck_dealer"
+      ],
       "Salem": [
         "truck_dealer"
       ],
@@ -10717,6 +12150,9 @@
       "Santa Rosa": [
         "truck_dealer"
       ],
+      "Sault Ste. Marie": [
+        "truck_dealer"
+      ],
       "Savannah": [
         "truck_dealer"
       ],
@@ -10729,10 +12165,19 @@
       "Sioux Falls": [
         "truck_dealer"
       ],
+      "Springfield, Illinois": [
+        "truck_dealer"
+      ],
+      "St. Cloud": [
+        "truck_dealer"
+      ],
       "Syracuse": [
         "truck_dealer"
       ],
       "Topeka": [
+        "truck_dealer"
+      ],
+      "Traverse City": [
         "truck_dealer"
       ],
       "Tri-Cities": [
@@ -10762,6 +12207,9 @@
       "Washington": [
         "truck_dealer"
       ],
+      "Wausau": [
+        "truck_dealer"
+      ],
       "West Palm Beach": [
         "truck_dealer"
       ],
@@ -10779,10 +12227,13 @@
       ],
       "Winchester": [
         "truck_dealer"
+      ],
+      "Winona": [
+        "truck_dealer"
       ]
     },
-    "service_roles": 660,
-    "source_backed": 554
+    "service_roles": 747,
+    "source_backed": 618
   },
   "generated": {
     "accessed": "2026-06-27",

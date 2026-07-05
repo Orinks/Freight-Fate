@@ -18,27 +18,27 @@ def test_local_approach_data_covers_supported_map(world):
     data = json.loads(path.read_text(encoding="utf-8"))
     coverage = data["coverage"]
 
-    assert coverage["approaches"] == 2748
-    assert coverage["osm_road"] == 2742
+    assert coverage["approaches"] == 3152
+    assert coverage["osm_road"] == 3146
     # Every road-snapped target carries a real road name: the snap prefers the
     # nearest *named* road, so "unnamed public road" only survives where OSM
     # truly has no named street inside the search radius (currently nowhere).
-    assert coverage["named_road"] == 2742
+    assert coverage["named_road"] == 3146
     assert coverage["fallback"] == 6
-    assert coverage["estimated"] == 2129
+    assert coverage["estimated"] == 2404
     assert coverage["by_type"]["city_service"] == {
-        "estimated": 106,
+        "estimated": 129,
         "fallback": 0,
-        "named_road": 660,
-        "osm_road": 660,
-        "total": 660,
+        "named_road": 747,
+        "osm_road": 747,
+        "total": 747,
     }
     assert coverage["by_type"]["facility"] == {
-        "estimated": 2023,
+        "estimated": 2275,
         "fallback": 6,
-        "named_road": 2082,
-        "osm_road": 2082,
-        "total": 2088,
+        "named_road": 2399,
+        "osm_road": 2399,
+        "total": 2405,
     }
 
     services = sum(len(world.city_services(city)) for city in world.city_names())

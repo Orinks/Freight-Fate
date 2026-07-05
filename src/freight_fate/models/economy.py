@@ -9,6 +9,8 @@ REGION_FUEL_PRICE = {
     "northeast": 4.15,
     "appalachia": 3.95,
     "great_lakes": 3.75,
+    "upper_midwest": 3.55,
+    "corn_belt": 3.55,
     "heartland": 3.60,
     "southern_plains": 3.45,
     "mid_south": 3.45,

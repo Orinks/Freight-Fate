@@ -377,6 +377,10 @@ def test_new_dispatches_only_use_metadata_supported_routes(world):
                 assert route.metadata_complete(world)
 
 
+# Sweeping every city's board grows with the map and, under coverage tracing
+# on the slower Windows CI runner, straddles the default 120-second hang
+# timeout. It is long, not hung, so give it real headroom.
+@pytest.mark.timeout(300)
 def test_whole_board_never_offers_unsupported_route_legs(world):
     endorsements = {"refrigerated", "heavy_haul", "high_value"}
     routes = {}

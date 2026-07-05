@@ -29,6 +29,8 @@ REGIONS: tuple[str, ...] = (
     "northeast",
     "appalachia",
     "great_lakes",
+    "upper_midwest",
+    "corn_belt",
     "heartland",
     "southern_plains",
     "mid_south",
@@ -48,6 +50,8 @@ REGION_LABELS: dict[str, str] = {
     "northeast": "the Northeast",
     "appalachia": "Appalachia",
     "great_lakes": "the Great Lakes",
+    "upper_midwest": "the Upper Midwest",
+    "corn_belt": "the Corn Belt",
     "heartland": "the Heartland",
     "southern_plains": "the Southern Plains",
     "mid_south": "the Mid-South",
@@ -79,13 +83,14 @@ STATE_REGION: dict[str, str] = {
     "District of Columbia": "northeast",
     # Appalachia
     "West Virginia": "appalachia",
-    # Great Lakes / industrial Midwest
-    "Ohio": "great_lakes",
-    # Indiana is split by latitude in classify_region (Evansville -> mid_south).
-    "Illinois": "great_lakes",
-    "Michigan": "great_lakes",
-    "Wisconsin": "great_lakes",
-    "Minnesota": "great_lakes",
+    # Great Lakes / industrial Midwest. Ohio and Illinois are split by latitude
+    # in classify_region (their Lake shore stays great_lakes, interior ->
+    # corn_belt). Indiana is split by latitude too (Evansville -> mid_south,
+    # Indianapolis -> corn_belt, the north -> great_lakes).
+    # Michigan is split in classify_region: the Upper Peninsula -> upper_midwest.
+    # Minnesota and Wisconsin are the colder Upper Midwest.
+    "Wisconsin": "upper_midwest",
+    "Minnesota": "upper_midwest",
     # Heartland (corn belt + Missouri/Mississippi valley + northern plains)
     "Missouri": "heartland",
     "Iowa": "heartland",
@@ -155,8 +160,29 @@ def classify_region(state: str, lat: float, lon: float) -> str:
         return "appalachia" if lon <= -78.0 else "northeast"
     if state == "Indiana":
         # Far-southern Indiana on the Ohio River (Evansville) is Mid-South;
-        # the rest of the state is the industrial Great Lakes Midwest.
-        return "mid_south" if lat <= 38.5 else "great_lakes"
+        # central Indiana (Indianapolis) is the Corn Belt; the north (Fort
+        # Wayne, South Bend) is the industrial Great Lakes Midwest.
+        if lat <= 38.5:
+            return "mid_south"
+        return "corn_belt" if lat <= 40.5 else "great_lakes"
+    if state == "Illinois":
+        # Chicagoland and northern Illinois are Great Lakes; central and
+        # southern Illinois (Peoria, Springfield, the ADM corn country) are the
+        # Corn Belt.
+        return "great_lakes" if lat >= 41.5 else "corn_belt"
+    if state == "Ohio":
+        # The Lake Erie shore (Cleveland, Toledo, Akron) is Great Lakes; central
+        # and southern Ohio (Columbus, Dayton, Cincinnati) are the Corn Belt.
+        return "great_lakes" if lat >= 40.5 else "corn_belt"
+    if state == "Michigan":
+        # The Upper Peninsula -- Lake Superior northwoods, iron/timber country
+        # bordering Wisconsin -- is Upper Midwest; the Lower Peninsula (Detroit,
+        # Grand Rapids, the auto belt) is Great Lakes. The Straits of Mackinac
+        # split them: north of ~45.8 lat, or the western UP that dips south of
+        # that along Lake Michigan (lon <= -87).
+        if lat >= 45.8 or lon <= -87.0:
+            return "upper_midwest"
+        return "great_lakes"
     if state == "New York":
         # Western New York (Buffalo) is lake-effect Great Lakes country.
         return "great_lakes" if lon <= -78.0 else "northeast"

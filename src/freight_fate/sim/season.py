@@ -38,6 +38,11 @@ REGION_CLIMATE: dict[str, tuple[float, float, float]] = {
     "northeast": (9.0, 13.0, 6.0),
     "appalachia": (11.0, 11.0, 7.0),
     "great_lakes": (8.0, 14.0, 6.0),
+    # Coldest tier: the Iron Range and Upper Peninsula run Duluth-like
+    # winters, well below the lower-lakes belt.
+    "upper_midwest": (4.5, 16.0, 7.0),
+    # Continental interior between the lakes and the plains.
+    "corn_belt": (11.0, 14.0, 8.0),
     "heartland": (11.0, 14.0, 7.0),
     "southern_plains": (17.0, 11.0, 8.0),
     "mid_south": (16.0, 11.0, 7.0),

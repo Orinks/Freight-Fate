@@ -141,10 +141,12 @@ class TripRoadEventMixin:
                 city_state = world.cities[city].state
                 prev_state = world.cities[prev].state
                 crossing = f"Crossing into {city_state}. " if city_state != prev_state else ""
+                # State-disambiguated city keys ("Jackson, Michigan") already
+                # carry the state; don't speak it twice.
+                place = city if city.endswith(f", {city_state}") else f"{city}, {city_state}"
                 self._emit(
                     TripEventKind.CITY_REACHED,
-                    f"{crossing}Passing {city}, {city_state}. "
-                    f"Continuing on {leg.highway} toward {nxt}.",
+                    f"{crossing}Passing {place}. Continuing on {leg.highway} toward {nxt}.",
                 )
 
     def _hazard_risk(self) -> float:

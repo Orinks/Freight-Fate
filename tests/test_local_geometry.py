@@ -22,20 +22,20 @@ def test_local_geometry_data_covers_supported_map(world):
 
     assert "OpenRouteService driving-hgv" in data["generated"]["routing_decision"]
     assert "not ORS-certified HGV routes" in data["generated"]["routing_decision"]
-    assert coverage["targets"] == 2748
-    assert coverage["turn_level"] == 459
-    assert coverage["fallback"] == 2289
-    assert coverage["estimated"] == 2289
+    assert coverage["targets"] == 3152
+    assert coverage["turn_level"] == 509
+    assert coverage["fallback"] == 2643
+    assert coverage["estimated"] == 2643
     assert coverage["by_type"]["city_service"] == {
-        "estimated": 201,
-        "fallback": 201,
-        "total": 660,
-        "turn_level": 459,
+        "estimated": 238,
+        "fallback": 238,
+        "total": 747,
+        "turn_level": 509,
     }
     assert coverage["by_type"]["facility"] == {
-        "estimated": 2088,
-        "fallback": 2088,
-        "total": 2088,
+        "estimated": 2405,
+        "fallback": 2405,
+        "total": 2405,
         "turn_level": 0,
     }
 
