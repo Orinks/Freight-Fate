@@ -3850,6 +3850,132 @@
       ],
       "lat": 43.8014,
       "lon": -91.2396
+    },
+    "St. Cloud": {
+      "state": "Minnesota",
+      "region": "upper_midwest",
+      "locations": [
+        {
+          "name": "New Flyer Bus Plant",
+          "type": "automotive_plant",
+          "source_note": "New Flyer of America transit-bus manufacturing facility, St. Cloud -- North America's largest bus builder, including battery-electric buses."
+        },
+        {
+          "name": "Coborn's Distribution Center",
+          "type": "grocery_retail_dc",
+          "source_note": "Coborn's grocery distribution hub (with Associated Wholesale Grocers), I-94 Business Park, St. Cloud -- 650,000+ sq ft of fresh and frozen food warehouse."
+        }
+      ],
+      "lat": 45.5608,
+      "lon": -94.1625
+    },
+    "Rochester, Minnesota": {
+      "state": "Minnesota",
+      "region": "upper_midwest",
+      "locations": [
+        {
+          "name": "Crenlo Cab Works",
+          "type": "manufacturing_plant",
+          "source_note": "Crenlo Engineered Cabs, Rochester -- manufactures operator cabs for trucks and heavy equipment."
+        },
+        {
+          "name": "Seneca Foods Cannery",
+          "type": "food_processor",
+          "source_note": "Seneca Foods vegetable canning plant, Rochester, Minnesota."
+        }
+      ],
+      "lat": 44.0121,
+      "lon": -92.4802
+    },
+    "Mankato": {
+      "state": "Minnesota",
+      "region": "upper_midwest",
+      "locations": [
+        {
+          "name": "CHS Soybean Plant",
+          "type": "food_processor",
+          "source_note": "CHS soybean crush and oil refining plant on South Riverfront Drive, Mankato -- one of the largest soybean oil processing centers, with river terminal and private rail yard."
+        },
+        {
+          "name": "Taylor Corporation Campus",
+          "type": "manufacturing_plant",
+          "source_note": "Taylor Corporation headquarters and printing plants, North Mankato -- one of the largest graphic communications companies in the US."
+        }
+      ],
+      "lat": 44.1591,
+      "lon": -94.0092
+    },
+    "Winona": {
+      "state": "Minnesota",
+      "region": "upper_midwest",
+      "locations": [
+        {
+          "name": "Fastenal Distribution Center",
+          "type": "distribution",
+          "source_note": "Fastenal worldwide headquarters and main distribution operation, Winona."
+        },
+        {
+          "name": "Port of Winona",
+          "type": "port",
+          "source_note": "Winona Municipal Harbor on the upper Mississippi -- grain, aggregates and bulk commodities moved between barge, rail and truck (CD Terminal)."
+        }
+      ],
+      "lat": 44.05,
+      "lon": -91.6393
+    },
+    "Willmar": {
+      "state": "Minnesota",
+      "region": "upper_midwest",
+      "locations": [
+        {
+          "name": "Jennie-O Turkey Plant",
+          "type": "food_processor",
+          "source_note": "Jennie-O Turkey Store (Hormel) turkey processing plant on Willmar Avenue, Willmar."
+        },
+        {
+          "name": "BNSF Willmar Yard",
+          "type": "rail",
+          "source_note": "BNSF Willmar rail yard at the junction of the Marshall and Morris subdivisions; the 2022 Willmar Wye added a direct connector and an industrial-park rail spur."
+        }
+      ],
+      "lat": 45.1219,
+      "lon": -95.0433
+    },
+    "Albert Lea": {
+      "state": "Minnesota",
+      "region": "upper_midwest",
+      "locations": [
+        {
+          "name": "Mrs. Gerry's Kitchen",
+          "type": "food_processor",
+          "source_note": "Mrs. Gerry's Kitchen, Albert Lea -- 214,000 sq ft refrigerated salads and sides plant near the I-35/I-90 interchange, shipping coast to coast."
+        },
+        {
+          "name": "Lou-Rich Manufacturing",
+          "type": "manufacturing_plant",
+          "source_note": "Lou-Rich (Innovance), Albert Lea -- employee-owned contract manufacturer: fabrication, machining and assembly."
+        }
+      ],
+      "lat": 43.648,
+      "lon": -93.3683
+    },
+    "Hibbing": {
+      "state": "Minnesota",
+      "region": "upper_midwest",
+      "locations": [
+        {
+          "name": "Hibbing Taconite Mine",
+          "type": "mine_quarry",
+          "source_note": "Hibbing Taconite Company (Cleveland-Cliffs) open-pit iron mine and pellet plant north of Hibbing -- about 7.8 million tons of iron pellets a year."
+        },
+        {
+          "name": "L&M Radiator Plant",
+          "type": "manufacturing_plant",
+          "source_note": "L&M Radiator, Hibbing -- headquarters and plant building Mesabi heat exchangers for mining and heavy equipment."
+        }
+      ],
+      "lat": 47.4272,
+      "lon": -92.9377
     }
   }
 }
