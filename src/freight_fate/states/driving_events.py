@@ -617,6 +617,7 @@ class DrivingEventMixin:
         self._ramp_light_offset_s = rng.random() * (RAMP_LIGHT_RED_S + RAMP_LIGHT_GREEN_S)
         self._ramp_light_announced = False
         self._ramp_light_was_red = False
+        self._ramp_light_flip_said = False
         self._ramp_terminal_done = control == "none"
         self._ramp_waiting_at_light = False
 
@@ -640,12 +641,18 @@ class DrivingEventMixin:
             self.ctx.audio.play("ui/notify", volume=0.7)
             self.ctx.say_event("Green light. Pull ahead to the entrance.", interrupt=False)
             return
-        self.ctx.say_event(
-            "The light ahead turns red. Be ready to stop."
-            if red
-            else "The light ahead turns green.",
-            interrupt=False,
-        )
+        # Speak at most one flip after the first callout: a slow descent can
+        # span several signal cycles in real time, and the stop-bar exchange
+        # announces the state that finally matters. One update is
+        # information; a play-by-play of every cycle is chatter.
+        if not self._ramp_light_flip_said:
+            self._ramp_light_flip_said = True
+            self.ctx.say_event(
+                "The light ahead turns red. Be ready to stop."
+                if red
+                else "The light ahead turns green.",
+                interrupt=False,
+            )
 
     def _announce_ramp_terminal(self) -> None:
         """Mid-ramp callout naming the control at the terminal."""

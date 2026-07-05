@@ -178,10 +178,17 @@ class TripRoadEventMixin:
             self._traffic_warning_mi = self.position_mi + 8.0
             # A lead vehicle blocks one lane: braking always works, and a
             # clear neighboring lane lets the player pass around it instead.
+            # Reasons often end in "ahead" already, and a sub-tenth-mile gap
+            # is spoken as "right ahead", not "0.0 miles ahead".
+            reason = context.lead.reason.removesuffix(" ahead")
+            where = (
+                "right ahead"
+                if context.gap_mi < 0.1
+                else f"{self._gap_text(context.gap_mi)} ahead"
+            )
             self._emit(
                 TripEventKind.HAZARD,
-                f"Brake or change lanes! {context.lead.reason.capitalize()} "
-                f"{self._gap_text(context.gap_mi)} ahead.",
+                f"Brake or change lanes! {reason.capitalize()} {where}.",
                 deadline_s=2.5,
                 traffic=context,
                 dodgeable=True,

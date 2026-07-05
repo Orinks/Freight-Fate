@@ -141,15 +141,19 @@ DOCKING_MAX_MPH = 0.5  # dock/settle/rest actions need a complete stop
 
 
 def terse_hazard_message(message: str) -> str:
+    """Trim the hazard call for terse speech.
+
+    "Brake now!" is implied by the hazard tone and can go; "Brake or change
+    lanes!" carries real information -- the hazard is dodgeable -- so terse
+    mode keeps it as a two-word cue instead of dropping it."""
     text = message.strip()
-    for prefix in (
-        "Brake now! ",
-        "Brake now!",
-        "Brake or change lanes! ",
-        "Brake or change lanes!",
-    ):
+    for prefix in ("Brake now! ", "Brake now!"):
         if text.startswith(prefix):
             text = text[len(prefix) :].strip()
+            break
+    for prefix in ("Brake or change lanes! ", "Brake or change lanes!"):
+        if text.startswith(prefix):
+            text = "Brake or swerve! " + text[len(prefix) :].strip()
             break
     return text or message
 
