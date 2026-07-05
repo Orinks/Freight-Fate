@@ -228,6 +228,16 @@
   "in 1 miles".
 
 ### Changed
+- **Career stats at the terminal is now a browsable list.** Instead of one
+  long spoken paragraph, arrow through your level, reputation, deliveries,
+  lifetime miles, and earnings one line at a time; Enter repeats a line. The
+  screen also gains your rest status: whether you are fully rested or how
+  tired you are, plus your hours of service at a glance.
+- **Sleeping at the terminal no longer swallows 10 hours by accident.** If
+  your hours of service are fresh and you are not tired, choosing Sleep 10
+  hours now warns that sleeping would only move the clock forward, and asks
+  you to press Enter again to sleep anyway. So an extra press on the sleep
+  option can never quietly cost you a rested clock.
 - **New installs now start at relaxed trip pacing.** Fresh installs default to
   the relaxed pace, which gives you the most real time to hear and react to
   spoken warnings like exits and hazards. Existing players keep whatever

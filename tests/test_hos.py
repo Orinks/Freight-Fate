@@ -1150,6 +1150,45 @@ def test_city_sleep_resets_hours_and_advances_the_clock():
         app.shutdown()
 
 
+@pytest.mark.smoke
+def test_city_sleep_when_already_rested_needs_a_second_enter():
+    """Pressing Enter on Sleep right after a reset used to quietly burn
+    another 10 hours; a rested driver now gets a warning first."""
+    from freight_fate.app import App
+    from freight_fate.models.profile import Profile
+    from freight_fate.states.city import CityMenuState
+
+    app = App()
+    try:
+        app.ctx.profile = Profile(name="Rested", current_city="Austin")
+        app.push_state(CityMenuState(app.ctx))
+        p = app.ctx.profile
+        before = p.game_hours
+
+        select(app.state, "Sleep 10 hours")  # first Enter: warning only
+        assert p.game_hours == before
+        app.state.handle_event(key_event(pygame.K_RETURN))  # confirm
+        assert p.game_hours == pytest.approx(before + 10.0)
+
+        # Rested again after sleeping: the next Enter warns again, and moving
+        # off the item cancels the pending confirmation.
+        select(app.state, "Sleep 10 hours")
+        assert p.game_hours == pytest.approx(before + 10.0)
+        app.state.handle_event(key_event(pygame.K_DOWN))
+        app.state.handle_event(key_event(pygame.K_UP))
+        app.state.handle_event(key_event(pygame.K_RETURN))
+        assert p.game_hours == pytest.approx(before + 10.0)  # warned, not slept
+
+        # A tired driver sleeps on the first press, as before.
+        p.hos.drive(300)
+        p.fatigue = 40.0
+        app.state.handle_event(key_event(pygame.K_RETURN))
+        assert p.game_hours == pytest.approx(before + 20.0)
+        assert p.fatigue == 0.0
+    finally:
+        app.shutdown()
+
+
 def test_dispatch_warns_before_accepting_job_that_exceeds_current_hos(monkeypatch):
     from freight_fate.app import App
     from freight_fate.models.jobs import JobBoard

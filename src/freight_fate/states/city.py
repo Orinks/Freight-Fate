@@ -24,6 +24,7 @@ from ..music import select_menu_music_sequence
 from ..sim.hos import LIMITS, clock_text, time_of_day
 from ..sim.vehicle import TruckState
 from .base import MenuItem, MenuState
+from .career_stats import CareerStatsState, fully_rested
 
 PICKUP_CHECK_IN_MIN = 15.0
 PICKUP_LOADING_MIN = 60.0
@@ -110,6 +111,7 @@ class CityMenuState(MenuState):
         super().__init__(ctx)
         self._board = JobBoard(ctx.world)
         self._jobs_cache: list[Job] | None = None
+        self._confirm_sleep_rested = False
 
     @property
     def title(self) -> str:  # type: ignore[override]
@@ -119,10 +121,21 @@ class CityMenuState(MenuState):
         return self.ctx.world.home_terminal(p.current_city).name
 
     def enter(self) -> None:
+        self._confirm_sleep_rested = False
         sequence = select_menu_music_sequence(self.ctx.profile)
         self.ctx.play_music_sequence("menu", sequence)
         self.ctx.audio.set_ambient("poi/facility_gate")
         super().enter()
+
+    # Moving off the Sleep item withdraws its pending double-press confirmation,
+    # so a stale "press Enter again" can never sleep you silently later.
+    def move(self, delta: int) -> None:
+        self._confirm_sleep_rested = False
+        super().move(delta)
+
+    def jump(self, index: int) -> None:
+        self._confirm_sleep_rested = False
+        super().jump(index)
 
     def exit(self) -> None:
         self.ctx.audio.set_ambient(None)
@@ -170,7 +183,8 @@ class CityMenuState(MenuState):
             MenuItem(
                 "Career stats",
                 self._stats,
-                help="Hear your level, reputation, and lifetime numbers.",
+                help="Review your level, reputation, lifetime numbers, and "
+                "rest status, one line at a time.",
             ),
             MenuItem("Truck status", self._truck_status, help="Hear fuel and damage at a glance."),
             MenuItem(
@@ -296,7 +310,7 @@ class CityMenuState(MenuState):
         self.refresh()
 
     def _stats(self) -> None:
-        self.ctx.say(self.ctx.profile.career.summary())
+        self.ctx.push_state(CareerStatsState(self.ctx))
 
     def _truck_status(self) -> None:
         p = self.ctx.profile
@@ -355,6 +369,16 @@ class CityMenuState(MenuState):
 
     def _sleep(self) -> None:
         p = self.ctx.profile
+        if fully_rested(p) and not self._confirm_sleep_rested:
+            self._confirm_sleep_rested = True
+            self.ctx.audio.play("ui/warning")
+            self.ctx.say(
+                "You are already rested: fresh hours of service and no fatigue. "
+                "Sleeping now would only move the clock forward 10 hours. "
+                "Press Enter again to sleep anyway."
+            )
+            return
+        self._confirm_sleep_rested = False
         before_fatigue = p.fatigue
         p.game_hours += 10.0
         p.hos.sleep()
