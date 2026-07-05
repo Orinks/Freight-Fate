@@ -211,6 +211,22 @@ class SpeedLimitSample:
 
 
 @dataclass(frozen=True)
+class TrafficVolumeSample:
+    """Traffic volume in effect from ``at_mi`` until the next sample.
+
+    Baked from FHWA HPMS AADT data at build time (see
+    ``tools/build_traffic_aadt.py``). ``aadt`` is annual average daily
+    traffic across both directions; ``lanes`` is through lanes *per
+    direction* on the sampled stretch. The samples form a step function
+    along the leg, like ``SpeedLimitSample``."""
+
+    at_mi: float
+    aadt: float
+    lanes: int = 2
+    source: str = ""
+
+
+@dataclass(frozen=True)
 class StateCrossing:
     at_mi: float
     from_state: str
@@ -415,6 +431,10 @@ class Leg:
     toll_events: tuple[TollEvent, ...] = ()
     interchanges: tuple[Interchange, ...] = ()
     speed_limits: tuple[SpeedLimitSample, ...] = ()
+    traffic_volumes: tuple[TrafficVolumeSample, ...] = ()
+    # Driving lanes per direction, baked from HPMS through-lane counts
+    # (leg-level median); 0 means unbaked and the runtime default applies.
+    lanes: int = 0
 
     def other(self, city: str) -> str:
         return self.b if city == self.a else self.a

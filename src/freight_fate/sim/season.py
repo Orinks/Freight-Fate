@@ -78,6 +78,26 @@ def real_clock_game_hours(now: datetime.datetime | None = None) -> float:
     return days_offset * 24.0 + hour
 
 
+# Careers start on the calendar anchor March 21, 2001 -- a Wednesday -- so
+# the day of the week falls out of the career clock directly.
+_CAREER_START_WEEKDAY = datetime.date(2001, 3, 21).weekday()
+WEEKDAY_NAMES = ("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday")
+
+
+def day_of_week(game_hours: float) -> int:
+    """Day of the week (0=Monday .. 6=Sunday) for a point on the career clock."""
+    return (_CAREER_START_WEEKDAY + int(game_hours // 24.0)) % 7
+
+
+def weekday_name(game_hours: float) -> str:
+    return WEEKDAY_NAMES[day_of_week(game_hours)]
+
+
+def is_weekend(game_hours: float) -> bool:
+    """Saturday or Sunday: commuter rush hours do not form."""
+    return day_of_week(game_hours) >= 5
+
+
 def season(game_hours: float) -> str:
     """Northern-hemisphere season for the career clock."""
     doy = day_of_year(game_hours)

@@ -48,7 +48,10 @@ def _nearest_exit_label(leg, at_mi: float, tol_mi: float = 2.0) -> str:
 
 
 def _zone_key(zone: Zone) -> str:
-    return f"{zone.reason}:{zone.start_mi:.3f}:{zone.end_mi:.3f}:{zone.limit_mph:.0f}"
+    # Keyed by place and reason only: a congestion zone's limit_mph is the
+    # live traffic speed and changes with the clock, and a re-keyed zone
+    # would re-announce itself every time the jam deepened a notch.
+    return f"{zone.reason}:{zone.start_mi:.3f}:{zone.end_mi:.3f}"
 
 
 def _fallback_grade(terrain: str, mile: float, highway: str) -> float:

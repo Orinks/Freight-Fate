@@ -37,6 +37,7 @@ from .world_parsing import (
     _parse_state_mileage,
     _parse_stop,
     _parse_toll_event,
+    _parse_traffic_volumes,
 )
 from .world_parsing import (
     minimum_curated_pois as minimum_curated_pois,
@@ -134,6 +135,9 @@ class World(WorldServiceMixin):
             speed_limits = _parse_speed_limits(
                 corridor.get("speed_limits", ()), miles, leg["from"], leg["to"]
             )
+            traffic_volumes = _parse_traffic_volumes(
+                corridor.get("traffic_aadt", ()), miles, leg["from"], leg["to"]
+            )
             self.legs.append(
                 Leg(
                     leg["from"],
@@ -151,6 +155,8 @@ class World(WorldServiceMixin):
                     toll_events,
                     interchanges,
                     speed_limits,
+                    traffic_volumes,
+                    max(0, int(leg.get("lanes", 0))),
                 )
             )
         self._adjacency: dict[str, list[Leg]] = {name: [] for name in self.cities}

@@ -140,6 +140,96 @@ FACILITY_GATE_ZONE_MI = 0.5
 NIGHT_HAZARD_BONUS = 0.10  # extra hazard risk after dark
 NIGHT_TRAFFIC_KEEP = 0.4  # chance a traffic zone still forms at night
 RUSH_HOUR_WINDOWS = ((6.5, 9.0), (16.0, 18.5))
+# -- Grounded congestion -------------------------------------------------------------
+# Congestion comes from traffic volume against capacity, not a dice roll.
+# Volume is FHWA HPMS AADT baked per leg where available (Leg.traffic_volumes)
+# with a class/metro heuristic backstop; the hourly share of daily traffic
+# follows the standard commuter shape (AM and PM weekday peaks, a flat
+# late-morning weekend hump, near-empty small hours). Capacity is the
+# textbook ~2,000 vehicles per hour per lane. The volume-to-capacity ratio
+# then gates whether a traffic-prone stretch is actually jammed *right now*:
+# metro stretches jam at rush hour and flow free at midnight.
+LANE_CAPACITY_VPH = 2000.0  # per lane, per direction
+DIRECTIONAL_SPLIT = 0.55  # peak-direction share of two-way volume
+CONGESTION_MIN_RATIO = 0.72  # volume/capacity where slowdowns begin
+CONGESTION_HEAVY_RATIO = 0.9  # dense, clearly slowed traffic
+CONGESTION_JAM_RATIO = 1.05  # demand over capacity: stop and go
+CONGESTION_SAMPLE_MI = 1.0  # stride when scanning a route for jam-prone stretches
+CONGESTION_MIN_ZONE_MI = 1.0  # ignore blips shorter than this
+CONGESTION_JOIN_GAP_MI = 2.0  # merge prone stretches separated by less
+
+# Hourly share of daily traffic (indexed by clock hour). Sums to ~1.0.
+# Shape follows FHWA/state-DOT urban hourly distributions: weekday twin
+# peaks near 7-8 AM and 4-6 PM; weekends flatter with a midday hump.
+# fmt: off
+HOURLY_SHARE_WEEKDAY = (
+    0.008, 0.005, 0.004, 0.005, 0.010, 0.025,  # 0-5
+    0.050, 0.072, 0.068, 0.052, 0.048, 0.050,  # 6-11
+    0.053, 0.054, 0.058, 0.068, 0.078, 0.080,  # 12-17
+    0.062, 0.045, 0.035, 0.028, 0.022, 0.014,  # 18-23
+)
+HOURLY_SHARE_WEEKEND = (
+    0.014, 0.010, 0.007, 0.006, 0.007, 0.012,  # 0-5
+    0.024, 0.035, 0.048, 0.065, 0.073, 0.077,  # 6-11
+    0.077, 0.075, 0.073, 0.071, 0.067, 0.060,  # 12-17
+    0.052, 0.044, 0.037, 0.030, 0.023, 0.016,  # 18-23
+)
+# fmt: on
+
+# Heuristic AADT for legs with no baked HPMS profile: typical two-way
+# volumes by highway class, lifted near metros. Rural interstates run in
+# the tens of thousands; urban interstates several times that.
+HEURISTIC_AADT = {
+    "interstate": (26000.0, 92000.0),  # (rural, near-metro)
+    "us_highway": (11000.0, 34000.0),
+    "state_route": (7000.0, 20000.0),
+}
+
+
+def hourly_volume_fraction(hour: float, weekend: bool) -> float:
+    """Share of the day's traffic moving in this clock hour."""
+    table = HOURLY_SHARE_WEEKEND if weekend else HOURLY_SHARE_WEEKDAY
+    return table[int(hour) % 24]
+
+
+def congestion_ratio(aadt: float, hour: float, lanes: int, weekend: bool) -> float:
+    """Peak-direction volume-to-capacity ratio for an hour of the day."""
+    vph = aadt * hourly_volume_fraction(hour, weekend) * DIRECTIONAL_SPLIT
+    return vph / (max(1, lanes) * LANE_CAPACITY_VPH)
+
+
+def congestion_limit_mph(ratio: float, posted: float) -> float | None:
+    """Prevailing traffic speed for a volume-to-capacity ratio, or ``None``
+    when traffic still moves at the posted limit."""
+    if ratio < CONGESTION_MIN_RATIO:
+        return None
+    if ratio < CONGESTION_HEAVY_RATIO:
+        return max(45.0, min(posted, posted - 12.0))
+    if ratio < CONGESTION_JAM_RATIO:
+        return 38.0
+    return 26.0
+
+
+def leg_aadt_at(leg: Leg, offset_mi: float) -> tuple[float, int] | None:
+    """Baked (AADT, per-direction lanes) at a leg-relative offset, or ``None``
+    when the leg carries no HPMS profile. Step function like speed limits."""
+    samples = leg.traffic_volumes
+    if not samples:
+        return None
+    chosen = samples[0]
+    for sample in samples:
+        if sample.at_mi <= offset_mi:
+            chosen = sample
+        else:
+            break
+    return chosen.aadt, chosen.lanes
+
+
+def heuristic_aadt(highway: str, near_city: bool) -> float:
+    rural, metro = HEURISTIC_AADT.get(_highway_class(highway), HEURISTIC_AADT["state_route"])
+    return metro if near_city else rural
+
+
 # Lanes: chance a construction zone actually closes one side of the road
 # (most interstate work zones do), and the per-direction lane count. The
 # count is a Phase-1 default; an OSM ``lanes=`` enrichment pass can bake a
@@ -394,13 +484,21 @@ class Zone:
     ``closed_lane`` marks a lane coned off through the zone (an index into
     the leg's lanes, 0 = right). Construction sets it; the taper zone ahead
     of the work carries the same value so the merge callout can say which
-    way to move."""
+    way to move.
+
+    Congestion zones ("heavy traffic") carry ``aadt`` and per-direction
+    ``lanes`` instead of a fixed schedule: whether the zone is active and how
+    slow it runs are recomputed from the clock hour, so the same stretch jams
+    at rush hour and flows free at midnight. ``limit_mph`` on those zones is
+    the current effective traffic speed, refreshed by the trip."""
 
     start_mi: float
     end_mi: float
     limit_mph: float
     reason: str
     closed_lane: int | None = None
+    aadt: float | None = None
+    lanes: int = 2
 
 
 @dataclass

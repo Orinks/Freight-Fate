@@ -584,15 +584,38 @@ def test_night_zone_layout_is_deterministic(world):
 
 
 def test_night_produces_sparser_traffic(world):
-    def traffic_count(hour):
-        return sum(
-            1
-            for s in range(40)
-            for z in make_trip(world, start_hour=hour, seed=s).zones
-            if z.reason == "heavy traffic"
+    # Congestion zones are fixed in space (volume-prone stretches) but
+    # follow the clock: the same stretch that jams at the evening rush is
+    # open road in the small hours.
+    import dataclasses
+
+    from freight_fate.data.world_models import Route, TrafficVolumeSample
+    from freight_fate.sim import Trip, TruckState, WeatherSystem
+
+    cached = world.route_options("Atlanta", "Dallas")[0]
+    samples = (
+        TrafficVolumeSample(at_mi=0.0, aadt=150000.0, lanes=3),
+        TrafficVolumeSample(at_mi=12.0, aadt=20000.0, lanes=2),
+    )
+    leg = dataclasses.replace(cached.legs[0], traffic_volumes=samples)
+    route = Route(cities=list(cached.cities), legs=[leg] + list(cached.legs[1:]))
+
+    def trip_at(hour):
+        truck = TruckState()
+        truck.transmission.automatic = True
+        return Trip(
+            route, truck, WeatherSystem("atlantic_southeast", seed=1), seed=2, start_hour=hour
         )
 
-    assert traffic_count(23.0) < traffic_count(12.0)
+    rush = trip_at(17.0)
+    jams = [z for z in rush.zones if z.reason == "heavy traffic"]
+    assert jams and all(z.aadt is not None for z in jams)
+    assert any(rush._zone_is_active(z) for z in jams)
+
+    night = trip_at(3.0)
+    night_jams = [z for z in night.zones if z.reason == "heavy traffic"]
+    assert night_jams
+    assert not any(night._zone_is_active(z) for z in night_jams)
 
 
 def test_rush_hour_increases_corridor_traffic_density(world):

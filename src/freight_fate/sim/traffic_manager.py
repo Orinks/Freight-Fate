@@ -272,6 +272,39 @@ class TrafficManager:
     def _vehicle_class(self, vehicle) -> str:
         return getattr(vehicle, "vehicle_class", "vehicle")
 
+    def inject_congestion(self, zone, *, position_mi: float) -> None:
+        """Fill an activating congestion zone with slow vehicles ahead.
+
+        Both lanes get traffic pacing the zone's prevailing speed, so the jam
+        is heard and felt through the existing lead-vehicle machinery -- and a
+        dodge into the next lane over meets metal there too."""
+        key_base = f"congestion:{zone.start_mi:.1f}"
+        if any(vehicle.key.startswith(key_base) for vehicle in self.vehicles):
+            return
+        rng = random.Random(
+            int(hashlib.sha256(f"{self.seed}:{key_base}".encode()).hexdigest()[:12], 16)
+        )
+        pace = max(10.0, float(zone.limit_mph))
+        anchor = max(position_mi + 0.25, zone.start_mi + 0.2)
+        added: list[TrafficVehicle] = []
+        for i in range(rng.randint(3, 5)):
+            lane = i % 2
+            speed = max(6.0, pace + rng.uniform(-9.0, 4.0))
+            added.append(
+                TrafficVehicle(
+                    key=f"{key_base}:{i}",
+                    position_mi=anchor + i * rng.uniform(0.25, 0.6),
+                    speed_mph=speed,
+                    target_speed_mph=speed,
+                    relative_lane=self.player_lane - lane,
+                    intent="braking" if i == 0 else rng.choice(("following", "cruising")),
+                    vehicle_class=rng.choice(("car", "car", "semi", "box truck")),
+                    lane=lane,
+                )
+            )
+        self.vehicles.extend(added)
+        self.vehicles.sort(key=lambda vehicle: vehicle.position_mi)
+
     def vehicle_in_lane(
         self,
         position_mi: float,

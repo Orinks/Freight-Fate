@@ -408,6 +408,26 @@ def _parse_speed_limits(
     return tuple(sorted(samples, key=lambda s: s.at_mi))
 
 
+def _parse_traffic_volume(raw, leg_miles: float, from_city: str, to_city: str):
+    if not isinstance(raw, dict):
+        raise ValueError(f"{from_city} to {to_city} traffic volume must be an object")
+    at_mi = _parse_at_mi(
+        raw, leg_miles, from_city, to_city, "traffic volume", allow_endpoints=True
+    )
+    aadt = float(raw.get("aadt", 0.0))
+    if aadt <= 0:
+        raise ValueError(f"{from_city} to {to_city} traffic volume at {at_mi} has no AADT")
+    lanes = max(1, int(raw.get("lanes", 2)))
+    source = str(raw.get("source", "")).strip()
+    return TrafficVolumeSample(at_mi=at_mi, aadt=aadt, lanes=lanes, source=source)
+
+
+def _parse_traffic_volumes(raw_samples, leg_miles: float, from_city: str, to_city: str):
+    """Parse the baked HPMS AADT profile, ordered along the leg."""
+    samples = tuple(_parse_traffic_volume(s, leg_miles, from_city, to_city) for s in raw_samples)
+    return tuple(sorted(samples, key=lambda s: s.at_mi))
+
+
 def _parse_state_crossing(
     raw, leg_miles: float, from_city: str, to_city: str, default_from_state: str
 ) -> StateCrossing:

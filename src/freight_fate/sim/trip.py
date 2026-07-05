@@ -6,6 +6,7 @@ from __future__ import annotations
 import random
 
 from ..data.world import Leg, Route
+from .season import is_weekend
 from .traffic_manager import TrafficManager
 from .trip_models import *
 from .trip_road_events import TripRoadEventMixin
@@ -43,6 +44,7 @@ class Trip(TripRoadEventMixin, TripTrafficMixin):
         start_hour: float = 12.0,
         imperial: bool = True,
         hazard_scale: float = 1.0,
+        career_hours: float | None = None,
     ) -> None:
         self.route = route
         self.truck = truck
@@ -50,6 +52,10 @@ class Trip(TripRoadEventMixin, TripTrafficMixin):
         self.time_scale = time_scale
         self.hazard_scale = max(0.0, hazard_scale)
         self.start_hour = start_hour  # clock hour of day at departure
+        # Absolute career clock at departure: carries the day of the week so
+        # commuter rush hour only forms on weekdays. None (older callers and
+        # tests) reads as a weekday, the more demanding default.
+        self.career_hours = career_hours
         self._imperial = imperial
         self.position_mi = 0.0
         self.game_minutes = 0.0
@@ -332,7 +338,6 @@ class Trip(TripRoadEventMixin, TripTrafficMixin):
         return cues
 
     def _place_zones(self) -> list[Zone]:
-        night = is_night(self.start_hour)
         zones: list[Zone] = []
         total = self.route.miles
         n = max(0, int(total / 150))
@@ -356,11 +361,112 @@ class Trip(TripRoadEventMixin, TripTrafficMixin):
                     )
                 )
                 zones.append(Zone(at, at + length, 45, "construction", closed_lane=closed))
-            elif not night or self._rng.random() < NIGHT_TRAFFIC_KEEP:
-                zones.append(Zone(at, at + length, 50, "heavy traffic"))
+        # Congestion is no longer a dice roll: traffic-prone stretches come
+        # from HPMS volume against capacity and turn on with the clock.
+        zones.extend(self._place_congestion_zones())
         zones.extend(self._facility_speed_zones())
         zones.sort(key=lambda z: z.start_mi)
         return zones
+
+    def _route_aadt_at(self, mile: float) -> tuple[float, int]:
+        """(two-way AADT, per-direction lanes) at a route mile: the baked HPMS
+        profile where the leg has one, else the class/metro heuristic."""
+        leg_i, leg_start = self._leg_at_mile(mile)
+        leg = self.route.legs[leg_i]
+        forward = self.route.cities[leg_i] == leg.a
+        offset = mile - leg_start
+        leg_offset = offset if forward else leg.miles - offset
+        baked = leg_aadt_at(leg, leg_offset)
+        if baked is not None:
+            return baked
+        near = self._near_city(mile)
+        # Urban interstates run three or more lanes per direction, so the
+        # metro heuristic rarely jams on its own -- real HPMS profiles are
+        # what put a specific overloaded stretch over the line.
+        lanes = 3 if near and _highway_class(leg.highway) == "interstate" else leg_lane_count(leg)
+        return heuristic_aadt(leg.highway, near), lanes
+
+    def _place_congestion_zones(self) -> list[Zone]:
+        """Stretches where peak-hour demand approaches capacity.
+
+        The zones are fixed in space; whether each one is *active*, and how
+        slow it runs, is recomputed from the clock as the trip progresses
+        (see ``_zone_is_active``). A stretch that jams at 5 PM is open road
+        at midnight."""
+        total = self.route.miles
+        if self._is_facility_approach_route() or total < 10.0:
+            return []
+        peak_share = max(HOURLY_SHARE_WEEKDAY)
+        prone: list[Zone] = []
+        run_start: float | None = None
+        run_samples: list[tuple[float, int]] = []
+
+        def flush(end_mile: float) -> None:
+            nonlocal run_start, run_samples
+            if run_start is not None and end_mile - run_start >= CONGESTION_MIN_ZONE_MI:
+                aadts = sorted(sample[0] for sample in run_samples)
+                prone.append(
+                    Zone(
+                        run_start,
+                        end_mile,
+                        50.0,  # placeholder; refreshed from the clock when active
+                        "heavy traffic",
+                        aadt=aadts[len(aadts) // 2],
+                        lanes=min(sample[1] for sample in run_samples),
+                    )
+                )
+            run_start, run_samples = None, []
+
+        mile = 0.0
+        while mile <= total:
+            aadt, lanes = self._route_aadt_at(mile)
+            peak_ratio = aadt * peak_share * DIRECTIONAL_SPLIT / (max(1, lanes) * LANE_CAPACITY_VPH)
+            if peak_ratio >= CONGESTION_MIN_RATIO:
+                if run_start is None:
+                    run_start = mile
+                run_samples.append((aadt, lanes))
+            else:
+                flush(mile)
+            mile += CONGESTION_SAMPLE_MI
+        flush(min(mile, total))
+
+        merged: list[Zone] = []
+        for zone in prone:
+            if merged and zone.start_mi - merged[-1].end_mi <= CONGESTION_JOIN_GAP_MI:
+                prev = merged[-1]
+                merged[-1] = Zone(
+                    prev.start_mi,
+                    zone.end_mi,
+                    50.0,
+                    "heavy traffic",
+                    aadt=max(prev.aadt or 0.0, zone.aadt or 0.0),
+                    lanes=min(prev.lanes, zone.lanes),
+                )
+            else:
+                merged.append(zone)
+        return merged
+
+    def _current_career_hours(self) -> float | None:
+        if self.career_hours is None:
+            return None
+        return self.career_hours + self.game_minutes / 60.0
+
+    def _is_weekend_now(self) -> bool:
+        hours = self._current_career_hours()
+        return False if hours is None else is_weekend(hours)
+
+    def _zone_is_active(self, zone: Zone) -> bool:
+        """Whether a zone applies right now. Fixed zones always do; congestion
+        zones follow the clock, and an active one gets its effective traffic
+        speed refreshed here so announcements and limits stay current."""
+        if zone.aadt is None:
+            return True
+        ratio = congestion_ratio(zone.aadt, self.current_hour, zone.lanes, self._is_weekend_now())
+        limit = congestion_limit_mph(ratio, self._corridor_limit_at(zone.start_mi))
+        if limit is None:
+            return False
+        zone.limit_mph = limit
+        return True
 
     def _facility_speed_zones(self) -> list[Zone]:
         total = self.route.miles
@@ -531,7 +637,11 @@ class Trip(TripRoadEventMixin, TripTrafficMixin):
         return base
 
     def next_zone_within(self, within_mi: float) -> Zone | None:
-        ahead = [z for z in self.zones if 0 < z.start_mi - self.position_mi <= within_mi]
+        ahead = [
+            z
+            for z in self.zones
+            if 0 < z.start_mi - self.position_mi <= within_mi and self._zone_is_active(z)
+        ]
         return min(ahead, key=lambda z: z.start_mi) if ahead else None
 
     @property
@@ -558,7 +668,9 @@ class Trip(TripRoadEventMixin, TripTrafficMixin):
         return best
 
     def _active_zone_at(self, mile: float) -> Zone | None:
-        active = [z for z in self.zones if z.start_mi <= mile <= z.end_mi]
+        active = [
+            z for z in self.zones if z.start_mi <= mile <= z.end_mi and self._zone_is_active(z)
+        ]
         if not active:
             return None
         return min(active, key=lambda z: z.limit_mph)
@@ -812,10 +924,23 @@ class Trip(TripRoadEventMixin, TripTrafficMixin):
                 f"{self._speed_value(CONSTRUCTION_TAPER_LIMIT_MPH)} at the taper, then "
                 f"{self._speed_value(zone.limit_mph)} through the work zone."
             )
+        if zone.reason == "heavy traffic" and zone.aadt is not None:
+            return (
+                f"In {self._distance_text(ahead)}, {self._congestion_phrase()} ahead. "
+                f"Traffic slowing to {self._speed_value(zone.limit_mph)}."
+            )
         return (
             f"In {self._distance_text(ahead)}, {zone.reason} ahead. "
             f"Speed limit {self._speed_value(zone.limit_mph)}."
         )
+
+    def _congestion_phrase(self) -> str:
+        """What to call a live jam: rush hour gets named when it is one."""
+        hour = self.current_hour % 24.0
+        in_rush = any(start <= hour < end for start, end in RUSH_HOUR_WINDOWS)
+        if in_rush and not self._is_weekend_now():
+            return "rush hour congestion"
+        return "heavy traffic"
 
     def _zone_entry_message(self, zone: Zone) -> str:
         if zone.reason == "construction merge":
@@ -842,6 +967,11 @@ class Trip(TripRoadEventMixin, TripTrafficMixin):
                 "Work zone active. Stay in the lane and watch the barrels. "
                 f"Speed limit {self._speed_value(zone.limit_mph)}."
             )
+        if zone.reason == "heavy traffic" and zone.aadt is not None:
+            return (
+                f"{self._congestion_phrase().capitalize()}. Traffic slowing to "
+                f"{self._speed_value(zone.limit_mph)}; hold your gap."
+            )
         return f"{zone.reason} ahead. Speed limit {self._speed_value(zone.limit_mph)}."
 
     def _check_zones(self) -> None:
@@ -851,6 +981,8 @@ class Trip(TripRoadEventMixin, TripTrafficMixin):
             ahead = zone.start_mi - self.position_mi
             if zone.reason == "construction merge":
                 continue
+            if not self._zone_is_active(zone):
+                continue  # a quiet congestion stretch may still wake up later
             if 0 < ahead <= lookahead and key not in self._announced_zone_warnings:
                 self._announced_zone_warnings.add(key)
                 self._emit(
@@ -873,6 +1005,10 @@ class Trip(TripRoadEventMixin, TripTrafficMixin):
                     zone=zone,
                     suppress_sound=quiet,
                 )
+                if zone.reason == "heavy traffic" and zone.aadt is not None:
+                    # Fill the jam with slow metal: the existing lead-vehicle,
+                    # ACC, and hazard machinery turn it into stop-and-go.
+                    self.traffic_manager.inject_congestion(zone, position_mi=self.position_mi)
             elif self._active_zone is not None:
                 self._construction_zone_grace_start.pop(_zone_key(self._active_zone), None)
                 resumed = self._corridor_limit_at(self.position_mi)

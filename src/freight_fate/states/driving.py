@@ -56,6 +56,7 @@ class DrivingState(DrivingControlsMixin, DrivingUpdateMixin, DrivingEventMixin, 
             start_hour=trip_start_hour,
             imperial=ctx.settings.imperial_units,
             hazard_scale=hos.hazard_scale(ctx.settings.hos_mode),
+            career_hours=profile.game_hours,
         )
         self.lane = LaneKeeping(seed=self.trip_seed)
         self._day_music_sequence = select_drive_music_sequence(
