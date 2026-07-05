@@ -2,8 +2,6 @@
 
 ## Unreleased
 
-## 1.8.0 - 2026-07-05
-
 ### Added
 
 - **The upper Midwest and Great Lakes fill in with twenty-nine new cities
@@ -29,6 +27,10 @@
   Illinois, Indiana, and southern Ohio. Each has its own weather, fuel
   prices, freight market flavor, and road hazards, so a winter run out of
   Duluth no longer sounds like a summer haul into Cincinnati.
+
+## 1.8.0 - 2026-07-05
+
+### Added
 
 - **Report a problem straight from the main menu.** A new Report a problem
   option, just above Quit, opens the Freight Fate bug report page on GitHub
