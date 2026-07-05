@@ -521,10 +521,11 @@ def strip_user_data(build_dir: Path) -> None:
     if build_dir.suffix == ".app":
         roots.append(build_dir / "Contents" / "MacOS")
     for root in roots:
-        saves = root / "saves"
-        if saves.exists():
-            shutil.rmtree(saves, ignore_errors=True)
-            print(f"Stripped bundled '{saves.name}/' from the build (never ship saves).")
+        for name in ("saves", "logs"):
+            leftover = root / name
+            if leftover.exists():
+                shutil.rmtree(leftover, ignore_errors=True)
+                print(f"Stripped bundled '{name}/' from the build (never ship user data).")
 
 
 def archive(build_dir: Path, label: str) -> Path:

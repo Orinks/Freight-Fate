@@ -13,6 +13,13 @@ from .vehicle import TruckState
 from .weather import WeatherKind, WeatherSystem
 
 
+def _spoken_distance(value: float, unit: str) -> str:
+    """A whole-number distance with the unit pluralized for speech, so a
+    screen reader never hears "in 1 miles"."""
+    rounded = round(value)
+    return f"{rounded:.0f} {unit if rounded == 1 else unit + 's'}"
+
+
 def _rest_stop_cue_text(prefix: str, parking_label: str) -> str:
     parts = [prefix]
     if parking_label:
@@ -102,8 +109,8 @@ class Trip:
 
     def _distance_text(self, miles: float) -> str:
         if self.imperial:
-            return f"{miles:.0f} miles"
-        return f"{miles * 1.609344:.0f} kilometers"
+            return _spoken_distance(miles, "mile")
+        return _spoken_distance(miles * 1.609344, "kilometer")
 
     def _gap_text(self, miles: float) -> str:
         if self.imperial:
@@ -262,7 +269,7 @@ class Trip:
                         f"{stop.label} ahead{at_part}",
                         _rest_stop_cue_text(
                             f"{stop.label.capitalize()}{at_part} ahead in "
-                            f"{'1 mile' if self.imperial else self._distance_text(1.0)}",
+                            f"{self._distance_text(1.0)}",
                             stop.parking_label,
                         ),
                     )
@@ -562,11 +569,14 @@ class Trip:
 
     def progress_summary(self, imperial: bool = True) -> str:
         if imperial:
-            dist = f"{self.remaining_miles:.0f} miles remaining of {self.total_miles:.0f}"
+            dist = (
+                f"{_spoken_distance(self.remaining_miles, 'mile')} "
+                f"remaining of {self.total_miles:.0f}"
+            )
         else:
             dist = (
-                f"{self.remaining_miles * 1.609:.0f} kilometers remaining "
-                f"of {self.total_miles * 1.609:.0f}"
+                f"{_spoken_distance(self.remaining_miles * 1.609, 'kilometer')} "
+                f"remaining of {self.total_miles * 1.609:.0f}"
             )
         leg = self.route.legs[self.current_leg_index]
         toward = self.route.cities[self.current_leg_index + 1]
@@ -589,7 +599,11 @@ class Trip:
         if cue is None:
             return f"Destination {self.route.cities[-1]} ahead."
         ahead = max(0.0, cue.at_mi - self.position_mi)
-        ahead_text = f"{ahead:.0f} miles" if imperial else f"{ahead * 1.609344:.0f} kilometers"
+        ahead_text = (
+            _spoken_distance(ahead, "mile")
+            if imperial
+            else _spoken_distance(ahead * 1.609344, "kilometer")
+        )
         if cue.kind == "rest_stop":
             return f"Next stop in {ahead_text}: {cue.text}."
         if cue.kind == "state_crossing":

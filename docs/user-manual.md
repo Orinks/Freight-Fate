@@ -135,10 +135,10 @@ Your terminal is the safe hub between jobs. Public terminal actions include:
 | Dispatch board | Browse freight offers from local facilities. |
 | Garage | Refuel, repair, service tires, wash the truck, buy upgrades, buy trucks, or switch owned trucks. |
 | Request pay advance | Draw cash against your next load when you are broke. |
-| Career stats | Review level, reputation, deliveries, and career totals. |
+| Career stats | Browse level, reputation, deliveries, career totals, rest status, and hours of service line by line. |
 | Truck status | Review truck model, fuel, tank size, damage, tire wear, and road grime. |
 | Time and weather | Review the clock, career day, and current city weather. |
-| Sleep 10 hours | Rest at the terminal and reset hours of service. |
+| Sleep 10 hours | Rest at the terminal and reset hours of service. Warns first if you are already rested, since sleeping then only advances the clock. |
 | Save game | Save the current career. |
 | Settings | Open settings categories. |
 | Quit to main menu | Save and return to the title menu. |

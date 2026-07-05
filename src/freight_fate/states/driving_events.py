@@ -207,9 +207,13 @@ class DrivingEventMixin:
         self.ctx.audio.play("ui/notify", volume=0.5)
         ahead = stop.at_mi - self.trip.position_mi
         if stop.type == "delivery_destination":
+            labeled = getattr(stop, "exit_phrase", "") or stop.exit_label
             head = (
-                f"Signaling for {self._destination_exit_phrase(stop)}, "
-                f"destination exit for {stop.name},"
+                # A labeled exit already names itself; don't repeat the
+                # facility that the fallback phrase would have baked in.
+                f"Signaling for {labeled}, destination exit for {stop.name},"
+                if labeled
+                else f"Signaling for the destination exit for {stop.name},"
             )
         elif stop.exit_label:
             head = f"Signaling for {stop.exit_label}, {stop.spoken_name},"
@@ -219,13 +223,27 @@ class DrivingEventMixin:
             f"{head} {ahead:.1f} miles ahead. Slow to {RAMP_MAX_MPH:.0f} or less for the ramp."
         )
 
+    def _exit_window_mi(self) -> float:
+        """Arming and announcement window for exits, scaled like zone warnings.
+
+        At speed under time compression a fixed window shrinks to nothing in
+        real terms -- at 74 mph on fast pacing, 5 miles is about 7 real
+        seconds, not enough to hear the callout, arm the exit, and brake to
+        ramp speed. Scale the window so it covers roughly
+        ``EXIT_WARNING_REAL_S`` of real time at the current pace.
+        """
+        speed = max(self.truck.speed_mph, 30.0)
+        miles = EXIT_WARNING_REAL_S * speed * self.trip.effective_time_scale / 3600.0
+        return max(EXIT_WINDOW_MI, min(miles, EXIT_WINDOW_MAX_MI))
+
     def _upcoming_exit_stop(self):
-        stop = self.trip.upcoming_stop(EXIT_WINDOW_MI)
+        window = self._exit_window_mi()
+        stop = self.trip.upcoming_stop(window)
         destination = self._destination_exit_stop()
         if destination is None:
             return stop
         ahead = destination.at_mi - self.trip.position_mi
-        if not (0 <= ahead <= EXIT_WINDOW_MI):
+        if not (0 <= ahead <= window):
             return stop
         if stop is None or destination.at_mi <= stop.at_mi:
             return destination
@@ -269,20 +287,23 @@ class DrivingEventMixin:
         return f"the exit for {stop.name}"
 
     def _destination_exit_announcement(self, stop, ahead: float) -> str:
-        phrase = self._destination_exit_phrase(stop)
-        if self._terse_speech():
-            return f"In {ahead:.0f} miles, {phrase}, destination exit."
-        return (
-            f"In {ahead:.0f} miles, {phrase}, destination exit. "
-            f"Press {self.ctx.control_hint('take_exit')} to take it."
+        labeled = getattr(stop, "exit_phrase", "") or stop.exit_label
+        distance = f"{ahead:.0f} miles" if round(ahead) != 1 else "1 mile"
+        core = (
+            f"In {distance}, {labeled}, destination exit."
+            if labeled
+            else f"In {distance}, the destination exit for {stop.name}."
         )
+        if self._terse_speech():
+            return core
+        return f"{core} Press {self.ctx.control_hint('take_exit')} to take it."
 
     def _check_destination_exit(self) -> None:
         stop = self._destination_exit_stop()
         if stop is None:
             return
         ahead = stop.at_mi - self.trip.position_mi
-        if not (0 < ahead <= EXIT_WINDOW_MI):
+        if not (0 < ahead <= self._exit_window_mi()):
             return
         key = self._destination_exit_key(stop)
         if key == self._destination_exit_announced_key:
@@ -376,9 +397,11 @@ class DrivingEventMixin:
             self._cancel_cruise()
             self.ctx.audio.play("ui/notify", volume=0.7)
             if stop.type == "delivery_destination":
+                labeled = getattr(stop, "exit_phrase", "") or stop.exit_label
                 take = (
-                    f"You take {self._destination_exit_phrase(stop)}, "
-                    f"destination exit for {stop.name}."
+                    f"You take {labeled}, destination exit for {stop.name}."
+                    if labeled
+                    else f"You take the destination exit for {stop.name}."
                 )
             else:
                 take = (
@@ -393,14 +416,16 @@ class DrivingEventMixin:
             )
             self.ctx.say_event(message, interrupt=True)
         else:
-            missed = stop.exit_label if stop.exit_label else "the exit"
-            place = (
-                self._destination_exit_phrase(stop)
-                if stop.type == "delivery_destination"
-                else stop.spoken_name
-            )
+            if stop.type == "delivery_destination":
+                # The exit phrase already carries its own label; naming both
+                # would speak the same exit twice in one sentence.
+                missed = self._destination_exit_phrase(stop)
+            elif stop.exit_label:
+                missed = f"{stop.exit_label} for {stop.spoken_name}"
+            else:
+                missed = f"the exit for {stop.spoken_name}"
             self.ctx.say_event(
-                f"You were going too fast for the ramp and missed {missed} for {place}.",
+                f"You were going too fast for the ramp and missed {missed}.",
                 interrupt=True,
             )
 

@@ -215,6 +215,23 @@ def test_release_docs_are_staged_with_build_payload(tmp_path, monkeypatch):
     )
 
 
+def test_strip_user_data_removes_saves_and_logs(tmp_path):
+    build_release = load_build_release_module()
+    build_dir = tmp_path / "FreightFate"
+    (build_dir / "saves" / "profiles").mkdir(parents=True)
+    (build_dir / "saves" / "profiles" / "Smoke.json").write_text("{}", encoding="utf-8")
+    (build_dir / "logs").mkdir()
+    (build_dir / "logs" / "game.log").write_text("smoke run\n", encoding="utf-8")
+    (build_dir / "freight_fate").mkdir()
+
+    build_release.strip_user_data(build_dir)
+
+    # The smoke check writes both; neither may ship (the CI log leaked once).
+    assert not (build_dir / "saves").exists()
+    assert not (build_dir / "logs").exists()
+    assert (build_dir / "freight_fate").exists()
+
+
 def test_packaged_payload_requires_release_docs(tmp_path):
     build_release = load_build_release_module()
     build_dir = tmp_path / "FreightFate"

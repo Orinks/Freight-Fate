@@ -1,6 +1,9 @@
 # Changelog
 
 ## Unreleased
+
+## 1.8.0 - 2026-07-05
+
 ### Added
 
 - **Report a problem straight from the main menu.** A new Report a problem
@@ -55,6 +58,27 @@
 
 ### Fixed
 
+- **Switching screen readers no longer leaves the game silent.** The game now
+  notices within a few seconds when your screen reader closes or changes, for
+  example going from NVDA to Narrator and back to NVDA, and reconnects its
+  speech to whichever voice is running, telling you which one it picked.
+  While Narrator is running, the game keeps its own Windows voice so that
+  moving through menus still cuts speech off crisply; Narrator itself only
+  carries the game's speech as a last resort when no other voice on the
+  machine works. This also
+  works if you start the game before your screen reader: speech simply
+  begins once the screen reader is up. Your speech rate, voice, and separate
+  event voice settings carry over to the reconnected voice automatically.
+
+- **Release archives no longer ship the build machine's log.** The packaging
+  smoke check writes a log inside the build folder; it is now stripped
+  alongside saves before archiving, so a fresh download starts with an empty
+  logs folder instead of a confusing leftover run.
+- **Save migration now explains itself.** When the game folds an old save
+  folder into the active one on first run, it writes what moved from where
+  to the game log and leaves a small saves-moved.txt breadcrumb at the old
+  location, so an unexpectedly familiar career is traceable instead of
+  haunted.
 - **Spoken help now teaches the W and Q gear keys everywhere.** The engine
   start walkthrough, the transmission setting, and the manual-transmission
   page of How to play still told manual drivers to shift with the number
@@ -205,7 +229,40 @@
   flavor, and regional hazards on runs through both cities now match the
   geography. Thanks to liamerven.
 
+### Fixed
+- **Exit warnings now arrive early enough to act on.** At highway speed on
+  standard or fast pacing, the destination exit callout used to fire so close
+  that by the time it finished speaking the ramp was gone. The warning
+  distance now grows with your speed and pacing, so you always get roughly
+  the same amount of real listening and braking time, and the exit can be
+  armed as soon as you hear the callout.
+- **Exit announcements no longer say the same name twice.** Messages like
+  "missed exit 5B for exit 5B" and "Signaling for the exit for the warehouse,
+  destination exit for the warehouse" now speak each exit and facility name
+  exactly once. Distances also read naturally: "in 1 mile" instead of
+  "in 1 miles".
+
 ### Changed
+- **Career stats at the terminal is now a browsable list.** Instead of one
+  long spoken paragraph, arrow through your level, reputation, deliveries,
+  lifetime miles, and earnings one line at a time; Enter repeats a line. The
+  screen also gains your rest status: whether you are fully rested or how
+  tired you are, plus your hours of service at a glance.
+- **Sleeping at the terminal no longer swallows 10 hours by accident.** If
+  your hours of service are fresh and you are not tired, choosing Sleep 10
+  hours now warns that sleeping would only move the clock forward, and asks
+  you to press Enter again to sleep anyway. So an extra press on the sleep
+  option can never quietly cost you a rested clock.
+- **New installs now start at relaxed trip pacing.** Fresh installs default to
+  the relaxed pace, which gives you the most real time to hear and react to
+  spoken warnings like exits and hazards. Existing players keep whatever
+  pacing they already chose, and standard and fast are still one setting away
+  under Settings, Gameplay, Trip pacing.
+- **All music now plays at the same volume.** Six tracks, including the main
+  menu themes, Open Road, Night Haul, and Small Hours, were much louder than
+  the rest of the soundtrack. They have been brought down to match, so the
+  music volume slider now behaves the same no matter which track is playing,
+  and the menu no longer greets you louder than the drive that follows.
 - **Real-world weather now refreshes three times as often.** With the real
   weather source turned on, the game checks the live conditions for your
   destination every five minutes instead of every fifteen, so fog rolling in,
