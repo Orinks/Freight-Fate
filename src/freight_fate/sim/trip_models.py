@@ -60,6 +60,14 @@ STATE_TRUCK_MAX_MPH: dict[str, float] = {
 }
 
 
+def leg_lane_count(leg: Leg | None) -> int:
+    """Driving lanes per direction on a leg, defaulting to a two-lane rural
+    interstate. Honors a baked ``lanes`` field once OSM enrichment adds one."""
+    if leg is None:
+        return DEFAULT_LEG_LANES
+    return max(1, int(getattr(leg, "lanes", 0) or DEFAULT_LEG_LANES))
+
+
 def _highway_class(highway: str) -> str:
     h = (highway or "").strip().upper()
     if h.startswith(("I-", "I ", "INTERSTATE")):
@@ -132,6 +140,12 @@ FACILITY_GATE_ZONE_MI = 0.5
 NIGHT_HAZARD_BONUS = 0.10  # extra hazard risk after dark
 NIGHT_TRAFFIC_KEEP = 0.4  # chance a traffic zone still forms at night
 RUSH_HOUR_WINDOWS = ((6.5, 9.0), (16.0, 18.5))
+# Lanes: chance a construction zone actually closes one side of the road
+# (most interstate work zones do), and the per-direction lane count. The
+# count is a Phase-1 default; an OSM ``lanes=`` enrichment pass can bake a
+# real per-leg count onto ``Leg`` later and ``leg_lane_count`` will use it.
+CONSTRUCTION_CLOSURE_CHANCE = 0.65
+DEFAULT_LEG_LANES = 2
 TRAFFIC_LOOKAHEAD_MI = 2.5
 TRAFFIC_WARNING_GAP_S = 2.2
 TRAFFIC_PRESSURE_LOOKAHEAD_MI = 2.5
@@ -215,6 +229,10 @@ class HazardDef:
     wildlife is actually on the move. Selection weights by ``weight`` *after*
     the eligibility filter, so context shapes both which hazards are possible
     and how likely each one is.
+
+    ``dodgeable`` marks hazards a quick lane change clears: something fixed in
+    one lane (debris, a stopped or slow vehicle). Anything moving across the
+    road, sweeping every lane, or degrading the whole surface is brake-only.
     """
 
     text: str
@@ -223,15 +241,17 @@ class HazardDef:
     weather: tuple[WeatherKind, ...] | None = None
     terrain: tuple[str, ...] | None = None
     animal: bool = False
+    dodgeable: bool = False
 
 
 HAZARDS: tuple[HazardDef, ...] = (
     # Nationwide staples: plausible on any interstate, in any conditions.
-    HazardDef("debris on the road", 1.2),
-    HazardDef("retread debris from a blown tire", 1.0),
-    HazardDef("a vehicle stopped on the shoulder", 1.0),
-    HazardDef("a slow vehicle ahead", 0.9),
-    HazardDef("a sudden lane closure ahead", 0.8),
+    HazardDef("debris on the road", 1.2, dodgeable=True),
+    HazardDef("retread debris from a blown tire", 1.0, dodgeable=True),
+    # The move-over law in action: shift a lane away from the shoulder.
+    HazardDef("a vehicle stopped on the shoulder", 1.0, dodgeable=True),
+    HazardDef("a slow vehicle ahead", 0.9, dodgeable=True),
+    HazardDef("a sudden lane closure ahead", 0.8, dodgeable=True),
     HazardDef("stopped traffic around a fender bender", 0.9),
     # Wildlife: dawn/dusk/night, regional species.
     HazardDef(
@@ -259,7 +279,7 @@ HAZARDS: tuple[HazardDef, ...] = (
     ),
     HazardDef("an animal on the road", 0.7, animal=True),  # generic fallback
     # Wet weather only.
-    HazardDef("standing water flooding the lane", 1.1, weather=_WET),
+    HazardDef("standing water flooding the lane", 1.1, weather=_WET, dodgeable=True),
     HazardDef("the trailer hydroplaning on standing water", 1.0, weather=_HEAVY_WET),
     HazardDef(
         "hail hammering the windshield",
@@ -296,6 +316,7 @@ HAZARDS: tuple[HazardDef, ...] = (
         0.5,
         weather=(WeatherKind.WIND,),
         regions=("desert_southwest", "great_basin", "southern_plains"),
+        dodgeable=True,
     ),
     # Mountain terrain only.
     HazardDef(
@@ -303,9 +324,19 @@ HAZARDS: tuple[HazardDef, ...] = (
         1.0,
         terrain=("mountain",),
         regions=("rockies", "appalachia", "great_basin", "pacific_northwest", "california"),
+        dodgeable=True,
     ),
     HazardDef("a runaway truck on the grade ahead", 0.8, terrain=("mountain",)),
 )
+
+
+# Text-keyed lookup so hazard consumers can stay on the (text, weight) shape
+# of ``eligible_hazards`` and still learn whether a lane change clears it.
+DODGEABLE_HAZARD_TEXTS = frozenset(h.text for h in HAZARDS if h.dodgeable)
+
+
+def hazard_is_dodgeable(text: str) -> bool:
+    return text in DODGEABLE_HAZARD_TEXTS
 
 
 def eligible_hazards(
@@ -358,12 +389,18 @@ class TripEvent:
 
 @dataclass
 class Zone:
-    """A stretch of road with a reduced speed limit."""
+    """A stretch of road with a reduced speed limit.
+
+    ``closed_lane`` marks a lane coned off through the zone (an index into
+    the leg's lanes, 0 = right). Construction sets it; the taper zone ahead
+    of the work carries the same value so the merge callout can say which
+    way to move."""
 
     start_mi: float
     end_mi: float
     limit_mph: float
     reason: str
+    closed_lane: int | None = None
 
 
 @dataclass
@@ -413,7 +450,10 @@ class RoadStop:
 
 @dataclass
 class NPCVehicle:
-    """A simulated nearby road user that can affect traffic flow."""
+    """A simulated nearby road user that can affect traffic flow.
+
+    ``lane`` is the absolute lane index (0 = right), mirroring
+    ``TrafficVehicle``; ``relative_lane`` keeps the spoken-text surface."""
 
     key: str
     position_mi: float
@@ -422,6 +462,7 @@ class NPCVehicle:
     relative_lane: int
     behavior: str
     length_mi: float = 0.25
+    lane: int = 0
 
     @property
     def at_mi(self) -> float:

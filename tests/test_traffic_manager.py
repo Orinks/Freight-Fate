@@ -93,7 +93,7 @@ def test_traffic_vehicle_maps_new_intents_to_legacy_behavior_and_reason():
 def test_lead_vehicle_selects_nearest_vehicle_in_player_lane():
     manager = _manager()
     manager.vehicles = [
-        TrafficVehicle("left", 5.1, 55.0, 55.0, -1, "passing", "car"),
+        TrafficVehicle("left", 5.1, 55.0, 55.0, -1, "passing", "car", lane=1),
         TrafficVehicle("far", 6.0, 45.0, 45.0, 0, "following", "semi"),
         TrafficVehicle("near", 5.3, 42.0, 42.0, 0, "braking", "car"),
     ]
@@ -103,6 +103,20 @@ def test_lead_vehicle_selects_nearest_vehicle_in_player_lane():
     assert context is not None
     assert context.lead.key == "near"
     assert context.closing_mph == 18.0
+
+
+def test_lead_vehicle_follows_the_player_into_the_left_lane():
+    manager = _manager()
+    manager.vehicles = [
+        TrafficVehicle("left", 5.1, 55.0, 55.0, -1, "passing", "car", lane=1),
+        TrafficVehicle("right", 5.3, 42.0, 42.0, 0, "braking", "car"),
+    ]
+
+    manager.player_lane = 1
+    context = manager.lead_vehicle(position_mi=5.0, truck_speed_mph=60.0)
+
+    assert context is not None
+    assert context.lead.key == "left"
 
 
 def test_lead_vehicle_keeps_overlapping_vehicle_in_player_lane():

@@ -448,5 +448,5 @@ def test_metric_zone_warning_uses_metric_speed_limit(world):
 
     msgs = [ev.message for ev in trip.update(0.0) if ev.kind == TripEventKind.GPS_CUE]
     blob = " ".join(msgs)
-    assert "speed limit 89, then 72" in blob  # 55/45 mph rendered as km/h
-    assert "speed limit 55, then 45" not in blob
+    assert "Speed limit 89 at the taper, then 72" in blob  # 55/45 mph rendered as km/h
+    assert "Speed limit 55 at the taper, then 45" not in blob

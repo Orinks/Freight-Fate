@@ -516,6 +516,15 @@ def test_facility_gate_warns_before_final_low_speed_zone(world):
     assert "In 2 miles, facility gate ahead. Speed limit 15." in warnings
 
 
+def _closure_part(zone) -> str:
+    """The lane-closure sentence the construction warning carries, if any."""
+    if zone.closed_lane is None:
+        return "All lanes stay open through the work; hold your lane. "
+    shut = "right" if zone.closed_lane == 0 else "left"
+    keep = "left" if zone.closed_lane == 0 else "right"
+    return f"The {shut} lane is closed; merge {keep} at the taper. "
+
+
 def test_construction_zone_warns_before_entry(world):
     trip, truck = make_trip(world, "Chicago", "Indianapolis", seed=2)
     zone = next(z for z in trip.zones if z.reason == "construction")
@@ -531,8 +540,8 @@ def test_construction_zone_warns_before_entry(world):
     warnings = _gps_messages(events)
     assert warnings == [
         f"Brake now! In {trip._distance_text(lookahead)}, construction ahead. "
-        f"Merge left for the flagger taper; speed limit "
-        f"{CONSTRUCTION_TAPER_LIMIT_MPH:.0f}, then {zone.limit_mph:.0f} "
+        f"{_closure_part(zone)}Speed limit "
+        f"{CONSTRUCTION_TAPER_LIMIT_MPH:.0f} at the taper, then {zone.limit_mph:.0f} "
         "through the work zone."
     ]
 
@@ -593,8 +602,8 @@ def test_construction_zone_speeding_fine_waits_for_grace_distance(world):
     advance = trip.update(0.0)
     assert _gps_messages(advance) == [
         "Brake now! In 2 miles, construction ahead. "
-        f"Merge left for the flagger taper; speed limit "
-        f"{CONSTRUCTION_TAPER_LIMIT_MPH:.0f}, then {zone.limit_mph:.0f} "
+        f"{_closure_part(zone)}Speed limit "
+        f"{CONSTRUCTION_TAPER_LIMIT_MPH:.0f} at the taper, then {zone.limit_mph:.0f} "
         "through the work zone."
     ]
 

@@ -176,12 +176,15 @@ class TripRoadEventMixin:
             and self.position_mi >= self._traffic_warning_mi
         ):
             self._traffic_warning_mi = self.position_mi + 8.0
+            # A lead vehicle blocks one lane: braking always works, and a
+            # clear neighboring lane lets the player pass around it instead.
             self._emit(
                 TripEventKind.HAZARD,
-                f"Brake now! {context.lead.reason.capitalize()} "
+                f"Brake or change lanes! {context.lead.reason.capitalize()} "
                 f"{self._gap_text(context.gap_mi)} ahead.",
                 deadline_s=2.5,
                 traffic=context,
+                dodgeable=True,
             )
             return
         self._hazard_check_mi -= moved_mi
@@ -199,10 +202,13 @@ class TripRoadEventMixin:
                 return
             texts, weights = zip(*choices, strict=True)
             hazard = self._rng.choices(texts, weights)[0]
+            dodgeable = hazard_is_dodgeable(hazard)
+            call = "Brake or change lanes!" if dodgeable else "Brake now!"
             self._emit(
                 TripEventKind.HAZARD,
-                f"Brake now! {hazard[0].upper()}{hazard[1:]}.",
+                f"{call} {hazard[0].upper()}{hazard[1:]}.",
                 deadline_s=(self._rng.uniform(3.0, 4.5) * self._visibility_reaction_factor()),
+                dodgeable=dodgeable,
             )
 
     def _visibility_reaction_factor(self) -> float:

@@ -66,6 +66,11 @@ class DrivingEventMixin:
             self._hazard_deadline = self._brake_budget_s() + slack * hos.reaction_window_mult(
                 self.ctx.profile.fatigue
             )
+            # A dodgeable hazard sits in the lane you are in *now*; ending up
+            # in any other lane before the deadline clears it, if that lane
+            # is actually open. See _finish_lane_change.
+            self._hazard_dodgeable = bool(event.data.get("dodgeable", False))
+            self._hazard_lane = self.lane.lane
             message = terse_hazard_message(event.message) if self._terse_speech() else event.message
             self.ctx.say_event(message, interrupt=True)
         elif kind == TripEventKind.INSPECTION:
@@ -328,17 +333,18 @@ class DrivingEventMixin:
             head = f"Signal on for {stop.exit_label}, {stop.spoken_name},"
         else:
             head = f"Signal on for the {stop.spoken_name} exit,"
+        lane_hint = "" if self.lane.lane == 0 else " Get into the right lane."
         if self.ctx.settings.steering_assist == "off":
             self._exit_lane_alignment = EXIT_LANE_READY
             self._exit_lane_ready_said = True
             self.ctx.audio.play("ui/notify", volume=0.6)
             self.ctx.say(
-                f"{head} {ahead:.1f} miles ahead. Exit lane set. "
+                f"{head} {ahead:.1f} miles ahead. Exit lane set.{lane_hint} "
                 f"Slow to {RAMP_MAX_MPH:.0f} or less for the ramp."
             )
             return
         self.ctx.say(
-            f"{head} {ahead:.1f} miles ahead. "
+            f"{head} {ahead:.1f} miles ahead.{lane_hint} "
             "Move right for the exit lane, then slow to "
             f"{RAMP_MAX_MPH:.0f} or less for the ramp."
         )
@@ -350,6 +356,11 @@ class DrivingEventMixin:
         self._exit_commit_said = False
 
     def _exit_lane_ready(self) -> bool:
+        # Ramps peel off the right lane: no amount of in-lane alignment
+        # helps from the left lane, and a change in progress toward the
+        # right still counts as making the gore.
+        if self.lane.lane != 0 and self._lane_change_target != 0:
+            return False
         return (
             self._exit_lane_alignment >= EXIT_LANE_READY
             or self.lane.offset >= EXIT_LANE_OFFSET_READY
@@ -668,6 +679,11 @@ class DrivingEventMixin:
             self._ramp_stop = stop
             self._ramp_end_said = False
             self._destination_exit_taken = stop.type == "delivery_destination"
+            # The ramp is a single lane peeling off the right side.
+            self.lane.lane = 0
+            self.lane.offset = 0.0
+            self._lane_change_target = None
+            self._merge_deadline = None
             self._cancel_cruise()
             self.ctx.audio.play("ui/notify", volume=0.7)
             if stop.type == "delivery_destination":
@@ -1206,7 +1222,8 @@ class DrivingEventMixin:
         return [
             title,
             "",
-            f"Speed: {t.speed_mph:.0f} mph (limit {limit:.0f}{', ' + reason if reason else ''})",
+            f"Speed: {t.speed_mph:.0f} mph (limit {limit:.0f}{', ' + reason if reason else ''})"
+            f"   Lane: {self.lane.lane_name}",
             f"Gear: {gear}   RPM: {t.rpm:.0f}   {'ENGINE ON' if t.engine_on else 'engine off'}"
             + (f"   CRUISE {self._cruise_mph:.0f}" if self._cruise_mph is not None else ""),
             f"Air: {t.air_pressure_psi:.0f} psi   "

@@ -49,9 +49,10 @@ from ..radio import (
 )
 from ..sim import hos
 from ..sim.hos import HosClock, clock_text, is_night, time_of_day
-from ..sim.lane import LaneKeeping
+from ..sim.lane import LaneKeeping, lane_label
 from ..sim.transmission import REVERSE
 from ..sim.trip import RoadStop, Trip, TripEventKind
+from ..sim.trip_models import leg_lane_count
 from ..sim.vehicle import KG_PER_TON, G, TruckState
 from ..sim.weather import WeatherKind, WeatherSystem
 from .base import MenuItem, MenuState, State
@@ -89,6 +90,22 @@ DESTINATION_EXIT_BEFORE_END_MI = 1.0
 UNLOADING_MIN = 45.0  # receiver dock work before settlement
 UNLOADING_WAIT_S = 1.5
 
+# Discrete lanes on top of the LaneKeeping drift model. With steering assist
+# on, holding the wheel across the lane line is the lane change; with assist
+# off, a Left/Right arrow tap runs a timed change with signal clicks.
+LANE_MIN_MPH = 10.0  # below this there is nothing to steer
+LANE_TAP_CHANGE_S = 2.5  # assist-off timed drift across the line
+LANE_SIGNAL_CLICK_S = 0.45  # turn-signal cadence during a tap change
+MERGE_WINDOW_S = 8.0  # time to vacate a coned-off lane after the warning
+MERGE_BARRELS_DAMAGE = 0.25  # collision severity for riding into the barrels
+SIDESWIPE_DAMAGE = 0.35  # changing lanes into occupied space costs more
+DODGE_CLEARANCE_AHEAD_MI = 0.35  # target lane must be clear this far ahead...
+DODGE_CLEARANCE_BEHIND_MI = 0.15  # ...and this far behind your drive tires
+KEEP_RIGHT_NAG_S = 45.0  # left-lane camping before the CB calls you out
+KEEP_RIGHT_REPEAT_S = 75.0  # spacing for repeat nags while still camping
+KEEP_RIGHT_MIN_MPH = 45.0  # lane discipline only matters at highway speed
+PASSING_LOOKAHEAD_MI = 0.6  # slower right-lane traffic inside this justifies the left lane
+
 CRUISE_MIN_MPH = 20.0  # cruise control needs road speed to hold
 CRUISE_STEP_MPH = 5.0  # set-point change per Accel/Coast (+/-) tap
 CRUISE_MAX_MPH = 85.0  # highest cruise set point (top US posted limits)
@@ -107,7 +124,12 @@ DOCKING_MAX_MPH = 0.5  # dock/settle/rest actions need a complete stop
 
 def terse_hazard_message(message: str) -> str:
     text = message.strip()
-    for prefix in ("Brake now! ", "Brake now!"):
+    for prefix in (
+        "Brake now! ",
+        "Brake now!",
+        "Brake or change lanes! ",
+        "Brake or change lanes!",
+    ):
         if text.startswith(prefix):
             text = text[len(prefix) :].strip()
             break

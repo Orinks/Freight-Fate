@@ -157,6 +157,16 @@ class DrivingState(DrivingControlsMixin, DrivingUpdateMixin, DrivingEventMixin, 
         self._brake_lockout_cue_timer = 0.0
         self._brake_air_hissed = False  # rising-edge guard for the brake-apply hiss
         self._lane_rumble_timer = 0.0
+        # Discrete lanes: tap-change progress (assist off), closed-lane
+        # policing, hazard-dodge context, and keep-right pressure.
+        self._lane_change_target: int | None = None
+        self._lane_change_timer = 0.0
+        self._lane_signal_timer = 0.0
+        self._merge_deadline: float | None = None
+        self._hazard_dodgeable = False
+        self._hazard_lane = 0
+        self._left_lane_s = 0.0
+        self._keep_right_nags = 0
         self._ambient_event_cooldown_s = 0.0
         self._pending_ambient_event: tuple[str, str | None] | None = None
         self._lane_guidance_state = "center"
@@ -230,6 +240,7 @@ class DrivingState(DrivingControlsMixin, DrivingUpdateMixin, DrivingEventMixin, 
             "ticket_fines_paid": self.ticket_fines_paid,
             "failure_to_stop_count": self.failure_to_stop_count,
             "lane_offset": self.lane.offset,
+            "lane_index": self.lane.lane,
         }
 
     @classmethod
@@ -299,6 +310,7 @@ class DrivingState(DrivingControlsMixin, DrivingUpdateMixin, DrivingEventMixin, 
             state.ticket_fines_paid = float(data.get("ticket_fines_paid", 0.0))
             state.failure_to_stop_count = int(data.get("failure_to_stop_count", 0))
             state.lane.offset = float(data.get("lane_offset", 0.0))
+            state.lane.lane = max(0, int(data.get("lane_index", 0)))
             return state
         except (KeyError, TypeError, ValueError):
             log.warning("Could not resume saved trip", exc_info=True)

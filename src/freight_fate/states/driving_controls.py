@@ -58,6 +58,10 @@ class DrivingControlsMixin:
             self._adjust_cruise(CRUISE_STEP_MPH)
         elif key in (pygame.K_MINUS, pygame.K_KP_MINUS) or getattr(event, "unicode", "") == "-":
             self._adjust_cruise(-CRUISE_STEP_MPH)
+        elif key == pygame.K_LEFT and self.ctx.settings.steering_assist == "off":
+            self._tap_lane_change(1)
+        elif key == pygame.K_RIGHT and self.ctx.settings.steering_assist == "off":
+            self._tap_lane_change(-1)
         elif key == pygame.K_SPACE:
             self._speak_speed()
         elif key in (pygame.K_RETURN, pygame.K_KP_ENTER):
@@ -94,6 +98,42 @@ class DrivingControlsMixin:
             self._speak_radio_status()
         elif key == pygame.K_F1:
             self._speak_driving_help()
+
+    def _tap_lane_change(self, direction: int) -> None:
+        """Assist-off lane change: a timed drift across the line, +1 moves
+        left, -1 moves right. With steering assist on, the held wheel does
+        this instead, so the tap handler never runs there."""
+        if self._microsleep_deadline is not None:
+            return  # the held-key wake-up check owns the arrows right now
+        t = self.truck
+        lane = self.lane
+        if self._ramp_mi is not None:
+            self.ctx.say("You are on the exit ramp. No lanes to change.")
+            return
+        if self._lane_change_target is not None:
+            self.ctx.say("Still changing lanes.")
+            return
+        if not t.engine_on or t.speed_mph < LANE_MIN_MPH:
+            self.ctx.say(
+                "Lane changes need the engine running and at least "
+                f"{LANE_MIN_MPH:.0f} miles per hour."
+            )
+            return
+        target = lane.lane + direction
+        if not 0 <= target < lane.lane_count:
+            self.ctx.say(f"You are already in the {lane.lane_name} lane.")
+            return
+        zone = self.trip.active_zone
+        if zone is not None and zone.reason == "construction" and zone.closed_lane == target:
+            self.ctx.audio.play("ui/error")
+            self.ctx.say(f"The {lane_label(target, lane.lane_count)} lane is closed here.")
+            return
+        self._lane_change_target = target
+        self._lane_change_timer = LANE_TAP_CHANGE_S
+        self._lane_signal_timer = 0.0
+        pan = -0.6 if direction > 0 else 0.6
+        self.ctx.audio.play("vehicle/turn_signal", volume=0.8, pan=pan)
+        self.ctx.say(f"Changing to the {lane_label(target, lane.lane_count)} lane.")
 
     def _objective_help(self) -> str:
         if self.phase == DRIVE_PHASE_PICKUP:
@@ -159,7 +199,11 @@ class DrivingControlsMixin:
             "The Tab status menu includes a Driver apps tablet menu for "
             "navigation, weather, traffic, truck stops, road chatter, and ELD. "
             "Left or Right Control stops the driving event voice. "
-            "Left and Right arrows steer when lane drift is enabled. "
+            "Left and Right arrows steer when lane drift is enabled; steer "
+            "across the lane line to change lanes. With lane drift off, tap "
+            "Left or Right to change lanes instead. Exits leave from the "
+            "right lane, and hazards called out as brake or change lanes "
+            "can be dodged with a clear lane beside you. "
             "T route POI menu when already stopped "
             "at one: available actions may include fuel, break, sleep, "
             "inspect, roadside assistance, or save when source-backed. H horn. "

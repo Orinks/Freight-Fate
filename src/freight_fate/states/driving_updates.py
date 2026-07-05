@@ -118,6 +118,9 @@ class DrivingUpdateMixin:
         # change; the setter only re-renders cues when the choice actually flips.
         self.trip.imperial = self.ctx.settings.imperial_units
         pos_before = self.trip.position_mi
+        # Same-lane traffic checks and spoken relative lanes follow the
+        # player's discrete lane, so mirror it before the trip advances.
+        self.trip.traffic_manager.player_lane = self.lane.lane
         for event in self.trip.update(dt):
             self._handle_trip_event(event)
         self._check_weigh_station_enforcement(pos_before)
@@ -372,6 +375,8 @@ class DrivingUpdateMixin:
                 steer = pad.steering
         self.lane.steering = steer
         leg = self.route.legs[self.trip.current_leg_index]
+        # The exit ramp is a single lane; the mainline keeps its leg count.
+        self.lane.set_lane_count(1 if self._ramp_mi is not None else leg_lane_count(leg))
         curve = 0.0
         if leg.terrain == "hills":
             curve = 0.25
@@ -387,6 +392,151 @@ class DrivingUpdateMixin:
             if not self._terse_speech():
                 message += " Steer back toward the lane center."
             self.ctx.say_event(message, interrupt=True)
+        if self.lane.crossed:
+            # A held drift carried the truck across the line: the wheel was
+            # the lane change. One signal click marks the commit.
+            pan = -0.6 if self.lane.crossed > 0 else 0.6
+            self.ctx.audio.play("vehicle/turn_signal", volume=0.6, pan=pan)
+            self._finish_lane_change()
+        self._update_tap_lane_change(dt)
+        self._update_merge(dt)
+        self._update_keep_right(dt)
+
+    def _update_tap_lane_change(self, dt: float) -> None:
+        """Advance an assist-off tap change: signal clicks, then the flip."""
+        if self._lane_change_target is None:
+            return
+        target = self._lane_change_target
+        pan = -0.6 if target > self.lane.lane else 0.6
+        self._lane_signal_timer += dt
+        if self._lane_signal_timer >= LANE_SIGNAL_CLICK_S:
+            self._lane_signal_timer = 0.0
+            self.ctx.audio.play("vehicle/turn_signal", volume=0.8, pan=pan)
+        self._lane_change_timer -= dt
+        if self._lane_change_timer <= 0:
+            self._lane_change_target = None
+            self.lane.lane = min(target, self.lane.lane_count - 1)
+            self._finish_lane_change()
+
+    def _finish_lane_change(self) -> None:
+        """The truck has just arrived in a new lane: check the space it moved
+        into, resolve any dodgeable hazard, and reset keep-right pressure."""
+        self._left_lane_s = 0.0
+        self._keep_right_nags = 0
+        lane = self.lane
+        other = self.trip.traffic_manager.vehicle_in_lane(
+            self.trip.position_mi,
+            lane.lane,
+            ahead_mi=DODGE_CLEARANCE_AHEAD_MI,
+            behind_mi=DODGE_CLEARANCE_BEHIND_MI,
+        )
+        if other is not None and self.truck.speed_mph > LANE_MIN_MPH:
+            self.ctx.audio.play("vehicle/collision")
+            self.ctx.controller.rumble.impact(SIDESWIPE_DAMAGE)
+            self.truck.apply_collision(SIDESWIPE_DAMAGE)
+            self.ctx.say_event(
+                f"You sideswiped a {other.vehicle_class} in the {lane.lane_name} "
+                f"lane! The truck took damage, now {self.truck.damage_pct:.0f} "
+                "percent. Check your mirrors before moving over.",
+                interrupt=True,
+            )
+            return
+        if (
+            self._hazard_deadline is not None
+            and self._hazard_dodgeable
+            and lane.lane != self._hazard_lane
+        ):
+            self._hazard_deadline = None
+            self.ctx.audio.play("events/hazard_clear", volume=0.75)
+            self.ctx.controller.rumble.alert(intensity=0.4)
+            self.ctx.say_event("You swerve around it. Well done.", interrupt=False)
+            self.ctx.award_achievement("hazard_avoided", event=True)
+            return
+        self.ctx.say_event(f"In the {lane.lane_name} lane.", interrupt=False)
+
+    def _update_merge(self, dt: float) -> None:
+        """Riding a coned-off lane: one urgent warning, then the barrels win."""
+        zone = self.trip.active_zone
+        closed = zone.closed_lane if zone is not None and zone.reason == "construction" else None
+        if closed is None or self.lane.lane != closed or self.truck.speed_mph < LANE_MIN_MPH:
+            self._merge_deadline = None
+            return
+        open_lane = closed - 1 if closed > 0 else closed + 1
+        open_name = lane_label(open_lane, self.lane.lane_count)
+        if self._merge_deadline is None:
+            self._merge_deadline = MERGE_WINDOW_S
+            self.ctx.audio.play("ui/warning")
+            self.ctx.controller.rumble.alert()
+            self.ctx.say_event(
+                f"You are in the closed {lane_label(closed, self.lane.lane_count)} "
+                f"lane! Move to the {open_name} lane!",
+                interrupt=True,
+            )
+            return
+        if self._lane_change_target is not None and self._lane_change_target != closed:
+            return  # already moving over: hold the countdown
+        self._merge_deadline -= dt
+        if self._merge_deadline <= 0:
+            self._merge_deadline = None
+            self.lane.lane = open_lane
+            self.lane.offset = 0.0
+            self._lane_change_target = None
+            self.ctx.audio.play("vehicle/collision")
+            self.ctx.controller.rumble.impact(MERGE_BARRELS_DAMAGE)
+            self.truck.apply_collision(MERGE_BARRELS_DAMAGE)
+            self.ctx.say_event(
+                "You plowed through the barrels and lurched into the "
+                f"{open_name} lane. The truck took damage, now "
+                f"{self.truck.damage_pct:.0f} percent.",
+                interrupt=True,
+            )
+
+    def _keep_right_justified(self) -> bool:
+        """Left-lane time is legitimate while passing slower right-lane
+        traffic, or while construction has the right lane coned off."""
+        zone = self.trip.active_zone
+        if zone is not None and zone.closed_lane == 0:
+            return True
+        slower = self.trip.traffic_manager.vehicle_in_lane(
+            self.trip.position_mi,
+            0,
+            ahead_mi=PASSING_LOOKAHEAD_MI,
+            behind_mi=0.05,
+        )
+        return slower is not None and slower.speed_mph < self.truck.speed_mph + 3.0
+
+    def _update_keep_right(self, dt: float) -> None:
+        """Camping the left lane draws CB grumbling: keep right except to pass."""
+        lane = self.lane
+        if (
+            lane.lane_count < 2
+            or lane.lane != lane.lane_count - 1
+            or self.truck.speed_mph < KEEP_RIGHT_MIN_MPH
+            or self._ramp_mi is not None
+        ):
+            self._left_lane_s = 0.0
+            self._keep_right_nags = 0
+            return
+        if self._keep_right_justified():
+            self._left_lane_s = max(0.0, self._left_lane_s - dt)
+            return
+        self._left_lane_s += dt
+        threshold = KEEP_RIGHT_NAG_S + self._keep_right_nags * KEEP_RIGHT_REPEAT_S
+        if self._left_lane_s < threshold:
+            return
+        self._keep_right_nags += 1
+        if self._keep_right_nags == 1:
+            self._speak_ambient_event(
+                "CB chatter: you have been riding the left lane a while. "
+                "Keep right except to pass.",
+                "events/cb_radio_chatter",
+            )
+        else:
+            self.ctx.audio.play("traffic/car_pass", volume=0.9, pan=0.5)
+            self._speak_ambient_event(
+                "Traffic is stacking up and passing you on the right. Move back to the right lane.",
+                "events/cb_radio_chatter",
+            )
 
     def _lane_pan(self) -> float:
         """Stereo pan for the rumble strip: it comes from the side you have

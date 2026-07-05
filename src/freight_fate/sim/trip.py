@@ -340,11 +340,22 @@ class Trip(TripRoadEventMixin, TripTrafficMixin):
             at = self._rng.uniform(15, max(16, total - 20))
             length = self._rng.uniform(3, 9)
             if self._rng.random() < 0.6:
+                closed = (
+                    self._rng.choice((0, 1))
+                    if self._rng.random() < CONSTRUCTION_CLOSURE_CHANCE
+                    else None
+                )
                 taper_start = max(0.0, at - CONSTRUCTION_TAPER_MI)
                 zones.append(
-                    Zone(taper_start, at, CONSTRUCTION_TAPER_LIMIT_MPH, "construction merge")
+                    Zone(
+                        taper_start,
+                        at,
+                        CONSTRUCTION_TAPER_LIMIT_MPH,
+                        "construction merge",
+                        closed_lane=closed,
+                    )
                 )
-                zones.append(Zone(at, at + length, 45, "construction"))
+                zones.append(Zone(at, at + length, 45, "construction", closed_lane=closed))
             elif not night or self._rng.random() < NIGHT_TRAFFIC_KEEP:
                 zones.append(Zone(at, at + length, 50, "heavy traffic"))
         zones.extend(self._facility_speed_zones())
@@ -522,6 +533,11 @@ class Trip(TripRoadEventMixin, TripTrafficMixin):
     def next_zone_within(self, within_mi: float) -> Zone | None:
         ahead = [z for z in self.zones if 0 < z.start_mi - self.position_mi <= within_mi]
         return min(ahead, key=lambda z: z.start_mi) if ahead else None
+
+    @property
+    def active_zone(self) -> Zone | None:
+        """The reduced-limit zone the truck is currently inside, if any."""
+        return self._active_zone_at(self.position_mi)
 
     def _active_zone_at(self, mile: float) -> Zone | None:
         active = [z for z in self.zones if z.start_mi <= mile <= z.end_mi]
@@ -758,12 +774,24 @@ class Trip(TripRoadEventMixin, TripTrafficMixin):
         miles = ZONE_WARNING_REAL_S * speed * self.effective_time_scale / 3600.0
         return max(ZONE_WARNING_LOOKAHEAD_MI, min(miles, ZONE_WARNING_MAX_MI))
 
+    @staticmethod
+    def _closure_phrases(zone: Zone) -> tuple[str, str]:
+        """(closed lane name, direction to merge) for a zone's coned-off lane."""
+        if zone.closed_lane == 0:
+            return "right", "left"
+        return "left", "right"
+
     def _zone_warning_message(self, zone: Zone, ahead: float) -> str:
         if zone.reason == "construction":
+            if zone.closed_lane is not None:
+                shut, keep = self._closure_phrases(zone)
+                merge_part = f"The {shut} lane is closed; merge {keep} at the taper. "
+            else:
+                merge_part = "All lanes stay open through the work; hold your lane. "
             return (
                 f"Brake now! In {self._distance_text(ahead)}, construction ahead. "
-                f"Merge left for the flagger taper; speed limit "
-                f"{self._speed_value(CONSTRUCTION_TAPER_LIMIT_MPH)}, then "
+                f"{merge_part}Speed limit "
+                f"{self._speed_value(CONSTRUCTION_TAPER_LIMIT_MPH)} at the taper, then "
                 f"{self._speed_value(zone.limit_mph)} through the work zone."
             )
         return (
@@ -773,11 +801,25 @@ class Trip(TripRoadEventMixin, TripTrafficMixin):
 
     def _zone_entry_message(self, zone: Zone) -> str:
         if zone.reason == "construction merge":
+            if zone.closed_lane is not None:
+                shut, keep = self._closure_phrases(zone)
+                return (
+                    f"Construction merge taper. The {shut} lane closes ahead; "
+                    f"merge {keep} now. "
+                    f"Speed limit {self._speed_value(zone.limit_mph)}."
+                )
             return (
-                "Construction merge taper. Follow the flagger and merge left. "
+                "Construction merge taper. Follow the flagger through the cones. "
                 f"Speed limit {self._speed_value(zone.limit_mph)}."
             )
         if zone.reason == "construction":
+            if zone.closed_lane is not None:
+                shut, keep = self._closure_phrases(zone)
+                return (
+                    f"Work zone active. The {shut} lane is closed; stay in the "
+                    f"{keep} lane and watch the barrels. "
+                    f"Speed limit {self._speed_value(zone.limit_mph)}."
+                )
             return (
                 "Work zone active. Stay in the lane and watch the barrels. "
                 f"Speed limit {self._speed_value(zone.limit_mph)}."

@@ -18,6 +18,13 @@ from .trip_models import (
 
 @dataclass
 class TrafficVehicle:
+    """One NPC in the traffic bubble.
+
+    ``lane`` is the absolute lane index (0 = right lane, counting leftward),
+    matching the player's ``LaneKeeping.lane``. ``relative_lane`` keeps the
+    legacy spoken-text surface (negative = left of the player) and is
+    recomputed against the player's lane every manager update."""
+
     key: str
     position_mi: float
     speed_mph: float
@@ -26,6 +33,7 @@ class TrafficVehicle:
     intent: str
     vehicle_class: str
     length_mi: float = 0.25
+    lane: int = 0
 
     @property
     def at_mi(self) -> float:
@@ -97,6 +105,9 @@ class TrafficManager:
         self.imperial = imperial
         self.vehicles: list[TrafficVehicle] = []
         self.announced_vehicle_keys: set[str] = set()
+        # The driving state mirrors the player's discrete lane here each
+        # frame so same-lane checks and spoken relative lanes stay honest.
+        self.player_lane = 0
 
     def _seed_key(self) -> str:
         route_key = "|".join(
@@ -174,18 +185,20 @@ class TrafficManager:
                 }[intent]
                 rush_slowdown = rng.uniform(4.0, 10.0) if self._rush_hour_traffic_bias(leg) else 0.0
                 speed = max(25.0, base_speed - weather_slowdown - rush_slowdown)
-                lane = -1 if intent == "passing" else 0
-                if intent == "merging":
-                    lane = 1
+                # Passing traffic lives in the left lane; everyone else --
+                # including vehicles merging in from a ramp -- holds the
+                # right lane, where trucks are supposed to be.
+                lane = 1 if intent == "passing" else 0
                 vehicles.append(
                     TrafficVehicle(
                         key=f"traffic:{leg_index}:{slot}:{intent}",
                         position_mi=start + rng.uniform(low, high),
                         speed_mph=speed,
                         target_speed_mph=speed,
-                        relative_lane=lane,
+                        relative_lane=-lane,
                         intent=intent,
                         vehicle_class=vehicle_class,
+                        lane=lane,
                     )
                 )
         self.vehicles = sorted(vehicles, key=lambda vehicle: vehicle.position_mi)
@@ -218,7 +231,7 @@ class TrafficManager:
         # used by TrafficContext while the traffic bubble is split out.
         nearest: tuple[float, TrafficVehicle] | None = None
         for vehicle in self.vehicles:
-            if vehicle.relative_lane != 0:
+            if vehicle.lane != self.player_lane:
                 continue
             gap_mi = vehicle.position_mi - position_mi
             if gap_mi < -vehicle.length_mi or gap_mi > TRAFFIC_LOOKAHEAD_MI:
@@ -259,14 +272,35 @@ class TrafficManager:
     def _vehicle_class(self, vehicle) -> str:
         return getattr(vehicle, "vehicle_class", "vehicle")
 
+    def vehicle_in_lane(
+        self,
+        position_mi: float,
+        lane: int,
+        *,
+        ahead_mi: float = 0.35,
+        behind_mi: float = 0.15,
+    ) -> TrafficVehicle | None:
+        """The nearest vehicle occupying ``lane`` beside or just ahead of the
+        player -- the mirror check before a lane change or a hazard dodge."""
+        nearest: TrafficVehicle | None = None
+        nearest_gap = float("inf")
+        for vehicle in self.vehicles:
+            if vehicle.lane != lane:
+                continue
+            gap = vehicle.position_mi - position_mi
+            if -behind_mi - vehicle.length_mi <= gap <= ahead_mi:
+                distance = abs(max(0.0, gap))
+                if distance < nearest_gap:
+                    nearest, nearest_gap = vehicle, distance
+        return nearest
+
     def update(self, *, dt: float, position_mi: float, time_scale: float) -> None:
         game_hours = dt * time_scale / 3600.0
         kept: list[TrafficVehicle] = []
         for vehicle in self.vehicles:
             gap = vehicle.position_mi - position_mi
             intent = self._vehicle_intent(vehicle)
-            if intent == "merging" and 0.0 <= gap <= 1.4:
-                vehicle.relative_lane = 0
+            vehicle.relative_lane = self.player_lane - vehicle.lane
             if intent == "braking" and 0.0 <= gap <= 1.8:
                 vehicle.target_speed_mph = max(30.0, vehicle.target_speed_mph - 8.0 * dt)
             delta = vehicle.target_speed_mph - vehicle.speed_mph
