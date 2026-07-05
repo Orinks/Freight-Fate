@@ -690,11 +690,14 @@ class HomeCityState(MenuState):
         for name in self._cities:
             city = self.ctx.world.cities[name]
             terminal = self.ctx.world.home_terminal(name)
+            # Some city keys are already state-disambiguated ("Springfield,
+            # Illinois"); don't append the state a second time.
+            place = name if name.endswith(f", {city.state}") else f"{name}, {city.state}"
             items.append(
                 MenuItem(
-                    f"{name}, {city.state}",
+                    place,
                     lambda n=name: self._pick(n),
-                    help=f"Start at {terminal.spoken_name} in {name}, {city.state}.",
+                    help=f"Start at {terminal.spoken_name} in {place}.",
                 )
             )
         return items

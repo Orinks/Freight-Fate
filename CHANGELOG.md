@@ -2,6 +2,32 @@
 
 ## Unreleased
 
+### Added
+
+- **The upper Midwest and Great Lakes fill in with twenty-nine new cities
+  across five states.** Illinois gains Springfield, Bloomington, Champaign,
+  and Decatur. Michigan gains Flint, Saginaw, Kalamazoo, Port Huron, Muskegon,
+  Jackson, and Traverse City, plus the Upper Peninsula iron and shipping towns
+  of Marquette, Escanaba, Sault Ste. Marie, Iron Mountain, and Houghton.
+  Wisconsin gains Kenosha, Eau Claire, Wausau, and La Crosse. Minnesota gains
+  St. Cloud, Rochester, Mankato, Winona, Willmar, Albert Lea, and Hibbing on
+  the Iron Range. Indiana gains Gary and Lafayette. Every city comes with
+  real, named freight facilities -- haul taconite pellets from the Hibbing
+  mine, steel out of Gary Works, new Subarus from Lafayette, and turkeys from
+  Willmar -- with truck-routed corridors, real truck stops, and labeled
+  highway exits along the way. Long slogs like Minneapolis to Fargo and
+  Chicago to Indianapolis now have proper stops in between, and Fort Wayne,
+  South Bend, and Evansville trade their generic docks for real ones like
+  the GM pickup plant and the Mead Johnson formula works.
+
+- **The Great Lakes split into three regions that each feel like
+  themselves.** The Upper Midwest covers Minnesota, Wisconsin, and Michigan's
+  Upper Peninsula; the Great Lakes keeps the lower-lakes industrial belt from
+  Chicago through Detroit to Buffalo; and the new Corn Belt takes interior
+  Illinois, Indiana, and southern Ohio. Each has its own weather, fuel
+  prices, freight market flavor, and road hazards, so a winter run out of
+  Duluth no longer sounds like a summer haul into Cincinnati.
+
 ## 1.8.0 - 2026-07-05
 
 ### Added

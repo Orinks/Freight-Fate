@@ -162,7 +162,7 @@
     },
     "Indianapolis": {
       "state": "Indiana",
-      "region": "great_lakes",
+      "region": "corn_belt",
       "locations": [
         {
           "name": "Crossroads Logistics Park",
@@ -1042,7 +1042,7 @@
     },
     "Cincinnati": {
       "state": "Ohio",
-      "region": "great_lakes",
+      "region": "corn_belt",
       "locations": [
         {
           "name": "Queensgate Rail Yard",
@@ -1066,7 +1066,7 @@
     },
     "Columbus": {
       "state": "Ohio",
-      "region": "great_lakes",
+      "region": "corn_belt",
       "locations": [
         {
           "name": "Rickenbacker Inland Port",
@@ -1122,7 +1122,7 @@
     },
     "Milwaukee": {
       "state": "Wisconsin",
-      "region": "great_lakes",
+      "region": "upper_midwest",
       "locations": [
         {
           "name": "Jones Island Bulk Port",
@@ -1146,7 +1146,7 @@
     },
     "Minneapolis": {
       "state": "Minnesota",
-      "region": "great_lakes",
+      "region": "upper_midwest",
       "locations": [
         {
           "name": "Upper Harbor Grain Terminal",
@@ -1490,7 +1490,18 @@
     "Fort Wayne": {
       "state": "Indiana",
       "region": "great_lakes",
-      "locations": [],
+      "locations": [
+        {
+          "name": "GM Fort Wayne Assembly",
+          "type": "automotive_plant",
+          "source_note": "General Motors Fort Wayne Assembly (Roanoke, southwest of Fort Wayne) -- 4.6 million sq ft plant building Chevrolet Silverado and GMC Sierra pickups."
+        },
+        {
+          "name": "Steel Dynamics Structural Mill",
+          "type": "steel_industrial",
+          "source_note": "Steel Dynamics Structural and Rail Division mill at Columbia City, west of Fort Wayne; Steel Dynamics is headquartered in Fort Wayne."
+        }
+      ],
       "lat": 41.0793,
       "lon": -85.1394
     },
@@ -1692,7 +1703,7 @@
     },
     "Madison": {
       "state": "Wisconsin",
-      "region": "great_lakes",
+      "region": "upper_midwest",
       "locations": [],
       "lat": 43.0731,
       "lon": -89.4012
@@ -2054,7 +2065,7 @@
     "Dayton": {
       "lat": 39.75895,
       "lon": -84.19161,
-      "region": "great_lakes",
+      "region": "corn_belt",
       "state": "Ohio",
       "locations": []
     },
@@ -2077,7 +2088,18 @@
       "lon": -87.55585,
       "region": "mid_south",
       "state": "Indiana",
-      "locations": []
+      "locations": [
+        {
+          "name": "Mead Johnson Nutrition Plant",
+          "type": "food_processor",
+          "source_note": "Mead Johnson Nutrition (Reckitt), Evansville -- US headquarters and its largest US manufacturing and R&D center, producing Enfamil infant formula."
+        },
+        {
+          "name": "Amcor Packaging Plant",
+          "type": "manufacturing_plant",
+          "source_note": "Amcor (formerly Berry Global, merged 2025) plastics packaging manufacturing and former global headquarters, Evansville."
+        }
+      ]
     },
     "Fargo": {
       "lat": 46.87719,
@@ -2096,7 +2118,7 @@
     "Peoria": {
       "lat": 40.69365,
       "lon": -89.58899,
-      "region": "great_lakes",
+      "region": "corn_belt",
       "state": "Illinois",
       "locations": []
     },
@@ -2117,7 +2139,7 @@
     "Green Bay": {
       "lat": 44.51916,
       "lon": -88.01983,
-      "region": "great_lakes",
+      "region": "upper_midwest",
       "state": "Wisconsin",
       "locations": []
     },
@@ -2133,7 +2155,18 @@
       "lon": -86.25001,
       "region": "great_lakes",
       "state": "Indiana",
-      "locations": []
+      "locations": [
+        {
+          "name": "AM General Mishawaka Plant",
+          "type": "automotive_plant",
+          "source_note": "AM General Mishawaka Manufacturing Campus east of South Bend -- Humvee/HMMWV assembly since 1984; AM General is headquartered in South Bend."
+        },
+        {
+          "name": "Steel Warehouse Processing Center",
+          "type": "steel_industrial",
+          "source_note": "Steel Warehouse, South Bend -- family-owned steel service center headquarters: coil slitting, pickling, cut-to-length processing."
+        }
+      ]
     },
     "Albany": {
       "lat": 42.65258,
@@ -2725,7 +2758,7 @@
     },
     "Duluth": {
       "state": "Minnesota",
-      "region": "great_lakes",
+      "region": "upper_midwest",
       "locations": [
         {
           "name": "Port of Duluth-Superior",
@@ -3485,6 +3518,533 @@
       ],
       "lat": 37.9717,
       "lon": -100.8727
+    },
+    "Decatur": {
+      "state": "Illinois",
+      "region": "corn_belt",
+      "locations": [
+        {
+          "name": "ADM Decatur Complex",
+          "type": "food_processor",
+          "source_note": "Archer Daniels Midland headquarters complex (~1,125 acres); corn and soy processing at ~600k/200k bushels a day."
+        },
+        {
+          "name": "Caterpillar Decatur Plant",
+          "type": "manufacturing_plant",
+          "source_note": "Caterpillar plant building off-highway and large mining trucks and wheel-tractor scrapers, Decatur."
+        },
+        {
+          "name": "Tate & Lyle Corn Wet Mill",
+          "type": "food_processor",
+          "source_note": "Tate & Lyle (former A.E. Staley) corn wet-milling / high-fructose corn syrup plant, Decatur."
+        }
+      ],
+      "lat": 39.8403,
+      "lon": -88.9548
+    },
+    "Springfield, Illinois": {
+      "state": "Illinois",
+      "region": "corn_belt",
+      "locations": [
+        {
+          "name": "Springfield Distribution Center",
+          "type": "distribution",
+          "source_note": "Central Illinois distribution on the I-55 Chicago-St. Louis corridor at the state capital."
+        },
+        {
+          "name": "Bunn Manufacturing",
+          "type": "manufacturing_plant",
+          "source_note": "Bunn commercial beverage-equipment manufacturing, Springfield."
+        }
+      ],
+      "lat": 39.7817,
+      "lon": -89.6501
+    },
+    "Bloomington": {
+      "state": "Illinois",
+      "region": "corn_belt",
+      "locations": [
+        {
+          "name": "Rivian Normal Assembly Plant",
+          "type": "automotive_plant",
+          "source_note": "Rivian electric-vehicle plant in Normal (~4M sq ft former Mitsubishi plant)."
+        },
+        {
+          "name": "Rivian Supplier Park",
+          "type": "distribution",
+          "source_note": "Rivian supplier/logistics park serving the Normal EV plant."
+        }
+      ],
+      "lat": 40.4842,
+      "lon": -88.9937
+    },
+    "Champaign": {
+      "state": "Illinois",
+      "region": "corn_belt",
+      "locations": [
+        {
+          "name": "Flex-N-Gate",
+          "type": "manufacturing_plant",
+          "source_note": "Flex-N-Gate automotive stampings and assemblies, Champaign-Urbana."
+        },
+        {
+          "name": "Kraft Heinz Champaign Plant",
+          "type": "food_processor",
+          "source_note": "Kraft Heinz food-manufacturing plant, Champaign."
+        }
+      ],
+      "lat": 40.1164,
+      "lon": -88.2434
+    },
+    "Flint": {
+      "state": "Michigan",
+      "region": "great_lakes",
+      "locations": [
+        {
+          "name": "GM Flint Assembly",
+          "type": "automotive_plant",
+          "source_note": "General Motors Flint Assembly, heavy-duty pickup truck production."
+        },
+        {
+          "name": "Flint Genesee Distribution",
+          "type": "distribution",
+          "source_note": "Auto-supply and regional distribution serving the I-75/I-69 corridor, Flint."
+        }
+      ],
+      "lat": 43.0125,
+      "lon": -83.6875
+    },
+    "Kalamazoo": {
+      "state": "Michigan",
+      "region": "great_lakes",
+      "locations": [
+        {
+          "name": "Pfizer Kalamazoo",
+          "type": "manufacturing_plant",
+          "source_note": "Pfizer's largest manufacturing site (~1,300 acres): active ingredients, drug products, medical devices."
+        },
+        {
+          "name": "Stryker Kalamazoo",
+          "type": "manufacturing_plant",
+          "source_note": "Stryker global headquarters and medical-device manufacturing/logistics campus, Kalamazoo."
+        }
+      ],
+      "lat": 42.2917,
+      "lon": -85.5872
+    },
+    "Saginaw": {
+      "state": "Michigan",
+      "region": "great_lakes",
+      "locations": [
+        {
+          "name": "Nexteer Automotive",
+          "type": "automotive_plant",
+          "source_note": "Nexteer Automotive steering-systems manufacturing, rooted in Saginaw since 1906."
+        },
+        {
+          "name": "Saginaw Metal Casting Operations",
+          "type": "steel_industrial",
+          "source_note": "GM Saginaw metal-casting foundry supplying powertrain components."
+        }
+      ],
+      "lat": 43.4195,
+      "lon": -83.9508
+    },
+    "Port Huron": {
+      "state": "Michigan",
+      "region": "great_lakes",
+      "locations": [
+        {
+          "name": "Blue Water Bridge Freight Terminal",
+          "type": "cross_dock",
+          "source_note": "Blue Water Bridge port of entry -- the second-busiest US-Canada commercial truck crossing (~826k trucks/yr)."
+        },
+        {
+          "name": "Port Huron Distribution",
+          "type": "distribution",
+          "source_note": "Border transload and distribution serving the I-94/I-69 crossing to Sarnia, Ontario."
+        }
+      ],
+      "lat": 42.9709,
+      "lon": -82.4249
+    },
+    "Muskegon": {
+      "state": "Michigan",
+      "region": "great_lakes",
+      "locations": [
+        {
+          "name": "Port of Muskegon",
+          "type": "port",
+          "source_note": "Port of Muskegon deepwater Lake Michigan port (aggregate, coal, salt; ~1M+ tons/yr)."
+        },
+        {
+          "name": "Howmet Aerospace",
+          "type": "manufacturing_plant",
+          "source_note": "Howmet Aerospace precision-casting/aerospace-engine-component manufacturing, Muskegon County."
+        }
+      ],
+      "lat": 43.2342,
+      "lon": -86.2484
+    },
+    "Jackson, Michigan": {
+      "state": "Michigan",
+      "region": "great_lakes",
+      "locations": [
+        {
+          "name": "Gerdau MacSteel",
+          "type": "steel_industrial",
+          "source_note": "Gerdau special-bar-quality steel mill, Jackson."
+        },
+        {
+          "name": "Michigan Automotive Compressor",
+          "type": "automotive_plant",
+          "source_note": "Michigan Automotive Compressor (Denso/Toyota) air-conditioning compressor plant, Parma near Jackson."
+        }
+      ],
+      "lat": 42.2459,
+      "lon": -84.4013
+    },
+    "Traverse City": {
+      "state": "Michigan",
+      "region": "great_lakes",
+      "locations": [
+        {
+          "name": "Cherry Central Cooperative",
+          "type": "food_processor",
+          "source_note": "Cherry Central grower cooperative -- cherry and fruit processing in the Grand Traverse fruit belt."
+        },
+        {
+          "name": "Traverse City Cold Storage",
+          "type": "cold_storage",
+          "source_note": "Cold storage and shipping for northern Michigan tree fruit."
+        }
+      ],
+      "lat": 44.7631,
+      "lon": -85.6206
+    },
+    "Marquette": {
+      "state": "Michigan",
+      "region": "upper_midwest",
+      "locations": [
+        {
+          "name": "Cleveland-Cliffs Tilden Mine",
+          "type": "mine_quarry",
+          "source_note": "Cleveland-Cliffs Tilden iron-ore mine and pellet plant, Marquette Iron Range."
+        },
+        {
+          "name": "Presque Isle Ore Dock",
+          "type": "port",
+          "source_note": "LS&I ore dock at Marquette's Upper Harbor, shipping iron-ore pellets on Lake Superior."
+        }
+      ],
+      "lat": 46.5436,
+      "lon": -87.3954
+    },
+    "Escanaba": {
+      "state": "Michigan",
+      "region": "upper_midwest",
+      "locations": [
+        {
+          "name": "Escanaba Ore Dock",
+          "type": "port",
+          "source_note": "CN ore dock on Little Bay de Noc, shipping Marquette/Menominee Range iron-ore pellets."
+        },
+        {
+          "name": "Billerud Escanaba Mill",
+          "type": "lumber_paper",
+          "source_note": "Billerud (former Verso) paper mill, a major coated-paper producer since 1891, Escanaba."
+        }
+      ],
+      "lat": 45.7453,
+      "lon": -87.0646
+    },
+    "Sault Ste. Marie": {
+      "state": "Michigan",
+      "region": "upper_midwest",
+      "locations": [
+        {
+          "name": "Soo Locks Freight Terminal",
+          "type": "port",
+          "source_note": "Soo Locks -- the Great Lakes lock system through which Lake Superior iron ore and grain transit."
+        },
+        {
+          "name": "International Bridge Port of Entry",
+          "type": "cross_dock",
+          "source_note": "Sault Ste. Marie International Bridge border crossing and transload to Sault Ste. Marie, Ontario."
+        }
+      ],
+      "lat": 46.4953,
+      "lon": -84.3453
+    },
+    "Iron Mountain": {
+      "state": "Michigan",
+      "region": "upper_midwest",
+      "locations": [
+        {
+          "name": "Systems Control",
+          "type": "manufacturing_plant",
+          "source_note": "Systems Control electrical substation and control-building manufacturing, Iron Mountain."
+        },
+        {
+          "name": "Iron Mountain Forest Products",
+          "type": "lumber_paper",
+          "source_note": "Timber and forest-products shipping from the western Upper Peninsula."
+        }
+      ],
+      "lat": 45.8202,
+      "lon": -88.0654
+    },
+    "Houghton": {
+      "state": "Michigan",
+      "region": "upper_midwest",
+      "locations": [
+        {
+          "name": "Keweenaw Forest Products",
+          "type": "lumber_paper",
+          "source_note": "Timber and pulpwood shipping from the Keweenaw / Copper Country."
+        },
+        {
+          "name": "Houghton County Distribution",
+          "type": "distribution",
+          "source_note": "Regional distribution serving the far northern Keweenaw Peninsula."
+        }
+      ],
+      "lat": 47.1211,
+      "lon": -88.5694
+    },
+    "Kenosha": {
+      "state": "Wisconsin",
+      "region": "upper_midwest",
+      "locations": [
+        {
+          "name": "Uline Distribution Center",
+          "type": "distribution",
+          "source_note": "Uline shipping-supply headquarters and distribution complex, Pleasant Prairie/Kenosha -- one of the largest DCs in the Midwest."
+        },
+        {
+          "name": "Amazon Fulfillment Center KRB1",
+          "type": "retail_distribution",
+          "source_note": "Amazon fulfillment center in the LakeView Corporate Park, Kenosha, on the I-94 corridor between Milwaukee and Chicago."
+        }
+      ],
+      "lat": 42.5847,
+      "lon": -87.8212
+    },
+    "Eau Claire": {
+      "state": "Wisconsin",
+      "region": "upper_midwest",
+      "locations": [
+        {
+          "name": "Menards Distribution Center",
+          "type": "distribution",
+          "source_note": "Menards home-improvement headquarters and distribution center, Eau Claire."
+        },
+        {
+          "name": "National Presto Industries",
+          "type": "manufacturing_plant",
+          "source_note": "National Presto Industries -- small-appliance and housewares manufacturer headquartered in Eau Claire."
+        }
+      ],
+      "lat": 44.8113,
+      "lon": -91.4985
+    },
+    "Wausau": {
+      "state": "Wisconsin",
+      "region": "upper_midwest",
+      "locations": [
+        {
+          "name": "Greenheck Group",
+          "type": "manufacturing_plant",
+          "source_note": "Greenheck -- commercial air-movement and ventilation equipment manufacturer, Schofield near Wausau."
+        },
+        {
+          "name": "Marathon Cheese Corporation",
+          "type": "food_processor",
+          "source_note": "Marathon Cheese cutting-and-packaging plant, Marathon City near Wausau."
+        }
+      ],
+      "lat": 44.9591,
+      "lon": -89.6301
+    },
+    "La Crosse": {
+      "state": "Wisconsin",
+      "region": "upper_midwest",
+      "locations": [
+        {
+          "name": "Kwik Trip Distribution Center",
+          "type": "distribution",
+          "source_note": "Kwik Trip headquarters, commissary, bakery and dairy distribution complex, La Crosse -- supplies the entire convenience-store chain."
+        },
+        {
+          "name": "Trane Technologies",
+          "type": "manufacturing_plant",
+          "source_note": "Trane -- commercial HVAC / air-conditioning manufacturing, La Crosse."
+        }
+      ],
+      "lat": 43.8014,
+      "lon": -91.2396
+    },
+    "St. Cloud": {
+      "state": "Minnesota",
+      "region": "upper_midwest",
+      "locations": [
+        {
+          "name": "New Flyer Bus Plant",
+          "type": "automotive_plant",
+          "source_note": "New Flyer of America transit-bus manufacturing facility, St. Cloud -- North America's largest bus builder, including battery-electric buses."
+        },
+        {
+          "name": "Coborn's Distribution Center",
+          "type": "grocery_retail_dc",
+          "source_note": "Coborn's grocery distribution hub (with Associated Wholesale Grocers), I-94 Business Park, St. Cloud -- 650,000+ sq ft of fresh and frozen food warehouse."
+        }
+      ],
+      "lat": 45.5608,
+      "lon": -94.1625
+    },
+    "Rochester, Minnesota": {
+      "state": "Minnesota",
+      "region": "upper_midwest",
+      "locations": [
+        {
+          "name": "Crenlo Cab Works",
+          "type": "manufacturing_plant",
+          "source_note": "Crenlo Engineered Cabs, Rochester -- manufactures operator cabs for trucks and heavy equipment."
+        },
+        {
+          "name": "Seneca Foods Cannery",
+          "type": "food_processor",
+          "source_note": "Seneca Foods vegetable canning plant, Rochester, Minnesota."
+        }
+      ],
+      "lat": 44.0121,
+      "lon": -92.4802
+    },
+    "Mankato": {
+      "state": "Minnesota",
+      "region": "upper_midwest",
+      "locations": [
+        {
+          "name": "CHS Soybean Plant",
+          "type": "food_processor",
+          "source_note": "CHS soybean crush and oil refining plant on South Riverfront Drive, Mankato -- one of the largest soybean oil processing centers, with river terminal and private rail yard."
+        },
+        {
+          "name": "Taylor Corporation Campus",
+          "type": "manufacturing_plant",
+          "source_note": "Taylor Corporation headquarters and printing plants, North Mankato -- one of the largest graphic communications companies in the US."
+        }
+      ],
+      "lat": 44.1591,
+      "lon": -94.0092
+    },
+    "Winona": {
+      "state": "Minnesota",
+      "region": "upper_midwest",
+      "locations": [
+        {
+          "name": "Fastenal Distribution Center",
+          "type": "distribution",
+          "source_note": "Fastenal worldwide headquarters and main distribution operation, Winona."
+        },
+        {
+          "name": "Port of Winona",
+          "type": "port",
+          "source_note": "Winona Municipal Harbor on the upper Mississippi -- grain, aggregates and bulk commodities moved between barge, rail and truck (CD Terminal)."
+        }
+      ],
+      "lat": 44.05,
+      "lon": -91.6393
+    },
+    "Willmar": {
+      "state": "Minnesota",
+      "region": "upper_midwest",
+      "locations": [
+        {
+          "name": "Jennie-O Turkey Plant",
+          "type": "food_processor",
+          "source_note": "Jennie-O Turkey Store (Hormel) turkey processing plant on Willmar Avenue, Willmar."
+        },
+        {
+          "name": "BNSF Willmar Yard",
+          "type": "rail",
+          "source_note": "BNSF Willmar rail yard at the junction of the Marshall and Morris subdivisions; the 2022 Willmar Wye added a direct connector and an industrial-park rail spur."
+        }
+      ],
+      "lat": 45.1219,
+      "lon": -95.0433
+    },
+    "Albert Lea": {
+      "state": "Minnesota",
+      "region": "upper_midwest",
+      "locations": [
+        {
+          "name": "Mrs. Gerry's Kitchen",
+          "type": "food_processor",
+          "source_note": "Mrs. Gerry's Kitchen, Albert Lea -- 214,000 sq ft refrigerated salads and sides plant near the I-35/I-90 interchange, shipping coast to coast."
+        },
+        {
+          "name": "Lou-Rich Manufacturing",
+          "type": "manufacturing_plant",
+          "source_note": "Lou-Rich (Innovance), Albert Lea -- employee-owned contract manufacturer: fabrication, machining and assembly."
+        }
+      ],
+      "lat": 43.648,
+      "lon": -93.3683
+    },
+    "Hibbing": {
+      "state": "Minnesota",
+      "region": "upper_midwest",
+      "locations": [
+        {
+          "name": "Hibbing Taconite Mine",
+          "type": "mine_quarry",
+          "source_note": "Hibbing Taconite Company (Cleveland-Cliffs) open-pit iron mine and pellet plant north of Hibbing -- about 7.8 million tons of iron pellets a year."
+        },
+        {
+          "name": "L&M Radiator Plant",
+          "type": "manufacturing_plant",
+          "source_note": "L&M Radiator, Hibbing -- headquarters and plant building Mesabi heat exchangers for mining and heavy equipment."
+        }
+      ],
+      "lat": 47.4272,
+      "lon": -92.9377
+    },
+    "Gary": {
+      "state": "Indiana",
+      "region": "great_lakes",
+      "locations": [
+        {
+          "name": "Gary Works Steel Mill",
+          "type": "steel_industrial",
+          "source_note": "U.S. Steel Gary Works on Lake Michigan, operating since 1906 -- integrated steel mill anchoring the Calumet industrial region."
+        },
+        {
+          "name": "Port of Indiana-Burns Harbor",
+          "type": "port",
+          "source_note": "Port of Indiana-Burns Harbor on Lake Michigan east of Gary, adjacent to the Cleveland-Cliffs Burns Harbor integrated mill (their second-largest US facility)."
+        }
+      ],
+      "lat": 41.5934,
+      "lon": -87.3464
+    },
+    "Lafayette, Indiana": {
+      "state": "Indiana",
+      "region": "corn_belt",
+      "locations": [
+        {
+          "name": "Subaru of Indiana Plant",
+          "type": "automotive_plant",
+          "source_note": "Subaru of Indiana Automotive, Lafayette -- Subaru's only assembly plant outside Asia, building the Ascent, Crosstrek and Forester."
+        },
+        {
+          "name": "Wabash National Trailer Plant",
+          "type": "manufacturing_plant",
+          "source_note": "Wabash National, Lafayette -- North America's leading semi-trailer manufacturer, headquartered and building trailers in Lafayette."
+        }
+      ],
+      "lat": 40.4167,
+      "lon": -86.8753
     }
   }
 }

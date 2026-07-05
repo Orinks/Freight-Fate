@@ -112,10 +112,13 @@ def _open_road_mile(trip):
 
 def test_runtime_prefers_baked_maxspeed_over_heuristic(world):
     route = world.route_options("Chicago", "St. Louis")[0]
-    leg = route.legs[0]
-    heuristic = corridor_speed_limit(leg.highway, "heartland")
+    heuristic = corridor_speed_limit(route.legs[0].highway, "heartland")
     baked = heuristic + 5.0  # a value the heuristic would never produce here
-    route.legs[0] = dataclasses.replace(leg, speed_limits=(SpeedLimitSample(0.0, baked),))
+    # Chicago-St. Louis may route through intermediate cities, so bake the value
+    # onto every leg -- the sampled open-road mile can land on any of them.
+    route.legs[:] = [
+        dataclasses.replace(leg, speed_limits=(SpeedLimitSample(0.0, baked),)) for leg in route.legs
+    ]
     trip = Trip(route, TruckState(), WeatherSystem("great_lakes", seed=1), seed=2)
     assert trip._corridor_limit_at(_open_road_mile(trip)) == baked
 

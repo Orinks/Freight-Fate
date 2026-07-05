@@ -371,6 +371,8 @@ REGION_MARKET_TAGS = {
     "northeast": ("port", "intermodal", "industrial", "retail"),
     "appalachia": ("industrial", "mining", "manufacturing"),
     "great_lakes": ("intermodal", "manufacturing", "automotive", "agriculture"),
+    "upper_midwest": ("agriculture", "food", "manufacturing", "intermodal"),
+    "corn_belt": ("agriculture", "food", "manufacturing", "intermodal"),
     "heartland": ("agriculture", "intermodal", "food"),
     "southern_plains": ("energy", "agriculture", "intermodal", "retail"),
     "mid_south": ("parcel", "manufacturing", "food"),
