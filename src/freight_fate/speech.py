@@ -6,10 +6,23 @@ module wraps it in a small game-friendly interface that:
 
 * never crashes the game if speech is unavailable (silent fallback),
 * picks the best backend that is actually usable on this machine: Prism's
-  registry lists every backend it was compiled with (NVDA first by static
-  priority) whether or not that screen reader is running, so the choice is
-  validated against ``is_supported_at_runtime`` and falls down the priority
-  list instead of binding to a screen reader that is not there,
+  ``acquire_best`` cannot be trusted for this -- it returns the highest
+  priority backend that already has a live cached instance (whatever the
+  game happens to be holding), and otherwise ranks by static registry
+  priority whether or not that screen reader is running -- so the registry
+  is enumerated in priority order and every candidate is validated against
+  its live ``is_supported_at_runtime`` check,
+* treats Prism's ``UIA`` backend (the route to Narrator, via UI Automation
+  notifications) as a gated last resort: it reports runtime support on every
+  modern Windows whether or not anyone is listening, so it is skipped unless
+  Narrator is actually running -- and even then it only wins when no other
+  voice works, because the backend raises every notification with
+  ``NotificationProcessing_ImportantAll``, which Narrator queues without
+  ever cancelling: interrupt and stop are no-ops, so menu browsing through
+  it piles up unread items,
+* keeps watching while the game runs: if the player switches screen readers
+  mid-session (NVDA off, Narrator on, back to NVDA), a periodic health check
+  re-detects the running one and reconnects speech instead of going silent,
 * prefers ``output`` (speech + braille) and falls back to ``speak``,
 * can be disabled with the ``FREIGHT_FATE_NO_SPEECH=1`` environment variable
   (used by the headless test suite and CI), and forced to a specific backend
@@ -20,8 +33,14 @@ from __future__ import annotations
 
 import logging
 import os
+import sys
 
 log = logging.getLogger(__name__)
+
+# Seconds between runtime health checks of the speech backend. Short enough
+# that a player who switches screen readers hears the game again within a few
+# seconds, long enough that the registry scan costs nothing per frame.
+REFRESH_INTERVAL_S = 3.0
 
 
 def _usable(backend) -> bool:
@@ -35,14 +54,85 @@ def _usable(backend) -> bool:
     )
 
 
+def _narrator_running() -> bool:
+    """True when Windows Narrator is up.
+
+    Narrator has no client API of its own: Prism reaches it through UI
+    Automation notifications (the ``UIA`` backend), and only a running
+    Narrator reads those aloud. The backend cannot tell the difference --
+    it reports runtime support whenever UIA itself exists, which is every
+    modern Windows -- so the process check lives here."""
+    if sys.platform != "win32":
+        return False
+    try:
+        import ctypes
+        from ctypes import wintypes
+
+        class ProcessEntry32W(ctypes.Structure):
+            _fields_ = [
+                ("dwSize", wintypes.DWORD),
+                ("cntUsage", wintypes.DWORD),
+                ("th32ProcessID", wintypes.DWORD),
+                ("th32DefaultHeapID", ctypes.POINTER(ctypes.c_ulong)),
+                ("th32ModuleID", wintypes.DWORD),
+                ("cntThreads", wintypes.DWORD),
+                ("th32ParentProcessID", wintypes.DWORD),
+                ("pcPriClassBase", ctypes.c_long),
+                ("dwFlags", wintypes.DWORD),
+                ("szExeFile", ctypes.c_wchar * 260),
+            ]
+
+        kernel32 = ctypes.windll.kernel32
+        kernel32.CreateToolhelp32Snapshot.restype = wintypes.HANDLE
+        snapshot = kernel32.CreateToolhelp32Snapshot(0x2, 0)  # TH32CS_SNAPPROCESS
+        if snapshot in (None, wintypes.HANDLE(-1).value):
+            return False
+        try:
+            entry = ProcessEntry32W()
+            entry.dwSize = ctypes.sizeof(ProcessEntry32W)
+            found = kernel32.Process32FirstW(snapshot, ctypes.byref(entry))
+            while found:
+                if entry.szExeFile.lower() == "narrator.exe":
+                    return True
+                found = kernel32.Process32NextW(snapshot, ctypes.byref(entry))
+            return False
+        finally:
+            kernel32.CloseHandle(snapshot)
+    except Exception:
+        log.debug("Narrator detection failed", exc_info=True)
+        return False
+
+
+def _name_of(ctx, backend_id) -> str:
+    try:
+        return ctx.name_of(backend_id)
+    except Exception:
+        return str(backend_id)
+
+
+# Ranks the UIA backend below every other voice even while Narrator is
+# running. Prism's UIA backend raises all notifications with
+# NotificationProcessing_ImportantAll, which Narrator queues without ever
+# cancelling -- interrupt and stop are no-ops -- so menu browsing through it
+# stacks up unread items. Until that is fixed upstream (the fix is
+# ImportantMostRecent for the interrupt case), UIA is only for machines
+# where nothing else can speak at all: queued speech beats silence.
+_UIA_LAST_RESORT_PRIORITY = -1
+
+
 def pick_backend(ctx, override: str | None = None):
     """Choose a speech backend from a Prism context.
 
-    ``acquire_best`` ranks by static registry priority, which can return a
-    screen reader that is installed in the registry but not running (NVDA
-    outranks everything). Validate its runtime support, then fall back
-    through the remaining backends in priority order. Returns None when
-    nothing on the machine can speak.
+    Prism's ``acquire_best`` is unsuitable: it returns the highest-priority
+    backend that merely has a live cached instance -- which is whatever this
+    game already holds, so a screen reader started mid-session would never be
+    noticed -- and otherwise ranks by static registry priority whether or not
+    that screen reader is running. Instead, enumerate the registry in
+    priority order and validate every candidate against its live runtime
+    check. The ``UIA`` backend (Narrator's route) claims runtime support
+    unconditionally, so it is skipped unless Narrator is actually running,
+    and even then ranked last (see ``_UIA_LAST_RESORT_PRIORITY``). Returns
+    None when nothing on the machine can speak.
     """
     if override:
         try:
@@ -60,22 +150,23 @@ def pick_backend(ctx, override: str | None = None):
                 exc_info=True,
             )
     try:
-        best = ctx.acquire_best()
-        if _usable(best):
-            return best
-        log.info(
-            "Prism's preferred backend %s is not running; trying the others",
-            getattr(best, "name", "?"),
-        )
-    except Exception:
-        log.debug("acquire_best failed", exc_info=True)
-    try:
-        ids = [ctx.id_of(i) for i in range(ctx.backends_count)]
-        ids.sort(key=ctx.priority_of, reverse=True)
+        narrator = _narrator_running()
+        candidates = []
+        for index in range(ctx.backends_count):
+            backend_id = ctx.id_of(index)
+            name = _name_of(ctx, backend_id)
+            if name == "UIA":
+                if not narrator:
+                    continue
+                priority = _UIA_LAST_RESORT_PRIORITY
+            else:
+                priority = ctx.priority_of(backend_id)
+            candidates.append((priority, backend_id))
+        candidates.sort(key=lambda entry: entry[0], reverse=True)
     except Exception:
         log.warning("Could not enumerate speech backends", exc_info=True)
         return None
-    for backend_id in ids:
+    for _, backend_id in candidates:
         try:
             backend = ctx.acquire(backend_id)
         except Exception:
@@ -131,6 +222,10 @@ class Speech:
         self._backend = None
         self._event_backend = None
         self._prism_error: type[Exception] = Exception
+        self._override = os.environ.get("FREIGHT_FATE_SPEECH_BACKEND")
+        self._event_pref: str | None = None
+        self._config: dict[str, float | str] = {}
+        self._refresh_timer = 0.0
         if os.environ.get("FREIGHT_FATE_NO_SPEECH"):
             log.info("Speech disabled via FREIGHT_FATE_NO_SPEECH")
             return
@@ -138,11 +233,12 @@ class Speech:
             import prism
 
             self._ctx = prism.Context()
-            self._backend = pick_backend(self._ctx, os.environ.get("FREIGHT_FATE_SPEECH_BACKEND"))
+            self._backend = pick_backend(self._ctx, self._override)
             self._prism_error = prism.PrismError
             if self._backend is None:
-                log.warning("No usable speech backend on this machine; continuing silently")
-                self._ctx = None
+                # Keep the context: the player may start their screen reader
+                # after the game, and refresh() will connect to it then.
+                log.warning("No usable speech backend yet; will keep checking")
             else:
                 log.info("Speech backend: %s", self._backend.name)
                 self.select_event_backend(EVENT_BACKEND)
@@ -248,6 +344,10 @@ class Speech:
         separate software voice is used instead, so the feature works the same
         on every platform. Falls back to the main voice only when there is no
         separate voice at all."""
+        # Remember the preference even when it cannot be honored right now:
+        # refresh() re-runs the selection after a backend swap or when a
+        # screen reader appears mid-session.
+        self._event_pref = name or None
         if self._ctx is None or self._backend is None:
             return
         if not name:
@@ -287,7 +387,12 @@ class Speech:
         """Push speech parameters to every backend that supports them.
 
         Unsupported parameters (and backends) are skipped silently, and any
-        backend failure is logged without disturbing the others or the game."""
+        backend failure is logged without disturbing the others or the game.
+        The values are remembered so a backend swap mid-session (see
+        :meth:`refresh`) can re-apply the player's settings to the new voice."""
+        for key, value in (("rate", rate), ("pitch", pitch), ("volume", volume), ("voice", voice)):
+            if value is not None:
+                self._config[key] = value
         for backend in self._backends():
             self._configure_backend(backend, rate, pitch, volume, voice)
 
@@ -348,7 +453,17 @@ class Speech:
         """Speak (and braille, where supported) the given text."""
         if self._backend is None or not text:
             return
-        if not self._speak_with_backend(self._backend, text, interrupt):
+        if self._speak_with_backend(self._backend, text, interrupt):
+            return
+        # The utterance failed: the screen reader probably just quit or was
+        # switched. Re-detect immediately and retry once so this line is not
+        # lost; if nothing can speak right now, poll() keeps looking.
+        self._backend = None
+        if (
+            self.refresh(announce=False)
+            and self._backend is not None
+            and not self._speak_with_backend(self._backend, text, interrupt)
+        ):
             self._backend = None
 
     def say_event(self, text: str, interrupt: bool = True) -> None:
@@ -369,6 +484,79 @@ class Speech:
             if interrupt:
                 self.stop_main()
             self.say(text, interrupt=False)
+
+    # -- runtime re-detection ----------------------------------------------------
+    #
+    # The backend chosen at startup can die at any time: players switch screen
+    # readers mid-session (NVDA to Narrator and back), restart them, or start
+    # them after the game. These hooks notice within a few seconds and rebind
+    # speech to whatever is running instead of leaving the game mute.
+
+    def refresh(self, announce: bool = True) -> bool:
+        """Re-detect which screen reader or voice should be speaking.
+
+        Runs the same selection as startup: the environment override first,
+        then the highest-priority backend that is usable right now. When the
+        choice changes, the event voice is re-selected and the player's
+        speech settings are re-applied to the new voice. Returns True when
+        the main voice changed."""
+        if self._ctx is None:
+            return False
+        old_backend = self._backend
+        old_name = self.backend_name if old_backend is not None else None
+        try:
+            backend = pick_backend(self._ctx, self._override)
+        except Exception:
+            log.exception("Speech re-detection failed")
+            return False
+        if backend is None:
+            if old_backend is None:
+                return False
+            log.warning("Speech backend %s went away and nothing else can speak", old_name)
+            self._backend = None
+            self._event_backend = None
+            return True
+        try:
+            new_name = backend.name
+        except Exception:
+            new_name = "unknown"
+        if old_backend is not None and new_name == old_name:
+            # Same main voice as before; just make sure the event voice is
+            # alive too (it can die independently, e.g. a SAPI hiccup).
+            if self._event_pref and self._event_backend is None:
+                self.select_event_backend(self._event_pref)
+                if self._event_backend is not None and self._config:
+                    self.configure(**self._config)
+            return False
+        self._backend = backend
+        log.info("Speech backend switched: %s -> %s", old_name or "none", new_name)
+        self.select_event_backend(self._event_pref)
+        if self._config:
+            self.configure(**self._config)
+        if announce:
+            # The UIA backend is how the game reaches Narrator; players know
+            # the screen reader's name, not the plumbing's.
+            display = "Narrator" if new_name == "UIA" else new_name
+            self.say(f"Speech is now using {display}.", interrupt=False)
+        return True
+
+    def poll(self, dt: float) -> None:
+        """Periodic health check, driven every frame by the game loop."""
+        if self._ctx is None:
+            return
+        self._refresh_timer += dt
+        if self._refresh_timer < REFRESH_INTERVAL_S:
+            return
+        self._refresh_timer = 0.0
+        self.refresh()
+
+    def request_refresh(self) -> None:
+        """Make the next :meth:`poll` re-detect immediately.
+
+        Called when the game window regains focus: switching screen readers
+        happens outside the game, so that is the moment a change most likely
+        just occurred."""
+        self._refresh_timer = REFRESH_INTERVAL_S
 
     _PREVIEW_FEATURES = {
         "speech_rate": "supports_set_rate",

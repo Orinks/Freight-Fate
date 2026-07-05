@@ -365,6 +365,10 @@ class App:
             while self.running:
                 dt = self.clock.tick(FPS) / 1000.0
                 for event in pygame.event.get():
+                    if event.type == pygame.WINDOWFOCUSGAINED:
+                        # Switching screen readers happens outside the game;
+                        # re-check speech the moment the player comes back.
+                        self.speech.request_refresh()
                     if event.type == pygame.QUIT:
                         self.running = False
                     elif event.type in _CONTROLLER_EVENTS:
@@ -382,6 +386,8 @@ class App:
                 if state is not None and getattr(state, "wants_controller_repeat", False):
                     for event in repeats:
                         state.handle_controller(event, self.controller)
+                # Reconnect speech if the player's screen reader changed.
+                self.speech.poll(dt)
                 if self.controller.take_disconnect():
                     self.ctx.say(
                         "Controller disconnected. You can keep playing with the "

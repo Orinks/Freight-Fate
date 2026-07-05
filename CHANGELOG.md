@@ -55,6 +55,18 @@
 
 ### Fixed
 
+- **Switching screen readers no longer leaves the game silent.** The game now
+  notices within a few seconds when your screen reader closes or changes, for
+  example going from NVDA to Narrator and back to NVDA, and reconnects its
+  speech to whichever voice is running, telling you which one it picked.
+  While Narrator is running, the game keeps its own Windows voice so that
+  moving through menus still cuts speech off crisply; Narrator itself only
+  carries the game's speech as a last resort when no other voice on the
+  machine works. This also
+  works if you start the game before your screen reader: speech simply
+  begins once the screen reader is up. Your speech rate, voice, and separate
+  event voice settings carry over to the reconnected voice automatically.
+
 - **Release archives no longer ship the build machine's log.** The packaging
   smoke check writes a log inside the build folder; it is now stripped
   alongside saves before archiving, so a fresh download starts with an empty

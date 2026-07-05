@@ -2,8 +2,9 @@
 
 from dataclasses import dataclass, field
 
+from freight_fate import speech as speech_module
 from freight_fate.audio import ASSETS, AudioEngine
-from freight_fate.speech import Speech, pick_backend, pick_event_backend
+from freight_fate.speech import REFRESH_INTERVAL_S, Speech, pick_backend, pick_event_backend
 
 
 @dataclass
@@ -103,6 +104,68 @@ def test_backend_without_speak_or_output_is_skipped():
     assert pick_backend(ctx).name == "SAPI"
 
 
+def test_cached_fallback_does_not_mask_a_screen_reader_that_started():
+    # The acquire_best trap: it returns the highest-priority backend with a
+    # live cached instance -- whatever voice the game is already holding --
+    # not what is running. Here NVDA started mid-session while acquire_best
+    # still offers the usable OneCore fallback; selection must ignore it and
+    # find NVDA through live runtime checks.
+    ctx = FakeContext(
+        [FakeBackend("NVDA", 103), FakeBackend("ONE_CORE", 98)],
+        best="ONE_CORE",  # what acquire_best returns: the held, cached voice
+    )
+    assert pick_backend(ctx).name == "NVDA"
+
+
+def _narrator_registry(nvda_running: bool) -> FakeContext:
+    """A Windows registry shape including the UIA backend, which claims
+    runtime support whether or not Narrator is listening."""
+    return FakeContext(
+        [
+            FakeBackend("NVDA", 103, FakeFeatures(is_supported_at_runtime=nvda_running)),
+            FakeBackend("OneCore", 98),
+            FakeBackend("SAPI", 97),
+            FakeBackend("UIA", 97),
+        ],
+        best="NVDA",
+    )
+
+
+def test_uia_is_skipped_when_narrator_is_not_running(monkeypatch):
+    # Without the gate the game would talk into UIA notifications nobody
+    # reads aloud -- silence. The plain software voice must win instead.
+    monkeypatch.setattr(speech_module, "_narrator_running", lambda: False)
+    assert pick_backend(_narrator_registry(nvda_running=False)).name == "OneCore"
+
+
+def test_narrator_route_stays_last_resort_even_when_narrator_runs(monkeypatch):
+    # Prism's UIA backend cannot interrupt or stop (Narrator queues every
+    # notification), so menu browsing through it is unusable. While any
+    # software voice works, it must win over the Narrator route.
+    monkeypatch.setattr(speech_module, "_narrator_running", lambda: True)
+    assert pick_backend(_narrator_registry(nvda_running=False)).name == "OneCore"
+
+
+def test_narrator_route_used_when_nothing_else_can_speak(monkeypatch):
+    # Queued speech through Narrator still beats total silence.
+    monkeypatch.setattr(speech_module, "_narrator_running", lambda: True)
+    ctx = FakeContext(
+        [
+            FakeBackend("NVDA", 103, FakeFeatures(is_supported_at_runtime=False)),
+            FakeBackend("OneCore", 98, FakeFeatures(is_supported_at_runtime=False)),
+            FakeBackend("UIA", 97),
+        ],
+        best="NVDA",
+    )
+    assert pick_backend(ctx).name == "UIA"
+
+
+def test_running_screen_reader_beats_narrator(monkeypatch):
+    # NVDA and Narrator both up: the richer screen reader API wins.
+    monkeypatch.setattr(speech_module, "_narrator_running", lambda: True)
+    assert pick_backend(_narrator_registry(nvda_running=True)).name == "NVDA"
+
+
 def test_event_channel_uses_sapi_alongside_the_screen_reader():
     ctx = registry(nvda_running=True)
     main = pick_backend(ctx)
@@ -153,8 +216,9 @@ class FakeParamFeatures:
 class RecordingBackend:
     """A backend that records the parameters Speech.configure pushes to it."""
 
-    def __init__(self, name, voices, features):
+    def __init__(self, name, voices, features, priority=0):
         self.name = name
+        self.priority = priority
         self._voices = list(voices)
         self.features = features
         self.rate = None
@@ -420,6 +484,144 @@ def test_event_backend_none_when_no_separate_voice_exists():
     s._backend = ctx.acquire("VoiceOver")
     s.select_event_backend("SAPI")
     assert s.event_backend_name == "none"
+
+
+# -- runtime screen reader switching (NVDA -> Narrator -> NVDA) ---------------
+
+
+def _live_registry(nvda_running: bool):
+    """A speakable registry for runtime-switch tests: NVDA (a screen reader
+    that may or may not be running) plus SAPI (always-on software voice)."""
+    nvda = RecordingBackend(
+        "NVDA",
+        [],
+        FakeParamFeatures(is_supported_at_runtime=nvda_running, supports_stop=True),
+        priority=103,
+    )
+    sapi = RecordingBackend(
+        "SAPI",
+        ["David", "Zira"],
+        FakeParamFeatures(
+            supports_stop=True,
+            supports_set_rate=True,
+            supports_set_pitch=True,
+            supports_set_volume=True,
+            supports_set_voice=True,
+            supports_count_voices=True,
+            supports_get_voice_name=True,
+        ),
+        priority=97,
+    )
+    ctx = FakeContext([nvda, sapi], best="NVDA")
+    s = Speech()  # FREIGHT_FATE_NO_SPEECH (conftest) leaves it empty
+    s._ctx = ctx
+    return s, nvda, sapi
+
+
+def test_say_failure_switches_to_a_live_voice_and_retries():
+    # NVDA quits mid-game: the utterance that fails must come out of the
+    # fallback voice instead of muting the game forever.
+    s, nvda, sapi = _live_registry(nvda_running=False)
+    s._backend = nvda
+    nvda.fail_output = True
+    s.say("Turn left ahead.")
+    assert s.backend_name == "SAPI"
+    assert sapi.spoken == [("Turn left ahead.", True)]
+
+
+def test_say_failure_with_no_live_voice_recovers_when_one_returns():
+    s, nvda, sapi = _live_registry(nvda_running=False)
+    sapi.features.is_supported_at_runtime = False  # nothing else to speak with
+    s._backend = nvda
+    nvda.fail_output = True
+    s.say("hello")
+    assert not s.available
+    nvda.fail_output = False
+    nvda.features.is_supported_at_runtime = True  # the screen reader is back
+    s.poll(REFRESH_INTERVAL_S)
+    assert s.backend_name == "NVDA"
+    assert nvda.spoken == [("Speech is now using NVDA.", False)]
+
+
+def test_poll_returns_to_the_screen_reader_when_it_comes_back():
+    # The game fell back to SAPI while NVDA was closed; when NVDA reappears
+    # the periodic check must switch back and say so through the new voice.
+    s, nvda, sapi = _live_registry(nvda_running=False)
+    s._backend = sapi
+    s.poll(REFRESH_INTERVAL_S)
+    assert s.backend_name == "SAPI"  # nothing better yet: stays put
+    nvda.features.is_supported_at_runtime = True
+    s.poll(REFRESH_INTERVAL_S)
+    assert s.backend_name == "NVDA"
+    assert nvda.spoken == [("Speech is now using NVDA.", False)]
+
+
+def test_switch_reselects_event_voice_and_reapplies_settings():
+    # While NVDA was closed the main voice fell back to SAPI, so there was no
+    # separate event voice. Switching back to NVDA must revive the SAPI event
+    # voice and push the player's saved speech settings onto it.
+    s, nvda, sapi = _live_registry(nvda_running=False)
+    s._backend = sapi
+    s.select_event_backend("SAPI")  # SAPI is the main voice: nothing separate
+    assert s.event_backend_name == "none"
+    s.configure(rate=0.8, voice="Zira")
+    nvda.features.is_supported_at_runtime = True
+    s.poll(REFRESH_INTERVAL_S)
+    assert s.backend_name == "NVDA"
+    assert s.event_backend_name == "SAPI"
+    assert sapi.rate == 0.8
+    assert sapi.voice == 1
+
+
+def test_event_voice_revives_after_a_failure():
+    s, nvda, sapi = _live_registry(nvda_running=True)
+    s._backend = nvda
+    s.select_event_backend("SAPI")
+    assert s.event_backend_name == "SAPI"
+    sapi.fail_output = True
+    s.say_event("Brake now.")  # falls back to the main voice...
+    assert s.event_backend_name == "none"
+    assert nvda.spoken == [("Brake now.", False)]
+    sapi.fail_output = False
+    s.poll(REFRESH_INTERVAL_S)  # ...and the health check brings it back
+    assert s.event_backend_name == "SAPI"
+
+
+def test_request_refresh_makes_the_next_poll_immediate():
+    s, nvda, sapi = _live_registry(nvda_running=False)
+    s._backend = sapi
+    nvda.features.is_supported_at_runtime = True
+    s.poll(0.016)  # a normal frame: far too soon for the periodic check
+    assert s.backend_name == "SAPI"
+    s.request_refresh()  # the game window regained focus
+    s.poll(0.016)
+    assert s.backend_name == "NVDA"
+
+
+def test_speech_appears_for_a_screen_reader_started_after_the_game():
+    s, nvda, sapi = _live_registry(nvda_running=False)
+    sapi.features.is_supported_at_runtime = False
+    s.poll(REFRESH_INTERVAL_S)
+    assert not s.available  # still nothing on the machine can speak
+    nvda.features.is_supported_at_runtime = True
+    s.poll(REFRESH_INTERVAL_S)
+    assert s.backend_name == "NVDA"
+
+
+def test_healthy_backend_is_kept_without_announcements():
+    s, nvda, _sapi = _live_registry(nvda_running=True)
+    s._backend = nvda
+    for _ in range(3):
+        s.poll(REFRESH_INTERVAL_S)
+    assert s.backend_name == "NVDA"
+    assert nvda.spoken == []  # no spurious "speech is now using" chatter
+
+
+def test_poll_is_safe_without_prism():
+    s = Speech()  # headless: no context at all
+    s.poll(REFRESH_INTERVAL_S)  # must not raise
+    s.request_refresh()
+    assert not s.refresh()
 
 
 class _RecordingSpeech:
