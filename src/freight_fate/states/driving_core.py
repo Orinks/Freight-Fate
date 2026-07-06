@@ -93,6 +93,14 @@ def terse_hazard_message(message: str) -> str:
     return text or message
 
 
+def timezone_crossing_message(event, terse: bool) -> str:
+    """The spoken zone crossing: terse mode says only the zone itself."""
+    zone = event.data.get("to_zone")
+    if terse and zone is not None:
+        return f"{zone.name}."
+    return event.message
+
+
 DRIVE_PHASE_PICKUP = "pickup"
 DRIVE_PHASE_DELIVERY = "delivery"
 

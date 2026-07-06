@@ -5,9 +5,9 @@
 ### Added
 
 - **The map now has real time zones, and your clock changes as you cross
-  them.** Drive west out of Tennessee on I-40 and you will hear "You are
-  crossing into Central Time. Set your clock back one hour; it is now 2:15
-  PM." Every spoken clock -- rest stops, sleep, city arrivals, the driving
+  them.** Drive west out of Tennessee on I-40 and you will hear "Crossing
+  into Central Time. It is now 2:15 PM." With terse speech on, it is just
+  "Central Time." Every spoken clock -- rest stops, sleep, city arrivals, the driving
   status screens -- now reads the local time where your truck is, and the
   clock readouts name the zone, like "2:15 PM Central Time". Delivery
   deadlines are also quoted the way a real receiver would say them: in the

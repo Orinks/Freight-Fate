@@ -910,13 +910,12 @@ class Trip:
             return
         previous = self._current_timezone
         self._current_timezone = zone
-        hours = abs(zone.offset_h - previous.offset_h)
-        amount = "one hour" if hours == 1.0 else f"{hours:.0f} hours"
-        direction = "back" if zone.offset_h < previous.offset_h else "forward"
+        # The new local time is the whole message: it shows which way the
+        # clock jumped without spelling out an instruction the game already
+        # handles, and it stays short on routes that cross often.
         self._emit(
             TripEventKind.TIMEZONE_CROSSING,
-            f"You are crossing into {zone.name}. Set your clock {direction} "
-            f"{amount}; it is now {clock_text(self.local_hour)}.",
+            f"Crossing into {zone.name}. It is now {clock_text(self.local_hour)}.",
             from_zone=previous,
             to_zone=zone,
         )

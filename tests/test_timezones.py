@@ -164,22 +164,31 @@ def test_crossing_announces_the_new_local_clock_once():
     trip._check_timezone()
     events = [e for e in trip._events if e.kind == TripEventKind.TIMEZONE_CROSSING]
     assert len(events) == 1
-    message = events[0].message
-    assert "Central Time" in message
-    assert "back" in message
-    assert "11 AM" in message  # noon Eastern reference is 11 AM Central
+    # Noon on the Eastern reference clock is 11 AM Central: the new local
+    # time is the whole announcement, with no clock-setting instruction.
+    assert events[0].message == "Crossing into Central Time. It is now 11 AM."
     trip._check_timezone()
     assert len([e for e in trip._events if e.kind == TripEventKind.TIMEZONE_CROSSING]) == 1
 
 
-def test_crossing_east_says_set_the_clock_forward():
+def test_crossing_east_announces_the_eastern_clock():
     trip = _trip(Route(["B", "A"], [_tennessee_leg()]), start_hour=12.0)
     trip.position_mi = 45.0
     trip._check_timezone()
     events = [e for e in trip._events if e.kind == TripEventKind.TIMEZONE_CROSSING]
     assert len(events) == 1
-    assert "Eastern Time" in events[0].message
-    assert "forward" in events[0].message
+    assert events[0].message == "Crossing into Eastern Time. It is now 12 PM."
+
+
+def test_terse_speech_says_only_the_zone():
+    from freight_fate.states.driving_core import timezone_crossing_message
+
+    trip = _trip(Route(["A", "B"], [_tennessee_leg()]), start_hour=12.0)
+    trip.position_mi = 35.0
+    trip._check_timezone()
+    event = next(e for e in trip._events if e.kind == TripEventKind.TIMEZONE_CROSSING)
+    assert timezone_crossing_message(event, terse=True) == "Central Time."
+    assert timezone_crossing_message(event, terse=False) == event.message
 
 
 def test_local_hour_follows_the_truck_across_the_boundary():

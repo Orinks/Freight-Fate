@@ -49,6 +49,12 @@ class DrivingEventMixin:
                 self.ctx.audio.play(sound)
             self.ctx.say_event(event.message, interrupt=False)
             self.ctx.award_achievement("state_crossing", event=True)
+        elif kind == TripEventKind.TIMEZONE_CROSSING:
+            if sound is not None:
+                self.ctx.audio.play(sound)
+            self.ctx.say_event(
+                timezone_crossing_message(event, self._terse_speech()), interrupt=False
+            )
         elif kind == TripEventKind.ARRIVED:
             pass  # handled by _arrive()
         elif self._event_disables_cruise(event):
