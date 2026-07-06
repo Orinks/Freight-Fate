@@ -375,7 +375,9 @@ class DrivingUpdateMixin:
             if pad.active and pad.steering:
                 steer = pad.steering
         self.lane.steering = steer
-        leg = self.route.legs[self.trip.current_leg_index]
+        # The trip's own route: after a surface chain swap the active trip
+        # drives the street legs, not the highway legs.
+        leg = self.trip.route.legs[self.trip.current_leg_index]
         # The exit ramp is a single lane; the mainline keeps its leg count.
         self.lane.set_lane_count(1 if self._ramp_mi is not None else leg_lane_count(leg))
         curve = 0.0

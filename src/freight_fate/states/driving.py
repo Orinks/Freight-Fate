@@ -153,6 +153,12 @@ class DrivingState(DrivingControlsMixin, DrivingUpdateMixin, DrivingEventMixin, 
         self._destination_exit_taken = False
         self._missed_destination_exit_said = False
         self._destination_exit_announced_key = ""
+        # Surface chain: after the destination ramp, the drive continues on
+        # the facility's real street chain to the gate instead of a scripted
+        # arrival. The highway trip is kept for records; the active trip
+        # becomes the surface route.
+        self._surface_chain = False
+        self._highway_trip = None
         self._cruise_mph: float | None = None
         self._cruise_throttle = 0.0
         self._acc_following = False
@@ -195,12 +201,15 @@ class DrivingState(DrivingControlsMixin, DrivingUpdateMixin, DrivingEventMixin, 
     def _logbook_location(self) -> str:
         if self.phase == DRIVE_PHASE_PICKUP:
             return f"local route to {self._pickup_facility_text()}"
-        if not self.route.legs:
+        route = self.trip.route  # the surface chain once off the highway
+        if not route.legs:
             return self.job.destination
-        index = max(0, min(self.trip.current_leg_index, len(self.route.legs) - 1))
-        leg = self.route.legs[index]
-        start = self.route.cities[index]
-        end = self.route.cities[index + 1]
+        index = max(0, min(self.trip.current_leg_index, len(route.legs) - 1))
+        leg = route.legs[index]
+        if self._surface_chain:
+            return f"{leg.highway} in {self.job.destination}"
+        start = route.cities[index]
+        end = route.cities[index + 1]
         return f"{leg.highway} from {start} to {end}"
 
     # -- save and resume -----------------------------------------------------------
@@ -252,6 +261,9 @@ class DrivingState(DrivingControlsMixin, DrivingUpdateMixin, DrivingEventMixin, 
             "failure_to_stop_count": self.failure_to_stop_count,
             "lane_offset": self.lane.offset,
             "lane_index": self.lane.lane,
+            # Mid-surface-chain saves resume on the street chain; absent on
+            # older saves, which resume exactly as before.
+            "surface_chain": self._surface_chain,
         }
 
     @classmethod
@@ -300,6 +312,20 @@ class DrivingState(DrivingControlsMixin, DrivingUpdateMixin, DrivingEventMixin, 
             state.speeding_strikes = int(data["speeding_strikes"])
             state.trip.restore(position_mi, game_minutes)
             state.trip.restore_toll_charges(list(data.get("toll_charges", ())))
+            if bool(data.get("surface_chain", False)):
+                # The save was made on the facility's street chain: re-enter
+                # it (deterministic rebuild; the chain shares the restored
+                # toll ledger). If the data no longer offers a chain, fall
+                # back to the highway route just short of the destination
+                # exit so the player simply takes it again.
+                state._destination_exit_taken = True
+                if state._begin_surface_chain(announce=False):
+                    state.trip.restore(position_mi, game_minutes)
+                else:
+                    state._destination_exit_taken = False
+                    state.trip.restore(
+                        max(0.0, state.trip.total_miles - 2.0), game_minutes
+                    )
             state.truck.restore_air_brake_snapshot(data.get("air_brake"), default_ready=True)
             if bool(data.get("engine_on", False)):
                 state.truck.start_engine()

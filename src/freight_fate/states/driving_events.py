@@ -595,6 +595,68 @@ class DrivingEventMixin:
             return True
         return stop.type == "delivery_destination" and self.ctx.settings.steering_assist == "off"
 
+    def _surface_chain_route(self):
+        """The destination facility's tier-1 street chain, or None.
+
+        Only a genuine multi-segment turn-level route makes a chain; a
+        single synthetic leg would just be the old teleport with extra
+        steps, so those facilities keep the scripted arrival."""
+        try:
+            route = self.ctx.world.facility_approach_route(
+                self.job.destination, self.job.destination_location
+            )
+        except (KeyError, ValueError):
+            return None
+        if route is None or len(route.legs) < 2:
+            return None
+        if not any(leg.local_speed_mph > 0 for leg in route.legs):
+            return None
+        return route
+
+    def _begin_surface_chain(self, *, announce: bool = True) -> bool:
+        """Swap the finished highway trip for the facility's street chain.
+
+        The clock, the day of the week, and the toll ledger carry over, so
+        deadlines, rush hour, and settlement are unaffected: only the road
+        under the wheels changes."""
+        if self._surface_chain:
+            return False  # already on the streets
+        route = self._surface_chain_route()
+        if route is None:
+            return False
+        old = self.trip
+        surface = Trip(
+            route,
+            self.truck,
+            self.weather,
+            time_scale=old.time_scale,
+            seed=self.trip_seed ^ 0x5AFE,
+            start_hour=old.start_hour,
+            imperial=old.imperial,
+            hazard_scale=0.0,  # no random hazards on the last city miles
+            career_hours=old.career_hours,
+        )
+        surface.game_minutes = old.game_minutes  # deadline and clock continuity
+        surface.toll_charges = old.toll_charges  # settlement reads the live trip
+        surface.hos_violation = old.hos_violation
+        self._highway_trip = old
+        self.trip = surface
+        self._surface_chain = True
+        self._reset_exit_lane_state()
+        self._exit_signal_on = False
+        if announce:
+            first = route.legs[0]
+            street = (
+                first.local_cue.rstrip(".") if first.local_cue else f"Start on {first.highway}"
+            )
+            self.ctx.audio.play("ui/notify", volume=0.7)
+            self.ctx.say_event(
+                f"Off the ramp and onto city streets: {street[:1].lower()}{street[1:]}. "
+                f"{self.trip._distance_text(route.miles)} to the facility gate.",
+                interrupt=False,
+            )
+        return True
+
     def _begin_ramp_terminal(self, stop) -> None:
         """Decide what controls the end of the ramp just taken.
 
@@ -770,6 +832,8 @@ class DrivingEventMixin:
                 self._ramp_stop = None
                 self._ramp_control = ""
                 if stop.type == "delivery_destination":
+                    if self._begin_surface_chain():
+                        return
                     self.trip.position_mi = self.trip.total_miles
                     self.trip.finished = True
                     self._open_facility_arrival()
