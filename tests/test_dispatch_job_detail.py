@@ -35,6 +35,9 @@ def test_f1_on_dispatch_job_opens_structured_detail_view():
         assert f"> Cargo: {job.cargo.label}." in lines
         assert "Origin:" in joined
         assert "Destination:" in joined
+        # The detail view always names the state, even for a unique city name,
+        # so a player who does not know the geography can ask for it here.
+        assert "in Buffalo, New York" in joined
         assert "Distance:" in joined
         assert "Pay:" in joined
         assert "Dollars per mile:" in joined

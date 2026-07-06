@@ -13,6 +13,11 @@
   Michigan, Michigan", now say it once. Existing careers and saved trips carry
   over unchanged.
 
+- **Job details always tell you the state.** Not sure where Baton Rouge is?
+  Open a job's detail view from the dispatch board and the origin and
+  destination lines now always include the state, like "in Baton Rouge,
+  Louisiana", even for cities with a unique name. Board offers stay short.
+
 ### Added
 
 - **The upper Midwest and Great Lakes fill in with twenty-nine new cities
