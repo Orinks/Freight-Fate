@@ -72,8 +72,10 @@ def _career_location(profile: Profile) -> str:
     trip = profile.active_trip or {}
     job = trip.get("job", {})
     destination = job.get("destination")
+    # Spoken fields exist in post-slug payloads; legacy payloads fall back to
+    # origin/destination, which there hold the old speakable display name.
     if trip.get("kind") == "pickup_drive":
-        origin = str(job.get("origin") or profile.current_city)
+        origin = str(job.get("origin_spoken") or job.get("origin") or profile.current_city)
         facility = facility_text(
             str(job.get("origin_type", "metro_market")),
             str(job.get("origin_location", "")),
@@ -86,7 +88,7 @@ def _career_location(profile: Profile) -> str:
         facility = facility_text(
             str(job.get("destination_type", "metro_market")),
             str(job.get("destination_location", "")),
-            str(destination),
+            str(job.get("destination_spoken") or destination),
             str(job.get("destination_locality", "")),
         )
         return f"{loaded} {facility}"
@@ -94,13 +96,13 @@ def _career_location(profile: Profile) -> str:
         facility = facility_text(
             str(job.get("destination_type", "metro_market")),
             str(job.get("destination_location", "")),
-            str(destination),
+            str(job.get("destination_spoken") or destination),
             str(job.get("destination_locality", "")),
         )
         return f"on the road to {facility}"
     try:
         terminal = get_world().home_terminal(profile.current_city)
-        return f"at {terminal.name} in {profile.current_city}"
+        return f"at {terminal.name} in {get_world().spoken_city(profile.current_city)}"
     except KeyError:
         return f"in {profile.current_city}"
 
@@ -246,7 +248,7 @@ class MainMenuState(MenuState):
             terminal = self.ctx.world.home_terminal(p.current_city)
             self.ctx.say(
                 f"Welcome back, {p.name}. You are parked at "
-                f"{terminal.name} in {p.current_city} "
+                f"{terminal.name} in {self.ctx.world.spoken_city(p.current_city)} "
                 f"with {p.money:,.0f} dollars.",
                 interrupt=True,
             )
@@ -502,7 +504,7 @@ class ConfirmCareerActionState(MenuState):
         if self.action == "reset":
             detail = (
                 "Resetting starts this driver over at "
-                f"{self.profile.current_city} with a fresh truck, "
+                f"{self.ctx.world.spoken_city(self.profile.current_city)} with a fresh truck, "
                 "starting money, no active trip, and no delivery history."
             )
         else:
@@ -530,7 +532,8 @@ class ConfirmCareerActionState(MenuState):
             fresh.save()
             message = (
                 f"{name} reset. The career starts over at "
-                f"{fresh.current_city} with {fresh.money:,.0f} dollars."
+                f"{self.ctx.world.spoken_city(fresh.current_city)} "
+                f"with {fresh.money:,.0f} dollars."
             )
         else:
             self.path.unlink(missing_ok=True)
@@ -622,9 +625,9 @@ class HomeTerminalState(MenuState):
         self.driver_name = driver_name
         by_region: dict[str, list[str]] = {}
         for city in ctx.world.cities.values():
-            by_region.setdefault(city.region, []).append(city.name)
-        for names in by_region.values():
-            names.sort()
+            by_region.setdefault(city.region, []).append(city.key)
+        for keys in by_region.values():
+            keys.sort(key=lambda k: ctx.world.cities[k].name)
         self._cities_by_region = by_region
         self._regions = sorted(by_region, key=_region_menu_name)
         default = (
@@ -687,16 +690,14 @@ class HomeCityState(MenuState):
 
     def build_items(self) -> list[MenuItem]:
         items: list[MenuItem] = []
-        for name in self._cities:
-            city = self.ctx.world.cities[name]
-            terminal = self.ctx.world.home_terminal(name)
-            # Some city keys are already state-disambiguated ("Springfield,
-            # Illinois"); don't append the state a second time.
-            place = name if name.endswith(f", {city.state}") else f"{name}, {city.state}"
+        for key in self._cities:
+            city = self.ctx.world.cities[key]
+            terminal = self.ctx.world.home_terminal(key)
+            place = city.spoken_qualified
             items.append(
                 MenuItem(
                     place,
-                    lambda n=name: self._pick(n),
+                    lambda k=key: self._pick(k),
                     help=f"Start at {terminal.spoken_name} in {place}.",
                 )
             )
@@ -720,8 +721,8 @@ class HomeCityState(MenuState):
         )
         self.ctx.say(
             f"{loaded_over}Welcome aboard, {name}. Your truck is parked at "
-            f"{terminal.spoken_name} in the {city} service area with "
-            f"{profile.money:,.0f} dollars and a full tank. "
+            f"{terminal.spoken_name} in the {self.ctx.world.spoken_city(city)} "
+            f"service area with {profile.money:,.0f} dollars and a full tank. "
             "Your first stop is the dispatch board.",
             interrupt=True,
         )

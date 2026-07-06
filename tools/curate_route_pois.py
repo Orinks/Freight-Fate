@@ -95,7 +95,7 @@ class Candidate:
 
 
 MANUAL_CORRIDOR_POIS: dict[tuple[str, str], tuple[dict[str, Any], ...]] = {
-    ("Buffalo", "New York"): (
+    ("buffalo_ny_us", "new_york_ny_us"): (
         {
             "name": "Pembroke Service Area",
             "type": "service_plaza",
@@ -147,7 +147,7 @@ MANUAL_CORRIDOR_POIS: dict[tuple[str, str], tuple[dict[str, Any], ...]] = {
             "curation": "curated",
         },
     ),
-    ("Tulsa", "Kansas City"): (
+    ("tulsa_ok_us", "kansas_city_mo_us"): (
         {
             "name": "Pete's 66 Fort Scott",
             "type": "truck_stop",
@@ -183,7 +183,7 @@ MANUAL_CORRIDOR_POIS: dict[tuple[str, str], tuple[dict[str, Any], ...]] = {
             "curation": "curated",
         },
     ),
-    ("Sacramento", "San Francisco"): (
+    ("sacramento_ca_us", "san_francisco_ca_us"): (
         {
             "name": "Sacramento 49er Travel Plaza",
             "type": "travel_center",
@@ -201,7 +201,7 @@ MANUAL_CORRIDOR_POIS: dict[tuple[str, str], tuple[dict[str, Any], ...]] = {
             "curation": "curated",
         },
     ),
-    ("Sacramento", "Reno"): (
+    ("sacramento_ca_us", "reno_nv_us"): (
         {
             "name": "Sacramento 49er Travel Plaza",
             "type": "travel_center",
@@ -219,7 +219,7 @@ MANUAL_CORRIDOR_POIS: dict[tuple[str, str], tuple[dict[str, Any], ...]] = {
             "curation": "curated",
         },
     ),
-    ("Reno", "Las Vegas"): (
+    ("reno_nv_us", "las_vegas_nv_us"): (
         {
             "name": "Hawthorne Shell",
             "type": "truck_stop",
@@ -254,7 +254,7 @@ MANUAL_CORRIDOR_POIS: dict[tuple[str, str], tuple[dict[str, Any], ...]] = {
             "curation": "curated",
         },
     ),
-    ("Spokane", "Boise"): (
+    ("spokane_wa_us", "boise_id_us"): (
         {
             "name": "Love's Travel Stop Post Falls",
             "type": "travel_center",

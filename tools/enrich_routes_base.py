@@ -75,34 +75,50 @@ ORS_CORRIDOR_SOURCE = (
 ORS_GRADE_SOURCE = (
     "OpenRouteService route elevation profile segmented by terrain (development-time)."
 )
+def spoken_state(data, value):
+    """Full state name for a city ``state`` value.
+
+    Post-slug world data stores 2-letter codes on cities while corridor
+    metadata (state crossings, state miles, Census/OSM context) keeps full
+    names. Codes resolve through the world's geo lookup; full names and
+    unknown values pass through unchanged.
+    """
+    value = str(value or "").strip()
+    for country in data.get("geo", {}).get("countries", {}).values():
+        states = country.get("states", {})
+        if value in states:
+            return str(states[value])
+    return value
+
+
 HIGH_PRIORITY_REMAINING_CORRIDORS = (
     {
-        "from": "Philadelphia",
-        "to": "Pittsburgh",
+        "from": "philadelphia_pa_us",
+        "to": "pittsburgh_pa_us",
         "label": "PA Turnpike / I-76 Allegheny corridor",
         "why": "major toll corridor with service plazas, grades, tunnels, and emergency service modeling",
     },
     {
-        "from": "Cleveland",
-        "to": "Chicago",
+        "from": "cleveland_oh_us",
+        "to": "chicago_il_us",
         "label": "Ohio/Indiana Turnpike and I-80/I-90 corridor",
         "why": "major toll and service-plaza-heavy Midwest freight corridor",
     },
     {
-        "from": "New York",
-        "to": "Boston",
+        "from": "new_york_ny_us",
+        "to": "boston_ma_us",
         "label": "I-95 / New England toll corridor",
         "why": "extends Northeast toll and service-plaza realism beyond the current NY-Philadelphia batch",
     },
     {
-        "from": "Philadelphia",
-        "to": "Baltimore",
+        "from": "philadelphia_pa_us",
+        "to": "baltimore_md_us",
         "label": "I-95 Northeast Corridor south of Philadelphia",
         "why": "connects the current NJ/Philadelphia lane to the broader Northeast freight network",
     },
     {
-        "from": "Pittsburgh",
-        "to": "Cleveland",
+        "from": "pittsburgh_pa_us",
+        "to": "cleveland_oh_us",
         "label": "PA/Ohio Turnpike connector corridor",
         "why": "ties the PA Turnpike batch into the Ohio Turnpike network",
     },

@@ -39,7 +39,7 @@ log = logging.getLogger(__name__)
 
 SAVE_VERSION = 4
 STARTING_MONEY = 5_000.0
-DEFAULT_CITY = "Chicago"
+DEFAULT_CITY = "chicago_il_us"
 SIGNATURE_FIELD = "_signature"
 SIGNATURE_VERSION_FIELD = "_signature_version"
 SIGNATURE_VERSION = 1

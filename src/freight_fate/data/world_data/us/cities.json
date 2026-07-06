@@ -1,7 +1,9 @@
 {
   "cities": {
-    "New York": {
-      "state": "New York",
+    "new_york_ny_us": {
+      "spoken_city": "New York",
+      "state": "NY",
+      "country": "US",
       "region": "northeast",
       "locations": [
         {
@@ -32,8 +34,10 @@
       "lat": 40.8085,
       "lon": -73.8785
     },
-    "Boston": {
-      "state": "Massachusetts",
+    "boston_ma_us": {
+      "spoken_city": "Boston",
+      "state": "MA",
+      "country": "US",
       "region": "northeast",
       "locations": [
         {
@@ -56,8 +60,10 @@
       "lat": 42.3601,
       "lon": -71.0589
     },
-    "Philadelphia": {
-      "state": "Pennsylvania",
+    "philadelphia_pa_us": {
+      "spoken_city": "Philadelphia",
+      "state": "PA",
+      "country": "US",
       "region": "northeast",
       "locations": [
         {
@@ -80,8 +86,10 @@
       "lat": 39.9526,
       "lon": -75.1652
     },
-    "Pittsburgh": {
-      "state": "Pennsylvania",
+    "pittsburgh_pa_us": {
+      "spoken_city": "Pittsburgh",
+      "state": "PA",
+      "country": "US",
       "region": "appalachia",
       "locations": [
         {
@@ -104,8 +112,10 @@
       "lat": 40.4406,
       "lon": -79.9959
     },
-    "Cleveland": {
-      "state": "Ohio",
+    "cleveland_oh_us": {
+      "spoken_city": "Cleveland",
+      "state": "OH",
+      "country": "US",
       "region": "great_lakes",
       "locations": [
         {
@@ -128,8 +138,10 @@
       "lat": 41.4993,
       "lon": -81.6944
     },
-    "Chicago": {
-      "state": "Illinois",
+    "chicago_il_us": {
+      "spoken_city": "Chicago",
+      "state": "IL",
+      "country": "US",
       "region": "great_lakes",
       "locations": [
         {
@@ -160,8 +172,10 @@
       "lat": 41.8781,
       "lon": -87.6298
     },
-    "Indianapolis": {
-      "state": "Indiana",
+    "indianapolis_in_us": {
+      "spoken_city": "Indianapolis",
+      "state": "IN",
+      "country": "US",
       "region": "corn_belt",
       "locations": [
         {
@@ -184,8 +198,10 @@
       "lat": 39.7684,
       "lon": -86.1581
     },
-    "St. Louis": {
-      "state": "Missouri",
+    "st_louis_mo_us": {
+      "spoken_city": "St. Louis",
+      "state": "MO",
+      "country": "US",
       "region": "heartland",
       "locations": [
         {
@@ -208,8 +224,10 @@
       "lat": 38.627,
       "lon": -90.1994
     },
-    "Nashville": {
-      "state": "Tennessee",
+    "nashville_tn_us": {
+      "spoken_city": "Nashville",
+      "state": "TN",
+      "country": "US",
       "region": "mid_south",
       "locations": [
         {
@@ -232,8 +250,10 @@
       "lat": 36.1627,
       "lon": -86.7816
     },
-    "Atlanta": {
-      "state": "Georgia",
+    "atlanta_ga_us": {
+      "spoken_city": "Atlanta",
+      "state": "GA",
+      "country": "US",
       "region": "atlantic_southeast",
       "locations": [
         {
@@ -264,8 +284,10 @@
       "lat": 33.749,
       "lon": -84.388
     },
-    "Dallas": {
-      "state": "Texas",
+    "dallas_tx_us": {
+      "spoken_city": "Dallas",
+      "state": "TX",
+      "country": "US",
       "region": "southern_plains",
       "locations": [
         {
@@ -288,8 +310,10 @@
       "lat": 32.7767,
       "lon": -96.797
     },
-    "Kansas City": {
-      "state": "Missouri",
+    "kansas_city_mo_us": {
+      "spoken_city": "Kansas City",
+      "state": "MO",
+      "country": "US",
       "region": "heartland",
       "locations": [
         {
@@ -312,8 +336,10 @@
       "lat": 39.0997,
       "lon": -94.5786
     },
-    "Denver": {
-      "state": "Colorado",
+    "denver_co_us": {
+      "spoken_city": "Denver",
+      "state": "CO",
+      "country": "US",
       "region": "rockies",
       "locations": [
         {
@@ -336,8 +362,10 @@
       "lat": 39.7392,
       "lon": -104.9903
     },
-    "Albuquerque": {
-      "state": "New Mexico",
+    "albuquerque_nm_us": {
+      "spoken_city": "Albuquerque",
+      "state": "NM",
+      "country": "US",
       "region": "desert_southwest",
       "locations": [
         {
@@ -360,8 +388,10 @@
       "lat": 35.0844,
       "lon": -106.6504
     },
-    "Phoenix": {
-      "state": "Arizona",
+    "phoenix_az_us": {
+      "spoken_city": "Phoenix",
+      "state": "AZ",
+      "country": "US",
       "region": "desert_southwest",
       "locations": [
         {
@@ -384,8 +414,10 @@
       "lat": 33.4484,
       "lon": -112.074
     },
-    "Salt Lake City": {
-      "state": "Utah",
+    "salt_lake_city_ut_us": {
+      "spoken_city": "Salt Lake City",
+      "state": "UT",
+      "country": "US",
       "region": "rockies",
       "locations": [
         {
@@ -408,8 +440,10 @@
       "lat": 40.7608,
       "lon": -111.891
     },
-    "Las Vegas": {
-      "state": "Nevada",
+    "las_vegas_nv_us": {
+      "spoken_city": "Las Vegas",
+      "state": "NV",
+      "country": "US",
       "region": "desert_southwest",
       "locations": [
         {
@@ -432,8 +466,10 @@
       "lat": 36.1699,
       "lon": -115.1398
     },
-    "Los Angeles": {
-      "state": "California",
+    "los_angeles_ca_us": {
+      "spoken_city": "Los Angeles",
+      "state": "CA",
+      "country": "US",
       "region": "california",
       "locations": [
         {
@@ -464,8 +500,10 @@
       "lat": 34.0522,
       "lon": -118.2437
     },
-    "San Francisco": {
-      "state": "California",
+    "san_francisco_ca_us": {
+      "spoken_city": "San Francisco",
+      "state": "CA",
+      "country": "US",
       "region": "california",
       "locations": [
         {
@@ -488,8 +526,10 @@
       "lat": 37.7749,
       "lon": -122.4194
     },
-    "Portland": {
-      "state": "Oregon",
+    "portland_or_us": {
+      "spoken_city": "Portland",
+      "state": "OR",
+      "country": "US",
       "region": "pacific_northwest",
       "locations": [
         {
@@ -512,8 +552,10 @@
       "lat": 45.5152,
       "lon": -122.6784
     },
-    "Seattle": {
-      "state": "Washington",
+    "seattle_wa_us": {
+      "spoken_city": "Seattle",
+      "state": "WA",
+      "country": "US",
       "region": "pacific_northwest",
       "locations": [
         {
@@ -536,8 +578,10 @@
       "lat": 47.6062,
       "lon": -122.3321
     },
-    "Hartford": {
-      "state": "Connecticut",
+    "hartford_ct_us": {
+      "spoken_city": "Hartford",
+      "state": "CT",
+      "country": "US",
       "region": "northeast",
       "locations": [
         {
@@ -560,8 +604,10 @@
       "lat": 41.7658,
       "lon": -72.6734
     },
-    "Buffalo": {
-      "state": "New York",
+    "buffalo_ny_us": {
+      "spoken_city": "Buffalo",
+      "state": "NY",
+      "country": "US",
       "region": "great_lakes",
       "locations": [
         {
@@ -584,8 +630,10 @@
       "lat": 42.8864,
       "lon": -78.8784
     },
-    "Baltimore": {
-      "state": "Maryland",
+    "baltimore_md_us": {
+      "spoken_city": "Baltimore",
+      "state": "MD",
+      "country": "US",
       "region": "northeast",
       "locations": [
         {
@@ -616,8 +664,10 @@
       "lat": 39.2904,
       "lon": -76.6122
     },
-    "Richmond": {
-      "state": "Virginia",
+    "richmond_va_us": {
+      "spoken_city": "Richmond",
+      "state": "VA",
+      "country": "US",
       "region": "atlantic_southeast",
       "locations": [
         {
@@ -640,8 +690,10 @@
       "lat": 37.5407,
       "lon": -77.436
     },
-    "Raleigh": {
-      "state": "North Carolina",
+    "raleigh_nc_us": {
+      "spoken_city": "Raleigh",
+      "state": "NC",
+      "country": "US",
       "region": "atlantic_southeast",
       "locations": [
         {
@@ -664,8 +716,10 @@
       "lat": 35.7796,
       "lon": -78.6382
     },
-    "Charlotte": {
-      "state": "North Carolina",
+    "charlotte_nc_us": {
+      "spoken_city": "Charlotte",
+      "state": "NC",
+      "country": "US",
       "region": "atlantic_southeast",
       "locations": [
         {
@@ -688,8 +742,10 @@
       "lat": 35.2271,
       "lon": -80.8431
     },
-    "Savannah": {
-      "state": "Georgia",
+    "savannah_ga_us": {
+      "spoken_city": "Savannah",
+      "state": "GA",
+      "country": "US",
       "region": "atlantic_southeast",
       "locations": [
         {
@@ -712,8 +768,10 @@
       "lat": 32.0809,
       "lon": -81.0912
     },
-    "Jacksonville": {
-      "state": "Florida",
+    "jacksonville_fl_us": {
+      "spoken_city": "Jacksonville",
+      "state": "FL",
+      "country": "US",
       "region": "florida",
       "locations": [
         {
@@ -736,8 +794,10 @@
       "lat": 30.3322,
       "lon": -81.6557
     },
-    "Tampa": {
-      "state": "Florida",
+    "tampa_fl_us": {
+      "spoken_city": "Tampa",
+      "state": "FL",
+      "country": "US",
       "region": "florida",
       "locations": [
         {
@@ -760,8 +820,10 @@
       "lat": 27.9506,
       "lon": -82.4572
     },
-    "Miami": {
-      "state": "Florida",
+    "miami_fl_us": {
+      "spoken_city": "Miami",
+      "state": "FL",
+      "country": "US",
       "region": "florida",
       "locations": [
         {
@@ -784,8 +846,10 @@
       "lat": 25.7617,
       "lon": -80.1918
     },
-    "Birmingham": {
-      "state": "Alabama",
+    "birmingham_al_us": {
+      "spoken_city": "Birmingham",
+      "state": "AL",
+      "country": "US",
       "region": "mid_south",
       "locations": [
         {
@@ -808,8 +872,10 @@
       "lat": 33.5186,
       "lon": -86.8104
     },
-    "Memphis": {
-      "state": "Tennessee",
+    "memphis_tn_us": {
+      "spoken_city": "Memphis",
+      "state": "TN",
+      "country": "US",
       "region": "mid_south",
       "locations": [
         {
@@ -840,8 +906,10 @@
       "lat": 35.1495,
       "lon": -90.049
     },
-    "Little Rock": {
-      "state": "Arkansas",
+    "little_rock_ar_us": {
+      "spoken_city": "Little Rock",
+      "state": "AR",
+      "country": "US",
       "region": "mid_south",
       "locations": [
         {
@@ -864,8 +932,10 @@
       "lat": 34.7465,
       "lon": -92.2896
     },
-    "New Orleans": {
-      "state": "Louisiana",
+    "new_orleans_la_us": {
+      "spoken_city": "New Orleans",
+      "state": "LA",
+      "country": "US",
       "region": "gulf_coast",
       "locations": [
         {
@@ -888,8 +958,10 @@
       "lat": 29.9511,
       "lon": -90.0715
     },
-    "Houston": {
-      "state": "Texas",
+    "houston_tx_us": {
+      "spoken_city": "Houston",
+      "state": "TX",
+      "country": "US",
       "region": "gulf_coast",
       "locations": [
         {
@@ -920,8 +992,10 @@
       "lat": 29.7604,
       "lon": -95.3698
     },
-    "San Antonio": {
-      "state": "Texas",
+    "san_antonio_tx_us": {
+      "spoken_city": "San Antonio",
+      "state": "TX",
+      "country": "US",
       "region": "gulf_coast",
       "locations": [
         {
@@ -944,8 +1018,10 @@
       "lat": 29.4241,
       "lon": -98.4936
     },
-    "El Paso": {
-      "state": "Texas",
+    "el_paso_tx_us": {
+      "spoken_city": "El Paso",
+      "state": "TX",
+      "country": "US",
       "region": "desert_southwest",
       "locations": [
         {
@@ -968,8 +1044,10 @@
       "lat": 31.7619,
       "lon": -106.485
     },
-    "Tucson": {
-      "state": "Arizona",
+    "tucson_az_us": {
+      "spoken_city": "Tucson",
+      "state": "AZ",
+      "country": "US",
       "region": "desert_southwest",
       "locations": [
         {
@@ -992,8 +1070,10 @@
       "lat": 32.2226,
       "lon": -110.9747
     },
-    "Knoxville": {
-      "state": "Tennessee",
+    "knoxville_tn_us": {
+      "spoken_city": "Knoxville",
+      "state": "TN",
+      "country": "US",
       "region": "appalachia",
       "locations": [
         {
@@ -1016,8 +1096,10 @@
       "lat": 35.9606,
       "lon": -83.9207
     },
-    "Louisville": {
-      "state": "Kentucky",
+    "louisville_ky_us": {
+      "spoken_city": "Louisville",
+      "state": "KY",
+      "country": "US",
       "region": "mid_south",
       "locations": [
         {
@@ -1040,8 +1122,10 @@
       "lat": 38.2527,
       "lon": -85.7585
     },
-    "Cincinnati": {
-      "state": "Ohio",
+    "cincinnati_oh_us": {
+      "spoken_city": "Cincinnati",
+      "state": "OH",
+      "country": "US",
       "region": "corn_belt",
       "locations": [
         {
@@ -1064,8 +1148,10 @@
       "lat": 39.1031,
       "lon": -84.512
     },
-    "Columbus": {
-      "state": "Ohio",
+    "columbus_oh_us": {
+      "spoken_city": "Columbus",
+      "state": "OH",
+      "country": "US",
       "region": "corn_belt",
       "locations": [
         {
@@ -1088,8 +1174,10 @@
       "lat": 39.9612,
       "lon": -82.9988
     },
-    "Detroit": {
-      "state": "Michigan",
+    "detroit_mi_us": {
+      "spoken_city": "Detroit",
+      "state": "MI",
+      "country": "US",
       "region": "great_lakes",
       "locations": [
         {
@@ -1120,8 +1208,10 @@
       "lat": 42.3314,
       "lon": -83.0458
     },
-    "Milwaukee": {
-      "state": "Wisconsin",
+    "milwaukee_wi_us": {
+      "spoken_city": "Milwaukee",
+      "state": "WI",
+      "country": "US",
       "region": "upper_midwest",
       "locations": [
         {
@@ -1144,8 +1234,10 @@
       "lat": 43.0389,
       "lon": -87.9065
     },
-    "Minneapolis": {
-      "state": "Minnesota",
+    "minneapolis_mn_us": {
+      "spoken_city": "Minneapolis",
+      "state": "MN",
+      "country": "US",
       "region": "upper_midwest",
       "locations": [
         {
@@ -1168,8 +1260,10 @@
       "lat": 44.9778,
       "lon": -93.265
     },
-    "Des Moines": {
-      "state": "Iowa",
+    "des_moines_ia_us": {
+      "spoken_city": "Des Moines",
+      "state": "IA",
+      "country": "US",
       "region": "heartland",
       "locations": [
         {
@@ -1192,8 +1286,10 @@
       "lat": 41.5868,
       "lon": -93.625
     },
-    "Omaha": {
-      "state": "Nebraska",
+    "omaha_ne_us": {
+      "spoken_city": "Omaha",
+      "state": "NE",
+      "country": "US",
       "region": "heartland",
       "locations": [
         {
@@ -1216,8 +1312,10 @@
       "lat": 41.2565,
       "lon": -95.9345
     },
-    "Wichita": {
-      "state": "Kansas",
+    "wichita_ks_us": {
+      "spoken_city": "Wichita",
+      "state": "KS",
+      "country": "US",
       "region": "southern_plains",
       "locations": [
         {
@@ -1240,8 +1338,10 @@
       "lat": 37.6872,
       "lon": -97.3301
     },
-    "Tulsa": {
-      "state": "Oklahoma",
+    "tulsa_ok_us": {
+      "spoken_city": "Tulsa",
+      "state": "OK",
+      "country": "US",
       "region": "southern_plains",
       "locations": [
         {
@@ -1264,8 +1364,10 @@
       "lat": 36.154,
       "lon": -95.9928
     },
-    "Oklahoma City": {
-      "state": "Oklahoma",
+    "oklahoma_city_ok_us": {
+      "spoken_city": "Oklahoma City",
+      "state": "OK",
+      "country": "US",
       "region": "southern_plains",
       "locations": [
         {
@@ -1288,8 +1390,10 @@
       "lat": 35.4676,
       "lon": -97.5164
     },
-    "Amarillo": {
-      "state": "Texas",
+    "amarillo_tx_us": {
+      "spoken_city": "Amarillo",
+      "state": "TX",
+      "country": "US",
       "region": "southern_plains",
       "locations": [
         {
@@ -1312,8 +1416,10 @@
       "lat": 35.222,
       "lon": -101.8313
     },
-    "Cheyenne": {
-      "state": "Wyoming",
+    "cheyenne_wy_us": {
+      "spoken_city": "Cheyenne",
+      "state": "WY",
+      "country": "US",
       "region": "rockies",
       "locations": [
         {
@@ -1336,8 +1442,10 @@
       "lat": 41.14,
       "lon": -104.8202
     },
-    "Sacramento": {
-      "state": "California",
+    "sacramento_ca_us": {
+      "spoken_city": "Sacramento",
+      "state": "CA",
+      "country": "US",
       "region": "california",
       "locations": [
         {
@@ -1360,8 +1468,10 @@
       "lat": 38.5816,
       "lon": -121.4944
     },
-    "Fresno": {
-      "state": "California",
+    "fresno_ca_us": {
+      "spoken_city": "Fresno",
+      "state": "CA",
+      "country": "US",
       "region": "california",
       "locations": [
         {
@@ -1384,8 +1494,10 @@
       "lat": 36.7378,
       "lon": -119.7871
     },
-    "San Diego": {
-      "state": "California",
+    "san_diego_ca_us": {
+      "spoken_city": "San Diego",
+      "state": "CA",
+      "country": "US",
       "region": "california",
       "locations": [
         {
@@ -1408,8 +1520,10 @@
       "lat": 32.7157,
       "lon": -117.1611
     },
-    "Reno": {
-      "state": "Nevada",
+    "reno_nv_us": {
+      "spoken_city": "Reno",
+      "state": "NV",
+      "country": "US",
       "region": "great_basin",
       "locations": [
         {
@@ -1432,8 +1546,10 @@
       "lat": 39.5296,
       "lon": -119.8138
     },
-    "Boise": {
-      "state": "Idaho",
+    "boise_id_us": {
+      "spoken_city": "Boise",
+      "state": "ID",
+      "country": "US",
       "region": "great_basin",
       "locations": [
         {
@@ -1456,8 +1572,10 @@
       "lat": 43.615,
       "lon": -116.2023
     },
-    "Spokane": {
-      "state": "Washington",
+    "spokane_wa_us": {
+      "spoken_city": "Spokane",
+      "state": "WA",
+      "country": "US",
       "region": "pacific_northwest",
       "locations": [
         {
@@ -1480,15 +1598,19 @@
       "lat": 47.6588,
       "lon": -117.426
     },
-    "Toledo": {
-      "state": "Ohio",
+    "toledo_oh_us": {
+      "spoken_city": "Toledo",
+      "state": "OH",
+      "country": "US",
       "region": "great_lakes",
       "locations": [],
       "lat": 41.6528,
       "lon": -83.5379
     },
-    "Fort Wayne": {
-      "state": "Indiana",
+    "fort_wayne_in_us": {
+      "spoken_city": "Fort Wayne",
+      "state": "IN",
+      "country": "US",
       "region": "great_lakes",
       "locations": [
         {
@@ -1505,536 +1627,688 @@
       "lat": 41.0793,
       "lon": -85.1394
     },
-    "Washington": {
-      "state": "District of Columbia",
+    "washington_dc_us": {
+      "spoken_city": "Washington",
+      "state": "DC",
+      "country": "US",
       "region": "northeast",
       "locations": [],
       "lat": 38.9072,
       "lon": -77.0369
     },
-    "Providence": {
-      "state": "Rhode Island",
+    "providence_ri_us": {
+      "spoken_city": "Providence",
+      "state": "RI",
+      "country": "US",
       "region": "northeast",
       "locations": [],
       "lat": 41.824,
       "lon": -71.4128
     },
-    "Worcester": {
-      "state": "Massachusetts",
+    "worcester_ma_us": {
+      "spoken_city": "Worcester",
+      "state": "MA",
+      "country": "US",
       "region": "northeast",
       "locations": [],
       "lat": 42.2626,
       "lon": -71.8023
     },
-    "Bridgeport": {
-      "state": "Connecticut",
+    "bridgeport_ct_us": {
+      "spoken_city": "Bridgeport",
+      "state": "CT",
+      "country": "US",
       "region": "northeast",
       "locations": [],
       "lat": 41.1865,
       "lon": -73.1952
     },
-    "Rochester": {
-      "state": "New York",
+    "rochester_ny_us": {
+      "spoken_city": "Rochester",
+      "state": "NY",
+      "country": "US",
       "region": "northeast",
       "locations": [],
       "lat": 43.1566,
       "lon": -77.6088
     },
-    "Greensboro": {
-      "state": "North Carolina",
+    "greensboro_nc_us": {
+      "spoken_city": "Greensboro",
+      "state": "NC",
+      "country": "US",
       "region": "atlantic_southeast",
       "locations": [],
       "lat": 36.0726,
       "lon": -79.792
     },
-    "Fayetteville": {
-      "state": "North Carolina",
+    "fayetteville_nc_us": {
+      "spoken_city": "Fayetteville",
+      "state": "NC",
+      "country": "US",
       "region": "atlantic_southeast",
       "locations": [],
       "lat": 35.0527,
       "lon": -78.8784
     },
-    "Virginia Beach": {
-      "state": "Virginia",
+    "virginia_beach_va_us": {
+      "spoken_city": "Virginia Beach",
+      "state": "VA",
+      "country": "US",
       "region": "atlantic_southeast",
       "locations": [],
       "lat": 36.8529,
       "lon": -75.978
     },
-    "Orlando": {
-      "state": "Florida",
+    "orlando_fl_us": {
+      "spoken_city": "Orlando",
+      "state": "FL",
+      "country": "US",
       "region": "florida",
       "locations": [],
       "lat": 28.5383,
       "lon": -81.3792
     },
-    "Tallahassee": {
-      "state": "Florida",
+    "tallahassee_fl_us": {
+      "spoken_city": "Tallahassee",
+      "state": "FL",
+      "country": "US",
       "region": "florida",
       "locations": [],
       "lat": 30.4383,
       "lon": -84.2807
     },
-    "Mobile": {
-      "state": "Alabama",
+    "mobile_al_us": {
+      "spoken_city": "Mobile",
+      "state": "AL",
+      "country": "US",
       "region": "mid_south",
       "locations": [],
       "lat": 30.6954,
       "lon": -88.0399
     },
-    "Baton Rouge": {
-      "state": "Louisiana",
+    "baton_rouge_la_us": {
+      "spoken_city": "Baton Rouge",
+      "state": "LA",
+      "country": "US",
       "region": "gulf_coast",
       "locations": [],
       "lat": 30.4515,
       "lon": -91.1871
     },
-    "Shreveport": {
-      "state": "Louisiana",
+    "shreveport_la_us": {
+      "spoken_city": "Shreveport",
+      "state": "LA",
+      "country": "US",
       "region": "gulf_coast",
       "locations": [],
       "lat": 32.5252,
       "lon": -93.7502
     },
-    "Montgomery": {
-      "state": "Alabama",
+    "montgomery_al_us": {
+      "spoken_city": "Montgomery",
+      "state": "AL",
+      "country": "US",
       "region": "mid_south",
       "locations": [],
       "lat": 32.3668,
       "lon": -86.3
     },
-    "Huntsville": {
-      "state": "Alabama",
+    "huntsville_al_us": {
+      "spoken_city": "Huntsville",
+      "state": "AL",
+      "country": "US",
       "region": "mid_south",
       "locations": [],
       "lat": 34.7304,
       "lon": -86.5861
     },
-    "Chattanooga": {
-      "state": "Tennessee",
+    "chattanooga_tn_us": {
+      "spoken_city": "Chattanooga",
+      "state": "TN",
+      "country": "US",
       "region": "mid_south",
       "locations": [],
       "lat": 35.0456,
       "lon": -85.3097
     },
-    "Fort Worth": {
-      "state": "Texas",
+    "fort_worth_tx_us": {
+      "spoken_city": "Fort Worth",
+      "state": "TX",
+      "country": "US",
       "region": "southern_plains",
       "locations": [],
       "lat": 32.7555,
       "lon": -97.3308
     },
-    "Austin": {
-      "state": "Texas",
+    "austin_tx_us": {
+      "spoken_city": "Austin",
+      "state": "TX",
+      "country": "US",
       "region": "gulf_coast",
       "locations": [],
       "lat": 30.2672,
       "lon": -97.7431
     },
-    "Lubbock": {
-      "state": "Texas",
+    "lubbock_tx_us": {
+      "spoken_city": "Lubbock",
+      "state": "TX",
+      "country": "US",
       "region": "southern_plains",
       "locations": [],
       "lat": 33.5779,
       "lon": -101.8552
     },
-    "Lincoln": {
-      "state": "Nebraska",
+    "lincoln_ne_us": {
+      "spoken_city": "Lincoln",
+      "state": "NE",
+      "country": "US",
       "region": "heartland",
       "locations": [],
       "lat": 40.8136,
       "lon": -96.7026
     },
-    "Sioux Falls": {
-      "state": "South Dakota",
+    "sioux_falls_sd_us": {
+      "spoken_city": "Sioux Falls",
+      "state": "SD",
+      "country": "US",
       "region": "heartland",
       "locations": [],
       "lat": 43.5446,
       "lon": -96.7311
     },
-    "Springfield": {
-      "state": "Missouri",
+    "springfield_mo_us": {
+      "spoken_city": "Springfield",
+      "state": "MO",
+      "country": "US",
       "region": "heartland",
       "locations": [],
       "lat": 37.209,
       "lon": -93.2923
     },
-    "Colorado Springs": {
-      "state": "Colorado",
+    "colorado_springs_co_us": {
+      "spoken_city": "Colorado Springs",
+      "state": "CO",
+      "country": "US",
       "region": "rockies",
       "locations": [],
       "lat": 38.8339,
       "lon": -104.8214
     },
-    "Fort Collins": {
-      "state": "Colorado",
+    "fort_collins_co_us": {
+      "spoken_city": "Fort Collins",
+      "state": "CO",
+      "country": "US",
       "region": "rockies",
       "locations": [],
       "lat": 40.5853,
       "lon": -105.0844
     },
-    "San Jose": {
-      "state": "California",
+    "san_jose_ca_us": {
+      "spoken_city": "San Jose",
+      "state": "CA",
+      "country": "US",
       "region": "california",
       "locations": [],
       "lat": 37.3382,
       "lon": -121.8863
     },
-    "Bakersfield": {
-      "state": "California",
+    "bakersfield_ca_us": {
+      "spoken_city": "Bakersfield",
+      "state": "CA",
+      "country": "US",
       "region": "california",
       "locations": [],
       "lat": 35.3733,
       "lon": -119.0187
     },
-    "Stockton": {
-      "state": "California",
+    "stockton_ca_us": {
+      "spoken_city": "Stockton",
+      "state": "CA",
+      "country": "US",
       "region": "california",
       "locations": [],
       "lat": 37.9577,
       "lon": -121.2908
     },
-    "Lexington": {
-      "state": "Kentucky",
+    "lexington_ky_us": {
+      "spoken_city": "Lexington",
+      "state": "KY",
+      "country": "US",
       "region": "mid_south",
       "locations": [],
       "lat": 38.0406,
       "lon": -84.5037
     },
-    "Madison": {
-      "state": "Wisconsin",
+    "madison_wi_us": {
+      "spoken_city": "Madison",
+      "state": "WI",
+      "country": "US",
       "region": "upper_midwest",
       "locations": [],
       "lat": 43.0731,
       "lon": -89.4012
     },
-    "Grand Rapids": {
-      "state": "Michigan",
+    "grand_rapids_mi_us": {
+      "spoken_city": "Grand Rapids",
+      "state": "MI",
+      "country": "US",
       "region": "great_lakes",
       "locations": [],
       "lat": 42.9634,
       "lon": -85.6681
     },
-    "Akron": {
-      "state": "Ohio",
+    "akron_oh_us": {
+      "spoken_city": "Akron",
+      "state": "OH",
+      "country": "US",
       "region": "great_lakes",
       "locations": [],
       "lat": 41.0814,
       "lon": -81.519
     },
-    "Rockford": {
-      "state": "Illinois",
+    "rockford_il_us": {
+      "spoken_city": "Rockford",
+      "state": "IL",
+      "country": "US",
       "region": "great_lakes",
       "locations": [],
       "lat": 42.2711,
       "lon": -89.094
     },
-    "Riverside": {
+    "riverside_ca_us": {
+      "spoken_city": "Riverside",
+      "state": "CA",
+      "country": "US",
       "lat": 33.95335,
       "lon": -117.39616,
       "region": "california",
-      "state": "California",
       "locations": []
     },
-    "Santa Ana": {
+    "santa_ana_ca_us": {
+      "spoken_city": "Santa Ana",
+      "state": "CA",
+      "country": "US",
       "lat": 33.74557,
       "lon": -117.86783,
       "region": "california",
-      "state": "California",
       "locations": []
     },
-    "Oxnard": {
+    "oxnard_ca_us": {
+      "spoken_city": "Oxnard",
+      "state": "CA",
+      "country": "US",
       "lat": 34.1975,
       "lon": -119.17705,
       "region": "california",
-      "state": "California",
       "locations": []
     },
-    "Santa Rosa": {
+    "santa_rosa_ca_us": {
+      "spoken_city": "Santa Rosa",
+      "state": "CA",
+      "country": "US",
       "lat": 38.44047,
       "lon": -122.71443,
       "region": "california",
-      "state": "California",
       "locations": []
     },
-    "Oceanside": {
+    "oceanside_ca_us": {
+      "spoken_city": "Oceanside",
+      "state": "CA",
+      "country": "US",
       "lat": 33.19587,
       "lon": -117.37948,
       "region": "california",
-      "state": "California",
       "locations": []
     },
-    "Lancaster": {
+    "lancaster_ca_us": {
+      "spoken_city": "Lancaster",
+      "state": "CA",
+      "country": "US",
       "lat": 34.69804,
       "lon": -118.13674,
       "region": "california",
-      "state": "California",
       "locations": []
     },
-    "Salinas": {
+    "salinas_ca_us": {
+      "spoken_city": "Salinas",
+      "state": "CA",
+      "country": "US",
       "lat": 36.67774,
       "lon": -121.6555,
       "region": "california",
-      "state": "California",
       "locations": []
     },
-    "Valencia": {
+    "valencia_ca_us": {
+      "spoken_city": "Valencia",
+      "state": "CA",
+      "country": "US",
       "lat": 34.44361,
       "lon": -118.60953,
       "region": "california",
-      "state": "California",
       "locations": []
     },
-    "Visalia": {
+    "visalia_ca_us": {
+      "spoken_city": "Visalia",
+      "state": "CA",
+      "country": "US",
       "lat": 36.33023,
       "lon": -119.29206,
       "region": "california",
-      "state": "California",
       "locations": []
     },
-    "Victorville": {
+    "victorville_ca_us": {
+      "spoken_city": "Victorville",
+      "state": "CA",
+      "country": "US",
       "lat": 34.53611,
       "lon": -117.29116,
       "region": "california",
-      "state": "California",
       "locations": []
     },
-    "Chico": {
+    "chico_ca_us": {
+      "spoken_city": "Chico",
+      "state": "CA",
+      "country": "US",
       "lat": 39.72849,
       "lon": -121.83748,
       "region": "california",
-      "state": "California",
       "locations": []
     },
-    "Fairfield": {
+    "fairfield_ca_us": {
+      "spoken_city": "Fairfield",
+      "state": "CA",
+      "country": "US",
       "lat": 38.24936,
       "lon": -122.03997,
       "region": "california",
-      "state": "California",
       "locations": []
     },
-    "Santa Maria": {
+    "santa_maria_ca_us": {
+      "spoken_city": "Santa Maria",
+      "state": "CA",
+      "country": "US",
       "lat": 34.95303,
       "lon": -120.43572,
       "region": "california",
-      "state": "California",
       "locations": []
     },
-    "Corpus Christi": {
+    "corpus_christi_tx_us": {
+      "spoken_city": "Corpus Christi",
+      "state": "TX",
+      "country": "US",
       "lat": 27.80058,
       "lon": -97.39638,
       "region": "gulf_coast",
-      "state": "Texas",
       "locations": []
     },
-    "Laredo": {
+    "laredo_tx_us": {
+      "spoken_city": "Laredo",
+      "state": "TX",
+      "country": "US",
       "lat": 27.50641,
       "lon": -99.50754,
       "region": "gulf_coast",
-      "state": "Texas",
       "locations": []
     },
-    "Brownsville": {
+    "brownsville_tx_us": {
+      "spoken_city": "Brownsville",
+      "state": "TX",
+      "country": "US",
       "lat": 25.90175,
       "lon": -97.49748,
       "region": "gulf_coast",
-      "state": "Texas",
       "locations": []
     },
-    "McKinney": {
+    "mckinney_tx_us": {
+      "spoken_city": "McKinney",
+      "state": "TX",
+      "country": "US",
       "lat": 33.19762,
       "lon": -96.61527,
       "region": "southern_plains",
-      "state": "Texas",
       "locations": []
     },
-    "Killeen": {
+    "killeen_tx_us": {
+      "spoken_city": "Killeen",
+      "state": "TX",
+      "country": "US",
       "lat": 31.11712,
       "lon": -97.7278,
       "region": "southern_plains",
-      "state": "Texas",
       "locations": []
     },
-    "McAllen": {
+    "mcallen_tx_us": {
+      "spoken_city": "McAllen",
+      "state": "TX",
+      "country": "US",
       "lat": 26.20341,
       "lon": -98.23001,
       "region": "gulf_coast",
-      "state": "Texas",
       "locations": []
     },
-    "Midland": {
+    "midland_tx_us": {
+      "spoken_city": "Midland",
+      "state": "TX",
+      "country": "US",
       "lat": 31.99735,
       "lon": -102.07791,
       "region": "southern_plains",
-      "state": "Texas",
       "locations": []
     },
-    "Waco": {
+    "waco_tx_us": {
+      "spoken_city": "Waco",
+      "state": "TX",
+      "country": "US",
       "lat": 31.54933,
       "lon": -97.14667,
       "region": "southern_plains",
-      "state": "Texas",
       "locations": []
     },
-    "Topeka": {
+    "topeka_ks_us": {
+      "spoken_city": "Topeka",
+      "state": "KS",
+      "country": "US",
       "lat": 39.04833,
       "lon": -95.67804,
       "region": "southern_plains",
-      "state": "Kansas",
       "locations": []
     },
-    "Abilene": {
+    "abilene_tx_us": {
+      "spoken_city": "Abilene",
+      "state": "TX",
+      "country": "US",
       "lat": 32.44874,
       "lon": -99.73314,
       "region": "southern_plains",
-      "state": "Texas",
       "locations": []
     },
-    "Lafayette": {
+    "lafayette_la_us": {
+      "spoken_city": "Lafayette",
+      "state": "LA",
+      "country": "US",
       "lat": 30.22409,
       "lon": -92.01984,
       "region": "gulf_coast",
-      "state": "Louisiana",
       "locations": []
     },
-    "Beaumont": {
+    "beaumont_tx_us": {
+      "spoken_city": "Beaumont",
+      "state": "TX",
+      "country": "US",
       "lat": 30.08605,
       "lon": -94.10185,
       "region": "gulf_coast",
-      "state": "Texas",
       "locations": []
     },
-    "College Station": {
+    "college_station_tx_us": {
+      "spoken_city": "College Station",
+      "state": "TX",
+      "country": "US",
       "lat": 30.62798,
       "lon": -96.33441,
       "region": "gulf_coast",
-      "state": "Texas",
       "locations": []
     },
-    "Wichita Falls": {
+    "wichita_falls_tx_us": {
+      "spoken_city": "Wichita Falls",
+      "state": "TX",
+      "country": "US",
       "lat": 33.91371,
       "lon": -98.49339,
       "region": "southern_plains",
-      "state": "Texas",
       "locations": []
     },
-    "Tyler": {
+    "tyler_tx_us": {
+      "spoken_city": "Tyler",
+      "state": "TX",
+      "country": "US",
       "lat": 32.35126,
       "lon": -95.30106,
       "region": "southern_plains",
-      "state": "Texas",
       "locations": []
     },
-    "Cape Coral": {
+    "cape_coral_fl_us": {
+      "spoken_city": "Cape Coral",
+      "state": "FL",
+      "country": "US",
       "lat": 26.56285,
       "lon": -81.94953,
       "region": "florida",
-      "state": "Florida",
       "locations": []
     },
-    "Clarksville": {
+    "clarksville_tn_us": {
+      "spoken_city": "Clarksville",
+      "state": "TN",
+      "country": "US",
       "lat": 36.52977,
       "lon": -87.35945,
       "region": "mid_south",
-      "state": "Tennessee",
       "locations": []
     },
-    "Murfreesboro": {
+    "murfreesboro_tn_us": {
+      "spoken_city": "Murfreesboro",
+      "state": "TN",
+      "country": "US",
       "lat": 35.84562,
       "lon": -86.39027,
       "region": "mid_south",
-      "state": "Tennessee",
       "locations": []
     },
-    "Port Saint Lucie": {
+    "port_saint_lucie_fl_us": {
+      "spoken_city": "Port Saint Lucie",
+      "state": "FL",
+      "country": "US",
       "lat": 27.29393,
       "lon": -80.35033,
       "region": "florida",
-      "state": "Florida",
       "locations": []
     },
-    "Jackson": {
+    "jackson_ms_us": {
+      "spoken_city": "Jackson",
+      "state": "MS",
+      "country": "US",
       "lat": 32.29876,
       "lon": -90.18481,
       "region": "mid_south",
-      "state": "Mississippi",
       "locations": []
     },
-    "Gainesville": {
+    "gainesville_fl_us": {
+      "spoken_city": "Gainesville",
+      "state": "FL",
+      "country": "US",
       "lat": 29.65163,
       "lon": -82.32483,
       "region": "florida",
-      "state": "Florida",
       "locations": []
     },
-    "Columbia": {
+    "columbia_sc_us": {
+      "spoken_city": "Columbia",
+      "state": "SC",
+      "country": "US",
       "lat": 34.00071,
       "lon": -81.03481,
       "region": "atlantic_southeast",
-      "state": "South Carolina",
       "locations": []
     },
-    "Charleston": {
+    "charleston_sc_us": {
+      "spoken_city": "Charleston",
+      "state": "SC",
+      "country": "US",
       "lat": 32.77632,
       "lon": -79.93275,
       "region": "atlantic_southeast",
-      "state": "South Carolina",
       "locations": []
     },
-    "Coral Springs": {
+    "coral_springs_fl_us": {
+      "spoken_city": "Coral Springs",
+      "state": "FL",
+      "country": "US",
       "lat": 26.27119,
       "lon": -80.2706,
       "region": "florida",
-      "state": "Florida",
       "locations": []
     },
-    "Athens": {
+    "athens_ga_us": {
+      "spoken_city": "Athens",
+      "state": "GA",
+      "country": "US",
       "lat": 33.96095,
       "lon": -83.37794,
       "region": "atlantic_southeast",
-      "state": "Georgia",
       "locations": []
     },
-    "West Palm Beach": {
+    "west_palm_beach_fl_us": {
+      "spoken_city": "West Palm Beach",
+      "state": "FL",
+      "country": "US",
       "lat": 26.71534,
       "lon": -80.05337,
       "region": "florida",
-      "state": "Florida",
       "locations": []
     },
-    "Palm Bay": {
+    "palm_bay_fl_us": {
+      "spoken_city": "Palm Bay",
+      "state": "FL",
+      "country": "US",
       "lat": 28.03446,
       "lon": -80.58866,
       "region": "florida",
-      "state": "Florida",
       "locations": []
     },
-    "Wilmington": {
+    "wilmington_nc_us": {
+      "spoken_city": "Wilmington",
+      "state": "NC",
+      "country": "US",
       "lat": 34.23556,
       "lon": -77.94604,
       "region": "atlantic_southeast",
-      "state": "North Carolina",
       "locations": []
     },
-    "Tuscaloosa": {
+    "tuscaloosa_al_us": {
+      "spoken_city": "Tuscaloosa",
+      "state": "AL",
+      "country": "US",
       "lat": 33.20984,
       "lon": -87.56917,
       "region": "mid_south",
-      "state": "Alabama",
       "locations": []
     },
-    "Lakeland": {
+    "lakeland_fl_us": {
+      "spoken_city": "Lakeland",
+      "state": "FL",
+      "country": "US",
       "lat": 28.03947,
       "lon": -81.9498,
       "region": "florida",
-      "state": "Florida",
       "locations": []
     },
-    "Roanoke": {
+    "roanoke_va_us": {
+      "spoken_city": "Roanoke",
+      "state": "VA",
+      "country": "US",
       "lat": 37.27097,
       "lon": -79.94143,
       "region": "appalachia",
-      "state": "Virginia",
       "locations": [
         {
           "name": "Norfolk Southern Roanoke Rail Yard",
@@ -2048,46 +2322,58 @@
         }
       ]
     },
-    "Aurora": {
+    "aurora_il_us": {
+      "spoken_city": "Aurora",
+      "state": "IL",
+      "country": "US",
       "lat": 41.76058,
       "lon": -88.32007,
       "region": "great_lakes",
-      "state": "Illinois",
       "locations": []
     },
-    "Syracuse": {
+    "syracuse_ny_us": {
+      "spoken_city": "Syracuse",
+      "state": "NY",
+      "country": "US",
       "lat": 43.04812,
       "lon": -76.14742,
       "region": "northeast",
-      "state": "New York",
       "locations": []
     },
-    "Dayton": {
+    "dayton_oh_us": {
+      "spoken_city": "Dayton",
+      "state": "OH",
+      "country": "US",
       "lat": 39.75895,
       "lon": -84.19161,
       "region": "corn_belt",
-      "state": "Ohio",
       "locations": []
     },
-    "Cedar Rapids": {
+    "cedar_rapids_ia_us": {
+      "spoken_city": "Cedar Rapids",
+      "state": "IA",
+      "country": "US",
       "lat": 42.00833,
       "lon": -91.64407,
       "region": "heartland",
-      "state": "Iowa",
       "locations": []
     },
-    "Allentown": {
+    "allentown_pa_us": {
+      "spoken_city": "Allentown",
+      "state": "PA",
+      "country": "US",
       "lat": 40.60843,
       "lon": -75.49018,
       "region": "northeast",
-      "state": "Pennsylvania",
       "locations": []
     },
-    "Evansville": {
+    "evansville_in_us": {
+      "spoken_city": "Evansville",
+      "state": "IN",
+      "country": "US",
       "lat": 37.97476,
       "lon": -87.55585,
       "region": "mid_south",
-      "state": "Indiana",
       "locations": [
         {
           "name": "Mead Johnson Nutrition Plant",
@@ -2101,60 +2387,76 @@
         }
       ]
     },
-    "Fargo": {
+    "fargo_nd_us": {
+      "spoken_city": "Fargo",
+      "state": "ND",
+      "country": "US",
       "lat": 46.87719,
       "lon": -96.7898,
       "region": "heartland",
-      "state": "North Dakota",
       "locations": []
     },
-    "Ann Arbor": {
+    "ann_arbor_mi_us": {
+      "spoken_city": "Ann Arbor",
+      "state": "MI",
+      "country": "US",
       "lat": 42.27756,
       "lon": -83.74088,
       "region": "great_lakes",
-      "state": "Michigan",
       "locations": []
     },
-    "Peoria": {
+    "peoria_il_us": {
+      "spoken_city": "Peoria",
+      "state": "IL",
+      "country": "US",
       "lat": 40.69365,
       "lon": -89.58899,
       "region": "corn_belt",
-      "state": "Illinois",
       "locations": []
     },
-    "Lansing": {
+    "lansing_mi_us": {
+      "spoken_city": "Lansing",
+      "state": "MI",
+      "country": "US",
       "lat": 42.73253,
       "lon": -84.55553,
       "region": "great_lakes",
-      "state": "Michigan",
       "locations": []
     },
-    "Manchester": {
+    "manchester_nh_us": {
+      "spoken_city": "Manchester",
+      "state": "NH",
+      "country": "US",
       "lat": 42.99564,
       "lon": -71.45479,
       "region": "northeast",
-      "state": "New Hampshire",
       "locations": []
     },
-    "Green Bay": {
+    "green_bay_wi_us": {
+      "spoken_city": "Green Bay",
+      "state": "WI",
+      "country": "US",
       "lat": 44.51916,
       "lon": -88.01983,
       "region": "upper_midwest",
-      "state": "Wisconsin",
       "locations": []
     },
-    "Davenport": {
+    "davenport_ia_us": {
+      "spoken_city": "Davenport",
+      "state": "IA",
+      "country": "US",
       "lat": 41.52364,
       "lon": -90.57764,
       "region": "heartland",
-      "state": "Iowa",
       "locations": []
     },
-    "South Bend": {
+    "south_bend_in_us": {
+      "spoken_city": "South Bend",
+      "state": "IN",
+      "country": "US",
       "lat": 41.68338,
       "lon": -86.25001,
       "region": "great_lakes",
-      "state": "Indiana",
       "locations": [
         {
           "name": "AM General Mishawaka Plant",
@@ -2168,92 +2470,118 @@
         }
       ]
     },
-    "Albany": {
+    "albany_ny_us": {
+      "spoken_city": "Albany",
+      "state": "NY",
+      "country": "US",
       "lat": 42.65258,
       "lon": -73.75623,
       "region": "northeast",
-      "state": "New York",
       "locations": []
     },
-    "Tri-Cities": {
+    "tri_cities_wa_us": {
+      "spoken_city": "Tri-Cities",
+      "state": "WA",
+      "country": "US",
       "lat": 46.2454,
       "lon": -119.19617,
       "region": "pacific_northwest",
-      "state": "Washington",
       "locations": []
     },
-    "Eugene": {
+    "eugene_or_us": {
+      "spoken_city": "Eugene",
+      "state": "OR",
+      "country": "US",
       "lat": 44.05207,
       "lon": -123.08675,
       "region": "pacific_northwest",
-      "state": "Oregon",
       "locations": []
     },
-    "Salem": {
+    "salem_or_us": {
+      "spoken_city": "Salem",
+      "state": "OR",
+      "country": "US",
       "lat": 44.9429,
       "lon": -123.0351,
       "region": "pacific_northwest",
-      "state": "Oregon",
       "locations": []
     },
-    "Billings": {
+    "billings_mt_us": {
+      "spoken_city": "Billings",
+      "state": "MT",
+      "country": "US",
       "lat": 45.78329,
       "lon": -108.50069,
       "region": "rockies",
-      "state": "Montana",
       "locations": []
     },
-    "Provo": {
+    "provo_ut_us": {
+      "spoken_city": "Provo",
+      "state": "UT",
+      "country": "US",
       "lat": 40.23384,
       "lon": -111.65853,
       "region": "rockies",
-      "state": "Utah",
       "locations": []
     },
-    "Pueblo": {
+    "pueblo_co_us": {
+      "spoken_city": "Pueblo",
+      "state": "CO",
+      "country": "US",
       "lat": 38.25445,
       "lon": -104.60914,
       "region": "rockies",
-      "state": "Colorado",
       "locations": []
     },
-    "Las Cruces": {
+    "las_cruces_nm_us": {
+      "spoken_city": "Las Cruces",
+      "state": "NM",
+      "country": "US",
       "lat": 32.31232,
       "lon": -106.77834,
       "region": "desert_southwest",
-      "state": "New Mexico",
       "locations": []
     },
-    "Pocatello": {
+    "pocatello_id_us": {
+      "spoken_city": "Pocatello",
+      "state": "ID",
+      "country": "US",
       "lat": 42.8713,
       "lon": -112.44553,
       "region": "great_basin",
-      "state": "Idaho",
       "locations": []
     },
-    "Idaho Falls": {
+    "idaho_falls_id_us": {
+      "spoken_city": "Idaho Falls",
+      "state": "ID",
+      "country": "US",
       "lat": 43.46658,
       "lon": -112.03414,
       "region": "great_basin",
-      "state": "Idaho",
       "locations": []
     },
-    "Twin Falls": {
+    "twin_falls_id_us": {
+      "spoken_city": "Twin Falls",
+      "state": "ID",
+      "country": "US",
       "lat": 42.56297,
       "lon": -114.46087,
       "region": "great_basin",
-      "state": "Idaho",
       "locations": []
     },
-    "Elko": {
+    "elko_nv_us": {
+      "spoken_city": "Elko",
+      "state": "NV",
+      "country": "US",
       "lat": 40.83242,
       "lon": -115.76312,
       "region": "great_basin",
-      "state": "Nevada",
       "locations": []
     },
-    "Newark": {
-      "state": "New Jersey",
+    "newark_nj_us": {
+      "spoken_city": "Newark",
+      "state": "NJ",
+      "country": "US",
       "region": "northeast",
       "locations": [
         {
@@ -2276,8 +2604,10 @@
       "lat": 40.7357,
       "lon": -74.1724
     },
-    "Trenton": {
-      "state": "New Jersey",
+    "trenton_nj_us": {
+      "spoken_city": "Trenton",
+      "state": "NJ",
+      "country": "US",
       "region": "northeast",
       "locations": [
         {
@@ -2300,8 +2630,10 @@
       "lat": 40.2171,
       "lon": -74.7429
     },
-    "Atlantic City": {
-      "state": "New Jersey",
+    "atlantic_city_nj_us": {
+      "spoken_city": "Atlantic City",
+      "state": "NJ",
+      "country": "US",
       "region": "northeast",
       "locations": [
         {
@@ -2324,8 +2656,10 @@
       "lat": 39.3642,
       "lon": -74.4231
     },
-    "Salisbury": {
-      "state": "Maryland",
+    "salisbury_md_us": {
+      "spoken_city": "Salisbury",
+      "state": "MD",
+      "country": "US",
       "region": "northeast",
       "locations": [
         {
@@ -2348,8 +2682,10 @@
       "lat": 38.3607,
       "lon": -75.5994
     },
-    "Burlington": {
-      "state": "Vermont",
+    "burlington_vt_us": {
+      "spoken_city": "Burlington",
+      "state": "VT",
+      "country": "US",
       "region": "northeast",
       "locations": [
         {
@@ -2372,8 +2708,10 @@
       "lat": 44.4759,
       "lon": -73.2121
     },
-    "Norfolk": {
-      "state": "Virginia",
+    "norfolk_va_us": {
+      "spoken_city": "Norfolk",
+      "state": "VA",
+      "country": "US",
       "region": "atlantic_southeast",
       "locations": [
         {
@@ -2396,8 +2734,10 @@
       "lat": 36.8468,
       "lon": -76.2852
     },
-    "Harrisburg": {
-      "state": "Pennsylvania",
+    "harrisburg_pa_us": {
+      "spoken_city": "Harrisburg",
+      "state": "PA",
+      "country": "US",
       "region": "northeast",
       "locations": [
         {
@@ -2420,8 +2760,10 @@
       "lat": 40.2737,
       "lon": -76.8844
     },
-    "Scranton": {
-      "state": "Pennsylvania",
+    "scranton_pa_us": {
+      "spoken_city": "Scranton",
+      "state": "PA",
+      "country": "US",
       "region": "northeast",
       "locations": [
         {
@@ -2444,8 +2786,10 @@
       "lat": 41.4092,
       "lon": -75.6649
     },
-    "Erie": {
-      "state": "Pennsylvania",
+    "erie_pa_us": {
+      "spoken_city": "Erie",
+      "state": "PA",
+      "country": "US",
       "region": "great_lakes",
       "locations": [
         {
@@ -2468,8 +2812,10 @@
       "lat": 42.1292,
       "lon": -80.0851
     },
-    "Binghamton": {
-      "state": "New York",
+    "binghamton_ny_us": {
+      "spoken_city": "Binghamton",
+      "state": "NY",
+      "country": "US",
       "region": "northeast",
       "locations": [
         {
@@ -2492,8 +2838,10 @@
       "lat": 42.0987,
       "lon": -75.918
     },
-    "New Haven": {
-      "state": "Connecticut",
+    "new_haven_ct_us": {
+      "spoken_city": "New Haven",
+      "state": "CT",
+      "country": "US",
       "region": "northeast",
       "locations": [
         {
@@ -2516,8 +2864,10 @@
       "lat": 41.3081,
       "lon": -72.9282
     },
-    "Augusta": {
-      "state": "Georgia",
+    "augusta_ga_us": {
+      "spoken_city": "Augusta",
+      "state": "GA",
+      "country": "US",
       "region": "atlantic_southeast",
       "locations": [
         {
@@ -2540,8 +2890,10 @@
       "lat": 33.471,
       "lon": -81.9748
     },
-    "Macon": {
-      "state": "Georgia",
+    "macon_ga_us": {
+      "spoken_city": "Macon",
+      "state": "GA",
+      "country": "US",
       "region": "atlantic_southeast",
       "locations": [
         {
@@ -2564,8 +2916,10 @@
       "lat": 32.8407,
       "lon": -83.6324
     },
-    "Greenville": {
-      "state": "South Carolina",
+    "greenville_sc_us": {
+      "spoken_city": "Greenville",
+      "state": "SC",
+      "country": "US",
       "region": "atlantic_southeast",
       "locations": [
         {
@@ -2588,8 +2942,10 @@
       "lat": 34.8526,
       "lon": -82.394
     },
-    "Charleston, West Virginia": {
-      "state": "West Virginia",
+    "charleston_wv_us": {
+      "spoken_city": "Charleston",
+      "state": "WV",
+      "country": "US",
       "region": "appalachia",
       "locations": [
         {
@@ -2612,8 +2968,10 @@
       "lat": 38.3498,
       "lon": -81.6326
     },
-    "Portland, Maine": {
-      "state": "Maine",
+    "portland_me_us": {
+      "spoken_city": "Portland",
+      "state": "ME",
+      "country": "US",
       "region": "northeast",
       "locations": [
         {
@@ -2636,8 +2994,10 @@
       "lat": 43.6615,
       "lon": -70.2553
     },
-    "Springfield, Massachusetts": {
-      "state": "Massachusetts",
+    "springfield_ma_us": {
+      "spoken_city": "Springfield",
+      "state": "MA",
+      "country": "US",
       "region": "northeast",
       "locations": [
         {
@@ -2660,8 +3020,10 @@
       "lat": 42.1015,
       "lon": -72.5898
     },
-    "Wilmington, Delaware": {
-      "state": "Delaware",
+    "wilmington_de_us": {
+      "spoken_city": "Wilmington",
+      "state": "DE",
+      "country": "US",
       "region": "northeast",
       "locations": [
         {
@@ -2684,8 +3046,10 @@
       "lat": 39.746,
       "lon": -75.5466
     },
-    "Fort Smith": {
-      "state": "Arkansas",
+    "fort_smith_ar_us": {
+      "spoken_city": "Fort Smith",
+      "state": "AR",
+      "country": "US",
       "region": "mid_south",
       "locations": [
         {
@@ -2708,8 +3072,10 @@
       "lat": 35.3859,
       "lon": -94.3986
     },
-    "Dover": {
-      "state": "Delaware",
+    "dover_de_us": {
+      "spoken_city": "Dover",
+      "state": "DE",
+      "country": "US",
       "region": "northeast",
       "locations": [
         {
@@ -2732,8 +3098,10 @@
       "lat": 39.1582,
       "lon": -75.5244
     },
-    "Bangor": {
-      "state": "Maine",
+    "bangor_me_us": {
+      "spoken_city": "Bangor",
+      "state": "ME",
+      "country": "US",
       "region": "northeast",
       "locations": [
         {
@@ -2756,8 +3124,10 @@
       "lat": 44.8012,
       "lon": -68.7778
     },
-    "Duluth": {
-      "state": "Minnesota",
+    "duluth_mn_us": {
+      "spoken_city": "Duluth",
+      "state": "MN",
+      "country": "US",
       "region": "upper_midwest",
       "locations": [
         {
@@ -2780,8 +3150,10 @@
       "lat": 46.7833,
       "lon": -92.1066
     },
-    "Gulfport": {
-      "state": "Mississippi",
+    "gulfport_ms_us": {
+      "spoken_city": "Gulfport",
+      "state": "MS",
+      "country": "US",
       "region": "mid_south",
       "locations": [
         {
@@ -2804,8 +3176,10 @@
       "lat": 30.3674,
       "lon": -89.0928
     },
-    "Missoula": {
-      "state": "Montana",
+    "missoula_mt_us": {
+      "spoken_city": "Missoula",
+      "state": "MT",
+      "country": "US",
       "region": "rockies",
       "locations": [
         {
@@ -2828,8 +3202,10 @@
       "lat": 46.8721,
       "lon": -113.994
     },
-    "Portsmouth": {
-      "state": "New Hampshire",
+    "portsmouth_nh_us": {
+      "spoken_city": "Portsmouth",
+      "state": "NH",
+      "country": "US",
       "region": "northeast",
       "locations": [
         {
@@ -2852,8 +3228,10 @@
       "lat": 43.0718,
       "lon": -70.7626
     },
-    "Bismarck": {
-      "state": "North Dakota",
+    "bismarck_nd_us": {
+      "spoken_city": "Bismarck",
+      "state": "ND",
+      "country": "US",
       "region": "heartland",
       "locations": [
         {
@@ -2876,8 +3254,10 @@
       "lat": 46.8083,
       "lon": -100.7837
     },
-    "Rapid City": {
-      "state": "South Dakota",
+    "rapid_city_sd_us": {
+      "spoken_city": "Rapid City",
+      "state": "SD",
+      "country": "US",
       "region": "heartland",
       "locations": [
         {
@@ -2900,8 +3280,10 @@
       "lat": 44.0805,
       "lon": -103.231
     },
-    "Montpelier": {
-      "state": "Vermont",
+    "montpelier_vt_us": {
+      "spoken_city": "Montpelier",
+      "state": "VT",
+      "country": "US",
       "region": "northeast",
       "locations": [
         {
@@ -2924,8 +3306,10 @@
       "lat": 44.2601,
       "lon": -72.5754
     },
-    "Morgantown": {
-      "state": "West Virginia",
+    "morgantown_wv_us": {
+      "spoken_city": "Morgantown",
+      "state": "WV",
+      "country": "US",
       "region": "appalachia",
       "locations": [
         {
@@ -2948,8 +3332,10 @@
       "lat": 39.6295,
       "lon": -79.9559
     },
-    "Rock Springs": {
-      "state": "Wyoming",
+    "rock_springs_wy_us": {
+      "spoken_city": "Rock Springs",
+      "state": "WY",
+      "country": "US",
       "region": "rockies",
       "locations": [
         {
@@ -2972,8 +3358,10 @@
       "lat": 41.5875,
       "lon": -109.2029
     },
-    "Newport": {
-      "state": "Rhode Island",
+    "newport_ri_us": {
+      "spoken_city": "Newport",
+      "state": "RI",
+      "country": "US",
       "region": "northeast",
       "locations": [
         {
@@ -2996,8 +3384,10 @@
       "lat": 41.4901,
       "lon": -71.3128
     },
-    "Tacoma": {
-      "state": "Washington",
+    "tacoma_wa_us": {
+      "spoken_city": "Tacoma",
+      "state": "WA",
+      "country": "US",
       "region": "pacific_northwest",
       "locations": [
         {
@@ -3019,8 +3409,10 @@
       "lat": 47.2529,
       "lon": -122.4443
     },
-    "Everett": {
-      "state": "Washington",
+    "everett_wa_us": {
+      "spoken_city": "Everett",
+      "state": "WA",
+      "country": "US",
       "region": "pacific_northwest",
       "locations": [
         {
@@ -3042,8 +3434,10 @@
       "lat": 47.979,
       "lon": -122.2021
     },
-    "Olympia": {
-      "state": "Washington",
+    "olympia_wa_us": {
+      "spoken_city": "Olympia",
+      "state": "WA",
+      "country": "US",
       "region": "pacific_northwest",
       "locations": [
         {
@@ -3060,8 +3454,10 @@
       "lat": 47.0379,
       "lon": -122.9007
     },
-    "Yakima": {
-      "state": "Washington",
+    "yakima_wa_us": {
+      "spoken_city": "Yakima",
+      "state": "WA",
+      "country": "US",
       "region": "pacific_northwest",
       "locations": [
         {
@@ -3083,8 +3479,10 @@
       "lat": 46.6021,
       "lon": -120.5059
     },
-    "Medford": {
-      "state": "Oregon",
+    "medford_or_us": {
+      "spoken_city": "Medford",
+      "state": "OR",
+      "country": "US",
       "region": "pacific_northwest",
       "locations": [
         {
@@ -3106,8 +3504,10 @@
       "lat": 42.3265,
       "lon": -122.8756
     },
-    "Roseburg": {
-      "state": "Oregon",
+    "roseburg_or_us": {
+      "spoken_city": "Roseburg",
+      "state": "OR",
+      "country": "US",
       "region": "pacific_northwest",
       "locations": [
         {
@@ -3124,8 +3524,10 @@
       "lat": 43.2165,
       "lon": -123.3417
     },
-    "Bellingham": {
-      "state": "Washington",
+    "bellingham_wa_us": {
+      "spoken_city": "Bellingham",
+      "state": "WA",
+      "country": "US",
       "region": "pacific_northwest",
       "locations": [
         {
@@ -3147,8 +3549,10 @@
       "lat": 48.7519,
       "lon": -122.4787
     },
-    "Pendleton": {
-      "state": "Oregon",
+    "pendleton_or_us": {
+      "spoken_city": "Pendleton",
+      "state": "OR",
+      "country": "US",
       "region": "pacific_northwest",
       "locations": [
         {
@@ -3170,8 +3574,10 @@
       "lat": 45.6721,
       "lon": -118.7886
     },
-    "Asheville": {
-      "state": "North Carolina",
+    "asheville_nc_us": {
+      "spoken_city": "Asheville",
+      "state": "NC",
+      "country": "US",
       "region": "appalachia",
       "locations": [
         {
@@ -3188,8 +3594,10 @@
       "lat": 35.5951,
       "lon": -82.5515
     },
-    "Johnson City": {
-      "state": "Tennessee",
+    "johnson_city_tn_us": {
+      "spoken_city": "Johnson City",
+      "state": "TN",
+      "country": "US",
       "region": "appalachia",
       "locations": [
         {
@@ -3206,8 +3614,10 @@
       "lat": 36.3134,
       "lon": -82.3535
     },
-    "Harrisonburg": {
-      "state": "Virginia",
+    "harrisonburg_va_us": {
+      "spoken_city": "Harrisonburg",
+      "state": "VA",
+      "country": "US",
       "region": "appalachia",
       "locations": [
         {
@@ -3229,8 +3639,10 @@
       "lat": 38.4496,
       "lon": -78.8689
     },
-    "Winchester": {
-      "state": "Virginia",
+    "winchester_va_us": {
+      "spoken_city": "Winchester",
+      "state": "VA",
+      "country": "US",
       "region": "appalachia",
       "locations": [
         {
@@ -3252,8 +3664,10 @@
       "lat": 39.1857,
       "lon": -78.1633
     },
-    "Hagerstown": {
-      "state": "Maryland",
+    "hagerstown_md_us": {
+      "spoken_city": "Hagerstown",
+      "state": "MD",
+      "country": "US",
       "region": "appalachia",
       "locations": [
         {
@@ -3270,8 +3684,10 @@
       "lat": 39.6418,
       "lon": -77.72
     },
-    "Beckley": {
-      "state": "West Virginia",
+    "beckley_wv_us": {
+      "spoken_city": "Beckley",
+      "state": "WV",
+      "country": "US",
       "region": "appalachia",
       "locations": [
         {
@@ -3288,8 +3704,10 @@
       "lat": 37.7782,
       "lon": -81.1882
     },
-    "Columbia, Missouri": {
-      "state": "Missouri",
+    "columbia_mo_us": {
+      "spoken_city": "Columbia",
+      "state": "MO",
+      "country": "US",
       "region": "heartland",
       "locations": [
         {
@@ -3311,8 +3729,10 @@
       "lat": 38.9517,
       "lon": -92.3341
     },
-    "Sioux City": {
-      "state": "Iowa",
+    "sioux_city_ia_us": {
+      "spoken_city": "Sioux City",
+      "state": "IA",
+      "country": "US",
       "region": "heartland",
       "locations": [
         {
@@ -3334,8 +3754,10 @@
       "lat": 42.4999,
       "lon": -96.4003
     },
-    "Grand Island": {
-      "state": "Nebraska",
+    "grand_island_ne_us": {
+      "spoken_city": "Grand Island",
+      "state": "NE",
+      "country": "US",
       "region": "heartland",
       "locations": [
         {
@@ -3357,8 +3779,10 @@
       "lat": 40.9264,
       "lon": -98.342
     },
-    "North Platte": {
-      "state": "Nebraska",
+    "north_platte_ne_us": {
+      "spoken_city": "North Platte",
+      "state": "NE",
+      "country": "US",
       "region": "heartland",
       "locations": [
         {
@@ -3375,8 +3799,10 @@
       "lat": 41.1239,
       "lon": -100.7654
     },
-    "Joplin": {
-      "state": "Missouri",
+    "joplin_mo_us": {
+      "spoken_city": "Joplin",
+      "state": "MO",
+      "country": "US",
       "region": "heartland",
       "locations": [
         {
@@ -3393,8 +3819,10 @@
       "lat": 37.0842,
       "lon": -94.5133
     },
-    "Rolla": {
-      "state": "Missouri",
+    "rolla_mo_us": {
+      "spoken_city": "Rolla",
+      "state": "MO",
+      "country": "US",
       "region": "heartland",
       "locations": [
         {
@@ -3411,8 +3839,10 @@
       "lat": 37.9514,
       "lon": -91.7713
     },
-    "San Angelo": {
-      "state": "Texas",
+    "san_angelo_tx_us": {
+      "spoken_city": "San Angelo",
+      "state": "TX",
+      "country": "US",
       "region": "southern_plains",
       "locations": [
         {
@@ -3429,8 +3859,10 @@
       "lat": 31.4638,
       "lon": -100.437
     },
-    "Lawton": {
-      "state": "Oklahoma",
+    "lawton_ok_us": {
+      "spoken_city": "Lawton",
+      "state": "OK",
+      "country": "US",
       "region": "southern_plains",
       "locations": [
         {
@@ -3447,8 +3879,10 @@
       "lat": 34.6086,
       "lon": -98.3903
     },
-    "Salina": {
-      "state": "Kansas",
+    "salina_ks_us": {
+      "spoken_city": "Salina",
+      "state": "KS",
+      "country": "US",
       "region": "southern_plains",
       "locations": [
         {
@@ -3465,8 +3899,10 @@
       "lat": 38.8403,
       "lon": -97.6114
     },
-    "Enid": {
-      "state": "Oklahoma",
+    "enid_ok_us": {
+      "spoken_city": "Enid",
+      "state": "OK",
+      "country": "US",
       "region": "southern_plains",
       "locations": [
         {
@@ -3483,8 +3919,10 @@
       "lat": 36.3956,
       "lon": -97.8784
     },
-    "Dodge City": {
-      "state": "Kansas",
+    "dodge_city_ks_us": {
+      "spoken_city": "Dodge City",
+      "state": "KS",
+      "country": "US",
       "region": "southern_plains",
       "locations": [
         {
@@ -3501,8 +3939,10 @@
       "lat": 37.7528,
       "lon": -100.0171
     },
-    "Garden City": {
-      "state": "Kansas",
+    "garden_city_ks_us": {
+      "spoken_city": "Garden City",
+      "state": "KS",
+      "country": "US",
       "region": "southern_plains",
       "locations": [
         {
@@ -3519,8 +3959,10 @@
       "lat": 37.9717,
       "lon": -100.8727
     },
-    "Decatur": {
-      "state": "Illinois",
+    "decatur_il_us": {
+      "spoken_city": "Decatur",
+      "state": "IL",
+      "country": "US",
       "region": "corn_belt",
       "locations": [
         {
@@ -3542,8 +3984,10 @@
       "lat": 39.8403,
       "lon": -88.9548
     },
-    "Springfield, Illinois": {
-      "state": "Illinois",
+    "springfield_il_us": {
+      "spoken_city": "Springfield",
+      "state": "IL",
+      "country": "US",
       "region": "corn_belt",
       "locations": [
         {
@@ -3560,8 +4004,10 @@
       "lat": 39.7817,
       "lon": -89.6501
     },
-    "Bloomington": {
-      "state": "Illinois",
+    "bloomington_il_us": {
+      "spoken_city": "Bloomington",
+      "state": "IL",
+      "country": "US",
       "region": "corn_belt",
       "locations": [
         {
@@ -3578,8 +4024,10 @@
       "lat": 40.4842,
       "lon": -88.9937
     },
-    "Champaign": {
-      "state": "Illinois",
+    "champaign_il_us": {
+      "spoken_city": "Champaign",
+      "state": "IL",
+      "country": "US",
       "region": "corn_belt",
       "locations": [
         {
@@ -3596,8 +4044,10 @@
       "lat": 40.1164,
       "lon": -88.2434
     },
-    "Flint": {
-      "state": "Michigan",
+    "flint_mi_us": {
+      "spoken_city": "Flint",
+      "state": "MI",
+      "country": "US",
       "region": "great_lakes",
       "locations": [
         {
@@ -3614,8 +4064,10 @@
       "lat": 43.0125,
       "lon": -83.6875
     },
-    "Kalamazoo": {
-      "state": "Michigan",
+    "kalamazoo_mi_us": {
+      "spoken_city": "Kalamazoo",
+      "state": "MI",
+      "country": "US",
       "region": "great_lakes",
       "locations": [
         {
@@ -3632,8 +4084,10 @@
       "lat": 42.2917,
       "lon": -85.5872
     },
-    "Saginaw": {
-      "state": "Michigan",
+    "saginaw_mi_us": {
+      "spoken_city": "Saginaw",
+      "state": "MI",
+      "country": "US",
       "region": "great_lakes",
       "locations": [
         {
@@ -3650,8 +4104,10 @@
       "lat": 43.4195,
       "lon": -83.9508
     },
-    "Port Huron": {
-      "state": "Michigan",
+    "port_huron_mi_us": {
+      "spoken_city": "Port Huron",
+      "state": "MI",
+      "country": "US",
       "region": "great_lakes",
       "locations": [
         {
@@ -3668,8 +4124,10 @@
       "lat": 42.9709,
       "lon": -82.4249
     },
-    "Muskegon": {
-      "state": "Michigan",
+    "muskegon_mi_us": {
+      "spoken_city": "Muskegon",
+      "state": "MI",
+      "country": "US",
       "region": "great_lakes",
       "locations": [
         {
@@ -3686,8 +4144,10 @@
       "lat": 43.2342,
       "lon": -86.2484
     },
-    "Jackson, Michigan": {
-      "state": "Michigan",
+    "jackson_mi_us": {
+      "spoken_city": "Jackson",
+      "state": "MI",
+      "country": "US",
       "region": "great_lakes",
       "locations": [
         {
@@ -3704,8 +4164,10 @@
       "lat": 42.2459,
       "lon": -84.4013
     },
-    "Traverse City": {
-      "state": "Michigan",
+    "traverse_city_mi_us": {
+      "spoken_city": "Traverse City",
+      "state": "MI",
+      "country": "US",
       "region": "great_lakes",
       "locations": [
         {
@@ -3722,8 +4184,10 @@
       "lat": 44.7631,
       "lon": -85.6206
     },
-    "Marquette": {
-      "state": "Michigan",
+    "marquette_mi_us": {
+      "spoken_city": "Marquette",
+      "state": "MI",
+      "country": "US",
       "region": "upper_midwest",
       "locations": [
         {
@@ -3740,8 +4204,10 @@
       "lat": 46.5436,
       "lon": -87.3954
     },
-    "Escanaba": {
-      "state": "Michigan",
+    "escanaba_mi_us": {
+      "spoken_city": "Escanaba",
+      "state": "MI",
+      "country": "US",
       "region": "upper_midwest",
       "locations": [
         {
@@ -3758,8 +4224,10 @@
       "lat": 45.7453,
       "lon": -87.0646
     },
-    "Sault Ste. Marie": {
-      "state": "Michigan",
+    "sault_ste_marie_mi_us": {
+      "spoken_city": "Sault Ste. Marie",
+      "state": "MI",
+      "country": "US",
       "region": "upper_midwest",
       "locations": [
         {
@@ -3776,8 +4244,10 @@
       "lat": 46.4953,
       "lon": -84.3453
     },
-    "Iron Mountain": {
-      "state": "Michigan",
+    "iron_mountain_mi_us": {
+      "spoken_city": "Iron Mountain",
+      "state": "MI",
+      "country": "US",
       "region": "upper_midwest",
       "locations": [
         {
@@ -3794,8 +4264,10 @@
       "lat": 45.8202,
       "lon": -88.0654
     },
-    "Houghton": {
-      "state": "Michigan",
+    "houghton_mi_us": {
+      "spoken_city": "Houghton",
+      "state": "MI",
+      "country": "US",
       "region": "upper_midwest",
       "locations": [
         {
@@ -3812,8 +4284,10 @@
       "lat": 47.1211,
       "lon": -88.5694
     },
-    "Kenosha": {
-      "state": "Wisconsin",
+    "kenosha_wi_us": {
+      "spoken_city": "Kenosha",
+      "state": "WI",
+      "country": "US",
       "region": "upper_midwest",
       "locations": [
         {
@@ -3830,8 +4304,10 @@
       "lat": 42.5847,
       "lon": -87.8212
     },
-    "Eau Claire": {
-      "state": "Wisconsin",
+    "eau_claire_wi_us": {
+      "spoken_city": "Eau Claire",
+      "state": "WI",
+      "country": "US",
       "region": "upper_midwest",
       "locations": [
         {
@@ -3848,8 +4324,10 @@
       "lat": 44.8113,
       "lon": -91.4985
     },
-    "Wausau": {
-      "state": "Wisconsin",
+    "wausau_wi_us": {
+      "spoken_city": "Wausau",
+      "state": "WI",
+      "country": "US",
       "region": "upper_midwest",
       "locations": [
         {
@@ -3866,8 +4344,10 @@
       "lat": 44.9591,
       "lon": -89.6301
     },
-    "La Crosse": {
-      "state": "Wisconsin",
+    "la_crosse_wi_us": {
+      "spoken_city": "La Crosse",
+      "state": "WI",
+      "country": "US",
       "region": "upper_midwest",
       "locations": [
         {
@@ -3884,8 +4364,10 @@
       "lat": 43.8014,
       "lon": -91.2396
     },
-    "St. Cloud": {
-      "state": "Minnesota",
+    "st_cloud_mn_us": {
+      "spoken_city": "St. Cloud",
+      "state": "MN",
+      "country": "US",
       "region": "upper_midwest",
       "locations": [
         {
@@ -3902,8 +4384,10 @@
       "lat": 45.5608,
       "lon": -94.1625
     },
-    "Rochester, Minnesota": {
-      "state": "Minnesota",
+    "rochester_mn_us": {
+      "spoken_city": "Rochester",
+      "state": "MN",
+      "country": "US",
       "region": "upper_midwest",
       "locations": [
         {
@@ -3920,8 +4404,10 @@
       "lat": 44.0121,
       "lon": -92.4802
     },
-    "Mankato": {
-      "state": "Minnesota",
+    "mankato_mn_us": {
+      "spoken_city": "Mankato",
+      "state": "MN",
+      "country": "US",
       "region": "upper_midwest",
       "locations": [
         {
@@ -3938,8 +4424,10 @@
       "lat": 44.1591,
       "lon": -94.0092
     },
-    "Winona": {
-      "state": "Minnesota",
+    "winona_mn_us": {
+      "spoken_city": "Winona",
+      "state": "MN",
+      "country": "US",
       "region": "upper_midwest",
       "locations": [
         {
@@ -3956,8 +4444,10 @@
       "lat": 44.05,
       "lon": -91.6393
     },
-    "Willmar": {
-      "state": "Minnesota",
+    "willmar_mn_us": {
+      "spoken_city": "Willmar",
+      "state": "MN",
+      "country": "US",
       "region": "upper_midwest",
       "locations": [
         {
@@ -3974,8 +4464,10 @@
       "lat": 45.1219,
       "lon": -95.0433
     },
-    "Albert Lea": {
-      "state": "Minnesota",
+    "albert_lea_mn_us": {
+      "spoken_city": "Albert Lea",
+      "state": "MN",
+      "country": "US",
       "region": "upper_midwest",
       "locations": [
         {
@@ -3992,8 +4484,10 @@
       "lat": 43.648,
       "lon": -93.3683
     },
-    "Hibbing": {
-      "state": "Minnesota",
+    "hibbing_mn_us": {
+      "spoken_city": "Hibbing",
+      "state": "MN",
+      "country": "US",
       "region": "upper_midwest",
       "locations": [
         {
@@ -4010,8 +4504,10 @@
       "lat": 47.4272,
       "lon": -92.9377
     },
-    "Gary": {
-      "state": "Indiana",
+    "gary_in_us": {
+      "spoken_city": "Gary",
+      "state": "IN",
+      "country": "US",
       "region": "great_lakes",
       "locations": [
         {
@@ -4028,8 +4524,10 @@
       "lat": 41.5934,
       "lon": -87.3464
     },
-    "Lafayette, Indiana": {
-      "state": "Indiana",
+    "lafayette_in_us": {
+      "spoken_city": "Lafayette",
+      "state": "IN",
+      "country": "US",
       "region": "corn_belt",
       "locations": [
         {

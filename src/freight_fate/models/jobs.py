@@ -224,9 +224,9 @@ def _is_legacy_facility_name(city: str, location_name: str) -> bool:
 class Job:
     cargo: CargoType
     weight_tons: float
-    origin: str
+    origin: str  # city key; legacy saves hold the old display name
     origin_location: str
-    destination: str
+    destination: str  # city key; legacy saves hold the old display name
     distance_mi: float  # shortest-route miles, used for pay and deadline
     pay: float
     deadline_game_h: float
@@ -239,6 +239,19 @@ class Job:
     origin_locality: str = ""
     destination_locality: str = ""
     bobtail: bool = False  # empty reposition run: relocate, no cargo or pay
+    # Speakable city names, set at dispatch. Legacy payloads predate these
+    # fields, but there origin/destination hold the old spoken display name,
+    # so the fallback properties below always read cleanly.
+    origin_spoken: str = ""
+    destination_spoken: str = ""
+
+    @property
+    def spoken_origin(self) -> str:
+        return self.origin_spoken or self.origin
+
+    @property
+    def spoken_destination(self) -> str:
+        return self.destination_spoken or self.destination
 
     def describe(self, index: int | None = None, total: int | None = None) -> str:
         prefix = f"Job {index} of {total}: " if index is not None else ""
@@ -259,19 +272,19 @@ class Job:
 
     def origin_facility_text(self) -> str:
         return facility_text(
-            self.origin_type, self.origin_location, self.origin, self.origin_locality
+            self.origin_type, self.origin_location, self.spoken_origin, self.origin_locality
         )
 
     def origin_offer_text(self) -> str:
         return facility_offer_text(
-            self.origin_type, self.origin_location, self.origin, self.origin_locality
+            self.origin_type, self.origin_location, self.spoken_origin, self.origin_locality
         )
 
     def destination_facility_text(self) -> str:
         return facility_text(
             self.destination_type,
             self.destination_location,
-            self.destination,
+            self.spoken_destination,
             self.destination_locality,
         )
 
@@ -279,7 +292,7 @@ class Job:
         return facility_offer_text(
             self.destination_type,
             self.destination_location,
-            self.destination,
+            self.spoken_destination,
             self.destination_locality,
         )
 
@@ -323,6 +336,8 @@ def job_payload(job: Job) -> dict:
         "destination_type": job.destination_type,
         "destination_facility_id": job.destination_facility_id,
         "destination_locality": job.destination_locality,
+        "origin_spoken": job.origin_spoken,
+        "destination_spoken": job.destination_spoken,
         "distance_mi": job.distance_mi,
         "pay": job.pay,
         "deadline_game_h": job.deadline_game_h,
@@ -336,12 +351,14 @@ def job_from_payload(data: dict) -> Job:
     origin = str(data["origin"])
     destination = str(data["destination"])
     origin_location = str(
-        data.get("origin_location") or data.get("origin_facility") or f"{origin} freight market"
+        data.get("origin_location")
+        or data.get("origin_facility")
+        or f"{data.get('origin_spoken') or origin} freight market"
     )
     destination_location = str(
         data.get("destination_location")
         or data.get("destination_facility")
-        or f"{destination} freight market"
+        or f"{data.get('destination_spoken') or destination} freight market"
     )
     return Job(
         cargo,
@@ -361,7 +378,27 @@ def job_from_payload(data: dict) -> Job:
         origin_locality=str(data.get("origin_locality", "")),
         destination_locality=str(data.get("destination_locality", "")),
         bobtail=bool(data.get("bobtail", False)),
+        origin_spoken=str(data.get("origin_spoken", "")),
+        destination_spoken=str(data.get("destination_spoken", "")),
     )
+
+
+def normalize_job_cities(job: Job, world: World) -> Job:
+    """Resolve legacy save city names to canonical keys, keeping speech intact.
+
+    Pre-slug payloads store display names ("Jackson, Michigan") in
+    ``origin``/``destination`` and no spoken fields. Capture the speakable
+    form first, then rewrite the identity to the current key so every world
+    lookup downstream sees canonical keys. Unknown cities pass through
+    unchanged for the caller's usual fallbacks.
+    """
+    if not job.origin_spoken:
+        job.origin_spoken = world.spoken_city(job.origin)
+    if not job.destination_spoken:
+        job.destination_spoken = world.spoken_city(job.destination)
+    job.origin = world.resolve_city_key(job.origin)
+    job.destination = world.resolve_city_key(job.destination)
+    return job
 
 
 def make_reposition_job(world: World, origin: str, destination: str) -> Job | None:
@@ -373,11 +410,13 @@ def make_reposition_job(world: World, origin: str, destination: str) -> Job | No
     arrival the player simply parks at the destination city's hub and can shop
     its dispatch board.
     """
+    origin = world.resolve_city_key(origin)
+    destination = world.resolve_city_key(destination)
     route = world.supported_route(origin, destination)
     if route is None:
         return None
     miles = round(route.miles, 1)
-    dest = world.cities[destination]
+    dest = world.city(destination)
     dest_loc = dest.locations[0] if dest.locations else None
     return Job(
         CARGO_CATALOG["general"],
@@ -389,9 +428,11 @@ def make_reposition_job(world: World, origin: str, destination: str) -> Job | No
         0.0,
         required_hours(miles, route, world) * 3.0 + 24.0,
         origin_type="company_yard",
-        destination_location=dest_loc.name if dest_loc else f"{destination} yard",
+        destination_location=dest_loc.name if dest_loc else f"{dest.name} yard",
         destination_type=dest_loc.type if dest_loc else "company_yard",
         bobtail=True,
+        origin_spoken=world.spoken_city(origin),
+        destination_spoken=world.spoken_city(destination),
     )
 
 
@@ -699,7 +740,8 @@ class JobBoard:
         market: Market | None = None,
     ) -> list[Job]:
         jobs: list[Job] = []
-        city_obj = self.world.cities[city]
+        city = self.world.resolve_city_key(city)
+        city_obj = self.world.city(city)
         candidates = [c for c in self._candidates(city) if c[1] >= MIN_JOB_DISTANCE_MI]
         cap = self.distance_cap(level)
         reachable = [c for c in candidates if c[1] <= cap]
@@ -918,4 +960,6 @@ class JobBoard:
             destination_facility_id=destination_facility.id,
             origin_locality=origin_facility.locality,
             destination_locality=destination_facility.locality,
+            origin_spoken=self.world.spoken_city(origin),
+            destination_spoken=self.world.spoken_city(destination),
         )

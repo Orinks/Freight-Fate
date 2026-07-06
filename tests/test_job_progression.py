@@ -80,7 +80,7 @@ def test_bobtail_relocates_to_a_nearby_city_without_pay():
         app.ctx.push_state(ArrivalState(app.ctx, driving))
         arrival = app.state
 
-        assert p.current_city == "Cheyenne"  # relocated to the new hub
+        assert p.current_city == "cheyenne_wy_us"  # relocated to the new hub
         assert p.money == money_before  # no pay for an empty run
         assert p.career.deliveries == 0  # not counted as a delivery
         # The repositioned arrival screen carries its summary.
@@ -144,8 +144,8 @@ def test_destination_weighting_prefers_near_cities(world):
     near = far = 0
     for seed in range(60):
         for job in JobBoard(world, seed=seed).offers("Chicago", set(), level=6):
-            near += job.destination == "Milwaukee"
-            far += job.destination == "New York"
+            near += job.destination == "milwaukee_wi_us"
+            far += job.destination == "new_york_ny_us"
     assert near > far
 
 
@@ -221,7 +221,7 @@ def test_representative_boards_use_truck_plausible_locations(world):
         jobs = JobBoard(world, seed=3).offers(city, set(), level=2)
         assert jobs
         assert all(
-            any(job.origin_location == loc.name for loc in world.cities[city].locations)
+            any(job.origin_location == loc.name for loc in world.city(city).locations)
             for job in jobs
         )
         assert all(job.origin_facility_id for job in jobs)

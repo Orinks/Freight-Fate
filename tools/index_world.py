@@ -15,11 +15,12 @@ Usage::
 
 The split follows ``world_data/index.json``: ``cities`` -> each country's
 ``cities.json`` (``{"cities": {...}}``), ``legs`` -> ``legs.json``
-(``{"legs": [...]}``), and ``world.json``'s top-level ``route_stop_data`` is
-merged into each country's ``metadata.json``. A city is assigned to a country by
-its ``country`` field; when the index lists exactly one country every city and
-leg belongs to it, so the current single-country (US) data needs no per-city
-tags.
+(``{"legs": [...]}``), ``world.json``'s top-level ``geo`` lookup (state and
+country codes -> spoken names) -> ``world_data/geo.json``, and the top-level
+``route_stop_data`` is merged into each country's ``metadata.json``. A city is
+assigned to a country by its ``country`` field; when the index lists exactly
+one country every city and leg belongs to it, so per-city tags are optional in
+single-country data.
 """
 
 from __future__ import annotations
@@ -76,6 +77,8 @@ def build_country_files(data: dict[str, Any], index: dict[str, Any]) -> dict[Pat
         by_country[code]["legs"].append(leg)
 
     files: dict[Path, str] = {}
+    if "geo" in data:
+        files[WORLD_DATA_PATH / "geo.json"] = _dumps(data["geo"])
     for country in countries:
         code = country["code"]
         country_dir = WORLD_DATA_PATH / country["path"]

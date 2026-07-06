@@ -393,9 +393,17 @@ def test_old_map_snapshot_still_resumes():
         enter_world(app.ctx)
         assert isinstance(app.state, DrivingState)
         assert app.state.resumed
-        assert app.state.route.cities == old_route
+        # the old display names canonicalize to the stable slug keys...
+        assert app.state.route.cities == [
+            "chicago_il_us",
+            "st_louis_mo_us",
+            "kansas_city_mo_us",
+            "denver_co_us",
+        ]
         assert app.state.trip.position_mi == 412.0
-        assert app.state.job.destination == "Denver"
+        assert app.state.job.destination == "denver_co_us"
+        # ...while the spoken destination stays what the player has heard
+        assert app.state.job.spoken_destination == "Denver"
         assert app.state.truck.air_ready
         assert app.state.truck.parking_brake
     finally:

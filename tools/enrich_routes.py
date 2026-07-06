@@ -87,32 +87,32 @@ ORS_GRADE_SOURCE = (
 )
 HIGH_PRIORITY_REMAINING_CORRIDORS = (
     {
-        "from": "Philadelphia",
-        "to": "Pittsburgh",
+        "from": "philadelphia_pa_us",
+        "to": "pittsburgh_pa_us",
         "label": "PA Turnpike / I-76 Allegheny corridor",
         "why": "major toll corridor with service plazas, grades, tunnels, and emergency service modeling",
     },
     {
-        "from": "Cleveland",
-        "to": "Chicago",
+        "from": "cleveland_oh_us",
+        "to": "chicago_il_us",
         "label": "Ohio/Indiana Turnpike and I-80/I-90 corridor",
         "why": "major toll and service-plaza-heavy Midwest freight corridor",
     },
     {
-        "from": "New York",
-        "to": "Boston",
+        "from": "new_york_ny_us",
+        "to": "boston_ma_us",
         "label": "I-95 / New England toll corridor",
         "why": "extends Northeast toll and service-plaza realism beyond the current NY-Philadelphia batch",
     },
     {
-        "from": "Philadelphia",
-        "to": "Baltimore",
+        "from": "philadelphia_pa_us",
+        "to": "baltimore_md_us",
         "label": "I-95 Northeast Corridor south of Philadelphia",
         "why": "connects the current NJ/Philadelphia lane to the broader Northeast freight network",
     },
     {
-        "from": "Pittsburgh",
-        "to": "Cleveland",
+        "from": "pittsburgh_pa_us",
+        "to": "cleveland_oh_us",
         "label": "PA/Ohio Turnpike connector corridor",
         "why": "ties the PA Turnpike batch into the Ohio Turnpike network",
     },
@@ -147,8 +147,8 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
         description="Inspect or smoke-check offline corridor metadata."
     )
-    parser.add_argument("--from-city", default="Chicago")
-    parser.add_argument("--to-city", default="Indianapolis")
+    parser.add_argument("--from-city", default="chicago_il_us")
+    parser.add_argument("--to-city", default="indianapolis_in_us")
     parser.add_argument(
         "--live-smoke", action="store_true", help="Make tiny no-key OSRM and elevation requests."
     )

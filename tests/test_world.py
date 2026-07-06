@@ -88,16 +88,22 @@ def test_northeast_corridors_prefer_i95_not_inland_loops(world):
     # Best option is the direct I-95 hop. The NJ Turnpike alternate via
     # Trenton/Newark is the real I-95 corridor, so it is allowed; loops inland
     # through the Alleghenies (Pittsburgh/Harrisburg) or Great Lakes are not.
-    assert philly_ny[0].cities == ["Philadelphia", "New York"]
+    assert philly_ny[0].cities == ["philadelphia_pa_us", "new_york_ny_us"]
     assert philly_ny[0].highways == ["I-95"]
-    inland = {"Pittsburgh", "Buffalo", "Harrisburg", "Scranton", "Binghamton"}
+    inland = {
+        "pittsburgh_pa_us",
+        "buffalo_ny_us",
+        "harrisburg_pa_us",
+        "scranton_pa_us",
+        "binghamton_ny_us",
+    }
     assert all(inland.isdisjoint(route.cities) for route in philly_ny)
 
     philly_boston = world.route_options("Philadelphia", "Boston", count=5)
-    assert philly_boston[0].cities == ["Philadelphia", "New York", "Boston"]
+    assert philly_boston[0].cities == ["philadelphia_pa_us", "new_york_ny_us", "boston_ma_us"]
     assert philly_boston[0].highways == ["I-95"]
-    assert all("Pittsburgh" not in route.cities for route in philly_boston)
-    assert all("Buffalo" not in route.cities for route in philly_boston)
+    assert all("pittsburgh_pa_us" not in route.cities for route in philly_boston)
+    assert all("buffalo_ny_us" not in route.cities for route in philly_boston)
 
 
 def test_shortest_route_is_actually_shortest(world):
@@ -124,7 +130,7 @@ def test_every_city_has_locations_with_known_cargo(world):
         assert city.locations, f"{city.name} has no freight locations"
         for loc in city.locations:
             assert loc.id, f"{loc.name} has no stable id"
-            assert loc.city == city.name
+            assert loc.city == city.key
             assert loc.type in FREIGHT_LOCATION_TYPES, f"unknown location type {loc.type}"
             assert loc.spoken_name
             assert loc.source_note

@@ -82,7 +82,7 @@ def test_i84_to_portland_never_enters_washington():
     world = get_world()
     checked = 0
     for leg in world.legs:
-        if leg.highway != "I-84" or "Portland" not in (leg.a, leg.b):
+        if leg.highway != "I-84" or "portland_or_us" not in (leg.a, leg.b):
             continue
         checked += 1
         # ``c.state`` is the state you arrive in; on I-84 by Portland you never

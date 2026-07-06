@@ -311,14 +311,14 @@ class PauseMenuState(MenuState):
             self.ctx.say(
                 f"Driving to pickup at {d._pickup_facility_text()}. "
                 f"{d.job.weight_tons:.0f} tons of {d.job.cargo.label} are "
-                f"assigned for {d.job.destination}. "
+                f"assigned for {d.job.spoken_destination}. "
                 f"{d._pickup_progress_summary()} {hours_used:.1f} hours used. "
                 f"{d._air_status_text()}."
             )
             return
         self.ctx.say(
             f"Hauling {d.job.weight_tons:.0f} tons of {d.job.cargo.label} "
-            f"to {d.job.destination}. "
+            f"to {d.job.spoken_destination}. "
             f"{d.trip.progress_summary(self.ctx.settings.imperial_units)} "
             f"{hours_used:.1f} hours used of {d.job.deadline_game_h:.0f}. "
             f"{d._air_status_text()}."
@@ -351,7 +351,7 @@ class PauseMenuState(MenuState):
         self.ctx.save_profile()
         self.ctx.say(
             f"Job abandoned. You paid a five hundred dollar penalty and "
-            f"returned to {p.current_city}.",
+            f"returned to {self.ctx.world.spoken_city(p.current_city)}.",
             interrupt=True,
         )
         self.ctx.pop_state()  # close pause menu
@@ -389,7 +389,8 @@ class FacilityArrivalState(MenuState):
         from ..discord_presence import PresenceState
 
         return PresenceState(
-            "Delivering", f"{self.driving.job.cargo.label} to {self.driving.job.destination}"
+            "Delivering",
+            f"{self.driving.job.cargo.label} to {self.driving.job.spoken_destination}",
         )
 
     def enter(self) -> None:
@@ -538,9 +539,9 @@ class ArrivalState(MenuState):
         self.summary_parts.insert(
             0,
             (
-                f"Bobtailed empty to {job.destination} in {hours:.1f} hours. "
+                f"Bobtailed empty to {job.spoken_destination} in {hours:.1f} hours. "
                 f"It is {clock_text(p.game_hours)}. No load and no pay, but you are "
-                f"parked at {self.terminal.name} and can shop the {job.destination} "
+                f"parked at {self.terminal.name} and can shop the {job.spoken_destination} "
                 f"dispatch board. Fuel {d.truck.fuel_fraction * 100:.0f} percent."
             ),
         )
@@ -613,7 +614,7 @@ class ArrivalState(MenuState):
             0,
             (
                 f"Delivered {job.weight_tons:.0f} tons of {job.cargo.label} to "
-                f"{job.destination} in {hours:.1f} hours, "
+                f"{job.spoken_destination} in {hours:.1f} hours, "
                 f"{'on time' if on_time else 'late'}. "
                 f"It is {clock_text(p.game_hours)}. "
                 f"Gross pay {gross_pay:,.0f} dollars. "
@@ -625,7 +626,7 @@ class ArrivalState(MenuState):
                 f"Net driver pay {net_pay:,.0f} "
                 f"dollars, and you now have {p.money:,.0f}. "
                 f"After unloading, dispatch has you parked at "
-                f"{self.terminal.name} for the {job.destination} service area."
+                f"{self.terminal.name} for the {job.spoken_destination} service area."
             ),
         )
         if early_bonus >= 1.0:
@@ -670,10 +671,11 @@ class ArrivalState(MenuState):
         if p.pay_advance >= 1.0:
             advance_lines.append(f"Pay advance still outstanding: {p.pay_advance:,.0f} dollars.")
         self.summary_lines = [
-            f"Delivered {job.weight_tons:.0f} tons of {job.cargo.label} to {job.destination}.",
+            f"Delivered {job.weight_tons:.0f} tons of {job.cargo.label} "
+            f"to {job.spoken_destination}.",
             f"Trip time: {hours:.1f} hours, {timing.lower()}.",
             f"It is {clock_text(p.game_hours)}.",
-            f"Parked at {self.terminal.name} for the {job.destination} service area.",
+            f"Parked at {self.terminal.name} for the {job.spoken_destination} service area.",
             f"Gross pay: {gross_pay:,.0f} dollars.",
             f"Carrier-paid or reimbursed charges: {carrier_charges:,.0f} "
             f"dollars, including tolls {toll_expense:,.0f} and "
@@ -684,7 +686,7 @@ class ArrivalState(MenuState):
             f"Net driver pay: {net_pay:,.0f} dollars.",
             f"Money after settlement: {p.money:,.0f} dollars.",
             bonus_text + ".",
-            f"Route: {' to '.join(d.route.cities)}.",
+            f"Route: {' to '.join(self.ctx.world.spoken_city(c) for c in d.route.cities)}.",
             f"Distance credited: {job.distance_mi:.0f} miles.",
             cargo_condition + ".",
             f"Fuel remaining: {d.truck.fuel_fraction * 100:.0f} percent.",
@@ -753,38 +755,38 @@ class ArrivalState(MenuState):
         if abs(dest_lon - origin_lon) >= 35.0:
             ids.append("coast_to_coast")
         route66 = {
-            "Chicago",
-            "St. Louis",
-            "Tulsa",
-            "Oklahoma City",
-            "Amarillo",
-            "Albuquerque",
-            "Flagstaff",
-            "Los Angeles",
+            "chicago_il_us",
+            "st_louis_mo_us",
+            "tulsa_ok_us",
+            "oklahoma_city_ok_us",
+            "amarillo_tx_us",
+            "albuquerque_nm_us",
+            "flagstaff_az_us",
+            "los_angeles_ca_us",
         }
         if origin in route66 and dest in route66:
             ids.append("route66_run")
         arrival_hour = self.driving.trip.current_hour
         # Plain "deliver into this city" badges (titles claim nothing extra).
         simple_arrival = {
-            "Phoenix": "phoenix_arrival",
-            "Wichita": "wichita_arrival",
-            "Bakersfield": "bakersfield_arrival",
-            "Las Vegas": "vegas_arrival",
+            "phoenix_az_us": "phoenix_arrival",
+            "wichita_ks_us": "wichita_arrival",
+            "bakersfield_ca_us": "bakersfield_arrival",
+            "las_vegas_nv_us": "vegas_arrival",
         }
         if dest in simple_arrival:
             ids.append(simple_arrival[dest])
         # Badges whose title names a condition, so the condition is enforced:
-        if dest == "Amarillo" and 5.0 <= arrival_hour < 12.0:  # "by Daybreak"
+        if dest == "amarillo_tx_us" and 5.0 <= arrival_hour < 12.0:  # "by Daybreak"
             ids.append("amarillo_arrival")
-        if dest == "Tulsa" and on_time:  # "Right on Schedule"
+        if dest == "tulsa_ok_us" and on_time:  # "Right on Schedule"
             ids.append("tulsa_arrival")
         if world.cities[dest].state == "Georgia" and is_night(arrival_hour):
             ids.append("georgia_arrival")  # "Midnight Freight"
         # Departures: the title puts the city in the rearview / "out of" it.
-        if origin == "Lubbock":  # "in the Rearview"
+        if origin == "lubbock_tx_us":  # "in the Rearview"
             ids.append("lubbock_arrival")
-        if origin == "Detroit":  # "Last Load Out of"
+        if origin == "detroit_mi_us":  # "Last Load Out of"
             ids.append("detroit_run")
 
         # -- Challenges: grind milestones, long hauls, spotless runs ----------

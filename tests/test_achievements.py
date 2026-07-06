@@ -178,9 +178,9 @@ def test_eastbound_badge_fires_only_on_an_eastbound_delivery(monkeypatch):
     try:
         app.ctx.profile = Profile(name="Eastbound Run")
         p = app.ctx.profile
-        p.current_city = "Chicago"
+        p.current_city = "chicago_il_us"
         world = app.ctx.world
-        origin_lon = world.cities["Chicago"].lon
+        origin_lon = world.city("Chicago").lon
         job = next(
             job
             for job in JobBoard(world, seed=11).offers(

@@ -14,6 +14,7 @@ import re
 import zlib
 from pathlib import Path
 
+from .legacy_aliases import LEGACY_CITY_SLUGS
 from .world_constants import *
 from .world_loader import load_world_data
 from .world_models import *
@@ -46,65 +47,95 @@ def _load_base_world_data(root: Path) -> dict:
 
 class World:
     def __init__(self, data: dict) -> None:
+        geo = data.get("geo") if isinstance(data.get("geo"), dict) else {}
+        countries = geo.get("countries") if isinstance(geo.get("countries"), dict) else {}
         self.cities: dict[str, City] = {}
         self._facilities_by_id: dict[str, Location] = {}
-        for name, c in data["cities"].items():
+        for key, c in data["cities"].items():
             lat = float(c.get("lat", 0.0))
             lon = float(c.get("lon", 0.0))
-            explicit_locs = tuple(_parse_location(loc, name, lat, lon) for loc in c["locations"])
-            tags = _market_tags_for_city(name, c, explicit_locs)
-            locs = _expand_market_locations(name, lat, lon, explicit_locs, tags)
-            self._validate_city_locations(name, locs)
-            self.cities[name] = City(name, c["state"], c["region"], locs, lat, lon, tags)
+            spoken_city, state_name, state_code, country_code, country_name = _city_identity(
+                key, c, countries
+            )
+            explicit_locs = tuple(
+                _parse_location(loc, key, spoken_city, lat, lon) for loc in c["locations"]
+            )
+            tags = _market_tags_for_city(key, state_code, c, explicit_locs)
+            locs = _expand_market_locations(key, spoken_city, lat, lon, explicit_locs, tags)
+            self._validate_city_locations(spoken_city, locs)
+            self.cities[key] = City(
+                spoken_city,
+                state_name,
+                c["region"],
+                locs,
+                lat,
+                lon,
+                tags,
+                key=key,
+                state_code=state_code,
+                country=country_code,
+                country_name=country_name,
+            )
+        self._city_aliases, self._ambiguous_spoken = _build_city_aliases(self.cities)
+        self._legacy_names_by_key: dict[str, tuple[str, ...]] = {}
+        for old_name, slug in LEGACY_CITY_SLUGS.items():
+            if slug in self.cities and old_name != slug:
+                self._legacy_names_by_key.setdefault(slug, ())
+                self._legacy_names_by_key[slug] += (old_name,)
+        self._legacy_facility_ids = _build_legacy_facility_ids(
+            self.cities, self._legacy_names_by_key
+        )
 
         self.legs: list[Leg] = []
         for leg in data["legs"]:
+            # Endpoints resolve through the alias table so additive overlays
+            # written against pre-slug names keep merging.
+            leg_from = self.resolve_city_key(leg["from"])
+            leg_to = self.resolve_city_key(leg["to"])
             miles = float(leg["miles"])
             stops = tuple(
-                _parse_stop(s, miles, leg["from"], leg["to"]) for s in leg.get("stops", ())
+                _parse_stop(s, miles, leg_from, leg_to) for s in leg.get("stops", ())
             )
             corridor = leg.get("corridor", {})
             route_points = tuple(
-                _parse_route_point(p, miles, leg["from"], leg["to"])
+                _parse_route_point(p, miles, leg_from, leg_to)
                 for p in corridor.get("route_points", ())
             )
             elevation_samples = tuple(
-                _parse_elevation_sample(s, miles, leg["from"], leg["to"])
+                _parse_elevation_sample(s, miles, leg_from, leg_to)
                 for s in corridor.get("elevation_samples", ())
             )
             grade_segments = tuple(
-                _parse_grade_segment(s, miles, leg["from"], leg["to"])
+                _parse_grade_segment(s, miles, leg_from, leg_to)
                 for s in corridor.get("grade_segments", ())
             )
             state_crossings = tuple(
-                _parse_state_crossing(
-                    c, miles, leg["from"], leg["to"], self.cities[leg["from"]].state
-                )
+                _parse_state_crossing(c, miles, leg_from, leg_to, self.cities[leg_from].state)
                 for c in corridor.get("state_crossings", ())
             )
             checkpoints = tuple(
-                _parse_checkpoint(c, miles, leg["from"], leg["to"])
+                _parse_checkpoint(c, miles, leg_from, leg_to)
                 for c in corridor.get("checkpoints", ())
             )
             state_miles = tuple(
-                _parse_state_mileage(m, leg["from"], leg["to"])
+                _parse_state_mileage(m, leg_from, leg_to)
                 for m in corridor.get("state_miles", ())
             )
             toll_events = tuple(
-                _parse_toll_event(e, miles, leg["from"], leg["to"], leg["highway"])
+                _parse_toll_event(e, miles, leg_from, leg_to, leg["highway"])
                 for e in corridor.get("toll_events", ())
             )
             interchanges = tuple(
-                _parse_interchange(x, miles, leg["from"], leg["to"], leg["highway"])
+                _parse_interchange(x, miles, leg_from, leg_to, leg["highway"])
                 for x in corridor.get("interchanges", ())
             )
             speed_limits = _parse_speed_limits(
-                corridor.get("speed_limits", ()), miles, leg["from"], leg["to"]
+                corridor.get("speed_limits", ()), miles, leg_from, leg_to
             )
             self.legs.append(
                 Leg(
-                    leg["from"],
-                    leg["to"],
+                    leg_from,
+                    leg_to,
                     miles,
                     leg["highway"],
                     leg["terrain"],
@@ -167,28 +198,84 @@ class World:
     def city_names(self) -> list[str]:
         return sorted(self.cities)
 
+    def resolve_city_key(self, city: str) -> str:
+        """Canonical key for any current or legacy city reference.
+
+        Old saves persist bare display names ("Jackson") or qualified ones
+        ("Jackson, Michigan"); both resolve through the alias table. Unknown
+        text echoes back unchanged so callers keep their existing
+        unknown-city behavior.
+        """
+        text = str(city or "").strip()
+        if text in self.cities:
+            return text
+        return self._city_aliases.get(text, text)
+
+    def city(self, city: str) -> City:
+        """The City for a current or legacy reference; KeyError if unknown."""
+        try:
+            return self.cities[self.resolve_city_key(city)]
+        except KeyError:
+            raise KeyError(f"Unknown city: {city}") from None
+
+    def spoken_city(self, city: str, qualified: bool | None = None) -> str:
+        """Speakable name for a city reference; never the slug key.
+
+        ``qualified=None`` appends the state exactly when the bare name is
+        shared by more than one city (Jackson -> "Jackson, Mississippi").
+        Unresolvable legacy text passes through unchanged -- old display
+        names are already speakable.
+        """
+        key = self.resolve_city_key(city)
+        city_obj = self.cities.get(key)
+        if city_obj is None:
+            return str(city)
+        if qualified is None:
+            qualified = key in self._ambiguous_spoken
+        return city_obj.spoken_qualified if qualified else city_obj.name
+
     def neighbors(self, city: str) -> list[Leg]:
-        return self._adjacency[city]
+        return self._adjacency[self.resolve_city_key(city)]
 
     def facility_location(self, city: str, location_name: str) -> Location:
-        if city not in self.cities:
+        key = self.resolve_city_key(city)
+        if key not in self.cities:
             raise KeyError(f"Unknown city: {city}")
+        city_obj = self.cities[key]
         normalized_name = str(location_name or "").strip()
-        for location in self.cities[city].locations:
-            if location.name == normalized_name or location.id == normalized_name:
+        normalized_id = self._resolve_facility_id(normalized_name)
+        # Legacy saves may name template facilities with the old display name
+        # embedded ("Jackson, Michigan Regional Cross-Dock").
+        name_candidates = {normalized_name}
+        for old_name in self._legacy_names_by_key.get(key, ()):
+            name_candidates.add(normalized_name.replace(old_name, city_obj.name))
+        for location in city_obj.locations:
+            if location.name in name_candidates or location.id in (
+                normalized_name,
+                normalized_id,
+            ):
                 return location
-        if _is_legacy_market_name(city, normalized_name):
-            return self.default_facility(city)
+        if _is_legacy_market_name(
+            (city_obj.name, *self._legacy_names_by_key.get(key, ())), normalized_name
+        ):
+            return self.default_facility(key)
         raise KeyError(f"Unknown facility in {city}: {location_name}")
 
     def facility_by_id(self, facility_id: str) -> Location:
         try:
-            return self._facilities_by_id[facility_id]
+            return self._facilities_by_id[self._resolve_facility_id(facility_id)]
         except KeyError:
             raise KeyError(f"Unknown facility id: {facility_id}") from None
 
+    def _resolve_facility_id(self, facility_id: str) -> str:
+        """Translate a pre-slug facility id to its current form when known."""
+        if facility_id in self._facilities_by_id:
+            return facility_id
+        return self._legacy_facility_ids.get(facility_id, facility_id)
+
     def default_facility(self, city: str) -> Location:
         """Stable fallback for legacy jobs that only named a city."""
+        city = self.resolve_city_key(city)
         if city not in self.cities:
             raise KeyError(f"Unknown city: {city}")
         locations = self.cities[city].locations
@@ -211,29 +298,34 @@ class World:
 
         The world data mostly lists shippers and receivers rather than company
         yards, so explicit terminal facilities are preferred and every other
-        city gets a stable fallback yard name.
+        city gets a stable fallback yard name. ``HomeTerminal.city`` carries the
+        spoken city name -- the terminal object exists to be announced.
         """
-        if city not in self.cities:
+        key = self.resolve_city_key(city)
+        if key not in self.cities:
             raise KeyError(f"Unknown city: {city}")
-        city_obj = self.cities[city]
+        city_obj = self.cities[key]
         for location in city_obj.locations:
             if location.type == "terminal":
-                return HomeTerminal(location.name, city, city_obj.state, "terminal")
+                return HomeTerminal(location.name, city_obj.name, city_obj.state, "terminal")
         for location in city_obj.locations:
             if location.type == "company_yard":
-                return HomeTerminal(location.name, city, city_obj.state, "company_yard")
-        return HomeTerminal(f"{city} Company Yard", city, city_obj.state, "company_yard")
+                return HomeTerminal(location.name, city_obj.name, city_obj.state, "company_yard")
+        return HomeTerminal(
+            f"{city_obj.name} Company Yard", city_obj.name, city_obj.state, "company_yard"
+        )
 
     def facility_approach_route(self, city: str, location_name: str) -> Route:
         """A short, drivable local route from the company terminal to a facility."""
-        location = self.facility_location(city, location_name)
+        key = self.resolve_city_key(city)
+        location = self.facility_location(key, location_name)
         base_miles = FACILITY_APPROACH_MILES.get(location.type, 4.0)
-        seed = zlib.crc32(f"{city}:{location.name}:{location.type}".encode())
+        seed = zlib.crc32(f"{key}:{location.name}:{location.type}".encode())
         offset = (seed % 7) * 0.25
         miles = round(base_miles + offset, 1)
         road = FACILITY_APPROACH_ROADS.get(location.type, "facility access road")
-        leg = Leg(city, city, miles, road, "flat", ())
-        return Route([city, city], [leg])
+        leg = Leg(key, key, miles, road, "flat", ())
+        return Route([key, key], [leg])
 
     def shortest_route(
         self,
@@ -248,6 +340,8 @@ class World:
         the historical full graph available for legacy saves and map integrity
         checks while supported freight routes are enriched lane by lane.
         """
+        start = self.resolve_city_key(start)
+        end = self.resolve_city_key(end)
         if start not in self.cities or end not in self.cities:
             raise KeyError(f"Unknown city: {start if start not in self.cities else end}")
         penalties = penalties or {}
@@ -297,6 +391,7 @@ class World:
         """
         if len(cities) < 2:
             return None
+        cities = [self.resolve_city_key(c) for c in cities]
         legs: list[Leg] = []
         for a, b in zip(cities, cities[1:], strict=False):
             leg = next((x for x in self._adjacency.get(a, ()) if x.other(a) == b), None)
@@ -313,6 +408,8 @@ class World:
     ) -> Route | None:
         if penalties:
             return self.shortest_route(start, end, penalties, require_metadata=True)
+        start = self.resolve_city_key(start)
+        end = self.resolve_city_key(end)
         key = (start, end)
         if key not in self._supported_route_cache:
             self._supported_route_cache[key] = self.shortest_route(
@@ -356,30 +453,121 @@ class World:
 _world: World | None = None
 
 
-def _leg_pair_key(leg: dict) -> frozenset:
-    return frozenset((leg.get("from"), leg.get("to")))
+def _city_identity(key: str, raw: dict, countries: dict) -> tuple[str, str, str, str, str]:
+    """(spoken city, spoken state, state code, country code, spoken country).
+
+    Migrated cities carry ``spoken_city`` plus 2-letter ``state``/``country``
+    codes resolved through the geo lookup. Pre-slug shapes (bare-name key,
+    full state name, no country) still compose sensibly so overlays and small
+    test fixtures keep loading.
+    """
+    spoken_city = str(raw.get("spoken_city", "")).strip() or key
+    raw_state = str(raw.get("state", "")).strip()
+    country_code = str(raw.get("country", "")).strip() or "US"
+    country_info = countries.get(country_code) if isinstance(countries, dict) else None
+    country_info = country_info if isinstance(country_info, dict) else {}
+    states = country_info.get("states") if isinstance(country_info.get("states"), dict) else {}
+    country_name = str(country_info.get("name", "")).strip() or country_code
+    if raw_state in states:
+        return spoken_city, str(states[raw_state]), raw_state, country_code, country_name
+    code = next((c for c, name in states.items() if name == raw_state), "")
+    return spoken_city, raw_state, code, country_code, country_name
+
+
+def _build_city_aliases(cities: dict[str, City]) -> tuple[dict[str, str], frozenset[str]]:
+    """(alias text -> key) plus the keys whose bare spoken name is shared.
+
+    Bare spoken names alias only while globally unique; qualified forms
+    ("Jackson, Michigan" / "Jackson, MI") always alias. The frozen
+    ``LEGACY_CITY_SLUGS`` map wins every conflict: an old save's name must
+    keep meaning the city it meant when the save was written, even after a
+    later map expansion reuses the name.
+    """
+    spoken_count: dict[str, int] = {}
+    for city in cities.values():
+        folded = city.name.casefold()
+        spoken_count[folded] = spoken_count.get(folded, 0) + 1
+    ambiguous = frozenset(
+        city.key for city in cities.values() if spoken_count[city.name.casefold()] > 1
+    )
+    aliases: dict[str, str] = {}
+    for key, city in cities.items():
+        if spoken_count[city.name.casefold()] == 1:
+            aliases.setdefault(city.name, key)
+        if city.state:
+            aliases.setdefault(f"{city.name}, {city.state}", key)
+        if city.state_code:
+            aliases.setdefault(f"{city.name}, {city.state_code}", key)
+    for old_name, slug in LEGACY_CITY_SLUGS.items():
+        if slug in cities:
+            aliases[old_name] = slug
+    return aliases, ambiguous
+
+
+def _build_legacy_facility_ids(
+    cities: dict[str, City], legacy_names_by_key: dict[str, tuple[str, ...]]
+) -> dict[str, str]:
+    """Map pre-slug facility ids to current ones.
+
+    Old ids embedded a slug of the display name (``jackson-michigan:...``);
+    template facility names embedded the display name too, so both parts can
+    differ. Rebuilt per legacy name so every persisted job facility id keeps
+    resolving.
+    """
+    legacy_ids: dict[str, str] = {}
+    for key, old_names in legacy_names_by_key.items():
+        city = cities[key]
+        for old_name in old_names:
+            for location in city.locations:
+                old_facility_name = (
+                    location.name.replace(city.name, old_name)
+                    if location.template
+                    else location.name
+                )
+                old_id = _stable_facility_id(old_name, location.type, old_facility_name)
+                legacy_ids.setdefault(old_id, location.id)
+    return legacy_ids
+
+
+def _overlay_city_key(name: str, cities: dict) -> str:
+    """The key an overlay city name lands on: itself, or the slug it aliases.
+
+    Overlays written before the slug migration name cities by display name;
+    treating those as the base city they alias keeps the merge additive
+    instead of duplicating the city under its old name.
+    """
+    if name in cities:
+        return name
+    slug = LEGACY_CITY_SLUGS.get(name)
+    return slug if slug in cities else name
+
+
+def _leg_pair_key(leg: dict, cities: dict) -> frozenset:
+    return frozenset(
+        (_overlay_city_key(leg.get("from"), cities), _overlay_city_key(leg.get("to"), cities))
+    )
 
 
 def _merge_overlay(base: dict, overlay: dict) -> dict:
     """Return ``base`` with overlay cities and legs added, never overridden.
 
     The merge is purely additive so the checked-in base stays authoritative:
-    a city already present by name keeps its base definition, and a leg already
-    present (by unordered endpoint pair) keeps its base definition. Only genuinely
-    new cities and legs from the overlay are appended. The base dict is not
-    mutated.
+    a city already present (by key, or by a pre-slug legacy name aliasing one)
+    keeps its base definition, and a leg already present (by unordered endpoint
+    pair) keeps its base definition. Only genuinely new cities and legs from
+    the overlay are appended. The base dict is not mutated.
     """
     merged = dict(base)
     cities = dict(base.get("cities", {}))
     for name, city in overlay.get("cities", {}).items():
-        if name not in cities:
+        if _overlay_city_key(name, cities) not in cities:
             cities[name] = city
     merged["cities"] = cities
 
     legs = list(base.get("legs", []))
-    seen = {_leg_pair_key(leg) for leg in legs}
+    seen = {_leg_pair_key(leg, cities) for leg in legs}
     for leg in overlay.get("legs", []):
-        key = _leg_pair_key(leg)
+        key = _leg_pair_key(leg, cities)
         if key not in seen:
             seen.add(key)
             legs.append(leg)
@@ -387,13 +575,15 @@ def _merge_overlay(base: dict, overlay: dict) -> dict:
     return merged
 
 
-def _parse_location(raw: dict, city: str, city_lat: float, city_lon: float) -> Location:
+def _parse_location(
+    raw: dict, city_key: str, spoken_city: str, city_lat: float, city_lon: float
+) -> Location:
     if not isinstance(raw, dict):
-        raise ValueError(f"{city} facility must be an object")
-    name = _clean_facility_name(city, str(raw.get("name", "")).strip())
+        raise ValueError(f"{spoken_city} facility must be an object")
+    name = _clean_facility_name(spoken_city, str(raw.get("name", "")).strip())
     facility_type = str(raw.get("type", "")).strip()
     if facility_type not in FREIGHT_LOCATION_TYPES:
-        raise ValueError(f"{city} facility {name!r} has unknown type {facility_type!r}")
+        raise ValueError(f"{spoken_city} facility {name!r} has unknown type {facility_type!r}")
     default_roles = FACILITY_CARGO_ROLES.get(facility_type, {})
     raw_cargo = tuple(str(cargo).strip() for cargo in raw.get("cargo", ()) if str(cargo).strip())
     default_cargo = _dedupe(default_roles.get("ships", ()) + default_roles.get("receives", ()))
@@ -413,8 +603,8 @@ def _parse_location(raw: dict, city: str, city_lat: float, city_lon: float) -> L
         name=name,
         type=facility_type,
         cargo=cargo,
-        id=str(raw.get("id") or _stable_facility_id(city, facility_type, name)).strip(),
-        city=city,
+        id=str(raw.get("id") or _stable_facility_id(city_key, facility_type, name)).strip(),
+        city=city_key,
         locality=locality,
         roles=roles,
         ships=ships,
@@ -430,7 +620,8 @@ def _parse_location(raw: dict, city: str, city_lat: float, city_lon: float) -> L
 
 
 def _expand_market_locations(
-    city: str,
+    city_key: str,
+    spoken_city: str,
     lat: float,
     lon: float,
     explicit_locations: tuple[Location, ...],
@@ -445,10 +636,11 @@ def _expand_market_locations(
     for facility_type in _dedupe(desired_types):
         if facility_type in existing_types:
             continue
-        location = _template_location(city, lat, lon, facility_type, market_tags)
+        location = _template_location(city_key, spoken_city, lat, lon, facility_type, market_tags)
         if location.name.lower() in existing_names:
             location = _template_location(
-                city,
+                city_key,
+                spoken_city,
                 lat,
                 lon,
                 facility_type,
@@ -462,7 +654,8 @@ def _expand_market_locations(
 
 
 def _template_location(
-    city: str,
+    city_key: str,
+    spoken_city: str,
     lat: float,
     lon: float,
     facility_type: str,
@@ -470,21 +663,21 @@ def _template_location(
     name_suffix: str = "",
 ) -> Location:
     template = FACILITY_NAME_TEMPLATES[facility_type]
-    name = template.format(city=city) + name_suffix
+    name = template.format(city=spoken_city) + name_suffix
     roles = FACILITY_CARGO_ROLES[facility_type]
     cargo = _dedupe(roles["ships"] + roles["receives"])
     source_note = (
         f"{FACILITY_SOURCE_NOTES[facility_type]} Generated offline as a "
-        f"representative {city} metro-market facility; not a claim about a "
+        f"representative {spoken_city} metro-market facility; not a claim about a "
         "specific real-world shipper."
     )
-    jitter_lat, jitter_lon = _jittered_coordinates(city, facility_type, lat, lon)
+    jitter_lat, jitter_lon = _jittered_coordinates(city_key, facility_type, lat, lon)
     return Location(
         name=name,
         type=facility_type,
         cargo=cargo,
-        id=_stable_facility_id(city, facility_type, name),
-        city=city,
+        id=_stable_facility_id(city_key, facility_type, name),
+        city=city_key,
         roles=("shipper", "receiver"),
         ships=roles["ships"],
         receives=roles["receives"],
@@ -498,11 +691,11 @@ def _template_location(
 
 
 def _market_tags_for_city(
-    city: str, raw_city: dict, locations: tuple[Location, ...]
+    city_key: str, state_code: str, raw_city: dict, locations: tuple[Location, ...]
 ) -> tuple[str, ...]:
     tags: set[str] = set(REGION_MARKET_TAGS.get(str(raw_city.get("region", "")), ()))
-    tags.update(STATE_MARKET_TAGS.get(str(raw_city.get("state", "")), ()))
-    tags.update(CITY_MARKET_TAGS.get(city, ()))
+    tags.update(STATE_MARKET_TAGS.get(state_code, ()))
+    tags.update(CITY_MARKET_TAGS.get(city_key, ()))
     for location in locations:
         tags.update(_tags_for_facility_type(location.type))
     return tuple(sorted(tags))
@@ -582,15 +775,23 @@ def _jittered_coordinates(
     return round(lat + lat_offset, 5), round(lon + lon_offset, 5)
 
 
-def _is_legacy_market_name(city: str, name: str) -> bool:
+def _is_legacy_market_name(city_names: tuple[str, ...], name: str) -> bool:
+    """True when ``name`` is one of the old whole-city market placeholders.
+
+    Checked against every name the city has answered to (current spoken plus
+    frozen legacy display names) so pre-slug saves keep resolving."""
     normalized = name.strip().lower()
-    city_lower = city.lower()
-    return normalized in {
-        "",
-        city_lower,
-        f"{city_lower} freight market",
-        f"{city_lower} metro freight market",
-    }
+    if not normalized:
+        return True
+    for city_name in city_names:
+        city_lower = city_name.lower()
+        if normalized in {
+            city_lower,
+            f"{city_lower} freight market",
+            f"{city_lower} metro freight market",
+        }:
+            return True
+    return False
 
 
 def _parse_stop(raw, leg_miles: float, from_city: str, to_city: str) -> Stop:
