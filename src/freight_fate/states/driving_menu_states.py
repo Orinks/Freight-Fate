@@ -1,6 +1,7 @@
 # ruff: noqa: F403,F405
 from __future__ import annotations
 
+from ..sim.timezones import to_local
 from .driving_core import *
 from .driving_rest_states import ShoulderSleepConfirmationState
 
@@ -101,7 +102,8 @@ class DrivingStatusScreenState(MenuState):
         hours_used = d.trip.game_minutes / 60.0
         deadline = d.job.deadline_game_h - hours_used
         deadline_text = (
-            f"{deadline:.1f} hours before the deadline"
+            f"{deadline:.1f} hours before the deadline, "
+            f"due {_deadline_appointment(d)}"
             if deadline >= 0
             else f"{-deadline:.1f} hours past the deadline"
         )
@@ -115,7 +117,8 @@ class DrivingStatusScreenState(MenuState):
             f"Transmission: {'automatic' if t.transmission.automatic else 'manual'}, {d._gear_text()}",
             f"Fatigue: {profile.fatigue:.0f} percent",
             f"Hours: {d.hos.summary(self.ctx.settings.hos_mode).rstrip('.')}",
-            f"Time: {clock_text(d.trip.current_hour)}, {deadline_text}",
+            f"Time: {clock_text(d.trip.local_hour)} {d.trip.current_timezone.name}, "
+            f"{deadline_text}",
         ]
 
     def _map_lines(self) -> list[str]:
@@ -271,7 +274,7 @@ class PauseMenuState(MenuState):
             f"{FIELD_REPAIR_DAMAGE_PCT:.0f} percent damage for "
             f"{cost:,.0f} dollars. You have {p.money:,.0f} dollars. "
             f"The repair took an hour and a half: it is "
-            f"{clock_text(d.trip.current_hour)}. {_deadline_text(d)}"
+            f"{clock_text(d.trip.local_hour)}. {_deadline_text(d)}"
         )
 
     def _emergency_shoulder_sleep(self) -> None:
@@ -540,7 +543,8 @@ class ArrivalState(MenuState):
             0,
             (
                 f"Bobtailed empty to {job.spoken_destination} in {hours:.1f} hours. "
-                f"It is {clock_text(p.game_hours)}. No load and no pay, but you are "
+                f"It is {clock_text(to_local(p.game_hours, d.trip.destination_timezone))}. "
+                f"No load and no pay, but you are "
                 f"parked at {self.terminal.name} and can shop the {job.spoken_destination} "
                 f"dispatch board. Fuel {d.truck.fuel_fraction * 100:.0f} percent."
             ),
@@ -616,7 +620,7 @@ class ArrivalState(MenuState):
                 f"Delivered {job.weight_tons:.0f} tons of {job.cargo.label} to "
                 f"{job.spoken_destination} in {hours:.1f} hours, "
                 f"{'on time' if on_time else 'late'}. "
-                f"It is {clock_text(p.game_hours)}. "
+                f"It is {clock_text(to_local(p.game_hours, d.trip.destination_timezone))}. "
                 f"Gross pay {gross_pay:,.0f} dollars. "
                 f"Carrier-paid or reimbursed charges {carrier_charges:,.0f} dollars: "
                 f"tolls {toll_expense:,.0f}, accessorials "
@@ -674,7 +678,7 @@ class ArrivalState(MenuState):
             f"Delivered {job.weight_tons:.0f} tons of {job.cargo.label} "
             f"to {job.spoken_destination}.",
             f"Trip time: {hours:.1f} hours, {timing.lower()}.",
-            f"It is {clock_text(p.game_hours)}.",
+            f"It is {clock_text(to_local(p.game_hours, d.trip.destination_timezone))}.",
             f"Parked at {self.terminal.name} for the {job.spoken_destination} service area.",
             f"Gross pay: {gross_pay:,.0f} dollars.",
             f"Carrier-paid or reimbursed charges: {carrier_charges:,.0f} "
@@ -766,7 +770,9 @@ class ArrivalState(MenuState):
         }
         if origin in route66 and dest in route66:
             ids.append("route66_run")
-        arrival_hour = self.driving.trip.current_hour
+        # Wall-clock badge conditions ("by Daybreak", "Midnight Freight") read
+        # the destination's local clock, matching what the player just heard.
+        arrival_hour = self.driving.trip.local_hour
         # Plain "deliver into this city" badges (titles claim nothing extra).
         simple_arrival = {
             "phoenix_az_us": "phoenix_arrival",

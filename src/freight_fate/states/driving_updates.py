@@ -315,7 +315,7 @@ class DrivingUpdateMixin:
             mode
         )
 
-        night = is_night(self.trip.current_hour)
+        night = is_night(self.trip.local_hour)
         if moving:
             p.fatigue = min(100.0, p.fatigue + hos.fatigue_rate_per_min(night) * gm)
         fatigue = p.fatigue
@@ -447,7 +447,7 @@ class DrivingUpdateMixin:
             # Harsh, continuous pad buzz while over the rumble strip; refreshed
             # each frame, it stops on its own once steered back off.
             self.ctx.controller.rumble.rumble_strip(rumble)
-        night = is_night(self.trip.current_hour)
+        night = is_night(self.trip.local_hour)
         if night:
             audio.set_ambient("ambient/night")
         else:
