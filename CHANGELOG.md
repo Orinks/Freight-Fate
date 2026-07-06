@@ -32,6 +32,16 @@
   not smoothed away. The desert stretches run long between service stops --
   planning fuel and hours of service matters out here.
 
+- **Interstate 10 fills in three real stops between the coasts.** Indio joins
+  I-10 between Los Angeles and Phoenix through the Coachella Valley. Van Horn
+  joins the long, empty run between El Paso and San Antonio -- the emptiest
+  stretch of interstate in the game -- with a real truck stop to fuel up
+  before the desert. Lake Charles joins between Houston and Lafayette, home
+  to the Citgo Lake Charles refining complex, one of the largest on the Gulf
+  Coast. Mobile and Gulfport now count as Gulf Coast country instead of
+  Mid-South, matching their weather, freight market, and road character to
+  the coast they actually sit on.
+
 ### Changed
 
 - **Cities that share a name now always say their state.** With two Jacksons,

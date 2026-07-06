@@ -1721,7 +1721,7 @@
       "spoken_city": "Mobile",
       "state": "AL",
       "country": "US",
-      "region": "mid_south",
+      "region": "gulf_coast",
       "locations": [],
       "lat": 30.6954,
       "lon": -88.0399
@@ -3154,7 +3154,7 @@
       "spoken_city": "Gulfport",
       "state": "MS",
       "country": "US",
-      "region": "mid_south",
+      "region": "gulf_coast",
       "locations": [
         {
           "name": "Port of Gulfport",
@@ -4613,6 +4613,39 @@
           "name": "HanesBrands Distribution Center",
           "type": "distribution",
           "source_note": "HanesBrands (headquartered in Winston-Salem) apparel distribution operation."
+        }
+      ]
+    },
+    "indio_ca_us": {
+      "spoken_city": "Indio",
+      "state": "CA",
+      "country": "US",
+      "region": "california",
+      "lat": 33.7206,
+      "lon": -116.2156,
+      "locations": []
+    },
+    "van_horn_tx_us": {
+      "spoken_city": "Van Horn",
+      "state": "TX",
+      "country": "US",
+      "region": "desert_southwest",
+      "lat": 31.0432,
+      "lon": -104.83,
+      "locations": []
+    },
+    "lake_charles_la_us": {
+      "spoken_city": "Lake Charles",
+      "state": "LA",
+      "country": "US",
+      "region": "gulf_coast",
+      "lat": 30.2266,
+      "lon": -93.2174,
+      "locations": [
+        {
+          "name": "Citgo Lake Charles Manufacturing Complex",
+          "type": "chemical_petroleum_terminal",
+          "source_note": "Citgo's Lake Charles refinery and petrochemical complex -- one of the largest refineries on the US Gulf Coast."
         }
       ]
     }
