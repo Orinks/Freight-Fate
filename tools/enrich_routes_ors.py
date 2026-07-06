@@ -212,6 +212,61 @@ def ors_corridor_samples(
     return samples, sample_elevations
 
 
+GRADE_BIN_MI = 0.25  # fixed real-distance width for grade-fidelity sampling
+
+
+def fine_grade_samples(
+    parsed: dict[str, Any],
+    leg_miles: float,
+    bin_width_mi: float = GRADE_BIN_MI,
+) -> tuple[list[dict[str, float]], list[float]]:
+    """Real elevation change over real distance traveled, in fixed-width bins.
+
+    Feed the result to :func:`grade_segments_from_samples` for grade segments
+    that actually reflect short, sharp pitches (a real mountain leg can carry
+    a genuine 6-8% grade for under a mile) instead of the near-flat average
+    :func:`ors_corridor_samples` gives at its default handful of samples.
+
+    This is deliberately NOT ``ors_corridor_samples`` at a higher
+    ``sample_count``: that function picks N evenly spaced *target* mileposts
+    and snaps each to the nearest following vertex. Once N approaches real
+    vertex density, a long straight stretch (sparser vertices) can collapse
+    several targets onto the very same vertex -- a false flat run followed by
+    a spurious jump once the scan reaches the next real vertex, producing
+    wildly implausible grades (30%+ on real interstate terrain). Walking the
+    polyline forward exactly once and closing a bin only on genuine
+    accumulated distance avoids that artifact entirely. ORS already returns
+    the full, undecimated elevation profile in the one directions() call, so
+    this costs no extra requests.
+    """
+    coords = parsed["coordinates"]
+    elevations = parsed["elevations_ft"]
+    if len(coords) < 2:
+        raise RuntimeError("ORS route geometry has fewer than two points")
+    cumulative_mi = [0.0]
+    for prev, cur in zip(coords, coords[1:], strict=False):
+        cumulative_mi.append(cumulative_mi[-1] + _haversine_miles(prev[1], prev[0], cur[1], cur[0]))
+    total = cumulative_mi[-1] or 1.0
+    scale = leg_miles / total if leg_miles else 1.0
+
+    lon0, lat0 = coords[0]
+    samples: list[dict[str, float]] = [{"at_mi": 0.0, "lat": float(lat0), "lon": float(lon0)}]
+    sample_elevations: list[float] = [elevations[0]]
+    acc_mi = 0.0
+    last = len(coords) - 1
+    for i in range(1, len(coords)):
+        acc_mi += cumulative_mi[i] - cumulative_mi[i - 1]
+        if acc_mi >= bin_width_mi or i == last:
+            lon, lat = coords[i]
+            samples.append(
+                {"at_mi": round(cumulative_mi[i] * scale, 3), "lat": float(lat), "lon": float(lon)}
+            )
+            sample_elevations.append(elevations[i])
+            acc_mi = 0.0
+    samples[-1]["at_mi"] = leg_miles
+    return samples, sample_elevations
+
+
 def _ors_sample_count(miles: float) -> int:
     """Corridor sample count for ORS legs.
 

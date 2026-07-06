@@ -71,11 +71,13 @@ def enrich_all_routes(
                     for point, elevation in zip(samples, elevations, strict=True)
                 ]
             if "grade_segments" in needs:
-                corridor["grade_segments"] = (
-                    grade_segments_from_samples(samples, elevations, leg)
-                    if engine == "ors"
-                    else _grade_segments(samples, elevations, leg)
-                )
+                if engine == "ors":
+                    fine_samples, fine_elevations = fine_grade_samples(parsed, float(leg["miles"]))
+                    corridor["grade_segments"] = grade_segments_from_samples(
+                        fine_samples, fine_elevations, leg
+                    )
+                else:
+                    corridor["grade_segments"] = _grade_segments(samples, elevations, leg)
                 # Label the leg's coarse terrain from the real grades. Only new
                 # legs reach here (fully-enriched legs are skipped above), so a
                 # placeholder "flat" on a freshly-added mountain leg is corrected
@@ -183,7 +185,8 @@ def refresh_corridors(
             elevation_source = ORS_ELEVATION_SOURCE
             corridor_source = ORS_CORRIDOR_SOURCE
             corridor["tollway_detected"] = parsed["has_tollway"]
-            grade_segments = grade_segments_from_samples(samples, elevations, leg)
+            fine_samples, fine_elevations = fine_grade_samples(parsed, miles)
+            grade_segments = grade_segments_from_samples(fine_samples, fine_elevations, leg)
         else:
             route = _cached_osrm_route(data, leg, cache_dir, rate_limit_s)
             samples = _sample_geometry(route["geometry"]["coordinates"], miles)

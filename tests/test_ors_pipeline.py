@@ -121,6 +121,59 @@ def test_grade_segments_from_samples_single_when_uniform():
     assert len(segs) == 1 and segs[0]["terrain"] == "flat"
 
 
+def test_fine_grade_samples_matches_leg_miles_and_is_contiguous():
+    # 5 evenly spaced vertices climbing steadily -- a sanity check that the
+    # distance-walk sampler covers the whole leg with no gaps.
+    parsed = {
+        "coordinates": [[-110.0, 35.0 + 0.05 * i] for i in range(5)],
+        "elevations_ft": [1000.0, 1500.0, 2000.0, 2500.0, 3000.0],
+    }
+    leg_miles = 20.0
+    samples, elevations = enrich_routes.fine_grade_samples(parsed, leg_miles, bin_width_mi=1.0)
+    assert samples[0]["at_mi"] == 0.0
+    assert samples[-1]["at_mi"] == leg_miles
+    assert len(samples) == len(elevations)
+    assert all(a["at_mi"] <= b["at_mi"] for a, b in zip(samples, samples[1:], strict=False))
+
+
+def test_fine_grade_samples_avoids_the_sparse_vertex_snap_artifact():
+    """A long, flat, sparsely-vertexed stretch followed by a short, densely
+    vertexed real climb must not produce a spurious grade spike.
+
+    ors_corridor_samples at a high sample_count can snap several evenly
+    *target*-spaced mileposts onto the same vertex once a stretch has fewer
+    real vertices than requested samples, then show a huge jump once the
+    scan reaches the next real vertex. fine_grade_samples walks the real
+    polyline forward instead, so it must not reproduce that artifact.
+    """
+    # A -> B: one huge flat segment (only two vertices, ~97 mi, no gain).
+    # B -> C -> D -> E -> F: a short, real ~7.4% climb over the last ~5 mi,
+    # with vertices packed close together (the realistic shape for a real
+    # pass -- OSM/ORS shape points get denser where the road curves).
+    coords = [
+        [-114.0, 35.0],  # A
+        [-112.5, 35.2],  # B (~97 mi later, flat)
+        [-112.48, 35.201],
+        [-112.46, 35.202],
+        [-112.44, 35.203],
+        [-112.42, 35.204],  # F (climbing +2000 ft from B)
+    ]
+    elevations = [3000.0, 3000.0, 3500.0, 4000.0, 4500.0, 5000.0]
+    parsed = {"coordinates": coords, "elevations_ft": elevations}
+
+    samples, sample_elevations = enrich_routes.fine_grade_samples(
+        parsed, leg_miles=102.0, bin_width_mi=0.25
+    )
+    leg = {"miles": 102.0, "terrain": "flat", "from": "a", "to": "f"}
+    segs = enrich_routes.grade_segments_from_samples(samples, sample_elevations, leg)
+
+    # The flat 100-mile stretch must not read as a spike -- every segment
+    # must stay within a physically plausible bound for a real highway.
+    assert all(abs(s["avg_grade_pct"]) <= 10.0 for s in segs)
+    # The real climb must still show up as mountain-classified.
+    assert any(s["terrain"] == "mountain" and s["avg_grade_pct"] > 3.0 for s in segs)
+
+
 def test_ors_sample_count_scales_with_distance():
     assert enrich_routes._ors_sample_count(40) == 5  # short legs get a floor
     assert enrich_routes._ors_sample_count(490) == 18  # ~1 per 30 mi
