@@ -59,7 +59,12 @@ _TRACKS_BY_KEY = {track.key: track for track in ALL_MUSIC_TRACKS}
 
 
 def _profile_is_night(profile) -> bool:
-    """True when the loaded career's clock currently reads night."""
+    """True when the loaded career's clock currently reads night.
+
+    Reads the absolute career clock, not the current city's local time: menu
+    music is chosen before the world data (and with it the city's time zone)
+    is loaded, and a bed picked up to three hours off local dusk is cosmetic.
+    """
     if profile is None:
         return False
     hour = (getattr(profile, "game_hours", 0.0) or 0.0) % 24.0

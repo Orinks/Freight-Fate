@@ -174,7 +174,7 @@ class RestStopState(MenuState):
             parts.append(f"{self.stop.parking_text}.")
         parts.extend(
             [
-                f"It is {clock_text(self.driving.trip.current_hour)}.",
+                f"It is {clock_text(self.driving.trip.local_hour)}.",
                 self.current_text(),
             ]
         )
@@ -381,7 +381,7 @@ class RestStopState(MenuState):
         self.ctx.audio.play("ui/notify")
         self.ctx.say(
             f"You took a 30-minute break. "
-            f"It is {clock_text(d.trip.current_hour)}. "
+            f"It is {clock_text(d.trip.local_hour)}. "
             f"Your break requirement is reset and you feel a little "
             f"fresher. {_deadline_text(d)}"
         )
@@ -397,7 +397,7 @@ class RestStopState(MenuState):
         self.ctx.audio.play("ui/notify")
         self.ctx.say(
             f"You took a short food and coffee break. "
-            f"It is {clock_text(d.trip.current_hour)}. "
+            f"It is {clock_text(d.trip.local_hour)}. "
             f"{_deadline_text(d)}"
         )
 
@@ -428,7 +428,7 @@ class RestStopState(MenuState):
         )
         self.ctx.say(
             f"You slept {hours} hours in the sleeper berth. "
-            f"It is {clock_text(d.trip.current_hour)}. {status} {_deadline_text(d)}"
+            f"It is {clock_text(d.trip.local_hour)}. {status} {_deadline_text(d)}"
         )
         self.ctx.award_achievement("slept_on_route")
         self.refresh()
@@ -444,7 +444,7 @@ class RestStopState(MenuState):
         self.ctx.audio.play("ui/notify")
         self.ctx.say(
             f"You slept 10 hours and woke rested. "
-            f"It is {clock_text(d.trip.current_hour)}. "
+            f"It is {clock_text(d.trip.local_hour)}. "
             f"Hours of service reset. {_deadline_text(d)}"
         )
         self.ctx.award_achievement("slept_on_route")
@@ -464,7 +464,7 @@ class RestStopState(MenuState):
         self.ctx.audio.play("ui/notify")
         self.ctx.say(
             f"You bed down in the cramped lot, off to the side. "
-            f"It is {clock_text(d.trip.current_hour)}. Hours of service "
+            f"It is {clock_text(d.trip.local_hour)}. Hours of service "
             f"reset, but the rest was poor and you wake still tired. "
             f"{_deadline_text(d)}"
         )
@@ -490,7 +490,7 @@ class RestStopState(MenuState):
         self.ctx.audio.play("ui/notify")
         self.ctx.say(
             f"Truck repaired for {cost:,.0f} dollars. "
-            f"It is {clock_text(d.trip.current_hour)}. "
+            f"It is {clock_text(d.trip.local_hour)}. "
             f"You have {p.money:,.0f} dollars. {_deadline_text(d)}"
         )
         self.ctx.award_achievement("garage_repair")
@@ -514,7 +514,7 @@ class RestStopState(MenuState):
             f"Roadside assistance patched the truck to "
             f"{d.truck.damage_pct:.0f} percent damage for "
             f"{cost:,.0f} dollars. It is "
-            f"{clock_text(d.trip.current_hour)}. {_deadline_text(d)}"
+            f"{clock_text(d.trip.local_hour)}. {_deadline_text(d)}"
         )
 
     def _inspect(self) -> None:
@@ -524,7 +524,7 @@ class RestStopState(MenuState):
         self.ctx.audio.play("ui/notify")
         self.ctx.say(
             f"Inspection check-in complete at {self.stop.spoken_name}. "
-            f"It is {clock_text(d.trip.current_hour)}. "
+            f"It is {clock_text(d.trip.local_hour)}. "
             f"{_deadline_text(d)}"
         )
         self.ctx.award_achievement("inspection")
@@ -573,7 +573,7 @@ class ParkingFullState(MenuState):
         self.ctx.audio.set_ambient("poi/rest_stop_night")
         self.ctx.say(
             f"The truck parking at {self.stop.spoken_name} is full tonight. "
-            f"It is {clock_text(self.driving.trip.current_hour)}. "
+            f"It is {clock_text(self.driving.trip.local_hour)}. "
             f"{self.current_text()}"
         )
 

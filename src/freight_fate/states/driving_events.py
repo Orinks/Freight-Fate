@@ -185,7 +185,7 @@ class DrivingEventMixin:
         self.truck.brake = 1.0
         self.truck.set_parking_brake()
         can_sleep = "sleep" in stop.actions
-        if can_sleep and hos.parking_is_full(self.trip_seed, stop.at_mi, self.trip.current_hour):
+        if can_sleep and hos.parking_is_full(self.trip_seed, stop.at_mi, self.trip.local_hour):
             self.ctx.push_state(ParkingFullState(self.ctx, self, stop))
             return
         self.ctx.push_state(RestStopState(self.ctx, self, stop))
@@ -796,8 +796,9 @@ class DrivingEventMixin:
             f"Remaining: {remaining}",
             f"Weather: {self.weather.current.value}",
             f"Date: {self._calendar_phrase() or 'unknown'}",
-            f"Clock: {clock_text(self.trip.current_hour)} "
-            f"({time_of_day(self.trip.current_hour)})   "
+            f"Clock: {clock_text(self.trip.local_hour)} "
+            f"{self.trip.current_timezone.name} "
+            f"({time_of_day(self.trip.local_hour)})   "
             f"Fatigue: {self.ctx.profile.fatigue:.0f}%",
             "",
             self._status_text,

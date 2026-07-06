@@ -14,6 +14,7 @@ from ..models.jobs import Job, JobBoard, job_from_payload, job_payload, normaliz
 from ..models.trucks import TRUCK_CATALOG
 from ..music import select_menu_music_sequence
 from ..sim.hos import clock_text, time_of_day
+from ..sim.timezones import city_zone, to_local
 from .base import MenuItem, MenuState
 from .career_stats import CareerStatsState, fully_rested
 from .city_dispatch import (
@@ -287,7 +288,8 @@ class CityMenuState(MenuState):
 
         p = self.ctx.profile
         city = self.ctx.world.city(p.current_city)
-        hour = p.game_hours % 24.0
+        zone = city_zone(city)
+        hour = to_local(p.game_hours, zone) % 24.0
         day = p.market_day() + 1
         desc, live = None, False
         provider = self.ctx.real_weather_provider()
@@ -309,7 +311,7 @@ class CityMenuState(MenuState):
             desc = WeatherSystem(city.region, seed=seed, game_hours=season_hours).describe()
         source = "Live weather" if live else "Weather"
         self.ctx.say(
-            f"It is {clock_text(hour)}, {time_of_day(hour)}, "
+            f"It is {clock_text(hour)} {zone.name}, {time_of_day(hour)}, "
             f"{date_text(season_hours)}, in {season(season_hours)}, "
             f"day {day} of your career. "
             f"{source} in {city.name}: {desc}."
@@ -334,7 +336,8 @@ class CityMenuState(MenuState):
         p.market.advance_to(p.market_day())
         self.ctx.save_profile()
         self.ctx.audio.play("ui/notify")
-        hour = p.game_hours % 24.0
+        zone = city_zone(self.ctx.world.city(p.current_city))
+        hour = to_local(p.game_hours, zone) % 24.0
         self.ctx.say(
             f"You slept 10 hours and woke rested. It is "
             f"{clock_text(hour)}, {time_of_day(hour)}. "

@@ -65,7 +65,7 @@ class DrivingState(DrivingControlsMixin, DrivingUpdateMixin, DrivingEventMixin, 
         self._day_music_index = 0
         self._night_music_index = 0
         self._music_elapsed_s = 0.0
-        self._music_night = is_night(trip_start_hour)
+        self._music_night = is_night(self.trip.local_start_hour)
         self.tutorial = Tutorial(ctx) if not profile.tutorial_done else None
 
         self.hos = profile.hos  # shift clock lives on the profile
@@ -241,7 +241,7 @@ class DrivingState(DrivingControlsMixin, DrivingUpdateMixin, DrivingEventMixin, 
         self.ctx.audio.set_weather(self.weather.effects.sound)
         self.ctx.audio.set_wind(self.weather.effects.wind)
         mode = "automatic" if self.truck.transmission.automatic else "manual"
-        now = clock_text(self.trip.current_hour)
+        now = clock_text(self.trip.local_hour)
         if self.resumed:
             hours_used = self.trip.game_minutes / 60.0
             drive_name = "pickup drive" if self.phase == DRIVE_PHASE_PICKUP else "loaded delivery"

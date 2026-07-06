@@ -6,7 +6,8 @@ from __future__ import annotations
 import random
 
 from ..data.world import Leg, Route, get_world
-from .hos import is_night
+from .hos import clock_text, is_night
+from .timezones import appointment_text, city_zone, zone_for
 from .trip_models import *
 from .trip_route_helpers import *
 from .vehicle import TruckState
@@ -62,6 +63,8 @@ class Trip:
         self._events: list[TripEvent] = []
         self._leg_starts = self._compute_leg_starts()
         self._city_mileposts = list(self._leg_starts) + [self.total_miles]
+        self.start_timezone, self.timezone_crossings = self._compute_timezone_crossings()
+        self._current_timezone = self.start_timezone
         self.stops = self._place_stops()
         self.traffic_leads = self._place_traffic()
         self.navigation_cues = self._build_navigation_cues()
@@ -128,6 +131,101 @@ class Trip:
             starts.append(acc)
             acc += leg.miles
         return starts
+
+    def _timezone_samples(self) -> list[tuple[float, TimeZone]]:
+        """(trip mile, zone) along the route, from city and route-point geometry.
+
+        City endpoints are sampled too, so a leg with no baked geometry still
+        lands its clock change somewhere between two cities in different zones.
+        """
+        world = get_world()
+        samples: list[tuple[float, TimeZone]] = []
+        for i, (start, leg) in enumerate(zip(self._leg_starts, self.route.legs, strict=True)):
+            forward = self.route.cities[i] == leg.a
+            city = world.cities.get(self.route.cities[i])
+            if city is not None and (city.lat or city.lon):
+                samples.append((start, city_zone(city)))
+            for pt in leg.route_points:
+                offset = _stop_offset_for_direction(pt.at_mi, leg.miles, forward)
+                zone = zone_for(pt.lat, pt.lon, _leg_state_at(leg, pt.at_mi))
+                samples.append((start + offset, zone))
+        last = world.cities.get(self.route.cities[-1])
+        if last is not None and (last.lat or last.lon):
+            samples.append((self.total_miles, city_zone(last)))
+        samples.sort(key=lambda s: s[0])
+        return samples
+
+    def _compute_timezone_crossings(self) -> tuple[TimeZone, list[TimezoneCrossing]]:
+        """Start zone plus the deduped clock-change mileposts for the route.
+
+        A flip that reverts within ``TIMEZONE_DWELL_MI`` is a road hugging the
+        boundary, not a crossing, and is dropped -- same idea as the state
+        crossing sanitizer.
+        """
+        samples = self._timezone_samples()
+        if not samples:
+            return zone_for(0.0, 0.0), []
+        current = samples[0][1]
+        start = current
+        crossings: list[TimezoneCrossing] = []
+        for i, (mile, zone) in enumerate(samples):
+            if zone.key == current.key:
+                continue
+            settled = True
+            for later_mile, later_zone in samples[i + 1 :]:
+                if later_mile - mile > TIMEZONE_DWELL_MI:
+                    break
+                if later_zone.key == current.key:
+                    settled = False
+                    break
+            if settled:
+                crossings.append(TimezoneCrossing(mile, current, zone))
+                current = zone
+        return start, crossings
+
+    def timezone_at(self, mile: float) -> TimeZone:
+        """The time zone in effect at a trip milepost."""
+        zone = self.start_timezone
+        for crossing in self.timezone_crossings:
+            if crossing.at_mi <= mile:
+                zone = crossing.to_zone
+            else:
+                break
+        return zone
+
+    @property
+    def current_timezone(self) -> TimeZone:
+        return self.timezone_at(self.position_mi)
+
+    @property
+    def destination_timezone(self) -> TimeZone:
+        return self.timezone_at(self.total_miles)
+
+    @property
+    def local_hour(self) -> float:
+        """The wall clock where the truck is right now; what the player hears.
+
+        ``current_hour`` stays on the absolute (Eastern-reference) timeline
+        for durations and deadlines; only speech and day/night feel go local.
+        """
+        return (self.current_hour + self.current_timezone.offset_h) % 24.0
+
+    @property
+    def local_start_hour(self) -> float:
+        """The local wall clock at departure, for day/night placement."""
+        return (self.start_hour + self.start_timezone.offset_h) % 24.0
+
+    def deadline_clock_text(self, deadline_game_h: float, zone: TimeZone | None = None) -> str:
+        """The delivery appointment as a receiver would quote it: the wall
+        clock in the destination's zone, e.g. '6 PM Central Time tomorrow'.
+
+        ``zone`` overrides where the appointment is read -- a pickup drive's
+        trip ends at the origin facility, so its caller passes the delivery
+        city's zone instead of this trip's endpoint.
+        """
+        now = self.start_hour + self.game_minutes / 60.0
+        remaining = deadline_game_h - self.game_minutes / 60.0
+        return appointment_text(now, remaining, zone or self.destination_timezone)
 
     def _place_stops(self) -> list[RoadStop]:
         out: list[RoadStop] = []
@@ -290,7 +388,7 @@ class Trip:
         return cues
 
     def _place_zones(self) -> list[Zone]:
-        night = is_night(self.start_hour)
+        night = is_night(self.local_start_hour)
         zones: list[Zone] = []
         total = self.route.miles
         n = max(0, int(total / 150))
@@ -333,7 +431,7 @@ class Trip:
             base *= 1.3
         elif region in _COLD_PATROL_REGIONS:
             base *= 0.7
-        if is_night(self.start_hour):
+        if is_night(self.local_start_hour):
             base *= 1.15
         return base
 
@@ -381,7 +479,7 @@ class Trip:
             bad_weather_bias += (0.9 - effects.grip) * 0.45
         if effects.visibility_mi < 3.0:
             bad_weather_bias += (3.0 - effects.visibility_mi) * 0.05
-        night = is_night(self.start_hour)
+        night = is_night(self.local_start_hour)
         for start, leg in zip(self._leg_starts, self.route.legs, strict=True):
             if leg.miles < 70.0:
                 continue
@@ -680,6 +778,7 @@ class Trip:
             if i and self.position_mi >= start:
                 self._announced_cities.add(i)
         self._active_zone = self._active_zone_at(self.position_mi)
+        self._current_timezone = self.timezone_at(self.position_mi)
 
     def restore_toll_charges(self, charges: list[dict]) -> None:
         """Restore settlement toll expenses from an active-drive snapshot."""
@@ -740,6 +839,7 @@ class Trip:
         self._check_navigation_cues()
         self._check_tolls()
         self._check_cities()
+        self._check_timezone()
         if moved_mi > 0.0:
             self._check_hazards(moved_mi)
             self._check_conditions_speed(moved_mi)
@@ -798,6 +898,28 @@ class Trip:
                     f"Speed limit {self._speed_value(resumed)}.",
                 )
             self._active_zone = zone
+
+    def _check_timezone(self) -> None:
+        """Announce a clock change the moment the truck passes a zone boundary.
+
+        The message carries the new local time, so it is composed here at
+        crossing time rather than baked into a static cue at trip start.
+        """
+        zone = self.timezone_at(self.position_mi)
+        if zone.key == self._current_timezone.key:
+            return
+        previous = self._current_timezone
+        self._current_timezone = zone
+        hours = abs(zone.offset_h - previous.offset_h)
+        amount = "one hour" if hours == 1.0 else f"{hours:.0f} hours"
+        direction = "back" if zone.offset_h < previous.offset_h else "forward"
+        self._emit(
+            TripEventKind.TIMEZONE_CROSSING,
+            f"You are crossing into {zone.name}. Set your clock {direction} "
+            f"{amount}; it is now {clock_text(self.local_hour)}.",
+            from_zone=previous,
+            to_zone=zone,
+        )
 
     def _check_speed_limit(self) -> None:
         """Announce a changed posted limit on the open road (signs at a region
@@ -948,7 +1070,7 @@ class Trip:
         """
         vis = self.weather.effects.visibility_mi
         risk = 0.25 + (0.25 if vis < 2 else 0.0)
-        if is_night(self.current_hour):
+        if is_night(self.local_hour):
             risk += NIGHT_HAZARD_BONUS
         return risk * self.hazard_scale
 
@@ -979,7 +1101,7 @@ class Trip:
                 self.current_region,
                 self.weather.current,
                 self.terrain_at(self.position_mi),
-                self.current_hour,
+                self.local_hour,
             )
             if not choices:
                 return

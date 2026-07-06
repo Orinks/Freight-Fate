@@ -36,6 +36,7 @@ from ..music import (
 from ..sim import hos
 from ..sim.hos import HosClock, clock_text, is_night, time_of_day
 from ..sim.lane import LaneKeeping
+from ..sim.timezones import city_zone
 from ..sim.transmission import REVERSE
 from ..sim.trip import RoadStop, Trip, TripEventKind
 from ..sim.vehicle import KG_PER_TON, G, TruckState
@@ -115,6 +116,10 @@ def _route_event_sound(event) -> str | None:
     if kind == TripEventKind.TOLL_CHARGED:
         return "events/toll_charged"
     if kind in {TripEventKind.STATE_CROSSING, TripEventKind.CHECKPOINT}:
+        return "events/state_crossing"
+    if kind == TripEventKind.TIMEZONE_CROSSING:
+        # A boundary marker like a state line; reuse its earcon until the
+        # sound pack gains a dedicated one.
         return "events/state_crossing"
     if kind == TripEventKind.ZONE_ENTER:
         zone = event.data.get("zone")
@@ -281,10 +286,22 @@ def _advance_rest_clock(driving: DrivingState, minutes: float) -> None:
     driving.weather.update(minutes)
 
 
+def _deadline_appointment(driving: DrivingState) -> str:
+    """The delivery appointment in the receiving city's local time.
+
+    Anchored on the job's destination, not the current trip's endpoint: a
+    pickup drive ends at the origin facility, possibly in another zone.
+    """
+    zone = city_zone(driving.ctx.world.city(driving.job.destination))
+    return driving.trip.deadline_clock_text(driving.job.deadline_game_h, zone)
+
+
 def _deadline_text(driving: DrivingState) -> str:
     remaining = driving.job.deadline_game_h - driving.trip.game_minutes / 60.0
     if remaining > 0:
-        return f"{remaining:.1f} hours left to deliver."
+        # The appointment reads in the receiver's local time, the way a real
+        # dispatcher quotes it -- the zone name keeps it unambiguous mid-route.
+        return f"{remaining:.1f} hours left to deliver; that is {_deadline_appointment(driving)}."
     return f"You are now {-remaining:.1f} hours past the deadline."
 
 
@@ -296,7 +313,7 @@ def _perform_shoulder_sleep(driving: DrivingState, anchor_mi: float) -> str:
     p.fatigue = hos.rest_shoulder(p.fatigue)
     parts = [
         f"You sleep poorly on the shoulder, woken again and again by "
-        f"passing trucks. It is {clock_text(driving.trip.current_hour)}. "
+        f"passing trucks. It is {clock_text(driving.trip.local_hour)}. "
         f"Hours of service reset, but you are still tired."
     ]
     if hos.shoulder_fine_due(driving.trip_seed, anchor_mi):

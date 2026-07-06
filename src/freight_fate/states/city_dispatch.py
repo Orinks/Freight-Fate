@@ -15,6 +15,7 @@ from ..models.jobs import (
 )
 from ..music import select_menu_music_sequence
 from ..sim.hos import LIMITS
+from ..sim.timezones import appointment_text, city_zone
 from ..sim.vehicle import TruckState
 from .base import MenuItem, MenuState
 
@@ -319,7 +320,11 @@ class JobDetailState(MenuState):
             f"Distance: {job.distance_mi:.0f} miles.",
             f"Pay: {job.pay:,.0f} dollars.",
             f"Dollars per mile: {dollars_per_mile:.2f}.",
-            f"Deadline: {job.deadline_game_h:.0f} hours.",
+            # The appointment reads in the receiver's local time, the way real
+            # dispatch quotes it. "About" because the clock starts at pickup
+            # departure, after check-in and loading.
+            f"Deadline: {job.deadline_game_h:.0f} hours; deliver by about "
+            f"{appointment_text(p.game_hours, job.deadline_game_h, city_zone(world.city(job.destination)))}.",
             f"Equipment: {job.equipment_text()}.",
         ]
         locked = job.locked_reason(p.career.endorsements, p.career.level)

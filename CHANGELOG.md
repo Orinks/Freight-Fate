@@ -2,6 +2,21 @@
 
 ## Unreleased
 
+### Added
+
+- **The map now has real time zones, and your clock changes as you cross
+  them.** Drive west out of Tennessee on I-40 and you will hear "You are
+  crossing into Central Time. Set your clock back one hour; it is now 2:15
+  PM." Every spoken clock -- rest stops, sleep, city arrivals, the driving
+  status screens -- now reads the local time where your truck is, and the
+  clock readouts name the zone, like "2:15 PM Central Time". Delivery
+  deadlines are also quoted the way a real receiver would say them: in the
+  destination's local time, like "deliver by 6 PM Central Time tomorrow", on
+  the dispatch job details and in the driving deadline readouts. Hours of
+  service, deadlines, and pay are untouched; only what the wall clock says
+  changes. Boundaries follow the real lines, including split states like
+  Tennessee, Kentucky, Indiana, the Florida panhandle, and far west Texas.
+
 ### Changed
 
 - **Cities that share a name now always say their state.** With two Jacksons,
