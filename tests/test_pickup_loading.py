@@ -105,11 +105,12 @@ def test_dispatch_board_stays_stable_when_reopened():
 
 
 def test_facility_approach_route_has_real_mileage_and_label(world):
-    jobs = world.cities["Chicago"].locations
+    jobs = world.city("Chicago").locations
+    # legacy city name resolves; the route itself carries canonical keys
     route = world.facility_approach_route("Chicago", jobs[0].name)
 
     assert route.miles > 2.0
-    assert route.cities == ["Chicago", "Chicago"]
+    assert route.cities == ["chicago_il_us", "chicago_il_us"]
     assert route.highways
     assert "access road" in route.highways[0]
     assert route.describe().startswith(f"{route.miles:.0f} miles via")

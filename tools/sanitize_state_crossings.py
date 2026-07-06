@@ -33,6 +33,7 @@ from enrich_routes import (  # noqa: E402  (path shim above must run first)
     WORLD_PATH,
     coalesce_short_states,
     crossings_from_sequence,
+    spoken_state,
     state_miles_from_sequence,
 )
 
@@ -68,7 +69,10 @@ def sanitize(data: dict[str, Any]) -> list[dict[str, Any]]:
         if not baked:
             continue
         leg_miles = float(leg["miles"])
-        endpoint_states = (cities[leg["from"]]["state"], cities[leg["to"]]["state"])
+        endpoint_states = (
+            spoken_state(data, cities[leg["from"]]["state"]),
+            spoken_state(data, cities[leg["to"]]["state"]),
+        )
         sequence = _sequence_from_crossings(
             baked, endpoint_states[0], endpoint_states[1], leg_miles
         )

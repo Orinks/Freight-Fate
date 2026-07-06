@@ -10,7 +10,7 @@ from __future__ import annotations
 import zlib
 
 from ..models.economy import pay_advance_grant, pay_advance_unavailable_reason
-from ..models.jobs import Job, JobBoard, job_from_payload, job_payload
+from ..models.jobs import Job, JobBoard, job_from_payload, job_payload, normalize_job_cities
 from ..models.trucks import TRUCK_CATALOG
 from ..music import select_menu_music_sequence
 from ..sim.hos import clock_text, time_of_day
@@ -87,16 +87,16 @@ class CityMenuState(MenuState):
         from ..discord_presence import PresenceState
 
         p = self.ctx.profile
-        city = p.current_city if p else ""
+        city = self.ctx.world.spoken_city(p.current_city) if p and p.current_city else ""
         detail = f"{city} service area" if city else ""
         return PresenceState("At the terminal", detail)
 
     def announce_entry(self) -> None:
         p = self.ctx.profile
-        city = self.ctx.world.cities[p.current_city]
+        city = self.ctx.world.city(p.current_city)
         terminal = self.ctx.world.home_terminal(p.current_city)
         self.ctx.say(
-            f"Parked at {terminal.spoken_name} in the {p.current_city} "
+            f"Parked at {terminal.spoken_name} in the {city.name} "
             f"service area, {city.state}. You have {p.money:,.0f} dollars. "
             f"{self.current_text()}"
         )
@@ -174,7 +174,10 @@ class CityMenuState(MenuState):
         key = self._dispatch_cache_key()
         cache = p.dispatch_board_cache if not market_changed else None
         if cache and cache.get("key") == key:
-            jobs = [job_from_payload(payload) for payload in cache.get("jobs", [])]
+            jobs = [
+                normalize_job_cities(job_from_payload(payload), self.ctx.world)
+                for payload in cache.get("jobs", [])
+            ]
         else:
             jobs = self._board.offers(
                 p.current_city, p.career.endorsements, level=p.career.level, market=p.market
@@ -213,7 +216,7 @@ class CityMenuState(MenuState):
 
     def _garage_label(self) -> str:
         p = self.ctx.profile
-        region = self.ctx.world.cities[p.current_city].region
+        region = self.ctx.world.city(p.current_city).region
         price = self.ctx.economy.fuel_price(region)
         return f"Garage: fuel {price:.2f} per gallon"
 
@@ -283,14 +286,16 @@ class CityMenuState(MenuState):
         from ..sim.weather import WeatherSystem
 
         p = self.ctx.profile
-        city = self.ctx.world.cities[p.current_city]
+        city = self.ctx.world.city(p.current_city)
         hour = p.game_hours % 24.0
         day = p.market_day() + 1
         desc, live = None, False
         provider = self.ctx.real_weather_provider()
         if provider is not None:
-            provider.request(city.name, city.lat, city.lon)
-            kind = provider.get(city.name)
+            # Keyed by the city key, not the spoken name: two cities can share
+            # a spoken name but they are different places with different skies.
+            provider.request(city.key, city.lat, city.lon)
+            kind = provider.get(city.key)
             if kind is not None:
                 desc, live = kind.value, True
         from ..sim.season import date_text, real_clock_game_hours, season
@@ -300,14 +305,14 @@ class CityMenuState(MenuState):
         season_hours = real_clock_game_hours() if provider is not None else p.game_hours
         if desc is None:
             # deterministic per city and hour, so asking twice agrees
-            seed = zlib.crc32(f"{city.name}:{int(p.game_hours)}".encode())
+            seed = zlib.crc32(f"{city.key}:{int(p.game_hours)}".encode())
             desc = WeatherSystem(city.region, seed=seed, game_hours=season_hours).describe()
         source = "Live weather" if live else "Weather"
         self.ctx.say(
             f"It is {clock_text(hour)}, {time_of_day(hour)}, "
             f"{date_text(season_hours)}, in {season(season_hours)}, "
             f"day {day} of your career. "
-            f"{source} in {p.current_city}: {desc}."
+            f"{source} in {city.name}: {desc}."
         )
 
     def _sleep(self) -> None:
@@ -383,13 +388,15 @@ class BobtailDestState(MenuState):
         for name in self._cities:
             route = world.supported_route(here, name)
             miles = route.miles if route is not None else 0.0
-            city = world.cities[name]
-            label = f"{name}, {city.state} -- {self.ctx.settings.distance_text(miles)} empty"
+            city = world.city(name)
+            label = (
+                f"{city.name}, {city.state} -- {self.ctx.settings.distance_text(miles)} empty"
+            )
             items.append(
                 MenuItem(
                     label,
                     lambda n=name: self._start(n),
-                    help=f"Drive empty to {name} to shop its board.",
+                    help=f"Drive empty to {world.spoken_city(name)} to shop its board.",
                 )
             )
         items.append(MenuItem("Back to terminal", self.go_back))
@@ -410,11 +417,12 @@ class BobtailDestState(MenuState):
         p.dispatch_board_cache = None
         p.active_trip = driving.snapshot()
         self.ctx.save_profile()
+        spoken_dest = job.spoken_destination
         self.ctx.say(
-            f"Bobtailing empty to {dest}, {route.miles:.0f} miles on "
-            f"{route.highways[0]}. No load and no pay -- you will see the {dest} "
-            "dispatch board on arrival. Check in at the city terminal when you "
-            "get there.",
+            f"Bobtailing empty to {spoken_dest}, {route.miles:.0f} miles on "
+            f"{route.highways[0]}. No load and no pay -- you will see the "
+            f"{spoken_dest} dispatch board on arrival. Check in at the city "
+            "terminal when you get there.",
             interrupt=True,
         )
         self.ctx.push_state(driving)

@@ -67,7 +67,7 @@ def test_northeast_short_corridor_deadline_uses_direct_route(world):
         job
         for seed in range(40)
         for job in JobBoard(world, seed=seed).offers("Philadelphia", endorsements=set(), level=1)
-        if job.destination == "New York"
+        if job.destination == "new_york_ny_us"
     ]
 
     assert ny_jobs

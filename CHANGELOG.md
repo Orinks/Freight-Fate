@@ -2,6 +2,17 @@
 
 ## Unreleased
 
+### Changed
+
+- **Cities that share a name now always say their state.** With two Jacksons,
+  two Portlands, and three Springfields on the map, dispatch offers, route
+  planning, GPS announcements, and delivery summaries now say "Jackson,
+  Mississippi" or "Jackson, Michigan" wherever the bare name would be
+  ambiguous. Cities with a unique name keep their short spoken form, and a few
+  places that used to stutter their state twice, like "toward Jackson,
+  Michigan, Michigan", now say it once. Existing careers and saved trips carry
+  over unchanged.
+
 ### Added
 
 - **The upper Midwest and Great Lakes fill in with twenty-nine new cities

@@ -245,13 +245,13 @@ def test_interchange_exit_label_property():
 def test_leg_heading_follows_route_numbering(world):
     # Odd routes are signed N/S even where the geometry runs diagonally
     # (I-95 NY->Philadelphia trends southwest but is signed South).
-    assert _leg_heading("I-95", "New York", "Philadelphia") == "South"
-    assert _leg_heading("I-95", "Philadelphia", "New York") == "North"
+    assert _leg_heading("I-95", "new_york_ny_us", "philadelphia_pa_us") == "South"
+    assert _leg_heading("I-95", "philadelphia_pa_us", "new_york_ny_us") == "North"
     # Even routes are signed E/W.
-    assert _leg_heading("I-80", "Chicago", "Cleveland") == "East"
-    assert _leg_heading("I-80", "Cleveland", "Chicago") == "West"
+    assert _leg_heading("I-80", "chicago_il_us", "cleveland_oh_us") == "East"
+    assert _leg_heading("I-80", "cleveland_oh_us", "chicago_il_us") == "West"
     # No route number -> no heading.
-    assert _leg_heading("Local Road", "Chicago", "Cleveland") == ""
+    assert _leg_heading("Local Road", "chicago_il_us", "cleveland_oh_us") == ""
 
 
 def _leg0_curated_stop(route):

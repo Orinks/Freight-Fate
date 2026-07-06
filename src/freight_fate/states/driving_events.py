@@ -321,7 +321,11 @@ class DrivingEventMixin:
     ) -> tuple[float, str, str] | None:
         if not self.route.legs:
             return None
-        destination = self.route.cities[-1].casefold()
+        # Matched against real interchange sign text, so compare the spoken
+        # city name ("Nashville"), never the slug key.
+        destination = self.ctx.world.spoken_city(
+            self.route.cities[-1], qualified=False
+        ).casefold()
         candidates = []
         for i in range(len(self.route.legs) - 1, -1, -1):
             leg = self.route.legs[i]
@@ -757,8 +761,8 @@ class DrivingEventMixin:
         truck = TRUCK_CATALOG.get(self.ctx.profile.truck) if self.ctx.profile else None
         return driving_presence(
             phase=self.phase,
-            origin=self.job.origin,
-            destination=self.job.destination,
+            origin=self.job.spoken_origin,
+            destination=self.job.spoken_destination,
             cargo=self.job.cargo.label,
             fraction=fraction,
             moving=moving,
@@ -772,7 +776,7 @@ class DrivingEventMixin:
         title = (
             f"Deadheading to pickup at {self._pickup_facility_text()}"
             if self.phase == DRIVE_PHASE_PICKUP
-            else f"Driving loaded to {self.job.destination}"
+            else f"Driving loaded to {self.job.spoken_destination}"
         )
         remaining = (
             f"{self.trip.remaining_miles:.1f} of {self.trip.total_miles:.1f} miles"

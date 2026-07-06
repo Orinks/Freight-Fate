@@ -406,7 +406,7 @@ def test_delivery_final_miles_use_facility_approach_limits(world):
 
 
 def test_pickup_deadhead_route_uses_local_facility_limits(world):
-    route = world.facility_approach_route("Chicago", world.cities["Chicago"].locations[0].name)
+    route = world.facility_approach_route("Chicago", world.city("Chicago").locations[0].name)
     truck = TruckState()
     weather = WeatherSystem("great_lakes", seed=1)
     trip = Trip(route, truck, weather, seed=2)
@@ -421,7 +421,7 @@ def test_pickup_deadhead_route_uses_local_facility_limits(world):
 
 
 def test_facility_gate_warns_before_final_low_speed_zone(world):
-    route = world.facility_approach_route("Chicago", world.cities["Chicago"].locations[0].name)
+    route = world.facility_approach_route("Chicago", world.city("Chicago").locations[0].name)
     truck = TruckState()
     weather = WeatherSystem("great_lakes", seed=1)
     trip = Trip(route, truck, weather, seed=2)

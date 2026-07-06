@@ -162,8 +162,9 @@ class Trip:
         cues: list[NavigationCue] = []
         for i, (start, leg) in enumerate(zip(self._leg_starts, self.route.legs, strict=True)):
             forward = self.route.cities[i] == leg.a
-            toward = self.route.cities[i + 1]
-            heading = _leg_heading(leg.highway, self.route.cities[i], toward)
+            toward_key = self.route.cities[i + 1]
+            toward = get_world().spoken_city(toward_key)
+            heading = _leg_heading(leg.highway, self.route.cities[i], toward_key)
             shield = f"{leg.highway} {heading}".strip()
             segment_miles = leg.miles
             if i == 0:
@@ -580,10 +581,15 @@ class Trip:
             )
         leg = self.route.legs[self.current_leg_index]
         toward = self.route.cities[self.current_leg_index + 1]
-        state = get_world().cities[toward].state
+        world = get_world()
+        toward_name = world.spoken_city(toward, qualified=False)
+        state = world.cities[toward].state
         next_context = self.next_navigation_context(imperial)
         terrain_text = self._current_grade_text()
-        return f"{dist}. On {leg.highway} toward {toward}, {state}. {terrain_text}. {next_context}"
+        return (
+            f"{dist}. On {leg.highway} toward {toward_name}, {state}. "
+            f"{terrain_text}. {next_context}"
+        )
 
     def _current_grade_text(self) -> str:
         grade_pct = self.grade_at(self.position_mi) * 100.0
@@ -597,7 +603,7 @@ class Trip:
     def next_navigation_context(self, imperial: bool = True) -> str:
         cue = self.next_navigation_cue()
         if cue is None:
-            return f"Destination {self.route.cities[-1]} ahead."
+            return f"Destination {get_world().spoken_city(self.route.cities[-1])} ahead."
         ahead = max(0.0, cue.at_mi - self.position_mi)
         ahead_text = (
             _spoken_distance(ahead, "mile")
@@ -706,7 +712,9 @@ class Trip:
         self.game_minutes += game_min
         target = self.current_target_city
         self.weather.set_region(target.region)
-        self.weather.set_city(target.name, target.lat, target.lon)
+        # Identity for the live-weather cache: cities sharing a spoken name
+        # ("Jackson") are still different places with different skies.
+        self.weather.set_city(target.key, target.lat, target.lon)
         changed = self.weather.update(game_min)
         if changed is not None:
             self._emit(
@@ -739,7 +747,10 @@ class Trip:
 
         if self.position_mi >= self.total_miles:
             self.finished = True
-            self._emit(TripEventKind.ARRIVED, f"You have arrived in {self.route.cities[-1]}.")
+            self._emit(
+                TripEventKind.ARRIVED,
+                f"You have arrived in {get_world().spoken_city(self.route.cities[-1])}.",
+            )
         return self._events
 
     # -- event checks ----------------------------------------------------------------
@@ -803,7 +814,7 @@ class Trip:
             self._announced_speed_limit = limit
             verb = "reduced to" if lowered else "raised to"
             city = self._nearest_urban_city(self.position_mi) if lowered else None
-            where = f" approaching {city}" if city else ""
+            where = f" approaching {get_world().spoken_city(city)}" if city else ""
             self._emit(
                 TripEventKind.GPS_CUE, f"Speed limit {verb} {self._speed_value(limit)}{where}."
             )
@@ -924,8 +935,9 @@ class Trip:
                 crossing = f"Crossing into {city_state}. " if city_state != prev_state else ""
                 self._emit(
                     TripEventKind.CITY_REACHED,
-                    f"{crossing}Passing {city}, {city_state}. "
-                    f"Continuing on {leg.highway} toward {nxt}.",
+                    f"{crossing}Passing {world.spoken_city(city, qualified=False)}, "
+                    f"{city_state}. "
+                    f"Continuing on {leg.highway} toward {world.spoken_city(nxt)}.",
                 )
 
     def _hazard_risk(self) -> float:

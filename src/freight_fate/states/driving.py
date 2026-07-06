@@ -36,7 +36,7 @@ class DrivingState(DrivingControlsMixin, DrivingUpdateMixin, DrivingEventMixin, 
         self.truck.damage_pct = profile.truck_damage_pct
         self.truck.set_cold_air_start()
         self.start_damage = profile.truck_damage_pct
-        region = ctx.world.cities[job.origin].region
+        region = ctx.world.city(job.origin).region
         self.weather = WeatherSystem(
             region,
             seed=self.trip_seed,
@@ -179,7 +179,9 @@ class DrivingState(DrivingControlsMixin, DrivingUpdateMixin, DrivingEventMixin, 
                 route = ctx.world.route_from_cities(data["route_cities"])
             if route is None:
                 return None
-            job = job_from_payload(j)
+            # Pre-slug saves store display names; canonicalize before any
+            # world lookup so an old trip resumes instead of being dropped.
+            job = normalize_job_cities(job_from_payload(j), ctx.world)
             position_mi = float(data.get("position_mi", 0.0))
             game_minutes = float(data.get("game_minutes", 0.0))
             job.deadline_game_h = fair_active_deadline(
@@ -246,7 +248,7 @@ class DrivingState(DrivingControlsMixin, DrivingUpdateMixin, DrivingEventMixin, 
             destination = (
                 self._pickup_facility_text()
                 if self.phase == DRIVE_PHASE_PICKUP
-                else self.job.destination
+                else self.job.spoken_destination
             )
             progress = (
                 self._pickup_progress_summary()

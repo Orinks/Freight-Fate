@@ -265,6 +265,15 @@ def _join_destinations(destinations: tuple[str, ...]) -> str:
 
 @dataclass(frozen=True)
 class City:
+    """A freight service area.
+
+    ``key`` is the stable identity (``jackson_ms_us``): it keys ``World.cities``,
+    leg endpoints, and saves, and is never spoken. ``name`` is the bare spoken
+    city ("Jackson") and ``state`` the spoken state name ("Mississippi"),
+    composed at load from the geo lookup; speech that must disambiguate uses
+    ``spoken_qualified`` or ``World.spoken_city``.
+    """
+
     name: str
     state: str
     region: str
@@ -272,6 +281,14 @@ class City:
     lat: float = 0.0
     lon: float = 0.0
     market_tags: tuple[str, ...] = ()
+    key: str = ""
+    state_code: str = ""
+    country: str = ""
+    country_name: str = ""
+
+    @property
+    def spoken_qualified(self) -> str:
+        return f"{self.name}, {self.state}" if self.state else self.name
 
 
 @dataclass(frozen=True)

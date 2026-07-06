@@ -32,7 +32,7 @@ def test_region_picker_lists_regions_and_defaults_to_chicagos_region(world):
     try:
         picker = open_picker(app)
         # defaults to the region that contains the default city (Chicago)
-        default_region = world.cities["Chicago"].region
+        default_region = world.city("Chicago").region
         assert picker.items[picker.index].text.startswith(_region_menu_name(default_region))
         # one item per region that actually has cities
         regions_with_cities = {c.region for c in world.cities.values()}
@@ -82,7 +82,7 @@ def test_picking_a_city_sets_the_profile_start_city():
     try:
         picker = open_picker(app, name="Southerner")
         # drill into Atlanta's region, then pick the city
-        atlanta_region = app.ctx.world.cities["Atlanta"].region
+        atlanta_region = app.ctx.world.city("Atlanta").region
         target = _region_menu_name(atlanta_region)
         while not picker.items[picker.index].text.startswith(target):
             picker.handle_event(key_event(pygame.K_DOWN))
@@ -96,12 +96,13 @@ def test_picking_a_city_sets_the_profile_start_city():
         assert isinstance(app.state, CityMenuState)
         p = app.ctx.profile
         assert p.name == "Southerner"
-        assert p.current_city == "Atlanta"
+        # the picker persists the stable city key, never the spoken name
+        assert p.current_city == "atlanta_ga_us"
         assert app.state.title == "Atlanta Company Yard"
         assert app.state.items[app.state.index].text == "Dispatch board"
         assert ("poi/facility_gate", 1.0) in ambient
         # the choice is already persisted to disk
-        assert Profile.load(p.path).current_city == "Atlanta"
+        assert Profile.load(p.path).current_city == "atlanta_ga_us"
     finally:
         app.shutdown()
 
