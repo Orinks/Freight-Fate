@@ -256,13 +256,23 @@ def fine_grade_samples(
     last = len(coords) - 1
     for i in range(1, len(coords)):
         acc_mi += cumulative_mi[i] - cumulative_mi[i - 1]
-        if acc_mi >= bin_width_mi or i == last:
-            lon, lat = coords[i]
-            samples.append(
-                {"at_mi": round(cumulative_mi[i] * scale, 3), "lat": float(lat), "lon": float(lon)}
-            )
+        if acc_mi < bin_width_mi and i != last:
+            continue
+        lon, lat = coords[i]
+        at_mi = round(cumulative_mi[i] * scale, 3)
+        # A stored grade segment rounds its endpoints to 1 decimal place, so a
+        # sample gap under ~0.1 mi can silently round away to a zero-width
+        # segment that world.py rejects. Require real headroom before it.
+        if at_mi - samples[-1]["at_mi"] >= 0.15:
+            samples.append({"at_mi": at_mi, "lat": float(lat), "lon": float(lon)})
             sample_elevations.append(elevations[i])
-            acc_mi = 0.0
+        elif i == last:
+            # The forced final close landed too close to the previous sample
+            # to survive rounding -- update that bin in place to the true
+            # endpoint instead of appending a near-zero-width duplicate.
+            samples[-1] = {"at_mi": at_mi, "lat": float(lat), "lon": float(lon)}
+            sample_elevations[-1] = elevations[i]
+        acc_mi = 0.0
     samples[-1]["at_mi"] = leg_miles
     return samples, sample_elevations
 

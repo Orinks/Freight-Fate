@@ -174,6 +174,34 @@ def test_fine_grade_samples_avoids_the_sparse_vertex_snap_artifact():
     assert any(s["terrain"] == "mountain" and s["avg_grade_pct"] > 3.0 for s in segs)
 
 
+def test_fine_grade_samples_never_yields_a_zero_width_final_segment():
+    """Regression: when the last real ORS vertex sits a hair's-breadth past
+    the previous sample, the forced final close used to append a near-
+    duplicate point. A stored grade segment rounds its endpoints to 1
+    decimal place, so that tiny gap could round away to start_mi == end_mi
+    -- exactly what world.py's parser rejects (observed live on a real
+    Flagstaff -> Kingman route: a 151.0-151.0 segment). Needs at least 3
+    real samples before the tiny final gap so the fix exercises the same
+    merge/round path the real bug hit -- 2 samples fall back to the
+    unrounded single-segment builder and would hide the bug."""
+    coords = [
+        [-110.0, 35.0],
+        [-109.5, 35.0],  # ~28.7 mi later
+        [-109.0, 35.0],  # ~57.4 mi later
+        [-108.999, 35.0],  # ~0.06 mi further -- under the merge-safe gap
+    ]
+    elevations = [1000.0, 1000.0, 1000.0, 1200.0]
+    parsed = {"coordinates": coords, "elevations_ft": elevations}
+    samples, sample_elevations = enrich_routes.fine_grade_samples(parsed, leg_miles=57.46)
+    assert len(samples) >= 3, "test setup must exercise the merge path, not the fallback"
+    leg = {"miles": 57.46, "terrain": "flat", "from": "a", "to": "b"}
+    segs = enrich_routes.grade_segments_from_samples(samples, sample_elevations, leg)
+
+    assert all(s["end_mi"] > s["start_mi"] for s in segs)
+    assert segs[0]["start_mi"] == 0.0
+    assert segs[-1]["end_mi"] == 57.5  # world.py rounds leg.miles the same way
+
+
 def test_ors_sample_count_scales_with_distance():
     assert enrich_routes._ors_sample_count(40) == 5  # short legs get a floor
     assert enrich_routes._ors_sample_count(490) == 18  # ~1 per 30 mi
