@@ -17,6 +17,21 @@
   changes. Boundaries follow the real lines, including split states like
   Tennessee, Kentucky, Indiana, the Florida panhandle, and far west Texas.
 
+- **Interstate 40 pushes west into the Mojave and east through the Carolina
+  Piedmont.** Six new stops join the map: Barstow, Kingman, Flagstaff, and
+  Gallup carry I-40 across the high desert Southwest, including a real climb
+  onto the Colorado Plateau near Flagstaff, home to the Nestle Purina
+  PetCare plant. Tucumcari fills the long, sparse gap between Albuquerque
+  and Amarillo. Winston-Salem, home to the HanesBrands distribution
+  operation, joins between Asheville and Greensboro to close out I-40's
+  mountain-to-Piedmont run through North Carolina. New connecting spurs
+  link Barstow to Victorville and Las Vegas on I-15, Flagstaff to Phoenix on
+  I-17, and Kingman to Las Vegas on US-93. Grades along this corridor come
+  from real elevation data at far finer resolution than before, so the
+  climbs and descents through Arizona and New Mexico are genuinely felt,
+  not smoothed away. The desert stretches run long between service stops --
+  planning fuel and hours of service matters out here.
+
 ### Changed
 
 - **Cities that share a name now always say their state.** With two Jacksons,

@@ -4543,6 +4543,78 @@
       ],
       "lat": 40.4167,
       "lon": -86.8753
+    },
+    "barstow_ca_us": {
+      "spoken_city": "Barstow",
+      "state": "CA",
+      "country": "US",
+      "region": "california",
+      "lat": 34.8958,
+      "lon": -117.0173,
+      "locations": [
+        {
+          "name": "BNSF Barstow Yard",
+          "type": "rail",
+          "source_note": "BNSF Barstow classification yard on the transcon line, at the I-15/I-40 junction -- one of BNSF's major Southwest rail hubs."
+        }
+      ]
+    },
+    "kingman_az_us": {
+      "spoken_city": "Kingman",
+      "state": "AZ",
+      "country": "US",
+      "region": "desert_southwest",
+      "lat": 35.1894,
+      "lon": -114.053,
+      "locations": []
+    },
+    "flagstaff_az_us": {
+      "spoken_city": "Flagstaff",
+      "state": "AZ",
+      "country": "US",
+      "region": "desert_southwest",
+      "lat": 35.1983,
+      "lon": -111.6513,
+      "locations": [
+        {
+          "name": "Nestle Purina PetCare Plant",
+          "type": "food_processor",
+          "source_note": "Nestle Purina PetCare dry pet-food manufacturing plant, Flagstaff -- operating since the 1950s."
+        }
+      ]
+    },
+    "gallup_nm_us": {
+      "spoken_city": "Gallup",
+      "state": "NM",
+      "country": "US",
+      "region": "desert_southwest",
+      "lat": 35.5281,
+      "lon": -108.7426,
+      "locations": []
+    },
+    "tucumcari_nm_us": {
+      "spoken_city": "Tucumcari",
+      "state": "NM",
+      "country": "US",
+      "region": "desert_southwest",
+      "lat": 35.1717,
+      "lon": -103.725,
+      "locations": []
+    },
+    "winston_salem_nc_us": {
+      "spoken_city": "Winston-Salem",
+      "state": "NC",
+      "country": "US",
+      "region": "atlantic_southeast",
+      "lat": 36.0999,
+      "lon": -80.2442,
+      "locations": [
+        {
+          "name": "HanesBrands Distribution Center",
+          "type": "distribution",
+          "source_note": "HanesBrands (headquartered in Winston-Salem) apparel distribution operation."
+        }
+      ]
     }
   }
 }
