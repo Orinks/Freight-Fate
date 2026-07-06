@@ -842,7 +842,11 @@ class JobBoardState(MenuState):
     def handle_event(self, event) -> None:
         import pygame
 
-        if event.type == pygame.KEYDOWN and event.key == pygame.K_F1 and self.jobs:
+        if (
+            event.type == pygame.KEYDOWN
+            and event.key == pygame.K_F1
+            and self.index < len(self.jobs)
+        ):
             self.ctx.push_state(JobDetailState(self.ctx, self, self.jobs[self.index]))
             return
         super().handle_event(event)

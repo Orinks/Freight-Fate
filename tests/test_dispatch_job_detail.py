@@ -119,6 +119,28 @@ def test_locked_job_detail_does_not_sound_accept_available():
         app.shutdown()
 
 
+def test_f1_on_back_item_does_not_crash():
+    from freight_fate.app import App
+    from freight_fate.states.city import JobBoardState, JobDetailState
+
+    app = App()
+    try:
+        board = _job_board(app)
+        # Move to the trailing "Back to terminal" item (past the last job).
+        board.handle_event(key_event(pygame.K_END))
+        assert board.index == len(board.jobs)
+        assert board.items[board.index].text == "Back to terminal"
+
+        # F1 here must not index off the end of the jobs list.
+        board.handle_event(key_event(pygame.K_F1))
+
+        assert app.state is board
+        assert isinstance(app.state, JobBoardState)
+        assert not isinstance(app.state, JobDetailState)
+    finally:
+        app.shutdown()
+
+
 def test_job_detail_accept_command_accepts_and_escape_returns():
     from freight_fate.app import App
     from freight_fate.states.city import JobBoardState, PickupFacilityState

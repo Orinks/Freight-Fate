@@ -125,6 +125,8 @@
   new as -- or newer than -- the latest nightly, so once those changes ship in
   a stable build you converge back onto stable instead of being left on an
   equivalent nightly.
+  
+  **Fixed** a bug in which pressing F1 on the "Back to terminal" entry on the dispatch board would crash the game.
 
 ### Changed
 - **Hours-of-service rules are more realistic.** Realistic mode now tracks the
