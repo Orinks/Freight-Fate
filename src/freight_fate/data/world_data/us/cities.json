@@ -5332,6 +5332,15 @@
       "lat": 41.7558,
       "lon": -124.2026,
       "locations": []
+    },
+    "morristown_tn_us": {
+      "spoken_city": "Morristown",
+      "state": "TN",
+      "country": "US",
+      "region": "appalachia",
+      "lat": 36.2145,
+      "lon": -83.2949,
+      "locations": []
     }
   }
 }

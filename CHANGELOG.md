@@ -39,6 +39,12 @@
   Ukiah up to Eureka on Humboldt Bay and Crescent City, with mountain runs inland
   to Redding on Highway 299 and Grants Pass on US-199.
 
+- **The eastern mountains start filling in too.** Morristown, Tennessee joins the
+  map on the US-11E valley run between Knoxville and Johnson City -- past Jefferson
+  City, Greeneville, and Jonesborough, with the Davy Crockett birthplace along the
+  way -- so freight moves the real East Tennessee towns instead of skipping the
+  whole stretch.
+
 - **Truck stops now tell you what they are known for.** When you check your
   route or pull in to rest, the big travel-center brands call out their
   specialty out loud, so a stop is not just a name on the road anymore. A Love's
