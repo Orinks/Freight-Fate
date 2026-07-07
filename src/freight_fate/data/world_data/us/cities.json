@@ -4846,6 +4846,78 @@
       "lat": 31.8457,
       "lon": -102.3676,
       "locations": []
+    },
+    "carlisle_pa_us": {
+      "spoken_city": "Carlisle",
+      "state": "PA",
+      "country": "US",
+      "region": "northeast",
+      "lat": 40.2015,
+      "lon": -77.1889,
+      "locations": []
+    },
+    "elizabethtown_ky_us": {
+      "spoken_city": "Elizabethtown",
+      "state": "KY",
+      "country": "US",
+      "region": "mid_south",
+      "lat": 37.694,
+      "lon": -85.8591,
+      "locations": []
+    },
+    "utica_ny_us": {
+      "spoken_city": "Utica",
+      "state": "NY",
+      "country": "US",
+      "region": "northeast",
+      "lat": 43.1009,
+      "lon": -75.2327,
+      "locations": []
+    },
+    "moses_lake_wa_us": {
+      "spoken_city": "Moses Lake",
+      "state": "WA",
+      "country": "US",
+      "region": "pacific_northwest",
+      "lat": 47.1301,
+      "lon": -119.2781,
+      "locations": []
+    },
+    "conway_ar_us": {
+      "spoken_city": "Conway",
+      "state": "AR",
+      "country": "US",
+      "region": "mid_south",
+      "lat": 35.0887,
+      "lon": -92.4421,
+      "locations": []
+    },
+    "iowa_city_ia_us": {
+      "spoken_city": "Iowa City",
+      "state": "IA",
+      "country": "US",
+      "region": "heartland",
+      "lat": 41.6611,
+      "lon": -91.5302,
+      "locations": []
+    },
+    "charlottesville_va_us": {
+      "spoken_city": "Charlottesville",
+      "state": "VA",
+      "country": "US",
+      "region": "appalachia",
+      "lat": 38.0293,
+      "lon": -78.4767,
+      "locations": []
+    },
+    "casper_wy_us": {
+      "spoken_city": "Casper",
+      "state": "WY",
+      "country": "US",
+      "region": "rockies",
+      "lat": 42.8666,
+      "lon": -106.3131,
+      "locations": []
     }
   }
 }

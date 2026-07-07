@@ -18,8 +18,13 @@
   Interstate 94; and the Interstate 25 climb through New Mexico adds Santa Fe
   and Las Vegas, New Mexico. Down in Texas and the Gulf, Odessa joins in the
   Permian Basin, Kerrville in the Hill Country, and Orange, Texas and Sulphur,
-  Louisiana on the Interstate 10 run near the state line. More cities are being
-  added across the map.
+  Louisiana on the Interstate 10 run near the state line. In the East and
+  heartland, Interstate 81 adds Carlisle, Pennsylvania, a big trucking-and-
+  warehouse town; Interstate 65 adds Elizabethtown, Kentucky; the New York
+  Thruway adds Utica; Interstate 64 adds Charlottesville, Virginia; Interstate
+  40 adds Conway, Arkansas; Interstate 80 adds Iowa City; Interstate 90 adds
+  Moses Lake, Washington; and Interstate 25 adds Casper, Wyoming. More cities
+  are being added across the map.
 
 - **The longest coast-to-interior hauls now name the towns you pass.** Atlanta
   to Dallas calls out the Interstate 20 towns clear across Alabama, Mississippi,
