@@ -117,6 +117,21 @@
         {"lat": 47.1053, "lon": -104.7122, "note": "Glendive -- I-94 near the ND line"},
         {"lat": 46.8083, "lon": -100.7837, "note": "Bismarck -- I-94 end (existing node)"}
       ]
+    },
+    {
+      "ref": "I-80-NV",
+      "spoken": "Interstate 80",
+      "phase": 1,
+      "tier": 1,
+      "status": "unstarted",
+      "note": "I-80 across the Nevada Great Basin: Reno to Salt Lake City. Today the map skips it with a single reno-slc leg and leaves Elko hanging off SLC only (no reno-elko), so Reno->Elko backtracks. Real freight/mining towns on the road: Winnemucca, Battle Mountain, Elko (exists), West Wendover at the Utah line.",
+      "waypoints": [
+        {"lat": 39.5296, "lon": -119.8138, "note": "Reno -- I-80 west start (existing node)"},
+        {"lat": 40.9730, "lon": -117.7357, "note": "Winnemucca -- I-80, US-95 junction"},
+        {"lat": 40.8324, "lon": -115.7631, "note": "Elko -- I-80 (existing node)"},
+        {"lat": 40.7391, "lon": -114.0733, "note": "West Wendover -- I-80 at the Utah line"},
+        {"lat": 40.7608, "lon": -111.8910, "note": "Salt Lake City -- I-80 end (existing node)"}
+      ]
     }
   ]
 }

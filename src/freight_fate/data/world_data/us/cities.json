@@ -5251,6 +5251,33 @@
       "lat": 47.1053,
       "lon": -104.7122,
       "locations": []
+    },
+    "winnemucca_nv_us": {
+      "spoken_city": "Winnemucca",
+      "state": "NV",
+      "country": "US",
+      "region": "great_basin",
+      "lat": 40.973,
+      "lon": -117.7357,
+      "locations": []
+    },
+    "battle_mountain_nv_us": {
+      "spoken_city": "Battle Mountain",
+      "state": "NV",
+      "country": "US",
+      "region": "great_basin",
+      "lat": 40.6421,
+      "lon": -116.9343,
+      "locations": []
+    },
+    "west_wendover_nv_us": {
+      "spoken_city": "West Wendover",
+      "state": "NV",
+      "country": "US",
+      "region": "great_basin",
+      "lat": 40.7391,
+      "lon": -114.0733,
+      "locations": []
     }
   }
 }

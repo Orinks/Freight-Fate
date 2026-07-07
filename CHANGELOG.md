@@ -26,7 +26,11 @@
   valley from Billings through Miles City and Glendive and into the North Dakota
   badlands -- so freight moves the real cities instead of skipping across. And
   central Oregon opens up: Bend, on US-97 south from Klamath Falls and west over
-  the Santiam Pass from Eugene.
+  the Santiam Pass from Eugene. And Interstate 80 finally crosses the Nevada
+  Great Basin -- Reno through Winnemucca, Battle Mountain, Elko, and West Wendover
+  to Salt Lake City, so the run rolls through the mining towns on the Humboldt
+  and over Golconda, Emigrant, and Silverzone summits instead of leaping the
+  whole desert in one hop.
 
 - **Truck stops now tell you what they are known for.** When you check your
   route or pull in to rest, the big travel-center brands call out their
