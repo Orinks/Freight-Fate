@@ -143,6 +143,13 @@
   Syracuse to Albany, Greenville to Atlanta, and Grand Island to North Platte.
   Real grades on each.
 
+- **Fourteen more road-changing runs name their roads.** Gulfport to Jackson,
+  Corpus Christi to McAllen, Fort Smith to Little Rock, Tuscaloosa to Huntsville,
+  Richmond to Raleigh, Columbia to Savannah, Ann Arbor to Fort Wayne, Sault Ste
+  Marie down to Traverse City, Burlington to Albany, Allentown to Bridgeport, the
+  California coast-and-valley runs, and Abilene to Wichita Falls. Each town names
+  the real highway.
+
 - **The map now has real time zones, and your clock changes as you cross
   them.** Drive west out of Tennessee on I-40 and you will hear "Crossing
   into Central Time. It is now 2:15 PM." With terse speech on, it is just
