@@ -106,6 +106,13 @@
   Des Moines, Shreveport to Dallas, Jackson to New Orleans and to Tuscaloosa,
   Omaha to Kansas City, and Rock Springs to Salt Lake City. Real grades on each.
 
+- **Eleven road-changing runs across the map get their towns and roads.** Los
+  Angeles and Medford down California's Central Valley, Garden City and Dodge
+  City across the Kansas and panhandle plains, Brownsville up the Rio Grande to
+  Laredo, the Tri-Cities to Seattle and Portland, Jacksonville to Tampa,
+  Clarksville to Louisville by the Kentucky parkways, and the Virginia coast to
+  Raleigh. Each town names its real highway.
+
 - **The map now has real time zones, and your clock changes as you cross
   them.** Drive west out of Tennessee on I-40 and you will hear "Crossing
   into Central Time. It is now 2:15 PM." With terse speech on, it is just
