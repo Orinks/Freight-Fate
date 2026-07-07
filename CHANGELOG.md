@@ -150,6 +150,12 @@
   California coast-and-valley runs, and Abilene to Wichita Falls. Each town names
   the real highway.
 
+- **Fifteen more runs fill in the Midwest, South, and Florida.** The Wisconsin
+  runs into Madison, Asheville to Winston-Salem, the Florida Interstate 75 and
+  95 runs, Mobile to New Orleans, Columbus to Cleveland, Houston to Lake Charles,
+  Kalamazoo to Detroit, Memphis to Little Rock, and Binghamton to Albany. Real
+  grades throughout.
+
 - **The map now has real time zones, and your clock changes as you cross
   them.** Drive west out of Tennessee on I-40 and you will hear "Crossing
   into Central Time. It is now 2:15 PM." With terse speech on, it is just
