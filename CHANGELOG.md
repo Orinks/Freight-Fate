@@ -50,6 +50,15 @@
   town is announced with the actual highway it sits on, so a run that changes
   roads names the road you are really on.
 
+- **The long diagonal hauls that change highways now name each road.** Dallas to
+  St Louis runs Interstate 35 to Oklahoma City then Interstate 44 through Tulsa,
+  Joplin, and Springfield; Dallas to Albuquerque comes down US-287 then
+  Interstate 40 past Amarillo; Albuquerque to Phoenix climbs Interstate 40 to
+  Flagstaff then drops Interstate 17 into the desert; and Billings to Cheyenne
+  and to Fort Collins run Interstate 90 to Sheridan then Interstate 25 down
+  through Casper. Each town is announced with its real highway, and the grades
+  come from real elevation.
+
 - **The map now has real time zones, and your clock changes as you cross
   them.** Drive west out of Tennessee on I-40 and you will hear "Crossing
   into Central Time. It is now 2:15 PM." With terse speech on, it is just
