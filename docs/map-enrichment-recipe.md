@@ -111,13 +111,33 @@ for the map owner instead of deciding silently. A town can be BOTH a stop on
 this leg today and a future node -- adding it as a checkpoint now does not
 block promoting it later.
 
-### 4. Position and write the checkpoints
+### 4. Validate the route geometry (before trusting it)
+
+ORS's cost model occasionally prefers a road real trucks do not take -- it
+routed San Antonio->El Paso down US-90 through Del Rio (scored 23 mi longer
+but 6 minutes faster than I-10) while the leg's declared highway and curated
+stops were I-10. Three signals of a wrong-road route, any of which means
+stop and investigate before refreshing geometry or placing checkpoints:
+
+- Several candidate towns from the declared highway get rejected off-route.
+- The ORS distance differs from the curated mileage by more than ~4%.
+- Existing curated stops sit far from the fetched polyline.
+
+The fix is a curated `route_via` list on the leg (`[{"lat", "lon",
+"note"}]`) pinning the route through a town on the declared highway; every
+ORS fetch (geometry refresh, mileage adoption, enrichment) honors it and the
+note records why. Sometimes the geometry is right and the LABEL is wrong
+instead -- Billings->Salt Lake City is declared I-15 but genuinely runs
+I-90 + US-191 + US-20 + I-15; keep the real route and use per-checkpoint
+highway fields (below) so cues name the actual road.
+
+### 5. Position and write the checkpoints
 
 ```sh
 uv run --group tooling python tools/place_checkpoints.py \
     --leg "from_slug:to_slug" \
     --candidate "Seligman|35.3258|-112.8747|AZ" \
-    --candidate "Ash Fork|35.2247|-112.4841|AZ" \
+    --candidate "Big Sky|45.2841|-111.2460|MT|place|US-191" \
     --write
 ```
 
@@ -127,10 +147,12 @@ anything more than 2 miles off-route -- the sanity gate that catches wrong
 towns, coordinate typos, and places on a different road. It writes spoken
 names and full spoken state names, merges with existing checkpoints (curated
 positions win), and drops the synthetic "corridor between" placeholder once
-at least one real place covers the leg. Investigate every rejection: it
-usually means the coordinates or the town are wrong, not the gate.
+at least one real place covers the leg. The optional trailing fields set the
+checkpoint type and its spoken highway (for legs whose declared highway
+oversimplifies the real route). Investigate every rejection: it usually
+means the coordinates or the town are wrong, not the gate.
 
-### 5. Discover truck-stop POIs
+### 6. Discover truck-stop POIs
 
 ```sh
 uv run python tools/enrich_routes.py --add-overpass-pois \
@@ -146,7 +168,7 @@ downtown is honest -- do not force a stop. Known gap: a metro's beltway truck
 stops can sit outside the endpoint search box; add those by hand with source
 notes if the leg needs fuel support.
 
-### 6. Refresh geometry and grades
+### 7. Refresh geometry and grades
 
 ```sh
 uv run --group tooling python tools/enrich_routes.py --refresh-geometry \
@@ -160,7 +182,7 @@ stops, checkpoints, tolls, and crossings are preserved. Legs enriched before
 the fine-grade fix (mid-2026) under-report real climbs (Kingman-Flagstaff
 showed 1.37% max on a 4,000 ft climb), so run this for every touched leg.
 
-### 7. Verify and commit
+### 8. Verify and commit
 
 ```sh
 uv run python tools/index_world.py && uv run python tools/index_world.py --check
@@ -175,6 +197,32 @@ everything added (read each new name and state aloud). Commit the batch with
 real source notes in the message; data-only batches that change nothing
 player-visible take `[skip changelog]`, but a batch that adds audible places
 to legs players can drive deserves a changelog entry under `Added`.
+
+## Capturing alternate routes during a scrub
+
+The enrichment pass is when real alternate routes surface: a leg's ORS route
+disagrees with its declared highway, a second comparable road obviously
+exists (Billings->Salt Lake City runs US-191 through Gallatin Canyon, but
+I-90->Butte->I-15 is the all-interstate alternative), or a >150-mile span
+clearly wants an intermediate node. Route choice belongs to the GRAPH, not
+to any one leg -- `World.route_options` already returns multiple distinct
+routes when the graph offers them, and the planned dispatch briefing will
+let the player weigh time, fuel, grades, and weather between them. So when
+you spot an alternate during a scrub, do not bake a detour into the existing
+leg's geometry. Record it in the batch's findings as one of:
+
+1. **Node promotions** (preferred): intermediate towns that hit the node
+   rule (Bozeman, Idaho Falls, Pocatello, Ogden, Salina, Topeka...). Once
+   promoted and legged, the alternates emerge from pathfinding naturally,
+   and the long atomic leg gets split on the next pass.
+2. **A parallel leg** between the same two cities, when both routes
+   genuinely serve the same city pair end-to-end (a supported pattern --
+   several already exist). The new leg gets its own highway label, its own
+   `route_via` to pin its road, and the full recipe run.
+
+Hand the recorded list to the map owner with the batch -- promotions and new
+legs are corridor work with their own review, not silent additions inside an
+enrichment commit.
 
 ## Batching guidance
 
