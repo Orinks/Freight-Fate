@@ -467,6 +467,21 @@ OVERPASS_POI_SOURCE = (
 )
 
 
+def _city_poi_source(city: str) -> str:
+    """Source note for a POI found by querying at an endpoint city itself.
+
+    Keeps the "Overpass" + "amenity query" markers that
+    ``prune_non_truck_pois`` matches on, and differs from
+    ``OVERPASS_POI_SOURCE`` so ``_spread_stop_positions`` treats the stop's
+    endpoint position as authoritative rather than nudging it along the leg.
+    """
+    return (
+        "OpenStreetMap/Overpass development-time amenity query centered on the "
+        f"{city} endpoint city's own coordinates; curated into a gameplay POI "
+        "(clean name, normalized category) without raw OSM IDs."
+    )
+
+
 def _bbox(lat: float, lon: float, radius_m: float) -> str:
     """A ``south,west,north,east`` box roughly ``radius_m`` around a point.
 
@@ -493,17 +508,34 @@ def _overpass_named_candidates(
     independents, rest areas, service plazas, and HGV truck parking alike --
     whatever OSM has a real name for. Unnamed amenities are skipped (no synthetic
     placeholders). Deduped by name, capped at ``want``.
+
+    Searches mid-corridor samples plus the leg's two endpoint cities
+    (``samples[0]``/``samples[-1]`` sit on the cities themselves). Real
+    truck-stop clusters live at town exits, and on long legs the mid-corridor
+    samples land 25-30mi apart, so an endpoint cluster fell outside every
+    search box (confirmed misses: Tucumcari, Barstow, Kingman, Indio, Van
+    Horn). Endpoint queries are cache-keyed by city, not leg, so legs sharing
+    a city share one Overpass response.
     """
-    candidate_points = [samples[len(samples) // 2]]
+    leg_prefix = f"named--{leg['from']}--{leg['to']}"
+    mid_points = [samples[len(samples) // 2]]
     if len(samples) >= 4:
-        candidate_points += [samples[1], samples[-2]]
+        mid_points += [samples[1], samples[-2]]
     if len(samples) >= 6:
-        candidate_points += [samples[len(samples) // 4], samples[3 * len(samples) // 4]]
+        mid_points += [samples[len(samples) // 4], samples[3 * len(samples) // 4]]
+    candidate_points = [
+        (f"{leg_prefix}--{point['at_mi']:.1f}", point, OVERPASS_POI_SOURCE)
+        for point in mid_points
+    ]
+    candidate_points += [
+        (f"named-city--{leg['from']}", samples[0], _city_poi_source(leg["from"])),
+        (f"named-city--{leg['to']}", samples[-1], _city_poi_source(leg["to"])),
+    ]
     # Gather across points, then rank: truck stops first, generic corridor fuel
     # as a fallback, warehouse/grocery retail fuel dropped entirely. Keeping the
     # best per name means one slow point doesn't starve the leg of good POIs.
     best: dict[str, tuple[int, dict[str, Any]]] = {}
-    for point in candidate_points:
+    for cache_key, point, source in candidate_points:
         box = _bbox(point["lat"], point["lon"], 6000)
         query = f"""
         [out:json][timeout:40];
@@ -517,7 +549,7 @@ def _overpass_named_candidates(
         try:
             payload = _cached_overpass_json(
                 cache_dir,
-                f"named--{leg['from']}--{leg['to']}--{point['at_mi']:.1f}",
+                cache_key,
                 urllib.parse.urlencode({"data": query}).encode("utf-8"),
                 rate_limit_s=rate_limit_s,
             )
@@ -541,7 +573,7 @@ def _overpass_named_candidates(
                 "name": name,
                 "type": stop_type,
                 "at_mi": at_mi,
-                "source": OVERPASS_POI_SOURCE,
+                "source": source,
                 "parking": _parking_for_stop_type(stop_type),
                 "actions": _actions_for_stop_type(stop_type),
                 "services": _services_for_stop_type(stop_type),

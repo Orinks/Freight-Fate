@@ -120,9 +120,16 @@ def add_overpass_pois(
     """Additively enrich legs with named OSM truck POIs of any brand.
 
     Purely additive (POIs do not gate dispatch): adds up to ``per_leg`` new
-    named stops per leg, deduped against existing Love's/Pilot curation. Robust
-    to Overpass hiccups -- a leg that errors or finds nothing is simply skipped,
-    and the cache makes re-runs resumable.
+    named corridor stops per leg, deduped against existing Love's/Pilot
+    curation. Robust to Overpass hiccups -- a leg that errors or finds nothing
+    is simply skipped, and the cache makes re-runs resumable.
+
+    Endpoint-city finds ride on top of the ``per_leg`` corridor budget: a
+    physical truck stop at a city serves every leg touching that city (a
+    driver on any of them really does pass it), so each such leg gets it at
+    its own end -- and a long sparse leg still keeps its corridor slots for
+    mid-route coverage. The minimum-spacing rule caps discovery at one stop
+    per leg end per run.
     """
     cache_dir.mkdir(parents=True, exist_ok=True)
     added = updated = 0
@@ -141,19 +148,23 @@ def add_overpass_pois(
             leg, points, cache_dir, rate_limit_s, per_leg + len(existing) + 6
         )
         fresh = []
+        corridor_added = 0
         for cand in cands:
             if cand["name"].lower() in existing:
                 continue
             at = float(cand["at_mi"])
             # Keep stops visibly apart on the corridor: a cluster of POIs found
-            # near one sample point would otherwise land on nearly the same mile.
+            # near one sample point would otherwise land on nearly the same
+            # mile. This also limits each endpoint city to one stop per run.
             if any(abs(at - t) < MIN_STOP_SPACING_MI for t in taken_mi):
                 continue
+            if cand["source"] == OVERPASS_POI_SOURCE:  # mid-corridor find
+                if corridor_added >= per_leg:
+                    continue
+                corridor_added += 1
             fresh.append(cand)
             existing.add(cand["name"].lower())
             taken_mi.append(at)
-            if len(fresh) >= per_leg:
-                break
         if fresh:
             leg["stops"] = sorted(stops + fresh, key=lambda s: float(s["at_mi"]))
             _spread_stop_positions(leg["stops"], leg["miles"])

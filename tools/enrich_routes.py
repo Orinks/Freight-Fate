@@ -208,7 +208,11 @@ def main(argv: list[str] | None = None) -> int:
         "--write, --per-leg, and optionally --only.",
     )
     parser.add_argument(
-        "--per-leg", type=int, default=2, help="Max new POIs per leg for --add-overpass-pois."
+        "--per-leg",
+        type=int,
+        default=2,
+        help="Max new mid-corridor POIs per leg for --add-overpass-pois "
+        "(endpoint-city finds ride on top, at most one per leg end).",
     )
     parser.add_argument(
         "--add-maxspeed",
