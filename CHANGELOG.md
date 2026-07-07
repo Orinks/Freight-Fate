@@ -28,6 +28,14 @@
   the Red River and Big Sioux valleys. Grades on all of them come from real
   elevation.
 
+- **The mountain and desert interstates fill in.** Salt Lake City and Provo to
+  Las Vegas name the Interstate 15 towns down through Cedar City and St. George;
+  Colorado Springs to Albuquerque runs the Interstate 25 Front Range and New
+  Mexico high plains (Trinidad, Raton, Las Vegas New Mexico); Bismarck to
+  Billings crosses the Dakota and Montana plains on Interstate 94; and Los
+  Angeles to San Francisco names the lonely Interstate 5 valley landmarks and
+  the Interstate 580 Bay approach. Real grades throughout.
+
 - **The map now has real time zones, and your clock changes as you cross
   them.** Drive west out of Tennessee on I-40 and you will hear "Crossing
   into Central Time. It is now 2:15 PM." With terse speech on, it is just
