@@ -4648,6 +4648,33 @@
           "source_note": "Citgo's Lake Charles refinery and petrochemical complex -- one of the largest refineries on the US Gulf Coast."
         }
       ]
+    },
+    "meridian_ms_us": {
+      "spoken_city": "Meridian",
+      "state": "MS",
+      "country": "US",
+      "region": "mid_south",
+      "lat": 32.3643,
+      "lon": -88.7037,
+      "locations": []
+    },
+    "vicksburg_ms_us": {
+      "spoken_city": "Vicksburg",
+      "state": "MS",
+      "country": "US",
+      "region": "mid_south",
+      "lat": 32.3526,
+      "lon": -90.8779,
+      "locations": []
+    },
+    "monroe_la_us": {
+      "spoken_city": "Monroe",
+      "state": "LA",
+      "country": "US",
+      "region": "gulf_coast",
+      "lat": 32.5093,
+      "lon": -92.1193,
+      "locations": []
     }
   }
 }

@@ -4,6 +4,13 @@
 
 ### Added
 
+- **New freight cities you can haul to and from.** The map is growing new
+  pickup-and-delivery cities in the gaps between the ones already there -- real
+  towns where a load can start or end, not just places you drive past. So far
+  this release adds, on the Deep South Interstate 20 run between Shreveport and
+  Tuscaloosa: Monroe, Louisiana; Vicksburg, Mississippi, up on the river bluffs;
+  and Meridian, Mississippi. More cities are being added across the map.
+
 - **The longest coast-to-interior hauls now name the towns you pass.** Atlanta
   to Dallas calls out the Interstate 20 towns clear across Alabama, Mississippi,
   and Louisiana -- Oxford, Bessemer, Meridian, Vicksburg on the river, and Monroe
