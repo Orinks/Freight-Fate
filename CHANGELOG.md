@@ -4,8 +4,8 @@
 
 ### Added
 
-- **The biggest map update yet -- 93 new cities to pick up and deliver in.** A
-  city is a place a load can start or end, and the map grew from 249 to 342 of
+- **The biggest map update yet -- 100 new cities to pick up and deliver in.** A
+  city is a place a load can start or end, and the map grew from 249 to 349 of
   them, filling in dead zones that used to have nothing drivable for hundreds of
   miles: the mountain West, the northern plains, the Nevada Great Basin, the
   Oregon and California coast, and Appalachia. Whole corridors that simply were
