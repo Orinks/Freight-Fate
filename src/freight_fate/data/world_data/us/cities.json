@@ -5359,6 +5359,15 @@
       "lat": 37.129,
       "lon": -84.0833,
       "locations": []
+    },
+    "bowling_green_ky_us": {
+      "spoken_city": "Bowling Green",
+      "state": "KY",
+      "country": "US",
+      "region": "mid_south",
+      "lat": 36.9685,
+      "lon": -86.4808,
+      "locations": []
     }
   }
 }

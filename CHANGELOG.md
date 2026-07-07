@@ -47,6 +47,9 @@
   Bluegrass to East Tennessee for the first time: Richmond and London between
   Lexington and Knoxville, past Berea and Corbin, over the Kentucky, Rockcastle,
   and Cumberland rivers with the Kentucky Music Hall of Fame at Renfro Valley.
+  And Bowling Green -- the Corvette city -- joins Interstate 65 between Louisville
+  and Nashville, over the Green and Barren rivers through Mammoth Cave country, so
+  freight no longer jumps straight from Elizabethtown to Tennessee.
 
 - **Truck stops now tell you what they are known for.** When you check your
   route or pull in to rest, the big travel-center brands call out their
