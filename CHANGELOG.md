@@ -119,6 +119,12 @@
   Providence to New York, Fresno to Sacramento down the valley, Charleston to
   Wilmington up the coast, and more. Real grades throughout.
 
+- **Nine more runs, including some lonely ones.** Burlington to Manchester
+  through the Green Mountains, Pocatello to Salt Lake City, Austin to Houston,
+  Cedar Rapids to Rockford past Dubuque, the Kansas runs into Wichita, Marquette
+  to Sault Ste Marie across the empty Upper Peninsula, and Brownsville up to
+  Corpus Christi. Real grades on each.
+
 - **The map now has real time zones, and your clock changes as you cross
   them.** Drive west out of Tennessee on I-40 and you will hear "Crossing
   into Central Time. It is now 2:15 PM." With terse speech on, it is just
