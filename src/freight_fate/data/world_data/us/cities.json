@@ -5152,6 +5152,24 @@
       "lat": 44.4908,
       "lon": -103.8594,
       "locations": []
+    },
+    "coeur_d_alene_id_us": {
+      "spoken_city": "Coeur d'Alene",
+      "state": "ID",
+      "country": "US",
+      "region": "great_basin",
+      "lat": 47.6777,
+      "lon": -116.7805,
+      "locations": []
+    },
+    "bozeman_mt_us": {
+      "spoken_city": "Bozeman",
+      "state": "MT",
+      "country": "US",
+      "region": "rockies",
+      "lat": 45.677,
+      "lon": -111.0429,
+      "locations": []
     }
   }
 }
