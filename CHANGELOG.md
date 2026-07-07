@@ -86,6 +86,14 @@
   the new Interstate 22, and Elko to Salt Lake City across the Nevada desert.
   Real grades throughout.
 
+- **A dozen road-changing legs across the country get their towns and roads.**
+  Charlotte to Knoxville over the Blue Ridge, Duluth to Fargo across the north
+  woods, Elko to Boise through the Nevada and Idaho desert, the Chattanooga and
+  Macon runs into Atlanta, Baltimore to Pittsburgh over the Alleghenies, Sioux
+  Falls to Minneapolis, Midland to Amarillo up the Llano, Charlotte to Savannah,
+  Baton Rouge to Shreveport, and Idaho Falls to Boise. Each town names the real
+  highway under the wheels.
+
 - **The map now has real time zones, and your clock changes as you cross
   them.** Drive west out of Tennessee on I-40 and you will hear "Crossing
   into Central Time. It is now 2:15 PM." With terse speech on, it is just
