@@ -5305,6 +5305,33 @@
       "lat": 44.0266,
       "lon": -116.9629,
       "locations": []
+    },
+    "ukiah_ca_us": {
+      "spoken_city": "Ukiah",
+      "state": "CA",
+      "country": "US",
+      "region": "california",
+      "lat": 39.1502,
+      "lon": -123.2078,
+      "locations": []
+    },
+    "eureka_ca_us": {
+      "spoken_city": "Eureka",
+      "state": "CA",
+      "country": "US",
+      "region": "california",
+      "lat": 40.8021,
+      "lon": -124.1637,
+      "locations": []
+    },
+    "crescent_city_ca_us": {
+      "spoken_city": "Crescent City",
+      "state": "CA",
+      "country": "US",
+      "region": "california",
+      "lat": 41.7558,
+      "lon": -124.2026,
+      "locations": []
     }
   }
 }

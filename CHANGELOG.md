@@ -32,7 +32,12 @@
   Great Basin -- Reno through Winnemucca, Battle Mountain, Elko, and West Wendover
   to Salt Lake City, so the run rolls through the mining towns on the Humboldt
   and over Golconda, Emigrant, and Silverzone summits instead of leaping the
-  whole desert in one hop.
+  whole desert in one hop. The Oregon Blue Mountains are dispatchable stops now,
+  not just names on the Boise-Portland haul -- La Grande, Baker City, and Ontario,
+  chained up Cabbage Hill over Deadman Pass down to the Snake River. And the
+  North Coast comes alive at last: US-101 winds the redwoods from Santa Rosa and
+  Ukiah up to Eureka on Humboldt Bay and Crescent City, with mountain runs inland
+  to Redding on Highway 299 and Grants Pass on US-199.
 
 - **Truck stops now tell you what they are known for.** When you check your
   route or pull in to rest, the big travel-center brands call out their

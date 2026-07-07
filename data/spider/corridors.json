@@ -147,6 +147,20 @@
         {"lat": 44.0266, "lon": -116.9629, "note": "Ontario -- I-84 at the Idaho line"},
         {"lat": 43.6150, "lon": -116.2023, "note": "Boise -- I-84 end (existing node)"}
       ]
+    },
+    {
+      "ref": "US-101-NCA",
+      "spoken": "US Route 101",
+      "phase": 2,
+      "tier": 2,
+      "status": "unstarted",
+      "note": "US-101 up the Northern California coast: Santa Rosa through Ukiah and the redwoods to Eureka on Humboldt Bay, then north to Crescent City near the Oregon line. The whole North Coast is a dead zone today. Spurs (added directly) tie Eureka east to Redding on CA-299 and Crescent City north to Grants Pass on US-199, plugging the coast into I-5.",
+      "waypoints": [
+        {"lat": 38.4404, "lon": -122.7141, "note": "Santa Rosa -- US-101 south start (existing node)"},
+        {"lat": 39.1502, "lon": -123.2078, "note": "Ukiah -- US-101 Mendocino County"},
+        {"lat": 40.8021, "lon": -124.1637, "note": "Eureka -- US-101 on Humboldt Bay"},
+        {"lat": 41.7558, "lon": -124.2026, "note": "Crescent City -- US-101 near the Oregon line"}
+      ]
     }
   ]
 }
