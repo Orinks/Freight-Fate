@@ -125,6 +125,12 @@
   to Sault Ste Marie across the empty Upper Peninsula, and Brownsville up to
   Corpus Christi. Real grades on each.
 
+- **Fifteen more road-changing runs name their roads.** Grand Rapids to Chicago
+  around Lake Michigan, Athens to Chattanooga through Atlanta, Worcester to New
+  York, Detroit to Cleveland on the turnpike, the Roanoke and Virginia runs, the
+  California valley-to-coast runs from Visalia, the Idaho high-desert legs, and
+  the Tennessee and Texas back-road runs. Each town names the real highway.
+
 - **The map now has real time zones, and your clock changes as you cross
   them.** Drive west out of Tennessee on I-40 and you will hear "Crossing
   into Central Time. It is now 2:15 PM." With terse speech on, it is just
