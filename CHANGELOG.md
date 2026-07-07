@@ -210,6 +210,12 @@
   Johnson City, Boston to Hartford, Santa Rosa to San Jose, College Station to
   Austin, and Augusta to Macon. Real grades on each.
 
+- **Thirteen more runs get their towns.** The Upper Peninsula and Wisconsin
+  runs, Toledo to Fort Wayne, the Texas Interstate 20 runs into Dallas and
+  Shreveport, Peoria to Davenport, Norfolk to Richmond, Roseburg to Medford,
+  Sioux City to Omaha, Albert Lea to Minneapolis, and South Bend to Chicago.
+  Real grades on each.
+
 - **The map now has real time zones, and your clock changes as you cross
   them.** Drive west out of Tennessee on I-40 and you will hear "Crossing
   into Central Time. It is now 2:15 PM." With terse speech on, it is just
