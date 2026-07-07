@@ -94,6 +94,12 @@
   Baton Rouge to Shreveport, and Idaho Falls to Boise. Each town names the real
   highway under the wheels.
 
+- **Sixteen shorter runs fill in, coast to coast.** Bangor to Manchester up New
+  England, the New York to Boston shoreline, Harrisburg and Charleston to
+  Pittsburgh, the Colorado and Idaho Interstate 15 and 25 runs, Missoula to
+  Spokane, Houston to San Antonio, Austin to Dallas past Temple, and more. Real
+  grades on each.
+
 - **The map now has real time zones, and your clock changes as you cross
   them.** Drive west out of Tennessee on I-40 and you will hear "Crossing
   into Central Time. It is now 2:15 PM." With terse speech on, it is just
