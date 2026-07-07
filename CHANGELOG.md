@@ -235,6 +235,13 @@
   California runs down from Victorville and Oceanside into Los Angeles, Newark to
   Philadelphia, Orlando to Tampa, and Macon to Atlanta. Real grades on each.
 
+- **Sixteen more short runs get their towns.** Lancaster to Bakersfield, the
+  Minnesota runs into Rochester and Minneapolis, Murfreesboro to Huntsville,
+  Saginaw to Lansing, Lexington to Cincinnati, the New Jersey and Pennsylvania
+  runs, Yakima to the Tri-Cities, Baton Rouge to New Orleans, Iron Mountain to
+  Marquette, Greensboro to Raleigh, and Austin to San Antonio. Real grades on
+  each.
+
 - **The map now has real time zones, and your clock changes as you cross
   them.** Drive west out of Tennessee on I-40 and you will hear "Crossing
   into Central Time. It is now 2:15 PM." With terse speech on, it is just
