@@ -280,6 +280,14 @@
   Cheyenne, Las Cruces to El Paso, and the Illinois and Michigan runs. Real
   grades on each.
 
+- **The last short metro hops fill in, and the map is now fully named.** Akron to
+  Cleveland, Montpelier to Burlington, the Seattle-Tacoma-Olympia corridor,
+  Dallas to Fort Worth through Arlington, Winston-Salem to Greensboro, and the
+  last New England and mid-Atlantic hops. With this, every drivable route on the
+  map -- 559 of 562 legs -- now calls out the real towns you pass, and the three
+  that don't are honestly empty (a desert hop, an intra-city crossing) or await a
+  routing decision. Grades everywhere come from real elevation.
+
 - **The map now has real time zones, and your clock changes as you cross
   them.** Drive west out of Tennessee on I-40 and you will hear "Crossing
   into Central Time. It is now 2:15 PM." With terse speech on, it is just
