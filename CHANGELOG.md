@@ -4,13 +4,15 @@
 
 ### Added
 
-- **Interstate 70 opens up through the Colorado Rockies and Utah.** You can now
-  pick up and deliver in Grand Junction, Glenwood Springs, Silverthorne, and
-  Edwards, Colorado, and Green River, Richfield, and Nephi, Utah -- the whole
-  Interstate 70 mountain run from Denver over the Eisenhower Tunnel and Vail
-  Pass, through Glenwood Canyon, and across the Utah desert. The high climbs are
-  felt in real grades, and there is a lone diesel stop out in the San Rafael
-  Swell where there is nothing else for a hundred miles.
+- **The mountain West fills in, interstate by interstate.** New freight cities
+  are opening up along the western interstates the map did not reach before.
+  Interstate 70 now runs the whole way from Denver over the Eisenhower Tunnel,
+  Vail Pass, and Glenwood Canyon and across the Utah desert -- pick up and
+  deliver in Grand Junction, Glenwood Springs, Silverthorne, and Edwards,
+  Colorado, and Green River, Richfield, and Nephi, Utah, with the high climbs
+  felt in real grades and a lone diesel stop out in the San Rafael Swell.
+  Interstate 15 reaches up through Montana, adding Helena, Great Falls, and
+  Shelby from Butte to the Canada line.
 
 - **Truck stops now tell you what they are known for.** When you check your
   route or pull in to rest, the big travel-center brands call out their

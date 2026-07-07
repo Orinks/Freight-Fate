@@ -5026,6 +5026,33 @@
       "lat": 39.7102,
       "lon": -111.8363,
       "locations": []
+    },
+    "helena_mt_us": {
+      "spoken_city": "Helena",
+      "state": "MT",
+      "country": "US",
+      "region": "rockies",
+      "lat": 46.5927,
+      "lon": -112.0361,
+      "locations": []
+    },
+    "great_falls_mt_us": {
+      "spoken_city": "Great Falls",
+      "state": "MT",
+      "country": "US",
+      "region": "rockies",
+      "lat": 47.5002,
+      "lon": -111.3008,
+      "locations": []
+    },
+    "shelby_mt_us": {
+      "spoken_city": "Shelby",
+      "state": "MT",
+      "country": "US",
+      "region": "rockies",
+      "lat": 48.5053,
+      "lon": -111.857,
+      "locations": []
     }
   }
 }

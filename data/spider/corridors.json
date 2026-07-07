@@ -18,6 +18,20 @@
         {"lat": 39.7102, "lon": -111.8366, "note": "Nephi -- I-15 north toward Salt Lake City"},
         {"lat": 40.7608, "lon": -111.8910, "note": "Salt Lake City -- I-15 end"}
       ]
+    },
+    {
+      "ref": "I-15-MT",
+      "spoken": "Interstate 15",
+      "phase": 1,
+      "tier": 1,
+      "status": "unstarted",
+      "note": "Montana I-15: Butte north through Helena and Great Falls to Shelby (US-2 junction near the Canada line). Uncovered; Great Falls and Helena are big missing freight cities. Sets up the US-2 Hi-Line tie-in.",
+      "waypoints": [
+        {"lat": 46.0038, "lon": -112.5347, "note": "Butte -- I-15 start (existing node)"},
+        {"lat": 46.5927, "lon": -112.0361, "note": "Helena -- I-15 through the state capital"},
+        {"lat": 47.5052, "lon": -111.3008, "note": "Great Falls -- I-15"},
+        {"lat": 48.5075, "lon": -111.8563, "note": "Shelby -- I-15 at US-2 near the Canada line"}
+      ]
     }
   ]
 }
