@@ -587,6 +587,15 @@ def _overpass_named_candidates(
                 "actions": _actions_for_stop_type(stop_type),
                 "services": _services_for_stop_type(stop_type),
             }
+            # The stop's real OSM coordinate (node lat/lon, or way/relation
+            # center) rides alongside at_mi so Josh's 1.9 surface-street layer
+            # can route a driver off the ramp to the actual truck stop. The
+            # runtime ignores unknown keys, so this is purely additive.
+            lat = element.get("lat", element.get("center", {}).get("lat"))
+            lon = element.get("lon", element.get("center", {}).get("lon"))
+            if lat is not None and lon is not None:
+                cand["lat"] = round(float(lat), 5)
+                cand["lon"] = round(float(lon), 5)
             existing = best.get(name.lower())
             if existing is None or score > existing[0]:
                 best[name.lower()] = (score, cand)

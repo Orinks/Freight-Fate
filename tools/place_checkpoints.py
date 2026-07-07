@@ -191,6 +191,11 @@ def main(argv: list[str] | None = None) -> int:
                 "type": cand["type"],
                 "state": er.spoken_state(data, cand["state"]),
                 "highway": highway,
+                # Real coordinates alongside the along-leg position: the game
+                # narrates by at_mi, but Josh's surface-street layer (1.9) can
+                # route to a real lat/lon. Additive; the loader ignores it.
+                "lat": round(cand["lat"], 5),
+                "lon": round(cand["lon"], 5),
                 "source": (
                     f"Real town on {highway} between {leg['from']} and "
                     f"{leg['to']}; position matched to the nearest point on the "

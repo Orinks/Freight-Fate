@@ -60,8 +60,8 @@ def _world(legs: list[dict]) -> dict:
     return {"cities": cities, "legs": legs}
 
 
-def _stop_element(name: str) -> dict:
-    return {"tags": {"name": name, "amenity": "fuel", "hgv": "yes"}}
+def _stop_element(name: str, lat: float = 35.19, lon: float = -114.05) -> dict:
+    return {"lat": lat, "lon": lon, "tags": {"name": name, "amenity": "fuel", "hgv": "yes"}}
 
 
 def _patch_overpass(monkeypatch, responses: dict[str, dict]) -> list[str]:
@@ -97,6 +97,8 @@ def test_endpoint_cities_are_queried_and_city_cluster_found(monkeypatch, tmp_pat
     assert stop["name"] == "Flying J Travel Center"
     assert stop["at_mi"] == 150.0  # pinned to the Kingman end, not nudged mid-leg
     assert "kingman_az_us endpoint city" in stop["source"]
+    # Real OSM coordinate is captured for Josh's surface-street layer.
+    assert stop["lat"] == 35.19 and stop["lon"] == -114.05
 
 
 def test_shared_endpoint_stop_serves_every_touching_leg(monkeypatch, tmp_path):
