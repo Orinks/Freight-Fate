@@ -4,6 +4,20 @@
 
 ### Added
 
+- **The longest coast-to-interior hauls now name the towns you pass.** Atlanta
+  to Dallas calls out the Interstate 20 towns clear across Alabama, Mississippi,
+  and Louisiana -- Oxford, Bessemer, Meridian, Vicksburg on the river, and Monroe
+  among them, 25 in all. The big western drives fill in too: San Francisco and
+  Reno to Salt Lake City name the Sierra and Nevada desert stops from Truckee and
+  Fernley through Winnemucca and Wells to West Wendover; Omaha to Cheyenne names
+  the Nebraska Interstate 80 towns from Ogallala to Kimball; and Portland to Salt
+  Lake City runs the Columbia Gorge and Snake River Plain from Hood River and The
+  Dalles through Baker City and Jerome to Ogden. Sacramento and San Francisco to
+  Portland now name the Interstate 5 towns over the Siskiyous -- Redding, Mount
+  Shasta, Yreka, Ashland, Grants Pass -- and down the Willamette to Woodburn.
+  Grades on every one of these come from real elevation now, so the Sierra,
+  Siskiyou, and Blue Mountain climbs are felt instead of smoothed flat.
+
 - **The map now has real time zones, and your clock changes as you cross
   them.** Drive west out of Tennessee on I-40 and you will hear "Crossing
   into Central Time. It is now 2:15 PM." With terse speech on, it is just
