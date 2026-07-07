@@ -68,6 +68,27 @@ def test_ors_directions_kwargs_inserts_curated_via_points():
     ]
 
 
+def test_rescale_covers_interchanges_and_speed_limits():
+    """Mileage adoption must rescale EVERY at_mi field. Interchanges and
+    speed_limits were missed historically, leaving positions past the new leg
+    total (World.load range validators reject the whole world)."""
+    leg = {
+        "miles": 578.0,
+        "stops": [],
+        "corridor": {
+            "interchanges": [{"at_mi": 557.8, "exit_ref": "37"}],
+            "speed_limits": [
+                {"at_mi": 0.0, "mph": 60.0},
+                {"at_mi": 570.0, "mph": 80.0},
+            ],
+        },
+    }
+    enrich_routes._rescale_corridor_positions(leg, 555.0 / 578.0, 555.0)
+    assert leg["corridor"]["interchanges"][0]["at_mi"] == pytest.approx(535.6, abs=0.1)
+    assert leg["corridor"]["speed_limits"][0]["at_mi"] == 0.0  # anchor preserved
+    assert leg["corridor"]["speed_limits"][1]["at_mi"] < 555.0
+
+
 def test_parse_ors_route_maps_geometry_distance_and_extras():
     parsed = enrich_routes.parse_ors_route(_mock_ors_payload())
 

@@ -240,11 +240,20 @@ def _rescale_corridor_positions(leg: dict[str, Any], factor: float, new_miles: f
         segments[0]["start_mi"] = 0.0
         segments[-1]["end_mi"] = round(new_miles, 1)
 
-    for field in ("state_crossings", "checkpoints", "toll_events"):
+    for field in ("state_crossings", "checkpoints", "toll_events", "interchanges"):
         for item in corridor.get(field, []):
             item["at_mi"] = interior(item["at_mi"])
     for stop in leg.get("stops", []):
         stop["at_mi"] = interior(stop["at_mi"])
+
+    # speed_limits is a step function whose first entry anchors the leg start;
+    # keep that anchor at 0.0 (interior() would push it to 0.1 and the loader
+    # would lose the initial limit).
+    speed_limits = corridor.get("speed_limits", [])
+    for entry in speed_limits:
+        entry["at_mi"] = round(min(round(new_miles - 0.1, 1), entry["at_mi"] * factor), 1)
+    if speed_limits:
+        speed_limits[0]["at_mi"] = 0.0
 
     # state_miles is a per-state breakdown, not an at_mi; scale it so it still
     # sums to the leg total, fixing rounding drift on the last entry.
