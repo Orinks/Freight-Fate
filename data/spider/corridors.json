@@ -175,6 +175,21 @@
         {"lat": 36.9487, "lon": -84.0966, "note": "Corbin -- I-75 near the Cumberland Gap country"},
         {"lat": 35.9606, "lon": -83.9207, "note": "Knoxville -- I-75 end (existing node)"}
       ]
+    },
+    {
+      "ref": "I-64-KYWV",
+      "spoken": "Interstate 64",
+      "phase": 1,
+      "tier": 1,
+      "status": "unstarted",
+      "note": "I-64 down the Ohio River country: Lexington east through Morehead to the tri-state at Ashland (KY) and Huntington (WV), then on to Charleston. Entirely missing today -- lexington-charleston does not exist. Ashland is the US-23 gateway to the Eastern Kentucky coalfields (next corridor).",
+      "waypoints": [
+        {"lat": 38.0406, "lon": -84.5037, "note": "Lexington -- I-64 west start (existing node)"},
+        {"lat": 38.1840, "lon": -83.4327, "note": "Morehead -- I-64 gap-breaker"},
+        {"lat": 38.4784, "lon": -82.6379, "note": "Ashland -- I-64 at the Ohio, US-23 junction"},
+        {"lat": 38.4192, "lon": -82.4452, "note": "Huntington -- I-64 in West Virginia"},
+        {"lat": 38.3498, "lon": -81.6326, "note": "Charleston -- I-64 end (existing node)"}
+      ]
     }
   ]
 }

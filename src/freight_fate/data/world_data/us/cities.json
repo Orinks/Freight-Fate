@@ -5368,6 +5368,42 @@
       "lat": 36.9685,
       "lon": -86.4808,
       "locations": []
+    },
+    "mount_sterling_ky_us": {
+      "spoken_city": "Mount Sterling",
+      "state": "KY",
+      "country": "US",
+      "region": "mid_south",
+      "lat": 38.0565,
+      "lon": -83.9433,
+      "locations": []
+    },
+    "morehead_ky_us": {
+      "spoken_city": "Morehead",
+      "state": "KY",
+      "country": "US",
+      "region": "mid_south",
+      "lat": 38.184,
+      "lon": -83.4327,
+      "locations": []
+    },
+    "ashland_ky_us": {
+      "spoken_city": "Ashland",
+      "state": "KY",
+      "country": "US",
+      "region": "mid_south",
+      "lat": 38.4784,
+      "lon": -82.6379,
+      "locations": []
+    },
+    "huntington_wv_us": {
+      "spoken_city": "Huntington",
+      "state": "WV",
+      "country": "US",
+      "region": "appalachia",
+      "lat": 38.4192,
+      "lon": -82.4452,
+      "locations": []
     }
   }
 }
