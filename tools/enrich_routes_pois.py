@@ -61,7 +61,7 @@ _NON_STOP_KEYWORDS = ("cleaning service", "weigh station", "inspection station")
 _RETAIL_SHOP_TAGS = {"supermarket", "wholesale", "department_store", "convenience"}
 
 
-def _truck_relevance(tags: dict[str, str], name: str) -> int | None:
+def _truck_relevance(tags: dict[str, str], name: str, rural_fallback: bool = False) -> int | None:
     """Rank a candidate POI for a freight game; ``None`` means drop it.
 
     Truck-relevant only: service plazas, rest areas, HGV-tagged or HGV-diesel
@@ -69,6 +69,11 @@ def _truck_relevance(tags: dict[str, str], name: str) -> int | None:
     ``amenity=fuel`` car station with no truck signal is dropped -- a Class-8
     driver does not pull a 70-foot rig into a corner Shell. Warehouse/grocery
     retail and OSM mistags are rejected too.
+
+    ``rural_fallback`` relaxes only the last rule: on a leg that would otherwise
+    carry no stop at all, a named fuel station not explicitly diesel-free is
+    accepted at the lowest score (1) as a splash-and-dash diesel point, so a real
+    truck stop always outranks it and it types as a plain ``fuel_station``.
     """
     low = name.lower()
     if len(low.strip()) < 2:
@@ -92,6 +97,8 @@ def _truck_relevance(tags: dict[str, str], name: str) -> int | None:
         or amenity == "parking"
     )
     if not truck_signal:
+        if rural_fallback and amenity == "fuel" and tags.get("fuel:diesel", "") != "no":
+            return 1  # rural splash-and-dash diesel; any real truck stop outranks it
         return None  # generic car fuel -- not a truck stop
     score = 0
     if highway == "services":
@@ -116,6 +123,7 @@ def add_overpass_pois(
     rate_limit_s: float,
     only: set[tuple[str, str]],
     per_leg: int = 2,
+    rural_fallback: bool = False,
 ) -> dict[str, Any]:
     """Additively enrich legs with named OSM truck POIs of any brand.
 
@@ -145,7 +153,8 @@ def add_overpass_pois(
         existing = {str(s.get("name", "")).lower() for s in stops}
         taken_mi = [float(s["at_mi"]) for s in stops]
         cands = _overpass_named_candidates(
-            leg, points, cache_dir, rate_limit_s, per_leg + len(existing) + 6
+            leg, points, cache_dir, rate_limit_s, per_leg + len(existing) + 6,
+            rural_fallback=rural_fallback,
         )
         fresh = []
         corridor_added = 0

@@ -510,6 +510,7 @@ def _overpass_named_candidates(
     cache_dir: Path,
     rate_limit_s: float,
     want: int,
+    rural_fallback: bool = False,
 ) -> list[dict[str, Any]]:
     """Named truck-relevant POIs of any brand near a leg, from OpenStreetMap.
 
@@ -574,7 +575,7 @@ def _overpass_named_candidates(
                 continue
             if not name:
                 continue
-            score = _truck_relevance(tags, name)
+            score = _truck_relevance(tags, name, rural_fallback=rural_fallback)
             if score is None:
                 continue  # retail/grocery fuel -- not a truck stop
             stop_type = _stop_type_from_tags(tags)

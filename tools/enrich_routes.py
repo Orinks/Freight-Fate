@@ -224,6 +224,14 @@ def main(argv: list[str] | None = None) -> int:
         "(endpoint-city finds ride on top, at most one per leg end).",
     )
     parser.add_argument(
+        "--rural-fuel-fallback",
+        action="store_true",
+        help="With --add-overpass-pois: on legs that would otherwise carry no "
+        "stop, also accept a named diesel-selling fuel station (no HGV tag "
+        "required) as a low-ranked fuel_station stop. Pair with --only on the "
+        "stopless legs so legs with real truck stops are untouched.",
+    )
+    parser.add_argument(
         "--add-maxspeed",
         action="store_true",
         help="Bake real OpenStreetMap maxspeed onto legs as a "
@@ -342,6 +350,7 @@ def main(argv: list[str] | None = None) -> int:
             rate_limit_s=args.rate_limit,
             only=_parse_only(args.only),
             per_leg=args.per_leg,
+            rural_fallback=args.rural_fuel_fallback,
         )
         if args.write:
             WORLD_PATH.write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")
