@@ -36,6 +36,13 @@
   Angeles to San Francisco names the lonely Interstate 5 valley landmarks and
   the Interstate 580 Bay approach. Real grades throughout.
 
+- **The southern and plains interstates keep filling in.** San Diego to Phoenix
+  names the Interstate 8 desert (El Centro, Yuma, Gila Bend); Rapid City to
+  Sioux Falls crosses South Dakota on Interstate 90 (Wall, Chamberlain,
+  Mitchell); New Orleans to Houston runs the Interstate 10 bayous; Cleveland to
+  Chicago follows the Interstate 80 toll road; and Amarillo to Dallas comes down
+  the Panhandle on US-287. Real grades throughout.
+
 - **The map now has real time zones, and your clock changes as you cross
   them.** Drive west out of Tennessee on I-40 and you will hear "Crossing
   into Central Time. It is now 2:15 PM." With terse speech on, it is just
