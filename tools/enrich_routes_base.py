@@ -32,9 +32,20 @@ ORS_EXTRA_INFO = ("steepness", "tollways", "waytype")
 # endpoint becomes {base}/v2/directions/{profile}. Override with ORS_BASE_URL.
 ORS_DEFAULT_BASE_URL = "https://api.heigit.org/openrouteservice"
 OVERPASS_URL = "https://overpass-api.de/api/interpreter"
-OVERPASS_URLS = (
-    OVERPASS_URL,
-    "https://overpass.kumi.systems/api/interpreter",
+# Prefer a self-hosted Overpass when OVERPASS_URL is set in the environment
+# (e.g. a Docker instance on the LAN or tailnet, like the self-hosted ORS); it
+# is tried first, with the public mirrors as fallback. Build-time only, mirroring
+# ORS_BASE_URL -- never read at runtime.
+OVERPASS_URLS = tuple(
+    dict.fromkeys(
+        url
+        for url in (
+            os.environ.get("OVERPASS_URL"),
+            OVERPASS_URL,
+            "https://overpass.kumi.systems/api/interpreter",
+        )
+        if url
+    )
 )
 CENSUS_STATES_URL = "https://www2.census.gov/geo/tiger/GENZ2023/shp/cb_2023_us_state_500k.zip"
 CENSUS_STATES_GEOJSON_URL = (
