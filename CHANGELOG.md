@@ -249,6 +249,12 @@
   Madison, Palm Bay to Orlando, the Wisconsin runs to La Crosse, and Valencia to
   Bakersfield. Real grades on each.
 
+- **Fourteen more road-changing runs name their roads.** The Los Angeles basin
+  runs from Riverside, Oxnard, Santa Ana, and Valencia, College Station to
+  Houston, Wilmington to Fayetteville, Clarksville to Murfreesboro, Enid to
+  Oklahoma City, Stockton and Fairfield into the Bay Area, Scranton to Allentown,
+  and South Bend to Fort Wayne. Each town names the real highway.
+
 - **The map now has real time zones, and your clock changes as you cross
   them.** Drive west out of Tennessee on I-40 and you will hear "Crossing
   into Central Time. It is now 2:15 PM." With terse speech on, it is just
