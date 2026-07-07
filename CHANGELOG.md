@@ -274,6 +274,12 @@
   Minnesota runs, Bloomington to Champaign, and Escanaba to Iron Mountain. Real
   grades on each.
 
+- **The short Northeast and metro hops fill in.** The New Jersey, Connecticut,
+  and Delaware shore runs, Baltimore to Washington, Boston to Providence and
+  Worcester, the California Bay Area hops, Salem to Portland, Fort Collins to
+  Cheyenne, Las Cruces to El Paso, and the Illinois and Michigan runs. Real
+  grades on each.
+
 - **The map now has real time zones, and your clock changes as you cross
   them.** Drive west out of Tennessee on I-40 and you will hear "Crossing
   into Central Time. It is now 2:15 PM." With terse speech on, it is just
