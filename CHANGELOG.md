@@ -216,6 +216,13 @@
   Sioux City to Omaha, Albert Lea to Minneapolis, and South Bend to Chicago.
   Real grades on each.
 
+- **Thirteen more road-changing runs name their roads.** Killeen to College
+  Station, Oceanside up to Victorville, Aurora to Milwaukee, Albany to Hartford,
+  Allentown to New York, the Delmarva and Chesapeake runs, Evansville to
+  Clarksville, Santa Rosa to Stockton, Tuscaloosa to Montgomery, Roanoke to
+  Greensboro, Manchester to Providence, and South Bend to Grand Rapids. Each
+  town names the real highway.
+
 - **The map now has real time zones, and your clock changes as you cross
   them.** Drive west out of Tennessee on I-40 and you will hear "Crossing
   into Central Time. It is now 2:15 PM." With terse speech on, it is just
