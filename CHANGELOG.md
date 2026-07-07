@@ -73,6 +73,13 @@
   the bottom of Lake Michigan to Grand Rapids; and Eugene climbs to the
   Tri-Cities. Each names the real road under the wheels.
 
+- **The interstate core fills in coast to coast.** Fourteen more well-traveled
+  runs now name their towns: Philadelphia to Pittsburgh over the Alleghenies,
+  Chicago to St Louis, Indianapolis to Nashville, Memphis to St Louis, Detroit
+  to Chicago, Spokane to Seattle over Snoqualmie Pass, the desert runs from Las
+  Cruces and El Paso, Tampa to Miami down Alligator Alley, and the plains runs
+  around St Louis, Kansas City, Fargo, and Tulsa. Real grades on every one.
+
 - **The map now has real time zones, and your clock changes as you cross
   them.** Drive west out of Tennessee on I-40 and you will hear "Crossing
   into Central Time. It is now 2:15 PM." With terse speech on, it is just
