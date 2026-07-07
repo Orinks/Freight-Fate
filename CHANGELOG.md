@@ -66,6 +66,13 @@
   Richmond over the Alleghenies, Jacksonville to Atlanta, Des Moines to Chicago,
   and Rapid City to Billings across the Montana high plains. Real grades on all.
 
+- **The Northeast Thruway and more western runs get their towns.** Buffalo and
+  Rochester to New York now run the Thruway east to Albany and down the Hudson
+  through Utica, Amsterdam, Kingston, and Newburgh; Provo reaches Boise and Fort
+  Collins; Las Cruces runs to Midland through the Permian Basin; Green Bay wraps
+  the bottom of Lake Michigan to Grand Rapids; and Eugene climbs to the
+  Tri-Cities. Each names the real road under the wheels.
+
 - **The map now has real time zones, and your clock changes as you cross
   them.** Drive west out of Tennessee on I-40 and you will hear "Crossing
   into Central Time. It is now 2:15 PM." With terse speech on, it is just
