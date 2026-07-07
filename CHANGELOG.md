@@ -242,6 +242,13 @@
   Marquette, Greensboro to Raleigh, and Austin to San Antonio. Real grades on
   each.
 
+- **Sixteen more short runs get their towns.** Madison to Milwaukee, Gulfport to
+  New Orleans and Mobile, Lexington to Louisville, the Maryland and Pennsylvania
+  runs into Harrisburg and Baltimore, Kalamazoo to South Bend, Joplin to
+  Springfield, Lake Charles to Lafayette, Buffalo to Rochester, Rockford to
+  Madison, Palm Bay to Orlando, the Wisconsin runs to La Crosse, and Valencia to
+  Bakersfield. Real grades on each.
+
 - **The map now has real time zones, and your clock changes as you cross
   them.** Drive west out of Tennessee on I-40 and you will hear "Crossing
   into Central Time. It is now 2:15 PM." With terse speech on, it is just
