@@ -204,6 +204,12 @@
   Beckley to Roanoke, Wichita Falls to Fort Worth, Santa Ana to Lancaster, and
   McKinney to Tyler. Real grades on each.
 
+- **Thirteen more runs get their towns.** Greenville to Columbia and Charlotte,
+  Philadelphia to Baltimore, Cheyenne to Denver, Erie to Cleveland, Huntsville to
+  Birmingham, Murfreesboro to Chattanooga, Cincinnati to Louisville, Knoxville to
+  Johnson City, Boston to Hartford, Santa Rosa to San Jose, College Station to
+  Austin, and Augusta to Macon. Real grades on each.
+
 - **The map now has real time zones, and your clock changes as you cross
   them.** Drive west out of Tennessee on I-40 and you will hear "Crossing
   into Central Time. It is now 2:15 PM." With terse speech on, it is just
