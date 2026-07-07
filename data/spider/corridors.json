@@ -205,6 +205,19 @@
         {"lat": 37.2490, "lon": -83.1932, "note": "Hazard -- KY-80 Perry County"},
         {"lat": 37.1290, "lon": -84.0833, "note": "London -- KY-80 at I-75 (existing node)"}
       ]
+    },
+    {
+      "ref": "US-101-OR",
+      "spoken": "US Route 101",
+      "phase": 2,
+      "tier": 2,
+      "status": "unstarted",
+      "note": "The Oregon coast: US-101 from Coos Bay north through Newport to Astoria at the mouth of the Columbia. Whole coast is a dead zone. Ties inland to I-5 via Coos Bay-Roseburg (OR-42) and Astoria-Portland (US-30), added directly.",
+      "waypoints": [
+        {"lat": 43.3665, "lon": -124.2179, "note": "Coos Bay -- US-101 south end, Oregon's largest coastal port"},
+        {"lat": 44.6368, "lon": -124.0535, "note": "Newport -- US-101 central coast, Yaquina Bay"},
+        {"lat": 46.1879, "lon": -123.8313, "note": "Astoria -- US-101 at the Columbia (US-30 to Portland)"}
+      ]
     }
   ]
 }

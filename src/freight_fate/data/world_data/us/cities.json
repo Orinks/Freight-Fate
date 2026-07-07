@@ -5431,6 +5431,42 @@
       "lat": 37.2495,
       "lon": -83.1932,
       "locations": []
+    },
+    "coos_bay_or_us": {
+      "spoken_city": "Coos Bay",
+      "state": "OR",
+      "country": "US",
+      "region": "pacific_northwest",
+      "lat": 43.3665,
+      "lon": -124.2179,
+      "locations": []
+    },
+    "newport_or_us": {
+      "spoken_city": "Newport",
+      "state": "OR",
+      "country": "US",
+      "region": "pacific_northwest",
+      "lat": 44.6368,
+      "lon": -124.0535,
+      "locations": []
+    },
+    "astoria_or_us": {
+      "spoken_city": "Astoria",
+      "state": "OR",
+      "country": "US",
+      "region": "pacific_northwest",
+      "lat": 46.1879,
+      "lon": -123.8313,
+      "locations": []
+    },
+    "corvallis_or_us": {
+      "spoken_city": "Corvallis",
+      "state": "OR",
+      "country": "US",
+      "region": "pacific_northwest",
+      "lat": 44.5646,
+      "lon": -123.262,
+      "locations": []
     }
   }
 }
