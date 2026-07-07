@@ -581,14 +581,23 @@ def _checkpoints(
     leg: dict[str, Any],
     samples: list[dict[str, float]],
 ) -> list[dict[str, Any]]:
+    """One fallback checkpoint at the leg midpoint, pending real curation.
+
+    Checkpoint ``name`` and ``state`` are read aloud verbatim by the trip
+    narrator ("Passing <name>, <state> on <highway>"), so both must be spoken
+    text: composed spoken city names (never slug keys) and the full spoken
+    state name (never a 2-letter code a screen reader would spell out).
+    """
     cities = data["cities"]
+    spoken_from = str(cities[leg["from"]].get("spoken_city") or leg["from"])
+    spoken_to = str(cities[leg["to"]].get("spoken_city") or leg["to"])
     mid = samples[len(samples) // 2]
     return [
         {
-            "name": f"{leg['highway']} corridor between {leg['from']} and {leg['to']}",
+            "name": f"{leg['highway']} corridor between {spoken_from} and {spoken_to}",
             "at_mi": round(max(1.0, min(float(leg["miles"]) - 1.0, mid["at_mi"])), 1),
             "type": "place",
-            "state": cities[leg["to"]]["state"],
+            "state": spoken_state(data, cities[leg["to"]]["state"]),
             "highway": leg["highway"],
             "source": "Curated OSRM/OpenStreetMap corridor checkpoint.",
         }

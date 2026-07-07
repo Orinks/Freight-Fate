@@ -141,6 +141,22 @@ def test_existing_curated_endpoint_stop_is_not_duplicated_or_crowded(monkeypatch
     assert leg["stops"] == [curated]
 
 
+def test_placeholder_checkpoint_uses_spoken_names_not_slugs():
+    """Checkpoint name/state are narrated verbatim -- never slugs or codes."""
+    pois = sys.modules["enrich_routes_pois"]
+    data = {
+        "cities": {
+            "flagstaff_az_us": {"spoken_city": "Flagstaff", "state": "AZ"},
+            "kingman_az_us": {"spoken_city": "Kingman", "state": "AZ"},
+        },
+        "geo": {"countries": {"US": {"states": {"AZ": "Arizona"}}}},
+    }
+    leg = {"from": "flagstaff_az_us", "to": "kingman_az_us", "miles": 151.0, "highway": "I-40"}
+    (checkpoint,) = pois._checkpoints(data, leg, _route_points(151.0))
+    assert checkpoint["name"] == "I-40 corridor between Flagstaff and Kingman"
+    assert checkpoint["state"] == "Arizona"
+
+
 def test_endpoint_finds_ride_on_top_of_corridor_budget(monkeypatch, tmp_path):
     leg = _leg("flagstaff_az_us", "kingman_az_us", 151.0)
     data = _world([leg])
