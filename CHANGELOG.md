@@ -186,6 +186,12 @@
   River Gorge, Huntsville to Nashville, Louisville to Indianapolis, Cleveland to
   Toledo, Santa Maria to Oxnard, and Enid to Wichita. Real grades on each.
 
+- **Fifteen more runs get their towns.** Tucson to Phoenix, Pueblo to Denver,
+  Joplin to Tulsa, Iron Mountain to Houghton across the Upper Peninsula,
+  Cincinnati to Indianapolis, Bakersfield to Los Angeles over the Grapevine, the
+  Kansas and Texas runs, Hartford to New York, Chattanooga to Knoxville, and
+  Roanoke up the Shenandoah to Harrisonburg. Real grades on each.
+
 - **The map now has real time zones, and your clock changes as you cross
   them.** Drive west out of Tennessee on I-40 and you will hear "Crossing
   into Central Time. It is now 2:15 PM." With terse speech on, it is just
