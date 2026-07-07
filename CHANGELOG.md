@@ -113,6 +113,12 @@
   Clarksville to Louisville by the Kentucky parkways, and the Virginia coast to
   Raleigh. Each town names its real highway.
 
+- **Seventeen more runs fill in, from the Northwest to the Carolinas.** Portland
+  to Seattle, Columbus to Pittsburgh and Indianapolis, the Appalachian runs from
+  Charleston and Johnson City to Roanoke, Knoxville and Louisville to Nashville,
+  Providence to New York, Fresno to Sacramento down the valley, Charleston to
+  Wilmington up the coast, and more. Real grades throughout.
+
 - **The map now has real time zones, and your clock changes as you cross
   them.** Drive west out of Tennessee on I-40 and you will hear "Crossing
   into Central Time. It is now 2:15 PM." With terse speech on, it is just
