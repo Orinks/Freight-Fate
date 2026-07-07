@@ -13,6 +13,13 @@ from .trip_route_helpers import *
 from .vehicle import TruckState
 from .weather import WeatherKind, WeatherSystem
 
+# A stop is announced ("stop ahead") when it first comes within this many miles
+# ahead (_check_stops). restore() seeds this SAME window as already-announced so
+# a resumed trip does not re-announce a stop that was called out before the save.
+# Keep the two uses on one constant; letting them drift is what caused resumed
+# trips to occasionally replay a STOP_AHEAD.
+STOP_AHEAD_LOOKAHEAD_MI = 5.0
+
 
 def _spoken_distance(value: float, unit: str) -> str:
     """A whole-number distance with the unit pluralized for speech, so a
@@ -759,7 +766,9 @@ class Trip:
         # Seed the spoken limit at the resume point so it is not re-announced.
         self._announced_speed_limit = self._corridor_limit_at(self.position_mi)
         for stop in self.stops:
-            if stop.at_mi <= self.position_mi:
+            # Seed passed stops AND stops already inside the "stop ahead" window;
+            # both were announced before the save, so a resume must not re-fire them.
+            if stop.at_mi <= self.position_mi + STOP_AHEAD_LOOKAHEAD_MI:
                 self._announced_stops.add(stop.name)
         for cue in self.navigation_cues:
             if cue.at_mi <= self.position_mi:
@@ -943,7 +952,7 @@ class Trip:
     def _check_stops(self) -> None:
         for stop in self.stops:
             ahead = stop.at_mi - self.position_mi
-            if 0 < ahead <= 5.0 and stop.name not in self._announced_stops:
+            if 0 < ahead <= STOP_AHEAD_LOOKAHEAD_MI and stop.name not in self._announced_stops:
                 self._announced_stops.add(stop.name)
                 exit_part = f" at {stop.exit_label}" if stop.exit_label else ""
                 parts = [f"{stop.spoken_name}{exit_part} in {self._distance_text(ahead)}."]

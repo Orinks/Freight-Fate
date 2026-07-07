@@ -97,6 +97,13 @@
   prices, freight market flavor, and road hazards, so a winter run out of
   Duluth no longer sounds like a summer haul into Cincinnati.
 
+### Fixed
+
+- **Resuming a trip no longer repeats a stop it already called out.** When you
+  continued a saved run, the game could re-announce a truck stop or rest area
+  just ahead that it had already told you about before you saved. It now
+  remembers what it said and stays quiet.
+
 ## 1.8.0 - 2026-07-05
 
 ### Added
