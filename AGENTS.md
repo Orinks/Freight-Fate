@@ -55,6 +55,9 @@ from commit subjects. CI fails any PR that changes user-facing paths
 - Data must be deterministic and load offline. Add source notes for
   real-world facilities, stops, and limits. No raw OpenStreetMap tags in
   player-facing names.
+- Enriching a leg (real checkpoints, truck-stop POIs, fine grades) or
+  finishing a new corridor: follow `docs/map-enrichment-recipe.md` exactly --
+  it encodes the judgment rules and the spoken-text invariants.
 - After data changes run the world and route tests, e.g.
   `uv run pytest tests/test_world.py tests/test_world_overlay.py`.
 
