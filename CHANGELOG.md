@@ -162,6 +162,12 @@
   Rapids, Sacramento to Reno over Donner Summit, Fayetteville to Charlotte, and
   Wichita Falls to McKinney. Real grades on each.
 
+- **Eleven more runs, New England to California.** Lafayette to Beaumont, the
+  New Hampshire and Vermont runs into Hartford and Manchester, Albany to
+  Worcester, Wilmington to Raleigh, Indianapolis to Fort Wayne, Bangor to
+  Portland, McKinney to Waco, Twin Falls to Boise, and Los Angeles out to Indio.
+  Real grades on each.
+
 - **The map now has real time zones, and your clock changes as you cross
   them.** Drive west out of Tennessee on I-40 and you will hear "Crossing
   into Central Time. It is now 2:15 PM." With terse speech on, it is just
