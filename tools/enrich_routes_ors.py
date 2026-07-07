@@ -14,14 +14,21 @@ def ors_api_key() -> str | None:
     return key or None
 
 
-def _ors_directions_kwargs(start: dict[str, Any], end: dict[str, Any]) -> dict[str, Any]:
+def _ors_directions_kwargs(
+    start: dict[str, Any],
+    end: dict[str, Any],
+    via: tuple[dict[str, Any], ...] = (),
+) -> dict[str, Any]:
     """The driving-hgv directions request as SDK keyword arguments.
 
-    Pure, so it is unit-testable without the SDK installed.
+    Pure, so it is unit-testable without the SDK installed. ``via`` points
+    (curated ``route_via`` on a leg) pin the route to the leg's declared
+    highway when ORS's cost model narrowly prefers a different road.
     """
     return {
         "coordinates": [
             [float(start["lon"]), float(start["lat"])],
+            *[[float(p["lon"]), float(p["lat"])] for p in via],
             [float(end["lon"]), float(end["lat"])],
         ],
         "profile": ORS_HGV_PROFILE,
@@ -36,6 +43,7 @@ def fetch_ors_hgv_route(
     end: dict[str, Any],
     api_key: str,
     *,
+    via: tuple[dict[str, Any], ...] = (),
     timeout_s: float = OSRM_TIMEOUT_S + 15,
 ) -> dict[str, Any]:
     """Live OpenRouteService driving-hgv request returning the raw GeoJSON.
@@ -57,7 +65,7 @@ def fetch_ors_hgv_route(
     client = openrouteservice.Client(
         key=api_key, base_url=base_url, timeout=timeout_s, retry_over_query_limit=True
     )
-    return client.directions(**_ors_directions_kwargs(start, end))
+    return client.directions(**_ors_directions_kwargs(start, end, via))
 
 
 def parse_ors_route(payload: dict[str, Any]) -> dict[str, Any]:
@@ -160,13 +168,21 @@ def _cached_ors_route(
 
     Caching keeps re-runs off the rate-limited API; the committed artifact is
     still ``world.json``, and ``.route-cache/`` stays local (git-ignored).
+
+    A leg may carry a curated ``route_via`` list (``[{"lat", "lon", "note"}]``)
+    pinning the route to its declared highway -- used when ORS's cost model
+    narrowly prefers a different road than real trucks take (e.g. it routed
+    San Antonio->El Paso down US-90 instead of I-10). Via points join the
+    cache key so adding one invalidates the old route.
     """
     cities = data["cities"]
-    path = _cache_file(cache_dir, "ors", f"{leg['from']}--{leg['to']}--{leg['highway']}")
+    via = tuple(leg.get("route_via", ()))
+    via_key = "".join(f"--via{p['lat']:.3f},{p['lon']:.3f}" for p in via)
+    path = _cache_file(cache_dir, "ors", f"{leg['from']}--{leg['to']}--{leg['highway']}{via_key}")
     if path.exists():
         payload = json.loads(path.read_text(encoding="utf-8"))
     else:
-        payload = fetch_ors_hgv_route(cities[leg["from"]], cities[leg["to"]], api_key)
+        payload = fetch_ors_hgv_route(cities[leg["from"]], cities[leg["to"]], api_key, via=via)
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(json.dumps(payload, sort_keys=True), encoding="utf-8")
         if rate_limit_s > 0:

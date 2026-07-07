@@ -53,6 +53,21 @@ def _mock_ors_payload():
     }
 
 
+def test_ors_directions_kwargs_inserts_curated_via_points():
+    """A leg's route_via pins ORS to the declared highway (e.g. I-10 when the
+    cost model narrowly prefers US-90); via points go between the endpoints."""
+    kwargs = enrich_routes._ors_directions_kwargs(
+        {"lat": 29.42, "lon": -98.49},
+        {"lat": 31.76, "lon": -106.49},
+        via=({"lat": 30.57, "lon": -100.64, "note": "pin to I-10 at Sonora"},),
+    )
+    assert kwargs["coordinates"] == [
+        [-98.49, 29.42],
+        [-100.64, 30.57],
+        [-106.49, 31.76],
+    ]
+
+
 def test_parse_ors_route_maps_geometry_distance_and_extras():
     parsed = enrich_routes.parse_ors_route(_mock_ors_payload())
 

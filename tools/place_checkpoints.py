@@ -100,9 +100,9 @@ def merge_checkpoints(
 
 def _parse_candidate(raw: str) -> dict[str, Any]:
     parts = [p.strip() for p in raw.split("|")]
-    if len(parts) not in (4, 5):
+    if len(parts) not in (4, 5, 6):
         raise SystemExit(
-            f"--candidate must be 'Name|lat|lon|State[|type]', got {raw!r}"
+            f"--candidate must be 'Name|lat|lon|State[|type[|highway]]', got {raw!r}"
         )
     name, lat, lon, state = parts[:4]
     if not name or "_" in name:
@@ -112,7 +112,11 @@ def _parse_candidate(raw: str) -> dict[str, Any]:
         "lat": float(lat),
         "lon": float(lon),
         "state": state,
-        "type": parts[4] if len(parts) == 5 else "place",
+        "type": parts[4] if len(parts) >= 5 and parts[4] else "place",
+        # A leg's declared highway can oversimplify (Billings->SLC is "I-15"
+        # but really I-90 + US-191 + US-20 + I-15); the spoken cue should name
+        # the road the driver is actually on at that checkpoint.
+        "highway": parts[5] if len(parts) == 6 and parts[5] else "",
     }
 
 
@@ -179,15 +183,16 @@ def main(argv: list[str] | None = None) -> int:
                 "or a place not on this route."
             )
             continue
+        highway = cand["highway"] or leg["highway"]
         accepted.append(
             {
                 "name": cand["name"],
                 "at_mi": at_mi,
                 "type": cand["type"],
                 "state": er.spoken_state(data, cand["state"]),
-                "highway": leg["highway"],
+                "highway": highway,
                 "source": (
-                    f"Real town on {leg['highway']} between {leg['from']} and "
+                    f"Real town on {highway} between {leg['from']} and "
                     f"{leg['to']}; position matched to the nearest point on the "
                     f"real ORS driving-hgv route geometry ({off_mi} mi off-route "
                     "at closest approach)."
