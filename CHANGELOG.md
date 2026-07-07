@@ -168,6 +168,12 @@
   Portland, McKinney to Waco, Twin Falls to Boise, and Los Angeles out to Indio.
   Real grades on each.
 
+- **Fifteen more road-changing runs name their roads.** Corpus Christi to Laredo,
+  Green Bay to Madison, Yakima to Seattle over Snoqualmie, Orlando to
+  Jacksonville, Allentown to Baltimore, the Washington and California runs, West
+  Palm Beach across to Cape Coral, Pittsburgh to Cleveland, Augusta to Savannah,
+  and Topeka to Wichita on the turnpike. Each town names the real highway.
+
 - **The map now has real time zones, and your clock changes as you cross
   them.** Drive west out of Tennessee on I-40 and you will hear "Crossing
   into Central Time. It is now 2:15 PM." With terse speech on, it is just
