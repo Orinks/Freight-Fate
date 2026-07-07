@@ -79,21 +79,31 @@ Read the leg's current `stops`, `corridor.checkpoints`, `miles`, and
 `highway` from `world.json`. Note what is already real (curated stops,
 named checkpoints) -- that content is load-bearing and stays.
 
-### 2. Identify candidate towns
+### 2. Generate candidate towns
 
-List the real, well-known towns and named localities on that highway between
-the endpoints, in driving order. Sources, in preference order:
+Do not recall towns from memory -- it doesn't scale and mixes up
+town-center vs interchange coordinates. Generate them from data:
 
-- Public knowledge of the corridor (interstate exit towns are well
-  documented; think "what would a trucker or road-tripper name on this
-  stretch").
-- GeoNames (`tools/pick_nodes.py` fetches `cities15000` for places over
-  15k population; smaller waypoint towns -- most of them -- need hand-sourced
-  coordinates from GeoNames/Census, recorded in the source note).
+```sh
+uv run --group tooling python tools/corridor_places.py \
+    --leg "from_slug:to_slug" --min-pop 250
+```
 
-For each candidate, record: spoken name, latitude/longitude, and state.
-When unsure whether a town is actually on the route, include it anyway --
-the placement gate in step 4 rejects wrong towns mechanically.
+This fetches the leg's real ORS route and prints every real GeoNames
+populated place within 2 miles of it (the same buffer as the placement
+gate, so listed candidates place cleanly), ordered along the drive, with
+population and off-route distance, already formatted as `--candidate`
+strings. Places that are already city nodes are dropped. Review the list:
+prune suburbs of the endpoint cities and obvious over-density, keep the
+real orientation towns. `--min-pop` tunes the floor -- start ~250; drop to
+0 on a very empty western leg to surface the tiny waypoint towns, raise it
+to skip clutter on a busy eastern one. `--min-spacing-mi` collapses
+clusters to the largest place in a window.
+
+The generator's coordinates come from GeoNames (accurate), so the step-5
+placement gate rarely fires; a rejection means the town's center really is
+more than 2 miles off the road, which is itself the correct signal to drop
+it (you don't announce a town the driver doesn't pass).
 
 ### 3. Apply the node-vs-checkpoint rule
 
@@ -145,6 +155,10 @@ described the old road); and sanity-check `interchanges` against exit-ref
 mileposts. Then proceed with checkpoints and POIs as normal.
 
 ### 5. Position and write the checkpoints
+
+Feed the reviewed candidate lines from step 2 to the placement tool (add a
+`|place|<highway>` suffix on any where the road differs from the leg's
+declared highway):
 
 ```sh
 uv run --group tooling python tools/place_checkpoints.py \
@@ -266,3 +280,26 @@ is the finishing pass: run steps 1-7 for every new leg immediately after
 building, so no corridor ships placeholder checkpoints or misses its
 endpoint truck stops. One PR per corridor, each a player-facing content drop
 with its own changelog line.
+
+## Spidering the network (finding new legs and cities)
+
+Distinct from enriching existing legs: this fills GAPS in the graph where a
+whole corridor or region has no coverage (the "Liam effect"). The same
+`corridor_places.py` generator drives it in **node mode** -- give it two
+anchor cities on a highway and a node-scale population floor:
+
+```sh
+uv run --group tooling python tools/corridor_places.py \
+    --from-coord "39.5296,-119.8138" --to-coord "40.7608,-111.8910" \
+    --highway I-80 --min-pop 3000 --min-spacing-mi 25
+```
+
+It lists the real towns along that corridor that are NOT already nodes,
+biggest first, ordered along the route -- the raw material for deciding
+which become dispatchable cities. Apply the node rule (step 3) to each,
+flag the coin-flips for the map owner, then build the chosen nodes + legs
+(the corridor-building pattern above) and run the full recipe on each new
+leg. Work outward corridor by corridor (one interstate at a time), so the
+network grows connected rather than as isolated islands. New nodes are a
+bigger commitment than checkpoints (dispatchable, priced, facilities) --
+always get owner sign-off on the node list before building.
