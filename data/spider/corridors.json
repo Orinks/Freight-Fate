@@ -62,6 +62,20 @@
         {"lat": 44.2911, "lon": -105.5022, "note": "Gillette -- I-90 Powder River Basin"},
         {"lat": 44.0805, "lon": -103.2310, "note": "Rapid City -- I-90 end (existing node)"}
       ]
+    },
+    {
+      "ref": "US-2-E",
+      "spoken": "US Route 2",
+      "phase": 2,
+      "tier": 3,
+      "status": "unstarted",
+      "note": "US-2 Hi-Line eastern half: Grand Forks across northern Minnesota to Duluth, completing the corridor into the existing Duluth hub.",
+      "waypoints": [
+        {"lat": 47.9253, "lon": -97.0329, "note": "Grand Forks -- US-2 east start (existing node)"},
+        {"lat": 47.4716, "lon": -94.8803, "note": "Bemidji -- US-2 north-central Minnesota"},
+        {"lat": 47.2372, "lon": -93.5303, "note": "Grand Rapids -- US-2 Minnesota"},
+        {"lat": 46.7867, "lon": -92.1005, "note": "Duluth -- US-2 end (existing node)"}
+      ]
     }
   ]
 }

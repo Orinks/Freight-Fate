@@ -5170,6 +5170,24 @@
       "lat": 45.677,
       "lon": -111.0429,
       "locations": []
+    },
+    "bemidji_mn_us": {
+      "spoken_city": "Bemidji",
+      "state": "MN",
+      "country": "US",
+      "region": "upper_midwest",
+      "lat": 47.4736,
+      "lon": -94.8803,
+      "locations": []
+    },
+    "grand_rapids_mn_us": {
+      "spoken_city": "Grand Rapids",
+      "state": "MN",
+      "country": "US",
+      "region": "upper_midwest",
+      "lat": 47.2372,
+      "lon": -93.5302,
+      "locations": []
     }
   }
 }

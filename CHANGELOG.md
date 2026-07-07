@@ -16,7 +16,8 @@
   Shelby from Butte to the Canada line. And the US-2 Hi-Line now runs the whole
   northern tier from Shelby to Grand Forks -- Havre, Glasgow, and Wolf Point,
   Montana, plus Williston in the Bakken oil patch, Minot, and Devils Lake, North
-  Dakota. And Interstate 90 fills its gaps: Coeur d'Alene, Idaho and Bozeman,
+  Dakota, and on to Duluth through Bemidji and Grand Rapids, Minnesota. And
+  Interstate 90 fills its gaps: Coeur d'Alene, Idaho and Bozeman,
   Montana on the main line, and Sheridan, Gillette, and Buffalo, Wyoming with
   Spearfish, South Dakota across the Powder River Basin to the Black Hills.
 
