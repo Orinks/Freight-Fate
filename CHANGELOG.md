@@ -4,6 +4,14 @@
 
 ### Added
 
+- **Interstate 70 opens up through the Colorado Rockies and Utah.** You can now
+  pick up and deliver in Grand Junction, Glenwood Springs, Silverthorne, and
+  Edwards, Colorado, and Green River, Richfield, and Nephi, Utah -- the whole
+  Interstate 70 mountain run from Denver over the Eisenhower Tunnel and Vail
+  Pass, through Glenwood Canyon, and across the Utah desert. The high climbs are
+  felt in real grades, and there is a lone diesel stop out in the San Rafael
+  Swell where there is nothing else for a hundred miles.
+
 - **Truck stops now tell you what they are known for.** When you check your
   route or pull in to rest, the big travel-center brands call out their
   specialty out loud, so a stop is not just a name on the road anymore. A Love's

@@ -355,7 +355,10 @@ def _grade_segment(
     return {
         "start_mi": round(start_mi, 1),
         "end_mi": round(end_mi, 1),
-        "avg_grade_pct": round(sum(grades) / len(grades), 2),
+        # Clamp to the loader's realistic band (+/-15%). A short segment over an
+        # ORS elevation blip can otherwise average to a bogus 17%+ and fail the
+        # world load -- common on mountain corridors (Green River-Richfield on I-70).
+        "avg_grade_pct": max(-14.0, min(14.0, round(sum(grades) / len(grades), 2))),
         "terrain": terrain,
         "source": ORS_GRADE_SOURCE,
     }

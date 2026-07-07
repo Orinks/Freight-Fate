@@ -4963,6 +4963,69 @@
       "lat": 46.0038,
       "lon": -112.5347,
       "locations": []
+    },
+    "silverthorne_co_us": {
+      "spoken_city": "Silverthorne",
+      "state": "CO",
+      "country": "US",
+      "region": "rockies",
+      "lat": 39.6321,
+      "lon": -106.0743,
+      "locations": []
+    },
+    "edwards_co_us": {
+      "spoken_city": "Edwards",
+      "state": "CO",
+      "country": "US",
+      "region": "rockies",
+      "lat": 39.645,
+      "lon": -106.5942,
+      "locations": []
+    },
+    "glenwood_springs_co_us": {
+      "spoken_city": "Glenwood Springs",
+      "state": "CO",
+      "country": "US",
+      "region": "rockies",
+      "lat": 39.5505,
+      "lon": -107.3248,
+      "locations": []
+    },
+    "grand_junction_co_us": {
+      "spoken_city": "Grand Junction",
+      "state": "CO",
+      "country": "US",
+      "region": "rockies",
+      "lat": 39.0639,
+      "lon": -108.5507,
+      "locations": []
+    },
+    "green_river_ut_us": {
+      "spoken_city": "Green River",
+      "state": "UT",
+      "country": "US",
+      "region": "rockies",
+      "lat": 38.9952,
+      "lon": -110.1618,
+      "locations": []
+    },
+    "richfield_ut_us": {
+      "spoken_city": "Richfield",
+      "state": "UT",
+      "country": "US",
+      "region": "rockies",
+      "lat": 38.7725,
+      "lon": -112.0841,
+      "locations": []
+    },
+    "nephi_ut_us": {
+      "spoken_city": "Nephi",
+      "state": "UT",
+      "country": "US",
+      "region": "rockies",
+      "lat": 39.7102,
+      "lon": -111.8363,
+      "locations": []
     }
   }
 }
