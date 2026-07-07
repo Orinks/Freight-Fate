@@ -90,6 +90,19 @@
         {"lat": 48.2766, "lon": -116.5533, "note": "Sandpoint -- US-2 Idaho panhandle"},
         {"lat": 47.6588, "lon": -117.4260, "note": "Spokane -- US-2 end (existing node)"}
       ]
+    },
+    {
+      "ref": "US-2-WA",
+      "spoken": "US Route 2",
+      "phase": 2,
+      "tier": 3,
+      "status": "unstarted",
+      "note": "US-2 westernmost segment: Spokane across the Columbia Plateau to Wenatchee, then over Stevens Pass to Everett on Puget Sound -- completing US-2 coast to coast. Wenatchee is a real central-Washington freight hub.",
+      "waypoints": [
+        {"lat": 47.6588, "lon": -117.4260, "note": "Spokane -- US-2 west start (existing node)"},
+        {"lat": 47.4235, "lon": -120.3103, "note": "Wenatchee -- US-2 central Washington"},
+        {"lat": 47.9790, "lon": -122.2021, "note": "Everett -- US-2 at Puget Sound (existing node)"}
+      ]
     }
   ]
 }

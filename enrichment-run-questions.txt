@@ -1,0 +1,924 @@
+ENRICHMENT OVERNIGHT RUN -- QUESTIONS FOR NROMEY
+================================================
+
+How to use this file:
+- Read each question. Each one has MY DEFAULT (what I will do if you say nothing).
+- To accept a default, leave it alone.
+- To change something, put **** on the ANSWER line and type your answer after it.
+- No tables anywhere, everything is line by line.
+
+
+QUESTION 1 -- What order do I work the legs in?
+Context: ~545 legs have only placeholder checkpoints. I go region by region,
+biggest-mileage-first (the emptiest, most impactful legs first).
+MY DEFAULT: biggest-mileage-first across the whole map, in batches of about
+8-10 legs per commit.
+YOUR ANSWER: Biggest by mile, I like your thoughts here.
+
+QUESTION 2 -- Full recipe per leg, or checkpoints only?
+Context: per leg I can do (a) just checkpoints, or (b) the full recipe =
+checkpoints + endpoint truck-stop discovery + fine-grade refresh. The
+self-hosted router makes (b) cheap; it is the complete job.
+MY DEFAULT: full recipe on every leg.
+YOUR ANSWER: Full recipe. This will handle everything so we don't need to re-run / check it when we spider interstates and u highways.
+
+
+QUESTION 3 -- Only touch legs that have ZERO real checkpoints tonight?
+Context: 17 legs already have real checkpoints (the I-40/I-10/pilot/batch-1
+work). Leaving them alone keeps the run simple and avoids re-touching good data.
+MY DEFAULT: only enrich legs with zero real checkpoints; skip the 17 done ones.
+YOUR ANSWER: We have time/usage will be turned off so you won't over-work. Enrich all.
+
+
+QUESTION 4 -- How dense should checkpoints be?
+Context: the generator lists every real town on the route. I prune so a leg
+does not get 20 checkpoints. I plan to keep roughly one checkpoint per 15-20
+miles, favoring the larger towns, starting at a population floor of 250 and
+dropping lower only on very empty western legs that would otherwise come back
+nearly bare.
+MY DEFAULT: about one checkpoint per 15-20 miles, population floor 250
+(auto-lower on near-empty legs).
+YOUR ANSWER: Agreed.
+
+
+QUESTION 5 -- Node-promotion candidates (towns big enough to be their own city).
+Context: some towns on these legs are really node material (dispatchable
+cities), not just checkpoints. I will NEVER create a new city unattended --
+that is a dispatchable, priced thing that needs your sign-off.
+MY DEFAULT: name the town as a checkpoint for now AND log it in the morning
+report as a node candidate for you to approve later. I do not create nodes.
+YOUR ANSWER: Agreed, this is the kind of thing you can add to this file ... in single lines / with a sentence, and I can say yay or nay in the file.
+
+
+QUESTION 6 -- Wrong-road legs (router picks a different highway than the leg claims).
+Context: a few legs route down the wrong road (like San Antonio-El Paso went
+US-90 instead of I-10). Fixing one means a route_via pin, re-projecting stops,
+and adopting new mileage -- which CHANGES PAY. That is the riskiest step and I
+do not want to do it unattended.
+MY DEFAULT: SKIP any wrong-road leg entirely and log it in the morning report
+for us to fix together. No pay changes happen tonight.
+YOUR ANSWER: Don't skip the wrong road legs, just note them and I'll ok running them tomorrow or when the legs are fully worked.
+
+
+QUESTION 7 -- Confirm: no mileage changes at all tonight?
+Context: leg mileage drives pay and deadlines. Batch 1 legs all matched the
+router within 0.2 percent, so no mileage change was needed. A big mismatch is
+itself a wrong-road flag (see Q6).
+MY DEFAULT: I run NO mileage adoption tonight. Mileage stays exactly as is.
+YOUR ANSWER: If the recipe says that we need to calculate mileage, I would rather keep re-work at a minimum. If you have questions, this is the file to raise the route with me. I'll mots likely agree with ya, I may re-direct you especially if I know the local area.
+
+
+QUESTION 8 -- Commit and changelog cadence.
+Context: committing per batch keeps the run resumable and reviewable.
+MY DEFAULT: one git commit per region batch (about 8-10 legs), each with its
+own plain-language changelog entry under Added. Nothing gets pushed -- all
+commits stay local on map/i40-corridor for your review.
+YOUR ANSWER: Agreed. I doubt that Josh will go through every single commit, I'm the map guy now ... but for auditability and in case we have an issue later, I think it's a good idea. We may not want to squash push for PRs for Josh. He's likely to see "huge map enhancement PR" and PR it though as it'll be a lot.
+
+
+QUESTION 9 -- The three specific towns from earlier.
+Context: you already weighed in on these.
+- Texarkana: you said node is fine. Tonight it stays a checkpoint on Little
+  Rock-Dallas; I log it for node promotion later.
+- Hot Springs: it is 13.9 miles off I-30, so it cannot be an honest checkpoint
+  on Little Rock-Dallas. I leave it off and log it as a node+spur candidate.
+- Arkadelphia: rejected at 2.06 miles off-route on I-30. I need your call.
+MY DEFAULT for Arkadelphia: skip it (just over the honesty threshold) unless
+you say otherwise.
+YOUR ANSWER: Re; Arkadelphia, skip it for now but once surface roads are done ... by Josh, I could see a truck go to Hot Springs or even Arkadelphia. It'd be a challenging surface road nav task.
+
+
+QUESTION 10 -- Anything to AVOID tonight?
+Context: I know the surface-streets / last-mile layer from Josh's 1.9 branch is
+a SEPARATE layer that connects at endpoints -- I will not touch that or conflate
+it with routing-leg checkpoints. Are there any regions, specific legs, or files
+I should stay away from while you sleep?
+YOUR ANSWER: Nope
+
+
+QUESTION 11 -- Morning report.
+Context: I will write a run-report file listing every leg I enriched, every leg
+I skipped and why, all node candidates found, and any oddities -- plus update
+the handoff memory. Confirm you want this.
+MY DEFAULT: yes, write a full morning report file.
+YOUR ANSWER I want this. Biggest thing we'll need to pass to Josh as part of the change log for 1.9's map enrichment is how many cities and towns we add, and how many are checkpoints. We'll need to just tell users the bsaics on what we added. I.E. added 150 cities, places where you can pick up freight etc. This will be a hefty add, and we'll want to keep track of this with some kind of python file that can be run or kept track of and possibly a place in game that the user can get map statistics, explore the map, look at possible legs etc.
+
+
+QUESTION 12 -- If I hit the usage limit before the list is dry.
+Context: with usage-based billing OFF, the session just stops when the limit is
+hit -- no extra charge. The work is resumable: per-batch commits mean restarting
+me later picks up exactly where I left off (I regenerate the remaining list).
+MY DEFAULT: stop cleanly on limit, leave a note in the report saying how many
+legs remain, and wait for you to restart me after the window resets.
+YOUR ANSWER: Agreed
+
+
+ANYTHING ELSE YOU WANT TO TELL ME (put **** and type):
+
+Nothing else.
+
+
+QUESTION 13 -- Capture exact coordinates on truck stops (for Josh's surface nav)?
+(This got lost when the file was re-saved earlier -- here it is again, already
+handled.) You asked whether to store exactly where stops/docks are so Josh's
+surface-street layer can guide the driver to them. What I found: docks and gates
+are ALREADY covered by Josh's facility_endpoints.json (source-backed
+coordinates), and his last-mile chain already hooks onto the highway interchange
+and facility endpoint that my recipe emits -- so nothing is needed there. The one
+gap was truck stops: I was discovering them from OpenStreetMap WITH a real
+coordinate and throwing it away. I have now fixed the tools to store lat/lon on
+every truck stop I discover and every checkpoint I place. It is additive; the
+game ignores it today. DONE -- committed. Say the word if you want it removed.
+YOUR ANSWER:
+
+
+================================================
+NODE CANDIDATES -- towns big enough to maybe be their own city
+================================================
+During the run I add one line per town that looks like real city (node)
+material -- a place you could pick up and deliver freight, not just drive past.
+Put yay or nay after each and I will build the yays (as a later, separate step
+with your sign-off). One line each, newest at the bottom.
+
+- Meridian, Mississippi (pop ~40k) -- Interstate 20 / Interstate 59 junction on
+  the Atlanta-Dallas leg. Real junction city. yay/nay:
+yay
+- Monroe, Louisiana (pop ~50k) -- largest town on the Atlanta-Dallas leg,
+  Interstate 20 / US-165, regional freight hub. yay/nay:
+yay
+- Vicksburg, Mississippi (pop ~23k) -- Mississippi River port on Interstate 20,
+  a real freight generator. yay/nay:
+yay
+- Fernley, Nevada (pop ~19k) -- largest town on Interstate 80 east of Reno,
+  distribution and industry. yay/nay:
+yay
+- Redding, California (pop ~92k) -- major northern California city on Interstate
+  5, a real gateway hub. yay/nay:
+yay
+- Grants Pass, Oregon (pop ~37k) -- southern Oregon city on Interstate 5. yay/nay:
+yay
+- Ogden, Utah (pop ~85k) -- major city on Interstate 15 north of Salt Lake City
+  (also flagged earlier from the Billings work). yay/nay:
+yay
+- Tonopah, Nevada (pop ~2.5k) -- the lone town in a 200-mile stretch of US-95
+  between Reno and Las Vegas; a real US-6 / US-95 junction and historic mining
+  town. Small, but it breaks a long empty gap. yay/nay:
+yay
+- Laramie, Wyoming (pop ~32k) -- university city on Interstate 80 just west of
+yay
+  Cheyenne. yay/nay:
+yay
+- Brookings, South Dakota (pop ~24k) -- Interstate 29 city, South Dakota State
+  University. yay/nay:
+yay
+- Kerrville, Texas (pop ~23k) -- Hill Country hub on Interstate 10 between
+  Junction and San Antonio. yay/nay:
+yay
+- Saint George, Utah (pop ~73k) -- major southern Utah city on Interstate 15,
+  a real distribution hub. yay/nay:
+yay
+- Cedar City, Utah (pop ~30k) -- Interstate 15 city in southern Utah. yay/nay:
+yay
+- Las Vegas, New Mexico (pop ~13k) -- Interstate 25 junction city (NOT the
+  Nevada one). yay/nay:
+yay
+- Dickinson, North Dakota (pop ~24k) -- Interstate 94 city, a Bakken oil hub.
+  yay/nay:
+yay
+- Yuma, Arizona (pop ~96k) -- major Interstate 8 city, agriculture hub. yay/nay:
+yay
+- El Centro, California (pop ~44k) -- Imperial Valley hub on Interstate 8. yay/nay:
+yay
+- Mitchell, South Dakota (pop ~16k) -- Interstate 90 / US-281 city. yay/nay:
+yay
+- Sulphur, Louisiana (pop ~20k) -- Interstate 10 petrochemical town. yay/nay:
+yay
+- Orange, Texas (pop ~19k) -- Interstate 10 port/petrochemical town at the
+  Louisiana line. yay/nay:
+yay
+  --- nodes that would UNLOCK a second route choice (per the dual-route note) ---
+- Santa Fe, New Mexico (pop ~88k) -- state capital on the US-285/Interstate 25
+  Denver-Albuquerque diagonal; a real metro and freight point. yay/nay:
+yay though this probably would have been picked up with a interstate spider, run it as a node anyway
+- Klamath Falls, Oregon (pop ~21k) -- on US-97; makes the US-97 alternate to
+  Interstate 5 (Sacramento/SF to Portland) a pickable second route. yay/nay:
+yes
+- Del Rio, Texas (pop ~34k) -- on US-90; makes the US-90 alternate to Interstate
+  10 (Van Horn/San Antonio) a pickable second route; real border city. yay/nay:
+yes
+- Lewiston, Idaho (pop ~34k) and McCall, Idaho -- on true US-95; make the US-95
+  mountain alternate to the Spokane-Boise Interstate 84 route pickable. yay/nay:
+yes
+- Casper, Wyoming (pop ~60k) -- largest city on Interstate 25 between Billings
+  and Cheyenne/Fort Collins; a real oil-and-gas freight hub. yay/nay:
+yes
+- Conway, Arkansas (pop ~65k) -- Interstate 40 city just north of Little Rock.
+  yay/nay:
+yes
+- Iowa City, Iowa (pop ~74k) -- Interstate 80 city, University of Iowa. yay/nay:
+yes
+- Charlottesville, Virginia (pop ~47k) -- Interstate 64 city, University of
+  Virginia. yay/nay:
+yes
+- Butte, Montana (pop ~34k) -- Interstate 90 / Interstate 15 junction, historic
+  mining city; also the natural split point for a Butte-Interstate 15 alternate
+  to the Billings-Salt Lake City US-191 route. yay/nay:
+yes
+- Utica, New York (pop ~61k) -- Interstate 90 / New York Thruway city in the
+yes
+  Mohawk Valley. yay/nay:
+yay
+- Odessa, Texas (pop ~114k) -- Interstate 20 Permian Basin city next to Midland;
+  a major oilfield freight hub. yay/nay:
+yay
+- Carlisle, Pennsylvania (pop ~19k) -- Interstate 76 / Interstate 81 junction, a
+  huge East Coast trucking/warehousing hub. yay/nay:
+yay
+- Elizabethtown, Kentucky (pop ~30k) -- Interstate 65 city south of Louisville.
+  yay/nay:
+yay
+- Moses Lake, Washington (pop ~22k) -- Interstate 90 city in central Washington.
+  yay/nay:
+yay
+
+
+================================================
+WRONG-ROAD LEGS -- need your OK before I touch them
+================================================
+Legs where the router takes a different road than the leg claims (like San
+Antonio-El Paso going US-90 instead of I-10). I do NOT enrich these tonight --
+the geometry is wrong, so checkpoints would land in the wrong places. I note
+each one here with what I think the fix is. Put yay or nay to approve the fix.
+One line each.
+
+(none yet)
+
+
+================================================
+ROUTE / MILEAGE QUESTIONS -- things I want your local knowledge on
+================================================
+Per Q7: if a leg genuinely needs a mileage change or I am unsure which road is
+right, I raise it here instead of guessing. One line each, with my best guess.
+
+- Sacramento-Portland and San Francisco-Portland (both Interstate 5): tonight I
+  pinned BOTH to Interstate 5 (a route_via through Yreka, Central Point, and
+  Roseburg) because every one of their curated truck stops is on Interstate 5
+  (Yreka, Central Point/Medford, Oakland Oregon). No mileage change -- the miles
+  already matched the Interstate 5 route. The reason I had to pin them: the
+  router preferred US-97 / Oregon-58 through Klamath Falls, which is the OTHER
+  real, valid truck route. You told me both are valid. QUESTION: do you want me
+  to ADD a second, parallel leg for each pair on the US-97 route (its own
+  highway label + its own route_via), so a driver could choose Interstate 5 vs
+  US-97 at dispatch? That is a brand-new graph edge (a new leg), so I am leaving
+  it here for your yay/nay instead of adding it unattended. yay/nay:
+yes please
+- Spokane to Boise (declared US-95, 421 mi): I did NOT enrich this one tonight.
+  The router -- and the leg's 421 miles -- follow the Interstate 84 / US-395
+  route through Hermiston, La Grande, and Baker City, NOT the direct US-95
+  mountain route through Lewiston, Grangeville, and McCall (which is shorter,
+  about 370 miles, but a slow two-lane grade over White Bird). So the "US-95"
+  label and the geometry disagree. QUESTION: which route is this leg meant to
+  be? If the Interstate 84 / Hermiston route, I will relabel and enrich it with
+  per-checkpoint highways (no mileage change). If the true US-95 mountain route,
+  that is a shorter mileage (a pay change) and I would pin it with a route_via.
+  My guess: the Interstate 84 / Hermiston route, since the mileage already
+  matches it. Answer -- "I-84/Hermiston" or "real US-95":
+yes
+- Denver to Albuquerque (declared Interstate 25, 419 mi): I did NOT enrich this
+  one tonight. The router -- and the 419 miles -- follow US-285, the direct
+  diagonal through the San Luis Valley (Fairplay, Poncha Pass, Alamosa,
+  Antonito, Espanola), NOT Interstate 25 (which doglegs east through Colorado
+  Springs, Pueblo, Trinidad, and Raton, about 450 miles). Colorado Springs to
+  Albuquerque already covers the Interstate 25 route. QUESTION: is this direct
+  Denver-Albuquerque leg meant to be the US-285 shortcut (relabel + enrich, no
+  mileage change) or the true Interstate 25 route (a pay change, pin with a
+  route_via)? My guess: the US-285 shortcut, since the mileage matches it.
+  Answer -- "US-285 shortcut" or "real I-25":
+I think it could be either. The normal interstate route would be 25, but the other is a shortcut, I'd route via the shortcut and then have i25 be 25.
+--- UPDATE (per your "calc both routes, don't ask" guidance, 2026-07-07) ---
+You told me: two valid routes both get calculated; the picker or a user setting
+chooses which; don't ask. I saved that to memory and applied it. One key fact I
+confirmed in the code: the route picker tells alternates apart by the CITIES
+they pass through, so two routes between the same pair only show up as separate
+choices if they run through different intermediate NODES -- a duplicate straight
+A-to-B leg is invisible to the picker. So here is how I handled the three
+questions above; none of them need an answer from you anymore:
+  - Denver to Albuquerque: enriched the direct leg as the US-285 diagonal (its
+    real route and mileage). The Interstate 25 route ALREADY exists as a separate
+    choice through the Denver -> Colorado Springs -> Albuquerque node path, so
+    BOTH routes are already pickable today. Nothing else needed. DONE.
+  - Spokane to Boise: enriched the direct leg as the Interstate 84 / US-395 /
+    Hermiston route (its real route and mileage), with each town's real road
+    named. The true US-95 mountain route (Lewiston, Grangeville, McCall) becomes
+    a second choice once those are city nodes -- see node candidates. DONE.
+  - Sacramento / San Francisco to Portland: already enriched on Interstate 5
+    (matches their curated stops). The US-97 / Klamath Falls alternate becomes a
+    second choice once Klamath Falls (and maybe Bend) are nodes -- see below.
+  - Van Horn to San Antonio: enriched on Interstate 10 (matches its stops). The
+    US-90 / Del Rio alternate needs Del Rio as a node -- see below.
+So there are no open route questions here now. The "alternate route" nodes are
+in the NODE CANDIDATES list; approving them is what turns each second route into
+a real pickable choice at dispatch.
+
+- Lubbock to Dallas (declared US-84, 324 mi, NO curated stops): the router runs
+  a rural diagonal on US-82 then US-380 (Ralls, Dickens, Seymour, Jacksboro)
+  into the Dallas-Fort Worth area -- NOT US-84 (which runs southeast through
+  Post, Snyder, and Sweetwater to Interstate 20, then east through Abilene). The
+  324 miles matches the US-82/380 diagonal. There are no curated stops to tell
+  me which route the map intends, and this is West Texas back-country I would
+  rather not guess on. QUESTION: should this leg be the US-82/US-380 diagonal
+  (what the router picks, no mileage change) or the US-84 to Interstate 20 route
+  through Sweetwater and Abilene (a mileage change)? This is the ONE leg where I
+  genuinely can't tell -- not a dual-route preference, a "which did we mean"
+  question. Answer -- "US-82/380 diagonal" or "US-84 via Sweetwater":
+I genuinely can't tell on this one either and I don't think it really matters on this one, I'd prefer interstate as the main plan and add a route via through the west Texas boring back country, really borint, did I mention boring?
+
+================================================
+RUN LOG -- I APPEND HERE AS I WORK (read top to bottom)
+================================================
+Batch by batch: which legs, what I added, anything odd. Newest at the bottom.
+
+BATCH 1 -- the seven biggest empty legs. Real checkpoints + fine grades added,
+no mileage changes. Truck-stop discovery deferred to the end-of-run sweep.
+  - Atlanta to Dallas (Interstate 20, 783 mi): 25 checkpoints, Douglasville
+    through Meridian, Vicksburg, Monroe, to Canton.
+  - San Francisco to Salt Lake City (Interstate 80, 737 mi): 16 checkpoints over
+    the Sierra and across the Nevada desert (Vallejo to West Wendover).
+  - Reno to Salt Lake City (Interstate 80, 518 mi): 8 desert checkpoints
+    (Fernley to West Wendover).
+  - Omaha to Cheyenne (Interstate 80, 497 mi): 10 checkpoints across Nebraska
+    (Waverly to Pine Bluffs).
+  - Portland to Salt Lake City (Interstate 84, 767 mi): 20 checkpoints down the
+    Columbia Gorge and across the Snake River Plain (Hood River to Ogden).
+  - Sacramento to Portland (Interstate 5, 578 mi): 17 checkpoints (Woodland to
+    Woodburn) -- pinned to Interstate 5, see the route note above.
+  - San Francisco to Portland (Interstate 5, 633 mi): 19 checkpoints (Vallejo to
+    Woodburn) -- pinned to Interstate 5.
+  Total this batch: 115 real checkpoints across 7 legs.
+  Two things worth knowing:
+  - I-84 Columbia Gorge: I checked your concern -- the geometry refresh did NOT
+    bring back the phantom Oregon/Washington state crossings. The scrubbed
+    crossings are preserved (Oregon to Idaho to Utah only) and the pipeline guard
+    still holds. Nothing to fix there.
+  - Dropped a handful of endpoint-suburb sprawl towns (Mesquite by Dallas,
+    Berkeley by San Francisco, Chalco by Omaha, Troutdale and Bountiful by the
+    Portland/Salt Lake ends, Tigard by Portland) and one false positive: Carson,
+    Washington, which sits across the Columbia River from Interstate 84 -- the
+    driver never actually passes through it.
+
+BATCH 2 -- next five biggest, single-highway (plus one Interstate 10 pin).
+Checkpoints + grades, no mileage changes.
+  - Van Horn to San Antonio (Interstate 10, 456 mi): 8 checkpoints (Balmorhea,
+    Fort Stockton, Ozona, Sonora, Junction, Kerrville, Comfort, Boerne). Pinned
+    to Interstate 10 -- the router wanted US-90 through Del Rio, but this leg is
+    Interstate 10 and its mileage matches, the same fix used on San Antonio-El
+    Paso. Its curated Love's stop near Van Horn is on Interstate 10.
+  - Reno to Las Vegas (US-95, 444 mi): 8 desert checkpoints from Silver Springs
+    to Indian Springs, through Hawthorne, Tonopah, and Beatty.
+  - Cheyenne to Salt Lake City (Interstate 80, 441 mi): 8 checkpoints across
+    Wyoming (Laramie, Rawlins, Green River, Evanston) into Utah.
+  - Boise to Portland (Interstate 84, 430 mi): 11 checkpoints (Caldwell to Hood
+    River, down the Blue Mountains and the Columbia).
+  - Fargo to Omaha (Interstate 29, 425 mi): 11 checkpoints down the Red River
+    and Big Sioux valleys (Sisseton, Brookings, the Sioux Falls and Sioux City
+    edges, to Missouri Valley).
+  Total this batch: 46 real checkpoints across 5 legs.
+  Deferred: Spokane to Boise -- see the route question below.
+
+BATCH 3 -- five single-highway legs (Interstate 15, 25, 94, and 5). Checkpoints
++ grades, no mileage changes.
+  - Salt Lake City to Las Vegas (Interstate 15, 420 mi): 9 checkpoints (Lehi,
+    Nephi, Beaver, Cedar City, St. George, Mesquite).
+  - Colorado Springs to Albuquerque (Interstate 25, 378 mi): 12 checkpoints down
+    the Front Range into New Mexico (Walsenburg, Trinidad, Raton, Las Vegas New
+    Mexico, Bernalillo).
+  - Provo to Las Vegas (Interstate 15, 377 mi): 7 checkpoints (Nephi to Mesquite).
+  - Bismarck to Billings (Interstate 94, 414 mi): 10 checkpoints across the
+    Dakota and Montana plains (Dickinson, Glendive, Miles City, Forsyth).
+  - Los Angeles to San Francisco (Interstate 5, 384 mi): 6 checkpoints -- the
+    valley is genuinely empty along Interstate 5, so this names the real
+    landmarks (Lebec at the Grapevine, Kettleman City, Santa Nella) and the
+    Interstate 580 Bay approach through Livermore and Oakland. Skipped a handful
+    of unnamed farm/ranch map dots that would mean nothing to a driver.
+  Total this batch: 44 real checkpoints across 5 legs.
+  Deferred: Denver to Albuquerque -- see the route question below.
+
+BATCH 4 -- six single-highway legs (Interstate 8, 90, 10, 95, 80, US-287).
+Checkpoints + grades, no mileage changes.
+  - San Diego to Phoenix (Interstate 8, 355 mi): 8 checkpoints across the desert
+    (Pine Valley, El Centro, Yuma, Gila Bend).
+  - Rapid City to Sioux Falls (Interstate 90, 349 mi): 10 checkpoints across
+    South Dakota (Wall, Chamberlain on the Missouri, Mitchell).
+  - New Orleans to Houston (Interstate 10, 348 mi): 12 checkpoints across the
+    bayous (Breaux Bridge, Crowley, the Lake Charles edge, Orange, Vidor).
+  - Jacksonville to Miami (Interstate 95, 346 mi): only 4 checkpoints. Interstate
+    95 runs several miles inland of Florida's beach cities, so on-route towns are
+    thin (Palm Coast, Palm Beach Gardens). Worth a later polish pass to name
+    Daytona, Melbourne, and West Palm Beach at their interchanges.
+  - Cleveland to Chicago (Interstate 80, 345 mi): 10 checkpoints along the toll
+    road (Elyria, the Toledo and South Bend edges, the Indiana lakeshore).
+  - Amarillo to Dallas (US-287, 362 mi): 12 checkpoints down the Panhandle
+    (Claude, Clarendon, Childress, Vernon, the Wichita Falls edge, Decatur).
+  Total this batch: 56 real checkpoints across 6 legs.
+
+BATCH 5 -- the two previously-deferred dual-route legs, now enriched per your
+"calc both routes" guidance (see the route update note further down).
+Checkpoints + grades, no mileage changes.
+  - Denver to Albuquerque (relabeled to US-285, 419 mi): 10 checkpoints down the
+    San Luis Valley (Bailey, Fairplay, Alamosa, Antonito, Espanola, Santa Fe),
+    with the tail near Santa Fe and Bernalillo labeled Interstate 25. The
+    Interstate 25 route is already a separate pickable choice via Colorado
+    Springs, so both routes exist today.
+  - Spokane to Boise (relabeled to Interstate 84, 421 mi): 10 checkpoints, each
+    tagged with its real road (Interstate 90 to Sprague and Ritzville, US-395 to
+    Connell, Interstate 84 from Hermiston through La Grande and Baker City).
+  Total this batch: 20 real checkpoints across 2 legs.
+
+BATCH 6 -- the big multi-highway cross-corridor legs, each enriched on its real
+route with per-town highways. Checkpoints + grades, no mileage changes.
+  - Dallas to St Louis (Interstate 44, 664 mi): 21 checkpoints. Pinned to the
+    Interstate 44 route (Interstate 35 to Oklahoma City, then Interstate 44
+    through Tulsa, Joplin, Springfield, Rolla) -- the router wanted
+    Interstate 30 / US-67 through Little Rock, but every curated stop on this leg
+    is on Interstate 44. Towns tagged Interstate 35 (Denton to Moore) then 44.
+  - Albuquerque to Phoenix (Interstate 40, 455 mi): 11 checkpoints. Pinned to
+    Interstate 40 west to Flagstaff then Interstate 17 south (Winslow, Camp
+    Verde) -- the router wanted the US-60 / Globe diagonal, but the leg's stops
+    are on Interstate 40.
+  - Dallas to Albuquerque (relabeled US-287, 646 mi): 16 checkpoints down the
+    Panhandle on US-287, then Interstate 40 west of Amarillo (Bushland, Vega,
+    Santa Rosa).
+  - Billings to Cheyenne (relabeled Interstate 25, 453 mi): 10 checkpoints,
+    Interstate 90 to Sheridan and Buffalo then Interstate 25 through Casper.
+  - Billings to Fort Collins (relabeled Interstate 25, 497 mi): 11 checkpoints,
+    the same Interstate 90 then Interstate 25 run down to Wellington.
+  Total this batch: 69 real checkpoints across 5 legs.
+
+BATCH 7 -- ten more legs (mostly single-highway, two dual-route). Checkpoints +
+grades, no mileage changes.
+  - Birmingham to New Orleans (Interstate 59, 8 cp), Missoula to Billings
+    (Interstate 90, 12 cp: Butte, Bozeman, Livingston), Little Rock to Oklahoma
+    City (Interstate 40, 12 cp), Milwaukee to Minneapolis (Interstate 94, 11 cp:
+    the Wisconsin Dells to Baldwin), El Paso to Tucson (Interstate 10, 7 cp:
+    Deming, Lordsburg, Willcox, Benson), Boise to Salt Lake City (Interstate 84,
+    8 cp), Charleston West Virginia to Richmond (Interstate 64, 5 cp: Lewisburg,
+    Lexington, Charlottesville), Jacksonville to Atlanta (Interstate 75, 8 cp).
+  - Two dual-route legs enriched on their real (router-matched) roads:
+    Des Moines to Chicago runs Interstate 80 to the Quad Cities then Interstate
+    88 through Dixon and DeKalb; Rapid City to Billings (relabeled US-212) runs
+    Interstate 90 to Belle Fourche then US-212 across the Montana high plains to
+    Hardin.
+  Total this batch: 88 real checkpoints across 10 legs.
+
+BATCH 8 -- seven more multi-highway legs. Checkpoints + grades, no mileage
+changes.
+  - Buffalo to New York and Rochester to New York (both pinned to the New York
+    Thruway: Interstate 90 to Albany then Interstate 87 south through Kingston
+    and Newburgh; the router wanted the Binghamton/Scranton shortcut, but both
+    legs' curated stops are Thruway service areas): 14 and 10 checkpoints.
+  - Provo to Boise (Interstate 15 to Tremonton then Interstate 84): 10 cp.
+  - Las Cruces to Midland (Interstate 10 to Sierra Blanca then Interstate 20
+    through Pecos, Monahans, Odessa): 8 cp.
+  - Provo to Fort Collins (US-40 up to Interstate 80 across Wyoming): 9 cp.
+  - Green Bay to Grand Rapids (Interstate 43 to Milwaukee, Interstate 94 around
+    the bottom of Lake Michigan, Interstate 196 up to Grand Rapids): 11 cp.
+  - Eugene to Tri-Cities (Interstate 5 to Portland, Interstate 84 up the Gorge,
+    Interstate 82 to the Tri-Cities): 9 cp.
+  Total this batch: 71 real checkpoints across 7 legs.
+  Deferred: Lubbock to Dallas -- see the route question below.
+
+BATCH 9 -- fourteen clean single-highway legs (a big sweep of the interstate
+core). Checkpoints + grades, no mileage changes.
+  Philadelphia-Pittsburgh (Interstate 76, 7), Chicago-St Louis (Interstate 55,
+  7), Indianapolis-Nashville (Interstate 65, 8), Memphis-St Louis (Interstate
+  55, 9), Detroit-Chicago (Interstate 94, 7), Spokane-Seattle (Interstate 90, 7:
+  Moses Lake, Ellensburg, Snoqualmie Pass), Las Cruces-Tucson (Interstate 10,
+  6), El Paso-Albuquerque (Interstate 25, 6: Hatch, Truth or Consequences,
+  Socorro), Tampa-Miami (Interstate 75 / Alligator Alley, 4), Rock Springs-
+  Cheyenne (Interstate 80, 3), St Louis-Kansas City (Interstate 70, 5),
+  Fargo-Sioux Falls (Interstate 29, 5), Tulsa-Kansas City (US-69, 9), and
+  Las Vegas-Phoenix (US-93, 3: So-Hi, Wikieup, Wickenburg -- desert, honestly
+  sparse).
+  Total this batch: 86 real checkpoints across 14 legs.
+
+BATCH 10 -- eight more clean single-highway legs. Checkpoints + grades, no
+mileage changes.
+  Minneapolis-Des Moines (Interstate 35, 6), Charlotte-Atlanta (Interstate 85,
+  6), Tallahassee-Mobile (Interstate 10, 4), Indianapolis-St Louis (Interstate
+  70, 6), Houston-Dallas (Interstate 45, 6: Conroe, Huntsville, Corsicana),
+  Fargo-Minneapolis (Interstate 94, 6), Birmingham-Memphis (Interstate 22, 8:
+  Jasper, New Albany, Holly Springs), Elko-Salt Lake City (Interstate 80, 3).
+  Total this batch: 45 real checkpoints across 8 legs.
+
+BATCH 11 -- twelve multi-highway legs. Checkpoints + grades, no mileage changes.
+  - Charlotte to Knoxville: pinned to Interstate 40 (Interstate 77 to Statesville
+    then Interstate 40 through Hickory, Marion, Asheville -- the router wanted
+    US-74, but the stops are Interstate 40): 7 cp.
+  - Duluth to Fargo: relabeled Interstate 35 -> US-10 (it actually runs MN-210 to
+    Brainerd then US-10 west; the Interstate 35 label was wrong): 9 cp.
+  - Elko to Boise: relabeled to Interstate 84 (Interstate 80 to Wells, US-93 to
+    Twin Falls, Interstate 84 to Boise): 9 cp.
+  - Two-interstate legs with per-town roads: St Louis-Nashville (I-64/I-57/I-24),
+    Savannah-Atlanta (I-16/I-75), Nashville-Atlanta (I-24/I-75), Baltimore-
+    Pittsburgh (I-70), Sioux Falls-Minneapolis (I-90/US-169), Midland-Amarillo
+    (US-87/I-27), Charlotte-Savannah (I-77/US-321), Baton Rouge-Shreveport
+    (US-190/I-49), Idaho Falls-Boise (I-15/I-86/I-84).
+  Total this batch: 85 real checkpoints across 12 legs.
+
+BATCH 12 -- sixteen clean legs (mostly shorter interstate hops). Checkpoints +
+grades, no mileage changes.
+  Bangor-Manchester (Interstate 95, 9), Las Cruces-Albuquerque (Interstate 25,
+  5), North Platte-Cheyenne (Interstate 80, 7), Charleston WV-Pittsburgh
+  (Interstate 79, 7), Springfield-St Louis (Interstate 44, 6), Pueblo-Cheyenne
+  (Interstate 25, 4), Idaho Falls-Salt Lake City (Interstate 15, 6), Hibbing-
+  Minneapolis (US-169, 6), Pocatello-Provo (Interstate 15, 7), Pendleton-
+  Portland (Interstate 84, 5), New York-Boston (Interstate 95, 5: Stamford,
+  Milford, Meriden), Harrisburg-Pittsburgh (Interstate 76, 4), Missoula-Spokane
+  (Interstate 90, 4: Coeur d'Alene), Houston-San Antonio (Interstate 10, 5),
+  Austin-Dallas (Interstate 35, 4: Temple, Waxahachie), Memphis-Nashville
+  (Interstate 40, 3 -- Jackson is a node mid-route, so this one is honestly thin;
+  I removed 4 obscure unnamed map dots that would not orient a driver, and per
+  your request added Buck Snort at exit 152, mile 150 -- the one with the
+  gloriously sketchy gas station).
+  Total this batch: 86 real checkpoints across 16 legs.
+
+BATCH 13 -- thirteen clean single-highway legs. Checkpoints + grades, no mileage
+changes.
+  Wichita-Kansas City (Interstate 35, 5), Bismarck-Fargo (Interstate 94, 6),
+  Birmingham-Nashville (Interstate 65, 5), Knoxville-Atlanta (Interstate 75, 4),
+  Des Moines-Kansas City (Interstate 35, 5), Buffalo-Cleveland (Interstate 90,
+  4), Fort Worth-Austin (Interstate 35, 4), Lincoln-Des Moines (Interstate 80,
+  6), Shreveport-Dallas (Interstate 20, 4), Jackson-New Orleans (Interstate 55,
+  5), Jackson-Tuscaloosa (Interstate 20, 4), Omaha-Kansas City (Interstate 29,
+  5), Rock Springs-Salt Lake City (Interstate 80, 5).
+  Total this batch: 62 real checkpoints across 13 legs.
+
+BATCH 14 -- eleven multi-highway / relabel legs. Checkpoints + grades, no
+mileage changes.
+  Garden City-Amarillo (US-83/US-54/US-287, 7), Los Angeles-Fresno (I-5/CA-99,
+  5), Medford-Chico (I-5/CA-99, 7), Virginia Beach-Raleigh (US-58/US-13/US-64,
+  6), Brownsville-Laredo (relabeled to US-83 along the Rio Grande, 6),
+  Dodge City-Salina (US-56/I-135, 7), Tri-Cities-Seattle (I-82/I-90 over
+  Snoqualmie, 5), Tri-Cities-Portland (I-82/I-84, 5), Jacksonville-Tampa
+  (I-10/US-301/I-75, 7), Clarksville-Louisville (US-41/Pennyrile Pkwy/Western
+  Kentucky Pkwy/I-65, 7), Norfolk-Raleigh (relabeled I-95 -> US-64, 6).
+  Total this batch: 68 real checkpoints across 11 legs.
+
+BATCH 15 -- seventeen clean legs. Checkpoints + grades, no mileage changes.
+  Portland-Seattle (I-5, 3), Columbus-Pittsburgh (I-70, 6), Sioux Falls-Omaha
+  (I-29, 5), Springfield-Tulsa (I-44, 6), Charleston WV-Roanoke (I-64/US-460, 5),
+  Knoxville-Nashville (I-40, 4), Pueblo-Fort Collins (I-25, 4), Johnson City-
+  Roanoke (I-81, 7), Columbus-Indianapolis (I-70, 5), Jackson-Baton Rouge
+  (I-55, 5), Louisville-Nashville (I-65, 4), Providence-New York (I-95, 5),
+  St Cloud-Fargo (I-94, 4), Fresno-Sacramento (CA-99, 6), Tallahassee-
+  Jacksonville (I-10, 1 -- the Osceola forest stretch is empty), Mobile-
+  Montgomery (I-65, 2), Charleston SC-Wilmington (US-17 coastal, 5).
+  Total this batch: 77 real checkpoints across 17 legs.
+
+BATCH 16 -- nine clean legs. Checkpoints + grades, no mileage changes.
+  Burlington-Manchester (I-89, 6), Pocatello-Salt Lake City (I-15, 5), Macon-
+  Savannah (I-16, 2), Austin-Houston (US-290, 4), Cedar Rapids-Rockford (US-20,
+  6), Oklahoma City-Wichita (I-35, 4), Dodge City-Wichita (relabeled US-400 ->
+  US-50 via Hutchinson, 6), Marquette-Sault Ste Marie (M-28 across the Upper
+  Peninsula, 1 -- Munising; the U.P. is empty), Brownsville-Corpus Christi
+  (relabeled I-69 -> US-77, 4).
+  Total this batch: 38 real checkpoints across 9 legs.
+
+BATCH 17 -- fifteen multi-highway legs with per-town roads. Checkpoints +
+grades, no mileage changes.
+  Grand Rapids-Chicago (I-196/I-94), Athens-Chattanooga (GA-316/I-85/I-75),
+  Worcester-New York (I-90/I-84/I-95), Detroit-Cleveland (I-75/I-80 turnpike),
+  Topeka-Lincoln (relabeled I-70 -> US-75), Twin Falls-Elko (US-93/I-80),
+  Roanoke-Richmond (relabeled I-64 -> US-460/US-60), Roanoke-Raleigh
+  (US-220/I-40), Visalia-Lancaster (CA-99/CA-58/CA-14), Visalia-Santa Maria
+  (CA-41/US-101), Idaho Falls-Twin Falls (I-15/I-86/I-84), Athens-Columbia
+  (US-78/I-20), Evansville-Nashville (US-41/Pennyrile Pkwy/I-24), Beaumont-
+  College Station (US-90/TX-99/TX-6), Clarksville-Huntsville (I-24/US-231).
+  Total this batch: 76 real checkpoints across 15 legs.
+
+BATCH 18 -- twelve clean legs. Checkpoints + grades, no mileage changes.
+  Montgomery-Atlanta (I-85, 3), Grand Rapids-Detroit (I-96, 3), Laredo-San
+  Antonio (I-35, 5), Morgantown-Charleston WV (I-79, 6), Barstow-Las Vegas
+  (I-15, 2 -- Mojave desert), Baltimore-Richmond (I-95, 4), Duluth-Minneapolis
+  (I-35, 5), Abilene-Fort Worth (I-20, 2), Midland-Abilene (I-20, 5: Big Spring,
+  Sweetwater), Albert Lea-Des Moines (I-35, 3), Syracuse-Buffalo (I-90, 4),
+  Madison-Chicago (I-90, 3).
+  Total this batch: 45 real checkpoints across 12 legs.
+
+BATCH 19 -- ten clean legs. Checkpoints + grades, no mileage changes.
+  Flagstaff-Phoenix (I-17, 4), Augusta-Atlanta (I-20, 3), Corpus Christi-San
+  Antonio (I-37, 5), Killeen-Fort Worth (I-35, 4), Raleigh-Charlotte (I-85/US-64,
+  3), Washington-Philadelphia (I-95, 4), Laredo-McAllen (US-83, 4), Syracuse-
+  Albany (I-90, 5), Greenville-Atlanta (I-85, 4), Grand Island-North Platte
+  (I-80, 2 -- Kearney and Lexington are already city nodes).
+  Total this batch: 38 real checkpoints across 10 legs.
+
+BATCH 20 -- fourteen multi/relabel legs. Checkpoints + grades, no mileage
+changes. Relabels: Gulfport-Jackson I-20 -> US-49; Corpus-McAllen I-69 -> US-281;
+Fort Smith-Little Rock I-540 -> I-40; Columbia-Savannah I-95 -> US-321; Santa
+Maria-Valencia US-101 -> CA-166; Abilene-Wichita Falls I-20 -> US-277.
+  Also: Tuscaloosa-Huntsville (I-59/I-65/I-565), Richmond-Raleigh (I-85),
+  Ann Arbor-Fort Wayne (I-94/I-69), Sault Ste Marie-Traverse City (I-75/US-31),
+  Burlington-Albany (US-7/US-4/I-87), Allentown-Bridgeport (I-78/I-95), Chico-
+  Santa Rosa (I-5/CA-20/CA-29), San Jose-Fresno (US-101/CA-152/CA-99).
+  Total this batch: 69 real checkpoints across 14 legs.
+
+BATCH 21 -- fifteen clean legs. Checkpoints + grades, no mileage changes.
+  Wausau-Madison (I-39), La Crosse-Madison (I-90), Asheville-Winston Salem
+  (I-40), Gainesville-Lakeland (I-75), Mobile-New Orleans (I-10), Columbus-
+  Cleveland (I-71), Coral Springs-Palm Bay (I-95), Houston-Lake Charles (I-10),
+  Kalamazoo-Detroit (I-94), Traverse City-Grand Rapids (US-131), Savannah-
+  Jacksonville (I-95), Wichita Falls-Oklahoma City (I-44), Memphis-Little Rock
+  (I-40), Binghamton-Albany (I-88), Cape Coral-Coral Springs (I-75 Alligator
+  Alley, 1).
+  Total this batch: 63 real checkpoints across 15 legs.
+
+BATCH 22 -- eleven clean legs. Checkpoints + grades, no mileage changes.
+  Lafayette-New Orleans (I-10), Peoria-Rockford (I-39), Des Moines-Omaha (I-80),
+  Chattanooga-Nashville (I-24), Cape Coral-Tampa (I-75), Bloomington-Chicago
+  (I-55), Fort Collins-Colorado Springs (I-25), Ann Arbor-Grand Rapids (I-96),
+  Sacramento-Reno (I-80 over Donner), Fayetteville-Charlotte (US-74), Wichita
+  Falls-McKinney (US-287/US-380).
+  Total this batch: 41 real checkpoints across 11 legs.
+
+BATCH 23 -- eleven clean legs. Checkpoints + grades, no mileage changes.
+  Lafayette-Beaumont (I-10), Manchester-Hartford (US-3/I-495/I-90/I-84), Albany-
+  Worcester (I-90 Mass Pike), Wilmington-Raleigh (I-40), Montpelier-Manchester
+  (I-89), Indianapolis-Fort Wayne (I-69), Bangor-Portland (I-95), McKinney-Waco
+  (I-35), Twin Falls-Boise (I-84), Los Angeles-Indio (I-10), Santa Maria-
+  Bakersfield (CA-166).
+  Total this batch: 44 real checkpoints across 11 legs.
+
+BATCH 24 -- fifteen multi/relabel legs. Checkpoints + grades, no mileage changes.
+  Relabels: Corpus-Laredo I-37 -> US-59; Allentown-Baltimore I-95 -> US-222;
+  Salisbury-Norfolk I-264 -> US-13; Albany-Bridgeport I-90 -> US-7.
+  Also: Green Bay-Madison (I-41/US-151), Yakima-Seattle (I-82/I-90), Orlando-
+  Jacksonville (I-4/I-95), Tri-Cities-Spokane (US-395/I-90), West Palm Beach-
+  Cape Coral (US-98/US-27/I-75), Salinas-Fresno (US-101/CA-152/CA-99), Fairfield-
+  Salinas (I-680/US-101), Pittsburgh-Cleveland (I-76/I-80), Augusta-Savannah
+  (US-25/GA-21), Salinas-Stockton (US-101/I-5), Topeka-Wichita (I-335/I-35
+  turnpike).
+  Total this batch: 58 real checkpoints across 15 legs.
+
+BATCH 25 -- fifteen clean legs. Checkpoints + grades, no mileage changes.
+  Erie-Pittsburgh (I-79), Asheville-Charlotte (I-40), Champaign-Indianapolis
+  (I-74), Stockton-Fresno (CA-99), Columbia-Kansas City (I-70), Akron-Columbus
+  (I-71), Columbia-St Louis (I-70), Lubbock-Amarillo (I-27), Davenport-Rockford
+  (I-88), Harrisburg-Scranton (I-81), Olympia-Portland (I-5), El Paso-Van Horn
+  (I-10), Evansville-Louisville (I-64), Green Bay-Milwaukee (I-43), Fort Smith-
+  Tulsa (I-40).
+  Total this batch: 51 real checkpoints across 15 legs.
+
+BATCH 26 -- fifteen clean legs. Checkpoints + grades, no mileage changes.
+  Lakeland-Port St Lucie (SR-60), Chico-Fairfield (CA-99/I-80), Dayton-Fort Wayne
+  (US-33), Cape Coral-Lakeland (I-75), Chattanooga-Atlanta (I-75), San Jose-
+  Sacramento (I-80), Columbia-Charleston (I-26), Asheville-Knoxville (I-40),
+  Huntsville-Nashville (I-65), Port St Lucie-Miami (I-95), Louisville-
+  Indianapolis (I-65), Cleveland-Toledo (I-90), Santa Maria-Oxnard (US-101),
+  Tucumcari-Amarillo (I-40), Enid-Wichita (US-81).
+  Total this batch: 42 real checkpoints across 15 legs.
+
+BATCH 27 -- fifteen clean legs. Checkpoints + grades, no mileage changes.
+  Relabels: Cedar Rapids-Des Moines I-380 -> US-30; Midland-Lubbock I-27 ->
+  US-87; Dayton-Indianapolis (highway was unset) -> I-70.
+  Also: Tucson-Phoenix (I-10), Pueblo-Denver (I-25), Joplin-Tulsa (I-44), Iron
+  Mountain-Houghton (US-141, Upper Peninsula), Cincinnati-Indianapolis (I-74),
+  Bakersfield-Los Angeles (I-5 Grapevine), San Angelo-Midland (US-87), Salina-
+  Topeka (I-70), Hartford-New York (I-84/CT-8/I-95), Chattanooga-Knoxville
+  (I-75), Roanoke-Harrisonburg (I-81), Rolla-Springfield (I-44).
+  Total this batch: 45 real checkpoints across 15 legs.
+
+BATCH 28 -- fourteen clean legs. Checkpoints + grades, no mileage changes.
+  Akron-Pittsburgh (I-76), Salinas-San Francisco (US-101), West Palm Beach-Palm
+  Bay (I-95), Eugene-Portland (I-5), Escanaba-Green Bay (US-41), Washington-
+  Richmond (I-95), Bakersfield-Fresno (CA-99), Charleston-Savannah (US-17
+  coastal), Portland ME-Boston (I-95), New York-Philadelphia (I-95), Richmond-
+  Virginia Beach (I-64), Gainesville-Orlando (I-75), Aurora-Peoria (I-80),
+  Pocatello-Twin Falls (relabeled I-15 -> I-86, then I-84).
+  Total this batch: 45 real checkpoints across 14 legs.
+
+BATCH 29 -- twelve clean legs. Checkpoints + grades, no mileage changes.
+  Palm Bay-Lakeland (I-4), Kingman-Las Vegas (US-93), Columbus-Cincinnati
+  (I-71), Oklahoma City-Tulsa (I-44), Harrisburg-Philadelphia (I-76), Rolla-St
+  Louis (I-44), Newport-New Haven (I-95), Oxnard-Lancaster (CA-126/CA-14),
+  Beckley-Roanoke (I-77/US-460), Wichita Falls-Fort Worth (relabeled to US-287),
+  Santa Ana-Lancaster (I-5/CA-14), McKinney-Tyler (US-380/US-69).
+  Total this batch: 39 real checkpoints across 12 legs.
+
+BATCH 30 -- thirteen clean legs. Checkpoints + grades, no mileage changes.
+  Greenville-Columbia (I-26), Philadelphia-Baltimore (I-95), Cheyenne-Denver
+  (I-25), Erie-Cleveland (I-90), Greenville-Charlotte (I-85), Huntsville-
+  Birmingham (I-65), Murfreesboro-Chattanooga (I-24), Cincinnati-Louisville
+  (I-71), Knoxville-Johnson City (I-81/US-11E), Boston-Hartford (I-90/I-84),
+  Santa Rosa-San Jose (US-101/I-880), College Station-Austin (relabeled to
+  TX-21/US-290), Augusta-Macon (Fall Line Freeway SR-540).
+  Total this batch: 36 real checkpoints across 13 legs.
+
+BATCH 31 -- thirteen clean legs. Checkpoints + grades, no mileage changes.
+  Marquette-Houghton (US-41), Toledo-Fort Wayne (US-24), Eau Claire-Wausau
+  (WI-29), Tyler-Shreveport (I-20), Tyler-Dallas (I-20), Peoria-Davenport (I-74),
+  Norfolk-Richmond (I-64), Roseburg-Medford (I-5), Sioux City-Omaha (I-29),
+  Wausau-Green Bay (WI-29), Albert Lea-Minneapolis (I-35), South Bend-Chicago
+  (I-90), Grand Island-Lincoln (I-80).
+  Total this batch: 40 real checkpoints across 13 legs.
+
+BATCH 32 -- thirteen multi/relabel legs. Checkpoints + grades, no mileage
+changes. Relabels: Killeen-College Station I-14 -> US-190; Salisbury-Baltimore
+I-97 -> US-50; Wilmington-Salisbury I-95 -> US-13; Tuscaloosa-Montgomery I-359
+-> US-82; Roanoke-Greensboro I-73 -> US-220.
+  Also: Oceanside-Victorville (CA-76/I-15/I-215), Aurora-Milwaukee (I-294/I-94),
+  Albany-Hartford (I-90/I-91), Allentown-New York (I-78/I-95), Evansville-
+  Clarksville (US-41/I-69), Santa Rosa-Stockton (US-101/CA-12/I-5), Manchester-
+  Providence (US-3/I-495/I-95), South Bend-Grand Rapids (US-31/I-196).
+  Total this batch: 48 real checkpoints across 13 legs.
+
+BATCH 33 -- sixteen clean legs. Checkpoints + grades, no mileage changes.
+  Springfield-St Louis (I-55), Santa Rosa-Sacramento (I-80), Waco-Dallas (I-35),
+  Portland-Manchester (I-95), Lansing-Detroit (I-96), Willmar-Minneapolis
+  (US-12), Columbia-Charlotte (I-77), Erie-Buffalo (I-90), Eau Claire-Minneapolis
+  (I-94), Waco-College Station (TX-6), Muskegon-Kalamazoo (US-131), Montgomery-
+  Birmingham (I-65), Gary-Lafayette (I-65), Charlotte-Greensboro (I-85), Salina-
+  Wichita (I-135), Hibbing-Duluth (US-53).
+  Total this batch: 37 real checkpoints across 16 legs.
+
+BATCH 34 -- sixteen clean legs. Checkpoints + grades, no mileage changes.
+  Chico-Sacramento (relabeled I-5 -> CA-99), Waco-Fort Worth (I-35), San Angelo-
+  Abilene (US-83), Sacramento-San Francisco (I-80), Springfield-Albany (I-90),
+  Rockford-Chicago (I-90), Beaumont-Houston (I-10), Syracuse-Rochester (I-90),
+  Sioux City-Sioux Falls (I-29), Lawton-Oklahoma City (I-44), Victorville-Los
+  Angeles (I-15 Cajon Pass), Cedar Rapids-Davenport (I-80), Newark-Philadelphia
+  (I-95), Orlando-Tampa (I-4), Oceanside-Los Angeles (I-5), Macon-Atlanta (I-75).
+  Total this batch: 37 real checkpoints across 16 legs.
+
+BATCH 35 -- sixteen clean legs. Checkpoints + grades, no mileage changes.
+  Lancaster-Bakersfield (CA-58), Mankato-Rochester (US-14), Murfreesboro-
+  Huntsville (US-231), Saginaw-Lansing (US-127), Rochester-Minneapolis (US-52),
+  Lexington-Cincinnati (I-75), Newark-Allentown (I-78), Yakima-Tri-Cities (I-82),
+  Baton Rouge-New Orleans (I-10), Visalia-Bakersfield (CA-99), Harrisburg-
+  Allentown (I-78), Mankato-Minneapolis (US-169), Harrisburg-Baltimore (I-83),
+  Iron Mountain-Marquette (US-41), Greensboro-Raleigh (I-40), Austin-San Antonio
+  (I-35).
+  Total this batch: 42 real checkpoints across 16 legs.
+
+BATCH 36 -- sixteen clean legs. Checkpoints + grades, no mileage changes.
+  Madison-Milwaukee (I-94), Gulfport-New Orleans (I-10), Lexington-Louisville
+  (I-64), Hagerstown-Harrisburg (I-81), Kalamazoo-South Bend (I-94), Wilmington-
+  Baltimore (I-95), Hagerstown-Baltimore (I-70), Joplin-Springfield (I-44), Lake
+  Charles-Lafayette (I-10), Gulfport-Mobile (I-10), Buffalo-Rochester (I-90),
+  Rockford-Madison (I-90), Palm Bay-Orlando (I-95), Rochester-La Crosse (I-90),
+  Eau Claire-La Crosse (US-53), Valencia-Bakersfield (I-5).
+  Total this batch: 37 real checkpoints across 16 legs.
+
+BATCH 37 -- fourteen multi/relabel legs (mostly the LA basin and short multi
+routes). Checkpoints + grades, no mileage changes. Relabels: College Station-
+Houston I-45 -> TX-6; South Bend-Fort Wayne US-30 -> US-33; Port St Lucie-Coral
+Springs SR-869 -> I-95.
+  Also: Riverside-Valencia (CA-91/I-210), Oxnard-Santa Ana (US-101/I-5),
+  Valencia-Victorville (CA-14/I-15), Wilmington-Fayetteville (NC-87), Riverside-
+  Lancaster (I-215/I-15/CA-14), Clarksville-Murfreesboro (I-24), Enid-OKC
+  (US-81), Stockton-San Francisco (I-205/I-580), Fairfield-San Jose (I-680),
+  Scranton-Allentown (I-476), Santa Ana-Victorville (CA-60/I-15).
+  Total this batch: 34 real checkpoints across 14 legs.
+
+BATCH 38 -- eighteen clean short legs. Checkpoints + grades, no mileage changes.
+  Athens-Atlanta (I-85), Binghamton-Syracuse (I-81), New Haven-New York (I-95),
+  Eugene-Roseburg (I-5), Gainesville-Jacksonville (I-10), West Palm Beach-Miami
+  (I-95), Augusta-Columbia (I-20), Morgantown-Pittsburgh (I-79), Aurora-Rockford
+  (I-88), Dayton-Columbus (I-70), Harrisonburg-Winchester (I-81), Colorado
+  Springs-Denver (I-25), Lansing-Grand Rapids (I-96), Springfield-Bloomington
+  (I-55), Flint-Detroit (I-75), Killeen-Austin (I-35), Manchester-Worcester
+  (I-495), Port Huron-Flint (I-69).
+  Total this batch: 34 real checkpoints across 18 legs.
+
+BATCH 39 -- eighteen clean short legs. Checkpoints + grades, no mileage changes.
+  Escanaba-Marquette (US-41), Ann Arbor-Lansing (I-96), Eugene-Salem (I-5),
+  Jackson-Kalamazoo (I-94), St Cloud-Minneapolis (I-94), Gary-South Bend (I-90),
+  Fort Collins-Denver (I-25), Port St Lucie-Palm Bay (I-95), Springfield-New
+  Haven (I-91), Rochester-Albert Lea (I-90), Topeka-Kansas City (I-70), Port
+  Huron-Detroit (I-94), Lafayette-Indianapolis (I-65), Kenosha-Chicago (I-94),
+  St Cloud-Willmar (MN-23), Bellingham-Everett (I-5), Johnson City-Asheville
+  (I-26), Lincoln-Omaha (I-80).
+  Node candidate: Lawrence, Kansas (~94k, University of Kansas, on I-70). yay/nay:
+  Total this batch: 30 real checkpoints across 18 legs.
+
+BATCH 40 -- twenty clean short legs. Checkpoints + grades, no mileage changes.
+  Santa Ana-Valencia (I-5), Riverside-Oceanside (I-215/I-15), Worcester-Hartford
+  (I-90/I-84), Raleigh-Fayetteville (I-95), Oxnard-Los Angeles (US-101),
+  Brownsville-McAllen (relabeled to US-83), Scranton-Binghamton (I-81), Beckley-
+  Charleston (I-77), Detroit-Toledo (I-75), McKinney-Fort Worth (I-35),
+  Portsmouth-Boston (I-95), Dover-Salisbury (US-13), Lafayette-Baton Rouge
+  (I-10), Lawton-Wichita Falls (I-44), Dodge City-Garden City (US-50), Rochester-
+  Winona (US-14), Springfield-Worcester (I-90), Portsmouth-Portland (I-95),
+  Bloomington-Champaign (I-74), Escanaba-Iron Mountain (US-2).
+  Total this batch: 34 real checkpoints across 20 legs.
+
+BATCH 41 -- twenty-three clean short legs. Checkpoints + grades, no mileage
+changes. Trenton-Atlantic City (US-206), Pendleton-Tri-Cities (I-84), Atlantic
+City-Philadelphia (I-676), Bridgeport-Hartford (relabeled to I-84/CT-8), Dover-
+Wilmington (I-95), Flint-Lansing (I-69), Boston-Providence (I-95), New York-
+Bridgeport (I-95), Newark-Trenton (I-95), Champaign-Decatur (I-72), Kalamazoo-
+Grand Rapids (US-131), San Jose-San Francisco (US-101), Stockton-Sacramento
+(I-5), Fort Collins-Cheyenne (I-25), Baltimore-Washington (I-95), Salem-Portland
+(I-5), Portsmouth-Manchester (I-95), Las Cruces-El Paso (I-10), Boston-Worcester
+(I-90), Winchester-Hagerstown (I-81), Springfield-Decatur (I-72), Muskegon-Grand
+Rapids (I-96), Bloomington-Peoria (I-74).
+  Total this batch: 41 real checkpoints across 23 legs.
+
+BATCH 42 (FINAL) -- twenty-two of the shortest legs (adjacent-metro hops).
+Checkpoints + grades, no mileage changes. Akron-Cleveland, Montpelier-Burlington,
+the Michigan metro hops, New Haven/Springfield-Hartford, Trenton/Wilmington-
+Philadelphia, Newport-Providence, the Seattle/Tacoma/Olympia and Everett hops,
+Gary-Chicago, Dallas-Fort Worth (Arlington), Newark-New York, Winona-La Crosse,
+Winston Salem-Greensboro, New Haven-Bridgeport, Norfolk-Virginia Beach, Kenosha-
+Milwaukee.
+  Two legs left honestly empty/deferred:
+  - Barstow to Victorville (32 mi): the Mojave between them has no town within
+    2 miles of Interstate 15 -- an honest 0-checkpoint desert hop.
+  - Lubbock to Dallas: still awaiting your US-84-vs-US-82/380 answer above.
+  Total this batch: ~22 real checkpoints across 22 legs.
+
+  *** THE SPARSE LIST IS NOW DRY. 559 of 562 legs carry real named checkpoints. ***
+
+
+================================================
+FINAL TALLY -- filled in when the run ends
+================================================
+
+(FINAL TOTALS -- the sparse-leg enrichment run is COMPLETE, 42 batches.)
+Cities / nodes added:  0 (I never create dispatchable cities unattended -- see
+  the ~30 node candidates above awaiting your yay/nay)
+Node candidates found for you to approve:  ~30 (all in the NODE CANDIDATES list)
+Legs enriched tonight:  538 (560 of 562 legs now carry real named checkpoints,
+  up from 22 at the start)
+Checkpoints added:  2,184 real named checkpoints (map now has 2,269, up from 85)
+Truck stops added:  0 so far -- the Overpass truck-stop sweep (Phase B) has NOT
+  run yet; it is the slow, network-bound pass I deferred to the end
+Truck stops now carrying a real coordinate:  0 so far (comes with Phase B)
+Legs skipped, and why:  Lubbock-Dallas (one genuine which-road question; see the
+  ROUTE / MILEAGE section)
+Wrong-road legs noted for later:  none skipped -- per your "calc both routes"
+  guidance I pinned or relabeled every wrong-road leg onto its real road as I
+  went, rather than deferring them
+Legs still remaining:  2 (Lubbock-Dallas, awaiting your route answer; and
+  Barstow-Victorville, an honestly-empty 32mi Mojave hop with no on-route town)
+
+
+================================================
+MAP TOTALS -- THE WHOLE MAP, AND HOW FAR IT HAS COME
+================================================
+You asked for two things here: where the map stands right now, and how much
+we have added since the very beginning. I pulled the starting numbers straight
+out of the project's git history so they are real, not guessed.
+
+WHERE THE MAP STANDS RIGHT NOW (snapshot taken just before tonight's run):
+  Cities (places you can pick up and deliver freight):  258
+  Legs (routes between cities):                         562
+  Total mapped miles:                                   87,373
+  Real named checkpoints (places you drive past):       85
+  Placeholder checkpoints still to enrich:              540
+  Truck stops:                                          910
+     of those with a real coordinate (for surface nav): 0
+
+WHERE THE MAP BEGAN:
+  There are two honest "starting points" in the history.
+  A) The very first map, version 1.0.0 -- the true beginning:
+       21 cities, 27 legs, 10,725 miles, 53 truck stops, 0 named checkpoints.
+  B) The first real US interstate map, version 1.4.0 (the "59-city" map):
+       59 cities, 106 legs, 29,881 miles, 158 truck stops, 0 named checkpoints.
+  Named checkpoints did not exist as a feature until later in development, so
+  both starting points had zero. Every real named checkpoint on the map today
+  is something the team added.
+  YOU CHOSE (2026-07-07): baseline B, version 1.4.0, the 59-city interstate map.
+  I use that as the "start" for the changelog story below.
+
+TOTAL WE HAVE ADDED SINCE THE START (right-now minus the starting point):
+  ** From the 59-city interstate map (B, version 1.4.0) -- your chosen baseline:
+     +199 cities, +456 legs, +57,492 miles, +752 truck stops, +85 named checkpoints
+  (For reference, counting all the way back to version 1.0.0:
+     +237 cities, +535 legs, +76,648 miles, +857 truck stops, +85 named checkpoints)
+
+HOW TO THINK ABOUT IT FOR THE 1.9 CHANGELOG:
+  Using baseline B, the headline is: the map has grown from 59 cities to 258 --
+  roughly +199 cities (freight pickup/delivery points) and +456 routes between
+  them since the first interstate map. That is the "look how big this world has
+  gotten" line for Josh. For what players get in THIS release specifically, use
+  tonight's work: the FINAL TALLY above (real named checkpoints and truck stops
+  added, coordinates captured). I fill the "new grand total" lines below when
+  the run ends so you see the before-and-after in one place.
+
+END-OF-RUN DELIVERABLE -- CITY AND CHECKPOINT LISTS:
+  You asked for a file listing the cities and the checkpoints. Built:
+  tools/map_inventory.py writes map_inventory.txt -- every city grouped by
+  region (with full state names) and every real named checkpoint grouped by the
+  leg it sits on, in mile order. Placeholders are left out. I generate a fresh
+  copy at the end of the run so it reflects everything added tonight. Run it any
+  time yourself with:  uv run python tools/map_inventory.py
+
+NEW GRAND TOTAL AFTER TONIGHT (filled in when the run ends):
+  Cities:                       258  (unchanged -- I never create nodes unattended)
+  Legs:                         562  (unchanged -- enrichment only, no new legs)
+  Real named checkpoints:        85  ->  2,269  (2,184 added tonight -- run complete)
+  Placeholder checkpoints:      540  ->  2     (all converted to real, minus 2 legs)
+  Truck stops:                  910  ->  910   (unchanged -- Overpass sweep not run yet)
+  Truck stops with a coordinate:  0  ->  0     (comes with the Overpass sweep)
+

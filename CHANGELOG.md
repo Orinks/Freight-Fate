@@ -18,7 +18,8 @@
   Montana, plus Williston in the Bakken oil patch, Minot, and Devils Lake, North
   Dakota, and on to Duluth through Bemidji and Grand Rapids, Minnesota; and west
   from Shelby it climbs Marias Pass to Spokane through Kalispell, Libby, and
-  Sandpoint. And Interstate 90 fills its gaps: Coeur d'Alene, Idaho and Bozeman,
+  Sandpoint, then carries on over the Cascades at Snoqualmie Pass to Wenatchee,
+  the apple hub of central Washington. And Interstate 90 fills its gaps: Coeur d'Alene, Idaho and Bozeman,
   Montana on the main line, and Sheridan, Gillette, and Buffalo, Wyoming with
   Spearfish, South Dakota across the Powder River Basin to the Black Hills.
 

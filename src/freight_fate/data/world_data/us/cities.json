@@ -5215,6 +5215,15 @@
       "lat": 48.2766,
       "lon": -116.5533,
       "locations": []
+    },
+    "wenatchee_wa_us": {
+      "spoken_city": "Wenatchee",
+      "state": "WA",
+      "country": "US",
+      "region": "pacific_northwest",
+      "lat": 47.4235,
+      "lon": -120.3103,
+      "locations": []
     }
   }
 }
