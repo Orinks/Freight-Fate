@@ -137,6 +137,12 @@
   Interstate 20 runs through Big Spring and Sweetwater, Syracuse to Buffalo, and
   Madison to Chicago. Real grades on each.
 
+- **Ten more runs get their towns.** Flagstaff down to Phoenix, Augusta to
+  Atlanta, Corpus Christi to San Antonio, Killeen to Fort Worth, Raleigh to
+  Charlotte, Washington to Philadelphia, Laredo to McAllen down the Rio Grande,
+  Syracuse to Albany, Greenville to Atlanta, and Grand Island to North Platte.
+  Real grades on each.
+
 - **The map now has real time zones, and your clock changes as you cross
   them.** Drive west out of Tennessee on I-40 and you will hear "Crossing
   into Central Time. It is now 2:15 PM." With terse speech on, it is just
