@@ -14,10 +14,11 @@ network I/O runs on a background thread and no error ever propagates into
 the game loop.
 
 Privacy: the feature is off by default and only ever sends the broad
-activity strings above, authenticated by a random driver identity the player
-confirmed in their browser (see :func:`begin_setup`). The driver's spoken
-display name lives on the site, chosen at confirmation; the game never
-transmits profile names, save data, or anything about the real player.
+activity strings above, authenticated by account-issued credentials the
+player copies from the Orinks driver setup page and pastes into the game
+once (see :func:`verify_identity`). The driver's display name lives on the
+site, tied to their Orinks account; the game never transmits profile names,
+save data, or anything about the real player.
 """
 
 from __future__ import annotations
@@ -25,10 +26,9 @@ from __future__ import annotations
 import json
 import logging
 import os
-import secrets
 import threading
 import time
-import urllib.parse
+import urllib.error
 import urllib.request
 from collections.abc import Callable
 from dataclasses import dataclass
@@ -54,11 +54,6 @@ MIN_CHANGE_INTERVAL_S = 15.0
 # stops a two-second detour (a status screen, a confirmation prompt) from
 # bouncing the driver off and back onto the public board.
 OFF_DUTY_GRACE_S = 20.0
-
-# Seconds a setup-confirmation poll waits between checks, and how long the
-# whole browser-confirmation flow may take before the game gives up.
-SETUP_POLL_INTERVAL_S = 3.0
-SETUP_TIMEOUT_S = 15 * 60.0
 
 _REQUEST_TIMEOUT_S = 10.0
 _WORKER_TICK_S = HEARTBEAT_INTERVAL_S
@@ -88,12 +83,12 @@ def _http_json(url: str, payload: dict | None, headers: dict[str, str]) -> dict:
 
 @dataclass
 class OnlineIdentity:
-    """The random, player-confirmed credentials for posting presence.
+    """Account-issued credentials for posting presence.
 
-    ``driver_id`` is public (it names the profile page on Orinks);
-    ``driver_token`` is the posting secret and never leaves this machine
-    except inside authenticated requests. Both are game-generated -- there is
-    no account, e-mail, or real-world identity behind them.
+    Both values come from the Orinks driver setup page after the player
+    signs in there: ``driver_id`` is public (it names the profile page on
+    Orinks); ``driver_token`` is the posting secret, shown once at issuance,
+    and never leaves this machine except inside authenticated requests.
     """
 
     driver_id: str
@@ -128,61 +123,33 @@ class OnlineIdentity:
             return None
         return cls(driver_id=driver_id, driver_token=driver_token)
 
-    @classmethod
-    def generate(cls) -> OnlineIdentity:
-        return cls(
-            driver_id=f"driver-{secrets.token_urlsafe(9).lower().replace('_', '-')}",
-            driver_token=secrets.token_urlsafe(48),
-        )
 
+def verify_identity(identity: OnlineIdentity, *, transport: Transport = _http_json) -> str:
+    """Check pasted credentials against Orinks without going on duty.
 
-def new_setup_token() -> str:
-    """A short-lived random secret naming one browser-confirmation session."""
-    return secrets.token_urlsafe(32)
-
-
-def begin_setup(
-    identity: OnlineIdentity,
-    setup_token: str,
-    *,
-    transport: Transport = _http_json,
-) -> str | None:
-    """Register a setup session on Orinks and return the confirmation URL.
-
-    The player opens the URL in their browser, picks a driver name and a
-    visibility level there, and confirms. Returns None when the site is
-    unreachable or refuses the session.
+    Posts one empty-activity presence request -- the server treats that as an
+    off-duty sign-off, so a valid pair changes nothing visible. Returns one
+    of ``"ok"``, ``"driver_not_found"`` (the Driver ID is wrong),
+    ``"unauthorized"`` (the token is wrong or was rotated), or ``"error"``
+    (network trouble; nothing learned).
     """
     try:
         reply = transport(
-            f"{base_url()}/api/freight-fate/setup",
-            {
-                "driverId": identity.driver_id,
-                "driverToken": identity.driver_token,
-                "setupToken": setup_token,
-            },
-            {},
+            f"{base_url()}/api/freight-fate/presence",
+            {"driverId": identity.driver_id, "activity": "", "detail": ""},
+            {"Authorization": f"Bearer {identity.driver_token}"},
         )
-    except Exception as e:
-        log.warning("Online presence setup failed: %s", e)
-        return None
-    url = reply.get("setupUrl")
-    return url if isinstance(url, str) and url else None
-
-
-def check_setup(setup_token: str, *, transport: Transport = _http_json) -> str:
-    """One poll of the setup session: 'confirmed', 'pending', 'expired', or 'error'."""
-    try:
-        query = urllib.parse.urlencode({"token": setup_token})
-        reply = transport(f"{base_url()}/api/freight-fate/setup?{query}", None, {})
-    except Exception as e:
-        log.debug("Online presence setup poll failed: %s", e)
+    except urllib.error.HTTPError as e:
+        if e.code == 404:
+            return "driver_not_found"
+        if e.code == 401:
+            return "unauthorized"
+        log.warning("Online identity check failed: HTTP %s", e.code)
         return "error"
-    if reply.get("confirmed"):
-        return "confirmed"
-    if reply.get("expired") or not reply.get("found", True):
-        return "expired"
-    return "pending"
+    except Exception as e:
+        log.warning("Online identity check failed: %s", e)
+        return "error"
+    return "ok" if reply.get("ok") else "error"
 
 
 # -- presence service ---------------------------------------------------------

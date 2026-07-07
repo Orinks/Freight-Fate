@@ -3,15 +3,14 @@
 These cover the behaviour that must hold regardless of whether the site is
 even reachable: the disabled/off-by-default path, heartbeat and change
 scheduling, the off-duty grace and sign-off, credential storage, and the
-setup helpers. A fake transport and an injected clock keep every test
-deterministic and free of real sockets.
+pasted-credential verification. A fake transport and an injected clock keep
+every test deterministic and free of real sockets.
 """
 
 from __future__ import annotations
 
 import json
-
-import pytest
+import urllib.error
 
 from freight_fate.discord_presence import PresenceState
 from freight_fate.online_presence import (
@@ -21,10 +20,8 @@ from freight_fate.online_presence import (
     OnlineIdentity,
     OnlinePresence,
     base_url,
-    begin_setup,
-    check_setup,
     fetch_board,
-    new_setup_token,
+    verify_identity,
 )
 from freight_fate.settings import Settings
 
@@ -266,21 +263,10 @@ def test_disable_signs_off_and_reenable_resumes():
 
 
 def test_identity_round_trips_through_disk():
-    identity = OnlineIdentity.generate()
+    identity = OnlineIdentity(driver_id="road-star-abcd1234", driver_token="s" * 68)
     identity.save()
     loaded = OnlineIdentity.load()
     assert loaded == identity
-
-
-def test_generated_identities_are_distinct_and_well_formed():
-    a, b = OnlineIdentity.generate(), OnlineIdentity.generate()
-    assert a.driver_id != b.driver_id
-    assert a.driver_token != b.driver_token
-    assert a.driver_id.startswith("driver-")
-    assert len(a.driver_token) >= 24
-    # The site normalizes ids to lowercase [a-z0-9_-]; generate within that.
-    assert all(c.isalnum() or c in "-_" for c in a.driver_id)
-    assert a.driver_id == a.driver_id.lower()
 
 
 def test_missing_or_malformed_identity_loads_as_none():
@@ -293,7 +279,7 @@ def test_missing_or_malformed_identity_loads_as_none():
     assert OnlineIdentity.load() is None
 
 
-# -- setup and board helpers -----------------------------------------------------
+# -- verification and board helpers ----------------------------------------------
 
 
 def test_base_url_env_override(monkeypatch):
@@ -301,35 +287,31 @@ def test_base_url_env_override(monkeypatch):
     assert base_url() == "http://localhost:3000"
 
 
-def test_begin_setup_returns_the_confirmation_url():
-    transport = FakeTransport(reply={"ok": True, "setupUrl": "https://orinks.net/x"})
-    url = begin_setup(IDENTITY, new_setup_token(), transport=transport)
-    assert url == "https://orinks.net/x"
-    _, payload, _ = transport.requests[0]
-    assert payload["driverId"] == IDENTITY.driver_id
-    assert payload["driverToken"] == IDENTITY.driver_token
+def _http_error(code: int) -> urllib.error.HTTPError:
+    return urllib.error.HTTPError("https://orinks.net", code, "err", None, None)
 
 
-def test_begin_setup_unreachable_returns_none():
-    assert begin_setup(IDENTITY, "tok", transport=FakeTransport(error=OSError())) is None
-    assert begin_setup(IDENTITY, "tok", transport=FakeTransport(reply={"ok": False})) is None
+def test_verify_identity_ok_posts_an_off_duty_signoff():
+    transport = FakeTransport(reply={"ok": True, "cleared": True})
+    assert verify_identity(IDENTITY, transport=transport) == "ok"
+    url, payload, headers = transport.requests[0]
+    assert url.endswith("/api/freight-fate/presence")
+    # Empty activity means "off duty": validating never puts us on the board.
+    assert payload == {"driverId": IDENTITY.driver_id, "activity": "", "detail": ""}
+    assert headers["Authorization"] == f"Bearer {IDENTITY.driver_token}"
 
 
-@pytest.mark.parametrize(
-    ("reply", "expected"),
-    [
-        ({"found": True, "confirmed": True, "expired": False}, "confirmed"),
-        ({"found": True, "confirmed": False, "expired": False}, "pending"),
-        ({"found": True, "confirmed": False, "expired": True}, "expired"),
-        ({"found": False}, "expired"),
-    ],
-)
-def test_check_setup_states(reply, expected):
-    assert check_setup("tok", transport=FakeTransport(reply=reply)) == expected
-
-
-def test_check_setup_unreachable_is_an_error():
-    assert check_setup("tok", transport=FakeTransport(error=OSError())) == "error"
+def test_verify_identity_maps_the_failure_modes():
+    assert (
+        verify_identity(IDENTITY, transport=FakeTransport(error=_http_error(404)))
+        == "driver_not_found"
+    )
+    assert (
+        verify_identity(IDENTITY, transport=FakeTransport(error=_http_error(401))) == "unauthorized"
+    )
+    assert verify_identity(IDENTITY, transport=FakeTransport(error=_http_error(500))) == "error"
+    assert verify_identity(IDENTITY, transport=FakeTransport(error=OSError())) == "error"
+    assert verify_identity(IDENTITY, transport=FakeTransport(reply={"ok": False})) == "error"
 
 
 def test_fetch_board_returns_drivers_or_none():
