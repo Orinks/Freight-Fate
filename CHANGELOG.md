@@ -12,6 +12,13 @@
   rig needs tires or you need to get clean, you can plan which stop to aim for
   instead of pulling in and hoping.
 
+- **Hundreds more truck stops named along your routes.** The map now calls out
+  far more real travel centers, truck stops, and rest areas by name as you drive
+  -- Love's, Pilot, Flying J, TA, Petro, and independents alike -- each pinned to
+  its real location. About nineteen out of twenty routes now have at least one
+  named place to fuel, eat, or park; the rest are the genuinely empty rural
+  stretches where a driver really does have to plan ahead.
+
 - **New freight cities you can haul to and from.** The map is growing new
   pickup-and-delivery cities in the gaps between the ones already there -- real
   towns where a load can start or end, not just places you drive past. New this
