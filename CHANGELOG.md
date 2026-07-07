@@ -223,6 +223,12 @@
   Greensboro, Manchester to Providence, and South Bend to Grand Rapids. Each
   town names the real highway.
 
+- **Sixteen more short runs get their towns.** Springfield to St Louis, Santa
+  Rosa to Sacramento, Waco to Dallas and College Station, Portland to Manchester,
+  Lansing to Detroit, Columbia to Charlotte, Erie to Buffalo, the Wisconsin and
+  Michigan runs, Montgomery to Birmingham, Gary to Lafayette, Charlotte to
+  Greensboro, Salina to Wichita, and Hibbing to Duluth. Real grades on each.
+
 - **The map now has real time zones, and your clock changes as you cross
   them.** Drive west out of Tennessee on I-40 and you will hear "Crossing
   into Central Time. It is now 2:15 PM." With terse speech on, it is just
