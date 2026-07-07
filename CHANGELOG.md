@@ -42,9 +42,11 @@
   Interstate 5 Siskiyous or the US-97 high desert through Klamath Falls; Spokane
   to Boise can take the Interstate 84 valley or the slow US-95 mountain run over
   White Bird through Lewiston and McCall; San Antonio to Van Horn can take
-  Interstate 10 or the US-90 border road through Del Rio; and Billings to Salt
-  Lake City can run the direct route or drop down Interstate 15 through Butte and
-  Idaho Falls.
+  Interstate 10 or the US-90 border road through Del Rio; Billings to Salt Lake
+  City can run the direct route or drop down Interstate 15 through Butte and Idaho
+  Falls; and Lubbock to Dallas can take the interstate through Abilene and Fort
+  Worth or the lonely US-82 back-country diagonal through Dickens, Seymour, and
+  Jacksboro.
 
 - **The longest coast-to-interior hauls now name the towns you pass.** Atlanta
   to Dallas calls out the Interstate 20 towns clear across Alabama, Mississippi,
