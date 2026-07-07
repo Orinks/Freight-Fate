@@ -6,10 +6,14 @@
 
 - **New freight cities you can haul to and from.** The map is growing new
   pickup-and-delivery cities in the gaps between the ones already there -- real
-  towns where a load can start or end, not just places you drive past. So far
-  this release adds, on the Deep South Interstate 20 run between Shreveport and
-  Tuscaloosa: Monroe, Louisiana; Vicksburg, Mississippi, up on the river bluffs;
-  and Meridian, Mississippi. More cities are being added across the map.
+  towns where a load can start or end, not just places you drive past. New this
+  release: on the Deep South Interstate 20 run, Monroe, Louisiana; Vicksburg,
+  Mississippi on the river bluffs; and Meridian, Mississippi. Out west, Utah's
+  Interstate 15 adds Ogden, Cedar City, and Saint George; Nevada adds Fernley on
+  Interstate 80 and Tonopah out on the lonely US-95 between Reno and Las Vegas;
+  Interstate 8 adds El Centro and Yuma; and Interstate 5 toward Oregon adds
+  Redding, California and Grants Pass, Oregon. More cities are being added across
+  the map.
 
 - **The longest coast-to-interior hauls now name the towns you pass.** Atlanta
   to Dallas calls out the Interstate 20 towns clear across Alabama, Mississippi,

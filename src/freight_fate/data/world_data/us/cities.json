@@ -4675,6 +4675,87 @@
       "lat": 32.5093,
       "lon": -92.1193,
       "locations": []
+    },
+    "ogden_ut_us": {
+      "spoken_city": "Ogden",
+      "state": "UT",
+      "country": "US",
+      "region": "rockies",
+      "lat": 41.223,
+      "lon": -111.9738,
+      "locations": []
+    },
+    "cedar_city_ut_us": {
+      "spoken_city": "Cedar City",
+      "state": "UT",
+      "country": "US",
+      "region": "rockies",
+      "lat": 37.6775,
+      "lon": -113.0619,
+      "locations": []
+    },
+    "saint_george_ut_us": {
+      "spoken_city": "Saint George",
+      "state": "UT",
+      "country": "US",
+      "region": "rockies",
+      "lat": 37.1041,
+      "lon": -113.5841,
+      "locations": []
+    },
+    "fernley_nv_us": {
+      "spoken_city": "Fernley",
+      "state": "NV",
+      "country": "US",
+      "region": "great_basin",
+      "lat": 39.608,
+      "lon": -119.2518,
+      "locations": []
+    },
+    "tonopah_nv_us": {
+      "spoken_city": "Tonopah",
+      "state": "NV",
+      "country": "US",
+      "region": "great_basin",
+      "lat": 38.0672,
+      "lon": -117.2301,
+      "locations": []
+    },
+    "yuma_az_us": {
+      "spoken_city": "Yuma",
+      "state": "AZ",
+      "country": "US",
+      "region": "desert_southwest",
+      "lat": 32.7253,
+      "lon": -114.6244,
+      "locations": []
+    },
+    "el_centro_ca_us": {
+      "spoken_city": "El Centro",
+      "state": "CA",
+      "country": "US",
+      "region": "california",
+      "lat": 32.792,
+      "lon": -115.5631,
+      "locations": []
+    },
+    "redding_ca_us": {
+      "spoken_city": "Redding",
+      "state": "CA",
+      "country": "US",
+      "region": "california",
+      "lat": 40.5865,
+      "lon": -122.3917,
+      "locations": []
+    },
+    "grants_pass_or_us": {
+      "spoken_city": "Grants Pass",
+      "state": "OR",
+      "country": "US",
+      "region": "pacific_northwest",
+      "lat": 42.4393,
+      "lon": -123.3307,
+      "locations": []
     }
   }
 }
