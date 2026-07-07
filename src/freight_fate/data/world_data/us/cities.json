@@ -5341,6 +5341,24 @@
       "lat": 36.2145,
       "lon": -83.2949,
       "locations": []
+    },
+    "richmond_ky_us": {
+      "spoken_city": "Richmond",
+      "state": "KY",
+      "country": "US",
+      "region": "mid_south",
+      "lat": 37.7479,
+      "lon": -84.2947,
+      "locations": []
+    },
+    "london_ky_us": {
+      "spoken_city": "London",
+      "state": "KY",
+      "country": "US",
+      "region": "mid_south",
+      "lat": 37.129,
+      "lon": -84.0833,
+      "locations": []
     }
   }
 }

@@ -43,7 +43,10 @@
   map on the US-11E valley run between Knoxville and Johnson City -- past Jefferson
   City, Greeneville, and Jonesborough, with the Davy Crockett birthplace along the
   way -- so freight moves the real East Tennessee towns instead of skipping the
-  whole stretch.
+  whole stretch. And Interstate 75 now runs Appalachian Kentucky, connecting the
+  Bluegrass to East Tennessee for the first time: Richmond and London between
+  Lexington and Knoxville, past Berea and Corbin, over the Kentucky, Rockcastle,
+  and Cumberland rivers with the Kentucky Music Hall of Fame at Renfro Valley.
 
 - **Truck stops now tell you what they are known for.** When you check your
   route or pull in to rest, the big travel-center brands call out their

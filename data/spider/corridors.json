@@ -161,6 +161,20 @@
         {"lat": 40.8021, "lon": -124.1637, "note": "Eureka -- US-101 on Humboldt Bay"},
         {"lat": 41.7558, "lon": -124.2026, "note": "Crescent City -- US-101 near the Oregon line"}
       ]
+    },
+    {
+      "ref": "I-75-KY",
+      "spoken": "Interstate 75",
+      "phase": 1,
+      "tier": 1,
+      "status": "unstarted",
+      "note": "I-75 through Appalachian Kentucky: Lexington south through the Cumberland foothills to Knoxville. No lexington-knoxville leg exists today -- a virgin build connecting the Bluegrass to East Tennessee. Real freight towns on the road: Richmond, Berea, London, Corbin.",
+      "waypoints": [
+        {"lat": 38.0406, "lon": -84.5037, "note": "Lexington -- I-75 north start (existing node)"},
+        {"lat": 37.1290, "lon": -84.0833, "note": "London -- I-75 Appalachian Kentucky"},
+        {"lat": 36.9487, "lon": -84.0966, "note": "Corbin -- I-75 near the Cumberland Gap country"},
+        {"lat": 35.9606, "lon": -83.9207, "note": "Knoxville -- I-75 end (existing node)"}
+      ]
     }
   ]
 }
