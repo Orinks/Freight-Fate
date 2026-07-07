@@ -131,6 +131,19 @@ instead -- Billings->Salt Lake City is declared I-15 but genuinely runs
 I-90 + US-191 + US-20 + I-15; keep the real route and use per-checkpoint
 highway fields (below) so cues name the actual road.
 
+**Correcting a wrong-road leg** (the full sequence, proven on San
+Antonio->El Paso): set `route_via`; inspect the leg's auto-discovered
+Overpass stops and REMOVE any that belong to the wrong road (check their
+sources -- hand-curated stops with official-feed sources stay); run
+`--adopt-ors-miles --only` for the real distance (pay/deadline change --
+confirm with the map owner first); run `--refresh-geometry --engine ors
+--only`; re-project the surviving curated stops onto the new geometry from
+their real-world coordinates (`position_on_route` in
+`tools/place_checkpoints.py`, noting the re-projection in each source);
+rebuild `speed_limits` with `--add-maxspeed --only` (the old profile
+described the old road); and sanity-check `interchanges` against exit-ref
+mileposts. Then proceed with checkpoints and POIs as normal.
+
 ### 5. Position and write the checkpoints
 
 ```sh
@@ -151,6 +164,14 @@ at least one real place covers the leg. The optional trailing fields set the
 checkpoint type and its spoken highway (for legs whose declared highway
 oversimplifies the real route). Investigate every rejection: it usually
 means the coordinates or the town are wrong, not the gate.
+
+One legitimate rejection cause (pilot lesson from Salina, Russell, and
+Colby on I-70): a real on-route town whose CENTER sits more than 2 miles
+from the road. Use the town's interchange coordinates instead -- that is
+where the driver actually passes it. When unsure which side of town the
+road runs, read the leg's polyline directly (filter `parsed["coordinates"]`
+near the town's longitude and look at the latitudes) rather than guessing
+twice. Never widen the gate; it is doing its job.
 
 ### 6. Discover truck-stop POIs
 
