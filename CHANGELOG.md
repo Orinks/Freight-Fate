@@ -229,6 +229,12 @@
   Michigan runs, Montgomery to Birmingham, Gary to Lafayette, Charlotte to
   Greensboro, Salina to Wichita, and Hibbing to Duluth. Real grades on each.
 
+- **Sixteen more short runs get their towns.** Chico to Sacramento, Sacramento to
+  San Francisco, the Texas runs into Fort Worth and Abilene, Springfield to
+  Albany, Rockford to Chicago, Beaumont to Houston, Syracuse to Rochester, the
+  California runs down from Victorville and Oceanside into Los Angeles, Newark to
+  Philadelphia, Orlando to Tampa, and Macon to Atlanta. Real grades on each.
+
 - **The map now has real time zones, and your clock changes as you cross
   them.** Drive west out of Tennessee on I-40 and you will hear "Crossing
   into Central Time. It is now 2:15 PM." With terse speech on, it is just
