@@ -192,6 +192,12 @@
   Kansas and Texas runs, Hartford to New York, Chattanooga to Knoxville, and
   Roanoke up the Shenandoah to Harrisonburg. Real grades on each.
 
+- **The Northeast corridor and more fill in.** New York to Philadelphia, Portland
+  to Boston, Washington to Richmond, Richmond to Virginia Beach, Akron to
+  Pittsburgh, Salinas to San Francisco, Bakersfield to Fresno, Charleston to
+  Savannah up the coast, Eugene to Portland, and Escanaba to Green Bay. Real
+  grades on each.
+
 - **The map now has real time zones, and your clock changes as you cross
   them.** Drive west out of Tennessee on I-40 and you will hear "Crossing
   into Central Time. It is now 2:15 PM." With terse speech on, it is just
