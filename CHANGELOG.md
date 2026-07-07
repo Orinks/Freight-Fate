@@ -262,6 +262,12 @@
   to Austin, Manchester to Worcester, and Port Huron to Flint. Real grades on
   each.
 
+- **Eighteen more short runs get their towns.** The Upper Peninsula and Michigan
+  runs, Eugene to Salem, the Minnesota runs, Fort Collins to Denver, Springfield
+  to New Haven, Topeka to Kansas City, Lafayette to Indianapolis, Kenosha to
+  Chicago, Bellingham to Everett, Johnson City to Asheville, and Lincoln to
+  Omaha. Real grades on each.
+
 - **The map now has real time zones, and your clock changes as you cross
   them.** Drive west out of Tennessee on I-40 and you will hear "Crossing
   into Central Time. It is now 2:15 PM." With terse speech on, it is just
