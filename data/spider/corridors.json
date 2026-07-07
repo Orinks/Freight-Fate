@@ -48,6 +48,20 @@
         {"lat": 48.2330, "lon": -101.2963, "note": "Minot -- US-2"},
         {"lat": 47.9253, "lon": -97.0329, "note": "Grand Forks -- US-2 at I-29 (end)"}
       ]
+    },
+    {
+      "ref": "I-90-WY",
+      "spoken": "Interstate 90",
+      "phase": 1,
+      "tier": 1,
+      "status": "unstarted",
+      "note": "I-90 Billings southeast through the Wyoming Powder River Basin (Sheridan, Gillette) to Rapid City. Uncovered coal-and-oil freight country; both endpoints are existing nodes.",
+      "waypoints": [
+        {"lat": 45.7833, "lon": -108.5007, "note": "Billings -- I-90 start (existing node)"},
+        {"lat": 44.7972, "lon": -106.9562, "note": "Sheridan -- I-90 in Wyoming"},
+        {"lat": 44.2911, "lon": -105.5022, "note": "Gillette -- I-90 Powder River Basin"},
+        {"lat": 44.0805, "lon": -103.2310, "note": "Rapid City -- I-90 end (existing node)"}
+      ]
     }
   ]
 }

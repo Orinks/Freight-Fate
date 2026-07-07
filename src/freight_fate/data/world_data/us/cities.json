@@ -5116,6 +5116,42 @@
       "lat": 47.9253,
       "lon": -97.0328,
       "locations": []
+    },
+    "sheridan_wy_us": {
+      "spoken_city": "Sheridan",
+      "state": "WY",
+      "country": "US",
+      "region": "rockies",
+      "lat": 44.7972,
+      "lon": -106.9562,
+      "locations": []
+    },
+    "buffalo_wy_us": {
+      "spoken_city": "Buffalo",
+      "state": "WY",
+      "country": "US",
+      "region": "rockies",
+      "lat": 44.3483,
+      "lon": -106.6989,
+      "locations": []
+    },
+    "gillette_wy_us": {
+      "spoken_city": "Gillette",
+      "state": "WY",
+      "country": "US",
+      "region": "rockies",
+      "lat": 44.2911,
+      "lon": -105.5022,
+      "locations": []
+    },
+    "spearfish_sd_us": {
+      "spoken_city": "Spearfish",
+      "state": "SD",
+      "country": "US",
+      "region": "heartland",
+      "lat": 44.4908,
+      "lon": -103.8594,
+      "locations": []
     }
   }
 }
