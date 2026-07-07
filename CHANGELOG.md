@@ -18,6 +18,16 @@
   Grades on every one of these come from real elevation now, so the Sierra,
   Siskiyou, and Blue Mountain climbs are felt instead of smoothed flat.
 
+- **More of the long western and plains runs now name their towns.** Van Horn
+  to San Antonio calls out the Interstate 10 Trans-Pecos and Hill Country towns
+  -- Fort Stockton, Ozona, Sonora, Junction, Kerrville, and Boerne. Reno to Las
+  Vegas names the lonely US-95 desert stops through Hawthorne, Tonopah, and
+  Beatty. Cheyenne to Salt Lake City runs the Interstate 80 Wyoming high desert
+  (Laramie, Rawlins, Green River, Evanston); Boise to Portland comes down the
+  Blue Mountains and the Columbia; and Fargo to Omaha follows Interstate 29 down
+  the Red River and Big Sioux valleys. Grades on all of them come from real
+  elevation.
+
 - **The map now has real time zones, and your clock changes as you cross
   them.** Drive west out of Tennessee on I-40 and you will hear "Crossing
   into Central Time. It is now 2:15 PM." With terse speech on, it is just
