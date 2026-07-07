@@ -76,6 +76,20 @@
         {"lat": 47.2372, "lon": -93.5303, "note": "Grand Rapids -- US-2 Minnesota"},
         {"lat": 46.7867, "lon": -92.1005, "note": "Duluth -- US-2 end (existing node)"}
       ]
+    },
+    {
+      "ref": "US-2-W",
+      "spoken": "US Route 2",
+      "phase": 2,
+      "tier": 3,
+      "status": "unstarted",
+      "note": "US-2 western half: Shelby over Marias Pass through NW Montana (Kalispell) and the Idaho panhandle (Sandpoint) to Spokane. Uncovered; Kalispell is a real Flathead Valley freight hub.",
+      "waypoints": [
+        {"lat": 48.5075, "lon": -111.8563, "note": "Shelby -- US-2 west start (existing node)"},
+        {"lat": 48.1958, "lon": -114.3129, "note": "Kalispell -- US-2 over Marias Pass"},
+        {"lat": 48.2766, "lon": -116.5533, "note": "Sandpoint -- US-2 Idaho panhandle"},
+        {"lat": 47.6588, "lon": -117.4260, "note": "Spokane -- US-2 end (existing node)"}
+      ]
     }
   ]
 }

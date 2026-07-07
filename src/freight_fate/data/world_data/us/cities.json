@@ -5188,6 +5188,33 @@
       "lat": 47.2372,
       "lon": -93.5302,
       "locations": []
+    },
+    "kalispell_mt_us": {
+      "spoken_city": "Kalispell",
+      "state": "MT",
+      "country": "US",
+      "region": "rockies",
+      "lat": 48.1958,
+      "lon": -114.3129,
+      "locations": []
+    },
+    "libby_mt_us": {
+      "spoken_city": "Libby",
+      "state": "MT",
+      "country": "US",
+      "region": "rockies",
+      "lat": 48.3883,
+      "lon": -115.556,
+      "locations": []
+    },
+    "sandpoint_id_us": {
+      "spoken_city": "Sandpoint",
+      "state": "ID",
+      "country": "US",
+      "region": "great_basin",
+      "lat": 48.2766,
+      "lon": -116.5533,
+      "locations": []
     }
   }
 }
