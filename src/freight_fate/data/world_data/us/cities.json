@@ -5224,6 +5224,15 @@
       "lat": 47.4235,
       "lon": -120.3103,
       "locations": []
+    },
+    "bend_or_us": {
+      "spoken_city": "Bend",
+      "state": "OR",
+      "country": "US",
+      "region": "pacific_northwest",
+      "lat": 44.0582,
+      "lon": -121.3153,
+      "locations": []
     }
   }
 }
