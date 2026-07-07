@@ -17,6 +17,19 @@
   changes. Boundaries follow the real lines, including split states like
   Tennessee, Kentucky, Indiana, the Florida panhandle, and far west Texas.
 
+- **The southern plains routes now name their towns.** Oklahoma City to
+  Amarillo calls out the old Route 66 towns from El Reno and Weatherford
+  through Elk City, Sayre, Shamrock, and McLean. Amarillo to Albuquerque
+  names Vega, Adrian, and San Jon across the Llano Estacado and Clines
+  Corners, Moriarty, and Edgewood down off the mountains into the Rio
+  Grande valley. The I-35 runs between Oklahoma City, Fort Worth, and
+  Dallas name Gainesville, Denton, and Ardmore, and Little Rock to Dallas
+  calls out Benton, Hope, Texarkana, and the east Texas towns of Sulphur
+  Springs, Greenville, and Rockwall. Grades along all of these now come
+  from real elevation data, so the short climbs -- the Arbuckle Mountains
+  on I-35 and the drop off the caprock west of Amarillo -- are felt
+  instead of smoothed flat.
+
 - **Three of the longest, emptiest drives now call out the real towns along
   the way.** Kansas City to Denver names the I-70 towns from Lawrence and
   Topeka through Salina, Hays, and Goodland to Limon. Billings to Salt Lake
