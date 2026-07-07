@@ -1,0 +1,23 @@
+{
+  "corridors": [
+    {
+      "ref": "I-70",
+      "spoken": "Interstate 70",
+      "phase": 1,
+      "tier": 1,
+      "status": "unstarted",
+      "note": "Pilot corridor. Denver to Salt Lake City via the Colorado Rockies (Eisenhower Tunnel, Vail Pass, Glenwood Canyon), across the Utah San Rafael Swell, then I-15 north from Cove Fort. Entirely missing from the map today. Waypoints pin ORS onto I-70 so it does not shortcut to the faster I-80 route.",
+      "waypoints": [
+        {"lat": 39.7392, "lon": -104.9903, "note": "Denver -- I-70 west start"},
+        {"lat": 39.6295, "lon": -106.0655, "note": "Silverthorne -- I-70 exit 205, forces the mountain route not I-80"},
+        {"lat": 39.5490, "lon": -107.3310, "note": "Glenwood Springs -- I-70 through Glenwood Canyon"},
+        {"lat": 39.1088, "lon": -108.4619, "note": "Clifton -- I-70 at Grand Junction"},
+        {"lat": 38.9955, "lon": -110.1596, "note": "Green River, Utah -- I-70 east of the San Rafael Swell"},
+        {"lat": 38.9583, "lon": -111.8602, "note": "Salina, Utah -- I-70 west of the Swell"},
+        {"lat": 38.5994, "lon": -112.5769, "note": "Cove Fort -- I-70 ends at I-15"},
+        {"lat": 39.7102, "lon": -111.8366, "note": "Nephi -- I-15 north toward Salt Lake City"},
+        {"lat": 40.7608, "lon": -111.8910, "note": "Salt Lake City -- I-15 end"}
+      ]
+    }
+  ]
+}
