@@ -180,6 +180,12 @@
   Portland, El Paso to Van Horn, Evansville to Louisville, Green Bay to
   Milwaukee, and Fort Smith to Tulsa. Real grades on each.
 
+- **Fifteen more runs get their towns.** The Florida interior and coast runs,
+  Chico to Fairfield, Dayton to Fort Wayne, Chattanooga to Atlanta, San Jose to
+  Sacramento, Columbia to Charleston, Asheville to Knoxville through the Pigeon
+  River Gorge, Huntsville to Nashville, Louisville to Indianapolis, Cleveland to
+  Toledo, Santa Maria to Oxnard, and Enid to Wichita. Real grades on each.
+
 - **The map now has real time zones, and your clock changes as you cross
   them.** Drive west out of Tennessee on I-40 and you will hear "Crossing
   into Central Time. It is now 2:15 PM." With terse speech on, it is just
