@@ -4,15 +4,19 @@
 
 ### Added
 
-- **The mountain West fills in, interstate by interstate.** New freight cities
-  are opening up along the western interstates the map did not reach before.
+- **The mountain West and northern plains fill in, highway by highway.** New
+  freight cities are opening up along the western roads the map did not reach
+  before.
   Interstate 70 now runs the whole way from Denver over the Eisenhower Tunnel,
   Vail Pass, and Glenwood Canyon and across the Utah desert -- pick up and
   deliver in Grand Junction, Glenwood Springs, Silverthorne, and Edwards,
   Colorado, and Green River, Richfield, and Nephi, Utah, with the high climbs
   felt in real grades and a lone diesel stop out in the San Rafael Swell.
   Interstate 15 reaches up through Montana, adding Helena, Great Falls, and
-  Shelby from Butte to the Canada line.
+  Shelby from Butte to the Canada line. And the US-2 Hi-Line now runs the whole
+  northern tier from Shelby to Grand Forks -- Havre, Glasgow, and Wolf Point,
+  Montana, plus Williston in the Bakken oil patch, Minot, and Devils Lake, North
+  Dakota.
 
 - **Truck stops now tell you what they are known for.** When you check your
   route or pull in to rest, the big travel-center brands call out their

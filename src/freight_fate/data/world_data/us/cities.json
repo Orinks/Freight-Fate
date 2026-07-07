@@ -5053,6 +5053,69 @@
       "lat": 48.5053,
       "lon": -111.857,
       "locations": []
+    },
+    "havre_mt_us": {
+      "spoken_city": "Havre",
+      "state": "MT",
+      "country": "US",
+      "region": "rockies",
+      "lat": 48.55,
+      "lon": -109.6841,
+      "locations": []
+    },
+    "glasgow_mt_us": {
+      "spoken_city": "Glasgow",
+      "state": "MT",
+      "country": "US",
+      "region": "rockies",
+      "lat": 48.197,
+      "lon": -106.6367,
+      "locations": []
+    },
+    "wolf_point_mt_us": {
+      "spoken_city": "Wolf Point",
+      "state": "MT",
+      "country": "US",
+      "region": "rockies",
+      "lat": 48.0906,
+      "lon": -105.6406,
+      "locations": []
+    },
+    "williston_nd_us": {
+      "spoken_city": "Williston",
+      "state": "ND",
+      "country": "US",
+      "region": "heartland",
+      "lat": 48.147,
+      "lon": -103.618,
+      "locations": []
+    },
+    "minot_nd_us": {
+      "spoken_city": "Minot",
+      "state": "ND",
+      "country": "US",
+      "region": "heartland",
+      "lat": 48.2325,
+      "lon": -101.2963,
+      "locations": []
+    },
+    "devils_lake_nd_us": {
+      "spoken_city": "Devils Lake",
+      "state": "ND",
+      "country": "US",
+      "region": "heartland",
+      "lat": 48.1128,
+      "lon": -98.8651,
+      "locations": []
+    },
+    "grand_forks_nd_us": {
+      "spoken_city": "Grand Forks",
+      "state": "ND",
+      "country": "US",
+      "region": "heartland",
+      "lat": 47.9253,
+      "lon": -97.0328,
+      "locations": []
     }
   }
 }

@@ -32,6 +32,22 @@
         {"lat": 47.5052, "lon": -111.3008, "note": "Great Falls -- I-15"},
         {"lat": 48.5075, "lon": -111.8563, "note": "Shelby -- I-15 at US-2 near the Canada line"}
       ]
+    },
+    {
+      "ref": "US-2",
+      "spoken": "US Route 2",
+      "phase": 2,
+      "tier": 3,
+      "status": "unstarted",
+      "note": "The Hi-Line: US-2 across the northern tier of Montana and North Dakota, Shelby to Grand Forks. No interstate shadows it (I-94 is far south), so it passes the shadow rule. Loaded with uncovered freight cities -- Williston (Bakken oil), Minot, Havre, Glasgow.",
+      "waypoints": [
+        {"lat": 48.5075, "lon": -111.8563, "note": "Shelby -- US-2 east start (existing node)"},
+        {"lat": 48.5500, "lon": -109.6841, "note": "Havre -- US-2 Hi-Line"},
+        {"lat": 48.1969, "lon": -106.6367, "note": "Glasgow -- US-2"},
+        {"lat": 48.1470, "lon": -103.6180, "note": "Williston -- US-2 in the Bakken"},
+        {"lat": 48.2330, "lon": -101.2963, "note": "Minot -- US-2"},
+        {"lat": 47.9253, "lon": -97.0329, "note": "Grand Forks -- US-2 at I-29 (end)"}
+      ]
     }
   ]
 }
