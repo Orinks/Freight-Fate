@@ -100,6 +100,12 @@
   Spokane, Houston to San Antonio, Austin to Dallas past Temple, and more. Real
   grades on each.
 
+- **Thirteen more heartland and southern runs get their towns.** Wichita and Des
+  Moines to Kansas City, Bismarck to Fargo, Birmingham to Nashville, Knoxville to
+  Atlanta, Buffalo to Cleveland along Lake Erie, Fort Worth to Austin, Lincoln to
+  Des Moines, Shreveport to Dallas, Jackson to New Orleans and to Tuscaloosa,
+  Omaha to Kansas City, and Rock Springs to Salt Lake City. Real grades on each.
+
 - **The map now has real time zones, and your clock changes as you cross
   them.** Drive west out of Tennessee on I-40 and you will hear "Crossing
   into Central Time. It is now 2:15 PM." With terse speech on, it is just
