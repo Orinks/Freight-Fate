@@ -4,6 +4,19 @@
 
 ### Added
 
+- **See who else is hauling right now with the new drivers board.** A new
+  Drivers online item in the main menu reads the live board from orinks.net:
+  each driver's name, what they are doing, their route and cargo, and how
+  fresh the report is. If you want to appear there yourself, set up sharing
+  under Settings, Online. Nothing is ever shared until you do: the game
+  explains exactly what gets shared and opens your browser so you can pick a
+  driver name and confirm before anything is sent, and you choose there
+  whether the public board lists you at all. Only broad in-game activity is
+  shared, like "Driving: Chicago to
+  Dallas, steel coils", never your save files, real name, or location, and
+  you leave the board within minutes of going off duty or turning sharing
+  off.
+
 - **The map now has real time zones, and your clock changes as you cross
   them.** Drive west out of Tennessee on I-40 and you will hear "Crossing
   into Central Time. It is now 2:15 PM." With terse speech on, it is just

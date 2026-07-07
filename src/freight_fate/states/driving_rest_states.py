@@ -88,6 +88,9 @@ class TrafficStopState(MenuState):
         detail = base.detail if base is not None else ""
         return PresenceState("Pulled over", detail)
 
+    def online_presence(self):
+        return self.presence()
+
     def _resolve(self) -> None:
         """Decide the outcome and apply any ticket immediately."""
         p = self.ctx.profile
@@ -166,6 +169,9 @@ class RestStopState(MenuState):
         base = self.driving.presence()
         detail = base.detail if base is not None else ""
         return PresenceState("Resting at a stop", detail)
+
+    def online_presence(self):
+        return self.presence()
 
     def announce_entry(self) -> None:
         self.ctx.audio.set_ambient(_poi_ambient_key(self.stop))

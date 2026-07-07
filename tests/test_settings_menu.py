@@ -145,7 +145,7 @@ def test_settings_menu_uses_category_submenus():
         picker = SettingsState(app.ctx)
         app.push_state(picker)
         labels = [item.text for item in picker.items]
-        assert labels == ["Gameplay", "Audio", "Speech and weather", "Updates", "Back"]
+        assert labels == ["Gameplay", "Audio", "Speech and weather", "Online", "Updates", "Back"]
 
         while picker.items[picker.index].text != "Audio":
             picker.handle_event(key_event(pygame.K_DOWN))
