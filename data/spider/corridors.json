@@ -132,6 +132,21 @@
         {"lat": 40.7391, "lon": -114.0733, "note": "West Wendover -- I-80 at the Utah line"},
         {"lat": 40.7608, "lon": -111.8910, "note": "Salt Lake City -- I-80 end (existing node)"}
       ]
+    },
+    {
+      "ref": "I-84-OR",
+      "spoken": "Interstate 84",
+      "phase": 1,
+      "tier": 1,
+      "status": "unstarted",
+      "note": "I-84 east half over the Oregon Blue Mountains: Pendleton up Cabbage Hill and down to Boise. Today portland-boise skips the whole east half and Pendleton dead-ends short of it. Real freight cities on the road: La Grande, Baker City, Ontario at the Snake River (Idaho line).",
+      "waypoints": [
+        {"lat": 45.6721, "lon": -118.7886, "note": "Pendleton -- I-84 west start (existing node)"},
+        {"lat": 45.3246, "lon": -118.0877, "note": "La Grande -- I-84 over the Blue Mountains"},
+        {"lat": 44.7749, "lon": -117.8344, "note": "Baker City -- I-84"},
+        {"lat": 44.0266, "lon": -116.9629, "note": "Ontario -- I-84 at the Idaho line"},
+        {"lat": 43.6150, "lon": -116.2023, "note": "Boise -- I-84 end (existing node)"}
+      ]
     }
   ]
 }

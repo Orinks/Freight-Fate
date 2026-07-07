@@ -5278,6 +5278,33 @@
       "lat": 40.7391,
       "lon": -114.0733,
       "locations": []
+    },
+    "la_grande_or_us": {
+      "spoken_city": "La Grande",
+      "state": "OR",
+      "country": "US",
+      "region": "pacific_northwest",
+      "lat": 45.3246,
+      "lon": -118.0877,
+      "locations": []
+    },
+    "baker_city_or_us": {
+      "spoken_city": "Baker City",
+      "state": "OR",
+      "country": "US",
+      "region": "pacific_northwest",
+      "lat": 44.7749,
+      "lon": -117.8344,
+      "locations": []
+    },
+    "ontario_or_us": {
+      "spoken_city": "Ontario",
+      "state": "OR",
+      "country": "US",
+      "region": "pacific_northwest",
+      "lat": 44.0266,
+      "lon": -116.9629,
+      "locations": []
     }
   }
 }

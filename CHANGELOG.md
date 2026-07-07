@@ -5,7 +5,8 @@
 ### Added
 
 - **The mountain West and northern plains fill in, highway by highway.** New
-  freight cities are opening up along the western roads the map did not reach
+  Our first maps had multiple dead zones in the plains, the mountain west and the west coast regions. These updates try to close some loops and fill in areas that simply could not be driven within the Game
+  Freight cities are opening up along the western roads the map did not reach
   before.
   Interstate 70 now runs the whole way from Denver over the Eisenhower Tunnel,
   Vail Pass, and Glenwood Canyon and across the Utah desert -- pick up and
