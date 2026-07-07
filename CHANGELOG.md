@@ -80,6 +80,12 @@
   Cruces and El Paso, Tampa to Miami down Alligator Alley, and the plains runs
   around St Louis, Kansas City, Fargo, and Tulsa. Real grades on every one.
 
+- **More trunk routes get their towns.** Minneapolis to Des Moines, Charlotte to
+  Atlanta, Tallahassee to Mobile, Indianapolis to St Louis, Houston to Dallas
+  past Huntsville and Corsicana, Fargo to Minneapolis, Birmingham to Memphis on
+  the new Interstate 22, and Elko to Salt Lake City across the Nevada desert.
+  Real grades throughout.
+
 - **The map now has real time zones, and your clock changes as you cross
   them.** Drive west out of Tennessee on I-40 and you will hear "Crossing
   into Central Time. It is now 2:15 PM." With terse speech on, it is just
