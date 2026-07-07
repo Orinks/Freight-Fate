@@ -198,6 +198,12 @@
   Savannah up the coast, Eugene to Portland, and Escanaba to Green Bay. Real
   grades on each.
 
+- **Twelve more runs get their towns.** Palm Bay to Lakeland, Kingman to Las
+  Vegas, Columbus to Cincinnati, Oklahoma City to Tulsa, Harrisburg to
+  Philadelphia, Rolla to St Louis, Newport to New Haven, Oxnard to Lancaster,
+  Beckley to Roanoke, Wichita Falls to Fort Worth, Santa Ana to Lancaster, and
+  McKinney to Tyler. Real grades on each.
+
 - **The map now has real time zones, and your clock changes as you cross
   them.** Drive west out of Tennessee on I-40 and you will hear "Crossing
   into Central Time. It is now 2:15 PM." With terse speech on, it is just
