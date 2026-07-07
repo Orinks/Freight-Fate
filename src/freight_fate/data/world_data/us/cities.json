@@ -5404,6 +5404,33 @@
       "lat": 38.4192,
       "lon": -82.4452,
       "locations": []
+    },
+    "paintsville_ky_us": {
+      "spoken_city": "Paintsville",
+      "state": "KY",
+      "country": "US",
+      "region": "mid_south",
+      "lat": 37.8145,
+      "lon": -82.8071,
+      "locations": []
+    },
+    "pikeville_ky_us": {
+      "spoken_city": "Pikeville",
+      "state": "KY",
+      "country": "US",
+      "region": "mid_south",
+      "lat": 37.4793,
+      "lon": -82.5188,
+      "locations": []
+    },
+    "hazard_ky_us": {
+      "spoken_city": "Hazard",
+      "state": "KY",
+      "country": "US",
+      "region": "mid_south",
+      "lat": 37.2495,
+      "lon": -83.1932,
+      "locations": []
     }
   }
 }

@@ -190,6 +190,21 @@
         {"lat": 38.4192, "lon": -82.4452, "note": "Huntington -- I-64 in West Virginia"},
         {"lat": 38.3498, "lon": -81.6326, "note": "Charleston -- I-64 end (existing node)"}
       ]
+    },
+    {
+      "ref": "KY-COALFIELDS",
+      "spoken": "US Route 23",
+      "phase": 2,
+      "tier": 2,
+      "status": "unstarted",
+      "note": "Eastern Kentucky coalfields: down US-23 (the Country Music Highway) from Ashland through Prestonsburg to Pikeville, then west on the KY-80 Hal Rogers Parkway through Hazard to London on I-75. Ties the coal country into the map via Ashland (I-64) and London (I-75). Real Appalachian coal-and-log freight.",
+      "waypoints": [
+        {"lat": 38.4784, "lon": -82.6379, "note": "Ashland -- US-23 north end (existing node)"},
+        {"lat": 37.6659, "lon": -82.7713, "note": "Prestonsburg -- US-23 Floyd County"},
+        {"lat": 37.4793, "lon": -82.5188, "note": "Pikeville -- US-23 Pike County coal hub"},
+        {"lat": 37.2490, "lon": -83.1932, "note": "Hazard -- KY-80 Perry County"},
+        {"lat": 37.1290, "lon": -84.0833, "note": "London -- KY-80 at I-75 (existing node)"}
+      ]
     }
   ]
 }
