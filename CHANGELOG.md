@@ -17,6 +17,19 @@
   changes. Boundaries follow the real lines, including split states like
   Tennessee, Kentucky, Indiana, the Florida panhandle, and far west Texas.
 
+- **Three of the longest, emptiest drives now call out the real towns along
+  the way.** Kansas City to Denver names the I-70 towns from Lawrence and
+  Topeka through Salina, Hays, and Goodland to Limon. Billings to Salt Lake
+  City narrates its real mountain route through Livingston, Bozeman, Big Sky,
+  West Yellowstone, Idaho Falls, and Pocatello, naming the actual road under
+  your wheels as it changes from I-90 to US-191 to US-20 to I-15. San Antonio
+  to El Paso calls out every Hill Country and Trans-Pecos town from Boerne to
+  Sierra Blanca -- and that run now follows its real road, I-10 the whole
+  way, with true mileage, real West Texas 80 mile-per-hour speed limits, and
+  grades from the actual climbs, matching the Love's and Pilot stops that
+  were always on that highway. A real Sapp Brothers travel center now greets
+  you at Salt Lake City at the end of the run down from Billings.
+
 - **Interstate 40 pushes west into the Mojave and east through the Carolina
   Piedmont.** Six new stops join the map: Barstow, Kingman, Flagstaff, and
   Gallup carry I-40 across the high desert Southwest, including a real climb
