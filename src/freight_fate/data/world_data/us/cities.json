@@ -4918,6 +4918,51 @@
       "lat": 42.8666,
       "lon": -106.3131,
       "locations": []
+    },
+    "klamath_falls_or_us": {
+      "spoken_city": "Klamath Falls",
+      "state": "OR",
+      "country": "US",
+      "region": "pacific_northwest",
+      "lat": 42.2249,
+      "lon": -121.7817,
+      "locations": []
+    },
+    "del_rio_tx_us": {
+      "spoken_city": "Del Rio",
+      "state": "TX",
+      "country": "US",
+      "region": "gulf_coast",
+      "lat": 29.3627,
+      "lon": -100.8968,
+      "locations": []
+    },
+    "lewiston_id_us": {
+      "spoken_city": "Lewiston",
+      "state": "ID",
+      "country": "US",
+      "region": "great_basin",
+      "lat": 46.4165,
+      "lon": -117.0177,
+      "locations": []
+    },
+    "mccall_id_us": {
+      "spoken_city": "McCall",
+      "state": "ID",
+      "country": "US",
+      "region": "great_basin",
+      "lat": 44.911,
+      "lon": -116.0987,
+      "locations": []
+    },
+    "butte_mt_us": {
+      "spoken_city": "Butte",
+      "state": "MT",
+      "country": "US",
+      "region": "rockies",
+      "lat": 46.0038,
+      "lon": -112.5347,
+      "locations": []
     }
   }
 }

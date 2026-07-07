@@ -4,6 +4,14 @@
 
 ### Added
 
+- **Truck stops now tell you what they are known for.** When you check your
+  route or pull in to rest, the big travel-center brands call out their
+  specialty out loud, so a stop is not just a name on the road anymore. A Love's
+  is where you go for tire care and a quick lube; a TravelCenters of America or a
+  Petro has the truck repair shop; Pilot and Flying J are your showers. When the
+  rig needs tires or you need to get clean, you can plan which stop to aim for
+  instead of pulling in and hoping.
+
 - **New freight cities you can haul to and from.** The map is growing new
   pickup-and-delivery cities in the gaps between the ones already there -- real
   towns where a load can start or end, not just places you drive past. New this
@@ -23,8 +31,20 @@
   warehouse town; Interstate 65 adds Elizabethtown, Kentucky; the New York
   Thruway adds Utica; Interstate 64 adds Charlottesville, Virginia; Interstate
   40 adds Conway, Arkansas; Interstate 80 adds Iowa City; Interstate 90 adds
-  Moses Lake, Washington; and Interstate 25 adds Casper, Wyoming. More cities
-  are being added across the map.
+  Moses Lake, Washington; and Interstate 25 adds Casper, Wyoming. Out in the
+  mountain West, Klamath Falls, Oregon; Del Rio, Texas on the Rio Grande;
+  Lewiston and McCall, Idaho; and Butte, Montana round out the batch -- close to
+  forty new freight cities in all.
+
+- **Some hauls now offer more than one way to drive them.** Where two real truck
+  routes exist, the map carries both, so the route picker can weigh them by time,
+  fuel, and grades. Sacramento or San Francisco to Portland can run the
+  Interstate 5 Siskiyous or the US-97 high desert through Klamath Falls; Spokane
+  to Boise can take the Interstate 84 valley or the slow US-95 mountain run over
+  White Bird through Lewiston and McCall; San Antonio to Van Horn can take
+  Interstate 10 or the US-90 border road through Del Rio; and Billings to Salt
+  Lake City can run the direct route or drop down Interstate 15 through Butte and
+  Idaho Falls.
 
 - **The longest coast-to-interior hauls now name the towns you pass.** Atlanta
   to Dallas calls out the Interstate 20 towns clear across Alabama, Mississippi,
