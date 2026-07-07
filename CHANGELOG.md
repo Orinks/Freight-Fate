@@ -59,6 +59,13 @@
   through Casper. Each town is announced with its real highway, and the grades
   come from real elevation.
 
+- **The heartland and mountain west keep filling in.** Ten more long runs now
+  name their towns: Birmingham to New Orleans, Missoula to Billings past Butte
+  and Bozeman, Little Rock to Oklahoma City, Milwaukee to Minneapolis by the
+  Wisconsin Dells, El Paso to Tucson, Boise to Salt Lake City, Charleston to
+  Richmond over the Alleghenies, Jacksonville to Atlanta, Des Moines to Chicago,
+  and Rapid City to Billings across the Montana high plains. Real grades on all.
+
 - **The map now has real time zones, and your clock changes as you cross
   them.** Drive west out of Tennessee on I-40 and you will hear "Crossing
   into Central Time. It is now 2:15 PM." With terse speech on, it is just
