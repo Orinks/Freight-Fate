@@ -255,6 +255,13 @@
   Oklahoma City, Stockton and Fairfield into the Bay Area, Scranton to Allentown,
   and South Bend to Fort Wayne. Each town names the real highway.
 
+- **Eighteen more short runs get their towns.** Athens to Atlanta, Binghamton to
+  Syracuse, New Haven to New York, Eugene to Roseburg, Gainesville to
+  Jacksonville, West Palm Beach to Miami, Augusta to Columbia, Morgantown to
+  Pittsburgh, the Illinois and Michigan runs, the Colorado Front Range, Killeen
+  to Austin, Manchester to Worcester, and Port Huron to Flint. Real grades on
+  each.
+
 - **The map now has real time zones, and your clock changes as you cross
   them.** Drive west out of Tennessee on I-40 and you will hear "Crossing
   into Central Time. It is now 2:15 PM." With terse speech on, it is just
