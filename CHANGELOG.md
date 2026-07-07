@@ -268,6 +268,12 @@
   Chicago, Bellingham to Everett, Johnson City to Asheville, and Lincoln to
   Omaha. Real grades on each.
 
+- **Twenty more short runs get their towns.** The Los Angeles basin and Rio
+  Grande runs, the New England shoreline runs, Detroit to Toledo, McKinney to
+  Fort Worth, Lafayette to Baton Rouge, Lawton to Wichita Falls, the Kansas and
+  Minnesota runs, Bloomington to Champaign, and Escanaba to Iron Mountain. Real
+  grades on each.
+
 - **The map now has real time zones, and your clock changes as you cross
   them.** Drive west out of Tennessee on I-40 and you will hear "Crossing
   into Central Time. It is now 2:15 PM." With terse speech on, it is just
