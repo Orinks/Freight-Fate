@@ -156,6 +156,12 @@
   Kalamazoo to Detroit, Memphis to Little Rock, and Binghamton to Albany. Real
   grades throughout.
 
+- **Eleven more runs get their towns.** Lafayette to New Orleans, Peoria to
+  Rockford, Des Moines to Omaha, Chattanooga to Nashville, Cape Coral to Tampa,
+  Bloomington to Chicago, Fort Collins to Colorado Springs, Ann Arbor to Grand
+  Rapids, Sacramento to Reno over Donner Summit, Fayetteville to Charlotte, and
+  Wichita Falls to McKinney. Real grades on each.
+
 - **The map now has real time zones, and your clock changes as you cross
   them.** Drive west out of Tennessee on I-40 and you will hear "Crossing
   into Central Time. It is now 2:15 PM." With terse speech on, it is just
