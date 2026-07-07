@@ -85,7 +85,7 @@ def _ccw(ax, ay, bx, by, cx, cy):
 
 def _segments_cross(a, b, c, d):
     """True if segment a-b crosses c-d (each pt is (lat,lon))."""
-    ay, ax = a; by, bx = b; cy, cx = c; dy, dx = d
+    (ay, ax), (by, bx), (cy, cx), (dy, dx) = a, b, c, d
     return (_ccw(ax, ay, cx, cy, dx, dy) != _ccw(bx, by, cx, cy, dx, dy)) and (
         _ccw(ax, ay, bx, by, cx, cy) != _ccw(ax, ay, bx, by, dx, dy)
     )
@@ -140,13 +140,16 @@ def _assemble_rings(arcs):
                 if used[i]:
                     continue
                 if arc[0] == ring[-1]:
-                    ring.extend(arc[1:]); used[i] = True; changed = True
+                    ring.extend(arc[1:])
                 elif arc[-1] == ring[-1]:
-                    ring.extend(reversed(arc[:-1])); used[i] = True; changed = True
+                    ring.extend(reversed(arc[:-1]))
                 elif arc[-1] == ring[0]:
-                    ring[:0] = arc[:-1]; used[i] = True; changed = True
+                    ring[:0] = arc[:-1]
                 elif arc[0] == ring[0]:
-                    ring[:0] = list(reversed(arc[1:])); used[i] = True; changed = True
+                    ring[:0] = list(reversed(arc[1:]))
+                else:
+                    continue
+                used[i] = changed = True
         rings.append(ring)
     return rings
 

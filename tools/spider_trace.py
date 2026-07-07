@@ -84,7 +84,7 @@ def main():
             "points": [
                 {"lat": round(ll[1], 5), "lon": round(ll[0], 5),
                  "at_mi": round(c * parsed["miles"] / hav_total, 1)}
-                for ll, c in zip(coords, cum)
+                for ll, c in zip(coords, cum, strict=False)
             ],
         }
         out = SPIDER / "traces" / f"{a.ref}.json"
