@@ -145,7 +145,13 @@ def test_deadlines_cover_required_hos_time_across_the_network(world):
     from freight_fate.models.jobs import required_hours
 
     endorsements = {"refrigerated", "heavy_haul", "high_value"}
-    for city in world.city_names():
+    # Bounded, deterministic sample of origins rather than every city: this scans
+    # city x seed x generated jobs and grew with the map (~30s at 349 cities, which
+    # times out on slower CI runners). The deadline-vs-HOS check is a formula
+    # invariant, so ~96 diverse origins exercise the distance/route range without an
+    # O(cities) scan that balloons CI time as the map keeps growing.
+    all_cities = sorted(world.city_names())
+    for city in all_cities[:: max(1, len(all_cities) // 96)]:
         for seed in range(3):
             jobs = JobBoard(world, seed=seed).offers(city, endorsements, count=5, level=5)
             for job in jobs:
