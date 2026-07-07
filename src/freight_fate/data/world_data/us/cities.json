@@ -4756,6 +4756,96 @@
       "lat": 42.4393,
       "lon": -123.3307,
       "locations": []
+    },
+    "laramie_wy_us": {
+      "spoken_city": "Laramie",
+      "state": "WY",
+      "country": "US",
+      "region": "rockies",
+      "lat": 41.3114,
+      "lon": -105.5911,
+      "locations": []
+    },
+    "brookings_sd_us": {
+      "spoken_city": "Brookings",
+      "state": "SD",
+      "country": "US",
+      "region": "heartland",
+      "lat": 44.3114,
+      "lon": -96.7984,
+      "locations": []
+    },
+    "dickinson_nd_us": {
+      "spoken_city": "Dickinson",
+      "state": "ND",
+      "country": "US",
+      "region": "heartland",
+      "lat": 46.8792,
+      "lon": -102.7896,
+      "locations": []
+    },
+    "mitchell_sd_us": {
+      "spoken_city": "Mitchell",
+      "state": "SD",
+      "country": "US",
+      "region": "heartland",
+      "lat": 43.7094,
+      "lon": -98.0298,
+      "locations": []
+    },
+    "las_vegas_nm_us": {
+      "spoken_city": "Las Vegas",
+      "state": "NM",
+      "country": "US",
+      "region": "desert_southwest",
+      "lat": 35.5939,
+      "lon": -105.2239,
+      "locations": []
+    },
+    "santa_fe_nm_us": {
+      "spoken_city": "Santa Fe",
+      "state": "NM",
+      "country": "US",
+      "region": "desert_southwest",
+      "lat": 35.687,
+      "lon": -105.9378,
+      "locations": []
+    },
+    "kerrville_tx_us": {
+      "spoken_city": "Kerrville",
+      "state": "TX",
+      "country": "US",
+      "region": "gulf_coast",
+      "lat": 30.0474,
+      "lon": -99.1403,
+      "locations": []
+    },
+    "sulphur_la_us": {
+      "spoken_city": "Sulphur",
+      "state": "LA",
+      "country": "US",
+      "region": "gulf_coast",
+      "lat": 30.2366,
+      "lon": -93.3774,
+      "locations": []
+    },
+    "orange_tx_us": {
+      "spoken_city": "Orange",
+      "state": "TX",
+      "country": "US",
+      "region": "gulf_coast",
+      "lat": 30.093,
+      "lon": -93.7365,
+      "locations": []
+    },
+    "odessa_tx_us": {
+      "spoken_city": "Odessa",
+      "state": "TX",
+      "country": "US",
+      "region": "southern_plains",
+      "lat": 31.8457,
+      "lon": -102.3676,
+      "locations": []
     }
   }
 }

@@ -12,8 +12,14 @@
   Interstate 15 adds Ogden, Cedar City, and Saint George; Nevada adds Fernley on
   Interstate 80 and Tonopah out on the lonely US-95 between Reno and Las Vegas;
   Interstate 8 adds El Centro and Yuma; and Interstate 5 toward Oregon adds
-  Redding, California and Grants Pass, Oregon. More cities are being added across
-  the map.
+  Redding, California and Grants Pass, Oregon. Up on the northern plains and
+  Rockies, Interstate 80 adds Laramie, Wyoming; Brookings and Mitchell, South
+  Dakota join on Interstates 29 and 90; Dickinson, North Dakota comes in on
+  Interstate 94; and the Interstate 25 climb through New Mexico adds Santa Fe
+  and Las Vegas, New Mexico. Down in Texas and the Gulf, Odessa joins in the
+  Permian Basin, Kerrville in the Hill Country, and Orange, Texas and Sulphur,
+  Louisiana on the Interstate 10 run near the state line. More cities are being
+  added across the map.
 
 - **The longest coast-to-interior hauls now name the towns you pass.** Atlanta
   to Dallas calls out the Interstate 20 towns clear across Alabama, Mississippi,
