@@ -5233,6 +5233,24 @@
       "lat": 44.0582,
       "lon": -121.3153,
       "locations": []
+    },
+    "miles_city_mt_us": {
+      "spoken_city": "Miles City",
+      "state": "MT",
+      "country": "US",
+      "region": "rockies",
+      "lat": 46.4083,
+      "lon": -105.8406,
+      "locations": []
+    },
+    "glendive_mt_us": {
+      "spoken_city": "Glendive",
+      "state": "MT",
+      "country": "US",
+      "region": "rockies",
+      "lat": 47.1053,
+      "lon": -104.7122,
+      "locations": []
     }
   }
 }

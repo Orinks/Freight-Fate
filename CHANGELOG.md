@@ -21,7 +21,10 @@
   Sandpoint, then carries on over the Cascades at Snoqualmie Pass to Wenatchee,
   the apple hub of central Washington. And Interstate 90 fills its gaps: Coeur d'Alene, Idaho and Bozeman,
   Montana on the main line, and Sheridan, Gillette, and Buffalo, Wyoming with
-  Spearfish, South Dakota across the Powder River Basin to the Black Hills. And
+  Spearfish, South Dakota across the Powder River Basin to the Black Hills.
+  Interstate 94 now runs the southern tier of Montana too, down the Yellowstone
+  valley from Billings through Miles City and Glendive and into the North Dakota
+  badlands -- so freight moves the real cities instead of skipping across. And
   central Oregon opens up: Bend, on US-97 south from Klamath Falls and west over
   the Santiam Pass from Eugene.
 

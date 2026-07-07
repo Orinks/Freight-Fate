@@ -103,6 +103,20 @@
         {"lat": 47.4235, "lon": -120.3103, "note": "Wenatchee -- US-2 central Washington"},
         {"lat": 47.9790, "lon": -122.2021, "note": "Everett -- US-2 at Puget Sound (existing node)"}
       ]
+    },
+    {
+      "ref": "I-94-MT",
+      "spoken": "Interstate 94",
+      "phase": 1,
+      "tier": 1,
+      "status": "unstarted",
+      "note": "I-94 across eastern Montana into North Dakota: Billings to Bismarck along the Yellowstone valley. Existing map skips straight across with billings-dickinson and billings-bismarck long legs; Miles City and Glendive are the real freight towns on the road. The southern-tier counterpart to the US-2 Hi-Line, completing the MT/ND grid.",
+      "waypoints": [
+        {"lat": 45.7833, "lon": -108.5007, "note": "Billings -- I-94 west start (existing node)"},
+        {"lat": 46.4083, "lon": -105.8406, "note": "Miles City -- I-94, forces the eastern route not I-90"},
+        {"lat": 47.1053, "lon": -104.7122, "note": "Glendive -- I-94 near the ND line"},
+        {"lat": 46.8083, "lon": -100.7837, "note": "Bismarck -- I-94 end (existing node)"}
+      ]
     }
   ]
 }
