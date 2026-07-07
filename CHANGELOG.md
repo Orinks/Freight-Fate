@@ -131,6 +131,12 @@
   California valley-to-coast runs from Visalia, the Idaho high-desert legs, and
   the Tennessee and Texas back-road runs. Each town names the real highway.
 
+- **Twelve more runs, north and south.** Montgomery to Atlanta, Grand Rapids to
+  Detroit, Laredo to San Antonio, Morgantown to Charleston, Barstow to Las Vegas
+  across the Mojave, Baltimore to Richmond, Duluth to Minneapolis, the West Texas
+  Interstate 20 runs through Big Spring and Sweetwater, Syracuse to Buffalo, and
+  Madison to Chicago. Real grades on each.
+
 - **The map now has real time zones, and your clock changes as you cross
   them.** Drive west out of Tennessee on I-40 and you will hear "Crossing
   into Central Time. It is now 2:15 PM." With terse speech on, it is just
