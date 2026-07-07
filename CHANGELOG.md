@@ -174,6 +174,12 @@
   Palm Beach across to Cape Coral, Pittsburgh to Cleveland, Augusta to Savannah,
   and Topeka to Wichita on the turnpike. Each town names the real highway.
 
+- **Fifteen more runs get their towns.** Erie to Pittsburgh, Asheville to
+  Charlotte, Champaign to Indianapolis, the California valley runs, the Missouri
+  Interstate 70 runs, Lubbock to Amarillo, Harrisburg to Scranton, Olympia to
+  Portland, El Paso to Van Horn, Evansville to Louisville, Green Bay to
+  Milwaukee, and Fort Smith to Tulsa. Real grades on each.
+
 - **The map now has real time zones, and your clock changes as you cross
   them.** Drive west out of Tennessee on I-40 and you will hear "Crossing
   into Central Time. It is now 2:15 PM." With terse speech on, it is just
