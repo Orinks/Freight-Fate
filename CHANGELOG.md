@@ -4,388 +4,43 @@
 
 ### Added
 
-- **The mountain West and northern plains fill in, highway by highway.** Our
-  first maps had dead zones across the plains, the mountain West, and the West
-  Coast -- whole regions you simply could not drive. These updates close some of
-  those loops and open the roads the map did not reach before. New freight cities
-  are coming online all along them.
-  Interstate 70 now runs the whole way from Denver over the Eisenhower Tunnel,
-  Vail Pass, and Glenwood Canyon and across the Utah desert -- pick up and
-  deliver in Grand Junction, Glenwood Springs, Silverthorne, and Edwards,
-  Colorado, and Green River, Richfield, and Nephi, Utah, with the high climbs
-  felt in real grades and a lone diesel stop out in the San Rafael Swell.
-  Interstate 15 reaches up through Montana, adding Helena, Great Falls, and
-  Shelby from Butte to the Canada line. And the US-2 Hi-Line now runs the whole
-  northern tier from Shelby to Grand Forks -- Havre, Glasgow, and Wolf Point,
-  Montana, plus Williston in the Bakken oil patch, Minot, and Devils Lake, North
-  Dakota, and on to Duluth through Bemidji and Grand Rapids, Minnesota; and west
-  from Shelby it climbs Marias Pass to Spokane through Kalispell, Libby, and
-  Sandpoint, then carries on over the Cascades at Snoqualmie Pass to Wenatchee,
-  the apple hub of central Washington. And Interstate 90 fills its gaps: Coeur d'Alene, Idaho and Bozeman,
-  Montana on the main line, and Sheridan, Gillette, and Buffalo, Wyoming with
-  Spearfish, South Dakota across the Powder River Basin to the Black Hills.
-  Interstate 94 now runs the southern tier of Montana too, down the Yellowstone
-  valley from Billings through Miles City and Glendive and into the North Dakota
-  badlands -- so freight moves the real cities instead of skipping across. And
-  central Oregon opens up: Bend, on US-97 south from Klamath Falls and west over
-  the Santiam Pass from Eugene. And Interstate 80 finally crosses the Nevada
-  Great Basin -- Reno through Winnemucca, Battle Mountain, Elko, and West Wendover
-  to Salt Lake City, so the run rolls through the mining towns on the Humboldt
-  and over Golconda, Emigrant, and Silverzone summits instead of leaping the
-  whole desert in one hop. The Oregon Blue Mountains are dispatchable stops now,
-  not just names on the Boise-Portland haul -- La Grande, Baker City, and Ontario,
-  chained up Cabbage Hill over Deadman Pass down to the Snake River. And the
-  North Coast comes alive at last: US-101 winds the redwoods from Santa Rosa and
-  Ukiah up to Eureka on Humboldt Bay and Crescent City, with mountain runs inland
-  to Redding on Highway 299 and Grants Pass on US-199.
+- **The biggest map update yet -- 93 new cities to pick up and deliver in.** A
+  city is a place a load can start or end, and the map grew from 249 to 342 of
+  them, filling in dead zones that used to have nothing drivable for hundreds of
+  miles: the mountain West, the northern plains, the Nevada Great Basin, the
+  Oregon and California coast, and Appalachia. Whole corridors that simply were
+  not there before now connect city to city on the real roads -- Interstate 70
+  over the Colorado Rockies, the US-2 Hi-Line across the northern tier, Interstate
+  80 across Nevada, and Interstate 75 through the Kentucky mountains among them. Be careful, though -- there are still some challenging
+  routes where you had better watch your fuel and get it when you can.
 
-- **The eastern mountains start filling in too.** Morristown, Tennessee joins the
-  map on the US-11E valley run between Knoxville and Johnson City -- past Jefferson
-  City, Greeneville, and Jonesborough, with the Davy Crockett birthplace along the
-  way -- so freight moves the real East Tennessee towns instead of skipping the
-  whole stretch. And Interstate 75 now runs Appalachian Kentucky, connecting the
-  Bluegrass to East Tennessee for the first time: Richmond and London between
-  Lexington and Knoxville, past Berea and Corbin, over the Kentucky, Rockcastle,
-  and Cumberland rivers with the Kentucky Music Hall of Fame at Renfro Valley.
-  And Bowling Green -- the Corvette city -- joins Interstate 65 between Louisville
-  and Nashville, over the Green and Barren rivers through Mammoth Cave country, so
-  freight no longer jumps straight from Elizabethtown to Tennessee.
+- **Every run now names the real towns and country you pass.** Those are
+  checkpoints -- the actual places along a route, spoken as you reach them -- and
+  the map went from about 550 of them to over 2,500. Instead of empty miles, a
+  haul now names the towns you pass, the rivers it crosses, the mountain passes
+  and summits it climbs, and the state lines along the way, all from real
+  geography and real elevation data, so the grades are felt and not smoothed flat.
 
-- **Truck stops now tell you what they are known for.** When you check your
-  route or pull in to rest, the big travel-center brands call out their
-  specialty out loud, so a stop is not just a name on the road anymore. A Love's
-  is where you go for tire care and a quick lube; a TravelCenters of America or a
-  Petro has the truck repair shop; Pilot and Flying J are your showers. When the
-  rig needs tires or you need to get clean, you can plan which stop to aim for
-  instead of pulling in and hoping.
+- **Over 1,700 truck stops are now named along your routes.** Real travel centers, truck
+  stops, and rest areas -- Love's, Pilot, Flying J, TA, Petro, and independents
+  -- each pinned to its real location, so every route now has at least one place
+  to fuel or park, and even the emptiest rural stretches point you to a real
+  diesel pump you can pull a rig into. For now these are just named on the map;
+  making them do something -- rest, showers, repairs, and buffs -- comes in a
+  later update. We'll also add special stops with special buffs, coming soon.
+  And as we keep adding map areas, part of filling in the proper map data is
+  making sure there's always a place you can stop for a fill-and-go.
 
-- **Hundreds more truck stops named along your routes.** The map now calls out
-  far more real travel centers, truck stops, and rest areas by name as you drive
-  -- Love's, Pilot, Flying J, TA, Petro, and independents alike -- each pinned to
-  its real location. Every route now names at least one place to fuel, eat, or
-  park -- and on the emptiest rural stretches, where there is no full travel
-  center, it will at least point you to a real diesel pump you can pull a rig
-  into.
-
-- **New freight cities you can haul to and from.** The map is growing new
-  pickup-and-delivery cities in the gaps between the ones already there -- real
-  towns where a load can start or end, not just places you drive past. New this
-  release: on the Deep South Interstate 20 run, Monroe, Louisiana; Vicksburg,
-  Mississippi on the river bluffs; and Meridian, Mississippi. Out west, Utah's
-  Interstate 15 adds Ogden, Cedar City, and Saint George; Nevada adds Fernley on
-  Interstate 80 and Tonopah out on the lonely US-95 between Reno and Las Vegas;
-  Interstate 8 adds El Centro and Yuma; and Interstate 5 toward Oregon adds
-  Redding, California and Grants Pass, Oregon. Up on the northern plains and
-  Rockies, Interstate 80 adds Laramie, Wyoming; Brookings and Mitchell, South
-  Dakota join on Interstates 29 and 90; Dickinson, North Dakota comes in on
-  Interstate 94; and the Interstate 25 climb through New Mexico adds Santa Fe
-  and Las Vegas, New Mexico. Down in Texas and the Gulf, Odessa joins in the
-  Permian Basin, Kerrville in the Hill Country, and Orange, Texas and Sulphur,
-  Louisiana on the Interstate 10 run near the state line. In the East and
-  heartland, Interstate 81 adds Carlisle, Pennsylvania, a big trucking-and-
-  warehouse town; Interstate 65 adds Elizabethtown, Kentucky; the New York
-  Thruway adds Utica; Interstate 64 adds Charlottesville, Virginia; Interstate
-  40 adds Conway, Arkansas; Interstate 80 adds Iowa City; Interstate 90 adds
-  Moses Lake, Washington; and Interstate 25 adds Casper, Wyoming. Out in the
-  mountain West, Klamath Falls, Oregon; Del Rio, Texas on the Rio Grande;
-  Lewiston and McCall, Idaho; and Butte, Montana round out the batch -- close to
-  forty new freight cities in all.
+- **New: real roadside landmarks as you drive.** Routes now call out the world
+  going by -- entering a national forest, crossing a named river, approaching a
+  mountain pass, a roadside museum ahead -- over 2,800 of them, drawn from real
+  map data so a long haul has a sense of place instead of silence.
 
 - **Some hauls now offer more than one way to drive them.** Where two real truck
-  routes exist, the map carries both, so the route picker can weigh them by time,
-  fuel, and grades. Sacramento or San Francisco to Portland can run the
-  Interstate 5 Siskiyous or the US-97 high desert through Klamath Falls; Spokane
-  to Boise can take the Interstate 84 valley or the slow US-95 mountain run over
-  White Bird through Lewiston and McCall; San Antonio to Van Horn can take
-  Interstate 10 or the US-90 border road through Del Rio; Billings to Salt Lake
-  City can run the direct route or drop down Interstate 15 through Butte and Idaho
-  Falls; and Lubbock to Dallas can take the interstate through Abilene and Fort
-  Worth or the lonely US-82 back-country diagonal through Dickens, Seymour, and
-  Jacksboro.
-
-- **The longest coast-to-interior hauls now name the towns you pass.** Atlanta
-  to Dallas calls out the Interstate 20 towns clear across Alabama, Mississippi,
-  and Louisiana -- Oxford, Bessemer, Meridian, Vicksburg on the river, and Monroe
-  among them, 25 in all. The big western drives fill in too: San Francisco and
-  Reno to Salt Lake City name the Sierra and Nevada desert stops from Truckee and
-  Fernley through Winnemucca and Wells to West Wendover; Omaha to Cheyenne names
-  the Nebraska Interstate 80 towns from Ogallala to Kimball; and Portland to Salt
-  Lake City runs the Columbia Gorge and Snake River Plain from Hood River and The
-  Dalles through Baker City and Jerome to Ogden. Sacramento and San Francisco to
-  Portland now name the Interstate 5 towns over the Siskiyous -- Redding, Mount
-  Shasta, Yreka, Ashland, Grants Pass -- and down the Willamette to Woodburn.
-  Grades on every one of these come from real elevation now, so the Sierra,
-  Siskiyou, and Blue Mountain climbs are felt instead of smoothed flat.
-
-- **More of the long western and plains runs now name their towns.** Van Horn
-  to San Antonio calls out the Interstate 10 Trans-Pecos and Hill Country towns
-  -- Fort Stockton, Ozona, Sonora, Junction, Kerrville, and Boerne. Reno to Las
-  Vegas names the lonely US-95 desert stops through Hawthorne, Tonopah, and
-  Beatty. Cheyenne to Salt Lake City runs the Interstate 80 Wyoming high desert
-  (Laramie, Rawlins, Green River, Evanston); Boise to Portland comes down the
-  Blue Mountains and the Columbia; and Fargo to Omaha follows Interstate 29 down
-  the Red River and Big Sioux valleys. Grades on all of them come from real
-  elevation.
-
-- **The mountain and desert interstates fill in.** Salt Lake City and Provo to
-  Las Vegas name the Interstate 15 towns down through Cedar City and St. George;
-  Colorado Springs to Albuquerque runs the Interstate 25 Front Range and New
-  Mexico high plains (Trinidad, Raton, Las Vegas New Mexico); Bismarck to
-  Billings crosses the Dakota and Montana plains on Interstate 94; and Los
-  Angeles to San Francisco names the lonely Interstate 5 valley landmarks and
-  the Interstate 580 Bay approach. Real grades throughout.
-
-- **The southern and plains interstates keep filling in.** San Diego to Phoenix
-  names the Interstate 8 desert (El Centro, Yuma, Gila Bend); Rapid City to
-  Sioux Falls crosses South Dakota on Interstate 90 (Wall, Chamberlain,
-  Mitchell); New Orleans to Houston runs the Interstate 10 bayous; Cleveland to
-  Chicago follows the Interstate 80 toll road; and Amarillo to Dallas comes down
-  the Panhandle on US-287. Real grades throughout.
-
-- **Two more long routes get their towns, and their real roads.** Denver to
-  Albuquerque now names the US-285 run through the San Luis Valley (Fairplay,
-  Alamosa, Antonito) down to Santa Fe; Spokane to Boise names the Columbia Basin
-  and Blue Mountain towns (Ritzville, Hermiston, La Grande, Baker City). Each
-  town is announced with the actual highway it sits on, so a run that changes
-  roads names the road you are really on.
-
-- **The long diagonal hauls that change highways now name each road.** Dallas to
-  St Louis runs Interstate 35 to Oklahoma City then Interstate 44 through Tulsa,
-  Joplin, and Springfield; Dallas to Albuquerque comes down US-287 then
-  Interstate 40 past Amarillo; Albuquerque to Phoenix climbs Interstate 40 to
-  Flagstaff then drops Interstate 17 into the desert; and Billings to Cheyenne
-  and to Fort Collins run Interstate 90 to Sheridan then Interstate 25 down
-  through Casper. Each town is announced with its real highway, and the grades
-  come from real elevation.
-
-- **The heartland and mountain west keep filling in.** Ten more long runs now
-  name their towns: Birmingham to New Orleans, Missoula to Billings past Butte
-  and Bozeman, Little Rock to Oklahoma City, Milwaukee to Minneapolis by the
-  Wisconsin Dells, El Paso to Tucson, Boise to Salt Lake City, Charleston to
-  Richmond over the Alleghenies, Jacksonville to Atlanta, Des Moines to Chicago,
-  and Rapid City to Billings across the Montana high plains. Real grades on all.
-
-- **The Northeast Thruway and more western runs get their towns.** Buffalo and
-  Rochester to New York now run the Thruway east to Albany and down the Hudson
-  through Utica, Amsterdam, Kingston, and Newburgh; Provo reaches Boise and Fort
-  Collins; Las Cruces runs to Midland through the Permian Basin; Green Bay wraps
-  the bottom of Lake Michigan to Grand Rapids; and Eugene climbs to the
-  Tri-Cities. Each names the real road under the wheels.
-
-- **The interstate core fills in coast to coast.** Fourteen more well-traveled
-  runs now name their towns: Philadelphia to Pittsburgh over the Alleghenies,
-  Chicago to St Louis, Indianapolis to Nashville, Memphis to St Louis, Detroit
-  to Chicago, Spokane to Seattle over Snoqualmie Pass, the desert runs from Las
-  Cruces and El Paso, Tampa to Miami down Alligator Alley, and the plains runs
-  around St Louis, Kansas City, Fargo, and Tulsa. Real grades on every one.
-
-- **More trunk routes get their towns.** Minneapolis to Des Moines, Charlotte to
-  Atlanta, Tallahassee to Mobile, Indianapolis to St Louis, Houston to Dallas
-  past Huntsville and Corsicana, Fargo to Minneapolis, Birmingham to Memphis on
-  the new Interstate 22, and Elko to Salt Lake City across the Nevada desert.
-  Real grades throughout.
-
-- **A dozen road-changing legs across the country get their towns and roads.**
-  Charlotte to Knoxville over the Blue Ridge, Duluth to Fargo across the north
-  woods, Elko to Boise through the Nevada and Idaho desert, the Chattanooga and
-  Macon runs into Atlanta, Baltimore to Pittsburgh over the Alleghenies, Sioux
-  Falls to Minneapolis, Midland to Amarillo up the Llano, Charlotte to Savannah,
-  Baton Rouge to Shreveport, and Idaho Falls to Boise. Each town names the real
-  highway under the wheels.
-
-- **Sixteen shorter runs fill in, coast to coast.** Bangor to Manchester up New
-  England, the New York to Boston shoreline, Harrisburg and Charleston to
-  Pittsburgh, the Colorado and Idaho Interstate 15 and 25 runs, Missoula to
-  Spokane, Houston to San Antonio, Austin to Dallas past Temple, and more. Real
-  grades on each.
-
-- **Thirteen more heartland and southern runs get their towns.** Wichita and Des
-  Moines to Kansas City, Bismarck to Fargo, Birmingham to Nashville, Knoxville to
-  Atlanta, Buffalo to Cleveland along Lake Erie, Fort Worth to Austin, Lincoln to
-  Des Moines, Shreveport to Dallas, Jackson to New Orleans and to Tuscaloosa,
-  Omaha to Kansas City, and Rock Springs to Salt Lake City. Real grades on each.
-
-- **Eleven road-changing runs across the map get their towns and roads.** Los
-  Angeles and Medford down California's Central Valley, Garden City and Dodge
-  City across the Kansas and panhandle plains, Brownsville up the Rio Grande to
-  Laredo, the Tri-Cities to Seattle and Portland, Jacksonville to Tampa,
-  Clarksville to Louisville by the Kentucky parkways, and the Virginia coast to
-  Raleigh. Each town names its real highway.
-
-- **Seventeen more runs fill in, from the Northwest to the Carolinas.** Portland
-  to Seattle, Columbus to Pittsburgh and Indianapolis, the Appalachian runs from
-  Charleston and Johnson City to Roanoke, Knoxville and Louisville to Nashville,
-  Providence to New York, Fresno to Sacramento down the valley, Charleston to
-  Wilmington up the coast, and more. Real grades throughout.
-
-- **Nine more runs, including some lonely ones.** Burlington to Manchester
-  through the Green Mountains, Pocatello to Salt Lake City, Austin to Houston,
-  Cedar Rapids to Rockford past Dubuque, the Kansas runs into Wichita, Marquette
-  to Sault Ste Marie across the empty Upper Peninsula, and Brownsville up to
-  Corpus Christi. Real grades on each.
-
-- **Fifteen more road-changing runs name their roads.** Grand Rapids to Chicago
-  around Lake Michigan, Athens to Chattanooga through Atlanta, Worcester to New
-  York, Detroit to Cleveland on the turnpike, the Roanoke and Virginia runs, the
-  California valley-to-coast runs from Visalia, the Idaho high-desert legs, and
-  the Tennessee and Texas back-road runs. Each town names the real highway.
-
-- **Twelve more runs, north and south.** Montgomery to Atlanta, Grand Rapids to
-  Detroit, Laredo to San Antonio, Morgantown to Charleston, Barstow to Las Vegas
-  across the Mojave, Baltimore to Richmond, Duluth to Minneapolis, the West Texas
-  Interstate 20 runs through Big Spring and Sweetwater, Syracuse to Buffalo, and
-  Madison to Chicago. Real grades on each.
-
-- **Ten more runs get their towns.** Flagstaff down to Phoenix, Augusta to
-  Atlanta, Corpus Christi to San Antonio, Killeen to Fort Worth, Raleigh to
-  Charlotte, Washington to Philadelphia, Laredo to McAllen down the Rio Grande,
-  Syracuse to Albany, Greenville to Atlanta, and Grand Island to North Platte.
-  Real grades on each.
-
-- **Fourteen more road-changing runs name their roads.** Gulfport to Jackson,
-  Corpus Christi to McAllen, Fort Smith to Little Rock, Tuscaloosa to Huntsville,
-  Richmond to Raleigh, Columbia to Savannah, Ann Arbor to Fort Wayne, Sault Ste
-  Marie down to Traverse City, Burlington to Albany, Allentown to Bridgeport, the
-  California coast-and-valley runs, and Abilene to Wichita Falls. Each town names
-  the real highway.
-
-- **Fifteen more runs fill in the Midwest, South, and Florida.** The Wisconsin
-  runs into Madison, Asheville to Winston-Salem, the Florida Interstate 75 and
-  95 runs, Mobile to New Orleans, Columbus to Cleveland, Houston to Lake Charles,
-  Kalamazoo to Detroit, Memphis to Little Rock, and Binghamton to Albany. Real
-  grades throughout.
-
-- **Eleven more runs get their towns.** Lafayette to New Orleans, Peoria to
-  Rockford, Des Moines to Omaha, Chattanooga to Nashville, Cape Coral to Tampa,
-  Bloomington to Chicago, Fort Collins to Colorado Springs, Ann Arbor to Grand
-  Rapids, Sacramento to Reno over Donner Summit, Fayetteville to Charlotte, and
-  Wichita Falls to McKinney. Real grades on each.
-
-- **Eleven more runs, New England to California.** Lafayette to Beaumont, the
-  New Hampshire and Vermont runs into Hartford and Manchester, Albany to
-  Worcester, Wilmington to Raleigh, Indianapolis to Fort Wayne, Bangor to
-  Portland, McKinney to Waco, Twin Falls to Boise, and Los Angeles out to Indio.
-  Real grades on each.
-
-- **Fifteen more road-changing runs name their roads.** Corpus Christi to Laredo,
-  Green Bay to Madison, Yakima to Seattle over Snoqualmie, Orlando to
-  Jacksonville, Allentown to Baltimore, the Washington and California runs, West
-  Palm Beach across to Cape Coral, Pittsburgh to Cleveland, Augusta to Savannah,
-  and Topeka to Wichita on the turnpike. Each town names the real highway.
-
-- **Fifteen more runs get their towns.** Erie to Pittsburgh, Asheville to
-  Charlotte, Champaign to Indianapolis, the California valley runs, the Missouri
-  Interstate 70 runs, Lubbock to Amarillo, Harrisburg to Scranton, Olympia to
-  Portland, El Paso to Van Horn, Evansville to Louisville, Green Bay to
-  Milwaukee, and Fort Smith to Tulsa. Real grades on each.
-
-- **Fifteen more runs get their towns.** The Florida interior and coast runs,
-  Chico to Fairfield, Dayton to Fort Wayne, Chattanooga to Atlanta, San Jose to
-  Sacramento, Columbia to Charleston, Asheville to Knoxville through the Pigeon
-  River Gorge, Huntsville to Nashville, Louisville to Indianapolis, Cleveland to
-  Toledo, Santa Maria to Oxnard, and Enid to Wichita. Real grades on each.
-
-- **Fifteen more runs get their towns.** Tucson to Phoenix, Pueblo to Denver,
-  Joplin to Tulsa, Iron Mountain to Houghton across the Upper Peninsula,
-  Cincinnati to Indianapolis, Bakersfield to Los Angeles over the Grapevine, the
-  Kansas and Texas runs, Hartford to New York, Chattanooga to Knoxville, and
-  Roanoke up the Shenandoah to Harrisonburg. Real grades on each.
-
-- **The Northeast corridor and more fill in.** New York to Philadelphia, Portland
-  to Boston, Washington to Richmond, Richmond to Virginia Beach, Akron to
-  Pittsburgh, Salinas to San Francisco, Bakersfield to Fresno, Charleston to
-  Savannah up the coast, Eugene to Portland, and Escanaba to Green Bay. Real
-  grades on each.
-
-- **Twelve more runs get their towns.** Palm Bay to Lakeland, Kingman to Las
-  Vegas, Columbus to Cincinnati, Oklahoma City to Tulsa, Harrisburg to
-  Philadelphia, Rolla to St Louis, Newport to New Haven, Oxnard to Lancaster,
-  Beckley to Roanoke, Wichita Falls to Fort Worth, Santa Ana to Lancaster, and
-  McKinney to Tyler. Real grades on each.
-
-- **Thirteen more runs get their towns.** Greenville to Columbia and Charlotte,
-  Philadelphia to Baltimore, Cheyenne to Denver, Erie to Cleveland, Huntsville to
-  Birmingham, Murfreesboro to Chattanooga, Cincinnati to Louisville, Knoxville to
-  Johnson City, Boston to Hartford, Santa Rosa to San Jose, College Station to
-  Austin, and Augusta to Macon. Real grades on each.
-
-- **Thirteen more runs get their towns.** The Upper Peninsula and Wisconsin
-  runs, Toledo to Fort Wayne, the Texas Interstate 20 runs into Dallas and
-  Shreveport, Peoria to Davenport, Norfolk to Richmond, Roseburg to Medford,
-  Sioux City to Omaha, Albert Lea to Minneapolis, and South Bend to Chicago.
-  Real grades on each.
-
-- **Thirteen more road-changing runs name their roads.** Killeen to College
-  Station, Oceanside up to Victorville, Aurora to Milwaukee, Albany to Hartford,
-  Allentown to New York, the Delmarva and Chesapeake runs, Evansville to
-  Clarksville, Santa Rosa to Stockton, Tuscaloosa to Montgomery, Roanoke to
-  Greensboro, Manchester to Providence, and South Bend to Grand Rapids. Each
-  town names the real highway.
-
-- **Sixteen more short runs get their towns.** Springfield to St Louis, Santa
-  Rosa to Sacramento, Waco to Dallas and College Station, Portland to Manchester,
-  Lansing to Detroit, Columbia to Charlotte, Erie to Buffalo, the Wisconsin and
-  Michigan runs, Montgomery to Birmingham, Gary to Lafayette, Charlotte to
-  Greensboro, Salina to Wichita, and Hibbing to Duluth. Real grades on each.
-
-- **Sixteen more short runs get their towns.** Chico to Sacramento, Sacramento to
-  San Francisco, the Texas runs into Fort Worth and Abilene, Springfield to
-  Albany, Rockford to Chicago, Beaumont to Houston, Syracuse to Rochester, the
-  California runs down from Victorville and Oceanside into Los Angeles, Newark to
-  Philadelphia, Orlando to Tampa, and Macon to Atlanta. Real grades on each.
-
-- **Sixteen more short runs get their towns.** Lancaster to Bakersfield, the
-  Minnesota runs into Rochester and Minneapolis, Murfreesboro to Huntsville,
-  Saginaw to Lansing, Lexington to Cincinnati, the New Jersey and Pennsylvania
-  runs, Yakima to the Tri-Cities, Baton Rouge to New Orleans, Iron Mountain to
-  Marquette, Greensboro to Raleigh, and Austin to San Antonio. Real grades on
-  each.
-
-- **Sixteen more short runs get their towns.** Madison to Milwaukee, Gulfport to
-  New Orleans and Mobile, Lexington to Louisville, the Maryland and Pennsylvania
-  runs into Harrisburg and Baltimore, Kalamazoo to South Bend, Joplin to
-  Springfield, Lake Charles to Lafayette, Buffalo to Rochester, Rockford to
-  Madison, Palm Bay to Orlando, the Wisconsin runs to La Crosse, and Valencia to
-  Bakersfield. Real grades on each.
-
-- **Fourteen more road-changing runs name their roads.** The Los Angeles basin
-  runs from Riverside, Oxnard, Santa Ana, and Valencia, College Station to
-  Houston, Wilmington to Fayetteville, Clarksville to Murfreesboro, Enid to
-  Oklahoma City, Stockton and Fairfield into the Bay Area, Scranton to Allentown,
-  and South Bend to Fort Wayne. Each town names the real highway.
-
-- **Eighteen more short runs get their towns.** Athens to Atlanta, Binghamton to
-  Syracuse, New Haven to New York, Eugene to Roseburg, Gainesville to
-  Jacksonville, West Palm Beach to Miami, Augusta to Columbia, Morgantown to
-  Pittsburgh, the Illinois and Michigan runs, the Colorado Front Range, Killeen
-  to Austin, Manchester to Worcester, and Port Huron to Flint. Real grades on
-  each.
-
-- **Eighteen more short runs get their towns.** The Upper Peninsula and Michigan
-  runs, Eugene to Salem, the Minnesota runs, Fort Collins to Denver, Springfield
-  to New Haven, Topeka to Kansas City, Lafayette to Indianapolis, Kenosha to
-  Chicago, Bellingham to Everett, Johnson City to Asheville, and Lincoln to
-  Omaha. Real grades on each.
-
-- **Twenty more short runs get their towns.** The Los Angeles basin and Rio
-  Grande runs, the New England shoreline runs, Detroit to Toledo, McKinney to
-  Fort Worth, Lafayette to Baton Rouge, Lawton to Wichita Falls, the Kansas and
-  Minnesota runs, Bloomington to Champaign, and Escanaba to Iron Mountain. Real
-  grades on each.
-
-- **The short Northeast and metro hops fill in.** The New Jersey, Connecticut,
-  and Delaware shore runs, Baltimore to Washington, Boston to Providence and
-  Worcester, the California Bay Area hops, Salem to Portland, Fort Collins to
-  Cheyenne, Las Cruces to El Paso, and the Illinois and Michigan runs. Real
-  grades on each.
-
-- **The last short metro hops fill in, and the map is now fully named.** Akron to
-  Cleveland, Montpelier to Burlington, the Seattle-Tacoma-Olympia corridor,
-  Dallas to Fort Worth through Arlington, Winston-Salem to Greensboro, and the
-  last New England and mid-Atlantic hops. With this, every drivable route on the
-  map -- 559 of 562 legs -- now calls out the real towns you pass, and the three
-  that don't are honestly empty (a desert hop, an intra-city crossing) or await a
-  routing decision. Grades everywhere come from real elevation.
+  routes reach the same place, the map keeps both, so a run can offer a choice --
+  a faster interstate or a shorter back road -- instead of a single fixed path.
+  Is it winter, and you'd rather take a southern route than a mountainous
+  northern one? We've got you covered.
 
 - **The map now has real time zones, and your clock changes as you cross
   them.** Drive west out of Tennessee on I-40 and you will hear "Crossing
@@ -399,57 +54,6 @@
   service, deadlines, and pay are untouched; only what the wall clock says
   changes. Boundaries follow the real lines, including split states like
   Tennessee, Kentucky, Indiana, the Florida panhandle, and far west Texas.
-
-- **The southern plains routes now name their towns.** Oklahoma City to
-  Amarillo calls out the old Route 66 towns from El Reno and Weatherford
-  through Elk City, Sayre, Shamrock, and McLean. Amarillo to Albuquerque
-  names Vega, Adrian, and San Jon across the Llano Estacado and Clines
-  Corners, Moriarty, and Edgewood down off the mountains into the Rio
-  Grande valley. The I-35 runs between Oklahoma City, Fort Worth, and
-  Dallas name Gainesville, Denton, and Ardmore, and Little Rock to Dallas
-  calls out Benton, Hope, Texarkana, and the east Texas towns of Sulphur
-  Springs, Greenville, and Rockwall. Grades along all of these now come
-  from real elevation data, so the short climbs -- the Arbuckle Mountains
-  on I-35 and the drop off the caprock west of Amarillo -- are felt
-  instead of smoothed flat.
-
-- **Three of the longest, emptiest drives now call out the real towns along
-  the way.** Kansas City to Denver names the I-70 towns from Lawrence and
-  Topeka through Salina, Hays, and Goodland to Limon. Billings to Salt Lake
-  City narrates its real mountain route through Livingston, Bozeman, Big Sky,
-  West Yellowstone, Idaho Falls, and Pocatello, naming the actual road under
-  your wheels as it changes from I-90 to US-191 to US-20 to I-15. San Antonio
-  to El Paso calls out every Hill Country and Trans-Pecos town from Boerne to
-  Sierra Blanca -- and that run now follows its real road, I-10 the whole
-  way, with true mileage, real West Texas 80 mile-per-hour speed limits, and
-  grades from the actual climbs, matching the Love's and Pilot stops that
-  were always on that highway. A real Sapp Brothers travel center now greets
-  you at Salt Lake City at the end of the run down from Billings.
-
-- **Interstate 40 pushes west into the Mojave and east through the Carolina
-  Piedmont.** Six new stops join the map: Barstow, Kingman, Flagstaff, and
-  Gallup carry I-40 across the high desert Southwest, including a real climb
-  onto the Colorado Plateau near Flagstaff, home to the Nestle Purina
-  PetCare plant. Tucumcari fills the long, sparse gap between Albuquerque
-  and Amarillo. Winston-Salem, home to the HanesBrands distribution
-  operation, joins between Asheville and Greensboro to close out I-40's
-  mountain-to-Piedmont run through North Carolina. New connecting spurs
-  link Barstow to Victorville and Las Vegas on I-15, Flagstaff to Phoenix on
-  I-17, and Kingman to Las Vegas on US-93. Grades along this corridor come
-  from real elevation data at far finer resolution than before, so the
-  climbs and descents through Arizona and New Mexico are genuinely felt,
-  not smoothed away. The desert stretches run long between service stops --
-  planning fuel and hours of service matters out here.
-
-- **Interstate 10 fills in three real stops between the coasts.** Indio joins
-  I-10 between Los Angeles and Phoenix through the Coachella Valley. Van Horn
-  joins the long, empty run between El Paso and San Antonio -- the emptiest
-  stretch of interstate in the game -- with a real truck stop to fuel up
-  before the desert. Lake Charles joins between Houston and Lafayette, home
-  to the Citgo Lake Charles refining complex, one of the largest on the Gulf
-  Coast. Mobile and Gulfport now count as Gulf Coast country instead of
-  Mid-South, matching their weather, freight market, and road character to
-  the coast they actually sit on.
 
 ### Changed
 
