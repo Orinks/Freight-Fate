@@ -43,6 +43,13 @@
   Chicago follows the Interstate 80 toll road; and Amarillo to Dallas comes down
   the Panhandle on US-287. Real grades throughout.
 
+- **Two more long routes get their towns, and their real roads.** Denver to
+  Albuquerque now names the US-285 run through the San Luis Valley (Fairplay,
+  Alamosa, Antonito) down to Santa Fe; Spokane to Boise names the Columbia Basin
+  and Blue Mountain towns (Ritzville, Hermiston, La Grande, Baker City). Each
+  town is announced with the actual highway it sits on, so a run that changes
+  roads names the road you are really on.
+
 - **The map now has real time zones, and your clock changes as you cross
   them.** Drive west out of Tennessee on I-40 and you will hear "Crossing
   into Central Time. It is now 2:15 PM." With terse speech on, it is just
