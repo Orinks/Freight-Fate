@@ -226,6 +226,125 @@ def test_bass_engine_uses_single_pitched_loop(monkeypatch):
     a.shutdown()
 
 
+def _record_sfx_keys(monkeypatch, impl):
+    """Record every sound key the backend opens, without changing behavior."""
+    keys: list[str] = []
+    original = impl._sfx_stream
+
+    def spy(key, looping=False):
+        keys.append(key)
+        return original(key, looping)
+
+    monkeypatch.setattr(impl, "_sfx_stream", spy)
+    return keys
+
+
+def test_silent_engine_start_skips_the_ignition_crank(monkeypatch):
+    monkeypatch.delenv("FREIGHT_FATE_AUDIO_BACKEND", raising=False)
+    a = AudioEngine()
+    if a.backend_name != "bass":
+        pytest.skip("BASS backend unavailable")
+    impl = a._impl
+    keys = _record_sfx_keys(monkeypatch, impl)
+    a.engine_start(play_start_sound=False)  # resume / menu-return path
+    assert a.engine_running
+    assert "engine/start" not in keys  # the crank must not replay
+    assert impl._engine_stream is not None  # the loop still comes up
+    a.engine_stop()
+    a.shutdown()
+
+
+def test_deliberate_engine_start_plays_crank_and_arms_crossfade(monkeypatch):
+    monkeypatch.delenv("FREIGHT_FATE_AUDIO_BACKEND", raising=False)
+    a = AudioEngine()
+    if a.backend_name != "bass":
+        pytest.skip("BASS backend unavailable")
+    impl = a._impl
+    keys = _record_sfx_keys(monkeypatch, impl)
+    a.engine_start()  # deliberate ignition
+    assert "engine/start" in keys
+    # A crank fade-out plus the loop fade-in are scheduled, and the loop starts
+    # silent so the ignition is not drowned out.
+    assert len(impl._fades) == 2
+    assert impl._engine_intro_gain == 0.0
+    a.engine_stop()
+    a.shutdown()
+
+
+def test_engine_start_crossfade_ramps_the_loop_up_over_time(monkeypatch):
+    monkeypatch.delenv("FREIGHT_FATE_AUDIO_BACKEND", raising=False)
+    a = AudioEngine()
+    if a.backend_name != "bass":
+        pytest.skip("BASS backend unavailable")
+    impl = a._impl
+    a.engine_start()
+    assert impl._engine_intro_gain == 0.0
+    # Advance well past the clip length plus the crossfade window.
+    for _ in range(400):
+        a.update(0.05)
+    assert impl._engine_intro_gain == 1.0
+    assert len(impl._fades) == 0  # finished fades are dropped
+    a.engine_stop()
+    a.shutdown()
+
+
+def test_engine_starting_true_during_crank_then_clears(monkeypatch):
+    monkeypatch.delenv("FREIGHT_FATE_AUDIO_BACKEND", raising=False)
+    a = AudioEngine()
+    if a.backend_name != "bass":
+        pytest.skip("BASS backend unavailable")
+    a.engine_start()  # deliberate ignition
+    assert a.engine_starting  # loop has not taken over yet
+    # Advance past the clip length plus the crossfade window.
+    for _ in range(400):
+        a.update(0.05)
+    assert not a.engine_starting  # loop has taken over
+    assert a.engine_running
+    a.engine_stop()
+    a.shutdown()
+
+
+def test_silent_engine_start_is_never_marked_starting(monkeypatch):
+    monkeypatch.delenv("FREIGHT_FATE_AUDIO_BACKEND", raising=False)
+    a = AudioEngine()
+    if a.backend_name != "bass":
+        pytest.skip("BASS backend unavailable")
+    a.engine_start(play_start_sound=False)  # resume / menu-return path
+    assert not a.engine_starting  # no crank, nothing to gate on
+    a.engine_stop()
+    a.shutdown()
+
+
+def test_engine_stop_clears_engine_starting(monkeypatch):
+    monkeypatch.delenv("FREIGHT_FATE_AUDIO_BACKEND", raising=False)
+    a = AudioEngine()
+    if a.backend_name != "bass":
+        pytest.skip("BASS backend unavailable")
+    a.engine_start()
+    assert a.engine_starting
+    a.engine_stop()  # stopping mid-crank must leave clean state
+    assert not a.engine_starting
+    a.shutdown()
+
+
+def test_null_backend_is_never_engine_starting():
+    assert audio._NullBackend().engine_starting is False
+
+
+def test_engine_stop_clears_pending_fades(monkeypatch):
+    monkeypatch.delenv("FREIGHT_FATE_AUDIO_BACKEND", raising=False)
+    a = AudioEngine()
+    if a.backend_name != "bass":
+        pytest.skip("BASS backend unavailable")
+    impl = a._impl
+    a.engine_start()
+    assert len(impl._fades) > 0
+    a.engine_stop()
+    assert len(impl._fades) == 0
+    assert impl._engine_intro_gain == 1.0
+    a.shutdown()
+
+
 def test_road_noise_loop_tracks_speed(monkeypatch):
     monkeypatch.delenv("FREIGHT_FATE_AUDIO_BACKEND", raising=False)
     a = AudioEngine()

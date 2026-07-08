@@ -30,6 +30,7 @@ from pathlib import Path
 import pygame
 
 from . import assets_pack
+from .audio_fades import Fade, FadeScheduler
 
 log = logging.getLogger(__name__)
 
@@ -62,6 +63,20 @@ ENGINE_RPM_MAX = 2200.0
 ENGINE_FREQ_MAX_MULT = 2.2
 ENGINE_SLIDE_MS = 120
 ENGINE_LOOP_GAIN = 1.0
+
+# Ignition crossfade. When the engine is deliberately started, the "engine/start"
+# one-shot plays at full volume while the idle loop is held silent; near the tail
+# of the clip the two crossfade over ENGINE_START_CROSSFADE_S seconds. Tune these
+# to taste -- curve names are keys into ``audio_fades.CURVES`` (linear, ease_in,
+# ease_out, ease_in_out, exponential, equal_power_in/out).
+ENGINE_START_CROSSFADE_S = 0.3  # length of the tail blend
+ENGINE_START_TAIL_ANCHOR = True  # blend ends at the clip's end; False = blend from t=0
+ENGINE_START_FADE_OUT_CURVE = "equal_power_out"  # start.ogg 1.0 -> 0.0
+ENGINE_START_FADE_IN_CURVE = "equal_power_in"  # engine loop 0.0 -> 1.0
+ENGINE_START_ASSUMED_LEN_S = 2.0  # fallback if the clip length can't be queried
+# Short fade-in for a silent (no-crank) engine loop start, e.g. resuming a trip
+# whose engine was already running, or coming back from an in-trip menu.
+ENGINE_RESUME_FADE_S = 0.25
 
 BASS_NO_SOUND_DEVICE = 0
 
@@ -153,6 +168,10 @@ class _PygameBackend:
         self._music_track: str | None = None
         self._music_buffer: io.BytesIO | None = None  # streamed; must outlive playback
         self._engine_running = False
+        self._engine_intro_gain = 1.0  # crossfade multiplier on the engine loop
+        self._engine_starting = False  # True only during the ignition crossfade
+        self._engine_last_rpm = ENGINE_RPM_IDLE
+        self._fades = FadeScheduler()
         try:
             if not pygame.mixer.get_init():
                 pygame.mixer.pre_init(44100, -16, 2, 1024)
@@ -247,19 +266,94 @@ class _PygameBackend:
 
     # -- truck engine crossfade ----------------------------------------------
 
-    def engine_start(self) -> None:
+    def engine_start(self, play_start_sound: bool = True) -> None:
         if self._engine_running:
             return
         self._engine_running = True
-        self.play("engine/start")
+        self._fades.clear()
+        # The engine loop is held at intro gain 0 while the ignition one-shot
+        # plays, then crossfaded up. A silent (resume) start skips the crank
+        # and just eases the loop in.
+        self._engine_intro_gain = 0.0
+        if play_start_sound:
+            self._begin_engine_start_crossfade()
+        else:
+            self._fades.add(
+                Fade(
+                    self._set_engine_intro_gain,
+                    0.0,
+                    1.0,
+                    ENGINE_RESUME_FADE_S,
+                    curve=ENGINE_START_FADE_IN_CURVE,
+                )
+            )
         for i, (key, _rpm) in enumerate(ENGINE_BANDS):
-            self.start_loop(CH_ENGINE[i], key, volume=0.0, fade_ms=900)
-        self.set_engine_rpm(620, throttle=0.0)
+            self.start_loop(CH_ENGINE[i], key, volume=0.0, fade_ms=0)
+        self.set_engine_rpm(ENGINE_RPM_IDLE, throttle=0.0)
+
+    def _begin_engine_start_crossfade(self) -> None:
+        """Play ``engine/start`` at full volume and blend into the loop at its tail."""
+        self._engine_starting = True
+        snd = self._sound("engine/start")
+        channel = snd.play() if snd is not None else None
+        if snd is None or channel is None:
+            # No crank available (headless, no free channel): bring the loop up
+            # promptly so the engine is still audible.
+            self._fades.add(
+                Fade(
+                    self._set_engine_intro_gain,
+                    0.0,
+                    1.0,
+                    ENGINE_RESUME_FADE_S,
+                    on_done=self._end_engine_starting,
+                )
+            )
+            return
+        base = max(0.0, min(1.0, self._category_volume("engine") * self.master_volume))
+        channel.set_volume(base)
+        clip_len = snd.get_length()
+        delay = max(0.0, clip_len - ENGINE_START_CROSSFADE_S) if ENGINE_START_TAIL_ANCHOR else 0.0
+        self._fades.add(
+            Fade(
+                lambda m: channel.set_volume(base * m),
+                1.0,
+                0.0,
+                ENGINE_START_CROSSFADE_S,
+                curve=ENGINE_START_FADE_OUT_CURVE,
+                delay_s=delay,
+            )
+        )
+        self._fades.add(
+            Fade(
+                self._set_engine_intro_gain,
+                0.0,
+                1.0,
+                ENGINE_START_CROSSFADE_S,
+                curve=ENGINE_START_FADE_IN_CURVE,
+                delay_s=delay,
+                on_done=self._end_engine_starting,
+            )
+        )
+
+    def _set_engine_intro_gain(self, gain: float) -> None:
+        self._engine_intro_gain = max(0.0, min(1.0, gain))
+        # Re-apply the band volumes at the last known RPM so the ramp is heard
+        # immediately, regardless of when set_engine_rpm next runs.
+        self.set_engine_rpm(self._engine_last_rpm)
+
+    def _end_engine_starting(self) -> None:
+        self._engine_starting = False
+
+    def update(self, dt: float) -> None:
+        self._fades.update(dt)
 
     def engine_stop(self, shutdown_sound: bool = True) -> None:
         if not self._engine_running:
             return
         self._engine_running = False
+        self._fades.clear()
+        self._engine_intro_gain = 1.0
+        self._engine_starting = False
         for ch in CH_ENGINE:
             self.stop_loop(ch, fade_ms=250)
         if shutdown_sound:
@@ -269,14 +363,19 @@ class _PygameBackend:
         """Crossfade the four engine loops around the current RPM."""
         if not (self.enabled and self._engine_running):
             return
+        self._engine_last_rpm = rpm
         for i, (_key, center) in enumerate(ENGINE_BANDS):
             # triangular weight, 1.0 at band center, 0 beyond ~600 rpm away
             w = max(0.0, 1.0 - abs(rpm - center) / 620.0)
-            self.set_loop_volume(CH_ENGINE[i], ENGINE_LOOP_GAIN * w)
+            self.set_loop_volume(CH_ENGINE[i], ENGINE_LOOP_GAIN * w * self._engine_intro_gain)
 
     @property
     def engine_running(self) -> bool:
         return self._engine_running
+
+    @property
+    def engine_starting(self) -> bool:
+        return self._engine_starting
 
     # -- music ----------------------------------------------------------------
 
@@ -363,6 +462,9 @@ class _BassBackend:
             BASS_ATTRIB_FREQ,
             BASS_ATTRIB_PAN,
             BASS_ATTRIB_VOL,
+            BASS_POS_BYTE,
+            BASS_ChannelBytes2Seconds,
+            BASS_ChannelGetLength,
             BASS_ChannelSetAttribute,
             BASS_ChannelSlideAttribute,
         )
@@ -375,6 +477,9 @@ class _BassBackend:
         self._bass_call = bass_call
         self._slide = BASS_ChannelSlideAttribute
         self._set_attr = BASS_ChannelSetAttribute
+        self._get_length = BASS_ChannelGetLength
+        self._bytes2seconds = BASS_ChannelBytes2Seconds
+        self._POS_BYTE = BASS_POS_BYTE
         self._ATTRIB_FREQ = BASS_ATTRIB_FREQ
         self._ATTRIB_VOL = BASS_ATTRIB_VOL
         self._ATTRIB_PAN = BASS_ATTRIB_PAN
@@ -392,6 +497,11 @@ class _BassBackend:
         self._engine_running = False
         self._engine_stream = None
         self._engine_base_freq = 0.0
+        self._engine_intro_stream = None  # ignition one-shot, kept for the crossfade
+        self._engine_intro_gain = 1.0  # crossfade multiplier on the engine loop
+        self._engine_starting = False  # True only during the ignition crossfade
+        self._engine_last_rpm = ENGINE_RPM_IDLE
+        self._fades = FadeScheduler()
 
         if os.environ.get("SDL_AUDIODRIVER", "").lower() == "dummy":
             self._output = Output(device=BASS_NO_SOUND_DEVICE)
@@ -545,11 +655,26 @@ class _BassBackend:
 
     # -- truck engine: one loop, frequency tracks RPM ------------------------------
 
-    def engine_start(self) -> None:
+    def engine_start(self, play_start_sound: bool = True) -> None:
         if self._engine_running:
             return
         self._engine_running = True
-        self.play("engine/start")
+        self._fades.clear()
+        # Hold the loop silent while the ignition one-shot plays; crossfade it
+        # up at the tail. A silent (resume) start skips the crank.
+        self._engine_intro_gain = 0.0
+        if play_start_sound:
+            self._begin_engine_start_crossfade()
+        else:
+            self._fades.add(
+                Fade(
+                    self._set_engine_intro_gain,
+                    0.0,
+                    1.0,
+                    ENGINE_RESUME_FADE_S,
+                    curve=ENGINE_START_FADE_IN_CURVE,
+                )
+            )
         stream = self._sfx_stream(ENGINE_LOOP_KEY, looping=True)
         if stream is not None:
             try:
@@ -561,11 +686,95 @@ class _BassBackend:
         self._engine_stream = stream
         self.set_engine_rpm(ENGINE_RPM_IDLE, throttle=0.0)
 
+    def _begin_engine_start_crossfade(self) -> None:
+        """Play ``engine/start`` at full volume and blend into the loop at its tail."""
+        self._engine_starting = True
+        stream = self._sfx_stream("engine/start")
+        if stream is None:
+            self._fades.add(
+                Fade(
+                    self._set_engine_intro_gain,
+                    0.0,
+                    1.0,
+                    ENGINE_RESUME_FADE_S,
+                    on_done=self._end_engine_starting,
+                )
+            )
+            return
+        base = max(0.0, min(1.0, self._category_volume("engine") * self.master_volume))
+        try:
+            stream.set_volume(base)
+            stream.play()
+        except self._BassError:
+            log.warning("Could not play engine/start", exc_info=True)
+            self._fades.add(
+                Fade(
+                    self._set_engine_intro_gain,
+                    0.0,
+                    1.0,
+                    ENGINE_RESUME_FADE_S,
+                    on_done=self._end_engine_starting,
+                )
+            )
+            return
+        self._retain(stream)
+        self._engine_intro_stream = stream
+        clip_len = self._stream_length_s(stream)
+        delay = max(0.0, clip_len - ENGINE_START_CROSSFADE_S) if ENGINE_START_TAIL_ANCHOR else 0.0
+
+        def fade_crank(m: float) -> None:
+            with contextlib.suppress(self._BassError):
+                stream.set_volume(base * m)
+
+        self._fades.add(
+            Fade(
+                fade_crank,
+                1.0,
+                0.0,
+                ENGINE_START_CROSSFADE_S,
+                curve=ENGINE_START_FADE_OUT_CURVE,
+                delay_s=delay,
+            )
+        )
+        self._fades.add(
+            Fade(
+                self._set_engine_intro_gain,
+                0.0,
+                1.0,
+                ENGINE_START_CROSSFADE_S,
+                curve=ENGINE_START_FADE_IN_CURVE,
+                delay_s=delay,
+                on_done=self._end_engine_starting,
+            )
+        )
+
+    def _stream_length_s(self, stream) -> float:
+        """Length of a stream in seconds, or a safe fallback."""
+        try:
+            length_bytes = self._bass_call(self._get_length, stream.handle, self._POS_BYTE)
+            return float(self._bass_call(self._bytes2seconds, stream.handle, length_bytes))
+        except self._BassError:
+            return ENGINE_START_ASSUMED_LEN_S
+
+    def _set_engine_intro_gain(self, gain: float) -> None:
+        self._engine_intro_gain = max(0.0, min(1.0, gain))
+        self.set_engine_rpm(self._engine_last_rpm)
+
+    def _end_engine_starting(self) -> None:
+        self._engine_starting = False
+
+    def update(self, dt: float) -> None:
+        self._fades.update(dt)
+
     def engine_stop(self, shutdown_sound: bool = True) -> None:
         self.reverse_stop()
         if not self._engine_running:
             return
         self._engine_running = False
+        self._fades.clear()
+        self._engine_intro_gain = 1.0
+        self._engine_starting = False
+        self._engine_intro_stream = None
         if self._engine_stream is not None:
             self._fade_out(self._engine_stream, 250)
             self._engine_stream = None
@@ -576,8 +785,18 @@ class _BassBackend:
         """Slide the engine loop's playback frequency to track RPM."""
         if not (self._engine_running and self._engine_stream is not None):
             return
+        self._engine_last_rpm = rpm
         target = self._engine_base_freq * engine_freq_mult(rpm)
-        vol = max(0.0, min(1.0, ENGINE_LOOP_GAIN * self.engine_volume * self.master_volume))
+        vol = max(
+            0.0,
+            min(
+                1.0,
+                ENGINE_LOOP_GAIN
+                * self.engine_volume
+                * self.master_volume
+                * self._engine_intro_gain,
+            ),
+        )
         try:
             self._bass_call(
                 self._slide, self._engine_stream.handle, self._ATTRIB_FREQ, target, ENGINE_SLIDE_MS
@@ -589,6 +808,10 @@ class _BassBackend:
     @property
     def engine_running(self) -> bool:
         return self._engine_running
+
+    @property
+    def engine_starting(self) -> bool:
+        return self._engine_starting
 
     # -- music ----------------------------------------------------------------
 
@@ -664,7 +887,16 @@ class _BassBackend:
         if self._engine_stream is not None:
             try:
                 self._engine_stream.set_volume(
-                    max(0.0, min(1.0, ENGINE_LOOP_GAIN * self.engine_volume * self.master_volume))
+                    max(
+                        0.0,
+                        min(
+                            1.0,
+                            ENGINE_LOOP_GAIN
+                            * self.engine_volume
+                            * self.master_volume
+                            * self._engine_intro_gain,
+                        ),
+                    )
                 )
             except self._BassError:
                 self._engine_stream = None
@@ -677,6 +909,7 @@ class _BassBackend:
                 self._music_stream = None
 
     def shutdown(self) -> None:
+        self._fades.clear()
         for ch in list(self._loops):
             self.stop_loop(ch, fade_ms=0)
         self.engine_stop(shutdown_sound=False)
@@ -693,6 +926,7 @@ class _NullBackend:
     name = "none"
     enabled = False
     engine_running = False
+    engine_starting = False
 
     def __init__(self) -> None:
         self.master_volume = 1.0
@@ -708,9 +942,10 @@ class _NullBackend:
     ) -> None: ...
     def set_loop_volume(self, channel: int, volume: float) -> None: ...
     def stop_loop(self, channel: int, fade_ms: int = 300) -> None: ...
-    def engine_start(self) -> None: ...
+    def engine_start(self, play_start_sound: bool = True) -> None: ...
     def engine_stop(self, shutdown_sound: bool = True) -> None: ...
     def set_engine_rpm(self, rpm: float, throttle: float = 0.0) -> None: ...
+    def update(self, dt: float) -> None: ...
     def reverse_start(self) -> None: ...
     def reverse_stop(self) -> None: ...
     def play_music(self, track: str, fade_ms: int = 1500) -> None: ...
@@ -811,12 +1046,24 @@ class AudioEngine:
 
     # -- truck engine ----------------------------------------------------------------
 
-    def engine_start(self) -> None:
-        self._impl.engine_start()
+    def engine_start(self, play_start_sound: bool = True) -> None:
+        """Start the engine audio.
+
+        ``play_start_sound`` True (a deliberate ignition) plays the ignition
+        one-shot and crossfades it into the idle loop at the clip's tail.
+        Pass False to bring the running-engine loop up silently -- e.g. when
+        resuming a saved trip whose engine was already on, or returning from an
+        in-trip menu -- so the crank never replays.
+        """
+        self._impl.engine_start(play_start_sound)
 
     def engine_stop(self, shutdown_sound: bool = True) -> None:
         self.reverse_stop()
         self._impl.engine_stop(shutdown_sound)
+
+    def update(self, dt: float) -> None:
+        """Advance time-based audio fades. Call once per frame from the main loop."""
+        self._impl.update(dt)
 
     def set_engine_rpm(self, rpm: float, throttle: float = 0.0) -> None:
         self._impl.set_engine_rpm(rpm, throttle)
@@ -824,6 +1071,11 @@ class AudioEngine:
     @property
     def engine_running(self) -> bool:
         return self._impl.engine_running
+
+    @property
+    def engine_starting(self) -> bool:
+        """True while a deliberate ignition is still crossfading into the loop."""
+        return self._impl.engine_starting
 
     # -- road / weather / ambience --------------------------------------------
 

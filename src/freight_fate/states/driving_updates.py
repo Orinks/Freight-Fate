@@ -418,7 +418,9 @@ class DrivingUpdateMixin:
         t = self.truck
         audio = self.ctx.audio
         if t.engine_on and not audio.engine_running:
-            audio.engine_start()
+            # Catch-up sync (resuming a running-engine trip, returning from a
+            # menu): bring the loop up without replaying the ignition crank.
+            audio.engine_start(play_start_sound=False)
         engine_load = t.throttle
         if t.transmission.automatic and t.transmission.shifting:
             engine_load = min(engine_load, 0.08)

@@ -249,6 +249,10 @@ class DrivingControlsMixin:
         self.ctx.push_state(PauseMenuState(self.ctx, self))
 
     def _toggle_engine(self) -> None:
+        if self.ctx.audio.engine_starting:
+            # Ignition still in progress; ignore mashed presses so the crank,
+            # shutdown, and loop sounds cannot stack on top of each other.
+            return
         t = self.truck
         if t.engine_on:
             if t.speed_mph > ENGINE_SHUTDOWN_SAFE_MPH:

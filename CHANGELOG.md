@@ -124,6 +124,14 @@
 
 ### Fixed
 
+- **The engine no longer re-cranks when you pick a trip back up.** Resuming a
+  saved haul with the engine already running -- or coming back from a menu
+  mid-drive -- used to replay the ignition sound as if you had just turned the
+  key. Now the running engine simply fades back in, and the starter is heard
+  only when you actually start the engine yourself. When you do start it, the
+  crank now blends smoothly into the running engine instead of being drowned
+  out the instant it catches.
+
 - **Your truck no longer idles all night while you sleep.** Bedding down for
   the night -- at a rest stop, in the sleeper berth, in a cramped lot, or on
   the shoulder -- now shuts the engine down first, and you will hear "You
