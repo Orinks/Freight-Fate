@@ -294,6 +294,15 @@ def _advance_rest_clock(driving: DrivingState, minutes: float) -> None:
     driving.weather.update(minutes)
 
 
+def _shut_down_engine(driving: DrivingState) -> str:
+    """Stop the engine before a night's sleep; no truck idles through ten
+    hours. Returns the spoken prefix, empty when it was already off."""
+    if not driving.truck.engine_on:
+        return ""
+    driving.truck.stop_engine()
+    return "You shut down the engine. "
+
+
 def _deadline_appointment(driving: DrivingState) -> str:
     """The delivery appointment in the receiving city's local time.
 
@@ -316,11 +325,12 @@ def _deadline_text(driving: DrivingState) -> str:
 def _perform_shoulder_sleep(driving: DrivingState, anchor_mi: float) -> str:
     """Apply the emergency shoulder-sleep outcome and return spoken text."""
     p = driving.ctx.profile
+    engine_off = _shut_down_engine(driving)
     _advance_rest_clock(driving, hos.SLEEP_MIN)
     driving.hos.sleep()
     p.fatigue = hos.rest_shoulder(p.fatigue)
     parts = [
-        f"You sleep poorly on the shoulder, woken again and again by "
+        f"{engine_off}You sleep poorly on the shoulder, woken again and again by "
         f"passing trucks. It is {clock_text(driving.trip.local_hour)}. "
         f"Hours of service reset, but you are still tired."
     ]

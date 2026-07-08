@@ -572,6 +572,56 @@ def test_write_apply_script_waits_for_pid_and_relaunches(tmp_path):
     assert f'rm -rf "{install}"' not in text
 
 
+def test_extracted_root_finds_macos_app_bundle(tmp_path, monkeypatch):
+    # The macOS archive holds FreightFate.app (ditto --keepParent), not a
+    # plain FreightFate folder; extraction must find the bundle (issue #25).
+    monkeypatch.setattr(updater.sys, "platform", "darwin")
+    staging = tmp_path / "unpacked"
+    (staging / "FreightFate.app" / "Contents" / "MacOS").mkdir(parents=True)
+    assert updater.extracted_root(staging) == staging / "FreightFate.app"
+
+
+def test_extracted_root_missing_app_raises(tmp_path):
+    try:
+        updater.extracted_root(tmp_path, "FreightFate-1.7.0-macos.zip")
+    except FileNotFoundError as exc:
+        assert "FreightFate-1.7.0-macos.zip" in str(exc)
+    else:
+        raise AssertionError("extracted_root accepted an empty staging dir")
+
+
+def test_install_target_is_bundle_root_on_macos(tmp_path, monkeypatch):
+    exe = tmp_path / "FreightFate.app" / "Contents" / "MacOS" / "FreightFate"
+    exe.parent.mkdir(parents=True)
+    exe.write_text("", encoding="utf-8")
+    monkeypatch.setattr(updater.sys, "executable", str(exe))
+    monkeypatch.setattr(updater.sys, "platform", "darwin")
+    assert updater.install_target() == tmp_path / "FreightFate.app"
+
+
+def test_install_target_is_install_root_off_macos(monkeypatch):
+    # Only macOS wraps the install in a bundle; elsewhere the exe dir is it.
+    monkeypatch.setattr(updater.sys, "platform", "linux")
+    assert updater.install_target() == updater.install_root()
+
+
+def test_write_apply_script_macos_swaps_whole_bundle(tmp_path, monkeypatch):
+    monkeypatch.setattr(updater.sys, "platform", "darwin")
+    staging = tmp_path / "staging"
+    staging.mkdir()
+    new_root = staging / "FreightFate.app"
+    install = tmp_path / "Applications" / "FreightFate.app"
+    script = write_apply_script(new_root, install, staging, pid=4242)
+    text = script.read_text(encoding="utf-8")
+    assert "4242" in text
+    assert str(new_root) in text
+    # the old bundle is parked, not deleted, until the new one is in place
+    assert f'mv "{install}" "{install}.old"' in text
+    assert f'mv "{install}.old" "{install}"' in text
+    assert f'open "{install}"' in text
+    assert script.parent == tmp_path  # outside the staging dir it deletes
+
+
 # -- settings -----------------------------------------------------------------
 
 

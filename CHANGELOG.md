@@ -12,14 +12,15 @@
   not there before now connect city to city on the real roads -- Interstate 70
   over the Colorado Rockies, the US-2 Hi-Line across the northern tier, Interstate
   80 across Nevada, and Interstate 75 through the Kentucky mountains among them. Be careful, though -- there are still some challenging
-  routes where you had better watch your fuel and get it when you can.
+  routes where you had better watch your fuel and get it when you can. Thanks
+  to nromey.
 
 - **Every run now names the real towns and country you pass.** Those are
   checkpoints -- the actual places along a route, spoken as you reach them -- and
   the map went from about 550 of them to over 2,500. Instead of empty miles, a
   haul now names the towns you pass and the state lines along the way, all from
   real geography, and real elevation data means the grades are felt and not
-  smoothed flat.
+  smoothed flat. Thanks to nromey.
 
 - **Over 1,700 truck stops are now named along your routes.** Real travel centers, truck
   stops, and rest areas -- Love's, Pilot, Flying J, TA, Petro, and independents
@@ -27,7 +28,7 @@
   to fuel or park, and even the emptiest rural stretches point you to a real
   diesel pump you can pull a rig into. For now these are just named on the map;
   making them do something -- rest, showers, repairs, and buffs -- comes in a
-  later update.
+  later update. Thanks to nromey.
 
 - **The map keeps filling in -- twenty more cities across seven new corridors.**
   Since the big update above, the network grew city by city: Interstate 80 across
@@ -54,11 +55,17 @@
   deliver -- and Wells now splits the old Elko run, so Interstate 80 freight
   passes through the real town instead of leaping it.
 
+- **New: real roadside landmarks as you drive.** Routes now call out the world
+  going by -- entering a national forest, crossing a named river, approaching a
+  mountain pass, a roadside museum ahead -- over 2,800 of them, drawn from real
+  map data so a long haul has a sense of place instead of silence. Thanks to
+  nromey.
+
 - **Some hauls now offer more than one way to drive them.** Where two real truck
   routes reach the same place, the map keeps both, so a run can offer a choice --
   a faster interstate or a shorter back road -- instead of a single fixed path.
   Is it winter, and you'd rather take a southern route than a mountainous
-  northern one? We've got you covered.
+  northern one? We've got you covered. Thanks to nromey.
 
 - **The map now has real time zones, and your clock changes as you cross
   them.** Drive west out of Tennessee on I-40 and you will hear "Crossing
@@ -116,6 +123,19 @@
   Duluth no longer sounds like a summer haul into Cincinnati.
 
 ### Fixed
+
+- **Your truck no longer idles all night while you sleep.** Bedding down for
+  the night -- at a rest stop, in the sleeper berth, in a cramped lot, or on
+  the shoulder -- now shuts the engine down first, and you will hear "You
+  shut down the engine" as you turn in. When you head back to the road,
+  start the engine as usual. Thanks to Bartholomue.
+
+- **Updating the game on Mac now works.** Downloading an update used to end
+  with "the download failed" and nothing installed, leaving Mac players to
+  fetch each new version by hand. The updater now understands the Mac app
+  bundle: it swaps in the new app after the game closes and reopens it for
+  you, just like on Windows and Linux. Your saves are untouched. Thanks to
+  vlad-a-c.
 
 - **Asking for job details on Back to terminal no longer crashes the game.**
   On the dispatch board, pressing F1 while on the Back to terminal entry used

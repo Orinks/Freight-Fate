@@ -416,6 +416,7 @@ class RestStopState(MenuState):
         d = self.driving
         p = self.ctx.profile
         minutes = float(hours * 60)
+        engine_off = _shut_down_engine(d)
         _advance_rest_clock(d, minutes)
         completed = d.hos.sleeper_split_rest(minutes)
         p.fatigue = hos.rest_sleeper_split(p.fatigue, minutes, completed=completed)
@@ -427,7 +428,7 @@ class RestStopState(MenuState):
             else (d.hos.split_pending_summary() or "Sleeper berth rest recorded.")
         )
         self.ctx.say(
-            f"You slept {hours} hours in the sleeper berth. "
+            f"{engine_off}You slept {hours} hours in the sleeper berth. "
             f"It is {clock_text(d.trip.local_hour)}. {status} {_deadline_text(d)}"
         )
         self.ctx.award_achievement("slept_on_route")
@@ -437,13 +438,14 @@ class RestStopState(MenuState):
         d = self.driving
         p = self.ctx.profile
         before_fatigue = p.fatigue
+        engine_off = _shut_down_engine(d)
         _advance_rest_clock(d, hos.SLEEP_MIN)
         d.hos.sleep()
         p.fatigue = hos.rest_sleep(p.fatigue)
         self._save_here(silent=True)
         self.ctx.audio.play("ui/notify")
         self.ctx.say(
-            f"You slept 10 hours and woke rested. "
+            f"{engine_off}You slept 10 hours and woke rested. "
             f"It is {clock_text(d.trip.local_hour)}. "
             f"Hours of service reset. {_deadline_text(d)}"
         )
@@ -457,13 +459,14 @@ class RestStopState(MenuState):
         tired. No shoulder fine -- a lot is more legitimate than the freeway."""
         d = self.driving
         p = self.ctx.profile
+        engine_off = _shut_down_engine(d)
         _advance_rest_clock(d, hos.SLEEP_MIN)
         d.hos.sleep()
         p.fatigue = hos.rest_shoulder(p.fatigue)
         self._save_here(silent=True)
         self.ctx.audio.play("ui/notify")
         self.ctx.say(
-            f"You bed down in the cramped lot, off to the side. "
+            f"{engine_off}You bed down in the cramped lot, off to the side. "
             f"It is {clock_text(d.trip.local_hour)}. Hours of service "
             f"reset, but the rest was poor and you wake still tired. "
             f"{_deadline_text(d)}"
