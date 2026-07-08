@@ -392,9 +392,7 @@ class BobtailDestState(MenuState):
             route = world.supported_route(here, name)
             miles = route.miles if route is not None else 0.0
             city = world.city(name)
-            label = (
-                f"{city.name}, {city.state} -- {self.ctx.settings.distance_text(miles)} empty"
-            )
+            label = f"{city.name}, {city.state} -- {self.ctx.settings.distance_text(miles)} empty"
             items.append(
                 MenuItem(
                     label,

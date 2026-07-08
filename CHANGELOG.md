@@ -59,6 +59,13 @@
   prices, freight market flavor, and road hazards, so a winter run out of
   Duluth no longer sounds like a summer haul into Cincinnati.
 
+### Fixed
+
+- **Asking for job details on Back to terminal no longer crashes the game.**
+  On the dispatch board, pressing F1 while on the Back to terminal entry used
+  to crash; it now simply reads the entry back, like any other menu item.
+  Thanks to ironcross32.
+
 ## 1.8.0 - 2026-07-05
 
 ### Added
