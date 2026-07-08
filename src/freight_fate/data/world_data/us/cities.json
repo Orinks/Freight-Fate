@@ -5647,6 +5647,60 @@
       "lat": 45.2101,
       "lon": -123.1987,
       "locations": []
+    },
+    "alamo_nv_us": {
+      "spoken_city": "Alamo",
+      "state": "NV",
+      "country": "US",
+      "region": "desert_southwest",
+      "lat": 37.365,
+      "lon": -115.1645,
+      "locations": []
+    },
+    "ely_nv_us": {
+      "spoken_city": "Ely",
+      "state": "NV",
+      "country": "US",
+      "region": "great_basin",
+      "lat": 39.2474,
+      "lon": -114.8886,
+      "locations": []
+    },
+    "wells_nv_us": {
+      "spoken_city": "Wells",
+      "state": "NV",
+      "country": "US",
+      "region": "great_basin",
+      "lat": 41.1116,
+      "lon": -114.9645,
+      "locations": []
+    },
+    "eureka_nv_us": {
+      "spoken_city": "Eureka",
+      "state": "NV",
+      "country": "US",
+      "region": "great_basin",
+      "lat": 39.5127,
+      "lon": -115.9606,
+      "locations": []
+    },
+    "austin_nv_us": {
+      "spoken_city": "Austin",
+      "state": "NV",
+      "country": "US",
+      "region": "great_basin",
+      "lat": 39.4933,
+      "lon": -117.0695,
+      "locations": []
+    },
+    "fallon_nv_us": {
+      "spoken_city": "Fallon",
+      "state": "NV",
+      "country": "US",
+      "region": "great_basin",
+      "lat": 39.4735,
+      "lon": -118.7774,
+      "locations": []
     }
   }
 }
