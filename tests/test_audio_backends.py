@@ -15,6 +15,26 @@ from freight_fate.audio import (
 from freight_fate.music import ALL_MUSIC_TRACKS
 
 
+@pytest.fixture(autouse=True)
+def _free_leaked_bass():
+    """Free any BASS device a test leaves initialized.
+
+    A test whose body fails before its own ``a.shutdown()`` would otherwise
+    leave the BASS no-sound device initialized. The next ``AudioEngine()``
+    then hits ``BASS_ERROR_ALREADY`` during construction and silently falls
+    back to pygame, turning a single failure into a cascade of skipped BASS
+    tests -- and leaking the init into later test files.
+    """
+    yield
+    try:
+        from sound_lib.external.pybass import BASS_Free, BASS_SetDevice
+
+        BASS_SetDevice(0)
+        BASS_Free()  # best-effort; a no-op when nothing is initialized
+    except Exception:
+        pass
+
+
 def exercise(a: AudioEngine) -> None:
     """Every facade call must be safe regardless of backend."""
     a.play("ui/menu_select")
@@ -262,19 +282,34 @@ def test_pygame_backend_does_not_play_reverse_loop_through_mixer(monkeypatch):
 def test_bass_one_shots_survive_garbage_collection(monkeypatch):
     # Channel.__del__ in sound_lib frees the BASS handle on garbage
     # collection; the backend must hold a reference until playback ends,
-    # or every one-shot (menu sounds, horn, warnings) is cut off instantly
+    # or every one-shot (menu sounds, horn, warnings) is cut off instantly.
     import gc
+    import weakref
 
     monkeypatch.delenv("FREIGHT_FATE_AUDIO_BACKEND", raising=False)
     a = AudioEngine()
     if a.backend_name != "bass":
         pytest.skip("BASS backend unavailable")
-    impl = a._impl
-    a.play("ui/menu_move")
-    gc.collect()
-    assert impl._retained
-    assert impl._retained[-1].is_playing
-    a.shutdown()
+    try:
+        impl = a._impl
+        a.play("ui/menu_move")
+        assert impl._retained
+        stream = impl._retained[-1]
+        assert stream.is_playing  # the one-shot really started on the device
+
+        # Drop every local strong reference and force a collection. Without the
+        # backend's retain list, Channel.__del__ would run here and free the
+        # BASS handle mid-playback; the retained wrapper must survive the sweep.
+        # (Asserting is_playing *after* gc would instead race a real-time
+        # engine: ui/menu_move is only ~70 ms, so a scheduling stall on a
+        # loaded CI runner lets it finish naturally and flake the check.)
+        marker = weakref.ref(stream)
+        del stream
+        gc.collect()
+        assert marker() is not None
+        assert impl._retained[-1] is marker()
+    finally:
+        a.shutdown()
 
 
 def test_bass_fading_loops_stay_alive_during_fade(monkeypatch):
