@@ -5602,6 +5602,15 @@
       "lat": 41.7354,
       "lon": -122.6345,
       "locations": []
+    },
+    "watertown_sd_us": {
+      "spoken_city": "Watertown",
+      "state": "SD",
+      "country": "US",
+      "region": "heartland",
+      "lat": 44.8994,
+      "lon": -97.1151,
+      "locations": []
     }
   }
 }

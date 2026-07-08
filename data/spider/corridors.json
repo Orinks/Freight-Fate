@@ -291,6 +291,20 @@
         {"lat": 41.7354, "lon": -122.6345, "note": "Yreka -- I-5 Siskiyou County seat"},
         {"lat": 42.3265, "lon": -122.8756, "note": "Medford -- I-5 over Siskiyou Summit (existing node)"}
       ]
+    },
+    {
+      "ref": "I-29-DAK",
+      "spoken": "Interstate 29",
+      "phase": 1,
+      "tier": 1,
+      "status": "built",
+      "note": "I-29 up the Dakotas: add Watertown to split the 206-mile Fargo->Brookings hop (Brookings already existed), completing Fargo -> Watertown -> Brookings -> Sioux Falls. Also dropped two redundant unprotected expresses: the 248-mile Fargo->Sioux Falls and the 425-mile Fargo->Omaha. The Fargo->Watertown leg carries the North Dakota-South Dakota line. Built.",
+      "waypoints": [
+        {"lat": 46.8772, "lon": -96.7898, "note": "Fargo -- I-29 north end (existing node)"},
+        {"lat": 44.8994, "lon": -97.1151, "note": "Watertown -- I-29 (new)"},
+        {"lat": 44.3114, "lon": -96.7984, "note": "Brookings -- I-29 (existing node)"},
+        {"lat": 43.5446, "lon": -96.7311, "note": "Sioux Falls -- I-29 (existing node)"}
+      ]
     }
   ]
 }
