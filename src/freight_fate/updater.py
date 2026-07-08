@@ -86,6 +86,18 @@ def install_root() -> Path:
     return Path(sys.executable).resolve().parent
 
 
+def install_target() -> Path:
+    """What the apply script replaces: the enclosing ``.app`` bundle on
+    macOS (the executable sits in ``Contents/MacOS`` inside it), else the
+    folder holding the executable."""
+    root = install_root()
+    if sys.platform == "darwin":
+        for parent in (root, *root.parents):
+            if parent.suffix == ".app":
+                return parent
+    return root
+
+
 @lru_cache(maxsize=1)
 def load_build_info(version: str) -> BuildInfo | None:
     """Read build_info.json from the install folder; cached, since menu
@@ -391,9 +403,23 @@ def extract(archive: Path, staging: Path) -> Path:
 
         with zipfile.ZipFile(archive) as z:
             z.extractall(staging)
+    return extracted_root(staging, archive.name)
+
+
+def extracted_root(staging: Path, archive_name: str = "the archive") -> Path:
+    """The new app folder inside an unpacked archive.
+
+    Windows and Linux archives hold a plain ``FreightFate`` folder; the
+    macOS archive holds the ``FreightFate.app`` bundle (``ditto
+    --keepParent`` in ``tools/build_release.py``).
+    """
+    if sys.platform == "darwin":
+        bundle = staging / f"{APP_NAME}.app"
+        if bundle.is_dir():
+            return bundle
     new_root = staging / APP_NAME
     if not new_root.is_dir():
-        raise FileNotFoundError(f"{APP_NAME} folder missing from {archive.name}")
+        raise FileNotFoundError(f"{APP_NAME} folder missing from {archive_name}")
     return new_root
 
 
@@ -427,11 +453,34 @@ rm -rf "{staging}"
 rm -f "$0"
 """
 
+_MACOS_SCRIPT = """#!/bin/sh
+# Swap the whole app bundle. Saves live in ~/Library/Application Support,
+# never inside the bundle. The old bundle is parked beside the install until
+# the new one is in place, so a failed copy cannot leave the player with no
+# game at all.
+while kill -0 {pid} 2>/dev/null; do sleep 1; done
+rm -rf "{dst}.old"
+mv "{dst}" "{dst}.old"
+if mv "{src}" "{dst}" 2>/dev/null || cp -R "{src}" "{dst}"; then
+  rm -rf "{dst}.old"
+else
+  mv "{dst}.old" "{dst}"
+fi
+rm -rf "{staging}"
+open "{dst}"
+rm -f "$0"
+"""
+
 
 def write_apply_script(new_root: Path, install: Path, staging: Path, pid: int) -> Path:
     """The helper script that swaps in the update once the game exits."""
     exe = APP_NAME + (".exe" if sys.platform == "win32" else "")
-    template = _WINDOWS_SCRIPT if sys.platform == "win32" else _POSIX_SCRIPT
+    if sys.platform == "win32":
+        template = _WINDOWS_SCRIPT
+    elif sys.platform == "darwin" and install.suffix == ".app":
+        template = _MACOS_SCRIPT
+    else:
+        template = _POSIX_SCRIPT
     text = template.format(pid=pid, src=new_root, dst=install, staging=staging, exe=exe)
     suffix = ".bat" if sys.platform == "win32" else ".sh"
     script = staging.parent / f"{APP_NAME.lower()}-apply-{pid}{suffix}"
@@ -444,7 +493,7 @@ def write_apply_script(new_root: Path, install: Path, staging: Path, pid: int) -
 def apply_and_restart(new_root: Path, staging: Path) -> None:
     """Spawn the detached apply script. The caller must then quit the game;
     the script waits for this process to exit before touching files."""
-    script = write_apply_script(new_root, install_root(), staging, os.getpid())
+    script = write_apply_script(new_root, install_target(), staging, os.getpid())
     if sys.platform == "win32":
         flags = subprocess.CREATE_NO_WINDOW | subprocess.CREATE_NEW_PROCESS_GROUP
         subprocess.Popen(
