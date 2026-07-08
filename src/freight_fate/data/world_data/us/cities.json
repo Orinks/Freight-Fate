@@ -5539,6 +5539,33 @@
       "lat": 39.3061,
       "lon": -102.2694,
       "locations": []
+    },
+    "junction_tx_us": {
+      "spoken_city": "Junction",
+      "state": "TX",
+      "country": "US",
+      "region": "gulf_coast",
+      "lat": 30.4894,
+      "lon": -99.772,
+      "locations": []
+    },
+    "ozona_tx_us": {
+      "spoken_city": "Ozona",
+      "state": "TX",
+      "country": "US",
+      "region": "gulf_coast",
+      "lat": 30.7099,
+      "lon": -101.201,
+      "locations": []
+    },
+    "fort_stockton_tx_us": {
+      "spoken_city": "Fort Stockton",
+      "state": "TX",
+      "country": "US",
+      "region": "gulf_coast",
+      "lat": 30.8935,
+      "lon": -102.8794,
+      "locations": []
     }
   }
 }

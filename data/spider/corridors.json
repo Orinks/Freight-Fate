@@ -245,6 +245,23 @@
         {"lat": 39.3958, "lon": -101.0524, "note": "Colby -- I-70 western Kansas"},
         {"lat": 39.7392, "lon": -104.9903, "note": "Denver -- I-70 west end (existing node)"}
       ]
+    },
+    {
+      "ref": "I-10-WTX",
+      "spoken": "Interstate 10",
+      "phase": 1,
+      "tier": 1,
+      "status": "built",
+      "note": "I-10 across West Texas: San Antonio through Kerrville, Junction, Ozona, and Fort Stockton to Van Horn and El Paso. The 555-mile San Antonio-El Paso express and the 456-mile Van Horn-San Antonio skip were replaced by the real desert chain; the US-90 Del Rio border alternate stays. Built.",
+      "waypoints": [
+        {"lat": 29.4241, "lon": -98.4936, "note": "San Antonio -- I-10 west start (existing node)"},
+        {"lat": 30.0474, "lon": -99.1403, "note": "Kerrville -- I-10 Hill Country (existing node)"},
+        {"lat": 30.4894, "lon": -99.7720, "note": "Junction -- I-10 Kimble County"},
+        {"lat": 30.7099, "lon": -101.2010, "note": "Ozona -- I-10 Crockett County"},
+        {"lat": 30.8935, "lon": -102.8794, "note": "Fort Stockton -- I-10 Pecos County"},
+        {"lat": 31.0407, "lon": -104.8305, "note": "Van Horn -- I-10 (existing node)"},
+        {"lat": 31.7587, "lon": -106.4869, "note": "El Paso -- I-10 west end (existing node)"}
+      ]
     }
   ]
 }
