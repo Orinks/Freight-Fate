@@ -386,6 +386,79 @@ def test_horn_uses_reserved_loop_slot(monkeypatch):
     a.shutdown()
 
 
+def test_bass_horn_sustains_then_rings_out_on_release(monkeypatch):
+    monkeypatch.delenv("FREIGHT_FATE_AUDIO_BACKEND", raising=False)
+    a = AudioEngine()
+    if a.backend_name != "bass":
+        pytest.skip("BASS backend unavailable")
+    impl = a._impl
+    a.horn_start()
+    a.horn_start()  # key autorepeat must not stack a second horn
+    assert list(impl._sustains) == [audio.CH_HORN]
+    stream = impl._loops[audio.CH_HORN][2]
+    a.horn_stop()
+    # The loop is released and the channel handed off, but the stream keeps
+    # playing its release tail (retained so it is not freed mid-tail).
+    assert audio.CH_HORN not in impl._sustains
+    assert audio.CH_HORN not in impl._loops
+    assert stream in impl._retained
+    a.shutdown()
+
+
+def test_bass_horn_press_during_release_tail_does_not_stack(monkeypatch):
+    monkeypatch.delenv("FREIGHT_FATE_AUDIO_BACKEND", raising=False)
+    a = AudioEngine()
+    if a.backend_name != "bass":
+        pytest.skip("BASS backend unavailable")
+    impl = a._impl
+    a.horn_start()
+    a.horn_stop()  # tail is now ringing out on the channel
+    tail = impl._releasing.get(audio.CH_HORN)
+    assert tail is not None and tail[1].is_playing
+    retained = len(impl._retained)
+    a.horn_start()  # pressed again mid-tail: must be ignored, not stacked
+    assert audio.CH_HORN not in impl._sustains  # no new held loop
+    assert audio.CH_HORN not in impl._loops
+    assert impl._releasing.get(audio.CH_HORN) is tail  # same tail, no new stream
+    assert len(impl._retained) == retained  # nothing new retained
+    a.shutdown()
+
+
+def test_pygame_horn_press_during_release_tail_does_not_restart(monkeypatch):
+    monkeypatch.setenv("FREIGHT_FATE_AUDIO_BACKEND", "pygame")
+    a = AudioEngine()
+    if a.backend_name != "pygame":
+        pytest.skip("pygame backend unavailable")
+    impl = a._impl
+    a.horn_start()
+    a.horn_stop()
+    state = impl._sustains[audio.CH_HORN]
+    assert state["phase"] == "release"
+    a.horn_start()  # mid-tail press: must not restart the horn
+    assert impl._sustains[audio.CH_HORN] is state
+    assert impl._sustains[audio.CH_HORN]["phase"] == "release"
+    a.shutdown()
+
+
+def test_pygame_horn_sustain_phase_transitions(monkeypatch):
+    monkeypatch.setenv("FREIGHT_FATE_AUDIO_BACKEND", "pygame")
+    a = AudioEngine()
+    if a.backend_name != "pygame":
+        pytest.skip("pygame backend unavailable")
+    impl = a._impl
+    a.horn_start()
+    a.horn_start()  # idempotent while held
+    assert list(impl._sustains) == [audio.CH_HORN]
+    assert impl._sustains[audio.CH_HORN]["phase"] == "sustain"
+    # The loop region is sliced shorter than the whole file, proving we loop an
+    # interior region rather than the full horn.
+    head, body, _tail = next(iter(impl._segment_cache.values()))
+    assert body.get_length() < head.get_length()
+    a.horn_stop()
+    assert impl._sustains[audio.CH_HORN]["phase"] == "release"
+    a.shutdown()
+
+
 def test_pygame_backend_does_not_play_reverse_loop_through_mixer(monkeypatch):
     backend = audio._PygameBackend.__new__(audio._PygameBackend)
 

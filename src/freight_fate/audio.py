@@ -31,6 +31,7 @@ import pygame
 
 from . import assets_pack
 from .audio_fades import Fade, FadeScheduler
+from .audio_loops import SustainLoop, to_seconds
 
 log = logging.getLogger(__name__)
 
@@ -47,6 +48,12 @@ CH_HORN = 8
 CH_REVERSE = 9
 RESERVED = 9
 NUM_CHANNELS = 32
+
+# Horn sustain loop points (samples, at the asset's 44100 Hz). The horn is an
+# attack -> sustain -> release sound: play the attack, loop this tuned interior
+# region while the key/button is held, then let the release tail ring out.
+HORN_LOOP_START = 11816
+HORN_LOOP_END = 12379
 
 # RPM centers for the pygame engine loop crossfade.
 ENGINE_BANDS = (
@@ -165,6 +172,11 @@ class _PygameBackend:
         self.ui_volume = 0.9
         self._cache: dict[str, pygame.mixer.Sound] = {}
         self._loops: dict[int, tuple[str, float]] = {}  # channel -> (key, base gain)
+        # channel -> sustain-loop state (segment Sounds + phase); see
+        # start_sustain_loop. Kept separate from _loops so per-frame update()
+        # can re-queue the loop body for gapless repetition.
+        self._sustains: dict[int, dict] = {}
+        self._segment_cache: dict[tuple, tuple] = {}  # (key, start, end) -> (head, body, tail)
         self._music_track: str | None = None
         self._music_buffer: io.BytesIO | None = None  # streamed; must outlive playback
         self._engine_running = False
@@ -243,9 +255,134 @@ class _PygameBackend:
     def stop_loop(self, channel: int, fade_ms: int = 300) -> None:
         if not self.enabled:
             return
+        if channel in self._sustains:
+            del self._sustains[channel]
+            pygame.mixer.Channel(channel).fadeout(fade_ms)
         if channel in self._loops:
             pygame.mixer.Channel(channel).fadeout(fade_ms)
             del self._loops[channel]
+
+    def _build_segments(self, key: str, loop_start: int, loop_end: int):
+        """Slice a decoded sound into (head, body, tail) Sounds; cached per key.
+
+        ``head`` is the attack through the loop end (samples ``0:loop_end``),
+        ``body`` is the loop region (``loop_start:loop_end``) tiled so it
+        comfortably outlasts a frame -- that keeps the always-queued handoff
+        in :meth:`_service_sustains` gapless even at low frame rates -- and
+        ``tail`` is the release (``loop_end:``), or None if the loop ends at EOF.
+        """
+        cache_key = (key, loop_start, loop_end)
+        cached = self._segment_cache.get(cache_key)
+        if cached is not None:
+            return cached
+        snd = self._sound(key)
+        if snd is None:
+            return None
+        try:
+            import numpy
+
+            arr = pygame.sndarray.array(snd)
+        except Exception:
+            log.warning("Could not slice %s for a sustain loop", key, exc_info=True)
+            return None
+        n = len(arr)
+        start = max(0, min(loop_start, n))
+        end = max(start + 1, min(loop_end, n))
+        region = numpy.ascontiguousarray(arr[start:end])
+        freq = pygame.mixer.get_init()[0] if pygame.mixer.get_init() else 44100
+        reps = max(1, -(-int(freq * 0.1) // max(1, len(region))))  # ceil to ~100 ms
+        tiled = numpy.tile(region, (reps, 1) if region.ndim == 2 else reps)
+        head = pygame.sndarray.make_sound(numpy.ascontiguousarray(arr[:end]))
+        body = pygame.sndarray.make_sound(numpy.ascontiguousarray(tiled))
+        tail = pygame.sndarray.make_sound(numpy.ascontiguousarray(arr[end:])) if end < n else None
+        segs = (head, body, tail)
+        self._segment_cache[cache_key] = segs
+        return segs
+
+    def start_sustain_loop(
+        self,
+        channel: int,
+        key: str,
+        loop_start: float,
+        loop_end: float,
+        *,
+        units: str = "samples",
+        volume: float = 1.0,
+    ) -> None:
+        if not self.enabled:
+            return
+        current = self._sustains.get(channel)
+        if current and current["key"] == key:
+            # Already sounding on this channel: update gain while held, but
+            # ignore the press entirely during the release tail so a repeat
+            # press never restarts or stacks the sound.
+            if current["phase"] == "sustain":
+                current["gain"] = volume
+                self._apply_sustain_volume(channel)
+            return
+        freq = pygame.mixer.get_init()[0] if pygame.mixer.get_init() else 44100
+        start_i = int(round(to_seconds(loop_start, units, freq) * freq))
+        end_i = int(round(to_seconds(loop_end, units, freq) * freq))
+        segs = self._build_segments(key, start_i, end_i)
+        if segs is None:
+            return
+        self.stop_loop(channel, fade_ms=0)
+        head, body, tail = segs
+        self._sustains[channel] = {
+            "key": key,
+            "gain": volume,
+            "body": body,
+            "tail": tail,
+            "phase": "sustain",
+        }
+        self._apply_sustain_volume(channel)
+        ch = pygame.mixer.Channel(channel)
+        ch.play(head, loops=0)
+        ch.queue(body)
+
+    def release_sustain_loop(self, channel: int, fade_ms: int = 0) -> None:
+        st = self._sustains.get(channel)
+        if st is None:
+            self.stop_loop(channel, fade_ms=fade_ms)
+            return
+        st["phase"] = "release"
+        ch = pygame.mixer.Channel(channel)
+        if st["tail"] is not None:
+            # Replace the queued body with the tail so, once the current loop
+            # iteration ends, the natural release plays out (<=1 body length of
+            # latency). _service_sustains clears the slot when the tail ends.
+            ch.queue(st["tail"])
+        else:
+            ch.fadeout(max(0, fade_ms))
+            del self._sustains[channel]
+
+    def _apply_sustain_volume(self, channel: int) -> None:
+        st = self._sustains.get(channel)
+        if not st:
+            return
+        vol = max(
+            0.0,
+            min(
+                1.0,
+                st["gain"] * self._category_volume(_loop_category(channel)) * self.master_volume,
+            ),
+        )
+        pygame.mixer.Channel(channel).set_volume(vol)
+
+    def _service_sustains(self) -> None:
+        """Keep a body queued during sustain; retire the slot when a tail ends."""
+        if not self._sustains:
+            return
+        for channel, st in list(self._sustains.items()):
+            ch = pygame.mixer.Channel(channel)
+            if st["phase"] == "sustain":
+                if ch.get_busy() and ch.get_queue() is None:
+                    ch.queue(st["body"])
+                elif not ch.get_busy():  # ran dry; restart the loop
+                    ch.play(st["body"], loops=0)
+                    ch.queue(st["body"])
+            elif not ch.get_busy():  # release tail finished
+                del self._sustains[channel]
 
     def reverse_start(self) -> None:
         # The reverse loop is intentionally not played through pygame.mixer.
@@ -346,6 +483,7 @@ class _PygameBackend:
 
     def update(self, dt: float) -> None:
         self._fades.update(dt)
+        self._service_sustains()
 
     def engine_stop(self, shutdown_sound: bool = True) -> None:
         if not self._engine_running:
@@ -491,6 +629,11 @@ class _BassBackend:
         self.engine_volume = 0.55
         self.ui_volume = 0.9
         self._loops: dict[int, tuple[str, float, object]] = {}  # slot -> (key, gain, stream)
+        self._sustains: dict[int, SustainLoop] = {}  # slot -> active sustain loop
+        # slot -> (key, stream) still ringing out its release tail after a
+        # release. Tracked so a repeat press cannot stack a second overlapping
+        # sound on top of the tail.
+        self._releasing: dict[int, tuple[str, object]] = {}
         self._retained: list = []  # streams kept alive until BASS finishes them
         self._music_track: str | None = None
         self._music_stream = None
@@ -627,9 +770,103 @@ class _BassBackend:
             self._apply_loop_volume(channel)
 
     def stop_loop(self, channel: int, fade_ms: int = 300) -> None:
+        releasing = self._releasing.pop(channel, None)
+        if releasing is not None:
+            self._fade_out(releasing[1], fade_ms)  # cut the ringing-out tail too
+        sustain = self._sustains.pop(channel, None)
+        if sustain is not None:
+            sustain.stop()
         entry = self._loops.pop(channel, None)
         if entry is not None:
             self._fade_out(entry[2], fade_ms)
+
+    def _release_tail_playing(self, channel: int, key: str) -> bool:
+        """True while ``channel`` is still ringing out a release tail of ``key``."""
+        entry = self._releasing.get(channel)
+        if entry is None:
+            return False
+        rkey, stream = entry
+        try:
+            playing = stream.is_playing
+        except self._BassError:
+            playing = False
+        if not playing:
+            self._releasing.pop(channel, None)
+            return False
+        return rkey == key
+
+    def start_sustain_loop(
+        self,
+        channel: int,
+        key: str,
+        loop_start: float,
+        loop_end: float,
+        *,
+        units: str = "samples",
+        volume: float = 1.0,
+    ) -> None:
+        """Play ``key`` and loop only the interior ``[loop_start, loop_end)``.
+
+        The attack (before ``loop_start``) plays once, then the region repeats
+        seamlessly until :meth:`release_sustain_loop`. Loop points are in
+        samples or seconds per ``units``. A repeat call while the same key is
+        already sounding on ``channel`` -- held or ringing out its release tail
+        -- is ignored, so presses never stack.
+        """
+        current = self._loops.get(channel)
+        if current and current[0] == key and channel in self._sustains:
+            self.set_loop_volume(channel, volume)
+            return
+        if self._release_tail_playing(channel, key):
+            return
+        if current:
+            self.stop_loop(channel, fade_ms=0)
+        stream = self._sfx_stream(key, looping=False)
+        if stream is None:
+            return
+        try:
+            sustain = SustainLoop(stream, loop_start, loop_end, units=units)
+        except Exception:
+            log.warning("Could not set loop points for %s", key, exc_info=True)
+            return
+        self._releasing.pop(channel, None)
+        self._loops[channel] = (key, volume, stream)
+        self._sustains[channel] = sustain
+        try:
+            stream.set_volume(0.0)
+            stream.play()
+        except self._BassError:
+            del self._loops[channel]
+            del self._sustains[channel]
+            return
+        self._apply_loop_volume(channel)
+
+    def release_sustain_loop(self, channel: int, fade_ms: int = 0) -> None:
+        """Stop looping ``channel`` and let its release tail play to the end.
+
+        Playback continues from wherever it is, past the loop end, through the
+        tail; BASS autofrees the stream at EOF. ``fade_ms`` optionally fades the
+        tail out (0 keeps the natural release at full volume).
+        """
+        sustain = self._sustains.pop(channel, None)
+        if sustain is None:
+            # No sustain loop here; fall back to a plain stop so callers can use
+            # release/stop interchangeably on a channel.
+            self.stop_loop(channel, fade_ms=fade_ms)
+            return
+        sustain.release()
+        entry = self._loops.pop(channel, None)
+        if entry is None:
+            return
+        key, _gain, stream = entry
+        if fade_ms > 0:
+            self._fade_out(stream, fade_ms)
+        else:
+            # Hand the stream to the retain list so dropping the _loops
+            # reference does not free it mid-tail; BASS autofrees it at EOF.
+            self._retain(stream)
+        # Remember the tail so a repeat press during it does not stack a horn.
+        self._releasing[channel] = (key, stream)
 
     def reverse_start(self) -> None:
         self.start_loop(CH_REVERSE, "vehicle/reverse", volume=0.4, fade_ms=80)
@@ -942,6 +1179,17 @@ class _NullBackend:
     ) -> None: ...
     def set_loop_volume(self, channel: int, volume: float) -> None: ...
     def stop_loop(self, channel: int, fade_ms: int = 300) -> None: ...
+    def start_sustain_loop(
+        self,
+        channel: int,
+        key: str,
+        loop_start: float,
+        loop_end: float,
+        *,
+        units: str = "samples",
+        volume: float = 1.0,
+    ) -> None: ...
+    def release_sustain_loop(self, channel: int, fade_ms: int = 0) -> None: ...
     def engine_start(self, play_start_sound: bool = True) -> None: ...
     def engine_stop(self, shutdown_sound: bool = True) -> None: ...
     def set_engine_rpm(self, rpm: float, throttle: float = 0.0) -> None: ...
@@ -1044,6 +1292,32 @@ class AudioEngine:
     def stop_loop(self, channel: int, fade_ms: int = 300) -> None:
         self._impl.stop_loop(channel, fade_ms)
 
+    def start_sustain_loop(
+        self,
+        channel: int,
+        key: str,
+        loop_start: float,
+        loop_end: float,
+        *,
+        units: str = "samples",
+        volume: float = 1.0,
+    ) -> None:
+        """Loop only the interior ``[loop_start, loop_end)`` of ``key``.
+
+        The attack before ``loop_start`` plays once, then the region repeats
+        until :meth:`release_sustain_loop`, which lets the release tail after
+        ``loop_end`` play out. Loop points are in ``"samples"`` or ``"seconds"``
+        per ``units``. Ideal for held sounds (a horn, a siren) that should
+        sustain naturally and ring out on release.
+        """
+        self._impl.start_sustain_loop(
+            channel, key, loop_start, loop_end, units=units, volume=volume
+        )
+
+    def release_sustain_loop(self, channel: int, fade_ms: int = 0) -> None:
+        """Stop looping ``channel`` and let its release tail play to the end."""
+        self._impl.release_sustain_loop(channel, fade_ms)
+
     # -- truck engine ----------------------------------------------------------------
 
     def engine_start(self, play_start_sound: bool = True) -> None:
@@ -1109,10 +1383,18 @@ class AudioEngine:
             self.start_loop(CH_AMBIENT, key, volume=volume, fade_ms=800)
 
     def horn_start(self) -> None:
-        self.start_loop(CH_HORN, "vehicle/horn", volume=1.0, fade_ms=0)
+        self.start_sustain_loop(
+            CH_HORN,
+            "vehicle/horn",
+            HORN_LOOP_START,
+            HORN_LOOP_END,
+            units="samples",
+            volume=1.0,
+        )
 
     def horn_stop(self) -> None:
-        self.stop_loop(CH_HORN, fade_ms=80)
+        # Let the horn's natural release ring out instead of cutting it short.
+        self.release_sustain_loop(CH_HORN, fade_ms=0)
 
     def reverse_start(self) -> None:
         self._impl.reverse_start()

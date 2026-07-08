@@ -82,6 +82,12 @@
 
 ### Changed
 
+- **The horn sounds like a real horn held down.** Instead of restarting the
+  same short honk over and over, holding the horn now sustains one steady blast
+  for as long as you press it, and when you let go the horn rings out and fades
+  the way a real one does rather than cutting off abruptly. Pressing the horn
+  again while it is still sounding no longer layers a second horn on top.
+
 - **Cities that share a name now always say their state.** With two Jacksons,
   two Portlands, and three Springfields on the map, dispatch offers, route
   planning, GPS announcements, and delivery summaries now say "Jackson,
