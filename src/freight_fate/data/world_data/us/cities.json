@@ -5503,6 +5503,42 @@
       "lat": 41.1428,
       "lon": -102.9777,
       "locations": []
+    },
+    "junction_city_ks_us": {
+      "spoken_city": "Junction City",
+      "state": "KS",
+      "country": "US",
+      "region": "southern_plains",
+      "lat": 39.0286,
+      "lon": -96.8314,
+      "locations": []
+    },
+    "hays_ks_us": {
+      "spoken_city": "Hays",
+      "state": "KS",
+      "country": "US",
+      "region": "southern_plains",
+      "lat": 38.8792,
+      "lon": -99.3268,
+      "locations": []
+    },
+    "colby_ks_us": {
+      "spoken_city": "Colby",
+      "state": "KS",
+      "country": "US",
+      "region": "southern_plains",
+      "lat": 39.3958,
+      "lon": -101.0524,
+      "locations": []
+    },
+    "burlington_co_us": {
+      "spoken_city": "Burlington",
+      "state": "CO",
+      "country": "US",
+      "region": "rockies",
+      "lat": 39.3061,
+      "lon": -102.2694,
+      "locations": []
     }
   }
 }

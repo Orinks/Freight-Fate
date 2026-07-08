@@ -231,6 +231,20 @@
         {"lat": 41.1403, "lon": -100.7601, "note": "North Platte -- I-80 (existing node)"},
         {"lat": 41.1400, "lon": -104.8202, "note": "Cheyenne -- I-80 west end (existing node)"}
       ]
+    },
+    {
+      "ref": "I-70-KS",
+      "spoken": "Interstate 70",
+      "phase": 1,
+      "tier": 1,
+      "status": "unstarted",
+      "note": "I-70 across Kansas and onto the Colorado high plains: Topeka through Salina to Denver. Topeka-Salina exists but skips Junction City; west of Salina (Hays, Colby, and on across eastern Colorado) is entirely missing. The famous flat Kansas City-Denver express leg stays.",
+      "waypoints": [
+        {"lat": 39.0473, "lon": -95.6752, "note": "Topeka -- I-70 east start (existing node)"},
+        {"lat": 38.8403, "lon": -97.6114, "note": "Salina -- I-70 (existing node)"},
+        {"lat": 39.3958, "lon": -101.0524, "note": "Colby -- I-70 western Kansas"},
+        {"lat": 39.7392, "lon": -104.9903, "note": "Denver -- I-70 west end (existing node)"}
+      ]
     }
   ]
 }
