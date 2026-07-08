@@ -37,6 +37,9 @@ def test_f1_on_dispatch_job_opens_structured_detail_view():
         assert f"> Cargo: {job.cargo.label}." in lines
         assert "Origin:" in joined
         assert "Destination:" in joined
+        # The detail view always names the state, even for a unique city name,
+        # so a player who does not know the geography can ask for it here.
+        assert "in Buffalo, New York" in joined
         assert "Distance:" in joined
         assert "Carrier gross:" in joined
         assert "Dollars per mile:" in joined
@@ -145,6 +148,28 @@ def test_locked_job_detail_does_not_sound_accept_available():
 
         assert locked_action.text == f"Cannot accept this dispatch: {locked_reason}"
         assert spoken[-1] == locked_reason
+    finally:
+        app.shutdown()
+
+
+def test_f1_on_back_item_does_not_crash():
+    from freight_fate.app import App
+    from freight_fate.states.city import JobBoardState, JobDetailState
+
+    app = App()
+    try:
+        board = _job_board(app)
+        # Move to the trailing "Back to terminal" item (past the last job).
+        board.handle_event(key_event(pygame.K_END))
+        assert board.index == len(board.jobs)
+        assert board.items[board.index].text == "Back to terminal"
+
+        # F1 here must not index off the end of the jobs list.
+        board.handle_event(key_event(pygame.K_F1))
+
+        assert app.state is board
+        assert isinstance(app.state, JobBoardState)
+        assert not isinstance(app.state, JobDetailState)
     finally:
         app.shutdown()
 

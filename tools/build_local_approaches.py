@@ -103,7 +103,7 @@ def collect_targets() -> list[Target]:
     targets: list[Target] = []
 
     for city_name in world.city_names():
-        city = world.cities[city_name]
+        city = world.city(city_name)
         for entry in city_services["cities"][city_name]:
             fallback = bool(entry.get("fallback"))
             targets.append(
@@ -232,7 +232,7 @@ def approach_record(target: Target) -> dict[str, Any]:
 
 def city_lat_lon(target: Target) -> tuple[float, float]:
     world = get_world()
-    city = world.cities[target.city]
+    city = world.city(target.city)
     return city.lat, city.lon
 
 

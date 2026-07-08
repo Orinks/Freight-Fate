@@ -71,11 +71,13 @@ def enrich_all_routes(
                     for point, elevation in zip(samples, elevations, strict=True)
                 ]
             if "grade_segments" in needs:
-                corridor["grade_segments"] = (
-                    grade_segments_from_samples(samples, elevations, leg)
-                    if engine == "ors"
-                    else _grade_segments(samples, elevations, leg)
-                )
+                if engine == "ors":
+                    fine_samples, fine_elevations = fine_grade_samples(parsed, float(leg["miles"]))
+                    corridor["grade_segments"] = grade_segments_from_samples(
+                        fine_samples, fine_elevations, leg
+                    )
+                else:
+                    corridor["grade_segments"] = _grade_segments(samples, elevations, leg)
                 # Label the leg's coarse terrain from the real grades. Only new
                 # legs reach here (fully-enriched legs are skipped above), so a
                 # placeholder "flat" on a freshly-added mountain leg is corrected
@@ -183,7 +185,8 @@ def refresh_corridors(
             elevation_source = ORS_ELEVATION_SOURCE
             corridor_source = ORS_CORRIDOR_SOURCE
             corridor["tollway_detected"] = parsed["has_tollway"]
-            grade_segments = grade_segments_from_samples(samples, elevations, leg)
+            fine_samples, fine_elevations = fine_grade_samples(parsed, miles)
+            grade_segments = grade_segments_from_samples(fine_samples, fine_elevations, leg)
         else:
             route = _cached_osrm_route(data, leg, cache_dir, rate_limit_s)
             samples = _sample_geometry(route["geometry"]["coordinates"], miles)
@@ -237,11 +240,20 @@ def _rescale_corridor_positions(leg: dict[str, Any], factor: float, new_miles: f
         segments[0]["start_mi"] = 0.0
         segments[-1]["end_mi"] = round(new_miles, 1)
 
-    for field in ("state_crossings", "checkpoints", "toll_events"):
+    for field in ("state_crossings", "checkpoints", "toll_events", "interchanges"):
         for item in corridor.get(field, []):
             item["at_mi"] = interior(item["at_mi"])
     for stop in leg.get("stops", []):
         stop["at_mi"] = interior(stop["at_mi"])
+
+    # speed_limits is a step function whose first entry anchors the leg start;
+    # keep that anchor at 0.0 (interior() would push it to 0.1 and the loader
+    # would lose the initial limit).
+    speed_limits = corridor.get("speed_limits", [])
+    for entry in speed_limits:
+        entry["at_mi"] = round(min(round(new_miles - 0.1, 1), entry["at_mi"] * factor), 1)
+    if speed_limits:
+        speed_limits[0]["at_mi"] = 0.0
 
     # state_miles is a per-state breakdown, not an at_mi; scale it so it still
     # sums to the leg total, fixing rounding drift on the last entry.
@@ -464,6 +476,21 @@ OVERPASS_POI_SOURCE = (
 )
 
 
+def _city_poi_source(city: str) -> str:
+    """Source note for a POI found by querying at an endpoint city itself.
+
+    Keeps the "Overpass" + "amenity query" markers that
+    ``prune_non_truck_pois`` matches on, and differs from
+    ``OVERPASS_POI_SOURCE`` so ``_spread_stop_positions`` treats the stop's
+    endpoint position as authoritative rather than nudging it along the leg.
+    """
+    return (
+        "OpenStreetMap/Overpass development-time amenity query centered on the "
+        f"{city} endpoint city's own coordinates; curated into a gameplay POI "
+        "(clean name, normalized category) without raw OSM IDs."
+    )
+
+
 def _bbox(lat: float, lon: float, radius_m: float) -> str:
     """A ``south,west,north,east`` box roughly ``radius_m`` around a point.
 
@@ -483,6 +510,7 @@ def _overpass_named_candidates(
     cache_dir: Path,
     rate_limit_s: float,
     want: int,
+    rural_fallback: bool = False,
 ) -> list[dict[str, Any]]:
     """Named truck-relevant POIs of any brand near a leg, from OpenStreetMap.
 
@@ -490,17 +518,34 @@ def _overpass_named_candidates(
     independents, rest areas, service plazas, and HGV truck parking alike --
     whatever OSM has a real name for. Unnamed amenities are skipped (no synthetic
     placeholders). Deduped by name, capped at ``want``.
+
+    Searches mid-corridor samples plus the leg's two endpoint cities
+    (``samples[0]``/``samples[-1]`` sit on the cities themselves). Real
+    truck-stop clusters live at town exits, and on long legs the mid-corridor
+    samples land 25-30mi apart, so an endpoint cluster fell outside every
+    search box (confirmed misses: Tucumcari, Barstow, Kingman, Indio, Van
+    Horn). Endpoint queries are cache-keyed by city, not leg, so legs sharing
+    a city share one Overpass response.
     """
-    candidate_points = [samples[len(samples) // 2]]
+    leg_prefix = f"named--{leg['from']}--{leg['to']}"
+    mid_points = [samples[len(samples) // 2]]
     if len(samples) >= 4:
-        candidate_points += [samples[1], samples[-2]]
+        mid_points += [samples[1], samples[-2]]
     if len(samples) >= 6:
-        candidate_points += [samples[len(samples) // 4], samples[3 * len(samples) // 4]]
+        mid_points += [samples[len(samples) // 4], samples[3 * len(samples) // 4]]
+    candidate_points = [
+        (f"{leg_prefix}--{point['at_mi']:.1f}", point, OVERPASS_POI_SOURCE)
+        for point in mid_points
+    ]
+    candidate_points += [
+        (f"named-city--{leg['from']}", samples[0], _city_poi_source(leg["from"])),
+        (f"named-city--{leg['to']}", samples[-1], _city_poi_source(leg["to"])),
+    ]
     # Gather across points, then rank: truck stops first, generic corridor fuel
     # as a fallback, warehouse/grocery retail fuel dropped entirely. Keeping the
     # best per name means one slow point doesn't starve the leg of good POIs.
     best: dict[str, tuple[int, dict[str, Any]]] = {}
-    for point in candidate_points:
+    for cache_key, point, source in candidate_points:
         box = _bbox(point["lat"], point["lon"], 6000)
         query = f"""
         [out:json][timeout:40];
@@ -514,7 +559,7 @@ def _overpass_named_candidates(
         try:
             payload = _cached_overpass_json(
                 cache_dir,
-                f"named--{leg['from']}--{leg['to']}--{point['at_mi']:.1f}",
+                cache_key,
                 urllib.parse.urlencode({"data": query}).encode("utf-8"),
                 rate_limit_s=rate_limit_s,
             )
@@ -530,7 +575,7 @@ def _overpass_named_candidates(
                 continue
             if not name:
                 continue
-            score = _truck_relevance(tags, name)
+            score = _truck_relevance(tags, name, rural_fallback=rural_fallback)
             if score is None:
                 continue  # retail/grocery fuel -- not a truck stop
             stop_type = _stop_type_from_tags(tags)
@@ -538,11 +583,20 @@ def _overpass_named_candidates(
                 "name": name,
                 "type": stop_type,
                 "at_mi": at_mi,
-                "source": OVERPASS_POI_SOURCE,
+                "source": source,
                 "parking": _parking_for_stop_type(stop_type),
                 "actions": _actions_for_stop_type(stop_type),
                 "services": _services_for_stop_type(stop_type),
             }
+            # The stop's real OSM coordinate (node lat/lon, or way/relation
+            # center) rides alongside at_mi so Josh's 1.9 surface-street layer
+            # can route a driver off the ramp to the actual truck stop. The
+            # runtime ignores unknown keys, so this is purely additive.
+            lat = element.get("lat", element.get("center", {}).get("lat"))
+            lon = element.get("lon", element.get("center", {}).get("lon"))
+            if lat is not None and lon is not None:
+                cand["lat"] = round(float(lat), 5)
+                cand["lon"] = round(float(lon), 5)
             existing = best.get(name.lower())
             if existing is None or score > existing[0]:
                 best[name.lower()] = (score, cand)

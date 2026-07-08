@@ -146,7 +146,7 @@ def collect_targets() -> list[Target]:
     approaches = json.loads(LOCAL_APPROACHES_PATH.read_text(encoding="utf-8"))["approaches"]
     targets: list[Target] = []
     for city_name in world.city_names():
-        city = world.cities[city_name]
+        city = world.city(city_name)
         for entry in services[city_name]:
             target_id = f"city_service:{slug(city_name)}:{entry['key']}"
             approach = approaches[target_id]

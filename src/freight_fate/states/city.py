@@ -34,8 +34,10 @@ from ..models.jobs import (
     CARGO_CATALOG,
     Job,
     JobBoard,
+    facility_text,
     job_from_payload,
     job_payload,
+    normalize_job_cities,
     route_drive_hours,
 )
 from ..models.start_options import option_for_profile
@@ -47,6 +49,7 @@ from ..models.trailers import (
 from ..models.trucks import TRUCK_CATALOG
 from ..music import select_menu_music_sequence
 from ..sim.hos import LIMITS, clock_text, time_of_day
+from ..sim.timezones import appointment_text, city_zone, to_local
 from .base import MenuItem, MenuState
 from .career_stats import CareerStatsState, fully_rested
 from .city_garage import GarageState
@@ -166,13 +169,13 @@ class CityMenuState(MenuState):
         from ..discord_presence import PresenceState
 
         p = self.ctx.profile
-        city = p.current_city if p else ""
+        city = self.ctx.world.spoken_city(p.current_city) if p and p.current_city else ""
         detail = f"{city} service area" if city else ""
         return PresenceState("At the terminal", detail)
 
     def announce_entry(self) -> None:
         p = self.ctx.profile
-        city = self.ctx.world.cities[p.current_city]
+        city = self.ctx.world.city(p.current_city)
         terminal = self.ctx.world.home_terminal(p.current_city)
         business = status_label(p.business_status)
         rank = p.career.rank
@@ -206,7 +209,7 @@ class CityMenuState(MenuState):
         else:
             first_day = f" Career objective: {career_objective(p).terminal_text}"
         self.ctx.say(
-            f"Parked at {terminal.spoken_name} in the {p.current_city} "
+            f"Parked at {terminal.spoken_name} in the {city.name} "
             f"service area, {city.state}. {business.capitalize()} with "
             f"level {rank.level}, {rank.title}. "
             f"You have {p.money:,.0f} dollars. "
@@ -368,7 +371,7 @@ class CityMenuState(MenuState):
 
     def _garage_label(self) -> str:
         p = self.ctx.profile
-        region = self.ctx.world.cities[p.current_city].region
+        region = self.ctx.world.city(p.current_city).region
         price = self.ctx.economy.fuel_price(region)
         return f"Garage: fuel {price:.2f} per gallon"
 
@@ -448,14 +451,17 @@ class CityMenuState(MenuState):
         from ..sim.weather import WeatherSystem
 
         p = self.ctx.profile
-        city = self.ctx.world.cities[p.current_city]
-        hour = p.game_hours % 24.0
+        city = self.ctx.world.city(p.current_city)
+        zone = city_zone(city)
+        hour = to_local(p.game_hours, zone) % 24.0
         day = p.market_day() + 1
         desc, live = None, False
         provider = self.ctx.real_weather_provider()
         if provider is not None:
-            provider.request(city.name, city.lat, city.lon)
-            kind = provider.get(city.name)
+            # Keyed by the city key, not the spoken name: two cities can share
+            # a spoken name but they are different places with different skies.
+            provider.request(city.key, city.lat, city.lon)
+            kind = provider.get(city.key)
             if kind is not None:
                 desc, live = kind.value, True
         from ..sim.season import date_text, real_clock_game_hours, season
@@ -465,14 +471,14 @@ class CityMenuState(MenuState):
         season_hours = real_clock_game_hours() if provider is not None else p.game_hours
         if desc is None:
             # deterministic per city and hour, so asking twice agrees
-            seed = zlib.crc32(f"{city.name}:{int(p.game_hours)}".encode())
+            seed = zlib.crc32(f"{city.key}:{int(p.game_hours)}".encode())
             desc = WeatherSystem(city.region, seed=seed, game_hours=season_hours).describe()
         source = "Live weather" if live else "Weather"
         self.ctx.say(
-            f"It is {clock_text(hour)}, {time_of_day(hour)}, "
+            f"It is {clock_text(hour)} {zone.name}, {time_of_day(hour)}, "
             f"{date_text(season_hours)}, in {season(season_hours)}, "
             f"day {day} of your career. "
-            f"{source} in {p.current_city}: {desc}."
+            f"{source} in {city.name}: {desc}."
         )
 
     def _sleep(self) -> None:
@@ -496,7 +502,8 @@ class CityMenuState(MenuState):
         p.market.advance_to(p.market_day())
         self.ctx.save_profile()
         self.ctx.audio.play("ui/notify")
-        hour = p.game_hours % 24.0
+        zone = city_zone(self.ctx.world.city(p.current_city))
+        hour = to_local(p.game_hours, zone) % 24.0
         self.ctx.say(
             f"You slept 10 hours and woke rested. It is "
             f"{clock_text(hour)}, {time_of_day(hour)}. "
@@ -557,7 +564,12 @@ def open_freight_market(ctx) -> list[Job]:
     key = dispatch_cache_key(p)
     cache = p.dispatch_board_cache if not market_changed else None
     if cache and cache.get("key") == key:
-        jobs = [_job_from_payload(payload) for payload in cache.get("jobs", [])]
+        # Cached payloads may predate the slug migration; normalize their
+        # city references so a restored board keeps resolving.
+        jobs = [
+            normalize_job_cities(_job_from_payload(payload), ctx.world)
+            for payload in cache.get("jobs", [])
+        ]
     else:
         jobs = board.offers(
             p.current_city,
@@ -667,15 +679,13 @@ class BobtailDestState(MenuState):
         for name in self._cities:
             route = world.supported_route(here, name)
             miles = route.miles if route is not None else 0.0
-            city = world.cities[name]
-            # State-disambiguated names ("Jackson, Michigan") keep one state.
-            place = name if name.endswith(f", {city.state}") else f"{name}, {city.state}"
-            label = f"{place} -- {self.ctx.settings.distance_text(miles)} empty"
+            city = world.city(name)
+            label = f"{city.name}, {city.state} -- {self.ctx.settings.distance_text(miles)} empty"
             items.append(
                 MenuItem(
                     label,
                     lambda n=name: self._start(n),
-                    help=f"Drive empty to {name} to see its dispatch board.",
+                    help=f"Drive empty to {world.spoken_city(name)} to see its dispatch board.",
                 )
             )
         items.append(MenuItem("Back to terminal", self.go_back))
@@ -696,11 +706,12 @@ class BobtailDestState(MenuState):
         p.dispatch_board_cache = None
         p.active_trip = driving.snapshot()
         self.ctx.save_profile()
+        spoken_dest = job.spoken_destination
         self.ctx.say(
-            f"Bobtailing empty to {dest}, {route.miles:.0f} miles on "
-            f"{route.highways[0]}. No load and no pay -- you will see the {dest} "
-            "dispatch board on arrival. Check in at the city terminal when you "
-            "get there.",
+            f"Bobtailing empty to {spoken_dest}, {route.miles:.0f} miles on "
+            f"{route.highways[0]}. No load and no pay -- you will see the "
+            f"{spoken_dest} dispatch board on arrival. Check in at the city "
+            "terminal when you get there.",
             interrupt=True,
         )
         self.ctx.push_state(driving)
@@ -1295,14 +1306,28 @@ class JobDetailState(MenuState):
             reputation=p.career.reputation,
         )
         dollars_per_mile = business.gross_pay / max(job.distance_mi, 1.0)
+        world = self.ctx.world
+        # The detail view is the "tell me more" surface, so it always names the
+        # state -- board offers stay short, but a player who does not know
+        # where Baton Rouge is can open the job and hear "..., Louisiana".
+        destination_text = facility_text(
+            job.destination_type,
+            job.destination_location,
+            world.spoken_city(job.destination, qualified=True),
+            job.destination_locality,
+        )
         lines = [
             f"Cargo: {job.cargo.label}.",
             f"Origin: {job.origin_facility_text()}.",
-            f"Destination: {job.destination_facility_text()} in {job.destination}.",
+            f"Destination: {destination_text}.",
             f"Distance: {job.distance_mi:.0f} miles.",
             f"{pay_label(p.business_status)}: {business.gross_pay:,.0f} dollars.",
             f"Dollars per mile: {dollars_per_mile:.2f}.",
-            f"Deadline: {job.deadline_game_h:.0f} hours.",
+            # The appointment reads in the receiver's local time, the way real
+            # dispatch quotes it. "About" because the clock starts at pickup
+            # departure, after check-in and loading.
+            f"Deadline: {job.deadline_game_h:.0f} hours; deliver by about "
+            f"{appointment_text(p.game_hours, job.deadline_game_h, city_zone(world.city(job.destination)))}.",
             f"Equipment: {job.equipment_text()}.",
             f"Trailer: {self.board._trailer_note(self.job)}",
         ]

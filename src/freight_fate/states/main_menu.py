@@ -72,8 +72,10 @@ def _career_location(profile: Profile) -> str:
     trip = profile.active_trip or {}
     job = trip.get("job", {})
     destination = job.get("destination")
+    # Spoken fields exist in post-slug payloads; legacy payloads fall back to
+    # origin/destination, which there hold the old speakable display name.
     if trip.get("kind") == "pickup_drive":
-        origin = str(job.get("origin") or profile.current_city)
+        origin = str(job.get("origin_spoken") or job.get("origin") or profile.current_city)
         facility = facility_text(
             str(job.get("origin_type", "metro_market")),
             str(job.get("origin_location", "")),
@@ -86,7 +88,7 @@ def _career_location(profile: Profile) -> str:
         facility = facility_text(
             str(job.get("destination_type", "metro_market")),
             str(job.get("destination_location", "")),
-            str(destination),
+            str(job.get("destination_spoken") or destination),
             str(job.get("destination_locality", "")),
         )
         return f"{loaded} {facility}"
@@ -94,13 +96,13 @@ def _career_location(profile: Profile) -> str:
         facility = facility_text(
             str(job.get("destination_type", "metro_market")),
             str(job.get("destination_location", "")),
-            str(destination),
+            str(job.get("destination_spoken") or destination),
             str(job.get("destination_locality", "")),
         )
         return f"on the road to {facility}"
     try:
         terminal = get_world().home_terminal(profile.current_city)
-        return f"at {terminal.name} in {profile.current_city}"
+        return f"at {terminal.name} in {get_world().spoken_city(profile.current_city)}"
     except KeyError:
         return f"in {profile.current_city}"
 
@@ -249,7 +251,7 @@ class MainMenuState(MenuState):
             terminal = self.ctx.world.home_terminal(p.current_city)
             self.ctx.say(
                 f"Welcome back, {p.name}. You are parked at "
-                f"{terminal.name} in {p.current_city} "
+                f"{terminal.name} in {self.ctx.world.spoken_city(p.current_city)} "
                 f"with {p.money:,.0f} dollars.",
                 interrupt=True,
             )
@@ -505,7 +507,7 @@ class ConfirmCareerActionState(MenuState):
         if self.action == "reset":
             detail = (
                 "Resetting starts this driver over at "
-                f"{self.profile.current_city} with a fresh truck, "
+                f"{self.ctx.world.spoken_city(self.profile.current_city)} with a fresh truck, "
                 "starting money, no active trip, and no delivery history."
             )
         else:
@@ -534,7 +536,8 @@ class ConfirmCareerActionState(MenuState):
             fresh.save()
             message = (
                 f"{name} reset. The career starts over at "
-                f"{fresh.current_city} with {fresh.carrier_name} "
+                f"{self.ctx.world.spoken_city(fresh.current_city)} "
+                f"with {fresh.carrier_name} "
                 f"and {fresh.money:,.0f} dollars."
             )
         else:

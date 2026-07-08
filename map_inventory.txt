@@ -1,0 +1,4337 @@
+FREIGHT FATE MAP INVENTORY
+==========================
+Cities (freight nodes): 349
+Real named checkpoints: 2571
+Legs carrying at least one named checkpoint: 684
+
+
+================================================
+CITIES -- 349 places you can pick up and deliver freight
+================================================
+Grouped by region, alphabetical within each region.
+
+Appalachia (14):
+  Asheville, North Carolina
+  Beckley, West Virginia
+  Charleston, West Virginia
+  Charlottesville, Virginia
+  Hagerstown, Maryland
+  Harrisonburg, Virginia
+  Huntington, West Virginia
+  Johnson City, Tennessee
+  Knoxville, Tennessee
+  Morgantown, West Virginia
+  Morristown, Tennessee
+  Pittsburgh, Pennsylvania
+  Roanoke, Virginia
+  Winchester, Virginia
+
+Atlantic Southeast (17):
+  Athens, Georgia
+  Atlanta, Georgia
+  Augusta, Georgia
+  Charleston, South Carolina
+  Charlotte, North Carolina
+  Columbia, South Carolina
+  Fayetteville, North Carolina
+  Greensboro, North Carolina
+  Greenville, South Carolina
+  Macon, Georgia
+  Norfolk, Virginia
+  Raleigh, North Carolina
+  Richmond, Virginia
+  Savannah, Georgia
+  Virginia Beach, Virginia
+  Wilmington, North Carolina
+  Winston-Salem, North Carolina
+
+California (28):
+  Bakersfield, California
+  Barstow, California
+  Chico, California
+  Crescent City, California
+  El Centro, California
+  Eureka, California
+  Fairfield, California
+  Fresno, California
+  Indio, California
+  Lancaster, California
+  Los Angeles, California
+  Oceanside, California
+  Oxnard, California
+  Redding, California
+  Riverside, California
+  Sacramento, California
+  Salinas, California
+  San Diego, California
+  San Francisco, California
+  San Jose, California
+  Santa Ana, California
+  Santa Maria, California
+  Santa Rosa, California
+  Stockton, California
+  Ukiah, California
+  Valencia, California
+  Victorville, California
+  Visalia, California
+
+Corn Belt (10):
+  Bloomington, Illinois
+  Champaign, Illinois
+  Cincinnati, Ohio
+  Columbus, Ohio
+  Dayton, Ohio
+  Decatur, Illinois
+  Indianapolis, Indiana
+  Lafayette, Indiana
+  Peoria, Illinois
+  Springfield, Illinois
+
+Desert Southwest (14):
+  Albuquerque, New Mexico
+  El Paso, Texas
+  Flagstaff, Arizona
+  Gallup, New Mexico
+  Kingman, Arizona
+  Las Cruces, New Mexico
+  Las Vegas, Nevada
+  Las Vegas, New Mexico
+  Phoenix, Arizona
+  Santa Fe, New Mexico
+  Tucson, Arizona
+  Tucumcari, New Mexico
+  Van Horn, Texas
+  Yuma, Arizona
+
+Florida (12):
+  Cape Coral, Florida
+  Coral Springs, Florida
+  Gainesville, Florida
+  Jacksonville, Florida
+  Lakeland, Florida
+  Miami, Florida
+  Orlando, Florida
+  Palm Bay, Florida
+  Port Saint Lucie, Florida
+  Tallahassee, Florida
+  Tampa, Florida
+  West Palm Beach, Florida
+
+Great Basin (15):
+  Battle Mountain, Nevada
+  Boise, Idaho
+  Coeur d'Alene, Idaho
+  Elko, Nevada
+  Fernley, Nevada
+  Idaho Falls, Idaho
+  Lewiston, Idaho
+  McCall, Idaho
+  Pocatello, Idaho
+  Reno, Nevada
+  Sandpoint, Idaho
+  Tonopah, Nevada
+  Twin Falls, Idaho
+  West Wendover, Nevada
+  Winnemucca, Nevada
+
+Great Lakes (22):
+  Akron, Ohio
+  Ann Arbor, Michigan
+  Aurora, Illinois
+  Buffalo, New York
+  Chicago, Illinois
+  Cleveland, Ohio
+  Detroit, Michigan
+  Erie, Pennsylvania
+  Flint, Michigan
+  Fort Wayne, Indiana
+  Gary, Indiana
+  Grand Rapids, Michigan
+  Jackson, Michigan
+  Kalamazoo, Michigan
+  Lansing, Michigan
+  Muskegon, Michigan
+  Port Huron, Michigan
+  Rockford, Illinois
+  Saginaw, Michigan
+  South Bend, Indiana
+  Toledo, Ohio
+  Traverse City, Michigan
+
+Gulf Coast (21):
+  Austin, Texas
+  Baton Rouge, Louisiana
+  Beaumont, Texas
+  Brownsville, Texas
+  College Station, Texas
+  Corpus Christi, Texas
+  Del Rio, Texas
+  Gulfport, Mississippi
+  Houston, Texas
+  Kerrville, Texas
+  Lafayette, Louisiana
+  Lake Charles, Louisiana
+  Laredo, Texas
+  McAllen, Texas
+  Mobile, Alabama
+  Monroe, Louisiana
+  New Orleans, Louisiana
+  Orange, Texas
+  San Antonio, Texas
+  Shreveport, Louisiana
+  Sulphur, Louisiana
+
+Heartland (27):
+  Bismarck, North Dakota
+  Brookings, South Dakota
+  Cedar Rapids, Iowa
+  Columbia, Missouri
+  Davenport, Iowa
+  Des Moines, Iowa
+  Devils Lake, North Dakota
+  Dickinson, North Dakota
+  Fargo, North Dakota
+  Grand Forks, North Dakota
+  Grand Island, Nebraska
+  Iowa City, Iowa
+  Joplin, Missouri
+  Kansas City, Missouri
+  Lincoln, Nebraska
+  Minot, North Dakota
+  Mitchell, South Dakota
+  North Platte, Nebraska
+  Omaha, Nebraska
+  Rapid City, South Dakota
+  Rolla, Missouri
+  Sioux City, Iowa
+  Sioux Falls, South Dakota
+  Spearfish, South Dakota
+  Springfield, Missouri
+  St. Louis, Missouri
+  Williston, North Dakota
+
+Mid South (28):
+  Ashland, Kentucky
+  Birmingham, Alabama
+  Bowling Green, Kentucky
+  Chattanooga, Tennessee
+  Clarksville, Tennessee
+  Conway, Arkansas
+  Elizabethtown, Kentucky
+  Evansville, Indiana
+  Fort Smith, Arkansas
+  Hazard, Kentucky
+  Huntsville, Alabama
+  Jackson, Mississippi
+  Lexington, Kentucky
+  Little Rock, Arkansas
+  London, Kentucky
+  Louisville, Kentucky
+  Memphis, Tennessee
+  Meridian, Mississippi
+  Montgomery, Alabama
+  Morehead, Kentucky
+  Mount Sterling, Kentucky
+  Murfreesboro, Tennessee
+  Nashville, Tennessee
+  Paintsville, Kentucky
+  Pikeville, Kentucky
+  Richmond, Kentucky
+  Tuscaloosa, Alabama
+  Vicksburg, Mississippi
+
+Northeast (33):
+  Albany, New York
+  Allentown, Pennsylvania
+  Atlantic City, New Jersey
+  Baltimore, Maryland
+  Bangor, Maine
+  Binghamton, New York
+  Boston, Massachusetts
+  Bridgeport, Connecticut
+  Burlington, Vermont
+  Carlisle, Pennsylvania
+  Dover, Delaware
+  Harrisburg, Pennsylvania
+  Hartford, Connecticut
+  Manchester, New Hampshire
+  Montpelier, Vermont
+  New Haven, Connecticut
+  New York, New York
+  Newark, New Jersey
+  Newport, Rhode Island
+  Philadelphia, Pennsylvania
+  Portland, Maine
+  Portsmouth, New Hampshire
+  Providence, Rhode Island
+  Rochester, New York
+  Salisbury, Maryland
+  Scranton, Pennsylvania
+  Springfield, Massachusetts
+  Syracuse, New York
+  Trenton, New Jersey
+  Utica, New York
+  Washington, District of Columbia
+  Wilmington, Delaware
+  Worcester, Massachusetts
+
+Pacific Northwest (26):
+  Astoria, Oregon
+  Baker City, Oregon
+  Bellingham, Washington
+  Bend, Oregon
+  Coos Bay, Oregon
+  Corvallis, Oregon
+  Eugene, Oregon
+  Everett, Washington
+  Grants Pass, Oregon
+  Klamath Falls, Oregon
+  La Grande, Oregon
+  Medford, Oregon
+  Moses Lake, Washington
+  Newport, Oregon
+  Olympia, Washington
+  Ontario, Oregon
+  Pendleton, Oregon
+  Portland, Oregon
+  Roseburg, Oregon
+  Salem, Oregon
+  Seattle, Washington
+  Spokane, Washington
+  Tacoma, Washington
+  Tri-Cities, Washington
+  Wenatchee, Washington
+  Yakima, Washington
+
+Rockies (37):
+  Billings, Montana
+  Bozeman, Montana
+  Buffalo, Wyoming
+  Butte, Montana
+  Casper, Wyoming
+  Cedar City, Utah
+  Cheyenne, Wyoming
+  Colorado Springs, Colorado
+  Denver, Colorado
+  Edwards, Colorado
+  Fort Collins, Colorado
+  Gillette, Wyoming
+  Glasgow, Montana
+  Glendive, Montana
+  Glenwood Springs, Colorado
+  Grand Junction, Colorado
+  Great Falls, Montana
+  Green River, Utah
+  Havre, Montana
+  Helena, Montana
+  Kalispell, Montana
+  Laramie, Wyoming
+  Libby, Montana
+  Miles City, Montana
+  Missoula, Montana
+  Nephi, Utah
+  Ogden, Utah
+  Provo, Utah
+  Pueblo, Colorado
+  Richfield, Utah
+  Rock Springs, Wyoming
+  Saint George, Utah
+  Salt Lake City, Utah
+  Shelby, Montana
+  Sheridan, Wyoming
+  Silverthorne, Colorado
+  Wolf Point, Montana
+
+Southern Plains (22):
+  Abilene, Texas
+  Amarillo, Texas
+  Dallas, Texas
+  Dodge City, Kansas
+  Enid, Oklahoma
+  Fort Worth, Texas
+  Garden City, Kansas
+  Killeen, Texas
+  Lawton, Oklahoma
+  Lubbock, Texas
+  McKinney, Texas
+  Midland, Texas
+  Odessa, Texas
+  Oklahoma City, Oklahoma
+  Salina, Kansas
+  San Angelo, Texas
+  Topeka, Kansas
+  Tulsa, Oklahoma
+  Tyler, Texas
+  Waco, Texas
+  Wichita Falls, Texas
+  Wichita, Kansas
+
+Upper Midwest (23):
+  Albert Lea, Minnesota
+  Bemidji, Minnesota
+  Duluth, Minnesota
+  Eau Claire, Wisconsin
+  Escanaba, Michigan
+  Grand Rapids, Minnesota
+  Green Bay, Wisconsin
+  Hibbing, Minnesota
+  Houghton, Michigan
+  Iron Mountain, Michigan
+  Kenosha, Wisconsin
+  La Crosse, Wisconsin
+  Madison, Wisconsin
+  Mankato, Minnesota
+  Marquette, Michigan
+  Milwaukee, Wisconsin
+  Minneapolis, Minnesota
+  Rochester, Minnesota
+  Sault Ste. Marie, Michigan
+  St. Cloud, Minnesota
+  Wausau, Wisconsin
+  Willmar, Minnesota
+  Winona, Minnesota
+
+
+================================================
+CHECKPOINTS -- 2571 named places you drive past
+================================================
+Grouped by the leg they sit on, in mile order along the drive.
+
+Abilene -> Fort Worth (I-20)
+  at 16 mi: Clyde (Texas)
+  at 57 mi: Eastland (Texas)
+
+Abilene -> Wichita Falls (US-277)
+  at 40 mi: Stamford (Texas)
+  at 55 mi: Haskell (Texas)
+  at 76 mi: Munday (Texas)
+  at 100 mi: Seymour (Texas)
+  at 138 mi: Holliday (Texas)
+
+Akron -> Cleveland (I-77)
+  at 32 mi: Garfield Heights (Ohio)
+
+Akron -> Columbus (I-71)
+  at 25 mi: Westfield Center (Ohio)
+  at 92 mi: Marengo (Ohio)
+
+Akron -> Pittsburgh (I-76)
+  at 30 mi: Craig Beach (Ohio)
+  at 46 mi: Canfield (Ohio)
+  at 72 mi: Big Beaver (Pennsylvania)
+  at 90 mi: Cranberry Township (Pennsylvania)
+
+Albany -> Bridgeport (US-7)
+  at 20 mi: Valatie (New York)
+  at 57 mi: Sheffield (Massachusetts)
+  at 88 mi: West Torrington (Connecticut)
+  at 107 mi: Waterbury (Connecticut)
+  at 125 mi: Shelton (Connecticut)
+
+Albany -> Hartford (I-90)
+  at 40 mi: Stockbridge (Massachusetts)
+  at 74 mi: Westfield (Massachusetts)
+  at 94 mi: Enfield (Connecticut)
+
+Albany -> Worcester (I-90)
+  at 41 mi: Stockbridge (Massachusetts)
+  at 74 mi: Westfield (Massachusetts)
+  at 97 mi: Palmer (Massachusetts)
+  at 117 mi: Charlton (Massachusetts)
+
+Albert Lea -> Des Moines (I-35)
+  at 36 mi: Clear Lake (Iowa)
+  at 72 mi: Dows (Iowa)
+  at 106 mi: Story City (Iowa)
+
+Albert Lea -> Minneapolis (I-35)
+  at 18 mi: Ellendale (Minnesota)
+  at 33 mi: Owatonna (Minnesota)
+  at 48 mi: Faribault (Minnesota)
+
+Albuquerque -> Gallup (I-40)
+  at 76 mi: Grants (New Mexico)
+
+Albuquerque -> Phoenix (I-40)
+  at 44 mi: Laguna (New Mexico)
+  at 74 mi: Grants (New Mexico)
+  at 102 mi: Thoreau (New Mexico)
+  at 124 mi: Church Rock (New Mexico)
+  at 164 mi: Houck (Arizona)
+  at 222 mi: Holbrook (Arizona)
+  at 253 mi: Winslow (Arizona)
+  at 319 mi: Kachina Village (Arizona)
+  at 366 mi: Camp Verde (Arizona)
+  at 392 mi: Cordes Lakes (Arizona)
+  at 420 mi: New River (Arizona)
+
+Albuquerque -> Santa Fe (I-25)
+  at 17 mi: Bernalillo (New Mexico)
+  at 48 mi: La Cienega (New Mexico)
+
+Albuquerque -> Tucumcari (I-40)
+  at 116 mi: Santa Rosa (New Mexico)
+
+Allentown -> Baltimore (US-222)
+  at 7 mi: Ancient Oaks (Pennsylvania)
+  at 38 mi: Wyomissing (Pennsylvania)
+  at 53 mi: Ephrata (Pennsylvania)
+  at 88 mi: York (Pennsylvania)
+  at 103 mi: Shrewsbury (Pennsylvania)
+  at 123 mi: Hunt Valley (Maryland)
+
+Allentown -> Bridgeport (I-78)
+  at 21 mi: Easton (Pennsylvania)
+  at 41 mi: High Bridge (New Jersey)
+  at 68 mi: Scotch Plains (New Jersey)
+  at 92 mi: Union City (New Jersey)
+  at 117 mi: New Rochelle (New York)
+  at 135 mi: Stamford (Connecticut)
+
+Allentown -> New York (I-95)
+  at 21 mi: Easton (Pennsylvania)
+  at 42 mi: High Bridge (New Jersey)
+  at 68 mi: Scotch Plains (New Jersey)
+  at 93 mi: Union City (New Jersey)
+
+Amarillo -> Albuquerque (I-40)
+  at 36 mi: Vega (Texas)
+  at 50 mi: Adrian (Texas)
+  at 89 mi: San Jon (New Mexico)
+  at 227 mi: Clines Corners (New Mexico)
+  at 249 mi: Moriarty (New Mexico)
+  at 258 mi: Edgewood (New Mexico)
+
+Amarillo -> Dallas (US-287)
+  at 30 mi: Claude (Texas)
+  at 60 mi: Clarendon (Texas)
+  at 86 mi: Memphis (Texas)
+  at 117 mi: Childress (Texas)
+  at 145 mi: Quanah (Texas)
+  at 175 mi: Vernon (Texas)
+  at 197 mi: Electra (Texas)
+  at 213 mi: Iowa Park (Texas)
+  at 244 mi: Henrietta (Texas)
+  at 272 mi: Bowie (Texas)
+  at 299 mi: Decatur (Texas)
+  at 314 mi: Rhome (Texas)
+
+Ann Arbor -> Fort Wayne (I-69)
+  at 15 mi: Chelsea (Michigan)
+  at 46 mi: Spring Arbor (Michigan)
+  at 83 mi: Coldwater (Michigan)
+  at 124 mi: Auburn (Indiana)
+
+Ann Arbor -> Grand Rapids (I-96)
+  at 30 mi: Howell (Michigan)
+  at 61 mi: Holt (Michigan)
+  at 90 mi: Portland (Michigan)
+
+Ann Arbor -> Lansing (I-96)
+  at 30 mi: Howell (Michigan)
+  at 48 mi: Williamston (Michigan)
+
+Asheville -> Charlotte (I-40)
+  at 16 mi: Black Mountain (North Carolina)
+  at 33 mi: West Marion (North Carolina)
+  at 55 mi: Morganton (North Carolina)
+  at 76 mi: Hickory (North Carolina)
+  at 110 mi: Lowesville (North Carolina)
+
+Asheville -> Knoxville (I-40)
+  at 17 mi: Canton (North Carolina)
+  at 68 mi: Newport (Tennessee)
+
+Asheville -> Winston-Salem (I-40)
+  at 16 mi: Black Mountain (North Carolina)
+  at 33 mi: West Marion (North Carolina)
+  at 55 mi: Morganton (North Carolina)
+  at 76 mi: Hickory (North Carolina)
+  at 102 mi: Statesville (North Carolina)
+  at 135 mi: Clemmons (North Carolina)
+
+Ashland -> Huntington (I-64)
+  at 8 mi: Kenova (West Virginia)
+
+Ashland -> Paintsville (US-23)
+  at 6 mi: Kenova (West Virginia)
+  at 30 mi: Louisa (Kentucky)
+
+Astoria -> Portland (US-26)
+  at 17 mi: Seaside (Oregon)
+  at 89 mi: Beaverton (Oregon)
+
+Athens -> Atlanta (I-85)
+  at 18 mi: Statham (Georgia)
+  at 42 mi: Lawrenceville (Georgia)
+
+Athens -> Chattanooga (I-75)
+  at 18 mi: Statham (Georgia)
+  at 42 mi: Lawrenceville (Georgia)
+  at 91 mi: Acworth (Georgia)
+  at 127 mi: Calhoun (Georgia)
+  at 146 mi: Dalton (Georgia)
+  at 169 mi: Fort Oglethorpe (Georgia)
+
+Athens -> Columbia (I-20)
+  at 15 mi: Crawford (Georgia)
+  at 43 mi: Washington (Georgia)
+  at 92 mi: Martinez (Georgia)
+  at 151 mi: Lexington (South Carolina)
+
+Atlanta -> Birmingham (I-20)
+  at 65 mi: Tallapoosa and Alabama line approach (Georgia)
+  at 100 mi: Lincoln truck stop corridor (Alabama)
+
+Atlanta -> Dallas (I-20)
+  at 22 mi: Douglasville (Georgia)
+  at 39 mi: Temple (Georgia)
+  at 87 mi: Oxford (Alabama)
+  at 114 mi: Pell City (Alabama)
+  at 139 mi: Irondale (Alabama)
+  at 160 mi: Bessemer (Alabama)
+  at 188 mi: Coaling (Alabama)
+  at 291 mi: Meridian (Mississippi)
+  at 319 mi: Newton (Mississippi)
+  at 338 mi: Forest (Mississippi)
+  at 369 mi: Brandon (Mississippi)
+  at 391 mi: Clinton (Mississippi)
+  at 423 mi: Vicksburg (Mississippi)
+  at 445 mi: Tallulah (Louisiana)
+  at 463 mi: Delhi (Louisiana)
+  at 478 mi: Rayville (Louisiana)
+  at 499 mi: Monroe (Louisiana)
+  at 530 mi: Ruston (Louisiana)
+  at 546 mi: Arcadia (Louisiana)
+  at 569 mi: Minden (Louisiana)
+  at 589 mi: Red Chute (Louisiana)
+  at 611 mi: Greenwood (Louisiana)
+  at 670 mi: Liberty City (Texas)
+  at 700 mi: Hideaway (Texas)
+  at 724 mi: Canton (Texas)
+
+Atlantic City -> Philadelphia (I-676)
+  at 39 mi: Sicklerville (New Jersey)
+  at 55 mi: Audubon (New Jersey)
+
+Augusta -> Atlanta (I-20)
+  at 7 mi: Martinez (Georgia)
+  at 57 mi: Crawfordville (Georgia)
+  at 73 mi: Greensboro (Georgia)
+
+Augusta -> Columbia (I-20)
+  at 59 mi: Lexington (South Carolina)
+
+Augusta -> Macon (GA-540)
+  at 32 mi: Wrens (Georgia)
+  at 64 mi: Sandersville (Georgia)
+  at 102 mi: Gordon (Georgia)
+
+Augusta -> Savannah (GA-21)
+  at 29 mi: Waynesboro (Georgia)
+  at 51 mi: Millen (Georgia)
+  at 69 mi: Sylvania (Georgia)
+  at 86 mi: Newington (Georgia)
+  at 113 mi: Rincon (Georgia)
+
+Aurora -> Milwaukee (I-294)
+  at 39 mi: Des Plaines (Illinois)
+  at 62 mi: Gurnee (Illinois)
+  at 94 mi: Caledonia (Wisconsin)
+
+Aurora -> Peoria (I-80)
+  at 13 mi: Yorkville (Illinois)
+  at 42 mi: Ottawa (Illinois)
+  at 59 mi: Oglesby (Illinois)
+  at 103 mi: Chillicothe (Illinois)
+
+Aurora -> Rockford (I-88)
+  at 27 mi: DeKalb (Illinois)
+  at 54 mi: Monroe Center (Illinois)
+
+Austin -> Dallas (I-35)
+  at 67 mi: Temple (Texas)
+  at 94 mi: Hewitt (Texas)
+  at 119 mi: West (Texas)
+  at 166 mi: Waxahachie (Texas)
+
+Austin -> Houston (US-290)
+  at 25 mi: Elgin (Texas)
+  at 55 mi: Giddings (Texas)
+  at 89 mi: Brenham (Texas)
+  at 110 mi: Hempstead (Texas)
+
+Austin -> San Antonio (I-35)
+  at 30 mi: San Marcos (Texas)
+  at 48 mi: New Braunfels (Texas)
+  at 63 mi: Live Oak (Texas)
+
+Baker City -> Ontario (I-84)
+  at 44 mi: Huntington (Oregon)
+
+Bakersfield -> Fresno (CA-99)
+  at 32 mi: Delano (California)
+  at 63 mi: Tulare (California)
+  at 93 mi: Selma (California)
+
+Bakersfield -> Los Angeles (I-5)
+  at 9 mi: Greenfield (California)
+  at 41 mi: Lebec (California)
+
+Baltimore -> Pittsburgh (I-70)
+  at 48 mi: Frederick (Maryland)
+  at 66 mi: Mount Lena (Maryland)
+  at 85 mi: Clear Spring (Maryland)
+  at 101 mi: Hancock (Maryland)
+  at 141 mi: Bedford (Pennsylvania)
+  at 178 mi: Somerset (Pennsylvania)
+  at 200 mi: Acme (Pennsylvania)
+
+Baltimore -> Richmond (I-95)
+  at 53 mi: Annandale (Virginia)
+  at 71 mi: Dale City (Virginia)
+  at 87 mi: Stafford (Virginia)
+  at 136 mi: Ashland (Virginia)
+
+Baltimore -> Washington (I-95)
+  at 9 mi: Hanover (Maryland)
+  at 31 mi: Greenbelt (Maryland)
+
+Bangor -> Manchester (I-95)
+  at 15 mi: Carmel (Maine)
+  at 35 mi: Pittsfield (Maine)
+  at 55 mi: Waterville (Maine)
+  at 76 mi: Augusta (Maine)
+  at 99 mi: Sabattus (Maine)
+  at 115 mi: New Gloucester (Maine)
+  at 144 mi: West Scarborough (Maine)
+  at 165 mi: Wells Beach Station (Maine)
+  at 199 mi: Exeter (New Hampshire)
+
+Bangor -> Portland (I-95)
+  at 15 mi: Carmel (Maine)
+  at 35 mi: Pittsfield (Maine)
+  at 55 mi: Waterville (Maine)
+  at 76 mi: Augusta (Maine)
+  at 104 mi: Brunswick (Maine)
+
+Barstow -> Las Vegas (I-15)
+  at 12 mi: Yermo (California)
+  at 63 mi: Baker (California)
+
+Baton Rouge -> New Orleans (I-10)
+  at 17 mi: Prairieville (Louisiana)
+  at 69 mi: Kenner (Louisiana)
+
+Baton Rouge -> Shreveport (I-49)
+  at 18 mi: Erwinville (Louisiana)
+  at 39 mi: Krotz Springs (Louisiana)
+  at 79 mi: Bunkie (Louisiana)
+  at 96 mi: Lecompte (Louisiana)
+  at 111 mi: Alexandria (Louisiana)
+
+Battle Mountain -> Elko (I-80)
+  at 48 mi: Carlin (Nevada)
+
+Beaumont -> College Station (TX-99)
+  at 15 mi: China (Texas)
+  at 43 mi: Liberty (Texas)
+  at 87 mi: Spring (Texas)
+  at 103 mi: Tomball (Texas)
+  at 140 mi: Navasota (Texas)
+
+Beaumont -> Houston (I-10)
+  at 15 mi: China (Texas)
+  at 43 mi: Liberty (Texas)
+  at 65 mi: Barrett (Texas)
+
+Beaumont -> Orange (I-10)
+  at 7 mi: Vidor (Texas)
+
+Beckley -> Charleston (I-77)
+  at 5 mi: Bradley (West Virginia)
+  at 52 mi: Rand (West Virginia)
+
+Beckley -> Roanoke (I-77)
+  at 10 mi: Shady Spring (West Virginia)
+  at 59 mi: Pearisburg (Virginia)
+  at 81 mi: Blacksburg (Virginia)
+  at 98 mi: Shawsville (Virginia)
+  at 113 mi: Salem (Virginia)
+
+Bellingham -> Everett (I-5)
+  at 27 mi: Mount Vernon (Washington)
+  at 48 mi: Smokey Point (Washington)
+
+Bemidji -> Grand Rapids (US-2)
+  at 19 mi: Cass Lake (Minnesota)
+  at 58 mi: Deer River (Minnesota)
+
+Bend -> Eugene (US-20)
+  at 22 mi: Sisters (Oregon)
+
+Billings -> Cheyenne (I-25)
+  at 46 mi: Hardin (Montana)
+  at 80 mi: Lodge Grass (Montana)
+  at 113 mi: Ranchester (Wyoming)
+  at 129 mi: Sheridan (Wyoming)
+  at 164 mi: Buffalo (Wyoming)
+  at 209 mi: Kaycee (Wyoming)
+  at 276 mi: Casper (Wyoming)
+  at 298 mi: Glenrock (Wyoming)
+  at 324 mi: Douglas (Wyoming)
+  at 384 mi: Wheatland (Wyoming)
+
+Billings -> Fort Collins (I-25)
+  at 46 mi: Hardin (Montana)
+  at 80 mi: Lodge Grass (Montana)
+  at 113 mi: Ranchester (Wyoming)
+  at 129 mi: Sheridan (Wyoming)
+  at 164 mi: Buffalo (Wyoming)
+  at 209 mi: Kaycee (Wyoming)
+  at 276 mi: Casper (Wyoming)
+  at 298 mi: Glenrock (Wyoming)
+  at 323 mi: Douglas (Wyoming)
+  at 383 mi: Wheatland (Wyoming)
+  at 484 mi: Wellington (Colorado)
+
+Billings -> Miles City (I-94)
+  at 21 mi: Worden (Montana)
+  at 100 mi: Forsyth (Montana)
+
+Billings -> Salt Lake City (I-15)
+  at 41 mi: Columbus (Montana)
+  at 81 mi: Big Timber (Montana)
+  at 116 mi: Livingston (Montana)
+  at 142 mi: Bozeman (Montana)
+  at 182 mi: Big Sky (Montana)
+  at 232 mi: West Yellowstone (Montana)
+  at 286 mi: Ashton (Idaho)
+  at 313 mi: Rexburg (Idaho)
+  at 340 mi: Idaho Falls (Idaho)
+  at 366 mi: Blackfoot (Idaho)
+  at 389 mi: Pocatello (Idaho)
+  at 444 mi: Malad City (Idaho)
+  at 480 mi: Tremonton (Utah)
+  at 496 mi: Brigham City (Utah)
+  at 517 mi: Ogden (Utah)
+
+Billings -> Sheridan (I-90)
+  at 46 mi: Hardin (Montana)
+  at 80 mi: Lodge Grass (Montana)
+  at 114 mi: Ranchester (Wyoming)
+
+Binghamton -> Albany (I-88)
+  at 38 mi: Sidney (New York)
+  at 59 mi: Oneonta (New York)
+  at 78 mi: Worcester (New York)
+  at 95 mi: Cobleskill (New York)
+  at 122 mi: Rotterdam (New York)
+
+Binghamton -> Syracuse (I-81)
+  at 18 mi: Whitney Point (New York)
+  at 41 mi: Cortland (New York)
+
+Birmingham -> Memphis (I-22)
+  at 38 mi: Jasper (Alabama)
+  at 54 mi: Carbon Hill (Alabama)
+  at 75 mi: Twin (Alabama)
+  at 104 mi: Tremont (Mississippi)
+  at 124 mi: Mooreville (Mississippi)
+  at 155 mi: New Albany (Mississippi)
+  at 189 mi: Holly Springs (Mississippi)
+  at 214 mi: Olive Branch (Mississippi)
+
+Birmingham -> Nashville (I-65)
+  at 27 mi: Smoke Rise (Alabama)
+  at 48 mi: Cullman (Alabama)
+  at 68 mi: Hartselle (Alabama)
+  at 93 mi: Athens (Alabama)
+  at 111 mi: Elkton (Tennessee)
+
+Birmingham -> New Orleans (I-59)
+  at 42 mi: Coaling (Alabama)
+  at 145 mi: Meridian (Mississippi)
+  at 162 mi: Enterprise (Mississippi)
+  at 202 mi: Laurel (Mississippi)
+  at 233 mi: West Hattiesburg (Mississippi)
+  at 257 mi: Lumberton (Mississippi)
+  at 293 mi: Picayune (Mississippi)
+  at 312 mi: Slidell (Louisiana)
+
+Bismarck -> Dickinson (I-94)
+  at 31 mi: New Salem (North Dakota)
+  at 75 mi: Richardton (North Dakota)
+
+Bismarck -> Fargo (I-94)
+  at 43 mi: Steele (North Dakota)
+  at 73 mi: Medina (North Dakota)
+  at 100 mi: Jamestown (North Dakota)
+  at 135 mi: Valley City (North Dakota)
+  at 150 mi: Tower City (North Dakota)
+  at 174 mi: Casselton (North Dakota)
+
+Bloomington -> Champaign (I-74)
+  at 18 mi: Le Roy (Illinois)
+  at 40 mi: Mahomet (Illinois)
+
+Bloomington -> Chicago (I-55)
+  at 18 mi: Lexington (Illinois)
+  at 56 mi: Dwight (Illinois)
+
+Bloomington -> Peoria (I-74)
+  at 31 mi: Morton (Illinois)
+
+Boise -> Portland (I-84)
+  at 27 mi: Caldwell (Idaho)
+  at 56 mi: Ontario (Oregon)
+  at 84 mi: Huntington (Oregon)
+  at 128 mi: Baker City (Oregon)
+  at 147 mi: North Powder (Oregon)
+  at 170 mi: La Grande (Oregon)
+  at 243 mi: Stanfield (Oregon)
+  at 267 mi: Boardman (Oregon)
+  at 294 mi: Arlington (Oregon)
+  at 346 mi: The Dalles (Oregon)
+  at 368 mi: Hood River (Oregon)
+
+Boise -> Salt Lake City (I-84)
+  at 44 mi: Mountain Home (Idaho)
+  at 70 mi: Glenns Ferry (Idaho)
+  at 89 mi: Bliss (Idaho)
+  at 115 mi: Jerome (Idaho)
+  at 140 mi: Hazelton (Idaho)
+  at 159 mi: Heyburn (Idaho)
+  at 268 mi: Tremonton (Utah)
+  at 304 mi: Ogden (Utah)
+
+Boston -> Hartford (I-84)
+  at 36 mi: Grafton (Massachusetts)
+  at 52 mi: Charlton (Massachusetts)
+  at 82 mi: Tolland (Connecticut)
+
+Boston -> Providence (I-95)
+  at 10 mi: Quincy (Massachusetts)
+  at 38 mi: Attleboro (Massachusetts)
+
+Boston -> Worcester (I-90)
+  at 10 mi: Newton (Massachusetts)
+  at 36 mi: Grafton (Massachusetts)
+
+Bowling Green -> Nashville (I-65)
+  at 8 mi: Plano (Kentucky)
+  at 51 mi: Goodlettsville (Tennessee)
+
+Bozeman -> Billings (I-90)
+  at 27 mi: Livingston (Montana)
+  at 61 mi: Big Timber (Montana)
+  at 101 mi: Columbus (Montana)
+  at 126 mi: Laurel (Montana)
+
+Bridgeport -> Hartford (I-84)
+  at 11 mi: Shelton (Connecticut)
+  at 29 mi: Waterbury (Connecticut)
+  at 50 mi: Farmington (Connecticut)
+
+Brookings -> Fargo (I-29)
+  at 50 mi: Watertown (South Dakota)
+  at 84 mi: Summit (South Dakota)
+  at 111 mi: Sisseton (South Dakota)
+  at 129 mi: New Effington (South Dakota)
+  at 189 mi: Oxbow (North Dakota)
+
+Brownsville -> Corpus Christi (US-77)
+  at 25 mi: Harlingen (Texas)
+  at 48 mi: Raymondville (Texas)
+  at 120 mi: Kingsville (Texas)
+  at 144 mi: Robstown (Texas)
+
+Brownsville -> Laredo (US-83)
+  at 25 mi: Harlingen (Texas)
+  at 44 mi: Weslaco (Texas)
+  at 69 mi: La Homa (Texas)
+  at 101 mi: Rio Grande City (Texas)
+  at 155 mi: Zapata (Texas)
+  at 193 mi: Rio Bravo (Texas)
+
+Brownsville -> McAllen (US-83)
+  at 25 mi: Harlingen (Texas)
+  at 44 mi: Weslaco (Texas)
+
+Buffalo -> Cleveland (I-90)
+  at 44 mi: Dunkirk (New York)
+  at 76 mi: North East (Pennsylvania)
+  at 118 mi: Conneaut (Ohio)
+  at 148 mi: Madison (Ohio)
+
+Buffalo -> New York (I-90)
+  at 35 mi: Batavia (New York)
+  at 61 mi: Henrietta (New York)
+  at 83 mi: Clifton Springs (New York)
+  at 109 mi: Centerport (New York)
+  at 124 mi: Village Green (New York)
+  at 159 mi: Oneida (New York)
+  at 179 mi: Utica (New York)
+  at 211 mi: Fort Plain (New York)
+  at 232 mi: Amsterdam (New York)
+  at 247 mi: Rotterdam (New York)
+  at 275 mi: Ravena (New York)
+  at 311 mi: Kingston (New York)
+  at 339 mi: Newburgh (New York)
+  at 356 mi: Peekskill (New York)
+
+Buffalo -> Rochester (I-90)
+  at 39 mi: Batavia (New York)
+  at 58 mi: Churchville (New York)
+
+Burlington -> Albany (I-87)
+  at 13 mi: Charlotte (Vermont)
+  at 30 mi: Addison (Vermont)
+  at 75 mi: Whitehall (New York)
+  at 94 mi: Queensbury (New York)
+  at 121 mi: Saratoga Springs (New York)
+  at 151 mi: Troy (New York)
+
+Burlington -> Manchester (I-89)
+  at 10 mi: Williston (Vermont)
+  at 28 mi: Waterbury (Vermont)
+  at 73 mi: South Royalton (Vermont)
+  at 96 mi: Lebanon (New Hampshire)
+  at 120 mi: New London (New Hampshire)
+  at 156 mi: Bow Bog (New Hampshire)
+
+Butte -> Bozeman (I-90)
+  at 26 mi: Whitehall (Montana)
+  at 55 mi: Three Forks (Montana)
+  at 75 mi: Belgrade (Montana)
+
+Butte -> Helena (I-15)
+  at 39 mi: Boulder (Montana)
+  at 61 mi: Montana City (Montana)
+
+Butte -> Idaho Falls (I-15)
+  at 63 mi: Dillon (Montana)
+  at 156 mi: Dubois (Idaho)
+  at 188 mi: Roberts (Idaho)
+
+Cape Coral -> Coral Springs (I-75)
+  at 24 mi: Bonita Springs (Florida)
+
+Cape Coral -> Lakeland (I-75)
+  at 33 mi: Punta Gorda (Florida)
+  at 56 mi: Arcadia (Florida)
+  at 106 mi: Bartow (Florida)
+
+Cape Coral -> Tampa (I-75)
+  at 33 mi: Punta Gorda (Florida)
+  at 77 mi: Sarasota Springs (Florida)
+  at 94 mi: Ellenton (Florida)
+
+Carlisle -> Hagerstown (I-81)
+  at 32 mi: Chambersburg (Pennsylvania)
+
+Casper -> Billings (I-25)
+  at 11 mi: Homa Hills (Wyoming)
+  at 68 mi: Kaycee (Wyoming)
+  at 113 mi: Buffalo (Wyoming)
+  at 148 mi: Sheridan (Wyoming)
+  at 164 mi: Ranchester (Wyoming)
+  at 197 mi: Lodge Grass (Montana)
+  at 232 mi: Hardin (Montana)
+
+Cedar City -> Saint George (I-15)
+  at 13 mi: Kanarraville (Utah)
+  at 36 mi: Leeds (Utah)
+
+Cedar Rapids -> Davenport (I-80)
+  at 29 mi: Iowa City (Iowa)
+  at 70 mi: Walcott (Iowa)
+
+Cedar Rapids -> Des Moines (US-30)
+  at 53 mi: Tama (Iowa)
+  at 82 mi: Melbourne (Iowa)
+
+Cedar Rapids -> Rockford (US-20)
+  at 24 mi: Anamosa (Iowa)
+  at 45 mi: Cascade (Iowa)
+  at 70 mi: Dubuque (Iowa)
+  at 92 mi: The Galena Territory (Illinois)
+  at 133 mi: Freeport (Illinois)
+  at 154 mi: Winnebago (Illinois)
+
+Champaign -> Decatur (I-72)
+  at 21 mi: Monticello (Illinois)
+  at 45 mi: Forsyth (Illinois)
+
+Champaign -> Indianapolis (I-74)
+  at 13 mi: Saint Joseph (Illinois)
+  at 36 mi: Danville (Illinois)
+  at 55 mi: Veedersburg (Indiana)
+  at 106 mi: Brownsburg (Indiana)
+
+Charleston -> Pittsburgh (I-79)
+  at 15 mi: Sissonville (West Virginia)
+  at 38 mi: Ripley (West Virginia)
+  at 70 mi: Mineral Wells (West Virginia)
+  at 97 mi: Saint Marys (West Virginia)
+  at 124 mi: New Martinsville (West Virginia)
+  at 161 mi: Wheeling (West Virginia)
+  at 191 mi: Washington (Pennsylvania)
+
+Charleston -> Richmond (I-64)
+  at 110 mi: Lewisburg (West Virginia)
+  at 139 mi: Covington (Virginia)
+  at 180 mi: Lexington (Virginia)
+  at 222 mi: Waynesboro (Virginia)
+  at 248 mi: Charlottesville (Virginia)
+
+Charleston -> Roanoke (I-64)
+  at 66 mi: Shady Spring (West Virginia)
+  at 115 mi: Pearisburg (Virginia)
+  at 138 mi: Blacksburg (Virginia)
+  at 155 mi: Shawsville (Virginia)
+  at 170 mi: Salem (Virginia)
+
+Charleston -> Savannah (US-17)
+  at 11 mi: Shell Point (South Carolina)
+  at 32 mi: Jacksonboro (South Carolina)
+  at 75 mi: Ridgeland (South Carolina)
+  at 90 mi: Hardeeville (South Carolina)
+
+Charleston -> Wilmington (US-17)
+  at 29 mi: Awendaw (South Carolina)
+  at 61 mi: Georgetown (South Carolina)
+  at 96 mi: Myrtle Beach (South Carolina)
+  at 117 mi: Little River (South Carolina)
+  at 133 mi: Shallotte (North Carolina)
+
+Charlotte -> Atlanta (I-85)
+  at 52 mi: Gaffney (South Carolina)
+  at 72 mi: Valley Falls (South Carolina)
+  at 125 mi: Northlake (South Carolina)
+  at 151 mi: Lavonia (Georgia)
+  at 196 mi: Braselton (Georgia)
+  at 213 mi: Suwanee (Georgia)
+
+Charlotte -> Greensboro (I-85)
+  at 40 mi: Salisbury (North Carolina)
+  at 74 mi: High Point (North Carolina)
+
+Charlotte -> Knoxville (I-40)
+  at 37 mi: Statesville (North Carolina)
+  at 62 mi: Hickory (North Carolina)
+  at 82 mi: Morganton (North Carolina)
+  at 100 mi: Marion (North Carolina)
+  at 118 mi: Black Mountain (North Carolina)
+  at 144 mi: Canton (North Carolina)
+  at 188 mi: Newport (Tennessee)
+
+Charlotte -> Savannah (I-77)
+  at 40 mi: Richburg (South Carolina)
+  at 86 mi: Dentsville (South Carolina)
+  at 102 mi: Pineridge (South Carolina)
+  at 124 mi: North (South Carolina)
+  at 145 mi: Denmark (South Carolina)
+  at 186 mi: Estill (South Carolina)
+  at 222 mi: Hardeeville (South Carolina)
+
+Charlottesville -> Harrisonburg (I-64)
+  at 8 mi: Hollymead (Virginia)
+  at 38 mi: Elkton (Virginia)
+
+Chattanooga -> Atlanta (I-75)
+  at 8 mi: Fort Oglethorpe (Georgia)
+  at 30 mi: Dalton (Georgia)
+  at 50 mi: Calhoun (Georgia)
+
+Chattanooga -> Knoxville (I-75)
+  at 18 mi: Ooltewah (Tennessee)
+  at 33 mi: Hopewell (Tennessee)
+  at 49 mi: Riceville (Tennessee)
+  at 75 mi: Philadelphia (Tennessee)
+
+Chattanooga -> Nashville (I-24)
+  at 25 mi: Jasper (Tennessee)
+  at 46 mi: Monteagle (Tennessee)
+  at 70 mi: Manchester (Tennessee)
+
+Cheyenne -> Casper (I-25)
+  at 69 mi: Wheatland (Wyoming)
+  at 129 mi: Douglas (Wyoming)
+  at 154 mi: Glenrock (Wyoming)
+
+Cheyenne -> Denver (I-25)
+  at 34 mi: Wellington (Colorado)
+  at 66 mi: Mead (Colorado)
+
+Cheyenne -> Laramie (I-80)
+  at 27 mi: Buford (Wyoming)
+
+Cheyenne -> Salt Lake City (I-80)
+  at 49 mi: Laramie (Wyoming)
+  at 149 mi: Rawlins (Wyoming)
+  at 189 mi: Wamsutter (Wyoming)
+  at 272 mi: Green River (Wyoming)
+  at 326 mi: Fort Bridger (Wyoming)
+  at 357 mi: Evanston (Wyoming)
+  at 396 mi: Coalville (Utah)
+  at 420 mi: Summit Park (Utah)
+
+Chicago -> Indianapolis (I-65)
+  at 36 mi: Gary and Hammond industrial corridor (Indiana)
+  at 117 mi: Lafayette (Indiana)
+
+Chicago -> St. Louis (I-55)
+  at 59 mi: Kankakee (Illinois)
+  at 87 mi: Gilman (Illinois)
+  at 121 mi: Rantoul (Illinois)
+  at 153 mi: Monticello (Illinois)
+  at 176 mi: Forsyth (Illinois)
+  at 211 mi: Taylorville (Illinois)
+  at 247 mi: Litchfield (Illinois)
+
+Chico -> Fairfield (I-80)
+  at 46 mi: Yuba City (California)
+  at 94 mi: Davis (California)
+  at 112 mi: Vacaville (California)
+
+Chico -> Redding (I-5)
+  at 27 mi: Los Molinos (California)
+  at 42 mi: Red Bluff (California)
+  at 62 mi: Anderson (California)
+
+Chico -> Sacramento (CA-99)
+  at 46 mi: Yuba City (California)
+  at 62 mi: Rio Oso (California)
+
+Chico -> Santa Rosa (I-5)
+  at 20 mi: Orland (California)
+  at 36 mi: Willows (California)
+  at 62 mi: Williams (California)
+  at 103 mi: Clearlake (California)
+  at 120 mi: Middletown (California)
+  at 138 mi: Calistoga (California)
+
+Cincinnati -> Indianapolis (I-74)
+  at 46 mi: Batesville (Indiana)
+  at 61 mi: Greensburg (Indiana)
+  at 81 mi: Shelbyville (Indiana)
+
+Cincinnati -> Louisville (I-71)
+  at 36 mi: Glencoe (Kentucky)
+  at 75 mi: La Grange (Kentucky)
+
+Clarksville -> Huntsville (I-65)
+  at 24 mi: Pleasant View (Tennessee)
+  at 64 mi: La Vergne (Tennessee)
+  at 88 mi: Christiana (Tennessee)
+  at 105 mi: Shelbyville (Tennessee)
+  at 132 mi: Fayetteville (Tennessee)
+  at 152 mi: Meridianville (Alabama)
+
+Clarksville -> Louisville (I-65)
+  at 11 mi: Fort Campbell North (Kentucky)
+  at 27 mi: Hopkinsville (Kentucky)
+  at 50 mi: Nortonville (Kentucky)
+  at 67 mi: Morehead (Kentucky)
+  at 120 mi: Leitchfield (Kentucky)
+  at 151 mi: Elizabethtown (Kentucky)
+  at 186 mi: Okolona (Kentucky)
+
+Clarksville -> Murfreesboro (I-24)
+  at 24 mi: Pleasant View (Tennessee)
+  at 64 mi: La Vergne (Tennessee)
+
+Cleveland -> Chicago (I-80)
+  at 26 mi: Elyria (Ohio)
+  at 54 mi: Milan (Ohio)
+  at 109 mi: Perrysburg (Ohio)
+  at 124 mi: Swanton (Ohio)
+  at 146 mi: Burlington (Ohio)
+  at 182 mi: Fremont (Indiana)
+  at 244 mi: Granger (Indiana)
+  at 268 mi: Hudson Lake (Indiana)
+  at 305 mi: Portage (Indiana)
+  at 323 mi: East Chicago (Indiana)
+
+Cleveland -> Toledo (I-90)
+  at 26 mi: Elyria (Ohio)
+  at 54 mi: Milan (Ohio)
+  at 95 mi: Genoa (Ohio)
+
+Coeur d'Alene -> Missoula (I-90)
+  at 37 mi: Kellogg (Idaho)
+  at 55 mi: Mullan (Idaho)
+  at 107 mi: Superior (Montana)
+  at 150 mi: Frenchtown (Montana)
+
+College Station -> Austin (TX-21)
+  at 28 mi: Caldwell (Texas)
+  at 82 mi: Elgin (Texas)
+
+College Station -> Houston (TX-6)
+  at 25 mi: Navasota (Texas)
+  at 62 mi: Tomball (Texas)
+
+Colorado Springs -> Albuquerque (I-25)
+  at 69 mi: Colorado City (Colorado)
+  at 92 mi: Walsenburg (Colorado)
+  at 108 mi: Aguilar (Colorado)
+  at 127 mi: Trinidad (Colorado)
+  at 148 mi: Raton (New Mexico)
+  at 189 mi: Springer (New Mexico)
+  at 214 mi: Wagon Mound (New Mexico)
+  at 256 mi: Las Vegas (New Mexico)
+  at 279 mi: Ribera (New Mexico)
+  at 303 mi: Glorieta (New Mexico)
+  at 330 mi: La Cienega (New Mexico)
+  at 361 mi: Bernalillo (New Mexico)
+
+Colorado Springs -> Denver (I-25)
+  at 20 mi: Woodmoor (Colorado)
+
+Columbia -> Charleston (I-26)
+  at 71 mi: Harleyville (South Carolina)
+  at 104 mi: Hanahan (South Carolina)
+
+Columbia -> Charlotte (I-77)
+  at 75 mi: Fort Mill (South Carolina)
+
+Columbia -> Kansas City (I-70)
+  at 22 mi: Windsor Place (Missouri)
+  at 70 mi: Concordia (Missouri)
+
+Columbia -> Savannah (US-321)
+  at 23 mi: Swansea (South Carolina)
+  at 53 mi: Denmark (South Carolina)
+  at 94 mi: Estill (South Carolina)
+  at 130 mi: Hardeeville (South Carolina)
+
+Columbia -> St. Louis (I-70)
+  at 68 mi: Warrenton (Missouri)
+  at 84 mi: Wentzville (Missouri)
+  at 103 mi: Chesterfield (Missouri)
+
+Columbus -> Cincinnati (I-71)
+  at 28 mi: Bethel (Ohio)
+  at 49 mi: Bowersville (Ohio)
+  at 92 mi: Blue Ash (Ohio)
+
+Columbus -> Cleveland (I-71)
+  at 36 mi: Marengo (Ohio)
+  at 103 mi: Seville (Ohio)
+
+Columbus -> Indianapolis (I-70)
+  at 27 mi: Choctaw Lake (Ohio)
+  at 63 mi: Huber Heights (Ohio)
+  at 79 mi: Brookville (Ohio)
+  at 99 mi: New Paris (Ohio)
+  at 134 mi: Spiceland (Indiana)
+
+Columbus -> Pittsburgh (I-70)
+  at 30 mi: Buckeye Lake (Ohio)
+  at 55 mi: Zanesville (Ohio)
+  at 80 mi: Cambridge (Ohio)
+  at 120 mi: Cadiz (Ohio)
+  at 149 mi: Weirton Heights (West Virginia)
+  at 166 mi: Imperial (Pennsylvania)
+
+Conway -> Fort Smith (I-40)
+  at 22 mi: Morrilton (Arkansas)
+  at 46 mi: Russellville (Arkansas)
+  at 71 mi: Clarksville (Arkansas)
+  at 90 mi: Ozark (Arkansas)
+  at 115 mi: Alma (Arkansas)
+
+Coos Bay -> Roseburg (OR-38)
+  at 27 mi: Reedsport (Oregon)
+  at 87 mi: Sutherlin (Oregon)
+
+Coral Springs -> Palm Bay (I-95)
+  at 27 mi: Aberdeen (Florida)
+  at 46 mi: Palm Beach Gardens (Florida)
+  at 92 mi: Fort Pierce South (Florida)
+
+Corpus Christi -> Laredo (US-59)
+  at 19 mi: Robstown (Texas)
+  at 45 mi: Alice (Texas)
+  at 80 mi: Freer (Texas)
+
+Corpus Christi -> McAllen (US-281)
+  at 19 mi: Robstown (Texas)
+  at 45 mi: Alice (Texas)
+  at 85 mi: Falfurrias (Texas)
+  at 150 mi: Edinburg (Texas)
+
+Corpus Christi -> San Antonio (I-37)
+  at 8 mi: Portland (Texas)
+  at 28 mi: Sinton (Texas)
+  at 58 mi: Beeville (Texas)
+  at 88 mi: Kenedy (Texas)
+  at 117 mi: Floresville (Texas)
+
+Crescent City -> Grants Pass (US-199)
+  at 19 mi: Gasquet (California)
+  at 53 mi: Cave Junction (Oregon)
+
+Dallas -> Albuquerque (US-287)
+  at 48 mi: Rhome (Texas)
+  at 64 mi: Decatur (Texas)
+  at 91 mi: Bowie (Texas)
+  at 118 mi: Henrietta (Texas)
+  at 149 mi: Iowa Park (Texas)
+  at 165 mi: Electra (Texas)
+  at 187 mi: Vernon (Texas)
+  at 217 mi: Quanah (Texas)
+  at 245 mi: Childress (Texas)
+  at 275 mi: Memphis (Texas)
+  at 302 mi: Clarendon (Texas)
+  at 332 mi: Claude (Texas)
+  at 373 mi: Bushland (Texas)
+  at 394 mi: Vega (Texas)
+  at 529 mi: Santa Rosa (New Mexico)
+  at 616 mi: Edgewood (New Mexico)
+
+Dallas -> Fort Worth (I-30)
+  at 19 mi: Arlington (Texas)
+
+Dallas -> St. Louis (I-44)
+  at 37 mi: Denton (Texas)
+  at 65 mi: Gainesville (Texas)
+  at 86 mi: Marietta (Oklahoma)
+  at 102 mi: Ardmore (Oklahoma)
+  at 160 mi: Purcell (Oklahoma)
+  at 183 mi: Moore (Oklahoma)
+  at 217 mi: Luther (Oklahoma)
+  at 234 mi: Chandler (Oklahoma)
+  at 261 mi: Bristow (Oklahoma)
+  at 280 mi: Sapulpa (Oklahoma)
+  at 318 mi: Claremore (Oklahoma)
+  at 350 mi: Vinita (Oklahoma)
+  at 374 mi: Miami (Oklahoma)
+  at 390 mi: Loma Linda (Missouri)
+  at 416 mi: Sarcoxie (Missouri)
+  at 432 mi: Mount Vernon (Missouri)
+  at 486 mi: Marshfield (Missouri)
+  at 512 mi: Lebanon (Missouri)
+  at 539 mi: Waynesville (Missouri)
+  at 574 mi: Saint James (Missouri)
+  at 601 mi: Sullivan (Missouri)
+
+Davenport -> Iowa City (I-80)
+  at 16 mi: Walcott (Iowa)
+  at 47 mi: West Branch (Iowa)
+
+Davenport -> Rockford (I-88)
+  at 9 mi: East Moline (Illinois)
+  at 27 mi: Hillsdale (Illinois)
+  at 73 mi: Dixon (Illinois)
+  at 97 mi: Rochelle (Illinois)
+
+Dayton -> Columbus (I-70)
+  at 12 mi: Park Layne (Ohio)
+  at 62 mi: Lincoln Village (Ohio)
+
+Dayton -> Fort Wayne (US-33)
+  at 13 mi: Clayton (Ohio)
+  at 36 mi: Greenville (Ohio)
+  at 67 mi: Celina (Ohio)
+  at 99 mi: Decatur (Indiana)
+
+Dayton -> Indianapolis (I-70)
+  at 13 mi: Clayton (Ohio)
+  at 36 mi: New Paris (Ohio)
+  at 72 mi: Spiceland (Indiana)
+  at 101 mi: Cumberland (Indiana)
+
+Del Rio -> Van Horn (US-90)
+  at 120 mi: Sanderson (Texas)
+  at 174 mi: Marathon (Texas)
+  at 205 mi: Alpine (Texas)
+  at 231 mi: Marfa (Texas)
+
+Denver -> Albuquerque (US-285)
+  at 44 mi: Bailey (Colorado)
+  at 83 mi: Fairplay (Colorado)
+  at 124 mi: Nathrop (Colorado)
+  at 140 mi: Poncha Springs (Colorado)
+  at 217 mi: Alamosa (Colorado)
+  at 245 mi: Antonito (Colorado)
+  at 331 mi: Española (New Mexico)
+  at 354 mi: Santa Fe (New Mexico)
+  at 371 mi: La Cienega (New Mexico)
+  at 402 mi: Bernalillo (New Mexico)
+
+Denver -> Salt Lake City (I-80)
+  at 91 mi: Vail Pass mountain corridor (Colorado)
+  at 229 mi: Grand Junction western slope corridor (Colorado)
+  at 429 mi: I-15 approach to Salt Lake City (Utah)
+
+Denver -> Silverthorne (I-70)
+  at 11 mi: West Pleasant View (Colorado)
+  at 32 mi: Idaho Springs (Colorado)
+
+Des Moines -> Chicago (I-80)
+  at 34 mi: Newton (Iowa)
+  at 60 mi: Malcom (Iowa)
+  at 88 mi: Williamsburg (Iowa)
+  at 113 mi: Iowa City (Iowa)
+  at 154 mi: Walcott (Iowa)
+  at 174 mi: Le Claire (Iowa)
+  at 189 mi: Hillsdale (Illinois)
+  at 233 mi: Dixon (Illinois)
+  at 255 mi: Rochelle (Illinois)
+  at 271 mi: DeKalb (Illinois)
+
+Des Moines -> Kansas City (I-35)
+  at 27 mi: Saint Charles (Iowa)
+  at 44 mi: Osceola (Iowa)
+  at 76 mi: Lamoni (Iowa)
+  at 101 mi: Bethany (Missouri)
+  at 140 mi: Cameron (Missouri)
+
+Des Moines -> Omaha (I-80)
+  at 38 mi: Stuart (Iowa)
+  at 55 mi: Adair (Iowa)
+  at 91 mi: Avoca (Iowa)
+  at 113 mi: Underwood (Iowa)
+
+Detroit -> Chicago (I-94)
+  at 56 mi: Chelsea (Michigan)
+  at 94 mi: Albion (Michigan)
+  at 130 mi: Galesburg (Michigan)
+  at 155 mi: Paw Paw (Michigan)
+  at 187 mi: Fair Plain (Michigan)
+  at 242 mi: Portage (Indiana)
+  at 263 mi: East Chicago (Indiana)
+
+Detroit -> Cleveland (I-75)
+  at 38 mi: Monroe (Michigan)
+  at 70 mi: Genoa (Ohio)
+  at 114 mi: Milan (Ohio)
+  at 141 mi: Elyria (Ohio)
+
+Detroit -> Toledo (I-75)
+  at 38 mi: Monroe (Michigan)
+
+Devils Lake -> Grand Forks (US-2)
+  at 27 mi: Lakota (North Dakota)
+  at 73 mi: Grand Forks Air Force Base (North Dakota)
+
+Dodge City -> Garden City (US-50)
+  at 19 mi: Cimarron (Kansas)
+
+Dodge City -> Salina (US-56)
+  at 17 mi: Spearville (Kansas)
+  at 36 mi: Kinsley (Kansas)
+  at 61 mi: Larned (Kansas)
+  at 84 mi: Great Bend (Kansas)
+  at 115 mi: Lyons (Kansas)
+  at 145 mi: McPherson (Kansas)
+  at 169 mi: Assaria (Kansas)
+
+Dodge City -> Wichita (US-50)
+  at 17 mi: Spearville (Kansas)
+  at 36 mi: Kinsley (Kansas)
+  at 62 mi: Macksville (Kansas)
+  at 82 mi: Stafford (Kansas)
+  at 119 mi: South Hutchinson (Kansas)
+  at 152 mi: Maize (Kansas)
+
+Dover -> Salisbury (US-13)
+  at 17 mi: Harrington (Delaware)
+  at 36 mi: Seaford (Delaware)
+
+Dover -> Wilmington (I-95)
+  at 14 mi: Smyrna (Delaware)
+  at 39 mi: Bear (Delaware)
+
+Duluth -> Fargo (US-10)
+  at 18 mi: Cloquet (Minnesota)
+  at 62 mi: McGregor (Minnesota)
+  at 99 mi: Crosby (Minnesota)
+  at 115 mi: Brainerd (Minnesota)
+  at 143 mi: Staples (Minnesota)
+  at 161 mi: Wadena (Minnesota)
+  at 185 mi: Perham (Minnesota)
+  at 206 mi: Detroit Lakes (Minnesota)
+  at 230 mi: Hawley (Minnesota)
+
+Duluth -> Minneapolis (I-35)
+  at 18 mi: Cloquet (Minnesota)
+  at 42 mi: Moose Lake (Minnesota)
+  at 65 mi: Sandstone (Minnesota)
+  at 87 mi: Pine City (Minnesota)
+  at 108 mi: North Branch (Minnesota)
+
+Eau Claire -> La Crosse (US-53)
+  at 18 mi: Eleva (Wisconsin)
+  at 44 mi: Arcadia (Wisconsin)
+  at 74 mi: Holmen (Wisconsin)
+
+Eau Claire -> Minneapolis (I-94)
+  at 12 mi: Elk Mound (Wisconsin)
+  at 47 mi: Baldwin (Wisconsin)
+
+Eau Claire -> Wausau (WI-29)
+  at 13 mi: Chippewa Falls (Wisconsin)
+  at 35 mi: Stanley (Wisconsin)
+  at 64 mi: Abbotsford (Wisconsin)
+  at 88 mi: Marathon (Wisconsin)
+
+Edwards -> Glenwood Springs (I-70)
+  at 24 mi: Gypsum (Colorado)
+
+El Centro -> Yuma (I-8)
+  at 44 mi: Felicity (California)
+
+El Paso -> Albuquerque (I-25)
+  at 20 mi: Anthony (New Mexico)
+  at 60 mi: Radium Springs (New Mexico)
+  at 82 mi: Hatch (New Mexico)
+  at 118 mi: Truth or Consequences (New Mexico)
+  at 190 mi: Socorro (New Mexico)
+  at 244 mi: Los Lunas (New Mexico)
+
+El Paso -> Tucson (I-10)
+  at 20 mi: Anthony (New Mexico)
+  at 102 mi: Deming (New Mexico)
+  at 161 mi: Lordsburg (New Mexico)
+  at 210 mi: Bowie (Arizona)
+  at 235 mi: Willcox (Arizona)
+  at 269 mi: Benson (Arizona)
+  at 296 mi: Vail (Arizona)
+
+El Paso -> Van Horn (I-10)
+  at 30 mi: Fabens (Texas)
+  at 53 mi: Fort Hancock (Texas)
+  at 88 mi: Sierra Blanca (Texas)
+
+Elizabethtown -> Bowling Green (I-65)
+  at 42 mi: Cave City (Kentucky)
+  at 57 mi: Smiths Grove (Kentucky)
+
+Elko -> Boise (I-84)
+  at 9 mi: Osino (Nevada)
+  at 49 mi: Wells (Nevada)
+  at 117 mi: Jackpot (Nevada)
+  at 145 mi: Hollister (Idaho)
+  at 160 mi: Filer (Idaho)
+  at 178 mi: Jerome (Idaho)
+  at 204 mi: Bliss (Idaho)
+  at 223 mi: Glenns Ferry (Idaho)
+  at 249 mi: Mountain Home (Idaho)
+
+Elko -> West Wendover (I-80)
+  at 9 mi: Osino (Nevada)
+  at 49 mi: Wells (Nevada)
+
+Enid -> Oklahoma City (US-81)
+  at 21 mi: Hennessey (Oklahoma)
+  at 39 mi: Kingfisher (Oklahoma)
+  at 73 mi: Warr Acres (Oklahoma)
+
+Enid -> Wichita (US-81)
+  at 51 mi: Tonkawa (Oklahoma)
+  at 92 mi: Wellington (Kansas)
+  at 113 mi: Haysville (Kansas)
+
+Erie -> Buffalo (I-90)
+  at 16 mi: North East (Pennsylvania)
+  at 47 mi: Dunkirk (New York)
+  at 80 mi: Hamburg (New York)
+
+Erie -> Cleveland (I-90)
+  at 31 mi: Conneaut (Ohio)
+  at 61 mi: Madison (Ohio)
+
+Erie -> Pittsburgh (I-79)
+  at 11 mi: Middleboro (Pennsylvania)
+  at 38 mi: Fredericksburg (Pennsylvania)
+  at 63 mi: Lake Latonka (Pennsylvania)
+  at 107 mi: Cranberry Township (Pennsylvania)
+
+Escanaba -> Green Bay (US-41)
+  at 56 mi: Marinette (Wisconsin)
+  at 79 mi: Oconto (Wisconsin)
+  at 101 mi: Suamico (Wisconsin)
+
+Escanaba -> Iron Mountain (US-2)
+  at 23 mi: Powers (Michigan)
+  at 43 mi: Norway (Michigan)
+
+Escanaba -> Marquette (US-41)
+  at 9 mi: Gladstone (Michigan)
+
+Eugene -> Portland (I-5)
+  at 45 mi: Millersburg (Oregon)
+  at 81 mi: Woodburn (Oregon)
+
+Eugene -> Roseburg (I-5)
+  at 22 mi: Cottage Grove (Oregon)
+  at 44 mi: Yoncalla (Oregon)
+  at 60 mi: Sutherlin (Oregon)
+
+Eugene -> Salem (I-5)
+  at 45 mi: Millersburg (Oregon)
+
+Eugene -> Tri-Cities (I-84)
+  at 45 mi: Millersburg (Oregon)
+  at 81 mi: Woodburn (Oregon)
+  at 101 mi: Tigard (Oregon)
+  at 125 mi: Troutdale (Oregon)
+  at 171 mi: Hood River (Oregon)
+  at 192 mi: The Dalles (Oregon)
+  at 245 mi: Arlington (Oregon)
+  at 271 mi: Boardman (Oregon)
+  at 295 mi: Umatilla (Oregon)
+
+Eureka -> Crescent City (US-101)
+  at 8 mi: Arcata (California)
+  at 42 mi: Ore'q (California)
+  at 63 mi: Klamath (California)
+
+Eureka -> Redding (CA-299)
+  at 8 mi: Arcata (California)
+  at 47 mi: Willow Creek (California)
+  at 63 mi: Burnt Ranch (California)
+  at 103 mi: Weaverville (California)
+
+Evansville -> Clarksville (I-69)
+  at 11 mi: Henderson (Kentucky)
+  at 27 mi: Sebree (Kentucky)
+  at 48 mi: Madisonville (Kentucky)
+  at 81 mi: Hopkinsville (Kentucky)
+  at 96 mi: Fort Campbell North (Kentucky)
+
+Evansville -> Louisville (I-64)
+  at 30 mi: Lynnville (Indiana)
+  at 54 mi: Ferdinand (Indiana)
+  at 105 mi: Georgetown (Indiana)
+
+Evansville -> Nashville (I-24)
+  at 11 mi: Henderson (Kentucky)
+  at 72 mi: Central City (Kentucky)
+  at 109 mi: Russellville (Kentucky)
+  at 133 mi: Springfield (Tennessee)
+
+Everett -> Seattle (I-5)
+  at 17 mi: Shoreline (Washington)
+
+Fairfield -> Salinas (I-680)
+  at 26 mi: Concord (California)
+  at 51 mi: Pleasanton (California)
+  at 70 mi: Milpitas (California)
+  at 106 mi: Gilroy (California)
+  at 127 mi: Prunedale (California)
+
+Fairfield -> San Jose (I-680)
+  at 26 mi: Concord (California)
+  at 51 mi: Pleasanton (California)
+  at 70 mi: Milpitas (California)
+
+Fargo -> Minneapolis (I-94)
+  at 27 mi: Barnesville (Minnesota)
+  at 59 mi: Fergus Falls (Minnesota)
+  at 88 mi: Evansville (Minnesota)
+  at 129 mi: Sauk Centre (Minnesota)
+  at 163 mi: Saint Joseph (Minnesota)
+  at 182 mi: Clearwater (Minnesota)
+
+Fargo -> Omaha (I-29)
+  at 17 mi: Oxbow (North Dakota)
+  at 91 mi: Sisseton (South Dakota)
+  at 119 mi: Summit (South Dakota)
+  at 193 mi: Brookings (South Dakota)
+  at 237 mi: Crooks (South Dakota)
+  at 253 mi: Tea (South Dakota)
+  at 278 mi: Beresford (South Dakota)
+  at 308 mi: Elk Point (South Dakota)
+  at 336 mi: Sergeant Bluff (Iowa)
+  at 366 mi: Onawa (Iowa)
+  at 401 mi: Missouri Valley (Iowa)
+
+Fargo -> Sioux Falls (I-29)
+  at 17 mi: Oxbow (North Dakota)
+  at 91 mi: Sisseton (South Dakota)
+  at 119 mi: Summit (South Dakota)
+  at 193 mi: Brookings (South Dakota)
+  at 237 mi: Crooks (South Dakota)
+
+Fayetteville -> Charlotte (US-74)
+  at 22 mi: Raeford (North Carolina)
+  at 42 mi: Laurinburg (North Carolina)
+  at 58 mi: Hamlet (North Carolina)
+  at 84 mi: Wadesboro (North Carolina)
+  at 122 mi: Indian Trail (North Carolina)
+
+Fernley -> Winnemucca (I-80)
+  at 59 mi: Lovelock (Nevada)
+
+Flagstaff -> Kingman (I-40)
+  at 78 mi: Seligman (Arizona)
+
+Flagstaff -> Phoenix (I-17)
+  at 10 mi: Kachina Village (Arizona)
+  at 57 mi: Camp Verde (Arizona)
+  at 82 mi: Cordes Lakes (Arizona)
+  at 112 mi: New River (Arizona)
+
+Flint -> Detroit (I-75)
+  at 9 mi: Grand Blanc (Michigan)
+  at 46 mi: Troy (Michigan)
+
+Flint -> Lansing (I-69)
+  at 9 mi: Swartz Creek (Michigan)
+  at 43 mi: Haslett (Michigan)
+
+Flint -> Saginaw (I-75)
+  at 6 mi: Mount Morris (Michigan)
+
+Fort Collins -> Cheyenne (I-25)
+  at 13 mi: Wellington (Colorado)
+
+Fort Collins -> Colorado Springs (I-25)
+  at 8 mi: Timnath (Colorado)
+  at 29 mi: Mead (Colorado)
+  at 112 mi: Woodmoor (Colorado)
+
+Fort Collins -> Denver (I-25)
+  at 8 mi: Timnath (Colorado)
+  at 29 mi: Mead (Colorado)
+
+Fort Smith -> Little Rock (I-40)
+  at 14 mi: Alma (Arkansas)
+  at 39 mi: Ozark (Arkansas)
+  at 58 mi: Clarksville (Arkansas)
+  at 83 mi: Russellville (Arkansas)
+  at 108 mi: Morrilton (Arkansas)
+  at 127 mi: Conway (Arkansas)
+  at 142 mi: Maumelle (Arkansas)
+
+Fort Smith -> Tulsa (I-40)
+  at 7 mi: Roland (Oklahoma)
+  at 24 mi: Sallisaw (Oklahoma)
+  at 84 mi: Porter (Oklahoma)
+
+Fort Worth -> Austin (I-35)
+  at 44 mi: Itasca (Texas)
+  at 95 mi: Hewitt (Texas)
+  at 122 mi: Temple (Texas)
+  at 138 mi: Salado (Texas)
+
+Fort Worth -> Oklahoma City (I-35)
+  at 34 mi: Denton (Texas)
+  at 63 mi: Gainesville (Texas)
+  at 103 mi: Ardmore (Oklahoma)
+
+Fresno -> Sacramento (CA-99)
+  at 23 mi: Madera (California)
+  at 38 mi: Chowchilla (California)
+  at 56 mi: Merced (California)
+  at 94 mi: Modesto (California)
+  at 111 mi: Manteca (California)
+  at 134 mi: Lodi (California)
+
+Gainesville -> Jacksonville (I-10)
+  at 25 mi: Starke (Florida)
+  at 51 mi: Baldwin (Florida)
+
+Gainesville -> Lakeland (I-75)
+  at 14 mi: Micanopy (Florida)
+  at 50 mi: Marion Oaks (Florida)
+  at 65 mi: Wildwood (Florida)
+  at 94 mi: Clermont (Florida)
+  at 110 mi: Four Corners (Florida)
+  at 129 mi: Polk City (Florida)
+
+Gainesville -> Orlando (I-75)
+  at 14 mi: Micanopy (Florida)
+  at 50 mi: Marion Oaks (Florida)
+  at 65 mi: Wildwood (Florida)
+  at 104 mi: Ocoee (Florida)
+
+Gallup -> Flagstaff (I-40)
+  at 95 mi: Holbrook (Arizona)
+  at 127 mi: Winslow (Arizona)
+
+Garden City -> Amarillo (US-83)
+  at 34 mi: Sublette (Kansas)
+  at 69 mi: Liberal (Kansas)
+  at 89 mi: Hooker (Oklahoma)
+  at 109 mi: Guymon (Oklahoma)
+  at 130 mi: Texhoma (Oklahoma)
+  at 150 mi: Stratford (Texas)
+  at 183 mi: Dumas (Texas)
+
+Gary -> Chicago (I-90)
+  at 11 mi: East Chicago (Indiana)
+
+Gary -> Lafayette (I-65)
+  at 9 mi: Merrillville (Indiana)
+  at 61 mi: Remington (Indiana)
+  at 85 mi: Battle Ground (Indiana)
+
+Gary -> South Bend (I-90)
+  at 11 mi: Portage (Indiana)
+  at 47 mi: Hudson Lake (Indiana)
+
+Gillette -> Spearfish (I-90)
+  at 29 mi: Moorcroft (Wyoming)
+  at 61 mi: Sundance (Wyoming)
+
+Glasgow -> Wolf Point (US-2)
+  at 14 mi: Nashua (Montana)
+  at 30 mi: Frazer (Montana)
+
+Glendive -> Dickinson (I-94)
+  at 38 mi: Beach (North Dakota)
+  at 78 mi: Belfield (North Dakota)
+
+Glenwood Springs -> Grand Junction (I-70)
+  at 26 mi: Rifle (Colorado)
+  at 42 mi: Battlement Mesa (Colorado)
+  at 75 mi: Palisade (Colorado)
+
+Grand Forks -> Bemidji (US-2)
+  at 27 mi: Crookston (Minnesota)
+  at 70 mi: Fosston (Minnesota)
+  at 88 mi: Bagley (Minnesota)
+  at 107 mi: Wilton (Minnesota)
+
+Grand Forks -> Fargo (I-29)
+  at 15 mi: Thompson (North Dakota)
+  at 40 mi: Hillsboro (North Dakota)
+  at 72 mi: Harwood (North Dakota)
+
+Grand Island -> Lincoln (I-80)
+  at 50 mi: Knox (Nebraska)
+  at 70 mi: Goehner (Nebraska)
+  at 90 mi: Emerald (Nebraska)
+
+Grand Island -> North Platte (I-80)
+  at 99 mi: Cozad (Nebraska)
+  at 122 mi: Brady (Nebraska)
+
+Grand Junction -> Green River (I-70)
+  at 12 mi: Fruita (Colorado)
+
+Grand Rapids -> Chicago (I-196)
+  at 23 mi: Zeeland (Michigan)
+  at 39 mi: Douglas (Michigan)
+  at 56 mi: South Haven (Michigan)
+  at 82 mi: Fair Plain (Michigan)
+  at 138 mi: Portage (Indiana)
+  at 158 mi: East Chicago (Indiana)
+
+Grand Rapids -> Detroit (I-96)
+  at 43 mi: Portland (Michigan)
+  at 71 mi: Holt (Michigan)
+  at 103 mi: Howell (Michigan)
+
+Grand Rapids -> Duluth (US-2)
+  at 37 mi: Floodwood (Minnesota)
+  at 75 mi: Proctor (Minnesota)
+
+Grants Pass -> Roseburg (I-5)
+  at 49 mi: Tri-City (Oregon)
+
+Great Falls -> Shelby (I-15)
+  at 10 mi: Sun Prairie (Montana)
+  at 34 mi: Dutton (Montana)
+  at 60 mi: Conrad (Montana)
+
+Green Bay -> Grand Rapids (I-94)
+  at 31 mi: Francis Creek (Wisconsin)
+  at 72 mi: Oostburg (Wisconsin)
+  at 89 mi: Port Washington (Wisconsin)
+  at 134 mi: Caledonia (Wisconsin)
+  at 165 mi: Gurnee (Illinois)
+  at 226 mi: East Chicago (Indiana)
+  at 244 mi: Portage (Indiana)
+  at 263 mi: Trail Creek (Indiana)
+  at 300 mi: Fair Plain (Michigan)
+  at 326 mi: South Haven (Michigan)
+  at 344 mi: Douglas (Michigan)
+
+Green Bay -> Madison (I-41)
+  at 22 mi: Kaukauna (Wisconsin)
+  at 54 mi: Oshkosh (Wisconsin)
+  at 99 mi: Beaver Dam (Wisconsin)
+  at 130 mi: Sun Prairie (Wisconsin)
+
+Green Bay -> Milwaukee (I-43)
+  at 31 mi: Francis Creek (Wisconsin)
+  at 72 mi: Oostburg (Wisconsin)
+  at 88 mi: Port Washington (Wisconsin)
+
+Green River -> Richfield (I-70)
+  at 105 mi: Salina (Utah)
+
+Greensboro -> Raleigh (I-40)
+  at 25 mi: Graham (North Carolina)
+  at 41 mi: Hillsborough (North Carolina)
+
+Greenville -> Atlanta (I-85)
+  at 26 mi: Northlake (South Carolina)
+  at 52 mi: Lavonia (Georgia)
+  at 97 mi: Braselton (Georgia)
+  at 114 mi: Suwanee (Georgia)
+
+Greenville -> Charlotte (I-85)
+  at 29 mi: Valley Falls (South Carolina)
+  at 48 mi: Gaffney (South Carolina)
+  at 79 mi: Gastonia (North Carolina)
+
+Greenville -> Columbia (I-26)
+  at 26 mi: Gray Court (South Carolina)
+  at 96 mi: Seven Oaks (South Carolina)
+
+Gulfport -> Jackson (US-49)
+  at 34 mi: Wiggins (Mississippi)
+  at 72 mi: West Hattiesburg (Mississippi)
+  at 99 mi: Collins (Mississippi)
+  at 118 mi: Magee (Mississippi)
+  at 149 mi: Florence (Mississippi)
+
+Gulfport -> Mobile (I-10)
+  at 16 mi: D'Iberville (Mississippi)
+  at 39 mi: Moss Point (Mississippi)
+  at 64 mi: Tillmans Corner (Alabama)
+
+Gulfport -> New Orleans (I-10)
+  at 22 mi: Diamondhead (Mississippi)
+  at 48 mi: Slidell (Louisiana)
+
+Hagerstown -> Baltimore (I-70)
+  at 26 mi: Frederick (Maryland)
+  at 45 mi: Lisbon (Maryland)
+  at 66 mi: Catonsville (Maryland)
+
+Hagerstown -> Harrisburg (I-81)
+  at 23 mi: Chambersburg (Pennsylvania)
+  at 54 mi: Carlisle (Pennsylvania)
+
+Harrisburg -> Allentown (I-78)
+  at 25 mi: Jonestown (Pennsylvania)
+  at 53 mi: Hamburg (Pennsylvania)
+
+Harrisburg -> Baltimore (I-83)
+  at 25 mi: York (Pennsylvania)
+  at 42 mi: Shrewsbury (Pennsylvania)
+  at 62 mi: Hunt Valley (Maryland)
+
+Harrisburg -> Carlisle (I-81)
+  at 16 mi: New Kingstown (Pennsylvania)
+
+Harrisburg -> Philadelphia (I-76)
+  at 11 mi: Middletown (Pennsylvania)
+  at 44 mi: Denver (Pennsylvania)
+
+Harrisburg -> Pittsburgh (I-76)
+  at 22 mi: Carlisle (Pennsylvania)
+  at 99 mi: Bedford (Pennsylvania)
+  at 136 mi: Somerset (Pennsylvania)
+  at 158 mi: Acme (Pennsylvania)
+
+Harrisburg -> Scranton (I-81)
+  at 64 mi: Mahanoy City (Pennsylvania)
+  at 79 mi: West Hazleton (Pennsylvania)
+  at 102 mi: Wilkes-Barre (Pennsylvania)
+
+Harrisonburg -> Winchester (I-81)
+  at 19 mi: New Market (Virginia)
+  at 50 mi: Strasburg (Virginia)
+
+Hartford -> New York (I-95)
+  at 30 mi: Waterbury (Connecticut)
+  at 48 mi: Shelton (Connecticut)
+  at 81 mi: Stamford (Connecticut)
+
+Havre -> Glasgow (US-2)
+  at 22 mi: Chinook (Montana)
+  at 46 mi: Fort Belknap Agency (Montana)
+  at 88 mi: Malta (Montana)
+
+Hazard -> London (KY-80)
+  at 43 mi: Manchester (Kentucky)
+
+Helena -> Great Falls (I-15)
+  at 80 mi: Ulm (Montana)
+
+Hibbing -> Duluth (US-53)
+  at 25 mi: Virginia (Minnesota)
+
+Hibbing -> Minneapolis (US-169)
+  at 8 mi: Keewatin (Minnesota)
+  at 34 mi: Grand Rapids (Minnesota)
+  at 52 mi: Hill City (Minnesota)
+  at 87 mi: Aitkin (Minnesota)
+  at 116 mi: Vineland (Minnesota)
+  at 180 mi: Elk River (Minnesota)
+
+Houston -> Dallas (I-45)
+  at 39 mi: Conroe (Texas)
+  at 69 mi: Huntsville (Texas)
+  at 131 mi: Buffalo (Texas)
+  at 151 mi: Fairfield (Texas)
+  at 184 mi: Corsicana (Texas)
+  at 205 mi: Ennis (Texas)
+
+Houston -> Lake Charles (I-10)
+  at 21 mi: Barrett (Texas)
+  at 43 mi: Liberty (Texas)
+  at 71 mi: China (Texas)
+  at 93 mi: Vidor (Texas)
+  at 110 mi: Orange (Texas)
+  at 132 mi: Sulphur (Louisiana)
+
+Houston -> San Antonio (I-10)
+  at 49 mi: Sealy (Texas)
+  at 72 mi: Columbus (Texas)
+  at 95 mi: Schulenburg (Texas)
+  at 118 mi: Waelder (Texas)
+  at 161 mi: Seguin (Texas)
+
+Huntington -> Charleston (I-64)
+  at 10 mi: Pea Ridge (West Virginia)
+  at 33 mi: Teays Valley (West Virginia)
+
+Huntsville -> Birmingham (I-65)
+  at 10 mi: Madison (Alabama)
+  at 33 mi: Hartselle (Alabama)
+  at 53 mi: Cullman (Alabama)
+  at 90 mi: Gardendale (Alabama)
+
+Huntsville -> Nashville (I-65)
+  at 9 mi: Meridianville (Alabama)
+  at 30 mi: Fayetteville (Tennessee)
+  at 56 mi: Shelbyville (Tennessee)
+  at 73 mi: Christiana (Tennessee)
+
+Idaho Falls -> Boise (I-84)
+  at 26 mi: Blackfoot (Idaho)
+  at 54 mi: Arbon Valley (Idaho)
+  at 70 mi: American Falls (Idaho)
+  at 122 mi: Heyburn (Idaho)
+  at 140 mi: Hazelton (Idaho)
+  at 165 mi: Jerome (Idaho)
+  at 191 mi: Bliss (Idaho)
+  at 210 mi: Glenns Ferry (Idaho)
+  at 236 mi: Mountain Home (Idaho)
+
+Idaho Falls -> Salt Lake City (I-15)
+  at 26 mi: Blackfoot (Idaho)
+  at 61 mi: Inkom (Idaho)
+  at 79 mi: Arimo (Idaho)
+  at 105 mi: Malad City (Idaho)
+  at 141 mi: Tremonton (Utah)
+  at 177 mi: Ogden (Utah)
+
+Idaho Falls -> Twin Falls (I-86)
+  at 26 mi: Blackfoot (Idaho)
+  at 54 mi: Arbon Valley (Idaho)
+  at 70 mi: American Falls (Idaho)
+  at 122 mi: Heyburn (Idaho)
+  at 141 mi: Hazelton (Idaho)
+
+Indianapolis -> Fort Wayne (I-69)
+  at 50 mi: Chesterfield (Indiana)
+  at 71 mi: Fowlerton (Indiana)
+  at 87 mi: Van Buren (Indiana)
+  at 104 mi: Markle (Indiana)
+
+Indianapolis -> Nashville (I-65)
+  at 43 mi: Columbus (Indiana)
+  at 83 mi: Scottsburg (Indiana)
+  at 103 mi: Sellersburg (Indiana)
+  at 122 mi: Okolona (Kentucky)
+  at 157 mi: Elizabethtown (Kentucky)
+  at 196 mi: Cave City (Kentucky)
+  at 212 mi: Smiths Grove (Kentucky)
+  at 230 mi: Plano (Kentucky)
+
+Indianapolis -> St. Louis (I-70)
+  at 40 mi: Cloverdale (Indiana)
+  at 76 mi: West Terre Haute (Indiana)
+  at 108 mi: Casey (Illinois)
+  at 142 mi: Effingham (Illinois)
+  at 173 mi: Vandalia (Illinois)
+  at 192 mi: Greenville (Illinois)
+
+Indio -> Phoenix (I-10)
+  at 96 mi: Blythe (California)
+  at 118 mi: Quartzsite (Arizona)
+
+Iowa City -> Des Moines (I-80)
+  at 8 mi: Tiffin (Iowa)
+  at 26 mi: Williamsburg (Iowa)
+  at 55 mi: Malcom (Iowa)
+  at 80 mi: Newton (Iowa)
+  at 103 mi: Altoona (Iowa)
+
+Iron Mountain -> Houghton (US-141)
+  at 29 mi: Crystal Falls (Michigan)
+  at 85 mi: Baraga (Michigan)
+
+Iron Mountain -> Marquette (US-41)
+  at 46 mi: Republic (Michigan)
+  at 65 mi: Ishpeming (Michigan)
+
+Jackson -> Ann Arbor (I-94)
+  at 22 mi: Chelsea (Michigan)
+
+Jackson -> Baton Rouge (I-55)
+  at 25 mi: Crystal Springs (Mississippi)
+  at 54 mi: Brookhaven (Mississippi)
+  at 78 mi: McComb (Mississippi)
+  at 114 mi: Amite (Louisiana)
+  at 154 mi: Walker (Louisiana)
+
+Jackson -> Kalamazoo (I-94)
+  at 20 mi: Albion (Michigan)
+  at 56 mi: Galesburg (Michigan)
+
+Jackson -> Lansing (US-127)
+  at 29 mi: Holt (Michigan)
+
+Jackson -> Meridian (I-20)
+  at 14 mi: Brandon (Mississippi)
+  at 65 mi: Newton (Mississippi)
+
+Jackson -> New Orleans (I-55)
+  at 25 mi: Crystal Springs (Mississippi)
+  at 54 mi: Brookhaven (Mississippi)
+  at 78 mi: McComb (Mississippi)
+  at 114 mi: Amite (Louisiana)
+  at 135 mi: Ponchatoula (Louisiana)
+
+Jackson -> Tuscaloosa (I-20)
+  at 14 mi: Brandon (Mississippi)
+  at 64 mi: Newton (Mississippi)
+  at 92 mi: Meridian (Mississippi)
+  at 112 mi: Cuba (Alabama)
+
+Jacksonville -> Atlanta (I-75)
+  at 27 mi: Macclenny (Florida)
+  at 92 mi: Jennings (Florida)
+  at 131 mi: Adel (Georgia)
+  at 151 mi: Tifton (Georgia)
+  at 170 mi: Ashburn (Georgia)
+  at 188 mi: Cordele (Georgia)
+  at 220 mi: Perry (Georgia)
+  at 261 mi: Forsyth (Georgia)
+
+Jacksonville -> Miami (I-95)
+  at 61 mi: Palm Coast (Florida)
+  at 142 mi: Port Saint John (Florida)
+  at 158 mi: Viera East (Florida)
+  at 270 mi: Palm Beach Gardens (Florida)
+
+Jacksonville -> Tampa (I-75)
+  at 21 mi: Baldwin (Florida)
+  at 48 mi: Starke (Florida)
+  at 86 mi: Citra (Florida)
+  at 102 mi: Ocala (Florida)
+  at 118 mi: Marion Oaks (Florida)
+  at 137 mi: Lake Panasoffkee (Florida)
+  at 177 mi: Wesley Chapel (Florida)
+
+Johnson City -> Asheville (I-26)
+  at 15 mi: Erwin (Tennessee)
+  at 52 mi: Weaverville (North Carolina)
+
+Johnson City -> Roanoke (I-81)
+  at 28 mi: Bristol (Tennessee)
+  at 43 mi: Abingdon (Virginia)
+  at 72 mi: Marion (Virginia)
+  at 97 mi: Wytheville (Virginia)
+  at 125 mi: Dublin (Virginia)
+  at 142 mi: Christiansburg (Virginia)
+  at 165 mi: Salem (Virginia)
+
+Joplin -> Springfield (I-44)
+  at 26 mi: Sarcoxie (Missouri)
+  at 44 mi: Mount Vernon (Missouri)
+
+Joplin -> Tulsa (I-44)
+  at 8 mi: Loma Linda (Missouri)
+  at 26 mi: Miami (Oklahoma)
+  at 51 mi: Vinita (Oklahoma)
+  at 86 mi: Claremore (Oklahoma)
+
+Kalamazoo -> Detroit (I-94)
+  at 10 mi: Galesburg (Michigan)
+  at 46 mi: Albion (Michigan)
+  at 84 mi: Chelsea (Michigan)
+
+Kalamazoo -> Grand Rapids (US-131)
+  at 13 mi: Plainwell (Michigan)
+  at 43 mi: Kentwood (Michigan)
+
+Kalamazoo -> South Bend (I-94)
+  at 27 mi: Three Rivers (Michigan)
+  at 65 mi: Granger (Indiana)
+
+Kalispell -> Libby (US-2)
+  at 21 mi: Marion (Montana)
+
+Kansas City -> Denver (I-70)
+  at 40 mi: Lawrence (Kansas)
+  at 63 mi: Topeka (Kansas)
+  at 128 mi: Junction City (Kansas)
+  at 151 mi: Abilene (Kansas)
+  at 174 mi: Salina (Kansas)
+  at 241 mi: Russell (Kansas)
+  at 266 mi: Hays (Kansas)
+  at 350 mi: Oakley (Kansas)
+  at 371 mi: Colby (Kansas)
+  at 407 mi: Goodland (Kansas)
+  at 437 mi: Burlington (Colorado)
+  at 514 mi: Limon (Colorado)
+
+Kenosha -> Chicago (I-94)
+  at 22 mi: Gurnee (Illinois)
+
+Kenosha -> Milwaukee (I-94)
+  at 22 mi: Caledonia (Wisconsin)
+
+Killeen -> Austin (I-35)
+  at 21 mi: Florence (Texas)
+
+Killeen -> College Station (US-190)
+  at 17 mi: Belton (Texas)
+  at 38 mi: Rogers (Texas)
+  at 54 mi: Cameron (Texas)
+  at 88 mi: Hearne (Texas)
+
+Killeen -> Fort Worth (I-35)
+  at 24 mi: Temple (Texas)
+  at 52 mi: Hewitt (Texas)
+  at 77 mi: West (Texas)
+  at 103 mi: Itasca (Texas)
+
+Kingman -> Barstow (I-40)
+  at 62 mi: Needles (California)
+
+Kingman -> Las Vegas (US-93)
+  at 7 mi: So-Hi (Arizona)
+
+Klamath Falls -> Bend (US-97)
+  at 27 mi: Chiloquin (Oregon)
+  at 118 mi: Three Rivers (Oregon)
+
+Klamath Falls -> Eugene (OR-58)
+  at 27 mi: Chiloquin (Oregon)
+  at 131 mi: Oakridge (Oregon)
+  at 154 mi: Lowell (Oregon)
+
+Knoxville -> Atlanta (I-75)
+  at 43 mi: Madisonville (Tennessee)
+  at 60 mi: Etowah (Tennessee)
+  at 105 mi: Chatsworth (Georgia)
+  at 137 mi: Rydal (Georgia)
+
+Knoxville -> Morristown (US-11E)
+  at 28 mi: Jefferson City (Tennessee)
+
+Knoxville -> Nashville (I-40)
+  at 36 mi: Kingston (Tennessee)
+  at 60 mi: Crab Orchard (Tennessee)
+  at 101 mi: Cookeville (Tennessee)
+  at 129 mi: Gordonsville (Tennessee)
+
+La Crosse -> Madison (I-90)
+  at 28 mi: Sparta (Wisconsin)
+  at 44 mi: Tomah (Wisconsin)
+  at 70 mi: Mauston (Wisconsin)
+  at 91 mi: Lake Delton (Wisconsin)
+  at 129 mi: DeForest (Wisconsin)
+
+La Grande -> Baker City (I-84)
+  at 25 mi: North Powder (Oregon)
+
+Lafayette -> Baton Rouge (I-10)
+  at 9 mi: Breaux Bridge (Louisiana)
+  at 39 mi: Rosedale (Louisiana)
+
+Lafayette -> Beaumont (I-10)
+  at 24 mi: Crowley (Louisiana)
+  at 41 mi: Jennings (Louisiana)
+  at 63 mi: Iowa (Louisiana)
+  at 85 mi: Sulphur (Louisiana)
+  at 108 mi: Orange (Texas)
+  at 125 mi: Vidor (Texas)
+
+Lafayette -> Indianapolis (I-65)
+  at 7 mi: Dayton (Indiana)
+  at 36 mi: Lebanon (Indiana)
+
+Lafayette -> New Orleans (I-10)
+  at 9 mi: Breaux Bridge (Louisiana)
+  at 39 mi: Rosedale (Louisiana)
+  at 70 mi: Prairieville (Louisiana)
+
+Lake Charles -> Lafayette (I-10)
+  at 34 mi: Jennings (Louisiana)
+  at 51 mi: Crowley (Louisiana)
+  at 68 mi: Ossun (Louisiana)
+
+Lakeland -> Port Saint Lucie (SR-60)
+  at 12 mi: Bartow (Florida)
+  at 28 mi: Lake Wales (Florida)
+
+Lancaster -> Bakersfield (CA-58)
+  at 13 mi: Rosamond (California)
+  at 49 mi: Tehachapi (California)
+
+Lansing -> Detroit (I-96)
+  at 18 mi: Williamston (Michigan)
+  at 36 mi: Howell (Michigan)
+
+Lansing -> Grand Rapids (I-96)
+  at 24 mi: Portland (Michigan)
+
+Laramie -> Rock Springs (I-80)
+  at 99 mi: Rawlins (Wyoming)
+  at 139 mi: Wamsutter (Wyoming)
+
+Laredo -> McAllen (US-83)
+  at 12 mi: Rio Bravo (Texas)
+  at 50 mi: Zapata (Texas)
+  at 104 mi: Rio Grande City (Texas)
+  at 135 mi: La Homa (Texas)
+
+Laredo -> San Antonio (I-35)
+  at 29 mi: Cactus (Texas)
+  at 68 mi: Cotulla (Texas)
+  at 84 mi: Dilley (Texas)
+  at 101 mi: Pearsall (Texas)
+  at 123 mi: Devine (Texas)
+
+Las Cruces -> Albuquerque (I-25)
+  at 17 mi: Radium Springs (New Mexico)
+  at 38 mi: Hatch (New Mexico)
+  at 75 mi: Truth or Consequences (New Mexico)
+  at 146 mi: Socorro (New Mexico)
+  at 201 mi: Los Lunas (New Mexico)
+
+Las Cruces -> El Paso (I-10)
+  at 25 mi: Anthony (New Mexico)
+
+Las Cruces -> Midland (I-10)
+  at 25 mi: Anthony (New Mexico)
+  at 58 mi: Socorro (Texas)
+  at 76 mi: Fabens (Texas)
+  at 99 mi: Fort Hancock (Texas)
+  at 134 mi: Sierra Blanca (Texas)
+  at 256 mi: Pecos (Texas)
+  at 294 mi: Monahans (Texas)
+  at 330 mi: Odessa (Texas)
+
+Las Cruces -> Tucson (I-10)
+  at 59 mi: Deming (New Mexico)
+  at 119 mi: Lordsburg (New Mexico)
+  at 168 mi: Bowie (Arizona)
+  at 193 mi: Willcox (Arizona)
+  at 227 mi: Benson (Arizona)
+  at 254 mi: Vail (Arizona)
+
+Las Vegas -> Los Angeles (I-15)
+  at 43 mi: Primm state line corridor (Nevada)
+  at 150 mi: Barstow desert services corridor (California)
+
+Las Vegas -> Phoenix (US-93)
+  at 100 mi: So-Hi (Arizona)
+  at 162 mi: Wikieup (Arizona)
+  at 236 mi: Wickenburg (Arizona)
+
+Las Vegas -> Pueblo (I-25)
+  at 43 mi: Wagon Mound (New Mexico)
+  at 68 mi: Springer (New Mexico)
+  at 109 mi: Raton (New Mexico)
+  at 130 mi: Trinidad (Colorado)
+  at 148 mi: Aguilar (Colorado)
+  at 165 mi: Walsenburg (Colorado)
+  at 188 mi: Colorado City (Colorado)
+
+Lawton -> Oklahoma City (I-44)
+  at 16 mi: Elgin (Oklahoma)
+  at 45 mi: Chickasha (Oklahoma)
+  at 68 mi: Newcastle (Oklahoma)
+
+Lawton -> Wichita Falls (I-44)
+  at 10 mi: Geronimo (Oklahoma)
+  at 40 mi: Burkburnett (Texas)
+
+Lewiston -> McCall (US-95)
+  at 14 mi: Lapwai (Idaho)
+  at 42 mi: Craigmont (Idaho)
+  at 72 mi: Grangeville (Idaho)
+  at 116 mi: Riggins (Idaho)
+  at 151 mi: New Meadows (Idaho)
+
+Lexington -> Cincinnati (I-75)
+  at 14 mi: Georgetown (Kentucky)
+  at 44 mi: Williamstown (Kentucky)
+  at 71 mi: Florence (Kentucky)
+
+Lexington -> Louisville (I-64)
+  at 13 mi: Versailles (Kentucky)
+  at 46 mi: Shelbyville (Kentucky)
+
+Lexington -> Mount Sterling (I-64)
+  at 20 mi: Winchester (Kentucky)
+
+Libby -> Sandpoint (US-2)
+  at 18 mi: Troy (Montana)
+  at 52 mi: Bonners Ferry (Idaho)
+
+Lincoln -> Des Moines (I-80)
+  at 15 mi: Waverly (Nebraska)
+  at 76 mi: Underwood (Iowa)
+  at 98 mi: Avoca (Iowa)
+  at 134 mi: Adair (Iowa)
+  at 150 mi: Stuart (Iowa)
+  at 170 mi: Van Meter (Iowa)
+
+Lincoln -> Omaha (I-80)
+  at 15 mi: Waverly (Nebraska)
+  at 43 mi: Chalco (Nebraska)
+
+Little Rock -> Conway (I-40)
+  at 17 mi: Maumelle (Arkansas)
+
+Little Rock -> Dallas (I-30)
+  at 25 mi: Benton (Arkansas)
+  at 112 mi: Hope (Arkansas)
+  at 141 mi: Texarkana (Arkansas)
+  at 239 mi: Sulphur Springs (Texas)
+  at 270 mi: Greenville (Texas)
+  at 296 mi: Rockwall (Texas)
+
+Little Rock -> Oklahoma City (I-40)
+  at 33 mi: Conway (Arkansas)
+  at 52 mi: Morrilton (Arkansas)
+  at 76 mi: Russellville (Arkansas)
+  at 101 mi: Clarksville (Arkansas)
+  at 121 mi: Ozark (Arkansas)
+  at 145 mi: Alma (Arkansas)
+  at 163 mi: Roland (Oklahoma)
+  at 180 mi: Sallisaw (Oklahoma)
+  at 223 mi: Checotah (Oklahoma)
+  at 250 mi: Henryetta (Oklahoma)
+  at 268 mi: Okemah (Oklahoma)
+  at 299 mi: Johnson (Oklahoma)
+
+London -> Knoxville (I-75)
+  at 12 mi: Corbin (Kentucky)
+  at 28 mi: Williamsburg (Kentucky)
+  at 67 mi: Caryville (Tennessee)
+
+Los Angeles -> Fresno (CA-99)
+  at 73 mi: Lebec (California)
+  at 104 mi: Greenfield (California)
+  at 143 mi: Delano (California)
+  at 174 mi: Tulare (California)
+  at 204 mi: Selma (California)
+
+Los Angeles -> Indio (I-10)
+  at 48 mi: Fontana (California)
+  at 78 mi: Beaumont (California)
+  at 115 mi: Thousand Palms (California)
+
+Los Angeles -> San Diego (I-5)
+  at 35 mi: Orange County I-5 corridor (California)
+  at 66 mi: Camp Pendleton and San Onofre coast (California)
+
+Los Angeles -> San Francisco (I-5)
+  at 73 mi: Lebec (California)
+  at 90 mi: Mettler (California)
+  at 176 mi: Kettleman City (California)
+  at 273 mi: Santa Nella Village (California)
+  at 341 mi: Livermore (California)
+  at 372 mi: Oakland (California)
+
+Louisville -> Elizabethtown (I-65)
+  at 9 mi: Okolona (Kentucky)
+  at 31 mi: Lebanon Junction (Kentucky)
+
+Louisville -> Indianapolis (I-65)
+  at 10 mi: Sellersburg (Indiana)
+  at 31 mi: Scottsburg (Indiana)
+  at 70 mi: Columbus (Indiana)
+
+Lubbock -> Abilene (US-84)
+  at 18 mi: Slaton (Texas)
+  at 41 mi: Post (Texas)
+  at 84 mi: Snyder (Texas)
+  at 124 mi: Sweetwater (Texas)
+  at 147 mi: Merkel (Texas)
+
+Lubbock -> Amarillo (I-27)
+  at 19 mi: Abernathy (Texas)
+  at 36 mi: Hale Center (Texas)
+  at 51 mi: Seth Ward (Texas)
+  at 88 mi: Happy (Texas)
+  at 106 mi: Canyon (Texas)
+
+Lubbock -> Dallas (US-82)
+  at 13 mi: Idalou (Texas)
+  at 30 mi: Ralls (Texas)
+  at 63 mi: Dickens (Texas)
+  at 126 mi: Benjamin (Texas)
+  at 158 mi: Seymour (Texas)
+  at 192 mi: Olney (Texas)
+  at 231 mi: Jacksboro (Texas)
+
+Macon -> Atlanta (I-75)
+  at 24 mi: Forsyth (Georgia)
+  at 48 mi: Locust Grove (Georgia)
+
+Macon -> Savannah (I-16)
+  at 41 mi: Dudley (Georgia)
+  at 102 mi: Metter (Georgia)
+
+Madison -> Chicago (I-90)
+  at 40 mi: Janesville (Wisconsin)
+  at 60 mi: Roscoe (Illinois)
+  at 104 mi: Gilberts (Illinois)
+
+Madison -> Milwaukee (I-94)
+  at 27 mi: Lake Mills (Wisconsin)
+  at 53 mi: Delafield (Wisconsin)
+
+Manchester -> Hartford (I-84)
+  at 18 mi: Nashua (New Hampshire)
+  at 33 mi: Westford (Massachusetts)
+  at 51 mi: Hudson (Massachusetts)
+  at 83 mi: Charlton (Massachusetts)
+  at 113 mi: Tolland (Connecticut)
+
+Manchester -> Providence (I-495)
+  at 18 mi: Nashua (New Hampshire)
+  at 33 mi: Lowell (Massachusetts)
+  at 58 mi: Newton (Massachusetts)
+  at 89 mi: Attleboro (Massachusetts)
+
+Manchester -> Worcester (I-495)
+  at 18 mi: Nashua (New Hampshire)
+  at 33 mi: Westford (Massachusetts)
+  at 51 mi: Hudson (Massachusetts)
+
+Mankato -> Minneapolis (US-169)
+  at 13 mi: Saint Peter (Minnesota)
+  at 38 mi: Belle Plaine (Minnesota)
+  at 56 mi: Shakopee (Minnesota)
+
+Mankato -> Rochester (US-14)
+  at 8 mi: Eagle Lake (Minnesota)
+  at 44 mi: Owatonna (Minnesota)
+  at 69 mi: Kasson (Minnesota)
+
+Marquette -> Houghton (US-41)
+  at 15 mi: Ishpeming (Michigan)
+  at 37 mi: Michigamme (Michigan)
+  at 72 mi: Baraga (Michigan)
+
+Marquette -> Sault Ste. Marie (M-28)
+  at 43 mi: Munising (Michigan)
+
+McCall -> Boise (ID-55)
+  at 29 mi: Cascade (Idaho)
+  at 79 mi: Horseshoe Bend (Idaho)
+  at 98 mi: Eagle (Idaho)
+
+McKinney -> Fort Worth (I-35)
+  at 18 mi: The Colony (Texas)
+  at 48 mi: North Richland Hills (Texas)
+
+McKinney -> Tyler (US-69)
+  at 8 mi: Princeton (Texas)
+  at 32 mi: Greenville (Texas)
+  at 60 mi: Emory (Texas)
+  at 94 mi: Lindale (Texas)
+
+McKinney -> Waco (I-35)
+  at 62 mi: Waxahachie (Texas)
+  at 81 mi: Milford (Texas)
+  at 121 mi: Lacy-Lakeview (Texas)
+
+Medford -> Chico (I-5)
+  at 13 mi: Ashland (Oregon)
+  at 51 mi: Yreka (California)
+  at 88 mi: Mount Shasta (California)
+  at 123 mi: Lakehead (California)
+  at 148 mi: Redding (California)
+  at 177 mi: Red Bluff (California)
+  at 193 mi: Los Molinos (California)
+
+Medford -> Grants Pass (I-5)
+  at 21 mi: Rogue River (Oregon)
+
+Memphis -> Little Rock (I-40)
+  at 8 mi: West Memphis (Arkansas)
+  at 46 mi: Forrest City (Arkansas)
+  at 71 mi: Brinkley (Arkansas)
+  at 112 mi: Lonoke (Arkansas)
+
+Memphis -> Nashville (I-40)
+  at 108 mi: Parker Crossroads (Tennessee)
+  at 150 mi: Buck Snort (Tennessee)
+  at 187 mi: Kingston Springs (Tennessee)
+
+Memphis -> St. Louis (I-55)
+  at 8 mi: West Memphis (Arkansas)
+  at 26 mi: Turrell (Arkansas)
+  at 48 mi: Keiser (Arkansas)
+  at 107 mi: Portageville (Missouri)
+  at 142 mi: Miner (Missouri)
+  at 164 mi: Scott City (Missouri)
+  at 204 mi: Perryville (Missouri)
+  at 232 mi: Bloomsdale (Missouri)
+  at 251 mi: Festus (Missouri)
+
+Meridian -> Tuscaloosa (I-20)
+  at 13 mi: Toomsuba (Mississippi)
+
+Midland -> Abilene (I-20)
+  at 22 mi: Stanton (Texas)
+  at 42 mi: Big Spring (Texas)
+  at 80 mi: Colorado City (Texas)
+  at 110 mi: Sweetwater (Texas)
+  at 133 mi: Merkel (Texas)
+
+Midland -> Amarillo (I-27)
+  at 57 mi: Lamesa (Texas)
+  at 88 mi: Tahoka (Texas)
+  at 135 mi: Abernathy (Texas)
+  at 152 mi: Hale Center (Texas)
+  at 167 mi: Seth Ward (Texas)
+  at 204 mi: Happy (Texas)
+  at 222 mi: Canyon (Texas)
+
+Midland -> Lubbock (US-87)
+  at 57 mi: Lamesa (Texas)
+  at 89 mi: Tahoka (Texas)
+
+Miles City -> Glendive (I-94)
+  at 38 mi: Terry (Montana)
+
+Milwaukee -> Chicago (I-94)
+  at 36 mi: Kenosha I-94 corridor (Wisconsin)
+
+Milwaukee -> Minneapolis (I-94)
+  at 26 mi: Delafield (Wisconsin)
+  at 52 mi: Lake Mills (Wisconsin)
+  at 82 mi: DeForest (Wisconsin)
+  at 120 mi: Lake Delton (Wisconsin)
+  at 141 mi: Mauston (Wisconsin)
+  at 160 mi: Oakdale (Wisconsin)
+  at 176 mi: Warrens (Wisconsin)
+  at 196 mi: Black River Falls (Wisconsin)
+  at 223 mi: Osseo (Wisconsin)
+  at 256 mi: Elk Mound (Wisconsin)
+  at 292 mi: Baldwin (Wisconsin)
+
+Minneapolis -> Des Moines (I-35)
+  at 30 mi: Elko New Market (Minnesota)
+  at 64 mi: Owatonna (Minnesota)
+  at 79 mi: Ellendale (Minnesota)
+  at 132 mi: Clear Lake (Iowa)
+  at 167 mi: Dows (Iowa)
+  at 201 mi: Story City (Iowa)
+
+Minot -> Devils Lake (US-2)
+  at 8 mi: Surrey (North Dakota)
+  at 45 mi: Towner (North Dakota)
+  at 64 mi: Rugby (North Dakota)
+  at 91 mi: Leeds (North Dakota)
+
+Missoula -> Billings (I-90)
+  at 17 mi: Clinton (Montana)
+  at 49 mi: Drummond (Montana)
+  at 81 mi: Deer Lodge (Montana)
+  at 96 mi: Warm Springs (Montana)
+  at 118 mi: Butte (Montana)
+  at 143 mi: Whitehall (Montana)
+  at 172 mi: Three Forks (Montana)
+  at 201 mi: Bozeman (Montana)
+  at 228 mi: Livingston (Montana)
+  at 262 mi: Big Timber (Montana)
+  at 302 mi: Columbus (Montana)
+  at 327 mi: Laurel (Montana)
+
+Missoula -> Butte (I-90)
+  at 17 mi: Clinton (Montana)
+  at 49 mi: Drummond (Montana)
+  at 80 mi: Deer Lodge (Montana)
+  at 96 mi: Warm Springs (Montana)
+
+Mitchell -> Rapid City (I-90)
+  at 25 mi: Plankinton (South Dakota)
+  at 48 mi: Kimball (South Dakota)
+  at 70 mi: Chamberlain (South Dakota)
+  at 108 mi: Presho (South Dakota)
+  at 141 mi: Murdo (South Dakota)
+  at 183 mi: Kadoka (South Dakota)
+  at 222 mi: Wall (South Dakota)
+  at 267 mi: Box Elder (South Dakota)
+
+Mobile -> Montgomery (I-65)
+  at 91 mi: Evergreen (Alabama)
+  at 126 mi: Greenville (Alabama)
+
+Mobile -> New Orleans (I-10)
+  at 36 mi: Moss Point (Mississippi)
+  at 58 mi: D'Iberville (Mississippi)
+  at 87 mi: Diamondhead (Mississippi)
+  at 113 mi: Slidell (Louisiana)
+
+Monroe -> Vicksburg (I-20)
+  at 22 mi: Rayville (Louisiana)
+  at 37 mi: Delhi (Louisiana)
+  at 55 mi: Tallulah (Louisiana)
+
+Montgomery -> Atlanta (I-85)
+  at 54 mi: Auburn (Alabama)
+  at 77 mi: Valley (Alabama)
+  at 113 mi: Grantville (Georgia)
+
+Montgomery -> Birmingham (I-65)
+  at 9 mi: Millbrook (Alabama)
+  at 82 mi: Hoover (Alabama)
+
+Montpelier -> Burlington (I-89)
+  at 12 mi: Waterbury (Vermont)
+  at 29 mi: Williston (Vermont)
+
+Montpelier -> Manchester (I-89)
+  at 37 mi: South Royalton (Vermont)
+  at 60 mi: Lebanon (New Hampshire)
+  at 84 mi: New London (New Hampshire)
+  at 120 mi: Bow Bog (New Hampshire)
+
+Morehead -> Ashland (I-64)
+  at 37 mi: Grayson (Kentucky)
+  at 59 mi: Kenova (West Virginia)
+
+Morgantown -> Charleston (I-79)
+  at 18 mi: Fairmont (West Virginia)
+  at 34 mi: Bridgeport (West Virginia)
+  at 58 mi: Weston (West Virginia)
+  at 74 mi: Burnsville (West Virginia)
+  at 90 mi: Sutton (West Virginia)
+  at 143 mi: Elkview (West Virginia)
+
+Morgantown -> Pittsburgh (I-79)
+  at 8 mi: Cheat Lake (West Virginia)
+  at 27 mi: Uniontown (Pennsylvania)
+  at 63 mi: Baldwin (Pennsylvania)
+
+Morristown -> Johnson City (US-11E)
+  at 30 mi: Greeneville (Tennessee)
+  at 54 mi: Jonesborough (Tennessee)
+
+Moses Lake -> Seattle (I-90)
+  at 29 mi: George (Washington)
+  at 71 mi: Ellensburg (Washington)
+  at 94 mi: Cle Elum (Washington)
+  at 124 mi: Snoqualmie Pass (Washington)
+  at 161 mi: Issaquah (Washington)
+
+Mount Sterling -> Morehead (I-64)
+  at 13 mi: Owingsville (Kentucky)
+
+Murfreesboro -> Chattanooga (I-24)
+  at 32 mi: Manchester (Tennessee)
+  at 56 mi: Monteagle (Tennessee)
+  at 76 mi: Jasper (Tennessee)
+
+Murfreesboro -> Huntsville (US-231)
+  at 9 mi: Christiana (Tennessee)
+  at 26 mi: Shelbyville (Tennessee)
+  at 53 mi: Fayetteville (Tennessee)
+  at 74 mi: Meridianville (Alabama)
+
+Muskegon -> Grand Rapids (I-96)
+  at 24 mi: Coopersville (Michigan)
+
+Muskegon -> Kalamazoo (US-131)
+  at 24 mi: Coopersville (Michigan)
+  at 48 mi: Kentwood (Michigan)
+  at 78 mi: Plainwell (Michigan)
+
+Nashville -> Atlanta (I-24)
+  at 64 mi: Manchester (Tennessee)
+  at 87 mi: Monteagle (Tennessee)
+  at 107 mi: Jasper (Tennessee)
+  at 138 mi: Fort Oglethorpe (Georgia)
+  at 160 mi: Dalton (Georgia)
+  at 180 mi: Calhoun (Georgia)
+
+Nephi -> Provo (I-15)
+  at 33 mi: Spanish Fork (Utah)
+
+New Haven -> Bridgeport (I-95)
+  at 10 mi: Shelton (Connecticut)
+
+New Haven -> Hartford (I-91)
+  at 20 mi: Meriden (Connecticut)
+
+New Haven -> New York (I-95)
+  at 10 mi: Shelton (Connecticut)
+  at 43 mi: Stamford (Connecticut)
+
+New Orleans -> Houston (I-10)
+  at 65 mi: Prairieville (Louisiana)
+  at 97 mi: Rosedale (Louisiana)
+  at 126 mi: Breaux Bridge (Louisiana)
+  at 155 mi: Crowley (Louisiana)
+  at 172 mi: Jennings (Louisiana)
+  at 193 mi: Iowa (Louisiana)
+  at 215 mi: Sulphur (Louisiana)
+  at 238 mi: Orange (Texas)
+  at 255 mi: Vidor (Texas)
+  at 277 mi: China (Texas)
+  at 305 mi: Liberty (Texas)
+  at 326 mi: Barrett (Texas)
+
+New York -> Boston (I-95)
+  at 28 mi: Stamford (Connecticut)
+  at 58 mi: Milford (Connecticut)
+  at 89 mi: Meriden (Connecticut)
+  at 122 mi: Tolland (Connecticut)
+  at 152 mi: Charlton (Massachusetts)
+
+New York -> Bridgeport (I-95)
+  at 11 mi: New Rochelle (New York)
+  at 28 mi: Stamford (Connecticut)
+
+New York -> Philadelphia (I-95)
+  at 45 mi: Piscataway (New Jersey)
+  at 62 mi: Twin Rivers (New Jersey)
+  at 95 mi: Cinnaminson (New Jersey)
+
+Newark -> Allentown (I-78)
+  at 16 mi: Scotch Plains (New Jersey)
+  at 42 mi: High Bridge (New Jersey)
+  at 61 mi: Easton (Pennsylvania)
+
+Newark -> New York (I-95)
+  at 12 mi: Union City (New Jersey)
+
+Newark -> Philadelphia (I-95)
+  at 23 mi: Piscataway (New Jersey)
+  at 40 mi: Twin Rivers (New Jersey)
+  at 73 mi: Cinnaminson (New Jersey)
+
+Newark -> Trenton (I-95)
+  at 21 mi: Edison (New Jersey)
+  at 38 mi: Princeton (New Jersey)
+
+Newport -> Astoria (US-101)
+  at 25 mi: Lincoln City (Oregon)
+  at 47 mi: Cloverdale (Oregon)
+  at 68 mi: Tillamook (Oregon)
+  at 116 mi: Seaside (Oregon)
+
+Newport -> New Haven (I-95)
+  at 19 mi: South Kingstown (Rhode Island)
+  at 40 mi: Westerly (Rhode Island)
+  at 57 mi: New London (Connecticut)
+  at 97 mi: Branford (Connecticut)
+
+Newport -> Providence (I-95)
+  at 11 mi: North Kingstown (Rhode Island)
+
+Norfolk -> Raleigh (US-64)
+  at 26 mi: South Suffolk (Virginia)
+  at 56 mi: Winton (North Carolina)
+  at 73 mi: Aulander (North Carolina)
+  at 117 mi: Tarboro (North Carolina)
+  at 133 mi: Rocky Mount (North Carolina)
+  at 178 mi: Knightdale (North Carolina)
+
+Norfolk -> Richmond (I-64)
+  at 28 mi: Smithfield (Virginia)
+  at 76 mi: Hopewell (Virginia)
+
+Norfolk -> Virginia Beach (I-264)
+  at 6 mi: Lawson Forest (Virginia)
+
+North Platte -> Cheyenne (I-80)
+  at 20 mi: Sutherland (Nebraska)
+  at 52 mi: Ogallala (Nebraska)
+  at 70 mi: Big Springs (Nebraska)
+  at 93 mi: Chappell (Nebraska)
+  at 139 mi: Potter (Nebraska)
+  at 156 mi: Kimball (Nebraska)
+  at 178 mi: Pine Bluffs (Wyoming)
+
+Oceanside -> Los Angeles (I-5)
+  at 36 mi: Mission Viejo (California)
+  at 58 mi: Anaheim (California)
+
+Oceanside -> Victorville (I-215)
+  at 12 mi: Bonsall (California)
+  at 30 mi: Temecula (California)
+  at 52 mi: Perris (California)
+  at 78 mi: San Bernardino (California)
+  at 104 mi: Oak Hills (California)
+
+Ogden -> Pocatello (I-15)
+  at 9 mi: Pleasant View (Utah)
+  at 38 mi: Tremonton (Utah)
+  at 73 mi: Malad City (Idaho)
+  at 116 mi: Inkom (Idaho)
+
+Oklahoma City -> Amarillo (I-40)
+  at 27 mi: El Reno (Oklahoma)
+  at 70 mi: Weatherford (Oklahoma)
+  at 111 mi: Elk City (Oklahoma)
+  at 128 mi: Sayre (Oklahoma)
+  at 165 mi: Shamrock (Texas)
+  at 185 mi: McLean (Texas)
+  at 215 mi: Groom (Texas)
+
+Oklahoma City -> Dallas (I-35)
+  at 137 mi: Gainesville (Texas)
+  at 167 mi: Denton (Texas)
+
+Oklahoma City -> Tulsa (I-44)
+  at 26 mi: Luther (Oklahoma)
+  at 44 mi: Chandler (Oklahoma)
+  at 73 mi: Bristow (Oklahoma)
+  at 93 mi: Sapulpa (Oklahoma)
+
+Oklahoma City -> Wichita (I-35)
+  at 33 mi: Guthrie (Oklahoma)
+  at 89 mi: Tonkawa (Oklahoma)
+  at 130 mi: Wellington (Kansas)
+  at 151 mi: Haysville (Kansas)
+
+Olympia -> Portland (I-5)
+  at 24 mi: Centralia (Washington)
+  at 67 mi: Longview (Washington)
+
+Omaha -> Cheyenne (I-80)
+  at 43 mi: Waverly (Nebraska)
+  at 233 mi: Cozad (Nebraska)
+  at 256 mi: Brady (Nebraska)
+  at 297 mi: Sutherland (Nebraska)
+  at 329 mi: Ogallala (Nebraska)
+  at 347 mi: Big Springs (Nebraska)
+  at 370 mi: Chappell (Nebraska)
+  at 416 mi: Potter (Nebraska)
+  at 434 mi: Kimball (Nebraska)
+  at 456 mi: Pine Bluffs (Wyoming)
+
+Omaha -> Kansas City (I-29)
+  at 22 mi: Pacific Junction (Iowa)
+  at 70 mi: Rock Port (Missouri)
+  at 96 mi: Mound City (Missouri)
+  at 129 mi: Country Club Village (Missouri)
+  at 160 mi: Platte City (Missouri)
+
+Ontario -> Boise (I-84)
+  at 29 mi: Caldwell (Idaho)
+  at 46 mi: Meridian (Idaho)
+
+Orange -> Sulphur (I-10)
+  at 13 mi: Vinton (Louisiana)
+
+Orlando -> Jacksonville (I-95)
+  at 28 mi: Deltona (Florida)
+  at 79 mi: Palm Coast (Florida)
+
+Orlando -> Tampa (I-4)
+  at 40 mi: Polk City (Florida)
+  at 61 mi: Plant City (Florida)
+
+Oxnard -> Lancaster (CA-14)
+  at 21 mi: Santa Paula (California)
+  at 38 mi: Piru (California)
+  at 95 mi: Palmdale (California)
+
+Oxnard -> Los Angeles (US-101)
+  at 22 mi: Thousand Oaks (California)
+
+Oxnard -> Santa Ana (I-5)
+  at 22 mi: Thousand Oaks (California)
+  at 86 mi: Anaheim (California)
+
+Paintsville -> Pikeville (US-23)
+  at 12 mi: Prestonsburg (Kentucky)
+
+Palm Bay -> Lakeland (I-4)
+  at 8 mi: June Park (Florida)
+  at 48 mi: Saint Cloud (Florida)
+  at 71 mi: Celebration (Florida)
+  at 92 mi: Polk City (Florida)
+
+Palm Bay -> Orlando (I-95)
+  at 21 mi: Viera East (Florida)
+  at 68 mi: Union Park (Florida)
+
+Pendleton -> Portland (I-84)
+  at 22 mi: Stanfield (Oregon)
+  at 46 mi: Boardman (Oregon)
+  at 73 mi: Arlington (Oregon)
+  at 125 mi: The Dalles (Oregon)
+  at 147 mi: Hood River (Oregon)
+
+Pendleton -> Tri-Cities (I-84)
+  at 29 mi: Hermiston (Oregon)
+
+Peoria -> Davenport (I-74)
+  at 20 mi: Brimfield (Illinois)
+  at 45 mi: Galesburg (Illinois)
+  at 61 mi: Woodhull (Illinois)
+  at 87 mi: Coal Valley (Illinois)
+
+Peoria -> Rockford (I-39)
+  at 18 mi: Chillicothe (Illinois)
+  at 34 mi: Henry (Illinois)
+  at 64 mi: La Salle (Illinois)
+  at 89 mi: Compton (Illinois)
+  at 119 mi: Monroe Center (Illinois)
+
+Philadelphia -> Baltimore (I-95)
+  at 15 mi: Chester (Pennsylvania)
+  at 40 mi: Brookside (Delaware)
+  at 67 mi: Aberdeen (Maryland)
+  at 88 mi: Rossville (Maryland)
+
+Philadelphia -> Pittsburgh (I-76)
+  at 33 mi: Lionville (Pennsylvania)
+  at 63 mi: Denver (Pennsylvania)
+  at 95 mi: Middletown (Pennsylvania)
+  at 122 mi: Carlisle (Pennsylvania)
+  at 199 mi: Bedford (Pennsylvania)
+  at 236 mi: Somerset (Pennsylvania)
+  at 258 mi: Acme (Pennsylvania)
+
+Phoenix -> Los Angeles (I-10)
+  at 130 mi: Quartzsite desert services corridor (Arizona)
+  at 269 mi: Palm Springs and San Gorgonio Pass (California)
+
+Pikeville -> Hazard (KY-80)
+  at 11 mi: Betsy Layne (Kentucky)
+  at 41 mi: Hindman (Kentucky)
+
+Pittsburgh -> Cleveland (I-76)
+  at 20 mi: Cranberry Township (Pennsylvania)
+  at 38 mi: Big Beaver (Pennsylvania)
+  at 64 mi: Canfield (Ohio)
+  at 79 mi: Newton Falls (Ohio)
+  at 123 mi: Garfield Heights (Ohio)
+
+Pocatello -> Provo (I-15)
+  at 13 mi: Inkom (Idaho)
+  at 30 mi: Arimo (Idaho)
+  at 56 mi: Malad City (Idaho)
+  at 92 mi: Tremonton (Utah)
+  at 128 mi: Ogden (Utah)
+  at 155 mi: Bountiful (Utah)
+  at 192 mi: Lehi (Utah)
+
+Pocatello -> Salt Lake City (I-15)
+  at 12 mi: Inkom (Idaho)
+  at 30 mi: Arimo (Idaho)
+  at 56 mi: Malad City (Idaho)
+  at 92 mi: Tremonton (Utah)
+  at 128 mi: Ogden (Utah)
+
+Pocatello -> Twin Falls (I-86)
+  at 10 mi: Arbon Valley (Idaho)
+  at 26 mi: American Falls (Idaho)
+  at 78 mi: Heyburn (Idaho)
+  at 97 mi: Hazelton (Idaho)
+
+Port Huron -> Detroit (I-94)
+  at 46 mi: Saint Clair Shores (Michigan)
+
+Port Huron -> Flint (I-69)
+  at 47 mi: Lapeer (Michigan)
+
+Port Saint Lucie -> Coral Springs (I-95)
+  at 38 mi: Palm Beach Gardens (Florida)
+  at 72 mi: Boca Del Mar (Florida)
+
+Port Saint Lucie -> Miami (I-95)
+  at 39 mi: Palm Beach Gardens (Florida)
+
+Port Saint Lucie -> Palm Bay (I-95)
+  at 31 mi: West Vero Corridor (Florida)
+
+Portland -> Boston (I-95)
+  at 10 mi: West Scarborough (Maine)
+  at 32 mi: Wells Beach Station (Maine)
+  at 70 mi: Amesbury (Massachusetts)
+  at 98 mi: Saugus (Massachusetts)
+
+Portland -> Manchester (I-95)
+  at 10 mi: West Scarborough (Maine)
+  at 32 mi: Wells Beach Station (Maine)
+  at 66 mi: Exeter (New Hampshire)
+
+Portland -> Salt Lake City (I-84)
+  at 62 mi: Hood River (Oregon)
+  at 84 mi: The Dalles (Oregon)
+  at 136 mi: Arlington (Oregon)
+  at 162 mi: Boardman (Oregon)
+  at 186 mi: Stanfield (Oregon)
+  at 260 mi: La Grande (Oregon)
+  at 284 mi: North Powder (Oregon)
+  at 303 mi: Baker City (Oregon)
+  at 346 mi: Huntington (Oregon)
+  at 374 mi: Ontario (Oregon)
+  at 404 mi: Caldwell (Idaho)
+  at 420 mi: Meridian (Idaho)
+  at 470 mi: Mountain Home (Idaho)
+  at 496 mi: Glenns Ferry (Idaho)
+  at 515 mi: Bliss (Idaho)
+  at 541 mi: Jerome (Idaho)
+  at 566 mi: Hazelton (Idaho)
+  at 585 mi: Heyburn (Idaho)
+  at 694 mi: Tremonton (Utah)
+  at 730 mi: Ogden (Utah)
+
+Portland -> Seattle (I-5)
+  at 54 mi: Longview (Washington)
+  at 97 mi: Centralia (Washington)
+  at 141 mi: Lakewood (Washington)
+
+Portsmouth -> Boston (I-95)
+  at 19 mi: Amesbury (Massachusetts)
+  at 48 mi: Saugus (Massachusetts)
+
+Portsmouth -> Manchester (I-95)
+  at 15 mi: Exeter (New Hampshire)
+
+Portsmouth -> Portland (I-95)
+  at 43 mi: West Scarborough (Maine)
+
+Providence -> New York (I-95)
+  at 34 mi: Plainfield (Connecticut)
+  at 54 mi: Montville Center (Connecticut)
+  at 98 mi: Branford (Connecticut)
+  at 113 mi: Milford (Connecticut)
+  at 143 mi: Stamford (Connecticut)
+
+Provo -> Boise (I-84)
+  at 54 mi: Bountiful (Utah)
+  at 80 mi: Ogden (Utah)
+  at 98 mi: Perry (Utah)
+  at 117 mi: Tremonton (Utah)
+  at 226 mi: Heyburn (Idaho)
+  at 244 mi: Hazelton (Idaho)
+  at 269 mi: Jerome (Idaho)
+  at 295 mi: Bliss (Idaho)
+  at 314 mi: Glenns Ferry (Idaho)
+  at 340 mi: Mountain Home (Idaho)
+
+Provo -> Cedar City (I-15)
+  at 8 mi: Spanish Fork (Utah)
+  at 41 mi: Nephi (Utah)
+  at 100 mi: Fillmore (Utah)
+  at 155 mi: Beaver (Utah)
+  at 200 mi: Enoch (Utah)
+
+Provo -> Fort Collins (I-80)
+  at 28 mi: Heber City (Utah)
+  at 46 mi: Silver Summit (Utah)
+  at 61 mi: Coalville (Utah)
+  at 100 mi: Evanston (Wyoming)
+  at 131 mi: Fort Bridger (Wyoming)
+  at 185 mi: Green River (Wyoming)
+  at 268 mi: Wamsutter (Wyoming)
+  at 308 mi: Rawlins (Wyoming)
+  at 407 mi: Laramie (Wyoming)
+
+Provo -> Las Vegas (I-15)
+  at 41 mi: Nephi (Utah)
+  at 100 mi: Fillmore (Utah)
+  at 155 mi: Beaver (Utah)
+  at 207 mi: Cedar City (Utah)
+  at 258 mi: Saint George (Utah)
+  at 296 mi: Mesquite (Nevada)
+  at 327 mi: Moapa Town (Nevada)
+
+Provo -> Salt Lake City (I-15)
+  at 34 mi: West Jordan (Utah)
+
+Pueblo -> Cheyenne (I-25)
+  at 36 mi: Security-Widefield (Colorado)
+  at 65 mi: Woodmoor (Colorado)
+  at 149 mi: Mead (Colorado)
+  at 181 mi: Wellington (Colorado)
+
+Pueblo -> Denver (I-25)
+  at 35 mi: Security-Widefield (Colorado)
+  at 64 mi: Woodmoor (Colorado)
+
+Pueblo -> Fort Collins (I-25)
+  at 35 mi: Security-Widefield (Colorado)
+  at 65 mi: Woodmoor (Colorado)
+  at 149 mi: Mead (Colorado)
+  at 169 mi: Timnath (Colorado)
+
+Raleigh -> Charlotte (I-85)
+  at 31 mi: Pittsboro (North Carolina)
+  at 49 mi: Siler City (North Carolina)
+  at 130 mi: Harrisburg (North Carolina)
+
+Raleigh -> Fayetteville (I-95)
+  at 39 mi: Dunn (North Carolina)
+
+Rapid City -> Billings (US-212)
+  at 30 mi: Sturgis (South Dakota)
+  at 57 mi: Belle Fourche (South Dakota)
+  at 153 mi: Broadus (Montana)
+  at 198 mi: Ashland (Montana)
+  at 218 mi: Lame Deer (Montana)
+  at 235 mi: Busby (Montana)
+  at 276 mi: Hardin (Montana)
+
+Rapid City -> Sioux Falls (I-90)
+  at 11 mi: Box Elder (South Dakota)
+  at 56 mi: Wall (South Dakota)
+  at 96 mi: Kadoka (South Dakota)
+  at 137 mi: Murdo (South Dakota)
+  at 170 mi: Presho (South Dakota)
+  at 208 mi: Chamberlain (South Dakota)
+  at 230 mi: Kimball (South Dakota)
+  at 254 mi: Plankinton (South Dakota)
+  at 277 mi: Mitchell (South Dakota)
+  at 334 mi: Hartford (South Dakota)
+
+Redding -> Klamath Falls (US-97)
+  at 7 mi: Shasta Lake (California)
+  at 26 mi: Lakehead (California)
+  at 61 mi: Mount Shasta (California)
+  at 121 mi: Dorris (California)
+
+Redding -> Medford (I-5)
+  at 7 mi: Shasta Lake (California)
+  at 26 mi: Lakehead (California)
+  at 61 mi: Mount Shasta (California)
+  at 98 mi: Yreka (California)
+  at 136 mi: Ashland (Oregon)
+
+Reno -> Fernley (I-80)
+  at 4 mi: Sparks (Nevada)
+
+Reno -> Las Vegas (US-95)
+  at 41 mi: Silver Springs (Nevada)
+  at 73 mi: Yerington (Nevada)
+  at 96 mi: Schurz (Nevada)
+  at 129 mi: Hawthorne (Nevada)
+  at 233 mi: Tonopah (Nevada)
+  at 260 mi: Goldfield (Nevada)
+  at 326 mi: Beatty (Nevada)
+  at 399 mi: Indian Springs (Nevada)
+
+Reno -> Tonopah (US-95)
+  at 41 mi: Silver Springs (Nevada)
+  at 73 mi: Yerington (Nevada)
+  at 96 mi: Schurz (Nevada)
+  at 129 mi: Hawthorne (Nevada)
+
+Richfield -> Nephi (I-15)
+  at 14 mi: Aurora (Utah)
+  at 41 mi: Scipio (Utah)
+
+Richmond -> Charlottesville (I-64)
+  at 9 mi: Tuckahoe (Virginia)
+
+Richmond -> London (I-75)
+  at 14 mi: Berea (Kentucky)
+
+Richmond -> Raleigh (I-85)
+  at 23 mi: Petersburg (Virginia)
+  at 49 mi: McKenney (Virginia)
+  at 79 mi: South Hill (Virginia)
+  at 111 mi: Henderson (North Carolina)
+  at 136 mi: Wake Forest (North Carolina)
+
+Richmond -> Virginia Beach (I-64)
+  at 8 mi: Sandston (Virginia)
+  at 77 mi: East Hampton (Virginia)
+
+Riverside -> Lancaster (I-215)
+  at 13 mi: San Bernardino (California)
+  at 41 mi: Phelan (California)
+  at 77 mi: Palmdale (California)
+
+Riverside -> Oceanside (I-215)
+  at 18 mi: Perris (California)
+  at 40 mi: Temecula (California)
+  at 57 mi: Bonsall (California)
+
+Riverside -> Valencia (I-210)
+  at 12 mi: Corona (California)
+  at 30 mi: Pomona (California)
+  at 56 mi: Pasadena (California)
+
+Roanoke -> Greensboro (US-220)
+  at 25 mi: Rocky Mount (Virginia)
+  at 47 mi: Collinsville (Virginia)
+  at 70 mi: Eden (North Carolina)
+
+Roanoke -> Harrisonburg (I-81)
+  at 9 mi: Cloverdale (Virginia)
+  at 28 mi: Buchanan (Virginia)
+  at 52 mi: East Lexington (Virginia)
+  at 90 mi: Verona (Virginia)
+
+Roanoke -> Raleigh (I-40)
+  at 24 mi: Rocky Mount (Virginia)
+  at 46 mi: Collinsville (Virginia)
+  at 70 mi: Eden (North Carolina)
+  at 107 mi: Burlington (North Carolina)
+  at 126 mi: Hillsborough (North Carolina)
+
+Roanoke -> Richmond (US-460)
+  at 11 mi: Blue Ridge (Virginia)
+  at 29 mi: Bedford (Virginia)
+  at 44 mi: Timberlake (Virginia)
+  at 71 mi: Appomattox (Virginia)
+  at 99 mi: Dillwyn (Virginia)
+  at 148 mi: Midlothian (Virginia)
+
+Rochester -> Albert Lea (I-90)
+  at 12 mi: Stewartville (Minnesota)
+  at 42 mi: Austin (Minnesota)
+
+Rochester -> La Crosse (I-90)
+  at 24 mi: Saint Charles (Minnesota)
+  at 62 mi: Dakota (Minnesota)
+
+Rochester -> Minneapolis (US-52)
+  at 23 mi: Zumbrota (Minnesota)
+  at 43 mi: Cannon Falls (Minnesota)
+  at 68 mi: Inver Grove Heights (Minnesota)
+
+Rochester -> New York (I-90)
+  at 27 mi: Clifton Springs (New York)
+  at 52 mi: Centerport (New York)
+  at 101 mi: Oneida (New York)
+  at 121 mi: Utica (New York)
+  at 152 mi: Fort Plain (New York)
+  at 188 mi: Rotterdam (New York)
+  at 214 mi: Ravena (New York)
+  at 250 mi: Kingston (New York)
+  at 277 mi: Newburgh (New York)
+  at 294 mi: Peekskill (New York)
+
+Rochester -> Winona (US-14)
+  at 24 mi: Saint Charles (Minnesota)
+
+Rock Springs -> Cheyenne (I-80)
+  at 68 mi: Wamsutter (Wyoming)
+  at 108 mi: Rawlins (Wyoming)
+  at 208 mi: Laramie (Wyoming)
+
+Rock Springs -> Salt Lake City (I-80)
+  at 16 mi: Green River (Wyoming)
+  at 70 mi: Fort Bridger (Wyoming)
+  at 100 mi: Evanston (Wyoming)
+  at 140 mi: Coalville (Utah)
+  at 163 mi: Summit Park (Utah)
+
+Rockford -> Chicago (I-90)
+  at 9 mi: Cherry Valley (Illinois)
+  at 42 mi: Gilberts (Illinois)
+
+Rockford -> Madison (I-90)
+  at 15 mi: Roscoe (Illinois)
+  at 34 mi: Janesville (Wisconsin)
+
+Rolla -> Springfield (I-44)
+  at 7 mi: Doolittle (Missouri)
+  at 29 mi: Waynesville (Missouri)
+  at 57 mi: Lebanon (Missouri)
+  at 85 mi: Marshfield (Missouri)
+
+Rolla -> St. Louis (I-44)
+  at 10 mi: Saint James (Missouri)
+  at 39 mi: Sullivan (Missouri)
+
+Roseburg -> Medford (I-5)
+  at 20 mi: Tri-City (Oregon)
+  at 68 mi: Grants Pass (Oregon)
+  at 84 mi: Gold Hill (Oregon)
+
+Sacramento -> Portland (I-5)
+  at 19 mi: Woodland (California)
+  at 58 mi: Williams (California)
+  at 84 mi: Willows (California)
+  at 100 mi: Orland (California)
+  at 130 mi: Red Bluff (California)
+  at 159 mi: Redding (California)
+  at 183 mi: Lakehead (California)
+  at 218 mi: Mount Shasta (California)
+  at 255 mi: Yreka (California)
+  at 293 mi: Ashland (Oregon)
+  at 335 mi: Grants Pass (Oregon)
+  at 382 mi: Tri-City (Oregon)
+  at 415 mi: Sutherlin (Oregon)
+  at 430 mi: Yoncalla (Oregon)
+  at 452 mi: Cottage Grove (Oregon)
+  at 514 mi: Millersburg (Oregon)
+  at 549 mi: Woodburn (Oregon)
+
+Sacramento -> Reno (I-80)
+  at 18 mi: Roseville (California)
+  at 33 mi: Auburn (California)
+  at 49 mi: Colfax (California)
+  at 100 mi: Truckee (California)
+  at 122 mi: Verdi (Nevada)
+
+Sacramento -> San Francisco (I-80)
+  at 14 mi: Davis (California)
+  at 34 mi: Vacaville (California)
+  at 56 mi: Vallejo (California)
+
+Saginaw -> Lansing (US-127)
+  at 23 mi: Clio (Michigan)
+  at 41 mi: Swartz Creek (Michigan)
+  at 75 mi: Haslett (Michigan)
+
+Saint George -> Las Vegas (I-15)
+  at 39 mi: Mesquite (Nevada)
+  at 70 mi: Moapa Town (Nevada)
+  at 111 mi: Nellis Air Force Base (Nevada)
+
+Salem -> Portland (I-5)
+  at 17 mi: Woodburn (Oregon)
+  at 38 mi: Tigard (Oregon)
+
+Salina -> Topeka (I-70)
+  at 25 mi: Abilene (Kansas)
+  at 48 mi: Junction City (Kansas)
+  at 92 mi: Maple Hill (Kansas)
+
+Salina -> Wichita (I-135)
+  at 14 mi: Assaria (Kansas)
+  at 64 mi: Newton (Kansas)
+  at 81 mi: Park City (Kansas)
+
+Salinas -> Fresno (CA-156)
+  at 7 mi: Prunedale (California)
+  at 70 mi: Los Banos (California)
+  at 118 mi: Madera (California)
+
+Salinas -> San Francisco (US-101)
+  at 8 mi: Prunedale (California)
+  at 29 mi: Gilroy (California)
+  at 91 mi: San Mateo (California)
+
+Salinas -> Stockton (I-5)
+  at 7 mi: Prunedale (California)
+  at 121 mi: Lathrop (California)
+
+Salisbury -> Baltimore (US-50)
+  at 7 mi: Hebron (Maryland)
+  at 32 mi: Cambridge (Maryland)
+  at 47 mi: Easton (Maryland)
+  at 97 mi: Glen Burnie (Maryland)
+
+Salisbury -> Norfolk (US-13)
+  at 28 mi: Pocomoke City (Maryland)
+  at 73 mi: Exmore (Virginia)
+  at 91 mi: Cheriton (Virginia)
+
+Salt Lake City -> Las Vegas (I-15)
+  at 28 mi: Lehi (Utah)
+  at 52 mi: Spanish Fork (Utah)
+  at 84 mi: Nephi (Utah)
+  at 144 mi: Fillmore (Utah)
+  at 198 mi: Beaver (Utah)
+  at 250 mi: Cedar City (Utah)
+  at 302 mi: Saint George (Utah)
+  at 339 mi: Mesquite (Nevada)
+  at 370 mi: Moapa Town (Nevada)
+
+Salt Lake City -> Ogden (I-15)
+  at 11 mi: Bountiful (Utah)
+  at 29 mi: South Weber (Utah)
+
+San Angelo -> Abilene (US-83)
+  at 33 mi: Bronte (Texas)
+
+San Angelo -> Midland (US-87)
+  at 11 mi: Grape Creek (Texas)
+  at 43 mi: Sterling City (Texas)
+  at 75 mi: Garden City (Texas)
+
+San Antonio -> Dallas (I-35)
+  at 80 mi: Austin I-35 corridor (Texas)
+  at 184 mi: Waco truck services corridor (Texas)
+
+San Antonio -> Del Rio (US-90)
+  at 26 mi: Castroville (Texas)
+  at 42 mi: Hondo (Texas)
+  at 62 mi: Sabinal (Texas)
+  at 84 mi: Uvalde (Texas)
+  at 123 mi: Brackettville (Texas)
+  at 147 mi: Laughlin Air Force Base (Texas)
+
+San Antonio -> El Paso (I-10)
+  at 31 mi: Boerne (Texas)
+  at 48 mi: Comfort (Texas)
+  at 64 mi: Kerrville (Texas)
+  at 114 mi: Junction (Texas)
+  at 172 mi: Sonora (Texas)
+  at 208 mi: Ozona (Texas)
+  at 314 mi: Fort Stockton (Texas)
+  at 366 mi: Balmorhea (Texas)
+  at 433 mi: Van Horn (Texas)
+  at 466 mi: Sierra Blanca (Texas)
+
+San Antonio -> Kerrville (I-10)
+  at 31 mi: Boerne (Texas)
+  at 48 mi: Comfort (Texas)
+
+San Diego -> El Centro (I-8)
+  at 15 mi: El Cajon (California)
+  at 43 mi: Pine Valley (California)
+  at 71 mi: Jacumba Hot Springs (California)
+  at 86 mi: Ocotillo (California)
+  at 104 mi: Seeley (California)
+
+San Diego -> Phoenix (I-8)
+  at 43 mi: Pine Valley (California)
+  at 71 mi: Jacumba Hot Springs (California)
+  at 86 mi: Ocotillo (California)
+  at 112 mi: El Centro (California)
+  at 169 mi: Yuma (Arizona)
+  at 200 mi: Wellton (Arizona)
+  at 236 mi: Dateland (Arizona)
+  at 286 mi: Gila Bend (Arizona)
+
+San Francisco -> Portland (I-5)
+  at 31 mi: Vallejo (California)
+  at 53 mi: Vacaville (California)
+  at 76 mi: Cottonwood (California)
+  at 112 mi: Williams (California)
+  at 138 mi: Willows (California)
+  at 154 mi: Orland (California)
+  at 184 mi: Red Bluff (California)
+  at 213 mi: Redding (California)
+  at 238 mi: Lakehead (California)
+  at 272 mi: Mount Shasta (California)
+  at 310 mi: Yreka (California)
+  at 348 mi: Ashland (Oregon)
+  at 389 mi: Grants Pass (Oregon)
+  at 437 mi: Tri-City (Oregon)
+  at 470 mi: Sutherlin (Oregon)
+  at 485 mi: Yoncalla (Oregon)
+  at 507 mi: Cottage Grove (Oregon)
+  at 569 mi: Millersburg (Oregon)
+  at 604 mi: Woodburn (Oregon)
+
+San Francisco -> Salt Lake City (I-80)
+  at 31 mi: Vallejo (California)
+  at 54 mi: Vacaville (California)
+  at 73 mi: Davis (California)
+  at 104 mi: Roseville (California)
+  at 119 mi: Auburn (California)
+  at 136 mi: Colfax (California)
+  at 187 mi: Truckee (California)
+  at 208 mi: Verdi (Nevada)
+  at 252 mi: Fernley (Nevada)
+  at 311 mi: Lovelock (Nevada)
+  at 383 mi: Winnemucca (Nevada)
+  at 436 mi: Battle Mountain (Nevada)
+  at 485 mi: Carlin (Nevada)
+  at 516 mi: Osino (Nevada)
+  at 556 mi: Wells (Nevada)
+  at 614 mi: West Wendover (Nevada)
+
+San Jose -> Fresno (CA-152)
+  at 32 mi: Gilroy (California)
+  at 80 mi: Los Banos (California)
+  at 127 mi: Madera (California)
+
+San Jose -> Sacramento (I-80)
+  at 25 mi: Pleasanton (California)
+  at 51 mi: Concord (California)
+  at 84 mi: Vacaville (California)
+  at 102 mi: Davis (California)
+
+San Jose -> San Francisco (US-101)
+  at 31 mi: San Mateo (California)
+
+Sandpoint -> Spokane (US-2)
+  at 67 mi: Spokane Valley (Washington)
+
+Santa Ana -> Lancaster (I-5)
+  at 39 mi: Glendale (California)
+  at 96 mi: Palmdale (California)
+
+Santa Ana -> Valencia (I-5)
+  at 39 mi: Glendale (California)
+
+Santa Ana -> Victorville (I-15)
+  at 22 mi: Diamond Bar (California)
+  at 42 mi: Rancho Cucamonga (California)
+  at 71 mi: Oak Hills (California)
+
+Santa Fe -> Las Vegas (I-25)
+  at 19 mi: Glorieta (New Mexico)
+  at 43 mi: Ribera (New Mexico)
+
+Santa Maria -> Bakersfield (CA-166)
+  at 56 mi: New Cuyama (California)
+  at 79 mi: Maricopa (California)
+  at 119 mi: Greenfield (California)
+
+Santa Maria -> Oxnard (US-101)
+  at 32 mi: Buellton (California)
+  at 75 mi: Santa Barbara (California)
+  at 102 mi: Ventura (California)
+
+Santa Maria -> Valencia (CA-166)
+  at 56 mi: New Cuyama (California)
+  at 79 mi: Maricopa (California)
+  at 120 mi: Lebec (California)
+
+Santa Rosa -> Sacramento (I-80)
+  at 17 mi: Petaluma (California)
+  at 62 mi: Vacaville (California)
+  at 80 mi: Davis (California)
+
+Santa Rosa -> San Jose (I-880)
+  at 17 mi: Petaluma (California)
+  at 59 mi: Oakland (California)
+  at 83 mi: Fremont (California)
+
+Santa Rosa -> Stockton (I-5)
+  at 17 mi: Petaluma (California)
+  at 75 mi: Rio Vista (California)
+
+Santa Rosa -> Ukiah (US-101)
+  at 10 mi: Windsor (California)
+  at 32 mi: Cloverdale (California)
+
+Sault Ste. Marie -> Traverse City (I-75)
+  at 52 mi: Saint Ignace (Michigan)
+  at 75 mi: Pellston (Michigan)
+  at 99 mi: Bay Harbor (Michigan)
+  at 143 mi: Elk Rapids (Michigan)
+
+Savannah -> Atlanta (I-16)
+  at 63 mi: Metter (Georgia)
+  at 124 mi: Dudley (Georgia)
+  at 188 mi: Forsyth (Georgia)
+  at 213 mi: Locust Grove (Georgia)
+
+Savannah -> Jacksonville (I-95)
+  at 22 mi: Richmond Hill (Georgia)
+  at 74 mi: Dock Junction (Georgia)
+  at 105 mi: Kingsland (Georgia)
+
+Scranton -> Allentown (I-476)
+  at 11 mi: Pittston (Pennsylvania)
+  at 52 mi: Lehighton (Pennsylvania)
+
+Scranton -> Binghamton (I-81)
+  at 7 mi: Clarks Green (Pennsylvania)
+  at 49 mi: Conklin (New York)
+
+Seattle -> Tacoma (I-5)
+  at 22 mi: Federal Way (Washington)
+
+Shelby -> Havre (US-2)
+  at 42 mi: Chester (Montana)
+  at 62 mi: Rudyard (Montana)
+
+Shelby -> Kalispell (US-2)
+  at 24 mi: Cut Bank (Montana)
+  at 58 mi: North Browning (Montana)
+  at 143 mi: Columbia Falls (Montana)
+
+Shreveport -> Dallas (I-20)
+  at 16 mi: Greenwood (Louisiana)
+  at 74 mi: Liberty City (Texas)
+  at 105 mi: Hideaway (Texas)
+  at 129 mi: Canton (Texas)
+
+Shreveport -> Monroe (I-20)
+  at 9 mi: Red Chute (Louisiana)
+  at 29 mi: Minden (Louisiana)
+  at 68 mi: Ruston (Louisiana)
+  at 84 mi: Calhoun (Louisiana)
+
+Silverthorne -> Edwards (I-70)
+  at 11 mi: Copper Mountain (Colorado)
+  at 30 mi: Vail (Colorado)
+
+Sioux City -> Omaha (I-29)
+  at 8 mi: Sergeant Bluff (Iowa)
+  at 38 mi: Onawa (Iowa)
+  at 73 mi: Missouri Valley (Iowa)
+
+Sioux City -> Sioux Falls (I-29)
+  at 22 mi: Elk Point (South Dakota)
+  at 52 mi: Beresford (South Dakota)
+  at 77 mi: Tea (South Dakota)
+
+Sioux Falls -> Brookings (I-29)
+  at 10 mi: Crooks (South Dakota)
+
+Sioux Falls -> Minneapolis (I-90)
+  at 30 mi: Luverne (Minnesota)
+  at 60 mi: Worthington (Minnesota)
+  at 91 mi: Windom (Minnesota)
+  at 118 mi: Saint James (Minnesota)
+  at 143 mi: Lake Crystal (Minnesota)
+  at 168 mi: Saint Peter (Minnesota)
+  at 193 mi: Belle Plaine (Minnesota)
+  at 211 mi: Shakopee (Minnesota)
+
+Sioux Falls -> Mitchell (I-90)
+  at 16 mi: Hartford (South Dakota)
+  at 59 mi: Alexandria (South Dakota)
+
+Sioux Falls -> Omaha (I-29)
+  at 34 mi: Beresford (South Dakota)
+  at 64 mi: Elk Point (South Dakota)
+  at 92 mi: Sergeant Bluff (Iowa)
+  at 122 mi: Onawa (Iowa)
+  at 157 mi: Missouri Valley (Iowa)
+
+South Bend -> Chicago (I-90)
+  at 19 mi: Hudson Lake (Indiana)
+  at 56 mi: Portage (Indiana)
+  at 74 mi: East Chicago (Indiana)
+
+South Bend -> Fort Wayne (US-33)
+  at 28 mi: Goshen (Indiana)
+  at 46 mi: Ligonier (Indiana)
+  at 68 mi: Churubusco (Indiana)
+
+South Bend -> Grand Rapids (I-196)
+  at 37 mi: Benton Heights (Michigan)
+  at 59 mi: South Haven (Michigan)
+  at 76 mi: Douglas (Michigan)
+  at 107 mi: Jenison (Michigan)
+
+Spearfish -> Rapid City (I-90)
+  at 19 mi: Sturgis (South Dakota)
+  at 40 mi: Blackhawk (South Dakota)
+
+Spokane -> Boise (I-84)
+  at 36 mi: Sprague (Washington)
+  at 59 mi: Ritzville (Washington)
+  at 101 mi: Connell (Washington)
+  at 171 mi: Hermiston (Oregon)
+  at 250 mi: La Grande (Oregon)
+  at 274 mi: North Powder (Oregon)
+  at 293 mi: Baker City (Oregon)
+  at 336 mi: Huntington (Oregon)
+  at 365 mi: Ontario (Oregon)
+  at 394 mi: Caldwell (Idaho)
+
+Spokane -> Coeur d'Alene (I-90)
+  at 10 mi: Spokane Valley (Washington)
+
+Spokane -> Lewiston (US-195)
+  at 32 mi: Rosalia (Washington)
+  at 59 mi: Colfax (Washington)
+  at 75 mi: Pullman (Washington)
+
+Spokane -> Moses Lake (I-90)
+  at 11 mi: Four Lakes (Washington)
+  at 36 mi: Sprague (Washington)
+  at 59 mi: Ritzville (Washington)
+
+Spokane -> Seattle (I-90)
+  at 36 mi: Sprague (Washington)
+  at 59 mi: Ritzville (Washington)
+  at 103 mi: Moses Lake (Washington)
+  at 131 mi: George (Washington)
+  at 173 mi: Ellensburg (Washington)
+  at 196 mi: Cle Elum (Washington)
+  at 226 mi: Snoqualmie Pass (Washington)
+
+Spokane -> Wenatchee (I-90)
+  at 11 mi: Four Lakes (Washington)
+  at 36 mi: Sprague (Washington)
+  at 59 mi: Ritzville (Washington)
+  at 138 mi: Quincy (Washington)
+  at 160 mi: Rock Island (Washington)
+
+Springfield -> Albany (I-90)
+  at 13 mi: Westfield (Massachusetts)
+  at 47 mi: Stockbridge (Massachusetts)
+
+Springfield -> Bloomington (I-55)
+  at 12 mi: Sherman (Illinois)
+  at 46 mi: Atlanta (Illinois)
+
+Springfield -> Decatur (I-72)
+  at 9 mi: Riverton (Illinois)
+  at 34 mi: Harristown (Illinois)
+
+Springfield -> Hartford (I-91)
+  at 9 mi: Enfield (Connecticut)
+
+Springfield -> New Haven (I-91)
+  at 9 mi: Enfield (Connecticut)
+  at 43 mi: Meriden (Connecticut)
+
+Springfield -> St. Louis (I-44)
+  at 28 mi: Marshfield (Missouri)
+  at 55 mi: Lebanon (Missouri)
+  at 84 mi: Waynesville (Missouri)
+  at 105 mi: Doolittle (Missouri)
+  at 121 mi: Saint James (Missouri)
+  at 150 mi: Sullivan (Missouri)
+
+Springfield -> St. Louis (I-55)
+  at 15 mi: Divernon (Illinois)
+  at 42 mi: Litchfield (Illinois)
+
+Springfield -> Tulsa (I-44)
+  at 32 mi: Mount Vernon (Missouri)
+  at 49 mi: Sarcoxie (Missouri)
+  at 77 mi: Loma Linda (Missouri)
+  at 94 mi: Miami (Oklahoma)
+  at 119 mi: Vinita (Oklahoma)
+  at 154 mi: Claremore (Oklahoma)
+
+Springfield -> Worcester (I-90)
+  at 10 mi: Ludlow (Massachusetts)
+  at 38 mi: Charlton (Massachusetts)
+
+St. Cloud -> Fargo (I-94)
+  at 42 mi: Sauk Centre (Minnesota)
+  at 83 mi: Evansville (Minnesota)
+  at 112 mi: Fergus Falls (Minnesota)
+  at 144 mi: Barnesville (Minnesota)
+
+St. Cloud -> Minneapolis (I-94)
+  at 55 mi: Brooklyn Park (Minnesota)
+
+St. Cloud -> Willmar (MN-23)
+  at 17 mi: Cold Spring (Minnesota)
+  at 33 mi: Paynesville (Minnesota)
+  at 52 mi: Spicer (Minnesota)
+
+St. Louis -> Kansas City (I-70)
+  at 41 mi: Wentzville (Missouri)
+  at 57 mi: Warrenton (Missouri)
+  at 75 mi: New Florence (Missouri)
+  at 144 mi: Windsor Place (Missouri)
+  at 192 mi: Concordia (Missouri)
+
+St. Louis -> Nashville (I-24)
+  at 20 mi: O'Fallon (Illinois)
+  at 43 mi: Okawville (Illinois)
+  at 119 mi: Marion (Illinois)
+  at 143 mi: Vienna (Illinois)
+  at 175 mi: Hendron (Kentucky)
+  at 208 mi: Eddyville (Kentucky)
+  at 284 mi: Pleasant View (Tennessee)
+
+Stockton -> Fresno (CA-99)
+  at 15 mi: Manteca (California)
+  at 31 mi: Modesto (California)
+  at 70 mi: Merced (California)
+  at 87 mi: Chowchilla (California)
+  at 103 mi: Madera (California)
+
+Stockton -> Sacramento (I-5)
+  at 22 mi: Thornton (California)
+
+Stockton -> San Francisco (I-580)
+  at 20 mi: Tracy (California)
+  at 40 mi: Livermore (California)
+  at 71 mi: Oakland (California)
+
+Sulphur -> Lake Charles (I-10)
+  at 9 mi: Westlake (Louisiana)
+
+Syracuse -> Albany (I-90)
+  at 29 mi: Oneida (New York)
+  at 52 mi: Utica (New York)
+  at 88 mi: Fort Plain (New York)
+  at 112 mi: Amsterdam (New York)
+  at 129 mi: Rotterdam (New York)
+
+Syracuse -> Buffalo (I-90)
+  at 26 mi: Centerport (New York)
+  at 80 mi: Henrietta (New York)
+  at 110 mi: Batavia (New York)
+  at 136 mi: Harris Hill (New York)
+
+Syracuse -> Rochester (I-90)
+  at 26 mi: Centerport (New York)
+  at 79 mi: East Rochester (New York)
+
+Syracuse -> Utica (I-90)
+  at 14 mi: Kirkville (New York)
+  at 29 mi: Oneida (New York)
+
+Tacoma -> Olympia (I-5)
+  at 10 mi: Lakewood (Washington)
+
+Tallahassee -> Jacksonville (I-10)
+  at 140 mi: Macclenny (Florida)
+
+Tallahassee -> Mobile (I-10)
+  at 14 mi: Midway (Florida)
+  at 108 mi: Ponce de Leon (Florida)
+  at 175 mi: East Milton (Florida)
+  at 190 mi: Ferry Pass (Florida)
+
+Tampa -> Miami (I-75)
+  at 40 mi: Ellenton (Florida)
+  at 89 mi: Arcadia (Florida)
+  at 173 mi: Clewiston (Florida)
+  at 188 mi: South Bay (Florida)
+
+Toledo -> Fort Wayne (US-24)
+  at 8 mi: Perrysburg (Ohio)
+  at 53 mi: Defiance (Ohio)
+  at 74 mi: Antwerp (Ohio)
+  at 92 mi: New Haven (Indiana)
+
+Tonopah -> Las Vegas (US-95)
+  at 27 mi: Goldfield (Nevada)
+  at 94 mi: Beatty (Nevada)
+  at 166 mi: Indian Springs (Nevada)
+
+Topeka -> Kansas City (I-70)
+  at 24 mi: Lawrence (Kansas)
+
+Topeka -> Lincoln (US-75)
+  at 17 mi: Hoyt (Kansas)
+  at 32 mi: Holton (Kansas)
+  at 64 mi: Sabetha (Kansas)
+  at 98 mi: Auburn (Nebraska)
+  at 117 mi: Nebraska City (Nebraska)
+  at 134 mi: Syracuse (Nebraska)
+
+Topeka -> Wichita (I-335)
+  at 14 mi: Auburn (Kansas)
+  at 110 mi: El Dorado (Kansas)
+  at 126 mi: Andover (Kansas)
+
+Traverse City -> Grand Rapids (US-131)
+  at 7 mi: Chums Corner (Michigan)
+  at 28 mi: Mesick (Michigan)
+  at 72 mi: Reed City (Michigan)
+  at 130 mi: Belmont (Michigan)
+
+Trenton -> Atlantic City (US-206)
+  at 21 mi: Vincentown (New Jersey)
+  at 42 mi: Hammonton (New Jersey)
+  at 59 mi: Pomona (New Jersey)
+
+Trenton -> Philadelphia (I-295)
+  at 18 mi: Bensalem (Pennsylvania)
+
+Tri-Cities -> Portland (I-84)
+  at 32 mi: Umatilla (Oregon)
+  at 56 mi: Boardman (Oregon)
+  at 82 mi: Arlington (Oregon)
+  at 135 mi: The Dalles (Oregon)
+  at 157 mi: Hood River (Oregon)
+
+Tri-Cities -> Seattle (I-82)
+  at 47 mi: Sunnyside (Washington)
+  at 70 mi: Wapato (Washington)
+  at 117 mi: Ellensburg (Washington)
+  at 140 mi: Cle Elum (Washington)
+  at 170 mi: Snoqualmie Pass (Washington)
+
+Tri-Cities -> Spokane (I-90)
+  at 39 mi: Connell (Washington)
+  at 81 mi: Ritzville (Washington)
+  at 104 mi: Sprague (Washington)
+  at 129 mi: Four Lakes (Washington)
+
+Tucson -> Phoenix (I-10)
+  at 22 mi: Marana (Arizona)
+  at 50 mi: Eloy (Arizona)
+  at 89 mi: Sun Lakes (Arizona)
+
+Tucumcari -> Amarillo (I-40)
+  at 78 mi: Vega (Texas)
+  at 100 mi: Bushland (Texas)
+
+Tulsa -> Kansas City (US-69)
+  at 28 mi: Claremore (Oklahoma)
+  at 63 mi: Vinita (Oklahoma)
+  at 87 mi: Miami (Oklahoma)
+  at 105 mi: Loma Linda (Missouri)
+  at 129 mi: Carthage (Missouri)
+  at 153 mi: Lamar (Missouri)
+  at 179 mi: Nevada (Missouri)
+  at 208 mi: Butler (Missouri)
+  at 236 mi: Harrisonville (Missouri)
+
+Tuscaloosa -> Huntsville (I-65)
+  at 16 mi: Coaling (Alabama)
+  at 44 mi: Bessemer (Alabama)
+  at 67 mi: Gardendale (Alabama)
+  at 83 mi: Smoke Rise (Alabama)
+  at 104 mi: Cullman (Alabama)
+  at 123 mi: Hartselle (Alabama)
+  at 146 mi: Madison (Alabama)
+
+Tuscaloosa -> Montgomery (US-82)
+  at 34 mi: Brent (Alabama)
+  at 56 mi: Maplesville (Alabama)
+  at 90 mi: Prattville (Alabama)
+
+Twin Falls -> Boise (I-84)
+  at 13 mi: Jerome (Idaho)
+  at 39 mi: Bliss (Idaho)
+  at 58 mi: Glenns Ferry (Idaho)
+  at 84 mi: Mountain Home (Idaho)
+
+Twin Falls -> Elko (I-80)
+  at 6 mi: Filer (Idaho)
+  at 49 mi: Jackpot (Nevada)
+  at 117 mi: Wells (Nevada)
+  at 157 mi: Osino (Nevada)
+
+Tyler -> Dallas (I-20)
+  at 15 mi: Hideaway (Texas)
+  at 39 mi: Canton (Texas)
+
+Tyler -> Shreveport (I-20)
+  at 23 mi: Liberty City (Texas)
+  at 82 mi: Greenwood (Louisiana)
+
+Ukiah -> Eureka (US-101)
+  at 23 mi: Willits (California)
+  at 46 mi: Laytonville (California)
+  at 93 mi: Redway (California)
+  at 113 mi: Weott (California)
+  at 140 mi: Fortuna (California)
+
+Utica -> Albany (I-90)
+  at 13 mi: Ilion (New York)
+  at 37 mi: Fort Plain (New York)
+  at 61 mi: Amsterdam (New York)
+  at 78 mi: Rotterdam (New York)
+
+Valencia -> Bakersfield (I-5)
+  at 35 mi: Lebec (California)
+  at 66 mi: Greenfield (California)
+
+Valencia -> Victorville (I-15)
+  at 39 mi: Vincent (California)
+
+Van Horn -> San Antonio (I-10)
+  at 70 mi: Balmorhea (Texas)
+  at 123 mi: Fort Stockton (Texas)
+  at 233 mi: Ozona (Texas)
+  at 270 mi: Sonora (Texas)
+  at 330 mi: Junction (Texas)
+  at 389 mi: Kerrville (Texas)
+  at 407 mi: Comfort (Texas)
+  at 424 mi: Boerne (Texas)
+
+Vicksburg -> Jackson (I-20)
+  at 17 mi: Edwards (Mississippi)
+  at 34 mi: Clinton (Mississippi)
+
+Victorville -> Los Angeles (I-15)
+  at 13 mi: Oak Hills (California)
+  at 43 mi: Rancho Cucamonga (California)
+
+Virginia Beach -> Raleigh (US-64)
+  at 48 mi: South Suffolk (Virginia)
+  at 78 mi: Winton (North Carolina)
+  at 94 mi: Aulander (North Carolina)
+  at 138 mi: Tarboro (North Carolina)
+  at 154 mi: Rocky Mount (North Carolina)
+  at 199 mi: Knightdale (North Carolina)
+
+Visalia -> Bakersfield (CA-99)
+  at 30 mi: Porterville (California)
+
+Visalia -> Lancaster (CA-99)
+  at 30 mi: Porterville (California)
+  at 119 mi: Tehachapi (California)
+  at 155 mi: Rosamond (California)
+
+Visalia -> Santa Maria (CA-41)
+  at 20 mi: Hanford (California)
+  at 36 mi: Stratford (California)
+  at 52 mi: Kettleman City (California)
+  at 88 mi: Shandon (California)
+  at 119 mi: Atascadero (California)
+  at 136 mi: San Luis Obispo (California)
+  at 151 mi: Arroyo Grande (California)
+
+Waco -> College Station (TX-6)
+  at 29 mi: Marlin (Texas)
+  at 66 mi: Hearne (Texas)
+
+Waco -> Dallas (I-35)
+  at 7 mi: Lacy-Lakeview (Texas)
+  at 24 mi: Abbott (Texas)
+  at 66 mi: Waxahachie (Texas)
+
+Waco -> Fort Worth (I-35)
+  at 7 mi: Lacy-Lakeview (Texas)
+  at 24 mi: Abbott (Texas)
+  at 45 mi: Itasca (Texas)
+
+Washington -> Philadelphia (I-95)
+  at 56 mi: Rossville (Maryland)
+  at 77 mi: Aberdeen (Maryland)
+  at 105 mi: Brookside (Delaware)
+  at 130 mi: Chester (Pennsylvania)
+
+Washington -> Richmond (I-95)
+  at 26 mi: Dale City (Virginia)
+  at 42 mi: Stafford (Virginia)
+  at 91 mi: Ashland (Virginia)
+
+Wausau -> Green Bay (WI-29)
+  at 12 mi: Weston (Wisconsin)
+  at 32 mi: Wittenberg (Wisconsin)
+  at 60 mi: Shawano (Wisconsin)
+  at 84 mi: Pittsfield (Wisconsin)
+
+Wausau -> Madison (I-39)
+  at 15 mi: Mosinee (Wisconsin)
+  at 33 mi: Stevens Point (Wisconsin)
+  at 58 mi: Plainfield (Wisconsin)
+  at 81 mi: Westfield (Wisconsin)
+  at 106 mi: Portage (Wisconsin)
+  at 129 mi: DeForest (Wisconsin)
+
+Wenatchee -> Everett (I-90)
+  at 11 mi: Cashmere (Washington)
+  at 65 mi: Cle Elum (Washington)
+  at 94 mi: Snoqualmie Pass (Washington)
+  at 141 mi: Bellevue (Washington)
+  at 159 mi: Picnic Point-North Lynnwood (Washington)
+
+West Palm Beach -> Cape Coral (I-75)
+  at 14 mi: Wellington (Florida)
+  at 46 mi: Belle Glade (Florida)
+  at 65 mi: Clewiston (Florida)
+  at 96 mi: LaBelle (Florida)
+  at 127 mi: Fort Myers (Florida)
+
+West Palm Beach -> Miami (I-95)
+  at 14 mi: Boynton Beach (Florida)
+  at 44 mi: Fort Lauderdale (Florida)
+
+West Palm Beach -> Palm Bay (I-95)
+  at 12 mi: Palm Beach Gardens (Florida)
+  at 58 mi: Fort Pierce South (Florida)
+
+Wichita -> Kansas City (I-35)
+  at 29 mi: El Dorado (Kansas)
+  at 88 mi: Emporia (Kansas)
+  at 105 mi: Lebo (Kansas)
+  at 127 mi: Williamsburg (Kansas)
+  at 144 mi: Ottawa (Kansas)
+
+Wichita Falls -> Fort Worth (US-287)
+  at 20 mi: Henrietta (Texas)
+  at 48 mi: Bowie (Texas)
+  at 75 mi: Decatur (Texas)
+  at 90 mi: Rhome (Texas)
+  at 107 mi: Blue Mound (Texas)
+
+Wichita Falls -> McKinney (US-287)
+  at 20 mi: Henrietta (Texas)
+  at 48 mi: Bowie (Texas)
+  at 75 mi: Decatur (Texas)
+  at 101 mi: Denton (Texas)
+  at 121 mi: Prosper (Texas)
+
+Wichita Falls -> Oklahoma City (I-44)
+  at 14 mi: Burkburnett (Texas)
+  at 44 mi: Geronimo (Oklahoma)
+  at 69 mi: Elgin (Oklahoma)
+  at 98 mi: Chickasha (Oklahoma)
+  at 121 mi: Newcastle (Oklahoma)
+
+Williston -> Minot (US-2)
+  at 35 mi: Ray (North Dakota)
+  at 71 mi: Stanley (North Dakota)
+  at 117 mi: Burlington (North Dakota)
+
+Willmar -> Minneapolis (US-12)
+  at 27 mi: Litchfield (Minnesota)
+  at 76 mi: Orono (Minnesota)
+
+Wilmington -> Baltimore (I-95)
+  at 12 mi: Brookside (Delaware)
+  at 40 mi: Aberdeen (Maryland)
+  at 61 mi: Rossville (Maryland)
+
+Wilmington -> Fayetteville (NC-87)
+  at 16 mi: Northwest (North Carolina)
+  at 50 mi: Elizabethtown (North Carolina)
+
+Wilmington -> Philadelphia (I-95)
+  at 14 mi: Chester (Pennsylvania)
+
+Wilmington -> Raleigh (I-40)
+  at 28 mi: Burgaw (North Carolina)
+  at 48 mi: Rose Hill (North Carolina)
+  at 100 mi: Benson (North Carolina)
+
+Wilmington -> Salisbury (US-13)
+  at 12 mi: Bear (Delaware)
+  at 38 mi: Smyrna (Delaware)
+  at 68 mi: Harrington (Delaware)
+  at 88 mi: Seaford (Delaware)
+
+Winchester -> Hagerstown (I-81)
+  at 22 mi: Martinsburg (West Virginia)
+  at 37 mi: Williamsport (Maryland)
+
+Winona -> La Crosse (US-61)
+  at 11 mi: Trempealeau (Wisconsin)
+
+Winston-Salem -> Greensboro (I-40)
+  at 11 mi: Kernersville (North Carolina)
+
+Wolf Point -> Williston (US-2)
+  at 21 mi: Poplar (Montana)
+  at 54 mi: Culbertson (Montana)
+
+Worcester -> Hartford (I-84)
+  at 16 mi: Charlton (Massachusetts)
+  at 46 mi: Tolland (Connecticut)
+
+Worcester -> New York (I-84)
+  at 16 mi: Charlton (Massachusetts)
+  at 46 mi: Tolland (Connecticut)
+  at 94 mi: Waterbury (Connecticut)
+  at 112 mi: Shelton (Connecticut)
+  at 145 mi: Stamford (Connecticut)
+
+Yakima -> Seattle (I-90)
+  at 36 mi: Ellensburg (Washington)
+  at 60 mi: Cle Elum (Washington)
+  at 89 mi: Snoqualmie Pass (Washington)
+
+Yakima -> Tri-Cities (I-82)
+  at 12 mi: Wapato (Washington)
+  at 35 mi: Sunnyside (Washington)
+  at 63 mi: Benton City (Washington)
+
+Yuma -> Phoenix (I-8)
+  at 14 mi: Fortuna Foothills (Arizona)
+  at 31 mi: Wellton (Arizona)
+  at 67 mi: Dateland (Arizona)
+  at 117 mi: Gila Bend (Arizona)
+  at 168 mi: Avondale (Arizona)

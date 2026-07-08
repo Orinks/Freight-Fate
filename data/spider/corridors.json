@@ -1,0 +1,325 @@
+{
+  "corridors": [
+    {
+      "ref": "I-70",
+      "spoken": "Interstate 70",
+      "phase": 1,
+      "tier": 1,
+      "status": "unstarted",
+      "note": "Pilot corridor. Denver to Salt Lake City via the Colorado Rockies (Eisenhower Tunnel, Vail Pass, Glenwood Canyon), across the Utah San Rafael Swell, then I-15 north from Cove Fort. Entirely missing from the map today. Waypoints pin ORS onto I-70 so it does not shortcut to the faster I-80 route.",
+      "waypoints": [
+        {"lat": 39.7392, "lon": -104.9903, "note": "Denver -- I-70 west start"},
+        {"lat": 39.6295, "lon": -106.0655, "note": "Silverthorne -- I-70 exit 205, forces the mountain route not I-80"},
+        {"lat": 39.5490, "lon": -107.3310, "note": "Glenwood Springs -- I-70 through Glenwood Canyon"},
+        {"lat": 39.1088, "lon": -108.4619, "note": "Clifton -- I-70 at Grand Junction"},
+        {"lat": 38.9955, "lon": -110.1596, "note": "Green River, Utah -- I-70 east of the San Rafael Swell"},
+        {"lat": 38.9583, "lon": -111.8602, "note": "Salina, Utah -- I-70 west of the Swell"},
+        {"lat": 38.5994, "lon": -112.5769, "note": "Cove Fort -- I-70 ends at I-15"},
+        {"lat": 39.7102, "lon": -111.8366, "note": "Nephi -- I-15 north toward Salt Lake City"},
+        {"lat": 40.7608, "lon": -111.8910, "note": "Salt Lake City -- I-15 end"}
+      ]
+    },
+    {
+      "ref": "I-15-MT",
+      "spoken": "Interstate 15",
+      "phase": 1,
+      "tier": 1,
+      "status": "unstarted",
+      "note": "Montana I-15: Butte north through Helena and Great Falls to Shelby (US-2 junction near the Canada line). Uncovered; Great Falls and Helena are big missing freight cities. Sets up the US-2 Hi-Line tie-in.",
+      "waypoints": [
+        {"lat": 46.0038, "lon": -112.5347, "note": "Butte -- I-15 start (existing node)"},
+        {"lat": 46.5927, "lon": -112.0361, "note": "Helena -- I-15 through the state capital"},
+        {"lat": 47.5052, "lon": -111.3008, "note": "Great Falls -- I-15"},
+        {"lat": 48.5075, "lon": -111.8563, "note": "Shelby -- I-15 at US-2 near the Canada line"}
+      ]
+    },
+    {
+      "ref": "US-2",
+      "spoken": "US Route 2",
+      "phase": 2,
+      "tier": 3,
+      "status": "unstarted",
+      "note": "The Hi-Line: US-2 across the northern tier of Montana and North Dakota, Shelby to Grand Forks. No interstate shadows it (I-94 is far south), so it passes the shadow rule. Loaded with uncovered freight cities -- Williston (Bakken oil), Minot, Havre, Glasgow.",
+      "waypoints": [
+        {"lat": 48.5075, "lon": -111.8563, "note": "Shelby -- US-2 east start (existing node)"},
+        {"lat": 48.5500, "lon": -109.6841, "note": "Havre -- US-2 Hi-Line"},
+        {"lat": 48.1969, "lon": -106.6367, "note": "Glasgow -- US-2"},
+        {"lat": 48.1470, "lon": -103.6180, "note": "Williston -- US-2 in the Bakken"},
+        {"lat": 48.2330, "lon": -101.2963, "note": "Minot -- US-2"},
+        {"lat": 47.9253, "lon": -97.0329, "note": "Grand Forks -- US-2 at I-29 (end)"}
+      ]
+    },
+    {
+      "ref": "I-90-WY",
+      "spoken": "Interstate 90",
+      "phase": 1,
+      "tier": 1,
+      "status": "unstarted",
+      "note": "I-90 Billings southeast through the Wyoming Powder River Basin (Sheridan, Gillette) to Rapid City. Uncovered coal-and-oil freight country; both endpoints are existing nodes.",
+      "waypoints": [
+        {"lat": 45.7833, "lon": -108.5007, "note": "Billings -- I-90 start (existing node)"},
+        {"lat": 44.7972, "lon": -106.9562, "note": "Sheridan -- I-90 in Wyoming"},
+        {"lat": 44.2911, "lon": -105.5022, "note": "Gillette -- I-90 Powder River Basin"},
+        {"lat": 44.0805, "lon": -103.2310, "note": "Rapid City -- I-90 end (existing node)"}
+      ]
+    },
+    {
+      "ref": "US-2-E",
+      "spoken": "US Route 2",
+      "phase": 2,
+      "tier": 3,
+      "status": "unstarted",
+      "note": "US-2 Hi-Line eastern half: Grand Forks across northern Minnesota to Duluth, completing the corridor into the existing Duluth hub.",
+      "waypoints": [
+        {"lat": 47.9253, "lon": -97.0329, "note": "Grand Forks -- US-2 east start (existing node)"},
+        {"lat": 47.4716, "lon": -94.8803, "note": "Bemidji -- US-2 north-central Minnesota"},
+        {"lat": 47.2372, "lon": -93.5303, "note": "Grand Rapids -- US-2 Minnesota"},
+        {"lat": 46.7867, "lon": -92.1005, "note": "Duluth -- US-2 end (existing node)"}
+      ]
+    },
+    {
+      "ref": "US-2-W",
+      "spoken": "US Route 2",
+      "phase": 2,
+      "tier": 3,
+      "status": "unstarted",
+      "note": "US-2 western half: Shelby over Marias Pass through NW Montana (Kalispell) and the Idaho panhandle (Sandpoint) to Spokane. Uncovered; Kalispell is a real Flathead Valley freight hub.",
+      "waypoints": [
+        {"lat": 48.5075, "lon": -111.8563, "note": "Shelby -- US-2 west start (existing node)"},
+        {"lat": 48.1958, "lon": -114.3129, "note": "Kalispell -- US-2 over Marias Pass"},
+        {"lat": 48.2766, "lon": -116.5533, "note": "Sandpoint -- US-2 Idaho panhandle"},
+        {"lat": 47.6588, "lon": -117.4260, "note": "Spokane -- US-2 end (existing node)"}
+      ]
+    },
+    {
+      "ref": "US-2-WA",
+      "spoken": "US Route 2",
+      "phase": 2,
+      "tier": 3,
+      "status": "unstarted",
+      "note": "US-2 westernmost segment: Spokane across the Columbia Plateau to Wenatchee, then over Stevens Pass to Everett on Puget Sound -- completing US-2 coast to coast. Wenatchee is a real central-Washington freight hub.",
+      "waypoints": [
+        {"lat": 47.6588, "lon": -117.4260, "note": "Spokane -- US-2 west start (existing node)"},
+        {"lat": 47.4235, "lon": -120.3103, "note": "Wenatchee -- US-2 central Washington"},
+        {"lat": 47.9790, "lon": -122.2021, "note": "Everett -- US-2 at Puget Sound (existing node)"}
+      ]
+    },
+    {
+      "ref": "I-94-MT",
+      "spoken": "Interstate 94",
+      "phase": 1,
+      "tier": 1,
+      "status": "unstarted",
+      "note": "I-94 across eastern Montana into North Dakota: Billings to Bismarck along the Yellowstone valley. Existing map skips straight across with billings-dickinson and billings-bismarck long legs; Miles City and Glendive are the real freight towns on the road. The southern-tier counterpart to the US-2 Hi-Line, completing the MT/ND grid.",
+      "waypoints": [
+        {"lat": 45.7833, "lon": -108.5007, "note": "Billings -- I-94 west start (existing node)"},
+        {"lat": 46.4083, "lon": -105.8406, "note": "Miles City -- I-94, forces the eastern route not I-90"},
+        {"lat": 47.1053, "lon": -104.7122, "note": "Glendive -- I-94 near the ND line"},
+        {"lat": 46.8083, "lon": -100.7837, "note": "Bismarck -- I-94 end (existing node)"}
+      ]
+    },
+    {
+      "ref": "I-80-NV",
+      "spoken": "Interstate 80",
+      "phase": 1,
+      "tier": 1,
+      "status": "unstarted",
+      "note": "I-80 across the Nevada Great Basin: Reno to Salt Lake City. Today the map skips it with a single reno-slc leg and leaves Elko hanging off SLC only (no reno-elko), so Reno->Elko backtracks. Real freight/mining towns on the road: Winnemucca, Battle Mountain, Elko (exists), West Wendover at the Utah line.",
+      "waypoints": [
+        {"lat": 39.5296, "lon": -119.8138, "note": "Reno -- I-80 west start (existing node)"},
+        {"lat": 40.9730, "lon": -117.7357, "note": "Winnemucca -- I-80, US-95 junction"},
+        {"lat": 40.8324, "lon": -115.7631, "note": "Elko -- I-80 (existing node)"},
+        {"lat": 40.7391, "lon": -114.0733, "note": "West Wendover -- I-80 at the Utah line"},
+        {"lat": 40.7608, "lon": -111.8910, "note": "Salt Lake City -- I-80 end (existing node)"}
+      ]
+    },
+    {
+      "ref": "I-84-OR",
+      "spoken": "Interstate 84",
+      "phase": 1,
+      "tier": 1,
+      "status": "unstarted",
+      "note": "I-84 east half over the Oregon Blue Mountains: Pendleton up Cabbage Hill and down to Boise. Today portland-boise skips the whole east half and Pendleton dead-ends short of it. Real freight cities on the road: La Grande, Baker City, Ontario at the Snake River (Idaho line).",
+      "waypoints": [
+        {"lat": 45.6721, "lon": -118.7886, "note": "Pendleton -- I-84 west start (existing node)"},
+        {"lat": 45.3246, "lon": -118.0877, "note": "La Grande -- I-84 over the Blue Mountains"},
+        {"lat": 44.7749, "lon": -117.8344, "note": "Baker City -- I-84"},
+        {"lat": 44.0266, "lon": -116.9629, "note": "Ontario -- I-84 at the Idaho line"},
+        {"lat": 43.6150, "lon": -116.2023, "note": "Boise -- I-84 end (existing node)"}
+      ]
+    },
+    {
+      "ref": "US-101-NCA",
+      "spoken": "US Route 101",
+      "phase": 2,
+      "tier": 2,
+      "status": "unstarted",
+      "note": "US-101 up the Northern California coast: Santa Rosa through Ukiah and the redwoods to Eureka on Humboldt Bay, then north to Crescent City near the Oregon line. The whole North Coast is a dead zone today. Spurs (added directly) tie Eureka east to Redding on CA-299 and Crescent City north to Grants Pass on US-199, plugging the coast into I-5.",
+      "waypoints": [
+        {"lat": 38.4404, "lon": -122.7141, "note": "Santa Rosa -- US-101 south start (existing node)"},
+        {"lat": 39.1502, "lon": -123.2078, "note": "Ukiah -- US-101 Mendocino County"},
+        {"lat": 40.8021, "lon": -124.1637, "note": "Eureka -- US-101 on Humboldt Bay"},
+        {"lat": 41.7558, "lon": -124.2026, "note": "Crescent City -- US-101 near the Oregon line"}
+      ]
+    },
+    {
+      "ref": "I-75-KY",
+      "spoken": "Interstate 75",
+      "phase": 1,
+      "tier": 1,
+      "status": "unstarted",
+      "note": "I-75 through Appalachian Kentucky: Lexington south through the Cumberland foothills to Knoxville. No lexington-knoxville leg exists today -- a virgin build connecting the Bluegrass to East Tennessee. Real freight towns on the road: Richmond, Berea, London, Corbin.",
+      "waypoints": [
+        {"lat": 38.0406, "lon": -84.5037, "note": "Lexington -- I-75 north start (existing node)"},
+        {"lat": 37.1290, "lon": -84.0833, "note": "London -- I-75 Appalachian Kentucky"},
+        {"lat": 36.9487, "lon": -84.0966, "note": "Corbin -- I-75 near the Cumberland Gap country"},
+        {"lat": 35.9606, "lon": -83.9207, "note": "Knoxville -- I-75 end (existing node)"}
+      ]
+    },
+    {
+      "ref": "I-64-KYWV",
+      "spoken": "Interstate 64",
+      "phase": 1,
+      "tier": 1,
+      "status": "unstarted",
+      "note": "I-64 down the Ohio River country: Lexington east through Morehead to the tri-state at Ashland (KY) and Huntington (WV), then on to Charleston. Entirely missing today -- lexington-charleston does not exist. Ashland is the US-23 gateway to the Eastern Kentucky coalfields (next corridor).",
+      "waypoints": [
+        {"lat": 38.0406, "lon": -84.5037, "note": "Lexington -- I-64 west start (existing node)"},
+        {"lat": 38.1840, "lon": -83.4327, "note": "Morehead -- I-64 gap-breaker"},
+        {"lat": 38.4784, "lon": -82.6379, "note": "Ashland -- I-64 at the Ohio, US-23 junction"},
+        {"lat": 38.4192, "lon": -82.4452, "note": "Huntington -- I-64 in West Virginia"},
+        {"lat": 38.3498, "lon": -81.6326, "note": "Charleston -- I-64 end (existing node)"}
+      ]
+    },
+    {
+      "ref": "KY-COALFIELDS",
+      "spoken": "US Route 23",
+      "phase": 2,
+      "tier": 2,
+      "status": "unstarted",
+      "note": "Eastern Kentucky coalfields: down US-23 (the Country Music Highway) from Ashland through Prestonsburg to Pikeville, then west on the KY-80 Hal Rogers Parkway through Hazard to London on I-75. Ties the coal country into the map via Ashland (I-64) and London (I-75). Real Appalachian coal-and-log freight.",
+      "waypoints": [
+        {"lat": 38.4784, "lon": -82.6379, "note": "Ashland -- US-23 north end (existing node)"},
+        {"lat": 37.6659, "lon": -82.7713, "note": "Prestonsburg -- US-23 Floyd County"},
+        {"lat": 37.4793, "lon": -82.5188, "note": "Pikeville -- US-23 Pike County coal hub"},
+        {"lat": 37.2490, "lon": -83.1932, "note": "Hazard -- KY-80 Perry County"},
+        {"lat": 37.1290, "lon": -84.0833, "note": "London -- KY-80 at I-75 (existing node)"}
+      ]
+    },
+    {
+      "ref": "US-101-OR",
+      "spoken": "US Route 101",
+      "phase": 2,
+      "tier": 2,
+      "status": "unstarted",
+      "note": "The Oregon coast: US-101 from Coos Bay north through Newport to Astoria at the mouth of the Columbia. Whole coast is a dead zone. Ties inland to I-5 via Coos Bay-Roseburg (OR-42) and Astoria-Portland (US-30), added directly.",
+      "waypoints": [
+        {"lat": 43.3665, "lon": -124.2179, "note": "Coos Bay -- US-101 south end, Oregon's largest coastal port"},
+        {"lat": 44.6368, "lon": -124.0535, "note": "Newport -- US-101 central coast, Yaquina Bay"},
+        {"lat": 46.1879, "lon": -123.8313, "note": "Astoria -- US-101 at the Columbia (US-30 to Portland)"}
+      ]
+    },
+    {
+      "ref": "I-80-NE",
+      "spoken": "Interstate 80",
+      "phase": 1,
+      "tier": 1,
+      "status": "unstarted",
+      "note": "I-80 up the Platte River valley across western Nebraska: Grand Island to Cheyenne. Grand Island, North Platte, and Cheyenne exist; the long grand_island-north_platte and north_platte-cheyenne legs skip the real I-80 towns (Kearney, Lexington, Ogallala, Sidney).",
+      "waypoints": [
+        {"lat": 40.9264, "lon": -98.3420, "note": "Grand Island -- I-80 east start (existing node)"},
+        {"lat": 41.1403, "lon": -100.7601, "note": "North Platte -- I-80 (existing node)"},
+        {"lat": 41.1400, "lon": -104.8202, "note": "Cheyenne -- I-80 west end (existing node)"}
+      ]
+    },
+    {
+      "ref": "I-70-KS",
+      "spoken": "Interstate 70",
+      "phase": 1,
+      "tier": 1,
+      "status": "unstarted",
+      "note": "I-70 across Kansas and onto the Colorado high plains: Topeka through Salina to Denver. Topeka-Salina exists but skips Junction City; west of Salina (Hays, Colby, and on across eastern Colorado) is entirely missing. The famous flat Kansas City-Denver express leg stays.",
+      "waypoints": [
+        {"lat": 39.0473, "lon": -95.6752, "note": "Topeka -- I-70 east start (existing node)"},
+        {"lat": 38.8403, "lon": -97.6114, "note": "Salina -- I-70 (existing node)"},
+        {"lat": 39.3958, "lon": -101.0524, "note": "Colby -- I-70 western Kansas"},
+        {"lat": 39.7392, "lon": -104.9903, "note": "Denver -- I-70 west end (existing node)"}
+      ]
+    },
+    {
+      "ref": "I-10-WTX",
+      "spoken": "Interstate 10",
+      "phase": 1,
+      "tier": 1,
+      "status": "built",
+      "note": "I-10 across West Texas: San Antonio through Kerrville, Junction, Ozona, and Fort Stockton to Van Horn and El Paso. The 555-mile San Antonio-El Paso express and the 456-mile Van Horn-San Antonio skip were replaced by the real desert chain; the US-90 Del Rio border alternate stays. Built.",
+      "waypoints": [
+        {"lat": 29.4241, "lon": -98.4936, "note": "San Antonio -- I-10 west start (existing node)"},
+        {"lat": 30.0474, "lon": -99.1403, "note": "Kerrville -- I-10 Hill Country (existing node)"},
+        {"lat": 30.4894, "lon": -99.7720, "note": "Junction -- I-10 Kimble County"},
+        {"lat": 30.7099, "lon": -101.2010, "note": "Ozona -- I-10 Crockett County"},
+        {"lat": 30.8935, "lon": -102.8794, "note": "Fort Stockton -- I-10 Pecos County"},
+        {"lat": 31.0407, "lon": -104.8305, "note": "Van Horn -- I-10 (existing node)"},
+        {"lat": 31.7587, "lon": -106.4869, "note": "El Paso -- I-10 west end (existing node)"}
+      ]
+    },
+    {
+      "ref": "I-25-RATON",
+      "spoken": "Interstate 25",
+      "phase": 1,
+      "tier": 1,
+      "status": "built",
+      "note": "I-25 over Raton Pass: Pueblo through Walsenburg, Trinidad, and Raton to Las Vegas, New Mexico, closing the 214-mile Las Vegas-Pueblo skip. Raton Pass carries the real ~6% grade and the New Mexico-Colorado state line. The pinned Denver-Albuquerque US-285 mountain express is untouched. Built.",
+      "waypoints": [
+        {"lat": 38.2544, "lon": -104.6091, "note": "Pueblo -- I-25 north end (existing node)"},
+        {"lat": 37.6242, "lon": -104.7803, "note": "Walsenburg -- I-25 checkpoint"},
+        {"lat": 37.1695, "lon": -104.5005, "note": "Trinidad -- I-25 Colorado side of Raton Pass"},
+        {"lat": 36.9033, "lon": -104.4391, "note": "Raton -- I-25 New Mexico side of the pass"},
+        {"lat": 35.5939, "lon": -105.2239, "note": "Las Vegas, NM -- I-25 south end (existing node)"}
+      ]
+    },
+    {
+      "ref": "I-5-SHASTA",
+      "spoken": "Interstate 5",
+      "phase": 1,
+      "tier": 1,
+      "status": "built",
+      "note": "I-5 over the Siskiyous: split the 149-mile Redding->Medford hop (and drop the redundant 219-mile Medford->Chico express) by adding Mount Shasta and Yreka. The Yreka->Medford leg carries Siskiyou Summit and the California-Oregon state line; the climb past Dunsmuir and Black Butte is real mountain grade. Built.",
+      "waypoints": [
+        {"lat": 40.5865, "lon": -122.3917, "note": "Redding -- I-5 south end (existing node)"},
+        {"lat": 41.3099, "lon": -122.3106, "note": "Mount Shasta -- I-5 below the peak"},
+        {"lat": 41.7354, "lon": -122.6345, "note": "Yreka -- I-5 Siskiyou County seat"},
+        {"lat": 42.3265, "lon": -122.8756, "note": "Medford -- I-5 over Siskiyou Summit (existing node)"}
+      ]
+    },
+    {
+      "ref": "I-29-DAK",
+      "spoken": "Interstate 29",
+      "phase": 1,
+      "tier": 1,
+      "status": "built",
+      "note": "I-29 up the Dakotas: add Watertown to split the 206-mile Fargo->Brookings hop (Brookings already existed), completing Fargo -> Watertown -> Brookings -> Sioux Falls. Also dropped two redundant unprotected expresses: the 248-mile Fargo->Sioux Falls and the 425-mile Fargo->Omaha. The Fargo->Watertown leg carries the North Dakota-South Dakota line. Built.",
+      "waypoints": [
+        {"lat": 46.8772, "lon": -96.7898, "note": "Fargo -- I-29 north end (existing node)"},
+        {"lat": 44.8994, "lon": -97.1151, "note": "Watertown -- I-29 (new)"},
+        {"lat": 44.3114, "lon": -96.7984, "note": "Brookings -- I-29 (existing node)"},
+        {"lat": 43.5446, "lon": -96.7311, "note": "Sioux Falls -- I-29 (existing node)"}
+      ]
+    },
+    {
+      "ref": "OR-99W-WILLAMETTE",
+      "spoken": "Oregon Route 99W",
+      "phase": 1,
+      "tier": 1,
+      "status": "built",
+      "note": "Willamette Valley fill: the I-5 spine (Portland-Salem-Albany-Eugene, with Albany tying Corvallis in) already existed; this adds Woodburn on I-5 and the OR-99W wine-country western alternate through Newberg and McMinnville, giving a distinct Portland->Salem route. Dropped the now-redundant Portland-Salem, Eugene-Salem, and Eugene-Portland expresses. Rex Hill on 99W comes out hills; the rest is flat valley floor. Built.",
+      "waypoints": [
+        {"lat": 45.5152, "lon": -122.6784, "note": "Portland -- north end (existing node)"},
+        {"lat": 45.3001, "lon": -122.9729, "note": "Newberg -- OR-99W wine country"},
+        {"lat": 45.2101, "lon": -123.1987, "note": "McMinnville -- OR-99W"},
+        {"lat": 45.1437, "lon": -122.8551, "note": "Woodburn -- I-5 (Portland-Salem)"},
+        {"lat": 44.9429, "lon": -123.0351, "note": "Salem -- valley hub (existing node)"}
+      ]
+    }
+  ]
+}

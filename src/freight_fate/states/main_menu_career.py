@@ -76,14 +76,14 @@ class HomeTerminalState(MenuState):
         option = start_option(start_key)
         by_region: dict[str, list[str]] = {}
         for city in ctx.world.cities.values():
-            by_region.setdefault(city.region, []).append(city.name)
-        for names in by_region.values():
-            names.sort()
+            by_region.setdefault(city.region, []).append(city.key)
+        for keys in by_region.values():
+            keys.sort(key=lambda k: ctx.world.cities[k].name)
         self._cities_by_region = by_region
         self._regions = sorted(by_region, key=_region_menu_name)
-        default_city = (
-            option.default_city if option.default_city in ctx.world.cities else DEFAULT_CITY
-        )
+        # Start options may still name their default city pre-slug.
+        option_default = ctx.world.resolve_city_key(option.default_city)
+        default_city = option_default if option_default in ctx.world.cities else DEFAULT_CITY
         default = (
             ctx.world.cities[default_city].region if default_city in ctx.world.cities else None
         )
@@ -140,8 +140,9 @@ class HomeCityState(MenuState):
         self.region = region
         self._cities = list(city_names)
         option = start_option(start_key)
-        if option.default_city in self._cities:
-            self.index = self._cities.index(option.default_city)
+        option_default = ctx.world.resolve_city_key(option.default_city)
+        if option_default in self._cities:
+            self.index = self._cities.index(option_default)
         elif DEFAULT_CITY in self._cities:
             self.index = self._cities.index(DEFAULT_CITY)
 
@@ -153,16 +154,14 @@ class HomeCityState(MenuState):
 
     def build_items(self) -> list[MenuItem]:
         items: list[MenuItem] = []
-        for name in self._cities:
-            city = self.ctx.world.cities[name]
-            terminal = self.ctx.world.home_terminal(name)
-            # Some city keys are already state-disambiguated ("Springfield,
-            # Illinois"); don't append the state a second time.
-            place = name if name.endswith(f", {city.state}") else f"{name}, {city.state}"
+        for key in self._cities:
+            city = self.ctx.world.cities[key]
+            terminal = self.ctx.world.home_terminal(key)
+            place = city.spoken_qualified
             items.append(
                 MenuItem(
                     place,
-                    lambda n=name: self._pick(n),
+                    lambda k=key: self._pick(k),
                     help=f"Start at {terminal.spoken_name} in {place}.",
                 )
             )

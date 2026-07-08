@@ -14,6 +14,7 @@ import random
 import pygame
 
 from ..achievements import add_unique_stat, increment_stat
+from ..data.amenities import spoken_amenities
 from ..data.world import Route
 from ..models.business import (
     build_business_settlement,
@@ -24,7 +25,13 @@ from ..models.business import (
 )
 from ..models.career import xp_class_multiplier, xp_streak_bonus
 from ..models.economy import MOTEL_COST, pay_advance_grant, pay_advance_unavailable_reason
-from ..models.jobs import Job, fair_active_deadline, job_from_payload, job_payload
+from ..models.jobs import (
+    Job,
+    fair_active_deadline,
+    job_from_payload,
+    job_payload,
+    normalize_job_cities,
+)
 from ..models.settlement import (
     carrier_accessorial_charges,
     charge_summary,
@@ -50,6 +57,7 @@ from ..radio import (
 from ..sim import hos
 from ..sim.hos import HosClock, clock_text, is_night, time_of_day
 from ..sim.lane import LaneKeeping, lane_label
+from ..sim.timezones import city_zone
 from ..sim.transmission import REVERSE
 from ..sim.trip import RoadStop, Trip, TripEventKind
 from ..sim.trip_models import leg_lane_count
@@ -158,6 +166,14 @@ def terse_hazard_message(message: str) -> str:
     return text or message
 
 
+def timezone_crossing_message(event, terse: bool) -> str:
+    """The spoken zone crossing: terse mode says only the zone itself."""
+    zone = event.data.get("to_zone")
+    if terse and zone is not None:
+        return f"{zone.name}."
+    return event.message
+
+
 DRIVE_PHASE_PICKUP = "pickup"
 DRIVE_PHASE_DELIVERY = "delivery"
 DRIVE_PHASE_CITY_SERVICE = "city_service"
@@ -182,6 +198,10 @@ def _route_event_sound(event) -> str | None:
     if kind == TripEventKind.TOLL_CHARGED:
         return "events/toll_charged"
     if kind in {TripEventKind.STATE_CROSSING, TripEventKind.CHECKPOINT}:
+        return "events/state_crossing"
+    if kind == TripEventKind.TIMEZONE_CROSSING:
+        # A boundary marker like a state line; reuse its earcon until the
+        # sound pack gains a dedicated one.
         return "events/state_crossing"
     if kind == TripEventKind.ZONE_ENTER:
         zone = event.data.get("zone")
@@ -440,22 +460,44 @@ def _advance_rest_clock(
         )
 
 
+def _shut_down_engine(driving: DrivingState) -> str:
+    """Stop the engine before a night's sleep; no truck idles through ten
+    hours. Returns the spoken prefix, empty when it was already off."""
+    if not driving.truck.engine_on:
+        return ""
+    driving.truck.stop_engine()
+    return "You shut down the engine. "
+
+
+def _deadline_appointment(driving: DrivingState) -> str:
+    """The delivery appointment in the receiving city's local time.
+
+    Anchored on the job's destination, not the current trip's endpoint: a
+    pickup drive ends at the origin facility, possibly in another zone.
+    """
+    zone = city_zone(driving.ctx.world.city(driving.job.destination))
+    return driving.trip.deadline_clock_text(driving.job.deadline_game_h, zone)
+
+
 def _deadline_text(driving: DrivingState) -> str:
     remaining = driving.job.deadline_game_h - driving.trip.game_minutes / 60.0
     if remaining > 0:
-        return f"{remaining:.1f} hours left to deliver."
+        # The appointment reads in the receiver's local time, the way a real
+        # dispatcher quotes it -- the zone name keeps it unambiguous mid-route.
+        return f"{remaining:.1f} hours left to deliver; that is {_deadline_appointment(driving)}."
     return f"You are now {-remaining:.1f} hours past the deadline."
 
 
 def _perform_shoulder_sleep(driving: DrivingState, anchor_mi: float) -> str:
     """Apply the emergency shoulder-sleep outcome and return spoken text."""
     p = driving.ctx.profile
+    engine_off = _shut_down_engine(driving)
     _advance_rest_clock(driving, hos.SLEEP_MIN)
     driving.hos.sleep()
     p.fatigue = hos.rest_shoulder(p.fatigue)
     parts = [
-        f"You sleep poorly on the shoulder, woken again and again by "
-        f"passing trucks. It is {clock_text(driving.trip.current_hour)}. "
+        f"{engine_off}You sleep poorly on the shoulder, woken again and again by "
+        f"passing trucks. It is {clock_text(driving.trip.local_hour)}. "
         f"Hours of service reset, but you are still tired."
     ]
     if hos.shoulder_fine_due(driving.trip_seed, anchor_mi):
@@ -524,6 +566,9 @@ def _poi_offers_text(stop) -> str:
         parts.append(f"offers {_join_phrase(offers)}")
     if services:
         parts.append(f"listed services: {_join_phrase(services)}")
+    brand_text = spoken_amenities(stop.name, getattr(stop, "type", ""))
+    if brand_text:
+        parts.append(brand_text)
     if getattr(stop, "parking_text", ""):
         parts.append(stop.parking_text)
     return "; ".join(parts) if parts else "services not listed"

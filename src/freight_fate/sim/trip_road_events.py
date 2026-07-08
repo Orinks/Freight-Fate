@@ -27,7 +27,7 @@ class TripRoadEventMixin:
             intensity += 0.12
         if self._rush_hour_traffic_bias(leg):
             intensity += 0.14
-        if is_night(self.start_hour):
+        if is_night(self.local_start_hour):
             intensity -= 0.06
         effects = self.weather.effects
         if effects.grip < 0.9:
@@ -141,19 +141,18 @@ class TripRoadEventMixin:
                 city_state = world.cities[city].state
                 prev_state = world.cities[prev].state
                 crossing = f"Crossing into {city_state}. " if city_state != prev_state else ""
-                # State-disambiguated city keys ("Jackson, Michigan") already
-                # carry the state; don't speak it twice.
-                place = city if city.endswith(f", {city_state}") else f"{city}, {city_state}"
                 self._emit(
                     TripEventKind.CITY_REACHED,
-                    f"{crossing}Passing {place}. Continuing on {leg.highway} toward {nxt}.",
+                    f"{crossing}Passing {world.spoken_city(city, qualified=False)}, "
+                    f"{city_state}. "
+                    f"Continuing on {leg.highway} toward {world.spoken_city(nxt)}.",
                 )
 
     def _hazard_risk(self) -> float:
         """Chance of a hazard at each check; worse in fog and after dark."""
         vis = self.weather.effects.visibility_mi
         risk = 0.25 + (0.25 if vis < 2 else 0.0)
-        if is_night(self.current_hour):
+        if is_night(self.local_hour):
             risk += NIGHT_HAZARD_BONUS
         return risk * self.hazard_scale
 
@@ -212,7 +211,7 @@ class TripRoadEventMixin:
                 self.current_region,
                 self.weather.current,
                 self.terrain_at(self.position_mi),
-                self.current_hour,
+                self.local_hour,
             )
             if not choices:
                 return

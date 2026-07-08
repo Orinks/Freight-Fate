@@ -53,6 +53,42 @@ def _mock_ors_payload():
     }
 
 
+def test_ors_directions_kwargs_inserts_curated_via_points():
+    """A leg's route_via pins ORS to the declared highway (e.g. I-10 when the
+    cost model narrowly prefers US-90); via points go between the endpoints."""
+    kwargs = enrich_routes._ors_directions_kwargs(
+        {"lat": 29.42, "lon": -98.49},
+        {"lat": 31.76, "lon": -106.49},
+        via=({"lat": 30.57, "lon": -100.64, "note": "pin to I-10 at Sonora"},),
+    )
+    assert kwargs["coordinates"] == [
+        [-98.49, 29.42],
+        [-100.64, 30.57],
+        [-106.49, 31.76],
+    ]
+
+
+def test_rescale_covers_interchanges_and_speed_limits():
+    """Mileage adoption must rescale EVERY at_mi field. Interchanges and
+    speed_limits were missed historically, leaving positions past the new leg
+    total (World.load range validators reject the whole world)."""
+    leg = {
+        "miles": 578.0,
+        "stops": [],
+        "corridor": {
+            "interchanges": [{"at_mi": 557.8, "exit_ref": "37"}],
+            "speed_limits": [
+                {"at_mi": 0.0, "mph": 60.0},
+                {"at_mi": 570.0, "mph": 80.0},
+            ],
+        },
+    }
+    enrich_routes._rescale_corridor_positions(leg, 555.0 / 578.0, 555.0)
+    assert leg["corridor"]["interchanges"][0]["at_mi"] == pytest.approx(535.6, abs=0.1)
+    assert leg["corridor"]["speed_limits"][0]["at_mi"] == 0.0  # anchor preserved
+    assert leg["corridor"]["speed_limits"][1]["at_mi"] < 555.0
+
+
 def test_parse_ors_route_maps_geometry_distance_and_extras():
     parsed = enrich_routes.parse_ors_route(_mock_ors_payload())
 
@@ -119,6 +155,87 @@ def test_grade_segments_from_samples_single_when_uniform():
     leg = {"miles": 90.0, "terrain": "flat", "from": "A", "to": "B"}
     segs = enrich_routes.grade_segments_from_samples(samples, elevations, leg)
     assert len(segs) == 1 and segs[0]["terrain"] == "flat"
+
+
+def test_fine_grade_samples_matches_leg_miles_and_is_contiguous():
+    # 5 evenly spaced vertices climbing steadily -- a sanity check that the
+    # distance-walk sampler covers the whole leg with no gaps.
+    parsed = {
+        "coordinates": [[-110.0, 35.0 + 0.05 * i] for i in range(5)],
+        "elevations_ft": [1000.0, 1500.0, 2000.0, 2500.0, 3000.0],
+    }
+    leg_miles = 20.0
+    samples, elevations = enrich_routes.fine_grade_samples(parsed, leg_miles, bin_width_mi=1.0)
+    assert samples[0]["at_mi"] == 0.0
+    assert samples[-1]["at_mi"] == leg_miles
+    assert len(samples) == len(elevations)
+    assert all(a["at_mi"] <= b["at_mi"] for a, b in zip(samples, samples[1:], strict=False))
+
+
+def test_fine_grade_samples_avoids_the_sparse_vertex_snap_artifact():
+    """A long, flat, sparsely-vertexed stretch followed by a short, densely
+    vertexed real climb must not produce a spurious grade spike.
+
+    ors_corridor_samples at a high sample_count can snap several evenly
+    *target*-spaced mileposts onto the same vertex once a stretch has fewer
+    real vertices than requested samples, then show a huge jump once the
+    scan reaches the next real vertex. fine_grade_samples walks the real
+    polyline forward instead, so it must not reproduce that artifact.
+    """
+    # A -> B: one huge flat segment (only two vertices, ~97 mi, no gain).
+    # B -> C -> D -> E -> F: a short, real ~7.4% climb over the last ~5 mi,
+    # with vertices packed close together (the realistic shape for a real
+    # pass -- OSM/ORS shape points get denser where the road curves).
+    coords = [
+        [-114.0, 35.0],  # A
+        [-112.5, 35.2],  # B (~97 mi later, flat)
+        [-112.48, 35.201],
+        [-112.46, 35.202],
+        [-112.44, 35.203],
+        [-112.42, 35.204],  # F (climbing +2000 ft from B)
+    ]
+    elevations = [3000.0, 3000.0, 3500.0, 4000.0, 4500.0, 5000.0]
+    parsed = {"coordinates": coords, "elevations_ft": elevations}
+
+    samples, sample_elevations = enrich_routes.fine_grade_samples(
+        parsed, leg_miles=102.0, bin_width_mi=0.25
+    )
+    leg = {"miles": 102.0, "terrain": "flat", "from": "a", "to": "f"}
+    segs = enrich_routes.grade_segments_from_samples(samples, sample_elevations, leg)
+
+    # The flat 100-mile stretch must not read as a spike -- every segment
+    # must stay within a physically plausible bound for a real highway.
+    assert all(abs(s["avg_grade_pct"]) <= 10.0 for s in segs)
+    # The real climb must still show up as mountain-classified.
+    assert any(s["terrain"] == "mountain" and s["avg_grade_pct"] > 3.0 for s in segs)
+
+
+def test_fine_grade_samples_never_yields_a_zero_width_final_segment():
+    """Regression: when the last real ORS vertex sits a hair's-breadth past
+    the previous sample, the forced final close used to append a near-
+    duplicate point. A stored grade segment rounds its endpoints to 1
+    decimal place, so that tiny gap could round away to start_mi == end_mi
+    -- exactly what world.py's parser rejects (observed live on a real
+    Flagstaff -> Kingman route: a 151.0-151.0 segment). Needs at least 3
+    real samples before the tiny final gap so the fix exercises the same
+    merge/round path the real bug hit -- 2 samples fall back to the
+    unrounded single-segment builder and would hide the bug."""
+    coords = [
+        [-110.0, 35.0],
+        [-109.5, 35.0],  # ~28.7 mi later
+        [-109.0, 35.0],  # ~57.4 mi later
+        [-108.999, 35.0],  # ~0.06 mi further -- under the merge-safe gap
+    ]
+    elevations = [1000.0, 1000.0, 1000.0, 1200.0]
+    parsed = {"coordinates": coords, "elevations_ft": elevations}
+    samples, sample_elevations = enrich_routes.fine_grade_samples(parsed, leg_miles=57.46)
+    assert len(samples) >= 3, "test setup must exercise the merge path, not the fallback"
+    leg = {"miles": 57.46, "terrain": "flat", "from": "a", "to": "b"}
+    segs = enrich_routes.grade_segments_from_samples(samples, sample_elevations, leg)
+
+    assert all(s["end_mi"] > s["start_mi"] for s in segs)
+    assert segs[0]["start_mi"] == 0.0
+    assert segs[-1]["end_mi"] == 57.5  # world.py rounds leg.miles the same way
 
 
 def test_ors_sample_count_scales_with_distance():

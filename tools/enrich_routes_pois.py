@@ -61,7 +61,7 @@ _NON_STOP_KEYWORDS = ("cleaning service", "weigh station", "inspection station")
 _RETAIL_SHOP_TAGS = {"supermarket", "wholesale", "department_store", "convenience"}
 
 
-def _truck_relevance(tags: dict[str, str], name: str) -> int | None:
+def _truck_relevance(tags: dict[str, str], name: str, rural_fallback: bool = False) -> int | None:
     """Rank a candidate POI for a freight game; ``None`` means drop it.
 
     Truck-relevant only: service plazas, rest areas, HGV-tagged or HGV-diesel
@@ -69,6 +69,11 @@ def _truck_relevance(tags: dict[str, str], name: str) -> int | None:
     ``amenity=fuel`` car station with no truck signal is dropped -- a Class-8
     driver does not pull a 70-foot rig into a corner Shell. Warehouse/grocery
     retail and OSM mistags are rejected too.
+
+    ``rural_fallback`` relaxes only the last rule: on a leg that would otherwise
+    carry no stop at all, a named fuel station not explicitly diesel-free is
+    accepted at the lowest score (1) as a splash-and-dash diesel point, so a real
+    truck stop always outranks it and it types as a plain ``fuel_station``.
     """
     low = name.lower()
     if len(low.strip()) < 2:
@@ -92,6 +97,8 @@ def _truck_relevance(tags: dict[str, str], name: str) -> int | None:
         or amenity == "parking"
     )
     if not truck_signal:
+        if rural_fallback and amenity == "fuel" and tags.get("fuel:diesel", "") != "no":
+            return 1  # rural splash-and-dash diesel; any real truck stop outranks it
         return None  # generic car fuel -- not a truck stop
     score = 0
     if highway == "services":
@@ -116,13 +123,21 @@ def add_overpass_pois(
     rate_limit_s: float,
     only: set[tuple[str, str]],
     per_leg: int = 2,
+    rural_fallback: bool = False,
 ) -> dict[str, Any]:
     """Additively enrich legs with named OSM truck POIs of any brand.
 
     Purely additive (POIs do not gate dispatch): adds up to ``per_leg`` new
-    named stops per leg, deduped against existing Love's/Pilot curation. Robust
-    to Overpass hiccups -- a leg that errors or finds nothing is simply skipped,
-    and the cache makes re-runs resumable.
+    named corridor stops per leg, deduped against existing Love's/Pilot
+    curation. Robust to Overpass hiccups -- a leg that errors or finds nothing
+    is simply skipped, and the cache makes re-runs resumable.
+
+    Endpoint-city finds ride on top of the ``per_leg`` corridor budget: a
+    physical truck stop at a city serves every leg touching that city (a
+    driver on any of them really does pass it), so each such leg gets it at
+    its own end -- and a long sparse leg still keeps its corridor slots for
+    mid-route coverage. The minimum-spacing rule caps discovery at one stop
+    per leg end per run.
     """
     cache_dir.mkdir(parents=True, exist_ok=True)
     added = updated = 0
@@ -138,22 +153,27 @@ def add_overpass_pois(
         existing = {str(s.get("name", "")).lower() for s in stops}
         taken_mi = [float(s["at_mi"]) for s in stops]
         cands = _overpass_named_candidates(
-            leg, points, cache_dir, rate_limit_s, per_leg + len(existing) + 6
+            leg, points, cache_dir, rate_limit_s, per_leg + len(existing) + 6,
+            rural_fallback=rural_fallback,
         )
         fresh = []
+        corridor_added = 0
         for cand in cands:
             if cand["name"].lower() in existing:
                 continue
             at = float(cand["at_mi"])
             # Keep stops visibly apart on the corridor: a cluster of POIs found
-            # near one sample point would otherwise land on nearly the same mile.
+            # near one sample point would otherwise land on nearly the same
+            # mile. This also limits each endpoint city to one stop per run.
             if any(abs(at - t) < MIN_STOP_SPACING_MI for t in taken_mi):
                 continue
+            if cand["source"] == OVERPASS_POI_SOURCE:  # mid-corridor find
+                if corridor_added >= per_leg:
+                    continue
+                corridor_added += 1
             fresh.append(cand)
             existing.add(cand["name"].lower())
             taken_mi.append(at)
-            if len(fresh) >= per_leg:
-                break
         if fresh:
             leg["stops"] = sorted(stops + fresh, key=lambda s: float(s["at_mi"]))
             _spread_stop_positions(leg["stops"], leg["miles"])
@@ -570,14 +590,23 @@ def _checkpoints(
     leg: dict[str, Any],
     samples: list[dict[str, float]],
 ) -> list[dict[str, Any]]:
+    """One fallback checkpoint at the leg midpoint, pending real curation.
+
+    Checkpoint ``name`` and ``state`` are read aloud verbatim by the trip
+    narrator ("Passing <name>, <state> on <highway>"), so both must be spoken
+    text: composed spoken city names (never slug keys) and the full spoken
+    state name (never a 2-letter code a screen reader would spell out).
+    """
     cities = data["cities"]
+    spoken_from = str(cities[leg["from"]].get("spoken_city") or leg["from"])
+    spoken_to = str(cities[leg["to"]].get("spoken_city") or leg["to"])
     mid = samples[len(samples) // 2]
     return [
         {
-            "name": f"{leg['highway']} corridor between {leg['from']} and {leg['to']}",
+            "name": f"{leg['highway']} corridor between {spoken_from} and {spoken_to}",
             "at_mi": round(max(1.0, min(float(leg["miles"]) - 1.0, mid["at_mi"])), 1),
             "type": "place",
-            "state": cities[leg["to"]]["state"],
+            "state": spoken_state(data, cities[leg["to"]]["state"]),
             "highway": leg["highway"],
             "source": "Curated OSRM/OpenStreetMap corridor checkpoint.",
         }

@@ -490,7 +490,7 @@ def test_delivery_final_miles_use_facility_approach_limits(world):
 
 
 def test_pickup_deadhead_route_uses_local_facility_limits(world):
-    route = world.facility_approach_route("Chicago", world.cities["Chicago"].locations[0].name)
+    route = world.facility_approach_route("Chicago", world.city("Chicago").locations[0].name)
     truck = TruckState()
     weather = WeatherSystem("great_lakes", seed=1)
     trip = Trip(route, truck, weather, seed=2)
@@ -505,7 +505,7 @@ def test_pickup_deadhead_route_uses_local_facility_limits(world):
 
 
 def test_facility_gate_warns_before_final_low_speed_zone(world):
-    route = world.facility_approach_route("Chicago", world.cities["Chicago"].locations[0].name)
+    route = world.facility_approach_route("Chicago", world.city("Chicago").locations[0].name)
     truck = TruckState()
     weather = WeatherSystem("great_lakes", seed=1)
     trip = Trip(route, truck, weather, seed=2)
@@ -601,7 +601,10 @@ def test_construction_zone_speeding_fine_waits_for_grace_distance(world):
 
     trip.position_mi = zone.start_mi - 2.0
     advance = trip.update(0.0)
-    assert _gps_messages(advance) == [
+    # A denser map can land an exit-pressure cue in the same window; the
+    # construction warning itself is what this test pins down.
+    construction_cues = [m for m in _gps_messages(advance) if "construction ahead" in m]
+    assert construction_cues == [
         "Brake now! In 2 miles, construction ahead. "
         f"{_closure_part(zone)}Speed limit "
         f"{CONSTRUCTION_TAPER_LIMIT_MPH:.0f} at the taper, then {zone.limit_mph:.0f} "
@@ -741,8 +744,12 @@ def test_bad_weather_slows_modeled_traffic(world):
 
     assert clear.npc_vehicles
     assert rain.npc_vehicles
-    assert rain.npc_vehicles[0].at_mi == clear.npc_vehicles[0].at_mi
-    assert rain.npc_vehicles[0].speed_mph < clear.npc_vehicles[0].speed_mph
+    # Troopers cruise at a fixed patrol speed regardless of weather; the
+    # weather comparison belongs to the first civilian vehicle.
+    clear_civilian = next(v for v in clear.npc_vehicles if v.vehicle_class != "state trooper")
+    rain_civilian = next(v for v in rain.npc_vehicles if v.vehicle_class != "state trooper")
+    assert rain_civilian.at_mi == clear_civilian.at_mi
+    assert rain_civilian.speed_mph < clear_civilian.speed_mph
 
 
 def test_rush_hour_can_slow_modeled_traffic(world):
@@ -770,8 +777,23 @@ def test_traffic_pressure_marks_exit_and_construction_context(world):
 
 
 def test_traffic_pressure_gps_cue_deduplicates(world):
+    from freight_fate.sim.trip_models import TRAFFIC_PRESSURE_LOOKAHEAD_MI
+
     trip, _truck = make_trip(world)
-    pressure = next(p for p in trip.traffic_pressures if p.kind == "exit")
+    # Only one pressure cue fires per update, so pick an exit pressure with
+    # no neighbor inside the lookahead window; a denser map otherwise hands
+    # the first cue to whichever pressure sorts earlier.
+    def _isolated(p):
+        return all(
+            q is p or abs(q.start_mi - p.start_mi) > TRAFFIC_PRESSURE_LOOKAHEAD_MI + 1.0
+            for q in trip.traffic_pressures
+        )
+
+    pressure = next(
+        p
+        for p in trip.traffic_pressures
+        if p.kind == "exit" and p.start_mi > 1.0 and _isolated(p)
+    )
     trip.position_mi = pressure.start_mi - 1.0
 
     first = trip.update(0.0)

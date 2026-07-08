@@ -316,13 +316,16 @@ class RestStopState(MenuState):
 
     def announce_entry(self) -> None:
         self.ctx.audio.set_ambient(
-            _poi_ambient_key(self.stop, self.driving.trip.current_hour))
+            _poi_ambient_key(self.stop, self.driving.trip.local_hour))
         parts = [f"{self.stop.spoken_name}."]
         if self.stop.parking_text:
             parts.append(f"{self.stop.parking_text}.")
+        brand_text = spoken_amenities(self.stop.name, getattr(self.stop, "type", ""))
+        if brand_text:
+            parts.append(f"{brand_text}.")
         parts.extend(
             [
-                f"It is {clock_text(self.driving.trip.current_hour)}.",
+                f"It is {clock_text(self.driving.trip.local_hour)}.",
                 self.current_text(),
             ]
         )
@@ -555,7 +558,7 @@ class RestStopState(MenuState):
         self.ctx.audio.play("ui/notify")
         self.ctx.say(
             f"You took a 30-minute break. "
-            f"It is {clock_text(d.trip.current_hour)}. "
+            f"It is {clock_text(d.trip.local_hour)}. "
             f"Your break requirement is reset and you feel a little "
             f"fresher. {_deadline_text(d)}"
         )
@@ -571,7 +574,7 @@ class RestStopState(MenuState):
         self.ctx.audio.play("ui/notify")
         self.ctx.say(
             f"You took a short food and coffee break. "
-            f"It is {clock_text(d.trip.current_hour)}. "
+            f"It is {clock_text(d.trip.local_hour)}. "
             "The coffee helps you stay alert a little longer, but "
             "this short stop does not reset your 30-minute break "
             "requirement. "
@@ -593,6 +596,7 @@ class RestStopState(MenuState):
         d = self.driving
         p = self.ctx.profile
         minutes = float(hours * 60)
+        engine_off = _shut_down_engine(d)
         _advance_rest_clock(d, minutes)
         completed = d.hos.sleeper_split_rest(minutes)
         p.fatigue = hos.rest_sleeper_split(p.fatigue, minutes, completed=completed)
@@ -604,8 +608,8 @@ class RestStopState(MenuState):
             else (d.hos.split_pending_summary() or "Sleeper berth rest recorded.")
         )
         self.ctx.say(
-            f"You slept {hours} hours in the sleeper berth. "
-            f"It is {clock_text(d.trip.current_hour)}. {status} {_deadline_text(d)}"
+            f"{engine_off}You slept {hours} hours in the sleeper berth. "
+            f"It is {clock_text(d.trip.local_hour)}. {status} {_deadline_text(d)}"
         )
         self.ctx.award_achievement("slept_on_route")
         self.refresh()
@@ -614,14 +618,15 @@ class RestStopState(MenuState):
         d = self.driving
         p = self.ctx.profile
         before_fatigue = p.fatigue
+        engine_off = _shut_down_engine(d)
         _advance_rest_clock(d, hos.SLEEP_MIN)
         d.hos.sleep()
         p.fatigue = hos.rest_sleep(p.fatigue)
         self._save_here(silent=True)
         self.ctx.audio.play("ui/notify")
         self.ctx.say(
-            f"You slept 10 hours and woke rested. "
-            f"It is {clock_text(d.trip.current_hour)}. "
+            f"{engine_off}You slept 10 hours and woke rested. "
+            f"It is {clock_text(d.trip.local_hour)}. "
             f"Hours of service reset. {_deadline_text(d)}"
         )
         self.ctx.award_achievement("slept_on_route")
@@ -661,14 +666,15 @@ class RestStopState(MenuState):
         tired. No shoulder fine -- a lot is more legitimate than the freeway."""
         d = self.driving
         p = self.ctx.profile
+        engine_off = _shut_down_engine(d)
         _advance_rest_clock(d, hos.SLEEP_MIN)
         d.hos.sleep()
         p.fatigue = hos.rest_shoulder(p.fatigue)
         self._save_here(silent=True)
         self.ctx.audio.play("ui/notify")
         self.ctx.say(
-            f"You bed down in the cramped lot, off to the side. "
-            f"It is {clock_text(d.trip.current_hour)}. Hours of service "
+            f"{engine_off}You bed down in the cramped lot, off to the side. "
+            f"It is {clock_text(d.trip.local_hour)}. Hours of service "
             f"reset, but the rest was poor and you wake still tired. "
             f"{_deadline_text(d)}"
         )
@@ -709,7 +715,7 @@ class RestStopState(MenuState):
         self.ctx.audio.play("ui/notify")
         self.ctx.say(
             f"Truck repaired for {cost:,.0f} dollars. "
-            f"It is {clock_text(d.trip.current_hour)}. "
+            f"It is {clock_text(d.trip.local_hour)}. "
             f"You have {p.money:,.0f} dollars. {_deadline_text(d)}"
         )
         self.ctx.award_achievement("garage_repair")
@@ -737,7 +743,7 @@ class RestStopState(MenuState):
         self.ctx.say(
             f"Roadside assistance patched the truck to "
             f"{d.truck.damage_pct:.0f} percent damage {billing}. It is "
-            f"{clock_text(d.trip.current_hour)}. {_deadline_text(d)}"
+            f"{clock_text(d.trip.local_hour)}. {_deadline_text(d)}"
         )
         self.ctx.award_achievement("roadside_fix")
 
@@ -748,7 +754,7 @@ class RestStopState(MenuState):
         self.ctx.audio.play("ui/notify")
         self.ctx.say(
             f"Inspection check-in complete at {self.stop.spoken_name}. "
-            f"It is {clock_text(d.trip.current_hour)}. "
+            f"It is {clock_text(d.trip.local_hour)}. "
             f"{_deadline_text(d)}"
         )
         _record_inspection(self.ctx)
@@ -798,7 +804,7 @@ class ParkingFullState(MenuState):
             _poi_ambient_key(self.stop, self.driving.trip.current_hour))
         self.ctx.say(
             f"The truck parking at {self.stop.spoken_name} is full tonight. "
-            f"It is {clock_text(self.driving.trip.current_hour)}. "
+            f"It is {clock_text(self.driving.trip.local_hour)}. "
             f"{self.current_text()}"
         )
 

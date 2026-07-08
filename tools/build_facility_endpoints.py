@@ -140,7 +140,7 @@ def collect_targets() -> list[FacilityTarget]:
     world = get_world()
     targets: list[FacilityTarget] = []
     for city_name in world.city_names():
-        city = world.cities[city_name]
+        city = world.city(city_name)
         for location in city.locations:
             targets.append(
                 FacilityTarget(

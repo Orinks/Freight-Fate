@@ -9,6 +9,7 @@ from enum import Enum
 
 from ..data.world import STOP_TYPE_LABELS, Leg, TollEvent
 from .hos import is_night, time_of_day
+from .timezones import TimeZone
 from .vehicle import TruckState
 from .weather import WeatherKind, WeatherSystem
 
@@ -140,6 +141,10 @@ FACILITY_GATE_LIMIT_MPH = 15.0
 DESTINATION_APPROACH_ZONE_MI = 3.0
 FACILITY_GATE_ZONE_MI = 0.5
 NIGHT_HAZARD_BONUS = 0.10  # extra hazard risk after dark
+# A zone flip that flips back within this distance is boundary noise from a
+# road hugging the line (the state-crossing dwell filter's lesson), not a
+# crossing the driver should reset a watch for.
+TIMEZONE_DWELL_MI = 10.0
 NIGHT_TRAFFIC_KEEP = 0.4  # chance a traffic zone still forms at night
 RUSH_HOUR_WINDOWS = ((6.5, 9.0), (16.0, 18.5))
 # -- Grounded congestion -------------------------------------------------------------
@@ -476,6 +481,7 @@ class TripEventKind(Enum):
     INSPECTION = "inspection"
     GPS_CUE = "gps_cue"
     STATE_CROSSING = "state_crossing"
+    TIMEZONE_CROSSING = "timezone_crossing"
     CHECKPOINT = "checkpoint"
     TOLL_CHARGED = "toll_charged"
     ARRIVED = "arrived"
@@ -486,6 +492,15 @@ class TripEvent:
     kind: TripEventKind
     message: str
     data: dict = field(default_factory=dict)
+
+
+@dataclass(frozen=True)
+class TimezoneCrossing:
+    """The trip milepost where the route passes into another time zone."""
+
+    at_mi: float
+    from_zone: TimeZone
+    to_zone: TimeZone
 
 
 @dataclass
