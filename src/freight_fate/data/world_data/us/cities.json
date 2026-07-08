@@ -5566,6 +5566,24 @@
       "lat": 30.8935,
       "lon": -102.8794,
       "locations": []
+    },
+    "raton_nm_us": {
+      "spoken_city": "Raton",
+      "state": "NM",
+      "country": "US",
+      "region": "desert_southwest",
+      "lat": 36.9033,
+      "lon": -104.4391,
+      "locations": []
+    },
+    "trinidad_co_us": {
+      "spoken_city": "Trinidad",
+      "state": "CO",
+      "country": "US",
+      "region": "rockies",
+      "lat": 37.1695,
+      "lon": -104.5005,
+      "locations": []
     }
   }
 }

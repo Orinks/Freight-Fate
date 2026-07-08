@@ -262,6 +262,21 @@
         {"lat": 31.0407, "lon": -104.8305, "note": "Van Horn -- I-10 (existing node)"},
         {"lat": 31.7587, "lon": -106.4869, "note": "El Paso -- I-10 west end (existing node)"}
       ]
+    },
+    {
+      "ref": "I-25-RATON",
+      "spoken": "Interstate 25",
+      "phase": 1,
+      "tier": 1,
+      "status": "built",
+      "note": "I-25 over Raton Pass: Pueblo through Walsenburg, Trinidad, and Raton to Las Vegas, New Mexico, closing the 214-mile Las Vegas-Pueblo skip. Raton Pass carries the real ~6% grade and the New Mexico-Colorado state line. The pinned Denver-Albuquerque US-285 mountain express is untouched. Built.",
+      "waypoints": [
+        {"lat": 38.2544, "lon": -104.6091, "note": "Pueblo -- I-25 north end (existing node)"},
+        {"lat": 37.6242, "lon": -104.7803, "note": "Walsenburg -- I-25 checkpoint"},
+        {"lat": 37.1695, "lon": -104.5005, "note": "Trinidad -- I-25 Colorado side of Raton Pass"},
+        {"lat": 36.9033, "lon": -104.4391, "note": "Raton -- I-25 New Mexico side of the pass"},
+        {"lat": 35.5939, "lon": -105.2239, "note": "Las Vegas, NM -- I-25 south end (existing node)"}
+      ]
     }
   ]
 }
