@@ -17,9 +17,9 @@
 - **Every run now names the real towns and country you pass.** Those are
   checkpoints -- the actual places along a route, spoken as you reach them -- and
   the map went from about 550 of them to over 2,500. Instead of empty miles, a
-  haul now names the towns you pass, the rivers it crosses, the mountain passes
-  and summits it climbs, and the state lines along the way, all from real
-  geography and real elevation data, so the grades are felt and not smoothed flat.
+  haul now names the towns you pass and the state lines along the way, all from
+  real geography, and real elevation data means the grades are felt and not
+  smoothed flat.
 
 - **Over 1,700 truck stops are now named along your routes.** Real travel centers, truck
   stops, and rest areas -- Love's, Pilot, Flying J, TA, Petro, and independents
@@ -43,10 +43,16 @@
   real named stops to fuel and park along the way, and grades that rise and fall
   with the real terrain.
 
-- **New: real roadside landmarks as you drive.** Routes now call out the world
-  going by -- entering a national forest, crossing a named river, approaching a
-  mountain pass, a roadside museum ahead -- over 2,800 of them, drawn from real
-  map data so a long haul has a sense of place instead of silence.
+- **Nevada's Great Basin opens up -- six new cities on three high-desert
+  corridors.** The empty interior between the interstates fills in: US-93 up the
+  eastern Great Basin from Las Vegas through Alamo and Ely to Wells; US-50 -- "the
+  Loneliest Road in America" -- across the middle through Eureka, Austin, and
+  Fallon; and US-6 tying Ely to Tonopah. These are long, quiet, climbing hauls
+  over real mountain grades (the run to Wells tops seven percent over Pequop
+  Summit), and every leg points you to a real diesel pump so you never run dry on
+  the lonely stretches. Ely, Fallon, and Wells are new places to pick up and
+  deliver -- and Wells now splits the old Elko run, so Interstate 80 freight
+  passes through the real town instead of leaping it.
 
 - **Some hauls now offer more than one way to drive them.** Where two real truck
   routes reach the same place, the map keeps both, so a run can offer a choice --
