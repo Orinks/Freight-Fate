@@ -277,6 +277,20 @@
         {"lat": 36.9033, "lon": -104.4391, "note": "Raton -- I-25 New Mexico side of the pass"},
         {"lat": 35.5939, "lon": -105.2239, "note": "Las Vegas, NM -- I-25 south end (existing node)"}
       ]
+    },
+    {
+      "ref": "I-5-SHASTA",
+      "spoken": "Interstate 5",
+      "phase": 1,
+      "tier": 1,
+      "status": "built",
+      "note": "I-5 over the Siskiyous: split the 149-mile Redding->Medford hop (and drop the redundant 219-mile Medford->Chico express) by adding Mount Shasta and Yreka. The Yreka->Medford leg carries Siskiyou Summit and the California-Oregon state line; the climb past Dunsmuir and Black Butte is real mountain grade. Built.",
+      "waypoints": [
+        {"lat": 40.5865, "lon": -122.3917, "note": "Redding -- I-5 south end (existing node)"},
+        {"lat": 41.3099, "lon": -122.3106, "note": "Mount Shasta -- I-5 below the peak"},
+        {"lat": 41.7354, "lon": -122.6345, "note": "Yreka -- I-5 Siskiyou County seat"},
+        {"lat": 42.3265, "lon": -122.8756, "note": "Medford -- I-5 over Siskiyou Summit (existing node)"}
+      ]
     }
   ]
 }

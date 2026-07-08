@@ -5584,6 +5584,24 @@
       "lat": 37.1695,
       "lon": -104.5005,
       "locations": []
+    },
+    "mount_shasta_ca_us": {
+      "spoken_city": "Mount Shasta",
+      "state": "CA",
+      "country": "US",
+      "region": "california",
+      "lat": 41.3099,
+      "lon": -122.3106,
+      "locations": []
+    },
+    "yreka_ca_us": {
+      "spoken_city": "Yreka",
+      "state": "CA",
+      "country": "US",
+      "region": "california",
+      "lat": 41.7354,
+      "lon": -122.6345,
+      "locations": []
     }
   }
 }
