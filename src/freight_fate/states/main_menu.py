@@ -921,21 +921,25 @@ class SettingsCategoryState(MenuState):
         if self.category == "online":
             from ..online_presence import OnlineIdentity
 
-            configured = OnlineIdentity.load() is not None
             return [
                 MenuItem(
+                    # The identity check lives INSIDE the label so it is
+                    # fresh on every read: a captured build-time value went
+                    # stale the moment setup completed (or the identity file
+                    # changed on disk) and misreported "on" while dormant.
                     lambda: (
                         f"Share on the drivers board: {'on' if s.online_presence else 'off'}"
-                        if configured
+                        if OnlineIdentity.load() is not None
                         else "Share on the drivers board: not set up"
                     ),
                     lambda: self._toggle_online_presence(1),
                     help="Show what you are hauling on the public drivers "
                     "board at orinks.net while you are on a job. Nothing is "
                     "shared until you set it up: selecting this the first "
-                    "time opens your browser to choose a driver name and "
-                    "confirm. Only broad in-game activity is ever shared, "
-                    "never your save files or personal details.",
+                    "time opens the drivers board setup menu, where you sign "
+                    "in on orinks.net and paste in your Driver ID and token. "
+                    "Only broad in-game activity is ever shared, never your "
+                    "save files or personal details.",
                 ),
                 MenuItem("Back", self.go_back),
             ]
