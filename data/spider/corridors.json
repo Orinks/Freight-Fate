@@ -218,6 +218,108 @@
         {"lat": 44.6368, "lon": -124.0535, "note": "Newport -- US-101 central coast, Yaquina Bay"},
         {"lat": 46.1879, "lon": -123.8313, "note": "Astoria -- US-101 at the Columbia (US-30 to Portland)"}
       ]
+    },
+    {
+      "ref": "I-80-NE",
+      "spoken": "Interstate 80",
+      "phase": 1,
+      "tier": 1,
+      "status": "unstarted",
+      "note": "I-80 up the Platte River valley across western Nebraska: Grand Island to Cheyenne. Grand Island, North Platte, and Cheyenne exist; the long grand_island-north_platte and north_platte-cheyenne legs skip the real I-80 towns (Kearney, Lexington, Ogallala, Sidney).",
+      "waypoints": [
+        {"lat": 40.9264, "lon": -98.3420, "note": "Grand Island -- I-80 east start (existing node)"},
+        {"lat": 41.1403, "lon": -100.7601, "note": "North Platte -- I-80 (existing node)"},
+        {"lat": 41.1400, "lon": -104.8202, "note": "Cheyenne -- I-80 west end (existing node)"}
+      ]
+    },
+    {
+      "ref": "I-70-KS",
+      "spoken": "Interstate 70",
+      "phase": 1,
+      "tier": 1,
+      "status": "unstarted",
+      "note": "I-70 across Kansas and onto the Colorado high plains: Topeka through Salina to Denver. Topeka-Salina exists but skips Junction City; west of Salina (Hays, Colby, and on across eastern Colorado) is entirely missing. The famous flat Kansas City-Denver express leg stays.",
+      "waypoints": [
+        {"lat": 39.0473, "lon": -95.6752, "note": "Topeka -- I-70 east start (existing node)"},
+        {"lat": 38.8403, "lon": -97.6114, "note": "Salina -- I-70 (existing node)"},
+        {"lat": 39.3958, "lon": -101.0524, "note": "Colby -- I-70 western Kansas"},
+        {"lat": 39.7392, "lon": -104.9903, "note": "Denver -- I-70 west end (existing node)"}
+      ]
+    },
+    {
+      "ref": "I-10-WTX",
+      "spoken": "Interstate 10",
+      "phase": 1,
+      "tier": 1,
+      "status": "built",
+      "note": "I-10 across West Texas: San Antonio through Kerrville, Junction, Ozona, and Fort Stockton to Van Horn and El Paso. The 555-mile San Antonio-El Paso express and the 456-mile Van Horn-San Antonio skip were replaced by the real desert chain; the US-90 Del Rio border alternate stays. Built.",
+      "waypoints": [
+        {"lat": 29.4241, "lon": -98.4936, "note": "San Antonio -- I-10 west start (existing node)"},
+        {"lat": 30.0474, "lon": -99.1403, "note": "Kerrville -- I-10 Hill Country (existing node)"},
+        {"lat": 30.4894, "lon": -99.7720, "note": "Junction -- I-10 Kimble County"},
+        {"lat": 30.7099, "lon": -101.2010, "note": "Ozona -- I-10 Crockett County"},
+        {"lat": 30.8935, "lon": -102.8794, "note": "Fort Stockton -- I-10 Pecos County"},
+        {"lat": 31.0407, "lon": -104.8305, "note": "Van Horn -- I-10 (existing node)"},
+        {"lat": 31.7587, "lon": -106.4869, "note": "El Paso -- I-10 west end (existing node)"}
+      ]
+    },
+    {
+      "ref": "I-25-RATON",
+      "spoken": "Interstate 25",
+      "phase": 1,
+      "tier": 1,
+      "status": "built",
+      "note": "I-25 over Raton Pass: Pueblo through Walsenburg, Trinidad, and Raton to Las Vegas, New Mexico, closing the 214-mile Las Vegas-Pueblo skip. Raton Pass carries the real ~6% grade and the New Mexico-Colorado state line. The pinned Denver-Albuquerque US-285 mountain express is untouched. Built.",
+      "waypoints": [
+        {"lat": 38.2544, "lon": -104.6091, "note": "Pueblo -- I-25 north end (existing node)"},
+        {"lat": 37.6242, "lon": -104.7803, "note": "Walsenburg -- I-25 checkpoint"},
+        {"lat": 37.1695, "lon": -104.5005, "note": "Trinidad -- I-25 Colorado side of Raton Pass"},
+        {"lat": 36.9033, "lon": -104.4391, "note": "Raton -- I-25 New Mexico side of the pass"},
+        {"lat": 35.5939, "lon": -105.2239, "note": "Las Vegas, NM -- I-25 south end (existing node)"}
+      ]
+    },
+    {
+      "ref": "I-5-SHASTA",
+      "spoken": "Interstate 5",
+      "phase": 1,
+      "tier": 1,
+      "status": "built",
+      "note": "I-5 over the Siskiyous: split the 149-mile Redding->Medford hop (and drop the redundant 219-mile Medford->Chico express) by adding Mount Shasta and Yreka. The Yreka->Medford leg carries Siskiyou Summit and the California-Oregon state line; the climb past Dunsmuir and Black Butte is real mountain grade. Built.",
+      "waypoints": [
+        {"lat": 40.5865, "lon": -122.3917, "note": "Redding -- I-5 south end (existing node)"},
+        {"lat": 41.3099, "lon": -122.3106, "note": "Mount Shasta -- I-5 below the peak"},
+        {"lat": 41.7354, "lon": -122.6345, "note": "Yreka -- I-5 Siskiyou County seat"},
+        {"lat": 42.3265, "lon": -122.8756, "note": "Medford -- I-5 over Siskiyou Summit (existing node)"}
+      ]
+    },
+    {
+      "ref": "I-29-DAK",
+      "spoken": "Interstate 29",
+      "phase": 1,
+      "tier": 1,
+      "status": "built",
+      "note": "I-29 up the Dakotas: add Watertown to split the 206-mile Fargo->Brookings hop (Brookings already existed), completing Fargo -> Watertown -> Brookings -> Sioux Falls. Also dropped two redundant unprotected expresses: the 248-mile Fargo->Sioux Falls and the 425-mile Fargo->Omaha. The Fargo->Watertown leg carries the North Dakota-South Dakota line. Built.",
+      "waypoints": [
+        {"lat": 46.8772, "lon": -96.7898, "note": "Fargo -- I-29 north end (existing node)"},
+        {"lat": 44.8994, "lon": -97.1151, "note": "Watertown -- I-29 (new)"},
+        {"lat": 44.3114, "lon": -96.7984, "note": "Brookings -- I-29 (existing node)"},
+        {"lat": 43.5446, "lon": -96.7311, "note": "Sioux Falls -- I-29 (existing node)"}
+      ]
+    },
+    {
+      "ref": "OR-99W-WILLAMETTE",
+      "spoken": "Oregon Route 99W",
+      "phase": 1,
+      "tier": 1,
+      "status": "built",
+      "note": "Willamette Valley fill: the I-5 spine (Portland-Salem-Albany-Eugene, with Albany tying Corvallis in) already existed; this adds Woodburn on I-5 and the OR-99W wine-country western alternate through Newberg and McMinnville, giving a distinct Portland->Salem route. Dropped the now-redundant Portland-Salem, Eugene-Salem, and Eugene-Portland expresses. Rex Hill on 99W comes out hills; the rest is flat valley floor. Built.",
+      "waypoints": [
+        {"lat": 45.5152, "lon": -122.6784, "note": "Portland -- north end (existing node)"},
+        {"lat": 45.3001, "lon": -122.9729, "note": "Newberg -- OR-99W wine country"},
+        {"lat": 45.2101, "lon": -123.1987, "note": "McMinnville -- OR-99W"},
+        {"lat": 45.1437, "lon": -122.8551, "note": "Woodburn -- I-5 (Portland-Salem)"},
+        {"lat": 44.9429, "lon": -123.0351, "note": "Salem -- valley hub (existing node)"}
+      ]
     }
   ]
 }

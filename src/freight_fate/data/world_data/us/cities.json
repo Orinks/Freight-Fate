@@ -5467,6 +5467,186 @@
       "lat": 44.5646,
       "lon": -123.262,
       "locations": []
+    },
+    "kearney_ne_us": {
+      "spoken_city": "Kearney",
+      "state": "NE",
+      "country": "US",
+      "region": "heartland",
+      "lat": 40.6996,
+      "lon": -99.0817,
+      "locations": []
+    },
+    "lexington_ne_us": {
+      "spoken_city": "Lexington",
+      "state": "NE",
+      "country": "US",
+      "region": "heartland",
+      "lat": 40.7808,
+      "lon": -99.7418,
+      "locations": []
+    },
+    "ogallala_ne_us": {
+      "spoken_city": "Ogallala",
+      "state": "NE",
+      "country": "US",
+      "region": "heartland",
+      "lat": 41.1281,
+      "lon": -101.7196,
+      "locations": []
+    },
+    "sidney_ne_us": {
+      "spoken_city": "Sidney",
+      "state": "NE",
+      "country": "US",
+      "region": "heartland",
+      "lat": 41.1428,
+      "lon": -102.9777,
+      "locations": []
+    },
+    "junction_city_ks_us": {
+      "spoken_city": "Junction City",
+      "state": "KS",
+      "country": "US",
+      "region": "southern_plains",
+      "lat": 39.0286,
+      "lon": -96.8314,
+      "locations": []
+    },
+    "hays_ks_us": {
+      "spoken_city": "Hays",
+      "state": "KS",
+      "country": "US",
+      "region": "southern_plains",
+      "lat": 38.8792,
+      "lon": -99.3268,
+      "locations": []
+    },
+    "colby_ks_us": {
+      "spoken_city": "Colby",
+      "state": "KS",
+      "country": "US",
+      "region": "southern_plains",
+      "lat": 39.3958,
+      "lon": -101.0524,
+      "locations": []
+    },
+    "burlington_co_us": {
+      "spoken_city": "Burlington",
+      "state": "CO",
+      "country": "US",
+      "region": "rockies",
+      "lat": 39.3061,
+      "lon": -102.2694,
+      "locations": []
+    },
+    "junction_tx_us": {
+      "spoken_city": "Junction",
+      "state": "TX",
+      "country": "US",
+      "region": "gulf_coast",
+      "lat": 30.4894,
+      "lon": -99.772,
+      "locations": []
+    },
+    "ozona_tx_us": {
+      "spoken_city": "Ozona",
+      "state": "TX",
+      "country": "US",
+      "region": "gulf_coast",
+      "lat": 30.7099,
+      "lon": -101.201,
+      "locations": []
+    },
+    "fort_stockton_tx_us": {
+      "spoken_city": "Fort Stockton",
+      "state": "TX",
+      "country": "US",
+      "region": "gulf_coast",
+      "lat": 30.8935,
+      "lon": -102.8794,
+      "locations": []
+    },
+    "raton_nm_us": {
+      "spoken_city": "Raton",
+      "state": "NM",
+      "country": "US",
+      "region": "desert_southwest",
+      "lat": 36.9033,
+      "lon": -104.4391,
+      "locations": []
+    },
+    "trinidad_co_us": {
+      "spoken_city": "Trinidad",
+      "state": "CO",
+      "country": "US",
+      "region": "rockies",
+      "lat": 37.1695,
+      "lon": -104.5005,
+      "locations": []
+    },
+    "mount_shasta_ca_us": {
+      "spoken_city": "Mount Shasta",
+      "state": "CA",
+      "country": "US",
+      "region": "california",
+      "lat": 41.3099,
+      "lon": -122.3106,
+      "locations": []
+    },
+    "yreka_ca_us": {
+      "spoken_city": "Yreka",
+      "state": "CA",
+      "country": "US",
+      "region": "california",
+      "lat": 41.7354,
+      "lon": -122.6345,
+      "locations": []
+    },
+    "watertown_sd_us": {
+      "spoken_city": "Watertown",
+      "state": "SD",
+      "country": "US",
+      "region": "heartland",
+      "lat": 44.8994,
+      "lon": -97.1151,
+      "locations": []
+    },
+    "albany_or_us": {
+      "spoken_city": "Albany",
+      "state": "OR",
+      "country": "US",
+      "region": "pacific_northwest",
+      "lat": 44.6365,
+      "lon": -123.1059,
+      "locations": []
+    },
+    "woodburn_or_us": {
+      "spoken_city": "Woodburn",
+      "state": "OR",
+      "country": "US",
+      "region": "pacific_northwest",
+      "lat": 45.1437,
+      "lon": -122.8551,
+      "locations": []
+    },
+    "newberg_or_us": {
+      "spoken_city": "Newberg",
+      "state": "OR",
+      "country": "US",
+      "region": "pacific_northwest",
+      "lat": 45.3001,
+      "lon": -122.9729,
+      "locations": []
+    },
+    "mcminnville_or_us": {
+      "spoken_city": "McMinnville",
+      "state": "OR",
+      "country": "US",
+      "region": "pacific_northwest",
+      "lat": 45.2101,
+      "lon": -123.1987,
+      "locations": []
     }
   }
 }
