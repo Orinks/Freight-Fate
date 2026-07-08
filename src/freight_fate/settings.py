@@ -25,6 +25,9 @@ CHATTER_CATEGORY_FIELDS = {
     "highway_marker": "chatter_passes",
     "museum": "chatter_museums",
     "billboard": "chatter_billboards",
+    # Placed roadside billboards baked as leg landmarks (billboard spider); ride
+    # the same switch as the random-pool billboards so one toggle governs both.
+    "billboard_sign": "chatter_billboards",
 }
 
 # The player-facing chatter switches, in menu order.
