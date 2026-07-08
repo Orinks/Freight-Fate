@@ -544,6 +544,25 @@ def make_trip(world, start_hour, seed=2, start="Atlanta", end="Dallas"):
     return Trip(route, truck, weather, seed=seed, start_hour=start_hour)
 
 
+def job_with_supported_route(world, city, level, jobs=None):
+    """An offered ``city`` job at ``level`` whose route is supported.
+
+    Tries the given ``jobs`` first, then searches seeds so a shifted job draw
+    (which happens as the map grows) can't StopIteration -- the test only needs
+    a genuine acceptable job, not one particular seed's.
+    """
+    from freight_fate.models.jobs import JobBoard
+
+    for job in jobs or ():
+        if world.supported_route(job.origin, job.destination):
+            return job
+    for seed in range(200):
+        for job in JobBoard(world, seed=seed).offers(city, set(), level=level):
+            if world.supported_route(job.origin, job.destination):
+                return job
+    raise AssertionError(f"no offered {city} job with a supported route under any seed")
+
+
 def test_night_zone_layout_is_deterministic(world):
     a = make_trip(world, start_hour=23.0, seed=11)
     b = make_trip(world, start_hour=23.0, seed=11)
@@ -1207,7 +1226,7 @@ def test_dispatch_warns_before_accepting_job_that_exceeds_current_hos(monkeypatc
         app.ctx.profile.current_city = "Austin"
         app.ctx.profile.hos.drive(LIMITS["realistic"][0] - 30.0)
         jobs = JobBoard(app.ctx.world, seed=2).offers("Austin", set(), level=2)
-        job = next(j for j in jobs if app.ctx.world.supported_route(j.origin, j.destination))
+        job = job_with_supported_route(app.ctx.world, "Austin", 2, jobs)
         board = JobBoardState(app.ctx, [job])
 
         board._accept(job)
@@ -1281,7 +1300,7 @@ def test_dispatch_does_not_warn_after_hours_reset(monkeypatch):
 
         assert "extra legal rest" not in spoken[-1]
 
-        job = next(j for j in jobs if app.ctx.world.supported_route(j.origin, j.destination))
+        job = job_with_supported_route(app.ctx.world, "Austin", 2, jobs)
         board._accept(job)
 
         assert "Hours warning" not in spoken[-1]
