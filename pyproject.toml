@@ -48,6 +48,8 @@ dev = [
     "soundfile>=0.14.0",
     "pre-commit>=4.6.0",
     "hypothesis>=6.155.7",
+    "openrouteservice>=2.3.3",
+    "osmium>=4.3.1",
 ]
 build = [
     "nuitka>=4.0.8",

@@ -102,10 +102,10 @@ STATE_REGION: dict[str, str] = {
     # Southern Plains
     "KS": "southern_plains",
     "OK": "southern_plains",
-    # Mid-South (interior Dixie / Cumberland / Ozark fringe)
+    # Mid-South (interior Dixie / Cumberland / Ozark fringe).
+    # Alabama and Mississippi are split by latitude in classify_region (their
+    # Gulf coastal strip -> gulf_coast).
     "KY": "mid_south",
-    "AL": "mid_south",
-    "MS": "mid_south",
     "AR": "mid_south",
     # Atlantic Southeast (Piedmont + southern Atlantic coastal plain).
     # Virginia and North Carolina are split by longitude in classify_region
@@ -151,6 +151,10 @@ def classify_region(state: str, lat: float, lon: float) -> str:
     if state == "NV":
         # Reno and northern Nevada are Great Basin; Las Vegas is Mojave desert.
         return "great_basin" if lat >= 38.0 else "desert_southwest"
+    if state in ("AL", "MS"):
+        # The Gulf coastal strip (Mobile, Gulfport) is Gulf Coast; the
+        # interior of both states is Mid-South.
+        return "gulf_coast" if lat <= 31.0 else "mid_south"
     if state == "TN":
         # East Tennessee is Appalachian; middle and west are Mid-South.
         return "appalachia" if lon >= -85.0 else "mid_south"

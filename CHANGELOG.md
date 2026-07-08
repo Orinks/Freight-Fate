@@ -4,6 +4,42 @@
 
 ### Added
 
+- **The biggest map update yet -- 100 new cities to pick up and deliver in.** A
+  city is a place a load can start or end, and the map grew from 249 to 349 of
+  them, filling in dead zones that used to have nothing drivable for hundreds of
+  miles: the mountain West, the northern plains, the Nevada Great Basin, the
+  Oregon and California coast, and Appalachia. Whole corridors that simply were
+  not there before now connect city to city on the real roads -- Interstate 70
+  over the Colorado Rockies, the US-2 Hi-Line across the northern tier, Interstate
+  80 across Nevada, and Interstate 75 through the Kentucky mountains among them. Be careful, though -- there are still some challenging
+  routes where you had better watch your fuel and get it when you can.
+
+- **Every run now names the real towns and country you pass.** Those are
+  checkpoints -- the actual places along a route, spoken as you reach them -- and
+  the map went from about 550 of them to over 2,500. Instead of empty miles, a
+  haul now names the towns you pass, the rivers it crosses, the mountain passes
+  and summits it climbs, and the state lines along the way, all from real
+  geography and real elevation data, so the grades are felt and not smoothed flat.
+
+- **Over 1,700 truck stops are now named along your routes.** Real travel centers, truck
+  stops, and rest areas -- Love's, Pilot, Flying J, TA, Petro, and independents
+  -- each pinned to its real location, so every route now has at least one place
+  to fuel or park, and even the emptiest rural stretches point you to a real
+  diesel pump you can pull a rig into. For now these are just named on the map;
+  making them do something -- rest, showers, repairs, and buffs -- comes in a
+  later update.
+
+- **New: real roadside landmarks as you drive.** Routes now call out the world
+  going by -- entering a national forest, crossing a named river, approaching a
+  mountain pass, a roadside museum ahead -- over 2,800 of them, drawn from real
+  map data so a long haul has a sense of place instead of silence.
+
+- **Some hauls now offer more than one way to drive them.** Where two real truck
+  routes reach the same place, the map keeps both, so a run can offer a choice --
+  a faster interstate or a shorter back road -- instead of a single fixed path.
+  Is it winter, and you'd rather take a southern route than a mountainous
+  northern one? We've got you covered.
+
 - **The map now has real time zones, and your clock changes as you cross
   them.** Drive west out of Tennessee on I-40 and you will hear "Crossing
   into Central Time. It is now 2:15 PM." With terse speech on, it is just
@@ -65,6 +101,11 @@
   On the dispatch board, pressing F1 while on the Back to terminal entry used
   to crash; it now simply reads the entry back, like any other menu item.
   Thanks to ironcross32.
+
+- **Resuming a trip no longer repeats a stop it already called out.** When you
+  continued a saved run, the game could re-announce a truck stop or rest area
+  just ahead that it had already told you about before you saved. It now
+  remembers what it said and stays quiet. Thanks to nromey.
 
 ## 1.8.0 - 2026-07-05
 

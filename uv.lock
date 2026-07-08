@@ -365,7 +365,7 @@ name = "exceptiongroup"
 version = "1.3.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "typing-extensions", marker = "python_full_version < '3.11'" },
+    { name = "typing-extensions" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/50/79/66800aadf48771f6b62f7eb014e352e5d06856655206165d775e675a02c9/exceptiongroup-1.3.1.tar.gz", hash = "sha256:8b412432c6055b0b7d14c310000ae93352ed6754f70fa8f7c34141f91c4e3219", size = 30371, upload-time = "2025-11-21T23:01:54.787Z" }
 wheels = [
@@ -413,6 +413,8 @@ controller-diagnostics = [
 ]
 dev = [
     { name = "hypothesis" },
+    { name = "openrouteservice" },
+    { name = "osmium" },
     { name = "pre-commit" },
     { name = "pytest" },
     { name = "pytest-cov" },
@@ -441,6 +443,8 @@ build = [{ name = "nuitka", specifier = ">=4.0.8" }]
 controller-diagnostics = [{ name = "pygame", specifier = ">=2.6" }]
 dev = [
     { name = "hypothesis", specifier = ">=6.155.7" },
+    { name = "openrouteservice", specifier = ">=2.3.3" },
+    { name = "osmium", specifier = ">=4.3.1" },
     { name = "pre-commit", specifier = ">=4.6.0" },
     { name = "pytest", specifier = ">=8.3" },
     { name = "pytest-cov", specifier = ">=6.0" },

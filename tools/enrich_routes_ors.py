@@ -14,14 +14,21 @@ def ors_api_key() -> str | None:
     return key or None
 
 
-def _ors_directions_kwargs(start: dict[str, Any], end: dict[str, Any]) -> dict[str, Any]:
+def _ors_directions_kwargs(
+    start: dict[str, Any],
+    end: dict[str, Any],
+    via: tuple[dict[str, Any], ...] = (),
+) -> dict[str, Any]:
     """The driving-hgv directions request as SDK keyword arguments.
 
-    Pure, so it is unit-testable without the SDK installed.
+    Pure, so it is unit-testable without the SDK installed. ``via`` points
+    (curated ``route_via`` on a leg) pin the route to the leg's declared
+    highway when ORS's cost model narrowly prefers a different road.
     """
     return {
         "coordinates": [
             [float(start["lon"]), float(start["lat"])],
+            *[[float(p["lon"]), float(p["lat"])] for p in via],
             [float(end["lon"]), float(end["lat"])],
         ],
         "profile": ORS_HGV_PROFILE,
@@ -36,6 +43,7 @@ def fetch_ors_hgv_route(
     end: dict[str, Any],
     api_key: str,
     *,
+    via: tuple[dict[str, Any], ...] = (),
     timeout_s: float = OSRM_TIMEOUT_S + 15,
 ) -> dict[str, Any]:
     """Live OpenRouteService driving-hgv request returning the raw GeoJSON.
@@ -57,7 +65,7 @@ def fetch_ors_hgv_route(
     client = openrouteservice.Client(
         key=api_key, base_url=base_url, timeout=timeout_s, retry_over_query_limit=True
     )
-    return client.directions(**_ors_directions_kwargs(start, end))
+    return client.directions(**_ors_directions_kwargs(start, end, via))
 
 
 def parse_ors_route(payload: dict[str, Any]) -> dict[str, Any]:
@@ -160,13 +168,21 @@ def _cached_ors_route(
 
     Caching keeps re-runs off the rate-limited API; the committed artifact is
     still ``world.json``, and ``.route-cache/`` stays local (git-ignored).
+
+    A leg may carry a curated ``route_via`` list (``[{"lat", "lon", "note"}]``)
+    pinning the route to its declared highway -- used when ORS's cost model
+    narrowly prefers a different road than real trucks take (e.g. it routed
+    San Antonio->El Paso down US-90 instead of I-10). Via points join the
+    cache key so adding one invalidates the old route.
     """
     cities = data["cities"]
-    path = _cache_file(cache_dir, "ors", f"{leg['from']}--{leg['to']}--{leg['highway']}")
+    via = tuple(leg.get("route_via", ()))
+    via_key = "".join(f"--via{p['lat']:.3f},{p['lon']:.3f}" for p in via)
+    path = _cache_file(cache_dir, "ors", f"{leg['from']}--{leg['to']}--{leg['highway']}{via_key}")
     if path.exists():
         payload = json.loads(path.read_text(encoding="utf-8"))
     else:
-        payload = fetch_ors_hgv_route(cities[leg["from"]], cities[leg["to"]], api_key)
+        payload = fetch_ors_hgv_route(cities[leg["from"]], cities[leg["to"]], api_key, via=via)
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(json.dumps(payload, sort_keys=True), encoding="utf-8")
         if rate_limit_s > 0:
@@ -208,6 +224,71 @@ def ors_corridor_samples(
             else (elevations[-1] if elevations else 0.0)
         )
     samples[0]["at_mi"] = 0.0
+    samples[-1]["at_mi"] = leg_miles
+    return samples, sample_elevations
+
+
+GRADE_BIN_MI = 0.25  # fixed real-distance width for grade-fidelity sampling
+
+
+def fine_grade_samples(
+    parsed: dict[str, Any],
+    leg_miles: float,
+    bin_width_mi: float = GRADE_BIN_MI,
+) -> tuple[list[dict[str, float]], list[float]]:
+    """Real elevation change over real distance traveled, in fixed-width bins.
+
+    Feed the result to :func:`grade_segments_from_samples` for grade segments
+    that actually reflect short, sharp pitches (a real mountain leg can carry
+    a genuine 6-8% grade for under a mile) instead of the near-flat average
+    :func:`ors_corridor_samples` gives at its default handful of samples.
+
+    This is deliberately NOT ``ors_corridor_samples`` at a higher
+    ``sample_count``: that function picks N evenly spaced *target* mileposts
+    and snaps each to the nearest following vertex. Once N approaches real
+    vertex density, a long straight stretch (sparser vertices) can collapse
+    several targets onto the very same vertex -- a false flat run followed by
+    a spurious jump once the scan reaches the next real vertex, producing
+    wildly implausible grades (30%+ on real interstate terrain). Walking the
+    polyline forward exactly once and closing a bin only on genuine
+    accumulated distance avoids that artifact entirely. ORS already returns
+    the full, undecimated elevation profile in the one directions() call, so
+    this costs no extra requests.
+    """
+    coords = parsed["coordinates"]
+    elevations = parsed["elevations_ft"]
+    if len(coords) < 2:
+        raise RuntimeError("ORS route geometry has fewer than two points")
+    cumulative_mi = [0.0]
+    for prev, cur in zip(coords, coords[1:], strict=False):
+        cumulative_mi.append(cumulative_mi[-1] + _haversine_miles(prev[1], prev[0], cur[1], cur[0]))
+    total = cumulative_mi[-1] or 1.0
+    scale = leg_miles / total if leg_miles else 1.0
+
+    lon0, lat0 = coords[0]
+    samples: list[dict[str, float]] = [{"at_mi": 0.0, "lat": float(lat0), "lon": float(lon0)}]
+    sample_elevations: list[float] = [elevations[0]]
+    acc_mi = 0.0
+    last = len(coords) - 1
+    for i in range(1, len(coords)):
+        acc_mi += cumulative_mi[i] - cumulative_mi[i - 1]
+        if acc_mi < bin_width_mi and i != last:
+            continue
+        lon, lat = coords[i]
+        at_mi = round(cumulative_mi[i] * scale, 3)
+        # A stored grade segment rounds its endpoints to 1 decimal place, so a
+        # sample gap under ~0.1 mi can silently round away to a zero-width
+        # segment that world.py rejects. Require real headroom before it.
+        if at_mi - samples[-1]["at_mi"] >= 0.15:
+            samples.append({"at_mi": at_mi, "lat": float(lat), "lon": float(lon)})
+            sample_elevations.append(elevations[i])
+        elif i == last:
+            # The forced final close landed too close to the previous sample
+            # to survive rounding -- update that bin in place to the true
+            # endpoint instead of appending a near-zero-width duplicate.
+            samples[-1] = {"at_mi": at_mi, "lat": float(lat), "lon": float(lon)}
+            sample_elevations[-1] = elevations[i]
+        acc_mi = 0.0
     samples[-1]["at_mi"] = leg_miles
     return samples, sample_elevations
 
@@ -274,7 +355,10 @@ def _grade_segment(
     return {
         "start_mi": round(start_mi, 1),
         "end_mi": round(end_mi, 1),
-        "avg_grade_pct": round(sum(grades) / len(grades), 2),
+        # Clamp to the loader's realistic band (+/-15%). A short segment over an
+        # ORS elevation blip can otherwise average to a bogus 17%+ and fail the
+        # world load -- common on mountain corridors (Green River-Richfield on I-70).
+        "avg_grade_pct": max(-14.0, min(14.0, round(sum(grades) / len(grades), 2))),
         "terrain": terrain,
         "source": ORS_GRADE_SOURCE,
     }

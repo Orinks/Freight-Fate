@@ -42,9 +42,18 @@ ORS_EXTRA_INFO = ("steepness", "tollways", "waytype")
 # endpoint becomes {base}/v2/directions/{profile}. Override with ORS_BASE_URL.
 ORS_DEFAULT_BASE_URL = "https://api.heigit.org/openrouteservice"
 OVERPASS_URL = "https://overpass-api.de/api/interpreter"
-OVERPASS_URLS = (
-    OVERPASS_URL,
-    "https://overpass.kumi.systems/api/interpreter",
+# Prefer a self-hosted Overpass via the OVERPASS_URL env var (see
+# enrich_routes_base); public mirrors stay as fallback.
+OVERPASS_URLS = tuple(
+    dict.fromkeys(
+        url
+        for url in (
+            os.environ.get("OVERPASS_URL"),
+            OVERPASS_URL,
+            "https://overpass.kumi.systems/api/interpreter",
+        )
+        if url
+    )
 )
 CENSUS_STATES_URL = "https://www2.census.gov/geo/tiger/GENZ2023/shp/cb_2023_us_state_500k.zip"
 CENSUS_STATES_GEOJSON_URL = (
@@ -208,7 +217,19 @@ def main(argv: list[str] | None = None) -> int:
         "--write, --per-leg, and optionally --only.",
     )
     parser.add_argument(
-        "--per-leg", type=int, default=2, help="Max new POIs per leg for --add-overpass-pois."
+        "--per-leg",
+        type=int,
+        default=2,
+        help="Max new mid-corridor POIs per leg for --add-overpass-pois "
+        "(endpoint-city finds ride on top, at most one per leg end).",
+    )
+    parser.add_argument(
+        "--rural-fuel-fallback",
+        action="store_true",
+        help="With --add-overpass-pois: on legs that would otherwise carry no "
+        "stop, also accept a named diesel-selling fuel station (no HGV tag "
+        "required) as a low-ranked fuel_station stop. Pair with --only on the "
+        "stopless legs so legs with real truck stops are untouched.",
     )
     parser.add_argument(
         "--add-maxspeed",
@@ -329,6 +350,7 @@ def main(argv: list[str] | None = None) -> int:
             rate_limit_s=args.rate_limit,
             only=_parse_only(args.only),
             per_leg=args.per_leg,
+            rural_fallback=args.rural_fuel_fallback,
         )
         if args.write:
             WORLD_PATH.write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")
