@@ -97,6 +97,19 @@
 
 ### Fixed
 
+- **Your truck no longer idles all night while you sleep.** Bedding down for
+  the night -- at a rest stop, in the sleeper berth, in a cramped lot, or on
+  the shoulder -- now shuts the engine down first, and you will hear "You
+  shut down the engine" as you turn in. When you head back to the road,
+  start the engine as usual. Thanks to Bartholomue.
+
+- **Updating the game on Mac now works.** Downloading an update used to end
+  with "the download failed" and nothing installed, leaving Mac players to
+  fetch each new version by hand. The updater now understands the Mac app
+  bundle: it swaps in the new app after the game closes and reopens it for
+  you, just like on Windows and Linux. Your saves are untouched. Thanks to
+  vlad-a-c.
+
 - **Asking for job details on Back to terminal no longer crashes the game.**
   On the dispatch board, pressing F1 while on the Back to terminal entry used
   to crash; it now simply reads the entry back, like any other menu item.

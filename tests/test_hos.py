@@ -920,6 +920,45 @@ def test_split_sleeper_rest_action_advances_clock_and_speaks_status(monkeypatch)
 
 
 @pytest.mark.smoke
+def test_sleeping_shuts_down_a_running_engine(monkeypatch):
+    # A truck must not idle through a 10-hour sleep (issue #40): sleeping
+    # kills a running engine, says so, and stays quiet when it was already off.
+    from freight_fate.app import App
+    from freight_fate.states.driving import RestStopState
+
+    app = App()
+    spoken = []
+    monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: spoken.append(text))
+    try:
+        driving = start_drive(app)
+        driving.truck.start_engine()
+        sleeper = SimpleNamespace(
+            name="Big Truck Stop",
+            at_mi=driving.trip.position_mi,
+            type="truck_stop",
+            actions=("break", "fuel", "sleep"),
+            services=(),
+            parking="confirmed",
+            exit_label="",
+            spoken_name="Big Truck Stop",
+            parking_text="confirmed truck parking",
+        )
+        app.push_state(RestStopState(app.ctx, driving, sleeper))
+
+        select(app.state, "Sleep 10 hours")
+
+        assert not driving.truck.engine_on
+        assert any("You shut down the engine." in text for text in spoken)
+
+        spoken.clear()
+        select(app.state, "Sleep 10 hours")
+
+        assert not any("shut down the engine" in text for text in spoken)
+    finally:
+        app.shutdown()
+
+
+@pytest.mark.smoke
 def test_full_parking_offers_drive_on_and_shoulder(monkeypatch):
     from freight_fate.app import App
     from freight_fate.states.driving import (
