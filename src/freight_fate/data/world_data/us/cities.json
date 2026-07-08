@@ -5611,6 +5611,42 @@
       "lat": 44.8994,
       "lon": -97.1151,
       "locations": []
+    },
+    "albany_or_us": {
+      "spoken_city": "Albany",
+      "state": "OR",
+      "country": "US",
+      "region": "pacific_northwest",
+      "lat": 44.6365,
+      "lon": -123.1059,
+      "locations": []
+    },
+    "woodburn_or_us": {
+      "spoken_city": "Woodburn",
+      "state": "OR",
+      "country": "US",
+      "region": "pacific_northwest",
+      "lat": 45.1437,
+      "lon": -122.8551,
+      "locations": []
+    },
+    "newberg_or_us": {
+      "spoken_city": "Newberg",
+      "state": "OR",
+      "country": "US",
+      "region": "pacific_northwest",
+      "lat": 45.3001,
+      "lon": -122.9729,
+      "locations": []
+    },
+    "mcminnville_or_us": {
+      "spoken_city": "McMinnville",
+      "state": "OR",
+      "country": "US",
+      "region": "pacific_northwest",
+      "lat": 45.2101,
+      "lon": -123.1987,
+      "locations": []
     }
   }
 }

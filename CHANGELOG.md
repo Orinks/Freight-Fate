@@ -29,6 +29,20 @@
   making them do something -- rest, showers, repairs, and buffs -- comes in a
   later update.
 
+- **The map keeps filling in -- twenty more cities across seven new corridors.**
+  Since the big update above, the network grew city by city: Interstate 80 across
+  western Nebraska (Kearney, Lexington, Ogallala, and Sidney), Interstate 70 over
+  the Kansas high plains into Colorado (Hays, Colby, Junction City, and
+  Burlington), Interstate 10 through the West Texas desert (Fort Stockton, Ozona,
+  and Junction), Interstate 25 over Raton Pass into New Mexico (Raton and
+  Trinidad), Interstate 5 over the Siskiyou Mountains (Mount Shasta and Yreka),
+  Interstate 29 up the Dakota plains (Watertown), and the full Willamette Valley
+  run from Portland down to Eugene -- Woodburn and Albany on Interstate 5, plus a
+  wine-country alternate through Newberg and McMinnville. Each new city is a real
+  place to pick up and deliver, wired to its neighbors on truck-routed roads with
+  real named stops to fuel and park along the way, and grades that rise and fall
+  with the real terrain.
+
 - **New: real roadside landmarks as you drive.** Routes now call out the world
   going by -- entering a national forest, crossing a named river, approaching a
   mountain pass, a roadside museum ahead -- over 2,800 of them, drawn from real

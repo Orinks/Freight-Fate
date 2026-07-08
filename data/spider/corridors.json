@@ -305,6 +305,21 @@
         {"lat": 44.3114, "lon": -96.7984, "note": "Brookings -- I-29 (existing node)"},
         {"lat": 43.5446, "lon": -96.7311, "note": "Sioux Falls -- I-29 (existing node)"}
       ]
+    },
+    {
+      "ref": "OR-99W-WILLAMETTE",
+      "spoken": "Oregon Route 99W",
+      "phase": 1,
+      "tier": 1,
+      "status": "built",
+      "note": "Willamette Valley fill: the I-5 spine (Portland-Salem-Albany-Eugene, with Albany tying Corvallis in) already existed; this adds Woodburn on I-5 and the OR-99W wine-country western alternate through Newberg and McMinnville, giving a distinct Portland->Salem route. Dropped the now-redundant Portland-Salem, Eugene-Salem, and Eugene-Portland expresses. Rex Hill on 99W comes out hills; the rest is flat valley floor. Built.",
+      "waypoints": [
+        {"lat": 45.5152, "lon": -122.6784, "note": "Portland -- north end (existing node)"},
+        {"lat": 45.3001, "lon": -122.9729, "note": "Newberg -- OR-99W wine country"},
+        {"lat": 45.2101, "lon": -123.1987, "note": "McMinnville -- OR-99W"},
+        {"lat": 45.1437, "lon": -122.8551, "note": "Woodburn -- I-5 (Portland-Salem)"},
+        {"lat": 44.9429, "lon": -123.0351, "note": "Salem -- valley hub (existing node)"}
+      ]
     }
   ]
 }
