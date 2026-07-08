@@ -218,6 +218,19 @@
         {"lat": 44.6368, "lon": -124.0535, "note": "Newport -- US-101 central coast, Yaquina Bay"},
         {"lat": 46.1879, "lon": -123.8313, "note": "Astoria -- US-101 at the Columbia (US-30 to Portland)"}
       ]
+    },
+    {
+      "ref": "I-80-NE",
+      "spoken": "Interstate 80",
+      "phase": 1,
+      "tier": 1,
+      "status": "unstarted",
+      "note": "I-80 up the Platte River valley across western Nebraska: Grand Island to Cheyenne. Grand Island, North Platte, and Cheyenne exist; the long grand_island-north_platte and north_platte-cheyenne legs skip the real I-80 towns (Kearney, Lexington, Ogallala, Sidney).",
+      "waypoints": [
+        {"lat": 40.9264, "lon": -98.3420, "note": "Grand Island -- I-80 east start (existing node)"},
+        {"lat": 41.1403, "lon": -100.7601, "note": "North Platte -- I-80 (existing node)"},
+        {"lat": 41.1400, "lon": -104.8202, "note": "Cheyenne -- I-80 west end (existing node)"}
+      ]
     }
   ]
 }

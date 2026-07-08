@@ -5467,6 +5467,42 @@
       "lat": 44.5646,
       "lon": -123.262,
       "locations": []
+    },
+    "kearney_ne_us": {
+      "spoken_city": "Kearney",
+      "state": "NE",
+      "country": "US",
+      "region": "heartland",
+      "lat": 40.6996,
+      "lon": -99.0817,
+      "locations": []
+    },
+    "lexington_ne_us": {
+      "spoken_city": "Lexington",
+      "state": "NE",
+      "country": "US",
+      "region": "heartland",
+      "lat": 40.7808,
+      "lon": -99.7418,
+      "locations": []
+    },
+    "ogallala_ne_us": {
+      "spoken_city": "Ogallala",
+      "state": "NE",
+      "country": "US",
+      "region": "heartland",
+      "lat": 41.1281,
+      "lon": -101.7196,
+      "locations": []
+    },
+    "sidney_ne_us": {
+      "spoken_city": "Sidney",
+      "state": "NE",
+      "country": "US",
+      "region": "heartland",
+      "lat": 41.1428,
+      "lon": -102.9777,
+      "locations": []
     }
   }
 }
