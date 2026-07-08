@@ -870,6 +870,43 @@ class SettingsCategoryState(MenuState):
                 "Controls how often driving status reminders speak.",
             ),
             (
+                lambda: f"Roadside chatter: {s.chatter_summary()}",
+                self._set_all_chatter,
+                "The ambient color spoken between navigation cues: parks, "
+                "rivers, mountain passes, museums, and billboards. Right "
+                "arrow turns everything on, Left arrow turns everything "
+                "off, and the switches below fine-tune each kind. Safety "
+                "and navigation announcements are never affected.",
+            ),
+            (
+                lambda: f"Speak parks and forests: {'on' if s.chatter_parks else 'off'}",
+                lambda _d: self._toggle_chatter("chatter_parks"),
+                "Callouts when the road enters a national park, national "
+                "forest, or other protected public land.",
+            ),
+            (
+                lambda: f"Speak river crossings: {'on' if s.chatter_rivers else 'off'}",
+                lambda _d: self._toggle_chatter("chatter_rivers"),
+                "Callouts when the road crosses a named river.",
+            ),
+            (
+                lambda: f"Speak mountain passes: {'on' if s.chatter_passes else 'off'}",
+                lambda _d: self._toggle_chatter("chatter_passes"),
+                "Callouts approaching a named mountain pass, plus famous "
+                "highway markers like the Loneliest Road in America.",
+            ),
+            (
+                lambda: f"Speak museums and attractions: {'on' if s.chatter_museums else 'off'}",
+                lambda _d: self._toggle_chatter("chatter_museums"),
+                "Callouts for museums and roadside attractions near the route.",
+            ),
+            (
+                lambda: f"Speak billboards: {'on' if s.chatter_billboards else 'off'}",
+                lambda _d: self._toggle_chatter("chatter_billboards"),
+                "Occasional roadside billboards, read as you pass them. "
+                "Expect attorney ads and questionable tourist traps.",
+            ),
+            (
                 lambda: (
                     f"Menu position announcements: {'on' if s.announce_menu_position else 'off'}"
                 ),
@@ -1036,6 +1073,18 @@ class SettingsCategoryState(MenuState):
 
     def _cycle_verbosity(self, d: int) -> None:
         self.ctx.settings.speech_verbosity = (self.ctx.settings.speech_verbosity + d) % 3
+        self._announce()
+
+    def _set_all_chatter(self, d: int) -> None:
+        # The master switch is directional like every other Left/Right
+        # control: Right (or Enter) turns every chatter kind on, Left turns
+        # every kind off.
+        self.ctx.settings.set_all_chatter(d >= 0)
+        self._announce()
+
+    def _toggle_chatter(self, field: str) -> None:
+        settings = self.ctx.settings
+        setattr(settings, field, not getattr(settings, field))
         self._announce()
 
     def _toggle_menu_position(self, _d: int) -> None:

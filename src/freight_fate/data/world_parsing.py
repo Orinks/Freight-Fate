@@ -463,6 +463,57 @@ def _parse_traffic_volumes(raw_samples, leg_miles: float, from_city: str, to_cit
     return tuple(sorted(samples, key=lambda s: s.at_mi))
 
 
+# Mirrors the bake-side filter in tools/enrich_routes_landmarks.py, plus the
+# hand-curated highway heritage markers ("the Loneliest Road in America");
+# anything outside this set is a bake bug and should fail the load loudly.
+LANDMARK_CATEGORIES = frozenset(
+    {
+        "national_park",
+        "wilderness",
+        "national_forest",
+        "mountain_pass",
+        "river",
+        "museum",
+        "protected_area",
+        "highway_marker",
+    }
+)
+
+
+def _parse_landmark(raw, leg_miles: float, from_city: str, to_city: str) -> Landmark:
+    if not isinstance(raw, dict):
+        raise ValueError(f"{from_city} to {to_city} landmark must be an object")
+    name = str(raw.get("name", "")).strip()
+    if not name:
+        raise ValueError(f"{from_city} to {to_city} has a landmark without a name")
+    at_mi = _parse_at_mi(
+        raw, leg_miles, from_city, to_city, f"landmark {name!r}", allow_endpoints=True
+    )
+    category = str(raw.get("category", "")).strip()
+    if category not in LANDMARK_CATEGORIES:
+        raise ValueError(
+            f"{from_city} to {to_city} landmark {name!r} has unknown category {category!r}"
+        )
+    kind = str(raw.get("kind", "")).strip()
+    if kind not in ("zone", "point"):
+        raise ValueError(f"{from_city} to {to_city} landmark {name!r} has unknown kind {kind!r}")
+    spoken = str(raw.get("spoken", "")).strip()
+    if not spoken:
+        raise ValueError(f"{from_city} to {to_city} landmark {name!r} has no spoken line")
+    blob = f"{name} {spoken}".lower()
+    if any(marker in blob for marker in RAW_POI_TEXT_MARKERS):
+        raise ValueError(
+            f"{from_city} to {to_city} landmark {name!r} exposes raw OSM/source text"
+        )
+    return Landmark(name, at_mi, category, kind, spoken)
+
+
+def _parse_landmarks(raw_landmarks, leg_miles: float, from_city: str, to_city: str):
+    """Parse the baked landmark list, ordered along the leg."""
+    landmarks = tuple(_parse_landmark(x, leg_miles, from_city, to_city) for x in raw_landmarks)
+    return tuple(sorted(landmarks, key=lambda x: x.at_mi))
+
+
 def _parse_state_crossing(
     raw, leg_miles: float, from_city: str, to_city: str, default_from_state: str
 ) -> StateCrossing:

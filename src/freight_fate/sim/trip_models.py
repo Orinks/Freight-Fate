@@ -470,6 +470,31 @@ def eligible_hazards(
     return out
 
 
+@dataclass(frozen=True)
+class RoadsideCallout:
+    """One scheduled ambient roadside line: a landmark or a billboard.
+
+    ``at_mi`` is the trip mile (direction-resolved), ``category`` is the
+    landmark category or ``"billboard"`` -- the roadside-chatter settings
+    filter on it at speak time, so the schedule itself stays deterministic
+    regardless of settings."""
+
+    key: str
+    at_mi: float
+    category: str
+    spoken: str
+
+
+# Ambient roadside lines keep their distance so river clusters and museum
+# rows never stack into a wall of speech; safety cues are never spaced.
+LANDMARK_MIN_SPACING_MI = 2.0
+# Billboards pace like the real interstate genre: one every half hour or so
+# of highway driving, never in the first miles of a trip.
+BILLBOARD_MIN_GAP_MI = 35.0
+BILLBOARD_MAX_GAP_MI = 65.0
+BILLBOARD_LEAD_IN_MI = 15.0
+
+
 class TripEventKind(Enum):
     ZONE_ENTER = "zone_enter"
     ZONE_EXIT = "zone_exit"
@@ -484,6 +509,8 @@ class TripEventKind(Enum):
     TIMEZONE_CROSSING = "timezone_crossing"
     CHECKPOINT = "checkpoint"
     TOLL_CHARGED = "toll_charged"
+    LANDMARK = "landmark"
+    BILLBOARD = "billboard"
     ARRIVED = "arrived"
 
 

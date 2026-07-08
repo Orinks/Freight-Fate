@@ -58,8 +58,28 @@
 - **New: real roadside landmarks as you drive.** Routes now call out the world
   going by -- entering a national forest, crossing a named river, approaching a
   mountain pass, a roadside museum ahead -- over 2,800 of them, drawn from real
-  map data so a long haul has a sense of place instead of silence. Thanks to
-  nromey.
+  map data so a long haul has a sense of place instead of silence. The callouts
+  ride the quiet background voice: they wait their turn behind navigation and
+  never talk over a safety warning. Thanks to nromey.
+
+- **Billboards line the highway now, and they have opinions.** Every long run
+  passes the occasional billboard, read aloud as you go by: earnest church
+  signs, truck-wreck attorneys, mystery spots, and the world's largest
+  several things. Some routes get their own real roadside culture -- free ice
+  water on Interstate 90, alien jerky on Interstate 15 -- and no sign repeats
+  itself on the same trip.
+
+- **You choose the roadside chatter you want to hear.** A new Roadside
+  chatter group in Settings, Speech and weather, has one master switch and
+  separate switches for parks and forests, river crossings, mountain passes,
+  museums and attractions, and billboards -- so you can keep the geography
+  and lose the jokes, or the other way around. Terse speech verbosity mutes
+  all of it, and safety and navigation announcements are never affected.
+
+- **Name-brand truck stops now tell you what they are good at.** Pulling up
+  the details on a branded stop adds its specialty -- tire care and a quick
+  lube at a Love's, the sit-down restaurant at a Petro -- to the spoken
+  rundown at the stop and in the en-route stop listings.
 
 - **Some hauls now offer more than one way to drive them.** Where two real truck
   routes reach the same place, the map keeps both, so a run can offer a choice --

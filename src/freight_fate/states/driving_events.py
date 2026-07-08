@@ -47,6 +47,14 @@ class DrivingEventMixin:
             return
         kind = event.kind
         sound = _route_event_sound(event)
+        if kind in (TripEventKind.LANDMARK, TripEventKind.BILLBOARD):
+            # Ambient roadside color, filtered by the player's chatter
+            # switches at speak time so a mid-trip settings change applies
+            # immediately. Terse speech mutes all of it; a muted callout is
+            # dropped whole -- it never becomes the A-key replay either.
+            category = str(event.data.get("category", ""))
+            if self._terse_speech() or not self.ctx.settings.chatter_enabled(category):
+                return
         if event.message:
             self._last_event_message = event.message  # replayable with A
         if kind == TripEventKind.HAZARD:
@@ -93,6 +101,8 @@ class DrivingEventMixin:
             self.ctx.say_event(
                 timezone_crossing_message(event, self._terse_speech()), interrupt=False
             )
+        elif kind in (TripEventKind.LANDMARK, TripEventKind.BILLBOARD):
+            self._speak_ambient_event(event.message)
         elif kind == TripEventKind.ARRIVED:
             pass  # handled by _arrive()
         elif self._event_disables_cruise(event):

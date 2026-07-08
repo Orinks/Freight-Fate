@@ -115,8 +115,12 @@ class Trip(TripRoadEventMixin, TripTrafficMixin):
         self.zones = self._place_zones()
         self.traffic_pressures = self._place_traffic_pressures()
         self.navigation_cues = self._build_navigation_cues()
+        self.landmarks = self._place_landmarks()
+        self.billboards = self._place_billboards()
         self.patrols = self._place_patrols()
         self.traffic_manager.add_patrol_traffic(self.patrols)
+        self._announced_landmarks: set[str] = set()
+        self._announced_billboards: set[str] = set()
         self._announced_stops: set[str] = set()
         self._announced_cities: set[int] = set()
         self._announced_navigation: set[str] = set()
@@ -485,6 +489,92 @@ class Trip(TripRoadEventMixin, TripTrafficMixin):
                 )
         cues.sort(key=lambda cue: cue.at_mi)
         return cues
+
+    def _place_landmarks(self) -> list[RoadsideCallout]:
+        """Schedule the baked roadside landmarks along this route.
+
+        Direction-resolved to trip miles and thinned to the minimum spacing so
+        a river cluster (three crossings in a mile is real geography) speaks
+        once instead of stacking. City-street approaches stay quiet."""
+        if self._is_facility_approach_route():
+            return []
+        callouts: list[RoadsideCallout] = []
+        for i, (start, leg) in enumerate(zip(self._leg_starts, self.route.legs, strict=True)):
+            forward = self.route.cities[i] == leg.a
+            for landmark in leg.landmarks:
+                offset = _stop_offset_for_direction(landmark.at_mi, leg.miles, forward)
+                callouts.append(
+                    RoadsideCallout(
+                        f"landmark:{i}:{landmark.at_mi}:{landmark.name}",
+                        start + offset,
+                        landmark.category,
+                        f"{landmark.spoken}.",
+                    )
+                )
+        callouts.sort(key=lambda c: c.at_mi)
+        spaced: list[RoadsideCallout] = []
+        last = -LANDMARK_MIN_SPACING_MI
+        for callout in callouts:
+            if callout.at_mi - last < LANDMARK_MIN_SPACING_MI:
+                continue
+            spaced.append(callout)
+            last = callout.at_mi
+        return spaced
+
+    def _place_billboards(self) -> list[RoadsideCallout]:
+        """Schedule parody billboards along the highway, seeded per trip.
+
+        Corridor-keyed signs (the real roadside culture of that highway) are
+        preferred where the route has them; the generic Americana pool fills
+        the rest. Deterministic for a seeded trip, and each sign text appears
+        at most once per trip -- repetition kills the joke."""
+        from ..data.billboards import corridor_billboards, random_billboard
+
+        if self._is_facility_approach_route():
+            return []
+        rng = random.Random(None if self._seed is None else self._seed ^ 0xB111B0A2)
+        callouts: list[RoadsideCallout] = []
+        used: set[str] = set()
+        at = BILLBOARD_LEAD_IN_MI + rng.uniform(0.0, BILLBOARD_MIN_GAP_MI)
+        while at < self.total_miles - 5.0:
+            leg_i, _ = self._leg_at_mile(at)
+            pool = corridor_billboards(self.route.legs[leg_i].highway)
+            fresh_corridor = [text for text in pool if text not in used]
+            if fresh_corridor and rng.random() < 0.5:
+                text = rng.choice(fresh_corridor)
+            else:
+                text = random_billboard(rng)
+                for _ in range(6):
+                    if text not in used:
+                        break
+                    text = random_billboard(rng)
+            if text not in used:
+                used.add(text)
+                callouts.append(
+                    RoadsideCallout(f"billboard:{at:.1f}", at, "billboard", f"Billboard: {text}")
+                )
+            at += rng.uniform(BILLBOARD_MIN_GAP_MI, BILLBOARD_MAX_GAP_MI)
+        return callouts
+
+    def _check_roadside_callouts(self) -> None:
+        self._check_callout_list(self.landmarks, self._announced_landmarks, TripEventKind.LANDMARK)
+        self._check_callout_list(
+            self.billboards, self._announced_billboards, TripEventKind.BILLBOARD
+        )
+
+    def _check_callout_list(self, callouts, announced: set[str], kind) -> None:
+        for callout in callouts:
+            if callout.key in announced:
+                continue
+            behind = self.position_mi - callout.at_mi
+            if behind < 0:
+                break  # sorted by mile; nothing further along is due yet
+            announced.add(callout.key)
+            # A callout overshot by more than a mile (a resumed save, a menu
+            # jump) is stale scenery; note it silently rather than narrate
+            # the past.
+            if behind <= 1.0:
+                self._emit(kind, callout.spoken, category=callout.category)
 
     def _place_zones(self) -> list[Zone]:
         zones: list[Zone] = []
@@ -976,6 +1066,12 @@ class Trip(TripRoadEventMixin, TripTrafficMixin):
             if cue.at_mi <= self.position_mi:
                 self._announced_navigation.add(f"{cue.key}:advance")
                 self._announced_navigation.add(f"{cue.key}:near")
+        for callout in (*self.landmarks, *self.billboards):
+            if callout.at_mi <= self.position_mi:
+                if callout.category == "billboard":
+                    self._announced_billboards.add(callout.key)
+                else:
+                    self._announced_landmarks.add(callout.key)
         for patrol in self.patrols:
             if patrol.start_mi <= self.position_mi:
                 self._announced_patrols.add(_patrol_key(patrol))
@@ -1059,6 +1155,7 @@ class Trip(TripRoadEventMixin, TripTrafficMixin):
         self._check_npc_traffic_cues()
         self._check_traffic_pressures()
         self._check_navigation_cues()
+        self._check_roadside_callouts()
         self._check_tolls()
         self._check_cities()
         self._check_timezone()

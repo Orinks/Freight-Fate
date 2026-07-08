@@ -227,6 +227,23 @@ class TrafficVolumeSample:
 
 
 @dataclass(frozen=True)
+class Landmark:
+    """A narratable roadside feature baked from OpenStreetMap.
+
+    ``kind`` is ``"zone"`` (a protected area you enter) or ``"point"`` (a spot
+    you pass); ``category`` is the finer bucket (``national_park``, ``river``,
+    ``mountain_pass``, ``museum``, ...) that the roadside-chatter settings
+    filter on. ``spoken`` is the finished ambient cue line, authored at bake
+    time so the runtime never composes from raw tags."""
+
+    name: str
+    at_mi: float
+    category: str
+    kind: str
+    spoken: str
+
+
+@dataclass(frozen=True)
 class StateCrossing:
     at_mi: float
     from_state: str
@@ -457,6 +474,8 @@ class Leg:
     # zone the street instead of a whole-route blanket. Empty on highways.
     local_cue: str = ""
     local_speed_mph: float = 0.0
+    # Narratable roadside features (OSM bake), spoken as ambient chatter.
+    landmarks: tuple[Landmark, ...] = ()
 
     def other(self, city: str) -> str:
         return self.b if city == self.a else self.a
