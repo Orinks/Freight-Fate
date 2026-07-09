@@ -67,6 +67,20 @@
   Is it winter, and you'd rather take a southern route than a mountainous
   northern one? We've got you covered. Thanks to nromey.
 
+- **See who else is hauling right now with the new drivers board.** A new
+  Drivers online item in the main menu reads the live board from orinks.net:
+  each driver's name, what they are doing, their route and cargo, and how
+  fresh the report is. If you want to appear there yourself, set up sharing
+  under Settings, Online. Drivers are Orinks accounts now: the game opens
+  the orinks.net setup page where you sign in, pick your driver name and
+  whether the public board lists you at all, and copy a Driver ID and a
+  one-time posting token; back in the game you paste each from the
+  clipboard and choose Connect and save. Nothing is ever shared before
+  that, the game speaks exactly what gets shared, and only broad in-game
+  activity goes out, like "Driving: Chicago to Dallas, steel coils", never
+  your save files, real name, or location. You leave the board within
+  minutes of going off duty or turning sharing off.
+
 - **The map now has real time zones, and your clock changes as you cross
   them.** Drive west out of Tennessee on I-40 and you will hear "Crossing
   into Central Time. It is now 2:15 PM." With terse speech on, it is just

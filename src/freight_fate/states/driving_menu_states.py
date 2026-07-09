@@ -102,8 +102,7 @@ class DrivingStatusScreenState(MenuState):
         hours_used = d.trip.game_minutes / 60.0
         deadline = d.job.deadline_game_h - hours_used
         deadline_text = (
-            f"{deadline:.1f} hours before the deadline, "
-            f"due {_deadline_appointment(d)}"
+            f"{deadline:.1f} hours before the deadline, due {_deadline_appointment(d)}"
             if deadline >= 0
             else f"{-deadline:.1f} hours past the deadline"
         )
@@ -177,6 +176,9 @@ class PauseMenuState(MenuState):
         base = self.driving.presence()
         detail = base.detail if base is not None else ""
         return PresenceState("Paused", detail)
+
+    def online_presence(self):
+        return self.presence()
 
     def build_items(self) -> list[MenuItem]:
         drive_label = "pickup drive" if self.driving.phase == DRIVE_PHASE_PICKUP else "delivery"
@@ -395,6 +397,9 @@ class FacilityArrivalState(MenuState):
             "Delivering",
             f"{self.driving.job.cargo.label} to {self.driving.job.spoken_destination}",
         )
+
+    def online_presence(self):
+        return self.presence()
 
     def enter(self) -> None:
         sequence = select_menu_music_sequence(self.ctx.profile)

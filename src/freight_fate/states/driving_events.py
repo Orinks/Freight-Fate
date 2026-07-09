@@ -329,9 +329,7 @@ class DrivingEventMixin:
             return None
         # Matched against real interchange sign text, so compare the spoken
         # city name ("Nashville"), never the slug key.
-        destination = self.ctx.world.spoken_city(
-            self.route.cities[-1], qualified=False
-        ).casefold()
+        destination = self.ctx.world.spoken_city(self.route.cities[-1], qualified=False).casefold()
         candidates = []
         for i in range(len(self.route.legs) - 1, -1, -1):
             leg = self.route.legs[i]
@@ -774,6 +772,9 @@ class DrivingEventMixin:
             moving=moving,
             truck_label=truck.label if truck else "",
         )
+
+    def online_presence(self):
+        return self.presence()
 
     def lines(self) -> list[str]:
         t = self.truck
