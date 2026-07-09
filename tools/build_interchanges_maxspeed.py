@@ -85,8 +85,18 @@ def _leg_states(data: dict[str, Any], leg: dict[str, Any]) -> set[str]:
         city = data["cities"].get(leg[end], {})
         state = str(city.get("state", "")).strip()
         if state:
-            states.add(state)
+            # City entries store 2-letter codes; Geofabrik slugs need the
+            # full name, so resolve through the world's geo lookup.
+            states.add(_spoken_state(data, state))
     return states
+
+
+def _spoken_state(data: dict[str, Any], value: str) -> str:
+    for country in data.get("geo", {}).get("countries", {}).values():
+        states = country.get("states", {})
+        if value in states:
+            return str(states[value])
+    return value
 
 
 def _pbf_for_states(states: set[str], region_dir: Path) -> list[Path]:

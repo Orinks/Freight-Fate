@@ -137,7 +137,7 @@ def collect_targets() -> list[FacilityTarget]:
     local_approaches = json.loads(LOCAL_APPROACHES_PATH.read_text(encoding="utf-8"))["approaches"]
     targets: list[FacilityTarget] = []
     for city_name in world.city_names():
-        city = world.cities[city_name]
+        city = world.city(city_name)
         for location in city.locations:
             endpoint = endpoints[location.id]
             approach = local_approaches[f"facility:{location.id}"]

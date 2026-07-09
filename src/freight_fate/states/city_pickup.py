@@ -147,7 +147,7 @@ class PickupFacilityState(MenuState):
             activity = "Loading at the dock"
         else:
             activity = "At a pickup facility"
-        return PresenceState(activity, f"{self.job.cargo.label} for {self.job.destination}")
+        return PresenceState(activity, f"{self.job.cargo.label} for {self.job.spoken_destination}")
 
     def enter(self) -> None:
         sequence = select_menu_music_sequence(self.ctx.profile)
@@ -159,7 +159,10 @@ class PickupFacilityState(MenuState):
 
         self.ctx.audio.set_ambient(facility_ambient_key(self.job.origin_type))
         if self.loaded:
-            lead = f"Loaded at {self.facility}. The trailer is sealed for {self.job.destination}."
+            lead = (
+                f"Loaded at {self.facility}. The trailer is sealed for "
+                f"{self.job.spoken_destination}."
+            )
             if getattr(self, "_just_loaded", False):
                 lead += f" Loading took {PICKUP_LOADING_MIN:.0f} minutes."
                 self._just_loaded = False
@@ -372,7 +375,7 @@ class PickupFacilityState(MenuState):
             self.title,
             f"Facility: {self.facility}",
             f"Cargo: {self.job.weight_tons:.0f} tons of {self.job.cargo.label}",
-            f"Destination: {self.job.destination}",
+            f"Destination: {self.job.spoken_destination}",
             f"Status: {state}",
             f"Speed: {self.truck.speed_mph:.0f} mph",
             f"Air: {self.truck.air_pressure_psi:.0f} psi   "
@@ -409,11 +412,11 @@ class RouteSelectState(MenuState):
             for route in routes:
                 for name in route.cities:
                     city = ctx.world.cities[name]
-                    provider.request(city.name, city.lat, city.lon)
+                    provider.request(city.key, city.lat, city.lon)
 
     def announce_entry(self) -> None:
         self.ctx.say(
-            f"Route planning to {self.job.destination}. "
+            f"Route planning to {self.job.spoken_destination}. "
             f"{len(self.routes)} route option{'s' if len(self.routes) != 1 else ''}. "
             + self.current_text()
         )
@@ -428,7 +431,10 @@ class RouteSelectState(MenuState):
                     lambda r=route: self._start(r),
                     help=(
                         "Via "
-                        + ", ".join(route.cities[1:-1] or ["no major cities"])
+                        + ", ".join(
+                            [self.ctx.world.spoken_city(n) for n in route.cities[1:-1]]
+                            or ["no major cities"]
+                        )
                         + ". Press W for weather."
                     ),
                 )
@@ -457,7 +463,7 @@ class RouteSelectState(MenuState):
             for name in route.cities[1:][:5]:
                 kind = provider.get(name)
                 if kind is not None:
-                    parts.append(f"{name}: {kind.value}")
+                    parts.append(f"{self.ctx.world.spoken_city(name)}: {kind.value}")
             if parts:
                 self.ctx.say("Live weather along the route. " + ". ".join(parts) + ".")
                 return

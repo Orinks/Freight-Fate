@@ -72,8 +72,10 @@ def _career_location(profile: Profile) -> str:
     trip = profile.active_trip or {}
     job = trip.get("job", {})
     destination = job.get("destination")
+    # Spoken fields exist in post-slug payloads; legacy payloads fall back to
+    # origin/destination, which there hold the old speakable display name.
     if trip.get("kind") == "pickup_drive":
-        origin = str(job.get("origin") or profile.current_city)
+        origin = str(job.get("origin_spoken") or job.get("origin") or profile.current_city)
         facility = facility_text(
             str(job.get("origin_type", "metro_market")),
             str(job.get("origin_location", "")),
@@ -86,7 +88,7 @@ def _career_location(profile: Profile) -> str:
         facility = facility_text(
             str(job.get("destination_type", "metro_market")),
             str(job.get("destination_location", "")),
-            str(destination),
+            str(job.get("destination_spoken") or destination),
             str(job.get("destination_locality", "")),
         )
         return f"{loaded} {facility}"
@@ -94,13 +96,13 @@ def _career_location(profile: Profile) -> str:
         facility = facility_text(
             str(job.get("destination_type", "metro_market")),
             str(job.get("destination_location", "")),
-            str(destination),
+            str(job.get("destination_spoken") or destination),
             str(job.get("destination_locality", "")),
         )
         return f"on the road to {facility}"
     try:
         terminal = get_world().home_terminal(profile.current_city)
-        return f"at {terminal.name} in {profile.current_city}"
+        return f"at {terminal.name} in {get_world().spoken_city(profile.current_city)}"
     except KeyError:
         return f"in {profile.current_city}"
 
@@ -249,7 +251,7 @@ class MainMenuState(MenuState):
             terminal = self.ctx.world.home_terminal(p.current_city)
             self.ctx.say(
                 f"Welcome back, {p.name}. You are parked at "
-                f"{terminal.name} in {p.current_city} "
+                f"{terminal.name} in {self.ctx.world.spoken_city(p.current_city)} "
                 f"with {p.money:,.0f} dollars.",
                 interrupt=True,
             )
@@ -505,7 +507,7 @@ class ConfirmCareerActionState(MenuState):
         if self.action == "reset":
             detail = (
                 "Resetting starts this driver over at "
-                f"{self.profile.current_city} with a fresh truck, "
+                f"{self.ctx.world.spoken_city(self.profile.current_city)} with a fresh truck, "
                 "starting money, no active trip, and no delivery history."
             )
         else:
@@ -534,7 +536,8 @@ class ConfirmCareerActionState(MenuState):
             fresh.save()
             message = (
                 f"{name} reset. The career starts over at "
-                f"{fresh.current_city} with {fresh.carrier_name} "
+                f"{self.ctx.world.spoken_city(fresh.current_city)} "
+                f"with {fresh.carrier_name} "
                 f"and {fresh.money:,.0f} dollars."
             )
         else:
@@ -867,6 +870,43 @@ class SettingsCategoryState(MenuState):
                 "Controls how often driving status reminders speak.",
             ),
             (
+                lambda: f"Roadside chatter: {s.chatter_summary()}",
+                self._set_all_chatter,
+                "The ambient color spoken between navigation cues: parks, "
+                "rivers, mountain passes, museums, and billboards. Right "
+                "arrow turns everything on, Left arrow turns everything "
+                "off, and the switches below fine-tune each kind. Safety "
+                "and navigation announcements are never affected.",
+            ),
+            (
+                lambda: f"Speak parks and forests: {'on' if s.chatter_parks else 'off'}",
+                lambda _d: self._toggle_chatter("chatter_parks"),
+                "Callouts when the road enters a national park, national "
+                "forest, or other protected public land.",
+            ),
+            (
+                lambda: f"Speak river crossings: {'on' if s.chatter_rivers else 'off'}",
+                lambda _d: self._toggle_chatter("chatter_rivers"),
+                "Callouts when the road crosses a named river.",
+            ),
+            (
+                lambda: f"Speak mountain passes: {'on' if s.chatter_passes else 'off'}",
+                lambda _d: self._toggle_chatter("chatter_passes"),
+                "Callouts approaching a named mountain pass, plus famous "
+                "highway markers like the Loneliest Road in America.",
+            ),
+            (
+                lambda: f"Speak museums and attractions: {'on' if s.chatter_museums else 'off'}",
+                lambda _d: self._toggle_chatter("chatter_museums"),
+                "Callouts for museums and roadside attractions near the route.",
+            ),
+            (
+                lambda: f"Speak billboards: {'on' if s.chatter_billboards else 'off'}",
+                lambda _d: self._toggle_chatter("chatter_billboards"),
+                "Occasional roadside billboards, read as you pass them. "
+                "Expect attorney ads and questionable tourist traps.",
+            ),
+            (
                 lambda: (
                     f"Menu position announcements: {'on' if s.announce_menu_position else 'off'}"
                 ),
@@ -1033,6 +1073,18 @@ class SettingsCategoryState(MenuState):
 
     def _cycle_verbosity(self, d: int) -> None:
         self.ctx.settings.speech_verbosity = (self.ctx.settings.speech_verbosity + d) % 3
+        self._announce()
+
+    def _set_all_chatter(self, d: int) -> None:
+        # The master switch is directional like every other Left/Right
+        # control: Right (or Enter) turns every chatter kind on, Left turns
+        # every kind off.
+        self.ctx.settings.set_all_chatter(d >= 0)
+        self._announce()
+
+    def _toggle_chatter(self, field: str) -> None:
+        settings = self.ctx.settings
+        setattr(settings, field, not getattr(settings, field))
         self._announce()
 
     def _toggle_menu_position(self, _d: int) -> None:

@@ -42,9 +42,9 @@ jobs:
           path: coverage.xml
 
   changelog:
-    # The changelog gate only runs locally as a pre-commit hook, which outside
-    # contributors don't have installed; this enforces it on every PR.
-    if: github.event_name == 'pull_request'
+    # The changelog gate runs locally as a pre-push hook, which not every
+    # clone has installed; this enforces it on every PR and also on direct
+    # pushes to dev and main, which would otherwise slip past ungated.
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
@@ -53,10 +53,18 @@ jobs:
           fetch-depth: 0
 
       - name: Require a changelog entry for user-facing changes
-        run: >
-          python3 tools/release_notes.py check
-          --base "origin/${{ github.base_ref }}"
-          --head HEAD
+        env:
+          # PRs diff against their target branch; pushes diff against the
+          # ref the branch pointed at before this push.
+          BASE: ${{ github.event_name == 'pull_request' && format('origin/{0}', github.base_ref) || github.event.before }}
+        run: |
+          if [ "${{ github.event_name }}" = "push" ] && ! git cat-file -e "$BASE" 2>/dev/null; then
+            # A brand-new branch pushes an all-zeros "before", and a force
+            # push can point at history this clone no longer has.
+            echo "Base commit $BASE unavailable (new branch or force push); skipping."
+            exit 0
+          fi
+          python3 tools/release_notes.py check --base "$BASE" --head HEAD
 
   build:
     runs-on: ubuntu-latest

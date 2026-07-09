@@ -113,7 +113,10 @@ def _state_context(
     state_shapes: list[dict[str, Any]],
 ) -> dict[str, list[dict[str, Any]]]:
     leg_miles = float(leg["miles"])
-    endpoint_states = (data["cities"][leg["from"]]["state"], data["cities"][leg["to"]]["state"])
+    endpoint_states = (
+        spoken_state(data, data["cities"][leg["from"]]["state"]),
+        spoken_state(data, data["cities"][leg["to"]]["state"]),
+    )
     points = _state_points(geometry, leg_miles, state_shapes)
     if not points:
         points = [

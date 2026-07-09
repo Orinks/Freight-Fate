@@ -6,34 +6,50 @@ from __future__ import annotations
 import re
 import zlib
 
+from .legacy_aliases import LEGACY_CITY_SLUGS
 from .world_constants import *
 from .world_models import *
 
 
-def _leg_pair_key(leg: dict) -> frozenset:
-    return frozenset((leg.get("from"), leg.get("to")))
+def _overlay_city_key(name: str, cities: dict) -> str:
+    """The key an overlay city name lands on: itself, or the slug it aliases.
+
+    Overlays written before the slug migration name cities by display name;
+    treating those as the base city they alias keeps the merge additive
+    instead of duplicating the city under its old name.
+    """
+    if name in cities:
+        return name
+    slug = LEGACY_CITY_SLUGS.get(name)
+    return slug if slug in cities else name
+
+
+def _leg_pair_key(leg: dict, cities: dict) -> frozenset:
+    return frozenset(
+        (_overlay_city_key(leg.get("from"), cities), _overlay_city_key(leg.get("to"), cities))
+    )
 
 
 def _merge_overlay(base: dict, overlay: dict) -> dict:
     """Return ``base`` with overlay cities and legs added, never overridden.
 
     The merge is purely additive so the checked-in base stays authoritative:
-    a city already present by name keeps its base definition, and a leg already
-    present (by unordered endpoint pair) keeps its base definition. Only genuinely
-    new cities and legs from the overlay are appended. The base dict is not
-    mutated.
+    a city already present (by key, or by a pre-slug legacy name aliasing one)
+    keeps its base definition, and a leg already present (by unordered endpoint
+    pair) keeps its base definition. Only genuinely new cities and legs from
+    the overlay are appended. The base dict is not mutated.
     """
     merged = dict(base)
     cities = dict(base.get("cities", {}))
     for name, city in overlay.get("cities", {}).items():
-        if name not in cities:
+        if _overlay_city_key(name, cities) not in cities:
             cities[name] = city
     merged["cities"] = cities
 
     legs = list(base.get("legs", []))
-    seen = {_leg_pair_key(leg) for leg in legs}
+    seen = {_leg_pair_key(leg, cities) for leg in legs}
     for leg in overlay.get("legs", []):
-        key = _leg_pair_key(leg)
+        key = _leg_pair_key(leg, cities)
         if key not in seen:
             seen.add(key)
             legs.append(leg)
@@ -41,13 +57,15 @@ def _merge_overlay(base: dict, overlay: dict) -> dict:
     return merged
 
 
-def _parse_location(raw: dict, city: str, city_lat: float, city_lon: float) -> Location:
+def _parse_location(
+    raw: dict, city_key: str, spoken_city: str, city_lat: float, city_lon: float
+) -> Location:
     if not isinstance(raw, dict):
-        raise ValueError(f"{city} facility must be an object")
-    name = _clean_facility_name(city, str(raw.get("name", "")).strip())
+        raise ValueError(f"{spoken_city} facility must be an object")
+    name = _clean_facility_name(spoken_city, str(raw.get("name", "")).strip())
     facility_type = str(raw.get("type", "")).strip()
     if facility_type not in FREIGHT_LOCATION_TYPES:
-        raise ValueError(f"{city} facility {name!r} has unknown type {facility_type!r}")
+        raise ValueError(f"{spoken_city} facility {name!r} has unknown type {facility_type!r}")
     default_roles = FACILITY_CARGO_ROLES.get(facility_type, {})
     raw_cargo = tuple(str(cargo).strip() for cargo in raw.get("cargo", ()) if str(cargo).strip())
     default_cargo = _dedupe(default_roles.get("ships", ()) + default_roles.get("receives", ()))
@@ -67,8 +85,8 @@ def _parse_location(raw: dict, city: str, city_lat: float, city_lon: float) -> L
         name=name,
         type=facility_type,
         cargo=cargo,
-        id=str(raw.get("id") or _stable_facility_id(city, facility_type, name)).strip(),
-        city=city,
+        id=str(raw.get("id") or _stable_facility_id(city_key, facility_type, name)).strip(),
+        city=city_key,
         locality=locality,
         roles=roles,
         ships=ships,
@@ -84,7 +102,8 @@ def _parse_location(raw: dict, city: str, city_lat: float, city_lon: float) -> L
 
 
 def _expand_market_locations(
-    city: str,
+    city_key: str,
+    spoken_city: str,
     lat: float,
     lon: float,
     explicit_locations: tuple[Location, ...],
@@ -99,10 +118,11 @@ def _expand_market_locations(
     for facility_type in _dedupe(desired_types):
         if facility_type in existing_types:
             continue
-        location = _template_location(city, lat, lon, facility_type, market_tags)
+        location = _template_location(city_key, spoken_city, lat, lon, facility_type, market_tags)
         if location.name.lower() in existing_names:
             location = _template_location(
-                city,
+                city_key,
+                spoken_city,
                 lat,
                 lon,
                 facility_type,
@@ -116,7 +136,8 @@ def _expand_market_locations(
 
 
 def _template_location(
-    city: str,
+    city_key: str,
+    spoken_city: str,
     lat: float,
     lon: float,
     facility_type: str,
@@ -124,21 +145,21 @@ def _template_location(
     name_suffix: str = "",
 ) -> Location:
     template = FACILITY_NAME_TEMPLATES[facility_type]
-    name = template.format(city=city) + name_suffix
+    name = template.format(city=spoken_city) + name_suffix
     roles = FACILITY_CARGO_ROLES[facility_type]
     cargo = _dedupe(roles["ships"] + roles["receives"])
     source_note = (
         f"{FACILITY_SOURCE_NOTES[facility_type]} Generated offline as a "
-        f"representative {city} metro-market facility; not a claim about a "
+        f"representative {spoken_city} metro-market facility; not a claim about a "
         "specific real-world shipper."
     )
-    jitter_lat, jitter_lon = _jittered_coordinates(city, facility_type, lat, lon)
+    jitter_lat, jitter_lon = _jittered_coordinates(city_key, facility_type, lat, lon)
     return Location(
         name=name,
         type=facility_type,
         cargo=cargo,
-        id=_stable_facility_id(city, facility_type, name),
-        city=city,
+        id=_stable_facility_id(city_key, facility_type, name),
+        city=city_key,
         roles=("shipper", "receiver"),
         ships=roles["ships"],
         receives=roles["receives"],
@@ -152,11 +173,11 @@ def _template_location(
 
 
 def _market_tags_for_city(
-    city: str, raw_city: dict, locations: tuple[Location, ...]
+    city_key: str, state_code: str, raw_city: dict, locations: tuple[Location, ...]
 ) -> tuple[str, ...]:
     tags: set[str] = set(REGION_MARKET_TAGS.get(str(raw_city.get("region", "")), ()))
-    tags.update(STATE_MARKET_TAGS.get(str(raw_city.get("state", "")), ()))
-    tags.update(CITY_MARKET_TAGS.get(city, ()))
+    tags.update(STATE_MARKET_TAGS.get(state_code, ()))
+    tags.update(CITY_MARKET_TAGS.get(city_key, ()))
     for location in locations:
         tags.update(_tags_for_facility_type(location.type))
     return tuple(sorted(tags))
@@ -201,6 +222,12 @@ def _stable_facility_id(city: str, facility_type: str, name: str) -> str:
     return f"{_slug(city)}:{facility_type}:{_slug(name)}"
 
 
+def _service_city_slug(text: str) -> str:
+    """The city fragment of a local city-service id ("Sault Ste. Marie" ->
+    "sault-ste-marie"), matching how the local-data sweep slugged names."""
+    return re.sub(r"[^a-z0-9]+", "-", text.lower()).strip("-")
+
+
 def _slug(text: str) -> str:
     out: list[str] = []
     pending_dash = False
@@ -236,15 +263,23 @@ def _jittered_coordinates(
     return round(lat + lat_offset, 5), round(lon + lon_offset, 5)
 
 
-def _is_legacy_market_name(city: str, name: str) -> bool:
+def _is_legacy_market_name(city_names: tuple[str, ...], name: str) -> bool:
+    """True when ``name`` is one of the old whole-city market placeholders.
+
+    Checked against every name the city has answered to (current spoken plus
+    frozen legacy display names) so pre-slug saves keep resolving."""
     normalized = name.strip().lower()
-    city_lower = city.lower()
-    return normalized in {
-        "",
-        city_lower,
-        f"{city_lower} freight market",
-        f"{city_lower} metro freight market",
-    }
+    if not normalized:
+        return True
+    for city_name in city_names:
+        city_lower = city_name.lower()
+        if normalized in {
+            city_lower,
+            f"{city_lower} freight market",
+            f"{city_lower} metro freight market",
+        }:
+            return True
+    return False
 
 
 def _parse_stop(raw, leg_miles: float, from_city: str, to_city: str) -> Stop:
@@ -426,6 +461,57 @@ def _parse_traffic_volumes(raw_samples, leg_miles: float, from_city: str, to_cit
     """Parse the baked HPMS AADT profile, ordered along the leg."""
     samples = tuple(_parse_traffic_volume(s, leg_miles, from_city, to_city) for s in raw_samples)
     return tuple(sorted(samples, key=lambda s: s.at_mi))
+
+
+# Mirrors the bake-side filter in tools/enrich_routes_landmarks.py, plus the
+# hand-curated highway heritage markers ("the Loneliest Road in America");
+# anything outside this set is a bake bug and should fail the load loudly.
+LANDMARK_CATEGORIES = frozenset(
+    {
+        "national_park",
+        "wilderness",
+        "national_forest",
+        "mountain_pass",
+        "river",
+        "museum",
+        "protected_area",
+        "highway_marker",
+    }
+)
+
+
+def _parse_landmark(raw, leg_miles: float, from_city: str, to_city: str) -> Landmark:
+    if not isinstance(raw, dict):
+        raise ValueError(f"{from_city} to {to_city} landmark must be an object")
+    name = str(raw.get("name", "")).strip()
+    if not name:
+        raise ValueError(f"{from_city} to {to_city} has a landmark without a name")
+    at_mi = _parse_at_mi(
+        raw, leg_miles, from_city, to_city, f"landmark {name!r}", allow_endpoints=True
+    )
+    category = str(raw.get("category", "")).strip()
+    if category not in LANDMARK_CATEGORIES:
+        raise ValueError(
+            f"{from_city} to {to_city} landmark {name!r} has unknown category {category!r}"
+        )
+    kind = str(raw.get("kind", "")).strip()
+    if kind not in ("zone", "point"):
+        raise ValueError(f"{from_city} to {to_city} landmark {name!r} has unknown kind {kind!r}")
+    spoken = str(raw.get("spoken", "")).strip()
+    if not spoken:
+        raise ValueError(f"{from_city} to {to_city} landmark {name!r} has no spoken line")
+    blob = f"{name} {spoken}".lower()
+    if any(marker in blob for marker in RAW_POI_TEXT_MARKERS):
+        raise ValueError(
+            f"{from_city} to {to_city} landmark {name!r} exposes raw OSM/source text"
+        )
+    return Landmark(name, at_mi, category, kind, spoken)
+
+
+def _parse_landmarks(raw_landmarks, leg_miles: float, from_city: str, to_city: str):
+    """Parse the baked landmark list, ordered along the leg."""
+    landmarks = tuple(_parse_landmark(x, leg_miles, from_city, to_city) for x in raw_landmarks)
+    return tuple(sorted(landmarks, key=lambda x: x.at_mi))
 
 
 def _parse_state_crossing(

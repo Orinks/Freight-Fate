@@ -227,6 +227,23 @@ class TrafficVolumeSample:
 
 
 @dataclass(frozen=True)
+class Landmark:
+    """A narratable roadside feature baked from OpenStreetMap.
+
+    ``kind`` is ``"zone"`` (a protected area you enter) or ``"point"`` (a spot
+    you pass); ``category`` is the finer bucket (``national_park``, ``river``,
+    ``mountain_pass``, ``museum``, ...) that the roadside-chatter settings
+    filter on. ``spoken`` is the finished ambient cue line, authored at bake
+    time so the runtime never composes from raw tags."""
+
+    name: str
+    at_mi: float
+    category: str
+    kind: str
+    spoken: str
+
+
+@dataclass(frozen=True)
 class StateCrossing:
     at_mi: float
     from_state: str
@@ -405,6 +422,15 @@ def _join_destinations(destinations: tuple[str, ...]) -> str:
 
 @dataclass(frozen=True)
 class City:
+    """A freight service area.
+
+    ``key`` is the stable identity (``jackson_ms_us``): it keys ``World.cities``,
+    leg endpoints, and saves, and is never spoken. ``name`` is the bare spoken
+    city ("Jackson") and ``state`` the spoken state name ("Mississippi"),
+    composed at load from the geo lookup; speech that must disambiguate uses
+    ``spoken_qualified`` or ``World.spoken_city``.
+    """
+
     name: str
     state: str
     region: str
@@ -412,6 +438,14 @@ class City:
     lat: float = 0.0
     lon: float = 0.0
     market_tags: tuple[str, ...] = ()
+    key: str = ""
+    state_code: str = ""
+    country: str = ""
+    country_name: str = ""
+
+    @property
+    def spoken_qualified(self) -> str:
+        return f"{self.name}, {self.state}" if self.state else self.name
 
 
 @dataclass(frozen=True)
@@ -440,6 +474,8 @@ class Leg:
     # zone the street instead of a whole-route blanket. Empty on highways.
     local_cue: str = ""
     local_speed_mph: float = 0.0
+    # Narratable roadside features (OSM bake), spoken as ambient chatter.
+    landmarks: tuple[Landmark, ...] = ()
 
     def other(self, city: str) -> str:
         return self.b if city == self.a else self.a

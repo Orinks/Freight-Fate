@@ -73,7 +73,7 @@ class GarageState(MenuState):
         ]
 
     def _region(self) -> str:
-        return self.ctx.world.cities[self.ctx.profile.current_city].region
+        return self.ctx.world.city(self.ctx.profile.current_city).region
 
     def _tank_gal(self) -> float:
         return self.ctx.profile.truck_specs().fuel_tank_gal

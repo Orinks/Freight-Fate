@@ -5,8 +5,10 @@ from __future__ import annotations
 
 import random
 
-from ..data.world import Leg, Route
+from ..data.world import Leg, Route, get_world
+from .hos import clock_text, is_night
 from .season import is_weekend
+from .timezones import appointment_text, city_zone, zone_for
 from .traffic_manager import TrafficManager
 from .trip_models import *
 from .trip_road_events import TripRoadEventMixin
@@ -14,6 +16,13 @@ from .trip_route_helpers import *
 from .trip_traffic import TripTrafficMixin
 from .vehicle import TruckState
 from .weather import WeatherSystem
+
+# A stop is announced ("stop ahead") when it first comes within this many miles
+# ahead (_check_stops). restore() seeds this SAME window as already-announced so
+# a resumed trip does not re-announce a stop that was called out before the save.
+# Keep the two uses on one constant; letting them drift is what caused resumed
+# trips to occasionally replay a STOP_AHEAD.
+STOP_AHEAD_LOOKAHEAD_MI = 5.0
 
 
 def _spoken_distance(value: float, unit: str) -> str:
@@ -88,6 +97,8 @@ class Trip(TripRoadEventMixin, TripTrafficMixin):
         self._events: list[TripEvent] = []
         self._leg_starts = self._compute_leg_starts()
         self._city_mileposts = list(self._leg_starts) + [self.total_miles]
+        self.start_timezone, self.timezone_crossings = self._compute_timezone_crossings()
+        self._current_timezone = self.start_timezone
         self.stops = self._place_stops()
         self.toll_charges: list[TollCharge] = []
         self.traffic_manager = TrafficManager(
@@ -104,8 +115,12 @@ class Trip(TripRoadEventMixin, TripTrafficMixin):
         self.zones = self._place_zones()
         self.traffic_pressures = self._place_traffic_pressures()
         self.navigation_cues = self._build_navigation_cues()
+        self.landmarks = self._place_landmarks()
+        self.billboards = self._place_billboards()
         self.patrols = self._place_patrols()
         self.traffic_manager.add_patrol_traffic(self.patrols)
+        self._announced_landmarks: set[str] = set()
+        self._announced_billboards: set[str] = set()
         self._announced_stops: set[str] = set()
         self._announced_cities: set[int] = set()
         self._announced_navigation: set[str] = set()
@@ -183,6 +198,101 @@ class Trip(TripRoadEventMixin, TripTrafficMixin):
             acc += leg.miles
         return starts
 
+    def _timezone_samples(self) -> list[tuple[float, TimeZone]]:
+        """(trip mile, zone) along the route, from city and route-point geometry.
+
+        City endpoints are sampled too, so a leg with no baked geometry still
+        lands its clock change somewhere between two cities in different zones.
+        """
+        world = get_world()
+        samples: list[tuple[float, TimeZone]] = []
+        for i, (start, leg) in enumerate(zip(self._leg_starts, self.route.legs, strict=True)):
+            forward = self.route.cities[i] == leg.a
+            city = world.cities.get(self.route.cities[i])
+            if city is not None and (city.lat or city.lon):
+                samples.append((start, city_zone(city)))
+            for pt in leg.route_points:
+                offset = _stop_offset_for_direction(pt.at_mi, leg.miles, forward)
+                zone = zone_for(pt.lat, pt.lon, _leg_state_at(leg, pt.at_mi))
+                samples.append((start + offset, zone))
+        last = world.cities.get(self.route.cities[-1])
+        if last is not None and (last.lat or last.lon):
+            samples.append((self.total_miles, city_zone(last)))
+        samples.sort(key=lambda s: s[0])
+        return samples
+
+    def _compute_timezone_crossings(self) -> tuple[TimeZone, list[TimezoneCrossing]]:
+        """Start zone plus the deduped clock-change mileposts for the route.
+
+        A flip that reverts within ``TIMEZONE_DWELL_MI`` is a road hugging the
+        boundary, not a crossing, and is dropped -- same idea as the state
+        crossing sanitizer.
+        """
+        samples = self._timezone_samples()
+        if not samples:
+            return zone_for(0.0, 0.0), []
+        current = samples[0][1]
+        start = current
+        crossings: list[TimezoneCrossing] = []
+        for i, (mile, zone) in enumerate(samples):
+            if zone.key == current.key:
+                continue
+            settled = True
+            for later_mile, later_zone in samples[i + 1 :]:
+                if later_mile - mile > TIMEZONE_DWELL_MI:
+                    break
+                if later_zone.key == current.key:
+                    settled = False
+                    break
+            if settled:
+                crossings.append(TimezoneCrossing(mile, current, zone))
+                current = zone
+        return start, crossings
+
+    def timezone_at(self, mile: float) -> TimeZone:
+        """The time zone in effect at a trip milepost."""
+        zone = self.start_timezone
+        for crossing in self.timezone_crossings:
+            if crossing.at_mi <= mile:
+                zone = crossing.to_zone
+            else:
+                break
+        return zone
+
+    @property
+    def current_timezone(self) -> TimeZone:
+        return self.timezone_at(self.position_mi)
+
+    @property
+    def destination_timezone(self) -> TimeZone:
+        return self.timezone_at(self.total_miles)
+
+    @property
+    def local_hour(self) -> float:
+        """The wall clock where the truck is right now; what the player hears.
+
+        ``current_hour`` stays on the absolute (Eastern-reference) timeline
+        for durations and deadlines; only speech and day/night feel go local.
+        """
+        return (self.current_hour + self.current_timezone.offset_h) % 24.0
+
+    @property
+    def local_start_hour(self) -> float:
+        """The local wall clock at departure, for day/night placement."""
+        return (self.start_hour + self.start_timezone.offset_h) % 24.0
+
+    def deadline_clock_text(self, deadline_game_h: float, zone: TimeZone | None = None) -> str:
+        """The delivery appointment as a receiver would quote it: the wall
+        clock in the destination's zone, e.g. '6 PM Central Time tomorrow'.
+
+        ``zone`` overrides where the appointment is read -- a pickup drive's
+        trip ends at the origin facility, so its caller passes the delivery
+        city's zone instead of this trip's endpoint.
+        """
+        now = self.start_hour + self.game_minutes / 60.0
+        remaining = deadline_game_h - self.game_minutes / 60.0
+        return appointment_text(now, remaining, zone or self.destination_timezone)
+
     def _place_stops(self) -> list[RoadStop]:
         out: list[RoadStop] = []
         for i, (start, leg) in enumerate(zip(self._leg_starts, self.route.legs, strict=True)):
@@ -234,7 +344,8 @@ class Trip(TripRoadEventMixin, TripTrafficMixin):
         cues: list[NavigationCue] = []
         for i, (start, leg) in enumerate(zip(self._leg_starts, self.route.legs, strict=True)):
             forward = self.route.cities[i] == leg.a
-            toward = self.route.cities[i + 1]
+            toward_key = self.route.cities[i + 1]
+            toward = get_world().spoken_city(toward_key)
             if self._is_facility_approach_route():
                 # Tier-1 surface segments carry their baked maneuver; speak
                 # it verbatim with the segment distance. Legs without one
@@ -265,7 +376,7 @@ class Trip(TripRoadEventMixin, TripTrafficMixin):
                         )
                     )
                 continue
-            heading = _leg_heading(leg.highway, self.route.cities[i], toward)
+            heading = _leg_heading(leg.highway, self.route.cities[i], toward_key)
             shield = f"{leg.highway} {heading}".strip()
             segment_miles = leg.miles
             if i == 0:
@@ -378,6 +489,92 @@ class Trip(TripRoadEventMixin, TripTrafficMixin):
                 )
         cues.sort(key=lambda cue: cue.at_mi)
         return cues
+
+    def _place_landmarks(self) -> list[RoadsideCallout]:
+        """Schedule the baked roadside landmarks along this route.
+
+        Direction-resolved to trip miles and thinned to the minimum spacing so
+        a river cluster (three crossings in a mile is real geography) speaks
+        once instead of stacking. City-street approaches stay quiet."""
+        if self._is_facility_approach_route():
+            return []
+        callouts: list[RoadsideCallout] = []
+        for i, (start, leg) in enumerate(zip(self._leg_starts, self.route.legs, strict=True)):
+            forward = self.route.cities[i] == leg.a
+            for landmark in leg.landmarks:
+                offset = _stop_offset_for_direction(landmark.at_mi, leg.miles, forward)
+                callouts.append(
+                    RoadsideCallout(
+                        f"landmark:{i}:{landmark.at_mi}:{landmark.name}",
+                        start + offset,
+                        landmark.category,
+                        f"{landmark.spoken}.",
+                    )
+                )
+        callouts.sort(key=lambda c: c.at_mi)
+        spaced: list[RoadsideCallout] = []
+        last = -LANDMARK_MIN_SPACING_MI
+        for callout in callouts:
+            if callout.at_mi - last < LANDMARK_MIN_SPACING_MI:
+                continue
+            spaced.append(callout)
+            last = callout.at_mi
+        return spaced
+
+    def _place_billboards(self) -> list[RoadsideCallout]:
+        """Schedule parody billboards along the highway, seeded per trip.
+
+        Corridor-keyed signs (the real roadside culture of that highway) are
+        preferred where the route has them; the generic Americana pool fills
+        the rest. Deterministic for a seeded trip, and each sign text appears
+        at most once per trip -- repetition kills the joke."""
+        from ..data.billboards import corridor_billboards, random_billboard
+
+        if self._is_facility_approach_route():
+            return []
+        rng = random.Random(None if self._seed is None else self._seed ^ 0xB111B0A2)
+        callouts: list[RoadsideCallout] = []
+        used: set[str] = set()
+        at = BILLBOARD_LEAD_IN_MI + rng.uniform(0.0, BILLBOARD_MIN_GAP_MI)
+        while at < self.total_miles - 5.0:
+            leg_i, _ = self._leg_at_mile(at)
+            pool = corridor_billboards(self.route.legs[leg_i].highway)
+            fresh_corridor = [text for text in pool if text not in used]
+            if fresh_corridor and rng.random() < 0.5:
+                text = rng.choice(fresh_corridor)
+            else:
+                text = random_billboard(rng)
+                for _ in range(6):
+                    if text not in used:
+                        break
+                    text = random_billboard(rng)
+            if text not in used:
+                used.add(text)
+                callouts.append(
+                    RoadsideCallout(f"billboard:{at:.1f}", at, "billboard", f"Billboard: {text}")
+                )
+            at += rng.uniform(BILLBOARD_MIN_GAP_MI, BILLBOARD_MAX_GAP_MI)
+        return callouts
+
+    def _check_roadside_callouts(self) -> None:
+        self._check_callout_list(self.landmarks, self._announced_landmarks, TripEventKind.LANDMARK)
+        self._check_callout_list(
+            self.billboards, self._announced_billboards, TripEventKind.BILLBOARD
+        )
+
+    def _check_callout_list(self, callouts, announced: set[str], kind) -> None:
+        for callout in callouts:
+            if callout.key in announced:
+                continue
+            behind = self.position_mi - callout.at_mi
+            if behind < 0:
+                break  # sorted by mile; nothing further along is due yet
+            announced.add(callout.key)
+            # A callout overshot by more than a mile (a resumed save, a menu
+            # jump) is stale scenery; note it silently rather than narrate
+            # the past.
+            if behind <= 1.0:
+                self._emit(kind, callout.spoken, category=callout.category)
 
     def _place_zones(self) -> list[Zone]:
         zones: list[Zone] = []
@@ -559,7 +756,7 @@ class Trip(TripRoadEventMixin, TripTrafficMixin):
             base *= 1.3
         elif region in _COLD_PATROL_REGIONS:
             base *= 0.7
-        if is_night(self.start_hour):
+        if is_night(self.local_start_hour):
             base *= 1.15
         return base
 
@@ -781,10 +978,15 @@ class Trip(TripRoadEventMixin, TripTrafficMixin):
             )
         leg = self.route.legs[self.current_leg_index]
         toward = self.route.cities[self.current_leg_index + 1]
-        state = get_world().cities[toward].state
+        world = get_world()
+        toward_name = world.spoken_city(toward, qualified=False)
+        state = world.cities[toward].state
         next_context = self.next_navigation_context(imperial)
         terrain_text = self._current_grade_text()
-        return f"{dist}. On {leg.highway} toward {toward}, {state}. {terrain_text}. {next_context}"
+        return (
+            f"{dist}. On {leg.highway} toward {toward_name}, {state}. "
+            f"{terrain_text}. {next_context}"
+        )
 
     def _current_grade_text(self) -> str:
         grade_pct = self.grade_at(self.position_mi) * 100.0
@@ -798,7 +1000,7 @@ class Trip(TripRoadEventMixin, TripTrafficMixin):
     def next_navigation_context(self, imperial: bool = True) -> str:
         cue = self.next_navigation_cue()
         if cue is None:
-            return f"Destination {self.route.cities[-1]} ahead."
+            return f"Destination {get_world().spoken_city(self.route.cities[-1])} ahead."
         ahead = max(0.0, cue.at_mi - self.position_mi)
         ahead_text = (
             _spoken_distance(ahead, "mile")
@@ -856,12 +1058,20 @@ class Trip(TripRoadEventMixin, TripTrafficMixin):
         # Seed the spoken limit at the resume point so it is not re-announced.
         self._announced_speed_limit = self._corridor_limit_at(self.position_mi)
         for stop in self.stops:
-            if stop.at_mi <= self.position_mi:
+            # Seed passed stops AND stops already inside the "stop ahead" window;
+            # both were announced before the save, so a resume must not re-fire them.
+            if stop.at_mi <= self.position_mi + STOP_AHEAD_LOOKAHEAD_MI:
                 self._announced_stops.add(stop.name)
         for cue in self.navigation_cues:
             if cue.at_mi <= self.position_mi:
                 self._announced_navigation.add(f"{cue.key}:advance")
                 self._announced_navigation.add(f"{cue.key}:near")
+        for callout in (*self.landmarks, *self.billboards):
+            if callout.at_mi <= self.position_mi:
+                if callout.category == "billboard":
+                    self._announced_billboards.add(callout.key)
+                else:
+                    self._announced_landmarks.add(callout.key)
         for patrol in self.patrols:
             if patrol.start_mi <= self.position_mi:
                 self._announced_patrols.add(_patrol_key(patrol))
@@ -881,6 +1091,7 @@ class Trip(TripRoadEventMixin, TripTrafficMixin):
             if i and self.position_mi >= start:
                 self._announced_cities.add(i)
         self._active_zone = self._active_zone_at(self.position_mi)
+        self._current_timezone = self.timezone_at(self.position_mi)
 
     def restore_toll_charges(self, charges: list[dict]) -> None:
         """Restore settlement toll expenses from an active-drive snapshot."""
@@ -911,7 +1122,9 @@ class Trip(TripRoadEventMixin, TripTrafficMixin):
         self.game_minutes += game_min
         target = self.current_target_city
         self.weather.set_region(target.region)
-        self.weather.set_city(target.name, target.lat, target.lon)
+        # Identity for the live-weather cache: cities sharing a spoken name
+        # ("Jackson") are still different places with different skies.
+        self.weather.set_city(target.key, target.lat, target.lon)
         changed = self.weather.update(game_min)
         if changed is not None:
             self._emit(
@@ -942,8 +1155,10 @@ class Trip(TripRoadEventMixin, TripTrafficMixin):
         self._check_npc_traffic_cues()
         self._check_traffic_pressures()
         self._check_navigation_cues()
+        self._check_roadside_callouts()
         self._check_tolls()
         self._check_cities()
+        self._check_timezone()
         if moved_mi > 0.0:
             self._check_patrol_heads_up()
             self._check_hazards(moved_mi)
@@ -952,7 +1167,10 @@ class Trip(TripRoadEventMixin, TripTrafficMixin):
 
         if self.position_mi >= self.total_miles:
             self.finished = True
-            self._emit(TripEventKind.ARRIVED, f"You have arrived in {self.route.cities[-1]}.")
+            self._emit(
+                TripEventKind.ARRIVED,
+                f"You have arrived in {get_world().spoken_city(self.route.cities[-1])}.",
+            )
         return self._events
 
     # -- event checks ----------------------------------------------------------------
@@ -1083,6 +1301,27 @@ class Trip(TripRoadEventMixin, TripTrafficMixin):
                 )
             self._active_zone = zone
 
+    def _check_timezone(self) -> None:
+        """Announce a clock change the moment the truck passes a zone boundary.
+
+        The message carries the new local time, so it is composed here at
+        crossing time rather than baked into a static cue at trip start.
+        """
+        zone = self.timezone_at(self.position_mi)
+        if zone.key == self._current_timezone.key:
+            return
+        previous = self._current_timezone
+        self._current_timezone = zone
+        # The new local time is the whole message: it shows which way the
+        # clock jumped without spelling out an instruction the game already
+        # handles, and it stays short on routes that cross often.
+        self._emit(
+            TripEventKind.TIMEZONE_CROSSING,
+            f"Crossing into {zone.name}. It is now {clock_text(self.local_hour)}.",
+            from_zone=previous,
+            to_zone=zone,
+        )
+
     def _check_speed_limit(self) -> None:
         """Announce a changed posted limit on the open road (signs at a region
         or urban boundary). While a zone is active the zone owns the spoken
@@ -1098,7 +1337,7 @@ class Trip(TripRoadEventMixin, TripTrafficMixin):
             self._announced_speed_limit = limit
             verb = "reduced to" if lowered else "raised to"
             city = self._nearest_urban_city(self.position_mi) if lowered else None
-            where = f" approaching {city}" if city else ""
+            where = f" approaching {get_world().spoken_city(city)}" if city else ""
             self._emit(
                 TripEventKind.GPS_CUE, f"Speed limit {verb} {self._speed_value(limit)}{where}."
             )
@@ -1106,7 +1345,7 @@ class Trip(TripRoadEventMixin, TripTrafficMixin):
     def _check_stops(self) -> None:
         for stop in self.stops:
             ahead = stop.at_mi - self.position_mi
-            if 0 < ahead <= 5.0 and stop.name not in self._announced_stops:
+            if 0 < ahead <= STOP_AHEAD_LOOKAHEAD_MI and stop.name not in self._announced_stops:
                 self._announced_stops.add(stop.name)
                 exit_part = f" at {stop.exit_label}" if stop.exit_label else ""
                 parts = [f"{stop.spoken_name}{exit_part} in {self._distance_text(ahead)}."]

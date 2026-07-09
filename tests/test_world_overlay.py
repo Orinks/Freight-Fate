@@ -75,8 +75,10 @@ def test_overlay_cannot_override_base_city(tmp_path):
     path.write_text(json.dumps(overlay), encoding="utf-8")
 
     world = World.load(overlay=path)
-    # base Chicago wins; the overlay's bogus definition is ignored
-    assert world.cities["Chicago"].state == base.cities["Chicago"].state
+    # base Chicago wins; the overlay's pre-slug name aliases the base city and
+    # its bogus definition is ignored
+    assert len(world.cities) == len(base.cities)
+    assert world.city("Chicago").state == base.city("Chicago").state
 
 
 def test_overlay_does_not_duplicate_an_existing_leg(tmp_path):

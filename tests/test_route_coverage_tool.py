@@ -25,7 +25,7 @@ def test_route_coverage_report_is_machine_readable():
     assert report["metadata_contract"]["legacy_full_graph_available_for_old_saves"] is True
     assert report["metadata_contract"]["placeholder_pois_do_not_count_for_dispatch"]
     assert "source-backed truck-stop coverage" in report["current_batch_notes"][0]
-    assert report["totals"]["legs"] == 542
+    assert report["totals"]["legs"] == 721
     assert report["totals"]["playable"] == report["totals"]["legs"]
     assert report["missing_playable"] == []
     assert report["totals"]["route_points"] == report["totals"]["legs"]
@@ -45,20 +45,26 @@ def test_route_coverage_report_is_machine_readable():
     assert report["totals"]["toll_legs"] >= 5
 
     chicago_indy = next(
-        leg for leg in report["legs"] if leg["from"] == "Chicago" and leg["to"] == "Indianapolis"
+        leg
+        for leg in report["legs"]
+        if leg["from"] == "chicago_il_us" and leg["to"] == "indianapolis_in_us"
     )
     assert chicago_indy["playable"]
     assert chicago_indy["missing"] == []
 
     chicago_st_louis = next(
-        leg for leg in report["legs"] if leg["from"] == "Chicago" and leg["to"] == "St. Louis"
+        leg
+        for leg in report["legs"]
+        if leg["from"] == "chicago_il_us" and leg["to"] == "st_louis_mo_us"
     )
     assert chicago_st_louis["playable"]
     assert chicago_st_louis["missing"] == []
     assert chicago_st_louis["curated_poi_count"] >= (chicago_st_louis["minimum_curated_pois"])
 
     formerly_placeholder_only = next(
-        leg for leg in report["legs"] if leg["from"] == "Indianapolis" and leg["to"] == "St. Louis"
+        leg
+        for leg in report["legs"]
+        if leg["from"] == "indianapolis_in_us" and leg["to"] == "st_louis_mo_us"
     )
     assert formerly_placeholder_only["playable"]
     assert formerly_placeholder_only["placeholder_poi_count"] == 0
@@ -70,11 +76,11 @@ def test_route_coverage_report_is_machine_readable():
     assert formerly_placeholder_only["unsupported_reasons"] == []
 
     newly_curated = {
-        ("New York", "Boston"): 2,
-        ("Indianapolis", "Nashville"): 2,
-        ("Nashville", "Atlanta"): 2,
-        ("Kansas City", "Denver"): 3,
-        ("Dallas", "Albuquerque"): 3,
+        ("new_york_ny_us", "boston_ma_us"): 2,
+        ("indianapolis_in_us", "nashville_tn_us"): 2,
+        ("nashville_tn_us", "atlanta_ga_us"): 2,
+        ("kansas_city_mo_us", "denver_co_us"): 3,
+        ("dallas_tx_us", "albuquerque_nm_us"): 3,
     }
     for (start, end), expected_count in newly_curated.items():
         leg = next(item for item in report["legs"] if item["from"] == start and item["to"] == end)

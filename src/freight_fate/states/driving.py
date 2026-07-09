@@ -38,7 +38,7 @@ class DrivingState(DrivingControlsMixin, DrivingUpdateMixin, DrivingEventMixin, 
         self.truck.damage_pct = profile.truck_damage_pct
         self.truck.set_cold_air_start()
         self.start_damage = profile.truck_damage_pct
-        region = ctx.world.cities[job.origin].region
+        region = ctx.world.city(job.origin).region
         self.weather = WeatherSystem(
             region,
             seed=self.trip_seed,
@@ -65,7 +65,7 @@ class DrivingState(DrivingControlsMixin, DrivingUpdateMixin, DrivingEventMixin, 
         self._night_music_sequence = select_drive_music_sequence(
             self.route, self.trip_seed, 0.0, self.weather.current
         )
-        self._music_night = is_night(trip_start_hour)
+        self._music_night = is_night(self.trip.local_start_hour)
         self.radio = RadioState.from_settings(ctx.settings)
         self._radio_backend = _DrivingRadioBackend(self)
         # Station rotation: per-station shuffled song order, with host breaks
@@ -288,7 +288,9 @@ class DrivingState(DrivingControlsMixin, DrivingUpdateMixin, DrivingEventMixin, 
                 route = ctx.world.route_from_cities(data["route_cities"])
             if route is None:
                 return None
-            job = job_from_payload(j)
+            # Pre-slug saves store display names; canonicalize before any
+            # world lookup so an old trip resumes instead of being dropped.
+            job = normalize_job_cities(job_from_payload(j), ctx.world)
             position_mi = float(data.get("position_mi", 0.0))
             game_minutes = float(data.get("game_minutes", 0.0))
             job.deadline_game_h = fair_active_deadline(
@@ -365,7 +367,7 @@ class DrivingState(DrivingControlsMixin, DrivingUpdateMixin, DrivingEventMixin, 
         self.ctx.audio.set_weather(self.weather.effects.sound)
         self.ctx.audio.set_wind(self.weather.effects.wind)
         mode = "automatic" if self.truck.transmission.automatic else "manual"
-        now = clock_text(self.trip.current_hour)
+        now = clock_text(self.trip.local_hour)
         if self.resumed:
             hours_used = self.trip.game_minutes / 60.0
             if self.phase == DRIVE_PHASE_PICKUP:
@@ -376,7 +378,7 @@ class DrivingState(DrivingControlsMixin, DrivingUpdateMixin, DrivingEventMixin, 
                 destination = self._city_service_text()
             else:
                 drive_name = "loaded delivery"
-                destination = self.job.destination
+                destination = self.job.spoken_destination
             progress = (
                 self._pickup_progress_summary()
                 if self.phase == DRIVE_PHASE_PICKUP

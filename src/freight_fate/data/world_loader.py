@@ -12,6 +12,11 @@ def load_world_data(root: Path) -> dict:
         raise ValueError(f"{index_path} does not contain a 'countries' list")
 
     data = {"cities": {}, "legs": []}
+    # Spoken-name lookup for state and country codes ("MS" -> "Mississippi").
+    # Optional so pre-slug data trees and minimal test fixtures still load.
+    geo_path = root / "geo.json"
+    if geo_path.exists():
+        data["geo"] = _load_json(geo_path)
     for country in index["countries"]:
         code = country["code"]
         country_dir = root / country["path"]

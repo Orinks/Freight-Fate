@@ -47,6 +47,14 @@ class DrivingEventMixin:
             return
         kind = event.kind
         sound = _route_event_sound(event)
+        if kind in (TripEventKind.LANDMARK, TripEventKind.BILLBOARD):
+            # Ambient roadside color, filtered by the player's chatter
+            # switches at speak time so a mid-trip settings change applies
+            # immediately. Terse speech mutes all of it; a muted callout is
+            # dropped whole -- it never becomes the A-key replay either.
+            category = str(event.data.get("category", ""))
+            if self._terse_speech() or not self.ctx.settings.chatter_enabled(category):
+                return
         if event.message:
             self._last_event_message = event.message  # replayable with A
         if kind == TripEventKind.HAZARD:
@@ -87,6 +95,14 @@ class DrivingEventMixin:
             add_unique_stat(self.ctx.profile, "states_crossed", str(state))
             self._speak_ambient_event(event.message, sound)
             self.ctx.award_achievement("state_crossing", event=True)
+        elif kind == TripEventKind.TIMEZONE_CROSSING:
+            if sound is not None:
+                self.ctx.audio.play(sound)
+            self.ctx.say_event(
+                timezone_crossing_message(event, self._terse_speech()), interrupt=False
+            )
+        elif kind in (TripEventKind.LANDMARK, TripEventKind.BILLBOARD):
+            self._speak_ambient_event(event.message)
         elif kind == TripEventKind.ARRIVED:
             pass  # handled by _arrive()
         elif self._event_disables_cruise(event):
@@ -292,7 +308,7 @@ class DrivingEventMixin:
             return
 
         can_sleep = "sleep" in stop.actions
-        if can_sleep and hos.parking_is_full(self.trip_seed, stop.at_mi, self.trip.current_hour):
+        if can_sleep and hos.parking_is_full(self.trip_seed, stop.at_mi, self.trip.local_hour):
             self.ctx.push_state(ParkingFullState(self.ctx, self, stop))
             return
         self.ctx.push_state(RestStopState(self.ctx, self, stop))
@@ -554,7 +570,11 @@ class DrivingEventMixin:
     ) -> tuple[float, str, str] | None:
         if not self.route.legs:
             return None
-        destination = self.route.cities[-1].casefold()
+        # Matched against real interchange sign text, so compare the spoken
+        # city name ("Nashville"), never the slug key.
+        destination = self.ctx.world.spoken_city(
+            self.route.cities[-1], qualified=False
+        ).casefold()
         candidates = []
         for i in range(len(self.route.legs) - 1, -1, -1):
             leg = self.route.legs[i]
@@ -1433,8 +1453,8 @@ class DrivingEventMixin:
         truck = TRUCK_CATALOG.get(self.ctx.profile.truck) if self.ctx.profile else None
         return driving_presence(
             phase=self.phase,
-            origin=self.job.origin,
-            destination=self.job.destination,
+            origin=self.job.spoken_origin,
+            destination=self.job.spoken_destination,
             cargo=self.job.cargo.label,
             fraction=fraction,
             moving=moving,
@@ -1448,7 +1468,7 @@ class DrivingEventMixin:
         title = (
             f"Deadheading to pickup at {self._pickup_facility_text()}"
             if self.phase == DRIVE_PHASE_PICKUP
-            else f"Driving loaded to {self.job.destination}"
+            else f"Driving loaded to {self.job.spoken_destination}"
         )
         remaining = (
             f"{self.trip.remaining_miles:.1f} of {self.trip.total_miles:.1f} miles"
@@ -1469,8 +1489,9 @@ class DrivingEventMixin:
             f"Remaining: {remaining}",
             f"Weather: {self.weather.current.value}",
             f"Date: {self._calendar_phrase() or 'unknown'}",
-            f"Clock: {clock_text(self.trip.current_hour)} "
-            f"({time_of_day(self.trip.current_hour)})   "
+            f"Clock: {clock_text(self.trip.local_hour)} "
+            f"{self.trip.current_timezone.name} "
+            f"({time_of_day(self.trip.local_hour)})   "
             f"Fatigue: {self.ctx.profile.fatigue:.0f}%",
             "",
             self._status_text,

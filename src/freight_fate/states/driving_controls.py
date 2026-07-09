@@ -537,7 +537,8 @@ class DrivingControlsMixin:
             f"Weather: {self.weather.describe(self.ctx.settings.imperial_units)}",
             f"Radio: {self.radio.status_text()}",
             f"Calendar: {self._calendar_phrase() or 'unknown'}",
-            f"Clock: {clock_text(self.trip.current_hour)} ({time_of_day(self.trip.current_hour)})",
+            f"Clock: {clock_text(self.trip.local_hour)} {self.trip.current_timezone.name} "
+            f"({time_of_day(self.trip.local_hour)})",
         ]
         if self._cruise_mph is not None:
             lines.insert(
@@ -615,7 +616,7 @@ class DrivingControlsMixin:
     def _clock_phrase(self) -> str:
         """'It is 5:33 AM, March 21, spring.' -- the time plus the calendar."""
         cal = self._calendar_phrase()
-        base = f"It is {clock_text(self.trip.current_hour)}"
+        base = f"It is {clock_text(self.trip.local_hour)} {self.trip.current_timezone.name}"
         return f"{base}, {cal}." if cal else f"{base}."
 
     def _speak_clock(self) -> None:
@@ -647,9 +648,11 @@ class DrivingControlsMixin:
                 if eta < remaining
                 else "You are running behind. Keep your speed up."
             )
+            appointment = _deadline_appointment(self)
             self.ctx.say(
                 f"{now} {hours_used:.1f} hours on the road. "
-                f"{remaining:.1f} hours until the deadline. "
+                f"{remaining:.1f} hours until the deadline; "
+                f"delivery is due by {appointment}. "
                 f"Estimated time to arrival {eta:.1f} hours {basis}. "
                 f"{verdict} {hos_part}"
             )
@@ -739,7 +742,7 @@ class DrivingControlsMixin:
         source = "Live conditions" if self.weather.live else "Currently"
         safe_speed = self.ctx.settings.speed_text(self.weather.effects.safe_speed_mph)
         parts = [
-            f"It is {time_of_day(self.trip.current_hour)}.",
+            f"It is {time_of_day(self.trip.local_hour)}.",
             f"{source} {self.weather.describe()}.",
             f"Safe speed about {safe_speed}.",
         ]

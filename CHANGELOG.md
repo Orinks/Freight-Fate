@@ -4,6 +4,120 @@
 
 ### Added
 
+- **The biggest map update yet -- 100 new cities to pick up and deliver in.** A
+  city is a place a load can start or end, and the map grew from 249 to 349 of
+  them, filling in dead zones that used to have nothing drivable for hundreds of
+  miles: the mountain West, the northern plains, the Nevada Great Basin, the
+  Oregon and California coast, and Appalachia. Whole corridors that simply were
+  not there before now connect city to city on the real roads -- Interstate 70
+  over the Colorado Rockies, the US-2 Hi-Line across the northern tier, Interstate
+  80 across Nevada, and Interstate 75 through the Kentucky mountains among them. Be careful, though -- there are still some challenging
+  routes where you had better watch your fuel and get it when you can. Thanks
+  to nromey.
+
+- **Every run now names the real towns and country you pass.** Those are
+  checkpoints -- the actual places along a route, spoken as you reach them -- and
+  the map went from about 550 of them to over 2,500. Instead of empty miles, a
+  haul now names the towns you pass and the state lines along the way, all from
+  real geography, and real elevation data means the grades are felt and not
+  smoothed flat. Thanks to nromey.
+
+- **Over 1,700 truck stops are now named along your routes.** Real travel centers, truck
+  stops, and rest areas -- Love's, Pilot, Flying J, TA, Petro, and independents
+  -- each pinned to its real location, so every route now has at least one place
+  to fuel or park, and even the emptiest rural stretches point you to a real
+  diesel pump you can pull a rig into. For now these are just named on the map;
+  making them do something -- rest, showers, repairs, and buffs -- comes in a
+  later update. Thanks to nromey.
+
+- **The map keeps filling in -- twenty more cities across seven new corridors.**
+  Since the big update above, the network grew city by city: Interstate 80 across
+  western Nebraska (Kearney, Lexington, Ogallala, and Sidney), Interstate 70 over
+  the Kansas high plains into Colorado (Hays, Colby, Junction City, and
+  Burlington), Interstate 10 through the West Texas desert (Fort Stockton, Ozona,
+  and Junction), Interstate 25 over Raton Pass into New Mexico (Raton and
+  Trinidad), Interstate 5 over the Siskiyou Mountains (Mount Shasta and Yreka),
+  Interstate 29 up the Dakota plains (Watertown), and the full Willamette Valley
+  run from Portland down to Eugene -- Woodburn and Albany on Interstate 5, plus a
+  wine-country alternate through Newberg and McMinnville. Each new city is a real
+  place to pick up and deliver, wired to its neighbors on truck-routed roads with
+  real named stops to fuel and park along the way, and grades that rise and fall
+  with the real terrain.
+
+- **Nevada's Great Basin opens up -- six new cities on three high-desert
+  corridors.** The empty interior between the interstates fills in: US-93 up the
+  eastern Great Basin from Las Vegas through Alamo and Ely to Wells; US-50 -- "the
+  Loneliest Road in America" -- across the middle through Eureka, Austin, and
+  Fallon; and US-6 tying Ely to Tonopah. These are long, quiet, climbing hauls
+  over real mountain grades (the run to Wells tops seven percent over Pequop
+  Summit), and every leg points you to a real diesel pump so you never run dry on
+  the lonely stretches. Ely, Fallon, and Wells are new places to pick up and
+  deliver -- and Wells now splits the old Elko run, so Interstate 80 freight
+  passes through the real town instead of leaping it.
+
+- **New: real roadside landmarks as you drive.** Routes now call out the world
+  going by -- entering a national forest, crossing a named river, approaching a
+  mountain pass, a roadside museum ahead -- over 2,800 of them, drawn from real
+  map data so a long haul has a sense of place instead of silence. The callouts
+  ride the quiet background voice: they wait their turn behind navigation and
+  never talk over a safety warning. Thanks to nromey.
+
+- **Billboards line the highway now, and they have opinions.** Every long run
+  passes the occasional billboard, read aloud as you go by: earnest church
+  signs, truck-wreck attorneys, mystery spots, and the world's largest
+  several things. Some routes get their own real roadside culture -- free ice
+  water on Interstate 90, alien jerky on Interstate 15 -- and no sign repeats
+  itself on the same trip.
+
+- **You choose the roadside chatter you want to hear.** A new Roadside
+  chatter group in Settings, Speech and weather, has one master switch and
+  separate switches for parks and forests, river crossings, mountain passes,
+  museums and attractions, and billboards -- so you can keep the geography
+  and lose the jokes, or the other way around. Terse speech verbosity mutes
+  all of it, and safety and navigation announcements are never affected.
+
+- **Name-brand truck stops now tell you what they are good at.** Pulling up
+  the details on a branded stop adds its specialty -- tire care and a quick
+  lube at a Love's, the sit-down restaurant at a Petro -- to the spoken
+  rundown at the stop and in the en-route stop listings.
+
+- **Some hauls now offer more than one way to drive them.** Where two real truck
+  routes reach the same place, the map keeps both, so a run can offer a choice --
+  a faster interstate or a shorter back road -- instead of a single fixed path.
+  Is it winter, and you'd rather take a southern route than a mountainous
+  northern one? We've got you covered. Thanks to nromey.
+
+- **The map now has real time zones, and your clock changes as you cross
+  them.** Drive west out of Tennessee on I-40 and you will hear "Crossing
+  into Central Time. It is now 2:15 PM." With terse speech on, it is just
+  "Central Time." Every spoken clock -- rest stops, sleep, city arrivals, the driving
+  status screens -- now reads the local time where your truck is, and the
+  clock readouts name the zone, like "2:15 PM Central Time". Delivery
+  deadlines are also quoted the way a real receiver would say them: in the
+  destination's local time, like "deliver by 6 PM Central Time tomorrow", on
+  the dispatch job details and in the driving deadline readouts. Hours of
+  service, deadlines, and pay are untouched; only what the wall clock says
+  changes. Boundaries follow the real lines, including split states like
+  Tennessee, Kentucky, Indiana, the Florida panhandle, and far west Texas.
+
+### Changed
+
+- **Cities that share a name now always say their state.** With two Jacksons,
+  two Portlands, and three Springfields on the map, dispatch offers, route
+  planning, GPS announcements, and delivery summaries now say "Jackson,
+  Mississippi" or "Jackson, Michigan" wherever the bare name would be
+  ambiguous. Cities with a unique name keep their short spoken form, and a few
+  places that used to stutter their state twice, like "toward Jackson,
+  Michigan, Michigan", now say it once. Existing careers and saved trips carry
+  over unchanged.
+
+- **Job details always tell you the state.** Not sure where Baton Rouge is?
+  Open a job's detail view from the dispatch board and the origin and
+  destination lines now always include the state, like "in Baton Rouge,
+  Louisiana", even for cities with a unique name. Board offers stay short.
+
+### Added
+
 - **The upper Midwest and Great Lakes fill in with twenty-nine new cities
   across five states.** Illinois gains Springfield, Bloomington, Champaign,
   and Decatur. Michigan gains Flint, Saginaw, Kalamazoo, Port Huron, Muskegon,
@@ -270,6 +384,31 @@
   zone, with a radio squelch cue and a clear "check your speed" line. The cue
   stays secondary to hazards and construction warnings, and the U upcoming key
   can review that chatter alongside stops, speed zones, and exits.
+
+### Fixed
+
+- **Your truck no longer idles all night while you sleep.** Bedding down for
+  the night -- at a rest stop, in the sleeper berth, in a cramped lot, or on
+  the shoulder -- now shuts the engine down first, and you will hear "You
+  shut down the engine" as you turn in. When you head back to the road,
+  start the engine as usual. Thanks to Bartholomue.
+
+- **Updating the game on Mac now works.** Downloading an update used to end
+  with "the download failed" and nothing installed, leaving Mac players to
+  fetch each new version by hand. The updater now understands the Mac app
+  bundle: it swaps in the new app after the game closes and reopens it for
+  you, just like on Windows and Linux. Your saves are untouched. Thanks to
+  vlad-a-c.
+
+- **Asking for job details on Back to terminal no longer crashes the game.**
+  On the dispatch board, pressing F1 while on the Back to terminal entry used
+  to crash; it now simply reads the entry back, like any other menu item.
+  Thanks to ironcross32.
+
+- **Resuming a trip no longer repeats a stop it already called out.** When you
+  continued a saved run, the game could re-announce a truck stop or rest area
+  just ahead that it had already told you about before you saved. It now
+  remembers what it said and stays quiet. Thanks to nromey.
 
 ## 1.8.0 - 2026-07-05
 

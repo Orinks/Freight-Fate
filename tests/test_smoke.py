@@ -98,7 +98,7 @@ def test_full_game_flow_headless(monkeypatch):
         assert isinstance(app.state, CityMenuState)
         assert app.ctx.profile is not None
         assert app.ctx.profile.name == "Smoke"
-        assert app.ctx.profile.current_city == "Chicago"
+        assert app.ctx.profile.current_city == "chicago_il_us"
 
         # Open dispatch board and accept the assigned job: a new hire runs
         # dispatch's load, and the trainer recommendation keeps it short

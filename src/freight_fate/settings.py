@@ -12,6 +12,30 @@ log = logging.getLogger(__name__)
 
 TIME_SCALES = (10.0, 20.0, 40.0)
 
+# Which chatter switch governs each roadside-callout category. Zone entries
+# (parks, forests, wilderness) share one switch; the lone highway heritage
+# marker rides with the scenic passes.
+CHATTER_CATEGORY_FIELDS = {
+    "national_park": "chatter_parks",
+    "national_forest": "chatter_parks",
+    "wilderness": "chatter_parks",
+    "protected_area": "chatter_parks",
+    "river": "chatter_rivers",
+    "mountain_pass": "chatter_passes",
+    "highway_marker": "chatter_passes",
+    "museum": "chatter_museums",
+    "billboard": "chatter_billboards",
+}
+
+# The player-facing chatter switches, in menu order.
+CHATTER_FIELDS = (
+    "chatter_parks",
+    "chatter_rivers",
+    "chatter_passes",
+    "chatter_museums",
+    "chatter_billboards",
+)
+
 
 @dataclass
 class Settings:
@@ -38,6 +62,15 @@ class Settings:
     engine_volume: float = 0.55
     ui_volume: float = 0.9
     speech_verbosity: int = 1  # 0 terse, 1 normal, 2 chatty
+    # Roadside chatter: the ambient color spoken between navigation cues.
+    # Each category has its own switch so a player can keep the geography
+    # (rivers, passes) while silencing the jokes (billboards), or vice versa.
+    # Safety and navigation speech is never affected by these.
+    chatter_parks: bool = True  # entering parks, forests, and wild lands
+    chatter_rivers: bool = True  # named river crossings
+    chatter_passes: bool = True  # mountain passes and scenic highway markers
+    chatter_museums: bool = True  # museums and roadside attractions
+    chatter_billboards: bool = True  # parody billboards
     announce_menu_position: bool = True  # speak "N of M" position in menus
     sapi_events: bool = True  # driving events on a separate voice
     event_backend: str = "SAPI"  # which voice that is (e.g. SAPI/OneCore)
@@ -92,6 +125,9 @@ class Settings:
             s.controller_enabled = True
         if not isinstance(s.haptics_enabled, bool):
             s.haptics_enabled = True
+        for attr in CHATTER_FIELDS:
+            if not isinstance(getattr(s, attr), bool):
+                setattr(s, attr, True)
         for attr in (
             "master_volume",
             "sfx_volume",
@@ -108,6 +144,27 @@ class Settings:
         if not isinstance(s.radio_station_id, str) or not s.radio_station_id:
             s.radio_station_id = "route_playlist"
         return s
+
+    def chatter_enabled(self, category: str) -> bool:
+        """Whether a roadside-callout category is currently spoken.
+
+        Unknown categories default to on so a future bake category speaks
+        rather than silently vanishing."""
+        field = CHATTER_CATEGORY_FIELDS.get(category)
+        return True if field is None else bool(getattr(self, field))
+
+    def chatter_summary(self) -> str:
+        """The master menu label state: everything, off, or custom."""
+        states = [bool(getattr(self, field)) for field in CHATTER_FIELDS]
+        if all(states):
+            return "everything"
+        if not any(states):
+            return "off"
+        return "custom"
+
+    def set_all_chatter(self, enabled: bool) -> None:
+        for field in CHATTER_FIELDS:
+            setattr(self, field, enabled)
 
     def speed_text(self, mph: float) -> str:
         if self.imperial_units:

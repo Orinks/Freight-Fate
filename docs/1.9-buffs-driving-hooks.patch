@@ -1,0 +1,36 @@
+diff --git a/src/freight_fate/states/driving_core.py b/src/freight_fate/states/driving_core.py
+index ef9d394..7c0722e 100644
+--- a/src/freight_fate/states/driving_core.py
++++ b/src/freight_fate/states/driving_core.py
+@@ -14,6 +14,7 @@ import random
+ import pygame
+ 
+ from ..achievements import add_unique_stat
++from ..data.amenities import spoken_amenities
+ from ..data.world import Route
+ from ..models.economy import pay_advance_grant, pay_advance_unavailable_reason
+ from ..models.jobs import (
+@@ -390,6 +391,9 @@ def _poi_offers_text(stop) -> str:
+         parts.append(f"offers {_join_phrase(offers)}")
+     if services:
+         parts.append(f"listed services: {_join_phrase(services)}")
++    brand_text = spoken_amenities(stop.name, getattr(stop, "type", ""))
++    if brand_text:
++        parts.append(brand_text)
+     if getattr(stop, "parking_text", ""):
+         parts.append(stop.parking_text)
+     return "; ".join(parts) if parts else "services not listed"
+diff --git a/src/freight_fate/states/driving_rest_states.py b/src/freight_fate/states/driving_rest_states.py
+index 15ac03d..f0a82d7 100644
+--- a/src/freight_fate/states/driving_rest_states.py
++++ b/src/freight_fate/states/driving_rest_states.py
+@@ -172,6 +172,9 @@ class RestStopState(MenuState):
+         parts = [f"{self.stop.spoken_name}."]
+         if self.stop.parking_text:
+             parts.append(f"{self.stop.parking_text}.")
++        brand_text = spoken_amenities(self.stop.name, getattr(self.stop, "type", ""))
++        if brand_text:
++            parts.append(f"{brand_text}.")
+         parts.extend(
+             [
+                 f"It is {clock_text(self.driving.trip.local_hour)}.",

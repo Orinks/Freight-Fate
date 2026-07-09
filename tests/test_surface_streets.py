@@ -67,7 +67,7 @@ def test_surface_zones_follow_the_street_speeds(world):
 
 
 def test_single_leg_approaches_keep_the_blanket_zone(world):
-    route = world.facility_approach_route("Chicago", world.cities["Chicago"].locations[0].name)
+    route = world.facility_approach_route("Chicago", world.city("Chicago").locations[0].name)
     if any(leg.local_speed_mph > 0 for leg in route.legs):
         pytest.skip("this facility gained turn-level data; blanket no longer applies")
     trip = _trip(route)

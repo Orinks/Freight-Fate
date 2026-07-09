@@ -236,17 +236,26 @@ def test_eastbound_badge_fires_only_on_an_eastbound_delivery(monkeypatch):
     try:
         app.ctx.profile = Profile(name="Eastbound Run")
         p = app.ctx.profile
-        p.current_city = "Chicago"
+        p.current_city = "chicago_il_us"
         world = app.ctx.world
-        origin_lon = world.cities["Chicago"].lon
+        origin_lon = world.city("Chicago").lon
+        # Find any unlocked, net-eastbound job Chicago offers. Which seed yields
+        # one shifts as the map grows (more western destinations dilute a single
+        # seed's draw), so search seeds instead of pinning one -- the test only
+        # needs a genuine eastbound delivery, not a specific one.
         job = next(
-            job
-            for job in JobBoard(world, seed=11).offers(
-                "Chicago", p.career.endorsements, level=5, market=p.market
-            )
-            if not job.locked_reason(p.career.endorsements, p.career.level)
-            and world.cities[job.destination].lon > origin_lon + 1.0  # net eastbound
+            (
+                candidate
+                for seed in range(200)
+                for candidate in JobBoard(world, seed=seed).offers(
+                    "Chicago", p.career.endorsements, level=5, market=p.market
+                )
+                if not candidate.locked_reason(p.career.endorsements, p.career.level)
+                and world.cities[candidate.destination].lon > origin_lon + 1.0  # net eastbound
+            ),
+            None,
         )
+        assert job is not None, "expected Chicago to offer a net-eastbound job under some seed"
         route = world.supported_route_options(job.origin, job.destination)[0]
         driving = DrivingState(app.ctx, job, route)
         driving.trip.game_minutes = job.deadline_game_h * 30.0

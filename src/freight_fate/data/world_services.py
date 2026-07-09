@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import re
 import zlib
 
 from .world_constants import (
@@ -20,11 +19,6 @@ from .world_models import (
     LocalGeometry,
     Route,
 )
-
-
-def _service_slug(text: str) -> str:
-    return re.sub(r"[^a-z0-9]+", "-", text.lower()).strip("-")
-
 
 CITY_SERVICE_APPROACH_MILES = {
     "freight_market": 3.0,
@@ -46,22 +40,25 @@ class WorldServiceMixin:
         Source-backed entries from ``city_services.json`` are preferred per
         service key. Missing keys stay available as representative fallback
         services so the existing offline menu contract remains complete.
+        ``CityService.city`` carries the canonical city key so it round-trips
+        through the other service lookups; spoken text uses ``name``.
         """
-        if city not in self.cities:
+        city_key = self.resolve_city_key(city)
+        if city_key not in self.cities:
             raise KeyError(f"Unknown city: {city}")
-        source_entries = self._city_service_data.get(city, {})
+        source_entries = self._city_service_data.get(city_key, {})
         services: list[CityService] = []
         for key in CITY_SERVICE_ORDER:
             raw = source_entries.get(key)
             if raw is None:
-                services.append(self._fallback_city_service(city, key))
+                services.append(self._fallback_city_service(city_key, key))
                 continue
-            city_obj = self.cities[city]
+            city_obj = self.cities[city_key]
             services.append(
                 CityService(
                     key=key,
                     name=str(raw["name"]).strip(),
-                    city=city,
+                    city=city_key,
                     state=city_obj.state,
                     kind=str(raw.get("kind", key)).strip() or key,
                     source_note=str(raw.get("source_note", "")).strip(),
@@ -77,18 +74,18 @@ class WorldServiceMixin:
             )
         return tuple(services)
 
-    def _fallback_city_service(self, city: str, key: str) -> CityService:
-        city_obj = self.cities[city]
-        terminal = self.home_terminal(city)
+    def _fallback_city_service(self, city_key: str, key: str) -> CityService:
+        city_obj = self.cities[city_key]
+        terminal = self.home_terminal(city_key)
         names = {
-            "freight_market": f"{city} Freight Market Office",
+            "freight_market": f"{city_obj.name} Freight Market Office",
             "garage": f"{terminal.name} Garage",
-            "truck_dealer": f"{city} Truck Dealer",
+            "truck_dealer": f"{city_obj.name} Truck Dealer",
         }
         return CityService(
             key=key,
             name=names[key],
-            city=city,
+            city=city_key,
             state=city_obj.state,
             kind=key,
             source_note=CITY_SERVICE_SOURCE_NOTES[key],
@@ -108,10 +105,10 @@ class WorldServiceMixin:
         return self._local_geometries.get(target_id)
 
     def city_service_approach(self, city: str, key: str) -> LocalApproach | None:
-        return self.local_approach(f"city_service:{_service_slug(city)}:{key}")
+        return self.local_approach(f"city_service:{self.resolve_city_key(city)}:{key}")
 
     def city_service_geometry(self, city: str, key: str) -> LocalGeometry | None:
-        return self.local_geometry(f"city_service:{_service_slug(city)}:{key}")
+        return self.local_geometry(f"city_service:{self.resolve_city_key(city)}:{key}")
 
     def facility_approach(self, city: str, location_name: str) -> LocalApproach | None:
         location = self.facility_location(city, location_name)
@@ -131,6 +128,7 @@ class WorldServiceMixin:
 
     def city_service_route(self, city: str, key: str) -> Route:
         """A short, drivable local route from the terminal to a city service."""
+        city = self.resolve_city_key(city)
         service = self.city_service(city, key)
         geometry = self.city_service_geometry(city, key)
         if geometry is not None and geometry.turn_level and geometry.segments:
@@ -168,6 +166,7 @@ class WorldServiceMixin:
 
     def facility_approach_route(self, city: str, location_name: str) -> Route:
         """A short, drivable local route from the company terminal to a facility."""
+        city = self.resolve_city_key(city)
         location = self.facility_location(city, location_name)
         source_approach = self._facility_approaches.get(location.id)
         if source_approach is not None and source_approach.turn_level and source_approach.segments:
