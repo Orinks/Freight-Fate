@@ -109,6 +109,16 @@
 
 ### Changed
 
+- **The horn sounds like a real horn held down.** Instead of restarting the
+  same short honk over and over, holding the horn now sustains one steady blast
+  for as long as you press it, and when you let go the horn rings out and fades
+  the way a real one does rather than cutting off abruptly. Pressing the horn
+  again while it is still sounding no longer layers a second horn on top.
+
+- **Abandoning a job now asks you to confirm.** Choosing Abandon job from the
+  pause menu opens a Yes or No prompt that starts on No, so you have to arrow
+  down to Yes to actually give up the load and pay the penalty. Choosing No
+  takes you straight back to the pause menu with the job intact.
 - **Cities that share a name now always say their state.** With two Jacksons,
   two Portlands, and three Springfields on the map, dispatch offers, route
   planning, GPS announcements, and delivery summaries now say "Jackson,
@@ -150,6 +160,14 @@
   Duluth no longer sounds like a summer haul into Cincinnati.
 
 ### Fixed
+
+- **The engine no longer re-cranks when you pick a trip back up.** Resuming a
+  saved haul with the engine already running -- or coming back from a menu
+  mid-drive -- used to replay the ignition sound as if you had just turned the
+  key. Now the running engine simply fades back in, and the starter is heard
+  only when you actually start the engine yourself. When you do start it, the
+  crank now blends smoothly into the running engine instead of being drowned
+  out the instant it catches.
 
 - **Your truck no longer idles all night while you sleep.** Bedding down for
   the night -- at a rest stop, in the sleeper berth, in a cramped lot, or on

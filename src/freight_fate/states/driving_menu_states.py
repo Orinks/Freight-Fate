@@ -340,27 +340,8 @@ class PauseMenuState(MenuState):
         self.ctx.push_state(SettingsState(self.ctx))
 
     def _abandon(self) -> None:
-        from .city import CityMenuState
-
-        p = self.ctx.profile
-        p.money -= 500.0
-        p.career.reputation = max(0.0, p.career.reputation - 5.0)
-        p.truck_fuel_gal = self.driving.truck.fuel_gal
-        p.truck_damage_pct = self.driving.truck.damage_pct
-        # the hours spent on the failed run still happened: keep the world
-        # clock consistent with the HOS and fatigue already accrued
-        p.game_hours += self.driving.trip.game_minutes / 60.0
-        p.market.advance_to(p.market_day())
-        p.active_trip = None
-        p.pay_advance_used_for_load = False
-        self.ctx.save_profile()
-        self.ctx.say(
-            f"Job abandoned. You paid a five hundred dollar penalty and "
-            f"returned to {self.ctx.world.spoken_city(p.current_city)}.",
-            interrupt=True,
-        )
-        self.ctx.pop_state()  # close pause menu
-        self.ctx.replace_state(CityMenuState(self.ctx))
+        # Abandoning is destructive and one keystroke away, so confirm first.
+        self.ctx.push_state(AbandonJobConfirmationState(self.ctx, self.driving))
 
     def _quit_to_menu(self) -> None:
         from .main_menu import MainMenuState
@@ -375,6 +356,69 @@ class PauseMenuState(MenuState):
             interrupt=True,
         )
         self.ctx.reset_to(MainMenuState(self.ctx))
+
+
+class AbandonJobConfirmationState(MenuState):
+    """Yes/No guard in front of abandoning a job. Lands on "No" so giving up
+    the load takes a deliberate arrow to "Yes"."""
+
+    title = "Abandon job?"
+    intro_help = (
+        "Use up and down arrows to navigate, Enter to select. "
+        "Escape cancels and returns to the pause menu."
+    )
+
+    def __init__(self, ctx, driving: DrivingState) -> None:
+        super().__init__(ctx)
+        self.driving = driving
+
+    def announce_entry(self) -> None:
+        self.ctx.say(
+            f"{self.title} Abandoning gives up this load. You will pay a five "
+            "hundred dollar penalty, take a reputation hit, and return to "
+            f"{self.ctx.world.spoken_city(self.ctx.profile.current_city)}. "
+            f"{self.current_text()}"
+        )
+
+    def build_items(self) -> list[MenuItem]:
+        return [
+            MenuItem(
+                "No, keep driving",
+                self.go_back,
+                help="Return to the pause menu and keep this job.",
+            ),
+            MenuItem(
+                "Yes, abandon the job",
+                self._confirm,
+                help="Give up this job. Costs five hundred dollars and "
+                "reputation, and returns you to the origin city.",
+            ),
+        ]
+
+    def _confirm(self) -> None:
+        from .city import CityMenuState
+
+        p = self.ctx.profile
+        p.money -= 500.0
+        p.career.reputation = max(0.0, p.career.reputation - 5.0)
+        p.truck_fuel_gal = self.driving.truck.fuel_gal
+        p.truck_damage_pct = self.driving.truck.damage_pct
+        # the hours spent on the failed run still happened: keep the world
+        # clock consistent with the HOS and fatigue already accrued
+        p.game_hours += self.driving.trip.game_minutes / 60.0
+        p.market.advance_to(p.market_day())
+        p.active_trip = None
+        p.pay_advance_used_for_load = False
+        self.ctx.save_profile()
+        self.ctx.pop_state()  # close this confirmation
+        self.ctx.pop_state()  # close the pause menu
+        self.ctx.replace_state(CityMenuState(self.ctx))
+        # interrupt=True so this overrides any menu re-announcement during unwind
+        self.ctx.say(
+            f"Job abandoned. You paid a five hundred dollar penalty and "
+            f"returned to {self.ctx.world.spoken_city(p.current_city)}.",
+            interrupt=True,
+        )
 
 
 class FacilityArrivalState(MenuState):
