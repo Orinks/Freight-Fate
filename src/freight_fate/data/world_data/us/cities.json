@@ -6313,6 +6313,15 @@
       "locations": [],
       "lat": 37.2676,
       "lon": -76.0174
+    },
+    "key_west_fl_us": {
+      "spoken_city": "Key West",
+      "state": "FL",
+      "country": "US",
+      "region": "florida",
+      "locations": [],
+      "lat": 24.5551,
+      "lon": -81.78
     }
   }
 }

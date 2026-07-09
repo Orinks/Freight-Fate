@@ -4,6 +4,11 @@
 
 ### Added
 
+- **Drive the Overseas Highway to Key West.** Key West joins the map at the very
+  end of the road, reached from Miami down US-1 through the Florida Keys -- Key
+  Largo, Islamorada, Marathon, Big Pine Key -- across the Seven Mile Bridge, all the
+  way to the southernmost point in the continental United States.
+
 - **You can now cross the Chesapeake Bay Bridge-Tunnel.** Cape Charles joins the
   map on Virginia's Eastern Shore, and the run north from Norfolk takes you out
   across the seventeen-mile Bridge-Tunnel -- diving into two tunnels beneath the
@@ -195,9 +200,9 @@
   truck stops, rest areas, and the Red River crossing along the way.
 
 - **The drivable map crosses one hundred thousand miles.** This drop adds about
-  twenty-four thousand five hundred miles of new road and sixty-eight new cities,
+  twenty-four thousand six hundred miles of new road and sixty-nine new cities,
   bringing the network past one hundred thousand miles you can actually drive --
-  123,254 miles across 443 cities and 997 routes.
+  123,413 miles across 444 cities and 998 routes.
 
 - **Exits now come straight from real-world maps -- with the correct exit names
   and numbers.** On the Interstates, your stops and your destination exit are
