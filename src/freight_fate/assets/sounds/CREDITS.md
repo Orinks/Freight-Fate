@@ -69,9 +69,11 @@ current idle, start, and shutdown cues.
 | Toll charged | `events/toll_charged.ogg` | Short toll/transponder cue |
 | State crossing | `events/state_crossing.ogg` | Short route milestone cue |
 | Inspection warning | `events/inspection_warning.ogg` | Short inspection/weigh-station cue |
-| Local turn left | `events/turn_left.ogg` | ElevenLabs-generated placeholder non-speech turn cue |
-| Local turn right | `events/turn_right.ogg` | ElevenLabs-generated placeholder non-speech turn cue |
-| Local turn ahead | `events/turn_ahead.ogg` | ElevenLabs-generated placeholder non-speech local-route cue |
+| Local turn left | `events/turn_left.ogg` | ElevenLabs-generated falling two-note turn chime, panned left at playback |
+| Local turn right | `events/turn_right.ogg` | Rising mirror of the left-turn chime (note order swapped via `tools/mirror_turn_chime.py`), panned right at playback |
+| Local turn ahead | `events/turn_ahead.ogg` | ElevenLabs-generated single-tone straight-ahead cue, loudness-normalized |
+| Ramp light red | `events/ramp_light_red.ogg` | ElevenLabs-generated low two-tone stop cue for a red ramp-terminal light |
+| Ramp light green | `events/ramp_light_green.ogg` | ElevenLabs-generated go cue for a green ramp-terminal light, loudness-normalized |
 | Police siren | `events/police_siren.ogg` | ElevenLabs-generated trooper pull-over siren wail |
 | CB radio chatter | `events/cb_radio_chatter.ogg` | ElevenLabs-generated CB squelch and chatter for bear and enforcement heads-up cues |
 | Spike strip | `events/spike_strip.ogg` | ElevenLabs-generated spike-strip puncture/air-hiss for felony stops |

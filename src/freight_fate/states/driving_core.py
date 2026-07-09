@@ -249,6 +249,26 @@ def _local_turn_sound(cue) -> str | None:
     return sounds.get(direction)
 
 
+# Turn earcons come from the side of the maneuver, the same convention as
+# the lane-guidance beeps: hear it on the side you are about to steer toward.
+TURN_CUE_PAN = 0.6
+
+
+def _route_event_sound_pan(event) -> float:
+    """Stereo pan for a route event's sound cue; only local turns pan."""
+    if event.kind != TripEventKind.GPS_CUE:
+        return 0.0
+    cue = event.data.get("cue")
+    if getattr(cue, "kind", None) != "local_turn":
+        return 0.0
+    direction = str(getattr(cue, "direction", "") or "").strip().lower()
+    if direction == "left":
+        return -TURN_CUE_PAN
+    if direction == "right":
+        return TURN_CUE_PAN
+    return 0.0
+
+
 def _poi_ambient_key(stop, hour: float) -> str:
     if stop.type == "weigh_station":
         return "poi/weigh_station_lane"
@@ -264,8 +284,7 @@ def _speeding_settlement_fine(strikes: int) -> float:
 def _record_inspection(ctx, *, event: bool = False) -> None:
     """Every inspection feeds both the one-off badge and the career tally."""
     ctx.award_achievement("inspection", event=event)
-    if ctx.profile is not None and increment_stat(
-            ctx.profile, "inspections_passed") >= 5:
+    if ctx.profile is not None and increment_stat(ctx.profile, "inspections_passed") >= 5:
         ctx.award_achievement("scale_regular", event=event)
 
 

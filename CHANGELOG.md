@@ -235,10 +235,19 @@
   grows through senior company ranks before a level-18 leased-on
   owner-operator gate, level-21 authority prep, level-25 own authority, and
   established independent owner-operator ranks through level 30.
-- **Local turns can now add a small sound cue.** Source-backed local service and
-  facility approaches can play subtle non-speech turn sounds when the checked-in
-  route data clearly marks a local direction. Spoken GPS instructions with road
-  names remain the main guidance.
+- **Local turns now say and sound which way to steer.** Turn-by-turn cues on
+  local streets say "Turn left onto" or "Turn right onto" instead of just
+  "Turn onto", and each turn plays a soft chime from the side you are about
+  to steer toward: a falling chime on the left, a rising chime on the right,
+  and a single steady tone for continuing straight. Gentle bends where the
+  street just changes name are spoken as "Continue onto" so a turn cue always
+  means a real turn. Spoken GPS instructions with road names remain the main
+  guidance.
+- **The traffic light at the end of an exit ramp has its own sound.** A firm
+  low two-tone cue means the light is red and you should brake; a bright go
+  chime means green. You hear them when the light is first called out, when
+  it changes ahead of you, and when a wait at the stop bar ends, alongside
+  the spoken callouts.
 - **Dispatch rows now preview trailer fit and take-home.** Company drivers keep
   carrier-provided trailer support, while owner-operators and own-authority
   drivers hear when a load needs a missing trailer program or owned trailer.

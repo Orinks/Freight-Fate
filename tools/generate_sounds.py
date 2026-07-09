@@ -54,23 +54,51 @@ SPECS: dict[str, tuple[str, float, float]] = {
         3.0,
         0.5,
     ),
+    # The turn earcons are panned by the game at playback, so the shape
+    # carries the direction too: falling for left, rising for right, steady
+    # for straight on -- readable even on a mono or single-ear setup.
     "events/turn_left": (
-        "Short quiet non-verbal vehicle navigation earcon leaning left in stereo, "
-        "soft two-note chime, under spoken GPS, no words, no voice, no melody",
-        0.5,
-        0.35,
+        "Classic two-tone doorbell chime, ding dong, first tone high and "
+        "second tone lower, soft and gentle like a GPS navigation "
+        "indication, no words, no voice, no whoosh, no music",
+        0.7,
+        0.75,
     ),
+    # The API resists rising two-note chimes (it keeps returning falling
+    # doorbells), so the shipped turn_right.ogg is derived from turn_left
+    # with tools/mirror_turn_chime.py; regenerate the left cue first, then
+    # re-run the mirror instead of trusting this prompt.
     "events/turn_right": (
-        "Short quiet non-verbal vehicle navigation earcon leaning right in stereo, "
-        "soft two-note chime, under spoken GPS, no words, no voice, no melody",
-        0.5,
-        0.35,
+        "Cheerful two-note chime going upward like a positive app "
+        "notification, a low soft bell note then a clearly higher brighter "
+        "bell note, rising interval, gentle GPS navigation indication, "
+        "no words, no voice, no whoosh, no music",
+        0.7,
+        0.75,
     ),
     "events/turn_ahead": (
-        "Short quiet centered non-verbal vehicle navigation earcon for straight "
-        "ahead, soft chime, under spoken GPS, no words, no voice, no melody",
-        0.5,
-        0.35,
+        "One single marimba note struck twice at exactly the same pitch, two "
+        "identical repeated notes with no pitch change at all, soft gentle "
+        "GPS navigation indication for straight ahead, no words, no voice, "
+        "no whoosh, no music",
+        0.7,
+        0.75,
+    ),
+    "events/ramp_light_red": (
+        "Short firm traffic light red warning cue for an audio driving game, "
+        "two low descending buzzer-tinged tones meaning stop ahead, serious "
+        "but not harsh, distinct from a simple beep, heard inside a truck "
+        "cab, no speech, no music, no siren",
+        1.0,
+        0.65,
+    ),
+    "events/ramp_light_green": (
+        "Short bright traffic light green go cue for an audio driving game, "
+        "quick friendly upward two-note bell chirp meaning proceed, light "
+        "and positive, heard inside a truck cab, no speech, no music, "
+        "no whoosh",
+        0.9,
+        0.65,
     ),
     "events/hazard_clear": (
         "Very short achievement-style success sound in C major, bright two-note "

@@ -76,7 +76,11 @@ with block-aware distances, per-street speed zones replace the blanket
 access-road limit (merged over same-speed runs), same-city boundaries no
 longer announce a city passage, and highway merge/exit pressure language is
 suppressed on surface routes. `tests/test_surface_streets.py` pins the
-behavior. The original gap list, for the record:
+behavior. Follow-up shipped: the geometry builders now bake turn
+*directions* from the signed bearing change at each road-name boundary
+("Turn right onto", with near-straight name changes as "Continue onto"),
+and the runtime plays a direction-shaped earcon panned from the maneuver
+side (falling chime left, rising chime right, steady tone ahead). The original gap list, for the record:
 
 `Trip` already models a route as a list of `Leg`s, and tier-1 approaches
 already return multi-leg routes. What is missing:

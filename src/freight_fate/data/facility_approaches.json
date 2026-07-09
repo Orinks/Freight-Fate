@@ -355,43 +355,43 @@
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto South Main Street.",
+          "cue": "Turn left onto South Main Street.",
           "miles": 0.1,
           "road": "South Main Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto unnamed public road.",
+          "cue": "Continue onto unnamed public road.",
           "miles": 0.05,
           "road": "unnamed public road",
           "speed_mph": 15.0
         },
         {
-          "cue": "Turn onto South Main Street.",
+          "cue": "Continue onto South Main Street.",
           "miles": 0.18,
           "road": "South Main Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto North Main Street.",
+          "cue": "Continue onto North Main Street.",
           "miles": 0.16,
           "road": "North Main Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Howard Street.",
+          "cue": "Turn right onto Howard Street.",
           "miles": 0.55,
           "road": "Howard Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto East Glenwood Avenue.",
+          "cue": "Turn right onto East Glenwood Avenue.",
           "miles": 1.46,
           "road": "East Glenwood Avenue",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto East Tallmadge Avenue (SR 261).",
+          "cue": "Turn right onto East Tallmadge Avenue (SR 261).",
           "miles": 0.11,
           "road": "East Tallmadge Avenue (SR 261)",
           "speed_mph": 25.0
@@ -463,43 +463,43 @@
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto South Main Street.",
+          "cue": "Turn left onto South Main Street.",
           "miles": 0.1,
           "road": "South Main Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto unnamed public road.",
+          "cue": "Continue onto unnamed public road.",
           "miles": 0.05,
           "road": "unnamed public road",
           "speed_mph": 15.0
         },
         {
-          "cue": "Turn onto South Main Street.",
+          "cue": "Continue onto South Main Street.",
           "miles": 0.18,
           "road": "South Main Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto North Main Street.",
+          "cue": "Continue onto North Main Street.",
           "miles": 0.16,
           "road": "North Main Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Howard Street.",
+          "cue": "Turn right onto Howard Street.",
           "miles": 0.55,
           "road": "Howard Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto East Glenwood Avenue.",
+          "cue": "Turn right onto East Glenwood Avenue.",
           "miles": 1.46,
           "road": "East Glenwood Avenue",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto East Tallmadge Avenue (SR 261).",
+          "cue": "Turn right onto East Tallmadge Avenue (SR 261).",
           "miles": 0.12,
           "road": "East Tallmadge Avenue (SR 261)",
           "speed_mph": 25.0
@@ -769,19 +769,19 @@
           "speed_mph": 15.0
         },
         {
-          "cue": "Turn onto Washington Avenue (NY 5).",
+          "cue": "Turn left onto Washington Avenue (NY 5).",
           "miles": 0.46,
           "road": "Washington Avenue (NY 5)",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Central Avenue (NY 5).",
+          "cue": "Continue onto Central Avenue (NY 5).",
           "miles": 1.48,
           "road": "Central Avenue (NY 5)",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto unnamed public road.",
+          "cue": "Turn left onto unnamed public road.",
           "miles": 0.05,
           "road": "unnamed public road",
           "speed_mph": 15.0
@@ -2305,43 +2305,43 @@
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto North State Street.",
+          "cue": "Continue onto North State Street.",
           "miles": 0.24,
           "road": "North State Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto East Kingsley Street.",
+          "cue": "Turn left onto East Kingsley Street.",
           "miles": 0.13,
           "road": "East Kingsley Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto North Division Street.",
+          "cue": "Turn right onto North Division Street.",
           "miles": 0.19,
           "road": "North Division Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Broadway Street.",
+          "cue": "Continue onto Broadway Street.",
           "miles": 0.4,
           "road": "Broadway Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto unnamed public road.",
+          "cue": "Turn left onto unnamed public road.",
           "miles": 0.05,
           "road": "unnamed public road",
           "speed_mph": 15.0
         },
         {
-          "cue": "Turn onto Broadway Street.",
+          "cue": "Turn left onto Broadway Street.",
           "miles": 0.66,
           "road": "Broadway Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Baits Drive.",
+          "cue": "Turn right onto Baits Drive.",
           "miles": 0.2,
           "road": "Baits Drive",
           "speed_mph": 25.0
@@ -2809,43 +2809,43 @@
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto West Pack Square (US 25).",
+          "cue": "Turn left onto West Pack Square (US 25).",
           "miles": 0.05,
           "road": "West Pack Square (US 25)",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Southwest Pack Square (US 25).",
+          "cue": "Continue onto Southwest Pack Square (US 25).",
           "miles": 0.05,
           "road": "Southwest Pack Square (US 25)",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Biltmore Avenue (US 25).",
+          "cue": "Continue onto Biltmore Avenue (US 25).",
           "miles": 0.44,
           "road": "Biltmore Avenue (US 25)",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Biltmore Avenue.",
+          "cue": "Continue onto Biltmore Avenue.",
           "miles": 0.65,
           "road": "Biltmore Avenue",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Hospital Drive.",
+          "cue": "Turn right onto Hospital Drive.",
           "miles": 0.07,
           "road": "Hospital Drive",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Victoria Road.",
+          "cue": "Turn left onto Victoria Road.",
           "miles": 0.67,
           "road": "Victoria Road",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto unnamed public road.",
+          "cue": "Turn right onto unnamed public road.",
           "miles": 0.14,
           "road": "unnamed public road",
           "speed_mph": 15.0
@@ -2983,25 +2983,25 @@
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto West Dougherty Street.",
+          "cue": "Turn right onto West Dougherty Street.",
           "miles": 0.18,
           "road": "West Dougherty Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Prince Avenue.",
+          "cue": "Continue onto Prince Avenue.",
           "miles": 0.19,
           "road": "Prince Avenue",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Barber Street.",
+          "cue": "Turn right onto Barber Street.",
           "miles": 1.36,
           "road": "Barber Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Dairy Pak Drive.",
+          "cue": "Turn right onto Dairy Pak Drive.",
           "miles": 0.35,
           "road": "Dairy Pak Drive",
           "speed_mph": 25.0
@@ -3568,31 +3568,31 @@
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Piedmont Avenue Southeast.",
+          "cue": "Continue onto Piedmont Avenue Southeast.",
           "miles": 0.18,
           "road": "Piedmont Avenue Southeast",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Decatur Street Southeast.",
+          "cue": "Turn left onto Decatur Street Southeast.",
           "miles": 0.17,
           "road": "Decatur Street Southeast",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Peachtree Center Avenue Northeast.",
+          "cue": "Turn right onto Peachtree Center Avenue Northeast.",
           "miles": 0.8,
           "road": "Peachtree Center Avenue Northeast",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Peachtree Street Northeast.",
+          "cue": "Continue onto Peachtree Street Northeast.",
           "miles": 1.1,
           "road": "Peachtree Street Northeast",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto unnamed public road.",
+          "cue": "Turn left onto unnamed public road.",
           "miles": 0.05,
           "road": "unnamed public road",
           "speed_mph": 15.0
@@ -4489,43 +4489,43 @@
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto North River Street.",
+          "cue": "Turn left onto North River Street.",
           "miles": 0.08,
           "road": "North River Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto West New York Street.",
+          "cue": "Turn right onto West New York Street.",
           "miles": 0.1,
           "road": "West New York Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto East New York Street.",
+          "cue": "Continue onto East New York Street.",
           "miles": 0.13,
           "road": "East New York Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto North Broadway (IL 25).",
+          "cue": "Turn left onto North Broadway (IL 25).",
           "miles": 0.75,
           "road": "North Broadway (IL 25)",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Pierce Street.",
+          "cue": "Turn right onto Pierce Street.",
           "miles": 0.1,
           "road": "Pierce Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto North Lincoln Avenue.",
+          "cue": "Turn left onto North Lincoln Avenue.",
           "miles": 0.1,
           "road": "North Lincoln Avenue",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Rural Street.",
+          "cue": "Turn right onto Rural Street.",
           "miles": 0.67,
           "road": "Rural Street",
           "speed_mph": 25.0
@@ -5389,43 +5389,43 @@
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto North Calvert Street (MD 2).",
+          "cue": "Turn left onto North Calvert Street (MD 2).",
           "miles": 0.06,
           "road": "North Calvert Street (MD 2)",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto South Calvert Street (MD 2).",
+          "cue": "Continue onto South Calvert Street (MD 2).",
           "miles": 0.21,
           "road": "South Calvert Street (MD 2)",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Light Street (MD 2).",
+          "cue": "Turn right onto Light Street (MD 2).",
           "miles": 0.41,
           "road": "Light Street (MD 2)",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Key Highway.",
+          "cue": "Turn left onto Key Highway.",
           "miles": 0.73,
           "road": "Key Highway",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Jackson Street.",
+          "cue": "Turn right onto Jackson Street.",
           "miles": 0.16,
           "road": "Jackson Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto East Fort Avenue.",
+          "cue": "Turn left onto East Fort Avenue.",
           "miles": 0.67,
           "road": "East Fort Avenue",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Hull Street.",
+          "cue": "Turn left onto Hull Street.",
           "miles": 0.1,
           "road": "Hull Street",
           "speed_mph": 25.0
@@ -5728,37 +5728,37 @@
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Union Street (ME 222).",
+          "cue": "Turn left onto Union Street (ME 222).",
           "miles": 1.75,
           "road": "Union Street (ME 222)",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto unnamed public road.",
+          "cue": "Turn left onto unnamed public road.",
           "miles": 0.15,
           "road": "unnamed public road",
           "speed_mph": 15.0
         },
         {
-          "cue": "Turn onto Maine Avenue.",
+          "cue": "Turn right onto Maine Avenue.",
           "miles": 0.28,
           "road": "Maine Avenue",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto unnamed public road.",
+          "cue": "Continue onto unnamed public road.",
           "miles": 0.05,
           "road": "unnamed public road",
           "speed_mph": 15.0
         },
         {
-          "cue": "Turn onto Godfrey Boulevard.",
+          "cue": "Turn left onto Godfrey Boulevard.",
           "miles": 0.4,
           "road": "Godfrey Boulevard",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto unnamed public road.",
+          "cue": "Turn right onto unnamed public road.",
           "miles": 0.05,
           "road": "unnamed public road",
           "speed_mph": 15.0
@@ -5929,37 +5929,37 @@
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Union Street.",
+          "cue": "Turn right onto Union Street.",
           "miles": 0.29,
           "road": "Union Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Main Street.",
+          "cue": "Turn right onto Main Street.",
           "miles": 0.14,
           "road": "Main Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Main Street (US 1A;ME 9 Business).",
+          "cue": "Continue onto Main Street (US 1A;ME 9 Business).",
           "miles": 0.77,
           "road": "Main Street (US 1A;ME 9 Business)",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto US 1A;ME 9 Business.",
+          "cue": "Continue onto US 1A;ME 9 Business.",
           "miles": 0.05,
           "road": "US 1A;ME 9 Business",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Main Street (US 1A;ME 9 Business).",
+          "cue": "Continue onto Main Street (US 1A;ME 9 Business).",
           "miles": 0.54,
           "road": "Main Street (US 1A;ME 9 Business)",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Main Road North (US 1A;ME 9 Business).",
+          "cue": "Continue onto Main Road North (US 1A;ME 9 Business).",
           "miles": 0.46,
           "road": "Main Road North (US 1A;ME 9 Business)",
           "speed_mph": 25.0
@@ -7648,43 +7648,43 @@
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Hawley Street.",
+          "cue": "Turn right onto Hawley Street.",
           "miles": 0.13,
           "road": "Hawley Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Washington Street.",
+          "cue": "Turn right onto Washington Street.",
           "miles": 0.05,
           "road": "Washington Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Hawley Street.",
+          "cue": "Turn left onto Hawley Street.",
           "miles": 0.06,
           "road": "Hawley Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto State Street (NY 434).",
+          "cue": "Turn right onto State Street (NY 434).",
           "miles": 0.35,
           "road": "State Street (NY 434)",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Vestal Parkway East (NY 434).",
+          "cue": "Continue onto Vestal Parkway East (NY 434).",
           "miles": 2.29,
           "road": "Vestal Parkway East (NY 434)",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto unnamed public road.",
+          "cue": "Turn left onto unnamed public road.",
           "miles": 0.05,
           "road": "unnamed public road",
           "speed_mph": 15.0
         },
         {
-          "cue": "Turn onto Vestal Parkway East (NY 434).",
+          "cue": "Turn right onto Vestal Parkway East (NY 434).",
           "miles": 0.84,
           "road": "Vestal Parkway East (NY 434)",
           "speed_mph": 25.0
@@ -8086,43 +8086,43 @@
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto F L Shuttlesworth Drive.",
+          "cue": "Turn right onto F L Shuttlesworth Drive.",
           "miles": 0.89,
           "road": "F L Shuttlesworth Drive",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto 19th Avenue North.",
+          "cue": "Turn right onto 19th Avenue North.",
           "miles": 0.35,
           "road": "19th Avenue North",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Old Huntsville Road.",
+          "cue": "Turn left onto Old Huntsville Road.",
           "miles": 0.05,
           "road": "Old Huntsville Road",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto F L Shuttlesworth Drive.",
+          "cue": "Continue onto F L Shuttlesworth Drive.",
           "miles": 0.13,
           "road": "F L Shuttlesworth Drive",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto 21st Avenue North.",
+          "cue": "Turn right onto 21st Avenue North.",
           "miles": 0.05,
           "road": "21st Avenue North",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto F L Shuttlesworth Drive.",
+          "cue": "Turn left onto F L Shuttlesworth Drive.",
           "miles": 0.13,
           "road": "F L Shuttlesworth Drive",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto unnamed public road.",
+          "cue": "Turn right onto unnamed public road.",
           "miles": 0.36,
           "road": "unnamed public road",
           "speed_mph": 15.0
@@ -8920,43 +8920,43 @@
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto North East Street (US 51 Business;US 66 Hist).",
+          "cue": "Continue onto North East Street (US 51 Business;US 66 Hist).",
           "miles": 0.05,
           "road": "North East Street (US 51 Business;US 66 Hist)",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto North Main Street (US 51 Business;US 66 Hist).",
+          "cue": "Continue onto North Main Street (US 51 Business;US 66 Hist).",
           "miles": 0.74,
           "road": "North Main Street (US 51 Business;US 66 Hist)",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto South Main Street (US 51 Business;US 66 Hist).",
+          "cue": "Continue onto South Main Street (US 51 Business;US 66 Hist).",
           "miles": 0.25,
           "road": "South Main Street (US 51 Business;US 66 Hist)",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto South Main Street (US 51 BUS;US 66 Hist).",
+          "cue": "Continue onto South Main Street (US 51 BUS;US 66 Hist).",
           "miles": 0.05,
           "road": "South Main Street (US 51 BUS;US 66 Hist)",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto South Main Street (US 51 Business;US 66 Hist).",
+          "cue": "Continue onto South Main Street (US 51 Business;US 66 Hist).",
           "miles": 0.22,
           "road": "South Main Street (US 51 Business;US 66 Hist)",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto West Beaufort Street.",
+          "cue": "Turn right onto West Beaufort Street.",
           "miles": 0.7,
           "road": "West Beaufort Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Uptown Circle.",
+          "cue": "Continue onto Uptown Circle.",
           "miles": 0.05,
           "road": "Uptown Circle",
           "speed_mph": 25.0
@@ -9061,13 +9061,13 @@
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto South Vista Avenue.",
+          "cue": "Turn right onto South Vista Avenue.",
           "miles": 2.28,
           "road": "South Vista Avenue",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto West Airport Way.",
+          "cue": "Continue onto West Airport Way.",
           "miles": 0.28,
           "road": "West Airport Way",
           "speed_mph": 25.0
@@ -9106,19 +9106,19 @@
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto South Vista Avenue.",
+          "cue": "Turn right onto South Vista Avenue.",
           "miles": 2.28,
           "road": "South Vista Avenue",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto West Airport Way.",
+          "cue": "Continue onto West Airport Way.",
           "miles": 0.24,
           "road": "West Airport Way",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto unnamed public road.",
+          "cue": "Turn left onto unnamed public road.",
           "miles": 0.05,
           "road": "unnamed public road",
           "speed_mph": 15.0
@@ -9157,13 +9157,13 @@
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto South Vista Avenue.",
+          "cue": "Turn right onto South Vista Avenue.",
           "miles": 2.28,
           "road": "South Vista Avenue",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto West Airport Way.",
+          "cue": "Continue onto West Airport Way.",
           "miles": 0.05,
           "road": "West Airport Way",
           "speed_mph": 25.0
@@ -11974,43 +11974,43 @@
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto South Side Bridge.",
+          "cue": "Continue onto South Side Bridge.",
           "miles": 0.21,
           "road": "South Side Bridge",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Ferry Street.",
+          "cue": "Turn right onto Ferry Street.",
           "miles": 0.15,
           "road": "Ferry Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto unnamed public road.",
+          "cue": "Turn right onto unnamed public road.",
           "miles": 0.05,
           "road": "unnamed public road",
           "speed_mph": 15.0
         },
         {
-          "cue": "Turn onto MacCorkle Avenue Southeast (WV 61).",
+          "cue": "Turn left onto MacCorkle Avenue Southeast (WV 61).",
           "miles": 0.54,
           "road": "MacCorkle Avenue Southeast (WV 61)",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto MacCorkle Avenue Southwest (WV 61).",
+          "cue": "Continue onto MacCorkle Avenue Southwest (WV 61).",
           "miles": 1.15,
           "road": "MacCorkle Avenue Southwest (WV 61)",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto unnamed public road.",
+          "cue": "Turn right onto unnamed public road.",
           "miles": 0.05,
           "road": "unnamed public road",
           "speed_mph": 15.0
         },
         {
-          "cue": "Turn onto MacCorkle Avenue Southwest (WV 61).",
+          "cue": "Turn left onto MacCorkle Avenue Southwest (WV 61).",
           "miles": 0.13,
           "road": "MacCorkle Avenue Southwest (WV 61)",
           "speed_mph": 25.0
@@ -12544,43 +12544,43 @@
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto West Good Samaritan Way.",
+          "cue": "Turn right onto West Good Samaritan Way.",
           "miles": 0.1,
           "road": "West Good Samaritan Way",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto South Church Street.",
+          "cue": "Turn left onto South Church Street.",
           "miles": 0.35,
           "road": "South Church Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Quincey Street.",
+          "cue": "Turn right onto Quincey Street.",
           "miles": 0.1,
           "road": "Quincey Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto South Mint Street.",
+          "cue": "Turn left onto South Mint Street.",
           "miles": 0.23,
           "road": "South Mint Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto West Summit Avenue.",
+          "cue": "Turn right onto West Summit Avenue.",
           "miles": 0.05,
           "road": "West Summit Avenue",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Wilmore Drive.",
+          "cue": "Turn left onto Wilmore Drive.",
           "miles": 0.51,
           "road": "Wilmore Drive",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto West Boulevard (NC 160).",
+          "cue": "Turn right onto West Boulevard (NC 160).",
           "miles": 0.67,
           "road": "West Boulevard (NC 160)",
           "speed_mph": 25.0
@@ -12916,25 +12916,25 @@
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Market Street.",
+          "cue": "Turn left onto Market Street.",
           "miles": 1.17,
           "road": "Market Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Cherokee Boulevard.",
+          "cue": "Turn left onto Cherokee Boulevard.",
           "miles": 0.12,
           "road": "Cherokee Boulevard",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Manufacturers Road.",
+          "cue": "Turn left onto Manufacturers Road.",
           "miles": 0.87,
           "road": "Manufacturers Road",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Hamm Road.",
+          "cue": "Turn left onto Hamm Road.",
           "miles": 0.09,
           "road": "Hamm Road",
           "speed_mph": 25.0
@@ -13996,43 +13996,43 @@
           "speed_mph": 15.0
         },
         {
-          "cue": "Turn onto Wall Street.",
+          "cue": "Turn right onto Wall Street.",
           "miles": 0.05,
           "road": "Wall Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto unnamed public road.",
+          "cue": "Turn right onto unnamed public road.",
           "miles": 0.07,
           "road": "unnamed public road",
           "speed_mph": 15.0
         },
         {
-          "cue": "Turn onto Main Street.",
+          "cue": "Turn left onto Main Street.",
           "miles": 0.28,
           "road": "Main Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Park Avenue.",
+          "cue": "Continue onto Park Avenue.",
           "miles": 1.31,
           "road": "Park Avenue",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Midway.",
+          "cue": "Continue onto Midway.",
           "miles": 0.43,
           "road": "Midway",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Hegan Lane.",
+          "cue": "Turn right onto Hegan Lane.",
           "miles": 0.6,
           "road": "Hegan Lane",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Huss Lane.",
+          "cue": "Turn right onto Huss Lane.",
           "miles": 0.13,
           "road": "Huss Lane",
           "speed_mph": 25.0
@@ -14929,43 +14929,43 @@
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Detroit Avenue (US 6;US 20;US 42;SR 3).",
+          "cue": "Continue onto Detroit Avenue (US 6;US 20;US 42;SR 3).",
           "miles": 0.6,
           "road": "Detroit Avenue (US 6;US 20;US 42;SR 3)",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Detroit Avenue (US 6 Alternate).",
+          "cue": "Continue onto Detroit Avenue (US 6 Alternate).",
           "miles": 0.12,
           "road": "Detroit Avenue (US 6 Alternate)",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto West 28th Street.",
+          "cue": "Turn left onto West 28th Street.",
           "miles": 0.2,
           "road": "West 28th Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto unnamed public road.",
+          "cue": "Continue onto unnamed public road.",
           "miles": 0.05,
           "road": "unnamed public road",
           "speed_mph": 15.0
         },
         {
-          "cue": "Turn onto Fulton Road.",
+          "cue": "Continue onto Fulton Road.",
           "miles": 0.45,
           "road": "Fulton Road",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Lorain Avenue (SR 10).",
+          "cue": "Turn right onto Lorain Avenue (SR 10).",
           "miles": 0.14,
           "road": "Lorain Avenue (SR 10)",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto West 41st Street.",
+          "cue": "Turn left onto West 41st Street.",
           "miles": 0.61,
           "road": "West 41st Street",
           "speed_mph": 25.0
@@ -15763,43 +15763,43 @@
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto North Nevada Avenue.",
+          "cue": "Turn right onto North Nevada Avenue.",
           "miles": 0.19,
           "road": "North Nevada Avenue",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto East Bijou Street.",
+          "cue": "Turn left onto East Bijou Street.",
           "miles": 0.05,
           "road": "East Bijou Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto North Nevada Avenue.",
+          "cue": "Turn right onto North Nevada Avenue.",
           "miles": 0.96,
           "road": "North Nevada Avenue",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto East Uintah Street.",
+          "cue": "Turn left onto East Uintah Street.",
           "miles": 0.19,
           "road": "East Uintah Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto West Uintah Street.",
+          "cue": "Continue onto West Uintah Street.",
           "miles": 0.1,
           "road": "West Uintah Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Wood Avenue.",
+          "cue": "Turn right onto Wood Avenue.",
           "miles": 1.16,
           "road": "Wood Avenue",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto West Van Buren Street.",
+          "cue": "Turn left onto West Van Buren Street.",
           "miles": 0.07,
           "road": "West Van Buren Street",
           "speed_mph": 25.0
@@ -16168,25 +16168,25 @@
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto West Broadway.",
+          "cue": "Continue onto West Broadway.",
           "miles": 1.75,
           "road": "West Broadway",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto West Broadway (MO TT).",
+          "cue": "Continue onto West Broadway (MO TT).",
           "miles": 1.1,
           "road": "West Broadway (MO TT)",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Silvey Street.",
+          "cue": "Turn right onto Silvey Street.",
           "miles": 0.34,
           "road": "Silvey Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Water Leaf Drive.",
+          "cue": "Turn left onto Water Leaf Drive.",
           "miles": 0.05,
           "road": "Water Leaf Drive",
           "speed_mph": 25.0
@@ -17215,43 +17215,43 @@
           "speed_mph": 15.0
         },
         {
-          "cue": "Turn onto Mesquite Street.",
+          "cue": "Turn left onto Mesquite Street.",
           "miles": 0.14,
           "road": "Mesquite Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Belden Street.",
+          "cue": "Turn left onto Belden Street.",
           "miles": 0.12,
           "road": "Belden Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto unnamed public road.",
+          "cue": "Turn left onto unnamed public road.",
           "miles": 0.05,
           "road": "unnamed public road",
           "speed_mph": 15.0
         },
         {
-          "cue": "Turn onto North Tancahua Street.",
+          "cue": "Turn left onto North Tancahua Street.",
           "miles": 0.05,
           "road": "North Tancahua Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Padre Street.",
+          "cue": "Turn right onto Padre Street.",
           "miles": 0.05,
           "road": "Padre Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto West Broadway Street.",
+          "cue": "Turn right onto West Broadway Street.",
           "miles": 1.45,
           "road": "West Broadway Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Nueces Bay Boulevard.",
+          "cue": "Turn right onto Nueces Bay Boulevard.",
           "miles": 0.25,
           "road": "Nueces Bay Boulevard",
           "speed_mph": 25.0
@@ -17290,43 +17290,43 @@
           "speed_mph": 15.0
         },
         {
-          "cue": "Turn onto Mesquite Street.",
+          "cue": "Turn left onto Mesquite Street.",
           "miles": 0.14,
           "road": "Mesquite Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Belden Street.",
+          "cue": "Turn left onto Belden Street.",
           "miles": 0.12,
           "road": "Belden Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto unnamed public road.",
+          "cue": "Turn left onto unnamed public road.",
           "miles": 0.05,
           "road": "unnamed public road",
           "speed_mph": 15.0
         },
         {
-          "cue": "Turn onto North Tancahua Street.",
+          "cue": "Turn left onto North Tancahua Street.",
           "miles": 0.05,
           "road": "North Tancahua Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Padre Street.",
+          "cue": "Turn right onto Padre Street.",
           "miles": 0.23,
           "road": "Padre Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Martin Luther King Drive.",
+          "cue": "Continue onto Martin Luther King Drive.",
           "miles": 1.52,
           "road": "Martin Luther King Drive",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto I-37 Frontage Road.",
+          "cue": "Continue onto I-37 Frontage Road.",
           "miles": 0.29,
           "road": "I-37 Frontage Road",
           "speed_mph": 25.0
@@ -19114,43 +19114,43 @@
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Cherry Street.",
+          "cue": "Turn left onto Cherry Street.",
           "miles": 0.06,
           "road": "Cherry Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto 5th Avenue.",
+          "cue": "Turn right onto 5th Avenue.",
           "miles": 0.06,
           "road": "5th Avenue",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Southwest 5th Street.",
+          "cue": "Continue onto Southwest 5th Street.",
           "miles": 0.1,
           "road": "Southwest 5th Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto West Martin Luther King Junior Parkway.",
+          "cue": "Turn left onto West Martin Luther King Junior Parkway.",
           "miles": 0.34,
           "road": "West Martin Luther King Junior Parkway",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto East Martin Luther King Junior Parkway.",
+          "cue": "Continue onto East Martin Luther King Junior Parkway.",
           "miles": 1.11,
           "road": "East Martin Luther King Junior Parkway",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Southeast 15th Street.",
+          "cue": "Turn left onto Southeast 15th Street.",
           "miles": 0.07,
           "road": "Southeast 15th Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto unnamed public road.",
+          "cue": "Turn right onto unnamed public road.",
           "miles": 0.1,
           "road": "unnamed public road",
           "speed_mph": 15.0
@@ -20245,25 +20245,25 @@
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Loockerman Plaza.",
+          "cue": "Turn left onto Loockerman Plaza.",
           "miles": 0.18,
           "road": "Loockerman Plaza",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto East Loockerman Street.",
+          "cue": "Continue onto East Loockerman Street.",
           "miles": 0.92,
           "road": "East Loockerman Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto East Division Street (DE 8).",
+          "cue": "Turn right onto East Division Street (DE 8).",
           "miles": 0.15,
           "road": "East Division Street (DE 8)",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto North Little Creek Road (DE 8).",
+          "cue": "Continue onto North Little Creek Road (DE 8).",
           "miles": 0.79,
           "road": "North Little Creek Road (DE 8)",
           "speed_mph": 25.0
@@ -20500,43 +20500,43 @@
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Loockerman Plaza.",
+          "cue": "Turn left onto Loockerman Plaza.",
           "miles": 0.18,
           "road": "Loockerman Plaza",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto East Loockerman Street.",
+          "cue": "Continue onto East Loockerman Street.",
           "miles": 0.15,
           "road": "East Loockerman Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Park Drive.",
+          "cue": "Turn left onto Park Drive.",
           "miles": 0.25,
           "road": "Park Drive",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Kings Highway Northeast.",
+          "cue": "Continue onto Kings Highway Northeast.",
           "miles": 0.39,
           "road": "Kings Highway Northeast",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto unnamed public road.",
+          "cue": "Continue onto unnamed public road.",
           "miles": 0.05,
           "road": "unnamed public road",
           "speed_mph": 15.0
         },
         {
-          "cue": "Turn onto White Oak Road.",
+          "cue": "Continue onto White Oak Road.",
           "miles": 2.09,
           "road": "White Oak Road",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Long Point Road.",
+          "cue": "Turn right onto Long Point Road.",
           "miles": 0.54,
           "road": "Long Point Road",
           "speed_mph": 25.0
@@ -20641,31 +20641,31 @@
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto West 1st Street.",
+          "cue": "Turn right onto West 1st Street.",
           "miles": 0.43,
           "road": "West 1st Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Glen Place Drive.",
+          "cue": "Turn left onto Glen Place Drive.",
           "miles": 0.24,
           "road": "Glen Place Drive",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto West Superior Street.",
+          "cue": "Turn right onto West Superior Street.",
           "miles": 0.39,
           "road": "West Superior Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Garfield Avenue.",
+          "cue": "Turn left onto Garfield Avenue.",
           "miles": 0.64,
           "road": "Garfield Avenue",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Helberg Drive.",
+          "cue": "Turn left onto Helberg Drive.",
           "miles": 0.62,
           "road": "Helberg Drive",
           "speed_mph": 25.0
@@ -20704,37 +20704,37 @@
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto West 1st Street.",
+          "cue": "Turn right onto West 1st Street.",
           "miles": 0.43,
           "road": "West 1st Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Glen Place Drive.",
+          "cue": "Turn left onto Glen Place Drive.",
           "miles": 0.24,
           "road": "Glen Place Drive",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto West Superior Street.",
+          "cue": "Turn right onto West Superior Street.",
           "miles": 0.39,
           "road": "West Superior Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Garfield Avenue.",
+          "cue": "Turn left onto Garfield Avenue.",
           "miles": 0.64,
           "road": "Garfield Avenue",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Helberg Drive.",
+          "cue": "Turn left onto Helberg Drive.",
           "miles": 0.73,
           "road": "Helberg Drive",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Port Terminal Drive.",
+          "cue": "Turn right onto Port Terminal Drive.",
           "miles": 0.15,
           "road": "Port Terminal Drive",
           "speed_mph": 25.0
@@ -20773,43 +20773,43 @@
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto West 1st Street.",
+          "cue": "Turn right onto West 1st Street.",
           "miles": 1.13,
           "road": "West 1st Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Piedmont Avenue.",
+          "cue": "Turn right onto Piedmont Avenue.",
           "miles": 0.06,
           "road": "Piedmont Avenue",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto North 18th Avenue West.",
+          "cue": "Turn left onto North 18th Avenue West.",
           "miles": 0.05,
           "road": "North 18th Avenue West",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto unnamed public road.",
+          "cue": "Turn right onto unnamed public road.",
           "miles": 0.09,
           "road": "unnamed public road",
           "speed_mph": 15.0
         },
         {
-          "cue": "Turn onto North 20th Avenue West.",
+          "cue": "Turn right onto North 20th Avenue West.",
           "miles": 0.13,
           "road": "North 20th Avenue West",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto unnamed public road.",
+          "cue": "Turn left onto unnamed public road.",
           "miles": 0.06,
           "road": "unnamed public road",
           "speed_mph": 15.0
         },
         {
-          "cue": "Turn onto West 3rd Street.",
+          "cue": "Continue onto West 3rd Street.",
           "miles": 1.09,
           "road": "West 3rd Street",
           "speed_mph": 25.0
@@ -21013,43 +21013,43 @@
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto West 1st Street.",
+          "cue": "Turn right onto West 1st Street.",
           "miles": 0.43,
           "road": "West 1st Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Glen Place Drive.",
+          "cue": "Turn left onto Glen Place Drive.",
           "miles": 0.24,
           "road": "Glen Place Drive",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto West Superior Street.",
+          "cue": "Turn right onto West Superior Street.",
           "miles": 0.12,
           "road": "West Superior Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto West Michigan Street.",
+          "cue": "Continue onto West Michigan Street.",
           "miles": 0.15,
           "road": "West Michigan Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Lower Michigan Street.",
+          "cue": "Continue onto Lower Michigan Street.",
           "miles": 0.59,
           "road": "Lower Michigan Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto West Michigan Street.",
+          "cue": "Turn left onto West Michigan Street.",
           "miles": 0.66,
           "road": "West Michigan Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto South 29th Avenue West.",
+          "cue": "Turn left onto South 29th Avenue West.",
           "miles": 0.05,
           "road": "South 29th Avenue West",
           "speed_mph": 25.0
@@ -22144,43 +22144,43 @@
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto West Broadway Avenue.",
+          "cue": "Turn left onto West Broadway Avenue.",
           "miles": 0.72,
           "road": "West Broadway Avenue",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto North Harrison Street.",
+          "cue": "Turn right onto North Harrison Street.",
           "miles": 0.05,
           "road": "North Harrison Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto unnamed public road.",
+          "cue": "Turn left onto unnamed public road.",
           "miles": 0.2,
           "road": "unnamed public road",
           "speed_mph": 15.0
         },
         {
-          "cue": "Turn onto Taylor Street.",
+          "cue": "Turn right onto Taylor Street.",
           "miles": 0.05,
           "road": "Taylor Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto West Randolph Avenue.",
+          "cue": "Turn left onto West Randolph Avenue.",
           "miles": 0.33,
           "road": "West Randolph Avenue",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto unnamed public road.",
+          "cue": "Continue onto unnamed public road.",
           "miles": 0.05,
           "road": "unnamed public road",
           "speed_mph": 15.0
         },
         {
-          "cue": "Turn onto West Randolph Avenue.",
+          "cue": "Continue onto West Randolph Avenue.",
           "miles": 1.34,
           "road": "West Randolph Avenue",
           "speed_mph": 25.0
@@ -22648,31 +22648,31 @@
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto South Park Row (PA 5 Alternate).",
+          "cue": "Turn left onto South Park Row (PA 5 Alternate).",
           "miles": 0.08,
           "road": "South Park Row (PA 5 Alternate)",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto French Street (PA 5 Alternate).",
+          "cue": "Turn left onto French Street (PA 5 Alternate).",
           "miles": 0.05,
           "road": "French Street (PA 5 Alternate)",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto East 6th Street (PA 5 Alternate).",
+          "cue": "Turn right onto East 6th Street (PA 5 Alternate).",
           "miles": 1.2,
           "road": "East 6th Street (PA 5 Alternate)",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto East Lake Road (PA 5 Alternate).",
+          "cue": "Continue onto East Lake Road (PA 5 Alternate).",
           "miles": 0.73,
           "road": "East Lake Road (PA 5 Alternate)",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto unnamed public road.",
+          "cue": "Turn left onto unnamed public road.",
           "miles": 0.34,
           "road": "unnamed public road",
           "speed_mph": 15.0
@@ -22744,43 +22744,43 @@
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto South Park Row (PA 5 Alternate).",
+          "cue": "Turn right onto South Park Row (PA 5 Alternate).",
           "miles": 0.06,
           "road": "South Park Row (PA 5 Alternate)",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto unnamed public road.",
+          "cue": "Turn left onto unnamed public road.",
           "miles": 0.05,
           "road": "unnamed public road",
           "speed_mph": 15.0
         },
         {
-          "cue": "Turn onto West 7th Street.",
+          "cue": "Turn right onto West 7th Street.",
           "miles": 0.05,
           "road": "West 7th Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Peach Street.",
+          "cue": "Turn left onto Peach Street.",
           "miles": 1.27,
           "road": "Peach Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Peach Street (US 19).",
+          "cue": "Turn right onto Peach Street (US 19).",
           "miles": 0.41,
           "road": "Peach Street (US 19)",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto West 31st Street.",
+          "cue": "Turn right onto West 31st Street.",
           "miles": 0.27,
           "road": "West 31st Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Walnut Street.",
+          "cue": "Turn left onto Walnut Street.",
           "miles": 0.05,
           "road": "Walnut Street",
           "speed_mph": 25.0
@@ -23380,25 +23380,25 @@
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Harlow Road.",
+          "cue": "Turn right onto Harlow Road.",
           "miles": 1.28,
           "road": "Harlow Road",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto unnamed public road.",
+          "cue": "Turn left onto unnamed public road.",
           "miles": 0.16,
           "road": "unnamed public road",
           "speed_mph": 15.0
         },
         {
-          "cue": "Turn onto Gateway Street.",
+          "cue": "Turn left onto Gateway Street.",
           "miles": 0.93,
           "road": "Gateway Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto unnamed public road.",
+          "cue": "Turn right onto unnamed public road.",
           "miles": 0.15,
           "road": "unnamed public road",
           "speed_mph": 15.0
@@ -24526,43 +24526,43 @@
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Union Avenue.",
+          "cue": "Turn left onto Union Avenue.",
           "miles": 0.31,
           "road": "Union Avenue",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Ohio Street.",
+          "cue": "Turn right onto Ohio Street.",
           "miles": 0.22,
           "road": "Ohio Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Jackson Street.",
+          "cue": "Turn left onto Jackson Street.",
           "miles": 0.05,
           "road": "Jackson Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto unnamed public road.",
+          "cue": "Turn right onto unnamed public road.",
           "miles": 0.29,
           "road": "unnamed public road",
           "speed_mph": 15.0
         },
         {
-          "cue": "Turn onto Pennsylvania Avenue.",
+          "cue": "Turn left onto Pennsylvania Avenue.",
           "miles": 0.65,
           "road": "Pennsylvania Avenue",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Cordelia Road.",
+          "cue": "Continue onto Cordelia Road.",
           "miles": 0.7,
           "road": "Cordelia Road",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Orehr Road.",
+          "cue": "Turn left onto Orehr Road.",
           "miles": 0.37,
           "road": "Orehr Road",
           "speed_mph": 25.0
@@ -24667,43 +24667,43 @@
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Union Avenue.",
+          "cue": "Turn left onto Union Avenue.",
           "miles": 0.31,
           "road": "Union Avenue",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Ohio Street.",
+          "cue": "Turn right onto Ohio Street.",
           "miles": 0.22,
           "road": "Ohio Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Jackson Street.",
+          "cue": "Turn left onto Jackson Street.",
           "miles": 0.05,
           "road": "Jackson Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto unnamed public road.",
+          "cue": "Turn right onto unnamed public road.",
           "miles": 0.29,
           "road": "unnamed public road",
           "speed_mph": 15.0
         },
         {
-          "cue": "Turn onto Pennsylvania Avenue.",
+          "cue": "Turn left onto Pennsylvania Avenue.",
           "miles": 0.65,
           "road": "Pennsylvania Avenue",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Cordelia Road.",
+          "cue": "Continue onto Cordelia Road.",
           "miles": 0.7,
           "road": "Cordelia Road",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Orehr Road.",
+          "cue": "Turn left onto Orehr Road.",
           "miles": 0.37,
           "road": "Orehr Road",
           "speed_mph": 25.0
@@ -25336,43 +25336,43 @@
           "speed_mph": 15.0
         },
         {
-          "cue": "Turn onto East Court Street (M 21).",
+          "cue": "Turn right onto East Court Street (M 21).",
           "miles": 0.31,
           "road": "East Court Street (M 21)",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto East Court Street.",
+          "cue": "Continue onto East Court Street.",
           "miles": 0.39,
           "road": "East Court Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Albert R. Horrigan Drive.",
+          "cue": "Turn left onto Albert R. Horrigan Drive.",
           "miles": 0.77,
           "road": "Albert R. Horrigan Drive",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Robert T Longway Boulevard.",
+          "cue": "Turn right onto Robert T Longway Boulevard.",
           "miles": 0.14,
           "road": "Robert T Longway Boulevard",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto North Franklin Avenue.",
+          "cue": "Turn left onto North Franklin Avenue.",
           "miles": 0.1,
           "road": "North Franklin Avenue",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Nebraska Avenue.",
+          "cue": "Turn right onto Nebraska Avenue.",
           "miles": 0.46,
           "road": "Nebraska Avenue",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto unnamed public road.",
+          "cue": "Turn left onto unnamed public road.",
           "miles": 0.11,
           "road": "unnamed public road",
           "speed_mph": 15.0
@@ -25411,43 +25411,43 @@
           "speed_mph": 15.0
         },
         {
-          "cue": "Turn onto East Court Street (M 21).",
+          "cue": "Turn right onto East Court Street (M 21).",
           "miles": 0.25,
           "road": "East Court Street (M 21)",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Chavez Drive.",
+          "cue": "Turn left onto Chavez Drive.",
           "miles": 0.13,
           "road": "Chavez Drive",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto East Third Street.",
+          "cue": "Turn right onto East Third Street.",
           "miles": 0.05,
           "road": "East Third Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Chavez Drive.",
+          "cue": "Turn left onto Chavez Drive.",
           "miles": 1.17,
           "road": "Chavez Drive",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Lewis Street.",
+          "cue": "Continue onto Lewis Street.",
           "miles": 0.78,
           "road": "Lewis Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Leith Street.",
+          "cue": "Turn left onto Leith Street.",
           "miles": 0.13,
           "road": "Leith Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto James P Cole Boulevard.",
+          "cue": "Turn right onto James P Cole Boulevard.",
           "miles": 0.49,
           "road": "James P Cole Boulevard",
           "speed_mph": 25.0
@@ -25486,37 +25486,37 @@
           "speed_mph": 15.0
         },
         {
-          "cue": "Turn onto East Court Street (M 21).",
+          "cue": "Turn right onto East Court Street (M 21).",
           "miles": 0.31,
           "road": "East Court Street (M 21)",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto East Court Street.",
+          "cue": "Continue onto East Court Street.",
           "miles": 0.39,
           "road": "East Court Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Albert R. Horrigan Drive.",
+          "cue": "Turn left onto Albert R. Horrigan Drive.",
           "miles": 0.77,
           "road": "Albert R. Horrigan Drive",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Robert T Longway Boulevard.",
+          "cue": "Turn right onto Robert T Longway Boulevard.",
           "miles": 1.14,
           "road": "Robert T Longway Boulevard",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto North Averill Avenue.",
+          "cue": "Turn left onto North Averill Avenue.",
           "miles": 0.14,
           "road": "North Averill Avenue",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto unnamed public road.",
+          "cue": "Turn left onto unnamed public road.",
           "miles": 0.21,
           "road": "unnamed public road",
           "speed_mph": 15.0
@@ -25720,43 +25720,43 @@
           "speed_mph": 15.0
         },
         {
-          "cue": "Turn onto East Court Street (M 21).",
+          "cue": "Turn right onto East Court Street (M 21).",
           "miles": 0.31,
           "road": "East Court Street (M 21)",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto East Court Street.",
+          "cue": "Continue onto East Court Street.",
           "miles": 0.39,
           "road": "East Court Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Albert R. Horrigan Drive.",
+          "cue": "Turn left onto Albert R. Horrigan Drive.",
           "miles": 0.77,
           "road": "Albert R. Horrigan Drive",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Robert T Longway Boulevard.",
+          "cue": "Turn right onto Robert T Longway Boulevard.",
           "miles": 0.14,
           "road": "Robert T Longway Boulevard",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto North Franklin Avenue.",
+          "cue": "Turn left onto North Franklin Avenue.",
           "miles": 0.47,
           "road": "North Franklin Avenue",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto unnamed public road.",
+          "cue": "Turn right onto unnamed public road.",
           "miles": 0.05,
           "road": "unnamed public road",
           "speed_mph": 15.0
         },
         {
-          "cue": "Turn onto Maplewood Avenue.",
+          "cue": "Turn left onto Maplewood Avenue.",
           "miles": 0.12,
           "road": "Maplewood Avenue",
           "speed_mph": 25.0
@@ -26785,31 +26785,31 @@
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Commerce Street.",
+          "cue": "Continue onto Commerce Street.",
           "miles": 0.31,
           "road": "Commerce Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto unnamed public road.",
+          "cue": "Continue onto unnamed public road.",
           "miles": 0.14,
           "road": "unnamed public road",
           "speed_mph": 15.0
         },
         {
-          "cue": "Turn onto Commerce Street.",
+          "cue": "Continue onto Commerce Street.",
           "miles": 0.21,
           "road": "Commerce Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto South Main Street.",
+          "cue": "Turn right onto South Main Street.",
           "miles": 1.41,
           "road": "South Main Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Saint Joseph Court.",
+          "cue": "Turn left onto Saint Joseph Court.",
           "miles": 0.13,
           "road": "Saint Joseph Court",
           "speed_mph": 25.0
@@ -27871,43 +27871,43 @@
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto East Walnut Street.",
+          "cue": "Continue onto East Walnut Street.",
           "miles": 0.58,
           "road": "East Walnut Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Evans Street.",
+          "cue": "Turn right onto Evans Street.",
           "miles": 0.05,
           "road": "Evans Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto East Walnut Street.",
+          "cue": "Turn left onto East Walnut Street.",
           "miles": 0.13,
           "road": "East Walnut Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Ballinger Street.",
+          "cue": "Turn right onto Ballinger Street.",
           "miles": 0.12,
           "road": "Ballinger Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto East Spruce Street.",
+          "cue": "Turn left onto East Spruce Street.",
           "miles": 1.68,
           "road": "East Spruce Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto North Jennie Barker Road.",
+          "cue": "Turn right onto North Jennie Barker Road.",
           "miles": 0.5,
           "road": "North Jennie Barker Road",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Jennie Barker Road.",
+          "cue": "Continue onto Jennie Barker Road.",
           "miles": 0.33,
           "road": "Jennie Barker Road",
           "speed_mph": 25.0
@@ -27946,43 +27946,43 @@
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto East Walnut Street.",
+          "cue": "Continue onto East Walnut Street.",
           "miles": 0.58,
           "road": "East Walnut Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Evans Street.",
+          "cue": "Turn right onto Evans Street.",
           "miles": 0.05,
           "road": "Evans Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto East Walnut Street.",
+          "cue": "Turn left onto East Walnut Street.",
           "miles": 0.13,
           "road": "East Walnut Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Ballinger Street.",
+          "cue": "Turn right onto Ballinger Street.",
           "miles": 0.12,
           "road": "Ballinger Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto East Spruce Street.",
+          "cue": "Turn left onto East Spruce Street.",
           "miles": 1.68,
           "road": "East Spruce Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto North Jennie Barker Road.",
+          "cue": "Turn right onto North Jennie Barker Road.",
           "miles": 0.5,
           "road": "North Jennie Barker Road",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Jennie Barker Road.",
+          "cue": "Continue onto Jennie Barker Road.",
           "miles": 0.33,
           "road": "Jennie Barker Road",
           "speed_mph": 25.0
@@ -28450,43 +28450,43 @@
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto East South Front Street.",
+          "cue": "Continue onto East South Front Street.",
           "miles": 0.2,
           "road": "East South Front Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto North Oak Street.",
+          "cue": "Turn left onto North Oak Street.",
           "miles": 0.05,
           "road": "North Oak Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto unnamed public road.",
+          "cue": "Turn right onto unnamed public road.",
           "miles": 0.09,
           "road": "unnamed public road",
           "speed_mph": 15.0
         },
         {
-          "cue": "Turn onto North Vine Street.",
+          "cue": "Turn left onto North Vine Street.",
           "miles": 0.07,
           "road": "North Vine Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto East 4th Street.",
+          "cue": "Turn right onto East 4th Street.",
           "miles": 1.04,
           "road": "East 4th Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Sky Park Road.",
+          "cue": "Turn left onto Sky Park Road.",
           "miles": 0.5,
           "road": "Sky Park Road",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Sky Park Road (US 30 Truck;US 281 Truck;NE 2 Truck).",
+          "cue": "Continue onto Sky Park Road (US 30 Truck;US 281 Truck;NE 2 Truck).",
           "miles": 1.0,
           "road": "Sky Park Road (US 30 Truck;US 281 Truck;NE 2 Truck)",
           "speed_mph": 25.0
@@ -28855,43 +28855,43 @@
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Monroe Center Street Northwest.",
+          "cue": "Turn left onto Monroe Center Street Northwest.",
           "miles": 0.28,
           "road": "Monroe Center Street Northwest",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Monroe Avenue Northwest.",
+          "cue": "Turn right onto Monroe Avenue Northwest.",
           "miles": 0.71,
           "road": "Monroe Avenue Northwest",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Newberry Street Northwest.",
+          "cue": "Turn left onto Newberry Street Northwest.",
           "miles": 0.05,
           "road": "Newberry Street Northwest",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto 6th Street Northwest.",
+          "cue": "Continue onto 6th Street Northwest.",
           "miles": 0.15,
           "road": "6th Street Northwest",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Front Avenue Northwest.",
+          "cue": "Turn right onto Front Avenue Northwest.",
           "miles": 0.46,
           "road": "Front Avenue Northwest",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto unnamed public road.",
+          "cue": "Continue onto unnamed public road.",
           "miles": 0.09,
           "road": "unnamed public road",
           "speed_mph": 15.0
         },
         {
-          "cue": "Turn onto Scribner Avenue Northwest.",
+          "cue": "Turn right onto Scribner Avenue Northwest.",
           "miles": 0.56,
           "road": "Scribner Avenue Northwest",
           "speed_mph": 25.0
@@ -29161,31 +29161,31 @@
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Dousman Street.",
+          "cue": "Continue onto Dousman Street.",
           "miles": 2.11,
           "road": "Dousman Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Boland Road.",
+          "cue": "Turn right onto Boland Road.",
           "miles": 0.56,
           "road": "Boland Road",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Steven Street.",
+          "cue": "Turn right onto Steven Street.",
           "miles": 0.06,
           "road": "Steven Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Bond Street.",
+          "cue": "Turn left onto Bond Street.",
           "miles": 0.44,
           "road": "Bond Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto unnamed public road.",
+          "cue": "Continue onto unnamed public road.",
           "miles": 0.19,
           "road": "unnamed public road",
           "speed_mph": 15.0
@@ -29521,43 +29521,43 @@
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto South Eugene Street.",
+          "cue": "Turn left onto South Eugene Street.",
           "miles": 0.27,
           "road": "South Eugene Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Eugene Court.",
+          "cue": "Continue onto Eugene Court.",
           "miles": 0.05,
           "road": "Eugene Court",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto unnamed public road.",
+          "cue": "Turn right onto unnamed public road.",
           "miles": 0.06,
           "road": "unnamed public road",
           "speed_mph": 15.0
         },
         {
-          "cue": "Turn onto Blandwood Avenue.",
+          "cue": "Turn left onto Blandwood Avenue.",
           "miles": 0.05,
           "road": "Blandwood Avenue",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto unnamed public road.",
+          "cue": "Turn right onto unnamed public road.",
           "miles": 0.06,
           "road": "unnamed public road",
           "speed_mph": 15.0
         },
         {
-          "cue": "Turn onto Spring Garden Street.",
+          "cue": "Turn right onto Spring Garden Street.",
           "miles": 2.68,
           "road": "Spring Garden Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto unnamed public road.",
+          "cue": "Continue onto unnamed public road.",
           "miles": 0.12,
           "road": "unnamed public road",
           "speed_mph": 15.0
@@ -29596,43 +29596,43 @@
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto South Greene Street.",
+          "cue": "Turn right onto South Greene Street.",
           "miles": 0.27,
           "road": "South Greene Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto unnamed public road.",
+          "cue": "Turn left onto unnamed public road.",
           "miles": 0.05,
           "road": "unnamed public road",
           "speed_mph": 15.0
         },
         {
-          "cue": "Turn onto West McGee Street.",
+          "cue": "Turn left onto West McGee Street.",
           "miles": 0.06,
           "road": "West McGee Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto South Elm Street.",
+          "cue": "Turn right onto South Elm Street.",
           "miles": 1.06,
           "road": "South Elm Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto South Elm Eugene Street.",
+          "cue": "Turn left onto South Elm Eugene Street.",
           "miles": 1.48,
           "road": "South Elm Eugene Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto West J J Drive.",
+          "cue": "Turn right onto West J J Drive.",
           "miles": 0.13,
           "road": "West J J Drive",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Torrence Drive.",
+          "cue": "Turn left onto Torrence Drive.",
           "miles": 0.05,
           "road": "Torrence Drive",
           "speed_mph": 25.0
@@ -29770,43 +29770,43 @@
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto North Greene Street.",
+          "cue": "Turn left onto North Greene Street.",
           "miles": 0.07,
           "road": "North Greene Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto West Friendly Avenue.",
+          "cue": "Turn right onto West Friendly Avenue.",
           "miles": 0.07,
           "road": "West Friendly Avenue",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto North Elm Street.",
+          "cue": "Turn left onto North Elm Street.",
           "miles": 0.1,
           "road": "North Elm Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Summit Avenue.",
+          "cue": "Turn right onto Summit Avenue.",
           "miles": 1.49,
           "road": "Summit Avenue",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto 4th Street.",
+          "cue": "Turn left onto 4th Street.",
           "miles": 0.05,
           "road": "4th Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Fairview Street.",
+          "cue": "Turn right onto Fairview Street.",
           "miles": 0.63,
           "road": "Fairview Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto 9th Street.",
+          "cue": "Turn right onto 9th Street.",
           "miles": 0.05,
           "road": "9th Street",
           "speed_mph": 25.0
@@ -30835,31 +30835,31 @@
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto South Potomac Street (US 40 ALT).",
+          "cue": "Turn left onto South Potomac Street (US 40 ALT).",
           "miles": 0.24,
           "road": "South Potomac Street (US 40 ALT)",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto South Potomac Street.",
+          "cue": "Continue onto South Potomac Street.",
           "miles": 1.22,
           "road": "South Potomac Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto South Potomac Street (MD 65).",
+          "cue": "Continue onto South Potomac Street (MD 65).",
           "miles": 0.71,
           "road": "South Potomac Street (MD 65)",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto East Oak Ridge Drive.",
+          "cue": "Turn left onto East Oak Ridge Drive.",
           "miles": 0.38,
           "road": "East Oak Ridge Drive",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto unnamed public road.",
+          "cue": "Continue onto unnamed public road.",
           "miles": 0.06,
           "road": "unnamed public road",
           "speed_mph": 15.0
@@ -31624,43 +31624,43 @@
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Central Row.",
+          "cue": "Continue onto Central Row.",
           "miles": 0.05,
           "road": "Central Row",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto American Row.",
+          "cue": "Continue onto American Row.",
           "miles": 0.05,
           "road": "American Row",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Market Street.",
+          "cue": "Turn left onto Market Street.",
           "miles": 0.61,
           "road": "Market Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Reverend Robert A. Moody Overpass.",
+          "cue": "Continue onto Reverend Robert A. Moody Overpass.",
           "miles": 0.72,
           "road": "Reverend Robert A. Moody Overpass",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Weston Street.",
+          "cue": "Turn right onto Weston Street.",
           "miles": 0.2,
           "road": "Weston Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Leibert Road.",
+          "cue": "Continue onto Leibert Road.",
           "miles": 0.05,
           "road": "Leibert Road",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Riverside Park Road.",
+          "cue": "Turn right onto Riverside Park Road.",
           "miles": 0.3,
           "road": "Riverside Park Road",
           "speed_mph": 25.0
@@ -33415,43 +33415,43 @@
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto West Stone Run Lane.",
+          "cue": "Turn right onto West Stone Run Lane.",
           "miles": 0.06,
           "road": "West Stone Run Lane",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Stone Run Lane.",
+          "cue": "Continue onto Stone Run Lane.",
           "miles": 0.18,
           "road": "Stone Run Lane",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Cobblestone Lane.",
+          "cue": "Turn left onto Cobblestone Lane.",
           "miles": 0.08,
           "road": "Cobblestone Lane",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto East Sunnyside Road.",
+          "cue": "Turn right onto East Sunnyside Road.",
           "miles": 1.28,
           "road": "East Sunnyside Road",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto South Woodruff Avenue.",
+          "cue": "Turn left onto South Woodruff Avenue.",
           "miles": 1.36,
           "road": "South Woodruff Avenue",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto 12th Street.",
+          "cue": "Turn right onto 12th Street.",
           "miles": 0.05,
           "road": "12th Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto unnamed public road.",
+          "cue": "Turn right onto unnamed public road.",
           "miles": 0.05,
           "road": "unnamed public road",
           "speed_mph": 15.0
@@ -33490,31 +33490,31 @@
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto West Stone Run Lane.",
+          "cue": "Turn right onto West Stone Run Lane.",
           "miles": 0.06,
           "road": "West Stone Run Lane",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Stone Run Lane.",
+          "cue": "Continue onto Stone Run Lane.",
           "miles": 0.18,
           "road": "Stone Run Lane",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Cobblestone Lane.",
+          "cue": "Turn left onto Cobblestone Lane.",
           "miles": 0.08,
           "road": "Cobblestone Lane",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto East Sunnyside Road.",
+          "cue": "Turn right onto East Sunnyside Road.",
           "miles": 2.32,
           "road": "East Sunnyside Road",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto unnamed public road.",
+          "cue": "Turn left onto unnamed public road.",
           "miles": 0.27,
           "road": "unnamed public road",
           "speed_mph": 15.0
@@ -33685,43 +33685,43 @@
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto West Stone Run Lane.",
+          "cue": "Turn right onto West Stone Run Lane.",
           "miles": 0.05,
           "road": "West Stone Run Lane",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Stonebrook Lane.",
+          "cue": "Turn left onto Stonebrook Lane.",
           "miles": 0.09,
           "road": "Stonebrook Lane",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto South Boulevard.",
+          "cue": "Continue onto South Boulevard.",
           "miles": 1.4,
           "road": "South Boulevard",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto unnamed public road.",
+          "cue": "Turn left onto unnamed public road.",
           "miles": 0.05,
           "road": "unnamed public road",
           "speed_mph": 15.0
         },
         {
-          "cue": "Turn onto Elm Street.",
+          "cue": "Continue onto Elm Street.",
           "miles": 0.31,
           "road": "Elm Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto West Broadway Street (I 15 Business;US 20 Business).",
+          "cue": "Continue onto West Broadway Street (I 15 Business;US 20 Business).",
           "miles": 0.66,
           "road": "West Broadway Street (I 15 Business;US 20 Business)",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto unnamed public road.",
+          "cue": "Turn right onto unnamed public road.",
           "miles": 0.11,
           "road": "unnamed public road",
           "speed_mph": 15.0
@@ -34552,43 +34552,43 @@
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto West Ludington Street (M 95).",
+          "cue": "Continue onto West Ludington Street (M 95).",
           "miles": 0.07,
           "road": "West Ludington Street (M 95)",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Carpenter Avenue (M 95).",
+          "cue": "Turn left onto Carpenter Avenue (M 95).",
           "miles": 0.87,
           "road": "Carpenter Avenue (M 95)",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto South Carpenter Avenue (M 95).",
+          "cue": "Continue onto South Carpenter Avenue (M 95).",
           "miles": 0.76,
           "road": "South Carpenter Avenue (M 95)",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto East Breitung Avenue.",
+          "cue": "Turn left onto East Breitung Avenue.",
           "miles": 0.25,
           "road": "East Breitung Avenue",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Woodbine Street.",
+          "cue": "Turn right onto Woodbine Street.",
           "miles": 0.25,
           "road": "Woodbine Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto East Breen Avenue.",
+          "cue": "Turn left onto East Breen Avenue.",
           "miles": 0.1,
           "road": "East Breen Avenue",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto State Street.",
+          "cue": "Turn right onto State Street.",
           "miles": 0.44,
           "road": "State Street",
           "speed_mph": 25.0
@@ -34660,37 +34660,37 @@
           "speed_mph": 15.0
         },
         {
-          "cue": "Turn onto East Washington Avenue.",
+          "cue": "Turn left onto East Washington Avenue.",
           "miles": 0.95,
           "road": "East Washington Avenue",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto South Elm Avenue.",
+          "cue": "Turn left onto South Elm Avenue.",
           "miles": 0.08,
           "road": "South Elm Avenue",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Page Avenue.",
+          "cue": "Turn right onto Page Avenue.",
           "miles": 0.8,
           "road": "Page Avenue",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Streator Avenue.",
+          "cue": "Turn right onto Streator Avenue.",
           "miles": 0.05,
           "road": "Streator Avenue",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Alley Street.",
+          "cue": "Turn left onto Alley Street.",
           "miles": 0.18,
           "road": "Alley Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Knapp Street.",
+          "cue": "Turn right onto Knapp Street.",
           "miles": 0.23,
           "road": "Knapp Street",
           "speed_mph": 25.0
@@ -36214,43 +36214,43 @@
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto West Michigan Avenue.",
+          "cue": "Turn right onto West Michigan Avenue.",
           "miles": 0.41,
           "road": "West Michigan Avenue",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Academy Street.",
+          "cue": "Turn right onto Academy Street.",
           "miles": 0.05,
           "road": "Academy Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto West Michigan Avenue.",
+          "cue": "Turn left onto West Michigan Avenue.",
           "miles": 0.29,
           "road": "West Michigan Avenue",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Stadium Drive.",
+          "cue": "Continue onto Stadium Drive.",
           "miles": 0.45,
           "road": "Stadium Drive",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Oliver Street.",
+          "cue": "Turn right onto Oliver Street.",
           "miles": 0.08,
           "road": "Oliver Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Ring Road South.",
+          "cue": "Turn left onto Ring Road South.",
           "miles": 0.68,
           "road": "Ring Road South",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Lawson Drive.",
+          "cue": "Turn left onto Lawson Drive.",
           "miles": 0.12,
           "road": "Lawson Drive",
           "speed_mph": 25.0
@@ -36289,43 +36289,43 @@
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto West Michigan Avenue.",
+          "cue": "Turn right onto West Michigan Avenue.",
           "miles": 0.41,
           "road": "West Michigan Avenue",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Academy Street.",
+          "cue": "Turn right onto Academy Street.",
           "miles": 0.05,
           "road": "Academy Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto West Michigan Avenue.",
+          "cue": "Turn left onto West Michigan Avenue.",
           "miles": 0.29,
           "road": "West Michigan Avenue",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Stadium Drive.",
+          "cue": "Continue onto Stadium Drive.",
           "miles": 0.45,
           "road": "Stadium Drive",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Oliver Street.",
+          "cue": "Turn right onto Oliver Street.",
           "miles": 0.08,
           "road": "Oliver Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Ring Road South.",
+          "cue": "Turn left onto Ring Road South.",
           "miles": 0.68,
           "road": "Ring Road South",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Lawson Drive.",
+          "cue": "Turn left onto Lawson Drive.",
           "miles": 0.11,
           "road": "Lawson Drive",
           "speed_mph": 25.0
@@ -36793,43 +36793,43 @@
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Admiral Boulevard.",
+          "cue": "Turn right onto Admiral Boulevard.",
           "miles": 0.05,
           "road": "Admiral Boulevard",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto MO 9.",
+          "cue": "Turn left onto MO 9.",
           "miles": 0.39,
           "road": "MO 9",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Heart of America Bridge (MO 9).",
+          "cue": "Continue onto Heart of America Bridge (MO 9).",
           "miles": 0.64,
           "road": "Heart of America Bridge (MO 9)",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto MO 9.",
+          "cue": "Continue onto MO 9.",
           "miles": 0.49,
           "road": "MO 9",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto West 10th Avenue.",
+          "cue": "Turn left onto West 10th Avenue.",
           "miles": 0.08,
           "road": "West 10th Avenue",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto North Atlantic Street.",
+          "cue": "Turn left onto North Atlantic Street.",
           "miles": 0.33,
           "road": "North Atlantic Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto unnamed public road.",
+          "cue": "Turn right onto unnamed public road.",
           "miles": 0.28,
           "road": "unnamed public road",
           "speed_mph": 15.0
@@ -38947,19 +38947,19 @@
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Mc Kay Avenue.",
+          "cue": "Turn left onto Mc Kay Avenue.",
           "miles": 0.05,
           "road": "Mc Kay Avenue",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto East Lime Street.",
+          "cue": "Turn right onto East Lime Street.",
           "miles": 0.23,
           "road": "East Lime Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Bartow Road (US 98).",
+          "cue": "Turn right onto Bartow Road (US 98).",
           "miles": 1.59,
           "road": "Bartow Road (US 98)",
           "speed_mph": 25.0
@@ -40879,31 +40879,31 @@
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto unnamed public road.",
+          "cue": "Continue onto unnamed public road.",
           "miles": 0.38,
           "road": "unnamed public road",
           "speed_mph": 15.0
         },
         {
-          "cue": "Turn onto Southwest 2nd Street (US 281 Business).",
+          "cue": "Continue onto Southwest 2nd Street (US 281 Business).",
           "miles": 0.81,
           "road": "Southwest 2nd Street (US 281 Business)",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto US 281 Business.",
+          "cue": "Continue onto US 281 Business.",
           "miles": 0.9,
           "road": "US 281 Business",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Southwest 11th Street (US 281 Business).",
+          "cue": "Turn left onto Southwest 11th Street (US 281 Business).",
           "miles": 0.64,
           "road": "Southwest 11th Street (US 281 Business)",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto King Road.",
+          "cue": "Turn right onto King Road.",
           "miles": 0.28,
           "road": "King Road",
           "speed_mph": 25.0
@@ -41767,43 +41767,43 @@
           "speed_mph": 15.0
         },
         {
-          "cue": "Turn onto State Capitol.",
+          "cue": "Turn left onto State Capitol.",
           "miles": 0.05,
           "road": "State Capitol",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Capitol Mall.",
+          "cue": "Turn left onto Capitol Mall.",
           "miles": 0.05,
           "road": "Capitol Mall",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto State Capitol.",
+          "cue": "Turn right onto State Capitol.",
           "miles": 0.07,
           "road": "State Capitol",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto West 7th Street.",
+          "cue": "Turn left onto West 7th Street.",
           "miles": 1.01,
           "road": "West 7th Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto East 7th Street.",
+          "cue": "Continue onto East 7th Street.",
           "miles": 0.42,
           "road": "East 7th Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Ferry Street.",
+          "cue": "Turn right onto Ferry Street.",
           "miles": 0.11,
           "road": "Ferry Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto East 9th Street.",
+          "cue": "Turn left onto East 9th Street.",
           "miles": 0.77,
           "road": "East 9th Street",
           "speed_mph": 25.0
@@ -43723,19 +43723,19 @@
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto West Gorham Street.",
+          "cue": "Turn left onto West Gorham Street.",
           "miles": 0.43,
           "road": "West Gorham Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto East Gorham Street.",
+          "cue": "Continue onto East Gorham Street.",
           "miles": 1.32,
           "road": "East Gorham Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto East Johnson Street.",
+          "cue": "Continue onto East Johnson Street.",
           "miles": 0.43,
           "road": "East Johnson Street",
           "speed_mph": 25.0
@@ -45688,43 +45688,43 @@
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto South Fir Street.",
+          "cue": "Continue onto South Fir Street.",
           "miles": 0.82,
           "road": "South Fir Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto West Barnett Street.",
+          "cue": "Turn left onto West Barnett Street.",
           "miles": 0.12,
           "road": "West Barnett Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto East Barnett Road.",
+          "cue": "Continue onto East Barnett Road.",
           "miles": 1.66,
           "road": "East Barnett Road",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto State Street.",
+          "cue": "Turn right onto State Street.",
           "miles": 0.49,
           "road": "State Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Golf View Drive.",
+          "cue": "Turn right onto Golf View Drive.",
           "miles": 0.05,
           "road": "Golf View Drive",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Creek View Drive.",
+          "cue": "Turn left onto Creek View Drive.",
           "miles": 0.35,
           "road": "Creek View Drive",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto unnamed public road.",
+          "cue": "Turn left onto unnamed public road.",
           "miles": 0.09,
           "road": "unnamed public road",
           "speed_mph": 15.0
@@ -46126,43 +46126,43 @@
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto North 2nd Street (TN 3;TN 14).",
+          "cue": "Turn left onto North 2nd Street (TN 3;TN 14).",
           "miles": 0.07,
           "road": "North 2nd Street (TN 3;TN 14)",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto November 6th Street.",
+          "cue": "Turn right onto November 6th Street.",
           "miles": 0.1,
           "road": "November 6th Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Adams Avenue.",
+          "cue": "Turn right onto Adams Avenue.",
           "miles": 0.08,
           "road": "Adams Avenue",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto unnamed public road.",
+          "cue": "Turn left onto unnamed public road.",
           "miles": 0.08,
           "road": "unnamed public road",
           "speed_mph": 15.0
         },
         {
-          "cue": "Turn onto North Front Street.",
+          "cue": "Turn left onto North Front Street.",
           "miles": 0.05,
           "road": "North Front Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Jefferson Avenue.",
+          "cue": "Turn right onto Jefferson Avenue.",
           "miles": 0.06,
           "road": "Jefferson Avenue",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Riverside Drive.",
+          "cue": "Turn left onto Riverside Drive.",
           "miles": 1.78,
           "road": "Riverside Drive",
           "speed_mph": 25.0
@@ -47752,37 +47752,37 @@
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Mullan Road (MT 263).",
+          "cue": "Turn left onto Mullan Road (MT 263).",
           "miles": 0.79,
           "road": "Mullan Road (MT 263)",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Mullan Road (S-263).",
+          "cue": "Continue onto Mullan Road (S-263).",
           "miles": 0.05,
           "road": "Mullan Road (S-263)",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Mullan Road (MT 263).",
+          "cue": "Continue onto Mullan Road (MT 263).",
           "miles": 0.06,
           "road": "Mullan Road (MT 263)",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Mullan Road (US 93;MT 263).",
+          "cue": "Continue onto Mullan Road (US 93;MT 263).",
           "miles": 0.05,
           "road": "Mullan Road (US 93;MT 263)",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Mullan Road (MT 263).",
+          "cue": "Continue onto Mullan Road (MT 263).",
           "miles": 0.08,
           "road": "Mullan Road (MT 263)",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto unnamed public road.",
+          "cue": "Turn right onto unnamed public road.",
           "miles": 0.11,
           "road": "unnamed public road",
           "speed_mph": 15.0
@@ -47986,13 +47986,13 @@
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Palmer Street.",
+          "cue": "Turn left onto Palmer Street.",
           "miles": 0.19,
           "road": "Palmer Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto unnamed public road.",
+          "cue": "Turn right onto unnamed public road.",
           "miles": 0.07,
           "road": "unnamed public road",
           "speed_mph": 15.0
@@ -48625,25 +48625,25 @@
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Northfield Street (VT 12).",
+          "cue": "Continue onto Northfield Street (VT 12).",
           "miles": 0.97,
           "road": "Northfield Street (VT 12)",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Vermont Route 12 (VT 12).",
+          "cue": "Continue onto Vermont Route 12 (VT 12).",
           "miles": 0.83,
           "road": "Vermont Route 12 (VT 12)",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Lord Road.",
+          "cue": "Turn right onto Lord Road.",
           "miles": 0.12,
           "road": "Lord Road",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto unnamed public road.",
+          "cue": "Continue onto unnamed public road.",
           "miles": 0.05,
           "road": "unnamed public road",
           "speed_mph": 15.0
@@ -49606,43 +49606,43 @@
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto West Muskegon Avenue.",
+          "cue": "Turn left onto West Muskegon Avenue.",
           "miles": 0.05,
           "road": "West Muskegon Avenue",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto 2nd Street.",
+          "cue": "Turn left onto 2nd Street.",
           "miles": 0.08,
           "road": "2nd Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto unnamed public road.",
+          "cue": "Turn right onto unnamed public road.",
           "miles": 0.05,
           "road": "unnamed public road",
           "speed_mph": 15.0
         },
         {
-          "cue": "Turn onto Houston Avenue.",
+          "cue": "Continue onto Houston Avenue.",
           "miles": 0.64,
           "road": "Houston Avenue",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Glade Street.",
+          "cue": "Turn left onto Glade Street.",
           "miles": 0.14,
           "road": "Glade Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto West Southern Avenue.",
+          "cue": "Turn right onto West Southern Avenue.",
           "miles": 0.7,
           "road": "West Southern Avenue",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Montgomery Avenue.",
+          "cue": "Turn left onto Montgomery Avenue.",
           "miles": 0.4,
           "road": "Montgomery Avenue",
           "speed_mph": 25.0
@@ -49681,43 +49681,43 @@
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto West Muskegon Avenue.",
+          "cue": "Turn left onto West Muskegon Avenue.",
           "miles": 0.05,
           "road": "West Muskegon Avenue",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto 2nd Street.",
+          "cue": "Turn left onto 2nd Street.",
           "miles": 0.08,
           "road": "2nd Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto unnamed public road.",
+          "cue": "Turn right onto unnamed public road.",
           "miles": 0.05,
           "road": "unnamed public road",
           "speed_mph": 15.0
         },
         {
-          "cue": "Turn onto Houston Avenue.",
+          "cue": "Continue onto Houston Avenue.",
           "miles": 0.64,
           "road": "Houston Avenue",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Glade Street.",
+          "cue": "Turn left onto Glade Street.",
           "miles": 0.14,
           "road": "Glade Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto West Southern Avenue.",
+          "cue": "Turn right onto West Southern Avenue.",
           "miles": 0.7,
           "road": "West Southern Avenue",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Montgomery Avenue.",
+          "cue": "Turn left onto Montgomery Avenue.",
           "miles": 0.4,
           "road": "Montgomery Avenue",
           "speed_mph": 25.0
@@ -49888,43 +49888,43 @@
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto West Muskegon Avenue.",
+          "cue": "Turn right onto West Muskegon Avenue.",
           "miles": 0.35,
           "road": "West Muskegon Avenue",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Spring Street.",
+          "cue": "Turn right onto Spring Street.",
           "miles": 0.05,
           "road": "Spring Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Yuba Street.",
+          "cue": "Turn left onto Yuba Street.",
           "miles": 0.7,
           "road": "Yuba Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Marquette Avenue.",
+          "cue": "Turn left onto Marquette Avenue.",
           "miles": 0.11,
           "road": "Marquette Avenue",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Ottawa Street.",
+          "cue": "Turn right onto Ottawa Street.",
           "miles": 0.49,
           "road": "Ottawa Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Veteran's Memorial Causeway (M 120).",
+          "cue": "Turn left onto Veteran's Memorial Causeway (M 120).",
           "miles": 0.39,
           "road": "Veteran's Memorial Causeway (M 120)",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto unnamed public road.",
+          "cue": "Turn left onto unnamed public road.",
           "miles": 0.52,
           "road": "unnamed public road",
           "speed_mph": 15.0
@@ -50755,43 +50755,43 @@
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Gravier Street.",
+          "cue": "Turn left onto Gravier Street.",
           "miles": 0.28,
           "road": "Gravier Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Loyola Avenue.",
+          "cue": "Turn left onto Loyola Avenue.",
           "miles": 0.05,
           "road": "Loyola Avenue",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Gravier Street.",
+          "cue": "Turn right onto Gravier Street.",
           "miles": 1.27,
           "road": "Gravier Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto South Dupre Street.",
+          "cue": "Turn left onto South Dupre Street.",
           "miles": 0.06,
           "road": "South Dupre Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto unnamed public road.",
+          "cue": "Turn right onto unnamed public road.",
           "miles": 0.06,
           "road": "unnamed public road",
           "speed_mph": 15.0
         },
         {
-          "cue": "Turn onto Perdido Street.",
+          "cue": "Turn right onto Perdido Street.",
           "miles": 0.32,
           "road": "Perdido Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto South Norman C. Francis Parkway.",
+          "cue": "Turn right onto South Norman C. Francis Parkway.",
           "miles": 0.05,
           "road": "South Norman C. Francis Parkway",
           "speed_mph": 25.0
@@ -51127,43 +51127,43 @@
           "speed_mph": 15.0
         },
         {
-          "cue": "Turn onto Halleck Street.",
+          "cue": "Turn right onto Halleck Street.",
           "miles": 0.18,
           "road": "Halleck Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Oak Point Avenue.",
+          "cue": "Turn left onto Oak Point Avenue.",
           "miles": 0.07,
           "road": "Oak Point Avenue",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Hunts Point Avenue.",
+          "cue": "Turn right onto Hunts Point Avenue.",
           "miles": 0.15,
           "road": "Hunts Point Avenue",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Randall Avenue.",
+          "cue": "Turn left onto Randall Avenue.",
           "miles": 0.51,
           "road": "Randall Avenue",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Leggett Avenue.",
+          "cue": "Turn right onto Leggett Avenue.",
           "miles": 0.28,
           "road": "Leggett Avenue",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Bruckner Boulevard.",
+          "cue": "Turn left onto Bruckner Boulevard.",
           "miles": 0.94,
           "road": "Bruckner Boulevard",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto East 138th Street.",
+          "cue": "Turn left onto East 138th Street.",
           "miles": 0.05,
           "road": "East 138th Street",
           "speed_mph": 25.0
@@ -51202,43 +51202,43 @@
           "speed_mph": 15.0
         },
         {
-          "cue": "Turn onto Halleck Street.",
+          "cue": "Turn right onto Halleck Street.",
           "miles": 0.55,
           "road": "Halleck Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Edgewater Road.",
+          "cue": "Turn left onto Edgewater Road.",
           "miles": 0.46,
           "road": "Edgewater Road",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Bruckner Boulevard.",
+          "cue": "Turn right onto Bruckner Boulevard.",
           "miles": 0.13,
           "road": "Bruckner Boulevard",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Bronx River Avenue.",
+          "cue": "Turn left onto Bronx River Avenue.",
           "miles": 1.17,
           "road": "Bronx River Avenue",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Cross Bronx Expressway Service Road.",
+          "cue": "Continue onto Cross Bronx Expressway Service Road.",
           "miles": 0.16,
           "road": "Cross Bronx Expressway Service Road",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Noble Avenue.",
+          "cue": "Turn left onto Noble Avenue.",
           "miles": 0.11,
           "road": "Noble Avenue",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Bronx River Avenue.",
+          "cue": "Turn right onto Bronx River Avenue.",
           "miles": 0.17,
           "road": "Bronx River Avenue",
           "speed_mph": 25.0
@@ -51673,31 +51673,31 @@
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Broad Street.",
+          "cue": "Turn right onto Broad Street.",
           "miles": 0.61,
           "road": "Broad Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Lincoln Park.",
+          "cue": "Turn right onto Lincoln Park.",
           "miles": 0.23,
           "road": "Lincoln Park",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Clinton Avenue.",
+          "cue": "Continue onto Clinton Avenue.",
           "miles": 0.38,
           "road": "Clinton Avenue",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Elizabeth Avenue.",
+          "cue": "Continue onto Elizabeth Avenue.",
           "miles": 0.88,
           "road": "Elizabeth Avenue",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto unnamed public road.",
+          "cue": "Turn left onto unnamed public road.",
           "miles": 0.13,
           "road": "unnamed public road",
           "speed_mph": 15.0
@@ -53518,43 +53518,43 @@
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Capitol Way Southeast.",
+          "cue": "Continue onto Capitol Way Southeast.",
           "miles": 0.05,
           "road": "Capitol Way Southeast",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Capitol Boulevard South East.",
+          "cue": "Turn left onto Capitol Boulevard South East.",
           "miles": 0.66,
           "road": "Capitol Boulevard South East",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Capitol Boulevard South.",
+          "cue": "Continue onto Capitol Boulevard South.",
           "miles": 0.05,
           "road": "Capitol Boulevard South",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Capitol Boulevard South East.",
+          "cue": "Continue onto Capitol Boulevard South East.",
           "miles": 0.18,
           "road": "Capitol Boulevard South East",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Custer Way Southwest.",
+          "cue": "Turn right onto Custer Way Southwest.",
           "miles": 0.26,
           "road": "Custer Way Southwest",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto North 2nd Avenue Southwest.",
+          "cue": "Turn right onto North 2nd Avenue Southwest.",
           "miles": 0.09,
           "road": "North 2nd Avenue Southwest",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Desoto Street.",
+          "cue": "Turn left onto Desoto Street.",
           "miles": 0.06,
           "road": "Desoto Street",
           "speed_mph": 25.0
@@ -55606,19 +55606,19 @@
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Northeast Jefferson Avenue (IL 29).",
+          "cue": "Continue onto Northeast Jefferson Avenue (IL 29).",
           "miles": 1.66,
           "road": "Northeast Jefferson Avenue (IL 29)",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Northeast Adams Street (IL 29).",
+          "cue": "Continue onto Northeast Adams Street (IL 29).",
           "miles": 0.58,
           "road": "Northeast Adams Street (IL 29)",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Sloan Street.",
+          "cue": "Turn right onto Sloan Street.",
           "miles": 0.05,
           "road": "Sloan Street",
           "speed_mph": 25.0
@@ -56086,43 +56086,43 @@
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto unnamed public road.",
+          "cue": "Turn left onto unnamed public road.",
           "miles": 0.07,
           "road": "unnamed public road",
           "speed_mph": 15.0
         },
         {
-          "cue": "Turn onto West Monroe Street.",
+          "cue": "Turn left onto West Monroe Street.",
           "miles": 0.05,
           "road": "West Monroe Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto North 1st Avenue.",
+          "cue": "Turn right onto North 1st Avenue.",
           "miles": 0.07,
           "road": "North 1st Avenue",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto West Van Buren Street (US 80 Hist).",
+          "cue": "Turn left onto West Van Buren Street (US 80 Hist).",
           "miles": 0.43,
           "road": "West Van Buren Street (US 80 Hist)",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Grand Avenue.",
+          "cue": "Turn right onto Grand Avenue.",
           "miles": 1.42,
           "road": "Grand Avenue",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto West McDowell Road.",
+          "cue": "Turn left onto West McDowell Road.",
           "miles": 0.79,
           "road": "West McDowell Road",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto North 25th Drive.",
+          "cue": "Turn left onto North 25th Drive.",
           "miles": 0.05,
           "road": "North 25th Drive",
           "speed_mph": 25.0
@@ -56557,25 +56557,25 @@
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Liberty Avenue.",
+          "cue": "Continue onto Liberty Avenue.",
           "miles": 0.05,
           "road": "Liberty Avenue",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto 11th Street (Purple Belt).",
+          "cue": "Turn left onto 11th Street (Purple Belt).",
           "miles": 0.11,
           "road": "11th Street (Purple Belt)",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Smallman Street.",
+          "cue": "Turn right onto Smallman Street.",
           "miles": 1.92,
           "road": "Smallman Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto 35th Street.",
+          "cue": "Turn left onto 35th Street.",
           "miles": 0.22,
           "road": "35th Street",
           "speed_mph": 25.0
@@ -58759,37 +58759,37 @@
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Dorrance Street.",
+          "cue": "Turn right onto Dorrance Street.",
           "miles": 0.29,
           "road": "Dorrance Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Dyer Street.",
+          "cue": "Turn right onto Dyer Street.",
           "miles": 0.13,
           "road": "Dyer Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Eddy Street.",
+          "cue": "Continue onto Eddy Street.",
           "miles": 0.19,
           "road": "Eddy Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Eddy Street (US 1A).",
+          "cue": "Turn right onto Eddy Street (US 1A).",
           "miles": 0.12,
           "road": "Eddy Street (US 1A)",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Eddy Street.",
+          "cue": "Continue onto Eddy Street.",
           "miles": 1.4,
           "road": "Eddy Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Ernest Street.",
+          "cue": "Turn left onto Ernest Street.",
           "miles": 0.15,
           "road": "Ernest Street",
           "speed_mph": 25.0
@@ -58828,37 +58828,37 @@
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Dorrance Street.",
+          "cue": "Turn right onto Dorrance Street.",
           "miles": 0.29,
           "road": "Dorrance Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Dyer Street.",
+          "cue": "Turn right onto Dyer Street.",
           "miles": 0.13,
           "road": "Dyer Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Eddy Street.",
+          "cue": "Continue onto Eddy Street.",
           "miles": 0.19,
           "road": "Eddy Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Eddy Street (US 1A).",
+          "cue": "Turn right onto Eddy Street (US 1A).",
           "miles": 0.15,
           "road": "Eddy Street (US 1A)",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Allens Avenue (US 1A).",
+          "cue": "Continue onto Allens Avenue (US 1A).",
           "miles": 1.39,
           "road": "Allens Avenue (US 1A)",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Terminal Road.",
+          "cue": "Turn left onto Terminal Road.",
           "miles": 0.27,
           "road": "Terminal Road",
           "speed_mph": 25.0
@@ -59656,43 +59656,43 @@
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto North Person Street.",
+          "cue": "Turn left onto North Person Street.",
           "miles": 0.71,
           "road": "North Person Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Wake Forest Road.",
+          "cue": "Continue onto Wake Forest Road.",
           "miles": 1.02,
           "road": "Wake Forest Road",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Atlantic Avenue.",
+          "cue": "Continue onto Atlantic Avenue.",
           "miles": 0.34,
           "road": "Atlantic Avenue",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto unnamed public road.",
+          "cue": "Turn left onto unnamed public road.",
           "miles": 0.08,
           "road": "unnamed public road",
           "speed_mph": 15.0
         },
         {
-          "cue": "Turn onto East Whitaker Mill Road.",
+          "cue": "Turn left onto East Whitaker Mill Road.",
           "miles": 0.14,
           "road": "East Whitaker Mill Road",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto unnamed public road.",
+          "cue": "Turn right onto unnamed public road.",
           "miles": 0.05,
           "road": "unnamed public road",
           "speed_mph": 15.0
         },
         {
-          "cue": "Turn onto Wake Forest Road.",
+          "cue": "Turn right onto Wake Forest Road.",
           "miles": 0.6,
           "road": "Wake Forest Road",
           "speed_mph": 25.0
@@ -60160,43 +60160,43 @@
           "speed_mph": 15.0
         },
         {
-          "cue": "Turn onto Plaza Street.",
+          "cue": "Turn right onto Plaza Street.",
           "miles": 0.05,
           "road": "Plaza Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto North Virginia Street (US 395 BUS).",
+          "cue": "Turn left onto North Virginia Street (US 395 BUS).",
           "miles": 0.27,
           "road": "North Virginia Street (US 395 BUS)",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto South Virginia Street (US 395 BUS).",
+          "cue": "Continue onto South Virginia Street (US 395 BUS).",
           "miles": 0.75,
           "road": "South Virginia Street (US 395 BUS)",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto US 395 BUS.",
+          "cue": "Continue onto US 395 BUS.",
           "miles": 0.05,
           "road": "US 395 BUS",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto South Virginia Street (US 395 BUS).",
+          "cue": "Continue onto South Virginia Street (US 395 BUS).",
           "miles": 0.67,
           "road": "South Virginia Street (US 395 BUS)",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto East Plumb Lane.",
+          "cue": "Turn left onto East Plumb Lane.",
           "miles": 0.37,
           "road": "East Plumb Lane",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Wrondel Way.",
+          "cue": "Turn right onto Wrondel Way.",
           "miles": 0.05,
           "road": "Wrondel Way",
           "speed_mph": 25.0
@@ -60235,43 +60235,43 @@
           "speed_mph": 15.0
         },
         {
-          "cue": "Turn onto Plaza Street.",
+          "cue": "Turn right onto Plaza Street.",
           "miles": 0.05,
           "road": "Plaza Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto North Virginia Street (US 395 BUS).",
+          "cue": "Turn left onto North Virginia Street (US 395 BUS).",
           "miles": 0.27,
           "road": "North Virginia Street (US 395 BUS)",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto South Virginia Street (US 395 BUS).",
+          "cue": "Continue onto South Virginia Street (US 395 BUS).",
           "miles": 0.75,
           "road": "South Virginia Street (US 395 BUS)",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto US 395 BUS.",
+          "cue": "Continue onto US 395 BUS.",
           "miles": 0.05,
           "road": "US 395 BUS",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto South Virginia Street (US 395 BUS).",
+          "cue": "Continue onto South Virginia Street (US 395 BUS).",
           "miles": 0.67,
           "road": "South Virginia Street (US 395 BUS)",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto East Plumb Lane.",
+          "cue": "Turn left onto East Plumb Lane.",
           "miles": 0.37,
           "road": "East Plumb Lane",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Wrondel Way.",
+          "cue": "Turn right onto Wrondel Way.",
           "miles": 0.05,
           "road": "Wrondel Way",
           "speed_mph": 25.0
@@ -60310,43 +60310,43 @@
           "speed_mph": 15.0
         },
         {
-          "cue": "Turn onto Plaza Street.",
+          "cue": "Turn right onto Plaza Street.",
           "miles": 0.05,
           "road": "Plaza Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto North Virginia Street (US 395 BUS).",
+          "cue": "Turn left onto North Virginia Street (US 395 BUS).",
           "miles": 0.27,
           "road": "North Virginia Street (US 395 BUS)",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto South Virginia Street (US 395 BUS).",
+          "cue": "Continue onto South Virginia Street (US 395 BUS).",
           "miles": 0.75,
           "road": "South Virginia Street (US 395 BUS)",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto US 395 BUS.",
+          "cue": "Continue onto US 395 BUS.",
           "miles": 0.05,
           "road": "US 395 BUS",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto South Virginia Street (US 395 BUS).",
+          "cue": "Continue onto South Virginia Street (US 395 BUS).",
           "miles": 0.67,
           "road": "South Virginia Street (US 395 BUS)",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto East Plumb Lane.",
+          "cue": "Turn left onto East Plumb Lane.",
           "miles": 0.37,
           "road": "East Plumb Lane",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Wrondel Way.",
+          "cue": "Turn right onto Wrondel Way.",
           "miles": 0.05,
           "road": "Wrondel Way",
           "speed_mph": 25.0
@@ -60484,43 +60484,43 @@
           "speed_mph": 15.0
         },
         {
-          "cue": "Turn onto Plaza Street.",
+          "cue": "Turn right onto Plaza Street.",
           "miles": 0.05,
           "road": "Plaza Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto North Virginia Street (US 395 BUS).",
+          "cue": "Turn left onto North Virginia Street (US 395 BUS).",
           "miles": 0.27,
           "road": "North Virginia Street (US 395 BUS)",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto South Virginia Street (US 395 BUS).",
+          "cue": "Continue onto South Virginia Street (US 395 BUS).",
           "miles": 0.75,
           "road": "South Virginia Street (US 395 BUS)",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto US 395 BUS.",
+          "cue": "Continue onto US 395 BUS.",
           "miles": 0.05,
           "road": "US 395 BUS",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto South Virginia Street (US 395 BUS).",
+          "cue": "Continue onto South Virginia Street (US 395 BUS).",
           "miles": 1.45,
           "road": "South Virginia Street (US 395 BUS)",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto unnamed public road.",
+          "cue": "Turn left onto unnamed public road.",
           "miles": 0.06,
           "road": "unnamed public road",
           "speed_mph": 15.0
         },
         {
-          "cue": "Turn onto East Gentry Way.",
+          "cue": "Turn left onto East Gentry Way.",
           "miles": 0.45,
           "road": "East Gentry Way",
           "speed_mph": 25.0
@@ -63067,37 +63067,37 @@
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Northeast Stephens Street (OR 99).",
+          "cue": "Continue onto Northeast Stephens Street (OR 99).",
           "miles": 0.46,
           "road": "Northeast Stephens Street (OR 99)",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Northeast Garden Valley Boulevard.",
+          "cue": "Turn left onto Northeast Garden Valley Boulevard.",
           "miles": 0.27,
           "road": "Northeast Garden Valley Boulevard",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Northwest Garden Valley Boulevard.",
+          "cue": "Continue onto Northwest Garden Valley Boulevard.",
           "miles": 0.94,
           "road": "Northwest Garden Valley Boulevard",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto unnamed public road.",
+          "cue": "Turn right onto unnamed public road.",
           "miles": 0.16,
           "road": "unnamed public road",
           "speed_mph": 15.0
         },
         {
-          "cue": "Turn onto Northwest Stewart Parkway.",
+          "cue": "Turn right onto Northwest Stewart Parkway.",
           "miles": 0.15,
           "road": "Northwest Stewart Parkway",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto unnamed public road.",
+          "cue": "Turn left onto unnamed public road.",
           "miles": 0.14,
           "road": "unnamed public road",
           "speed_mph": 15.0
@@ -63829,43 +63829,43 @@
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Holland Avenue.",
+          "cue": "Continue onto Holland Avenue.",
           "miles": 0.14,
           "road": "Holland Avenue",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto West Remington Street.",
+          "cue": "Continue onto West Remington Street.",
           "miles": 0.17,
           "road": "West Remington Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto North Michigan Avenue.",
+          "cue": "Turn right onto North Michigan Avenue.",
           "miles": 1.31,
           "road": "North Michigan Avenue",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Oak Street.",
+          "cue": "Turn right onto Oak Street.",
           "miles": 0.14,
           "road": "Oak Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Pine Street.",
+          "cue": "Turn left onto Pine Street.",
           "miles": 0.14,
           "road": "Pine Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Weiss Street.",
+          "cue": "Turn right onto Weiss Street.",
           "miles": 0.06,
           "road": "Weiss Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Carrollton Road.",
+          "cue": "Turn left onto Carrollton Road.",
           "miles": 0.06,
           "road": "Carrollton Road",
           "speed_mph": 25.0
@@ -63937,43 +63937,43 @@
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Holland Avenue.",
+          "cue": "Continue onto Holland Avenue.",
           "miles": 0.14,
           "road": "Holland Avenue",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto West Remington Street.",
+          "cue": "Continue onto West Remington Street.",
           "miles": 0.17,
           "road": "West Remington Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto North Michigan Avenue.",
+          "cue": "Turn right onto North Michigan Avenue.",
           "miles": 1.31,
           "road": "North Michigan Avenue",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Oak Street.",
+          "cue": "Turn right onto Oak Street.",
           "miles": 0.14,
           "road": "Oak Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Pine Street.",
+          "cue": "Turn left onto Pine Street.",
           "miles": 0.08,
           "road": "Pine Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Ellsworth Street.",
+          "cue": "Turn right onto Ellsworth Street.",
           "miles": 0.06,
           "road": "Ellsworth Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto unnamed public road.",
+          "cue": "Turn left onto unnamed public road.",
           "miles": 0.17,
           "road": "unnamed public road",
           "speed_mph": 15.0
@@ -64111,43 +64111,43 @@
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Holland Avenue.",
+          "cue": "Continue onto Holland Avenue.",
           "miles": 0.14,
           "road": "Holland Avenue",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto West Remington Street.",
+          "cue": "Continue onto West Remington Street.",
           "miles": 0.17,
           "road": "West Remington Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto North Michigan Avenue.",
+          "cue": "Turn right onto North Michigan Avenue.",
           "miles": 1.31,
           "road": "North Michigan Avenue",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Oak Street.",
+          "cue": "Turn right onto Oak Street.",
           "miles": 0.14,
           "road": "Oak Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Pine Street.",
+          "cue": "Turn left onto Pine Street.",
           "miles": 0.08,
           "road": "Pine Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Ellsworth Street.",
+          "cue": "Turn right onto Ellsworth Street.",
           "miles": 0.06,
           "road": "Ellsworth Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto unnamed public road.",
+          "cue": "Turn left onto unnamed public road.",
           "miles": 0.17,
           "road": "unnamed public road",
           "speed_mph": 15.0
@@ -65143,43 +65143,43 @@
           "speed_mph": 15.0
         },
         {
-          "cue": "Turn onto West Vine Street.",
+          "cue": "Turn left onto West Vine Street.",
           "miles": 0.14,
           "road": "West Vine Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto South Salisbury Boulevard (US 13 BUS).",
+          "cue": "Turn left onto South Salisbury Boulevard (US 13 BUS).",
           "miles": 0.37,
           "road": "South Salisbury Boulevard (US 13 BUS)",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto North Salisbury Boulevard (US 13 BUS).",
+          "cue": "Continue onto North Salisbury Boulevard (US 13 BUS).",
           "miles": 1.23,
           "road": "North Salisbury Boulevard (US 13 BUS)",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Edgemore Avenue.",
+          "cue": "Turn left onto Edgemore Avenue.",
           "miles": 0.19,
           "road": "Edgemore Avenue",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Northwood Drive.",
+          "cue": "Turn left onto Northwood Drive.",
           "miles": 0.57,
           "road": "Northwood Drive",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Winfield Avenue.",
+          "cue": "Turn left onto Winfield Avenue.",
           "miles": 0.08,
           "road": "Winfield Avenue",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Windsor Drive.",
+          "cue": "Turn right onto Windsor Drive.",
           "miles": 0.13,
           "road": "Windsor Drive",
           "speed_mph": 25.0
@@ -65581,31 +65581,31 @@
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto 400 South (US 89).",
+          "cue": "Turn right onto 400 South (US 89).",
           "miles": 0.46,
           "road": "400 South (US 89)",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto 400 South.",
+          "cue": "Continue onto 400 South.",
           "miles": 2.05,
           "road": "400 South",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Redwood Road (SR 68).",
+          "cue": "Turn right onto Redwood Road (SR 68).",
           "miles": 0.61,
           "road": "Redwood Road (SR 68)",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto South Temple.",
+          "cue": "Turn right onto South Temple.",
           "miles": 0.05,
           "road": "South Temple",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto unnamed public road.",
+          "cue": "Turn right onto unnamed public road.",
           "miles": 0.05,
           "road": "unnamed public road",
           "speed_mph": 15.0
@@ -66436,43 +66436,43 @@
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Main Plaza.",
+          "cue": "Turn right onto Main Plaza.",
           "miles": 0.05,
           "road": "Main Plaza",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto unnamed public road.",
+          "cue": "Turn left onto unnamed public road.",
           "miles": 0.05,
           "road": "unnamed public road",
           "speed_mph": 15.0
         },
         {
-          "cue": "Turn onto Villita Street.",
+          "cue": "Turn left onto Villita Street.",
           "miles": 0.09,
           "road": "Villita Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto South Saint Mary's Street.",
+          "cue": "Turn right onto South Saint Mary's Street.",
           "miles": 1.51,
           "road": "South Saint Mary's Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Mission Road.",
+          "cue": "Turn right onto Mission Road.",
           "miles": 0.08,
           "road": "Mission Road",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Lone Star Boulevard.",
+          "cue": "Turn right onto Lone Star Boulevard.",
           "miles": 0.08,
           "road": "Lone Star Boulevard",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto unnamed public road.",
+          "cue": "Turn right onto unnamed public road.",
           "miles": 0.1,
           "road": "unnamed public road",
           "speed_mph": 15.0
@@ -66940,19 +66940,19 @@
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Mason Street.",
+          "cue": "Turn left onto Mason Street.",
           "miles": 1.24,
           "road": "Mason Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Filbert Street.",
+          "cue": "Turn right onto Filbert Street.",
           "miles": 0.09,
           "road": "Filbert Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Powell Street.",
+          "cue": "Turn left onto Powell Street.",
           "miles": 0.44,
           "road": "Powell Street",
           "speed_mph": 25.0
@@ -67288,19 +67288,19 @@
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto South 24th Street.",
+          "cue": "Turn right onto South 24th Street.",
           "miles": 0.49,
           "road": "South 24th Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto McLaughlin Avenue.",
+          "cue": "Continue onto McLaughlin Avenue.",
           "miles": 0.54,
           "road": "McLaughlin Avenue",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto unnamed public road.",
+          "cue": "Turn right onto unnamed public road.",
           "miles": 0.21,
           "road": "unnamed public road",
           "speed_mph": 15.0
@@ -67834,43 +67834,43 @@
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto South Broadway (CA 135).",
+          "cue": "Turn left onto South Broadway (CA 135).",
           "miles": 0.69,
           "road": "South Broadway (CA 135)",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto West Morrison Avenue.",
+          "cue": "Turn right onto West Morrison Avenue.",
           "miles": 0.05,
           "road": "West Morrison Avenue",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto South Broadway (CA 135).",
+          "cue": "Turn left onto South Broadway (CA 135).",
           "miles": 1.38,
           "road": "South Broadway (CA 135)",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Western Village Drive.",
+          "cue": "Turn right onto Western Village Drive.",
           "miles": 0.05,
           "road": "Western Village Drive",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto unnamed public road.",
+          "cue": "Turn left onto unnamed public road.",
           "miles": 0.17,
           "road": "unnamed public road",
           "speed_mph": 15.0
         },
         {
-          "cue": "Turn onto West Betteravia Road.",
+          "cue": "Turn right onto West Betteravia Road.",
           "miles": 0.6,
           "road": "West Betteravia Road",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto South Oakley Avenue.",
+          "cue": "Turn left onto South Oakley Avenue.",
           "miles": 0.14,
           "road": "South Oakley Avenue",
           "speed_mph": 25.0
@@ -68140,43 +68140,43 @@
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Mendocino Avenue.",
+          "cue": "Turn left onto Mendocino Avenue.",
           "miles": 0.41,
           "road": "Mendocino Avenue",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto College Avenue.",
+          "cue": "Turn left onto College Avenue.",
           "miles": 0.58,
           "road": "College Avenue",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto West College Avenue.",
+          "cue": "Continue onto West College Avenue.",
           "miles": 0.08,
           "road": "West College Avenue",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto unnamed public road.",
+          "cue": "Turn right onto unnamed public road.",
           "miles": 0.05,
           "road": "unnamed public road",
           "speed_mph": 15.0
         },
         {
-          "cue": "Turn onto North Dutton Avenue.",
+          "cue": "Turn right onto North Dutton Avenue.",
           "miles": 0.77,
           "road": "North Dutton Avenue",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Westberry Drive.",
+          "cue": "Continue onto Westberry Drive.",
           "miles": 0.05,
           "road": "Westberry Drive",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Guerneville Road.",
+          "cue": "Turn right onto Guerneville Road.",
           "miles": 0.11,
           "road": "Guerneville Road",
           "speed_mph": 25.0
@@ -68875,31 +68875,31 @@
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto West Bay Street (GA 25 Connector).",
+          "cue": "Continue onto West Bay Street (GA 25 Connector).",
           "miles": 0.93,
           "road": "West Bay Street (GA 25 Connector)",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Southeast Lathrop Avenue.",
+          "cue": "Turn right onto Southeast Lathrop Avenue.",
           "miles": 0.05,
           "road": "Southeast Lathrop Avenue",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto East Lathrop Avenue.",
+          "cue": "Continue onto East Lathrop Avenue.",
           "miles": 0.46,
           "road": "East Lathrop Avenue",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto West River Street.",
+          "cue": "Turn right onto West River Street.",
           "miles": 0.14,
           "road": "West River Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto unnamed public road.",
+          "cue": "Turn left onto unnamed public road.",
           "miles": 0.18,
           "road": "unnamed public road",
           "speed_mph": 15.0
@@ -69037,31 +69037,31 @@
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto West Bay Street (GA 25 Connector).",
+          "cue": "Continue onto West Bay Street (GA 25 Connector).",
           "miles": 0.93,
           "road": "West Bay Street (GA 25 Connector)",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Southeast Lathrop Avenue.",
+          "cue": "Turn right onto Southeast Lathrop Avenue.",
           "miles": 0.05,
           "road": "Southeast Lathrop Avenue",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto East Lathrop Avenue.",
+          "cue": "Continue onto East Lathrop Avenue.",
           "miles": 0.46,
           "road": "East Lathrop Avenue",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto West River Street.",
+          "cue": "Turn right onto West River Street.",
           "miles": 0.14,
           "road": "West River Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto unnamed public road.",
+          "cue": "Turn left onto unnamed public road.",
           "miles": 0.12,
           "road": "unnamed public road",
           "speed_mph": 15.0
@@ -69133,43 +69133,43 @@
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto General McIntosh Boulevard.",
+          "cue": "Continue onto General McIntosh Boulevard.",
           "miles": 0.07,
           "road": "General McIntosh Boulevard",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto East Bay Street.",
+          "cue": "Continue onto East Bay Street.",
           "miles": 0.05,
           "road": "East Bay Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto General McIntosh Boulevard.",
+          "cue": "Continue onto General McIntosh Boulevard.",
           "miles": 0.22,
           "road": "General McIntosh Boulevard",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto East President Street.",
+          "cue": "Turn left onto East President Street.",
           "miles": 1.47,
           "road": "East President Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Pennsylvania Avenue.",
+          "cue": "Turn right onto Pennsylvania Avenue.",
           "miles": 0.11,
           "road": "Pennsylvania Avenue",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Hawthorne Street.",
+          "cue": "Turn left onto Hawthorne Street.",
           "miles": 0.14,
           "road": "Hawthorne Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Nevada Street.",
+          "cue": "Turn right onto Nevada Street.",
           "miles": 0.05,
           "road": "Nevada Street",
           "speed_mph": 25.0
@@ -70660,25 +70660,25 @@
           "speed_mph": 15.0
         },
         {
-          "cue": "Turn onto South Minnesota Avenue (I 229 Business;SD 115).",
+          "cue": "Continue onto South Minnesota Avenue (I 229 Business;SD 115).",
           "miles": 2.41,
           "road": "South Minnesota Avenue (I 229 Business;SD 115)",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto South Minnesota Avenue (SD 115).",
+          "cue": "Continue onto South Minnesota Avenue (SD 115).",
           "miles": 0.21,
           "road": "South Minnesota Avenue (SD 115)",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto West Lotta Street.",
+          "cue": "Turn left onto West Lotta Street.",
           "miles": 0.24,
           "road": "West Lotta Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto East Lotta Street.",
+          "cue": "Continue onto East Lotta Street.",
           "miles": 0.27,
           "road": "East Lotta Street",
           "speed_mph": 25.0
@@ -72169,43 +72169,43 @@
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Pynchon Street.",
+          "cue": "Turn left onto Pynchon Street.",
           "miles": 0.05,
           "road": "Pynchon Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto unnamed public road.",
+          "cue": "Turn right onto unnamed public road.",
           "miles": 0.05,
           "road": "unnamed public road",
           "speed_mph": 15.0
         },
         {
-          "cue": "Turn onto Boland Way.",
+          "cue": "Turn right onto Boland Way.",
           "miles": 0.06,
           "road": "Boland Way",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Main Street.",
+          "cue": "Turn left onto Main Street.",
           "miles": 0.77,
           "road": "Main Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Main Street (MA 116).",
+          "cue": "Continue onto Main Street (MA 116).",
           "miles": 1.35,
           "road": "Main Street (MA 116)",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Center Street (MA 116).",
+          "cue": "Continue onto Center Street (MA 116).",
           "miles": 1.02,
           "road": "Center Street (MA 116)",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto unnamed public road.",
+          "cue": "Turn right onto unnamed public road.",
           "miles": 0.05,
           "road": "unnamed public road",
           "speed_mph": 15.0
@@ -72376,31 +72376,31 @@
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Park Central East.",
+          "cue": "Turn left onto Park Central East.",
           "miles": 0.11,
           "road": "Park Central East",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto East Saint Louis Street.",
+          "cue": "Continue onto East Saint Louis Street.",
           "miles": 1.69,
           "road": "East Saint Louis Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto South Dysart Avenue.",
+          "cue": "Turn right onto South Dysart Avenue.",
           "miles": 0.08,
           "road": "South Dysart Avenue",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto East Mc Daniel Street.",
+          "cue": "Turn left onto East Mc Daniel Street.",
           "miles": 0.33,
           "road": "East Mc Daniel Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto unnamed public road.",
+          "cue": "Turn right onto unnamed public road.",
           "miles": 0.05,
           "road": "unnamed public road",
           "speed_mph": 15.0
@@ -72439,37 +72439,37 @@
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Park Central East.",
+          "cue": "Turn left onto Park Central East.",
           "miles": 0.11,
           "road": "Park Central East",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto East Saint Louis Street.",
+          "cue": "Continue onto East Saint Louis Street.",
           "miles": 1.69,
           "road": "East Saint Louis Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto South Dysart Avenue.",
+          "cue": "Turn right onto South Dysart Avenue.",
           "miles": 0.08,
           "road": "South Dysart Avenue",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto East Mc Daniel Street.",
+          "cue": "Turn left onto East Mc Daniel Street.",
           "miles": 0.36,
           "road": "East Mc Daniel Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto South Barnes Avenue.",
+          "cue": "Turn left onto South Barnes Avenue.",
           "miles": 0.06,
           "road": "South Barnes Avenue",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto unnamed public road.",
+          "cue": "Turn right onto unnamed public road.",
           "miles": 0.15,
           "road": "unnamed public road",
           "speed_mph": 15.0
@@ -74059,43 +74059,43 @@
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto South 11th Street.",
+          "cue": "Turn left onto South 11th Street.",
           "miles": 0.35,
           "road": "South 11th Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto East 11th Street.",
+          "cue": "Continue onto East 11th Street.",
           "miles": 0.46,
           "road": "East 11th Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Saint Paul Avenue.",
+          "cue": "Turn right onto Saint Paul Avenue.",
           "miles": 0.61,
           "road": "Saint Paul Avenue",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto East Portland Avenue.",
+          "cue": "Turn right onto East Portland Avenue.",
           "miles": 0.13,
           "road": "East Portland Avenue",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Lincoln Avenue.",
+          "cue": "Turn left onto Lincoln Avenue.",
           "miles": 0.46,
           "road": "Lincoln Avenue",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Lincoln Avenue Loop.",
+          "cue": "Turn right onto Lincoln Avenue Loop.",
           "miles": 0.28,
           "road": "Lincoln Avenue Loop",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto unnamed public road.",
+          "cue": "Turn right onto unnamed public road.",
           "miles": 0.09,
           "road": "unnamed public road",
           "speed_mph": 15.0
@@ -74959,43 +74959,43 @@
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Jackson Street.",
+          "cue": "Turn right onto Jackson Street.",
           "miles": 0.26,
           "road": "Jackson Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto North Summit Street (SR 65).",
+          "cue": "Turn left onto North Summit Street (SR 65).",
           "miles": 0.13,
           "road": "North Summit Street (SR 65)",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Cherry Street.",
+          "cue": "Turn right onto Cherry Street.",
           "miles": 0.09,
           "road": "Cherry Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Main Street.",
+          "cue": "Continue onto Main Street.",
           "miles": 1.16,
           "road": "Main Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Nevada Street.",
+          "cue": "Turn left onto Nevada Street.",
           "miles": 0.05,
           "road": "Nevada Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Berry Street.",
+          "cue": "Turn right onto Berry Street.",
           "miles": 0.17,
           "road": "Berry Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Leonard Street.",
+          "cue": "Turn left onto Leonard Street.",
           "miles": 0.05,
           "road": "Leonard Street",
           "speed_mph": 25.0
@@ -76024,43 +76024,43 @@
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto East State Street (CR 635).",
+          "cue": "Turn right onto East State Street (CR 635).",
           "miles": 0.48,
           "road": "East State Street (CR 635)",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto North Olden Avenue (CR 622).",
+          "cue": "Turn left onto North Olden Avenue (CR 622).",
           "miles": 0.33,
           "road": "North Olden Avenue (CR 622)",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Lawrence Street.",
+          "cue": "Turn right onto Lawrence Street.",
           "miles": 0.18,
           "road": "Lawrence Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto North Clinton Avenue.",
+          "cue": "Turn right onto North Clinton Avenue.",
           "miles": 0.13,
           "road": "North Clinton Avenue",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Nottingham Way.",
+          "cue": "Continue onto Nottingham Way.",
           "miles": 0.08,
           "road": "Nottingham Way",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Nottingham Way (CR 614).",
+          "cue": "Continue onto Nottingham Way (CR 614).",
           "miles": 0.05,
           "road": "Nottingham Way (CR 614)",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto unnamed public road.",
+          "cue": "Turn left onto unnamed public road.",
           "miles": 0.43,
           "road": "unnamed public road",
           "speed_mph": 15.0
@@ -77485,43 +77485,43 @@
           "speed_mph": 15.0
         },
         {
-          "cue": "Turn onto University Boulevard.",
+          "cue": "Turn left onto University Boulevard.",
           "miles": 0.05,
           "road": "University Boulevard",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Greensboro Avenue.",
+          "cue": "Turn right onto Greensboro Avenue.",
           "miles": 0.72,
           "road": "Greensboro Avenue",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Greensboro Avenue (AL 215).",
+          "cue": "Continue onto Greensboro Avenue (AL 215).",
           "miles": 0.64,
           "road": "Greensboro Avenue (AL 215)",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Southside Drive.",
+          "cue": "Turn right onto Southside Drive.",
           "miles": 0.33,
           "road": "Southside Drive",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto unnamed public road.",
+          "cue": "Turn left onto unnamed public road.",
           "miles": 0.08,
           "road": "unnamed public road",
           "speed_mph": 15.0
         },
         {
-          "cue": "Turn onto Southside Drive.",
+          "cue": "Turn left onto Southside Drive.",
           "miles": 0.33,
           "road": "Southside Drive",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto 31st Street.",
+          "cue": "Turn right onto 31st Street.",
           "miles": 0.15,
           "road": "31st Street",
           "speed_mph": 25.0
@@ -78550,43 +78550,43 @@
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto unnamed public road.",
+          "cue": "Turn right onto unnamed public road.",
           "miles": 0.05,
           "road": "unnamed public road",
           "speed_mph": 15.0
         },
         {
-          "cue": "Turn onto 10th Street.",
+          "cue": "Turn right onto 10th Street.",
           "miles": 0.06,
           "road": "10th Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto C Street.",
+          "cue": "Turn left onto C Street.",
           "miles": 0.1,
           "road": "C Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Kemper Campbell Ranch Road.",
+          "cue": "Continue onto Kemper Campbell Ranch Road.",
           "miles": 0.55,
           "road": "Kemper Campbell Ranch Road",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto unnamed public road.",
+          "cue": "Turn left onto unnamed public road.",
           "miles": 1.21,
           "road": "unnamed public road",
           "speed_mph": 15.0
         },
         {
-          "cue": "Turn onto Park Road.",
+          "cue": "Turn left onto Park Road.",
           "miles": 0.62,
           "road": "Park Road",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Yates Road.",
+          "cue": "Turn right onto Yates Road.",
           "miles": 0.23,
           "road": "Yates Road",
           "speed_mph": 25.0
@@ -79087,43 +79087,43 @@
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto South Court Street (CA 63).",
+          "cue": "Turn left onto South Court Street (CA 63).",
           "miles": 0.26,
           "road": "South Court Street (CA 63)",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto South Court Street.",
+          "cue": "Continue onto South Court Street.",
           "miles": 1.5,
           "road": "South Court Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto West Green Oaks Drive.",
+          "cue": "Turn right onto West Green Oaks Drive.",
           "miles": 0.29,
           "road": "West Green Oaks Drive",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto West Dorothea Avenue.",
+          "cue": "Turn right onto West Dorothea Avenue.",
           "miles": 0.08,
           "road": "West Dorothea Avenue",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto South West Street.",
+          "cue": "Turn left onto South West Street.",
           "miles": 0.27,
           "road": "South West Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto West Caldwell Avenue (CR J30).",
+          "cue": "Turn right onto West Caldwell Avenue (CR J30).",
           "miles": 0.17,
           "road": "West Caldwell Avenue (CR J30)",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto South Oak View Street.",
+          "cue": "Turn left onto South Oak View Street.",
           "miles": 0.26,
           "road": "South Oak View Street",
           "speed_mph": 25.0
@@ -79261,43 +79261,43 @@
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto South Church Street.",
+          "cue": "Turn right onto South Church Street.",
           "miles": 0.05,
           "road": "South Church Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto unnamed public road.",
+          "cue": "Turn left onto unnamed public road.",
           "miles": 0.12,
           "road": "unnamed public road",
           "speed_mph": 15.0
         },
         {
-          "cue": "Turn onto South Bridge Street.",
+          "cue": "Turn right onto South Bridge Street.",
           "miles": 0.66,
           "road": "South Bridge Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto East Tulare Avenue.",
+          "cue": "Turn left onto East Tulare Avenue.",
           "miles": 0.06,
           "road": "East Tulare Avenue",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto unnamed public road.",
+          "cue": "Turn right onto unnamed public road.",
           "miles": 0.05,
           "road": "unnamed public road",
           "speed_mph": 15.0
         },
         {
-          "cue": "Turn onto South Santa Fe Street.",
+          "cue": "Turn right onto South Santa Fe Street.",
           "miles": 0.84,
           "road": "South Santa Fe Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto East K Avenue.",
+          "cue": "Turn left onto East K Avenue.",
           "miles": 0.19,
           "road": "East K Avenue",
           "speed_mph": 25.0
@@ -80557,43 +80557,43 @@
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto North Scott Avenue (US 287 Bus).",
+          "cue": "Continue onto North Scott Avenue (US 287 Bus).",
           "miles": 0.23,
           "road": "North Scott Avenue (US 287 Bus)",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto unnamed public road.",
+          "cue": "Turn right onto unnamed public road.",
           "miles": 0.07,
           "road": "unnamed public road",
           "speed_mph": 15.0
         },
         {
-          "cue": "Turn onto Lincoln Street (FM 171).",
+          "cue": "Turn right onto Lincoln Street (FM 171).",
           "miles": 0.2,
           "road": "Lincoln Street (FM 171)",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Burkburnett Road.",
+          "cue": "Turn left onto Burkburnett Road.",
           "miles": 0.53,
           "road": "Burkburnett Road",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Burkburnett Road (TX 240).",
+          "cue": "Continue onto Burkburnett Road (TX 240).",
           "miles": 0.58,
           "road": "Burkburnett Road (TX 240)",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Pleasant View Drive.",
+          "cue": "Turn left onto Pleasant View Drive.",
           "miles": 0.26,
           "road": "Pleasant View Drive",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Old Burk Highway.",
+          "cue": "Turn right onto Old Burk Highway.",
           "miles": 0.24,
           "road": "Old Burk Highway",
           "speed_mph": 25.0
@@ -82315,25 +82315,25 @@
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto North Cameron Street (US 11).",
+          "cue": "Continue onto North Cameron Street (US 11).",
           "miles": 0.21,
           "road": "North Cameron Street (US 11)",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto North Loudoun Street (US 11).",
+          "cue": "Turn right onto North Loudoun Street (US 11).",
           "miles": 0.28,
           "road": "North Loudoun Street (US 11)",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Brooke Road (SR 1322).",
+          "cue": "Turn right onto Brooke Road (SR 1322).",
           "miles": 0.76,
           "road": "Brooke Road (SR 1322)",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Mercury Way.",
+          "cue": "Turn right onto Mercury Way.",
           "miles": 0.14,
           "road": "Mercury Way",
           "speed_mph": 25.0
@@ -82999,43 +82999,43 @@
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Grove Street.",
+          "cue": "Turn left onto Grove Street.",
           "miles": 0.15,
           "road": "Grove Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Concord Street.",
+          "cue": "Turn right onto Concord Street.",
           "miles": 0.05,
           "road": "Concord Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Prescott Street.",
+          "cue": "Turn left onto Prescott Street.",
           "miles": 0.65,
           "road": "Prescott Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto North Street.",
+          "cue": "Turn right onto North Street.",
           "miles": 0.05,
           "road": "North Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Byron Street.",
+          "cue": "Turn left onto Byron Street.",
           "miles": 0.31,
           "road": "Byron Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Millbrook Street.",
+          "cue": "Turn right onto Millbrook Street.",
           "miles": 0.06,
           "road": "Millbrook Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto unnamed public road.",
+          "cue": "Turn left onto unnamed public road.",
           "miles": 0.2,
           "road": "unnamed public road",
           "speed_mph": 15.0
@@ -83206,19 +83206,19 @@
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Webster Street.",
+          "cue": "Continue onto Webster Street.",
           "miles": 0.11,
           "road": "Webster Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Webster Street (MA 12).",
+          "cue": "Continue onto Webster Street (MA 12).",
           "miles": 0.12,
           "road": "Webster Street (MA 12)",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto unnamed public road.",
+          "cue": "Turn left onto unnamed public road.",
           "miles": 0.16,
           "road": "unnamed public road",
           "speed_mph": 15.0
@@ -83422,19 +83422,19 @@
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Old Town Road.",
+          "cue": "Turn right onto Old Town Road.",
           "miles": 0.2,
           "road": "Old Town Road",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto West Valley Mall Boulevard.",
+          "cue": "Turn left onto West Valley Mall Boulevard.",
           "miles": 0.05,
           "road": "West Valley Mall Boulevard",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Valley Industrial Park Lane.",
+          "cue": "Turn right onto Valley Industrial Park Lane.",
           "miles": 0.18,
           "road": "Valley Industrial Park Lane",
           "speed_mph": 25.0
@@ -83473,43 +83473,43 @@
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto East Yakima Avenue.",
+          "cue": "Turn left onto East Yakima Avenue.",
           "miles": 0.1,
           "road": "East Yakima Avenue",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto West Yakima Avenue.",
+          "cue": "Continue onto West Yakima Avenue.",
           "miles": 1.19,
           "road": "West Yakima Avenue",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto unnamed public road.",
+          "cue": "Turn left onto unnamed public road.",
           "miles": 0.09,
           "road": "unnamed public road",
           "speed_mph": 15.0
         },
         {
-          "cue": "Turn onto West Chestnut Avenue.",
+          "cue": "Turn right onto West Chestnut Avenue.",
           "miles": 0.23,
           "road": "West Chestnut Avenue",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Stanley Boulevard.",
+          "cue": "Turn left onto Stanley Boulevard.",
           "miles": 0.23,
           "road": "Stanley Boulevard",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto South 23rd Avenue.",
+          "cue": "Turn left onto South 23rd Avenue.",
           "miles": 0.09,
           "road": "South 23rd Avenue",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn onto Tieton Drive.",
+          "cue": "Turn right onto Tieton Drive.",
           "miles": 0.05,
           "road": "Tieton Drive",
           "speed_mph": 25.0

@@ -116,7 +116,13 @@ def test_local_geometry_trip_uses_local_turn_cues(world):
     assert cues
     assert cues[0].near_text.startswith("Start on ")
     assert not any("merge onto" in cue.near_text.lower() for cue in cues)
-    assert any("Turn onto" in cue.near_text for cue in cues[1:])
+    # Directional bake: every boundary cue is a turn with a side or an
+    # explicit continue, never the old directionless "Turn onto".
+    assert all(
+        cue.near_text.startswith(("Turn left onto", "Turn right onto", "Continue onto"))
+        for cue in cues[1:]
+    )
+    assert any(cue.near_text.startswith("Turn ") for cue in cues[1:])
 
 
 def test_build_tool_routes_tiny_osm_fixture(tmp_path):
@@ -164,7 +170,12 @@ def test_build_tool_routes_tiny_osm_fixture(tmp_path):
     routes = build_local_geometry.route_state_targets(osm, [target])
 
     assert target.target_id in routes
-    assert [segment["road"] for segment in routes[target.target_id].segments] == [
+    segments = routes[target.target_id].segments
+    assert [segment["road"] for segment in segments] == [
         "Terminal Drive",
         "Market Street",
     ]
+    # North up Terminal Drive, then east on Market Street: a right turn,
+    # read out of the geometry so the panned earcon direction is baked in.
+    assert segments[0]["cue"] == "Start on Terminal Drive."
+    assert segments[1]["cue"] == "Turn right onto Market Street."

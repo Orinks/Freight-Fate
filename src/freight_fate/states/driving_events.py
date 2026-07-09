@@ -112,7 +112,7 @@ class DrivingEventMixin:
             if critical:
                 self._pending_ambient_event = None
                 if sound is not None and kind != TripEventKind.ZONE_ENTER:
-                    self.ctx.audio.play(sound)
+                    self.ctx.audio.play(sound, pan=_route_event_sound_pan(event))
                 self.ctx.say_event(event.message, interrupt=True)
             elif self._should_space_ambient_event(event):
                 self._speak_ambient_event(
@@ -121,7 +121,7 @@ class DrivingEventMixin:
                 )
             else:
                 if sound is not None and kind != TripEventKind.ZONE_ENTER:
-                    self.ctx.audio.play(sound)
+                    self.ctx.audio.play(sound, pan=_route_event_sound_pan(event))
                 self.ctx.say_event(event.message, interrupt=False)
         if kind == TripEventKind.ZONE_ENTER:
             self.ctx.audio.play(sound or "ui/notify")
@@ -666,9 +666,7 @@ class DrivingEventMixin:
         self._exit_signal_on = False
         if announce:
             first = route.legs[0]
-            street = (
-                first.local_cue.rstrip(".") if first.local_cue else f"Start on {first.highway}"
-            )
+            street = first.local_cue.rstrip(".") if first.local_cue else f"Start on {first.highway}"
             self.ctx.audio.play("ui/notify", volume=0.7)
             self.ctx.say_event(
                 f"Off the ramp and onto city streets: {street[:1].lower()}{street[1:]}. "
@@ -720,7 +718,7 @@ class DrivingEventMixin:
             # The wait at the stop bar ends; the driveway is just ahead.
             self._ramp_waiting_at_light = False
             self._ramp_terminal_done = True
-            self.ctx.audio.play("ui/notify", volume=0.7)
+            self.ctx.audio.play("events/ramp_light_green", volume=0.8)
             self.ctx.say_event("Green light. Pull ahead to the entrance.", interrupt=False)
             return
         # Speak at most one flip after the first callout: a slow descent can
@@ -729,6 +727,10 @@ class DrivingEventMixin:
         # information; a play-by-play of every cycle is chatter.
         if not self._ramp_light_flip_said:
             self._ramp_light_flip_said = True
+            self.ctx.audio.play(
+                "events/ramp_light_red" if red else "events/ramp_light_green",
+                volume=0.7,
+            )
             self.ctx.say_event(
                 "The light ahead turns red. Be ready to stop."
                 if red
@@ -742,7 +744,10 @@ class DrivingEventMixin:
         if self._ramp_control == "signal":
             red = self._ramp_light_is_red()
             self._ramp_light_was_red = red
-            self.ctx.audio.play("ui/warning" if red else "ui/notify", volume=0.7)
+            self.ctx.audio.play(
+                "events/ramp_light_red" if red else "events/ramp_light_green",
+                volume=0.8,
+            )
             self.ctx.say_event(
                 "Traffic light at the end of the ramp, currently red. Brake to a stop."
                 if red
@@ -793,13 +798,13 @@ class DrivingEventMixin:
                 else:
                     self.ctx.audio.play("traffic/car_pass", volume=1.0, pan=-0.4)
                     self.ctx.say_event(
-                        "You crept through the red light. Cross traffic leans "
-                        "on the horn.",
+                        "You crept through the red light. Cross traffic leans on the horn.",
                         interrupt=True,
                     )
                 return
             self._ramp_terminal_done = True
             self._ramp_waiting_at_light = False
+            self.ctx.audio.play("events/ramp_light_green", volume=0.7)
             self.ctx.say_event(
                 "Green light. Through the intersection; brake for the entrance."
                 if speed <= GREEN_ROLL_MPH
@@ -829,8 +834,7 @@ class DrivingEventMixin:
             else:
                 self.ctx.audio.play("traffic/car_pass", volume=1.0, pan=0.4)
                 self.ctx.say_event(
-                    "You rolled the stop sign at the ramp end. Cross traffic "
-                    "leans on the horn.",
+                    "You rolled the stop sign at the ramp end. Cross traffic leans on the horn.",
                     interrupt=True,
                 )
             return

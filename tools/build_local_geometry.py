@@ -273,14 +273,18 @@ def shortest_geometry(target: Target, graph: RouteGraph) -> GeometryPath | None:
     if end_ref not in dist:
         return None
     node = end_ref
-    reversed_edges: list[tuple[str, float]] = []
+    path_nodes = [node]
+    reversed_roads: list[str] = []
     while node != start_ref:
         prev_node, road = prev[node]
-        edge_miles = haversine_mi(*graph.nodes[prev_node], *graph.nodes[node])
-        reversed_edges.append((road, edge_miles))
+        reversed_roads.append(road)
+        path_nodes.append(prev_node)
         node = prev_node
-    raw_edges = list(reversed(reversed_edges))
-    segments = collapse_segments(raw_edges)
+    path_nodes.reverse()
+    roads = list(reversed(reversed_roads))  # one road label per edge
+    coords = [graph.nodes[ref] for ref in path_nodes]
+    raw_edges = [(roads[i], haversine_mi(*coords[i], *coords[i + 1])) for i in range(len(roads))]
+    segments = collapse_segments(raw_edges, coords)
     if not segments:
         return None
     total = round(sum(segment["miles"] for segment in segments), 2)
@@ -289,18 +293,46 @@ def shortest_geometry(target: Target, graph: RouteGraph) -> GeometryPath | None:
     return GeometryPath(total, tuple(segments))
 
 
-def collapse_segments(edges: list[tuple[str, float]]) -> list[dict[str, Any]]:
+def collapse_segments(
+    edges: list[tuple[str, float]],
+    coords: list[tuple[float, float]] | None = None,
+) -> list[dict[str, Any]]:
+    """Merge same-road edge runs into spoken segments.
+
+    ``coords`` is the node coordinate per path point (one more than edges).
+    With it, each road-name boundary gets a turn direction from the signed
+    bearing change through the junction, so the cue reads "Turn right onto
+    Palm Street" and the runtime's panned turn earcon fires; near-straight
+    name changes read "Continue onto". Without coords the cues stay
+    directionless ("Turn onto"), the pre-existing wording."""
     segments: list[dict[str, Any]] = []
-    for road, miles in edges:
+    for i, (road, miles) in enumerate(edges):
         if segments and segments[-1]["road"] == road:
             segments[-1]["miles"] += miles
+            segments[-1]["end_edge"] = i + 1
         else:
-            segments.append({"road": road, "miles": miles})
+            segments.append({"road": road, "miles": miles, "start_edge": i, "end_edge": i + 1})
     out: list[dict[str, Any]] = []
     for i, segment in enumerate(segments):
         miles = round(max(segment["miles"], 0.05), 2)
         road = segment["road"]
-        cue = f"Start on {road}." if i == 0 else f"Turn onto {road}."
+        if i == 0:
+            cue = f"Start on {road}."
+        else:
+            direction = ""
+            if coords is not None:
+                direction = turn_direction(
+                    coords,
+                    boundary=segment["start_edge"],
+                    prev_start=segments[i - 1]["start_edge"],
+                    next_end=segment["end_edge"],
+                )
+            if direction:
+                cue = f"Turn {direction} onto {road}."
+            elif coords is not None:
+                cue = f"Continue onto {road}."
+            else:
+                cue = f"Turn onto {road}."
         out.append(
             {
                 "road": road,
@@ -310,6 +342,71 @@ def collapse_segments(edges: list[tuple[str, float]]) -> list[dict[str, Any]]:
             }
         )
     return out[:8]
+
+
+# A junction only counts as a real turn once the heading swings this far;
+# gentler bends read as "Continue onto" so the earcon does not claim a
+# steering move the street does not make.
+TURN_MIN_DEG = 28.0
+# Bearings are read this far out from the junction on each side, so a
+# node-dense curb radius or lane jog does not decide the whole maneuver.
+TURN_LOOKOUT_MI = 0.04
+
+
+def turn_direction(
+    coords: list[tuple[float, float]],
+    *,
+    boundary: int,
+    prev_start: int,
+    next_end: int,
+) -> str:
+    """Signed heading change at a road-name boundary: "left", "right", or ""
+    for near-straight. ``boundary`` indexes the shared junction node; the
+    incoming and outgoing bearings are sampled ``TURN_LOOKOUT_MI`` along each
+    road, clamped to that road's own extent so a short next street cannot
+    borrow the maneuver after it."""
+    junction = coords[boundary]
+    before = _point_along(coords, boundary, -1, stop=prev_start)
+    after = _point_along(coords, boundary, +1, stop=next_end)
+    if before == junction or after == junction:
+        return ""
+    inbound = _bearing_deg(*before, *junction)
+    outbound = _bearing_deg(*junction, *after)
+    delta = ((outbound - inbound + 180.0) % 360.0) - 180.0
+    if delta >= TURN_MIN_DEG:
+        return "right"
+    if delta <= -TURN_MIN_DEG:
+        return "left"
+    return ""
+
+
+def _point_along(
+    coords: list[tuple[float, float]],
+    start: int,
+    step: int,
+    *,
+    stop: int,
+) -> tuple[float, float]:
+    """Coordinate about ``TURN_LOOKOUT_MI`` from ``coords[start]`` walking by
+    ``step``, never past index ``stop``."""
+    total = 0.0
+    i = start
+    while i != stop and total < TURN_LOOKOUT_MI:
+        j = i + step
+        if j < 0 or j >= len(coords):
+            break
+        total += haversine_mi(*coords[i], *coords[j])
+        i = j
+    return coords[i]
+
+
+def _bearing_deg(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
+    """Initial great-circle bearing from point 1 to point 2, degrees 0..360."""
+    p1, p2 = math.radians(lat1), math.radians(lat2)
+    dlmb = math.radians(lon2 - lon1)
+    x = math.sin(dlmb) * math.cos(p2)
+    y = math.cos(p1) * math.sin(p2) - math.sin(p1) * math.cos(p2) * math.cos(dlmb)
+    return math.degrees(math.atan2(x, y)) % 360.0
 
 
 def geometry_record(target: Target, geometry: GeometryPath | None, extract: Path) -> dict[str, Any]:

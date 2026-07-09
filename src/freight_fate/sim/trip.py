@@ -35,10 +35,10 @@ def _spoken_distance(value: float, unit: str) -> str:
 def _cue_direction(text: str) -> str:
     """Turn direction for the earcon, read out of a baked maneuver cue.
 
-    Today's local-geometry builder writes directionless cues ("Turn onto
-    Palm Street"), so this usually returns "" and the spoken text carries
-    the maneuver; when a future bake adds "Turn right onto...", the panned
-    earcon comes along for free."""
+    The local-geometry builders bake directional maneuvers ("Turn right
+    onto Palm Street", "Continue onto Main Street"), so the panned earcon
+    follows the spoken cue; directionless legacy cues ("Turn onto") return
+    "" and stay speech-only."""
     lowered = text.lower()
     if "left" in lowered:
         return "left"
