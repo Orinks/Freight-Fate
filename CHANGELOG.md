@@ -4,10 +4,10 @@
 
 ### Added
 
-- **The drivable map keeps growing.** This drop adds roughly 750 miles of new
-  road and eleven new cities, bringing the network to about 99,500 miles you can
-  actually drive, across 386 cities and 737 routes. (Numbers finalized at
-  release from `tools/map_stats.py --since <last release>`.)
+- **The drivable map crosses one hundred thousand miles.** This drop adds about
+  two thousand two hundred fifty miles of new road and twenty-six new cities,
+  bringing the network past one hundred thousand miles you can actually drive --
+  101,042 miles across 401 cities and 760 routes.
 
 - **Exits now come straight from real-world maps -- with the correct exit names
   and numbers.** On the Interstates, your stops and your destination exit are
