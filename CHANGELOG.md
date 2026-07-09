@@ -4,6 +4,14 @@
 
 ### Added
 
+- **The Deep South knits together with eleven more connections.** Birmingham runs
+  down to Opelika and on to Columbus, Georgia; Columbus drops to Dothan past Lake
+  Eufaula; Montgomery reaches Meridian on US-80 through Selma; Huntsville joins
+  Chattanooga along the Tennessee River past Scottsboro; Mobile connects to
+  Hattiesburg, Baton Rouge to Gulfport, and Crestview up to Dothan. In the west,
+  Shreveport now reaches Texarkana on Interstate 49, and Little Rock and Texarkana
+  both connect down to El Dorado through the south Arkansas timber country.
+
 - **Two Tennessee cities join the Interstate 40 run across the state.** Jackson
   now breaks up the long Memphis-to-Nashville haul, and Cookeville splits the
   Nashville-to-Knoxville climb over the Cumberland Plateau -- so driving clear
@@ -77,9 +85,9 @@
   truck stops, rest areas, and the Red River crossing along the way.
 
 - **The drivable map crosses one hundred thousand miles.** This drop adds about
-  five thousand seven hundred miles of new road and thirty-four new cities,
+  six thousand eight hundred miles of new road and thirty-four new cities,
   bringing the network past one hundred thousand miles you can actually drive --
-  104,482 miles across 409 cities and 796 routes.
+  105,609 miles across 409 cities and 807 routes.
 
 - **Exits now come straight from real-world maps -- with the correct exit names
   and numbers.** On the Interstates, your stops and your destination exit are
