@@ -4,6 +4,11 @@
 
 ### Added
 
+- **The central California coast fills in along US-101.** San Luis Obispo and Santa
+  Barbara join the map, completing the scenic coast run between the Bay Area and Los
+  Angeles -- Salinas down through SLO and Santa Maria, over the coastal grades to
+  Santa Barbara and Oxnard.
+
 - **The Florida Gulf coast opens up, across Alligator Alley.** Fort Myers and Naples
   join the map, connecting Tampa down the Gulf coast, and the run from Naples to
   Miami takes Interstate 75's Alligator Alley straight across the Everglades -- no
@@ -206,9 +211,9 @@
   truck stops, rest areas, and the Red River crossing along the way.
 
 - **The drivable map crosses one hundred thousand miles.** This drop adds about
-  twenty-four thousand nine hundred miles of new road and seventy-one new cities,
+  twenty-four thousand nine hundred miles of new road and seventy-three new cities,
   bringing the network past one hundred thousand miles you can actually drive --
-  123,711 miles across 446 cities and 1,001 routes.
+  123,713 miles across 448 cities and 1,003 routes.
 
 - **Exits now come straight from real-world maps -- with the correct exit names
   and numbers.** On the Interstates, your stops and your destination exit are

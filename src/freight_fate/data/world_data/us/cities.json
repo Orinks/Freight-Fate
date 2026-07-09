@@ -6340,6 +6340,24 @@
       "locations": [],
       "lat": 26.142,
       "lon": -81.7948
+    },
+    "san_luis_obispo_ca_us": {
+      "spoken_city": "San Luis Obispo",
+      "state": "CA",
+      "country": "US",
+      "region": "california",
+      "locations": [],
+      "lat": 35.2828,
+      "lon": -120.6596
+    },
+    "santa_barbara_ca_us": {
+      "spoken_city": "Santa Barbara",
+      "state": "CA",
+      "country": "US",
+      "region": "california",
+      "locations": [],
+      "lat": 34.4208,
+      "lon": -119.6982
     }
   }
 }
