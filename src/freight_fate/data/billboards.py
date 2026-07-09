@@ -42,7 +42,6 @@ GENERIC_BILLBOARDS = (
     "Did you eat today? Thank a trucker.",
     "Last real coffee for two hundred miles. This is not a drill.",
     "World's largest pecan. You'll smell it before you see it. Next exit.",
-    "Try our forty-eight ounce steak. Seasoned and purely American, if you eat this thing in an hour, you eat it for free!",
     "Fireworks, fireworks, fireworks. You're already past it.",
     "Prime rib buffet, nine ninety-nine. Cardiologist not included.",
     "Hitchhikers may be escaping inmates. Drive friendly.",
