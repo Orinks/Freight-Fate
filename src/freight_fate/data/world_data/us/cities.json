@@ -5935,6 +5935,15 @@
       "locations": [],
       "lat": 36.3353,
       "lon": -92.3852
+    },
+    "texarkana_ar_us": {
+      "spoken_city": "Texarkana",
+      "state": "AR",
+      "country": "US",
+      "region": "mid_south",
+      "locations": [],
+      "lat": 33.4418,
+      "lon": -94.0377
     }
   }
 }

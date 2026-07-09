@@ -4,10 +4,16 @@
 
 ### Added
 
+- **The Little Rock to Dallas run now stops at real towns.** Texarkana joins the
+  map, right on the Arkansas-Texas line, and the long Interstate 30 haul breaks
+  into a real chain of stops -- Benton, Arkadelphia, and Hope in Arkansas, then
+  New Boston, Mount Pleasant, Sulphur Springs, and Greenville in Texas -- with
+  truck stops, rest areas, and the Red River crossing along the way.
+
 - **The drivable map crosses one hundred thousand miles.** This drop adds about
-  two thousand two hundred fifty miles of new road and twenty-six new cities,
+  two thousand two hundred fifty miles of new road and twenty-seven new cities,
   bringing the network past one hundred thousand miles you can actually drive --
-  101,042 miles across 401 cities and 760 routes.
+  101,047 miles across 402 cities and 761 routes.
 
 - **Exits now come straight from real-world maps -- with the correct exit names
   and numbers.** On the Interstates, your stops and your destination exit are

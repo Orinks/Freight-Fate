@@ -69,6 +69,18 @@ Eureka Springs (near Harrison) = the Christ of the Ozarks statue + the Great
 Passion Play. Mountain Home / Bull Shoals lake country. Winding-road / runaway-
 truck-ramp signage fits these genuine mountain legs.
 
+## I-30 Little Rock -> Dallas (built 2026-07-09) -- signage opportunities
+
+(`little_rock->texarkana->dallas`, splitting the old atomic 319mi leg.)
+**Hope, AR** = birthplace of President Bill Clinton ("A Place Called Hope") AND
+the "Watermelon Capital of the World" (record-setting 200+ lb watermelons) -- a
+double-barreled 90s-nostalgia + roadside-giant billboard, prime. **Texarkana** =
+the town that straddles the Arkansas-Texas state line (the federal post office /
+courthouse sits in BOTH states; "photographers of the state line" gag) -- a
+natural place-that-is-two-places billboard. **Arkadelphia** = Henderson State /
+Ouachita Baptist college-rivalry town. The **Red River** crossing at the state
+line is a real freight/landmark moment.
+
 ## Owner checkpoint requests (place when the road gets built)
 
 - **Midlothian, VA** on **US-60** (Midlothian Turnpike) west/southwest of
