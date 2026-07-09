@@ -5701,6 +5701,33 @@
       "lat": 39.4735,
       "lon": -118.7774,
       "locations": []
+    },
+    "florence_sc_us": {
+      "spoken_city": "Florence",
+      "state": "SC",
+      "country": "US",
+      "region": "atlantic_southeast",
+      "locations": [],
+      "lat": 34.1954,
+      "lon": -79.7626
+    },
+    "lumberton_nc_us": {
+      "spoken_city": "Lumberton",
+      "state": "NC",
+      "country": "US",
+      "region": "atlantic_southeast",
+      "locations": [],
+      "lat": 34.6183,
+      "lon": -79.0105
+    },
+    "petersburg_va_us": {
+      "spoken_city": "Petersburg",
+      "state": "VA",
+      "country": "US",
+      "region": "atlantic_southeast",
+      "locations": [],
+      "lat": 37.2279,
+      "lon": -77.4019
     }
   }
 }

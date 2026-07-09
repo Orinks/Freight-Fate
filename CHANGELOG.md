@@ -4,6 +4,16 @@
 
 ### Added
 
+- **The Interstate 95 coast now connects, from Richmond down to Savannah.**
+  Three new cities join the map: Florence and Lumberton along the Carolinas'
+  stretch of Ninety-Five, and Petersburg, Virginia, where Ninety-Five meets
+  Interstate Eighty-Five. That fills a real gap -- the East Coast's busiest
+  freight run used to force a detour inland, and now you can drive it city to
+  city on the actual road. Along the way you will pass and hear real towns:
+  Walterboro, Saint George, and Dillon in South Carolina, Roanoke Rapids and
+  Emporia in Virginia, with truck stops and a welcome center to fuel and rest
+  at.
+
 - **The biggest map update yet -- 100 new cities to pick up and deliver in.** A
   city is a place a load can start or end, and the map grew from 249 to 349 of
   them, filling in dead zones that used to have nothing drivable for hundreds of
