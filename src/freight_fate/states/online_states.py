@@ -107,7 +107,7 @@ class OnlineSetupState(MenuState):
     setting, and tells the running presence service to adopt them.
     """
 
-    title = "Drivers board setup"
+    title = "Driver profile setup"
 
     def __init__(self, ctx) -> None:
         super().__init__(ctx)

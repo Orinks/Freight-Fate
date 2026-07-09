@@ -14,6 +14,7 @@ import pygame
 from . import __version__
 from .achievements import AchievementAward, award
 from .audio import AudioEngine
+from .cloud_saves import CloudSaves
 from .controller import ControllerManager
 from .data.world import World, get_world
 from .discord_presence import DiscordPresence
@@ -169,9 +170,19 @@ class GameContext:
         """Reflect the drivers-board setting (e.g. after a settings change)."""
         self._app.online.set_enabled(self.settings.online_presence)
 
+    def apply_cloud_saves(self) -> None:
+        """Reflect the cloud backup setting (e.g. after a settings change)."""
+        self._app.cloud.set_enabled(self.settings.cloud_saves)
+
+    def cloud_saves_service(self) -> CloudSaves:
+        """The backup service, for the Cloud backup menu."""
+        return self._app.cloud
+
     def adopt_online_identity(self, identity) -> None:
-        """Adopt freshly confirmed drivers-board credentials (setup flow)."""
+        """Adopt freshly confirmed account credentials (setup flow). The
+        drivers board and cloud backup share them."""
         self._app.online.set_identity(identity)
+        self._app.cloud.set_identity(identity)
 
     def apply_controller(self) -> None:
         """Reflect the controller setting (e.g. after a settings change)."""
@@ -308,10 +319,19 @@ class App:
         self.world = get_world()
         self.economy = Economy()
         self.presence = DiscordPresence(enabled=self.settings.discord_presence)
+        identity = OnlineIdentity.load()
         self.online = OnlinePresence(
             enabled=self.settings.online_presence,
-            identity=OnlineIdentity.load(),
+            identity=identity,
         )
+        self.cloud = CloudSaves(
+            enabled=self.settings.cloud_saves,
+            identity=identity,
+        )
+        # Every profile save, wherever it happens, queues a cloud backup.
+        from .models import profile as profile_module
+
+        profile_module.save_listener = self.cloud.queue_backup
         self.controller = ControllerManager(
             enabled=self.settings.controller_enabled,
             haptics=self.settings.haptics_enabled,
@@ -374,6 +394,7 @@ class App:
         self.push_state(MainMenuState(self.ctx))
         self.presence.start()  # after init; never blocks if Discord is absent
         self.online.start()  # opt-in drivers board; dormant unless confirmed
+        self.cloud.start()  # opt-in save backup; dormant unless confirmed
         frames = 0
         try:
             while self.running:
@@ -452,6 +473,11 @@ class App:
         self.settings.save()
         self.presence.shutdown()
         self.online.shutdown()
+        self.cloud.shutdown()  # flushes the final save's backup, bounded
+        from .models import profile as profile_module
+
+        if profile_module.save_listener == self.cloud.queue_backup:
+            profile_module.save_listener = None
         self.controller.shutdown()
         self.audio.shutdown()
         self.speech.shutdown()
