@@ -90,6 +90,10 @@ def test_playtest_harness_drives_a_specific_route(monkeypatch):
     assert "New Jersey into New York" in transcript
 
 
+# Six full simulated deliveries in one test, under coverage tracing on a
+# contended CI runner, straddle the default 120-second hang timeout. It is
+# long, not hung, so give it real headroom.
+@pytest.mark.timeout(300)
 @pytest.mark.property
 @settings(max_examples=6, deadline=None)
 @given(
