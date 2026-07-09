@@ -9,6 +9,17 @@
   actually drive, across 386 cities and 737 routes. (Numbers finalized at
   release from `tools/map_stats.py --since <last release>`.)
 
+- **Routes now carry the real posted speed limits.** Instead of estimating a
+  limit from the road type, most legs now use the actual posted speed limits from
+  map data (interstates, US highways, and more), so your truck runs the real
+  limit on the road it is driving. Rural roads without published limits still fall
+  back to a sensible estimate.
+
+- **Interstate 10 across the Florida Panhandle now stops at real towns.** Two
+  cities join the map: Pensacola and Crestview. The long Tallahassee-to-Mobile run
+  breaks into stops through Marianna, DeFuniak Springs, and Spanish Fort, with
+  truck stops and rest areas along the way.
+
 - **Interstate 75 between Chattanooga and Atlanta now stops at real towns.**
   Two Georgia cities join the map: Dalton, the carpet capital, and Cartersville.
   The run breaks into stops through Ringgold, Calhoun, and Marietta instead of one

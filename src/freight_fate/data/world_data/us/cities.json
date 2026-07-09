@@ -5836,6 +5836,24 @@
       "locations": [],
       "lat": 34.1651,
       "lon": -84.8001
+    },
+    "pensacola_fl_us": {
+      "spoken_city": "Pensacola",
+      "state": "FL",
+      "country": "US",
+      "region": "florida",
+      "locations": [],
+      "lat": 30.4213,
+      "lon": -87.2169
+    },
+    "crestview_fl_us": {
+      "spoken_city": "Crestview",
+      "state": "FL",
+      "country": "US",
+      "region": "florida",
+      "locations": [],
+      "lat": 30.7621,
+      "lon": -86.5706
     }
   }
 }
