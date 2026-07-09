@@ -81,6 +81,17 @@ natural place-that-is-two-places billboard. **Arkadelphia** = Henderson State /
 Ouachita Baptist college-rivalry town. The **Red River** crossing at the state
 line is a real freight/landmark moment.
 
+## South Arkansas Delta -> Louisiana (built 2026-07-09) -- signage opportunities
+
+(`little_rock->pine_bluff->el_dorado->monroe`, US-63/US-165 timber & oil country.)
+**Warren, AR** = the "Pink Tomato Capital" (Bradley County Pink Tomato Festival,
+a state-symbol tomato) -- a natural roadside-produce billboard. **El Dorado, AR**
+= the 1920s oil-boom town ("Arkansas's Original Boomtown"), Murphy Oil's home, the
+restored Rialto/Griffin district -- an oil-derrick billboard fits. **Junction
+City** literally straddles the Arkansas-Louisiana state line (main street IS the
+border). **Ruston, LA** = Louisiana Tech + the Louisiana Peach Festival. Pine
+Bluff = the "Home of the Arkansas Railroad Museum" (Cotton Belt shops).
+
 ## Owner checkpoint requests (place when the road gets built)
 
 - **Midlothian, VA** on **US-60** (Midlothian Turnpike) west/southwest of

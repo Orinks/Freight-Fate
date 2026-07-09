@@ -5944,6 +5944,24 @@
       "locations": [],
       "lat": 33.4418,
       "lon": -94.0377
+    },
+    "pine_bluff_ar_us": {
+      "spoken_city": "Pine Bluff",
+      "state": "AR",
+      "country": "US",
+      "region": "mid_south",
+      "locations": [],
+      "lat": 34.2284,
+      "lon": -92.0032
+    },
+    "el_dorado_ar_us": {
+      "spoken_city": "El Dorado",
+      "state": "AR",
+      "country": "US",
+      "region": "mid_south",
+      "locations": [],
+      "lat": 33.2076,
+      "lon": -92.6663
     }
   }
 }

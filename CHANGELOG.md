@@ -4,6 +4,13 @@
 
 ### Added
 
+- **South Arkansas's timber and oil country joins the map, connecting into
+  Louisiana.** Two cities arrive -- Pine Bluff and El Dorado -- and a new run drops
+  south from Little Rock through Pine Bluff and El Dorado to Monroe, Louisiana,
+  stopping at real towns along the way: Redfield, Warren, Hermitage, Junction City
+  on the state line, Bernice, and Ruston. It opens the first road link between the
+  Arkansas and Louisiana networks.
+
 - **The Little Rock to Dallas run now stops at real towns.** Texarkana joins the
   map, right on the Arkansas-Texas line, and the long Interstate 30 haul breaks
   into a real chain of stops -- Benton, Arkadelphia, and Hope in Arkansas, then
@@ -11,9 +18,9 @@
   truck stops, rest areas, and the Red River crossing along the way.
 
 - **The drivable map crosses one hundred thousand miles.** This drop adds about
-  two thousand two hundred fifty miles of new road and twenty-seven new cities,
+  two thousand five hundred miles of new road and twenty-nine new cities,
   bringing the network past one hundred thousand miles you can actually drive --
-  101,047 miles across 402 cities and 761 routes.
+  101,277 miles across 404 cities and 764 routes.
 
 - **Exits now come straight from real-world maps -- with the correct exit names
   and numbers.** On the Interstates, your stops and your destination exit are

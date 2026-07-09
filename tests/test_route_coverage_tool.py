@@ -25,7 +25,7 @@ def test_route_coverage_report_is_machine_readable():
     assert report["metadata_contract"]["legacy_full_graph_available_for_old_saves"] is True
     assert report["metadata_contract"]["placeholder_pois_do_not_count_for_dispatch"]
     assert "source-backed truck-stop coverage" in report["current_batch_notes"][0]
-    assert report["totals"]["legs"] == 761
+    assert report["totals"]["legs"] == 764
     assert report["totals"]["playable"] == report["totals"]["legs"]
     assert report["missing_playable"] == []
     assert report["totals"]["route_points"] == report["totals"]["legs"]
