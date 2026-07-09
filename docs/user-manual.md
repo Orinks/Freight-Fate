@@ -525,6 +525,16 @@ Speech and weather settings include:
 | Speech voice | Appears only when selectable voices are available. |
 | Weather source | Switches between simulated weather and live city conditions when available. |
 
+Online settings include:
+
+| Setting | Purpose |
+| --- | --- |
+| Share on the drivers board | Show what you are hauling on the public drivers board at orinks.net while you are on a job. Nothing is shared until you set it up: the first time you select it, the game reads out exactly what gets shared and opens your browser, where you choose a driver name and confirm before anything is sent. Only broad in-game activity is shared, like your route, cargo, and rough progress, never your save files, real name, or location. Turn it off any time; you leave the board within a few minutes. |
+
+The main menu also has a Drivers online item that reads the same public board:
+each driver's name, what they are doing, and how fresh the report is. Viewing
+the board shares nothing about you and does not require sharing to be on.
+
 ## Audio, Speech, And Accessibility
 
 Freight Fate is built to be playable by ear. Menus, status screens, update

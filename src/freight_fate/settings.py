@@ -43,6 +43,12 @@ class Settings:
     update_channel: str = ""  # "stable"/"dev"; "" follows this build's channel
     skipped_update: str = ""  # release tag the player chose to skip
     discord_presence: bool = True  # show broad activity in Discord (privacy-safe)
+    # Share on-duty status on the public orinks.net drivers board. On by
+    # default like Discord presence, but inert until the player completes the
+    # browser setup: nothing is ever sent without a confirmed driver identity
+    # (see online_presence.py), and board listing further requires choosing
+    # the public visibility on the site.
+    online_presence: bool = True
     controller_enabled: bool = True  # accept game-controller input alongside the keyboard
     haptics_enabled: bool = True  # rumble/vibration feedback on the controller
 

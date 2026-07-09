@@ -20,6 +20,7 @@ from .discord_presence import DiscordPresence
 from .models.economy import Economy
 from .models.profile import Profile
 from .music import music_track_duration_s
+from .online_presence import OnlineIdentity, OnlinePresence
 from .settings import Settings
 from .speech import Speech
 from .states.base import State
@@ -164,6 +165,14 @@ class GameContext:
         """Reflect the Discord presence setting (e.g. after a settings change)."""
         self._app.presence.set_enabled(self.settings.discord_presence)
 
+    def apply_online_presence(self) -> None:
+        """Reflect the drivers-board setting (e.g. after a settings change)."""
+        self._app.online.set_enabled(self.settings.online_presence)
+
+    def adopt_online_identity(self, identity) -> None:
+        """Adopt freshly confirmed drivers-board credentials (setup flow)."""
+        self._app.online.set_identity(identity)
+
     def apply_controller(self) -> None:
         """Reflect the controller setting (e.g. after a settings change)."""
         self.controller.set_enabled(self.settings.controller_enabled)
@@ -299,6 +308,10 @@ class App:
         self.world = get_world()
         self.economy = Economy()
         self.presence = DiscordPresence(enabled=self.settings.discord_presence)
+        self.online = OnlinePresence(
+            enabled=self.settings.online_presence,
+            identity=OnlineIdentity.load(),
+        )
         self.controller = ControllerManager(
             enabled=self.settings.controller_enabled,
             haptics=self.settings.haptics_enabled,
@@ -360,6 +373,7 @@ class App:
         self.running = True
         self.push_state(MainMenuState(self.ctx))
         self.presence.start()  # after init; never blocks if Discord is absent
+        self.online.start()  # opt-in drivers board; dormant unless confirmed
         frames = 0
         try:
             while self.running:
@@ -399,6 +413,7 @@ class App:
                 if self.state is not None:
                     self.state.update(dt)
                     self.presence.update(self.state.presence())
+                    self.online.update(self.state.online_presence())
                 if self.ctx.achievement_notice_timer > 0:
                     self.ctx.achievement_notice_timer = max(
                         0.0,
@@ -436,6 +451,7 @@ class App:
             self.ctx.profile.save()
         self.settings.save()
         self.presence.shutdown()
+        self.online.shutdown()
         self.controller.shutdown()
         self.audio.shutdown()
         self.speech.shutdown()

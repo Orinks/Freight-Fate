@@ -434,7 +434,11 @@ def test_upgrade_f1_help_explains_player_benefits():
 def test_pause_and_abandon_returns_to_city():
     from freight_fate.app import App
     from freight_fate.states.city import CityMenuState, PickupFacilityState, RouteSelectState
-    from freight_fate.states.driving import DrivingState, PauseMenuState
+    from freight_fate.states.driving import (
+        AbandonJobConfirmationState,
+        DrivingState,
+        PauseMenuState,
+    )
     from freight_fate.states.main_menu import MainMenuState, NameEntryState
 
     app = App()
@@ -475,8 +479,71 @@ def test_pause_and_abandon_returns_to_city():
         while pause.items[pause.index].text != "Abandon job":
             pause.handle_event(key_event(pygame.K_DOWN))
         pause.handle_event(key_event(pygame.K_RETURN))
+        # The abandon now needs a Yes/No confirmation that lands on No.
+        assert isinstance(app.state, AbandonJobConfirmationState)
+        confirm = app.state
+        assert confirm.items[confirm.index].text == "No, keep driving"
+        confirm.handle_event(key_event(pygame.K_DOWN))  # arrow to Yes
+        confirm.handle_event(key_event(pygame.K_RETURN))
         assert isinstance(app.state, CityMenuState)
         assert app.ctx.profile.money == money - 500.0
         assert app.ctx.profile.current_city == origin
+    finally:
+        app.shutdown()
+
+
+@pytest.mark.smoke
+def test_abandon_prompt_no_returns_to_pause_menu():
+    from freight_fate.app import App
+    from freight_fate.states.city import PickupFacilityState, RouteSelectState
+    from freight_fate.states.driving import (
+        AbandonJobConfirmationState,
+        DrivingState,
+        PauseMenuState,
+    )
+    from freight_fate.states.main_menu import MainMenuState, NameEntryState
+
+    app = App()
+    try:
+        app.push_state(MainMenuState(app.ctx))
+        while app.state.items[app.state.index].text != "New career":
+            app.state.handle_event(key_event(pygame.K_DOWN))
+        app.state.handle_event(key_event(pygame.K_RETURN))
+        assert isinstance(app.state, NameEntryState)
+        app.state.handle_event(key_event(pygame.K_RETURN))  # default name
+        app.state.handle_event(key_event(pygame.K_RETURN))  # default region
+        app.state.handle_event(key_event(pygame.K_RETURN))  # default home terminal
+        app.state.handle_event(key_event(pygame.K_RETURN))  # job board
+        board = app.state
+        while board.jobs[board.index].cargo.endorsement:  # skip locked teasers
+            board.handle_event(key_event(pygame.K_DOWN))
+        app.state.handle_event(key_event(pygame.K_RETURN))  # accept job
+        assert isinstance(app.state, DrivingState)
+        app.state.trip.position_mi = app.state.trip.total_miles
+        app.state.trip.finished = True
+        app.state.truck.velocity_mps = 0.0
+        app.state.update(1 / 60)
+        assert isinstance(app.state, PickupFacilityState)
+        app.state.handle_event(key_event(pygame.K_RETURN))  # check in at origin
+        app.state.handle_event(key_event(pygame.K_RETURN))  # load at dock
+        app.state.handle_event(key_event(pygame.K_RETURN))  # depart for destination
+        assert isinstance(app.state, RouteSelectState)
+        app.state.handle_event(key_event(pygame.K_RETURN))  # accept planned route
+        assert isinstance(app.state, DrivingState)
+
+        app.state.handle_event(key_event(pygame.K_ESCAPE))
+        assert isinstance(app.state, PauseMenuState)
+        pause = app.state
+        money = app.ctx.profile.money
+        active_trip = app.ctx.profile.active_trip
+        while pause.items[pause.index].text != "Abandon job":
+            pause.handle_event(key_event(pygame.K_DOWN))
+        pause.handle_event(key_event(pygame.K_RETURN))
+        assert isinstance(app.state, AbandonJobConfirmationState)
+        # Enter on the default "No" cancels and returns to the pause menu.
+        app.state.handle_event(key_event(pygame.K_RETURN))
+        assert app.state is pause
+        assert app.ctx.profile.money == money
+        assert app.ctx.profile.active_trip is active_trip
     finally:
         app.shutdown()

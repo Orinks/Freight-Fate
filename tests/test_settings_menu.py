@@ -145,7 +145,7 @@ def test_settings_menu_uses_category_submenus():
         picker = SettingsState(app.ctx)
         app.push_state(picker)
         labels = [item.text for item in picker.items]
-        assert labels == ["Gameplay", "Audio", "Speech and weather", "Updates", "Back"]
+        assert labels == ["Gameplay", "Audio", "Speech and weather", "Online", "Updates", "Back"]
 
         while picker.items[picker.index].text != "Audio":
             picker.handle_event(key_event(pygame.K_DOWN))
@@ -217,5 +217,35 @@ def test_speech_setting_adjustment_previews_adjusted_voice(monkeypatch):
         assert text.startswith("Speech rate:")
         assert interrupt is True
         assert fallback_spoken == []
+    finally:
+        app.shutdown()
+
+
+@pytest.mark.smoke
+def test_online_sharing_label_tracks_identity_freshness():
+    """The sharing label re-checks the identity file on every read.
+
+    Regression: the configured check was captured once at menu build, so the
+    label said "on" while sharing was actually dormant (no credentials), and
+    stayed "not set up" after setup completed until the menu was rebuilt.
+    """
+    from freight_fate.app import App
+    from freight_fate.online_presence import OnlineIdentity
+
+    app = App()
+    try:
+        cat = open_settings_category(app, "Online")
+        while not cat.items[cat.index].text.startswith("Share on the drivers board"):
+            cat.handle_event(key_event(pygame.K_DOWN))
+        item = cat.items[cat.index]
+        assert item.text == "Share on the drivers board: not set up"
+
+        # Credentials appear on disk (setup completing) with no menu rebuild:
+        # the same MenuItem must immediately report the real on/off state.
+        OnlineIdentity(driver_id="road-star-abcd1234", driver_token="t" * 68).save()
+        assert item.text in (
+            "Share on the drivers board: on",
+            "Share on the drivers board: off",
+        )
     finally:
         app.shutdown()

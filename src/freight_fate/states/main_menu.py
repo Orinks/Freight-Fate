@@ -205,14 +205,22 @@ class MainMenuState(MenuState):
             )
         )
         items.append(
+            MenuItem(
+                "Drivers online",
+                self._drivers_online,
+                help="Hear who is hauling right now on the public orinks.net "
+                "drivers board. Viewing the board shares nothing about you.",
+            )
+        )
+        items.append(
             MenuItem("How to play", self._help, help="Learn the controls and the goal of the game.")
         )
         items.append(
             MenuItem(
                 "Settings",
                 self._settings,
-                help="Units, transmission mode, volumes, weather, "
-                "voices, update channel, and trip pacing.",
+                help="Units, transmission mode, volumes, weather, voices, "
+                "online sharing, update channel, and trip pacing.",
             )
         )
         items.append(
@@ -271,6 +279,11 @@ class MainMenuState(MenuState):
 
     def _settings(self) -> None:
         self.ctx.push_state(SettingsState(self.ctx))
+
+    def _drivers_online(self) -> None:
+        from .online_states import DriversOnlineState
+
+        self.ctx.push_state(DriversOnlineState(self.ctx))
 
     def _report_issue(self) -> None:
         import webbrowser
@@ -747,6 +760,7 @@ class SettingsState(MenuState):
         ("Gameplay", "gameplay"),
         ("Audio", "audio"),
         ("Speech and weather", "speech"),
+        ("Online", "online"),
         ("Updates", "updates"),
     )
 
@@ -787,6 +801,7 @@ class SettingsCategoryState(MenuState):
         "gameplay": "Gameplay",
         "audio": "Audio",
         "speech": "Speech and weather",
+        "online": "Online",
         "updates": "Updates",
     }
 
@@ -903,6 +918,31 @@ class SettingsCategoryState(MenuState):
             ]
             items.append(MenuItem("Back", self.go_back))
             return items
+        if self.category == "online":
+            from ..online_presence import OnlineIdentity
+
+            return [
+                MenuItem(
+                    # The identity check lives INSIDE the label so it is
+                    # fresh on every read: a captured build-time value went
+                    # stale the moment setup completed (or the identity file
+                    # changed on disk) and misreported "on" while dormant.
+                    lambda: (
+                        f"Share on the drivers board: {'on' if s.online_presence else 'off'}"
+                        if OnlineIdentity.load() is not None
+                        else "Share on the drivers board: not set up"
+                    ),
+                    lambda: self._toggle_online_presence(1),
+                    help="Show what you are hauling on the public drivers "
+                    "board at orinks.net while you are on a job. Nothing is "
+                    "shared until you set it up: selecting this the first "
+                    "time opens the drivers board setup menu, where you sign "
+                    "in on orinks.net and paste in your Driver ID and token. "
+                    "Only broad in-game activity is ever shared, never your "
+                    "save files or personal details.",
+                ),
+                MenuItem("Back", self.go_back),
+            ]
         return [
             MenuItem(
                 lambda: (
@@ -955,6 +995,7 @@ class SettingsCategoryState(MenuState):
                     lambda d: self._volume("music_volume", 0.1 * d),
                     lambda d: self._volume("ui_volume", 0.1 * d),
                 ],
+                "online": [self._toggle_online_presence],
                 "updates": [self._toggle_update_channel],
             }[self.category]
         if self.index < len(actions):
@@ -1107,6 +1148,21 @@ class SettingsCategoryState(MenuState):
     def _toggle_discord_presence(self, _d: int) -> None:
         self.ctx.settings.discord_presence = not self.ctx.settings.discord_presence
         self.ctx.apply_presence()
+        self._announce()
+
+    def _toggle_online_presence(self, _d: int) -> None:
+        from ..online_presence import OnlineIdentity
+        from .online_states import OnlineSetupState
+
+        s = self.ctx.settings
+        if OnlineIdentity.load() is None:
+            # Not set up yet: the spoken disclosure and browser confirmation
+            # happen in the setup state; it flips the setting on success.
+            # The setting alone shares nothing without an identity.
+            self.ctx.push_state(OnlineSetupState(self.ctx))
+            return
+        s.online_presence = not s.online_presence
+        self.ctx.apply_online_presence()
         self._announce()
 
     def _toggle_controller(self, _d: int) -> None:

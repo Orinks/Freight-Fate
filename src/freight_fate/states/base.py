@@ -96,6 +96,15 @@ class State:
         """
         return None
 
+    def online_presence(self):
+        """The on-duty snapshot for the live drivers board, or None.
+
+        Only the hauling states (driving, paused, pulled over, resting,
+        delivering) report themselves; everything else returns None so the
+        player drops off the public board the moment they are not on a job.
+        """
+        return None
+
 
 @dataclass
 class MenuItem:
