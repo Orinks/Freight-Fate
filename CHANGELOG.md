@@ -27,6 +27,13 @@
   breaks into stops through Marianna, DeFuniak Springs, and Spanish Fort, with
   truck stops and rest areas along the way.
 
+- **Arkansas opens up -- Walmart alley and the Delta.** Three new cities join the
+  map: Fayetteville and Bentonville (Walmart's home) in the northwest, and
+  Jonesboro in the northeast. Interstate 49 now climbs the real Boston Mountains
+  from Fort Smith up through Fayetteville and Bentonville toward Joplin, and
+  Jonesboro reaches Memphis and Little Rock across the rice-country Delta. You will
+  pass Springdale, Rogers, Alma, West Memphis, Brinkley, and more.
+
 - **The Indiana Toll Road and southwest Ohio fill in.** Elkhart, Indiana -- the
   RV manufacturing capital -- joins the map on Interstate 80/90, linking Toledo
   across to South Bend, and Dayton and Cincinnati are now directly connected on

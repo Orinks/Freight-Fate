@@ -5890,6 +5890,33 @@
       "locations": [],
       "lat": 41.682,
       "lon": -85.9767
+    },
+    "fayetteville_ar_us": {
+      "spoken_city": "Fayetteville",
+      "state": "AR",
+      "country": "US",
+      "region": "heartland",
+      "locations": [],
+      "lat": 36.0626,
+      "lon": -94.1574
+    },
+    "bentonville_ar_us": {
+      "spoken_city": "Bentonville",
+      "state": "AR",
+      "country": "US",
+      "region": "heartland",
+      "locations": [],
+      "lat": 36.3729,
+      "lon": -94.2088
+    },
+    "jonesboro_ar_us": {
+      "spoken_city": "Jonesboro",
+      "state": "AR",
+      "country": "US",
+      "region": "heartland",
+      "locations": [],
+      "lat": 35.8423,
+      "lon": -90.7043
     }
   }
 }
