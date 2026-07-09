@@ -6358,6 +6358,87 @@
       "locations": [],
       "lat": 34.4208,
       "lon": -119.6982
+    },
+    "gadsden_al_us": {
+      "spoken_city": "Gadsden",
+      "state": "AL",
+      "country": "US",
+      "region": "mid_south",
+      "locations": [],
+      "lat": 34.014,
+      "lon": -86.006
+    },
+    "florence_al_us": {
+      "spoken_city": "Florence",
+      "state": "AL",
+      "country": "US",
+      "region": "mid_south",
+      "locations": [],
+      "lat": 34.799,
+      "lon": -87.677
+    },
+    "rome_ga_us": {
+      "spoken_city": "Rome",
+      "state": "GA",
+      "country": "US",
+      "region": "atlantic_southeast",
+      "locations": [],
+      "lat": 34.257,
+      "lon": -85.165
+    },
+    "columbus_ms_us": {
+      "spoken_city": "Columbus",
+      "state": "MS",
+      "country": "US",
+      "region": "mid_south",
+      "locations": [],
+      "lat": 33.495,
+      "lon": -88.427
+    },
+    "natchez_ms_us": {
+      "spoken_city": "Natchez",
+      "state": "MS",
+      "country": "US",
+      "region": "mid_south",
+      "locations": [],
+      "lat": 31.56,
+      "lon": -91.403
+    },
+    "brunswick_ga_us": {
+      "spoken_city": "Brunswick",
+      "state": "GA",
+      "country": "US",
+      "region": "atlantic_southeast",
+      "locations": [],
+      "lat": 31.15,
+      "lon": -81.491
+    },
+    "panama_city_fl_us": {
+      "spoken_city": "Panama City",
+      "state": "FL",
+      "country": "US",
+      "region": "florida",
+      "locations": [],
+      "lat": 30.158,
+      "lon": -85.66
+    },
+    "natchitoches_la_us": {
+      "spoken_city": "Natchitoches",
+      "state": "LA",
+      "country": "US",
+      "region": "gulf_coast",
+      "locations": [],
+      "lat": 31.76,
+      "lon": -93.087
+    },
+    "houma_la_us": {
+      "spoken_city": "Houma",
+      "state": "LA",
+      "country": "US",
+      "region": "gulf_coast",
+      "locations": [],
+      "lat": 29.596,
+      "lon": -90.719
     }
   }
 }

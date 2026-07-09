@@ -4,6 +4,13 @@
 
 ### Added
 
+- **Nine more Southern cities join the map.** Gadsden lands on Interstate 59
+  between Birmingham and Chattanooga; Brunswick breaks up the Interstate 95 run from
+  Jacksonville to Savannah; Natchitoches sits on Interstate 49 between Alexandria and
+  Shreveport; plus Florence in the Alabama Shoals, Rome and Columbus, historic
+  Natchez on the Mississippi bluffs, Panama City on the Florida panhandle, and Houma
+  down in the Louisiana bayou.
+
 - **The central California coast fills in along US-101.** San Luis Obispo and Santa
   Barbara join the map, completing the scenic coast run between the Bay Area and Los
   Angeles -- Salinas down through SLO and Santa Maria, over the coastal grades to
@@ -211,9 +218,9 @@
   truck stops, rest areas, and the Red River crossing along the way.
 
 - **The drivable map crosses one hundred thousand miles.** This drop adds about
-  twenty-four thousand nine hundred miles of new road and seventy-three new cities,
+  twenty-five thousand eight hundred miles of new road and eighty-two new cities,
   bringing the network past one hundred thousand miles you can actually drive --
-  123,713 miles across 448 cities and 1,003 routes.
+  124,638 miles across 457 cities and 1,018 routes.
 
 - **Exits now come straight from real-world maps -- with the correct exit names
   and numbers.** On the Interstates, your stops and your destination exit are
