@@ -4,6 +4,12 @@
 
 ### Added
 
+- **Two Tennessee cities join the Interstate 40 run across the state.** Jackson
+  now breaks up the long Memphis-to-Nashville haul, and Cookeville splits the
+  Nashville-to-Knoxville climb over the Cumberland Plateau -- so driving clear
+  across Tennessee now stops in real towns the whole way (Jackson, Nashville,
+  Cookeville) with Buck Snort and Parker Crossroads still along the road.
+
 - **Nine famous Interstate stretches open up at once.** The New York Thruway from
   the city to Albany up the Hudson Valley; Interstate 5 from Sacramento to Redding;
   the Cajon Pass climb from Riverside to Victorville -- a real mountain grade;
@@ -71,9 +77,9 @@
   truck stops, rest areas, and the Red River crossing along the way.
 
 - **The drivable map crosses one hundred thousand miles.** This drop adds about
-  five thousand seven hundred miles of new road and thirty-two new cities,
+  five thousand seven hundred miles of new road and thirty-four new cities,
   bringing the network past one hundred thousand miles you can actually drive --
-  104,473 miles across 407 cities and 794 routes.
+  104,482 miles across 409 cities and 796 routes.
 
 - **Exits now come straight from real-world maps -- with the correct exit names
   and numbers.** On the Interstates, your stops and your destination exit are

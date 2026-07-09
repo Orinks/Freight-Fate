@@ -659,9 +659,14 @@ def test_legs_are_sane_and_unique(world):
 
 
 def leg_terrain(world, a, b):
-    route = world.route_from_cities([a, b])
-    assert route is not None, f"no direct leg {a}-{b}"
-    return route.legs[0].terrain
+    # A famous corridor may now be a multi-leg chain (e.g. Knoxville-Nashville
+    # runs Knoxville->Cookeville->Nashville). The pinned landform lives on
+    # whichever leg actually crosses it, so return the strongest terrain along
+    # the whole drive (mountain > hills > flat).
+    route = world.supported_route(a, b)
+    assert route is not None, f"no route {a}-{b}"
+    rank = {"flat": 0, "hills": 1, "mountain": 2}
+    return max((leg.terrain for leg in route.legs), key=lambda t: rank[t])
 
 
 def test_famous_corridors_have_real_terrain(world):

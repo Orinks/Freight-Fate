@@ -5989,6 +5989,24 @@
       "locations": [],
       "lat": 31.0982,
       "lon": -97.3428
+    },
+    "jackson_tn_us": {
+      "spoken_city": "Jackson",
+      "state": "TN",
+      "country": "US",
+      "region": "mid_south",
+      "locations": [],
+      "lat": 35.6145,
+      "lon": -88.8139
+    },
+    "cookeville_tn_us": {
+      "spoken_city": "Cookeville",
+      "state": "TN",
+      "country": "US",
+      "region": "mid_south",
+      "locations": [],
+      "lat": 36.1628,
+      "lon": -85.5016
     }
   }
 }
