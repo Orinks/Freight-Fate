@@ -9,6 +9,13 @@
   actually drive, across 386 cities and 737 routes. (Numbers finalized at
   release from `tools/map_stats.py --since <last release>`.)
 
+- **Exits now come straight from real-world maps -- with the correct exit names
+  and numbers.** On the Interstates, your stops and your destination exit are
+  announced with their actual exit number and name and the places they point to --
+  "Exit 33, Yemassee," "toward Beaufort and Port Royal," "Durham" -- taken directly
+  from real map data, so you always know the right exit to take. This now covers
+  the whole Interstate network.
+
 - **Routes now carry the real posted speed limits.** Instead of estimating a
   limit from the road type, most legs now use the actual posted speed limits from
   map data (interstates, US highways, and more), so your truck runs the real
