@@ -4,6 +4,14 @@
 
 ### Added
 
+- **The Kentucky parkways and the Appalachian coalfields open up.** Thirteen new
+  runs through some of the most storied hauling country in the East: Pound Gap
+  from Johnson City to Pikeville, Corridor G from Charleston, the Cumberland Gap
+  on US-25E, the Mountain Parkway to Hazard, Interstate 68 over the Alleghenies to
+  Hagerstown, and the New River Gorge road to Beckley -- real mountain grades with
+  brake checks, plus the Bluegrass, Western Kentucky, and Cumberland parkways
+  through Bardstown, Somerset, and Middlesboro.
+
 - **Georgia fills in from the mountains to the Florida line.** Athens now connects
   to Macon, Augusta, and Greenville, South Carolina; Macon reaches Columbus;
   LaGrange drops to Columbus on Interstate 185; and across the south, Albany links
@@ -92,9 +100,9 @@
   truck stops, rest areas, and the Red River crossing along the way.
 
 - **The drivable map crosses one hundred thousand miles.** This drop adds about
-  seven thousand seven hundred miles of new road and thirty-four new cities,
+  nine thousand one hundred miles of new road and thirty-four new cities,
   bringing the network past one hundred thousand miles you can actually drive --
-  106,481 miles across 409 cities and 817 routes.
+  107,909 miles across 409 cities and 830 routes.
 
 - **Exits now come straight from real-world maps -- with the correct exit names
   and numbers.** On the Interstates, your stops and your destination exit are
