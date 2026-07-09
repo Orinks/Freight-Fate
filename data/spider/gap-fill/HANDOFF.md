@@ -188,8 +188,17 @@ against slug variants, region FROM THE CLASSIFIER, split-don't-duplicate when
 it lands on an existing leg -- e.g. Lima splits the new Toledo-Dayton leg,
 Bloomington splits Indianapolis-Evansville).
 
-CITY WAVE 1 -- corridor-critical, build after Batch 4 (10 cities). These
+CITY WAVE 1 -- corridor-critical, build after Batch 4 (11 cities). These
 unlock or split legs the batch plan needs:
+- Jackson, Tennessee -- BUILD FIRST, owner priority with a history: this is
+  the city the slug-key migration was built FOR (three-Jacksons collision),
+  and pickaxe across all branches proves it was never actually added
+  afterward -- the intention was lost, not the data. Build: split the 209mi
+  memphis-nashville I-40 leg into memphis-jackson + jackson-nashville,
+  KEEPING the existing curated checkpoints (Parker Crossroads, Buck Snort,
+  Kingston Springs) and the existing "Pilot Travel Center Jackson" stop on
+  the correct halves. Region from the classifier. NOT Jackson, Mississippi;
+  not Jackson, Michigan.
 - Wytheville, Virginia -- I-77 x I-81 junction; unlocks Beckley-Winston-Salem
   as two real legs.
 - Lynchburg, Virginia -- US-29/US-460 hub; fixes the Roanoke-Charlottesville
@@ -199,20 +208,22 @@ unlock or split legs the batch plan needs:
   bigger, I-75 x US-30).
 - Terre Haute, Indiana -- I-70 Indianapolis-St. Louis midpoint, genuine void.
 - Effingham, Illinois -- I-57 x I-70 junction, famous trucking crossroads.
-- Jackson, Tennessee -- I-40 Memphis-Nashville midpoint, genuine void. (NOT
-  Jackson, Mississippi, which is long-established and got its Hattiesburg leg
-  in the Deep South batch; and not the existing Jackson, Michigan either.)
 - Ocala, Florida -- I-75 Tampa-Gainesville, real distribution hub.
 - Longview, Texas -- I-20 east-Texas void; enables Tyler-Texarkana chain.
 - Dubuque, Iowa -- tri-state US-151/US-61 hub.
 
 CITY WAVE 2 -- eastern/central voids, build after Batch 6 (~12 cities):
 - Paducah, Kentucky (I-24 x Ohio River) and Owensboro, Kentucky (US-60).
-- Kingsport or Bristol (the Tennessee/Virginia Tri-Cities -- NOT the existing
-  Washington tri_cities_wa_us node) -- I-81 void between Knoxville and
-  Roanoke; pick ONE anchor. NOTE: Johnson City, the metro's third city, is
-  ALREADY on the map (it sits on I-26 and carries Batch 3's Johnson
-  City-Pikeville pair), so this item is only about anchoring I-81 proper.
+- Tri-Cities Tennessee/Virginia, DOWNGRADED after verification (NOT the
+  existing Washington tri_cities_wa_us node): the corridor was worked
+  recently -- Morristown and Johnson City are nodes, and the 176mi
+  johnson_city-roanoke I-81 leg already SPEAKS Bristol, Abingdon, Marion,
+  Wytheville, Dublin, Christiansburg, and Salem as checkpoints. Promoting
+  Wytheville (Wave 1) splits that leg and anchors I-81; after that,
+  Kingsport/Bristol move to Wave 4 owner-picks unless the owner wants the
+  Tri-Cities as a freight destination in its own right. Kingsport sits on
+  US-11W/US-23 off the built path -- it would also ride the future Batch 3
+  johnson_city-pikeville leg as a checkpoint.
 - Staunton, Virginia -- I-81 x I-64 junction.
 - Cumberland, Maryland -- I-68 mid-void (with the Morgantown-Hagerstown leg).
 - Parkersburg, West Virginia -- I-77 Ohio River void.
