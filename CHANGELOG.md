@@ -4,6 +4,14 @@
 
 ### Added
 
+- **Nine famous Interstate stretches open up at once.** The New York Thruway from
+  the city to Albany up the Hudson Valley; Interstate 5 from Sacramento to Redding;
+  the Cajon Pass climb from Riverside to Victorville -- a real mountain grade;
+  Interstate 75 from Toledo to Dayton past Neil Armstrong's hometown of Wapakoneta;
+  Kansas City to Joplin past Harry Truman's birthplace; plus Chicago to Champaign,
+  Indianapolis to Evansville, Colorado Springs to Pueblo, and Tallahassee to Lake
+  City across the quiet Big Bend.
+
 - **The Deep South fills in with seven new connections.** Birmingham now runs to
   Chattanooga on Interstate 59; Mobile, Meridian, and Tupelo link up the length of
   US-45; Jackson and Gulfport both reach Hattiesburg on US-49; Columbia connects to
@@ -63,9 +71,9 @@
   truck stops, rest areas, and the Red River crossing along the way.
 
 - **The drivable map crosses one hundred thousand miles.** This drop adds about
-  four thousand five hundred miles of new road and thirty-two new cities,
+  five thousand seven hundred miles of new road and thirty-two new cities,
   bringing the network past one hundred thousand miles you can actually drive --
-  103,340 miles across 407 cities and 785 routes.
+  104,473 miles across 407 cities and 794 routes.
 
 - **Exits now come straight from real-world maps -- with the correct exit names
   and numbers.** On the Interstates, your stops and your destination exit are
