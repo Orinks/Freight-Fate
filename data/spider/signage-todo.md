@@ -101,6 +101,16 @@ duck-hunting flooded timber. A duck-call or grain-elevator billboard is perfect
 here; also good "watch for farm equipment / grain-truck" seasonal signage. The
 Arkansas River crossing on the Pine Bluff leg is a landmark moment.
 
+## Dothan / wiregrass 3-state hub (built 2026-07-09, spider coverage) -- signage
+
+(`montgomery->dothan->tallahassee` + `dothan->albany`, US-231/US-84 peanut country.)
+**Dothan, AL** = "Peanut Capital of the World" -- the National Peanut Festival and
+the painted-peanut statues downtown; a giant-peanut billboard writes itself.
+**Blakely, GA** (on the Albany leg) = home of the last-standing Confederate flagpole
+and Kolomoki Mounds; also peanut country. **Troy, AL** = Troy University; **Ozark,
+AL** = next to Fort Novosel (Army aviation). The Chattahoochee and Apalachicola
+River crossings are real landmark moments.
+
 ## Owner checkpoint requests (place when the road gets built)
 
 - **Midlothian, VA** on **US-60** (Midlothian Turnpike) west/southwest of

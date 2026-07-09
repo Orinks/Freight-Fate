@@ -5971,6 +5971,15 @@
       "locations": [],
       "lat": 34.5001,
       "lon": -91.5526
+    },
+    "dothan_al_us": {
+      "spoken_city": "Dothan",
+      "state": "AL",
+      "country": "US",
+      "region": "mid_south",
+      "locations": [],
+      "lat": 31.2232,
+      "lon": -85.3905
     }
   }
 }

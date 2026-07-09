@@ -4,6 +4,12 @@
 
 ### Added
 
+- **Dothan, Alabama's "Peanut Capital," ties three states together.** The new
+  wiregrass city connects Montgomery, Tallahassee, and Albany by real US-highway
+  runs through the peanut country of southeast Alabama, the Florida Panhandle, and
+  southwest Georgia -- stopping at towns like Troy, Ozark, Blakely, and Cottondale
+  and crossing the Chattahoochee and Apalachicola rivers.
+
 - **Stuttgart, the rice and duck capital, anchors Arkansas's farm country.** The
   new city sits in the Grand Prairie rice belt, reached from Little Rock through
   England and looping down to Pine Bluff, crossing the Arkansas River -- flat
@@ -23,9 +29,9 @@
   truck stops, rest areas, and the Red River crossing along the way.
 
 - **The drivable map crosses one hundred thousand miles.** This drop adds about
-  two thousand six hundred miles of new road and thirty new cities,
+  two thousand nine hundred miles of new road and thirty-one new cities,
   bringing the network past one hundred thousand miles you can actually drive --
-  101,369 miles across 405 cities and 766 routes.
+  101,665 miles across 406 cities and 769 routes.
 
 - **Exits now come straight from real-world maps -- with the correct exit names
   and numbers.** On the Interstates, your stops and your destination exit are
