@@ -27,6 +27,11 @@
   breaks into stops through Marianna, DeFuniak Springs, and Spanish Fort, with
   truck stops and rest areas along the way.
 
+- **The Indiana Toll Road and southwest Ohio fill in.** Elkhart, Indiana -- the
+  RV manufacturing capital -- joins the map on Interstate 80/90, linking Toledo
+  across to South Bend, and Dayton and Cincinnati are now directly connected on
+  Interstate 75. You will pass towns like Swanton, Fremont, Monroe, and Sharonville.
+
 - **Mississippi opens up: Tupelo, Hattiesburg, and Grenada join the map.** Three
   new cities knit together the state's Interstates -- Interstate 22 from Birmingham
   through Tupelo to Memphis, Interstate 59 down through Hattiesburg to New Orleans,

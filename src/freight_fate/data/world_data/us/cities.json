@@ -5881,6 +5881,15 @@
       "locations": [],
       "lat": 33.7712,
       "lon": -89.8087
+    },
+    "elkhart_in_us": {
+      "spoken_city": "Elkhart",
+      "state": "IN",
+      "country": "US",
+      "region": "great_lakes",
+      "locations": [],
+      "lat": 41.682,
+      "lon": -85.9767
     }
   }
 }
