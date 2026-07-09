@@ -6304,6 +6304,15 @@
       "locations": [],
       "lat": 44.368,
       "lon": -100.351
+    },
+    "cape_charles_va_us": {
+      "spoken_city": "Cape Charles",
+      "state": "VA",
+      "country": "US",
+      "region": "atlantic_southeast",
+      "locations": [],
+      "lat": 37.2676,
+      "lon": -76.0174
     }
   }
 }

@@ -10,6 +10,29 @@ The work is generally autonomous per the established rules (node rule,
 enrichment recipe, spoken invariants). Everything below is ordered so Opus can
 start at the top and keep going.
 
+## FLAVOR: Chesapeake Bay Bridge-Tunnel (structure built 2026-07-10)
+Cape Charles VA minted; norfolk->salisbury US-13 split into the 43mi CBBT crossing
+(norfolk->cape_charles) + the 96mi Delmarva run. Map side DONE: the crossing carries
+a checkpoint at mile 17, 6 factual atmosphere landmarks (entering / Sea Gull Island
+pull-off / Thimble Shoal + Chesapeake Channel tunnels / "no land visible" / reaching
+the Eastern Shore), and a $45 commercial toll (cash_card). 1.9 CONTENT TO WORKSHOP
+(owner ideas, NOT on the map -- parody/mini-game/achievement ships on the 1.9 line):
+- Funny placemarkers ("You can no longer see land. This is fine." / "Now entering a
+  tunnel. Under the ocean. In a truck. Sure.").
+- SEAGULL mini-game/collectible at Sea Gull Island: catch a seagull off the pier
+  (skill mini-game) OR pick up seagull roadkill on the crossing (grim collectible),
+  then the ironic drop-off at an Eastern Shore sea-life center. Rides
+  [[project-streamable-minigames]] + the stoppable-stop spine. Streamer-bait, audio-
+  friendly. (No OSM sea-life-center POI found on the Eastern Shore -- curate the
+  drop-off stop, or use the Virginia Aquarium at the Norfolk end.)
+- ACHIEVEMENTS: "Can't See The Shore" (first crossing), "Under the Sea" (tunnels).
+- WIND-CLOSURE HAZARD (killer realism): the real CBBT bans high-profile vehicles
+  (trucks!) at sustained wind >~40mph -- a weather-mechanic hook where the shortcut
+  gets CLOSED and you wait it out or reroute the long way through Richmond. Pairs
+  with the toll + [[project-backroad-stoplights]] clock economy (the toll booth is a
+  clock-eating stop; note the toll system ALREADY has an `ezpass` method for the
+  Golden EZ Pass idea).
+
 ## PROGRESS (update as batches land)
 
 - [x] Jackson TN + Cookeville TN promoted, I-40 split (2b3ccc1)

@@ -4,6 +4,13 @@
 
 ### Added
 
+- **You can now cross the Chesapeake Bay Bridge-Tunnel.** Cape Charles joins the
+  map on Virginia's Eastern Shore, and the run north from Norfolk takes you out
+  across the seventeen-mile Bridge-Tunnel -- diving into two tunnels beneath the
+  shipping channels, past Sea Gull Island, out to where no land is visible in any
+  direction, and up the Delmarva peninsula to Salisbury. It carries a hefty truck
+  toll, because of course it does.
+
 - **The northern Rockies and the Great Basin connect end to end.** Fifteen final
   runs: Missoula to Helena over MacDonald Pass, Provo to Green River over Soldier
   Summit, and Fort Collins up to Laramie -- real mountain grades -- plus Helena to
@@ -188,9 +195,9 @@
   truck stops, rest areas, and the Red River crossing along the way.
 
 - **The drivable map crosses one hundred thousand miles.** This drop adds about
-  twenty-four thousand five hundred miles of new road and sixty-seven new cities,
+  twenty-four thousand five hundred miles of new road and sixty-eight new cities,
   bringing the network past one hundred thousand miles you can actually drive --
-  123,249 miles across 442 cities and 996 routes.
+  123,254 miles across 443 cities and 997 routes.
 
 - **Exits now come straight from real-world maps -- with the correct exit names
   and numbers.** On the Interstates, your stops and your destination exit are
