@@ -4,6 +4,12 @@
 
 ### Added
 
+- **Three more western Interstate gaps close up.** Twin Falls now connects to
+  Ogden on Interstate 84, Idaho Falls to Pocatello on Interstate 15 past the Potato
+  Capital of Blackfoot, and Casper climbs to Buffalo on Interstate 25 through the
+  Powder River country -- filling in the Mountain West so the long-haul routes
+  through Idaho, Utah, and Wyoming connect city to city.
+
 - **Interstate 80 across Nebraska is now continuous.** The one missing gap,
   Kearney to North Platte through Cozad and Gothenburg, is filled -- so the great
   transcontinental Interstate 80 run across the Platte River valley connects city
@@ -50,9 +56,9 @@
   truck stops, rest areas, and the Red River crossing along the way.
 
 - **The drivable map crosses one hundred thousand miles.** This drop adds about
-  three thousand five hundred miles of new road and thirty-two new cities,
+  three thousand eight hundred miles of new road and thirty-two new cities,
   bringing the network past one hundred thousand miles you can actually drive --
-  102,245 miles across 407 cities and 775 routes.
+  102,596 miles across 407 cities and 778 routes.
 
 - **Exits now come straight from real-world maps -- with the correct exit names
   and numbers.** On the Interstates, your stops and your destination exit are
