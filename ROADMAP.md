@@ -10,8 +10,12 @@
 
 ## 1.9 in flight (`feat/career-1.9`)
 
-Two threads: make the drive *between* the exits real, and make the world
-big and specific enough that every run feels like a place.
+Four threads: make the drive *between* the exits real, give every maneuver
+and working hour weight, make the career read like real employment, and
+make the world big and specific enough that every run feels like a place.
+(Also releasing with 1.9: everything built for 1.8 that missed the 1.8.0
+cut -- the exit setup, expanded enforcement, logbook, timed dock work, and
+city service drives below.)
 
 ### Lanes and maneuvering
 
@@ -50,6 +54,84 @@ big and specific enough that every run feels like a place.
       direction flipped -- then merges up the on-ramp onto the highway trip
       with clock and toll continuity and a `departure_chain` save marker.
       Facilities without turn-level data keep the scripted highway start.
+
+### Maneuvers, enforcement, and the working day
+
+Mechanics finished after the 1.8.0 cut, so they release with 1.9 (the
+detailed design notes live in the sections further down, whose "Shipped
+for 1.8" framing predates the release split):
+
+- [x] **Highway exits take a real setup.** X signals the announced exit,
+      the GPS asks for the right-side exit lane, checks ramp speed at the
+      gore, and explains missed exits; destination ramps follow the same
+      speed/lane/intent contract, and merge/exit traffic puts spoken
+      pressure on the maneuver.
+- [x] **Enforcement beyond the speeding stop.** Weigh-station blow-pasts
+      and severe visible damage draw roadside stops; running from lights
+      escalates through warnings to a felony stop with spike strips and
+      loaded-run cancellation; construction zones stage a merge/flagger
+      taper before the barrels; CB chatter hints at bears and work-zone
+      enforcement a few miles out.
+- [x] **The working day has weight.** An in-cab logbook records a real
+      Record of Duty Status that traffic stops actually read; loading,
+      unloading, and pull-ins take spoken on-duty time; loaded launches ramp
+      in like a heavy truck; rush hour and corridor busyness shape traffic
+      and hazard pacing.
+- [x] **Drive to city services.** The terminal's freight office, garage,
+      and truck dealer are short local drives with sourced names, road
+      context, and (where the data supports it) real street-by-street
+      turns.
+
+### Career, dispatch, and business
+
+The other half of the 1.9 line: the career now reads like employment at a
+real starter carrier, not a menu of freight. Detail lives in the Business
+section below and the Unreleased changelog; the release-line view:
+
+- [x] **Grounded start choices.** New careers pick among fictional
+      company-driver starter carriers (assigned equipment, carrier-paid
+      fuel and routine repairs, different wage/dispatch/freight tradeoffs,
+      carrier-shaped dispatch boards) or a higher-risk owner-operator start
+      with operating costs active from day one.
+- [x] **A 30-level business arc.** Company-driver ranks lead to the
+      level-18 leased-on owner-operator gate, level-21 authority prep,
+      level-25 own authority, and independent ranks through 30 -- with
+      distinct guidance voices per level band and haul-length caps that
+      grow through the whole arc instead of maxing out by level 12.
+- [x] **Dispatch freedom is earned.** New hires run the load and lane
+      dispatch assigns -- accept or decline against a small budget that
+      refills on promotion, no route menu -- with load choice from the full
+      board unlocking at level 8 and route choice reserved for
+      owner-operators and own authority. Declined loads stay declined.
+- [x] **The economy pays like a real one.** Carrier accounts cover a
+      company driver's road fuel and repairs; specialty cargo and on-time
+      streaks compound experience; reputation pays a continuous dispatch
+      trust bonus; personal money buys endorsement courses and motel rest.
+- [x] **Trailers matter.** Trailer programs for leased-on owner-operators,
+      owned trailers under own authority, and dispatch rows that preview
+      trailer fit and estimated take-home before you accept.
+- [x] **A first day that lands.** A repeating first-day briefing until the
+      first dispatch is accepted, a Career plan terminal item naming the
+      next practical step, and a rewritten How to play that teaches earned
+      dispatch freedom.
+- [x] **114 achievements.** The badge wall nearly doubles: state, region,
+      and city arrivals, cargo firsts, close calls, mishaps, and career
+      milestones, each nodding to a country or trucking song.
+- [x] **Save compatibility.** Careers back through the version-4 schema
+      load with sensible defaults, and newer-snapshot saves no longer crash
+      older-schema loads.
+
+### Radio
+
+- [x] **The in-cab radio follows the map.** M toggles, brackets tune the
+      currently receivable stations, Y speaks status, Tab has a Radio
+      screen; streamer-safe by default with real public streams behind an
+      explicit opt-in.
+- [x] **Hosts, regional stations, and real signal behavior.** The Roadhouse
+      and Night Line have live hosts; twelve fictional regional stations
+      with newly composed songs cover markets across the map, fading to
+      static at the fringe of their range and handing back to the Roadhouse
+      when the signal drops.
 
 ### World and narration
 
@@ -353,7 +435,7 @@ Net-new realism candidates, roughly by area:
   owner-operator arc is shipped; true-authority depth, trailer polish,
   operating-cost tuning, and market pricing are tracked under Business.
 
-## Shipped for 1.8: local city service drives
+## Local city service drives (built for 1.8, releases with 1.9)
 
 The first ATS-style city-layout foundation is in: from the terminal, **Drive to
 city services** lets the player pick the freight market office, terminal
@@ -435,7 +517,7 @@ Follow-up hooks for the roadmap worker:
   offices, while the business arc remains focused on driver/company vs
   owner-operator settlement and operating costs.
 
-## Shipped for 1.8: timed facility work and stop-menu settling
+## Timed facility work and stop-menu settling (built for 1.8, releases with 1.9)
 
 Pickup, loading, destination docking, unloading, and route-stop pull-ins now
 feel like short in-game actions instead of instant teleports. Loading and
@@ -455,7 +537,7 @@ Follow-ups for a later facility/keyboard polish pass:
 - If key repeat is ever enabled globally, add an explicit post-transition input
   guard so held braking/navigation keys cannot leak into newly opened menus.
 
-## Shipped for 1.8: in-cab logbook (Record of Duty Status)
+## In-cab logbook, Record of Duty Status (built for 1.8, releases with 1.9)
 
 The game talks about an ELD and the shipped `TrafficStopState` already runs a
 spoken "license/logbook check." That now has a real logbook behind it:
