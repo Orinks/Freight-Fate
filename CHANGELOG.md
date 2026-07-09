@@ -4,6 +4,11 @@
 
 ### Added
 
+- **Dallas now connects to the Texas Panhandle up US-287.** Two new runs -- Dallas
+  to Wichita Falls, then on to Amarillo through Decatur, Bowie, Vernon, Childress,
+  and Memphis -- open the busy Highway 287 truck route across the plains, crossing
+  the Red River, and tie Dallas to Amarillo (and onward to Albuquerque).
+
 - **The Interstate 20 run from Birmingham to Tuscaloosa is now drivable.** This
   short but heavily-trucked segment past the Mercedes-Benz plant had no route of
   its own; adding it means the whole Interstate 20 corridor -- Atlanta, Birmingham,
@@ -40,9 +45,9 @@
   truck stops, rest areas, and the Red River crossing along the way.
 
 - **The drivable map crosses one hundred thousand miles.** This drop adds about
-  three thousand miles of new road and thirty-two new cities,
+  three thousand three hundred miles of new road and thirty-two new cities,
   bringing the network past one hundred thousand miles you can actually drive --
-  101,783 miles across 407 cities and 772 routes.
+  102,146 miles across 407 cities and 774 routes.
 
 - **Exits now come straight from real-world maps -- with the correct exit names
   and numbers.** On the Interstates, your stops and your destination exit are
