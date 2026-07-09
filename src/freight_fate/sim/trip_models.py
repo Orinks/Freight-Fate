@@ -138,6 +138,10 @@ NIGHT_HAZARD_BONUS = 0.10  # extra hazard risk after dark
 # crossing the driver should reset a watch for.
 TIMEZONE_DWELL_MI = 10.0
 NIGHT_TRAFFIC_KEEP = 0.4  # chance a traffic zone still forms at night
+# Open road guaranteed between generated slow zones: without it, independent
+# placement could drop one construction zone inside another, or chain them
+# back to back with no gap (player-reported on the 2026-07-09 snapshot).
+ZONE_MIN_GAP_MI = 8.0
 TRAFFIC_LOOKAHEAD_MI = 2.5
 TRAFFIC_WARNING_GAP_S = 2.2
 ZONE_WARNING_LOOKAHEAD_MI = 2.0  # minimum distance heads-up for a zone

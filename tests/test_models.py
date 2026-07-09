@@ -387,3 +387,21 @@ def test_unit_formatting():
     assert "miles per hour" in s.speed_text(60)
     s.imperial_units = False
     assert s.speed_text(60) == "97 kilometers per hour"
+
+
+def test_job_spoken_names_always_carry_the_state(world):
+    """Dispatch offers name places a player may never have heard of; the
+    state must always ride along ("McCall, Idaho"), not only when two
+    cities share a name (player request)."""
+    board = JobBoard(world, seed=5)
+    jobs = board.offers("Chicago", endorsements=set(), level=2)
+    assert jobs
+    for job in jobs:
+        origin_city = world.city(job.origin)
+        dest_city = world.city(job.destination)
+        assert job.spoken_origin == origin_city.spoken_qualified
+        assert job.spoken_destination == dest_city.spoken_qualified
+        if origin_city.state:
+            assert origin_city.state in job.spoken_origin
+        if dest_city.state:
+            assert dest_city.state in job.spoken_destination

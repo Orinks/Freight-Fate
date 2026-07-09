@@ -637,7 +637,7 @@ class DrivingControlsMixin:
         safe_speed = self.ctx.settings.speed_text(self.weather.effects.safe_speed_mph)
         parts = [
             f"It is {time_of_day(self.trip.local_hour)}.",
-            f"{source} {self.weather.describe()}.",
+            f"{source} {self.weather.describe(self.ctx.settings.imperial_units)}.",
             f"Safe speed about {safe_speed}.",
         ]
         if not self.weather.live:

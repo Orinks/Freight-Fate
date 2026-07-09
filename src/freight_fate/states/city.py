@@ -308,7 +308,9 @@ class CityMenuState(MenuState):
         if desc is None:
             # deterministic per city and hour, so asking twice agrees
             seed = zlib.crc32(f"{city.key}:{int(p.game_hours)}".encode())
-            desc = WeatherSystem(city.region, seed=seed, game_hours=season_hours).describe()
+            desc = WeatherSystem(city.region, seed=seed, game_hours=season_hours).describe(
+                self.ctx.settings.imperial_units
+            )
         source = "Live weather" if live else "Weather"
         self.ctx.say(
             f"It is {clock_text(hour)} {zone.name}, {time_of_day(hour)}, "

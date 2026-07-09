@@ -257,6 +257,14 @@
 
 ### Changed
 
+- **Dispatches and route planning now always name the state with each
+  city.** A job reads as "to McCall, Idaho" even when no other McCall
+  exists, so an unfamiliar town still tells you roughly where you are
+  headed. And each route option now says which cities it passes through
+  right in the option itself -- "through Boise, Idaho, then McCall" --
+  instead of only in the F1 help, so you can weigh routes the same way
+  the end-of-trip summary describes them. Thanks to a player suggestion.
+
 - **Online settings are now gathered in one place.** The Discord presence
   toggle moved from Settings, Gameplay to Settings, Online, alongside the
   drivers board and the new cloud backup options. And before you have set
@@ -315,6 +323,19 @@
   Duluth no longer sounds like a summer haul into Cincinnati.
 
 ### Fixed
+
+- **Construction zones no longer stack or chain together.** Slow zones were
+  placed independently, so a construction zone could land inside another
+  one, or two could start back to back with no open road between. Zones now
+  keep at least eight miles apart, so "end of construction" always means
+  open road ahead. Thanks to a player report.
+
+- **Metric mode now covers the whole weather report.** With units set to
+  kilometers, pressing V mid-drive still read the temperature in Fahrenheit
+  and low visibility in miles. Temperatures now speak in Celsius and
+  visibility in kilometers everywhere weather is described: the V report,
+  weather-change announcements while driving, trip resume summaries, and
+  the terminal weather check. Thanks to a player report.
 
 - **The engine sound now stops when you shut down to sleep.** Going to sleep
   at a rest stop, motel, or on the shoulder shuts the engine down, but the

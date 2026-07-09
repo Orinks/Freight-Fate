@@ -399,13 +399,27 @@ class Trip:
         zones: list[Zone] = []
         total = self.route.miles
         n = max(0, int(total / 150))
+        # Spans already claimed by placed zones. Real work zones are signed
+        # well apart; without this, independent draws could nest one zone
+        # inside another or butt two together with no open road between.
+        spans: list[tuple[float, float]] = []
         for _ in range(n):
-            at = self._rng.uniform(15, max(16, total - 20))
-            length = self._rng.uniform(3, 9)
+            for _attempt in range(8):
+                at = self._rng.uniform(15, max(16, total - 20))
+                end = at + self._rng.uniform(3, 9)
+                if all(
+                    at > s_end + ZONE_MIN_GAP_MI or end < s_start - ZONE_MIN_GAP_MI
+                    for s_start, s_end in spans
+                ):
+                    break
+            else:
+                continue  # the route is crowded; place fewer zones instead
             if self._rng.random() < 0.6:
-                zones.append(Zone(at, at + length, 45, "construction"))
+                zones.append(Zone(at, end, 45, "construction"))
+                spans.append((at, end))
             elif not night or self._rng.random() < NIGHT_TRAFFIC_KEEP:
-                zones.append(Zone(at, at + length, 50, "heavy traffic"))
+                zones.append(Zone(at, end, 50, "heavy traffic"))
+                spans.append((at, end))
         zones.extend(self._facility_speed_zones())
         zones.sort(key=lambda z: z.start_mi)
         return zones
@@ -827,7 +841,7 @@ class Trip:
         if changed is not None:
             self._emit(
                 TripEventKind.WEATHER_CHANGE,
-                f"Weather changing: {self.weather.describe()}",
+                f"Weather changing: {self.weather.describe(self.imperial)}",
                 weather=changed,
             )
         self.truck.grip = self.weather.effects.grip

@@ -1685,3 +1685,35 @@ def test_engine_audio_mirror_sync_catches_any_out_of_band_stop():
         assert not app.ctx.audio.engine_running
     finally:
         app.shutdown()
+
+
+def test_route_planning_labels_name_through_cities_with_states():
+    """Route options must say which cities they pass through, state-qualified,
+    in the spoken label itself -- not only in the F1 help (player request:
+    'I have no idea where McCall is, but knowing the state gives me a
+    general idea of, oh, that's the way we're going')."""
+    from freight_fate.app import App
+    from freight_fate.models import JobBoard
+    from freight_fate.states.city_dispatch import RouteSelectState
+
+    app = App()
+    try:
+        world = app.ctx.world
+        job = next(
+            j
+            for j in JobBoard(world, seed=3).offers("Chicago", endorsements=set(), level=2)
+            if len(world.supported_route_options(j.origin, j.destination)[0].cities) > 2
+        )
+        routes = world.supported_route_options(job.origin, job.destination)
+        state = RouteSelectState(app.ctx, job, routes)
+        state.items = state.build_items()
+
+        label = state.items[0].text
+        assert "through " in label or "passing no major cities" in label
+        route = routes[0]
+        first_via = world.city(route.cities[1])
+        assert first_via.spoken_qualified in label
+        # The destination line carries the state too.
+        assert world.city(job.destination).spoken_qualified == job.spoken_destination
+    finally:
+        app.shutdown()

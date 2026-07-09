@@ -259,7 +259,7 @@ class DrivingState(DrivingControlsMixin, DrivingUpdateMixin, DrivingEventMixin, 
                 self.ctx.say(
                     f"Resuming {drive_name}: {destination}. {progress} "
                     f"{hours_used:.1f} of {self.job.deadline_game_h:.0f} hours used. "
-                    f"{now}. {mode}. {self.weather.describe()}. "
+                    f"{now}. {mode}. {self.weather.describe(self.ctx.settings.imperial_units)}. "
                     f"{self._parked_entry_status()}",
                     interrupt=False,
                 )
@@ -270,7 +270,7 @@ class DrivingState(DrivingControlsMixin, DrivingUpdateMixin, DrivingEventMixin, 
                     f"{progress} "
                     f"{hours_used:.1f} hours used of {self.job.deadline_game_h:.0f}. "
                     f"It is {now}. Transmission is {mode}. "
-                    f"Weather: {self.weather.describe()}. "
+                    f"Weather: {self.weather.describe(self.ctx.settings.imperial_units)}. "
                     f"You are parked. {self._engine_entry_instruction()} "
                     "When air pressure is ready, press "
                     f"{self.ctx.control_hint('parking_brake')} to release the parking brake.",
@@ -285,7 +285,7 @@ class DrivingState(DrivingControlsMixin, DrivingUpdateMixin, DrivingEventMixin, 
             )
             if self._terse_speech():
                 self.ctx.say(
-                    f"{objective}{now}. {mode}. {self.weather.describe()}. "
+                    f"{objective}{now}. {mode}. {self.weather.describe(self.ctx.settings.imperial_units)}. "
                     f"{self._parked_entry_status()}",
                     interrupt=False,
                 )
@@ -293,7 +293,7 @@ class DrivingState(DrivingControlsMixin, DrivingUpdateMixin, DrivingEventMixin, 
                 self.ctx.say(
                     f"You are at the wheel. {objective}It is {now}. "
                     f"Transmission is {mode}. "
-                    f"Weather: {self.weather.describe()}. "
+                    f"Weather: {self.weather.describe(self.ctx.settings.imperial_units)}. "
                     f"{self._engine_entry_instruction()} "
                     f"{self.ctx.control_hint('help')} lists the controls.",
                     interrupt=False,
