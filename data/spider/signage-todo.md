@@ -29,6 +29,46 @@ need BUILT legs, so this list trails the map build.
 - **Spartanburg / Greer, SC** -- the BMW plant on I-85 is a real freight landmark
   (and a possible "manufacturing" pickup flavor later).
 
+## New corridors built 2026-07-09 -- signage opportunities
+
+**I-75 South Georgia** (`*->valdosta->tifton->cordele->macon`): **Ashburn, GA** --
+the "World's Largest Peanut" monument right on I-75 (prime, instantly parody-able).
+Cordele = self-proclaimed "Watermelon Capital of the World." Perry = the Georgia
+National Fairgrounds. Valdosta = "Winnersville."
+
+**I-75 North Georgia** (`chattanooga->dalton->cartersville->atlanta`): **Dalton, GA**
+= "Carpet Capital of the World" (floor it). Cartersville = Etowah Indian Mounds +
+the world's first outdoor Coca-Cola wall sign (1894).
+
+**I-10 Panhandle** (`tallahassee->crestview->pensacola->mobile`): **Pensacola** =
+the Blue Angels / National Naval Aviation Museum ("Cradle of Naval Aviation"),
+plus the Gulf beaches. DeFuniak Springs = a perfectly round natural lake.
+
+**SW Georgia** (`columbus`, `albany`): **Columbus** = Fort Benning ("Home of the
+Infantry") + the National Infantry Museum + Coca-Cola's birthplace history; the
+Chattahoochee whitewater. Plains/Jimmy Carter is just south. **Tuskegee** (already
+a placed landmark on I-85 SW) = the Airmen.
+
+**Mississippi** (I-22/I-59/I-55): **Tupelo** = Elvis Presley's birthplace (huge,
+on I-22) + the Natchez Trace. **Meridian** = the "Home of Jimmie Rodgers" (father
+of country music) + the world's largest carousel (Dentzel). **Laurel** = HGTV's
+*Home Town*. **Vicksburg** (existing) = the Civil War siege / military park.
+
+**Indiana Toll Road** (`toledo->elkhart->south_bend`): **Elkhart, IN** = "RV
+Capital of the World" + the RV/MH Hall of Fame (right on I-80/90). South Bend =
+Notre Dame ("Touchdown Jesus").
+
+**Arkansas NW / Walmart alley** (`fort_smith->fayetteville->bentonville->joplin`):
+**Bentonville** = Walmart's birthplace (the original 5&10 + the Walmart Museum) +
+Crystal Bridges Museum of American Art. Springdale = Tyson Foods. Fayetteville =
+the Razorbacks ("Woo Pig Sooie"). The Boston Mountains climb itself is a "steep
+grades / trucks check your brakes" sign moment.
+
+**Arkansas Ozarks** (`fayetteville->harrison->mountain_home->jonesboro`, US-412/62):
+Eureka Springs (near Harrison) = the Christ of the Ozarks statue + the Great
+Passion Play. Mountain Home / Bull Shoals lake country. Winding-road / runaway-
+truck-ramp signage fits these genuine mountain legs.
+
 ## Owner checkpoint requests (place when the road gets built)
 
 - **Midlothian, VA** on **US-60** (Midlothian Turnpike) west/southwest of
