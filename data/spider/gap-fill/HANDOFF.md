@@ -10,9 +10,23 @@ The work is generally autonomous per the established rules (node rule,
 enrichment recipe, spoken invariants). Everything below is ordered so Opus can
 start at the top and keep going.
 
-## Part 0 -- housekeeping Opus must do FIRST (one commit, ready to go)
+## PROGRESS (update as batches land)
 
-The worktree holds Batch 0, fully built and TEST-GREEN but uncommitted:
+- [x] Jackson TN + Cookeville TN promoted, I-40 split (2b3ccc1)
+- [x] Batch 0 -- 9 Interstate spine emergencies (2758aff)
+- [x] Batch 1b -- 11 Deep South legs (452a246)
+- [x] Batch 2 -- 10 Georgia legs (a6fa281)
+- [x] Batch 3 -- 13 Kentucky/Appalachian legs (a69de00)
+- [x] Scanner re-run 2026-07-10: corridor 392->353, nn 184->160; catalogs
+      refreshed to *-2026-07-10.txt. Now **409 cities / 830 legs / 107,909 mi**.
+- [ ] Batch 4 -- Carolinas & Virginia  <-- NEXT
+- [ ] City Wave 1 (after Batch 4), then Batch 5+ per Part 3.
+- Cadence reminder: re-run BOTH scanners every 2-3 batches (done above); the
+  flaky --add-maxspeed dispatcher needs a per-leg retry loop after each batch.
+
+## Part 0 -- housekeeping (DONE -- Batch 0 committed as 2758aff)
+
+The worktree held Batch 0, fully built and TEST-GREEN but uncommitted:
 nine interstate legs (New York-Albany I-87, Colorado Springs-Pueblo I-25,
 Chicago-Champaign I-57, Sacramento-Redding I-5, Indianapolis-Evansville I-69,
 Kansas City-Joplin I-49, Toledo-Dayton I-75, Riverside-Victorville I-15 Cajon
