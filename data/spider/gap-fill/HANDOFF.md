@@ -23,13 +23,21 @@ Built the four highest-value flavor corridors -- three iconic experiential cross
 Each iconic crossing got atmosphere landmarks + (where real) a toll. Pattern proven:
 a "nothing" spot (Sea Gull Island) becomes a content anchor for the 1.9 mini-game/
 achievement/weather hooks.
-REMAINING flavor picks (owner-taste, do as a curated pass when wanted): Natchez MS,
-Columbus MS, Florence AL, Rome GA, Gadsden AL, Moab/Vernal/Logan UT, Prescott AZ,
-Walla Walla WA, Port Angeles WA, Lufkin/Victoria/Paris-Sherman TX, Natchitoches/
-Houma LA, Clovis/Socorro NM, New London CT, Aberdeen SD, Alpena MI, Brunswick GA,
-Panama City FL, Modesto/Merced CA (CA-99), etc. NEXT PHASE: billboard runs (Opus
-autonomously drafts per-corridor billboard files -> owner workshops copy -> bake;
-see [[project-billboard-content-plan]]).
+FLAVOR CITY WAVE DONE (fbbb944 + 0f77b57): 22 flavor cities built -- sub-wave A
+(Gadsden, Florence AL, Rome, Columbus MS, Natchez, Brunswick, Panama City,
+Natchitoches, Houma) + sub-wave B (Socorro, Clovis, Sherman, Paris, Lufkin,
+Victoria, Modesto, Merced, Prescott, Logan, Moab, Aberdeen, New London).
+STILL OPTIONAL (a few owner-taste leftovers if ever wanted): Vernal UT, Walla Walla
++ Port Angeles WA, Alpena MI. **MAP BUILD ESSENTIALLY COMPLETE: 470 cities / 1039
+legs / 126,238 drivable mi.** Final scan shows nn 125 / corridor 402 -- these went
+UP because the flavor cities add neighbor-gaps; it is the density tail + metro
+sprawl, NOT missing high-value connectivity. Done per the Part-5 definition.
+**NEXT PHASE: BILLBOARDS.** Pipeline is on THIS map branch (data/spider/signsheets/
+Ready_*.md -> tools/bake_billboards.py). 6 corridors already sheeted (Route 66,
+Mojave, Kansas, Ozarks, Platte, desert SW). Opus autonomously drafts new
+Ready_*.md sheets per built corridor (facts from public data, copy invented) ->
+owner workshops the `spoken:` copy (owner ENJOYS this) -> bake_billboards. See
+[[project-billboard-content-plan]] + signage-todo.md for the drafting queue.
 
 ## FLAVOR: Chesapeake Bay Bridge-Tunnel (structure built 2026-07-10)
 Cape Charles VA minted; norfolk->salisbury US-13 split into the 43mi CBBT crossing
