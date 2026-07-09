@@ -36,8 +36,21 @@ start at the top and keep going.
 - [x] Scanner re-run 2026-07-10c: corridor 359->374 (Wave 2 cities add gaps),
       nn 157->148. Catalogs = *-2026-07-10c.txt. Now 430 cities / 909 legs /
       113,991 mi.
-- [ ] Batch 7 -- Texas & southern plains  <-- NEXT
-- [ ] City Wave 3, Batches 8-11, City Wave 4 per Part 3.
+- [x] Batch 7 -- 13 Texas & southern plains (c8a9fb4)
+- [x] City Wave 3 -- 12 western plains & Rockies cities (550a47d)
+- [x] Batch 8 -- 14 Great Plains ladder & Ozarks (1bad0a6)
+- [x] Batch 9 -- 12 California (42631f5)
+- [x] Batch 10 -- 14 Pacific Northwest / Cascade passes (04b6e61)
+- [x] Batch 11 -- 15 Big Sky & Great Basin (1220802)
+- [x] **ALL 11 SYSTEMATIC LEG BATCHES + CITY WAVES 1-3 COMPLETE.** Final scan
+      2026-07-10d: corridor 392->331, nn 184->102 (catalogs *-2026-07-10d.txt).
+      **442 cities / 996 legs / 123,249 drivable mi (+82 cities / +275 legs /
+      ~+24,500 mi vs dev).**
+- [ ] REMAINING (optional): City Wave 4 (owner-pick flavor coastal -- Key West,
+      Naples, San Luis Obispo/Santa Barbara, Brunswick, etc.); a "Batch 12" from
+      the surviving 331-corridor tail (mostly opportunistic density + the metro-
+      sprawl that triage excludes -- diminishing returns, curate the worth-building
+      ones). The high-value connectivity program is DONE.
 
 ### CITY WAVE 2 PLAN (analyzed 2026-07-10, ready to execute)
 None are clean checkpoint-splits. Verified nearest nodes + which sit on a bypass

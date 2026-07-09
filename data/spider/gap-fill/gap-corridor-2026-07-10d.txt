@@ -1,132 +1,117 @@
-# 374 TRUE adjacency gaps (route-verified: no node near the actual road)
+# 331 TRUE adjacency gaps (route-verified: no node near the actual road)
 
 ## by region-pair (thinnest connectivity first)
-   48  mid_south <-> mid_south
-   27  california <-> california
+   45  mid_south <-> mid_south
    20  great_lakes <-> great_lakes
-   17  rockies <-> rockies
+   16  southern_plains <-> southern_plains
+   15  california <-> california
    15  upper_midwest <-> upper_midwest
    15  corn_belt <-> great_lakes
-   14  southern_plains <-> southern_plains
    14  florida <-> florida
    14  appalachia <-> atlantic_southeast
-   13  heartland <-> heartland
-   12  pacific_northwest <-> pacific_northwest
    12  corn_belt <-> corn_belt
    12  northeast <-> northeast
    12  atlantic_southeast <-> atlantic_southeast
-   11  gulf_coast <-> southern_plains
-   11  heartland <-> upper_midwest
-   10  great_basin <-> great_basin
-   10  heartland <-> southern_plains
    10  corn_belt <-> mid_south
+    9  heartland <-> upper_midwest
     8  appalachia <-> appalachia
+    8  heartland <-> heartland
+    8  heartland <-> southern_plains
+    8  rockies <-> rockies
     7  appalachia <-> mid_south
-    6  gulf_coast <-> gulf_coast
+    7  gulf_coast <-> gulf_coast
+    7  desert_southwest <-> desert_southwest
+    6  gulf_coast <-> mid_south
+    6  gulf_coast <-> southern_plains
     6  appalachia <-> corn_belt
+    5  great_basin <-> great_basin
     5  atlantic_southeast <-> mid_south
-    4  heartland <-> mid_south
-    4  gulf_coast <-> mid_south
-    4  heartland <-> rockies
-    4  great_basin <-> pacific_northwest
+    4  pacific_northwest <-> pacific_northwest
     4  mid_south <-> southern_plains
     4  appalachia <-> great_lakes
+    3  great_basin <-> pacific_northwest
+    3  heartland <-> mid_south
+    3  heartland <-> rockies
     2  corn_belt <-> heartland
     2  california <-> pacific_northwest
     2  great_lakes <-> upper_midwest
     2  atlantic_southeast <-> florida
     2  appalachia <-> northeast
-    2  desert_southwest <-> desert_southwest
     2  desert_southwest <-> rockies
     2  florida <-> mid_south
     2  great_basin <-> rockies
     1  great_lakes <-> heartland
+    1  desert_southwest <-> gulf_coast
     1  desert_southwest <-> great_basin
     1  california <-> great_basin
 
 ## by region (total gap endpoints)
-  132  mid_south
+  127  mid_south
    62  great_lakes
-   58  heartland
-   57  california
    57  corn_belt
-   53  southern_plains
+   50  southern_plains
    49  appalachia
    45  atlantic_southeast
-   43  upper_midwest
-   42  rockies
+   42  heartland
+   41  upper_midwest
+   33  california
    32  florida
-   30  pacific_northwest
-   28  great_basin
    27  gulf_coast
    26  northeast
-    7  desert_southwest
+   23  rockies
+   18  desert_southwest
+   17  great_basin
+   13  pacific_northwest
 
 ## full list (driving mi)
    33mi  Dallas,TX <-> McKinney,TX  [dallas_tx_us :: mckinney_tx_us]  (southern_plains/southern_plains)
    33mi  Los Angeles,CA <-> Santa Ana,CA  [los_angeles_ca_us :: santa_ana_ca_us]  (california/california)
    34mi  Hibbing,MN <-> Grand Rapids,MN  [hibbing_mn_us :: grand_rapids_mn_us]  (upper_midwest/upper_midwest)
-   35mi  Lake Charles,LA <-> Orange,TX  [lake_charles_la_us :: orange_tx_us]  (gulf_coast/gulf_coast)
    36mi  Nashville,TN <-> Murfreesboro,TN  [nashville_tn_us :: murfreesboro_tn_us]  (mid_south/mid_south)
    36mi  Tampa,FL <-> Lakeland,FL  [tampa_fl_us :: lakeland_fl_us]  (florida/florida)
-   37mi  Salem,OR <-> Corvallis,OR  [salem_or_us :: corvallis_or_us]  (pacific_northwest/pacific_northwest)
    38mi  Riverside,CA <-> Santa Ana,CA  [riverside_ca_us :: santa_ana_ca_us]  (california/california)
    38mi  San Diego,CA <-> Oceanside,CA  [san_diego_ca_us :: oceanside_ca_us]  (california/california)
    40mi  Gainesville,FL <-> Ocala,FL  [gainesville_fl_us :: ocala_fl_us]  (florida/florida)
    40mi  Los Angeles,CA <-> Valencia,CA  [los_angeles_ca_us :: valencia_ca_us]  (california/california)
    42mi  Chicago,IL <-> Aurora,IL  [chicago_il_us :: aurora_il_us]  (great_lakes/great_lakes)
-   43mi  Fresno,CA <-> Visalia,CA  [fresno_ca_us :: visalia_ca_us]  (california/california)
    43mi  Sacramento,CA <-> Fairfield,CA  [sacramento_ca_us :: fairfield_ca_us]  (california/california)
-   46mi  Coeur d'Alene,ID <-> Sandpoint,ID  [coeur_d_alene_id_us :: sandpoint_id_us]  (great_basin/great_basin)
    46mi  Coral Springs,FL <-> West Palm Beach,FL  [coral_springs_fl_us :: west_palm_beach_fl_us]  (florida/florida)
    46mi  Miami,FL <-> Coral Springs,FL  [miami_fl_us :: coral_springs_fl_us]  (florida/florida)
    47mi  San Francisco,CA <-> Fairfield,CA  [san_francisco_ca_us :: fairfield_ca_us]  (california/california)
-   49mi  Oxnard,CA <-> Valencia,CA  [oxnard_ca_us :: valencia_ca_us]  (california/california)
    51mi  Gainesville,FL <-> Lake City,FL  [gainesville_fl_us :: lake_city_fl_us]  (florida/florida)
    51mi  Port Saint Lucie,FL <-> West Palm Beach,FL  [port_saint_lucie_fl_us :: west_palm_beach_fl_us]  (florida/florida)
    52mi  Santa Ana,CA <-> Oceanside,CA  [santa_ana_ca_us :: oceanside_ca_us]  (california/california)
    53mi  Nashville,TN <-> Clarksville,TN  [nashville_tn_us :: clarksville_tn_us]  (mid_south/mid_south)
    53mi  Stockton,CA <-> Fairfield,CA  [stockton_ca_us :: fairfield_ca_us]  (california/california)
    55mi  Orlando,FL <-> Lakeland,FL  [orlando_fl_us :: lakeland_fl_us]  (florida/florida)
-   55mi  San Francisco,CA <-> Santa Rosa,CA  [san_francisco_ca_us :: santa_rosa_ca_us]  (california/california)
    55mi  Santa Rosa,CA <-> Fairfield,CA  [santa_rosa_ca_us :: fairfield_ca_us]  (california/california)
    59mi  Bloomington,IN <-> Terre Haute,IN  [bloomington_in_us :: terre_haute_in_us]  (corn_belt/corn_belt)
    60mi  Los Angeles,CA <-> Riverside,CA  [los_angeles_ca_us :: riverside_ca_us]  (california/california)
-   60mi  Newport,OR <-> Albany,OR  [newport_or_us :: albany_or_us]  (pacific_northwest/pacific_northwest)
-   60mi  San Jose,CA <-> Salinas,CA  [san_jose_ca_us :: salinas_ca_us]  (california/california)
-   61mi  Lancaster,CA <-> Victorville,CA  [lancaster_ca_us :: victorville_ca_us]  (california/california)
    62mi  Fort Wayne,IN <-> Lima,OH  [fort_wayne_in_us :: lima_oh_us]  (great_lakes/great_lakes)
    62mi  Mankato,MN <-> Albert Lea,MN  [mankato_mn_us :: albert_lea_mn_us]  (upper_midwest/upper_midwest)
    63mi  Akron,OH <-> Mansfield,OH  [akron_oh_us :: mansfield_oh_us]  (great_lakes/great_lakes)
    64mi  Decatur,IL <-> Effingham,IL  [decatur_il_us :: effingham_il_us]  (corn_belt/corn_belt)
-   65mi  Fort Collins,CO <-> Laramie,WY  [fort_collins_co_us :: laramie_wy_us]  (rockies/rockies)
    66mi  Charleston,WV <-> Ashland,KY  [charleston_wv_us :: ashland_ky_us]  (appalachia/mid_south)
    66mi  Morehead,KY <-> Paintsville,KY  [morehead_ky_us :: paintsville_ky_us]  (mid_south/mid_south)
    67mi  Morehead,KY <-> Huntington,WV  [morehead_ky_us :: huntington_wv_us]  (mid_south/appalachia)
    68mi  Eau Claire,WI <-> Winona,MN  [eau_claire_wi_us :: winona_mn_us]  (upper_midwest/upper_midwest)
-   68mi  Moses Lake,WA <-> Wenatchee,WA  [moses_lake_wa_us :: wenatchee_wa_us]  (pacific_northwest/pacific_northwest)
    69mi  Aurora,IL <-> Gary,IN  [aurora_il_us :: gary_in_us]  (great_lakes/great_lakes)
    69mi  Clarksville,TN <-> Bowling Green,KY  [clarksville_tn_us :: bowling_green_ky_us]  (mid_south/mid_south)
    72mi  Beckley,WV <-> Wytheville,VA  [beckley_wv_us :: wytheville_va_us]  (appalachia/appalachia)
    72mi  Boston,MA <-> Newport,RI  [boston_ma_us :: newport_ri_us]  (northeast/northeast)
    72mi  Davenport,IA <-> Dubuque,IA  [davenport_ia_us :: dubuque_ia_us]  (heartland/heartland)
-   73mi  San Jose,CA <-> Stockton,CA  [san_jose_ca_us :: stockton_ca_us]  (california/california)
    75mi  Atlantic City,NJ <-> Wilmington,DE  [atlantic_city_nj_us :: wilmington_de_us]  (northeast/northeast)
    75mi  Champaign,IL <-> Effingham,IL  [champaign_il_us :: effingham_il_us]  (corn_belt/corn_belt)
    76mi  Topeka,KS <-> Saint Joseph,MO  [topeka_ks_us :: saint_joseph_mo_us]  (southern_plains/heartland)
-   76mi  Tri-Cities,WA <-> Moses Lake,WA  [tri_cities_wa_us :: moses_lake_wa_us]  (pacific_northwest/pacific_northwest)
-   78mi  Riverside,CA <-> Indio,CA  [riverside_ca_us :: indio_ca_us]  (california/california)
-   78mi  Springfield,MO <-> Harrison,AR  [springfield_mo_us :: harrison_ar_us]  (heartland/mid_south)
-   80mi  Medford,OR <-> Klamath Falls,OR  [medford_or_us :: klamath_falls_or_us]  (pacific_northwest/pacific_northwest)
    80mi  St. Louis,MO <-> Mount Vernon,IL  [st_louis_mo_us :: mount_vernon_il_us]  (heartland/corn_belt)
    81mi  Klamath Falls,OR <-> Mount Shasta,CA  [klamath_falls_or_us :: mount_shasta_ca_us]  (pacific_northwest/california)
    81mi  Orlando,FL <-> Ocala,FL  [orlando_fl_us :: ocala_fl_us]  (florida/florida)
-   82mi  Bentonville,AR <-> Harrison,AR  [bentonville_ar_us :: harrison_ar_us]  (mid_south/mid_south)
    82mi  Ocala,FL <-> Daytona Beach,FL  [ocala_fl_us :: daytona_beach_fl_us]  (florida/florida)
    82mi  Rockford,IL <-> Kenosha,WI  [rockford_il_us :: kenosha_wi_us]  (great_lakes/upper_midwest)
    83mi  Salem,OR <-> Newport,OR  [salem_or_us :: newport_or_us]  (pacific_northwest/pacific_northwest)
    85mi  Aurora,IL <-> Kenosha,WI  [aurora_il_us :: kenosha_wi_us]  (great_lakes/upper_midwest)
-   86mi  Indio,CA <-> El Centro,CA  [indio_ca_us :: el_centro_ca_us]  (california/california)
+   85mi  Wichita Falls,TX <-> Ardmore,OK  [wichita_falls_tx_us :: ardmore_ok_us]  (southern_plains/southern_plains)
+   86mi  Fayetteville,AR <-> Muskogee,OK  [fayetteville_ar_us :: muskogee_ok_us]  (mid_south/southern_plains)
    86mi  Lafayette,LA <-> Sulphur,LA  [lafayette_la_us :: sulphur_la_us]  (gulf_coast/gulf_coast)
    86mi  Winston-Salem,NC <-> Wytheville,VA  [winston_salem_nc_us :: wytheville_va_us]  (atlantic_southeast/appalachia)
    87mi  Roanoke,VA <-> Staunton,VA  [roanoke_va_us :: staunton_va_us]  (appalachia/appalachia)
@@ -135,88 +120,73 @@
    89mi  Battle Mountain,NV <-> Austin,NV  [battle_mountain_nv_us :: austin_nv_us]  (great_basin/great_basin)
    89mi  Murfreesboro,TN <-> Bowling Green,KY  [murfreesboro_tn_us :: bowling_green_ky_us]  (mid_south/mid_south)
    91mi  Champaign,IL <-> Terre Haute,IN  [champaign_il_us :: terre_haute_in_us]  (corn_belt/corn_belt)
-   91mi  College Station,TX <-> Temple,TX  [college_station_tx_us :: temple_tx_us]  (gulf_coast/southern_plains)
-   93mi  Columbia,MO <-> Rolla,MO  [columbia_mo_us :: rolla_mo_us]  (heartland/heartland)
    93mi  Madison,WI <-> Dubuque,IA  [madison_wi_us :: dubuque_ia_us]  (upper_midwest/heartland)
    94mi  Elizabethtown,KY <-> Owensboro,KY  [elizabethtown_ky_us :: owensboro_ky_us]  (mid_south/mid_south)
    94mi  Shreveport,LA <-> El Dorado,AR  [shreveport_la_us :: el_dorado_ar_us]  (gulf_coast/mid_south)
    94mi  Washington,DC <-> Dover,DE  [washington_dc_us :: dover_de_us]  (northeast/northeast)
    95mi  Cordele,GA <-> Columbus,GA  [cordele_ga_us :: columbus_ga_us]  (atlantic_southeast/atlantic_southeast)
-   95mi  Lancaster,CA <-> Barstow,CA  [lancaster_ca_us :: barstow_ca_us]  (california/california)
    95mi  Palm Bay,FL <-> Daytona Beach,FL  [palm_bay_fl_us :: daytona_beach_fl_us]  (florida/florida)
    95mi  Springfield,IL <-> Effingham,IL  [springfield_il_us :: effingham_il_us]  (corn_belt/corn_belt)
    95mi  Tallahassee,FL <-> Tifton,GA  [tallahassee_fl_us :: tifton_ga_us]  (florida/atlantic_southeast)
    96mi  Lima,OH <-> Mansfield,OH  [lima_oh_us :: mansfield_oh_us]  (great_lakes/great_lakes)
-   97mi  San Angelo,TX <-> Junction,TX  [san_angelo_tx_us :: junction_tx_us]  (southern_plains/gulf_coast)
+   97mi  Lake Charles,LA <-> Alexandria,LA  [lake_charles_la_us :: alexandria_la_us]  (gulf_coast/gulf_coast)
    98mi  Baltimore,MD <-> Winchester,VA  [baltimore_md_us :: winchester_va_us]  (northeast/appalachia)
    98mi  Chattanooga,TN <-> Cookeville,TN  [chattanooga_tn_us :: cookeville_tn_us]  (mid_south/mid_south)
    98mi  Hartford,CT <-> Newport,RI  [hartford_ct_us :: newport_ri_us]  (northeast/northeast)
-   98mi  Helena,MT <-> Bozeman,MT  [helena_mt_us :: bozeman_mt_us]  (rockies/rockies)
    98mi  Mount Vernon,IL <-> Cape Girardeau,MO  [mount_vernon_il_us :: cape_girardeau_mo_us]  (corn_belt/heartland)
    98mi  Toledo,OH <-> Mansfield,OH  [toledo_oh_us :: mansfield_oh_us]  (great_lakes/great_lakes)
-   98mi  Williston,ND <-> Glendive,MT  [williston_nd_us :: glendive_mt_us]  (heartland/rockies)
    99mi  Erie,PA <-> Youngstown,OH  [erie_pa_us :: youngstown_oh_us]  (great_lakes/great_lakes)
-   99mi  Odessa,TX <-> Fort Stockton,TX  [odessa_tx_us :: fort_stockton_tx_us]  (southern_plains/gulf_coast)
   100mi  Paducah,KY <-> Mount Vernon,IL  [paducah_ky_us :: mount_vernon_il_us]  (mid_south/corn_belt)
   100mi  San Angelo,TX <-> Ozona,TX  [san_angelo_tx_us :: ozona_tx_us]  (southern_plains/gulf_coast)
   100mi  Tupelo,MS <-> Grenada,MS  [tupelo_ms_us :: grenada_ms_us]  (mid_south/mid_south)
-  100mi  Yakima,WA <-> Moses Lake,WA  [yakima_wa_us :: moses_lake_wa_us]  (pacific_northwest/pacific_northwest)
   101mi  Columbus,OH <-> Lima,OH  [columbus_oh_us :: lima_oh_us]  (corn_belt/great_lakes)
   101mi  Macon,GA <-> LaGrange,GA  [macon_ga_us :: lagrange_ga_us]  (atlantic_southeast/atlantic_southeast)
   102mi  Lafayette,IN <-> Terre Haute,IN  [lafayette_in_us :: terre_haute_in_us]  (corn_belt/corn_belt)
+  103mi  Bentonville,AR <-> Muskogee,OK  [bentonville_ar_us :: muskogee_ok_us]  (mid_south/southern_plains)
   103mi  Charlotte,NC <-> Florence,SC  [charlotte_nc_us :: florence_sc_us]  (atlantic_southeast/atlantic_southeast)
   103mi  Green Bay,WI <-> Iron Mountain,MI  [green_bay_wi_us :: iron_mountain_mi_us]  (upper_midwest/upper_midwest)
   103mi  Huntington,WV <-> Parkersburg,WV  [huntington_wv_us :: parkersburg_wv_us]  (appalachia/appalachia)
-  103mi  San Diego,CA <-> Riverside,CA  [san_diego_ca_us :: riverside_ca_us]  (california/california)
   104mi  Cincinnati,OH <-> Morehead,KY  [cincinnati_oh_us :: morehead_ky_us]  (corn_belt/mid_south)
+  104mi  Fort Worth,TX <-> Ardmore,OK  [fort_worth_tx_us :: ardmore_ok_us]  (southern_plains/southern_plains)
   104mi  Louisville,KY <-> Bloomington,IN  [louisville_ky_us :: bloomington_in_us]  (mid_south/corn_belt)
+  105mi  McKinney,TX <-> Ardmore,OK  [mckinney_tx_us :: ardmore_ok_us]  (southern_plains/southern_plains)
   105mi  Tupelo,MS <-> Jackson,TN  [tupelo_ms_us :: jackson_tn_us]  (mid_south/mid_south)
-  106mi  Garden City,KS <-> Colby,KS  [garden_city_ks_us :: colby_ks_us]  (southern_plains/southern_plains)
-  106mi  Wolf Point,MT <-> Glendive,MT  [wolf_point_mt_us :: glendive_mt_us]  (rockies/rockies)
   107mi  Aurora,IL <-> Bloomington,IL  [aurora_il_us :: bloomington_il_us]  (great_lakes/corn_belt)
   107mi  Louisville,KY <-> Owensboro,KY  [louisville_ky_us :: owensboro_ky_us]  (mid_south/mid_south)
-  107mi  McCall,ID <-> Ontario,OR  [mccall_id_us :: ontario_or_us]  (great_basin/pacific_northwest)
   108mi  Clarksville,TN <-> Owensboro,KY  [clarksville_tn_us :: owensboro_ky_us]  (mid_south/mid_south)
   108mi  Decatur,IL <-> Terre Haute,IN  [decatur_il_us :: terre_haute_in_us]  (corn_belt/corn_belt)
+  108mi  Lawton,OK <-> Ardmore,OK  [lawton_ok_us :: ardmore_ok_us]  (southern_plains/southern_plains)
   108mi  Pittsburgh,PA <-> Cumberland,MD  [pittsburgh_pa_us :: cumberland_md_us]  (appalachia/appalachia)
   108mi  South Bend,IN <-> Lafayette,IN  [south_bend_in_us :: lafayette_in_us]  (great_lakes/corn_belt)
-  109mi  Conway,AR <-> Harrison,AR  [conway_ar_us :: harrison_ar_us]  (mid_south/mid_south)
-  110mi  Bismarck,ND <-> Minot,ND  [bismarck_nd_us :: minot_nd_us]  (heartland/heartland)
+  108mi  Sulphur,LA <-> Alexandria,LA  [sulphur_la_us :: alexandria_la_us]  (gulf_coast/gulf_coast)
   110mi  Evansville,IN <-> Terre Haute,IN  [evansville_in_us :: terre_haute_in_us]  (mid_south/corn_belt)
   110mi  Madison,WI <-> Kenosha,WI  [madison_wi_us :: kenosha_wi_us]  (upper_midwest/upper_midwest)
+  111mi  Baton Rouge,LA <-> Alexandria,LA  [baton_rouge_la_us :: alexandria_la_us]  (gulf_coast/gulf_coast)
   111mi  Columbus,OH <-> Parkersburg,WV  [columbus_oh_us :: parkersburg_wv_us]  (corn_belt/appalachia)
   111mi  Lakeland,FL <-> Ocala,FL  [lakeland_fl_us :: ocala_fl_us]  (florida/florida)
   112mi  Wichita,KS <-> Junction City,KS  [wichita_ks_us :: junction_city_ks_us]  (southern_plains/southern_plains)
   113mi  Des Moines,IA <-> Waterloo,IA  [des_moines_ia_us :: waterloo_ia_us]  (heartland/heartland)
-  113mi  Missoula,MT <-> Helena,MT  [missoula_mt_us :: helena_mt_us]  (rockies/rockies)
-  114mi  Cedar City,UT <-> Richfield,UT  [cedar_city_ut_us :: richfield_ut_us]  (rockies/rockies)
   114mi  Fort Wayne,IN <-> Lafayette,IN  [fort_wayne_in_us :: lafayette_in_us]  (great_lakes/corn_belt)
-  114mi  Great Falls,MT <-> Havre,MT  [great_falls_mt_us :: havre_mt_us]  (rockies/rockies)
   115mi  Elko,NV <-> Eureka,NV  [elko_nv_us :: eureka_nv_us]  (great_basin/great_basin)
   115mi  Greensboro,NC <-> Lynchburg,VA  [greensboro_nc_us :: lynchburg_va_us]  (atlantic_southeast/appalachia)
   115mi  Rochester,MN <-> Waterloo,IA  [rochester_mn_us :: waterloo_ia_us]  (upper_midwest/heartland)
-  115mi  Tulsa,OK <-> Enid,OK  [tulsa_ok_us :: enid_ok_us]  (southern_plains/southern_plains)
   116mi  Ashland,KY <-> Parkersburg,WV  [ashland_ky_us :: parkersburg_wv_us]  (mid_south/appalachia)
-  116mi  Dodge City,KS <-> Hays,KS  [dodge_city_ks_us :: hays_ks_us]  (southern_plains/southern_plains)
   116mi  Knoxville,TN <-> Dalton,GA  [knoxville_tn_us :: dalton_ga_us]  (appalachia/atlantic_southeast)
-  116mi  Lewiston,ID <-> Coeur d'Alene,ID  [lewiston_id_us :: coeur_d_alene_id_us]  (great_basin/great_basin)
   116mi  Tulsa,OK <-> Bentonville,AR  [tulsa_ok_us :: bentonville_ar_us]  (southern_plains/mid_south)
-  116mi  Twin Falls,ID <-> Wells,NV  [twin_falls_id_us :: wells_nv_us]  (great_basin/great_basin)
-  117mi  Austin,TX <-> Kerrville,TX  [austin_tx_us :: kerrville_tx_us]  (gulf_coast/gulf_coast)
+  117mi  Joplin,MO <-> Muskogee,OK  [joplin_mo_us :: muskogee_ok_us]  (heartland/southern_plains)
   117mi  Mankato,MN <-> Willmar,MN  [mankato_mn_us :: willmar_mn_us]  (upper_midwest/upper_midwest)
   117mi  Memphis,TN <-> Stuttgart,AR  [memphis_tn_us :: stuttgart_ar_us]  (mid_south/mid_south)
   117mi  Petersburg,VA <-> Lynchburg,VA  [petersburg_va_us :: lynchburg_va_us]  (atlantic_southeast/appalachia)
-  117mi  Tulsa,OK <-> Fayetteville,AR  [tulsa_ok_us :: fayetteville_ar_us]  (southern_plains/mid_south)
-  117mi  Tyler,TX <-> Texarkana,AR  [tyler_tx_us :: texarkana_ar_us]  (southern_plains/mid_south)
   118mi  Kalamazoo,MI <-> Gary,IN  [kalamazoo_mi_us :: gary_in_us]  (great_lakes/great_lakes)
   118mi  Tonopah,NV <-> Austin,NV  [tonopah_nv_us :: austin_nv_us]  (great_basin/great_basin)
   118mi  Wilmington,NC <-> Florence,SC  [wilmington_nc_us :: florence_sc_us]  (atlantic_southeast/atlantic_southeast)
   119mi  Augusta,GA <-> Greenville,SC  [augusta_ga_us :: greenville_sc_us]  (atlantic_southeast/atlantic_southeast)
   119mi  La Crosse,WI <-> Dubuque,IA  [la_crosse_wi_us :: dubuque_ia_us]  (upper_midwest/heartland)
   119mi  Trenton,NJ <-> Scranton,PA  [trenton_nj_us :: scranton_pa_us]  (northeast/northeast)
+  119mi  Van Horn,TX <-> Carlsbad,NM  [van_horn_tx_us :: carlsbad_nm_us]  (desert_southwest/desert_southwest)
+  120mi  Casper,WY <-> Rawlins,WY  [casper_wy_us :: rawlins_wy_us]  (rockies/rockies)
   120mi  Jonesboro,AR <-> Stuttgart,AR  [jonesboro_ar_us :: stuttgart_ar_us]  (mid_south/mid_south)
   120mi  St. Cloud,MN <-> Mankato,MN  [st_cloud_mn_us :: mankato_mn_us]  (upper_midwest/upper_midwest)
-  120mi  West Wendover,NV <-> Ely,NV  [west_wendover_nv_us :: ely_nv_us]  (great_basin/great_basin)
   121mi  Bloomington,IN <-> Owensboro,KY  [bloomington_in_us :: owensboro_ky_us]  (corn_belt/mid_south)
   121mi  Conway,AR <-> Mountain Home,AR  [conway_ar_us :: mountain_home_ar_us]  (mid_south/mid_south)
   121mi  Jackson,MI <-> Lima,OH  [jackson_mi_us :: lima_oh_us]  (great_lakes/great_lakes)
@@ -225,7 +195,6 @@
   122mi  Columbus,OH <-> Ashland,KY  [columbus_oh_us :: ashland_ky_us]  (corn_belt/mid_south)
   122mi  Fort Wayne,IN <-> Jackson,MI  [fort_wayne_in_us :: jackson_mi_us]  (great_lakes/great_lakes)
   122mi  Fort Wayne,IN <-> Kalamazoo,MI  [fort_wayne_in_us :: kalamazoo_mi_us]  (great_lakes/great_lakes)
-  122mi  Missoula,MT <-> Kalispell,MT  [missoula_mt_us :: kalispell_mt_us]  (rockies/rockies)
   123mi  Decatur,IL <-> Mount Vernon,IL  [decatur_il_us :: mount_vernon_il_us]  (corn_belt/corn_belt)
   123mi  South Bend,IN <-> Muskegon,MI  [south_bend_in_us :: muskegon_mi_us]  (great_lakes/great_lakes)
   124mi  Durham,NC <-> Lynchburg,VA  [durham_nc_us :: lynchburg_va_us]  (atlantic_southeast/appalachia)
@@ -241,8 +210,6 @@
   128mi  Elizabethtown,KY <-> London,KY  [elizabethtown_ky_us :: london_ky_us]  (mid_south/mid_south)
   128mi  Evansville,IN <-> Effingham,IL  [evansville_in_us :: effingham_il_us]  (mid_south/corn_belt)
   128mi  Minneapolis,MN <-> Winona,MN  [minneapolis_mn_us :: winona_mn_us]  (upper_midwest/upper_midwest)
-  128mi  Winnemucca,NV <-> Fallon,NV  [winnemucca_nv_us :: fallon_nv_us]  (great_basin/great_basin)
-  129mi  Bakersfield,CA <-> Barstow,CA  [bakersfield_ca_us :: barstow_ca_us]  (california/california)
   129mi  Cincinnati,OH <-> Bloomington,IN  [cincinnati_oh_us :: bloomington_in_us]  (corn_belt/corn_belt)
   129mi  Jackson,TN <-> Paducah,KY  [jackson_tn_us :: paducah_ky_us]  (mid_south/mid_south)
   129mi  Nashville,TN <-> Owensboro,KY  [nashville_tn_us :: owensboro_ky_us]  (mid_south/mid_south)
@@ -251,12 +218,8 @@
   130mi  Conway,AR <-> Jonesboro,AR  [conway_ar_us :: jonesboro_ar_us]  (mid_south/mid_south)
   130mi  Dayton,OH <-> Mansfield,OH  [dayton_oh_us :: mansfield_oh_us]  (corn_belt/great_lakes)
   130mi  Tri-Cities,WA <-> Wenatchee,WA  [tri_cities_wa_us :: wenatchee_wa_us]  (pacific_northwest/pacific_northwest)
-  130mi  Waco,TX <-> Tyler,TX  [waco_tx_us :: tyler_tx_us]  (southern_plains/southern_plains)
-  131mi  Casper,WY <-> Gillette,WY  [casper_wy_us :: gillette_wy_us]  (rockies/rockies)
-  131mi  Dickinson,ND <-> Williston,ND  [dickinson_nd_us :: williston_nd_us]  (heartland/heartland)
   132mi  Birmingham,AL <-> LaGrange,GA  [birmingham_al_us :: lagrange_ga_us]  (mid_south/atlantic_southeast)
   132mi  Rockford,IL <-> Bloomington,IL  [rockford_il_us :: bloomington_il_us]  (great_lakes/corn_belt)
-  132mi  Salem,OR <-> Bend,OR  [salem_or_us :: bend_or_us]  (pacific_northwest/pacific_northwest)
   132mi  Toledo,OH <-> Akron,OH  [toledo_oh_us :: akron_oh_us]  (great_lakes/great_lakes)
   133mi  Crescent City,CA <-> Coos Bay,OR  [crescent_city_ca_us :: coos_bay_or_us]  (california/pacific_northwest)
   133mi  Elizabethtown,KY <-> Bloomington,IN  [elizabethtown_ky_us :: bloomington_in_us]  (mid_south/corn_belt)
@@ -277,10 +240,10 @@
   137mi  Saint George,UT <-> Alamo,NV  [saint_george_ut_us :: alamo_nv_us]  (rockies/desert_southwest)
   139mi  Battle Mountain,NV <-> Eureka,NV  [battle_mountain_nv_us :: eureka_nv_us]  (great_basin/great_basin)
   139mi  Charlotte,NC <-> Wytheville,VA  [charlotte_nc_us :: wytheville_va_us]  (atlantic_southeast/appalachia)
+  139mi  Fort Stockton,TX <-> Carlsbad,NM  [fort_stockton_tx_us :: carlsbad_nm_us]  (gulf_coast/desert_southwest)
   139mi  Pendleton,OR <-> Lewiston,ID  [pendleton_or_us :: lewiston_id_us]  (pacific_northwest/great_basin)
-  139mi  Provo,UT <-> Green River,UT  [provo_ut_us :: green_river_ut_us]  (rockies/rockies)
-  139mi  Willmar,MN <-> Watertown,SD  [willmar_mn_us :: watertown_sd_us]  (upper_midwest/heartland)
   140mi  Bowling Green,KY <-> Paducah,KY  [bowling_green_ky_us :: paducah_ky_us]  (mid_south/mid_south)
+  140mi  Oklahoma City,OK <-> Muskogee,OK  [oklahoma_city_ok_us :: muskogee_ok_us]  (southern_plains/southern_plains)
   140mi  Washington,DC <-> Harrisonburg,VA  [washington_dc_us :: harrisonburg_va_us]  (northeast/appalachia)
   141mi  Roanoke,VA <-> Durham,NC  [roanoke_va_us :: durham_nc_us]  (appalachia/atlantic_southeast)
   142mi  Evansville,IN <-> Cape Girardeau,MO  [evansville_in_us :: cape_girardeau_mo_us]  (mid_south/heartland)
@@ -299,20 +262,19 @@
   145mi  Greensboro,NC <-> Florence,SC  [greensboro_nc_us :: florence_sc_us]  (atlantic_southeast/atlantic_southeast)
   145mi  Johnson City,TN <-> Winston-Salem,NC  [johnson_city_tn_us :: winston_salem_nc_us]  (appalachia/atlantic_southeast)
   145mi  Lexington,NE <-> Colby,KS  [lexington_ne_us :: colby_ks_us]  (heartland/southern_plains)
-  145mi  Mitchell,SD <-> Watertown,SD  [mitchell_sd_us :: watertown_sd_us]  (heartland/heartland)
   145mi  Pittsburgh,PA <-> Parkersburg,WV  [pittsburgh_pa_us :: parkersburg_wv_us]  (appalachia/appalachia)
   146mi  Abilene,TX <-> Junction,TX  [abilene_tx_us :: junction_tx_us]  (southern_plains/gulf_coast)
   146mi  Jonesboro,AR <-> Jackson,TN  [jonesboro_ar_us :: jackson_tn_us]  (mid_south/mid_south)
   146mi  Morristown,TN <-> Wytheville,VA  [morristown_tn_us :: wytheville_va_us]  (appalachia/appalachia)
-  146mi  North Platte,NE <-> Colby,KS  [north_platte_ne_us :: colby_ks_us]  (heartland/southern_plains)
   147mi  Cape Coral,FL <-> Port Saint Lucie,FL  [cape_coral_fl_us :: port_saint_lucie_fl_us]  (florida/florida)
-  147mi  Kearney,NE <-> Hays,KS  [kearney_ne_us :: hays_ks_us]  (heartland/southern_plains)
+  147mi  El Dorado,AR <-> Alexandria,LA  [el_dorado_ar_us :: alexandria_la_us]  (mid_south/gulf_coast)
   148mi  Del Rio,TX <-> Junction,TX  [del_rio_tx_us :: junction_tx_us]  (gulf_coast/gulf_coast)
   148mi  Grand Rapids,MI <-> Gary,IN  [grand_rapids_mi_us :: gary_in_us]  (great_lakes/great_lakes)
   148mi  Vicksburg,MS <-> Grenada,MS  [vicksburg_ms_us :: grenada_ms_us]  (mid_south/mid_south)
   149mi  Cincinnati,OH <-> Ashland,KY  [cincinnati_oh_us :: ashland_ky_us]  (corn_belt/mid_south)
   149mi  Cincinnati,OH <-> Huntington,WV  [cincinnati_oh_us :: huntington_wv_us]  (corn_belt/appalachia)
   150mi  Morristown,TN <-> Pikeville,KY  [morristown_tn_us :: pikeville_ky_us]  (appalachia/mid_south)
+  150mi  Vicksburg,MS <-> Alexandria,LA  [vicksburg_ms_us :: alexandria_la_us]  (mid_south/gulf_coast)
   151mi  Birmingham,AL <-> Cartersville,GA  [birmingham_al_us :: cartersville_ga_us]  (mid_south/atlantic_southeast)
   151mi  Clarksville,TN <-> Elizabethtown,KY  [clarksville_tn_us :: elizabethtown_ky_us]  (mid_south/mid_south)
   151mi  Colorado Springs,CO <-> Burlington,CO  [colorado_springs_co_us :: burlington_co_us]  (rockies/rockies)
@@ -320,7 +282,6 @@
   152mi  Cedar City,UT <-> Alamo,NV  [cedar_city_ut_us :: alamo_nv_us]  (rockies/desert_southwest)
   152mi  Jonesboro,AR <-> Cape Girardeau,MO  [jonesboro_ar_us :: cape_girardeau_mo_us]  (mid_south/heartland)
   152mi  Lexington,NE <-> Hays,KS  [lexington_ne_us :: hays_ks_us]  (heartland/southern_plains)
-  152mi  Lincoln,NE <-> Junction City,KS  [lincoln_ne_us :: junction_city_ks_us]  (heartland/southern_plains)
   152mi  Mankato,MN <-> Brookings,SD  [mankato_mn_us :: brookings_sd_us]  (upper_midwest/heartland)
   153mi  Dayton,OH <-> Ashland,KY  [dayton_oh_us :: ashland_ky_us]  (corn_belt/mid_south)
   153mi  Killeen,TX <-> Kerrville,TX  [killeen_tx_us :: kerrville_tx_us]  (southern_plains/gulf_coast)
@@ -330,14 +291,10 @@
   154mi  Beckley,WV <-> Staunton,VA  [beckley_wv_us :: staunton_va_us]  (appalachia/appalachia)
   154mi  Richmond,KY <-> Cookeville,TN  [richmond_ky_us :: cookeville_tn_us]  (mid_south/mid_south)
   155mi  Sioux City,IA <-> Mitchell,SD  [sioux_city_ia_us :: mitchell_sd_us]  (heartland/heartland)
-  155mi  Sioux Falls,SD <-> Mankato,MN  [sioux_falls_sd_us :: mankato_mn_us]  (heartland/upper_midwest)
   155mi  Texarkana,AR <-> Pine Bluff,AR  [texarkana_ar_us :: pine_bluff_ar_us]  (mid_south/mid_south)
   156mi  Duluth,MN <-> Eau Claire,WI  [duluth_mn_us :: eau_claire_wi_us]  (upper_midwest/upper_midwest)
-  156mi  Tacoma,WA <-> Yakima,WA  [tacoma_wa_us :: yakima_wa_us]  (pacific_northwest/pacific_northwest)
   157mi  Jackson,TN <-> Cape Girardeau,MO  [jackson_tn_us :: cape_girardeau_mo_us]  (mid_south/heartland)
   157mi  Muskegon,MI <-> Gary,IN  [muskegon_mi_us :: gary_in_us]  (great_lakes/great_lakes)
-  157mi  Salinas,CA <-> Santa Maria,CA  [salinas_ca_us :: santa_maria_ca_us]  (california/california)
-  157mi  San Angelo,TX <-> Del Rio,TX  [san_angelo_tx_us :: del_rio_tx_us]  (southern_plains/gulf_coast)
   157mi  St. Cloud,MN <-> Bemidji,MN  [st_cloud_mn_us :: bemidji_mn_us]  (upper_midwest/upper_midwest)
   158mi  Cleveland,OH <-> Lima,OH  [cleveland_oh_us :: lima_oh_us]  (great_lakes/great_lakes)
   158mi  Huntsville,AL <-> Cookeville,TN  [huntsville_al_us :: cookeville_tn_us]  (mid_south/mid_south)
@@ -347,6 +304,7 @@
   161mi  Charleston,SC <-> Augusta,GA  [charleston_sc_us :: augusta_ga_us]  (atlantic_southeast/atlantic_southeast)
   161mi  College Station,TX <-> Tyler,TX  [college_station_tx_us :: tyler_tx_us]  (gulf_coast/southern_plains)
   161mi  Tonopah,NV <-> Alamo,NV  [tonopah_nv_us :: alamo_nv_us]  (great_basin/desert_southwest)
+  162mi  Amarillo,TX <-> Liberal,KS  [amarillo_tx_us :: liberal_ks_us]  (southern_plains/southern_plains)
   162mi  Baton Rouge,LA <-> Vicksburg,MS  [baton_rouge_la_us :: vicksburg_ms_us]  (gulf_coast/mid_south)
   162mi  Moses Lake,WA <-> Lewiston,ID  [moses_lake_wa_us :: lewiston_id_us]  (pacific_northwest/great_basin)
   162mi  Pittsburgh,PA <-> Mansfield,OH  [pittsburgh_pa_us :: mansfield_oh_us]  (appalachia/great_lakes)
@@ -357,17 +315,16 @@
   163mi  Florence,SC <-> Spartanburg,SC  [florence_sc_us :: spartanburg_sc_us]  (atlantic_southeast/atlantic_southeast)
   163mi  Mansfield,OH <-> Parkersburg,WV  [mansfield_oh_us :: parkersburg_wv_us]  (great_lakes/appalachia)
   164mi  Bridgeport,CT <-> Scranton,PA  [bridgeport_ct_us :: scranton_pa_us]  (northeast/northeast)
+  164mi  El Paso,TX <-> Carlsbad,NM  [el_paso_tx_us :: carlsbad_nm_us]  (desert_southwest/desert_southwest)
   164mi  Gary,IN <-> Terre Haute,IN  [gary_in_us :: terre_haute_in_us]  (great_lakes/corn_belt)
   164mi  Laramie,WY <-> Silverthorne,CO  [laramie_wy_us :: silverthorne_co_us]  (rockies/rockies)
   164mi  Montgomery,AL <-> Pensacola,FL  [montgomery_al_us :: pensacola_fl_us]  (mid_south/florida)
-  164mi  San Angelo,TX <-> Fort Stockton,TX  [san_angelo_tx_us :: fort_stockton_tx_us]  (southern_plains/gulf_coast)
   165mi  Knoxville,TN <-> Murfreesboro,TN  [knoxville_tn_us :: murfreesboro_tn_us]  (appalachia/mid_south)
   165mi  McKinney,TX <-> Texarkana,AR  [mckinney_tx_us :: texarkana_ar_us]  (southern_plains/mid_south)
   165mi  Tallahassee,FL <-> Columbus,GA  [tallahassee_fl_us :: columbus_ga_us]  (florida/atlantic_southeast)
   165mi  Tuscaloosa,AL <-> Grenada,MS  [tuscaloosa_al_us :: grenada_ms_us]  (mid_south/mid_south)
   166mi  Birmingham,AL <-> Dalton,GA  [birmingham_al_us :: dalton_ga_us]  (mid_south/atlantic_southeast)
   166mi  Dayton,OH <-> Huntington,WV  [dayton_oh_us :: huntington_wv_us]  (corn_belt/appalachia)
-  166mi  Kansas City,MO <-> Springfield,MO  [kansas_city_mo_us :: springfield_mo_us]  (heartland/heartland)
   166mi  Kenosha,WI <-> Dubuque,IA  [kenosha_wi_us :: dubuque_ia_us]  (upper_midwest/heartland)
   166mi  Missoula,MT <-> Great Falls,MT  [missoula_mt_us :: great_falls_mt_us]  (rockies/rockies)
   167mi  Charlotte,NC <-> Johnson City,TN  [charlotte_nc_us :: johnson_city_tn_us]  (atlantic_southeast/appalachia)
@@ -382,6 +339,7 @@
   169mi  Colorado Springs,CO <-> Edwards,CO  [colorado_springs_co_us :: edwards_co_us]  (rockies/rockies)
   169mi  Fresno,CA <-> Santa Maria,CA  [fresno_ca_us :: santa_maria_ca_us]  (california/california)
   169mi  Hazard,KY <-> Wytheville,VA  [hazard_ky_us :: wytheville_va_us]  (mid_south/appalachia)
+  169mi  Joplin,MO <-> Lawrence,KS  [joplin_mo_us :: lawrence_ks_us]  (heartland/southern_plains)
   169mi  Tucumcari,NM <-> Santa Fe,NM  [tucumcari_nm_us :: santa_fe_nm_us]  (desert_southwest/desert_southwest)
   170mi  Laramie,WY <-> Casper,WY  [laramie_wy_us :: casper_wy_us]  (rockies/rockies)
   170mi  Springfield,MO <-> Columbia,MO  [springfield_mo_us :: columbia_mo_us]  (heartland/heartland)
@@ -391,7 +349,6 @@
   172mi  Albany,NY <-> Scranton,PA  [albany_ny_us :: scranton_pa_us]  (northeast/northeast)
   172mi  Baton Rouge,LA <-> Hattiesburg,MS  [baton_rouge_la_us :: hattiesburg_ms_us]  (gulf_coast/mid_south)
   172mi  Dayton,OH <-> Parkersburg,WV  [dayton_oh_us :: parkersburg_wv_us]  (corn_belt/appalachia)
-  172mi  Gillette,WY <-> Miles City,MT  [gillette_wy_us :: miles_city_mt_us]  (rockies/rockies)
   172mi  Lancaster,CA <-> Santa Maria,CA  [lancaster_ca_us :: santa_maria_ca_us]  (california/california)
   172mi  Youngstown,OH <-> Parkersburg,WV  [youngstown_oh_us :: parkersburg_wv_us]  (great_lakes/appalachia)
   173mi  Kearney,NE <-> Colby,KS  [kearney_ne_us :: colby_ks_us]  (heartland/southern_plains)
@@ -404,16 +361,16 @@
   175mi  Tonopah,NV <-> Fallon,NV  [tonopah_nv_us :: fallon_nv_us]  (great_basin/great_basin)
   175mi  Vicksburg,MS <-> Pine Bluff,AR  [vicksburg_ms_us :: pine_bluff_ar_us]  (mid_south/mid_south)
   176mi  Lafayette,IN <-> Lima,OH  [lafayette_in_us :: lima_oh_us]  (corn_belt/great_lakes)
-  176mi  Wichita,KS <-> Tulsa,OK  [wichita_ks_us :: tulsa_ok_us]  (southern_plains/southern_plains)
   178mi  Killeen,TX <-> Junction,TX  [killeen_tx_us :: junction_tx_us]  (southern_plains/gulf_coast)
   178mi  Rock Springs,WY <-> Ogden,UT  [rock_springs_wy_us :: ogden_ut_us]  (rockies/rockies)
   179mi  Kalamazoo,MI <-> Lafayette,IN  [kalamazoo_mi_us :: lafayette_in_us]  (great_lakes/corn_belt)
   180mi  Huntsville,AL <-> LaGrange,GA  [huntsville_al_us :: lagrange_ga_us]  (mid_south/atlantic_southeast)
   181mi  Worcester,MA <-> Montpelier,VT  [worcester_ma_us :: montpelier_vt_us]  (northeast/northeast)
-  182mi  Fort Smith,AR <-> Texarkana,AR  [fort_smith_ar_us :: texarkana_ar_us]  (mid_south/mid_south)
   182mi  Jonesboro,AR <-> Paducah,KY  [jonesboro_ar_us :: paducah_ky_us]  (mid_south/mid_south)
   182mi  Killeen,TX <-> Abilene,TX  [killeen_tx_us :: abilene_tx_us]  (southern_plains/southern_plains)
   183mi  Bloomington,IN <-> Mount Vernon,IL  [bloomington_in_us :: mount_vernon_il_us]  (corn_belt/corn_belt)
+  183mi  Tucumcari,NM <-> Roswell,NM  [tucumcari_nm_us :: roswell_nm_us]  (desert_southwest/desert_southwest)
+  184mi  Albuquerque,NM <-> Farmington,NM  [albuquerque_nm_us :: farmington_nm_us]  (desert_southwest/desert_southwest)
   185mi  Portland,OR <-> Yakima,WA  [portland_or_us :: yakima_wa_us]  (pacific_northwest/pacific_northwest)
   186mi  Rolla,MO <-> Cape Girardeau,MO  [rolla_mo_us :: cape_girardeau_mo_us]  (heartland/heartland)
   187mi  Salinas,CA <-> Visalia,CA  [salinas_ca_us :: visalia_ca_us]  (california/california)
@@ -421,9 +378,9 @@
   189mi  Escanaba,MI <-> Wausau,WI  [escanaba_mi_us :: wausau_wi_us]  (upper_midwest/upper_midwest)
   189mi  Huntsville,AL <-> Jackson,TN  [huntsville_al_us :: jackson_tn_us]  (mid_south/mid_south)
   190mi  Lincoln,NE <-> Salina,KS  [lincoln_ne_us :: salina_ks_us]  (heartland/southern_plains)
-  190mi  Topeka,KS <-> Joplin,MO  [topeka_ks_us :: joplin_mo_us]  (southern_plains/heartland)
   191mi  Sioux City,IA <-> Grand Island,NE  [sioux_city_ia_us :: grand_island_ne_us]  (heartland/heartland)
   191mi  Tacoma,WA <-> Moses Lake,WA  [tacoma_wa_us :: moses_lake_wa_us]  (pacific_northwest/pacific_northwest)
+  192mi  Muskogee,OK <-> Ardmore,OK  [muskogee_ok_us :: ardmore_ok_us]  (southern_plains/southern_plains)
   193mi  Atlanta,GA <-> Huntsville,AL  [atlanta_ga_us :: huntsville_al_us]  (atlantic_southeast/mid_south)
   193mi  Grand Island,NE <-> Salina,KS  [grand_island_ne_us :: salina_ks_us]  (heartland/southern_plains)
   194mi  Santa Rosa,CA <-> Redding,CA  [santa_rosa_ca_us :: redding_ca_us]  (california/california)
@@ -434,6 +391,7 @@
   202mi  Cedar City,UT <-> Ely,NV  [cedar_city_ut_us :: ely_nv_us]  (rockies/great_basin)
   203mi  Mountain Home,AR <-> Stuttgart,AR  [mountain_home_ar_us :: stuttgart_ar_us]  (mid_south/mid_south)
   207mi  Burlington,VT <-> Utica,NY  [burlington_vt_us :: utica_ny_us]  (northeast/northeast)
+  211mi  Santa Fe,NM <-> Farmington,NM  [santa_fe_nm_us :: farmington_nm_us]  (desert_southwest/desert_southwest)
   213mi  Spartanburg,SC <-> Wytheville,VA  [spartanburg_sc_us :: wytheville_va_us]  (atlantic_southeast/appalachia)
   215mi  Roanoke,VA <-> Pikeville,KY  [roanoke_va_us :: pikeville_ky_us]  (appalachia/mid_south)
   217mi  Missoula,MT <-> Lewiston,ID  [missoula_mt_us :: lewiston_id_us]  (rockies/great_basin)
