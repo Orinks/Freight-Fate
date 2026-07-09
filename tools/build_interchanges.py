@@ -31,6 +31,7 @@ import argparse
 import hashlib
 import json
 import math
+import os
 import re
 import time
 import urllib.error
@@ -45,11 +46,24 @@ from typing import Any
 ROOT = Path(__file__).resolve().parents[1]
 WORLD_PATH = ROOT / "src" / "freight_fate" / "data" / "world.json"
 CACHE_DIR = ROOT / ".route-cache" / "interchanges"
-OVERPASS_MIRRORS = (
+PUBLIC_OVERPASS_MIRRORS = (
     "https://overpass-api.de/api/interpreter",
     "https://overpass.private.coffee/api/interpreter",
     "https://overpass.kumi.systems/api/interpreter",
 )
+
+
+def _overpass_mirrors() -> tuple[str, ...]:
+    """Overpass endpoints, self-hosted first when OVERPASS_URL is set (same
+    convention as enrich_routes_base); public mirrors stay as fallback. Read at
+    call time -- not frozen at import -- so the env is always honored. A local
+    instance turns the junction sweep from hours (public throttling) into minutes.
+    """
+    return tuple(
+        url
+        for url in (os.environ.get("OVERPASS_URL"), *PUBLIC_OVERPASS_MIRRORS)
+        if url
+    )
 OSRM_ROUTE_URL = "https://router.project-osrm.org/route/v1/driving/{coords}"
 USER_AGENT = "FreightFate interchange curation (https://github.com/Orinks/Freight-Fate)"
 ACCESSED_DATE = "2026-06-23"
@@ -150,6 +164,42 @@ def _osrm_geometry(
     cum = 0.0
     prev: tuple[float, float] | None = None
     for lon, lat in geom:
+        if prev is not None:
+            cum += _haversine_mi(prev[0], prev[1], lat, lon)
+        out.append((lat, lon, cum))
+        prev = (lat, lon)
+    return out
+
+
+_ENRICH_MODULE = None
+
+
+def _ors_geometry(
+    data: dict[str, Any], leg: dict[str, Any], rate_limit: float, api_key: str
+) -> list[tuple[float, float, float]] | None:
+    """Dense ``[(lat, lon, cumulative_mi), ...]`` for a leg from the self-hosted
+    OpenRouteService instead of public OSRM -- so the whole interchange sweep can
+    run locally. Reuses ``enrich_routes``' cached ORS fetch/parse (importing the
+    aggregate module triggers the cross-module namespace wiring that resolves its
+    private helpers); the ORS route is already cached for enriched legs, so this
+    is usually a free cache read, and a miss hits the local ORS (unlimited)."""
+    global _ENRICH_MODULE
+    if _ENRICH_MODULE is None:
+        tools_dir = str(Path(__file__).resolve().parent)
+        if tools_dir not in sys.path:
+            sys.path.insert(0, tools_dir)
+        _ENRICH_MODULE = importlib.import_module("enrich_routes")
+    parsed = _ENRICH_MODULE._cached_ors_route(
+        data, leg, ROOT / ".route-cache", rate_limit, api_key
+    )
+    coords = parsed.get("coordinates") or []  # dense [[lon, lat], ...]
+    if len(coords) < 2:
+        return None
+    out: list[tuple[float, float, float]] = []
+    cum = 0.0
+    prev: tuple[float, float] | None = None
+    for point in coords:
+        lat, lon = float(point[1]), float(point[0])
         if prev is not None:
             cum += _haversine_mi(prev[0], prev[1], lat, lon)
         out.append((lat, lon, cum))
@@ -658,7 +708,7 @@ def _cached_post(query: str, rate_limit: float) -> dict[str, Any] | None:
     # mirrors a few times with exponential backoff so a long crawl rides out a
     # rate-limit window instead of dropping the leg. Cache makes a re-run free.
     for attempt in range(4):
-        for url in OVERPASS_MIRRORS:
+        for url in _overpass_mirrors():
             req = urllib.request.Request(
                 url,
                 data=body,
@@ -670,7 +720,10 @@ def _cached_post(query: str, rate_limit: float) -> dict[str, Any] | None:
             try:
                 with urllib.request.urlopen(req, timeout=120) as resp:
                     payload = json.loads(resp.read().decode("utf-8"))
-            except (TimeoutError, OSError, urllib.error.URLError) as exc:
+            except (TimeoutError, OSError, urllib.error.URLError, ValueError) as exc:
+                # ValueError catches an empty / non-JSON 200 body -- the local
+                # single-dispatcher Overpass sheds those under load, and an
+                # uncaught JSONDecodeError would kill the whole crawl.
                 code = getattr(exc, "code", "")
                 print(
                     f"    Overpass {url.split('/')[2]} -> {type(exc).__name__} "
@@ -739,14 +792,18 @@ def _split_destinations(raw: str) -> list[str]:
 
 
 def discover_leg(
-    leg: dict[str, Any], rate_limit: float, local_index: LocalOsmIndex | None = None
+    leg: dict[str, Any],
+    rate_limit: float,
+    local_index: LocalOsmIndex | None = None,
+    geom: list[tuple[float, float, float]] | None = None,
 ) -> list[dict[str, Any]]:
     highway = str(leg.get("highway", ""))
     shield_rx = _shield_pattern(highway)
     if shield_rx is None:
         return []
-    route_points = list(leg.get("corridor", {}).get("route_points", ()))
-    geom = _osrm_geometry(route_points, rate_limit)
+    if geom is None:
+        route_points = list(leg.get("corridor", {}).get("route_points", ()))
+        geom = _osrm_geometry(route_points, rate_limit)
     if not geom:
         return []
     leg_miles = float(leg["miles"])
@@ -895,6 +952,14 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--max-legs", type=int, default=0)
     parser.add_argument("--rate-limit", type=float, default=1.0)
     parser.add_argument(
+        "--ors",
+        action="store_true",
+        help="Source dense route geometry from the self-hosted OpenRouteService "
+        "(ORS_BASE_URL/ORS_API_KEY) instead of public OSRM, so the whole "
+        "interchange sweep runs locally. Pair with OVERPASS_URL for the "
+        "junction queries.",
+    )
+    parser.add_argument(
         "--force", action="store_true", help="Re-discover legs that already have interchanges."
     )
     parser.add_argument(
@@ -1000,6 +1065,7 @@ def main(argv: list[str] | None = None) -> int:
         bounds = _local_prefilter_bounds(index_legs)
         local_index = load_local_index_cache_only(args.local_index_cache, bounds)
 
+    ors_key = os.environ.get("ORS_API_KEY") or "selfhosted"
     total_added = 0
     updated_legs = 0
     processed = 0
@@ -1008,7 +1074,13 @@ def main(argv: list[str] | None = None) -> int:
         processed += 1
         label = f"{leg['from']}->{leg['to']} ({leg['highway']})"
         print(f"[{processed}] {label}", flush=True)
-        found = discover_leg(leg, args.rate_limit, local_index)
+        geom = None
+        if args.ors:
+            geom = _ors_geometry(data, leg, args.rate_limit, ors_key)
+            if not geom:
+                print("    (no ORS geometry; skipped)", flush=True)
+                continue
+        found = discover_leg(leg, args.rate_limit, local_index, geom=geom)
         print(f"    {len(found)} interchanges", flush=True)
         if found:
             corridor["interchanges"] = found

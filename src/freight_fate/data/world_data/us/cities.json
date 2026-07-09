@@ -5701,6 +5701,294 @@
       "lat": 39.4735,
       "lon": -118.7774,
       "locations": []
+    },
+    "florence_sc_us": {
+      "spoken_city": "Florence",
+      "state": "SC",
+      "country": "US",
+      "region": "atlantic_southeast",
+      "locations": [],
+      "lat": 34.1954,
+      "lon": -79.7626
+    },
+    "lumberton_nc_us": {
+      "spoken_city": "Lumberton",
+      "state": "NC",
+      "country": "US",
+      "region": "atlantic_southeast",
+      "locations": [],
+      "lat": 34.6183,
+      "lon": -79.0105
+    },
+    "petersburg_va_us": {
+      "spoken_city": "Petersburg",
+      "state": "VA",
+      "country": "US",
+      "region": "atlantic_southeast",
+      "locations": [],
+      "lat": 37.2279,
+      "lon": -77.4019
+    },
+    "durham_nc_us": {
+      "spoken_city": "Durham",
+      "state": "NC",
+      "country": "US",
+      "region": "atlantic_southeast",
+      "locations": [],
+      "lat": 35.994,
+      "lon": -78.8986
+    },
+    "spartanburg_sc_us": {
+      "spoken_city": "Spartanburg",
+      "state": "SC",
+      "country": "US",
+      "region": "atlantic_southeast",
+      "locations": [],
+      "lat": 34.9496,
+      "lon": -81.932
+    },
+    "lake_city_fl_us": {
+      "spoken_city": "Lake City",
+      "state": "FL",
+      "country": "US",
+      "region": "florida",
+      "locations": [],
+      "lat": 30.1897,
+      "lon": -82.6393
+    },
+    "valdosta_ga_us": {
+      "spoken_city": "Valdosta",
+      "state": "GA",
+      "country": "US",
+      "region": "atlantic_southeast",
+      "locations": [],
+      "lat": 30.8327,
+      "lon": -83.2785
+    },
+    "tifton_ga_us": {
+      "spoken_city": "Tifton",
+      "state": "GA",
+      "country": "US",
+      "region": "atlantic_southeast",
+      "locations": [],
+      "lat": 31.4505,
+      "lon": -83.5085
+    },
+    "cordele_ga_us": {
+      "spoken_city": "Cordele",
+      "state": "GA",
+      "country": "US",
+      "region": "atlantic_southeast",
+      "locations": [],
+      "lat": 31.9635,
+      "lon": -83.7824
+    },
+    "opelika_al_us": {
+      "spoken_city": "Opelika",
+      "state": "AL",
+      "country": "US",
+      "region": "mid_south",
+      "locations": [],
+      "lat": 32.6454,
+      "lon": -85.3783
+    },
+    "lagrange_ga_us": {
+      "spoken_city": "LaGrange",
+      "state": "GA",
+      "country": "US",
+      "region": "atlantic_southeast",
+      "locations": [],
+      "lat": 33.0362,
+      "lon": -85.0319
+    },
+    "columbus_ga_us": {
+      "spoken_city": "Columbus",
+      "state": "GA",
+      "country": "US",
+      "region": "atlantic_southeast",
+      "locations": [],
+      "lat": 32.461,
+      "lon": -84.9877
+    },
+    "albany_ga_us": {
+      "spoken_city": "Albany",
+      "state": "GA",
+      "country": "US",
+      "region": "atlantic_southeast",
+      "locations": [],
+      "lat": 31.5785,
+      "lon": -84.1557
+    },
+    "dalton_ga_us": {
+      "spoken_city": "Dalton",
+      "state": "GA",
+      "country": "US",
+      "region": "atlantic_southeast",
+      "locations": [],
+      "lat": 34.7698,
+      "lon": -84.9702
+    },
+    "cartersville_ga_us": {
+      "spoken_city": "Cartersville",
+      "state": "GA",
+      "country": "US",
+      "region": "atlantic_southeast",
+      "locations": [],
+      "lat": 34.1651,
+      "lon": -84.8001
+    },
+    "pensacola_fl_us": {
+      "spoken_city": "Pensacola",
+      "state": "FL",
+      "country": "US",
+      "region": "florida",
+      "locations": [],
+      "lat": 30.4213,
+      "lon": -87.2169
+    },
+    "crestview_fl_us": {
+      "spoken_city": "Crestview",
+      "state": "FL",
+      "country": "US",
+      "region": "florida",
+      "locations": [],
+      "lat": 30.7621,
+      "lon": -86.5706
+    },
+    "tupelo_ms_us": {
+      "spoken_city": "Tupelo",
+      "state": "MS",
+      "country": "US",
+      "region": "mid_south",
+      "locations": [],
+      "lat": 34.2576,
+      "lon": -88.7034
+    },
+    "hattiesburg_ms_us": {
+      "spoken_city": "Hattiesburg",
+      "state": "MS",
+      "country": "US",
+      "region": "mid_south",
+      "locations": [],
+      "lat": 31.3271,
+      "lon": -89.2903
+    },
+    "grenada_ms_us": {
+      "spoken_city": "Grenada",
+      "state": "MS",
+      "country": "US",
+      "region": "mid_south",
+      "locations": [],
+      "lat": 33.7712,
+      "lon": -89.8087
+    },
+    "elkhart_in_us": {
+      "spoken_city": "Elkhart",
+      "state": "IN",
+      "country": "US",
+      "region": "great_lakes",
+      "locations": [],
+      "lat": 41.682,
+      "lon": -85.9767
+    },
+    "fayetteville_ar_us": {
+      "spoken_city": "Fayetteville",
+      "state": "AR",
+      "country": "US",
+      "region": "mid_south",
+      "locations": [],
+      "lat": 36.0626,
+      "lon": -94.1574
+    },
+    "bentonville_ar_us": {
+      "spoken_city": "Bentonville",
+      "state": "AR",
+      "country": "US",
+      "region": "mid_south",
+      "locations": [],
+      "lat": 36.3729,
+      "lon": -94.2088
+    },
+    "jonesboro_ar_us": {
+      "spoken_city": "Jonesboro",
+      "state": "AR",
+      "country": "US",
+      "region": "mid_south",
+      "locations": [],
+      "lat": 35.8423,
+      "lon": -90.7043
+    },
+    "harrison_ar_us": {
+      "spoken_city": "Harrison",
+      "state": "AR",
+      "country": "US",
+      "region": "mid_south",
+      "locations": [],
+      "lat": 36.2298,
+      "lon": -93.1077
+    },
+    "mountain_home_ar_us": {
+      "spoken_city": "Mountain Home",
+      "state": "AR",
+      "country": "US",
+      "region": "mid_south",
+      "locations": [],
+      "lat": 36.3353,
+      "lon": -92.3852
+    },
+    "texarkana_ar_us": {
+      "spoken_city": "Texarkana",
+      "state": "AR",
+      "country": "US",
+      "region": "mid_south",
+      "locations": [],
+      "lat": 33.4418,
+      "lon": -94.0377
+    },
+    "pine_bluff_ar_us": {
+      "spoken_city": "Pine Bluff",
+      "state": "AR",
+      "country": "US",
+      "region": "mid_south",
+      "locations": [],
+      "lat": 34.2284,
+      "lon": -92.0032
+    },
+    "el_dorado_ar_us": {
+      "spoken_city": "El Dorado",
+      "state": "AR",
+      "country": "US",
+      "region": "mid_south",
+      "locations": [],
+      "lat": 33.2076,
+      "lon": -92.6663
+    },
+    "stuttgart_ar_us": {
+      "spoken_city": "Stuttgart",
+      "state": "AR",
+      "country": "US",
+      "region": "mid_south",
+      "locations": [],
+      "lat": 34.5001,
+      "lon": -91.5526
+    },
+    "dothan_al_us": {
+      "spoken_city": "Dothan",
+      "state": "AL",
+      "country": "US",
+      "region": "mid_south",
+      "locations": [],
+      "lat": 31.2232,
+      "lon": -85.3905
+    },
+    "temple_tx_us": {
+      "spoken_city": "Temple",
+      "state": "TX",
+      "country": "US",
+      "region": "southern_plains",
+      "locations": [],
+      "lat": 31.0982,
+      "lon": -97.3428
     }
   }
 }

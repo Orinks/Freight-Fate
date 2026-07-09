@@ -4,6 +4,154 @@
 
 ### Added
 
+- **The Deep South fills in with seven new connections.** Birmingham now runs to
+  Chattanooga on Interstate 59; Mobile, Meridian, and Tupelo link up the length of
+  US-45; Jackson and Gulfport both reach Hattiesburg on US-49; Columbia connects to
+  Spartanburg on Interstate 26; and Austin joins Temple straight up Interstate 35.
+  Whole stretches of Alabama, Mississippi, and the Carolinas that could only be
+  reached the long way around are now direct.
+
+- **Three more western Interstate gaps close up.** Twin Falls now connects to
+  Ogden on Interstate 84, Idaho Falls to Pocatello on Interstate 15 past the Potato
+  Capital of Blackfoot, and Casper climbs to Buffalo on Interstate 25 through the
+  Powder River country -- filling in the Mountain West so the long-haul routes
+  through Idaho, Utah, and Wyoming connect city to city.
+
+- **Interstate 80 across Nebraska is now continuous.** The one missing gap,
+  Kearney to North Platte through Cozad and Gothenburg, is filled -- so the great
+  transcontinental Interstate 80 run across the Platte River valley connects city
+  by city, right past the hundredth-meridian marker.
+
+- **Dallas now connects to the Texas Panhandle up US-287.** Two new runs -- Dallas
+  to Wichita Falls, then on to Amarillo through Decatur, Bowie, Vernon, Childress,
+  and Memphis -- open the busy Highway 287 truck route across the plains, crossing
+  the Red River, and tie Dallas to Amarillo (and onward to Albuquerque).
+
+- **The Interstate 20 run from Birmingham to Tuscaloosa is now drivable.** This
+  short but heavily-trucked segment past the Mercedes-Benz plant had no route of
+  its own; adding it means the whole Interstate 20 corridor -- Atlanta, Birmingham,
+  Tuscaloosa, Meridian, Jackson, Vicksburg, Monroe, Shreveport, Dallas -- can now
+  be driven city by city, stopping in every town along the way.
+
+- **Temple, Texas completes the Interstate 35 spine through Central Texas.** The
+  new city fills the gap between Killeen and Waco, so the busy run up the middle of
+  Texas now stops at every real city along the way -- through Belton and Troy --
+  instead of skipping the heart of the corridor.
+
+- **Dothan, Alabama's "Peanut Capital," ties three states together.** The new
+  wiregrass city connects Montgomery, Tallahassee, and Albany by real US-highway
+  runs through the peanut country of southeast Alabama, the Florida Panhandle, and
+  southwest Georgia -- stopping at towns like Troy, Ozark, Blakely, and Cottondale
+  and crossing the Chattahoochee and Apalachicola rivers.
+
+- **Stuttgart, the rice and duck capital, anchors Arkansas's farm country.** The
+  new city sits in the Grand Prairie rice belt, reached from Little Rock through
+  England and looping down to Pine Bluff, crossing the Arkansas River -- flat
+  farm-road driving through real Delta towns.
+
+- **South Arkansas's timber and oil country joins the map, connecting into
+  Louisiana.** Two cities arrive -- Pine Bluff and El Dorado -- and a new run drops
+  south from Little Rock through Pine Bluff and El Dorado to Monroe, Louisiana,
+  stopping at real towns along the way: Redfield, Warren, Hermitage, Junction City
+  on the state line, Bernice, and Ruston. It opens the first road link between the
+  Arkansas and Louisiana networks.
+
+- **The Little Rock to Dallas run now stops at real towns.** Texarkana joins the
+  map, right on the Arkansas-Texas line, and the long Interstate 30 haul breaks
+  into a real chain of stops -- Benton, Arkadelphia, and Hope in Arkansas, then
+  New Boston, Mount Pleasant, Sulphur Springs, and Greenville in Texas -- with
+  truck stops, rest areas, and the Red River crossing along the way.
+
+- **The drivable map crosses one hundred thousand miles.** This drop adds about
+  four thousand five hundred miles of new road and thirty-two new cities,
+  bringing the network past one hundred thousand miles you can actually drive --
+  103,340 miles across 407 cities and 785 routes.
+
+- **Exits now come straight from real-world maps -- with the correct exit names
+  and numbers.** On the Interstates, your stops and your destination exit are
+  announced with their actual exit number and name and the places they point to --
+  "Exit 33, Yemassee," "toward Beaufort and Port Royal," "Durham" -- taken directly
+  from real map data, so you always know the right exit to take. This now covers
+  the whole Interstate network.
+
+- **Routes now carry the real posted speed limits.** Instead of estimating a
+  limit from the road type, most legs now use the actual posted speed limits from
+  map data (interstates, US highways, and more), so your truck runs the real
+  limit on the road it is driving. Rural roads without published limits still fall
+  back to a sensible estimate.
+
+- **Interstate 10 across the Florida Panhandle now stops at real towns.** Two
+  cities join the map: Pensacola and Crestview. The long Tallahassee-to-Mobile run
+  breaks into stops through Marianna, DeFuniak Springs, and Spanish Fort, with
+  truck stops and rest areas along the way.
+
+- **Northern Arkansas's Ozark truck routes join the map.** Harrison and Mountain
+  Home connect Northwest Arkansas across the winding US-412 and US-62 to Jonesboro
+  -- the real curvy mountain roads a lot of trucks take, with genuine Ozark grades
+  and turns through Springdale, Huntsville, Yellville, and beyond.
+
+- **Arkansas opens up -- Walmart alley and the Delta.** Three new cities join the
+  map: Fayetteville and Bentonville (Walmart's home) in the northwest, and
+  Jonesboro in the northeast. Interstate 49 now climbs the real Boston Mountains
+  from Fort Smith up through Fayetteville and Bentonville toward Joplin, and
+  Jonesboro reaches Memphis and Little Rock across the rice-country Delta. You will
+  pass Springdale, Rogers, Alma, West Memphis, Brinkley, and more.
+
+- **The Indiana Toll Road and southwest Ohio fill in.** Elkhart, Indiana -- the
+  RV manufacturing capital -- joins the map on Interstate 80/90, linking Toledo
+  across to South Bend, and Dayton and Cincinnati are now directly connected on
+  Interstate 75. You will pass towns like Swanton, Fremont, Monroe, and Sharonville.
+
+- **Mississippi opens up: Tupelo, Hattiesburg, and Grenada join the map.** Three
+  new cities knit together the state's Interstates -- Interstate 22 from Birmingham
+  through Tupelo to Memphis, Interstate 59 down through Hattiesburg to New Orleans,
+  and a new Interstate 55 run from Memphis through Grenada to Jackson. You will
+  pass and hear Jasper, New Albany, Holly Springs, Laurel, Picayune, and more,
+  with truck stops and real exits along the way.
+
+- **Interstate 75 between Chattanooga and Atlanta now stops at real towns.**
+  Two Georgia cities join the map: Dalton, the carpet capital, and Cartersville.
+  The run breaks into stops through Ringgold, Calhoun, and Marietta instead of one
+  long leg, with truck stops to fuel and rest at. Truck-stop names across the map
+  also read more cleanly now (no more bare "T A" or leftover store numbers).
+
+- **Southwest Georgia joins the map: Columbus and Albany.** Columbus, Georgia --
+  the state's third-largest city, next to Fort Benning -- and Albany open up the
+  wiregrass region, linking west to Montgomery, Alabama and east to the
+  Interstate 75 towns at Tifton. You will pass and hear Tuskegee, Cusseta,
+  Dawson, and Sylvester along the way.
+
+- **Interstate 85 now runs unbroken from Atlanta down to Montgomery, Alabama.**
+  Two more cities join the map: Opelika, Alabama, next to Auburn, and LaGrange,
+  Georgia. The Atlanta-to-Montgomery run now stops city to city -- through
+  Newnan, Auburn, and Valley -- instead of as one long leg, with truck stops and
+  a rest area to break at.
+
+- **Interstate 75 through South Georgia is now a chain of towns, not one long
+  haul.** Four cities join the map: Lake City, Florida, and Valdosta, Tifton,
+  and Cordele, Georgia. The run from Jacksonville up to Macon and Atlanta now
+  stops city to city instead of as a single unbroken three-hundred-mile leg, and
+  you will pass and hear the towns between -- Jennings, Adel, Ashburn, Perry --
+  with truck stops and rest areas to break at.
+
+- **Interstate 85 now runs unbroken through the Carolina Piedmont into Atlanta.**
+  Two more cities join the map: Durham, North Carolina, in the Research Triangle,
+  and Spartanburg, South Carolina, on the busy Eighty-Five freight run. The drive
+  from Petersburg down through Durham, Greensboro, Charlotte, and Greenville into
+  Atlanta finally connects city to city on the real road, and you will pass and
+  hear the towns along it -- South Hill and Henderson in the north, Gastonia and
+  Gaffney in the Carolinas -- with truck stops to fuel and rest at.
+
+- **The Interstate 95 coast now connects, from Richmond down to Savannah.**
+  Three new cities join the map: Florence and Lumberton along the Carolinas'
+  stretch of Ninety-Five, and Petersburg, Virginia, where Ninety-Five meets
+  Interstate Eighty-Five. That fills a real gap -- the East Coast's busiest
+  freight run used to force a detour inland, and now you can drive it city to
+  city on the actual road. Along the way you will pass and hear real towns:
+  Walterboro, Saint George, and Dillon in South Carolina, Roanoke Rapids and
+  Emporia in Virginia, with truck stops and a welcome center to fuel and rest
+  at.
+
 - **The biggest map update yet -- 100 new cities to pick up and deliver in.** A
   city is a place a load can start or end, and the map grew from 249 to 349 of
   them, filling in dead zones that used to have nothing drivable for hundreds of
