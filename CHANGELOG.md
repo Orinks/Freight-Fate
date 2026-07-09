@@ -4,6 +4,12 @@
 
 ### Added
 
+- **California connects up, coast to desert.** Twelve new runs: San Francisco to
+  Santa Rosa and San Jose to Salinas and Stockton; Salinas down the coast to Santa
+  Maria; Fresno to Visalia; Oxnard to Valencia; Bakersfield over Tehachapi to
+  Barstow; Lancaster to Barstow and Victorville; San Diego up to Riverside; and
+  Riverside out to Indio and El Centro across the desert.
+
 - **The Great Plains ladder and the Ozarks connect up.** Fourteen new runs lace
   the plains together -- Dodge City to Hays, Garden City and North Platte to Colby,
   Kearney to Hays, Lincoln to Junction City, Bismarck to Minot, Mitchell to
@@ -167,9 +173,9 @@
   truck stops, rest areas, and the Red River crossing along the way.
 
 - **The drivable map crosses one hundred thousand miles.** This drop adds about
-  twenty thousand three hundred miles of new road and sixty-seven new cities,
+  twenty-one thousand three hundred miles of new road and sixty-seven new cities,
   bringing the network past one hundred thousand miles you can actually drive --
-  119,138 miles across 442 cities and 955 routes.
+  120,127 miles across 442 cities and 967 routes.
 
 - **Exits now come straight from real-world maps -- with the correct exit names
   and numbers.** On the Interstates, your stops and your destination exit are
