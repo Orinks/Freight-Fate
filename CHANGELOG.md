@@ -4,6 +4,11 @@
 
 ### Added
 
+- **The drivable map keeps growing.** This drop adds roughly 750 miles of new
+  road and eleven new cities, bringing the network to about 99,500 miles you can
+  actually drive, across 386 cities and 737 routes. (Numbers finalized at
+  release from `tools/map_stats.py --since <last release>`.)
+
 - **Interstate 85 now runs unbroken from Atlanta down to Montgomery, Alabama.**
   Two more cities join the map: Opelika, Alabama, next to Auburn, and LaGrange,
   Georgia. The Atlanta-to-Montgomery run now stops city to city -- through
