@@ -4,6 +4,13 @@
 
 ### Added
 
+- **The Deep South fills in with seven new connections.** Birmingham now runs to
+  Chattanooga on Interstate 59; Mobile, Meridian, and Tupelo link up the length of
+  US-45; Jackson and Gulfport both reach Hattiesburg on US-49; Columbia connects to
+  Spartanburg on Interstate 26; and Austin joins Temple straight up Interstate 35.
+  Whole stretches of Alabama, Mississippi, and the Carolinas that could only be
+  reached the long way around are now direct.
+
 - **Three more western Interstate gaps close up.** Twin Falls now connects to
   Ogden on Interstate 84, Idaho Falls to Pocatello on Interstate 15 past the Potato
   Capital of Blackfoot, and Casper climbs to Buffalo on Interstate 25 through the
@@ -56,9 +63,9 @@
   truck stops, rest areas, and the Red River crossing along the way.
 
 - **The drivable map crosses one hundred thousand miles.** This drop adds about
-  three thousand eight hundred miles of new road and thirty-two new cities,
+  four thousand five hundred miles of new road and thirty-two new cities,
   bringing the network past one hundred thousand miles you can actually drive --
-  102,596 miles across 407 cities and 778 routes.
+  103,340 miles across 407 cities and 785 routes.
 
 - **Exits now come straight from real-world maps -- with the correct exit names
   and numbers.** On the Interstates, your stops and your destination exit are
