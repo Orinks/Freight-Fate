@@ -27,6 +27,13 @@
   breaks into stops through Marianna, DeFuniak Springs, and Spanish Fort, with
   truck stops and rest areas along the way.
 
+- **Mississippi opens up: Tupelo, Hattiesburg, and Grenada join the map.** Three
+  new cities knit together the state's Interstates -- Interstate 22 from Birmingham
+  through Tupelo to Memphis, Interstate 59 down through Hattiesburg to New Orleans,
+  and a new Interstate 55 run from Memphis through Grenada to Jackson. You will
+  pass and hear Jasper, New Albany, Holly Springs, Laurel, Picayune, and more,
+  with truck stops and real exits along the way.
+
 - **Interstate 75 between Chattanooga and Atlanta now stops at real towns.**
   Two Georgia cities join the map: Dalton, the carpet capital, and Cartersville.
   The run breaks into stops through Ringgold, Calhoun, and Marietta instead of one

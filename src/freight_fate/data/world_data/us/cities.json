@@ -5854,6 +5854,33 @@
       "locations": [],
       "lat": 30.7621,
       "lon": -86.5706
+    },
+    "tupelo_ms_us": {
+      "spoken_city": "Tupelo",
+      "state": "MS",
+      "country": "US",
+      "region": "gulf_coast",
+      "locations": [],
+      "lat": 34.2576,
+      "lon": -88.7034
+    },
+    "hattiesburg_ms_us": {
+      "spoken_city": "Hattiesburg",
+      "state": "MS",
+      "country": "US",
+      "region": "gulf_coast",
+      "locations": [],
+      "lat": 31.3271,
+      "lon": -89.2903
+    },
+    "grenada_ms_us": {
+      "spoken_city": "Grenada",
+      "state": "MS",
+      "country": "US",
+      "region": "gulf_coast",
+      "locations": [],
+      "lat": 33.7712,
+      "lon": -89.8087
     }
   }
 }
