@@ -5728,6 +5728,24 @@
       "locations": [],
       "lat": 37.2279,
       "lon": -77.4019
+    },
+    "durham_nc_us": {
+      "spoken_city": "Durham",
+      "state": "NC",
+      "country": "US",
+      "region": "atlantic_southeast",
+      "locations": [],
+      "lat": 35.994,
+      "lon": -78.8986
+    },
+    "spartanburg_sc_us": {
+      "spoken_city": "Spartanburg",
+      "state": "SC",
+      "country": "US",
+      "region": "atlantic_southeast",
+      "locations": [],
+      "lat": 34.9496,
+      "lon": -81.932
     }
   }
 }

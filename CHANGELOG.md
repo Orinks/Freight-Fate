@@ -4,6 +4,14 @@
 
 ### Added
 
+- **Interstate 85 now runs unbroken through the Carolina Piedmont into Atlanta.**
+  Two more cities join the map: Durham, North Carolina, in the Research Triangle,
+  and Spartanburg, South Carolina, on the busy Eighty-Five freight run. The drive
+  from Petersburg down through Durham, Greensboro, Charlotte, and Greenville into
+  Atlanta finally connects city to city on the real road, and you will pass and
+  hear the towns along it -- South Hill and Henderson in the north, Gastonia and
+  Gaffney in the Carolinas -- with truck stops to fuel and rest at.
+
 - **The Interstate 95 coast now connects, from Richmond down to Savannah.**
   Three new cities join the map: Florence and Lumberton along the Carolinas'
   stretch of Ninety-Five, and Petersburg, Virginia, where Ninety-Five meets

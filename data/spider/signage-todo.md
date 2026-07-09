@@ -21,6 +21,14 @@ need BUILT legs, so this list trails the map build.
   once they exist (South of the Border's northbound countdown, Maryland House,
   Delaware toll, etc.).
 
+## I-85 Piedmont spine (built 2026-07-08)
+
+- **Gaffney, SC** -- the Peachoid, a giant peach-shaped water tower (of *House of
+  Cards* fame). On `charlotte_nc_us -> spartanburg_sc_us`. Prime, instantly
+  recognizable roadside billboard.
+- **Spartanburg / Greer, SC** -- the BMW plant on I-85 is a real freight landmark
+  (and a possible "manufacturing" pickup flavor later).
+
 ## Owner checkpoint requests (place when the road gets built)
 
 - **Midlothian, VA** on **US-60** (Midlothian Turnpike) west/southwest of
