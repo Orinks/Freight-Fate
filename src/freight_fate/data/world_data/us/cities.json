@@ -5917,6 +5917,24 @@
       "locations": [],
       "lat": 35.8423,
       "lon": -90.7043
+    },
+    "harrison_ar_us": {
+      "spoken_city": "Harrison",
+      "state": "AR",
+      "country": "US",
+      "region": "heartland",
+      "locations": [],
+      "lat": 36.2298,
+      "lon": -93.1077
+    },
+    "mountain_home_ar_us": {
+      "spoken_city": "Mountain Home",
+      "state": "AR",
+      "country": "US",
+      "region": "heartland",
+      "locations": [],
+      "lat": 36.3353,
+      "lon": -92.3852
     }
   }
 }

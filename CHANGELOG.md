@@ -27,6 +27,11 @@
   breaks into stops through Marianna, DeFuniak Springs, and Spanish Fort, with
   truck stops and rest areas along the way.
 
+- **Northern Arkansas's Ozark truck routes join the map.** Harrison and Mountain
+  Home connect Northwest Arkansas across the winding US-412 and US-62 to Jonesboro
+  -- the real curvy mountain roads a lot of trucks take, with genuine Ozark grades
+  and turns through Springdale, Huntsville, Yellville, and beyond.
+
 - **Arkansas opens up -- Walmart alley and the Delta.** Three new cities join the
   map: Fayetteville and Bentonville (Walmart's home) in the northwest, and
   Jonesboro in the northeast. Interstate 49 now climbs the real Boston Mountains
