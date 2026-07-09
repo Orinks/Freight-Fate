@@ -1,10 +1,11 @@
 # Freight Fate Roadmap
 
-> Current stable: **1.7.0** (shipped). Next release: **1.8.0**, in flight on the
-> `awesome-greider` branch (troopers, real OSM speed limits, seasons,
-> cargo-weight physics, predictive adaptive cruise, and more). `pyproject` is
-> set to 1.8.0 so developer snapshots report it; the stable tag follows at
-> release.
+> Current stable: **1.8.0** (shipped 2026-07-05). Next release: **1.9.0**, in
+> flight on the `feat/career-1.9` branch, whose ROADMAP carries the full
+> 1.9-in-flight feature view; it lands here when that line merges for
+> release. `pyproject` on `dev` reports 1.8.1 for nightly snapshots. Keep
+> this file current: when a feature lands, check it off or add it in the
+> same change (see the Roadmap upkeep section in `AGENTS.md`).
 
 ## Shipped in 1.6.0
 
