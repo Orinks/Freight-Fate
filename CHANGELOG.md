@@ -4,6 +4,13 @@
 
 ### Added
 
+- **Thirteen more cities finish the flavor map, coast to coast.** Socorro joins
+  Interstate 25 down the Rio Grande; Modesto and Merced fill California's Highway 99
+  between Stockton and Fresno; New London lands on Interstate 95 between Providence
+  and New Haven; plus Clovis, Sherman, Paris, Lufkin, and Victoria across Texas and
+  New Mexico, Prescott in the Arizona highlands, Logan and Moab in Utah, and
+  Aberdeen up in the Dakotas.
+
 - **Nine more Southern cities join the map.** Gadsden lands on Interstate 59
   between Birmingham and Chattanooga; Brunswick breaks up the Interstate 95 run from
   Jacksonville to Savannah; Natchitoches sits on Interstate 49 between Alexandria and
@@ -218,9 +225,9 @@
   truck stops, rest areas, and the Red River crossing along the way.
 
 - **The drivable map crosses one hundred thousand miles.** This drop adds about
-  twenty-five thousand eight hundred miles of new road and eighty-two new cities,
+  twenty-seven thousand four hundred miles of new road and ninety-five new cities,
   bringing the network past one hundred thousand miles you can actually drive --
-  124,638 miles across 457 cities and 1,018 routes.
+  126,238 miles across 470 cities and 1,039 routes.
 
 - **Exits now come straight from real-world maps -- with the correct exit names
   and numbers.** On the Interstates, your stops and your destination exit are

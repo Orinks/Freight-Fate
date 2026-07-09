@@ -6439,6 +6439,123 @@
       "locations": [],
       "lat": 29.596,
       "lon": -90.719
+    },
+    "socorro_nm_us": {
+      "spoken_city": "Socorro",
+      "state": "NM",
+      "country": "US",
+      "region": "desert_southwest",
+      "locations": [],
+      "lat": 34.058,
+      "lon": -106.891
+    },
+    "clovis_nm_us": {
+      "spoken_city": "Clovis",
+      "state": "NM",
+      "country": "US",
+      "region": "desert_southwest",
+      "locations": [],
+      "lat": 34.404,
+      "lon": -103.205
+    },
+    "sherman_tx_us": {
+      "spoken_city": "Sherman",
+      "state": "TX",
+      "country": "US",
+      "region": "southern_plains",
+      "locations": [],
+      "lat": 33.636,
+      "lon": -96.609
+    },
+    "paris_tx_us": {
+      "spoken_city": "Paris",
+      "state": "TX",
+      "country": "US",
+      "region": "southern_plains",
+      "locations": [],
+      "lat": 33.661,
+      "lon": -95.556
+    },
+    "lufkin_tx_us": {
+      "spoken_city": "Lufkin",
+      "state": "TX",
+      "country": "US",
+      "region": "southern_plains",
+      "locations": [],
+      "lat": 31.338,
+      "lon": -94.729
+    },
+    "victoria_tx_us": {
+      "spoken_city": "Victoria",
+      "state": "TX",
+      "country": "US",
+      "region": "gulf_coast",
+      "locations": [],
+      "lat": 28.805,
+      "lon": -96.985
+    },
+    "modesto_ca_us": {
+      "spoken_city": "Modesto",
+      "state": "CA",
+      "country": "US",
+      "region": "california",
+      "locations": [],
+      "lat": 37.639,
+      "lon": -120.997
+    },
+    "merced_ca_us": {
+      "spoken_city": "Merced",
+      "state": "CA",
+      "country": "US",
+      "region": "california",
+      "locations": [],
+      "lat": 37.302,
+      "lon": -120.483
+    },
+    "prescott_az_us": {
+      "spoken_city": "Prescott",
+      "state": "AZ",
+      "country": "US",
+      "region": "desert_southwest",
+      "locations": [],
+      "lat": 34.54,
+      "lon": -112.469
+    },
+    "logan_ut_us": {
+      "spoken_city": "Logan",
+      "state": "UT",
+      "country": "US",
+      "region": "rockies",
+      "locations": [],
+      "lat": 41.735,
+      "lon": -111.834
+    },
+    "moab_ut_us": {
+      "spoken_city": "Moab",
+      "state": "UT",
+      "country": "US",
+      "region": "rockies",
+      "locations": [],
+      "lat": 38.573,
+      "lon": -109.55
+    },
+    "aberdeen_sd_us": {
+      "spoken_city": "Aberdeen",
+      "state": "SD",
+      "country": "US",
+      "region": "heartland",
+      "locations": [],
+      "lat": 45.465,
+      "lon": -98.487
+    },
+    "new_london_ct_us": {
+      "spoken_city": "New London",
+      "state": "CT",
+      "country": "US",
+      "region": "northeast",
+      "locations": [],
+      "lat": 41.356,
+      "lon": -72.1
     }
   }
 }
