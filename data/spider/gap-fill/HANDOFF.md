@@ -30,8 +30,14 @@ start at the top and keep going.
       Now **418 cities / 869 legs / 110,969 mi**.
 - [x] Batch 6 -- 19 Midwest lattice legs (696a693). Now 418 cities / 888 legs /
       112,691 mi.
-- [ ] City Wave 2  <-- NEXT (analysis done -- see CITY WAVE 2 PLAN below)
-- [ ] Batch 7+ per Part 3.
+- [x] City Wave 2 -- 12 cities (18abafe): Cumberland, St Joseph, Mansfield,
+      Youngstown, Staunton, Paducah, Owensboro, Daytona Beach, Waterloo,
+      Parkersburg, Mount Vernon, Cape Girardeau. Kingsport dropped.
+- [x] Scanner re-run 2026-07-10c: corridor 359->374 (Wave 2 cities add gaps),
+      nn 157->148. Catalogs = *-2026-07-10c.txt. Now 430 cities / 909 legs /
+      113,991 mi.
+- [ ] Batch 7 -- Texas & southern plains  <-- NEXT
+- [ ] City Wave 3, Batches 8-11, City Wave 4 per Part 3.
 
 ### CITY WAVE 2 PLAN (analyzed 2026-07-10, ready to execute)
 None are clean checkpoint-splits. Verified nearest nodes + which sit on a bypass
