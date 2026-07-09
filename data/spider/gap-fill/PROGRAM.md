@@ -1,5 +1,9 @@
 # Gap-fill program (Fable design review, 2026-07-09)
 
+> SUPERSEDED as the working plan by `HANDOFF.md` in this folder (Fable
+> analysis, same day) -- start there. This file is kept for the full review
+> text: per-batch pair lists, exclusion reasoning, and the original ledger.
+
 Operational plan for closing the map's connectivity gaps. Inputs: two systematic
 scans run 2026-07-09 against 407 cities / 785 legs (the raw catalogs and the
 scanner scripts live beside this file). The review below is Fable 5's triage of
