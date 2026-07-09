@@ -481,6 +481,10 @@ class DrivingEventMixin:
     def _destination_exit_stop(self):
         if self.phase != DRIVE_PHASE_DELIVERY or self._destination_exit_taken:
             return None
+        if self._departure_chain:
+            # Still on the origin's streets: the end of the active trip is
+            # the on-ramp merge, not the delivery exit.
+            return None
         details = self._destination_exit_details()
         if details is None:
             at_mi = max(0.0, self.trip.total_miles - DESTINATION_EXIT_BEFORE_END_MI)
@@ -572,9 +576,7 @@ class DrivingEventMixin:
             return None
         # Matched against real interchange sign text, so compare the spoken
         # city name ("Nashville"), never the slug key.
-        destination = self.ctx.world.spoken_city(
-            self.route.cities[-1], qualified=False
-        ).casefold()
+        destination = self.ctx.world.spoken_city(self.route.cities[-1], qualified=False).casefold()
         candidates = []
         for i in range(len(self.route.legs) - 1, -1, -1):
             leg = self.route.legs[i]
@@ -674,6 +676,80 @@ class DrivingEventMixin:
                 interrupt=False,
             )
         return True
+
+    def _departure_chain_route(self):
+        """The origin facility's street chain driven outbound, or None.
+
+        Same bar as the arrival side: only a genuine multi-segment
+        turn-level chain qualifies; other facilities keep the scripted
+        departure straight onto the highway."""
+        if self.phase != DRIVE_PHASE_DELIVERY:
+            return None
+        try:
+            return self.ctx.world.facility_departure_route(
+                self.job.origin, self.job.origin_location
+            )
+        except (AttributeError, KeyError, ValueError):
+            return None
+
+    def _begin_departure_chain(self, *, announce: bool = True) -> bool:
+        """Start the loaded run on the origin facility's street chain.
+
+        The full highway trip built at dispatch is parked aside; the truck
+        pulls out of the gate onto real streets and the on-ramp merge hands
+        the highway trip back with the clock and toll ledger intact."""
+        if self._departure_chain or self._surface_chain:
+            return False
+        route = self._departure_chain_route()
+        if route is None:
+            return False
+        highway = self.trip
+        surface = Trip(
+            route,
+            self.truck,
+            self.weather,
+            time_scale=highway.time_scale,
+            seed=self.trip_seed ^ 0xD00D,
+            start_hour=highway.start_hour,
+            imperial=highway.imperial,
+            hazard_scale=0.0,  # no random hazards on the first city miles
+            career_hours=highway.career_hours,
+        )
+        self._highway_trip = highway
+        self.trip = surface
+        self._departure_chain = True
+        if announce:
+            first = route.legs[0]
+            street = first.local_cue.rstrip(".") if first.local_cue else f"Start on {first.highway}"
+            merge_leg = highway.route.legs[0]
+            self.ctx.say_event(
+                f"Out of the gate and onto city streets: "
+                f"{street[:1].lower()}{street[1:]}. "
+                f"{surface._distance_text(route.miles)} to the "
+                f"{merge_leg.highway} on-ramp.",
+                interrupt=False,
+            )
+        return True
+
+    def _finish_departure_chain(self) -> None:
+        """End of the streets: up the on-ramp and onto the highway trip."""
+        surface = self.trip
+        highway = self._highway_trip
+        highway.game_minutes = surface.game_minutes  # clock continuity
+        highway.toll_charges = surface.toll_charges  # settlement reads the live trip
+        highway.hos_violation = surface.hos_violation
+        self.trip = highway
+        self._highway_trip = None
+        self._departure_chain = False
+        # Coming up the ramp you are in the right lane, merging left.
+        self.lane.lane = 0
+        self.lane.offset = 0.0
+        merge_leg = highway.route.legs[0]
+        self.ctx.audio.play("vehicle/turn_signal", volume=0.6, pan=-0.6)
+        self.ctx.say_event(
+            f"Up the ramp and onto {merge_leg.highway}. Merge left when clear.",
+            interrupt=False,
+        )
 
     def _begin_ramp_terminal(self, stop) -> None:
         """Decide what controls the end of the ramp just taken.

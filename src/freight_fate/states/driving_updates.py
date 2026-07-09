@@ -12,6 +12,13 @@ LANE_GUIDANCE_PAN = 0.85
 class DrivingUpdateMixin:
     def update(self, dt: float) -> None:
         t = self.truck
+        # A fresh loaded run out of a chain-capable origin starts on the
+        # facility's streets. Decided on the first tick, never on a resume:
+        # from_snapshot marks the check done and re-enters a chain itself.
+        if not self._departure_checked:
+            self._departure_checked = True
+            if not self.resumed:
+                self._begin_departure_chain()
         # pacing can be changed from the pause menu mid-trip; keep the trip's
         # clock compression in step with the setting
         self.trip.time_scale = self.ctx.settings.time_scale
@@ -141,7 +148,10 @@ class DrivingUpdateMixin:
         if self.tutorial:
             self.tutorial.update(dt, t)
         if self.trip.finished:
-            if self.phase == DRIVE_PHASE_PICKUP:
+            if self._departure_chain:
+                # End of the origin's streets: merge onto the highway trip.
+                self._finish_departure_chain()
+            elif self.phase == DRIVE_PHASE_PICKUP:
                 self._handle_pickup_gate()
             elif self.phase == DRIVE_PHASE_CITY_SERVICE:
                 self._handle_city_service_gate()
@@ -1110,11 +1120,7 @@ class DrivingUpdateMixin:
             self._brake_squeal_cooldown_s = max(0.0, self._brake_squeal_cooldown_s - dt)
             return
         t = self.truck
-        if (
-            t.brake >= 0.4
-            and t.speed_mph > 10.0
-            and t.brake_temp_c >= t.specs.brake_fade_temp_c
-        ):
+        if t.brake >= 0.4 and t.speed_mph > 10.0 and t.brake_temp_c >= t.specs.brake_fade_temp_c:
             self.ctx.audio.play("vehicle/brake_squeal", volume=0.8)
             self._brake_squeal_cooldown_s = 4.0
 

@@ -103,14 +103,18 @@ prompt window (same interaction family as the exit-lane setup), not a lane
 geometry change. The discrete two-lane prototype is a separate, unlanded
 design and this plan must not depend on it.
 
-### Phase 3 -- Chain highway and surface (DELIVERED: arrival side)
+### Phase 3 -- Chain highway and surface (DELIVERED: both sides)
 
 Shipped: the destination ramp flows onto the facility's tier-1 street
 chain and ends at the standard gate arrival, with exact clock/toll/weekday
 continuity and a `surface_chain` save marker (old saves untouched; chains
 rebuild deterministically on resume). Facilities without turn-level data
-keep the scripted arrival. The departure mirror (gate, surface chain,
-on-ramp merge) remains open. Original notes:
+keep the scripted arrival. The departure mirror shipped too: a loaded run
+out of a chain-capable origin starts at the gate on the reversed chain
+(`facility_departure_route`, turn directions flipped per junction), merges
+onto the highway trip at the ramp, and carries a `departure_chain` save
+marker. The pickup deadhead already drove the approach chain, so both ends
+of a load now sit on real streets. Original notes:
 
 Today `DrivingState` runs one route object per phase (deadhead route, or the
 highway route) and the arrival is a scripted stop. Chaining:

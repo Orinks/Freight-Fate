@@ -248,6 +248,12 @@
   chime means green. You hear them when the light is first called out, when
   it changes ahead of you, and when a wait at the stop bar ends, alongside
   the spoken callouts.
+- **Loaded runs now pull out of the gate onto real streets.** Leaving a
+  shipper that has turn-level street data, the drive starts at the facility
+  gate and follows the same named streets you arrived by, with every turn
+  mirrored for the outbound direction, then merges up the on-ramp onto the
+  highway. A save made on the outbound streets resumes there, and facilities
+  without street data keep the usual highway start.
 - **Dispatch rows now preview trailer fit and take-home.** Company drivers keep
   carrier-provided trailer support, while owner-operators and own-authority
   drivers hear when a load needs a missing trailer program or owned trailer.

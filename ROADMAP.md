@@ -44,9 +44,12 @@ big and specific enough that every run feels like a place.
       onto the facility's tier-1 street chain and ends at the standard gate
       arrival, with clock/toll/weekday continuity and a `surface_chain` save
       marker; facilities without turn-level data keep the scripted arrival.
-- [ ] **Surface chaining, departure side.** Mirror the arrival: pull out of
-      the gate onto the street chain and merge onto the highway, instead of
-      starting the trip already on the on-ramp.
+- [x] **Surface chaining, departure side.** A loaded run out of a
+      chain-capable origin facility starts at the gate and drives the same
+      street chain outbound -- leg order reversed and every junction's turn
+      direction flipped -- then merges up the on-ramp onto the highway trip
+      with clock and toll continuity and a `departure_chain` save marker.
+      Facilities without turn-level data keep the scripted highway start.
 
 ### World and narration
 
