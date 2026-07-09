@@ -4,6 +4,13 @@
 
 ### Added
 
+- **The Great Plains ladder and the Ozarks connect up.** Fourteen new runs lace
+  the plains together -- Dodge City to Hays, Garden City and North Platte to Colby,
+  Kearney to Hays, Lincoln to Junction City, Bismarck to Minot, Mitchell to
+  Watertown, Sioux Falls to Mankato, Willmar to Watertown -- and down south,
+  Columbia to Rolla, Kansas City to Springfield, and three roads into Harrison,
+  Arkansas from Springfield, Conway, and Bentonville through the Ozark hills.
+
 - **Twelve more cities open up the western plains and the Rockies.** Lawrence,
   Kansas joins the Interstate 70 run from Topeka to Kansas City; Ardmore breaks up
   Oklahoma City to Dallas over the Arbuckle Mountains; Rawlins lands on Interstate
@@ -160,9 +167,9 @@
   truck stops, rest areas, and the Red River crossing along the way.
 
 - **The drivable map crosses one hundred thousand miles.** This drop adds about
-  eighteen thousand six hundred miles of new road and sixty-seven new cities,
+  twenty thousand three hundred miles of new road and sixty-seven new cities,
   bringing the network past one hundred thousand miles you can actually drive --
-  117,394 miles across 442 cities and 941 routes.
+  119,138 miles across 442 cities and 955 routes.
 
 - **Exits now come straight from real-world maps -- with the correct exit names
   and numbers.** On the Interstates, your stops and your destination exit are
