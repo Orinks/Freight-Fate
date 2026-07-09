@@ -5746,6 +5746,42 @@
       "locations": [],
       "lat": 34.9496,
       "lon": -81.932
+    },
+    "lake_city_fl_us": {
+      "spoken_city": "Lake City",
+      "state": "FL",
+      "country": "US",
+      "region": "florida",
+      "locations": [],
+      "lat": 30.1897,
+      "lon": -82.6393
+    },
+    "valdosta_ga_us": {
+      "spoken_city": "Valdosta",
+      "state": "GA",
+      "country": "US",
+      "region": "atlantic_southeast",
+      "locations": [],
+      "lat": 30.8327,
+      "lon": -83.2785
+    },
+    "tifton_ga_us": {
+      "spoken_city": "Tifton",
+      "state": "GA",
+      "country": "US",
+      "region": "atlantic_southeast",
+      "locations": [],
+      "lat": 31.4505,
+      "lon": -83.5085
+    },
+    "cordele_ga_us": {
+      "spoken_city": "Cordele",
+      "state": "GA",
+      "country": "US",
+      "region": "atlantic_southeast",
+      "locations": [],
+      "lat": 31.9635,
+      "lon": -83.7824
     }
   }
 }

@@ -4,6 +4,13 @@
 
 ### Added
 
+- **Interstate 75 through South Georgia is now a chain of towns, not one long
+  haul.** Four cities join the map: Lake City, Florida, and Valdosta, Tifton,
+  and Cordele, Georgia. The run from Jacksonville up to Macon and Atlanta now
+  stops city to city instead of as a single unbroken three-hundred-mile leg, and
+  you will pass and hear the towns between -- Jennings, Adel, Ashburn, Perry --
+  with truck stops and rest areas to break at.
+
 - **Interstate 85 now runs unbroken through the Carolina Piedmont into Atlanta.**
   Two more cities join the map: Durham, North Carolina, in the Research Triangle,
   and Spartanburg, South Carolina, on the busy Eighty-Five freight run. The drive
