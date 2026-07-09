@@ -6322,6 +6322,24 @@
       "locations": [],
       "lat": 24.5551,
       "lon": -81.78
+    },
+    "fort_myers_fl_us": {
+      "spoken_city": "Fort Myers",
+      "state": "FL",
+      "country": "US",
+      "region": "florida",
+      "locations": [],
+      "lat": 26.6406,
+      "lon": -81.8723
+    },
+    "naples_fl_us": {
+      "spoken_city": "Naples",
+      "state": "FL",
+      "country": "US",
+      "region": "florida",
+      "locations": [],
+      "lat": 26.142,
+      "lon": -81.7948
     }
   }
 }

@@ -4,6 +4,12 @@
 
 ### Added
 
+- **The Florida Gulf coast opens up, across Alligator Alley.** Fort Myers and Naples
+  join the map, connecting Tampa down the Gulf coast, and the run from Naples to
+  Miami takes Interstate 75's Alligator Alley straight across the Everglades -- no
+  services for eighty miles, panther-crossing country, and a truck toll for the
+  privilege.
+
 - **Drive the Overseas Highway to Key West.** Key West joins the map at the very
   end of the road, reached from Miami down US-1 through the Florida Keys -- Key
   Largo, Islamorada, Marathon, Big Pine Key -- across the Seven Mile Bridge, all the
@@ -200,9 +206,9 @@
   truck stops, rest areas, and the Red River crossing along the way.
 
 - **The drivable map crosses one hundred thousand miles.** This drop adds about
-  twenty-four thousand six hundred miles of new road and sixty-nine new cities,
+  twenty-four thousand nine hundred miles of new road and seventy-one new cities,
   bringing the network past one hundred thousand miles you can actually drive --
-  123,413 miles across 444 cities and 998 routes.
+  123,711 miles across 446 cities and 1,001 routes.
 
 - **Exits now come straight from real-world maps -- with the correct exit names
   and numbers.** On the Interstates, your stops and your destination exit are
