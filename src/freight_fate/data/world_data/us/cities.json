@@ -6196,6 +6196,114 @@
       "locations": [],
       "lat": 37.306,
       "lon": -89.518
+    },
+    "lawrence_ks_us": {
+      "spoken_city": "Lawrence",
+      "state": "KS",
+      "country": "US",
+      "region": "southern_plains",
+      "locations": [],
+      "lat": 38.972,
+      "lon": -95.235
+    },
+    "muskogee_ok_us": {
+      "spoken_city": "Muskogee",
+      "state": "OK",
+      "country": "US",
+      "region": "southern_plains",
+      "locations": [],
+      "lat": 35.749,
+      "lon": -95.37
+    },
+    "ardmore_ok_us": {
+      "spoken_city": "Ardmore",
+      "state": "OK",
+      "country": "US",
+      "region": "southern_plains",
+      "locations": [],
+      "lat": 34.174,
+      "lon": -97.144
+    },
+    "rawlins_wy_us": {
+      "spoken_city": "Rawlins",
+      "state": "WY",
+      "country": "US",
+      "region": "rockies",
+      "locations": [],
+      "lat": 41.791,
+      "lon": -107.238
+    },
+    "alexandria_la_us": {
+      "spoken_city": "Alexandria",
+      "state": "LA",
+      "country": "US",
+      "region": "gulf_coast",
+      "locations": [],
+      "lat": 31.311,
+      "lon": -92.445
+    },
+    "farmington_nm_us": {
+      "spoken_city": "Farmington",
+      "state": "NM",
+      "country": "US",
+      "region": "desert_southwest",
+      "locations": [],
+      "lat": 36.728,
+      "lon": -108.219
+    },
+    "durango_co_us": {
+      "spoken_city": "Durango",
+      "state": "CO",
+      "country": "US",
+      "region": "rockies",
+      "locations": [],
+      "lat": 37.275,
+      "lon": -107.88
+    },
+    "roswell_nm_us": {
+      "spoken_city": "Roswell",
+      "state": "NM",
+      "country": "US",
+      "region": "desert_southwest",
+      "locations": [],
+      "lat": 33.394,
+      "lon": -104.523
+    },
+    "carlsbad_nm_us": {
+      "spoken_city": "Carlsbad",
+      "state": "NM",
+      "country": "US",
+      "region": "desert_southwest",
+      "locations": [],
+      "lat": 32.421,
+      "lon": -104.229
+    },
+    "liberal_ks_us": {
+      "spoken_city": "Liberal",
+      "state": "KS",
+      "country": "US",
+      "region": "southern_plains",
+      "locations": [],
+      "lat": 37.043,
+      "lon": -100.921
+    },
+    "scottsbluff_ne_us": {
+      "spoken_city": "Scottsbluff",
+      "state": "NE",
+      "country": "US",
+      "region": "heartland",
+      "locations": [],
+      "lat": 41.867,
+      "lon": -103.667
+    },
+    "pierre_sd_us": {
+      "spoken_city": "Pierre",
+      "state": "SD",
+      "country": "US",
+      "region": "heartland",
+      "locations": [],
+      "lat": 44.368,
+      "lon": -100.351
     }
   }
 }

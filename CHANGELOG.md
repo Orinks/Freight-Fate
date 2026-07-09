@@ -4,6 +4,14 @@
 
 ### Added
 
+- **Twelve more cities open up the western plains and the Rockies.** Lawrence,
+  Kansas joins the Interstate 70 run from Topeka to Kansas City; Ardmore breaks up
+  Oklahoma City to Dallas over the Arbuckle Mountains; Rawlins lands on Interstate
+  80 across Wyoming; Alexandria anchors the middle of Interstate 49 in Louisiana;
+  and the long-empty corners fill in -- Roswell and Carlsbad in the New Mexico oil
+  country, Farmington and Durango at the Four Corners over the Million Dollar
+  Highway, plus Muskogee, Liberal, Scottsbluff, and Pierre.
+
 - **Texas and the southern plains connect up with thirteen new runs.** The
   Interstate 49 line finishes across Arkansas from Fort Smith to Texarkana; Tulsa
   reaches Fayetteville, Enid, and Wichita; Waco runs to Tyler and on to Texarkana;
@@ -152,9 +160,9 @@
   truck stops, rest areas, and the Red River crossing along the way.
 
 - **The drivable map crosses one hundred thousand miles.** This drop adds about
-  sixteen thousand eight hundred miles of new road and fifty-five new cities,
+  eighteen thousand six hundred miles of new road and sixty-seven new cities,
   bringing the network past one hundred thousand miles you can actually drive --
-  115,588 miles across 430 cities and 922 routes.
+  117,394 miles across 442 cities and 941 routes.
 
 - **Exits now come straight from real-world maps -- with the correct exit names
   and numbers.** On the Interstates, your stops and your destination exit are
