@@ -5980,6 +5980,15 @@
       "locations": [],
       "lat": 31.2232,
       "lon": -85.3905
+    },
+    "temple_tx_us": {
+      "spoken_city": "Temple",
+      "state": "TX",
+      "country": "US",
+      "region": "southern_plains",
+      "locations": [],
+      "lat": 31.0982,
+      "lon": -97.3428
     }
   }
 }

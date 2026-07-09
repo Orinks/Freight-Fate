@@ -4,6 +4,11 @@
 
 ### Added
 
+- **Temple, Texas completes the Interstate 35 spine through Central Texas.** The
+  new city fills the gap between Killeen and Waco, so the busy run up the middle of
+  Texas now stops at every real city along the way -- through Belton and Troy --
+  instead of skipping the heart of the corridor.
+
 - **Dothan, Alabama's "Peanut Capital," ties three states together.** The new
   wiregrass city connects Montgomery, Tallahassee, and Albany by real US-highway
   runs through the peanut country of southeast Alabama, the Florida Panhandle, and
@@ -29,9 +34,9 @@
   truck stops, rest areas, and the Red River crossing along the way.
 
 - **The drivable map crosses one hundred thousand miles.** This drop adds about
-  two thousand nine hundred miles of new road and thirty-one new cities,
+  two thousand nine hundred miles of new road and thirty-two new cities,
   bringing the network past one hundred thousand miles you can actually drive --
-  101,665 miles across 406 cities and 769 routes.
+  101,726 miles across 407 cities and 771 routes.
 
 - **Exits now come straight from real-world maps -- with the correct exit names
   and numbers.** On the Interstates, your stops and your destination exit are
