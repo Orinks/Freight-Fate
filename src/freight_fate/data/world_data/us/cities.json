@@ -5859,7 +5859,7 @@
       "spoken_city": "Tupelo",
       "state": "MS",
       "country": "US",
-      "region": "gulf_coast",
+      "region": "mid_south",
       "locations": [],
       "lat": 34.2576,
       "lon": -88.7034
@@ -5868,7 +5868,7 @@
       "spoken_city": "Hattiesburg",
       "state": "MS",
       "country": "US",
-      "region": "gulf_coast",
+      "region": "mid_south",
       "locations": [],
       "lat": 31.3271,
       "lon": -89.2903
@@ -5877,7 +5877,7 @@
       "spoken_city": "Grenada",
       "state": "MS",
       "country": "US",
-      "region": "gulf_coast",
+      "region": "mid_south",
       "locations": [],
       "lat": 33.7712,
       "lon": -89.8087
@@ -5895,7 +5895,7 @@
       "spoken_city": "Fayetteville",
       "state": "AR",
       "country": "US",
-      "region": "heartland",
+      "region": "mid_south",
       "locations": [],
       "lat": 36.0626,
       "lon": -94.1574
@@ -5904,7 +5904,7 @@
       "spoken_city": "Bentonville",
       "state": "AR",
       "country": "US",
-      "region": "heartland",
+      "region": "mid_south",
       "locations": [],
       "lat": 36.3729,
       "lon": -94.2088
@@ -5913,7 +5913,7 @@
       "spoken_city": "Jonesboro",
       "state": "AR",
       "country": "US",
-      "region": "heartland",
+      "region": "mid_south",
       "locations": [],
       "lat": 35.8423,
       "lon": -90.7043
@@ -5922,7 +5922,7 @@
       "spoken_city": "Harrison",
       "state": "AR",
       "country": "US",
-      "region": "heartland",
+      "region": "mid_south",
       "locations": [],
       "lat": 36.2298,
       "lon": -93.1077
@@ -5931,7 +5931,7 @@
       "spoken_city": "Mountain Home",
       "state": "AR",
       "country": "US",
-      "region": "heartland",
+      "region": "mid_south",
       "locations": [],
       "lat": 36.3353,
       "lon": -92.3852
