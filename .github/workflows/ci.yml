@@ -33,7 +33,7 @@ jobs:
         run: uv run ruff check src tests tools
 
       - name: Run tests
-        run: uv run pytest tests/ -v --cov=src/freight_fate --cov-report=xml
+        run: uv run pytest tests/ -v -n auto --cov=src/freight_fate --cov-report=xml
 
       - name: Upload coverage report
         uses: actions/upload-artifact@v7
