@@ -9,6 +9,12 @@
   actually drive, across 386 cities and 737 routes. (Numbers finalized at
   release from `tools/map_stats.py --since <last release>`.)
 
+- **Interstate 75 between Chattanooga and Atlanta now stops at real towns.**
+  Two Georgia cities join the map: Dalton, the carpet capital, and Cartersville.
+  The run breaks into stops through Ringgold, Calhoun, and Marietta instead of one
+  long leg, with truck stops to fuel and rest at. Truck-stop names across the map
+  also read more cleanly now (no more bare "T A" or leftover store numbers).
+
 - **Southwest Georgia joins the map: Columbus and Albany.** Columbus, Georgia --
   the state's third-largest city, next to Fort Benning -- and Albany open up the
   wiregrass region, linking west to Montgomery, Alabama and east to the

@@ -5818,6 +5818,24 @@
       "locations": [],
       "lat": 31.5785,
       "lon": -84.1557
+    },
+    "dalton_ga_us": {
+      "spoken_city": "Dalton",
+      "state": "GA",
+      "country": "US",
+      "region": "atlantic_southeast",
+      "locations": [],
+      "lat": 34.7698,
+      "lon": -84.9702
+    },
+    "cartersville_ga_us": {
+      "spoken_city": "Cartersville",
+      "state": "GA",
+      "country": "US",
+      "region": "atlantic_southeast",
+      "locations": [],
+      "lat": 34.1651,
+      "lon": -84.8001
     }
   }
 }
