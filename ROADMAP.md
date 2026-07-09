@@ -1,10 +1,89 @@
 # Freight Fate Roadmap
 
-> Current stable: **1.7.0** (shipped). Next release: **1.8.0**, in flight on the
-> `awesome-greider` branch (troopers, real OSM speed limits, seasons,
-> cargo-weight physics, predictive adaptive cruise, and more). `pyproject` is
-> set to 1.8.0 so developer snapshots report it; the stable tag follows at
-> release.
+> Current stable: **1.8.0** (shipped 2026-07-05). Next release: **1.9.0**, in
+> flight on the `feat/career-1.9` branch -- driving realism between the exits
+> (discrete lanes, ramp terminals, congestion, real surface streets) plus the
+> highway-spider world expansion, roadside narration, and real time zones.
+> `pyproject` is set to 1.9.0 so developer snapshots report it; the stable tag
+> follows at release. Keep this file current: when a feature lands on the 1.9
+> line, check it off here in the same change.
+
+## 1.9 in flight (`feat/career-1.9`)
+
+Two threads: make the drive *between* the exits real, and make the world
+big and specific enough that every run feels like a place.
+
+### Lanes and maneuvering
+
+- [x] **Discrete lanes on the drift model.** `LaneKeeping` carries a discrete
+      lane index under its continuous offset: with steering assist on,
+      steering across the line is the lane change; with assist off, a
+      Left/Right tap runs a timed change with signal clicks. Dodgeable
+      hazards ("Brake or change lanes!"), sideswipe risk against real
+      absolute-lane traffic, construction lane closures with barrel crashes,
+      keep-right-except-to-pass CB nags, and right-lane exit gating.
+- [x] **Signalized ramp terminals grounded in OSM.** Baked
+      `traffic_signals`/`stop` nodes on 6,295 of 13,504 exit ramp links
+      (heuristic elsewhere): a red/green cycle at the stop bar, grace
+      distance, cross-traffic clips for running it -- now with dedicated
+      red and green light earcons alongside the spoken callouts.
+- [x] **Congestion grounded in FHWA HPMS volume.** Real AADT baked per leg
+      drives clock-gated jams on a commuter curve: metro stretches jam at
+      rush hour and flow free at midnight; entering a live jam injects slow
+      traffic into both lanes.
+- [x] **Surface streets driven for real.** Tier-1 street chains carry baked
+      per-segment cues and speed zones; boundary cues speak the maneuver
+      with block-aware distances; city-passage and highway-pressure language
+      is suppressed on streets.
+- [x] **Steering audio cues.** The geometry builders bake turn *directions*
+      from the signed bearing change at each road-name boundary ("Turn right
+      onto", with near-straight name changes as "Continue onto"), and the
+      runtime plays a direction-shaped earcon panned from the maneuver side:
+      falling chime left, rising chime right, steady tone ahead.
+- [x] **Surface chaining, arrival side.** The destination exit ramp flows
+      onto the facility's tier-1 street chain and ends at the standard gate
+      arrival, with clock/toll/weekday continuity and a `surface_chain` save
+      marker; facilities without turn-level data keep the scripted arrival.
+- [ ] **Surface chaining, departure side.** Mirror the arrival: pull out of
+      the gate onto the street chain and merge onto the highway, instead of
+      starting the trip already on the on-ramp.
+
+### World and narration
+
+- [x] **Highway-spider map expansion.** Corridor-inventory tooling plus
+      dozens of spider batches grow the map to 375 cities and 626 enriched
+      legs -- real corridors across the Great Basin, the Hi-Line, the
+      Dakotas, Appalachia, West Texas, and more, each with real roads,
+      checkpoints, grades, and truck stops.
+- [x] **Stable slug city keys.** Cities key by slug (`abilene_tx_us`) with a
+      composed spoken layer, ending display-name collisions as the map grows.
+- [x] **Truck-stop POI sweep and rural-diesel fallback.** Every leg now has
+      a real or fallback fuel stop.
+- [x] **Roadside landmarks and billboards.** 2,835 baked OSM landmarks speak
+      as ambient chatter (national forests, named rivers, passes, museums),
+      plus corridor-keyed parody billboards; a Settings group adds a master
+      Roadside chatter switch with per-kind toggles, and terse verbosity
+      mutes it all.
+- [x] **Brand amenities at service stops.** Travel-center brands describe
+      their real amenity sets in POI offers and rest-stop menus (the
+      spoken layer of the amenities/Big Buck's modules).
+- [x] **Real US time zones.** The compressed career clock now crosses real
+      zone boundaries with spoken zone changes; deadlines read in the
+      destination's local time.
+- [ ] **Service-stop buffs and the Big Buck's catalog.** The amenities and
+      `big_bucks` modules ship content and tiers; the gameplay layer --
+      purchase menus and buff effects on rest quality, fatigue, or morale --
+      is not wired yet.
+- [ ] **Overlay re-sweep on the slug world.** The local-approach /
+      city-service / turn-level geometry sweeps predate the slug migration
+      and the newest cities; the runtime canonicalizes old ids and new
+      targets simply fall back until the five-builder overlay pipeline is
+      updated for slug keys and re-run over the 375-city map.
+- [ ] **Earcon audition pass.** The five 1.9 steering sounds (turn
+      left/right/ahead, ramp light red/green) shipped verified by
+      measurement, not by ear; regenerate any that sound off via
+      `tools/generate_sounds.py` (+ `tools/mirror_turn_chime.py` for the
+      right-turn mirror).
 
 ## Shipped in 1.6.0
 
@@ -28,8 +107,8 @@ A consolidation pass focused on closing realism gaps and removing rough
 edges rather than adding new systems. Much of it shipped in **1.7.0**
 (player-feedback UX, dispatcher pay advances, relaxed mode, grounded
 hazards, drowsiness, truck-legal HGV routing); the 1.7.0 CHANGELOG is the
-source of truth for that release's exact contents. The **1.8.0** batch on
-the `awesome-greider` branch -- pending merge -- adds the trooper pull-overs,
+source of truth for that release's exact contents. The **1.8.0** batch --
+shipped 2026-07-05 -- added the trooper pull-overs,
 real OSM `maxspeed` baked per leg, corridor/real speed limits, seasons and a
 temperature model, cargo-weight physics, immediate speeding-cost cues, the
 S/A/U info keys, the HTML manual, and limit-aware (predictive) adaptive
