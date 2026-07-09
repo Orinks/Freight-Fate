@@ -854,14 +854,6 @@ class SettingsCategoryState(MenuState):
                     help="Choose whether lane drift is off, light, or realistic.",
                 ),
                 MenuItem(
-                    lambda: f"Discord presence: {'on' if s.discord_presence else 'off'}",
-                    lambda: self._toggle_discord_presence(1),
-                    help="Show broad activity in Discord, like the main menu, "
-                    "driving a route, or resting. Only general game status "
-                    "is shared, never your save files or personal details. "
-                    "Has no effect if Discord is not running.",
-                ),
-                MenuItem(
                     lambda: f"Controller: {'enabled' if s.controller_enabled else 'disabled'}",
                     lambda: self._toggle_controller(1),
                     help="Accept game-controller input alongside the keyboard. "
@@ -930,16 +922,22 @@ class SettingsCategoryState(MenuState):
                     lambda: (
                         f"Share on the drivers board: {'on' if s.online_presence else 'off'}"
                         if OnlineIdentity.load() is not None
-                        else "Share on the drivers board: not set up"
+                        # Before setup this item IS the driver profile
+                        # gateway: connecting unlocks the board and cloud
+                        # backup, so the label names the profile, not just
+                        # sharing.
+                        else "Driver profile: not set up"
                     ),
                     lambda: self._toggle_online_presence(1),
-                    help="Show what you are hauling on the public drivers "
-                    "board at orinks.net while you are on a job. Nothing is "
-                    "shared until you set it up: selecting this the first "
-                    "time opens the drivers board setup menu, where you sign "
-                    "in on orinks.net and paste in your Driver ID and token. "
-                    "Only broad in-game activity is ever shared, never your "
-                    "save files or personal details.",
+                    help="Your driver profile is your Orinks account sign-in "
+                    "for online features: the public drivers board and cloud "
+                    "save backup. Nothing is shared until you set it up: "
+                    "selecting this the first time opens the driver profile "
+                    "setup menu, where you sign in on orinks.net and paste "
+                    "in your Driver ID and token. Once set up, this toggles "
+                    "sharing on the drivers board: only broad in-game "
+                    "activity is ever shared, never your save files or "
+                    "personal details.",
                 ),
                 MenuItem(
                     lambda: (
@@ -952,13 +950,22 @@ class SettingsCategoryState(MenuState):
                     "own Orinks account so you can restore it on another "
                     "computer. Backups are private to your account and never "
                     "appear on the drivers board. Uses the same sign-in as "
-                    "the drivers board, so set that up first.",
+                    "your driver profile, so set that up first.",
                 ),
                 MenuItem(
                     "Restore a cloud backup",
                     self._cloud_backup_menu,
                     help="List the careers backed up to your Orinks account "
                     "and bring one onto this computer.",
+                ),
+                MenuItem(
+                    lambda: f"Discord presence: {'on' if s.discord_presence else 'off'}",
+                    lambda: self._toggle_discord_presence(1),
+                    help="Show broad activity in Discord, like the main menu, "
+                    "driving a route, or resting. Only general game status "
+                    "is shared, never your save files or personal details. "
+                    "Has no effect if Discord is not running. Works without "
+                    "a driver profile.",
                 ),
                 MenuItem("Back", self.go_back),
             ]
@@ -1002,7 +1009,6 @@ class SettingsCategoryState(MenuState):
                     self._cycle_pace,
                     self._cycle_hos,
                     self._cycle_steering,
-                    self._toggle_discord_presence,
                     self._toggle_controller,
                     self._toggle_haptics,
                 ],
@@ -1014,7 +1020,15 @@ class SettingsCategoryState(MenuState):
                     lambda d: self._volume("music_volume", 0.1 * d),
                     lambda d: self._volume("ui_volume", 0.1 * d),
                 ],
-                "online": [self._toggle_online_presence, self._toggle_cloud_saves],
+                # Index-aligned with the online items: the restore entry at
+                # index 2 is an action, not a value, so left/right is a no-op
+                # there rather than falling through to the Discord toggle.
+                "online": [
+                    self._toggle_online_presence,
+                    self._toggle_cloud_saves,
+                    lambda _d: None,
+                    self._toggle_discord_presence,
+                ],
                 "updates": [self._toggle_update_channel],
             }[self.category]
         if self.index < len(actions):
@@ -1194,9 +1208,9 @@ class SettingsCategoryState(MenuState):
             # without them the setting would be inert, so point at the setup
             # item instead of flipping a switch that does nothing.
             self.ctx.say(
-                "Cloud backup uses the same Orinks sign-in as the drivers "
-                "board. Choose Share on the drivers board on this menu to "
-                "set that up first, then turn cloud backup on.",
+                "Cloud backup uses the same Orinks sign-in as your driver "
+                "profile. Choose Driver profile on this menu to set that up "
+                "first, then turn cloud backup on.",
                 interrupt=True,
             )
             return

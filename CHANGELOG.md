@@ -109,6 +109,13 @@
 
 ### Changed
 
+- **Online settings are now gathered in one place.** The Discord presence
+  toggle moved from Settings, Gameplay to Settings, Online, alongside the
+  drivers board and the new cloud backup options. And before you have set
+  up your Orinks sign-in, the first Online item now says "Driver profile:
+  not set up" -- setting it up is one step that unlocks both the drivers
+  board and cloud backup.
+
 - **The horn sounds like a real horn held down.** Instead of restarting the
   same short honk over and over, holding the horn now sustains one steady blast
   for as long as you press it, and when you let go the horn rings out and fades

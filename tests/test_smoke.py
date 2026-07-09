@@ -335,7 +335,7 @@ def test_discord_presence_toggle_is_accessible_and_wired(monkeypatch):
         toggles: list[bool] = []
         monkeypatch.setattr(app.presence, "set_enabled", toggles.append)
 
-        app.push_state(SettingsCategoryState(app.ctx, "gameplay"))
+        app.push_state(SettingsCategoryState(app.ctx, "online"))
         menu = app.state
         idx = next(
             i for i, item in enumerate(menu.items) if item.text.startswith("Discord presence")

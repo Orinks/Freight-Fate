@@ -499,7 +499,6 @@ Gameplay settings include:
 | Trip pacing | Choose relaxed, standard, or fast pacing. Pacing applies at highway speed; the clock eases toward real time while you accelerate, brake, or maneuver, so working up through the gears does not cost most of a game hour. Setting the parking brake while stopped means deliberate waiting: time then passes at double your pacing, letting weather and daylight move along. |
 | Hours of service | Choose realistic or relaxed hours rules. |
 | Lane drift | Choose whether lane drift is off, light, or realistic. When on, a short beep comes from the side you drift toward, so steer away from the beep. A dedicated centered-lane chime confirms you are centered again, and the rumble strip is panned to the side you have drifted toward near the lane edge. |
-| Discord presence | Show broad activity in Discord (menu, terminal, driving, resting, delivering) with high-level route and cargo. Only general game status is shared, never your saves or personal details. On by default; no effect if Discord is closed. |
 
 Audio settings include:
 
@@ -529,9 +528,10 @@ Online settings include:
 
 | Setting | Purpose |
 | --- | --- |
-| Share on the drivers board | Show what you are hauling on the public drivers board at orinks.net while you are on a job. Nothing is shared until you set it up: the first time you select it, the game reads out exactly what gets shared and opens your browser, where you choose a driver name and confirm before anything is sent. Only broad in-game activity is shared, like your route, cargo, and rough progress, never your save files, real name, or location. Turn it off any time; you leave the board within a few minutes. |
-| Back up saves to your Orinks account | After each game save, upload that career to your own Orinks account so you can restore it on another computer or after losing this one. Off until you turn it on, and separate from the drivers board: backups are private to your account and never appear anywhere public. It uses the same one-time sign-in as the drivers board, so set that up first. The last ten backups of each career are kept. |
+| Driver profile / Share on the drivers board | Your driver profile is your Orinks account sign-in for online features: the drivers board and cloud save backup. Before setup this item reads "Driver profile: not set up", and selecting it opens the setup menu: the game reads out exactly what gets shared and opens your browser, where you choose a driver name and confirm before anything is sent. Once set up, the same item toggles sharing on the public drivers board: only broad in-game activity is shared, like your route, cargo, and rough progress, never your save files, real name, or location. Turn it off any time; you leave the board within a few minutes. |
+| Back up saves to your Orinks account | After each game save, upload that career to your own Orinks account so you can restore it on another computer or after losing this one. Off until you turn it on, and separate from the drivers board: backups are private to your account and never appear anywhere public. It uses the same one-time sign-in as your driver profile, so set that up first. The last ten backups of each career are kept. |
 | Restore a cloud backup | Lists the careers backed up to your account, newest first, and brings one onto this computer. Restoring replaces that career's local save, and the save it replaces is kept beside it as a fallback file. If the same career was played on two computers, this menu is also where you choose which copy wins. |
+| Discord presence | Show broad activity in Discord (menu, terminal, driving, resting, delivering) with high-level route and cargo. Only general game status is shared, never your saves or personal details. On by default; no effect if Discord is closed. Works without a driver profile. |
 
 The main menu also has a Drivers online item that reads the same public board:
 each driver's name, what they are doing, and how fresh the report is. Viewing
