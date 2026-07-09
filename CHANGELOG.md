@@ -4,6 +4,12 @@
 
 ### Added
 
+- **The Interstate 20 run from Birmingham to Tuscaloosa is now drivable.** This
+  short but heavily-trucked segment past the Mercedes-Benz plant had no route of
+  its own; adding it means the whole Interstate 20 corridor -- Atlanta, Birmingham,
+  Tuscaloosa, Meridian, Jackson, Vicksburg, Monroe, Shreveport, Dallas -- can now
+  be driven city by city, stopping in every town along the way.
+
 - **Temple, Texas completes the Interstate 35 spine through Central Texas.** The
   new city fills the gap between Killeen and Waco, so the busy run up the middle of
   Texas now stops at every real city along the way -- through Belton and Troy --
@@ -34,9 +40,9 @@
   truck stops, rest areas, and the Red River crossing along the way.
 
 - **The drivable map crosses one hundred thousand miles.** This drop adds about
-  two thousand nine hundred miles of new road and thirty-two new cities,
+  three thousand miles of new road and thirty-two new cities,
   bringing the network past one hundred thousand miles you can actually drive --
-  101,726 miles across 407 cities and 771 routes.
+  101,783 miles across 407 cities and 772 routes.
 
 - **Exits now come straight from real-world maps -- with the correct exit names
   and numbers.** On the Interstates, your stops and your destination exit are
