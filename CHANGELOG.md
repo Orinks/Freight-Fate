@@ -4,6 +4,13 @@
 
 ### Added
 
+- **Georgia fills in from the mountains to the Florida line.** Athens now connects
+  to Macon, Augusta, and Greenville, South Carolina; Macon reaches Columbus;
+  LaGrange drops to Columbus on Interstate 185; and across the south, Albany links
+  to Cordele, Valdosta, and Tallahassee while Valdosta reaches Tallahassee and
+  Dothan -- ten new runs through antebellum Madison, Uncle Remus's Eatonton,
+  Moultrie, and Cairo.
+
 - **The Deep South knits together with eleven more connections.** Birmingham runs
   down to Opelika and on to Columbus, Georgia; Columbus drops to Dothan past Lake
   Eufaula; Montgomery reaches Meridian on US-80 through Selma; Huntsville joins
@@ -85,9 +92,9 @@
   truck stops, rest areas, and the Red River crossing along the way.
 
 - **The drivable map crosses one hundred thousand miles.** This drop adds about
-  six thousand eight hundred miles of new road and thirty-four new cities,
+  seven thousand seven hundred miles of new road and thirty-four new cities,
   bringing the network past one hundred thousand miles you can actually drive --
-  105,609 miles across 409 cities and 807 routes.
+  106,481 miles across 409 cities and 817 routes.
 
 - **Exits now come straight from real-world maps -- with the correct exit names
   and numbers.** On the Interstates, your stops and your destination exit are
