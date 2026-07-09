@@ -4,6 +4,13 @@
 
 ### Added
 
+- **Texas and the southern plains connect up with thirteen new runs.** The
+  Interstate 49 line finishes across Arkansas from Fort Smith to Texarkana; Tulsa
+  reaches Fayetteville, Enid, and Wichita; Waco runs to Tyler and on to Texarkana;
+  Lake Charles crosses into Orange; College Station to Temple; Austin up into the
+  Hill Country to Kerrville; and out west, San Angelo connects to Junction, Del Rio,
+  and Fort Stockton, with Odessa reaching Fort Stockton across the oil patch.
+
 - **Twelve more cities fill in the eastern and heartland map.** Cumberland,
   Maryland lands on the Interstate 68 climb over the Alleghenies; Saint Joseph joins
   the Interstate 29 run from Kansas City to Omaha; Mansfield breaks up Columbus to
@@ -145,9 +152,9 @@
   truck stops, rest areas, and the Red River crossing along the way.
 
 - **The drivable map crosses one hundred thousand miles.** This drop adds about
-  fifteen thousand two hundred miles of new road and fifty-five new cities,
+  sixteen thousand eight hundred miles of new road and fifty-five new cities,
   bringing the network past one hundred thousand miles you can actually drive --
-  113,991 miles across 430 cities and 909 routes.
+  115,588 miles across 430 cities and 922 routes.
 
 - **Exits now come straight from real-world maps -- with the correct exit names
   and numbers.** On the Interstates, your stops and your destination exit are
