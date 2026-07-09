@@ -49,6 +49,12 @@ class Settings:
     # (see online_presence.py), and board listing further requires choosing
     # the public visibility on the site.
     online_presence: bool = True
+    # Back up saves to the player's own Orinks account after each local save.
+    # Off by default and separate from drivers-board sharing: that feature's
+    # spoken disclosure promises save files are never sent, so mirroring them
+    # to the cloud needs its own explicit yes -- even though it reuses the
+    # same account credentials and never shows saves to anyone else.
+    cloud_saves: bool = False
     controller_enabled: bool = True  # accept game-controller input alongside the keyboard
     haptics_enabled: bool = True  # rumble/vibration feedback on the controller
 
@@ -93,6 +99,8 @@ class Settings:
             s.controller_enabled = True
         if not isinstance(s.haptics_enabled, bool):
             s.haptics_enabled = True
+        if not isinstance(s.cloud_saves, bool):
+            s.cloud_saves = False
         for attr in (
             "master_volume",
             "sfx_volume",

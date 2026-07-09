@@ -81,6 +81,19 @@
   your save files, real name, or location. You leave the board within
   minutes of going off duty or turning sharing off.
 
+- **Your careers can now back up to the cloud.** Turn on Back up saves to
+  your Orinks account under Settings, Online, and after each game save your
+  career quietly uploads to your own orinks.net account -- so a dead hard
+  drive no longer means a dead career, and you can pick up the same driver
+  on another computer. It uses the same one-time sign-in as the drivers
+  board, nothing extra to set up, and backups are private to your account:
+  they never appear on the drivers board or anywhere public. The new
+  Restore a cloud backup menu reads your backups aloud, newest first, and
+  brings one onto this computer -- keeping the save it replaces beside it
+  as a fallback. Played the same career on two computers? The game notices
+  and asks which copy should win instead of silently overwriting either.
+  Cloud backup is off until you turn it on.
+
 - **The map now has real time zones, and your clock changes as you cross
   them.** Drive west out of Tennessee on I-40 and you will hear "Crossing
   into Central Time. It is now 2:15 PM." With terse speech on, it is just

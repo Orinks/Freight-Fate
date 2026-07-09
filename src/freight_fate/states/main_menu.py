@@ -941,6 +941,25 @@ class SettingsCategoryState(MenuState):
                     "Only broad in-game activity is ever shared, never your "
                     "save files or personal details.",
                 ),
+                MenuItem(
+                    lambda: (
+                        f"Back up saves to your Orinks account: {'on' if s.cloud_saves else 'off'}"
+                        if OnlineIdentity.load() is not None
+                        else "Back up saves to your Orinks account: not set up"
+                    ),
+                    lambda: self._toggle_cloud_saves(1),
+                    help="After each game save, upload that career to your "
+                    "own Orinks account so you can restore it on another "
+                    "computer. Backups are private to your account and never "
+                    "appear on the drivers board. Uses the same sign-in as "
+                    "the drivers board, so set that up first.",
+                ),
+                MenuItem(
+                    "Restore a cloud backup",
+                    self._cloud_backup_menu,
+                    help="List the careers backed up to your Orinks account "
+                    "and bring one onto this computer.",
+                ),
                 MenuItem("Back", self.go_back),
             ]
         return [
@@ -995,7 +1014,7 @@ class SettingsCategoryState(MenuState):
                     lambda d: self._volume("music_volume", 0.1 * d),
                     lambda d: self._volume("ui_volume", 0.1 * d),
                 ],
-                "online": [self._toggle_online_presence],
+                "online": [self._toggle_online_presence, self._toggle_cloud_saves],
                 "updates": [self._toggle_update_channel],
             }[self.category]
         if self.index < len(actions):
@@ -1164,6 +1183,38 @@ class SettingsCategoryState(MenuState):
         s.online_presence = not s.online_presence
         self.ctx.apply_online_presence()
         self._announce()
+
+    def _toggle_cloud_saves(self, _d: int) -> None:
+        from ..online_presence import OnlineIdentity
+        from .cloud_save_states import CLOUD_DISCLOSURE
+
+        s = self.ctx.settings
+        if OnlineIdentity.load() is None:
+            # Cloud backup rides the same account credentials as the board;
+            # without them the setting would be inert, so point at the setup
+            # item instead of flipping a switch that does nothing.
+            self.ctx.say(
+                "Cloud backup uses the same Orinks sign-in as the drivers "
+                "board. Choose Share on the drivers board on this menu to "
+                "set that up first, then turn cloud backup on.",
+                interrupt=True,
+            )
+            return
+        s.cloud_saves = not s.cloud_saves
+        s.save()
+        self.ctx.apply_cloud_saves()
+        if s.cloud_saves:
+            # Turning it on is the consent moment: speak the full disclosure
+            # here, not buried in help text.
+            self.ctx.say(f"Cloud backup on. {CLOUD_DISCLOSURE}", interrupt=True)
+            self.refresh()
+        else:
+            self._announce()
+
+    def _cloud_backup_menu(self) -> None:
+        from .cloud_save_states import CloudBackupState
+
+        self.ctx.push_state(CloudBackupState(self.ctx))
 
     def _toggle_controller(self, _d: int) -> None:
         self.ctx.settings.controller_enabled = not self.ctx.settings.controller_enabled

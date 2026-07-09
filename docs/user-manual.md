@@ -530,6 +530,8 @@ Online settings include:
 | Setting | Purpose |
 | --- | --- |
 | Share on the drivers board | Show what you are hauling on the public drivers board at orinks.net while you are on a job. Nothing is shared until you set it up: the first time you select it, the game reads out exactly what gets shared and opens your browser, where you choose a driver name and confirm before anything is sent. Only broad in-game activity is shared, like your route, cargo, and rough progress, never your save files, real name, or location. Turn it off any time; you leave the board within a few minutes. |
+| Back up saves to your Orinks account | After each game save, upload that career to your own Orinks account so you can restore it on another computer or after losing this one. Off until you turn it on, and separate from the drivers board: backups are private to your account and never appear anywhere public. It uses the same one-time sign-in as the drivers board, so set that up first. The last ten backups of each career are kept. |
+| Restore a cloud backup | Lists the careers backed up to your account, newest first, and brings one onto this computer. Restoring replaces that career's local save, and the save it replaces is kept beside it as a fallback file. If the same career was played on two computers, this menu is also where you choose which copy wins. |
 
 The main menu also has a Drivers online item that reads the same public board:
 each driver's name, what they are doing, and how fresh the report is. Viewing
