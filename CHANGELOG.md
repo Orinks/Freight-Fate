@@ -4,6 +4,13 @@
 
 ### Added
 
+- **The Midwest lattice comes together with nineteen new runs.** Cedar Rapids to
+  Iowa City; Peoria to Springfield, Decatur, and on to Bloomington and St. Louis;
+  Champaign to Lafayette; and across Michigan and the crossroads, Detroit to Ann
+  Arbor, Flint, and Toledo; Toledo to Columbus; Fort Wayne to Elkhart, Lansing, and
+  Gary; Lansing and Kalamazoo; Milwaukee to Rockford; Indianapolis to South Bend;
+  Grand Rapids to Saginaw; and Muskegon up to Traverse City along Lake Michigan.
+
 - **The Northeast fills in from Maine to the Chesapeake.** Fourteen new short-haul
   runs stitch the dense Northeast together: Boston to Manchester, Providence to
   Worcester, Hartford, and New Haven; Philadelphia to Allentown and on to Trenton;
@@ -130,9 +137,9 @@
   truck stops, rest areas, and the Red River crossing along the way.
 
 - **The drivable map crosses one hundred thousand miles.** This drop adds about
-  twelve thousand two hundred miles of new road and forty-three new cities,
+  thirteen thousand nine hundred miles of new road and forty-three new cities,
   bringing the network past one hundred thousand miles you can actually drive --
-  110,969 miles across 418 cities and 869 routes.
+  112,691 miles across 418 cities and 888 routes.
 
 - **Exits now come straight from real-world maps -- with the correct exit names
   and numbers.** On the Interstates, your stops and your destination exit are
