@@ -9,6 +9,12 @@
   actually drive, across 386 cities and 737 routes. (Numbers finalized at
   release from `tools/map_stats.py --since <last release>`.)
 
+- **Southwest Georgia joins the map: Columbus and Albany.** Columbus, Georgia --
+  the state's third-largest city, next to Fort Benning -- and Albany open up the
+  wiregrass region, linking west to Montgomery, Alabama and east to the
+  Interstate 75 towns at Tifton. You will pass and hear Tuskegee, Cusseta,
+  Dawson, and Sylvester along the way.
+
 - **Interstate 85 now runs unbroken from Atlanta down to Montgomery, Alabama.**
   Two more cities join the map: Opelika, Alabama, next to Auburn, and LaGrange,
   Georgia. The Atlanta-to-Montgomery run now stops city to city -- through

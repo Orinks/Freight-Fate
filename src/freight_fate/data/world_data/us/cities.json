@@ -5800,6 +5800,24 @@
       "locations": [],
       "lat": 33.0362,
       "lon": -85.0319
+    },
+    "columbus_ga_us": {
+      "spoken_city": "Columbus",
+      "state": "GA",
+      "country": "US",
+      "region": "atlantic_southeast",
+      "locations": [],
+      "lat": 32.461,
+      "lon": -84.9877
+    },
+    "albany_ga_us": {
+      "spoken_city": "Albany",
+      "state": "GA",
+      "country": "US",
+      "region": "atlantic_southeast",
+      "locations": [],
+      "lat": 31.5785,
+      "lon": -84.1557
     }
   }
 }
