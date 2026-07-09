@@ -17,7 +17,7 @@ Built legs used: `las_cruces_nm_us -> tucson_az_us` (The Thing) and
 - treatment: billboard
 - leg: las_cruces_nm_us -> tucson_az_us
 - at_mi: 60
-- spoken: Billboard: What is it? The Thing? Mystery of the desert ahead. You have two hundred miles to guess. Do not call government officials, do not stop moving! If you want to know, gather yourself, and contemplate what this thing really is. We don't even know.
+- spoken: Billboard: What is it? The Thing? Mystery of the desert ahead. Two hundred miles to guess, and whatever you do, do not stop moving.
 
 ### The Thing (countdown, sign two)
 - treatment: billboard
@@ -30,7 +30,7 @@ Built legs used: `las_cruces_nm_us -> tucson_az_us` (The Thing) and
 - leg: las_cruces_nm_us -> tucson_az_us
 - at_mi: 208
 - spoken: Billboard: The Thing, next exit. You have wondered for two hundred miles. Do not drive past now. You made it. Will you survive?
-- describe: The Thing is a roadside mystery museum near Benson that has teased drivers with "What is it?" signs for generations. Pay a dollar or two, walk a gauntlet of desert oddities, and finally meet the Thing itself. We will not spoil it.
+- describe: The Thing is a roadside mystery museum near Benson that has teased drivers with "What is it?" signs for generations. Pay a dollar or two, walk a gauntlet of desert oddities, and finally meet the Thing itself. Gather yourself and contemplate what it really is -- we won't spoil it, and honestly, we don't even know.
 
 ### Cabazon Dinosaurs
 - treatment: billboard

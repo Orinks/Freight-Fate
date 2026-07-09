@@ -52,7 +52,8 @@ kingman_az_us` (151).
 - treatment: billboard
 - leg: gallup_nm_us -> flagstaff_az_us
 - at_mi: 100
-- spoken: Billboard: The Jack Rabbit Trading Post ahead. There is a giant rabbit out front and a sign that says, simply, HERE IT IS. It has said that since your grandparents drove by. See the rabbit, trade at the rabbit, cause you'll find things you never knew you needed, probably not made in the good ol U.S.A. but come anyway!
+- spoken: Billboard: The Jack Rabbit Trading Post ahead. A giant rabbit out front, and a sign that says, simply, HERE IT IS.
+- describe: That giant rabbit and its one-word sign, HERE IT IS, have pointed drivers off Route sixty-six since your grandparents drove by. See the rabbit, trade at the rabbit -- you'll find things you never knew you needed, probably not made in the good ol' U.S.A., but come anyway.
 
 ### Standin' on the Corner
 - treatment: billboard
