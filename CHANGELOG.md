@@ -4,6 +4,14 @@
 
 ### Added
 
+- **The northern Rockies and the Great Basin connect end to end.** Fifteen final
+  runs: Missoula to Helena over MacDonald Pass, Provo to Green River over Soldier
+  Summit, and Fort Collins up to Laramie -- real mountain grades -- plus Helena to
+  Bozeman, Missoula to Kalispell, Great Falls to Havre along the Hi-Line, Casper to
+  Gillette to Miles City, the North Dakota oil country (Dickinson, Williston,
+  Glendive, Wolf Point), and the empty heart of Nevada and Utah (Twin Falls to
+  Wells, West Wendover to Ely, Winnemucca to Fallon, Cedar City to Richfield).
+
 - **The Pacific Northwest fills in over the Cascade passes.** Fourteen new runs:
   Seattle over Stevens Pass to Wenatchee, Tacoma over White Pass to Yakima, Salem
   over Santiam Pass to Bend -- real mountain grades with brake checks -- plus the
@@ -180,9 +188,9 @@
   truck stops, rest areas, and the Red River crossing along the way.
 
 - **The drivable map crosses one hundred thousand miles.** This drop adds about
-  twenty-two thousand seven hundred miles of new road and sixty-seven new cities,
+  twenty-four thousand five hundred miles of new road and sixty-seven new cities,
   bringing the network past one hundred thousand miles you can actually drive --
-  121,482 miles across 442 cities and 981 routes.
+  123,249 miles across 442 cities and 996 routes.
 
 - **Exits now come straight from real-world maps -- with the correct exit names
   and numbers.** On the Interstates, your stops and your destination exit are
