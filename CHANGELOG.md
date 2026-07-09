@@ -4,6 +4,13 @@
 
 ### Added
 
+- **The Carolinas and Virginia knit together with thirteen new runs.** Charlotte
+  reaches Winston-Salem and Lumberton; Wilmington connects to Lumberton; Greensboro
+  drops to Fayetteville; Charleston runs up to Florence; Asheville crosses the Blue
+  Ridge to Spartanburg and Greenville; Roanoke links to Winston-Salem; Raleigh and
+  Norfolk both reach Petersburg; and out of Washington, new roads run to Winchester,
+  Hagerstown, and Charlottesville through Leesburg, Warrenton, and Frederick.
+
 - **The Kentucky parkways and the Appalachian coalfields open up.** Thirteen new
   runs through some of the most storied hauling country in the East: Pound Gap
   from Johnson City to Pikeville, Corridor G from Charleston, the Cumberland Gap
@@ -100,9 +107,9 @@
   truck stops, rest areas, and the Red River crossing along the way.
 
 - **The drivable map crosses one hundred thousand miles.** This drop adds about
-  nine thousand one hundred miles of new road and thirty-four new cities,
+  ten thousand three hundred miles of new road and thirty-four new cities,
   bringing the network past one hundred thousand miles you can actually drive --
-  107,909 miles across 409 cities and 830 routes.
+  109,130 miles across 409 cities and 843 routes.
 
 - **Exits now come straight from real-world maps -- with the correct exit names
   and numbers.** On the Interstates, your stops and your destination exit are
