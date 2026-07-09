@@ -123,6 +123,10 @@ class DrivingState(DrivingControlsMixin, DrivingUpdateMixin, DrivingEventMixin, 
         self._lane_rumble_timer = 0.0
         self._lane_guidance_state = "center"
         self._reverse_cue_active = False
+        # Prev-frame accel/brake state, so a forward<->reverse shift needs a
+        # fresh press (release then press) rather than a held control.
+        self._reverse_brake_held = False
+        self._reverse_accel_held = False
         self._status_text = f"Press {self.ctx.control_hint('engine')} to start the engine."
 
     def _terse_speech(self) -> bool:

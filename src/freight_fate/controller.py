@@ -498,6 +498,17 @@ class ControllerManager:
         return self._brake if self.active else 0.0
 
     @property
+    def throttle_target(self) -> float:
+        """Instantaneous trigger position, before smoothing. Press/release
+        detection (e.g. the reverse shift gesture) must read this so a quick
+        tap registers -- the smoothed reads above lag behind the trigger."""
+        return self._throttle_target if self.active else 0.0
+
+    @property
+    def brake_target(self) -> float:
+        return self._brake_target if self.active else 0.0
+
+    @property
     def clutch(self) -> float:
         return self._clutch if self.active else 0.0
 

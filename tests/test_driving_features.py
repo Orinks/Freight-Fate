@@ -135,6 +135,91 @@ def test_automatic_reverse_selection_is_spoken(monkeypatch):
         app.shutdown()
 
 
+def test_automatic_held_brake_does_not_engage_reverse(monkeypatch):
+    """Braking to a stop and holding must not slip into reverse; only a fresh
+    press (release, then press again) engages it."""
+    from freight_fate.app import App
+
+    app = App()
+    monkeypatch.setattr(app.ctx.audio, "play", lambda *a, **k: None)
+    monkeypatch.setattr(app.ctx, "say_event", lambda *a, **k: None)
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        driving.truck.velocity_mps = 0.0
+        # Brake was already held coming into this frame, as after braking to
+        # a stop -- no rising edge, so reverse must not engage.
+        driving._reverse_brake_held = True
+        assert not driving._update_reverse_controls(accelerating=False, braking_key=True)
+        assert not driving.truck.transmission.in_reverse
+        # Release the brake, then a fresh press engages reverse.
+        assert not driving._update_reverse_controls(accelerating=False, braking_key=False)
+        assert driving._update_reverse_controls(accelerating=False, braking_key=True)
+        assert driving.truck.transmission.in_reverse
+    finally:
+        app.shutdown()
+
+
+def test_automatic_held_accelerator_does_not_flip_out_of_reverse(monkeypatch):
+    """Holding the accelerator to brake a reverse roll to a stop must not flip
+    to forward; a fresh press is required."""
+    from freight_fate.app import App
+    from freight_fate.sim.transmission import REVERSE
+
+    app = App()
+    monkeypatch.setattr(app.ctx.audio, "play", lambda *a, **k: None)
+    monkeypatch.setattr(app.ctx, "say_event", lambda *a, **k: None)
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        tr = driving.truck.transmission
+        tr.gear = REVERSE
+        driving.truck.velocity_mps = 0.0
+        # Accelerator was held while it braked the reverse roll to a stop.
+        driving._reverse_accel_held = True
+        assert not driving._update_reverse_controls(accelerating=True, braking_key=False)
+        assert tr.in_reverse
+        # Release, then a fresh press flips to forward.
+        driving._update_reverse_controls(accelerating=False, braking_key=False)
+        driving._update_reverse_controls(accelerating=True, braking_key=False)
+        assert not tr.in_reverse
+    finally:
+        app.shutdown()
+
+
+def test_accelerator_does_not_thrust_while_braking_in_reverse(monkeypatch):
+    """Pressing the accelerator to brake a backward roll must never command
+    reverse thrust -- throttle stays down while the service brake engages."""
+    from freight_fate.app import App
+    from freight_fate.sim.transmission import REVERSE
+
+    class Keys:
+        def __getitem__(self, key):
+            return key == pygame.K_UP
+
+    app = App()
+    monkeypatch.setattr(pygame.key, "get_pressed", lambda: Keys())
+    monkeypatch.setattr(app.ctx.audio, "play", lambda *a, **k: None)
+    monkeypatch.setattr(app.ctx, "say_event", lambda *a, **k: None)
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        t = driving.truck
+        t.transmission.gear = REVERSE
+        t.velocity_mps = -3.0
+        t.throttle = 0.5
+        # Accelerator already held, so this is not a fresh press: no gear flip.
+        driving._reverse_accel_held = True
+
+        driving.update(1 / 60)
+
+        assert t.transmission.in_reverse
+        assert t.throttle < 0.5  # decays toward 0 rather than ramping up
+        assert t.brake > 0.0  # the service brake is what arrests the roll
+    finally:
+        app.shutdown()
+
+
 def test_driving_f1_describes_safe_shutdown_and_destination_parking(monkeypatch):
     from freight_fate.app import App
 
