@@ -188,17 +188,13 @@ against slug variants, region FROM THE CLASSIFIER, split-don't-duplicate when
 it lands on an existing leg -- e.g. Lima splits the new Toledo-Dayton leg,
 Bloomington splits Indianapolis-Evansville).
 
-CITY WAVE 1 -- corridor-critical, build after Batch 4 (11 cities). These
+CITY WAVE 1 -- corridor-critical, build after Batch 4 (~11 cities). These
 unlock or split legs the batch plan needs:
-- Jackson, Tennessee -- BUILD FIRST, owner priority with a history: this is
-  the city the slug-key migration was built FOR (three-Jacksons collision),
-  and pickaxe across all branches proves it was never actually added
-  afterward -- the intention was lost, not the data. Build: split the 209mi
-  memphis-nashville I-40 leg into memphis-jackson + jackson-nashville,
-  KEEPING the existing curated checkpoints (Parker Crossroads, Buck Snort,
-  Kingston Springs) and the existing "Pilot Travel Center Jackson" stop on
-  the correct halves. Region from the classifier. NOT Jackson, Mississippi;
-  not Jackson, Michigan.
+- [DONE 2026-07-09, commit 2b3ccc1] Jackson, Tennessee AND Cookeville,
+  Tennessee -- both promoted and the I-40 legs split
+  (memphis->jackson->nashville, knoxville->cookeville->nashville); Buck Snort
+  and the other curated checkpoints preserved; Cumberland Plateau "mountain"
+  and Highland Rim "hills" pins held. These two are OFF the build list.
 - Wytheville, Virginia -- I-77 x I-81 junction; unlocks Beckley-Winston-Salem
   as two real legs.
 - Lynchburg, Virginia -- US-29/US-460 hub; fixes the Roanoke-Charlottesville
