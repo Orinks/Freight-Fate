@@ -409,6 +409,7 @@ class App:
                     )
                     if self.state is not None:
                         self.state.on_controller_disconnect()
+                self.ctx.audio.update(dt)  # advance time-based audio fades
                 if self.state is not None:
                     self.state.update(dt)
                     self.presence.update(self.state.presence())

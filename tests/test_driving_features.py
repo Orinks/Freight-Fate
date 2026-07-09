@@ -643,6 +643,7 @@ def test_engine_shutdown_is_blocked_at_highway_speed(monkeypatch):
         quiet_trip(driving)
         driving.handle_event(key_event(pygame.K_e))
         assert driving.truck.engine_on
+        app.ctx.audio.update(5.0)  # let the ignition finish before toggling again
         driving.truck.velocity_mps = 31.3
 
         driving.handle_event(key_event(pygame.K_e))
@@ -702,6 +703,7 @@ def test_engine_shutdown_is_allowed_once_stopped():
         quiet_trip(driving)
         driving.handle_event(key_event(pygame.K_e))
         assert driving.truck.engine_on
+        app.ctx.audio.update(5.0)  # let the ignition finish before toggling again
         driving.truck.velocity_mps = 0.0
         driving.handle_event(key_event(pygame.K_e))
         assert not driving.truck.engine_on
@@ -1515,9 +1517,7 @@ def test_destination_exit_announced_within_scaled_window(monkeypatch):
 
     app = App()
     events = []
-    monkeypatch.setattr(
-        app.ctx, "say_event", lambda text, interrupt=True: events.append(text)
-    )
+    monkeypatch.setattr(app.ctx, "say_event", lambda text, interrupt=True: events.append(text))
     try:
         driving = start_drive(app)
         quiet_trip(driving)
@@ -1543,9 +1543,7 @@ def test_exit_announcements_speak_each_name_once(monkeypatch):
     app = App()
     said = []
     monkeypatch.setattr(app.ctx, "say", lambda text, **k: said.append(text))
-    monkeypatch.setattr(
-        app.ctx, "say_event", lambda text, interrupt=True: said.append(text)
-    )
+    monkeypatch.setattr(app.ctx, "say_event", lambda text, interrupt=True: said.append(text))
     try:
         driving = start_drive(app)
         quiet_trip(driving)
@@ -1578,9 +1576,7 @@ def test_labeled_missed_exit_names_the_exit_once(monkeypatch):
 
     app = App()
     said = []
-    monkeypatch.setattr(
-        app.ctx, "say_event", lambda text, interrupt=True: said.append(text)
-    )
+    monkeypatch.setattr(app.ctx, "say_event", lambda text, interrupt=True: said.append(text))
     try:
         driving = start_drive(app)
         quiet_trip(driving)
