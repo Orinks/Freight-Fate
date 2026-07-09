@@ -23,7 +23,7 @@ Built legs used: `las_cruces_nm_us -> tucson_az_us` (The Thing) and
 - treatment: billboard
 - leg: las_cruces_nm_us -> tucson_az_us
 - at_mi: 150
-- spoken: Billboard: The Thing. Still ahead. Still a mystery. Still only a dollar or two to find out. Probably. No officials of any type required or allowed. If you're an official, turn back now or hide your identity.
+- spoken: Billboard: The Thing. Still ahead, still a mystery, still a dollar or two to find out. No officials of any type allowed -- if you're one, turn back now or hide your identity.
 
 ### The Thing (countdown, sign three)
 - treatment: billboard
@@ -49,7 +49,7 @@ Built legs used: `las_cruces_nm_us -> tucson_az_us` (The Thing) and
 - treatment: billboard
 - leg: los_angeles_ca_us -> indio_ca_us
 - at_mi: 65
-- spoken: Billboard: A forest of windmills ahead in the San Gorgonio Pass. Thousands of them, turning in the same wind that is currently shoving your trailer around. They will not kill your birds ...or your fuzzy dice, but they'll spin, that's for sure.
+- spoken: Billboard: A forest of windmills ahead in the San Gorgonio Pass, turning in the same wind that is currently shoving your trailer around. They will not kill your birds, or your fuzzy dice, but they will spin.
 
 ---
 

@@ -34,7 +34,8 @@ kingman_az_us` (151).
 - treatment: billboard
 - leg: amarillo_tx_us -> tucumcari_nm_us
 - at_mi: 108
-- spoken: Billboard: Tucumcari tonight. Two thousand motel rooms and a mile of neon on Route sixty-six. The sign has said so for sixty years, and the sign is right. From fleebag to fo-tel, Tucumcari's got you covered!
+- spoken: Billboard: Tucumcari tonight. Two thousand motel rooms and a mile of neon on Route sixty-six. From fleebag to fo-tel, Tucumcari's got you covered.
+- describe: The neon has promised "Tucumcari Tonite" for sixty years, and it is still right -- a whole mile of classic Route sixty-six motels lit up against the New Mexico dark.
 
 ### Cline's Corners
 - treatment: billboard

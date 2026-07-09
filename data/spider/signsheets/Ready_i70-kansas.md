@@ -10,7 +10,8 @@ Facts from public data; copy invented. One built leg:
 - treatment: billboard
 - leg: kansas_city_mo_us -> denver_co_us
 - at_mi: 90
-- spoken: Billboard: The Oz Museum ahead in Wamego. Follow the yellow brick road off Interstate seventy for ruby slippers, flying monkeys, and more Dorothy than one small town should legally hold. There's no place like home.
+- spoken: Billboard: The Oz Museum ahead in Wamego. Follow the yellow brick road off Interstate seventy. There's no place like home.
+- describe: Ruby slippers, flying monkeys, and more Dorothy than one small town should legally hold -- the Oz Museum in Wamego packs generations of Wizard of Oz collecting into one very committed building.
 
 ### Mushroom Rock
 - treatment: landmark
@@ -28,7 +29,8 @@ Facts from public data; copy invented. One built leg:
 - treatment: billboard
 - leg: kansas_city_mo_us -> denver_co_us
 - at_mi: 235
-- spoken: Billboard: The Garden of Eden ahead in Lucas -- a yard full of concrete Bible scenes and political statements, built over decades by one very determined old man. Roadside folk art like nowhere else on Earth.
+- spoken: Billboard: The Garden of Eden ahead in Lucas -- concrete Bible scenes and populist politics in a front yard, roadside folk art like nowhere else.
+- describe: Built over decades by one very determined old man, the Garden of Eden in Lucas is a yard packed with hand-poured concrete tableaux -- Adam and Eve, the working man against the powerful, and, they say, the builder himself still on display.
 
 ### World's Largest Prairie Dog
 - treatment: billboard

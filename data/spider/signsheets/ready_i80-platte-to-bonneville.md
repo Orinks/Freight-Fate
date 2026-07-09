@@ -48,7 +48,7 @@ when approved. Facts from public data; copy invented. Three built legs:
 - treatment: billboard
 - leg: san_francisco_ca_us -> salt_lake_city_ut_us
 - at_mi: 705
-- spoken: Billboard: Out on the salt flats ahead stands the Tree of Utah, an eighty-foot concrete tree sprouting from the salt, baffling drivers in the middle of absolute nowhere since the eighties. How do you think this thing happened?
+- spoken: Billboard: Out on the salt flats ahead stands the Tree of Utah, an eighty-foot concrete tree sprouting from the salt in the middle of nowhere. How do you think this thing happened?
 
 ### Donner Pass
 - treatment: landmark
@@ -60,7 +60,8 @@ when approved. Facts from public data; copy invented. Three built legs:
 - treatment: billboard
 - leg: omaha_ne_us -> cheyenne_wy_us
 - at_mi: 250
-- spoken: Billboard: An original Pony Express station ahead in Gothenburg -- a squat log cabin where teenage riders once swapped horses at a gallop to carry the mail west. Two thousand miles in ten days, no phone required.
+- spoken: Billboard: An original Pony Express station ahead in Gothenburg, where teenage riders once swapped horses at a gallop to carry the mail west.
+- describe: A squat log cabin, one of the last original Pony Express stations. The relay ran two thousand miles in ten days and lasted barely eighteen months before the telegraph put it out of a job.
 
 ---
 

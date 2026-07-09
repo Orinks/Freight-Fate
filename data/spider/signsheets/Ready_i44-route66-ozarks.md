@@ -36,7 +36,7 @@ I-44 corridor through Tulsa, Springfield, and the Ozarks). **at_mi are ESTIMATES
 - treatment: billboard
 - leg: dallas_tx_us -> st_louis_mo_us
 - at_mi: 350
-- spoken: Billboard: Galena ahead, an old lead-mining town in the Kansas corner where Route sixty-six clips three states in a few miles. A rusty tow truck out front may look familiar if you have seen a certain cartoon.
+- spoken: Billboard: Galena ahead, an old Route sixty-six mining town where three states meet in a few miles. That rusty tow truck out front may look familiar if you have seen a certain cartoon.
 
 ### Gay Parita
 - treatment: billboard
