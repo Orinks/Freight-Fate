@@ -4,6 +4,14 @@
 
 ### Added
 
+- **Twelve more cities fill in the eastern and heartland map.** Cumberland,
+  Maryland lands on the Interstate 68 climb over the Alleghenies; Saint Joseph joins
+  the Interstate 29 run from Kansas City to Omaha; Mansfield breaks up Columbus to
+  Cleveland; Youngstown sits between Akron and Pittsburgh; plus Staunton, Paducah,
+  Owensboro, Parkersburg, Mount Vernon, Cape Girardeau, Waterloo, and Daytona Beach
+  -- each connecting to its neighbors on real highways through towns like Paw Paw,
+  Romney, and Appalachian coal country.
+
 - **The Midwest lattice comes together with nineteen new runs.** Cedar Rapids to
   Iowa City; Peoria to Springfield, Decatur, and on to Bloomington and St. Louis;
   Champaign to Lafayette; and across Michigan and the crossroads, Detroit to Ann
@@ -137,9 +145,9 @@
   truck stops, rest areas, and the Red River crossing along the way.
 
 - **The drivable map crosses one hundred thousand miles.** This drop adds about
-  thirteen thousand nine hundred miles of new road and forty-three new cities,
+  fifteen thousand two hundred miles of new road and fifty-five new cities,
   bringing the network past one hundred thousand miles you can actually drive --
-  112,691 miles across 418 cities and 888 routes.
+  113,991 miles across 430 cities and 909 routes.
 
 - **Exits now come straight from real-world maps -- with the correct exit names
   and numbers.** On the Interstates, your stops and your destination exit are
