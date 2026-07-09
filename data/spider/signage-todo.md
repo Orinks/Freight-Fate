@@ -92,6 +92,15 @@ City** literally straddles the Arkansas-Louisiana state line (main street IS the
 border). **Ruston, LA** = Louisiana Tech + the Louisiana Peach Festival. Pine
 Bluff = the "Home of the Arkansas Railroad Museum" (Cotton Belt shops).
 
+## Stuttgart / Grand Prairie rice belt (built 2026-07-09) -- signage opportunities
+
+(`little_rock->stuttgart->pine_bluff`, US-165/US-79 rice country.) **Stuttgart, AR**
+= "Rice and Duck Capital of the World" -- the World Championship Duck Calling
+Contest (Wings Over the Prairie), Riceland Foods, endless rice/soybean fields and
+duck-hunting flooded timber. A duck-call or grain-elevator billboard is perfect
+here; also good "watch for farm equipment / grain-truck" seasonal signage. The
+Arkansas River crossing on the Pine Bluff leg is a landmark moment.
+
 ## Owner checkpoint requests (place when the road gets built)
 
 - **Midlothian, VA** on **US-60** (Midlothian Turnpike) west/southwest of

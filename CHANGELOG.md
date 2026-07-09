@@ -4,6 +4,11 @@
 
 ### Added
 
+- **Stuttgart, the rice and duck capital, anchors Arkansas's farm country.** The
+  new city sits in the Grand Prairie rice belt, reached from Little Rock through
+  England and looping down to Pine Bluff, crossing the Arkansas River -- flat
+  farm-road driving through real Delta towns.
+
 - **South Arkansas's timber and oil country joins the map, connecting into
   Louisiana.** Two cities arrive -- Pine Bluff and El Dorado -- and a new run drops
   south from Little Rock through Pine Bluff and El Dorado to Monroe, Louisiana,
@@ -18,9 +23,9 @@
   truck stops, rest areas, and the Red River crossing along the way.
 
 - **The drivable map crosses one hundred thousand miles.** This drop adds about
-  two thousand five hundred miles of new road and twenty-nine new cities,
+  two thousand six hundred miles of new road and thirty new cities,
   bringing the network past one hundred thousand miles you can actually drive --
-  101,277 miles across 404 cities and 764 routes.
+  101,369 miles across 405 cities and 766 routes.
 
 - **Exits now come straight from real-world maps -- with the correct exit names
   and numbers.** On the Interstates, your stops and your destination exit are

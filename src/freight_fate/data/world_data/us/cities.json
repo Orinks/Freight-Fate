@@ -5962,6 +5962,15 @@
       "locations": [],
       "lat": 33.2076,
       "lon": -92.6663
+    },
+    "stuttgart_ar_us": {
+      "spoken_city": "Stuttgart",
+      "state": "AR",
+      "country": "US",
+      "region": "mid_south",
+      "locations": [],
+      "lat": 34.5001,
+      "lon": -91.5526
     }
   }
 }
