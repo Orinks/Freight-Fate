@@ -38,7 +38,10 @@ from .net import ssl_context
 
 log = logging.getLogger(__name__)
 
-DEFAULT_BASE_URL = "https://orinks.net"
+# The www host, deliberately: the apex orinks.net answers API calls with a
+# 307 redirect to www, and urllib will not re-send a POST body through a
+# redirect -- so heartbeats against the apex fail with HTTPError 307.
+DEFAULT_BASE_URL = "https://www.orinks.net"
 
 # The board treats a driver as gone after ~3 missed beats (server TTL is
 # three minutes), so one heartbeat a minute keeps a steady presence without
