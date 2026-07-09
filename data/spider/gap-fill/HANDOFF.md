@@ -21,11 +21,15 @@ start at the top and keep going.
       refreshed to *-2026-07-10.txt. Now **409 cities / 830 legs / 107,909 mi**.
 - [x] Batch 4 -- 13 Carolinas & Virginia legs (2b5f7a2)
 - [x] City Wave 1 -- 7 cities via leg-splits (4569180): Wytheville, Bloomington,
-      Lima, Ocala, Dubuque, Terre Haute, Effingham. DEFERRED: Lynchburg VA +
-      Longview TX (need new connections, not a checkpoint-split -- do these two
-      as a small add before Batch 5).
-- [ ] Lynchburg VA + Longview TX (Wave 1 leftovers)  <-- NEXT
-- [ ] Batch 5 -- Northeast dense mesh, then Batch 6+ per Part 3.
+      Lima, Ocala, Dubuque, Terre Haute, Effingham.
+- [x] City Wave 1 leftovers -- Lynchburg VA + Longview TX hubs (bbab3d0).
+      Wave 1 COMPLETE (9 cities). Placed owner's Midlothian checkpoint.
+- [x] Batch 5 -- 14 Northeast legs (7446f43).
+- [x] Scanner re-run 2026-07-10b: corridor 353->359 (UP -- City Wave 1's new
+      cities create fresh neighbor-gaps), nn 160->157. Catalogs = *-2026-07-10b.txt.
+      Now **418 cities / 869 legs / 110,969 mi**.
+- [ ] Batch 6 -- Midwest lattice  <-- NEXT
+- [ ] City Wave 2, then Batch 7+ per Part 3.
 - Cadence reminder: re-run BOTH scanners every 2-3 batches (done above); the
   flaky --add-maxspeed dispatcher needs a per-leg retry loop after each batch.
 
