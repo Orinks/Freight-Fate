@@ -4,6 +4,13 @@
 
 ### Added
 
+- **The Pacific Northwest fills in over the Cascade passes.** Fourteen new runs:
+  Seattle over Stevens Pass to Wenatchee, Tacoma over White Pass to Yakima, Salem
+  over Santiam Pass to Bend -- real mountain grades with brake checks -- plus the
+  Willamette Valley (Salem-Corvallis, Newport-Albany), the Columbia Basin
+  (Wenatchee, Moses Lake, Tri-Cities, Yakima), the Oregon coast to Olympia, and the
+  Idaho panhandle from Lewiston through Coeur d'Alene to Sandpoint.
+
 - **California connects up, coast to desert.** Twelve new runs: San Francisco to
   Santa Rosa and San Jose to Salinas and Stockton; Salinas down the coast to Santa
   Maria; Fresno to Visalia; Oxnard to Valencia; Bakersfield over Tehachapi to
@@ -173,9 +180,9 @@
   truck stops, rest areas, and the Red River crossing along the way.
 
 - **The drivable map crosses one hundred thousand miles.** This drop adds about
-  twenty-one thousand three hundred miles of new road and sixty-seven new cities,
+  twenty-two thousand seven hundred miles of new road and sixty-seven new cities,
   bringing the network past one hundred thousand miles you can actually drive --
-  120,127 miles across 442 cities and 967 routes.
+  121,482 miles across 442 cities and 981 routes.
 
 - **Exits now come straight from real-world maps -- with the correct exit names
   and numbers.** On the Interstates, your stops and your destination exit are
