@@ -96,6 +96,10 @@
 
 ### Changed
 
+- **Abandoning a job now asks you to confirm.** Choosing Abandon job from the
+  pause menu opens a Yes or No prompt that starts on No, so you have to arrow
+  down to Yes to actually give up the load and pay the penalty. Choosing No
+  takes you straight back to the pause menu with the job intact.
 - **Cities that share a name now always say their state.** With two Jacksons,
   two Portlands, and three Springfields on the map, dispatch offers, route
   planning, GPS announcements, and delivery summaries now say "Jackson,
