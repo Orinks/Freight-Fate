@@ -160,7 +160,9 @@ batch are in PROGRAM.md sections; headline sequence:
 - Batch 10, Pacific Northwest: Salem-Corvallis, Newport-Albany US-20,
   Salem-Bend US-20 Santiam Pass (grade), Medford-Klamath Falls,
   Astoria-Olympia US-101, Seattle-Wenatchee US-2 Stevens Pass (grade), Moses
-  Lake-Wenatchee, Tri-Cities-Moses Lake, Wenatchee-Yakima US-97, Yakima-Moses
+  Lake-Wenatchee, Tri-Cities WASHINGTON-Moses Lake (the existing
+  tri_cities_wa_us node -- not the Tennessee Tri-Cities of Wave 2),
+  Wenatchee-Yakima US-97, Yakima-Moses
   Lake, Tacoma-Yakima US-12, Newberg-Woodburn, McMinnville-Woodburn,
   Lewiston-Coeur d'Alene US-95, Coeur d'Alene-Sandpoint, McCall-Ontario,
   Sandpoint-Libby.
@@ -197,15 +199,20 @@ unlock or split legs the batch plan needs:
   bigger, I-75 x US-30).
 - Terre Haute, Indiana -- I-70 Indianapolis-St. Louis midpoint, genuine void.
 - Effingham, Illinois -- I-57 x I-70 junction, famous trucking crossroads.
-- Jackson, Tennessee -- I-40 Memphis-Nashville midpoint, genuine void.
+- Jackson, Tennessee -- I-40 Memphis-Nashville midpoint, genuine void. (NOT
+  Jackson, Mississippi, which is long-established and got its Hattiesburg leg
+  in the Deep South batch; and not the existing Jackson, Michigan either.)
 - Ocala, Florida -- I-75 Tampa-Gainesville, real distribution hub.
 - Longview, Texas -- I-20 east-Texas void; enables Tyler-Texarkana chain.
 - Dubuque, Iowa -- tri-state US-151/US-61 hub.
 
 CITY WAVE 2 -- eastern/central voids, build after Batch 6 (~12 cities):
 - Paducah, Kentucky (I-24 x Ohio River) and Owensboro, Kentucky (US-60).
-- Kingsport or Bristol (Tri-Cities, Tennessee/Virginia) -- I-81 void between
-  Knoxville and Roanoke; pick ONE anchor.
+- Kingsport or Bristol (the Tennessee/Virginia Tri-Cities -- NOT the existing
+  Washington tri_cities_wa_us node) -- I-81 void between Knoxville and
+  Roanoke; pick ONE anchor. NOTE: Johnson City, the metro's third city, is
+  ALREADY on the map (it sits on I-26 and carries Batch 3's Johnson
+  City-Pikeville pair), so this item is only about anchoring I-81 proper.
 - Staunton, Virginia -- I-81 x I-64 junction.
 - Cumberland, Maryland -- I-68 mid-void (with the Morgantown-Hagerstown leg).
 - Parkersburg, West Virginia -- I-77 Ohio River void.
