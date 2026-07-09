@@ -28,8 +28,41 @@ start at the top and keep going.
 - [x] Scanner re-run 2026-07-10b: corridor 353->359 (UP -- City Wave 1's new
       cities create fresh neighbor-gaps), nn 160->157. Catalogs = *-2026-07-10b.txt.
       Now **418 cities / 869 legs / 110,969 mi**.
-- [ ] Batch 6 -- Midwest lattice  <-- NEXT
-- [ ] City Wave 2, then Batch 7+ per Part 3.
+- [x] Batch 6 -- 19 Midwest lattice legs (696a693). Now 418 cities / 888 legs /
+      112,691 mi.
+- [ ] City Wave 2  <-- NEXT (analysis done -- see CITY WAVE 2 PLAN below)
+- [ ] Batch 7+ per Part 3.
+
+### CITY WAVE 2 PLAN (analyzed 2026-07-10, ready to execute)
+None are clean checkpoint-splits. Verified nearest nodes + which sit on a bypass
+leg between two neighbors. Build pattern = Longview/Lynchburg (mint city, add spoke
+legs to 2-3 nearest nodes; where the city sits on a bypass leg, REPLACE that leg
+with two halves through the city -- but FIRST check ORIGINAL_ADJACENT_PAIRS, none
+of these four were). Regions from classifier. Highways are best-effort; checkpoints
+carry the geography.
+- **Cumberland MD** -- CLEAN SPLIT of morgantown->hagerstown I-68 (on-route 0.22mi):
+  morgantown->cumberland + cumberland->hagerstown. + cumberland->winchester (US-50).
+- **St Joseph MO** -- bypass of kansas_city->omaha I-29 (city ~few mi off): replace
+  with kc->st_joseph + st_joseph->omaha (I-29).
+- **Mansfield OH** -- bypass of columbus->cleveland I-71 (3mi off): replace with
+  columbus->mansfield + mansfield->cleveland (I-71).
+- **Youngstown OH** -- bypass of akron->pittsburgh I-76 (6mi off): replace with
+  akron->youngstown + youngstown->pittsburgh; + youngstown->cleveland (optional).
+- **Staunton VA** -- spokes: staunton->harrisonburg (I-81) + staunton->charlottesville
+  (I-64). (harrisonburg->charlottesville US-33 bypasses it -- keep, add spokes.)
+- **Paducah KY** -- spokes: paducah->clarksville (I-24) + paducah->evansville (I-69).
+  + paducah->cape_girardeau (I-57) once Cape is a node.
+- **Owensboro KY** -- spokes: owensboro->evansville (US-60) + owensboro->bowling_green
+  (US-231). (no existing bypass leg.)
+- **Daytona Beach FL** -- spokes: daytona->orlando (I-4) + daytona->jacksonville (I-95).
+- **Waterloo IA** -- spokes: waterloo->cedar_rapids (US-380) + waterloo->dubuque (US-20).
+- **Parkersburg WV** -- spokes: parkersburg->charleston (I-77) + parkersburg->morgantown.
+- **Mount Vernon IL** -- spokes: mount_vernon->effingham (I-57) + mount_vernon->evansville
+  (I-64). (I-57 x I-64 junction.)
+- **Cape Girardeau MO** -- spokes: cape->st_louis (I-55) + cape->paducah (I-57).
+- **Kingsport TN** -- DEFER/DROP: the Tri-Cities is already served by Johnson City +
+  the Bristol checkpoint; only add if the owner wants it as a freight destination.
+Cadence: re-run BOTH scanners after Wave 2 (it adds ~12 cities -> reshapes gaps).
 - Cadence reminder: re-run BOTH scanners every 2-3 batches (done above); the
   flaky --add-maxspeed dispatcher needs a per-leg retry loop after each batch.
 
