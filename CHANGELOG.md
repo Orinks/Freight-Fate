@@ -4,6 +4,12 @@
 
 ### Added
 
+- **Lynchburg and Longview become real hubs.** Lynchburg, Virginia now anchors
+  US-460 between Roanoke and Richmond -- past Bedford, Appomattox, and Midlothian --
+  and reaches Charlottesville up US-29. Longview, Texas takes its place on
+  Interstate 20 between Tyler and Shreveport, past Marshall, and runs up US-59 to
+  Texarkana.
+
 - **Seven cities fill in long blank stretches of Interstate.** Wytheville breaks up
   the Interstate 81 run through the Virginia mountains; Bloomington splits the
   Interstate 69 haul to Evansville; Lima lands on Interstate 75 between Toledo and
@@ -116,9 +122,9 @@
   truck stops, rest areas, and the Red River crossing along the way.
 
 - **The drivable map crosses one hundred thousand miles.** This drop adds about
-  ten thousand six hundred miles of new road and forty-one new cities,
+  ten thousand eight hundred miles of new road and forty-three new cities,
   bringing the network past one hundred thousand miles you can actually drive --
-  109,387 miles across 416 cities and 851 routes.
+  109,556 miles across 418 cities and 855 routes.
 
 - **Exits now come straight from real-world maps -- with the correct exit names
   and numbers.** On the Interstates, your stops and your destination exit are

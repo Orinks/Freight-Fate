@@ -6070,6 +6070,24 @@
       "locations": [],
       "lat": 39.12,
       "lon": -88.544
+    },
+    "lynchburg_va_us": {
+      "spoken_city": "Lynchburg",
+      "state": "VA",
+      "country": "US",
+      "region": "appalachia",
+      "locations": [],
+      "lat": 37.414,
+      "lon": -79.142
+    },
+    "longview_tx_us": {
+      "spoken_city": "Longview",
+      "state": "TX",
+      "country": "US",
+      "region": "southern_plains",
+      "locations": [],
+      "lat": 32.501,
+      "lon": -94.74
     }
   }
 }
