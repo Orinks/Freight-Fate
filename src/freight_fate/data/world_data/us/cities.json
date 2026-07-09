@@ -5782,6 +5782,24 @@
       "locations": [],
       "lat": 31.9635,
       "lon": -83.7824
+    },
+    "opelika_al_us": {
+      "spoken_city": "Opelika",
+      "state": "AL",
+      "country": "US",
+      "region": "mid_south",
+      "locations": [],
+      "lat": 32.6454,
+      "lon": -85.3783
+    },
+    "lagrange_ga_us": {
+      "spoken_city": "LaGrange",
+      "state": "GA",
+      "country": "US",
+      "region": "atlantic_southeast",
+      "locations": [],
+      "lat": 33.0362,
+      "lon": -85.0319
     }
   }
 }

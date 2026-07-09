@@ -4,6 +4,12 @@
 
 ### Added
 
+- **Interstate 85 now runs unbroken from Atlanta down to Montgomery, Alabama.**
+  Two more cities join the map: Opelika, Alabama, next to Auburn, and LaGrange,
+  Georgia. The Atlanta-to-Montgomery run now stops city to city -- through
+  Newnan, Auburn, and Valley -- instead of as one long leg, with truck stops and
+  a rest area to break at.
+
 - **Interstate 75 through South Georgia is now a chain of towns, not one long
   haul.** Four cities join the map: Lake City, Florida, and Valdosta, Tifton,
   and Cordele, Georgia. The run from Jacksonville up to Macon and Atlanta now
