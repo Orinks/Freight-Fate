@@ -4,6 +4,15 @@
 
 ### Added
 
+- **Seven cities fill in long blank stretches of Interstate.** Wytheville breaks up
+  the Interstate 81 run through the Virginia mountains; Bloomington splits the
+  Interstate 69 haul to Evansville; Lima lands on Interstate 75 between Toledo and
+  Dayton; Ocala joins the Jacksonville-to-Tampa run; Dubuque anchors the Mississippi
+  River crossing on US-20; and Terre Haute and Effingham break the long Indianapolis-
+  to-St. Louis drive on Interstate 70 into real stops. Each was a place you drove
+  past for a hundred miles with nowhere to stop -- now they're real cities to
+  pick up and deliver in.
+
 - **The Carolinas and Virginia knit together with thirteen new runs.** Charlotte
   reaches Winston-Salem and Lumberton; Wilmington connects to Lumberton; Greensboro
   drops to Fayetteville; Charleston runs up to Florence; Asheville crosses the Blue
@@ -107,9 +116,9 @@
   truck stops, rest areas, and the Red River crossing along the way.
 
 - **The drivable map crosses one hundred thousand miles.** This drop adds about
-  ten thousand three hundred miles of new road and thirty-four new cities,
+  ten thousand six hundred miles of new road and forty-one new cities,
   bringing the network past one hundred thousand miles you can actually drive --
-  109,130 miles across 409 cities and 843 routes.
+  109,387 miles across 416 cities and 851 routes.
 
 - **Exits now come straight from real-world maps -- with the correct exit names
   and numbers.** On the Interstates, your stops and your destination exit are

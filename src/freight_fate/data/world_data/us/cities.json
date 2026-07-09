@@ -6007,6 +6007,69 @@
       "locations": [],
       "lat": 36.1628,
       "lon": -85.5016
+    },
+    "wytheville_va_us": {
+      "spoken_city": "Wytheville",
+      "state": "VA",
+      "country": "US",
+      "region": "appalachia",
+      "locations": [],
+      "lat": 36.948,
+      "lon": -81.087
+    },
+    "bloomington_in_us": {
+      "spoken_city": "Bloomington",
+      "state": "IN",
+      "country": "US",
+      "region": "corn_belt",
+      "locations": [],
+      "lat": 39.165,
+      "lon": -86.526
+    },
+    "lima_oh_us": {
+      "spoken_city": "Lima",
+      "state": "OH",
+      "country": "US",
+      "region": "great_lakes",
+      "locations": [],
+      "lat": 40.743,
+      "lon": -84.105
+    },
+    "ocala_fl_us": {
+      "spoken_city": "Ocala",
+      "state": "FL",
+      "country": "US",
+      "region": "florida",
+      "locations": [],
+      "lat": 29.187,
+      "lon": -82.14
+    },
+    "dubuque_ia_us": {
+      "spoken_city": "Dubuque",
+      "state": "IA",
+      "country": "US",
+      "region": "heartland",
+      "locations": [],
+      "lat": 42.5,
+      "lon": -90.665
+    },
+    "terre_haute_in_us": {
+      "spoken_city": "Terre Haute",
+      "state": "IN",
+      "country": "US",
+      "region": "corn_belt",
+      "locations": [],
+      "lat": 39.467,
+      "lon": -87.414
+    },
+    "effingham_il_us": {
+      "spoken_city": "Effingham",
+      "state": "IL",
+      "country": "US",
+      "region": "corn_belt",
+      "locations": [],
+      "lat": 39.12,
+      "lon": -88.544
     }
   }
 }
