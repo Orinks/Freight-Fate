@@ -10,6 +10,27 @@ The work is generally autonomous per the established rules (node rule,
 enrichment recipe, spoken invariants). Everything below is ordered so Opus can
 start at the top and keep going.
 
+## FLAVOR PASS (marquee done 2026-07-10; commits 05219eb/82a21b1/135e02e/6d14461)
+Built the four highest-value flavor corridors -- three iconic experiential crossings
++ two real node-void fills:
+- **CBBT** (Cape Charles) -- Chesapeake Bay Bridge-Tunnel, see below.
+- **Key West / Overseas Highway** (miami->key_west US-1) -- Seven Mile Bridge,
+  southernmost-point trophy destination.
+- **Florida Gulf + Alligator Alley** (Fort Myers, Naples; naples->miami I-75) --
+  Everglades crossing, panther zone, $12 toll; fills the thin Gulf coast.
+- **Central CA coast** (San Luis Obispo, Santa Barbara) -- US-101 split, fills the
+  scenic Bay-to-LA void.
+Each iconic crossing got atmosphere landmarks + (where real) a toll. Pattern proven:
+a "nothing" spot (Sea Gull Island) becomes a content anchor for the 1.9 mini-game/
+achievement/weather hooks.
+REMAINING flavor picks (owner-taste, do as a curated pass when wanted): Natchez MS,
+Columbus MS, Florence AL, Rome GA, Gadsden AL, Moab/Vernal/Logan UT, Prescott AZ,
+Walla Walla WA, Port Angeles WA, Lufkin/Victoria/Paris-Sherman TX, Natchitoches/
+Houma LA, Clovis/Socorro NM, New London CT, Aberdeen SD, Alpena MI, Brunswick GA,
+Panama City FL, Modesto/Merced CA (CA-99), etc. NEXT PHASE: billboard runs (Opus
+autonomously drafts per-corridor billboard files -> owner workshops copy -> bake;
+see [[project-billboard-content-plan]]).
+
 ## FLAVOR: Chesapeake Bay Bridge-Tunnel (structure built 2026-07-10)
 Cape Charles VA minted; norfolk->salisbury US-13 split into the 43mi CBBT crossing
 (norfolk->cape_charles) + the 96mi Delmarva run. Map side DONE: the crossing carries
