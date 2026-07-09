@@ -87,8 +87,9 @@ class DrivingUpdateMixin:
         if pad_on:
             clutch_val = max(clutch_val, pad.clutch)
         t.transmission.clutch = clutch_val if not t.transmission.automatic else 0.0
+        clutch_disengaged = t.transmission.clutch > 0.5 or t.transmission.shifting
         self._update_lane(keys, dt)
-        self._update_cruise(dt, braking, accelerating)
+        self._update_cruise(dt, braking, accelerating, clutch_disengaged)
 
         if t.transmission.automatic and t.engine_on:
             new_gear = t.auto_shift()

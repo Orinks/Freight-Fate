@@ -108,6 +108,7 @@ class DrivingState(DrivingControlsMixin, DrivingUpdateMixin, DrivingEventMixin, 
         self._destination_exit_announced_key = ""
         self._cruise_mph: float | None = None
         self._cruise_throttle = 0.0
+        self._cruise_applied = 0.0
         self._acc_following = False
         self._acc_weather_gap_said = False
         self._acc_limit_capped = False

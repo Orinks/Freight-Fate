@@ -457,6 +457,7 @@ class DrivingEventMixin:
             return
         self._cruise_mph = t.speed_mph
         self._cruise_throttle = t.throttle
+        self._cruise_applied = t.throttle
         self._acc_following = False
         self._acc_weather_gap_said = False
         self._acc_limit_capped = False
@@ -485,6 +486,7 @@ class DrivingEventMixin:
     def _cancel_cruise(self) -> None:
         self._cruise_mph = None
         self._cruise_throttle = 0.0
+        self._cruise_applied = 0.0
         self._acc_following = False
         self._acc_weather_gap_said = False
         self._acc_limit_capped = False
@@ -533,7 +535,9 @@ class DrivingEventMixin:
             probe += ACC_LIMIT_LOOKAHEAD_STEP_MI
         return lowest_limit, lowest_reason
 
-    def _update_cruise(self, dt: float, braking: bool, accelerating: bool) -> None:
+    def _update_cruise(
+        self, dt: float, braking: bool, accelerating: bool, clutch_disengaged: bool
+    ) -> None:
         """Hold speed when clear, and follow slower modeled traffic when present."""
         if self._cruise_mph is None:
             return
@@ -544,6 +548,14 @@ class DrivingEventMixin:
             return
         if accelerating:
             return  # manual override; cruise resumes when the key lifts
+        if clutch_disengaged:
+            # Clutch in / mid-shift: driveline is open, so any applied throttle
+            # only free-revs the engine. Cut throttle to idle and hold the
+            # integrator; the applied throttle ramps back up from zero once the
+            # clutch engages again.
+            t.throttle = 0.0
+            self._cruise_applied = 0.0
+            return
         target_mph = self._cruise_mph
         # Predictive ACC: never carry the driver past the posted limit. With real
         # OSM limits baked per leg, a held set speed would otherwise sail through
@@ -583,7 +595,15 @@ class DrivingEventMixin:
         self._acc_following = following
         error = target_mph - t.speed_mph
         self._cruise_throttle = max(0.0, min(1.0, self._cruise_throttle + error * 0.08 * dt))
-        t.throttle = self._cruise_throttle
+        # Ramp the applied throttle up to the held integrator value rather than
+        # snapping, so cruise eases back in after a clutch release; drops (traffic
+        # or a lower limit) still apply immediately. On a steady frame the applied
+        # throttle already equals _cruise_throttle, so this holds as before.
+        if self._cruise_throttle > self._cruise_applied:
+            self._cruise_applied = min(self._cruise_throttle, self._cruise_applied + dt * 2.2)
+        else:
+            self._cruise_applied = self._cruise_throttle
+        t.throttle = self._cruise_applied
         if (following or limit_capped) and error < -2.0:
             weather_brake = 0.45 if self.weather.effects.grip < 0.7 else 0.65
             t.brake = max(t.brake, min(weather_brake, abs(error) / 30.0))

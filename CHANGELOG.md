@@ -365,6 +365,12 @@
   when it happens, and the idle goes quiet with it. Thanks to Darren Duff
   for the report.
 
+- **Adaptive cruise no longer revs the engine when you press the clutch to
+  shift.** With a manual gearbox, holding the clutch under cruise control used
+  to send the engine screaming toward the redline. Now cruise eases off the
+  moment the clutch goes in, the engine settles back toward idle, and the speed
+  is picked back up smoothly once you let the clutch out.
+
 - **The engine no longer re-cranks when you pick a trip back up.** Resuming a
   saved haul with the engine already running -- or coming back from a menu
   mid-drive -- used to replay the ignition sound as if you had just turned the
