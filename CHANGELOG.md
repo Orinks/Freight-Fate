@@ -4,6 +4,14 @@
 
 ### Added
 
+- **The Northeast fills in from Maine to the Chesapeake.** Fourteen new short-haul
+  runs stitch the dense Northeast together: Boston to Manchester, Providence to
+  Worcester, Hartford, and New Haven; Philadelphia to Allentown and on to Trenton;
+  Baltimore and Washington across the Chesapeake Bay Bridge to Dover and Salisbury;
+  Harrisburg to Wilmington; Washington and Pittsburgh to Carlisle; Binghamton to
+  Utica; and up through the Green and White Mountains, Albany and Portland, Maine
+  to Montpelier.
+
 - **Lynchburg and Longview become real hubs.** Lynchburg, Virginia now anchors
   US-460 between Roanoke and Richmond -- past Bedford, Appomattox, and Midlothian --
   and reaches Charlottesville up US-29. Longview, Texas takes its place on
@@ -122,9 +130,9 @@
   truck stops, rest areas, and the Red River crossing along the way.
 
 - **The drivable map crosses one hundred thousand miles.** This drop adds about
-  ten thousand eight hundred miles of new road and forty-three new cities,
+  twelve thousand two hundred miles of new road and forty-three new cities,
   bringing the network past one hundred thousand miles you can actually drive --
-  109,556 miles across 418 cities and 855 routes.
+  110,969 miles across 418 cities and 869 routes.
 
 - **Exits now come straight from real-world maps -- with the correct exit names
   and numbers.** On the Interstates, your stops and your destination exit are
