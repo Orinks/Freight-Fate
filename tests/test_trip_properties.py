@@ -80,3 +80,41 @@ def test_generated_slow_zones_never_nest_or_touch(world):
                 f"seed {seed}: {a.reason} {a.start_mi:.1f}-{a.end_mi:.1f} and "
                 f"{b.reason} {b.start_mi:.1f}-{b.end_mi:.1f} overlap or touch"
             )
+
+
+def test_no_brake_hazards_on_facility_access_roads(world, monkeypatch):
+    """A deadhead crawl to a pickup facility must never spring a "brake now"
+    hazard: the access road is minutes long at yard speeds (player report).
+    Forced to certainty, the hazard check still declines to fire there."""
+    from freight_fate.sim.trip import Trip as TripClass
+    from freight_fate.sim.trip_models import TripEventKind
+
+    city = world.cities["chicago_il_us"]
+    location = city.locations[0]
+    route = world.facility_approach_route(city.key, location.name)
+    trip = Trip(
+        route,
+        TruckState(),
+        WeatherSystem(city.region, seed=7),
+        seed=1,
+    )
+    assert trip._is_facility_approach_route()
+
+    monkeypatch.setattr(TripClass, "_hazard_risk", lambda self: 1.0)
+    trip._hazard_check_mi = 0.0
+    trip._check_hazards(1.0)
+
+    assert all(e.kind != TripEventKind.HAZARD for e in trip._events)
+
+    # The same forced check on a normal route does fire, so this test would
+    # catch the gate being lost.
+    highway_route = world.supported_route("Chicago", "St. Louis")
+    highway_trip = Trip(
+        highway_route,
+        TruckState(),
+        WeatherSystem(city.region, seed=7),
+        seed=1,
+    )
+    highway_trip._hazard_check_mi = 0.0
+    highway_trip._check_hazards(1.0)
+    assert any(e.kind == TripEventKind.HAZARD for e in highway_trip._events)

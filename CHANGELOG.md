@@ -324,6 +324,12 @@
 
 ### Fixed
 
+- **No more "brake now" ambushes on the way to a pickup.** The short
+  facility access road you deadhead down to reach a shipper no longer
+  springs road hazards or emergency-braking events; those belong on the
+  open road, not on a two-minute crawl at yard speeds. Thanks to a player
+  report.
+
 - **Construction zones no longer stack or chain together.** Slow zones were
   placed independently, so a construction zone could land inside another
   one, or two could start back to back with no open road between. Zones now
