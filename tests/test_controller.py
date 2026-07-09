@@ -143,6 +143,127 @@ def test_disconnect_latches_once():
     m.shutdown()
 
 
+def test_reconnect_reopens_after_removed(monkeypatch):
+    # A device-added after a device-removed must reopen the pad, so a reconnect
+    # restores controller input rather than leaving it dead.
+    m = ControllerManager(enabled=True)
+    m._controller = object()
+    m._instance_id = 7
+    m.process_event(pygame.event.Event(pygame.CONTROLLERDEVICEREMOVED, instance_id=7))
+    assert not m.connected
+
+    reopened = []
+    monkeypatch.setattr(m, "_reopen", lambda: reopened.append(True))
+    m.process_event(pygame.event.Event(pygame.CONTROLLERDEVICEADDED, device_index=3))
+    assert reopened == [True]  # bound the reconnected pad
+    m.shutdown()
+
+
+def test_reopen_does_not_cycle_subsystem(monkeypatch):
+    # _reopen must drop the old pad and rebind WITHOUT quitting/re-initializing
+    # the SDL subsystem -- cycling it re-registers the event watch and doubles
+    # every controller event.
+    m = ControllerManager(enabled=True)
+    calls = []
+    fake_sdl = type(
+        "FakeSDL",
+        (),
+        {"quit": lambda self: calls.append("quit"), "init": lambda self: calls.append("init")},
+    )()
+    m._sdl = fake_sdl
+    m._controller = object()
+    m._instance_id = 7
+    monkeypatch.setattr(m, "_open_first", lambda: calls.append("open"))
+    m._reopen()
+    assert calls == ["open"]  # reopened, never cycled the subsystem
+    m.shutdown()
+
+
+def test_add_ignored_while_pad_still_attached(monkeypatch):
+    # A spurious device-added must not drop a working, still-attached binding.
+    m = ControllerManager(enabled=True)
+    m._controller = object()
+    m._instance_id = 7
+    monkeypatch.setattr(m, "_is_attached", lambda: True)
+    reopened = []
+    monkeypatch.setattr(m, "_reopen", lambda: reopened.append(True))
+    m.process_event(pygame.event.Event(pygame.CONTROLLERDEVICEADDED, device_index=3))
+    assert reopened == []  # left the existing pad bound
+    assert m._instance_id == 7
+    m.shutdown()
+
+
+def test_binding_latches_to_first_event_id():
+    # A hot-plug can leave Controller.id stale, so the pad's real events arrive
+    # under a different id. The first real event's id is authoritative: the
+    # manager adopts it and applies the event (triggers come back to life).
+    m = ControllerManager(enabled=True)
+    m._controller = object()
+    m._instance_id = 0
+    m._id_pending = True  # freshly (re)opened, id still provisional
+    m.process_event(_axis(pygame.CONTROLLER_AXIS_TRIGGERLEFT, 32767, instance_id=2))
+    assert m._instance_id == 2  # adopted the id the events actually carry
+    assert not m._id_pending  # latched
+    assert m._brake_target > 0  # ...and the event was applied
+    m.shutdown()
+
+
+def test_foreign_duplicate_button_is_not_forwarded():
+    # Once the binding is latched, a button under a *different* id (a duplicate
+    # from a pad that enumerates twice) must not be forwarded to the state, or
+    # it would fire the action a second time.
+    m = ControllerManager(enabled=True)
+    m._controller = object()
+    m._instance_id = 0
+    m._id_pending = False  # already latched to id 0
+    # The genuine press is forwarded...
+    assert m.process_event(_button(pygame.CONTROLLER_BUTTON_A, instance_id=0)) is True
+    # ...its duplicate under id 2 is dropped, not forwarded.
+    assert m.process_event(_button(pygame.CONTROLLER_BUTTON_A, instance_id=2)) is False
+    m.shutdown()
+
+
+def test_duplicate_button_down_not_forwarded():
+    # A pad that delivers a button twice (same id, no intervening release) must
+    # forward only the first press to the state.
+    m = ControllerManager(enabled=True)
+    m._controller = object()
+    m._instance_id = 0
+    assert m.process_event(_button(pygame.CONTROLLER_BUTTON_A, instance_id=0)) is True
+    assert m.process_event(_button(pygame.CONTROLLER_BUTTON_A, instance_id=0)) is False
+    # After a genuine release, the next press is fresh again.
+    assert m.process_event(_button_up(pygame.CONTROLLER_BUTTON_A, instance_id=0)) is True
+    assert m.process_event(_button(pygame.CONTROLLER_BUTTON_A, instance_id=0)) is True
+    m.shutdown()
+
+
+def test_duplicate_button_down_does_not_double_toggle():
+    # Regression: a single RB+A press delivered twice in a frame must toggle the
+    # engine exactly once, not on-then-off.
+    from freight_fate.app import App
+
+    app = App()
+    c = force_controller(app)
+    c._id_pending = False  # bound to id 0
+    driving = start_drive(app)
+    quiet_trip(driving)
+    calls = []
+    real = driving._toggle_engine
+    driving._toggle_engine = lambda: calls.append(1) or real()
+
+    def down(button):
+        app._dispatch_controller(
+            pygame.event.Event(pygame.CONTROLLERBUTTONDOWN, button=button, instance_id=0)
+        )
+
+    down(pygame.CONTROLLER_BUTTON_RIGHTSHOULDER)  # hold modifier
+    down(pygame.CONTROLLER_BUTTON_RIGHTSHOULDER)  # duplicate delivery
+    down(pygame.CONTROLLER_BUTTON_A)  # press
+    down(pygame.CONTROLLER_BUTTON_A)  # duplicate delivery
+    assert calls == [1]  # toggled exactly once
+    app.shutdown()
+
+
 def test_disabled_manager_ignores_controller():
     m = ControllerManager(enabled=True)
     m._controller = object()
@@ -242,6 +363,7 @@ def test_controller_info_buttons_speak(monkeypatch):
     # B button speaks speed; RB+B speaks fuel.
     app._dispatch_controller(_button(pygame.CONTROLLER_BUTTON_B))
     assert any("per hour" in t for t in spoken)
+    app._dispatch_controller(_button_up(pygame.CONTROLLER_BUTTON_B))  # release before re-press
     spoken.clear()
     app._dispatch_controller(_button(pygame.CONTROLLER_BUTTON_RIGHTSHOULDER))
     app._dispatch_controller(_button(pygame.CONTROLLER_BUTTON_B))
@@ -259,6 +381,27 @@ def test_controller_disconnect_pauses_driving():
     driving.on_controller_disconnect()
     assert isinstance(app.state, PauseMenuState)
     app.shutdown()
+
+
+def test_event_pump_error_is_survived(monkeypatch):
+    # A pygame-internal failure out of event.get() (as seen on some Bluetooth
+    # hot-plugs) must be logged and skipped, not crash the main loop.
+    from freight_fate.app import App
+
+    app = App()
+    calls = {"n": 0}
+    real_get = pygame.event.get
+
+    def flaky_get(*args, **kwargs):
+        calls["n"] += 1
+        if calls["n"] == 1:
+            raise SystemError("<built-in function get> returned a result with an exception set")
+        return real_get(*args, **kwargs)
+
+    monkeypatch.setattr(pygame.event, "get", flaky_get)
+    monkeypatch.setattr(pygame.event, "pump", lambda: None)
+    app.run(max_frames=3)  # would raise if the error escaped the loop
+    assert calls["n"] >= 2  # survived the raising frame and kept pumping
 
 
 def test_plain_state_not_trapped_by_controller():
