@@ -421,6 +421,13 @@ class DrivingUpdateMixin:
             # Catch-up sync (resuming a running-engine trip, returning from a
             # menu): bring the loop up without replaying the ignition crank.
             audio.engine_start(play_start_sound=False)
+        elif not t.engine_on and audio.engine_running:
+            # The mirror sync: the engine went off outside this frame loop
+            # (a rest-menu shutdown), so drop the loop without a second
+            # shutdown clunk. Without this the loop plays on with the engine
+            # off -- inaudible under the old RPM-weighted band volumes, but
+            # plainly audible with the constant-volume BASS engine loop.
+            audio.engine_stop(shutdown_sound=False)
         engine_load = t.throttle
         if t.transmission.automatic and t.transmission.shifting:
             engine_load = min(engine_load, 0.08)

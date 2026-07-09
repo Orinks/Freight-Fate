@@ -1631,3 +1631,57 @@ def test_exit_key_is_a_toggle_and_needs_an_exit_nearby():
         assert driving._exit_stop is None
     finally:
         app.shutdown()
+
+
+# -- engine audio follows out-of-band engine stops (nightly regression) ------------
+
+
+def test_rest_menu_shutdown_also_stops_engine_audio():
+    """Sleeping shuts the truck's engine down from a rest menu, outside the
+    driving frame loop. Regression: the audio loop was left running -- masked
+    while band volumes tracked RPM, plainly audible once the BASS engine
+    model kept constant volume."""
+    from freight_fate.app import App
+    from freight_fate.states import driving_core
+
+    app = App()
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        assert driving.truck.start_engine()
+        driving._update_audio(0.0)
+        assert app.ctx.audio.engine_running
+
+        prefix = driving_core._shut_down_engine(driving)
+
+        assert prefix == "You shut down the engine. "
+        assert not driving.truck.engine_on
+        assert not app.ctx.audio.engine_running
+
+        # Already off: no double narration, audio stays off.
+        assert driving_core._shut_down_engine(driving) == ""
+        assert not app.ctx.audio.engine_running
+    finally:
+        app.shutdown()
+
+
+def test_engine_audio_mirror_sync_catches_any_out_of_band_stop():
+    """The frame-loop audio sync must work in both directions: any path that
+    turns the truck's engine off without telling the audio engine is corrected
+    on the next frame, silently."""
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        assert driving.truck.start_engine()
+        driving._update_audio(0.0)
+        assert app.ctx.audio.engine_running
+
+        driving.truck.stop_engine()  # off-path stop: audio not told directly
+        driving._update_audio(0.0)
+
+        assert not app.ctx.audio.engine_running
+    finally:
+        app.shutdown()

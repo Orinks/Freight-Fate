@@ -300,6 +300,10 @@ def _shut_down_engine(driving: DrivingState) -> str:
     if not driving.truck.engine_on:
         return ""
     driving.truck.stop_engine()
+    # The audio engine must follow: the driving frame loop only notices
+    # engine-off transitions that happen inside truck.update(), so a stop
+    # made here (from a rest menu) would leave the loop playing forever.
+    driving.ctx.audio.engine_stop()
     return "You shut down the engine. "
 
 

@@ -316,6 +316,13 @@
 
 ### Fixed
 
+- **The engine sound now stops when you shut down to sleep.** Going to sleep
+  at a rest stop, motel, or on the shoulder shuts the engine down, but the
+  engine sound kept playing over the night and after you woke, as if the
+  truck were still idling with the engine off. The shutdown is now heard
+  when it happens, and the idle goes quiet with it. Thanks to Darren Duff
+  for the report.
+
 - **The engine no longer re-cranks when you pick a trip back up.** Resuming a
   saved haul with the engine already running -- or coming back from a menu
   mid-drive -- used to replay the ignition sound as if you had just turned the
