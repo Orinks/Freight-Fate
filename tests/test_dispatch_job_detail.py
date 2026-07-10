@@ -3,11 +3,16 @@ from driving_feature_helpers import key_event
 
 
 def _job_board(app):
+    from freight_fate.models.career import LEVEL_XP
     from freight_fate.models.jobs import JobBoard
     from freight_fate.models.profile import Profile
     from freight_fate.states.city import JobBoardState
 
     app.ctx.profile = Profile(name="Dispatch Detail", current_city="Buffalo")
+    # Senior driver: the seed-7 deal reshuffles whenever the world grows, and
+    # a level-locked first job would strip the detail view of its accept item
+    # (1.9 hardens this helper the same way).
+    app.ctx.profile.career.xp = LEVEL_XP[-1]
     jobs = JobBoard(app.ctx.world, seed=7).offers(
         "Buffalo", {"refrigerated", "heavy_haul", "high_value"}, level=5
     )
@@ -122,10 +127,16 @@ def test_locked_job_detail_does_not_sound_accept_available():
         jobs = JobBoard(app.ctx.world, seed=7).offers("Buffalo", set(), level=2)
         state = JobBoardState(app.ctx, jobs)
         app.push_state(state)
-        while not state.jobs[state.index].locked_reason(
-            app.ctx.profile.career.endorsements, app.ctx.profile.career.level
-        ):
+        # Bounded walk: if a future deal has no locked job, fail with a
+        # message instead of cycling the board forever.
+        for _ in range(len(state.jobs) + 1):
+            if state.jobs[state.index].locked_reason(
+                app.ctx.profile.career.endorsements, app.ctx.profile.career.level
+            ):
+                break
             state.handle_event(key_event(pygame.K_DOWN))
+        else:
+            raise AssertionError("seed-7 deal offers no locked job to test against")
 
         state.handle_event(key_event(pygame.K_F1))
         locked_action = app.state.items[-2]
@@ -174,8 +185,18 @@ def test_job_detail_accept_command_accepts_and_escape_returns():
         assert isinstance(app.state, JobBoardState)
 
         board.handle_event(key_event(pygame.K_F1))
-        while app.state.items[app.state.index].text != "Accept this dispatch":
+        # Walk at most one full menu cycle; a reshuffled seed-7 deal must fail
+        # loudly here, never loop forever (each K_DOWN plays a sound, which
+        # once disguised this exact loop as an audio hang).
+        for _ in range(len(app.state.items)):
+            if app.state.items[app.state.index].text == "Accept this dispatch":
+                break
             app.state.handle_event(key_event(pygame.K_DOWN))
+        else:
+            raise AssertionError(
+                "no 'Accept this dispatch' item on the job detail screen: "
+                + "; ".join(item.text for item in app.state.items)
+            )
         app.state.handle_event(key_event(pygame.K_RETURN))
         assert (
             isinstance(app.state, PickupFacilityState)
