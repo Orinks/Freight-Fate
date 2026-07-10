@@ -101,8 +101,10 @@ class DrivingControlsMixin:
         objective_help = self._objective_help()
         self.ctx.say(
             "Hold Up arrow to accelerate, Down arrow to brake. "
-            "When stopped in automatic, hold Down arrow to reverse slowly; "
-            "touch Up arrow to brake and return to forward. "
+            "In automatic, brake to a stop, then release the Down arrow and "
+            "press it again to shift into reverse and back slowly. While "
+            "reversing, hold the Up arrow to brake to a stop, then release it "
+            "and press again to shift back into forward. "
             "Hold B for the emergency brake, the hardest possible stop. "
             "K sets adaptive cruise at your current speed; bad weather "
             "increases the following gap, sharp posted-limit drops make it "
@@ -147,7 +149,11 @@ class DrivingControlsMixin:
             "The A button shifts up a gear and the X button shifts down, while "
             "you hold the left bumper for the clutch. "
             if manual
-            else ""
+            else "In automatic, brake to a stop, then let the left trigger "
+            "return to neutral and press it again to shift into reverse and "
+            "back slowly. While reversing, hold the right trigger to brake to a "
+            "stop, then let it return to neutral and press again to shift back "
+            "into forward. "
         )
         self.ctx.say(
             "Right trigger is the gas, left trigger the brake; press the left "

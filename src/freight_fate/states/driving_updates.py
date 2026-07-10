@@ -30,10 +30,16 @@ class DrivingUpdateMixin:
         key_down = keys[pygame.K_DOWN]
         accelerating = key_up or pad_throttle > 0.05
         braking_key = key_down or pad_brake > 0.05
-        backing = self._update_reverse_controls(accelerating, braking_key)
+        # The shift gesture keys off a fresh press, so it reads the trigger's
+        # instantaneous position rather than the smoothed accelerate/brake
+        # values above -- otherwise the smoothing lag swallows a quick tap and
+        # the release-then-press never registers as neutral in between.
+        accel_held = key_up or (pad.throttle_target if pad_on else 0.0) > 0.05
+        brake_held = key_down or (pad.brake_target if pad_on else 0.0) > 0.05
+        backing = self._update_reverse_controls(accelerating, braking_key, accel_held, brake_held)
         if accelerating and not backing and t.air_brakes_holding:
             self._maybe_say_air_brake_lockout()
-        if key_up and not backing:
+        if key_up and not backing and not t.transmission.in_reverse:
             if t.engine_brake:
                 t.engine_brake = False
                 self.ctx.say_event("Engine brake off.", interrupt=False)
@@ -42,7 +48,7 @@ class DrivingUpdateMixin:
             t.throttle = min(0.45, t.throttle + ramp)
         else:
             t.throttle = max(0.0, t.throttle - ramp * 2)
-        if pad_throttle > 0.05 and not backing:
+        if pad_throttle > 0.05 and not backing and not t.transmission.in_reverse:
             if t.engine_brake:
                 t.engine_brake = False
                 self.ctx.say_event("Engine brake off.", interrupt=False)
@@ -87,8 +93,9 @@ class DrivingUpdateMixin:
         if pad_on:
             clutch_val = max(clutch_val, pad.clutch)
         t.transmission.clutch = clutch_val if not t.transmission.automatic else 0.0
+        clutch_disengaged = t.transmission.clutch > 0.5 or t.transmission.shifting
         self._update_lane(keys, dt)
-        self._update_cruise(dt, braking, accelerating)
+        self._update_cruise(dt, braking, accelerating, clutch_disengaged)
 
         if t.transmission.automatic and t.engine_on:
             new_gear = t.auto_shift()
@@ -268,14 +275,38 @@ class DrivingUpdateMixin:
             # flickers across it every cycle and re-announces back to back.
             self._air_ready_said = False
 
-    def _update_reverse_controls(self, accelerating: bool, braking_key: bool) -> bool:
-        """Return True when the current key state means backing up."""
+    def _update_reverse_controls(
+        self,
+        accelerating: bool,
+        braking_key: bool,
+        accel_held: bool | None = None,
+        brake_held: bool | None = None,
+    ) -> bool:
+        """Return True when the current key state means backing up.
+
+        ``accel_held``/``brake_held`` are the instantaneous (unsmoothed) press
+        states used for the shift-gesture edge detection; they default to the
+        ramped ``accelerating``/``braking_key`` for the keyboard, where the two
+        are the same.
+        """
         t = self.truck
         tr = t.transmission
+        if accel_held is None:
+            accel_held = accelerating
+        if brake_held is None:
+            brake_held = braking_key
+        # A direction change needs a fresh press (rising edge): braking or
+        # accelerating to a stop and holding the control no longer flips gears --
+        # the player must release and press again. For a controller this is the
+        # trigger returning to neutral and being pressed once more.
+        brake_edge = brake_held and not self._reverse_brake_held
+        accel_edge = accel_held and not self._reverse_accel_held
+        self._reverse_brake_held = brake_held
+        self._reverse_accel_held = accel_held
         if not tr.automatic:
             return tr.in_reverse and braking_key and not accelerating
         if tr.in_reverse:
-            if accelerating and abs(t.velocity_mps) < 0.3:
+            if accel_edge and abs(t.velocity_mps) < 0.3:
                 tr.gear = 1
                 tr._shift_timer = 0.0
                 self.ctx.audio.play("vehicle/gear_shift", volume=0.55)
@@ -283,7 +314,7 @@ class DrivingUpdateMixin:
                 self.ctx.say_event("Forward gear selected.", interrupt=False)
                 return False
             return braking_key and not accelerating
-        if braking_key and not accelerating and t.speed_mph < 0.5:
+        if brake_edge and not accel_held and t.speed_mph < 0.5:
             tr.gear = REVERSE
             tr._shift_timer = 0.0
             self._cancel_cruise()

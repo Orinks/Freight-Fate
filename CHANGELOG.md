@@ -265,6 +265,13 @@
   instead of only in the F1 help, so you can weigh routes the same way
   the end-of-trip summary describes them. Thanks to a player suggestion.
 
+- **Switching between forward and reverse now takes a deliberate action.** In an
+  automatic, braking to a stop no longer slips straight into reverse, and
+  holding the accelerator to stop while reversing no longer flips you straight
+  back into forward. Come to a stop, then release the control and press it again
+  to change direction. On a controller, let the trigger return to neutral first,
+  then press it again.
+
 - **Online settings are now gathered in one place.** The Discord presence
   toggle moved from Settings, Gameplay to Settings, Online, alongside the
   drivers board and the new cloud backup options. And before you have set
@@ -364,6 +371,17 @@
   truck were still idling with the engine off. The shutdown is now heard
   when it happens, and the idle goes quiet with it. Thanks to Darren Duff
   for the report.
+
+- **Using the accelerator to brake in reverse no longer speeds you up.** In an
+  automatic, pressing the accelerator while rolling backward is meant to slow
+  and stop the truck, but at higher reverse speeds it could push you faster
+  instead. It now brakes reliably all the way to a stop.
+
+- **Adaptive cruise no longer revs the engine when you press the clutch to
+  shift.** With a manual gearbox, holding the clutch under cruise control used
+  to send the engine screaming toward the redline. Now cruise eases off the
+  moment the clutch goes in, the engine settles back toward idle, and the speed
+  is picked back up smoothly once you let the clutch out.
 
 - **The engine no longer re-cranks when you pick a trip back up.** Resuming a
   saved haul with the engine already running -- or coming back from a menu
