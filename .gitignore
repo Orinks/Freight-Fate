@@ -50,3 +50,7 @@ saves/
 # Local API key notes used by asset-generation tooling.
 AI API Keys.txt
 *API Keys*.txt
+
+# ChatGPT signsheet batch staging (transient)
+data/spider/signsheets/batch*/
+data/spider/signsheets/*.zip
