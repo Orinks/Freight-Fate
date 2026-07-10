@@ -133,8 +133,10 @@ def verify_identity(identity: OnlineIdentity, *, transport: Transport = _http_js
     Posts one empty-activity presence request -- the server treats that as an
     off-duty sign-off, so a valid pair changes nothing visible. Returns one
     of ``"ok"``, ``"driver_not_found"`` (the Driver ID is wrong),
-    ``"unauthorized"`` (the token is wrong or was rotated), or ``"error"``
-    (network trouble; nothing learned).
+    ``"unauthorized"`` (the token is wrong or was rotated), ``"rejected"``
+    (the server answered but refused the credentials for another reason,
+    e.g. a malformed paste), or ``"error"`` (network trouble; nothing
+    learned).
     """
     try:
         reply = transport(
@@ -147,7 +149,15 @@ def verify_identity(identity: OnlineIdentity, *, transport: Transport = _http_js
             return "driver_not_found"
         if e.code == 401:
             return "unauthorized"
-        log.warning("Online identity check failed: HTTP %s", e.code)
+        # Keep the server's own explanation (Convex sends a JSON error body)
+        # so a player-attached log tells us *why* a paste was refused.
+        try:
+            body = e.read().decode("utf-8", "replace")[:500]
+        except Exception:
+            body = ""
+        log.warning("Online identity check failed: HTTP %s %s", e.code, body)
+        if 400 <= e.code < 500:
+            return "rejected"
         return "error"
     except Exception as e:
         log.warning("Online identity check failed: %s", e)

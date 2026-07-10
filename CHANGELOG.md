@@ -345,6 +345,17 @@
   can ease off and slow down before the repair bill grows. Thanks to a
   player report.
 
+- **Online setup now tells you when orinks.net refuses your pasted
+  credentials, instead of blaming your connection.** If the server answered
+  but did not accept the Driver ID and token, the game said "could not reach
+  orinks.net, check your connection," sending you off to troubleshoot a
+  network that was fine. It now says the credentials were not accepted and
+  asks you to re-copy them from the setup page. The token paste item also
+  checks that the pasted text looks like a real driver token -- they always
+  start with the letters F F D and an underscore -- and says so when it does
+  not, catching a wrong copy before anything is sent. Thanks to a player
+  report.
+
 - **Music keeps playing while the game is paused.** If a music track ended
   while you sat on the pause menu -- or in settings, help, or any other menu
   over a drive -- the music went silent until you resumed driving. The next

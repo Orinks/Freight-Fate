@@ -309,6 +309,11 @@ def test_verify_identity_maps_the_failure_modes():
     assert (
         verify_identity(IDENTITY, transport=FakeTransport(error=_http_error(401))) == "unauthorized"
     )
+    # Other 4xx codes mean the server answered and refused the credentials
+    # (issue 63: a malformed paste came back as HTTP 400), which must not be
+    # reported to the player as a connection problem.
+    assert verify_identity(IDENTITY, transport=FakeTransport(error=_http_error(400))) == "rejected"
+    assert verify_identity(IDENTITY, transport=FakeTransport(error=_http_error(422))) == "rejected"
     assert verify_identity(IDENTITY, transport=FakeTransport(error=_http_error(500))) == "error"
     assert verify_identity(IDENTITY, transport=FakeTransport(error=OSError())) == "error"
     assert verify_identity(IDENTITY, transport=FakeTransport(reply={"ok": False})) == "error"

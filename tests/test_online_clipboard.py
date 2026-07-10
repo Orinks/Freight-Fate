@@ -75,3 +75,13 @@ def test_non_mac_still_uses_tk_fallback(monkeypatch):
     spy_tk = SimpleNamespace(Tk=FakeRoot)
     monkeypatch.setitem(sys.modules, "tkinter", spy_tk)
     assert online_states._clipboard_once() == "ffd_token"
+
+
+def test_token_paste_requires_the_site_prefix():
+    # Site tokens are always "ffd_" plus 64 hex characters. Issue 63: an
+    # 87-character wrong paste used to pass this check and reach the server,
+    # which refused it with an HTTP 400 the player could not interpret.
+    assert online_states.looks_like_token("ffd_" + "a" * 64)
+    assert not online_states.looks_like_token("a" * 87)
+    assert not online_states.looks_like_token("ffd_token with spaces")
+    assert not online_states.looks_like_token("ffd_x")  # far too short

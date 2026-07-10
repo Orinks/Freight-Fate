@@ -107,7 +107,7 @@ def looks_like_driver_id(text: str) -> bool:
 
 def looks_like_token(text: str) -> bool:
     t = text.strip()
-    return 24 <= len(t) <= 512 and not any(c.isspace() for c in t)
+    return t.startswith(_TOKEN_PREFIX) and 24 <= len(t) <= 512 and not any(c.isspace() for c in t)
 
 
 class OnlineSetupState(MenuState):
@@ -229,7 +229,7 @@ class OnlineSetupState(MenuState):
                 interrupt=True,
             )
             return
-        if text.startswith(_TOKEN_PREFIX) and looks_like_token(text):
+        if looks_like_token(text):
             self._token = text
             self.refresh()
             self.ctx.say(
@@ -272,9 +272,10 @@ class OnlineSetupState(MenuState):
             return
         if not looks_like_token(text):
             self.ctx.say(
-                "The clipboard text does not look like a driver token. Use "
-                "the Copy token button on the setup page, then choose this "
-                "item again.",
+                "The clipboard text does not look like a driver token. "
+                "Tokens from the setup page start with the letters F F D "
+                "and an underscore. Use the Copy token button on the setup "
+                "page, then choose this item again.",
                 interrupt=True,
             )
             return
@@ -356,6 +357,14 @@ class OnlineSetupState(MenuState):
             self.ctx.say(
                 "The token does not match. If you rotated the token on the "
                 "site, copy the new one and paste it again.",
+                interrupt=True,
+            )
+        elif outcome == "rejected":
+            self.ctx.say(
+                "orinks.net answered, but did not accept the pasted Driver ID "
+                "and token. Re-copy each one from the setup page with its "
+                "Copy button, paste them again, and try Connect once more. "
+                "Nothing was saved.",
                 interrupt=True,
             )
         else:
