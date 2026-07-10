@@ -374,13 +374,13 @@ class App:
     def _dispatch_controller(self, event: pygame.event.Event) -> None:
         """Feed a controller event to the manager, then to the active state.
 
-        The manager updates its cached axis/modifier/hot-plug state first;
-        only button presses are then handed to the state, which routes them
-        to the same methods keyboard events already call.
+        The manager updates its cached axis/modifier/hot-plug state first and
+        reports whether the event is an accepted button press for the bound
+        controller; only those reach the state, so a duplicate from a pad that
+        enumerates twice can never fire an action a second time.
         """
-        self.controller.process_event(event)
-        button_event = event.type in (pygame.CONTROLLERBUTTONDOWN, pygame.CONTROLLERBUTTONUP)
-        if button_event and self.controller.active and self.state is not None:
+        forward = self.controller.process_event(event)
+        if forward and self.controller.active and self.state is not None:
             self.state.handle_controller(event, self.controller)
 
     # -- main loop ------------------------------------------------------------
@@ -399,7 +399,23 @@ class App:
         try:
             while self.running:
                 dt = self.clock.tick(FPS) / 1000.0
-                for event in pygame.event.get():
+                try:
+                    events = pygame.event.get()
+                except Exception:
+                    # A controller hot-plug (notably a Bluetooth resume) can make
+                    # SDL's internal instance-id map inconsistent, and pygame's
+                    # controller layer then raises out of the C event pump
+                    # (KeyError surfacing as SystemError). Losing this batch of
+                    # events is survivable; crashing the game is not.
+                    log.exception(
+                        "pygame.event.get() failed (frame %d; controller %s); skipping this batch",
+                        frames,
+                        "connected" if self.controller.connected else "disconnected",
+                    )
+                    with contextlib.suppress(Exception):
+                        pygame.event.pump()
+                    continue
+                for event in events:
                     if event.type == pygame.WINDOWFOCUSGAINED:
                         # Switching screen readers happens outside the game;
                         # re-check speech the moment the player comes back.

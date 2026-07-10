@@ -106,6 +106,17 @@ class ControllerManager:
         self._instance_id: int | None = None
         self._name = ""
         self._disconnected = False  # latched until the app consumes it
+        # A freshly opened pad reports a device id from ``Controller.id`` that a
+        # hot-plug can leave stale (the events then arrive under a different id).
+        # We treat the opened id as provisional and adopt the id of the first
+        # real event we see, so the binding always matches the live event stream.
+        self._id_pending = False
+        # Buttons currently held, so a duplicate press (some pads/drivers deliver
+        # a button twice) fires its action only once, on the genuine transition.
+        self._buttons_down: set[int] = set()
+        # Last "foreign" instance id we logged a dropped event for, so a stream
+        # of events from a stale/other pad logs once rather than every frame.
+        self._logged_mismatch_id: int | None = None
         # Haptics live in their own pygame-free engine; we only supply the
         # guarded device send/stop and drive it once per frame in tick().
         self.rumble = RumbleEngine(send=self._device_rumble, stop=self._device_stop_rumble)
@@ -175,22 +186,100 @@ class ControllerManager:
         with contextlib.suppress(Exception):  # pragma: no cover - driver dependent
             self._controller.stop_rumble()
 
+    # Controls SDL surfaces on a fully mapped pad; a reconnect that drops these
+    # is the signature of the "dead triggers/shoulders" fault, so we check them.
+    _ESSENTIAL_MAPPINGS = ("lefttrigger", "righttrigger", "leftshoulder", "rightshoulder")
+
+    def _open_index(self, index: int) -> bool:
+        """Bind the GameController at ``index``; return True on success."""
+        if self._sdl is None or not self._sdl.is_controller(index):
+            return False
+        try:
+            self._controller = self._sdl.Controller(index)
+        except Exception:  # pragma: no cover - driver dependent
+            log.debug("Could not open controller at slot %d", index, exc_info=True)
+            return False
+        self._instance_id = self._controller.id
+        # Provisional: the first real event's instance id is authoritative (see
+        # _id_pending), which self-heals a stale id left by a hot-plug.
+        self._id_pending = True
+        try:
+            self._name = self._sdl.name_forindex(index) or "controller"
+        except Exception:  # pragma: no cover
+            self._name = "controller"
+        log.info("Controller connected: %s (instance %s)", self._name, self._instance_id)
+        self._log_capabilities(index)
+        return True
+
     def _open_first(self) -> None:
         if self._sdl is None:
             return
         for index in range(self._sdl.get_count()):
-            if self._sdl.is_controller(index):
-                try:
-                    self._controller = self._sdl.Controller(index)
-                except Exception:  # pragma: no cover - driver dependent
-                    continue
-                self._instance_id = self._controller.id
-                try:
-                    self._name = self._sdl.name_forindex(index) or "controller"
-                except Exception:  # pragma: no cover
-                    self._name = "controller"
-                log.info("Controller connected: %s", self._name)
+            if self._open_index(index):
                 return
+
+    def _log_capabilities(self, index: int) -> None:
+        """DEBUG snapshot of the bound pad, plus a WARNING if the trigger and
+        shoulder controls are unmapped -- the fingerprint of the reconnect bug
+        where those inputs stop responding while the rest of the pad works."""
+        if self._controller is None:
+            return
+        mapping: dict[str, str] = {}
+        with contextlib.suppress(Exception):  # pragma: no cover - driver dependent
+            mapping = self._controller.get_mapping()
+        with contextlib.suppress(Exception):  # pragma: no cover - driver dependent
+            joy = self._controller.as_joystick()
+            log.debug(
+                "Controller %r caps: guid=%s axes=%d buttons=%d hats=%d",
+                self._name,
+                joy.get_guid(),
+                joy.get_numaxes(),
+                joy.get_numbuttons(),
+                joy.get_numhats(),
+            )
+        if mapping:
+            missing = [name for name in self._ESSENTIAL_MAPPINGS if not mapping.get(name)]
+            log.debug("Controller %r mapping keys: %s", self._name, sorted(mapping))
+            if missing:
+                log.warning(
+                    "Controller %r reconnected without %s mapped; "
+                    "brake/throttle and bumpers may not respond",
+                    self._name,
+                    ", ".join(missing),
+                )
+
+    def _close_controller(self) -> None:
+        """Release the SDL controller before dropping our reference, so its
+        bookkeeping is torn down cleanly across a hot-plug."""
+        if self._controller is not None:
+            with contextlib.suppress(Exception):  # pragma: no cover - driver/stub dependent
+                self._controller.quit()
+        self._controller = None
+        self._instance_id = None
+        self._id_pending = False
+        self._buttons_down.clear()
+
+    def _is_attached(self) -> bool:
+        """Whether the bound pad is still physically present. Assumes attached
+        if the API is unavailable (e.g. the test stub), so we don't drop a
+        working binding on a spurious ADDED event."""
+        if self._controller is None:
+            return False
+        try:
+            return bool(self._controller.attached())
+        except Exception:  # pragma: no cover - driver/stub dependent
+            return True
+
+    def _reopen(self) -> None:
+        """Drop the current pad and bind whatever is connected now.
+
+        The first real event's instance id (see ``_id_pending``) corrects a
+        stale id left by a hot-plug, so we never cycle the SDL subsystem:
+        quitting and re-initializing it while the event loop is live
+        re-registers SDL's controller event watch and makes every controller
+        event arrive twice."""
+        self._close_controller()
+        self._open_first()
 
     def take_disconnect(self) -> bool:
         """Return and clear the pending-disconnect flag (app pauses on True)."""
@@ -205,6 +294,7 @@ class ControllerManager:
         self._throttle = self._brake = 0.0
         self.modifier = False
         self._repeat_button = None
+        self._buttons_down.clear()
         self.rumble.reset()
 
     # -- input notification ---------------------------------------------------
@@ -223,30 +313,94 @@ class ControllerManager:
 
     # -- event handling -------------------------------------------------------
 
-    def process_event(self, event: pygame.event.Event) -> None:
-        """Update device/axis/modifier state from a CONTROLLER* event."""
+    def process_event(self, event: pygame.event.Event) -> bool:
+        """Update device/axis/modifier state from a CONTROLLER* event.
+
+        Returns True only for a button press/release that belongs to the bound
+        controller and should be forwarded to the active state. Axis, device,
+        and rejected (foreign-id) events return False, so the app never routes a
+        stray event -- e.g. a duplicate from a pad that enumerates twice -- into
+        a game action."""
         etype = event.type
         if etype == pygame.CONTROLLERDEVICEADDED:
-            if self._controller is None:
-                self._open_first()
-            return
+            device_index = getattr(event, "device_index", None)
+            log.debug("Controller device added (slot %s)", device_index)
+            # Re-open when nothing is bound, or the bound pad has quietly
+            # detached (a missed REMOVED event) -- otherwise a stale binding
+            # would block the reconnect.
+            if self._controller is not None and self._is_attached():
+                log.debug("Ignoring add; a pad is already bound (instance %s)", self._instance_id)
+                return False
+            # Re-open in place. The first real event's id (see _id_pending)
+            # corrects a stale id from the hot-plug; we deliberately do not cycle
+            # the SDL subsystem, which would double every controller event.
+            self._reopen()
+            return False
         if etype == pygame.CONTROLLERDEVICEREMOVED:
+            log.debug("Controller device removed (instance %s)", event.instance_id)
             if self._instance_id is not None and event.instance_id == self._instance_id:
-                self._controller = None
-                self._instance_id = None
+                self._close_controller()
                 self._reset_analog()
                 self._disconnected = True
+                self._logged_mismatch_id = None
                 log.info("Controller disconnected")
-            return
-        if not self.active or event.instance_id != self._instance_id:
-            return
+            return False
+        if not self.active:
+            return False
+        if event.instance_id != self._instance_id:
+            if self._id_pending:
+                # First real event after (re)open: its id is authoritative, so a
+                # stale id from Controller.id after a hot-plug is corrected here.
+                log.info(
+                    "Controller bound to instance %s (opened as %s)",
+                    event.instance_id,
+                    self._instance_id,
+                )
+                self._instance_id = event.instance_id
+                self._id_pending = False
+                self._logged_mismatch_id = None
+            else:
+                # A genuinely foreign id: a second pad, or a duplicate from a pad
+                # that enumerates twice. Drop it (log once) so it never doubles a
+                # toggle or other action.
+                if event.instance_id != self._logged_mismatch_id:
+                    self._logged_mismatch_id = event.instance_id
+                    log.debug(
+                        "Dropping controller event from instance %s (bound to %s)",
+                        event.instance_id,
+                        self._instance_id,
+                    )
+                return False
+        else:
+            # Matched the bound id, so it is live: stop treating the id as
+            # provisional (a duplicate under a different id is now a duplicate).
+            self._id_pending = False
         if etype == pygame.CONTROLLERAXISMOTION:
             self._on_axis(event.axis, event.value)
+            return False
         elif etype == pygame.CONTROLLERBUTTONDOWN:
+            if event.button in self._buttons_down:
+                # Duplicate press with no intervening release: ignore it so a pad
+                # that delivers a button twice cannot fire the action twice.
+                log.debug(
+                    "Ignoring duplicate button-down %s (instance %s)",
+                    event.button,
+                    event.instance_id,
+                )
+                return False
+            self._buttons_down.add(event.button)
             self.active_device = CONTROLLER
+            log.debug("Button down %s (instance %s)", event.button, event.instance_id)
             self._on_button_down(event.button)
+            return True
         elif etype == pygame.CONTROLLERBUTTONUP:
+            if event.button not in self._buttons_down:
+                return False  # stray/duplicate release
+            self._buttons_down.discard(event.button)
+            log.debug("Button up %s (instance %s)", event.button, event.instance_id)
             self._on_button_up(event.button)
+            return True
+        return False
 
     def _on_axis(self, axis: int, raw: int) -> None:
         value = raw / AXIS_MAX
@@ -349,7 +503,7 @@ class ControllerManager:
 
     def shutdown(self) -> None:
         self.rumble.reset()  # silence the pad before we drop it
-        self._controller = None
+        self._close_controller()
         if self._sdl is not None:
             with contextlib.suppress(Exception):  # pragma: no cover
                 self._sdl.quit()

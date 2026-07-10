@@ -330,6 +330,21 @@
   open road, not on a two-minute crawl at yard speeds. Thanks to a player
   report.
 
+- **Reconnecting a controller no longer crashes the game or leaves it
+  half-working.** Unplugging a pad -- or having it change to another device and
+  come back over Bluetooth -- could crash the game outright, or bring the
+  controller back with the triggers and bumpers dead so you could steer but not
+  brake. The game now recovers from the hot-plug instead of crashing, and
+  fully re-acquires the controller when it returns -- even when the system hands
+  it back under a new identity -- so braking, throttle, and the bumpers work
+  again right away.
+
+- **Controller toggle actions no longer fire twice.** On some controllers --
+  notably the Xbox Elite -- setting or releasing the parking brake, or starting
+  or shutting down the engine, could trigger twice from a single press, so the
+  action immediately undid itself. Each button press now counts once, even when
+  the controller reports itself to the system more than once.
+
 - **Construction zones no longer stack or chain together.** Slow zones were
   placed independently, so a construction zone could land inside another
   one, or two could start back to back with no open road between. Zones now
