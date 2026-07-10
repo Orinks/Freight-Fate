@@ -331,6 +331,11 @@
 
 ### Fixed
 
+- **Pasting your Driver ID and token now works on Mac.** Setting up the
+  online drivers board no longer crashes the game, or silently does
+  nothing in the downloadable app, when you paste your Driver ID or
+  driver token from the clipboard on a Mac. Thanks to a player report.
+
 - **No more "brake now" ambushes on the way to a pickup.** The short
   facility access road you deadhead down to reach a shipper no longer
   springs road hazards or emergency-braking events; those belong on the

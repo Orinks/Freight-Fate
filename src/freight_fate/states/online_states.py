@@ -12,6 +12,8 @@ slot from ``update`` so the game loop and speech stay responsive throughout.
 
 from __future__ import annotations
 
+import subprocess
+import sys
 import threading
 import time
 import webbrowser
@@ -61,8 +63,20 @@ def _clipboard_once() -> str | None:
                 return _clean_clip(raw.decode("utf-8", "ignore"))
     except Exception:
         pass
-    # Fallback: hidden Tk root, synchronously on the game loop (it is fast;
-    # a worker-thread Tk on Windows is not reliable).
+    # macOS fallback: pbpaste ships with the OS and needs no GUI toolkit.
+    # A hidden Tk root must never be created here -- initializing Tk inside
+    # a running SDL app aborts the whole process at the C level (Cocoa
+    # tolerates one GUI toolkit per app), and try/except cannot catch it.
+    if sys.platform == "darwin":
+        try:
+            result = subprocess.run(["pbpaste"], capture_output=True, timeout=2.0, check=False)
+            if result.returncode == 0 and result.stdout:
+                return _clean_clip(result.stdout.decode("utf-8", "ignore")) or None
+        except Exception:
+            pass
+        return None
+    # Fallback elsewhere: hidden Tk root, synchronously on the game loop (it
+    # is fast; a worker-thread Tk on Windows is not reliable).
     try:
         import tkinter
 
