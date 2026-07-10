@@ -11,6 +11,10 @@ Built legs: `meridian_ms_us -> tupelo_ms_us` (142), `mobile_al_us -> meridian_ms
 
 ---
 
+<!-- complete-legs -->
+**Complete built legs in this corridor (use ONLY these slugs for `leg:`):**
+`columbus_ms_us -> tupelo_ms_us` (66), `columbus_ms_us -> tuscaloosa_al_us` (59), `meridian_ms_us -> tupelo_ms_us` (142), `meridian_ms_us -> tuscaloosa_al_us` (95), `mobile_al_us -> meridian_ms_us` (133), `mobile_al_us -> montgomery_al_us` (168), `montgomery_al_us -> meridian_ms_us` (157), `tuscaloosa_al_us -> montgomery_al_us` (106)
+
 ### Elvis Presley Birthplace
 - treatment: billboard
 - leg: meridian_ms_us -> tupelo_ms_us

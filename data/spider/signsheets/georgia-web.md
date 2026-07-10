@@ -12,6 +12,10 @@ Built legs: `athens_ga_us -> macon_ga_us` (94), `athens_ga_us -> augusta_ga_us`
 
 ---
 
+<!-- complete-legs -->
+**Complete built legs in this corridor (use ONLY these slugs for `leg:`):**
+`albany_ga_us -> valdosta_ga_us` (81), `athens_ga_us -> augusta_ga_us` (99), `athens_ga_us -> chattanooga_tn_us` (177), `athens_ga_us -> macon_ga_us` (94), `augusta_ga_us -> macon_ga_us` (123), `columbus_ga_us -> albany_ga_us` (86), `cordele_ga_us -> albany_ga_us` (39), `cordele_ga_us -> macon_ga_us` (66), `lagrange_ga_us -> columbus_ga_us` (46), `macon_ga_us -> columbus_ga_us` (99), `rome_ga_us -> cartersville_ga_us` (27), `rome_ga_us -> chattanooga_tn_us` (68)
+
 ### Uncle Remus Country
 - treatment: billboard
 - leg: athens_ga_us -> macon_ga_us

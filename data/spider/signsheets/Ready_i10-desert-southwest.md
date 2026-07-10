@@ -13,6 +13,10 @@ Built legs used: `las_cruces_nm_us -> tucson_az_us` (The Thing) and
 
 ---
 
+<!-- complete-legs -->
+**Complete built legs in this corridor (use ONLY these slugs for `leg:`):**
+`las_cruces_nm_us -> tucson_az_us` (275), `los_angeles_ca_us -> indio_ca_us` (128)
+
 ### The Thing (countdown, sign one)
 - treatment: billboard
 - leg: las_cruces_nm_us -> tucson_az_us

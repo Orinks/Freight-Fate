@@ -14,6 +14,10 @@ was split at Cumberland), `morgantown_wv_us -> beckley_wv_us` (169),
 
 ---
 
+<!-- complete-legs -->
+**Complete built legs in this corridor (use ONLY these slugs for `leg:`):**
+`cumberland_md_us -> hagerstown_md_us` (68), `elizabethtown_ky_us -> bowling_green_ky_us` (75), `hazard_ky_us -> london_ky_us` (63), `huntington_wv_us -> paintsville_ky_us` (62), `johnson_city_tn_us -> pikeville_ky_us` (122), `lexington_ky_us -> elizabethtown_ky_us` (84), `lexington_ky_us -> mount_sterling_ky_us` (36), `london_ky_us -> bowling_green_ky_us` (147), `morgantown_wv_us -> beckley_wv_us` (169), `morgantown_wv_us -> cumberland_md_us` (73), `morristown_tn_us -> johnson_city_tn_us` (61), `morristown_tn_us -> london_ky_us` (102), `mount_sterling_ky_us -> hazard_ky_us` (93), `paintsville_ky_us -> hazard_ky_us` (63), `paintsville_ky_us -> pikeville_ky_us` (39), `pikeville_ky_us -> hazard_ky_us` (62)
+
 ### Bourbon Capital of the World
 - treatment: billboard
 - leg: lexington_ky_us -> elizabethtown_ky_us

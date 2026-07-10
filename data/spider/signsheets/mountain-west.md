@@ -15,6 +15,10 @@ richfield_ut_us` (114), `missoula_mt_us -> helena_mt_us` (113).
 
 ---
 
+<!-- complete-legs -->
+**Complete built legs in this corridor (use ONLY these slugs for `leg:`):**
+`cedar_city_ut_us -> richfield_ut_us` (114), `clovis_nm_us -> roswell_nm_us` (111), `ely_nv_us -> wells_nv_us` (139), `grand_junction_co_us -> green_river_ut_us` (102), `great_falls_mt_us -> havre_mt_us` (114), `green_river_ut_us -> richfield_ut_us` (123), `helena_mt_us -> bozeman_mt_us` (98), `helena_mt_us -> great_falls_mt_us` (92), `missoula_mt_us -> helena_mt_us` (113), `moab_ut_us -> grand_junction_co_us` (113), `moab_ut_us -> green_river_ut_us` (52), `rawlins_wy_us -> rock_springs_wy_us` (108), `socorro_nm_us -> las_cruces_nm_us` (146), `twin_falls_id_us -> wells_nv_us` (116), `wells_nv_us -> west_wendover_nv_us` (58), `west_wendover_nv_us -> ely_nv_us` (120), `winnemucca_nv_us -> fallon_nv_us` (128)
+
 ### Roswell
 - treatment: billboard
 - leg: clovis_nm_us -> roswell_nm_us

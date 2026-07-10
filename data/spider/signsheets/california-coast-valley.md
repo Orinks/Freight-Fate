@@ -13,6 +13,10 @@ Built legs: `salinas_ca_us -> san_luis_obispo_ca_us` (127), `san_luis_obispo_ca_
 
 ---
 
+<!-- complete-legs -->
+**Complete built legs in this corridor (use ONLY these slugs for `leg:`):**
+`bakersfield_ca_us -> barstow_ca_us` (129), `bakersfield_ca_us -> fresno_ca_us` (109), `fresno_ca_us -> visalia_ca_us` (43), `merced_ca_us -> fresno_ca_us` (56), `modesto_ca_us -> merced_ca_us` (39), `salinas_ca_us -> fresno_ca_us` (141), `salinas_ca_us -> san_luis_obispo_ca_us` (127), `salinas_ca_us -> stockton_ca_us` (131), `san_luis_obispo_ca_us -> santa_maria_ca_us` (32), `santa_barbara_ca_us -> oxnard_ca_us` (39), `santa_maria_ca_us -> bakersfield_ca_us` (128), `santa_maria_ca_us -> santa_barbara_ca_us` (75), `stockton_ca_us -> modesto_ca_us` (31), `visalia_ca_us -> bakersfield_ca_us` (81), `visalia_ca_us -> santa_maria_ca_us` (167)
+
 ### The Madonna Inn
 - treatment: billboard
 - leg: salinas_ca_us -> san_luis_obispo_ca_us

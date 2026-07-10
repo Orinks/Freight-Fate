@@ -13,6 +13,10 @@ coeur_d_alene_id_us` (116).
 
 ---
 
+<!-- complete-legs -->
+**Complete built legs in this corridor (use ONLY these slugs for `leg:`):**
+`astoria_or_us -> olympia_wa_us` (122), `coeur_d_alene_id_us -> sandpoint_id_us` (46), `klamath_falls_or_us -> bend_or_us` (138), `lewiston_id_us -> coeur_d_alene_id_us` (116), `medford_or_us -> klamath_falls_or_us` (80), `newport_or_us -> albany_or_us` (60), `newport_or_us -> astoria_or_us` (133), `salem_or_us -> albany_or_us` (26), `salem_or_us -> bend_or_us` (132), `seattle_wa_us -> tacoma_wa_us` (34), `seattle_wa_us -> wenatchee_wa_us` (148), `tacoma_wa_us -> olympia_wa_us` (31), `tacoma_wa_us -> yakima_wa_us` (156), `wenatchee_wa_us -> yakima_wa_us` (107), `yakima_wa_us -> seattle_wa_us` (142)
+
 ### Bavarian Leavenworth
 - treatment: billboard
 - leg: seattle_wa_us -> wenatchee_wa_us

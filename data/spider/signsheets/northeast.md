@@ -15,6 +15,10 @@ split at New London; use `new_london_ct_us -> new_haven_ct_us` for the shoreline
 
 ---
 
+<!-- complete-legs -->
+**Complete built legs in this corridor (use ONLY these slugs for `leg:`):**
+`albany_ny_us -> montpelier_vt_us` (158), `binghamton_ny_us -> albany_ny_us` (138), `binghamton_ny_us -> utica_ny_us` (94), `boston_ma_us -> manchester_nh_us` (52), `boston_ma_us -> providence_ri_us` (50), `harrisburg_pa_us -> allentown_pa_us` (81), `harrisburg_pa_us -> carlisle_pa_us` (23), `harrisburg_pa_us -> philadelphia_pa_us` (106), `harrisburg_pa_us -> wilmington_de_us` (99), `manchester_nh_us -> providence_ri_us` (101), `montpelier_vt_us -> manchester_nh_us` (130), `new_london_ct_us -> new_haven_ct_us` (47), `philadelphia_pa_us -> allentown_pa_us` (58), `providence_ri_us -> new_london_ct_us` (63), `utica_ny_us -> albany_ny_us` (94), `washington_dc_us -> carlisle_pa_us` (113), `washington_dc_us -> philadelphia_pa_us` (146), `wilmington_de_us -> philadelphia_pa_us` (30)
+
 ### Gettysburg
 - treatment: landmark
 - leg: washington_dc_us -> carlisle_pa_us

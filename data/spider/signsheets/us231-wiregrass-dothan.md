@@ -12,6 +12,10 @@ dothan_al_us` (138).
 
 ---
 
+<!-- complete-legs -->
+**Complete built legs in this corridor (use ONLY these slugs for `leg:`):**
+`albany_ga_us -> tallahassee_fl_us` (88), `albany_ga_us -> valdosta_ga_us` (81), `columbus_ga_us -> albany_ga_us` (86), `columbus_ga_us -> dothan_al_us` (99), `columbus_ga_us -> montgomery_al_us` (82), `crestview_fl_us -> dothan_al_us` (111), `dothan_al_us -> albany_ga_us` (84), `dothan_al_us -> tallahassee_fl_us` (109), `montgomery_al_us -> dothan_al_us` (103), `tallahassee_fl_us -> crestview_fl_us` (150), `valdosta_ga_us -> dothan_al_us` (138), `valdosta_ga_us -> tallahassee_fl_us` (87)
+
 ### Peanut Capital of the World
 - treatment: billboard
 - leg: montgomery_al_us -> dothan_al_us

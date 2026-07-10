@@ -14,6 +14,10 @@ meridian_ms_us` (157), `jackson_ms_us -> hattiesburg_ms_us` (91).
 
 ---
 
+<!-- complete-legs -->
+**Complete built legs in this corridor (use ONLY these slugs for `leg:`):**
+`baton_rouge_la_us -> gulfport_ms_us` (136), `birmingham_al_us -> gadsden_al_us` (62), `birmingham_al_us -> opelika_al_us` (113), `gadsden_al_us -> chattanooga_tn_us` (90), `gulfport_ms_us -> hattiesburg_ms_us` (70), `gulfport_ms_us -> jackson_ms_us` (161), `gulfport_ms_us -> mobile_al_us` (75), `jackson_ms_us -> baton_rouge_la_us` (175), `jackson_ms_us -> hattiesburg_ms_us` (91), `jackson_ms_us -> meridian_ms_us` (93), `meridian_ms_us -> hattiesburg_ms_us` (90), `mobile_al_us -> hattiesburg_ms_us` (98), `mobile_al_us -> meridian_ms_us` (133), `mobile_al_us -> montgomery_al_us` (168), `montgomery_al_us -> birmingham_al_us` (91), `montgomery_al_us -> meridian_ms_us` (157), `montgomery_al_us -> opelika_al_us` (61)
+
 ### Home of the Band Alabama
 - treatment: billboard
 - leg: gadsden_al_us -> chattanooga_tn_us

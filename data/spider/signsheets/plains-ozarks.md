@@ -14,6 +14,10 @@ rapid_city_sd_us` (179), `springfield_mo_us -> harrison_ar_us` (78),
 
 ---
 
+<!-- complete-legs -->
+**Complete built legs in this corridor (use ONLY these slugs for `leg:`):**
+`columbia_mo_us -> kansas_city_mo_us` (126), `columbia_mo_us -> rolla_mo_us` (93), `conway_ar_us -> harrison_ar_us` (109), `dodge_city_ks_us -> hays_ks_us` (116), `kansas_city_mo_us -> springfield_mo_us` (166), `kearney_ne_us -> hays_ks_us` (147), `lincoln_ne_us -> junction_city_ks_us` (152), `mitchell_sd_us -> rapid_city_sd_us` (278), `mitchell_sd_us -> watertown_sd_us` (145), `pierre_sd_us -> mitchell_sd_us` (171), `pierre_sd_us -> rapid_city_sd_us` (179), `rolla_mo_us -> springfield_mo_us` (111), `springfield_mo_us -> harrison_ar_us` (78)
+
 ### Boot Hill
 - treatment: billboard
 - leg: dodge_city_ks_us -> hays_ks_us

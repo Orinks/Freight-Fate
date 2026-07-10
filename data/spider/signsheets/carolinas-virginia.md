@@ -15,6 +15,10 @@ petersburg_va_us` (84), `washington_dc_us -> charlottesville_va_us` (116),
 
 ---
 
+<!-- complete-legs -->
+**Complete built legs in this corridor (use ONLY these slugs for `leg:`):**
+`asheville_nc_us -> charlotte_nc_us` (127), `asheville_nc_us -> greenville_sc_us` (63), `asheville_nc_us -> spartanburg_sc_us` (71), `asheville_nc_us -> winston_salem_nc_us` (145), `charlotte_nc_us -> greensboro_nc_us` (90), `charlotte_nc_us -> lumberton_nc_us` (139), `charlotte_nc_us -> spartanburg_sc_us` (76), `charlotte_nc_us -> winston_salem_nc_us` (78), `fayetteville_nc_us -> charlotte_nc_us` (136), `fayetteville_nc_us -> petersburg_va_us` (186), `greensboro_nc_us -> fayetteville_nc_us` (95), `lumberton_nc_us -> fayetteville_nc_us` (33), `lynchburg_va_us -> charlottesville_va_us` (68), `lynchburg_va_us -> richmond_va_us` (116), `norfolk_va_us -> petersburg_va_us` (84), `norfolk_va_us -> richmond_va_us` (98), `petersburg_va_us -> richmond_va_us` (24), `richmond_va_us -> charlottesville_va_us` (70), `roanoke_va_us -> greensboro_nc_us` (105), `roanoke_va_us -> lynchburg_va_us` (56), `roanoke_va_us -> winston_salem_nc_us` (105), `spartanburg_sc_us -> greenville_sc_us` (33), `washington_dc_us -> charlottesville_va_us` (116), `washington_dc_us -> richmond_va_us` (109), `wilmington_nc_us -> fayetteville_nc_us` (90), `wilmington_nc_us -> lumberton_nc_us` (79), `winston_salem_nc_us -> greensboro_nc_us` (28), `wytheville_va_us -> roanoke_va_us` (78)
+
 ### The Biltmore
 - treatment: billboard
 - leg: asheville_nc_us -> greenville_sc_us

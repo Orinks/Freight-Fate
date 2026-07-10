@@ -6,6 +6,10 @@ I-44 corridor through Tulsa, Springfield, and the Ozarks). **at_mi are ESTIMATES
 
 ---
 
+<!-- complete-legs -->
+**Complete built legs in this corridor (use ONLY these slugs for `leg:`):**
+`dallas_tx_us -> st_louis_mo_us` (664)
+
 ### Blue Whale of Catoosa
 - treatment: billboard
 - leg: dallas_tx_us -> st_louis_mo_us

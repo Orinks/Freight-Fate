@@ -17,6 +17,10 @@ grand_rapids_mi_us` (382), `bemidji_mn_us -> grand_rapids_mn_us` (72).
 
 ---
 
+<!-- complete-legs -->
+**Complete built legs in this corridor (use ONLY these slugs for `leg:`):**
+`akron_oh_us -> cleveland_oh_us` (39), `akron_oh_us -> columbus_oh_us` (125), `ann_arbor_mi_us -> flint_mi_us` (54), `ann_arbor_mi_us -> grand_rapids_mi_us` (133), `ann_arbor_mi_us -> toledo_oh_us` (54), `bemidji_mn_us -> grand_rapids_mn_us` (72), `cleveland_oh_us -> toledo_oh_us` (114), `columbus_oh_us -> cincinnati_oh_us` (106), `dayton_oh_us -> cincinnati_oh_us` (54), `dayton_oh_us -> columbus_oh_us` (70), `detroit_mi_us -> ann_arbor_mi_us` (44), `detroit_mi_us -> cleveland_oh_us` (168), `detroit_mi_us -> toledo_oh_us` (59), `elkhart_in_us -> south_bend_in_us` (21), `flint_mi_us -> detroit_mi_us` (68), `flint_mi_us -> saginaw_mi_us` (37), `grand_rapids_mi_us -> detroit_mi_us` (160), `grand_rapids_mi_us -> saginaw_mi_us` (115), `green_bay_wi_us -> grand_rapids_mi_us` (382), `jackson_mi_us -> ann_arbor_mi_us` (37), `jackson_mi_us -> kalamazoo_mi_us` (66), `kalamazoo_mi_us -> detroit_mi_us` (140), `kalamazoo_mi_us -> elkhart_in_us` (61), `kalamazoo_mi_us -> grand_rapids_mi_us` (50), `kalamazoo_mi_us -> south_bend_in_us` (76), `lima_oh_us -> dayton_oh_us` (73), `south_bend_in_us -> grand_rapids_mi_us` (115), `toledo_oh_us -> columbus_oh_us` (146), `toledo_oh_us -> elkhart_in_us` (139), `toledo_oh_us -> lima_oh_us` (77), `traverse_city_mi_us -> grand_rapids_mi_us` (140)
+
 ### The RV Capital of the World
 - treatment: billboard
 - leg: toledo_oh_us -> elkhart_in_us

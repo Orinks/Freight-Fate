@@ -15,6 +15,10 @@ beaumont_tx_us` (108), `college_station_tx_us -> temple_tx_us` (91),
 
 ---
 
+<!-- complete-legs -->
+**Complete built legs in this corridor (use ONLY these slugs for `leg:`):**
+`austin_tx_us -> dallas_tx_us` (196), `austin_tx_us -> kerrville_tx_us` (117), `austin_tx_us -> san_antonio_tx_us` (79), `austin_tx_us -> temple_tx_us` (68), `beaumont_tx_us -> college_station_tx_us` (165), `college_station_tx_us -> austin_tx_us` (107), `college_station_tx_us -> temple_tx_us` (91), `dallas_tx_us -> wichita_falls_tx_us` (138), `lufkin_tx_us -> beaumont_tx_us` (108), `lufkin_tx_us -> tyler_tx_us` (85), `paris_tx_us -> texarkana_ar_us` (94), `san_angelo_tx_us -> del_rio_tx_us` (157), `san_antonio_tx_us -> dallas_tx_us` (274), `san_antonio_tx_us -> del_rio_tx_us` (154), `san_antonio_tx_us -> kerrville_tx_us` (66), `sherman_tx_us -> paris_tx_us` (65), `temple_tx_us -> waco_tx_us` (36), `texarkana_ar_us -> dallas_tx_us` (180), `tyler_tx_us -> dallas_tx_us` (98), `tyler_tx_us -> texarkana_ar_us` (117), `victoria_tx_us -> san_antonio_tx_us` (115), `waco_tx_us -> college_station_tx_us` (92), `waco_tx_us -> dallas_tx_us` (95), `waco_tx_us -> tyler_tx_us` (130)
+
 ### The Eiffel Tower, With a Hat
 - treatment: billboard
 - leg: sherman_tx_us -> paris_tx_us

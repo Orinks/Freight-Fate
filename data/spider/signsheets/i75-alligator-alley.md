@@ -12,6 +12,10 @@ Built leg: `naples_fl_us -> miami_fl_us` (122).
 
 ---
 
+<!-- complete-legs -->
+**Complete built legs in this corridor (use ONLY these slugs for `leg:`):**
+`naples_fl_us -> miami_fl_us` (122)
+
 ### Skunk Ape Research Headquarters
 - treatment: billboard
 - leg: naples_fl_us -> miami_fl_us

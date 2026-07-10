@@ -14,6 +14,10 @@ brunswick_ga_us` (69), `charleston_sc_us -> savannah_ga_us` (108),
 
 ---
 
+<!-- complete-legs -->
+**Complete built legs in this corridor (use ONLY these slugs for `leg:`):**
+`augusta_ga_us -> columbia_sc_us` (71), `augusta_ga_us -> savannah_ga_us` (132), `brunswick_ga_us -> savannah_ga_us` (78), `charleston_sc_us -> savannah_ga_us` (108), `charleston_sc_us -> wilmington_nc_us` (168), `charlotte_nc_us -> savannah_ga_us` (239), `columbia_sc_us -> charleston_sc_us` (116), `columbia_sc_us -> charlotte_nc_us` (93), `columbia_sc_us -> savannah_ga_us` (147), `jacksonville_fl_us -> brunswick_ga_us` (69), `jacksonville_fl_us -> miami_fl_us` (346)
+
 ### The Oldest City
 - treatment: billboard
 - leg: jacksonville_fl_us -> miami_fl_us

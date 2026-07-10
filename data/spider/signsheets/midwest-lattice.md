@@ -13,6 +13,10 @@ st_louis_mo_us` (101), `indianapolis_in_us -> terre_haute_in_us` (77),
 
 ---
 
+<!-- complete-legs -->
+**Complete built legs in this corridor (use ONLY these slugs for `leg:`):**
+`cedar_rapids_ia_us -> dubuque_ia_us` (70), `cedar_rapids_ia_us -> iowa_city_ia_us` (31), `dayton_oh_us -> indianapolis_in_us` (113), `dubuque_ia_us -> rockford_il_us` (93), `effingham_il_us -> st_louis_mo_us` (101), `indianapolis_in_us -> st_louis_mo_us` (242), `indianapolis_in_us -> terre_haute_in_us` (77), `lima_oh_us -> dayton_oh_us` (73), `terre_haute_in_us -> effingham_il_us` (70), `toledo_oh_us -> lima_oh_us` (77)
+
 ### Big Things in a Small Town
 - treatment: billboard
 - leg: terre_haute_in_us -> effingham_il_us

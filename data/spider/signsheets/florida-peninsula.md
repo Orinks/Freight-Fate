@@ -16,6 +16,10 @@ miami_fl_us` (71).
 
 ---
 
+<!-- complete-legs -->
+**Complete built legs in this corridor (use ONLY these slugs for `leg:`):**
+`cape_coral_fl_us -> lakeland_fl_us` (118), `cape_coral_fl_us -> tampa_fl_us` (134), `daytona_beach_fl_us -> jacksonville_fl_us` (93), `daytona_beach_fl_us -> orlando_fl_us` (56), `fort_myers_fl_us -> naples_fl_us` (43), `gainesville_fl_us -> jacksonville_fl_us` (71), `gainesville_fl_us -> lakeland_fl_us` (144), `gainesville_fl_us -> orlando_fl_us` (115), `jacksonville_fl_us -> miami_fl_us` (346), `jacksonville_fl_us -> ocala_fl_us` (103), `lakeland_fl_us -> port_saint_lucie_fl_us` (127), `naples_fl_us -> miami_fl_us` (122), `ocala_fl_us -> tampa_fl_us` (100), `orlando_fl_us -> jacksonville_fl_us` (141), `orlando_fl_us -> tampa_fl_us` (84), `palm_bay_fl_us -> lakeland_fl_us` (107), `palm_bay_fl_us -> orlando_fl_us` (74), `port_saint_lucie_fl_us -> miami_fl_us` (115), `port_saint_lucie_fl_us -> palm_bay_fl_us` (65), `tampa_fl_us -> fort_myers_fl_us` (133), `tampa_fl_us -> miami_fl_us` (265), `west_palm_beach_fl_us -> cape_coral_fl_us` (138), `west_palm_beach_fl_us -> miami_fl_us` (71), `west_palm_beach_fl_us -> palm_bay_fl_us` (110)
+
 ### The World Center of Racing
 - treatment: billboard
 - leg: daytona_beach_fl_us -> jacksonville_fl_us
