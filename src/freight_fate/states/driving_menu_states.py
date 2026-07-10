@@ -178,7 +178,11 @@ class PauseMenuState(MenuState):
         return PresenceState("Paused", detail)
 
     def online_presence(self):
-        return self.presence()
+        # A paused player is not actively hauling, so they leave the public
+        # drivers board as though they went off duty; the service's off-duty
+        # grace absorbs a quick pause-and-resume without bouncing the row.
+        # Discord presence (above) still shows "Paused" while the menu is up.
+        return None
 
     def build_items(self) -> list[MenuItem]:
         drive_label = "pickup drive" if self.driving.phase == DRIVE_PHASE_PICKUP else "delivery"

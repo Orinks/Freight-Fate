@@ -257,6 +257,12 @@
 
 ### Changed
 
+- **Pausing now takes you off the live drivers board.** The pause menu used to
+  keep you listed as "Paused"; now it counts as going off duty, so the public
+  board only shows drivers who are actively hauling. A quick pause and resume
+  will not bounce you off the board, and Discord presence still shows
+  "Paused" to your friends while the menu is open.
+
 - **Dispatches and route planning now always name the state with each
   city.** A job reads as "to McCall, Idaho" even when no other McCall
   exists, so an unfamiliar town still tells you roughly where you are

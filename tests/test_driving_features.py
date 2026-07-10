@@ -1635,6 +1635,27 @@ def test_reverse_audio_loop_restarts_after_pause_resume(monkeypatch):
         app.shutdown()
 
 
+def test_pause_menu_reports_off_duty_to_the_drivers_board():
+    from freight_fate.app import App
+    from freight_fate.states.driving import PauseMenuState
+
+    app = App()
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        assert driving.online_presence() is not None
+
+        app.ctx.push_state(PauseMenuState(app.ctx, driving))
+        pause = app.state
+        assert isinstance(pause, PauseMenuState)
+        # Paused players leave the public board like an off-duty sign-off...
+        assert pause.online_presence() is None
+        # ...while Discord presence still tells friends the game is paused.
+        assert pause.presence().activity == "Paused"
+    finally:
+        app.shutdown()
+
+
 @pytest.mark.smoke
 def test_can_back_up_to_a_missed_rest_stop_with_t_menu():
     from freight_fate.app import App
