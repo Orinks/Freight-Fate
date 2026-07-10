@@ -6556,6 +6556,15 @@
       "locations": [],
       "lat": 41.356,
       "lon": -72.1
+    },
+    "blythe_ca_us": {
+      "spoken_city": "Blythe",
+      "state": "CA",
+      "country": "US",
+      "region": "california",
+      "locations": [],
+      "lat": 33.6178,
+      "lon": -114.5883
     }
   }
 }
