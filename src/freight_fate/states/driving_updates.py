@@ -507,6 +507,15 @@ class DrivingUpdateMixin:
     def _play_current_music(self, fade_ms: int = 4000) -> None:
         self.ctx.audio.play_music(self._current_music_track(), fade_ms=fade_ms)
 
+    def tick_covered_music(self, dt: float) -> None:
+        """Keep the drive playlist rotating while a menu covers this state.
+
+        Menus stacked over the drive tick this through the context's music
+        rotation, so a bed that ends mid-pause hands off to the next track
+        instead of going silent. Day/night stays as it was when the menu
+        opened; the switch happens when driving resumes."""
+        self._update_music_rotation(self._music_night, dt)
+
     def _update_music_rotation(self, night: bool, dt: float) -> None:
         if night != self._music_night:
             self._music_night = night

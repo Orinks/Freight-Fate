@@ -261,6 +261,14 @@ class GameContext:
     def update_music_rotation(self, dt: float) -> None:
         """Advance music beds when their one-shot playback ends."""
         if self._music_rotation_pool is None or self._music_rotation_track is None:
+            # No menu bed is rotating. A drive sitting under this menu (pause,
+            # settings, a traffic stop...) keeps its own playlist turning over,
+            # so the music does not fall silent when the current track ends.
+            for state in reversed(self._app.states[:-1]):
+                tick = getattr(state, "tick_covered_music", None)
+                if tick is not None:
+                    tick(dt)
+                    break
             return
         self._music_rotation_elapsed_s += max(0.0, dt)
         if self._music_rotation_elapsed_s < music_track_duration_s(self._music_rotation_track):

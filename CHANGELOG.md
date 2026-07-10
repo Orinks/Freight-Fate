@@ -336,6 +336,11 @@
 
 ### Fixed
 
+- **Music keeps playing while the game is paused.** If a music track ended
+  while you sat on the pause menu -- or in settings, help, or any other menu
+  over a drive -- the music went silent until you resumed driving. The next
+  track now starts on its own, so a long pause no longer means a quiet cab.
+
 - **Pasting your Driver ID and token now works on Mac.** Setting up the
   online drivers board no longer crashes the game, or silently does
   nothing in the downloadable app, when you paste your Driver ID or

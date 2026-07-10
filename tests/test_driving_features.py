@@ -382,6 +382,37 @@ def test_closing_status_panel_does_not_restart_drive_music(monkeypatch):
         app.shutdown()
 
 
+def test_drive_music_advances_to_next_track_while_paused(monkeypatch):
+    from freight_fate.app import App
+    from freight_fate.music import music_track_duration_s
+    from freight_fate.states.driving import PauseMenuState
+
+    app = App()
+    played = []
+    monkeypatch.setattr(
+        app.ctx.audio,
+        "play_music",
+        lambda track, fade_ms=1500: played.append(track),
+    )
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+
+        driving.handle_event(key_event(pygame.K_ESCAPE))
+        assert isinstance(app.state, PauseMenuState)
+        first = driving._current_music_track()
+        played.clear()
+
+        # Sit on the pause menu until the current bed's one-shot playback ends.
+        app.state.update(music_track_duration_s(first) + 1.0)
+
+        following = driving._current_music_track()
+        assert following != first
+        assert played == [following]
+    finally:
+        app.shutdown()
+
+
 def test_how_to_play_documents_new_gameplay_systems():
     from freight_fate.states.main_menu import HELP_PAGES
 
