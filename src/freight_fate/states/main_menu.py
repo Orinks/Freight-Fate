@@ -833,6 +833,14 @@ class SettingsCategoryState(MenuState):
                     "with W and Q to shift up and down.",
                 ),
                 MenuItem(
+                    lambda: f"Automatic direction changes: {s.automatic_direction_changes}",
+                    lambda: self._cycle_automatic_direction_changes(1),
+                    help="Simple changes between forward and reverse when you keep "
+                    "holding the control after the truck stops. Deliberate waits "
+                    "for you to release the control and press it again. This only "
+                    "affects automatic transmission.",
+                ),
+                MenuItem(
                     lambda: f"Trip pacing: {self._pace_label()}",
                     lambda: self._cycle_pace(1),
                     help="Controls how quickly game time and distance pass "
@@ -1006,6 +1014,7 @@ class SettingsCategoryState(MenuState):
                 "gameplay": [
                     self._toggle_units,
                     self._toggle_transmission,
+                    self._cycle_automatic_direction_changes,
                     self._cycle_pace,
                     self._cycle_hos,
                     self._cycle_steering,
@@ -1142,6 +1151,15 @@ class SettingsCategoryState(MenuState):
 
     def _toggle_transmission(self, _d: int) -> None:
         self.ctx.settings.automatic_transmission = not self.ctx.settings.automatic_transmission
+        self._announce()
+
+    def _cycle_automatic_direction_changes(self, d: int) -> None:
+        modes = ["simple", "deliberate"]
+        try:
+            i = modes.index(self.ctx.settings.automatic_direction_changes)
+        except ValueError:
+            i = 0
+        self.ctx.settings.automatic_direction_changes = modes[(i + d) % len(modes)]
         self._announce()
 
     def _cycle_pace(self, d: int) -> None:

@@ -265,12 +265,11 @@
   instead of only in the F1 help, so you can weigh routes the same way
   the end-of-trip summary describes them. Thanks to a player suggestion.
 
-- **Switching between forward and reverse now takes a deliberate action.** In an
-  automatic, braking to a stop no longer slips straight into reverse, and
-  holding the accelerator to stop while reversing no longer flips you straight
-  back into forward. Come to a stop, then release the control and press it again
-  to change direction. On a controller, let the trigger return to neutral first,
-  then press it again.
+- **Automatic direction changes can now be simple or deliberate.** Simple is the
+  casual default: keep holding the control after the truck stops to change
+  between forward and reverse. Deliberate keeps the safer two-step behavior from
+  the previous snapshot: stop, release the control, then press it again. Choose
+  the style you prefer under Settings, Gameplay. Manual shifting is unchanged.
 
 - **Online settings are now gathered in one place.** The Discord presence
   toggle moved from Settings, Gameplay to Settings, Online, alongside the

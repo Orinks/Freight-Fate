@@ -295,18 +295,21 @@ class DrivingUpdateMixin:
             accel_held = accelerating
         if brake_held is None:
             brake_held = braking_key
-        # A direction change needs a fresh press (rising edge): braking or
-        # accelerating to a stop and holding the control no longer flips gears --
-        # the player must release and press again. For a controller this is the
-        # trigger returning to neutral and being pressed once more.
+        # Deliberate direction changes use a fresh press (rising edge). Simple
+        # direction changes keep the familiar behavior of holding the control
+        # through the stop. Track both edges in either mode so changing the
+        # setting during a drive cannot leave stale input state behind.
         brake_edge = brake_held and not self._reverse_brake_held
         accel_edge = accel_held and not self._reverse_accel_held
         self._reverse_brake_held = brake_held
         self._reverse_accel_held = accel_held
         if not tr.automatic:
             return tr.in_reverse and braking_key and not accelerating
+        deliberate = self.ctx.settings.automatic_direction_changes == "deliberate"
+        forward_requested = accel_edge if deliberate else accelerating
+        reverse_requested = brake_edge if deliberate else braking_key
         if tr.in_reverse:
-            if accel_edge and abs(t.velocity_mps) < 0.3:
+            if forward_requested and abs(t.velocity_mps) < 0.3:
                 tr.gear = 1
                 tr._shift_timer = 0.0
                 self.ctx.audio.play("vehicle/gear_shift", volume=0.55)
@@ -314,7 +317,7 @@ class DrivingUpdateMixin:
                 self.ctx.say_event("Forward gear selected.", interrupt=False)
                 return False
             return braking_key and not accelerating
-        if brake_edge and not accel_held and t.speed_mph < 0.5:
+        if reverse_requested and not accel_held and t.speed_mph < 0.5:
             tr.gear = REVERSE
             tr._shift_timer = 0.0
             self._cancel_cruise()

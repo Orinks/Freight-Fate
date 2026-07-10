@@ -135,6 +135,82 @@ def test_automatic_reverse_selection_is_spoken(monkeypatch):
         app.shutdown()
 
 
+def test_simple_automatic_holds_through_stop_to_change_direction(monkeypatch):
+    from freight_fate.app import App
+    from freight_fate.sim.transmission import REVERSE
+
+    app = App()
+    monkeypatch.setattr(app.ctx.audio, "play", lambda *a, **k: None)
+    monkeypatch.setattr(app.ctx, "say_event", lambda *a, **k: None)
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        assert app.ctx.settings.automatic_direction_changes == "simple"
+
+        driving.truck.velocity_mps = 0.0
+        driving._reverse_brake_held = True
+        assert driving._update_reverse_controls(accelerating=False, braking_key=True)
+        assert driving.truck.transmission.in_reverse
+
+        driving.truck.velocity_mps = 0.0
+        driving._reverse_accel_held = True
+        driving._update_reverse_controls(accelerating=True, braking_key=False)
+        assert driving.truck.transmission.gear != REVERSE
+    finally:
+        app.shutdown()
+
+
+def test_controller_trigger_edges_follow_automatic_direction_style(monkeypatch):
+    """The deliberate controller path reads the unsmoothed trigger target so
+    a full release is observable even while the smoothed brake value lingers."""
+    from freight_fate.app import App
+
+    app = App()
+    monkeypatch.setattr(app.ctx.audio, "play", lambda *a, **k: None)
+    monkeypatch.setattr(app.ctx, "say_event", lambda *a, **k: None)
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        driving.truck.velocity_mps = 0.0
+
+        app.ctx.settings.automatic_direction_changes = "simple"
+        driving._reverse_brake_held = True
+        assert driving._update_reverse_controls(
+            accelerating=False,
+            braking_key=True,
+            accel_held=False,
+            brake_held=True,
+        )
+
+        driving.truck.transmission.gear = 1
+        app.ctx.settings.automatic_direction_changes = "deliberate"
+        driving._reverse_brake_held = True
+        assert not driving._update_reverse_controls(
+            accelerating=False,
+            braking_key=True,
+            accel_held=False,
+            brake_held=True,
+        )
+        assert not driving.truck.transmission.in_reverse
+
+        # The instantaneous target reaches neutral before the smoothed brake.
+        assert not driving._update_reverse_controls(
+            accelerating=False,
+            braking_key=True,
+            accel_held=False,
+            brake_held=False,
+        )
+        assert driving._update_reverse_controls(
+            accelerating=False,
+            braking_key=True,
+            accel_held=False,
+            brake_held=True,
+        )
+        assert driving.truck.transmission.in_reverse
+    finally:
+        app.shutdown()
+
+
 def test_automatic_held_brake_does_not_engage_reverse(monkeypatch):
     """Braking to a stop and holding must not slip into reverse; only a fresh
     press (release, then press again) engages it."""
@@ -144,6 +220,7 @@ def test_automatic_held_brake_does_not_engage_reverse(monkeypatch):
     monkeypatch.setattr(app.ctx.audio, "play", lambda *a, **k: None)
     monkeypatch.setattr(app.ctx, "say_event", lambda *a, **k: None)
     try:
+        app.ctx.settings.automatic_direction_changes = "deliberate"
         driving = start_drive(app)
         quiet_trip(driving)
         driving.truck.velocity_mps = 0.0
@@ -170,6 +247,7 @@ def test_automatic_held_accelerator_does_not_flip_out_of_reverse(monkeypatch):
     monkeypatch.setattr(app.ctx.audio, "play", lambda *a, **k: None)
     monkeypatch.setattr(app.ctx, "say_event", lambda *a, **k: None)
     try:
+        app.ctx.settings.automatic_direction_changes = "deliberate"
         driving = start_drive(app)
         quiet_trip(driving)
         tr = driving.truck.transmission
@@ -202,6 +280,7 @@ def test_accelerator_does_not_thrust_while_braking_in_reverse(monkeypatch):
     monkeypatch.setattr(app.ctx.audio, "play", lambda *a, **k: None)
     monkeypatch.setattr(app.ctx, "say_event", lambda *a, **k: None)
     try:
+        app.ctx.settings.automatic_direction_changes = "deliberate"
         driving = start_drive(app)
         quiet_trip(driving)
         t = driving.truck
@@ -216,6 +295,39 @@ def test_accelerator_does_not_thrust_while_braking_in_reverse(monkeypatch):
         assert t.transmission.in_reverse
         assert t.throttle < 0.5  # decays toward 0 rather than ramping up
         assert t.brake > 0.0  # the service brake is what arrests the roll
+    finally:
+        app.shutdown()
+
+
+def test_driving_help_explains_selected_automatic_direction_style(monkeypatch):
+    from freight_fate.app import App
+
+    app = App()
+    spoken = []
+    monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: spoken.append(text))
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+
+        app.ctx.settings.automatic_direction_changes = "simple"
+        driving._speak_keyboard_help()
+        assert "simple direction changes" in spoken[-1]
+        assert "keep holding the Down arrow" in spoken[-1]
+
+        app.ctx.settings.automatic_direction_changes = "deliberate"
+        driving._speak_keyboard_help()
+        assert "deliberate direction changes" in spoken[-1]
+        assert "release the Down arrow and press it again" in spoken[-1]
+
+        app.ctx.settings.automatic_direction_changes = "simple"
+        driving._speak_controller_help()
+        assert "simple direction changes" in spoken[-1]
+        assert "keep holding the left trigger" in spoken[-1]
+
+        app.ctx.settings.automatic_direction_changes = "deliberate"
+        driving._speak_controller_help()
+        assert "deliberate direction changes" in spoken[-1]
+        assert "let the left trigger return to neutral" in spoken[-1]
     finally:
         app.shutdown()
 

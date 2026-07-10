@@ -58,6 +58,44 @@ def test_settings_menu_cycles_lane_drift():
         app.shutdown()
 
 
+@pytest.mark.smoke
+def test_settings_menu_cycles_automatic_direction_changes():
+    from freight_fate.app import App
+    from freight_fate.settings import Settings
+
+    app = App()
+    try:
+        assert app.ctx.settings.automatic_direction_changes == "simple"
+        cat = open_settings_category(app, "Gameplay")
+        while not cat.items[cat.index].text.startswith("Automatic direction changes"):
+            cat.handle_event(key_event(pygame.K_DOWN))
+
+        assert cat.current_help().startswith("Simple changes between forward and reverse")
+        cat.handle_event(key_event(pygame.K_RETURN))
+        assert app.ctx.settings.automatic_direction_changes == "deliberate"
+        assert Settings.load().automatic_direction_changes == "deliberate"
+        assert cat.items[cat.index].text == "Automatic direction changes: deliberate"
+
+        cat.handle_event(key_event(pygame.K_LEFT))
+        assert app.ctx.settings.automatic_direction_changes == "simple"
+    finally:
+        app.shutdown()
+
+
+def test_invalid_automatic_direction_setting_falls_back_to_simple():
+    import json
+
+    from freight_fate.settings import Settings
+
+    settings = Settings()
+    settings.path.parent.mkdir(parents=True, exist_ok=True)
+    settings.path.write_text(
+        json.dumps({"automatic_direction_changes": "mystery"}), encoding="utf-8"
+    )
+
+    assert Settings.load().automatic_direction_changes == "simple"
+
+
 def test_settings_menu_saves_each_change():
     from freight_fate.app import App
     from freight_fate.settings import Settings

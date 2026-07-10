@@ -17,6 +17,9 @@ TIME_SCALES = (10.0, 20.0, 40.0)
 class Settings:
     imperial_units: bool = True
     automatic_transmission: bool = True  # friendlier default for new players
+    # Simple keeps the familiar hold-through-stop behavior. Deliberate requires
+    # a release and second press before an automatic changes direction.
+    automatic_direction_changes: str = "simple"  # simple/deliberate
     # Distance compression while driving. Relaxed (10x) by default: new players
     # get the most real time to hear and react to spoken events; veterans can
     # step up to standard or fast in Settings, Gameplay.
@@ -91,6 +94,8 @@ class Settings:
             s.hos_mode = "realistic"
         if s.steering_assist not in ("off", "light", "realistic"):
             s.steering_assist = "off"
+        if s.automatic_direction_changes not in ("simple", "deliberate"):
+            s.automatic_direction_changes = "simple"
         if s.update_channel not in ("", "stable", "dev"):
             s.update_channel = ""
         if not isinstance(s.event_backend, str) or not s.event_backend:

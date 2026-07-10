@@ -90,6 +90,32 @@ def test_playtest_harness_drives_a_specific_route(monkeypatch):
     assert "New Jersey into New York" in transcript
 
 
+def test_playtest_transcript_covers_both_automatic_direction_styles(monkeypatch):
+    from freight_fate.sim.transmission import REVERSE
+
+    with PlaytestHarness(monkeypatch) as harness:
+        result = harness.start_route("Newark", "New York")
+        driving = harness.driving
+        driving.truck.velocity_mps = 0.0
+
+        harness.app.ctx.settings.automatic_direction_changes = "simple"
+        driving._reverse_brake_held = True
+        assert driving._update_reverse_controls(accelerating=False, braking_key=True)
+        assert "[event] Reverse selected. Backing slowly." in result.transcript
+
+        driving.truck.transmission.gear = 1
+        result.transcript.clear()
+        harness.app.ctx.settings.automatic_direction_changes = "deliberate"
+        driving._reverse_brake_held = True
+        assert not driving._update_reverse_controls(accelerating=False, braking_key=True)
+        assert driving.truck.transmission.gear != REVERSE
+        assert result.transcript == []
+
+        driving._update_reverse_controls(accelerating=False, braking_key=False)
+        assert driving._update_reverse_controls(accelerating=False, braking_key=True)
+        assert "[event] Reverse selected. Backing slowly." in result.transcript
+
+
 # Six full simulated deliveries in one test, under coverage tracing on a
 # contended CI runner, straddle the default 120-second hang timeout. It is
 # long, not hung, so give it real headroom.
