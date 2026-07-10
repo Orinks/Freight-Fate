@@ -336,6 +336,15 @@
 
 ### Fixed
 
+- **The truck now warns you while the engine is over-revving, instead of
+  surprising you with damage at delivery.** Holding the engine at redline --
+  easiest to do by backing up fast for a long stretch -- quietly ground the
+  truck down, and the first you heard of it was a big damage number on the
+  end screen. Now a warning sounds and the game tells you the engine is
+  taking damage and the current total, repeating while it goes on, so you
+  can ease off and slow down before the repair bill grows. Thanks to a
+  player report.
+
 - **Music keeps playing while the game is paused.** If a music track ended
   while you sat on the pause menu -- or in settings, help, or any other menu
   over a drive -- the music went silent until you resumed driving. The next

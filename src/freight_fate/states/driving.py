@@ -6,7 +6,7 @@ from __future__ import annotations
 from .driving_core import *
 from .driving_controls import DrivingControlsMixin
 from .driving_events import DrivingEventMixin
-from .driving_updates import DrivingUpdateMixin
+from .driving_updates import OVERREV_GRACE_S, DrivingUpdateMixin
 
 
 class DrivingState(DrivingControlsMixin, DrivingUpdateMixin, DrivingEventMixin, State):
@@ -120,6 +120,8 @@ class DrivingState(DrivingControlsMixin, DrivingUpdateMixin, DrivingEventMixin, 
         self._spring_brake_said = self.truck.spring_brakes_active
         self._brake_lockout_cue_timer = 0.0
         self._brake_air_hissed = False  # rising-edge guard for the brake-apply hiss
+        self._overrev_s = 0.0  # continuous seconds at damaging RPM
+        self._overrev_warn_due = OVERREV_GRACE_S  # repeats push it out further
         self._lane_rumble_timer = 0.0
         self._lane_guidance_state = "center"
         self._reverse_cue_active = False

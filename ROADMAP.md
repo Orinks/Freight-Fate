@@ -118,6 +118,19 @@ From a batch of player reports:
 
 ### Driving feel
 
+- [x] **Over-rev damage is now audible while it happens.** Sustained redline
+  (easiest by backing up fast for a long stretch: the road-coupled RPM pins at
+  `max_rpm`) silently ground the truck down 0.8%/s and only surfaced on the
+  end screen (issue #62). The driving loop now plays the warning cue and
+  speaks the rising damage total, repeating while it persists, with a short
+  grace so shift flares stay quiet. Follow-up if wanted: a governor that cuts
+  throttle at redline, and a reverse-speed cap, so sustained redline damage
+  is hard to reach at all.
+- [ ] **Don't bind a controller when the controller setting is off.**
+  `ControllerManager.__init__` opens the first pad unconditionally; with the
+  setting disabled the game still enumerates and binds (issue #61: a fight
+  stick got picked up despite controller-off). Gate `_open_first()` and the
+  device-added hot-plug path on `enabled`, and open on `set_enabled(True)`.
 - **Gear / launch realism.** Partly addressed: gross mass is now
   cargo-weight-aware (tare + payload), so a heavy load accelerates slower,
   lugs on grades, and burns more fuel, and an empty deadhead is light and

@@ -135,6 +135,51 @@ def test_automatic_reverse_selection_is_spoken(monkeypatch):
         app.shutdown()
 
 
+def test_sustained_redline_speaks_a_damage_warning(monkeypatch):
+    from freight_fate.app import App
+
+    app = App()
+    events = []
+    played = []
+    monkeypatch.setattr(app.ctx.audio, "play", lambda key, volume=1.0: played.append(key))
+    monkeypatch.setattr(
+        app.ctx,
+        "say_event",
+        lambda text, interrupt=True: events.append((text, interrupt)),
+    )
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        t = driving.truck
+        t.engine_on = True
+        t.rpm = t.specs.max_rpm
+        t.damage_pct = 12.0
+
+        driving._update_overrev(1.0)  # inside the grace period: a shift flare
+        assert events == []
+
+        driving._update_overrev(1.0)  # sustained past the grace: warn
+        assert "redline" in events[-1][0].lower()
+        assert "12 percent" in events[-1][0]
+        assert events[-1][1] is True
+        assert "ui/warning" in played
+
+        events.clear()
+        driving._update_overrev(5.0)  # repeat interval not reached yet
+        assert events == []
+        driving._update_overrev(6.0)  # past it: nag again while damage accrues
+        assert len(events) == 1
+
+        events.clear()
+        t.rpm = t.specs.idle_rpm  # easing off resets the whole cycle
+        driving._update_overrev(1.0)
+        t.rpm = t.specs.max_rpm
+        driving._update_overrev(1.0)  # back at redline, but within fresh grace
+        assert events == []
+    finally:
+        app.shutdown()
+
+
 def test_simple_automatic_holds_through_stop_to_change_direction(monkeypatch):
     from freight_fate.app import App
     from freight_fate.sim.transmission import REVERSE

@@ -8,6 +8,12 @@ LANE_GUIDANCE_DRIFT_START = 0.3
 LANE_GUIDANCE_CENTER_MAX = 0.18
 LANE_GUIDANCE_PAN = 0.85
 
+# Sustained redline quietly grinds the engine down (Truck._update_temps), so
+# the player must hear about it while it is happening, not at the end screen.
+# The grace period lets a shift's momentary flare pass unremarked.
+OVERREV_GRACE_S = 1.5
+OVERREV_REPEAT_S = 10.0
+
 
 class DrivingUpdateMixin:
     def update(self, dt: float) -> None:
@@ -133,6 +139,7 @@ class DrivingUpdateMixin:
         self._update_announcements(dt)
         self._update_hazard(dt)
         self._update_microsleep(keys, dt)
+        self._update_overrev(dt)
         self._update_speeding(dt)
         self._update_pull_over(dt)
         if self.tutorial:
@@ -678,6 +685,28 @@ class DrivingUpdateMixin:
                 "sleep.",
                 interrupt=True,
             )
+
+    def _update_overrev(self, dt: float) -> None:
+        t = self.truck
+        if not t.over_revving:
+            self._overrev_s = 0.0
+            self._overrev_warn_due = OVERREV_GRACE_S
+            return
+        self._overrev_s += dt
+        if self._overrev_s < self._overrev_warn_due:
+            return
+        self._overrev_warn_due = self._overrev_s + OVERREV_REPEAT_S
+        self.ctx.audio.play("ui/warning")
+        self.ctx.controller.rumble.alert()
+        message = (
+            f"Redline. Damage {t.damage_pct:.0f} percent."
+            if self._terse_speech()
+            else (
+                "The engine is screaming at redline and taking damage, now "
+                f"{t.damage_pct:.0f} percent. Ease off and slow down."
+            )
+        )
+        self.ctx.say_event(message, interrupt=True)
 
     def _update_speeding(self, dt: float) -> None:
         if self._ramp_mi is not None:

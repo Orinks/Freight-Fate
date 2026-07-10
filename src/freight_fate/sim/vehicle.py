@@ -479,10 +479,15 @@ class TruckState:
         cooling = (self.brake_temp_c - 20.0) * (0.02 + 0.004 * speed)
         self.brake_temp_c = max(20.0, self.brake_temp_c + (heating - cooling) * dt)
 
-        if self.rpm > s.max_rpm * 0.98 and self.engine_on:
+        if self.over_revving:
             self.damage_pct = min(100.0, self.damage_pct + 0.8 * dt)
 
     # -- convenience ---------------------------------------------------------------
+
+    @property
+    def over_revving(self) -> bool:
+        """True while the engine is pinned past redline and taking damage."""
+        return self.engine_on and self.rpm > self.specs.max_rpm * 0.98
 
     @property
     def speed_mph(self) -> float:
