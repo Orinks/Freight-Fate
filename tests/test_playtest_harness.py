@@ -9,6 +9,54 @@ from hypothesis import strategies as st
 from playtest_harness import PlaytestHarness
 
 
+@pytest.mark.parametrize(
+    ("mode", "time_scale"),
+    [("relaxed", 10.0), ("standard", 20.0), ("realistic", 40.0)],
+)
+def test_each_driving_mode_completes_a_full_spoken_delivery(monkeypatch, mode, time_scale):
+    with PlaytestHarness(monkeypatch) as harness:
+        harness.app.ctx.settings.time_scale = time_scale
+        result = harness.start_delivery(profile_name=f"Harness {mode.title()} Mode")
+        harness.drive_delivery_to_completion()
+
+    assert result.deliveries == 1
+    assert result.destination == result.current_city
+    assert "Dispatch routed you to" in result.transcript_text
+    assert "arrived" in result.transcript_text.lower()
+    result.assert_no_known_destination_exit_regressions()
+
+
+@pytest.mark.parametrize(
+    ("time_scale", "minimum_slack", "maximum_damage"),
+    [(10.0, 5.9, 11.0), (20.0, 3.9, 18.1), (40.0, 3.9, 18.1)],
+)
+def test_mode_transcripts_prove_hazard_warning_and_recovery_pressure(
+    monkeypatch, time_scale, minimum_slack, maximum_damage
+):
+    from freight_fate.sim.trip import TripEventKind
+    from freight_fate.sim.trip_models import TripEvent
+
+    with PlaytestHarness(monkeypatch) as harness:
+        harness.app.ctx.settings.time_scale = time_scale
+        result = harness.start_delivery(profile_name=f"Harness Pressure {time_scale:g}")
+        harness.prepare_for_driving(speed_mph=70.0)
+        event = TripEvent(
+            TripEventKind.HAZARD,
+            "Brake now! Disabled truck ahead.",
+            {"deadline_s": 4.0, "dodgeable": False},
+        )
+        harness.driving._handle_trip_event(event)
+        brake_budget = harness.driving._brake_budget_s()
+        reaction_slack = harness.driving._hazard_deadline - brake_budget
+        harness.driving._update_hazard(harness.driving._hazard_deadline + 0.1)
+
+        assert reaction_slack >= minimum_slack
+        assert harness.driving.truck.damage_pct <= maximum_damage
+
+    assert "Brake now! Disabled truck ahead." in result.transcript_text
+    assert "Collision! The truck took damage." in result.transcript_text
+
+
 def test_playtest_harness_forces_headless_environment_before_pygame():
     import os
     import subprocess

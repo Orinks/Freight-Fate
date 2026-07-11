@@ -55,6 +55,7 @@ from ..radio import (
     truck_position,
 )
 from ..sim import hos
+from ..sim.driving_modes import tuning_for_time_scale
 from ..sim.hos import HosClock, clock_text, is_night, time_of_day
 from ..sim.lane import LaneKeeping, lane_label
 from ..sim.timezones import city_zone

@@ -15,7 +15,9 @@ class DrivingEventMixin:
         if sound is not None:
             self.ctx.audio.play(sound)
         self.ctx.say_event(message, interrupt=False)
-        self._ambient_event_cooldown_s = AMBIENT_EVENT_SPACING_S
+        self._ambient_event_cooldown_s = tuning_for_time_scale(
+            self.trip.time_scale
+        ).ambient_spacing_s
 
     def _update_ambient_events(self, dt: float) -> None:
         if self._ambient_event_cooldown_s > 0.0:
@@ -71,8 +73,9 @@ class DrivingEventMixin:
             # getting on the pedal, and fatigue eats into that part only --
             # a drowsy driver reacts late, but the truck stops no slower.
             slack = event.data.get("deadline_s", 4.0)
-            self._hazard_deadline = self._brake_budget_s() + slack * hos.reaction_window_mult(
-                self.ctx.profile.fatigue
+            reaction = tuning_for_time_scale(self.trip.time_scale).reaction_window
+            self._hazard_deadline = self._brake_budget_s() + slack * reaction * (
+                hos.reaction_window_mult(self.ctx.profile.fatigue)
             )
             # A dodgeable hazard sits in the lane you are in *now*; ending up
             # in any other lane before the deadline clears it, if that lane
@@ -456,7 +459,7 @@ class DrivingEventMixin:
         """Arming and announcement window for exits, scaled like zone warnings.
 
         At speed under time compression a fixed window shrinks to nothing in
-        real terms -- at 74 mph on fast pacing, 5 miles is about 7 real
+        real terms -- at 74 mph on realistic pacing, 5 miles is about 7 real
         seconds, not enough to hear the callout, arm the exit, and brake to
         ramp speed. Scale the window so it covers roughly
         ``EXIT_WARNING_REAL_S`` of real time at the current pace.

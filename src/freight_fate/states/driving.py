@@ -55,7 +55,10 @@ class DrivingState(DrivingControlsMixin, DrivingUpdateMixin, DrivingEventMixin, 
             seed=self.trip_seed,
             start_hour=trip_start_hour,
             imperial=ctx.settings.imperial_units,
-            hazard_scale=hos.hazard_scale(ctx.settings.hos_mode),
+            hazard_scale=(
+                hos.hazard_scale(ctx.settings.hos_mode)
+                * tuning_for_time_scale(ctx.settings.time_scale).hazard_frequency
+            ),
             career_hours=profile.game_hours,
         )
         self.lane = LaneKeeping(seed=self.trip_seed)
