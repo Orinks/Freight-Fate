@@ -118,8 +118,10 @@ def test_playtest_transcript_covers_both_automatic_direction_styles(monkeypatch)
 
 # Six full simulated deliveries in one test, under coverage tracing on a
 # contended CI runner, straddle the default 120-second hang timeout. It is
-# long, not hung, so give it real headroom.
-@pytest.mark.timeout(300)
+# long, not hung, so give it real headroom; 300 seconds proved marginal for
+# the sibling sweep tests once the suite grew, and the thread timeout kills
+# the whole xdist worker.
+@pytest.mark.timeout(600)
 @pytest.mark.property
 @settings(max_examples=6, deadline=None)
 @given(

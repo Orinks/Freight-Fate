@@ -140,8 +140,9 @@ def test_route_deadline_uses_baked_limit_near_city():
 
 # Walking every corridor grows with the map and, under coverage tracing on a
 # contended CI runner, straddles the default 120-second hang timeout. It is
-# long, not hung, so give it real headroom.
-@pytest.mark.timeout(300)
+# long, not hung, so give it real headroom; 300 seconds proved marginal once
+# the suite grew, and the thread timeout kills the whole xdist worker.
+@pytest.mark.timeout(600)
 def test_deadlines_cover_required_hos_time_across_the_network(world):
     """Every generated job's deadline must cover the honest HOS time (driving at
     the planning pace plus mandatory breaks and 10-hour sleeps). This is the

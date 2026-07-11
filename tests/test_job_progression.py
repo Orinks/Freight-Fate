@@ -369,8 +369,10 @@ def test_new_dispatches_only_use_metadata_supported_routes(world):
 
 # Sweeping every city's board grows with the map and, under coverage tracing
 # on the slower Windows CI runner, straddles the default 120-second hang
-# timeout. It is long, not hung, so give it real headroom.
-@pytest.mark.timeout(300)
+# timeout. It is long, not hung, so give it real headroom; 300 seconds proved
+# marginal once the suite grew, and the thread timeout kills the whole xdist
+# worker.
+@pytest.mark.timeout(600)
 def test_whole_board_never_offers_unsupported_route_legs(world):
     # Spot-check board generation across a bounded, deterministic sample of origin
     # cities (x4 seeds) rather than every city. The full scan grew with the map
