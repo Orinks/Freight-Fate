@@ -73,3 +73,23 @@ def test_complete_surface_transition_chain_has_ordered_spoken_cues(monkeypatch):
             "Off the ramp and onto city streets",
         )
         result.assert_screen_reader_friendly()
+
+
+@pytest.mark.career_1_9
+def test_ramp_light_dispatches_red_then_green_cues_in_order(monkeypatch):
+    with PlaytestHarness(monkeypatch) as harness:
+        result = harness.start_delivery(profile_name="Ramp Light Driver")
+        driving = harness.driving
+        driving._ramp_mi = 0.2
+        driving._ramp_control = "signal"
+        driving._ramp_terminal_done = False
+        driving._ramp_light_offset_s = 0.0
+        driving._ramp_light_timer = 0.0
+        driving._announce_ramp_terminal()
+        driving._ramp_waiting_at_light = True
+        driving._update_ramp_light(13.0)
+
+    result.assert_ordered(
+        "Traffic light at the end of the ramp, currently red",
+        "Green light. Pull ahead to the entrance",
+    )
