@@ -349,3 +349,62 @@ def test_radio_controls_are_keyboard_reachable(monkeypatch):
 
     assert "radio" in result.transcript_text.lower()
     result.assert_screen_reader_friendly()
+
+
+@pytest.mark.career_1_9
+def test_app_speech_dispatch_flushes_stale_main_speech_for_urgent_events(monkeypatch):
+    calls = []
+
+    class SpeechProbe:
+        def say(self, text, interrupt=True):
+            calls.append(("say_main", text, interrupt))
+
+        def say_event(self, text, interrupt=True):
+            calls.append(("say_event", text, interrupt))
+
+        def stop_main(self):
+            calls.append(("stop_main",))
+
+        def stop_event(self):
+            calls.append(("stop_event",))
+
+    with PlaytestHarness(monkeypatch) as harness:
+        ctx = harness.app.ctx
+        ctx.speech = SpeechProbe()
+        ctx.settings.sapi_events = False
+        # Restore the real app-level routing hidden by transcript capture.
+        from freight_fate.app import GameContext
+
+        GameContext.say(ctx, "Routine status", interrupt=False)
+        GameContext.say_event(ctx, "Brake now!", interrupt=True)
+        ctx.stop_speech()
+
+    assert calls == [
+        ("say_main", "Routine status", False),
+        ("stop_main",),
+        ("say_main", "Brake now!", False),
+        ("stop_main",),
+        ("stop_event",),
+    ]
+
+
+@pytest.mark.career_1_9
+def test_app_dedicated_event_voice_does_not_interrupt_main_speech(monkeypatch):
+    calls = []
+
+    class SpeechProbe:
+        def say_event(self, text, interrupt=True):
+            calls.append(("say_event", text, interrupt))
+
+        def stop_main(self):
+            calls.append(("stop_main",))
+
+    with PlaytestHarness(monkeypatch) as harness:
+        ctx = harness.app.ctx
+        ctx.speech = SpeechProbe()
+        ctx.settings.sapi_events = True
+        from freight_fate.app import GameContext
+
+        GameContext.say_event(ctx, "Construction merge ahead", interrupt=True)
+
+    assert calls == [("say_event", "Construction merge ahead", True)]
