@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- **Career 1.9 playtests now follow more of a driver's real journey.** Reusable transcript checks cover career stages, driving modes, keyboard-operated controls, speech ordering, and deterministic road events so regressions are caught before they reach players.
+
 ### Changed
 
 - **Relaxed driving now leaves real breathing room without removing the truck.**

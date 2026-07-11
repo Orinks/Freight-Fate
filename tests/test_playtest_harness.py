@@ -10,6 +10,7 @@ from hypothesis import strategies as st
 from playtest_harness import PlaytestHarness
 
 
+@pytest.mark.career_1_9
 @pytest.mark.parametrize(
     ("mode", "time_scale"),
     [("relaxed", 10.0), ("standard", 20.0), ("realistic", 40.0)],
@@ -109,6 +110,7 @@ def test_app_forces_dummy_video_when_speech_is_disabled():
 
 
 @pytest.mark.smoke
+@pytest.mark.career_1_9
 def test_playtest_harness_records_headless_delivery_transcript(monkeypatch):
     with PlaytestHarness(monkeypatch) as harness:
         result = harness.start_delivery(profile_name="Harness Smoke")
@@ -318,3 +320,32 @@ def test_keyboard_navigation_failure_is_bounded_and_descriptive(monkeypatch):
         harness.app.push_state(MainMenuState(harness.app.ctx))
         with pytest.raises(AssertionError, match="not reachable with Down"):
             harness._select_current_menu_text("Missing harness action")
+
+
+@pytest.mark.career_1_9
+def test_deterministic_hook_restores_inspection_event(monkeypatch):
+    from freight_fate.sim.trip import TripEventKind
+
+    with PlaytestHarness(monkeypatch) as harness:
+        result = harness.start_delivery(profile_name="Harness Inspection")
+        harness.emit_trip_event(
+            TripEventKind.INSPECTION,
+            "Inspection station ahead.",
+            {"facility": "Harness safety scale"},
+        )
+
+    assert "Inspection station ahead" in result.transcript_text
+    assert any(entry.channel == "event" for entry in result.spoken)
+    result.assert_screen_reader_friendly()
+
+
+@pytest.mark.career_1_9
+def test_radio_controls_are_keyboard_reachable(monkeypatch):
+    with PlaytestHarness(monkeypatch) as harness:
+        result = harness.start_delivery(profile_name="Harness Radio")
+        harness.press_key(pygame.K_m)
+        harness.press_key(pygame.K_RIGHTBRACKET, "]")
+        harness.press_key(pygame.K_BACKSLASH, "\\")
+
+    assert "radio" in result.transcript_text.lower()
+    result.assert_screen_reader_friendly()

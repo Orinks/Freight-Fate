@@ -322,6 +322,13 @@ class PlaytestHarness:
         self.driving.trip.traffic_pressures = [pressure]
         return pressure
 
+    def emit_trip_event(self, kind, text: str, data: dict | None = None) -> None:
+        """Re-enable one deterministic trip event after default neutralization."""
+        from freight_fate.sim.trip_models import TripEvent
+
+        assert self.driving is not None
+        self.driving._handle_trip_event(TripEvent(kind, text, data or {}))
+
     def _select_current_menu_text(self, text: str) -> None:
         assert self.app is not None
         for _ in range(len(self.app.state.items)):

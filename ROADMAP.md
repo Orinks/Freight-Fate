@@ -10,6 +10,8 @@
 
 ## 1.9 in flight (`feat/career-1.9`)
 
+- [x] Add a curated `career_1_9` transcript-backed smoke suite with reusable career-stage presets, structured speech ordering, keyboard reachability, all driving modes, and deterministic event hooks.
+
 Four threads: make the drive *between* the exits real, give every maneuver
 and working hour weight, make the career read like real employment, and
 make the world big and specific enough that every run feels like a place.
