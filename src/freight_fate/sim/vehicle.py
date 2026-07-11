@@ -12,7 +12,7 @@ from __future__ import annotations
 import math
 from dataclasses import dataclass, field
 
-from .transmission import Transmission
+from .transmission import AUTO_UPSHIFT_RPM, Transmission
 
 G = 9.81
 AIR_DENSITY = 1.225
@@ -170,7 +170,34 @@ class TruckState:
         rpm_est = self.coupled_rpm() if not tr.in_neutral else self.rpm
         rpm_est = max(rpm_est, self.specs.idle_rpm * (0.5 + 0.5 * self.throttle))
         braking = self.brake > 0.01 or self.emergency_brake or self.air_brakes_holding
-        return tr.auto_update(rpm_est, self.throttle, self.velocity_mps > 0.5, braking)
+        can_upshift = True
+        if 0 < tr.gear < tr.num_gears and self.throttle > 0.5 and self.grade > 0.02:
+            next_gear = tr.gear + 1
+            next_rpm = max(self.specs.idle_rpm, self.coupled_rpm(next_gear))
+            next_ratio = abs(tr.ratio_for(next_gear))
+            next_torque = self.torque_at(next_rpm) * self.throttle * self.health_factor
+            next_force = (
+                next_torque
+                * next_ratio
+                * self.specs.driveline_efficiency
+                / self.specs.wheel_radius_m
+            )
+            traction_limit = self.gross_mass_kg * G * 0.33 * self.grip
+            next_force = min(next_force, traction_limit)
+            # Do not grab a taller gear that cannot pull the current road load.
+            # This predicts the post-shift tractive force instead of repeatedly
+            # shifting up, losing speed, and kicking straight back down.
+            minimum_post_shift_rpm = AUTO_UPSHIFT_RPM * (1.0 if self.grade >= 0.05 else 0.8)
+            can_upshift = (
+                next_rpm >= minimum_post_shift_rpm and next_force >= self.resistance_force() * 1.05
+            )
+        return tr.auto_update(
+            rpm_est,
+            self.throttle,
+            self.velocity_mps > 0.5,
+            braking,
+            can_upshift,
+        )
 
     # -- forces -----------------------------------------------------------------
 
@@ -179,6 +206,10 @@ class TruckState:
             return 0.0
         ratio = self.transmission.drive_ratio
         if ratio == 0.0:
+            return 0.0
+        if self.coupled_rpm() >= self.specs.max_rpm:
+            # The diesel governor cuts fuel at governed RPM. Continuing to hold
+            # the throttle must not accelerate through a fixed low gear.
             return 0.0
         torque = self.torque_at(self.rpm) * self.throttle * self.health_factor
         direction = -1.0 if ratio < 0 else 1.0
@@ -486,8 +517,12 @@ class TruckState:
 
     @property
     def over_revving(self) -> bool:
-        """True while the engine is pinned past redline and taking damage."""
-        return self.engine_on and self.rpm > self.specs.max_rpm * 0.98
+        """True after a forced over-rev, such as an unsafe downshift.
+
+        Reaching the normal fuel governor under power is safe; damage begins
+        only when road speed mechanically drives the engine beyond its limit.
+        """
+        return self.engine_on and self.coupled_rpm() > self.specs.max_rpm * 1.05
 
     @property
     def speed_mph(self) -> float:

@@ -47,6 +47,45 @@ def make_auto_truck() -> TruckState:
     return t
 
 
+def test_manual_governor_holds_low_gear_without_engine_damage():
+    truck = TruckState()
+    truck.start_engine()
+    truck.set_air_ready(parking_brake=False)
+    truck.transmission.gear = 1
+    truck.throttle = 1.0
+
+    drive(truck, 20.0)
+    speed_at_governor = truck.speed_mph
+    damage_at_governor = truck.damage_pct
+    drive(truck, 10.0)
+
+    assert truck.rpm == pytest.approx(truck.specs.max_rpm)
+    assert truck.speed_mph == pytest.approx(speed_at_governor, abs=0.5)
+    assert truck.damage_pct == pytest.approx(damage_at_governor)
+
+
+@pytest.mark.parametrize("grade", [0.04, 0.06, 0.08])
+def test_loaded_automatic_avoids_steep_grade_shift_hunting(grade):
+    from freight_fate.sim.vehicle import KG_PER_TON
+
+    truck = make_auto_truck()
+    truck.set_air_ready(parking_brake=False)
+    truck.cargo_kg = 25 * KG_PER_TON
+    truck.grade = grade
+    truck.throttle = 1.0
+    shifts = 0
+    previous_gear = truck.transmission.gear
+    for _ in range(90 * 60):
+        truck.auto_shift()
+        truck.update(1 / 60)
+        if truck.transmission.gear != previous_gear:
+            shifts += 1
+            previous_gear = truck.transmission.gear
+
+    assert shifts <= 12
+    assert truck.speed_mph > 3.0
+
+
 def test_gross_mass_includes_cargo_payload():
     from freight_fate.sim.vehicle import KG_PER_TON, REFERENCE_CARGO_KG
 

@@ -4,6 +4,15 @@
 
 ### Fixed
 
+- **Manual and automatic transmissions behave reliably on steep grades.** The
+  diesel governor now holds a safe low-gear road speed without quietly damaging
+  the engine, and automatic trucks avoid shifts that cannot pull the hill.
+- **Transmission changes now apply when you return to an active drive.** The
+  game announces the new automatic or manual mode instead of waiting until the
+  next trip.
+- **Destination signs no longer send you down an early exit.** Navigation now
+  favors the interchange nearest the destination over an earlier sign that
+  happens to mention the same city.
 - **Speeding fines now follow you on bobtail runs.** Empty repositioning trips
   charge accumulated speeding-strike fines and announce the cost in the arrival
   summary instead of silently letting the fines disappear.

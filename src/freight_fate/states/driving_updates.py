@@ -94,6 +94,12 @@ class DrivingUpdateMixin:
             self._brake_air_hissed = True
         elif t.brake < 0.02:
             self._brake_air_hissed = False
+        desired_automatic = self.ctx.settings.automatic_transmission
+        if t.transmission.automatic != desired_automatic:
+            t.transmission.automatic = desired_automatic
+            mode = "automatic" if desired_automatic else "manual"
+            self.ctx.say_event(f"Transmission changed to {mode}.", interrupt=True)
+
         clutch_pressed = keys[pygame.K_LSHIFT] or keys[pygame.K_RSHIFT]
         clutch_val = 1.0 if clutch_pressed else 0.0
         if pad_on:

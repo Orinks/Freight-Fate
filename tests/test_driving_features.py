@@ -33,6 +33,38 @@ def test_trip_event_sounds_use_contextual_cues():
     assert _route_event_sound(event) == "events/construction_zone"
 
 
+def test_active_drive_applies_manual_setting_and_announces_it(monkeypatch):
+    from freight_fate.app import App
+
+    app = App()
+    events = []
+
+    class HeldShift:
+        def __getitem__(self, key):
+            return key == pygame.K_LSHIFT
+
+    keys = HeldShift()
+    monkeypatch.setattr(pygame.key, "get_pressed", lambda: keys)
+    monkeypatch.setattr(
+        app.ctx,
+        "say_event",
+        lambda text, interrupt=True: events.append((text, interrupt)),
+    )
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        assert driving.truck.transmission.automatic
+        app.ctx.settings.automatic_transmission = False
+
+        driving.update(1 / 60)
+
+        assert not driving.truck.transmission.automatic
+        assert driving.truck.transmission.clutch == 1.0
+        assert ("Transmission changed to manual.", True) in events
+    finally:
+        app.shutdown()
+
+
 def test_passing_hazard_plays_clear_sound(monkeypatch):
     from freight_fate.app import App
     from freight_fate.states.driving_core import HAZARD_SAFE_MPH
@@ -136,6 +168,8 @@ def test_automatic_reverse_selection_is_spoken(monkeypatch):
 
 
 def test_sustained_redline_speaks_a_damage_warning(monkeypatch):
+    import math
+
     from freight_fate.app import App
 
     app = App()
@@ -152,6 +186,10 @@ def test_sustained_redline_speaks_a_damage_warning(monkeypatch):
         quiet_trip(driving)
         t = driving.truck
         t.engine_on = True
+        t.transmission.gear = 1
+        ratio = abs(t.transmission.ratio_for(1))
+        wheel_rps = (t.specs.max_rpm * 1.1) / (60.0 * ratio)
+        t.velocity_mps = wheel_rps * 2 * math.pi * t.specs.wheel_radius_m
         t.rpm = t.specs.max_rpm
         t.damage_pct = 12.0
 
@@ -1083,7 +1121,59 @@ def test_delivery_exit_uses_real_destination_interchange():
 
         assert destination is not None
         assert destination.exit_label
-        assert destination.at_mi == pytest.approx(67.5, abs=0.2)
+        assert destination.at_mi == pytest.approx(72.8, abs=0.2)
+    finally:
+        app.shutdown()
+
+
+def test_delivery_exit_prefers_nearest_interchange_over_early_city_sign():
+    import dataclasses
+
+    from freight_fate.app import App
+    from freight_fate.data.world_models import Interchange
+    from freight_fate.models.jobs import CARGO_CATALOG, Job
+    from freight_fate.models.profile import Profile
+    from freight_fate.states.driving import DrivingState
+
+    app = App()
+    try:
+        app.ctx.profile = Profile(name="Nearest Exit", current_city="Buffalo")
+        route = app.ctx.world.supported_route("Buffalo", "Rochester")
+        leg = route.legs[-1]
+        early = Interchange(
+            at_mi=10.0,
+            exit_ref="10",
+            destinations=("Rochester",),
+            name="",
+            highway=leg.highway,
+            source="test",
+        )
+        near = Interchange(
+            at_mi=leg.miles - 1.0,
+            exit_ref="near",
+            destinations=("Freight district",),
+            name="",
+            highway=leg.highway,
+            source="test",
+        )
+        route.legs[-1] = dataclasses.replace(leg, interchanges=(early, near))
+        job = Job(
+            CARGO_CATALOG["general"],
+            12.0,
+            "Buffalo",
+            "company yard",
+            "Rochester",
+            route.miles,
+            1000.0,
+            12.0,
+            destination_location="Rochester freight market",
+        )
+        driving = DrivingState(app.ctx, job, route, phase="delivery")
+
+        details = driving._destination_exit_details()
+
+        assert details is not None
+        assert details[1] == "exit near"
     finally:
         app.shutdown()
 

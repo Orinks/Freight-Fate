@@ -69,6 +69,7 @@ def test_cruise_does_not_rev_engine_when_clutch_is_depressed(monkeypatch):
         driving.handle_event(key_event(pygame.K_e))  # engine on
         t.cargo_kg = 0.0
         t.grade = 0.0
+        app.ctx.settings.automatic_transmission = False
         t.transmission.automatic = False  # the bug is manual-only
         t.transmission.gear = 10
         t.velocity_mps = 26.8  # ~60 mph

@@ -91,7 +91,12 @@ class Transmission:
     # -- automatic ---------------------------------------------------------------
 
     def auto_update(
-        self, rpm: float, throttle: float, moving: bool, braking: bool = False
+        self,
+        rpm: float,
+        throttle: float,
+        moving: bool,
+        braking: bool = False,
+        can_upshift: bool = True,
     ) -> int | None:
         """Pick a gear in automatic mode. Returns the new gear when it changes.
 
@@ -115,7 +120,7 @@ class Transmission:
             self.gear = 1
             self._shift_timer = SHIFT_TIME
             return self.gear
-        if rpm > AUTO_UPSHIFT_RPM and self.gear < self.num_gears and not braking:
+        if rpm > AUTO_UPSHIFT_RPM and self.gear < self.num_gears and not braking and can_upshift:
             self.gear += 1
             self._shift_timer = SHIFT_TIME
             return self.gear

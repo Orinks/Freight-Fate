@@ -348,16 +348,14 @@ class DrivingEventMixin:
                 )
                 candidates.append(
                     (
-                        not matches_destination,
                         len(self.route.legs) - 1 - i,
                         dist_from_destination,
+                        not matches_destination,
                         route_mile,
                         ix.exit_label,
                         ix.spoken_phrase,
                     )
                 )
-            if candidates and not candidates[0][0]:
-                break
         if not candidates:
             return None
         candidates.sort()
