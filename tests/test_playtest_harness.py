@@ -210,6 +210,7 @@ def test_playtest_harness_neutralizes_random_traffic_by_default(monkeypatch):
         assert harness.driving.trip.traffic_pressures == []
 
 
+@pytest.mark.career_1_9
 def test_playtest_harness_can_exercise_npc_traffic(monkeypatch):
     with PlaytestHarness(monkeypatch) as harness:
         result = harness.start_delivery(profile_name="Harness NPC Traffic")
@@ -227,6 +228,7 @@ def test_playtest_harness_can_exercise_npc_traffic(monkeypatch):
     assert "leave a gap" in result.transcript_text
 
 
+@pytest.mark.career_1_9
 def test_playtest_harness_can_exercise_traffic_pressure_guidance(monkeypatch):
     with PlaytestHarness(monkeypatch) as harness:
         result = harness.start_delivery(profile_name="Harness Traffic Pressure")
@@ -417,3 +419,36 @@ def test_app_dedicated_event_voice_does_not_interrupt_main_speech(monkeypatch):
         GameContext.say_event(ctx, "Construction merge ahead", interrupt=True)
 
     assert calls == [("say_event", "Construction merge ahead", True)]
+
+
+@pytest.mark.career_1_9
+def test_deterministic_landmark_and_billboard_hooks_honor_granular_toggles(monkeypatch):
+    from freight_fate.sim.trip import TripEventKind
+
+    with PlaytestHarness(monkeypatch) as harness:
+        result = harness.start_delivery(profile_name="Chatter Driver")
+        harness.emit_trip_event(
+            TripEventKind.LANDMARK, "Crossing the Harness River.", {"category": "river"}
+        )
+        harness.emit_trip_event(
+            TripEventKind.BILLBOARD,
+            "Billboard: Harness coffee ahead.",
+            {"category": "billboard"},
+        )
+        harness.driving._update_ambient_events(999.0)
+        before = len(result.spoken)
+        harness.app.ctx.settings.chatter_rivers = False
+        harness.app.ctx.settings.chatter_billboards = False
+        harness.emit_trip_event(
+            TripEventKind.LANDMARK, "Crossing the Muted River.", {"category": "river"}
+        )
+        harness.emit_trip_event(
+            TripEventKind.BILLBOARD,
+            "Billboard: Muted roadside joke.",
+            {"category": "billboard"},
+        )
+
+    assert "Harness River" in result.transcript_text
+    assert "Harness coffee" in result.transcript_text
+    assert len(result.spoken) == before
+    assert "Muted" not in result.transcript_text

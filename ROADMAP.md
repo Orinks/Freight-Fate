@@ -11,6 +11,7 @@
 ## 1.9 in flight (`feat/career-1.9`)
 
 - [x] Add a curated `career_1_9` transcript-backed smoke suite with reusable career-stage presets, structured speech ordering, keyboard reachability, all driving modes, and deterministic event hooks.
+- [ ] Wire Big Buck's content into a playable roadside stop; current 1.9 data and spoken refusal content are shipped, but no honest drive-and-enter gameplay path exists yet.
 
 Four threads: make the drive *between* the exits real, give every maneuver
 and working hour weight, make the career read like real employment, and
