@@ -60,7 +60,12 @@ def test_complete_surface_transition_chain_has_ordered_spoken_cues(monkeypatch):
         assert driving.lane.lane == 0
 
         # Real destination-intent key and the actual surface swap seam.
+        stop = driving._destination_exit_stop()
+        assert stop is not None
+        driving._exit_stop = stop
         harness.press_key(pygame.K_x, "x")
+        assert driving._exit_signal_on
+        assert "Signal on" in result.transcript[-1]
         assert driving._begin_surface_chain()
         assert driving._surface_chain
         approach_snapshot = driving.snapshot()

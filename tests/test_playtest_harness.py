@@ -354,12 +354,35 @@ def test_deterministic_hook_restores_inspection_event(monkeypatch):
 def test_radio_controls_are_keyboard_reachable(monkeypatch):
     with PlaytestHarness(monkeypatch) as harness:
         result = harness.start_delivery(profile_name="Harness Radio")
+        before_enabled = harness.driving.radio.enabled
         harness.press_key(pygame.K_m)
+        assert harness.driving.radio.enabled is not before_enabled
+        assert result.transcript[-1].lower().startswith("radio ")
+        before_station = harness.driving.radio.station_id
         harness.press_key(pygame.K_RIGHTBRACKET, "]")
-        harness.press_key(pygame.K_BACKSLASH, "\\")
+        assert harness.driving.radio.station_id != before_station
+        assert (
+            "selected" in result.transcript[-1].lower() or "tuned" in result.transcript[-1].lower()
+        )
+        harness.press_key(pygame.K_y, "y")
+        assert result.transcript[-1].startswith("Radio ")
 
     assert "radio" in result.transcript_text.lower()
     result.assert_screen_reader_friendly()
+
+
+@pytest.mark.career_1_9
+def test_lane_setup_keys_change_lane_and_speak_result(monkeypatch):
+    with PlaytestHarness(monkeypatch) as harness:
+        harness.start_delivery(profile_name="Lane Keyboard Driver")
+        harness.prepare_for_driving(speed_mph=45.0)
+        harness.app.ctx.settings.steering_assist = "off"
+        harness.driving.lane.lane = 0
+        harness.press_key(pygame.K_LEFT)
+        assert harness.driving._lane_change_target == 1
+        harness.driving._update_tap_lane_change(3.0)
+        assert harness.driving.lane.lane == 1
+        assert "left lane" in harness.result.transcript[-1].lower()
 
 
 @pytest.mark.career_1_9
