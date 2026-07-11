@@ -585,6 +585,13 @@ class ArrivalState(MenuState):
         job = d.job
         self.title = "Repositioned"
         p.current_city = job.destination
+        driver_charges = _speeding_settlement_fine(d.speeding_strikes)
+        if driver_charges:
+            p.money -= driver_charges
+            self.summary_parts.append(
+                f"Driver-responsibility charges: speeding fines cost you "
+                f"{driver_charges:,.0f} dollars."
+            )
         p.truck_fuel_gal = d.truck.fuel_gal
         p.truck_damage_pct = d.truck.damage_pct
         p.game_hours += hours

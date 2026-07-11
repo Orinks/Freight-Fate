@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+### Fixed
+
+- **Speeding fines now follow you on bobtail runs.** Empty repositioning trips
+  charge accumulated speeding-strike fines and announce the cost in the arrival
+  summary instead of silently letting the fines disappear.
+
 ### Changed
 
 - **Freight Fate checks for updates again when you leave a terminal.** Returning

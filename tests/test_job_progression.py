@@ -90,6 +90,39 @@ def test_bobtail_relocates_to_a_nearby_city_without_pay():
         app.shutdown()
 
 
+def test_bobtail_speeding_strikes_charge_the_driver():
+    from freight_fate.app import App
+    from freight_fate.models.jobs import make_reposition_job
+    from freight_fate.models.profile import Profile
+    from freight_fate.states.driving import (
+        ArrivalState,
+        DrivingState,
+        _speeding_settlement_fine,
+    )
+
+    app = App()
+    try:
+        app.ctx.profile = Profile(name="Fast Bobtail")
+        p = app.ctx.profile
+        job = make_reposition_job(app.ctx.world, "Denver", "Cheyenne")
+        assert job is not None
+        route = app.ctx.world.supported_route("Denver", "Cheyenne")
+        driving = DrivingState(app.ctx, job, route)
+        driving.speeding_strikes = 2
+        money_before = p.money
+
+        arrival = ArrivalState(app.ctx, driving)
+
+        fine = _speeding_settlement_fine(2)
+        assert p.money == money_before - fine
+        assert any(
+            f"{fine:,.0f} dollars" in line and "speeding fines" in line
+            for line in arrival.summary_lines
+        )
+    finally:
+        app.shutdown()
+
+
 def test_bobtail_personal_conveyance_records_off_duty_hos_time():
     from freight_fate.app import App
     from freight_fate.models.jobs import make_reposition_job
