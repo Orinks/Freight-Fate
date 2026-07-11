@@ -77,6 +77,10 @@ for 1.8" framing predates the release split):
       unloading, and pull-ins take spoken on-duty time; loaded launches ramp
       in like a heavy truck; rush hour and corridor busyness shape traffic
       and hazard pacing.
+- [x] **Three distinct driving-pressure modes.** Relaxed retains the 1.9 truck,
+      traffic, weather, fatigue, and hazard systems with calmer spacing, wider
+      reactions, gentler recovery, and quieter routine speech. Standard keeps
+      balanced pressure; Realistic keeps the quickest decision cadence.
 - [x] **Drive to city services.** The terminal's freight office, garage,
       and truck dealer are short local drives with sourced names, road
       context, and (where the data supports it) real street-by-street

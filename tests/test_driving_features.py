@@ -314,10 +314,10 @@ def test_how_to_play_documents_new_gameplay_systems():
     assert "slow lead vehicles" in help_text
     assert "settings are grouped into categories" in help_text
     assert "open a category to see its settings" in help_text
-    assert "trip pacing changes how quickly distance and game time pass" in help_text
-    assert "relaxed pacing gives you more real time to react, and is the default" in help_text
-    assert "relaxed keeps the clock but gives a more forgiving schedule" in help_text
-    assert "longer limits and fewer penalties" in help_text
+    assert "driving mode changes trip pacing and pressure" in help_text
+    assert "relaxed gives more real time, wider hazard windows" in help_text
+    assert "standard keeps balanced timing and consequences" in help_text
+    assert "real violations keep their normal consequences" in help_text
     assert "adaptive cruise" in help_text
     assert "three second clear-weather gap" in help_text
     assert "increase the following gap" in help_text
@@ -1822,9 +1822,7 @@ def test_destination_exit_announced_within_scaled_window(monkeypatch):
 
     app = App()
     events = []
-    monkeypatch.setattr(
-        app.ctx, "say_event", lambda text, interrupt=True: events.append(text)
-    )
+    monkeypatch.setattr(app.ctx, "say_event", lambda text, interrupt=True: events.append(text))
     try:
         driving = start_drive(app)
         quiet_trip(driving)
@@ -1850,9 +1848,7 @@ def test_exit_announcements_speak_each_name_once(monkeypatch):
     app = App()
     said = []
     monkeypatch.setattr(app.ctx, "say", lambda text, **k: said.append(text))
-    monkeypatch.setattr(
-        app.ctx, "say_event", lambda text, interrupt=True: said.append(text)
-    )
+    monkeypatch.setattr(app.ctx, "say_event", lambda text, interrupt=True: said.append(text))
     try:
         driving = start_drive(app)
         quiet_trip(driving)
@@ -1885,9 +1881,7 @@ def test_labeled_missed_exit_names_the_exit_once(monkeypatch):
 
     app = App()
     said = []
-    monkeypatch.setattr(
-        app.ctx, "say_event", lambda text, interrupt=True: said.append(text)
-    )
+    monkeypatch.setattr(app.ctx, "say_event", lambda text, interrupt=True: said.append(text))
     try:
         driving = start_drive(app)
         quiet_trip(driving)

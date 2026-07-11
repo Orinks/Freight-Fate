@@ -270,7 +270,7 @@ FULL_COMPRESSION_MPH = 50.0  # road speed where full pacing resumes
 # Setting the parking brake says "I'm staying put": nothing needs real-time
 # reactions, so waiting runs at double the configured pacing -- weather,
 # daylight, and dock time pass without dropping into real time, and each
-# pacing setting keeps its relative feel (relaxed 20x, standard 40x, fast
+# pacing setting keeps its relative feel (relaxed 20x, standard 40x, realistic
 # 80x). Releasing the brake returns to the speed ramp instantly.
 PARKED_TIME_SCALE_MULT = 2.0
 STATE_CROSSING_WARNING_LOOKAHEAD_MI = 10.0

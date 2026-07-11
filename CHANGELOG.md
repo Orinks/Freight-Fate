@@ -2,6 +2,17 @@
 
 ## Unreleased
 
+### Changed
+
+- **Relaxed driving now leaves real breathing room without removing the truck.**
+  Relaxed pacing keeps weather, traffic, air brakes, fatigue, hazards, and
+  consequences understandable, but hazards are spaced farther apart, warnings
+  allow more response time, collision damage and fatigue build more gently,
+  and routine speech is calmer. Standard keeps the previous balanced pressure,
+  while the former Fast pacing is now called Realistic and retains the quickest
+  decision cadence. Safety warnings also stay in front of hours and fatigue
+  chatter instead of being interrupted.
+
 ### Added
 
 - **The biggest map update yet -- 100 new cities to pick up and deliver in.** A
