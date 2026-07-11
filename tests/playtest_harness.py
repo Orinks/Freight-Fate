@@ -117,6 +117,7 @@ class PlaytestHarness:
         job_rank: int = 0,
         route_rank: int = 0,
         configure_profile=None,
+        stop_at_pickup: bool = False,
     ) -> PlaytestResult:
         from freight_fate.states.city import (
             CityMenuState,
@@ -169,6 +170,8 @@ class PlaytestHarness:
         self.app.state.update(1 / 60)
         _finish_timed_state(self.app)
         assert isinstance(self.app.state, PickupFacilityState)
+        if stop_at_pickup:
+            return self.result
         self.app.state.handle_event(key_event(pygame.K_RETURN))
         self.app.state.handle_event(key_event(pygame.K_RETURN))
         _finish_timed_state(self.app)
