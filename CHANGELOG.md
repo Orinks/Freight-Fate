@@ -4,6 +4,13 @@
 
 ### Added
 
+- **Nine long runs now call out real towns instead of vague corridors.** On
+  routes like San Antonio to Dallas, Denver to Salt Lake City, Phoenix to Los
+  Angeles, Atlanta to Birmingham, and Chicago to Indianapolis, the game names
+  the actual towns you pass -- New Braunfels and Waxahachie, Steamboat Springs
+  and Vernal, Quartzsite, Baker and Yermo out in the desert -- in place of the
+  old generic "corridor" markers.
+
 - **Thirteen more cities finish the flavor map, coast to coast.** Socorro joins
   Interstate 25 down the Rio Grande; Modesto and Merced fill California's Highway 99
   between Stockton and Fresno; New London lands on Interstate 95 between Providence

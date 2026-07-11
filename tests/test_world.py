@@ -444,9 +444,7 @@ def test_corridor_metadata_supports_offline_itineraries(world):
     assert max(abs(segment.avg_grade_pct) for segment in leg.grade_segments) < 0.2
     assert [crossing.state for crossing in leg.state_crossings] == ["Indiana"]
     assert leg.state_crossings[0].at_mi == 32.8
-    assert any(
-        checkpoint.name == "Gary and Hammond industrial corridor" for checkpoint in leg.checkpoints
-    )
+    assert any(checkpoint.name == "Lafayette" for checkpoint in leg.checkpoints)
     assert sum(state_miles.miles for state_miles in leg.state_miles) == leg.miles
 
 
