@@ -323,6 +323,15 @@ def test_keyboard_navigation_failure_is_bounded_and_descriptive(monkeypatch):
 
 
 @pytest.mark.career_1_9
+def test_name_entry_uses_real_space_key_and_preserves_accessible_name(monkeypatch):
+    with PlaytestHarness(monkeypatch) as harness:
+        result = harness.start_delivery(profile_name="Harness Driver")
+        assert harness.app.ctx.profile.name == "Harness Driver"
+
+    assert "space" in result.transcript
+
+
+@pytest.mark.career_1_9
 def test_deterministic_hook_restores_inspection_event(monkeypatch):
     from freight_fate.sim.trip import TripEventKind
 

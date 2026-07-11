@@ -138,8 +138,8 @@ class PlaytestHarness:
         self._select_current_menu_text("New career")
         assert isinstance(self.app.state, NameEntryState)
         for ch in profile_name:
-            if ch != " ":
-                self.app.state.handle_event(key_event(ord(ch.lower()), ch))
+            key = pygame.K_SPACE if ch == " " else ord(ch.lower())
+            self.app.state.handle_event(key_event(key, ch))
         self.app.state.handle_event(key_event(pygame.K_RETURN))
         assert isinstance(self.app.state, CareerStartState)
         self.app.state.handle_event(key_event(pygame.K_RETURN))
