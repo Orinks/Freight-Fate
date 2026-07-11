@@ -434,6 +434,11 @@
 
 ### Fixed
 
+- **A few routes now name the right highway.** On the runs from Denver to Salt
+  Lake City, Santa Rosa to Stockton, and Clarksville to Huntsville, the game
+  announced a highway the route never actually takes; it now names the road you
+  are really driving.
+
 - **Your truck no longer idles all night while you sleep.** Bedding down for
   the night -- at a rest stop, in the sleeper berth, in a cramped lot, or on
   the shoulder -- now shuts the engine down first, and you will hear "You
