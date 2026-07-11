@@ -265,6 +265,37 @@ class PlaytestHarness:
         self.result.remaining_miles = driving.trip.remaining_miles
         return self.result
 
+    def continue_to_next_delivery(self, *, job_rank: int = 0, route_rank: int = 0) -> None:
+        """Leave settlement and dispatch another load on the same career."""
+        from freight_fate.states.city import CityMenuState, JobBoardState, PickupFacilityState
+        from freight_fate.states.driving import ArrivalState, DrivingState
+
+        assert isinstance(self.app.state, ArrivalState)
+        self.app.state.handle_event(key_event(pygame.K_ESCAPE))
+        assert isinstance(self.app.state, CityMenuState)
+        self._select_current_menu_text("Dispatch board")
+        assert isinstance(self.app.state, JobBoardState)
+        if self.app.state.assigned_mode:
+            self._accept_assigned_job(job_rank)
+        else:
+            self._choose_unlocked_job(job_rank)
+        assert isinstance(self.app.state, DrivingState)
+        self.app.state.trip.position_mi = self.app.state.trip.total_miles
+        self.app.state.trip.finished = True
+        self.app.state.truck.velocity_mps = 0.0
+        self.app.state.update(1 / 60)
+        _finish_timed_state(self.app)
+        assert isinstance(self.app.state, PickupFacilityState)
+        self.app.state.handle_event(key_event(pygame.K_RETURN))
+        self.app.state.handle_event(key_event(pygame.K_RETURN))
+        _finish_timed_state(self.app)
+        self.app.state.handle_event(key_event(pygame.K_RETURN))
+        if self.app.state.__class__.__name__ == "RouteSelectState":
+            self._choose_route(route_rank)
+        assert isinstance(self.app.state, DrivingState)
+        self.driving = self.app.state
+        self._neutralize_random_trip_friction()
+
     def prepare_for_driving(self, *, speed_mph: float = 30.0) -> None:
         """Put the active delivery truck in a road-ready deterministic state."""
         assert self.driving is not None
