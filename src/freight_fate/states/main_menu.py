@@ -133,6 +133,14 @@ class MainMenuState(MenuState):
     _update_checker: UpdateChecker | None = None
     _update_prompted = False
 
+    @classmethod
+    def arm_update_check(cls, settings) -> None:
+        """Start a fresh silent check for the next main-menu update cycle."""
+        if not updater.is_frozen():
+            return
+        cls._update_checker = UpdateChecker(settings)
+        cls._update_prompted = False
+
     def enter(self) -> None:
         super().enter()
         profile = self.ctx.profile
@@ -142,8 +150,8 @@ class MainMenuState(MenuState):
         sequence = select_menu_music_sequence(profile)
         self.ctx.play_music_sequence("menu", sequence)
         cls = MainMenuState
-        if updater.is_frozen() and cls._update_checker is None:
-            cls._update_checker = UpdateChecker(self.ctx.settings)
+        if cls._update_checker is None:
+            cls.arm_update_check(self.ctx.settings)
 
     def update(self, dt: float) -> None:
         super().update(dt)

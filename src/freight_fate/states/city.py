@@ -363,6 +363,7 @@ class CityMenuState(MenuState):
 
         self.ctx.save_profile()
         self.ctx.say("Progress saved.")
+        MainMenuState.arm_update_check(self.ctx.settings)
         self.ctx.reset_to(MainMenuState(self.ctx))
 
     def go_back(self) -> None:

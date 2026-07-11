@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+### Changed
+
+- **Freight Fate checks for updates again when you leave a terminal.** Returning
+  to the main menu from a city terminal or pickup facility now starts a quiet
+  background check, so an available update can be installed before you finish
+  the session.
+
 ### Added
 
 - **The Deep South fills in with seven new connections.** Birmingham now runs to

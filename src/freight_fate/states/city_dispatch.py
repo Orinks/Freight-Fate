@@ -568,6 +568,7 @@ class PickupFacilityState(MenuState):
 
         self._save_state()
         self.ctx.say("Saved. Your pickup objective will resume here.", interrupt=True)
+        MainMenuState.arm_update_check(self.ctx.settings)
         self.ctx.reset_to(MainMenuState(self.ctx))
 
     def _cancel(self) -> None:
