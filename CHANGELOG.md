@@ -19,6 +19,10 @@
 
 ### Changed
 
+- **The soundtrack now uses the finished music throughout the game.** Menu,
+  daytime driving, and nighttime driving tracks have been replaced with their
+  full-quality versions, normalized to match the existing music. Urban Roll
+  also joins the menu rotation as a separate track from its driving version.
 - **Automatic shifting now follows real heavy-truck strategy.** Lower gears use
   progressive shift points, the starting gear responds to load and grade,
   light trucks can skip unneeded gears, and braking selects a useful lower gear
