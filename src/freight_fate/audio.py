@@ -67,7 +67,7 @@ ENGINE_BANDS = (
 ENGINE_LOOP_KEY = "engine/idle"
 ENGINE_RPM_IDLE = 600.0
 ENGINE_RPM_MAX = 2200.0
-ENGINE_FREQ_MAX_MULT = 2.2
+ENGINE_FREQ_MAX_MULT = 1.75
 ENGINE_SLIDE_MS = 120
 ENGINE_LOOP_GAIN = 1.0
 
@@ -132,11 +132,20 @@ def verify_sound_assets() -> None:
 def engine_freq_mult(rpm: float) -> float:
     """Playback-frequency multiplier for the BASS engine loop at ``rpm``.
 
-    Linear from 1.0 at idle (600 RPM) to ~2.2x at redline (2200 RPM),
+    Linear from 1.0 at idle (600 RPM) to 1.75x at redline (2200 RPM),
     clamped at both ends.
     """
     t = (rpm - ENGINE_RPM_IDLE) / (ENGINE_RPM_MAX - ENGINE_RPM_IDLE)
     return max(1.0, min(ENGINE_FREQ_MAX_MULT, 1.0 + t * (ENGINE_FREQ_MAX_MULT - 1.0)))
+
+
+def engine_load_gain(throttle: float) -> float:
+    """Audible engine effort: present at idle, fuller under power.
+
+    An automated shift cuts engine torque. Honoring the supplied load makes
+    that interruption audible instead of pitch-sliding one continuous siren.
+    """
+    return 0.55 + 0.45 * max(0.0, min(1.0, throttle))
 
 
 def _one_shot_category(key: str) -> str:
@@ -502,10 +511,13 @@ class _PygameBackend:
         if not (self.enabled and self._engine_running):
             return
         self._engine_last_rpm = rpm
+        load_gain = engine_load_gain(throttle)
         for i, (_key, center) in enumerate(ENGINE_BANDS):
             # triangular weight, 1.0 at band center, 0 beyond ~600 rpm away
             w = max(0.0, 1.0 - abs(rpm - center) / 620.0)
-            self.set_loop_volume(CH_ENGINE[i], ENGINE_LOOP_GAIN * w * self._engine_intro_gain)
+            self.set_loop_volume(
+                CH_ENGINE[i], ENGINE_LOOP_GAIN * w * load_gain * self._engine_intro_gain
+            )
 
     @property
     def engine_running(self) -> bool:
@@ -1029,6 +1041,7 @@ class _BassBackend:
             min(
                 1.0,
                 ENGINE_LOOP_GAIN
+                * engine_load_gain(throttle)
                 * self.engine_volume
                 * self.master_volume
                 * self._engine_intro_gain,

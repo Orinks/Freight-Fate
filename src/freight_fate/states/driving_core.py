@@ -39,7 +39,7 @@ from ..sim.lane import LaneKeeping
 from ..sim.timezones import city_zone
 from ..sim.transmission import REVERSE
 from ..sim.trip import RoadStop, Trip, TripEventKind
-from ..sim.vehicle import KG_PER_TON, G, TruckState
+from ..sim.vehicle import KG_PER_TON, REFERENCE_CARGO_KG, G, TruckState
 from ..sim.weather import WeatherKind, WeatherSystem
 from .base import MenuItem, MenuState, State
 

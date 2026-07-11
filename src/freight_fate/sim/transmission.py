@@ -20,6 +20,7 @@ NEUTRAL = 0
 AUTO_UPSHIFT_RPM = 1750
 AUTO_DOWNSHIFT_RPM = 1050
 SHIFT_TIME = 1.0  # seconds of torque interruption
+PROGRESSIVE_UPSHIFT_RPM = (1000, 1300, 1400, 1500, 1600, 1700, 1700, 1700, 1700, 1800)
 
 
 @dataclass
@@ -35,6 +36,7 @@ class Transmission:
     gear: int = NEUTRAL  # -1 = reverse, 0 = neutral, 1..10
     clutch: float = 0.0  # 0 engaged .. 1 fully pressed
     _shift_timer: float = field(default=0.0, repr=False)
+    _gear_hold_timer: float = field(default=999.0, repr=False)
 
     @property
     def num_gears(self) -> int:
@@ -97,6 +99,11 @@ class Transmission:
         moving: bool,
         braking: bool = False,
         can_upshift: bool = True,
+        minimum_shift_interval_s: float = 0.0,
+        upshift_rpm: float = AUTO_UPSHIFT_RPM,
+        start_gear: int = 1,
+        upshift_steps: int = 1,
+        downshift_target: int | None = None,
     ) -> int | None:
         """Pick a gear in automatic mode. Returns the new gear when it changes.
 
@@ -109,8 +116,9 @@ class Transmission:
             return None
         if self.gear == NEUTRAL:
             if throttle > 0.05:
-                self.gear = 1
+                self.gear = max(1, min(self.num_gears, start_gear))
                 self._shift_timer = SHIFT_TIME
+                self._gear_hold_timer = 0.0
                 return self.gear
             return None
         if not moving and self.gear > 1:
@@ -119,14 +127,20 @@ class Transmission:
             # engine dies on every restart.
             self.gear = 1
             self._shift_timer = SHIFT_TIME
+            self._gear_hold_timer = 0.0
             return self.gear
-        if rpm > AUTO_UPSHIFT_RPM and self.gear < self.num_gears and not braking and can_upshift:
-            self.gear += 1
+        if self._gear_hold_timer < minimum_shift_interval_s:
+            return None
+        if rpm > upshift_rpm and self.gear < self.num_gears and not braking and can_upshift:
+            self.gear = min(self.num_gears, self.gear + max(1, upshift_steps))
             self._shift_timer = SHIFT_TIME
+            self._gear_hold_timer = 0.0
             return self.gear
         if rpm < AUTO_DOWNSHIFT_RPM and self.gear > 1 and moving:
-            self.gear -= 1
+            target = self.gear - 1 if downshift_target is None else downshift_target
+            self.gear = max(1, min(self.gear - 1, target))
             self._shift_timer = SHIFT_TIME
+            self._gear_hold_timer = 0.0
             return self.gear
         return None
 
@@ -139,9 +153,11 @@ class Transmission:
             return None
         self.gear -= 1
         self._shift_timer = SHIFT_TIME
+        self._gear_hold_timer = 0.0
         return self.gear
 
     def update(self, dt: float) -> None:
+        self._gear_hold_timer += max(0.0, dt)
         if self._shift_timer > 0.0:
             self._shift_timer = max(0.0, self._shift_timer - dt)
 

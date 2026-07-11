@@ -12,7 +12,7 @@ from __future__ import annotations
 import math
 from dataclasses import dataclass, field
 
-from .transmission import AUTO_UPSHIFT_RPM, Transmission
+from .transmission import PROGRESSIVE_UPSHIFT_RPM, Transmission
 
 G = 9.81
 AIR_DENSITY = 1.225
@@ -170,9 +170,25 @@ class TruckState:
         rpm_est = self.coupled_rpm() if not tr.in_neutral else self.rpm
         rpm_est = max(rpm_est, self.specs.idle_rpm * (0.5 + 0.5 * self.throttle))
         braking = self.brake > 0.01 or self.emergency_brake or self.air_brakes_holding
+        load_fraction = min(1.0, max(0.0, self.cargo_kg / REFERENCE_CARGO_KG))
+        minimum_shift_interval_s = 1.75 if braking else 1.25 + 0.35 * load_fraction
+        start_gear = 1 if self.grade >= 0.02 or load_fraction >= 0.75 else 2
+        if load_fraction <= 0.2 and self.grade <= 0.01:
+            start_gear = 3
+        current_gear = max(1, tr.gear)
+        progressive = PROGRESSIVE_UPSHIFT_RPM[current_gear - 1]
+        load_raise = 150.0 * load_fraction
+        grade_raise = min(200.0, max(0.0, self.grade) * 3000.0)
+        upshift_rpm = min(self.specs.max_rpm * 0.9, progressive + load_raise + grade_raise)
+        upshift_steps = 1
+        if 0 < tr.gear < tr.num_gears and load_fraction <= 0.2 and self.grade <= 0.01:
+            skip_gear = min(tr.num_gears, tr.gear + 2)
+            if skip_gear > tr.gear + 1 and self.coupled_rpm(skip_gear) >= 900.0:
+                upshift_steps = 2
         can_upshift = True
+        target_gear = min(tr.num_gears, max(1, tr.gear) + upshift_steps)
         if 0 < tr.gear < tr.num_gears and self.throttle > 0.5 and self.grade > 0.02:
-            next_gear = tr.gear + 1
+            next_gear = target_gear
             next_rpm = max(self.specs.idle_rpm, self.coupled_rpm(next_gear))
             next_ratio = abs(tr.ratio_for(next_gear))
             next_torque = self.torque_at(next_rpm) * self.throttle * self.health_factor
@@ -187,16 +203,28 @@ class TruckState:
             # Do not grab a taller gear that cannot pull the current road load.
             # This predicts the post-shift tractive force instead of repeatedly
             # shifting up, losing speed, and kicking straight back down.
-            minimum_post_shift_rpm = AUTO_UPSHIFT_RPM * (1.0 if self.grade >= 0.05 else 0.8)
+            minimum_post_shift_rpm = 1050.0 if self.grade >= 0.02 else 900.0
             can_upshift = (
                 next_rpm >= minimum_post_shift_rpm and next_force >= self.resistance_force() * 1.05
             )
+        downshift_target = None
+        if braking and tr.gear > 1:
+            candidates = [
+                gear for gear in range(1, tr.gear) if 1050.0 <= self.coupled_rpm(gear) <= 1700.0
+            ]
+            if candidates:
+                downshift_target = max(candidates)
         return tr.auto_update(
             rpm_est,
             self.throttle,
             self.velocity_mps > 0.5,
             braking,
             can_upshift,
+            minimum_shift_interval_s,
+            upshift_rpm,
+            start_gear,
+            upshift_steps,
+            downshift_target,
         )
 
     # -- forces -----------------------------------------------------------------
@@ -469,7 +497,8 @@ class TruckState:
                     # stall while still rolling. The RPM-threshold downshift
                     # can be outrun by a hard deceleration during the shift
                     # delay, so force the drop here.
-                    tr.kickdown()
+                    if self.brake <= 0.01 and not self.emergency_brake:
+                        tr.kickdown()
                 self.rpm = max(
                     s.idle_rpm, s.idle_rpm + (s.max_rpm - s.idle_rpm) * self.throttle * 0.3
                 )

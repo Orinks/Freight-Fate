@@ -19,6 +19,11 @@
 
 ### Changed
 
+- **Automatic shifting now follows real heavy-truck strategy.** Lower gears use
+  progressive shift points, the starting gear responds to load and grade,
+  light trucks can skip unneeded gears, and braking selects a useful lower gear
+  instead of stepping through every ratio. Engine audio now unloads between
+  gears instead of sweeping upward as one continuous high-pitched tone.
 - **Freight Fate checks for updates again when you leave a terminal.** Returning
   to the main menu from a city terminal or pickup facility now starts a quiet
   background check, so an available update can be installed before you finish

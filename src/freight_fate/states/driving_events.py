@@ -598,7 +598,13 @@ class DrivingEventMixin:
         # or a lower limit) still apply immediately. On a steady frame the applied
         # throttle already equals _cruise_throttle, so this holds as before.
         if self._cruise_throttle > self._cruise_applied:
-            self._cruise_applied = min(self._cruise_throttle, self._cruise_applied + dt * 2.2)
+            load_fraction = min(1.0, max(0.0, t.cargo_kg / REFERENCE_CARGO_KG))
+            recovery_rate = 0.7 + 0.8 * (1.0 - load_fraction)
+            recovery_rate += min(0.6, max(0.0, error) / 15.0)
+            self._cruise_applied = min(
+                self._cruise_throttle,
+                self._cruise_applied + dt * recovery_rate,
+            )
         else:
             self._cruise_applied = self._cruise_throttle
         t.throttle = self._cruise_applied

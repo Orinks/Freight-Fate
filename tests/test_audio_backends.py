@@ -11,6 +11,7 @@ from freight_fate.audio import (
     AudioEngine,
     _asset_path,
     engine_freq_mult,
+    engine_load_gain,
 )
 from freight_fate.music import ALL_MUSIC_TRACKS
 
@@ -91,6 +92,12 @@ def test_engine_freq_mult_mapping():
     assert engine_freq_mult(99_999) == ENGINE_FREQ_MAX_MULT  # clamped above redline
     mid = engine_freq_mult((ENGINE_RPM_IDLE + ENGINE_RPM_MAX) / 2)
     assert abs(mid - (1.0 + ENGINE_FREQ_MAX_MULT) / 2) < 1e-9
+
+
+def test_engine_load_gain_keeps_idle_audible_and_unloads_during_shift():
+    assert engine_load_gain(0.0) == 0.55
+    assert engine_load_gain(0.08) < engine_load_gain(0.7)
+    assert engine_load_gain(1.0) == 1.0
 
 
 def test_split_volume_settings_apply_to_silent_backend():
