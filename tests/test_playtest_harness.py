@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import pygame
 import pytest
+from career_1_9_scenarios import CAREER_STAGES, career_stage
 from hypothesis import given, settings
 from hypothesis import strategies as st
 from playtest_harness import PlaytestHarness
@@ -278,3 +279,42 @@ def test_playtest_harness_delivery_properties(monkeypatch, job_rank, route_rank)
     assert result.destination == result.current_city
     assert result.remaining_miles == 0.0
     result.assert_no_known_destination_exit_regressions()
+
+
+@pytest.mark.career_1_9
+@pytest.mark.parametrize("stage", CAREER_STAGES)
+def test_reusable_career_stage_presets_reach_real_dispatch(monkeypatch, stage):
+    with PlaytestHarness(monkeypatch) as harness:
+        result = harness.start_delivery(
+            profile_name=f"Harness {stage}", configure_profile=career_stage(stage)
+        )
+
+        profile = harness.app.ctx.profile
+        preset = CAREER_STAGES[stage]
+        assert profile.business_status == preset.business_status
+        assert profile.career.level == preset.level
+
+    result.assert_screen_reader_friendly()
+
+
+@pytest.mark.career_1_9
+def test_structured_transcript_preserves_channel_interrupt_and_order(monkeypatch):
+    with PlaytestHarness(monkeypatch) as harness:
+        result = harness.start_delivery(profile_name="Harness Structured Speech")
+        harness.app.ctx.say_event("Harness event channel check", interrupt=False)
+
+    assert {entry.channel for entry in result.spoken} == {"main", "event"}
+    assert any(entry.interrupt for entry in result.spoken)
+    assert result.spoken[-1].interrupt is False
+    result.assert_ordered("Freight Fate", "New career", "Dispatch assigns", "Dispatch routed")
+    result.assert_screen_reader_friendly()
+
+
+@pytest.mark.career_1_9
+def test_keyboard_navigation_failure_is_bounded_and_descriptive(monkeypatch):
+    from freight_fate.states.main_menu import MainMenuState
+
+    with PlaytestHarness(monkeypatch) as harness:
+        harness.app.push_state(MainMenuState(harness.app.ctx))
+        with pytest.raises(AssertionError, match="not reachable with Down"):
+            harness._select_current_menu_text("Missing harness action")

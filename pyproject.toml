@@ -84,6 +84,7 @@ testpaths = ["tests"]
 # fast with a stack trace instead of stalling the whole run.
 addopts = "-q --timeout=120 --timeout-method=thread"
 markers = [
+    "career_1_9: curated transcript-backed career 1.9 smoke coverage",
     "property: property-based randomized tests",
     "smoke: headless end-to-end smoke tests",
 ]

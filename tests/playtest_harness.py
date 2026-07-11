@@ -26,8 +26,17 @@ def _finish_timed_state(app) -> None:
 
 
 @dataclass
+class SpokenEntry:
+    sequence: int
+    channel: str
+    text: str
+    interrupt: bool
+
+
+@dataclass
 class PlaytestResult:
     transcript: list[str] = field(default_factory=list)
+    spoken: list[SpokenEntry] = field(default_factory=list)
     deliveries: int = 0
     destination: str = ""
     current_city: str = ""
@@ -49,6 +58,27 @@ class PlaytestResult:
             self.transcript_text
         )
         assert self.remaining_miles == 0.0
+
+    def assert_ordered(self, *phrases: str) -> None:
+        """Assert phrases occur in order, allowing unrelated speech between them."""
+        cursor = 0
+        for phrase in phrases:
+            cursor = next(
+                (
+                    i + 1
+                    for i, line in enumerate(self.transcript[cursor:], cursor)
+                    if phrase in line
+                ),
+                0,
+            )
+            assert cursor, f"Missing or out-of-order phrase {phrase!r}\n{self.transcript_text}"
+
+    def assert_screen_reader_friendly(self) -> None:
+        assert self.transcript
+        assert all(line.strip() == line and line for line in self.transcript)
+        raw_markers = ("osm_id", "amenity=", "highway=", "node/", "way/")
+        assert not any(marker in self.transcript_text.lower() for marker in raw_markers)
+        assert all(entry.sequence == i for i, entry in enumerate(self.spoken))
 
 
 class PlaytestHarness:
@@ -73,9 +103,11 @@ class PlaytestHarness:
             self.app.shutdown()
 
     def _say(self, text: str, interrupt: bool = True) -> None:
+        self.result.spoken.append(SpokenEntry(len(self.result.spoken), "main", text, interrupt))
         self.result.transcript.append(text)
 
     def _say_event(self, text: str, interrupt: bool = True) -> None:
+        self.result.spoken.append(SpokenEntry(len(self.result.spoken), "event", text, interrupt))
         self.result.transcript.append(f"[event] {text}")
 
     def start_delivery(
@@ -292,8 +324,13 @@ class PlaytestHarness:
 
     def _select_current_menu_text(self, text: str) -> None:
         assert self.app is not None
-        while self.app.state.items[self.app.state.index].text != text:
+        for _ in range(len(self.app.state.items)):
+            if self.app.state.items[self.app.state.index].text == text:
+                break
             self.app.state.handle_event(key_event(pygame.K_DOWN))
+        else:
+            choices = [item.text for item in self.app.state.items]
+            raise AssertionError(f"Menu item {text!r} not reachable with Down: {choices}")
         self.app.state.handle_event(key_event(pygame.K_RETURN))
 
     def _choose_unlocked_job(self, rank: int) -> None:
@@ -303,8 +340,12 @@ class PlaytestHarness:
         assert unlocked
         unlocked.sort(key=lambda item: item[1].distance_mi)
         target_index, _job = unlocked[rank % len(unlocked)]
-        while board.index != target_index:
+        for _ in range(len(board.items)):
+            if board.index == target_index:
+                break
             board.handle_event(key_event(pygame.K_DOWN))
+        else:
+            raise AssertionError(f"Job index {target_index} not keyboard reachable")
         self.app.state.handle_event(key_event(pygame.K_RETURN))
 
     def _accept_assigned_job(self, rank: int) -> None:
@@ -316,8 +357,12 @@ class PlaytestHarness:
             )
             if decline_index is None:
                 break  # out of declines or no alternative freight
-            while board.index != decline_index:
+            for _ in range(len(board.items)):
+                if board.index == decline_index:
+                    break
                 board.handle_event(key_event(pygame.K_DOWN))
+            else:
+                raise AssertionError("Decline action not keyboard reachable")
             board.handle_event(key_event(pygame.K_RETURN))
         board.handle_event(key_event(pygame.K_HOME))
         board.handle_event(key_event(pygame.K_RETURN))
@@ -326,8 +371,12 @@ class PlaytestHarness:
         assert self.app is not None
         route_state = self.app.state
         target_index = rank % len(route_state.routes)
-        while route_state.index != target_index:
+        for _ in range(len(route_state.items)):
+            if route_state.index == target_index:
+                break
             route_state.handle_event(key_event(pygame.K_DOWN))
+        else:
+            raise AssertionError(f"Route index {target_index} not keyboard reachable")
         route_state.handle_event(key_event(pygame.K_RETURN))
 
     def _neutralize_random_trip_friction(self) -> None:
