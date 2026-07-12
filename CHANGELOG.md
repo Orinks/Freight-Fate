@@ -4,6 +4,10 @@
 
 ### Added
 
+- **Hot Springs joins the map in the Ouachitas.** The old resort town links to
+  Little Rock and Texarkana on US-70 and runs north to Fort Smith on US-270 --
+  a real mountain haul over the Ouachita ridges.
+
 - **The Missouri and Iowa heartland fills in.** Sedalia opens the US-50 run
   between Kansas City and Columbia, and Kirksville and Ottumwa join a US-63
   corridor north from Columbia up into Des Moines.

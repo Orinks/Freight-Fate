@@ -7303,6 +7303,15 @@
       "locations": [],
       "lat": 41.0197,
       "lon": -92.4113
+    },
+    "hot_springs_ar_us": {
+      "spoken_city": "Hot Springs",
+      "state": "AR",
+      "country": "US",
+      "region": "mid_south",
+      "locations": [],
+      "lat": 34.5137,
+      "lon": -93.0552
     }
   }
 }
