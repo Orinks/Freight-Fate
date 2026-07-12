@@ -7213,6 +7213,24 @@
       "locations": [],
       "lat": 43.7508,
       "lon": -87.7145
+    },
+    "hobbs_nm_us": {
+      "spoken_city": "Hobbs",
+      "state": "NM",
+      "country": "US",
+      "region": "desert_southwest",
+      "locations": [],
+      "lat": 32.7026,
+      "lon": -103.136
+    },
+    "alamogordo_nm_us": {
+      "spoken_city": "Alamogordo",
+      "state": "NM",
+      "country": "US",
+      "region": "desert_southwest",
+      "locations": [],
+      "lat": 32.8995,
+      "lon": -105.9603
     }
   }
 }

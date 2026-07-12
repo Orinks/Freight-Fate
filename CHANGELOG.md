@@ -4,6 +4,11 @@
 
 ### Added
 
+- **Southeastern New Mexico's oil country joins the map.** Hobbs anchors the
+  Permian Basin with runs to Carlsbad, Lubbock, and Odessa, and Alamogordo opens
+  the US-54 and US-70 routes between El Paso, Las Cruces, and Roswell -- including
+  the mountain climb over the Sacramentos.
+
 - **Wisconsin's Fox Valley and lakeshore fill in.** Fond du Lac, Oshkosh, and
   Sheboygan join the map, opening the Interstate 41 run up the Fox River Valley
   from Milwaukee to Green Bay and the Interstate 43 lakeshore route past
