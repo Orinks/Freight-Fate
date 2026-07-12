@@ -1,3 +1,5 @@
+import urllib.error
+
 from freight_fate.achievements import ACHIEVEMENT_BY_ID
 from freight_fate.models.jobs import CARGO_CATALOG, Job
 from freight_fate.models.profile import Profile
@@ -107,3 +109,27 @@ def test_achievement_payload_uses_official_definition_and_deduplicates(tmp_path)
     assert not queue_achievement(box, achievement, earned_at_ms=456)
     assert box.items[0].payload["name"] == achievement.name
     assert box.items[0].payload["description"] == achievement.description
+
+
+def test_new_snapshot_replaces_stale_queued_snapshot(tmp_path):
+    identity = OnlineIdentity("driver-1234", "ffd_" + "a" * 64)
+    box = JournalOutbox(identity, True, tmp_path / "outbox.json")
+    assert box.enqueue(
+        "/api/freight-fate/profile-snapshot", {"snapshot": {"level": 1}}, "profile-1"
+    )
+    assert box.enqueue(
+        "/api/freight-fate/profile-snapshot", {"snapshot": {"level": 2}}, "profile-2"
+    )
+    assert [item.event_id for item in box.items] == ["profile-2"]
+
+
+def test_permanent_consent_error_is_dropped_without_retrying(tmp_path):
+    identity = OnlineIdentity("driver-1234", "ffd_" + "a" * 64)
+
+    def denied(*_args):
+        raise urllib.error.HTTPError("https://example.test", 403, "sharing_not_enabled", {}, None)
+
+    box = JournalOutbox(identity, True, tmp_path / "outbox.json", transport=denied)
+    box.enqueue("/events", {}, "evt")
+    assert box.flush() == 0
+    assert box.items == []

@@ -7,6 +7,7 @@ import json
 import logging
 import threading
 import time
+import urllib.error
 from collections.abc import Callable
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -68,6 +69,8 @@ class JournalOutbox:
         with self._lock:
             if any(item.event_id == event_id for item in self.items):
                 return False
+            if endpoint == "/api/freight-fate/profile-snapshot":
+                self.items = [item for item in self.items if item.endpoint != endpoint]
             self.items.append(OutboxItem(endpoint, payload, event_id))
             self.items = self.items[-MAX_OUTBOX_ITEMS:]
             self._save()
@@ -89,6 +92,18 @@ class JournalOutbox:
                     {"Authorization": f"Bearer {self.identity.driver_token}"},
                 )
                 ok = bool(reply.get("ok"))
+            except urllib.error.HTTPError as error:
+                # Authentication, consent, and validation failures cannot heal
+                # through retries. Rate limiting and server failures can.
+                if error.code in {400, 401, 403, 404}:
+                    with self._lock:
+                        self.items = [
+                            value for value in self.items if value.event_id != item.event_id
+                        ]
+                        self._save()
+                    continue
+                log.debug("Road journal post failed: HTTP %s", error.code)
+                ok = False
             except Exception as error:
                 log.debug("Road journal post failed: %s", error)
                 ok = False
