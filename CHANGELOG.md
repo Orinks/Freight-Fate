@@ -4,6 +4,9 @@
 
 ### Added
 
+- **The north country opens at Watertown.** Watertown joins the map on Interstate
+  81 north of Syracuse and ties east to Utica over the Tug Hill on NY-12.
+
 - **The southwest Texas border country joins the map.** Uvalde comes onto the
   US-90 run between San Antonio and Del Rio, and the border city of Eagle Pass
   ties in on US-57 and US-277.
