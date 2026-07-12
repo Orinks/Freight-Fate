@@ -4,6 +4,10 @@
 
 ### Added
 
+- **The Deep South fills in.** Cullman comes onto Interstate 65 between Huntsville
+  and Birmingham, Selma onto US-80 west of Montgomery, Troy onto US-231 toward
+  Dothan, and Americus ties into Albany and Columbus in southwest Georgia.
+
 - **Ames, Hickory, Danville, and Yuba City join the map.** Ames comes onto
   Interstate 35 north of Des Moines, Hickory onto Interstate 40 between Asheville
   and Charlotte, Danville onto US-29 between Greensboro and Lynchburg, and Yuba

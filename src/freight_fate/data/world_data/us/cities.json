@@ -7762,6 +7762,42 @@
       "locations": [],
       "lat": 39.1404,
       "lon": -121.6169
+    },
+    "cullman_al_us": {
+      "spoken_city": "Cullman",
+      "state": "AL",
+      "country": "US",
+      "region": "mid_south",
+      "locations": [],
+      "lat": 34.1748,
+      "lon": -86.8436
+    },
+    "selma_al_us": {
+      "spoken_city": "Selma",
+      "state": "AL",
+      "country": "US",
+      "region": "mid_south",
+      "locations": [],
+      "lat": 32.4074,
+      "lon": -87.0211
+    },
+    "troy_al_us": {
+      "spoken_city": "Troy",
+      "state": "AL",
+      "country": "US",
+      "region": "mid_south",
+      "locations": [],
+      "lat": 31.8091,
+      "lon": -85.97
+    },
+    "americus_ga_us": {
+      "spoken_city": "Americus",
+      "state": "GA",
+      "country": "US",
+      "region": "atlantic_southeast",
+      "locations": [],
+      "lat": 32.0724,
+      "lon": -84.2327
     }
   }
 }
