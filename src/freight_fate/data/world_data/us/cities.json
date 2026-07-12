@@ -6565,6 +6565,51 @@
       "locations": [],
       "lat": 33.6178,
       "lon": -114.5883
+    },
+    "marble_falls_tx_us": {
+      "spoken_city": "Marble Falls",
+      "state": "TX",
+      "country": "US",
+      "lat": 30.5784,
+      "lon": -98.2751,
+      "region": "gulf_coast",
+      "locations": []
+    },
+    "lampasas_tx_us": {
+      "spoken_city": "Lampasas",
+      "state": "TX",
+      "country": "US",
+      "lat": 31.0638,
+      "lon": -98.1817,
+      "region": "southern_plains",
+      "locations": []
+    },
+    "stephenville_tx_us": {
+      "spoken_city": "Stephenville",
+      "state": "TX",
+      "country": "US",
+      "lat": 32.2207,
+      "lon": -98.2023,
+      "region": "southern_plains",
+      "locations": []
+    },
+    "mineral_wells_tx_us": {
+      "spoken_city": "Mineral Wells",
+      "state": "TX",
+      "country": "US",
+      "lat": 32.8085,
+      "lon": -98.1128,
+      "region": "southern_plains",
+      "locations": []
+    },
+    "jacksboro_tx_us": {
+      "spoken_city": "Jacksboro",
+      "state": "TX",
+      "country": "US",
+      "lat": 33.2184,
+      "lon": -98.1587,
+      "region": "southern_plains",
+      "locations": []
     }
   }
 }

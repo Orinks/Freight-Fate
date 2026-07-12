@@ -4,6 +4,12 @@
 
 ### Added
 
+- **US-281 opens up central Texas, a north-south run beside Interstate 35.**
+  Five towns join the map -- Marble Falls in the Highland Lakes, Lampasas,
+  Stephenville, Mineral Wells, and Jacksboro -- linking San Antonio all the way
+  up to Wichita Falls on US-281, the freight route that skips the Interstate 35
+  crawl through Austin and the Metroplex.
+
 - **Nine long runs now call out real towns instead of vague corridors.** On
   routes like San Antonio to Dallas, Denver to Salt Lake City, Phoenix to Los
   Angeles, Atlanta to Birmingham, and Chicago to Indianapolis, the game names
