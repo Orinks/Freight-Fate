@@ -7267,6 +7267,15 @@
       "locations": [],
       "lat": 33.6891,
       "lon": -78.8867
+    },
+    "williamsport_pa_us": {
+      "spoken_city": "Williamsport",
+      "state": "PA",
+      "country": "US",
+      "region": "northeast",
+      "locations": [],
+      "lat": 41.2412,
+      "lon": -77.0011
     }
   }
 }

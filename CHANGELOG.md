@@ -4,6 +4,10 @@
 
 ### Added
 
+- **The US-15 route through north-central Pennsylvania opens.** Williamsport joins
+  the map on the Susquehanna, linking Harrisburg, State College, and Binghamton --
+  including the mountain climb north onto the plateau toward New York.
+
 - **The Grand Strand comes onto the map at Myrtle Beach.** Myrtle Beach seats on
   the coastal US-17 run between Charleston and Wilmington and ties inland to
   Florence and Interstate 95 on US-501.
