@@ -55,11 +55,6 @@
   Maine and West Virginia turnpikes now adds an estimated commercial toll to the
   run -- so a toll route is a real cost to weigh against the free way around.
 
-- **Speed limits along every route now match the real posted limits.** The whole
-  map now carries actual speed-limit data pulled from the road network, so the
-  posted limit you hear reflects the highway you are really on instead of a rough
-  estimate.
-
 - **Owatonna, Marshalltown, Hinesville, and Spring Hill join the map.** Owatonna
   comes onto Interstate 35 south of Minneapolis, Marshalltown onto US-30 in
   central Iowa, Hinesville ties Fort Stewart into Savannah and Brunswick, and
@@ -571,10 +566,10 @@
   the whole Interstate network.
 
 - **Routes now carry the real posted speed limits.** Instead of estimating a
-  limit from the road type, most legs now use the actual posted speed limits from
-  map data (interstates, US highways, and more), so your truck runs the real
-  limit on the road it is driving. Rural roads without published limits still fall
-  back to a sensible estimate.
+  limit from the road type, every leg on the map now carries the actual posted
+  speed limits from map data (interstates, US highways, and more), so your truck
+  runs the real limit on the road it is driving. Rural roads without published
+  limits still fall back to a sensible estimate.
 
 - **Interstate 10 across the Florida Panhandle now stops at real towns.** Two
   cities join the map: Pensacola and Crestview. The long Tallahassee-to-Mobile run

@@ -262,6 +262,11 @@ Net-new realism candidates, roughly by area:
   approaches after the highway portion.
 - **Business realism.** The company-driver→owner-operator arc, loans, and
   insurance already sketched under Business.
+- [x] **National hub network fill (407 → 623 cities).** Audit-driven map
+  expansion on the 1.8.x nightly line (community PR #68): every >10,000-pop
+  independent city without a bigger neighbor within ~30 miles was built with
+  the full enrichment recipe -- 1,287 legs, ~139,000 network miles, real toll
+  events on the major turnpikes, and posted speed limits on every leg.
 
 ## Planned for 1.8: in-cab logbook (Record of Duty Status)
 
