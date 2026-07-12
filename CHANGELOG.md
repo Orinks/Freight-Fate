@@ -16,6 +16,16 @@
   jobs and engine overhauls alongside tires -- each takes shop time and, for
   owner-operators, real money. Company drivers bill the carrier, as always.
 
+- **The big-name truck stops along your route now fix your rig -- and each
+  brand is good at what it is really known for.** Pull into a Love's or a
+  Speedco and their tire bay replaces worn tires fast, close to the garage
+  price. TravelCenters of America and Petro run full service shops that also
+  do brake jobs on the road. Any other major travel center can mount tires,
+  at a road markup -- and an engine overhaul still means a trip to your
+  terminal garage. Independent stops fix what their listing says, and Big
+  Buck's, famously, fixes nothing. Road shops sell the whole job or none of
+  it, so if cash is short, plan for the terminal.
+
 - **The biggest map update yet -- 100 new cities to pick up and deliver in.** A
   city is a place a load can start or end, and the map grew from 249 to 349 of
   them, filling in dead zones that used to have nothing drivable for hundreds of

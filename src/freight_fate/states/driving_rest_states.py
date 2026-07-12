@@ -408,6 +408,34 @@ class RestStopState(MenuState):
                     help="Pay the shop to repair truck damage before returning to the road.",
                 )
             )
+        brand = classify_brand(self.stop.name)
+        if brand is not None and brand.tier == "travel_center":
+            if "tires" in brand.signature:
+                tire_help = (
+                    f"{brand.spoken} runs a dedicated tire bay: road tire "
+                    "service close to the terminal garage price, done fast. "
+                    "Company drivers bill the carrier; owner-operators pay."
+                )
+            else:
+                tire_help = (
+                    f"{brand.spoken} can mount tires on the road, at a "
+                    "markup over the terminal garage. Tire specialists "
+                    "like Love's and Speedco do the same work cheaper "
+                    "and faster."
+                )
+            items.append(MenuItem(self._tire_label, self._service_tires, help=tire_help))
+            if "repair" in brand.signature:
+                items.append(
+                    MenuItem(
+                        self._brake_label,
+                        self._service_brakes,
+                        help=f"{brand.spoken} runs a full truck service "
+                        "shop and can reline worn brake shoes on the "
+                        "road, at a markup over the terminal garage. "
+                        "Company drivers bill the carrier; "
+                        "owner-operators pay.",
+                    )
+                )
         if "roadside_assistance" in actions:
             items.append(
                 MenuItem(
@@ -745,6 +773,112 @@ class RestStopState(MenuState):
             f"{clock_text(d.trip.local_hour)}. {_deadline_text(d)}"
         )
         self.ctx.award_achievement("roadside_fix")
+
+    def _tire_bay(self) -> bool:
+        brand = classify_brand(self.stop.name)
+        return brand is not None and "tires" in brand.signature
+
+    def _tire_rate(self) -> float:
+        return ROAD_TIRE_SPECIALIST_COST_PER_PCT if self._tire_bay() else ROAD_TIRE_COST_PER_PCT
+
+    def _tire_label(self) -> str:
+        wear = self.driving.truck.tire_wear_pct
+        if wear < 1:
+            return "Tires: tread is in top shape"
+        if not player_pays_operating_costs(self.ctx.profile.business_status):
+            return f"Replace tires: {wear:.0f} percent wear, carrier billed"
+        cost = round(wear * self._tire_rate(), 2)
+        return f"Replace tires: {wear:.0f} percent wear for {cost:,.0f} dollars"
+
+    def _brake_label(self) -> str:
+        wear = self.driving.truck.brake_wear_pct
+        if wear < 1:
+            return "Brakes: shoes are in top shape"
+        if not player_pays_operating_costs(self.ctx.profile.business_status):
+            return f"Brake job: {wear:.0f} percent wear, carrier billed"
+        cost = round(wear * ROAD_BRAKE_COST_PER_PCT, 2)
+        return f"Brake job: {wear:.0f} percent wear for {cost:,.0f} dollars"
+
+    def _service_tires(self) -> None:
+        minutes = ROAD_TIRE_SPECIALIST_MIN if self._tire_bay() else ROAD_TIRE_MIN
+        self._road_wear_service(
+            attr="tire_wear_pct",
+            cost_per_pct=self._tire_rate(),
+            minutes=minutes,
+            duty_note="road tire service",
+            fresh_say="The tires are already in top shape.",
+            service_noun="tire service",
+            carrier_done="replaced the tires",
+            done_say="Tires replaced.",
+        )
+
+    def _service_brakes(self) -> None:
+        self._road_wear_service(
+            attr="brake_wear_pct",
+            cost_per_pct=ROAD_BRAKE_COST_PER_PCT,
+            minutes=ROAD_BRAKE_MIN,
+            duty_note="road brake service",
+            fresh_say="The brakes are already in top shape.",
+            service_noun="a brake job",
+            carrier_done="relined the brakes",
+            done_say="Brakes relined.",
+        )
+
+    def _road_wear_service(
+        self,
+        *,
+        attr: str,
+        cost_per_pct: float,
+        minutes: float,
+        duty_note: str,
+        fresh_say: str,
+        service_noun: str,
+        carrier_done: str,
+        done_say: str,
+    ) -> None:
+        """Brand-shop wear service on the road, all-or-nothing like road repair.
+
+        Partial service stays a terminal-garage courtesy; a road shop sells
+        the whole job or none of it."""
+        d = self.driving
+        p = self.ctx.profile
+        wear = getattr(d.truck, attr)
+        if wear < 1.0:
+            self.ctx.say(fresh_say)
+            return
+        if not player_pays_operating_costs(p.business_status):
+            setattr(d.truck, attr, 0.0)
+            _advance_rest_clock(d, minutes, "on_duty_not_driving", duty_note)
+            d.hos.on_duty(minutes)
+            self._save_here(silent=True)
+            self.ctx.audio.play("ui/notify")
+            self.ctx.say(
+                f"The shop {carrier_done} at {wear:.0f} percent wear on the "
+                f"carrier account. It is {clock_text(d.trip.local_hour)}. "
+                f"{_deadline_text(d)}"
+            )
+            self.refresh()
+            return
+        cost = round(wear * cost_per_pct, 2)
+        if p.money < cost:
+            self.ctx.audio.play("ui/error")
+            self.ctx.say(
+                f"{service_noun.capitalize()} costs {cost:,.0f} dollars "
+                "here. You cannot afford it."
+            )
+            return
+        p.money -= cost
+        setattr(d.truck, attr, 0.0)
+        _advance_rest_clock(d, minutes, "on_duty_not_driving", duty_note)
+        d.hos.on_duty(minutes)
+        self._save_here(silent=True)
+        self.ctx.audio.play("ui/notify")
+        self.ctx.say(
+            f"{done_say} {cost:,.0f} dollars. It is "
+            f"{clock_text(d.trip.local_hour)}. You have {p.money:,.0f} "
+            f"dollars. {_deadline_text(d)}"
+        )
+        self.refresh()
 
     def _inspect(self) -> None:
         d = self.driving

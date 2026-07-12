@@ -14,7 +14,7 @@ import random
 import pygame
 
 from ..achievements import add_unique_stat, increment_stat
-from ..data.amenities import spoken_amenities
+from ..data.amenities import classify_brand, spoken_amenities
 from ..data.world import Route
 from ..models.business import (
     build_business_settlement,
@@ -75,6 +75,18 @@ FIELD_REPAIR_DAMAGE_PCT = 25.0  # damage level the patch repairs down to
 MECHANIC_CALLOUT_FEE = 500.0
 MECHANIC_RATE_PER_PCT = 110.0  # premium over the garage's 85 per percent
 MECHANIC_WAIT_MIN = 90.0  # game minutes waiting for the truck to be fixed
+# Road wear service at branded travel centers -- the brand IS the capability
+# (amenities.classify_brand): Love's and Speedco run dedicated tire bays at
+# close to the terminal-garage rate and turn the truck around fast; TA and
+# Petro full-service shops also reline brakes; every other major travel
+# center can mount tires at a road markup. Engine overhauls stay in the
+# terminal garage, and a landmark like Big Buck's fixes nothing.
+ROAD_TIRE_SPECIALIST_COST_PER_PCT = 50.0  # tire brands, near the garage's 45
+ROAD_TIRE_SPECIALIST_MIN = 45.0
+ROAD_TIRE_COST_PER_PCT = 60.0  # everyone else marks tire work up
+ROAD_TIRE_MIN = 75.0
+ROAD_BRAKE_COST_PER_PCT = 55.0  # road-shop premium over the garage's 40
+ROAD_BRAKE_MIN = 120.0
 FUEL_STOP_MIN = 20.0  # fueling is on-duty-not-driving work
 INSPECTION_MIN = 15.0  # routine scale/inspection check-in time
 OUT_OF_SERVICE_MIN = hos.SLEEP_MIN
