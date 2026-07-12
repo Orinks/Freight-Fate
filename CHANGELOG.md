@@ -6,7 +6,9 @@
 
 - **Engine sound now stays present through automatic gear changes.** Shifts still ease the engine tone briefly, without the repeated volume pumping that could sound like the engine was dropping out.
 
-- Smoothed out the transition between the tail of the engine start sound with the start of the engine loop, ramping from a forced full load down to the off throttle idle load
+- **Starting the engine no longer dips in volume.** The running engine sound now
+  meets the tail of the ignition sound at the same level, then settles smoothly
+  down to idle instead of briefly dropping out.
 
 - **Manual and automatic transmissions behave reliably on steep grades.** The
   diesel governor now holds a safe low-gear road speed without quietly damaging
