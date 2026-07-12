@@ -125,3 +125,33 @@ River crossings are real landmark moments.
   Petersburg -> Durham -> Greensboro -> Charlotte -> Atlanta and would connect
   to the EXISTING `charlotte -> greensboro` I-85 leg. High-value freight
   corridor, natural next build off this batch.
+
+## Overnight US-highway corridors (2026-07-12) — signage opportunities
+
+- **Evans Plunge, Hot Springs SD** — OWNER REQUEST (personal: owner loved it as
+  a kid; his dad was born in Hot Springs). Real attraction, world's oldest/largest
+  natural warm-water indoor pool (since 1890). Sits on the new
+  `lusk -> hot_springs` (US-18) and `hot_springs -> rapid_city` (SD-79) legs of
+  the Cheyenne -> Rapid City corridor. Real-register billboard/landmark, NOT
+  parody. Do not lose this one.
+- Tonight's new corridors open more signage country: US-281 (TX Hill Country /
+  Highland Lakes — Marble Falls), US-75 & US-69 (southeastern Oklahoma), the
+  US-287 Ports-to-Plains spine (Panhandle up to Denver; Cadillac Ranch already by
+  Amarillo), and the Black Hills (Mount Rushmore, Wind Cave near Hot Springs).
+- **Bristol Motor Speedway, Bristol TN** — OWNER-flagged (personal: dragged to
+  the "Speedway in Lights" Christmas display every year lol). Major real landmark
+  ("The Last Great Colosseum," NASCAR short track). On the new `abingdon->bristol`
+  (I-81) and `bristol->kingsport` (US-11W) legs of the Tri-Cities corridor.
+  Real-register billboard -- races + the Christmas lights.
+- **Million Dollar Highway (US-550, Ouray/Silverton), Colorado** — great story
+  for a billboard on the new `durango->montrose` MOUNTAIN leg (Red Mountain Pass).
+  Legends for the name: (1) the roadbed fill was mine tailings still rich in gold
+  & silver ore -- "you're driving on a million dollars"; (2) ~$1M/mile to blast
+  the shelf road through the Uncompahgre Gorge in the 1920s; (3) a traveler
+  "wouldn't drive it again for a million dollars" (no guardrails, sheer drops
+  above Ouray). Real-register / history billboard. Pairs with the grade physics.
+- **Strawberry, AZ (owner's birthplace)** on AZ-87 north of Payson (Pine/
+  Strawberry, up the Mogollon Rim). The truck route Payson->Winslow is AZ-260
+  (east via Heber/Snowflake), not AZ-87, so Strawberry isn't on a built leg yet;
+  a future AZ-87-N spur (Payson->Pine->Strawberry) could seat it. Little ol town,
+  personal marker -- worth a checkpoint/billboard if that spur is ever built.

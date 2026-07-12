@@ -7,6 +7,10 @@ when approved. Facts from public data; copy invented. Three built legs:
 
 ---
 
+<!-- complete-legs -->
+**Complete built legs in this corridor (use ONLY these slugs for `leg:`):**
+`cheyenne_wy_us -> salt_lake_city_ut_us` (441), `omaha_ne_us -> cheyenne_wy_us` (497), `san_francisco_ca_us -> salt_lake_city_ut_us` (737)
+
 ### Great Platte River Road Archway
 - treatment: billboard
 - leg: omaha_ne_us -> cheyenne_wy_us

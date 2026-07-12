@@ -6,6 +6,10 @@ Facts from public data; copy invented. One built leg:
 
 ---
 
+<!-- complete-legs -->
+**Complete built legs in this corridor (use ONLY these slugs for `leg:`):**
+`kansas_city_mo_us -> denver_co_us` (603)
+
 ### Oz Museum
 - treatment: billboard
 - leg: kansas_city_mo_us -> denver_co_us

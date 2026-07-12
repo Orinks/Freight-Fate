@@ -10,9 +10,136 @@ The work is generally autonomous per the established rules (node rule,
 enrichment recipe, spoken invariants). Everything below is ordered so Opus can
 start at the top and keep going.
 
-## Part 0 -- housekeeping Opus must do FIRST (one commit, ready to go)
+## FLAVOR PASS (marquee done 2026-07-10; commits 05219eb/82a21b1/135e02e/6d14461)
+Built the four highest-value flavor corridors -- three iconic experiential crossings
++ two real node-void fills:
+- **CBBT** (Cape Charles) -- Chesapeake Bay Bridge-Tunnel, see below.
+- **Key West / Overseas Highway** (miami->key_west US-1) -- Seven Mile Bridge,
+  southernmost-point trophy destination.
+- **Florida Gulf + Alligator Alley** (Fort Myers, Naples; naples->miami I-75) --
+  Everglades crossing, panther zone, $12 toll; fills the thin Gulf coast.
+- **Central CA coast** (San Luis Obispo, Santa Barbara) -- US-101 split, fills the
+  scenic Bay-to-LA void.
+Each iconic crossing got atmosphere landmarks + (where real) a toll. Pattern proven:
+a "nothing" spot (Sea Gull Island) becomes a content anchor for the 1.9 mini-game/
+achievement/weather hooks.
+FLAVOR CITY WAVE DONE (fbbb944 + 0f77b57): 22 flavor cities built -- sub-wave A
+(Gadsden, Florence AL, Rome, Columbus MS, Natchez, Brunswick, Panama City,
+Natchitoches, Houma) + sub-wave B (Socorro, Clovis, Sherman, Paris, Lufkin,
+Victoria, Modesto, Merced, Prescott, Logan, Moab, Aberdeen, New London).
+STILL OPTIONAL (a few owner-taste leftovers if ever wanted): Vernal UT, Walla Walla
++ Port Angeles WA, Alpena MI. **MAP BUILD ESSENTIALLY COMPLETE: 470 cities / 1039
+legs / 126,238 drivable mi.** Final scan shows nn 125 / corridor 402 -- these went
+UP because the flavor cities add neighbor-gaps; it is the density tail + metro
+sprawl, NOT missing high-value connectivity. Done per the Part-5 definition.
+**NEXT PHASE: BILLBOARDS.** Pipeline is on THIS map branch (data/spider/signsheets/
+Ready_*.md -> tools/bake_billboards.py). 6 corridors already sheeted (Route 66,
+Mojave, Kansas, Ozarks, Platte, desert SW). Opus autonomously drafts new
+Ready_*.md sheets per built corridor (facts from public data, copy invented) ->
+owner workshops the `spoken:` copy (owner ENJOYS this) -> bake_billboards. See
+[[project-billboard-content-plan]] + signage-todo.md for the drafting queue.
 
-The worktree holds Batch 0, fully built and TEST-GREEN but uncommitted:
+## FLAVOR: Chesapeake Bay Bridge-Tunnel (structure built 2026-07-10)
+Cape Charles VA minted; norfolk->salisbury US-13 split into the 43mi CBBT crossing
+(norfolk->cape_charles) + the 96mi Delmarva run. Map side DONE: the crossing carries
+a checkpoint at mile 17, 6 factual atmosphere landmarks (entering / Sea Gull Island
+pull-off / Thimble Shoal + Chesapeake Channel tunnels / "no land visible" / reaching
+the Eastern Shore), and a $45 commercial toll (cash_card). 1.9 CONTENT TO WORKSHOP
+(owner ideas, NOT on the map -- parody/mini-game/achievement ships on the 1.9 line):
+- Funny placemarkers ("You can no longer see land. This is fine." / "Now entering a
+  tunnel. Under the ocean. In a truck. Sure.").
+- SEAGULL mini-game/collectible at Sea Gull Island: catch a seagull off the pier
+  (skill mini-game) OR pick up seagull roadkill on the crossing (grim collectible),
+  then the ironic drop-off at an Eastern Shore sea-life center. Rides
+  [[project-streamable-minigames]] + the stoppable-stop spine. Streamer-bait, audio-
+  friendly. (No OSM sea-life-center POI found on the Eastern Shore -- curate the
+  drop-off stop, or use the Virginia Aquarium at the Norfolk end.)
+- ACHIEVEMENTS: "Can't See The Shore" (first crossing), "Under the Sea" (tunnels).
+- WIND-CLOSURE HAZARD (killer realism): the real CBBT bans high-profile vehicles
+  (trucks!) at sustained wind >~40mph -- a weather-mechanic hook where the shortcut
+  gets CLOSED and you wait it out or reroute the long way through Richmond. Pairs
+  with the toll + [[project-backroad-stoplights]] clock economy (the toll booth is a
+  clock-eating stop; note the toll system ALREADY has an `ezpass` method for the
+  Golden EZ Pass idea).
+
+## PROGRESS (update as batches land)
+
+- [x] Jackson TN + Cookeville TN promoted, I-40 split (2b3ccc1)
+- [x] Batch 0 -- 9 Interstate spine emergencies (2758aff)
+- [x] Batch 1b -- 11 Deep South legs (452a246)
+- [x] Batch 2 -- 10 Georgia legs (a6fa281)
+- [x] Batch 3 -- 13 Kentucky/Appalachian legs (a69de00)
+- [x] Scanner re-run 2026-07-10: corridor 392->353, nn 184->160; catalogs
+      refreshed to *-2026-07-10.txt. Now **409 cities / 830 legs / 107,909 mi**.
+- [x] Batch 4 -- 13 Carolinas & Virginia legs (2b5f7a2)
+- [x] City Wave 1 -- 7 cities via leg-splits (4569180): Wytheville, Bloomington,
+      Lima, Ocala, Dubuque, Terre Haute, Effingham.
+- [x] City Wave 1 leftovers -- Lynchburg VA + Longview TX hubs (bbab3d0).
+      Wave 1 COMPLETE (9 cities). Placed owner's Midlothian checkpoint.
+- [x] Batch 5 -- 14 Northeast legs (7446f43).
+- [x] Scanner re-run 2026-07-10b: corridor 353->359 (UP -- City Wave 1's new
+      cities create fresh neighbor-gaps), nn 160->157. Catalogs = *-2026-07-10b.txt.
+      Now **418 cities / 869 legs / 110,969 mi**.
+- [x] Batch 6 -- 19 Midwest lattice legs (696a693). Now 418 cities / 888 legs /
+      112,691 mi.
+- [x] City Wave 2 -- 12 cities (18abafe): Cumberland, St Joseph, Mansfield,
+      Youngstown, Staunton, Paducah, Owensboro, Daytona Beach, Waterloo,
+      Parkersburg, Mount Vernon, Cape Girardeau. Kingsport dropped.
+- [x] Scanner re-run 2026-07-10c: corridor 359->374 (Wave 2 cities add gaps),
+      nn 157->148. Catalogs = *-2026-07-10c.txt. Now 430 cities / 909 legs /
+      113,991 mi.
+- [x] Batch 7 -- 13 Texas & southern plains (c8a9fb4)
+- [x] City Wave 3 -- 12 western plains & Rockies cities (550a47d)
+- [x] Batch 8 -- 14 Great Plains ladder & Ozarks (1bad0a6)
+- [x] Batch 9 -- 12 California (42631f5)
+- [x] Batch 10 -- 14 Pacific Northwest / Cascade passes (04b6e61)
+- [x] Batch 11 -- 15 Big Sky & Great Basin (1220802)
+- [x] **ALL 11 SYSTEMATIC LEG BATCHES + CITY WAVES 1-3 COMPLETE.** Final scan
+      2026-07-10d: corridor 392->331, nn 184->102 (catalogs *-2026-07-10d.txt).
+      **442 cities / 996 legs / 123,249 drivable mi (+82 cities / +275 legs /
+      ~+24,500 mi vs dev).**
+- [ ] REMAINING (optional): City Wave 4 (owner-pick flavor coastal -- Key West,
+      Naples, San Luis Obispo/Santa Barbara, Brunswick, etc.); a "Batch 12" from
+      the surviving 331-corridor tail (mostly opportunistic density + the metro-
+      sprawl that triage excludes -- diminishing returns, curate the worth-building
+      ones). The high-value connectivity program is DONE.
+
+### CITY WAVE 2 PLAN (analyzed 2026-07-10, ready to execute)
+None are clean checkpoint-splits. Verified nearest nodes + which sit on a bypass
+leg between two neighbors. Build pattern = Longview/Lynchburg (mint city, add spoke
+legs to 2-3 nearest nodes; where the city sits on a bypass leg, REPLACE that leg
+with two halves through the city -- but FIRST check ORIGINAL_ADJACENT_PAIRS, none
+of these four were). Regions from classifier. Highways are best-effort; checkpoints
+carry the geography.
+- **Cumberland MD** -- CLEAN SPLIT of morgantown->hagerstown I-68 (on-route 0.22mi):
+  morgantown->cumberland + cumberland->hagerstown. + cumberland->winchester (US-50).
+- **St Joseph MO** -- bypass of kansas_city->omaha I-29 (city ~few mi off): replace
+  with kc->st_joseph + st_joseph->omaha (I-29).
+- **Mansfield OH** -- bypass of columbus->cleveland I-71 (3mi off): replace with
+  columbus->mansfield + mansfield->cleveland (I-71).
+- **Youngstown OH** -- bypass of akron->pittsburgh I-76 (6mi off): replace with
+  akron->youngstown + youngstown->pittsburgh; + youngstown->cleveland (optional).
+- **Staunton VA** -- spokes: staunton->harrisonburg (I-81) + staunton->charlottesville
+  (I-64). (harrisonburg->charlottesville US-33 bypasses it -- keep, add spokes.)
+- **Paducah KY** -- spokes: paducah->clarksville (I-24) + paducah->evansville (I-69).
+  + paducah->cape_girardeau (I-57) once Cape is a node.
+- **Owensboro KY** -- spokes: owensboro->evansville (US-60) + owensboro->bowling_green
+  (US-231). (no existing bypass leg.)
+- **Daytona Beach FL** -- spokes: daytona->orlando (I-4) + daytona->jacksonville (I-95).
+- **Waterloo IA** -- spokes: waterloo->cedar_rapids (US-380) + waterloo->dubuque (US-20).
+- **Parkersburg WV** -- spokes: parkersburg->charleston (I-77) + parkersburg->morgantown.
+- **Mount Vernon IL** -- spokes: mount_vernon->effingham (I-57) + mount_vernon->evansville
+  (I-64). (I-57 x I-64 junction.)
+- **Cape Girardeau MO** -- spokes: cape->st_louis (I-55) + cape->paducah (I-57).
+- **Kingsport TN** -- DEFER/DROP: the Tri-Cities is already served by Johnson City +
+  the Bristol checkpoint; only add if the owner wants it as a freight destination.
+Cadence: re-run BOTH scanners after Wave 2 (it adds ~12 cities -> reshapes gaps).
+- Cadence reminder: re-run BOTH scanners every 2-3 batches (done above); the
+  flaky --add-maxspeed dispatcher needs a per-leg retry loop after each batch.
+
+## Part 0 -- housekeeping (DONE -- Batch 0 committed as 2758aff)
+
+The worktree held Batch 0, fully built and TEST-GREEN but uncommitted:
 nine interstate legs (New York-Albany I-87, Colorado Springs-Pueblo I-25,
 Chicago-Champaign I-57, Sacramento-Redding I-5, Indianapolis-Evansville I-69,
 Kansas City-Joplin I-49, Toledo-Dayton I-75, Riverside-Victorville I-15 Cajon
@@ -188,17 +315,13 @@ against slug variants, region FROM THE CLASSIFIER, split-don't-duplicate when
 it lands on an existing leg -- e.g. Lima splits the new Toledo-Dayton leg,
 Bloomington splits Indianapolis-Evansville).
 
-CITY WAVE 1 -- corridor-critical, build after Batch 4 (11 cities). These
+CITY WAVE 1 -- corridor-critical, build after Batch 4 (~11 cities). These
 unlock or split legs the batch plan needs:
-- Jackson, Tennessee -- BUILD FIRST, owner priority with a history: this is
-  the city the slug-key migration was built FOR (three-Jacksons collision),
-  and pickaxe across all branches proves it was never actually added
-  afterward -- the intention was lost, not the data. Build: split the 209mi
-  memphis-nashville I-40 leg into memphis-jackson + jackson-nashville,
-  KEEPING the existing curated checkpoints (Parker Crossroads, Buck Snort,
-  Kingston Springs) and the existing "Pilot Travel Center Jackson" stop on
-  the correct halves. Region from the classifier. NOT Jackson, Mississippi;
-  not Jackson, Michigan.
+- [DONE 2026-07-09, commit 2b3ccc1] Jackson, Tennessee AND Cookeville,
+  Tennessee -- both promoted and the I-40 legs split
+  (memphis->jackson->nashville, knoxville->cookeville->nashville); Buck Snort
+  and the other curated checkpoints preserved; Cumberland Plateau "mountain"
+  and Highland Rim "hills" pins held. These two are OFF the build list.
 - Wytheville, Virginia -- I-77 x I-81 junction; unlocks Beckley-Winston-Salem
   as two real legs.
 - Lynchburg, Virginia -- US-29/US-460 hub; fixes the Roanoke-Charlottesville

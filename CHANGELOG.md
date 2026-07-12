@@ -49,6 +49,451 @@
 
 ### Added
 
+- **The major toll turnpikes now charge realistic tolls.** Running the Kansas
+  Turnpike, the Oklahoma turnpikes, the New York Thruway, the Pennsylvania and
+  Ohio turnpikes, the Indiana Toll Road, the Illinois Tollway, the Mass Pike, the
+  Maine and West Virginia turnpikes now adds an estimated commercial toll to the
+  run -- so a toll route is a real cost to weigh against the free way around.
+
+- **Speed limits along every route now match the real posted limits.** The whole
+  map now carries actual speed-limit data pulled from the road network, so the
+  posted limit you hear reflects the highway you are really on instead of a rough
+  estimate.
+
+- **Owatonna, Marshalltown, Hinesville, and Spring Hill join the map.** Owatonna
+  comes onto Interstate 35 south of Minneapolis, Marshalltown onto US-30 in
+  central Iowa, Hinesville ties Fort Stewart into Savannah and Brunswick, and
+  Spring Hill opens the US-19 coast north of Tampa.
+
+- **New Jersey and Louisiana fill in.** Toms River and Vineland join the map on
+  the Garden State Parkway and in South Jersey, Ruston comes onto Interstate 20
+  between Shreveport and Monroe, and Hammond ties Baton Rouge to New Orleans.
+
+- **The Pacific Northwest interior fills in.** Longview comes onto Interstate 5
+  between Olympia and Portland, Walla Walla ties into the Tri-Cities and Pendleton
+  on US-12, and Port Angeles opens the Olympic Peninsula on US-101.
+
+- **Clarksville now runs straight into Nashville.** The Interstate 24 route from
+  Clarksville no longer skips past Nashville, and the drive in from the northwest
+  passes Fort Campbell.
+
+- **Northern New England joins the map.** Rutland ties central Vermont to
+  Burlington and Albany, Keene links southwest New Hampshire, Lewiston opens
+  Maine north of Portland, and Barnstable brings Cape Cod onto the map.
+
+- **The Deep South fills in.** Cullman comes onto Interstate 65 between Huntsville
+  and Birmingham, Selma onto US-80 west of Montgomery, Troy onto US-231 toward
+  Dothan, and Americus ties into Albany and Columbus in southwest Georgia.
+
+- **Ames, Hickory, Danville, and Yuba City join the map.** Ames comes onto
+  Interstate 35 north of Des Moines, Hickory onto Interstate 40 between Asheville
+  and Charlotte, Danville onto US-29 between Greensboro and Lynchburg, and Yuba
+  City onto California's CA-99 between Sacramento and Chico.
+
+- **Ohio and northwest Pennsylvania fill in.** Zanesville comes onto Interstate 70
+  between Columbus and Wheeling, Meadville onto Interstate 79 between Erie and
+  Pittsburgh, and Chillicothe and Marion tie into Columbus on US-23.
+
+- **Oxford, Jamestown, Fort Dodge, and Mattoon join the map.** Oxford ties into
+  northern Mississippi (Tupelo, Memphis, Clarksdale), Jamestown onto the Southern
+  Tier between Erie and Buffalo, Fort Dodge into north-central Iowa, and Mattoon
+  onto Interstate 57 between Effingham and Champaign.
+
+- **Wheeling, Columbus, and southwest Florida join the map.** Wheeling comes onto
+  Interstate 70 between Columbus and Pittsburgh, Columbus anchors east-central
+  Nebraska, and Sarasota and North Port fill the Interstate 75 run down Florida's
+  Gulf coast between Tampa and Fort Myers.
+
+- **The West Texas plains fill in.** Plainview comes onto Interstate 27 between
+  Lubbock and Amarillo, Big Spring onto Interstate 20 between Midland and Abilene,
+  and Hereford ties Amarillo west to Clovis on US-60.
+
+- **Palm Coast, Ridgecrest, and Susanville reach the last corners.** Palm Coast
+  comes onto Interstate 95 between Daytona and Jacksonville, and Ridgecrest and
+  Susanville open the lonely US-395 desert runs in California -- including the
+  mountain climb over the Cascades from Susanville to Redding.
+
+- **The Georgia and South Carolina midlands fill in.** Dublin comes onto
+  Interstate 16 between Macon and Savannah, Statesboro ties into Savannah and
+  Augusta, and Sumter links Columbia and Florence.
+
+- **Findlay, Dyersburg, and Burlington fill more gaps.** Findlay comes onto
+  Interstate 75 between Toledo and Lima, Dyersburg ties northwest Tennessee to
+  Memphis and Jackson, and Burlington joins the Mississippi in southeast Iowa
+  between Ottumwa and Iowa City.
+
+- **Russellville joins the Arkansas River valley.** Russellville comes onto
+  Interstate 40 between Conway and Fort Smith, a real stop on the run west from
+  Little Rock.
+
+- **Central Oklahoma fills in.** Stillwater, Ponca City, and Ada join the map,
+  linking Oklahoma City, Tulsa, Enid, Bartlesville, Ardmore, and McAlester across
+  the middle of the state.
+
+- **Jamestown, Mason City, and Altus fill the last plains gaps.** Jamestown comes
+  onto Interstate 94 between Bismarck and Fargo, Mason City onto Interstate 35
+  between Albert Lea and Des Moines, and Altus ties into southwestern Oklahoma.
+
+- **Norfolk, Brownwood, and Pampa round out the plains.** Norfolk anchors
+  northeast Nebraska (Sioux City, Grand Island, Omaha), Brownwood ties central
+  Texas together (Abilene, San Angelo, Lampasas), and Pampa comes onto the map in
+  the Texas Panhandle north of Amarillo.
+
+- **Vincennes and Poplar Bluff join the map.** Vincennes seats on the US-41
+  corridor between Terre Haute and Evansville, and Poplar Bluff anchors
+  southeastern Missouri with runs to Cape Girardeau, Jonesboro, and a US-60 haul
+  west into the Ozarks toward Springfield.
+
+- **The Blues Highway fills in at Clarksdale.** Clarksdale joins the map on US-61,
+  completing the Delta run from Memphis down through Cleveland to Greenville, with
+  an eastern tie to Grenada.
+
+- **The Columbia Gorge opens at The Dalles.** The Dalles comes onto Interstate 84
+  between Portland and Pendleton, seating a stop in the Gorge on the run east.
+
+- **East Texas piney woods open at Palestine.** Palestine joins the map hubbing
+  Tyler, Lufkin, and College Station on US-69, US-84, and TX-21.
+
+- **Douglas joins southeastern Arizona.** The border town of Douglas ties in over
+  the Mule Mountains through Bisbee to Sierra Vista and runs northwest to Tucson.
+
+- **The north country opens at Watertown.** Watertown joins the map on Interstate
+  81 north of Syracuse and ties east to Utica over the Tug Hill on NY-12.
+
+- **The southwest Texas border country joins the map.** Uvalde comes onto the
+  US-90 run between San Antonio and Del Rio, and the border city of Eagle Pass
+  ties in on US-57 and US-277.
+
+- **Central Kansas fills in.** Emporia comes onto the Kansas Turnpike between
+  Topeka and Wichita, and Hutchinson and Great Bend open a wheat-country run from
+  Wichita and Salina west toward Hays.
+
+- **Hot Springs joins the map in the Ouachitas.** The old resort town links to
+  Little Rock and Texarkana on US-70 and runs north to Fort Smith on US-270 --
+  a real mountain haul over the Ouachita ridges.
+
+- **The Missouri and Iowa heartland fills in.** Sedalia opens the US-50 run
+  between Kansas City and Columbia, and Kirksville and Ottumwa join a US-63
+  corridor north from Columbia up into Des Moines.
+
+- **The US-15 route through north-central Pennsylvania opens.** Williamsport joins
+  the map on the Susquehanna, linking Harrisburg, State College, and Binghamton --
+  including the mountain climb north onto the plateau toward New York.
+
+- **The Grand Strand comes onto the map at Myrtle Beach.** Myrtle Beach seats on
+  the coastal US-17 run between Charleston and Wilmington and ties inland to
+  Florence and Interstate 95 on US-501.
+
+- **Western Illinois joins along the Mississippi.** The river port of Quincy and
+  the rail town of Galesburg come onto the map, opening the Interstate 72 run east
+  to Springfield and a proper Interstate 74 stop at Galesburg between Peoria and
+  the Quad Cities.
+
+- **The Mississippi Delta opens up at Greenville.** Greenville joins the map with
+  US-82 east to Grenada, US-61 south down the Delta to Vicksburg, and a run across
+  the river into Arkansas toward Pine Bluff.
+
+- **Southeastern New Mexico's oil country joins the map.** Hobbs anchors the
+  Permian Basin with runs to Carlsbad, Lubbock, and Odessa, and Alamogordo opens
+  the US-54 and US-70 routes between El Paso, Las Cruces, and Roswell -- including
+  the mountain climb over the Sacramentos.
+
+- **Wisconsin's Fox Valley and lakeshore fill in.** Fond du Lac, Oshkosh, and
+  Sheboygan join the map, opening the Interstate 41 run up the Fox River Valley
+  from Milwaukee to Green Bay and the Interstate 43 lakeshore route past
+  Sheboygan.
+
+- **A northern route across the Pennsylvania mountains opens up.** Altoona and
+  State College join the map, giving a US-22 and US-322 run from Pittsburgh over
+  the Allegheny ridges to Harrisburg -- a real mountain haul alongside the
+  Turnpike, with steep grades over the Allegheny Front and the Seven Mountains.
+
+- **Central Indiana fills in around Indianapolis.** Muncie, Anderson, Kokomo,
+  Columbus, and Richmond join the map, opening the Interstate 69 run northeast,
+  the US-31 haul north to Kokomo, and proper Interstate 65 and 70 stops at
+  Columbus and Richmond on the way to Louisville and Dayton.
+
+- **The Colorado River and southern Arizona fill in.** Lake Havasu City and
+  Bullhead City open the river run down from Kingman to Yuma, and Nogales and
+  Sierra Vista put the Mexican border and Interstate 19 on the map below Tucson.
+
+- **Eastern North Carolina comes onto the map.** Greenville, Jacksonville,
+  New Bern, and Rocky Mount join the network, opening the US-17 coastal run
+  from Wilmington up past Camp Lejeune, the US-264 haul from Raleigh, and a
+  proper Interstate 95 stop at Rocky Mount between Fayetteville and Virginia.
+
+- **US-60 climbs east from Phoenix through copper country.** Globe -- the old
+  copper-mining town -- and Show Low, up in the White Mountains, join the map,
+  opening the US-60 run past Apache Junction and Superior, down through the Salt
+  River Canyon, and on to Interstate 40 at Holbrook.
+
+- **The Interstate 10 corridor around Phoenix fills in.** Casa Grande -- the big
+  distribution hub between Phoenix and Tucson -- and Buckeye, out on the western
+  farm flats, join the map, breaking the I-10 runs into real stops past Eloy,
+  Marana, and Quartzsite.
+
+- **The Verde Valley opens along Interstate 17.** Camp Verde -- the I-17/AZ-260
+  junction -- plus Cottonwood and red-rock Sedona join the map, splitting the
+  Phoenix-to-Flagstaff run through the valley, with AZ-260 tying east to Payson.
+
+- **The Beeline Highway and Route 66 open central Arizona.** Payson -- the
+  junction town below the Mogollon Rim -- plus Winslow and Holbrook join the map:
+  the AZ-87 Beeline climb from Phoenix to Payson, the AZ-260 run east to Winslow,
+  and Interstate 40 past Holbrook to Gallup.
+
+- **Northern Wisconsin fills in, Wausau up to Duluth.** Chippewa Falls and Rice
+  Lake join the map, carrying WI-29 and US-53 north from Green Bay country up
+  through Superior to the head of Lake Superior at Duluth.
+
+- **US-89 climbs to Page and Lake Powell.** Page joins the map, opening the run
+  north from Flagstaff across the Navajo Nation, past Cameron, to the Glen Canyon
+  and Lake Powell country.
+
+- **The Redwood Highway opens, US-101 north to Eureka.** Willits and Fortuna join
+  the map, completing the North Coast run from Ukiah up through the redwoods --
+  past Garberville and down the Eel River canyon -- to Eureka on Humboldt Bay.
+
+- **The eastern Sierra opens along US-395, Reno to the Antelope Valley.** Carson
+  City, Mammoth Lakes, Bishop, Lone Pine, and Mojave join the map, opening the
+  long run down the east side of the Sierra Nevada -- over Conway Summit and the
+  Sherwin Grade, through the Owens Valley beneath Mount Whitney, down to Mojave
+  and Lancaster.
+
+- **Interstate 90's Silver Valley opens across the Idaho panhandle.** Kellogg --
+  heart of the old silver-mining country -- and Superior, Montana join the map,
+  breaking out the I-90 run from Coeur d'Alene over Lookout Pass into Missoula,
+  past historic Wallace.
+
+- **Southwest Colorado connects to the Front Range over Wolf Creek Pass.** Pagosa
+  Springs, Alamosa, and Walsenburg join the map, opening the US-160 run from
+  Durango across Wolf Creek and La Veta passes down to Pueblo and Interstate 25 --
+  Wolf Creek being the pass of runaway-truck fame, a fourteen-percent grade over
+  the San Juans.
+
+- **The Million Dollar Highway opens, Durango to Grand Junction.** Montrose and
+  Delta join the map, breaking out the US-550 run over Red Mountain Pass -- past
+  Silverton and Ouray, the "Switzerland of America" -- a real high-country
+  crossing that climbs over four thousand feet with grades past eleven percent,
+  the steepest, most dramatic road on the map.
+
+- **Interstate 81 now reaches Richmond the primary way, over Afton Mountain.**
+  Staunton joins the map at the Interstate 64 / Interstate 81 junction, so a load
+  off I-81 can take I-64 east through the Blue Ridge -- past Waynesboro and
+  Charlottesville into Richmond -- the main truck route east, not just the older
+  US-460 line through Lynchburg.
+
+- **The Tri-Cities open up along Interstate 81 and US-11W.** Marion and Abingdon
+  in southwest Virginia, and Bristol and Kingsport in northeast Tennessee, join
+  the map -- linking Wytheville down through the Tennessee valley to Morristown
+  and Knoxville, so the whole I-81 Appalachian freight run is drivable.
+
+- **A Black Hills freight run opens, Cheyenne to Rapid City.** Wheatland and Lusk
+  out on the Wyoming high plains, and Hot Springs at the southern edge of the
+  Black Hills, join the map -- linking Cheyenne up through Lusk and into Rapid
+  City and Mount Rushmore country.
+
+- **US-287 completes the Ports-to-Plains, all the way to Denver.** Boise City
+  out in the Oklahoma panhandle, and Lamar and Limon on the Colorado high plains,
+  join the map -- finishing the US-287 freight spine so a load can run from San
+  Antonio up through the Panhandle to the Colorado Front Range on US highways.
+
+- **US-287 climbs the Texas Panhandle north of Amarillo.** Dumas -- cattle and
+  meatpacking country -- and Stratford join the map, carrying the Ports-to-Plains
+  freight run up toward the Oklahoma line (Colorado and Denver still to come).
+
+- **US-75 reaches north out of Tulsa into Kansas.** Bartlesville -- the old
+  Phillips 66 oil town -- and Coffeyville join the map, carrying the US-75
+  freight run up across the Oklahoma line into southeast Kansas.
+
+- **US-69 connects southeastern Oklahoma up to Muskogee.** McAlester joins the
+  map, completing the US-69 freight run east of US-75 -- from Durant and Atoka
+  up through Eufaula and Checotah -- so the Texoma corridor reaches Muskogee and
+  Fort Smith.
+
+- **US-287 becomes drivable town by town across the Texas Panhandle.** Vernon,
+  Childress, and Clarendon join the map, breaking the long Wichita Falls to
+  Amarillo haul into real stops along the Ports-to-Plains freight route --
+  through Quanah, Memphis, and Claude.
+
+- **US-75 links Dallas and Tulsa through southern Oklahoma.** Durant, Atoka,
+  Henryetta, and Okmulgee join the map, completing the north-south run from the
+  Metroplex up across the Red River and through the Choctaw and Muscogee country
+  to Tulsa -- a freight route that skips the long swing out to Interstate 44.
+
+- **US-281 opens up central Texas, a north-south run beside Interstate 35.**
+  Five towns join the map -- Marble Falls in the Highland Lakes, Lampasas,
+  Stephenville, Mineral Wells, and Jacksboro -- linking San Antonio all the way
+  up to Wichita Falls on US-281, the freight route that skips the Interstate 35
+  crawl through Austin and the Metroplex.
+
+- **Nine long runs now call out real towns instead of vague corridors.** On
+  routes like San Antonio to Dallas, Denver to Salt Lake City, Phoenix to Los
+  Angeles, Atlanta to Birmingham, and Chicago to Indianapolis, the game names
+  the actual towns you pass -- New Braunfels and Waxahachie, Steamboat Springs
+  and Vernal, Quartzsite, Baker and Yermo out in the desert -- in place of the
+  old generic "corridor" markers.
+
+- **Thirteen more cities finish the flavor map, coast to coast.** Socorro joins
+  Interstate 25 down the Rio Grande; Modesto and Merced fill California's Highway 99
+  between Stockton and Fresno; New London lands on Interstate 95 between Providence
+  and New Haven; plus Clovis, Sherman, Paris, Lufkin, and Victoria across Texas and
+  New Mexico, Prescott in the Arizona highlands, Logan and Moab in Utah, and
+  Aberdeen up in the Dakotas.
+
+- **Nine more Southern cities join the map.** Gadsden lands on Interstate 59
+  between Birmingham and Chattanooga; Brunswick breaks up the Interstate 95 run from
+  Jacksonville to Savannah; Natchitoches sits on Interstate 49 between Alexandria and
+  Shreveport; plus Florence in the Alabama Shoals, Rome and Columbus, historic
+  Natchez on the Mississippi bluffs, Panama City on the Florida panhandle, and Houma
+  down in the Louisiana bayou.
+
+- **The central California coast fills in along US-101.** San Luis Obispo and Santa
+  Barbara join the map, completing the scenic coast run between the Bay Area and Los
+  Angeles -- Salinas down through SLO and Santa Maria, over the coastal grades to
+  Santa Barbara and Oxnard.
+
+- **The Florida Gulf coast opens up, across Alligator Alley.** Fort Myers and Naples
+  join the map, connecting Tampa down the Gulf coast, and the run from Naples to
+  Miami takes Interstate 75's Alligator Alley straight across the Everglades -- no
+  services for eighty miles, panther-crossing country, and a truck toll for the
+  privilege.
+
+- **Drive the Overseas Highway to Key West.** Key West joins the map at the very
+  end of the road, reached from Miami down US-1 through the Florida Keys -- Key
+  Largo, Islamorada, Marathon, Big Pine Key -- across the Seven Mile Bridge, all the
+  way to the southernmost point in the continental United States.
+
+- **You can now cross the Chesapeake Bay Bridge-Tunnel.** Cape Charles joins the
+  map on Virginia's Eastern Shore, and the run north from Norfolk takes you out
+  across the seventeen-mile Bridge-Tunnel -- diving into two tunnels beneath the
+  shipping channels, past Sea Gull Island, out to where no land is visible in any
+  direction, and up the Delmarva peninsula to Salisbury. It carries a hefty truck
+  toll, because of course it does.
+
+- **The northern Rockies and the Great Basin connect end to end.** Fifteen final
+  runs: Missoula to Helena over MacDonald Pass, Provo to Green River over Soldier
+  Summit, and Fort Collins up to Laramie -- real mountain grades -- plus Helena to
+  Bozeman, Missoula to Kalispell, Great Falls to Havre along the Hi-Line, Casper to
+  Gillette to Miles City, the North Dakota oil country (Dickinson, Williston,
+  Glendive, Wolf Point), and the empty heart of Nevada and Utah (Twin Falls to
+  Wells, West Wendover to Ely, Winnemucca to Fallon, Cedar City to Richfield).
+
+- **The Pacific Northwest fills in over the Cascade passes.** Fourteen new runs:
+  Seattle over Stevens Pass to Wenatchee, Tacoma over White Pass to Yakima, Salem
+  over Santiam Pass to Bend -- real mountain grades with brake checks -- plus the
+  Willamette Valley (Salem-Corvallis, Newport-Albany), the Columbia Basin
+  (Wenatchee, Moses Lake, Tri-Cities, Yakima), the Oregon coast to Olympia, and the
+  Idaho panhandle from Lewiston through Coeur d'Alene to Sandpoint.
+
+- **California connects up, coast to desert.** Twelve new runs: San Francisco to
+  Santa Rosa and San Jose to Salinas and Stockton; Salinas down the coast to Santa
+  Maria; Fresno to Visalia; Oxnard to Valencia; Bakersfield over Tehachapi to
+  Barstow; Lancaster to Barstow and Victorville; San Diego up to Riverside; and
+  Riverside out to Indio and El Centro across the desert.
+
+- **The Great Plains ladder and the Ozarks connect up.** Fourteen new runs lace
+  the plains together -- Dodge City to Hays, Garden City and North Platte to Colby,
+  Kearney to Hays, Lincoln to Junction City, Bismarck to Minot, Mitchell to
+  Watertown, Sioux Falls to Mankato, Willmar to Watertown -- and down south,
+  Columbia to Rolla, Kansas City to Springfield, and three roads into Harrison,
+  Arkansas from Springfield, Conway, and Bentonville through the Ozark hills.
+
+- **Twelve more cities open up the western plains and the Rockies.** Lawrence,
+  Kansas joins the Interstate 70 run from Topeka to Kansas City; Ardmore breaks up
+  Oklahoma City to Dallas over the Arbuckle Mountains; Rawlins lands on Interstate
+  80 across Wyoming; Alexandria anchors the middle of Interstate 49 in Louisiana;
+  and the long-empty corners fill in -- Roswell and Carlsbad in the New Mexico oil
+  country, Farmington and Durango at the Four Corners over the Million Dollar
+  Highway, plus Muskogee, Liberal, Scottsbluff, and Pierre.
+
+- **Texas and the southern plains connect up with thirteen new runs.** The
+  Interstate 49 line finishes across Arkansas from Fort Smith to Texarkana; Tulsa
+  reaches Fayetteville, Enid, and Wichita; Waco runs to Tyler and on to Texarkana;
+  Lake Charles crosses into Orange; College Station to Temple; Austin up into the
+  Hill Country to Kerrville; and out west, San Angelo connects to Junction, Del Rio,
+  and Fort Stockton, with Odessa reaching Fort Stockton across the oil patch.
+
+- **Twelve more cities fill in the eastern and heartland map.** Cumberland,
+  Maryland lands on the Interstate 68 climb over the Alleghenies; Saint Joseph joins
+  the Interstate 29 run from Kansas City to Omaha; Mansfield breaks up Columbus to
+  Cleveland; Youngstown sits between Akron and Pittsburgh; plus Staunton, Paducah,
+  Owensboro, Parkersburg, Mount Vernon, Cape Girardeau, Waterloo, and Daytona Beach
+  -- each connecting to its neighbors on real highways through towns like Paw Paw,
+  Romney, and Appalachian coal country.
+
+- **The Midwest lattice comes together with nineteen new runs.** Cedar Rapids to
+  Iowa City; Peoria to Springfield, Decatur, and on to Bloomington and St. Louis;
+  Champaign to Lafayette; and across Michigan and the crossroads, Detroit to Ann
+  Arbor, Flint, and Toledo; Toledo to Columbus; Fort Wayne to Elkhart, Lansing, and
+  Gary; Lansing and Kalamazoo; Milwaukee to Rockford; Indianapolis to South Bend;
+  Grand Rapids to Saginaw; and Muskegon up to Traverse City along Lake Michigan.
+
+- **The Northeast fills in from Maine to the Chesapeake.** Fourteen new short-haul
+  runs stitch the dense Northeast together: Boston to Manchester, Providence to
+  Worcester, Hartford, and New Haven; Philadelphia to Allentown and on to Trenton;
+  Baltimore and Washington across the Chesapeake Bay Bridge to Dover and Salisbury;
+  Harrisburg to Wilmington; Washington and Pittsburgh to Carlisle; Binghamton to
+  Utica; and up through the Green and White Mountains, Albany and Portland, Maine
+  to Montpelier.
+
+- **Lynchburg and Longview become real hubs.** Lynchburg, Virginia now anchors
+  US-460 between Roanoke and Richmond -- past Bedford, Appomattox, and Midlothian --
+  and reaches Charlottesville up US-29. Longview, Texas takes its place on
+  Interstate 20 between Tyler and Shreveport, past Marshall, and runs up US-59 to
+  Texarkana.
+
+- **Seven cities fill in long blank stretches of Interstate.** Wytheville breaks up
+  the Interstate 81 run through the Virginia mountains; Bloomington splits the
+  Interstate 69 haul to Evansville; Lima lands on Interstate 75 between Toledo and
+  Dayton; Ocala joins the Jacksonville-to-Tampa run; Dubuque anchors the Mississippi
+  River crossing on US-20; and Terre Haute and Effingham break the long Indianapolis-
+  to-St. Louis drive on Interstate 70 into real stops. Each was a place you drove
+  past for a hundred miles with nowhere to stop -- now they're real cities to
+  pick up and deliver in.
+
+- **The Carolinas and Virginia knit together with thirteen new runs.** Charlotte
+  reaches Winston-Salem and Lumberton; Wilmington connects to Lumberton; Greensboro
+  drops to Fayetteville; Charleston runs up to Florence; Asheville crosses the Blue
+  Ridge to Spartanburg and Greenville; Roanoke links to Winston-Salem; Raleigh and
+  Norfolk both reach Petersburg; and out of Washington, new roads run to Winchester,
+  Hagerstown, and Charlottesville through Leesburg, Warrenton, and Frederick.
+
+- **The Kentucky parkways and the Appalachian coalfields open up.** Thirteen new
+  runs through some of the most storied hauling country in the East: Pound Gap
+  from Johnson City to Pikeville, Corridor G from Charleston, the Cumberland Gap
+  on US-25E, the Mountain Parkway to Hazard, Interstate 68 over the Alleghenies to
+  Hagerstown, and the New River Gorge road to Beckley -- real mountain grades with
+  brake checks, plus the Bluegrass, Western Kentucky, and Cumberland parkways
+  through Bardstown, Somerset, and Middlesboro.
+
+- **Georgia fills in from the mountains to the Florida line.** Athens now connects
+  to Macon, Augusta, and Greenville, South Carolina; Macon reaches Columbus;
+  LaGrange drops to Columbus on Interstate 185; and across the south, Albany links
+  to Cordele, Valdosta, and Tallahassee while Valdosta reaches Tallahassee and
+  Dothan -- ten new runs through antebellum Madison, Uncle Remus's Eatonton,
+  Moultrie, and Cairo.
+
+- **The Deep South knits together with eleven more connections.** Birmingham runs
+  down to Opelika and on to Columbus, Georgia; Columbus drops to Dothan past Lake
+  Eufaula; Montgomery reaches Meridian on US-80 through Selma; Huntsville joins
+  Chattanooga along the Tennessee River past Scottsboro; Mobile connects to
+  Hattiesburg, Baton Rouge to Gulfport, and Crestview up to Dothan. In the west,
+  Shreveport now reaches Texarkana on Interstate 49, and Little Rock and Texarkana
+  both connect down to El Dorado through the south Arkansas timber country.
+
+- **Two Tennessee cities join the Interstate 40 run across the state.** Jackson
+  now breaks up the long Memphis-to-Nashville haul, and Cookeville splits the
+  Nashville-to-Knoxville climb over the Cumberland Plateau -- so driving clear
+  across Tennessee now stops in real towns the whole way (Jackson, Nashville,
+  Cookeville) with Buck Snort and Parker Crossroads still along the road.
+
+- **Nine famous Interstate stretches open up at once.** The New York Thruway from
+  the city to Albany up the Hudson Valley; Interstate 5 from Sacramento to Redding;
+  the Cajon Pass climb from Riverside to Victorville -- a real mountain grade;
+  Interstate 75 from Toledo to Dayton past Neil Armstrong's hometown of Wapakoneta;
+  Kansas City to Joplin past Harry Truman's birthplace; plus Chicago to Champaign,
+  Indianapolis to Evansville, Colorado Springs to Pueblo, and Tallahassee to Lake
+  City across the quiet Big Bend.
 - **Optional Profile sharing stays quiet during driving.** With Profile sharing on,
   Freight Fate can queue automatic fictional road-journal posts,
   achievements, and an allowlisted last-saved career snapshot for the public
@@ -114,9 +559,9 @@
   truck stops, rest areas, and the Red River crossing along the way.
 
 - **The drivable map crosses one hundred thousand miles.** This drop adds about
-  four thousand five hundred miles of new road and thirty-two new cities,
+  twenty-seven thousand four hundred miles of new road and ninety-five new cities,
   bringing the network past one hundred thousand miles you can actually drive --
-  103,340 miles across 407 cities and 785 routes.
+  126,238 miles across 470 cities and 1,039 routes.
 
 - **Exits now come straight from real-world maps -- with the correct exit names
   and numbers.** On the Interstates, your stops and your destination exit are
@@ -254,12 +699,6 @@
   deliver -- and Wells now splits the old Elko run, so Interstate 80 freight
   passes through the real town instead of leaping it.
 
-- **New: real roadside landmarks as you drive.** Routes now call out the world
-  going by -- entering a national forest, crossing a named river, approaching a
-  mountain pass, a roadside museum ahead -- over 2,800 of them, drawn from real
-  map data so a long haul has a sense of place instead of silence. Thanks to
-  nromey.
-
 - **Some hauls now offer more than one way to drive them.** Where two real truck
   routes reach the same place, the map keeps both, so a run can offer a choice --
   a faster interstate or a shorter back road -- instead of a single fixed path.
@@ -387,6 +826,10 @@
 
 ### Fixed
 
+- **A few routes now name the right highway.** On the runs from Denver to Salt
+  Lake City, Santa Rosa to Stockton, and Clarksville to Huntsville, the game
+  announced a highway the route never actually takes; it now names the road you
+  are really driving.
 - **The truck now warns you while the engine is over-revving, instead of
   surprising you with damage at delivery.** Holding the engine at redline --
   easiest to do by backing up fast for a long stretch -- quietly ground the

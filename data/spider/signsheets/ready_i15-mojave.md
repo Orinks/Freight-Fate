@@ -7,6 +7,10 @@ Facts from public data; copy invented. One built leg:
 
 ---
 
+<!-- complete-legs -->
+**Complete built legs in this corridor (use ONLY these slugs for `leg:`):**
+`las_vegas_nv_us -> los_angeles_ca_us` (270)
+
 ### World's Tallest Thermometer
 - treatment: billboard
 - leg: las_vegas_nv_us -> los_angeles_ca_us

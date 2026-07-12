@@ -16,6 +16,10 @@ kingman_az_us` (151).
 
 ---
 
+<!-- complete-legs -->
+**Complete built legs in this corridor (use ONLY these slugs for `leg:`):**
+`albuquerque_nm_us -> gallup_nm_us` (138), `albuquerque_nm_us -> tucumcari_nm_us` (176), `amarillo_tx_us -> albuquerque_nm_us` (288), `flagstaff_az_us -> kingman_az_us` (151), `gallup_nm_us -> flagstaff_az_us` (185), `oklahoma_city_ok_us -> amarillo_tx_us` (258), `tucumcari_nm_us -> amarillo_tx_us` (114)
+
 ### The Big Texan Steak Ranch
 - treatment: billboard
 - leg: oklahoma_city_ok_us -> amarillo_tx_us
