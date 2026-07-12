@@ -7420,6 +7420,33 @@
       "locations": [],
       "lat": 36.757,
       "lon": -90.4293
+    },
+    "norfolk_ne_us": {
+      "spoken_city": "Norfolk",
+      "state": "NE",
+      "country": "US",
+      "region": "heartland",
+      "locations": [],
+      "lat": 42.0287,
+      "lon": -97.417
+    },
+    "brownwood_tx_us": {
+      "spoken_city": "Brownwood",
+      "state": "TX",
+      "country": "US",
+      "region": "southern_plains",
+      "locations": [],
+      "lat": 31.7093,
+      "lon": -98.9912
+    },
+    "pampa_tx_us": {
+      "spoken_city": "Pampa",
+      "state": "TX",
+      "country": "US",
+      "region": "southern_plains",
+      "locations": [],
+      "lat": 35.5362,
+      "lon": -100.9599
     }
   }
 }

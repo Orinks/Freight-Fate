@@ -4,6 +4,11 @@
 
 ### Added
 
+- **Norfolk, Brownwood, and Pampa round out the plains.** Norfolk anchors
+  northeast Nebraska (Sioux City, Grand Island, Omaha), Brownwood ties central
+  Texas together (Abilene, San Angelo, Lampasas), and Pampa comes onto the map in
+  the Texas Panhandle north of Amarillo.
+
 - **Vincennes and Poplar Bluff join the map.** Vincennes seats on the US-41
   corridor between Terre Haute and Evansville, and Poplar Bluff anchors
   southeastern Missouri with runs to Cape Girardeau, Jonesboro, and a US-60 haul
