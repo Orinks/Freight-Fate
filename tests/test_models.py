@@ -2,6 +2,8 @@
 
 import json
 
+import pytest
+
 from freight_fate.models import Career, Economy, JobBoard, Profile
 from freight_fate.models.career import level_for_xp
 from freight_fate.models.jobs import CARGO_CATALOG, plan_hos
@@ -136,6 +138,11 @@ def test_route_deadline_uses_baked_limit_near_city():
     )
 
 
+# Walking every corridor grows with the map and, under coverage tracing on a
+# contended CI runner, straddles the default 120-second hang timeout. It is
+# long, not hung, so give it real headroom; 300 seconds proved marginal once
+# the suite grew, and the thread timeout kills the whole xdist worker.
+@pytest.mark.timeout(600)
 def test_deadlines_cover_required_hos_time_across_the_network(world):
     """Every generated job's deadline must cover the honest HOS time (driving at
     the planning pace plus mandatory breaks and 10-hour sleeps). This is the
@@ -381,3 +388,21 @@ def test_unit_formatting():
     assert "miles per hour" in s.speed_text(60)
     s.imperial_units = False
     assert s.speed_text(60) == "97 kilometers per hour"
+
+
+def test_job_spoken_names_always_carry_the_state(world):
+    """Dispatch offers name places a player may never have heard of; the
+    state must always ride along ("McCall, Idaho"), not only when two
+    cities share a name (player request)."""
+    board = JobBoard(world, seed=5)
+    jobs = board.offers("Chicago", endorsements=set(), level=2)
+    assert jobs
+    for job in jobs:
+        origin_city = world.city(job.origin)
+        dest_city = world.city(job.destination)
+        assert job.spoken_origin == origin_city.spoken_qualified
+        assert job.spoken_destination == dest_city.spoken_qualified
+        if origin_city.state:
+            assert origin_city.state in job.spoken_origin
+        if dest_city.state:
+            assert dest_city.state in job.spoken_destination

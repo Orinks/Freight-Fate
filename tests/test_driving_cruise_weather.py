@@ -47,6 +47,60 @@ def test_cruise_control_holds_the_set_speed(monkeypatch):
         app.shutdown()
 
 
+def test_cruise_does_not_rev_engine_when_clutch_is_depressed(monkeypatch):
+    from freight_fate.app import App
+
+    class Keys:
+        pressed = set()
+
+        def __getitem__(self, key):
+            return key in self.pressed
+
+    keys = Keys()
+    monkeypatch.setattr(pygame.key, "get_pressed", lambda: keys)
+
+    app = App()
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        driving.trip.zones = []
+        open_limits(driving)
+        t = driving.truck
+        driving.handle_event(key_event(pygame.K_e))  # engine on
+        t.cargo_kg = 0.0
+        t.grade = 0.0
+        app.ctx.settings.automatic_transmission = False
+        t.transmission.automatic = False  # the bug is manual-only
+        t.transmission.gear = 10
+        t.velocity_mps = 26.8  # ~60 mph
+        t.throttle = 0.35
+        driving.handle_event(key_event(pygame.K_k))  # engage cruise
+        # Let cruise settle to its holding throttle with the clutch out.
+        for _ in range(30):
+            driving.update(1 / 60)
+        held_throttle = driving._cruise_throttle
+        assert held_throttle > 0.05
+        assert t.rpm < t.specs.max_rpm * 0.9
+
+        # Depress the clutch to shift: throttle must cut to idle, not free-rev.
+        keys.pressed = {pygame.K_LSHIFT}
+        for _ in range(30):  # ~0.5 s clutch in
+            driving.update(1 / 60)
+            assert t.throttle == 0.0
+        assert driving._cruise_mph is not None  # cruise stays engaged
+        assert t.rpm < t.specs.max_rpm * 0.6  # engine settled toward idle
+
+        # Release the clutch: cruise ramps the throttle back up toward the hold.
+        keys.pressed = set()
+        driving.update(1 / 60)
+        assert t.throttle > 0.0
+        for _ in range(30):
+            driving.update(1 / 60)
+        assert t.throttle > held_throttle * 0.5
+    finally:
+        app.shutdown()
+
+
 @pytest.mark.smoke
 def test_cruise_set_point_adjusts_with_plus_and_minus():
     from freight_fate.app import App

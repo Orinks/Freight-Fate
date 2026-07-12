@@ -73,6 +73,32 @@ def test_playtest_harness_records_headless_delivery_transcript(monkeypatch):
 
 
 @pytest.mark.smoke
+def test_delivery_publication_is_queued_without_spoken_interruption(monkeypatch):
+    from freight_fate.online_presence import OnlineIdentity
+
+    posted = []
+
+    def transport(url, payload, headers):
+        posted.append((url, payload, headers))
+        return {"ok": True}
+
+    with PlaytestHarness(monkeypatch) as harness:
+        harness.app.journal.identity = OnlineIdentity("driver-1234", "ffd_" + "a" * 64)
+        harness.app.journal.enabled = True
+        harness.app.journal.transport = transport
+        result = harness.start_delivery(profile_name="Silent Publisher")
+        harness.drive_delivery_to_completion()
+        harness.app.journal.flush()
+
+    assert result.deliveries == 1
+    assert any(url.endswith("/api/freight-fate/events/delivery") for url, _, _ in posted)
+    transcript = result.transcript_text.lower()
+    assert "journal" not in transcript
+    assert "publishing" not in transcript
+    assert "upload" not in transcript
+
+
+@pytest.mark.smoke
 def test_playtest_harness_drives_a_specific_route(monkeypatch):
     # The Newark -> New York corridor crosses to NY at the GWB on I-95 (the
     # Holland Tunnel fix); driving it directly should complete and never mention
@@ -87,9 +113,43 @@ def test_playtest_harness_drives_a_specific_route(monkeypatch):
     assert result.destination == "New York"
     assert result.remaining_miles == 0.0
     assert "Holland Tunnel" not in transcript
-    assert "New Jersey into New York" in transcript
+    # State lines announce only when crossed; this short delivery finishes at
+    # the terminal before its mapped crossing cue.
+    assert "New Jersey into New York" not in transcript
 
 
+def test_playtest_transcript_covers_both_automatic_direction_styles(monkeypatch):
+    from freight_fate.sim.transmission import REVERSE
+
+    with PlaytestHarness(monkeypatch) as harness:
+        result = harness.start_route("Newark", "New York")
+        driving = harness.driving
+        driving.truck.velocity_mps = 0.0
+
+        harness.app.ctx.settings.automatic_direction_changes = "simple"
+        driving._reverse_brake_held = True
+        assert driving._update_reverse_controls(accelerating=False, braking_key=True)
+        assert "[event] Reverse selected. Backing slowly." in result.transcript
+
+        driving.truck.transmission.gear = 1
+        result.transcript.clear()
+        harness.app.ctx.settings.automatic_direction_changes = "deliberate"
+        driving._reverse_brake_held = True
+        assert not driving._update_reverse_controls(accelerating=False, braking_key=True)
+        assert driving.truck.transmission.gear != REVERSE
+        assert result.transcript == []
+
+        driving._update_reverse_controls(accelerating=False, braking_key=False)
+        assert driving._update_reverse_controls(accelerating=False, braking_key=True)
+        assert "[event] Reverse selected. Backing slowly." in result.transcript
+
+
+# Six full simulated deliveries in one test, under coverage tracing on a
+# contended CI runner, straddle the default 120-second hang timeout. It is
+# long, not hung, so give it real headroom; 300 seconds proved marginal for
+# the sibling sweep tests once the suite grew, and the thread timeout kills
+# the whole xdist worker.
+@pytest.mark.timeout(600)
 @pytest.mark.property
 @settings(max_examples=6, deadline=None)
 @given(

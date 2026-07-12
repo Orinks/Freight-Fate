@@ -28,14 +28,6 @@ def _spoken_distance(value: float, unit: str) -> str:
     return f"{rounded:.0f} {unit if rounded == 1 else unit + 's'}"
 
 
-def _rest_stop_cue_text(prefix: str, parking_label: str) -> str:
-    parts = [prefix]
-    if parking_label:
-        parts.append(parking_label)
-    parts.append("press X to take the exit.")
-    return "; ".join(parts)
-
-
 class Trip:
     """One delivery run along a chosen route."""
 
@@ -373,11 +365,7 @@ class Trip:
                         "rest_stop",
                         start + offset,
                         f"{stop.label} ahead{at_part}",
-                        _rest_stop_cue_text(
-                            f"{stop.label.capitalize()}{at_part} ahead in "
-                            f"{self._distance_text(1.0)}",
-                            stop.parking_label,
-                        ),
+                        "",
                     )
                 )
         for i, lead in enumerate(self.traffic_leads):
@@ -399,13 +387,27 @@ class Trip:
         zones: list[Zone] = []
         total = self.route.miles
         n = max(0, int(total / 150))
+        # Spans already claimed by placed zones. Real work zones are signed
+        # well apart; without this, independent draws could nest one zone
+        # inside another or butt two together with no open road between.
+        spans: list[tuple[float, float]] = []
         for _ in range(n):
-            at = self._rng.uniform(15, max(16, total - 20))
-            length = self._rng.uniform(3, 9)
+            for _attempt in range(8):
+                at = self._rng.uniform(15, max(16, total - 20))
+                end = at + self._rng.uniform(3, 9)
+                if all(
+                    at > s_end + ZONE_MIN_GAP_MI or end < s_start - ZONE_MIN_GAP_MI
+                    for s_start, s_end in spans
+                ):
+                    break
+            else:
+                continue  # the route is crowded; place fewer zones instead
             if self._rng.random() < 0.6:
-                zones.append(Zone(at, at + length, 45, "construction"))
+                zones.append(Zone(at, end, 45, "construction"))
+                spans.append((at, end))
             elif not night or self._rng.random() < NIGHT_TRAFFIC_KEEP:
-                zones.append(Zone(at, at + length, 50, "heavy traffic"))
+                zones.append(Zone(at, end, 50, "heavy traffic"))
+                spans.append((at, end))
         zones.extend(self._facility_speed_zones())
         zones.sort(key=lambda z: z.start_mi)
         return zones
@@ -827,7 +829,7 @@ class Trip:
         if changed is not None:
             self._emit(
                 TripEventKind.WEATHER_CHANGE,
-                f"Weather changing: {self.weather.describe()}",
+                f"Weather changing: {self.weather.describe(self.imperial)}",
                 weather=changed,
             )
         self.truck.grip = self.weather.effects.grip
@@ -973,10 +975,9 @@ class Trip:
                     self._emit(TripEventKind.GPS_CUE, cue.near_text or cue.text, cue=cue)
                 continue
             if cue.kind == "rest_stop":
-                key = f"{cue.key}:near"
-                if 0 < ahead <= 1.2 and key not in self._announced_navigation:
-                    self._announced_navigation.add(key)
-                    self._emit(TripEventKind.GPS_CUE, cue.near_text, cue=cue)
+                # Road stops already receive one actionable announcement from
+                # _check_stops at five miles.  A second one-mile reminder made
+                # busy routes needlessly repetitive.
                 continue
             if cue.kind == "traffic":
                 key = f"{cue.key}:advance"
@@ -1002,16 +1003,19 @@ class Trip:
                 continue
             advance_key = f"{cue.key}:advance"
             near_key = f"{cue.key}:near"
-            lookahead = STATE_CROSSING_WARNING_LOOKAHEAD_MI if cue.kind == "state_crossing" else 2.0
+            if cue.kind == "state_crossing":
+                if ahead <= 0 and near_key not in self._announced_navigation:
+                    self._announced_navigation.add(near_key)
+                    self._emit(TripEventKind.STATE_CROSSING, cue.near_text, cue=cue)
+                continue
+            lookahead = 2.0
             if 0 < ahead <= lookahead and advance_key not in self._announced_navigation:
                 self._announced_navigation.add(advance_key)
                 message = f"In {self._distance_text(ahead)}, {cue.text}."
                 self._emit(TripEventKind.GPS_CUE, message, cue=cue)
             if -0.1 <= ahead <= 0.1 and near_key not in self._announced_navigation:
                 self._announced_navigation.add(near_key)
-                if cue.kind == "state_crossing":
-                    self._emit(TripEventKind.STATE_CROSSING, cue.near_text, cue=cue)
-                elif cue.kind == "checkpoint":
+                if cue.kind == "checkpoint":
                     self._emit(TripEventKind.CHECKPOINT, cue.near_text, cue=cue)
                 else:
                     self._emit(TripEventKind.GPS_CUE, cue.near_text, cue=cue)
@@ -1084,6 +1088,10 @@ class Trip:
 
     def _check_hazards(self, moved_mi: float) -> None:
         """Occasional road hazards that demand braking."""
+        if self._is_facility_approach_route():
+            # A deadhead crawl down a facility access road is minutes long at
+            # yard speeds; a "brake now" ambush there is noise, not driving.
+            return
         context = self.traffic_context()
         if (
             context is not None

@@ -33,6 +33,38 @@ def test_trip_event_sounds_use_contextual_cues():
     assert _route_event_sound(event) == "events/construction_zone"
 
 
+def test_active_drive_applies_manual_setting_and_announces_it(monkeypatch):
+    from freight_fate.app import App
+
+    app = App()
+    events = []
+
+    class HeldShift:
+        def __getitem__(self, key):
+            return key == pygame.K_LSHIFT
+
+    keys = HeldShift()
+    monkeypatch.setattr(pygame.key, "get_pressed", lambda: keys)
+    monkeypatch.setattr(
+        app.ctx,
+        "say_event",
+        lambda text, interrupt=True: events.append((text, interrupt)),
+    )
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        assert driving.truck.transmission.automatic
+        app.ctx.settings.automatic_transmission = False
+
+        driving.update(1 / 60)
+
+        assert not driving.truck.transmission.automatic
+        assert driving.truck.transmission.clutch == 1.0
+        assert ("Transmission changed to manual.", True) in events
+    finally:
+        app.shutdown()
+
+
 def test_passing_hazard_plays_clear_sound(monkeypatch):
     from freight_fate.app import App
     from freight_fate.states.driving_core import HAZARD_SAFE_MPH
@@ -135,6 +167,254 @@ def test_automatic_reverse_selection_is_spoken(monkeypatch):
         app.shutdown()
 
 
+def test_sustained_redline_speaks_a_damage_warning(monkeypatch):
+    import math
+
+    from freight_fate.app import App
+
+    app = App()
+    events = []
+    played = []
+    monkeypatch.setattr(app.ctx.audio, "play", lambda key, volume=1.0: played.append(key))
+    monkeypatch.setattr(
+        app.ctx,
+        "say_event",
+        lambda text, interrupt=True: events.append((text, interrupt)),
+    )
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        t = driving.truck
+        t.engine_on = True
+        t.transmission.gear = 1
+        ratio = abs(t.transmission.ratio_for(1))
+        wheel_rps = (t.specs.max_rpm * 1.1) / (60.0 * ratio)
+        t.velocity_mps = wheel_rps * 2 * math.pi * t.specs.wheel_radius_m
+        t.rpm = t.specs.max_rpm
+        t.damage_pct = 12.0
+
+        driving._update_overrev(1.0)  # inside the grace period: a shift flare
+        assert events == []
+
+        driving._update_overrev(1.0)  # sustained past the grace: warn
+        assert "redline" in events[-1][0].lower()
+        assert "12 percent" in events[-1][0]
+        assert events[-1][1] is True
+        assert "ui/warning" in played
+
+        events.clear()
+        driving._update_overrev(5.0)  # repeat interval not reached yet
+        assert events == []
+        driving._update_overrev(6.0)  # past it: nag again while damage accrues
+        assert len(events) == 1
+
+        events.clear()
+        t.rpm = t.specs.idle_rpm  # easing off resets the whole cycle
+        driving._update_overrev(1.0)
+        t.rpm = t.specs.max_rpm
+        driving._update_overrev(1.0)  # back at redline, but within fresh grace
+        assert events == []
+    finally:
+        app.shutdown()
+
+
+def test_simple_automatic_holds_through_stop_to_change_direction(monkeypatch):
+    from freight_fate.app import App
+    from freight_fate.sim.transmission import REVERSE
+
+    app = App()
+    monkeypatch.setattr(app.ctx.audio, "play", lambda *a, **k: None)
+    monkeypatch.setattr(app.ctx, "say_event", lambda *a, **k: None)
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        assert app.ctx.settings.automatic_direction_changes == "simple"
+
+        driving.truck.velocity_mps = 0.0
+        driving._reverse_brake_held = True
+        assert driving._update_reverse_controls(accelerating=False, braking_key=True)
+        assert driving.truck.transmission.in_reverse
+
+        driving.truck.velocity_mps = 0.0
+        driving._reverse_accel_held = True
+        driving._update_reverse_controls(accelerating=True, braking_key=False)
+        assert driving.truck.transmission.gear != REVERSE
+    finally:
+        app.shutdown()
+
+
+def test_controller_trigger_edges_follow_automatic_direction_style(monkeypatch):
+    """The deliberate controller path reads the unsmoothed trigger target so
+    a full release is observable even while the smoothed brake value lingers."""
+    from freight_fate.app import App
+
+    app = App()
+    monkeypatch.setattr(app.ctx.audio, "play", lambda *a, **k: None)
+    monkeypatch.setattr(app.ctx, "say_event", lambda *a, **k: None)
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        driving.truck.velocity_mps = 0.0
+
+        app.ctx.settings.automatic_direction_changes = "simple"
+        driving._reverse_brake_held = True
+        assert driving._update_reverse_controls(
+            accelerating=False,
+            braking_key=True,
+            accel_held=False,
+            brake_held=True,
+        )
+
+        driving.truck.transmission.gear = 1
+        app.ctx.settings.automatic_direction_changes = "deliberate"
+        driving._reverse_brake_held = True
+        assert not driving._update_reverse_controls(
+            accelerating=False,
+            braking_key=True,
+            accel_held=False,
+            brake_held=True,
+        )
+        assert not driving.truck.transmission.in_reverse
+
+        # The instantaneous target reaches neutral before the smoothed brake.
+        assert not driving._update_reverse_controls(
+            accelerating=False,
+            braking_key=True,
+            accel_held=False,
+            brake_held=False,
+        )
+        assert driving._update_reverse_controls(
+            accelerating=False,
+            braking_key=True,
+            accel_held=False,
+            brake_held=True,
+        )
+        assert driving.truck.transmission.in_reverse
+    finally:
+        app.shutdown()
+
+
+def test_automatic_held_brake_does_not_engage_reverse(monkeypatch):
+    """Braking to a stop and holding must not slip into reverse; only a fresh
+    press (release, then press again) engages it."""
+    from freight_fate.app import App
+
+    app = App()
+    monkeypatch.setattr(app.ctx.audio, "play", lambda *a, **k: None)
+    monkeypatch.setattr(app.ctx, "say_event", lambda *a, **k: None)
+    try:
+        app.ctx.settings.automatic_direction_changes = "deliberate"
+        driving = start_drive(app)
+        quiet_trip(driving)
+        driving.truck.velocity_mps = 0.0
+        # Brake was already held coming into this frame, as after braking to
+        # a stop -- no rising edge, so reverse must not engage.
+        driving._reverse_brake_held = True
+        assert not driving._update_reverse_controls(accelerating=False, braking_key=True)
+        assert not driving.truck.transmission.in_reverse
+        # Release the brake, then a fresh press engages reverse.
+        assert not driving._update_reverse_controls(accelerating=False, braking_key=False)
+        assert driving._update_reverse_controls(accelerating=False, braking_key=True)
+        assert driving.truck.transmission.in_reverse
+    finally:
+        app.shutdown()
+
+
+def test_automatic_held_accelerator_does_not_flip_out_of_reverse(monkeypatch):
+    """Holding the accelerator to brake a reverse roll to a stop must not flip
+    to forward; a fresh press is required."""
+    from freight_fate.app import App
+    from freight_fate.sim.transmission import REVERSE
+
+    app = App()
+    monkeypatch.setattr(app.ctx.audio, "play", lambda *a, **k: None)
+    monkeypatch.setattr(app.ctx, "say_event", lambda *a, **k: None)
+    try:
+        app.ctx.settings.automatic_direction_changes = "deliberate"
+        driving = start_drive(app)
+        quiet_trip(driving)
+        tr = driving.truck.transmission
+        tr.gear = REVERSE
+        driving.truck.velocity_mps = 0.0
+        # Accelerator was held while it braked the reverse roll to a stop.
+        driving._reverse_accel_held = True
+        assert not driving._update_reverse_controls(accelerating=True, braking_key=False)
+        assert tr.in_reverse
+        # Release, then a fresh press flips to forward.
+        driving._update_reverse_controls(accelerating=False, braking_key=False)
+        driving._update_reverse_controls(accelerating=True, braking_key=False)
+        assert not tr.in_reverse
+    finally:
+        app.shutdown()
+
+
+def test_accelerator_does_not_thrust_while_braking_in_reverse(monkeypatch):
+    """Pressing the accelerator to brake a backward roll must never command
+    reverse thrust -- throttle stays down while the service brake engages."""
+    from freight_fate.app import App
+    from freight_fate.sim.transmission import REVERSE
+
+    class Keys:
+        def __getitem__(self, key):
+            return key == pygame.K_UP
+
+    app = App()
+    monkeypatch.setattr(pygame.key, "get_pressed", lambda: Keys())
+    monkeypatch.setattr(app.ctx.audio, "play", lambda *a, **k: None)
+    monkeypatch.setattr(app.ctx, "say_event", lambda *a, **k: None)
+    try:
+        app.ctx.settings.automatic_direction_changes = "deliberate"
+        driving = start_drive(app)
+        quiet_trip(driving)
+        t = driving.truck
+        t.transmission.gear = REVERSE
+        t.velocity_mps = -3.0
+        t.throttle = 0.5
+        # Accelerator already held, so this is not a fresh press: no gear flip.
+        driving._reverse_accel_held = True
+
+        driving.update(1 / 60)
+
+        assert t.transmission.in_reverse
+        assert t.throttle < 0.5  # decays toward 0 rather than ramping up
+        assert t.brake > 0.0  # the service brake is what arrests the roll
+    finally:
+        app.shutdown()
+
+
+def test_driving_help_explains_selected_automatic_direction_style(monkeypatch):
+    from freight_fate.app import App
+
+    app = App()
+    spoken = []
+    monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: spoken.append(text))
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+
+        app.ctx.settings.automatic_direction_changes = "simple"
+        driving._speak_keyboard_help()
+        assert "simple direction changes" in spoken[-1]
+        assert "keep holding the Down arrow" in spoken[-1]
+
+        app.ctx.settings.automatic_direction_changes = "deliberate"
+        driving._speak_keyboard_help()
+        assert "deliberate direction changes" in spoken[-1]
+        assert "release the Down arrow and press it again" in spoken[-1]
+
+        app.ctx.settings.automatic_direction_changes = "simple"
+        driving._speak_controller_help()
+        assert "simple direction changes" in spoken[-1]
+        assert "keep holding the left trigger" in spoken[-1]
+
+        app.ctx.settings.automatic_direction_changes = "deliberate"
+        driving._speak_controller_help()
+        assert "deliberate direction changes" in spoken[-1]
+        assert "let the left trigger return to neutral" in spoken[-1]
+    finally:
+        app.shutdown()
+
+
 def test_driving_f1_describes_safe_shutdown_and_destination_parking(monkeypatch):
     from freight_fate.app import App
 
@@ -181,6 +461,37 @@ def test_closing_status_panel_does_not_restart_drive_music(monkeypatch):
 
         assert app.state is driving
         assert played == []
+    finally:
+        app.shutdown()
+
+
+def test_drive_music_advances_to_next_track_while_paused(monkeypatch):
+    from freight_fate.app import App
+    from freight_fate.music import music_track_duration_s
+    from freight_fate.states.driving import PauseMenuState
+
+    app = App()
+    played = []
+    monkeypatch.setattr(
+        app.ctx.audio,
+        "play_music",
+        lambda track, fade_ms=1500: played.append(track),
+    )
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+
+        driving.handle_event(key_event(pygame.K_ESCAPE))
+        assert isinstance(app.state, PauseMenuState)
+        first = driving._current_music_track()
+        played.clear()
+
+        # Sit on the pause menu until the current bed's one-shot playback ends.
+        app.state.update(music_track_duration_s(first) + 1.0)
+
+        following = driving._current_music_track()
+        assert following != first
+        assert played == [following]
     finally:
         app.shutdown()
 
@@ -643,6 +954,7 @@ def test_engine_shutdown_is_blocked_at_highway_speed(monkeypatch):
         quiet_trip(driving)
         driving.handle_event(key_event(pygame.K_e))
         assert driving.truck.engine_on
+        app.ctx.audio.update(5.0)  # let the ignition finish before toggling again
         driving.truck.velocity_mps = 31.3
 
         driving.handle_event(key_event(pygame.K_e))
@@ -702,6 +1014,7 @@ def test_engine_shutdown_is_allowed_once_stopped():
         quiet_trip(driving)
         driving.handle_event(key_event(pygame.K_e))
         assert driving.truck.engine_on
+        app.ctx.audio.update(5.0)  # let the ignition finish before toggling again
         driving.truck.velocity_mps = 0.0
         driving.handle_event(key_event(pygame.K_e))
         assert not driving.truck.engine_on
@@ -808,7 +1121,59 @@ def test_delivery_exit_uses_real_destination_interchange():
 
         assert destination is not None
         assert destination.exit_label
-        assert destination.at_mi == pytest.approx(67.5, abs=0.2)
+        assert destination.at_mi == pytest.approx(72.8, abs=0.2)
+    finally:
+        app.shutdown()
+
+
+def test_delivery_exit_prefers_nearest_interchange_over_early_city_sign():
+    import dataclasses
+
+    from freight_fate.app import App
+    from freight_fate.data.world_models import Interchange
+    from freight_fate.models.jobs import CARGO_CATALOG, Job
+    from freight_fate.models.profile import Profile
+    from freight_fate.states.driving import DrivingState
+
+    app = App()
+    try:
+        app.ctx.profile = Profile(name="Nearest Exit", current_city="Buffalo")
+        route = app.ctx.world.supported_route("Buffalo", "Rochester")
+        leg = route.legs[-1]
+        early = Interchange(
+            at_mi=10.0,
+            exit_ref="10",
+            destinations=("Rochester",),
+            name="",
+            highway=leg.highway,
+            source="test",
+        )
+        near = Interchange(
+            at_mi=leg.miles - 1.0,
+            exit_ref="near",
+            destinations=("Freight district",),
+            name="",
+            highway=leg.highway,
+            source="test",
+        )
+        route.legs[-1] = dataclasses.replace(leg, interchanges=(early, near))
+        job = Job(
+            CARGO_CATALOG["general"],
+            12.0,
+            "Buffalo",
+            "company yard",
+            "Rochester",
+            route.miles,
+            1000.0,
+            12.0,
+            destination_location="Rochester freight market",
+        )
+        driving = DrivingState(app.ctx, job, route, phase="delivery")
+
+        details = driving._destination_exit_details()
+
+        assert details is not None
+        assert details[1] == "exit near"
     finally:
         app.shutdown()
 
@@ -1329,7 +1694,7 @@ def test_toll_route_delivery_settlement_records_expense(monkeypatch):
         app.shutdown()
 
 
-def test_engine_audio_load_drops_during_automatic_shift(monkeypatch):
+def test_engine_audio_load_eases_without_dropping_out_during_automatic_shift(monkeypatch):
     from freight_fate.app import App
 
     app = App()
@@ -1353,7 +1718,10 @@ def test_engine_audio_load_drops_during_automatic_shift(monkeypatch):
 
         driving._update_audio(0.0)
 
-        assert samples[-1][1] <= 0.08
+        assert samples[-1] == (1700.0, 0.45)
+        from freight_fate.audio import engine_load_gain
+
+        assert engine_load_gain(samples[-1][1]) >= 0.75
     finally:
         app.shutdown()
 
@@ -1432,6 +1800,27 @@ def test_reverse_audio_loop_restarts_after_pause_resume(monkeypatch):
         driving._update_audio(0.0)
 
         assert starts == ["start"]
+    finally:
+        app.shutdown()
+
+
+def test_pause_menu_reports_off_duty_to_the_drivers_board():
+    from freight_fate.app import App
+    from freight_fate.states.driving import PauseMenuState
+
+    app = App()
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        assert driving.online_presence() is not None
+
+        app.ctx.push_state(PauseMenuState(app.ctx, driving))
+        pause = app.state
+        assert isinstance(pause, PauseMenuState)
+        # Paused players leave the public board like an off-duty sign-off...
+        assert pause.online_presence() is None
+        # ...while Discord presence still tells friends the game is paused.
+        assert pause.presence().activity == "Paused"
     finally:
         app.shutdown()
 
@@ -1515,9 +1904,7 @@ def test_destination_exit_announced_within_scaled_window(monkeypatch):
 
     app = App()
     events = []
-    monkeypatch.setattr(
-        app.ctx, "say_event", lambda text, interrupt=True: events.append(text)
-    )
+    monkeypatch.setattr(app.ctx, "say_event", lambda text, interrupt=True: events.append(text))
     try:
         driving = start_drive(app)
         quiet_trip(driving)
@@ -1543,9 +1930,7 @@ def test_exit_announcements_speak_each_name_once(monkeypatch):
     app = App()
     said = []
     monkeypatch.setattr(app.ctx, "say", lambda text, **k: said.append(text))
-    monkeypatch.setattr(
-        app.ctx, "say_event", lambda text, interrupt=True: said.append(text)
-    )
+    monkeypatch.setattr(app.ctx, "say_event", lambda text, interrupt=True: said.append(text))
     try:
         driving = start_drive(app)
         quiet_trip(driving)
@@ -1578,9 +1963,7 @@ def test_labeled_missed_exit_names_the_exit_once(monkeypatch):
 
     app = App()
     said = []
-    monkeypatch.setattr(
-        app.ctx, "say_event", lambda text, interrupt=True: said.append(text)
-    )
+    monkeypatch.setattr(app.ctx, "say_event", lambda text, interrupt=True: said.append(text))
     try:
         driving = start_drive(app)
         quiet_trip(driving)
@@ -1633,5 +2016,91 @@ def test_exit_key_is_a_toggle_and_needs_an_exit_nearby():
         assert driving._exit_stop is stop
         driving.handle_event(key_event(pygame.K_x))
         assert driving._exit_stop is None
+    finally:
+        app.shutdown()
+
+
+# -- engine audio follows out-of-band engine stops (nightly regression) ------------
+
+
+def test_rest_menu_shutdown_also_stops_engine_audio():
+    """Sleeping shuts the truck's engine down from a rest menu, outside the
+    driving frame loop. Regression: the audio loop was left running -- masked
+    while band volumes tracked RPM, plainly audible once the BASS engine
+    model kept constant volume."""
+    from freight_fate.app import App
+    from freight_fate.states import driving_core
+
+    app = App()
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        assert driving.truck.start_engine()
+        driving._update_audio(0.0)
+        assert app.ctx.audio.engine_running
+
+        prefix = driving_core._shut_down_engine(driving)
+
+        assert prefix == "You shut down the engine. "
+        assert not driving.truck.engine_on
+        assert not app.ctx.audio.engine_running
+
+        # Already off: no double narration, audio stays off.
+        assert driving_core._shut_down_engine(driving) == ""
+        assert not app.ctx.audio.engine_running
+    finally:
+        app.shutdown()
+
+
+def test_engine_audio_mirror_sync_catches_any_out_of_band_stop():
+    """The frame-loop audio sync must work in both directions: any path that
+    turns the truck's engine off without telling the audio engine is corrected
+    on the next frame, silently."""
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        assert driving.truck.start_engine()
+        driving._update_audio(0.0)
+        assert app.ctx.audio.engine_running
+
+        driving.truck.stop_engine()  # off-path stop: audio not told directly
+        driving._update_audio(0.0)
+
+        assert not app.ctx.audio.engine_running
+    finally:
+        app.shutdown()
+
+
+def test_route_planning_labels_name_through_cities_with_states():
+    """Route options must say which cities they pass through, state-qualified,
+    in the spoken label itself -- not only in the F1 help (player request:
+    'I have no idea where McCall is, but knowing the state gives me a
+    general idea of, oh, that's the way we're going')."""
+    from freight_fate.app import App
+    from freight_fate.models import JobBoard
+    from freight_fate.states.city_dispatch import RouteSelectState
+
+    app = App()
+    try:
+        world = app.ctx.world
+        job = next(
+            j
+            for j in JobBoard(world, seed=3).offers("Chicago", endorsements=set(), level=2)
+            if len(world.supported_route_options(j.origin, j.destination)[0].cities) > 2
+        )
+        routes = world.supported_route_options(job.origin, job.destination)
+        state = RouteSelectState(app.ctx, job, routes)
+        state.items = state.build_items()
+
+        label = state.items[0].text
+        assert "through " in label or "passing no major cities" in label
+        route = routes[0]
+        first_via = world.city(route.cities[1])
+        assert first_via.spoken_qualified in label
+        # The destination line carries the state too.
+        assert world.city(job.destination).spoken_qualified == job.spoken_destination
     finally:
         app.shutdown()

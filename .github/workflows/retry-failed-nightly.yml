@@ -1,0 +1,49 @@
+name: Retry failed nightly
+
+on:
+  workflow_run:
+    workflows: [Build]
+    types: [completed]
+
+permissions:
+  actions: write
+  contents: read
+
+concurrency:
+  group: retry-nightly-${{ github.event.workflow_run.id }}
+  cancel-in-progress: false
+
+jobs:
+  retry:
+    name: Retry once after delay
+    if: >-
+      github.event.workflow_run.event == 'schedule' &&
+      github.event.workflow_run.conclusion == 'failure' &&
+      github.event.workflow_run.run_attempt == 1
+    runs-on: ubuntu-latest
+    timeout-minutes: 55
+    steps:
+      - name: Wait for a transient failure to clear
+        run: sleep 2700
+
+      - name: Dispatch one recovery build if still needed
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TAG="nightly-$(date -u +%Y%m%d)"
+
+          if gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            echo "$TAG already exists; the nightly recovered while waiting."
+            exit 0
+          fi
+
+          ACTIVE=$(gh run list --repo "$GITHUB_REPOSITORY" \
+            --workflow Build --branch dev --limit 20 \
+            --json status --jq '[.[] | select(.status == "queued" or .status == "in_progress")] | length')
+          if [ "$ACTIVE" -gt 0 ]; then
+            echo "A dev Build is already queued or running; not dispatching a duplicate."
+            exit 0
+          fi
+
+          echo "Scheduled nightly is still missing after 45 minutes; dispatching one retry."
+          gh workflow run Build --repo "$GITHUB_REPOSITORY" --ref dev -f dry_run=false

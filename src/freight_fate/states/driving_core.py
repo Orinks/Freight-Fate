@@ -39,7 +39,7 @@ from ..sim.lane import LaneKeeping
 from ..sim.timezones import city_zone
 from ..sim.transmission import REVERSE
 from ..sim.trip import RoadStop, Trip, TripEventKind
-from ..sim.vehicle import KG_PER_TON, G, TruckState
+from ..sim.vehicle import KG_PER_TON, REFERENCE_CARGO_KG, G, TruckState
 from ..sim.weather import WeatherKind, WeatherSystem
 from .base import MenuItem, MenuState, State
 
@@ -300,6 +300,10 @@ def _shut_down_engine(driving: DrivingState) -> str:
     if not driving.truck.engine_on:
         return ""
     driving.truck.stop_engine()
+    # The audio engine must follow: the driving frame loop only notices
+    # engine-off transitions that happen inside truck.update(), so a stop
+    # made here (from a rest menu) would leave the loop playing forever.
+    driving.ctx.audio.engine_stop()
     return "You shut down the engine. "
 
 

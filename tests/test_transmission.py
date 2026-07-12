@@ -125,6 +125,16 @@ def test_auto_waits_for_shift_to_finish():
     assert not tr.shifting
 
 
+def test_auto_respects_minimum_interval_between_shifts():
+    tr = Transmission(automatic=True, gear=2)
+    assert tr.auto_update(1800, 0.8, True, minimum_shift_interval_s=3.5) == 3
+    tr.update(1.0)
+    assert not tr.shifting
+    assert tr.auto_update(1800, 0.8, True, minimum_shift_interval_s=3.5) is None
+    tr.update(2.5)
+    assert tr.auto_update(1800, 0.8, True, minimum_shift_interval_s=3.5) == 4
+
+
 def test_auto_does_not_shift_out_of_reverse():
     tr = Transmission(automatic=True, gear=REVERSE)
     assert tr.auto_update(1900, throttle=0.5, moving=True) is None

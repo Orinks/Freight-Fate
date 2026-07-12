@@ -1,10 +1,11 @@
 # Freight Fate Roadmap
 
-> Current stable: **1.7.0** (shipped). Next release: **1.8.0**, in flight on the
-> `awesome-greider` branch (troopers, real OSM speed limits, seasons,
-> cargo-weight physics, predictive adaptive cruise, and more). `pyproject` is
-> set to 1.8.0 so developer snapshots report it; the stable tag follows at
-> release.
+> Current stable: **1.8.0** (shipped 2026-07-05). Next release: **1.9.0**, in
+> flight on the `feat/career-1.9` branch, whose ROADMAP carries the full
+> 1.9-in-flight feature view; it lands here when that line merges for
+> release. `pyproject` on `dev` reports 1.8.1 for nightly snapshots. Keep
+> this file current: when a feature lands, check it off or add it in the
+> same change (see the Roadmap upkeep section in `AGENTS.md`).
 
 ## Shipped in 1.6.0
 
@@ -117,6 +118,29 @@ From a batch of player reports:
 
 ### Driving feel
 
+- [x] **Over-rev damage is now audible while it happens.** Sustained redline
+  (easiest by backing up fast for a long stretch: the road-coupled RPM pins at
+  `max_rpm`) silently ground the truck down 0.8%/s and only surfaced on the
+  end screen (issue #62). The driving loop now plays the warning cue and
+  speaks the rising damage total, repeating while it persists, with a short
+  grace so shift flares stay quiet. Follow-up if wanted: a governor that cuts
+  throttle at redline, and a reverse-speed cap, so sustained redline damage
+  is hard to reach at all.
+- [x] **Don't bind a controller when the controller setting is off.**
+  `ControllerManager.__init__` opens the first pad unconditionally; with the
+  setting disabled the game still enumerates and binds (issue #61: a fight
+  stick got picked up despite controller-off). Gate `_open_first()` and the
+  device-added hot-plug path on `enabled`, and open on `set_enabled(True)`.
+- [x] **Verify the controller off/on toggle does not double button events.**
+  Disabling now quits the SDL controller subsystem and re-enabling calls
+  `init()` again mid-session, which the `_reopen()` docstring warns
+  re-registers SDL's controller event watch so every event arrives twice
+  (PR #67 review). Play-verified with a real pad (2026-07-12): several
+  off/on toggle cycles in Settings, then button presses in menus -- no
+  doubled events on current pygame, so no follow-up needed. If duplicates
+  ever appear after a pygame upgrade, the fix is to make disable only close
+  the pad and keep the initialized subsystem alive, reserving `_sdl.quit()`
+  for `shutdown()`.
 - **Gear / launch realism.** Partly addressed: gross mass is now
   cargo-weight-aware (tare + payload), so a heavy load accelerates slower,
   lugs on grades, and burns more fuel, and an empty deadhead is light and
@@ -565,3 +589,4 @@ fit for an audio-first game.
 - [ ] Steam/itch.io distribution
 - [ ] Localization of all speech strings
 - [ ] Optional online leaderboards
+- [x] Opt-in Profile sharing for fictional road journals, achievements, and last-saved profile summaries

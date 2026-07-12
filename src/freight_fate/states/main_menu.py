@@ -133,6 +133,14 @@ class MainMenuState(MenuState):
     _update_checker: UpdateChecker | None = None
     _update_prompted = False
 
+    @classmethod
+    def arm_update_check(cls, settings) -> None:
+        """Start a fresh silent check for the next main-menu update cycle."""
+        if not updater.is_frozen():
+            return
+        cls._update_checker = UpdateChecker(settings)
+        cls._update_prompted = False
+
     def enter(self) -> None:
         super().enter()
         profile = self.ctx.profile
@@ -142,8 +150,8 @@ class MainMenuState(MenuState):
         sequence = select_menu_music_sequence(profile)
         self.ctx.play_music_sequence("menu", sequence)
         cls = MainMenuState
-        if updater.is_frozen() and cls._update_checker is None:
-            cls._update_checker = UpdateChecker(self.ctx.settings)
+        if cls._update_checker is None:
+            cls.arm_update_check(self.ctx.settings)
 
     def update(self, dt: float) -> None:
         super().update(dt)
@@ -205,14 +213,22 @@ class MainMenuState(MenuState):
             )
         )
         items.append(
+            MenuItem(
+                "Drivers online",
+                self._drivers_online,
+                help="Hear who is hauling right now on the public orinks.net "
+                "drivers board. Viewing the board shares nothing about you.",
+            )
+        )
+        items.append(
             MenuItem("How to play", self._help, help="Learn the controls and the goal of the game.")
         )
         items.append(
             MenuItem(
                 "Settings",
                 self._settings,
-                help="Units, transmission mode, volumes, weather, "
-                "voices, update channel, and trip pacing.",
+                help="Units, transmission mode, volumes, weather, voices, "
+                "online sharing, update channel, and trip pacing.",
             )
         )
         items.append(
@@ -271,6 +287,11 @@ class MainMenuState(MenuState):
 
     def _settings(self) -> None:
         self.ctx.push_state(SettingsState(self.ctx))
+
+    def _drivers_online(self) -> None:
+        from .online_states import DriversOnlineState
+
+        self.ctx.push_state(DriversOnlineState(self.ctx))
 
     def _report_issue(self) -> None:
         import webbrowser
@@ -747,6 +768,7 @@ class SettingsState(MenuState):
         ("Gameplay", "gameplay"),
         ("Audio", "audio"),
         ("Speech and weather", "speech"),
+        ("Online", "online"),
         ("Updates", "updates"),
     )
 
@@ -787,6 +809,7 @@ class SettingsCategoryState(MenuState):
         "gameplay": "Gameplay",
         "audio": "Audio",
         "speech": "Speech and weather",
+        "online": "Online",
         "updates": "Updates",
     }
 
@@ -818,6 +841,14 @@ class SettingsCategoryState(MenuState):
                     "with W and Q to shift up and down.",
                 ),
                 MenuItem(
+                    lambda: f"Automatic direction changes: {s.automatic_direction_changes}",
+                    lambda: self._cycle_automatic_direction_changes(1),
+                    help="Simple changes between forward and reverse when you keep "
+                    "holding the control after the truck stops. Deliberate waits "
+                    "for you to release the control and press it again. This only "
+                    "affects automatic transmission.",
+                ),
+                MenuItem(
                     lambda: f"Trip pacing: {self._pace_label()}",
                     lambda: self._cycle_pace(1),
                     help="Controls how quickly game time and distance pass "
@@ -837,14 +868,6 @@ class SettingsCategoryState(MenuState):
                     lambda: f"Lane drift: {self._steering_label()}",
                     lambda: self._cycle_steering(1),
                     help="Choose whether lane drift is off, light, or realistic.",
-                ),
-                MenuItem(
-                    lambda: f"Discord presence: {'on' if s.discord_presence else 'off'}",
-                    lambda: self._toggle_discord_presence(1),
-                    help="Show broad activity in Discord, like the main menu, "
-                    "driving a route, or resting. Only general game status "
-                    "is shared, never your save files or personal details. "
-                    "Has no effect if Discord is not running.",
                 ),
                 MenuItem(
                     lambda: f"Controller: {'enabled' if s.controller_enabled else 'disabled'}",
@@ -903,6 +926,66 @@ class SettingsCategoryState(MenuState):
             ]
             items.append(MenuItem("Back", self.go_back))
             return items
+        if self.category == "online":
+            from ..online_presence import OnlineIdentity
+
+            return [
+                MenuItem(
+                    # The identity check lives INSIDE the label so it is
+                    # fresh on every read: a captured build-time value went
+                    # stale the moment setup completed (or the identity file
+                    # changed on disk) and misreported "on" while dormant.
+                    lambda: (
+                        (
+                            "Profile sharing: off requested"
+                            if s.profile_sharing_pending_off
+                            else f"Profile sharing: {'on' if s.online_presence else 'off'}"
+                        )
+                        if OnlineIdentity.load() is not None
+                        # Before setup this item IS the driver profile
+                        # gateway: connecting unlocks the board and cloud
+                        # backup, so the label names the profile, not just
+                        # sharing.
+                        else "Profile sharing: not set up"
+                    ),
+                    lambda: self._toggle_online_presence(1),
+                    help="Profile sharing is one optional public setting for your driver profile, "
+                    "official achievements, automatic fictional road-journal posts, updates feed, "
+                    "and on-duty board activity. Nothing is shared until you set it up: "
+                    "selecting this the first time opens the driver profile "
+                    "setup menu, where you sign in on orinks.net and paste "
+                    "in your Driver ID and token. Cloud saves remain private and separate.",
+                ),
+                MenuItem(
+                    lambda: (
+                        f"Back up saves to your Orinks account: {'on' if s.cloud_saves else 'off'}"
+                        if OnlineIdentity.load() is not None
+                        else "Back up saves to your Orinks account: not set up"
+                    ),
+                    lambda: self._toggle_cloud_saves(1),
+                    help="After each game save, upload that career to your "
+                    "own Orinks account so you can restore it on another "
+                    "computer. Backups are private to your account and never "
+                    "appear on the drivers board. Uses the same sign-in as "
+                    "your driver profile, so set that up first.",
+                ),
+                MenuItem(
+                    "Restore a cloud backup",
+                    self._cloud_backup_menu,
+                    help="List the careers backed up to your Orinks account "
+                    "and bring one onto this computer.",
+                ),
+                MenuItem(
+                    lambda: f"Discord presence: {'on' if s.discord_presence else 'off'}",
+                    lambda: self._toggle_discord_presence(1),
+                    help="Show broad activity in Discord, like the main menu, "
+                    "driving a route, or resting. Only general game status "
+                    "is shared, never your save files or personal details. "
+                    "Has no effect if Discord is not running. Works without "
+                    "a driver profile.",
+                ),
+                MenuItem("Back", self.go_back),
+            ]
         return [
             MenuItem(
                 lambda: (
@@ -940,10 +1023,10 @@ class SettingsCategoryState(MenuState):
                 "gameplay": [
                     self._toggle_units,
                     self._toggle_transmission,
+                    self._cycle_automatic_direction_changes,
                     self._cycle_pace,
                     self._cycle_hos,
                     self._cycle_steering,
-                    self._toggle_discord_presence,
                     self._toggle_controller,
                     self._toggle_haptics,
                 ],
@@ -954,6 +1037,15 @@ class SettingsCategoryState(MenuState):
                     lambda d: self._volume("engine_volume", 0.1 * d),
                     lambda d: self._volume("music_volume", 0.1 * d),
                     lambda d: self._volume("ui_volume", 0.1 * d),
+                ],
+                # Index-aligned with the online items: the restore entry at
+                # index 2 is an action, not a value, so left/right is a no-op
+                # there rather than falling through to the Discord toggle.
+                "online": [
+                    self._toggle_online_presence,
+                    self._toggle_cloud_saves,
+                    lambda _d: None,
+                    self._toggle_discord_presence,
                 ],
                 "updates": [self._toggle_update_channel],
             }[self.category]
@@ -1070,6 +1162,15 @@ class SettingsCategoryState(MenuState):
         self.ctx.settings.automatic_transmission = not self.ctx.settings.automatic_transmission
         self._announce()
 
+    def _cycle_automatic_direction_changes(self, d: int) -> None:
+        modes = ["simple", "deliberate"]
+        try:
+            i = modes.index(self.ctx.settings.automatic_direction_changes)
+        except ValueError:
+            i = 0
+        self.ctx.settings.automatic_direction_changes = modes[(i + d) % len(modes)]
+        self._announce()
+
     def _cycle_pace(self, d: int) -> None:
         scales = list(TIME_SCALES)
         try:
@@ -1108,6 +1209,52 @@ class SettingsCategoryState(MenuState):
         self.ctx.settings.discord_presence = not self.ctx.settings.discord_presence
         self.ctx.apply_presence()
         self._announce()
+
+    def _toggle_online_presence(self, _d: int) -> None:
+        from ..online_presence import OnlineIdentity
+        from .online_states import OnlineSetupState, ProfileSharingSyncState
+
+        s = self.ctx.settings
+        if OnlineIdentity.load() is None:
+            # Not set up yet: the spoken disclosure and browser confirmation
+            # happen in the setup state; it flips the setting on success.
+            # The setting alone shares nothing without an identity.
+            self.ctx.push_state(OnlineSetupState(self.ctx))
+            return
+        target = False if s.profile_sharing_pending_off else not s.online_presence
+        self.ctx.push_state(ProfileSharingSyncState(self.ctx, target))
+
+    def _toggle_cloud_saves(self, _d: int) -> None:
+        from ..online_presence import OnlineIdentity
+        from .cloud_save_states import CLOUD_DISCLOSURE
+
+        s = self.ctx.settings
+        if OnlineIdentity.load() is None:
+            # Cloud backup rides the same account credentials as the board;
+            # without them the setting would be inert, so point at the setup
+            # item instead of flipping a switch that does nothing.
+            self.ctx.say(
+                "Cloud backup uses the same Orinks sign-in as your driver "
+                "profile. Choose Driver profile on this menu to set that up "
+                "first, then turn cloud backup on.",
+                interrupt=True,
+            )
+            return
+        s.cloud_saves = not s.cloud_saves
+        s.save()
+        self.ctx.apply_cloud_saves()
+        if s.cloud_saves:
+            # Turning it on is the consent moment: speak the full disclosure
+            # here, not buried in help text.
+            self.ctx.say(f"Cloud backup on. {CLOUD_DISCLOSURE}", interrupt=True)
+            self.refresh()
+        else:
+            self._announce()
+
+    def _cloud_backup_menu(self) -> None:
+        from .cloud_save_states import CloudBackupState
+
+        self.ctx.push_state(CloudBackupState(self.ctx))
 
     def _toggle_controller(self, _d: int) -> None:
         self.ctx.settings.controller_enabled = not self.ctx.settings.controller_enabled

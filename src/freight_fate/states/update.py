@@ -122,7 +122,9 @@ class UpdatePromptState(MenuState):
                 "What's new", self._whats_new, help="Read the changes in this update, line by line."
             ),
             MenuItem(
-                "Remind me later", self.go_back, help="Ask again the next time the game starts."
+                "Remind me later",
+                self.go_back,
+                help="Dismiss this prompt. Ask again after returning to the main menu from a terminal or pickup facility, or the next time the game starts.",
             ),
             MenuItem(
                 "Skip this version",

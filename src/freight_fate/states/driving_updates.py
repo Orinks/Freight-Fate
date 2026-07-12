@@ -1,12 +1,30 @@
 # ruff: noqa: F403,F405
 from __future__ import annotations
 
+from ..audio_fades import curve as _resolve_curve
 from .driving_core import *
 from .driving_rest_states import TrafficStopState
 
 LANE_GUIDANCE_DRIFT_START = 0.3
 LANE_GUIDANCE_CENTER_MAX = 0.18
 LANE_GUIDANCE_PAN = 0.85
+
+# Sustained redline quietly grinds the engine down (Truck._update_temps), so
+# the player must hear about it while it is happening, not at the end screen.
+# The grace period lets a shift's momentary flare pass unremarked.
+OVERREV_GRACE_S = 1.5
+OVERREV_REPEAT_S = 10.0
+
+# An automatic shift caps audible engine load so the bed doesn't duck out.
+SHIFT_LOAD_CAP = 0.45
+# When the shift completes the cap eases from SHIFT_LOAD_CAP back to full over
+# this window. The curve (a key into audio_fades.CURVES) shapes the return: an
+# ease-out leaves the shift level quickly -- so the engine doesn't sit soft --
+# while still arriving at full load gently instead of snapping. A plain "linear"
+# ramp had to be stretched long to hide the snap, which sounded too soft.
+SHIFT_LOAD_RECOVERY_S = 0.032
+SHIFT_LOAD_RECOVERY_CURVE = "ease_out"
+_shift_recovery_curve = _resolve_curve(SHIFT_LOAD_RECOVERY_CURVE)
 
 
 class DrivingUpdateMixin:
@@ -30,10 +48,16 @@ class DrivingUpdateMixin:
         key_down = keys[pygame.K_DOWN]
         accelerating = key_up or pad_throttle > 0.05
         braking_key = key_down or pad_brake > 0.05
-        backing = self._update_reverse_controls(accelerating, braking_key)
+        # The shift gesture keys off a fresh press, so it reads the trigger's
+        # instantaneous position rather than the smoothed accelerate/brake
+        # values above -- otherwise the smoothing lag swallows a quick tap and
+        # the release-then-press never registers as neutral in between.
+        accel_held = key_up or (pad.throttle_target if pad_on else 0.0) > 0.05
+        brake_held = key_down or (pad.brake_target if pad_on else 0.0) > 0.05
+        backing = self._update_reverse_controls(accelerating, braking_key, accel_held, brake_held)
         if accelerating and not backing and t.air_brakes_holding:
             self._maybe_say_air_brake_lockout()
-        if key_up and not backing:
+        if key_up and not backing and not t.transmission.in_reverse:
             if t.engine_brake:
                 t.engine_brake = False
                 self.ctx.say_event("Engine brake off.", interrupt=False)
@@ -42,7 +66,7 @@ class DrivingUpdateMixin:
             t.throttle = min(0.45, t.throttle + ramp)
         else:
             t.throttle = max(0.0, t.throttle - ramp * 2)
-        if pad_throttle > 0.05 and not backing:
+        if pad_throttle > 0.05 and not backing and not t.transmission.in_reverse:
             if t.engine_brake:
                 t.engine_brake = False
                 self.ctx.say_event("Engine brake off.", interrupt=False)
@@ -82,13 +106,20 @@ class DrivingUpdateMixin:
             self._brake_air_hissed = True
         elif t.brake < 0.02:
             self._brake_air_hissed = False
+        desired_automatic = self.ctx.settings.automatic_transmission
+        if t.transmission.automatic != desired_automatic:
+            t.transmission.automatic = desired_automatic
+            mode = "automatic" if desired_automatic else "manual"
+            self.ctx.say_event(f"Transmission changed to {mode}.", interrupt=True)
+
         clutch_pressed = keys[pygame.K_LSHIFT] or keys[pygame.K_RSHIFT]
         clutch_val = 1.0 if clutch_pressed else 0.0
         if pad_on:
             clutch_val = max(clutch_val, pad.clutch)
         t.transmission.clutch = clutch_val if not t.transmission.automatic else 0.0
+        clutch_disengaged = t.transmission.clutch > 0.5 or t.transmission.shifting
         self._update_lane(keys, dt)
-        self._update_cruise(dt, braking, accelerating)
+        self._update_cruise(dt, braking, accelerating, clutch_disengaged)
 
         if t.transmission.automatic and t.engine_on:
             new_gear = t.auto_shift()
@@ -126,6 +157,7 @@ class DrivingUpdateMixin:
         self._update_announcements(dt)
         self._update_hazard(dt)
         self._update_microsleep(keys, dt)
+        self._update_overrev(dt)
         self._update_speeding(dt)
         self._update_pull_over(dt)
         if self.tutorial:
@@ -268,14 +300,41 @@ class DrivingUpdateMixin:
             # flickers across it every cycle and re-announces back to back.
             self._air_ready_said = False
 
-    def _update_reverse_controls(self, accelerating: bool, braking_key: bool) -> bool:
-        """Return True when the current key state means backing up."""
+    def _update_reverse_controls(
+        self,
+        accelerating: bool,
+        braking_key: bool,
+        accel_held: bool | None = None,
+        brake_held: bool | None = None,
+    ) -> bool:
+        """Return True when the current key state means backing up.
+
+        ``accel_held``/``brake_held`` are the instantaneous (unsmoothed) press
+        states used for the shift-gesture edge detection; they default to the
+        ramped ``accelerating``/``braking_key`` for the keyboard, where the two
+        are the same.
+        """
         t = self.truck
         tr = t.transmission
+        if accel_held is None:
+            accel_held = accelerating
+        if brake_held is None:
+            brake_held = braking_key
+        # Deliberate direction changes use a fresh press (rising edge). Simple
+        # direction changes keep the familiar behavior of holding the control
+        # through the stop. Track both edges in either mode so changing the
+        # setting during a drive cannot leave stale input state behind.
+        brake_edge = brake_held and not self._reverse_brake_held
+        accel_edge = accel_held and not self._reverse_accel_held
+        self._reverse_brake_held = brake_held
+        self._reverse_accel_held = accel_held
         if not tr.automatic:
             return tr.in_reverse and braking_key and not accelerating
+        deliberate = self.ctx.settings.automatic_direction_changes == "deliberate"
+        forward_requested = accel_edge if deliberate else accelerating
+        reverse_requested = brake_edge if deliberate else braking_key
         if tr.in_reverse:
-            if accelerating and abs(t.velocity_mps) < 0.3:
+            if forward_requested and abs(t.velocity_mps) < 0.3:
                 tr.gear = 1
                 tr._shift_timer = 0.0
                 self.ctx.audio.play("vehicle/gear_shift", volume=0.55)
@@ -283,7 +342,7 @@ class DrivingUpdateMixin:
                 self.ctx.say_event("Forward gear selected.", interrupt=False)
                 return False
             return braking_key and not accelerating
-        if braking_key and not accelerating and t.speed_mph < 0.5:
+        if reverse_requested and not accel_held and t.speed_mph < 0.5:
             tr.gear = REVERSE
             tr._shift_timer = 0.0
             self._cancel_cruise()
@@ -418,10 +477,35 @@ class DrivingUpdateMixin:
         t = self.truck
         audio = self.ctx.audio
         if t.engine_on and not audio.engine_running:
-            audio.engine_start()
-        engine_load = t.throttle
+            # Catch-up sync (resuming a running-engine trip, returning from a
+            # menu): bring the loop up without replaying the ignition crank.
+            audio.engine_start(play_start_sound=False)
+        elif not t.engine_on and audio.engine_running:
+            # The mirror sync: the engine went off outside this frame loop
+            # (a rest-menu shutdown), so drop the loop without a second
+            # shutdown clunk. Without this the loop plays on with the engine
+            # off -- inaudible under the old RPM-weighted band volumes, but
+            # plainly audible with the constant-volume BASS engine loop.
+            audio.engine_stop(shutdown_sound=False)
+        # A shift briefly unloads the engine, but the old 0.08 clamp cut loop
+        # gain by roughly forty percent and made repeated shifts sound like the
+        # engine was ducking or nearly dropping out. Cap the load to a
+        # perceptible torque easing while shifting, then -- once the shift ends
+        # -- ease the cap back to full over SHIFT_LOAD_RECOVERY_S along the
+        # recovery curve, so the return "under load" is a shaped glide rather
+        # than a single-frame snap.
         if t.transmission.automatic and t.transmission.shifting:
-            engine_load = min(engine_load, 0.08)
+            self._shift_recover_t = 0.0
+            cap = SHIFT_LOAD_CAP
+        elif self._shift_recover_t < 1.0:
+            step = dt / SHIFT_LOAD_RECOVERY_S if SHIFT_LOAD_RECOVERY_S > 0 else 1.0
+            self._shift_recover_t = min(1.0, self._shift_recover_t + step)
+            cap = SHIFT_LOAD_CAP + (1.0 - SHIFT_LOAD_CAP) * _shift_recovery_curve(
+                self._shift_recover_t
+            )
+        else:
+            cap = 1.0
+        engine_load = min(t.throttle, cap)
         audio.set_engine_rpm(t.rpm, engine_load)
         audio.set_road_noise(t.velocity_mps)
         if t.engine_on and t.transmission.in_reverse:
@@ -463,6 +547,15 @@ class DrivingUpdateMixin:
 
     def _play_current_music(self, fade_ms: int = 4000) -> None:
         self.ctx.audio.play_music(self._current_music_track(), fade_ms=fade_ms)
+
+    def tick_covered_music(self, dt: float) -> None:
+        """Keep the drive playlist rotating while a menu covers this state.
+
+        Menus stacked over the drive tick this through the context's music
+        rotation, so a bed that ends mid-pause hands off to the next track
+        instead of going silent. Day/night stays as it was when the menu
+        opened; the switch happens when driving resumes."""
+        self._update_music_rotation(self._music_night, dt)
 
     def _update_music_rotation(self, night: bool, dt: float) -> None:
         if night != self._music_night:
@@ -626,6 +719,28 @@ class DrivingUpdateMixin:
                 "sleep.",
                 interrupt=True,
             )
+
+    def _update_overrev(self, dt: float) -> None:
+        t = self.truck
+        if not t.over_revving:
+            self._overrev_s = 0.0
+            self._overrev_warn_due = OVERREV_GRACE_S
+            return
+        self._overrev_s += dt
+        if self._overrev_s < self._overrev_warn_due:
+            return
+        self._overrev_warn_due = self._overrev_s + OVERREV_REPEAT_S
+        self.ctx.audio.play("ui/warning")
+        self.ctx.controller.rumble.alert()
+        message = (
+            f"Redline. Damage {t.damage_pct:.0f} percent."
+            if self._terse_speech()
+            else (
+                "The engine is screaming at redline and taking damage, now "
+                f"{t.damage_pct:.0f} percent. Ease off and slow down."
+            )
+        )
+        self.ctx.say_event(message, interrupt=True)
 
     def _update_speeding(self, dt: float) -> None:
         if self._ramp_mi is not None:
