@@ -7015,6 +7015,24 @@
       "lon": -111.761,
       "region": "desert_southwest",
       "locations": []
+    },
+    "casa_grande_az_us": {
+      "spoken_city": "Casa Grande",
+      "state": "AZ",
+      "country": "US",
+      "lat": 32.8795,
+      "lon": -111.7574,
+      "region": "desert_southwest",
+      "locations": []
+    },
+    "buckeye_az_us": {
+      "spoken_city": "Buckeye",
+      "state": "AZ",
+      "country": "US",
+      "lat": 33.3703,
+      "lon": -112.5838,
+      "region": "desert_southwest",
+      "locations": []
     }
   }
 }

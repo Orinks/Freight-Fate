@@ -4,6 +4,11 @@
 
 ### Added
 
+- **The Interstate 10 corridor around Phoenix fills in.** Casa Grande -- the big
+  distribution hub between Phoenix and Tucson -- and Buckeye, out on the western
+  farm flats, join the map, breaking the I-10 runs into real stops past Eloy,
+  Marana, and Quartzsite.
+
 - **The Verde Valley opens along Interstate 17.** Camp Verde -- the I-17/AZ-260
   junction -- plus Cottonwood and red-rock Sedona join the map, splitting the
   Phoenix-to-Flagstaff run through the valley, with AZ-260 tying east to Payson.
