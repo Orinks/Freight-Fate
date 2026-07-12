@@ -150,3 +150,8 @@ River crossings are real landmark moments.
   the shelf road through the Uncompahgre Gorge in the 1920s; (3) a traveler
   "wouldn't drive it again for a million dollars" (no guardrails, sheer drops
   above Ouray). Real-register / history billboard. Pairs with the grade physics.
+- **Strawberry, AZ (owner's birthplace)** on AZ-87 north of Payson (Pine/
+  Strawberry, up the Mogollon Rim). The truck route Payson->Winslow is AZ-260
+  (east via Heber/Snowflake), not AZ-87, so Strawberry isn't on a built leg yet;
+  a future AZ-87-N spur (Payson->Pine->Strawberry) could seat it. Little ol town,
+  personal marker -- worth a checkpoint/billboard if that spur is ever built.

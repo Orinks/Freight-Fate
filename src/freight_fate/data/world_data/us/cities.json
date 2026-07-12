@@ -6961,6 +6961,33 @@
       "lon": -91.7382,
       "region": "upper_midwest",
       "locations": []
+    },
+    "payson_az_us": {
+      "spoken_city": "Payson",
+      "state": "AZ",
+      "country": "US",
+      "lat": 34.2308,
+      "lon": -111.3251,
+      "region": "desert_southwest",
+      "locations": []
+    },
+    "winslow_az_us": {
+      "spoken_city": "Winslow",
+      "state": "AZ",
+      "country": "US",
+      "lat": 35.0242,
+      "lon": -110.6974,
+      "region": "desert_southwest",
+      "locations": []
+    },
+    "holbrook_az_us": {
+      "spoken_city": "Holbrook",
+      "state": "AZ",
+      "country": "US",
+      "lat": 34.9023,
+      "lon": -110.1582,
+      "region": "desert_southwest",
+      "locations": []
     }
   }
 }

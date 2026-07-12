@@ -4,6 +4,11 @@
 
 ### Added
 
+- **The Beeline Highway and Route 66 open central Arizona.** Payson -- the
+  junction town below the Mogollon Rim -- plus Winslow and Holbrook join the map:
+  the AZ-87 Beeline climb from Phoenix to Payson, the AZ-260 run east to Winslow,
+  and Interstate 40 past Holbrook to Gallup.
+
 - **Northern Wisconsin fills in, Wausau up to Duluth.** Chippewa Falls and Rice
   Lake join the map, carrying WI-29 and US-53 north from Green Bay country up
   through Superior to the head of Lake Superior at Duluth.
