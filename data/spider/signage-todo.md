@@ -143,3 +143,10 @@ River crossings are real landmark moments.
   ("The Last Great Colosseum," NASCAR short track). On the new `abingdon->bristol`
   (I-81) and `bristol->kingsport` (US-11W) legs of the Tri-Cities corridor.
   Real-register billboard -- races + the Christmas lights.
+- **Million Dollar Highway (US-550, Ouray/Silverton), Colorado** — great story
+  for a billboard on the new `durango->montrose` MOUNTAIN leg (Red Mountain Pass).
+  Legends for the name: (1) the roadbed fill was mine tailings still rich in gold
+  & silver ore -- "you're driving on a million dollars"; (2) ~$1M/mile to blast
+  the shelf road through the Uncompahgre Gorge in the 1920s; (3) a traveler
+  "wouldn't drive it again for a million dollars" (no guardrails, sheer drops
+  above Ouray). Real-register / history billboard. Pairs with the grade physics.

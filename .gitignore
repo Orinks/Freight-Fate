@@ -54,3 +54,6 @@ AI API Keys.txt
 # ChatGPT signsheet batch staging (transient)
 data/spider/signsheets/batch*/
 data/spider/signsheets/*.zip
+
+# local scratch status (not for commit)
+STATUS.md
