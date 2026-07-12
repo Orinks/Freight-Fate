@@ -6988,6 +6988,33 @@
       "lon": -110.1582,
       "region": "desert_southwest",
       "locations": []
+    },
+    "camp_verde_az_us": {
+      "spoken_city": "Camp Verde",
+      "state": "AZ",
+      "country": "US",
+      "lat": 34.5636,
+      "lon": -111.8543,
+      "region": "desert_southwest",
+      "locations": []
+    },
+    "cottonwood_az_us": {
+      "spoken_city": "Cottonwood",
+      "state": "AZ",
+      "country": "US",
+      "lat": 34.7392,
+      "lon": -112.0099,
+      "region": "desert_southwest",
+      "locations": []
+    },
+    "sedona_az_us": {
+      "spoken_city": "Sedona",
+      "state": "AZ",
+      "country": "US",
+      "lat": 34.8697,
+      "lon": -111.761,
+      "region": "desert_southwest",
+      "locations": []
     }
   }
 }

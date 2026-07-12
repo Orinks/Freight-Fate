@@ -4,6 +4,10 @@
 
 ### Added
 
+- **The Verde Valley opens along Interstate 17.** Camp Verde -- the I-17/AZ-260
+  junction -- plus Cottonwood and red-rock Sedona join the map, splitting the
+  Phoenix-to-Flagstaff run through the valley, with AZ-260 tying east to Payson.
+
 - **The Beeline Highway and Route 66 open central Arizona.** Payson -- the
   junction town below the Mogollon Rim -- plus Winslow and Holbrook join the map:
   the AZ-87 Beeline climb from Phoenix to Payson, the AZ-260 run east to Winslow,
