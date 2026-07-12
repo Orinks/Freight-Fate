@@ -220,3 +220,32 @@ def queue_achievement(outbox: JournalOutbox, achievement, *, earned_at_ms: int) 
         },
         event_id,
     )
+
+
+def queue_career_milestones(
+    outbox: JournalOutbox,
+    profile,
+    *,
+    previous_level: int,
+    occurred_at_ms: int,
+) -> int:
+    milestones: list[tuple[str, int | None]] = []
+    if profile.career.deliveries == 1:
+        milestones.append(("first_delivery", None))
+    if profile.career.level > previous_level:
+        milestones.append(("career_level", int(profile.career.level)))
+    queued = 0
+    for milestone_type, level in milestones:
+        event_id = stable_event_id(
+            "career", milestone_type, profile.name, level or profile.career.deliveries
+        )
+        payload = {
+            "eventId": event_id,
+            "milestoneType": milestone_type,
+            **({"level": level} if level is not None else {}),
+            "occurredAt": occurred_at_ms,
+        }
+        queued += int(
+            outbox.enqueue("/api/freight-fate/events/career-milestone", payload, event_id)
+        )
+    return queued

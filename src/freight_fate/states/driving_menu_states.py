@@ -669,14 +669,16 @@ class ArrivalState(MenuState):
         road_grime_added = min(100.0, job.distance_mi * ROAD_GRIME_PER_MILE)
         p.tire_wear_pct = min(100.0, p.tire_wear_pct + tire_wear_added)
         p.road_grime_pct = min(100.0, p.road_grime_pct + road_grime_added)
+        previous_level = p.career.level
         announcements = p.career.record_delivery(job.distance_mi, net_pay, on_time, trip_damage)
         p.game_hours += hours
         p.market.advance_to(p.market_day())
         p.active_trip = None
         p.pay_advance_used_for_load = False
         self.ctx.save_profile()
-        from ..online_journal import queue_delivery
+        from ..online_journal import queue_career_milestones, queue_delivery
 
+        occurred_at_ms = int(time.time() * 1000)
         if queue_delivery(
             self.ctx._app.journal,
             p,
@@ -684,8 +686,15 @@ class ArrivalState(MenuState):
             origin=self.ctx.world.spoken_city(job.origin),
             destination=self.ctx.world.spoken_city(job.destination),
             on_time=on_time,
-            occurred_at_ms=int(time.time() * 1000),
+            occurred_at_ms=occurred_at_ms,
             undamaged=trip_damage <= 1,
+        ):
+            self.ctx._app.journal.flush_async()
+        if queue_career_milestones(
+            self.ctx._app.journal,
+            p,
+            previous_level=previous_level,
+            occurred_at_ms=occurred_at_ms,
         ):
             self.ctx._app.journal.flush_async()
 

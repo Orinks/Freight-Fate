@@ -9,6 +9,7 @@ from freight_fate.online_journal import (
     OutboxItem,
     profile_snapshot,
     queue_achievement,
+    queue_career_milestones,
     queue_delivery,
     stable_event_id,
 )
@@ -155,3 +156,22 @@ def test_runtime_opt_out_clears_queue_and_reenable_cannot_publish_it(tmp_path):
     box.set_enabled(True)
     box.flush()
     assert posted == []
+
+
+def test_first_delivery_and_level_up_queue_only_proven_milestones(tmp_path):
+    identity = OnlineIdentity("driver-1234", "ffd_" + "a" * 64)
+    box = JournalOutbox(identity, True, tmp_path / "outbox.json")
+    profile = Profile(name="Road Star")
+    profile.career.deliveries = 1
+    profile.career.xp = 2_000
+    assert queue_career_milestones(box, profile, previous_level=1, occurred_at_ms=123) == 2
+    assert {item.payload["milestoneType"] for item in box.items} == {
+        "first_delivery",
+        "career_level",
+    }
+    assert (
+        queue_career_milestones(
+            box, profile, previous_level=profile.career.level, occurred_at_ms=456
+        )
+        == 0
+    )
