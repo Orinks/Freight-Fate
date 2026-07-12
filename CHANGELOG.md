@@ -4,6 +4,10 @@
 
 ### Added
 
+- **Russellville joins the Arkansas River valley.** Russellville comes onto
+  Interstate 40 between Conway and Fort Smith, a real stop on the run west from
+  Little Rock.
+
 - **Central Oklahoma fills in.** Stillwater, Ponca City, and Ada join the map,
   linking Oklahoma City, Tulsa, Enid, Bartlesville, Ardmore, and McAlester across
   the middle of the state.

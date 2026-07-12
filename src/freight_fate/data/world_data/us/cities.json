@@ -7501,6 +7501,15 @@
       "locations": [],
       "lat": 34.7745,
       "lon": -96.6783
+    },
+    "russellville_ar_us": {
+      "spoken_city": "Russellville",
+      "state": "AR",
+      "country": "US",
+      "region": "mid_south",
+      "locations": [],
+      "lat": 35.2784,
+      "lon": -93.1338
     }
   }
 }
