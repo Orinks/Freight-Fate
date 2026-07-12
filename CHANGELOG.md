@@ -4,6 +4,11 @@
 
 ### Added
 
+- **Ames, Hickory, Danville, and Yuba City join the map.** Ames comes onto
+  Interstate 35 north of Des Moines, Hickory onto Interstate 40 between Asheville
+  and Charlotte, Danville onto US-29 between Greensboro and Lynchburg, and Yuba
+  City onto California's CA-99 between Sacramento and Chico.
+
 - **Ohio and northwest Pennsylvania fill in.** Zanesville comes onto Interstate 70
   between Columbus and Wheeling, Meadville onto Interstate 79 between Erie and
   Pittsburgh, and Chillicothe and Marion tie into Columbus on US-23.

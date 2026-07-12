@@ -7726,6 +7726,42 @@
       "locations": [],
       "lat": 40.5884,
       "lon": -83.1285
+    },
+    "ames_ia_us": {
+      "spoken_city": "Ames",
+      "state": "IA",
+      "country": "US",
+      "region": "heartland",
+      "locations": [],
+      "lat": 42.0347,
+      "lon": -93.6199
+    },
+    "hickory_nc_us": {
+      "spoken_city": "Hickory",
+      "state": "NC",
+      "country": "US",
+      "region": "atlantic_southeast",
+      "locations": [],
+      "lat": 35.7332,
+      "lon": -81.3412
+    },
+    "danville_va_us": {
+      "spoken_city": "Danville",
+      "state": "VA",
+      "country": "US",
+      "region": "appalachia",
+      "locations": [],
+      "lat": 36.586,
+      "lon": -79.395
+    },
+    "yuba_city_ca_us": {
+      "spoken_city": "Yuba City",
+      "state": "CA",
+      "country": "US",
+      "region": "california",
+      "locations": [],
+      "lat": 39.1404,
+      "lon": -121.6169
     }
   }
 }
