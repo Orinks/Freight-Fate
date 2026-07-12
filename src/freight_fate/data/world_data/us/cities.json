@@ -6916,6 +6916,24 @@
       "lon": -118.174,
       "region": "california",
       "locations": []
+    },
+    "willits_ca_us": {
+      "spoken_city": "Willits",
+      "state": "CA",
+      "country": "US",
+      "lat": 39.4096,
+      "lon": -123.3556,
+      "region": "california",
+      "locations": []
+    },
+    "fortuna_ca_us": {
+      "spoken_city": "Fortuna",
+      "state": "CA",
+      "country": "US",
+      "lat": 40.5982,
+      "lon": -124.1573,
+      "region": "california",
+      "locations": []
     }
   }
 }

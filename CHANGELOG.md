@@ -4,6 +4,10 @@
 
 ### Added
 
+- **The Redwood Highway opens, US-101 north to Eureka.** Willits and Fortuna join
+  the map, completing the North Coast run from Ukiah up through the redwoods --
+  past Garberville and down the Eel River canyon -- to Eureka on Humboldt Bay.
+
 - **The eastern Sierra opens along US-395, Reno to the Antelope Valley.** Carson
   City, Mammoth Lakes, Bishop, Lone Pine, and Mojave join the map, opening the
   long run down the east side of the Sierra Nevada -- over Conway Summit and the
