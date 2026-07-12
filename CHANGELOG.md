@@ -4,6 +4,11 @@
 
 ### Added
 
+- **US-75 links Dallas and Tulsa through southern Oklahoma.** Durant, Atoka,
+  Henryetta, and Okmulgee join the map, completing the north-south run from the
+  Metroplex up across the Red River and through the Choctaw and Muscogee country
+  to Tulsa -- a freight route that skips the long swing out to Interstate 44.
+
 - **US-281 opens up central Texas, a north-south run beside Interstate 35.**
   Five towns join the map -- Marble Falls in the Highland Lakes, Lampasas,
   Stephenville, Mineral Wells, and Jacksboro -- linking San Antonio all the way

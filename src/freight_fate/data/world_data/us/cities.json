@@ -6610,6 +6610,42 @@
       "lon": -98.1587,
       "region": "southern_plains",
       "locations": []
+    },
+    "durant_ok_us": {
+      "spoken_city": "Durant",
+      "state": "OK",
+      "country": "US",
+      "lat": 33.994,
+      "lon": -96.3708,
+      "region": "southern_plains",
+      "locations": []
+    },
+    "atoka_ok_us": {
+      "spoken_city": "Atoka",
+      "state": "OK",
+      "country": "US",
+      "lat": 34.3859,
+      "lon": -96.1283,
+      "region": "southern_plains",
+      "locations": []
+    },
+    "henryetta_ok_us": {
+      "spoken_city": "Henryetta",
+      "state": "OK",
+      "country": "US",
+      "lat": 35.4398,
+      "lon": -95.9819,
+      "region": "southern_plains",
+      "locations": []
+    },
+    "okmulgee_ok_us": {
+      "spoken_city": "Okmulgee",
+      "state": "OK",
+      "country": "US",
+      "lat": 35.6234,
+      "lon": -95.9605,
+      "region": "southern_plains",
+      "locations": []
     }
   }
 }
