@@ -4,6 +4,10 @@
 
 ### Added
 
+- **Clarksville now runs straight into Nashville.** The Interstate 24 route from
+  Clarksville no longer skips past Nashville, and the drive in from the northwest
+  passes Fort Campbell.
+
 - **Northern New England joins the map.** Rutland ties central Vermont to
   Burlington and Albany, Keene links southwest New Hampshire, Lewiston opens
   Maine north of Portland, and Barnstable brings Cape Cod onto the map.
