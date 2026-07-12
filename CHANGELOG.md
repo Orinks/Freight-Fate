@@ -4,6 +4,11 @@
 
 ### Added
 
+- **Owatonna, Marshalltown, Hinesville, and Spring Hill join the map.** Owatonna
+  comes onto Interstate 35 south of Minneapolis, Marshalltown onto US-30 in
+  central Iowa, Hinesville ties Fort Stewart into Savannah and Brunswick, and
+  Spring Hill opens the US-19 coast north of Tampa.
+
 - **New Jersey and Louisiana fill in.** Toms River and Vineland join the map on
   the Garden State Parkway and in South Jersey, Ruston comes onto Interstate 20
   between Shreveport and Monroe, and Hammond ties Baton Rouge to New Orleans.

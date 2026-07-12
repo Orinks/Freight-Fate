@@ -7897,6 +7897,42 @@
       "locations": [],
       "lat": 30.5044,
       "lon": -90.4612
+    },
+    "owatonna_mn_us": {
+      "spoken_city": "Owatonna",
+      "state": "MN",
+      "country": "US",
+      "region": "upper_midwest",
+      "locations": [],
+      "lat": 44.0839,
+      "lon": -93.226
+    },
+    "marshalltown_ia_us": {
+      "spoken_city": "Marshalltown",
+      "state": "IA",
+      "country": "US",
+      "region": "heartland",
+      "locations": [],
+      "lat": 42.0494,
+      "lon": -92.908
+    },
+    "hinesville_ga_us": {
+      "spoken_city": "Hinesville",
+      "state": "GA",
+      "country": "US",
+      "region": "atlantic_southeast",
+      "locations": [],
+      "lat": 31.8469,
+      "lon": -81.5959
+    },
+    "spring_hill_fl_us": {
+      "spoken_city": "Spring Hill",
+      "state": "FL",
+      "country": "US",
+      "region": "florida",
+      "locations": [],
+      "lat": 28.4789,
+      "lon": -82.5257
     }
   }
 }
