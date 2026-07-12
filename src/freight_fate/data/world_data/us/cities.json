@@ -6808,6 +6808,24 @@
       "lon": -82.5618,
       "region": "appalachia",
       "locations": []
+    },
+    "montrose_co_us": {
+      "spoken_city": "Montrose",
+      "state": "CO",
+      "country": "US",
+      "lat": 38.4783,
+      "lon": -107.8762,
+      "region": "rockies",
+      "locations": []
+    },
+    "delta_co_us": {
+      "spoken_city": "Delta",
+      "state": "CO",
+      "country": "US",
+      "lat": 38.7422,
+      "lon": -108.069,
+      "region": "rockies",
+      "locations": []
     }
   }
 }

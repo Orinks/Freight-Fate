@@ -4,6 +4,12 @@
 
 ### Added
 
+- **The Million Dollar Highway opens, Durango to Grand Junction.** Montrose and
+  Delta join the map, breaking out the US-550 run over Red Mountain Pass -- past
+  Silverton and Ouray, the "Switzerland of America" -- a real high-country
+  crossing that climbs over four thousand feet with grades past eleven percent,
+  the steepest, most dramatic road on the map.
+
 - **Interstate 81 now reaches Richmond the primary way, over Afton Mountain.**
   Staunton joins the map at the Interstate 64 / Interstate 81 junction, so a load
   off I-81 can take I-64 east through the Blue Ridge -- past Waynesboro and
