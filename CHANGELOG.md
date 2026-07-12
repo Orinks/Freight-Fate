@@ -4,6 +4,10 @@
 
 ### Added
 
+- **The Georgia and South Carolina midlands fill in.** Dublin comes onto
+  Interstate 16 between Macon and Savannah, Statesboro ties into Savannah and
+  Augusta, and Sumter links Columbia and Florence.
+
 - **Findlay, Dyersburg, and Burlington fill more gaps.** Findlay comes onto
   Interstate 75 between Toledo and Lima, Dyersburg ties northwest Tennessee to
   Memphis and Jackson, and Burlington joins the Mississippi in southeast Iowa

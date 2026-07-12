@@ -7537,6 +7537,33 @@
       "locations": [],
       "lat": 40.8075,
       "lon": -91.1129
+    },
+    "dublin_ga_us": {
+      "spoken_city": "Dublin",
+      "state": "GA",
+      "country": "US",
+      "region": "atlantic_southeast",
+      "locations": [],
+      "lat": 32.5404,
+      "lon": -82.9037
+    },
+    "statesboro_ga_us": {
+      "spoken_city": "Statesboro",
+      "state": "GA",
+      "country": "US",
+      "region": "atlantic_southeast",
+      "locations": [],
+      "lat": 32.4488,
+      "lon": -81.7832
+    },
+    "sumter_sc_us": {
+      "spoken_city": "Sumter",
+      "state": "SC",
+      "country": "US",
+      "region": "atlantic_southeast",
+      "locations": [],
+      "lat": 33.9204,
+      "lon": -80.3414
     }
   }
 }
