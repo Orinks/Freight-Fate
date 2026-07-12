@@ -136,17 +136,45 @@ class ControllerManager:
         self._repeat_countdown = 0.0
         self._repeat_held = 0.0
 
+        # Defer touching the SDL controller subsystem until support is on, so a
+        # player with controllers disabled never enumerates or binds a pad. It
+        # comes up lazily on the first enable (see set_enabled/_init_subsystem).
+        self._sdl = None
+        if enabled:
+            self._init_subsystem()
+        else:
+            log.debug("Controller support off at startup; subsystem not initialized")
+
+    # -- device lifecycle -----------------------------------------------------
+
+    def _init_subsystem(self) -> None:
+        """Initialize the SDL controller subsystem and bind the first pad.
+
+        Idempotent and headless-safe: a failure leaves ``_sdl`` None (keyboard
+        only), and a repeat call while already initialized is a no-op."""
+        if self._sdl is not None:
+            return
         try:
             from pygame._sdl2 import controller as sdl_controller
 
             self._sdl = sdl_controller
             self._sdl.init()
+            log.debug("Controller subsystem initialized")
             self._open_first()
         except Exception:  # pragma: no cover - platform/driver dependent
             log.info("Controller subsystem unavailable; keyboard only", exc_info=True)
             self._sdl = None
 
-    # -- device lifecycle -----------------------------------------------------
+    def _teardown_subsystem(self) -> None:
+        """Silence and release the pad, then uninitialize the subsystem so no
+        controller handles or SDL state remain while support is off."""
+        self.rumble.reset()  # silence the pad before we drop it
+        self._close_controller()
+        if self._sdl is not None:
+            with contextlib.suppress(Exception):  # pragma: no cover
+                self._sdl.quit()
+            self._sdl = None
+            log.debug("Controller subsystem torn down")
 
     @property
     def connected(self) -> bool:
@@ -163,7 +191,10 @@ class ControllerManager:
 
     def set_enabled(self, enabled: bool) -> None:
         self.enabled = enabled
-        if not enabled:
+        if enabled:
+            self._init_subsystem()  # bring the subsystem up on first enable
+        else:
+            self._teardown_subsystem()  # close handles + uninit while off
             self._reset_analog()
             self.active_device = KEYBOARD
 
@@ -513,9 +544,4 @@ class ControllerManager:
         return self._clutch if self.active else 0.0
 
     def shutdown(self) -> None:
-        self.rumble.reset()  # silence the pad before we drop it
-        self._close_controller()
-        if self._sdl is not None:
-            with contextlib.suppress(Exception):  # pragma: no cover
-                self._sdl.quit()
-            self._sdl = None
+        self._teardown_subsystem()
