@@ -22,6 +22,10 @@ jobs:
       SDL_VIDEODRIVER: dummy
       SDL_AUDIODRIVER: dummy
       FREIGHT_FATE_NO_SPEECH: "1"
+      # sys.monitoring coverage core (Python 3.12+): the default tracer makes
+      # the CPU-bound network sweeps ~5x slower, and that multiplier grows CI
+      # time with every map expansion. sysmon measured ~1.15x on the same test.
+      COVERAGE_CORE: sysmon
     steps:
       - uses: actions/checkout@v6
 
@@ -37,7 +41,7 @@ jobs:
         run: uv run ruff check src tests tools
 
       - name: Run tests
-        run: uv run pytest tests/ -v -n auto --cov=src/freight_fate --cov-report=xml
+        run: uv run pytest tests/ -n auto --durations=15 --cov=src/freight_fate --cov-report=xml
 
       - name: Upload coverage report
         uses: actions/upload-artifact@v7
