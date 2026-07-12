@@ -6871,6 +6871,51 @@
       "lon": -114.8908,
       "region": "rockies",
       "locations": []
+    },
+    "carson_city_nv_us": {
+      "spoken_city": "Carson City",
+      "state": "NV",
+      "country": "US",
+      "lat": 39.1638,
+      "lon": -119.7674,
+      "region": "great_basin",
+      "locations": []
+    },
+    "mammoth_lakes_ca_us": {
+      "spoken_city": "Mammoth Lakes",
+      "state": "CA",
+      "country": "US",
+      "lat": 37.6485,
+      "lon": -118.9721,
+      "region": "california",
+      "locations": []
+    },
+    "bishop_ca_us": {
+      "spoken_city": "Bishop",
+      "state": "CA",
+      "country": "US",
+      "lat": 37.3635,
+      "lon": -118.3951,
+      "region": "california",
+      "locations": []
+    },
+    "lone_pine_ca_us": {
+      "spoken_city": "Lone Pine",
+      "state": "CA",
+      "country": "US",
+      "lat": 36.606,
+      "lon": -118.0628,
+      "region": "california",
+      "locations": []
+    },
+    "mojave_ca_us": {
+      "spoken_city": "Mojave",
+      "state": "CA",
+      "country": "US",
+      "lat": 35.0525,
+      "lon": -118.174,
+      "region": "california",
+      "locations": []
     }
   }
 }

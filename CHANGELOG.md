@@ -4,6 +4,12 @@
 
 ### Added
 
+- **The eastern Sierra opens along US-395, Reno to the Antelope Valley.** Carson
+  City, Mammoth Lakes, Bishop, Lone Pine, and Mojave join the map, opening the
+  long run down the east side of the Sierra Nevada -- over Conway Summit and the
+  Sherwin Grade, through the Owens Valley beneath Mount Whitney, down to Mojave
+  and Lancaster.
+
 - **Interstate 90's Silver Valley opens across the Idaho panhandle.** Kellogg --
   heart of the old silver-mining country -- and Superior, Montana join the map,
   breaking out the I-90 run from Coeur d'Alene over Lookout Pass into Missoula,
