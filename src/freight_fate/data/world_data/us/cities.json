@@ -7690,6 +7690,42 @@
       "locations": [],
       "lat": 39.4831,
       "lon": -88.3728
+    },
+    "zanesville_oh_us": {
+      "spoken_city": "Zanesville",
+      "state": "OH",
+      "country": "US",
+      "region": "corn_belt",
+      "locations": [],
+      "lat": 39.9403,
+      "lon": -82.0132
+    },
+    "meadville_pa_us": {
+      "spoken_city": "Meadville",
+      "state": "PA",
+      "country": "US",
+      "region": "appalachia",
+      "locations": [],
+      "lat": 41.6412,
+      "lon": -80.1514
+    },
+    "chillicothe_oh_us": {
+      "spoken_city": "Chillicothe",
+      "state": "OH",
+      "country": "US",
+      "region": "corn_belt",
+      "locations": [],
+      "lat": 39.3331,
+      "lon": -82.9824
+    },
+    "marion_oh_us": {
+      "spoken_city": "Marion",
+      "state": "OH",
+      "country": "US",
+      "region": "great_lakes",
+      "locations": [],
+      "lat": 40.5884,
+      "lon": -83.1285
     }
   }
 }

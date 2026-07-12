@@ -4,6 +4,10 @@
 
 ### Added
 
+- **Ohio and northwest Pennsylvania fill in.** Zanesville comes onto Interstate 70
+  between Columbus and Wheeling, Meadville onto Interstate 79 between Erie and
+  Pittsburgh, and Chillicothe and Marion tie into Columbus on US-23.
+
 - **Oxford, Jamestown, Fort Dodge, and Mattoon join the map.** Oxford ties into
   northern Mississippi (Tupelo, Memphis, Clarksdale), Jamestown onto the Southern
   Tier between Erie and Buffalo, Fort Dodge into north-central Iowa, and Mattoon
