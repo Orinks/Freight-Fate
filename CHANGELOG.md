@@ -4,6 +4,11 @@
 
 ### Added
 
+- **US-287 becomes drivable town by town across the Texas Panhandle.** Vernon,
+  Childress, and Clarendon join the map, breaking the long Wichita Falls to
+  Amarillo haul into real stops along the Ports-to-Plains freight route --
+  through Quanah, Memphis, and Claude.
+
 - **US-75 links Dallas and Tulsa through southern Oklahoma.** Durant, Atoka,
   Henryetta, and Okmulgee join the map, completing the north-south run from the
   Metroplex up across the Red River and through the Choctaw and Muscogee country
@@ -382,12 +387,6 @@
   the lonely stretches. Ely, Fallon, and Wells are new places to pick up and
   deliver -- and Wells now splits the old Elko run, so Interstate 80 freight
   passes through the real town instead of leaping it.
-
-- **New: real roadside landmarks as you drive.** Routes now call out the world
-  going by -- entering a national forest, crossing a named river, approaching a
-  mountain pass, a roadside museum ahead -- over 2,800 of them, drawn from real
-  map data so a long haul has a sense of place instead of silence. Thanks to
-  nromey.
 
 - **Some hauls now offer more than one way to drive them.** Where two real truck
   routes reach the same place, the map keeps both, so a run can offer a choice --

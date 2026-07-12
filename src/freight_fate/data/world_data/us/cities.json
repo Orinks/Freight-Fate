@@ -6646,6 +6646,33 @@
       "lon": -95.9605,
       "region": "southern_plains",
       "locations": []
+    },
+    "vernon_tx_us": {
+      "spoken_city": "Vernon",
+      "state": "TX",
+      "country": "US",
+      "lat": 34.1554,
+      "lon": -99.2663,
+      "region": "southern_plains",
+      "locations": []
+    },
+    "childress_tx_us": {
+      "spoken_city": "Childress",
+      "state": "TX",
+      "country": "US",
+      "lat": 34.4265,
+      "lon": -100.204,
+      "region": "southern_plains",
+      "locations": []
+    },
+    "clarendon_tx_us": {
+      "spoken_city": "Clarendon",
+      "state": "TX",
+      "country": "US",
+      "lat": 34.9384,
+      "lon": -100.8843,
+      "region": "southern_plains",
+      "locations": []
     }
   }
 }
