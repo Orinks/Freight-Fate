@@ -1,5 +1,9 @@
 name: CI
 
+permissions:
+  contents: read
+  actions: write
+
 on:
   push:
     branches: [main, dev]
@@ -85,3 +89,33 @@ jobs:
         with:
           name: dist
           path: dist/
+
+  recover-nightly:
+    name: Recover failed nightly
+    if: github.event_name == 'push' && github.ref == 'refs/heads/dev'
+    needs: [test, changelog]
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Retry today's failed snapshot
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TAG="nightly-$(date -u +%Y%m%d)"
+
+          if gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            echo "$TAG already exists; no recovery build needed."
+            exit 0
+          fi
+
+          CONCLUSION=$(gh run list --repo "$GITHUB_REPOSITORY" \
+            --workflow Build --event schedule --limit 1 \
+            --json conclusion --jq '.[0].conclusion // ""')
+
+          if [ "$CONCLUSION" != "failure" ]; then
+            echo "Latest scheduled Build conclusion is '$CONCLUSION'; not retrying."
+            exit 0
+          fi
+
+          echo "Today's scheduled snapshot failed and $TAG is missing; dispatching recovery."
+          gh workflow run Build --repo "$GITHUB_REPOSITORY" --ref dev -f dry_run=false
