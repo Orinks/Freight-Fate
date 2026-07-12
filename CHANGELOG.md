@@ -4,6 +4,11 @@
 
 ### Added
 
+- **Eastern North Carolina comes onto the map.** Greenville, Jacksonville,
+  New Bern, and Rocky Mount join the network, opening the US-17 coastal run
+  from Wilmington up past Camp Lejeune, the US-264 haul from Raleigh, and a
+  proper Interstate 95 stop at Rocky Mount between Fayetteville and Virginia.
+
 - **US-60 climbs east from Phoenix through copper country.** Globe -- the old
   copper-mining town -- and Show Low, up in the White Mountains, join the map,
   opening the US-60 run past Apache Junction and Superior, down through the Salt

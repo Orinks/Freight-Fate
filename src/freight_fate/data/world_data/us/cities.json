@@ -7051,6 +7051,42 @@
       "lon": -110.0298,
       "region": "desert_southwest",
       "locations": []
+    },
+    "greenville_nc_us": {
+      "spoken_city": "Greenville",
+      "state": "NC",
+      "country": "US",
+      "region": "atlantic_southeast",
+      "locations": [],
+      "lat": 35.6127,
+      "lon": -77.3664
+    },
+    "new_bern_nc_us": {
+      "spoken_city": "New Bern",
+      "state": "NC",
+      "country": "US",
+      "region": "atlantic_southeast",
+      "locations": [],
+      "lat": 35.1085,
+      "lon": -77.0441
+    },
+    "jacksonville_nc_us": {
+      "spoken_city": "Jacksonville",
+      "state": "NC",
+      "country": "US",
+      "region": "atlantic_southeast",
+      "locations": [],
+      "lat": 34.7541,
+      "lon": -77.4302
+    },
+    "rocky_mount_nc_us": {
+      "spoken_city": "Rocky Mount",
+      "state": "NC",
+      "country": "US",
+      "region": "atlantic_southeast",
+      "locations": [],
+      "lat": 35.9382,
+      "lon": -77.7905
     }
   }
 }
