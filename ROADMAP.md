@@ -126,7 +126,7 @@ From a batch of player reports:
   grace so shift flares stay quiet. Follow-up if wanted: a governor that cuts
   throttle at redline, and a reverse-speed cap, so sustained redline damage
   is hard to reach at all.
-- [ ] **Don't bind a controller when the controller setting is off.**
+- [x] **Don't bind a controller when the controller setting is off.**
   `ControllerManager.__init__` opens the first pad unconditionally; with the
   setting disabled the game still enumerates and binds (issue #61: a fight
   stick got picked up despite controller-off). Gate `_open_first()` and the

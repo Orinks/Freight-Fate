@@ -275,6 +275,44 @@ def test_disabled_manager_ignores_controller():
     m.shutdown()
 
 
+def test_disabled_manager_never_inits_subsystem(monkeypatch):
+    # With controller support off, the SDL subsystem must not be touched: no
+    # enumeration, no pad bound. Guard against a real pad on the test machine.
+    opened = []
+    monkeypatch.setattr(ControllerManager, "_open_first", lambda self: opened.append(True))
+    m = ControllerManager(enabled=False)
+    assert m._sdl is None  # subsystem never initialized
+    assert m._controller is None
+    assert opened == []  # never went looking for a pad
+    m.shutdown()
+
+
+def test_enabling_inits_subsystem(monkeypatch):
+    # Turning support on for the first time brings the subsystem up.
+    m = ControllerManager(enabled=False)
+    inited = []
+    monkeypatch.setattr(m, "_init_subsystem", lambda: inited.append(True))
+    m.set_enabled(True)
+    assert m.enabled
+    assert inited == [True]
+    m.shutdown()
+
+
+def test_disabling_tears_down_subsystem():
+    # Disabling releases the open pad and uninitializes the subsystem so no
+    # controller handles or SDL state linger while support is off.
+    m = ControllerManager(enabled=True)
+    m._controller = object()
+    m._instance_id = 0
+    quits = []
+    m._sdl = type("FakeSDL", (), {"quit": lambda self: quits.append(True)})()
+    m.set_enabled(False)
+    assert m._controller is None  # handle released
+    assert m._sdl is None  # subsystem uninitialized
+    assert quits == [True]
+    m.shutdown()
+
+
 # -- menus -------------------------------------------------------------------
 
 
