@@ -39,21 +39,18 @@ def test_settings_menu_cycles_hours_of_service():
 
 
 @pytest.mark.smoke
-def test_settings_menu_cycles_lane_drift():
+def test_lane_controls_live_only_in_driving_assistance():
     from freight_fate.app import App
 
     app = App()
     try:
-        assert app.ctx.settings.steering_assist == "realistic"
-        cat = open_settings_category(app, "Gameplay")
-        while not cat.items[cat.index].text.startswith("Lane drift"):
-            cat.handle_event(key_event(pygame.K_DOWN))
-        cat.handle_event(key_event(pygame.K_RETURN))
-        assert app.ctx.settings.steering_assist == "off"
-        cat.handle_event(key_event(pygame.K_RETURN))
-        assert app.ctx.settings.steering_assist == "light"
-        cat.handle_event(key_event(pygame.K_LEFT))
-        assert app.ctx.settings.steering_assist == "off"
+        gameplay = open_settings_category(app, "Gameplay")
+        assert not any(item.text.startswith("Lane drift") for item in gameplay.items)
+        gameplay.handle_event(key_event(pygame.K_ESCAPE))
+        assistance = open_settings_category(app, "Driving assistance")
+        labels = [item.text for item in assistance.items]
+        assert any(label.startswith("Lane-departure warning") for label in labels)
+        assert any(label.startswith("Lane centering assistance") for label in labels)
     finally:
         app.shutdown()
 
@@ -232,6 +229,15 @@ def test_driving_assistance_preset_keyboard_path_and_custom_transition():
         loaded = Settings.load()
         assert loaded.driving_assistance_preset == "custom"
         assert any("Automatic emergency braking: off" in line for line in spoken)
+        assert "Driving assistance preset: Custom." in spoken
+        original_index = cat.index
+        cat.handle_event(key_event(pygame.K_HOME))
+        cat.handle_event(key_event(pygame.K_LEFT))
+        assert app.ctx.settings.driving_assistance_preset == "all"
+        assert cat.items[cat.index].text == "Driving assistance preset: All assists"
+        cat.handle_event(key_event(pygame.K_RIGHT))
+        assert app.ctx.settings.driving_assistance_preset == "realistic"
+        assert original_index == 1
     finally:
         app.shutdown()
 

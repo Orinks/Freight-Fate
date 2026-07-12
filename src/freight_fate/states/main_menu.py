@@ -838,7 +838,7 @@ class SettingsCategoryState(MenuState):
                     lambda field=field, label=label: (
                         f"{label}: "
                         + (
-                            getattr(s, field)
+                            self._descent_level_label()
                             if field == "descent_speed_control"
                             else ("on" if getattr(s, field) else "off")
                         )
@@ -890,11 +890,6 @@ class SettingsCategoryState(MenuState):
                     "road hazards. Relaxed eases the hours limits and "
                     "makes road hazards rare, so you can focus on "
                     "driver responsibility: hours, fueling, and repairs.",
-                ),
-                MenuItem(
-                    lambda: f"Lane drift: {self._steering_label()}",
-                    lambda: self._cycle_steering(1),
-                    help="Choose whether lane drift is off, light, or realistic.",
                 ),
                 MenuItem(
                     lambda: f"Controller: {'enabled' if s.controller_enabled else 'disabled'}",
@@ -1052,7 +1047,6 @@ class SettingsCategoryState(MenuState):
                     self._cycle_automatic_direction_changes,
                     self._cycle_pace,
                     self._cycle_hos,
-                    self._cycle_steering,
                     self._toggle_controller,
                     self._toggle_haptics,
                 ],
@@ -1193,6 +1187,9 @@ class SettingsCategoryState(MenuState):
             "custom": "Custom",
         }[self.ctx.settings.driving_assistance_preset]
 
+    def _descent_level_label(self) -> str:
+        return self.ctx.settings.descent_speed_control.title()
+
     def _cycle_assist_preset(self, direction: int) -> None:
         presets = tuple(DRIVING_ASSIST_PRESETS)
         current = self.ctx.settings.driving_assistance_preset
@@ -1213,6 +1210,8 @@ class SettingsCategoryState(MenuState):
             setattr(self.ctx.settings, field, not getattr(self.ctx.settings, field))
         self.ctx.settings.refresh_driving_assistance_preset()
         self._announce()
+        if self.ctx.settings.driving_assistance_preset == "custom":
+            self.ctx.say("Driving assistance preset: Custom.")
 
     def _pace_label(self) -> str:
         scale = self.ctx.settings.time_scale

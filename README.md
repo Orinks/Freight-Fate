@@ -38,6 +38,7 @@ visual display mirrors all speech for sighted players and helpers.
   speeds, construction and traffic zones, road hazards that demand quick
   braking, curated rest stops and service plazas with parking certainty,
   carrier-paid toll-road settlement charges, and roadside rescue when you run dry.
+- **Adjustable driving assistance** — open Settings → Driving assistance for one Realistic, Balanced, or All assists preset selector plus individual emergency-braking, lane, stop-and-go, and descent controls. Individual changes are shown as Custom.
 - **Real-world weather (optional)** — flip Settings → Weather source to
   "real world" and each city uses its live current conditions from the free
   [National Weather Service](https://www.weather.gov/documentation/services-web-api)
