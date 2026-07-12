@@ -38,8 +38,8 @@
 
 ### Added
 
-- **Optional road journal sharing stays quiet and factual.** After renewing
-  online-sharing consent on Orinks, Freight Fate can queue delivery facts,
+- **Optional Profile sharing stays quiet during driving.** With Profile sharing on,
+  Freight Fate can queue automatic fictional road-journal posts,
   achievements, and an allowlisted last-saved career snapshot for the public
   driver profile. Offline posting retries in the background and never adds a
   spoken interruption while driving.

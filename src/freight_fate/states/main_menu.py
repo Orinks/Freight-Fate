@@ -936,24 +936,25 @@ class SettingsCategoryState(MenuState):
                     # stale the moment setup completed (or the identity file
                     # changed on disk) and misreported "on" while dormant.
                     lambda: (
-                        f"Share on the drivers board: {'on' if s.online_presence else 'off'}"
+                        (
+                            "Profile sharing: off requested"
+                            if s.profile_sharing_pending_off
+                            else f"Profile sharing: {'on' if s.online_presence else 'off'}"
+                        )
                         if OnlineIdentity.load() is not None
                         # Before setup this item IS the driver profile
                         # gateway: connecting unlocks the board and cloud
                         # backup, so the label names the profile, not just
                         # sharing.
-                        else "Driver profile: not set up"
+                        else "Profile sharing: not set up"
                     ),
                     lambda: self._toggle_online_presence(1),
-                    help="Your driver profile is your Orinks account sign-in "
-                    "for online features: the public drivers board and cloud "
-                    "save backup. Nothing is shared until you set it up: "
+                    help="Profile sharing is one optional public setting for your driver profile, "
+                    "official achievements, automatic fictional road-journal posts, updates feed, "
+                    "and on-duty board activity. Nothing is shared until you set it up: "
                     "selecting this the first time opens the driver profile "
                     "setup menu, where you sign in on orinks.net and paste "
-                    "in your Driver ID and token. Once set up, this toggles "
-                    "sharing on the drivers board: only broad in-game "
-                    "activity is ever shared, never your save files or "
-                    "personal details.",
+                    "in your Driver ID and token. Cloud saves remain private and separate.",
                 ),
                 MenuItem(
                     lambda: (
@@ -1211,7 +1212,7 @@ class SettingsCategoryState(MenuState):
 
     def _toggle_online_presence(self, _d: int) -> None:
         from ..online_presence import OnlineIdentity
-        from .online_states import OnlineSetupState
+        from .online_states import OnlineSetupState, ProfileSharingSyncState
 
         s = self.ctx.settings
         if OnlineIdentity.load() is None:
@@ -1220,9 +1221,8 @@ class SettingsCategoryState(MenuState):
             # The setting alone shares nothing without an identity.
             self.ctx.push_state(OnlineSetupState(self.ctx))
             return
-        s.online_presence = not s.online_presence
-        self.ctx.apply_online_presence()
-        self._announce()
+        target = False if s.profile_sharing_pending_off else not s.online_presence
+        self.ctx.push_state(ProfileSharingSyncState(self.ctx, target))
 
     def _toggle_cloud_saves(self, _d: int) -> None:
         from ..online_presence import OnlineIdentity

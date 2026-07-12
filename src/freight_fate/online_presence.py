@@ -165,6 +165,29 @@ def verify_identity(identity: OnlineIdentity, *, transport: Transport = _http_js
     return "ok" if reply.get("ok") else "error"
 
 
+def set_profile_sharing(
+    identity: OnlineIdentity, enabled: bool, *, transport: Transport = _http_json
+) -> str:
+    """Set the authoritative public Profile-sharing state on orinks.net."""
+    try:
+        reply = transport(
+            f"{base_url()}/api/freight-fate/profile-sharing",
+            {"driverId": identity.driver_id, "enabled": enabled},
+            {"Authorization": f"Bearer {identity.driver_token}"},
+        )
+    except urllib.error.HTTPError as e:
+        if e.code == 404:
+            return "driver_not_found"
+        if e.code == 401:
+            return "unauthorized"
+        log.warning("Profile sharing update failed: HTTP %s", e.code)
+        return "error"
+    except Exception as e:
+        log.warning("Profile sharing update failed: %s", e)
+        return "error"
+    return "ok" if reply.get("ok") and reply.get("enabled") is enabled else "error"
+
+
 # -- presence service ---------------------------------------------------------
 
 

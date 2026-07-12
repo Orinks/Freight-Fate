@@ -579,4 +579,4 @@ fit for an audio-first game.
 - [ ] Steam/itch.io distribution
 - [ ] Localization of all speech strings
 - [ ] Optional online leaderboards
-- [x] Opt-in factual road journals, achievements, and last-saved profile summaries
+- [x] Opt-in Profile sharing for fictional road journals, achievements, and last-saved profile summaries

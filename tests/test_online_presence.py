@@ -21,6 +21,7 @@ from freight_fate.online_presence import (
     OnlinePresence,
     base_url,
     fetch_board,
+    set_profile_sharing,
     verify_identity,
 )
 from freight_fate.settings import Settings
@@ -78,13 +79,20 @@ def make_service(transport, clock, *, enabled=True, identity=IDENTITY):
 # -- disabled and unconfigured paths ------------------------------------------
 
 
-def test_sharing_defaults_on_but_is_inert_without_setup():
-    # Like Discord presence the setting itself defaults to on, but the
-    # service cannot send anything until a browser-confirmed identity exists.
-    assert Settings().online_presence is True
+def test_profile_sharing_defaults_off_without_setup():
+    assert Settings().online_presence is False
     assert OnlineIdentity.load() is None
     service = OnlinePresence(enabled=Settings().online_presence, identity=OnlineIdentity.load())
     assert not service.enabled
+
+
+def test_profile_sharing_posts_one_authoritative_boolean():
+    transport = FakeTransport(reply={"ok": True, "enabled": False})
+    assert set_profile_sharing(IDENTITY, False, transport=transport) == "ok"
+    url, payload, headers = transport.requests[0]
+    assert url.endswith("/api/freight-fate/profile-sharing")
+    assert payload == {"driverId": IDENTITY.driver_id, "enabled": False}
+    assert headers["Authorization"].startswith("Bearer ")
 
 
 def test_disabled_never_posts():

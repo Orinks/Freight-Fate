@@ -22,19 +22,18 @@ import pygame
 
 from .. import online_presence
 from ..online_presence import OnlineIdentity
+from ..settings import PROFILE_SHARING_CONSENT_VERSION
 from .base import MenuItem, MenuState
 
 DISCLOSURE = (
-    "Online sharing sends factual game information to orinks.net under the driver name "
-    "you choose. While hauling, the public board can show your route's cities, cargo, "
-    "and rough progress. After you separately renew consent on the website, your profile "
-    "can also show eligible delivery journal entries, unlocked achievements, occurrence "
-    "times, career level and totals, current truck, and your last-saved city and snapshot "
-    "time. Public profiles can appear in the updates feed. Unlisted profiles are visible "
-    "to anyone with their link. Private profiles show none of it. The game never publishes "
-    "your real name, full save, money, coordinates, active cargo details, or precise live "
-    "location. Turn sharing off any time in Settings, Online; posting stops quietly and "
-    "the website hides expanded data when consent is withdrawn."
+    "Profile sharing is optional and off until you turn it on. When on, orinks.net can "
+    "publicly show your driver name and broad on-duty board activity; eligible profile "
+    "details such as career level, totals, current truck, last-saved city, and snapshot "
+    "time; official achievements you earn; and automatic fictional road-journal posts "
+    "generated from gameplay. Public updates can also appear in the Freight Fate updates "
+    "feed. Freight Fate does not publish your real name, full save, money, coordinates, "
+    "active cargo details, or precise real-world location. Turn Profile sharing off at "
+    "any time to stop posting and make your shared profile and updates private."
 )
 
 _ID_CHARS = frozenset("abcdefghijklmnopqrstuvwxyz0123456789-_")
@@ -317,7 +316,12 @@ class OnlineSetupState(MenuState):
         identity = OnlineIdentity(driver_id=self._driver_id, driver_token=self._token)
 
         def worker() -> None:
-            self._outcome = online_presence.verify_identity(identity)
+            verified = online_presence.verify_identity(identity)
+            self._outcome = (
+                online_presence.set_profile_sharing(identity, True)
+                if verified == "ok"
+                else verified
+            )
 
         threading.Thread(target=worker, name="online-verify", daemon=True).start()
 
@@ -339,13 +343,15 @@ class OnlineSetupState(MenuState):
             identity = OnlineIdentity(driver_id=self._driver_id, driver_token=self._token)
             identity.save()
             self.ctx.settings.online_presence = True
+            self.ctx.settings.profile_sharing_consent_version = PROFILE_SHARING_CONSENT_VERSION
+            self.ctx.settings.profile_sharing_pending_off = False
             self.ctx.settings.save()
             self.ctx.adopt_online_identity(identity)
             self.ctx.apply_online_presence()
             self.ctx.audio.play("ui/menu_select")
             self.ctx.say(
-                f"Connected. You are set up as {self._driver_id}. Sharing is "
-                "on; you appear on the board while hauling.",
+                f"Connected as {self._driver_id}. Profile sharing is on. Eligible driver "
+                "information and gameplay updates can now appear publicly on orinks.net.",
                 interrupt=True,
             )
             self.ctx.pop_state()
@@ -381,6 +387,82 @@ class OnlineSetupState(MenuState):
         if self._driver_id or self._token:
             self.ctx.say("Setup closed. Nothing was saved.")
         super().go_back()
+
+
+class ProfileSharingSyncState(MenuState):
+    """Synchronize Profile sharing without blocking the game loop."""
+
+    title = "Profile sharing"
+
+    def __init__(self, ctx, enabled: bool) -> None:
+        super().__init__(ctx)
+        self.enabled = enabled
+        self._pending = False
+        self._outcome: str | None = None
+
+    def build_items(self) -> list[MenuItem]:
+        action = f"Turn Profile sharing {'on' if self.enabled else 'off'}"
+        if self._pending:
+            action = f"Turning Profile sharing {'on' if self.enabled else 'off'}"
+        return [
+            MenuItem(action, self._start),
+            MenuItem("Hear what gets shared", lambda: self.ctx.say(DISCLOSURE, interrupt=True)),
+            MenuItem("Cancel", self.go_back),
+        ]
+
+    def _start(self) -> None:
+        if self._pending:
+            return
+        identity = OnlineIdentity.load()
+        if identity is None:
+            self.ctx.push_state(OnlineSetupState(self.ctx))
+            return
+        self._pending = True
+        if not self.enabled:
+            self.ctx.settings.profile_sharing_pending_off = True
+            self.ctx.settings.save()
+            self.ctx.apply_online_presence()
+        self.refresh()
+        self.ctx.say(
+            "Turning Profile sharing on."
+            if self.enabled
+            else "Turning Profile sharing off. Local posting has stopped; public information may remain visible until orinks.net confirms the change.",
+            interrupt=True,
+        )
+
+        def worker() -> None:
+            self._outcome = online_presence.set_profile_sharing(identity, self.enabled)
+
+        threading.Thread(target=worker, name="profile-sharing", daemon=True).start()
+
+    def update(self, dt: float) -> None:
+        super().update(dt)
+        outcome, self._outcome = self._outcome, None
+        if outcome is None:
+            return
+        self._pending = False
+        if outcome == "ok":
+            self.ctx.settings.online_presence = self.enabled
+            if self.enabled:
+                self.ctx.settings.profile_sharing_consent_version = PROFILE_SHARING_CONSENT_VERSION
+            self.ctx.settings.profile_sharing_pending_off = False
+            self.ctx.settings.save()
+            self.ctx.apply_online_presence()
+            self.ctx.say(
+                "Profile sharing is on. Eligible driver information and gameplay updates can now appear publicly on orinks.net."
+                if self.enabled
+                else "Profile sharing is off. Posting has stopped and your Freight Fate profile and activity are no longer public.",
+                interrupt=True,
+            )
+            self.ctx.pop_state()
+            return
+        self.refresh()
+        self.ctx.say(
+            "Profile sharing is still off. orinks.net could not confirm the change. Try again."
+            if self.enabled
+            else "Profile sharing may still be public. Local posting is stopped, but orinks.net could not confirm the request. Choose Turn Profile sharing off to retry.",
+            interrupt=True,
+        )
 
 
 def _updated_text(updated_at_ms: float) -> str:

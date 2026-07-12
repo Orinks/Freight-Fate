@@ -11,6 +11,7 @@ from .models.profile import data_dir
 log = logging.getLogger(__name__)
 
 TIME_SCALES = (10.0, 20.0, 40.0)
+PROFILE_SHARING_CONSENT_VERSION = 2
 
 
 @dataclass
@@ -51,7 +52,12 @@ class Settings:
     # browser setup: nothing is ever sent without a confirmed driver identity
     # (see online_presence.py), and board listing further requires choosing
     # the public visibility on the site.
-    online_presence: bool = True
+    online_presence: bool = False
+    profile_sharing_consent_version: int = 0
+    # A failed server revocation keeps public state uncertain, but stops all
+    # local publication immediately and retries when the player activates the
+    # stable Profile sharing item again.
+    profile_sharing_pending_off: bool = False
     # Back up saves to the player's own Orinks account after each local save.
     # Off by default and separate from drivers-board sharing: that feature's
     # spoken disclosure promises save files are never sent, so mirroring them
@@ -81,6 +87,10 @@ class Settings:
             for k, v in data.items():
                 if hasattr(s, k):
                     setattr(s, k, v)
+            # The former board-only opt-in covered less information. Never
+            # silently expand it into public Profile sharing.
+            if data.get("profile_sharing_consent_version") != PROFILE_SHARING_CONSENT_VERSION:
+                s.online_presence = False
         except FileNotFoundError:
             pass
         except (json.JSONDecodeError, OSError):

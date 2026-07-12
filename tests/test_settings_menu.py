@@ -273,19 +273,19 @@ def test_online_sharing_label_tracks_identity_freshness():
     app = App()
     try:
         cat = open_settings_category(app, "Online")
-        while not cat.items[cat.index].text.startswith("Driver profile"):
+        while not cat.items[cat.index].text.startswith("Profile sharing"):
             cat.handle_event(key_event(pygame.K_DOWN))
         item = cat.items[cat.index]
         # Before setup the item is the driver-profile gateway; the sharing
         # wording only appears once credentials exist.
-        assert item.text == "Driver profile: not set up"
+        assert item.text == "Profile sharing: not set up"
 
         # Credentials appear on disk (setup completing) with no menu rebuild:
         # the same MenuItem must immediately report the real on/off state.
         OnlineIdentity(driver_id="road-star-abcd1234", driver_token="t" * 68).save()
         assert item.text in (
-            "Share on the drivers board: on",
-            "Share on the drivers board: off",
+            "Profile sharing: on",
+            "Profile sharing: off",
         )
     finally:
         app.shutdown()

@@ -170,8 +170,9 @@ class GameContext:
 
     def apply_online_presence(self) -> None:
         """Reflect the drivers-board setting (e.g. after a settings change)."""
-        self._app.online.set_enabled(self.settings.online_presence)
-        self._app.journal.set_enabled(self.settings.online_presence)
+        enabled = self.settings.online_presence and not self.settings.profile_sharing_pending_off
+        self._app.online.set_enabled(enabled)
+        self._app.journal.set_enabled(enabled)
 
     def apply_cloud_saves(self) -> None:
         """Reflect the cloud backup setting (e.g. after a settings change)."""
