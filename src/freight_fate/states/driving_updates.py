@@ -104,7 +104,14 @@ class DrivingUpdateMixin:
         clutch_val = 1.0 if clutch_pressed else 0.0
         if pad_on:
             clutch_val = max(clutch_val, pad.clutch)
-        t.transmission.clutch = clutch_val if not t.transmission.automatic else 0.0
+        manual_mode = not t.transmission.automatic
+        t.transmission.clutch = clutch_val if manual_mode else 0.0
+        clutch_engaged = t.transmission.clutch > 0.5
+        if manual_mode and clutch_engaged and not self._clutch_pressed_prev:
+            self.ctx.audio.play("vehicle/cToggle")
+        elif manual_mode and not clutch_engaged and self._clutch_pressed_prev:
+            self.ctx.audio.play("vehicle/cToggle")
+        self._clutch_pressed_prev = clutch_engaged
         clutch_disengaged = t.transmission.clutch > 0.5 or t.transmission.shifting
         self._update_lane(keys, dt)
         self._update_cruise(dt, braking, accelerating, clutch_disengaged)

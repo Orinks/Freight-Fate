@@ -120,6 +120,7 @@ class DrivingState(DrivingControlsMixin, DrivingUpdateMixin, DrivingEventMixin, 
         self._spring_brake_said = self.truck.spring_brakes_active
         self._brake_lockout_cue_timer = 0.0
         self._brake_air_hissed = False  # rising-edge guard for the brake-apply hiss
+        self._clutch_pressed_prev = False
         self._overrev_s = 0.0  # continuous seconds at damaging RPM
         self._overrev_warn_due = OVERREV_GRACE_S  # repeats push it out further
         self._lane_rumble_timer = 0.0

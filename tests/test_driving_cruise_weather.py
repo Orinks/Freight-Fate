@@ -242,6 +242,41 @@ def test_automatic_shift_uses_shift_cue_not_brake_air(monkeypatch):
         app.shutdown()
 
 
+def test_manual_clutch_press_and_release_play_toggle_cue(monkeypatch):
+    from freight_fate.app import App
+
+    class Keys:
+        def __init__(self):
+            self.pressed = set()
+
+        def __getitem__(self, key):
+            return key in self.pressed
+
+    app = App()
+    played = []
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        app.ctx.settings.automatic_transmission = False
+        driving.truck.transmission.automatic = False
+        keys = Keys()
+        monkeypatch.setattr(pygame.key, "get_pressed", lambda: keys)
+        monkeypatch.setattr(app.ctx.audio, "play", lambda key, volume=1.0: played.append((key, volume)))
+
+        driving.update(0.0)
+        assert played == []
+
+        keys.pressed.add(pygame.K_LSHIFT)
+        driving.update(0.0)
+        assert played == [("vehicle/cToggle", 1.0)]
+
+        keys.pressed.remove(pygame.K_LSHIFT)
+        driving.update(0.0)
+        assert played == [("vehicle/cToggle", 1.0), ("vehicle/cToggle", 1.0)]
+    finally:
+        app.shutdown()
+
+
 @pytest.mark.smoke
 def test_cruise_control_requires_road_speed_and_cancels_on_hazard():
     from freight_fate.app import App

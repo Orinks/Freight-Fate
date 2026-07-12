@@ -38,6 +38,9 @@
 
 ### Added
 
+- **Manual clutch presses and releases now play a toggle cue.** In manual
+  transmission mode, pressing or releasing the clutch triggers the vehicle
+  toggle sound once per edge.
 - **Optional Profile sharing stays quiet during driving.** With Profile sharing on,
   Freight Fate can queue automatic fictional road-journal posts,
   achievements, and an allowlisted last-saved career snapshot for the public
