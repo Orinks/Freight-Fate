@@ -4,6 +4,10 @@
 
 ### Added
 
+- **The Pacific Northwest interior fills in.** Longview comes onto Interstate 5
+  between Olympia and Portland, Walla Walla ties into the Tri-Cities and Pendleton
+  on US-12, and Port Angeles opens the Olympic Peninsula on US-101.
+
 - **Clarksville now runs straight into Nashville.** The Interstate 24 route from
   Clarksville no longer skips past Nashville, and the drive in from the northwest
   passes Fort Campbell.

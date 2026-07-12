@@ -7834,6 +7834,33 @@
       "locations": [],
       "lat": 41.7003,
       "lon": -70.3002
+    },
+    "longview_wa_us": {
+      "spoken_city": "Longview",
+      "state": "WA",
+      "country": "US",
+      "region": "pacific_northwest",
+      "locations": [],
+      "lat": 46.1382,
+      "lon": -122.9382
+    },
+    "walla_walla_wa_us": {
+      "spoken_city": "Walla Walla",
+      "state": "WA",
+      "country": "US",
+      "region": "pacific_northwest",
+      "locations": [],
+      "lat": 46.0646,
+      "lon": -118.343
+    },
+    "port_angeles_wa_us": {
+      "spoken_city": "Port Angeles",
+      "state": "WA",
+      "country": "US",
+      "region": "pacific_northwest",
+      "locations": [],
+      "lat": 48.1181,
+      "lon": -123.4307
     }
   }
 }
