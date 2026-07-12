@@ -63,7 +63,7 @@ HELP_PAGES = [
             "It is on by default and has no effect if Discord is closed.",
             "Profile sharing can make eligible driver information public on orinks.net,",
             "showing a driver name you choose, your route, cargo, and rough progress.",
-            "It can include official achievements, automatic fictional road-journal posts,",
+            "It can include official achievements, automatic road-journal posts,",
             "career totals, your current truck, and your last-saved city.",
             "Public profiles and eligible posts can appear in the Freight Fate updates feed;",
             "private profiles expose none of this. Full saves and precise location stay private.",

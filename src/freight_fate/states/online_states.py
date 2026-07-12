@@ -29,7 +29,7 @@ DISCLOSURE = (
     "Profile sharing is optional and off until you turn it on. When on, orinks.net can "
     "publicly show your driver name and broad on-duty board activity; eligible profile "
     "details such as career level, totals, current truck, last-saved city, and snapshot "
-    "time; official achievements you earn; and automatic fictional road-journal posts "
+    "time; official achievements you earn; and automatic road-journal posts "
     "generated from gameplay. Public updates can also appear in the Freight Fate updates "
     "feed. Freight Fate does not publish your real name, full save, money, coordinates, "
     "active cargo details, or precise real-world location. Turn Profile sharing off at "

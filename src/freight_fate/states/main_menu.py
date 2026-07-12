@@ -950,7 +950,7 @@ class SettingsCategoryState(MenuState):
                     ),
                     lambda: self._toggle_online_presence(1),
                     help="Profile sharing is one optional public setting for your driver profile, "
-                    "official achievements, automatic fictional road-journal posts, updates feed, "
+                    "official achievements, automatic road-journal posts, updates feed, "
                     "and on-duty board activity. Nothing is shared until you set it up: "
                     "selecting this the first time opens the driver profile "
                     "setup menu, where you sign in on orinks.net and paste "

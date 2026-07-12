@@ -15,7 +15,7 @@ class ImmediateThread:
 def test_disclosure_is_single_profile_sharing_consent():
     lowered = DISCLOSURE.lower()
     assert "profile sharing" in lowered
-    assert "fictional road-journal" in lowered
+    assert "road-journal" in lowered
     assert "official achievements" in lowered
     assert "updates feed" in lowered
     assert "separately" not in lowered
