@@ -7276,6 +7276,33 @@
       "locations": [],
       "lat": 41.2412,
       "lon": -77.0011
+    },
+    "sedalia_mo_us": {
+      "spoken_city": "Sedalia",
+      "state": "MO",
+      "country": "US",
+      "region": "heartland",
+      "locations": [],
+      "lat": 38.7045,
+      "lon": -93.2283
+    },
+    "kirksville_mo_us": {
+      "spoken_city": "Kirksville",
+      "state": "MO",
+      "country": "US",
+      "region": "heartland",
+      "locations": [],
+      "lat": 40.1948,
+      "lon": -92.5832
+    },
+    "ottumwa_ia_us": {
+      "spoken_city": "Ottumwa",
+      "state": "IA",
+      "country": "US",
+      "region": "heartland",
+      "locations": [],
+      "lat": 41.0197,
+      "lon": -92.4113
     }
   }
 }

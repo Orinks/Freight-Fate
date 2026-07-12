@@ -4,6 +4,10 @@
 
 ### Added
 
+- **The Missouri and Iowa heartland fills in.** Sedalia opens the US-50 run
+  between Kansas City and Columbia, and Kirksville and Ottumwa join a US-63
+  corridor north from Columbia up into Des Moines.
+
 - **The US-15 route through north-central Pennsylvania opens.** Williamsport joins
   the map on the Susquehanna, linking Harrisburg, State College, and Binghamton --
   including the mountain climb north onto the plateau toward New York.
