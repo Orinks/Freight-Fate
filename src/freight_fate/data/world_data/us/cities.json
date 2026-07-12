@@ -7087,6 +7087,42 @@
       "locations": [],
       "lat": 35.9382,
       "lon": -77.7905
+    },
+    "lake_havasu_city_az_us": {
+      "spoken_city": "Lake Havasu City",
+      "state": "AZ",
+      "country": "US",
+      "region": "desert_southwest",
+      "locations": [],
+      "lat": 34.4839,
+      "lon": -114.3225
+    },
+    "bullhead_city_az_us": {
+      "spoken_city": "Bullhead City",
+      "state": "AZ",
+      "country": "US",
+      "region": "desert_southwest",
+      "locations": [],
+      "lat": 35.1478,
+      "lon": -114.5683
+    },
+    "nogales_az_us": {
+      "spoken_city": "Nogales",
+      "state": "AZ",
+      "country": "US",
+      "region": "desert_southwest",
+      "locations": [],
+      "lat": 31.3404,
+      "lon": -110.9343
+    },
+    "sierra_vista_az_us": {
+      "spoken_city": "Sierra Vista",
+      "state": "AZ",
+      "country": "US",
+      "region": "desert_southwest",
+      "locations": [],
+      "lat": 31.5455,
+      "lon": -110.2773
     }
   }
 }

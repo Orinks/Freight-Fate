@@ -4,6 +4,10 @@
 
 ### Added
 
+- **The Colorado River and southern Arizona fill in.** Lake Havasu City and
+  Bullhead City open the river run down from Kingman to Yuma, and Nogales and
+  Sierra Vista put the Mexican border and Interstate 19 on the map below Tucson.
+
 - **Eastern North Carolina comes onto the map.** Greenville, Jacksonville,
   New Bern, and Rocky Mount join the network, opening the US-17 coastal run
   from Wilmington up past Camp Lejeune, the US-264 haul from Raleigh, and a
