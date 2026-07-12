@@ -7168,6 +7168,24 @@
       "locations": [],
       "lat": 39.8289,
       "lon": -84.8902
+    },
+    "altoona_pa_us": {
+      "spoken_city": "Altoona",
+      "state": "PA",
+      "country": "US",
+      "region": "appalachia",
+      "locations": [],
+      "lat": 40.5187,
+      "lon": -78.3947
+    },
+    "state_college_pa_us": {
+      "spoken_city": "State College",
+      "state": "PA",
+      "country": "US",
+      "region": "northeast",
+      "locations": [],
+      "lat": 40.7934,
+      "lon": -77.86
     }
   }
 }

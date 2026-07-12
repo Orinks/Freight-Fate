@@ -4,6 +4,11 @@
 
 ### Added
 
+- **A northern route across the Pennsylvania mountains opens up.** Altoona and
+  State College join the map, giving a US-22 and US-322 run from Pittsburgh over
+  the Allegheny ridges to Harrisburg -- a real mountain haul alongside the
+  Turnpike, with steep grades over the Allegheny Front and the Seven Mountains.
+
 - **Central Indiana fills in around Indianapolis.** Muncie, Anderson, Kokomo,
   Columbus, and Richmond join the map, opening the Interstate 69 run northeast,
   the US-31 haul north to Kokomo, and proper Interstate 65 and 70 stops at
