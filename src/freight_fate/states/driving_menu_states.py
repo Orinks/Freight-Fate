@@ -416,19 +416,6 @@ class AbandonJobConfirmationState(MenuState):
         p.active_trip = None
         p.pay_advance_used_for_load = False
         self.ctx.save_profile()
-        from ..online_journal import queue_delivery
-
-        if queue_delivery(
-            self.ctx._app.journal,
-            p,
-            job,
-            origin=self.ctx.world.spoken_city(job.origin),
-            destination=self.ctx.world.spoken_city(job.destination),
-            on_time=on_time,
-            occurred_at_ms=int(time.time() * 1000),
-            undamaged=trip_damage <= 1,
-        ):
-            self.ctx._app.journal.flush_async()
         self.ctx.pop_state()  # close this confirmation
         self.ctx.pop_state()  # close the pause menu
         self.ctx.replace_state(CityMenuState(self.ctx))
@@ -688,6 +675,19 @@ class ArrivalState(MenuState):
         p.active_trip = None
         p.pay_advance_used_for_load = False
         self.ctx.save_profile()
+        from ..online_journal import queue_delivery
+
+        if queue_delivery(
+            self.ctx._app.journal,
+            p,
+            job,
+            origin=self.ctx.world.spoken_city(job.origin),
+            destination=self.ctx.world.spoken_city(job.destination),
+            on_time=on_time,
+            occurred_at_ms=int(time.time() * 1000),
+            undamaged=trip_damage <= 1,
+        ):
+            self.ctx._app.journal.flush_async()
 
         self.summary_parts.insert(
             0,

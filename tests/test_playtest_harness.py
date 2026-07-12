@@ -73,6 +73,32 @@ def test_playtest_harness_records_headless_delivery_transcript(monkeypatch):
 
 
 @pytest.mark.smoke
+def test_delivery_publication_is_queued_without_spoken_interruption(monkeypatch):
+    from freight_fate.online_presence import OnlineIdentity
+
+    posted = []
+
+    def transport(url, payload, headers):
+        posted.append((url, payload, headers))
+        return {"ok": True}
+
+    with PlaytestHarness(monkeypatch) as harness:
+        harness.app.journal.identity = OnlineIdentity("driver-1234", "ffd_" + "a" * 64)
+        harness.app.journal.enabled = True
+        harness.app.journal.transport = transport
+        result = harness.start_delivery(profile_name="Silent Publisher")
+        harness.drive_delivery_to_completion()
+        harness.app.journal.flush()
+
+    assert result.deliveries == 1
+    assert any(url.endswith("/api/freight-fate/events/delivery") for url, _, _ in posted)
+    transcript = result.transcript_text.lower()
+    assert "journal" not in transcript
+    assert "publishing" not in transcript
+    assert "upload" not in transcript
+
+
+@pytest.mark.smoke
 def test_playtest_harness_drives_a_specific_route(monkeypatch):
     # The Newark -> New York corridor crosses to NY at the GWB on I-95 (the
     # Holland Tunnel fix); driving it directly should complete and never mention
