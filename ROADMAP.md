@@ -131,15 +131,16 @@ From a batch of player reports:
   setting disabled the game still enumerates and binds (issue #61: a fight
   stick got picked up despite controller-off). Gate `_open_first()` and the
   device-added hot-plug path on `enabled`, and open on `set_enabled(True)`.
-- [ ] **Verify the controller off/on toggle does not double button events.**
+- [x] **Verify the controller off/on toggle does not double button events.**
   Disabling now quits the SDL controller subsystem and re-enabling calls
   `init()` again mid-session, which the `_reopen()` docstring warns
   re-registers SDL's controller event watch so every event arrives twice
-  (PR #67 review). Playtest with a real pad: toggle controller support off
-  then on in Settings and press buttons in a menu. If presses double, make
-  disable only close the pad (`rumble.reset()` + `_close_controller()`) and
-  keep the initialized subsystem alive, reserving `_sdl.quit()` for
-  `shutdown()`.
+  (PR #67 review). Play-verified with a real pad (2026-07-12): several
+  off/on toggle cycles in Settings, then button presses in menus -- no
+  doubled events on current pygame, so no follow-up needed. If duplicates
+  ever appear after a pygame upgrade, the fix is to make disable only close
+  the pad and keep the initialized subsystem alive, reserving `_sdl.quit()`
+  for `shutdown()`.
 - **Gear / launch realism.** Partly addressed: gross mass is now
   cargo-weight-aware (tare + payload), so a heavy load accelerates slower,
   lugs on grades, and burns more fuel, and an empty deadhead is light and
