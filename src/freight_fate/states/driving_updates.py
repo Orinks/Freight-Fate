@@ -404,8 +404,34 @@ class DrivingUpdateMixin:
             curve = 0.55
         if self._ramp_mi is not None:
             curve += 0.35
+        curve_assisting = (
+            self.ctx.settings.curve_speed_assist
+            and curve > 0
+            and self.truck.speed_mph > 50 - curve * 20
+        )
+        if curve_assisting:
+            self.truck.brake = max(self.truck.brake, min(0.5, curve))
+            if not self._curve_assist_active:
+                self.ctx.say_event("Curve speed assistance slowing.", interrupt=False)
+        elif self._curve_assist_active:
+            self.ctx.say_event("Curve speed assistance released.", interrupt=False)
+        self._curve_assist_active = curve_assisting
+        transition_assisting = (
+            self.ctx.settings.route_transition_assist
+            and self._ramp_mi is not None
+            and self.truck.speed_mph > RAMP_MAX_MPH
+        )
+        if transition_assisting:
+            self.truck.brake = max(self.truck.brake, 0.4)
+            if not self._transition_assist_active:
+                self.ctx.say_event("Route-transition assistance slowing.", interrupt=False)
+        elif self._transition_assist_active:
+            self.ctx.say_event("Route-transition assistance released.", interrupt=False)
+        self._transition_assist_active = transition_assisting
         wind = self.weather.effects.wind
         if self.lane.update(dt, self.truck.velocity_mps, curve=curve, wind=wind, assist=mode):
+            if not self.ctx.settings.lane_departure_warning:
+                return
             self.ctx.audio.play("vehicle/rumble_strip", volume=1.0, pan=self._lane_pan())
             self.truck.damage_pct = min(100.0, self.truck.damage_pct + 1.0)
             message = self.lane.describe()
@@ -819,12 +845,21 @@ class DrivingUpdateMixin:
             return
         if self.truck.speed_mph <= HAZARD_SAFE_MPH:
             self._hazard_deadline = None
+            self._automatic_braking_announced = False
             self.ctx.audio.play("events/hazard_clear", volume=0.75)
             self.ctx.controller.rumble.alert(intensity=0.4)
             self.ctx.say_event("Hazard avoided. Well done.", interrupt=False)
             self.ctx.award_achievement("hazard_avoided", event=True)
             return
         self._hazard_deadline -= dt
+        if (
+            self.ctx.settings.automatic_emergency_braking
+            and self._hazard_deadline <= self._brake_budget_s()
+        ):
+            self.truck.brake = max(self.truck.brake, 1.0)
+            if not self._automatic_braking_announced:
+                self._automatic_braking_announced = True
+                self.ctx.say_event("Emergency braking engaged.", interrupt=True)
         if self._hazard_deadline <= 0:
             self._hazard_deadline = None
             self.ctx.audio.play("vehicle/collision")

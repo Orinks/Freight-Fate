@@ -11,6 +11,22 @@ from .models.profile import data_dir
 log = logging.getLogger(__name__)
 
 TIME_SCALES = (10.0, 20.0, 40.0)
+DRIVING_ASSIST_FIELDS = (
+    "automatic_emergency_braking",
+    "lane_departure_warning",
+    "stop_and_go_assist",
+    "lane_centering_assist",
+    "descent_speed_control",
+    "exit_speed_assist",
+    "destination_approach_assist",
+    "curve_speed_assist",
+    "route_transition_assist",
+)
+DRIVING_ASSIST_PRESETS = {
+    "realistic": (True, True, True, False, "realistic", True, False, True, True),
+    "balanced": (True, True, True, True, "balanced", True, True, True, True),
+    "all": (True, True, True, True, "interactive", True, True, True, True),
+}
 
 # Which chatter switch governs each roadside-callout category. Zone entries
 # (parks, forests, wilderness) share one switch; the lone highway heritage
@@ -50,6 +66,16 @@ class Settings:
         "realistic"  # hours of service: realistic/relaxed (debug_off is an internal dev bypass)
     )
     steering_assist: str = "off"  # off/light/realistic lane drift
+    driving_assistance_preset: str = "realistic"
+    automatic_emergency_braking: bool = True
+    lane_departure_warning: bool = True
+    stop_and_go_assist: bool = True
+    lane_centering_assist: bool = False
+    descent_speed_control: str = "realistic"
+    exit_speed_assist: bool = True
+    destination_approach_assist: bool = False
+    curve_speed_assist: bool = True
+    route_transition_assist: bool = True
     master_volume: float = 1.0
     sfx_volume: float = 0.8
     music_volume: float = 0.5
@@ -95,9 +121,30 @@ class Settings:
             json.dump(asdict(self), f, indent=2)
         tmp.replace(self.path)
 
+    def apply_driving_assistance_preset(self, preset: str) -> None:
+        for field, value in zip(DRIVING_ASSIST_FIELDS, DRIVING_ASSIST_PRESETS[preset], strict=True):
+            setattr(self, field, value)
+        self.driving_assistance_preset = preset
+        self._sync_lane_setting()
+
+    def refresh_driving_assistance_preset(self) -> str:
+        values = tuple(getattr(self, field) for field in DRIVING_ASSIST_FIELDS)
+        matches = [name for name, mapping in DRIVING_ASSIST_PRESETS.items() if mapping == values]
+        self.driving_assistance_preset = matches[0] if len(matches) == 1 else "custom"
+        self._sync_lane_setting()
+        return self.driving_assistance_preset
+
+    def _sync_lane_setting(self) -> None:
+        self.steering_assist = (
+            "light"
+            if self.lane_centering_assist
+            else ("realistic" if self.lane_departure_warning else "off")
+        )
+
     @classmethod
     def load(cls) -> Settings:
         s = cls()
+        data = None
         try:
             with open(s.path, encoding="utf-8") as f:
                 data = json.load(f)
@@ -117,6 +164,26 @@ class Settings:
             s.hos_mode = "realistic"
         if s.steering_assist not in ("off", "light", "realistic"):
             s.steering_assist = "off"
+            s.lane_departure_warning = False
+            s.lane_centering_assist = False
+        if data is not None and "driving_assistance_preset" not in data:
+            s.lane_departure_warning = s.steering_assist != "off"
+            s.lane_centering_assist = s.steering_assist == "light"
+            for field in DRIVING_ASSIST_FIELDS:
+                if field == "descent_speed_control":
+                    setattr(s, field, "off")
+                elif field not in ("lane_departure_warning", "lane_centering_assist"):
+                    setattr(s, field, False)
+            s.driving_assistance_preset = "custom"
+        for field in DRIVING_ASSIST_FIELDS:
+            if field == "descent_speed_control":
+                continue
+            if not isinstance(getattr(s, field), bool):
+                setattr(s, field, getattr(cls(), field))
+        if s.descent_speed_control not in ("off", "realistic", "balanced", "interactive"):
+            s.descent_speed_control = "realistic"
+        if data is None or "driving_assistance_preset" in data:
+            s.refresh_driving_assistance_preset()
         if s.update_channel not in ("", "stable", "dev"):
             s.update_channel = ""
         if not isinstance(s.event_backend, str) or not s.event_backend:

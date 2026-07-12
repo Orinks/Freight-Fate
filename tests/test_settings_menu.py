@@ -44,16 +44,16 @@ def test_settings_menu_cycles_lane_drift():
 
     app = App()
     try:
-        assert app.ctx.settings.steering_assist == "off"
+        assert app.ctx.settings.steering_assist == "realistic"
         cat = open_settings_category(app, "Gameplay")
         while not cat.items[cat.index].text.startswith("Lane drift"):
             cat.handle_event(key_event(pygame.K_DOWN))
         cat.handle_event(key_event(pygame.K_RETURN))
-        assert app.ctx.settings.steering_assist == "light"
+        assert app.ctx.settings.steering_assist == "off"
         cat.handle_event(key_event(pygame.K_RETURN))
-        assert app.ctx.settings.steering_assist == "realistic"
-        cat.handle_event(key_event(pygame.K_LEFT))
         assert app.ctx.settings.steering_assist == "light"
+        cat.handle_event(key_event(pygame.K_LEFT))
+        assert app.ctx.settings.steering_assist == "off"
     finally:
         app.shutdown()
 
@@ -145,7 +145,14 @@ def test_settings_menu_uses_category_submenus():
         picker = SettingsState(app.ctx)
         app.push_state(picker)
         labels = [item.text for item in picker.items]
-        assert labels == ["Gameplay", "Audio", "Speech and weather", "Updates", "Back"]
+        assert labels == [
+            "Gameplay",
+            "Driving assistance",
+            "Audio",
+            "Speech and weather",
+            "Updates",
+            "Back",
+        ]
 
         while picker.items[picker.index].text != "Audio":
             picker.handle_event(key_event(pygame.K_DOWN))

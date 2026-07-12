@@ -173,6 +173,13 @@ class DrivingState(DrivingControlsMixin, DrivingUpdateMixin, DrivingEventMixin, 
         self._acc_following = False
         self._acc_weather_gap_said = False
         self._acc_limit_capped = False
+        self._automatic_braking_announced = False
+        self._descent_control_active = False
+        self._descent_limit_state = ""
+        self._descent_capture_active = False
+        self._assist_exit_slowing_said = False
+        self._curve_assist_active = False
+        self._transition_assist_active = False
         self._arrival_stop_said = False
         self._arrival_full_stop_said = False
         self._arrival_menu_open = False

@@ -672,6 +672,8 @@ Late delivery and cargo damage reduce pay.
 
 ## Settings
 
+Driving assistance offers one preset selector with three presets: Realistic, Balanced, and All assists. Changing an individual assist is shown as Custom. Individual settings below it control emergency braking, lane support, stop-and-go traffic, descent speed, exit slowing, destination approach, curve speed, and route-transition workload. Assists never choose a route, take an exit, enter a yard, dock, or complete a delivery. The player still steers, confirms route choices and exits, initiates lane changes, leaves long stops, and handles every precision task.
+
 Settings are grouped into categories. In a settings category, Up and Down choose
 a setting, Right arrow or Enter changes it forward, Left arrow changes it
 backward, and Escape returns to the category list. Changes are saved as they

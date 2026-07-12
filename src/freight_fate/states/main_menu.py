@@ -12,7 +12,7 @@ from ..achievements import ACHIEVEMENTS, earned_ids
 from ..models.profile import Profile, ProfileIntegrityError
 from ..models.start_options import apply_start_option, option_for_profile
 from ..music import select_menu_music_sequence
-from ..settings import TIME_SCALES
+from ..settings import DRIVING_ASSIST_FIELDS, DRIVING_ASSIST_PRESETS, TIME_SCALES
 from .base import MenuItem, MenuState, State
 from .main_menu_help import (
     HELP_PAGES as HELP_PAGES,
@@ -622,6 +622,7 @@ class SettingsState(MenuState):
 
     CATEGORIES = (
         ("Gameplay", "gameplay"),
+        ("Driving assistance", "assistance"),
         ("Audio", "audio"),
         ("Speech and weather", "speech"),
         ("Updates", "updates"),
@@ -662,6 +663,7 @@ class SettingsCategoryState(MenuState):
 
     TITLES = {
         "gameplay": "Gameplay",
+        "assistance": "Driving assistance",
         "audio": "Audio",
         "speech": "Speech and weather",
         "updates": "Updates",
@@ -677,6 +679,31 @@ class SettingsCategoryState(MenuState):
 
     def build_items(self) -> list[MenuItem]:
         s = self.ctx.settings
+        if self.category == "assistance":
+            items = [
+                MenuItem(
+                    lambda: f"Driving assistance preset: {self._assist_preset_label()}",
+                    lambda: self._cycle_assist_preset(1),
+                    help="Realistic provides modern truck safety support. Balanced adds light lane centering and interactive descent hold. All assists adds the strongest automatic interventions. Changing an individual assist makes this Custom. You still steer, choose routes, confirm exits, and handle yards and docks.",
+                )
+            ]
+            items.extend(
+                MenuItem(
+                    lambda field=field, label=label: (
+                        f"{label}: "
+                        + (
+                            getattr(s, field)
+                            if field == "descent_speed_control"
+                            else ("on" if getattr(s, field) else "off")
+                        )
+                    ),
+                    lambda field=field: self._toggle_driving_assist(field),
+                    help=help_text,
+                )
+                for field, label, help_text in self._driving_assist_specs()
+            )
+            items.append(MenuItem("Back", self.go_back))
+            return items
         if self.category == "gameplay":
             return [
                 MenuItem(
@@ -851,6 +878,13 @@ class SettingsCategoryState(MenuState):
                     self._toggle_radio_real_streams,
                     lambda d: self._volume("ui_volume", 0.1 * d),
                 ],
+                "assistance": [
+                    self._cycle_assist_preset,
+                    *[
+                        (lambda d, field=field: self._toggle_driving_assist(field, d))
+                        for field, _, _ in self._driving_assist_specs()
+                    ],
+                ],
                 "updates": [self._toggle_update_channel],
             }[self.category]
         if self.index < len(actions):
@@ -963,6 +997,83 @@ class SettingsCategoryState(MenuState):
         )
         return specs
 
+    @staticmethod
+    def _driving_assist_specs():
+        return (
+            (
+                "automatic_emergency_braking",
+                "Automatic emergency braking",
+                "Warns first, then brakes if you have not slowed enough.",
+            ),
+            (
+                "lane_departure_warning",
+                "Lane-departure warning",
+                "Warns when the truck drifts toward a lane edge.",
+            ),
+            (
+                "stop_and_go_assist",
+                "Stop-and-go assistance",
+                "Slows for traffic queues. At a full stop, cruise cancels and you decide when to move again.",
+            ),
+            (
+                "lane_centering_assist",
+                "Lane centering assistance",
+                "Adds light steering help; you still steer ordinary roads and curves.",
+            ),
+            (
+                "descent_speed_control",
+                "Descent speed control",
+                "Manages engine braking. Balanced and Interactive capture a lower target when you brake. All assists also selects safe targets.",
+            ),
+            (
+                "exit_speed_assist",
+                "Exit speed assistance",
+                "Slows for an already-selected exit; you still confirm and take it.",
+            ),
+            (
+                "destination_approach_assist",
+                "Destination approach assistance",
+                "Slows and stops at the selected facility arrival point; it never enters the yard or docks.",
+            ),
+            (
+                "curve_speed_assist",
+                "Curve speed assistance",
+                "Reduces speed workload for mapped curves; you still steer.",
+            ),
+            (
+                "route_transition_assist",
+                "Route-transition assistance",
+                "Helps manage speed and lane workload at confirmed route transitions.",
+            ),
+        )
+
+    def _assist_preset_label(self) -> str:
+        return {
+            "realistic": "Realistic",
+            "balanced": "Balanced",
+            "all": "All assists",
+            "custom": "Custom",
+        }[self.ctx.settings.driving_assistance_preset]
+
+    def _cycle_assist_preset(self, direction: int) -> None:
+        presets = tuple(DRIVING_ASSIST_PRESETS)
+        current = self.ctx.settings.driving_assistance_preset
+        index = presets.index(current) if current in presets else (-1 if direction > 0 else 0)
+        self.ctx.settings.apply_driving_assistance_preset(
+            presets[(index + direction) % len(presets)]
+        )
+        self._announce()
+
+    def _toggle_driving_assist(self, field: str, direction: int = 1) -> None:
+        if field == "descent_speed_control":
+            levels = ("off", "realistic", "balanced", "interactive")
+            current = levels.index(self.ctx.settings.descent_speed_control)
+            self.ctx.settings.descent_speed_control = levels[(current + direction) % len(levels)]
+        elif field in DRIVING_ASSIST_FIELDS:
+            setattr(self.ctx.settings, field, not getattr(self.ctx.settings, field))
+        self.ctx.settings.refresh_driving_assistance_preset()
+        self._announce()
+
     def _pace_label(self) -> str:
         scale = self.ctx.settings.time_scale
         return {10.0: "relaxed", 20.0: "standard", 40.0: "realistic"}.get(scale, f"{scale:g} times")
@@ -1047,6 +1158,9 @@ class SettingsCategoryState(MenuState):
         except ValueError:
             i = 0
         self.ctx.settings.steering_assist = modes[(i + d) % len(modes)]
+        self.ctx.settings.lane_departure_warning = self.ctx.settings.steering_assist != "off"
+        self.ctx.settings.lane_centering_assist = self.ctx.settings.steering_assist == "light"
+        self.ctx.settings.refresh_driving_assistance_preset()
         self._announce()
 
     def _toggle_discord_presence(self, _d: int) -> None:

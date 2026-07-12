@@ -559,6 +559,29 @@ def test_hazard_deadline_covers_braking_time_from_current_speed():
         app.shutdown()
 
 
+def test_balanced_descent_capture_does_not_repeat_while_brake_is_held():
+    from freight_fate.app import App
+
+    app = App()
+    spoken = []
+    app.ctx.say_event = lambda text, interrupt=False: spoken.append(text)
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        open_limits(driving)
+        driving.ctx.settings.descent_speed_control = "balanced"
+        driving.truck.grade = -0.06
+        driving.truck.engine_on = True
+        driving.truck.velocity_mps = 22.0
+        driving.truck.transmission.automatic = True
+        driving._cruise_mph = 60.0
+        driving._update_cruise(0.1, True, False)
+        driving._update_cruise(0.1, True, False)
+        assert sum("Descent target changed" in text for text in spoken) == 1
+    finally:
+        app.shutdown()
+
+
 @pytest.mark.smoke
 def test_service_brakes_beat_a_highway_hazard_after_human_reaction(monkeypatch):
     """The taught response -- hear the warning, hold Down -- must succeed from

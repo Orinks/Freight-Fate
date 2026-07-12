@@ -67,6 +67,8 @@ class DrivingControlsMixin:
         elif key in (pygame.K_RETURN, pygame.K_KP_ENTER):
             if self.phase == DRIVE_PHASE_CITY_SERVICE:
                 self._enter_city_service()
+            elif self._arrival_full_stop_said and self.truck.speed_mph <= 0.5:
+                self._open_facility_arrival()
         elif key == pygame.K_TAB:
             self.ctx.push_state(DrivingStatusState(self.ctx, self))
         elif key == pygame.K_f:
@@ -147,10 +149,7 @@ class DrivingControlsMixin:
                 f"Your current objective is {self._city_service_text()}: "
                 "drive there, stop, then press Enter to go inside. "
             )
-        return (
-            "Pickup and loading are complete. At your destination, stop, "
-            "then dock and deliver. "
-        )
+        return "Pickup and loading are complete. At your destination, stop, then dock and deliver. "
 
     def _speak_driving_help(self) -> None:
         """F1 help: keyboard or controller layout, following the device in use."""
@@ -275,7 +274,10 @@ class DrivingControlsMixin:
             self._handle_controller_modified(button)
             return
         if button == pygame.CONTROLLER_BUTTON_A:
-            self._shift_relative(1)
+            if self._arrival_full_stop_said and self.truck.speed_mph <= 0.5:
+                self._open_facility_arrival()
+            else:
+                self._shift_relative(1)
         elif button == pygame.CONTROLLER_BUTTON_X:
             self._shift_relative(-1)
         elif button == pygame.CONTROLLER_BUTTON_B:
