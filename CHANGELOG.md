@@ -4,6 +4,11 @@
 
 ### Added
 
+- **Central Indiana fills in around Indianapolis.** Muncie, Anderson, Kokomo,
+  Columbus, and Richmond join the map, opening the Interstate 69 run northeast,
+  the US-31 haul north to Kokomo, and proper Interstate 65 and 70 stops at
+  Columbus and Richmond on the way to Louisville and Dayton.
+
 - **The Colorado River and southern Arizona fill in.** Lake Havasu City and
   Bullhead City open the river run down from Kingman to Yuma, and Nogales and
   Sierra Vista put the Mexican border and Interstate 19 on the map below Tucson.

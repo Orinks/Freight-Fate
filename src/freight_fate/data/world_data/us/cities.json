@@ -7123,6 +7123,51 @@
       "locations": [],
       "lat": 31.5455,
       "lon": -110.2773
+    },
+    "muncie_in_us": {
+      "spoken_city": "Muncie",
+      "state": "IN",
+      "country": "US",
+      "region": "corn_belt",
+      "locations": [],
+      "lat": 40.1934,
+      "lon": -85.3864
+    },
+    "anderson_in_us": {
+      "spoken_city": "Anderson",
+      "state": "IN",
+      "country": "US",
+      "region": "corn_belt",
+      "locations": [],
+      "lat": 40.1053,
+      "lon": -85.6803
+    },
+    "kokomo_in_us": {
+      "spoken_city": "Kokomo",
+      "state": "IN",
+      "country": "US",
+      "region": "corn_belt",
+      "locations": [],
+      "lat": 40.4864,
+      "lon": -86.1336
+    },
+    "columbus_in_us": {
+      "spoken_city": "Columbus",
+      "state": "IN",
+      "country": "US",
+      "region": "corn_belt",
+      "locations": [],
+      "lat": 39.2014,
+      "lon": -85.9214
+    },
+    "richmond_in_us": {
+      "spoken_city": "Richmond",
+      "state": "IN",
+      "country": "US",
+      "region": "corn_belt",
+      "locations": [],
+      "lat": 39.8289,
+      "lon": -84.8902
     }
   }
 }
