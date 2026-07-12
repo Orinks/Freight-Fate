@@ -30,17 +30,17 @@ def main() -> int:
             internal.append(lg)
         elif one_hop and (f in cities or t in cities):
             reaching.append(lg)
-    internal.sort(key=lambda l: (l["from"], l["to"]))
-    reaching.sort(key=lambda l: (l["from"], l["to"]))
+    internal.sort(key=lambda lg: (lg["from"], lg["to"]))
+    reaching.sort(key=lambda lg: (lg["from"], lg["to"]))
 
     def fmt(lg):
         return f"`{lg['from']} -> {lg['to']}` ({round(lg['miles'])})"
 
     print(f"# {len(internal)} internal legs among {len(cities)} cities")
-    print(", ".join(fmt(l) for l in internal))
+    print(", ".join(fmt(lg) for lg in internal))
     if one_hop:
         print(f"\n# {len(reaching)} legs reaching one hop out")
-        print(", ".join(fmt(l) for l in reaching))
+        print(", ".join(fmt(lg) for lg in reaching))
     return 0
 
 
