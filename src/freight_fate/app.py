@@ -7,6 +7,7 @@ import faulthandler
 import logging
 import os
 import sys
+import time
 from pathlib import Path
 
 import pygame
@@ -21,6 +22,7 @@ from .discord_presence import DiscordPresence
 from .models.economy import Economy
 from .models.profile import Profile
 from .music import music_track_duration_s
+from .online_journal import JournalOutbox, queue_achievement, queue_profile_snapshot
 from .online_presence import OnlineIdentity, OnlinePresence
 from .settings import Settings
 from .speech import Speech
@@ -295,6 +297,10 @@ class GameContext:
         if result is None:
             return None
         self.profile.save()
+        if queue_achievement(
+            self._app.journal, result.achievement, earned_at_ms=int(time.time() * 1000)
+        ):
+            self._app.journal.flush_async()
         self.achievement_notice = result.message
         self.achievement_notice_timer = 12.0
         if not announce:
@@ -336,10 +342,35 @@ class App:
             enabled=self.settings.cloud_saves,
             identity=identity,
         )
+        self.journal = JournalOutbox(
+            identity=identity,
+            enabled=self.settings.online_presence,
+            path=OnlineIdentity.path().with_name("online-outbox.json"),
+        )
         # Every profile save, wherever it happens, queues a cloud backup.
         from .models import profile as profile_module
 
-        profile_module.save_listener = self.cloud.queue_backup
+        def saved_profile(profile) -> None:
+            self.cloud.queue_backup(profile)
+            try:
+                from .models.trucks import TRUCK_CATALOG
+
+                city_name = self.world.city(profile.current_city).spoken_qualified
+                truck_name = TRUCK_CATALOG[profile.truck].label
+                queued = queue_profile_snapshot(
+                    self.journal,
+                    profile,
+                    city_name=city_name,
+                    truck_name=truck_name,
+                    captured_at_ms=int(time.time() * 1000),
+                )
+                if queued:
+                    self.journal.flush_async()
+            except (KeyError, AttributeError):
+                log.debug("Profile snapshot was not queueable", exc_info=True)
+
+        self._profile_save_listener = saved_profile
+        profile_module.save_listener = saved_profile
         self.controller = ControllerManager(
             enabled=self.settings.controller_enabled,
             haptics=self.settings.haptics_enabled,
@@ -500,7 +531,7 @@ class App:
         self.cloud.shutdown()  # flushes the final save's backup, bounded
         from .models import profile as profile_module
 
-        if profile_module.save_listener == self.cloud.queue_backup:
+        if profile_module.save_listener == self._profile_save_listener:
             profile_module.save_listener = None
         self.controller.shutdown()
         self.audio.shutdown()

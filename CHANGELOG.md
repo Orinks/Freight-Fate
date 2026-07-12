@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- **Optional road journal sharing stays quiet and factual.** After renewing
+  online-sharing consent on Orinks, Freight Fate can queue delivery facts,
+  achievements, and an allowlisted last-saved career snapshot for the public
+  driver profile. Offline posting retries in the background and never adds a
+  spoken interruption while driving.
+
 ### Fixed
 
 - **Manual and automatic transmissions behave reliably on steep grades.** The

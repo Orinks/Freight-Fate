@@ -1,0 +1,109 @@
+from freight_fate.achievements import ACHIEVEMENT_BY_ID
+from freight_fate.models.jobs import CARGO_CATALOG, Job
+from freight_fate.models.profile import Profile
+from freight_fate.online_journal import (
+    JournalOutbox,
+    profile_snapshot,
+    queue_achievement,
+    queue_delivery,
+    stable_event_id,
+)
+from freight_fate.online_presence import OnlineIdentity
+
+
+def test_stable_event_id_is_deterministic_and_fact_sensitive():
+    assert stable_event_id("delivery", "job-1", 4) == stable_event_id("delivery", "job-1", 4)
+    assert stable_event_id("delivery", "job-1", 4) != stable_event_id("delivery", "job-2", 4)
+
+
+def test_snapshot_allowlists_saved_career_facts():
+    profile = Profile(name="Road Star")
+    profile.career.deliveries = 7
+    profile.career.total_miles = 1234.56
+    result = profile_snapshot(
+        profile, city_name="Chicago, Illinois", truck_name="Roadmaster", captured_at_ms=123
+    )
+    assert result["lastSavedCity"] == "Chicago, Illinois"
+    assert result["deliveries"] == 7
+    assert result["milesDriven"] == 1234.6
+    assert "money" not in result
+    assert "active_trip" not in result
+
+
+def test_outbox_persists_deduplicates_and_retries(tmp_path):
+    calls = []
+    now = [100.0]
+
+    def transport(url, payload, headers):
+        calls.append((url, payload, headers))
+        if len(calls) == 1:
+            raise OSError("offline")
+        return {"ok": True}
+
+    identity = OnlineIdentity("driver-1234", "ffd_" + "a" * 64)
+    path = tmp_path / "outbox.json"
+    box = JournalOutbox(identity, True, path, transport=transport, clock=lambda: now[0])
+    assert box.enqueue("/events", {"value": 1}, "evt-1")
+    assert not box.enqueue("/events", {"value": 1}, "evt-1")
+    assert box.flush() == 0
+    restored = JournalOutbox(identity, True, path, transport=transport, clock=lambda: now[0])
+    assert restored.items[0].attempts == 1
+    assert restored.flush() == 0
+    now[0] = restored.items[0].next_attempt_at
+    assert restored.flush() == 1
+    assert restored.items == []
+
+
+def test_disabled_outbox_never_queues_or_posts(tmp_path):
+    box = JournalOutbox(
+        None,
+        False,
+        tmp_path / "outbox.json",
+        transport=lambda *_: (_ for _ in ()).throw(AssertionError()),
+    )
+    assert not box.enqueue("/events", {}, "evt")
+    assert box.flush() == 0
+
+
+def test_delivery_payload_is_structured_and_duplicate_completion_is_suppressed(tmp_path):
+    identity = OnlineIdentity("driver-1234", "ffd_" + "a" * 64)
+    box = JournalOutbox(identity, True, tmp_path / "outbox.json")
+    profile = Profile(name="Road Star")
+    profile.career.deliveries = 1
+    job = Job(
+        CARGO_CATALOG["general"], 20, "chicago_il_us", "terminal", "denver_co_us", 1000, 2000, 20
+    )
+    assert queue_delivery(
+        box,
+        profile,
+        job,
+        origin="Chicago, Illinois",
+        destination="Denver, Colorado",
+        on_time=True,
+        occurred_at_ms=123,
+        undamaged=True,
+    )
+    assert not queue_delivery(
+        box,
+        profile,
+        job,
+        origin="Chicago, Illinois",
+        destination="Denver, Colorado",
+        on_time=True,
+        occurred_at_ms=456,
+        undamaged=True,
+    )
+    payload = box.items[0].payload
+    assert payload["payload"]["weightPounds"] == 40_000
+    assert payload["payload"]["notableCondition"] == "Delivered without new truck damage"
+    assert "summary" not in payload
+
+
+def test_achievement_payload_uses_official_definition_and_deduplicates(tmp_path):
+    identity = OnlineIdentity("driver-1234", "ffd_" + "a" * 64)
+    box = JournalOutbox(identity, True, tmp_path / "outbox.json")
+    achievement = ACHIEVEMENT_BY_ID["first_delivery"]
+    assert queue_achievement(box, achievement, earned_at_ms=123)
+    assert not queue_achievement(box, achievement, earned_at_ms=456)
+    assert box.items[0].payload["name"] == achievement.name
+    assert box.items[0].payload["description"] == achievement.description
