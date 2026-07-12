@@ -7231,6 +7231,15 @@
       "locations": [],
       "lat": 32.8995,
       "lon": -105.9603
+    },
+    "greenville_ms_us": {
+      "spoken_city": "Greenville",
+      "state": "MS",
+      "country": "US",
+      "region": "mid_south",
+      "locations": [],
+      "lat": 33.4101,
+      "lon": -91.0618
     }
   }
 }

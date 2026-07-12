@@ -4,6 +4,10 @@
 
 ### Added
 
+- **The Mississippi Delta opens up at Greenville.** Greenville joins the map with
+  US-82 east to Grenada, US-61 south down the Delta to Vicksburg, and a run across
+  the river into Arkansas toward Pine Bluff.
+
 - **Southeastern New Mexico's oil country joins the map.** Hobbs anchors the
   Permian Basin with runs to Carlsbad, Lubbock, and Odessa, and Alamogordo opens
   the US-54 and US-70 routes between El Paso, Las Cruces, and Roswell -- including
