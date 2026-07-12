@@ -100,6 +100,14 @@ jobs:
             exit 0
           fi
 
+          ACTIVE=$(gh run list --repo "$GITHUB_REPOSITORY" \
+            --workflow Build --branch dev --limit 20 \
+            --json status --jq '[.[] | select(.status == "queued" or .status == "in_progress")] | length')
+          if [ "$ACTIVE" -gt 0 ]; then
+            echo "A dev Build is already queued or running; no duplicate recovery needed."
+            exit 0
+          fi
+
           CONCLUSION=$(gh run list --repo "$GITHUB_REPOSITORY" \
             --workflow Build --event schedule --limit 1 \
             --json conclusion --jq '.[0].conclusion // ""')
