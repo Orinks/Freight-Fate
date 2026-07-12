@@ -7384,6 +7384,15 @@
       "locations": [],
       "lat": 31.7621,
       "lon": -95.6308
+    },
+    "the_dalles_or_us": {
+      "spoken_city": "The Dalles",
+      "state": "OR",
+      "country": "US",
+      "region": "pacific_northwest",
+      "locations": [],
+      "lat": 45.5946,
+      "lon": -121.1787
     }
   }
 }

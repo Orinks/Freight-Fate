@@ -4,6 +4,9 @@
 
 ### Added
 
+- **The Columbia Gorge opens at The Dalles.** The Dalles comes onto Interstate 84
+  between Portland and Pendleton, seating a stop in the Gorge on the run east.
+
 - **East Texas piney woods open at Palestine.** Palestine joins the map hubbing
   Tyler, Lufkin, and College Station on US-69, US-84, and TX-21.
 
