@@ -4,6 +4,11 @@
 
 ### Added
 
+- **Western Illinois joins along the Mississippi.** The river port of Quincy and
+  the rail town of Galesburg come onto the map, opening the Interstate 72 run east
+  to Springfield and a proper Interstate 74 stop at Galesburg between Peoria and
+  the Quad Cities.
+
 - **The Mississippi Delta opens up at Greenville.** Greenville joins the map with
   US-82 east to Grenada, US-61 south down the Delta to Vicksburg, and a run across
   the river into Arkansas toward Pine Bluff.

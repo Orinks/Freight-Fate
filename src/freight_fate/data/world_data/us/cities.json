@@ -7240,6 +7240,24 @@
       "locations": [],
       "lat": 33.4101,
       "lon": -91.0618
+    },
+    "quincy_il_us": {
+      "spoken_city": "Quincy",
+      "state": "IL",
+      "country": "US",
+      "region": "corn_belt",
+      "locations": [],
+      "lat": 39.9356,
+      "lon": -91.4099
+    },
+    "galesburg_il_us": {
+      "spoken_city": "Galesburg",
+      "state": "IL",
+      "country": "US",
+      "region": "corn_belt",
+      "locations": [],
+      "lat": 40.9478,
+      "lon": -90.3712
     }
   }
 }
