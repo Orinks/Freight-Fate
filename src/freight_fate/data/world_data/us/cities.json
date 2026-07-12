@@ -7618,6 +7618,42 @@
       "locations": [],
       "lat": 34.815,
       "lon": -102.3991
+    },
+    "wheeling_wv_us": {
+      "spoken_city": "Wheeling",
+      "state": "WV",
+      "country": "US",
+      "region": "appalachia",
+      "locations": [],
+      "lat": 40.064,
+      "lon": -80.7209
+    },
+    "columbus_ne_us": {
+      "spoken_city": "Columbus",
+      "state": "NE",
+      "country": "US",
+      "region": "heartland",
+      "locations": [],
+      "lat": 41.4297,
+      "lon": -97.3684
+    },
+    "sarasota_fl_us": {
+      "spoken_city": "Sarasota",
+      "state": "FL",
+      "country": "US",
+      "region": "florida",
+      "locations": [],
+      "lat": 27.3364,
+      "lon": -82.5307
+    },
+    "north_port_fl_us": {
+      "spoken_city": "North Port",
+      "state": "FL",
+      "country": "US",
+      "region": "florida",
+      "locations": [],
+      "lat": 27.0442,
+      "lon": -82.2359
     }
   }
 }

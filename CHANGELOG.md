@@ -4,6 +4,11 @@
 
 ### Added
 
+- **Wheeling, Columbus, and southwest Florida join the map.** Wheeling comes onto
+  Interstate 70 between Columbus and Pittsburgh, Columbus anchors east-central
+  Nebraska, and Sarasota and North Port fill the Interstate 75 run down Florida's
+  Gulf coast between Tampa and Fort Myers.
+
 - **The West Texas plains fill in.** Plainview comes onto Interstate 27 between
   Lubbock and Amarillo, Big Spring onto Interstate 20 between Midland and Abilene,
   and Hereford ties Amarillo west to Clovis on US-60.
