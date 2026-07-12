@@ -25,13 +25,16 @@ from ..online_presence import OnlineIdentity
 from .base import MenuItem, MenuState
 
 DISCLOSURE = (
-    "Sharing on the drivers board sends your in-game activity to orinks.net "
-    "while you are hauling: what you are doing, your route's cities, your "
-    "cargo, and rough progress. It appears under the driver name on your "
-    "orinks.net account, chosen on the site's setup page. Nothing about you "
-    "or your computer is sent: no real name, no location, no save files. You "
-    "can turn this off any time in Settings, Online, and you disappear from "
-    "the board within minutes."
+    "Online sharing sends factual game information to orinks.net under the driver name "
+    "you choose. While hauling, the public board can show your route's cities, cargo, "
+    "and rough progress. After you separately renew consent on the website, your profile "
+    "can also show eligible delivery journal entries, unlocked achievements, occurrence "
+    "times, career level and totals, current truck, and your last-saved city and snapshot "
+    "time. Public profiles can appear in the updates feed. Unlisted profiles are visible "
+    "to anyone with their link. Private profiles show none of it. The game never publishes "
+    "your real name, full save, money, coordinates, active cargo details, or precise live "
+    "location. Turn sharing off any time in Settings, Online; posting stops quietly and "
+    "the website hides expanded data when consent is withdrawn."
 )
 
 _ID_CHARS = frozenset("abcdefghijklmnopqrstuvwxyz0123456789-_")

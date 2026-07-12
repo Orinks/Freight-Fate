@@ -54,6 +54,18 @@ class JournalOutbox:
         except (OSError, ValueError, TypeError):
             self.items = []
 
+    def set_enabled(self, enabled: bool) -> None:
+        self.enabled = bool(enabled) and self.identity is not None
+        if not self.enabled:
+            with self._lock:
+                self.items.clear()
+                self._save()
+
+    def set_identity(self, identity: OnlineIdentity | None) -> None:
+        self.identity = identity
+        if identity is None:
+            self.enabled = False
+
     def _save(self) -> None:
         self.path.parent.mkdir(parents=True, exist_ok=True)
         temp = self.path.with_suffix(".tmp")

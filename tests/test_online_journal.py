@@ -1,3 +1,4 @@
+import json
 import urllib.error
 
 from freight_fate.achievements import ACHIEVEMENT_BY_ID
@@ -5,6 +6,7 @@ from freight_fate.models.jobs import CARGO_CATALOG, Job
 from freight_fate.models.profile import Profile
 from freight_fate.online_journal import (
     JournalOutbox,
+    OutboxItem,
     profile_snapshot,
     queue_achievement,
     queue_delivery,
@@ -133,3 +135,23 @@ def test_permanent_consent_error_is_dropped_without_retrying(tmp_path):
     box.enqueue("/events", {}, "evt")
     assert box.flush() == 0
     assert box.items == []
+
+
+def test_runtime_opt_out_clears_queue_and_reenable_cannot_publish_it(tmp_path):
+    posted = []
+    identity = OnlineIdentity("driver-1234", "ffd_" + "a" * 64)
+    box = JournalOutbox(
+        identity,
+        True,
+        tmp_path / "outbox.json",
+        transport=lambda *args: posted.append(args) or {"ok": True},
+    )
+    box.items.append(OutboxItem("/events", {}, "waiting"))
+    box._save()
+    box.set_enabled(False)
+    assert not box.enqueue("/events", {}, "off")
+    assert box.items == []
+    assert json.loads((tmp_path / "outbox.json").read_text())["items"] == []
+    box.set_enabled(True)
+    box.flush()
+    assert posted == []

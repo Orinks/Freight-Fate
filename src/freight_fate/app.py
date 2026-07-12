@@ -171,6 +171,7 @@ class GameContext:
     def apply_online_presence(self) -> None:
         """Reflect the drivers-board setting (e.g. after a settings change)."""
         self._app.online.set_enabled(self.settings.online_presence)
+        self._app.journal.set_enabled(self.settings.online_presence)
 
     def apply_cloud_saves(self) -> None:
         """Reflect the cloud backup setting (e.g. after a settings change)."""
@@ -185,6 +186,7 @@ class GameContext:
         drivers board and cloud backup share them."""
         self._app.online.set_identity(identity)
         self._app.cloud.set_identity(identity)
+        self._app.journal.set_identity(identity)
 
     def apply_controller(self) -> None:
         """Reflect the controller setting (e.g. after a settings change)."""
