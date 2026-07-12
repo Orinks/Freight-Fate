@@ -6,6 +6,8 @@
 
 - **Engine sound now stays present through automatic gear changes.** Shifts still ease the engine tone briefly, without the repeated volume pumping that could sound like the engine was dropping out.
 
+- Smoothed out the transition between the tail of the engine start sound with the start of the engine loop, ramping from a forced full load down to the off throttle idle load
+
 - **Manual and automatic transmissions behave reliably on steep grades.** The
   diesel governor now holds a safe low-gear road speed without quietly damaging
   the engine, and automatic trucks avoid shifts that cannot pull the hill.
@@ -21,6 +23,9 @@
 
 ### Changed
 
+- **The engine no longer jumps in volume the instant an automatic shift
+  finishes.** It now eases back up to full pull over a brief moment, so completed
+  shifts sound smooth instead of abruptly snapping back under load.
 - **Route alerts no longer repeat at one mile.** Fuel stops, rest stops, and
   other actionable exits now speak once at five miles. State lines speak once
   as you cross them.

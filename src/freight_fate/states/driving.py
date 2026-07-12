@@ -125,6 +125,7 @@ class DrivingState(DrivingControlsMixin, DrivingUpdateMixin, DrivingEventMixin, 
         self._lane_rumble_timer = 0.0
         self._lane_guidance_state = "center"
         self._reverse_cue_active = False
+        self._shift_recover_t = 1.0  # 0->1 recovery progress after an automatic shift ends
         # Prev-frame accel/brake state, so a forward<->reverse shift needs a
         # fresh press (release then press) rather than a held control.
         self._reverse_brake_held = False

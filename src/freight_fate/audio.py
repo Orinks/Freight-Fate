@@ -84,6 +84,10 @@ ENGINE_START_ASSUMED_LEN_S = 2.0  # fallback if the clip length can't be queried
 # Short fade-in for a silent (no-crank) engine loop start, e.g. resuming a trip
 # whose engine was already running, or coming back from an in-trip menu.
 ENGINE_RESUME_FADE_S = 0.25
+# After the crank hands off, the loop starts at the crank's (full-load) volume so
+# there is no dip, then eases down to its true off-throttle load over this window.
+ENGINE_START_SETTLE_S = 0.6  # ease from crank level down to idle load
+ENGINE_START_SETTLE_CURVE = "ease_out"  # key into audio_fades.CURVES
 
 BASS_NO_SOUND_DEVICE = 0
 
@@ -190,6 +194,7 @@ class _PygameBackend:
         self._music_buffer: io.BytesIO | None = None  # streamed; must outlive playback
         self._engine_running = False
         self._engine_intro_gain = 1.0  # crossfade multiplier on the engine loop
+        self._engine_intro_load = 0.0  # ignition load boost: 1.0 forces full load
         self._engine_starting = False  # True only during the ignition crossfade
         self._engine_last_rpm = ENGINE_RPM_IDLE
         self._fades = FadeScheduler()
@@ -421,6 +426,7 @@ class _PygameBackend:
         # plays, then crossfaded up. A silent (resume) start skips the crank
         # and just eases the loop in.
         self._engine_intro_gain = 0.0
+        self._engine_intro_load = 0.0
         if play_start_sound:
             self._begin_engine_start_crossfade()
         else:
@@ -459,6 +465,9 @@ class _PygameBackend:
         channel.set_volume(base)
         clip_len = snd.get_length()
         delay = max(0.0, clip_len - ENGINE_START_CROSSFADE_S) if ENGINE_START_TAIL_ANCHOR else 0.0
+        # Boost the loop to full (crank) load through the handoff so it meets the
+        # crank tail at the same level instead of the quieter off-throttle idle.
+        self._engine_intro_load = 1.0
         self._fades.add(
             Fade(
                 lambda m: channel.set_volume(base * m),
@@ -480,11 +489,27 @@ class _PygameBackend:
                 on_done=self._end_engine_starting,
             )
         )
+        # Once the crossfade completes, ease the load boost back off so the loop
+        # settles to its real off-throttle volume.
+        self._fades.add(
+            Fade(
+                self._set_engine_intro_load,
+                1.0,
+                0.0,
+                ENGINE_START_SETTLE_S,
+                curve=ENGINE_START_SETTLE_CURVE,
+                delay_s=delay + ENGINE_START_CROSSFADE_S,
+            )
+        )
 
     def _set_engine_intro_gain(self, gain: float) -> None:
         self._engine_intro_gain = max(0.0, min(1.0, gain))
         # Re-apply the band volumes at the last known RPM so the ramp is heard
         # immediately, regardless of when set_engine_rpm next runs.
+        self.set_engine_rpm(self._engine_last_rpm)
+
+    def _set_engine_intro_load(self, value: float) -> None:
+        self._engine_intro_load = max(0.0, min(1.0, value))
         self.set_engine_rpm(self._engine_last_rpm)
 
     def _end_engine_starting(self) -> None:
@@ -500,6 +525,7 @@ class _PygameBackend:
         self._engine_running = False
         self._fades.clear()
         self._engine_intro_gain = 1.0
+        self._engine_intro_load = 0.0
         self._engine_starting = False
         for ch in CH_ENGINE:
             self.stop_loop(ch, fade_ms=250)
@@ -512,6 +538,9 @@ class _PygameBackend:
             return
         self._engine_last_rpm = rpm
         load_gain = engine_load_gain(throttle)
+        # During the ignition handoff, boost load toward full so the loop meets
+        # the crank tail; the boost eases back to 0 afterward.
+        load_gain += self._engine_intro_load * (1.0 - load_gain)
         for i, (_key, center) in enumerate(ENGINE_BANDS):
             # triangular weight, 1.0 at band center, 0 beyond ~600 rpm away
             w = max(0.0, 1.0 - abs(rpm - center) / 620.0)
@@ -654,6 +683,7 @@ class _BassBackend:
         self._engine_base_freq = 0.0
         self._engine_intro_stream = None  # ignition one-shot, kept for the crossfade
         self._engine_intro_gain = 1.0  # crossfade multiplier on the engine loop
+        self._engine_intro_load = 0.0  # ignition load boost: 1.0 forces full load
         self._engine_starting = False  # True only during the ignition crossfade
         self._engine_last_rpm = ENGINE_RPM_IDLE
         self._fades = FadeScheduler()
@@ -912,6 +942,7 @@ class _BassBackend:
         # Hold the loop silent while the ignition one-shot plays; crossfade it
         # up at the tail. A silent (resume) start skips the crank.
         self._engine_intro_gain = 0.0
+        self._engine_intro_load = 0.0
         if play_start_sound:
             self._begin_engine_start_crossfade()
         else:
@@ -970,6 +1001,9 @@ class _BassBackend:
         self._engine_intro_stream = stream
         clip_len = self._stream_length_s(stream)
         delay = max(0.0, clip_len - ENGINE_START_CROSSFADE_S) if ENGINE_START_TAIL_ANCHOR else 0.0
+        # Boost the loop to full (crank) load through the handoff so it meets the
+        # crank tail at the same level instead of the quieter off-throttle idle.
+        self._engine_intro_load = 1.0
 
         def fade_crank(m: float) -> None:
             with contextlib.suppress(self._BassError):
@@ -996,6 +1030,18 @@ class _BassBackend:
                 on_done=self._end_engine_starting,
             )
         )
+        # Once the crossfade completes, ease the load boost back off so the loop
+        # settles to its real off-throttle volume.
+        self._fades.add(
+            Fade(
+                self._set_engine_intro_load,
+                1.0,
+                0.0,
+                ENGINE_START_SETTLE_S,
+                curve=ENGINE_START_SETTLE_CURVE,
+                delay_s=delay + ENGINE_START_CROSSFADE_S,
+            )
+        )
 
     def _stream_length_s(self, stream) -> float:
         """Length of a stream in seconds, or a safe fallback."""
@@ -1007,6 +1053,10 @@ class _BassBackend:
 
     def _set_engine_intro_gain(self, gain: float) -> None:
         self._engine_intro_gain = max(0.0, min(1.0, gain))
+        self.set_engine_rpm(self._engine_last_rpm)
+
+    def _set_engine_intro_load(self, value: float) -> None:
+        self._engine_intro_load = max(0.0, min(1.0, value))
         self.set_engine_rpm(self._engine_last_rpm)
 
     def _end_engine_starting(self) -> None:
@@ -1022,6 +1072,7 @@ class _BassBackend:
         self._engine_running = False
         self._fades.clear()
         self._engine_intro_gain = 1.0
+        self._engine_intro_load = 0.0
         self._engine_starting = False
         self._engine_intro_stream = None
         if self._engine_stream is not None:
@@ -1036,12 +1087,16 @@ class _BassBackend:
             return
         self._engine_last_rpm = rpm
         target = self._engine_base_freq * engine_freq_mult(rpm)
+        load_gain = engine_load_gain(throttle)
+        # During the ignition handoff, boost load toward full so the loop meets
+        # the crank tail; the boost eases back to 0 afterward.
+        load_gain += self._engine_intro_load * (1.0 - load_gain)
         vol = max(
             0.0,
             min(
                 1.0,
                 ENGINE_LOOP_GAIN
-                * engine_load_gain(throttle)
+                * load_gain
                 * self.engine_volume
                 * self.master_volume
                 * self._engine_intro_gain,

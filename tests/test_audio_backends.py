@@ -270,10 +270,12 @@ def test_deliberate_engine_start_plays_crank_and_arms_crossfade(monkeypatch):
     keys = _record_sfx_keys(monkeypatch, impl)
     a.engine_start()  # deliberate ignition
     assert "engine/start" in keys
-    # A crank fade-out plus the loop fade-in are scheduled, and the loop starts
-    # silent so the ignition is not drowned out.
-    assert len(impl._fades) == 2
+    # A crank fade-out, the loop fade-in, and the post-handoff load settle are
+    # scheduled; the loop starts silent so the ignition is not drowned out, and
+    # its load is boosted to full so it meets the crank tail without a dip.
+    assert len(impl._fades) == 3
     assert impl._engine_intro_gain == 0.0
+    assert impl._engine_intro_load == 1.0
     a.engine_stop()
     a.shutdown()
 
