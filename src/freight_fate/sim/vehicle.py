@@ -32,6 +32,33 @@ LAUNCH_TRACTION_LOW_SPEED_MPH = 25.0
 LAUNCH_TRACTION_START_G = 0.12
 LAUNCH_TRACTION_ROLLING_G = 0.33
 
+# -- rig wear -------------------------------------------------------------------
+# Tires, brakes, and the engine wear from how the truck is driven, not just
+# from miles. Distance- and energy-coupled terms scale with the trip's time
+# compression (carried in ``fuel_burn_mult``) so wear per game mile stays
+# honest at any time scale; the abuse terms (over-rev, lugging) charge per
+# real second of the behavior, like the damage accrual they replace.
+# Absolute rates are compressed for playability; the ratios are the point:
+# jake-braked descents spare the service brakes, heavy loads chew tires,
+# and redline abuse eats the engine.
+TIRE_WEAR_PCT_PER_MILE = 0.003  # tread loss per mile at the rated gross
+TIRE_WEAR_BRAKING_PCT = 2.0e-4  # extra per (application x m/s x s): stops scrub tread
+BRAKE_WEAR_PCT_PER_ENERGY = 5.0e-4  # per (application x m/s x load x s)
+BRAKE_WEAR_HOT_MULT = 2.0  # glazing: wear doubles once the shoes are past fade
+ENGINE_WEAR_PCT_PER_H_IDLE = 0.03
+ENGINE_WEAR_PCT_PER_H_FULL_LOAD = 0.15
+ENGINE_WEAR_OVER_REV_PCT_PER_S = 0.8  # was the damage_pct redline penalty
+ENGINE_WEAR_LUG_PCT_PER_S = 0.05  # heavy throttle far below the torque band
+LUG_THROTTLE = 0.7
+LUG_RPM_FRACTION = 0.7  # of peak-torque RPM
+
+# What wear does to the physics.
+TIRE_WEAR_GRIP_LOSS = 0.25  # bald tires lose a quarter of their grip
+BRAKE_WEAR_FORCE_LOSS = 0.30  # worn shoes lose up to 30% braking force
+BRAKE_WEAR_FADE_LOSS_C = 150.0  # and start fading this much sooner
+ENGINE_WEAR_POWER_LOSS = 0.25  # a tired engine is down up to a quarter
+ENGINE_WEAR_FUEL_PENALTY = 0.15  # and burns up to 15% more fuel for its power
+
 
 @dataclass(frozen=True)
 class TruckSpecs:
@@ -91,7 +118,10 @@ class TruckState:
     fuel_gal: float = 150.0
     engine_temp_c: float = 60.0
     brake_temp_c: float = 20.0
-    damage_pct: float = 0.0  # 0 = pristine, 100 = wrecked
+    damage_pct: float = 0.0  # incident damage: collisions, leaving the road
+    tire_wear_pct: float = 0.0  # 0 = fresh tread, 100 = bald
+    brake_wear_pct: float = 0.0  # 0 = new shoes, 100 = metal on metal
+    engine_wear_pct: float = 0.0  # 0 = fresh overhaul, 100 = worn out
     odometer_mi: float = 0.0
     cargo_kg: float = REFERENCE_CARGO_KG  # payload aboard; default = full reference load
 
@@ -137,8 +167,28 @@ class TruckState:
 
     @property
     def health_factor(self) -> float:
-        """Power multiplier from accumulated damage."""
+        """Power multiplier from accumulated incident damage."""
         return max(0.3, 1.0 - self.damage_pct / 150.0)
+
+    # -- wear effects ------------------------------------------------------------
+
+    @property
+    def effective_grip(self) -> float:
+        """Weather grip degraded by tread wear; bald tires make every surface worse."""
+        return self.grip * (1.0 - TIRE_WEAR_GRIP_LOSS * self.tire_wear_pct / 100.0)
+
+    @property
+    def brake_wear_factor(self) -> float:
+        return 1.0 - BRAKE_WEAR_FORCE_LOSS * self.brake_wear_pct / 100.0
+
+    @property
+    def brake_fade_onset_c(self) -> float:
+        """Worn shoes start fading cooler than the spec sheet says."""
+        return self.specs.brake_fade_temp_c - BRAKE_WEAR_FADE_LOSS_C * self.brake_wear_pct / 100.0
+
+    @property
+    def engine_wear_factor(self) -> float:
+        return 1.0 - ENGINE_WEAR_POWER_LOSS * self.engine_wear_pct / 100.0
 
     @property
     def tare_kg(self) -> float:
@@ -184,6 +234,7 @@ class TruckState:
         if ratio == 0.0:
             return 0.0
         torque = self.torque_at(self.rpm) * self.throttle * self.health_factor
+        torque *= self.engine_wear_factor
         direction = -1.0 if ratio < 0 else 1.0
         force = torque * abs(ratio) * self.specs.driveline_efficiency / self.specs.wheel_radius_m
         # Drive wheels can use roughly a third of gross weight once rolling,
@@ -193,7 +244,7 @@ class TruckState:
         traction_g = (
             LAUNCH_TRACTION_START_G + (LAUNCH_TRACTION_ROLLING_G - LAUNCH_TRACTION_START_G) * launch
         )
-        traction_limit = self.gross_mass_kg * G * traction_g * self.grip
+        traction_limit = self.gross_mass_kg * G * traction_g * self.effective_grip
         return direction * min(force, traction_limit)
 
     def resistance_force(self) -> float:
@@ -211,7 +262,7 @@ class TruckState:
         if abs(self.velocity_mps) <= 0.01:
             return 0.0
         s = self.specs
-        fade_temp = s.brake_fade_temp_c
+        fade_temp = self.brake_fade_onset_c
         fade = (
             1.0
             if self.brake_temp_c < fade_temp
@@ -220,14 +271,14 @@ class TruckState:
         holding = self.air_brakes_holding
         application = 1.0 if self.emergency_brake or holding else self.brake
         boost = EMERGENCY_BRAKE_MULT if self.emergency_brake or holding else 1.0
-        effort = G * s.max_brake_decel_g * application * boost * fade
+        effort = G * s.max_brake_decel_g * application * boost * fade * self.brake_wear_factor
         # Tire friction scales with the weight on the tires (and weather grip);
         # the foundation brakes have a fixed force ceiling sized for the rated
         # gross (``specs.mass_kg``). A load at or below the rated weight reaches
         # the friction-limited deceleration (unchanged behavior), but a heavier
         # load is brake-capacity limited -- the brakes cannot generate enough
         # force for its mass, so it decelerates more gently and stops longer.
-        friction = self.gross_mass_kg * effort * self.grip
+        friction = self.gross_mass_kg * effort * self.effective_grip
         capacity = s.mass_kg * effort
         service = min(friction, capacity)
         jake = (
@@ -271,6 +322,7 @@ class TruckState:
         self._update_rpm(dt)
         self._update_fuel(dt)
         self._update_temps(dt)
+        self._update_wear(dt)
 
     # -- air brakes ---------------------------------------------------------------
 
@@ -469,6 +521,8 @@ class TruckState:
         # ~0.8 gal/h at idle; load burn calibrated for ~6.5-7 mpg at 60 mph cruise
         power_kw = abs(self.drive_force()) * abs(self.velocity_mps) / 1000.0
         burn = (0.00022 + power_kw * 1.5e-5) * self.specs.fuel_burn_factor
+        # A tired engine burns more fuel for the power it still makes.
+        burn *= 1.0 + ENGINE_WEAR_FUEL_PENALTY * self.engine_wear_pct / 100.0
         self.fuel_gal = max(0.0, self.fuel_gal - burn * dt * self.fuel_burn_mult)
         if self.fuel_gal <= 0.0:
             self.stop_engine()
@@ -488,8 +542,48 @@ class TruckState:
         cooling = (self.brake_temp_c - 20.0) * (0.02 + 0.004 * speed)
         self.brake_temp_c = max(20.0, self.brake_temp_c + (heating - cooling) * dt)
 
-        if self.rpm > s.max_rpm * 0.98 and self.engine_on:
-            self.damage_pct = min(100.0, self.damage_pct + 0.8 * dt)
+    def _update_wear(self, dt: float) -> None:
+        s = self.specs
+        # Distance- and energy-coupled wear scales with the trip's time
+        # compression (fuel_burn_mult, same trick fuel uses) so a game mile
+        # costs the same tread at any time scale.
+        sim_dt = dt * self.fuel_burn_mult
+        speed = abs(self.velocity_mps)
+        load = self.gross_mass_kg / s.mass_kg
+        application = 1.0 if self.emergency_brake or self.air_brakes_holding else self.brake
+
+        tire = speed * sim_dt / 1609.344 * TIRE_WEAR_PCT_PER_MILE * load
+        if speed > 0.01:
+            tire += application * speed * sim_dt * TIRE_WEAR_BRAKING_PCT
+        self.tire_wear_pct = min(100.0, self.tire_wear_pct + tire)
+
+        # The service brakes wear with the energy they dissipate; the jake
+        # dissipates its share in the engine and costs the shoes nothing.
+        if application > 0.0 and speed > 0.01:
+            brake = application * speed * load * sim_dt * BRAKE_WEAR_PCT_PER_ENERGY
+            if self.brake_temp_c >= self.brake_fade_onset_c:
+                brake *= BRAKE_WEAR_HOT_MULT
+            self.brake_wear_pct = min(100.0, self.brake_wear_pct + brake)
+
+        if self.engine_on:
+            duty = self.throttle * (self.rpm / s.max_rpm)
+            rate = ENGINE_WEAR_PCT_PER_H_IDLE + (
+                ENGINE_WEAR_PCT_PER_H_FULL_LOAD - ENGINE_WEAR_PCT_PER_H_IDLE
+            ) * min(1.0, duty)
+            engine = rate / 3600.0 * sim_dt
+            # Abuse penalties charge per real second of the behavior, like
+            # the damage accrual the over-rev term replaces.
+            if self.rpm > s.max_rpm * 0.98:
+                engine += ENGINE_WEAR_OVER_REV_PCT_PER_S * dt
+            lugging = (
+                not self.transmission.in_neutral
+                and self.throttle > LUG_THROTTLE
+                and speed > 0.5
+                and self.rpm < s.peak_torque_rpm * LUG_RPM_FRACTION
+            )
+            if lugging:
+                engine += ENGINE_WEAR_LUG_PCT_PER_S * dt
+            self.engine_wear_pct = min(100.0, self.engine_wear_pct + engine)
 
     # -- convenience ---------------------------------------------------------------
 

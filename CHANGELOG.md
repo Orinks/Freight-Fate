@@ -4,6 +4,18 @@
 
 ### Added
 
+- **Your rig now wears with how you drive it -- tires, brakes, and engine each
+  have their own meter.** Miles and heavy loads slowly eat tire tread, riding
+  the service brakes wears the shoes (hot brakes wear them even faster), and
+  hours under load wear the engine -- with over-revving and lugging punishing
+  it hardest. Wear talks back: bald tires grip less, worn brakes pull weaker
+  and overheat sooner, and a tired engine loses power and burns more fuel. The
+  engine brake still costs the shoes nothing, so use it on the long downgrades.
+  Your delivery summary tells you what each run added, the truck status
+  readouts speak all three meters, and the terminal garage now offers brake
+  jobs and engine overhauls alongside tires -- each takes shop time and, for
+  owner-operators, real money. Company drivers bill the carrier, as always.
+
 - **The biggest map update yet -- 100 new cities to pick up and deliver in.** A
   city is a place a load can start or end, and the map grew from 249 to 349 of
   them, filling in dead zones that used to have nothing drivable for hundreds of

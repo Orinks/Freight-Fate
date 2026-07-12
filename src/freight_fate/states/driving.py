@@ -34,10 +34,15 @@ class DrivingState(DrivingControlsMixin, DrivingUpdateMixin, DrivingEventMixin, 
         # so a heavy load pulls away gently and lugs on grades.
         self.truck.cargo_kg = job.weight_tons * KG_PER_TON if phase == DRIVE_PHASE_DELIVERY else 0.0
         self.truck.transmission.automatic = ctx.settings.automatic_transmission
-        self.truck.fuel_gal = min(profile.truck_fuel_gal, self.truck.specs.fuel_tank_gal)
-        self.truck.damage_pct = profile.truck_damage_pct
+        profile.load_truck_condition(self.truck)
         self.truck.set_cold_air_start()
         self.start_damage = profile.truck_damage_pct
+        # Trip-start wear, for "this run added..." deltas at settlement
+        # (mid-trip saves re-sync the profile, so the profile can't provide
+        # these once the trip is underway).
+        self.start_tire_wear = profile.tire_wear_pct
+        self.start_brake_wear = profile.brake_wear_pct
+        self.start_engine_wear = profile.engine_wear_pct
         region = ctx.world.city(job.origin).region
         self.weather = WeatherSystem(
             region,
@@ -248,6 +253,11 @@ class DrivingState(DrivingControlsMixin, DrivingUpdateMixin, DrivingEventMixin, 
                 for charge in self.trip.toll_charges
             ],
             "start_damage": self.start_damage,
+            "start_wear": {
+                "tire": self.start_tire_wear,
+                "brake": self.start_brake_wear,
+                "engine": self.start_engine_wear,
+            },
             "speeding_strikes": self.speeding_strikes,
             "air_brake": self.truck.air_brake_snapshot(),
             "engine_on": self.truck.engine_on,
@@ -311,6 +321,13 @@ class DrivingState(DrivingControlsMixin, DrivingUpdateMixin, DrivingEventMixin, 
             )
             state.resumed = True
             state.start_damage = float(data["start_damage"])
+            # Saves from before the wear meters count deltas from the resume
+            # point: the truck just loaded the profile's wear, so the run
+            # simply reports a little less instead of failing to load.
+            start_wear = data.get("start_wear", {})
+            state.start_tire_wear = float(start_wear.get("tire", state.truck.tire_wear_pct))
+            state.start_brake_wear = float(start_wear.get("brake", state.truck.brake_wear_pct))
+            state.start_engine_wear = float(start_wear.get("engine", state.truck.engine_wear_pct))
             state.speeding_strikes = int(data["speeding_strikes"])
             state.trip.restore(position_mi, game_minutes)
             state.trip.restore_toll_charges(list(data.get("toll_charges", ())))

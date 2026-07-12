@@ -418,6 +418,64 @@ def test_garage_services_tires_and_wash():
 
 
 @pytest.mark.smoke
+def test_garage_services_brakes_and_engine():
+    from freight_fate.app import App
+    from freight_fate.models.business import LEASED_OWNER_OPERATOR
+    from freight_fate.models.profile import Profile
+    from freight_fate.states.city import GarageState
+
+    app = App()
+    try:
+        app.ctx.profile = Profile(name="Maintenance", current_city="Chicago")
+        p = app.ctx.profile
+        p.business_status = LEASED_OWNER_OPERATOR
+        p.owned_trucks = ["rig"]
+        p.money = 10_000.0
+        p.brake_wear_pct = 20.0
+        p.engine_wear_pct = 30.0
+        garage = GarageState(app.ctx)
+        app.push_state(garage)
+
+        assert any("Brake job" in item.text for item in garage.items)
+        assert any("Engine overhaul" in item.text for item in garage.items)
+
+        garage._service_brakes()
+        assert p.brake_wear_pct == 0.0
+        assert p.money == 10_000.0 - 20.0 * 40.0
+
+        garage._service_engine()
+        assert p.engine_wear_pct == 0.0
+        assert p.money == 10_000.0 - 20.0 * 40.0 - 30.0 * 120.0
+    finally:
+        app.shutdown()
+
+
+@pytest.mark.smoke
+def test_garage_partial_brake_service_when_broke():
+    from freight_fate.app import App
+    from freight_fate.models.business import LEASED_OWNER_OPERATOR
+    from freight_fate.models.profile import Profile
+    from freight_fate.states.city import GarageState
+
+    app = App()
+    try:
+        app.ctx.profile = Profile(name="Broke", current_city="Chicago")
+        p = app.ctx.profile
+        p.business_status = LEASED_OWNER_OPERATOR
+        p.owned_trucks = ["rig"]
+        p.money = 200.0  # 5 percent of brake service at 40 dollars per percent
+        p.brake_wear_pct = 50.0
+        garage = GarageState(app.ctx)
+        app.push_state(garage)
+
+        garage._service_brakes()
+        assert p.brake_wear_pct == pytest.approx(45.0)
+        assert p.money == pytest.approx(0.0)
+    finally:
+        app.shutdown()
+
+
+@pytest.mark.smoke
 def test_upgrade_f1_help_explains_player_benefits():
     from freight_fate.app import App
     from freight_fate.models.business import LEASED_OWNER_OPERATOR

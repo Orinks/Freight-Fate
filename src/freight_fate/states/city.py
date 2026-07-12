@@ -444,6 +444,8 @@ class CityMenuState(MenuState):
             f"{specs.fuel_tank_gal:.0f}. "
             f"Tractor condition {condition}, {damage:.0f} percent damage. "
             f"Tire wear {p.tire_wear_pct:.0f} percent. "
+            f"Brake wear {p.brake_wear_pct:.0f} percent. "
+            f"Engine wear {p.engine_wear_pct:.0f} percent. "
             f"Road grime {p.road_grime_pct:.0f} percent."
         )
 

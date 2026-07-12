@@ -7,7 +7,6 @@ from .driving_core import *
 from .driving_rest_states import ShoulderSleepConfirmationState
 
 DELIVERY_SETTLEMENT_MAX_AVERAGE_MPH = 55.0
-TIRE_WEAR_PER_MILE = 0.003
 ROAD_GRIME_PER_MILE = 0.004
 
 
@@ -606,8 +605,7 @@ class PauseMenuState(MenuState):
         p = self.ctx.profile
         p.money -= 500.0
         p.career.reputation = max(0.0, p.career.reputation - 5.0)
-        p.truck_fuel_gal = self.driving.truck.fuel_gal
-        p.truck_damage_pct = self.driving.truck.damage_pct
+        p.store_truck_condition(self.driving.truck)
         # the hours spent on the failed run still happened: keep the world
         # clock consistent with the HOS and fatigue already accrued
         p.game_hours += self.driving.trip.game_minutes / 60.0
@@ -815,8 +813,7 @@ class ArrivalState(MenuState):
         job = d.job
         self.title = "Repositioned"
         p.current_city = job.destination
-        p.truck_fuel_gal = d.truck.fuel_gal
-        p.truck_damage_pct = d.truck.damage_pct
+        p.store_truck_condition(d.truck)
         p.game_hours += hours
         p.market.advance_to(p.market_day())
         p.active_trip = None
@@ -917,11 +914,11 @@ class ArrivalState(MenuState):
         on_time = hours <= job.deadline_game_h
         p.money += net_pay
         p.current_city = job.destination
-        p.truck_fuel_gal = d.truck.fuel_gal
-        p.truck_damage_pct = d.truck.damage_pct
-        tire_wear_added = min(100.0, job.distance_mi * TIRE_WEAR_PER_MILE)
+        # Tire, brake, and engine wear now come off the truck itself -- the
+        # physics accrued them mile by mile during the run. Grime stays a
+        # simple per-mile film; it has no physics to earn it.
+        p.store_truck_condition(d.truck)
         road_grime_added = min(100.0, job.distance_mi * ROAD_GRIME_PER_MILE)
-        p.tire_wear_pct = min(100.0, p.tire_wear_pct + tire_wear_added)
         p.road_grime_pct = min(100.0, p.road_grime_pct + road_grime_added)
         announcements = p.career.record_delivery(
             job.distance_mi,
@@ -979,11 +976,22 @@ class ArrivalState(MenuState):
                 f"The cargo run added {trip_damage:.0f} percent truck damage. "
                 "Visit the garage when you can."
             )
-        if tire_wear_added > 0.0 or road_grime_added > 0.0:
-            self.summary_parts.append(
-                f"The run added {tire_wear_added:.1f} percent tire wear and "
-                f"{road_grime_added:.1f} percent road grime."
+        wear_parts = []
+        for added, meter in (
+            (max(0.0, d.truck.tire_wear_pct - d.start_tire_wear), "tire wear"),
+            (max(0.0, d.truck.brake_wear_pct - d.start_brake_wear), "brake wear"),
+            (max(0.0, d.truck.engine_wear_pct - d.start_engine_wear), "engine wear"),
+            (road_grime_added, "road grime"),
+        ):
+            if added >= 0.1:
+                wear_parts.append(f"{added:.1f} percent {meter}")
+        if wear_parts:
+            joined = (
+                ", ".join(wear_parts[:-1]) + f", and {wear_parts[-1]}"
+                if len(wear_parts) > 1
+                else wear_parts[0]
             )
+            self.summary_parts.append(f"The run added {joined}.")
         self.summary_parts.extend(announcements)
         self._award_arrival_achievements(
             on_time=on_time,

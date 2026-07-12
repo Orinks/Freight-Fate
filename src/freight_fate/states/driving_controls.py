@@ -4,6 +4,9 @@ from __future__ import annotations
 from .driving_core import *
 from .driving_menu_states import DrivingStatusState, PauseMenuState
 
+# Wear meters join the status readout once they're worth planning around.
+WEAR_STATUS_PCT = 50.0
+
 
 class DrivingControlsMixin:
     def handle_event(self, event: pygame.event.Event) -> None:
@@ -555,6 +558,13 @@ class DrivingControlsMixin:
                 )
         if t.damage_pct - self.start_damage > 1:
             lines.append(f"Damage: new damage {t.damage_pct - self.start_damage:.0f} percent")
+        for worn, label in (
+            (t.tire_wear_pct, "Tires"),
+            (t.brake_wear_pct, "Brakes"),
+            (t.engine_wear_pct, "Engine"),
+        ):
+            if worn >= WEAR_STATUS_PCT:
+                lines.append(f"{label}: {worn:.0f} percent worn")
         if self.ctx.settings.speech_verbosity >= 1:
             fatigue = self.ctx.profile.fatigue
             if fatigue >= hos.FATIGUE_DROWSY:

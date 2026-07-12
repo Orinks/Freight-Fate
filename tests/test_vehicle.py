@@ -396,6 +396,158 @@ def test_brake_heat_builds_and_cools():
     assert t.brake_temp_c < hot
 
 
+def test_tire_wear_accrues_with_miles_and_load():
+    from freight_fate.sim.vehicle import KG_PER_TON
+
+    light = make_auto_truck()
+    heavy = make_auto_truck()
+    light.cargo_kg = 0.0
+    heavy.cargo_kg = 25 * KG_PER_TON
+    for t in (light, heavy):
+        t.velocity_mps = 25.0
+        t.fuel_burn_mult = 60.0  # a compressed-time cruise, like a real trip
+        for _ in range(600):
+            t._update_wear(1 / 60)
+    assert light.tire_wear_pct > 0.0
+    assert heavy.tire_wear_pct > light.tire_wear_pct
+
+
+def test_parked_truck_does_not_wear_tires_or_brakes():
+    t = TruckState()
+    t.set_air_ready(parking_brake=True)  # spring brakes applied, speed zero
+    for _ in range(600):
+        t._update_wear(1 / 60)
+    assert t.tire_wear_pct == 0.0
+    assert t.brake_wear_pct == 0.0
+
+
+def test_jake_brake_spares_the_service_brakes():
+    """The same descent on the jake costs the shoes nothing; riding the
+    service brakes wears them -- the whole point of the jake as a mechanic."""
+    service = make_auto_truck()
+    jake = make_auto_truck()
+    for t in (service, jake):
+        t.velocity_mps = 13.0  # ~30 mph downgrade
+        t.grade = -0.06
+    service.brake = 0.5
+    jake.engine_brake = True
+    for _ in range(1200):  # 20 seconds of descent
+        service._update_wear(1 / 60)
+        jake._update_wear(1 / 60)
+    assert service.brake_wear_pct > 0.0
+    assert jake.brake_wear_pct == 0.0
+
+
+def test_hot_brakes_wear_faster():
+    cool = make_auto_truck()
+    glazed = make_auto_truck()
+    for t in (cool, glazed):
+        t.velocity_mps = 20.0
+        t.brake = 1.0
+    glazed.brake_temp_c = glazed.specs.brake_fade_temp_c + 50.0
+    cool._update_wear(1.0)
+    glazed._update_wear(1.0)
+    assert glazed.brake_wear_pct > cool.brake_wear_pct
+
+
+def test_worn_tires_cut_grip_and_lengthen_stops():
+    fresh = make_auto_truck()
+    bald = make_auto_truck()
+    bald.tire_wear_pct = 100.0
+    assert bald.effective_grip < fresh.effective_grip
+    fresh.velocity_mps = bald.velocity_mps = 25.0
+    fresh.brake = bald.brake = 1.0
+    assert abs(bald.brake_force()) < abs(fresh.brake_force())
+
+
+def test_worn_brakes_fade_sooner_and_pull_weaker():
+    fresh = make_auto_truck()
+    worn = make_auto_truck()
+    worn.brake_wear_pct = 80.0
+    assert worn.brake_fade_onset_c < fresh.brake_fade_onset_c
+    fresh.velocity_mps = worn.velocity_mps = 25.0
+    fresh.brake = worn.brake = 1.0
+    # Cool brakes: worn shoes still pull weaker than fresh ones.
+    assert abs(worn.brake_force()) < abs(fresh.brake_force())
+    # At a temperature between the worn and fresh fade onsets, only the
+    # worn shoes have started to fade.
+    temp = (worn.brake_fade_onset_c + fresh.brake_fade_onset_c) / 2.0
+    fresh.brake_temp_c = worn.brake_temp_c = temp
+    ratio = abs(worn.brake_force()) / abs(fresh.brake_force())
+    assert ratio < worn.brake_wear_factor
+
+
+def test_over_rev_wears_engine_not_damage():
+    t = make_auto_truck()
+    t.rpm = t.specs.max_rpm  # pinned at redline
+    t._update_wear(1.0)
+    assert t.engine_wear_pct > 0.5
+    assert t.damage_pct == 0.0
+
+
+def test_lugging_wears_the_engine():
+    lugger = TruckState()
+    lugger.start_engine()
+    lugger.transmission.automatic = False
+    lugger.transmission.gear = 8
+    lugger.velocity_mps = 3.0
+    lugger.throttle = 1.0
+    lugger.rpm = lugger.specs.idle_rpm  # far below the torque band, wide open
+    clean = TruckState()
+    clean.start_engine()
+    clean.transmission.automatic = False
+    clean.transmission.gear = 8
+    clean.velocity_mps = 25.0
+    clean.throttle = 1.0
+    clean.rpm = clean.specs.peak_torque_rpm
+    lugger._update_wear(1.0)
+    clean._update_wear(1.0)
+    assert lugger.engine_wear_pct > clean.engine_wear_pct + 0.01
+
+
+def test_engine_wear_cuts_power():
+    fresh = make_auto_truck()
+    tired = make_auto_truck()
+    tired.engine_wear_pct = 100.0
+    for t in (fresh, tired):
+        t.transmission.gear = 10
+        t.velocity_mps = 25.0
+        t.rpm = t.specs.peak_torque_rpm
+        t.throttle = 1.0
+    assert tired.drive_force() < fresh.drive_force()
+
+
+def test_engine_wear_burns_more_fuel_for_the_same_power():
+    """At low speed both trucks are traction-limited to the same drive force,
+    so equal power output shows the worn engine's fuel penalty cleanly."""
+    fresh = make_auto_truck()
+    tired = make_auto_truck()
+    tired.engine_wear_pct = 100.0
+    for t in (fresh, tired):
+        t.transmission.gear = 1
+        t.velocity_mps = 5.0
+        t.rpm = t.specs.peak_torque_rpm
+        t.throttle = 1.0
+    assert tired.drive_force() == pytest.approx(fresh.drive_force())
+    fresh_start, tired_start = fresh.fuel_gal, tired.fuel_gal
+    fresh._update_fuel(10.0)
+    tired._update_fuel(10.0)
+    assert (tired_start - tired.fuel_gal) > (fresh_start - fresh.fuel_gal)
+
+
+def test_wear_clamps_at_100():
+    t = make_auto_truck()
+    t.tire_wear_pct = t.brake_wear_pct = t.engine_wear_pct = 99.999
+    t.velocity_mps = 30.0
+    t.brake = 1.0
+    t.rpm = t.specs.max_rpm
+    t.fuel_burn_mult = 10_000.0
+    t._update_wear(60.0)
+    assert t.tire_wear_pct == 100.0
+    assert t.brake_wear_pct == 100.0
+    assert t.engine_wear_pct == 100.0
+
+
 def test_air_pressure_builds_when_engine_running_and_stops_at_cutout():
     t = TruckState()
     t.set_cold_air_start()

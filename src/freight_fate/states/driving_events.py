@@ -1189,8 +1189,7 @@ class DrivingEventMixin:
         self.truck.throttle = 0.0
         self.truck.brake = 1.0
         self.truck.set_parking_brake()
-        p.truck_fuel_gal = self.truck.fuel_gal
-        p.truck_damage_pct = self.truck.damage_pct
+        p.store_truck_condition(self.truck)
         p.game_hours += (self.trip.game_minutes + STOP_PULL_IN_MIN) / 60.0
         p.hos.on_duty(STOP_PULL_IN_MIN)
         p.market.advance_to(p.market_day())
@@ -1362,8 +1361,7 @@ class DrivingEventMixin:
                 self.truck.throttle = 0.0
                 self.truck.brake = 1.0
                 self.truck.set_parking_brake()
-                p.truck_fuel_gal = self.truck.fuel_gal
-                p.truck_damage_pct = self.truck.damage_pct
+                p.store_truck_condition(self.truck)
                 p.active_trip = self.snapshot()
                 self.ctx.save_profile()
                 self._set_status("Parked at city service. Press Enter to go inside.")
@@ -1420,8 +1418,7 @@ class DrivingEventMixin:
         self.truck.throttle = 0.0
         self.truck.brake = 1.0
         self.truck.set_parking_brake()
-        p.truck_fuel_gal = self.truck.fuel_gal
-        p.truck_damage_pct = self.truck.damage_pct
+        p.store_truck_condition(self.truck)
         p.game_hours += self.trip.game_minutes / 60.0
         p.market.advance_to(p.market_day())
         p.active_trip = None

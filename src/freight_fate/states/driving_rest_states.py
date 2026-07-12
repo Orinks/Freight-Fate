@@ -247,8 +247,7 @@ class FelonyStopState(MenuState):
             "felony failure-to-stop enforcement",
         )
         d.hos.on_duty(FAILURE_TO_STOP_PROCESSING_MIN)
-        p.truck_fuel_gal = d.truck.fuel_gal
-        p.truck_damage_pct = d.truck.damage_pct
+        p.store_truck_condition(d.truck)
         p.game_hours += d.trip.game_minutes / 60.0
         p.market.advance_to(p.market_day())
         p.active_trip = None
@@ -762,8 +761,7 @@ class RestStopState(MenuState):
     def _save_here(self, *, silent: bool = False) -> None:
         d = self.driving
         p = self.ctx.profile
-        p.truck_fuel_gal = d.truck.fuel_gal
-        p.truck_damage_pct = d.truck.damage_pct
+        p.store_truck_condition(d.truck)
         p.active_trip = d.snapshot()
         self.ctx.save_profile()
         if not silent:
@@ -856,8 +854,7 @@ class ParkingFullState(MenuState):
         _advance_rest_clock(d, hos.SLEEP_MIN)
         d.hos.sleep()
         p.fatigue = 0.0
-        p.truck_fuel_gal = d.truck.fuel_gal
-        p.truck_damage_pct = d.truck.damage_pct
+        p.store_truck_condition(d.truck)
         p.active_trip = d.snapshot()
         self.ctx.save_profile()
         self.ctx.audio.play("ui/notify")

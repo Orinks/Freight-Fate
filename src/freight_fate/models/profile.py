@@ -306,6 +306,8 @@ class Profile:
     current_city: str = DEFAULT_CITY
     truck_damage_pct: float = 0.0
     tire_wear_pct: float = 0.0
+    brake_wear_pct: float = 0.0
+    engine_wear_pct: float = 0.0
     road_grime_pct: float = 0.0
     truck_fuel_gal: float = 150.0
     game_hours: float = 6.0  # in-game clock, hours since career start
@@ -413,6 +415,26 @@ class Profile:
 
         upgrades = self.upgrades if self.owns_equipment() else {}
         return build_truck_specs(self.active_truck_key(), upgrades)
+
+    def load_truck_condition(self, truck) -> None:
+        """Put the saved rig condition onto a fresh ``TruckState`` at trip start.
+
+        Fuel, incident damage, and the wear meters travel together so no
+        sync site can pick up one and drop another.
+        """
+        truck.fuel_gal = min(self.truck_fuel_gal, truck.specs.fuel_tank_gal)
+        truck.damage_pct = self.truck_damage_pct
+        truck.tire_wear_pct = self.tire_wear_pct
+        truck.brake_wear_pct = self.brake_wear_pct
+        truck.engine_wear_pct = self.engine_wear_pct
+
+    def store_truck_condition(self, truck) -> None:
+        """Write the rig's current condition back to the profile for saving."""
+        self.truck_fuel_gal = truck.fuel_gal
+        self.truck_damage_pct = truck.damage_pct
+        self.tire_wear_pct = truck.tire_wear_pct
+        self.brake_wear_pct = truck.brake_wear_pct
+        self.engine_wear_pct = truck.engine_wear_pct
 
     def market_day(self) -> int:
         return int(self.game_hours // 24)

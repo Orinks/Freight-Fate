@@ -9,8 +9,12 @@ from .base import MenuItem, MenuState
 TERMINAL_FUEL_MIN = 20.0
 TERMINAL_REPAIR_MIN = 60.0
 TERMINAL_TIRE_MIN = 45.0
+TERMINAL_BRAKE_MIN = 90.0
+TERMINAL_ENGINE_MIN = 240.0
 TERMINAL_WASH_MIN = 20.0
 TIRE_SERVICE_COST_PER_PCT = 45.0
+BRAKE_SERVICE_COST_PER_PCT = 40.0
+ENGINE_OVERHAUL_COST_PER_PCT = 120.0
 TRUCK_WASH_COST = 35.0
 
 
@@ -40,8 +44,26 @@ class GarageState(MenuState):
                 self._tire_label,
                 self._service_tires,
                 help="Replace worn tires. Normal miles add slow tire wear, "
-                "even when you drive cleanly. Company drivers bill "
-                "the carrier; owner-operators pay the shop.",
+                "even when you drive cleanly; heavy loads and hard braking "
+                "add more. Worn tires grip the road less. Company drivers "
+                "bill the carrier; owner-operators pay the shop.",
+            ),
+            MenuItem(
+                self._brake_label,
+                self._service_brakes,
+                help="Reline worn brake shoes. Riding the service brakes "
+                "wears them, hot brakes wear faster, and the engine brake "
+                "costs them nothing. Worn shoes pull weaker and fade "
+                "sooner. Company drivers bill the carrier; owner-operators "
+                "pay the shop.",
+            ),
+            MenuItem(
+                self._engine_label,
+                self._service_engine,
+                help="Overhaul a tired engine. Hours under load wear it "
+                "slowly; over-revving and lugging wear it fast. A worn "
+                "engine is down on power and burns more fuel. Company "
+                "drivers bill the carrier; owner-operators pay the shop.",
             ),
             MenuItem(
                 self._wash_label,
@@ -234,6 +256,29 @@ class GarageState(MenuState):
         cost = round(wear * TIRE_SERVICE_COST_PER_PCT, 2)
         return f"Replace tires: {wear:.0f} percent wear for {cost:,.0f} dollars"
 
+    def _brake_label(self) -> str:
+        p = self.ctx.profile
+        wear = p.brake_wear_pct
+        if wear < 1:
+            return "Brakes: shoes are in top shape"
+        if not player_pays_operating_costs(p.business_status):
+            return f"Brake job on assigned company tractor: {wear:.0f} percent wear, carrier billed"
+        cost = round(wear * BRAKE_SERVICE_COST_PER_PCT, 2)
+        return f"Brake job: {wear:.0f} percent wear for {cost:,.0f} dollars"
+
+    def _engine_label(self) -> str:
+        p = self.ctx.profile
+        wear = p.engine_wear_pct
+        if wear < 1:
+            return "Engine: running like new"
+        if not player_pays_operating_costs(p.business_status):
+            return (
+                f"Engine overhaul on assigned company tractor: "
+                f"{wear:.0f} percent wear, carrier billed"
+            )
+        cost = round(wear * ENGINE_OVERHAUL_COST_PER_PCT, 2)
+        return f"Engine overhaul: {wear:.0f} percent wear for {cost:,.0f} dollars"
+
     def _wash_label(self) -> str:
         p = self.ctx.profile
         grime = p.road_grime_pct
@@ -295,6 +340,99 @@ class GarageState(MenuState):
         self.ctx.save_profile()
         self.ctx.audio.play("ui/notify")
         self.ctx.say(f"Tires replaced. {cost:,.0f} dollars. You have {p.money:,.0f} dollars left.")
+        self.refresh()
+
+    def _service_brakes(self) -> None:
+        self._service_wear_meter(
+            attr="brake_wear_pct",
+            cost_per_pct=BRAKE_SERVICE_COST_PER_PCT,
+            minutes=TERMINAL_BRAKE_MIN,
+            duty_note="brake service",
+            fresh_say="The brakes are already in top shape.",
+            carrier_done="relined the brakes",
+            partial_noun="brake service",
+            done_say="Brakes relined.",
+        )
+
+    def _service_engine(self) -> None:
+        self._service_wear_meter(
+            attr="engine_wear_pct",
+            cost_per_pct=ENGINE_OVERHAUL_COST_PER_PCT,
+            minutes=TERMINAL_ENGINE_MIN,
+            duty_note="engine overhaul",
+            fresh_say="The engine is already running like new.",
+            carrier_done="overhauled the engine",
+            partial_noun="engine work",
+            done_say="Engine overhauled.",
+        )
+
+    def _service_wear_meter(
+        self,
+        *,
+        attr: str,
+        cost_per_pct: float,
+        minutes: float,
+        duty_note: str,
+        fresh_say: str,
+        carrier_done: str,
+        partial_noun: str,
+        done_say: str,
+    ) -> None:
+        """Shared company/partial/full flow for a wear-meter service.
+
+        Mirrors the tire service exactly; tires keep their own wording
+        because players already know those phrases.
+        """
+        p = self.ctx.profile
+        wear = getattr(p, attr)
+        if wear < 1:
+            self.ctx.say(fresh_say)
+            return
+        start = p.game_hours
+        if not player_pays_operating_costs(p.business_status):
+            setattr(p, attr, 0.0)
+            p.game_hours += minutes / 60.0
+            _record_terminal_duty(self.ctx, start, p.game_hours, duty_note)
+            p.hos.on_duty(minutes)
+            self.ctx.save_profile()
+            self.ctx.audio.play("ui/notify")
+            self.ctx.say(
+                f"Carrier shop {carrier_done} at {wear:.0f} percent wear on "
+                f"the assigned tractor. The service took {minutes:.0f} "
+                "minutes and did not reduce your cash balance."
+            )
+            self.refresh()
+            return
+        cost = round(wear * cost_per_pct, 2)
+        if p.money < cost:
+            serviceable = p.money / cost_per_pct
+            if serviceable < 1:
+                self.ctx.audio.play("ui/error")
+                self.ctx.say(f"Not enough money for one percent of {partial_noun}.")
+                return
+            cost = round(serviceable * cost_per_pct, 2)
+            p.money -= cost
+            setattr(p, attr, max(0.0, wear - serviceable))
+            p.game_hours += minutes / 60.0
+            _record_terminal_duty(self.ctx, start, p.game_hours, duty_note)
+            p.hos.on_duty(minutes)
+            self.ctx.save_profile()
+            self.ctx.audio.play("ui/notify")
+            self.ctx.say(
+                f"Partial {partial_noun} fixed {serviceable:.0f} percent wear "
+                f"for {cost:,.0f} dollars. "
+                f"You have {p.money:,.0f} dollars left."
+            )
+            self.refresh()
+            return
+        p.money -= cost
+        setattr(p, attr, 0.0)
+        p.game_hours += minutes / 60.0
+        _record_terminal_duty(self.ctx, start, p.game_hours, duty_note)
+        p.hos.on_duty(minutes)
+        self.ctx.save_profile()
+        self.ctx.audio.play("ui/notify")
+        self.ctx.say(f"{done_say} {cost:,.0f} dollars. You have {p.money:,.0f} dollars left.")
         self.refresh()
 
     def _wash_truck(self) -> None:

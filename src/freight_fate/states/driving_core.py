@@ -514,8 +514,7 @@ def _perform_shoulder_sleep(driving: DrivingState, anchor_mi: float) -> str:
             f"Roadside debris and wake turbulence added "
             f"{hos.SHOULDER_DAMAGE_PCT:.0f} percent truck damage."
         )
-    p.truck_fuel_gal = driving.truck.fuel_gal
-    p.truck_damage_pct = driving.truck.damage_pct
+    p.store_truck_condition(driving.truck)
     p.active_trip = driving.snapshot()
     driving.ctx.save_profile()
     parts.append(_deadline_text(driving))
