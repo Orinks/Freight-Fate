@@ -4,6 +4,10 @@
 
 ### Added
 
+- **The southwest Texas border country joins the map.** Uvalde comes onto the
+  US-90 run between San Antonio and Del Rio, and the border city of Eagle Pass
+  ties in on US-57 and US-277.
+
 - **Central Kansas fills in.** Emporia comes onto the Kansas Turnpike between
   Topeka and Wichita, and Hutchinson and Great Bend open a wheat-country run from
   Wichita and Salina west toward Hays.

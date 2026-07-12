@@ -7339,6 +7339,24 @@
       "locations": [],
       "lat": 38.3645,
       "lon": -98.7648
+    },
+    "uvalde_tx_us": {
+      "spoken_city": "Uvalde",
+      "state": "TX",
+      "country": "US",
+      "region": "gulf_coast",
+      "locations": [],
+      "lat": 29.2097,
+      "lon": -99.7862
+    },
+    "eagle_pass_tx_us": {
+      "spoken_city": "Eagle Pass",
+      "state": "TX",
+      "country": "US",
+      "region": "gulf_coast",
+      "locations": [],
+      "lat": 28.7091,
+      "lon": -100.4995
     }
   }
 }
