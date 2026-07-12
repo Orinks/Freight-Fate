@@ -4,6 +4,8 @@
 
 ### Fixed
 
+- **Engine sound now stays present through automatic gear changes.** Shifts still ease the engine tone briefly, without the repeated volume pumping that could sound like the engine was dropping out.
+
 - **Manual and automatic transmissions behave reliably on steep grades.** The
   diesel governor now holds a safe low-gear road speed without quietly damaging
   the engine, and automatic trucks avoid shifts that cannot pull the hill.

@@ -477,7 +477,12 @@ class DrivingUpdateMixin:
             audio.engine_stop(shutdown_sound=False)
         engine_load = t.throttle
         if t.transmission.automatic and t.transmission.shifting:
-            engine_load = min(engine_load, 0.08)
+            # A shift briefly unloads the engine, but the old 0.08 clamp cut
+            # loop gain by roughly forty percent and made repeated shifts
+            # sound like the engine was ducking or nearly dropping out.
+            # Retain a perceptible torque easing without losing the continuous
+            # engine bed that communicates RPM and engagement.
+            engine_load = min(engine_load, 0.45)
         audio.set_engine_rpm(t.rpm, engine_load)
         audio.set_road_noise(t.velocity_mps)
         if t.engine_on and t.transmission.in_reverse:

@@ -1694,7 +1694,7 @@ def test_toll_route_delivery_settlement_records_expense(monkeypatch):
         app.shutdown()
 
 
-def test_engine_audio_load_drops_during_automatic_shift(monkeypatch):
+def test_engine_audio_load_eases_without_dropping_out_during_automatic_shift(monkeypatch):
     from freight_fate.app import App
 
     app = App()
@@ -1718,7 +1718,10 @@ def test_engine_audio_load_drops_during_automatic_shift(monkeypatch):
 
         driving._update_audio(0.0)
 
-        assert samples[-1][1] <= 0.08
+        assert samples[-1] == (1700.0, 0.45)
+        from freight_fate.audio import engine_load_gain
+
+        assert engine_load_gain(samples[-1][1]) >= 0.75
     finally:
         app.shutdown()
 
