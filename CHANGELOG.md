@@ -4,6 +4,11 @@
 
 ### Added
 
+- **US-60 climbs east from Phoenix through copper country.** Globe -- the old
+  copper-mining town -- and Show Low, up in the White Mountains, join the map,
+  opening the US-60 run past Apache Junction and Superior, down through the Salt
+  River Canyon, and on to Interstate 40 at Holbrook.
+
 - **The Interstate 10 corridor around Phoenix fills in.** Casa Grande -- the big
   distribution hub between Phoenix and Tucson -- and Buckeye, out on the western
   farm flats, join the map, breaking the I-10 runs into real stops past Eloy,

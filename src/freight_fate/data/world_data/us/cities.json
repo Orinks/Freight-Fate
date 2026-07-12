@@ -7033,6 +7033,24 @@
       "lon": -112.5838,
       "region": "desert_southwest",
       "locations": []
+    },
+    "globe_az_us": {
+      "spoken_city": "Globe",
+      "state": "AZ",
+      "country": "US",
+      "lat": 33.3942,
+      "lon": -110.7865,
+      "region": "desert_southwest",
+      "locations": []
+    },
+    "show_low_az_us": {
+      "spoken_city": "Show Low",
+      "state": "AZ",
+      "country": "US",
+      "lat": 34.2542,
+      "lon": -110.0298,
+      "region": "desert_southwest",
+      "locations": []
     }
   }
 }
