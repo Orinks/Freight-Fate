@@ -4,6 +4,11 @@
 
 ### Added
 
+- **A Black Hills freight run opens, Cheyenne to Rapid City.** Wheatland and Lusk
+  out on the Wyoming high plains, and Hot Springs at the southern edge of the
+  Black Hills, join the map -- linking Cheyenne up through Lusk and into Rapid
+  City and Mount Rushmore country.
+
 - **US-287 completes the Ports-to-Plains, all the way to Denver.** Boise City
   out in the Oklahoma panhandle, and Lamar and Limon on the Colorado high plains,
   join the map -- finishing the US-287 freight spine so a load can run from San

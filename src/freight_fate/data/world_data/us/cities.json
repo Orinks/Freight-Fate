@@ -6745,6 +6745,33 @@
       "lon": -103.6922,
       "region": "rockies",
       "locations": []
+    },
+    "wheatland_wy_us": {
+      "spoken_city": "Wheatland",
+      "state": "WY",
+      "country": "US",
+      "lat": 42.0541,
+      "lon": -104.953,
+      "region": "rockies",
+      "locations": []
+    },
+    "lusk_wy_us": {
+      "spoken_city": "Lusk",
+      "state": "WY",
+      "country": "US",
+      "lat": 42.7625,
+      "lon": -104.4522,
+      "region": "rockies",
+      "locations": []
+    },
+    "hot_springs_sd_us": {
+      "spoken_city": "Hot Springs",
+      "state": "SD",
+      "country": "US",
+      "lat": 43.4316,
+      "lon": -103.4744,
+      "region": "heartland",
+      "locations": []
     }
   }
 }

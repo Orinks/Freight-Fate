@@ -125,3 +125,16 @@ River crossings are real landmark moments.
   Petersburg -> Durham -> Greensboro -> Charlotte -> Atlanta and would connect
   to the EXISTING `charlotte -> greensboro` I-85 leg. High-value freight
   corridor, natural next build off this batch.
+
+## Overnight US-highway corridors (2026-07-12) — signage opportunities
+
+- **Evans Plunge, Hot Springs SD** — OWNER REQUEST (personal: owner loved it as
+  a kid; his dad was born in Hot Springs). Real attraction, world's oldest/largest
+  natural warm-water indoor pool (since 1890). Sits on the new
+  `lusk -> hot_springs` (US-18) and `hot_springs -> rapid_city` (SD-79) legs of
+  the Cheyenne -> Rapid City corridor. Real-register billboard/landmark, NOT
+  parody. Do not lose this one.
+- Tonight's new corridors open more signage country: US-281 (TX Hill Country /
+  Highland Lakes — Marble Falls), US-75 & US-69 (southeastern Oklahoma), the
+  US-287 Ports-to-Plains spine (Panhandle up to Denver; Cadillac Ranch already by
+  Amarillo), and the Black Hills (Mount Rushmore, Wind Cave near Hot Springs).
