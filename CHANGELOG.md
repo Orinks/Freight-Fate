@@ -4,6 +4,11 @@
 
 ### Added
 
+- **Palm Coast, Ridgecrest, and Susanville reach the last corners.** Palm Coast
+  comes onto Interstate 95 between Daytona and Jacksonville, and Ridgecrest and
+  Susanville open the lonely US-395 desert runs in California -- including the
+  mountain climb over the Cascades from Susanville to Redding.
+
 - **The Georgia and South Carolina midlands fill in.** Dublin comes onto
   Interstate 16 between Macon and Savannah, Statesboro ties into Savannah and
   Augusta, and Sumter links Columbia and Florence.

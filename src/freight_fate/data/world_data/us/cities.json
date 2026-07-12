@@ -7564,6 +7564,33 @@
       "locations": [],
       "lat": 33.9204,
       "lon": -80.3414
+    },
+    "palm_coast_fl_us": {
+      "spoken_city": "Palm Coast",
+      "state": "FL",
+      "country": "US",
+      "region": "florida",
+      "locations": [],
+      "lat": 29.5845,
+      "lon": -81.2078
+    },
+    "ridgecrest_ca_us": {
+      "spoken_city": "Ridgecrest",
+      "state": "CA",
+      "country": "US",
+      "region": "california",
+      "locations": [],
+      "lat": 35.6225,
+      "lon": -117.6709
+    },
+    "susanville_ca_us": {
+      "spoken_city": "Susanville",
+      "state": "CA",
+      "country": "US",
+      "region": "california",
+      "locations": [],
+      "lat": 40.4163,
+      "lon": -120.653
     }
   }
 }
