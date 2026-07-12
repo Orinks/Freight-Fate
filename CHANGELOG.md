@@ -4,6 +4,10 @@
 
 ### Added
 
+- **Central Oklahoma fills in.** Stillwater, Ponca City, and Ada join the map,
+  linking Oklahoma City, Tulsa, Enid, Bartlesville, Ardmore, and McAlester across
+  the middle of the state.
+
 - **Jamestown, Mason City, and Altus fill the last plains gaps.** Jamestown comes
   onto Interstate 94 between Bismarck and Fargo, Mason City onto Interstate 35
   between Albert Lea and Des Moines, and Altus ties into southwestern Oklahoma.

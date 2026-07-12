@@ -7474,6 +7474,33 @@
       "locations": [],
       "lat": 34.6381,
       "lon": -99.334
+    },
+    "stillwater_ok_us": {
+      "spoken_city": "Stillwater",
+      "state": "OK",
+      "country": "US",
+      "region": "southern_plains",
+      "locations": [],
+      "lat": 36.1156,
+      "lon": -97.0584
+    },
+    "ponca_city_ok_us": {
+      "spoken_city": "Ponca City",
+      "state": "OK",
+      "country": "US",
+      "region": "southern_plains",
+      "locations": [],
+      "lat": 36.707,
+      "lon": -97.0856
+    },
+    "ada_ok_us": {
+      "spoken_city": "Ada",
+      "state": "OK",
+      "country": "US",
+      "region": "southern_plains",
+      "locations": [],
+      "lat": 34.7745,
+      "lon": -96.6783
     }
   }
 }
