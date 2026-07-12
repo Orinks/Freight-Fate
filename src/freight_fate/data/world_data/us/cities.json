@@ -7402,6 +7402,24 @@
       "locations": [],
       "lat": 34.2004,
       "lon": -90.5712
+    },
+    "vincennes_in_us": {
+      "spoken_city": "Vincennes",
+      "state": "IN",
+      "country": "US",
+      "region": "corn_belt",
+      "locations": [],
+      "lat": 38.6773,
+      "lon": -87.5286
+    },
+    "poplar_bluff_mo_us": {
+      "spoken_city": "Poplar Bluff",
+      "state": "MO",
+      "country": "US",
+      "region": "heartland",
+      "locations": [],
+      "lat": 36.757,
+      "lon": -90.4293
     }
   }
 }

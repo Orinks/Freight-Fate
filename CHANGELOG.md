@@ -4,6 +4,11 @@
 
 ### Added
 
+- **Vincennes and Poplar Bluff join the map.** Vincennes seats on the US-41
+  corridor between Terre Haute and Evansville, and Poplar Bluff anchors
+  southeastern Missouri with runs to Cape Girardeau, Jonesboro, and a US-60 haul
+  west into the Ozarks toward Springfield.
+
 - **The Blues Highway fills in at Clarksdale.** Clarksdale joins the map on US-61,
   completing the Delta run from Memphis down through Cleveland to Greenville, with
   an eastern tie to Grenada.
