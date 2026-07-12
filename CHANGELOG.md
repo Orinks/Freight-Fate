@@ -4,6 +4,11 @@
 
 ### Added
 
+- **US-69 connects southeastern Oklahoma up to Muskogee.** McAlester joins the
+  map, completing the US-69 freight run east of US-75 -- from Durant and Atoka
+  up through Eufaula and Checotah -- so the Texoma corridor reaches Muskogee and
+  Fort Smith.
+
 - **US-287 becomes drivable town by town across the Texas Panhandle.** Vernon,
   Childress, and Clarendon join the map, breaking the long Wichita Falls to
   Amarillo haul into real stops along the Ports-to-Plains freight route --

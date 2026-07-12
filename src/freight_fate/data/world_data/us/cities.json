@@ -6673,6 +6673,15 @@
       "lon": -100.8843,
       "region": "southern_plains",
       "locations": []
+    },
+    "mcalester_ok_us": {
+      "spoken_city": "McAlester",
+      "state": "OK",
+      "country": "US",
+      "lat": 34.9334,
+      "lon": -95.7697,
+      "region": "southern_plains",
+      "locations": []
     }
   }
 }
