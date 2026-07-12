@@ -6934,6 +6934,42 @@
       "lon": -124.1573,
       "region": "california",
       "locations": []
+    },
+    "page_az_us": {
+      "spoken_city": "Page",
+      "state": "AZ",
+      "country": "US",
+      "lat": 36.9147,
+      "lon": -111.4558,
+      "region": "desert_southwest",
+      "locations": []
+    },
+    "chippewa_falls_wi_us": {
+      "spoken_city": "Chippewa Falls",
+      "state": "WI",
+      "country": "US",
+      "lat": 44.9369,
+      "lon": -91.3929,
+      "region": "upper_midwest",
+      "locations": []
+    },
+    "rice_lake_wi_us": {
+      "spoken_city": "Rice Lake",
+      "state": "WI",
+      "country": "US",
+      "lat": 45.5061,
+      "lon": -91.7382,
+      "region": "upper_midwest",
+      "locations": []
+    },
+    "superior_wi_us": {
+      "spoken_city": "Superior",
+      "state": "WI",
+      "country": "US",
+      "lat": 46.7208,
+      "lon": -92.1041,
+      "region": "upper_midwest",
+      "locations": []
     }
   }
 }

@@ -4,6 +4,14 @@
 
 ### Added
 
+- **Northern Wisconsin fills in, Wausau up to Duluth.** Chippewa Falls, Rice Lake,
+  and Superior -- Duluth's harbor twin across the bay -- join the map, carrying
+  WI-29 and US-53 north from Green Bay country to the head of Lake Superior.
+
+- **US-89 climbs to Page and Lake Powell.** Page joins the map, opening the run
+  north from Flagstaff across the Navajo Nation, past Cameron, to the Glen Canyon
+  and Lake Powell country.
+
 - **The Redwood Highway opens, US-101 north to Eureka.** Willits and Fortuna join
   the map, completing the North Coast run from Ukiah up through the redwoods --
   past Garberville and down the Eel River canyon -- to Eureka on Humboldt Bay.
