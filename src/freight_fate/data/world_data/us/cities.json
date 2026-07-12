@@ -7375,6 +7375,15 @@
       "locations": [],
       "lat": 31.3445,
       "lon": -109.5453
+    },
+    "palestine_tx_us": {
+      "spoken_city": "Palestine",
+      "state": "TX",
+      "country": "US",
+      "region": "southern_plains",
+      "locations": [],
+      "lat": 31.7621,
+      "lon": -95.6308
     }
   }
 }
