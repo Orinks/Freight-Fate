@@ -4,6 +4,10 @@
 
 ### Added
 
+- **Central Kansas fills in.** Emporia comes onto the Kansas Turnpike between
+  Topeka and Wichita, and Hutchinson and Great Bend open a wheat-country run from
+  Wichita and Salina west toward Hays.
+
 - **Hot Springs joins the map in the Ouachitas.** The old resort town links to
   Little Rock and Texarkana on US-70 and runs north to Fort Smith on US-270 --
   a real mountain haul over the Ouachita ridges.

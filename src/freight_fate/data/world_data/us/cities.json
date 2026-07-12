@@ -7312,6 +7312,33 @@
       "locations": [],
       "lat": 34.5137,
       "lon": -93.0552
+    },
+    "emporia_ks_us": {
+      "spoken_city": "Emporia",
+      "state": "KS",
+      "country": "US",
+      "region": "southern_plains",
+      "locations": [],
+      "lat": 38.4039,
+      "lon": -96.1817
+    },
+    "hutchinson_ks_us": {
+      "spoken_city": "Hutchinson",
+      "state": "KS",
+      "country": "US",
+      "region": "southern_plains",
+      "locations": [],
+      "lat": 38.0608,
+      "lon": -97.9298
+    },
+    "great_bend_ks_us": {
+      "spoken_city": "Great Bend",
+      "state": "KS",
+      "country": "US",
+      "region": "southern_plains",
+      "locations": [],
+      "lat": 38.3645,
+      "lon": -98.7648
     }
   }
 }
