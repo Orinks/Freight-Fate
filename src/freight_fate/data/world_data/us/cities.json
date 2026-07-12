@@ -7591,6 +7591,33 @@
       "locations": [],
       "lat": 40.4163,
       "lon": -120.653
+    },
+    "plainview_tx_us": {
+      "spoken_city": "Plainview",
+      "state": "TX",
+      "country": "US",
+      "region": "southern_plains",
+      "locations": [],
+      "lat": 34.1848,
+      "lon": -101.7068
+    },
+    "big_spring_tx_us": {
+      "spoken_city": "Big Spring",
+      "state": "TX",
+      "country": "US",
+      "region": "southern_plains",
+      "locations": [],
+      "lat": 32.2504,
+      "lon": -101.4787
+    },
+    "hereford_tx_us": {
+      "spoken_city": "Hereford",
+      "state": "TX",
+      "country": "US",
+      "region": "southern_plains",
+      "locations": [],
+      "lat": 34.815,
+      "lon": -102.3991
     }
   }
 }

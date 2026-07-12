@@ -4,6 +4,10 @@
 
 ### Added
 
+- **The West Texas plains fill in.** Plainview comes onto Interstate 27 between
+  Lubbock and Amarillo, Big Spring onto Interstate 20 between Midland and Abilene,
+  and Hereford ties Amarillo west to Clovis on US-60.
+
 - **Palm Coast, Ridgecrest, and Susanville reach the last corners.** Palm Coast
   comes onto Interstate 95 between Daytona and Jacksonville, and Ridgecrest and
   Susanville open the lonely US-395 desert runs in California -- including the
