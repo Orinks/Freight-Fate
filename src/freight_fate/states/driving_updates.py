@@ -1,6 +1,7 @@
 # ruff: noqa: F403,F405
 from __future__ import annotations
 
+from ..audio_fades import curve as _resolve_curve
 from .driving_core import *
 from .driving_rest_states import TrafficStopState
 
@@ -13,6 +14,17 @@ LANE_GUIDANCE_PAN = 0.85
 # The grace period lets a shift's momentary flare pass unremarked.
 OVERREV_GRACE_S = 1.5
 OVERREV_REPEAT_S = 10.0
+
+# An automatic shift caps audible engine load so the bed doesn't duck out.
+SHIFT_LOAD_CAP = 0.45
+# When the shift completes the cap eases from SHIFT_LOAD_CAP back to full over
+# this window. The curve (a key into audio_fades.CURVES) shapes the return: an
+# ease-out leaves the shift level quickly -- so the engine doesn't sit soft --
+# while still arriving at full load gently instead of snapping. A plain "linear"
+# ramp had to be stretched long to hide the snap, which sounded too soft.
+SHIFT_LOAD_RECOVERY_S = 0.032
+SHIFT_LOAD_RECOVERY_CURVE = "ease_out"
+_shift_recovery_curve = _resolve_curve(SHIFT_LOAD_RECOVERY_CURVE)
 
 
 class DrivingUpdateMixin:
@@ -475,14 +487,25 @@ class DrivingUpdateMixin:
             # off -- inaudible under the old RPM-weighted band volumes, but
             # plainly audible with the constant-volume BASS engine loop.
             audio.engine_stop(shutdown_sound=False)
-        engine_load = t.throttle
+        # A shift briefly unloads the engine, but the old 0.08 clamp cut loop
+        # gain by roughly forty percent and made repeated shifts sound like the
+        # engine was ducking or nearly dropping out. Cap the load to a
+        # perceptible torque easing while shifting, then -- once the shift ends
+        # -- ease the cap back to full over SHIFT_LOAD_RECOVERY_S along the
+        # recovery curve, so the return "under load" is a shaped glide rather
+        # than a single-frame snap.
         if t.transmission.automatic and t.transmission.shifting:
-            # A shift briefly unloads the engine, but the old 0.08 clamp cut
-            # loop gain by roughly forty percent and made repeated shifts
-            # sound like the engine was ducking or nearly dropping out.
-            # Retain a perceptible torque easing without losing the continuous
-            # engine bed that communicates RPM and engagement.
-            engine_load = min(engine_load, 0.45)
+            self._shift_recover_t = 0.0
+            cap = SHIFT_LOAD_CAP
+        elif self._shift_recover_t < 1.0:
+            step = dt / SHIFT_LOAD_RECOVERY_S if SHIFT_LOAD_RECOVERY_S > 0 else 1.0
+            self._shift_recover_t = min(1.0, self._shift_recover_t + step)
+            cap = SHIFT_LOAD_CAP + (1.0 - SHIFT_LOAD_CAP) * _shift_recovery_curve(
+                self._shift_recover_t
+            )
+        else:
+            cap = 1.0
+        engine_load = min(t.throttle, cap)
         audio.set_engine_rpm(t.rpm, engine_load)
         audio.set_road_noise(t.velocity_mps)
         if t.engine_on and t.transmission.in_reverse:

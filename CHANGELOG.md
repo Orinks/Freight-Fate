@@ -23,6 +23,9 @@
 
 ### Changed
 
+- **The engine no longer jumps in volume the instant an automatic shift
+  finishes.** It now eases back up to full pull over a brief moment, so completed
+  shifts sound smooth instead of abruptly snapping back under load.
 - **Route alerts no longer repeat at one mile.** Fuel stops, rest stops, and
   other actionable exits now speak once at five miles. State lines speak once
   as you cross them.
