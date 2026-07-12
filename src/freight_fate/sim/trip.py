@@ -28,14 +28,6 @@ def _spoken_distance(value: float, unit: str) -> str:
     return f"{rounded:.0f} {unit if rounded == 1 else unit + 's'}"
 
 
-def _rest_stop_cue_text(prefix: str, parking_label: str) -> str:
-    parts = [prefix]
-    if parking_label:
-        parts.append(parking_label)
-    parts.append("press X to take the exit.")
-    return "; ".join(parts)
-
-
 class Trip:
     """One delivery run along a chosen route."""
 
@@ -373,11 +365,7 @@ class Trip:
                         "rest_stop",
                         start + offset,
                         f"{stop.label} ahead{at_part}",
-                        _rest_stop_cue_text(
-                            f"{stop.label.capitalize()}{at_part} ahead in "
-                            f"{self._distance_text(1.0)}",
-                            stop.parking_label,
-                        ),
+                        "",
                     )
                 )
         for i, lead in enumerate(self.traffic_leads):
@@ -987,10 +975,9 @@ class Trip:
                     self._emit(TripEventKind.GPS_CUE, cue.near_text or cue.text, cue=cue)
                 continue
             if cue.kind == "rest_stop":
-                key = f"{cue.key}:near"
-                if 0 < ahead <= 1.2 and key not in self._announced_navigation:
-                    self._announced_navigation.add(key)
-                    self._emit(TripEventKind.GPS_CUE, cue.near_text, cue=cue)
+                # Road stops already receive one actionable announcement from
+                # _check_stops at five miles.  A second one-mile reminder made
+                # busy routes needlessly repetitive.
                 continue
             if cue.kind == "traffic":
                 key = f"{cue.key}:advance"
@@ -1016,16 +1003,19 @@ class Trip:
                 continue
             advance_key = f"{cue.key}:advance"
             near_key = f"{cue.key}:near"
-            lookahead = STATE_CROSSING_WARNING_LOOKAHEAD_MI if cue.kind == "state_crossing" else 2.0
+            if cue.kind == "state_crossing":
+                if ahead <= 0 and near_key not in self._announced_navigation:
+                    self._announced_navigation.add(near_key)
+                    self._emit(TripEventKind.STATE_CROSSING, cue.near_text, cue=cue)
+                continue
+            lookahead = 2.0
             if 0 < ahead <= lookahead and advance_key not in self._announced_navigation:
                 self._announced_navigation.add(advance_key)
                 message = f"In {self._distance_text(ahead)}, {cue.text}."
                 self._emit(TripEventKind.GPS_CUE, message, cue=cue)
             if -0.1 <= ahead <= 0.1 and near_key not in self._announced_navigation:
                 self._announced_navigation.add(near_key)
-                if cue.kind == "state_crossing":
-                    self._emit(TripEventKind.STATE_CROSSING, cue.near_text, cue=cue)
-                elif cue.kind == "checkpoint":
+                if cue.kind == "checkpoint":
                     self._emit(TripEventKind.CHECKPOINT, cue.near_text, cue=cue)
                 else:
                     self._emit(TripEventKind.GPS_CUE, cue.near_text, cue=cue)

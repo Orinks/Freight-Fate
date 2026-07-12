@@ -19,6 +19,9 @@
 
 ### Changed
 
+- **Route alerts no longer repeat at one mile.** Fuel stops, rest stops, and
+  other actionable exits now speak once at five miles. State lines speak once
+  as you cross them.
 - **The soundtrack now uses the finished music throughout the game.** Menu,
   daytime driving, and nighttime driving tracks have been replaced with their
   full-quality versions, normalized to match the existing music. Urban Roll

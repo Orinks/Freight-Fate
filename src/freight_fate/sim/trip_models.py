@@ -165,7 +165,6 @@ FULL_COMPRESSION_MPH = 50.0  # road speed where full pacing resumes
 # pacing setting keeps its relative feel (relaxed 20x, standard 40x, fast
 # 80x). Releasing the brake returns to the speed ramp instantly.
 PARKED_TIME_SCALE_MULT = 2.0
-STATE_CROSSING_WARNING_LOOKAHEAD_MI = 10.0
 CONSTRUCTION_ENFORCEMENT_GRACE_MI = 1.0
 # Driving faster than the weather's safe speed risks a traction-loss incident,
 # so the safe-speed readout has teeth. Risk scales with how far over you are and
