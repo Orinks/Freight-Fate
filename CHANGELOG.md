@@ -4,6 +4,11 @@
 
 ### Added
 
+- **Interstate 90's Silver Valley opens across the Idaho panhandle.** Kellogg --
+  heart of the old silver-mining country -- and Superior, Montana join the map,
+  breaking out the I-90 run from Coeur d'Alene over Lookout Pass into Missoula,
+  past historic Wallace.
+
 - **Southwest Colorado connects to the Front Range over Wolf Creek Pass.** Pagosa
   Springs, Alamosa, and Walsenburg join the map, opening the US-160 run from
   Durango across Wolf Creek and La Veta passes down to Pueblo and Interstate 25 --

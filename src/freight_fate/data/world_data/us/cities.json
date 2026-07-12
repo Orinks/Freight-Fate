@@ -6853,6 +6853,24 @@
       "lon": -104.7802,
       "region": "rockies",
       "locations": []
+    },
+    "kellogg_id_us": {
+      "spoken_city": "Kellogg",
+      "state": "ID",
+      "country": "US",
+      "lat": 47.5383,
+      "lon": -116.1193,
+      "region": "great_basin",
+      "locations": []
+    },
+    "superior_mt_us": {
+      "spoken_city": "Superior",
+      "state": "MT",
+      "country": "US",
+      "lat": 47.1919,
+      "lon": -114.8908,
+      "region": "rockies",
+      "locations": []
     }
   }
 }
