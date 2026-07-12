@@ -6129,10 +6129,10 @@
       "spoken_city": "Staunton",
       "state": "VA",
       "country": "US",
+      "lat": 38.1496,
+      "lon": -79.0717,
       "region": "appalachia",
-      "locations": [],
-      "lat": 38.15,
-      "lon": -79.072
+      "locations": []
     },
     "paducah_ky_us": {
       "spoken_city": "Paducah",

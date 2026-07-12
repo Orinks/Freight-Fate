@@ -4,6 +4,12 @@
 
 ### Added
 
+- **Interstate 81 now reaches Richmond the primary way, over Afton Mountain.**
+  Staunton joins the map at the Interstate 64 / Interstate 81 junction, so a load
+  off I-81 can take I-64 east through the Blue Ridge -- past Waynesboro and
+  Charlottesville into Richmond -- the main truck route east, not just the older
+  US-460 line through Lynchburg.
+
 - **The Tri-Cities open up along Interstate 81 and US-11W.** Marion and Abingdon
   in southwest Virginia, and Bristol and Kingsport in northeast Tennessee, join
   the map -- linking Wytheville down through the Tennessee valley to Morristown
