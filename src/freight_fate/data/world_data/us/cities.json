@@ -7393,6 +7393,15 @@
       "locations": [],
       "lat": 45.5946,
       "lon": -121.1787
+    },
+    "clarksdale_ms_us": {
+      "spoken_city": "Clarksdale",
+      "state": "MS",
+      "country": "US",
+      "region": "mid_south",
+      "locations": [],
+      "lat": 34.2004,
+      "lon": -90.5712
     }
   }
 }

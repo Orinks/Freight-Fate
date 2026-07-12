@@ -4,6 +4,10 @@
 
 ### Added
 
+- **The Blues Highway fills in at Clarksdale.** Clarksdale joins the map on US-61,
+  completing the Delta run from Memphis down through Cleveland to Greenville, with
+  an eastern tie to Grenada.
+
 - **The Columbia Gorge opens at The Dalles.** The Dalles comes onto Interstate 84
   between Portland and Pendleton, seating a stop in the Gorge on the run east.
 
