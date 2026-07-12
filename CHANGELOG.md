@@ -4,6 +4,11 @@
 
 ### Added
 
+- **The Tri-Cities open up along Interstate 81 and US-11W.** Marion and Abingdon
+  in southwest Virginia, and Bristol and Kingsport in northeast Tennessee, join
+  the map -- linking Wytheville down through the Tennessee valley to Morristown
+  and Knoxville, so the whole I-81 Appalachian freight run is drivable.
+
 - **A Black Hills freight run opens, Cheyenne to Rapid City.** Wheatland and Lusk
   out on the Wyoming high plains, and Hot Springs at the southern edge of the
   Black Hills, join the map -- linking Cheyenne up through Lusk and into Rapid

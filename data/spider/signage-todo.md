@@ -138,3 +138,8 @@ River crossings are real landmark moments.
   Highland Lakes — Marble Falls), US-75 & US-69 (southeastern Oklahoma), the
   US-287 Ports-to-Plains spine (Panhandle up to Denver; Cadillac Ranch already by
   Amarillo), and the Black Hills (Mount Rushmore, Wind Cave near Hot Springs).
+- **Bristol Motor Speedway, Bristol TN** — OWNER-flagged (personal: dragged to
+  the "Speedway in Lights" Christmas display every year lol). Major real landmark
+  ("The Last Great Colosseum," NASCAR short track). On the new `abingdon->bristol`
+  (I-81) and `bristol->kingsport` (US-11W) legs of the Tri-Cities corridor.
+  Real-register billboard -- races + the Christmas lights.

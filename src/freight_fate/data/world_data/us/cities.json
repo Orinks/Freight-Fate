@@ -6772,6 +6772,42 @@
       "lon": -103.4744,
       "region": "heartland",
       "locations": []
+    },
+    "marion_va_us": {
+      "spoken_city": "Marion",
+      "state": "VA",
+      "country": "US",
+      "lat": 36.8348,
+      "lon": -81.5148,
+      "region": "appalachia",
+      "locations": []
+    },
+    "abingdon_va_us": {
+      "spoken_city": "Abingdon",
+      "state": "VA",
+      "country": "US",
+      "lat": 36.7098,
+      "lon": -81.9774,
+      "region": "appalachia",
+      "locations": []
+    },
+    "bristol_tn_us": {
+      "spoken_city": "Bristol",
+      "state": "TN",
+      "country": "US",
+      "lat": 36.5951,
+      "lon": -82.1887,
+      "region": "appalachia",
+      "locations": []
+    },
+    "kingsport_tn_us": {
+      "spoken_city": "Kingsport",
+      "state": "TN",
+      "country": "US",
+      "lat": 36.5484,
+      "lon": -82.5618,
+      "region": "appalachia",
+      "locations": []
     }
   }
 }
