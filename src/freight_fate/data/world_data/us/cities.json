@@ -6718,6 +6718,33 @@
       "lon": -102.0721,
       "region": "southern_plains",
       "locations": []
+    },
+    "boise_city_ok_us": {
+      "spoken_city": "Boise City",
+      "state": "OK",
+      "country": "US",
+      "lat": 36.73,
+      "lon": -102.5119,
+      "region": "southern_plains",
+      "locations": []
+    },
+    "lamar_co_us": {
+      "spoken_city": "Lamar",
+      "state": "CO",
+      "country": "US",
+      "lat": 38.0872,
+      "lon": -102.6208,
+      "region": "rockies",
+      "locations": []
+    },
+    "limon_co_us": {
+      "spoken_city": "Limon",
+      "state": "CO",
+      "country": "US",
+      "lat": 39.2639,
+      "lon": -103.6922,
+      "region": "rockies",
+      "locations": []
     }
   }
 }

@@ -4,6 +4,11 @@
 
 ### Added
 
+- **US-287 completes the Ports-to-Plains, all the way to Denver.** Boise City
+  out in the Oklahoma panhandle, and Lamar and Limon on the Colorado high plains,
+  join the map -- finishing the US-287 freight spine so a load can run from San
+  Antonio up through the Panhandle to the Colorado Front Range on US highways.
+
 - **US-287 climbs the Texas Panhandle north of Amarillo.** Dumas -- cattle and
   meatpacking country -- and Stratford join the map, carrying the Ports-to-Plains
   freight run up toward the Oklahoma line (Colorado and Denver still to come).
