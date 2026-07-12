@@ -6826,6 +6826,33 @@
       "lon": -108.069,
       "region": "rockies",
       "locations": []
+    },
+    "pagosa_springs_co_us": {
+      "spoken_city": "Pagosa Springs",
+      "state": "CO",
+      "country": "US",
+      "lat": 37.2694,
+      "lon": -107.0098,
+      "region": "rockies",
+      "locations": []
+    },
+    "alamosa_co_us": {
+      "spoken_city": "Alamosa",
+      "state": "CO",
+      "country": "US",
+      "lat": 37.4695,
+      "lon": -105.87,
+      "region": "rockies",
+      "locations": []
+    },
+    "walsenburg_co_us": {
+      "spoken_city": "Walsenburg",
+      "state": "CO",
+      "country": "US",
+      "lat": 37.6242,
+      "lon": -104.7802,
+      "region": "rockies",
+      "locations": []
     }
   }
 }

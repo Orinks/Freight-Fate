@@ -4,6 +4,12 @@
 
 ### Added
 
+- **Southwest Colorado connects to the Front Range over Wolf Creek Pass.** Pagosa
+  Springs, Alamosa, and Walsenburg join the map, opening the US-160 run from
+  Durango across Wolf Creek and La Veta passes down to Pueblo and Interstate 25 --
+  Wolf Creek being the pass of runaway-truck fame, a fourteen-percent grade over
+  the San Juans.
+
 - **The Million Dollar Highway opens, Durango to Grand Junction.** Montrose and
   Delta join the map, breaking out the US-550 run over Red Mountain Pass -- past
   Silverton and Ouray, the "Switzerland of America" -- a real high-country
