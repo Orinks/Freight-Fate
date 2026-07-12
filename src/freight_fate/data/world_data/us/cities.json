@@ -7654,6 +7654,42 @@
       "locations": [],
       "lat": 27.0442,
       "lon": -82.2359
+    },
+    "oxford_ms_us": {
+      "spoken_city": "Oxford",
+      "state": "MS",
+      "country": "US",
+      "region": "mid_south",
+      "locations": [],
+      "lat": 34.3665,
+      "lon": -89.5192
+    },
+    "jamestown_ny_us": {
+      "spoken_city": "Jamestown",
+      "state": "NY",
+      "country": "US",
+      "region": "great_lakes",
+      "locations": [],
+      "lat": 42.097,
+      "lon": -79.2353
+    },
+    "fort_dodge_ia_us": {
+      "spoken_city": "Fort Dodge",
+      "state": "IA",
+      "country": "US",
+      "region": "heartland",
+      "locations": [],
+      "lat": 42.4975,
+      "lon": -94.168
+    },
+    "mattoon_il_us": {
+      "spoken_city": "Mattoon",
+      "state": "IL",
+      "country": "US",
+      "region": "corn_belt",
+      "locations": [],
+      "lat": 39.4831,
+      "lon": -88.3728
     }
   }
 }

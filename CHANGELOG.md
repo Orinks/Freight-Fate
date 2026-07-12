@@ -4,6 +4,11 @@
 
 ### Added
 
+- **Oxford, Jamestown, Fort Dodge, and Mattoon join the map.** Oxford ties into
+  northern Mississippi (Tupelo, Memphis, Clarksdale), Jamestown onto the Southern
+  Tier between Erie and Buffalo, Fort Dodge into north-central Iowa, and Mattoon
+  onto Interstate 57 between Effingham and Champaign.
+
 - **Wheeling, Columbus, and southwest Florida join the map.** Wheeling comes onto
   Interstate 70 between Columbus and Pittsburgh, Columbus anchors east-central
   Nebraska, and Sarasota and North Port fill the Interstate 75 run down Florida's
