@@ -6682,6 +6682,24 @@
       "lon": -95.7697,
       "region": "southern_plains",
       "locations": []
+    },
+    "bartlesville_ok_us": {
+      "spoken_city": "Bartlesville",
+      "state": "OK",
+      "country": "US",
+      "lat": 36.7473,
+      "lon": -95.9808,
+      "region": "southern_plains",
+      "locations": []
+    },
+    "coffeyville_ks_us": {
+      "spoken_city": "Coffeyville",
+      "state": "KS",
+      "country": "US",
+      "lat": 37.0373,
+      "lon": -95.6161,
+      "region": "southern_plains",
+      "locations": []
     }
   }
 }

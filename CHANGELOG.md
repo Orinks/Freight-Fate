@@ -4,6 +4,10 @@
 
 ### Added
 
+- **US-75 reaches north out of Tulsa into Kansas.** Bartlesville -- the old
+  Phillips 66 oil town -- and Coffeyville join the map, carrying the US-75
+  freight run up across the Oklahoma line into southeast Kansas.
+
 - **US-69 connects southeastern Oklahoma up to Muskogee.** McAlester joins the
   map, completing the US-69 freight run east of US-75 -- from Durant and Atoka
   up through Eufaula and Checotah -- so the Texoma corridor reaches Muskogee and
