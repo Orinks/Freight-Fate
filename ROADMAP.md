@@ -192,6 +192,7 @@ From a batch of player reports:
   trooper milestone (below) remains the home for *visible, immediate*
   enforcement: getting pulled over and on-the-spot fines.
 
+- [x] **Driving assistance presets and descent control.** Shipped for the current snapshot: Realistic, Balanced, All assists, and Custom coordinate optional lane, emergency-braking, stop-and-go, and interactive descent support without changing inherent adaptive-cruise behavior or simulation settings. Automatic exits, destination stops, yard entry, and docking remain deferred to Career 1.9 or later.
 - [x] **Limit-aware adaptive cruise.** Shipped: once real OSM limits, zones,
   and trooper enforcement landed, plain "hold the set speed" cruise would carry
   the driver straight through an urban drop into strikes and pull-overs. Cruise

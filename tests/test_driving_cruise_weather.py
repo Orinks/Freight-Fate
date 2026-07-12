@@ -608,6 +608,63 @@ def test_hazard_deadline_covers_braking_time_from_current_speed():
         app.shutdown()
 
 
+def test_automatic_emergency_braking_engages_once_and_cancels_cruise(monkeypatch):
+    from freight_fate.app import App
+
+    app = App()
+    spoken = []
+    app.ctx.say_event = lambda text, interrupt=False: spoken.append((text, interrupt))
+    try:
+        driving = start_drive(app)
+        driving.truck.velocity_mps = 25.0
+        driving._cruise_mph = 55.0
+        driving._hazard_deadline = driving._brake_budget_s()
+        driving._update_hazard(0.01)
+        driving._update_hazard(0.01)
+        assert driving.truck.brake == 1.0
+        assert driving._cruise_mph is None
+        assert [text for text, _ in spoken].count("Emergency braking engaged.") == 1
+    finally:
+        app.shutdown()
+
+
+@pytest.mark.parametrize(
+    ("level", "braking", "expected_active"),
+    [
+        ("off", False, False),
+        ("realistic", False, True),
+        ("balanced", True, True),
+        ("interactive", True, True),
+    ],
+)
+def test_descent_control_levels_and_brake_capture(monkeypatch, level, braking, expected_active):
+    from freight_fate.app import App
+
+    app = App()
+    spoken = []
+    app.ctx.say_event = lambda text, interrupt=False: spoken.append(text)
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        open_limits(driving)
+        driving.trip.traffic_context = lambda: None
+        driving.ctx.settings.descent_speed_control = level
+        driving.truck.grade = -0.06
+        driving.truck.engine_on = True
+        driving.truck.velocity_mps = 22.0
+        driving.truck.transmission.automatic = True
+        driving._cruise_mph = 60.0
+        driving._update_cruise(0.1, braking, False, False)
+        assert driving._descent_control_active is expected_active
+        if braking and level in ("balanced", "interactive"):
+            assert driving._cruise_mph == pytest.approx(driving.truck.speed_mph)
+            assert sum("Descent target changed" in text for text in spoken) == 1
+            driving._update_cruise(0.1, True, False, False)
+            assert sum("Descent target changed" in text for text in spoken) == 1
+    finally:
+        app.shutdown()
+
+
 @pytest.mark.smoke
 def test_service_brakes_beat_a_highway_hazard_after_human_reaction(monkeypatch):
     """The taught response -- hear the warning, hold Down -- must succeed from

@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Added
+
+- **Choose how much driving assistance the truck provides.** A new Driving assistance settings category offers Realistic, Balanced, All assists, and Custom presets for emergency braking, lane support, stop-and-go behavior, and interactive descent speed control. Adaptive cruise keeps its existing traffic, posted-limit, and weather behavior. Presets never change trip pacing, hours rules, transmission, weather, or hazard frequency.
+
 ### Fixed
 
 - **Manual and automatic transmissions behave reliably on steep grades.** The

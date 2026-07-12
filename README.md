@@ -209,7 +209,7 @@ Plug in an Xbox, PlayStation, or other compatible controller and the game picks
 up the first one automatically. It detects a controller connected or unplugged
 mid-game — unplugging pauses the drive — and you can switch back to the keyboard
 at any time. Button names below use the Xbox layout; the equivalents map
-automatically on other pads. Turn controller support off under Settings →
+automatically on other pads. Driving support can be adjusted under Settings → Driving assistance with Realistic, Balanced, All assists, or Custom presets. These presets affect driving assists only. Turn controller support off under Settings →
 Gameplay → Controller if you prefer keyboard only.
 
 #### Menus
