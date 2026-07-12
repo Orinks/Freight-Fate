@@ -4,6 +4,9 @@
 
 ### Added
 
+- **Douglas joins southeastern Arizona.** The border town of Douglas ties in over
+  the Mule Mountains through Bisbee to Sierra Vista and runs northwest to Tucson.
+
 - **The north country opens at Watertown.** Watertown joins the map on Interstate
   81 north of Syracuse and ties east to Utica over the Tug Hill on NY-12.
 

@@ -7366,6 +7366,15 @@
       "locations": [],
       "lat": 43.9748,
       "lon": -75.9108
+    },
+    "douglas_az_us": {
+      "spoken_city": "Douglas",
+      "state": "AZ",
+      "country": "US",
+      "region": "desert_southwest",
+      "locations": [],
+      "lat": 31.3445,
+      "lon": -109.5453
     }
   }
 }
