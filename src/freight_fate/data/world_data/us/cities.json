@@ -7798,6 +7798,42 @@
       "locations": [],
       "lat": 32.0724,
       "lon": -84.2327
+    },
+    "rutland_vt_us": {
+      "spoken_city": "Rutland",
+      "state": "VT",
+      "country": "US",
+      "region": "northeast",
+      "locations": [],
+      "lat": 43.6106,
+      "lon": -72.9726
+    },
+    "keene_nh_us": {
+      "spoken_city": "Keene",
+      "state": "NH",
+      "country": "US",
+      "region": "northeast",
+      "locations": [],
+      "lat": 42.9337,
+      "lon": -72.2781
+    },
+    "lewiston_me_us": {
+      "spoken_city": "Lewiston",
+      "state": "ME",
+      "country": "US",
+      "region": "northeast",
+      "locations": [],
+      "lat": 44.1004,
+      "lon": -70.2148
+    },
+    "barnstable_ma_us": {
+      "spoken_city": "Barnstable",
+      "state": "MA",
+      "country": "US",
+      "region": "northeast",
+      "locations": [],
+      "lat": 41.7003,
+      "lon": -70.3002
     }
   }
 }

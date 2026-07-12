@@ -4,6 +4,10 @@
 
 ### Added
 
+- **Northern New England joins the map.** Rutland ties central Vermont to
+  Burlington and Albany, Keene links southwest New Hampshire, Lewiston opens
+  Maine north of Portland, and Barnstable brings Cape Cod onto the map.
+
 - **The Deep South fills in.** Cullman comes onto Interstate 65 between Huntsville
   and Birmingham, Selma onto US-80 west of Montgomery, Troy onto US-231 toward
   Dothan, and Americus ties into Albany and Columbus in southwest Georgia.
