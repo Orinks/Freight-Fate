@@ -4,6 +4,10 @@
 
 ### Added
 
+- **Jamestown, Mason City, and Altus fill the last plains gaps.** Jamestown comes
+  onto Interstate 94 between Bismarck and Fargo, Mason City onto Interstate 35
+  between Albert Lea and Des Moines, and Altus ties into southwestern Oklahoma.
+
 - **Norfolk, Brownwood, and Pampa round out the plains.** Norfolk anchors
   northeast Nebraska (Sioux City, Grand Island, Omaha), Brownwood ties central
   Texas together (Abilene, San Angelo, Lampasas), and Pampa comes onto the map in

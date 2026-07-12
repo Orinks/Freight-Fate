@@ -7447,6 +7447,33 @@
       "locations": [],
       "lat": 35.5362,
       "lon": -100.9599
+    },
+    "jamestown_nd_us": {
+      "spoken_city": "Jamestown",
+      "state": "ND",
+      "country": "US",
+      "region": "heartland",
+      "locations": [],
+      "lat": 46.9105,
+      "lon": -98.7084
+    },
+    "mason_city_ia_us": {
+      "spoken_city": "Mason City",
+      "state": "IA",
+      "country": "US",
+      "region": "heartland",
+      "locations": [],
+      "lat": 43.1536,
+      "lon": -93.201
+    },
+    "altus_ok_us": {
+      "spoken_city": "Altus",
+      "state": "OK",
+      "country": "US",
+      "region": "southern_plains",
+      "locations": [],
+      "lat": 34.6381,
+      "lon": -99.334
     }
   }
 }
