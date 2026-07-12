@@ -6700,6 +6700,24 @@
       "lon": -95.6161,
       "region": "southern_plains",
       "locations": []
+    },
+    "dumas_tx_us": {
+      "spoken_city": "Dumas",
+      "state": "TX",
+      "country": "US",
+      "lat": 35.8656,
+      "lon": -101.9732,
+      "region": "southern_plains",
+      "locations": []
+    },
+    "stratford_tx_us": {
+      "spoken_city": "Stratford",
+      "state": "TX",
+      "country": "US",
+      "lat": 36.3361,
+      "lon": -102.0721,
+      "region": "southern_plains",
+      "locations": []
     }
   }
 }

@@ -4,6 +4,10 @@
 
 ### Added
 
+- **US-287 climbs the Texas Panhandle north of Amarillo.** Dumas -- cattle and
+  meatpacking country -- and Stratford join the map, carrying the Ports-to-Plains
+  freight run up toward the Oklahoma line (Colorado and Denver still to come).
+
 - **US-75 reaches north out of Tulsa into Kansas.** Bartlesville -- the old
   Phillips 66 oil town -- and Coffeyville join the map, carrying the US-75
   freight run up across the Oklahoma line into southeast Kansas.
