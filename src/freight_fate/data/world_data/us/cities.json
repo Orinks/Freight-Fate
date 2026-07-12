@@ -7258,6 +7258,15 @@
       "locations": [],
       "lat": 40.9478,
       "lon": -90.3712
+    },
+    "myrtle_beach_sc_us": {
+      "spoken_city": "Myrtle Beach",
+      "state": "SC",
+      "country": "US",
+      "region": "atlantic_southeast",
+      "locations": [],
+      "lat": 33.6891,
+      "lon": -78.8867
     }
   }
 }

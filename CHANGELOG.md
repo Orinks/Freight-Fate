@@ -4,6 +4,10 @@
 
 ### Added
 
+- **The Grand Strand comes onto the map at Myrtle Beach.** Myrtle Beach seats on
+  the coastal US-17 run between Charleston and Wilmington and ties inland to
+  Florence and Interstate 95 on US-501.
+
 - **Western Illinois joins along the Mississippi.** The river port of Quincy and
   the rail town of Galesburg come onto the map, opening the Interstate 72 run east
   to Springfield and a proper Interstate 74 stop at Galesburg between Peoria and
