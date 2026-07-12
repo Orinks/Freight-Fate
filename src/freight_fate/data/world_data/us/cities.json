@@ -7510,6 +7510,33 @@
       "locations": [],
       "lat": 35.2784,
       "lon": -93.1338
+    },
+    "findlay_oh_us": {
+      "spoken_city": "Findlay",
+      "state": "OH",
+      "country": "US",
+      "region": "great_lakes",
+      "locations": [],
+      "lat": 41.0442,
+      "lon": -83.6499
+    },
+    "dyersburg_tn_us": {
+      "spoken_city": "Dyersburg",
+      "state": "TN",
+      "country": "US",
+      "region": "mid_south",
+      "locations": [],
+      "lat": 36.0345,
+      "lon": -89.3859
+    },
+    "burlington_ia_us": {
+      "spoken_city": "Burlington",
+      "state": "IA",
+      "country": "US",
+      "region": "heartland",
+      "locations": [],
+      "lat": 40.8075,
+      "lon": -91.1129
     }
   }
 }

@@ -4,6 +4,11 @@
 
 ### Added
 
+- **Findlay, Dyersburg, and Burlington fill more gaps.** Findlay comes onto
+  Interstate 75 between Toledo and Lima, Dyersburg ties northwest Tennessee to
+  Memphis and Jackson, and Burlington joins the Mississippi in southeast Iowa
+  between Ottumwa and Iowa City.
+
 - **Russellville joins the Arkansas River valley.** Russellville comes onto
   Interstate 40 between Conway and Fort Smith, a real stop on the run west from
   Little Rock.
