@@ -6961,15 +6961,6 @@
       "lon": -91.7382,
       "region": "upper_midwest",
       "locations": []
-    },
-    "superior_wi_us": {
-      "spoken_city": "Superior",
-      "state": "WI",
-      "country": "US",
-      "lat": 46.7208,
-      "lon": -92.1041,
-      "region": "upper_midwest",
-      "locations": []
     }
   }
 }

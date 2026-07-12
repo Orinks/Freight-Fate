@@ -4,9 +4,9 @@
 
 ### Added
 
-- **Northern Wisconsin fills in, Wausau up to Duluth.** Chippewa Falls, Rice Lake,
-  and Superior -- Duluth's harbor twin across the bay -- join the map, carrying
-  WI-29 and US-53 north from Green Bay country to the head of Lake Superior.
+- **Northern Wisconsin fills in, Wausau up to Duluth.** Chippewa Falls and Rice
+  Lake join the map, carrying WI-29 and US-53 north from Green Bay country up
+  through Superior to the head of Lake Superior at Duluth.
 
 - **US-89 climbs to Page and Lake Powell.** Page joins the map, opening the run
   north from Flagstaff across the Navajo Nation, past Cameron, to the Glen Canyon
