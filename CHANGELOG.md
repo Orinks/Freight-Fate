@@ -4,6 +4,11 @@
 
 ### Added
 
+- **Wisconsin's Fox Valley and lakeshore fill in.** Fond du Lac, Oshkosh, and
+  Sheboygan join the map, opening the Interstate 41 run up the Fox River Valley
+  from Milwaukee to Green Bay and the Interstate 43 lakeshore route past
+  Sheboygan.
+
 - **A northern route across the Pennsylvania mountains opens up.** Altoona and
   State College join the map, giving a US-22 and US-322 run from Pittsburgh over
   the Allegheny ridges to Harrisburg -- a real mountain haul alongside the

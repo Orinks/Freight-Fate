@@ -7186,6 +7186,33 @@
       "locations": [],
       "lat": 40.7934,
       "lon": -77.86
+    },
+    "fond_du_lac_wi_us": {
+      "spoken_city": "Fond du Lac",
+      "state": "WI",
+      "country": "US",
+      "region": "upper_midwest",
+      "locations": [],
+      "lat": 43.773,
+      "lon": -88.447
+    },
+    "oshkosh_wi_us": {
+      "spoken_city": "Oshkosh",
+      "state": "WI",
+      "country": "US",
+      "region": "upper_midwest",
+      "locations": [],
+      "lat": 44.0247,
+      "lon": -88.5426
+    },
+    "sheboygan_wi_us": {
+      "spoken_city": "Sheboygan",
+      "state": "WI",
+      "country": "US",
+      "region": "upper_midwest",
+      "locations": [],
+      "lat": 43.7508,
+      "lon": -87.7145
     }
   }
 }
