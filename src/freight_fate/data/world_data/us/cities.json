@@ -7861,6 +7861,42 @@
       "locations": [],
       "lat": 48.1181,
       "lon": -123.4307
+    },
+    "toms_river_nj_us": {
+      "spoken_city": "Toms River",
+      "state": "NJ",
+      "country": "US",
+      "region": "northeast",
+      "locations": [],
+      "lat": 39.9537,
+      "lon": -74.1979
+    },
+    "vineland_nj_us": {
+      "spoken_city": "Vineland",
+      "state": "NJ",
+      "country": "US",
+      "region": "northeast",
+      "locations": [],
+      "lat": 39.4864,
+      "lon": -75.0257
+    },
+    "ruston_la_us": {
+      "spoken_city": "Ruston",
+      "state": "LA",
+      "country": "US",
+      "region": "gulf_coast",
+      "locations": [],
+      "lat": 32.5232,
+      "lon": -92.6379
+    },
+    "hammond_la_us": {
+      "spoken_city": "Hammond",
+      "state": "LA",
+      "country": "US",
+      "region": "gulf_coast",
+      "locations": [],
+      "lat": 30.5044,
+      "lon": -90.4612
     }
   }
 }

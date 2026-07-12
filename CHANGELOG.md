@@ -4,6 +4,10 @@
 
 ### Added
 
+- **New Jersey and Louisiana fill in.** Toms River and Vineland join the map on
+  the Garden State Parkway and in South Jersey, Ruston comes onto Interstate 20
+  between Shreveport and Monroe, and Hammond ties Baton Rouge to New Orleans.
+
 - **The Pacific Northwest interior fills in.** Longview comes onto Interstate 5
   between Olympia and Portland, Walla Walla ties into the Tri-Cities and Pendleton
   on US-12, and Port Angeles opens the Olympic Peninsula on US-101.
