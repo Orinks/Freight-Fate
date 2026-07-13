@@ -50,6 +50,7 @@ class CloudBackupState(MenuState):
     def __init__(self, ctx) -> None:
         super().__init__(ctx)
         self._saves: list[dict] | None = None
+        self._auth_failed = False
         self._fetched = threading.Event()
         self._announced = False
         self._status = "Checking your cloud backups."
@@ -66,6 +67,7 @@ class CloudBackupState(MenuState):
 
     def _start_fetch(self) -> None:
         self._saves = None
+        self._auth_failed = False
         self._fetched.clear()
         self._announced = False
         identity = self._identity()
@@ -74,7 +76,10 @@ class CloudBackupState(MenuState):
             return
 
         def worker() -> None:
-            self._saves = cloud_saves.list_saves(identity)
+            try:
+                self._saves = cloud_saves.list_saves(identity)
+            except cloud_saves.CloudAuthError:
+                self._auth_failed = True
             self._fetched.set()
 
         threading.Thread(target=worker, name="cloud-saves-list", daemon=True).start()
@@ -104,7 +109,9 @@ class CloudBackupState(MenuState):
                 MenuItem("Checking your cloud backups", self.speak_current),
                 MenuItem("Back", self.go_back),
             ]
-        if self._saves is None:
+        if self._auth_failed:
+            self._status = "Reconnect needed: orinks.net no longer accepts this computer's sign-in."
+        elif self._saves is None:
             self._status = "Cloud backups could not be reached."
         else:
             self._status = self._service().status
@@ -115,7 +122,15 @@ class CloudBackupState(MenuState):
                 help="This stays here so you can review the latest Cloud backup result.",
             )
         ]
-        if self._saves is None:
+        if self._auth_failed:
+            items.append(
+                MenuItem(
+                    "Reconnect needed: your orinks.net sign-in is no longer accepted",
+                    self.speak_current,
+                    help=cloud_saves.AUTH_HELP,
+                )
+            )
+        elif self._saves is None:
             items.append(
                 MenuItem(
                     "Your cloud backups could not be reached",
@@ -171,6 +186,11 @@ class CloudBackupState(MenuState):
         if self._announced or not self._fetched.is_set() or self._identity() is None:
             return
         self._announced = True
+        if self._auth_failed:
+            self._status = "Reconnect needed: orinks.net no longer accepts this computer's sign-in."
+            self.refresh(keep_index=False)
+            self.ctx.say(cloud_saves.AUTH_HELP, interrupt=True)
+            return
         if self._saves is None:
             self._status = "Cloud backups could not be reached."
             self.refresh(keep_index=False)
@@ -312,6 +332,9 @@ class CloudSlotState(MenuState):
             except CloudSaveIntegrityError as error:
                 self._outcome = error.code
                 return
+            except cloud_saves.CloudAuthError:
+                self._outcome = "auth_failed"
+                return
             if payload is None:
                 self._outcome = "download_failed"
                 return
@@ -406,6 +429,13 @@ class CloudSlotState(MenuState):
             self._status = "Backup needs a newer Freight Fate version. Nothing restored."
             self.ctx.say(
                 "This backup needs a newer Freight Fate version. Update the game and try again. Nothing was restored.",
+                interrupt=True,
+            )
+        elif outcome == "auth_failed":
+            self._status = "Reconnect needed. Nothing was restored."
+            self.ctx.say(
+                f"{cloud_saves.AUTH_HELP} Nothing was restored, and your "
+                "local career is unchanged.",
                 interrupt=True,
             )
         elif outcome in ("invalid_profile", "restore_failed"):

@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+### Fixed
+
+- **Cloud backup now tells you when this computer needs to reconnect.** If
+  orinks.net stops accepting this computer's sign-in, which can happen after
+  you connect a second computer with a new driver token, the cloud backup menu
+  now says so and walks you to Settings, Online to reconnect, instead of
+  wrongly reporting that your backups could not be reached.
 ## 1.8.1 - 2026-07-13
 
 ### Fixed
