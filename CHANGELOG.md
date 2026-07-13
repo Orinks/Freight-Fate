@@ -38,6 +38,26 @@
 
 ### Added
 
+- **Freezing rain is now its own weather, and it is the one worth parking
+  for.** Rain falling just below freezing glazes the road with ice far
+  slicker than snow -- a stop from 40 can take more than twice the room of a
+  dry stop from 60. The forecast and weather reports call it out, live
+  weather recognizes real freezing rain and sleet, and new road hazards come
+  with it. If you drive it, crawl.
+
+- **Hydroplaning now depends on your tires, not just the sky.** Fresh tread
+  at highway pressure almost never floats, but the more worn your tires, the
+  lower the speed where they start riding the water instead of the road --
+  bald tires in a heavy downpour let go near 60. When it happens the truck
+  calls it out and steering and braking go soft until you ease off. Deeper
+  standing water makes it worse; keeping good rubber on the truck is the fix.
+
+- **The engine brake can now break the drive wheels loose on slick roads.**
+  The jake slows only the drive axle, and on ice a full-stage jake in a low
+  gear is more than that axle can hold -- the truck warns you the wheels are
+  sliding, the retard fades, and the right move is a lighter stage or none at
+  all. On dry pavement nothing changes; this is a winter discipline.
+
 - **Your rig now wears with how you drive it -- tires, brakes, and engine each
   have their own meter.** Miles and heavy loads slowly eat tire tread, riding
   the service brakes wears the shoes (hot brakes wear them even faster), and

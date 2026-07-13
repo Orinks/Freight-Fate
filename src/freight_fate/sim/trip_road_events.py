@@ -236,6 +236,10 @@ class TripRoadEventMixin:
     def _conditions_incident_text(self) -> str:
         """The traction-loss phrase for the current conditions."""
         kind = self.weather.current
+        if self.truck.hydroplaning:
+            return "Hydroplaning, the tires are riding the water film."
+        if kind == WeatherKind.ICE:
+            return "The trailer is sliding on the ice."
         if kind == WeatherKind.SNOW:
             return "The trailer is sliding on the snow, too fast for the conditions."
         if kind in (WeatherKind.RAIN, WeatherKind.HEAVY_RAIN, WeatherKind.THUNDERSTORM):
@@ -243,18 +247,29 @@ class TripRoadEventMixin:
         return "Losing traction, too fast for the conditions."
 
     def _check_conditions_speed(self, moved_mi: float) -> None:
-        """Risk a traction-loss incident when driving too fast for slick roads."""
+        """Risk a traction-loss incident when driving too fast for slick roads.
+
+        The truck's own grip decides -- worn tread lowers it on every surface,
+        and actually hydroplaning (a physical state, not a phrase) counts as
+        deep overspeed no matter what the sign says.
+        """
         eff = self.weather.effects
+        grip = self.truck.effective_grip
         over = self.truck.speed_mph - eff.safe_speed_mph
-        if over <= CONDITIONS_SPEED_MARGIN_MPH or eff.grip >= CONDITIONS_GRIP_CEILING:
+        planing = self.truck.hydroplaning
+        if (over <= CONDITIONS_SPEED_MARGIN_MPH and not planing) or (
+            grip >= CONDITIONS_GRIP_CEILING
+        ):
             self._conditions_check_mi = CONDITIONS_CHECK_MI
             return
         self._conditions_check_mi -= moved_mi
         if self._conditions_check_mi > 0:
             return
         self._conditions_check_mi = CONDITIONS_CHECK_MI
-        severity = min(1.0, (over - CONDITIONS_SPEED_MARGIN_MPH) / 25.0)
-        risk = severity * (1.0 - eff.grip) * CONDITIONS_INCIDENT_RISK * self.hazard_scale
+        severity = min(1.0, max(0.0, over - CONDITIONS_SPEED_MARGIN_MPH) / 25.0)
+        if planing:
+            severity = max(severity, 0.7)
+        risk = severity * (1.0 - grip) * CONDITIONS_INCIDENT_RISK * self.hazard_scale
         if self._cond_rng.random() < risk:
             self._emit(
                 TripEventKind.HAZARD,

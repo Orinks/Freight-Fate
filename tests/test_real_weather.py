@@ -23,6 +23,17 @@ def test_condition_mapping_basics():
     assert map_condition("Thunderstorm") is WeatherKind.THUNDERSTORM
 
 
+def test_glaze_conditions_map_to_freezing_rain():
+    # Freezing rain, sleet, and ice used to be lumped into snow; they now map
+    # to the glare-ice condition, and must win over the plain rain keyword.
+    assert map_condition("Freezing Rain") is WeatherKind.ICE
+    assert map_condition("Light Freezing Drizzle") is WeatherKind.ICE
+    assert map_condition("Sleet") is WeatherKind.ICE
+    assert map_condition("Ice Fog") is WeatherKind.ICE
+    # Plain snow phrasing still lands on snow.
+    assert map_condition("Light Snow") is WeatherKind.SNOW
+
+
 def test_condition_unknown_or_empty_defaults_to_cloudy():
     assert map_condition("") is WeatherKind.CLOUDY
     assert map_condition("Volcanic Eruption") is WeatherKind.CLOUDY

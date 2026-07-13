@@ -117,6 +117,8 @@ class DrivingState(DrivingControlsMixin, DrivingUpdateMixin, DrivingEventMixin, 
         self.construction_seen = False
         self.traffic_seen = False
         self._brake_squeal_cooldown_s = 0.0  # hot-brake squeal cue spacing
+        self._hydro_active = False  # spoken hydroplane warning edge tracking
+        self._jake_slip_active = False  # spoken jake-slip warning edge tracking
         # Trooper pull-overs: a strike inside a patrol window may get you stopped
         # for an immediate ticket, separate from the silent at-delivery strikes.
         self.speeding_tickets = 0
@@ -525,7 +527,7 @@ class DrivingState(DrivingControlsMixin, DrivingUpdateMixin, DrivingEventMixin, 
         seen = add_unique_stat(p, "weather_seen", kind.name)
         if kind in {WeatherKind.RAIN, WeatherKind.HEAVY_RAIN}:
             self.ctx.award_achievement("rain_driver", event=event)
-        elif kind in {WeatherKind.SNOW, WeatherKind.WIND}:
+        elif kind in {WeatherKind.SNOW, WeatherKind.ICE, WeatherKind.WIND}:
             self.ctx.award_achievement("winter_or_wind", event=event)
         elif kind in {WeatherKind.FOG, WeatherKind.THUNDERSTORM}:
             self.ctx.award_achievement("low_visibility", event=event)

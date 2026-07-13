@@ -116,6 +116,31 @@ def test_variant_swaps_only_the_named_knob():
     assert bench._variant(sc, "target", 42.0).target_mph == 42.0
 
 
+def test_ice_stop_is_devastating():
+    # 40 mph on glare ice stops longer than 60 mph on dry pavement -- by a
+    # lot. This is the number that justifies parking for freezing rain.
+    ice = _RESULTS["stop-ice"].metrics["stop-feet"]
+    dry = _RESULTS["stop-dry"].metrics["stop-feet"]
+    assert ice > 2.0 * dry
+
+
+def test_bald_tires_plane_in_heavy_rain_and_stop_longer():
+    planing = _RESULTS["stop-hydro-bald"]
+    assert planing.metrics["hydro-s"] > 0.0
+    assert planing.metrics["stop-feet"] > _RESULTS["stop-bald-rain"].metrics["stop-feet"]
+    # Fresh tread in the same downpour never reaches its onset speed.
+    assert _RESULTS["stop-rain"].metrics["hydro-s"] == 0.0
+
+
+def test_jake_slides_on_ice_and_cannot_hold_the_grade():
+    run = _RESULTS["grade-jake-ice"]
+    assert run.metrics["jake-slip-s"] > 60.0
+    assert run.metrics["top-mph"] > 24.0  # target was 20; the capped jake loses ground
+    assert run.metrics["brake-wear"] == 0.0  # no service brakes in the scenario
+    # The same discipline on dry pavement never breaks the drives loose.
+    assert _RESULTS["grade-jake-only"].metrics["jake-slip-s"] == 0.0
+
+
 def test_worn_brakes_fade_sooner_than_fresh():
     # Same descent, same driving: worn shoes must not end up in better
     # shape than fresh ones, and their fade threshold sits lower.

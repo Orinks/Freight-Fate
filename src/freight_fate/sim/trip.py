@@ -1133,6 +1133,7 @@ class Trip(TripRoadEventMixin, TripTrafficMixin):
                 weather=changed,
             )
         self.truck.grip = self.weather.effects.grip
+        self.truck.water_mm = self.weather.effects.water_mm
         self.truck.drag_mult = self.weather.effects.drag_mult
         self.truck.grade = self.grade_at(self.position_mi)
         self.truck.fuel_burn_mult = scale

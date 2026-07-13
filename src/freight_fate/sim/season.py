@@ -29,6 +29,7 @@ SEASONS = ("winter", "spring", "summer", "autumn")
 
 # Temperatures at which precipitation type and ice risk flip, in Celsius.
 FREEZING_C = 1.0  # at or below this, rain falls as snow and ice forms
+FREEZING_RAIN_FLOOR_C = -4.0  # rain in the (floor, freezing] band glazes as ice
 WARM_STORM_C = 12.0  # thunderstorms need convective warmth above this
 
 # Per region: (annual mean C, seasonal half-swing C, daily half-swing C).
@@ -158,11 +159,15 @@ def adjust_for_temperature(kind: WeatherKind, temp_c: float | None) -> WeatherKi
         return kind
     wet = (WeatherKind.RAIN, WeatherKind.HEAVY_RAIN, WeatherKind.THUNDERSTORM)
     if temp_c <= FREEZING_C:
+        if kind is WeatherKind.RAIN and temp_c > FREEZING_RAIN_FLOOR_C:
+            # The freezing-rain band: rain that glazes on contact. Colder than
+            # the band (or heavier precipitation) falls as plain snow.
+            return WeatherKind.ICE
         if kind in wet:
             return WeatherKind.SNOW
         return kind
-    if kind is WeatherKind.SNOW:
-        # Too warm to snow: a cold rain, or just overcast when mild.
+    if kind in (WeatherKind.SNOW, WeatherKind.ICE):
+        # Too warm to freeze: a cold rain, or just overcast when mild.
         return WeatherKind.RAIN if temp_c < 6.0 else WeatherKind.CLOUDY
     if kind is WeatherKind.THUNDERSTORM and temp_c < WARM_STORM_C:
         return WeatherKind.HEAVY_RAIN

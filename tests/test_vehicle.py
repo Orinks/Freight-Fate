@@ -515,6 +515,55 @@ def test_engine_brake_bool_view_selects_full_stage():
     assert t.engine_brake_stage == 0
 
 
+def test_jake_is_capped_by_drive_axle_grip_on_ice():
+    """On glare ice a hard jake in a low gear outruns what the drive axle can
+    transmit: force caps, the slipping flag raises, and a lighter stage stays
+    hooked up -- the CDL rule about compression brakes on slick roads."""
+    t = make_auto_truck()
+    t.velocity_mps = 15.0
+    t.throttle = 0.0
+    t.rpm = 1800.0
+    t.engine_brake_stage = 3
+    t.transmission.gear = 7
+    dry = t.jake_brake_force()
+    assert not t.jake_slipping
+    t.grip = 0.15  # glare ice
+    assert t.jake_slipping
+    assert t.jake_brake_force() < dry
+    t.engine_brake_stage = 1  # light stage asks for a third; the axle holds it
+    assert not t.jake_slipping
+
+
+def test_hydroplane_onset_needs_water_and_drops_with_tread_wear():
+    """Fresh tread at highway pressure essentially never planes; worn tread in
+    deep water planes right in the speeds the game drives."""
+    t = make_auto_truck()
+    t.water_mm = 0.2  # a damp film cannot float a loaded truck tire
+    assert t.hydro_onset_mph is None
+    t.water_mm = 3.0  # heavy rain
+    fresh = t.hydro_onset_mph
+    assert fresh is not None and fresh > 85.0
+    t.tire_wear_pct = 80.0
+    worn = t.hydro_onset_mph
+    assert worn is not None and worn < fresh
+    assert 50.0 < worn < 70.0  # reachable at highway speed
+
+
+def test_hydroplaning_collapses_grip_and_slowing_restores_it():
+    t = make_auto_truck()
+    t.grip = 0.62  # heavy-rain surface
+    t.water_mm = 3.0
+    t.tire_wear_pct = 80.0
+    onset = t.hydro_onset_mph
+    assert onset is not None
+    t.velocity_mps = (onset + 15.0) / 2.23694  # past the collapse band
+    assert t.hydroplaning
+    planing = t.effective_grip
+    t.velocity_mps = (onset - 5.0) / 2.23694
+    assert not t.hydroplaning
+    assert t.effective_grip > planing * 2.0  # contact restored
+
+
 def test_governed_speed_is_not_abuse():
     """Sitting AT the governor is normal diesel running; overspeed wear only
     starts past it, when a downgrade drives the engine through the wheels."""

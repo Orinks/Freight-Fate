@@ -24,7 +24,8 @@ Tuning modes (one scenario at a time):
     ... grade-no-jake --solve target=20:60 peak-temp-c<=400
         Bisect for the edge: the highest (or lowest) knob value that still
         satisfies the limit. Knobs: target, cargo (tonnes), grade (percent),
-        brake-wear, tire-wear, engine-wear. Metrics: run --metrics to list.
+        brake-wear, tire-wear, engine-wear, water (mm standing water).
+        Metrics: run --metrics to list.
 """
 
 from __future__ import annotations
@@ -69,6 +70,7 @@ class Scenario:
     cargo_kg: float = 21_500.0  # reference full payload
     weather: WeatherKind = WeatherKind.CLEAR
     grip_override: float | None = None
+    water_override: float | None = None  # standing water mm; default from weather
     tire_wear: float = 0.0
     brake_wear: float = 0.0
     engine_wear: float = 0.0
@@ -155,6 +157,15 @@ SCENARIOS: tuple[Scenario, ...] = (
         braking="snub",
     ),
     Scenario(
+        name="grade-jake-ice",
+        summary="A 4 percent descent on glare ice, full jake, no service brakes.",
+        profile=((1.0, 0.0), (5.0, -4.0), (1.0, 0.0)),
+        weather=WeatherKind.ICE,
+        target_mph=20.0,
+        jake=True,
+        braking="none",
+    ),
+    Scenario(
         name="stop-dry",
         summary="Full-brake stop from 60 on dry pavement; the braking baseline.",
         profile=((5.0, 0.0),),
@@ -181,6 +192,21 @@ SCENARIOS: tuple[Scenario, ...] = (
         weather=WeatherKind.RAIN,
         tire_wear=80.0,
         stop_from_mph=60.0,
+    ),
+    Scenario(
+        name="stop-ice",
+        summary="A stop from 40 on freezing rain; glare ice under the whole rig.",
+        profile=((5.0, 0.0),),
+        weather=WeatherKind.ICE,
+        stop_from_mph=40.0,
+    ),
+    Scenario(
+        name="stop-hydro-bald",
+        summary="A stop from 65 in heavy rain on 80 percent worn tires; planing at entry.",
+        profile=((5.0, 0.0),),
+        weather=WeatherKind.HEAVY_RAIN,
+        tire_wear=80.0,
+        stop_from_mph=65.0,
     ),
 )
 
@@ -220,6 +246,7 @@ def _build_truck(sc: Scenario) -> TruckState:
     truck.engine_wear_pct = sc.engine_wear
     effects = EFFECTS[sc.weather]
     truck.grip = effects.grip if sc.grip_override is None else sc.grip_override
+    truck.water_mm = effects.water_mm if sc.water_override is None else sc.water_override
     truck.drag_mult = effects.drag_mult
     truck.set_air_ready(parking_brake=False)
     truck.start_engine()
@@ -294,6 +321,10 @@ class _Watcher:
     brake_held_s: float = 0.0
     jake_was_on: bool = False
     jake_held_s: float = 0.0
+    hydro_said: bool = False
+    hydro_s: float = 0.0
+    jake_slip_said: bool = False
+    jake_slip_s: float = 0.0
     peak_temp_c: float = 0.0
     peak_temp_mi: float = 0.0
     top_mph: float = 0.0
@@ -366,6 +397,22 @@ class _Watcher:
         if tk.spring_brakes_active and not self.springs_said:
             self.springs_said = True
             self.note(t_s, "spring brakes grab: air is gone")
+
+        if tk.hydroplaning:
+            self.hydro_s += DT
+            if not self.hydro_said:
+                self.hydro_said = True
+                onset = tk.hydro_onset_mph or 0.0
+                self.note(
+                    t_s,
+                    f"HYDROPLANING ({mph:.0f} mph, onset {onset:.0f}): "
+                    "tires riding the water film",
+                )
+        if tk.jake_slipping:
+            self.jake_slip_s += DT
+            if not self.jake_slip_said:
+                self.jake_slip_said = True
+                self.note(t_s, "JAKE SLIPPING: drive wheels breaking loose under the retarder")
 
         if mph >= RUNAWAY_MPH and not self.runaway_said:
             self.runaway_said = True
@@ -504,6 +551,10 @@ def _summarize(
         lines.append("service brake: never touched")
     if watch.jake_held_s > 0:
         lines.append(f"jake brake engaged {_clock(watch.jake_held_s)} total")
+    if watch.jake_slip_s > 0:
+        lines.append(f"drive wheels sliding under the jake {_clock(watch.jake_slip_s)} total")
+    if watch.hydro_s > 0:
+        lines.append(f"hydroplaning {_clock(watch.hydro_s)} total")
     if watch.lowest_moving_gear < 99:
         lines.append(f"lowest gear while moving: {watch.lowest_moving_gear}")
     return lines
@@ -528,6 +579,8 @@ def _collect_metrics(
         "brake-wear": truck.brake_wear_pct - wear0[1],
         "engine-wear": truck.engine_wear_pct - wear0[2],
         "time-s": t,
+        "hydro-s": watch.hydro_s,
+        "jake-slip-s": watch.jake_slip_s,
     }
 
 
@@ -542,7 +595,7 @@ def run_scenario(sc: Scenario) -> RunResult:
 # "the fastest target speed that keeps peak brake temperature under fade" --
 # and answers in a sentence. Both stay deterministic and plain-text.
 
-SWEEP_PARAMS = ("target", "cargo", "grade", "brake-wear", "tire-wear", "engine-wear")
+SWEEP_PARAMS = ("target", "cargo", "grade", "brake-wear", "tire-wear", "engine-wear", "water")
 
 
 def _variant(sc: Scenario, param: str, value: float) -> Scenario:
@@ -563,6 +616,8 @@ def _variant(sc: Scenario, param: str, value: float) -> Scenario:
         return replace(sc, tire_wear=value)
     if param == "engine-wear":
         return replace(sc, engine_wear=value)
+    if param == "water":  # standing water depth in millimeters
+        return replace(sc, water_override=value)
     raise ValueError(f"unknown sweep knob: {param}")
 
 
@@ -676,7 +731,10 @@ def run_solve(sc: Scenario, range_spec: str, limit_spec: str) -> list[str]:
 def _header(sc: Scenario) -> list[str]:
     truck_note = f"{sc.cargo_kg / 1000.0:.1f} tonne payload"
     grip = EFFECTS[sc.weather].grip if sc.grip_override is None else sc.grip_override
+    water = EFFECTS[sc.weather].water_mm if sc.water_override is None else sc.water_override
     wx = f"{sc.weather.value} (grip {grip:.2f})"
+    if water > 0:
+        wx = f"{sc.weather.value} (grip {grip:.2f}, {water:g} mm standing water)"
     wear_bits = []
     if sc.tire_wear:
         wear_bits.append(f"tires {sc.tire_wear:.0f} percent worn")

@@ -395,12 +395,20 @@ HAZARDS: tuple[HazardDef, ...] = (
     ),
     # Snow and ice only.
     HazardDef("a snow squall whiting out the lane", 1.0, weather=(WeatherKind.SNOW,)),
-    HazardDef("ice on the bridge deck", 1.0, weather=(WeatherKind.SNOW,)),
+    HazardDef("ice on the bridge deck", 1.0, weather=(WeatherKind.SNOW, WeatherKind.ICE)),
     HazardDef(
         "black ice on the shaded grade",
         1.1,
-        weather=(WeatherKind.SNOW,),
+        weather=(WeatherKind.SNOW, WeatherKind.ICE),
         terrain=("mountain", "hills"),
+    ),
+    # Freezing rain only: the whole road is finding out at the same time.
+    HazardDef("glaze ice sheeting the whole lane", 1.3, weather=(WeatherKind.ICE,)),
+    HazardDef(
+        "a car spun out on the glaze ahead",
+        1.1,
+        weather=(WeatherKind.ICE,),
+        dodgeable=True,
     ),
     # Dense fog only.
     HazardDef("brake lights looming in dense fog", 1.2, weather=(WeatherKind.FOG,)),

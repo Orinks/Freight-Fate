@@ -78,6 +78,28 @@ AMBIENT_C = 20.0
 BRAKE_COOL_BASE_PER_S = 0.0006  # fraction of excess heat shed per second, parked
 BRAKE_COOL_SPEED_PER_S = 0.0006  # extra fraction per sqrt(m/s) of airflow
 
+# -- traction -----------------------------------------------------------------
+# Hydroplaning follows the Horne relation: onset speed goes with the square
+# root of tire pressure, about 106 mph for a fresh ribbed truck tire at
+# highway pressure -- which is why a properly shod truck essentially never
+# planes. Worn tread and deeper standing water pull the onset down into the
+# speeds the game actually drives; past onset the tires ride the water film
+# and grip collapses toward its floor over a short speed band.
+HYDRO_ONSET_BASE_MPH = 106.0  # ~10.35 x sqrt(105 psi), fresh tread in a thin film
+HYDRO_TREAD_LOSS = 0.45  # bald tires plane at 55 percent of the fresh onset speed
+HYDRO_MIN_WATER_MM = 0.8  # a thinner film cannot float a loaded truck tire
+HYDRO_WATER_LOSS_PER_MM = 0.06  # onset drop per millimeter past the minimum film
+HYDRO_FULL_BAND_MPH = 12.0  # mph past onset where the collapse bottoms out
+HYDRO_GRIP_FLOOR = 0.30  # fraction of wet grip left when fully planing
+
+# The jake retards through the drive axle alone, so its force is capped by
+# that axle's share of the grip -- not the whole rig's. Half the axle's
+# static grip is the usable margin before compression braking breaks the
+# drive wheels loose (the start of a trolley jackknife). Dry pavement never
+# reaches the cap; glare ice puts full stage 3 in a low gear well past it.
+DRIVE_AXLE_LOAD_FRACTION = 0.425  # tandem drives carry 34k of an 80k gross
+JAKE_LOCK_MARGIN = 0.5  # usable fraction of drive-axle grip before the wheels slide
+
 # What wear does to the physics.
 TIRE_WEAR_GRIP_LOSS = 0.25  # bald tires lose a quarter of their grip
 BRAKE_WEAR_FORCE_LOSS = 0.30  # worn shoes lose up to 30% braking force
@@ -155,6 +177,7 @@ class TruckState:
     # environment, set each frame by the trip/weather layer
     grade: float = 0.0  # +uphill, e.g. 0.06 = 6%
     grip: float = 1.0  # weather traction multiplier
+    water_mm: float = 0.0  # standing water on the road; drives hydroplaning
     drag_mult: float = 1.0  # weather aero drag multiplier (headwinds/storms)
     fuel_burn_mult: float = 1.0  # trip time compression so mpg stays honest
     tire_wear_buff_mult: float = 1.0  # driver-care buff on tread wear (data/buffs.py)
@@ -213,9 +236,35 @@ class TruckState:
     # -- wear effects ------------------------------------------------------------
 
     @property
+    def hydro_onset_mph(self) -> float | None:
+        """The speed where the tires start riding the water film, or None when
+        the road holds too little water to float a loaded truck tire."""
+        if self.water_mm < HYDRO_MIN_WATER_MM:
+            return None
+        tread = 1.0 - HYDRO_TREAD_LOSS * self.tire_wear_pct / 100.0
+        water = max(0.5, 1.0 - HYDRO_WATER_LOSS_PER_MM * (self.water_mm - HYDRO_MIN_WATER_MM))
+        return HYDRO_ONSET_BASE_MPH * tread * water
+
+    @property
+    def hydroplaning(self) -> bool:
+        onset = self.hydro_onset_mph
+        return onset is not None and self.speed_mph > onset
+
+    def _hydro_grip_mult(self) -> float:
+        """1.0 below onset, collapsing toward the floor as speed leaves the
+        onset behind. Slowing down restores contact -- and grip -- smoothly."""
+        onset = self.hydro_onset_mph
+        if onset is None or self.speed_mph <= onset:
+            return 1.0
+        frac = min(1.0, (self.speed_mph - onset) / HYDRO_FULL_BAND_MPH)
+        return 1.0 - (1.0 - HYDRO_GRIP_FLOOR) * frac
+
+    @property
     def effective_grip(self) -> float:
-        """Weather grip degraded by tread wear; bald tires make every surface worse."""
-        return self.grip * (1.0 - TIRE_WEAR_GRIP_LOSS * self.tire_wear_pct / 100.0)
+        """Weather grip degraded by tread wear and hydroplaning; bald tires
+        make every surface worse and float sooner in standing water."""
+        tread = 1.0 - TIRE_WEAR_GRIP_LOSS * self.tire_wear_pct / 100.0
+        return self.grip * tread * self._hydro_grip_mult()
 
     @property
     def brake_wear_factor(self) -> float:
@@ -346,8 +395,8 @@ class TruckState:
             JAKE_RPM_FLOOR + (1.0 - JAKE_RPM_FLOOR) * rpm_frac
         )
 
-    def jake_brake_force(self) -> float:
-        """Retarding force at the wheels: crank torque through the gearing.
+    def _jake_force_demand(self) -> float:
+        """Wheel force the jake asks for: crank torque through the gearing.
 
         The gear ratio is the multiplier, so the same stage that pins the
         speed in 7th barely leans on the truck in overdrive -- and it drops
@@ -358,6 +407,32 @@ class TruckState:
             return 0.0
         s = self.specs
         return self.jake_retard_torque_nm() * ratio * s.driveline_efficiency / s.wheel_radius_m
+
+    def _jake_traction_cap(self) -> float:
+        """The most retard the drive axle can transmit before its wheels slide."""
+        return (
+            self.gross_mass_kg * G * DRIVE_AXLE_LOAD_FRACTION * JAKE_LOCK_MARGIN
+            * self.effective_grip
+        )
+
+    def jake_brake_force(self) -> float:
+        """Retarding force actually delivered: demand, capped by drive-axle grip.
+
+        On dry pavement the cap sits far above anything the jake can ask for;
+        on ice a hard stage in a low gear runs into it, which is the physics
+        behind the CDL rule about compression brakes on slick roads.
+        """
+        demand = self._jake_force_demand()
+        if demand <= 0.0:
+            return 0.0
+        return min(demand, self._jake_traction_cap())
+
+    @property
+    def jake_slipping(self) -> bool:
+        """Whether the jake is asking for more than the drive axle can hold --
+        the drive wheels breaking loose, the start of a trolley jackknife."""
+        demand = self._jake_force_demand()
+        return demand > 0.0 and demand > self._jake_traction_cap()
 
     def brake_force(self) -> float:
         if abs(self.velocity_mps) <= 0.01:

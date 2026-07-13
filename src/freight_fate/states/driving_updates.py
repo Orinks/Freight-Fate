@@ -150,6 +150,7 @@ class DrivingUpdateMixin:
         self._update_speeding(dt)
         self._update_pull_over(dt)
         self._update_brake_heat_cue(dt)
+        self._update_traction_cues()
         if self.tutorial:
             self.tutorial.update(dt, t)
         if self.trip.finished:
@@ -1148,6 +1149,26 @@ class DrivingUpdateMixin:
         if t.brake >= 0.4 and t.speed_mph > 10.0 and t.brake_temp_c >= t.specs.brake_fade_temp_c:
             self.ctx.audio.play("vehicle/brake_squeal", volume=0.8)
             self._brake_squeal_cooldown_s = 4.0
+
+    def _update_traction_cues(self) -> None:
+        """Speak the physical traction states once, on the edge they begin.
+
+        Each warning names the state and the action that clears it: ease off
+        the speed when the tires float, ease off the jake when the drive
+        wheels slide. The flag resets when the state clears, so a second
+        excursion warns again.
+        """
+        t = self.truck
+        planing = t.hydroplaning
+        if planing and not self._hydro_active:
+            self.ctx.say_event("Hydroplaning. The steering has gone light; ease off the speed.")
+        self._hydro_active = planing
+        slipping = t.jake_slipping and t.speed_mph > 5.0
+        if slipping and not self._jake_slip_active:
+            self.ctx.say_event(
+                "The drive wheels are sliding under the engine brake. Ease off the jake."
+            )
+        self._jake_slip_active = slipping
 
     def _update_pull_over(self, dt: float) -> None:
         if self._pull_over is None:
