@@ -27,6 +27,10 @@
 
 ### Changed
 
+- **Your public profile now fills in the moment you turn Profile sharing on.**
+  Connecting to orinks.net or re-enabling sharing publishes your career summary
+  right away, instead of waiting for your next save at a delivery or terminal.
+
 - **The engine no longer jumps in volume the instant an automatic shift
   finishes.** It now eases back up to full pull over a brief moment, so completed
   shifts sound smooth instead of abruptly snapping back under load.
