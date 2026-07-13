@@ -695,12 +695,13 @@ class SettingsCategoryState(MenuState):
                     "with W and Q to shift up and down.",
                 ),
                 MenuItem(
-                    lambda: f"Trip pacing: {self._pace_label()}",
+                    lambda: f"Driving mode: {self._pace_label()}",
                     lambda: self._cycle_pace(1),
-                    help="Controls how quickly game time and distance pass "
-                    "at highway speed. The clock always slows to near real "
-                    "time while you accelerate, brake, or maneuver, and runs "
-                    "at double pace while parked with the parking brake set.",
+                    help="Driving mode controls pacing and pressure. Relaxed "
+                    "gives wider hazard response windows, gentler "
+                    "collision damage and fatigue, calmer speech, and the most "
+                    "real time. Standard keeps balanced pressure. Realistic "
+                    "moves fastest, so decisions arrive sooner.",
                 ),
                 MenuItem(
                     lambda: f"Hours of service: {self._hos_label()}",
@@ -964,7 +965,7 @@ class SettingsCategoryState(MenuState):
 
     def _pace_label(self) -> str:
         scale = self.ctx.settings.time_scale
-        return {10.0: "relaxed", 20.0: "standard", 40.0: "fast"}.get(scale, f"{scale:g} times")
+        return {10.0: "relaxed", 20.0: "standard", 40.0: "realistic"}.get(scale, f"{scale:g} times")
 
     def _hos_label(self) -> str:
         return {

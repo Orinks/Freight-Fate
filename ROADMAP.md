@@ -1,10 +1,181 @@
 # Freight Fate Roadmap
 
-> Current stable: **1.7.0** (shipped). Next release: **1.8.0**, in flight on the
-> `awesome-greider` branch (troopers, real OSM speed limits, seasons,
-> cargo-weight physics, predictive adaptive cruise, and more). `pyproject` is
-> set to 1.8.0 so developer snapshots report it; the stable tag follows at
-> release.
+> Current stable: **1.8.0** (shipped 2026-07-05). Next release: **1.9.0**, in
+> flight on the `feat/career-1.9` branch -- driving realism between the exits
+> (discrete lanes, ramp terminals, congestion, real surface streets) plus the
+> highway-spider world expansion, roadside narration, and real time zones.
+> `pyproject` is set to 1.9.0 so developer snapshots report it; the stable tag
+> follows at release. Keep this file current: when a feature lands on the 1.9
+> line, check it off here in the same change.
+
+## 1.9 in flight (`feat/career-1.9`)
+
+- [x] Add a curated `career_1_9` transcript-backed smoke suite with reusable career-stage presets, structured speech ordering, keyboard reachability, all driving modes, and deterministic event hooks.
+- [ ] Wire Big Buck's content into a playable roadside stop; current 1.9 data and spoken refusal content are shipped, but no honest drive-and-enter gameplay path exists yet.
+
+Four threads: make the drive *between* the exits real, give every maneuver
+and working hour weight, make the career read like real employment, and
+make the world big and specific enough that every run feels like a place.
+(Also releasing with 1.9: everything built for 1.8 that missed the 1.8.0
+cut -- the exit setup, expanded enforcement, logbook, timed dock work, and
+city service drives below.)
+
+### Lanes and maneuvering
+
+- [x] **Discrete lanes on the drift model.** `LaneKeeping` carries a discrete
+      lane index under its continuous offset: with steering assist on,
+      steering across the line is the lane change; with assist off, a
+      Left/Right tap runs a timed change with signal clicks. Dodgeable
+      hazards ("Brake or change lanes!"), sideswipe risk against real
+      absolute-lane traffic, construction lane closures with barrel crashes,
+      keep-right-except-to-pass CB nags, and right-lane exit gating.
+- [x] **Signalized ramp terminals grounded in OSM.** Baked
+      `traffic_signals`/`stop` nodes on 6,295 of 13,504 exit ramp links
+      (heuristic elsewhere): a red/green cycle at the stop bar, grace
+      distance, cross-traffic clips for running it -- now with dedicated
+      red and green light earcons alongside the spoken callouts.
+- [x] **Congestion grounded in FHWA HPMS volume.** Real AADT baked per leg
+      drives clock-gated jams on a commuter curve: metro stretches jam at
+      rush hour and flow free at midnight; entering a live jam injects slow
+      traffic into both lanes.
+- [x] **Surface streets driven for real.** Tier-1 street chains carry baked
+      per-segment cues and speed zones; boundary cues speak the maneuver
+      with block-aware distances; city-passage and highway-pressure language
+      is suppressed on streets.
+- [x] **Steering audio cues.** The geometry builders bake turn *directions*
+      from the signed bearing change at each road-name boundary ("Turn right
+      onto", with near-straight name changes as "Continue onto"), and the
+      runtime plays a direction-shaped earcon panned from the maneuver side:
+      falling chime left, rising chime right, steady tone ahead.
+- [x] **Surface chaining, arrival side.** The destination exit ramp flows
+      onto the facility's tier-1 street chain and ends at the standard gate
+      arrival, with clock/toll/weekday continuity and a `surface_chain` save
+      marker; facilities without turn-level data keep the scripted arrival.
+- [x] **Surface chaining, departure side.** A loaded run out of a
+      chain-capable origin facility starts at the gate and drives the same
+      street chain outbound -- leg order reversed and every junction's turn
+      direction flipped -- then merges up the on-ramp onto the highway trip
+      with clock and toll continuity and a `departure_chain` save marker.
+      Facilities without turn-level data keep the scripted highway start.
+
+### Maneuvers, enforcement, and the working day
+
+Mechanics finished after the 1.8.0 cut, so they release with 1.9 (the
+detailed design notes live in the sections further down, whose "Shipped
+for 1.8" framing predates the release split):
+
+- [x] **Highway exits take a real setup.** X signals the announced exit,
+      the GPS asks for the right-side exit lane, checks ramp speed at the
+      gore, and explains missed exits; destination ramps follow the same
+      speed/lane/intent contract, and merge/exit traffic puts spoken
+      pressure on the maneuver.
+- [x] **Enforcement beyond the speeding stop.** Weigh-station blow-pasts
+      and severe visible damage draw roadside stops; running from lights
+      escalates through warnings to a felony stop with spike strips and
+      loaded-run cancellation; construction zones stage a merge/flagger
+      taper before the barrels; CB chatter hints at bears and work-zone
+      enforcement a few miles out.
+- [x] **The working day has weight.** An in-cab logbook records a real
+      Record of Duty Status that traffic stops actually read; loading,
+      unloading, and pull-ins take spoken on-duty time; loaded launches ramp
+      in like a heavy truck; rush hour and corridor busyness shape traffic
+      and hazard pacing.
+- [x] **Three distinct driving-pressure modes.** Relaxed retains the 1.9 truck,
+      traffic, weather, fatigue, and hazard systems with calmer spacing, wider
+      reactions, gentler recovery, and quieter routine speech. Standard keeps
+      balanced pressure; Realistic keeps the quickest decision cadence.
+- [x] **Drive to city services.** The terminal's freight office, garage,
+      and truck dealer are short local drives with sourced names, road
+      context, and (where the data supports it) real street-by-street
+      turns.
+
+### Career, dispatch, and business
+
+The other half of the 1.9 line: the career now reads like employment at a
+real starter carrier, not a menu of freight. Detail lives in the Business
+section below and the Unreleased changelog; the release-line view:
+
+- [x] **Grounded start choices.** New careers pick among fictional
+      company-driver starter carriers (assigned equipment, carrier-paid
+      fuel and routine repairs, different wage/dispatch/freight tradeoffs,
+      carrier-shaped dispatch boards) or a higher-risk owner-operator start
+      with operating costs active from day one.
+- [x] **A 30-level business arc.** Company-driver ranks lead to the
+      level-18 leased-on owner-operator gate, level-21 authority prep,
+      level-25 own authority, and independent ranks through 30 -- with
+      distinct guidance voices per level band and haul-length caps that
+      grow through the whole arc instead of maxing out by level 12.
+- [x] **Dispatch freedom is earned.** New hires run the load and lane
+      dispatch assigns -- accept or decline against a small budget that
+      refills on promotion, no route menu -- with load choice from the full
+      board unlocking at level 8 and route choice reserved for
+      owner-operators and own authority. Declined loads stay declined.
+- [x] **The economy pays like a real one.** Carrier accounts cover a
+      company driver's road fuel and repairs; specialty cargo and on-time
+      streaks compound experience; reputation pays a continuous dispatch
+      trust bonus; personal money buys endorsement courses and motel rest.
+- [x] **Trailers matter.** Trailer programs for leased-on owner-operators,
+      owned trailers under own authority, and dispatch rows that preview
+      trailer fit and estimated take-home before you accept.
+- [x] **A first day that lands.** A repeating first-day briefing until the
+      first dispatch is accepted, a Career plan terminal item naming the
+      next practical step, and a rewritten How to play that teaches earned
+      dispatch freedom.
+- [x] **114 achievements.** The badge wall nearly doubles: state, region,
+      and city arrivals, cargo firsts, close calls, mishaps, and career
+      milestones, each nodding to a country or trucking song.
+- [x] **Save compatibility.** Careers back through the version-4 schema
+      load with sensible defaults, and newer-snapshot saves no longer crash
+      older-schema loads.
+
+### Radio
+
+- [x] **The in-cab radio follows the map.** M toggles, brackets tune the
+      currently receivable stations, Y speaks status, Tab has a Radio
+      screen; streamer-safe by default with real public streams behind an
+      explicit opt-in.
+- [x] **Hosts, regional stations, and real signal behavior.** The Roadhouse
+      and Night Line have live hosts; twelve fictional regional stations
+      with newly composed songs cover markets across the map, fading to
+      static at the fringe of their range and handing back to the Roadhouse
+      when the signal drops.
+
+### World and narration
+
+- [x] **Highway-spider map expansion.** Corridor-inventory tooling plus
+      dozens of spider batches grow the map to 375 cities and 626 enriched
+      legs -- real corridors across the Great Basin, the Hi-Line, the
+      Dakotas, Appalachia, West Texas, and more, each with real roads,
+      checkpoints, grades, and truck stops.
+- [x] **Stable slug city keys.** Cities key by slug (`abilene_tx_us`) with a
+      composed spoken layer, ending display-name collisions as the map grows.
+- [x] **Truck-stop POI sweep and rural-diesel fallback.** Every leg now has
+      a real or fallback fuel stop.
+- [x] **Roadside landmarks and billboards.** 2,835 baked OSM landmarks speak
+      as ambient chatter (national forests, named rivers, passes, museums),
+      plus corridor-keyed parody billboards; a Settings group adds a master
+      Roadside chatter switch with per-kind toggles, and terse verbosity
+      mutes it all.
+- [x] **Brand amenities at service stops.** Travel-center brands describe
+      their real amenity sets in POI offers and rest-stop menus (the
+      spoken layer of the amenities/Big Buck's modules).
+- [x] **Real US time zones.** The compressed career clock now crosses real
+      zone boundaries with spoken zone changes; deadlines read in the
+      destination's local time.
+- [ ] **Service-stop buffs and the Big Buck's catalog.** The amenities and
+      `big_bucks` modules ship content and tiers; the gameplay layer --
+      purchase menus and buff effects on rest quality, fatigue, or morale --
+      is not wired yet.
+- [ ] **Overlay re-sweep on the slug world.** The local-approach /
+      city-service / turn-level geometry sweeps predate the slug migration
+      and the newest cities; the runtime canonicalizes old ids and new
+      targets simply fall back until the five-builder overlay pipeline is
+      updated for slug keys and re-run over the 375-city map.
+- [ ] **Earcon audition pass.** The five 1.9 steering sounds (turn
+      left/right/ahead, ramp light red/green) shipped verified by
+      measurement, not by ear; regenerate any that sound off via
+      `tools/generate_sounds.py` (+ `tools/mirror_turn_chime.py` for the
+      right-turn mirror).
 
 ## Shipped in 1.6.0
 
@@ -28,8 +199,8 @@ A consolidation pass focused on closing realism gaps and removing rough
 edges rather than adding new systems. Much of it shipped in **1.7.0**
 (player-feedback UX, dispatcher pay advances, relaxed mode, grounded
 hazards, drowsiness, truck-legal HGV routing); the 1.7.0 CHANGELOG is the
-source of truth for that release's exact contents. The **1.8.0** batch on
-the `awesome-greider` branch -- pending merge -- adds the trooper pull-overs,
+source of truth for that release's exact contents. The **1.8.0** batch --
+shipped 2026-07-05 -- added the trooper pull-overs,
 real OSM `maxspeed` baked per leg, corridor/real speed limits, seasons and a
 temperature model, cargo-weight physics, immediate speeding-cost cues, the
 S/A/U info keys, the HTML manual, and limit-aware (predictive) adaptive
@@ -271,7 +442,7 @@ Net-new realism candidates, roughly by area:
   owner-operator arc is shipped; true-authority depth, trailer polish,
   operating-cost tuning, and market pricing are tracked under Business.
 
-## Shipped for 1.8: local city service drives
+## Local city service drives (built for 1.8, releases with 1.9)
 
 The first ATS-style city-layout foundation is in: from the terminal, **Drive to
 city services** lets the player pick the freight market office, terminal
@@ -353,7 +524,7 @@ Follow-up hooks for the roadmap worker:
   offices, while the business arc remains focused on driver/company vs
   owner-operator settlement and operating costs.
 
-## Shipped for 1.8: timed facility work and stop-menu settling
+## Timed facility work and stop-menu settling (built for 1.8, releases with 1.9)
 
 Pickup, loading, destination docking, unloading, and route-stop pull-ins now
 feel like short in-game actions instead of instant teleports. Loading and
@@ -373,7 +544,7 @@ Follow-ups for a later facility/keyboard polish pass:
 - If key repeat is ever enabled globally, add an explicit post-transition input
   guard so held braking/navigation keys cannot leak into newly opened menus.
 
-## Shipped for 1.8: in-cab logbook (Record of Duty Status)
+## In-cab logbook, Record of Duty Status (built for 1.8, releases with 1.9)
 
 The game talks about an ELD and the shipped `TrafficStopState` already runs a
 spoken "license/logbook check." That now has a real logbook behind it:

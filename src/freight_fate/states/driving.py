@@ -63,7 +63,10 @@ class DrivingState(DrivingControlsMixin, DrivingUpdateMixin, DrivingEventMixin, 
             seed=self.trip_seed,
             start_hour=trip_start_hour,
             imperial=ctx.settings.imperial_units,
-            hazard_scale=hos.hazard_scale(ctx.settings.hos_mode),
+            hazard_scale=(
+                hos.hazard_scale(ctx.settings.hos_mode)
+                * tuning_for_time_scale(ctx.settings.time_scale).hazard_frequency
+            ),
             career_hours=profile.game_hours,
         )
         self.lane = LaneKeeping(seed=self.trip_seed)
@@ -167,6 +170,12 @@ class DrivingState(DrivingControlsMixin, DrivingUpdateMixin, DrivingEventMixin, 
         # becomes the surface route.
         self._surface_chain = False
         self._highway_trip = None
+        # Departure chain: the mirror. A loaded run out of a chain-capable
+        # origin facility starts on its streets and merges onto the highway.
+        # Checked lazily on the first drive tick so restored mid-highway
+        # saves are never pulled back onto the streets.
+        self._departure_chain = False
+        self._departure_checked = False
         self._cruise_mph: float | None = None
         self._cruise_throttle = 0.0
         self._acc_following = False
@@ -216,6 +225,8 @@ class DrivingState(DrivingControlsMixin, DrivingUpdateMixin, DrivingEventMixin, 
         leg = route.legs[index]
         if self._surface_chain:
             return f"{leg.highway} in {self.job.destination}"
+        if self._departure_chain:
+            return f"{leg.highway} in {self.job.origin}"
         start = route.cities[index]
         end = route.cities[index + 1]
         return f"{leg.highway} from {start} to {end}"
@@ -278,6 +289,8 @@ class DrivingState(DrivingControlsMixin, DrivingUpdateMixin, DrivingEventMixin, 
             # Mid-surface-chain saves resume on the street chain; absent on
             # older saves, which resume exactly as before.
             "surface_chain": self._surface_chain,
+            # Mid-departure-chain saves resume on the origin's streets.
+            "departure_chain": self._departure_chain,
         }
 
     @classmethod
@@ -350,9 +363,15 @@ class DrivingState(DrivingControlsMixin, DrivingUpdateMixin, DrivingEventMixin, 
                     state.trip.restore(position_mi, game_minutes)
                 else:
                     state._destination_exit_taken = False
-                    state.trip.restore(
-                        max(0.0, state.trip.total_miles - 2.0), game_minutes
-                    )
+                    state.trip.restore(max(0.0, state.trip.total_miles - 2.0), game_minutes)
+            elif bool(data.get("departure_chain", False)):
+                # Saved on the origin facility's outbound streets: re-enter
+                # the departure chain at the saved distance. If the data no
+                # longer offers one, the highway trip simply starts from the
+                # top -- the saved street miles were the first miles anyway.
+                if state._begin_departure_chain(announce=False):
+                    state.trip.restore(position_mi, game_minutes)
+            state._departure_checked = True
             state.truck.restore_air_brake_snapshot(data.get("air_brake"), default_ready=True)
             if bool(data.get("engine_on", False)):
                 state.truck.start_engine()

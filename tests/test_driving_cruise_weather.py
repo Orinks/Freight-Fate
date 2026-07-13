@@ -544,6 +544,7 @@ def test_hazard_deadline_covers_braking_time_from_current_speed():
 
     app = App()
     try:
+        app.ctx.settings.time_scale = 20.0
         driving = start_drive(app)
         quiet_trip(driving)
         t = driving.truck

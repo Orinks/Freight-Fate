@@ -12,9 +12,21 @@ LANE_GUIDANCE_PAN = 0.85
 class DrivingUpdateMixin:
     def update(self, dt: float) -> None:
         t = self.truck
+        # A fresh loaded run out of a chain-capable origin starts on the
+        # facility's streets. Decided on the first tick, never on a resume:
+        # from_snapshot marks the check done and re-enters a chain itself.
+        if not self._departure_checked:
+            self._departure_checked = True
+            if not self.resumed:
+                self._begin_departure_chain()
         # pacing can be changed from the pause menu mid-trip; keep the trip's
         # clock compression in step with the setting
         self.trip.time_scale = self.ctx.settings.time_scale
+        tuning = tuning_for_time_scale(self.trip.time_scale)
+        self.trip.hazard_scale = (
+            hos.hazard_scale(self.ctx.settings.hos_mode) * tuning.hazard_frequency
+        )
+        self.trip.traffic_manager.hazard_scale = self.trip.hazard_scale
         self._sync_radio_settings()
         self._sync_weather_source()
         keys = pygame.key.get_pressed()
@@ -141,7 +153,10 @@ class DrivingUpdateMixin:
         if self.tutorial:
             self.tutorial.update(dt, t)
         if self.trip.finished:
-            if self.phase == DRIVE_PHASE_PICKUP:
+            if self._departure_chain:
+                # End of the origin's streets: merge onto the highway trip.
+                self._finish_departure_chain()
+            elif self.phase == DRIVE_PHASE_PICKUP:
                 self._handle_pickup_gate()
             elif self.phase == DRIVE_PHASE_CITY_SERVICE:
                 self._handle_city_service_gate()
@@ -318,7 +333,7 @@ class DrivingUpdateMixin:
             self.hos.drive(gm)
         else:
             self.hos.on_duty(gm)  # the 14-hour window runs even while parked
-        if mode not in hos.HOS_NON_ENFORCED_MODES:
+        if mode not in hos.HOS_NON_ENFORCED_MODES and self._hazard_deadline is None:
             for message in self.hos.check_warnings(mode):
                 self.ctx.audio.play("ui/warning")
                 self.ctx.controller.rumble.alert()
@@ -330,11 +345,17 @@ class DrivingUpdateMixin:
         night = is_night(self.trip.local_hour)
         now_h = self._absolute_game_hour()
         if moving:
-            # An active food/drink buff slows accrual (data/buffs.py); it
-            # never touches the HOS duty clock above.
+            # Pressure-mode tuning scales how fast the day wears on you, and
+            # an active food/drink buff slows accrual (data/buffs.py); neither
+            # touches the HOS duty clock above.
+            fatigue_mult = tuning_for_time_scale(self.trip.time_scale).fatigue_rate
             p.fatigue = min(
                 100.0,
-                p.fatigue + hos.fatigue_rate_per_min(night) * gm * p.fatigue_buff_rate(now_h),
+                p.fatigue
+                + hos.fatigue_rate_per_min(night)
+                * gm
+                * fatigue_mult
+                * p.fatigue_buff_rate(now_h),
             )
         for worn in p.expire_buffs(now_h):
             text = worn.get("worn_off") or f"The {worn.get('label', 'buff').lower()} has worn off."
@@ -342,7 +363,8 @@ class DrivingUpdateMixin:
         self.truck.engine_wear_buff_mult = float(self.rig_buffs.get("engine", {}).get("rate", 1.0))
         self.truck.tire_wear_buff_mult = float(self.rig_buffs.get("tire", {}).get("rate", 1.0))
         fatigue = p.fatigue
-        if fatigue >= hos.FATIGUE_SEVERE and not self._severe_said:
+        alerts_clear = self._hazard_deadline is None
+        if fatigue >= hos.FATIGUE_SEVERE and not self._severe_said and alerts_clear:
             self._severe_said = True
             self._fatigue_cue_gm = 0.0
             self.ctx.audio.play("vehicle/rumble_strip", volume=0.8)
@@ -351,7 +373,7 @@ class DrivingUpdateMixin:
                 "your lane. Sleep at the next rest stop.",
                 interrupt=True,
             )
-        elif fatigue >= hos.FATIGUE_DROWSY and not self._drowsy_said:
+        elif fatigue >= hos.FATIGUE_DROWSY and not self._drowsy_said and alerts_clear:
             self._drowsy_said = True
             self._fatigue_cue_gm = 0.0
             self.ctx.audio.play("driver/yawn", volume=0.9)
@@ -787,7 +809,8 @@ class DrivingUpdateMixin:
         if self.ctx.settings.speech_verbosity == 0:
             return
         self._speed_announce_timer += dt
-        interval = 12.0 if self.ctx.settings.speech_verbosity == 1 else 7.0
+        base_interval = tuning_for_time_scale(self.trip.time_scale).routine_speech_interval_s
+        interval = base_interval if self.ctx.settings.speech_verbosity == 1 else 7.0
         if self._speed_announce_timer >= interval:
             self._speed_announce_timer = 0.0
             mph = self.truck.speed_mph
@@ -822,6 +845,7 @@ class DrivingUpdateMixin:
             self._hazard_deadline = None
             self.ctx.audio.play("vehicle/collision")
             severity = min(1.0, self.truck.speed_mph / 70.0)
+            severity *= tuning_for_time_scale(self.trip.time_scale).collision_damage
             self.ctx.controller.rumble.impact(severity)
             self.truck.apply_collision(severity)
             self.ctx.say_event(
@@ -1121,11 +1145,7 @@ class DrivingUpdateMixin:
             self._brake_squeal_cooldown_s = max(0.0, self._brake_squeal_cooldown_s - dt)
             return
         t = self.truck
-        if (
-            t.brake >= 0.4
-            and t.speed_mph > 10.0
-            and t.brake_temp_c >= t.specs.brake_fade_temp_c
-        ):
+        if t.brake >= 0.4 and t.speed_mph > 10.0 and t.brake_temp_c >= t.specs.brake_fade_temp_c:
             self.ctx.audio.play("vehicle/brake_squeal", volume=0.8)
             self._brake_squeal_cooldown_s = 4.0
 

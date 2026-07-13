@@ -27,6 +27,19 @@ from commit subjects. CI fails any PR that changes user-facing paths
 - Nothing player-facing (refactors, CI, tests, tooling): put
   `[skip changelog]` or `changelog: none` in every commit message.
 
+## Roadmap upkeep
+
+`ROADMAP.md` tracks feature status per release line and must move with the
+code, in the same change:
+
+- Landing a roadmap feature (or a meaningful slice of one): check it off or
+  reword its bullet to describe what actually shipped.
+- Building something new that is not on the roadmap: add it to the current
+  release-line section as you land it.
+- Discovering follow-up work worth doing (deferred wiring, a needed data
+  re-sweep, a known gap): record it as an unchecked bullet rather than
+  leaving it only in commit messages or session memory.
+
 ## Commands
 
 - Setup: `uv sync --group dev`

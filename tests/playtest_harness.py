@@ -26,8 +26,17 @@ def _finish_timed_state(app) -> None:
 
 
 @dataclass
+class SpokenEntry:
+    sequence: int
+    channel: str
+    text: str
+    interrupt: bool
+
+
+@dataclass
 class PlaytestResult:
     transcript: list[str] = field(default_factory=list)
+    spoken: list[SpokenEntry] = field(default_factory=list)
     deliveries: int = 0
     destination: str = ""
     current_city: str = ""
@@ -49,6 +58,27 @@ class PlaytestResult:
             self.transcript_text
         )
         assert self.remaining_miles == 0.0
+
+    def assert_ordered(self, *phrases: str) -> None:
+        """Assert phrases occur in order, allowing unrelated speech between them."""
+        cursor = 0
+        for phrase in phrases:
+            cursor = next(
+                (
+                    i + 1
+                    for i, line in enumerate(self.transcript[cursor:], cursor)
+                    if phrase in line
+                ),
+                0,
+            )
+            assert cursor, f"Missing or out-of-order phrase {phrase!r}\n{self.transcript_text}"
+
+    def assert_screen_reader_friendly(self) -> None:
+        assert self.transcript
+        assert all(line.strip() == line and line for line in self.transcript)
+        raw_markers = ("osm_id", "amenity=", "highway=", "node/", "way/")
+        assert not any(marker in self.transcript_text.lower() for marker in raw_markers)
+        assert all(entry.sequence == i for i, entry in enumerate(self.spoken))
 
 
 class PlaytestHarness:
@@ -73,9 +103,11 @@ class PlaytestHarness:
             self.app.shutdown()
 
     def _say(self, text: str, interrupt: bool = True) -> None:
+        self.result.spoken.append(SpokenEntry(len(self.result.spoken), "main", text, interrupt))
         self.result.transcript.append(text)
 
     def _say_event(self, text: str, interrupt: bool = True) -> None:
+        self.result.spoken.append(SpokenEntry(len(self.result.spoken), "event", text, interrupt))
         self.result.transcript.append(f"[event] {text}")
 
     def start_delivery(
@@ -85,6 +117,7 @@ class PlaytestHarness:
         job_rank: int = 0,
         route_rank: int = 0,
         configure_profile=None,
+        stop_at_pickup: bool = False,
     ) -> PlaytestResult:
         from freight_fate.states.city import (
             CityMenuState,
@@ -106,8 +139,8 @@ class PlaytestHarness:
         self._select_current_menu_text("New career")
         assert isinstance(self.app.state, NameEntryState)
         for ch in profile_name:
-            if ch != " ":
-                self.app.state.handle_event(key_event(ord(ch.lower()), ch))
+            key = pygame.K_SPACE if ch == " " else ord(ch.lower())
+            self.app.state.handle_event(key_event(key, ch))
         self.app.state.handle_event(key_event(pygame.K_RETURN))
         assert isinstance(self.app.state, CareerStartState)
         self.app.state.handle_event(key_event(pygame.K_RETURN))
@@ -137,6 +170,8 @@ class PlaytestHarness:
         self.app.state.update(1 / 60)
         _finish_timed_state(self.app)
         assert isinstance(self.app.state, PickupFacilityState)
+        if stop_at_pickup:
+            return self.result
         self.app.state.handle_event(key_event(pygame.K_RETURN))
         self.app.state.handle_event(key_event(pygame.K_RETURN))
         _finish_timed_state(self.app)
@@ -230,6 +265,37 @@ class PlaytestHarness:
         self.result.remaining_miles = driving.trip.remaining_miles
         return self.result
 
+    def continue_to_next_delivery(self, *, job_rank: int = 0, route_rank: int = 0) -> None:
+        """Leave settlement and dispatch another load on the same career."""
+        from freight_fate.states.city import CityMenuState, JobBoardState, PickupFacilityState
+        from freight_fate.states.driving import ArrivalState, DrivingState
+
+        assert isinstance(self.app.state, ArrivalState)
+        self.app.state.handle_event(key_event(pygame.K_ESCAPE))
+        assert isinstance(self.app.state, CityMenuState)
+        self._select_current_menu_text("Dispatch board")
+        assert isinstance(self.app.state, JobBoardState)
+        if self.app.state.assigned_mode:
+            self._accept_assigned_job(job_rank)
+        else:
+            self._choose_unlocked_job(job_rank)
+        assert isinstance(self.app.state, DrivingState)
+        self.app.state.trip.position_mi = self.app.state.trip.total_miles
+        self.app.state.trip.finished = True
+        self.app.state.truck.velocity_mps = 0.0
+        self.app.state.update(1 / 60)
+        _finish_timed_state(self.app)
+        assert isinstance(self.app.state, PickupFacilityState)
+        self.app.state.handle_event(key_event(pygame.K_RETURN))
+        self.app.state.handle_event(key_event(pygame.K_RETURN))
+        _finish_timed_state(self.app)
+        self.app.state.handle_event(key_event(pygame.K_RETURN))
+        if self.app.state.__class__.__name__ == "RouteSelectState":
+            self._choose_route(route_rank)
+        assert isinstance(self.app.state, DrivingState)
+        self.driving = self.app.state
+        self._neutralize_random_trip_friction()
+
     def prepare_for_driving(self, *, speed_mph: float = 30.0) -> None:
         """Put the active delivery truck in a road-ready deterministic state."""
         assert self.driving is not None
@@ -290,10 +356,22 @@ class PlaytestHarness:
         self.driving.trip.traffic_pressures = [pressure]
         return pressure
 
+    def emit_trip_event(self, kind, text: str, data: dict | None = None) -> None:
+        """Re-enable one deterministic trip event after default neutralization."""
+        from freight_fate.sim.trip_models import TripEvent
+
+        assert self.driving is not None
+        self.driving._handle_trip_event(TripEvent(kind, text, data or {}))
+
     def _select_current_menu_text(self, text: str) -> None:
         assert self.app is not None
-        while self.app.state.items[self.app.state.index].text != text:
+        for _ in range(len(self.app.state.items)):
+            if self.app.state.items[self.app.state.index].text == text:
+                break
             self.app.state.handle_event(key_event(pygame.K_DOWN))
+        else:
+            choices = [item.text for item in self.app.state.items]
+            raise AssertionError(f"Menu item {text!r} not reachable with Down: {choices}")
         self.app.state.handle_event(key_event(pygame.K_RETURN))
 
     def _choose_unlocked_job(self, rank: int) -> None:
@@ -303,8 +381,12 @@ class PlaytestHarness:
         assert unlocked
         unlocked.sort(key=lambda item: item[1].distance_mi)
         target_index, _job = unlocked[rank % len(unlocked)]
-        while board.index != target_index:
+        for _ in range(len(board.items)):
+            if board.index == target_index:
+                break
             board.handle_event(key_event(pygame.K_DOWN))
+        else:
+            raise AssertionError(f"Job index {target_index} not keyboard reachable")
         self.app.state.handle_event(key_event(pygame.K_RETURN))
 
     def _accept_assigned_job(self, rank: int) -> None:
@@ -316,8 +398,12 @@ class PlaytestHarness:
             )
             if decline_index is None:
                 break  # out of declines or no alternative freight
-            while board.index != decline_index:
+            for _ in range(len(board.items)):
+                if board.index == decline_index:
+                    break
                 board.handle_event(key_event(pygame.K_DOWN))
+            else:
+                raise AssertionError("Decline action not keyboard reachable")
             board.handle_event(key_event(pygame.K_RETURN))
         board.handle_event(key_event(pygame.K_HOME))
         board.handle_event(key_event(pygame.K_RETURN))
@@ -326,8 +412,12 @@ class PlaytestHarness:
         assert self.app is not None
         route_state = self.app.state
         target_index = rank % len(route_state.routes)
-        while route_state.index != target_index:
+        for _ in range(len(route_state.items)):
+            if route_state.index == target_index:
+                break
             route_state.handle_event(key_event(pygame.K_DOWN))
+        else:
+            raise AssertionError(f"Route index {target_index} not keyboard reachable")
         route_state.handle_event(key_event(pygame.K_RETURN))
 
     def _neutralize_random_trip_friction(self) -> None:

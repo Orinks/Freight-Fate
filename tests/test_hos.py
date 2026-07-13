@@ -876,6 +876,7 @@ def test_fatigued_driver_gets_a_shorter_hazard_window():
 
     app = App()
     try:
+        app.ctx.settings.time_scale = 20.0
         driving = start_drive(app)
         hazard = TripEvent(TripEventKind.HAZARD, "Brake now!", {"deadline_s": 4.0})
         app.ctx.profile.fatigue = 0.0

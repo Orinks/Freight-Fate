@@ -33,6 +33,55 @@ CITY_SERVICE_APPROACH_ROADS = {
 }
 
 
+def _local_cue_direction(cue: str) -> str:
+    """Maneuver direction baked in a local segment cue, or ""."""
+    lowered = cue.strip().lower()
+    if lowered.startswith("turn left"):
+        return "left"
+    if lowered.startswith("turn right"):
+        return "right"
+    if lowered.startswith("continue"):
+        return "ahead"
+    return ""
+
+
+def _reversed_local_legs(city: str, legs: list[Leg]) -> list[Leg]:
+    """The same street chain driven outbound: leg order reversed, and each
+    junction's turn direction flipped (an inbound right turn is an outbound
+    left at the same corner). Near-straight boundaries stay "Continue onto";
+    directionless legacy cues stay directionless."""
+    arrival = list(legs)
+    out: list[Leg] = []
+    for i, src in enumerate(reversed(arrival)):
+        if i == 0:
+            cue = f"Start on {src.highway}."
+        else:
+            # Outbound, the junction onto this leg is the one the inbound
+            # drive crossed *leaving* it: the cue baked on the leg after it.
+            inbound = _local_cue_direction(arrival[len(arrival) - i].local_cue)
+            if inbound == "left":
+                cue = f"Turn right onto {src.highway}."
+            elif inbound == "right":
+                cue = f"Turn left onto {src.highway}."
+            elif inbound == "ahead":
+                cue = f"Continue onto {src.highway}."
+            else:
+                cue = f"Turn onto {src.highway}."
+        out.append(
+            Leg(
+                city,
+                city,
+                src.miles,
+                src.highway,
+                "flat",
+                (),
+                local_cue=cue,
+                local_speed_mph=src.local_speed_mph,
+            )
+        )
+    return out
+
+
 class WorldServiceMixin:
     def city_services(self, city: str) -> tuple[CityService, ...]:
         """Service POIs available for local city driving.
@@ -163,6 +212,20 @@ class WorldServiceMixin:
             road = CITY_SERVICE_APPROACH_ROADS.get(service.kind, "city service road")
         leg = Leg(city, city, miles, road, "flat", ())
         return Route([city, city], [leg])
+
+    def facility_departure_route(self, city: str, location_name: str) -> Route | None:
+        """The facility's street chain driven outbound -- gate toward the
+        highway on-ramp -- or ``None`` when the facility has no genuine
+        multi-segment turn-level chain (those keep the scripted departure).
+        Mirrors the arrival-side chain gating in the driving layer."""
+        route = self.facility_approach_route(city, location_name)
+        if route is None or len(route.legs) < 2:
+            return None
+        if not any(leg.local_speed_mph > 0 for leg in route.legs):
+            return None
+        city = self.resolve_city_key(city)
+        legs = _reversed_local_legs(city, route.legs)
+        return Route([city] * (len(legs) + 1), legs)
 
     def facility_approach_route(self, city: str, location_name: str) -> Route:
         """A short, drivable local route from the company terminal to a facility."""

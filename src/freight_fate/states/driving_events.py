@@ -15,7 +15,9 @@ class DrivingEventMixin:
         if sound is not None:
             self.ctx.audio.play(sound)
         self.ctx.say_event(message, interrupt=False)
-        self._ambient_event_cooldown_s = AMBIENT_EVENT_SPACING_S
+        self._ambient_event_cooldown_s = tuning_for_time_scale(
+            self.trip.time_scale
+        ).ambient_spacing_s
 
     def _update_ambient_events(self, dt: float) -> None:
         if self._ambient_event_cooldown_s > 0.0:
@@ -71,8 +73,9 @@ class DrivingEventMixin:
             # getting on the pedal, and fatigue eats into that part only --
             # a drowsy driver reacts late, but the truck stops no slower.
             slack = event.data.get("deadline_s", 4.0)
-            self._hazard_deadline = self._brake_budget_s() + slack * hos.reaction_window_mult(
-                self.ctx.profile.fatigue
+            reaction = tuning_for_time_scale(self.trip.time_scale).reaction_window
+            self._hazard_deadline = self._brake_budget_s() + slack * reaction * (
+                hos.reaction_window_mult(self.ctx.profile.fatigue)
             )
             # A dodgeable hazard sits in the lane you are in *now*; ending up
             # in any other lane before the deadline clears it, if that lane
@@ -112,7 +115,7 @@ class DrivingEventMixin:
             if critical:
                 self._pending_ambient_event = None
                 if sound is not None and kind != TripEventKind.ZONE_ENTER:
-                    self.ctx.audio.play(sound)
+                    self.ctx.audio.play(sound, pan=_route_event_sound_pan(event))
                 self.ctx.say_event(event.message, interrupt=True)
             elif self._should_space_ambient_event(event):
                 self._speak_ambient_event(
@@ -121,7 +124,7 @@ class DrivingEventMixin:
                 )
             else:
                 if sound is not None and kind != TripEventKind.ZONE_ENTER:
-                    self.ctx.audio.play(sound)
+                    self.ctx.audio.play(sound, pan=_route_event_sound_pan(event))
                 self.ctx.say_event(event.message, interrupt=False)
         if kind == TripEventKind.ZONE_ENTER:
             self.ctx.audio.play(sound or "ui/notify")
@@ -456,7 +459,7 @@ class DrivingEventMixin:
         """Arming and announcement window for exits, scaled like zone warnings.
 
         At speed under time compression a fixed window shrinks to nothing in
-        real terms -- at 74 mph on fast pacing, 5 miles is about 7 real
+        real terms -- at 74 mph on realistic pacing, 5 miles is about 7 real
         seconds, not enough to hear the callout, arm the exit, and brake to
         ramp speed. Scale the window so it covers roughly
         ``EXIT_WARNING_REAL_S`` of real time at the current pace.
@@ -480,6 +483,10 @@ class DrivingEventMixin:
 
     def _destination_exit_stop(self):
         if self.phase != DRIVE_PHASE_DELIVERY or self._destination_exit_taken:
+            return None
+        if self._departure_chain:
+            # Still on the origin's streets: the end of the active trip is
+            # the on-ramp merge, not the delivery exit.
             return None
         details = self._destination_exit_details()
         if details is None:
@@ -572,9 +579,7 @@ class DrivingEventMixin:
             return None
         # Matched against real interchange sign text, so compare the spoken
         # city name ("Nashville"), never the slug key.
-        destination = self.ctx.world.spoken_city(
-            self.route.cities[-1], qualified=False
-        ).casefold()
+        destination = self.ctx.world.spoken_city(self.route.cities[-1], qualified=False).casefold()
         candidates = []
         for i in range(len(self.route.legs) - 1, -1, -1):
             leg = self.route.legs[i]
@@ -666,9 +671,7 @@ class DrivingEventMixin:
         self._exit_signal_on = False
         if announce:
             first = route.legs[0]
-            street = (
-                first.local_cue.rstrip(".") if first.local_cue else f"Start on {first.highway}"
-            )
+            street = first.local_cue.rstrip(".") if first.local_cue else f"Start on {first.highway}"
             self.ctx.audio.play("ui/notify", volume=0.7)
             self.ctx.say_event(
                 f"Off the ramp and onto city streets: {street[:1].lower()}{street[1:]}. "
@@ -676,6 +679,80 @@ class DrivingEventMixin:
                 interrupt=False,
             )
         return True
+
+    def _departure_chain_route(self):
+        """The origin facility's street chain driven outbound, or None.
+
+        Same bar as the arrival side: only a genuine multi-segment
+        turn-level chain qualifies; other facilities keep the scripted
+        departure straight onto the highway."""
+        if self.phase != DRIVE_PHASE_DELIVERY:
+            return None
+        try:
+            return self.ctx.world.facility_departure_route(
+                self.job.origin, self.job.origin_location
+            )
+        except (AttributeError, KeyError, ValueError):
+            return None
+
+    def _begin_departure_chain(self, *, announce: bool = True) -> bool:
+        """Start the loaded run on the origin facility's street chain.
+
+        The full highway trip built at dispatch is parked aside; the truck
+        pulls out of the gate onto real streets and the on-ramp merge hands
+        the highway trip back with the clock and toll ledger intact."""
+        if self._departure_chain or self._surface_chain:
+            return False
+        route = self._departure_chain_route()
+        if route is None:
+            return False
+        highway = self.trip
+        surface = Trip(
+            route,
+            self.truck,
+            self.weather,
+            time_scale=highway.time_scale,
+            seed=self.trip_seed ^ 0xD00D,
+            start_hour=highway.start_hour,
+            imperial=highway.imperial,
+            hazard_scale=0.0,  # no random hazards on the first city miles
+            career_hours=highway.career_hours,
+        )
+        self._highway_trip = highway
+        self.trip = surface
+        self._departure_chain = True
+        if announce:
+            first = route.legs[0]
+            street = first.local_cue.rstrip(".") if first.local_cue else f"Start on {first.highway}"
+            merge_leg = highway.route.legs[0]
+            self.ctx.say_event(
+                f"Out of the gate and onto city streets: "
+                f"{street[:1].lower()}{street[1:]}. "
+                f"{surface._distance_text(route.miles)} to the "
+                f"{merge_leg.highway} on-ramp.",
+                interrupt=False,
+            )
+        return True
+
+    def _finish_departure_chain(self) -> None:
+        """End of the streets: up the on-ramp and onto the highway trip."""
+        surface = self.trip
+        highway = self._highway_trip
+        highway.game_minutes = surface.game_minutes  # clock continuity
+        highway.toll_charges = surface.toll_charges  # settlement reads the live trip
+        highway.hos_violation = surface.hos_violation
+        self.trip = highway
+        self._highway_trip = None
+        self._departure_chain = False
+        # Coming up the ramp you are in the right lane, merging left.
+        self.lane.lane = 0
+        self.lane.offset = 0.0
+        merge_leg = highway.route.legs[0]
+        self.ctx.audio.play("vehicle/turn_signal", volume=0.6, pan=-0.6)
+        self.ctx.say_event(
+            f"Up the ramp and onto {merge_leg.highway}. Merge left when clear.",
+            interrupt=False,
+        )
 
     def _begin_ramp_terminal(self, stop) -> None:
         """Decide what controls the end of the ramp just taken.
@@ -720,7 +797,7 @@ class DrivingEventMixin:
             # The wait at the stop bar ends; the driveway is just ahead.
             self._ramp_waiting_at_light = False
             self._ramp_terminal_done = True
-            self.ctx.audio.play("ui/notify", volume=0.7)
+            self.ctx.audio.play("events/ramp_light_green", volume=0.8)
             self.ctx.say_event("Green light. Pull ahead to the entrance.", interrupt=False)
             return
         # Speak at most one flip after the first callout: a slow descent can
@@ -729,6 +806,10 @@ class DrivingEventMixin:
         # information; a play-by-play of every cycle is chatter.
         if not self._ramp_light_flip_said:
             self._ramp_light_flip_said = True
+            self.ctx.audio.play(
+                "events/ramp_light_red" if red else "events/ramp_light_green",
+                volume=0.7,
+            )
             self.ctx.say_event(
                 "The light ahead turns red. Be ready to stop."
                 if red
@@ -742,7 +823,10 @@ class DrivingEventMixin:
         if self._ramp_control == "signal":
             red = self._ramp_light_is_red()
             self._ramp_light_was_red = red
-            self.ctx.audio.play("ui/warning" if red else "ui/notify", volume=0.7)
+            self.ctx.audio.play(
+                "events/ramp_light_red" if red else "events/ramp_light_green",
+                volume=0.8,
+            )
             self.ctx.say_event(
                 "Traffic light at the end of the ramp, currently red. Brake to a stop."
                 if red
@@ -793,13 +877,13 @@ class DrivingEventMixin:
                 else:
                     self.ctx.audio.play("traffic/car_pass", volume=1.0, pan=-0.4)
                     self.ctx.say_event(
-                        "You crept through the red light. Cross traffic leans "
-                        "on the horn.",
+                        "You crept through the red light. Cross traffic leans on the horn.",
                         interrupt=True,
                     )
                 return
             self._ramp_terminal_done = True
             self._ramp_waiting_at_light = False
+            self.ctx.audio.play("events/ramp_light_green", volume=0.7)
             self.ctx.say_event(
                 "Green light. Through the intersection; brake for the entrance."
                 if speed <= GREEN_ROLL_MPH
@@ -829,8 +913,7 @@ class DrivingEventMixin:
             else:
                 self.ctx.audio.play("traffic/car_pass", volume=1.0, pan=0.4)
                 self.ctx.say_event(
-                    "You rolled the stop sign at the ramp end. Cross traffic "
-                    "leans on the horn.",
+                    "You rolled the stop sign at the ramp end. Cross traffic leans on the horn.",
                     interrupt=True,
                 )
             return
