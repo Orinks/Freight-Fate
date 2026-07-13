@@ -18,7 +18,10 @@ activity strings above, authenticated by account-issued credentials the
 player copies from the Orinks driver setup page and pastes into the game
 once (see :func:`verify_identity`). The driver's display name lives on the
 site, tied to their Orinks account; the game never transmits profile names,
-save data, or anything about the real player.
+save data, or anything about the real player. Every request's User-Agent
+does carry the game's build identity (see :func:`client_version`) so the
+site can tell which release a post came from -- moderation and bug triage
+data, never shown publicly.
 """
 
 from __future__ import annotations
@@ -67,6 +70,25 @@ def base_url() -> str:
     return os.environ.get("FREIGHT_FATE_ONLINE_URL", DEFAULT_BASE_URL).rstrip("/")
 
 
+def client_version() -> str:
+    """The build identity this game reports with every Orinks request.
+
+    Packaged builds report their release tag (``v1.8.0``, or
+    ``nightly-20260711`` on the dev channel); a source checkout, which has no
+    build stamp, reports ``source-<version>``. The site records the latest
+    value per driver so moderation can tell which build a suspicious profile
+    or save came from. It says nothing about the player or the machine.
+    """
+    from . import __version__, updater
+
+    build = updater.load_build_info(__version__)
+    tag = build.tag if build is not None else f"source-{__version__}"
+    # User-Agent product tokens must stay printable and space-free; version
+    # strings already are, but a malformed pyproject fallback must not be
+    # able to break every request header.
+    return "".join(c for c in tag if "!" <= c <= "~")[:64] or "unknown"
+
+
 # A transport posts (or gets, when payload is None) JSON and returns the
 # decoded JSON reply. Injected in tests; the default uses urllib with the
 # shared verified TLS context.
@@ -75,7 +97,11 @@ Transport = Callable[[str, dict | None, dict[str, str]], dict]
 
 def _http_json(url: str, payload: dict | None, headers: dict[str, str]) -> dict:
     data = None if payload is None else json.dumps(payload).encode("utf-8")
-    all_headers = {"User-Agent": "FreightFate", "Content-Type": "application/json", **headers}
+    all_headers = {
+        "User-Agent": f"FreightFate/{client_version()}",
+        "Content-Type": "application/json",
+        **headers,
+    }
     req = urllib.request.Request(url, data=data, headers=all_headers)
     with urllib.request.urlopen(req, timeout=_REQUEST_TIMEOUT_S, context=ssl_context()) as resp:
         return json.loads(resp.read().decode("utf-8"))

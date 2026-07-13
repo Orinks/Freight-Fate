@@ -595,3 +595,5 @@ fit for an audio-first game.
 - [ ] Localization of all speech strings
 - [ ] Optional online leaderboards
 - [x] Opt-in Profile sharing for fictional road journals, achievements, and last-saved profile summaries
+- [x] Online posts carry the game's build identity (release tag or source checkout) so moderation can tell which version a driver runs
+- [x] Server-side tamper screening on cloud-save uploads (stripped save signatures, money vs. lifetime earnings, XP vs. miles) stamps a sticky moderation flag; flagged careers are held off the public board, updates feed, and profiles until reviewed (fair-play rule published on the online rules page)

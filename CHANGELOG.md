@@ -49,6 +49,12 @@
 
 ### Added
 
+- **Online sharing now tells orinks.net which game version you are running.**
+  When Profile sharing or cloud backup is on, each post carries the release the
+  game was built from, such as a stable version or a nightly date. It is used
+  only for moderation and troubleshooting, is never shown publicly, and the
+  spoken "Hear what gets shared" disclosure now mentions it.
+
 - **The major toll turnpikes now charge realistic tolls.** Running the Kansas
   Turnpike, the Oklahoma turnpikes, the New York Thruway, the Pennsylvania and
   Ohio turnpikes, the Indiana Toll Road, the Illinois Tollway, the Mass Pike, the

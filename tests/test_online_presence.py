@@ -332,3 +332,62 @@ def test_fetch_board_returns_drivers_or_none():
     assert fetch_board(transport=FakeTransport(reply={"drivers": drivers})) == drivers
     assert fetch_board(transport=FakeTransport(reply={})) is None
     assert fetch_board(transport=FakeTransport(error=OSError())) is None
+
+
+# -- build identity reporting --------------------------------------------------
+
+
+def test_client_version_reports_source_checkout_without_a_build_stamp():
+    # Tests run from a source checkout, so there is no build_info.json and
+    # the reported identity must be the source form, not a bogus stable tag.
+    import freight_fate
+    from freight_fate.online_presence import client_version
+
+    assert client_version() == f"source-{freight_fate.__version__}"
+
+
+def test_client_version_reports_the_packaged_build_tag(monkeypatch):
+    from freight_fate import online_presence, updater
+
+    monkeypatch.setattr(
+        updater,
+        "load_build_info",
+        lambda version: updater.BuildInfo(tag="nightly-20260711", channel="dev", built_at=""),
+    )
+    assert online_presence.client_version() == "nightly-20260711"
+
+    # A mangled stamp must not be able to break the request header: spaces
+    # and control characters are dropped rather than sent.
+    monkeypatch.setattr(
+        updater,
+        "load_build_info",
+        lambda version: updater.BuildInfo(tag="bad tag\n", channel="dev", built_at=""),
+    )
+    assert online_presence.client_version() == "badtag"
+
+
+def test_default_transport_stamps_the_build_in_the_user_agent(monkeypatch):
+    import urllib.request
+
+    from freight_fate import online_presence
+
+    captured = {}
+
+    class FakeResponse:
+        def read(self):
+            return b'{"ok": true}'
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *exc):
+            return False
+
+    def fake_urlopen(req, timeout=None, context=None):
+        captured["user_agent"] = req.get_header("User-agent")
+        return FakeResponse()
+
+    monkeypatch.setattr(urllib.request, "urlopen", fake_urlopen)
+    reply = online_presence._http_json("https://example.test/api", {"x": 1}, {})
+    assert reply == {"ok": True}
+    assert captured["user_agent"] == f"FreightFate/{online_presence.client_version()}"

@@ -31,7 +31,9 @@ DISCLOSURE = (
     "details such as career level, totals, current truck, last-saved city, and snapshot "
     "time; official achievements you earn; and automatic road-journal posts "
     "generated from gameplay. Public updates can also appear in the Freight Fate updates "
-    "feed. Freight Fate does not publish your real name, full save, money, coordinates, "
+    "feed. Each post also tells orinks.net which game version you are running, used only "
+    "for moderation and troubleshooting and never shown publicly. Freight Fate does not "
+    "publish your real name, full save, money, coordinates, "
     "active cargo details, or precise real-world location. Turn Profile sharing off at "
     "any time to stop posting and make your shared profile and updates private."
 )
