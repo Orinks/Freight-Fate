@@ -9,6 +9,10 @@
   you connect a second computer with a new driver token, the cloud backup menu
   now says so and walks you to Settings, Online to reconnect, instead of
   wrongly reporting that your backups could not be reached.
+- **Long deliveries are easier on the game while you drive.** The destination
+  exit is now worked out once and remembered instead of being recalculated
+  every moment of the drive, removing a heavy background load tied to a
+  reported crash on coast-to-coast routes.
 ## 1.8.1 - 2026-07-13
 
 ### Fixed

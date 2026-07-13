@@ -325,6 +325,25 @@ class DrivingEventMixin:
     def _destination_exit_details(
         self, *, include_past: bool = False
     ) -> tuple[float, str, str] | None:
+        if include_past:
+            return self._scan_destination_exit_details(include_past=True)
+        # This runs every frame from _check_destination_exit, and the scan
+        # walks every interchange on the route building spoken phrases -- far
+        # too much churn to redo per tick on a coast-to-coast route. The
+        # winning exit only changes when the truck passes it, so reuse the
+        # last answer until then. A backward position move (missed-exit
+        # rewind, rescue) invalidates the cache wholesale, because exits
+        # behind the compute position come back into play.
+        pos = self.trip.position_mi
+        cache = self._destination_exit_cache
+        if cache is None or pos < cache[0] or (cache[1] is not None and cache[1][0] <= pos + 0.05):
+            cache = (pos, self._scan_destination_exit_details())
+            self._destination_exit_cache = cache
+        return cache[1]
+
+    def _scan_destination_exit_details(
+        self, *, include_past: bool = False
+    ) -> tuple[float, str, str] | None:
         if not self.route.legs:
             return None
         # Matched against real interchange sign text, so compare the spoken
