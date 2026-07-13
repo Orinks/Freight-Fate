@@ -24,11 +24,13 @@ from freight_fate.cloud_save_integrity import CloudSaveIntegrityError, canonical
 from freight_fate.cloud_saves import (
     DEBOUNCE_S,
     RETRY_INTERVAL_S,
+    CloudAuthError,
     CloudSaves,
     SyncState,
     backup_summary,
     cloud_content,
     download_save,
+    list_saves,
     profile_dict_from_content,
     restore_to_disk,
     save_slot_name,
@@ -69,6 +71,13 @@ class FakeTransport:
     @property
     def posts(self) -> list[dict]:
         return [p for _, p, _ in self.requests if p is not None]
+
+
+def auth_error(code: int = 401, error: str | None = None) -> urllib.error.HTTPError:
+    """The server's answer to a retired driver token (see issue 64: a new
+    token issued to a second computer retires the one stored here)."""
+    body = json.dumps({"error": error} if error else {}).encode("utf-8")
+    return urllib.error.HTTPError("url", code, "Unauthorized", None, io.BytesIO(body))
 
 
 def conflict_error(latest_revision: int = 5) -> urllib.error.HTTPError:
@@ -547,3 +556,44 @@ def test_cloud_toggle_speaks_the_disclosure_when_turned_on():
         assert not app.cloud.enabled
     finally:
         app.shutdown()
+
+
+# -- retired credentials (issue 64) ----------------------------------------------
+
+
+def test_list_saves_refused_credentials_raise_cloud_auth_error():
+    # A 401 means orinks.net answered and said no: the menus must tell the
+    # player to reconnect, never blame the network.
+    with pytest.raises(CloudAuthError):
+        list_saves(IDENTITY, transport=FakeTransport(error=auth_error(401)))
+
+
+def test_list_saves_unknown_driver_raises_cloud_auth_error():
+    with pytest.raises(CloudAuthError):
+        list_saves(
+            IDENTITY, transport=FakeTransport(error=auth_error(404, error="driver_not_found"))
+        )
+
+
+def test_list_saves_network_trouble_stays_none():
+    assert list_saves(IDENTITY, transport=FakeTransport(error=OSError("no route"))) is None
+
+
+def test_download_refused_credentials_raise_cloud_auth_error():
+    with pytest.raises(CloudAuthError):
+        download_save(
+            IDENTITY, save_name="Road Star", transport=FakeTransport(error=auth_error(401))
+        )
+
+
+def test_upload_with_retired_token_pauses_backups_with_reconnect_status():
+    transport = FakeTransport(error=auth_error(401))
+    clock = Clock()
+    service = make_service(transport, clock)
+    service.queue_backup(Profile(name="Road Star"))
+    drain(service, clock)
+
+    assert "Reconnect under Settings, Online" in service.status
+    # Not transient: the snapshot is dropped instead of retried forever.
+    drain(service, clock)
+    assert len(transport.posts) == 1

@@ -597,3 +597,4 @@ fit for an audio-first game.
 - [x] Opt-in Profile sharing for fictional road journals, achievements, and last-saved profile summaries
 - [x] Online posts carry the game's build identity (release tag or source checkout) so moderation can tell which version a driver runs
 - [x] Validated and server-signed private cloud revisions with verified public profile summaries
+- [ ] Per-machine driver tokens on orinks.net, so connecting a second computer no longer retires the first one's sign-in (the game now at least says reconnect instead of blaming the network; see issue #64)
