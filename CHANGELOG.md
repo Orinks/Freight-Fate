@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 1.8.1 - 2026-07-13
+
 ### Fixed
 
 - **The Mountain Grade driving track sounds right again.** The daytime
