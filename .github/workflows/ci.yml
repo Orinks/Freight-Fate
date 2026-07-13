@@ -120,12 +120,23 @@ jobs:
             exit 0
           fi
 
-          CONCLUSION=$(gh run list --repo "$GITHUB_REPOSITORY" \
+          RUN=$(gh run list --repo "$GITHUB_REPOSITORY" \
             --workflow Build --event schedule --limit 1 \
-            --json conclusion --jq '.[0].conclusion // ""')
+            --json conclusion,createdAt --jq '.[0] // empty | "\(.conclusion) \(.createdAt)"')
+          CONCLUSION=${RUN%% *}
+          CREATED=${RUN#* }
 
           if [ "$CONCLUSION" != "failure" ]; then
             echo "Latest scheduled Build conclusion is '$CONCLUSION'; not retrying."
+            exit 0
+          fi
+
+          # Only recover TODAY's failed snapshot. Before the daily cron has
+          # fired, the newest scheduled run is yesterday's -- and a stale
+          # failure there must not make a pre-cron push build today's
+          # snapshot hours early.
+          if [ "${CREATED%%T*}" != "$(date -u +%Y-%m-%d)" ]; then
+            echo "The failed scheduled Build is from ${CREATED%%T*}; today's snapshot has not run yet."
             exit 0
           fi
 
