@@ -12,6 +12,11 @@
 
 - [x] Add a curated `career_1_9` transcript-backed smoke suite with reusable career-stage presets, structured speech ordering, keyboard reachability, all driving modes, and deterministic event hooks.
 - [ ] Wire Big Buck's content into a playable roadside stop; current 1.9 data and spoken refusal content are shipped, but no honest drive-and-enter gameplay path exists yet.
+- [x] **Physics test bench** (`tools/physics_bench.py`): deterministic scripted-driver scenarios over the real truck model -- descents, runaway coasts, stop tests -- printing plain-text, screen-reader-friendly, diffable reports (peak brake temp, fade onset, wear added, the cues the game would have played). The tuning loop for every physics change; `tests/test_physics_bench.py` keeps its orderings honest.
+- [ ] Jake brake realism: today's jake is a flat force strong enough to hold an overweight rig on a 6 percent grade alone (bench: `grade-jake-only`, `grade-overweight`). It should scale with RPM and gear, and gain staged strength (1/2/3), so gear discipline matters on descents.
+- [ ] Brake thermal realism: drum temperature needs thermal mass and weaker high-speed cooling -- the bench shows a six-mile 6 percent drag peaking at 81 C while one full stop from 60 hits 187 C, so sustained drags can never reach fade and the drag-vs-snub lesson has no teeth.
+- [ ] Runaway truck ramps as regular highway furniture on steep descents: announced on approach, takeable as the escape move when the brakes are gone (the physics already runs away honestly -- bench `grade-runaway` tops 149 mph and grenades the engine past redline).
+- [ ] Chain laws on mountain legs: chain-up areas and signs, install time cost, chain damage risk, and the install penalty on a lonely snowy night out of Denver.
 
 Four threads: make the drive *between* the exits real, give every maneuver
 and working hour weight, make the career read like real employment, and
@@ -411,8 +416,10 @@ Net-new realism candidates, roughly by area:
   brakes have a fixed force ceiling sized for the rated gross, so loads over
   the rated weight are brake-capacity limited -- they stop longer and heat
   the brakes faster -- while loads at or below the rated gross are unchanged.
-  Remaining: tire and brake wear over a truck's life, and finer grade-based
-  fuel burn.
+  Tire, brake, and engine wear over a truck's life shipped with the 1.9 rig
+  wear system (wear accrues from how the truck is driven and feeds grip,
+  brake force, fade onset, power, and fuel burn). Remaining: finer
+  grade-based fuel burn.
 - **Traffic and corridors.** Three slices shipped: rush-hour departure windows
   (morning and afternoon commute) raise modeled traffic density, especially on
   checkpoint/metro corridors, and can slow lead traffic packs with
