@@ -4,6 +4,13 @@
 
 ### Changed
 
+- **Each truck now keeps its own condition.** Tire, brake, and engine wear,
+  damage, and fuel stay with the truck they happened to, so swapping tractors
+  at the dealer no longer carries your wear -- or your empty tank -- onto the
+  next rig, and the garage fixes the truck you actually drove in. A new truck
+  off the lot rolls out fresh with a full tank. Careers from earlier versions
+  load unchanged: your current wear settles onto every truck you own.
+
 - **Career 1.9 playtests now follow more of a driver's real journey.** Reusable transcript checks cover career stages, driving modes, keyboard-operated controls, speech ordering, and deterministic road events so regressions are caught before they reach players.
 
 - **Relaxed driving now leaves real breathing room without removing the truck.**

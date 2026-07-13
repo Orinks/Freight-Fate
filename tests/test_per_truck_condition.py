@@ -1,0 +1,178 @@
+"""Condition follows the truck, not the profile.
+
+Wear, damage, and fuel live in ``truck_conditions`` keyed by truck, and the
+flat ``tire_wear_pct``/``truck_fuel_gal``/... names proxy to whichever truck
+is active. These tests pin the invariants that matter for cheating and for
+the future rental system: swapping tractors never teleports condition, the
+garage fixes the truck you drove, and per-truck wear is under the save
+signature just like money is.
+"""
+
+from __future__ import annotations
+
+import json
+
+import pytest
+
+from freight_fate.models.business import (
+    COMPANY_DRIVER,
+    LEASED_OWNER_OPERATOR,
+)
+from freight_fate.models import profile as profmod
+from freight_fate.models.profile import Profile, ProfileIntegrityError
+
+
+def _owner_operator_fleet() -> Profile:
+    p = Profile(name="Fleet", business_status=LEASED_OWNER_OPERATOR)
+    p.truck = "rig"
+    p.owned_trucks = ["rig", "heavy_hauler"]
+    p.provision_truck_condition("rig", 150.0)
+    p.provision_truck_condition("heavy_hauler", 200.0)
+    return p
+
+
+def test_wear_accrues_per_truck_not_across_the_fleet():
+    p = _owner_operator_fleet()
+
+    p.tire_wear_pct = 25.0  # wear the rig we're driving
+    assert p.active_truck_key() == "rig"
+    assert p.tire_wear_pct == 25.0
+
+    p.truck = "heavy_hauler"  # switch tractors at the dealer
+    assert p.tire_wear_pct == 0.0  # the other truck is untouched
+
+    p.truck = "rig"
+    assert p.tire_wear_pct == 25.0  # rig kept its wear
+
+
+def test_switching_trucks_does_not_teleport_fuel_or_damage():
+    p = _owner_operator_fleet()
+    p.truck_fuel_gal = 40.0
+    p.truck_damage_pct = 12.0
+
+    p.truck = "heavy_hauler"
+    assert p.truck_fuel_gal == 200.0  # its own full tank, not the rig's 40
+    assert p.truck_damage_pct == 0.0  # its own condition, not the rig's damage
+
+
+def test_servicing_the_active_truck_leaves_parked_trucks_worn():
+    p = _owner_operator_fleet()
+    p.truck_conditions["heavy_hauler"]["tire_wear_pct"] = 40.0
+    p.tire_wear_pct = 60.0
+
+    p.tire_wear_pct = 0.0  # the garage services the truck we drove in
+
+    assert p.tire_wear_pct == 0.0
+    assert p.truck_conditions["heavy_hauler"]["tire_wear_pct"] == 40.0
+
+
+def test_company_driver_condition_keys_under_the_assigned_rig():
+    p = Profile(name="Company", business_status=COMPANY_DRIVER)
+    p.truck = "heavy_hauler"  # stray value; company drivers still run "rig"
+
+    assert p.active_truck_key() == "rig"
+    p.brake_wear_pct = 12.0
+
+    assert p.truck_conditions["rig"]["brake_wear_pct"] == 12.0
+    assert "heavy_hauler" not in p.truck_conditions
+
+
+def test_legacy_flat_condition_fans_out_to_every_owned_truck():
+    data = {
+        "name": "Legacy Fleet",
+        "business_status": LEASED_OWNER_OPERATOR,
+        "truck": "rig",
+        "owned_trucks": ["rig", "heavy_hauler"],
+        "tire_wear_pct": 30.0,
+        "brake_wear_pct": 20.0,
+        "engine_wear_pct": 10.0,
+        "truck_damage_pct": 15.0,
+        "truck_fuel_gal": 60.0,
+    }
+
+    p = Profile.from_dict(data)
+
+    # The active truck inherits the whole flat set, fuel included.
+    assert p.active_truck_key() == "rig"
+    assert p.tire_wear_pct == 30.0
+    assert p.brake_wear_pct == 20.0
+    assert p.engine_wear_pct == 10.0
+    assert p.truck_damage_pct == 15.0
+    assert p.truck_fuel_gal == 60.0
+
+    # The parked truck inherits the wear and damage (no free pristine spare)
+    # but gets a full tank rather than the active truck's 60 gallons.
+    parked = p.truck_conditions["heavy_hauler"]
+    assert parked["tire_wear_pct"] == 30.0
+    assert parked["brake_wear_pct"] == 20.0
+    assert parked["engine_wear_pct"] == 10.0
+    assert parked["damage_pct"] == 15.0
+    assert parked["fuel_gal"] > 60.0
+
+
+def test_per_truck_conditions_round_trip_and_stay_signed():
+    p = _owner_operator_fleet()
+    p.tire_wear_pct = 22.0
+    p.truck_conditions["heavy_hauler"]["engine_wear_pct"] = 5.0
+
+    path = p.save()
+    loaded = Profile.load(path)
+
+    assert loaded.tire_wear_pct == 22.0
+    assert loaded.truck_conditions["heavy_hauler"]["fuel_gal"] == 200.0
+    assert loaded.truck_conditions["heavy_hauler"]["engine_wear_pct"] == 5.0
+
+
+def test_tampering_per_truck_wear_is_rejected_and_quarantined():
+    p = Profile(name="Cheater Fleet")
+    p.tire_wear_pct = 50.0
+    path = p.save()
+
+    data = json.loads(path.read_text())
+    data["truck_conditions"]["rig"]["tire_wear_pct"] = 0.0  # scrub the wear
+    path.write_text(json.dumps(data))
+
+    with pytest.raises(ProfileIntegrityError):
+        Profile.load(path)
+    assert not path.exists()
+    assert path.with_suffix(".json.invalid").exists()
+
+
+def test_v1_signed_legacy_save_loads_and_migrates_without_quarantine():
+    """A save signed by a pre-per-truck build must validate, not quarantine.
+
+    v1 signed the flat condition fields; the current build must recognize that
+    older field set from ``_signature_version`` and re-sign on the next save.
+    """
+    p = Profile(name="V1 Signed", business_status=LEASED_OWNER_OPERATOR)
+    p.truck = "rig"
+    p.owned_trucks = ["rig"]
+    data = p.to_dict()
+
+    # Rewrite in the old flat shape and sign it the way a v1 build would.
+    data.pop("truck_conditions", None)
+    data["truck_damage_pct"] = 9.0
+    data["tire_wear_pct"] = 18.0
+    data["brake_wear_pct"] = 7.0
+    data["engine_wear_pct"] = 3.0
+    data["truck_fuel_gal"] = 70.0
+    data[profmod.SIGNATURE_VERSION_FIELD] = 1
+    data[profmod.SIGNATURE_FIELD] = profmod._signature_for(data, 1)
+    path = p.path
+    path.write_text(json.dumps(data))
+
+    loaded = Profile.load(path)  # must not raise ProfileIntegrityError
+
+    assert loaded.tire_wear_pct == 18.0
+    assert loaded.brake_wear_pct == 7.0
+    assert loaded.engine_wear_pct == 3.0
+    assert loaded.truck_damage_pct == 9.0
+    assert loaded.truck_fuel_gal == 70.0
+    assert path.exists()  # a valid legacy save is not quarantined
+
+    # Saving it again upgrades both the on-disk shape and the signature.
+    loaded.save()
+    resaved = json.loads(path.read_text())
+    assert resaved[profmod.SIGNATURE_VERSION_FIELD] == profmod.SIGNATURE_VERSION
+    assert isinstance(resaved.get("truck_conditions"), dict)
+    assert Profile.load(path).tire_wear_pct == 18.0  # still valid under v2

@@ -40,13 +40,26 @@ from .start_options import DEFAULT_START_KEY, START_MODE_COMPANY
 
 log = logging.getLogger(__name__)
 
-SAVE_VERSION = 10
+SAVE_VERSION = 11
 STARTING_MONEY = 5_000.0
 DEFAULT_CITY = "chicago_il_us"
+DEFAULT_FUEL_GAL = 150.0
 SIGNATURE_FIELD = "_signature"
 SIGNATURE_VERSION_FIELD = "_signature_version"
-SIGNATURE_VERSION = 1
+SIGNATURE_VERSION = 2
 SECRET_FILE = "profile.key"
+
+# Condition fields that were stored flat on the profile before per-truck
+# conditions (SAVE_VERSION 11 / SIGNATURE_VERSION 2). Kept for two reasons:
+# validating v1 signatures against the field set they were signed over, and
+# migrating legacy saves into per-truck records.
+_LEGACY_CONDITION_FIELDS = (
+    "truck_damage_pct",
+    "tire_wear_pct",
+    "brake_wear_pct",
+    "engine_wear_pct",
+    "truck_fuel_gal",
+)
 
 _legacy_checked = False
 
@@ -270,14 +283,24 @@ def _profile_secret() -> bytes:
         return secret
 
 
-def _signed_payload(data: dict) -> dict:
+def _signed_payload(data: dict, signature_version: int) -> dict:
     allowed = set(Profile.__dataclass_fields__) | {"version"}
+    if signature_version < 2:
+        # v1 saves signed the flat condition fields, before per-truck
+        # conditions replaced them. Validate against that older field set so a
+        # legitimately signed v1 save is not quarantined on first load.
+        allowed = (allowed - {"truck_conditions"}) | set(_LEGACY_CONDITION_FIELDS)
     return {key: data[key] for key in sorted(allowed) if key in data}
 
 
-def _signature_for(data: dict) -> str:
+def _signature_for(data: dict, signature_version: int | None = None) -> str:
+    if signature_version is None:
+        signature_version = int(data.get(SIGNATURE_VERSION_FIELD, 1))
     payload = json.dumps(
-        _signed_payload(data), sort_keys=True, separators=(",", ":"), ensure_ascii=True
+        _signed_payload(data, signature_version),
+        sort_keys=True,
+        separators=(",", ":"),
+        ensure_ascii=True,
     )
     return hmac.new(_profile_secret(), payload.encode("utf-8"), hashlib.sha256).hexdigest()
 
@@ -299,21 +322,73 @@ def _quarantine(path: Path) -> Path:
     return target
 
 
+def _fresh_condition(fuel_gal: float = DEFAULT_FUEL_GAL) -> dict:
+    """A brand-new truck's condition record: no wear, no damage, given fuel."""
+    return {
+        "tire_wear_pct": 0.0,
+        "brake_wear_pct": 0.0,
+        "engine_wear_pct": 0.0,
+        "damage_pct": 0.0,
+        "fuel_gal": fuel_gal,
+    }
+
+
+def _truck_tank_gal(key: str) -> float:
+    """A truck's full-tank capacity, or the default if its specs won't build."""
+    try:
+        from .trucks import build_truck_specs
+
+        return float(build_truck_specs(key, {}).fuel_tank_gal)
+    except Exception:
+        return DEFAULT_FUEL_GAL
+
+
+def _migrate_flat_conditions(data: dict) -> dict:
+    """Build per-truck condition records from a pre-migration flat profile.
+
+    Every owned truck (and the active/assigned key) inherits the profile's one
+    saved wear and damage set -- no free pristine spares from a swap. The
+    active truck also inherits the saved fuel; other parked trucks start with
+    full tanks (they were sitting still, and a fuel windfall is worth cents,
+    not an exploit).
+    """
+    tire = float(data.get("tire_wear_pct", 0.0))
+    brake = float(data.get("brake_wear_pct", 0.0))
+    engine = float(data.get("engine_wear_pct", 0.0))
+    damage = float(data.get("truck_damage_pct", 0.0))
+    fuel = float(data.get("truck_fuel_gal", DEFAULT_FUEL_GAL))
+
+    owns = is_owner_operator(data.get("business_status", COMPANY_DRIVER))
+    active = str(data.get("truck", "rig")) if owns else "rig"
+    keys = {str(k) for k in (data.get("owned_trucks") or [])}
+    keys.add(active)
+
+    conditions: dict[str, dict] = {}
+    for key in keys:
+        conditions[key] = {
+            "tire_wear_pct": tire,
+            "brake_wear_pct": brake,
+            "engine_wear_pct": engine,
+            "damage_pct": damage,
+            "fuel_gal": fuel if key == active else _truck_tank_gal(key),
+        }
+    return conditions
+
+
 @dataclass
 class Profile:
     name: str = "Driver"
     money: float = STARTING_MONEY
     current_city: str = DEFAULT_CITY
-    truck_damage_pct: float = 0.0
-    tire_wear_pct: float = 0.0
-    brake_wear_pct: float = 0.0
-    engine_wear_pct: float = 0.0
     road_grime_pct: float = 0.0
-    truck_fuel_gal: float = 150.0
     game_hours: float = 6.0  # in-game clock, hours since career start
     tutorial_done: bool = False
     truck: str = "rig"  # owner-operator active tractor, or assignment key
     owned_trucks: list[str] = field(default_factory=list)  # owned tractors after buy-in
+    # Condition follows the truck, not the profile: wear, damage, and fuel per
+    # owned truck key. The flat ``tire_wear_pct``/``truck_fuel_gal``/... names
+    # remain as properties (below) proxying to the active truck's record.
+    truck_conditions: dict[str, dict] = field(default_factory=dict)
     upgrades: dict[str, int] = field(default_factory=dict)  # owned-tractor upgrade key -> tier
     active_trip: dict | None = None  # mid-delivery snapshot, see DrivingState
     dispatch_board_cache: dict | None = None
@@ -353,6 +428,10 @@ class Profile:
         # Nested payloads keep only the fields this build knows: saves written
         # by a newer snapshot (or an older one with since-removed fields) load
         # instead of crashing on an unexpected keyword.
+        # Pre-11 saves stored one flat condition set; fan it out per truck so
+        # each owned tractor keeps its own wear, damage, and fuel from here on.
+        if not isinstance(d.get("truck_conditions"), dict):
+            d["truck_conditions"] = _migrate_flat_conditions(d)
         career = Career(**_known_fields(Career, d.pop("career", {})))
         market = Market(**_known_fields(Market, d.pop("market", {})))
         hos = HosClock.from_dict(d.pop("hos", None))  # absent in v2 saves: fresh clock
@@ -416,6 +495,67 @@ class Profile:
 
         upgrades = self.upgrades if self.owns_equipment() else {}
         return build_truck_specs(self.active_truck_key(), upgrades)
+
+    # -- per-truck condition ---------------------------------------------------
+    #
+    # Condition lives in ``truck_conditions`` keyed by truck. The flat names
+    # below stay as properties routed through the *active* truck's record, so
+    # the garage, the rig readout, and the save layer keep using ``p.tire_wear_pct``
+    # unchanged while each truck carries its own wear, damage, and fuel.
+
+    def _condition(self) -> dict:
+        """The active truck's condition record, created on first touch."""
+        key = self.active_truck_key()
+        rec = self.truck_conditions.get(key)
+        if rec is None:
+            rec = _fresh_condition()
+            self.truck_conditions[key] = rec
+        return rec
+
+    def provision_truck_condition(self, key: str, fuel_gal: float | None = None) -> None:
+        """Give a newly acquired truck its own fresh, full-tank record."""
+        tank = _truck_tank_gal(key) if fuel_gal is None else float(fuel_gal)
+        self.truck_conditions[key] = _fresh_condition(tank)
+
+    @property
+    def tire_wear_pct(self) -> float:
+        return float(self._condition().get("tire_wear_pct", 0.0))
+
+    @tire_wear_pct.setter
+    def tire_wear_pct(self, value: float) -> None:
+        self._condition()["tire_wear_pct"] = float(value)
+
+    @property
+    def brake_wear_pct(self) -> float:
+        return float(self._condition().get("brake_wear_pct", 0.0))
+
+    @brake_wear_pct.setter
+    def brake_wear_pct(self, value: float) -> None:
+        self._condition()["brake_wear_pct"] = float(value)
+
+    @property
+    def engine_wear_pct(self) -> float:
+        return float(self._condition().get("engine_wear_pct", 0.0))
+
+    @engine_wear_pct.setter
+    def engine_wear_pct(self, value: float) -> None:
+        self._condition()["engine_wear_pct"] = float(value)
+
+    @property
+    def truck_damage_pct(self) -> float:
+        return float(self._condition().get("damage_pct", 0.0))
+
+    @truck_damage_pct.setter
+    def truck_damage_pct(self, value: float) -> None:
+        self._condition()["damage_pct"] = float(value)
+
+    @property
+    def truck_fuel_gal(self) -> float:
+        return float(self._condition().get("fuel_gal", DEFAULT_FUEL_GAL))
+
+    @truck_fuel_gal.setter
+    def truck_fuel_gal(self, value: float) -> None:
+        self._condition()["fuel_gal"] = float(value)
 
     def load_truck_condition(self, truck) -> None:
         """Put the saved rig condition onto a fresh ``TruckState`` at trip start.

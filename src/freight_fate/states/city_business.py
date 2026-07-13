@@ -415,6 +415,8 @@ class TruckShopState(MenuState):
                 return
             p.money -= model.price
             p.owned_trucks.append(model.key)
+            # A truck off the dealer lot is its own rig: fresh wear, full tank.
+            p.provision_truck_condition(model.key, model.specs.fuel_tank_gal)
             self.ctx.audio.play("ui/cash")
             self._switch_to(model)
             self.ctx.say(
