@@ -14,11 +14,11 @@ import json
 
 import pytest
 
+from freight_fate.models import profile as profmod
 from freight_fate.models.business import (
     COMPANY_DRIVER,
     LEASED_OWNER_OPERATOR,
 )
-from freight_fate.models import profile as profmod
 from freight_fate.models.profile import Profile, ProfileIntegrityError
 
 
