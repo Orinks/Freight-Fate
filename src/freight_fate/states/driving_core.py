@@ -63,7 +63,7 @@ from ..sim.timezones import city_zone
 from ..sim.transmission import REVERSE
 from ..sim.trip import RoadStop, Trip, TripEventKind
 from ..sim.trip_models import leg_lane_count
-from ..sim.vehicle import KG_PER_TON, G, TruckState
+from ..sim.vehicle import CHAIN_SAFE_MPH, KG_PER_TON, TIRE_WINTER, G, TruckState
 from ..sim.weather import WeatherKind, WeatherSystem
 from .base import MenuItem, MenuState, State
 
@@ -77,6 +77,21 @@ FIELD_REPAIR_DAMAGE_PCT = 25.0  # damage level the patch repairs down to
 MECHANIC_CALLOUT_FEE = 500.0
 MECHANIC_RATE_PER_PCT = 110.0  # premium over the garage's 85 per percent
 MECHANIC_WAIT_MIN = 90.0  # game minutes waiting for the truck to be fixed
+# Chaining up is done kneeling on the shoulder in the weather that made it
+# necessary. Real crews quote twenty to thirty minutes for a drive-axle set;
+# doing it in the dark by headlamp costs more time and much more out of the
+# driver. Removal is quick by comparison.
+CHAIN_INSTALL_MIN = 25.0
+CHAIN_INSTALL_NIGHT_MULT = 1.6
+CHAIN_REMOVE_MIN = 10.0
+CHAIN_INSTALL_FATIGUE = 6.0
+CHAIN_INSTALL_NIGHT_FATIGUE = 10.0
+CHAIN_REMOVE_FATIGUE = 2.0
+# Rolling into an active chain law out of compliance: the checkpoint at the
+# bottom of the grade is staffed often enough that gambling is a bad trade.
+# The fine tracks Colorado's minimum chain-law citation.
+CHAIN_LAW_FINE = 500.0
+CHAIN_LAW_CHECKPOINT_CHANCE = 0.6
 # Road wear service at branded travel centers -- the brand IS the capability
 # (amenities.classify_brand): Love's and Speedco run dedicated tire bays at
 # close to the terminal-garage rate and turn the truck around fast; TA and

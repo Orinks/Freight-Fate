@@ -119,6 +119,8 @@ class Trip(TripRoadEventMixin, TripTrafficMixin):
         self.billboards = self._place_billboards()
         self.patrols = self._place_patrols()
         self.traffic_manager.add_patrol_traffic(self.patrols)
+        self.chain_law_areas = self._place_chain_law_areas()
+        self._announced_chain_law: set[str] = set()
         self._announced_landmarks: set[str] = set()
         self._announced_billboards: set[str] = set()
         self._announced_stops: set[str] = set()
@@ -788,6 +790,84 @@ class Trip(TripRoadEventMixin, TripTrafficMixin):
         active = [p for p in self.patrols if p.start_mi <= mile <= p.end_mi]
         return max(active, key=lambda p: p.intensity) if active else None
 
+    def _place_chain_law_areas(self) -> list[tuple[float, float]]:
+        """Stretches under a winter chain law: sustained steep grade, fixed in
+        space at trip build. Whether the law is *active* follows the live
+        weather (``chain_law_level``), so the same pass is open road in July
+        and a Level 2 control in an ice storm."""
+        if self._is_facility_approach_route():
+            return []
+        total = self.route.miles
+        areas: list[tuple[float, float]] = []
+        run_start: float | None = None
+        mile = 0.0
+        while mile <= total:
+            steep = abs(self.grade_at(mile)) >= CHAIN_LAW_MIN_GRADE
+            if steep and run_start is None:
+                run_start = mile
+            elif not steep and run_start is not None:
+                if mile - run_start >= CHAIN_LAW_MIN_RUN_MI:
+                    areas.append((max(0.0, run_start - CHAIN_LAW_LEAD_MI), mile))
+                run_start = None
+            mile += CHAIN_LAW_SAMPLE_MI
+        if run_start is not None and total - run_start >= CHAIN_LAW_MIN_RUN_MI:
+            areas.append((max(0.0, run_start - CHAIN_LAW_LEAD_MI), total))
+        merged: list[tuple[float, float]] = []
+        for area in areas:
+            if merged and area[0] - merged[-1][1] <= CHAIN_LAW_JOIN_GAP_MI:
+                merged[-1] = (merged[-1][0], area[1])
+            else:
+                merged.append(area)
+        return merged
+
+    def chain_law_level(self) -> int:
+        """0 = no law, 1 = winter-rated tires or chains, 2 = chains required.
+        The tiers follow the real shape of Colorado's commercial levels."""
+        surface = self.weather.effects.surface
+        if surface == "ice":
+            return 2
+        if surface == "snow":
+            return 1
+        return 0
+
+    def chain_law_area_at(self, mile: float) -> int | None:
+        """Index of the chain-law area containing this milepost, or None."""
+        for i, (start, end) in enumerate(self.chain_law_areas):
+            if start <= mile <= end:
+                return i
+        return None
+
+    def _check_chain_law(self) -> None:
+        level = self.chain_law_level()
+        if level == 0 or not self.chain_law_areas:
+            return
+        lookahead = max(self._zone_warning_lookahead_mi(), 1.0)
+        for i, (start, end) in enumerate(self.chain_law_areas):
+            key = f"chain-law:{i}:{level}"
+            if key in self._announced_chain_law:
+                continue
+            ahead = start - self.position_mi
+            inside = start <= self.position_mi <= end
+            if not inside and not 0 < ahead <= lookahead:
+                continue
+            self._announced_chain_law.add(key)
+            if level >= 2:
+                rule = "Level 2: chains required on all commercial vehicles"
+            else:
+                rule = "Level 1: winter-rated tires or chains required on commercial vehicles"
+            if inside:
+                where = "on this grade"
+                pullout = ""
+            else:
+                where = "on the grade ahead"
+                pullout = " Chain-up area on the right shoulder."
+            self._emit(
+                TripEventKind.GPS_CUE,
+                f"Flashing sign: chain law in effect {where}. {rule}.{pullout}",
+                chain_law=level,
+                chain_law_area=i,
+            )
+
     def _leg_traffic_density(self, leg: Leg, bad_weather_bias: float, night: bool) -> float:
         metro_bias = 0.18 if leg.checkpoints else 0.0
         night_bias = -0.08 if night else 0.0
@@ -1134,6 +1214,7 @@ class Trip(TripRoadEventMixin, TripTrafficMixin):
             )
         self.truck.grip = self.weather.effects.grip
         self.truck.water_mm = self.weather.effects.water_mm
+        self.truck.surface = self.weather.effects.surface
         self.truck.drag_mult = self.weather.effects.drag_mult
         self.truck.grade = self.grade_at(self.position_mi)
         self.truck.fuel_burn_mult = scale
@@ -1151,6 +1232,7 @@ class Trip(TripRoadEventMixin, TripTrafficMixin):
             time_scale=self.time_scale,
         )
         self._check_zones()
+        self._check_chain_law()
         self._check_speed_limit()
         self._check_stops()
         self._check_npc_traffic_cues()

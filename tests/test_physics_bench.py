@@ -141,6 +141,37 @@ def test_jake_slides_on_ice_and_cannot_hold_the_grade():
     assert _RESULTS["grade-jake-only"].metrics["jake-slip-s"] == 0.0
 
 
+def test_traction_ladder_orders_the_ice_stop():
+    # Each rung of the equipment ladder shortens the freezing-rain stop:
+    # stock rubber, then winter compound, then chains at chain speed.
+    stock = _RESULTS["stop-ice"].metrics["stop-feet"]
+    winter = _RESULTS["stop-ice-winter"].metrics["stop-feet"]
+    chained = _RESULTS["stop-ice-chains"].metrics["stop-feet"]
+    assert winter < stock
+    assert chained < winter
+
+
+def test_chained_jake_mostly_holds_the_icy_grade():
+    # Chains lift the drive-axle cap over the grade demand: the descent that
+    # slid for a quarter of an hour unchained barely slips chained, and the
+    # truck stops losing ground past its target.
+    chained = _RESULTS["grade-jake-ice-chains"]
+    unchained = _RESULTS["grade-jake-ice"]
+    assert chained.metrics["jake-slip-s"] < 0.25 * unchained.metrics["jake-slip-s"]
+    assert chained.metrics["top-mph"] < unchained.metrics["top-mph"]
+    # Proper chained use on ice costs almost nothing off the set.
+    assert chained.metrics["chain-wear"] < 5.0
+
+
+def test_chains_snap_on_bare_pavement():
+    # Five dry miles at highway speed grind the set to nothing: it snaps,
+    # bites the fender, and the truck finishes the run on rubber.
+    run = _RESULTS["chains-bare"]
+    assert run.metrics["chain-wear"] == 100.0
+    assert run.metrics["damage"] > 0.0
+    assert any("CHAINS SNAPPED" in e for e in run.events)
+
+
 def test_worn_brakes_fade_sooner_than_fresh():
     # Same descent, same driving: worn shoes must not end up in better
     # shape than fresh ones, and their fade threshold sits lower.

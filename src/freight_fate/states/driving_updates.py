@@ -151,6 +151,7 @@ class DrivingUpdateMixin:
         self._update_pull_over(dt)
         self._update_brake_heat_cue(dt)
         self._update_traction_cues()
+        self._update_chain_law()
         if self.tutorial:
             self.tutorial.update(dt, t)
         if self.trip.finished:
@@ -1169,6 +1170,63 @@ class DrivingUpdateMixin:
                 "The drive wheels are sliding under the engine brake. Ease off the jake."
             )
         self._jake_slip_active = slipping
+        if t.chains_just_snapped:
+            t.chains_just_snapped = False
+            self.ctx.say_event(
+                "A tire chain let go and hammered the fender on its way off. "
+                "The set is scrap; you are running on rubber again."
+            )
+        chains_fast = t.chains_on and t.speed_mph > CHAIN_SAFE_MPH + 2.0
+        if chains_fast and not self._chains_fast_active:
+            self.ctx.say_event(
+                "The chains are hammering the pavement at this speed. "
+                f"Keep it under {CHAIN_SAFE_MPH:.0f} or they will not last."
+            )
+        self._chains_fast_active = chains_fast
+
+    def _update_chain_law(self) -> None:
+        """Warn once per area, then run the deterministic checkpoint.
+
+        The physics is the real enforcement -- glare ice at 0.15 grip does not
+        negotiate -- but the law adds the honest paper consequence: roll past
+        the midpoint of an active control out of compliance and the checkpoint
+        at the bottom of the grade may have your number. One citation per area
+        per level; the roll is seeded, so a reload does not re-roll the dice.
+        """
+        t = self.truck
+        level = self.trip.chain_law_level()
+        if level == 0 or t.speed_mph < 3.0:
+            return
+        area = self.trip.chain_law_area_at(self.trip.position_mi)
+        if area is None:
+            return
+        compliant = t.chains_on or (level == 1 and t.tire_type == TIRE_WINTER)
+        if compliant:
+            return
+        key = (area, level)
+        if key not in self._chain_law_warned:
+            self._chain_law_warned.add(key)
+            need = "chains" if level >= 2 else "winter-rated tires or chains"
+            self.ctx.say_event(
+                f"You are rolling into an active chain law without {need}. "
+                "Stop and chain up, or hope the checkpoint is unstaffed."
+            )
+        start, end = self.trip.chain_law_areas[area]
+        if self.trip.position_mi < (start + end) / 2.0 or key in self._chain_law_cited:
+            return
+        self._chain_law_cited.add(key)
+        roll = random.Random(f"{self.trip_seed}:chain-law:{area}:{level}").random()
+        if roll >= CHAIN_LAW_CHECKPOINT_CHANCE:
+            return
+        p = self.ctx.profile
+        p.money -= CHAIN_LAW_FINE
+        self.ticket_fines_paid += CHAIN_LAW_FINE
+        self.ctx.audio.play("ui/error")
+        self.ctx.say_event(
+            "Chain checkpoint. An officer waves you onto the scale apron and "
+            f"writes a chain-law citation: {CHAIN_LAW_FINE:,.0f} dollars. "
+            f"You have {p.money:,.0f} dollars."
+        )
 
     def _update_pull_over(self, dt: float) -> None:
         if self._pull_over is None:

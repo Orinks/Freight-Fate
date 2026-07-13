@@ -275,6 +275,17 @@ FULL_COMPRESSION_MPH = 50.0  # road speed where full pacing resumes
 PARKED_TIME_SCALE_MULT = 2.0
 STATE_CROSSING_WARNING_LOOKAHEAD_MI = 10.0
 CONSTRUCTION_ENFORCEMENT_GRACE_MI = 1.5
+# Chain-law areas sit over sustained steep grade -- the real trigger for
+# CDOT/Caltrans chain controls. The areas are fixed in space at trip build;
+# whether the law is ACTIVE follows the live weather: snow puts the signs at
+# Level 1 (winter-rated tires or chains), freezing rain at Level 2 (chains on
+# all commercial vehicles). The lead mile stands in for the chain-up pullout
+# just before the grade.
+CHAIN_LAW_MIN_GRADE = 0.05
+CHAIN_LAW_MIN_RUN_MI = 1.0
+CHAIN_LAW_JOIN_GAP_MI = 2.0
+CHAIN_LAW_LEAD_MI = 0.5
+CHAIN_LAW_SAMPLE_MI = 0.25
 # Driving faster than the weather's safe speed risks a traction-loss incident,
 # so the safe-speed readout has teeth. Risk scales with how far over you are and
 # how little grip the conditions leave; only adverse grip counts.

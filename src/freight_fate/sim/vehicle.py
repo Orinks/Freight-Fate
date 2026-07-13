@@ -100,6 +100,29 @@ HYDRO_GRIP_FLOOR = 0.30  # fraction of wet grip left when fully planing
 DRIVE_AXLE_LOAD_FRACTION = 0.425  # tandem drives carry 34k of an 80k gross
 JAKE_LOCK_MARGIN = 0.5  # usable fraction of drive-axle grip before the wheels slide
 
+# Traction equipment. Tire compound and chains multiply the weather's grip on
+# the surfaces they were made for, and both trades are honest: winter rubber
+# is a softer compound that bites cold snow but wears faster and gives up a
+# little on warm dry pavement; chains are the only thing that truly holds
+# glare ice, and they are consumable -- sized for packed snow at chain speed,
+# they grind themselves apart on bare pavement or past CHAIN_SAFE_MPH until a
+# cross chain lets go into the fender. Wear rates are compressed for
+# playability like every other wear constant; the trade-offs are not.
+TIRE_ALL_SEASON = "all_season"
+TIRE_WINTER = "winter"
+WINTER_SNOW_GRIP_MULT = 1.30
+WINTER_ICE_GRIP_MULT = 1.50  # 0.15 becomes 0.22: better, still frightening
+WINTER_DRY_GRIP_LOSS = 0.03  # the soft compound squirms a little on warm dry roads
+WINTER_TREAD_WEAR_MULT = 1.5  # and it wears half again as fast
+CHAIN_SNOW_GRIP_MULT = 1.50  # chained packed snow drives about like rain
+CHAIN_ICE_GRIP_MULT = 2.50  # 0.15 becomes 0.38: crossable, carefully
+CHAIN_BARE_GRIP_LOSS = 0.15  # steel between the tread and dry pavement
+CHAIN_SAFE_MPH = 30.0  # chain speed; faster hammers the links apart
+CHAIN_WEAR_PCT_PER_MILE = 0.2  # about 500 miles of life used right
+CHAIN_WEAR_OVERSPEED_MULT = 6.0
+CHAIN_WEAR_BARE_MULT = 40.0  # bare pavement eats a set in a couple of miles
+CHAIN_SNAP_DAMAGE_PCT = 4.0  # the freed cross chains flail the fender and lines
+
 # What wear does to the physics.
 TIRE_WEAR_GRIP_LOSS = 0.25  # bald tires lose a quarter of their grip
 BRAKE_WEAR_FORCE_LOSS = 0.30  # worn shoes lose up to 30% braking force
@@ -171,6 +194,10 @@ class TruckState:
     tire_wear_pct: float = 0.0  # 0 = fresh tread, 100 = bald
     brake_wear_pct: float = 0.0  # 0 = new shoes, 100 = metal on metal
     engine_wear_pct: float = 0.0  # 0 = fresh overhaul, 100 = worn out
+    tire_type: str = TIRE_ALL_SEASON  # all_season or winter, follows the truck
+    chains_on: bool = False  # steel on the drives; installed and pulled at a stop
+    chain_wear_pct: float = 0.0  # 0 = fresh set, 100 = snapped or scrap
+    chains_just_snapped: bool = False  # one-shot event flag, consumed by the cue layer
     odometer_mi: float = 0.0
     cargo_kg: float = REFERENCE_CARGO_KG  # payload aboard; default = full reference load
 
@@ -178,6 +205,7 @@ class TruckState:
     grade: float = 0.0  # +uphill, e.g. 0.06 = 6%
     grip: float = 1.0  # weather traction multiplier
     water_mm: float = 0.0  # standing water on the road; drives hydroplaning
+    surface: str = "dry"  # dry, wet, snow, or ice; keys the traction equipment
     drag_mult: float = 1.0  # weather aero drag multiplier (headwinds/storms)
     fuel_burn_mult: float = 1.0  # trip time compression so mpg stays honest
     tire_wear_buff_mult: float = 1.0  # driver-care buff on tread wear (data/buffs.py)
@@ -238,8 +266,9 @@ class TruckState:
     @property
     def hydro_onset_mph(self) -> float | None:
         """The speed where the tires start riding the water film, or None when
-        the road holds too little water to float a loaded truck tire."""
-        if self.water_mm < HYDRO_MIN_WATER_MM:
+        the road holds too little water to float a loaded truck tire. Chains
+        bite through the film, so a chained truck cannot plane."""
+        if self.chains_on or self.water_mm < HYDRO_MIN_WATER_MM:
             return None
         tread = 1.0 - HYDRO_TREAD_LOSS * self.tire_wear_pct / 100.0
         water = max(0.5, 1.0 - HYDRO_WATER_LOSS_PER_MM * (self.water_mm - HYDRO_MIN_WATER_MM))
@@ -260,11 +289,38 @@ class TruckState:
         return 1.0 - (1.0 - HYDRO_GRIP_FLOOR) * frac
 
     @property
+    def traction_equipment_mult(self) -> float:
+        """Grip multiplier from chains or the tire compound on this surface.
+
+        Chains put steel between the tread and the road, so they speak for
+        the contact patch alone -- the tire type under them stops mattering.
+        """
+        if self.chains_on:
+            if self.surface == "ice":
+                return CHAIN_ICE_GRIP_MULT
+            if self.surface == "snow":
+                return CHAIN_SNOW_GRIP_MULT
+            return 1.0 - CHAIN_BARE_GRIP_LOSS
+        if self.tire_type == TIRE_WINTER:
+            if self.surface == "ice":
+                return WINTER_ICE_GRIP_MULT
+            if self.surface == "snow":
+                return WINTER_SNOW_GRIP_MULT
+            if self.surface == "dry":
+                return 1.0 - WINTER_DRY_GRIP_LOSS
+        return 1.0
+
+    @property
     def effective_grip(self) -> float:
-        """Weather grip degraded by tread wear and hydroplaning; bald tires
-        make every surface worse and float sooner in standing water."""
+        """Weather grip degraded by tread wear and hydroplaning, helped or
+        hurt by traction equipment; bald tires make every surface worse and
+        float sooner in standing water. With chains on, steel is the contact
+        patch: tread wear and the water film stop mattering."""
+        equip = self.traction_equipment_mult
+        if self.chains_on:
+            return self.grip * equip
         tread = 1.0 - TIRE_WEAR_GRIP_LOSS * self.tire_wear_pct / 100.0
-        return self.grip * tread * self._hydro_grip_mult()
+        return self.grip * tread * equip * self._hydro_grip_mult()
 
     @property
     def brake_wear_factor(self) -> float:
@@ -705,7 +761,26 @@ class TruckState:
         tire = speed * sim_dt / 1609.344 * TIRE_WEAR_PCT_PER_MILE * load
         if speed > 0.01:
             tire += application * speed * sim_dt * TIRE_WEAR_BRAKING_PCT
+        if self.tire_type == TIRE_WINTER:
+            tire *= WINTER_TREAD_WEAR_MULT
         self.tire_wear_pct = min(100.0, self.tire_wear_pct + tire * self.tire_wear_buff_mult)
+
+        # Chains wear by the mile, brutally faster on bare pavement or past
+        # chain speed. A set ground to nothing lets a cross chain go: the
+        # links flail into the fender and the whole set is scrap.
+        if self.chains_on and speed > 0.01:
+            rate = CHAIN_WEAR_PCT_PER_MILE
+            if self.surface not in ("snow", "ice"):
+                rate *= CHAIN_WEAR_BARE_MULT
+            if self.speed_mph > CHAIN_SAFE_MPH:
+                rate *= CHAIN_WEAR_OVERSPEED_MULT
+            self.chain_wear_pct = min(
+                100.0, self.chain_wear_pct + rate * speed * sim_dt / 1609.344
+            )
+            if self.chain_wear_pct >= 100.0:
+                self.chains_on = False
+                self.chains_just_snapped = True
+                self.damage_pct = min(100.0, self.damage_pct + CHAIN_SNAP_DAMAGE_PCT)
 
         # The service brakes wear with the energy they actually dissipate;
         # the jake dumps its share out the exhaust and costs the shoes nothing.

@@ -169,6 +169,76 @@ def test_company_driver_garage_service_is_carrier_billed():
         app.shutdown()
 
 
+def test_garage_sells_the_traction_equipment_ladder():
+    from freight_fate.app import App
+    from freight_fate.models.profile import Profile
+    from freight_fate.states.city import GarageState
+    from freight_fate.states.city_garage import (
+        CHAIN_SET_COST,
+        TIRE_SERVICE_COST_PER_PCT,
+        WINTER_TIRE_PREMIUM,
+    )
+
+    app = App()
+    try:
+        app.ctx.profile = Profile(name="Equipment", current_city="Chicago")
+        p = app.ctx.profile
+        p.business_status = LEASED_OWNER_OPERATOR
+        p.owned_trucks = ["rig"]
+        p.money = 20_000.0
+        app.push_state(GarageState(app.ctx))
+        state = app.state
+
+        # Winter swap: a fresh set at the premium, compound on the record.
+        p.tire_wear_pct = 30.0
+        state._swap_tire_compound()
+        winter_cost = round(100 * TIRE_SERVICE_COST_PER_PCT * WINTER_TIRE_PREMIUM, 2)
+        assert p.tire_type == "winter"
+        assert p.tire_wear_pct == 0.0
+        assert p.money == pytest.approx(20_000.0 - winter_cost)
+
+        # Chains go in the side box for a flat set price.
+        money_before = p.money
+        state._buy_chains()
+        assert p.chains_owned
+        assert p.chain_wear_pct == 0.0
+        assert p.money == pytest.approx(money_before - CHAIN_SET_COST)
+
+        # A fresh set aboard is not sold twice.
+        money_before = p.money
+        state._buy_chains()
+        assert p.money == pytest.approx(money_before)
+    finally:
+        app.shutdown()
+
+
+def test_company_driver_gets_carrier_chains_but_carrier_rubber():
+    from freight_fate.app import App
+    from freight_fate.models.profile import Profile
+    from freight_fate.states.city import GarageState
+
+    app = App()
+    try:
+        app.ctx.profile = Profile(name="Company Equip", current_city="Chicago")
+        p = app.ctx.profile
+        p.business_status = COMPANY_DRIVER
+        p.money = 50.0
+        app.push_state(GarageState(app.ctx))
+        state = app.state
+
+        # The carrier specs the rubber: no compound swap on the assigned rig.
+        state._swap_tire_compound()
+        assert p.tire_type == "all_season"
+        assert p.money == pytest.approx(50.0)
+
+        # Chains are required equipment: carrier billed, never out of pocket.
+        state._buy_chains()
+        assert p.chains_owned
+        assert p.money == pytest.approx(50.0)
+    finally:
+        app.shutdown()
+
+
 def test_company_driver_truck_status_says_assigned_not_owned():
     from freight_fate.app import App
     from freight_fate.models.profile import Profile

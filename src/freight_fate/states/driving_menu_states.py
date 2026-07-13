@@ -464,6 +464,31 @@ class PauseMenuState(MenuState):
                 help="Change units, transmission, volumes, weather, "
                 "voices, update channel, and trip pacing.",
             ),
+        ]
+        if self.driving.truck.chains_on:
+            items.append(
+                MenuItem(
+                    f"Remove snow chains: about {CHAIN_REMOVE_MIN:.0f} minutes",
+                    self._remove_chains,
+                    help="Pull the chains off the drives and stow them. Do it "
+                    "as soon as the road is bare again; chains grind apart "
+                    "fast on pavement.",
+                )
+            )
+        elif self.ctx.profile.chains_owned and self.ctx.profile.chain_wear_pct < 100:
+            items.append(
+                MenuItem(
+                    self._install_chains_label,
+                    self._install_chains,
+                    help="Stop, kneel on the shoulder, and hang the chain set "
+                    "on the drives. Chains bite snow and glare ice like "
+                    "nothing else. Keep it near chain speed, about thirty "
+                    "miles per hour, and pull them the moment the road is "
+                    "bare. Installing in the dark takes longer and takes "
+                    "more out of you.",
+                )
+            )
+        items += [
             MenuItem(
                 "Abandon job",
                 self._abandon,
@@ -537,6 +562,74 @@ class PauseMenuState(MenuState):
             f"{FIELD_REPAIR_DAMAGE_PCT:.0f} percent damage {billing}. "
             f"The repair took an hour and a half: it is "
             f"{clock_text(d.trip.local_hour)}. {_deadline_text(d)}"
+        )
+
+    def _chain_night(self) -> bool:
+        return is_night(self.driving.trip.local_hour)
+
+    def _install_chains_label(self) -> str:
+        minutes = CHAIN_INSTALL_MIN * (CHAIN_INSTALL_NIGHT_MULT if self._chain_night() else 1.0)
+        when = " in the dark" if self._chain_night() else ""
+        return f"Install snow chains{when}: about {minutes:.0f} minutes"
+
+    def _install_chains(self) -> None:
+        d = self.driving
+        p = self.ctx.profile
+        if d.truck.speed_mph > 3:
+            self.ctx.say("Come to a complete stop first.")
+            return
+        night = self._chain_night()
+        minutes = CHAIN_INSTALL_MIN * (CHAIN_INSTALL_NIGHT_MULT if night else 1.0)
+        fatigue = CHAIN_INSTALL_NIGHT_FATIGUE if night else CHAIN_INSTALL_FATIGUE
+        _advance_rest_clock(d, minutes, "on_duty_not_driving", "chain up")
+        d.hos.on_duty(minutes)
+        p.fatigue = min(100.0, p.fatigue + fatigue)
+        d.truck.chains_on = True
+        d._chains_fast_active = False
+        self.ctx.audio.play("ui/notify")
+        self.refresh()
+        effort = (
+            "Kneeling on a dark shoulder by headlamp, it takes everything "
+            "your gloves have got. "
+            if night
+            else ""
+        )
+        bare = (
+            " The road here is bare; they will grind apart fast until you "
+            "reach the snow."
+            if d.truck.surface not in ("snow", "ice")
+            else ""
+        )
+        self.ctx.say(
+            f"Chains hung on the drives in {minutes:.0f} minutes. {effort}"
+            f"Keep it near {CHAIN_SAFE_MPH:.0f} miles per hour, and pull them "
+            f"when the road turns bare.{bare} It is "
+            f"{clock_text(d.trip.local_hour)}. {_deadline_text(d)}"
+        )
+
+    def _remove_chains(self) -> None:
+        d = self.driving
+        if d.truck.speed_mph > 3:
+            self.ctx.say("Come to a complete stop first.")
+            return
+        _advance_rest_clock(d, CHAIN_REMOVE_MIN, "on_duty_not_driving", "remove chains")
+        d.hos.on_duty(CHAIN_REMOVE_MIN)
+        p = self.ctx.profile
+        p.fatigue = min(100.0, p.fatigue + CHAIN_REMOVE_FATIGUE)
+        d.truck.chains_on = False
+        self.ctx.audio.play("ui/notify")
+        self.refresh()
+        wear = d.truck.chain_wear_pct
+        state_word = (
+            "They are about done; pick up a fresh set at a garage."
+            if wear >= 75
+            else f"The set is {wear:.0f} percent worn."
+            if wear >= 1
+            else "The set is still fresh."
+        )
+        self.ctx.say(
+            f"Chains off and stowed in {CHAIN_REMOVE_MIN:.0f} minutes. "
+            f"{state_word} It is {clock_text(d.trip.local_hour)}. {_deadline_text(d)}"
         )
 
     def _emergency_shoulder_sleep(self) -> None:

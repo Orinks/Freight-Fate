@@ -39,7 +39,7 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT / "src") not in sys.path:
     sys.path.insert(0, str(ROOT / "src"))
 
-from freight_fate.sim.vehicle import TruckState  # noqa: E402
+from freight_fate.sim.vehicle import CHAIN_SAFE_MPH, TruckState  # noqa: E402
 from freight_fate.sim.weather import EFFECTS, WeatherKind  # noqa: E402
 
 DT = 0.1  # fixed physics timestep, seconds
@@ -74,6 +74,8 @@ class Scenario:
     tire_wear: float = 0.0
     brake_wear: float = 0.0
     engine_wear: float = 0.0
+    tire_type: str = "all_season"  # or "winter"
+    chains: bool = False  # start the run with chains installed
     target_mph: float = 55.0
     jake: bool = False
     jake_stage: int = 3  # 1..3 when jake is on; 3 = full retard
@@ -208,6 +210,39 @@ SCENARIOS: tuple[Scenario, ...] = (
         tire_wear=80.0,
         stop_from_mph=65.0,
     ),
+    Scenario(
+        name="stop-ice-winter",
+        summary="The freezing-rain stop from 40 on winter-compound tires.",
+        profile=((5.0, 0.0),),
+        weather=WeatherKind.ICE,
+        tire_type="winter",
+        stop_from_mph=40.0,
+    ),
+    Scenario(
+        name="stop-ice-chains",
+        summary="The freezing-rain stop from 30 with chains on the drives.",
+        profile=((5.0, 0.0),),
+        weather=WeatherKind.ICE,
+        chains=True,
+        stop_from_mph=30.0,
+    ),
+    Scenario(
+        name="grade-jake-ice-chains",
+        summary="The icy 4 percent descent again, full jake, chained up this time.",
+        profile=((1.0, 0.0), (5.0, -4.0), (1.0, 0.0)),
+        weather=WeatherKind.ICE,
+        chains=True,
+        target_mph=20.0,
+        jake=True,
+        braking="none",
+    ),
+    Scenario(
+        name="chains-bare",
+        summary="Chains left on across five dry miles at highway speed; they do not survive.",
+        profile=((5.0, 0.0),),
+        chains=True,
+        target_mph=55.0,
+    ),
 )
 
 
@@ -244,9 +279,12 @@ def _build_truck(sc: Scenario) -> TruckState:
     truck.tire_wear_pct = sc.tire_wear
     truck.brake_wear_pct = sc.brake_wear
     truck.engine_wear_pct = sc.engine_wear
+    truck.tire_type = sc.tire_type
+    truck.chains_on = sc.chains
     effects = EFFECTS[sc.weather]
     truck.grip = effects.grip if sc.grip_override is None else sc.grip_override
     truck.water_mm = effects.water_mm if sc.water_override is None else sc.water_override
+    truck.surface = effects.surface
     truck.drag_mult = effects.drag_mult
     truck.set_air_ready(parking_brake=False)
     truck.start_engine()
@@ -325,6 +363,8 @@ class _Watcher:
     hydro_s: float = 0.0
     jake_slip_said: bool = False
     jake_slip_s: float = 0.0
+    snap_said: bool = False
+    chains_fast_said: bool = False
     peak_temp_c: float = 0.0
     peak_temp_mi: float = 0.0
     top_mph: float = 0.0
@@ -413,6 +453,21 @@ class _Watcher:
             if not self.jake_slip_said:
                 self.jake_slip_said = True
                 self.note(t_s, "JAKE SLIPPING: drive wheels breaking loose under the retarder")
+
+        if tk.chains_on and mph > CHAIN_SAFE_MPH + 2.0 and not self.chains_fast_said:
+            self.chains_fast_said = True
+            self.note(
+                t_s,
+                f"cue: chains hammering past chain speed ({mph:.0f} mph, "
+                f"limit {CHAIN_SAFE_MPH:.0f})",
+            )
+        if tk.chains_just_snapped and not self.snap_said:
+            self.snap_said = True
+            self.note(
+                t_s,
+                f"CHAINS SNAPPED at {mph:.0f} mph: the set is scrap, "
+                "damage taken, running on rubber again",
+            )
 
         if mph >= RUNAWAY_MPH and not self.runaway_said:
             self.runaway_said = True
@@ -555,6 +610,11 @@ def _summarize(
         lines.append(f"drive wheels sliding under the jake {_clock(watch.jake_slip_s)} total")
     if watch.hydro_s > 0:
         lines.append(f"hydroplaning {_clock(watch.hydro_s)} total")
+    if sc.chains:
+        if truck.chain_wear_pct >= 100.0:
+            lines.append("chains destroyed: the set snapped and is scrap")
+        else:
+            lines.append(f"chain wear added: {truck.chain_wear_pct:.1f} percent")
     if watch.lowest_moving_gear < 99:
         lines.append(f"lowest gear while moving: {watch.lowest_moving_gear}")
     return lines
@@ -581,6 +641,8 @@ def _collect_metrics(
         "time-s": t,
         "hydro-s": watch.hydro_s,
         "jake-slip-s": watch.jake_slip_s,
+        "chain-wear": truck.chain_wear_pct,
+        "damage": truck.damage_pct,
     }
 
 
@@ -745,6 +807,13 @@ def _header(sc: Scenario) -> list[str]:
     lines = [f"Scenario: {sc.name}", f"  {sc.summary}", f"  Load {truck_note}. Weather {wx}."]
     if wear_bits:
         lines.append("  Starting wear: " + ", ".join(wear_bits) + ".")
+    equip_bits = []
+    if sc.tire_type == "winter":
+        equip_bits.append("winter-compound tires")
+    if sc.chains:
+        equip_bits.append("chains on the drives")
+    if equip_bits:
+        lines.append("  Equipment: " + " and ".join(equip_bits) + ".")
     return lines
 
 

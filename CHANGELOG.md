@@ -38,6 +38,28 @@
 
 ### Added
 
+- **Winter tires are now a real choice at the garage.** A winter-compound set
+  bites noticeably harder on snow and ice, and the trade is honest: it wears
+  faster and gives up a touch of grip on warm dry pavement. Company tractors
+  stay on whatever the carrier specs; owner-operators pick their rubber. The
+  rig readout and the garage both say which compound is mounted.
+
+- **Snow chains and chain laws have arrived on the steep grades.** Buy a
+  chain set at the garage and it rides in the side box until a flashing sign
+  before a snowy or icy pass calls a chain law: Level 1 wants winter tires or
+  chains, Level 2 wants chains on the drives. Chaining up happens from the
+  pause menu while stopped -- it costs real minutes and real fatigue, and
+  doing it in the dark costs more of both. Chained on glare ice the truck
+  actually holds: stops shorten dramatically and the engine brake stops
+  breaking the drive wheels loose on the descent.
+
+- **Chains are honest equipment, not a magic button.** They want chain speed,
+  about thirty miles per hour, and they hate bare pavement: run them fast or
+  dry and they grind apart until a chain lets go, whips the fender, and the
+  set is scrap. Rolling into an active chain law out of compliance gets a
+  spoken warning, and the checkpoint past the sign may write a five hundred
+  dollar citation.
+
 - **Freezing rain is now its own weather, and it is the one worth parking
   for.** Rain falling just below freezing glazes the road with ice far
   slicker than snow -- a stop from 40 can take more than twice the room of a

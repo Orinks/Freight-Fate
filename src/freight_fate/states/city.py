@@ -438,15 +438,25 @@ class CityMenuState(MenuState):
             lead = f"Assigned {carrier_name(p)} tractor: {truck.label}."
         else:
             lead = f"Owned tractor: {truck.label}."
+        compound = "winter" if p.tire_type == "winter" else "all-season"
+        if not p.chains_owned:
+            chains = "No snow chains aboard."
+        elif p.chain_wear_pct >= 100:
+            chains = "The snow chain set aboard is snapped scrap."
+        elif p.chain_wear_pct >= 1:
+            chains = f"Snow chains aboard, {p.chain_wear_pct:.0f} percent worn."
+        else:
+            chains = "Snow chains aboard and fresh."
         self.ctx.say(
             f"{lead} Fuel {fuel_pct:.0f} percent, "
             f"{p.truck_fuel_gal:.0f} gallons of "
             f"{specs.fuel_tank_gal:.0f}. "
             f"Tractor condition {condition}, {damage:.0f} percent damage. "
-            f"Tire wear {p.tire_wear_pct:.0f} percent. "
+            f"Tire wear {p.tire_wear_pct:.0f} percent, {compound} compound. "
             f"Brake wear {p.brake_wear_pct:.0f} percent. "
             f"Engine wear {p.engine_wear_pct:.0f} percent. "
-            f"Road grime {p.road_grime_pct:.0f} percent."
+            f"Road grime {p.road_grime_pct:.0f} percent. "
+            f"{chains}"
         )
 
     def _time_weather(self) -> None:

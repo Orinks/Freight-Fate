@@ -119,6 +119,9 @@ class DrivingState(DrivingControlsMixin, DrivingUpdateMixin, DrivingEventMixin, 
         self._brake_squeal_cooldown_s = 0.0  # hot-brake squeal cue spacing
         self._hydro_active = False  # spoken hydroplane warning edge tracking
         self._jake_slip_active = False  # spoken jake-slip warning edge tracking
+        self._chains_fast_active = False  # spoken chains-over-speed warning edge tracking
+        self._chain_law_warned: set[tuple[int, int]] = set()  # (area, level) spoken warnings
+        self._chain_law_cited: set[tuple[int, int]] = set()  # checkpoint rolls already taken
         # Trooper pull-overs: a strike inside a patrol window may get you stopped
         # for an immediate ticket, separate from the silent at-delivery strikes.
         self.speeding_tickets = 0
@@ -278,6 +281,7 @@ class DrivingState(DrivingControlsMixin, DrivingUpdateMixin, DrivingEventMixin, 
             "speeding_strikes": self.speeding_strikes,
             "air_brake": self.truck.air_brake_snapshot(),
             "engine_on": self.truck.engine_on,
+            "chains_on": self.truck.chains_on,
             "hos": self.hos.to_dict(),
             "fatigue": self.ctx.profile.fatigue,
             "hos_fine_count": self.hos_fine_count,
@@ -347,6 +351,8 @@ class DrivingState(DrivingControlsMixin, DrivingUpdateMixin, DrivingEventMixin, 
             state.start_tire_wear = float(start_wear.get("tire", state.truck.tire_wear_pct))
             state.start_brake_wear = float(start_wear.get("brake", state.truck.brake_wear_pct))
             state.start_engine_wear = float(start_wear.get("engine", state.truck.engine_wear_pct))
+            # Chains stay on the drives across a save; absent on older saves.
+            state.truck.chains_on = bool(data.get("chains_on", False))
             state.rig_buffs = {
                 str(group): dict(info)
                 for group, info in dict(data.get("rig_buffs", {})).items()

@@ -564,6 +564,94 @@ def test_hydroplaning_collapses_grip_and_slowing_restores_it():
     assert t.effective_grip > planing * 2.0  # contact restored
 
 
+def test_winter_tires_trade_dry_grip_for_snow_and_ice():
+    """The winter compound is a real trade, not a free upgrade: more bite on
+    snow and ice, slightly less on warm dry pavement, and faster tread wear."""
+    from freight_fate.sim.vehicle import (
+        TIRE_WINTER,
+        WINTER_DRY_GRIP_LOSS,
+        WINTER_ICE_GRIP_MULT,
+        WINTER_SNOW_GRIP_MULT,
+    )
+
+    t = make_auto_truck()
+    t.grip, t.surface = 0.45, "snow"
+    stock_snow = t.effective_grip
+    t.tire_type = TIRE_WINTER
+    assert t.effective_grip == pytest.approx(stock_snow * WINTER_SNOW_GRIP_MULT)
+    t.grip, t.surface = 0.15, "ice"
+    assert t.effective_grip == pytest.approx(0.15 * WINTER_ICE_GRIP_MULT)
+    t.grip, t.surface = 1.0, "dry"
+    assert t.effective_grip == pytest.approx(1.0 - WINTER_DRY_GRIP_LOSS)
+
+    # Same mile at the same speed costs the winter set more tread.
+    winter = make_auto_truck()
+    winter.tire_type = TIRE_WINTER
+    stock = make_auto_truck()
+    for truck in (winter, stock):
+        truck.velocity_mps = 25.0
+        truck._update_wear(60.0)
+    assert winter.tire_wear_pct > stock.tire_wear_pct
+
+
+def test_chains_replace_the_contact_patch():
+    """With chains on, steel touches the road: tread wear and the water film
+    stop mattering, and the chain multiplier alone works on the weather grip."""
+    from freight_fate.sim.vehicle import CHAIN_BARE_GRIP_LOSS, CHAIN_ICE_GRIP_MULT
+
+    t = make_auto_truck()
+    t.grip, t.surface, t.water_mm = 0.62, "wet", 3.0
+    t.tire_wear_pct = 80.0
+    t.velocity_mps = 70.0 / 2.23694
+    assert t.hydroplaning
+    t.chains_on = True
+    assert not t.hydroplaning  # chains bite through the film
+    assert t.effective_grip == pytest.approx(0.62 * (1.0 - CHAIN_BARE_GRIP_LOSS))
+    t.grip, t.surface, t.water_mm = 0.15, "ice", 0.0
+    assert t.effective_grip == pytest.approx(0.15 * CHAIN_ICE_GRIP_MULT)
+
+
+def test_chained_jake_holds_the_icy_grade():
+    """The jake cap that breaks loose on glare ice holds once the drives are
+    chained: the same demand fits under two and a half times the grip."""
+    t = make_auto_truck()
+    t.velocity_mps = 15.0
+    t.rpm = 1800.0
+    t.engine_brake_stage = 3
+    t.transmission.gear = 7
+    t.grip, t.surface = 0.15, "ice"
+    assert t.jake_slipping
+    t.chains_on = True
+    assert not t.jake_slipping
+
+
+def test_chains_grind_apart_on_bare_pavement_and_snap():
+    """Chains left on at highway speed on dry pavement destroy themselves in a
+    couple of miles: the set snaps, takes a bite of the fender, and is scrap."""
+    from freight_fate.sim.vehicle import CHAIN_SNAP_DAMAGE_PCT
+
+    t = make_auto_truck()
+    t.chains_on = True
+    t.surface = "dry"
+    t.velocity_mps = 55.0 / 2.23694
+    for _ in range(4000):  # up to 400 simulated seconds at highway speed
+        t._update_wear(0.1)
+        if t.chains_just_snapped:
+            break
+    assert t.chains_just_snapped
+    assert not t.chains_on
+    assert t.chain_wear_pct == pytest.approx(100.0)
+    assert t.damage_pct == pytest.approx(CHAIN_SNAP_DAMAGE_PCT)
+    # Used as intended -- packed snow at chain speed -- a set lasts the pass.
+    proper = make_auto_truck()
+    proper.chains_on = True
+    proper.grip, proper.surface = 0.45, "snow"
+    proper.velocity_mps = 25.0 / 2.23694
+    proper._update_wear(600.0)  # ten minutes of chained descent
+    assert proper.chains_on
+    assert proper.chain_wear_pct < 2.0
+
+
 def test_governed_speed_is_not_abuse():
     """Sitting AT the governor is normal diesel running; overspeed wear only
     starts past it, when a downgrade drives the engine through the wheels."""

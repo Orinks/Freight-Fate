@@ -66,6 +66,55 @@ def test_servicing_the_active_truck_leaves_parked_trucks_worn():
     assert p.truck_conditions["heavy_hauler"]["tire_wear_pct"] == 40.0
 
 
+def test_traction_equipment_rides_the_truck_record():
+    """Tire compound and the chain set bolt to the truck: they follow a swap
+    like wear does, and records saved before the fields existed read as the
+    all-season, no-chains defaults."""
+    p = _owner_operator_fleet()
+    p.tire_type = "winter"
+    p.chains_owned = True
+    p.chain_wear_pct = 30.0
+
+    p.truck = "heavy_hauler"  # the other tractor has its own equipment
+    assert p.tire_type == "all_season"
+    assert not p.chains_owned
+    assert p.chain_wear_pct == 0.0
+
+    p.truck = "rig"
+    assert p.tire_type == "winter"
+    assert p.chains_owned
+    assert p.chain_wear_pct == 30.0
+
+    # A record written before the equipment fields existed: defaults apply.
+    del p.truck_conditions["rig"]["tire_type"]
+    del p.truck_conditions["rig"]["chains_owned"]
+    del p.truck_conditions["rig"]["chain_wear_pct"]
+    assert p.tire_type == "all_season"
+    assert not p.chains_owned
+    assert p.chain_wear_pct == 0.0
+
+
+def test_equipment_flows_through_the_truck_condition_funnel():
+    """load/store round-trip: the compound reaches the TruckState, chain wear
+    accrued on the road comes back, and the compound choice stays garage-only."""
+    from freight_fate.sim.vehicle import TruckState
+
+    p = _owner_operator_fleet()
+    p.tire_type = "winter"
+    p.chains_owned = True
+
+    truck = TruckState()
+    p.load_truck_condition(truck)
+    assert truck.tire_type == "winter"
+    assert truck.chain_wear_pct == 0.0
+
+    truck.chain_wear_pct = 45.0  # a pass worth of chained miles
+    p.store_truck_condition(truck)
+    assert p.chain_wear_pct == 45.0
+    assert p.tire_type == "winter"
+    assert p.chains_owned  # ownership is profile equipment, not physics state
+
+
 def test_company_driver_condition_keys_under_the_assigned_rig():
     p = Profile(name="Company", business_status=COMPANY_DRIVER)
     p.truck = "heavy_hauler"  # stray value; company drivers still run "rig"

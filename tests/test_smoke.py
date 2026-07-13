@@ -403,7 +403,7 @@ def test_garage_services_tires_and_wash():
         garage = GarageState(app.ctx)
         app.push_state(garage)
 
-        assert any("Replace tires" in item.text for item in garage.items)
+        assert any("Replace all-season tires" in item.text for item in garage.items)
         assert any("Wash truck" in item.text for item in garage.items)
 
         garage._service_tires()

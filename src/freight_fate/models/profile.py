@@ -323,13 +323,22 @@ def _quarantine(path: Path) -> Path:
 
 
 def _fresh_condition(fuel_gal: float = DEFAULT_FUEL_GAL) -> dict:
-    """A brand-new truck's condition record: no wear, no damage, given fuel."""
+    """A brand-new truck's condition record: no wear, no damage, given fuel.
+
+    Traction equipment rides in the same record -- tire compound, whether a
+    chain set is aboard, and how worn that set is -- because it bolts to the
+    truck, not the driver. Older records missing these keys read as the
+    defaults through the property ``get`` calls below.
+    """
     return {
         "tire_wear_pct": 0.0,
         "brake_wear_pct": 0.0,
         "engine_wear_pct": 0.0,
         "damage_pct": 0.0,
         "fuel_gal": fuel_gal,
+        "tire_type": "all_season",
+        "chains_owned": False,
+        "chain_wear_pct": 0.0,
     }
 
 
@@ -557,6 +566,30 @@ class Profile:
     def truck_fuel_gal(self, value: float) -> None:
         self._condition()["fuel_gal"] = float(value)
 
+    @property
+    def tire_type(self) -> str:
+        return str(self._condition().get("tire_type", "all_season"))
+
+    @tire_type.setter
+    def tire_type(self, value: str) -> None:
+        self._condition()["tire_type"] = str(value)
+
+    @property
+    def chains_owned(self) -> bool:
+        return bool(self._condition().get("chains_owned", False))
+
+    @chains_owned.setter
+    def chains_owned(self, value: bool) -> None:
+        self._condition()["chains_owned"] = bool(value)
+
+    @property
+    def chain_wear_pct(self) -> float:
+        return float(self._condition().get("chain_wear_pct", 0.0))
+
+    @chain_wear_pct.setter
+    def chain_wear_pct(self, value: float) -> None:
+        self._condition()["chain_wear_pct"] = float(value)
+
     def load_truck_condition(self, truck) -> None:
         """Put the saved rig condition onto a fresh ``TruckState`` at trip start.
 
@@ -568,6 +601,8 @@ class Profile:
         truck.tire_wear_pct = self.tire_wear_pct
         truck.brake_wear_pct = self.brake_wear_pct
         truck.engine_wear_pct = self.engine_wear_pct
+        truck.tire_type = self.tire_type
+        truck.chain_wear_pct = self.chain_wear_pct
 
     def store_truck_condition(self, truck) -> None:
         """Write the rig's current condition back to the profile for saving."""
@@ -576,6 +611,9 @@ class Profile:
         self.tire_wear_pct = truck.tire_wear_pct
         self.brake_wear_pct = truck.brake_wear_pct
         self.engine_wear_pct = truck.engine_wear_pct
+        # Tire type is chosen at the garage, never behind the wheel, so it only
+        # flows profile-to-truck. Chain wear accrues while driving chained.
+        self.chain_wear_pct = truck.chain_wear_pct
 
     def fatigue_buff_rate(self, now_h: float) -> float:
         """Fatigue accrual multiplier from the active food or drink buff.
