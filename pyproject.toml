@@ -22,6 +22,7 @@ dependencies = [
     "prismatoid>=0.16",
     "numpy>=1.26",
     "certifi>=2024.7.4",
+    "cryptography>=45.0",
     "sound_lib @ git+https://github.com/samtupy/sound_lib_macos_fixes.git",
     # Optional Discord Rich Presence. Imported defensively: if it is ever
     # absent, or Discord is closed, the game still starts, plays, and exits.

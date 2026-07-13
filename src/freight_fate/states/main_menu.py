@@ -931,6 +931,16 @@ class SettingsCategoryState(MenuState):
 
             return [
                 MenuItem(
+                    lambda: (
+                        "orinks.net account: connected"
+                        if OnlineIdentity.load() is not None
+                        else "Set up orinks.net account"
+                    ),
+                    self._online_account_setup,
+                    help="Connect the game to your orinks.net account without turning on Profile "
+                    "sharing or Cloud backup.",
+                ),
+                MenuItem(
                     # The identity check lives INSIDE the label so it is
                     # fresh on every read: a captured build-time value went
                     # stale the moment setup completed (or the identity file
@@ -942,37 +952,30 @@ class SettingsCategoryState(MenuState):
                             else f"Profile sharing: {'on' if s.online_presence else 'off'}"
                         )
                         if OnlineIdentity.load() is not None
-                        # Before setup this item IS the driver profile
-                        # gateway: connecting unlocks the board and cloud
-                        # backup, so the label names the profile, not just
-                        # sharing.
                         else "Profile sharing: not set up"
                     ),
                     lambda: self._toggle_online_presence(1),
                     help="Profile sharing is one optional public setting for your driver profile, "
                     "official achievements, automatic road-journal posts, updates feed, "
                     "and on-duty board activity. Nothing is shared until you set it up: "
-                    "selecting this the first time opens the driver profile "
-                    "setup menu, where you sign in on orinks.net and paste "
-                    "in your Driver ID and token. Cloud saves remain private and separate.",
+                    "Set up the orinks.net account first. Cloud saves remain private and separate.",
                 ),
                 MenuItem(
                     lambda: (
-                        f"Back up saves to your Orinks account: {'on' if s.cloud_saves else 'off'}"
+                        f"Back up saves to your orinks.net account: {'on' if s.cloud_saves else 'off'}"
                         if OnlineIdentity.load() is not None
-                        else "Back up saves to your Orinks account: not set up"
+                        else "Back up saves to your orinks.net account: not set up"
                     ),
                     lambda: self._toggle_cloud_saves(1),
                     help="After each game save, upload that career to your "
-                    "own Orinks account so you can restore it on another "
+                    "own orinks.net account so you can restore it on another "
                     "computer. Backups are private to your account and never "
-                    "appear on the drivers board. Uses the same sign-in as "
-                    "your driver profile, so set that up first.",
+                    "appear as public downloads. Uses the same orinks.net account sign-in.",
                 ),
                 MenuItem(
                     "Restore a cloud backup",
                     self._cloud_backup_menu,
-                    help="List the careers backed up to your Orinks account "
+                    help="List the careers backed up to your orinks.net account "
                     "and bring one onto this computer.",
                 ),
                 MenuItem(
@@ -1038,10 +1041,10 @@ class SettingsCategoryState(MenuState):
                     lambda d: self._volume("music_volume", 0.1 * d),
                     lambda d: self._volume("ui_volume", 0.1 * d),
                 ],
-                # Index-aligned with the online items: the restore entry at
-                # index 2 is an action, not a value, so left/right is a no-op
-                # there rather than falling through to the Discord toggle.
+                # Account setup and restore are actions, so left/right does
+                # nothing on those rows instead of changing a nearby toggle.
                 "online": [
+                    lambda _d: None,
                     self._toggle_online_presence,
                     self._toggle_cloud_saves,
                     lambda _d: None,
@@ -1226,7 +1229,7 @@ class SettingsCategoryState(MenuState):
 
     def _toggle_cloud_saves(self, _d: int) -> None:
         from ..online_presence import OnlineIdentity
-        from .cloud_save_states import CLOUD_DISCLOSURE
+        from .cloud_save_states import CloudBackupConsentState
 
         s = self.ctx.settings
         if OnlineIdentity.load() is None:
@@ -1234,22 +1237,24 @@ class SettingsCategoryState(MenuState):
             # without them the setting would be inert, so point at the setup
             # item instead of flipping a switch that does nothing.
             self.ctx.say(
-                "Cloud backup uses the same Orinks sign-in as your driver "
-                "profile. Choose Driver profile on this menu to set that up "
-                "first, then turn cloud backup on.",
+                "Cloud backup uses the same orinks.net sign-in as your driver "
+                "profile. Choose Set up orinks.net account on this menu first, "
+                "then turn cloud backup on.",
                 interrupt=True,
             )
             return
-        s.cloud_saves = not s.cloud_saves
+        if not s.cloud_saves:
+            self.ctx.push_state(CloudBackupConsentState(self.ctx))
+            return
+        s.cloud_saves = False
         s.save()
         self.ctx.apply_cloud_saves()
-        if s.cloud_saves:
-            # Turning it on is the consent moment: speak the full disclosure
-            # here, not buried in help text.
-            self.ctx.say(f"Cloud backup on. {CLOUD_DISCLOSURE}", interrupt=True)
-            self.refresh()
-        else:
-            self._announce()
+        self._announce()
+
+    def _online_account_setup(self) -> None:
+        from .online_states import OnlineSetupState
+
+        self.ctx.push_state(OnlineSetupState(self.ctx))
 
     def _cloud_backup_menu(self) -> None:
         from .cloud_save_states import CloudBackupState

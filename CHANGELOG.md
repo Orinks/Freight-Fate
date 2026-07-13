@@ -31,10 +31,6 @@
 
 ### Changed
 
-- **Your public profile now fills in the moment you turn Profile sharing on.**
-  Connecting to orinks.net or re-enabling sharing publishes your career summary
-  right away, instead of waiting for your next save at a delivery or terminal.
-
 - **The engine no longer jumps in volume the instant an automatic shift
   finishes.** It now eases back up to full pull over a brief moment, so completed
   shifts sound smooth instead of abruptly snapping back under load.
@@ -197,12 +193,18 @@
   shipping channels, past Sea Gull Island, out to where no land is visible in any
   direction, and up the Delmarva peninsula to Salisbury. It carries a hefty truck
   toll, because of course it does.
+- **Cloud backups now prove they were accepted by orinks.net before restore.**
+  orinks.net validates and signs each private revision, and Freight Fate verifies
+  that signature before touching a local career. Public Profile sharing stays
+  separate: detailed career statistics come only from an accepted backup and
+  are omitted when no verified revision exists.
 
 - **Optional Profile sharing stays quiet during driving.** With Profile sharing on,
-  Freight Fate can queue automatic fictional road-journal posts,
-  achievements, and an allowlisted last-saved career snapshot for the public
-  driver profile. Offline posting retries in the background and never adds a
-  spoken interruption while driving.
+  Freight Fate can queue automatic road-journal posts,
+  achievements, and updates for the public driver profile. Detailed career
+  statistics come only from the latest private Cloud Backup accepted by
+  orinks.net. Offline posting retries in the background and never adds a spoken
+  interruption while driving.
 
 - **Exits now come straight from real-world maps -- with the correct exit names
   and numbers.** On the Interstates, your stops and your destination exit are

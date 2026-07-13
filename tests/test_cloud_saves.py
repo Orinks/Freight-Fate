@@ -3,8 +3,8 @@
 These cover what must hold whether or not orinks.net is reachable: the
 off-by-default path, the signature-stripped portable content form, debounce
 and no-change skipping, the parent-revision conflict guard, the save-listener
-hook, and restores (which must land unsigned so another machine's game can
-re-sign them). A fake transport and an injected clock keep every test
+hook, and restores (which must verify the server signature and receive a new
+local signature). A fake transport and an injected clock keep every test
 deterministic and free of real sockets.
 """
 
@@ -16,7 +16,11 @@ import json
 import urllib.error
 
 import pytest
+from cryptography.hazmat.primitives import serialization
+from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
 
+from freight_fate import cloud_save_integrity
+from freight_fate.cloud_save_integrity import CloudSaveIntegrityError, canonical_profile
 from freight_fate.cloud_saves import (
     DEBOUNCE_S,
     RETRY_INTERVAL_S,
@@ -36,6 +40,12 @@ from freight_fate.online_presence import OnlineIdentity, base_url
 from freight_fate.settings import Settings
 
 IDENTITY = OnlineIdentity(driver_id="driver-testtest", driver_token="t" * 48)
+TEST_KEY_ID = "test-key"
+TEST_PRIVATE_KEY = Ed25519PrivateKey.generate()
+TEST_PUBLIC_KEY = TEST_PRIVATE_KEY.public_key().public_bytes(
+    encoding=serialization.Encoding.Raw,
+    format=serialization.PublicFormat.Raw,
+)
 
 
 class FakeTransport:
@@ -98,8 +108,9 @@ def make_service(transport, clock, *, enabled=True, identity=IDENTITY):
 
 
 @pytest.fixture(autouse=True)
-def no_save_listener():
+def isolated_cloud_integrity(monkeypatch):
     """Tests own the module-level hook; leave nothing behind."""
+    monkeypatch.setattr(cloud_save_integrity, "PUBLIC_KEYS", {TEST_KEY_ID: TEST_PUBLIC_KEY})
     yield
     profile_module.save_listener = None
 
@@ -149,9 +160,7 @@ def test_backup_summary_reads_like_speech():
 
 
 def test_cloud_saves_default_off():
-    # Unlike presence, backup is a separate consent: the drivers-board
-    # disclosure promises save files are never sent, so this must not ride
-    # along with that setup.
+    # Private backup and public Profile sharing are separate consents.
     assert Settings().cloud_saves is False
 
 
@@ -337,6 +346,8 @@ def test_a_failing_listener_never_breaks_the_local_save():
 
 def make_cloud_reply(profile_dict: dict, revision: int = 3) -> dict:
     content, content_hash = cloud_content(profile_dict)
+    portable = profile_dict_from_content(content)
+    signature = TEST_PRIVATE_KEY.sign(canonical_profile(portable))
     return {
         "ok": True,
         "saveName": save_slot_name(str(profile_dict.get("name", "Driver"))),
@@ -347,6 +358,10 @@ def make_cloud_reply(profile_dict: dict, revision: int = 3) -> dict:
         "summary": backup_summary(profile_dict),
         "createdAt": 1_700_000_000_000,
         "content": base64.b64encode(content).decode("ascii"),
+        "sig": base64.b64encode(signature).decode("ascii"),
+        "keyId": TEST_KEY_ID,
+        "signedAt": "2026-07-13T12:00:00.000Z",
+        "validatorVersion": 1,
     }
 
 
@@ -363,10 +378,37 @@ def test_download_verifies_the_content_hash():
     )
 
 
-def test_restore_writes_an_unsigned_save_the_game_accepts():
-    # The cloud copy came from *another* machine: its signature (stripped at
-    # upload) would never verify here. The restore must land unsigned so
-    # Profile.load accepts and re-signs it instead of quarantining.
+def test_download_rejects_missing_or_future_verification_metadata():
+    unsigned = make_cloud_reply(Profile(name="Road Star").to_dict())
+    unsigned.pop("sig")
+    with pytest.raises(CloudSaveIntegrityError) as missing:
+        download_save(IDENTITY, save_name="Road Star", transport=FakeTransport(reply=unsigned))
+    assert missing.value.code == "unverified"
+
+    future = make_cloud_reply(Profile(name="Road Star").to_dict())
+    future["validatorVersion"] = 2
+    with pytest.raises(CloudSaveIntegrityError) as newer:
+        download_save(IDENTITY, save_name="Road Star", transport=FakeTransport(reply=future))
+    assert newer.value.code == "update_required"
+
+
+def test_download_rejects_payload_changed_after_server_signing():
+    reply = make_cloud_reply(Profile(name="Road Star", money=77_000.0).to_dict())
+    changed = Profile(name="Road Star", money=88_000.0).to_dict()
+    content, content_hash = cloud_content(changed)
+    reply["content"] = base64.b64encode(content).decode("ascii")
+    reply["contentHash"] = content_hash
+
+    with pytest.raises(CloudSaveIntegrityError) as tampered:
+        download_save(IDENTITY, save_name="Road Star", transport=FakeTransport(reply=reply))
+
+    assert tampered.value.code == "integrity_failed"
+
+
+def test_restore_verifies_then_writes_a_locally_signed_save():
+    # The cloud copy came from another machine. Its portable payload has an
+    # orinks.net signature, then receives this installation's local HMAC before
+    # the atomic replacement is installed.
     original = Profile(name="Road Star", money=77_000.0)
     reply = make_cloud_reply(original.to_dict(), revision=4)
     payload = download_save(IDENTITY, save_name="Road Star", transport=FakeTransport(reply=reply))
@@ -381,6 +423,7 @@ def test_restore_writes_an_unsigned_save_the_game_accepts():
 
     restored = Profile.load(path)
     assert restored.money == 77_000.0
+    assert SIGNATURE_FIELD in json.loads(path.read_text(encoding="utf-8"))
     backup = path.with_suffix(".json.bak")
     assert backup.exists()
     assert json.loads(backup.read_text(encoding="utf-8"))["money"] == 5.0
@@ -390,6 +433,23 @@ def test_restore_writes_an_unsigned_save_the_game_accepts():
     # The restored revision is the next upload's parent, so continuing this
     # career does not immediately conflict with the copy just downloaded.
     assert sync_state.slot("Road Star")["revision"] == 4
+
+
+def test_unverified_restore_changes_neither_disk_nor_sync_state():
+    local = Profile(name="Road Star", money=5.0)
+    path = local.save()
+    before = path.read_bytes()
+    reply = make_cloud_reply(Profile(name="Road Star", money=77_000.0).to_dict())
+    payload = download_save(IDENTITY, save_name="Road Star", transport=FakeTransport(reply=reply))
+    assert payload is not None
+    payload["sig"] = base64.b64encode(b"x" * 64).decode("ascii")
+    sync_state = SyncState()
+
+    with pytest.raises(CloudSaveIntegrityError, match="signature"):
+        restore_to_disk(payload, sync_state)
+
+    assert path.read_bytes() == before
+    assert sync_state.slots() == {}
 
 
 def test_upload_rejects_oversized_content():
@@ -443,11 +503,11 @@ def test_cloud_toggle_requires_the_account_setup_first():
         cat = open_online_settings(app)
         while not cat.items[cat.index].text.startswith("Back up saves"):
             cat.handle_event(key_event(pygame.K_DOWN))
-        assert cat.items[cat.index].text == "Back up saves to your Orinks account: not set up"
+        assert cat.items[cat.index].text == "Back up saves to your orinks.net account: not set up"
 
         cat.handle_event(key_event(pygame.K_RETURN))
         assert app.ctx.settings.cloud_saves is False
-        assert any("same Orinks sign-in" in t for t in spoken)
+        assert any("same orinks.net sign-in" in t for t in spoken)
     finally:
         app.shutdown()
 
@@ -466,12 +526,19 @@ def test_cloud_toggle_speaks_the_disclosure_when_turned_on():
         cat = open_online_settings(app)
         while not cat.items[cat.index].text.startswith("Back up saves"):
             cat.handle_event(key_event(pygame.K_DOWN))
-        assert cat.items[cat.index].text == "Back up saves to your Orinks account: off"
+        assert cat.items[cat.index].text == "Back up saves to your orinks.net account: off"
 
         cat.handle_event(key_event(pygame.K_RETURN))
+        consent = app.state
+        assert consent.title == "Turn Cloud backup on?"
+        assert consent.items[0].text == "No, keep Cloud backup off"
+        assert app.ctx.settings.cloud_saves is False
+        assert any(CLOUD_DISCLOSURE in t for t in spoken)
+
+        consent.handle_event(key_event(pygame.K_DOWN))
+        consent.handle_event(key_event(pygame.K_RETURN))
         assert app.ctx.settings.cloud_saves is True
         assert app.cloud.enabled
-        assert any(CLOUD_DISCLOSURE in t for t in spoken)
         assert Settings.load().cloud_saves is True
 
         spoken.clear()

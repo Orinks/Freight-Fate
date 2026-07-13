@@ -81,8 +81,6 @@ class JournalOutbox:
         with self._lock:
             if any(item.event_id == event_id for item in self.items):
                 return False
-            if endpoint == "/api/freight-fate/profile-snapshot":
-                self.items = [item for item in self.items if item.endpoint != endpoint]
             self.items.append(OutboxItem(endpoint, payload, event_id))
             self.items = self.items[-MAX_OUTBOX_ITEMS:]
             self._save()
@@ -138,36 +136,6 @@ class JournalOutbox:
 
     def flush_async(self) -> None:
         threading.Thread(target=self.flush, name="online-journal", daemon=True).start()
-
-
-def profile_snapshot(profile, *, city_name: str, truck_name: str, captured_at_ms: int) -> dict:
-    career = profile.career
-    level = int(career.level)
-    return {
-        "version": 1,
-        "level": level,
-        "careerTitle": f"Level {level} driver",
-        "lastSavedCity": city_name,
-        "deliveries": int(career.deliveries),
-        "milesDriven": round(float(career.total_miles), 1),
-        "reputation": round(float(career.reputation), 1),
-        "onTimeDeliveries": int(career.on_time_deliveries),
-        "truckName": truck_name,
-        "employmentStatus": "Owner-operator"
-        if profile.truck in profile.owned_trucks
-        else "Company driver",
-        "capturedAt": int(captured_at_ms),
-    }
-
-
-def queue_profile_snapshot(
-    outbox: JournalOutbox, profile, *, city_name: str, truck_name: str, captured_at_ms: int
-) -> bool:
-    payload = profile_snapshot(
-        profile, city_name=city_name, truck_name=truck_name, captured_at_ms=captured_at_ms
-    )
-    event_id = stable_event_id("profile", profile.name, captured_at_ms)
-    return outbox.enqueue("/api/freight-fate/profile-snapshot", {"snapshot": payload}, event_id)
 
 
 def queue_delivery(

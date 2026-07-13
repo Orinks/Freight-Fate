@@ -289,3 +289,34 @@ def test_online_sharing_label_tracks_identity_freshness():
         )
     finally:
         app.shutdown()
+
+
+@pytest.mark.smoke
+def test_online_menu_keeps_profile_sharing_and_private_cloud_backup_separate():
+    from freight_fate.app import App
+
+    app = App()
+    spoken: list[str] = []
+    app.ctx.say = lambda text, interrupt=True: spoken.append(text)
+    try:
+        menu = open_settings_category(app, "Online")
+        labels = [item.text for item in menu.items]
+        assert labels == [
+            "Set up orinks.net account",
+            "Profile sharing: not set up",
+            "Back up saves to your orinks.net account: not set up",
+            "Restore a cloud backup",
+            "Discord presence: on",
+            "Back",
+        ]
+        assert not any("shared career" in label.lower() for label in labels)
+
+        for expected in labels[1:]:
+            menu.handle_event(key_event(pygame.K_DOWN))
+            assert menu.items[menu.index].text == expected
+        assert any("Profile sharing: not set up" in text for text in spoken)
+        assert any(
+            "Back up saves to your orinks.net account: not set up" in text for text in spoken
+        )
+    finally:
+        app.shutdown()

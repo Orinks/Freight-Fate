@@ -1,9 +1,11 @@
 # Road journal Career 1.9 activation
 
-Current development publishes only delivery completion, official achievement
-unlocks, and version 1 allowlisted profile snapshots. It does not publish
-business, fleet, trailer, authority, inspection, route-history, or ownership
-details beyond the current truck ownership status.
+Current development publishes only delivery completion and official
+achievement unlocks from the game. Detailed profile statistics are an
+allowlisted server projection of the latest accepted private Cloud Backup;
+the client does not publish profile snapshots. It does not publish business,
+fleet, trailer, authority, inspection, route-history, or ownership details
+beyond the current truck ownership status.
 
 Career 1.9 activation requires a separate compatibility commit on that branch:
 

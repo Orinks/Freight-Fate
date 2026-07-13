@@ -7,7 +7,6 @@ from freight_fate.models.profile import Profile
 from freight_fate.online_journal import (
     JournalOutbox,
     OutboxItem,
-    profile_snapshot,
     queue_achievement,
     queue_career_milestones,
     queue_delivery,
@@ -19,20 +18,6 @@ from freight_fate.online_presence import OnlineIdentity
 def test_stable_event_id_is_deterministic_and_fact_sensitive():
     assert stable_event_id("delivery", "job-1", 4) == stable_event_id("delivery", "job-1", 4)
     assert stable_event_id("delivery", "job-1", 4) != stable_event_id("delivery", "job-2", 4)
-
-
-def test_snapshot_allowlists_saved_career_facts():
-    profile = Profile(name="Road Star")
-    profile.career.deliveries = 7
-    profile.career.total_miles = 1234.56
-    result = profile_snapshot(
-        profile, city_name="Chicago, Illinois", truck_name="Roadmaster", captured_at_ms=123
-    )
-    assert result["lastSavedCity"] == "Chicago, Illinois"
-    assert result["deliveries"] == 7
-    assert result["milesDriven"] == 1234.6
-    assert "money" not in result
-    assert "active_trip" not in result
 
 
 def test_outbox_persists_deduplicates_and_retries(tmp_path):
@@ -112,18 +97,6 @@ def test_achievement_payload_uses_official_definition_and_deduplicates(tmp_path)
     assert not queue_achievement(box, achievement, earned_at_ms=456)
     assert box.items[0].payload["name"] == achievement.name
     assert box.items[0].payload["description"] == achievement.description
-
-
-def test_new_snapshot_replaces_stale_queued_snapshot(tmp_path):
-    identity = OnlineIdentity("driver-1234", "ffd_" + "a" * 64)
-    box = JournalOutbox(identity, True, tmp_path / "outbox.json")
-    assert box.enqueue(
-        "/api/freight-fate/profile-snapshot", {"snapshot": {"level": 1}}, "profile-1"
-    )
-    assert box.enqueue(
-        "/api/freight-fate/profile-snapshot", {"snapshot": {"level": 2}}, "profile-2"
-    )
-    assert [item.event_id for item in box.items] == ["profile-2"]
 
 
 def test_permanent_consent_error_is_dropped_without_retrying(tmp_path):

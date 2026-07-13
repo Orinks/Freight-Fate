@@ -112,7 +112,7 @@ def test_enable_success_and_failure_are_server_authoritative(monkeypatch):
         succeeded._outcome = "ok"
         succeeded.update(0)
         assert app.ctx.settings.online_presence is True
-        assert app.ctx.settings.profile_sharing_consent_version == 2
+        assert app.ctx.settings.profile_sharing_consent_version == 3
         assert any("Profile sharing is on." in text for text in spoken)
         assert app.state is not succeeded
     finally:
@@ -138,51 +138,16 @@ def test_only_current_profile_sharing_consent_can_remain_on(monkeypatch, tmp_pat
     import freight_fate.settings as settings_module
 
     monkeypatch.setattr(settings_module, "data_dir", lambda: tmp_path)
-    for version, expected in [(None, False), (0, False), (1, False), (2, True), (3, False)]:
+    for version, expected in [
+        (None, False),
+        (0, False),
+        (1, False),
+        (2, False),
+        (3, True),
+        (4, False),
+    ]:
         data = {"online_presence": True}
         if version is not None:
             data["profile_sharing_consent_version"] = version
         (tmp_path / "settings.json").write_text(json.dumps(data), encoding="utf-8")
         assert Settings.load().online_presence is expected
-
-
-def test_enabling_sharing_mid_career_queues_a_snapshot_immediately(monkeypatch):
-    """A freshly consented driver's public profile must fill in right away,
-    not after the next save -- mid-haul that can be hours out."""
-    from freight_fate.app import App
-    from freight_fate.models.profile import Profile
-    from freight_fate.online_presence import OnlineIdentity
-
-    app = App()
-    try:
-        # No network: the outbox records sends instead of posting them.
-        sent = []
-        app.journal.transport = lambda url, payload, headers: (
-            sent.append((url, payload)),
-            {"ok": True},
-        )[1]
-        monkeypatch.setattr(app.journal, "flush_async", app.journal.flush)
-
-        identity = OnlineIdentity(driver_id="driver-testtest", driver_token="t" * 48)
-        app.ctx.adopt_online_identity(identity)
-        app.ctx.profile = Profile(name="Sharer")
-        app.ctx.settings.online_presence = True
-        app.ctx.settings.profile_sharing_pending_off = False
-
-        app.ctx.apply_online_presence()
-
-        snapshot_posts = [p for url, p in sent if url.endswith("/profile-snapshot")]
-        assert len(snapshot_posts) == 1
-        assert snapshot_posts[0]["snapshot"]["level"] == 1
-
-        # Re-applying an unchanged on state must not spam another snapshot.
-        app.ctx.apply_online_presence()
-        assert len([p for url, p in sent if url.endswith("/profile-snapshot")]) == 1
-
-        # With no career loaded, enabling sharing stays quiet.
-        app.journal.set_enabled(False)
-        app.ctx.profile = None
-        app.ctx.apply_online_presence()
-        assert len([p for url, p in sent if url.endswith("/profile-snapshot")]) == 1
-    finally:
-        app.shutdown()

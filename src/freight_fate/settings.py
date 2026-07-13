@@ -11,7 +11,7 @@ from .models.profile import data_dir
 log = logging.getLogger(__name__)
 
 TIME_SCALES = (10.0, 20.0, 40.0)
-PROFILE_SHARING_CONSENT_VERSION = 2
+PROFILE_SHARING_CONSENT_VERSION = 3
 
 
 @dataclass
@@ -59,10 +59,8 @@ class Settings:
     # stable Profile sharing item again.
     profile_sharing_pending_off: bool = False
     # Back up saves to the player's own Orinks account after each local save.
-    # Off by default and separate from drivers-board sharing: that feature's
-    # spoken disclosure promises save files are never sent, so mirroring them
-    # to the cloud needs its own explicit yes -- even though it reuses the
-    # same account credentials and never shows saves to anyone else.
+    # Off by default and separate from public Profile sharing. It needs its
+    # own explicit yes even though it reuses the same account credentials.
     cloud_saves: bool = False
     controller_enabled: bool = True  # accept game-controller input alongside the keyboard
     haptics_enabled: bool = True  # rumble/vibration feedback on the controller

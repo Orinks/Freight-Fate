@@ -28,14 +28,14 @@ from .base import MenuItem, MenuState
 DISCLOSURE = (
     "Profile sharing is optional and off until you turn it on. When on, orinks.net can "
     "publicly show your driver name and broad on-duty board activity; eligible profile "
-    "details such as career level, totals, current truck, last-saved city, and snapshot "
-    "time; official achievements you earn; and automatic road-journal posts "
+    "details; official achievements you earn; and automatic road-journal posts "
     "generated from gameplay. Public updates can also appear in the Freight Fate updates "
     "feed. Each post also tells orinks.net which game version you are running, used only "
     "for moderation and troubleshooting and never shown publicly. Freight Fate does not "
-    "publish your real name, full save, money, coordinates, "
-    "active cargo details, or precise real-world location. Turn Profile sharing off at "
-    "any time to stop posting and make your shared profile and updates private."
+    "publish your real name, full save, money, coordinates, active cargo details, or precise "
+    "real-world location. Detailed career statistics come only from your latest accepted "
+    "private backup. Turning Profile sharing off hides public details but does not turn "
+    "Cloud backup off."
 )
 
 _ID_CHARS = frozenset("abcdefghijklmnopqrstuvwxyz0123456789-_")
@@ -115,17 +115,16 @@ def looks_like_token(text: str) -> bool:
 
 
 class OnlineSetupState(MenuState):
-    """Paste account-issued credentials, verify them, and turn sharing on.
+    """Paste and verify account credentials without enabling either toggle.
 
-    Pushed from the settings menu when the player turns sharing on for the
-    first time. The menu is deliberately STATIC — the same six items for the
+    The menu is deliberately STATIC — the same six items for the
     whole flow, with labels that carry the captured state — because players
     build positional memory of spoken menus and refresh() preserves indices,
-    not item identity. On success it saves the credentials, flips the
-    setting, and tells the running presence service to adopt them.
+    not item identity. On success it saves the credentials while Profile
+    sharing and Cloud backup remain off.
     """
 
-    title = "Driver profile setup"
+    title = "orinks.net account setup"
 
     def __init__(self, ctx) -> None:
         super().__init__(ctx)
@@ -163,10 +162,10 @@ class OnlineSetupState(MenuState):
                 self._connect_label,
                 self._connect,
                 help="Checks your pasted credentials with orinks.net, saves "
-                "them, and turns sharing on. Nothing is sent before this.",
+                "them, and leaves Profile sharing and Cloud backup off.",
             ),
             MenuItem("Hear what gets shared", self._speak_disclosure),
-            MenuItem("Cancel", self.go_back, help="Leave without turning sharing on."),
+            MenuItem("Cancel", self.go_back, help="Leave without connecting this account."),
         ]
 
     def _id_label(self) -> str:
@@ -184,10 +183,10 @@ class OnlineSetupState(MenuState):
 
     def announce_entry(self) -> None:
         self.ctx.say(
-            f"{self.title}. Sharing sends only your in-game hauling activity "
-            "to orinks.net, under the driver name on your orinks.net account. "
-            "Nothing personal is sent, and nothing is sent at all until you "
-            "choose Connect and save at the end of this menu. The items below "
+            f"{self.title}. This connects the game to your orinks.net account. "
+            "Profile sharing and Cloud backup remain off until you turn each "
+            "one on separately. Nothing is saved until you choose Connect and "
+            "save at the end of this menu. The items below "
             f"walk you through it in order. {self.current_text()}"
         )
 
@@ -318,12 +317,10 @@ class OnlineSetupState(MenuState):
         identity = OnlineIdentity(driver_id=self._driver_id, driver_token=self._token)
 
         def worker() -> None:
-            verified = online_presence.verify_identity(identity)
-            self._outcome = (
-                online_presence.set_profile_sharing(identity, True)
-                if verified == "ok"
-                else verified
-            )
+            outcome = online_presence.verify_identity(identity)
+            if outcome == "ok":
+                outcome = online_presence.set_profile_sharing(identity, False)
+            self._outcome = outcome
 
         threading.Thread(target=worker, name="online-verify", daemon=True).start()
 
@@ -344,23 +341,25 @@ class OnlineSetupState(MenuState):
         if outcome == "ok" and self._driver_id and self._token:
             identity = OnlineIdentity(driver_id=self._driver_id, driver_token=self._token)
             identity.save()
-            self.ctx.settings.online_presence = True
-            self.ctx.settings.profile_sharing_consent_version = PROFILE_SHARING_CONSENT_VERSION
+            self.ctx.settings.online_presence = False
+            self.ctx.settings.cloud_saves = False
+            self.ctx.settings.profile_sharing_consent_version = 0
             self.ctx.settings.profile_sharing_pending_off = False
             self.ctx.settings.save()
             self.ctx.adopt_online_identity(identity)
             self.ctx.apply_online_presence()
+            self.ctx.apply_cloud_saves()
             self.ctx.audio.play("ui/menu_select")
             self.ctx.say(
-                f"Connected as {self._driver_id}. Profile sharing is on. Eligible driver "
-                "information and gameplay updates can now appear publicly on orinks.net.",
+                "orinks.net account connected. Profile sharing remains off. Cloud backup remains "
+                "off until you turn it on.",
                 interrupt=True,
             )
             self.ctx.pop_state()
             return
         if outcome == "driver_not_found":
             self.ctx.say(
-                "Orinks does not know that Driver ID. Re-copy the Driver ID "
+                "orinks.net does not know that Driver ID. Re-copy the Driver ID "
                 "from the setup page and paste it again.",
                 interrupt=True,
             )
@@ -386,6 +385,11 @@ class OnlineSetupState(MenuState):
             )
 
     def go_back(self) -> None:
+        if self._checking:
+            self.ctx.say(
+                "Account setup is still checking. Stay here for the result.", interrupt=True
+            )
+            return
         if self._driver_id or self._token:
             self.ctx.say("Setup closed. Nothing was saved.")
         super().go_back()
@@ -465,6 +469,14 @@ class ProfileSharingSyncState(MenuState):
             else "Profile sharing may still be public. Local posting is stopped, but orinks.net could not confirm the request. Choose Turn Profile sharing off to retry.",
             interrupt=True,
         )
+
+    def go_back(self) -> None:
+        if self._pending:
+            self.ctx.say(
+                "Profile sharing is still updating. Stay here for the result.", interrupt=True
+            )
+            return
+        super().go_back()
 
 
 def _updated_text(updated_at_ms: float) -> str:

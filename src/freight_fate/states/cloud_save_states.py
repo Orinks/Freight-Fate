@@ -11,16 +11,16 @@ import threading
 import time
 
 from .. import cloud_saves
+from ..cloud_save_integrity import CloudSaveIntegrityError
 from ..online_presence import OnlineIdentity
 from .base import MenuItem, MenuState
 
 CLOUD_DISCLOSURE = (
-    "Cloud backup uploads each career save to your own Orinks account after "
-    "the game saves it, so you can restore your progress on another computer "
-    "or after losing this one. Backups are private to your account: they "
-    "never appear on the drivers board or anywhere public. The last ten "
-    "backups of each career are kept. You can turn this off any time in "
-    "Settings, Online."
+    "Your full career is stored privately in your orinks.net account. orinks.net "
+    "validates and signs accepted backups before they can be restored. If "
+    "Profile sharing is also on, approved facts from your latest accepted "
+    "backup may appear in your public profile. The backup itself is never "
+    "public. The last ten accepted backups of each career are kept."
 )
 
 
@@ -52,6 +52,7 @@ class CloudBackupState(MenuState):
         self._saves: list[dict] | None = None
         self._fetched = threading.Event()
         self._announced = False
+        self._status = "Checking your cloud backups."
 
     def enter(self) -> None:
         self._start_fetch()
@@ -91,7 +92,7 @@ class CloudBackupState(MenuState):
         if self._identity() is None:
             return [
                 MenuItem(
-                    "Cloud backup needs your Orinks driver account",
+                    "Cloud backup needs your orinks.net driver account",
                     self.speak_current,
                     help="Set up the drivers board under Settings, Online "
                     "first; cloud backup uses the same sign-in.",
@@ -103,7 +104,17 @@ class CloudBackupState(MenuState):
                 MenuItem("Checking your cloud backups", self.speak_current),
                 MenuItem("Back", self.go_back),
             ]
-        items: list[MenuItem] = []
+        if self._saves is None:
+            self._status = "Cloud backups could not be reached."
+        else:
+            self._status = self._service().status
+        items: list[MenuItem] = [
+            MenuItem(
+                f"Status: {self._status}",
+                self.speak_current,
+                help="This stays here so you can review the latest Cloud backup result.",
+            )
+        ]
         if self._saves is None:
             items.append(
                 MenuItem(
@@ -146,6 +157,7 @@ class CloudBackupState(MenuState):
         self.ctx.say(CLOUD_DISCLOSURE)
 
     def _refresh_list(self) -> None:
+        self._status = "Checking your cloud backups."
         self._start_fetch()
         self.refresh(keep_index=False)
         self.ctx.say("Checking your cloud backups.")
@@ -159,11 +171,14 @@ class CloudBackupState(MenuState):
         if self._announced or not self._fetched.is_set() or self._identity() is None:
             return
         self._announced = True
-        self.refresh(keep_index=False)
         if self._saves is None:
+            self._status = "Cloud backups could not be reached."
+            self.refresh(keep_index=False)
             self.ctx.say("Your cloud backups could not be reached.", interrupt=True)
             return
         slots = self._slots()
+        self._status = self._service().status
+        self.refresh(keep_index=False)
         if not slots:
             self.ctx.say("No cloud backups yet.", interrupt=True)
         else:
@@ -189,12 +204,19 @@ class CloudSlotState(MenuState):
         self._busy = False
         self._outcome: str | None = None  # worker -> update() mailbox
         self._restored_path = None
+        self._status = "Ready. No restore has run in this menu."
 
     def _conflict(self) -> dict | None:
         return self.ctx.cloud_saves_service().conflicts().get(self.save_name)
 
     def build_items(self) -> list[MenuItem]:
-        items: list[MenuItem] = []
+        items: list[MenuItem] = [
+            MenuItem(
+                f"Status: {self._status}",
+                self.speak_current,
+                help="This status remains visible after restore and conflict actions.",
+            )
+        ]
         conflict = self._conflict()
         if conflict is not None:
             items.append(
@@ -209,7 +231,7 @@ class CloudSlotState(MenuState):
             items.append(
                 MenuItem(
                     "Keep this computer's save and back it up",
-                    self._keep_mine,
+                    self._confirm_keep_mine,
                     help="Uploads this computer's save over the cloud copy "
                     "and turns backups for this career back on.",
                 )
@@ -281,11 +303,15 @@ class CloudSlotState(MenuState):
         revision = entry.get("revision")
 
         def worker() -> None:
-            payload = cloud_saves.download_save(
-                identity,
-                save_name=self.save_name,
-                revision=revision if isinstance(revision, int) else None,
-            )
+            try:
+                payload = cloud_saves.download_save(
+                    identity,
+                    save_name=self.save_name,
+                    revision=revision if isinstance(revision, int) else None,
+                )
+            except CloudSaveIntegrityError as error:
+                self._outcome = error.code
+                return
             if payload is None:
                 self._outcome = "download_failed"
                 return
@@ -301,7 +327,13 @@ class CloudSlotState(MenuState):
 
         threading.Thread(target=worker, name="cloud-saves-restore", daemon=True).start()
 
-    def _keep_mine(self) -> None:
+    def _confirm_keep_mine(self) -> None:
+        if self._busy:
+            self.ctx.say("Still working on the last choice.", interrupt=True)
+            return
+        self.ctx.push_state(ConfirmKeepMineState(self.ctx, self))
+
+    def start_keep_mine(self) -> None:
         if self._busy:
             self.ctx.say("Still working on the last choice.", interrupt=True)
             return
@@ -333,8 +365,8 @@ class CloudSlotState(MenuState):
         if outcome is None:
             return
         self._busy = False
-        self.refresh()
         if outcome == "restored":
+            self._status = "Backup restored and verified. The replaced save was kept."
             self._reload_active_profile()
             self.ctx.audio.play("ui/menu_select")
             self.ctx.say(
@@ -344,6 +376,7 @@ class CloudSlotState(MenuState):
                 interrupt=True,
             )
         elif outcome == "kept_mine":
+            self._status = "This computer's save is now the accepted cloud backup."
             self.ctx.audio.play("ui/menu_select")
             self.ctx.say(
                 "Done. The cloud copy now matches this computer's save, and "
@@ -351,17 +384,50 @@ class CloudSlotState(MenuState):
                 interrupt=True,
             )
         elif outcome == "keep_mine_failed":
+            self._status = "Cloud overwrite failed. Nothing was changed."
             self.ctx.say(
                 "The upload did not go through. Check your connection and "
                 "try again; nothing was changed.",
                 interrupt=True,
             )
+        elif outcome == "unverified":
+            self._status = "Backup is not server-verified. Local save unchanged."
+            self.ctx.say(
+                "This backup is not server-verified. It was not restored, and your local career is unchanged.",
+                interrupt=True,
+            )
+        elif outcome == "integrity_failed":
+            self._status = "Backup failed its integrity check. Local save unchanged."
+            self.ctx.say(
+                "This backup failed its integrity check. It was not restored, and your local career is unchanged.",
+                interrupt=True,
+            )
+        elif outcome == "update_required":
+            self._status = "Backup needs a newer Freight Fate version. Nothing restored."
+            self.ctx.say(
+                "This backup needs a newer Freight Fate version. Update the game and try again. Nothing was restored.",
+                interrupt=True,
+            )
+        elif outcome in ("invalid_profile", "restore_failed"):
+            self._status = "Verified backup could not be saved. Nothing restored."
+            self.ctx.say(
+                "The verified backup could not be saved. Nothing was restored, and your local career is unchanged.",
+                interrupt=True,
+            )
         else:
+            self._status = "Backup download failed. Local save unchanged."
             self.ctx.say(
                 "The backup could not be downloaded. Check your connection "
                 "and try again; your local save was not touched.",
                 interrupt=True,
             )
+        self.refresh(keep_index=False)
+
+    def go_back(self) -> None:
+        if self._busy:
+            self.ctx.say("Cloud backup is still working. Stay here for the result.", interrupt=True)
+            return
+        super().go_back()
 
     def _reload_active_profile(self) -> None:
         """If the restored career is the one currently loaded, re-read it so
@@ -399,10 +465,60 @@ class ConfirmRestoreState(MenuState):
 
     def build_items(self) -> list[MenuItem]:
         return [
-            MenuItem("Yes, restore this backup", self._yes),
             MenuItem("No, keep this computer's save", self.go_back),
+            MenuItem("Yes, restore this backup", self._yes),
         ]
 
     def _yes(self) -> None:
         self.ctx.pop_state()
         self._slot_state.start_restore(self._entry)
+
+
+class CloudBackupConsentState(MenuState):
+    """Safe-default confirmation before private full-career uploads begin."""
+
+    title = "Turn Cloud backup on?"
+
+    def announce_entry(self) -> None:
+        self.ctx.say(f"{CLOUD_DISCLOSURE} {self.current_text()}")
+
+    def build_items(self) -> list[MenuItem]:
+        return [
+            MenuItem("No, keep Cloud backup off", self.go_back),
+            MenuItem("Yes, turn Cloud backup on", self._yes),
+        ]
+
+    def _yes(self) -> None:
+        self.ctx.settings.cloud_saves = True
+        self.ctx.settings.save()
+        self.ctx.apply_cloud_saves()
+        self.ctx.pop_state()
+        self.ctx.say(
+            "Cloud backup is on. The next accepted save will be private and server-verified."
+        )
+
+
+class ConfirmKeepMineState(MenuState):
+    """Safe-default gate before overwriting the accepted cloud copy."""
+
+    title = "Replace the cloud backup?"
+
+    def __init__(self, ctx, slot_state: CloudSlotState) -> None:
+        super().__init__(ctx)
+        self._slot_state = slot_state
+
+    def announce_entry(self) -> None:
+        self.ctx.say(
+            "Replace the accepted cloud copy with this computer's save? "
+            f"The server will validate it first. {self.current_text()}"
+        )
+
+    def build_items(self) -> list[MenuItem]:
+        return [
+            MenuItem("No, keep the current cloud backup", self.go_back),
+            MenuItem("Yes, validate and replace the cloud backup", self._yes),
+        ]
+
+    def _yes(self) -> None:
+        self.ctx.pop_state()
+        self._slot_state.start_keep_mine()

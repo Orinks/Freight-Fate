@@ -19,16 +19,16 @@ meantime the server answers 409 and nothing is overwritten -- the slot is
 marked conflicted here and the Cloud backup menu offers a spoken choice
 between the two copies.
 
-Privacy: off by default, separate from drivers-board sharing (whose spoken
-disclosure promises save files are never sent). Backups are private to the
-player's own Orinks account; nothing appears on any public page.
+Privacy: off by default and separate from public Profile sharing. Backups are
+private to the player's own orinks.net account; only an allowlisted summary of the
+latest accepted revision can supply detailed public statistics when Profile
+sharing is independently enabled.
 
 The uploaded content is the profile JSON *without* the local HMAC signature
-fields: the signing secret is per-machine, so a signed save restored onto
-another computer would be quarantined as tampered. Unsigned saves are
-accepted and re-signed on first load (see models/profile.py), which makes
-the stripped form the portable one. Transfer integrity is covered by a
-sha256 content hash verified on both upload (server-side) and download.
+fields: the signing secret is per-machine. orinks.net validates that portable
+payload before accepting a revision and signs it with Ed25519. Downloads are
+hash-checked and signature-verified before any local file is touched; a
+successful restore is immediately HMAC-signed for this installation.
 """
 
 from __future__ import annotations
@@ -46,6 +46,7 @@ from collections.abc import Callable
 from pathlib import Path
 from typing import TYPE_CHECKING
 
+from .cloud_save_integrity import CloudSaveIntegrityError, verify_cloud_revision
 from .online_presence import OnlineIdentity, Transport, _http_json, base_url
 
 if TYPE_CHECKING:
@@ -285,8 +286,11 @@ def download_save(
         return None
     try:
         profile_dict = profile_dict_from_content(content)
+        verify_cloud_revision(profile_dict, reply)
     except ValueError as e:
         log.warning("Cloud save download of %s unusable: %s", save_name, e)
+        if isinstance(e, CloudSaveIntegrityError):
+            raise
         return None
     return {
         "saveName": reply.get("saveName", save_name),
@@ -295,6 +299,10 @@ def download_save(
         "summary": reply.get("summary", ""),
         "createdAt": reply.get("createdAt"),
         "contentHash": reply.get("contentHash"),
+        "sig": reply.get("sig"),
+        "keyId": reply.get("keyId"),
+        "signedAt": reply.get("signedAt"),
+        "validatorVersion": reply.get("validatorVersion"),
         "profile": profile_dict,
     }
 
@@ -302,27 +310,34 @@ def download_save(
 def restore_to_disk(payload: dict, sync_state: SyncState | None = None) -> Path:
     """Write a downloaded cloud save over the local profile file.
 
-    The current local file (if any) is kept beside it as ``.json.bak`` --
-    invisible to the profile list, which only globs ``*.json``. The restored
-    file is written *unsigned*; the game re-signs it with this machine's
-    secret on first load. Records the restored revision in the sync state so
-    the next local save uploads with the right parent.
+    Verification and construction happen before touching disk. The current
+    local file (if any) is kept beside it as ``.json.bak``. The replacement is
+    atomically installed with this machine's HMAC signature, and the old file
+    is put back if installation fails. Sync state changes only after success.
     """
     from .models.profile import profiles_dir
 
-    name = save_slot_name(str(payload["profile"].get("name", payload["saveName"])))
+    profile = verify_cloud_revision(payload["profile"], payload)
+    signed_data = profile.to_dict()
+    name = save_slot_name(profile.name)
     path = profiles_dir() / f"{name}.json"
-    if path.exists():
-        try:
-            backup = path.with_suffix(".json.bak")
+    tmp = path.with_suffix(".json.tmp")
+    backup = path.with_suffix(".json.bak")
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with open(tmp, "w", encoding="utf-8") as f:
+        json.dump(signed_data, f, indent=2)
+    moved_old = False
+    try:
+        if path.exists():
             backup.unlink(missing_ok=True)
             path.replace(backup)
-        except OSError:
-            log.warning("Could not keep a local backup before restoring %s", name, exc_info=True)
-    tmp = path.with_suffix(".json.tmp")
-    with open(tmp, "w", encoding="utf-8") as f:
-        json.dump(payload["profile"], f, indent=2)
-    tmp.replace(path)
+            moved_old = True
+        tmp.replace(path)
+    except Exception:
+        tmp.unlink(missing_ok=True)
+        if moved_old and backup.exists() and not path.exists():
+            backup.replace(path)
+        raise
     if sync_state is not None and isinstance(payload.get("revision"), int):
         _, content_hash = cloud_content(payload["profile"])
         sync_state.record_synced(payload["saveName"], payload["revision"], content_hash)
@@ -394,6 +409,7 @@ class CloudSaves:
         self._stop = threading.Event()
         self._thread: threading.Thread | None = None
         self._started = False
+        self._status = "Cloud backup is ready."
 
     # -- public API -----------------------------------------------------------
 
@@ -478,6 +494,16 @@ class CloudSaves:
             if "conflict" in entry
         }
 
+    @property
+    def status(self) -> str:
+        """Short persistent player-facing result for the Cloud backup menu."""
+        with self._lock:
+            return self._status
+
+    def _set_status(self, message: str) -> None:
+        with self._lock:
+            self._status = message
+
     # -- worker / single-step logic ------------------------------------------
 
     def _stop_worker(self) -> None:
@@ -560,6 +586,7 @@ class CloudSaves:
             self.sync_state.record_synced(name, result["revision"], result["contentHash"])
             self._done_with(name, snapshot)
             self._retry_at = None
+            self._set_status("Latest backup accepted and server-verified.")
             log.info("Cloud backup of %s uploaded as revision %s", name, result["revision"])
             return
         if result.get("reason") == "conflict":
@@ -571,8 +598,27 @@ class CloudSaves:
                 result.get("latestRevision"),
             )
             return
-        if result.get("reason") in ("unauthorized", "driver_not_found", "too_large"):
+        if result.get("reason") in (
+            "unauthorized",
+            "driver_not_found",
+            "too_large",
+            "invalid_schema",
+            "invalid_name",
+            "invalid_city",
+            "invalid_range",
+            "invalid_possession",
+            "invalid_career",
+            "impossible_xp",
+            "impossible_money",
+            "invalid_market",
+            "invalid_hos",
+            "invalid_achievement",
+            "unsupported_version",
+        ):
             # Not transient: retrying with the same inputs cannot succeed.
+            self._set_status(
+                "Backup not accepted. Your local career is safe. Public details were not updated."
+            )
             self._done_with(name, snapshot)
             return
         # Transient (network, 5xx): keep the snapshot, back off.

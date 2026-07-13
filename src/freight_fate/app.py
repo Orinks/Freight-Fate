@@ -22,7 +22,7 @@ from .discord_presence import DiscordPresence
 from .models.economy import Economy
 from .models.profile import Profile
 from .music import music_track_duration_s
-from .online_journal import JournalOutbox, queue_achievement, queue_profile_snapshot
+from .online_journal import JournalOutbox, queue_achievement
 from .online_presence import OnlineIdentity, OnlinePresence
 from .settings import Settings
 from .speech import Speech
@@ -171,14 +171,8 @@ class GameContext:
     def apply_online_presence(self) -> None:
         """Reflect the drivers-board setting (e.g. after a settings change)."""
         enabled = self.settings.online_presence and not self.settings.profile_sharing_pending_off
-        was_sharing = self._app.journal.enabled
         self._app.online.set_enabled(enabled)
         self._app.journal.set_enabled(enabled)
-        # Sharing just turned on mid-career: publish the career snapshot now,
-        # so the public profile fills in immediately instead of waiting for
-        # the next save -- which mid-haul can be hours away.
-        if self._app.journal.enabled and not was_sharing and self.profile is not None:
-            self._app.snapshot_profile(self.profile)
 
     def apply_cloud_saves(self) -> None:
         """Reflect the cloud backup setting (e.g. after a settings change)."""
@@ -361,7 +355,6 @@ class App:
 
         def saved_profile(profile) -> None:
             self.cloud.queue_backup(profile)
-            self.snapshot_profile(profile)
 
         self._profile_save_listener = saved_profile
         profile_module.save_listener = saved_profile
@@ -375,31 +368,6 @@ class App:
 
         self.states: list[State] = []
         self.running = False
-
-    def snapshot_profile(self, profile) -> None:
-        """Queue the allowlisted career snapshot for the public profile.
-
-        Called on every profile save and the moment Profile sharing turns on,
-        so a freshly consented driver's public page fills in right away
-        instead of after their current haul. Best-effort: the outbox drops
-        the request when sharing is off or unconfigured.
-        """
-        try:
-            from .models.trucks import TRUCK_CATALOG
-
-            city_name = self.world.city(profile.current_city).spoken_qualified
-            truck_name = TRUCK_CATALOG[profile.truck].label
-            queued = queue_profile_snapshot(
-                self.journal,
-                profile,
-                city_name=city_name,
-                truck_name=truck_name,
-                captured_at_ms=int(time.time() * 1000),
-            )
-            if queued:
-                self.journal.flush_async()
-        except (KeyError, AttributeError):
-            log.debug("Profile snapshot was not queueable", exc_info=True)
 
     # -- state stack ------------------------------------------------------------
 

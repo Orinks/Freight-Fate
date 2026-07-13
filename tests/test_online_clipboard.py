@@ -10,6 +10,7 @@ from __future__ import annotations
 import sys
 from types import SimpleNamespace
 
+from freight_fate.settings import Settings
 from freight_fate.states import online_states
 
 
@@ -85,3 +86,47 @@ def test_token_paste_requires_the_site_prefix():
     assert not online_states.looks_like_token("a" * 87)
     assert not online_states.looks_like_token("ffd_token with spaces")
     assert not online_states.looks_like_token("ffd_x")  # far too short
+
+
+def test_account_setup_connects_with_both_sharing_toggles_off(monkeypatch):
+    calls: list[tuple[str, object]] = []
+
+    class ImmediateThread:
+        def __init__(self, *, target, **_kwargs):
+            self.target = target
+
+        def start(self):
+            self.target()
+
+    settings = Settings(online_presence=True, cloud_saves=True)
+    ctx = SimpleNamespace(
+        settings=settings,
+        audio=SimpleNamespace(play=lambda sound: calls.append(("sound", sound))),
+        say=lambda text, interrupt=True: calls.append(("say", text)),
+        pop_state=lambda: calls.append(("pop", None)),
+        adopt_online_identity=lambda identity: calls.append(("identity", identity.driver_id)),
+        apply_online_presence=lambda: calls.append(("profile", settings.online_presence)),
+        apply_cloud_saves=lambda: calls.append(("cloud", settings.cloud_saves)),
+    )
+    monkeypatch.setattr(online_states.threading, "Thread", ImmediateThread)
+    monkeypatch.setattr(online_states.online_presence, "verify_identity", lambda _identity: "ok")
+
+    def turn_public_sharing_off(_identity, enabled):
+        calls.append(("server_profile", enabled))
+        return "ok"
+
+    monkeypatch.setattr(
+        online_states.online_presence, "set_profile_sharing", turn_public_sharing_off
+    )
+    state = online_states.OnlineSetupState(ctx)
+    state.enter()
+    state._driver_id = "road-star-abcd1234"
+    state._token = "ffd_" + "a" * 64
+    state._connect()
+    state.update(0)
+
+    assert settings.online_presence is False
+    assert settings.cloud_saves is False
+    assert ("server_profile", False) in calls
+    assert ("profile", False) in calls
+    assert ("cloud", False) in calls
