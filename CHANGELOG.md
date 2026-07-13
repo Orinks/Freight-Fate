@@ -4,6 +4,10 @@
 
 ### Fixed
 
+- **The Mountain Grade driving track sounds right again.** The daytime
+  mountain music bed has been replaced with a corrected recording, normalized
+  to sit at the same volume as the rest of the soundtrack.
+
 - **Controllers are left alone when controller support is off.** With the setting disabled, the game no longer starts up the controller system or grabs a connected pad; turning support on in Settings, Gameplay activates it, and turning it back off releases the controller again.
 
 - **Engine sound now stays present through automatic gear changes.** Shifts still ease the engine tone briefly, without the repeated volume pumping that could sound like the engine was dropping out.
