@@ -328,8 +328,19 @@ class DrivingUpdateMixin:
         )
 
         night = is_night(self.trip.local_hour)
+        now_h = self._absolute_game_hour()
         if moving:
-            p.fatigue = min(100.0, p.fatigue + hos.fatigue_rate_per_min(night) * gm)
+            # An active food/drink buff slows accrual (data/buffs.py); it
+            # never touches the HOS duty clock above.
+            p.fatigue = min(
+                100.0,
+                p.fatigue + hos.fatigue_rate_per_min(night) * gm * p.fatigue_buff_rate(now_h),
+            )
+        for worn in p.expire_buffs(now_h):
+            text = worn.get("worn_off") or f"The {worn.get('label', 'buff').lower()} has worn off."
+            self.ctx.say_event(text, interrupt=False)
+        self.truck.engine_wear_buff_mult = float(self.rig_buffs.get("engine", {}).get("rate", 1.0))
+        self.truck.tire_wear_buff_mult = float(self.rig_buffs.get("tire", {}).get("rate", 1.0))
         fatigue = p.fatigue
         if fatigue >= hos.FATIGUE_SEVERE and not self._severe_said:
             self._severe_said = True

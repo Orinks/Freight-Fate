@@ -43,6 +43,9 @@ class DrivingState(DrivingControlsMixin, DrivingUpdateMixin, DrivingEventMixin, 
         self.start_tire_wear = profile.tire_wear_pct
         self.start_brake_wear = profile.brake_wear_pct
         self.start_engine_wear = profile.engine_wear_pct
+        # Rig-care buffs (quick lube, tire rotation) hold for the rest of
+        # the trip and die with it -- keyed by buff group, see data/buffs.py.
+        self.rig_buffs: dict[str, dict] = {}
         region = ctx.world.city(job.origin).region
         self.weather = WeatherSystem(
             region,
@@ -258,6 +261,7 @@ class DrivingState(DrivingControlsMixin, DrivingUpdateMixin, DrivingEventMixin, 
                 "brake": self.start_brake_wear,
                 "engine": self.start_engine_wear,
             },
+            "rig_buffs": self.rig_buffs,
             "speeding_strikes": self.speeding_strikes,
             "air_brake": self.truck.air_brake_snapshot(),
             "engine_on": self.truck.engine_on,
@@ -328,6 +332,10 @@ class DrivingState(DrivingControlsMixin, DrivingUpdateMixin, DrivingEventMixin, 
             state.start_tire_wear = float(start_wear.get("tire", state.truck.tire_wear_pct))
             state.start_brake_wear = float(start_wear.get("brake", state.truck.brake_wear_pct))
             state.start_engine_wear = float(start_wear.get("engine", state.truck.engine_wear_pct))
+            state.rig_buffs = {
+                str(group): dict(info)
+                for group, info in dict(data.get("rig_buffs", {})).items()
+            }
             state.speeding_strikes = int(data["speeding_strikes"])
             state.trip.restore(position_mi, game_minutes)
             state.trip.restore_toll_charges(list(data.get("toll_charges", ())))

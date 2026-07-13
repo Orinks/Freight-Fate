@@ -318,6 +318,7 @@ class Profile:
     active_trip: dict | None = None  # mid-delivery snapshot, see DrivingState
     dispatch_board_cache: dict | None = None
     fatigue: float = 0.0  # 0 fresh .. 100 exhausted
+    active_buffs: list = field(default_factory=list)  # timed consumables, see data/buffs.py
     pay_advance: float = 0.0  # outstanding dispatcher advance owed, repaid at delivery
     pay_advance_used_for_load: bool = False
     business_status: str = COMPANY_DRIVER  # company driver, then leased-on owner-operator
@@ -435,6 +436,30 @@ class Profile:
         self.tire_wear_pct = truck.tire_wear_pct
         self.brake_wear_pct = truck.brake_wear_pct
         self.engine_wear_pct = truck.engine_wear_pct
+
+    def fatigue_buff_rate(self, now_h: float) -> float:
+        """Fatigue accrual multiplier from the active food or drink buff.
+
+        1.0 when nothing is active. ``now_h`` is the absolute game hour
+        (game_hours plus trip minutes), the same clock the entries store.
+        """
+        for entry in self.active_buffs:
+            if entry.get("group") == "fatigue" and now_h < float(entry.get("expires_h", 0.0)):
+                return float(entry.get("rate", 1.0))
+        return 1.0
+
+    def add_timed_buff(self, entry: dict) -> None:
+        """One active buff per group: the newest replaces its predecessor."""
+        group = entry.get("group")
+        self.active_buffs = [b for b in self.active_buffs if b.get("group") != group]
+        self.active_buffs.append(entry)
+
+    def expire_buffs(self, now_h: float) -> list[dict]:
+        """Drop timed buffs past their hour; returns them for announcing."""
+        expired = [b for b in self.active_buffs if now_h >= float(b.get("expires_h", 0.0))]
+        if expired:
+            self.active_buffs = [b for b in self.active_buffs if b not in expired]
+        return expired
 
     def market_day(self) -> int:
         return int(self.game_hours // 24)

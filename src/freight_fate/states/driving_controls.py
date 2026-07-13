@@ -565,6 +565,18 @@ class DrivingControlsMixin:
         ):
             if worn >= WEAR_STATUS_PCT:
                 lines.append(f"{label}: {worn:.0f} percent worn")
+        now_h = self._absolute_game_hour()
+        for entry in self.ctx.profile.active_buffs:
+            left_h = float(entry.get("expires_h", 0.0)) - now_h
+            if left_h <= 0.0:
+                continue
+            if left_h >= 1.05:
+                left = f"about {left_h:.0f} hours left"
+            else:
+                left = f"about {left_h * 60.0:.0f} minutes left"
+            lines.append(f"{entry.get('label', 'Buff')}: {left}")
+        for info in self.rig_buffs.values():
+            lines.append(f"{info.get('label', 'Rig service')}: good for the rest of the trip")
         if self.ctx.settings.speech_verbosity >= 1:
             fatigue = self.ctx.profile.fatigue
             if fatigue >= hos.FATIGUE_DROWSY:

@@ -130,6 +130,8 @@ class TruckState:
     grip: float = 1.0  # weather traction multiplier
     drag_mult: float = 1.0  # weather aero drag multiplier (headwinds/storms)
     fuel_burn_mult: float = 1.0  # trip time compression so mpg stays honest
+    tire_wear_buff_mult: float = 1.0  # driver-care buff on tread wear (data/buffs.py)
+    engine_wear_buff_mult: float = 1.0  # driver-care buff on duty-cycle engine wear
 
     stalled: bool = False
     _last_service_air_application: float = field(default=0.0, repr=False)
@@ -555,7 +557,7 @@ class TruckState:
         tire = speed * sim_dt / 1609.344 * TIRE_WEAR_PCT_PER_MILE * load
         if speed > 0.01:
             tire += application * speed * sim_dt * TIRE_WEAR_BRAKING_PCT
-        self.tire_wear_pct = min(100.0, self.tire_wear_pct + tire)
+        self.tire_wear_pct = min(100.0, self.tire_wear_pct + tire * self.tire_wear_buff_mult)
 
         # The service brakes wear with the energy they dissipate; the jake
         # dissipates its share in the engine and costs the shoes nothing.
@@ -570,7 +572,9 @@ class TruckState:
             rate = ENGINE_WEAR_PCT_PER_H_IDLE + (
                 ENGINE_WEAR_PCT_PER_H_FULL_LOAD - ENGINE_WEAR_PCT_PER_H_IDLE
             ) * min(1.0, duty)
-            engine = rate / 3600.0 * sim_dt
+            # Care buffs slow honest duty-cycle wear only; the abuse terms
+            # below stay full price -- fresh oil does not excuse over-revving.
+            engine = rate / 3600.0 * sim_dt * self.engine_wear_buff_mult
             # Abuse penalties charge per real second of the behavior, like
             # the damage accrual the over-rev term replaces.
             if self.rpm > s.max_rpm * 0.98:

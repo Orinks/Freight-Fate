@@ -16,6 +16,18 @@
   jobs and engine overhauls alongside tires -- each takes shop time and, for
   owner-operators, real money. Company drivers bill the carrier, as always.
 
+- **Truck stops now sell more than fuel: meals, showers, and rig care that
+  keep you and the truck going longer.** A hot meal or an energy drink eases
+  fatigue right away and makes the next few hours of driving tire you more
+  slowly -- Petro's Iron Skillet dinner beats any roadside diner. At a Pilot
+  or Flying J, a fuel purchase makes the shower free, just like real life.
+  On the truck side, a Speedco or Love's lube bay slows engine wear for the
+  rest of the trip, a tire rotation does the same for tread, and a bottle of
+  diesel additive helps a little anywhere you fuel. One food buff and one of
+  each rig service at a time -- a new one replaces the old -- and none of it
+  ever adds legal driving hours. Your status readout tells you what is
+  active and how long it has left.
+
 - **The big-name truck stops along your route now fix your rig -- and each
   brand is good at what it is really known for.** Pull into a Love's or a
   Speedco and their tire bay replaces worn tires fast, close to the garage
