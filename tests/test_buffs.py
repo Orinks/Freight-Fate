@@ -281,7 +281,7 @@ def test_engine_buff_slows_duty_wear_but_not_over_rev_abuse():
     for t in (plain_abuse, buffed_abuse):
         t.start_engine()
         t.throttle = 0.0
-        t.rpm = t.specs.max_rpm
+        t.rpm = t.specs.max_rpm * 1.1  # a downgrade driving the engine past the governor
         t._update_wear(1.0)
     assert plain_abuse.engine_wear_pct >= 0.8  # the abuse term alone
     assert buffed_abuse.engine_wear_pct == pytest.approx(plain_abuse.engine_wear_pct, abs=1e-3)

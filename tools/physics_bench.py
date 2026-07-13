@@ -17,13 +17,21 @@ Usage:
     uv run python tools/physics_bench.py --list           # scenario names and one-liners
     uv run python tools/physics_bench.py grade-no-jake    # one scenario, full event log
     uv run python tools/physics_bench.py --full           # every scenario, full event logs
+
+Tuning modes (one scenario at a time):
+    ... grade-no-jake --sweep target=25:60:5
+        Re-run the scenario across a range of one knob; one line per value.
+    ... grade-no-jake --solve target=20:60 peak-temp-c<=400
+        Bisect for the edge: the highest (or lowest) knob value that still
+        satisfies the limit. Knobs: target, cargo (tonnes), grade (percent),
+        brake-wear, tire-wear, engine-wear. Metrics: run --metrics to list.
 """
 
 from __future__ import annotations
 
 import argparse
 import sys
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -66,6 +74,7 @@ class Scenario:
     engine_wear: float = 0.0
     target_mph: float = 55.0
     jake: bool = False
+    jake_stage: int = 3  # 1..3 when jake is on; 3 = full retard
     braking: str = "steady"  # steady, snub, or none
     stop_from_mph: float | None = None
 
@@ -100,6 +109,15 @@ SCENARIOS: tuple[Scenario, ...] = (
         target_mph=35.0,
         jake=True,
         braking="none",
+    ),
+    Scenario(
+        name="grade-jake-stage1",
+        summary="The descent on jake stage 1 with snubs; a light setting makes the shoes work.",
+        profile=((1.0, 0.0), (6.0, -6.0), (2.0, 0.0)),
+        target_mph=35.0,
+        jake=True,
+        jake_stage=1,
+        braking="snub",
     ),
     Scenario(
         name="grade-runaway",
@@ -172,6 +190,7 @@ class RunResult:
     scenario: Scenario
     events: list[str] = field(default_factory=list)
     summary: list[str] = field(default_factory=list)
+    metrics: dict[str, float] = field(default_factory=dict)
 
 
 def _clock(t_s: float) -> str:
@@ -216,6 +235,7 @@ class _Driver:
     target_mph: float
     jake: bool
     braking: str
+    jake_stage: int = 3
     snubbing: bool = field(default=False)
     jake_on: bool = field(default=False)
 
@@ -248,7 +268,7 @@ class _Driver:
 
         truck.throttle = throttle
         truck.brake = brake
-        truck.engine_brake = self.jake_on
+        truck.engine_brake_stage = self.jake_stage if self.jake_on else 0
 
 
 @dataclass
@@ -302,10 +322,10 @@ class _Watcher:
         if (
             not self.over_rev_said
             and tk.engine_on
-            and tk.rpm >= tk.specs.max_rpm * 0.98
+            and tk.rpm > tk.specs.max_rpm * 1.02
         ):
             self.over_rev_said = True
-            self.note(t_s, f"ENGINE PAST REDLINE ({tk.rpm:.0f} rpm): tearing itself apart")
+            self.note(t_s, f"ENGINE PAST THE GOVERNOR ({tk.rpm:.0f} rpm): tearing itself apart")
 
         band = (
             "hot"
@@ -367,7 +387,7 @@ class _Watcher:
 
 def _run_route(sc: Scenario) -> RunResult:
     truck = _build_truck(sc)
-    driver = _Driver(sc.target_mph, sc.jake, sc.braking)
+    driver = _Driver(sc.target_mph, sc.jake, sc.braking, sc.jake_stage)
     result = RunResult(sc)
     watch = _Watcher(truck, result.events, launch_mph=max(0.0, sc.target_mph - 5.0))
     effects = EFFECTS[sc.weather]
@@ -407,6 +427,7 @@ def _run_route(sc: Scenario) -> RunResult:
             break
 
     result.summary = _summarize(sc, truck, watch, t, wear0, fuel0)
+    result.metrics = _collect_metrics(truck, watch, t, wear0, fuel0)
     return result
 
 
@@ -443,6 +464,9 @@ def _run_stop(sc: Scenario) -> RunResult:
     distance_ft = (truck.odometer_mi - mark_mi) * FT_PER_MI
     watch.note(t, f"stopped: {distance_ft:.0f} feet in {t - mark_t:.1f} seconds")
     result.summary = _summarize(sc, truck, watch, t, wear0, fuel0)
+    result.metrics = _collect_metrics(truck, watch, t, wear0, fuel0)
+    result.metrics["stop-feet"] = distance_ft
+    result.metrics["stop-seconds"] = t - mark_t
     result.summary.insert(
         1,
         f"stopping distance {distance_ft:.0f} feet from {sc.stop_from_mph:.0f} mph "
@@ -485,8 +509,168 @@ def _summarize(
     return lines
 
 
+def _collect_metrics(
+    truck: TruckState,
+    watch: _Watcher,
+    t: float,
+    wear0: tuple[float, float, float],
+    fuel0: float,
+) -> dict[str, float]:
+    """Numeric run outcomes for the sweep and solve modes; the summary text
+    stays the human report, this stays the instrument readout."""
+    return {
+        "peak-temp-c": watch.peak_temp_c,
+        "top-mph": watch.top_mph,
+        "avg-mph": truck.odometer_mi / (t / 3600.0) if t > 0 else 0.0,
+        "fade-miles": watch.fade_miles,
+        "fuel-gal": fuel0 - truck.fuel_gal,
+        "tire-wear": truck.tire_wear_pct - wear0[0],
+        "brake-wear": truck.brake_wear_pct - wear0[1],
+        "engine-wear": truck.engine_wear_pct - wear0[2],
+        "time-s": t,
+    }
+
+
 def run_scenario(sc: Scenario) -> RunResult:
     return _run_stop(sc) if sc.stop_from_mph is not None else _run_route(sc)
+
+
+# -- sweeps and solves ------------------------------------------------------------
+# The bench doubles as a tuning instrument. A sweep re-runs one scenario
+# across a range of a single knob and prints one line per value, so a trend
+# reads top to bottom. A solve bisects the same knob for the edge case --
+# "the fastest target speed that keeps peak brake temperature under fade" --
+# and answers in a sentence. Both stay deterministic and plain-text.
+
+SWEEP_PARAMS = ("target", "cargo", "grade", "brake-wear", "tire-wear", "engine-wear")
+
+
+def _variant(sc: Scenario, param: str, value: float) -> Scenario:
+    if param == "target":
+        if sc.stop_from_mph is not None:
+            return replace(sc, stop_from_mph=value)
+        return replace(sc, target_mph=value)
+    if param == "cargo":  # given in tonnes, stored in kg
+        return replace(sc, cargo_kg=value * 1000.0)
+    if param == "grade":  # replace every non-flat segment's grade percent
+        profile = tuple(
+            (miles, value if pct != 0.0 else 0.0) for miles, pct in sc.profile
+        )
+        return replace(sc, profile=profile)
+    if param == "brake-wear":
+        return replace(sc, brake_wear=value)
+    if param == "tire-wear":
+        return replace(sc, tire_wear=value)
+    if param == "engine-wear":
+        return replace(sc, engine_wear=value)
+    raise ValueError(f"unknown sweep knob: {param}")
+
+
+def _parse_range(spec: str) -> tuple[str, float, float, float | None]:
+    """``param=lo:hi[:step]`` -> (param, lo, hi, step or None)."""
+    name, _, rng = spec.partition("=")
+    if name not in SWEEP_PARAMS or not rng:
+        raise ValueError(
+            f"expected PARAM=LO:HI with PARAM one of: {', '.join(SWEEP_PARAMS)}"
+        )
+    parts = rng.split(":")
+    if len(parts) not in (2, 3):
+        raise ValueError("range must be LO:HI or LO:HI:STEP")
+    lo, hi = float(parts[0]), float(parts[1])
+    step = abs(float(parts[2])) if len(parts) == 3 else None
+    return name, lo, hi, step
+
+
+def _metric_line(param: str, value: float, metrics: dict[str, float]) -> str:
+    bits = [
+        f"{param} {value:g}:",
+        f"top {metrics['top-mph']:.1f} mph,",
+        f"peak brakes {metrics['peak-temp-c']:.0f} C,",
+        f"{metrics['fade-miles']:.1f} fade miles,",
+        f"brake wear {metrics['brake-wear']:.3f},",
+        f"fuel {metrics['fuel-gal']:.2f} gal",
+    ]
+    if "stop-feet" in metrics:
+        bits.insert(1, f"stopped in {metrics['stop-feet']:.0f} feet,")
+    return " ".join(bits)
+
+
+def run_sweep(sc: Scenario, spec: str) -> list[str]:
+    param, lo, hi, step = _parse_range(spec)
+    if step is None:
+        step = abs(hi - lo) / 7.0 or 1.0  # default: eight points
+    direction = 1.0 if hi >= lo else -1.0
+    lines = [f"Sweep: {sc.name}, {param} from {lo:g} to {hi:g} step {step:g}"]
+    value = lo
+    while (value - hi) * direction <= 1e-9:
+        result = run_scenario(_variant(sc, param, value))
+        lines.append("  " + _metric_line(param, value, result.metrics))
+        value += step * direction
+    return lines
+
+
+def _parse_limit(spec: str) -> tuple[str, str, float]:
+    """``metric<=limit`` or ``metric>=limit`` -> (metric, op, limit)."""
+    for op in ("<=", ">="):
+        if op in spec:
+            metric, _, raw = spec.partition(op)
+            return metric.strip(), op, float(raw)
+    raise ValueError("limit must look like peak-temp-c<=400 or avg-mph>=30")
+
+
+def run_solve(sc: Scenario, range_spec: str, limit_spec: str) -> list[str]:
+    """Bisect one knob for the edge of a limit.
+
+    Assumes the metric moves monotonically with the knob across the range
+    (true for every tuning question the bench asks: more speed means more
+    heat, more cargo means longer stops). The endpoint probes verify there
+    is an edge to find and which side satisfies the limit.
+    """
+    param, lo, hi, _ = _parse_range(range_spec)
+    if hi <= lo:
+        return [f"solve range must run low to high; got {lo:g} to {hi:g}"]
+    metric, op, limit = _parse_limit(limit_spec)
+
+    def probe(value: float) -> float:
+        result = run_scenario(_variant(sc, param, value))
+        if metric not in result.metrics:
+            known = ", ".join(sorted(result.metrics))
+            raise ValueError(f"unknown metric {metric}; this run offers: {known}")
+        return result.metrics[metric]
+
+    def ok(measured: float) -> bool:
+        return measured <= limit if op == "<=" else measured >= limit
+
+    lines = [f"Solve: {sc.name}, {param} between {lo:g} and {hi:g}, keep {metric} {op} {limit:g}"]
+    lo_val, hi_val = probe(lo), probe(hi)
+    lines.append(f"  {param} {lo:g}: {metric} {lo_val:.1f}")
+    lines.append(f"  {param} {hi:g}: {metric} {hi_val:.1f}")
+    if ok(lo_val) and ok(hi_val):
+        lines.append("  the whole range satisfies the limit; nothing to bisect")
+        return lines
+    if not ok(lo_val) and not ok(hi_val):
+        lines.append("  no value in the range satisfies the limit")
+        return lines
+
+    good, bad = (lo, hi) if ok(lo_val) else (hi, lo)
+    tolerance = max(abs(hi - lo) / 512.0, 0.05)
+    good_metric = lo_val if ok(lo_val) else hi_val
+    for _ in range(24):
+        if abs(good - bad) <= tolerance:
+            break
+        mid = (good + bad) / 2.0
+        measured = probe(mid)
+        lines.append(f"  {param} {mid:.2f}: {metric} {measured:.1f}")
+        if ok(measured):
+            good, good_metric = mid, measured
+        else:
+            bad = mid
+    edge_word = "highest" if good < bad else "lowest"
+    lines.append(
+        f"  answer: {param} {good:.2f} is the {edge_word} value that keeps "
+        f"{metric} at {good_metric:.1f} ({op} {limit:g})"
+    )
+    return lines
 
 
 def _header(sc: Scenario) -> list[str]:
@@ -523,12 +707,32 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("scenario", nargs="*", help="scenario names (default: all)")
     parser.add_argument("--list", action="store_true", help="list scenarios and exit")
     parser.add_argument("--full", action="store_true", help="print full event logs")
+    parser.add_argument(
+        "--metrics", action="store_true", help="list solve/sweep metric names and exit"
+    )
+    parser.add_argument(
+        "--sweep",
+        metavar="PARAM=LO:HI[:STEP]",
+        help="re-run one scenario across a knob range, one line per value",
+    )
+    parser.add_argument(
+        "--solve",
+        nargs=2,
+        metavar=("PARAM=LO:HI", "METRIC<=LIMIT"),
+        help="bisect one knob for the edge of a limit, e.g. target=20:60 peak-temp-c<=400",
+    )
     args = parser.parse_args(argv)
 
     by_name = {sc.name: sc for sc in SCENARIOS}
     if args.list:
         for sc in SCENARIOS:
             print(f"{sc.name}: {sc.summary}")
+        return 0
+    if args.metrics:
+        route = sorted(run_scenario(SCENARIOS[0]).metrics)
+        print("route metrics: " + ", ".join(route))
+        print("stop scenarios add: stop-feet, stop-seconds")
+        print("knobs: " + ", ".join(SWEEP_PARAMS) + " (cargo in tonnes, grade in percent)")
         return 0
 
     picked = list(SCENARIOS)
@@ -539,6 +743,21 @@ def main(argv: list[str] | None = None) -> int:
             print("run with --list to see the names")
             return 2
         picked = [by_name[n] for n in args.scenario]
+
+    if args.sweep or args.solve:
+        if len(picked) != 1 or not args.scenario:
+            print("sweep and solve work on exactly one named scenario")
+            return 2
+        try:
+            if args.sweep:
+                lines = run_sweep(picked[0], args.sweep)
+            else:
+                lines = run_solve(picked[0], args.solve[0], args.solve[1])
+        except ValueError as err:
+            print(str(err))
+            return 2
+        print("\n".join(lines))
+        return 0
 
     # A single named scenario reads as a full log by default; a sweep
     # stays summaries-only unless --full asks otherwise.

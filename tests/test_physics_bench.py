@@ -85,6 +85,37 @@ def test_weather_stretches_stopping_distance():
     assert rain < bald_rain
 
 
+def test_jake_stages_form_a_ladder():
+    # Full jake spares the shoes entirely, stage 1 makes them work, and no
+    # jake at all works them hardest -- the staged retard teaches by degrees.
+    full = _wear_added("grade-jake-snub", "brakes")
+    stage1 = _wear_added("grade-jake-stage1", "brakes")
+    none = _wear_added("grade-no-jake", "brakes")
+    assert full <= stage1 < none
+
+
+def test_drag_descent_reaches_fade_and_jake_descent_stays_cool():
+    # The drag-vs-snub lesson with teeth: riding the shoes down six miles of
+    # 6 percent cooks them past fade; the jake descent never warms them.
+    assert _RESULTS["grade-no-jake"].metrics["peak-temp-c"] > 400.0
+    assert _RESULTS["grade-jake-only"].metrics["peak-temp-c"] < 100.0
+
+
+def test_sweep_and_solve_specs_parse():
+    assert bench._parse_range("target=20:60:5") == ("target", 20.0, 60.0, 5.0)
+    assert bench._parse_range("cargo=21.5:33.5") == ("cargo", 21.5, 33.5, None)
+    assert bench._parse_limit("peak-temp-c<=400") == ("peak-temp-c", "<=", 400.0)
+    assert bench._parse_limit("avg-mph>=30") == ("avg-mph", ">=", 30.0)
+
+
+def test_variant_swaps_only_the_named_knob():
+    sc = next(s for s in bench.SCENARIOS if s.name == "grade-no-jake")
+    assert bench._variant(sc, "cargo", 30.0).cargo_kg == 30_000.0
+    graded = bench._variant(sc, "grade", -4.0)
+    assert all(pct in (0.0, -4.0) for _, pct in graded.profile)
+    assert bench._variant(sc, "target", 42.0).target_mph == 42.0
+
+
 def test_worn_brakes_fade_sooner_than_fresh():
     # Same descent, same driving: worn shoes must not end up in better
     # shape than fresh ones, and their fade threshold sits lower.

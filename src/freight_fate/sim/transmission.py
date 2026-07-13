@@ -21,6 +21,12 @@ AUTO_UPSHIFT_RPM = 1750
 AUTO_LOW_GEAR_UPSHIFT_RPM = 1800
 AUTO_DOWNSHIFT_RPM = 1050
 SHIFT_TIME = 1.0  # seconds of torque interruption
+# With the engine brake working, a real automatic pre-selects a lower range
+# to put the engine where the retarder bites (high RPM) instead of upshifting
+# away from it. Downshift while below the target band, but never into a gear
+# that would spin the engine past the ceiling.
+JAKE_PRESELECT_RPM = 1700
+JAKE_MAX_RPM = 2150
 
 
 @dataclass
@@ -92,13 +98,20 @@ class Transmission:
     # -- automatic ---------------------------------------------------------------
 
     def auto_update(
-        self, rpm: float, throttle: float, moving: bool, braking: bool = False
+        self,
+        rpm: float,
+        throttle: float,
+        moving: bool,
+        braking: bool = False,
+        engine_braking: bool = False,
     ) -> int | None:
         """Pick a gear in automatic mode. Returns the new gear when it changes.
 
         While braking the box never upshifts -- a real automatic holds the gear
         for engine braking instead of grabbing a taller one as you slow, which
-        otherwise read as "geared up while stopping"."""
+        otherwise read as "geared up while stopping". With the engine brake
+        active it goes further and pre-selects DOWN toward the retard band,
+        because a jake in overdrive at low RPM is barely a brake at all."""
         if not self.automatic or self.shifting:
             return None
         if self.in_reverse:
@@ -117,10 +130,23 @@ class Transmission:
             self._shift_timer = SHIFT_TIME
             return self.gear
         upshift_rpm = AUTO_LOW_GEAR_UPSHIFT_RPM if self.gear <= 4 else AUTO_UPSHIFT_RPM
-        if rpm > upshift_rpm and self.gear < self.num_gears and not braking:
+        # Braking or engine-braking holds the gear -- except that a real
+        # automatic protects its engine: once the road spins it past the
+        # ceiling, the box upshifts anyway. On a downgrade that trades
+        # engine safety for a taller gear and a weaker jake, which is
+        # exactly the runaway spiral a mismanaged descent earns.
+        hold_gear = (braking or engine_braking) and rpm < JAKE_MAX_RPM
+        if rpm > upshift_rpm and self.gear < self.num_gears and not hold_gear:
             self.gear += 1
             self._shift_timer = SHIFT_TIME
             return self.gear
+        if engine_braking and moving and self.gear > 1 and rpm < JAKE_PRESELECT_RPM:
+            lower = GEAR_RATIOS[self.gear - 2]
+            current = GEAR_RATIOS[self.gear - 1]
+            if rpm * lower / current <= JAKE_MAX_RPM:
+                self.gear -= 1
+                self._shift_timer = SHIFT_TIME
+                return self.gear
         if rpm < AUTO_DOWNSHIFT_RPM and self.gear > 1 and moving:
             self.gear -= 1
             self._shift_timer = SHIFT_TIME

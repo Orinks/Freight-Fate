@@ -43,7 +43,7 @@ LAUNCH_TRACTION_ROLLING_G = 0.33
 # and redline abuse eats the engine.
 TIRE_WEAR_PCT_PER_MILE = 0.003  # tread loss per mile at the rated gross
 TIRE_WEAR_BRAKING_PCT = 2.0e-4  # extra per (application x m/s x s): stops scrub tread
-BRAKE_WEAR_PCT_PER_ENERGY = 5.0e-4  # per (application x m/s x load x s)
+BRAKE_WEAR_PCT_PER_MJ = 4.0e-3  # per megajoule actually dissipated in the shoes
 BRAKE_WEAR_HOT_MULT = 2.0  # glazing: wear doubles once the shoes are past fade
 ENGINE_WEAR_PCT_PER_H_IDLE = 0.03
 ENGINE_WEAR_PCT_PER_H_FULL_LOAD = 0.15
@@ -51,6 +51,32 @@ ENGINE_WEAR_OVER_REV_PCT_PER_S = 0.8  # was the damage_pct redline penalty
 ENGINE_WEAR_LUG_PCT_PER_S = 0.05  # heavy throttle far below the torque band
 LUG_THROTTLE = 0.7
 LUG_RPM_FRACTION = 0.7  # of peak-torque RPM
+
+# -- jake brake -----------------------------------------------------------------
+# The engine brake is retarding TORQUE at the crank, not a flat force at the
+# wheels: wheel force = torque x gear ratio / wheel radius, so the jake bites
+# hard in a low gear at high RPM and does almost nothing in overdrive at low
+# RPM. Three stages (two, four, six cylinders) scale the torque, and retard
+# grows with RPM -- which is the whole grade discipline: pick the gear and
+# the speed BEFORE the hill, because the jake rewards being set up early.
+JAKE_STAGES = 3
+JAKE_RPM_FLOOR = 0.3  # fraction of full retard left near idle speed
+
+# A hill can drive the engine past the governor through the wheels; power
+# alone cannot. Sitting AT governed speed is safe -- overspeed wear starts
+# just beyond it, which is what actually hurts a diesel.
+ROAD_OVERSPEED_RPM_MULT = 1.15  # how far the road can spin the engine past governed
+OVER_REV_RPM_MULT = 1.02  # abuse wear begins past this multiple of governed speed
+
+# -- brake heat -------------------------------------------------------------------
+# Heating is the real dissipated power (service brake force times speed)
+# soaked into the drums' thermal mass, so faded shoes that grip less also
+# heat less and the model finds its own equilibrium. Cooling is convective
+# and grows with the square root of speed: outrunning your brakes does not
+# also air-condition them.
+AMBIENT_C = 20.0
+BRAKE_COOL_BASE_PER_S = 0.0006  # fraction of excess heat shed per second, parked
+BRAKE_COOL_SPEED_PER_S = 0.0006  # extra fraction per sqrt(m/s) of airflow
 
 # What wear does to the physics.
 TIRE_WEAR_GRIP_LOSS = 0.25  # bald tires lose a quarter of their grip
@@ -74,9 +100,10 @@ class TruckSpecs:
     driveline_efficiency: float = 0.85
     max_brake_decel_g: float = 0.35
     brake_fade_temp_c: float = 400.0  # brakes fade above this temperature
+    brake_thermal_mass_j_per_c: float = 180_000.0  # drums and shoes, all ten positions
     fuel_tank_gal: float = 150.0
     fuel_burn_factor: float = 1.0  # model-specific thirst multiplier
-    engine_brake_force_n: float = 25_000.0
+    engine_brake_torque_nm: float = 1_800.0  # stage-3 retarding torque near rated RPM
     # Air-brake thresholds follow official CDL references: FMCSA gives
     # typical compressor cut-out/cut-in ranges, California places low-air
     # warnings at 55-75 psi, and Georgia describes spring brakes applying
@@ -107,7 +134,7 @@ class TruckState:
     rpm: float = 600.0
     throttle: float = 0.0
     brake: float = 0.0
-    engine_brake: bool = False
+    engine_brake_stage: int = 0  # 0 = off, 1..JAKE_STAGES = cylinders engaged
     emergency_brake: bool = False
     parking_brake: bool = False
     primary_air_psi: float = 125.0
@@ -139,6 +166,17 @@ class TruckState:
     def __post_init__(self) -> None:
         self.rpm = self.specs.idle_rpm
         self.fuel_gal = self.specs.fuel_tank_gal
+
+    # Not a dataclass field: the bool view proxies the staged jake so every
+    # existing on/off call site keeps working. Switching on selects full
+    # retard; the stage keys pick lighter settings.
+    @property
+    def engine_brake(self) -> bool:
+        return self.engine_brake_stage > 0
+
+    @engine_brake.setter
+    def engine_brake(self, value: bool) -> None:
+        self.engine_brake_stage = JAKE_STAGES if value else 0
 
     # -- engine ----------------------------------------------------------------
 
@@ -225,7 +263,10 @@ class TruckState:
         rpm_est = self.coupled_rpm() if not tr.in_neutral else self.rpm
         rpm_est = max(rpm_est, self.specs.idle_rpm * (0.5 + 0.5 * self.throttle))
         braking = self.brake > 0.01 or self.emergency_brake or self.air_brakes_holding
-        return tr.auto_update(rpm_est, self.throttle, self.velocity_mps > 0.5, braking)
+        jaking = self.engine_brake_stage > 0 and self.engine_on and self.throttle <= 0.05
+        return tr.auto_update(
+            rpm_est, self.throttle, self.velocity_mps > 0.5, braking, engine_braking=jaking
+        )
 
     # -- forces -----------------------------------------------------------------
 
@@ -260,7 +301,12 @@ class TruckState:
         grade_f = self.gross_mass_kg * G * math.sin(math.atan(self.grade))
         return drag + rolling + grade_f
 
-    def brake_force(self) -> float:
+    def service_brake_force(self) -> float:
+        """Magnitude of the foundation-brake force biting the drums right now.
+
+        This is the force that heats and wears the shoes; the jake is kept
+        separate because its energy goes out the exhaust, not into the drums.
+        """
         if abs(self.velocity_mps) <= 0.01:
             return 0.0
         s = self.specs
@@ -268,7 +314,7 @@ class TruckState:
         fade = (
             1.0
             if self.brake_temp_c < fade_temp
-            else max(0.35, 1.0 - (self.brake_temp_c - fade_temp) / 400)
+            else max(0.20, 1.0 - (self.brake_temp_c - fade_temp) / 300)
         )
         holding = self.air_brakes_holding
         application = 1.0 if self.emergency_brake or holding else self.brake
@@ -282,19 +328,42 @@ class TruckState:
         # force for its mass, so it decelerates more gently and stops longer.
         friction = self.gross_mass_kg * effort * self.effective_grip
         capacity = s.mass_kg * effort
-        service = min(friction, capacity)
-        jake = (
-            s.engine_brake_force_n
-            if (
-                self.engine_brake
-                and self.engine_on
-                and self.throttle <= 0.05
-                and not self.transmission.in_neutral
-            )
-            else 0.0
+        return min(friction, capacity)
+
+    def jake_retard_torque_nm(self) -> float:
+        """Compression-brake torque at the crank for the current stage and RPM."""
+        if (
+            self.engine_brake_stage <= 0
+            or not self.engine_on
+            or self.throttle > 0.05
+            or self.transmission.in_neutral
+        ):
+            return 0.0
+        s = self.specs
+        rpm_frac = max(0.0, min(1.0, self.rpm / s.max_rpm))
+        stage = min(JAKE_STAGES, self.engine_brake_stage) / JAKE_STAGES
+        return s.engine_brake_torque_nm * stage * (
+            JAKE_RPM_FLOOR + (1.0 - JAKE_RPM_FLOOR) * rpm_frac
         )
+
+    def jake_brake_force(self) -> float:
+        """Retarding force at the wheels: crank torque through the gearing.
+
+        The gear ratio is the multiplier, so the same stage that pins the
+        speed in 7th barely leans on the truck in overdrive -- and it drops
+        out entirely mid-shift, exactly like the drive torque does.
+        """
+        ratio = abs(self.transmission.drive_ratio)
+        if ratio == 0.0 or abs(self.velocity_mps) <= 0.01:
+            return 0.0
+        s = self.specs
+        return self.jake_retard_torque_nm() * ratio * s.driveline_efficiency / s.wheel_radius_m
+
+    def brake_force(self) -> float:
+        if abs(self.velocity_mps) <= 0.01:
+            return 0.0
         direction = 1.0 if self.velocity_mps > 0 else -1.0
-        return direction * (service + jake)
+        return direction * (self.service_brake_force() + self.jake_brake_force())
 
     # -- per-frame update ---------------------------------------------------------
 
@@ -506,7 +575,10 @@ class TruckState:
                     s.idle_rpm, s.idle_rpm + (s.max_rpm - s.idle_rpm) * self.throttle * 0.3
                 )
             else:
-                self.rpm = min(s.max_rpm, road_rpm)
+                # Road-driven: a downgrade can push past the governor, and
+                # that overspeed (not governed running) is what wears the
+                # engine. An automatic upshifts to protect itself first.
+                self.rpm = min(s.max_rpm * ROAD_OVERSPEED_RPM_MULT, road_rpm)
         else:
             target = s.idle_rpm + (s.max_rpm - s.idle_rpm) * self.throttle
             self.rpm += (target - self.rpm) * min(1.0, 4.0 * dt)
@@ -535,14 +607,15 @@ class TruckState:
         target = 60.0 + (28.0 + 45.0 * load if self.engine_on else 0.0)
         self.engine_temp_c += (target - self.engine_temp_c) * 0.03 * dt
 
-        applied = 1.0 if self.emergency_brake or self.air_brakes_holding else self.brake
         speed = abs(self.velocity_mps)
-        # Heavier loads dump more kinetic energy into the brakes, so a load over
-        # the rated gross heats and fades sooner; at the rated gross this is 1.0.
-        load_factor = self.gross_mass_kg / s.mass_kg
-        heating = applied * speed * 2.2 * load_factor
-        cooling = (self.brake_temp_c - 20.0) * (0.02 + 0.004 * speed)
-        self.brake_temp_c = max(20.0, self.brake_temp_c + (heating - cooling) * dt)
+        # Real energy accounting: the power the shoes actually dissipate
+        # (force times speed) soaks into the drums' thermal mass. Heavier
+        # loads brake with more force and so heat faster; faded shoes grip
+        # less and heat less, which is what keeps the model stable.
+        heating = self.service_brake_force() * speed / s.brake_thermal_mass_j_per_c
+        cool_frac = BRAKE_COOL_BASE_PER_S + BRAKE_COOL_SPEED_PER_S * math.sqrt(speed)
+        cooling = (self.brake_temp_c - AMBIENT_C) * cool_frac
+        self.brake_temp_c = max(AMBIENT_C, self.brake_temp_c + (heating - cooling) * dt)
 
     def _update_wear(self, dt: float) -> None:
         s = self.specs
@@ -559,10 +632,11 @@ class TruckState:
             tire += application * speed * sim_dt * TIRE_WEAR_BRAKING_PCT
         self.tire_wear_pct = min(100.0, self.tire_wear_pct + tire * self.tire_wear_buff_mult)
 
-        # The service brakes wear with the energy they dissipate; the jake
-        # dissipates its share in the engine and costs the shoes nothing.
-        if application > 0.0 and speed > 0.01:
-            brake = application * speed * load * sim_dt * BRAKE_WEAR_PCT_PER_ENERGY
+        # The service brakes wear with the energy they actually dissipate;
+        # the jake dumps its share out the exhaust and costs the shoes nothing.
+        service_force = self.service_brake_force()
+        if service_force > 0.0 and speed > 0.01:
+            brake = service_force * speed * sim_dt / 1.0e6 * BRAKE_WEAR_PCT_PER_MJ
             if self.brake_temp_c >= self.brake_fade_onset_c:
                 brake *= BRAKE_WEAR_HOT_MULT
             self.brake_wear_pct = min(100.0, self.brake_wear_pct + brake)
@@ -577,7 +651,7 @@ class TruckState:
             engine = rate / 3600.0 * sim_dt * self.engine_wear_buff_mult
             # Abuse penalties charge per real second of the behavior, like
             # the damage accrual the over-rev term replaces.
-            if self.rpm > s.max_rpm * 0.98:
+            if self.rpm > s.max_rpm * OVER_REV_RPM_MULT:
                 engine += ENGINE_WEAR_OVER_REV_PCT_PER_S * dt
             lugging = (
                 not self.transmission.in_neutral

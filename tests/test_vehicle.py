@@ -479,10 +479,49 @@ def test_worn_brakes_fade_sooner_and_pull_weaker():
 
 def test_over_rev_wears_engine_not_damage():
     t = make_auto_truck()
-    t.rpm = t.specs.max_rpm  # pinned at redline
+    t.rpm = t.specs.max_rpm * 1.1  # the road driving the engine past the governor
     t._update_wear(1.0)
     assert t.engine_wear_pct > 0.5
     assert t.damage_pct == 0.0
+
+
+def test_jake_force_scales_with_gear_stage_and_rpm():
+    """The jake is torque through the gearing: a lower gear multiplies it, a
+    lighter stage weakens it, and low RPM starves it -- the grade discipline."""
+    t = make_auto_truck()
+    t.velocity_mps = 15.0
+    t.throttle = 0.0
+    t.rpm = 1800.0
+    t.engine_brake_stage = 3
+    t.transmission.gear = 8
+    tall = t.jake_brake_force()
+    t.transmission.gear = 7
+    low = t.jake_brake_force()
+    assert tall > 0.0
+    assert low > tall  # lower gear, more retard at the wheels
+    t.engine_brake_stage = 1
+    assert t.jake_brake_force() < low / 2.0  # stage 1 is a third of stage 3
+    t.engine_brake_stage = 3
+    t.rpm = 900.0
+    assert t.jake_brake_force() < low  # slow engine, weak jake
+
+
+def test_engine_brake_bool_view_selects_full_stage():
+    t = make_auto_truck()
+    t.engine_brake = True
+    assert t.engine_brake_stage == 3
+    assert t.engine_brake
+    t.engine_brake = False
+    assert t.engine_brake_stage == 0
+
+
+def test_governed_speed_is_not_abuse():
+    """Sitting AT the governor is normal diesel running; overspeed wear only
+    starts past it, when a downgrade drives the engine through the wheels."""
+    t = make_auto_truck()
+    t.rpm = t.specs.max_rpm
+    t._update_wear(1.0)
+    assert t.engine_wear_pct < 0.1
 
 
 def test_lugging_wears_the_engine():

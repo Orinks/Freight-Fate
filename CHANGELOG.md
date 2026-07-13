@@ -4,6 +4,20 @@
 
 ### Changed
 
+- **The engine brake now works like a real three-stage jake.** It slows the
+  truck through the gears, so it pulls hardest in a low gear with the engine
+  turning fast, and does very little in top gear -- set your gear and speed
+  before the hill starts. An automatic transmission drops a gear to put the
+  jake to work, and shifts up to protect the engine if the hill spins it too
+  fast, leaving you a weaker jake in a taller gear. Heavy enough loads can
+  outrun the jake entirely, so snub the brakes early or crawl.
+
+- **Brakes now heat and cool like real drums.** Dragging the service brakes
+  down a long grade overheats them until they fade badly; short firm
+  applications with the jake carrying the load keep them cool. Going faster
+  no longer cools hot brakes, and letting a downhill rev the engine past its
+  limit now wears the engine -- running at governed speed is safe.
+
 - **Each truck now keeps its own condition.** Tire, brake, and engine wear,
   damage, and fuel stay with the truck they happened to, so swapping tractors
   at the dealer no longer carries your wear -- or your empty tank -- onto the
