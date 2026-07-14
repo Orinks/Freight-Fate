@@ -17,6 +17,13 @@
 
 ### Added
 
+- **The in-cab radio picks up twenty-six more real stations.** With real
+  streams allowed in settings, live local radio now reaches Portland, Boise,
+  Spokane, Salt Lake City, Las Vegas, Minneapolis, Milwaukee, Detroit,
+  Pittsburgh, Philadelphia, Baltimore, Washington, Nashville, Memphis,
+  Birmingham, Tampa, Miami, and more. Real jazz, news, roots, and independent
+  music fades in and out as you drive through each market, just like FM.
+
 - **The biggest map update yet -- 100 new cities to pick up and deliver in.** A
   city is a place a load can start or end, and the map grew from 249 to 349 of
   them, filling in dead zones that used to have nothing drivable for hundreds of

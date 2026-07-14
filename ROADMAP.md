@@ -139,6 +139,21 @@ section below and the Unreleased changelog; the release-line view:
       with newly composed songs cover markets across the map, fading to
       static at the fringe of their range and handing back to the Roadhouse
       when the signal drops.
+- [x] **Real local stations across the whole map.** The catalog now carries
+      40 real public and community streams (up from 14), filling Portland,
+      Boise, Spokane, Salt Lake City, Las Vegas, Minneapolis, Milwaukee,
+      Detroit, the Ohio Valley, the Northeast corridor, the South, Florida,
+      and the southern plains, each geo-ranged like FM and verified with a
+      live BASS smoke test. The game now bundles and loads the BASSHLS
+      addon (`src/freight_fate/lib/`), so HLS-only streams play too (first
+      user: KMHD Portland).
+- [ ] **AFN 360 Global channels stay unsupported.** StreamTheWorld
+      geo-blocks those mounts outside overseas military regions (HTTP 403
+      from US IPs on every URL form, HLS included); revisit only if AFN
+      opens access.
+- [ ] **Regional stream gaps to re-sweep.** St. Louis (KDHX) and Houston
+      (KPFT) had no working public stream endpoint on 2026-07-13; try again
+      in a later sweep.
 
 ### World and narration
 
