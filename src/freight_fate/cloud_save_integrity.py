@@ -72,6 +72,15 @@ def verify_cloud_revision(
             "integrity_failed", "The backup signature is invalid."
         ) from exc
     try:
-        return Profile.from_dict(payload)
+        profile = Profile.from_dict(payload)
     except Exception as exc:
         raise CloudSaveIntegrityError("invalid_profile", "The backup cannot be loaded.") from exc
+    # Defense in depth behind the signature: a payload blessed by an older
+    # validator (or a compromised one) still has to satisfy the invariants
+    # every honest save obeys -- see profile_invariants and its doc.
+    from .profile_invariants import check_profile_invariants, spoken_rejection
+
+    violations = check_profile_invariants(profile)
+    if violations:
+        raise CloudSaveIntegrityError("invalid_profile", spoken_rejection(violations))
+    return profile

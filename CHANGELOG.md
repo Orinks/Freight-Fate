@@ -38,6 +38,13 @@
 
 ### Added
 
+- **Cloud restores now get a second integrity check.** Beyond the server's
+  signature, a restored profile has to pass the game's own sanity rules --
+  wear between zero and one hundred, honest delivery counts, a fuel tank
+  that fits in a truck. A file that fails is refused with a plainly spoken
+  reason instead of being loaded, and saves from newer versions of the
+  game still restore fine.
+
 - **Winter tires are now a real choice at the garage.** A winter-compound set
   bites noticeably harder on snow and ice, and the trade is honest: it wears
   faster and gives up a touch of grip on warm dry pavement. Company tractors
